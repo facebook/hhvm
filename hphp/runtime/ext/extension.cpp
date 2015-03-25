@@ -108,10 +108,7 @@ static const char* dlerror() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Extension::Extension(litstr name, const char *version /* = "" */)
-    : m_hhvmAPIVersion(HHVM_API_VERSION)
-    , m_name(name)
-    , m_version(version ? version : "") {
+void Extension::registerExtension(litstr name) {
   if (s_registered_extensions == NULL) {
     s_registered_extensions = new ExtensionMap();
   }

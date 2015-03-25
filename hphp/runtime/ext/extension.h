@@ -57,6 +57,8 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#define HHVM_API_VERSION 20150324L
+
 class Extension : public IDebuggable {
 public:
   static bool IsLoaded(const String& name);
@@ -84,9 +86,15 @@ public:
   static void CompileSystemlib(const std::string &slib,
                                const std::string &name);
 public:
-  explicit Extension(litstr name, const char *version = "");
+  explicit Extension(litstr name, const char *version = "")
+    : m_hhvmAPIVersion(HHVM_API_VERSION)
+    , m_name(name)
+    , m_version(version ? version : "") {
+      registerExtension(name);
+  }
   virtual ~Extension() {}
 
+  void registerExtension(litstr name);
   const char *getVersion() const { return m_version.c_str();}
 
   // override these functions to implement module specific init/shutdown
@@ -129,8 +137,6 @@ private:
   std::string m_version;
   std::string m_dsoName;
 };
-
-#define HHVM_API_VERSION 20150112L
 
 #ifdef HHVM_BUILD_DSO
 #define HHVM_GET_MODULE(name) \

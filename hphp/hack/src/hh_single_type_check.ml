@@ -16,6 +16,7 @@ open Utils
 (*****************************************************************************)
 
 type mode =
+  | Ai
   | Suggest
   | Color
   | Coverage
@@ -138,6 +139,9 @@ let parse_options () =
     else mode := x
   in
   let options = [
+    "--ai",
+      Arg.Unit (set_mode Ai),
+      "";
     "--suggest",
       Arg.Unit (set_mode Suggest),
       "Suggest missing typehints";
@@ -248,8 +252,9 @@ let print_prolog files_info =
   end files_info [] in
   PrologMain.output_facts stdout facts
 
-let handle_mode mode files_info errors lint_errors =
+let handle_mode mode files_info errors lint_errors ai_results =
   match mode with
+  | Ai -> ()
   | Color ->
       Relative_path.Map.iter begin fun fn fileinfo ->
         if fn = builtins_filename then () else begin
@@ -303,9 +308,16 @@ let main_hack { filename; mode; } =
   ignore (Sys.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos));
   SharedMem.init();
   Hhi.set_hhi_root_for_unit_test "/tmp/hhi";
+  let outer_do f = match mode with
+    | Ai ->
+       let ai_results, inner_results = Ai.do_ f in
+       ai_results, [], inner_results
+    | _ ->
+       let lint_results, inner_results = Lint.do_ f in
+       [], lint_results, inner_results in
   let filename = Relative_path.create Relative_path.Dummy filename in
-  let lint_errors, (errors, files_info) =
-    Lint.do_ begin fun () ->
+  let ai_results, lint_errors, (errors, files_info) =
+    outer_do begin fun () ->
       Errors.do_ begin fun () ->
         let parsed_files = parse_file filename in
         let parsed_builtins = Parser_hack.program builtins_filename builtins in
@@ -343,7 +355,7 @@ let main_hack { filename; mode; } =
         files_info
       end
     end in
-  handle_mode mode files_info errors lint_errors
+  handle_mode mode files_info errors lint_errors ai_results
 
 (* command line driver *)
 let _ =

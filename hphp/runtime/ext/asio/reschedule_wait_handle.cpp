@@ -55,8 +55,8 @@ Object c_RescheduleWaitHandle::ti_create(int64_t queue, int priority) {
 }
 
 void c_RescheduleWaitHandle::initialize(uint32_t queue, uint32_t priority) {
-  setContextIdx(AsioSession::Get()->getCurrentContextIdx());
   setState(STATE_SCHEDULED);
+  setContextIdx(AsioSession::Get()->getCurrentContextIdx());
   m_queue = queue;
   m_priority = priority;
 

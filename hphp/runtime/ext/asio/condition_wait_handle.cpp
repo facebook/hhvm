@@ -106,8 +106,8 @@ void c_ConditionWaitHandle::t_fail(const Variant& exception) {
 void c_ConditionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   assert(!child->isFinished());
 
-  setContextIdx(child->getContextIdx());
   setState(STATE_BLOCKED);
+  setContextIdx(child->getContextIdx());
   m_child = child;
   m_child->incRefCount();
   m_child->getParentChain()

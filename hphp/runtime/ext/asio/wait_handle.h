@@ -173,6 +173,9 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
       // WaitableWaitHandle: !STATE_SUCCEEDED && !STATE_FAILED
       AsioBlockableChain m_parentChain;
 
+      // WaitableWaitHandle: !STATE_SUCCEEDED && !STATE_FAILED
+      context_idx_t m_contextIdx;
+
       union {
         // ExternalThreadEventWaitHandle: STATE_WAITING
         // SleepWaitHandle: STATE_WAITING

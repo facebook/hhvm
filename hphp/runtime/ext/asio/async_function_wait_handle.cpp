@@ -84,8 +84,8 @@ void c_AsyncFunctionWaitHandle::PrepareChild(const ActRec* fp,
 }
 
 void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
-  setContextIdx(child->getContextIdx());
   setState(STATE_BLOCKED);
+  setContextIdx(child->getContextIdx());
   m_child = child;
   m_child->getParentChain()
     .addParent(m_blockable, AsioBlockable::Kind::AsyncFunctionWaitHandle);

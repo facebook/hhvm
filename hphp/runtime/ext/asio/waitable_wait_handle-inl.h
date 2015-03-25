@@ -39,21 +39,49 @@ inline c_WaitableWaitHandle::~c_WaitableWaitHandle() {
   }
 }
 
+inline context_idx_t c_WaitableWaitHandle::getContextIdx() const {
+  assert(!isFinished());
+  return m_contextIdx;
+}
+
+inline void c_WaitableWaitHandle::setContextIdx(context_idx_t ctx_idx) {
+  assert(!isFinished());
+  m_contextIdx = ctx_idx;
+}
+
+inline bool c_WaitableWaitHandle::isInContext() const {
+  return getContextIdx();
+}
+
+inline AsioContext* c_WaitableWaitHandle::getContext() const {
+  assert(isInContext());
+  return AsioSession::Get()->getContext(getContextIdx());
+}
+
+inline AsioBlockableChain& c_WaitableWaitHandle::getParentChain() {
+  assert(!isFinished());
+  return m_parentChain;
+}
+
 inline void
 c_WaitableWaitHandle::enterContext(context_idx_t ctx_idx) {
   assert(ctx_idx <= AsioSession::Get()->getCurrentContextIdx());
+
+  // If this wait handle is being finished and there is a parent A that is being
+  // unblocked and a parent B that was not unblocked yet, it is possible that
+  // the parent A triggered an enterContext() that reaches us back thru the
+  // parent B. Unfortunately, the condition below is not enough even if parent's
+  // context is guaranteed to be equal or smaller. The issue is that a context
+  // of a finished wait handle is no longer accessible.
+  if (UNLIKELY(isFinished())) {
+    return;
+  }
 
   // Already in a more specific context?
   if (LIKELY(getContextIdx() >= ctx_idx)) {
     return;
   }
 
-  // If this wait handle is being finished and there is a parent A that is being
-  // unblocked and a parent B that was not unblocked yet, it is possible that
-  // the parent A triggered an enterContext() that reaches us back thru the
-  // parent B. Fortunately, parent's context is always equal or smaller, so
-  // the condition above handles !isFinished() case.
-  assert(!isFinished());
   enterContextImpl(ctx_idx);
 }
 

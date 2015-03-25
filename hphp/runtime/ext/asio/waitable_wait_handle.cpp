@@ -36,6 +36,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 int c_WaitableWaitHandle::t_getcontextidx() {
+  if (isFinished()) {
+    return 0;
+  }
+
   return getContextIdx();
 }
 

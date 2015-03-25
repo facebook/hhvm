@@ -94,6 +94,7 @@ namespace {
     context_idx_t ctx_idx
   ) {
     assert(AsioSession::Get()->getContext(ctx_idx));
+    assert(!waitHandle->isFinished());
     assert(waitHandle->getContextIdx() <= ctx_idx);
 
     // Not in a context being exited.
@@ -206,7 +207,10 @@ void AsioBlockableChain::exitContext(context_idx_t ctx_idx) {
 Array AsioBlockableChain::toArray() {
   Array result = Array::Create();
   for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
-    result.append(cur->getWaitHandle());
+    auto const wh = cur->getWaitHandle();
+    if (!wh->isFinished()) {
+      result.append(wh);
+    }
   }
   return result;
 }
@@ -215,7 +219,9 @@ c_WaitableWaitHandle*
 AsioBlockableChain::firstInContext(context_idx_t ctx_idx) {
   for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
     auto const wh = cur->getWaitHandle();
-    if (wh->getContextIdx() == ctx_idx) return wh;
+    if (!wh->isFinished() && wh->getContextIdx() == ctx_idx) {
+      return wh;
+    }
   }
   return nullptr;
 }

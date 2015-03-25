@@ -64,8 +64,8 @@ c_AsyncGeneratorWaitHandle::Create(c_AsyncGenerator* gen,
 
 void c_AsyncGeneratorWaitHandle::initialize(c_AsyncGenerator* gen,
                                             c_WaitableWaitHandle* child) {
-  setContextIdx(child->getContextIdx());
   setState(STATE_BLOCKED);
+  setContextIdx(child->getContextIdx());
   m_generator = gen;
   m_generator->incRefCount();
   m_child = child;

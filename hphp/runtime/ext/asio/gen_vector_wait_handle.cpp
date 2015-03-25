@@ -103,8 +103,8 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
 }
 
 void c_GenVectorWaitHandle::initialize(const Object& exception, c_Vector* deps, int64_t iter_pos, c_WaitableWaitHandle* child) {
-  setContextIdx(child->getContextIdx());
   setState(STATE_BLOCKED);
+  setContextIdx(child->getContextIdx());
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;

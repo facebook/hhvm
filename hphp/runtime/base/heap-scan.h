@@ -55,6 +55,13 @@ template<class F> void scanHeader(const Header* h, F& mark) {
     case HeaderKind::Object:
     case HeaderKind::ResumableObj:
     case HeaderKind::AwaitAllWH:
+    case HeaderKind::Vector:
+    case HeaderKind::Map:
+    case HeaderKind::Set:
+    case HeaderKind::Pair:
+    case HeaderKind::ImmVector:
+    case HeaderKind::ImmMap:
+    case HeaderKind::ImmSet:
       return h->obj_.scan(mark);
     case HeaderKind::Resource:
       return h->res_.scan(mark);

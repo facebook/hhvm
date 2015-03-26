@@ -60,8 +60,12 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
 
   auto const hasLoop = RuntimeOption::EvalJitLoops && cfgHasLoop(unit);
 
-  // TODO(#5792564): Guard relaxation doesn't work with loops.
-  if (shouldHHIRRelaxGuards() && !hasLoop) {
+  auto const traceMode = kind != TransKind::Optimize ||
+                         RuntimeOption::EvalJitPGORegionSelector == "hottrace";
+
+  // TODO (#5792564): Guard relaxation doesn't work with loops.
+  // TODO (#6599498): Guard relaxation is broken in wholecfg mode.
+  if (shouldHHIRRelaxGuards() && !hasLoop && traceMode) {
     Timer _t(Timer::optimize_relaxGuards);
     const bool simple = kind == TransKind::Profile &&
                         (RuntimeOption::EvalJitRegionSelector == "tracelet" ||

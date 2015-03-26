@@ -121,7 +121,7 @@ class PtrPrinter:
     def to_string(self):
         s = self._string()
 
-        out = '%s' % str(self._pointer())
+        out = '(%s) %s'  % (str(self._ptype()), str(self._pointer()))
         return '%s "%s"' % (out, s) if s is not None else out
 
 
@@ -131,50 +131,45 @@ class SmartPtrPrinter(PtrPrinter):
     def __init__(self, val):
         self.val = val
 
+    def _ptype(self):
+        return self.val.type
+
     def _pointer(self):
         return self.val['m_px']
 
-class ArrayPrinter(PtrPrinter):
-    RECOGNIZE = '^HPHP::Array$'
-
-    def __init__(self, val):
-        self.val = val
-
-    def _pointer(self):
-        return self.val['m_arr']['m_px']
-
-class ObjectPrinter(PtrPrinter):
-    RECOGNIZE = '^HPHP::Object$'
-
-    def __init__(self, val):
-        self.val = val
-
-    def _pointer(self):
-        return self.val['m_obj']['m_px']
-
-class ResourcePrinter(PtrPrinter):
-    RECOGNIZE = '^HPHP::Resource$'
-
-    def __init__(self, val):
-        self.val = val
-
-    def _pointer(self):
-        return self.val['m_res']['m_px']
-
-class StringPrinter(PtrPrinter):
+class StringPrinter(SmartPtrPrinter):
     RECOGNIZE = '^HPHP::(Static)?String$'
 
     def __init__(self, val):
-        self.val = val
+        super(StringPrinter, self).__init__(val['m_str'])
 
-    def _pointer(self):
-        return self.val['m_str']['m_px']
+class ArrayPrinter(SmartPtrPrinter):
+    RECOGNIZE = '^HPHP::Array$'
+
+    def __init__(self, val):
+        super(ArrayPrinter, self).__init__(val['m_arr'])
+
+class ObjectPrinter(SmartPtrPrinter):
+    RECOGNIZE = '^HPHP::Object$'
+
+    def __init__(self, val):
+        super(ObjectPrinter, self).__init__(val['m_obj'])
+
+class ResourcePrinter(SmartPtrPrinter):
+    RECOGNIZE = '^HPHP::Resource$'
+
+    def __init__(self, val):
+        super(ResourcePrinter, self).__init__(val['m_res'])
+
 
 class LowPtrPrinter(PtrPrinter):
     RECOGNIZE = '^HPHP::(LowPtr<.*>|LowPtrImpl<.*>)$'
 
     def __init__(self, val):
         self.val = val
+
+    def _ptype(self):
+        return self.val.type
 
     def _pointer(self):
         inner = self.val.type.template_argument(0)

@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
@@ -624,6 +625,20 @@ std::string NativeSig::toString(const char* classname,
   str += ")";
 
   return str;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+bool registerConstant(const StringData* cnsName,
+                      NativeConstantCallback callback) {
+  if (!Unit::defSystemConstantCallback(cnsName, callback)) {
+    return false;
+  }
+  TypedValue tv;
+  tv.m_type = KindOfUninit;
+  tv.m_data.pref = reinterpret_cast<RefData*>(callback);
+  s_constant_map[cnsName] = tv;
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////

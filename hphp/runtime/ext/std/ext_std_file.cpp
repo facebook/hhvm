@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/pipe.h"
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -1981,6 +1982,11 @@ void HHVM_FUNCTION(closedir,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString
+  s_STDIN("STDIN"),
+  s_STDOUT("STDOUT"),
+  s_STDERR("STDERR");
+
 void StandardExtension::initFile() {
 
   REGISTER_STRING_CONSTANT(DIRECTORY_SEPARATOR, s_DIRECTORY_SEPARATOR);
@@ -2014,6 +2020,10 @@ void StandardExtension::initFile() {
   REGISTER_CONSTANT(SEEK_SET, k_SEEK_SET);
   REGISTER_CONSTANT(SEEK_CUR, k_SEEK_CUR);
   REGISTER_CONSTANT(SEEK_END, k_SEEK_END);
+
+  Native::registerConstant(s_STDIN.get(),  BuiltinFiles::GetSTDIN);
+  Native::registerConstant(s_STDOUT.get(), BuiltinFiles::GetSTDOUT);
+  Native::registerConstant(s_STDERR.get(), BuiltinFiles::GetSTDERR);
 
   HHVM_FE(fopen);
   HHVM_FE(popen);

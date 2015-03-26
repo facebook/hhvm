@@ -227,4 +227,63 @@ TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
   return toSmash.primary;
 }
 
+TCA emitBindAddr(CodeBlock& cb, CodeBlock& frozen, TCA* addr, SrcKey sk) {
+  const bool needsJump = cb.base() == frozen.base();
+  TCA jumpAddr = nullptr;
+
+  if (needsJump) {
+    jumpAddr = cb.frontier();
+    Asm as{cb};
+    as.jmp(jumpAddr);
+  }
+
+  auto const sr = emitEphemeralServiceReq(
+    frozen,
+    mcg->getFreeStub(frozen, &mcg->cgFixups()),
+    REQ_BIND_ADDR,
+    addr,
+    sk.toAtomicInt(),
+    TransFlags{}.packed
+  );
+
+  mcg->cgFixups().m_codePointers.insert(addr);
+
+  if (needsJump) {
+    assert(jumpAddr);
+    TCA target = cb.frontier();
+    CodeCursor cursor(cb, jumpAddr);
+    Asm as{cb};
+    as.jmp(target);
+  }
+
+  return sr;
+}
+
+void emitBindJmpccFirst(CodeBlock&    cb,
+                        CodeBlock&    frozen,
+                        ConditionCode cc,
+                        SrcKey        targetSk0,
+                        SrcKey        targetSk1) {
+  mcg->backEnd().prepareForTestAndSmash(cb, 0,
+                                        TestAndSmashFlags::kAlignJccAndJmp);
+  Asm as{cb};
+  auto const jccAddr = cb.frontier();
+  mcg->setJmpTransID(jccAddr);
+  as.jcc(cc, jccAddr);
+  mcg->setJmpTransID(cb.frontier());
+  as.jmp(cb.frontier());
+
+  auto const sr =
+    emitEphemeralServiceReq(frozen,
+                            mcg->getFreeStub(frozen, &mcg->cgFixups()),
+                            REQ_BIND_JMPCC_FIRST,
+                            RipRelative(jccAddr),
+                            targetSk1.toAtomicInt(),
+                            targetSk0.toAtomicInt(),
+                            ccServiceReqArgInfo(cc));
+  CodeCursor cursor{cb, jccAddr};
+  as.jcc(cc, sr);
+  as.jmp(sr);
+}
+
 }}}

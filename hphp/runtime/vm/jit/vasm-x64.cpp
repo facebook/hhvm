@@ -382,16 +382,7 @@ void Vgen::emit(copy2& i) {
 }
 
 void Vgen::emit(bindaddr& i) {
-  mcg->setJmpTransID((TCA)i.dest);
-  *i.dest = emitEphemeralServiceReq(
-    frozen(),
-    mcg->getFreeStub(frozen(), &mcg->cgFixups()),
-    REQ_BIND_ADDR,
-    i.dest,
-    i.sk.toAtomicInt(),
-    TransFlags{}.packed
-  );
-  mcg->cgFixups().m_codePointers.insert(i.dest);
+  *i.dest = emitBindAddr(a->code(), frozen(), i.dest, i.sk);
 }
 
 void Vgen::emit(bindcall& i) {
@@ -401,22 +392,7 @@ void Vgen::emit(bindcall& i) {
 }
 
 void Vgen::emit(bindjcc1st& i) {
-  backend.prepareForTestAndSmash(a->code(), 0,
-                                 TestAndSmashFlags::kAlignJccAndJmp);
-  auto const patchAddr = a->frontier();
-  auto const jccStub =
-    emitEphemeralServiceReq(frozen(),
-                            mcg->getFreeStub(frozen(), &mcg->cgFixups()),
-                            REQ_BIND_JMPCC_FIRST,
-                            RipRelative(patchAddr),
-                            i.targets[1].toAtomicInt(),
-                            i.targets[0].toAtomicInt(),
-                            ccServiceReqArgInfo(i.cc));
-
-  mcg->setJmpTransID(a->frontier());
-  a->jcc(i.cc, jccStub);
-  mcg->setJmpTransID(a->frontier());
-  a->jmp(jccStub);
+  emitBindJmpccFirst(a->code(), frozen(), i.cc, i.targets[0], i.targets[1]);
 }
 
 void Vgen::emit(bindjcc& i) {

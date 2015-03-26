@@ -55,6 +55,26 @@ void emitBindJ(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
 TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                     SrcKey dest, TransFlags trflags);
 
+/*
+ * Emit a REQ_BIND_ADDR service request into `frozen', and return the
+ * starting address for the service request.  This function takes into
+ * account what the current block `cb' is while emitting the service
+ * request.  That is, if `cb' is the same as `frozen', a jump is
+ * emitted around the service request code.
+ */
+TCA emitBindAddr(CodeBlock& cb, CodeBlock& frozen, TCA* addr, SrcKey sk);
+
+/*
+ * Emit a REQ_BIND_JMPCC_FIRST service request in `frozen' and the
+ * corresponding jumps to be smashed in `cb'.  `frozen' and `cb' are
+ * allowed to be the same code block.
+ */
+void emitBindJmpccFirst(CodeBlock&    cb,
+                        CodeBlock&    frozen,
+                        ConditionCode cc,
+                        SrcKey        targetSk0,
+                        SrcKey        targetSk1);
+
 // An intentionally funny-looking-in-core-dumps constant for uninitialized
 // instruction pointers.
 constexpr uint64_t kUninitializedRIP = 0xba5eba11acc01ade;

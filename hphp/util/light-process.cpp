@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <boost/scoped_array.hpp>
+#include <boost/thread/barrier.hpp>
 
 #include <sys/resource.h>
 #include <sys/socket.h>
@@ -33,10 +34,12 @@
 #include <pwd.h>
 #include <signal.h>
 
+#include <folly/Memory.h>
 #include <folly/String.h>
 
 #include "hphp/util/afdt-util.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/hardware-counter.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 
@@ -145,10 +148,94 @@ int64_t ru2microseconds(const rusage& ru) {
   return time_us + time_s * 1000000;
 }
 
+/*
+ * Hardware counters can be configured to measure sub-process times,
+ * but note that any given LightProcess will be running jobs for
+ * multiple request threads (each request thread binds to a single
+ * LightProcess, but its a many to one mapping).
+ *
+ * This means that between the fork/exec and the waitpid, the LightProcess
+ * could fork/exec more processes for different requests. The solution
+ * is to fork/exec in a thread, and start the hardware counters there.
+ *
+ * The hardware counter will then measure time for that thread, and all
+ * its children - which is exactly what we want.
+ *
+ * HardwareCounterWrapper & co take care of that.
+ */
+struct HardwareCounterWrapperArg {
+  boost::barrier barrier{2};
+  pthread_t thr;
+  int afdt_fd;
+  pid_t (*func)(int);
+  pid_t pid;
+  int64_t *events;
+};
+
+std::map<pid_t, std::unique_ptr<HardwareCounterWrapperArg>> s_pidToHCWMap;
+
+void* hardwareCounterWrapper(void* varg) {
+  auto arg = (HardwareCounterWrapperArg*)varg;
+
+  HardwareCounter::s_counter.getCheck();
+  HardwareCounter::Reset();
+  arg->pid = arg->func(arg->afdt_fd);
+  // tell the main thread that pid has been set.
+  arg->barrier.wait();
+  if (arg->pid < 0) return nullptr;
+
+  // Wait until the main thread is ready to join us.
+  // Note that even though we have multiple threads running in the LightProcess
+  // now, at the time any of the do_* functions are called, any live threads are
+  // waiting here on this barrier; so there is no problem with fork, malloc,
+  // exec.
+  arg->barrier.wait();
+  HardwareCounter::GetPerfEvents(
+    [](const std::string& event, int64_t value, void* data) {
+      auto events = reinterpret_cast<int64_t*>(data);
+      if (event == "instructions") {
+        events[0] = value;
+      } else if (event == "loads") {
+        events[1] = value;
+      } else if (event == "stores") {
+        events[2] = value;
+      }
+    },
+    arg->events);
+
+  return nullptr;
+}
+
+void hardwareCounterWrapperHelper(pid_t (*func)(int), int afdt_fd) {
+  if (!s_trackProcessTimes) {
+    func(afdt_fd);
+    return;
+  }
+
+  auto arg = folly::make_unique<HardwareCounterWrapperArg>();
+  arg->afdt_fd = afdt_fd;
+  arg->func = func;
+  if (pthread_create(&arg->thr, nullptr, hardwareCounterWrapper, arg.get())) {
+    throw Exception("Failed to pthread_create: %s",
+                    folly::errnoStr(errno).c_str());
+  }
+  // Wait for the pid to be set. Note that we must not add any code here that
+  // could cause issues for the fork (eg malloc); we should wait on the barrier
+  // immediately after the thread is created.
+  arg->barrier.wait();
+  if (arg->pid > 0) {
+    // successfully forked, so don't join until waitpid.
+    s_pidToHCWMap[arg->pid] = std::move(arg);
+  } else {
+    // fork failed, join now.
+    pthread_join(arg->thr, nullptr);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // shadow process tasks
 
-void do_popen(int afdt_fd) {
+pid_t do_popen_helper(int afdt_fd) {
   std::string mode, buf, cwd;
 
   lwp_read(afdt_fd, mode, buf, cwd);
@@ -185,9 +272,14 @@ void do_popen(int afdt_fd) {
     // the fd is now owned by the main process, close our copy
     close(fd);
   }
+  return pid;
 }
 
-void do_proc_open(int afdt_fd) {
+void do_popen(int afdt_fd) {
+  hardwareCounterWrapperHelper(do_popen_helper, afdt_fd);
+}
+
+pid_t do_proc_open_helper(int afdt_fd) {
   std::string cmd, cwd;
   std::vector<std::string> env;
   std::vector<int> pvals;
@@ -199,7 +291,7 @@ void do_proc_open(int afdt_fd) {
     if (fd < 0) {
       lwp_write(afdt_fd, "error", (int32_t)EPROTO);
       close_fds(pkeys);
-      return;
+      return -1;
     }
     pkeys.push_back(fd);
   }
@@ -207,7 +299,7 @@ void do_proc_open(int afdt_fd) {
   // indicate error if an empty command was received
   if (cmd.length() == 0) {
     lwp_write(afdt_fd, "error", (int32_t)ENOENT);
-    return;
+    return -1;
   }
 
   // now ready to start the child process
@@ -228,7 +320,9 @@ void do_proc_open(int afdt_fd) {
       execl("/bin/sh", "sh", "-c", cmd.c_str(), nullptr);
     }
     _Exit(HPHP_EXIT_FAILURE);
-  } else if (child > 0) {
+  }
+
+  if (child > 0) {
     // successfully created the child process
     lwp_write(afdt_fd, "success", child);
   } else {
@@ -237,6 +331,11 @@ void do_proc_open(int afdt_fd) {
   }
 
   close_fds(pkeys);
+  return child;
+}
+
+void do_proc_open(int afdt_fd) {
+  hardwareCounterWrapperHelper(do_proc_open_helper, afdt_fd);
 }
 
 pid_t waited = 0;
@@ -265,8 +364,23 @@ void do_waitpid(int afdt_fd) {
   alarm(0); // cancel the previous alarm if not triggered yet
   waited = 0;
   const auto time_us = ru2microseconds(ru);
+  int64_t events[] = { 0, 0, 0 };
+  if (ret > 0 && s_trackProcessTimes) {
+    auto it = s_pidToHCWMap.find(ret);
+    if (it == s_pidToHCWMap.end()) {
+      throw Exception("pid not in map: %s",
+                      folly::errnoStr(errno).c_str());
+    }
 
-  lwp_write(afdt_fd, ret, stat, time_us, errno);
+    auto hcw = std::move(it->second);
+    s_pidToHCWMap.erase(it);
+    hcw->events = events;
+    hcw->barrier.wait();
+    pthread_join(hcw->thr, nullptr);
+  }
+
+  lwp_write(afdt_fd, ret, errno, stat,
+            time_us, events[0], events[1], events[2]);
 }
 
 void do_change_user(int afdt_fd) {
@@ -681,14 +795,18 @@ pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
   int stat;
   auto fin = g_procs[id].m_afdt_fd;
   int err;
-  int64_t time_us;
-  lwp_read(fin, ret, stat, time_us, err);
+  int64_t time_us, events[3];
+  lwp_read(fin, ret, err, stat,
+           time_us, events[0], events[1], events[2]);
 
   *stat_loc = stat;
   if (ret < 0) {
     errno = err;
   } else if (s_trackProcessTimes) {
     s_extra_request_microseconds += time_us;
+    HardwareCounter::IncInstructionCount(events[0]);
+    HardwareCounter::IncLoadCount(events[1]);
+    HardwareCounter::IncStoreCount(events[2]);
   }
 
   return ret;

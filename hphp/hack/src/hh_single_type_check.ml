@@ -141,7 +141,7 @@ let parse_options () =
   let options = [
     "--ai",
       Arg.Unit (set_mode Ai),
-      "";
+      "Run the abstract interpreter";
     "--suggest",
       Arg.Unit (set_mode Suggest),
       "Suggest missing typehints";

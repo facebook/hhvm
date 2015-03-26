@@ -24,7 +24,6 @@
 // Super temporary
 #ifndef USE_CMAKE
 #include "hphp/facebook/extensions/phpmc/ext_phpmc.h"
-#include "hphp/facebook/extensions/string_buffer/ext_string_buffer.h"
 #endif
 
 #include "hphp/runtime/ext/array/ext_array_idl.h"

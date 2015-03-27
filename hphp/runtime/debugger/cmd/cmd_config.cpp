@@ -159,7 +159,7 @@ void CmdConfig::onClient(DebuggerClient &client) {
   }
   if (var == "ContextLines" || var == "ctx") {
     int ctx = strtol(value.c_str(), nullptr, 10);
-    if (ctx < -1) {
+    if (ctx < 0) {
       client.error("%d is invalid for ContextLines(ctx)", ctx);
     } else {
       client.setDebuggerClientContextLines(ctx);

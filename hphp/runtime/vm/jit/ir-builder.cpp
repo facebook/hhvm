@@ -52,7 +52,7 @@ const typename M::mapped_type& get_required(const M& m,
 SSATmp* fwdGuardSource(IRInstruction* inst) {
   if (inst->is(AssertType, CheckType)) return inst->src(0);
 
-  assert(inst->is(AssertLoc, CheckLoc, AssertStk, CheckStk));
+  assertx(inst->is(AssertLoc, CheckLoc, AssertStk, CheckStk));
   inst->convertToNop();
   return nullptr;
 }
@@ -133,7 +133,7 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
     auto& prev = *prevIt;
 
     if (prev.isBlockEnd()) {
-      assert(where == m_curBlock->end());
+      assertx(where == m_curBlock->end());
 
       auto oldBlock = m_curBlock;
 
@@ -156,16 +156,16 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
     }
   }
 
-  assert(IMPLIES(inst->isBlockEnd(), where == m_curBlock->end()) &&
+  assertx(IMPLIES(inst->isBlockEnd(), where == m_curBlock->end()) &&
          "Can't insert a BlockEnd instruction in the middle of a block");
   if (do_assert && where != m_curBlock->begin()) {
     UNUSED auto prevIt = where;
     --prevIt;
-    assert(!prevIt->isBlockEnd() &&
+    assertx(!prevIt->isBlockEnd() &&
            "Can't append an instruction after a BlockEnd instruction");
   }
 
-  assert(inst->marker().valid());
+  assertx(inst->marker().valid());
   if (!inst->is(Nop, DefConst)) {
     where = m_curBlock->insert(where, inst);
     ++where;
@@ -468,7 +468,7 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   }
   // If FrameStateMgr's type isn't as good as the type param, we're missing
   // information in the IR.
-  assert(inst->typeParam() >= type);
+  assertx(inst->typeParam() >= type);
   inst->setTypeParam(std::min(type, inst->typeParam()));
 
   if (typeMightRelax()) return nullptr;
@@ -671,7 +671,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
   if (!simpResult.instrs.empty()) {
     // New instructions were generated. Append the new ones, filtering out Nops.
     for (auto* newInst : simpResult.instrs) {
-      assert(!newInst->isTransient());
+      assertx(!newInst->isTransient());
       if (newInst->op() == Nop) continue;
       appendInstruction(newInst);
     }
@@ -683,7 +683,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
 
   if (simpResult.dst) {
     // We're using some other instruction's output.  Don't append anything.
-    assert(simpResult.dst->inst() != inst);
+    assertx(simpResult.dst->inst() != inst);
     return simpResult.dst;
   }
 
@@ -692,7 +692,7 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
 }
 
 void IRBuilder::prepareForNextHHBC() {
-  assert(
+  assertx(
     syncedSpLevel() + m_state.evalStack().size() - m_state.stackDeficit() ==
       m_curMarker.spOff()
   );
@@ -710,7 +710,7 @@ void IRBuilder::exceptionStackBoundary() {
    * If this assert fires, we're trying to put things on the stack in a catch
    * trace that the unwinder won't be able to see.
    */
-  assert(
+  assertx(
     syncedSpLevel() + m_state.evalStack().size() - m_state.stackDeficit() ==
       m_curMarker.spOff()
   );
@@ -789,7 +789,7 @@ void IRBuilder::reoptimize() {
     auto nextBlock = block->next();
     auto backMarker = block->back().marker();
     auto instructions = block->moveInstrs();
-    assert(block->empty());
+    assertx(block->empty());
     while (!instructions.empty()) {
       auto* inst = &instructions.front();
       instructions.pop_front();
@@ -797,7 +797,7 @@ void IRBuilder::reoptimize() {
       // optimizeWork below may create new instructions, and will use
       // m_nextMarker to decide where they are. Use the marker from this
       // instruction.
-      assert(inst->marker().valid());
+      assertx(inst->marker().valid());
       setCurMarker(inst->marker());
 
       auto const tmp = optimizeInst(inst, CloneFlag::No, block);
@@ -806,8 +806,8 @@ void IRBuilder::reoptimize() {
       if (dst != tmp) {
         // The result of optimization has a different destination than the inst.
         // Generate a mov(tmp->dst) to get result into dst.
-        assert(inst->op() != DefLabel);
-        assert(block->empty() || !block->back().isBlockEnd() || inst->next());
+        assertx(inst->op() != DefLabel);
+        assertx(block->empty() || !block->back().isBlockEnd() || inst->next());
         auto src = tmp->inst()->is(Mov) ? tmp->inst()->src(0) : tmp;
         if (inst->next()) {
           // If the last instruction is a guard, insert the mov on the
@@ -832,7 +832,7 @@ void IRBuilder::reoptimize() {
       // to a nop). Replace it with a jump to the next block.
       appendInstruction(m_unit.gen(Jmp, backMarker, nextBlock));
     }
-    assert(block->back().isBlockEnd());
+    assertx(block->back().isBlockEnd());
     if (!block->back().isTerminal() && !block->next()) {
       // We converted the block-end instruction to a different one.
       // Set its next block appropriately.
@@ -901,13 +901,13 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
           changed = constrainSlot(inst->extra<LdLoc>()->locId, typeSrc,
             tc, "constrainValueLoc") || changed;
         } else {
-          assert(inst->is(LdStk));
+          assertx(inst->is(LdStk));
           changed = constrainSlot(inst->extra<LdStk>()->offset.offset, typeSrc,
             tc, "constrainValueStk") || changed;
         }
       } else {
         // Keep chasing down the source of val.
-        assert(typeSrc.isValue());
+        assertx(typeSrc.isValue());
         changed = constrainValue(typeSrc.value, tc) || changed;
       }
     }
@@ -969,9 +969,9 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
     for (; dst < inst->numDsts(); dst++) {
       if (val == inst->dst(dst)) break;
     }
-    assert(dst != inst->numDsts());
+    assertx(dst != inst->numDsts());
     for (auto& pred : inst->block()->preds()) {
-      assert(pred.inst()->is(Jmp));
+      assertx(pred.inst()->is(Jmp));
       auto src = pred.inst()->src(dst);
       changed = constrainValue(src, tc) || changed;
     }
@@ -1017,7 +1017,7 @@ bool IRBuilder::constrainSlot(int32_t idOrOffset,
 
   if (typeSrc.isValue()) return constrainValue(typeSrc.value, tc);
 
-  assert(typeSrc.isGuard());
+  assertx(typeSrc.isGuard());
   auto const guard = typeSrc.guard;
 
   always_assert(guard->is(AssertLoc, CheckLoc, AssertStk, CheckStk));
@@ -1078,13 +1078,13 @@ Type IRBuilder::localType(uint32_t id, TypeConstraint tc) {
 
 Type IRBuilder::predictedInnerType(uint32_t id) {
   auto const ty = m_state.predictedLocalType(id);
-  assert(ty <= Type::BoxedCell);
+  assertx(ty <= Type::BoxedCell);
   return ldRefReturn(ty.unbox());
 }
 
 Type IRBuilder::stackInnerTypePrediction(IRSPOffset offset) const {
   auto const ty = m_state.predictedStackType(offset);
-  assert(ty <= Type::BoxedCell);
+  assertx(ty <= Type::BoxedCell);
   return ldRefReturn(ty.unbox());
 }
 
@@ -1113,7 +1113,7 @@ void IRBuilder::setCurMarker(BCMarker newMarker) {
   FTRACE(2, "IRBuilder changing current marker from {} to {}\n",
          m_curMarker.valid() ? m_curMarker.show() : "<invalid>",
          newMarker.show());
-  assert(newMarker.valid());
+  assertx(newMarker.valid());
   m_curMarker = newMarker;
 }
 
@@ -1122,8 +1122,8 @@ bool IRBuilder::canStartBlock(Block* block) const {
 }
 
 bool IRBuilder::startBlock(Block* block, bool hasUnprocessedPred) {
-  assert(block);
-  assert(m_savedBlocks.empty());  // No bytecode control flow in exits.
+  assertx(block);
+  assertx(m_savedBlocks.empty());  // No bytecode control flow in exits.
 
   if (block == m_curBlock) return true;
 
@@ -1174,14 +1174,14 @@ bool IRBuilder::hasBlock(Offset offset) const {
 }
 
 void IRBuilder::setBlock(Offset offset, Block* block) {
-  assert(!hasBlock(offset));
+  assertx(!hasBlock(offset));
   m_offsetToBlockMap[offset] = block;
 }
 
 void IRBuilder::pushBlock(BCMarker marker, Block* b) {
   FTRACE(2, "IRBuilder saving {}@{} and using {}@{}\n",
          m_curBlock, m_curMarker.show(), b, marker.show());
-  assert(b);
+  assertx(b);
 
   m_savedBlocks.push_back(
     BlockState { m_curBlock, m_curMarker, m_exnStack }
@@ -1193,14 +1193,14 @@ void IRBuilder::pushBlock(BCMarker marker, Block* b) {
 
   if (do_assert) {
     for (UNUSED auto const& state : m_savedBlocks) {
-      assert(state.block != b &&
+      assertx(state.block != b &&
              "Can't push a block that's already in the saved stack");
     }
   }
 }
 
 void IRBuilder::popBlock() {
-  assert(!m_savedBlocks.empty());
+  assertx(!m_savedBlocks.empty());
 
   auto const& top = m_savedBlocks.back();
   FTRACE(2, "IRBuilder popping {}@{} to restore {}@{}\n",

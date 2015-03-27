@@ -181,7 +181,7 @@ GeneralEffects may_load_store_kill(AliasClass loads,
 GeneralEffects may_load_store_move(AliasClass loads,
                                    AliasClass stores,
                                    AliasClass move) {
-  assert(move <= loads);
+  assertx(move <= loads);
   return GeneralEffects { loads, stores, move, AEmpty };
 }
 
@@ -536,7 +536,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad { AElemIAny };
 
   case LdStructArrayElem:
-    assert(inst.src(1)->strVal()->isStatic());
+    assertx(inst.src(1)->strVal()->isStatic());
     return PureLoad { AElemS { inst.src(0), inst.src(1)->strVal() } };
 
   // TODO(#5575265): replace this instruction with CheckTypeMem.
@@ -613,7 +613,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VGetElem:
     // Right now we generally can't limit any of these better than general
     // re-entry rules, since they can raise warnings and re-enter.
-    assert(inst.src(0)->type() <= Type::PtrToGen);
+    assertx(inst.src(0)->type() <= Type::PtrToGen);
     return may_reenter(inst, may_load_store(
       AHeapAny | all_pointees(inst),
       AHeapAny | all_pointees(inst)
@@ -1199,7 +1199,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
 
 MemEffects memory_effects(const IRInstruction& inst) {
   auto const ret = memory_effects_impl(inst);
-  assert(check_effects(inst, ret));
+  assertx(check_effects(inst, ret));
   return ret;
 }
 

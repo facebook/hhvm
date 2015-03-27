@@ -59,7 +59,7 @@ void createBlockMap(HTS& hts,
     auto rBlock = blocks[i];
     auto id = rBlock->id();
     DEBUG_ONLY Offset bcOff = rBlock->start().offset();
-    assert(IMPLIES(i == 0, bcOff == irb.unit().bcOff()));
+    assertx(IMPLIES(i == 0, bcOff == irb.unit().bcOff()));
 
     // NB: This maps the region entry block to a new IR block, even though
     // we've already constructed an IR entry block. We'll make the IR entry
@@ -86,9 +86,9 @@ void setIRBlock(HTS& hts,
   Offset bcOffset = rBlock->start().offset();
 
   auto iit = blockIdToIRBlock.find(blockId);
-  assert(iit != blockIdToIRBlock.end());
+  assertx(iit != blockIdToIRBlock.end());
 
-  assert(!irb.hasBlock(bcOffset));
+  assertx(!irb.hasBlock(bcOffset));
   FTRACE(3, "  setIRBlock: blockId {}, offset {} => IR Block {}\n",
          blockId, bcOffset, iit->second->id());
   irb.setBlock(bcOffset, iit->second);
@@ -110,7 +110,7 @@ void setSuccIRBlocks(HTS& hts,
   }
   if (auto nextRetrans = region.nextRetrans(srcBlockId)) {
     auto it = blockIdToIRBlock.find(nextRetrans.value());
-    assert(it != blockIdToIRBlock.end());
+    assertx(it != blockIdToIRBlock.end());
     irb.setGuardFailBlock(it->second);
   } else {
     irb.resetGuardFailBlock();
@@ -198,7 +198,7 @@ void emitPredictionGuards(HTS& hts,
     auto loc  = pred.location;
     if (type <= Type::Cls) {
       // Do not generate guards for class; instead assert the type.
-      assert(loc.tag() == RegionDesc::Location::Tag::Stack);
+      assertx(loc.tag() == RegionDesc::Location::Tag::Stack);
       irgen::assertTypeLocation(hts, loc, type);
     } else {
       // Check inner type eagerly if it is the first block during profiling.
@@ -246,8 +246,8 @@ void emitPredictionGuards(HTS& hts,
     }
   }
 
-  assert(!typePreds.hasNext());
-  assert(!refPreds.hasNext());
+  assertx(!typePreds.hasNext());
+  assertx(!refPreds.hasNext());
 }
 
 void initNormalizedInstruction(
@@ -344,7 +344,7 @@ bool tryTranslateSingletonInline(HTS& hts,
   if (!funcd) return false;
 
   // Make sure we have an acceptable FPush and non-null callee.
-  assert(ninst.op() == Op::FPushFuncD ||
+  assertx(ninst.op() == Op::FPushFuncD ||
          ninst.op() == Op::FPushClsMethodD);
 
   auto fcall = ninst.nextSk();
@@ -364,8 +364,8 @@ bool tryTranslateSingletonInline(HTS& hts,
     auto cgetl = (const Op*)pc;
     auto sli = (const Op*)captures[0];
 
-    assert(*cgetl == Op::CGetL);
-    assert(*sli == Op::StaticLocInit);
+    assertx(*cgetl == Op::CGetL);
+    assertx(*sli == Op::StaticLocInit);
 
     return (getImm(sli, 0).u_IVA == getImm(cgetl, 0).u_IVA);
   };
@@ -413,8 +413,8 @@ bool tryTranslateSingletonInline(HTS& hts,
     return Atom(Op::String).onlyif([=] (PC pc, const Captures& captures) {
       auto string1 = (const Op*)pc;
       auto string2 = (const Op*)captures[i];
-      assert(*string1 == Op::String);
-      assert(*string2 == Op::String);
+      assertx(*string1 == Op::String);
+      assertx(*string2 == Op::String);
 
       auto const unit = funcd->unit();
       auto sd1 = unit->lookupLitstrId(getImmPtr(string1, 0)->u_SA);
@@ -484,7 +484,7 @@ folly::Optional<RegionDesc::BlockId> nextReachableBlock(
     auto const regionBlockId = workQ.front();
     workQ.pop();
     auto it = blockIdToIRBlock.find(regionBlockId);
-    assert(it != blockIdToIRBlock.end());
+    assertx(it != blockIdToIRBlock.end());
     auto irBlock = it->second;
     if (irb.canStartBlock(irBlock)) return regionBlockId;
     // Put the block back at the end of workQ, since it may become
@@ -677,8 +677,8 @@ TranslateResult irGenRegion(HTS& hts,
 
     processedBlocks.insert(blockId);
 
-    assert(!byRefs.hasNext());
-    assert(!knownFuncs.hasNext());
+    assertx(!byRefs.hasNext());
+    assertx(!knownFuncs.hasNext());
   }
   irGenTimer.stop();
   return TranslateResult::Success;
@@ -708,7 +708,7 @@ TranslateResult mcGenRegion(HTS& hts,
     return TranslateResult::Retry;
   } catch (const DataBlockFull& dbFull) {
     if (dbFull.name == "hot") {
-      assert(mcg->tx().useAHot());
+      assertx(mcg->tx().useAHot());
       mcg->tx().setUseAHot(false);
       // We can't return Retry here because the code block selection
       // will still say hot.
@@ -746,7 +746,7 @@ TranslateResult translateRegion(HTS& hts,
     Block* mainExit = findMainExitBlock(unit, lastSrcKey);
     FTRACE(2, "translateRegion: mainExit: B{}\nUnit: {}\n",
            mainExit->id(), unit);
-    assert(mainExit);
+    assertx(mainExit);
     pConds = hts.irb->postConds(mainExit);
   }
 

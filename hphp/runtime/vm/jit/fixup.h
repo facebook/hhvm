@@ -108,8 +108,8 @@ namespace HPHP { namespace jit {
 
 struct Fixup {
   Fixup(int32_t pcOff, int32_t spOff) : pcOffset{pcOff}, spOffset{spOff} {
-    assert(pcOffset >= 0);
-    assert(spOffset >= 0);
+    assertx(pcOffset >= 0);
+    assertx(spOffset >= 0);
   }
 
   Fixup() {}
@@ -190,17 +190,17 @@ private:
   }
 
   PC pc(const ActRec* ar, const Func* f, const Fixup& fixup) const {
-    assert(f);
+    assertx(f);
     return f->getEntry() + fixup.pcOffset;
   }
 
   void regsFromActRec(CTCA tca, const ActRec* ar, const Fixup& fixup,
                       VMRegs* outRegs) const {
     const Func* f = ar->m_func;
-    assert(f);
+    assertx(f);
     TRACE(3, "regsFromActRec:: tca %p -> (pcOff %d, spOff %d)\n",
           (void*)tca, fixup.pcOffset, fixup.spOffset);
-    assert(fixup.spOffset >= 0);
+    assertx(fixup.spOffset >= 0);
     outRegs->pc = reinterpret_cast<const Op*>(pc(ar, f, fixup));
     outRegs->fp = ar;
 

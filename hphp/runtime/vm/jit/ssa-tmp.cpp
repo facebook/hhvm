@@ -53,11 +53,11 @@ int typeNeededWords(Type t) {
   }
   if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.
-    assert(IMPLIES(t <= Type::StkElem, t.isKnownDataType()));
+    assertx(IMPLIES(t <= Type::StkElem, t.isKnownDataType()));
     return 1;
   }
 
-  assert(t <= Type::StkElem);
+  assertx(t <= Type::StkElem);
 
   // XXX(t4592459): This will return 2 for Type::Null, even though it only
   // needs 1 register (one for the type, none for the value). This is to work

@@ -119,7 +119,7 @@ void local_effects(const FrameStateMgr& frameState,
     case InterpOne:
     case InterpOneCF: {
       auto const& id = *inst->extra<InterpOneData>();
-      assert(!id.smashesAllLocals || id.nChangedLocals == 0);
+      assertx(!id.smashesAllLocals || id.nChangedLocals == 0);
       if (id.smashesAllLocals || inst->marker().func()->isPseudoMain()) {
         hook.clearLocals();
       } else {

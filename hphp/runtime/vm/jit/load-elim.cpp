@@ -176,7 +176,7 @@ TrackedLoc* find_tracked(Local& env,
                          AliasClass acls) {
   auto const meta = env.global.ainfo.find(canonicalize(acls));
   if (!meta) return nullptr;
-  assert(meta->index < kMaxTrackedALocs);
+  assertx(meta->index < kMaxTrackedALocs);
   return env.state.avail[meta->index] ? &env.state.tracked[meta->index]
                                       : nullptr;
 }
@@ -187,7 +187,7 @@ std::pair<SSATmp*,Type> load(Local& env,
   acls = canonicalize(acls);
   auto const meta = env.global.ainfo.find(acls);
   if (!meta) return { nullptr, Type::Gen };
-  assert(meta->index < kMaxTrackedALocs);
+  assertx(meta->index < kMaxTrackedALocs);
   auto& tracked = env.state.tracked[meta->index];
 
   if (env.state.avail[meta->index]) {

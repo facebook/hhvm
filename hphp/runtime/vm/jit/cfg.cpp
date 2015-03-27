@@ -66,7 +66,7 @@ struct BackEdgeVisitor {
     // found a backedge.
     if (m_path.test(id)) {
       // The entry block can't be a loop header.
-      assert(!block->isEntry());
+      assertx(!block->isEntry());
 
       m_visitor(e);
     }
@@ -122,7 +122,7 @@ BlockList poSortCfg(const IRUnit& unit) {
 BlockList rpoSortCfg(const IRUnit& unit) {
   auto blocks = poSortCfg(unit);
   std::reverse(blocks.begin(), blocks.end());
-  assert(blocks.size() <= unit.numBlocks());
+  assertx(blocks.size() <= unit.numBlocks());
   return blocks;
 }
 
@@ -141,7 +141,7 @@ Block* splitEdge(IRUnit& unit, Block* from, Block* to) {
   if (branch.taken() == to) {
     branch.setTaken(middle);
   } else {
-    assert(branch.next() == to);
+    assertx(branch.next() == to);
     branch.setNext(middle);
   }
 
@@ -267,7 +267,7 @@ IdomVector findDominators(const IRUnit& unit,
 }
 
 bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms) {
-  assert(b1 != nullptr && b2 != nullptr);
+  assertx(b1 != nullptr && b2 != nullptr);
   for (auto b = b2; b != nullptr; b = idoms[b]) {
     if (b == b1) return true;
   }
@@ -290,7 +290,7 @@ bool insertLoopPreHeaders(IRUnit& unit) {
     }
 
     // Header can't be the entry block.
-    assert(fwdPreds.size() != 0);
+    assertx(fwdPreds.size() != 0);
 
     // Already have a pre-header, so do nothing.
     if (fwdPreds.size() == 1) continue;
@@ -308,7 +308,7 @@ bool insertLoopPreHeaders(IRUnit& unit) {
     for (auto const pred : fwdPreds) {
       auto& branch = pred->from()->back();
 
-      assert(branch.taken() == header || branch.next() == header);
+      assertx(branch.taken() == header || branch.next() == header);
 
       if (branch.taken() == header) branch.setTaken(preheader);
       if (branch.next() == header) branch.setNext(preheader);

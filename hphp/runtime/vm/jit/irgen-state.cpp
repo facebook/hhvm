@@ -59,13 +59,13 @@ std::string show(const HTS& hts) {
   auto const stackDepth = hts.irb->syncedSpLevel().offset +
       safe_cast<int32_t>(hts.irb->evalStack().size()) -
       safe_cast<int32_t>(hts.irb->stackDeficit()) - frameCells;
-  assert(stackDepth >= 0);
+  assertx(stackDepth >= 0);
   auto spOffset = stackDepth;
   auto elem = [&](const std::string& str) {
     out << folly::format("| {:<80} |\n",
                          folly::format("{:>2}: {}",
                                        stackDepth - spOffset, str));
-    assert(spOffset > 0);
+    assertx(spOffset > 0);
     --spOffset;
   };
 
@@ -84,7 +84,7 @@ std::string show(const HTS& hts) {
                          .noFuncs()
       );
       auto msgStr = msg.str();
-      assert(msgStr.back() == '\n');
+      assertx(msgStr.back() == '\n');
       msgStr.erase(msgStr.size() - 1);
       for (unsigned i = 0; i < kNumActRecCells; ++i) elem(msgStr);
       fpi = fpi->m_parentIndex != -1
@@ -106,7 +106,7 @@ std::string show(const HTS& hts) {
 
   header(" in-memory ");
   for (auto i = hts.irb->evalStack().size(); spOffset > 0; ) {
-    assert(i < irgen::curFunc(hts)->maxStackCells());
+    assertx(i < irgen::curFunc(hts)->maxStackCells());
     if (checkFpi()) {
       i += kNumActRecCells;
       continue;

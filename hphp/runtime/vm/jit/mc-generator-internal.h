@@ -169,7 +169,7 @@ static inline void verifyTVOff(MemoryRef mr) {
   DEBUG_ONLY auto disp = mr.r.disp;
   // Make sure that we're operating on the m_type field of a
   // TypedValue*.
-  assert((disp & (sizeof(TypedValue) - 1)) == TVOFF(m_type));
+  assertx((disp & (sizeof(TypedValue) - 1)) == TVOFF(m_type));
 }
 
 template<typename SrcType, typename OpndType>
@@ -246,7 +246,7 @@ emitStoreTypedValue(X64Assembler& a, DataType type, PhysReg val,
     emitStoreTVType(a, type, dest[disp + TVOFF(m_type)]);
   }
   if (!IS_NULL_TYPE(type)) {
-    assert(val != InvalidReg);
+    assertx(val != InvalidReg);
     a.  storeq(val, dest[disp + TVOFF(m_data)]);
   }
 }
@@ -266,7 +266,7 @@ emitCopyTo(X64Assembler& a,
            Reg64 dest,
            int destOff,
            PhysReg scratch) {
-  assert(src != scratch);
+  assertx(src != scratch);
   // This is roughly how gcc compiles this.  Blow off m_aux.
   a.    loadq  (src[srcOff + TVOFF(m_data)], scratch);
   a.    storeq (scratch, dest[destOff + TVOFF(m_data)]);

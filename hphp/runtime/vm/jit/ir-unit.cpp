@@ -58,12 +58,12 @@ Block* IRUnit::defBlock(Block::Hint hint) {
 }
 
 SSATmp* IRUnit::cns(Type type) {
-  assert(type.hasConstVal() ||
+  assertx(type.hasConstVal() ||
          type.subtypeOfAny(Type::Uninit, Type::InitNull, Type::Nullptr));
   IRInstruction inst(DefConst, BCMarker{});
   inst.setTypeParam(type);
   if (SSATmp* tmp = m_constTable.lookup(&inst)) {
-    assert(tmp->type() == type);
+    assertx(tmp->type() == type);
     return tmp;
   }
   return m_constTable.insert(clone(&inst)->dst());

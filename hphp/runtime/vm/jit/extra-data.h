@@ -699,7 +699,7 @@ struct InterpOneData : IRExtraData {
       cellsPopped,
       cellsPushed
     );
-    assert(!smashesAllLocals || !nChangedLocals);
+    assertx(!smashesAllLocals || !nChangedLocals);
     if (smashesAllLocals) ret += ", smashes all locals";
     if (nChangedLocals) {
       for (auto i = 0; i < nChangedLocals; ++i) {
@@ -766,7 +766,7 @@ struct RBMsgData : IRExtraData {
     : type(t)
     , msg(msg)
   {
-    assert(msg->isStatic());
+    assertx(msg->isStatic());
   }
 
   std::string show() const {
@@ -1018,27 +1018,27 @@ X(LdPropAddr,                   PropOffset);
 //////////////////////////////////////////////////////////////////////
 
 template<bool hasExtra, Opcode opc, class T> struct AssertExtraTypes {
-  static void doassert() {
-    assert(!"called extra on an opcode without extra data");
+  static void doassertx() {
+    assertx(!"called extra on an opcode without extra data");
   }
   static void doassert_same() {
-    assert(!"called extra on an opcode without extra data");
+    assertx(!"called extra on an opcode without extra data");
   }
 };
 
 template<Opcode opc, class T> struct AssertExtraTypes<true,opc,T> {
   typedef typename IRExtraDataType<opc>::type ExtraType;
 
-  static void doassert() {
+  static void doassertx() {
     if (!std::is_base_of<T,ExtraType>::value) {
-      assert(!"extra<T> was called with an extra data "
+      assertx(!"extra<T> was called with an extra data "
               "type that doesn't match the opcode type");
     }
   }
   static void doassert_same() {
     if (!std::is_same<T,ExtraType>::value) {
       fprintf(stderr, "opcode = %s\n", opcodeName(opc));   \
-      assert(!"extra<T> was called with an extra data type that "
+      assertx(!"extra<T> was called with an extra data type that "
              "doesn't exactly match the opcode type");
     }
   }
@@ -1051,7 +1051,7 @@ template<class T> void assert_opcode_extra(Opcode opc) {
   case opcode:                                  \
     AssertExtraTypes<                           \
       OpHasExtraData<opcode>::value,opcode,T    \
-    >::doassert();                              \
+    >::doassertx();                              \
     break;
   switch (opc) { IR_OPCODES default: not_reached(); }
 #undef O

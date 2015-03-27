@@ -48,7 +48,7 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
   auto const ldPMExit = makePseudoMainExit(env);
   auto val = isReturnType ? topR(env)
                           : ldLoc(env, id, ldPMExit, DataTypeSpecific);
-  assert(val->type() <= Type::Cell || val->type() <= Type::BoxedCell);
+  assertx(val->type() <= Type::Cell || val->type() <= Type::BoxedCell);
 
   auto const valType = [&]() -> Type {
     if (val->type() <= Type::Cell) return val->type();
@@ -105,7 +105,7 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
     case AnnotAction::ObjectCheck:
       break;
   }
-  assert(result == AnnotAction::ObjectCheck);
+  assertx(result == AnnotAction::ObjectCheck);
 
   if (!(valType <= Type::Obj)) {
     // For RepoAuthoritative mode, if tc is a type alias we can optimize
@@ -135,7 +135,7 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
     if (tc.isSelf()) {
       tc.selfToClass(curFunc(env), &knownConstraint);
     } else {
-      assert(tc.isParent());
+      assertx(tc.isParent());
       tc.parentToClass(curFunc(env), &knownConstraint);
     }
     if (!knownConstraint) {
@@ -150,7 +150,7 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
     }
     clsName = knownConstraint->preClass()->name();
   }
-  assert(clsName);
+  assertx(clsName);
 
   // We can only burn in the Class* if it's unique or in the
   // inheritance hierarchy of our context. It's ok if the class isn't
@@ -161,7 +161,7 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
 
   // For "self" and "parent", knownConstraint should always be
   // non-null at this point
-  assert(IMPLIES(tc.isSelf() || tc.isParent(), knownConstraint != nullptr));
+  assertx(IMPLIES(tc.isSelf() || tc.isParent(), knownConstraint != nullptr));
 
   /*
    * If the local is a specialized object type and we don't have to constrain a
@@ -436,8 +436,8 @@ void emitOODeclExists(HTS& env, OODeclExistsOp subop) {
   auto const tAutoload = popC(env);
   auto const tCls = popC(env);
 
-  assert(tCls->isA(Type::Str)); // result of CastString
-  assert(tAutoload->isA(Type::Bool)); // result of CastBool
+  assertx(tCls->isA(Type::Str)); // result of CastString
+  assertx(tAutoload->isA(Type::Bool)); // result of CastBool
 
   ClassKind kind;
   switch (subop) {

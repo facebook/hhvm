@@ -389,7 +389,7 @@ inline SSATmp* top(HTS& env,
     extendStack(env, index.offset, type);
     tmp = env.irb->evalStack().top(index.offset);
   }
-  assert(tmp);
+  assertx(tmp);
   env.irb->constrainValue(tmp, tc);
   return tmp;
 }
@@ -489,7 +489,7 @@ inline SSATmp* unbox(HTS& env, SSATmp* val, Block* exit) {
 // Type helpers
 
 inline Type relaxToGuardable(Type ty) {
-  assert(ty <= Type::Gen);
+  assertx(ty <= Type::Gen);
   ty = ty.unspecialize();
 
   if (ty.isKnownDataType()) return ty;
@@ -532,7 +532,7 @@ inline bool classIsUniqueOrCtxParent(HTS& env, const Class* cls) {
 }
 
 inline SSATmp* ldCls(HTS& env, SSATmp* className) {
-  assert(className->isA(Type::Str));
+  assertx(className->isA(Type::Str));
   if (className->hasConstVal()) {
     if (auto const cls = Unit::lookupClass(className->strVal())) {
       if (classIsPersistentOrCtxParent(env, cls)) return cns(env, cls);
@@ -549,7 +549,7 @@ inline SSATmp* ldLoc(HTS& env,
                      uint32_t locId,
                      Block* exit,
                      TypeConstraint tc) {
-  assert(IMPLIES(exit == nullptr, !curFunc(env)->isPseudoMain()));
+  assertx(IMPLIES(exit == nullptr, !curFunc(env)->isPseudoMain()));
 
   auto const opStr = curFunc(env)->isPseudoMain()
     ? "LdLocPseudoMain"
@@ -558,8 +558,8 @@ inline SSATmp* ldLoc(HTS& env,
 
   if (curFunc(env)->isPseudoMain()) {
     auto const type = relaxToGuardable(env.irb->predictedLocalType(locId));
-    assert(!type.isSpecialized());
-    assert(type == type.dropConstVal());
+    assertx(!type.isSpecialized());
+    assertx(type == type.dropConstVal());
 
     // We don't support locals being type Gen, so if we ever get into such a
     // case, we need to punt.
@@ -678,7 +678,7 @@ inline SSATmp* stLocImpl(HTS& env,
                          SSATmp* newVal,
                          bool decRefOld,
                          bool incRefNew) {
-  assert(!newVal->type().maybe(Type::BoxedCell));
+  assertx(!newVal->type().maybe(Type::BoxedCell));
 
   auto const cat = decRefOld ? DataTypeCountness : DataTypeGeneric;
   auto const oldLoc = ldLoc(env, id, ldPMExit, cat);
@@ -773,7 +773,7 @@ inline SSATmp* ldLocAddr(HTS& env, uint32_t locId) {
 inline SSATmp* ldStkAddr(HTS& env, BCSPOffset relOffset) {
   // You're almost certainly doing it wrong if you want to get the address of a
   // stack cell that's in irb->evalStack().
-  assert(relOffset >= static_cast<int32_t>(env.irb->evalStack().size()));
+  assertx(relOffset >= static_cast<int32_t>(env.irb->evalStack().size()));
   auto const offset = offsetFromIRSP(env, relOffset);
   env.irb->constrainStack(offset, DataTypeSpecific);
   return gen(
@@ -786,7 +786,7 @@ inline SSATmp* ldStkAddr(HTS& env, BCSPOffset relOffset) {
 }
 
 inline void decRefLocalsInline(HTS& env) {
-  assert(!curFunc(env)->isPseudoMain());
+  assertx(!curFunc(env)->isPseudoMain());
   for (int id = curFunc(env)->numLocals() - 1; id >= 0; --id) {
     auto const loc = ldLoc(env, id, nullptr, DataTypeGeneric);
     gen(env, DecRef, loc);

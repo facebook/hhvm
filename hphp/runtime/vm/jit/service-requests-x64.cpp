@@ -118,7 +118,7 @@ void padStub(CodeBlock& stub) {
   // do not use nops, or the relocator will strip them out
   while (stub.available() >= 2) a.ud2();
   if (stub.available() > 0) a.int3();
-  assert(stub.available() == 0);
+  assertx(stub.available() == 0);
 }
 
 } // anonymous namespace
@@ -139,7 +139,7 @@ emitServiceReqImpl(CodeBlock& stub, SRFlags flags, ServiceRequest req,
    * Move args into appropriate regs. Eager VMReg save may bash flags,
    * so set the CondCode arguments first.
    */
-  assert(argv.size() <= kNumServiceReqArgRegs);
+  assertx(argv.size() <= kNumServiceReqArgRegs);
   for (int i = 0; i < argv.size(); ++i) {
     auto reg = serviceReqArgRegs[i];
     const auto& argInfo = argv[i];
@@ -156,7 +156,7 @@ emitServiceReqImpl(CodeBlock& stub, SRFlags flags, ServiceRequest req,
         // Already set before VM reg save.
         DEBUG_ONLY TCA start = as.frontier();
         as.    setcc(argInfo.m_cc, rbyte(reg));
-        assert(start - as.frontier() <= kMovSize);
+        assertx(start - as.frontier() <= kMovSize);
         FTRACE(2, "cc({}), ", cc_names[argInfo.m_cc]);
       } break;
       default: not_reached();

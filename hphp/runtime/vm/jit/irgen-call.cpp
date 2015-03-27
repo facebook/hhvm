@@ -230,7 +230,7 @@ void fpushObjMethodCommon(HTS& env,
      * actrec before entering the "real" cloned closure body.
      */
     if (func->attrs() & AttrStatic && !func->isClosureBody()) {
-      assert(baseClass);
+      assertx(baseClass);
       gen(env, DecRef, obj);
       objOrCls = cns(env, baseClass);
     }
@@ -341,7 +341,7 @@ SSATmp* clsMethodCtx(HTS& env, const Func* callee, const Class* cls) {
   if (env.irb->thisAvailable()) {
     // might not be a static call and $this is available, so we know it's
     // definitely not static
-    assert(curClass(env));
+    assertx(curClass(env));
     auto this_ = ldThis(env);
     gen(env, IncRef, this_);
     return this_;
@@ -465,11 +465,11 @@ void fpushActRec(HTS& env,
     objOrClass
   );
   auto const sframe = &env.irb->curBlock()->back();
-  assert(sframe->is(SpillFrame));
+  assertx(sframe->is(SpillFrame));
 
   env.fpiStack.push(FPIInfo { sp(env), returnSPOff, sframe });
 
-  assert(env.irb->stackDeficit() == 0);
+  assertx(env.irb->stackDeficit() == 0);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -714,7 +714,7 @@ void emitFPushClsMethodF(HTS& env, int32_t numParams) {
 
   auto classTmp = top(env, Type::Cls);
   auto methodTmp = topC(env, BCSPOffset{1}, DataTypeGeneric);
-  assert(classTmp->isA(Type::Cls));
+  assertx(classTmp->isA(Type::Cls));
   if (!classTmp->hasConstVal() || !methodTmp->hasConstVal(Type::Str)) {
     PUNT(FPushClsMethodF-unknownClassOrMethod);
   }

@@ -80,7 +80,7 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
   a.     Brk   (0);
 
   if (!persist) {
-    assert(cb.frontier() - start <= kMaxStubSpace);
+    assertx(cb.frontier() - start <= kMaxStubSpace);
     while (cb.frontier() - start < kMaxStubSpace) {
       a. Nop   ();
     }

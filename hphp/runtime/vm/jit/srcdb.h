@@ -50,11 +50,11 @@ struct GrowableVector {
     return m_vec ? m_vec->m_size : 0;
   }
   T& operator[](const size_t idx) {
-    assert(idx < size());
+    assertx(idx < size());
     return m_vec->m_data[idx];
   }
   const T& operator[](const size_t idx) const {
-    assert(idx < size());
+    assertx(idx < size());
     return m_vec->m_data[idx];
   }
   void push_back(const T& datum) {
@@ -217,8 +217,8 @@ struct SrcRec {
    * SrcKey that will continue the tracelet chain.
    */
   void setAnchorTranslation(TCA anc) {
-    assert(!m_anchorTranslation);
-    assert(m_tailFallbackJumps.empty());
+    assertx(!m_anchorTranslation);
+    assertx(m_tailFallbackJumps.empty());
     m_anchorTranslation = anc;
   }
 

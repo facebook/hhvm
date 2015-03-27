@@ -156,7 +156,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
   /*
    * Fill the first block predictions with the live types.
    */
-  assert(!ret->empty());
+  assertx(!ret->empty());
   auto const startSK = ret->start();
   for (auto& lt : context.liveTypes) {
     typedef RegionDesc::Location::Tag LTag;

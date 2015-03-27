@@ -143,7 +143,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     // to expose control-flow for now.
     // This can go away once Task #4075822 is done.
     if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
-      assert(hasTransId(newFirstBlockId));
+      assertx(hasTransId(newFirstBlockId));
       auto newTransId = getTransId(newFirstBlockId);
       auto& blocks = region->blocks();
       for (auto iOther = 0; iOther < blocks.size(); iOther++) {
@@ -221,7 +221,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
         maxArc = arc;
       }
     }
-    assert(maxArc != nullptr);
+    assertx(maxArc != nullptr);
     prevId = tid;
     tid = maxArc->dst();
   }

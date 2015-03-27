@@ -249,12 +249,12 @@ public:
     enterTC(m_tx.uniqueStubs.resumeHelper, nullptr);
   }
   void enterTCAtPrologue(ActRec *ar, TCA start) {
-    assert(ar);
-    assert(start);
+    assertx(ar);
+    assertx(start);
     enterTC(start, ar);
   }
   void enterTCAfterPrologue(TCA start) {
-    assert(start);
+    assertx(start);
     enterTC(start, nullptr);
   }
 

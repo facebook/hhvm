@@ -42,7 +42,7 @@ inline IRInstruction::IRInstruction(Opcode op,
   if (op != DefConst) {
     // DefConst is the only opcode that's allowed to not have a marker, since
     // it's not part of the instruction stream.
-    assert(m_marker.valid());
+    assertx(m_marker.valid());
   }
 }
 
@@ -85,8 +85,8 @@ inline bool IRInstruction::producesReference(int dstNo) const {
 }
 
 inline SSATmp* IRInstruction::getPassthroughValue() const {
-  assert(isPassthrough());
-  assert(is(IncRef,
+  assertx(isPassthrough());
+  assertx(is(IncRef,
             CheckType, AssertType, AssertNonNull,
             ColAddElemC, ColAddNewElemC,
             Mov));
@@ -96,7 +96,7 @@ inline SSATmp* IRInstruction::getPassthroughValue() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline uint32_t IRInstruction::id() const {
-  assert(m_id != kTransient);
+  assertx(m_id != kTransient);
   return m_id;
 }
 
@@ -128,7 +128,7 @@ inline BCMarker& IRInstruction::marker() {
 inline bool IRInstruction::hasTypeParam() const { return m_hasTypeParam; }
 
 inline Type IRInstruction::typeParam() const {
-  assert(m_hasTypeParam);
+  assertx(m_hasTypeParam);
   return m_typeParam;
 }
 
@@ -140,7 +140,7 @@ inline void IRInstruction::setTypeParam(Type t) {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void IRInstruction::initializeSrcs(uint32_t numSrcs, SSATmp** srcs) {
-  assert(!m_srcs && !m_numSrcs);
+  assertx(!m_srcs && !m_numSrcs);
   m_numSrcs = numSrcs;
   m_srcs = srcs;
 }
@@ -159,7 +159,7 @@ inline SSATmp* IRInstruction::src(uint32_t i) const {
 }
 
 inline SSATmp* IRInstruction::dst() const {
-  assert(!naryDst());
+  assertx(!naryDst());
   return m_dst;
 }
 
@@ -181,13 +181,13 @@ inline void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
 }
 
 inline void IRInstruction::setDst(SSATmp* newDst) {
-  assert(hasDst());
+  assertx(hasDst());
   m_dst = newDst;
   m_numDsts = newDst ? 1 : 0;
 }
 
 inline void IRInstruction::setDsts(uint32_t numDsts, SSATmp* newDsts) {
-  assert(naryDst());
+  assertx(naryDst());
   m_numDsts = numDsts;
   m_dst = newDsts;
 }
@@ -200,14 +200,14 @@ inline bool IRInstruction::hasExtra() const {
 
 template<Opcode opc>
 const typename IRExtraDataType<opc>::type* IRInstruction::extra() const {
-  assert(opc == op() && "ExtraData type error");
-  assert(m_extra != nullptr);
+  assertx(opc == op() && "ExtraData type error");
+  assertx(m_extra != nullptr);
   return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
 }
 
 template<Opcode opc>
 typename IRExtraDataType<opc>::type* IRInstruction::extra() {
-  assert(opc == op() && "ExtraData type error");
+  assertx(opc == op() && "ExtraData type error");
   return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
 }
 
@@ -222,7 +222,7 @@ inline const IRExtraData* IRInstruction::rawExtra() const {
 }
 
 inline void IRInstruction::setExtra(IRExtraData* data) {
-  assert(!m_extra);
+  assertx(!m_extra);
   m_extra = data;
 }
 
@@ -273,12 +273,12 @@ inline bool IRInstruction::isBlockEnd() const {
 }
 
 inline Block* IRInstruction::succ(int i) const {
-  assert(!m_edges || hasEdges());
+  assertx(!m_edges || hasEdges());
   return m_edges ? m_edges[i].to() : nullptr;
 }
 
 inline Edge* IRInstruction::succEdge(int i) {
-  assert(!m_edges || hasEdges());
+  assertx(!m_edges || hasEdges());
   return m_edges && m_edges[i].to() ? &m_edges[i] : nullptr;
 }
 
@@ -287,7 +287,7 @@ inline void IRInstruction::setSucc(int i, Block* b) {
     if (isTransient()) m_edges[i].setTransientTo(b);
     else m_edges[i].setTo(b);
   } else {
-    assert(!b && !m_edges);
+    assertx(!b && !m_edges);
   }
 }
 

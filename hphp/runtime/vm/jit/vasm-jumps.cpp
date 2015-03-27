@@ -118,7 +118,7 @@ void optimizeExits(Vunit& unit) {
 
   PostorderWalker{unit}.dfs([&](Vlabel b) {
     auto& code = unit.blocks[b].code;
-    assert(!code.empty());
+    assertx(!code.empty());
     if (code.back().op != Vinstr::jcc) return;
 
     auto const ijcc = code.back().jcc_;
@@ -193,7 +193,7 @@ void optimizeJmps(Vunit& unit) {
     PostorderWalker{unit}.dfs([&](Vlabel b) {
       auto& block = unit.blocks[b];
       auto& code = block.code;
-      assert(!code.empty());
+      assertx(!code.empty());
       if (code.back().op == Vinstr::jcc) {
         auto ss = succs(block);
         if (ss[0] == ss[1]) {

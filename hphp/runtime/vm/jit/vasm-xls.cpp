@@ -160,8 +160,8 @@ struct Vxls {
     }
     m_abi.simdUnreserved.remove(m_tmp);
     m_abi.simdReserved.add(m_tmp);
-    assert(!m_abi.gpUnreserved.contains(m_sp));
-    assert(!m_abi.gpUnreserved.contains(m_tmp));
+    assertx(!m_abi.gpUnreserved.contains(m_sp));
+    assertx(!m_abi.gpUnreserved.contains(m_tmp));
   }
   ~Vxls();
 
@@ -299,7 +299,7 @@ unsigned Interval::findRange(unsigned pos) const {
       return mid;
     }
   }
-  assert(lo == ranges.size() || pos < ranges[lo].start);
+  assertx(lo == ranges.size() || pos < ranges[lo].start);
   return lo;
 }
 
@@ -316,7 +316,7 @@ unsigned Interval::findUse(unsigned pos) const {
       return mid;
     }
   }
-  assert(lo == uses.size() || pos < uses[lo].pos);
+  assertx(lo == uses.size() || pos < uses[lo].pos);
   return lo;
 }
 
@@ -336,7 +336,7 @@ bool Interval::usedAt(unsigned pos) const {
 
 // Return the interval which has a use position at pos
 Interval* Interval::childAt(unsigned pos) {
-  assert(!parent);
+  assertx(!parent);
   for (auto ivl = this; ivl; ivl = ivl->next) {
     if (pos < ivl->start()) return nullptr;
     if (ivl->usedAt(pos)) return ivl;
@@ -347,7 +347,7 @@ Interval* Interval::childAt(unsigned pos) {
 // Return the next intersection point between current and other, or kMaxPos
 // if they never intersect.
 unsigned nextIntersect(const Interval* current, const Interval* other) {
-  assert(!current->fixed());
+  assertx(!current->fixed());
   if (!current->parent && !other->parent && !other->fixed()) {
     // Since other is inactive, it cannot cover current's start, and
     // current cannot cover other's start, since other started earlier.
@@ -406,7 +406,7 @@ unsigned Interval::firstUse() const {
 // that ensures both shorter intervals are nonempty. If keep_uses is set, Uses
 // exactly at the end of the first interval will stay with the first part.
 Interval* Interval::split(unsigned pos, bool keep_uses) {
-  assert(pos > start() && pos < end()); // both parts will be non-empty
+  assertx(pos > start() && pos < end()); // both parts will be non-empty
   auto leader = this->leader();
   Interval* child = jit::make<Interval>(leader);
   child->next = next;
@@ -497,7 +497,7 @@ Vxls::~Vxls() {
 void Vxls::allocate() {
   splitCriticalEdges(unit);
   blocks = sortBlocks(unit);
-  assert(check(unit));
+  assertx(check(unit));
   computePositions();
   analyzeRsp();
   buildIntervals();
@@ -552,7 +552,7 @@ void Vxls::computePositions() {
 int Vxls::spEffect(Vinstr& inst) const {
   switch (inst.op) {
     default:
-      if (debug) visitDefs(unit, inst, [&](Vreg r) { assert(r != m_sp); });
+      if (debug) visitDefs(unit, inst, [&](Vreg r) { assertx(r != m_sp); });
       return 0;
     case Vinstr::push:
     case Vinstr::pushm:
@@ -563,7 +563,7 @@ int Vxls::spEffect(Vinstr& inst) const {
     case Vinstr::addqi: {
       auto& i = inst.addqi_;
       if (i.d == Vreg64(m_sp)) {
-        assert(i.s1 == Vreg64(m_sp));
+        assertx(i.s1 == Vreg64(m_sp));
         return i.s0.l();
       }
       return 0;
@@ -571,7 +571,7 @@ int Vxls::spEffect(Vinstr& inst) const {
     case Vinstr::subqi: {
       auto& i = inst.subqi_;
       if (i.d == Vreg64(m_sp)) {
-        assert(i.s1 == Vreg64(m_sp));
+        assertx(i.s1 == Vreg64(m_sp));
         return -i.s0.l();
       }
       return 0;
@@ -579,7 +579,7 @@ int Vxls::spEffect(Vinstr& inst) const {
     case Vinstr::lea: {
       auto& i = inst.lea_;
       if (i.d == Vreg64(m_sp)) {
-        assert(i.s.base == i.d && !i.s.index.isValid());
+        assertx(i.s.base == i.d && !i.s.index.isValid());
         return i.s.disp;
       }
       return 0;
@@ -812,7 +812,7 @@ void Vxls::buildIntervals() {
   // Ranges and uses were generated in reverse order. Unreverse them now.
   for (auto ivl : intervals) {
     if (!ivl) continue;
-    assert(!ivl->ranges.empty()); // no empty intervals
+    assertx(!ivl->ranges.empty()); // no empty intervals
     std::reverse(ivl->uses.begin(), ivl->uses.end());
     std::reverse(ivl->ranges.begin(), ivl->ranges.end());
   }
@@ -825,16 +825,16 @@ void Vxls::buildIntervals() {
   if (debug) {
     forEach(livein[unit.entry], [&](Vreg r) {
       UNUSED auto ivl = intervals[r];
-      assert(ivl->constant || ivl->fixed());
+      assertx(ivl->constant || ivl->fixed());
     });
     for (auto ivl : intervals) {
       if (!ivl) continue;
       for (unsigned i = 1; i < ivl->uses.size(); i++) {
-        assert(ivl->uses[i].pos >= ivl->uses[i-1].pos); // monotonic
+        assertx(ivl->uses[i].pos >= ivl->uses[i-1].pos); // monotonic
       }
       for (unsigned i = 1; i < ivl->ranges.size(); i++) {
-        assert(ivl->ranges[i].end > ivl->ranges[i].start); // no empty ranges
-        assert(ivl->ranges[i].start > ivl->ranges[i-1].end); // no empty gaps
+        assertx(ivl->ranges[i].end > ivl->ranges[i].start); // no empty ranges
+        assertx(ivl->ranges[i].start > ivl->ranges[i-1].end); // no empty gaps
       }
     }
   }
@@ -867,15 +867,15 @@ void erase(jit::vector<Interval*>& list, jit::vector<Interval*>::iterator i) {
 // Update active and inactive lists based on pos
 void Vxls::update(unsigned pos) {
   auto free_spill_slot = [this] (Interval* ivl) {
-    assert(!ivl->next);
+    assertx(!ivl->next);
     auto slot = ivl->leader()->slot;
 
     if (slot != kInvalidSpillSlot) {
       if (ivl->wide) {
-        assert(spill_slots[slot + 1]);
+        assertx(spill_slots[slot + 1]);
         spill_slots[slot + 1] = ivl->end();
       }
-      assert(spill_slots[slot]);
+      assertx(spill_slots[slot]);
       spill_slots[slot] = ivl->end();
     }
   };
@@ -1013,7 +1013,7 @@ void Vxls::allocate(Interval* current) {
     auto prev_use = current->lastUseBefore(pos);
     UNUSED auto min_split = std::max(prev_use, current->start() + 1);
     auto max_split = pos;
-    assert(min_split <= max_split);
+    assertx(min_split <= max_split);
     auto split_pos = nearestSplitBefore(max_split);
     if (split_pos > current->start()) {
       auto second = current->split(split_pos, true);
@@ -1070,7 +1070,7 @@ void Vxls::allocBlocked(Interval* current) {
     auto prev_use = current->lastUseBefore(block_pos);
     UNUSED auto min_split = std::max(prev_use, cur_start + 1);
     auto max_split = block_pos;
-    assert(cur_start < min_split && min_split <= max_split);
+    assertx(cur_start < min_split && min_split <= max_split);
     auto split_pos = nearestSplitBefore(max_split);
     if (split_pos > current->start()) {
       auto second = current->split(split_pos, true);
@@ -1110,7 +1110,7 @@ void Vxls::spill(Interval* ivl) {
     }
     pending.push(ivl->split(split_pos));
   }
-  assert(ivl->uses.empty());
+  assertx(ivl->uses.empty());
   ivl->reg = InvalidReg;
   if (!ivl->constant) assignSpill(ivl);
 }
@@ -1144,7 +1144,7 @@ void Vxls::spillOthers(Interval* current, PhysReg r) {
 
 // Assign the next available spill slot to interval
 void Vxls::assignSpill(Interval* ivl) {
-  assert(!ivl->fixed() && ivl->parent && ivl->uses.empty());
+  assertx(!ivl->fixed() && ivl->parent && ivl->uses.empty());
 
   auto leader = ivl->parent;
 
@@ -1218,7 +1218,7 @@ private:
     auto ivl = xls.intervals[vreg];
     if (!ivl || vreg.isPhys()) return vreg;
     PhysReg reg = ivl->childAt(pos)->reg;
-    assert((kind == VregKind::Gpr && reg.isGP()) ||
+    assertx((kind == VregKind::Gpr && reg.isGP()) ||
            (kind == VregKind::Simd && reg.isSIMD()) ||
            (kind == VregKind::Sf && reg.isSF()) ||
            (kind == VregKind::Any && reg != InvalidReg));
@@ -1259,10 +1259,10 @@ void Vxls::resolveSplits() {
       auto range = block_ranges[b];
       if (pos % 2 == 0) {
         // even position requiring a copy must be on edge
-        assert(range.start == pos);
+        assertx(range.start == pos);
       } else {
         // odd position
-        assert(pos > range.start); // implicit label position per block
+        assertx(pos > range.start); // implicit label position per block
         if (pos + 1 == range.end) continue; // copy belongs on successor edge
         if (i2->reg != i1->reg) {
           copies[pos][i2->reg] = i1;
@@ -1275,14 +1275,14 @@ void Vxls::resolveSplits() {
 // Insert a spill after the def-position in ivl.
 void Vxls::insertSpill(Interval* ivl) {
   auto DEBUG_ONLY checkPos = [&](unsigned pos) {
-    assert(pos % 2 == 1);
+    assertx(pos % 2 == 1);
     DEBUG_ONLY auto b = findBlock(pos);
     DEBUG_ONLY auto range = block_ranges[b];
-    assert(pos - 1 >= range.start && pos + 1 < range.end);
+    assertx(pos - 1 >= range.start && pos + 1 < range.end);
     return true;
   };
   auto pos = ivl->def_pos + 1;
-  assert(checkPos(pos));
+  assertx(checkPos(pos));
   spills[pos][ivl->reg] = ivl; // store ivl->reg => ivl->slot
 }
 
@@ -1299,7 +1299,7 @@ void Vxls::lowerCopyargs() {
           if (i1 && !i1->fixed()) i1 = i1->childAt(pos);
           auto i2 = intervals[defs[i]];
           if (i2->reg != i1->reg) {
-            assert(!copies[pos][i2->reg]);
+            assertx(!copies[pos][i2->reg]);
             copies[pos][i2->reg] = i1;
           }
         }
@@ -1313,7 +1313,7 @@ void Vxls::lowerCopyargs() {
  * Search for the phidef in block `b', then return its dest tuple.
  */
 static Vtuple findDefs(const Vunit& unit, Vlabel b) {
-  assert(!unit.blocks[b].code.empty() &&
+  assertx(!unit.blocks[b].code.empty() &&
          unit.blocks[b].code.front().op == Vinstr::phidef);
   return unit.blocks[b].code.front().phidef_.defs;
 }
@@ -1328,7 +1328,7 @@ void Vxls::resolveEdges() {
       if (i1 && !i1->fixed()) i1 = i1->childAt(p1);
       auto i2 = intervals[defs[i]];
       if (i2->reg != i1->reg) {
-        assert((edge_copies[{block,targetIndex}][i2->reg] == nullptr));
+        assertx((edge_copies[{block,targetIndex}][i2->reg] == nullptr));
         edge_copies[{block,targetIndex}][i2->reg] = i1;
       }
     }
@@ -1373,7 +1373,7 @@ void Vxls::resolveEdges() {
         }
         // i2 can be unallocated if the tmp is a constant or is spilled.
         if (i2->reg != InvalidReg && i2->reg != i1->reg) {
-          assert((edge_copies[{b1,i}][i2->reg] == nullptr));
+          assertx((edge_copies[{b1,i}][i2->reg] == nullptr));
           edge_copies[{b1,i}][i2->reg] = i1;
         }
       });
@@ -1512,7 +1512,7 @@ SpillState instrInState(const Vunit& unit, const Vinstr& inst,
       // Spill space has been freed from a pushm{}, so we can't access
       // it. load{m_sp[0]} is special because it appears in some debugging code
       // to print the return address stored at that location.
-      assert(!instrNeedsSpill(unit, inst, sp) ||
+      assertx(!instrNeedsSpill(unit, inst, sp) ||
              (inst.op == Vinstr::load && inst.load_.s == sp[0]));
       return FreedSpill;
   }
@@ -1581,7 +1581,7 @@ void processSpillExits(Vunit& unit, Vlabel label, SpillState state,
     // actually leaves the trace, we need to free spill space before the
     // instruction that pushes the return address on the native stack.
     if (inst.op == Vinstr::pushm) {
-      assert(state == FreedSpill);
+      assertx(state == FreedSpill);
       if (prevState == NeedSpill) {
         FTRACE(3, "free spill before {}\n", show(unit, inst));
         free.origin = inst.origin;
@@ -1633,7 +1633,7 @@ void processSpillExits(Vunit& unit, Vlabel label, SpillState state,
  * Merge src into dst, returning true iff dst was changed.
  */
 bool mergeSpillStates(SpillState& dst, SpillState src) {
-  assert(src != Uninit);
+  assertx(src != Uninit);
   if (dst == src) return false;
 
   // The only allowed state transitions are to states with higher values, so we
@@ -1643,7 +1643,7 @@ bool mergeSpillStates(SpillState& dst, SpillState src) {
   // return from the current function. Jumping to/from code after pushm{}
   // from/to a block where spill space is live indicates a bug in the input
   // program.
-  assert((dst != FreedSpill || src == Uninit) &&
+  assertx((dst != FreedSpill || src == Uninit) &&
          (src != FreedSpill || dst == Uninit));
   auto const oldDst = dst;
   dst = std::max(dst, src);
@@ -1765,7 +1765,7 @@ void Vxls::allocateSpillSpace() {
     auto const successors = succs(block);
     if (state.out == NoSpill) {
       for (auto s : successors) {
-        assert(states[s].in != FreedSpill && "illegal state transition");
+        assertx(states[s].in != FreedSpill && "illegal state transition");
 
         if (states[s].in == NeedSpill) {
           FTRACE(3, "alloc spill on edge from {} -> {}\n", label, s);
@@ -1782,7 +1782,7 @@ void Vxls::allocateSpillSpace() {
     if (state.out == NeedSpill && successors.empty() &&
         block.code.back().op != Vinstr::ud2) {
       // state.out should be FreedSpill for ret instructions.
-      assert(block.code.back().op != Vinstr::ret);
+      assertx(block.code.back().op != Vinstr::ret);
       auto it = std::prev(block.code.end());
       FTRACE(3, "free spill before {}: {}\n", label, show(unit, (*it)));
       free.origin = it->origin;
@@ -1805,7 +1805,7 @@ void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
     auto ivl = spills[src];
     if (!ivl) continue;
     auto slot = ivl->leader()->slot;
-    assert(slot >= 0 && src == ivl->reg);
+    assertx(slot >= 0 && src == ivl->reg);
     MemoryRef ptr{slots.r + slotOffset(slot)};
     if (!ivl->wide) {
       always_assert_flog(
@@ -1815,7 +1815,7 @@ void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
       );
       stores.emplace_back(store{src, ptr});
     } else {
-      assert(src.isSIMD());
+      assertx(src.isSIMD());
       stores.emplace_back(storedqu{src, ptr});
     }
   }
@@ -1856,12 +1856,12 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
           break;
       }
     } else {
-      assert(ivl->spilled());
+      assertx(ivl->spilled());
       MemoryRef ptr{slots.r + slotOffset(ivl->slot)};
       if (!ivl->wide) {
         loads.emplace_back(load{ptr, dst});
       } else {
-        assert(dst.isSIMD());
+        assertx(dst.isSIMD());
         loads.emplace_back(loaddqu{ptr, dst});
       }
     }
@@ -2009,7 +2009,7 @@ void Vxls::printInstr(std::ostringstream& str, Vinstr* inst, unsigned pos,
     });
   }
   str << " " << draw(fixed, pos, Heavy, [&](Interval*, unsigned p) {
-    assert(p-pos < 2);
+    assertx(p-pos < 2);
     return fixed_covers[p-pos];
   });
   if (pos == block_ranges[b].start) {

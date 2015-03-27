@@ -111,7 +111,7 @@ SSATmp* genInstruction(HTS& env, IRInstruction* inst) {
   }
 
   if (inst->mayRaiseError()) {
-    assert(inst->taken() && inst->taken()->isCatch());
+    assertx(inst->taken() && inst->taken()->isCatch());
   }
 
   return env.irb->optimizeInst(inst, IRBuilder::CloneFlag::Yes, nullptr);
@@ -191,7 +191,7 @@ Type predictedTypeFromLocation(HTS& env, const Location& loc) {
   switch (loc.space) {
     case Location::Stack: {
       auto i = loc.bcRelOffset;
-      assert(i >= 0);
+      assertx(i >= 0);
       if (i < env.irb->evalStack().size()) {
         return topType(env, i, DataTypeGeneric);
       } else {

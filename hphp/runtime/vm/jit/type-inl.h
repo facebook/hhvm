@@ -64,11 +64,11 @@ typename std::enable_if<
   return std::is_same<T,bool>::value ? Type::Bool : Type::Int;
 }
 inline Type for_const(const StringData* sd) {
-  assert(sd->isStatic());
+  assertx(sd->isStatic());
   return Type::StaticStr;
 }
 inline Type for_const(const ArrayData* ad) {
-  assert(ad->isStatic());
+  assertx(ad->isStatic());
   return Type::StaticArray(ad->kind());
 }
 inline Type for_const(double)        { return Type::Dbl; }
@@ -164,7 +164,7 @@ inline bool Type::operator<=(Type rhs) const {
 
   // If `rhs' is a constant, we must be the same constant.
   if (rhs.m_hasConstVal) {
-    assert(!rhs.isUnion());
+    assertx(!rhs.isUnion());
     return lhs.m_hasConstVal && lhs.m_extra == rhs.m_extra;
   }
 
@@ -214,7 +214,7 @@ inline bool Type::isUnion() const {
 }
 
 inline bool Type::isKnownDataType() const {
-  assert(*this <= StkElem);
+  assertx(*this <= StkElem);
 
   // Some unions correspond to single KindOfs.
   return subtypeOfAny(Str, Arr, BoxedCell) || !isUnion();
@@ -241,7 +241,7 @@ inline bool Type::isReferenceType() const {
 
 template<typename T>
 Type Type::cns(T val, Type ret) {
-  assert(!ret.m_hasConstVal);
+  assertx(!ret.m_hasConstVal);
   ret.m_hasConstVal = true;
 
   static_assert(sizeof(T) <= sizeof(ret),
@@ -303,7 +303,7 @@ inline Type Type::cns(const TypedValue& tv) {
 
 inline Type Type::dropConstVal() const {
   if (!m_hasConstVal) return *this;
-  assert(!isUnion());
+  assertx(!isUnion());
 
   if (*this <= StaticArr) {
     return Type::StaticArray(arrVal()->kind());
@@ -328,13 +328,13 @@ bool Type::hasConstVal(T val) const {
 }
 
 inline uint64_t Type::rawVal() const {
-  assert(hasConstVal());
+  assertx(hasConstVal());
   return m_extra;
 }
 
 #define IMPLEMENT_CNS_VAL(TypeName, name, valtype)      \
   inline valtype Type::name##Val() const {              \
-    assert(hasConstVal(TypeName));                      \
+    assertx(hasConstVal(TypeName));                      \
     return m_##name##Val;                               \
   }
 
@@ -420,7 +420,7 @@ inline ArraySpec Type::arrSpec() const {
   if (m_hasConstVal) {
     return ArraySpec(arrVal()->kind());
   }
-  assert(m_arrSpec != ArraySpec::Bottom);
+  assertx(m_arrSpec != ArraySpec::Bottom);
   return m_arrSpec;
 }
 
@@ -434,7 +434,7 @@ inline ClassSpec Type::clsSpec() const {
   if (m_hasConstVal) {
     return ClassSpec(clsVal(), ClassSpec::ExactTag{});
   }
-  assert(m_clsSpec != ClassSpec::Bottom);
+  assertx(m_clsSpec != ClassSpec::Bottom);
   return m_clsSpec;
 }
 
@@ -446,40 +446,40 @@ inline TypeSpec Type::spec() const {
 // Inner types.
 
 inline Type Type::box() const {
-  assert(*this <= Cell);
+  assertx(*this <= Cell);
   // Boxing Uninit returns InitNull but that logic doesn't belong here.
-  assert(!maybe(Uninit) || *this == Cell);
+  assertx(!maybe(Uninit) || *this == Cell);
   return Type(m_bits << kBoxShift,
               ptrKind(),
               isSpecialized() && !m_hasConstVal ? m_extra : 0);
 }
 
 inline Type Type::inner() const {
-  assert(*this <= BoxedCell);
+  assertx(*this <= BoxedCell);
   return Type(m_bits >> kBoxShift, Ptr::Unk, m_extra);
 }
 
 inline Type Type::unbox() const {
-  assert(*this <= Gen);
+  assertx(*this <= Gen);
   return (*this & Cell) | (*this & BoxedCell).inner();
 }
 
 inline Type Type::ptr(Ptr kind) const {
-  assert(*this <= Gen);
+  assertx(*this <= Gen);
   return Type(m_bits << kPtrShift,
               kind,
               isSpecialized() && !m_hasConstVal ? m_extra : 0);
 }
 
 inline Type Type::deref() const {
-  assert(*this <= PtrToGen);
+  assertx(*this <= PtrToGen);
   return Type(m_bits >> kPtrShift,
               Ptr::Unk /* no longer a pointer */,
               isSpecialized() ? m_extra : 0);
 }
 
 inline Type Type::derefIfPtr() const {
-  assert(*this <= (Gen | PtrToGen));
+  assertx(*this <= (Gen | PtrToGen));
   return *this <= PtrToGen ? deref() : *this;
 }
 
@@ -500,7 +500,7 @@ inline Type::Type(bits_t bits, Ptr kind, uintptr_t extra /* = 0 */)
   , m_hasConstVal(false)
   , m_extra(extra)
 {
-  assert(checkValid());
+  assertx(checkValid());
 }
 
 inline Type::Type(Type t, ArraySpec arraySpec)
@@ -509,8 +509,8 @@ inline Type::Type(Type t, ArraySpec arraySpec)
   , m_hasConstVal(false)
   , m_arrSpec(arraySpec)
 {
-  assert(checkValid());
-  assert(m_arrSpec != ArraySpec::Bottom);
+  assertx(checkValid());
+  assertx(m_arrSpec != ArraySpec::Bottom);
 }
 
 inline Type::Type(Type t, ClassSpec classSpec)
@@ -519,8 +519,8 @@ inline Type::Type(Type t, ClassSpec classSpec)
   , m_hasConstVal(false)
   , m_clsSpec(classSpec)
 {
-  assert(checkValid());
-  assert(m_clsSpec != ClassSpec::Bottom);
+  assertx(checkValid());
+  assertx(m_clsSpec != ClassSpec::Bottom);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

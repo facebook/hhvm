@@ -189,7 +189,7 @@ void implRet(HTS& env, Type type) {
     return asyncFunctionReturn(env, retval);
   }
   if (resumed(env)) {
-    assert(curFunc(env)->isNonAsyncGenerator());
+    assertx(curFunc(env)->isNonAsyncGenerator());
     return generatorReturn(env, retval);
   }
   return normalReturn(env, retval);
@@ -203,7 +203,7 @@ void emitRetC(HTS& env) {
   if (curFunc(env)->isAsyncGenerator()) PUNT(RetC-AsyncGenerator);
 
   if (isInlining(env)) {
-    assert(!resumed(env));
+    assertx(!resumed(env));
     retFromInlined(env, Type::Cell);
   } else {
     implRet(env, Type::Cell);
@@ -211,8 +211,8 @@ void emitRetC(HTS& env) {
 }
 
 void emitRetV(HTS& env) {
-  assert(!resumed(env));
-  assert(!curFunc(env)->isResumable());
+  assertx(!resumed(env));
+  assertx(!curFunc(env)->isResumable());
   if (isInlining(env)) {
     retFromInlined(env, Type::BoxedInitCell);
   } else {

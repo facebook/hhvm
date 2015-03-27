@@ -93,7 +93,7 @@ inline ArrayKeyInfo checkStrictlyInteger(Type key) {
     ret.type = KeyType::Int;
     return ret;
   }
-  assert(key <= Type::Str);
+  assertx(key <= Type::Str);
   ret.type = KeyType::Str;
   if (key.hasConstVal()) {
     int64_t i;

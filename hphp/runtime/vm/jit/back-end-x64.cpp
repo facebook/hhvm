@@ -199,7 +199,7 @@ struct BackEnd : public jit::BackEnd {
   }
 
   bool isSmashable(Address frontier, int nBytes, int offset = 0) override {
-    assert(nBytes <= int(kCacheLineSize));
+    assertx(nBytes <= int(kCacheLineSize));
     uintptr_t iFrontier = uintptr_t(frontier) + offset;
     uintptr_t lastByte = uintptr_t(frontier) + nBytes - 1;
     return (iFrontier & ~kCacheLineMask) == (lastByte & ~kCacheLineMask);
@@ -211,7 +211,7 @@ struct BackEnd : public jit::BackEnd {
       X64Assembler a { cb };
       int gapSize = (~(uintptr_t(a.frontier()) + offset) & kCacheLineMask) + 1;
       a.emitNop(gapSize);
-      assert(isSmashable(a.frontier(), nBytes, offset));
+      assertx(isSmashable(a.frontier(), nBytes, offset));
     }
   }
 
@@ -228,13 +228,13 @@ struct BackEnd : public jit::BackEnd {
     switch (flags) {
       case TestAndSmashFlags::kAlignJcc:
         prepareForSmash(cb, testBytes + kJmpccLen, testBytes);
-        assert(isSmashable(cb.frontier() + testBytes, kJmpccLen));
+        assertx(isSmashable(cb.frontier() + testBytes, kJmpccLen));
         break;
       case TestAndSmashFlags::kAlignJccImmediate:
         prepareForSmash(cb,
                         testBytes + kJmpccLen,
                         testBytes + kJmpccLen - kJmpImmBytes);
-        assert(isSmashable(cb.frontier() + testBytes, kJmpccLen,
+        assertx(isSmashable(cb.frontier() + testBytes, kJmpccLen,
                            kJmpccLen - kJmpImmBytes));
         break;
       case TestAndSmashFlags::kAlignJccAndJmp:
@@ -248,8 +248,8 @@ struct BackEnd : public jit::BackEnd {
         mcg->cgFixups().m_alignFixups.emplace(
           cb.frontier(), std::make_pair(testBytes + kJmpccLen + kJmpLen,
                                         testBytes + kJmpccLen));
-        assert(isSmashable(cb.frontier() + testBytes, kJmpccLen));
-        assert(isSmashable(cb.frontier() + testBytes + kJmpccLen, kJmpLen));
+        assertx(isSmashable(cb.frontier() + testBytes, kJmpccLen));
+        assertx(isSmashable(cb.frontier() + testBytes + kJmpccLen, kJmpLen));
         break;
     }
   }
@@ -293,7 +293,7 @@ struct BackEnd : public jit::BackEnd {
     TCA keepNopHigh = nullptr;
     try {
       while (src != end) {
-        assert(src < end);
+        assertx(src < end);
         DecodedInstruction di(src);
         asm_count++;
 
@@ -302,7 +302,7 @@ struct BackEnd : public jit::BackEnd {
         while (af.first != af.second) {
           auto low = src + af.first->second.second;
           auto hi = src + af.first->second.first;
-          assert(low < hi);
+          assertx(low < hi);
           if (!keepNopLow || keepNopLow > low) keepNopLow = low;
           if (!keepNopHigh || keepNopHigh < hi) keepNopHigh = hi;
           TCA tmp = destBlock.frontier();
@@ -332,7 +332,7 @@ struct BackEnd : public jit::BackEnd {
            */
           if (size_t(di.picAddress() - start) >= range) {
             bool DEBUG_ONLY success = d2.setPicAddress(di.picAddress());
-            assert(success);
+            assertx(success);
           } else {
             if (!preserveAlignment && d2.isBranch()) {
               if (wideJmps.count(src)) {
@@ -358,7 +358,7 @@ struct BackEnd : public jit::BackEnd {
               always_assert(di.immediate() == ((uintptr_t(src) << 1) | 1));
               bool DEBUG_ONLY success =
                 d2.setImmediate(((uintptr_t)dest << 1) | 1);
-              assert(success);
+              assertx(success);
             }
             /*
              * An immediate that points into the range being moved, but which
@@ -396,7 +396,7 @@ struct BackEnd : public jit::BackEnd {
           dest += d2.size();
         }
         jmpDest = target;
-        assert(dest <= destBlock.frontier());
+        assertx(dest <= destBlock.frontier());
         destBlock.setFrontier(dest);
         src += di.size();
         if (keepNopHigh && src >= keepNopHigh) {
@@ -502,7 +502,7 @@ struct BackEnd : public jit::BackEnd {
       always_assert(end);
     }
     while (start != end) {
-      assert(start < end);
+      assertx(start < end);
       DecodedInstruction di(start);
 
       if (di.hasPicOffset()) {
@@ -707,14 +707,14 @@ struct BackEnd : public jit::BackEnd {
     // Unconditional rip-relative jmps can also be encoded with an EB as the
     // first byte, but that means the delta is 1 byte, and we shouldn't be
     // encoding smashable jumps that way.
-    assert(kJmpLen == kCallLen);
+    assertx(kJmpLen == kCallLen);
     always_assert(isSmashable(addr, x64::kJmpLen));
 
     auto& cb = mcg->code.blockFor(addr);
     CodeCursor cursor { cb, addr };
     X64Assembler a { cb };
     if (dest > addr && dest - addr <= x64::kJmpLen) {
-      assert(!isCall);
+      assertx(!isCall);
       a.  emitNop(dest - addr);
     } else if (isCall) {
       a.  call   (dest);
@@ -725,24 +725,24 @@ struct BackEnd : public jit::BackEnd {
 
  public:
   void smashJmp(TCA jmpAddr, TCA newDest) override {
-    assert(MCGenerator::canWrite());
+    assertx(MCGenerator::canWrite());
     FTRACE(2, "smashJmp: {} -> {}\n", jmpAddr, newDest);
     smashJmpOrCall(jmpAddr, newDest, false);
   }
 
   void smashCall(TCA callAddr, TCA newDest) override {
-    assert(MCGenerator::canWrite());
+    assertx(MCGenerator::canWrite());
     FTRACE(2, "smashCall: {} -> {}\n", callAddr, newDest);
     smashJmpOrCall(callAddr, newDest, true);
   }
 
   void smashJcc(TCA jccAddr, TCA newDest) override {
-    assert(MCGenerator::canWrite());
+    assertx(MCGenerator::canWrite());
     FTRACE(2, "smashJcc: {} -> {}\n", jccAddr, newDest);
     // Make sure the encoding is what we expect. It has to be a rip-relative jcc
     // with a 4-byte delta.
-    assert(*jccAddr == 0x0F && (*(jccAddr + 1) & 0xF0) == 0x80);
-    assert(isSmashable(jccAddr, x64::kJmpccLen));
+    assertx(*jccAddr == 0x0F && (*(jccAddr + 1) & 0xF0) == 0x80);
+    assertx(isSmashable(jccAddr, x64::kJmpccLen));
 
     // Can't use the assembler to write out a new instruction, because we have
     // to preserve the condition code.
@@ -756,23 +756,23 @@ struct BackEnd : public jit::BackEnd {
   void emitSmashableJump(CodeBlock& cb, TCA dest, ConditionCode cc) override {
     X64Assembler a { cb };
     if (cc == CC_None) {
-      assert(isSmashable(cb.frontier(), x64::kJmpLen));
+      assertx(isSmashable(cb.frontier(), x64::kJmpLen));
       a.  jmp(dest);
     } else {
-      assert(isSmashable(cb.frontier(), x64::kJmpccLen));
+      assertx(isSmashable(cb.frontier(), x64::kJmpccLen));
       a.  jcc(cc, dest);
     }
   }
 
   TCA smashableCallFromReturn(TCA retAddr) override {
     auto addr = retAddr - x64::kCallLen;
-    assert(isSmashable(addr, x64::kCallLen));
+    assertx(isSmashable(addr, x64::kCallLen));
     return addr;
   }
 
   void emitSmashableCall(CodeBlock& cb, TCA dest) override {
     X64Assembler a { cb };
-    assert(isSmashable(cb.frontier(), x64::kCallLen));
+    assertx(isSmashable(cb.frontier(), x64::kCallLen));
     a.  call(dest);
   }
 
@@ -960,13 +960,13 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       vunit.blocks[b].area = v.area();
       v.use(b);
       hhir_count += genBlock(state, v, vasm.cold(), block);
-      assert(v.closed());
-      assert(vasm.main().empty() || vasm.main().closed());
-      assert(vasm.cold().empty() || vasm.cold().closed());
-      assert(vasm.frozen().empty() || vasm.frozen().closed());
+      assertx(v.closed());
+      assertx(vasm.main().empty() || vasm.main().closed());
+      assertx(vasm.cold().empty() || vasm.cold().closed());
+      assertx(vasm.frozen().empty() || vasm.frozen().closed());
     }
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
-    assert(check(vunit));
+    assertx(check(vunit));
 
     if (useLLVM) {
       try {
@@ -993,8 +993,8 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     }
   }
 
-  assert(coldCodeIn.frontier() == coldStart);
-  assert(mainCodeIn.frontier() == mainStart);
+  assertx(coldCodeIn.frontier() == coldStart);
+  assertx(mainCodeIn.frontier() == mainStart);
 
   if (relocate) {
     if (asmInfo) {
@@ -1043,8 +1043,8 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     auto& ip = mcg->cgFixups().m_inProgressTailJumps;
     for (size_t i = 0; i < ip.size(); ++i) {
       const auto& ib = ip[i];
-      assert(!mainCode.contains(ib.toSmash()));
-      assert(!coldCode.contains(ib.toSmash()));
+      assertx(!mainCode.contains(ib.toSmash()));
+      assertx(!coldCode.contains(ib.toSmash()));
     }
     memset(mainCode.base(), 0xcc, mainCode.frontier() - mainCode.base());
     memset(coldCode.base(), 0xcc, coldCode.frontier() - coldCode.base());

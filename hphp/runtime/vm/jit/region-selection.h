@@ -167,12 +167,12 @@ struct RegionDesc::Location {
   Tag tag() const { return m_tag; };
 
   uint32_t localId() const {
-    assert(m_tag == Tag::Local);
+    assertx(m_tag == Tag::Local);
     return m_local.locId;
   }
 
   FPAbsOffset offsetFromFP() const {
-    assert(m_tag == Tag::Stack);
+    assertx(m_tag == Tag::Stack);
     return m_stack.offsetFromFP;
   }
 
@@ -305,7 +305,7 @@ class RegionDesc::Block {
    * one or more blocks from the callee.
    */
   void setInlinedCallee(const Func* callee) {
-    assert(callee);
+    assertx(callee);
     m_inlinedCallee = callee;
   }
   const Func* inlinedCallee() const {

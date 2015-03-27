@@ -46,7 +46,7 @@ struct StkPtrInfo {
  * number is not the actual difference between the two pointers.)
  */
 StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
-  assert(sp->type() <= Type::StkPtr);
+  assertx(sp->type() <= Type::StkPtr);
 
   auto const inst = sp->inst();
   switch (inst->op()) {
@@ -216,7 +216,7 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
     , m_stag(STag::What)                                    \
     , m_##what(x)                                           \
   {                                                         \
-    assert(checkInvariants());                              \
+    assertx(checkInvariants());                              \
   }                                                         \
                                                             \
   folly::Optional<A##What> AliasClass::what() const {       \
@@ -258,25 +258,25 @@ bool AliasClass::checkInvariants() const {
   case STag::Prop:    break;
   case STag::ElemI:   break;
   case STag::Stack:
-    assert(m_stack.base->type() <= Type::StkPtr ||
+    assertx(m_stack.base->type() <= Type::StkPtr ||
            m_stack.base->type() <= Type::FramePtr);
-    assert(m_stack.size != 0);  // use AEmpty if you want that
-    assert(m_stack.size > 0);
+    assertx(m_stack.size != 0);  // use AEmpty if you want that
+    assertx(m_stack.size > 0);
     break;
   case STag::ElemS:
-    assert(m_elemS.key->isStatic());
+    assertx(m_elemS.key->isStatic());
     break;
   case STag::MIState:
     break;
   }
 
-  assert(m_bits & stagBit(m_stag));
+  assertx(m_bits & stagBit(m_stag));
 
   return true;
 }
 
 bool AliasClass::equivData(AliasClass o) const {
-  assert(m_stag == o.m_stag);
+  assertx(m_stag == o.m_stag);
   switch (m_stag) {
   case STag::None:    return true;
   case STag::Frame:   return m_frame.fp == o.m_frame.fp &&
@@ -302,7 +302,7 @@ bool AliasClass::operator==(AliasClass o) const {
 }
 
 AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
-  assert(a.m_stag == b.m_stag);
+  assertx(a.m_stag == b.m_stag);
   switch (a.m_stag) {
   case STag::None:
     break;
@@ -311,7 +311,7 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
   case STag::ElemI:
   case STag::ElemS:
   case STag::MIState:
-    assert(!a.equivData(b));
+    assertx(!a.equivData(b));
     break;
 
   case STag::Stack:
@@ -336,8 +336,8 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
       auto ret = AliasClass{newBits};
       new (&ret.m_stack) AStack(newStack);
       ret.m_stag = STag::Stack;
-      assert(ret.checkInvariants());
-      assert(a <= ret && b <= ret);
+      assertx(ret.checkInvariants());
+      assertx(a <= ret && b <= ret);
       return ret;
     }
   }
@@ -432,7 +432,7 @@ bool AliasClass::operator<=(AliasClass o) const {
 }
 
 bool AliasClass::maybeData(AliasClass o) const {
-  assert(m_stag == o.m_stag);
+  assertx(m_stag == o.m_stag);
   switch (m_stag) {
   case STag::None:
     not_reached();  // handled above
@@ -513,7 +513,7 @@ bool AliasClass::maybe(AliasClass o) const {
    */
   if (m_stag == o.m_stag) {
     auto const bit = stagBit(m_stag);
-    assert(isect != 0);
+    assertx(isect != 0);
     if ((bit & isect) == isect) return maybeData(o);
     return true;
   }

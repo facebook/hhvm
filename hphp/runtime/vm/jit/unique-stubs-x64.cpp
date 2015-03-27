@@ -374,9 +374,9 @@ void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
   moveToAlign(cb);
   uniqueStubs.funcPrologueRedispatch = a.frontier();
 
-  assert(kScratchCrossTraceRegs.contains(rax));
-  assert(kScratchCrossTraceRegs.contains(rdx));
-  assert(kScratchCrossTraceRegs.contains(rcx));
+  assertx(kScratchCrossTraceRegs.contains(rax));
+  assertx(kScratchCrossTraceRegs.contains(rdx));
+  assertx(kScratchCrossTraceRegs.contains(rcx));
 
   Label actualDispatch;
   Label numParamsCheck;

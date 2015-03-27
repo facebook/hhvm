@@ -566,11 +566,11 @@ bool isBlockEnd(const Vinstr& inst);
   template<> struct Vinstr::matcher<name> {      \
     using type = jit::name;                      \
     static type& get(Vinstr& inst) {             \
-      assert(inst.op == name);                   \
+      assertx(inst.op == name);                   \
       return inst.name##_;                       \
     }                                            \
     static const type& get(const Vinstr& inst) { \
-      assert(inst.op == name);                   \
+      assertx(inst.op == name);                   \
       return inst.name##_;                       \
     }                                            \
   };

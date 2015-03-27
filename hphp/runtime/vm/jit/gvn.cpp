@@ -51,7 +51,7 @@ struct CongruenceHasher {
 
     for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
       auto src = inst->src(i);
-      assert(m_vnTable[src].value);
+      assertx(m_vnTable[src].value);
       result = folly::hash::hash_128_to_64(
         result,
         reinterpret_cast<size_t>(m_vnTable[src].value)
@@ -95,13 +95,13 @@ struct CongruenceComparator {
     for (uint32_t i = 0; i < instA->numSrcs(); ++i) {
       auto srcA = instA->src(i);
       auto srcB = instB->src(i);
-      assert(m_vnTable[srcA].value);
-      assert(m_vnTable[srcB].value);
+      assertx(m_vnTable[srcA].value);
+      assertx(m_vnTable[srcB].value);
       if (m_vnTable[srcA].value != m_vnTable[srcB].value) return false;
     }
 
     if (instA->hasExtra()) {
-      assert(instB->hasExtra());
+      assertx(instB->hasExtra());
       if (!equalsExtra(instA->op(), instA->rawExtra(), instB->rawExtra())) {
         return false;
       }
@@ -244,7 +244,7 @@ bool visitDefLabel(
   ValueNumberTable& updates,
   NameTable& nameTable
 ) {
-  assert(inst->is(DefLabel));
+  assertx(inst->is(DefLabel));
   bool changed = false;
 
   /*
@@ -274,9 +274,9 @@ bool visitDefLabel(
     for (auto& pred : block->preds()) {
       auto fromBlock = pred.from();
       auto& jmp = fromBlock->back();
-      assert(jmp.is(Jmp));
+      assertx(jmp.is(Jmp));
       auto src = jmp.src(i);
-      assert(vnTable[src].value);
+      assertx(vnTable[src].value);
       auto srcVN = vnTable[src].value;
 
       // Update forwardedDst if this is the first src we've seen that doesn't
@@ -297,7 +297,7 @@ bool visitDefLabel(
       break;
     }
 
-    assert(vnTable[dst].value);
+    assertx(vnTable[dst].value);
     if (canForwardDst && vnTable[dst].value != forwardedDst) {
       FTRACE(1, "forwarded through DefLabel: {} (old) -> {} (new)\n",
         *dst, *forwardedDst);
@@ -323,9 +323,9 @@ bool visitInstruction(
 
   if (!supportsGVN(inst)) return false;
 
-  assert(inst->numDsts() == 1);
+  assertx(inst->numDsts() == 1);
   auto dst = inst->dst(0);
-  assert(dst);
+  assertx(dst);
 
   SSATmp* temp;
   auto iter = nameTable.find(inst);
@@ -336,9 +336,9 @@ bool visitInstruction(
     temp = iter->second;
   }
 
-  assert(temp);
+  assertx(temp);
 
-  assert(vnTable[dst].value);
+  assertx(vnTable[dst].value);
   if (temp != vnTable[dst].value) {
     updates[dst] = ValueNumberMetadata { dst, temp };
     FTRACE(1,
@@ -412,7 +412,7 @@ bool canReplaceWith(
   const SSATmp* dst,
   const SSATmp* other
 ) {
-  assert(other->type() <= dst->type());
+  assertx(other->type() <= dst->type());
   return is_tmp_usable(idoms, other, dst->inst()->block());
 }
 

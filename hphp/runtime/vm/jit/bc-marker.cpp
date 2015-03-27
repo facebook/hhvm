@@ -27,7 +27,7 @@ namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 std::string BCMarker::show() const {
-  assert(valid());
+  assertx(valid());
   return folly::format(
     "--- bc {}{}, fp {}, spOff {} ({}){}",
     m_sk.offset(),

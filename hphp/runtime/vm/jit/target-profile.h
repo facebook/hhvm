@@ -82,7 +82,7 @@ struct TargetProfile {
    */
   template<class ReduceFn>
   T data(ReduceFn reduce) const {
-    assert(optimizing());
+    assertx(optimizing());
     auto const hand = handle();
     auto accum = T{};
     for (auto& base : rds::allTLBases()) {
@@ -223,7 +223,7 @@ struct StructArrayProfile {
   }
 
   Shape* getShape() const {
-    assert(isMonomorphic());
+    assertx(isMonomorphic());
     return shape;
   }
 
@@ -237,7 +237,7 @@ struct StructArrayProfile {
       return;
     }
 
-    assert(a.isMonomorphic());
+    assertx(a.isMonomorphic());
     if (b.isEmpty()) return;
     if (b.isMonomorphic() && a.getShape() == b.getShape()) return;
     a.makePolymorphic();

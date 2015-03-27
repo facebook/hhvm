@@ -474,7 +474,7 @@ struct CatchMaker {
     , m_callee(callee)
     , m_params(*params)
   {
-    assert(!m_params.thiz || inlining());
+    assertx(!m_params.thiz || inlining());
   }
 
   CatchMaker(const CatchMaker&) = delete;
@@ -645,7 +645,7 @@ SSATmp* coerce_value(HTS& env,
     return gen(env, ConvCellToBool, oldVal);
   }
 
-  assert(!(Type::Null < targetTy));
+  assertx(!(Type::Null < targetTy));
 
   if (targetTy <= Type::Int) {
     return gen(env,
@@ -755,8 +755,8 @@ jit::vector<SSATmp*> realize_params(HTS& env,
     ++stackIdx;
   }
 
-  assert(stackIdx == params.numThroughStack);
-  assert(argIdx == cbNumArgs);
+  assertx(stackIdx == params.numThroughStack);
+  assertx(argIdx == cbNumArgs);
 
   return ret;
 }
@@ -852,7 +852,7 @@ void builtinCall(HTS& env,
  */
 void nativeImplInlined(HTS& env) {
   auto const callee = curFunc(env);
-  assert(callee->nativeFuncPtr());
+  assertx(callee->nativeFuncPtr());
 
   auto const wasInliningConstructor =
     fp(env)->inst()->extra<DefInlineFP>()->fromFPushCtor;

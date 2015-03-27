@@ -51,7 +51,7 @@ bool shouldHHIRRelaxGuards() {
 #define DBoxPtr        return false;
 #define DAllocObj      return false; // fixed type from ExtraData
 #define DArrPacked     return false; // fixed type
-#define DArrElem       assert(inst->is(LdPackedArrayElem, LdStructArrayElem, \
+#define DArrElem       assertx(inst->is(LdPackedArrayElem, LdStructArrayElem, \
                                        ArrayGet));                           \
                          return typeMightRelax(inst->src(0));
 #define DThis          return false; // fixed type from ctx class
@@ -152,7 +152,7 @@ void visitLoad(IRInstruction* inst, const FrameStateMgr& state) {
 }
 
 Type relaxCell(Type t, TypeConstraint tc) {
-  assert(t <= Type::Cell);
+  assertx(t <= Type::Cell);
 
   switch (tc.category) {
     case DataTypeGeneric:
@@ -170,7 +170,7 @@ Type relaxCell(Type t, TypeConstraint tc) {
       return t.unspecialize();
 
     case DataTypeSpecialized:
-      assert(tc.wantClass() ^ tc.wantArrayKind());
+      assertx(tc.wantClass() ^ tc.wantArrayKind());
 
       if (tc.wantClass()) {
         // We could try to relax t's specialized class to tc.desiredClass() if
@@ -181,8 +181,8 @@ Type relaxCell(Type t, TypeConstraint tc) {
         // RATArrays always come from static analysis and never guards, so we
         // don't need to eliminate it here. Just make sure t actually fits the
         // constraint.
-        assert(t < Type::Arr && t.arrSpec().kind());
-        assert(!tc.wantArrayShape() || t.arrSpec().shape());
+        assertx(t < Type::Arr && t.arrSpec().kind());
+        assertx(!tc.wantArrayShape() || t.arrSpec().shape());
       }
 
       return t;
@@ -292,7 +292,7 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
       // specialized, a strict subtype of Obj or Arr, and that it fits the
       // specific requirements of tc.
 
-      assert(tc.wantClass() ^ tc.wantArrayKind());
+      assertx(tc.wantClass() ^ tc.wantArrayKind());
 
       if (t < Type::Obj && t.clsSpec()) {
         return tc.wantClass() &&

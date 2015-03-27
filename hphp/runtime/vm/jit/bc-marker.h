@@ -58,7 +58,7 @@ struct BCMarker {
     , m_profTransID{tid}
     , m_fp{fp}
   {
-    assert(valid());
+    assertx(valid());
   }
 
   bool operator==(const BCMarker& b) const {
@@ -75,13 +75,13 @@ struct BCMarker {
                                 m_sk.getFuncId() == DummyFuncId; }
   bool hasFunc() const { return valid() && !isDummy(); }
 
-  SrcKey      sk()          const { assert(valid());   return m_sk;           }
-  const Func* func()        const { assert(hasFunc()); return m_sk.func();    }
-  Offset      bcOff()       const { assert(valid());   return m_sk.offset();  }
-  bool        resumed()     const { assert(valid());   return m_sk.resumed(); }
-  FPAbsOffset spOff()       const { assert(valid());   return m_spOff;        }
-  TransID     profTransID() const { assert(valid());   return m_profTransID;  }
-  SSATmp*     fp()          const { assert(valid());   return m_fp;           }
+  SrcKey      sk()          const { assertx(valid());   return m_sk;           }
+  const Func* func()        const { assertx(hasFunc()); return m_sk.func();    }
+  Offset      bcOff()       const { assertx(valid());   return m_sk.offset();  }
+  bool        resumed()     const { assertx(valid());   return m_sk.resumed(); }
+  FPAbsOffset spOff()       const { assertx(valid());   return m_spOff;        }
+  TransID     profTransID() const { assertx(valid());   return m_profTransID;  }
+  SSATmp*     fp()          const { assertx(valid());   return m_fp;           }
 
   // Return a copy of this marker with an updated sp or fp.
   BCMarker adjustSP(FPAbsOffset sp) const {

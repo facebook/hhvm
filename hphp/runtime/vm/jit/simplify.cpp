@@ -89,7 +89,7 @@ SSATmp* gen(State& env, Opcode op, BCMarker marker, Args&&... args) {
       if (newDest || env.newInsts.size() != prevNewCount) {
         return newDest;
       } else {
-        assert(inst->isTransient());
+        assertx(inst->isTransient());
         inst = env.unit.clone(inst);
         env.newInsts.push_back(inst);
 
@@ -104,7 +104,7 @@ SSATmp* gen(State& env, Opcode op, BCMarker marker, Args&&... args) {
 
 template<class... Args>
 SSATmp* gen(State& env, Opcode op, Args&&... args) {
-  assert(!env.insts.empty());
+  assertx(!env.insts.empty());
   return gen(env, op, env.insts.top()->marker(), std::forward<Args>(args)...);
 }
 
@@ -571,7 +571,7 @@ SSATmp* simplifyMulInt(State& env, const IRInstruction* inst) {
     return a > 0 && folly::isPowTwo<uint64_t>(a);
   };
   auto log2 = [](int64_t a) {
-    assert(a > 0);
+    assertx(a > 0);
     return folly::findLastSet<uint64_t>(a) - 1;
   };
 
@@ -737,7 +737,7 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
   case XorBool:
     if (inst->src(1)->hasConstVal(true)) {
       // This is safe to add a new use to because inst->src(0) is a bool.
-      assert(inst->src(0)->isA(Type::Bool));
+      assertx(inst->src(0)->isA(Type::Bool));
       return inst->src(0);
     }
     return nullptr;
@@ -774,7 +774,7 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
     // This is safe because instanceofs don't take reference counted arguments.
-    assert(!inst->src(0)->type().maybe(Type::Counted) &&
+    assertx(!inst->src(0)->type().maybe(Type::Counted) &&
            !inst->src(1)->type().maybe(Type::Counted));
     return gen(
       env,
@@ -882,7 +882,7 @@ SSATmp* cmpImpl(State& env,
     return cns(env, bool(cmpOp(opName, 0, 0)));
   }
 
-  assert(type1 <= Type::Gen && type2 <= Type::Gen);
+  assertx(type1 <= Type::Gen && type2 <= Type::Gen);
 
   // Need both types to be unboxed to simplify, and the code below assumes the
   // types are known DataTypes.
@@ -1143,8 +1143,8 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   // Testing for StaticStr will make you miss out on CountedStr, and vice versa,
   // and similarly for arrays. PHP treats both types of string the same, so if
   // the distinction matters to you here, be careful.
-  assert(IMPLIES(type <= Type::Str, type == Type::Str));
-  assert(IMPLIES(type <= Type::Arr, type == Type::Arr));
+  assertx(IMPLIES(type <= Type::Str, type == Type::Str));
+  assertx(IMPLIES(type <= Type::Arr, type == Type::Arr));
 
   // The types are disjoint; the result must be false.
   if (!srcType.maybe(type)) {
@@ -1616,8 +1616,8 @@ SSATmp* simplifyBoxPtr(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyCheckInit(State& env, const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
-  assert(!srcType.maybe(Type::PtrToGen));
-  assert(inst->taken());
+  assertx(!srcType.maybe(Type::PtrToGen));
+  assertx(inst->taken());
   if (!srcType.maybe(Type::Uninit)) return gen(env, Nop);
   return nullptr;
 }
@@ -1794,7 +1794,7 @@ SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
 SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
-  assert(arr->hasConstVal(Type::Arr));
+  assertx(arr->hasConstVal(Type::Arr));
   if (!idx->hasConstVal()) return nullptr;
   auto const value = arr->arrVal()->nvGet(idx->intVal());
   return value ? cns(env, *value) : nullptr;
@@ -1803,7 +1803,7 @@ SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
 SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
-  assert(arr->hasConstVal(Type::Arr));
+  assertx(arr->hasConstVal(Type::Arr));
   if (!idx->hasConstVal()) return nullptr;
   auto const value = [&] {
     int64_t val;
@@ -1929,7 +1929,7 @@ SSATmp* simplifyOrdStr(State& env, const IRInstruction *inst) {
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   env.insts.push(inst);
   SCOPE_EXIT {
-    assert(env.insts.top() == inst);
+    assertx(env.insts.top() == inst);
     env.insts.pop();
   };
 
@@ -2053,13 +2053,13 @@ SimplifyResult simplify(IRUnit& unit,
   auto env = State { unit, typesMightRelax };
   auto const newDst = simplifyWork(env, origInst);
 
-  assert(validate(env, newDst, origInst));
+  assertx(validate(env, newDst, origInst));
 
   return SimplifyResult { std::move(env.newInsts), newDst };
 }
 
 void simplify(IRUnit& unit, IRInstruction* origInst) {
-  assert(!origInst->isTransient());
+  assertx(!origInst->isTransient());
 
   copyProp(origInst);
   auto res = simplify(unit, origInst, false);
@@ -2079,7 +2079,7 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
     }
 
     auto last = res.instrs.back();
-    assert(last->isBlockEnd());
+    assertx(last->isBlockEnd());
 
     if (!last->isTerminal() && !last->next()) {
       // We converted the block-end instruction to a different one.  Set its
@@ -2117,7 +2117,7 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
     origInst->dst()->setType(res.dst->type());
   } else {
     if (out_size == 1) {
-      assert(origInst->dst() == last->dst());
+      assertx(origInst->dst() == last->dst());
       FTRACE(1, "    {}\n", last->toString());
 
       // We only have a single instruction, so just become it.
@@ -2158,7 +2158,7 @@ void copyProp(IRInstruction* inst) {
 
     // We're assuming that all of our src instructions have already been
     // copyPropped.
-    assert(!inst->src(i)->inst()->is(Mov));
+    assertx(!inst->src(i)->inst()->is(Mov));
   }
 }
 

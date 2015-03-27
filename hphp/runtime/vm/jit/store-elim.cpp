@@ -396,7 +396,7 @@ void optimizeStores(IRUnit& unit) {
 
     auto& state         = genv.blockStates[blk->id()];
     auto const transfer = blockAnalysis[poId];
-    assert(state.id == poId);
+    assertx(state.id == poId);
 
     state.liveIn = transfer.gen | (state.liveOut & ~transfer.kill);
     FTRACE(4, "  block B{}\n"

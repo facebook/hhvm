@@ -273,7 +273,7 @@ void removeDeadCode(Vunit& unit) {
         }
       }
       if (mutate) {
-        assert(live == livein[b]);
+        assertx(live == livein[b]);
       } else {
         if (live != livein[b]) {
           livein[b] = live;

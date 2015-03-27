@@ -339,7 +339,7 @@ bool CallMap::hasInfo(Opcode op) {
 
 const CallInfo& CallMap::info(Opcode op) {
   auto it = s_callMap.m_map.find(op);
-  assert(it != s_callMap.m_map.end());
+  assertx(it != s_callMap.m_map.end());
   return it->second;
 }
 

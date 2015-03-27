@@ -33,7 +33,7 @@ void bindMem(HTS& env, SSATmp* ptr, SSATmp* src) {
 }
 
 void destroyName(HTS& env, SSATmp* name) {
-  assert(name == topC(env));
+  assertx(name == topC(env));
   popDecRef(env, name->type());
 }
 

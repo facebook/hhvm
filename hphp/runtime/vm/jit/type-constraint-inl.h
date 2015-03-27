@@ -59,8 +59,8 @@ inline bool TypeConstraint::isSpecialized() const {
 }
 
 inline TypeConstraint& TypeConstraint::setWantArrayKind() {
-  assert(!wantClass());
-  assert(isSpecialized());
+  assertx(!wantClass());
+  assertx(isSpecialized());
   m_specialized |= kWantArrayKind;
   return *this;
 }
@@ -70,8 +70,8 @@ inline bool TypeConstraint::wantArrayKind() const {
 }
 
 inline TypeConstraint& TypeConstraint::setWantArrayShape() {
-  assert(!wantClass());
-  assert(isSpecialized());
+  assertx(!wantClass());
+  assertx(isSpecialized());
   setWantArrayKind();
   m_specialized |= kWantArrayShape;
   return *this;
@@ -82,11 +82,11 @@ inline bool TypeConstraint::wantArrayShape() const {
 }
 
 inline TypeConstraint& TypeConstraint::setDesiredClass(const Class* cls) {
-  assert(m_specialized == 0 ||
+  assertx(m_specialized == 0 ||
          desiredClass()->classof(cls) || cls->classof(desiredClass()));
-  assert(isSpecialized());
+  assertx(isSpecialized());
   m_specialized = reinterpret_cast<uintptr_t>(cls);
-  assert(wantClass());
+  assertx(wantClass());
   return *this;
 }
 
@@ -95,7 +95,7 @@ inline bool TypeConstraint::wantClass() const {
 }
 
 inline const Class* TypeConstraint::desiredClass() const {
-  assert(wantClass());
+  assertx(wantClass());
   return reinterpret_cast<const Class*>(m_specialized);
 }
 

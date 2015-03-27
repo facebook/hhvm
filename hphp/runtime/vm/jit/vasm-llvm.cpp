@@ -336,7 +336,7 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
 
     // We override/ignore the alignment and use skew value to compensate.
     uint8_t* ret = code.alloc<uint8_t>(1, Size);
-    assert(Alignment < x64::kCacheLineSize &&
+    assertx(Alignment < x64::kCacheLineSize &&
            "alignment exceeds cache line size");
     always_assert(
       codeSkew == (reinterpret_cast<size_t>(ret) & (x64::kCacheLineSize - 1)) &&
@@ -1013,7 +1013,7 @@ struct LLVMEmitter {
    * Truncate val to i<bits>
    */
   llvm::Value* narrow(llvm::Value* val, size_t bits) {
-    assert(val->getType()->isIntegerTy());
+    assertx(val->getType()->isIntegerTy());
     return m_irb.CreateTrunc(val, intNType(bits));
   }
 
@@ -1021,7 +1021,7 @@ struct LLVMEmitter {
    * Zero-extend val to i<bits>
    */
   llvm::Value* zext(llvm::Value* val, size_t bits) {
-    assert(val->getType()->isIntegerTy());
+    assertx(val->getType()->isIntegerTy());
     return m_irb.CreateZExt(val, intNType(bits));
   }
 
@@ -1107,7 +1107,7 @@ private:
       // Update LLVM phi instructions if they've already been emitted; otherwise
       // enqueue useInfo so that phidef() can emit the uses.
       if (m_phis.size() != 0) {
-        assert(m_phis.size() == useInfo.uses.size());
+        assertx(m_phis.size() == useInfo.uses.size());
         for (auto phiInd = 0; phiInd < m_phis.size(); ++phiInd) {
           addIncoming(e, useInfo, phiInd);
         }
@@ -1118,8 +1118,8 @@ private:
 
     void phidef(LLVMEmitter& e, llvm::BasicBlock* toLabel,
                 const VregList& defs) {
-      assert(m_phis.size() == 0);
-      assert(m_pendingPreds.size() > 0);
+      assertx(m_phis.size() == 0);
+      assertx(m_pendingPreds.size() > 0);
 
       m_toLabel = toLabel;
       m_defs = defs;
@@ -1855,7 +1855,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
                               (int)call.kind());
 
     case CppCall::Kind::Destructor: {
-      assert(vargs.args.size() == 1);
+      assertx(vargs.args.size() == 1);
       llvm::Value* type = value(call.reg());
       type = m_irb.CreateLShr(type, kShiftDataTypeToDestrIndex, "typeIdx");
 
@@ -1896,18 +1896,18 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
   switch (destType) {
   case DestType::None:
     // nothing to do
-    assert(dests.size() == 0);
+    assertx(dests.size() == 0);
     break;
   case DestType::SSA:
   case DestType::Byte:
   case DestType::Dbl:
-    assert(dests.size() == 1);
+    assertx(dests.size() == 1);
     defineValue(dests[0], callInst);
     break;
   case DestType::TV: {
     static_assert(offsetof(TypedValue, m_data) == 0, "");
     static_assert(offsetof(TypedValue, m_type) == 8, "");
-    assert(dests.size() <= 2 && dests.size() >= 1);
+    assertx(dests.size() <= 2 && dests.size() >= 1);
     defineValue(dests[0], m_irb.CreateExtractValue(callInst, 0)); // m_data
     if (dests.size() == 2) {
       auto type = m_irb.CreateExtractValue(callInst, 1);
@@ -1916,7 +1916,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     break;
   }
   case DestType::SIMD: {
-    assert(dests.size() == 1);
+    assertx(dests.size() == 1);
     // Do we want to pack it manually into a <2 x i64>? Or bitcast to X86_MMX?
     // Leave it as TypedValue for now and see what LLVM optimizer does.
     defineValue(dests[0], callInst);
@@ -2007,7 +2007,7 @@ void LLVMEmitter::emit(const copy2& inst) {
 void LLVMEmitter::emit(const copyargs& inst) {
   auto& srcs = m_unit.tuples[inst.s];
   auto& dsts = m_unit.tuples[inst.d];
-  assert(srcs.size() == dsts.size());
+  assertx(srcs.size() == dsts.size());
   for (unsigned i = 0, n = srcs.size(); i < n; ++i) {
     defineValue(dsts[i], value(srcs[i]));
   }
@@ -2325,7 +2325,7 @@ void LLVMEmitter::emit(const ldimml& inst) {
 }
 
 void LLVMEmitter::emit(const ldimmq& inst) {
-  assert(inst.d.isVirt());
+  assertx(inst.d.isVirt());
   defineValue(inst.d, cns(inst.s.q()));
 }
 
@@ -2656,7 +2656,7 @@ void LLVMEmitter::emit(const sqrtsd& inst) {
 
 void LLVMEmitter::emit(const store& inst) {
   auto val = value(inst.s);
-  assert(val->getType()->getPrimitiveSizeInBits() == 64);
+  assertx(val->getType()->getPrimitiveSizeInBits() == 64);
   m_irb.CreateStore(val, emitPtr(inst.d, ptrType(val->getType())));
 }
 

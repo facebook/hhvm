@@ -52,7 +52,7 @@ void exitRequest(HTS& env, TransFlags flags, SrcKey target) {
   if (env.firstBcInst && target.offset() == curBcOff) {
     // The case where the instruction may branch back to itself is
     // handled in implMakeExit.
-    assert(!branchesToItself(curSrcKey(env)));
+    assertx(!branchesToItself(curSrcKey(env)));
     gen(env, ReqRetranslate, ReqRetranslateData { flags }, sp(env));
   } else {
     gen(env, ReqBindJmp, ReqBindJmpData { target, flags }, sp(env));
@@ -112,7 +112,7 @@ Block* makePseudoMainExit(HTS& env) {
 }
 
 Block* makeExitOpt(HTS& env, TransID transId) {
-  assert(!isInlining(env));
+  assertx(!isInlining(env));
   auto const targetBcOff = bcOff(env);
   auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher blockPusher(*env.irb, makeMarker(env, targetBcOff), exit);

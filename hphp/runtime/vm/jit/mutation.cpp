@@ -151,7 +151,7 @@ void cloneToBlock(const BlockList& rpoBlocks,
 
   auto targetIt = target->skipHeader();
   for (auto it = first; it != last; ++it) {
-    assert(!it->isControlFlow());
+    assertx(!it->isControlFlow());
 
     FTRACE(5, "cloneToBlock({}): {}\n", target->id(), it->toString());
     auto const newInst = unit.clone(&*it);
@@ -192,7 +192,7 @@ void moveToBlock(Block::iterator const first,
   auto targetIt = target->skipHeader();
   for (auto it = first; it != last;) {
     auto const inst = &*it;
-    assert(!inst->isControlFlow());
+    assertx(!inst->isControlFlow());
 
     FTRACE(5, "moveToBlock({}): {}\n",
            target->id(),

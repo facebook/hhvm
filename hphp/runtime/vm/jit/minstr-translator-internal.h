@@ -76,7 +76,7 @@ inline unsigned buildBitmask(T c, Args... args) {
 // FILL_ROW and BUILD_OPTAB* build up the static table of function pointers
 #define FILL_ROW(nm, ...) {                                     \
     auto const dest = &optab[buildBitmask(__VA_ARGS__)];        \
-    assert(*dest == nullptr);                                   \
+    assertx(*dest == nullptr);                                   \
     *dest = reinterpret_cast<OpFunc>(MInstrHelpers::nm);        \
   }
 
@@ -98,7 +98,7 @@ inline unsigned buildBitmask(T c, Args... args) {
 // to helper functions.
 inline KeyType getKeyType(const SSATmp* key) {
   DEBUG_ONLY auto const keyType = key->type();
-  assert(keyType <= Type::Cell);
+  assertx(keyType <= Type::Cell);
 
   if (key->isA(Type::Str)) return KeyType::Str;
   if (key->isA(Type::Int)) return KeyType::Int;
@@ -120,7 +120,7 @@ inline KeyType getKeyTypeNoInt(const SSATmp* key) {
 template<KeyType kt>
 TypedValue* keyPtr(TypedValue& key) {
   if (kt == KeyType::Any) {
-    assert(tvIsPlausible(key));
+    assertx(tvIsPlausible(key));
     return &key;
   }
   return reinterpret_cast<TypedValue*>(key.m_data.num);

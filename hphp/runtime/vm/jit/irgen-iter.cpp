@@ -31,7 +31,7 @@ namespace {
  * which is the offset corresponding to the branch being taken.
  */
 Offset iterBranchTarget(const NormalizedInstruction& i) {
-  assert(instrJumpOffset(reinterpret_cast<const Op*>(i.pc())) != nullptr);
+  assertx(instrJumpOffset(reinterpret_cast<const Op*>(i.pc())) != nullptr);
   return i.offset() + i.imm[1].u_BA;
 }
 

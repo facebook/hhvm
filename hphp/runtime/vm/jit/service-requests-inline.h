@@ -61,7 +61,7 @@ inline bool isEphemeralServiceReq(ServiceRequest sr) {
 template<typename... Arg>
 TCA emitServiceReq(CodeBlock& cb, SRFlags flags, ServiceRequest sr, Arg... a) {
   // These should reuse stubs. Use emitEphemeralServiceReq.
-  assert(!isEphemeralServiceReq(sr));
+  assertx(!isEphemeralServiceReq(sr));
 
   ServiceReqArgVec argv;
   packServiceReqArgs(argv, a...);
@@ -78,7 +78,7 @@ TCA emitServiceReq(CodeBlock& cb, ServiceRequest sr, Arg... a) {
 template<typename... Arg>
 TCA emitEphemeralServiceReq(CodeBlock& cb, TCA start, ServiceRequest sr,
                             Arg... a) {
-  assert(isEphemeralServiceReq(sr) ||
+  assertx(isEphemeralServiceReq(sr) ||
          sr == REQ_RETRANSLATE);
 
   ServiceReqArgVec argv;

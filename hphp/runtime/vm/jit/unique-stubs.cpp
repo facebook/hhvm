@@ -55,8 +55,8 @@ TCA UniqueStubs::add(const char* name, TCA start) {
   auto lower = std::lower_bound(m_ranges.begin(), m_ranges.end(), newStub);
 
   // We assume ranges are non-overlapping.
-  assert(lower == m_ranges.end() || newStub.end <= lower->start);
-  assert(lower == m_ranges.begin() || (lower - 1)->end <= newStub.start);
+  assertx(lower == m_ranges.end() || newStub.end <= lower->start);
+  assertx(lower == m_ranges.begin() || (lower - 1)->end <= newStub.start);
   m_ranges.insert(lower, newStub);
   return start;
 }

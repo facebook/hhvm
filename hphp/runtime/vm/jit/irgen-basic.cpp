@@ -188,7 +188,7 @@ void emitPrint(HTS& env) {
   } else if (type <= Type::Bool) {
     op = PrintBool;
   } else {
-    assert(type <= Type::Null);
+    assertx(type <= Type::Null);
     op = Nop;
   }
   // the print helpers decref their arg, so don't decref pop'ed value

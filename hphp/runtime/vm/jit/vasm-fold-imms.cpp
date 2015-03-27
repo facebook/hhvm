@@ -276,7 +276,7 @@ struct ImmFolder {
 // then change the instruction and embed the immediate.
 template<typename Folder>
 void foldImms(Vunit& unit) {
-  assert(check(unit)); // especially, SSA
+  assertx(check(unit)); // especially, SSA
   // block order doesn't matter, but only visit reachable blocks.
   auto blocks = sortBlocks(unit);
 

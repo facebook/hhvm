@@ -71,10 +71,10 @@ void beginInlining(HTS& env,
                    unsigned numParams,
                    const Func* target,
                    Offset returnBcOffset) {
-  assert(!env.fpiStack.empty() &&
+  assertx(!env.fpiStack.empty() &&
     "Inlining does not support calls with the FPush* in a different Tracelet");
-  assert(returnBcOffset >= 0 && "returnBcOffset before beginning of caller");
-  assert(curFunc(env)->base() + returnBcOffset < curFunc(env)->past() &&
+  assertx(returnBcOffset >= 0 && "returnBcOffset before beginning of caller");
+  assertx(curFunc(env)->base() + returnBcOffset < curFunc(env)->past() &&
          "returnBcOffset past end of caller");
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
@@ -137,10 +137,10 @@ void beginInlining(HTS& env,
 }
 
 void endInlinedCommon(HTS& env) {
-  assert(!env.fpiActiveStack.empty());
-  assert(!curFunc(env)->isPseudoMain());
+  assertx(!env.fpiActiveStack.empty());
+  assertx(!curFunc(env)->isPseudoMain());
 
-  assert(!resumed(env));
+  assertx(!resumed(env));
 
   decRefLocalsInline(env);
   if (curFunc(env)->mayHaveThis()) {
@@ -173,7 +173,7 @@ void endInlinedCommon(HTS& env) {
    * The push of the return value in the caller of this function is not yet
    * materialized.
    */
-  assert(env.irb->evalStack().empty());
+  assertx(env.irb->evalStack().empty());
   env.irb->clearStackDeficit();
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc(env)->fullName()->data());
@@ -188,7 +188,7 @@ void retFromInlined(HTS& env, Type type) {
 //////////////////////////////////////////////////////////////////////
 
 void inlSingletonSLoc(HTS& env, const Func* func, const Op* op) {
-  assert(*op == Op::StaticLocInit);
+  assertx(*op == Op::StaticLocInit);
 
   TransFlags trflags;
   trflags.noinlineSingleton = true;
@@ -213,8 +213,8 @@ void inlSingletonSProp(HTS& env,
                        const Func* func,
                        const Op* clsOp,
                        const Op* propOp) {
-  assert(*clsOp == Op::String);
-  assert(*propOp == Op::String);
+  assertx(*clsOp == Op::String);
+  assertx(*propOp == Op::String);
 
   TransFlags trflags;
   trflags.noinlineSingleton = true;

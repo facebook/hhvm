@@ -83,7 +83,7 @@ SSATmp* allocObjFast(HTS& env, const Class* cls) {
   // Make sure our property init vectors are all set up.
   const bool props = cls->pinitVec().size() > 0;
   const bool sprops = cls->numStaticProperties() > 0;
-  assert((props || sprops) == cls->needInitialization());
+  assertx((props || sprops) == cls->needInitialization());
   if (cls->needInitialization()) {
     if (props) initProps(env, cls);
     if (sprops) initSProps(env, cls);
@@ -124,7 +124,7 @@ void emitCreateCl(HTS& env, int32_t numParams, const StringData* clsName) {
   auto const clonedFunc = invokeFunc->cloneAndSetClass(
     const_cast<Class*>(curClass(env))
   );
-  assert(cls && (cls->attrs() & AttrUnique));
+  assertx(cls && (cls->attrs() & AttrUnique));
 
   auto const closure = allocObjFast(env, cls);
   gen(env, IncRef, closure);
@@ -160,7 +160,7 @@ void emitCreateCl(HTS& env, int32_t numParams, const StringData* clsName) {
   // Closure static variables are per instance, and need to start
   // uninitialized.  After numParams use vars, the remaining instance
   // properties hold any static locals.
-  assert(cls->numDeclProperties() ==
+  assertx(cls->numDeclProperties() ==
          clonedFunc->numStaticLocals() + numParams);
   for (int32_t numDeclProperties = cls->numDeclProperties();
       propId < numDeclProperties;
@@ -182,7 +182,7 @@ void emitNewArray(HTS& env, int32_t capacity) {
     push(env, cns(env, staticEmptyArray()));
   } else {
     if (auto newCap = PackedArray::getMaxCapInPlaceFast(capacity)) {
-      assert(newCap > static_cast<uint32_t>(capacity));
+      assertx(newCap > static_cast<uint32_t>(capacity));
       capacity = newCap;
     }
     push(env, gen(env, NewArray, cns(env, capacity)));

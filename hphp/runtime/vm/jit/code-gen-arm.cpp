@@ -651,7 +651,7 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
 
   auto& v = vmain();
   if (type.isKnownDataType()) {
-    assert(IS_REFCOUNTED_TYPE(type.toDataType()));
+    assertx(IS_REFCOUNTED_TYPE(type.toDataType()));
     increfMaybeStatic(v);
   } else {
     auto const sf = v.makeReg();
@@ -848,14 +848,14 @@ void CodeGenerator::cgCallHelper(Vout& v,
     case DestType::SIMD: CG_PUNT(cgCall-ReturnSIMD);
     case DestType::SSA:
     case DestType::Byte:
-      assert(dstReg1 == InvalidReg);
+      assertx(dstReg1 == InvalidReg);
       v << copy{PhysReg(vixl::x0), dstReg0};
       break;
     case DestType::None:
-      assert(dstReg0 == InvalidReg && dstReg1 == InvalidReg);
+      assertx(dstReg0 == InvalidReg && dstReg1 == InvalidReg);
       break;
     case DestType::Dbl:
-      assert(dstReg1 == InvalidReg);
+      assertx(dstReg1 == InvalidReg);
       v << copy{PhysReg(vixl::d0), dstReg0};
       break;
   }
@@ -901,7 +901,7 @@ CallDest CodeGenerator::callDestDbl(const IRInstruction* inst) const {
 template <class JmpFn>
 void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
                                       JmpFn doJcc) {
-  assert(inst->numSrcs() == 7);
+  assertx(inst->numSrcs() == 7);
 
   DEBUG_ONLY SSATmp* nParamsTmp = inst->src(1);
   DEBUG_ONLY SSATmp* firstBitNumTmp = inst->src(2);
@@ -915,18 +915,18 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
 
   // Get values in place
   auto funcPtrReg = funcPtrLoc.reg();
-  assert(funcPtrReg.isValid());
+  assertx(funcPtrReg.isValid());
 
   auto nParamsReg = nParamsLoc.reg();
 
   auto firstBitNum = static_cast<uint32_t>(firstBitNumTmp->intVal());
   auto mask64Reg = mask64Loc.reg();
   uint64_t mask64 = mask64Tmp->intVal();
-  assert(mask64);
+  assertx(mask64);
 
   auto vals64Reg = vals64Loc.reg();
   uint64_t vals64 = vals64Tmp->intVal();
-  assert((vals64 & mask64) == vals64);
+  assertx((vals64 & mask64) == vals64);
 
   auto thenBody = [&](Vout& v) {
     auto bitsOff = sizeof(uint64_t) * (firstBitNum / 64);
@@ -961,7 +961,7 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
 
   auto& v = vmain();
   if (firstBitNum == 0) {
-    assert(nParamsTmp->hasConstVal());
+    assertx(nParamsTmp->hasConstVal());
     // This is the first 64 bits. No need to check nParams.
     thenBody(v);
   } else {
@@ -1022,7 +1022,7 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
-  assert(m_state.unit.bcOff() == inst->marker().bcOff());
+  assertx(m_state.unit.bcOff() == inst->marker().bcOff());
   auto const destSK = SrcKey(curFunc(), m_state.unit.bcOff(), resumed());
   auto& v = vmain();
   v << fallback{destSK};
@@ -1092,7 +1092,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   if (returnType.isReferenceType()) {
     // this should use some kind of cmov
-    assert(isBuiltinByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
+    assertx(isBuiltinByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
     v << load{mis[returnOffset + TVOFF(m_data)], dst};
     if (dstType.isValid()) {
       condZero(v, dst, dstType, [&](Vout& v) {
@@ -1107,7 +1107,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   if (returnType <= Type::Cell || returnType <= Type::BoxedCell) {
     // this should use some kind of cmov
     static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
-    assert(isBuiltinByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
+    assertx(isBuiltinByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
     auto tmp_dst_type = v.makeReg();
     v << load{mis[returnOffset + TVOFF(m_data)], dst};
     if (dstType.isValid()) {
@@ -1128,7 +1128,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   // stack args are not supported yet
-  assert(m_state.catch_offsets[inst->block()] == 0);
+  assertx(m_state.catch_offsets[inst->block()] == 0);
 }
 
 static void unwindResumeHelper() {
@@ -1171,7 +1171,7 @@ void CodeGenerator::emitLoadTypedValue(Vout& v, Vloc dst, Vreg base,
 
 void CodeGenerator::emitStoreTypedValue(Vout& v, Vreg base, ptrdiff_t offset,
                                         Vloc src) {
-  assert(src.numWords() == 2);
+  assertx(src.numWords() == 2);
   auto reg0 = src.reg(0);
   auto reg1 = src.reg(1);
   v << store{reg0, base[offset + TVOFF(m_data)]};
@@ -1233,7 +1233,7 @@ void CodeGenerator::cgStLocPseudoMain(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdStk(IRInstruction* inst) {
-  assert(inst->taken() == nullptr);
+  assertx(inst->taken() == nullptr);
   auto src = srcLoc(0).reg();
   auto offset = cellsToBytes(inst->extra<LdStk>()->offset.offset);
   emitLoad(vmain(), inst->dst()->type(), dstLoc(0), src, offset);

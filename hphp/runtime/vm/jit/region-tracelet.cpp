@@ -171,7 +171,7 @@ RegionDescPtr RegionFormer::go() {
   irgen::gen(m_hts, EndGuards);
 
   while (true) {
-    assert(m_numBCInstrs <= RuntimeOption::EvalJitMaxRegionInstrs);
+    assertx(m_numBCInstrs <= RuntimeOption::EvalJitMaxRegionInstrs);
     if (m_numBCInstrs == RuntimeOption::EvalJitMaxRegionInstrs) {
       FTRACE(1, "selectTracelet: breaking region due to size limit ({})\n",
              m_numBCInstrs);
@@ -244,7 +244,7 @@ RegionDescPtr RegionFormer::go() {
       FTRACE(1, "selectTracelet: tracelet broken after {}\n", m_inst);
       break;
     } else {
-      assert(m_sk.func() == curFunc());
+      assertx(m_sk.func() == curFunc());
     }
 
     auto const curIRBlock = m_hts.irb->curBlock();
@@ -341,7 +341,7 @@ bool RegionFormer::prepareInstruction() {
   annotate(&m_inst);
 
   // Check all the inputs for unknown values.
-  assert(inputInfos.size() == m_inst.inputs.size());
+  assertx(inputInfos.size() == m_inst.inputs.size());
   for (unsigned i = 0; i < inputInfos.size(); ++i) {
     if (!consumeInput(i, inputInfos[i])) {
       FTRACE(2, "Stopping tracelet consuming {} input {}\n",
@@ -456,9 +456,9 @@ bool RegionFormer::traceThroughJmp() {
 }
 
 bool RegionFormer::tryInline(uint32_t& instrSize) {
-  assert(m_inst.source == m_sk);
-  assert(m_inst.func() == curFunc());
-  assert(m_sk.resumed() == resumed());
+  assertx(m_inst.source == m_sk);
+  assertx(m_inst.func() == curFunc());
+  assertx(m_sk.resumed() == resumed());
 
   instrSize = 0;
 
@@ -657,7 +657,7 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
  */
 void RegionFormer::recordDependencies() {
   // Record the incrementally constructed reffiness predictions.
-  assert(!m_region->empty());
+  assertx(!m_region->empty());
   auto& frontBlock = *m_region->blocks().front();
   for (auto const& dep : m_refDeps.m_arMap) {
     frontBlock.addReffinessPred(m_startSk, {dep.second.m_mask,

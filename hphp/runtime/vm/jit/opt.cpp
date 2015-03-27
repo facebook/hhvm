@@ -35,11 +35,11 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     if (msg) {
       printUnit(6, unit, folly::format("after {}", msg).str().c_str());
     }
-    assert(checkCfg(unit));
-    assert(checkTmpsSpanningCalls(unit));
+    assertx(checkCfg(unit));
+    assertx(checkTmpsSpanningCalls(unit));
     if (debug) {
       forEachInst(rpoSortCfg(unit), [&](IRInstruction* inst) {
-        assert(checkOperandTypes(inst, &unit));
+        assertx(checkOperandTypes(inst, &unit));
       });
     }
   };

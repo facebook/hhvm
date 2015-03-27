@@ -51,7 +51,7 @@ void implCns(HTS& env,
              const StringData* name,
              const StringData* fallbackName,
              bool error) {
-  assert(fallbackName == nullptr || !error);
+  assertx(fallbackName == nullptr || !error);
   auto const cnsNameTmp = cns(env, name);
   auto const tv = Unit::lookupPersistentCns(name);
   SSATmp* result = nullptr;
@@ -64,7 +64,7 @@ void implCns(HTS& env,
     if (tv->m_type == KindOfUninit) {
       // KindOfUninit is a dynamic system constant. always a slow
       // lookup.
-      assert(!fallbackNameTmp);
+      assertx(!fallbackNameTmp);
       if (error) {
         result = gen(env, LookupCnsE, cnsNameTmp);
       } else {

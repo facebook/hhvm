@@ -61,9 +61,9 @@ void suspendHookR(HTS& env, SSATmp* frame, SSATmp* objOrNullptr) {
 }
 
 void implAwaitE(HTS& env, SSATmp* child, Offset resumeOffset, int numIters) {
-  assert(curFunc(env)->isAsync());
-  assert(!resumed(env));
-  assert(child->type() <= Type::Obj);
+  assertx(curFunc(env)->isAsync());
+  assertx(!resumed(env));
+  assertx(child->type() <= Type::Obj);
 
   // Create the AsyncFunctionWaitHandle object. CreateAFWH takes care of
   // copying local variables and iterators.
@@ -100,9 +100,9 @@ void implAwaitE(HTS& env, SSATmp* child, Offset resumeOffset, int numIters) {
 }
 
 void implAwaitR(HTS& env, SSATmp* child, Offset resumeOffset) {
-  assert(curFunc(env)->isAsync());
-  assert(resumed(env));
-  assert(child->isA(Type::Obj));
+  assertx(curFunc(env)->isAsync());
+  assertx(resumed(env));
+  assertx(child->isA(Type::Obj));
 
   // We must do this before we do anything, because it can throw, and we can't
   // start tearing down the AFWH before that or the unwinder won't be able to
@@ -167,7 +167,7 @@ void yieldImpl(HTS& env, Offset resumeOffset) {
 
 void emitAwait(HTS& env, int32_t numIters) {
   auto const resumeOffset = nextBcOff(env);
-  assert(curFunc(env)->isAsync());
+  assertx(curFunc(env)->isAsync());
 
   if (curFunc(env)->isAsyncGenerator()) PUNT(Await-AsyncGenerator);
 
@@ -212,8 +212,8 @@ void emitAwait(HTS& env, int32_t numIters) {
 
 void emitCreateCont(HTS& env) {
   auto const resumeOffset = nextBcOff(env);
-  assert(!resumed(env));
-  assert(curFunc(env)->isGenerator());
+  assertx(!resumed(env));
+  assertx(curFunc(env)->isGenerator());
 
   if (curFunc(env)->isAsyncGenerator()) PUNT(CreateCont-AsyncGenerator);
 
@@ -245,10 +245,10 @@ void emitCreateCont(HTS& env) {
 
 void emitContEnter(HTS& env) {
   auto const returnOffset = nextBcOff(env);
-  assert(curClass(env));
-  assert(curClass(env)->classof(c_AsyncGenerator::classof()) ||
+  assertx(curClass(env));
+  assertx(curClass(env)->classof(c_AsyncGenerator::classof()) ||
          curClass(env)->classof(c_Generator::classof()));
-  assert(curFunc(env)->contains(returnOffset));
+  assertx(curFunc(env)->contains(returnOffset));
 
   // Load generator's FP and resume address.
   auto const genObj = ldThis(env);
@@ -280,8 +280,8 @@ void emitContRaise(HTS& env) { PUNT(ContRaise); }
 
 void emitYield(HTS& env) {
   auto const resumeOffset = nextBcOff(env);
-  assert(resumed(env));
-  assert(curFunc(env)->isGenerator());
+  assertx(resumed(env));
+  assertx(curFunc(env)->isGenerator());
 
   if (curFunc(env)->isAsyncGenerator()) PUNT(Yield-AsyncGenerator);
 
@@ -303,8 +303,8 @@ void emitYield(HTS& env) {
 
 void emitYieldK(HTS& env) {
   auto const resumeOffset = nextBcOff(env);
-  assert(resumed(env));
-  assert(curFunc(env)->isGenerator());
+  assertx(resumed(env));
+  assertx(curFunc(env)->isGenerator());
 
   if (curFunc(env)->isAsyncGenerator()) PUNT(YieldK-AsyncGenerator);
 
@@ -324,8 +324,8 @@ void emitYieldK(HTS& env) {
 }
 
 void emitContCheck(HTS& env, int32_t checkStarted) {
-  assert(curClass(env));
-  assert(curClass(env)->classof(c_AsyncGenerator::classof()) ||
+  assertx(curClass(env));
+  assertx(curClass(env)->classof(c_AsyncGenerator::classof()) ||
          curClass(env)->classof(c_Generator::classof()));
   auto const cont = ldThis(env);
   gen(env, ContPreNext, makeExitSlow(env), cont,
@@ -333,13 +333,13 @@ void emitContCheck(HTS& env, int32_t checkStarted) {
 }
 
 void emitContValid(HTS& env) {
-  assert(curClass(env));
+  assertx(curClass(env));
   auto const cont = ldThis(env);
   push(env, gen(env, ContValid, cont));
 }
 
 void emitContKey(HTS& env) {
-  assert(curClass(env));
+  assertx(curClass(env));
   auto const cont = ldThis(env);
   gen(env, ContStartedCheck, makeExitSlow(env), cont);
   auto const offset = cns(env, offsetof(c_Generator, m_key));
@@ -348,7 +348,7 @@ void emitContKey(HTS& env) {
 }
 
 void emitContCurrent(HTS& env) {
-  assert(curClass(env));
+  assertx(curClass(env));
   auto const cont = ldThis(env);
   gen(env, ContStartedCheck, makeExitSlow(env), cont);
   auto const offset = cns(env, offsetof(c_Generator, m_value));

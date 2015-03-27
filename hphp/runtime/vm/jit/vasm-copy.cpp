@@ -71,7 +71,7 @@ using RegInfo = folly::Optional<Vreg>;
  * initialized.
  */
 bool mergeInfo(RegInfo& dst, const RegInfo src) {
-  assert(src);
+  assertx(src);
 
   // Uninitialized dst: always take src's value.
   if (!dst) {
@@ -107,14 +107,14 @@ struct State {
   }
 
   void set(PhysReg r, Vreg info) {
-    assert(r == kAllowedReg);
-    assert(!info.isPhys());
+    assertx(r == kAllowedReg);
+    assertx(!info.isPhys());
     m_info = info;
   }
 
   Vreg get(PhysReg r) const {
-    assert(r == kAllowedReg);
-    assert(m_info);
+    assertx(r == kAllowedReg);
+    assertx(m_info);
     return *m_info;
   }
 
@@ -124,7 +124,7 @@ struct State {
 
   template<typename L>
   void forEachKnown(L body) const {
-    assert(m_info);
+    assertx(m_info);
     if (m_info->isValid()) {
       body(kAllowedReg, *m_info);
     }
@@ -282,13 +282,13 @@ State processDests(Env& env, const State inState,
   auto outState = inState;
 
   auto handleCopy = [&](Vreg dst, Vreg src, bool allowSwap) {
-    assert(dst.isValid());
+    assertx(dst.isValid());
 
     if (dst.isVirt() && src.isVirt()) {
       // First, the easy case: defining a Vreg from another Vreg. Remember the
       // assignment in the flow-insensitive vregVals map.
       if (env.vregVals[src].isValid()) src = env.vregVals[src];
-      assert(!env.vregVals[src].isValid());
+      assertx(!env.vregVals[src].isValid());
       env.vregVals[dst] = src;
       return;
     }

@@ -54,7 +54,7 @@ struct Vnum {                                             \
   explicit Vnum(size_t n) : n(safe_cast<uint32_t>(n)) {}  \
                                                           \
   /* implicit */ operator size_t() const {                \
-    if (check) assert(n != kInvalidId);                   \
+    if (check) assertx(n != kInvalidId);                   \
     return n;                                             \
   }                                                       \
                                                           \

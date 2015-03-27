@@ -842,7 +842,7 @@ struct NReq : Node {
 
 #define X(Kind, kind)                               \
   UNUSED N##Kind* to_##kind(Node* n) {              \
-    assert(n->type == NT::Kind);                    \
+    assertx(n->type == NT::Kind);                    \
     return static_cast<N##Kind*>(n);                \
   }                                                 \
   UNUSED const N##Kind* to_##kind(const Node* n) {  \
@@ -1344,7 +1344,7 @@ void find_alias_sets(Env& env) {
      * bounds).
      */
     if (tmp->inst()->is(LdCtx)) {
-      assert(tmp == canonical(tmp));
+      assertx(tmp == canonical(tmp));
 
       auto const fp = tmp->inst()->src(0);
       if (frame_to_ctx.contains(fp)) {
@@ -1352,7 +1352,7 @@ void find_alias_sets(Env& env) {
       } else {
         id = env.asets.size();
         frame_to_ctx[fp] = id;
-        assert(canonical(tmp) == tmp);
+        assertx(canonical(tmp) == tmp);
         env.asets.push_back(MustAliasSet { tmp->type(), tmp });
       }
 
@@ -1484,8 +1484,8 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src) {
 
   // Catch any issues with this early, instead of waiting for the full check
   // function.
-  assert(src.lower_bound >= 0);
-  assert(dst.lower_bound >= 0);
+  assertx(src.lower_bound >= 0);
+  assertx(dst.lower_bound >= 0);
 
   auto const new_lower_bound = std::min(dst.lower_bound, src.lower_bound);
   if (dst.lower_bound != new_lower_bound) {
@@ -1495,9 +1495,9 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src) {
 
   auto const new_pessimized = dst.pessimized || src.pessimized;
   if (dst.pessimized != new_pessimized) {
-    assert(new_pessimized);
+    assertx(new_pessimized);
     DEBUG_ONLY auto pess_changed = pessimize_for_merge(dst);
-    assert(pess_changed);
+    assertx(pess_changed);
     changed = true;
   }
 
@@ -1535,14 +1535,14 @@ bool merge_memory_support(RCState& dstState, const RCState& srcState) {
         auto const old_count = dst.memory_support.count();
         auto const new_count = new_memory_support.count();
         auto const delta     = old_count - new_count;
-        assert(delta > 0);
+        assertx(delta > 0);
 
         dst.lower_bound -= delta;
         dst.memory_support = new_memory_support;
         changed = true;
 
-        assert(dst.lower_bound >= 0);
-        assert(dst.lower_bound >= dst.memory_support.count());
+        assertx(dst.lower_bound >= 0);
+        assertx(dst.lower_bound >= dst.memory_support.count());
       }
       continue;
     }
@@ -1585,12 +1585,12 @@ bool merge_into(Env& env, RCState& dst, const RCState& src) {
     if (mem.none()) continue;
     for (auto loc = uint32_t{0}; loc < mem.size(); ++loc) {
       if (!mem[loc]) continue;
-      assert(dst.support_map[loc] == -1);
+      assertx(dst.support_map[loc] == -1);
       dst.support_map[loc] = asetID;
     }
   }
 
-  assert(check_state(dst));
+  assertx(check_state(dst));
 
   return changed;
 }
@@ -1600,7 +1600,7 @@ bool merge_into(Env& env, RCState& dst, const RCState& src) {
 template<class Fn>
 void for_aset(Env& env, RCState& state, SSATmp* tmp, Fn fn) {
   auto const asetID = env.asetMap[tmp];
-  if (asetID == -1) { assert(!tmp->type().maybe(Type::Counted)); return; }
+  if (asetID == -1) { assertx(!tmp->type().maybe(Type::Counted)); return; }
   if (state.asets[asetID].pessimized) return;
   fn(asetID);
 }
@@ -1842,7 +1842,7 @@ void create_store_support(Env& env,
        * anything inside this conflict set, and memory operations that could
        * decref any one of them will reduce the support for all of them.
        */
-      assert(state.support_map[meta->index] == -1);
+      assertx(state.support_map[meta->index] == -1);
 
       state.support_map[meta->index] = asetID;
       aset.memory_support.set(meta->index);
@@ -2151,7 +2151,7 @@ void rc_analyze_inst(Env& env,
    */
   for (auto srcID = uint32_t{0}; srcID < inst.numSrcs(); ++srcID) {
     if (consumes_reference_next_not_taken(inst, srcID)) {
-      assert(!consumes_reference_taken(inst, srcID));
+      assertx(!consumes_reference_taken(inst, srcID));
       for_aset(env, state, inst.src(srcID), [&] (ASetID asetID) {
         may_decref(env, state, asetID, add_node);
       });
@@ -2222,7 +2222,7 @@ void rc_analyze_step(Env& env,
   // the mrinfo, but it's not useful because only CallEffects causes it right
   // now, and SSATmps can't span calls.
   mrinfo_step(env, inst, state.avail);
-  assert(check_state(state));
+  assertx(check_state(state));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2314,7 +2314,7 @@ bool is_phi_pred(const NPhi* phi, Node* pred) {
 }
 
 void add_phi_pred(Env& env, NPhi* nphi, Node* pred) {
-  assert(direct_successor(pred, nphi));
+  assertx(direct_successor(pred, nphi));
   auto const phi = to_phi(nphi);
   if (phi->pred_list_sz + 1 >= phi->pred_list_cap) {
     ++phi->pred_list_cap;
@@ -2326,7 +2326,7 @@ void add_phi_pred(Env& env, NPhi* nphi, Node* pred) {
 }
 
 void rm_phi_pred(NPhi* phi, Node* n) {
-  assert(is_phi_pred(phi, n));
+  assertx(is_phi_pred(phi, n));
 
   // Only remove the first occurance of "n".  (A Sig node may be a predecessor
   // of the same Phi more than once.)
@@ -2343,7 +2343,7 @@ void rm_phi_pred(NPhi* phi, Node* n) {
  * Pre: direct_successor(first, current)
  */
 void rechain_forward(Node* first, Node* current, Node* replace) {
-  assert(direct_successor(first, current));
+  assertx(direct_successor(first, current));
   if (first->next == current) {
     first->next = replace;
     return;
@@ -2376,9 +2376,9 @@ void rechain_forward(Node* first, Node* current, Node* replace) {
  * Post: direct_successor(pred, last) and middle is unlinked entirely
  */
 void node_skip_over(Env& env, Node* pred, Node* middle, Node* last) {
-  assert(direct_successor(pred, middle));
-  assert(direct_successor(middle, last));
-  assert(middle->type != NT::Sig ||
+  assertx(direct_successor(pred, middle));
+  assertx(direct_successor(middle, last));
+  assertx(middle->type != NT::Sig ||
     (middle->next == nullptr || to_sig(middle)->taken == nullptr));
 
   // Unlink middle node.
@@ -2417,9 +2417,9 @@ Node* add_between(Env& env,
                   Node* pred,
                   Node* succ,
                   const T& new_data) {
-  assert(direct_successor(pred, succ));
+  assertx(direct_successor(pred, succ));
   auto const new_node = new (env.arena) T(new_data);
-  assert(new_node->type != NT::Phi);
+  assertx(new_node->type != NT::Phi);
 
   // Unlink backward pointers.
   if (succ->type == NT::Phi) {
@@ -2514,7 +2514,7 @@ std::string graph_dot_nodes(SSATmp* representative, size_t graph_id, Node* g) {
 
     if (n->next) {
       folly::format(&ret, " N{} -> N{};", node_num, node_to_id[n->next]);
-      assert(n->next->type == NT::Phi || n->next->prev == n);
+      assertx(n->next->type == NT::Phi || n->next->prev == n);
     }
 
     if (debug_back_links && n->prev) {
@@ -2547,7 +2547,7 @@ std::string graph_dot_nodes(SSATmp* representative, size_t graph_id, Node* g) {
 
 std::string graphs_dot_string(const jit::vector<MustAliasSet>& asets,
                               const jit::vector<Node*>& heads) {
-  assert(asets.size() == heads.size());
+  assertx(asets.size() == heads.size());
   auto ret = std::string{};
   ret = "digraph G {\n";
   for (auto graph_id = size_t{0}; graph_id < heads.size(); ++graph_id) {
@@ -2705,13 +2705,13 @@ void do_clean_graph(Env& env,
           continue;
         }
         if (next == taken && next != nullptr) {
-          assert(next->type == NT::Phi);
+          assertx(next->type == NT::Phi);
           auto const phi = to_phi(next);
           // We only apply this rule when it isn't a back_edge_preds because we
           // always want a Phi involved in loops.
           if (phi->pred_list_sz == 2 && phi->back_edge_preds == 0) {
             rm_phi_pred(phi, cur); // Leaving one of the preds.
-            assert(is_phi_pred(phi, cur));
+            assertx(is_phi_pred(phi, cur));
             static_assert(sizeof(NEmpty) < sizeof(NPhi), "");
             cur->type = NT::Empty;          // Let the empty rule remove it.
             changed = true;
@@ -2720,7 +2720,7 @@ void do_clean_graph(Env& env,
         }
 
         // Schedule taken for later, and continue doing the next path now.
-        assert(taken && next);
+        assertx(taken && next);
         workQ.emplace(cur, taken);
         prev = cur;
         cur = next;
@@ -2755,7 +2755,7 @@ Node* clean_graph(Env& env, Node* head) {
   bool changed;
   do {
     changed = false;
-    assert(workQ.empty());
+    assertx(workQ.empty());
     workQ.emplace(nullptr, head);
     do {
       Node* prev;
@@ -2839,7 +2839,7 @@ ChainProgress merge_incoming(Env& env,
                              const RCState& state,
                              Block* blk,
                              const Incoming& incoming) {
-  assert(!incoming.empty());
+  assertx(!incoming.empty());
   auto ret = ChainProgress{};
   ret.resize(env.asets.size());
   auto const incoming_sz = safe_cast<uint32_t>(incoming.size());
@@ -2985,7 +2985,7 @@ Node* reprocess_helper(Node* pred, Node* succ) {
 }
 
 bool can_sink(Env& env, const IRInstruction* inst, const Block* block) {
-  assert(inst->is(IncRef));
+  assertx(inst->is(IncRef));
   if (!block->taken() || !block->next()) return false;
   if (inst->src(0)->inst()->is(DefConst)) return true;
   auto const defBlock = findDefiningBlock(inst->src(0));
@@ -3004,7 +3004,7 @@ bool all_preds_are_sinkable_incs(const NPhi& phi) {
 }
 
 IRInstruction* find_sinkable_pred(const Env& env, const NPhi& phi) {
-  assert(all_preds_are_sinkable_incs(phi));
+  assertx(all_preds_are_sinkable_incs(phi));
   auto const block = phi.block;
   auto const it = std::find_if(
     phi.pred_list,
@@ -3211,7 +3211,7 @@ Node* rule_inc_pass_phi(Env& env, Node* node) {
   FTRACE(2, "    ** inc_pass_phi: {}\n", *new_inc);
   nphi->block->prepend(new_inc);
 
-  assert(nphi->prev == nullptr);
+  assertx(nphi->prev == nullptr);
   for (auto i = uint32_t{0}; i < nphi->pred_list_sz; ++i) {
     auto& pred_ptr = nphi->pred_list[i];
     auto const inc = to_inc(pred_ptr);
@@ -3314,18 +3314,18 @@ void rcgraph_opts(Env& env) {
   // Build the graphs.
   auto graphs = build_graphs(env, rcAnalysis);
   FTRACE(1, "rc arena size: {}\n", env.arena.size());
-  assert(check_graphs(graphs));
+  assertx(check_graphs(graphs));
   FTRACE(1, "{}", show_graphs(env.asets, graphs));
 
   // Clean the graphs up, so they're easier to pattern match against in the
   // optimize pass.
   graphs = clean_graphs(env, std::move(graphs));
-  assert(check_graphs(graphs));
+  assertx(check_graphs(graphs));
   FTRACE(1, "{}", show_graphs(env.asets, graphs));
 
   // Optimize each graph.
   optimize_graphs(env, graphs);
-  assert(check_graphs(graphs));
+  assertx(check_graphs(graphs));
   FTRACE(1, "rc arena size: {}\n", env.arena.size());
 }
 

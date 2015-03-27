@@ -99,13 +99,13 @@ folly::Optional<Type> interpOutputType(HTS& env,
     auto locId = localInputId(inst);
     static_assert(std::is_unsigned<typeof(locId)>::value,
                   "locId should be unsigned");
-    assert(locId < curFunc(env)->numLocals());
+    assertx(locId < curFunc(env)->numLocals());
     return env.irb->localType(locId, DataTypeSpecific);
   };
 
   auto boxed = [&] (Type t) -> Type {
     if (t == Type::Gen) return Type::BoxedInitCell;
-    assert(t <= Type::Cell || t <= Type::BoxedCell);
+    assertx(t <= Type::Cell || t <= Type::BoxedCell);
     checkTypeType = t <= Type::BoxedCell ? t : boxType(t);
     return Type::BoxedInitCell;
   };
@@ -245,9 +245,9 @@ interpOutputLocals(HTS& env,
 
     case OpSetOpL:
     case OpIncDecL: {
-      assert(pushedType.hasValue());
+      assertx(pushedType.hasValue());
       auto locType = env.irb->localType(localInputId(inst), DataTypeSpecific);
-      assert(locType < Type::Gen || curFunc(env)->isPseudoMain());
+      assertx(locType < Type::Gen || curFunc(env)->isPseudoMain());
 
       auto stackType = pushedType.value();
       setImmLocType(0, handleBoxiness(locType, stackType));
@@ -271,8 +271,8 @@ interpOutputLocals(HTS& env,
     }
     case OpVGetL:
     case OpBindL: {
-      assert(pushedType.hasValue());
-      assert(*pushedType <= Type::BoxedCell);
+      assertx(pushedType.hasValue());
+      assertx(*pushedType <= Type::BoxedCell);
       setImmLocType(0, pushedType.value());
       break;
     }
@@ -294,7 +294,7 @@ interpOutputLocals(HTS& env,
         case LL: {
           auto const& mii = getMInstrInfo(inst.mInstrOp());
           auto const& base = inst.inputs[mii.valCount()]->location;
-          assert(base.space == Location::Local);
+          assertx(base.space == Location::Local);
 
           // MInstrEffects expects to be used in the context of a normally
           // translated instruction, not an interpOne. The two important
@@ -317,7 +317,7 @@ interpOutputLocals(HTS& env,
           MInstrEffects effects(op, baseType);
           if (effects.baseValChanged) {
             auto const ty = effects.baseType.deref();
-            assert((ty <= Type::Cell ||
+            assertx((ty <= Type::Cell ||
                     ty <= Type::BoxedCell) ||
                     curFunc(env)->isPseudoMain());
             setLocType(base.offset, handleBoxiness(ty, ty));
@@ -452,7 +452,7 @@ void interpOne(HTS& env,
     sp(env),
     fp(env)
   );
-  assert(env.irb->stackDeficit() == 0);
+  assertx(env.irb->stackDeficit() == 0);
 }
 
 //////////////////////////////////////////////////////////////////////

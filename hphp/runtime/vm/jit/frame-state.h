@@ -65,7 +65,7 @@ struct EvalStack {
   }
 
   void replace(uint32_t offset, SSATmp* tmp) {
-    assert(offset < m_vector.size());
+    assertx(offset < m_vector.size());
     uint32_t index = m_vector.size() - 1 - offset;
     m_vector[index] = tmp;
   }
@@ -392,7 +392,7 @@ private:
 
 private:
   FrameState& cur() {
-    assert(!m_stack.empty());
+    assertx(!m_stack.empty());
     return m_stack.back();
   }
   const FrameState& cur() const {

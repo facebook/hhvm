@@ -75,7 +75,7 @@ class BackEnd {
   virtual Abi abi() = 0;
   virtual size_t cacheLineSize() = 0;
   size_t cacheLineMask() {
-    assert((cacheLineSize() & (cacheLineSize()-1)) == 0);
+    assertx((cacheLineSize() & (cacheLineSize()-1)) == 0);
     return cacheLineSize() - 1;
   }
 

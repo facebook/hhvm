@@ -152,7 +152,7 @@ void binaryArith(HTS& env, Op op) {
   auto const opc = promoteBinaryDoubles(env, op, src1, src2);
 
   if (opc == AddIntO || opc == SubIntO || opc == MulIntO) {
-    assert(src1->isA(Type::Int) && src2->isA(Type::Int));
+    assertx(src1->isA(Type::Int) && src2->isA(Type::Int));
     push(env, gen(env, opc, exitSlow, src1, src2));
   } else {
     push(env, gen(env, opc, src1, src2));
@@ -161,7 +161,7 @@ void binaryArith(HTS& env, Op op) {
 
 // Implementation function that only handles integer or double inc/dec.
 SSATmp* implIncDec(HTS& env, bool pre, bool inc, bool over, SSATmp* src) {
-  assert(src->type() <= Type::Int || src->type() <= Type::Dbl);
+  assertx(src->type() <= Type::Int || src->type() <= Type::Dbl);
 
   Opcode op;
 
@@ -197,7 +197,7 @@ SSATmp* implIncDec(HTS& env, bool pre, bool inc, bool over, SSATmp* src) {
  * 3. Array comparisons can throw if recursion is detected.
  */
 bool cmpOpTypesMayReenter(Type t0, Type t1) {
-  assert(t0 != Type::Gen && t1 != Type::Gen);
+  assertx(t0 != Type::Gen && t1 != Type::Gen);
   auto const badObjConvs = Type::Int | Type::Dbl | Type::Str;
   return (t0.maybe(Type::Obj) && t1.maybe(badObjConvs)) ||
          (t0.maybe(badObjConvs) && t1.maybe(Type::Obj)) ||
@@ -538,7 +538,7 @@ void emitDiv(HTS& env) {
       if (divisor->isA(Type::Int)) {
         divisorVal = divisor->intVal();
       } else {
-        assert(divisor->isA(Type::Bool));
+        assertx(divisor->isA(Type::Bool));
         divisorVal = divisor->boolVal();
       }
 
@@ -556,7 +556,7 @@ void emitDiv(HTS& env) {
         if (dividend->isA(Type::Int)) {
           dividendVal = dividend->intVal();
         } else {
-          assert(dividend->isA(Type::Bool));
+          assertx(dividend->isA(Type::Bool));
           dividendVal = dividend->boolVal();
         }
         popC(env);
@@ -580,7 +580,7 @@ void emitDiv(HTS& env) {
     } else if (src->isA(Type::Bool)) {
       return gen(env, ConvBoolToDbl, src);
     }
-    assert(src->isA(Type::Dbl));
+    assertx(src->isA(Type::Dbl));
     return src;
   };
 

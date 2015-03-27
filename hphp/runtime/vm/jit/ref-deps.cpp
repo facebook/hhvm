@@ -43,7 +43,7 @@ void RefDeps::addDep(int entryArDelta, unsigned argNum, bool isRef) {
   }
   Record& r = m_arMap[entryArDelta];
   if (argNum >= r.m_mask.size()) {
-    assert(argNum >= r.m_vals.size());
+    assertx(argNum >= r.m_vals.size());
     r.m_mask.resize(argNum + 1);
     r.m_vals.resize(argNum + 1);
   }
@@ -53,7 +53,7 @@ void RefDeps::addDep(int entryArDelta, unsigned argNum, bool isRef) {
 
 void
 ActRecState::pushFunc(const NormalizedInstruction& inst) {
-  assert(isFPush(inst.op()));
+  assertx(isFPush(inst.op()));
   if (inst.op() == OpFPushFuncD || inst.op() == OpFPushFuncU) {
     const Unit& unit = *inst.unit();
     Id funcId = inst.imm[1].u_SA;
@@ -127,10 +127,10 @@ ActRecState::checkByRef(int argNum, int entryArDelta, RefDeps* refDeps) {
     throwUnknownInput();
     not_reached();
   }
-  assert(r.m_topFunc);
+  assertx(r.m_topFunc);
   bool retval = r.m_topFunc->byRef(argNum);
   if (r.m_state == State::GUESSABLE) {
-    assert(r.m_entryArDelta != InvalidEntryArDelta);
+    assertx(r.m_entryArDelta != InvalidEntryArDelta);
     TRACE(2, "ActRecState: guessing arg%d -> %d\n", argNum, retval);
     refDeps->addDep(r.m_entryArDelta, argNum, retval);
   }
@@ -140,7 +140,7 @@ ActRecState::checkByRef(int argNum, int entryArDelta, RefDeps* refDeps) {
 const Func*
 ActRecState::knownFunc() {
   if (currentState() != State::KNOWN) return nullptr;
-  assert(!m_arStack.empty());
+  assertx(!m_arStack.empty());
   return m_arStack.back().m_topFunc;
 }
 

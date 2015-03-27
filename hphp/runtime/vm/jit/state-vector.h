@@ -62,7 +62,7 @@ struct StateVector {
   }
 
   const_reference operator[](uint32_t id) const {
-    assert(id < m_unit.numIds(nullKey));
+    assertx(id < m_unit.numIds(nullKey));
     return id < m_info.size() ? m_info[id] : m_init;
   }
 

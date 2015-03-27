@@ -126,30 +126,30 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
           sync_valid = unwind_valid = nothrow_valid = true;
           break;
         case Vinstr::syncpoint:
-          assert(sync_valid);
+          assertx(sync_valid);
           sync_valid = false;
           break;
         case Vinstr::unwind:
-          assert(unwind_valid);
+          assertx(unwind_valid);
           unwind_valid = nothrow_valid = false;
           break;
         case Vinstr::nothrow:
-          assert(nothrow_valid);
+          assertx(nothrow_valid);
           unwind_valid = nothrow_valid = false;
           break;
         case Vinstr::hostcall:
           hcsync_valid = hcunwind_valid = hcnocatch_valid = true;
           break;
         case Vinstr::hcsync:
-          assert(hcsync_valid);
+          assertx(hcsync_valid);
           hcsync_valid = false;
           break;
         case Vinstr::hcunwind:
-          assert(hcunwind_valid);
+          assertx(hcunwind_valid);
           hcunwind_valid = hcnocatch_valid = false;
           break;
         case Vinstr::hcnocatch:
-          assert(hcnocatch_valid);
+          assertx(hcnocatch_valid);
           hcunwind_valid = hcnocatch_valid = false;
           break;
         default:
@@ -167,19 +167,19 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
 
 bool check(Vunit& unit) {
   auto blocks = sortBlocks(unit);
-  assert(checkSSA(unit, blocks));
-  assert(checkCalls(unit, blocks));
+  assertx(checkSSA(unit, blocks));
+  assertx(checkCalls(unit, blocks));
   return true;
 }
 
 bool checkBlockEnd(Vunit& unit, Vlabel b) {
-  assert(!unit.blocks[b].code.empty());
+  assertx(!unit.blocks[b].code.empty());
   auto& block = unit.blocks[b];
   auto n = block.code.size();
   for (size_t i = 0; i < n - 1; ++i) {
-    assert(!isBlockEnd(block.code[i]));
+    assertx(!isBlockEnd(block.code[i]));
   }
-  assert(isBlockEnd(block.code[n - 1]));
+  assertx(isBlockEnd(block.code[n - 1]));
   return true;
 }
 

@@ -32,9 +32,9 @@ namespace {
 // fallthrough block, and `inst' will be inserted at the beginning of that
 // block.
 void insertAfter(IRInstruction* definer, IRInstruction* inst) {
-  assert(!definer->isTerminal());
+  assertx(!definer->isTerminal());
   if (definer->isControlFlow()) {
-    assert(definer->next());
+    assertx(definer->next());
     definer->next()->prepend(inst);
     return;
   }

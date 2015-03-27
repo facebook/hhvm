@@ -41,11 +41,11 @@ bool FixupMap::getFrameRegs(const ActRec* ar,
     // Note: if indirect fixups happen frequently enough, we could
     // just compare savedRip to be less than some threshold where
     // stubs in a.code stop.
-    assert(prevAr);
+    assertx(prevAr);
     auto pRealRip = ent->indirect.returnIpDisp +
       uintptr_t(prevAr->m_sfp);
     ent = m_fixups.find(*reinterpret_cast<CTCA*>(pRealRip));
-    assert(ent && !ent->isIndirect());
+    assertx(ent && !ent->isIndirect());
   }
   regsFromActRec(tca, ar, ent->fixup, outVMRegs);
   return true;
@@ -56,7 +56,7 @@ void FixupMap::recordIndirectFixup(CodeAddress frontier, int dwordsPushed) {
 }
 
 void FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
-  assert(RuntimeOption::EvalJit);
+  assertx(RuntimeOption::EvalJit);
 
   TRACE(1, "fixup(begin):\n");
 
@@ -65,7 +65,7 @@ void FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
   do {
     auto* prevRbp = rbp;
     rbp = nextRbp;
-    assert(rbp && "Missing fixup for native call");
+    assertx(rbp && "Missing fixup for native call");
     nextRbp = rbp->m_sfp;
     TRACE(2, "considering frame %p, %p\n", rbp, (void*)rbp->m_savedRip);
 
@@ -97,11 +97,11 @@ void FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
 
   auto isVMFrame = [] (ActRec* ar, const vixl::Simulator* sim) {
     // If this assert is failing, you may have forgotten a sync point somewhere
-    assert(ar);
+    assertx(ar);
     bool ret =
       uintptr_t(ar) - s_stackLimit >= s_stackSize &&
       !sim->is_on_stack(ar);
-    assert(!ret || isValidVMStackAddress(ar) || ar->resumed());
+    assertx(!ret || isValidVMStackAddress(ar) || ar->resumed());
     return ret;
   };
 

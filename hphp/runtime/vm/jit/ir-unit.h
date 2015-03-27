@@ -186,7 +186,7 @@ struct IRUnit {
   // Return the main FramePtr for the unit.  This is the result of the DefFP
   // instruction on the entry block.
   SSATmp* mainFP() const {
-    assert(!entry()->empty() && entry()->begin()->is(DefFP));
+    assertx(!entry()->empty() && entry()->begin()->is(DefFP));
     return entry()->begin()->dst();
   }
 

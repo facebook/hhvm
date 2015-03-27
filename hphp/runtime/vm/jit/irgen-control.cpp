@@ -65,7 +65,7 @@ void jmpImpl(HTS& env, Offset offset, JmpFlags flags) {
     prepareForHHBCMergePoint(env);
   }
   auto target = getBlock(env, offset);
-  assert(target != nullptr);
+  assertx(target != nullptr);
   gen(env, Jmp, target);
 }
 
@@ -78,7 +78,7 @@ void implCondJmp(HTS& env, Offset taken, bool negate, SSATmp* src) {
     prepareForHHBCMergePoint(env);
   }
   auto const target = getBlock(env, taken);
-  assert(target != nullptr);
+  assertx(target != nullptr);
   auto const boolSrc = gen(env, ConvCellToBool, src);
   gen(env, DecRef, src);
   gen(env, negate ? JmpZero : JmpNZero, target, boolSrc);
@@ -119,8 +119,8 @@ void emitSwitch(HTS& env,
 
   SSATmp* const switchVal = popC(env);
   Type type = switchVal->type();
-  assert(IMPLIES(!(type <= (Type::Int | Type::Null)), bounded));
-  assert(IMPLIES(bounded, iv.size() > 2));
+  assertx(IMPLIES(!(type <= (Type::Int | Type::Null)), bounded));
+  assertx(IMPLIES(bounded, iv.size() > 2));
   SSATmp* index;
   SSATmp* ssabase = cns(env, base);
   SSATmp* ssatargets = cns(env, nTargets);

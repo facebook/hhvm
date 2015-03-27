@@ -50,7 +50,7 @@ static void setupAfterPrologue(ActRec* fp, void* sp) {
 
 TCA fcallHelper(ActRec* ar, void* sp) {
   try {
-    assert(!ar->resumed());
+    assertx(!ar->resumed());
     TCA tca = mcg->getFuncPrologue((Func*)ar->m_func, ar->numArgs(), ar);
     if (tca) {
       return tca;
@@ -71,7 +71,7 @@ TCA fcallHelper(ActRec* ar, void* sp) {
       return (TCA)-ar->m_savedRip;
     }
     setupAfterPrologue(ar, sp);
-    assert(ar == vmRegsUnsafe().fp);
+    assertx(ar == vmRegsUnsafe().fp);
     return mcg->tx().uniqueStubs.resumeHelper;
   } catch (...) {
     /*

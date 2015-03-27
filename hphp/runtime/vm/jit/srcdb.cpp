@@ -100,12 +100,12 @@ void SrcRec::setFuncInfo(const Func* f) {
  * translation (which just is a REQ_RETRANSLATE).
  */
 TCA SrcRec::getFallbackTranslation() const {
-  assert(m_anchorTranslation);
+  assertx(m_anchorTranslation);
   return m_anchorTranslation;
 }
 
 void SrcRec::chainFrom(IncomingBranch br) {
-  assert(br.type() == IncomingBranch::Tag::ADDR ||
+  assertx(br.type() == IncomingBranch::Tag::ADDR ||
          mcg->code.isValidCodeAddress(br.toSmash()));
   TCA destAddr = getTopTranslation();
   m_incomingBranches.push_back(br);
@@ -150,7 +150,7 @@ void SrcRec::newTranslation(TCA newStart,
                             GrowableVector<IncomingBranch>& tailBranches) {
   // When translation punts due to hitting limit, will generate one
   // more translation that will call the interpreter.
-  assert(m_translations.size() <= RuntimeOption::EvalJitMaxTranslations);
+  assertx(m_translations.size() <= RuntimeOption::EvalJitMaxTranslations);
 
   TRACE(1, "SrcRec(%p)::newTranslation @%p, ", this, newStart);
 
@@ -208,7 +208,7 @@ void SrcRec::relocate(RelocationInfo& rel) {
 }
 
 void SrcRec::addDebuggerGuard(TCA dbgGuard, TCA dbgBranchGuardSrc) {
-  assert(!m_dbgBranchGuardSrc);
+  assertx(!m_dbgBranchGuardSrc);
 
   TRACE(1, "SrcRec(%p)::addDebuggerGuard @%p, "
         "%zd incoming branches to rechain\n",
@@ -265,7 +265,7 @@ void SrcRec::replaceOldTranslations() {
    * If we ever change that we'll have to change this to patch to
    * some sort of rebind requests.
    */
-  assert(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
+  assertx(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
   patchIncomingBranches(m_anchorTranslation);
 }
 

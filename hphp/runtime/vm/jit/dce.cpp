@@ -186,7 +186,7 @@ bool canDCE(IRInstruction* inst) {
   case LdUnwinderValue:
   case LdColArray:
   case OrdStr:
-    assert(!inst->isControlFlow());
+    assertx(!inst->isControlFlow());
     return true;
 
   case AKExistsObj:
@@ -544,7 +544,7 @@ void removeDeadInstructions(IRUnit& unit, const DceState& state) {
       // For now, all control flow instructions are essential. If we ever
       // change this, we'll need to be careful about unlinking dead CF
       // instructions here.
-      assert(IMPLIES(inst.isControlFlow(), !state[inst].isDead()));
+      assertx(IMPLIES(inst.isControlFlow(), !state[inst].isDead()));
       return state[inst].isDead();
     });
   });
@@ -612,7 +612,7 @@ bool findWeakActRecUses(const BlockList& blocks,
   bool killedFrames = false;
 
   auto const incWeak = [&] (const IRInstruction* inst, const SSATmp* src) {
-    assert(src->isA(Type::FramePtr));
+    assertx(src->isA(Type::FramePtr));
     auto const frameInst = src->inst();
     if (frameInst->op() == DefInlineFP) {
       ITRACE(3, "weak use of {} from {}\n", *frameInst, *inst);
@@ -633,7 +633,7 @@ bool findWeakActRecUses(const BlockList& blocks,
     case InlineReturn:
       {
         auto const frameInst = inst->src(0)->inst();
-        assert(frameInst->is(DefInlineFP));
+        assertx(frameInst->is(DefInlineFP));
         auto const frameUses = uses[frameInst->dst()];
         auto const weakUses  = state[frameInst].weakUseCount();
         /*
@@ -702,7 +702,7 @@ void performActRecFixups(const BlockList& blocks,
           always_assert(fp->inst()->is(DefInlineFP));
           auto const prev = fp->inst()->src(2);
           inst.marker() = inst.marker().adjustFP(prev);
-          assert(!state[prev->inst()].isDead());
+          assertx(!state[prev->inst()].isDead());
         }
       }
 

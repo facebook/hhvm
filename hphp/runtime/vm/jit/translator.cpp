@@ -1363,10 +1363,6 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
     irgen::gen(hts, CountBytecode);
   }
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts >= 2) {
-    irgen::gen(hts, DbgAssertRetAddr);
-  }
-
   if (isAlwaysNop(ni.op())) {
     // Do nothing
   } else if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {

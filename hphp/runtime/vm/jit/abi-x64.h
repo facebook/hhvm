@@ -29,7 +29,6 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/reserved-stack.h"
 
 namespace HPHP { namespace jit { namespace x64 {
 
@@ -199,7 +198,8 @@ UNUSED const Abi abi {
   kXMMUnreserved, // simdUnreserved
   kXMMReserved,   // simdReserved
   kCalleeSaved,   // calleeSaved
-  kSF             // sf
+  kSF,            // sf
+  true,           // canSpill
 };
 
 //////////////////////////////////////////////////////////////////////

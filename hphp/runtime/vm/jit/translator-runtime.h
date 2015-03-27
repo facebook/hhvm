@@ -39,9 +39,6 @@ namespace jit {
 
 struct TypeConstraint;
 
-constexpr size_t kReservedRSPSpillSpace = RESERVED_STACK_SPILL_SPACE;
-constexpr size_t kReservedRSPTotalSpace = RESERVED_STACK_TOTAL_SPACE;
-
 //////////////////////////////////////////////////////////////////////
 
 /* Helper functions for translated code */

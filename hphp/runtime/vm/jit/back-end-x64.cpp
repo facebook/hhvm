@@ -862,7 +862,8 @@ UNUSED const Abi vasm_abi {
   .simdUnreserved = vasm_simd,
   .simdReserved = x64::abi.simd() - vasm_simd,
   .calleeSaved = x64::kCalleeSaved,
-  .sf = x64::abi.sf
+  .sf = x64::abi.sf,
+  .canSpill = true
 };
 
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
@@ -948,6 +949,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     vasm.main(mainCode);
     vasm.cold(coldCode);
     vasm.frozen(*frozenCode);
+
     for (auto block : blocks) {
       auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
                block->hint() == Block::Hint::Unused ? vasm.frozen() :

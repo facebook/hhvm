@@ -5294,26 +5294,6 @@ void CodeGenerator::cgDbgAssertType(IRInstruction* inst) {
     });
 }
 
-/*
- * Defined in translator-asm-helpers.S. Used for an assert in DbgAssertRetAddr.
- */
-extern "C" void enterTCExit();
-
-void CodeGenerator::cgDbgAssertRetAddr(IRInstruction* inst) {
-  // With the exception of FreeActRec and RetCtrl, the native return address
-  // should always be the part of enterTCHelper that handles service
-  // requests. To keep things reasonable we only emit this at the beginning of
-  // a bytecode's translation, which should never begin with FreeActRec or
-  // RetCtrl.
-  always_assert(!inst->is(FreeActRec, RetCtrl));
-  auto& v = vmain();
-  auto const sf = v.makeReg();
-  v << cmpqm{v.cns(enterTCExit), *rsp, sf};
-  ifThen(v, CC_NE, sf, [&](Vout& v) {
-     v << ud2{};
-  });
-}
-
 void CodeGenerator::emitVerifyCls(IRInstruction* inst) {
   auto const objClass = inst->src(0);
   auto const objClassReg = srcLoc(inst, 0).reg();

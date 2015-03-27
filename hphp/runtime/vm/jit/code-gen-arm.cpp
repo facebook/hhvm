@@ -62,7 +62,6 @@ NOOP_OPCODE(HintStkInner)
 
 // When implemented this shouldn't be a nop, but there's no reason to make us
 // punt on everything until then.
-NOOP_OPCODE(DbgAssertRetAddr)
 NOOP_OPCODE(CountBytecode)
 
 #undef NOOP_OPCODE

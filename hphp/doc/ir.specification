@@ -1908,11 +1908,6 @@ To string conversions:
   Assert that S0 is of type T at runtime. If the assertion fails, execution is
   aborted via a hardware exception.
 
-| DbgAssertRetAddr, ND, NA, NF
-
-  Assert that the current hardware return address is the expected value. If the
-  assertion fails, execution is aborted via a hardware exception.
-
 | RBTraceEntry, ND, NA, NF
 
 | RBTraceMsg, ND, NA, NF

@@ -501,6 +501,7 @@ public:
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
   F(bool, HHIRAllocSIMDRegs,           true)                            \
+  F(bool, HHIRStressSpill,             false)                           \
   /* Region compiler flags */                                           \
   F(bool,     JitLoops,                loopsDefault())                  \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \

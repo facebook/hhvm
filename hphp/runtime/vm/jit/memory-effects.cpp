@@ -902,7 +902,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InterfaceSupportsStr:
   case IsWaitHandle:
   case DbgAssertRefCount:
-  case DbgAssertRetAddr:
   case NSame:
   case Same:
   case Gt:

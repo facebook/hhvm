@@ -99,7 +99,6 @@ struct BackEnd : public jit::BackEnd {
     sim.   set_xreg(arm::rStashedAR.code(), uintptr_t(saved_rStashedAr));
 
     // Leave space for register spilling and MInstrState.
-    sim.   set_sp(sim.sp() - kReservedRSPTotalSpace);
     assert(sim.is_on_stack(reinterpret_cast<void*>(sim.sp())));
 
     auto spOnEntry = sim.sp();

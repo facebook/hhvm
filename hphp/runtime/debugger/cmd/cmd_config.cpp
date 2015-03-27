@@ -35,6 +35,7 @@ void CmdConfig::help(DebuggerClient &client) {
       "on makes the debugger take small steps (not entire lines)",
     "set sa on/off","on makes where command display argument values",
     "set mcl limit","display at most limit source lines at breakpoints",
+    "set ctx num","display num lines of code before and after breakpoint (default=1)",
     nullptr);
   client.helpBody(
     "Use this command to change default settings. "
@@ -156,6 +157,16 @@ void CmdConfig::onClient(DebuggerClient &client) {
     }
     return;
   }
+  if (var == "ContextLines" || var == "ctx") {
+    int ctx = strtol(value.c_str(), nullptr, 10);
+    if (ctx < -1) {
+      client.error("%d is invalid for ContextLines(ctx)", ctx);
+    } else {
+      client.setDebuggerClientContextLines(ctx);
+      client.print("ContextLines(ctx) is set to %d", ctx);
+    }
+    return;
+  }
 
   listVars(client);
 }
@@ -175,6 +186,8 @@ void CmdConfig::listVars(DebuggerClient &client) {
                 client.getDebuggerClientStackArgs() ? "on" : "off");
   client.print("MaxCodeLines(mcl) %d",
                 client.getDebuggerClientMaxCodeLines());
+  client.print("ContextLines(ctx) %d",
+                client.getDebuggerClientContextLines());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1248,9 +1248,10 @@ void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
       int beginHighlightColumn = bp->m_char1;
       int endHighlightLine = bp->m_line2;
       int endHighlightColumn = bp->m_char2;
+      int contextLines = std::max(0, getDebuggerClientContextLines());
       // Lines where source listing should start and end
-      int firstLine = std::max(beginHighlightLine - 1, 1);
-      int lastLine = endHighlightLine + 1;
+      int firstLine = std::max(beginHighlightLine - contextLines, 1);
+      int lastLine = endHighlightLine + contextLines;
       int maxLines = getDebuggerClientMaxCodeLines();
 
       // If MaxCodeLines == 0: don't spew any code after a [s]tep or [n]ext
@@ -2370,6 +2371,15 @@ void DebuggerClient::loadConfig() {
        [this]() { return getDebuggerClientMaxCodeLines(); }
   ));
 
+  setDebuggerClientContextLines(Config::GetInt16(ini, config["ContextLines"], 1));
+  BIND(context_lines, IniSetting::SetAndGet<short>(
+       [this](const short& v) {
+         setDebuggerClientContextLines(v);
+         return true;
+       },
+       [this]() { return getDebuggerClientContextLines(); }
+  ));
+
   setDebuggerClientBypassCheck(Config::GetBool(ini, config["BypassAccessCheck"]));
   BIND(bypass_access_check, IniSetting::SetAndGet<bool>(
        [this](const bool& v) { setDebuggerClientBypassCheck(v); return true; },
@@ -2511,6 +2521,8 @@ void DebuggerClient::saveConfig() {
   stream << "hhvm.stack_args = " << getDebuggerClientStackArgs()
          << std::endl;
   stream << "hhvm.max_code_lines = " << getDebuggerClientMaxCodeLines()
+         << std::endl;
+  stream << "hhvm.context_lines = " << getDebuggerClientContextLines()
          << std::endl;
   stream << "hhvm.small_step = " << getDebuggerClientSmallStep()
          << std::endl;

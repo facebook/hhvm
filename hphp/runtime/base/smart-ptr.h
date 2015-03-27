@@ -34,7 +34,7 @@ namespace HPHP {
 const std::size_t kExpectedMPxOffset = 0;
 
 template<typename T>
-class SmartPtr {
+class SmartPtr final {
 public:
   SmartPtr() : m_px(nullptr) {}
   /* implicit */ SmartPtr(std::nullptr_t) : m_px(nullptr) { }
@@ -198,115 +198,6 @@ private:
   }
 
   T* m_px;  // raw pointer
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// AtomicSmartPtr
-
-/**
- * Thread-safe ref-counting smart pointer.
- */
-template<typename T>
-struct AtomicSmartPtr {
-  explicit AtomicSmartPtr(T* px = nullptr) : m_px(px) {
-    if (m_px) m_px->incAtomicCount();
-  }
-
-  template<class Y>
-  explicit AtomicSmartPtr(Y* px) : m_px(px) {
-    if (m_px) m_px->incAtomicCount();
-  }
-
-  AtomicSmartPtr(const AtomicSmartPtr<T>& src) : m_px(nullptr) {
-    operator=(src.get());
-  }
-
-  template<class Y>
-  AtomicSmartPtr(const AtomicSmartPtr<Y>& src) : m_px(nullptr) {
-    operator=(src.get());
-  }
-
-  ~AtomicSmartPtr() {
-    if (m_px && m_px->decAtomicCount() == 0) {
-      m_px->atomicRelease();
-    }
-  }
-
-  /**
-   * Assignments.
-   */
-
-  AtomicSmartPtr& operator=(const AtomicSmartPtr<T>& src) {
-    return operator=(src.m_px);
-  }
-
-  template<class Y>
-  AtomicSmartPtr& operator=(const AtomicSmartPtr<Y>& src) {
-    return operator=(src.get());
-  }
-
-  AtomicSmartPtr& operator=(T* px) {
-    if (m_px != px) {
-      if (m_px && m_px->decAtomicCount() == 0) {
-        m_px->atomicRelease();
-      }
-      m_px = px;
-      if (m_px) {
-        m_px->incAtomicCount();
-      }
-    }
-    return *this;
-  }
-
-  template<class Y>
-  AtomicSmartPtr& operator=(Y* px) {
-    T* npx = dynamic_cast<T*>(px);
-    if (m_px != npx) {
-      if (m_px && m_px->decAtomicCount() == 0) {
-        m_px->atomicRelease();
-      }
-      m_px = npx;
-      if (m_px) {
-        m_px->incAtomicCount();
-      }
-    }
-    return *this;
-  }
-
-  /**
-   * Safe bool cast.
-   */
-  explicit operator bool() const { return m_px != nullptr; }
-
-  /**
-   * Magic delegation.
-   */
-  T* operator->() const {
-    return m_px;
-  }
-
-  /**
-   * Get the raw pointer.
-   */
-  T* get() const {
-    return m_px;
-  }
-
-  /**
-   * Reset the raw pointer.
-   */
-  void reset(T* p = nullptr) {
-    operator=(p);
-  }
-
-protected:
-  void overwrite_unsafe(T* ptr) {
-    assert(!m_px);
-    m_px = ptr;
-  }
-
-private:
-  T* m_px;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

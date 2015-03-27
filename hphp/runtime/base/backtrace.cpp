@@ -42,19 +42,20 @@ const StaticString
 static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
   if (fp && fp->func() && fp->resumed() && fp->func()->isAsyncFunction()) {
     c_WaitableWaitHandle* currentWaitHandle = frame_afwh(fp);
+    if (currentWaitHandle->isFinished()) {
+      /*
+       * It's possible in very rare cases (it will return a truncated stack):
+       * 1) async function which WaitHandle is not referenced by anything
+       *      else finishes
+       * 2) its return value is an object with destructor
+       * 3) this destructor gets called as part of destruction of the
+       *      WaitHandleobject, which happens right before FP is adjusted
+      */
+      return nullptr;
+    }
+
     auto const contextIdx = currentWaitHandle->getContextIdx();
     while (currentWaitHandle != nullptr) {
-      if (currentWaitHandle->isFinished()) {
-        /*
-         * It's possible in very rare cases (it will return a truncated stack):
-         * 1) async function which WaitHandle is not referenced by anything
-         *      else finishes
-         * 2) its return value is an object with destructor
-         * 3) this destructor gets called as part of destruction of the
-         *      WaitHandleobject, which happens right before FP is adjusted
-        */
-        break;
-      }
       auto p = currentWaitHandle->getParentChain().firstInContext(contextIdx);
       if (p == nullptr) break;
 

@@ -89,7 +89,7 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
   if (!baseClass) return PropInfo();
 
   auto keyType = ni.inputs[iInd]->rtt;
-  if (!keyType.isConst(Type::Str)) return PropInfo();
+  if (!keyType.hasConstVal(Type::Str)) return PropInfo();
   auto const name = keyType.strVal();
 
   // If we are not in repo-authoriative mode, we need to check that
@@ -1338,7 +1338,7 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
   irgen::prepareForNextHHBC(
     hts,
     &ni,
-    ni.source.offset(),
+    ni.source,
     ni.endsRegion && !irgen::isInlining(hts)
   );
 
@@ -1356,7 +1356,7 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
                                          ni.offset(), ni.toString(),
                                          show(hts)));
 
-  irgen::ringbuffer(hts, Trace::RBTypeBytecodeStart, ni.source, 2);
+  irgen::ringbufferEntry(hts, Trace::RBTypeBytecodeStart, ni.source, 2);
   irgen::emitIncStat(hts, Stats::Instr_TC, 1);
   if (Trace::moduleEnabledRelease(Trace::llvm_count, 1) ||
       RuntimeOption::EvalJitLLVMCounters) {

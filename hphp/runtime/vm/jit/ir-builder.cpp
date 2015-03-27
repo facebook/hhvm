@@ -414,7 +414,7 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
   if (func->isStatic()) {
     if (fpInst->is(DefInlineFP)) {
       auto const ctx = fpInst->extra<DefInlineFP>()->ctx;
-      if (ctx->isConst(Type::Cls)) {
+      if (ctx->hasConstVal(Type::Cls)) {
         inst->convertToNop();
         return m_unit.cns(ConstCctx::cctx(ctx->clsVal()));
       }
@@ -472,7 +472,8 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   inst->setTypeParam(std::min(type, inst->typeParam()));
 
   if (typeMightRelax()) return nullptr;
-  if (inst->typeParam().isConst()) {
+  if (inst->typeParam().hasConstVal() ||
+      inst->typeParam().subtypeOfAny(Type::Uninit, Type::InitNull)) {
     return m_unit.cns(inst->typeParam());
   }
 
@@ -573,7 +574,8 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   inst->setTypeParam(std::min(type, inst->typeParam()));
 
   if (typeMightRelax()) return nullptr;
-  if (inst->typeParam().isConst()) {
+  if (inst->typeParam().hasConstVal() ||
+      inst->typeParam().subtypeOfAny(Type::Uninit, Type::InitNull)) {
     return m_unit.cns(inst->typeParam());
   }
 
@@ -616,8 +618,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
  */
 SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
                                 CloneFlag doClone,
-                                Block* srcBlock,
-                                const folly::Optional<IdomVector>& idoms) {
+                                Block* srcBlock) {
   static DEBUG_ONLY __thread int instNest = 0;
   if (debug) ++instNest;
   SCOPE_EXIT { if (debug) --instNest; };
@@ -760,18 +761,18 @@ void IRBuilder::reoptimize() {
   // handle the CFG's back-edges correctly.
   auto const use_fixed_point = RuntimeOption::EvalJitLoops;
 
-  auto blocksIds = rpoSortCfgWithIds(m_unit);
-  auto const idoms = findDominators(m_unit, blocksIds);
+  auto const rpoBlocks = rpoSortCfg(m_unit);
   boost::dynamic_bitset<> reachable(m_unit.numBlocks());
   reachable.set(m_unit.entry()->id());
 
   if (use_fixed_point) {
-    m_state.computeFixedPoint(blocksIds);
+    auto const rpoIDs = numberBlocks(m_unit, rpoBlocks);
+    m_state.computeFixedPoint(rpoBlocks, rpoIDs);
   } else {
     m_state.setLegacyReoptimize();
   }
 
-  for (auto block : blocksIds.blocks) {
+  for (auto block : rpoBlocks) {
     ITRACE(5, "reoptimize entering block: {}\n", block->id());
     Indent _i;
 
@@ -799,7 +800,7 @@ void IRBuilder::reoptimize() {
       assert(inst->marker().valid());
       setCurMarker(inst->marker());
 
-      auto const tmp = optimizeInst(inst, CloneFlag::No, block, idoms);
+      auto const tmp = optimizeInst(inst, CloneFlag::No, block);
       SSATmp* dst = inst->dst(0);
 
       if (dst != tmp) {

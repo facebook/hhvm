@@ -112,12 +112,6 @@
       - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFileStorageTest.php
       # Depends on previous
       - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFastFileStorageTest.php
-  ezpublish-kernel:
-    url: https://github.com/ezsystems/ezpublish-kernel.git
-    branch: v2014.07.0
-    commit: b7f0a2fd5750bbc11ce5bd6eb6c92d3180834463
-    install_root: ezpublish-kernel
-    test_root: ezpublish-kernel
   facebookphpsdk:
     # v3.2.3 from facebook/facebook-php-sdk and
     # https://github.com/facebook/facebook-php-sdk/pull/184
@@ -388,8 +382,8 @@
     test_root: jshrink
   mockery:
     url: https://github.com/padraic/mockery.git
-    branch: "0.9.2"
-    commit: 95a4855380dc70176c51807c678fb3bd6198529a
+    branch: "0.9.3"
+    commit: 686f85fa5b3b079cc0157d7cd3e9adb97f0b41e1
     install_root: mockery
     test_root: mockery
   monolog:

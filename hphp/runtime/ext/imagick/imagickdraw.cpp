@@ -116,7 +116,7 @@ static bool HHVM_METHOD(ImagickDraw, comment,
 static bool HHVM_METHOD(ImagickDraw, composite,
                         int64_t compose,
                         double x, double y, double width, double height,
-                        const Object compositeWand) {
+                        const Object& compositeWand) {
   auto wand = getDrawingWandResource(this_);
   Object compositeWandObj(compositeWand);
   auto magick = getMagickWandResource(compositeWandObj);

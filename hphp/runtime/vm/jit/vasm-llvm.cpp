@@ -19,6 +19,8 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/disasm.h"
 
+#include "hphp/runtime/base/arch.h"
+
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
@@ -998,6 +1000,10 @@ struct LLVMEmitter {
     );
   }
 
+  llvm::Value* cnsDbl(double d) {
+    return llvm::ConstantFP::get(m_irb.getDoubleTy(), d);
+  }
+
   /*
    * Truncate val to i<bits>
    */
@@ -1866,12 +1872,14 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     defineValue(dests[0], callInst);
     break;
   case DestType::TV: {
-    assert(dests.size() == 2);
     static_assert(offsetof(TypedValue, m_data) == 0, "");
     static_assert(offsetof(TypedValue, m_type) == 8, "");
+    assert(dests.size() <= 2 && dests.size() >= 1);
     defineValue(dests[0], m_irb.CreateExtractValue(callInst, 0)); // m_data
-    auto type = m_irb.CreateExtractValue(callInst, 1);
-    defineValue(dests[1], zext(type, 64)); // m_type
+    if (dests.size() == 2) {
+      auto type = m_irb.CreateExtractValue(callInst, 1);
+      defineValue(dests[1], zext(type, 64)); // m_type
+    }
     break;
   }
   case DestType::SIMD: {
@@ -2578,12 +2586,39 @@ void LLVMEmitter::emit(const shrqi& inst) {
 }
 
 void LLVMEmitter::emit(const sqrtsd& inst) {
-  auto sqrtFunc = llvm::Intrinsic::getDeclaration(
-    m_module.get(),
-    llvm::Intrinsic::sqrt,
-    std::vector<llvm::Type*>{m_irb.getDoubleTy()}
-  );
-  defineValue(inst.d, m_irb.CreateCall(sqrtFunc, asDbl(value(inst.s))));
+  // The square root of a negative number in vasm is NaN, but the llvm sqrt
+  // intrinsic is undefined for negative inputs. On x86, we can use an sse2
+  // intrinsic to get the right behavior with a single instruction, but on
+  // other platforms we emit a runtime check. We also skip the x64-specific
+  // path when the input is a constant, since llvm doesn't know how to constant
+  // fold the sse2 intrinsic.
+
+  auto dblVal = asDbl(value(inst.s));
+  if (arch() == Arch::X64 && !llvm::isa<llvm::Constant>(dblVal)) {
+    auto sqrtFunc = llvm::Intrinsic::getDeclaration(
+      m_module.get(),
+      llvm::Intrinsic::x86_sse2_sqrt_sd
+    );
+
+    llvm::Value* vec = llvm::UndefValue::get(
+      llvm::VectorType::get(m_irb.getDoubleTy(), 2));
+    vec = m_irb.CreateInsertElement(vec, dblVal, cns(0));
+    vec = m_irb.CreateCall(sqrtFunc, vec);
+    defineValue(inst.d, m_irb.CreateExtractElement(vec, cns(0)));
+  } else {
+    auto sqrtFunc = llvm::Intrinsic::getDeclaration(
+      m_module.get(),
+      llvm::Intrinsic::sqrt,
+      std::vector<llvm::Type*>{m_irb.getDoubleTy()}
+    );
+
+    auto lt = m_irb.CreateFCmpOLT(dblVal, cnsDbl(0.0));
+    auto NaN = llvm::ConstantFP::get(
+      m_context, llvm::APFloat::getNaN(llvm::APFloat::IEEEdouble));
+    defineValue(inst.d,
+                m_irb.CreateSelect(lt, NaN,
+                                   m_irb.CreateCall(sqrtFunc, dblVal)));
+  }
 }
 
 void LLVMEmitter::emit(const store& inst) {

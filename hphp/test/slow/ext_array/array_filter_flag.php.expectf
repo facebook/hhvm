@@ -1,0 +1,23 @@
+string(1) "x"
+int(10)
+string(1) "y"
+int(20)
+string(1) "x"
+string(1) "y"
+int(10)
+int(20)
+int(10)
+int(20)
+
+Warning: array_filter() expects at most 3 parameters in %s on line 26
+bool(true)
+string(1) "x"
+int(10)
+string(1) "y"
+int(20)
+string(1) "x"
+string(1) "y"
+int(10)
+int(20)
+int(10)
+int(20)

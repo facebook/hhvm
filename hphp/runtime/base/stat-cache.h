@@ -28,7 +28,7 @@
 #include <tbb/concurrent_hash_map.h>
 
 #include "hphp/util/lock.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/atomic-shared-ptr.h"
 #include "hphp/runtime/base/atomic-countable.h"
 
 namespace HPHP {
@@ -36,7 +36,7 @@ namespace HPHP {
 
 struct StatCache {
   struct Node;
-  typedef AtomicSmartPtr<Node> NodePtr;
+  typedef AtomicSharedPtr<Node> NodePtr;
   typedef tbb::concurrent_hash_map<std::string, NodePtr,
                                    stringHashCompare> NameNodeMap;
   typedef hphp_hash_map<int, NodePtr, int64_hash> WatchNodeMap;

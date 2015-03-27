@@ -210,7 +210,7 @@ void checkRefs(HTS& env,
 
     if (i == 0) {
       nParams = cns(env, 64);
-    } else if (!nParams || nParams->isConst()) {
+    } else if (!nParams || nParams->hasConstVal()) {
       nParams = gen(env, LdFuncNumParams, funcPtr);
     }
 

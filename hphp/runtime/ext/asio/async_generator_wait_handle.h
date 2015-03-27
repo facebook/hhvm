@@ -46,6 +46,9 @@ class c_AsyncGeneratorWaitHandle final : public c_ResumableWaitHandle {
   void t___construct();
 
  public:
+  static constexpr ptrdiff_t blockableOff() {
+    return offsetof(c_AsyncGeneratorWaitHandle, m_blockable);
+  }
   static c_AsyncGeneratorWaitHandle* Create(c_AsyncGenerator* gen,
                                             c_WaitableWaitHandle* child);
   void resume();
@@ -69,9 +72,7 @@ class c_AsyncGeneratorWaitHandle final : public c_ResumableWaitHandle {
 
   // valid if STATE_SCHEDULED || STATE_BLOCKED
   c_WaitableWaitHandle* m_child;
-
-  static const int8_t STATE_SCHEDULED = 3;
-  static const int8_t STATE_RUNNING   = 4;
+  AsioBlockable m_blockable;
 };
 
 inline c_AsyncGeneratorWaitHandle* c_WaitHandle::asAsyncGenerator() {

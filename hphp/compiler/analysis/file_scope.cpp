@@ -253,10 +253,6 @@ void FileScope::analyzeProgram(AnalysisResultPtr ar) {
   resolve_lambda_names(ar, shared_from_this());
 }
 
-bool FileScope::checkClass(const string &cls) {
-  return m_redecBases.find(cls) != m_redecBases.end();
-}
-
 void FileScope::visit(AnalysisResultPtr ar,
                       void (*cb)(AnalysisResultPtr, StatementPtr, void*),
                       void *data) {
@@ -299,17 +295,6 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
   fs = pseudoMain;
   m_pseudoMain = pseudoMain;
   return pseudoMain;
-}
-
-string FileScope::outputFilebase() const {
-  string file = m_fileName;
-  string out;
-  if (file.size() > 4 && file.substr(file.length() - 4) == ".php") {
-    out = file.substr(0, file.length() - 4);
-  } else {
-    out = file + ".nophp";
-  }
-  return Option::MangleFilename(out, false);
 }
 
 static void getFuncScopesSet(BlockScopeRawPtrQueue &v,

@@ -45,7 +45,6 @@ private:
   ExpressionPtr m_object;
   bool m_nullsafe;
   bool m_xhpGetAttr;
-  int m_objTemp;
 
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);

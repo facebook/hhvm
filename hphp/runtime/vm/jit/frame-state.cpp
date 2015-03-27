@@ -773,13 +773,14 @@ const StackState& FrameStateMgr::stackState(IRSPOffset offset) const {
   return const_cast<FrameStateMgr&>(*this).stackState(offset);
 }
 
-void FrameStateMgr::computeFixedPoint(const BlocksWithIds& blocks) {
+void FrameStateMgr::computeFixedPoint(const BlockList& blocks,
+                                      const BlockIDs& rpoIDs) {
   ITRACE(4, "FrameStateMgr computing fixed-point\n");
 
   assert(m_status == Status::None);  // we should have a clear state
   m_status = Status::RunningFixedPoint;
 
-  auto const entry = blocks.blocks[0];
+  auto const entry = blocks[0];
   DEBUG_ONLY auto const entryMarker = entry->front().marker();
   // So that we can actually call startBlock on the entry block.
   assert(m_stack.size() == 1);
@@ -788,19 +789,19 @@ void FrameStateMgr::computeFixedPoint(const BlocksWithIds& blocks) {
 
   // Use a worklist of RPO ids. That way, when we remove an active item to
   // process, we'll always pick the block earliest in RPO.
-  auto worklist = dataflow_worklist<uint32_t>(blocks.blocks.size());
+  auto worklist = dataflow_worklist<uint32_t>(blocks.size());
 
   // Start with entry.
   worklist.push(0);
 
   while (!worklist.empty()) {
     auto const rpoId = worklist.pop();
-    auto const block = blocks.blocks[rpoId];
+    auto const block = blocks[rpoId];
 
     ITRACE(5, "Processing block {}\n", block->id());
 
     auto const insert = [&] (Block* block) {
-      if (block != nullptr) worklist.push(blocks.ids[block]);
+      if (block != nullptr) worklist.push(rpoIDs[block]);
     };
 
     startBlock(block);

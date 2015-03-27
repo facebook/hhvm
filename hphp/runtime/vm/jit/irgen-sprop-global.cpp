@@ -64,10 +64,10 @@ SSATmp* ldClsPropAddr(HTS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
    * class itself.
    */
   bool const sPropKnown = [&] {
-    if (!ssaName->isConst()) return false;
+    if (!ssaName->hasConstVal()) return false;
     auto const propName = ssaName->strVal();
 
-    if (!ssaCls->isConst()) return false;
+    if (!ssaCls->hasConstVal()) return false;
     auto const cls = ssaCls->clsVal();
     if (!classIsPersistentOrCtxParent(env, cls)) return false;
 
@@ -350,4 +350,3 @@ void emitInitProp(HTS& env, const StringData* propName, InitPropOp op) {
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

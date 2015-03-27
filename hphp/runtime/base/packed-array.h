@@ -126,6 +126,7 @@ struct PackedArray {
   static uint32_t getMaxCapInPlaceFast(uint32_t cap);
 
   static size_t heapSize(const ArrayData*);
+  template<class Marker> static void scan(const ArrayData*, Marker&);
 
 private:
   static ArrayData* Grow(ArrayData*);
@@ -137,26 +138,7 @@ private:
   static ArrayData* CopyAndResizeIfNeededSlow(const ArrayData*);
   static ArrayData* CopyAndResizeIfNeeded(const ArrayData*);
   static ArrayData* ResizeIfNeeded(ArrayData*);
-
   static SortFlavor preSort(ArrayData*);
-public:
-  enum class Reason : uint8_t {
-    kForeachByRef,
-    kTakeByRef,
-    kSetRef,
-    kAppendRef,
-    kRemoveInt,
-    kRemoveStr,
-    kOutOfOrderIntKey,
-    kGetStr,
-    kSetStr,
-    kNumericString,
-    kPlusNotSupported,
-    kMergeNotSupported,
-    kSortNotSupported
-  };
-  static void downgradeAndWarn(ArrayData* ad, const Reason r);
-  static void warnUsage(const Reason r);
 };
 
 //////////////////////////////////////////////////////////////////////

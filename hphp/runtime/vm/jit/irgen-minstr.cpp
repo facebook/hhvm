@@ -510,7 +510,7 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
             if (key->isA(Type::Int)) {
               return isPacked ? SimpleOp::PackedArray
                               : SimpleOp::ProfiledPackedArray;
-            } else if (key->isConst(Type::StaticStr)) {
+            } else if (key->hasConstVal(Type::StaticStr)) {
               if (!isStruct || !baseType.arrSpec().shape()) {
                 return SimpleOp::ProfiledStructArray;
               }
@@ -1285,7 +1285,7 @@ SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
     return unboxed;
   };
 
-  if (key->isConst() &&
+  if (key->hasConstVal() &&
       packedArrayBoundsCheckUnnecessary(base->type(), key->intVal())) {
     return doLdElem();
   }
@@ -1311,7 +1311,7 @@ SSATmp* emitStructArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
   assert(base->isA(Type::Arr));
   assert(base->type().arrSpec().kind() == ArrayData::kStructKind);
   assert(base->type().arrSpec().shape());
-  assert(key->isConst(Type::Str));
+  assert(key->hasConstVal(Type::Str));
   assert(key->strVal()->isStatic());
 
   const auto keyStr = key->strVal();
@@ -1429,7 +1429,7 @@ void emitStringGet(MTS& env, SSATmp* key) {
 
 void emitVectorGet(MTS& env, SSATmp* key) {
   assert(key->isA(Type::Int));
-  if (key->isConst() && key->intVal() < 0) {
+  if (key->hasConstVal() && key->intVal() < 0) {
     PUNT(emitVectorGet);
   }
   auto const size = gen(env, LdVectorSize, env.base.value);
@@ -1446,7 +1446,7 @@ void emitPairGet(MTS& env, SSATmp* key) {
   assert(key->isA(Type::Int));
   static_assert(sizeof(TypedValue) == 16,
                 "TypedValue size expected to be 16 bytes");
-  if (key->isConst()) {
+  if (key->hasConstVal()) {
     auto idx = key->intVal();
     if (idx < 0 || idx > 1) {
       PUNT(emitPairGet);
@@ -1530,7 +1530,7 @@ void emitArraySet(MTS& env, SSATmp* key, SSATmp* value) {
 
 void emitVectorSet(MTS& env, SSATmp* key, SSATmp* value) {
   assert(key->isA(Type::Int));
-  if (key->isConst() && key->intVal() < 0) {
+  if (key->hasConstVal() && key->intVal() < 0) {
     PUNT(emitVectorSet); // will throw
   }
   auto const size = gen(env, LdVectorSize, env.base.value);

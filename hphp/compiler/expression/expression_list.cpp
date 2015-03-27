@@ -36,10 +36,12 @@ using namespace HPHP;
 
 ExpressionList::ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                                ListKind kind)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ExpressionList)),
-    m_arrayElements(false), m_collectionType(0), m_argUnpack(false),
-    m_kind(kind) {
-}
+  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ExpressionList))
+  , m_arrayElements(false)
+  , m_collectionType(Collection::InvalidType)
+  , m_argUnpack(false)
+  , m_kind(kind)
+{}
 
 /*
  * We can end up with chains of canonPtrs keeping the
@@ -168,7 +170,9 @@ bool ExpressionList::containsDynamicConstant(AnalysisResultPtr ar) const {
 }
 
 bool ExpressionList::isScalarArrayPairs() const {
-  if (!m_arrayElements || m_collectionType) return false;
+  if (!m_arrayElements || m_collectionType != Collection::InvalidType) {
+    return false;
+  }
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     ArrayPairExpressionPtr exp =
       dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
@@ -281,27 +285,19 @@ void ExpressionList::stripConcat() {
   }
 }
 
-void ExpressionList::markParam(int p, bool noRefWrapper) {
+void ExpressionList::markParam(int p) {
   ExpressionPtr param = (*this)[p];
   if (param->hasContext(Expression::InvokeArgument)) {
-    if (noRefWrapper) {
-      param->setContext(Expression::NoRefWrapper);
-    } else {
-      param->clearContext(Expression::NoRefWrapper);
-    }
   } else if (!param->hasContext(Expression::RefParameter)) {
     param->setContext(Expression::InvokeArgument);
     param->setContext(Expression::RefValue);
-    if (noRefWrapper) {
-      param->setContext(Expression::NoRefWrapper);
-    }
   }
   param->setArgNum(p);
 }
 
-void ExpressionList::markParams(bool noRefWrapper) {
+void ExpressionList::markParams() {
   for (int i = 0; i < getCount(); i++) {
-    markParam(i, noRefWrapper);
+    markParam(i);
   }
 }
 
@@ -498,7 +494,7 @@ void ExpressionList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 unsigned int ExpressionList::checkLitstrKeys() const {
-  assert(m_arrayElements && !m_collectionType);
+  assert(m_arrayElements && m_collectionType == Collection::InvalidType);
   std::set<string> keys;
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     ArrayPairExpressionPtr ap =

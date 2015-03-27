@@ -69,10 +69,12 @@ struct FreeStubList {
     uint64_t  m_freed;
   };
   static const uint64_t kStubFree = 0;
-  StubNode* m_list;
   FreeStubList() : m_list(nullptr) {}
+  TCA peek() { return (TCA)m_list; }
   TCA maybePop();
   void push(TCA stub);
+ private:
+  StubNode* m_list;
 };
 
 struct PendingFixup {
@@ -158,6 +160,8 @@ struct UsageInfo {
   size_t m_capacity;
   bool m_global;
 } ;
+
+struct TransRelocInfo;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -353,6 +357,32 @@ public:
    */
   void handleStackOverflow(ActRec* stashedAR);
 
+  /*
+    relocate using data from perf.
+    If time is non-negative, its used as the time to run perf record.
+    If time is -1, we pick a random subset of translations, and relocate them
+    in a random order.
+    If time is -2, we relocate all of the translations.
+
+    Currently we don't ever relocate anything from frozen (or prof). We also
+    don't relocate the cold portion of translations; but we still need to know
+    where those are in order to relocate back-references to the code that was
+    relocated.
+  */
+  void liveRelocate(int time);
+  void liveRelocate(bool random) { return liveRelocate(random ? -1 : 20); }
+  void recordPerfRelocMap(
+    TCA start, TCA end,
+    TCA coldStart, TCA coldEnd,
+    SrcKey sk, int argNum,
+    const GrowableVector<IncomingBranch> &incomingBranches,
+    CodeGenFixups& fixups);
+  String perfRelocMapInfo(
+    TCA start, TCA end,
+    TCA coldStart, TCA coldEnd,
+    SrcKey sk, int argNum,
+    const GrowableVector<IncomingBranch> &incomingBranches,
+    CodeGenFixups& fixups);
 private:
   /*
    * Service request handlers.
@@ -386,6 +416,13 @@ private:
 
   void invalidateSrcKey(SrcKey sk);
   void invalidateFuncProfSrcKeys(const Func* func);
+
+  void readRelocations(
+    FILE* relocFile,
+    std::set<TCA>* liveStubs,
+    void (*callback)(TransRelocInfo&& tri, void* data),
+    void* data);
+  void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& hot);
 
   void recordGdbTranslation(SrcKey sk, const Func* f,
                             const CodeBlock& cb,

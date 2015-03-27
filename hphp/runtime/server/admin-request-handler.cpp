@@ -225,6 +225,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/dump-array-info: dump array tracer info to /tmp/array_tracer_dump\n"
 
         "/start-stacktrace-profiler: set enable_stacktrace_profiler to true\n"
+        "/relocate:        relocate translations\n"
+        "    random        optional, default false, relocate random subset\n"
+        "       all        optional, default false, relocate all translations\n"
+        "      time        optional, default 20 (seconds)\n"
 
 #ifdef GOOGLE_CPU_PROFILER
         "/prof-cpu-on:     turn on CPU profiler\n"
@@ -417,6 +421,22 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
     if (cmd == "start-stacktrace-profiler") {
       enable_stacktrace_profiler = true;
+      transport->sendString("OK\n");
+      break;
+    }
+
+    if (cmd == "relocate") {
+      auto randomParam = transport->getParam("random");
+      auto allParam = transport->getParam("all");
+      auto time = transport->getIntParam("time");
+      bool random = randomParam == "true" || randomParam == "1";
+      if (allParam == "true" || allParam == "1") {
+        jit::mcg->liveRelocate(-2);
+      } else if (random || time == 0) {
+        jit::mcg->liveRelocate(random);
+      } else {
+        jit::mcg->liveRelocate(time);
+      }
       transport->sendString("OK\n");
       break;
     }

@@ -20,7 +20,6 @@
 #include "hphp/runtime/ext/asio/asio_blockable.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/timer.h"
 
@@ -53,8 +52,8 @@ Object c_SleepWaitHandle::ti_create(int64_t usecs) {
 
 void c_SleepWaitHandle::initialize(int64_t usecs) {
   auto const session = AsioSession::Get();
-  setContextIdx(session->getCurrentContextIdx());
   setState(STATE_WAITING);
+  setContextIdx(session->getCurrentContextIdx());
   m_waketime =
     AsioSession::TimePoint::clock::now() +
     std::chrono::microseconds(usecs);
@@ -107,8 +106,8 @@ void c_SleepWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
 
 void c_SleepWaitHandle::exitContext(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx));
-  assert(getContextIdx() == ctx_idx);
   assert(getState() == STATE_WAITING);
+  assert(getContextIdx() == ctx_idx);
 
   // Move us to the parent context.
   setContextIdx(getContextIdx() - 1);

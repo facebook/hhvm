@@ -20,7 +20,6 @@
 #include "hphp/runtime/ext/ext_generator.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
-#include "hphp/runtime/vm/jit/irgen-ringbuffer.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
@@ -34,7 +33,7 @@ void suspendHookE(HTS& env,
                   SSATmp* frame,
                   SSATmp* resumableAR,
                   SSATmp* resumable) {
-  ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
+  ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
   ifThen(
     env,
     [&] (Block* taken) {
@@ -48,7 +47,7 @@ void suspendHookE(HTS& env,
 }
 
 void suspendHookR(HTS& env, SSATmp* frame, SSATmp* objOrNullptr) {
-  ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
+  ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
   ifThen(
     env,
     [&] (Block* taken) {

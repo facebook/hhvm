@@ -166,73 +166,6 @@ TypePtr Type::Intersection(AnalysisResultConstPtr ar,
   return res;
 }
 
-bool Type::IsMappedToVariant(TypePtr t) {
-  if (!t) return true;
-  switch (t->m_kindOf) {
-  case KindOfBoolean:
-  case KindOfInt32  :
-  case KindOfInt64  :
-  case KindOfDouble :
-  case KindOfString :
-  case KindOfArray  :
-  case KindOfObject :
-  case KindOfResource:
-    return false;
-  default: break;
-  }
-  return true;
-}
-
-bool Type::IsCastNeeded(AnalysisResultConstPtr ar, TypePtr from, TypePtr to) {
-  if (SameType(from, to)) return false;
-  if (!from->m_kindOf) return true;
-  if (!to->m_kindOf) return true;
-
-  // Special case: all Sequence operations are implemented on both String and
-  // Array, and vice versa, therefore no need to cast between these types.
-  if ((from->m_kindOf == KindOfSequence && to->mustBe(KindOfSequence))
-   || (to->m_kindOf == KindOfSequence && from->mustBe(KindOfSequence))) {
-    return false;
-  }
-
-  switch (to->m_kindOf) {
-  case KindOfVariant:
-  case KindOfNumeric:
-  case KindOfPrimitive:
-  case KindOfPlusOperand:
-  case KindOfSome:
-  case KindOfSequence:
-  case KindOfAny:
-    // Currently these types are all mapped to Variant in runtime/base, and
-    // that's why these casting are not needed.
-    return false;
-  case KindOfObject:
-    if (from->m_kindOf == KindOfObject && to->m_name.empty() &&
-        !from->m_name.empty()) return false;
-    else return true;
-  default:
-    // if we don't have a specific type narrowed down, then
-    // it will be a Variant at at runtime, so no cast is needed.
-    return IsExactType(to->m_kindOf);
-  }
-}
-
-bool Type::IsCoercionNeeded(AnalysisResultConstPtr ar, TypePtr t1, TypePtr t2) {
-  if (t1->m_kindOf == KindOfSome ||
-      t1->m_kindOf == KindOfAny ||
-      t2->m_kindOf == KindOfSome ||
-      t2->m_kindOf == KindOfAny) return true;
-
-  // special case: we always coerce to a specific object type so we can
-  // type checking properties and methods
-  if (t1->m_kindOf == KindOfObject && !t1->m_name.empty() &&
-      t2->m_kindOf == KindOfObject && t2->m_name.empty()) {
-    return true;
-  }
-
-  return !Type::IsLegalCast(ar, t1, t2);
-}
-
 TypePtr Type::Coerce(AnalysisResultConstPtr ar, TypePtr type1, TypePtr type2) {
   if (SameType(type1, type2)) return type1;
   if (type1->m_kindOf == KindOfVariant ||
@@ -372,126 +305,6 @@ bool Type::IsExactType(KindOf kindOf) {
   return kindOf && !(kindOf & (kindOf-1));
 }
 
-bool Type::HasFastCastMethod(TypePtr t) {
-  switch (t->getKindOf()) {
-  case Type::KindOfBoolean:
-  case Type::KindOfInt32:
-  case Type::KindOfInt64:
-  case Type::KindOfDouble:
-  case Type::KindOfString:
-  case Type::KindOfArray:
-  case Type::KindOfObject:
-  case Type::KindOfResource:
-    return true;
-  default: break;
-  }
-  return false;
-}
-
-string Type::GetFastCastMethod(
-    TypePtr dst, bool allowRef, bool forConst) {
-  const char *prefix0 = allowRef ? "to" : "as";
-  const char *prefix1 = forConst ? "C"  : "";
-  const char *prefix2 = "Ref";
-  const char *type ATTRIBUTE_UNUSED;
-
-  switch (dst->getKindOf()) {
-  case Type::KindOfBoolean:
-  case Type::KindOfInt32:
-  case Type::KindOfInt64:
-  case Type::KindOfDouble:
-    prefix0 = "to";
-    prefix1 = "";
-    prefix2 = "Val";
-    break;
-  default: break;
-  }
-
-  switch (dst->getKindOf()) {
-  case Type::KindOfBoolean:
-    type = "Boolean";
-    break;
-  case Type::KindOfInt32:
-  case Type::KindOfInt64:
-    type = "Int64";
-    break;
-  case Type::KindOfDouble:
-    type = "Double";
-    break;
-  case Type::KindOfString:
-    type = "Str";
-    break;
-  case Type::KindOfArray:
-    type = "Arr";
-    break;
-  case Type::KindOfObject:
-    type = "Obj";
-    break;
-  case Type::KindOfResource:
-    type = "Res";
-    break;
-  default:
-    type = ""; // make the compiler happy
-    assert(false);
-    break;
-  }
-
-  return string(prefix0) + string(prefix1) + string(type) + string(prefix2);
-}
-
-/* This new IsLegalCast returns true in a few cases where the old version
- * (which was basically a hardcoded truth table) returned false; it seems
- * like "true" is in fact the right thing to return. The cases that appear
- * when compiling www are:
- *   Sequence -> Array
- *   PlusOperand -> Array
- *   String -> PlusOperand
- *   Boolean -> PlusOperand
- */
-
-bool Type::IsLegalCast(AnalysisResultConstPtr ar, TypePtr from, TypePtr to) {
-  if (!from->m_kindOf) return true;
-
-  // since both 'from' and 'to' represent sets of types, we do
-  // this by computing the set of types that we could possibly cast 'from'
-  // to, and then determining whether that overlaps with 'to'.
-  int canCastTo = KindOfBoolean | from->m_kindOf;
-
-  if (from->m_kindOf & KindOfVoid) canCastTo |= KindOfVoid;
-
-  // Boolean, Numeric, and String can all be cast among each other
-  if (from->m_kindOf & (KindOfBoolean | KindOfNumeric | KindOfString)) {
-    canCastTo |= KindOfNumeric | KindOfString;
-  }
-
-  if (from->m_kindOf & KindOfObject) {
-    // Objects can only cast to string if they have __tostring
-    if (from->m_name.empty()) {
-      canCastTo |= KindOfString; // we don't know which class it is
-    } else {
-      ClassScopePtr cls = ar->findClass(from->m_name);
-      if (!cls || cls->isRedeclaring() ||
-          cls->findFunction(ar, "__tostring", true)) {
-        canCastTo |= KindOfString;
-      }
-    }
-
-    // can only cast between objects if there's a subclass relation
-    if ((to->m_kindOf & KindOfObject)  && !to->m_name.empty() &&
-        !from->m_name.empty() && to->m_name != from->m_name) {
-      ClassScopePtr cls = ar->findClass(from->m_name);
-      if (cls && (cls->isRedeclaring() ||
-                  !cls->derivesFrom(ar, to->m_name, true, true))) {
-        canCastTo &= ~KindOfObject;
-      }
-
-    }
-  }
-
-  bool overlap = (to->m_kindOf & canCastTo);
-  return overlap;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 Type::Type(KindOf kindOf) : m_kindOf(kindOf) {
@@ -516,17 +329,8 @@ bool Type::isInteger() const {
   return false;
 }
 
-bool Type::isStandardObject() const {
-  return m_kindOf == KindOfObject && m_name.empty();
-}
-
 bool Type::isSpecificObject() const {
   return m_kindOf == KindOfObject && !m_name.empty();
-}
-
-bool Type::isNonConvertibleType() const {
-  return m_kindOf == KindOfObject || m_kindOf == KindOfResource ||
-         m_kindOf == KindOfArray;
 }
 
 bool Type::isNoObjectInvolved() const {
@@ -536,48 +340,6 @@ bool Type::isNoObjectInvolved() const {
     return false;
   else
     return true;
-}
-
-TypePtr Type::combinedArithmeticType(TypePtr t1, TypePtr t2) {
-  KindOf kind = KindOfAny;
-
-  if ((t1 && t1->is(Type::KindOfArray)) ||
-      (t2 && t2->is(Type::KindOfArray))) {
-    return TypePtr();
-  }
-
-  if (t1 && t1->isPrimitive()) {
-    if (t2 && t2->isPrimitive()) {
-      if (t2->getKindOf() > t1->getKindOf()) {
-        kind = t2->getKindOf();
-      } else {
-        kind = t1->getKindOf();
-      }
-    } else if (t1->is(KindOfDouble)) {
-      kind = KindOfDouble;
-    } else {
-      kind = KindOfNumeric;
-    }
-  } else if (t2 && t2->isPrimitive()) {
-    if (t2->is(KindOfDouble)) {
-      kind = KindOfDouble;
-    } else {
-      kind = KindOfNumeric;
-    }
-  } else if ((t1 && t1->mustBe(KindOfNumeric)) ||
-             (t2 && t2->mustBe(KindOfNumeric))) {
-    kind = KindOfNumeric;
-  }
-
-  if (kind < KindOfInt64) {
-    kind = KindOfInt64;
-  }
-
-  if (kind != KindOfAny) {
-    return GetType(kind);
-  }
-
-  return TypePtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -594,16 +356,6 @@ ClassScopePtr Type::getClass(AnalysisResultConstPtr ar,
     }
   }
   return cls;
-}
-
-std::string Type::getPHPName() {
-  switch (m_kindOf) {
-  case KindOfArray:       return "array";
-  case KindOfObject:      return m_name;
-  case KindOfResource:    return "resource";
-  default: break;
-  }
-  return "";
 }
 
 std::string Type::toString() const {

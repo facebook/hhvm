@@ -237,7 +237,7 @@ Type allocObjReturn(const IRInstruction* inst) {
       return Type::ExactObj(inst->extra<NewInstanceRaw>()->cls);
 
     case AllocObj:
-      return inst->src(0)->isConst()
+      return inst->src(0)->hasConstVal()
         ? Type::ExactObj(inst->src(0)->clsVal())
         : Type::Obj;
 
@@ -247,30 +247,39 @@ Type allocObjReturn(const IRInstruction* inst) {
 }
 
 Type arrElemReturn(const IRInstruction* inst) {
-  assert(inst->op() == LdPackedArrayElem || inst->op() == LdStructArrayElem);
+  assert(inst->is(LdPackedArrayElem, LdStructArrayElem, ArrayGet));
   assert(!inst->hasTypeParam() || inst->typeParam() <= Type::Gen);
-  auto const tyParam = inst->hasTypeParam() ? inst->typeParam() : Type::Gen;
+
+  auto resultType = inst->hasTypeParam() ? inst->typeParam() : Type::Gen;
+  if (inst->is(ArrayGet)) {
+    resultType = resultType & Type::InitCell;
+  }
+
+  // Elements of a static array are uncounted
+  if (inst->src(0)->isA(Type::StaticArr)) {
+    resultType = resultType & Type::UncountedInit;
+  }
 
   auto const arrTy = inst->src(0)->type().arrSpec().type();
-  if (!arrTy) return tyParam;
+  if (!arrTy) return resultType;
 
   using T = RepoAuthType::Array::Tag;
 
   switch (arrTy->tag()) {
     case T::Packed:
-      {
-        auto const idx = inst->src(1);
-        if (!idx->isConst()) return Type::Gen;
-        if (idx->intVal() >= 0 && idx->intVal() < arrTy->size()) {
-          return typeFromRAT(arrTy->packedElem(idx->intVal())) & tyParam;
-        }
+    {
+      auto const idx = inst->src(1);
+      if (idx->hasConstVal() &&
+          idx->intVal() >= 0 && idx->intVal() < arrTy->size()) {
+        return typeFromRAT(arrTy->packedElem(idx->intVal())) & resultType;
       }
-      return Type::Gen;
+      return resultType;
+    }
     case T::PackedN:
-      return typeFromRAT(arrTy->elemType()) & tyParam;
+      return typeFromRAT(arrTy->elemType()) & resultType;
   }
 
-  return tyParam;
+  not_reached();
 }
 
 Type thisReturn(const IRInstruction* inst) {
@@ -373,7 +382,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DBuiltin
 #undef DSubtract
 #undef DCns
-
 }
 
 }}

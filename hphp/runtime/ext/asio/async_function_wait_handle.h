@@ -57,6 +57,9 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
   static constexpr ptrdiff_t childOff() {
     return offsetof(c_AsyncFunctionWaitHandle, m_child);
   }
+  static constexpr ptrdiff_t blockableOff() {
+    return offsetof(c_AsyncFunctionWaitHandle, m_blockable);
+  }
   static c_AsyncFunctionWaitHandle* Create(
     const ActRec* origFp,
     size_t numSlots,
@@ -96,9 +99,7 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
 
   // valid if STATE_SCHEDULED || STATE_BLOCKED
   c_WaitableWaitHandle* m_child;
-
-  static const int8_t STATE_SCHEDULED = 3;
-  static const int8_t STATE_RUNNING   = 4;
+  AsioBlockable m_blockable;
 };
 
 inline c_AsyncFunctionWaitHandle* c_WaitHandle::asAsyncFunction() {

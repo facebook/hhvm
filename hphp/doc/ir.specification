@@ -1913,7 +1913,9 @@ To string conversions:
   Assert that the current hardware return address is the expected value. If the
   assertion fails, execution is aborted via a hardware exception.
 
-| RBTrace, ND, NA, NF
+| RBTraceEntry, ND, NA, NF
+
+| RBTraceMsg, ND, NA, NF
 
   Ring buffer tracing.
 
@@ -2165,7 +2167,7 @@ fields of that struct for holding intermediate values.
   Like ElemX, but used for intermediate element lookups that may modify the
   base as part of an unset operation.
 
-| ArrayGet, D(Cell), S(Arr) S(Int,Str), PRc|Er
+| ArrayGet, DArrElem, S(Arr) S(Int,Str), PRc|Er
 
   Get element with key S1 from base S0.
 

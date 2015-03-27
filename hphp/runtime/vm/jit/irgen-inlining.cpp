@@ -23,7 +23,9 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
-bool isInlining(const HTS& env) { return env.bcStateStack.size() > 1; }
+bool isInlining(const HTS& env) {
+  return env.inlineLevel > 0;
+}
 
 /*
  * When doing gen-time inlining, we set up a series of IR instructions
@@ -112,6 +114,7 @@ void beginInlining(HTS& env,
     false
   };
   env.bcStateStack.emplace_back(key);
+  env.inlineLevel++;
   updateMarker(env);
 
   auto const calleeFP = gen(env, DefInlineFP, data, calleeSP, prevSP, fp(env));
@@ -153,7 +156,10 @@ void endInlinedCommon(HTS& env) {
 
   // Return to the caller function.  Careful between here and the
   // updateMarker() below, where the caller state isn't entirely set up.
+  env.inlineLevel--;
   env.bcStateStack.pop_back();
+  always_assert(env.bcStateStack.size() > 0);
+
   env.fpiActiveStack.pop();
 
   updateMarker(env);

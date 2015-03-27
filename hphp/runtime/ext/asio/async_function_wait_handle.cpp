@@ -84,11 +84,11 @@ void c_AsyncFunctionWaitHandle::PrepareChild(const ActRec* fp,
 }
 
 void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
-  setContextIdx(child->getContextIdx());
   setState(STATE_BLOCKED);
+  setContextIdx(child->getContextIdx());
   m_child = child;
-
-  blockOn(child);
+  m_child->getParentChain()
+    .addParent(m_blockable, AsioBlockable::Kind::AsyncFunctionWaitHandle);
   incRefCount();
 }
 
@@ -141,9 +141,10 @@ void c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
   resumable()->setResumeAddr(nullptr, resumeOffset);
 
   // Set up the dependency.
-  m_child = child;
   setState(STATE_BLOCKED);
-  blockOn(m_child);
+  m_child = child;
+  m_child->getParentChain()
+    .addParent(m_blockable, AsioBlockable::Kind::AsyncFunctionWaitHandle);
 }
 
 void c_AsyncFunctionWaitHandle::ret(Cell& result) {

@@ -1,0 +1,1 @@
+Fatal error: Cannot re-declare as a constant previously defined type constant P::T in C in %stest/slow/class_type_constant/type_constant15.php on line 7

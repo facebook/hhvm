@@ -146,6 +146,10 @@ struct BackEnd : public jit::BackEnd {
     return x64::emitServiceReqWork(cb, start, flags, req, argv);
   }
 
+  size_t reusableStubSize() const override {
+    return x64::reusableStubSize();
+  }
+
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
                      SrcKey sk) override {
     Asm a { mainCode };
@@ -551,9 +555,9 @@ struct BackEnd : public jit::BackEnd {
     auto& ip = fixups.m_inProgressTailJumps;
     for (size_t i = 0; i < ip.size(); ++i) {
       IncomingBranch& ib = const_cast<IncomingBranch&>(ip[i]);
-      TCA adjusted = rel.adjustedAddressAfter(ib.toSmash());
-      always_assert(adjusted);
-      ib.adjust(adjusted);
+      if (TCA adjusted = rel.adjustedAddressAfter(ib.toSmash())) {
+        ib.adjust(adjusted);
+      }
     }
 
     for (auto& fixup : fixups.m_pendingFixups) {
@@ -641,6 +645,12 @@ struct BackEnd : public jit::BackEnd {
     }
     updatedAF.swap(fixups.m_alignFixups);
 
+    for (auto& af : fixups.m_reusedStubs) {
+      if (TCA adjusted = rel.adjustedAddressAfter(af)) {
+        af = adjusted;
+      }
+    }
+
     if (asmInfo) {
       fixupStateVector(asmInfo->asmInstRanges, rel);
       fixupStateVector(asmInfo->asmBlockRanges, rel);
@@ -671,6 +681,23 @@ struct BackEnd : public jit::BackEnd {
     for (auto codePtr : fixups.m_codePointers) {
       if (TCA adjusted = rel.adjustedAddressAfter(*codePtr)) {
         *codePtr = adjusted;
+      }
+    }
+  }
+
+  void findFixups(TCA start, TCA end, CodeGenFixups& fixups) override {
+    while (start != end) {
+      assert(start < end);
+      DecodedInstruction di(start);
+      start += di.size();
+
+      if (di.isCall()) {
+        if (auto fixup = mcg->fixupMap().findFixup(start)) {
+          fixups.m_pendingFixups.push_back(PendingFixup(start, *fixup));
+        }
+        if (auto ct = mcg->catchTraceMap().find(start)) {
+          fixups.m_pendingCatchTraces.emplace_back(start, *ct);
+        }
       }
     }
   }

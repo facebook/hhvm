@@ -299,11 +299,11 @@ TEST(Type, Const) {
   auto five = Type::cns(5);
   EXPECT_LT(five, Type::Int);
   EXPECT_NE(five, Type::Int);
-  EXPECT_TRUE(five.isConst());
+  EXPECT_TRUE(five.hasConstVal());
   EXPECT_EQ(5, five.intVal());
-  EXPECT_TRUE(five.isConst(Type::Int));
-  EXPECT_TRUE(five.isConst(5));
-  EXPECT_FALSE(five.isConst(5.0));
+  EXPECT_TRUE(five.hasConstVal(Type::Int));
+  EXPECT_TRUE(five.hasConstVal(5));
+  EXPECT_FALSE(five.hasConstVal(5.0));
   EXPECT_TRUE(Type::Gen.maybe(five));
   EXPECT_EQ(Type::Int, five | Type::Int);
   EXPECT_EQ(Type::Int, five | Type::cns(10));
@@ -326,7 +326,7 @@ TEST(Type, Const) {
   EXPECT_EQ("Bool<true>", True.toString());
   EXPECT_LT(True, Type::Bool);
   EXPECT_NE(True, Type::Bool);
-  EXPECT_TRUE(True.isConst());
+  EXPECT_TRUE(True.hasConstVal());
   EXPECT_EQ(true, True.boolVal());
   EXPECT_TRUE(Type::Uncounted.maybe(True));
   EXPECT_FALSE(five <= True);
@@ -335,12 +335,6 @@ TEST(Type, Const) {
   EXPECT_TRUE(!five.maybe(True));
   EXPECT_EQ(Type::Int | Type::Bool, five | True);
   EXPECT_EQ(Type::Bottom, five & True);
-
-  EXPECT_TRUE(Type::Uninit.isConst());
-  EXPECT_TRUE(Type::InitNull.isConst());
-  EXPECT_FALSE(Type::Null.isConst());
-  EXPECT_FALSE((Type::Uninit | Type::Bool).isConst());
-  EXPECT_FALSE(Type::Int.isConst());
 
   auto array = make_packed_array(1, 2, 3, 4);
   auto arrData = ArrayData::GetScalarArray(array.get());

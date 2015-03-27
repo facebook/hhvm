@@ -94,7 +94,7 @@ PHPAPI void php_error_docref0(const char *docref TSRMLS_DC, int type, const char
   HPHP::string_printf(msg, "%s%s%s(): ", class_name, space, get_active_function_name(TSRMLS_C));
   msg += format;
 
-  auto mode = static_cast<HPHP::ErrorConstants::ErrorModes>(type);
+  auto mode = static_cast<HPHP::ErrorMode>(type);
 
   HPHP::raise_message(mode, msg.c_str(), args);
   va_end(args);

@@ -388,7 +388,8 @@ bool canDCE(IRInstruction* inst) {
   case DbgAssertPtr:
   case DbgAssertType:
   case DbgAssertRetAddr:
-  case RBTrace:
+  case RBTraceEntry:
+  case RBTraceMsg:
   case ZeroErrorLevel:
   case RestoreErrorLevel:
   case IterInit:
@@ -696,11 +697,11 @@ void performActRecFixups(const BlockList& blocks,
     for (auto& inst : *block) {
       ITRACE(5, "{}\n", inst.toString());
 
-      if (auto const fp = inst.marker().m_fp) {
+      if (auto const fp = inst.marker().fp()) {
         if (state[fp->inst()].isDead()) {
           always_assert(fp->inst()->is(DefInlineFP));
           auto const prev = fp->inst()->src(2);
-          inst.marker().m_fp = prev;
+          inst.marker() = inst.marker().adjustFP(prev);
           assert(!state[prev->inst()].isDead());
         }
       }
@@ -728,7 +729,7 @@ void performActRecFixups(const BlockList& blocks,
       case DecRef:
         if (inst.marker().func() != outerFunc) {
           ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);
-          inst.marker() = inst.marker().adjustSp({safeDepth});
+          inst.marker() = inst.marker().adjustSP(FPAbsOffset{safeDepth});
         }
         break;
 

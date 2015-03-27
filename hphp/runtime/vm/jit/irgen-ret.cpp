@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
-#include "hphp/runtime/vm/jit/irgen-ringbuffer.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 
@@ -49,11 +48,11 @@ void retSurpriseCheck(HTS& env, SSATmp* frame, SSATmp* retVal) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      ringbuffer(env, Trace::RBTypeMsg, s_returnHook.get());
+      ringbufferMsg(env, Trace::RBTypeMsg, s_returnHook.get());
       gen(env, ReturnHook, frame, retVal);
     }
   );
-  ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
+  ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
 }
 
 void freeLocalsAndThis(HTS& env) {

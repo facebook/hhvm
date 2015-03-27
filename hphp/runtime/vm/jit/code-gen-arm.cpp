@@ -247,12 +247,12 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
 #define PUNT_OPCODE(name)                                               \
   void CodeGenerator::cg##name(IRInstruction* inst) {                   \
     cgPunt(__FILE__, __LINE__, #name, m_curInst->marker().bcOff(),      \
-           curFunc(), resumed(), m_curInst->marker().profTransId());    \
+           curFunc(), resumed(), m_curInst->marker().profTransID());    \
   }
 
 #define CG_PUNT(instr)                                              \
     cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff(), \
-           curFunc(), resumed(), m_curInst->marker().profTransId())
+           curFunc(), resumed(), m_curInst->marker().profTransID())
 
 //////////////////////////////////////////////////////////////////////
 PUNT_OPCODE(ArrayIdx)
@@ -499,7 +499,8 @@ PUNT_OPCODE(MapIsset)
 PUNT_OPCODE(IssetElem)
 PUNT_OPCODE(EmptyElem)
 PUNT_OPCODE(IncStat)
-PUNT_OPCODE(RBTrace)
+PUNT_OPCODE(RBTraceEntry)
+PUNT_OPCODE(RBTraceMsg)
 PUNT_OPCODE(IncTransCounter)
 PUNT_OPCODE(IncProfCounter)
 PUNT_OPCODE(DbgAssertType)
@@ -960,7 +961,7 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
 
   auto& v = vmain();
   if (firstBitNum == 0) {
-    assert(nParamsTmp->isConst());
+    assert(nParamsTmp->hasConstVal());
     // This is the first 64 bits. No need to check nParams.
     thenBody(v);
   } else {
@@ -1093,11 +1094,13 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     // this should use some kind of cmov
     assert(isBuiltinByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
     v << load{mis[returnOffset + TVOFF(m_data)], dst};
-    condZero(v, dst, dstType, [&](Vout& v) {
-      return v.cns(KindOfNull);
-    }, [&](Vout& v) {
-      return v.cns(returnType.toDataType());
-    });
+    if (dstType.isValid()) {
+      condZero(v, dst, dstType, [&](Vout& v) {
+          return v.cns(KindOfNull);
+        }, [&](Vout& v) {
+          return v.cns(returnType.toDataType());
+        });
+    }
     return;
   }
 
@@ -1107,12 +1110,14 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     assert(isBuiltinByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
     auto tmp_dst_type = v.makeReg();
     v << load{mis[returnOffset + TVOFF(m_data)], dst};
-    v << loadzbl{mis[returnOffset + TVOFF(m_type)], tmp_dst_type};
-    condZero(v, tmp_dst_type, dstType, [&](Vout& v) {
-      return v.cns(KindOfNull);
-    }, [&](Vout& v) {
-      return tmp_dst_type;
-    });
+    if (dstType.isValid()) {
+      v << loadzbl{mis[returnOffset + TVOFF(m_type)], tmp_dst_type};
+      condZero(v, tmp_dst_type, dstType, [&](Vout& v) {
+          return v.cns(KindOfNull);
+        }, [&](Vout& v) {
+          return tmp_dst_type;
+        });
+    }
     return;
   }
 

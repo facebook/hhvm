@@ -169,9 +169,6 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
   if (attrs & ClassInfo::FunctionIsFoldable) {
     f->setIsFoldable();
   }
-  if (attrs & ClassInfo::ContextSensitive) {
-    f->setContextSensitive(true);
-  }
   if (attrs & ClassInfo::NoFCallBuiltin) {
     f->setNoFCallBuiltin();
   }
@@ -236,6 +233,12 @@ void BuiltinSymbols::ImportNativeConstants(AnalysisResultPtr ar,
     dest->add(cnsPair.first->data(),
               Type::FromDataType(cnsPair.second.m_type, Type::Variant),
               e, ar, e);
+
+    if ((cnsPair.second.m_type == KindOfUninit) &&
+         cnsPair.second.m_data.pref) {
+      // Callback based constant
+      dest->setDynamic(ar, cnsPair.first->data(), true);
+    }
   }
 }
 
@@ -244,17 +247,8 @@ void BuiltinSymbols::ImportExtConstants(AnalysisResultPtr ar,
                                         ClassInfo *cls) {
   LocationPtr loc(new Location);
   for (auto cinfo : cls->getConstantsVec()) {
-    ExpressionPtr e;
-    TypePtr t;
-    if (cinfo->isDeferred()) {
-      // We make an assumption that if the constant is a callback type
-      // (e.g. STDIN, STDOUT, STDERR) then it will return an Object.
-      // Otherwise, if it's deferred (SID, PHP_SAPI, etc.) it'll be a String.
-      t = cinfo->isCallback() ? Type::Object : Type::String;
-    } else {
-      t = Type::FromDataType(cinfo->getValue().getType(), Type::Variant);
-      e = Expression::MakeScalarExpression(ar, ar, loc, cinfo->getValue());
-    }
+    auto t = Type::FromDataType(cinfo->getValue().getType(), Type::Variant);
+    auto e = Expression::MakeScalarExpression(ar, ar, loc, cinfo->getValue());
     dest->add(cinfo->name.data(), t, e, ar, e);
   }
 }

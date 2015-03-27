@@ -337,7 +337,7 @@
                     ],
                     "return": {
                         "type": "VariantVec",
-                        "desc": "An array of BlockableWaitHandles blocked on this wait handle"
+                        "desc": "An array of WaitableWaitHandles blocked on this wait handle"
                     },
                     "args": [
                     ]
@@ -359,22 +359,8 @@
             ]
         },
         {
-            "name": "HH\\BlockableWaitHandle",
-            "parent": "HH\\WaitableWaitHandle",
-            "desc": "A wait handle that can be blocked on a dependency",
-            "flags": [
-                "IsAbstract",
-                "IsCppAbstract",
-                "NoDefaultSweep"
-            ],
-            "funcs": [
-            ],
-            "consts": [
-            ]
-        },
-        {
             "name": "HH\\ResumableWaitHandle",
-            "parent": "HH\\BlockableWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle that can resume execution of PHP code",
             "flags": [
                 "IsAbstract",
@@ -509,7 +495,7 @@
         },
         {
             "name": "HH\\AwaitAllWaitHandle",
-            "parent": "HH\\BlockableWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle that waits for a list of other wait handles",
             "flags": [
                 "IsFinal",
@@ -595,7 +581,7 @@
         },
         {
             "name": "HH\\GenArrayWaitHandle",
-            "parent": "HH\\BlockableWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle representing an array of asynchronous operations",
             "flags": [
                 "IsFinal",
@@ -644,7 +630,7 @@
         },
         {
             "name": "HH\\GenMapWaitHandle",
-            "parent": "HH\\BlockableWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle representing a map of asynchronous operations",
             "flags": [
                 "IsFinal",
@@ -693,7 +679,7 @@
         },
         {
             "name": "HH\\GenVectorWaitHandle",
-            "parent": "HH\\BlockableWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle representing a vector of asynchronous operations",
             "flags": [
                 "IsFinal",

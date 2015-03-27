@@ -40,11 +40,8 @@ NewObjectExpression::NewObjectExpression
     But NewObjectExpression is written to use the class as the
     function name, so clear it here, to take care of the dynamic
     case.
-    Also set m_noStatic, to prevent errors in code gen due to
-    m_className being set.
   */
   m_class.reset();
-  m_noStatic = true;
 }
 
 ExpressionPtr NewObjectExpression::clone() {
@@ -52,9 +49,6 @@ ExpressionPtr NewObjectExpression::clone() {
   FunctionCall::deepCopy(exp);
   return exp;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// parser functions
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
@@ -74,7 +68,7 @@ void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
     }
 
     if (m_params) {
-      markRefParams(func, "", canInvokeFewArgs());
+      markRefParams(func, "");
     }
 
     if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {

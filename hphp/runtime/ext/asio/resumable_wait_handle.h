@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_ASIO_RESUMABLE_WAIT_HANDLE_H_
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
+#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
 
@@ -33,13 +33,13 @@ struct ActRec;
  * execution of PHP code that can be resumed once the result of awaited
  * WaitHandle becomes available.
  */
-class c_ResumableWaitHandle : public c_BlockableWaitHandle {
+class c_ResumableWaitHandle : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(ResumableWaitHandle)
 
   explicit c_ResumableWaitHandle(Class* cls = c_ResumableWaitHandle::classof(),
                                  HeaderKind kind = HeaderKind::Object)
-    : c_BlockableWaitHandle(cls, kind) {}
+    : c_WaitableWaitHandle(cls, kind) {}
   ~c_ResumableWaitHandle() {}
   static void ti_setoncreatecallback(const Variant& callback);
   static void ti_setonawaitcallback(const Variant& callback);
@@ -50,6 +50,12 @@ class c_ResumableWaitHandle : public c_BlockableWaitHandle {
   static c_ResumableWaitHandle* getRunning(ActRec* fp);
   void resume();
   void exitContext(context_idx_t ctx_idx);
+
+  static const int8_t STATE_BLOCKED   = 2;
+
+ protected:
+  static const int8_t STATE_SCHEDULED = 3;
+  static const int8_t STATE_RUNNING   = 4;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2701,8 +2701,8 @@ Variant HHVM_METHOD(SoapClient, __soapcall,
 }
 
 Variant HHVM_METHOD(SoapClient, __call,
-                    Variant name,
-                    Variant args) {
+                    const Variant& name,
+                    const Variant& args) {
   return HHVM_MN(SoapClient, __soapcall)(this_, name.toString(),
                                          args.toArray());
 }

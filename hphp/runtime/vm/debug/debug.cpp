@@ -42,18 +42,18 @@ DebugInfo* DebugInfo::Get() {
   return mcg->getDebugInfo();
 }
 
-DebugInfo::DebugInfo() : m_perfMap(0), m_dataMap(0) {
-  snprintf(m_perfMapName,
-           sizeof m_perfMapName,
-           "/tmp/perf-%d.map", getpid());
+DebugInfo::DebugInfo() {
+  m_perfMapName = folly::sformat("/tmp/perf-{}.map", getpid());
   if (RuntimeOption::EvalPerfPidMap) {
-    m_perfMap = fopen(m_perfMapName, "w");
+    m_perfMap = fopen(m_perfMapName.c_str(), "w");
   }
-  snprintf(m_dataMapName,
-           sizeof m_dataMapName,
-           "/tmp/perf-data-%d.map", getpid());
+  m_dataMapName = folly::sformat("/tmp/perf-data-{}.map", getpid());
   if (RuntimeOption::EvalPerfDataMap) {
-    m_dataMap = fopen(m_dataMapName, "w");
+    m_dataMap = fopen(m_dataMapName.c_str(), "w");
+  }
+  m_relocMapName = folly::sformat("/tmp/hhvm-reloc-{}.map", getpid());
+  if (RuntimeOption::EvalPerfRelocate) {
+    m_relocMap = fopen(m_relocMapName.c_str(), "w+");
   }
   generatePidMapOverlay();
 }
@@ -62,15 +62,20 @@ DebugInfo::~DebugInfo() {
   if (m_perfMap) {
     fclose(m_perfMap);
     if (!RuntimeOption::EvalKeepPerfPidMap) {
-      unlink(m_perfMapName);
+      unlink(m_perfMapName.c_str());
     }
   }
 
   if (m_dataMap) {
     fclose(m_dataMap);
     if (!RuntimeOption::EvalKeepPerfPidMap) {
-      unlink(m_dataMapName);
+      unlink(m_dataMapName.c_str());
     }
+  }
+
+  if (m_relocMap) {
+    fclose(m_relocMap);
+    unlink(m_relocMapName.c_str());
   }
 }
 
@@ -223,17 +228,23 @@ void DebugInfo::recordTracelet(TCRange range, const Func* func,
 
 void DebugInfo::recordDataMap(void* from, void* to, const std::string& desc) {
   if (!mcg) return;
-  return Get()->recordDataMapImpl(from, to, desc);
-}
-
-void DebugInfo::recordDataMapImpl(void* from, void* to,
-                                  const std::string& desc) {
-  if (m_dataMap) {
-    fprintf(m_dataMap, "%" PRIxPTR " %" PRIx64 " %s\n",
+  if (auto* dataMap = Get()->m_dataMap) {
+    fprintf(dataMap, "%" PRIxPTR " %" PRIx64 " %s\n",
             uintptr_t(from),
             uint64_t((char*)to - (char*)from),
             desc.c_str());
-    fflush(m_dataMap);
+    fflush(dataMap);
+  }
+}
+
+void DebugInfo::recordRelocMap(void* from, void* to,
+                               const String& transInfo) {
+  if (m_relocMap) {
+    fprintf(m_relocMap, "%" PRIxPTR " %" PRIx64 " %s\n",
+            uintptr_t(from),
+            uintptr_t(to),
+            transInfo.c_str());
+    fflush(m_relocMap);
   }
 }
 

@@ -58,13 +58,10 @@ final class StaticWaitHandle<T> extends WaitHandle<T> {
 abstract class WaitableWaitHandle<T> extends WaitHandle<T> {
   public function getContextIdx(): int {}
   public function getCreator(): /*AsyncFunction*/WaitHandle<mixed> {}
-  public function getParents(): array<BlockableWaitHandle<mixed>> {}
+  public function getParents(): array<WaitableWaitHandle<mixed>> {}
 }
 
-abstract class BlockableWaitHandle<T> extends WaitableWaitHandle<T> {
-}
-
-abstract class ResumableWaitHandle<T> extends BlockableWaitHandle<T> {
+abstract class ResumableWaitHandle<T> extends WaitableWaitHandle<T> {
   public static function setOnCreateCallback(?(function(AsyncFunctionWaitHandle<mixed>, WaitableWaitHandle<mixed>): void) $callback) {}
   public static function setOnAwaitCallback(?(function(AsyncFunctionWaitHandle<mixed>, WaitableWaitHandle<mixed>): void) $callback) {}
   public static function setOnSuccessCallback(?(function(AsyncFunctionWaitHandle<mixed>, mixed): void) $callback) {}
@@ -77,7 +74,7 @@ final class AsyncFunctionWaitHandle<T> extends ResumableWaitHandle<T> {
 final class AsyncGeneratorWaitHandle<Tk, Tv> extends ResumableWaitHandle<?(Tk, Tv)> {
 }
 
-final class AwaitAllWaitHandle extends BlockableWaitHandle<void> {
+final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
   public static function fromArray<T>(
     array<WaitHandle<T>> $deps
   ): WaitHandle<void>;
@@ -92,18 +89,18 @@ final class AwaitAllWaitHandle extends BlockableWaitHandle<void> {
   ): void {}
 }
 
-final class GenArrayWaitHandle extends BlockableWaitHandle<array> {
+final class GenArrayWaitHandle extends WaitableWaitHandle<array> {
   // This is technically overloaded to allow an array of nullable
   public static function create(array $dependencies): WaitHandle<array> {}
   public static function setOnCreateCallback(?(function(GenArrayWaitHandle, array): void) $callback) {}
 }
 
-final class GenMapWaitHandle<Tk, Tv> extends BlockableWaitHandle<Map<Tk, Tv>> {
+final class GenMapWaitHandle<Tk, Tv> extends WaitableWaitHandle<Map<Tk, Tv>> {
   public static function create(Map<Tk, WaitHandle<Tv>> $dependencies): WaitHandle<Map<Tk, Tv>> {}
   public static function setOnCreateCallback(?(function(GenMapWaitHandle<Tk, Tv>, Map<mixed, mixed>): void) $callback) {}
 }
 
-final class GenVectorWaitHandle<T> extends BlockableWaitHandle<Vector<T>> {
+final class GenVectorWaitHandle<T> extends WaitableWaitHandle<Vector<T>> {
   public static function create(Vector<WaitHandle<T>> $dependencies): WaitHandle<Vector<T>> {}
   public static function setOnCreateCallback(?(function(GenVectorWaitHandle<T>, Vector<mixed>): void) $callback) {}
 }

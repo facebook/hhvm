@@ -29,7 +29,6 @@
 #include "hphp/runtime/ext/asio/reschedule_wait_handle.h"
 #include "hphp/runtime/ext/asio/sleep_wait_handle.h"
 #include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
-#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/system/systemlib.h"
 
@@ -37,6 +36,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 int c_WaitableWaitHandle::t_getcontextidx() {
+  if (isFinished()) {
+    return 0;
+  }
+
   return getContextIdx();
 }
 

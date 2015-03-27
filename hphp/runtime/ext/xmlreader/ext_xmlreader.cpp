@@ -626,7 +626,7 @@ static XMLPropertyAccessorMap xmlreader_properties_map
 ((XMLPropertyAccessor*)xmlreader_properties);
 
 Variant HHVM_METHOD(XMLReader, __get,
-                    Variant name) {
+                    const Variant& name) {
   auto* data = Native::data<XMLReader>(this_);
   const xmlChar *retchar = nullptr;
   int retint = 0;

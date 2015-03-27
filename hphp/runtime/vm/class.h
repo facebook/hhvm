@@ -58,7 +58,7 @@ struct NativePropHandler;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using ClassPtr = AtomicSmartPtr<Class>;
+using ClassPtr = AtomicSharedPtr<Class>;
 
 /*
  * Class represents the full definition of a user class in a given request
@@ -652,6 +652,11 @@ public:
    * Whether this class has a constant named `clsCnsName'.
    */
   bool hasConstant(const StringData* clsCnsName) const;
+
+  /*
+   * Whether this class has a type constant named `typeCnsName'.
+   */
+  bool hasTypeConstant(const StringData* typeCnsName) const;
 
   /*
    * Look up the actual value of a class constant.  Perform dynamic

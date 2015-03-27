@@ -31,6 +31,7 @@
   TIMER_NAME(optimize_predictionOpts)           \
   TIMER_NAME(optimize_realxGuards)              \
   TIMER_NAME(optimize_refcountOpts)             \
+  TIMER_NAME(optimize_refcountOpts2)            \
   TIMER_NAME(optimize_relaxGuards)              \
   TIMER_NAME(optimize_reoptimize)               \
   TIMER_NAME(regalloc)                          \

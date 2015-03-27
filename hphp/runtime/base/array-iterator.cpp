@@ -202,7 +202,8 @@ void ArrayIter::objInit(ObjectData* obj) {
   if (incRef) {
     obj->incRefCount();
   }
-  initFuncTable[getCollectionType()](this, obj);
+  auto i = getCollectionType() - Collection::Type::InvalidType;
+  initFuncTable[i](this, obj);
 }
 
 void ArrayIter::cellInit(const Cell c) {

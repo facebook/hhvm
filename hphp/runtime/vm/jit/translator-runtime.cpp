@@ -689,9 +689,8 @@ Cell lookupCnsHelper(const TypedValue* tv,
 
   // Deferred constants such as SID
   if (UNLIKELY(tv->m_data.pref != nullptr)) {
-    ClassInfo::ConstantInfo* ci =
-      (ClassInfo::ConstantInfo*)(void*)tv->m_data.pref;
-    Cell *cns = const_cast<Variant&>(ci->getDeferredValue()).asTypedValue();
+    auto callback = (Unit::SystemConstantCallback)(tv->m_data.pref);
+    const Cell* cns = callback().asTypedValue();
     if (LIKELY(cns->m_type != KindOfUninit)) {
       Cell c1;
       cellDup(*cns, c1);

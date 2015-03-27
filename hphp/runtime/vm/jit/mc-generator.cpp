@@ -46,6 +46,7 @@
 #include "hphp/util/cycles.h"
 #include "hphp/util/debug.h"
 #include "hphp/util/disasm.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/maphuge.h"
 #include "hphp/util/meta.h"
 #include "hphp/util/process.h"
@@ -66,6 +67,7 @@
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/server/source-root-info.h"
+#include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/func.h"
@@ -95,6 +97,8 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/unwind.h"
+
+#include "hphp/tools/hfsort/jitsort.h"
 
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 
@@ -658,11 +662,20 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
   // prologues, this is just a possible prologue.
   TCA aStart    = code.main().frontier();
   TCA start     = aStart;
+  TCA coldStart = code.cold().frontier();
   TCA realColdStart   = mcg->code.realCold().frontier();
   TCA realFrozenStart = mcg->code.realFrozen().frontier();
 
   auto const skFuncBody = backEnd().emitFuncPrologue(
     code.main(), code.cold(), func, funcIsMagic, nPassed, start, aStart);
+  if (RuntimeOption::EvalPerfRelocate) {
+    GrowableVector<IncomingBranch> incomingBranches;
+    recordPerfRelocMap(aStart, code.main().frontier(),
+                       coldStart, code.cold().frontier(),
+                       funcBody, paramIndex,
+                       incomingBranches,
+                       m_fixups);
+  }
   m_fixups.process(nullptr);
 
   assert(backEnd().funcPrologueHasGuard(start, func));
@@ -963,6 +976,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
 }
 
 namespace {
+
 class FreeRequestStubTrigger {
   TCA m_stub;
  public:
@@ -1299,6 +1313,7 @@ MCGenerator::freeRequestStub(TCA stub) {
    */
   if (!writer) return false;
   assert(code.frozen().contains(stub));
+  m_debugInfo.recordRelocMap(stub, 0, "FreeStub");
   m_freeStubs.push(stub);
   return true;
 }
@@ -1307,8 +1322,8 @@ TCA MCGenerator::getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups) {
   TCA ret = m_freeStubs.maybePop();
   if (ret) {
     Stats::inc(Stats::Astub_Reused);
-    always_assert(m_freeStubs.m_list == nullptr ||
-                  code.isValidCodeAddress(TCA(m_freeStubs.m_list)));
+    always_assert(m_freeStubs.peek() == nullptr ||
+                  code.isValidCodeAddress(m_freeStubs.peek()));
     TRACE(1, "recycle stub %p\n", ret);
   } else {
     ret = frozen.frontier();
@@ -1441,6 +1456,11 @@ CodeGenFixups::process_only(
     m_inProgressTailJumps.swap(*inProgressTailBranches);
   }
   assert(m_inProgressTailJumps.empty());
+
+  for (auto& stub : m_reusedStubs) {
+    mcg->getDebugInfo()->recordRelocMap(stub, 0, "NewStub");
+  }
+  ClearContainer(m_reusedStubs);
 }
 
 void CodeGenFixups::clear() {
@@ -1586,25 +1606,10 @@ MCGenerator::translateWork(const TranslArgs& args) {
       }
 
       if (result == TranslateResult::Failure) {
-        // If the region translator failed for an Optimize translation, it's OK
-        // to do a Live translation for the function entry. Otherwise, fall
-        // back to Interp.
-        if (m_tx.mode() == TransKind::Optimize) {
-          if (sk.getFuncId() == liveFunc()->getFuncId() &&
-              liveUnit()->contains(vmpc()) &&
-              sk.offset() == liveUnit()->offsetOf(vmpc()) &&
-              sk.resumed() == liveResumed()) {
-            m_tx.setMode(TransKind::Live);
-            RegionContext rContext { sk.func(), sk.offset(), liveSpOff(),
-                sk.resumed() };
-            FTRACE(2, "populating live context for region after failed optimize"
-                   "translation\n");
-            populateLiveContext(rContext);
-            region = selectRegion(rContext, m_tx.mode());
-          } else {
-            region.reset();
-          }
-        }
+        // If the region translator failed, clear `region' to fall
+        // back to the interpreter.
+        FTRACE(1, "translateRegion: failed on region:\n{}\n", show(*region));
+        region.reset();
       }
     }
 
@@ -1676,6 +1681,13 @@ MCGenerator::translateWork(const TranslArgs& args) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
   }
 
+  if (RuntimeOption::EvalPerfRelocate) {
+    recordPerfRelocMap(start, code.main().frontier(),
+                       coldStart, code.cold().frontier(),
+                       sk, -1,
+                       srcRec.tailFallbackJumps(),
+                       m_fixups);
+  }
   GrowableVector<IncomingBranch> inProgressTailBranches;
   m_fixups.process(&inProgressTailBranches);
 
@@ -1875,6 +1887,496 @@ static Debug::TCRange rangeFrom(const CodeBlock& cb, const TCA addr,
                                 bool isAcold) {
   assert(cb.contains(addr));
   return Debug::TCRange(addr, cb.frontier(), isAcold);
+}
+
+struct TransRelocInfo {
+  TransRelocInfo() {}
+
+  TransRelocInfo(TransRelocInfo&& other) = default;
+  TransRelocInfo& operator=(TransRelocInfo&& other) = default;
+  TransRelocInfo(const TransRelocInfo&) = delete;
+  TransRelocInfo& operator=(const TransRelocInfo& other) = delete;
+  SrcKey sk;
+  int argNum;
+  TCA start;
+  TCA end;
+  TCA coldStart;
+  TCA coldEnd;
+  GrowableVector<IncomingBranch> incomingBranches;
+  CodeGenFixups fixups;
+};
+
+namespace {
+static bool readLine(std::string& out, FILE* file) {
+  out.resize(0);
+  while (true) {
+    int c = fgetc(file);
+    if (c == EOF) return out.size();
+    if (c == '\n') return true;
+    out.push_back(c);
+  }
+}
+
+struct TransRelocInfoHelper {
+  SrcKey::AtomicInt skInt;
+  int argNum;
+  std::pair<uint32_t,uint32_t> coldRange;
+  std::vector<IncomingBranch::Opaque> incomingBranches;
+  std::vector<uint32_t> addressImmediates;
+  std::vector<uint64_t> codePointers;
+  std::vector<std::pair<uint32_t, std::pair<int,int>>> alignFixups;
+
+  template<class SerDe> void serde(SerDe& sd) {
+    sd
+      (skInt)
+      (argNum)
+      (coldRange)
+      (incomingBranches)
+      (addressImmediates)
+      (codePointers)
+      (alignFixups)
+      ;
+  }
+
+  TransRelocInfo toTRI(const CodeCache& code) {
+    TransRelocInfo tri;
+    tri.sk = SrcKey(skInt);
+    tri.argNum = argNum;
+    tri.coldStart = code.base() + coldRange.first;
+    tri.coldEnd = code.base() + coldRange.second;
+
+    for (auto& ib : incomingBranches) {
+      tri.incomingBranches.push_back(IncomingBranch(ib));
+    }
+    for (auto& ai : addressImmediates) {
+      tri.fixups.m_addressImmediates.insert(ai + code.base());
+    }
+    for (auto& cp : codePointers) {
+      tri.fixups.m_codePointers.insert((TCA*)cp);
+    }
+    for (auto v : alignFixups) {
+      tri.fixups.m_alignFixups.emplace(v.first + code.base(),
+                                         v.second);
+    }
+    return tri;
+  }
+};
+}
+
+String MCGenerator::perfRelocMapInfo(
+  TCA start, TCA end,
+  TCA coldStart, TCA coldEnd,
+  SrcKey sk, int argNum,
+  const GrowableVector<IncomingBranch>& incomingBranchesIn,
+  CodeGenFixups& fixups) {
+
+  for (auto& stub : fixups.m_reusedStubs) {
+    mcg->getDebugInfo()->recordRelocMap(stub, 0, "NewStub");
+  }
+  ClearContainer(fixups.m_reusedStubs);
+
+  TransRelocInfoHelper trih;
+  trih.skInt = sk.toAtomicInt();
+  trih.argNum = argNum;
+
+  for (auto v : incomingBranchesIn) {
+    trih.incomingBranches.emplace_back(v.getOpaque());
+  }
+
+  for (auto v : fixups.m_addressImmediates) {
+    trih.addressImmediates.emplace_back(v - code.base());
+  }
+
+  for (auto v : fixups.m_codePointers) {
+    trih.codePointers.emplace_back((uint64_t)v);
+  }
+
+  for (auto v : fixups.m_alignFixups) {
+    trih.alignFixups.emplace_back(v.first - code.base(), v.second);
+  }
+
+  trih.coldRange = std::make_pair(uint32_t(coldStart - code.base()),
+                                  uint32_t(coldEnd - code.base()));
+
+  BlobEncoder blob;
+  blob(trih);
+
+  String data = string_base64_encode(static_cast<const char*>(blob.data()),
+                                     blob.size());
+  String id;
+  if (sk.valid()) {
+    int fid = sk.getFuncId();
+    if (&code.blockFor(start) == &code.prof()) {
+      // use -ve ids for translations we don't want
+      // to relocate (currently just profiling trs).
+      fid = -fid;
+    }
+    id = String(static_cast<int64_t>(fid));
+  } else {
+    id = String("Stub");
+  }
+
+  return id + String(" ") + data;
+}
+
+void MCGenerator::recordPerfRelocMap(
+  TCA start, TCA end,
+  TCA coldStart, TCA coldEnd,
+  SrcKey sk, int argNum,
+  const GrowableVector<IncomingBranch> &incomingBranchesIn,
+  CodeGenFixups& fixups) {
+
+  String info = perfRelocMapInfo(start, end,
+                                 coldStart, coldEnd,
+                                 sk, argNum,
+                                 incomingBranchesIn,
+                                 fixups);
+
+  m_debugInfo.recordRelocMap(start, end, info);
+}
+
+void MCGenerator::readRelocations(
+  FILE* relocFile,
+  std::set<TCA>* liveStubs,
+  void (*callback)(TransRelocInfo&& tri, void* data),
+  void* data) {
+  std::string line;
+  uint64_t addr;
+  uint64_t end;
+
+  while (readLine(line, relocFile)) {
+    int n;
+    if (sscanf(line.c_str(), "%" SCNx64 " %" SCNx64 "%n",
+               &addr, &end, &n) >= 2) {
+      auto pos = line.rfind(' ');
+      if (pos == n) {
+        if (liveStubs && !end) {
+          if (!strcmp("NewStub", line.c_str() + pos + 1)) {
+            liveStubs->insert((TCA)addr);
+          } else if (!strcmp("FreeStub", line.c_str() + pos + 1)) {
+            liveStubs->erase((TCA)addr);
+          }
+        }
+        continue;
+      }
+      assert(pos != std::string::npos && pos > n);
+      auto b64 = line.substr(pos + 1);
+      String decoded = string_base64_decode(b64.c_str(), b64.size(), true);
+
+      BlobDecoder blob(decoded.data(), decoded.size());
+      TransRelocInfoHelper trih;
+      blob(trih);
+
+      TransRelocInfo tri(trih.toTRI(code));
+      tri.start = reinterpret_cast<TCA>(addr);
+      tri.end = reinterpret_cast<TCA>(end);
+      backEnd().findFixups(tri.start, tri.end, tri.fixups);
+
+      callback(std::move(tri), data);
+    }
+  }
+}
+
+static void readRelocsIntoVector(TransRelocInfo&& tri, void* data) {
+  if (mcg->code.prof().contains(tri.start)) return;
+  auto v = static_cast<std::vector<TransRelocInfo>*>(data);
+  v->emplace_back(std::move(tri));
+}
+
+static bool okToRelocate = true;
+
+void MCGenerator::liveRelocate(int time) {
+  auto relocMap = m_debugInfo.getRelocMap();
+  if (!relocMap) return;
+
+  BlockingLeaseHolder writer(Translator::WriteLease());
+  assert(writer);
+  if (!okToRelocate) return;
+
+  SCOPE_EXIT { fseek(relocMap, 0, SEEK_END); };
+  fseek(relocMap, 0, SEEK_SET);
+
+  std::vector<TransRelocInfo> relocs;
+  if (time == -1) {
+    readRelocations(relocMap, nullptr, readRelocsIntoVector, &relocs);
+    if (!relocs.size()) return;
+
+    std::mt19937 g(42);
+    std::shuffle(relocs.begin(), relocs.end(), g);
+
+    unsigned new_size = g() % ((relocs.size() + 1) >> 1);
+    new_size += (relocs.size() + 3) >> 2;
+    assert(new_size > 0 && new_size <= relocs.size());
+
+    relocs.resize(new_size);
+  } else {
+    int pid = getpid();
+    auto relocResultsName = folly::sformat("/tmp/hhvm-reloc-{}.results", pid);
+    FILE* relocResultsFile;
+    if (!(relocResultsFile = fopen(relocResultsName.c_str(), "w+"))) {
+      Logger::Error("Error creating relocation results file '%s'\n",
+                    relocResultsName.c_str());
+      return;
+    }
+    SCOPE_EXIT { fclose(relocResultsFile); };
+    try {
+      HPHP::hfsort::jitsort(pid, time, relocMap, relocResultsFile);
+      fseek(relocResultsFile, 0, SEEK_SET);
+      readRelocations(relocResultsFile, nullptr, readRelocsIntoVector, &relocs);
+    } catch (...) {
+      Logger::Error("LiveRelocate failed");
+      return;
+    }
+  }
+
+  CodeCache::Selector cbSel(CodeCache::Selector::Args(code).hot(true));
+  CodeBlock& hot = code.main();
+
+  relocate(relocs, hot);
+}
+
+/*
+ * CodeSmasher is used to overwrite all the relocated code with ud2
+ * and int3 to ensure that we never execute it after the code has
+ * been relocated. Its run as a treadmill job, because old requests
+ * might continue to execute the old code, even after we finish
+ * the relocation step.
+ */
+struct CodeSmasher {
+  std::vector<std::pair<TCA,TCA>> entries;
+  void operator()() {
+    LeaseHolder writer(Translator::WriteLease());
+    if (!writer) {
+      Treadmill::enqueue(std::move(*this));
+      return;
+    }
+
+    for (auto& e : entries) {
+      CodeBlock cb;
+      cb.init(e.first, e.second - e.first, "relocated");
+      X64Assembler a { cb };
+      while (a.canEmit(2)) {
+        a.ud2();
+      }
+      if (a.canEmit(1)) a.int3();
+    }
+    okToRelocate = true;
+  }
+};
+
+namespace {
+struct PostProcessParam {
+  RelocationInfo& rel;
+  std::set<TCA>&  deadStubs;
+  FILE*           relocMap;
+};
+
+void postProcess(TransRelocInfo&& tri, void* paramPtr) {
+  auto& param = *static_cast<PostProcessParam*>(paramPtr);
+  auto& rel = param.rel;
+  auto& deadStubs = param.deadStubs;
+  auto relocMap = param.relocMap;
+  auto& be = mcg->backEnd();
+
+  if (!rel.adjustedAddressAfter(tri.start)) {
+    mcg->backEnd().adjustForRelocation(rel, tri.start, tri.end);
+    auto coldStart = tri.coldStart;
+    if (&mcg->code.blockFor(coldStart) == &mcg->code.realFrozen()) {
+      /*
+       * This is a bit silly. If we were generating code into frozen,
+       * and we also put stubs in frozen, and those stubs are now dead
+       * the code in them isn't valid (we smashed the first few bytes
+       * with a pointer and a size; see FreeStubList::StubNode).
+       * So skip over any of those. Its ok to process the live ones
+       * more than once.
+       */
+      auto it = deadStubs.lower_bound(tri.coldStart);
+      while (it != deadStubs.end() && *it < tri.coldEnd) {
+        mcg->backEnd().adjustForRelocation(rel, coldStart, *it);
+        coldStart = *it + mcg->backEnd().reusableStubSize();
+        ++it;
+      }
+    }
+    be.adjustForRelocation(rel, coldStart, tri.coldEnd);
+  }
+  auto adjustAfter = [&rel](TCA& addr) {
+    if (auto adj = rel.adjustedAddressAfter(addr)) addr = adj;
+  };
+  auto adjustBefore = [&rel](TCA& addr) {
+    if (auto adj = rel.adjustedAddressBefore(addr)) addr = adj;
+  };
+
+  adjustAfter(tri.start);
+  adjustBefore(tri.end);
+  adjustAfter(tri.coldStart);
+  adjustBefore(tri.coldEnd);
+
+  for (auto& ib : tri.incomingBranches) {
+    if (auto adjusted = rel.adjustedAddressAfter(ib.toSmash())) {
+      ib.adjust(adjusted);
+    }
+  }
+  be.adjustMetaDataForRelocation(rel, nullptr, tri.fixups);
+
+  auto data = mcg->perfRelocMapInfo(
+    tri.start, tri.end,
+    tri.coldStart, tri.coldEnd,
+    tri.sk, tri.argNum,
+    tri.incomingBranches,
+    tri.fixups);
+
+  fprintf(relocMap, "%" PRIxPTR " %" PRIxPTR " %s\n",
+          intptr_t(tri.start), intptr_t(tri.end),
+          data.c_str());
+}
+}
+
+void MCGenerator::relocate(std::vector<TransRelocInfo>& relocs,
+                           CodeBlock& dest) {
+  assert(Translator::WriteLease().amOwner());
+  assert(!Func::s_treadmill);
+
+  auto newRelocMapName = m_debugInfo.getRelocMapName() + ".tmp";
+  auto newRelocMap = fopen(newRelocMapName.c_str(), "w+");
+  if (!newRelocMap) return;
+
+  SCOPE_EXIT {
+    if (newRelocMap) fclose(newRelocMap);
+  };
+
+  Func::s_treadmill = true;
+  SCOPE_EXIT {
+    Func::s_treadmill = false;
+  };
+
+  auto ignoreEntry = [](const SrcKey& sk) {
+    // We can have entries such as UniqueStubs with no SrcKey
+    // These are ok to process.
+    if (!sk.valid()) return false;
+    // But if the func has been removed from the AtomicHashMap,
+    // we don't want to process it.
+    return !Func::isFuncIdValid(sk.getFuncId());
+  };
+
+  RelocationInfo rel;
+  auto& be = mcg->backEnd();
+  size_t num = 0;
+  assert(m_fixups.m_alignFixups.empty());
+  for (size_t sz = relocs.size(); num < sz; num++) {
+    auto& reloc = relocs[num];
+    if (ignoreEntry(reloc.sk)) continue;
+    auto start DEBUG_ONLY = dest.frontier();
+    try {
+      be.relocate(rel, dest,
+                  reloc.start, reloc.end, reloc.fixups, nullptr);
+    } catch (const DataBlockFull& dbf) {
+      break;
+    }
+    if (Trace::moduleEnabledRelease(Trace::mcg, 1)) {
+      Trace::traceRelease(
+        folly::sformat("Relocate: 0x{:08x}+0x{:04x} => 0x{:08x}+0x{:04x}\n",
+                       (uintptr_t)reloc.start, reloc.end - reloc.start,
+                       (uintptr_t)start, dest.frontier() - start));
+    }
+  }
+  ClearContainer(m_fixups.m_alignFixups);
+  assert(m_fixups.empty());
+
+  be.adjustForRelocation(rel);
+
+  for (size_t i = 0; i < num; i++) {
+    if (!ignoreEntry(relocs[i].sk)) {
+      be.adjustMetaDataForRelocation(rel, nullptr, relocs[i].fixups);
+    }
+  }
+
+  for (size_t i = 0; i < num; i++) {
+    if (!ignoreEntry(relocs[i].sk)) {
+      relocs[i].fixups.process_only(nullptr);
+    }
+  }
+
+  // At this point, all the relocated code should be correct, and runable.
+  // But eg if it has unlikely paths into cold code that has not been relocated,
+  // then the cold code will still point back to the original, not the relocated
+  // versions. Similarly reusable stubs will still point to the old code.
+  // Since we can now execute the relocated code, its ok to start fixing these
+  // things now.
+
+  for (auto& it : m_tx.getSrcDB()) {
+    it.second->relocate(rel);
+  }
+
+  std::unordered_set<Func*> visitedFuncs;
+  CodeSmasher s;
+  for (size_t i = 0; i < num; i++) {
+    auto& reloc = relocs[i];
+    if (ignoreEntry(reloc.sk)) continue;
+    for (auto& ib : reloc.incomingBranches) {
+      ib.relocate(rel);
+    }
+    if (!reloc.sk.valid()) continue;
+    auto f = const_cast<Func*>(reloc.sk.func());
+
+    be.adjustCodeForRelocation(rel, reloc.fixups);
+    reloc.fixups.clear();
+
+    // fixup code references in the corresponding cold block to point
+    // to the new code
+    be.adjustForRelocation(rel, reloc.coldStart, reloc.coldEnd);
+
+    if (visitedFuncs.insert(f).second) {
+      if (auto adjusted = rel.adjustedAddressAfter(f->getFuncBody())) {
+        f->setFuncBody(adjusted);
+      }
+      int num = Func::getMaxNumPrologues(f->numParams());
+      if (num < kNumFixedPrologues) num = kNumFixedPrologues;
+      while (num--) {
+        auto addr = f->getPrologue(num);
+        if (auto adjusted = rel.adjustedAddressAfter(addr)) {
+          f->setPrologue(num, adjusted);
+        }
+      }
+    }
+    if (reloc.end != reloc.start) {
+      s.entries.emplace_back(reloc.start, reloc.end);
+    }
+  }
+
+  auto relocMap = m_debugInfo.getRelocMap();
+  always_assert(relocMap);
+  fseek(relocMap, 0, SEEK_SET);
+
+  std::set<TCA> deadStubs;
+  auto stub = (FreeStubList::StubNode*)m_freeStubs.peek();
+  while (stub) {
+    deadStubs.insert((TCA)stub);
+    stub = stub->m_next;
+  }
+
+  auto param = PostProcessParam { rel, deadStubs, newRelocMap };
+  std::set<TCA> liveStubs;
+  readRelocations(relocMap, &liveStubs, postProcess, &param);
+
+  // ensure that any reusable stubs are updated for the relocated code
+  CodeGenFixups fixups;
+  for (auto stub : liveStubs) {
+    FTRACE(1, "Stub: 0x{:08x}\n", (uintptr_t)stub);
+    fixups.m_reusedStubs.emplace_back(stub);
+    always_assert(!rel.adjustedAddressAfter(stub));
+    fprintf(newRelocMap, "%" PRIxPTR " 0 %s\n", uintptr_t(stub), "NewStub");
+  }
+  be.adjustCodeForRelocation(rel, fixups);
+
+  unlink(m_debugInfo.getRelocMapName().c_str());
+  rename(newRelocMapName.c_str(), m_debugInfo.getRelocMapName().c_str());
+  fclose(newRelocMap);
+  newRelocMap = nullptr;
+  freopen(m_debugInfo.getRelocMapName().c_str(), "r+", relocMap);
+  fseek(relocMap, 0, SEEK_END);
+
+  okToRelocate = false;
+  Treadmill::enqueue(std::move(s));
 }
 
 void MCGenerator::recordBCInstr(uint32_t op,

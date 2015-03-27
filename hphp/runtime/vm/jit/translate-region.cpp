@@ -189,7 +189,7 @@ void emitPredictionGuards(HTS& hts,
     }
   }
 
-  if (isEntry) irgen::ringbuffer(hts, Trace::RBTypeTraceletGuards, sk);
+  if (isEntry) irgen::ringbufferEntry(hts, Trace::RBTypeTraceletGuards, sk);
 
   // Emit type guards.
   while (typePreds.hasNext(sk)) {
@@ -229,7 +229,7 @@ void emitPredictionGuards(HTS& hts,
         irgen::incProfCounter(hts, mcg->tx().profData()->curTransID());
       }
     }
-    irgen::ringbuffer(hts, Trace::RBTypeTraceletBody, sk);
+    irgen::ringbufferEntry(hts, Trace::RBTypeTraceletBody, sk);
   }
 
   // In the entry block, hhbc-translator gets a chance to emit some code
@@ -388,7 +388,7 @@ bool tryTranslateSingletonInline(HTS& hts,
 
   if (result.found()) {
     try {
-      irgen::prepareForNextHHBC(hts, nullptr, ninst.offset(), false);
+      irgen::prepareForNextHHBC(hts, nullptr, ninst.source, false);
       irgen::inlSingletonSLoc(
         hts,
         funcd,
@@ -446,7 +446,7 @@ bool tryTranslateSingletonInline(HTS& hts,
 
   if (result.found()) {
     try {
-      irgen::prepareForNextHHBC(hts, nullptr, ninst.offset(), false);
+      irgen::prepareForNextHHBC(hts, nullptr, ninst.source, false);
       irgen::inlSingletonSProp(
         hts,
         funcd,
@@ -548,6 +548,8 @@ TranslateResult irGenRegion(HTS& hts,
     const Func* topFunc = nullptr;
     TransID profTransId = getTransId(blockId);
     hts.profTransID = profTransId;
+    hts.inlineLevel = block->inlineLevel();
+    irgen::prepareForNextHHBC(hts, nullptr, sk, false);
 
     // Prepare to start translating this region block.  This loads the
     // FrameState for the IR block corresponding to the start of this
@@ -582,7 +584,7 @@ TranslateResult irGenRegion(HTS& hts,
 
       // Update bcOff here so any guards or assertions from metadata are
       // attributed to this instruction.
-      irgen::prepareForNextHHBC(hts, nullptr, sk.offset(), false);
+      irgen::prepareForNextHHBC(hts, nullptr, sk, false);
 
       // Update the current funcd, if we have a new one.
       if (knownFuncs.hasNext(sk)) {

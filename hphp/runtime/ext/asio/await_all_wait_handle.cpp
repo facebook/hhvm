@@ -264,8 +264,8 @@ Object c_AwaitAllWaitHandle::FromVector(const BaseVector* dependencies) {
 }
 
 void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {
-  setContextIdx(ctx_idx);
   setState(STATE_BLOCKED);
+  setContextIdx(ctx_idx);
   assert(m_cur >= 0);
 
   if (UNLIKELY(AsioSession::Get()->hasOnAwaitAllCreateCallback())) {
@@ -321,7 +321,8 @@ void c_AwaitAllWaitHandle::blockOnCurrent() {
     }
   }
 
-  blockOn(child);
+  child->getParentChain()
+    .addParent(m_blockable, AsioBlockable::Kind::AwaitAllWaitHandle);
 }
 
 void c_AwaitAllWaitHandle::markAsFailed(const Object& exception) {

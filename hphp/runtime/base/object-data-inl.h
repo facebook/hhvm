@@ -37,9 +37,7 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags,
   , m_attr_kind_count(flags | kind << 24)
 {
   assert(o_attribute == flags && !m_count);
-  assert(m_kind == HeaderKind::Object ||
-         m_kind == HeaderKind::ResumableObj ||
-         m_kind == HeaderKind::AwaitAllWH);
+  assert(isObjectKind(kind));
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
   instanceInit(cls);
@@ -157,9 +155,10 @@ inline bool ObjectData::isImmutableCollection() const {
 }
 
 inline Collection::Type ObjectData::getCollectionType() const {
-  return isCollection() ?
-    static_cast<Collection::Type>(o_subclass_u8) :
-    Collection::Type::InvalidType;
+  assert(Collection::isValidType(static_cast<Collection::Type>(m_kind)) ||
+         !isCollection());
+  return isCollection() ? static_cast<Collection::Type>(m_kind) :
+         Collection::Type::InvalidType;
 }
 
 inline bool ObjectData::isIterator() const {

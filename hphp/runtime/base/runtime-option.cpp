@@ -100,7 +100,7 @@ bool RuntimeOption::CallUserHandlerOnFatals = false;
 bool RuntimeOption::ThrowExceptionOnBadMethodCall = true;
 bool RuntimeOption::LogNativeStackOnOOM = true;
 int RuntimeOption::RuntimeErrorReportingLevel =
-  static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL);
+  static_cast<int>(ErrorMode::HPHP_ALL);
 int RuntimeOption::ForceErrorReportingLevel = 0;
 
 std::string RuntimeOption::ServerUser;
@@ -433,11 +433,6 @@ static inline bool controlFlowDefault() {
 #else
   return false;
 #endif
-}
-
-static bool refcountOptsDefault() {
-  // TODO(#5216936)
-  return !RuntimeOption::EvalHHIRBytecodeControlFlow;
 }
 
 static inline bool evalJitDefault() {
@@ -812,7 +807,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(NoSilencer, ini, logger["NoSilencer"]);
     Config::Bind(RuntimeErrorReportingLevel, ini,
                  logger["RuntimeErrorReportingLevel"],
-                 static_cast<int>(ErrorConstants::ErrorModes::HPHP_ALL));
+                 static_cast<int>(ErrorMode::HPHP_ALL));
     Config::Bind(ForceErrorReportingLevel, ini,
                  logger["ForceErrorReportingLevel"], 0);
     Config::Bind(AccessLogDefaultFormat, ini, logger["AccessLogDefaultFormat"],
@@ -992,6 +987,9 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(Eval ## name, ini, eval[#name], defaultVal);
     EVALFLAGS()
 #undef F
+    if (EvalPerfRelocate > 0) {
+      setRelocateRequests(EvalPerfRelocate);
+    }
     low_malloc_huge_pages(EvalMaxLowMemHugePages);
     HardwareCounter::Init(EvalProfileHWEnable,
                           url_decode(EvalProfileHWEvents.data(),

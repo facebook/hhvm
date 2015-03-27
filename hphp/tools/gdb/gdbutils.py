@@ -214,7 +214,7 @@ def rawptr(val):
     if name == 'HPHP::default_ptr':
         return val['m_p']
 
-    if name == 'HPHP::SmartPtr' or name == 'HPHP::AtomicSmartPtr':
+    if name == 'HPHP::SmartPtr' or name == 'HPHP::AtomicSharedPtr':
         return val['m_px']
 
     if name == 'HPHP::LowPtr' or name == 'HPHP::LowPtrImpl':

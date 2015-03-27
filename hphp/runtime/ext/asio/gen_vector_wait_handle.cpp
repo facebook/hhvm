@@ -103,13 +103,14 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
 }
 
 void c_GenVectorWaitHandle::initialize(const Object& exception, c_Vector* deps, int64_t iter_pos, c_WaitableWaitHandle* child) {
-  setContextIdx(child->getContextIdx());
   setState(STATE_BLOCKED);
+  setContextIdx(child->getContextIdx());
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;
 
-  blockOn(child);
+  child->getParentChain()
+    .addParent(m_blockable, AsioBlockable::Kind::GenVectorWaitHandle);
   incRefCount();
 }
 
@@ -135,7 +136,8 @@ void c_GenVectorWaitHandle::onUnblocked() {
       try {
         child_wh->enterContext(getContextIdx());
         detectCycle(child_wh);
-        blockOn(child_wh);
+        child_wh->getParentChain()
+          .addParent(m_blockable, AsioBlockable::Kind::GenVectorWaitHandle);
         return;
       } catch (const Object& cycle_exception) {
         putException(m_exception, cycle_exception.get());

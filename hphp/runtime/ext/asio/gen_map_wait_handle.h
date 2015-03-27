@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/smart-ptr.h"
-#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
+#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,18 +33,22 @@ namespace HPHP {
  * the exception is propagated by failure.
  */
 class c_Map;
-class c_GenMapWaitHandle final : public c_BlockableWaitHandle {
+class c_GenMapWaitHandle final : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(GenMapWaitHandle)
 
   explicit c_GenMapWaitHandle(Class* cls = c_GenMapWaitHandle::classof())
-    : c_BlockableWaitHandle(cls) {}
+    : c_WaitableWaitHandle(cls) {}
   ~c_GenMapWaitHandle() {}
 
   static void ti_setoncreatecallback(const Variant& callback);
   static Object ti_create(const Variant& dependencies);
 
  public:
+  static constexpr ptrdiff_t blockableOff() {
+    return offsetof(c_GenMapWaitHandle, m_blockable);
+  }
+
   void onUnblocked();
   String getName();
   c_WaitableWaitHandle* getChild();
@@ -58,6 +62,9 @@ class c_GenMapWaitHandle final : public c_BlockableWaitHandle {
   Object m_exception;
   SmartPtr<c_Map> m_deps;
   ssize_t m_iterPos;
+  AsioBlockable m_blockable;
+
+  static const int8_t STATE_BLOCKED = 2;
 };
 
 inline c_GenMapWaitHandle* c_WaitHandle::asGenMap() {

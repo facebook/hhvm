@@ -105,7 +105,7 @@ RegionFormer::RegionFormer(const RegionContext& ctx,
   , m_sk(ctx.func, ctx.bcOffset, ctx.resumed)
   , m_startSk(m_sk)
   , m_region(std::make_shared<RegionDesc>())
-  , m_curBlock(m_region->addBlock(m_sk, 0, ctx.spOffset))
+  , m_curBlock(m_region->addBlock(m_sk, 0, ctx.spOffset, 0))
   , m_blockFinished(false)
   , m_hts(// TODO(#5703534): this is using a different TransContext than actual
           // translation will use.
@@ -277,7 +277,7 @@ RegionDescPtr RegionFormer::go() {
 
   if (m_region && !m_region->empty()) {
     // Make sure we end the region before trying to print the IRUnit.
-    irgen::endRegion(m_hts, m_sk.offset());
+    irgen::endRegion(m_hts, m_sk);
 
     printUnit(
       kTraceletLevel, m_hts.irb->unit(),
@@ -320,7 +320,7 @@ bool RegionFormer::prepareInstruction() {
   m_inst.endsRegion = breaksBB ||
     (dontGuardAnyInputs(m_inst.op()) && opcodeChangesPC(m_inst.op()));
   m_inst.funcd = m_arStates.back().knownFunc();
-  irgen::prepareForNextHHBC(m_hts, &m_inst, m_sk.offset(), false);
+  irgen::prepareForNextHHBC(m_hts, &m_inst, m_sk, false);
 
   auto const inputInfos = getInputs(m_inst);
 
@@ -389,7 +389,8 @@ void RegionFormer::addInstruction() {
     FTRACE(2, "selectTracelet adding new block at {} after:\n{}\n",
            showShort(m_sk), show(*m_curBlock));
     always_assert(m_sk.func() == curFunc());
-    RegionDesc::Block* newCurBlock = m_region->addBlock(m_sk, 0, curSpOffset());
+    auto newCurBlock = m_region->addBlock(m_sk, 0, curSpOffset(),
+                                          m_hts.inlineLevel);
     m_region->addArc(m_curBlock->id(), newCurBlock->id());
     m_curBlock = newCurBlock;
     m_blockFinished = false;
@@ -412,7 +413,7 @@ bool RegionFormer::traceThroughJmp() {
   // inputs while inlining.
   if (!isUnconditionalJmp(m_inst.op()) &&
       !(inlining && isConditionalJmp(m_inst.op()) &&
-        irgen::publicTopType(m_hts, BCSPOffset{0}).isConst())) {
+        irgen::publicTopType(m_hts, BCSPOffset{0}).hasConstVal())) {
     return false;
   }
 
@@ -521,6 +522,35 @@ bool RegionFormer::tryInline(uint32_t& instrSize) {
     return refuse("shouldIRInline failed");
   }
   return true;
+}
+
+bool isLiteral(Op op) {
+  switch (op) {
+    case OpNull:
+    case OpNullUninit:
+    case OpTrue:
+    case OpFalse:
+    case OpInt:
+    case OpDouble:
+    case OpString:
+    case OpArray:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+bool isThisSelfOrParent(Op op) {
+  switch (op) {
+    case OpThis:
+    case OpSelf:
+    case OpParent:
+      return true;
+
+    default:
+      return false;
+  }
 }
 
 void RegionFormer::truncateLiterals() {

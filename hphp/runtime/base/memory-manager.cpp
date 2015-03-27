@@ -594,7 +594,9 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
 namespace {
 DEBUG_ONLY const char* header_names[] = {
   "Packed", "Struct", "Mixed", "Empty", "Apc", "Globals", "Proxy",
-  "String", "Object", "ResumableObj", "AwaitAllWH", "Resource", "Ref",
+  "String", "Resource", "Ref",
+  "Object", "ResumableObj", "AwaitAllWH",
+  "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
   "Resumable", "Native", "SmallMalloc", "BigMalloc", "BigObj",
   "Free", "Hole", "Debug"
 };
@@ -698,6 +700,13 @@ void MemoryManager::checkHeap() {
       case HeaderKind::Object:
       case HeaderKind::ResumableObj:
       case HeaderKind::AwaitAllWH:
+      case HeaderKind::Vector:
+      case HeaderKind::Map:
+      case HeaderKind::Set:
+      case HeaderKind::Pair:
+      case HeaderKind::ImmVector:
+      case HeaderKind::ImmMap:
+      case HeaderKind::ImmSet:
       case HeaderKind::Resource:
       case HeaderKind::Ref:
       case HeaderKind::Resumable:

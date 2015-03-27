@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_ASIO_GEN_ARRAY_WAIT_HANDLE_H_
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
+#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,18 +31,22 @@ namespace HPHP {
  * preserves structure (order and keys) of the original array. If one of the
  * wait handles failed, the exception is propagated by failure.
  */
-class c_GenArrayWaitHandle final : public c_BlockableWaitHandle {
+class c_GenArrayWaitHandle final : public c_WaitableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(GenArrayWaitHandle)
 
   explicit c_GenArrayWaitHandle(Class* cls = c_GenArrayWaitHandle::classof())
-    : c_BlockableWaitHandle(cls) {}
+    : c_WaitableWaitHandle(cls) {}
   ~c_GenArrayWaitHandle() {}
 
   static void ti_setoncreatecallback(const Variant& callback);
   static Object ti_create(const Array& dependencies);
 
  public:
+  static constexpr ptrdiff_t blockableOff() {
+    return offsetof(c_GenArrayWaitHandle, m_blockable);
+  }
+
   void onUnblocked();
   String getName();
   c_WaitableWaitHandle* getChild();
@@ -57,6 +61,9 @@ class c_GenArrayWaitHandle final : public c_BlockableWaitHandle {
   Object m_exception;
   Array m_deps;       // invariant: always kPackedKind or kMixedKind
   ssize_t m_iterPos;
+  AsioBlockable m_blockable;
+
+  static const int8_t STATE_BLOCKED = 2;
 };
 
 inline c_GenArrayWaitHandle* c_WaitHandle::asGenArray() {

@@ -32,6 +32,20 @@ using std::map;
 
 CallGraph cg;
 
+void CallGraph::clear() {
+  for (auto* arc : arcs) {
+    delete arc;
+  }
+  arcs = vector<Arc*>();
+  for (auto* cluster : clusters) {
+    delete cluster;
+  }
+  clusters = vector<Cluster*>();
+  funcs = vector<Func>();
+  addr2FuncId = map<uint64_t, FuncId>();
+
+}
+
 bool compareClustersDensity(const Cluster* c1, const Cluster* c2) {
   return (double) c1->samples / c1->size > (double) c2->samples / c2->size;
 }
@@ -45,9 +59,9 @@ void freezeClusters(vector<Cluster*>& clusters) {
     cluster->frozen = true;
     totalSize = newSize;
     FuncId fid = cluster->funcs[0];
-    TRACE(1, "freezing cluster for func %d, size = %u, samples = %u, %s)\n",
-          fid, cg.funcs[fid].size, cg.funcs[fid].samples,
-          cg.funcs[fid].mangledNames[0].c_str());
+    HFTRACE(1, "freezing cluster for func %d, size = %u, samples = %u, %s)\n",
+            fid, cg.funcs[fid].size, cg.funcs[fid].samples,
+            cg.funcs[fid].mangledNames[0].c_str());
   }
 }
 
@@ -125,8 +139,8 @@ vector<Cluster*> clusterize() {
       continue;
     }
 
-    TRACE(1, "merging %s -> %s: %u\n", predCluster->toString().c_str(),
-          cluster->toString().c_str(), cg.funcs[fid].samples);
+    HFTRACE(1, "merging %s -> %s: %u\n", predCluster->toString().c_str(),
+            cluster->toString().c_str(), cg.funcs[fid].samples);
 
     for (FuncId f : cluster->funcs) {
       funcCluster[f] = predCluster;
@@ -267,8 +281,8 @@ std::vector<Cluster*> pettisAndHansen() {
 
     orderFuncs(c1, c2);
 
-    TRACE(1, "merging %s -> %s: %.1f\n", c2->toString().c_str(),
-          c1->toString().c_str(), max->weight);
+    HFTRACE(1, "merging %s -> %s: %.1f\n", c2->toString().c_str(),
+            c1->toString().c_str(), max->weight);
 
     c1->merge(*c2, max->weight);
 

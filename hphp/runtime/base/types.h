@@ -21,6 +21,7 @@
 #include <limits>
 
 #include "hphp/util/low-ptr.h"
+#include "hphp/runtime/base/header-kind.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,20 +85,6 @@ enum class Mode {
 
 namespace Collection {
 
-enum Type : uint8_t { // Stored in ObjectData::o_subclassData.
-  // Values must be contiguous integers (for ArrayIter::initFuncTable).
-  InvalidType = 0,
-  VectorType = 1,
-  MapType = 2,
-  SetType = 3,
-  PairType = 4,
-  ImmVectorType = 5,
-  ImmMapType = 6,
-  ImmSetType = 7,
-};
-
-constexpr size_t MaxNumTypes = 8;
-
 inline Type stringToType(const char* str, size_t len) {
   switch (len) {
     case 6:
@@ -122,34 +109,6 @@ inline Type stringToType(const char* str, size_t len) {
 }
 inline Type stringToType(const std::string& s) {
   return stringToType(s.c_str(), s.size());
-}
-inline bool isVectorType(Collection::Type ctype) {
-  return (ctype == Collection::VectorType ||
-          ctype == Collection::ImmVectorType);
-}
-inline bool isMapType(Collection::Type ctype) {
-  return (ctype == Collection::MapType ||
-          ctype == Collection::ImmMapType);
-}
-inline bool isSetType(Collection::Type ctype) {
-  return (ctype == Collection::SetType ||
-          ctype == Collection::ImmSetType);
-}
-inline bool isInvalidType(Collection::Type ctype) {
-  return (ctype == Collection::InvalidType ||
-          static_cast<size_t>(ctype) >= Collection::MaxNumTypes);
-}
-inline bool isMutableType(Collection::Type ctype) {
-  return (ctype == Collection::VectorType ||
-          ctype == Collection::MapType ||
-          ctype == Collection::SetType);
-}
-inline bool isImmutableType(Collection::Type ctype) {
-  return !isMutableType(ctype);
-}
-
-inline bool isTypeWithPossibleIntStringKeys(Collection::Type ctype) {
-  return Collection::isSetType(ctype) || Collection::isMapType(ctype);
 }
 
 }
@@ -201,15 +160,6 @@ inline RefResult ref(const Variant& v) {
 inline RefResult ref(Variant& v) {
   return *(RefResultValue*)&v;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-class GlobalsArray;
-class ObjectAllocatorBase;
-class Profiler;
-class CodeCoverage;
-
-using GlobalVariables = GlobalsArray;
 
 ///////////////////////////////////////////////////////////////////////////////
 

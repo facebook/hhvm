@@ -474,7 +474,7 @@ const StaticString
   s_days("days");
 
 Variant HHVM_METHOD(DateInterval, __get,
-                    Variant member) {
+                    const Variant& member) {
   DateIntervalData* data = Native::data<DateIntervalData>(this_);
   if (member.isString()) {
     if (same(member, s_y)) {
@@ -513,8 +513,8 @@ Variant HHVM_METHOD(DateInterval, __get,
 }
 
 Variant HHVM_METHOD(DateInterval, __set,
-                    Variant member,
-                    Variant value) {
+                    const Variant& member,
+                    const Variant& value) {
   DateIntervalData* data = Native::data<DateIntervalData>(this_);
   if (member.isString()) {
     if (same(member, s_y)) {

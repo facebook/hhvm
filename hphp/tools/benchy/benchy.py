@@ -141,7 +141,14 @@ def build_branches(branches):
             sys.stdout = stdout
 
 
-def run_benchmarks(suites, benchmarks, run_perf, inner, outer, branches):
+def run_benchmarks(
+        suites,
+        benchmarks,
+        run_perf,
+        warmup,
+        inner,
+        outer,
+        branches):
     """Runs the benchmarks on the branches by invoking the harness script.
 
     """
@@ -150,15 +157,18 @@ def run_benchmarks(suites, benchmarks, run_perf, inner, outer, branches):
     suite_str = ' '.join(["--suite %s" % s for s in suites])
     benchmark_str = ' '.join(["--benchmark %s" % b for b in benchmarks])
     perf_str = '--perf' if run_perf else ''
+    warmup_str = '' if warmup is None else '--warmup {0}'.format(warmup)
     inner_str = '' if inner is None else '--inner {0}'.format(inner)
     outer_str = '' if outer is None else '--outer {0}'.format(outer)
     branch_str = ' '.join([b.format() for b in branches])
 
-    command = "{harness} {suites} {benchmarks} {perf} {inner} {outer} {branch}"
+    command = ("{harness} {suites} {benchmarks} {perf} "
+        "{warmup} {inner} {outer} {branch}")
     utils.run_command(command.format(harness=benchy_path,
                                suites=suite_str,
                                benchmarks=benchmark_str,
                                perf=perf_str,
+                               warmup=warmup_str,
                                inner=inner_str,
                                outer=outer_str,
                                branch=branch_str))
@@ -203,6 +213,10 @@ def main():
     parser.add_argument('--benchmark', action='append', type=str,
                         help='Run any benchmark that matches the provided '
                              'regex')
+    parser.add_argument('--warmup', action='store', type=int,
+                        help='Number of inner iterations of the benchmark to '
+                             'run and discard before the normal number of '
+                             'inner iterations')
     parser.add_argument('--inner', action='store', type=int,
                         help='Number of iterations of the benchmark to run '
                              'for each VM instance')
@@ -244,6 +258,7 @@ def main():
         included_benchmarks = []
 
     config.set_verbose_level(args.verbose)
+    warmup = args.warmup
     inner = args.inner
     outer = args.outer
     should_build = not (args.no_build or args.re_print)
@@ -264,7 +279,7 @@ def main():
     if should_run_benchmarks:
         run_benchmarks(included_suites,
                       included_benchmarks,
-                      run_perf, inner, outer, branches)
+                      run_perf, warmup, inner, outer, branches)
     process_results(branches, output_mode)
 
 

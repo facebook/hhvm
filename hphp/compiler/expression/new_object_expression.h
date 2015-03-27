@@ -35,8 +35,6 @@ public:
   bool isTemporary() const { return true; }
 private:
   bool m_dynamic;
-  std::string m_receiverTemp;
-  int m_objectTemp;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

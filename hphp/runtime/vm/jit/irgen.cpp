@@ -114,8 +114,7 @@ SSATmp* genInstruction(HTS& env, IRInstruction* inst) {
     assert(inst->taken() && inst->taken()->isCatch());
   }
 
-  return env.irb->optimizeInst(inst, IRBuilder::CloneFlag::Yes, nullptr,
-    folly::none);
+  return env.irb->optimizeInst(inst, IRBuilder::CloneFlag::Yes, nullptr);
 }
 }
 
@@ -131,9 +130,17 @@ void checkCold(HTS& env, TransID transId) {
   gen(env, CheckCold, makeExitOpt(env, transId), TransIDData(transId));
 }
 
-void ringbuffer(HTS& env, Trace::RingBufferType t, SrcKey sk, int level) {
+void ringbufferEntry(HTS& env, Trace::RingBufferType t, SrcKey sk, int level) {
   if (!Trace::moduleEnabled(Trace::ringbuffer, level)) return;
-  gen(env, RBTrace, RBTraceData(t, sk));
+  gen(env, RBTraceEntry, RBEntryData(t, sk));
+}
+
+void ringbufferMsg(HTS& env,
+                   Trace::RingBufferType t,
+                   const StringData* msg,
+                   int level) {
+  if (!Trace::moduleEnabled(Trace::ringbuffer, level)) return;
+  gen(env, RBTraceMsg, RBMsgData(t, msg));
 }
 
 void prepareEntry(HTS& env) {
@@ -149,33 +156,32 @@ void prepareForSideExit(HTS& env) { spillStack(env); }
 
 void endRegion(HTS& env) {
   auto const nextSk = curSrcKey(env).advanced(curUnit(env));
-  endRegion(env, nextSk.offset());
+  endRegion(env, nextSk);
 }
 
-void endRegion(HTS& env, Offset nextPc) {
+void endRegion(HTS& env, SrcKey nextSk) {
   FTRACE(1, "------------------- endRegion ---------------------------\n");
   if (!fp(env)) {
     // The function already returned.  There's no reason to generate code to
     // try to go to the next part of it.
     return;
   }
-  if (nextPc >= curFunc(env)->past()) {
-    // We have fallen off the end of the func's bytecodes. This happens
-    // when the function's bytecodes end with an unconditional
-    // backwards jump so that nextPc is out of bounds and causes an
-    // assertion failure in unit.cpp. The common case for this comes
-    // from the default value funclets, which are placed after the end
-    // of the function, with an unconditional branch back to the start
-    // of the function. So you should see this in any function with
-    // default params.
+  if (nextSk.offset() >= curFunc(env)->past()) {
+    // We have fallen off the end of the func's bytecodes. This
+    // happens when the function's bytecodes end with an unconditional
+    // backwards jump so that nextSk.offset() is out of bounds and
+    // causes an assertion failure in unit.cpp. The common case for
+    // this comes from the default value funclets, which are placed
+    // after the end of the function, with an unconditional branch
+    // back to the start of the function. So you should see this in
+    // any function with default params.
     return;
   }
-  prepareForNextHHBC(env, nullptr, nextPc, true);
+  prepareForNextHHBC(env, nullptr, nextSk, true);
   spillStack(env);
-  auto dest = SrcKey{curSrcKey(env), nextPc};
   gen(env, AdjustSP, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
-    sp(env));
-  gen(env, ReqBindJmp, ReqBindJmpData { dest }, sp(env));
+      sp(env));
+  gen(env, ReqBindJmp, ReqBindJmpData { nextSk }, sp(env));
 }
 
 // All accesses to the stack and locals in this function use DataTypeGeneric so
@@ -232,7 +238,7 @@ void endBlock(HTS& env, Offset next, bool nextIsMerge) {
 
 void prepareForNextHHBC(HTS& env,
                         const NormalizedInstruction* ni,
-                        Offset newOff,
+                        SrcKey newSk,
                         bool lastBcInst) {
   FTRACE(1, "------------------- prepareForNextHHBC ------------------\n");
   env.currentNormalizedInstruction = ni;
@@ -247,7 +253,14 @@ void prepareForNextHHBC(HTS& env,
     "Inlining while still at the first region instruction."
   );
 
-  env.bcStateStack.back().setOffset(newOff);
+  always_assert(env.bcStateStack.size() >= env.inlineLevel + 1);
+  auto pops = env.bcStateStack.size() - 1 - env.inlineLevel;
+  while (pops--) env.bcStateStack.pop_back();
+
+  always_assert_flog(env.bcStateStack.back().func() == newSk.func(),
+                     "Tried to update current SrcKey with a different func");
+
+  env.bcStateStack.back().setOffset(newSk.offset());
   updateMarker(env);
   env.lastBcInst = lastBcInst;
   env.catchCreator = nullptr;
@@ -267,7 +280,7 @@ void prepareForHHBCMergePoint(HTS& env) {
   // redefine StkPtrs, but calls still need to do that for now, so we
   // need this hack.
   auto spOff = IRSPOffset{-(env.irb->syncedSpLevel() - env.irb->spOffset())};
-  gen(env, AdjustSP, IRSPOffsetData{ spOff }, sp(env));
+  gen(env, AdjustSP, IRSPOffsetData { spOff }, sp(env));
 }
 
 FPAbsOffset logicalStackDepth(const HTS& env) {

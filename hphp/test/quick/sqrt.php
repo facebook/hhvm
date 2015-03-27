@@ -1,5 +1,16 @@
 <?php
+
+function neg_zero() {
+  $zero = -1.0;
+  while ($zero != 0.0) {
+    $zero /= 2.0;
+  }
+  return $zero;
+}
+
 function main($f) {
+  var_dump(sqrt(0.0));
+  var_dump(sqrt(neg_zero()));
   var_dump(sqrt(5));
   var_dump(sqrt(2.5));
   var_dump(sqrt(-3));

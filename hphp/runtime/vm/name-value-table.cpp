@@ -26,12 +26,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Dummy DT for named locals; keep out of conflict with actual DataTypes in
- * base/datatype.h.
- */
-constexpr DataType kNamedLocalDataType = kExtraInvalidDataType;
-
 NameValueTable::NameValueTable() {
   allocate(folly::nextPowTwo(RuntimeOption::EvalVMInitialGlobalTableSize));
 }

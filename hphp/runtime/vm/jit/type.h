@@ -362,7 +362,8 @@ public:
   /*
    * Stringify the Type.
    *
-   * constValString: @requires: isConst()
+   * constValString: @requires: hasConstVal() ||
+   *                            subtypeOfAny(Uninit, InitNull, Nullptr)
    */
   std::string toString() const;
   std::string constValString() const;
@@ -521,36 +522,39 @@ public:
   // Constant introspection.                                            [const]
 
   /*
-   * Does this Type represent a known value?
+   * Does this Type have a constant value? If true, we can call xxVal().
+   *
+   * Note: Bottom is a type with no value, and Uninit/InitNull/Nullptr are
+   * considered types with a single unique value, so this function returns false
+   * for those types. You may want to explicitly check for them as needed.
+   *
    */
-  bool isConst() const;
+  bool hasConstVal() const;
 
   /*
-   * Does this Type represent a known value subtyping `t'?
-   *
-   * @returns: isConst() && *this <= t
+   * @return hasConstVal() && *this <= t.
    */
-  bool isConst(Type t) const;
+  bool hasConstVal(Type t) const;
 
   /*
    * Does this Type represent the constant val `val'?
    *
-   * @returns: *this <= cns(val)
+   * @returns: hasConstVal(cns(val))
    */
   template<typename T>
-  bool isConst(T val) const;
+  bool hasConstVal(T val) const;
 
   /*
    * Return the const value for a const Type as a uint64_t.
    *
-   * @requires: isConst()
+   * @requires: hasConstVal()
    */
   uint64_t rawVal() const;
 
   /*
    * Return the const value for a const Type.
    *
-   * @requires: *this <= Type::T && m_hasConstVal
+   * @requires: hasConstVal(Type::T)
    */
   bool boolVal() const;
   int64_t intVal() const;

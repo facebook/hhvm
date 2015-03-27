@@ -97,20 +97,18 @@ private:
     auto p = reinterpret_cast<const char*>(vp);
     return p >= rds_.begin() && p < rds_.end();
   }
+  template<class T> void enqueue(T* p) {
+    work_.push_back(reinterpret_cast<const Header*>(p));
+  }
 
 private:
   // information about heap objects, indexed by valid object starts.
   std::unordered_map<const void*,Meta> meta_;
-
-  std::vector<const ArrayData*> arrs_;
-  std::vector<const ObjectData*> objs_;
-  std::vector<const ResourceData*> ress_;
-
+  std::vector<const Header*> work_;
+  folly::Range<const char*> rds_; // full mmap'd rds section.
   size_t total_;        // bytes allocated in heap
   size_t marked_;       // bytes marked exactly
   size_t ambig_marked_; // bytes marked ambiguously
-
-  folly::Range<const char*> rds_; // full mmap'd rds section.
 };
 
 // mark the object at p, return true if first time.
@@ -125,30 +123,50 @@ bool Marker::mark(const void* p) {
 void Marker::operator()(const ObjectData* p) {
   if (!p) return;
   if (p->getAttribute(ObjectData::HasNativeData)) {
+    // HNI style native object; mark the NativeNode header, queue the object.
+    // [NativeNode][NativeData][ObjectData][props] is one allocation.
     auto h = Native::getNativeNode(p, p->getVMClass()->getNativeDataInfo());
-    if (mark(h)) objs_.push_back(p);
+    if (mark(h)) {
+      enqueue(p);
+    }
   } else if (reinterpret_cast<const Header*>(p)->kind_ == HK::ResumableObj) {
+    // Resumable object. we also need to scan the actrec, locals,
+    // and iterators attached to it. It's wrapped by a ResumableNode header,
+    // which is what we need to mark.
+    // [ResumableNode][locals][Resumable][ObjectData<ResumableObj>]
     auto r = Resumable::FromObj(p);
     auto frame = reinterpret_cast<const TypedValue*>(r) -
                  r->actRec()->func()->numSlotsInFrame();
     auto node = reinterpret_cast<const ResumableNode*>(frame) - 1;
     assert(node->kind == HK::Resumable);
-    if (mark(node)) objs_.push_back(p);
-    // p points to a resumable object. when we scan it, we also need to
-    // scan the actrec, locals, and iterators attached to it, in case they
-    // aren't reached while scanning the stack.
+    if (mark(node)) {
+      enqueue(p);
+    }
   } else {
-    if (mark(p)) objs_.push_back(p);
+    // Ordinary non-builtin object subclass, or IDL-style native object.
+    if (mark(p)) {
+      enqueue(p);
+    }
   }
 }
 
+// Utility to just extract the kind field from an arbitrary Header ptr.
+inline HeaderKind kind(const void* p) {
+  return static_cast<const Header*>(p)->kind_;
+}
+
 void Marker::operator()(const ResourceData* p) {
-  if (p && mark(p)) ress_.push_back(p);
+  if (p && mark(p)) {
+    assert(kind(p) == HK::Resource);
+    enqueue(p);
+  }
 }
 
 // ArrayData objects could be static
 void Marker::operator()(const ArrayData* p) {
-  if (counted(p) && mark(p)) arrs_.push_back(p);
+  if (counted(p) && mark(p)) {
+    enqueue(p);
+  }
 }
 
 // RefData objects contain at most one ptr, scan it eagerly.
@@ -158,7 +176,9 @@ void Marker::operator()(const RefData* p) {
     // we already scanned p's body as part of scanning RDS.
     return;
   }
-  if (mark(p)) p->scan(*this);
+  if (mark(p)) {
+    enqueue(p);
+  }
 }
 
 // The only thing interesting in a string is a possible APCString*,
@@ -214,13 +234,58 @@ void Marker::operator()(const void* start, size_t len) {
   auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
   for (; s < e; s++) {
     auto p = *s;
-    if (meta_.find(p) == meta_.end()) continue;
-    // mark p. but we don't know if it's pointing to a real object.
-    // need to scan the heap to find real objects.
-    // maybe truncate low bits of p, e.g. when it's this|class
-    auto& meta = meta_[p];
-    meta.cmark = true;
-    // this should queue the object to be scanned, but how do we know its type?
+    auto it = meta_.find(p);
+    if (it == meta_.end()) continue;
+    // mark p if it's an interesting kind. since we have metadata for it,
+    // it must have a valid header.
+    auto h = reinterpret_cast<const Header*>(p);
+    switch (h->kind_) {
+      case HK::Apc:
+      case HK::Globals:
+      case HK::Proxy:
+      case HK::Ref:
+      case HK::Resource:
+      case HK::Packed:
+      case HK::Struct:
+      case HK::Mixed:
+      case HK::Empty:
+      case HK::Object:
+      case HK::ResumableObj:
+      case HK::AwaitAllWH:
+      case HK::Vector:
+      case HK::Map:
+      case HK::Set:
+      case HK::Pair:
+      case HK::ImmVector:
+      case HK::ImmMap:
+      case HK::ImmSet:
+      case HK::Resumable:
+      case HK::BigObj: // hmm.. what lives inside this?
+        it->second.cmark = true;
+        if (mark(p)) {
+          enqueue(p);
+        }
+        break;
+      case HK::Native:
+        it->second.cmark = true;
+        if (mark(p)) {
+          enqueue(Native::obj(&h->native_));
+        }
+        break;
+      case HK::String:
+        it->second.cmark = true;
+        mark(p);
+        break;
+      case HK::SmallMalloc:
+      case HK::BigMalloc:
+      case HK::Free:
+      case HK::Hole:
+      case HK::Debug:
+        break;
+    }
+    // for ObjectData embedded after NativeNode, ResumableNode, BigObj,
+    // do we want meta entries for them, directly? probably, then we can
+    // deal with pointers to either the ObjectData or the wrapper.
   }
 }
 
@@ -239,7 +304,6 @@ void Marker::init() {
       case HK::Apc:
       case HK::Globals:
       case HK::Proxy:
-      case HK::Resource:
         assert(h->count_ > 0);
         total_ += h->size();
         break;
@@ -248,12 +312,24 @@ void Marker::init() {
         assert(h->count_ > 0 || !h->ref_.zIsRef());
         total_ += h->size();
         break;
+      case HK::Resource:
+        // ZendNormalResourceData objects sometimes never incref'd
+        // TODO: t5969922, t6545412 might be a real bug.
+        total_ += h->size();
+        break;
       case HK::Packed:
       case HK::Struct:
       case HK::Mixed:
       case HK::Empty:
       case HK::String:
       case HK::Object:
+      case HK::Vector:
+      case HK::Map:
+      case HK::Set:
+      case HK::Pair:
+      case HK::ImmVector:
+      case HK::ImmMap:
+      case HK::ImmSet:
       case HK::ResumableObj:
       case HK::AwaitAllWH:
         // count==0 can be witnessed, see above
@@ -274,20 +350,13 @@ void Marker::init() {
   });
 }
 
-template<class T> T* take(std::vector<T*>& v) {
-  if (v.empty()) return nullptr;
-  auto e = v.back();
-  v.pop_back();
-  return e;
-}
-
 void Marker::trace() {
   scanRoots(*this);
-  do {
-    while (auto arr = take(arrs_)) arr->scan(*this);
-    while (auto obj = take(objs_)) obj->scan(*this);
-    while (auto res = take(ress_)) res->scan(*this);
-  } while (!arrs_.empty() || !objs_.empty());
+  while (!work_.empty()) {
+    auto h = work_.back();
+    work_.pop_back();
+    scanHeader(h, *this);
+  }
 }
 
 // another pass through the heap now that everything is marked.
@@ -307,6 +376,13 @@ void Marker::sweep() {
       case HK::Proxy:
       case HK::String:
       case HK::Object:
+      case HK::Vector:
+      case HK::Map:
+      case HK::Set:
+      case HK::Pair:
+      case HK::ImmVector:
+      case HK::ImmMap:
+      case HK::ImmSet:
       case HK::ResumableObj:
       case HK::AwaitAllWH:
       case HK::Resource:
@@ -335,7 +411,7 @@ void Marker::sweep() {
         break;
     }
   });
-  TRACE(1, "sweep total %lu marked %lu cmarked %lu\n",
+  TRACE(1, "sweep total %lu marked %lu ambig-marked %lu\n",
         total_, marked_, ambig_marked_);
 }
 }

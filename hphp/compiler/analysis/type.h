@@ -144,34 +144,10 @@ public:
   }
 
   /**
-   * Whether a type can be used as another type.
-   */
-  static bool IsLegalCast(AnalysisResultConstPtr ar, TypePtr from, TypePtr to);
-
-  /**
    * Find the intersection between two sets of types.
    */
   static TypePtr Intersection(AnalysisResultConstPtr ar,
                               TypePtr from, TypePtr to);
-
-  /**
-   * Whether or not this type is mapped to type Variant
-   * in the runtime
-   */
-  static bool IsMappedToVariant(TypePtr t);
-
-  /**
-   * Whether or not a cast is needed during code generation.
-   */
-  static bool IsCastNeeded(AnalysisResultConstPtr ar, TypePtr from, TypePtr to);
-
-  /**
-   * When a variable's type is t1, and it's used as t2, do we need to
-   * coerce variable's type? Normally, if t2 can be legally casted to t1,
-   * this returns false.
-   */
-  static bool IsCoercionNeeded(AnalysisResultConstPtr ar,
-                               TypePtr t1, TypePtr t2);
 
   /**
    * When a variable is assigned with two types, what type a variable
@@ -212,15 +188,6 @@ public:
    */
   static bool IsExactType(KindOf kindOf);
 
-  static bool HasFastCastMethod(TypePtr t);
-
-  /**
-   *  Returns the name of the method used to fast cast from
-   *  variant to dst
-   */
-  static std::string GetFastCastMethod(
-      TypePtr dst, bool allowRef, bool forConst);
-
 private:
   Type(KindOf kindOf, const std::string &name);
 
@@ -233,29 +200,14 @@ public:
   bool isExactType() const { return IsExactType(m_kindOf); }
   bool mustBe(KindOf kindOf) const { return !(m_kindOf & ~kindOf); }
   bool couldBe(KindOf kindOf) const { return m_kindOf & kindOf; }
-  bool isSubsetOf(TypePtr t) const {
-    return m_kindOf != t->m_kindOf && mustBe(t->m_kindOf);
-  }
   KindOf getKindOf() const { return m_kindOf;}
   bool isInteger() const;
-  bool isStandardObject() const;
   bool isSpecificObject() const;
-  bool isNonConvertibleType() const; // other types cannot convert to them
-  bool isPrimitive() const {
-    return IsExactType(m_kindOf) && (m_kindOf <= KindOfDouble) &&
-      (m_kindOf != KindOfVoid);
-  }
   bool isNoObjectInvolved() const;
   const std::string &getName() const { return m_name;}
-  static TypePtr combinedArithmeticType(TypePtr t1, TypePtr t2);
 
   ClassScopePtr getClass(AnalysisResultConstPtr ar,
                          BlockScopeRawPtr scope) const;
-
-  /**
-   * Type hint names in PHP.
-   */
-  std::string getPHPName();
 
   /**
    * Debug dump.

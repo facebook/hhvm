@@ -72,9 +72,7 @@ SSATmp* opt_is_a(HTS& env, uint32_t numArgs) {
   // behave the same as instanceof (which doesn't allow a string as the tested
   // object). Don't do the conversion if we're not sure this arg is false.
   auto const allowStringType = topType(env, BCSPOffset{0});
-  if (!(allowStringType <= Type::Bool)
-      || !allowStringType.isConst()
-      || allowStringType.boolVal()) {
+  if (!allowStringType.hasConstVal(Type::Bool) || allowStringType.boolVal()) {
     return nullptr;
   }
 
@@ -88,7 +86,7 @@ SSATmp* opt_is_a(HTS& env, uint32_t numArgs) {
 
   if (objType <= Type::Obj) {
     auto const classnameType = topType(env, BCSPOffset{1});
-    if (classnameType <= Type::StaticStr && classnameType.isConst()) {
+    if (classnameType.hasConstVal(Type::StaticStr)) {
       return implInstanceOfD(
         env,
         topC(env, BCSPOffset{2}),
@@ -108,7 +106,7 @@ SSATmp* opt_count(HTS& env, uint32_t numArgs) {
   auto const val = topC(env, BCSPOffset{1});
 
   // Bail if we're trying to do a recursive count()
-  if (!mode->isConst(0)) return nullptr;
+  if (!mode->hasConstVal(0)) return nullptr;
 
   return gen(env, Count, val);
 }
@@ -124,15 +122,15 @@ SSATmp* opt_ord(HTS& env, uint32_t numArgs) {
 
   // intercept constant, non-string ord() here instead of OrdStr simplify stage.
   // OrdStr depends on a string as input for its vasm implementation.
-  if (arg->isConst(Type::Bool)) {
+  if (arg->hasConstVal(Type::Bool)) {
     // ord((string)true)===ord("1"), ord((string)false)===ord("")
     return cns(env, int64_t{arg_type.boolVal() ? '1' : 0});
   } else if (arg_type <= Type::Null) {
     return cns(env, int64_t{0});
-  } else if (arg->isConst(Type::Int)) {
+  } else if (arg->hasConstVal(Type::Int)) {
     const auto conv = folly::to<std::string>(arg_type.intVal());
     return cns(env, int64_t{conv[0]});
-  } else if (arg->isConst(Type::Dbl)) {
+  } else if (arg->hasConstVal(Type::Dbl)) {
     const auto conv = folly::to<std::string>(arg_type.dblVal());
     return cns(env, int64_t{conv[0]});
   }
@@ -147,7 +145,7 @@ SSATmp* opt_ini_get(HTS& env, uint32_t numArgs) {
   // static string with a constant literal value so we can get the string value
   // at JIT time.
   auto const argType = topType(env, BCSPOffset{0});
-  if (!(argType <= Type::StaticStr) || !argType.isConst()) {
+  if (!(argType.hasConstVal(Type::StaticStr))) {
     return nullptr;
   }
 
@@ -193,7 +191,7 @@ SSATmp* opt_in_array(HTS& env, uint32_t numArgs) {
   }
 
   auto const haystackType = topType(env, BCSPOffset{1});
-  if (!(haystackType <= Type::StaticArr) || !haystackType.isConst()) {
+  if (!haystackType.hasConstVal(Type::StaticArr)) {
     // Haystack isn't statically known
     return nullptr;
   }
@@ -1068,7 +1066,7 @@ void emitIdx(HTS& env) {
       auto const okMap = [&]() {
         if (cls != c_Map::classof()) return false;
         if (keyType <= Type::Int) return true;
-        if (!keyType.isConst()) return false;
+        if (!keyType.hasConstVal()) return false;
         int64_t dummy;
         if (keyType.strVal()->isStrictlyInteger(dummy)) return false;
         return true;
@@ -1132,7 +1130,7 @@ void emitStrlen(HTS& env) {
 
   if (inType <= Type::Str) {
     auto const input = popC(env);
-    if (input->isConst()) {
+    if (input->hasConstVal()) {
       // static string; fold its strlen operation
       push(env, cns(env, input->strVal()->size()));
       return;
@@ -1183,4 +1181,3 @@ void emitSilence(HTS& env, Id localId, SilenceOp subop) {
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

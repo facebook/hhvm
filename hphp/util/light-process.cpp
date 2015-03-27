@@ -20,9 +20,10 @@
 
 #include <boost/scoped_array.hpp>
 
+#include <sys/resource.h>
+#include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/socket.h>
 
 #include <afdt.h>
 #include <grp.h>
@@ -34,44 +35,25 @@
 
 #include <folly/String.h>
 
-#include "hphp/util/process.h"
+#include "hphp/util/afdt-util.h"
+#include "hphp/util/compatibility.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/process.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 // helper functions
 
-Mutex LightProcess::s_mutex;
+namespace {
 
-static bool send_fd(int afdt_fd, int fd) {
-  afdt_error_t err = AFDT_ERROR_T_INIT;
-  errno = 0;
-  int ret = afdt_send_fd_msg(afdt_fd, 0, 0, fd, &err);
-  if (ret < 0 && errno == 0) {
-    // Set non-empty errno if afdt_send_fd_msg doesn't set one on error
-    errno = EPROTO;
-  }
-  return ret >= 0;
-}
+bool s_trackProcessTimes = false;
+Mutex s_mutex;
 
-static int recv_fd(int afdt_fd) {
-  int fd;
-  afdt_error_t err = AFDT_ERROR_T_INIT;
-  uint8_t afdt_buf[AFDT_MSGLEN];
-  uint32_t afdt_len;
-  errno = 0;
-  if (afdt_recv_fd_msg(afdt_fd, afdt_buf, &afdt_len, &fd, &err) < 0) {
-    if (errno == 0) {
-      // Set non-empty errno if afdt_send_fd_msg doesn't set one on error
-      errno = EPROTO;
-    }
-    return -1;
-  }
-  return fd;
-}
+using afdt::send_fd;
+using afdt::recv_fd;
 
-static char **build_envp(const std::vector<std::string> &env) {
+char **build_envp(const std::vector<std::string> &env) {
   char **envp = nullptr;
   int size = env.size();
   if (size) {
@@ -85,87 +67,93 @@ static char **build_envp(const std::vector<std::string> &env) {
   return envp;
 }
 
-static void close_fds(const std::vector<int> &fds) {
+void close_fds(const std::vector<int> &fds) {
   for (auto fd : fds) {
     ::close(fd);
   }
 }
 
-static void send_raw(int afdt_fd, const void* data, uint32_t len) {
-  afdt_error_t err = AFDT_ERROR_T_INIT;
-  while (len > 0) {
-    auto l = std::min<uint32_t>(len, AFDT_MSGLEN);
-    if (afdt_send_plain_msg(afdt_fd, (uint8_t*)data, l, &err) < 0) {
-      throw Exception("Failed in afdt_send: %s",
-                      err.message && err.message[0] ? err.message :
-                      folly::errnoStr(errno).c_str());
-    }
-    len -= l;
-    data = (char*)data + l;
+template<class Head, class... Tail>
+void lwp_write(int afdt_fd, const Head& h, Tail&&... args) {
+  if (afdt::sendRaw(afdt_fd, h, std::forward<Tail>(args)...)) {
+    throw Exception("Failed in afdt::sendRaw: %s",
+                    folly::errnoStr(errno).c_str());
   }
 }
 
-static void recv_raw(int afdt_fd, void* data, uint32_t len) {
-  afdt_error_t err = AFDT_ERROR_T_INIT;
-  while (len > 0) {
-    auto l = std::min<uint32_t>(len, AFDT_MSGLEN);
-
-    if (afdt_recv_plain_msg(afdt_fd, (uint8_t*)data, &l, &err) < 0) {
-      throw Exception("Failed in afdt_recv: %s",
-                      err.message && err.message[0] ? err.message :
-                      folly::errnoStr(errno).c_str());
-    }
-    assert(l <= len);
-    len -= l;
-    data = (char*)data + l;
+template<class Head, class... Tail>
+void lwp_read(int afdt_fd, Head& h, Tail&... args) {
+  if (afdt::recvRaw(afdt_fd, h, args...)) {
+    throw Exception("Failed in afdt::recvRaw: %s",
+                    folly::errnoStr(errno).c_str());
   }
 }
 
-static void lwp_write(int afdt_fd, const std::string &buf) {
-  size_t len = buf.length();
-  send_raw(afdt_fd, &len, sizeof(len));
-  send_raw(afdt_fd, buf.c_str(), len);
+// not thread safe - needs a lock when called from the main
+// process.
+int popen_impl(const char* cmd, const char* mode, pid_t* out_pid) {
+  int p[2];
+  auto const read = *mode == 'r';
+  if (!read && *mode != 'w') return -1;
+
+  if (pipe2(p, O_CLOEXEC) < 0) {
+    return -1;
+  }
+
+  auto pid = fork();
+  if (pid < 0) {
+    close(p[0]);
+    close(p[1]);
+    return -1;
+  }
+  int child_pipe = read ? 1 : 0;
+  if (pid == 0) {
+    // child
+
+    // replace stdin or stdout with the appropriate end
+    // of the pipe
+    if (p[child_pipe] == child_pipe) {
+      // pretty unlikely, but if it was we must clear CLOEXEC,
+      // and the only way to do that is to dup it to a new fd,
+      // and then dup2 it back
+      p[child_pipe] = fcntl(child_pipe, F_DUPFD_CLOEXEC, 3);
+    }
+    dup2(p[child_pipe], child_pipe);
+    // no need to close p[child_pipe] because of O_CLOEXEC
+
+    signal(SIGINT, SIG_DFL);
+    sigset_t eset;
+    sigemptyset(&eset);
+    sigprocmask(SIG_SETMASK, &eset, nullptr);
+    execl("/bin/sh", "sh", "-c", cmd, nullptr);
+    Logger::Warning("Failed to exec: `%s'", cmd);
+    _exit(1);
+  }
+  // parent
+
+  // close the pipe we're not using
+  close(p[child_pipe]);
+  *out_pid = pid;
+  return p[1-child_pipe];
 }
 
-static void lwp_write_int32(int afdt_fd, int32_t d) {
-  send_raw(afdt_fd, &d, sizeof(d));
-}
-
-static void lwp_write_int64(int afdt_fd, int64_t d) {
-  send_raw(afdt_fd, &d, sizeof(d));
-}
-
-static void lwp_read(int afdt_fd, std::string &buf) {
-  size_t len;
-  recv_raw(afdt_fd, &len, sizeof(len));
-  char *buffer = (char *)malloc(len);
-  recv_raw(afdt_fd, buffer, len);
-  buf.assign(buffer, len);
-  free(buffer);
-}
-
-static void lwp_read_int32(int afdt_fd, int32_t &d) {
-  recv_raw(afdt_fd, &d, sizeof(d));
-}
-
-static void lwp_read_int64(int afdt_fd, int64_t &d) {
-  recv_raw(afdt_fd, &d, sizeof(d));
+int64_t ru2microseconds(const rusage& ru) {
+  int64_t time_us = ru.ru_utime.tv_usec;
+  time_us += ru.ru_stime.tv_usec;
+  int64_t time_s = ru.ru_utime.tv_sec;
+  time_s += ru.ru_stime.tv_sec;
+  return time_us + time_s * 1000000;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // shadow process tasks
 
-static void do_popen(int afdt_fd) {
-  std::string buf;
-  std::string cwd;
+void do_popen(int afdt_fd) {
+  std::string mode, buf, cwd;
 
-  lwp_read(afdt_fd, buf);
-  bool read_only = (buf[0] == 'r');
-
-  lwp_read(afdt_fd, buf);
+  lwp_read(afdt_fd, mode, buf, cwd);
 
   std::string old_cwd;
-  lwp_read(afdt_fd, cwd);
 
   if (!cwd.empty()) {
     old_cwd = Process::GetCurrentDirectory();
@@ -178,67 +166,38 @@ static void do_popen(int afdt_fd) {
     }
   }
 
-  FILE *f = buf[0] ? ::popen(buf.c_str(), read_only ? "r" : "w") : nullptr;
+  pid_t pid;
+
+  auto fd = buf.empty() ? -1 :
+    popen_impl(buf.c_str(), mode.c_str(), &pid);
 
   if (!old_cwd.empty() && chdir(old_cwd.c_str())) {
     // only here if we can't change the cwd back
   }
 
-  if (f == nullptr) {
+  if (fd < 0) {
     Logger::Error("Light process failed popen: %d (%s).", errno,
                   folly::errnoStr(errno).c_str());
     lwp_write(afdt_fd, "error");
   } else {
-    lwp_write(afdt_fd, "success");
-    lwp_write_int64(afdt_fd, (int64_t)f);
-    int fd = fileno(f);
+    lwp_write(afdt_fd, "success", pid);
     send_fd(afdt_fd, fd);
+    // the fd is now owned by the main process, close our copy
+    close(fd);
   }
 }
 
-static void do_pclose(int afdt_fd) {
-  int64_t fptr = 0;
-  lwp_read_int64(afdt_fd, fptr);
-  FILE *f = (FILE *)fptr;
-  int ret = ::pclose(f);
-
-  lwp_write_int32(afdt_fd, ret);
-  if (ret < 0) {
-    lwp_write_int32(afdt_fd, errno);
-  }
-}
-
-static void do_proc_open(int afdt_fd) {
-  std::string cmd;
-  lwp_read(afdt_fd, cmd);
-
-  std::string cwd;
-  lwp_read(afdt_fd, cwd);
-
-  std::string buf;
-  int env_size = 0;
+void do_proc_open(int afdt_fd) {
+  std::string cmd, cwd;
   std::vector<std::string> env;
-  lwp_read_int32(afdt_fd, env_size);
-  for (int i = 0; i < env_size; i++) {
-    lwp_read(afdt_fd, buf);
-    env.push_back(buf);
-  }
-
-  int pipe_size = 0;
-  lwp_read_int32(afdt_fd, pipe_size);
   std::vector<int> pvals;
-  for (int i = 0; i < pipe_size; i++) {
-    int fd_value;
-    lwp_read_int32(afdt_fd, fd_value);
-    pvals.push_back(fd_value);
-  }
+  lwp_read(afdt_fd, cmd, cwd, env, pvals);
 
   std::vector<int> pkeys;
-  for (int i = 0; i < pipe_size; i++) {
+  for (int i = 0; i < pvals.size(); i++) {
     int fd = recv_fd(afdt_fd);
     if (fd < 0) {
-      lwp_write(afdt_fd, "error");
-      lwp_write_int32(afdt_fd, EPROTO);
+      lwp_write(afdt_fd, "error", (int32_t)EPROTO);
       close_fds(pkeys);
       return;
     }
@@ -247,15 +206,14 @@ static void do_proc_open(int afdt_fd) {
 
   // indicate error if an empty command was received
   if (cmd.length() == 0) {
-    lwp_write(afdt_fd, "error");
-    lwp_write_int32(afdt_fd, ENOENT);
+    lwp_write(afdt_fd, "error", (int32_t)ENOENT);
     return;
   }
 
   // now ready to start the child process
   pid_t child = fork();
   if (child == 0) {
-    for (int i = 0; i < pipe_size; i++) {
+    for (int i = 0; i < pvals.size(); i++) {
       dup2(pkeys[i], pvals[i]);
     }
     if (!cwd.empty() && chdir(cwd.c_str())) {
@@ -272,34 +230,29 @@ static void do_proc_open(int afdt_fd) {
     _Exit(HPHP_EXIT_FAILURE);
   } else if (child > 0) {
     // successfully created the child process
-    lwp_write(afdt_fd, "success");
-    lwp_write_int64(afdt_fd, (int64_t)child);
+    lwp_write(afdt_fd, "success", child);
   } else {
     // failed creating the child process
-    lwp_write(afdt_fd, "error");
-    lwp_write_int32(afdt_fd, errno);
+    lwp_write(afdt_fd, "error", errno);
   }
 
   close_fds(pkeys);
 }
 
-static pid_t waited = 0;
+pid_t waited = 0;
 
-static void kill_handler(int sig) {
+void kill_handler(int sig) {
   if (sig == SIGALRM && waited) {
     kill(waited, SIGKILL);
   }
 }
 
-static void do_waitpid(int afdt_fd) {
-  int64_t p = -1;
+void do_waitpid(int afdt_fd) {
+  pid_t pid = -1;
   int options = 0;
   int timeout = 0;
-  lwp_read_int64(afdt_fd, p);
-  lwp_read_int32(afdt_fd, options);
-  lwp_read_int32(afdt_fd, timeout);
+  lwp_read(afdt_fd, pid, options, timeout);
 
-  pid_t pid = (pid_t)p;
   int stat;
   if (timeout > 0) {
     waited = pid;
@@ -307,17 +260,16 @@ static void do_waitpid(int afdt_fd) {
     alarm(timeout);
   }
 
-  pid_t ret = ::waitpid(pid, &stat, options);
+  rusage ru;
+  const auto ret = ::wait4(pid, &stat, options, &ru);
   alarm(0); // cancel the previous alarm if not triggered yet
   waited = 0;
-  lwp_write_int64(afdt_fd, ret);
-  lwp_write_int32(afdt_fd, stat);
-  if (ret < 0) {
-    lwp_write_int32(afdt_fd, errno);
-  }
+  const auto time_us = ru2microseconds(ru);
+
+  lwp_write(afdt_fd, ret, stat, time_us, errno);
 }
 
-static void do_change_user(int afdt_fd) {
+void do_change_user(int afdt_fd) {
   std::string uname;
   lwp_read(afdt_fd, uname);
   if (uname.length() > 0) {
@@ -337,10 +289,13 @@ static void do_change_user(int afdt_fd) {
 ///////////////////////////////////////////////////////////////////////////////
 // light-weight process
 
-static boost::scoped_array<LightProcess> g_procs;
-static int g_procsCount = 0;
-static bool s_handlerInited = false;
-static LightProcess::LostChildHandler s_lostChildHandler;
+boost::scoped_array<LightProcess> g_procs;
+int g_procsCount = 0;
+bool s_handlerInited = false;
+LightProcess::LostChildHandler s_lostChildHandler;
+std::map<FILE*, pid_t> s_popenMap;
+
+} // namespace
 
 LightProcess::LightProcess() : m_shadowProcess(0), m_afdt_fd(-1) { }
 
@@ -366,7 +321,10 @@ void LightProcess::SigChldHandler(int sig, siginfo_t* info, void* ctx) {
 }
 
 void LightProcess::Initialize(const std::string &prefix, int count,
+                              bool trackProcessTimes,
                               const std::vector<int> &inherited_fds) {
+  s_trackProcessTimes = trackProcessTimes;
+
   if (prefix.empty() || count <= 0) {
     return;
   }
@@ -437,23 +395,24 @@ bool LightProcess::initShadow(int afdt_lid,
       exit(HPHP_EXIT_FAILURE);
     }
     afdt_error_t err = AFDT_ERROR_T_INIT;
-    m_afdt_fd = afdt_connect(afdt_filename.c_str(), &err);
-    if (m_afdt_fd < 0) {
+    auto afdt_fd = afdt_connect(afdt_filename.c_str(), &err);
+    if (afdt_fd < 0) {
       Logger::Warning("Unable to afdt_connect, filename %s: %d %s",
                       afdt_filename.c_str(),
                       errno, folly::errnoStr(errno).c_str());
       exit(HPHP_EXIT_FAILURE);
     }
 
-    // don't hold on to previous light processes' pipes, inherited
-    // fds, or the afdt listening socket
+    // shadow process doesn't use g_procs
     for (int i = 0; i < id; i++) {
       g_procs[i].closeFiles();
     }
+    g_procs.reset();
+    g_procsCount = 0;
     close_fds(inherited_fds);
     ::close(afdt_lid);
 
-    runShadow();
+    runShadow(afdt_fd);
   } else if (child < 0) {
     // failed
     Logger::Warning("Unable to fork lightly: %d %s", errno,
@@ -494,27 +453,27 @@ void LightProcess::closeShadow() {
     lwp_write(m_afdt_fd, "exit");
     // removes the "zombie" process, so not to interfere with later waits
     ::waitpid(m_shadowProcess, nullptr, 0);
+    m_shadowProcess = 0;
   }
+  closeFiles();
+}
+
+void LightProcess::closeFiles() {
   if (m_afdt_fd >= 0) {
     ::close(m_afdt_fd);
     m_afdt_fd = -1;
   }
-  m_shadowProcess = 0;
-}
-
-void LightProcess::closeFiles() {
-  ::close(m_afdt_fd);
 }
 
 bool LightProcess::Available() {
   return g_procsCount > 0;
 }
 
-void LightProcess::runShadow() {
+void LightProcess::runShadow(int afdt_fd) {
   std::string buf;
 
   pollfd pfd[1];
-  pfd[0].fd = m_afdt_fd;
+  pfd[0].fd = afdt_fd;
   pfd[0].events = POLLIN;
   try {
     while (true) {
@@ -528,20 +487,18 @@ void LightProcess::runShadow() {
         break;
       }
       if (pfd[0].revents & POLLIN) {
-        lwp_read(m_afdt_fd, buf);
+        lwp_read(afdt_fd, buf);
         if (buf == "exit") {
           Logger::Verbose("LightProcess exiting upon request");
           break;
         } else if (buf == "popen") {
-          do_popen(m_afdt_fd);
-        } else if (buf == "pclose") {
-          do_pclose(m_afdt_fd);
+          do_popen(afdt_fd);
         } else if (buf == "proc_open") {
-          do_proc_open(m_afdt_fd);
+          do_proc_open(afdt_fd);
         } else if (buf == "waitpid") {
-          do_waitpid(m_afdt_fd);
+          do_waitpid(afdt_fd);
         } else if (buf == "change_user") {
-          do_change_user(m_afdt_fd);
+          do_change_user(afdt_fd);
         } else if (buf[0]) {
           Logger::Info("LightProcess got invalid command: %.20s", buf.c_str());
         }
@@ -553,7 +510,7 @@ void LightProcess::runShadow() {
     Logger::Error("LightProcess exiting due to unknown exception");
   }
 
-  ::close(m_afdt_fd);
+  ::close(afdt_fd);
   _Exit(0);
 }
 
@@ -579,21 +536,31 @@ FILE *LightProcess::popen(const char *cmd, const char *type,
 
 FILE *LightProcess::HeavyPopenImpl(const char *cmd, const char *type,
                                    const char *cwd) {
+  int fd = -1;
+  pid_t pid;
+  Lock lock(s_mutex);
   if (cwd && *cwd) {
     auto old_cwd = Process::GetCurrentDirectory();
     if (old_cwd != cwd) {
-      Lock lock(s_mutex);
       if (chdir(cwd)) {
         Logger::Warning("Failed to chdir to %s.", cwd);
       }
-      FILE *f = ::popen(cmd, type);
+      fd = popen_impl(cmd, type, &pid);
       if (chdir(old_cwd.c_str())) {
         // error occurred changing cwd back
       }
-      return f;
+      if (fd < 0) return nullptr;
     }
   }
-  return ::popen(cmd, type);
+  if (fd < 0) {
+    fd = popen_impl(cmd, type, &pid);
+  }
+  if (fd < 0) return nullptr;
+  auto f = fdopen(fd, type);
+  if (f) {
+    s_popenMap[f] = pid;
+  }
+  return f;
 }
 
 FILE *LightProcess::LightPopenImpl(const char *cmd, const char *type,
@@ -601,64 +568,52 @@ FILE *LightProcess::LightPopenImpl(const char *cmd, const char *type,
   int id = GetId();
   Lock lock(g_procs[id].m_procMutex);
 
-  auto fout = g_procs[id].m_afdt_fd;
-  lwp_write(fout, "popen");
-  lwp_write(fout, type);
-  lwp_write(fout, cmd);
-  lwp_write(fout, cwd ? cwd : "");
+  auto afdt_fd = g_procs[id].m_afdt_fd;
+  lwp_write(afdt_fd, "popen", type, cmd, cwd ? cwd : "");
 
   std::string buf;
-  auto fin = g_procs[id].m_afdt_fd;
-  lwp_read(fin, buf);
+  lwp_read(afdt_fd, buf);
   if (buf == "error") {
     return nullptr;
   }
 
-  int64_t fptr = 0;
-  lwp_read_int64(fin, fptr);
-  if (!fptr) {
-    Logger::Error("Light process failed to return the file pointer.");
-    return nullptr;
-  }
-
-  int fd = recv_fd(fin);
+  pid_t pid;
+  lwp_read(afdt_fd, pid);
+  assert(pid);
+  int fd = recv_fd(afdt_fd);
   if (fd < 0) {
     Logger::Error("Light process failed to send the file descriptor.");
     return nullptr;
   }
   FILE *f = fdopen(fd, type);
-  g_procs[id].m_popenMap[(int64_t)f] = fptr;
-
+  if (f) {
+    g_procs[id].m_popenMap[f] = pid;
+  }
   return f;
 }
 
 int LightProcess::pclose(FILE *f) {
+  pid_t pid;
   if (!Available()) {
-    return ::pclose(f);
+    Lock lock(s_mutex);
+    auto it = s_popenMap.find(f);
+    if (it == s_popenMap.end()) return -1;
+    pid = it->second;
+    s_popenMap.erase(it);
+  } else {
+    int id = GetId();
+    Lock lock(g_procs[id].m_procMutex);
+
+    auto it = g_procs[id].m_popenMap.find(f);
+    if (it == g_procs[id].m_popenMap.end()) return -1;
+    pid = it->second;
+    g_procs[id].m_popenMap.erase(it);
   }
 
-  int id = GetId();
-  Lock lock(g_procs[id].m_procMutex);
-
-  std::map<int64_t, int64_t>::iterator it = g_procs[id].m_popenMap.find((int64_t)f);
-  if (it == g_procs[id].m_popenMap.end()) {
-    // try to close it with normal pclose
-    return ::pclose(f);
-  }
-
-  int64_t f2 = it->second;
-  g_procs[id].m_popenMap.erase((int64_t)f);
   fclose(f);
-
-  lwp_write(g_procs[id].m_afdt_fd, "pclose");
-  lwp_write_int64(g_procs[id].m_afdt_fd, f2);
-
-  int ret = -1;
-  lwp_read_int32(g_procs[id].m_afdt_fd, ret);
-  if (ret < 0) {
-    lwp_read_int32(g_procs[id].m_afdt_fd, errno);
-  }
-  return ret;
+  int status;
+  if (LightProcess::waitpid(pid, &status, 0, 0) < 0) return -1;
+  return status;
 }
 
 pid_t LightProcess::proc_open(const char *cmd, const std::vector<int> &created,
@@ -671,23 +626,13 @@ pid_t LightProcess::proc_open(const char *cmd, const std::vector<int> &created,
   always_assert(created.size() == desired.size());
 
   auto fout = g_procs[id].m_afdt_fd;
-  lwp_write(fout, "proc_open");
-  lwp_write(fout, cmd);
-  lwp_write(fout, cwd ? cwd : "");
-  lwp_write_int32(fout, (int)env.size());
-  for (unsigned int i = 0; i < env.size(); i++) {
-    lwp_write(fout, env[i]);
-  }
-
-  lwp_write_int32(fout, (int)created.size());
-  for (unsigned int i = 0; i < desired.size(); i++) {
-    lwp_write_int32(fout, desired[i]);
-  }
+  lwp_write(fout, "proc_open", cmd, cwd ? cwd : "",
+            env, desired);
 
   bool error_send = false;
   int save_errno = 0;
-  for (unsigned int i = 0; i < created.size(); i++) {
-    if (!send_fd(g_procs[id].m_afdt_fd, created[i])) {
+  for (auto cfd : created) {
+    if (!send_fd(g_procs[id].m_afdt_fd, cfd)) {
       error_send = true;
       save_errno = errno;
       break;
@@ -698,7 +643,7 @@ pid_t LightProcess::proc_open(const char *cmd, const std::vector<int> &created,
   auto fin = g_procs[id].m_afdt_fd;
   lwp_read(fin, buf);
   if (buf == "error") {
-    lwp_read_int32(fin, errno);
+    lwp_read(fin, errno);
     if (error_send) {
       // On this error, the receiver side returns dummy errno,
       // use the sender side errno here.
@@ -708,65 +653,61 @@ pid_t LightProcess::proc_open(const char *cmd, const std::vector<int> &created,
   }
   always_assert_flog(buf == "success",
                      "Unexpected message from light process: `{}'", buf);
-  int64_t pid = -1;
-  lwp_read_int64(fin, pid);
+  pid_t pid = -1;
+  lwp_read(fin, pid);
   always_assert(pid);
-  return (pid_t)pid;
+  return pid;
 }
 
 pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
                             int timeout) {
   if (!Available()) {
     // light process is not really there
-    return ::waitpid(pid, stat_loc, options);
+    rusage ru;
+    const auto ret = wait4(pid, stat_loc, options, &ru);
+    if (s_trackProcessTimes) {
+      s_extra_request_microseconds += ru2microseconds(ru);
+    }
+    return ret;
   }
 
   int id = GetId();
   Lock lock(g_procs[id].m_procMutex);
 
   auto fout = g_procs[id].m_afdt_fd;
-  lwp_write(fout, "waitpid");
-  lwp_write_int64(fout, (int64_t)pid);
-  lwp_write_int32(fout, options);
-  lwp_write_int32(fout, timeout);
+  lwp_write(fout, "waitpid", pid, options, timeout);
 
-  int64_t ret;
+  pid_t ret;
   int stat;
   auto fin = g_procs[id].m_afdt_fd;
-  lwp_read_int64(fin, ret);
-  lwp_read_int32(fin, stat);
+  int err;
+  int64_t time_us;
+  lwp_read(fin, ret, stat, time_us, err);
 
   *stat_loc = stat;
   if (ret < 0) {
-    lwp_read_int32(fin, errno);
+    errno = err;
+  } else if (s_trackProcessTimes) {
+    s_extra_request_microseconds += time_us;
   }
-  return (pid_t)ret;
+
+  return ret;
 }
 
 pid_t LightProcess::pcntl_waitpid(pid_t pid, int *stat_loc, int options) {
-  if (!Available()) {
-    return ::waitpid(pid, stat_loc, options);
+  rusage ru;
+  const auto ret = wait4(pid, stat_loc, options, &ru);
+  if (s_trackProcessTimes) {
+    s_extra_request_microseconds += ru2microseconds(ru);
   }
-
-  int id = GetId();
-  Lock lock(g_procs[id].m_procMutex);
-
-  pid_t p = ::waitpid(pid, stat_loc, options);
-  if (p == g_procs[id].m_shadowProcess) {
-    // got the shadow process, wait again
-    p = ::waitpid(pid, stat_loc, options);
-  }
-
-  return p;
+  return ret;
 }
 
 void LightProcess::ChangeUser(const std::string &username) {
   if (username.empty()) return;
   for (int i = 0; i < g_procsCount; i++) {
     Lock lock(g_procs[i].m_procMutex);
-    auto fout = g_procs[i].m_afdt_fd;
-    lwp_write(fout, "change_user");
-    lwp_write(fout, username);
+    lwp_write(g_procs[i].m_afdt_fd, "change_user", username);
   }
 }
 

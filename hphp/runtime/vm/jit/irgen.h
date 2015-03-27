@@ -114,9 +114,12 @@ void incProfCounter(HTS&, TransID);
 void checkCold(HTS&, TransID);
 
 /*
- * Generate a ringbuffer update for executing a particular SrcKey.
+ * If ringbuffer tracing is enabled, generate a ringbuffer entry associated
+ * with a SrcKey or string.
  */
-void ringbuffer(HTS&, Trace::RingBufferType t, SrcKey sk, int level = 1);
+void ringbufferEntry(HTS&, Trace::RingBufferType, SrcKey, int level = 1);
+void ringbufferMsg(HTS&, Trace::RingBufferType, const StringData*,
+                   int level = 1);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -132,14 +135,14 @@ void interpOne(HTS&, const NormalizedInstruction&);
 /*
  * Before translating/processing each bytecode instruction, the driver
  * of the irgen module calls this function to move to the next
- * bytecode offset (`newOff') to translate.
+ * bytecode instruction (`newSk') to translate.
  *
  * The flag `lastBcInst' should be set if this is the last bytecode in
  * a region that's being translated.
  */
 void prepareForNextHHBC(HTS&,
                         const NormalizedInstruction*,
-                        Offset newOff,
+                        SrcKey newSk,
                         bool lastBcInst);
 
 /*
@@ -169,7 +172,7 @@ void prepareForSideExit(HTS&);
  * made.
  */
 void endRegion(HTS&);
-void endRegion(HTS&, Offset);
+void endRegion(HTS&, SrcKey);
 void endBlock(HTS&, Offset next, bool nextIsMerge);
 
 //////////////////////////////////////////////////////////////////////

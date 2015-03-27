@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_CPP_BASE_SHARED_SHARED_STRING_H_
 #define incl_HPHP_CPP_BASE_SHARED_SHARED_STRING_H_
 
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/atomic-shared-ptr.h"
 #include "hphp/runtime/base/types.h"
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/atomic.h>
@@ -48,13 +48,13 @@ protected:
   static InternMap s_intern;
 };
 
-class SharedString : public AtomicSmartPtr<SharedStringData> {
+class SharedString : public AtomicSharedPtr<SharedStringData> {
 public:
   SharedString() {}
   /* implicit */ SharedString(SharedStringData *px)
-    : AtomicSmartPtr<SharedStringData>(px) {}
+    : AtomicSharedPtr<SharedStringData>(px) {}
   /* implicit */ SharedString(const SharedString &src)
-    : AtomicSmartPtr<SharedStringData>(src) {}
+    : AtomicSharedPtr<SharedStringData>(src) {}
   /* implicit */ SharedString(const std::string &data) {
     operator=(data);
   }

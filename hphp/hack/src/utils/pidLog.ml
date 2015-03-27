@@ -12,7 +12,9 @@ let log_oc = ref None
 
 let init root =
   assert (!log_oc = None);
-  log_oc := Some (open_out (Lock.lock_name root "pids"))
+  let old_umask = Unix.umask 0o111 in
+  log_oc := Some (open_out (Lock.lock_name root "pids"));
+  ignore (Unix.umask old_umask)
 
 let log ?reason pid =
   let reason = match reason with 

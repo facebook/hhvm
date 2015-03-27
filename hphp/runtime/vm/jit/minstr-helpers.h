@@ -457,26 +457,33 @@ ELEM_ARRAY_HELPER_TABLE(X)
 TypedValue arrayGetNotFound(int64_t k);
 TypedValue arrayGetNotFound(const StringData* k);
 
-template<KeyType keyType, bool checkForInt>
+template<KeyType keyType, bool checkForInt, bool arrIsStatic>
 TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
   auto ret = checkForInt ? checkedGet(a, key) : a->nvGet(key);
   if (ret) {
-    ret = tvToCell(ret);
-    tvRefcountedIncRef(ret);
+    if (arrIsStatic) {
+      tvAssertCell(ret);
+    } else {
+      ret = tvToCell(ret);
+      tvRefcountedIncRef(ret);
+    }
     return *ret;
   }
   return arrayGetNotFound(key);
 }
 
-#define ARRAYGET_HELPER_TABLE(m)               \
-  /* name        keyType     checkForInt   */  \
-  m(arrayGetS,   KeyType::Str,   false)        \
-  m(arrayGetSi,  KeyType::Str,    true)        \
-  m(arrayGetI,   KeyType::Int,   false)
+#define ARRAYGET_HELPER_TABLE(m)                           \
+  /* name        keyType     checkForInt   arrIsStatic */  \
+  m(arrayGetSC,  KeyType::Str,   false,    false)          \
+  m(arrayGetSU,  KeyType::Str,   false,     true)          \
+  m(arrayGetSiC, KeyType::Str,    true,    false)          \
+  m(arrayGetSiU, KeyType::Str,    true,     true)          \
+  m(arrayGetIC,  KeyType::Int,   false,    false)          \
+  m(arrayGetIU,  KeyType::Int,   false,     true)
 
-#define X(nm, keyType, checkForInt)                  \
-inline TypedValue nm(ArrayData* a, key_type<keyType> key) {\
-  return arrayGetImpl<keyType, checkForInt>(a, key);\
+#define X(nm, keyType, checkForInt, isStatic)                  \
+inline TypedValue nm(ArrayData* a, key_type<keyType> key) {    \
+  return arrayGetImpl<keyType, checkForInt, isStatic>(a, key); \
 }
 ARRAYGET_HELPER_TABLE(X)
 #undef X

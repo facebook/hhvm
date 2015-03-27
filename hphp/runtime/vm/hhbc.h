@@ -1098,35 +1098,6 @@ inline bool isFPassStar(Op opcode) {
   }
 }
 
-inline bool isLiteral(Op op) {
-  switch (op) {
-    case OpNull:
-    case OpNullUninit:
-    case OpTrue:
-    case OpFalse:
-    case OpInt:
-    case OpDouble:
-    case OpString:
-    case OpArray:
-      return true;
-
-    default:
-      return false;
-  }
-}
-
-inline bool isThisSelfOrParent(Op op) {
-  switch (op) {
-    case OpThis:
-    case OpSelf:
-    case OpParent:
-      return true;
-
-    default:
-      return false;
-  }
-}
-
 constexpr bool isRet(Op op) {
   return op == OpRetC || op == OpRetV;
 }

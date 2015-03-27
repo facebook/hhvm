@@ -64,13 +64,13 @@ c_AsyncGeneratorWaitHandle::Create(c_AsyncGenerator* gen,
 
 void c_AsyncGeneratorWaitHandle::initialize(c_AsyncGenerator* gen,
                                             c_WaitableWaitHandle* child) {
-  setContextIdx(child->getContextIdx());
   setState(STATE_BLOCKED);
+  setContextIdx(child->getContextIdx());
   m_generator = gen;
   m_generator->incRefCount();
   m_child = child;
-
-  blockOn(child);
+  m_child->getParentChain()
+    .addParent(m_blockable, AsioBlockable::Kind::AsyncGeneratorWaitHandle);
   incRefCount();
 }
 
@@ -122,9 +122,10 @@ void c_AsyncGeneratorWaitHandle::await(c_WaitableWaitHandle* child) {
   prepareChild(child);
 
   // Set up the dependency.
-  m_child = child;
   setState(STATE_BLOCKED);
-  blockOn(m_child);
+  m_child = child;
+  m_child->getParentChain()
+    .addParent(m_blockable, AsioBlockable::Kind::AsyncGeneratorWaitHandle);
 }
 
 void c_AsyncGeneratorWaitHandle::ret(Cell& result) {

@@ -40,16 +40,13 @@ public:
 
   void setRedeclared() { m_redeclared = true; }
 
-  void resolveStatic(const std::string &name);
-
   const std::string &getOriginalClassName() const { return m_origClassName; }
   const std::string &getClassName() const { return m_className; }
 
   ExpressionPtr getClass() const { return m_class; }
 
   ClassScopePtr resolveClass();
-  bool checkPresent();
-  ClassScopePtr resolveClassWithChecks();
+
 protected:
   ExpressionPtr m_class;
   std::string m_origClassName;

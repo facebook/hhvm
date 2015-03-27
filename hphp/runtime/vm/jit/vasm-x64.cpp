@@ -382,16 +382,7 @@ void Vgen::emit(copy2& i) {
 }
 
 void Vgen::emit(bindaddr& i) {
-  mcg->setJmpTransID((TCA)i.dest);
-  *i.dest = emitEphemeralServiceReq(
-    frozen(),
-    mcg->getFreeStub(frozen(), &mcg->cgFixups()),
-    REQ_BIND_ADDR,
-    i.dest,
-    i.sk.toAtomicInt(),
-    TransFlags{}.packed
-  );
-  mcg->cgFixups().m_codePointers.insert(i.dest);
+  *i.dest = emitBindAddr(a->code(), frozen(), i.dest, i.sk);
 }
 
 void Vgen::emit(bindcall& i) {
@@ -401,22 +392,7 @@ void Vgen::emit(bindcall& i) {
 }
 
 void Vgen::emit(bindjcc1st& i) {
-  backend.prepareForTestAndSmash(a->code(), 0,
-                                 TestAndSmashFlags::kAlignJccAndJmp);
-  auto const patchAddr = a->frontier();
-  auto const jccStub =
-    emitEphemeralServiceReq(frozen(),
-                            mcg->getFreeStub(frozen(), &mcg->cgFixups()),
-                            REQ_BIND_JMPCC_FIRST,
-                            RipRelative(patchAddr),
-                            i.targets[1].toAtomicInt(),
-                            i.targets[0].toAtomicInt(),
-                            ccServiceReqArgInfo(i.cc));
-
-  mcg->setJmpTransID(a->frontier());
-  a->jcc(i.cc, jccStub);
-  mcg->setJmpTransID(a->frontier());
-  a->jmp(jccStub);
+  emitBindJmpccFirst(a->code(), frozen(), i.cc, i.targets[0], i.targets[1]);
 }
 
 void Vgen::emit(bindjcc& i) {
@@ -973,8 +949,16 @@ void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
       // the lower bits, so shift the type result register.
       static_assert(offsetof(TypedValue, m_data) == 0, "");
       static_assert(offsetof(TypedValue, m_type) == 8, "");
-      assert(dests.size() == 2);
-      v << copy2{reg::rax, reg::rdx, dests[0], dests[1]};
+      if (dests.size() == 2) {
+        v << copy2{reg::rax, reg::rdx, dests[0], dests[1]};
+      } else {
+        // We have cases where we statically know the type but need the value
+        // from native call. Even if the type does not really need a register
+        // (e.g., InitNull), a Vreg is still allocated in assignRegs(), so the
+        // following assertion holds.
+        assert(dests.size() == 1);
+        v << copy{reg::rax, dests[0]};
+      }
       break;
     }
     case DestType::SIMD: {

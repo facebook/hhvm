@@ -1961,7 +1961,7 @@ static void enterVMAtAsyncFunc(ActRec* enterFnAr, Resumable* resumable,
     throw e;
   }
 
-  const bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
+  const bool useJit = RID().getJit();
   if (LIKELY(useJit && resumable->resumeAddr())) {
     Stats::inc(Stats::VMEnter);
     mcg->enterTCAfterPrologue(resumable->resumeAddr());
@@ -1975,7 +1975,7 @@ static void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
   assert(!enterFnAr->resumed());
   Stats::inc(Stats::VMEnter);
 
-  const bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
+  const bool useJit = RID().getJit();
   const bool useJitPrologue = useJit && vmfp()
     && !enterFnAr->m_varEnv
     && (stk != StackArgsState::Trimmed);
@@ -2011,7 +2011,7 @@ static void enterVMAtCurPC() {
   assert(vmpc());
   assert(vmfp()->func()->contains(vmpc()));
   Stats::inc(Stats::VMEnter);
-  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
+  if (RID().getJit()) {
     mcg->enterTC();
   } else {
     dispatch();
@@ -4450,7 +4450,7 @@ OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
     if (reinterpret_cast<TCA>(savedRip) != mcg->tx().uniqueStubs.callToExit) {
       savedRip = 0;
     }
-  } else if (!ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
+  } else if (!RID().getJit()) {
     // We entered this frame in the TC but the jit is now disabled, probably
     // because a debugger is attached. If we leave this frame in the
     // interpreter, we might be skipping a catch block that our caller expects
@@ -6791,7 +6791,7 @@ OPTBLD_INLINE void iopEval(IOP_ARGS) {
 
   vmStack().popC();
   if (unit->parseFatal(msg, line)) {
-    int errnum = static_cast<int>(ErrorConstants::ErrorModes::WARNING);
+    auto const errnum = static_cast<int>(ErrorMode::WARNING);
     if (vm->errorNeedsLogging(errnum)) {
       // manual call to Logger instead of logError as we need to use
       // evalFileName and line as the exception doesn't track the eval()
@@ -7511,12 +7511,11 @@ void recordCodeCoverage(PC pc) {
   assert(line != -1);
 
   if (unit != s_prev_unit || line != s_prev_line) {
-    ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
     s_prev_unit = unit;
     s_prev_line = line;
     const StringData* filepath = unit->filepath();
     assert(filepath->isStatic());
-    info->m_coverage->Record(filepath->data(), line, line);
+    TI().m_coverage->Record(filepath->data(), line, line);
   }
 }
 
@@ -7624,8 +7623,7 @@ TCA dispatchImpl() {
   assert(sizeof(optabDirect) / sizeof(const void *) == Op_count);
   assert(sizeof(optabDbg) / sizeof(const void *) == Op_count);
   const void **optab = optabDirect;
-  bool collectCoverage = ThreadInfo::s_threadInfo->
-    m_reqInjectionData.getCoverage();
+  bool collectCoverage = RID().getCoverage();
   if (collectCoverage) {
     optab = optabCover;
   }

@@ -22,7 +22,6 @@
 #include "hphp/runtime/ext/asio/asio_blockable.h"
 #include "hphp/runtime/ext/asio/asio_context.h"
 #include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -81,8 +80,8 @@ void c_ExternalThreadEventWaitHandle::initialize(
   ObjectData* priv_data
 ) {
   auto const session = AsioSession::Get();
-  setContextIdx(session->getCurrentContextIdx());
   setState(STATE_WAITING);
+  setContextIdx(session->getCurrentContextIdx());
   m_event = event;
   m_privData = priv_data;
 
@@ -188,8 +187,8 @@ void c_ExternalThreadEventWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
 
 void c_ExternalThreadEventWaitHandle::exitContext(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx));
-  assert(getContextIdx() == ctx_idx);
   assert(getState() == STATE_WAITING);
+  assert(getContextIdx() == ctx_idx);
 
   // Move us to the parent context.
   setContextIdx(getContextIdx() - 1);

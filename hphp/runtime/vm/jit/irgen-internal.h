@@ -533,7 +533,7 @@ inline bool classIsUniqueOrCtxParent(HTS& env, const Class* cls) {
 
 inline SSATmp* ldCls(HTS& env, SSATmp* className) {
   assert(className->isA(Type::Str));
-  if (className->isConst()) {
+  if (className->hasConstVal()) {
     if (auto const cls = Unit::lookupClass(className->strVal())) {
       if (classIsPersistentOrCtxParent(env, cls)) return cns(env, cls);
     }

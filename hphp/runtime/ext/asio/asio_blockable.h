@@ -30,8 +30,15 @@ class c_WaitableWaitHandle;
 class AsioBlockable final {
   public:
     enum class Kind : uint8_t {
-      BlockableWaitHandle,
+      AsyncFunctionWaitHandle,
+      AsyncGeneratorWaitHandle,
+      AwaitAllWaitHandle,
       ConditionWaitHandle,
+
+      // DEPRECATED
+      GenArrayWaitHandle,
+      GenMapWaitHandle,
+      GenVectorWaitHandle,
     };
 
     static constexpr ptrdiff_t bitsOff() {

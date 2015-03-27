@@ -94,6 +94,7 @@ class BackEnd {
   virtual TCA emitServiceReqWork(CodeBlock& cb, TCA start,
                                  SRFlags flags, ServiceRequest req,
                                  const ServiceReqArgVec& argv) = 0;
+  virtual size_t reusableStubSize() const = 0;
   virtual void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
                              SrcKey sk) = 0;
   virtual bool funcPrologueHasGuard(TCA prologue, const Func* func) = 0;

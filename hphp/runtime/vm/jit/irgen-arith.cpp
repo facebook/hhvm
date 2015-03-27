@@ -533,7 +533,7 @@ void emitDiv(HTS& env) {
   if (!divisor->isA(Type::Dbl) && !dividend->isA(Type::Dbl)) {
     // TODO(#2570625): support integer-integer division, move this to
     // simplifier:
-    if (divisor->isConst()) {
+    if (divisor->hasConstVal()) {
       int64_t divisorVal;
       if (divisor->isA(Type::Int)) {
         divisorVal = divisor->intVal();
@@ -551,7 +551,7 @@ void emitDiv(HTS& env) {
         return;
       }
 
-      if (dividend->isConst()) {
+      if (dividend->hasConstVal()) {
         int64_t dividendVal;
         if (dividend->isA(Type::Int)) {
           dividendVal = dividend->intVal();

@@ -156,7 +156,7 @@ bool RegionFormer::irBlockReachable(Block* block) {
 RegionDescPtr RegionFormer::go() {
   SCOPE_ASSERT_DETAIL("Tracelet Selector") {
     return folly::sformat("Region:\n{}\n\nUnit:\n{}\n",
-                          *m_region, m_irgs.irb->unit());
+                          *m_region, show(m_irgs.irb->unit()));
   };
 
   for (auto const& lt : m_ctx.liveTypes) {
@@ -277,7 +277,7 @@ RegionDescPtr RegionFormer::go() {
     // than not indicative of a real bug somewhere else in the system.
     // TODO: 5515310 investigate whether legit bugs cause this.
     FTRACE(1, "selectTracelet: Failed while inlining:\n{}\n{}",
-           show(*m_region), m_irgs.irb->unit());
+           show(*m_region), show(m_irgs.irb->unit()));
     m_inl.disable();
     m_region.reset();
   }

@@ -476,9 +476,9 @@ void print(const IRUnit& unit) {
   std::cerr << std::endl;
 }
 
-std::string IRUnit::toString() const {
+std::string show(const IRUnit& unit) {
   std::ostringstream out;
-  print(out, *this);
+  print(out, unit);
   return out.str();
 }
 

@@ -67,8 +67,8 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
       assert_log(
         false,
         [&] {
-          return folly::format("Bad type {} for local {}:\n\n{}\n",
-                               valType, id, env.irb->unit().toString()).str();
+          return folly::sformat("Bad type {} for local {}:\n\n{}\n",
+                                valType, id, show(env.irb->unit()));
         }
       );
     }

@@ -86,11 +86,6 @@ struct IRUnit {
    */
   explicit IRUnit(TransContext context);
 
-  /*
-   * Stringify the IRUnit.
-   */
-  std::string toString() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Instruction creation.
@@ -228,6 +223,13 @@ private:
   // Entry point.
   Block* m_entry;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Create a debug string for an IRUnit.
+ */
+std::string show(const IRUnit&);
 
 //////////////////////////////////////////////////////////////////////
 

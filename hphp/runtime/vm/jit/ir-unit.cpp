@@ -109,7 +109,7 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
 Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk) {
   Block* mainExit = nullptr;
 
-  FTRACE(5, "findMainExitBlock: starting on unit:\n{}\n", unit);
+  FTRACE(5, "findMainExitBlock: starting on unit:\n{}\n", show(unit));
 
   for (auto block : rpoSortCfg(unit)) {
     if (endsUnitAtSrcKey(block, lastSk)) {

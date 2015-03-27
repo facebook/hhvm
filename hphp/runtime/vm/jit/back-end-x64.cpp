@@ -440,7 +440,7 @@ static void printLLVMComparison(const IRUnit& ir_unit,
       " vasm: {} bytes | llvm: {} bytes | llvm is {}% of vasm",
       vasm_size, compare->main_size, percentage
     ),
-    ir_unit,
+    show(ir_unit),
     " vasm unit ",
     show(vasm_unit),
     " llvm IR ",

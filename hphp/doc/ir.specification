@@ -1222,12 +1222,15 @@ To string conversions:
 
   Unlinks a frame constructed by DefInlineFP.
 
-| CallArray, D(StkPtr), S(StkPtr) S(FramePtr), Er
+| CallArray<spOffset,returnOff,after,destroyLocals>, D(StkPtr),
+|                                                    S(StkPtr) S(FramePtr),
+|                                                    Er
 
-  Invoke function corresponding to the current FPI with array args. S0 points
-  to the stack resulting after the ActRec for the function and the array of its
-  arguments is pushed. CallArray pops the array off the stack, pushes the
-  elements of the array as arguments, and invokes the function in the ActRec.
+  Invoke function corresponding to the current FPI with array args. S0+spOffset
+  points to the stack resulting after the ActRec for the function and the array
+  of its arguments is pushed. CallArray pops the array off the stack, pushes
+  the elements of the array as arguments, and invokes the function in the
+  ActRec.
 
 | Call<offset,numParams,returnOff,funcd,destroyLocals>, D(StkPtr),
 |                                                       S(StkPtr) S(FramePtr),

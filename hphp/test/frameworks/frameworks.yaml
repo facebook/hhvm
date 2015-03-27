@@ -144,7 +144,7 @@
     branch: '3.0'
     commit: 300f50f02bf41c25677111bd0c8962643b16bff8
     install_root: flow
-    test_root: flow
+    test_root: flow/Build/BuildEssentials/PhpUnit
     config_file: flow/Build/BuildEssentials/PhpUnit/UnitTests.xml
   guzzle:
     url: https://github.com/guzzle/guzzle3.git

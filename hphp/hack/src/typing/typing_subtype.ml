@@ -89,13 +89,20 @@ and subtype_tparams env variancel super_tyl children_tyl =
 and subtype_tparam env variance super child =
   match variance with
   | Ast.Covariant -> sub_type env super child
-  | Ast.Contravariant -> sub_type env child super
+  | Ast.Contravariant -> super_type env super child
   | Ast.Invariant -> fst (Unify.unify env super child)
 
 (* Distinction b/w sub_type and sub_type_with_uenv similar to unify and
  * unify_with_uenv, see comment there. *)
 and sub_type env ty_super ty_sub =
   sub_type_with_uenv env (TUEnv.empty, ty_super) (TUEnv.empty, ty_sub)
+
+and super_type env ty_super ty_sub =
+  let old_gs = Env.grow_super env in
+  let env =
+    sub_type_with_uenv { env with Env.grow_super = not old_gs }
+      (TUEnv.empty, ty_sub) (TUEnv.empty, ty_super) in
+  { env with Env.grow_super = old_gs }
 
 and get_super_typevar_set_ env set ty_super =
   let env, ety_super = Env.expand_type env ty_super in
@@ -197,12 +204,35 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       let env, _ =
         Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) in
       env
-  | (_, Tunresolved _), (r_sub, _) ->
+(****************************************************************************)
+(* ### Begin Tunresolved madness ###
+ * If grow_super is true (the common case), then if the supertype is a
+ * Tunresolved, we allow it to keep growing, which is the desired behavior for
+ * e.g. figuring out the type of a generic, but if the subtype is a
+ * Tunresolved, then we check that all the members are indeed subtypes of the
+ * given supertype, which is the desired behavior for e.g. checking function
+ * return values. In general, if a supertype is Tunresolved, then we
+ * consider it to be "not yet finalized", but if a subtype is Tunresolved
+ * and the supertype isn't, we've probably hit a type annotation
+ * and should consider the supertype to be definitive.
+ *
+ * However, sometimes we want this behavior reversed, e.g. when the type
+ * annotation has a contravariant generic parameter or a `super` constraint --
+ * now the definitive type is the subtype.
+ *
+ * I considered splitting this out into a separate function and swapping the
+ * order of the super / sub types passed to it, so we would only have to handle
+ * one set of cases, but it doesn't look much better since that function still
+ * has to recursively call sub_type and therefore needs to remember whether its
+ * arguments had been swapped.
+ *)
+(****************************************************************************)
+  | (_, Tunresolved _), (r_sub, _) when Env.grow_super env ->
       let ty_sub = (r_sub, Tunresolved [ty_sub]) in
       let env, _ =
         Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) in
       env
-  | (_, Tany), (_, Tunresolved _) ->
+  | (_, Tany), (_, Tunresolved _) when Env.grow_super env ->
       (* This branch is necessary in the following case:
        * function foo<T as I>(T $x)
        * if I call foo with an intersection type, T is a Tvar,
@@ -213,10 +243,33 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
        * type.
        *)
       fst (Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
-  | _, (_, Tunresolved tyl) ->
+  | _, (_, Tunresolved tyl) when Env.grow_super env ->
       List.fold_left begin fun env x ->
         sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, x)
       end env tyl
+(****************************************************************************)
+(* Repeat the previous 3 cases but with the super / sub order reversed *)
+(****************************************************************************)
+  | (r_super, _), (_, Tunresolved _) when not (Env.grow_super env) ->
+      let ty_super = (r_super, Tunresolved [ty_super]) in
+      let env, _ =
+        Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) in
+      env
+  | (_, Tunresolved _), (_, Tany) when not (Env.grow_super env) ->
+      fst (Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
+  | (_, Tunresolved tyl), _ when not (Env.grow_super env) ->
+      List.fold_left begin fun env x ->
+        sub_type_with_uenv env (uenv_super, x) (uenv_sub, ty_sub)
+      end env tyl
+(****************************************************************************)
+(* OCaml doesn't inspect `when` clauses when checking pattern matching
+ * exhaustiveness, so just assert false here *)
+(****************************************************************************)
+  | _, (_, Tunresolved _)
+  | (_, Tunresolved _), _ -> assert false
+(****************************************************************************)
+(* ### End Tunresolved madness ### *)
+(****************************************************************************)
   | (_, Tapply _), (r_sub, Tgeneric (x, Some (Ast.Constraint_as, ty_sub)))
   | (_, Tprim _), (r_sub, Tgeneric (x, Some (Ast.Constraint_as, ty_sub))) ->
       (Errors.try_
@@ -519,3 +572,4 @@ let subtype_funs_no_return = subtype_funs_generic ~check_return:false
 (*****************************************************************************)
 
 let () = Typing_utils.sub_type_ref := sub_type
+let () = Typing_utils.super_type_ref := super_type

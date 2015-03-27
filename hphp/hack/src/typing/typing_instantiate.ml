@@ -115,7 +115,7 @@ and check_constraint env ck ty x_ty =
         | Ast.Constraint_as ->
             TUtils.sub_type env ty x_ty
         | Ast.Constraint_super ->
-            TUtils.sub_type env x_ty ty
+            TUtils.super_type env ty x_ty
       end
 
 and instantiate subst env (r, ty) =

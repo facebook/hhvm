@@ -47,6 +47,7 @@ type env = {
   genv : genv;
   todo : tfun list;
   in_loop : bool;
+  grow_super : bool;
 }
 and genv
 and anon = env -> fun_params -> env * ty
@@ -99,6 +100,7 @@ val set_return : env -> ty -> env
 val with_return : env -> (env -> env) -> env
 val allow_null_as_void : env -> bool
 val is_static : env -> bool
+val grow_super : env -> bool
 val get_self : env -> ty
 val get_self_id : env -> string
 val get_parent : env -> ty

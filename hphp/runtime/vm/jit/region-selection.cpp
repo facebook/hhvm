@@ -794,8 +794,7 @@ bool breaksRegion(Op opc) {
       return true;
 
     default:
-      return mcg->useLLVM() &&
-        opcodeControlFlowInfo(opc) == ControlFlowInfo::ChangesPC;
+      return false;
   }
 }
 

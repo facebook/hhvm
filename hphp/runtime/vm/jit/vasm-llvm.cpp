@@ -514,6 +514,7 @@ struct LLVMEmitter {
     , m_valueInfo(unit.next_vr)
     , m_blocks(unit.blocks.size())
     , m_incomingVmFp(unit.blocks.size())
+    , m_incomingVmSp(unit.blocks.size())
     , m_unit(unit)
     , m_areas(areas)
   {
@@ -611,6 +612,11 @@ struct LLVMEmitter {
     m_traceletFnTy = llvm::FunctionType::get(
       m_void,
       std::vector<llvm::Type*>({m_int64, m_int64, m_int64}),
+      false
+    );
+    m_bindcallFnTy = llvm::FunctionType::get(
+      m_int64,
+      std::vector<llvm::Type*>({m_int64, m_int64, m_int64, m_int64}),
       false
     );
 
@@ -1200,8 +1206,9 @@ VASM_OPCODES
   llvm::IRBuilder<true, llvm::ConstantFolder, IRBuilderVasmInserter> m_irb;
   std::unique_ptr<TCMemoryManager> m_tcMM;
 
-  // Function type used for tail calls to other tracelets.
+  // Function types used for call to tracelets/PHP functions.
   llvm::FunctionType* m_traceletFnTy{nullptr};
+  llvm::FunctionType* m_bindcallFnTy{nullptr};
 
   // Mimic HHVM's TypedValue.
   llvm::StructType* m_typedValueType{nullptr};
@@ -1217,8 +1224,9 @@ VASM_OPCODES
   // Vlabel -> llvm::BasicBlock map
   jit::vector<llvm::BasicBlock*> m_blocks;
 
-  // Vlabel -> Value for rVmFp entering a vasm block
+  // Vlabel -> Value for rVmFp/rVmSp entering a vasm block
   jit::vector<llvm::Value*> m_incomingVmFp;
+  jit::vector<llvm::Value*> m_incomingVmSp;
 
   jit::hash_map<llvm::BasicBlock*, PhiInfo> m_phiInfos;
 
@@ -1281,6 +1289,7 @@ VASM_OPCODES
 
 void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
   Timer timer(Timer::llvm_irGeneration);
+  SCOPE_ASSERT_DETAIL("LLVM Module") { return showModule(m_module.get()); };
 
   // Make sure all the llvm blocks are emitted in the order given by
   // layoutBlocks, regardless of which ones we need to use as jump targets
@@ -1296,11 +1305,16 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
     m_irb.SetInsertPoint(block(label));
 
     // If this isn't the first block of the unit, load the incoming value of
-    // rVmFp from our pred(s).
+    // rVmFp/rVmSp from our pred(s).
     if (label != labels.front()) {
-      auto& inFp = m_incomingVmFp[label];
+      auto inFp = m_incomingVmFp[label];
       always_assert(inFp);
       defineValue(x64::rVmFp, inFp);
+
+      // Only some instructions propagate a value for rVmSp to their
+      // successor(s).
+      auto inSp = m_incomingVmSp[label];
+      if (inSp) defineValue(x64::rVmSp, inSp);
     }
 
     for (auto& inst : b.code) {
@@ -1326,6 +1340,7 @@ O(andl) \
 O(andli) \
 O(andq) \
 O(andqi) \
+O(bindcall) \
 O(bindjcc1st) \
 O(bindjcc) \
 O(bindjmp) \
@@ -1488,10 +1503,8 @@ O(countbytecode)
                            size_t(label), show(m_unit, inst));
 
       // Not yet implemented opcodes:
-      case Vinstr::bindcall:
       case Vinstr::callstub:
       case Vinstr::contenter:
-      case Vinstr::kpcall:
       case Vinstr::mccall:
       case Vinstr::mcprep:
       case Vinstr::cmpsd:
@@ -1526,8 +1539,9 @@ O(countbytecode)
       inFp = value(x64::rVmFp);
     }
 
-    // Any values for these ABI registers aren't meant to last past the end of
-    // the block.
+    // Make sure we don't let any values from this block go to the next RPO
+    // block. PhysReg values are explicitly passed along edges as needed (see
+    // above).
     defineValue(x64::rVmSp, nullptr);
     defineValue(x64::rVmFp, nullptr);
     defineValue(x64::rStashedAR, nullptr);
@@ -1668,6 +1682,26 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   call->setMetadata(llvm::LLVMContext::MD_locrec,
                     llvm::MDNode::get(m_context, cns(id)));
   m_bindjmps.emplace_back(LLVMBindJmp{id, reqIp, inst.target, inst.trflags});
+}
+
+void LLVMEmitter::emit(const bindcall& inst) {
+  // All bindcall instructions use the same stub so we have to provide a unique
+  // name to ensure LLVM doesn't collapse the calls together.
+  auto funcName = m_tcMM->getUniqueSymbolName("bindcall_");
+  auto func = emitFuncPtr(funcName, m_bindcallFnTy, uint64_t(inst.stub));
+  std::vector<llvm::Value*> args{
+    value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp),
+    value(x64::rStashedAR)
+  };
+  auto next = block(inst.targets[0]);
+  auto unwind = block(inst.targets[1]);
+  auto call = m_irb.CreateInvoke(func, next, unwind, args);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_PHP);
+  call->setSmashable();
+
+  // bindcall is followed by a defvmsp to copy rVmSp into a Vreg, but it's not
+  // in this block. Pass the value to our next block.
+  m_incomingVmSp[inst.targets[0]] = call;
 }
 
 // Emitting a real REQ_BIND_(JUMPCC_FIRST|JCC) only makes sense if we can

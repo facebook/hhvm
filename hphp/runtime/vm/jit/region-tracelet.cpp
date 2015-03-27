@@ -315,8 +315,7 @@ bool RegionFormer::prepareInstruction() {
   new (&m_inst) NormalizedInstruction(m_sk, curUnit());
   auto const breaksBB =
     (m_profiling && instrBreaksProfileBB(&m_inst)) ||
-    (mcg->useLLVM() ? opcodeChangesPC(m_inst.op())
-                    : opcodeBreaksBB(m_inst.op()));
+    opcodeBreaksBB(m_inst.op());
   m_inst.endsRegion = breaksBB ||
     (dontGuardAnyInputs(m_inst.op()) && opcodeChangesPC(m_inst.op()));
   m_inst.funcd = m_arStates.back().knownFunc();

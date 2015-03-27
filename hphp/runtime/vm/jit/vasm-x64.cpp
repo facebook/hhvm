@@ -82,7 +82,6 @@ private:
   void emit(ldimmq& i);
   void emit(fallback& i);
   void emit(fallbackcc i);
-  void emit(kpcall& i);
   void emit(load& i);
   void emit(mccall& i);
   void emit(mcprep& i);
@@ -419,14 +418,6 @@ void Vgen::emit(fallbackcc i) {
   } else {
     destSR->emitFallbackJumpCustom(a->code(), frozen(), i.dest, i.trflags);
   }
-}
-
-void Vgen::emit(kpcall& i) {
-  backend.prepareForSmash(a->code(), kCallLen);
-  mcg->tx().profData()->addPrologueMainCaller(i.callee, i.prologIndex,
-                                              a->frontier());
-  always_assert(backend.isSmashable(a->frontier(), kCallLen));
-  a->call(i.target);
 }
 
 static void emitSimdImm(X64Assembler* a, int64_t val, Vreg d) {

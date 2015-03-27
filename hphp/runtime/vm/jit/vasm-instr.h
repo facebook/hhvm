@@ -73,7 +73,6 @@ struct Vunit;
   O(ldimmq, I(s) I(saveflags), Un, D(d))\
   O(fallback, I(dest), U(args), Dn)\
   O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
-  O(kpcall, I(target) I(callee) I(prologIndex), U(args), Dn)\
   O(load, Inone, U(s), D(d))\
   O(mccall, I(target), U(args), Dn)\
   O(mcprep, Inone, Un, D(d))\
@@ -270,8 +269,6 @@ struct ldimmq { Immed64 s; Vreg d; bool saveflags; };
 struct fallback { SrcKey dest; TransFlags trflags; RegSet args; };
 struct fallbackcc { ConditionCode cc; VregSF sf; SrcKey dest;
                     TransFlags trflags; RegSet args; };
-struct kpcall { CodeAddress target; const Func* callee; unsigned prologIndex;
-                RegSet args; };
 struct load { Vptr s; Vreg d; };
 struct mccall { CodeAddress target; RegSet args; };
 struct mcprep { Vreg64 d; };

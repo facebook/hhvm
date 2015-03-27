@@ -105,6 +105,10 @@ TCA SrcRec::getFallbackTranslation() const {
   return m_anchorTranslation;
 }
 
+FPAbsOffset SrcRec::nonResumedSPOff() const {
+  return serviceReqSPOff(getFallbackTranslation());
+}
+
 void SrcRec::chainFrom(IncomingBranch br) {
   assertx(br.type() == IncomingBranch::Tag::ADDR ||
          mcg->code.isValidCodeAddress(br.toSmash()));
@@ -138,12 +142,15 @@ void SrcRec::registerFallbackJump(TCA from, ConditionCode cc /* = -1 */) {
   mcg->cgFixups().m_inProgressTailJumps.push_back(incoming);
 }
 
-void SrcRec::emitFallbackJumpCustom(CodeBlock& cb, CodeBlock& frozen,
-                                    SrcKey sk, TransFlags trflags,
+void SrcRec::emitFallbackJumpCustom(CodeBlock& cb,
+                                    CodeBlock& frozen,
+                                    SrcKey sk,
+                                    TransFlags trflags,
                                     ConditionCode cc) {
   // Another platform dependency (the same one as above). TODO(2990497)
-  auto toSmash = x64::emitRetranslate(cb, frozen, cc, sk, trflags);
-
+  auto optSPOff = folly::Optional<FPAbsOffset>{};
+  if (!sk.resumed()) optSPOff = nonResumedSPOff();
+  auto toSmash = x64::emitRetranslate(cb, frozen, cc, sk, optSPOff, trflags);
   registerFallbackJump(toSmash, cc);
 }
 

@@ -131,9 +131,6 @@ PhysReg forceAlloc(const SSATmp& tmp) {
       opc == ReDefSP ||
       opc == ResetSP ||
       opc == AdjustSP ||
-      opc == Call ||
-      opc == CallArray ||
-      opc == ContEnter ||
       opc == RetAdjustStk ||
       opc == Mov,
       "unexpected StkPtr dest from {}",

@@ -388,7 +388,7 @@ void Vgen::emit(const copy2& i) {
 }
 
 void Vgen::emit(const bindaddr& i) {
-  *i.dest = emitBindAddr(a->code(), frozen(), i.dest, i.sk);
+  *i.dest = emitBindAddr(a->code(), frozen(), i.dest, i.sk, i.spOff);
 }
 
 void Vgen::emit(const bindcall& i) {
@@ -398,15 +398,30 @@ void Vgen::emit(const bindcall& i) {
 }
 
 void Vgen::emit(const bindjcc1st& i) {
-  emitBindJmpccFirst(a->code(), frozen(), i.cc, i.targets[0], i.targets[1]);
+  emitBindJmpccFirst(a->code(), frozen(), i.cc, i.targets[0], i.targets[1],
+                     i.spOff);
 }
 
 void Vgen::emit(const bindjcc& i) {
-  emitBindJ(a->code(), frozen(), i.cc, i.target, i.trflags);
+  emitBindJ(
+    a->code(),
+    frozen(),
+    i.cc,
+    i.target,
+    i.spOff,
+    i.trflags
+  );
 }
 
 void Vgen::emit(const bindjmp& i) {
-  emitBindJ(a->code(), frozen(), CC_None, i.target, i.trflags);
+  emitBindJ(
+    a->code(),
+    frozen(),
+    CC_None,
+    i.target,
+    i.spOff,
+    i.trflags
+  );
 }
 
 void Vgen::emit(const callstub& i) {
@@ -414,7 +429,7 @@ void Vgen::emit(const callstub& i) {
 }
 
 void Vgen::emit(const fallback& i) {
-  emit(fallbackcc{CC_None, InvalidReg, i.dest, i.trflags});
+  emit(fallbackcc{CC_None, InvalidReg, i.dest, i.trflags, i.args});
 }
 
 void Vgen::emit(const fallbackcc& i) {

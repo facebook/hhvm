@@ -137,7 +137,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   Asm a { mcg->code.main() };
 
-  // "assert" nothing uses rVmSp before computing it below.
+  // "assert" nothing uses rVmSp.
   if (debug) {
     a.    movq   (0x0fffafffbeefbeef, rVmSp);
   }
@@ -309,11 +309,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   auto destPC = func->unit()->entry() + entryOffset;
   SrcKey funcBody(func, destPC, false);
 
-  // Move rVmSp to the right place: just past all locals
-  int frameCells = func->numSlotsInFrame();
-  emitLea(a, rVmFp[-cellsToBytes(frameCells)], rVmSp);
-
-  Fixup fixup(funcBody.offset() - func->base(), frameCells);
+  Fixup const fixup(funcBody.offset() - func->base(), func->numSlotsInFrame());
 
   // Emit warnings for any missing arguments
   if (!func->isCPPBuiltin()) {
@@ -334,7 +330,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.cold(), rVmTl, fixup);
+  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.cold(), rVmTl,
+                              fixup);
 
   if (func->isClosureBody() && func->cls()) {
     int entry = nPassed <= numNonVariadicParams
@@ -345,7 +342,14 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
                    rax);
     a.    jmp     (rax);
   } else {
-    emitBindJ(mcg->code.main(), mcg->code.frozen(), CC_None, funcBody);
+    emitBindJ(
+      mcg->code.main(),
+      mcg->code.frozen(),
+      CC_None,
+      funcBody,
+      FPAbsOffset{func->numSlotsInFrame()},
+      TransFlags{}
+    );
   }
   return funcBody;
 }
@@ -358,21 +362,27 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   auto& mainCode = mcg->code.main();
   auto& frozenCode = mcg->code.frozen();
   Asm a { mainCode };
-  TCA start = mainCode.frontier();
+  auto const start = mainCode.frontier();
   assertx(mcg->cgFixups().empty());
+  auto const spOff = FPAbsOffset{func->numSlotsInFrame()};
+
   if (dvs.size() == 1) {
     a.  cmpl  (dvs[0].first, rVmFp[AROFF(m_numArgsAndFlags)]);
-    emitBindJ(mainCode, frozenCode, CC_LE, SrcKey(func, dvs[0].second, false));
-    emitBindJ(mainCode, frozenCode, CC_None, SrcKey(func, func->base(), false));
+    emitBindJ(mainCode, frozenCode, CC_LE, SrcKey(func, dvs[0].second, false),
+      spOff, TransFlags{});
+    emitBindJ(mainCode, frozenCode, CC_None, SrcKey(func, func->base(), false),
+      spOff, TransFlags{});
   } else {
     a.    loadl  (rVmFp[AROFF(m_numArgsAndFlags)], reg::eax);
     for (unsigned i = 0; i < dvs.size(); i++) {
       a.  cmpl   (dvs[i].first, reg::eax);
       emitBindJ(mainCode, frozenCode, CC_LE,
-                SrcKey(func, dvs[i].second, false));
+                SrcKey(func, dvs[i].second, false), spOff, TransFlags{});
     }
-    emitBindJ(mainCode, frozenCode, CC_None, SrcKey(func, func->base(), false));
+    emitBindJ(mainCode, frozenCode, CC_None, SrcKey(func, func->base(), false),
+      spOff, TransFlags{});
   }
+
   if (RuntimeOption::EvalPerfRelocate) {
     GrowableVector<IncomingBranch> incomingBranches;
     SrcKey sk = SrcKey(func, dvs[0].second, false);

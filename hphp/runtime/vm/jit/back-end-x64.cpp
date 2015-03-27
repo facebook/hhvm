@@ -114,24 +114,31 @@ struct BackEnd final : jit::BackEnd {
     return x64::emitUniqueStubs();
   }
 
-  TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
+  TCA emitServiceReqWork(CodeBlock& cb,
+                         TCA start,
+                         SRFlags flags,
+                         folly::Optional<FPAbsOffset> spOff,
                          ServiceRequest req,
                          const ServiceReqArgVec& argv) override {
-    return x64::emitServiceReqWork(cb, start, flags, req, argv);
+    return x64::emitServiceReqWork(cb, start, flags, spOff, req, argv);
   }
 
   size_t reusableStubSize() const override {
     return x64::reusableStubSize();
   }
 
-  void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
-                     SrcKey sk) override {
+  void emitInterpReq(CodeBlock& mainCode,
+                     SrcKey sk,
+                     FPAbsOffset spOff) override {
     Asm a { mainCode };
     // Add a counter for the translation if requested
     if (RuntimeOption::EvalJitTransCounters) {
       x64::emitTransCounterInc(a);
     }
     a.    emitImmReg(uint64_t(sk.pc()), argNumToRegName[0]);
+    if (!sk.resumed()) {
+      a.  lea(x64::rVmFp[-cellsToBytes(spOff.offset)], x64::rVmSp);
+    }
     a.    jmp(mcg->tx().uniqueStubs.interpHelper);
   }
 
@@ -275,8 +282,10 @@ struct BackEnd final : jit::BackEnd {
     return call + 5 + ((int32_t*)(call + 5))[-1];
   }
 
-  void addDbgGuard(CodeBlock& codeMain, CodeBlock& codeCold,
-                   SrcKey sk, size_t dbgOff) override {
+  void addDbgGuard(CodeBlock& codeMain,
+                   CodeBlock& codeCold,
+                   SrcKey sk,
+                   size_t dbgOff) override {
     Asm a { codeMain };
 
     // Emit the checks for debugger attach
@@ -284,6 +293,11 @@ struct BackEnd final : jit::BackEnd {
     emitTLSLoad<ThreadInfo>(a, ThreadInfo::s_threadInfo, rtmp);
     a.   loadb  (rtmp[dbgOff], rbyte(rtmp));
     a.   testb  ((int8_t)0xff, rbyte(rtmp));
+
+    if (!sk.resumed()) {
+      auto const off = mcg->tx().getSrcRec(sk)->nonResumedSPOff();
+      a. lea    (x64::rVmFp[-cellsToBytes(off.offset)], x64::rVmSp);
+    }
 
     // Branch to interpHelper if attached
     a.   emitImmReg(uint64_t(sk.pc()), argNumToRegName[0]);

@@ -383,7 +383,7 @@ void Vgen::emit(fallbackcc i) {
 }
 
 void Vgen::emit(fallback& i) {
-  emit(fallbackcc{CC_None, InvalidReg, i.dest, i.trflags});
+  emit(fallbackcc{CC_None, InvalidReg, i.dest, i.trflags, i.args});
 }
 
 void Vgen::emit(hcsync& i) {

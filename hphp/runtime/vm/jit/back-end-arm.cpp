@@ -152,18 +152,22 @@ struct BackEnd final : jit::BackEnd {
     return arm::emitUniqueStubs();
   }
 
-  TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
+  TCA emitServiceReqWork(CodeBlock& cb,
+                         TCA start,
+                         SRFlags flags,
+                         folly::Optional<FPAbsOffset> spOff,
                          ServiceRequest req,
                          const ServiceReqArgVec& argv) override {
-    return arm::emitServiceReqWork(cb, start, flags, req, argv);
+    return arm::emitServiceReqWork(cb, start, flags, spOff, req, argv);
   }
 
   size_t reusableStubSize() const override {
     return arm::reusableStubSize();
   }
 
-  void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
-                     SrcKey sk) override {
+  void emitInterpReq(CodeBlock& mainCode,
+                     SrcKey sk,
+                     FPAbsOffset spOff) override {
     if (RuntimeOption::EvalJitTransCounters) {
       vixl::MacroAssembler a { mainCode };
       arm::emitTransCounterInc(a);

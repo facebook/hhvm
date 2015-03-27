@@ -181,7 +181,7 @@ void endRegion(IRGS& env, SrcKey nextSk) {
   spillStack(env);
   gen(env, AdjustSP, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
       sp(env));
-  gen(env, ReqBindJmp, ReqBindJmpData { nextSk }, sp(env));
+  gen(env, ReqBindJmp, ReqBindJmpData { nextSk, absSPOff(env) }, sp(env));
 }
 
 // All accesses to the stack and locals in this function use DataTypeGeneric so

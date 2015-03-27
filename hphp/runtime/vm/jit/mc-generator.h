@@ -199,9 +199,9 @@ public:
 
   /*
    * enterTC is the main entry point for the translator from the bytecode
-   * interpreter (see enterVMWork).  It operates on behalf of a given nested
-   * invocation of the intepreter (calling back into it as necessary for blocks
-   * that need to be interpreted).
+   * interpreter.  It operates on behalf of a given nested invocation of the
+   * intepreter (calling back into it as necessary for blocks that need to be
+   * interpreted).
    *
    * If start is the address of a func prologue, stashedAR should be the ActRec
    * prepared for the call to that function, otherwise it should be nullptr.

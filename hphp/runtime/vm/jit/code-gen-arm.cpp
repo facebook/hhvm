@@ -1013,15 +1013,21 @@ void CodeGenerator::cgAdjustSP(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
-  vmain() << copy{srcLoc(0).reg(), PhysReg(rVmSp)};
-  vmain() << bindjmp{inst->extra<ReqBindJmp>()->dest};
+  auto const extra   = inst->extra<ReqBindJmp>();
+  auto& v            = vmain();
+  v << copy{srcLoc(0).reg(), PhysReg(rVmSp)};
+  v << bindjmp{extra->dest,
+               extra->spOff,
+               extra->trflags,
+               RegSet()};
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   assertx(m_state.unit.bcOff() == inst->marker().bcOff());
   auto const destSK = SrcKey(curFunc(), m_state.unit.bcOff(), resumed());
+  auto const extra = inst->extra<ReqRetranslate>();
   auto& v = vmain();
-  v << fallback{destSK};
+  v << fallback{destSK, extra->trflags, RegSet()};
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -73,13 +73,15 @@ template<Opcode op> struct IRExtraDataType;
 struct IRExtraData {};
 
 struct LdBindAddrData : IRExtraData {
-  explicit LdBindAddrData(SrcKey sk)
+  explicit LdBindAddrData(SrcKey sk, FPAbsOffset spOff)
     : sk(sk)
+    , spOff(spOff)
   {}
 
   std::string show() const { return showShort(sk); }
 
   SrcKey sk;
+  FPAbsOffset spOff;
 };
 
 struct LdSSwitchData : IRExtraData {
@@ -97,13 +99,19 @@ struct LdSSwitchData : IRExtraData {
     target->numCases   = numCases;
     target->defaultSk  = defaultSk;
     target->cases      = new (arena) Elm[numCases];
+    target->spOff      = spOff;
     std::copy(cases, cases + numCases, const_cast<Elm*>(target->cases));
     return target;
+  }
+
+  std::string show() const {
+    return folly::to<std::string>(spOff.offset);
   }
 
   int64_t     numCases;
   const Elm*  cases;
   SrcKey      defaultSk;
+  FPAbsOffset spOff;
 };
 
 struct JmpSwitchData : IRExtraData {
@@ -114,6 +122,7 @@ struct JmpSwitchData : IRExtraData {
     sd->cases      = cases;
     sd->defaultSk  = defaultSk;
     sd->targets    = new (arena) SrcKey[cases];
+    sd->spOff      = spOff;
     std::copy(targets, targets + cases, const_cast<SrcKey*>(sd->targets));
     return sd;
   }
@@ -123,6 +132,7 @@ struct JmpSwitchData : IRExtraData {
   int32_t cases;       // number of cases
   SrcKey  defaultSk;   // srckey of default case
   SrcKey* targets;     // srckeys for all targets
+  FPAbsOffset spOff;
 };
 
 struct LocalId : IRExtraData {
@@ -249,33 +259,37 @@ struct FPushCufData : IRExtraData {
  * Information for REQ_RETRANSLATE stubs.
  */
 struct ReqRetranslateData : IRExtraData {
-  TransFlags trflags;
-
   explicit ReqRetranslateData(TransFlags trflags)
-    : trflags(trflags)
+    : trflags{trflags}
   {}
 
   std::string show() const {
     return folly::to<std::string>(trflags.packed);
   }
+
+  TransFlags trflags;
 };
 
 /*
  * Information for REQ_BIND_JMP stubs.
  */
 struct ReqBindJmpData : IRExtraData {
-  SrcKey dest;
-  TransFlags trflags;
-
   explicit ReqBindJmpData(const SrcKey& dest,
+                          FPAbsOffset spOff,
                           TransFlags trflags = TransFlags{})
     : dest(dest)
+    , spOff(spOff)
     , trflags(trflags)
   {}
 
   std::string show() const {
-    return folly::to<std::string>(dest.offset(), ',', trflags.packed);
+    return folly::to<std::string>(dest.offset(), ',', spOff.offset, ',',
+      trflags.packed);
   }
+
+  SrcKey dest;
+  FPAbsOffset spOff;
+  TransFlags trflags;
 };
 
 /*

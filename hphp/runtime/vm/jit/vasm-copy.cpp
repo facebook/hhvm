@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,414 +13,338 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/vm/jit/vasm.h"
 
-#include "hphp/util/dataflow-worklist.h"
-
-#include "hphp/runtime/vm/jit/reg-alloc.h"
-#include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/vasm-print.h"
-#include "hphp/runtime/vm/jit/vasm-unit.h"
-#include "hphp/runtime/vm/jit/vasm-visit.h"
+#include <string>
+#include <algorithm>
+#include <array>
 
 #include <folly/Format.h>
 
-namespace HPHP { namespace jit {
+#include "hphp/util/trace.h"
+#include "hphp/util/dataflow-worklist.h"
+#include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/pass-tracer.h"
+#include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
 
-TRACE_SET_MOD(vasm);
+namespace HPHP { namespace jit {
 
 namespace {
 
-/*
- * Convert lea to copy when possible, exposing more opportunities for copy
- * propagation. Returns true iff the unit was modified.
- */
-bool reduceLeas(Vunit& unit, jit::vector<Vlabel>& blocks) {
-  bool changed = false;
-  for (auto label : blocks) {
-    for (auto& inst : unit.blocks[label].code) {
-      if (inst.op != Vinstr::lea) continue;
+TRACE_SET_MOD(vasm_copy);
 
-      auto& lea = inst.lea_;
-      if (lea.s.disp == 0 && lea.s.base.isValid() &&
-          !lea.s.index.isValid() && lea.s.seg == Vptr::DS) {
-        changed = true;
-        inst = copy{lea.s.base, lea.d};
-      }
-    }
-  }
-  return changed;
+//////////////////////////////////////////////////////////////////////
+
+using RpoID = uint32_t;
+
+constexpr auto kNumPhysRegs = 1;
+
+folly::Optional<int32_t> phys_reg_index(Vreg reg) {
+  assert(reg.isPhys());
+  if (reg == x64::rVmFp) return 0;
+  return folly::none;
 }
 
-/*
- * RegInfo represents what we know about the contents of a PhysReg, and can be
- * viewed as a lattice. folly::none is equivalent to Bottom (no value), a valid
- * Vreg represents a single known value, and an invalid Vreg represents Top
- * (unknown value). Values are merged with the union operator, as usual.
- *
- * All blocks start out with their input states set to Bottom, with states
- * merged in from predecessors as they become available. Note that the entry
- * block has an implicit predecessor with a Top out state, which is handled
- * while setting up the initial state for the optimization.
- */
-using RegInfo = folly::Optional<Vreg>;
+//////////////////////////////////////////////////////////////////////
 
 /*
- * Merge src into dst, returning true iff dst was modified. src must be
- * initialized.
+ * Information about the definition of a virtual register, if it was defined by
+ * either copying or lea'ing off another register.  The `base' register is not
+ * necessarily a virtual register.
  */
-bool mergeInfo(RegInfo& dst, const RegInfo src) {
-  assertx(src);
+struct RegInfo { Vreg base; int32_t disp; };
 
-  // Uninitialized dst: always take src's value.
-  if (!dst) {
-    dst = src;
-    return true;
-  }
-
-  // Unknown dst: no change no matter what src is.
-  if (!dst->isValid()) return false;
-
-  // Known dst but different src: degrade to unknown.
-  if (*dst != *src) {
-    dst = Vreg{};
-    return true;
-  }
-
-  return false;
+std::string show(RegInfo x) {
+  return folly::sformat("{} + {}", show(x.base), x.disp);
 }
 
-/*
- * This optimization was written and tested to work with all physical
- * registers. However, there is only one that really matters in practice:
- * rVmSp. State only cares about this register, drastically reducing both the
- * time and memory used by the optimization.
- */
+// Dataflow state.  There is one of these for each block entry.
 struct State {
-  static bool isSupported(Vreg reg) {
-    return reg == kAllowedReg;
-  }
-
-  void setUnknown() {
-    m_info = Vreg{};
-  }
-
-  void set(PhysReg r, Vreg info) {
-    assertx(r == kAllowedReg);
-    assertx(!info.isPhys());
-    m_info = info;
-  }
-
-  Vreg get(PhysReg r) const {
-    assertx(r == kAllowedReg);
-    assertx(m_info);
-    return *m_info;
-  }
-
-  bool merge(State other) {
-    return mergeInfo(m_info, other.m_info);
-  }
-
-  template<typename L>
-  void forEachKnown(L body) const {
-    assertx(m_info);
-    if (m_info->isValid()) {
-      body(kAllowedReg, *m_info);
-    }
-  }
-
- private:
-  static constexpr PhysReg kAllowedReg = x64::rVmSp;
-
-  RegInfo m_info;
+  bool initialized{false};
+  /*
+   * We have a bit of state for each physical register this pass tracks.  If
+   * the physical register has never been redefined, we will be safe rewriting
+   * uses of other Vregs that we know were defined in terms of it.  But if it
+   * may have been altered, we can't rewrite.
+   */
+  std::array<bool,kNumPhysRegs> phys_altered;
 };
-constexpr PhysReg State::kAllowedReg;
 
-std::string show(const State& state) {
-  const char* sep = "";
-  std::string ret = "[";
+struct BlockInfo {
+  RpoID rpoID;
+  State stateIn;
+};
 
-  state.forEachKnown([&](PhysReg phys, Vreg virt) {
-    if (!virt.isValid()) return;
-    folly::format(&ret, "{}{}: {}", sep, show(phys), show(virt));
-    sep = ", ";
-  });
-
-  return ret + "]";
-}
-
-/*
- * Env holds global state shared between different parts of the optimization.
- */
 struct Env {
-  Env(Vunit& unit, const Abi& abi)
+  explicit Env(Vunit& unit, const Abi& abi)
     : unit(unit)
     , abi(abi)
     , rpoBlocks(sortBlocks(unit))
-    , rpoIds(unit.blocks.size())
-    , inStates(unit.blocks.size())
-    , vregVals(unit.next_vr)
+    , blockInfos(unit.blocks.size())
+    , regs(unit.next_vr)
   {
-    for (uint32_t i = 0; i < rpoBlocks.size(); ++i) {
-      rpoIds[rpoBlocks[i]] = i;
-    }
+    auto rpoID = uint32_t{0};
+    for (auto& b : rpoBlocks) blockInfos[b].rpoID = rpoID++;
   }
 
   Vunit& unit;
   const Abi& abi;
-
-  // Reachable blocks in RPO.
   jit::vector<Vlabel> rpoBlocks;
 
-  // Keyed by Vlabel.
-  jit::vector<uint32_t> rpoIds;
-  jit::vector<State> inStates;
+  // Keyed by Vlabel.  This is populated by the flow-sensitive
+  // analyze_physical pass.
+  jit::vector<BlockInfo> blockInfos;
 
-  // Results of Vreg => Vreg copies, keyed by Vreg.
-  jit::vector<Vreg> vregVals;
-
-  // Did we mutate the Vunit?
-  bool changed{false};
+  // Keyed by Vreg.  This is populated as we go through the optimize pass, and
+  // doesn't need to be flow-sensitive since it only contains a RegInfo for
+  // virtual Vregs.  The information in the RegInfo is "usable" if it is also
+  // only virtual (and therefore SSA), or if it makes references to physical
+  // registers that may not have been altered (which is flow-sensitive
+  // information in blockInfos).
+  jit::vector<RegInfo> regs;
 };
 
-/*
- * VregSets maps from Vreg id to a RegSet of PhysRegs that currently contain
- * that Vreg's value. Used by UseVisitor to efficiently replace uses of a Vreg
- * with a PhysReg holding the same value.
- */
-using VregSets = jit::hash_map<size_t, RegSet>;
+//////////////////////////////////////////////////////////////////////
 
-/*
- * UseVisitor visits all srcs of an instruction, replacing operands in two
- * cases:
- *   - If virtual %x was defined as a copy of virtual %y, replace uses of %x
- *     with uses of %y. This unblocks some copy hinting in vxls.
- *   - If physical %p contains virtual %x, replace uses of %x with uses of
- *     %p. This eliminates uses of %x that would conflict with %p, allowing %x
- *     to be assigned to %p in many situations.
- */
-struct UseVisitor {
-  UseVisitor(const Vinstr& inst,
-             Env& env,
-             const VregSets& vregSets)
-    : m_env(env)
-    , m_changed(env.changed)
-    , m_vregSets(vregSets)
-    , m_inst(inst)
-  {}
-
-  /* Ignore imm and defs. */
-  template<typename T> void imm(T) {}
-  template<typename T> void def(T) {}
-  template<typename T, typename U> void defHint(T, U) {}
-
-  template<typename R> void use(R& r) { replace(r); }
-  void use(Vptr& ptr) {
-    if (ptr.base.isValid()) replace(ptr.base);
-    if (ptr.index.isValid()) replace(ptr.index);
-  }
-  void use(Vtuple t) {
-    for (auto& reg : m_env.unit.tuples[t]) replace(reg);
-  }
-  void use(VcallArgsId) { always_assert(false); }
-  void use(RegSet reg) {
-    // RegSets can't have Vregs in them. Nothing to do.
-  }
-  template<typename R, typename H> void useHint(R& reg, H&) { use(reg); }
-
-  template<typename R> void across(R& reg) {
-    // Only try to rename uses if the dest isn't physical, to avoid adding
-    // conflicts we can't resolve.
-    bool physDest = false;
-    visitDefs(m_env.unit, m_inst, [&](Vreg r) {
-      if (r.isPhys()) physDest = true;
-    });
-
-    if (!physDest) replace(reg);
-  }
-
- private:
-  template<typename R> void replace(R& reg) {
-    // If we have an SSA substitute for reg, use that first.
-    if (m_env.vregVals[reg].isValid()) {
-      ITRACE(2, "Replacing use of {} with {} in `{}'\n",
-             show(reg), show(m_env.vregVals[reg]), show(m_env.unit, m_inst));
-      reg = m_env.vregVals[reg];
-      m_changed = true;
-    }
-
-    // Next, check if reg is currently in any PhysRegs, and replace it with a
-    // use of that PhysReg if so.
-    auto const it = m_vregSets.find(reg);
-    if (it == m_vregSets.end()) return;
-    auto const newReg = it->second.findFirst();
-    if (newReg != InvalidReg) {
-      ITRACE(2, "Replacing use of {} with {} in `{}'\n",
-             show(reg), show(newReg), show(m_env.unit, m_inst));
-      reg = newReg;
-      m_changed = true;
-    }
-  }
-
-  const Env& m_env;
-  bool& m_changed;
-  const VregSets& m_vregSets;
-  const Vinstr& m_inst;
-};
-
-/*
- * Visit each dest of the given instruction, updating tracked state as
- * appropriate. vregSets is only useful during the mutation phase, so it will
- * be nullptr during analysis. In order to process all sources of copy2 and
- * copyargs before any definitions become visible, inState is never
- * modified. Instead, changes are made to a copy in outState, which is returned
- * to the caller.
- */
-State processDests(Env& env, const State inState,
-                   VregSets* vregSets, const Vinstr& inst) {
-  auto outState = inState;
-
-  auto handleCopy = [&](Vreg dst, Vreg src, bool allowSwap) {
-    assertx(dst.isValid());
-
-    if (dst.isVirt() && src.isVirt()) {
-      // First, the easy case: defining a Vreg from another Vreg. Remember the
-      // assignment in the flow-insensitive vregVals map.
-      if (env.vregVals[src].isValid()) src = env.vregVals[src];
-      assertx(!env.vregVals[src].isValid());
-      env.vregVals[dst] = src;
-      return;
-    }
-
-    // Next, see if we're copying a Vreg to a PhysReg, and remember that the
-    // PhysReg contains the Vreg if so.
-    if (allowSwap && State::isSupported(src) && dst.isVirt()) {
-      // Defining a Vreg from a PhysReg gives us the same information: the
-      // PhysReg contains the Vreg's value. It's only ok to take this path if
-      // the src we're copying from doesn't also appear as a dest of this
-      // instruction.
-      std::swap(src, dst);
-    }
-    if (State::isSupported(dst)) {
-      if (src.isPhys()) {
-        // If the src is another PhysReg, use its tracked value instead, even
-        // if it's unknown.
-        src = inState.get(src);
-      } else if (src.isVirt() && env.vregVals[src].isValid()) {
-        // Make sure we use canonical Vregs.
-        src = env.vregVals[src];
-      }
-
-      auto const prevReg = inState.get(dst);
-      // Forget that the previous value lives in dst.
-      if (vregSets && prevReg.isValid()) (*vregSets)[prevReg].remove(dst);
-
-      // Register that src lives in dst. src may still be invalid here.
-      outState.set(dst, src);
-      if (vregSets && src.isValid()) (*vregSets)[src].add(dst);
-    }
-  };
-
-  if (inst.op == Vinstr::copy) {
-    handleCopy(inst.copy_.d, inst.copy_.s, true);
-  } else if (inst.op == Vinstr::copy2) {
-    auto const& copy2 = inst.copy2_;
-    handleCopy(copy2.d0, copy2.s0, copy2.s0 != copy2.d1);
-    handleCopy(copy2.d1, copy2.s1, copy2.s1 != copy2.d0);
-  } else if (inst.op == Vinstr::copyargs) {
-    auto const& srcs = env.unit.tuples[inst.copyargs_.s];
-    auto const& dsts = env.unit.tuples[inst.copyargs_.d];
-    RegSet dstSet;
-    for (auto dst : dsts) if (dst.isPhys()) dstSet.add(dst);
-
-    for (auto i = 0; i < srcs.size(); ++i) {
-      handleCopy(dsts[i], srcs[i],
-                 srcs[i].isPhys() && !dstSet.contains(srcs[i]));
-    }
-  } else {
-    auto killReg = [&](Vreg dst) { handleCopy(dst, Vreg{}, false); };
-    visitDefs(env.unit, inst, killReg);
-
-    RegSet uses, across, defs;
-    getEffects(env.abi, inst, uses, across, defs);
-    defs.forEach(killReg);
-  }
-
-  return outState;
+State entry_state(Env& env) {
+  auto ret = State{};
+  ret.initialized = true;
+  ret.phys_altered.fill(0);
+  return ret;
 }
 
-} // namespace
-
-void optimizeCopies(Vunit& unit, const Abi& abi) {
-  FTRACE(2, "\n{:-^80}\n", " vasm-copy ");
-  Env env{unit, abi};
-  env.changed = reduceLeas(unit, env.rpoBlocks);
-
-  ITRACE(2, "\n{:-^60}\n", " analysis ");
-
-  // First, iterate over the CFG until we reach a fixed point. Give the entry
-  // block an unknown in state, push it on the worklist, and go.
-  env.inStates[unit.entry].setUnknown();
-  dataflow_worklist<uint32_t> worklist(unit.blocks.size());
-  worklist.push(0);
-
-  while (!worklist.empty()) {
-    auto const label = env.rpoBlocks[worklist.pop()];
-    auto& block      = env.unit.blocks[label];
-    auto state       = env.inStates[label];
-    ITRACE(2, "Entering {} with state: {}\n", label, show(state));
-    Trace::Indent indent;
-
-    for (auto& inst : block.code) {
-      state = processDests(env, state, nullptr, inst);
-    }
-
-    auto const& block_succs = succs(block.code.back());
-    if (!block_succs.empty()) {
-      ITRACE(2, "Leaving {} with state: {}\n", label, show(state));
-
-      // Merge our out state into all successors. If this changes any of their
-      // in states, enqueue them for processing.
-      for (auto succ : block_succs) {
-        if (env.inStates[succ].merge(state)) {
-          if (worklist.push(env.rpoIds[succ])) {
-            ITRACE(3, "Enqueued successor {}\n", succ);
-          } else {
-            ITRACE(3, "Successor {} already in worklist\n", succ);
-          }
-        }
-      }
-    } else {
-      ITRACE(2, "Leaving terminal {}\n", label);
-    }
-    FTRACE(2, "\n");
+bool merge_into(State& dst, const State& src) {
+  if (!dst.initialized) {
+    dst = src;
+    return true;
   }
 
-  ITRACE(2, "\n{:-^60}\n", " mutation ");
-  // Now do a single pass over the blocks, mutating uses this time.
-  VregSets vregSets;
-  for (auto b : env.rpoBlocks) {
-    auto state = env.inStates[b];
-    ITRACE(2, "Entering {} with state {}\n", b, show(state));
-    Trace::Indent indent;
+  auto changed = false;
 
-    // Build up a map to efficiently check if any Vreg is in a Physreg.
-    vregSets.clear();
-    state.forEachKnown([&](PhysReg phys, Vreg virt) {
-      vregSets[virt].add(phys);
+  for (auto i = uint32_t{0}; i < kNumPhysRegs; ++i) {
+    auto const new_alt = dst.phys_altered[i] || src.phys_altered[i];
+    if (new_alt != dst.phys_altered[i]) {
+      dst.phys_altered[i] = new_alt;
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+template<class F>
+void for_all_defs(Env& env, const Vinstr& inst, F f) {
+  visitDefs(env.unit, inst, f);
+  auto uses   = RegSet{};
+  auto across = RegSet{};
+  auto defs   = RegSet{};
+  getEffects(env.abi, inst, uses, across, defs);
+  defs.forEach(f);
+}
+
+void analyze_inst_physical(Env& env, State& state, Vinstr& inst) {
+  for_all_defs(env, inst, [&] (Vreg dst) {
+    if (!dst.isPhys()) return;
+    if (auto const idx = phys_reg_index(dst)) {
+      FTRACE(3, "      kill {}\n", show(dst));
+      state.phys_altered[*idx] = true;
+    }
+  });
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void analyze_physical(Env& env) {
+  FTRACE(1, "analyze_physical ---------------------------------\n");
+
+  env.blockInfos[env.unit.entry].stateIn = entry_state(env);
+  auto workQ = dataflow_worklist<RpoID>(env.unit.blocks.size());
+  workQ.push(RpoID{0});
+  do {
+    auto const label = env.rpoBlocks[workQ.pop()];
+    FTRACE(1, "{}:\n", label);
+    auto& blk = env.unit.blocks[label];
+    auto& binfo = env.blockInfos[label];
+
+    auto state = binfo.stateIn;
+    for (auto& inst : blk.code) {
+      FTRACE(2, "    {}\n", show(env.unit, inst));
+      analyze_inst_physical(env, state, inst);
+    }
+
+    for (auto s : succs(blk.code.back())) {
+      FTRACE(4, "  -> {}\n", s);
+      auto& sinfo = env.blockInfos[s];
+      if (merge_into(sinfo.stateIn, state)) workQ.push(sinfo.rpoID);
+    }
+  } while (!workQ.empty());
+}
+
+std::string show_fixed_point(Env& env) {
+  auto ret = std::string{};
+
+  for (auto& b : env.rpoBlocks) {
+    auto const& state = env.blockInfos[b].stateIn;
+    folly::format(&ret, "{: <4}:  ", b);
+    for (auto& v : state.phys_altered) folly::format(&ret, " {}", v);
+    ret += "\n";
+  }
+
+  return ret;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void analyze_copy(Env& env, const copy& copy) {
+  if (!copy.d.isVirt()) return;
+  auto& dst = env.regs[copy.d];
+  dst = RegInfo { copy.s, 0 };
+  FTRACE(3, "      {} = {}\n", show(copy.d), show(dst));
+}
+
+void analyze_lea(Env& env, const lea& lea) {
+  if (!(lea.s.seg == Vptr::DS && lea.s.scale == 1 && lea.d.isVirt())) return;
+  auto& dst = env.regs[lea.d];
+  dst = RegInfo { lea.s.base, lea.s.disp };
+  FTRACE(3, "      {} = {}\n", show(lea.d), show(dst));
+}
+
+void analyze_inst_virtual(Env& env, const Vinstr& inst) {
+  switch (inst.op) {
+  case Vinstr::copy: return analyze_copy(env, inst.copy_);
+  case Vinstr::lea:  return analyze_lea(env, inst.lea_);
+  default: break;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+template<class F>
+void if_tracking_reg(const Env& env, const State& state, Vreg reg, F f) {
+  if (!reg.isValid()) return;
+  auto& info = env.regs[reg];
+  if (!info.base.isValid()) return;
+  if (info.base.isPhys()) {
+    auto const index = phys_reg_index(info.base);
+    if (!index) return;
+    if (state.phys_altered[*index]) {
+      FTRACE(4, "        base may be altered\n");
+      return;
+    }
+  }
+  f(info);
+}
+
+struct OptVisit {
+  const Env& env;
+  const State& state;
+
+  template<class T> void imm(T&) {}
+  template<class T> void across(T& t) { use(t); }
+  template<class T, class H> void useHint(T& t, H&) { use(t); }
+  template<class T, class H> void defHint(T& t, H&) { def(t); }
+  template<class T> void def(T&) {}
+
+  void use(RegSet) {}
+  void use(VregSF) {}
+  void use(VcallArgsId) {}
+  void use(Vreg128) {}
+
+  void use(Vtuple t) { for (auto& reg : env.unit.tuples[t]) use(reg); }
+
+  void use(Vptr& ptr) {
+    // Rewrite memory operands that are based on registers we've copied or
+    // lea'd off of other registers.
+    if (ptr.seg != Vptr::DS) return;
+    if_tracking_reg(env, state, ptr.base, [&] (const RegInfo& info) {
+      FTRACE(2, "      rewrite: {} => {}\n", show(ptr.base), show(info));
+      ptr.base = info.base;
+      ptr.disp += info.disp;
     });
+  }
 
-    for (auto& inst : unit.blocks[b].code) {
-      UseVisitor use{inst, env, vregSets};
-      visitOperands(inst, use);
-      state = processDests(env, state, &vregSets, inst);
+  template<class T>
+  typename std::enable_if<
+    std::is_same<Vreg,T>::value ||
+      std::is_same<Vreg8,T>::value ||
+      std::is_same<Vreg16,T>::value ||
+      std::is_same<Vreg32,T>::value ||
+      std::is_same<Vreg64,T>::value ||
+      std::is_same<VregDbl,T>::value
+  >::type use(T& reg) {
+    // Rewrite to another register if it's just a copy.
+    if_tracking_reg(env, state, reg, [&] (const RegInfo& info) {
+      if (info.disp != 0) return;
+      FTRACE(2, "      rewrite: {} => {}\n", show(reg), show(info.base));
+      reg = info.base;
+    });
+  }
+};
+
+void optimize_copy(const Env& env, const State& state, Vinstr& inst) {
+  auto& copy = inst.copy_;
+  if_tracking_reg(env, state, copy.s, [&] (const RegInfo& info) {
+    if (info.disp != 0) {
+      FTRACE(2, "      copy => lea {}\n", show(info));
+      inst = lea{info.base[info.disp], copy.d};
+    }
+  });
+}
+
+void optimize_inst(const Env& env, const State& state, Vinstr& inst) {
+  auto visit = OptVisit { env, state };
+  visitOperands(inst, visit);
+  switch (inst.op) {
+  case Vinstr::copy:  optimize_copy(env, state, inst); break;
+  default:            break;
+  }
+}
+
+void optimize(Env& env) {
+  FTRACE(1, "optimize ---------------------------------\n");
+
+  for (auto const& label : env.rpoBlocks) {
+    FTRACE(1, "{}:\n", label);
+    auto& blk = env.unit.blocks[label];
+    auto& binfo = env.blockInfos[label];
+
+    auto state = binfo.stateIn;
+    for (auto& inst : blk.code) {
+      FTRACE(2, "    {}\n", show(env.unit, inst));
+      optimize_inst(env, state, inst);
+      analyze_inst_virtual(env, inst);
+      analyze_inst_physical(env, state, inst);
     }
   }
+}
 
-  if (env.changed) {
-    printUnit(kVasmCopyPropLevel, "after vasm-copy", unit);
-  }
+//////////////////////////////////////////////////////////////////////
+
+}
+
+/*
+ * This pass performs straight-forward copy propagation, along with stateful
+ * copy propagation of values through physical registers.  (Tracking the values
+ * of physical registers requires dataflow analysis, because they do not have
+ * single definitions.)
+ *
+ * The pass also tracks registers defined via lea instructions, and it knows
+ * when a register holds a value that is the same as another register plus some
+ * offset.  It then folds offsets in memory operands to try to require fewer
+ * registers.  The main motivation for this is to generally eliminate the need
+ * for a separate stack pointer (the result of HHIR's DefSP instruction, which
+ * will just be an lea off of the rVmFp physical register).
+ */
+void optimizeCopies(Vunit& unit, const Abi& abi) {
+  VpassTracer tracer{&unit, Trace::vasm_copy, "vasm-copy"};
+  Env env { unit, abi };
+  analyze_physical(env);
+  FTRACE(5, "\nfixed point:\n{}\n", show_fixed_point(env));
+  optimize(env);
 }
 
 }}

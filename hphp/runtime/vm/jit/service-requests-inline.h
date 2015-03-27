@@ -17,6 +17,7 @@
 #define incl_HPHP_RUNTIME_VM_SERVICE_REQUESTS_INLINE_H_
 
 #include "hphp/runtime/vm/jit/service-requests.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP { namespace jit {
@@ -72,22 +73,40 @@ inline bool isEphemeralServiceReq(ServiceRequest sr) {
 }
 
 template<typename... Arg>
-TCA emitServiceReq(CodeBlock& cb, SRFlags flags, ServiceRequest sr, Arg... a) {
+TCA emitServiceReq(CodeBlock& cb,
+                   SRFlags flags,
+                   folly::Optional<FPAbsOffset> spOff,
+                   ServiceRequest sr,
+                   Arg... a) {
   // These should reuse stubs. Use emitEphemeralServiceReq.
   assertx(!isEphemeralServiceReq(sr));
 
   auto const argv = packServiceReqArgs(a...);
-  return mcg->backEnd().emitServiceReqWork(cb, cb.frontier(),
-                                           flags | SRFlags::Persist,
-                                           sr, argv);
+  return mcg->backEnd().emitServiceReqWork(
+    cb,
+    cb.frontier(),
+    flags | SRFlags::Persist,
+    spOff,
+    sr,
+    argv
+  );
 }
 
 template<typename... Arg>
-TCA emitEphemeralServiceReq(CodeBlock& cb, TCA start, ServiceRequest sr,
+TCA emitEphemeralServiceReq(CodeBlock& cb,
+                            TCA start,
+                            folly::Optional<FPAbsOffset> spOff,
+                            ServiceRequest sr,
                             Arg... a) {
   assertx(isEphemeralServiceReq(sr) || sr == REQ_RETRANSLATE);
-  auto const argv = packServiceReqArgs(a...);
-  return mcg->backEnd().emitServiceReqWork(cb, start, SRFlags::None, sr, argv);
+  return mcg->backEnd().emitServiceReqWork(
+    cb,
+    start,
+    SRFlags::None,
+    spOff,
+    sr,
+    packServiceReqArgs(a...)
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/vixl/a64/constants-a64.h"
@@ -55,13 +56,16 @@ struct Vunit;
  */
 #define VASM_OPCODES\
   /* service requests, PHP-level function calls */\
-  O(bindaddr, I(dest) I(sk), Un, Dn)\
+  O(bindaddr, I(dest) I(sk) I(spOff), Un, Dn)\
   O(bindcall, I(stub), U(args), Dn)\
-  O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]), U(sf) U(args), Dn)\
-  O(bindjcc, I(cc) I(target) I(trflags), U(sf) U(args), Dn)\
-  O(bindjmp, I(target) I(trflags), U(args), Dn)\
+  O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]) I(spOff), U(sf) U(args), Dn)\
+  O(bindjcc, I(cc) I(target) I(spOff) I(trflags), U(sf) U(args), Dn)\
+  O(bindjmp, I(target) I(spOff) I(trflags), U(args), Dn)\
   O(callstub, I(target), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
+  O(fallback, I(dest), U(args), Dn)\
+  O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
+  O(svcreq, I(req) I(stub_block), U(args) U(extraArgs), Dn)\
   /* vasm intrinsics */\
   O(copy, Inone, UH(s,d), DH(d,s))\
   O(copy2, Inone, UH(s0,d0) UH(s1,d1), DH(d0,s0) DH(d1,s1))\
@@ -71,8 +75,6 @@ struct Vunit;
   O(ldimmb, I(s) I(saveflags), Un, D(d))\
   O(ldimml, I(s) I(saveflags), Un, D(d))\
   O(ldimmq, I(s) I(saveflags), Un, D(d))\
-  O(fallback, I(dest), U(args), Dn)\
-  O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
   O(load, Inone, U(s), D(d))\
   O(mccall, I(target), U(args), Dn)\
   O(mcprep, Inone, Un, D(d))\
@@ -81,7 +83,6 @@ struct Vunit;
   O(phijmp, Inone, U(uses), Dn)\
   O(phijcc, I(cc), U(uses) U(sf), Dn)\
   O(store, Inone, U(s) U(d), Dn)\
-  O(svcreq, I(req) I(stub_block), U(args) U(extraArgs), Dn)\
   O(syncpoint, I(fix), Un, Dn)\
   O(unwind, Inone, Un, Dn)\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
@@ -233,11 +234,10 @@ struct Vunit;
   O(xorbi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   O(xorq, Inone, U(s0) U(s1), D(d) D(sf))\
   O(xorqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  /* */
 
 ///////////////////////////////////////////////////////////////////////////////
 // Service requests.
-
-struct bindaddr { TCA* dest; SrcKey sk; };
 
 /*
  * PHP function call: Smashable call with custom ABI.
@@ -249,12 +249,117 @@ struct bindcall { TCA stub; RegSet args; Vlabel targets[2]; };
  */
 struct callstub { TCA target; RegSet args; };
 
-struct bindjcc1st { ConditionCode cc; VregSF sf; SrcKey targets[2];
-                    RegSet args; };
-struct bindjcc { ConditionCode cc; VregSF sf; SrcKey target;
-                 TransFlags trflags; RegSet args; };
-struct bindjmp { SrcKey target; TransFlags trflags; RegSet args; };
 struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
+struct svcreq { ServiceRequest req; RegSet args; Vtuple extraArgs;
+                TCA stub_block; };
+
+struct fallbackcc {
+  explicit fallbackcc(ConditionCode cc,
+                      VregSF sf,
+                      SrcKey dest,
+                      TransFlags trflags,
+                      RegSet args)
+    : cc{cc}
+    , sf{sf}
+    , dest{dest}
+    , trflags{trflags}
+    , args{args}
+  {}
+
+  ConditionCode cc;
+  VregSF sf;
+  SrcKey dest;
+  TransFlags trflags;
+  RegSet args;
+};
+
+struct fallback {
+  explicit fallback(SrcKey dest,
+                    TransFlags trflags,
+                    RegSet args)
+    : dest{dest}
+    , trflags{trflags}
+    , args{args}
+  {}
+
+  SrcKey dest;
+  TransFlags trflags;
+  RegSet args;
+};
+
+struct bindaddr {
+  explicit bindaddr(TCA* dest, SrcKey sk, FPAbsOffset spOff)
+    : dest(dest)
+    , sk(sk)
+    , spOff(spOff)
+  {}
+
+  TCA* dest;
+  SrcKey sk;
+  FPAbsOffset spOff;
+};
+
+struct bindjcc1st {
+  explicit bindjcc1st(ConditionCode cc,
+                      VregSF sf,
+                      std::array<SrcKey,2> targets,
+                      FPAbsOffset spOff,
+                      RegSet args)
+    : cc{cc}
+    , sf{sf}
+    , spOff(spOff)
+    , args{args}
+  {
+    this->targets[0] = targets[0];
+    this->targets[1] = targets[1];
+  }
+
+  ConditionCode cc;
+  VregSF sf;
+  SrcKey targets[2];
+  FPAbsOffset spOff;
+  RegSet args;
+};
+
+struct bindjcc {
+  explicit bindjcc(ConditionCode cc,
+                   VregSF sf,
+                   SrcKey target,
+                   FPAbsOffset spOff,
+                   TransFlags trflags,
+                   RegSet args)
+    : cc{cc}
+    , sf{sf}
+    , target{target}
+    , spOff(spOff)
+    , trflags{trflags}
+    , args{args}
+  {}
+
+  ConditionCode cc;
+  VregSF sf;
+  SrcKey target;
+  FPAbsOffset spOff;
+  TransFlags trflags;
+  RegSet args;
+};
+
+struct bindjmp {
+  explicit bindjmp(SrcKey target,
+                   FPAbsOffset spOff,
+                   TransFlags trflags,
+                   RegSet args)
+    : target{target}
+    , spOff(spOff)
+    , trflags{trflags}
+    , args{args}
+  {}
+
+  SrcKey target;
+  FPAbsOffset spOff;
+  TransFlags trflags;
+  RegSet args;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // VASM intrinsics.
@@ -282,9 +387,6 @@ struct fallthru {};
 struct ldimmb { Immed s; Vreg d; bool saveflags; };
 struct ldimml { Immed s; Vreg d; bool saveflags; };
 struct ldimmq { Immed64 s; Vreg d; bool saveflags; };
-struct fallback { SrcKey dest; TransFlags trflags; RegSet args; };
-struct fallbackcc { ConditionCode cc; VregSF sf; SrcKey dest;
-                    TransFlags trflags; RegSet args; };
 struct load { Vptr s; Vreg d; };
 struct mccall { CodeAddress target; RegSet args; };
 struct mcprep { Vreg64 d; };
@@ -293,8 +395,6 @@ struct phidef { Vtuple defs; };
 struct phijmp { Vlabel target; Vtuple uses; };
 struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
 struct store { Vreg s; Vptr d; };
-struct svcreq { ServiceRequest req; RegSet args; Vtuple extraArgs;
-                TCA stub_block; };
 struct syncpoint { Fixup fix; };
 struct unwind { Vlabel targets[2]; };
 

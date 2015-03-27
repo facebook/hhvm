@@ -326,7 +326,8 @@ Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  PhysReg rds, Fixup fixup) {
   // warning: keep this in sync with the vasm version below.
-  Asm a{mainCode}, acold{coldCode};
+  Asm a { mainCode };
+  Asm acold { coldCode };
 
   emitTestSurpriseFlags(a, rds);
   a.  jnz(coldCode.frontier());

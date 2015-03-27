@@ -1219,7 +1219,7 @@ To string conversions:
 
   Unlinks a frame constructed by DefInlineFP.
 
-| CallArray<spOffset,returnOff,after,destroyLocals>, D(StkPtr),
+| CallArray<spOffset,returnOff,after,destroyLocals>, ND,
 |                                                    S(StkPtr) S(FramePtr),
 |                                                    Er
 
@@ -1229,7 +1229,7 @@ To string conversions:
   the elements of the array as arguments, and invokes the function in the
   ActRec.
 
-| Call<offset,numParams,returnOff,funcd,destroyLocals>, D(StkPtr),
+| Call<offset,numParams,returnOff,funcd,destroyLocals>, ND,
 |                                                       S(StkPtr) S(FramePtr),
 |                                                       Er
 
@@ -1632,7 +1632,7 @@ To string conversions:
   S2 is returned. If S0 does not support array or indexed access S2 is
   returned.
 
-| LdBindAddr<SrcKey>, D(TCA), NA, NF
+| LdBindAddr<SrcKey,spOff>, D(TCA), NA, NF
 
   Creates a service request to bind the given target address. Returns a TCA
   pointing either to the service request (before the service request is
@@ -1731,7 +1731,7 @@ To string conversions:
   cross-scheduler and intra-scheduler cycle detection. Throws if the
   dependency cannot be established.
 
-| ContEnter<spOffset,returnBCOffset>, D(StkPtr),
+| ContEnter<spOffset,returnBCOffset>, ND,
 |                                     S(StkPtr) S(FramePtr) S(FramePtr) S(TCA),
 |                                     Er
 

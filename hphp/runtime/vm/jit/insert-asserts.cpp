@@ -88,7 +88,11 @@ void visit(IRUnit& unit, Block* block) {
       }
       break;
     case Call:
-      insertStkAssert(unit, &inst, inst.dst(), IRSPOffset{0});
+      {
+        auto const extra = inst.extra<Call>();
+        insertStkAssert(unit, &inst, inst.src(0),
+          extra->spOffset + extra->numParams + kNumActRecCells - 1);
+      }
       break;
     default:
       if (!inst.isBlockEnd()) {

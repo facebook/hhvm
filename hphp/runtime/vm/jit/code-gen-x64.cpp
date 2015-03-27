@@ -221,6 +221,24 @@ void ifRefCountedNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
   });
 }
 
+void debug_trashsp(Vout& v) {
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    v << syncvmsp{v.cns(0x42)};
+  }
+}
+
+void maybe_syncsp(Vout& v, BCMarker marker, Vreg sp) {
+  if (!marker.resumed()) {
+    debug_trashsp(v);
+    return;
+  }
+  v << syncvmsp{sp};
+}
+
+RegSet leave_trace_args(BCMarker marker) {
+  return marker.resumed() ? kCrossTraceRegs : kCrossTraceRegsNoSP;
+}
+
 } // unnamed namespace
 //////////////////////////////////////////////////////////////////////
 
@@ -525,19 +543,16 @@ Vreg CodeGenerator::emitCompare(Vout& v, IRInstruction* inst) {
 }
 
 void CodeGenerator::cgDefSP(IRInstruction* inst) {
-  auto sp = dstLoc(inst, 0).reg();
+  auto const sp = dstLoc(inst, 0).reg();
   auto& v = vmain();
-  v << defvmsp{sp};
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts && !inst->marker().resumed()) {
-    auto const fp = srcLoc(inst, 0).reg();
-    auto expectSp = v.makeReg();
-    auto const sf = v.makeReg();
-    // Verify that rVmSp == rbp - spOff
-    v << lea{fp[-cellsToBytes(inst->extra<StackOffset>()->offset)], expectSp};
-    v << cmpq{expectSp, sp, sf};
-    ifBlock(v, vcold(), CC_NE, sf, [](Vout& v) { v << ud2(); });
+  if (inst->marker().resumed()) {
+    v << defvmsp{sp};
+    return;
   }
+
+  auto const fp = srcLoc(inst, 0).reg();
+  v << lea{fp[-cellsToBytes(inst->extra<DefSP>()->offset)], sp};
 }
 
 void CodeGenerator::cgCheckNullptr(IRInstruction* inst) {
@@ -2157,16 +2172,16 @@ void CodeGenerator::cgAsyncRetCtrl(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
-  auto data   = inst->extra<LdBindAddr>();
-  auto dstReg = dstLoc(inst, 0).reg();
+  auto const extra  = inst->extra<LdBindAddr>();
+  auto const dstReg = dstLoc(inst, 0).reg();
   auto& v = vmain();
 
   // Emit service request to smash address of SrcKey into 'addr'.
-  TCA* addrPtr = mcg->allocData<TCA>(sizeof(TCA), 1);
-  v << bindaddr{addrPtr, data->sk};
+  auto const addrPtr = mcg->allocData<TCA>(sizeof(TCA), 1);
+  v << bindaddr{addrPtr, extra->sk, extra->spOff};
 
   // Load the maybe bound address.
-  auto addr = intptr_t(addrPtr);
+  auto const addr = reinterpret_cast<intptr_t>(addrPtr);
   // the tc/global data is intentionally layed out to guarantee
   // rip-relative addressing will work.
   // Also, a rip-relative load, is 1 byte smaller than the corresponding
@@ -2176,11 +2191,13 @@ void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
 
 void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
   auto const data     = inst->extra<JmpSwitchDest>();
+  auto const marker   = inst->marker();
   auto const index    = inst->src(0);
   auto const indexReg = srcLoc(inst, 0).reg();
+  auto const spOff    = data->spOff;
   auto& v = vmain();
 
-  v << syncvmsp{srcLoc(inst, 1).reg()};
+  maybe_syncsp(v, marker, srcLoc(inst, 1).reg());
 
   if (!index->hasConstVal()) {
     auto idx = indexReg;
@@ -2191,44 +2208,48 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
       }
       auto const sf = v.makeReg();
       v << cmpqi{data->cases - 2, idx, sf};
-      v << bindjcc{CC_AE, sf, data->defaultSk, TransFlags{}, kCrossTraceRegs};
+      v << bindjcc{CC_AE, sf, data->defaultSk, spOff,
+        TransFlags{}, leave_trace_args(marker)};
     }
 
-    TCA* table = mcg->allocData<TCA>(sizeof(TCA), data->cases);
-    auto t = v.makeReg();
+    auto const table = mcg->allocData<TCA>(sizeof(TCA), data->cases);
+    auto const t = v.makeReg();
     for (int i = 0; i < data->cases; i++) {
-      v << bindaddr{&table[i], data->targets[i]};
+      v << bindaddr{&table[i], data->targets[i], spOff};
     }
     v << leap{rip[(intptr_t)table], t};
-    v << jmpm{t[idx*8], kCrossTraceRegs};
+    v << jmpm{t[idx*8], leave_trace_args(marker)};
     return;
   }
 
-  int64_t indexVal = index->intVal();
+  auto indexVal = index->intVal();
   if (data->bounded) {
     indexVal -= data->base;
     if (indexVal >= data->cases - 2 || indexVal < 0) {
-      v << bindjmp{data->defaultSk, TransFlags(), kCrossTraceRegs};
+      v << bindjmp{data->defaultSk, spOff, TransFlags{},
+        leave_trace_args(marker)};
       return;
     }
   }
-  v << bindjmp{data->targets[indexVal], TransFlags(), kCrossTraceRegs};
+  v << bindjmp{data->targets[indexVal], spOff, TransFlags{},
+    leave_trace_args(marker)};
 }
 
 void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
-  auto data = inst->extra<LdSSwitchDestFast>();
+  auto const extra = inst->extra<LdSSwitchDestFast>();
+  auto const spOff = extra->spOff;
 
   auto table = mcg->allocData<SSwitchMap>(64);
-  new (table) SSwitchMap(data->numCases);
+  new (table) SSwitchMap(extra->numCases);
   auto& v = vmain();
 
-  for (int64_t i = 0; i < data->numCases; ++i) {
-    table->add(data->cases[i].str, nullptr);
-    TCA* addr = table->find(data->cases[i].str);
-    v << bindaddr{addr, data->cases[i].dest};
+  for (int64_t i = 0; i < extra->numCases; ++i) {
+    table->add(extra->cases[i].str, nullptr);
+    auto const addr = table->find(extra->cases[i].str);
+    v << bindaddr{addr, extra->cases[i].dest, spOff};
   }
-  TCA* def = mcg->allocData<TCA>(sizeof(TCA), 1);
-  v << bindaddr{def, data->defaultSk};
+  auto const def = mcg->allocData<TCA>(sizeof(TCA), 1);
+  v << bindaddr{def, extra->defaultSk, spOff};
   cgCallHelper(v,
                CppCall::direct(sswitchHelperFast),
                callDest(inst),
@@ -2243,7 +2264,7 @@ static TCA sswitchHelperSlow(TypedValue typedVal,
                              const StringData** strs,
                              int numStrs,
                              TCA* jmptab) {
-  Cell* cell = tvToCell(&typedVal);
+  auto const cell = tvToCell(&typedVal);
   for (int i = 0; i < numStrs; ++i) {
     if (cellEqual(*cell, strs[i])) return jmptab[i];
   }
@@ -2251,18 +2272,19 @@ static TCA sswitchHelperSlow(TypedValue typedVal,
 }
 
 void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
-  auto data = inst->extra<LdSSwitchDestSlow>();
+  auto const extra = inst->extra<LdSSwitchDestSlow>();
+  auto const spOff = extra->spOff;
 
   auto strtab = mcg->allocData<const StringData*>(
-    sizeof(const StringData*), data->numCases);
-  auto jmptab = mcg->allocData<TCA>(sizeof(TCA), data->numCases + 1);
+    sizeof(const StringData*), extra->numCases);
+  auto jmptab = mcg->allocData<TCA>(sizeof(TCA), extra->numCases + 1);
   auto& v = vmain();
 
-  for (int i = 0; i < data->numCases; ++i) {
-    strtab[i] = data->cases[i].str;
-    v << bindaddr{&jmptab[i], data->cases[i].dest};
+  for (int i = 0; i < extra->numCases; ++i) {
+    strtab[i] = extra->cases[i].str;
+    v << bindaddr{&jmptab[i], extra->cases[i].dest, spOff};
   }
-  v << bindaddr{&jmptab[data->numCases], data->defaultSk};
+  v << bindaddr{&jmptab[extra->numCases], extra->defaultSk, spOff};
   cgCallHelper(v,
                CppCall::direct(sswitchHelperSlow),
                callDest(inst),
@@ -2270,7 +2292,7 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
                argGroup(inst)
                  .typedValue(0)
                  .immPtr(strtab)
-                 .imm(data->numCases)
+                 .imm(extra->numCases)
                  .immPtr(jmptab));
 }
 
@@ -2370,11 +2392,14 @@ void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
-  auto dest    = inst->extra<ReqBindJmp>()->dest;
-  auto trflags = inst->extra<ReqBindJmp>()->trflags;
-  auto& v      = vmain();
-  v << syncvmsp{srcLoc(inst, 0).reg()};
-  v << bindjmp{dest, trflags, kCrossTraceRegs};
+  auto const extra   = inst->extra<ReqBindJmp>();
+  maybe_syncsp(vmain(), inst->marker(), srcLoc(inst, 0).reg());
+  vmain() << bindjmp{
+    extra->dest,
+    extra->spOff,
+    extra->trflags,
+    leave_trace_args(inst->marker())
+  };
 }
 
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
@@ -2389,10 +2414,10 @@ void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   auto const destSK = m_state.unit.initSrcKey();
-  auto trflags = inst->extra<ReqRetranslate>()->trflags;
+  auto const extra  = inst->extra<ReqRetranslate>();
   auto& v = vmain();
-  v << syncvmsp{srcLoc(inst, 0).reg()};
-  v << fallback{destSK, trflags, kCrossTraceRegs};
+  maybe_syncsp(v, inst->marker(), srcLoc(inst, 0).reg());
+  v << fallback{destSK, extra->trflags, leave_trace_args(inst->marker())};
 }
 
 void CodeGenerator::cgIncRef(IRInstruction* inst) {
@@ -2870,13 +2895,11 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
                  {done, m_state.labels[inst->taken()]}};
   m_state.catch_calls[inst->taken()] = CatchCall::PHP;
   v = done;
-  v << defvmsp{dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgCall(IRInstruction* inst) {
   auto const rSP    = srcLoc(inst, 0).reg();
   auto const rFP    = srcLoc(inst, 1).reg();
-  auto const rNewSP = dstLoc(inst, 0).reg();
   auto const extra  = inst->extra<Call>();
   auto const callee = extra->callee;
   auto const argc = extra->numParams;
@@ -2890,6 +2913,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   v << storeli{safe_cast<int32_t>(extra->after),
                rSP[cellsToBytes(extra->spOffset.offset) + ar + AROFF(m_soff)]};
 
+  // The sync_sp temporary will be eliminated by vasm-copy.
   auto const sync_sp = v.makeReg();
   v << lea{rSP[cellsToBytes(extra->spOffset.offset)], sync_sp};
 
@@ -2928,27 +2952,24 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     // register so the trace we are returning to has it where it expects.
     // TODO(#1273094): we should probably modify the actual builtins to return
     // values via registers using the C ABI and do a reg-to-reg move.
-    int nLocalCells = callee->numSlotsInFrame();
     v << load{rVmFp[AROFF(m_sfp)], rVmFp};
     emitRB(v, Trace::RBTypeFuncExit, callee->fullName()->data());
-    auto adjust = safe_cast<int>(sizeof(ActRec) + cellsToBytes(nLocalCells-1));
-    v << lea{sync_sp[adjust], rNewSP};
-  } else {
-    // Emit a smashable call that initially calls a recyclable service request
-    // stub. The stub and the eventual targets take rStashedAR as an argument.
-    auto& us = mcg->tx().uniqueStubs;
-    auto addr = callee ? us.immutableBindCallStub : us.bindCallStub;
-    v << syncvmsp{sync_sp};
-    v << lea{sync_sp[cellsToBytes(argc)], rStashedAR};
-    if (debug && RuntimeOption::EvalHHIRGenerateAsserts) {
-      emitImmStoreq(v, kUninitializedRIP, rStashedAR[AROFF(m_savedRip)]);
-    }
-    auto next = v.makeBlock();
-    v << bindcall{addr, kCrossCallRegs, {next, catchBlock}};
-    m_state.catch_calls[inst->taken()] = CatchCall::PHP;
-    v = next;
-    v << defvmsp{rNewSP};
+    return;
   }
+
+  // Emit a smashable call that initially calls a recyclable service request
+  // stub. The stub and the eventual targets take rStashedAR as an argument.
+  auto& us = mcg->tx().uniqueStubs;
+  auto addr = callee ? us.immutableBindCallStub : us.bindCallStub;
+  debug_trashsp(v);
+  v << lea{sync_sp[cellsToBytes(argc)], rStashedAR};
+  if (debug && RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitImmStoreq(v, kUninitializedRIP, rStashedAR[AROFF(m_savedRip)]);
+  }
+  auto next = v.makeBlock();
+  v << bindcall{addr, kCrossCallRegs, {next, catchBlock}};
+  m_state.catch_calls[inst->taken()] = CatchCall::PHP;
+  v = next;
 }
 
 void CodeGenerator::cgCastStk(IRInstruction *inst) {
@@ -4474,8 +4495,9 @@ void CodeGenerator::cgDefLabel(IRInstruction* inst) {
 
 void CodeGenerator::cgJmpSSwitchDest(IRInstruction* inst) {
   auto& v = vmain();
-  v << syncvmsp{srcLoc(inst, 1).reg()};
-  v << jmpr{srcLoc(inst, 0).reg(), kCrossTraceRegs};
+  auto const m = inst->marker();
+  maybe_syncsp(v, m, srcLoc(inst, 1).reg());
+  v << jmpr{srcLoc(inst, 0).reg(), leave_trace_args(m)};
 }
 
 void CodeGenerator::cgNewCol(IRInstruction* inst) {
@@ -4709,9 +4731,6 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
   v << contenter{curFpReg, addrReg, kCrossTraceRegs, {next, catchBlock}};
   m_state.catch_calls[inst->taken()] = CatchCall::PHP;
   v = next;
-  // curFpReg->m_savedRip will point here, and the next HHIR opcode must
-  // also start here.
-  v << defvmsp{dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {

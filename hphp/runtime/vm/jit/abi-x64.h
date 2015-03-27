@@ -125,8 +125,8 @@ constexpr PhysReg rStashedAR = reg::r15;
 /*
  * Registers that are live between all tracelets.
  */
-const RegSet kCrossTraceRegs =
-  rVmFp | rVmSp | rVmTl;
+const RegSet kCrossTraceRegs     = rVmFp | rVmSp | rVmTl;
+const RegSet kCrossTraceRegsNoSP = rVmFp | rVmTl;
 
 /*
  * Registers that are live during a PHP function call, between the caller and

@@ -78,6 +78,11 @@ inline Offset nextBcOff(const IRGS& env) {
   return nextSrcKey(env).offset();
 }
 
+inline FPAbsOffset absSPOff(const IRGS& env) {
+  return env.irb->syncedSpLevel() +
+    env.irb->evalStack().size() - env.irb->stackDeficit();
+}
+
 //////////////////////////////////////////////////////////////////////
 // Control-flow helpers.
 
@@ -225,8 +230,7 @@ void ifElse(IRGS& env, Branch branch, Next next) {
 //////////////////////////////////////////////////////////////////////
 
 inline BCMarker makeMarker(IRGS& env, Offset bcOff) {
-  auto stackOff = env.irb->syncedSpLevel() +
-    env.irb->evalStack().size() - env.irb->stackDeficit();
+  auto const stackOff = absSPOff(env);
 
   FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
          bcOff, stackOff.offset, curFunc(env)->fullName()->data());

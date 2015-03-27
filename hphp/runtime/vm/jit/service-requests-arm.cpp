@@ -41,8 +41,12 @@ size_t reusableStubSize() {
     (4 * maxArgReg()) * vixl::kInstructionSize;
 }
 
-TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
-                       ServiceRequest req, const ServiceReqArgVec& argv) {
+TCA emitServiceReqWork(CodeBlock& cb,
+                       TCA start,
+                       SRFlags flags,
+                       folly::Optional<FPAbsOffset> spOff,
+                       ServiceRequest req,
+                       const ServiceReqArgVec& argv) {
   MacroAssembler a { cb };
 
   const bool persist = flags & SRFlags::Persist;
@@ -99,13 +103,15 @@ void emitBindJ(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc,
 
   mcg->setJmpTransID(toSmash);
 
-  TCA sr = emitEphemeralServiceReq(frozen,
-                                   mcg->getFreeStub(frozen,
-                                                    &mcg->cgFixups()),
-                                   REQ_BIND_JMP,
-                                   toSmash,
-                                   dest.toAtomicInt(),
-                                   TransFlags{}.packed);
+  TCA sr = emitEphemeralServiceReq(
+    frozen,
+    mcg->getFreeStub(frozen, &mcg->cgFixups()),
+    folly::none,
+    REQ_BIND_JMP,
+    toSmash,
+    dest.toAtomicInt(),
+    TransFlags{}.packed
+  );
 
   MacroAssembler a { cb };
   if (cb.base() == frozen.base()) {

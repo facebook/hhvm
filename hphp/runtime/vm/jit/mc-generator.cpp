@@ -41,6 +41,7 @@
 #include <folly/String.h>
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/safe-cast.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
 #include "hphp/util/cycles.h"
@@ -432,18 +433,29 @@ MCGenerator::createTranslation(const TranslArgs& args) {
     }
   }
 
+  auto const srcRecSPOff = [&] () -> folly::Optional<FPAbsOffset> {
+    if (sk.resumed()) return folly::none;
+    return liveSpOff();
+  }();
+
   // We put retranslate requests at the end of our slab to more frequently
   //   allow conditional jump fall-throughs
   TCA astart          = code.main().frontier();
   TCA realColdStart   = code.realCold().frontier();
   TCA realFrozenStart = code.realFrozen().frontier();
-  TCA req = emitServiceReq(code.cold(), SRFlags::None, REQ_RETRANSLATE,
-                           sk.offset(), TransFlags().packed);
+  TCA req = emitServiceReq(code.cold(),
+                           SRFlags::None,
+                           srcRecSPOff,
+                           REQ_RETRANSLATE,
+                           sk.offset(),
+                           TransFlags().packed);
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
           sk.unit(), sk.offset(), req);
   SrcRec* sr = m_tx.getSrcRec(sk);
   sr->setFuncInfo(sk.func());
   sr->setAnchorTranslation(req);
+
+  if (srcRecSPOff) always_assert(sr->nonResumedSPOff() == *srcRecSPOff);
 
   size_t asize = code.main().frontier() - astart;
   size_t realColdSize   = code.realCold().frontier()   - realColdStart;
@@ -878,26 +890,29 @@ MCGenerator::bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req,
       return tDest;
     }
     sr->chainFrom(IncomingBranch::addr(addr));
-  } else {
-    DecodedInstruction di(toSmash);
-    if (di.isBranch() && !di.isJmp()) {
-      auto jt = backEnd().jccTarget(toSmash);
-      assertx(jt);
-      if (jt == tDest) {
-        // Already smashed
-        return tDest;
-      }
-      sr->chainFrom(IncomingBranch::jccFrom(toSmash));
-    } else {
-      assertx(!backEnd().jccTarget(toSmash));
-      if (!backEnd().jmpTarget(toSmash)
-          || backEnd().jmpTarget(toSmash) == tDest) {
-        // Already smashed
-        return tDest;
-      }
-      sr->chainFrom(IncomingBranch::jmpFrom(toSmash));
-    }
+    smashed = true;
+    return tDest;
   }
+
+  DecodedInstruction di(toSmash);
+  if (di.isBranch() && !di.isJmp()) {
+    auto jt = backEnd().jccTarget(toSmash);
+    assertx(jt);
+    if (jt == tDest) {
+      // Already smashed
+      return tDest;
+    }
+    sr->chainFrom(IncomingBranch::jccFrom(toSmash));
+  } else {
+    assertx(!backEnd().jccTarget(toSmash));
+    if (!backEnd().jmpTarget(toSmash)
+        || backEnd().jmpTarget(toSmash) == tDest) {
+      // Already smashed
+      return tDest;
+    }
+    sr->chainFrom(IncomingBranch::jmpFrom(toSmash));
+  }
+
   smashed = true;
   return tDest;
 }
@@ -932,13 +947,15 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
                             bool& smashed) {
   LeaseHolder writer(Translator::WriteLease());
   if (!writer) return nullptr;
-  auto skWillExplore = taken ? skTaken : skNotTaken;
-  auto skWillDefer = taken ? skNotTaken : skTaken;
-  auto dest = skWillExplore;
+  auto const skWillExplore = taken ? skTaken : skNotTaken;
+  auto const skWillDefer = taken ? skNotTaken : skTaken;
+  auto const dest = skWillExplore;
   auto cc = backEnd().jccCondCode(toSmash);
   TRACE(3, "bindJmpccFirst: explored %d, will defer %d; overwriting cc%02x "
         "taken %d\n",
         skWillExplore.offset(), skWillDefer.offset(), cc, taken);
+  always_assert(skTaken.resumed() == skNotTaken.resumed());
+  auto const isResumed = skTaken.resumed();
 
   // We want the branch to point to whichever side has not been explored yet.
   if (taken) cc = ccNegate(cc);
@@ -953,29 +970,41 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
 
   // can we just directly fall through?
   // a jmp + jz takes 5 + 6 = 11 bytes
-  bool fallThru = toSmash + kJmpccLen + kJmpLen == cb.frontier() &&
+  bool const fallThru = toSmash + kJmpccLen + kJmpLen == cb.frontier() &&
     !m_tx.getSrcDB().find(dest);
 
-  auto tDest = getTranslation(TranslArgs{dest, !fallThru});
+  auto const tDest = getTranslation(TranslArgs{dest, !fallThru});
   if (!tDest) {
     return 0;
   }
 
-  if (backEnd().jmpTarget(toSmash + kJmpccLen)
-      != backEnd().jccTarget(toSmash)) {
+  auto const jmpTarget = backEnd().jmpTarget(toSmash + kJmpccLen);
+  if (jmpTarget != backEnd().jccTarget(toSmash)) {
     // someone else already smashed this one. Ideally we would
     // just re-execute from toSmash - except the flags will have
     // been trashed.
     return tDest;
   }
 
-  TCA stub = emitEphemeralServiceReq(code.frozen(),
-                                     getFreeStub(code.frozen(),
-                                                 &mcg->cgFixups()),
-                                     REQ_BIND_JMP,
-                                     RipRelative(toSmash),
-                                     skWillDefer.toAtomicInt(),
-                                     TransFlags{}.packed);
+  /*
+   * If we're not in a resumed function, we need to fish out the stack offset
+   * that the original service request used, so we can use it again on the one
+   * we're about to create.
+   */
+  auto const optSPOff = [&] () -> folly::Optional<FPAbsOffset> {
+    if (isResumed) return folly::none;
+    return serviceReqSPOff(jmpTarget);
+  }();
+
+  auto const stub = emitEphemeralServiceReq(
+    code.frozen(),
+    getFreeStub(code.frozen(), &mcg->cgFixups()),
+    optSPOff,
+    REQ_BIND_JMP,
+    RipRelative(toSmash),
+    skWillDefer.toAtomicInt(),
+    TransFlags{}.packed
+  );
 
   mcg->cgFixups().process(nullptr);
   smashed = true;
@@ -1075,6 +1104,8 @@ MCGenerator::enterTC(TCA start, ActRec* stashedAR) {
 }
 
 TCA MCGenerator::handleServiceRequest(ServiceReqInfo& info) noexcept {
+  FTRACE(1, "handleServiceRequest {}\n", serviceReqName(info.req));
+
   assert_native_stack_aligned();
   tl_regState = VMRegState::CLEAN; // partially a lie: vmpc() isn't synced
 
@@ -1233,9 +1264,12 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
 }
 
 TCA MCGenerator::handleResume(bool interpFirst) {
+  FTRACE(1, "handleResume({})\n", interpFirst);
+
   if (!vmRegsUnsafe().pc) return m_tx.uniqueStubs.callToExit;
 
   tl_regState = VMRegState::CLEAN;
+
   auto sk = SrcKey{liveFunc(), vmpc(), liveResumed()};
   TCA start;
   if (interpFirst) {
@@ -1562,6 +1596,10 @@ MCGenerator::translateWork(const TranslArgs& args) {
     assertx(m_fixups.empty());
   };
 
+  FPAbsOffset initSpOffset =
+    args.region ? args.region->entry()->initialSpOffset()
+                : liveSpOff();
+
   PostConditions pconds;
   RegionDescPtr region;
   if (!reachedTranslationLimit(sk, srcRec)) {
@@ -1589,8 +1627,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
     auto result = TranslateResult::Retry;
     auto regionInterps = RegionBlacklist{};
-    auto const initSpOffset = region ? region->entry()->initialSpOffset()
-                                     : liveSpOff();
+    initSpOffset = region ? region->entry()->initialSpOffset()
+                          : liveSpOff();
 
     while (region && result == TranslateResult::Retry) {
       auto const transContext = TransContext {
@@ -1647,8 +1685,9 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
   if (transKindToRecord == TransKind::Interp) {
     assertCleanState();
-    FTRACE(1, "emitting dispatchBB interp request for failed translation\n");
-    backEnd().emitInterpReq(code.main(), code.cold(), sk);
+    FTRACE(1, "emitting dispatchBB interp request for failed "
+      "translation (spOff = {})\n", initSpOffset.offset);
+    backEnd().emitInterpReq(code.main(), sk, initSpOffset);
     // Fall through.
   }
 

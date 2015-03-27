@@ -295,12 +295,6 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
       }
       cur().syncedSpLevel -= extra->numParams + kNumActRecCells;
       cur().syncedSpLevel += 1;
-      /*
-       * TODO(#4810319): Call still defines a StkPtr because we can't keep the
-       * previous DefSP live across it right now.
-       */
-      cur().spOffset = cur().syncedSpLevel;
-      cur().spValue = inst->dst();
     }
     break;
 
@@ -321,8 +315,6 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
         cur().syncedSpLevel = inst->marker().spOff();
       }
       cur().syncedSpLevel -= kNumActRecCells;
-      cur().spOffset = cur().syncedSpLevel;
-      cur().spValue = inst->dst();
     }
     break;
 
@@ -338,8 +330,6 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
       } else {
         cur().syncedSpLevel = inst->marker().spOff();
       }
-      cur().spOffset = cur().syncedSpLevel;
-      cur().spValue = inst->dst();
     }
     break;
 

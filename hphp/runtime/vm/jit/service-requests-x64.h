@@ -40,22 +40,34 @@ namespace x64 {
  *   emitted. This is gross, but is a partial workaround for the inability
  *   to capture argument packs in the version of gcc we're using.
  */
-TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
-                       ServiceRequest req, const ServiceReqArgVec& argInfo);
+TCA emitServiceReqWork(CodeBlock& cb,
+                       TCA start,
+                       SRFlags flags,
+                       folly::Optional<FPAbsOffset> spOff,
+                       ServiceRequest req,
+                       const ServiceReqArgVec&);
 
 size_t reusableStubSize();
 
 /*
  * "cb" may be either the main section or frozen section.
  */
-void emitBindJ(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
-               SrcKey dest, TransFlags trflags = TransFlags{});
+void emitBindJ(CodeBlock& cb,
+               CodeBlock& frozen,
+               jit::ConditionCode cc,
+               SrcKey dest,
+               FPAbsOffset spOff,
+               TransFlags trflags);
 
 /*
  * Similar to the emitBindJ() series.  The address of the jmp is returned.
  */
-TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
-                    SrcKey dest, TransFlags trflags);
+TCA emitRetranslate(CodeBlock& cb,
+                    CodeBlock& frozen,
+                    jit::ConditionCode cc,
+                    SrcKey dest,
+                    folly::Optional<FPAbsOffset> spOff,
+                    TransFlags trflags);
 
 /*
  * Emit a REQ_BIND_ADDR service request into `frozen', and return the
@@ -64,18 +76,20 @@ TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
  * request.  That is, if `cb' is the same as `frozen', a jump is
  * emitted around the service request code.
  */
-TCA emitBindAddr(CodeBlock& cb, CodeBlock& frozen, TCA* addr, SrcKey sk);
+TCA emitBindAddr(CodeBlock& cb, CodeBlock& frozen, TCA* addr, SrcKey sk,
+                 FPAbsOffset spOff);
 
 /*
  * Emit a REQ_BIND_JMPCC_FIRST service request in `frozen' and the
  * corresponding jumps to be smashed in `cb'.  `frozen' and `cb' are
  * allowed to be the same code block.
  */
-void emitBindJmpccFirst(CodeBlock&    cb,
-                        CodeBlock&    frozen,
+void emitBindJmpccFirst(CodeBlock& cb,
+                        CodeBlock& frozen,
                         ConditionCode cc,
-                        SrcKey        targetSk0,
-                        SrcKey        targetSk1);
+                        SrcKey targetSk0,
+                        SrcKey targetSk1,
+                        FPAbsOffset spOff);
 
 // An intentionally funny-looking-in-core-dumps constant for uninitialized
 // instruction pointers.

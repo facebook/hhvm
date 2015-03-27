@@ -71,38 +71,6 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
       };
     }
 
-  case Call:
-    {
-      auto const prev = canonicalize_stkptr(inst->src(0));
-      auto const extra = inst->extra<Call>();
-      return StkPtrInfo {
-        prev.fp,
-        prev.offset + extra->spOffset.offset +
-          safe_cast<int32_t>(extra->numParams) +
-          int32_t{kNumActRecCells} - 1
-      };
-    }
-
-  case CallArray:
-    {
-      auto const prev = canonicalize_stkptr(inst->src(0));
-      auto const extra = inst->extra<CallArray>();
-      return StkPtrInfo {
-        prev.fp,
-        prev.offset + extra->spOffset.offset + int32_t{kNumActRecCells} + 1 - 1
-      };
-    }
-
-  case ContEnter:
-    {
-      auto const prev = canonicalize_stkptr(inst->src(0));
-      auto const extra = inst->extra<ContEnter>();
-      return StkPtrInfo {
-        prev.fp,
-        prev.offset + extra->spOffset.offset + 1 - 1
-      };
-    }
-
   default:
     always_assert_flog(false, "unexpected StkPtr: {}\n", sp->toString());
   }

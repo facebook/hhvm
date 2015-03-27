@@ -89,7 +89,8 @@ bool match_bindjcc1st(const Vunit& unit, Vlabel t0, Vlabel t1) {
     const auto& bj1 = unit.blocks[t1].code.back().bindjmp_;
     return addr0 == addr1 &&
            bj0.target.resumed() == bj1.target.resumed() &&
-           bj0.target.getFuncId() == bj1.target.getFuncId();
+           bj0.target.getFuncId() == bj1.target.getFuncId() &&
+           bj0.spOff == bj1.spOff;
   }
   return false;
 }
@@ -144,7 +145,8 @@ void optimizeExits(Vunit& unit) {
       const auto& bj0 = unit.blocks[t0].code.back().bindjmp_;
       const auto& bj1 = unit.blocks[t1].code.back().bindjmp_;
       hoist_sync(t0);
-      code.back() = bindjcc1st{ijcc.cc, ijcc.sf, {bj0.target, bj1.target},
+      code.back() = bindjcc1st{ijcc.cc, ijcc.sf, {{bj0.target, bj1.target}},
+                               bj0.spOff,
                                bj0.args | bj1.args};
       return;
     }
@@ -153,7 +155,8 @@ void optimizeExits(Vunit& unit) {
       const auto& bj = unit.blocks[exit].code.back().bindjmp_;
       auto origin = code.back().origin;
       hoist_sync(exit);
-      code.back() = bindjcc{cc, ijcc.sf, bj.target, bj.trflags, bj.args};
+      code.back() = bindjcc{cc, ijcc.sf, bj.target, bj.spOff,
+                            bj.trflags, bj.args};
       code.emplace_back(jmp{next});
       code.back().origin = origin;
     };
@@ -218,7 +221,9 @@ void optimizeJmps(Vunit& unit) {
             const auto jcc_origin = code.back().origin;
             code.pop_back();
             code.emplace_back(
-              fallbackcc{jcc_i.cc, jcc_i.sf, fb_i.dest, fb_i.trflags});
+              fallbackcc{jcc_i.cc, jcc_i.sf, fb_i.dest,
+                fb_i.trflags, fb_i.args}
+            );
             code.back().origin = jcc_origin;
             code.emplace_back(jmp{t0});
             code.back().origin = jcc_origin;

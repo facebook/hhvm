@@ -1580,7 +1580,8 @@ void processSpillExits(Vunit& unit, Vlabel label, SpillState state,
     } else {
       auto const& bj_i = inst.bindjcc_;
       targetCode.emplace_back(free);
-      targetCode.emplace_back(bindjmp{bj_i.target, bj_i.trflags, bj_i.args});
+      targetCode.emplace_back(bindjmp{bj_i.target, bj_i.spOff, bj_i.trflags,
+                                      bj_i.args});
       cc = bj_i.cc;
       sf = bj_i.sf;
     }

@@ -53,7 +53,8 @@ TCA emitRetFromInterpretedFrame() {
   auto const arBase = static_cast<int32_t>(sizeof(ActRec) - sizeof(Cell));
   a.   lea  (rVmSp[-arBase], serviceReqArgRegs[0]);
   a.   movq (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(mcg->code.cold(), SRFlags::None, REQ_POST_INTERP_RET);
+  emitServiceReq(mcg->code.cold(), SRFlags::None, folly::none,
+    REQ_POST_INTERP_RET);
   return ret;
 }
 
@@ -66,14 +67,15 @@ TCA emitRetFromInterpretedGeneratorFrame() {
   // find where its embedded AR is.
   PhysReg rContAR = serviceReqArgRegs[0];
   a.    loadq  (rVmFp[AROFF(m_this)], rContAR);
-  a.    lea  (rContAR[c_Generator::arOff()], rContAR);
+  a.    lea    (rContAR[c_Generator::arOff()], rContAR);
   a.    movq   (rVmFp, serviceReqArgRegs[1]);
-  emitServiceReq(mcg->code.cold(), SRFlags::None, REQ_POST_INTERP_RET);
+  emitServiceReq(mcg->code.cold(), SRFlags::None, folly::none,
+    REQ_POST_INTERP_RET);
   return ret;
 }
 
 TCA emitDebuggerRetFromInterpretedFrame() {
-  Asm a{mcg->code.cold()};
+  Asm a { mcg->code.cold() };
   moveToAlign(a.code());
   auto const ret = a.frontier();
 
@@ -91,7 +93,7 @@ TCA emitDebuggerRetFromInterpretedFrame() {
 }
 
 TCA emitDebuggerRetFromInterpretedGenFrame() {
-  Asm a{mcg->code.cold()};
+  Asm a { mcg->code.cold() };
   moveToAlign(a.code());
   auto const ret = a.frontier();
 
@@ -262,7 +264,8 @@ asm_label(a, resumeCppUnwind);
 asm_label(a, debuggerReturn);
   a.    loadq (rVmTl[unwinderDebuggerReturnSPOff()], rVmSp);
   a.    storeq(0, rVmTl[unwinderDebuggerReturnSPOff()]);
-  emitServiceReq(a.code(), SRFlags::None, REQ_POST_DEBUGGER_RET);
+  emitServiceReq(a.code(), SRFlags::None, folly::none,
+    REQ_POST_DEBUGGER_RET);
 
   uniqueStubs.add("endCatchHelper", uniqueStubs.endCatchHelper);
 }
@@ -535,6 +538,9 @@ void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
 
   // Cloned closure case:
   emitCall(a, CppCall::direct(helper), argSet(2));
+  if (debug) {
+    a.  movq   (0x2, rVmSp);  // "assert" nothing reads it
+  }
   a.    jmp    (rax);
   a.    ud2    ();
 
@@ -552,6 +558,9 @@ asm_label(a, popAndXchg);
   a.    pop    (rStashedAR[AROFF(m_savedRip)]);
   a.    xchgq  (rStashedAR, rVmFp);
   emitCall(a, CppCall::direct(helper), argSet(2));
+  if (debug) {
+    a.  movq   (0x1, rVmSp);  // "assert" nothing reads it
+  }
   a.    testq  (rax, rax);
   a.    js8    (skip);
   a.    xchgq  (rStashedAR, rVmFp);

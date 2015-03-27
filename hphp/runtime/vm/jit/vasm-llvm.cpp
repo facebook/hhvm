@@ -904,9 +904,12 @@ struct LLVMEmitter {
           // instruction, we have to create new stubs for the duplicates to
           // avoid reusing the ephemeral stubs before they're done.
           auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
+          auto optSPOff = folly::Optional<FPAbsOffset>{};
+          if (!req.target.resumed()) optSPOff = req.spOff;
           auto newStub = emitEphemeralServiceReq(
             frozen,
             mcg->getFreeStub(frozen, &mcg->cgFixups()),
+            optSPOff,
             REQ_BIND_JMP,
             RipRelative(jmpIp),
             req.target.toAtomicInt(),
@@ -921,13 +924,11 @@ struct LLVMEmitter {
           memcpy(afterJmp - sizeof(delta), &delta, sizeof(delta));
         } else {
           found = true;
-          // Patch the rip-relative lea in the stub to point at the jmp.
-          auto leaIp = req.stub;
-          always_assert((leaIp[0] & 0x48) == 0x48); // REX.W
-          always_assert(leaIp[1] == 0x8d); // lea
-          auto afterLea = leaIp + x64::kRipLeaLen;
-          auto delta = safe_cast<int32_t>(jmpIp - afterLea);
-          memcpy(afterLea - sizeof(delta), &delta, sizeof(delta));
+          adjustBindJmpPatchableJmpAddress(
+            req.stub,
+            req.target.resumed(),
+            jmpIp
+          );
         }
       };
 
@@ -1176,6 +1177,7 @@ private:
     TCA stub;
     bool stubReused;
     SrcKey target;
+    FPAbsOffset spOff;
     TransFlags trflags;
   };
 
@@ -1814,9 +1816,12 @@ void LLVMEmitter::emit(const bindjmp& inst) {
 
   auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
   bool reused;
+  auto optSPOff = folly::Optional<FPAbsOffset>{};
+  if (!inst.target.resumed()) optSPOff = inst.spOff;
   auto reqIp = emitEphemeralServiceReq(
     frozen,
     mcg->getFreeStub(frozen, &mcg->cgFixups(), &reused),
+    optSPOff,
     REQ_BIND_JMP,
     RipRelative(mcg->code.base()),
     inst.target.toAtomicInt(),
@@ -1832,7 +1837,7 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   call->setMetadata(llvm::LLVMContext::MD_locrec,
                     llvm::MDNode::get(m_context, cns(id)));
   m_bindjmps.emplace_back(
-    LLVMBindJmp{id, reqIp, reused, inst.target, inst.trflags}
+    LLVMBindJmp{id, reqIp, reused, inst.target, inst.spOff, inst.trflags}
   );
 }
 
@@ -1891,18 +1896,18 @@ void LLVMEmitter::emit(const bindjcc1st& inst) {
   emitJcc(
     inst.sf, inst.cc, "jcc1",
     [&] {
-      emit(bindjmp{inst.targets[1], TransFlags{}, inst.args});
+      emit(bindjmp{inst.targets[1], inst.spOff, TransFlags{}, inst.args});
     }
   );
 
-  emit(bindjmp{inst.targets[0], TransFlags{}, inst.args});
+  emit(bindjmp{inst.targets[0], inst.spOff, TransFlags{}, inst.args});
 }
 
 void LLVMEmitter::emit(const bindjcc& inst) {
   emitJcc(
     inst.sf, inst.cc, "jcc",
     [&] {
-      emit(bindjmp{inst.target, inst.trflags, inst.args});
+      emit(bindjmp{inst.target, inst.spOff, inst.trflags, inst.args});
     }
   );
 }
@@ -1913,9 +1918,14 @@ void LLVMEmitter::emit(const bindaddr& inst) {
 
   auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
   mcg->setJmpTransID((TCA)inst.dest);
+
+  auto optSPOff = folly::Optional<FPAbsOffset>{};
+  if (!inst.sk.resumed()) optSPOff = inst.spOff;
+
   *inst.dest = emitEphemeralServiceReq(
     frozen,
     mcg->getFreeStub(frozen, &mcg->cgFixups()),
+    optSPOff,
     REQ_BIND_ADDR,
     inst.dest,
     inst.sk.toAtomicInt(),
@@ -2267,15 +2277,24 @@ void LLVMEmitter::emit(const imul& inst) {
 
 void LLVMEmitter::emit(const fallback& inst) {
   TCA stub;
+  auto const sr = mcg->tx().getSrcRec(inst.dest);
   if (inst.trflags.packed == 0) {
-    stub = mcg->tx().getSrcRec(inst.dest)->getFallbackTranslation();
+    stub = sr->getFallbackTranslation();
   } else {
     // Emit a custom REQ_RETRANSLATE
     auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
     auto const args = packServiceReqArgs(inst.dest.offset(),
                                          inst.trflags.packed);
+    auto optSPOff = folly::Optional<FPAbsOffset>{};
+    if (!inst.dest.resumed()) optSPOff = sr->nonResumedSPOff();
     stub = mcg->backEnd().emitServiceReqWork(
-      frozen, frozen.frontier(), SRFlags::Persist, REQ_RETRANSLATE, args);
+      frozen,
+      frozen.frontier(),
+      SRFlags::Persist,
+      optSPOff,
+      REQ_RETRANSLATE,
+      args
+    );
   }
 
   auto func = emitFuncPtr(folly::sformat("reqRetranslate_{}", stub),
@@ -2297,7 +2316,7 @@ void LLVMEmitter::emit(const fallbackcc& inst) {
   emitJcc(
     inst.sf, inst.cc, "guard",
     [&] {
-      emit(fallback{inst.dest, inst.trflags});
+      emit(fallback{inst.dest, inst.trflags, inst.args});
     }
   );
 }

@@ -20,10 +20,13 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/asm-x64.h"
 
 namespace HPHP { namespace jit {
+
+//////////////////////////////////////////////////////////////////////
 
 #define SERVICE_REQUESTS \
   /*
@@ -151,6 +154,8 @@ struct ServiceReqInfo {
 static_assert(sizeof(ServiceReqInfo) == 0x30,
               "rsp adjustments in handleSRHelper");
 
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Assembly stub called by translated code to pack argument registers into a
  * ServiceReqInfo, along with some other bookkeeping tasks before a service
@@ -163,6 +168,29 @@ extern "C" void handleSRHelper();
  * ABI registers then jump somewhere in the TC.
  */
 extern "C" void handleSRResumeTC();
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Return the VM stack offset a service request was associated with.  This
+ * function is only legal to call with service requests that were created with
+ * an FPAbsOffset.  (TODO: list of when we do that.)
+ */
+FPAbsOffset serviceReqSPOff(TCA);
+
+/*
+ * A REQ_BIND_JMP service request passes an address of a jump that can be
+ * patched.  This function lets you change this jump address for an existing
+ * REQ_BIND_JMP stub to `newJmpIp'.  The caller must indicate whether the stub
+ * was created with a target SrcKey that is a resumed function.
+ *
+ * Pre: the `stub' must be a REQ_BIND_JMP stub.
+ */
+void adjustBindJmpPatchableJmpAddress(TCA stub,
+                                      bool targetIsResumed,
+                                      TCA newJmpIp);
+
+//////////////////////////////////////////////////////////////////////
 
 }}
 

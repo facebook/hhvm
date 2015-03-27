@@ -1182,7 +1182,6 @@ int64_t new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
 int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
   if (UNLIKELY(ad->getSize() == 0)) {
-    cow_check_occurred(ad->getCount(), check_one_bit_ref_array(ad->m_kind));
     if (UNLIKELY(ad->hasExactlyOneRef())) {
       if (ad->isPacked()) return iter_next_free_packed(dest, ad);
       if (ad->isMixed()) return iter_next_free_mixed(dest, ad);
@@ -1241,7 +1240,6 @@ int64_t new_iter_array_key(Iter*       dest,
                            TypedValue* valOut,
                            TypedValue* keyOut) {
   if (UNLIKELY(ad->getSize() == 0)) {
-    cow_check_occurred(ad->getCount(), check_one_bit_ref_array(ad->m_kind));
     if (UNLIKELY(ad->hasExactlyOneRef())) {
       if (ad->isPacked()) return iter_next_free_packed(dest, ad);
       if (ad->isMixed()) return iter_next_free_mixed(dest, ad);
@@ -1531,7 +1529,6 @@ static int64_t iter_next_apc_array(Iter* iter,
   auto const arr = APCLocalArray::asApcArray(ad);
   ssize_t const pos = arr->iterAdvanceImpl(arrIter->getPos());
   if (UNLIKELY(pos == ad->getSize())) {
-    cow_check_occurred(ad->getCount(), check_one_bit_ref_array(ad->m_kind));
     if (UNLIKELY(arr->hasExactlyOneRef())) {
       return iter_next_free_apc(iter, arr);
     }
@@ -1586,7 +1583,6 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     if (LIKELY(isPacked)) {
       ssize_t pos = arrIter->getPos() + 1;
       if (size_t(pos) >= size_t(ad->getSize())) {
-        cow_check_occurred(ad->getCount(), check_one_bit_ref_array(ad->m_kind));
         if (UNLIKELY(ad->hasExactlyOneRef())) {
           return iter_next_free_packed(iter, ad);
         }
@@ -1614,7 +1610,6 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     if (isStruct) {
       ssize_t pos = arrIter->getPos() + 1;
       if (size_t(pos) >= size_t(ad->getSize())) {
-        cow_check_occurred(ad->getCount(), check_one_bit_ref_array(ad->m_kind));
         if (UNLIKELY(ad->hasExactlyOneRef())) {
           return iter_next_free_struct(iter, ad);
         }
@@ -1646,7 +1641,6 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
     do {
       ++pos;
       if (size_t(pos) >= size_t(mixed->iterLimit())) {
-        cow_check_occurred(ad->getCount(), check_one_bit_ref_array(ad->m_kind));
         if (UNLIKELY(mixed->hasExactlyOneRef())) {
           return iter_next_free_mixed(iter, mixed->asArrayData());
         }
@@ -1789,7 +1783,6 @@ int64_t iter_next_mixed_impl(Iter* it,
 
   do {
     if (size_t(++pos) >= size_t(arr->iterLimit())) {
-      cow_check_occurred(arrData->getCount(), check_one_bit_ref_array(arrData->m_kind));
       if (UNLIKELY(arr->hasExactlyOneRef())) {
         return iter_next_free_mixed(it, arr->asArrayData());
       }
@@ -1803,16 +1796,12 @@ int64_t iter_next_mixed_impl(Iter* it,
 
 
   if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
-    cow_check_occurred(valOut->m_data.pstr->getCount(),
-        check_one_bit_ref(valOut->m_data.pstr->m_kind));
     if (UNLIKELY(!valOut->m_data.pstr->hasMultipleRefs())) {
       return iter_next_cold<false>(it, valOut, keyOut);
     }
     valOut->m_data.pstr->decRefCount();
   }
   if (HasKey && IS_REFCOUNTED_TYPE(keyOut->m_type)) {
-    cow_check_occurred(keyOut->m_data.pstr->getCount(),
-        check_one_bit_ref(keyOut->m_data.pstr->m_kind));
     if (UNLIKELY(!keyOut->m_data.pstr->hasMultipleRefs())) {
       return iter_next_cold_inc_val(it, valOut, keyOut);
     }
@@ -1842,16 +1831,12 @@ int64_t iter_next_packed_impl(Iter* it,
   ssize_t pos = iter.getPos() + 1;
   if (LIKELY(pos < ad->getSize())) {
     if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
-      cow_check_occurred(valOut->m_data.pstr->getCount(),
-          check_one_bit_ref(valOut->m_data.pstr->m_kind));
       if (UNLIKELY(!valOut->m_data.pstr->hasMultipleRefs())) {
         return iter_next_cold<false>(it, valOut, keyOut);
       }
       valOut->m_data.pstr->decRefCount();
     }
     if (HasKey && UNLIKELY(IS_REFCOUNTED_TYPE(keyOut->m_type))) {
-      cow_check_occurred(keyOut->m_data.pstr->getCount(),
-          check_one_bit_ref(keyOut->m_data.pstr->m_kind));
       if (UNLIKELY(!keyOut->m_data.pstr->hasMultipleRefs())) {
         return iter_next_cold_inc_val(it, valOut, keyOut);
       }
@@ -1867,7 +1852,6 @@ int64_t iter_next_packed_impl(Iter* it,
   }
 
   // Finished iterating---we need to free the array.
-  cow_check_occurred(ad->getCount(), check_one_bit_ref_array(ad->m_kind));
   if (UNLIKELY(ad->hasExactlyOneRef())) {
     return iter_next_free_packed(it, ad);
   }
@@ -1891,16 +1875,12 @@ int64_t iter_next_struct_impl(Iter* it,
   ssize_t pos = iter.getPos() + 1;
   if (LIKELY(pos < ad->getSize())) {
     if (IS_REFCOUNTED_TYPE(valOut->m_type)) {
-      cow_check_occurred(valOut->m_data.pstr->getCount(),
-          check_one_bit_ref(valOut->m_data.pstr->m_kind));
       if (UNLIKELY(!valOut->m_data.pstr->hasMultipleRefs())) {
         return iter_next_cold<false>(it, valOut, keyOut);
       }
       valOut->m_data.pstr->decRefCount();
     }
     if (HasKey && UNLIKELY(IS_REFCOUNTED_TYPE(keyOut->m_type))) {
-      cow_check_occurred(keyOut->m_data.pstr->getCount(),
-          check_one_bit_ref(keyOut->m_data.pstr->m_kind));
       if (UNLIKELY(!keyOut->m_data.pstr->hasMultipleRefs())) {
         return iter_next_cold_inc_val(it, valOut, keyOut);
       }
@@ -1918,7 +1898,6 @@ int64_t iter_next_struct_impl(Iter* it,
   }
 
   // Finished iterating---we need to free the array.
-  cow_check_occurred(ad->getCount(), check_one_bit_ref_array(ad->m_kind));
   if (UNLIKELY(ad->hasExactlyOneRef())) {
     return iter_next_free_struct(it, ad);
   }

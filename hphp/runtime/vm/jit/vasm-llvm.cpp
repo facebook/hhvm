@@ -539,24 +539,6 @@ struct LLVMEmitter {
                                m_function));
     m_blocks[unit.entry] = m_irb.GetInsertBlock();
 
-    // Register all unit's constants.
-    for (auto const& pair : unit.constants) {
-      switch (pair.first.kind) {
-        case Vconst::Quad:
-          defineValue(pair.second, cns(pair.first.val));
-          break;
-        case Vconst::Long:
-          defineValue(pair.second, cns(int32_t(pair.first.val)));
-          break;
-        case Vconst::Byte:
-          defineValue(pair.second, cns(uint8_t(pair.first.val)));
-          break;
-        case Vconst::ThreadLocal:
-          always_assert(false);
-          break;
-      }
-    }
-
     auto args = m_function->arg_begin();
     args->setName("rVmSp");
     defineValue(x64::rVmSp, args++);
@@ -597,6 +579,36 @@ struct LLVMEmitter {
     m_int64One    = m_irb.getInt64(1);
 
     m_int64Undef  = llvm::UndefValue::get(m_int64);
+
+    // Register all unit's constants.
+    for (auto const& pair : unit.constants) {
+      switch (pair.first.kind) {
+        case Vconst::Quad:
+          if (pair.first.isUndef) {
+            defineValue(pair.second, m_int64Undef);
+          } else {
+            defineValue(pair.second, cns(pair.first.val));
+          }
+          break;
+        case Vconst::Long:
+          if (pair.first.isUndef) {
+            defineValue(pair.second, llvm::UndefValue::get(m_int32));
+          } else {
+            defineValue(pair.second, cns(int32_t(pair.first.val)));
+          }
+          break;
+        case Vconst::Byte:
+          if (pair.first.isUndef) {
+            defineValue(pair.second, llvm::UndefValue::get(m_int8));
+          } else {
+            defineValue(pair.second, cns(uint8_t(pair.first.val)));
+          }
+          break;
+        case Vconst::ThreadLocal:
+          always_assert(false);
+          break;
+      }
+    }
 
     auto m_personalityFTy = llvm::FunctionType::get(m_int32, false);
     m_personalityFunc =

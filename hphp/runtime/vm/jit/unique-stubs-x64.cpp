@@ -297,17 +297,11 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   Label release;
   Label loopHead;
 
-  /*
-   * Note: the IR currently requires that we preserve r13 across calls to these
-   * free locals helpers.  These helpers assume the stack is balanced (rsp%16
-   * == 0) on entry, unlike normal ABI calls where the stack was balanced
-   * before the call, and now has the return address on the stack (rsp%16 ==
-   * 8).
-   */
-  auto const rIter     = r14;
-  auto const rFinished = r15;
-  auto const rType     = esi;
-  auto const rData     = rdi;
+  auto const rData     = argNumToRegName[0]; // not live coming in, but used
+                                             // for destructor calls
+  auto const rIter     = argNumToRegName[1]; // live coming in
+  auto const rFinished = rdx;
+  auto const rType     = rcx;
   int const tvSize     = sizeof(TypedValue);
 
   auto& cb = mcg->code.hot().available() > 512 ?
@@ -325,23 +319,28 @@ asm_label(a, release);
   });
   a.    ret    ();
 asm_label(a, doRelease);
-  a.    jmp    (lookupDestructor(a, PhysReg(rType)));
+  a.    push    (rIter);
+  a.    push    (rFinished);
+  a.    call    (lookupDestructor(a, PhysReg(rType)));
+  mcg->fixupMap().recordIndirectFixup(a.frontier(), 3);
+  a.    pop     (rFinished);
+  a.    pop     (rIter);
+  a.    ret     ();
 
-  moveToAlign(cb, kJmpTargetAlign);
-  uniqueStubs.freeManyLocalsHelper = a.frontier();
-  a.    lea    (rVmFp[-(jit::kNumFreeLocalsHelpers * sizeof(Cell))],
-                rFinished);
-
-  auto emitDecLocal = [&] {
+  auto emitDecLocal = [&]() {
     Label skipDecRef;
 
     emitLoadTVType(a, rIter[TVOFF(m_type)], rType);
     emitCmpTVType(a, KindOfRefCountThreshold, rType);
     a.  jle8   (skipDecRef);
     a.  call   (release);
-    mcg->fixupMap().recordIndirectFixup(a.frontier(), 0);
   asm_label(a, skipDecRef);
   };
+
+  moveToAlign(cb, kJmpTargetAlign);
+  uniqueStubs.freeManyLocalsHelper = a.frontier();
+  a.    lea    (rVmFp[-(jit::kNumFreeLocalsHelpers * sizeof(Cell))],
+                rFinished);
 
   // Loop for the first few locals, but unroll the final kNumFreeLocalsHelpers.
 asm_label(a, loopHead);
@@ -361,9 +360,10 @@ asm_label(a, loopHead);
   a.    ret    ();
 
   // Keep me small!
-  always_assert(a.frontier() - stubBegin <= 4 * kX64CacheLineSize);
+  always_assert(Stats::enabled() ||
+                (a.frontier() - stubBegin <= 4 * kX64CacheLineSize));
 
-  uniqueStubs.add("freeLocalsHelpers", uniqueStubs.freeManyLocalsHelper);
+  uniqueStubs.add("freeLocalsHelpers", stubBegin);
 }
 
 void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {

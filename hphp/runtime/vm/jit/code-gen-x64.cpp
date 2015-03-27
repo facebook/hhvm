@@ -2453,26 +2453,23 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
 
   if (numLocals == 0) return;
 
-  // The helpers called below use a special ABI, in which r14 and r15 is
-  // not saved, and the stub expects the stack to be imbalanced (RSP%16==0)
-  // on entry. So use PhysRegSaverStub which assumes the odd stack parity.
-  PhysRegSaverStub saver(v, RegSet());
-
   auto const target = numLocals > kNumFreeLocalsHelpers
     ? mcg->tx().uniqueStubs.freeManyLocalsHelper
     : mcg->tx().uniqueStubs.freeLocalsHelpers[numLocals - 1];
 
-  auto const args = RegSet(r14) | RegSet(rVmFp);
-  auto const kills = (abi.all() - abi.calleeSaved) | RegSet(r14) | RegSet(r15);
+  auto const iterReg = v.makeReg();
+  v << lea{rFp[-numLocals * sizeof(TypedValue)], iterReg};
 
-  auto& marker = inst->marker();
-  auto const fix = Fixup {
+  auto const& marker = inst->marker();
+  auto const fix = Fixup{
     marker.bcOff() - marker.func()->base(),
     marker.spOff().offset
   };
-
-  v << lea{rFp[-numLocals * sizeof(TypedValue)], r14};
-  v << callstub{target, args, kills, fix};
+  // The stub uses arg reg 0 as scratch and to pass arguments to destructors,
+  // so it expects the iter argument in arg reg 1.
+  auto const args = v.makeVcallArgs({{v.cns(Vconst::Quad), iterReg}});
+  v << vcall{CppCall::direct((void(*)())target),
+             args, v.makeTuple({}), fix, DestType::None, false};
 }
 
 /*

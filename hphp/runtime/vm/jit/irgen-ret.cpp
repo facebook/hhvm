@@ -60,12 +60,7 @@ void freeLocalsAndThis(IRGS& env) {
 
   auto const shouldFreeInline = [&]() -> bool {
     // In a pseudomain, we have to do a non-inline DecRef, because we can't
-    // side-exit in the middle of the sequence of LdLocPseudoMains.  In LLVM,
-    // non-inline decrefs are not currently supported, so we have to punt.
-    if (mcg->useLLVM()) {
-      if (curFunc(env)->isPseudoMain()) PUNT(LLVMPsuedoMain-RetC);
-      return true;
-    }
+    // side-exit in the middle of the sequence of LdLocPseudoMains.
     if (curFunc(env)->isPseudoMain()) return false;
 
     auto const count = mcg->numTranslations(

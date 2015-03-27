@@ -131,19 +131,17 @@ void ThreadInfo::onSessionExit() {
 void raise_infinite_recursion_error() {
   if (!RuntimeOption::NoInfiniteRecursionDetection) {
     // Reset profiler otherwise it might recurse further causing segfault.
-    ThreadInfo::s_threadInfo->m_profiler = nullptr;
+    TI().m_profiler = nullptr;
     raise_error("infinite recursion detected");
   }
 }
 
 static Exception* generate_request_timeout_exception() {
-  auto& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
-
   auto exceptionMsg = folly::sformat(
     RuntimeOption::ClientExecutionMode()
       ? "Maximum execution time of {} seconds exceeded"
       : "entire web request took longer than {} seconds and timed out",
-    data.getTimeout());
+    RID().getTimeout());
   auto exceptionStack = createBacktrace(BacktraceArgs()
                                         .withSelf()
                                         .withThis());
@@ -151,11 +149,9 @@ static Exception* generate_request_timeout_exception() {
 }
 
 static Exception* generate_request_cpu_timeout_exception() {
-  auto& data = ThreadInfo::s_threadInfo->m_reqInjectionData;
-
   auto exceptionMsg = folly::sformat(
     "Maximum CPU time of {} seconds exceeded",
-    data.getCPUTimeout()
+    RID().getCPUTimeout()
   );
 
   auto exceptionStack = createBacktrace(BacktraceArgs()
@@ -173,8 +169,8 @@ static Exception* generate_memory_exceeded_exception() {
 }
 
 ssize_t check_request_surprise() {
-  auto info = ThreadInfo::s_threadInfo;
-  auto& p = info->m_reqInjectionData;
+  auto& info = TI();
+  auto& p = info.m_reqInjectionData;
 
   auto const flags = fetchAndClearSurpriseFlags();
   auto const do_timedout = (flags & TimedOutFlag) && !p.getDebuggerAttached();
@@ -184,8 +180,8 @@ ssize_t check_request_surprise() {
     (flags & CPUTimedOutFlag) && !p.getDebuggerAttached();
 
   // Start with any pending exception that might be on the thread.
-  auto pendingException = info->m_pendingException;
-  info->m_pendingException = nullptr;
+  auto pendingException = info.m_pendingException;
+  info.m_pendingException = nullptr;
 
   if (do_timedout) {
     p.setCPUTimeout(0);  // Stop CPU timer so we won't time out twice.

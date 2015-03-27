@@ -93,6 +93,20 @@ struct ThreadInfo {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Access to the running thread's ThreadInfo and RequestInjectionData.
+ */
+
+inline ThreadInfo& TI() {
+  return *ThreadInfo::s_threadInfo;
+}
+
+inline RequestInjectionData& RID() {
+  return TI().m_reqInjectionData;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void raise_infinite_recursion_error();
 
 inline void* stack_top_ptr() {

@@ -552,7 +552,7 @@ void handle_destructor_exception(const char* situation) {
     throw;
   } catch (ExitException &e) {
     // ExitException is fine, no need to show a warning.
-    ThreadInfo::s_threadInfo->setPendingException(e.clone());
+    TI().setPendingException(e.clone());
     return;
   } catch (Object &e) {
     // For user exceptions, invoke the user exception handler
@@ -565,7 +565,7 @@ void handle_destructor_exception(const char* situation) {
       errorMsg += "(unable to call toString())";
     }
   } catch (Exception &e) {
-    ThreadInfo::s_threadInfo->setPendingException(e.clone());
+    TI().setPendingException(e.clone());
     errorMsg = situation;
     errorMsg += " raised a fatal error: ";
     errorMsg += e.what();
@@ -601,8 +601,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
   auto const context = g_context.getNoCheck();
   context->obSetImplicitFlush(true);
 
-  auto variablesOrder = ThreadInfo::s_threadInfo.getNoCheck()
-    ->m_reqInjectionData.getVariablesOrder();
+  auto& variablesOrder = RID().getVariablesOrder();
 
   if (variablesOrder.find('e') != std::string::npos ||
       variablesOrder.find('E') != std::string::npos) {
@@ -674,8 +673,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
   }
 
   if (RuntimeOption::RequestTimeoutSeconds) {
-    ThreadInfo::s_threadInfo->m_reqInjectionData.setTimeout(
-      RuntimeOption::RequestTimeoutSeconds);
+    RID().setTimeout(RuntimeOption::RequestTimeoutSeconds);
   }
 
   if (RuntimeOption::XenonForceAlwaysOn) {
@@ -696,7 +694,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  auto& ti = TI();
 
   if (debug) MM().traceHeap();
   if (RuntimeOption::EvalDumpTC) {
@@ -713,9 +711,9 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   Eval::Debugger::InterruptPSPEnded(program);
   hphp_context_exit();
   hphp_session_exit();
-  if (coverage && ti->m_reqInjectionData.getCoverage() &&
+  if (coverage && ti.m_reqInjectionData.getCoverage() &&
       !RuntimeOption::CodeCoverageOutputFile.empty()) {
-    ti->m_coverage->Report(RuntimeOption::CodeCoverageOutputFile);
+    ti.m_coverage->Report(RuntimeOption::CodeCoverageOutputFile);
   }
 }
 
@@ -1869,7 +1867,7 @@ static bool hphp_warmup(ExecutionContext *context,
 void hphp_session_init() {
   assert(!s_sessionInitialized);
   init_thread_locals();
-  ThreadInfo::s_threadInfo->onSessionInit();
+  TI().onSessionInit();
   MM().resetExternalStats();
   Treadmill::startRequest();
 
@@ -1922,7 +1920,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   }
 
   MM().resetCouldOOM(isStandardRequest());
-  ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData.resetTimer();
+  RID().resetTimer();
 
   LitstrTable::get().setReading();
 
@@ -2027,7 +2025,7 @@ void hphp_session_exit() {
   // finishes.
   Treadmill::finishRequest();
 
-  ThreadInfo::s_threadInfo->clearPendingException();
+  TI().clearPendingException();
 
   {
     ServerStatsHelper ssh("rollback");
@@ -2037,7 +2035,7 @@ void hphp_session_exit() {
     free_global_variables_after_sweep();
   }
 
-  ThreadInfo::s_threadInfo->onSessionExit();
+  TI().onSessionExit();
   assert(MM().empty());
 
   s_sessionInitialized = false;

@@ -242,13 +242,13 @@ void Debugger::Interrupt(int type, const char *program,
   DebuggerProxyPtr proxy = GetProxy();
   if (proxy) {
     TRACE(3, "proxy != null\n");
-    RequestInjectionData &rjdata = ThreadInfo::s_threadInfo->m_reqInjectionData;
+    auto& rjdata = RID();
     // The proxy will only service an interrupt if we've previously setup some
     // form of flow control command (steps, breakpoints, etc.) or if it's
     // an interrupt related to something like the session or request.
     if (proxy->needInterrupt() || type != BreakPointReached) {
       // Interrupts may execute some PHP code, causing another interruption.
-      std::stack<void *> &interrupts = rjdata.interrupts;
+      auto& interrupts = rjdata.interrupts;
 
       CmdInterrupt cmd((InterruptType)type, program, site, error);
       interrupts.push(&cmd);
@@ -344,11 +344,10 @@ bool Debugger::isThreadDebugging(int64_t tid) {
 // of debugging for request and other threads.
 void Debugger::registerThread() {
   TRACE(2, "Debugger::registerThread\n");
-  ThreadInfo* ti = ThreadInfo::s_threadInfo.getNoCheck();
-  int64_t tid = (int64_t)Process::GetThreadId();
+  auto const tid = (int64_t)Process::GetThreadId();
   ThreadInfoMap::accessor acc;
   m_threadInfos.insert(acc, tid);
-  acc->second = ti;
+  acc->second = &TI();
 }
 
 void Debugger::addOrUpdateSandbox(const DSandboxInfo &sandbox) {
@@ -387,16 +386,15 @@ void Debugger::registerSandbox(const DSandboxInfo &sandbox) {
 
   // add thread to m_sandboxThreadInfoMap
   const StringData* sid = makeStaticString(sandbox.id());
-  ThreadInfo* ti = ThreadInfo::s_threadInfo.getNoCheck();
+  auto ti = &TI();
   {
     SandboxThreadInfoMap::accessor acc;
     m_sandboxThreadInfoMap.insert(acc, sid);
-    ThreadInfoSet& set = acc->second;
-    set.insert(ti);
+    acc->second.insert(ti);
   }
 
-  // find out whether this sandbox is being debugged
-  DebuggerProxyPtr proxy = findProxy(sid);
+  // Find out whether this sandbox is being debugged.
+  auto proxy = findProxy(sid);
   if (proxy) {
     DebugHookHandler::attach<DebuggerHookHandler>(ti);
   }
@@ -404,21 +402,17 @@ void Debugger::registerSandbox(const DSandboxInfo &sandbox) {
 
 void Debugger::unregisterSandbox(const StringData* sandboxId) {
   TRACE(2, "Debugger::unregisterSandbox\n");
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   SandboxThreadInfoMap::accessor acc;
   if (m_sandboxThreadInfoMap.find(acc, sandboxId)) {
-    ThreadInfoSet& set = acc->second;
-    set.erase(ti);
+    acc->second.erase(&TI());
   }
 }
 
 #define FOREACH_SANDBOX_THREAD_BEGIN(sid, ti)  {                       \
   SandboxThreadInfoMap::const_accessor acc;                            \
   if (m_sandboxThreadInfoMap.find(acc, sid)) {                         \
-    const ThreadInfoSet& set = acc->second;                            \
-    for (std::set<ThreadInfo*>::iterator iter = set.begin();           \
-         iter != set.end(); ++iter) {                                  \
-      ThreadInfo* ti = (*iter);                                        \
+    auto const& set = acc->second;                                     \
+    for (auto ti : set) {                                              \
       assert(ThreadInfo::valid(ti));                                   \
 
 #define FOREACH_SANDBOX_THREAD_END()    } } }                          \

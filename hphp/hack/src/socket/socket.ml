@@ -8,17 +8,6 @@
  *
  *)
 
-
-
-let init_socket port =
-  if port = 0 then None else
-  let sock = Unix.socket Unix.PF_INET Unix.SOCK_STREAM 0 in
-  let _ = Unix.setsockopt sock Unix.SO_REUSEADDR true in
-  let _ = Unix.bind sock (
-    Unix.ADDR_INET (Unix.inet_addr_any, port)) in
-  let _ = Unix.listen sock 10 in
-  Some sock
-
 (* Initializes the unix domain socket *)
 let unix_socket sock_name =
   try

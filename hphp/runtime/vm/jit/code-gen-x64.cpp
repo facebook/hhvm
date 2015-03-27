@@ -4767,9 +4767,11 @@ void CodeGenerator::cgContPreNext(IRInstruction* inst) {
 
   static_assert(uint8_t(BaseGenerator::State::Created) == 0, "used below");
   static_assert(uint8_t(BaseGenerator::State::Started) == 1, "used below");
+  static_assert(uint8_t(BaseGenerator::State::Running) > 1, "");
+  static_assert(uint8_t(BaseGenerator::State::Done) > 1, "");
 
   // Take exit if state != 1 (checkStarted) or state > 1 (!checkStarted).
-  v << cmpbim{1, contReg[stateOff], sf};
+  v << cmpbim{int8_t(BaseGenerator::State::Started), contReg[stateOff], sf};
   emitFwdJcc(v, checkStarted ? CC_NE : CC_A, sf, inst->taken());
 
   // Set generator state as Running.

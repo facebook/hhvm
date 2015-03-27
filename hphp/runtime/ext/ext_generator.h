@@ -50,7 +50,7 @@ public:
     return resumableOff() + Resumable::resumeOffsetOff();
   }
   static constexpr ptrdiff_t stateOff() {
-    return whStateOffset();
+    return offsetof(BaseGenerator, m_state);
   }
 
   explicit BaseGenerator(Class* cls)
@@ -67,11 +67,11 @@ public:
   }
 
   State getState() const {
-    return static_cast<State>(subclass_u8());
+    return m_state;
   }
 
   void setState(State state) {
-    subclass_u8() = static_cast<uint8_t>(state);
+    m_state = state;
   }
 
   void startedCheck() {
@@ -112,6 +112,9 @@ public:
 
     return base + 2;
   }
+
+private:
+  State m_state;
 };
 
 

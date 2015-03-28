@@ -398,6 +398,24 @@ bool PDOMySqlConnection::create(const Array& options) {
     }
   }
 
+  ssl_ca = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_CA,
+                        NULL);
+  ssl_capath = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_CAPATH,
+                        NULL);
+  ssl_key = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_KEY,
+                        NULL);
+  ssl_cert = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_CERT,
+                        NULL);
+  ssl_cipher = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_CIPHER,
+                        NULL);
+
+  if ((ssl_ca || ssl_capath || ssl_key || ssl_cert || ssl_cipher) && !host.same(s_localhost)) {
+    if (mysql_set_ssl(m_server, ssl_key.c_str(), ssl_cert.c_str(), ssl_ca.c_str(), ssl_capath.c_str(), ssl_cipher.c_str())) {
+      handleError(__FILE__, __LINE__);
+      goto cleanup;
+    }
+  }
+
   if (host.empty() || host.same(s_localhost)) {
     unix_socket = vars[4].optval;
   }

@@ -316,7 +316,7 @@ bool PDOMySqlConnection::create(const Array& options) {
   if (!options.empty()) {
     long connect_timeout = pdo_attr_lval(options, PDO_ATTR_TIMEOUT, 30);
     long local_infile = pdo_attr_lval(options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0);
-    String init_cmd, default_file, default_group;
+    String init_cmd, default_file, default_group, ssl_ca, ssl_capath, ssl_cert, ssl_key, ssl_cipher;
     long compress = 0;
     m_buffered = pdo_attr_lval(options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
 
@@ -389,28 +389,28 @@ bool PDOMySqlConnection::create(const Array& options) {
         goto cleanup;
       }
     }
+    
+    ssl_ca = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_CA,
+                             NULL);
+    ssl_capath = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_CAPATH,
+                                 NULL);
+    ssl_key = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_KEY,
+                              NULL);
+    ssl_cert = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_CERT,
+                               NULL);
+    ssl_cipher = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_CIPHER,
+                                 NULL);
+
+    if ((ssl_ca || ssl_capath || ssl_key || ssl_cert || ssl_cipher) && !host.same(s_localhost)) {
+      if (mysql_ssl_set(m_server, ssl_key.c_str(), ssl_cert.c_str(), ssl_ca.c_str(), ssl_capath.c_str(), ssl_cipher.c_str())) {
+        handleError(__FILE__, __LINE__);
+        goto cleanup;
+      }
+    }
   }
 
   if (charset) {
     if (mysql_options(m_server, MYSQL_SET_CHARSET_NAME, charset)) {
-      handleError(__FILE__, __LINE__);
-      goto cleanup;
-    }
-  }
-
-  ssl_ca = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_CA,
-                        NULL);
-  ssl_capath = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_CAPATH,
-                        NULL);
-  ssl_key = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_KEY,
-                        NULL);
-  ssl_cert = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_CERT,
-                        NULL);
-  ssl_cipher = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_CIPHER,
-                        NULL);
-
-  if ((ssl_ca || ssl_capath || ssl_key || ssl_cert || ssl_cipher) && !host.same(s_localhost)) {
-    if (mysql_set_ssl(m_server, ssl_key.c_str(), ssl_cert.c_str(), ssl_ca.c_str(), ssl_capath.c_str(), ssl_cipher.c_str())) {
       handleError(__FILE__, __LINE__);
       goto cleanup;
     }

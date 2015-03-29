@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/cap-code.h"
 
 namespace HPHP {
 
@@ -481,8 +482,12 @@ private:
   union {
     struct {
       union {
-        struct { char m_pad[3]; HeaderKind m_kind; };
-        uint32_t m_capCode;
+        struct {
+          CapCode m_cap;
+          char m_pad;
+          HeaderKind m_kind;
+        };
+        uint32_t m_cap_kind;
       };
       mutable RefCount m_count;
     };

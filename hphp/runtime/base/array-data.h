@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/cap-code.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -435,15 +436,11 @@ protected:
     struct {
       union {
         struct {
-          UNUSED uint16_t m_unused1;
-          UNUSED uint8_t m_unused0;
+          CapCode m_cap;
+          uint8_t m_pad;
           ArrayKind m_kind;
         };
-        // Packed arrays overlay their encoded capacity with the kind field.
-        // kPackedKind is zero, and aliases the top byte of m_packedCapCode,
-        // so it won't influence the encoded capacity. For details on the
-        // encoding see the definition of packedCapToCode().
-        uint32_t m_packedCapCode;
+        uint32_t m_cap_kind;
       };
       mutable RefCount m_count;
     };

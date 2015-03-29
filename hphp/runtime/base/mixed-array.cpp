@@ -90,7 +90,7 @@ ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
 ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
   assert(size > 0);
   ArrayData* ad;
-  if (LIKELY(size <= kPackedCapCodeThreshold)) {
+  if (LIKELY(size <= CapCode::Threshold)) {
     auto cap = size;
     if (auto const newCap = PackedArray::getMaxCapInPlaceFast(cap)) {
       cap = newCap;
@@ -99,12 +99,12 @@ ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
     ad = static_cast<ArrayData*>(
       MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
     );
-    assert(cap == packedCodeToCap(cap));
+    assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = size; // pos=0
     ad->m_kindAndCount = cap | uint64_t{1} << 32; // kind=0, count=1
     assert(ad->m_kind == kPackedKind);
     assert(ad->m_size == size);
-    assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+    assert(cap == ad->m_cap.decode());
   } else {
     ad = MakePackedHelper(size, values);
   }
@@ -132,24 +132,24 @@ MixedArray::MakePackedHelper(uint32_t size, const TypedValue* values) {
   ad->m_count = 1;
   assert(ad->m_kind == kPackedKind);
   assert(ad->m_size == size);
-  assert(packedCodeToCap(ad->m_packedCapCode) >= size);
+  assert(ad->m_cap.decode() >= size);
   return ad;
 }
 
 ArrayData* MixedArray::MakePackedUninitialized(uint32_t size) {
   assert(size > 0);
   ArrayData* ad;
-  assert(size <= kPackedCapCodeThreshold);
+  assert(size <= CapCode::Threshold);
   auto const cap = size;
   ad = static_cast<ArrayData*>(
     MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
   );
-  assert(cap == packedCodeToCap(cap));
+  assert(cap == CapCode::ceil(cap).code);
   ad->m_sizeAndPos = size; // pos=0
   ad->m_kindAndCount = cap | uint64_t{1} << 32; // kind=0, count=1
   assert(ad->m_kind == kPackedKind);
   assert(ad->m_size == size);
-  assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+  assert(ad->m_cap.decode() == cap);
   assert(ad->m_pos == 0);
   assert(ad->m_count == 1);
   assert(PackedArray::checkInvariants(ad));
@@ -207,7 +207,7 @@ StructArray* MixedArray::MakeStructArray(
   Shape* shape
 ) {
   assert(size > 0);
-  assert(size <= kPackedCapCodeThreshold);
+  assert(size <= CapCode::Threshold);
   assert(shape);
 
   // Append values by moving -- Caller assumes we update refcount.
@@ -231,7 +231,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     : mallocArray(cap, mask);
 
   ad->m_sizeAndPos      = other.m_sizeAndPos;
-  ad->m_kindAndCount    = other.m_packedCapCode; // copy kind; count=0
+  ad->m_kindAndCount    = other.m_cap_kind; // copy cap_kind; count=0
   ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
   ad->m_tableMask       = mask;
   ad->m_nextKI          = other.m_nextKI;
@@ -399,18 +399,18 @@ ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
 
   ArrayData* ad;
   auto const size = array->m_size;
-  if (LIKELY(size <= kPackedCapCodeThreshold)) {
+  if (LIKELY(size <= CapCode::Threshold)) {
     // We don't need to copy the full capacity, since the array won't
     // change once it's uncounted.
     auto const cap = size;
     ad = static_cast<ArrayData*>(
       std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
     );
-    assert(cap == packedCodeToCap(cap));
+    assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = array->m_sizeAndPos;
     ad->m_kindAndCount = cap | int64_t{UncountedValue} << 32; // kind=0
     assert(ad->m_kind == ArrayData::kPackedKind);
-    assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+    assert(ad->m_cap.decode() == cap);
     assert(ad->m_size == size);
   } else {
     ad = MakeUncountedPackedHelper(array);
@@ -431,15 +431,15 @@ ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
 
 NEVER_INLINE
 ArrayData* MixedArray::MakeUncountedPackedHelper(ArrayData* array) {
-  auto const cap = roundUpPackedCap(array->m_size);
+  auto const fpcap = CapCode::ceil(array->m_size);
+  auto const cap = fpcap.decode();
   auto const ad = static_cast<ArrayData*>(
     std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
-  auto const capCode = packedCapToCode(cap);
   ad->m_sizeAndPos = array->m_sizeAndPos;
-  ad->m_kindAndCount = capCode | int64_t{UncountedValue} << 32;
+  ad->m_kindAndCount = fpcap.code | int64_t{UncountedValue} << 32;
   assert(ad->m_kind == ArrayData::kPackedKind);
-  assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+  assert(ad->m_cap.decode() == cap);
   assert(ad->m_size == array->m_size);
   assert(ad->m_pos == array->m_pos);
   return ad;
@@ -1050,7 +1050,7 @@ MixedArray::Grow(MixedArray* old, uint32_t newCap, uint32_t newMask) {
   auto const oldUsed    = old->m_used;
 
   ad->m_sizeAndPos      = old->m_sizeAndPos;
-  ad->m_kindAndCount    = old->m_packedCapCode; // kind=old->kind, count=0
+  ad->m_kindAndCount    = old->m_cap_kind; // cap_kind=old->cap_kind, count=0
   ad->m_capAndUsed      = uint64_t{oldUsed} << 32 | cap;
   ad->m_tableMask       = mask;
   ad->m_nextKI          = old->m_nextKI;
@@ -1581,7 +1581,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   auto const oldUsed = src->m_used;
 
   ad->m_sizeAndPos      = src->m_sizeAndPos;
-  ad->m_kindAndCount    = src->m_packedCapCode | uint64_t{1} << 32; // count=1
+  ad->m_kindAndCount    = src->m_cap_kind | uint64_t{1} << 32; // count=1
   ad->m_cap             = cap;
   ad->m_tableMask       = mask;
   ad->m_nextKI          = src->m_nextKI;

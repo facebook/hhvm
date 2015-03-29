@@ -26,10 +26,10 @@
 namespace HPHP {
 
 TEST(ARRAY, Capacity) {
-  EXPECT_TRUE(kPackedCapCodeThreshold == 0x10000);
+  EXPECT_TRUE(CapCode::Threshold == 0x7ff);
 
 #define MP(a, b) std::make_pair(a, b)
-  // Update the numbers if we change kPackedCapCodeThreshold
+  // Update the numbers if we change CapCode::Threshold
 #if (LG_SMART_SIZES_PER_DOUBLING == 1)
   std::pair<uint32_t, uint32_t> caps [] = {
     MP(3, 0),
@@ -42,7 +42,7 @@ TEST(ARRAY, Capacity) {
     MP(127, 0),
     MP(128, 191),
     MP(0xFFFF, 0),
-    MP(0x10000, 0x17F00),
+    MP(0x10000, 0),
     MP(0x10001, 0)
   };
 #elif (LG_SMART_SIZES_PER_DOUBLING == 2)
@@ -57,7 +57,7 @@ TEST(ARRAY, Capacity) {
     MP(127, 0),
     MP(128, 159),
     MP(0xFFFF, 0),
-    MP(0x10000, 0x13F00),
+    MP(0x10000, 0),
     MP(0x10001, 0)
   };
 #else

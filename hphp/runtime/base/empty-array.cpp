@@ -133,7 +133,7 @@ std::pair<ArrayData*,TypedValue*> EmptyArray::MakePackedInl(TypedValue tv) {
   auto const ad = static_cast<ArrayData*>(
     MM().objMallocLogged(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
-  assert(cap == packedCodeToCap(cap));
+  assert(cap == CapCode::ceil(cap).code);
   ad->m_sizeAndPos = 1; // size=1, pos=0
   ad->m_kindAndCount = cap; // kind=Packed, count=0
 
@@ -145,7 +145,6 @@ std::pair<ArrayData*,TypedValue*> EmptyArray::MakePackedInl(TypedValue tv) {
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
   assert(ad->m_count == 0);
-  assert((ad->m_packedCapCode & 0xFFFFFFUL) == cap);
   assert(PackedArray::checkInvariants(ad));
   return { ad, &lval };
 }

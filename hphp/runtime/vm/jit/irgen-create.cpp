@@ -213,7 +213,7 @@ void emitNewLikeArrayL(IRGS& env, int32_t id, int32_t capacity) {
 }
 
 void emitNewPackedArray(IRGS& env, int32_t numArgs) {
-  if (numArgs > kPackedCapCodeThreshold) {
+  if (numArgs > CapCode::Threshold) {
     PUNT(NewPackedArray-UnrealisticallyHuge);
   }
 

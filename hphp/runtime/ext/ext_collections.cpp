@@ -621,7 +621,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
   auto* oldBuf = m_data;
   auto* oldAd = arrayData();
   m_data = packedData(MixedArray::MakeReserve(newCap));
-  m_capacity = packedCodeToCap(arrayData()->m_packedCapCode);
+  m_capacity = arrayData()->m_cap.decode();
   arrayData()->m_size = m_size;
   if (LIKELY(!oldAd->hasMultipleRefs())) {
     std::memcpy(m_data, oldBuf, m_size * sizeof(TypedValue));

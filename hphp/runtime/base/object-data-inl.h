@@ -151,6 +151,11 @@ inline bool ObjectData::isImmutableCollection() const {
   return HPHP::isImmutableCollection(getCollectionType());
 }
 
+inline CollectionType ObjectData::collectionType() const {
+  assert(isValidCollection(static_cast<CollectionType>(m_kind)));
+  return static_cast<CollectionType>(m_kind);
+}
+
 inline CollectionType ObjectData::getCollectionType() const {
   assert(isValidCollection(static_cast<CollectionType>(m_kind)) ||
          !isCollection());

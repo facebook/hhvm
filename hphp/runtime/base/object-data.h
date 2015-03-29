@@ -175,7 +175,8 @@ struct ObjectData {
   bool isMutableCollection() const;
   bool isImmutableCollection() const;
 
-  CollectionType getCollectionType() const;
+  CollectionType collectionType() const; // must be isCollection()
+  CollectionType getCollectionType() const; // type or CT::Invalid
 
   bool getAttribute(Attribute) const;
   void setAttribute(Attribute) const;

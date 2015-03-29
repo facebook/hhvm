@@ -183,22 +183,21 @@ void ArrayIter::IteratorObjInit(ArrayIter* iter, ObjectData* obj) {
   }
 }
 
-constexpr int ctype_index(CollectionType t) {
-  return int(t) - int(CollectionType::Invalid);
+constexpr unsigned ctype_index(CollectionType t) {
+  return unsigned(t) - unsigned(CollectionType::Vector);
 }
 
-static_assert(ctype_index(CollectionType::Invalid) == 0, "");
-static_assert(ctype_index(CollectionType::Vector) == 1, "");
-static_assert(ctype_index(CollectionType::Map) == 2, "");
-static_assert(ctype_index(CollectionType::Set) == 3, "");
-static_assert(ctype_index(CollectionType::Pair) == 4, "");
-static_assert(ctype_index(CollectionType::ImmVector) == 5, "");
-static_assert(ctype_index(CollectionType::ImmMap) == 6, "");
-static_assert(ctype_index(CollectionType::ImmSet) == 7, "");
+static_assert(ctype_index(CollectionType::Vector) == 0, "");
+static_assert(ctype_index(CollectionType::Map) == 1, "");
+static_assert(ctype_index(CollectionType::Set) == 2, "");
+static_assert(ctype_index(CollectionType::Pair) == 3, "");
+static_assert(ctype_index(CollectionType::ImmVector) == 4, "");
+static_assert(ctype_index(CollectionType::ImmMap) == 5, "");
+static_assert(ctype_index(CollectionType::ImmSet) == 6, "");
+const unsigned MaxCollectionTypes = 7;
 
 const ArrayIter::InitFuncPtr
-ArrayIter::initFuncTable[MaxCollectionTypes] = {
-  &ArrayIter::IteratorObjInit,
+ArrayIter::initFuncTable[MaxCollectionTypes + 1] = {
   &ArrayIter::VectorInit,
   &ArrayIter::MapInit,
   &ArrayIter::SetInit,
@@ -206,16 +205,17 @@ ArrayIter::initFuncTable[MaxCollectionTypes] = {
   &ArrayIter::ImmVectorInit,
   &ArrayIter::ImmMapInit,
   &ArrayIter::ImmSetInit,
+  &ArrayIter::IteratorObjInit,
 };
 
 template <bool incRef>
 void ArrayIter::objInit(ObjectData* obj) {
   assert(obj);
   setObject(obj);
-  if (incRef) {
-    obj->incRefCount();
-  }
-  auto i = ctype_index(getCollectionType());
+  if (incRef) obj->incRefCount();
+  assert(getCollectionType() == obj->getCollectionType());
+  auto i = obj->isCollection() ? ctype_index(obj->collectionType()) :
+           MaxCollectionTypes;
   initFuncTable[i](this, obj);
 }
 

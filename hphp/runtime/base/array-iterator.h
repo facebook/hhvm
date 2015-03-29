@@ -310,7 +310,7 @@ private:
   static void IteratorObjInit(ArrayIter* iter, ObjectData* obj);
 
   typedef void(*InitFuncPtr)(ArrayIter*,ObjectData*);
-  static const InitFuncPtr initFuncTable[MaxCollectionTypes];
+  static const InitFuncPtr initFuncTable[];
 
   void destruct();
 

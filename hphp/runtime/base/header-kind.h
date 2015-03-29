@@ -56,8 +56,6 @@ enum class CollectionType : uint8_t { // Subset of possible HeaderKind values
   ImmSet = uint8_t(HeaderKind::ImmSet),
 };
 
-constexpr size_t MaxCollectionTypes = 8;
-
 inline bool isVectorCollection(CollectionType ctype) {
   return ctype == CollectionType::Vector || ctype == CollectionType::ImmVector;
 }

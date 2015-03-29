@@ -2,7 +2,7 @@ array(3) {
   [0]=>
   string(4) "/tmp"
   [1]=>
-  string(%d) "/var/releases/continuous_www_scripts%s"
+  string(13) "/var/releases"
   [2]=>
   string(8) "/var/www"
 }

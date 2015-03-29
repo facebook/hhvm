@@ -612,7 +612,12 @@ Variant HHVM_FUNCTION(array_pop,
     case CollectionType::Vector: return static_cast<c_Vector*>(obj)->t_pop();
     case CollectionType::Map:    return static_cast<c_Map*>(obj)->pop();
     case CollectionType::Set:    return static_cast<c_Set*>(obj)->pop();
-    default:                     break;
+    case CollectionType::Pair:
+    case CollectionType::ImmVector:
+    case CollectionType::ImmMap:
+    case CollectionType::ImmSet:
+    case CollectionType::Invalid:
+      break;
   }
   assert(false);
   return init_null();
@@ -828,13 +833,17 @@ Variant HHVM_FUNCTION(array_shift,
       if (!st->size()) return init_null();
       return st->popFront();
     }
-    default: {
-      raise_warning(
-        "%s() expects parameter 1 to be an array or mutable collection",
-        __FUNCTION__+2 /* remove the "f_" prefix */);
-      return init_null();
-    }
+    case CollectionType::Pair:
+    case CollectionType::ImmVector:
+    case CollectionType::ImmMap:
+    case CollectionType::ImmSet:
+    case CollectionType::Invalid:
+      break;
   }
+  raise_warning(
+    "%s() expects parameter 1 to be an array or mutable collection",
+    __FUNCTION__+2 /* remove the "f_" prefix */);
+  return init_null();
 }
 
 Variant HHVM_FUNCTION(array_slice,
@@ -1051,12 +1060,17 @@ Variant HHVM_FUNCTION(array_unshift,
       st->addFront(var.asCell());
       return st->size();
     }
-    default: {
-      raise_warning("%s() expects parameter 1 to be an array, Vector, or Set",
-                    __FUNCTION__+2 /* remove the "f_" prefix */);
-      return init_null();
-    }
+    case CollectionType::Map:
+    case CollectionType::Pair:
+    case CollectionType::ImmVector:
+    case CollectionType::ImmMap:
+    case CollectionType::ImmSet:
+    case CollectionType::Invalid:
+      break;
   }
+  raise_warning("%s() expects parameter 1 to be an array, Vector, or Set",
+                __FUNCTION__+2 /* remove the "f_" prefix */);
+  return init_null();
 }
 
 Variant HHVM_FUNCTION(array_values,

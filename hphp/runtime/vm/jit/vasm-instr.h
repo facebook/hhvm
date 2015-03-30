@@ -373,7 +373,9 @@ struct andqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct call { CodeAddress target; RegSet args; };
 struct callm { Vptr target; RegSet args; };
 struct callr { Vreg64 target; RegSet args; };
+// implements d = condition ? load_from(t) : f
 struct cloadq { ConditionCode cc; VregSF sf; Vreg64 f; Vptr t; Vreg64 d; };
+// implements d = condition ? t : f
 struct cmovq { ConditionCode cc; VregSF sf; Vreg64 f, t, d; };
 // compares are att-style: s1-s0 => sf
 struct cmpb  { Vreg8  s0; Vreg8  s1; VregSF sf; };

@@ -66,8 +66,6 @@ class Func;
 class VariableSerializer;
 class VariableUnserializer;
 
-///////////////////////////////////////////////////////////////////////////////
-
 using LowClassPtr  = LowPtr<Class>;
 using LowFuncPtr   = LowPtr<Func>;
 using LowStringPtr = LowPtr<const StringData>;
@@ -81,33 +79,6 @@ enum class Mode {
   ColValue = 2,
   ColKey = 3,
 };
-}
-
-inline CollectionType stringToCollectionType(const char* str, size_t len) {
-  switch (len) {
-    case 6:
-      if (!strcasecmp(str, "hh\\set")) return CollectionType::Set;
-      if (!strcasecmp(str, "hh\\map")) return CollectionType::Map;
-      break;
-    case 7:
-      if (!strcasecmp(str, "hh\\pair")) return CollectionType::Pair;
-      break;
-    case 9:
-      if (!strcasecmp(str, "hh\\vector")) return CollectionType::Vector;
-      if (!strcasecmp(str, "hh\\immmap")) return CollectionType::ImmMap;
-      if (!strcasecmp(str, "hh\\immset")) return CollectionType::ImmSet;
-      break;
-    case 12:
-      if (!strcasecmp(str, "hh\\immvector")) return CollectionType::ImmVector;
-      break;
-    default:
-      break;
-  }
-  return CollectionType::Invalid;
-}
-
-inline CollectionType stringToCollectionType(const std::string& s) {
-  return stringToCollectionType(s.c_str(), s.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -250,4 +221,4 @@ constexpr FuncId DummyFuncId = -2;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_TYPES_H_
+#endif

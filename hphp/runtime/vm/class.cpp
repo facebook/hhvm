@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -437,8 +438,7 @@ bool Class::isCppSerializable() const {
 
 bool Class::isCollectionClass() const {
   auto s = name();
-  return stringToCollectionType(s->data(), s->size()) !=
-         CollectionType::Invalid;
+  return stringToCollectionType(s->data(), s->size()).valid;
 }
 
 

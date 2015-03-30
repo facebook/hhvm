@@ -73,7 +73,7 @@ public:
   void markParam(int p);
   void markParams();
 
-  void setCollectionType(CollectionType cType);
+  void setCollectionElems();
   void setContainsUnpack() { m_argUnpack = true; };
   bool containsUnpack() const { return m_argUnpack; }
 
@@ -89,10 +89,11 @@ public:
 private:
   void optimize(AnalysisResultConstPtr ar);
   unsigned int checkLitstrKeys() const;
+  enum class ElemsKind: uint8_t { None, ArrayPairs, Collection };
 
+private:
   ExpressionPtrVec m_exps;
-  bool m_arrayElements;
-  CollectionType m_collectionType;
+  ElemsKind m_elems_kind;
   bool m_argUnpack;
   ListKind m_kind;
 };

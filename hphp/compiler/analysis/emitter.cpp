@@ -114,6 +114,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
@@ -3700,19 +3701,17 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           }
           const std::string* clsName = nullptr;
           cls->getString(clsName);
-          auto cType = stringToCollectionType(*clsName);
-          if (cType == CollectionType::Pair) {
-            if (nElms != 2) {
-              throw IncludeTimeFatalException(b,
-                "Pair objects must have exactly 2 elements");
-            }
-          } else if (cType == CollectionType::Invalid) {
+          auto ct = stringToCollectionType(*clsName);
+          if (!ct.valid) {
             throw IncludeTimeFatalException(b,
               "Cannot use collection initialization for non-collection class");
+          } else if (ct.type == CollectionType::Pair && nElms != 2) {
+            throw IncludeTimeFatalException(b,
+                "Pair objects must have exactly 2 elements");
           }
-          bool kvPairs = (cType == CollectionType::Map ||
-                          cType == CollectionType::ImmMap);
-          e.NewCol(int(cType), nElms);
+          bool kvPairs = (ct.type == CollectionType::Map ||
+                          ct.type == CollectionType::ImmMap);
+          e.NewCol(int(ct.type), nElms);
           if (kvPairs) {
             for (int i = 0; i < nElms; i++) {
               ArrayPairExpressionPtr ap(

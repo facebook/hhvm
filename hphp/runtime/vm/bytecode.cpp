@@ -4669,6 +4669,14 @@ OPTBLD_INLINE void iopCGetL(IOP_ARGS) {
   cgetl_body(vmfp(), fr, to, local);
 }
 
+OPTBLD_INLINE void iopCUGetL(IOP_ARGS) {
+  pc++;
+  const auto local = decode_la(pc);
+  auto to = vmStack().allocTV();
+  auto fr = frame_local(vmfp(), local);
+  tvDup(*tvToCell(fr), *to);
+}
+
 OPTBLD_INLINE void iopCGetL2(IOP_ARGS) {
   pc++;
   auto local = decode_la(pc);

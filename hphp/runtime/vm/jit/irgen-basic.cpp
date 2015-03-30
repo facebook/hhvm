@@ -85,6 +85,12 @@ void emitCGetL(HTS& env, int32_t id) {
   pushIncRef(env, ldLocInnerWarn(env, id, ldrefExit, ldPMExit, cat));
 }
 
+void emitCUGetL(HTS& env, int32_t id) {
+  auto const ldrefExit = makeExit(env);
+  auto const ldPMExit = makePseudoMainExit(env);
+  pushIncRef(env, ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeGeneric));
+}
+
 void emitPushL(HTS& env, int32_t id) {
   assertTypeLocal(env, id, Type::InitCell);  // bytecode invariant
   auto* locVal = ldLoc(env, id, makeExit(env), DataTypeGeneric);

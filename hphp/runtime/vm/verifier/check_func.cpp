@@ -654,9 +654,20 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
   return ok;
 }
 
-static char stkflav(FlavorDesc f) {
-  static const char flavs[] = { 'N', 'C', 'V', 'A', 'R', 'F' };
-  return f > NOV && f <= FV ? flavs[f] : '?';
+static const char* stkflav(FlavorDesc f) {
+  switch (f) {
+  case NOV:  return "N";
+  case CV:   return "C";
+  case VV:   return "V";
+  case AV:   return "A";
+  case RV:   return "R";
+  case FV:   return "F";
+  case UV:   return "U";
+  case CUV:  return "C|U";
+  case CVV:  return "C|V";
+  case CVUV: return "C|V|U";
+  }
+  not_reached();
 }
 
 bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
@@ -664,8 +675,9 @@ bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
   for (int i = 0; i < len; ++i) {
     if (args[i] != (FlavorDesc)sig[i] &&
         !((FlavorDesc)sig[i] == CVV && (args[i] == CV || args[i] == VV)) &&
+        !((FlavorDesc)sig[i] == CUV && (args[i] == CV || args[i] == UV)) &&
         !((FlavorDesc)sig[i] == CVUV && (args[i] == CV || args[i] == VV ||
-                                         args[i] == UV))) {
+                                         args[i] == UV || args[i] == CUV))) {
       error("flavor mismatch at %d, got %s expected %s\n",
              offset(pc), stkToString(len, args).c_str(),
              sigToString(len, sig).c_str());
@@ -774,9 +786,9 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = CVUV;
     }
     return m_tmp_sig;
-  case Op::CreateCl:  // TWO(IVA,SA),  CVMANY,   ONE(CV)
+  case Op::CreateCl:  // TWO(IVA,SA),  CVUMANY,   ONE(CV)
     for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
-      m_tmp_sig[i] = CVV;
+      m_tmp_sig[i] = CVUV;
     }
     return m_tmp_sig;
   case Op::NewPackedArray:  // ONE(IVA),     CMANY,   ONE(CV)

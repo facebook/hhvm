@@ -711,6 +711,16 @@ void in(ISS& env, const bc::CGetL& op) {
   push(env, locAsCell(env, op.loc1));
 }
 
+void in(ISS& env, const bc::CUGetL& op) {
+  auto const ty = locRaw(env, op.loc1);
+  if (ty.subtypeOf(TUninit)) {
+    return reduce(env, bc::NullUninit {});
+  }
+  nothrow(env);
+  if (!ty.couldBe(TUninit)) constprop(env);
+  push(env, ty.subtypeOf(TCell) ? ty : TCell);
+}
+
 void in(ISS& env, const bc::PushL& op) {
   impl(env, bc::CGetL { op.loc1 }, bc::UnsetL { op.loc1 });
 }

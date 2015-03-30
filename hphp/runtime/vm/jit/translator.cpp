@@ -275,6 +275,9 @@ static const struct {
   { OpCGetL,       {Local,            Stack1,       OutCInputL,        1 }},
   { OpCGetL2,      {Stack1|Local,     StackIns1,    OutCInputL,        1 }},
   { OpCGetL3,      {StackTop2|Local,  StackIns2,    OutCInputL,        1 }},
+  // In OpCUGetL we rely on OutCInputL returning Type::Cell (which covers Uninit
+  // values) instead of Type::InitCell.
+  { OpCUGetL,      {Local,            Stack1,       OutCInputL,        1 }},
   { OpPushL,       {Local,            Stack1|Local, OutCInputL,        1 }},
   { OpCGetN,       {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpCGetG,       {Stack1,           Stack1,       OutUnknown,        0 }},
@@ -967,6 +970,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::CGetL:
   case Op::CGetL2:
   case Op::CGetS:
+  case Op::CUGetL:
   case Op::CIterFree:
   case Op::CastArray:
   case Op::CastDouble:
@@ -1326,6 +1330,7 @@ static Type flavorToType(FlavorDesc f) {
     case NOV: not_reached();
 
     case CV: return Type::Cell;  // TODO(#3029148) this could be InitCell
+    case CUV: return Type::Cell;
     case UV: return Type::Uninit;
     case VV: return Type::BoxedInitCell;
     case AV: return Type::Cls;

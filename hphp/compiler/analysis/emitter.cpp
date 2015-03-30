@@ -433,6 +433,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 
 #define PUSH_CV getEmitterVisitor().pushEvalStack(StackSym::C)
 #define PUSH_UV PUSH_CV
+#define PUSH_CUV PUSH_CV
 #define PUSH_VV getEmitterVisitor().pushEvalStack(StackSym::V)
 #define PUSH_AV getEmitterVisitor().pushEvalStack(StackSym::A)
 #define PUSH_RV getEmitterVisitor().pushEvalStack(StackSym::R)
@@ -659,6 +660,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef PUSH_FOUR
 #undef PUSH_CV
 #undef PUSH_UV
+#undef PUSH_CUV
 #undef PUSH_VV
 #undef PUSH_HV
 #undef PUSH_AV
@@ -4633,7 +4635,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         // the new anonymous class, with the use variables as arguments.
         ExpressionListPtr valuesList(ce->getClosureValues());
         for (int i = 0; i < useCount; ++i) {
-          emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
+          ce->type() == ClosureType::Short
+            ? emitLambdaCaptureArg(e, (*valuesList)[i])
+            : emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
         }
 
         // The parser generated a unique name for the function,
@@ -5284,6 +5288,26 @@ void EmitterVisitor::emitBuiltinCallArg(Emitter& e,
     emitCGet(e);
   }
   return;
+}
+
+static bool isNormalLocalVariable(const ExpressionPtr& expr) {
+  SimpleVariable* sv = static_cast<SimpleVariable*>(expr.get());
+  return (expr->is(Expression::KindOfSimpleVariable) &&
+          !sv->isSuperGlobal() &&
+          !sv->isThis());
+}
+
+void EmitterVisitor::emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp) {
+  // Constant folding may lead this to be not a var anymore,
+  // so we should not be emitting *GetL in this case.
+  if (!isNormalLocalVariable(exp)) {
+    visit(exp);
+    return;
+  }
+  auto const sv = static_cast<SimpleVariable*>(exp.get());
+  Id locId = m_curFunc->lookupVarId(makeStaticString(sv->getName()));
+  emitVirtualLocal(locId);
+  e.CUGetL(locId);
 }
 
 void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
@@ -7261,13 +7285,6 @@ void EmitterVisitor::emitVirtualLocal(int localId) {
 
   m_evalStack.push(StackSym::L);
   m_evalStack.setInt(localId);
-}
-
-static bool isNormalLocalVariable(const ExpressionPtr& expr) {
-  SimpleVariable* sv = static_cast<SimpleVariable*>(expr.get());
-  return (expr->is(Expression::KindOfSimpleVariable) &&
-          !sv->isSuperGlobal() &&
-          !sv->isThis());
 }
 
 template<class Expr>

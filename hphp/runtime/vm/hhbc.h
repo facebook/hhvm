@@ -91,6 +91,7 @@ enum FlavorDesc {
   FV,   // Function parameter (cell or var)
   UV,   // Uninit
   CVV,  // Cell or Var argument
+  CUV,  // Cell, or Uninit argument
   CVUV, // Cell, Var, or Uninit argument
 };
 
@@ -592,6 +593,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(Unwind,          NA,               NOV,             NOV,        TF) \
   O(Throw,           NA,               ONE(CV),         NOV,        TF) \
   O(CGetL,           ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(CUGetL,          ONE(LA),          NOV,             ONE(CUV),   NF) \
   O(CGetL2,          ONE(LA),          NOV,             INS_1(CV),  NF) \
   O(CGetL3,          ONE(LA),          NOV,             INS_2(CV),  NF) \
   O(PushL,           ONE(LA),          NOV,             ONE(CV),    NF) \
@@ -733,7 +735,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(Parent,          NA,               NOV,             ONE(AV),    NF) \
   O(LateBoundCls,    NA,               NOV,             ONE(AV),    NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
-  O(CreateCl,        TWO(IVA,SA),      CVMANY,          ONE(CV),    NF) \
+  O(CreateCl,        TWO(IVA,SA),      CVUMANY,         ONE(CV),    NF) \
   O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \
   O(ContEnter,       NA,               ONE(CV),         ONE(CV),    CF) \
   O(ContRaise,       NA,               ONE(CV),         ONE(CV),    CF) \

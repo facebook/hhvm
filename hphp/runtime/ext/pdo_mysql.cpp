@@ -401,6 +401,7 @@ bool PDOMySqlConnection::create(const Array& options) {
     ssl_cipher = pdo_attr_strval(options, PDO_MYSQL_ATTR_SSL_CIPHER,
                                  NULL);
 
+
     if ((ssl_ca || ssl_capath || ssl_key || ssl_cert || ssl_cipher) && !host.same(s_localhost)) {
       if (mysql_ssl_set(m_server, ssl_key.c_str(), ssl_cert.c_str(), ssl_ca.c_str(), ssl_capath.c_str(), ssl_cipher.c_str())) {
         handleError(__FILE__, __LINE__);

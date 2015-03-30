@@ -157,6 +157,12 @@ const int64_t q_PDO$$MYSQL_ATTR_DIRECT_QUERY = PDO_MYSQL_ATTR_DIRECT_QUERY;
 const int64_t q_PDO$$MYSQL_ATTR_FOUND_ROWS   = PDO_MYSQL_ATTR_FOUND_ROWS;
 const int64_t q_PDO$$MYSQL_ATTR_IGNORE_SPACE = PDO_MYSQL_ATTR_IGNORE_SPACE;
 
+const int64_t q_PDO$$MYSQL_ATTR_SSL_KEY = PDO_MYSQL_ATTR_SSL_KEY;
+const int64_t q_PDO$$MYSQL_ATTR_SSL_CERT = PDO_MYSQL_ATTR_SSL_CERT;
+const int64_t q_PDO$$MYSQL_ATTR_SSL_CA = PDO_MYSQL_ATTR_SSL_CA;
+const int64_t q_PDO$$MYSQL_ATTR_SSL_CAPATH = PDO_MYSQL_ATTR_SSL_CAPATH;
+const int64_t q_PDO$$MYSQL_ATTR_SSL_CIPHER = PDO_MYSQL_ATTR_SSL_CIPHER;
+
 ///////////////////////////////////////////////////////////////////////////////
 // extension functions
 
@@ -3837,6 +3843,31 @@ public:
       s_PDO.get(),
       s_MYSQL_ATTR_IGNORE_SPACE.get(),
       q_PDO$$MYSQL_ATTR_IGNORE_SPACE
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_SSL_CA.get(),
+      q_PDO$$MYSQL_ATTR_SSL_CA
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_SSL_CAPATH.get(),
+      q_PDO$$MYSQL_ATTR_SSL_CAPATH
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_SSL_CERT.get(),
+      q_PDO$$MYSQL_ATTR_SSL_CERT
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_SSL_KEY.get(),
+      q_PDO$$MYSQL_ATTR_SSL_KEY
+    );
+    Native::registerClassConstant<KindOfInt64>(
+      s_PDO.get(),
+      s_MYSQL_ATTR_SSL_CIPHER.get(),
+      q_PDO$$MYSQL_ATTR_SSL_CIPHER
     );
     Native::registerClassConstant<KindOfStaticString>(
       s_PDO.get(),

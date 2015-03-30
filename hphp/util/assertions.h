@@ -88,9 +88,10 @@ void register_assert_fail_logger(AssertFailLogger);
  */
 struct AssertDetailImpl {
   /*
-   * Prints the results of all registered detailers to stderr.
+   * Prints the results of all registered detailers to stderr.  Returns true if
+   * we had any registered detailers.
    */
-  static void log();
+  static bool log();
 
 protected:
   explicit AssertDetailImpl(const char* name)
@@ -118,7 +119,7 @@ protected:
   AssertDetailImpl& operator=(const AssertDetailImpl&) = delete;
 
 private:
-  static void log_impl(const AssertDetailImpl*);
+  static bool log_impl(const AssertDetailImpl*);
   virtual std::string run() const = 0;
 
 private:

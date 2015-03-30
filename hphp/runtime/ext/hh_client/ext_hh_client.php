@@ -104,12 +104,12 @@ function typecheck(
   }
 
   $json = json_decode($output, true);
-  $passed = ($ret === 0) && idx($json, 'passed', false);
+  $passed = ($ret === 0) && hphp_array_idx($json, 'passed', false);
 
   if ($passed) {
     return new TypecheckResult(TypecheckStatus::SUCCESS, null, $json);
   } else {
-    $errors = idx($json, 'errors');
+    $errors = hphp_array_idx($json, 'errors', null);
     if ($errors) {
       $first_msg = reset(reset($errors)['message']);
       $error_text = sprintf(

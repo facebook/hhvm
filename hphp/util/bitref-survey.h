@@ -33,7 +33,7 @@ private:
   uint64_t check_count;
   uint64_t refcounting_copy_count;
   uint64_t bitref_copy_count;
-
+  uint64_t static_count;
 };
 
 /*

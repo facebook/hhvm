@@ -44,12 +44,15 @@ void survey_request_end() {
 
 void BitrefSurvey::cow_check_occurred(RefCount refcount, bool bitref) {
   check_count++;
-  // TODO counts non-counted objects
-  //FTRACE(1, "rc={}, bitref={}\n", refcount, bitref);
-  if (refcount > 1) {
-    assert(bitref);
+  if ((uint32_t)refcount > 1) {
+    //assert(bitref);
     //'necessary' copy
     refcounting_copy_count++;
+
+    // log static objects
+    if (!check_refcount_ns(refcount)) {
+      static_count++;
+    }
   }
   if (refcount == 1 && bitref) {
     //'unnecessary' copy
@@ -59,10 +62,20 @@ void BitrefSurvey::cow_check_occurred(RefCount refcount, bool bitref) {
 
 void BitrefSurvey::survey_request_end() {
   FTRACE(1, "final cow checks: {}\n", check_count);
-  FTRACE(1, "necessary copies: {}\n", refcounting_copy_count);
-  FTRACE(1, "unnecessary copies: {}\n", bitref_copy_count);
-  FTRACE(1, "copy avoided: {}\n",
-      check_count - refcounting_copy_count - bitref_copy_count);
+  TRACE(1, "necessary copies: %ld (%.2f%%)\n", refcounting_copy_count,
+      ((double) refcounting_copy_count / (double) check_count) * 100);
+  TRACE(1, "  static portion: %ld (%.2f%% of necessary copies\n", static_count,
+      ((double) static_count / (double) refcounting_copy_count) * 100);
+  TRACE(1, "unnecessary copies: %ld (%.2f%%)\n", bitref_copy_count,
+      ((double)bitref_copy_count / (double)check_count) * 100);
+  uint64_t avoided = check_count - refcounting_copy_count - bitref_copy_count;
+  TRACE(1, "copy avoided: %ld (%.2f%%)\n\n", avoided,
+      ((double)avoided / (double)check_count) * 100);
+
+  check_count = 0;
+  refcounting_copy_count = 0;
+  static_count = 0;
+  bitref_copy_count = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

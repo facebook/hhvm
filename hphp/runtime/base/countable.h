@@ -226,6 +226,7 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
   void setStatic() const {                      \
     assert(check_refcount(m_count));            \
     m_count = StaticValue;                      \
+    m_kind = (ArrayKind) set_one_bit_ref(m_kind); \
   }                                             \
   bool isStatic() const {                       \
     return m_count == StaticValue;              \
@@ -233,6 +234,7 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
   void setUncounted() const {                   \
     assert(check_refcount(m_count));            \
     m_count = UncountedValue;                   \
+    m_kind = (ArrayKind) set_one_bit_ref(m_kind); \
   }                                             \
   bool isUncounted() const {                    \
     return m_count == UncountedValue;           \

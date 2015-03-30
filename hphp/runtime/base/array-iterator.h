@@ -314,46 +314,6 @@ private:
 
   void destruct();
 
-  BaseVector* getVector() const {
-    assert(hasCollection());
-    assert(getCollectionType() == CollectionType::Vector ||
-           getCollectionType() == CollectionType::ImmVector);
-    return (BaseVector*)((intptr_t)m_obj & ~1);
-  }
-  BaseMap* getMap() const {
-    assert(hasCollection());
-    assert(isMapCollection(getCollectionType()));
-    return (BaseMap*)((intptr_t)m_obj & ~1);
-  }
-  BaseSet* getSet() const {
-    assert(hasCollection());
-    assert(getCollectionType() == CollectionType::Set ||
-           getCollectionType() == CollectionType::ImmSet);
-    return (BaseSet*)((intptr_t)m_obj & ~1);
-  }
-  c_Pair* getPair() const {
-    assert(hasCollection() && getCollectionType() == CollectionType::Pair);
-    return (c_Pair*)((intptr_t)m_obj & ~1);
-  }
-  c_ImmVector* getImmVector() const {
-    assert(hasCollection() &&
-           getCollectionType() == CollectionType::ImmVector);
-
-    return (c_ImmVector*)((intptr_t)m_obj & ~1);
-  }
-  c_ImmSet* getImmSet() {
-    assert(hasCollection() && getCollectionType() == CollectionType::ImmSet);
-    return (c_ImmSet*)((intptr_t)m_obj & ~1);
-  }
-  CollectionType getCollectionType() const {
-    ObjectData* obj = getObject();
-    return obj->getCollectionType();
-  }
-  ObjectData* getIteratorObj() const {
-    assert(hasIteratorObj());
-    return getObject();
-  }
-
   void setArrayData(const ArrayData* ad) {
     assert((intptr_t(ad) & 1) == 0);
     m_data = ad;

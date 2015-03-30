@@ -139,7 +139,7 @@ struct FPAbsOffset {
   bool operator==(FPAbsOffset o) const { return offset == o.offset; }
 
   bool isValid() const {
-    return offset == INT_MIN;
+    return offset != INT_MIN;
   }
 
   FPAbsOffset operator+(int32_t delta) const {

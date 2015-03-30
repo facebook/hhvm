@@ -1434,6 +1434,11 @@ void Class::setODAttributes() {
   if (lookupMethod(s_unset.get()     )) { m_ODAttrs |= ObjectData::UseUnset; }
   if (lookupMethod(s_call.get()      )) { m_ODAttrs |= ObjectData::HasCall;  }
   if (lookupMethod(s_clone.get()     )) { m_ODAttrs |= ObjectData::HasClone; }
+
+  if ((isBuiltin() && Native::getNativePropHandler(name())) ||
+      (m_parent && m_parent->hasNativePropHandler())) {
+    m_ODAttrs |= ObjectData::HasNativePropHandler;
+  }
 }
 
 void Class::setConstants() {
@@ -2384,18 +2389,21 @@ void Class::setNativeDataInfo() {
   }
 }
 
-bool Class::hasNativePropHandler() {
-  return getNativePropHandler() != nullptr;
+bool Class::hasNativePropHandler() const {
+  return m_ODAttrs & ObjectData::HasNativePropHandler;
 }
 
-Native::NativePropHandler* Class::getNativePropHandler() {
+const Native::NativePropHandler* Class::getNativePropHandler() const {
+  assert(hasNativePropHandler());
+
   for (auto cls = this; cls; cls = cls->parent()) {
-    auto propHandler = Native::getNativePropHandler(StrNR(cls->name()));
+    auto propHandler = Native::getNativePropHandler(cls->name());
     if (propHandler != nullptr) {
       return propHandler;
     }
   }
-  return nullptr;
+
+  not_reached();
 }
 
 void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  const {

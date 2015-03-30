@@ -793,12 +793,14 @@ public:
   /*
    * Whether the class registered native handler of magic props.
    */
-  bool hasNativePropHandler();
+  bool hasNativePropHandler() const;
 
   /*
    * Returns actual native handler of magic props.
+   *
+   * @requires hasNativePropHandler()
    */
-  Native::NativePropHandler* getNativePropHandler();
+  const Native::NativePropHandler* getNativePropHandler() const;
 
   /*
    * Get the underlying enum base type if this is an enum.

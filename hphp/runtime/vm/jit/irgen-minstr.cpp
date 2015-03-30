@@ -1085,6 +1085,10 @@ bool needFirstRatchet(const MTS& env) {
     if (mcodeIsElem(env.immVecM[0])) return false;
     return true;
   }
+
+  // Using the specialized type here is safe because we only elide the first
+  // ratchet if the first member instruction is a property access, in which
+  // case we have constrained the specialized type of the base in emitBaseLCR
   if (firstTy < Type::Obj && firstTy.clsSpec()) {
     auto const klass = firstTy.clsSpec().cls();
     auto const no_overrides = AttrNoOverrideMagicGet|
@@ -1096,6 +1100,15 @@ bool needFirstRatchet(const MTS& env) {
       // contains Uninit---if not we can still return false.  See
       // mightCallMagicPropMethod.
       return true;
+    }
+
+    if (klass->hasNativePropHandler()) {
+      const Class* cls = nullptr;
+      auto propInfo = getPropertyOffset(env.ni, curClass(env), cls, env.mii,
+                                        0, env.mii.valCount() + 1);
+      // For native properties if the property is declared then we know don't
+      // call the native handler
+      if (propInfo.offset == -1) return true;
     }
     if (mcodeIsProp(env.immVecM[0])) return false;
     return true;

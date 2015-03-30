@@ -305,7 +305,14 @@ void Vgen::emit(cloadq& i) {
   auto m = i.t;
   always_assert(!m.index.isValid()); // not supported, but could be later.
   if (i.f != i.d) {
-    always_assert(i.d != m.base); // don't clobber base
+    if (i.d == m.base) {
+      // We can't move f over d or we'll clobber the Vptr we need to load from.
+      // Since cload does the load unconditionally anyway, we can just load and
+      // cmov.
+      a->loadq(i.t, i.d);
+      a->cmov_reg64_reg64(ccNegate(i.cc), i.f, i.d);
+      return;
+    }
     a->movq(i.f, i.d);
   }
   a->cload_reg64_disp_reg64(i.cc, m.base, m.disp, i.d);

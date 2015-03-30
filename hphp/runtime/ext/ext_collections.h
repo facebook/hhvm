@@ -2119,7 +2119,7 @@ ObjectData* collectionDeepCopySet(c_Set* mp);
 ObjectData* collectionDeepCopyImmSet(c_ImmSet* st);
 ObjectData* collectionDeepCopyPair(c_Pair* pair);
 
-ObjectData* newCollectionHelper(uint32_t type, uint32_t size);
+ObjectData* newCollectionHelper(CollectionType type, uint32_t size);
 
 ///////////////////////////////////////////////////////////////////////////////
 

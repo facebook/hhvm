@@ -3720,7 +3720,7 @@ OPTBLD_INLINE void iopAddNewElemV(IOP_ARGS) {
 
 OPTBLD_INLINE void iopNewCol(IOP_ARGS) {
   pc++;
-  auto cType = decode_iva(pc);
+  auto cType = static_cast<CollectionType>(decode_iva(pc));
   auto nElms = decode_iva(pc);
   ObjectData* obj = newCollectionHelper(cType, nElms);
   vmStack().pushObject(obj);

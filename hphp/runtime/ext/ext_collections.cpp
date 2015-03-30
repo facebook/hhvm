@@ -2178,7 +2178,7 @@ BaseMap::php_differenceByKey(const Variant& it) {
   ObjectData* obj = it.getObjectData();
   TMap* target = BaseMap::Clone<TMap>(this);
   auto ret = Object::attach(target);
-  if (Collection::isMapType(obj->getCollectionType())) {
+  if (isMapCollection(obj->getCollectionType())) {
     auto mp = static_cast<BaseMap*>(obj);
     auto* eLimit = mp->elmLimit();
     for (auto* e = mp->firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
@@ -5464,16 +5464,16 @@ COLLECTION_TOSTRING_METHOD(Pair)
 
 #undef COLLECTION_TOSTRING_METHOD
 
-static inline bool isKeylessCollectionType(Collection::Type ctype) {
-  return Collection::isSetType(ctype);
+static inline bool isKeylessCollectionType(CollectionType ctype) {
+  return isSetCollection(ctype);
 }
 
 void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
   assert(obj->isCollection());
   int64_t sz = getCollectionSize(obj);
-  if (Collection::isVectorType(obj->getCollectionType()) ||
-      Collection::isSetType(obj->getCollectionType()) ||
-      obj->getCollectionType() == Collection::PairType) {
+  if (isVectorCollection(obj->getCollectionType()) ||
+      isSetCollection(obj->getCollectionType()) ||
+      obj->getCollectionType() == CollectionType::Pair) {
     serializer->pushObjectInfo(obj->getClassName(), obj->getId(), 'V');
     serializer->writeArrayHeader(sz, true);
     if (serializer->getType() == VariableSerializer::Type::Serialize ||
@@ -5499,7 +5499,7 @@ void collectionSerialize(ObjectData* obj, VariableSerializer* serializer) {
     }
     serializer->writeArrayFooter();
   } else {
-    assert(Collection::isMapType(obj->getCollectionType()));
+    assert(isMapCollection(obj->getCollectionType()));
     serializer->pushObjectInfo(obj->getClassName(), obj->getId(), 'K');
     serializer->writeArrayHeader(sz, false);
     for (ArrayIter iter(obj); iter; ++iter) {
@@ -5530,29 +5530,29 @@ void collectionDeepCopyTV(TypedValue* tv) {
       ObjectData* obj = tv->m_data.pobj;
       if (!obj->isCollection()) return;
       switch (obj->getCollectionType()) {
-        case Collection::VectorType:
+        case CollectionType::Vector:
           obj = collectionDeepCopyVector(static_cast<c_Vector*>(obj));
           break;
-        case Collection::MapType:
+        case CollectionType::Map:
           obj = collectionDeepCopyMap(static_cast<c_Map*>(obj));
           break;
-        case Collection::ImmMapType:
+        case CollectionType::ImmMap:
           obj = collectionDeepCopyImmMap(static_cast<c_ImmMap*>(obj));
           break;
-        case Collection::SetType:
+        case CollectionType::Set:
           obj = collectionDeepCopySet(static_cast<c_Set*>(obj));
           break;
-        case Collection::PairType:
+        case CollectionType::Pair:
           obj = collectionDeepCopyPair(static_cast<c_Pair*>(obj));
           break;
-        case Collection::ImmSetType:
+        case CollectionType::ImmSet:
           obj = collectionDeepCopyImmSet(static_cast<c_ImmSet*>(obj));
           break;
-        case Collection::ImmVectorType:
+        case CollectionType::ImmVector:
           obj = collectionDeepCopyImmVector(
                   static_cast<c_ImmVector*>(obj));
           break;
-        case Collection::InvalidType:
+        case CollectionType::Invalid:
           assert(false);
           obj = nullptr;
           break;
@@ -5637,18 +5637,18 @@ static inline TypedValue* collectionAtImpl(ObjectData* obj,
                                            const TypedValue* key) {
   assert(key->m_type != KindOfRef);
   switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-    case Collection::ImmVectorType:
+    case CollectionType::Vector:
+    case CollectionType::ImmVector:
       return BaseVector::OffsetAt<throwOnMiss>(obj, key);
-    case Collection::MapType:
-    case Collection::ImmMapType:
+    case CollectionType::Map:
+    case CollectionType::ImmMap:
       return BaseMap::OffsetAt<throwOnMiss>(obj, key);
-    case Collection::SetType:
-    case Collection::ImmSetType:
+    case CollectionType::Set:
+    case CollectionType::ImmSet:
       return BaseSet::OffsetAt<throwOnMiss>(obj, key);
-    case Collection::PairType:
+    case CollectionType::Pair:
       return c_Pair::OffsetAt<throwOnMiss>(obj, key);
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       break;
   }
   assert(false);
@@ -5675,7 +5675,7 @@ TypedValue* collectionAtLval(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
   TypedValue* ret;
   switch (obj->getCollectionType()) {
-    case Collection::VectorType: {
+    case CollectionType::Vector: {
       ret = BaseVector::OffsetAt<true>(obj, key);
       // We're about to expose an element of a Vector in an lvalue context;
       // if the element is a value-type (anything other than objects and
@@ -5689,10 +5689,10 @@ TypedValue* collectionAtLval(ObjectData* obj, const TypedValue* key) {
       }
       return ret;
     }
-    case Collection::ImmVectorType:
+    case CollectionType::ImmVector:
       ret = BaseVector::OffsetAt<true>(obj, key);
       break;
-    case Collection::MapType: {
+    case CollectionType::Map: {
       ret = BaseMap::OffsetAt<true>(obj, key);
       // We're about to expose an element of a Map in an lvalue context;
       // if the element is a value-type (anything other than objects and
@@ -5706,16 +5706,16 @@ TypedValue* collectionAtLval(ObjectData* obj, const TypedValue* key) {
       }
       return ret;
     }
-    case Collection::ImmMapType:
+    case CollectionType::ImmMap:
       ret = BaseMap::OffsetAt<true>(obj, key);
       break;
-    case Collection::SetType:
-    case Collection::ImmSetType:
+    case CollectionType::Set:
+    case CollectionType::ImmSet:
       BaseSet::throwNoMutableIndexAccess();
-    case Collection::PairType:
+    case CollectionType::Pair:
       ret = c_Pair::OffsetAt<true>(obj, key);
       break;
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       always_assert(false);
       break;
   }
@@ -5738,22 +5738,22 @@ TypedValue* collectionAtLval(ObjectData* obj, const TypedValue* key) {
 TypedValue* collectionAtRw(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
   switch (obj->getCollectionType()) {
-    case Collection::VectorType:
+    case CollectionType::Vector:
       // Since we're exposing an element of a Vector in an read/write context,
       // we need to sever any buffer sharing that might be going on.
       static_cast<c_Vector*>(obj)->mutate();
       return BaseVector::OffsetAt<true>(obj, key);
-    case Collection::MapType:
+    case CollectionType::Map:
       static_cast<c_Map*>(obj)->mutate();
       return BaseMap::OffsetAt<true>(obj, key);
-    case Collection::SetType:
-    case Collection::ImmSetType:
+    case CollectionType::Set:
+    case CollectionType::ImmSet:
       BaseSet::throwNoMutableIndexAccess();
-    case Collection::ImmVectorType:
-    case Collection::ImmMapType:
-    case Collection::PairType:
+    case CollectionType::ImmVector:
+    case CollectionType::ImmMap:
+    case CollectionType::Pair:
       throw_cannot_modify_immutable_object(obj->getClassName().data());
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       break;
   }
   assert(false);
@@ -5765,7 +5765,7 @@ void collectionInitSet(ObjectData* obj, TypedValue* key, TypedValue* val) {
   assert(val->m_type != KindOfRef);
   assert(val->m_type != KindOfUninit);
 
-  assert(Collection::isMapType(obj->getCollectionType()));
+  assert(isMapCollection(obj->getCollectionType()));
   BaseMap::OffsetSet(obj, key, val);
 }
 
@@ -5776,20 +5776,20 @@ void collectionSet(ObjectData* obj, const TypedValue* key,
   assert(val->m_type != KindOfUninit);
 
   switch (obj->getCollectionType()) {
-    case Collection::VectorType:
+    case CollectionType::Vector:
       c_Vector::OffsetSet(obj, key, val);
       break;
-    case Collection::MapType:
+    case CollectionType::Map:
       BaseMap::OffsetSet(obj, key, val);
       break;
-    case Collection::SetType:
-    case Collection::ImmSetType:
+    case CollectionType::Set:
+    case CollectionType::ImmSet:
       BaseSet::throwNoMutableIndexAccess();
-    case Collection::ImmVectorType:
-    case Collection::ImmMapType:
-    case Collection::PairType:
+    case CollectionType::ImmVector:
+    case CollectionType::ImmMap:
+    case CollectionType::Pair:
       throw_cannot_modify_immutable_object(obj->getClassName().data());
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       assert(false);
   }
 }
@@ -5797,18 +5797,18 @@ void collectionSet(ObjectData* obj, const TypedValue* key,
 bool collectionIsset(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-    case Collection::ImmVectorType:
+    case CollectionType::Vector:
+    case CollectionType::ImmVector:
       return BaseVector::OffsetIsset(obj, key);
-    case Collection::MapType:
-    case Collection::ImmMapType:
+    case CollectionType::Map:
+    case CollectionType::ImmMap:
       return BaseMap::OffsetIsset(obj, key);
-    case Collection::SetType:
-    case Collection::ImmSetType:
+    case CollectionType::Set:
+    case CollectionType::ImmSet:
       return BaseSet::OffsetIsset(obj, key);
-    case Collection::PairType:
+    case CollectionType::Pair:
       return c_Pair::OffsetIsset(obj, key);
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       assert(false);
       return false;
   }
@@ -5818,18 +5818,18 @@ bool collectionIsset(ObjectData* obj, TypedValue* key) {
 bool collectionEmpty(ObjectData* obj, TypedValue* key) {
   assert(key->m_type != KindOfRef);
   switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-    case Collection::ImmVectorType:
+    case CollectionType::Vector:
+    case CollectionType::ImmVector:
       return BaseVector::OffsetEmpty(obj, key);
-    case Collection::MapType:
-    case Collection::ImmMapType:
+    case CollectionType::Map:
+    case CollectionType::ImmMap:
       return BaseMap::OffsetEmpty(obj, key);
-    case Collection::SetType:
-    case Collection::ImmSetType:
+    case CollectionType::Set:
+    case CollectionType::ImmSet:
       return BaseSet::OffsetEmpty(obj, key);
-    case Collection::PairType:
+    case CollectionType::Pair:
       return c_Pair::OffsetEmpty(obj, key);
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       assert(false);
       return false;
   }
@@ -5839,20 +5839,20 @@ bool collectionEmpty(ObjectData* obj, TypedValue* key) {
 void collectionUnset(ObjectData* obj, const TypedValue* key) {
   assert(key->m_type != KindOfRef);
   switch (obj->getCollectionType()) {
-    case Collection::VectorType:
+    case CollectionType::Vector:
       c_Vector::OffsetUnset(obj, key);
       break;
-    case Collection::MapType:
+    case CollectionType::Map:
       c_Map::OffsetUnset(obj, key);
       break;
-    case Collection::SetType:
+    case CollectionType::Set:
       return BaseSet::OffsetUnset(obj, key);
-    case Collection::ImmVectorType:
-    case Collection::ImmMapType:
-    case Collection::ImmSetType:
-    case Collection::PairType:
+    case CollectionType::ImmVector:
+    case CollectionType::ImmMap:
+    case CollectionType::ImmSet:
+    case CollectionType::Pair:
       throw_cannot_modify_immutable_object(obj->getClassName().data());
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       assert(false);
       break;
   }
@@ -5863,21 +5863,21 @@ void collectionAppend(ObjectData* obj, TypedValue* val) {
   assert(val->m_type != KindOfUninit);
 
   switch (obj->getCollectionType()) {
-    case Collection::VectorType:
+    case CollectionType::Vector:
       static_cast<c_Vector*>(obj)->add(val);
       break;
-    case Collection::MapType:
+    case CollectionType::Map:
       static_cast<c_Map*>(obj)->add(val);
       break;
-    case Collection::SetType:
+    case CollectionType::Set:
       static_cast<c_Set*>(obj)->add(val);
       break;
-    case Collection::ImmVectorType:
-    case Collection::ImmMapType:
-    case Collection::ImmSetType:
-    case Collection::PairType:
+    case CollectionType::ImmVector:
+    case CollectionType::ImmMap:
+    case CollectionType::ImmSet:
+    case CollectionType::Pair:
       throw_cannot_modify_immutable_object(obj->getClassName().data());
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       assert(false);
       break;
   }
@@ -5887,20 +5887,20 @@ void collectionInitAppend(ObjectData* obj, TypedValue* val) {
   assert(val->m_type != KindOfRef);
   assert(val->m_type != KindOfUninit);
   switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-    case Collection::ImmVectorType:
+    case CollectionType::Vector:
+    case CollectionType::ImmVector:
       static_cast<BaseVector*>(obj)->add(val);
       break;
-    case Collection::SetType:
-    case Collection::ImmSetType:
+    case CollectionType::Set:
+    case CollectionType::ImmSet:
       static_cast<BaseSet*>(obj)->add(val);
       break;
-    case Collection::PairType:
+    case CollectionType::Pair:
       static_cast<c_Pair*>(obj)->initAdd(val);
       break;
-    case Collection::MapType:
-    case Collection::ImmMapType:
-    case Collection::InvalidType:
+    case CollectionType::Map:
+    case CollectionType::ImmMap:
+    case CollectionType::Invalid:
       assert(false);
       break;
   }
@@ -5909,18 +5909,18 @@ void collectionInitAppend(ObjectData* obj, TypedValue* val) {
 bool collectionContains(ObjectData* obj, const Variant& offset) {
   auto* key = offset.asCell();
   switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-    case Collection::ImmVectorType:
+    case CollectionType::Vector:
+    case CollectionType::ImmVector:
       return BaseVector::OffsetContains(obj, key);
-    case Collection::MapType:
-    case Collection::ImmMapType:
+    case CollectionType::Map:
+    case CollectionType::ImmMap:
       return BaseMap::OffsetContains(obj, key);
-    case Collection::SetType:
-    case Collection::ImmSetType:
+    case CollectionType::Set:
+    case CollectionType::ImmSet:
       return BaseSet::OffsetContains(obj, key);
-    case Collection::PairType:
+    case CollectionType::Pair:
       return c_Pair::OffsetContains(obj, key);
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       assert(false);
       return false;
   }
@@ -5929,22 +5929,22 @@ bool collectionContains(ObjectData* obj, const Variant& offset) {
 
 void collectionReserve(ObjectData* obj, int64_t sz) {
   switch (obj->getCollectionType()) {
-    case Collection::VectorType:
-    case Collection::ImmVectorType:
+    case CollectionType::Vector:
+    case CollectionType::ImmVector:
       static_cast<BaseVector*>(obj)->reserve(sz);
       break;
-    case Collection::MapType:
-    case Collection::ImmMapType:
+    case CollectionType::Map:
+    case CollectionType::ImmMap:
       static_cast<BaseMap*>(obj)->reserve(sz);
       break;
-    case Collection::SetType:
-    case Collection::ImmSetType:
+    case CollectionType::Set:
+    case CollectionType::ImmSet:
       static_cast<BaseSet*>(obj)->reserve(sz);
       break;
-    case Collection::PairType:
+    case CollectionType::Pair:
       // do nothing
       break;
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       assert(false);
       break;
   }
@@ -5954,66 +5954,66 @@ void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
                            int64_t sz, char type) {
   assert(obj->isCollection());
   switch (obj->getCollectionType()) {
-    case Collection::VectorType:
+    case CollectionType::Vector:
       c_Vector::Unserialize(obj, uns, sz, type);
       break;
-    case Collection::MapType:
-    case Collection::ImmMapType:
+    case CollectionType::Map:
+    case CollectionType::ImmMap:
       BaseMap::Unserialize(obj, uns, sz, type);
       break;
-    case Collection::SetType:
+    case CollectionType::Set:
       c_Set::Unserialize(obj, uns, sz, type);
       break;
-    case Collection::ImmVectorType:
+    case CollectionType::ImmVector:
       c_ImmVector::Unserialize(obj, uns, sz, type);
       break;
-    case Collection::ImmSetType:
+    case CollectionType::ImmSet:
       c_ImmSet::Unserialize(obj, uns, sz, type);
       break;
-    case Collection::PairType:
+    case CollectionType::Pair:
       c_Pair::Unserialize(obj, uns, sz, type);
       break;
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       assert(false);
       break;
   }
 }
 
 bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
-  Collection::Type ct = obj1->getCollectionType();
-  assert(Collection::isValidType(ct));
-  Collection::Type ct2 = obj2->getCollectionType();
+  assert(isValidCollection(obj1->getCollectionType()));
+  auto ct1 = obj1->getCollectionType();
+  auto ct2 = obj2->getCollectionType();
 
-  if (Collection::isMapType(ct) && Collection::isMapType(ct2)) {
+  if (isMapCollection(ct1) && isMapCollection(ct2)) {
     // For migration purposes, distinct Map types should compare equal
     return BaseMap::Equals(
       BaseMap::EqualityFlavor::OrderIrrelevant, obj1, obj2);
   }
 
-  if (Collection::isVectorType(ct) && Collection::isVectorType(ct2)) {
+  if (isVectorCollection(ct1) && isVectorCollection(ct2)) {
     return BaseVector::Equals(obj1, obj2);
   }
 
-  if (Collection::isSetType(ct) && Collection::isSetType(ct2)) {
+  if (isSetCollection(ct1) && isSetCollection(ct2)) {
     return BaseSet::Equals(obj1, obj2);
   }
 
-  if (ct != ct2) { return false; }
-  assert(ct == Collection::PairType);
+  if (ct1 != ct2) return false;
+  assert(ct1 == CollectionType::Pair);
   return c_Pair::Equals(obj1, obj2);
 }
 
-ObjectData* newCollectionHelper(uint32_t type, uint32_t size) {
+ObjectData* newCollectionHelper(CollectionType type, uint32_t size) {
   ObjectData* obj;
   switch (type) {
-    case Collection::VectorType: obj = newobj<c_Vector>(); break;
-    case Collection::MapType: obj = newobj<c_Map>(); break;
-    case Collection::SetType: obj = newobj<c_Set>(); break;
-    case Collection::PairType: obj = newobj<c_Pair>(c_Pair::NoInit{}); break;
-    case Collection::ImmVectorType: obj = newobj<c_ImmVector>(); break;
-    case Collection::ImmMapType: obj = newobj<c_ImmMap>(); break;
-    case Collection::ImmSetType: obj = newobj<c_ImmSet>(); break;
-    case Collection::InvalidType:
+    case CollectionType::Vector: obj = newobj<c_Vector>(); break;
+    case CollectionType::Map: obj = newobj<c_Map>(); break;
+    case CollectionType::Set: obj = newobj<c_Set>(); break;
+    case CollectionType::Pair: obj = newobj<c_Pair>(c_Pair::NoInit{}); break;
+    case CollectionType::ImmVector: obj = newobj<c_ImmVector>(); break;
+    case CollectionType::ImmMap: obj = newobj<c_ImmMap>(); break;
+    case CollectionType::ImmSet: obj = newobj<c_ImmSet>(); break;
+    case CollectionType::Invalid:
       obj = nullptr;
       raise_error("NewCol: Invalid collection type");
       break;

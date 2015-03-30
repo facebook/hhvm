@@ -139,7 +139,7 @@ retry:
 
 Object c_AwaitAllWaitHandle::ti_frommap(const Variant& dependencies) {
   if (UNLIKELY(!dependencies.isObject() ||
-               !Collection::isMapType(
+               !isMapCollection(
                  dependencies.getObjectData()->getCollectionType()))) {
     failMap();
   }
@@ -153,7 +153,7 @@ Object c_AwaitAllWaitHandle::ti_frommap(const Variant& dependencies) {
 
 Object c_AwaitAllWaitHandle::ti_fromvector(const Variant& dependencies) {
   if (UNLIKELY(!dependencies.isObject() ||
-               !Collection::isVectorType(
+               !isVectorCollection(
                  dependencies.getObjectData()->getCollectionType()))) {
     failVector();
   }

@@ -53,8 +53,8 @@ Variant f_array_map(int _argc, const Variant& callback, const Variant& arr1,
     bool keyConverted = (cell_arr1.m_type == KindOfArray);
     if (!keyConverted) {
       auto col_type = cell_arr1.m_data.pobj->getCollectionType();
-      assert(col_type != Collection::Type::InvalidType);
-      keyConverted = !Collection::isTypeWithPossibleIntStringKeys(col_type);
+      assert(col_type != CollectionType::Invalid);
+      keyConverted = !collectionAllowsIntStringKeys(col_type);
     }
     for (ArrayIter iter(arr1); iter; ++iter) {
       Variant result;

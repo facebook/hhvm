@@ -44,47 +44,46 @@ inline bool isObjectKind(HeaderKind k) {
          uint8_t(k) <= uint8_t(HeaderKind::ImmSet);
 }
 
-namespace Collection {
-
-enum Type : uint8_t { // Subset of possible HeaderKind values
+enum class CollectionType : uint8_t { // Subset of possible HeaderKind values
   // Values must be contiguous integers (for ArrayIter::initFuncTable).
-  InvalidType = static_cast<Type>(HeaderKind::AwaitAllWH),
-  VectorType = static_cast<Type>(HeaderKind::Vector),
-  MapType = static_cast<Type>(HeaderKind::Map),
-  SetType = static_cast<Type>(HeaderKind::Set),
-  PairType = static_cast<Type>(HeaderKind::Pair),
-  ImmVectorType = static_cast<Type>(HeaderKind::ImmVector),
-  ImmMapType = static_cast<Type>(HeaderKind::ImmMap),
-  ImmSetType = static_cast<Type>(HeaderKind::ImmSet),
+  Invalid = uint8_t(HeaderKind::AwaitAllWH),
+  Vector = uint8_t(HeaderKind::Vector),
+  Map = uint8_t(HeaderKind::Map),
+  Set = uint8_t(HeaderKind::Set),
+  Pair = uint8_t(HeaderKind::Pair),
+  ImmVector = uint8_t(HeaderKind::ImmVector),
+  ImmMap = uint8_t(HeaderKind::ImmMap),
+  ImmSet = uint8_t(HeaderKind::ImmSet),
 };
 
-constexpr size_t MaxNumTypes = 8;
+constexpr size_t MaxCollectionTypes = 8;
 
-inline bool isVectorType(Type ctype) {
-  return ctype == VectorType || ctype == ImmVectorType;
+inline bool isVectorCollection(CollectionType ctype) {
+  return ctype == CollectionType::Vector || ctype == CollectionType::ImmVector;
 }
-inline bool isMapType(Type ctype) {
-  return ctype == MapType || ctype == ImmMapType;
+inline bool isMapCollection(CollectionType ctype) {
+  return ctype == CollectionType::Map || ctype == CollectionType::ImmMap;
 }
-inline bool isSetType(Type ctype) {
-  return ctype == SetType || ctype == ImmSetType;
+inline bool isSetCollection(CollectionType ctype) {
+  return ctype == CollectionType::Set || ctype == CollectionType::ImmSet;
 }
-inline bool isValidType(Type ctype) {
-  return static_cast<uint8_t>(ctype) >= VectorType &&
-         static_cast<uint8_t>(ctype) <= ImmSetType;
+inline bool isValidCollection(CollectionType ctype) {
+  return uint8_t(ctype) >= uint8_t(CollectionType::Vector) &&
+         uint8_t(ctype) <= uint8_t(CollectionType::ImmSet);
 }
-inline bool isMutableType(Type ctype) {
-  return ctype == VectorType || ctype == MapType || ctype == SetType;
+inline bool isMutableCollection(CollectionType ctype) {
+  return ctype == CollectionType::Vector ||
+         ctype == CollectionType::Map ||
+         ctype == CollectionType::Set;
 }
-inline bool isImmutableType(Type ctype) {
-  return !isMutableType(ctype);
-}
-
-inline bool isTypeWithPossibleIntStringKeys(Type ctype) {
-  return isSetType(ctype) || isMapType(ctype);
+inline bool isImmutableCollection(CollectionType ctype) {
+  return !isMutableCollection(ctype);
 }
 
+inline bool collectionAllowsIntStringKeys(CollectionType ctype) {
+  return isSetCollection(ctype) || isMapCollection(ctype);
 }
+
 }
 
 #endif

@@ -38,7 +38,7 @@ ExpressionList::ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                                ListKind kind)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ExpressionList))
   , m_arrayElements(false)
-  , m_collectionType(Collection::InvalidType)
+  , m_collectionType(CollectionType::Invalid)
   , m_argUnpack(false)
   , m_kind(kind)
 {}
@@ -170,7 +170,7 @@ bool ExpressionList::containsDynamicConstant(AnalysisResultPtr ar) const {
 }
 
 bool ExpressionList::isScalarArrayPairs() const {
-  if (!m_arrayElements || m_collectionType != Collection::InvalidType) {
+  if (!m_arrayElements || m_collectionType != CollectionType::Invalid) {
     return false;
   }
   for (unsigned int i = 0; i < m_exps.size(); i++) {
@@ -301,7 +301,7 @@ void ExpressionList::markParams() {
   }
 }
 
-void ExpressionList::setCollectionType(Collection::Type cType) {
+void ExpressionList::setCollectionType(CollectionType cType) {
   m_arrayElements = true;
   m_collectionType = cType;
 }
@@ -494,7 +494,7 @@ void ExpressionList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 unsigned int ExpressionList::checkLitstrKeys() const {
-  assert(m_arrayElements && m_collectionType == Collection::InvalidType);
+  assert(m_arrayElements && m_collectionType == CollectionType::Invalid);
   std::set<string> keys;
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     ArrayPairExpressionPtr ap =

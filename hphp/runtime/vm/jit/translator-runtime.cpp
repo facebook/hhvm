@@ -1038,7 +1038,7 @@ Cell lookupClassConstantTv(TypedValue* cache,
 
 //////////////////////////////////////////////////////////////////////
 
-ObjectData* newColHelper(uint32_t type, uint32_t size) {
+ObjectData* newColHelper(CollectionType type, uint32_t size) {
   ObjectData* obj = newCollectionHelper(type, size);
   obj->incRefCount();
   return obj;

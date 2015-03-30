@@ -83,34 +83,31 @@ enum class Mode {
 };
 }
 
-namespace Collection {
-
-inline Type stringToType(const char* str, size_t len) {
+inline CollectionType stringToCollectionType(const char* str, size_t len) {
   switch (len) {
     case 6:
-      if (!strcasecmp(str, "hh\\set")) return SetType;
-      if (!strcasecmp(str, "hh\\map")) return MapType;
+      if (!strcasecmp(str, "hh\\set")) return CollectionType::Set;
+      if (!strcasecmp(str, "hh\\map")) return CollectionType::Map;
       break;
     case 7:
-      if (!strcasecmp(str, "hh\\pair")) return PairType;
+      if (!strcasecmp(str, "hh\\pair")) return CollectionType::Pair;
       break;
     case 9:
-      if (!strcasecmp(str, "hh\\vector")) return VectorType;
-      if (!strcasecmp(str, "hh\\immmap")) return ImmMapType;
-      if (!strcasecmp(str, "hh\\immset")) return ImmSetType;
+      if (!strcasecmp(str, "hh\\vector")) return CollectionType::Vector;
+      if (!strcasecmp(str, "hh\\immmap")) return CollectionType::ImmMap;
+      if (!strcasecmp(str, "hh\\immset")) return CollectionType::ImmSet;
       break;
     case 12:
-      if (!strcasecmp(str, "hh\\immvector")) return ImmVectorType;
+      if (!strcasecmp(str, "hh\\immvector")) return CollectionType::ImmVector;
       break;
     default:
       break;
   }
-  return InvalidType;
-}
-inline Type stringToType(const std::string& s) {
-  return stringToType(s.c_str(), s.size());
+  return CollectionType::Invalid;
 }
 
+inline CollectionType stringToCollectionType(const std::string& s) {
+  return stringToCollectionType(s.c_str(), s.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

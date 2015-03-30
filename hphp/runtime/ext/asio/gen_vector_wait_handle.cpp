@@ -49,7 +49,7 @@ void c_GenVectorWaitHandle::ti_setoncreatecallback(const Variant& callback) {
 Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
   if (UNLIKELY(!dependencies.isObject() ||
       dependencies.getObjectData()->getCollectionType() !=
-        Collection::VectorType)) {
+        CollectionType::Vector)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Expected dependencies to be an instance of Vector"));
     throw e;

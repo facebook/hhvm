@@ -73,7 +73,7 @@ public:
   void markParam(int p);
   void markParams();
 
-  void setCollectionType(Collection::Type cType);
+  void setCollectionType(CollectionType cType);
   void setContainsUnpack() { m_argUnpack = true; };
   bool containsUnpack() const { return m_argUnpack; }
 
@@ -92,7 +92,7 @@ private:
 
   ExpressionPtrVec m_exps;
   bool m_arrayElements;
-  Collection::Type m_collectionType;
+  CollectionType m_collectionType;
   bool m_argUnpack;
   ListKind m_kind;
 };

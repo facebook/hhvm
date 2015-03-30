@@ -195,7 +195,7 @@ TypedValue lookupClassConstantTv(TypedValue* cache,
                                  const StringData* cls,
                                  const StringData* cns);
 
-ObjectData* newColHelper(uint32_t type, uint32_t size);
+ObjectData* newColHelper(CollectionType type, uint32_t size);
 ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value);
 ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
                               TypedValue value);

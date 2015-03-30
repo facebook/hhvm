@@ -62,9 +62,9 @@ bool is_special_method_name(SString name);
 bool is_mock_class(borrowed_ptr<const php::Class>);
 
 /*
- * Returns a collection type name given a Collection::Type.
+ * Returns a collection type name given a CollectionType.
  */
-SString collectionTypeToString(uint32_t ctype);
+SString collectionTypeToString(CollectionType ctype);
 
 //////////////////////////////////////////////////////////////////////
 

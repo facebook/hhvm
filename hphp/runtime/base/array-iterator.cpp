@@ -183,8 +183,21 @@ void ArrayIter::IteratorObjInit(ArrayIter* iter, ObjectData* obj) {
   }
 }
 
+constexpr int ctype_index(CollectionType t) {
+  return int(t) - int(CollectionType::Invalid);
+}
+
+static_assert(ctype_index(CollectionType::Invalid) == 0, "");
+static_assert(ctype_index(CollectionType::Vector) == 1, "");
+static_assert(ctype_index(CollectionType::Map) == 2, "");
+static_assert(ctype_index(CollectionType::Set) == 3, "");
+static_assert(ctype_index(CollectionType::Pair) == 4, "");
+static_assert(ctype_index(CollectionType::ImmVector) == 5, "");
+static_assert(ctype_index(CollectionType::ImmMap) == 6, "");
+static_assert(ctype_index(CollectionType::ImmSet) == 7, "");
+
 const ArrayIter::InitFuncPtr
-ArrayIter::initFuncTable[Collection::MaxNumTypes] = {
+ArrayIter::initFuncTable[MaxCollectionTypes] = {
   &ArrayIter::IteratorObjInit,
   &ArrayIter::VectorInit,
   &ArrayIter::MapInit,
@@ -202,7 +215,7 @@ void ArrayIter::objInit(ObjectData* obj) {
   if (incRef) {
     obj->incRefCount();
   }
-  auto i = getCollectionType() - Collection::Type::InvalidType;
+  auto i = ctype_index(getCollectionType());
   initFuncTable[i](this, obj);
 }
 
@@ -261,24 +274,24 @@ ArrayIter& ArrayIter::operator=(ArrayIter&& iter) {
 
 bool ArrayIter::endHelper() const  {
   switch (getCollectionType()) {
-    case Collection::VectorType: {
+    case CollectionType::Vector: {
       return m_pos >= getVector()->size();
     }
-    case Collection::MapType:
-    case Collection::ImmMapType: {
+    case CollectionType::Map:
+    case CollectionType::ImmMap: {
       return !getMap()->iter_valid(m_pos);
     }
-    case Collection::SetType:
-    case Collection::ImmSetType: {
+    case CollectionType::Set:
+    case CollectionType::ImmSet: {
       return !getSet()->iter_valid(m_pos);
     }
-    case Collection::PairType: {
+    case CollectionType::Pair: {
       return m_pos >= getPair()->size();
     }
-    case Collection::ImmVectorType: {
+    case CollectionType::ImmVector: {
       return m_pos >= getImmVector()->size();
     }
-    case Collection::InvalidType: {
+    case CollectionType::Invalid: {
       ObjectData* obj = getIteratorObj();
       return !obj->o_invoke_few_args(s_valid, 0).toBoolean();
     }
@@ -288,12 +301,12 @@ bool ArrayIter::endHelper() const  {
 
 void ArrayIter::nextHelper() {
   switch (getCollectionType()) {
-    case Collection::VectorType: {
+    case CollectionType::Vector: {
       m_pos++;
       return;
     }
-    case Collection::MapType:
-    case Collection::ImmMapType: {
+    case CollectionType::Map:
+    case CollectionType::ImmMap: {
       BaseMap* mp = getMap();
       if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
@@ -301,7 +314,7 @@ void ArrayIter::nextHelper() {
       m_pos = mp->iter_next(m_pos);
       return;
     }
-    case Collection::SetType: {
+    case CollectionType::Set: {
       BaseSet* st = getSet();
       if (UNLIKELY(m_version != st->getVersion())) {
         throw_collection_modified();
@@ -309,21 +322,21 @@ void ArrayIter::nextHelper() {
       m_pos = st->iter_next(m_pos);
       return;
     }
-    case Collection::PairType: {
+    case CollectionType::Pair: {
       m_pos++;
       return;
     }
-    case Collection::ImmVectorType: {
+    case CollectionType::ImmVector: {
       m_pos++;
       return;
     }
-    case Collection::ImmSetType: {
+    case CollectionType::ImmSet: {
       c_ImmSet* st = getImmSet();
       assert(m_version == st->getVersion());
       m_pos = st->iter_next(m_pos);
       return;
     }
-    case Collection::InvalidType: {
+    case CollectionType::Invalid: {
       ObjectData* obj = getIteratorObj();
       obj->o_invoke_few_args(s_next, 0);
     }
@@ -332,38 +345,38 @@ void ArrayIter::nextHelper() {
 
 Variant ArrayIter::firstHelper() {
   switch (getCollectionType()) {
-    case Collection::VectorType: {
+    case CollectionType::Vector: {
       return m_pos;
     }
-    case Collection::MapType:
-    case Collection::ImmMapType: {
+    case CollectionType::Map:
+    case CollectionType::ImmMap: {
       BaseMap* mp = getMap();
       if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
       }
       return mp->iter_key(m_pos);
     }
-    case Collection::SetType: {
+    case CollectionType::Set: {
       BaseSet* st = getSet();
       if (UNLIKELY(m_version != st->getVersion())) {
         throw_collection_modified();
       }
       return st->iter_key(m_pos);
     }
-    case Collection::PairType: {
+    case CollectionType::Pair: {
       return m_pos;
     }
-    case Collection::ImmVectorType: {
+    case CollectionType::ImmVector: {
       return m_pos;
     }
-    case Collection::ImmSetType: {
+    case CollectionType::ImmSet: {
       c_ImmSet* st = getImmSet();
       if (UNLIKELY(m_version != st->getVersion())) {
         throw_collection_modified();
       }
       return st->iter_key(m_pos);
     }
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       break;
   }
   ObjectData* obj = getIteratorObj();
@@ -378,44 +391,44 @@ Variant ArrayIter::second() {
     return ad->getValue(m_pos);
   }
   switch (getCollectionType()) {
-    case Collection::VectorType: {
+    case CollectionType::Vector: {
       auto* vec = getVector();
       if (UNLIKELY(m_version != vec->getVersion())) {
         throw_collection_modified();
       }
       return tvAsCVarRef(vec->at(m_pos));
     }
-    case Collection::MapType:
-    case Collection::ImmMapType: {
+    case CollectionType::Map:
+    case CollectionType::ImmMap: {
       BaseMap* mp = getMap();
       if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
       }
       return tvAsCVarRef(mp->iter_value(m_pos));
     }
-    case Collection::SetType: {
+    case CollectionType::Set: {
       BaseSet* st = getSet();
       if (UNLIKELY(m_version != st->getVersion())) {
         throw_collection_modified();
       }
       return tvAsCVarRef(st->iter_value(m_pos));
     }
-    case Collection::PairType: {
+    case CollectionType::Pair: {
       return tvAsCVarRef(getPair()->at(m_pos));
     }
-    case Collection::ImmVectorType: {
+    case CollectionType::ImmVector: {
       c_ImmVector* fvec = getImmVector();
       if (UNLIKELY(m_version != fvec->getVersion())) {
         throw_collection_modified();
       }
       return tvAsCVarRef(fvec->at(m_pos));
     }
-    case Collection::ImmSetType: {
+    case CollectionType::ImmSet: {
       c_ImmSet* st = getImmSet();
       assert(m_version == st->getVersion());
       return tvAsCVarRef(st->iter_value(m_pos));
     }
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       break;
   }
 
@@ -442,44 +455,44 @@ const Variant& ArrayIter::secondRefPlus() {
     return ad->getValueRef(m_pos);
   }
   switch (getCollectionType()) {
-    case Collection::VectorType: {
+    case CollectionType::Vector: {
       auto* vec = getVector();
       if (UNLIKELY(m_version != vec->getVersion())) {
         throw_collection_modified();
       }
       return tvAsCVarRef(vec->at(m_pos));
     }
-    case Collection::MapType:
-    case Collection::ImmMapType: {
+    case CollectionType::Map:
+    case CollectionType::ImmMap: {
       BaseMap* mp = getMap();
       if (UNLIKELY(m_version != mp->getVersion())) {
         throw_collection_modified();
       }
       return tvAsCVarRef(mp->iter_value(m_pos));
     }
-    case Collection::SetType: {
+    case CollectionType::Set: {
       BaseSet* st = getSet();
       if (UNLIKELY(m_version != st->getVersion())) {
         throw_collection_modified();
       }
       return tvAsCVarRef(st->iter_value(m_pos));
     }
-    case Collection::PairType: {
+    case CollectionType::Pair: {
       return tvAsCVarRef(getPair()->at(m_pos));
     }
-    case Collection::ImmVectorType: {
+    case CollectionType::ImmVector: {
       c_ImmVector* fvec = getImmVector();
       if (UNLIKELY(m_version != fvec->getVersion())) {
         throw_collection_modified();
       }
       return tvAsCVarRef(fvec->at(m_pos));
     }
-    case Collection::ImmSetType: {
+    case CollectionType::ImmSet: {
       c_ImmSet* st = getImmSet();
       assert(m_version == st->getVersion());
       return tvAsCVarRef(st->iter_value(m_pos));
     }
-    case Collection::InvalidType: {
+    case CollectionType::Invalid: {
       throw_param_is_not_container();
     }
   }
@@ -1406,42 +1419,42 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                         TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "%s: I %p, obj %p, ctx %p, collection or Iterator or Object\n",
         __func__, dest, obj, ctx);
-  Collection::Type type = obj->getCollectionType();
+  auto type = obj->getCollectionType();
   valOut = tvToCell(valOut);
   if (keyOut) {
     keyOut = tvToCell(keyOut);
   }
   switch (type) {
-    case Collection::VectorType:
+    case CollectionType::Vector:
       return iterInit<c_Vector, ArrayIter::Versionable>(
                                 dest, static_cast<c_Vector*>(obj),
                                 valOut, keyOut);
-    case Collection::MapType:
-    case Collection::ImmMapType:
+    case CollectionType::Map:
+    case CollectionType::ImmMap:
       return iterInit<BaseMap, ArrayIter::VersionableSparse>(
                                 dest,
                                 static_cast<BaseMap*>(obj),
                                 valOut, keyOut);
-    case Collection::SetType:
+    case CollectionType::Set:
       return iterInit<c_Set, ArrayIter::VersionableSparse>(
                                 dest,
                                 static_cast<c_Set*>(obj),
                                 valOut, keyOut);
-    case Collection::PairType:
+    case CollectionType::Pair:
       return iterInit<c_Pair, ArrayIter::Fixed>(
                                 dest,
                                 static_cast<c_Pair*>(obj),
                                 valOut, keyOut);
-    case Collection::ImmVectorType:
+    case CollectionType::ImmVector:
       return iterInit<c_ImmVector, ArrayIter::Fixed>(
                                 dest, static_cast<c_ImmVector*>(obj),
                                 valOut, keyOut);
-    case Collection::ImmSetType:
+    case CollectionType::ImmSet:
       return iterInit<c_ImmSet, ArrayIter::VersionableSparse>(
                                    dest,
                                    static_cast<c_ImmSet*>(obj),
                                    valOut, keyOut);
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       return new_iter_object_any(dest, obj, ctx, valOut, keyOut);
   }
   not_reached();
@@ -1452,31 +1465,31 @@ NEVER_INLINE
 static int64_t iter_next_collection(ArrayIter* ai,
                                     TypedValue* valOut,
                                     TypedValue* keyOut,
-                                    Collection::Type type) {
+                                    CollectionType type) {
   assert(!ai->hasArrayData());
-  assert(type != Collection::InvalidType);
+  assert(type != CollectionType::Invalid);
 
   switch (type) {
-    case Collection::VectorType:
+    case CollectionType::Vector:
       return iterNext<c_Vector, ArrayIter::Versionable>(
         ai, valOut, keyOut);
-    case Collection::MapType:
-    case Collection::ImmMapType:
+    case CollectionType::Map:
+    case CollectionType::ImmMap:
       return iterNext<BaseMap, ArrayIter::VersionableSparse>(
         ai, valOut, keyOut);
-    case Collection::SetType:
+    case CollectionType::Set:
       return iterNext<c_Set, ArrayIter::VersionableSparse>(
         ai, valOut, keyOut);
-    case Collection::PairType:
+    case CollectionType::Pair:
       return iterNext<c_Pair, ArrayIter::Fixed>(
         ai, valOut, keyOut);
-    case Collection::ImmVectorType:
+    case CollectionType::ImmVector:
       return iterNext<c_ImmVector, ArrayIter::Fixed>(
         ai, valOut, keyOut);
-    case Collection::ImmSetType:
+    case CollectionType::ImmSet:
       return iterNext<c_ImmSet, ArrayIter::VersionableSparse>(
         ai, valOut, keyOut);
-    case Collection::InvalidType:
+    case CollectionType::Invalid:
       break;
   }
   not_reached();
@@ -1490,7 +1503,7 @@ int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
          ai->getIterType() == ArrayIter::TypeIterator);
   if (UNLIKELY(!ai->hasArrayData())) {
     auto const coll = ai->getObject()->getCollectionType();
-    if (UNLIKELY(coll != Collection::InvalidType)) {
+    if (UNLIKELY(coll != CollectionType::Invalid)) {
       return iter_next_collection<withRef>(ai, valOut, keyOut, coll);
     }
   }

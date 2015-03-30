@@ -310,42 +310,42 @@ private:
   static void IteratorObjInit(ArrayIter* iter, ObjectData* obj);
 
   typedef void(*InitFuncPtr)(ArrayIter*,ObjectData*);
-  static const InitFuncPtr initFuncTable[Collection::MaxNumTypes];
+  static const InitFuncPtr initFuncTable[MaxCollectionTypes];
 
   void destruct();
 
   BaseVector* getVector() const {
     assert(hasCollection());
-    assert(getCollectionType() == Collection::VectorType ||
-           getCollectionType() == Collection::ImmVectorType);
+    assert(getCollectionType() == CollectionType::Vector ||
+           getCollectionType() == CollectionType::ImmVector);
     return (BaseVector*)((intptr_t)m_obj & ~1);
   }
   BaseMap* getMap() const {
     assert(hasCollection());
-    assert(Collection::isMapType(getCollectionType()));
+    assert(isMapCollection(getCollectionType()));
     return (BaseMap*)((intptr_t)m_obj & ~1);
   }
   BaseSet* getSet() const {
     assert(hasCollection());
-    assert(getCollectionType() == Collection::SetType ||
-           getCollectionType() == Collection::ImmSetType);
+    assert(getCollectionType() == CollectionType::Set ||
+           getCollectionType() == CollectionType::ImmSet);
     return (BaseSet*)((intptr_t)m_obj & ~1);
   }
   c_Pair* getPair() const {
-    assert(hasCollection() && getCollectionType() == Collection::PairType);
+    assert(hasCollection() && getCollectionType() == CollectionType::Pair);
     return (c_Pair*)((intptr_t)m_obj & ~1);
   }
   c_ImmVector* getImmVector() const {
     assert(hasCollection() &&
-           getCollectionType() == Collection::ImmVectorType);
+           getCollectionType() == CollectionType::ImmVector);
 
     return (c_ImmVector*)((intptr_t)m_obj & ~1);
   }
   c_ImmSet* getImmSet() {
-    assert(hasCollection() && getCollectionType() == Collection::ImmSetType);
+    assert(hasCollection() && getCollectionType() == CollectionType::ImmSet);
     return (c_ImmSet*)((intptr_t)m_obj & ~1);
   }
-  Collection::Type getCollectionType() const {
+  CollectionType getCollectionType() const {
     ObjectData* obj = getObject();
     return obj->getCollectionType();
   }

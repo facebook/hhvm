@@ -48,7 +48,7 @@ void c_GenMapWaitHandle::ti_setoncreatecallback(const Variant& callback) {
 Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
   if (UNLIKELY(!dependencies.isObject() ||
       dependencies.getObjectData()->getCollectionType() !=
-        Collection::MapType)) {
+        CollectionType::Map)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Expected dependencies to be an instance of Map"));
     throw e;

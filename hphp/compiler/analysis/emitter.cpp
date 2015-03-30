@@ -3700,19 +3700,19 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           }
           const std::string* clsName = nullptr;
           cls->getString(clsName);
-          int cType = Collection::stringToType(*clsName);
-          if (cType == Collection::PairType) {
+          auto cType = stringToCollectionType(*clsName);
+          if (cType == CollectionType::Pair) {
             if (nElms != 2) {
               throw IncludeTimeFatalException(b,
                 "Pair objects must have exactly 2 elements");
             }
-          } else if (cType == Collection::InvalidType) {
+          } else if (cType == CollectionType::Invalid) {
             throw IncludeTimeFatalException(b,
               "Cannot use collection initialization for non-collection class");
           }
-          bool kvPairs = (cType == Collection::MapType ||
-                          cType == Collection::ImmMapType);
-          e.NewCol(cType, nElms);
+          bool kvPairs = (cType == CollectionType::Map ||
+                          cType == CollectionType::ImmMap);
+          e.NewCol(int(cType), nElms);
           if (kvPairs) {
             for (int i = 0; i < nElms; i++) {
               ArrayPairExpressionPtr ap(

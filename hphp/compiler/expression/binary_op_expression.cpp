@@ -67,23 +67,23 @@ BinaryOpExpression::BinaryOpExpression
     break;
   case T_COLLECTION: {
     std::string s = m_exp1->getLiteralString();
-    Collection::Type cType;
+    CollectionType cType;
     if (strcasecmp(s.c_str(), "vector") == 0) {
-      cType = Collection::VectorType;
+      cType = CollectionType::Vector;
     } else if (strcasecmp(s.c_str(), "map") == 0) {
-      cType = Collection::MapType;
+      cType = CollectionType::Map;
     } else if (strcasecmp(s.c_str(), "set") == 0) {
-      cType = Collection::SetType;
+      cType = CollectionType::Set;
     } else if (strcasecmp(s.c_str(), "pair") == 0) {
-      cType = Collection::PairType;
+      cType = CollectionType::Pair;
     } else if (strcasecmp(s.c_str(), "immvector") == 0) {
-      cType = Collection::ImmVectorType;
+      cType = CollectionType::ImmVector;
     } else if (strcasecmp(s.c_str(), "immmap") == 0) {
-      cType = Collection::ImmMapType;
+      cType = CollectionType::ImmMap;
     } else if (strcasecmp(s.c_str(), "immset") == 0) {
-      cType = Collection::ImmSetType;
+      cType = CollectionType::ImmSet;
     } else {
-      cType = Collection::InvalidType;
+      cType = CollectionType::Invalid;
     }
     ExpressionListPtr el = static_pointer_cast<ExpressionList>(m_exp2);
     el->setCollectionType(cType);

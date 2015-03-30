@@ -95,22 +95,24 @@ bool is_mock_class(borrowed_ptr<const php::Class> cls) {
   return cls->userAttributes.count(s_MockClass.get());
 }
 
-SString collectionTypeToString(uint32_t ctype) {
+SString collectionTypeToString(CollectionType ctype) {
   switch (ctype) {
-  case Collection::VectorType:
+  case CollectionType::Vector:
     return s_Vector.get();
-  case Collection::MapType:
+  case CollectionType::Map:
     return s_Map.get();
-  case Collection::SetType:
+  case CollectionType::Set:
     return s_Set.get();
-  case Collection::PairType:
+  case CollectionType::Pair:
     return s_Pair.get();
-  case Collection::ImmVectorType:
+  case CollectionType::ImmVector:
     return s_ImmVector.get();
-  case Collection::ImmSetType:
+  case CollectionType::ImmSet:
     return s_ImmSet.get();
-  case Collection::ImmMapType:
+  case CollectionType::ImmMap:
     return s_ImmMap.get();
+  case CollectionType::Invalid:
+    break;
   }
   assert(!"Unknown Collection Type");
   not_reached();

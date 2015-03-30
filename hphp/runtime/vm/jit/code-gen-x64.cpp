@@ -5008,7 +5008,7 @@ void CodeGenerator::cgLdWHState(IRInstruction* inst) {
   auto const rdst = dstLoc(inst, 0).reg();
   auto& v = vmain();
   auto state = v.makeReg();
-  v << loadzbq{robj[ObjectData::whStateOffset()], state};
+  v << loadzbq{robj[c_WaitHandle::stateOff()], state};
   v << andqi{0x0F, state, rdst, v.makeReg()};
 }
 

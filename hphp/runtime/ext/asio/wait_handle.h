@@ -105,7 +105,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
 
  public:
   static constexpr ptrdiff_t stateOff() {
-    return whStateOffset();
+    return offsetof(c_WaitHandle, m_kind_state);
   }
   static constexpr ptrdiff_t resultOff() {
     return offsetof(c_WaitHandle, m_resultOrException);
@@ -134,14 +134,14 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
     return m_resultOrException.m_data.pobj;
   }
 
-  Kind getKind() const { return static_cast<Kind>(subclass_u8() >> 4); }
-  uint8_t getState() const { return subclass_u8() & 0x0F; }
+  Kind getKind() const { return static_cast<Kind>(m_kind_state >> 4); }
+  uint8_t getState() const { return m_kind_state & 0x0F; }
   static uint8_t toKindState(Kind kind, uint8_t state) {
     assert((uint8_t)kind < 0x10 && state < 0x10);
     return ((uint8_t)kind << 4) | state;
   }
   void setKindState(Kind kind, uint8_t state) {
-    subclass_u8() = toKindState(kind, state);
+    m_kind_state = toKindState(kind, state);
   }
   void setContextVectorIndex(uint32_t idx) {
     m_ctxVecIndex = idx;
@@ -163,6 +163,20 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   static const int8_t STATE_SUCCEEDED = 0;
   static const int8_t STATE_FAILED    = 1;
 
+ private: // layout, ignoring ObjectData fields.
+  // 0                           8             9             10 12
+  // [m_parentChain             ][m_contextIdx][m_kind_state][ ][m_ctxVecIndex]
+  // [m_resultOrException.m_data][m_type]                       [m_aux]
+  static void checkLayout() {
+    constexpr auto data = offsetof(c_WaitHandle, m_resultOrException);
+    constexpr auto type = data + offsetof(TypedValue, m_type);
+    constexpr auto aux  = data + offsetof(TypedValue, m_aux);
+    static_assert(offsetof(c_WaitHandle, m_parentChain) == data, "");
+    static_assert(offsetof(c_WaitHandle, m_contextIdx) == type, "");
+    static_assert(offsetof(c_WaitHandle, m_kind_state) < aux, "");
+    static_assert(offsetof(c_WaitHandle, m_ctxVecIndex) == aux, "");
+  }
+
  protected:
   union {
     // STATE_SUCCEEDED || STATE_FAILED
@@ -175,6 +189,9 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
 
       // WaitableWaitHandle: !STATE_SUCCEEDED && !STATE_FAILED
       context_idx_t m_contextIdx;
+
+      // valid in any WaitHandle state. doesn't overlap Cell fields.
+      uint8_t m_kind_state;
 
       union {
         // ExternalThreadEventWaitHandle: STATE_WAITING

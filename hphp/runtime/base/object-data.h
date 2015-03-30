@@ -281,9 +281,6 @@ struct ObjectData {
   TypedValue* propVec();
   const TypedValue* propVec() const;
 
-  uint8_t& subclass_u8();
-  uint8_t subclass_u8() const;
-
  public:
   ObjectData* callCustomInstanceInit();
 
@@ -403,9 +400,6 @@ struct ObjectData {
   static constexpr ptrdiff_t attributeOff() {
     return offsetof(ObjectData, o_attribute);
   }
-  static constexpr ptrdiff_t whStateOffset() {
-    return offsetof(ObjectData, o_subclass_u8);
-  }
 
 private:
   friend struct MemoryProfile;
@@ -429,7 +423,7 @@ private:
   union {
     struct {
       mutable uint16_t o_attribute;
-      uint8_t o_subclass_u8; // for subclasses
+      uint8_t m_pad; // reserved for MM
       HeaderKind m_kind;
       mutable RefCount m_count;
     };
@@ -440,7 +434,7 @@ private:
   union {
     struct {
       mutable uint16_t o_attribute;
-      uint8_t o_subclass_u8; // for subclasses
+      uint8_t m_pad; // reserved for MM
       HeaderKind m_kind;
       mutable RefCount m_count;
     };

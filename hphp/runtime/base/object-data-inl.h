@@ -211,14 +211,6 @@ inline double ObjectData::toDouble() const {
   return toInt64();
 }
 
-inline uint8_t& ObjectData::subclass_u8() {
-  return o_subclass_u8;
-}
-
-inline uint8_t ObjectData::subclass_u8() const {
-  return o_subclass_u8;
-}
-
 inline const Func* ObjectData::methodNamed(const StringData* sd) const {
   return getVMClass()->lookupMethod(sd);
 }

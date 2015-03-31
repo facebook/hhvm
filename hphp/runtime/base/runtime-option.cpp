@@ -421,7 +421,7 @@ static inline bool loopsDefault() {
 #ifdef HHVM_JIT_LOOPS_BY_DEFAULT
   return true;
 #else
-  return false;
+  return RuntimeOption::EvalJitPGORegionSelector == "wholecfg";
 #endif
 }
 

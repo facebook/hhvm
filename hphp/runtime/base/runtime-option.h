@@ -503,7 +503,6 @@ public:
   F(bool, HHIRAllocSIMDRegs,           true)                            \
   F(bool, HHIRStressSpill,             false)                           \
   /* Region compiler flags */                                           \
-  F(bool,     JitLoops,                loopsDefault())                  \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
   F(bool,     JitPGO,                  pgoDefault())                    \
   F(string,   JitPGORegionSelector,    pgoRegionSelectorDefault())      \
@@ -513,6 +512,7 @@ public:
   F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
   F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
   F(bool,     JitPGOArrayGetStress,    false)                           \
+  F(bool,     JitLoops,                loopsDefault())                  \
   F(uint32_t, HotFuncCount,            4100)                            \
   F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             true)                            \

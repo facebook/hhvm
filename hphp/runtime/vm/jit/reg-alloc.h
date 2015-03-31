@@ -24,17 +24,12 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
-#ifdef VOID
-#undef VOID
-#endif
-
 namespace HPHP { namespace jit {
 
-class IRUnit;
+struct IRUnit;
 struct Vunit;
 struct Vinstr;
 struct CodegenState;
-class BackEnd;
 
 // Native stack layout:
 // | enterTCHelper |
@@ -69,7 +64,7 @@ PhysReg forceAlloc(const SSATmp& tmp);
 
 // Assign virtual registers to all SSATmps used or defined in reachable blocks.
 void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
-                const BlockList& blocks, BackEnd*);
+                const BlockList& blocks);
 
 // Return the set of physical registers implicitly accessed (used or defined)
 void getEffects(const Abi& abi, const Vinstr& i,

@@ -29,7 +29,6 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/reg-alloc-x64.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -81,14 +80,6 @@ struct BackEnd final : jit::BackEnd {
 
   PhysReg rVmTl() override {
     return x64::rVmTl;
-  }
-
-  bool storesCell(const IRInstruction& inst, uint32_t srcIdx) override {
-    return x64::storesCell(inst, srcIdx);
-  }
-
-  bool loadsCell(const IRInstruction& inst) override {
-    return x64::loadsCell(inst.op());
   }
 
   /*
@@ -482,7 +473,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       state.labels[i] = vunit.makeBlock(AreaIndex::Main);
     }
     // create vregs for all relevant SSATmps
-    assignRegs(unit, vunit, state, blocks, this);
+    assignRegs(unit, vunit, state, blocks);
     vunit.entry = state.labels[unit.entry()];
     vasm.main(mainCode);
     vasm.cold(coldCode);

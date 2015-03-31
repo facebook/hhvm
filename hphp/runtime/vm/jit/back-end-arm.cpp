@@ -28,7 +28,6 @@
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/func-prologues-arm.h"
 #include "hphp/runtime/vm/jit/unique-stubs-arm.h"
-#include "hphp/runtime/vm/jit/reg-alloc-arm.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/unwind-arm.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
@@ -70,14 +69,6 @@ struct BackEnd : public jit::BackEnd {
 
   PhysReg rVmTl() override {
     return PhysReg(arm::rVmTl);
-  }
-
-  bool storesCell(const IRInstruction& inst, uint32_t srcIdx) override {
-    return false;
-  }
-
-  bool loadsCell(const IRInstruction& inst) override {
-    return false;
   }
 
 #define CALLEE_SAVED_BARRIER() \
@@ -529,7 +520,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       state.labels[i] = vunit.makeBlock(AreaIndex::Main);
     }
     // create vregs for all relevant SSATmps
-    assignRegs(unit, vunit, state, blocks, this);
+    assignRegs(unit, vunit, state, blocks);
     vunit.entry = state.labels[unit.entry()];
     vasm.main(mainCode);
     vasm.cold(coldCode);

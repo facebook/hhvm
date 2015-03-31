@@ -81,8 +81,6 @@ struct BackEnd {
   virtual PhysReg rVmSp() = 0;
   virtual PhysReg rVmFp() = 0;
   virtual PhysReg rVmTl() = 0;
-  virtual bool storesCell(const IRInstruction& inst, uint32_t srcIdx) = 0;
-  virtual bool loadsCell(const IRInstruction& inst) = 0;
 
   virtual void enterTCHelper(TCA start, ActRec* stashedAR) = 0;
 

@@ -255,8 +255,7 @@ void emitBindCallStubs(UniqueStubs& uniqueStubs) {
     auto& vf = vasm.main();
     // Pop the return address into the actrec in rStashedAR.
     vf << store{PhysReg{rLinkReg}, PhysReg{rStashedAR}[AROFF(m_savedRip)]};
-    ServiceReqArgVec argv;
-    packServiceReqArgs(argv, (int64_t)i);
+    auto const argv = packServiceReqArgs((int64_t)i);
     not_implemented();
   }
   uniqueStubs.add("bindCallStub", uniqueStubs.bindCallStub);

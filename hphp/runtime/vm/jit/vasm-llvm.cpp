@@ -2061,8 +2061,8 @@ void LLVMEmitter::emit(const fallback& inst) {
   } else {
     // Emit a custom REQ_RETRANSLATE
     auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
-    ServiceReqArgVec args;
-    packServiceReqArgs(args, inst.dest.offset(), inst.trflags.packed);
+    auto const args = packServiceReqArgs(inst.dest.offset(),
+                                         inst.trflags.packed);
     stub = mcg->backEnd().emitServiceReqWork(
       frozen, frozen.frontier(), SRFlags::Persist, REQ_RETRANSLATE, args);
   }

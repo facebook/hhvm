@@ -224,7 +224,7 @@ void emitBindJ(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc,
 TCA emitRetranslate(CodeBlock& cb, CodeBlock& frozen, jit::ConditionCode cc,
                     SrcKey dest, TransFlags trflags) {
   auto toSmash = emitBindJPre(cb, frozen, cc);
-  TCA sr = emitServiceReq(frozen, REQ_RETRANSLATE,
+  TCA sr = emitServiceReq(frozen, SRFlags::None, REQ_RETRANSLATE,
                           dest.offset(), trflags.packed);
   emitBindJPost(cb, frozen, cc, toSmash, sr);
 

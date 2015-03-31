@@ -438,7 +438,7 @@ MCGenerator::createTranslation(const TranslArgs& args) {
   TCA astart          = code.main().frontier();
   TCA realColdStart   = code.realCold().frontier();
   TCA realFrozenStart = code.realFrozen().frontier();
-  TCA req = emitServiceReq(code.cold(), REQ_RETRANSLATE,
+  TCA req = emitServiceReq(code.cold(), SRFlags::None, REQ_RETRANSLATE,
                            sk.offset(), TransFlags().packed);
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
           sk.unit(), sk.offset(), req);

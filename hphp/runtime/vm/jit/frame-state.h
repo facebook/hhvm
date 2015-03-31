@@ -98,10 +98,12 @@ struct SlotState {
   SSATmp* value{nullptr};
 
   /*
-   * The current type of the local or stack slot.  We may have a tracked type
-   * even if we don't have an available value.  This happens across PHP-level
-   * calls, for example, or at some joint points where we couldn't find the
-   * same available value for all incoming edges.
+   * The current type of the local or stack slot.  We may have a
+   * tracked type even if we don't have an available value.  This
+   * happens across PHP-level calls, for example, or at some joint
+   * points where we couldn't find the same available value for all
+   * incoming edges.  However, whenever we have a value, the type of
+   * the SSATmp must match this `type' field.
    */
   Type type{Stack ? Type::StkElem : Type::Gen};
 

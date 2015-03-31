@@ -37,6 +37,9 @@ struct PostorderSort {
   void walk(Block* block) {
     if (m_visited.test(block->id())) return;
     m_visited.set(block->id());
+    // Valid blocks can't be empty, but we can see empty blocks here
+    // when trying to print a unit before it's finished for debugging.
+    if (block->empty()) return;
     if (auto const t = block->taken()) walk(t);
     if (auto const n = block->next()) walk(n);
     m_visitor(block);

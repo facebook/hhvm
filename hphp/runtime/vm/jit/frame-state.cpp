@@ -65,16 +65,24 @@ template<bool Stack>
 bool merge_into(SlotState<Stack>& dst, const SlotState<Stack>& src) {
   auto changed = false;
 
+  if (merge_util(dst.type, dst.type | src.type)) {
+    changed = true;
+  }
+
   // Get the least common ancestor across both states.
   if (merge_util(dst.value, least_common_ancestor(dst.value, src.value))) {
     changed = true;
+    assert(dst.value == nullptr || dst.type <= dst.value->type());
+
+    // We keep the invariant that the known value either has the same
+    // type as the known type or be nullptr.  Otherwise, we may end up
+    // using a value with a more general type than is known about it.
+    if (dst.value && dst.type < dst.value->type()) {
+      dst.value = nullptr;
+    }
   }
 
   if (merge_into(dst.typeSrcs, src.typeSrcs)) {
-    changed = true;
-  }
-
-  if (merge_util(dst.type, dst.type | src.type)) {
     changed = true;
   }
 
@@ -839,7 +847,9 @@ void FrameStateMgr::syncEvalStack() {
 
 SSATmp* FrameStateMgr::localValue(uint32_t id) const {
   always_assert(id < cur().locals.size());
-  return cur().locals[id].value;
+  auto const& local = cur().locals[id];
+  assert(local.value == nullptr || local.value->type() == local.type);
+  return local.value;
 }
 
 TypeSourceSet FrameStateMgr::localTypeSources(uint32_t id) const {
@@ -868,7 +878,9 @@ Type FrameStateMgr::predictedStackType(IRSPOffset offset) const {
 }
 
 SSATmp* FrameStateMgr::stackValue(IRSPOffset offset) const {
-  return stackState(offset).value;
+  const auto& state = stackState(offset);
+  assert(state.value == nullptr || state.value->type() == state.type);
+  return state.value;
 }
 
 TypeSourceSet FrameStateMgr::stackTypeSources(IRSPOffset offset) const {
@@ -916,6 +928,10 @@ void FrameStateMgr::refineStackType(IRSPOffset offset,
   auto const newType = state.type & ty;
   ITRACE(2, "stk[{}] updating type {} as {} -> {}\n", offset.offset,
     state.type, ty, newType);
+  // If the type gets more refined, we need to forget the old value.
+  // Otherwise, we may end up using a value with a more general type
+  // than is known about the stack slot.
+  if (newType != state.type) state.value = nullptr;
   state.type = newType;
   state.predictedType = newType;
   state.typeSrcs.clear();
@@ -991,6 +1007,10 @@ void FrameStateMgr::refineLocalType(uint32_t id,
   auto& local = cur().locals[id];
   auto const newType = local.type & type;
   ITRACE(2, "updating local {}'s type: {} -> {}\n", id, local.type, newType);
+  // If the type gets more refined, we need to forget the old value.
+  // Otherwise, we may end up using a value with a more general type
+  // than is known about the local.
+  if (newType != local.type) local.value = nullptr;
   local.type = newType;
   local.predictedType = newType;
   local.typeSrcs.clear();

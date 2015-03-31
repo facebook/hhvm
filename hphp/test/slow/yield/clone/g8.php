@@ -12,17 +12,14 @@ $x = foo();
 $x->rewind();
 $y1 = clone $x;
 $y2 = clone $x;
-$x->next();
-foreach ($x as $v) {
-  echo $v . "\n";
+for ($x->next(); $x->valid(); $x->next()) {
+  echo $x->current() . "\n";
 }
 echo "========\n";
-$y1->next();
-foreach ($y1 as $v) {
-  echo $v . "\n";
+for ($y1->next(); $y1->valid(); $y1->next()) {
+  echo $y1->current() . "\n";
 }
 echo "========\n";
-$y2->next();
-foreach ($y2 as $v) {
-  echo $v . "\n";
+for ($y2->next(); $y2->valid(); $y2->next()) {
+  echo $y2->current() . "\n";
 }

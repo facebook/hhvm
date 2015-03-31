@@ -1767,7 +1767,7 @@ To string conversions:
 
 | ContStarted, D(Bool), S(Obj), NF
 
-  Return true if a generator is has been run at least once, i.e. is not in the
+  Return true if a generator has been run at least once, i.e. is not in the
   Created state, false otherwise.
 
 | ContArIncKey, ND, S(FramePtr), NF

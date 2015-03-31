@@ -4207,7 +4207,7 @@ ContValid    []  ->  [C:Bool]
 ContStarted    []  ->  [C:Bool]
 
   Check whether a generator was started. $this must be a Generator object.
-  Pushed true onto the stack if the generator has already been run once,
+  Pushes true onto the stack if the generator has already been run once,
   false otherwise.
 
 ContKey    []  ->  [C]

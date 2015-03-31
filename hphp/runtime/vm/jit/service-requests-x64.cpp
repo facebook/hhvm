@@ -121,17 +121,10 @@ void padStub(CodeBlock& stub) {
   assertx(stub.available() == 0);
 }
 
-} // anonymous namespace
-
-//////////////////////////////////////////////////////////////////////
-
-size_t reusableStubSize() {
-  return maxStubSpace();
-}
-
-void
-emitServiceReqImpl(CodeBlock& stub, SRFlags flags, ServiceRequest req,
-                   const ServiceReqArgVec& argv) {
+void emitServiceReqImpl(CodeBlock& stub,
+                        SRFlags flags,
+                        ServiceRequest req,
+                        const ServiceReqArgVec& argv) {
   const bool persist = flags & SRFlags::Persist;
   Asm as{stub};
   FTRACE(2, "Emit Service Req @{} {}(", stub.base(), serviceReqName(req));
@@ -192,6 +185,14 @@ emitServiceReqImpl(CodeBlock& stub, SRFlags flags, ServiceRequest req,
   if (!persist) {
     padStub(stub);
   }
+}
+
+} // anonymous namespace
+
+//////////////////////////////////////////////////////////////////////
+
+size_t reusableStubSize() {
+  return maxStubSpace();
 }
 
 TCA

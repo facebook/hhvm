@@ -23,23 +23,42 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// forward declaration
+struct StringData;
+struct ArrayData;
+
 struct BitrefSurvey {
 
 public:
-  void cow_check_occurred(RefCount refcount, bool bitref);
+  void cow_check_occurred(RefCount refcount, bool bitref, bool isArray);
+  void cow_check_occurred(ArrayData* ad);
+  void cow_check_occurred(StringData* sd);
   void survey_request_end();
 
 private:
   uint64_t check_count;
-  uint64_t refcounting_copy_count;
-  uint64_t bitref_copy_count;
+  uint64_t arr_check_count;
+  uint64_t str_check_count;
+
+  uint64_t rc_copy_count;
+  uint64_t arr_rc_copy_count;
+  uint64_t str_rc_copy_count;
+
   uint64_t static_count;
+  uint64_t arr_static_count;
+  uint64_t str_static_count;
+
+  uint64_t bitref_copy_count;
+  uint64_t arr_bitref_copy_count;
+  uint64_t str_bitref_copy_count;
 };
 
 /*
  * Log when a copy-on-write check takes place. 
  */
 void cow_check_occurred(RefCount refcount, bool bitref);
+void cow_check_occurred(ArrayData* ad);
+void cow_check_occurred(StringData* sd);
 
 /*
  * Indicate that the request has ended and results should be printed

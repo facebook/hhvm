@@ -53,7 +53,7 @@ ArrayData* ArrayCommon::Pop(ArrayData* a, Variant &value) {
   if (!a->empty()) {
     auto const pos = a->iter_last();
     value = a->getValue(pos);
-    cow_check_occurred(a->getCount(), check_one_bit_ref_array(a->m_kind));
+    cow_check_occurred(a);
     return a->remove(a->getKey(pos), a->hasMultipleRefs());
   }
   value = uninit_null();
@@ -64,7 +64,7 @@ ArrayData* ArrayCommon::Dequeue(ArrayData* a, Variant &value) {
   if (!a->empty()) {
     auto const pos = a->iter_begin();
     value = a->getValue(pos);
-    cow_check_occurred(a->getCount(), check_one_bit_ref_array(a->m_kind));
+    cow_check_occurred(a);
     auto const ret = a->remove(a->getKey(pos), a->hasMultipleRefs());
     // In PHP, array_shift() will cause all numerically key-ed values re-keyed
     ret->renumber();

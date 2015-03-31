@@ -631,8 +631,7 @@ void cellBitNot(Cell& cell) {
       break;
 
     case KindOfString:
-      cow_check_occurred(cell.m_data.pstr->getCount(),
-          check_one_bit_ref(cell.m_data.pstr->m_kind));
+      cow_check_occurred(cell.m_data.pstr);
       if (cell.m_data.pstr->hasMultipleRefs()) {
     case KindOfStaticString:
         auto const newSd = StringData::Make(

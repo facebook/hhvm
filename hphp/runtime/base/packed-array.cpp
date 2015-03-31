@@ -813,7 +813,7 @@ static void adjustMArrayIter(ArrayData* ad, ssize_t pos) {
 
 ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
   assert(checkInvariants(adIn));
-  cow_check_occurred(adIn->getCount(), check_one_bit_ref_array(adIn->m_kind));
+  cow_check_occurred(adIn);
   auto const ad = adIn->hasMultipleRefs() ? Copy(adIn) : adIn;
 
   if (UNLIKELY(ad->m_size == 0)) {
@@ -838,7 +838,7 @@ ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
 
 ArrayData* PackedArray::Dequeue(ArrayData* adIn, Variant& value) {
   assert(checkInvariants(adIn));
-  cow_check_occurred(adIn->getCount(), check_one_bit_ref_array(adIn->m_kind));
+  cow_check_occurred(adIn);
   auto const ad = adIn->hasMultipleRefs() ? Copy(adIn) : adIn;
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
@@ -866,7 +866,7 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn,
                                 const Variant& v,
                                 bool copy) {
   assert(checkInvariants(adIn));
-  cow_check_occurred(adIn->getCount(), check_one_bit_ref_array(adIn->m_kind));
+  cow_check_occurred(adIn);
   auto const ad = adIn->hasMultipleRefs() ? CopyAndResizeIfNeeded(adIn)
                                           : ResizeIfNeeded(adIn);
   // To conform to PHP behavior, we invalidate all strong iterators when an

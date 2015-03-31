@@ -575,7 +575,7 @@ arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   static_assert(keyType != KeyType::Any,
                 "KeyType::Any is not supported in arraySetMImpl");
   assert(cellIsPlausible(value));
-  cow_check_occurred(a->getCount(), check_one_bit_ref_array(a->m_kind));
+  cow_check_occurred(a);
   const bool copy = a->hasMultipleRefs();
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
                                : uncheckedSet(a, key, value, copy);

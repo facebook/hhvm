@@ -1278,8 +1278,7 @@ inline Variant &concat_assign(Variant &v1, litstr s2) = delete;
 inline Variant &concat_assign(Variant &v1, const String& s2) {
   if (v1.getType() == KindOfString) {
     auto& str = v1.asStrRef();
-    cow_check_occurred(str.get()->getCount(),
-        check_one_bit_ref(str.get()->m_kind));
+    cow_check_occurred(str.get());
     if (str.get()->hasExactlyOneRef()) {
       str += StringSlice{s2.data(), static_cast<uint32_t>(s2.size())};
       return v1;

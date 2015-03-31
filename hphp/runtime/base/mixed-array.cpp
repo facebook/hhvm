@@ -1690,7 +1690,7 @@ ArrayData* MixedArray::ArrayPlusEqGeneric(ArrayData* ad,
 ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
   auto const neededSize = ad->size() + elems->size();
 
-  cow_check_occurred(ad->getCount(), check_one_bit_ref_array(ad->m_kind));
+  cow_check_occurred(ad);
   auto ret =
     ad->hasMultipleRefs() ? CopyReserve(asMixed(ad), neededSize) :
     asMixed(ad);
@@ -1789,7 +1789,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
 
 ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
   auto a = asMixed(ad);
-  cow_check_occurred(a->getCount(), check_one_bit_ref_array(a->m_kind));
+  cow_check_occurred(a);
   if (a->hasMultipleRefs()) a = a->copyMixed();
   auto elms = a->data();
   if (a->m_size) {
@@ -1813,7 +1813,7 @@ ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
 
 ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
   auto a = asMixed(adInput);
-  cow_check_occurred(a->getCount(), check_one_bit_ref_array(a->m_kind));
+  cow_check_occurred(a);
   if (a->hasMultipleRefs()) a = a->copyMixed();
   auto elms = a->data();
   if (a->m_size) {
@@ -1839,7 +1839,7 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput,
                               const Variant& v,
                               bool copy) {
   auto a = asMixed(adInput);
-  cow_check_occurred(a->getCount(), check_one_bit_ref_array(a->m_kind));
+  cow_check_occurred(a);
   if (a->hasMultipleRefs()) a = a->copyMixedAndResizeIfNeeded();
 
   auto elms = a->data();

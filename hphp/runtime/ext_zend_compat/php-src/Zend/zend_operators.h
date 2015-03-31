@@ -473,7 +473,7 @@ public:
   explicit ZArrVal(TypedValue* tv) : m_tv(tv) {}
   void cowCheck() {
     ArrayData * ad = m_tv->m_data.parr;
-    cow_check_occurred(ad->getCount(), check_one_bit_ref_array(ad->m_kind));
+    cow_check_occurred(ad);
     if (ad->isStatic() || ad->hasMultipleRefs()) {
       forceAsProxyArray ();
     }

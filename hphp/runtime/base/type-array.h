@@ -425,8 +425,7 @@ public:
   template<typename T>
   void removeImpl(const T& key) {
     if (m_arr) {
-      cow_check_occurred(m_arr->getCount(),
-          check_one_bit_ref_array(m_arr->m_kind));
+      cow_check_occurred(m_arr.get());
       ArrayData* escalated = m_arr->remove(key, (m_arr->hasMultipleRefs()));
       if (escalated != m_arr) m_arr = escalated;
     }
@@ -436,8 +435,7 @@ public:
   Variant& lvalAtImpl(const T& key, ACCESSPARAMS_DECL) {
     if (!m_arr) m_arr = ArrayData::Create();
     Variant* ret = nullptr;
-    cow_check_occurred(m_arr->getCount(),
-          check_one_bit_ref_array(m_arr->m_kind));
+    cow_check_occurred(m_arr.get());
     ArrayData* escalated = m_arr->lval(key, ret, m_arr->hasMultipleRefs());
     if (escalated != m_arr) m_arr = escalated;
     assert(ret);

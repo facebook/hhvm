@@ -952,6 +952,7 @@ public:
   std::set<PDOResource*> m_persistent_connections;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(PDORequestData, s_pdo_request_data);
+
 ///////////////////////////////////////////////////////////////////////////////
 // PDO
 

@@ -155,12 +155,6 @@ struct BackEnd : public jit::BackEnd {
     vmRegsUnsafe().stack.top() = (Cell*)sim.xreg(arm::rVmSp.code());
   }
 
-  void moveToAlign(CodeBlock& cb,
-                   MoveToAlignFlags alignment
-                   = MoveToAlignFlags::kJmpTargetAlign) override {
-    // TODO(2967396) implement properly
-  }
-
   UniqueStubs emitUniqueStubs() override {
     return arm::emitUniqueStubs();
   }
@@ -220,19 +214,6 @@ struct BackEnd : public jit::BackEnd {
 
   void emitTraceCall(CodeBlock& cb, Offset pcOff) override {
     // TODO(2967396) implement properly
-  }
-
-  bool isSmashable(Address frontier, int nBytes, int offset = 0) override {
-    // See prepareForSmash().
-    return true;
-  }
-
-  void prepareForSmash(CodeBlock& cb, int nBytes, int offset = 0) override {
-    // Don't do anything. We don't smash code on ARM; we smash non-executable
-    // data -- an 8-byte pointer -- that's embedded in the instruction stream.
-    // As long as that data is 8-byte aligned, it's safe to smash. All
-    // instructions are 4 bytes wide, so we'll just emit a single nop if needed
-    // to align the data.  This is done in emitSmashableJump.
   }
 
   void prepareForTestAndSmash(CodeBlock& cb, int testBytes,
@@ -463,6 +444,24 @@ struct BackEnd : public jit::BackEnd {
   }
 
   void genCodeImpl(IRUnit& unit, AsmInfo*) override;
+
+private:
+  void do_moveToAlign(CodeBlock& cb, MoveToAlignFlags alignment) override {
+    // TODO(2967396) implement properly
+  }
+
+  bool do_isSmashable(Address frontier, int nBytes, int offset) override {
+    // See prepareForSmash().
+    return true;
+  }
+
+  void do_prepareForSmash(CodeBlock& cb, int nBytes, int offset) override {
+    // Don't do anything. We don't smash code on ARM; we smash non-executable
+    // data -- an 8-byte pointer -- that's embedded in the instruction stream.
+    // As long as that data is 8-byte aligned, it's safe to smash. All
+    // instructions are 4 bytes wide, so we'll just emit a single nop if needed
+    // to align the data.  This is done in emitSmashableJump.
+  }
 };
 
 std::unique_ptr<jit::BackEnd> newBackEnd() {

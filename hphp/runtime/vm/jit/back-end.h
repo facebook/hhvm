@@ -71,6 +71,7 @@ struct BackEnd {
 
   virtual Abi abi() = 0;
   virtual size_t cacheLineSize() = 0;
+
   size_t cacheLineMask() {
     assertx((cacheLineSize() & (cacheLineSize()-1)) == 0);
     return cacheLineSize() - 1;
@@ -84,9 +85,13 @@ struct BackEnd {
   virtual bool loadsCell(const IRInstruction& inst) = 0;
 
   virtual void enterTCHelper(TCA start, ActRec* stashedAR) = 0;
-  virtual void moveToAlign(CodeBlock& cb,
-                           MoveToAlignFlags alignment
-                           = MoveToAlignFlags::kJmpTargetAlign) = 0;
+
+  void moveToAlign(CodeBlock& cb,
+                   MoveToAlignFlags alignment =
+                     MoveToAlignFlags::kJmpTargetAlign) {
+    do_moveToAlign(cb, alignment);
+  }
+
   virtual UniqueStubs emitUniqueStubs() = 0;
   virtual TCA emitServiceReqWork(CodeBlock& cb, TCA start,
                                  SRFlags flags, ServiceRequest req,
@@ -103,16 +108,23 @@ struct BackEnd {
   virtual void funcPrologueSmashGuard(TCA prologue, const Func* func) = 0;
   virtual void emitIncStat(CodeBlock& cb, intptr_t disp, int n) = 0;
   virtual void emitTraceCall(CodeBlock& cb, Offset pcOff) = 0;
+
   /*
    * Returns true if the given current frontier can have an nBytes-long
    * instruction written that will be smashable later.
    */
-  virtual bool isSmashable(Address frontier, int nBytes, int offset = 0) = 0;
+  bool isSmashable(Address frontier, int nBytes, int offset = 0) {
+    return do_isSmashable(frontier, nBytes, offset);
+  }
+
   /*
    * Call before emitting a test-jcc sequence. Inserts a nop gap such that after
    * writing a testBytes-long instruction, the frontier will be smashable.
    */
-  virtual void prepareForSmash(CodeBlock& cb, int nBytes, int offset = 0) = 0;
+  void prepareForSmash(CodeBlock& cb, int nBytes, int offset = 0) {
+    do_prepareForSmash(cb, nBytes, offset);
+  }
+
   virtual void prepareForTestAndSmash(CodeBlock& cb, int testBytes,
                                       TestAndSmashFlags flags) = 0;
 
@@ -151,6 +163,11 @@ struct BackEnd {
 
 protected:
   BackEnd() {}
+
+private:
+  virtual void do_moveToAlign(CodeBlock&, MoveToAlignFlags) = 0;
+  virtual bool do_isSmashable(Address, int, int) = 0;
+  virtual void do_prepareForSmash(CodeBlock&, int, int) = 0;
 };
 
 }}

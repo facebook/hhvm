@@ -119,25 +119,6 @@ struct BackEnd final : jit::BackEnd {
     CALLEE_SAVED_BARRIER();
   }
 
-  void moveToAlign(CodeBlock& cb,
-                   MoveToAlignFlags alignment
-                   = MoveToAlignFlags::kJmpTargetAlign) override {
-    size_t x64Alignment;
-
-    switch (alignment) {
-    case MoveToAlignFlags::kJmpTargetAlign:
-      x64Alignment = kJmpTargetAlign;
-      break;
-    case MoveToAlignFlags::kNonFallthroughAlign:
-      x64Alignment = jit::kNonFallthroughAlign;
-      break;
-    case MoveToAlignFlags::kCacheLineAlign:
-      x64Alignment = kCacheLineSize;
-      break;
-    }
-    x64::moveToAlign(cb, x64Alignment);
-  }
-
   UniqueStubs emitUniqueStubs() override {
     return x64::emitUniqueStubs();
   }
@@ -198,16 +179,6 @@ struct BackEnd final : jit::BackEnd {
 
   void emitTraceCall(CodeBlock& cb, Offset pcOff) override {
     x64::emitTraceCall(cb, pcOff);
-  }
-
-  bool isSmashable(Address frontier, int nBytes, int offset = 0) override {
-    return x64::isSmashable(frontier, nBytes, offset);
-  }
-
-  void prepareForSmash(CodeBlock& cb, int nBytes, int offset = 0) override {
-    prepareForSmashImpl(cb, nBytes, offset);
-    mcg->cgFixups().m_alignFixups.emplace(cb.frontier(),
-                                          std::make_pair(nBytes, offset));
   }
 
   void prepareForTestAndSmash(CodeBlock& cb, int testBytes,
@@ -348,6 +319,34 @@ struct BackEnd final : jit::BackEnd {
   }
 
   void genCodeImpl(IRUnit& unit, AsmInfo*) override;
+
+private:
+  void do_moveToAlign(CodeBlock& cb, MoveToAlignFlags alignment) override {
+    size_t x64Alignment;
+
+    switch (alignment) {
+    case MoveToAlignFlags::kJmpTargetAlign:
+      x64Alignment = kJmpTargetAlign;
+      break;
+    case MoveToAlignFlags::kNonFallthroughAlign:
+      x64Alignment = jit::kNonFallthroughAlign;
+      break;
+    case MoveToAlignFlags::kCacheLineAlign:
+      x64Alignment = kCacheLineSize;
+      break;
+    }
+    x64::moveToAlign(cb, x64Alignment);
+  }
+
+  bool do_isSmashable(Address frontier, int nBytes, int offset) override {
+    return x64::isSmashable(frontier, nBytes, offset);
+  }
+
+  void do_prepareForSmash(CodeBlock& cb, int nBytes, int offset) override {
+    prepareForSmashImpl(cb, nBytes, offset);
+    mcg->cgFixups().m_alignFixups.emplace(cb.frontier(),
+                                          std::make_pair(nBytes, offset));
+  }
 };
 
 //////////////////////////////////////////////////////////////////////

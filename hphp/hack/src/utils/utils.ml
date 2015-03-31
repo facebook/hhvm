@@ -140,6 +140,8 @@ module HashSet = (struct
 end : HashSetSig)
 
 let spf = Printf.sprintf
+let print_endlinef fmt = Printf.ksprintf print_endline fmt
+let prerr_endlinef fmt = Printf.ksprintf prerr_endline fmt
 
 let fst3 = function x, _, _ -> x
 let snd3 = function _, x, _ -> x

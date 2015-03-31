@@ -37,6 +37,26 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
  public:
   DECLARE_CLASS_NO_SWEEP(AsyncFunctionWaitHandle)
 
+  class Node final {
+   public:
+    static constexpr ptrdiff_t childOff() {
+      return offsetof(Node, m_child);
+    }
+    static constexpr ptrdiff_t blockableOff() {
+      return offsetof(Node, m_blockable);
+    }
+
+    void setChild(c_WaitableWaitHandle* child);
+    c_WaitableWaitHandle* getChild() const;
+    bool isFirstUnfinishedChild() const;
+    c_AsyncFunctionWaitHandle* getWaitHandle() const;
+    void onUnblocked();
+
+   private:
+    c_WaitableWaitHandle* m_child;
+    AsioBlockable m_blockable;
+  };
+
   explicit c_AsyncFunctionWaitHandle(Class* cls =
       c_AsyncFunctionWaitHandle::classof())
     : c_ResumableWaitHandle(cls, HeaderKind::ResumableObj) {}
@@ -54,11 +74,8 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
   static constexpr ptrdiff_t resumeOffsetOff() {
     return resumableOff() + Resumable::resumeOffsetOff();
   }
-  static constexpr ptrdiff_t childOff() {
-    return offsetof(c_AsyncFunctionWaitHandle, m_child);
-  }
-  static constexpr ptrdiff_t blockableOff() {
-    return offsetof(c_AsyncFunctionWaitHandle, m_blockable);
+  static constexpr ptrdiff_t childrenOff() {
+    return offsetof(c_AsyncFunctionWaitHandle, m_children);
   }
   static c_AsyncFunctionWaitHandle* Create(
     const ActRec* origFp,
@@ -98,8 +115,7 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
   void prepareChild(c_WaitableWaitHandle* child);
 
   // valid if STATE_SCHEDULED || STATE_BLOCKED
-  c_WaitableWaitHandle* m_child;
-  AsioBlockable m_blockable;
+  Node m_children[1];
 };
 
 inline c_AsyncFunctionWaitHandle* c_WaitHandle::asAsyncFunction() {
@@ -109,5 +125,7 @@ inline c_AsyncFunctionWaitHandle* c_WaitHandle::asAsyncFunction() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#include "hphp/runtime/ext/asio/async_function_wait_handle-inl.h"
 
 #endif // incl_HPHP_EXT_ASIO_ASYNC_FUNCTION_WAIT_HANDLE_H_

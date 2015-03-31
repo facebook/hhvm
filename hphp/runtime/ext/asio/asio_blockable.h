@@ -30,7 +30,7 @@ class c_WaitableWaitHandle;
 class AsioBlockable final {
   public:
     enum class Kind : uint8_t {
-      AsyncFunctionWaitHandle,
+      AsyncFunctionWaitHandleNode,
       AsyncGeneratorWaitHandle,
       AwaitAllWaitHandle,
       ConditionWaitHandle,

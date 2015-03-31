@@ -4952,6 +4952,7 @@ void CodeGenerator::cgLdAsyncArParentChain(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
+  typedef c_AsyncFunctionWaitHandle::Node Node;
   auto parentArReg = srcLoc(inst, 0).reg();
   auto childReg = srcLoc(inst, 1).reg();
   auto& v = vmain();
@@ -4963,12 +4964,15 @@ void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
                                + AsioBlockableChain::firstParentOff();
   const int64_t stateToArOff = c_AsyncFunctionWaitHandle::stateOff()
                              - c_AsyncFunctionWaitHandle::arOff();
-  const int64_t nextParentToArOff = c_AsyncFunctionWaitHandle::blockableOff()
+  const int64_t nextParentToArOff = c_AsyncFunctionWaitHandle::childrenOff()
+                                  + Node::blockableOff()
                                   + AsioBlockable::bitsOff()
                                   - c_AsyncFunctionWaitHandle::arOff();
-  const int64_t childToArOff = c_AsyncFunctionWaitHandle::childOff()
+  const int64_t childToArOff = c_AsyncFunctionWaitHandle::childrenOff()
+                             + Node::childOff()
                              - c_AsyncFunctionWaitHandle::arOff();
-  const int64_t blockableToArOff = c_AsyncFunctionWaitHandle::blockableOff()
+  const int64_t blockableToArOff = c_AsyncFunctionWaitHandle::childrenOff()
+                                 + Node::blockableOff()
                                  - c_AsyncFunctionWaitHandle::arOff();
 
   // parent->setState(STATE_BLOCKED);
@@ -4976,7 +4980,7 @@ void CodeGenerator::cgAFWHBlockOn(IRInstruction* inst) {
 
   // parent->m_blockable.m_bits = child->m_parentChain.m_firstParent|Kind::AFWH;
   auto firstParent = v.makeReg();
-  assertx(uint8_t(AsioBlockable::Kind::AsyncFunctionWaitHandle) == 0);
+  assertx(uint8_t(AsioBlockable::Kind::AsyncFunctionWaitHandleNode) == 0);
   v << load{childReg[firstParentOff], firstParent};
   v << store{firstParent, parentArReg[nextParentToArOff]};
 

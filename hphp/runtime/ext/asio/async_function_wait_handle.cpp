@@ -43,7 +43,7 @@ c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
 
   assert(!isRunning());
   frame_free_locals_inl_no_hook<false>(actRec(), actRec()->func()->numLocals());
-  decRefObj(m_child);
+  decRefObj(m_children[0].getChild());
 }
 
 void c_AsyncFunctionWaitHandle::t___construct() {
@@ -86,9 +86,7 @@ void c_AsyncFunctionWaitHandle::PrepareChild(const ActRec* fp,
 void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   setState(STATE_BLOCKED);
   setContextIdx(child->getContextIdx());
-  m_child = child;
-  m_child->getParentChain()
-    .addParent(m_blockable, AsioBlockable::Kind::AsyncFunctionWaitHandle);
+  m_children[0].setChild(child);
   incRefCount();
 }
 
@@ -99,17 +97,18 @@ void c_AsyncFunctionWaitHandle::resume() {
     return;
   }
 
+  auto const child = m_children[0].getChild();
   assert(getState() == STATE_SCHEDULED);
-  assert(m_child->isFinished());
+  assert(child->isFinished());
   setState(STATE_RUNNING);
 
-  if (LIKELY(m_child->isSucceeded())) {
+  if (LIKELY(child->isSucceeded())) {
     // child succeeded, pass the result to the async function
-    g_context->resumeAsyncFunc(resumable(), m_child, m_child->getResult());
+    g_context->resumeAsyncFunc(resumable(), child, child->getResult());
   } else {
     // child failed, raise the exception inside the async function
-    g_context->resumeAsyncFuncThrow(resumable(), m_child,
-                                    m_child->getException());
+    g_context->resumeAsyncFuncThrow(resumable(), child,
+                                    child->getException());
   }
 }
 
@@ -142,9 +141,7 @@ void c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
 
   // Set up the dependency.
   setState(STATE_BLOCKED);
-  m_child = child;
-  m_child->getParentChain()
-    .addParent(m_blockable, AsioBlockable::Kind::AsyncFunctionWaitHandle);
+  m_children[0].setChild(child);
 }
 
 void c_AsyncFunctionWaitHandle::ret(Cell& result) {
@@ -246,8 +243,7 @@ String c_AsyncFunctionWaitHandle::getName() {
 
 c_WaitableWaitHandle* c_AsyncFunctionWaitHandle::getChild() {
   if (getState() == STATE_BLOCKED) {
-    assert(m_child);
-    return m_child;
+    return m_children[0].getChild();
   } else {
     assert(getState() == STATE_SCHEDULED || getState() == STATE_RUNNING);
     return nullptr;
@@ -258,8 +254,7 @@ void c_AsyncFunctionWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
   switch (getState()) {
     case STATE_BLOCKED:
       // enter child into new context recursively
-      assert(m_child);
-      m_child->enterContext(ctx_idx);
+      m_children[0].getChild()->enterContext(ctx_idx);
       setContextIdx(ctx_idx);
       break;
 

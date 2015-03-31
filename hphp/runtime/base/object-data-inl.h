@@ -144,23 +144,16 @@ inline bool ObjectData::isCollection() const {
 }
 
 inline bool ObjectData::isMutableCollection() const {
-  return HPHP::isMutableCollection(getCollectionType());
+  return isCollection() && HPHP::isMutableCollection(collectionType());
 }
 
 inline bool ObjectData::isImmutableCollection() const {
-  return HPHP::isImmutableCollection(getCollectionType());
+  return isCollection() && HPHP::isImmutableCollection(collectionType());
 }
 
 inline CollectionType ObjectData::collectionType() const {
   assert(isValidCollection(static_cast<CollectionType>(m_kind)));
   return static_cast<CollectionType>(m_kind);
-}
-
-inline CollectionType ObjectData::getCollectionType() const {
-  assert(isValidCollection(static_cast<CollectionType>(m_kind)) ||
-         !isCollection());
-  return isCollection() ? static_cast<CollectionType>(m_kind) :
-         CollectionType::Invalid;
 }
 
 inline bool ObjectData::isIterator() const {

@@ -46,16 +46,16 @@ void c_GenMapWaitHandle::ti_setoncreatecallback(const Variant& callback) {
 }
 
 Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
+  ObjectData* obj;
   if (UNLIKELY(!dependencies.isObject() ||
-      dependencies.getObjectData()->getCollectionType() !=
-        CollectionType::Map)) {
+      !(obj = dependencies.getObjectData())->isCollection() ||
+      obj->collectionType() != CollectionType::Map)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Expected dependencies to be an instance of Map"));
     throw e;
   }
-  assert(dependencies.getObjectData()->instanceof(c_Map::classof()));
-  auto deps = SmartPtr<c_Map>::attach(
-    c_Map::Clone(dependencies.getObjectData()));
+  assert(obj->instanceof(c_Map::classof()));
+  auto deps = SmartPtr<c_Map>::attach(c_Map::Clone(obj));
   for (ssize_t iter_pos = deps->iter_begin();
        deps->iter_valid(iter_pos);
        iter_pos = deps->iter_next(iter_pos)) {

@@ -47,16 +47,16 @@ void c_GenVectorWaitHandle::ti_setoncreatecallback(const Variant& callback) {
 }
 
 Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
+  ObjectData* obj;
   if (UNLIKELY(!dependencies.isObject() ||
-      dependencies.getObjectData()->getCollectionType() !=
-        CollectionType::Vector)) {
+      !(obj = dependencies.getObjectData())->isCollection() ||
+      obj->collectionType() != CollectionType::Vector)) {
     Object e(SystemLib::AllocInvalidArgumentExceptionObject(
       "Expected dependencies to be an instance of Vector"));
     throw e;
   }
-  assert(dependencies.getObjectData()->instanceof(c_Vector::classof()));
-  auto deps = SmartPtr<c_Vector>::attach(
-    c_Vector::Clone(dependencies.getObjectData()));
+  assert(obj->instanceof(c_Vector::classof()));
+  auto deps = SmartPtr<c_Vector>::attach(c_Vector::Clone(obj));
   for (int64_t iter_pos = 0; iter_pos < deps->size(); ++iter_pos) {
     Cell* current = deps->at(iter_pos);
 

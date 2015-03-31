@@ -170,13 +170,11 @@ struct ObjectData {
   // Whether the object implements Iterator.
   bool isIterator() const;
 
-  // Whether the object is a collection.
+  // Whether the object is a collection, [and [not] mutable].
   bool isCollection() const;
   bool isMutableCollection() const;
   bool isImmutableCollection() const;
-
-  CollectionType collectionType() const; // must be isCollection()
-  CollectionType getCollectionType() const; // type or CT::Invalid
+  CollectionType collectionType() const; // asserts(isCollection())
 
   bool getAttribute(Attribute) const;
   void setAttribute(Attribute) const;

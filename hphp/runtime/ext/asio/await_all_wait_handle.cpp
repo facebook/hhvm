@@ -138,31 +138,28 @@ retry:
 }
 
 Object c_AwaitAllWaitHandle::ti_frommap(const Variant& dependencies) {
-  if (UNLIKELY(!dependencies.isObject() ||
-               !isMapCollection(
-                 dependencies.getObjectData()->getCollectionType()))) {
-    failMap();
+  if (LIKELY(dependencies.isObject())) {
+    auto obj = dependencies.getObjectData();
+    if (LIKELY(obj->isCollection() && isMapCollection(obj->collectionType()))) {
+      assert(obj->instanceof(c_Map::classof()) ||
+             obj->instanceof(c_ImmMap::classof()));
+      return FromMap(static_cast<BaseMap*>(obj));
+    }
   }
-  assert(
-    dependencies.getObjectData()->instanceof(c_Map::classof()) ||
-    dependencies.getObjectData()->instanceof(c_ImmMap::classof())
-  );
-
-  return FromMap(static_cast<BaseMap*>(dependencies.getObjectData()));
+  failMap();
 }
 
 Object c_AwaitAllWaitHandle::ti_fromvector(const Variant& dependencies) {
-  if (UNLIKELY(!dependencies.isObject() ||
-               !isVectorCollection(
-                 dependencies.getObjectData()->getCollectionType()))) {
-    failVector();
+  if (LIKELY(dependencies.isObject())) {
+    auto obj = dependencies.getObjectData();
+    if (LIKELY(obj->isCollection() &&
+               isVectorCollection(obj->collectionType()))) {
+      assert(obj->instanceof(c_Vector::classof()) ||
+             obj->instanceof(c_ImmVector::classof()));
+      return FromVector(static_cast<BaseVector*>(obj));
+    }
   }
-  assert(
-    dependencies.getObjectData()->instanceof(c_Vector::classof()) ||
-    dependencies.getObjectData()->instanceof(c_ImmVector::classof())
-  );
-
-  return FromVector(static_cast<BaseVector*>(dependencies.getObjectData()));
+  failVector();
 }
 
 Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {

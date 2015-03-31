@@ -96,6 +96,7 @@ bool is_mock_class(borrowed_ptr<const php::Class> cls) {
 }
 
 SString collectionTypeToString(CollectionType ctype) {
+  assert(isValidCollection(ctype));
   switch (ctype) {
   case CollectionType::Vector:
     return s_Vector.get();
@@ -111,10 +112,7 @@ SString collectionTypeToString(CollectionType ctype) {
     return s_ImmSet.get();
   case CollectionType::ImmMap:
     return s_ImmMap.get();
-  case CollectionType::Invalid:
-    break;
   }
-  assert(!"Unknown Collection Type");
   not_reached();
 }
 

@@ -287,8 +287,6 @@ bool ArrayIter::endHelper() const  {
         return m_pos >= static_cast<c_Pair*>(obj)->size();
       case CollectionType::ImmVector:
         return m_pos >= static_cast<c_ImmVector*>(obj)->size();
-      case CollectionType::Invalid:
-        break;
     }
   } else {
     return !obj->o_invoke_few_args(s_valid, 0).toBoolean();
@@ -328,8 +326,6 @@ void ArrayIter::nextHelper() {
         m_pos = set->iter_next(m_pos);
         return;
       }
-      case CollectionType::Invalid:
-        break;
     }
   } else {
     obj->o_invoke_few_args(s_next, 0);
@@ -366,8 +362,6 @@ Variant ArrayIter::firstHelper() {
         }
         return set->iter_key(m_pos);
       }
-      case CollectionType::Invalid:
-        break;
     }
   }
   return obj->o_invoke_few_args(s_key, 0);
@@ -421,8 +415,6 @@ Variant ArrayIter::second() {
         assert(m_version == set->getVersion());
         return tvAsCVarRef(set->iter_value(m_pos));
       }
-      case CollectionType::Invalid:
-        break;
     }
   }
   return obj->o_invoke_few_args(s_current, 0);
@@ -487,8 +479,6 @@ const Variant& ArrayIter::secondRefPlus() {
         assert(m_version == set->getVersion());
         return tvAsCVarRef(set->iter_value(m_pos));
       }
-      case CollectionType::Invalid:
-        break;
     }
   }
   throw_param_is_not_container();
@@ -1451,8 +1441,6 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                                      dest,
                                      static_cast<c_ImmSet*>(obj),
                                      valOut, keyOut);
-      case CollectionType::Invalid:
-        break;
     }
   }
   return new_iter_object_any(dest, obj, ctx, valOut, keyOut);
@@ -1466,7 +1454,7 @@ static int64_t iter_next_collection(ArrayIter* ai,
                                     TypedValue* keyOut,
                                     CollectionType type) {
   assert(!ai->hasArrayData());
-  assert(type != CollectionType::Invalid);
+  assert(isValidCollection(type));
   switch (type) {
     case CollectionType::Vector:
       return iterNext<c_Vector, ArrayIter::Versionable>(
@@ -1487,8 +1475,6 @@ static int64_t iter_next_collection(ArrayIter* ai,
     case CollectionType::ImmSet:
       return iterNext<c_ImmSet, ArrayIter::VersionableSparse>(
         ai, valOut, keyOut);
-    case CollectionType::Invalid:
-      break;
   }
   not_reached();
 }

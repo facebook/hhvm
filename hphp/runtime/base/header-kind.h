@@ -46,7 +46,6 @@ inline bool isObjectKind(HeaderKind k) {
 
 enum class CollectionType : uint8_t { // Subset of possible HeaderKind values
   // Values must be contiguous integers (for ArrayIter::initFuncTable).
-  Invalid = uint8_t(HeaderKind::AwaitAllWH),
   Vector = uint8_t(HeaderKind::Vector),
   Map = uint8_t(HeaderKind::Map),
   Set = uint8_t(HeaderKind::Set),

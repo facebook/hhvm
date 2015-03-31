@@ -607,8 +607,7 @@ Variant HHVM_FUNCTION(array_pop,
   }
   assert(container->m_type == KindOfObject);
   auto* obj = container->m_data.pobj;
-  assert(obj->isCollection());
-  switch (obj->getCollectionType()) {
+  switch (obj->collectionType()) {
     case CollectionType::Vector: return static_cast<c_Vector*>(obj)->t_pop();
     case CollectionType::Map:    return static_cast<c_Map*>(obj)->pop();
     case CollectionType::Set:    return static_cast<c_Set*>(obj)->pop();
@@ -616,7 +615,6 @@ Variant HHVM_FUNCTION(array_pop,
     case CollectionType::ImmVector:
     case CollectionType::ImmMap:
     case CollectionType::ImmSet:
-    case CollectionType::Invalid:
       break;
   }
   assert(false);
@@ -721,29 +719,38 @@ Variant HHVM_FUNCTION(array_push,
 
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    auto collection_type = obj->getCollectionType();
-    if (collection_type == CollectionType::Vector) {
-      c_Vector* vec = static_cast<c_Vector*>(obj);
-      vec->reserve(vec->size() + args.size() + 1);
-      vec->t_add(var);
-      for (ArrayIter iter(args); iter; ++iter) {
-        vec->t_add(iter.second());
+    if (obj->isCollection()) {
+      switch (obj->collectionType()) {
+        case CollectionType::Vector: {
+          c_Vector* vec = static_cast<c_Vector*>(obj);
+          vec->reserve(vec->size() + args.size() + 1);
+          vec->t_add(var);
+          for (ArrayIter iter(args); iter; ++iter) {
+            vec->t_add(iter.second());
+          }
+          return vec->size();
+        }
+        case CollectionType::Set: {
+          c_Set* set = static_cast<c_Set*>(obj);
+          set->reserve(set->size() + args.size() + 1);
+          set->t_add(var);
+          for (ArrayIter iter(args); iter; ++iter) {
+            set->t_add(iter.second());
+          }
+          return set->size();
+        }
+        case CollectionType::Map:
+        case CollectionType::Pair:
+        case CollectionType::ImmVector:
+        case CollectionType::ImmMap:
+        case CollectionType::ImmSet:
+          // other collection types are unsupported:
+          //  - mapping collections require a key
+          //  - immutable collections don't allow insertion
+          break;
       }
-      return vec->size();
-    } else if (collection_type == CollectionType::Set) {
-      c_Set* set = static_cast<c_Set*>(obj);
-      set->reserve(set->size() + args.size() + 1);
-      set->t_add(var);
-      for (ArrayIter iter(args); iter; ++iter) {
-        set->t_add(iter.second());
-      }
-      return set->size();
     }
-    // other collection types are unsupported:
-    //  - mapping collections require a key
-    //  - frozen collections don't allow insertion
   }
-
   throw_expected_array_or_collection_exception();
   return init_null();
 }
@@ -816,8 +823,7 @@ Variant HHVM_FUNCTION(array_shift,
   }
   assert(cell_array->m_type == KindOfObject);
   auto* obj = cell_array->m_data.pobj;
-  assert(obj->isCollection());
-  switch (obj->getCollectionType()) {
+  switch (obj->collectionType()) {
     case CollectionType::Vector: {
       auto* vec = static_cast<c_Vector*>(obj);
       if (!vec->size()) return init_null();
@@ -837,7 +843,6 @@ Variant HHVM_FUNCTION(array_shift,
     case CollectionType::ImmVector:
     case CollectionType::ImmMap:
     case CollectionType::ImmSet:
-    case CollectionType::Invalid:
       break;
   }
   raise_warning(
@@ -1035,7 +1040,7 @@ Variant HHVM_FUNCTION(array_unshift,
   assert(cell_array->m_type == KindOfObject);
   auto* obj = cell_array->m_data.pobj;
   assert(obj->isCollection());
-  switch (obj->getCollectionType()) {
+  switch (obj->collectionType()) {
     case CollectionType::Vector: {
       auto* vec = static_cast<c_Vector*>(obj);
       if (!args.empty()) {
@@ -1065,7 +1070,6 @@ Variant HHVM_FUNCTION(array_unshift,
     case CollectionType::ImmVector:
     case CollectionType::ImmMap:
     case CollectionType::ImmSet:
-    case CollectionType::Invalid:
       break;
   }
   raise_warning("%s() expects parameter 1 to be an array, Vector, or Set",
@@ -2291,7 +2295,8 @@ php_sort(VRefParam container, int sort_flags,
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    if (obj->getCollectionType() == CollectionType::Vector) {
+    if (obj->isCollection() &&
+        obj->collectionType() == CollectionType::Vector) {
       c_Vector* vec = static_cast<c_Vector*>(obj);
       vec->sort(sort_flags, ascending);
       return true;
@@ -2324,11 +2329,13 @@ php_asort(VRefParam container, int sort_flags,
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    if (obj->getCollectionType() == CollectionType::Map ||
-        obj->getCollectionType() == CollectionType::Set) {
-      HashCollection* hc = static_cast<HashCollection*>(obj);
-      hc->asort(sort_flags, ascending);
-      return true;
+    if (obj->isCollection()) {
+      auto type = obj->collectionType();
+      if (type == CollectionType::Map || type == CollectionType::Set) {
+        HashCollection* hc = static_cast<HashCollection*>(obj);
+        hc->asort(sort_flags, ascending);
+        return true;
+      }
     }
   }
   throw_expected_array_or_collection_exception();
@@ -2355,11 +2362,13 @@ php_ksort(VRefParam container, int sort_flags, bool ascending,
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    if (obj->getCollectionType() == CollectionType::Map ||
-        obj->getCollectionType() == CollectionType::Set) {
-      HashCollection* hc = static_cast<HashCollection*>(obj);
-      hc->ksort(sort_flags, ascending);
-      return true;
+    if (obj->isCollection()) {
+      auto type = obj->collectionType();
+      if (type == CollectionType::Map || type == CollectionType::Set) {
+        HashCollection* hc = static_cast<HashCollection*>(obj);
+        hc->ksort(sort_flags, ascending);
+        return true;
+      }
     }
   }
   throw_expected_array_or_collection_exception();
@@ -2437,9 +2446,11 @@ bool HHVM_FUNCTION(usort,
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    if (obj->getCollectionType() == CollectionType::Vector) {
-      c_Vector* vec = static_cast<c_Vector*>(obj);
-      return vec->usort(cmp_function);
+    if (obj->isCollection()) {
+      if (obj->collectionType() == CollectionType::Vector) {
+        c_Vector* vec = static_cast<c_Vector*>(obj);
+        return vec->usort(cmp_function);
+      }
     }
     // other collections are not supported:
     //  - Maps and Sets require associative sort
@@ -2464,10 +2475,12 @@ bool HHVM_FUNCTION(uasort,
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    if (obj->getCollectionType() == CollectionType::Map ||
-        obj->getCollectionType() == CollectionType::Set) {
-      HashCollection* hc = static_cast<HashCollection*>(obj);
-      return hc->uasort(cmp_function);
+    if (obj->isCollection()) {
+      auto type = obj->collectionType();
+      if (type == CollectionType::Map || type == CollectionType::Set) {
+        HashCollection* hc = static_cast<HashCollection*>(obj);
+        return hc->uasort(cmp_function);
+      }
     }
     // other collections are not supported:
     //  - Vectors require a non-associative sort
@@ -2487,10 +2500,12 @@ bool HHVM_FUNCTION(uksort,
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
-    if (obj->getCollectionType() == CollectionType::Map ||
-        obj->getCollectionType() == CollectionType::Set) {
-      HashCollection* hc = static_cast<HashCollection*>(obj);
-      return hc->uksort(cmp_function);
+    if (obj->isCollection()) {
+      auto type = obj->collectionType();
+      if (type == CollectionType::Map || type == CollectionType::Set) {
+        HashCollection* hc = static_cast<HashCollection*>(obj);
+        return hc->uksort(cmp_function);
+      }
     }
     // other collections are not supported:
     //  - Vectors require a non-associative sort

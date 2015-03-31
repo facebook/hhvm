@@ -31,6 +31,7 @@ type source_pos = char_pos * source_tag
 
 val region:
   FileInfo.mode option list ->
+  FormatConfig.t ->
   Relative_path.t ->
   start:int ->
   end_:int ->
@@ -40,11 +41,13 @@ val region:
 val program:
   ?no_trailing_commas:bool ->
   FileInfo.mode option list ->
+  FormatConfig.t ->
   Relative_path.t -> string ->
   string return
 
 val program_with_source_metadata:
   FileInfo.mode option list ->
+  FormatConfig.t ->
   Relative_path.t ->
   string ->
   (string * source_pos list) return

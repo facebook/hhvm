@@ -174,6 +174,7 @@ type env = {
       standard php parser does not support trailing commas, but hhvm does.
     *)
     no_trailing_commas : bool             ;
+    config : FormatConfig.t               ;
   }
 
 (*****************************************************************************)
@@ -198,7 +199,7 @@ type saved_env = {
     sv_source_pos_l  : source_pos list     ;
   }
 
-let empty file lexbuf from to_ keep_source_pos no_trailing_commas = {
+let empty file lexbuf from to_ config keep_source_pos no_trailing_commas = {
   margin     = ref 0                          ;
   last       = ref Newline                    ;
   last_token = ref Terror                     ;
@@ -211,8 +212,8 @@ let empty file lexbuf from to_ keep_source_pos no_trailing_commas = {
   priority   = 0                              ;
   char_pos   = ref 0                          ;
   abs_pos    = ref 0                          ;
-  char_size  = 80                             ;
-  char_break = 80                             ;
+  char_size  = FormatConfig.line_width config ;
+  char_break = FormatConfig.line_width config ;
   break_on   = max_int                        ;
   line       = ref 0                          ;
   report_fit = false                          ;
@@ -228,6 +229,7 @@ let empty file lexbuf from to_ keep_source_pos no_trailing_commas = {
   keep_source_pos                             ;
   source_pos_l  = ref []                      ;
   no_trailing_commas = no_trailing_commas     ;
+  config = config                             ;
 }
 
 (* Saves all the references of the environment *)
@@ -294,7 +296,7 @@ let make_tokenizer next_token env =
   if pos >= env.stop then Teof else
   let tok = next_token env.lexbuf in
   let new_pos = env.lexbuf.Lexing.lex_curr_pos in
-  env.silent := (new_pos <= env.from || pos >= env.to_ - 1);
+  env.silent := (new_pos <= env.from || pos > env.to_);
   env.last_token := tok;
   let str_value = Lexing.lexeme env.lexbuf in
   env.last_str := str_value;
@@ -586,7 +588,7 @@ end = struct
     env.margin := margin_cpy;
     result
 
-  let right env f = right_n 2 env f
+  let right env f = right_n (FormatConfig.indent_offset env.config) env f
   let right_fun f = fun env -> right env f
 
   let out s env =
@@ -1145,7 +1147,7 @@ type 'a return =
   | Internal_error
   | Success of 'a
 
-let rec entry ~keep_source_metadata ~no_trailing_commas ~modes
+let rec entry ~keep_source_metadata ~config ~no_trailing_commas ~modes
     file from to_ content k =
   try
     let errorl, () = Errors.do_ begin fun () ->
@@ -1157,7 +1159,7 @@ let rec entry ~keep_source_metadata ~no_trailing_commas ~modes
     then Parsing_error errorl
     else begin
       let lb = Lexing.from_string content in
-      let env = empty file lb from to_ keep_source_metadata no_trailing_commas in
+      let env = empty file lb from to_ config keep_source_metadata no_trailing_commas in
       header env;
       Success (k env)
     end
@@ -1696,8 +1698,9 @@ and xhp_multi env =
         name env;
         expect_xhp ">" env;
   end;
-  if next_token env <> Tsc
-  then newline env
+  match next_token env with
+    | Tsc | Tnewline -> ()
+    | _ -> newline env
 
 and xhp_attribute_list ~break env = wrap_xhp env begin function
   | Tword ->
@@ -1958,7 +1961,7 @@ and if_ ~is_toplevel env =
 and else_ ~is_toplevel env =
   match next_token_str env with
   | "else" | "elseif" ->
-      space env;
+      newline env;
       else_word ~is_toplevel env;
       else_ ~is_toplevel env
   | _ -> newline env
@@ -2041,7 +2044,11 @@ and switch env =
   line env [expect "}"]
 
 and case_list env =
-  right env begin fun env ->
+  let margin = if FormatConfig.indent_case env.config then
+    FormatConfig.indent_offset env.config
+  else
+    0 in
+  right_n margin env begin fun env ->
     list env case
   end
 
@@ -2132,8 +2139,37 @@ and expr_paren env =
 
 and expr_break_tarrow env =
   let env = { env with break_on = tarrow_prec } in
-  expr_atomic env;
-  right env (fun env -> ignore (expr_remain_loop 0 env))
+  let did_format = ref false in
+  (* If the align_cascaded_calls option is set, look for $foo-> and
+   * use that to set the margin. Otherwise, just use 'right' *)
+  if FormatConfig.align_cascaded_calls env.config
+  then try_token env Tlvar begin fun env ->
+    last_token env;
+    match next_token env with
+    | Tarrow | Tnsarrow ->
+      let margin = (!(env.char_pos) - 1) in
+      out_next env;
+      margin_set margin env begin fun env ->
+        wrap env begin function
+          | Tword -> last_token env
+          | Tlcb ->
+             last_token env;
+             expr env;
+             expect "}" env
+          | _ ->
+             back env;
+             expr_atomic env
+        end;
+        did_format := true;
+        ignore (expr_remain_loop 0 env)
+      end
+    | _ -> ()
+  end;
+  if not !(did_format)
+  then begin
+    expr_atomic env;
+    right env (fun env -> ignore (expr_remain_loop 0 env))
+  end
 
 and expr env =
   let break_on = ref 0 in
@@ -2619,20 +2655,20 @@ and arrow_opt env =
 (* The outside API *)
 (*****************************************************************************)
 
-let region modes file ~start ~end_ content =
+let region modes config file ~start ~end_ content =
   entry ~keep_source_metadata:false file start end_ content
-    ~no_trailing_commas:false ~modes
+    ~no_trailing_commas:false ~modes ~config
     (fun env -> Buffer.contents env.buffer)
 
-let program ?no_trailing_commas:(no_trailing_commas = false) modes file
+let program ?no_trailing_commas:(no_trailing_commas = false) modes config file
     content =
   entry ~keep_source_metadata:false file 0 max_int content
-    ~no_trailing_commas:no_trailing_commas ~modes
+    ~no_trailing_commas:no_trailing_commas ~modes ~config
     (fun env -> Buffer.contents env.buffer)
 
-let program_with_source_metadata modes file content =
+let program_with_source_metadata modes config file content =
   entry ~keep_source_metadata:true file 0 max_int content
-    ~no_trailing_commas:false ~modes begin
+    ~no_trailing_commas:false ~modes ~config begin
     fun env ->
       Buffer.contents env.buffer, List.rev !(env.source_pos_l)
   end

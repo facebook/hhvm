@@ -74,6 +74,21 @@ void simplify(IRUnit&, IRInstruction*);
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * Return true if the given AssertType-like instruction can be nop'd.
+ *
+ * This is exposed so that the preOptimizeAssertX() methods can share this
+ * logic.
+ *
+ * WARNING: Under certain (very uncommon) conditions, we may find that external
+ * information (e.g., from static analysis) conflicts with the instruction
+ * stream we have built.  This function will detect this scenario and will punt
+ * the entire trace in this case.
+ */
+bool canSimplifyAssertType(const IRInstruction* inst,
+                           Type srcType,
+                           bool srcMightRelax);
+
+/*
  * Propagate very simple copies through Mov instructions.
  *
  * More complicated copy-propagation is performed in the Simplifier.

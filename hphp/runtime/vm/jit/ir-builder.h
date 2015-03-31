@@ -341,6 +341,7 @@ private:
 
   bool m_enableSimplification{false};
   bool m_constrainGuards;
+  bool m_reoptimizing{false};
 
   GuardConstraints m_constraints;
 

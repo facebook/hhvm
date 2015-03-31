@@ -20,18 +20,22 @@
 #include <sstream>
 #include <type_traits>
 
+#include "hphp/util/overflow.h"
+#include "hphp/util/trace.h"
+
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
-#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
-#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/punt.h"
+#include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/util/overflow.h"
 
 namespace HPHP { namespace jit {
 
@@ -1627,20 +1631,28 @@ SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
 
   if (!srcType.maybe(typeParam)) {
-    /* This check will always fail. Convert the check into a Jmp. The rest of
-     * the block will be unreachable. */
+    // This check will always fail. Convert the check into a Jmp. The rest of
+    // the block will be unreachable.
     gen(env, Jmp, inst->taken());
     return inst->src(0);
   }
 
   auto const newType = srcType & typeParam;
   if (srcType <= newType) {
-    /* The type of the src is the same or more refined than type, so the guard
-     * is unnecessary. */
+    // The type of the src is the same or more refined than type, so the guard
+    // is unnecessary.
     return inst->src(0);
   }
 
   return nullptr;
+}
+
+SSATmp* simplifyAssertType(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+
+  return canSimplifyAssertType(inst, src->type(), mightRelax(env, src))
+    ? src
+    : nullptr;
 }
 
 SSATmp* decRefImpl(State& env, const IRInstruction* inst) {
@@ -1914,7 +1926,7 @@ SSATmp* simplifyAdjustSP(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyOrdStr(State& env, const IRInstruction *inst) {
+SSATmp* simplifyOrdStr(State& env, const IRInstruction* inst) {
   const auto src = inst->src(0);
   if (src->hasConstVal(Type::Str)) {
     // a static string is passed in, resolve with a constant.
@@ -1922,6 +1934,25 @@ SSATmp* simplifyOrdStr(State& env, const IRInstruction *inst) {
     return cns(env, int64_t{first});
   }
   return nullptr;
+}
+
+SSATmp* ldImpl(State& env, const IRInstruction* inst) {
+  if (env.typesMightRelax) return nullptr;
+
+  auto const t = inst->typeParam();
+
+  return t.hasConstVal() ||
+         t.subtypeOfAny(Type::Uninit, Type::InitNull, Type::Nullptr)
+    ? cns(env, t)
+    : nullptr;
+}
+
+SSATmp* simplifyLdLoc(State& env, const IRInstruction* inst) {
+  return ldImpl(env, inst);
+}
+
+SSATmp* simplifyLdStk(State& env, const IRInstruction* inst) {
+  return ldImpl(env, inst);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1944,6 +1975,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(Ceil)
   X(CheckInit)
   X(CheckType)
+  X(AssertType)
   X(CheckPackedArrayBounds)
   X(CoerceCellToBool)
   X(CoerceCellToDbl)
@@ -2035,6 +2067,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ArrayGet)
   X(AdjustSP)
   X(OrdStr)
+  X(LdLoc)
+  X(LdStk)
   default: break;
   }
 #undef X
@@ -2043,6 +2077,75 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
+}
+
+//////////////////////////////////////////////////////////////////////
+
+bool canSimplifyAssertType(const IRInstruction* inst,
+                           const Type srcType,
+                           bool srcMightRelax) {
+  assert(inst->is(AssertType, AssertLoc, AssertStk));
+
+  auto const typeParam = inst->typeParam();
+
+  if (!srcType.maybe(typeParam)) {
+    // If both types are boxed, this is okay and even expected as a means to
+    // update the hint for the inner type.
+    if (srcType <= Type::BoxedCell &&
+        typeParam <= Type::BoxedCell) {
+      return false;
+    }
+
+    // We got external information (probably from static analysis) that
+    // conflicts with what we've built up so far.  There's no reasonable way to
+    // continue here: we can't properly fatal the request because we can't make
+    // a catch trace or SpillStack without HhbcTranslator, and we can't punt on
+    // just this instruction because we might not be in the initial translation
+    // phase, and we can't just plow on forward since we'll probably generate
+    // malformed IR.  Since this case is very rare, just punt on the whole
+    // trace so it gets interpreted.
+    TRACE_PUNT("Invalid AssertTypeOp");
+  }
+
+  // Asserting in these situations doesn't add any information.
+  if (typeParam == Type::Cls && srcType <= Type::Cls) return true;
+  if (typeParam == Type::Gen && srcType <= Type::Gen) return true;
+
+  auto const newType = srcType & typeParam;
+
+  if (srcType <= newType) {
+    // The src type is at least as good as the new type.  Eliminate this
+    // AssertType if the src type won't relax.  We do this to avoid eliminating
+    // apparently redundant assert opcodes that may become useful after prior
+    // guards are relaxed.
+    if (!srcMightRelax) return true;
+
+    if (srcType < newType) {
+      // This can happen because of limitations in how Type::operator& handles
+      // specialized types: sometimes it returns a Type that's wider than it
+      // needs to be.  It shouldn't affect correctness but it can cause us to
+      // miss out on some perf.
+      FTRACE_MOD(Trace::hhir, 1,
+                 "Suboptimal AssertTypeOp: refineType({}, {}) -> {} in {}\n",
+                 srcType, typeParam, newType, *inst);
+
+      // We don't currently support intersecting RepoAuthType::Arrays
+      // (t4473238), so we might be here because srcType and typeParam have
+      // different RATArrays.  If that's the case, and if typeParam provides no
+      // other useful information, we can unconditionally eliminate this
+      // instruction: RATArrays never come from guards so we can't miss out on
+      // anything by doing so.
+      if (srcType < Type::Arr &&
+          srcType.arrSpec().type() &&
+          typeParam < Type::Arr &&
+          typeParam.arrSpec().type() &&
+          !typeParam.arrSpec().kind()) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 //////////////////////////////////////////////////////////////////////

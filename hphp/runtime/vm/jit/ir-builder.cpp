@@ -15,22 +15,25 @@
 */
 
 #include "hphp/runtime/vm/jit/ir-builder.h"
+
 #include <algorithm>
 #include <utility>
 
 #include <folly/ScopeGuard.h>
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/trace.h"
-#include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/guard-relaxation.h"
-#include "hphp/runtime/vm/jit/mutation.h"
-#include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/punt.h"
+
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/util/assertions.h"
+#include "hphp/runtime/vm/jit/guard-relaxation.h"
+#include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/punt.h"
+#include "hphp/runtime/vm/jit/simplify.h"
+#include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/translator.h"
 
 namespace HPHP { namespace jit {
 
@@ -222,10 +225,6 @@ SSATmp* IRBuilder::preOptimizeCheckTypeOp(IRInstruction* inst, Type oldType) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeCheckType(IRInstruction* inst) {
-  return preOptimizeCheckTypeOp(inst, inst->src(0)->type());
-}
-
 SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
   auto const offset = inst->extra<CheckStk>()->irSpOffset;
 
@@ -274,67 +273,20 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
          *inst, oldType,
          oldVal ? oldVal->toString() : "nullptr",
          typeSrc ? typeSrc->toString() : "nullptr");
-  auto const typeParam = inst->typeParam();
 
-  if (!oldType.maybe(typeParam)) {
-    // If both types are boxed this is ok and even expected as a means to
-    // update the hint for the inner type.
-    if (oldType <= Type::BoxedCell &&
-        typeParam <= Type::BoxedCell) {
-      return nullptr;
-    }
-
-    // We got external information (probably from static analysis) that
-    // conflicts with what we've built up so far. There's no reasonable way to
-    // continue here: we can't properly fatal the request because we can't make
-    // a catch trace or SpillStack without HhbcTranslator, we can't punt on
-    // just this instruction because we might not be in the initial translation
-    // phase, and we can't just plow on forward since we'll probably generate
-    // malformed IR. Since this case is very rare, just punt on the whole trace
-    // so it gets interpreted.
-    TRACE_PUNT("Invalid AssertTypeOp");
+  if (canSimplifyAssertType(inst, oldType, typeMightRelax(oldVal))) {
+    return fwdGuardSource(inst);
   }
 
-  // Asserting in these situations doesn't add any information.
-  if (typeParam == Type::Cls && oldType <= Type::Cls) return inst->src(0);
-  if (typeParam == Type::Gen && oldType <= Type::Gen) return inst->src(0);
+  auto const newType = oldType & inst->typeParam();
 
-  auto const newType = oldType & typeParam;
-
-  if (oldType <= newType) {
-    // oldType is at least as good as the new type. Eliminate this
-    // AssertTypeOp, but only if the src type won't relax, or the source value
-    // is another assert that's good enough. We do this to avoid eliminating
-    // apparently redundant assert opcodes that may become useful after prior
-    // guards are relaxed.
-    if (!typeMightRelax(oldVal) ||
-        (typeSrc && typeSrc->is(AssertType, AssertLoc, AssertStk) &&
-         typeSrc->typeParam() <= inst->typeParam())) {
-      return fwdGuardSource(inst);
-    }
-
-    if (oldType < newType) {
-      // This can happen because of limitations in how Type::operator& (used in
-      // refinedType()) handles specialized types: sometimes it returns a Type
-      // that's wider than it could be. It shouldn't affect correctness but it
-      // can cause us to miss out on some perf.
-      ITRACE(1, "Suboptimal AssertTypeOp: refineType({}, {}) -> {} in {}\n",
-             oldType, typeParam, newType, *inst);
-
-      // We don't currently support intersecting RepoAuthType::Arrays
-      // (t4473238), so we might be here because oldType and typeParam have
-      // different RATArrays. If that's the case and typeParam provides no
-      // other useful information we can unconditionally eliminate this
-      // instruction: RATArrays never come from guards so we can't miss out on
-      // anything by doing so.
-      if (oldType < Type::Arr &&
-          oldType.arrSpec().type() &&
-          typeParam < Type::Arr &&
-          typeParam.arrSpec().type() &&
-          !typeParam.arrSpec().kind()) {
-        return fwdGuardSource(inst);
-      }
-    }
+  // Eliminate this AssertTypeOp if the source value is another assert that's
+  // good enough.
+  if (oldType <= newType &&
+      typeSrc &&
+      typeSrc->is(AssertType, AssertLoc, AssertStk) &&
+      typeSrc->typeParam() <= inst->typeParam()) {
+    return fwdGuardSource(inst);
   }
 
   return nullptr;
@@ -585,22 +537,30 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
 SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst);
   switch (inst->op()) {
-  X(CheckType)
-  X(CheckStk)
-  X(CheckLoc)
   X(HintLocInner)
-  X(AssertLoc)
-  X(AssertStk)
-  X(AssertType)
   X(CheckCtxThis)
   X(LdCtx)
   X(DecRefThis)
-  X(LdLoc)
   X(StLoc)
-  X(CastStk)
-  X(CoerceStk)
-  X(LdStk)
   default: break;
+  }
+
+  if (!m_reoptimizing) {
+    // These preOptimize routines are only used at gen-time; the corresponding
+    // functionality at optimization-time is instrumented elsewhere (e.g.,
+    // simplify, load-elim, etc.).
+    switch (inst->op()) {
+      X(AssertType)
+      X(AssertLoc)
+      X(AssertStk)
+      X(CheckStk)
+      X(CheckLoc)
+      X(LdLoc)
+      X(LdStk)
+      X(CastStk)
+      X(CoerceStk)
+      default: break;
+    }
   }
 #undef X
   return nullptr;
@@ -743,6 +703,9 @@ void IRBuilder::exceptionStackBoundary() {
  *     fall-through edge to the next block.
  */
 void IRBuilder::reoptimize() {
+  m_reoptimizing = true;
+  SCOPE_EXIT { m_reoptimizing = false; };
+
   Timer _t(Timer::optimize_reoptimize);
   FTRACE(5, "ReOptimize:vvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };

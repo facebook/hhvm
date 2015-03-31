@@ -20,6 +20,8 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/base/execution-context.h"
 
+#include <vector>
+
 namespace HPHP { namespace SystemLib {
 /////////////////////////////////////////////////////////////////////////////
 
@@ -125,6 +127,27 @@ ALLOC_OBJECT_STUB(Directory);
 ALLOC_OBJECT_STUB(PDOException);
 
 #undef ALLOC_OBJECT_STUB
+
+/////////////////////////////////////////////////////////////////////////////
+
+static std::vector<Unit*> s_persistent_units;
+
+/* To be called during process startup ONLY, before threads are spun up.
+ * Typically this will be called by HPHP::Extension::moduleInit to load an
+ * extension-specific systemlib file, or to load the main systemlib.
+ */
+void addPersistentUnit(Unit* unit) {
+  s_persistent_units.push_back(unit);
+}
+
+/* Typically called between requests in non-RepoAuthoritative mode
+ * when function renaming is enabled.
+ */
+void mergePersistentUnits() {
+  for (auto unit : s_persistent_units) {
+    unit->merge();
+  }
+}
 
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::SystemLib

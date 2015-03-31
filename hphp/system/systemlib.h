@@ -102,6 +102,16 @@ ObjectData* AllocLazyKVZipIterableObject(const Variant& mp);
 ObjectData* AllocLazyIterableViewObject(const Variant& iterable);
 ObjectData* AllocLazyKeyedIterableViewObject(const Variant& iterable);
 
+/**
+ * Register a persistent unit to be re-merged (in non-repo mode)
+ */
+void addPersistentUnit(Unit* unit);
+
+/**
+ * Re-merge all persistent units
+ */
+void mergePersistentUnits();
+
 ///////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::SystemLib
 

@@ -536,17 +536,13 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
 
 SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst);
-  switch (inst->op()) {
-  X(HintLocInner)
-  X(StLoc)
-  default: break;
-  }
-
   if (!m_reoptimizing) {
     // These preOptimize routines are only used at gen-time; the corresponding
     // functionality at optimization-time is instrumented elsewhere (e.g.,
     // simplify, load-elim, etc.).
     switch (inst->op()) {
+      X(HintLocInner)
+      X(StLoc)
       X(AssertType)
       X(AssertLoc)
       X(AssertStk)

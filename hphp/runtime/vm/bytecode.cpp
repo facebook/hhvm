@@ -5760,8 +5760,14 @@ OPTBLD_INLINE void iopFPushFuncU(IOP_ARGS) {
 void fPushObjMethodImpl(Class* cls, StringData* name, ObjectData* obj,
                         int numArgs) {
   const Func* f;
-  LookupResult res = g_context->lookupObjMethod(f, cls, name,
-                                         arGetContextClass(vmfp()), true);
+  LookupResult res;
+  try {
+    res = g_context->lookupObjMethod(
+      f, cls, name, arGetContextClass(vmfp()), true);
+  } catch (...) {
+    decRefObj(obj);
+    throw;
+  }
   assert(f);
   ActRec* ar = vmStack().allocA();
   ar->m_func = f;

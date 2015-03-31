@@ -538,9 +538,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst);
   switch (inst->op()) {
   X(HintLocInner)
-  X(CheckCtxThis)
-  X(LdCtx)
-  X(DecRefThis)
   X(StLoc)
   default: break;
   }
@@ -559,6 +556,9 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
       X(LdStk)
       X(CastStk)
       X(CoerceStk)
+      X(CheckCtxThis)
+      X(LdCtx)
+      X(DecRefThis)
       default: break;
     }
   }

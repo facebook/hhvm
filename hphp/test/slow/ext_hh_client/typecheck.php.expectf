@@ -93,6 +93,6 @@ object(HH\Client\TypecheckResult)#3 (3) {
 }
 {"passed":false,"errors":[{"message":[{"descr":"Hack typechecking failed: typechecker command not found: %s\/this_file_does_not_exist"}]}]}
 
-Warning: Hack type error: Invalid return type at test.php line 1 in %s/typecheck.php on line 19
+Warning: Hack type error: Invalid return type at test.php line 1 in %s/typecheck.php on line %d
 
-Catchable fatal error: Hack type error: Invalid return type at test.php line 1 in %s/typecheck.php on line 20
+Catchable fatal error: Hack type error: Invalid return type at test.php line 1 in %s/typecheck.php on line %d

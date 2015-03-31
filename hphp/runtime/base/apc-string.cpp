@@ -18,13 +18,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-APCHandle* APCString::MakeShared(
-    DataType type, StringData* data, size_t& size) {
+APCHandle::Pair
+APCString::MakeSharedString(DataType type, StringData* data) {
   auto const len = data->size();
   auto const cap = roundUpPackedCap(static_cast<uint32_t>(len));
   auto const capCode = packedCapToCode(cap);
   auto apcStr = new (cap + 1) APCString(type);
-  size = cap + 1 + sizeof(APCString);
+  auto size = cap + 1 + sizeof(APCString);
 
   apcStr->m_str.m_data        = reinterpret_cast<char*>(apcStr + 1);
   apcStr->m_str.m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
@@ -43,7 +43,7 @@ APCHandle* APCString::MakeShared(
   assert(apcStr->m_str.m_count == 0);
   assert(apcStr->m_str.isFlat());
   assert(apcStr->m_str.checkSane());
-  return apcStr->getHandle();
+  return {apcStr->getHandle(), size};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

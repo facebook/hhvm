@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
+#include <type_traits>
+
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -45,28 +47,42 @@ const char* vixl_ccs[] = {
   "hi", "ls", "ge", "lt", "gt", "le", "al", "nv"
 };
 
-// Visitor class to format the operands of a Vinstr. There are
-// imm() overloaded methods for each type of operand used by any Vinstr.
-// If we are missing an overload, the templated catch-all prints "?".
+// Visitor class to format the operands of a Vinstr.  There are imm()
+// overloaded methods for each type of operand used by any Vinstr.  If you add
+// new imm types, you must add a printer for it here.
 struct FormatVisitor {
   FormatVisitor(const Vunit& unit, std::ostringstream& str)
     : unit(unit), str(str)
   {}
-  template<class T> void imm(T imm) {
-    str << sep() << "?";
+
+  template<class T>
+  typename std::enable_if<
+    std::is_integral<T>::value && !std::is_same<T,bool>::value
+  >::type imm(T t) {
+    str << sep() << t;
   }
-  void imm(ConditionCode cc) { str << sep() << cc_names[cc]; }
-  void imm(vixl::Condition cc) { str << sep() << vixl_ccs[cc]; }
-  void imm(uint8_t i) { imm(int(i)); }
-  void imm(uint16_t i) { imm(int(i)); }
-  void imm(int i) { str << sep() << i; }
-  void imm(bool b) { str << sep() << (b ? 'T' : 'F'); }
-  void imm(Immed s) { str << sep() << s.l(); }
-  void imm(Immed64 s) {
+
+  template<class T>
+  typename std::enable_if<
+    std::is_same<T,bool>::value
+  >::type imm(T b) { str << sep() << (b ? 'T' : 'F'); }
+
+  template<class T>
+  typename std::enable_if<
+    std::is_same<T,Immed>::value
+  >::type imm(T s) { str << sep() << s.l(); }
+
+  template<class T>
+  typename std::enable_if<
+    std::is_same<T,Immed64>::value
+  >::type imm(T s) {
     str << sep();
     if (s.fits(sz::byte)) str << s.l();
     else str << folly::format("0x{:08x}", s.q());
   }
+
+  void imm(ConditionCode cc) { str << sep() << cc_names[cc]; }
+  void imm(vixl::Condition cc) { str << sep() << vixl_ccs[cc]; }
   void imm(TCA addr) {
     str << sep() << getNativeFunctionName(addr);
   }
@@ -123,6 +139,15 @@ struct FormatVisitor {
   }
   void imm(RoundDirection rd) {
     str << sep() << show(rd);
+  }
+
+  void imm(RegSet x) { print(x); }
+  void imm(ComparisonPred x) {
+    str << sep();
+    switch (x) {
+    case ComparisonPred::eq_ord:   str << "eq_ord"; break;
+    case ComparisonPred::ne_unord: str << "ne_unord"; break;
+    }
   }
 
   template<class R> void across(R r) { print(r); }

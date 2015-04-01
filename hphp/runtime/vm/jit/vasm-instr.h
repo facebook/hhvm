@@ -58,7 +58,7 @@ struct Vunit;
   O(bindaddr, I(dest) I(sk), Un, Dn)\
   O(bindcall, I(stub), U(args), Dn)\
   O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]), U(sf) U(args), Dn)\
-  O(bindjcc, I(cc) I(target), U(sf) U(args), Dn)\
+  O(bindjcc, I(cc) I(target) I(trflags), U(sf) U(args), Dn)\
   O(bindjmp, I(target) I(trflags), U(args), Dn)\
   O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\

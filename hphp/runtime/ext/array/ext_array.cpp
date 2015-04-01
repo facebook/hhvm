@@ -1491,7 +1491,9 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
 ///////////////////////////////////////////////////////////////////////////////
 // diff functions
 
-static inline void addToSetHelper(c_Set* st, const Cell c, TypedValue* strTv,
+static inline void addToSetHelper(const SmartPtr<c_Set>& st,
+                                  const Cell c,
+                                  TypedValue* strTv,
                                   bool convertIntLikeStrs) {
   if (c.m_type == KindOfInt64) {
     st->add(c.m_data.num);
@@ -1513,7 +1515,9 @@ static inline void addToSetHelper(c_Set* st, const Cell c, TypedValue* strTv,
   }
 }
 
-static inline bool checkSetHelper(c_Set* st, const Cell c, TypedValue* strTv,
+static inline bool checkSetHelper(const SmartPtr<c_Set>& st,
+                                  const Cell c,
+                                  TypedValue* strTv,
                                   bool convertIntLikeStrs) {
   if (c.m_type == KindOfInt64) {
     return st->contains(c.m_data.num);
@@ -1533,7 +1537,8 @@ static inline bool checkSetHelper(c_Set* st, const Cell c, TypedValue* strTv,
   return st->contains(s);
 }
 
-static void containerValuesToSetHelper(c_Set* st, const Variant& container) {
+static void containerValuesToSetHelper(const SmartPtr<c_Set>& st,
+                                       const Variant& container) {
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   for (ArrayIter iter(container); iter; ++iter) {
@@ -1542,7 +1547,8 @@ static void containerValuesToSetHelper(c_Set* st, const Variant& container) {
   }
 }
 
-static void containerKeysToSetHelper(c_Set* st, const Variant& container) {
+static void containerKeysToSetHelper(const SmartPtr<c_Set>& st,
+                                     const Variant& container) {
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   bool isKey = container.asCell()->m_type == KindOfArray;
@@ -1600,8 +1606,7 @@ Variant HHVM_FUNCTION(array_diff,
   // Put all of the values from all the containers (except container1 into a
   // Set. All types aside from integer and string will be cast to string, and
   // we also convert int-like strings to integers.
-  c_Set* st;
-  Object setObj = st = newobj<c_Set>();
+  auto st = makeSmartPtr<c_Set>();
   st->reserve(largestSize);
   containerValuesToSetHelper(st, container2);
   if (UNLIKELY(moreThanTwo)) {
@@ -1651,8 +1656,7 @@ Variant HHVM_FUNCTION(array_diff_key,
   // Put all of the keys from all the containers (except container1) into a
   // Set. All types aside from integer and string will be cast to string, and
   // we also convert int-like strings to integers.
-  c_Set* st;
-  Object setObj = st = newobj<c_Set>();
+  auto st = makeSmartPtr<c_Set>();
   st->reserve(largestSize);
   containerKeysToSetHelper(st, container2);
   if (UNLIKELY(moreThanTwo)) {
@@ -1794,7 +1798,7 @@ static inline TypedValue* makeContainerListHelper(const Variant& a,
   return containers;
 }
 
-static inline void addToIntersectMapHelper(c_Map* mp,
+static inline void addToIntersectMapHelper(const SmartPtr<c_Map>& mp,
                                            const Cell c,
                                            TypedValue* intOneTv,
                                            TypedValue* strTv,
@@ -1819,7 +1823,7 @@ static inline void addToIntersectMapHelper(c_Map* mp,
   }
 }
 
-static inline void updateIntersectMapHelper(c_Map* mp,
+static inline void updateIntersectMapHelper(const SmartPtr<c_Map>& mp,
                                             const Cell c,
                                             int pos,
                                             TypedValue* strTv,
@@ -1856,12 +1860,11 @@ static inline void updateIntersectMapHelper(c_Map* mp,
   }
 }
 
-static void containerValuesIntersectHelper(c_Set* st,
+static void containerValuesIntersectHelper(const SmartPtr<c_Set>& st,
                                            TypedValue* containers,
                                            int count) {
   assert(count >= 2);
-  c_Map* mp;
-  Object mapObj = mp = newobj<c_Map>();
+  auto mp = makeSmartPtr<c_Map>();
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
@@ -1884,7 +1887,7 @@ static void containerValuesIntersectHelper(c_Set* st,
       updateIntersectMapHelper(mp, c, pos, strTv, true);
     }
   }
-  for (ArrayIter iter(mapObj); iter; ++iter) {
+  for (ArrayIter iter(mp.get()); iter; ++iter) {
     // For each key in the map, we copy the key to the set if the
     // corresponding value is equal to pos exactly (which means it
     // was present in all of the containers).
@@ -1896,12 +1899,11 @@ static void containerValuesIntersectHelper(c_Set* st,
   }
 }
 
-static void containerKeysIntersectHelper(c_Set* st,
+static void containerKeysIntersectHelper(const SmartPtr<c_Set>& st,
                                          TypedValue* containers,
                                          int count) {
   assert(count >= 2);
-  c_Map* mp;
-  Object mapObj = mp = newobj<c_Map>();
+  auto mp = makeSmartPtr<c_Map>();
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
@@ -1923,7 +1925,7 @@ static void containerKeysIntersectHelper(c_Set* st,
       updateIntersectMapHelper(mp, c, pos, strTv, !isKey);
     }
   }
-  for (ArrayIter iter(mapObj); iter; ++iter) {
+  for (ArrayIter iter(mp.get()); iter; ++iter) {
     // For each key in the map, we copy the key to the set if the
     // corresponding value is equal to pos exactly (which means it
     // was present in all of the containers).
@@ -1979,8 +1981,7 @@ Variant HHVM_FUNCTION(array_intersect,
   ARRAY_INTERSECT_PRELUDE()
   // Build up a Set containing the values that are present in all the
   // containers (except container1)
-  c_Set* st;
-  Object setObj = st = newobj<c_Set>();
+  auto st = makeSmartPtr<c_Set>();
   if (LIKELY(!moreThanTwo)) {
     // There is only one container (not counting container1) so we can
     // just call containerValuesToSetHelper() to build the Set.
@@ -2035,8 +2036,7 @@ Variant HHVM_FUNCTION(array_intersect_key,
   }
   // Build up a Set containing the keys that are present in all the containers
   // (except container1)
-  c_Set* st;
-  Object setObj = st = newobj<c_Set>();
+  auto st = makeSmartPtr<c_Set>();
   if (LIKELY(!moreThanTwo)) {
     // There is only one container (not counting container1) so we can just
     // call containerKeysToSetHelper() to build the Set.

@@ -178,6 +178,7 @@ static int getNextTokenType(int t) {
     case T_GROUP:
     case T_BY:
       return NextTokenType::TypeListMaybe;
+    case T_SUPER:
     case T_XHP_ATTRIBUTE:
       return NextTokenType::XhpClassName |
              NextTokenType::TypeListMaybe;
@@ -285,6 +286,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"enddeclare"           { RETTOKEN(T_ENDDECLARE);}
 <ST_IN_SCRIPTING>"instanceof"           { RETTOKEN(T_INSTANCEOF);}
 <ST_IN_SCRIPTING>"as"                   { RETTOKEN(T_AS);}
+<ST_IN_SCRIPTING>"super"                { RETTOKEN(T_SUPER);}
 <ST_IN_SCRIPTING>"switch"               { RETTOKEN(T_SWITCH);}
 <ST_IN_SCRIPTING>"endswitch"            { RETTOKEN(T_ENDSWITCH);}
 <ST_IN_SCRIPTING>"case"                 { RETTOKEN(T_CASE);}

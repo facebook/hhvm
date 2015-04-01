@@ -1582,7 +1582,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         region.get()
       };
 
-      HTS hhbcTrans { transContext };
+      IRGS irgs { transContext };
       FTRACE(1, "{}{:-^40}{}\n",
              color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
              " HHIR during translation ",
@@ -1590,7 +1590,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
       try {
         assertCleanState();
-        result = translateRegion(hhbcTrans, *region, regionInterps, args.flags,
+        result = translateRegion(irgs, *region, regionInterps, args.flags,
                                  pconds);
         FTRACE(2, "translateRegion finished with result {}\n", show(result));
       } catch (const std::exception& e) {
@@ -1706,11 +1706,11 @@ MCGenerator::translateWork(const TranslArgs& args) {
   return start;
 }
 
-void MCGenerator::traceCodeGen(HTS& hts) {
-  auto& unit = hts.unit;
+void MCGenerator::traceCodeGen(IRGS& irgs) {
+  auto& unit = irgs.unit;
 
   auto finishPass = [&](const char* msg, int level) {
-    printUnit(level, unit, msg, nullptr, hts.irb->guards());
+    printUnit(level, unit, msg, nullptr, irgs.irb->guards());
     assertx(checkCfg(unit));
   };
 
@@ -1721,7 +1721,7 @@ void MCGenerator::traceCodeGen(HTS& hts) {
     "IRUnit has loop but Eval.JitLoops=0"
   );
 
-  optimize(unit, *hts.irb, m_tx.mode());
+  optimize(unit, *irgs.irb, m_tx.mode());
   finishPass(" after optimizing ", kOptLevel);
 
   always_assert(this == mcg);

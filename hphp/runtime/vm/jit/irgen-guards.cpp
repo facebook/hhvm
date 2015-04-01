@@ -33,7 +33,7 @@ enum class ProfGuard { CheckLoc, CheckStk };
  * collected profiling information. Str -> StaticStr is the only supported
  * refinement for now.
  */
-void profiledGuard(HTS& env,
+void profiledGuard(IRGS& env,
                    Type type,
                    ProfGuard kind,
                    int32_t id, // locId or stackOff
@@ -71,11 +71,11 @@ uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
 
 }
 
-void assertTypeLocal(HTS& env, uint32_t locId, Type type) {
+void assertTypeLocal(IRGS& env, uint32_t locId, Type type) {
   gen(env, AssertLoc, type, LocalId(locId), fp(env));
 }
 
-void checkTypeLocal(HTS& env, uint32_t locId, Type type, Offset dest,
+void checkTypeLocal(IRGS& env, uint32_t locId, Type type, Offset dest,
                     bool outerOnly) {
   assertx(type <= Type::Cell || type <= Type::BoxedInitCell);
 
@@ -98,7 +98,7 @@ void checkTypeLocal(HTS& env, uint32_t locId, Type type, Offset dest,
   }
 }
 
-void assertTypeStack(HTS& env, BCSPOffset idx, Type type) {
+void assertTypeStack(IRGS& env, BCSPOffset idx, Type type) {
   if (idx.offset < env.irb->evalStack().size()) {
     // We're asserting a new type so we don't care about the previous type.
     auto const tmp = top(env, Type::StkElem, idx, DataTypeGeneric);
@@ -110,7 +110,7 @@ void assertTypeStack(HTS& env, BCSPOffset idx, Type type) {
   }
 }
 
-void checkTypeStack(HTS& env,
+void checkTypeStack(IRGS& env,
                     BCSPOffset idx,
                     Type type,
                     Offset dest,
@@ -159,7 +159,7 @@ void checkTypeStack(HTS& env,
 
 //////////////////////////////////////////////////////////////////////
 
-void assertTypeLocation(HTS& env, const RegionDesc::Location& loc, Type type) {
+void assertTypeLocation(IRGS& env, const RegionDesc::Location& loc, Type type) {
   assertx(type <= Type::StkElem);
   using T = RegionDesc::Location::Tag;
   switch (loc.tag()) {
@@ -172,7 +172,7 @@ void assertTypeLocation(HTS& env, const RegionDesc::Location& loc, Type type) {
   }
 }
 
-void checkTypeLocation(HTS& env,
+void checkTypeLocation(IRGS& env,
                        const RegionDesc::Location& loc,
                        Type type,
                        Offset dest,
@@ -190,7 +190,7 @@ void checkTypeLocation(HTS& env,
   }
 }
 
-void checkRefs(HTS& env,
+void checkRefs(IRGS& env,
                int64_t entryArDelta,
                const std::vector<bool>& mask,
                const std::vector<bool>& vals,

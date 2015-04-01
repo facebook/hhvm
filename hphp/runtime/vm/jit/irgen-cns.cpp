@@ -27,7 +27,7 @@ namespace {
 
 // Return a constant SSATmp representing a static value held in a TypedValue.
 // The TypedValue may be a non-scalar, but it must have a static value.
-SSATmp* staticTVCns(HTS& env, const TypedValue* tv) {
+SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
   switch (tv->m_type) {
     case KindOfNull:          return cns(env, Type::InitNull);
     case KindOfBoolean:       return cns(env, !!tv->m_data.num);
@@ -47,7 +47,7 @@ SSATmp* staticTVCns(HTS& env, const TypedValue* tv) {
   always_assert(false);
 }
 
-void implCns(HTS& env,
+void implCns(IRGS& env,
              const StringData* name,
              const StringData* fallbackName,
              bool error) {
@@ -110,21 +110,21 @@ void implCns(HTS& env,
 
 }
 
-void emitCns(HTS& env, const StringData* name) {
+void emitCns(IRGS& env, const StringData* name) {
   implCns(env, name, nullptr, false);
 }
 
-void emitCnsE(HTS& env, const StringData* name) {
+void emitCnsE(IRGS& env, const StringData* name) {
   implCns(env, name, nullptr, true);
 }
 
-void emitCnsU(HTS& env,
+void emitCnsU(IRGS& env,
               const StringData* name,
               const StringData* fallback) {
   implCns(env, name, fallback, false);
 }
 
-void emitClsCnsD(HTS& env,
+void emitClsCnsD(IRGS& env,
                  const StringData* cnsNameStr,
                  const StringData* clsNameStr) {
   auto const clsCnsName = ClsCnsName { clsNameStr, cnsNameStr };

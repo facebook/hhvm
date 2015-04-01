@@ -162,8 +162,8 @@ struct FrameState {
   /*
    * Tracking of the not-in-memory state of the virtual execution stack:
    *
-   *   During HhbcTranslator's run over the bytecode, these stacks contain
-   *   SSATmp values representing the execution stack state since the last
+   *   During the IR-generation step, these stacks contain SSATmp
+   *   values representing the execution stack state since the last
    *   spillStack() call.
    *
    *   The EvalStack contains cells that need to be spilled in order to

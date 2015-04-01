@@ -22,7 +22,7 @@
 
 namespace HPHP { namespace jit {
 
-struct HTS;
+struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -48,7 +48,7 @@ using RegionBlacklist = ProfSrcKeySet;
  * and the instruction is added to `interp' so that it will be interpreted on
  * the next attempt.
  */
-TranslateResult translateRegion(HTS&,
+TranslateResult translateRegion(IRGS&,
                                 const RegionDesc&,
                                 RegionBlacklist& toInterp,
                                 TransFlags trflags,

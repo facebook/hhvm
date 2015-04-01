@@ -36,7 +36,7 @@ const StaticString s_WaitHandle("HH\\WaitHandle");
 
 //////////////////////////////////////////////////////////////////////
 
-void verifyTypeImpl(HTS& env, int32_t const id) {
+void verifyTypeImpl(IRGS& env, int32_t const id) {
   const bool isReturnType = (id == HPHP::TypeConstraint::ReturnId);
   if (isReturnType && !RuntimeOption::EvalCheckReturnTypeHints) return;
 
@@ -227,14 +227,14 @@ DataType typeOpToDataType(IsTypeOp op) {
   not_reached();
 }
 
-void implIsScalarL(HTS& env, int32_t id) {
+void implIsScalarL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const src = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
   push(env, gen(env, IsScalarType, src));
 }
 
-void implIsScalarC(HTS& env) {
+void implIsScalarC(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, IsScalarType, src));
   gen(env, DecRef, src);
@@ -248,7 +248,7 @@ void implIsScalarC(HTS& env) {
  * doesn't always handle the additional type information very well.  It is
  * possibly a compile-time slowdown only, but we haven't investigated yet.)
  */
-folly::Optional<Type> ratToAssertType(HTS& env, RepoAuthType rat) {
+folly::Optional<Type> ratToAssertType(IRGS& env, RepoAuthType rat) {
   using T = RepoAuthType::Tag;
 
   switch (rat.tag()) {
@@ -315,7 +315,7 @@ folly::Optional<Type> ratToAssertType(HTS& env, RepoAuthType rat) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* implInstanceOfD(HTS& env, SSATmp* src, const StringData* className) {
+SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
   /*
    * InstanceOfD is always false if it's not an object.
    *
@@ -377,13 +377,13 @@ SSATmp* implInstanceOfD(HTS& env, SSATmp* src, const StringData* className) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitInstanceOfD(HTS& env, const StringData* className) {
+void emitInstanceOfD(IRGS& env, const StringData* className) {
   auto const src = popC(env);
   push(env, implInstanceOfD(env, src, className));
   gen(env, DecRef, src);
 }
 
-void emitInstanceOf(HTS& env) {
+void emitInstanceOf(IRGS& env) {
   auto const t1 = popC(env);
   auto const t2 = popC(env); // t2 instanceof t1
 
@@ -420,19 +420,19 @@ void emitInstanceOf(HTS& env) {
   gen(env, DecRef, t1);
 }
 
-void emitVerifyRetTypeC(HTS& env) {
+void emitVerifyRetTypeC(IRGS& env) {
   verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId);
 }
 
-void emitVerifyRetTypeV(HTS& env) {
+void emitVerifyRetTypeV(IRGS& env) {
   verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId);
 }
 
-void emitVerifyParamType(HTS& env, int32_t paramId) {
+void emitVerifyParamType(IRGS& env, int32_t paramId) {
   verifyTypeImpl(env, paramId);
 }
 
-void emitOODeclExists(HTS& env, OODeclExistsOp subop) {
+void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {
   auto const tAutoload = popC(env);
   auto const tCls = popC(env);
 
@@ -457,14 +457,14 @@ void emitOODeclExists(HTS& env, OODeclExistsOp subop) {
   gen(env, DecRef, tCls);
 }
 
-void emitIssetL(HTS& env, int32_t id) {
+void emitIssetL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const ld = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
   push(env, gen(env, IsNType, Type::Null, ld));
 }
 
-void emitEmptyL(HTS& env, int32_t id) {
+void emitEmptyL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const ld = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
@@ -474,7 +474,7 @@ void emitEmptyL(HTS& env, int32_t id) {
   );
 }
 
-void emitIsTypeC(HTS& env, IsTypeOp subop) {
+void emitIsTypeC(IRGS& env, IsTypeOp subop) {
   if (subop == IsTypeOp::Scalar) return implIsScalarC(env);
   auto const t = typeOpToDataType(subop);
   auto const src = popC(env, DataTypeSpecific);
@@ -486,7 +486,7 @@ void emitIsTypeC(HTS& env, IsTypeOp subop) {
   gen(env, DecRef, src);
 }
 
-void emitIsTypeL(HTS& env, int32_t id, IsTypeOp subop) {
+void emitIsTypeL(IRGS& env, int32_t id, IsTypeOp subop) {
   if (subop == IsTypeOp::Scalar) return implIsScalarL(env, id);
   auto const t = typeOpToDataType(subop);
   auto const ldrefExit = makeExit(env);
@@ -500,13 +500,13 @@ void emitIsTypeL(HTS& env, int32_t id, IsTypeOp subop) {
   }
 }
 
-void emitAssertRATL(HTS& env, int32_t loc, RepoAuthType rat) {
+void emitAssertRATL(IRGS& env, int32_t loc, RepoAuthType rat) {
   if (auto const t = ratToAssertType(env, rat)) {
     assertTypeLocal(env, loc, *t);
   }
 }
 
-void emitAssertRATStk(HTS& env, int32_t offset, RepoAuthType rat) {
+void emitAssertRATStk(IRGS& env, int32_t offset, RepoAuthType rat) {
   if (auto const t = ratToAssertType(env, rat)) {
     assertTypeStack(env, BCSPOffset{offset}, *t);
   }

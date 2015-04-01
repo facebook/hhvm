@@ -103,12 +103,12 @@ bool isBitOp(Op op) {
   }
 }
 
-SSATmp* promoteBool(HTS& env, SSATmp* src) {
+SSATmp* promoteBool(IRGS& env, SSATmp* src) {
   // booleans in arithmetic and bitwise operations get cast to ints
   return src->type() <= Type::Bool ? gen(env, ConvBoolToInt, src) : src;
 }
 
-Opcode promoteBinaryDoubles(HTS& env, Op op, SSATmp*& src1, SSATmp*& src2) {
+Opcode promoteBinaryDoubles(IRGS& env, Op op, SSATmp*& src1, SSATmp*& src2) {
   auto const type1 = src1->type();
   auto const type2 = src2->type();
   auto opc = intArithOp(op);
@@ -124,7 +124,7 @@ Opcode promoteBinaryDoubles(HTS& env, Op op, SSATmp*& src1, SSATmp*& src2) {
   return opc;
 }
 
-void binaryBitOp(HTS& env, Op op) {
+void binaryBitOp(IRGS& env, Op op) {
   auto const type2 = topC(env, BCSPOffset{0})->type();
   auto const type1 = topC(env, BCSPOffset{1})->type();
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
@@ -137,7 +137,7 @@ void binaryBitOp(HTS& env, Op op) {
   push(env, gen(env, bitOp(op), src1, src2));
 }
 
-void binaryArith(HTS& env, Op op) {
+void binaryArith(IRGS& env, Op op) {
   auto const type2 = topC(env, BCSPOffset{0})->type();
   auto const type1 = topC(env, BCSPOffset{1})->type();
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
@@ -160,7 +160,7 @@ void binaryArith(HTS& env, Op op) {
 }
 
 // Implementation function that only handles integer or double inc/dec.
-SSATmp* implIncDec(HTS& env, bool pre, bool inc, bool over, SSATmp* src) {
+SSATmp* implIncDec(IRGS& env, bool pre, bool inc, bool over, SSATmp* src) {
   assertx(src->type() <= Type::Int || src->type() <= Type::Dbl);
 
   Opcode op;
@@ -217,7 +217,7 @@ Opcode matchReentrantCmp(Opcode opc) {
   }
 }
 
-void implCmp(HTS& env, Opcode opc) {
+void implCmp(IRGS& env, Opcode opc) {
   // The following if-block is historical behavior from ir-translator: this
   // should be re-evaluated.
   if (opc == Lt || opc == Lte || opc == Gt || opc == Gte) {
@@ -251,7 +251,7 @@ void implCmp(HTS& env, Opcode opc) {
   gen(env, DecRef, src1);
 }
 
-void implAdd(HTS& env, Op op) {
+void implAdd(IRGS& env, Op op) {
   if (topC(env, BCSPOffset{0})->type() <= Type::Arr &&
       topC(env, BCSPOffset{1})->type() <= Type::Arr) {
     auto const tr = popC(env);
@@ -267,7 +267,7 @@ void implAdd(HTS& env, Op op) {
 
 }
 
-void emitConcat(HTS& env) {
+void emitConcat(IRGS& env) {
   auto const tr         = popC(env);
   auto const tl         = popC(env);
   // ConcatCellCell consumes only first ref, not second.
@@ -276,7 +276,7 @@ void emitConcat(HTS& env) {
   gen(env, DecRef, tr);
 }
 
-void emitConcatN(HTS& env, int32_t n) {
+void emitConcatN(IRGS& env, int32_t n) {
   if (n == 2) return emitConcat(env);
 
   auto const t1 = popC(env);
@@ -306,7 +306,7 @@ void emitConcatN(HTS& env, int32_t n) {
   gen(env, DecRef, t1);
 }
 
-void emitSetOpL(HTS& env, int32_t id, SetOpOp subop) {
+void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
   auto const subOpc = [&]() -> folly::Optional<Op> {
     switch (subop) {
     case SetOpOp::PlusEqual:   return Op::Add;
@@ -408,7 +408,7 @@ void emitSetOpL(HTS& env, int32_t id, SetOpOp subop) {
   pushStLoc(env, id, ldrefExit, ldPMExit, result);
 }
 
-void emitIncDecL(HTS& env, int32_t id, IncDecOp subop) {
+void emitIncDecL(IRGS& env, int32_t id, IncDecOp subop) {
   auto const pre = isPre(subop);
   auto const inc = isInc(subop);
   auto const over = isIncDecO(subop);
@@ -449,7 +449,7 @@ void emitIncDecL(HTS& env, int32_t id, IncDecOp subop) {
   stLoc(env, id, ldrefExit, ldPMExit, res);
 }
 
-void emitXor(HTS& env) {
+void emitXor(IRGS& env) {
   auto const btr = popC(env);
   auto const btl = popC(env);
   auto const tr = gen(env, ConvCellToBool, btr);
@@ -459,7 +459,7 @@ void emitXor(HTS& env) {
   gen(env, DecRef, btr);
 }
 
-void emitShl(HTS& env) {
+void emitShl(IRGS& env) {
   auto const shiftAmount    = popC(env);
   auto const lhs            = popC(env);
   auto const lhsInt         = gen(env, ConvCellToInt, lhs);
@@ -470,7 +470,7 @@ void emitShl(HTS& env) {
   gen(env, DecRef, shiftAmount);
 }
 
-void emitShr(HTS& env) {
+void emitShr(IRGS& env) {
   auto const shiftAmount    = popC(env);
   auto const lhs            = popC(env);
   auto const lhsInt         = gen(env, ConvCellToInt, lhs);
@@ -481,11 +481,11 @@ void emitShr(HTS& env) {
   gen(env, DecRef, shiftAmount);
 }
 
-void emitPow(HTS& env) {
+void emitPow(IRGS& env) {
   interpOne(env, Type::UncountedInit, 2);
 }
 
-void emitBitNot(HTS& env) {
+void emitBitNot(IRGS& env) {
   auto const srcType = topC(env)->type();
   if (srcType <= Type::Int) {
     auto const src = popC(env);
@@ -506,13 +506,13 @@ void emitBitNot(HTS& env) {
 }
 
 
-void emitNot(HTS& env) {
+void emitNot(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, XorBool, gen(env, ConvCellToBool, src), cns(env, true)));
   gen(env, DecRef, src);
 }
 
-void emitDiv(HTS& env) {
+void emitDiv(IRGS& env) {
   auto const divisorType  = topC(env, BCSPOffset{0})->type();
   auto const dividendType = topC(env, BCSPOffset{1})->type();
 
@@ -607,7 +607,7 @@ void emitDiv(HTS& env) {
   push(env, divVal);
 }
 
-void emitMod(HTS& env) {
+void emitMod(IRGS& env) {
   auto const btr = popC(env);
   auto const btl = popC(env);
   auto const tr = gen(env, ConvCellToInt, btr);
@@ -660,26 +660,26 @@ void emitMod(HTS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitBitAnd(HTS& env) { binaryBitOp(env, Op::BitAnd); }
-void emitBitOr(HTS& env)  { binaryBitOp(env, Op::BitOr); }
-void emitBitXor(HTS& env) { binaryBitOp(env, Op::BitXor); }
+void emitBitAnd(IRGS& env) { binaryBitOp(env, Op::BitAnd); }
+void emitBitOr(IRGS& env)  { binaryBitOp(env, Op::BitOr); }
+void emitBitXor(IRGS& env) { binaryBitOp(env, Op::BitXor); }
 
-void emitSub(HTS& env)    { binaryArith(env, Op::Sub); }
-void emitMul(HTS& env)    { binaryArith(env, Op::Mul); }
-void emitSubO(HTS& env)   { binaryArith(env, Op::SubO); }
-void emitMulO(HTS& env)   { binaryArith(env, Op::MulO); }
+void emitSub(IRGS& env)    { binaryArith(env, Op::Sub); }
+void emitMul(IRGS& env)    { binaryArith(env, Op::Mul); }
+void emitSubO(IRGS& env)   { binaryArith(env, Op::SubO); }
+void emitMulO(IRGS& env)   { binaryArith(env, Op::MulO); }
 
-void emitGt(HTS& env)     { implCmp(env, Gt);    }
-void emitGte(HTS& env)    { implCmp(env, Gte);   }
-void emitLt(HTS& env)     { implCmp(env, Lt);    }
-void emitLte(HTS& env)    { implCmp(env, Lte);   }
-void emitEq(HTS& env)     { implCmp(env, Eq);    }
-void emitNeq(HTS& env)    { implCmp(env, Neq);   }
-void emitSame(HTS& env)   { implCmp(env, Same);  }
-void emitNSame(HTS& env)  { implCmp(env, NSame); }
+void emitGt(IRGS& env)     { implCmp(env, Gt);    }
+void emitGte(IRGS& env)    { implCmp(env, Gte);   }
+void emitLt(IRGS& env)     { implCmp(env, Lt);    }
+void emitLte(IRGS& env)    { implCmp(env, Lte);   }
+void emitEq(IRGS& env)     { implCmp(env, Eq);    }
+void emitNeq(IRGS& env)    { implCmp(env, Neq);   }
+void emitSame(IRGS& env)   { implCmp(env, Same);  }
+void emitNSame(IRGS& env)  { implCmp(env, NSame); }
 
-void emitAdd(HTS& env)    { implAdd(env, Op::Add); }
-void emitAddO(HTS& env)   { implAdd(env, Op::AddO); }
+void emitAdd(IRGS& env)    { implAdd(env, Op::Add); }
+void emitAddO(IRGS& env)   { implAdd(env, Op::AddO); }
 
 //////////////////////////////////////////////////////////////////////
 

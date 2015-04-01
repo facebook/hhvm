@@ -30,7 +30,7 @@ namespace {
 
 const StaticString s_returnHook("SurpriseReturnHook");
 
-void retSurpriseCheck(HTS& env, SSATmp* frame, SSATmp* retVal) {
+void retSurpriseCheck(IRGS& env, SSATmp* frame, SSATmp* retVal) {
   /*
    * This is a weird situation for throwing: we've partially torn down the
    * ActRec (decref'd all the frame's locals), and we've popped the return
@@ -55,7 +55,7 @@ void retSurpriseCheck(HTS& env, SSATmp* frame, SSATmp* retVal) {
   ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
 }
 
-void freeLocalsAndThis(HTS& env) {
+void freeLocalsAndThis(IRGS& env) {
   auto const localCount = curFunc(env)->numLocals();
 
   auto const shouldFreeInline = [&]() -> bool {
@@ -93,13 +93,13 @@ void freeLocalsAndThis(HTS& env) {
   if (curFunc(env)->mayHaveThis()) gen(env, DecRefThis, fp(env));
 }
 
-void normalReturn(HTS& env, SSATmp* retval) {
+void normalReturn(IRGS& env, SSATmp* retval) {
   gen(env, StRetVal, fp(env), retval);
   gen(env, RetAdjustStk, fp(env));
   gen(env, RetCtrl, RetCtrlData { IRSPOffset{0}, false }, sp(env), fp(env));
 }
 
-void asyncFunctionReturn(HTS& env, SSATmp* retval) {
+void asyncFunctionReturn(IRGS& env, SSATmp* retval) {
   if (!resumed(env)) {
     // Return from an eagerly-executed async function: wrap the return value in
     // a StaticWaitHandle object and return that normally.
@@ -136,7 +136,7 @@ void asyncFunctionReturn(HTS& env, SSATmp* retval) {
   );
 }
 
-void generatorReturn(HTS& env, SSATmp* retval) {
+void generatorReturn(IRGS& env, SSATmp* retval) {
   // Clear generator's key and value.
   auto const oldKey = gen(env, LdContArKey, Type::Cell, fp(env));
   gen(env, StContArKey, fp(env), cns(env, Type::InitNull));
@@ -164,7 +164,7 @@ void generatorReturn(HTS& env, SSATmp* retval) {
   );
 }
 
-void implRet(HTS& env, Type type) {
+void implRet(IRGS& env, Type type) {
   if (curFunc(env)->attrs() & AttrMayUseVV) {
     // Note: this has to be the first thing, because we cannot bail after
     //       we start decRefing locs because then there'll be no corresponding
@@ -192,7 +192,7 @@ void implRet(HTS& env, Type type) {
 
 }
 
-void emitRetC(HTS& env) {
+void emitRetC(IRGS& env) {
   if (curFunc(env)->isAsyncGenerator()) PUNT(RetC-AsyncGenerator);
 
   if (isInlining(env)) {
@@ -203,7 +203,7 @@ void emitRetC(HTS& env) {
   }
 }
 
-void emitRetV(HTS& env) {
+void emitRetV(IRGS& env) {
   assertx(!resumed(env));
   assertx(!curFunc(env)->isResumable());
   if (isInlining(env)) {

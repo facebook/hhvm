@@ -91,7 +91,7 @@ uint32_t localInputId(const NormalizedInstruction& inst) {
   }
 }
 
-folly::Optional<Type> interpOutputType(HTS& env,
+folly::Optional<Type> interpOutputType(IRGS& env,
                                        const NormalizedInstruction& inst,
                                        folly::Optional<Type>& checkTypeType) {
   using namespace jit::InstrFlags;
@@ -193,7 +193,7 @@ folly::Optional<Type> interpOutputType(HTS& env,
 }
 
 jit::vector<InterpOneData::LocalType>
-interpOutputLocals(HTS& env,
+interpOutputLocals(IRGS& env,
                    const NormalizedInstruction& inst,
                    bool& smashesAllLocals,
                    folly::Optional<Type> pushedType) {
@@ -385,7 +385,7 @@ interpOutputLocals(HTS& env,
 
 }
 
-void interpOne(HTS& env, const NormalizedInstruction& inst) {
+void interpOne(IRGS& env, const NormalizedInstruction& inst) {
   folly::Optional<Type> checkTypeType;
   auto stackType = interpOutputType(env, inst, checkTypeType);
   auto popped = getStackPopped(inst.pc());
@@ -412,17 +412,17 @@ void interpOne(HTS& env, const NormalizedInstruction& inst) {
   }
 }
 
-void interpOne(HTS& env, int popped) {
+void interpOne(IRGS& env, int popped) {
   InterpOneData idata { offsetFromIRSP(env, BCSPOffset{0}) };
   interpOne(env, folly::none, popped, 0, idata);
 }
 
-void interpOne(HTS& env, Type outType, int popped) {
+void interpOne(IRGS& env, Type outType, int popped) {
   InterpOneData idata { offsetFromIRSP(env, BCSPOffset{0}) };
   interpOne(env, outType, popped, 1, idata);
 }
 
-void interpOne(HTS& env,
+void interpOne(IRGS& env,
                folly::Optional<Type> outType,
                int popped,
                int pushed,
@@ -464,49 +464,49 @@ void interpOne(HTS& env,
 
 #define INTERP interpOne(env, *env.currentNormalizedInstruction);
 
-void emitFPushObjMethod(HTS& env, int32_t, ObjMethodOp) { INTERP }
+void emitFPushObjMethod(IRGS& env, int32_t, ObjMethodOp) { INTERP }
 
-void emitLowInvalid(HTS& env)                { std::abort(); }
-void emitCGetL3(HTS& env, int32_t)           { INTERP }
-void emitBox(HTS& env)                       { INTERP }
-void emitBoxR(HTS& env)                      { INTERP }
-void emitAddElemV(HTS& env)                  { INTERP }
-void emitAddNewElemV(HTS& env)               { INTERP }
-void emitClsCns(HTS& env, const StringData*) { INTERP }
-void emitExit(HTS& env)                      { INTERP }
-void emitFatal(HTS& env, FatalOp)            { INTERP }
-void emitUnwind(HTS& env)                    { INTERP }
-void emitThrow(HTS& env)                     { INTERP }
-void emitCGetN(HTS& env)                     { INTERP }
-void emitVGetN(HTS& env)                     { INTERP }
-void emitIssetN(HTS& env)                    { INTERP }
-void emitEmptyN(HTS& env)                    { INTERP }
-void emitSetN(HTS& env)                      { INTERP }
-void emitSetOpN(HTS& env, SetOpOp)           { INTERP }
-void emitSetOpG(HTS& env, SetOpOp)           { INTERP }
-void emitSetOpS(HTS& env, SetOpOp)           { INTERP }
-void emitIncDecN(HTS& env, IncDecOp)         { INTERP }
-void emitIncDecG(HTS& env, IncDecOp)         { INTERP }
-void emitIncDecS(HTS& env, IncDecOp)         { INTERP }
-void emitBindN(HTS& env)                     { INTERP }
-void emitUnsetN(HTS& env)                    { INTERP }
-void emitUnsetG(HTS& env)                    { INTERP }
-void emitFPassN(HTS& env, int32_t)           { INTERP }
-void emitFCallUnpack(HTS& env, int32_t)      { INTERP }
-void emitCufSafeArray(HTS& env)              { INTERP }
-void emitCufSafeReturn(HTS& env)             { INTERP }
-void emitIncl(HTS& env)                      { INTERP }
-void emitInclOnce(HTS& env)                  { INTERP }
-void emitReq(HTS& env)                       { INTERP }
-void emitReqDoc(HTS& env)                    { INTERP }
-void emitReqOnce(HTS& env)                   { INTERP }
-void emitEval(HTS& env)                      { INTERP }
-void emitDefTypeAlias(HTS& env, int32_t)     { INTERP }
-void emitDefCns(HTS& env, const StringData*) { INTERP }
-void emitDefCls(HTS& env, int32_t)           { INTERP }
-void emitDefFunc(HTS& env, int32_t)          { INTERP }
-void emitCatch(HTS& env)                     { INTERP }
-void emitHighInvalid(HTS& env)               { std::abort(); }
+void emitLowInvalid(IRGS& env)                { std::abort(); }
+void emitCGetL3(IRGS& env, int32_t)           { INTERP }
+void emitBox(IRGS& env)                       { INTERP }
+void emitBoxR(IRGS& env)                      { INTERP }
+void emitAddElemV(IRGS& env)                  { INTERP }
+void emitAddNewElemV(IRGS& env)               { INTERP }
+void emitClsCns(IRGS& env, const StringData*) { INTERP }
+void emitExit(IRGS& env)                      { INTERP }
+void emitFatal(IRGS& env, FatalOp)            { INTERP }
+void emitUnwind(IRGS& env)                    { INTERP }
+void emitThrow(IRGS& env)                     { INTERP }
+void emitCGetN(IRGS& env)                     { INTERP }
+void emitVGetN(IRGS& env)                     { INTERP }
+void emitIssetN(IRGS& env)                    { INTERP }
+void emitEmptyN(IRGS& env)                    { INTERP }
+void emitSetN(IRGS& env)                      { INTERP }
+void emitSetOpN(IRGS& env, SetOpOp)           { INTERP }
+void emitSetOpG(IRGS& env, SetOpOp)           { INTERP }
+void emitSetOpS(IRGS& env, SetOpOp)           { INTERP }
+void emitIncDecN(IRGS& env, IncDecOp)         { INTERP }
+void emitIncDecG(IRGS& env, IncDecOp)         { INTERP }
+void emitIncDecS(IRGS& env, IncDecOp)         { INTERP }
+void emitBindN(IRGS& env)                     { INTERP }
+void emitUnsetN(IRGS& env)                    { INTERP }
+void emitUnsetG(IRGS& env)                    { INTERP }
+void emitFPassN(IRGS& env, int32_t)           { INTERP }
+void emitFCallUnpack(IRGS& env, int32_t)      { INTERP }
+void emitCufSafeArray(IRGS& env)              { INTERP }
+void emitCufSafeReturn(IRGS& env)             { INTERP }
+void emitIncl(IRGS& env)                      { INTERP }
+void emitInclOnce(IRGS& env)                  { INTERP }
+void emitReq(IRGS& env)                       { INTERP }
+void emitReqDoc(IRGS& env)                    { INTERP }
+void emitReqOnce(IRGS& env)                   { INTERP }
+void emitEval(IRGS& env)                      { INTERP }
+void emitDefTypeAlias(IRGS& env, int32_t)     { INTERP }
+void emitDefCns(IRGS& env, const StringData*) { INTERP }
+void emitDefCls(IRGS& env, int32_t)           { INTERP }
+void emitDefFunc(IRGS& env, int32_t)          { INTERP }
+void emitCatch(IRGS& env)                     { INTERP }
+void emitHighInvalid(IRGS& env)               { std::abort(); }
 
 //////////////////////////////////////////////////////////////////////
 

@@ -19,14 +19,14 @@
 namespace HPHP { struct StringData; }
 namespace HPHP { namespace jit {
 struct SSATmp;
-struct HTS;
+struct IRGS;
 }}
 
 namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* implInstanceOfD(HTS& env, SSATmp* src, const StringData* className);
+SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className);
 
 //////////////////////////////////////////////////////////////////////
 

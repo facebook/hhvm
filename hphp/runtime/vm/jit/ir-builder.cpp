@@ -740,7 +740,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   }
 
   if (inst->is(AssertType)) {
-    // Sometimes code in HhbcTranslator asks for a value with DataTypeSpecific
+    // Sometimes code in irgen asks for a value with DataTypeSpecific
     // but can tolerate a less specific value. If that happens, there's nothing
     // to constrain.
     if (!typeFitsConstraint(val->type(), tc)) return false;
@@ -756,7 +756,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
   }
 
   if (inst->is(CheckType)) {
-    // Sometimes code in HhbcTranslator asks for a value with DataTypeSpecific
+    // Sometimes code in irgen asks for a value with DataTypeSpecific
     // but can tolerate a less specific value. If that happens, there's nothing
     // to constrain.
     if (!typeFitsConstraint(val->type(), tc)) return false;

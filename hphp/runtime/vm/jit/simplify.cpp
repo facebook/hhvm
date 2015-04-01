@@ -654,8 +654,7 @@ SSATmp* simplifyDivDbl(State& env, const IRInstruction* inst) {
   // X / 0 -> bool(false)
   if (src2Val == 0.0) {
     // Ideally we'd generate a RaiseWarning and return false here, but we need
-    // a catch trace for that and we can't make a catch trace without
-    // HhbcTranslator.
+    // a catch trace for that and we can't make a catch trace here.
     return nullptr;
   }
 
@@ -2099,7 +2098,7 @@ bool canSimplifyAssertType(const IRInstruction* inst,
     // We got external information (probably from static analysis) that
     // conflicts with what we've built up so far.  There's no reasonable way to
     // continue here: we can't properly fatal the request because we can't make
-    // a catch trace or SpillStack without HhbcTranslator, and we can't punt on
+    // a catch trace or SpillStack without IRGS, and we can't punt on
     // just this instruction because we might not be in the initial translation
     // phase, and we can't just plow on forward since we'll probably generate
     // malformed IR.  Since this case is very rare, just punt on the whole

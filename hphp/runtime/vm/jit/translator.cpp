@@ -1293,9 +1293,9 @@ const char* show(TranslateResult r) {
 #define FOUR(x0,x1,x2,x3) , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3)
 #define NA                   /*  */
 
-static void translateDispatch(HTS& hts,
+static void translateDispatch(IRGS& irgs,
                               const NormalizedInstruction& ni) {
-#define O(nm, imms, ...) case Op::nm: irgen::emit##nm(hts imms); return;
+#define O(nm, imms, ...) case Op::nm: irgen::emit##nm(irgs imms); return;
   switch (ni.op()) { OPCODES }
 #undef O
 }
@@ -1339,12 +1339,12 @@ static Type flavorToType(FlavorDesc f) {
   not_reached();
 }
 
-void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
+void translateInstr(IRGS& irgs, const NormalizedInstruction& ni) {
   irgen::prepareForNextHHBC(
-    hts,
+    irgs,
     &ni,
     ni.source,
-    ni.endsRegion && !irgen::isInlining(hts)
+    ni.endsRegion && !irgen::isInlining(irgs)
   );
 
   auto pc = reinterpret_cast<const Op*>(ni.pc());
@@ -1353,27 +1353,27 @@ void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
     if (type != Type::Gen) {
       // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
       // is a little unsure of itself.
-      irgen::assertTypeStack(hts, BCSPOffset{i}, type);
+      irgen::assertTypeStack(irgs, BCSPOffset{i}, type);
     }
   }
 
   FTRACE(1, "\n{:-^60}\n", folly::format("Translating {}: {} with stack:\n{}",
                                          ni.offset(), ni.toString(),
-                                         show(hts)));
+                                         show(irgs)));
 
-  irgen::ringbufferEntry(hts, Trace::RBTypeBytecodeStart, ni.source, 2);
-  irgen::emitIncStat(hts, Stats::Instr_TC, 1);
+  irgen::ringbufferEntry(irgs, Trace::RBTypeBytecodeStart, ni.source, 2);
+  irgen::emitIncStat(irgs, Stats::Instr_TC, 1);
   if (Trace::moduleEnabledRelease(Trace::llvm_count, 1) ||
       RuntimeOption::EvalJitLLVMCounters) {
-    irgen::gen(hts, CountBytecode);
+    irgen::gen(irgs, CountBytecode);
   }
 
   if (isAlwaysNop(ni.op())) {
     // Do nothing
   } else if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
-    irgen::interpOne(hts, ni);
+    irgen::interpOne(irgs, ni);
   } else {
-    translateDispatch(hts, ni);
+    translateDispatch(irgs, ni);
   }
 }
 

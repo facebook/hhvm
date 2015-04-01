@@ -48,7 +48,7 @@ typedef hphp_hash_map<uint64_t,const uint64_t*> LiteralMap;
 struct Label;
 struct MCGenerator;
 struct AsmInfo;
-struct HTS;
+struct IRGS;
 
 extern "C" MCGenerator* mcg;
 
@@ -245,7 +245,7 @@ public:
   bool profileSrcKey(SrcKey sk) const;
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
-  void traceCodeGen(HTS&);
+  void traceCodeGen(IRGS&);
   void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
 
   /*

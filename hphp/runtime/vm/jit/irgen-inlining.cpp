@@ -23,7 +23,7 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
-bool isInlining(const HTS& env) {
+bool isInlining(const IRGS& env) {
   return env.inlineLevel > 0;
 }
 
@@ -67,7 +67,7 @@ bool isInlining(const HTS& env) {
  * is true iff a Call occured anywhere between the the definition of
  * its first argument and itself.
  */
-void beginInlining(HTS& env,
+void beginInlining(IRGS& env,
                    unsigned numParams,
                    const Func* target,
                    Offset returnBcOffset) {
@@ -136,7 +136,7 @@ void beginInlining(HTS& env,
   env.fpiStack.pop();
 }
 
-void endInlinedCommon(HTS& env) {
+void endInlinedCommon(IRGS& env) {
   assertx(!env.fpiActiveStack.empty());
   assertx(!curFunc(env)->isPseudoMain());
 
@@ -179,7 +179,7 @@ void endInlinedCommon(HTS& env) {
   FTRACE(1, "]]] end inlining: {}\n", curFunc(env)->fullName()->data());
 }
 
-void retFromInlined(HTS& env, Type type) {
+void retFromInlined(IRGS& env, Type type) {
   auto const retVal = pop(env, type, DataTypeGeneric);
   endInlinedCommon(env);
   push(env, retVal);
@@ -187,7 +187,7 @@ void retFromInlined(HTS& env, Type type) {
 
 //////////////////////////////////////////////////////////////////////
 
-void inlSingletonSLoc(HTS& env, const Func* func, const Op* op) {
+void inlSingletonSLoc(IRGS& env, const Func* func, const Op* op) {
   assertx(*op == Op::StaticLocInit);
 
   TransFlags trflags;
@@ -209,7 +209,7 @@ void inlSingletonSLoc(HTS& env, const Func* func, const Op* op) {
   pushIncRef(env, value);
 }
 
-void inlSingletonSProp(HTS& env,
+void inlSingletonSProp(IRGS& env,
                        const Func* func,
                        const Op* clsOp,
                        const Op* propOp) {

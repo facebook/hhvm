@@ -65,7 +65,7 @@ bool type_converts_to_number(Type ty) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* opt_is_a(HTS& env, uint32_t numArgs) {
+SSATmp* opt_is_a(IRGS& env, uint32_t numArgs) {
   if (numArgs != 3) return nullptr;
 
   // The last param of is_a has a default argument of false, which makes it
@@ -99,7 +99,7 @@ SSATmp* opt_is_a(HTS& env, uint32_t numArgs) {
   return nullptr;
 }
 
-SSATmp* opt_count(HTS& env, uint32_t numArgs) {
+SSATmp* opt_count(IRGS& env, uint32_t numArgs) {
   if (numArgs != 2) return nullptr;
 
   auto const mode = topC(env, BCSPOffset{0});
@@ -111,7 +111,7 @@ SSATmp* opt_count(HTS& env, uint32_t numArgs) {
   return gen(env, Count, val);
 }
 
-SSATmp* opt_ord(HTS& env, uint32_t numArgs) {
+SSATmp* opt_ord(IRGS& env, uint32_t numArgs) {
   if (numArgs != 1) return nullptr;
 
   auto const arg = topC(env, BCSPOffset{0});
@@ -138,7 +138,7 @@ SSATmp* opt_ord(HTS& env, uint32_t numArgs) {
   return nullptr;
 }
 
-SSATmp* opt_ini_get(HTS& env, uint32_t numArgs) {
+SSATmp* opt_ini_get(IRGS& env, uint32_t numArgs) {
   if (numArgs != 1) return nullptr;
 
   // Only generate the optimized version if the argument passed in is a
@@ -180,7 +180,7 @@ SSATmp* opt_ini_get(HTS& env, uint32_t numArgs) {
  * Transforms in_array with a static haystack argument into an AKExistsArr with
  * the haystack flipped.
  */
-SSATmp* opt_in_array(HTS& env, uint32_t numArgs) {
+SSATmp* opt_in_array(IRGS& env, uint32_t numArgs) {
   if (numArgs != 3) return nullptr;
 
   // We will restrict this optimization to needles that are strings, and
@@ -232,7 +232,7 @@ SSATmp* opt_in_array(HTS& env, uint32_t numArgs) {
   );
 }
 
-SSATmp* opt_get_class(HTS& env, uint32_t numArgs) {
+SSATmp* opt_get_class(IRGS& env, uint32_t numArgs) {
   auto const curCls = curClass(env);
   auto const curName = [&] {
     return curCls != nullptr ? cns(env, curCls->name()) : nullptr;
@@ -251,7 +251,7 @@ SSATmp* opt_get_class(HTS& env, uint32_t numArgs) {
   return nullptr;
 }
 
-SSATmp* opt_get_called_class(HTS& env, uint32_t numArgs) {
+SSATmp* opt_get_called_class(IRGS& env, uint32_t numArgs) {
   if (numArgs != 0) return nullptr;
   if (!curClass(env)) return nullptr;
   auto const ctx = ldCtx(env);
@@ -259,7 +259,7 @@ SSATmp* opt_get_called_class(HTS& env, uint32_t numArgs) {
   return gen(env, LdClsName, cls);
 }
 
-SSATmp* opt_sqrt(HTS& env, uint32_t numArgs) {
+SSATmp* opt_sqrt(IRGS& env, uint32_t numArgs) {
   if (numArgs != 1) return nullptr;
 
   auto const val = topC(env);
@@ -272,7 +272,7 @@ SSATmp* opt_sqrt(HTS& env, uint32_t numArgs) {
   return nullptr;
 }
 
-SSATmp* opt_ceil(HTS& env, uint32_t numArgs) {
+SSATmp* opt_ceil(IRGS& env, uint32_t numArgs) {
   if (numArgs != 1) return nullptr;
   if (!folly::CpuId().sse41()) return nullptr;
   auto const val = topC(env);
@@ -281,7 +281,7 @@ SSATmp* opt_ceil(HTS& env, uint32_t numArgs) {
   return gen(env, Ceil, dbl);
 }
 
-SSATmp* opt_floor(HTS& env, uint32_t numArgs) {
+SSATmp* opt_floor(IRGS& env, uint32_t numArgs) {
   if (numArgs != 1) return nullptr;
   if (!folly::CpuId().sse41()) return nullptr;
   auto const val = topC(env);
@@ -290,7 +290,7 @@ SSATmp* opt_floor(HTS& env, uint32_t numArgs) {
   return gen(env, Floor, dbl);
 }
 
-SSATmp* opt_abs(HTS& env, uint32_t numArgs) {
+SSATmp* opt_abs(IRGS& env, uint32_t numArgs) {
   if (numArgs != 1) return nullptr;
 
   auto const value = topC(env);
@@ -309,7 +309,7 @@ SSATmp* opt_abs(HTS& env, uint32_t numArgs) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool optimizedFCallBuiltin(HTS& env,
+bool optimizedFCallBuiltin(IRGS& env,
                            const Func* func,
                            uint32_t numArgs,
                            uint32_t numNonDefault) {
@@ -397,7 +397,7 @@ struct ParamPrep {
  * conversions.
  */
 template<class LoadParam>
-ParamPrep prepare_params(HTS& env,
+ParamPrep prepare_params(IRGS& env,
                          const Func* callee,
                          SSATmp* thiz,
                          uint32_t numArgs,
@@ -465,7 +465,7 @@ ParamPrep prepare_params(HTS& env,
 struct CatchMaker {
   enum class Kind { NotInlining, InliningNonCtor, InliningCtor };
 
-  explicit CatchMaker(HTS& env,
+  explicit CatchMaker(IRGS& env,
                       Kind kind,
                       const Func* callee,
                       const ParamPrep* params)
@@ -620,7 +620,7 @@ private:
   }
 
 private:
-  HTS& env;
+  IRGS& env;
   Kind const m_kind;
   const Func* m_callee;
   const ParamPrep& m_params;
@@ -628,7 +628,7 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* coerce_value(HTS& env,
+SSATmp* coerce_value(IRGS& env,
                      const Func* callee,
                      SSATmp* oldVal,
                      uint32_t paramIdx,
@@ -669,7 +669,7 @@ SSATmp* coerce_value(HTS& env,
              oldVal);
 }
 
-void coerce_stack(HTS& env,
+void coerce_stack(IRGS& env,
                   const Func* callee,
                   uint32_t paramIdx,
                   BCSPOffset offset,
@@ -711,7 +711,7 @@ void coerce_stack(HTS& env,
  * ParamPrep into a vector of SSATmps to pass to CallBuiltin.  If any of the
  * parameters needed type conversions, we need to do that here too.
  */
-jit::vector<SSATmp*> realize_params(HTS& env,
+jit::vector<SSATmp*> realize_params(IRGS& env,
                                     const Func* callee,
                                     ParamPrep& params,
                                     const CatchMaker& maker) {
@@ -763,7 +763,7 @@ jit::vector<SSATmp*> realize_params(HTS& env,
 
 //////////////////////////////////////////////////////////////////////
 
-void builtinCall(HTS& env,
+void builtinCall(IRGS& env,
                  const Func* callee,
                  ParamPrep& params,
                  const CatchMaker& catchMaker) {
@@ -850,7 +850,7 @@ void builtinCall(HTS& env,
  *
  * To make this work, we need to do some weird things in the catch trace.  ;)
  */
-void nativeImplInlined(HTS& env) {
+void nativeImplInlined(IRGS& env) {
   auto const callee = curFunc(env);
   assertx(callee->nativeFuncPtr());
 
@@ -903,7 +903,7 @@ void nativeImplInlined(HTS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* optimizedCallIsObject(HTS& env, SSATmp* src) {
+SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
   if (src->isA(Type::Obj) && src->type().clsSpec()) {
     auto const cls = src->type().clsSpec().cls();
     if (!env.irb->constrainValue(src, TypeConstraint(cls).setWeak())) {
@@ -942,7 +942,7 @@ SSATmp* optimizedCallIsObject(HTS& env, SSATmp* src) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitFCallBuiltin(HTS& env,
+void emitFCallBuiltin(IRGS& env,
                       int32_t numArgs,
                       int32_t numNonDefault,
                       const StringData* funcName) {
@@ -969,7 +969,7 @@ void emitFCallBuiltin(HTS& env,
   builtinCall(env, callee, params, catcher);
 }
 
-void emitNativeImpl(HTS& env) {
+void emitNativeImpl(IRGS& env) {
   if (isInlining(env)) return nativeImplInlined(env);
 
   gen(env, NativeImpl, fp(env), sp(env));
@@ -984,7 +984,7 @@ void emitNativeImpl(HTS& env) {
 // collection.  The stack will still contain the collection in that case, and
 // loaded_collection_array will be non-nullptr.  If we're really doing
 // ArrayIdx, it's nullptr.
-void implArrayIdx(HTS& env, SSATmp* loaded_collection_array) {
+void implArrayIdx(IRGS& env, SSATmp* loaded_collection_array) {
   // These types are just used to decide what to do; once we know what we're
   // actually doing we constrain the values with the popC()s later on in this
   // function.
@@ -1021,7 +1021,7 @@ void implArrayIdx(HTS& env, SSATmp* loaded_collection_array) {
   gen(env, DecRef, def);
 }
 
-void implGenericIdx(HTS& env) {
+void implGenericIdx(IRGS& env) {
   auto const def = popC(env, DataTypeSpecific);
   auto const key = popC(env, DataTypeSpecific);
   auto const arr = popC(env, DataTypeSpecific);
@@ -1031,7 +1031,7 @@ void implGenericIdx(HTS& env) {
   gen(env, DecRef, def);
 }
 
-void emitArrayIdx(HTS& env) {
+void emitArrayIdx(IRGS& env) {
   auto const arrType = topC(env, BCSPOffset{2}, DataTypeGeneric)->type();
   if (!(arrType <= Type::Arr)) {
     // raise fatal
@@ -1042,7 +1042,7 @@ void emitArrayIdx(HTS& env) {
   implArrayIdx(env, nullptr);
 }
 
-void emitIdx(HTS& env) {
+void emitIdx(IRGS& env) {
   auto const key      = topC(env, BCSPOffset{1}, DataTypeGeneric);
   auto const base     = topC(env, BCSPOffset{2}, DataTypeGeneric);
   auto const keyType  = key->type();
@@ -1089,7 +1089,7 @@ void emitIdx(HTS& env) {
   implGenericIdx(env);
 }
 
-void emitAKExists(HTS& env) {
+void emitAKExists(IRGS& env) {
   auto const arr = popC(env);
   auto const key = popC(env);
 
@@ -1108,7 +1108,7 @@ void emitAKExists(HTS& env) {
   gen(env, DecRef, key);
 }
 
-void emitGetMemoKey(HTS& env) {
+void emitGetMemoKey(IRGS& env) {
   auto const inTy = topC(env)->type();
   if (inTy <= Type::Int) {
     // An int is already a valid key. No-op.
@@ -1127,7 +1127,7 @@ void emitGetMemoKey(HTS& env) {
   gen(env, DecRef, obj);
 }
 
-void emitStrlen(HTS& env) {
+void emitStrlen(IRGS& env) {
   auto const inType = topC(env)->type();
 
   if (inType <= Type::Str) {
@@ -1158,7 +1158,7 @@ void emitStrlen(HTS& env) {
   interpOne(env, Type::Int | Type::InitNull, 1);
 }
 
-void emitSilence(HTS& env, Id localId, SilenceOp subop) {
+void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
   // We can't generate direct StLoc and LdLocs in pseudomains (violates an IR
   // invariant).
   if (curFunc(env)->isPseudoMain()) PUNT(PseudoMain-Silence);

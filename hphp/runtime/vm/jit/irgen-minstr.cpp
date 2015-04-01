@@ -66,25 +66,25 @@ enum class SimpleOp {
  * Minstr Translation State.  Member instructions are complex enough that we
  * need our own state environment while processing one.
  *
- * This is implicitly convertible to HTS so you can use ht-internal functions
- * on it.  Effectively MTS <: HTS (except the dot operator).
+ * This is implicitly convertible to IRGS so you can use ht-internal functions
+ * on it.  Effectively MTS <: IRGS (except the dot operator).
  */
 struct MTS {
-  explicit MTS(HTS& hts, Op effectiveOp)
-    : hts(hts)
+  explicit MTS(IRGS& irgs, Op effectiveOp)
+    : irgs(irgs)
     , op(effectiveOp)
-    , immVec(hts.currentNormalizedInstruction->immVec)
-    , immVecM(hts.currentNormalizedInstruction->immVecM)
-    , ni(*hts.currentNormalizedInstruction)
-    , irb(*hts.irb)
-    , unit(hts.unit)
+    , immVec(irgs.currentNormalizedInstruction->immVec)
+    , immVecM(irgs.currentNormalizedInstruction->immVecM)
+    , ni(*irgs.currentNormalizedInstruction)
+    , irb(*irgs.irb)
+    , unit(irgs.unit)
     , mii(getMInstrInfo(effectiveOp))
     , iInd(mii.valCount())
   {}
-  /* implicit */ operator HTS&() { return hts; }
-  /* implicit */ operator const HTS&() const { return hts; }
+  /* implicit */ operator IRGS&() { return irgs; }
+  /* implicit */ operator const IRGS&() const { return irgs; }
 
-  HTS& hts;
+  IRGS& irgs;
   Op op;
   ImmVector immVec;
   jit::vector<MemberCode> immVecM;
@@ -228,13 +228,13 @@ SSATmp* misLea(MTS& env, ptrdiff_t offset) {
     cns(env, safe_cast<int32_t>(offset)));
 }
 
-SSATmp* ptrToInitNull(HTS& env) {
+SSATmp* ptrToInitNull(IRGS& env) {
   // Nothing is allowed to write anything to the init null variant, so this
   // inner type is always true.
   return cns(env, Type::cns(&init_null_variant, Type::PtrToMembInitNull));
 }
 
-SSATmp* ptrToUninit(HTS& env) {
+SSATmp* ptrToUninit(IRGS& env) {
   // Nothing can write to the uninit null variant either, so the inner type
   // here is also always true.
   return cns(env, Type::cns(&null_variant, Type::PtrToMembUninit));
@@ -1231,7 +1231,7 @@ void emitMPre(MTS& env) {
     // exception paths from here out will need to clean up the tvRef{,2}
     // storage, so install a custom catch creator.
     auto const penv = &env;
-    env.hts.catchCreator = [penv] { return makeMISCatch(*penv); };
+    env.irgs.catchCreator = [penv] { return makeMISCatch(*penv); };
   }
 
   /*
@@ -1347,7 +1347,7 @@ SSATmp* emitArrayGet(MTS& env, SSATmp* key) {
 }
 
 void emitProfiledPackedArrayGet(MTS& env, SSATmp* key) {
-  TargetProfile<NonPackedArrayProfile> prof(env.hts.context,
+  TargetProfile<NonPackedArrayProfile> prof(env.irgs.context,
                                             env.irb.curMarker(),
                                             s_PackedArray.get());
   if (prof.profiling()) {
@@ -1387,7 +1387,7 @@ void emitProfiledPackedArrayGet(MTS& env, SSATmp* key) {
 }
 
 void emitProfiledStructArrayGet(MTS& env, SSATmp* key) {
-  TargetProfile<StructArrayProfile> prof(env.hts.context,
+  TargetProfile<StructArrayProfile> prof(env.irgs.context,
                                          env.irb.curMarker(),
                                          s_StructArray.get());
   if (prof.profiling()) {
@@ -2092,13 +2092,13 @@ void emitMPost(MTS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void implMInstr(HTS& hts, Op effectiveOp) {
-  if (curFunc(hts)->isPseudoMain()) {
-    interpOne(hts, *hts.currentNormalizedInstruction);
+void implMInstr(IRGS& irgs, Op effectiveOp) {
+  if (curFunc(irgs)->isPseudoMain()) {
+    interpOne(irgs, *irgs.currentNormalizedInstruction);
     return;
   }
 
-  auto env = MTS { hts, effectiveOp };
+  auto env = MTS { irgs, effectiveOp };
   numberStackInputs(env); // Assign stack slots to our stack inputs
   emitMPre(env);          // Emit the base and every intermediate op
   emitFinalMOp(env);      // Emit the final operation
@@ -2109,21 +2109,21 @@ void implMInstr(HTS& hts, Op effectiveOp) {
 
 }
 
-void emitBindM(HTS& env, int)                 { implMInstr(env, Op::BindM); }
-void emitCGetM(HTS& env, int)                 { implMInstr(env, Op::CGetM); }
-void emitEmptyM(HTS& env, int)                { implMInstr(env, Op::EmptyM); }
-void emitIncDecM(HTS& env, IncDecOp, int)     { implMInstr(env, Op::IncDecM); }
-void emitIssetM(HTS& env, int)                { implMInstr(env, Op::IssetM); }
-void emitSetM(HTS& env, int)                  { implMInstr(env, Op::SetM); }
-void emitSetOpM(HTS& env, SetOpOp, int)       { implMInstr(env, Op::SetOpM); }
-void emitUnsetM(HTS& env, int)                { implMInstr(env, Op::UnsetM); }
-void emitVGetM(HTS& env, int)                 { implMInstr(env, Op::VGetM); }
+void emitBindM(IRGS& env, int)                 { implMInstr(env, Op::BindM); }
+void emitCGetM(IRGS& env, int)                 { implMInstr(env, Op::CGetM); }
+void emitEmptyM(IRGS& env, int)                { implMInstr(env, Op::EmptyM); }
+void emitIncDecM(IRGS& env, IncDecOp, int)     { implMInstr(env, Op::IncDecM); }
+void emitIssetM(IRGS& env, int)                { implMInstr(env, Op::IssetM); }
+void emitSetM(IRGS& env, int)                  { implMInstr(env, Op::SetM); }
+void emitSetOpM(IRGS& env, SetOpOp, int)       { implMInstr(env, Op::SetOpM); }
+void emitUnsetM(IRGS& env, int)                { implMInstr(env, Op::UnsetM); }
+void emitVGetM(IRGS& env, int)                 { implMInstr(env, Op::VGetM); }
 
-void emitSetWithRefLM(HTS& env, int, int32_t) {
+void emitSetWithRefLM(IRGS& env, int, int32_t) {
   implMInstr(env, Op::SetWithRefLM);
 }
 
-void emitSetWithRefRM(HTS& env, int) {
+void emitSetWithRefRM(IRGS& env, int) {
   implMInstr(env, Op::SetWithRefRM);
 }
 

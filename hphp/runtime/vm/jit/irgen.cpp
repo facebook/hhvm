@@ -26,7 +26,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-Block* create_catch_block(HTS& env) {
+Block* create_catch_block(IRGS& env) {
   auto const catchBlock = env.irb->unit().defBlock(Block::Hint::Unused);
   BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
 
@@ -44,7 +44,7 @@ Block* create_catch_block(HTS& env) {
   return catchBlock;
 }
 
-void check_catch_stack_state(HTS& env, const IRInstruction* inst) {
+void check_catch_stack_state(IRGS& env, const IRInstruction* inst) {
   auto const& exnStack = env.irb->exceptionStackState();
   always_assert_flog(
     exnStack.sp == sp(env) &&
@@ -79,7 +79,7 @@ void check_catch_stack_state(HTS& env, const IRInstruction* inst) {
  * which may or may not insert it depending on a variety of factors.
  */
 namespace detail {
-SSATmp* genInstruction(HTS& env, IRInstruction* inst) {
+SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
   if (inst->mayRaiseError() && inst->taken()) {
     FTRACE(1, "{}: asserting about catch block\n", inst->toString());
     /*
@@ -120,22 +120,22 @@ SSATmp* genInstruction(HTS& env, IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-void incTransCounter(HTS& env) { gen(env, IncTransCounter); }
+void incTransCounter(IRGS& env) { gen(env, IncTransCounter); }
 
-void incProfCounter(HTS& env, TransID transId) {
+void incProfCounter(IRGS& env, TransID transId) {
   gen(env, IncProfCounter, TransIDData(transId));
 }
 
-void checkCold(HTS& env, TransID transId) {
+void checkCold(IRGS& env, TransID transId) {
   gen(env, CheckCold, makeExitOpt(env, transId), TransIDData(transId));
 }
 
-void ringbufferEntry(HTS& env, Trace::RingBufferType t, SrcKey sk, int level) {
+void ringbufferEntry(IRGS& env, Trace::RingBufferType t, SrcKey sk, int level) {
   if (!Trace::moduleEnabled(Trace::ringbuffer, level)) return;
   gen(env, RBTraceEntry, RBEntryData(t, sk));
 }
 
-void ringbufferMsg(HTS& env,
+void ringbufferMsg(IRGS& env,
                    Trace::RingBufferType t,
                    const StringData* msg,
                    int level) {
@@ -143,7 +143,7 @@ void ringbufferMsg(HTS& env,
   gen(env, RBTraceMsg, RBMsgData(t, msg));
 }
 
-void prepareEntry(HTS& env) {
+void prepareEntry(IRGS& env) {
   /*
    * We automatically hoist a load of the context to the beginning of every
    * region.  The reason is that it's trivially CSEable, so we might as well
@@ -152,9 +152,9 @@ void prepareEntry(HTS& env) {
   ldCtx(env);
 }
 
-void prepareForSideExit(HTS& env) { spillStack(env); }
+void prepareForSideExit(IRGS& env) { spillStack(env); }
 
-void endRegion(HTS& env) {
+void endRegion(IRGS& env) {
   auto const curSk  = curSrcKey(env);
   if (!instrAllowsFallThru(curSk.op())) return; // nothing to do here
 
@@ -162,7 +162,7 @@ void endRegion(HTS& env) {
   endRegion(env, nextSk);
 }
 
-void endRegion(HTS& env, SrcKey nextSk) {
+void endRegion(IRGS& env, SrcKey nextSk) {
   FTRACE(1, "------------------- endRegion ---------------------------\n");
   if (!fp(env)) {
     // The function already returned.  There's no reason to generate code to
@@ -178,7 +178,7 @@ void endRegion(HTS& env, SrcKey nextSk) {
 // All accesses to the stack and locals in this function use DataTypeGeneric so
 // this function should only be used for inspecting state; when the values are
 // actually used they must be constrained further.
-Type predictedTypeFromLocation(HTS& env, const Location& loc) {
+Type predictedTypeFromLocation(IRGS& env, const Location& loc) {
   switch (loc.space) {
     case Location::Stack: {
       auto i = loc.bcRelOffset;
@@ -218,7 +218,7 @@ Type predictedTypeFromLocation(HTS& env, const Location& loc) {
   not_reached();
 }
 
-void endBlock(HTS& env, Offset next, bool nextIsMerge) {
+void endBlock(IRGS& env, Offset next, bool nextIsMerge) {
   if (!fp(env)) {
     // If there's no fp, we've already executed a RetCtrl or similar, so
     // there's no reason to try to jump anywhere now.
@@ -227,7 +227,7 @@ void endBlock(HTS& env, Offset next, bool nextIsMerge) {
   jmpImpl(env, next, nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone);
 }
 
-void prepareForNextHHBC(HTS& env,
+void prepareForNextHHBC(IRGS& env,
                         const NormalizedInstruction* ni,
                         SrcKey newSk,
                         bool lastBcInst) {
@@ -258,11 +258,11 @@ void prepareForNextHHBC(HTS& env,
   env.irb->prepareForNextHHBC();
 }
 
-void finishHHBC(HTS& env) {
+void finishHHBC(IRGS& env) {
   env.firstBcInst = false;
 }
 
-void prepareForHHBCMergePoint(HTS& env) {
+void prepareForHHBCMergePoint(IRGS& env) {
   spillStack(env);
 
   // For bytecode-level merge points, we need to make sure the spOffset
@@ -274,16 +274,16 @@ void prepareForHHBCMergePoint(HTS& env) {
   gen(env, AdjustSP, IRSPOffsetData { spOff }, sp(env));
 }
 
-FPAbsOffset logicalStackDepth(const HTS& env) {
+FPAbsOffset logicalStackDepth(const IRGS& env) {
   // Negate the offsetFromIRSP because it is an offset from the actual StkPtr
   // (so negative values go deeper on the stack), but this function deals with
   // logical stack depths (where more positive values are deeper).
   return env.irb->spOffset() - offsetFromIRSP(env, BCSPOffset{0});
 }
 
-Type publicTopType(const HTS& env, BCSPOffset idx) {
+Type publicTopType(const IRGS& env, BCSPOffset idx) {
   // It's logically const, because we're using DataTypeGeneric.
-  return topType(const_cast<HTS&>(env), idx, DataTypeGeneric);
+  return topType(const_cast<IRGS&>(env), idx, DataTypeGeneric);
 }
 
 //////////////////////////////////////////////////////////////////////

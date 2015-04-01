@@ -555,10 +555,8 @@ int Vxls::spEffect(Vinstr& inst) const {
       if (debug) visitDefs(unit, inst, [&](Vreg r) { assertx(r != m_sp); });
       return 0;
     case Vinstr::push:
-    case Vinstr::pushm:
       return -8;
     case Vinstr::pop:
-    case Vinstr::popm:
       return 8;
     case Vinstr::addqi: {
       auto& i = inst.addqi_;
@@ -1458,10 +1456,6 @@ enum SpillState : uint8_t {
 
   // Spill space is needed and must be allocated at or before this point.
   NeedSpill,
-
-  // Spill space has been freed because we reached a pushm{} instruction and
-  // may not be accessed or reallocated.
-  FreedSpill,
 };
 
 /*
@@ -1500,21 +1494,11 @@ SpillState instrInState(const Vunit& unit, const Vinstr& inst,
     case Uninit: break;
 
     case NoSpill:
-      if (inst.op == Vinstr::pushm) return FreedSpill;
       if (instrNeedsSpill(unit, inst, sp)) return NeedSpill;
       return NoSpill;
 
     case NeedSpill:
-      if (inst.op == Vinstr::pushm) return FreedSpill;
       return NeedSpill;
-
-    case FreedSpill:
-      // Spill space has been freed from a pushm{}, so we can't access
-      // it. load{m_sp[0]} is special because it appears in some debugging code
-      // to print the return address stored at that location.
-      assertx(!instrNeedsSpill(unit, inst, sp) ||
-             (inst.op == Vinstr::load && inst.load_.s == sp[0]));
-      return FreedSpill;
   }
 
   always_assert(false);
@@ -1543,11 +1527,10 @@ void fixupBlockJumps(Vunit& unit, Vlabel label) {
 }
 
 /*
- * Walk through the given block, freeing spill space before pushm{} and undoing
- * any fallbackcc/bindjcc optimizations that happen in an area where spill
- * space is live. The latter transformation is necessary to make the hidden
- * edge out of the fallbackcc{} explicit, so we can insert an lea on it to free
- * spill space. It takes something like this:
+ * Walk through the given block, undoing any fallbackcc/bindjcc optimizations
+ * that happen in an area where spill space is live. The latter transformation
+ * is necessary to make the hidden edge out of the fallbackcc{} explicit, so we
+ * can insert an lea on it to free spill space. It takes something like this:
  *
  * B0:
  *   cmpbim 0, %rbp[0x10] => %flags
@@ -1569,28 +1552,11 @@ void processSpillExits(Vunit& unit, Vlabel label, SpillState state,
                        Vinstr free, PhysReg sp) {
   auto code = &unit.blocks[label].code;
   auto needFixup = false;
-  auto prevState = state;
 
   for (unsigned i = 0, n = code->size(); i < n; ++i) {
     auto& inst = (*code)[i];
     state = instrInState(unit, inst, state, sp);
 
-    // pushm is handled specially because our return sequence is a bit weird:
-    // we push the return address then do a ret instruction, in order to keep
-    // the CPU's RSB happy. So even though the ret instruction is the one that
-    // actually leaves the trace, we need to free spill space before the
-    // instruction that pushes the return address on the native stack.
-    if (inst.op == Vinstr::pushm) {
-      assertx(state == FreedSpill);
-      if (prevState == NeedSpill) {
-        FTRACE(3, "free spill before {}\n", show(unit, inst));
-        free.origin = inst.origin;
-        code->insert(code->begin() + i, free);
-      }
-      break;
-    }
-
-    prevState = state;
     if (state < NeedSpill ||
         (inst.op != Vinstr::fallbackcc && inst.op != Vinstr::bindjcc)) {
       continue;
@@ -1637,14 +1603,7 @@ bool mergeSpillStates(SpillState& dst, SpillState src) {
   if (dst == src) return false;
 
   // The only allowed state transitions are to states with higher values, so we
-  // merge with std::max(). The one exception is that it's illegal to merge
-  // FreedSpill with anything other than itself or Uninit. This is because
-  // FreedSpill only shows up after a pushm{}, which means we're about to
-  // return from the current function. Jumping to/from code after pushm{}
-  // from/to a block where spill space is live indicates a bug in the input
-  // program.
-  assertx((dst != FreedSpill || src == Uninit) &&
-         (src != FreedSpill || dst == Uninit));
+  // merge with std::max().
   auto const oldDst = dst;
   dst = std::max(dst, src);
   return dst != oldDst;
@@ -1678,16 +1637,14 @@ std::uniform_int_distribution<int> s_stressDist(1,7);
  *   - For each block (we use RPO to only visit reachable blocks but order
  *     doesn't matter):
  *     - Inspect the block's in-state and out-state:
- *       - FreedSpill in: Spill space is dead. Do nothing.
- *       - NoSpill in, >= NeedSpill out: Walk the block to see if we need to
+ *       - NoSpill in, == NeedSpill out: Walk the block to see if we need to
  *         allocate spill space before any instructions.
  *       - NoSpill out: Allocate spill space on any edges to successors with
  *         NeedSpill in-states.
  *       - NeedSpill out: If the block has no in-unit successors, free spill
  *         space before the block-end instruction.
- *       - != NoSpill out: Look for any pushm/fallbackcc/bindjcc instructions,
- *         freeing spill space and deoptimizing as appropriate (see
- *         processSpillExits()).
+ *       - != NoSpill out: Look for any fallbackcc/bindjcc instructions,
+ *         deoptimizing as appropriate (see processSpillExits()).
  */
 void Vxls::allocateSpillSpace() {
   if (RuntimeOption::EvalHHIRStressSpill && m_abi.canSpill) {
@@ -1726,7 +1683,12 @@ void Vxls::allocateSpillSpace() {
     auto const& block = unit.blocks[label];
     auto state = states[label].in;
 
-    for (auto& inst : block.code) state = instrInState(unit, inst, state, m_sp);
+    if (state < NeedSpill) {
+      for (auto& inst : block.code) {
+        state = instrInState(unit, inst, state, m_sp);
+        if (state == NeedSpill) break;
+      }
+    }
     states[label].out = state;
 
     for (auto s : succs(block)) {
@@ -1741,13 +1703,10 @@ void Vxls::allocateSpillSpace() {
     auto state = states[label];
     auto& block = unit.blocks[label];
 
-    // FreedSpill in-state: nothing to do since spill space is dead.
-    if (state.in == FreedSpill) continue;
-
-    // Any block with a NoSpill in-state and >= NeedSpill out-state might have
+    // Any block with a NoSpill in-state and == NeedSpill out-state might have
     // an instruction in it that needs spill space, which we allocate right
     // before the instruction in question.
-    if (state.in == NoSpill && state.out >= NeedSpill) {
+    if (state.in == NoSpill && state.out == NeedSpill) {
       auto state = NoSpill;
       for (auto it = block.code.begin(); it != block.code.end(); ++it) {
         state = instrInState(unit, *it, state, m_sp);
@@ -1765,8 +1724,6 @@ void Vxls::allocateSpillSpace() {
     auto const successors = succs(block);
     if (state.out == NoSpill) {
       for (auto s : successors) {
-        assertx(states[s].in != FreedSpill && "illegal state transition");
-
         if (states[s].in == NeedSpill) {
           FTRACE(3, "alloc spill on edge from {} -> {}\n", label, s);
           auto it = std::prev(block.code.end());
@@ -1781,8 +1738,6 @@ void Vxls::allocateSpillSpace() {
     // space is still allocated in core files.
     if (state.out == NeedSpill && successors.empty() &&
         block.code.back().op != Vinstr::ud2) {
-      // state.out should be FreedSpill for ret instructions.
-      assertx(block.code.back().op != Vinstr::ret);
       auto it = std::prev(block.code.end());
       FTRACE(3, "free spill before {}: {}\n", label, show(unit, (*it)));
       free.origin = it->origin;

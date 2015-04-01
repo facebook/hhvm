@@ -96,10 +96,7 @@ void freeLocalsAndThis(HTS& env) {
 void normalReturn(HTS& env, SSATmp* retval) {
   gen(env, StRetVal, fp(env), retval);
   gen(env, RetAdjustStk, fp(env));
-  auto const retAddr = gen(env, LdRetAddr, fp(env));
-  gen(env, FreeActRec, fp(env));
-  gen(env, RetCtrl, RetCtrlData { IRSPOffset{0}, false },
-    sp(env), fp(env), retAddr);
+  gen(env, RetCtrl, RetCtrlData { IRSPOffset{0}, false }, sp(env), fp(env));
 }
 
 void asyncFunctionReturn(HTS& env, SSATmp* retval) {
@@ -131,8 +128,8 @@ void asyncFunctionReturn(HTS& env, SSATmp* retval) {
 
   gen(
     env,
-    RetCtrl,
-    RetCtrlData { offsetFromIRSP(env, BCSPOffset{0}), false },
+    AsyncRetCtrl,
+    IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
     sp(env),
     fp(env),
     retAddr
@@ -158,16 +155,12 @@ void generatorReturn(HTS& env, SSATmp* retval) {
   push(env, cns(env, Type::InitNull));
 
   spillStack(env);
-  auto const retAddr = gen(env, LdRetAddr, fp(env));
-  gen(env, FreeActRec, fp(env));
-
   gen(
     env,
     RetCtrl,
     RetCtrlData { offsetFromIRSP(env, BCSPOffset{0}), false },
     sp(env),
-    fp(env),
-    retAddr
+    fp(env)
   );
 }
 

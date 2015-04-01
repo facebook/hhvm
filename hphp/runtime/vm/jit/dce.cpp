@@ -299,6 +299,7 @@ bool canDCE(IRInstruction* inst) {
   case NativeImpl:
   case CallBuiltin:
   case RetCtrl:
+  case AsyncRetCtrl:
   case StRetVal:
   case RetAdjustStk:
   case ReleaseVVOrExit:

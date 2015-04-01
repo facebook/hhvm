@@ -74,7 +74,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::imul:
     case Vinstr::incl:
     case Vinstr::incq:
-    case Vinstr::ldretaddr:
     case Vinstr::lea:
     case Vinstr::leap:
     case Vinstr::load:
@@ -89,7 +88,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::lslv:
     case Vinstr::movb:
     case Vinstr::movl:
-    case Vinstr::movretaddr:
     case Vinstr::movtqb:
     case Vinstr::movtql:
     case Vinstr::movzbl:
@@ -195,11 +193,8 @@ bool effectful(Vinstr& inst) {
     case Vinstr::phijcc:
     case Vinstr::phijmp:
     case Vinstr::pop:
-    case Vinstr::popm:
     case Vinstr::push:
-    case Vinstr::pushm:
     case Vinstr::ret:
-    case Vinstr::retctrl:
     case Vinstr::store:
     case Vinstr::storeb:
     case Vinstr::storebi:
@@ -218,6 +213,8 @@ bool effectful(Vinstr& inst) {
     case Vinstr::unwind:
     case Vinstr::vcall:
     case Vinstr::vinvoke:
+    case Vinstr::vretm:
+    case Vinstr::vret:
       return true;
   }
   always_assert(false);

@@ -90,6 +90,8 @@ private:
   void emit(syncpoint i);
   void emit(unwind i);
   void emit(landingpad& i) {}
+  void emit(vretm& i);
+  void emit(vret& i);
 
   // instructions
   void emit(andb& i) { commuteSF(i); a->andb(i.s0, i.d); }
@@ -168,11 +170,9 @@ private:
   void emit(orqi& i) { binary(i); a->orq(i.s0, i.d); }
   void emit(orqim& i) { a->orq(i.s0, i.m); }
   void emit(pop& i) { a->pop(i.d); }
-  void emit(popm& i) { a->pop(i.m); }
   void emit(psllq& i) { binary(i); a->psllq(i.s0, i.d); }
   void emit(psrlq& i) { binary(i); a->psrlq(i.s0, i.d); }
   void emit(push& i) { a->push(i.s); }
-  void emit(pushm& i) { a->push(i.s); }
   void emit(roundsd& i) { a->roundsd(i.dir, i.s, i.d); }
   void emit(ret& i) { a->ret(); }
   void emit(sarq& i) { unary(i); a->sarq(i.d); }
@@ -576,6 +576,17 @@ void Vgen::emit(unwind i) {
   // the edges to catch (unwinder) blocks and fall-through blocks.
   catches.push_back({a->frontier(), i.targets[1]});
   emit(jmp{i.targets[0]});
+}
+
+void Vgen::emit(vretm& i) {
+  a->push(i.retAddr);
+  a->loadq(i.prevFp, i.d);
+  a->ret();
+}
+
+void Vgen::emit(vret& i) {
+  a->push(i.retAddr);
+  a->ret();
 }
 
 // overall emitter
@@ -1052,18 +1063,6 @@ void lowerForX64(Vunit& unit, const Abi& abi) {
 
         case Vinstr::movtql:
           inst = copy{inst.movtql_.s, inst.movtql_.d};
-          break;
-
-        case Vinstr::ldretaddr:
-          inst = pushm{inst.ldretaddr_.s};
-          break;
-
-        case Vinstr::movretaddr:
-          inst = load{*rsp, inst.movretaddr_.d};
-          break;
-
-        case Vinstr::retctrl:
-          inst = ret{kCrossTraceRegs};
           break;
 
         case Vinstr::countbytecode:

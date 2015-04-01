@@ -973,10 +973,9 @@ void emitNativeImpl(HTS& env) {
   if (isInlining(env)) return nativeImplInlined(env);
 
   gen(env, NativeImpl, fp(env), sp(env));
-  auto const stack   = gen(env, RetAdjustStk, fp(env));
-  auto const retAddr = gen(env, LdRetAddr, fp(env));
-  auto const frame   = gen(env, FreeActRec, fp(env));
-  gen(env, RetCtrl, RetCtrlData(IRSPOffset{0}, false), stack, frame, retAddr);
+  auto const stack = gen(env, RetAdjustStk, fp(env));
+  auto const frame = fp(env);
+  gen(env, RetCtrl, RetCtrlData(IRSPOffset{0}, false), stack, frame);
 }
 
 //////////////////////////////////////////////////////////////////////

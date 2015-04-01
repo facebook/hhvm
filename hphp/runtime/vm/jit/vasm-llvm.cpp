@@ -1460,9 +1460,8 @@ O(xorbi) \
 O(xorq) \
 O(xorqi) \
 O(landingpad) \
-O(ldretaddr) \
-O(movretaddr) \
-O(retctrl) \
+O(vretm) \
+O(vret) \
 O(absdbl) \
 O(phijmp) \
 O(phijcc) \
@@ -1492,9 +1491,7 @@ O(countbytecode)
       case Vinstr::shlq:
       case Vinstr::ret:
       case Vinstr::push:
-      case Vinstr::pushm:
       case Vinstr::pop:
-      case Vinstr::popm:
       case Vinstr::psllq:
       case Vinstr::psrlq:
       case Vinstr::fallthru:
@@ -2529,20 +2526,22 @@ UNUSED void LLVMEmitter::emitAsm(const std::string& asmStatement,
   call->setCallingConv(llvm::CallingConv::C);
 }
 
-void LLVMEmitter::emit(const ldretaddr& inst) {
-  auto const ptr = m_irb.CreateBitCast(emitPtr(inst.s, 8),
-                                       ptrType(ptrType(m_traceletFnTy)),
-                                       "bcast");
-  defineValue(inst.d, m_irb.CreateLoad(ptr));
-}
+void LLVMEmitter::emit(const vretm& inst) {
+  assert_not_implemented(inst.args == x64::kCrossTraceRegs);
+  auto const retPtr = emitPtr(inst.retAddr, ptrType(ptrType(m_traceletFnTy)));
+  auto const retAddr = m_irb.CreateLoad(retPtr);
+  auto const prevFp = m_irb.CreateLoad(emitPtr(inst.prevFp, 64));
+  defineValue(inst.d, prevFp);
 
-void LLVMEmitter::emit(const movretaddr& inst) {
-  defineValue(inst.d, m_irb.CreatePtrToInt(value(inst.s), m_int64));
-}
-
-void LLVMEmitter::emit(const retctrl& inst) {
   // "Return" with a tail call to the loaded address
-  emitTraceletTailCall(value(inst.s));
+  emitTraceletTailCall(retAddr);
+}
+
+void LLVMEmitter::emit(const vret& inst) {
+  assert_not_implemented(inst.args == x64::kCrossTraceRegs);
+  auto const retAddr = m_irb.CreateIntToPtr(value(inst.retAddr),
+                                            ptrType(m_traceletFnTy));
+  emitTraceletTailCall(retAddr);
 }
 
 void LLVMEmitter::emit(const absdbl& inst) {

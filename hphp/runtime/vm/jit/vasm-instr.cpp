@@ -55,7 +55,8 @@ bool isBlockEnd(const Vinstr& inst) {
     case Vinstr::unwind:
     case Vinstr::vinvoke:
     case Vinstr::ret:
-    case Vinstr::retctrl:
+    case Vinstr::vretm:
+    case Vinstr::vret:
     case Vinstr::fallthru:
     // arm specific
     case Vinstr::hcunwind:

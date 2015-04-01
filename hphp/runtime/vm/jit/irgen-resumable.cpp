@@ -90,13 +90,11 @@ void implAwaitE(HTS& env, SSATmp* child, Offset resumeOffset, int numIters) {
   suspendHookE(env, fp(env), asyncAR, waitHandle);
   discard(env, 1);
 
-  // Grab caller info from ActRec, free ActRec, store the return value
-  // and return control to the caller.
+  // store the return value and return control to the caller.
   gen(env, StRetVal, fp(env), waitHandle);
-  auto const retAddr = gen(env, LdRetAddr, fp(env));
   auto const stack = gen(env, RetAdjustStk, fp(env));
-  auto const frame = gen(env, FreeActRec, fp(env));
-  gen(env, RetCtrl, RetCtrlData(IRSPOffset{0}, false), stack, frame, retAddr);
+  auto const frame = fp(env);
+  gen(env, RetCtrl, RetCtrlData(IRSPOffset{0}, false), stack, frame);
 }
 
 void implAwaitR(HTS& env, SSATmp* child, Offset resumeOffset) {
@@ -123,10 +121,9 @@ void implAwaitR(HTS& env, SSATmp* child, Offset resumeOffset) {
 
   spillStack(env);
   auto const stack    = sp(env);
-  auto const retAddr  = gen(env, LdRetAddr, fp(env));
-  auto const frame    = gen(env, FreeActRec, fp(env));
+  auto const frame    = fp(env);
   auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
-  gen(env, RetCtrl, RetCtrlData(spAdjust, true), stack, frame, retAddr);
+  gen(env, RetCtrl, RetCtrlData(spAdjust, true), stack, frame);
 }
 
 void yieldReturnControl(HTS& env) {
@@ -135,10 +132,9 @@ void yieldReturnControl(HTS& env) {
 
   spillStack(env);
   auto const stack    = sp(env);
-  auto const retAddr  = gen(env, LdRetAddr, fp(env));
-  auto const frame    = gen(env, FreeActRec, fp(env));
+  auto const frame    = fp(env);
   auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
-  gen(env, RetCtrl, RetCtrlData { spAdjust, true }, stack, frame, retAddr);
+  gen(env, RetCtrl, RetCtrlData { spAdjust, true }, stack, frame);
 }
 
 void yieldImpl(HTS& env, Offset resumeOffset) {
@@ -237,10 +233,9 @@ void emitCreateCont(HTS& env) {
   // Grab caller info from ActRec, free ActRec, store the return value
   // and return control to the caller.
   gen(env, StRetVal, fp(env), cont);
-  auto const retAddr = gen(env, LdRetAddr, fp(env));
   auto const stack = gen(env, RetAdjustStk, fp(env));
-  auto const frame = gen(env, FreeActRec, fp(env));
-  gen(env, RetCtrl, RetCtrlData(IRSPOffset{0}, false), stack, frame, retAddr);
+  auto const frame = fp(env);
+  gen(env, RetCtrl, RetCtrlData(IRSPOffset{0}, false), stack, frame);
 }
 
 void emitContEnter(HTS& env) {

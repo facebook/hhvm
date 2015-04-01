@@ -246,6 +246,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       stack_below(inst.src(0), inst.extra<RetCtrl>()->spOffset.offset - 1)
     };
 
+  case AsyncRetCtrl:
+    return ReturnEffects {
+      stack_below(inst.src(0), inst.extra<AsyncRetCtrl>()->offset.offset - 1)
+    };
+
   case GenericRetDecRefs:
     /*
      * The may-store information here is AUnknown: even though we know it

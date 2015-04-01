@@ -2101,8 +2101,8 @@ void CodeGenerator::cgRetAdjustStk(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
-  auto fpReg = srcLoc(inst, 0).reg(0);
-  vmain() << ldretaddr{fpReg[AROFF(m_savedRip)], dstLoc(inst, 0).reg()};
+  auto const fp = srcLoc(inst, 0).reg();
+  vmain() << load{fp[AROFF(m_savedRip)], dstLoc(inst, 0).reg()};
 }
 
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
@@ -2117,24 +2117,40 @@ void traceRet(ActRec* fp, Cell* sp, void* rip) {
 
 void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
   auto& v = vmain();
-  auto const retAddr = srcLoc(inst, 2).reg();
-  // Make sure rVmFp and rVmSp are set appropriately
   auto const sp = srcLoc(inst, 0).reg();
   auto const fp = srcLoc(inst, 1).reg();
   auto const sync_sp = v.makeReg();
   v << lea{sp[cellsToBytes(inst->extra<RetCtrl>()->spOffset.offset)], sync_sp};
   v << syncvmsp{sync_sp};
 
-  // Return control to caller
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    // call to a trace function
     auto ripReg = v.makeReg();
-    v << movretaddr{retAddr, ripReg};
+    v << load{fp[AROFF(m_savedRip)], ripReg};
+    auto prev_fp = v.makeReg();
+    v << load{fp[AROFF(m_sfp)], prev_fp};
     v << vcall{CppCall::direct(traceRet),
-               v.makeVcallArgs({{fp, sync_sp, ripReg}}), v.makeTuple({})};
+               v.makeVcallArgs({{prev_fp, sync_sp, ripReg}}), v.makeTuple({})};
   }
 
-  v << retctrl{srcLoc(inst, 2).reg()};
+  v << vretm{fp[AROFF(m_savedRip)], fp[AROFF(m_sfp)], rVmFp, kCrossTraceRegs};
+}
+
+void CodeGenerator::cgAsyncRetCtrl(IRInstruction* inst) {
+  auto& v = vmain();
+  auto const sp = srcLoc(inst, 0).reg();
+  auto const fp = srcLoc(inst, 1).reg();
+  auto const retAddr = srcLoc(inst, 2).reg();
+  auto const sync_sp = v.makeReg();
+  v << lea{sp[cellsToBytes(inst->extra<AsyncRetCtrl>()->offset.offset)],
+           sync_sp};
+  v << syncvmsp{sync_sp};
+
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    v << vcall{CppCall::direct(traceRet),
+               v.makeVcallArgs({{fp, sync_sp, retAddr}}), v.makeTuple({})};
+  }
+
+  v << vret{retAddr, kCrossTraceRegs};
 }
 
 void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {

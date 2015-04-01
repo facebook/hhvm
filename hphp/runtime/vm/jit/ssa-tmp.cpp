@@ -35,13 +35,8 @@ namespace {
 int typeNeededWords(Type t) {
   if (t.subtypeOfAny(Type::Uninit,
                      Type::InitNull,
-                     Type::RetAddr,
                      Type::Nullptr)) {
     // These don't need a register because their values are static or unused.
-    //
-    // RetAddr doesn't take any register because currently we only target x86,
-    // which takes the return address from the stack.  This knowledge should be
-    // moved to a machine-specific section once we target other architectures.
     return 0;
   }
   if (t.maybe(Type::Nullptr)) {

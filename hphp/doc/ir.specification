@@ -1268,18 +1268,19 @@ To string conversions:
 
 | LdRetAddr, D(RetAddr), S(FramePtr), NF
 
-  Load the return address off of the activation record pointed to by S0. The
-  return address D is normally provided to a RetCtrl. Between a LdRetAddr and a
-  RetCtrl, a FreeActRec is normally emitted to free the activation record S0.
-  This is the reason why LdRetAddr is a separate instruction from RetCtrl.
+  Load the saved return address from S0 into D.
 
-| RetCtrl<spOff,suspendingResumed>, ND, S(StkPtr) S(FramePtr) S(RetAddr), T
+| RetCtrl<spOff,suspendingResumed>, ND, S(StkPtr) S(FramePtr), T
 
-  Ensure that S0 + `spOff' (in cells) is stored in rVmSp and S1 is stored in
-  rVmFp and then execute a hardware procedure-return using the return address
-  specified by S2.  `suspendingResumed' indicates whether this instruction is
-  actually returning from a function or suspending a resumable (as in a yield
-  or a suspended await).
+  Ensure that S0 + `spOff' (in cells) is stored in rVmSp, S1's saved frame
+  pointer is stored in rVmFp, and return to the saved return address in
+  S1. `suspendingResumed' indicates when this instruction is suspending a
+  resumable rather than performing a normal function return.
+
+| AsyncRetCtrl<spOff>, ND, S(StkPtr) S(FramePtr) S(RetAddr), T
+
+  Ensure that S0 + `spOff` (in cells) is stored in rVmSp, S1 is stored in
+  rVmFp, and return to the address in S2.
 
 | StRetVal, ND, S(FramePtr) S(Gen), CRc
 

@@ -536,27 +536,22 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
 
 SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst);
-  if (!m_reoptimizing) {
-    // These preOptimize routines are only used at gen-time; the corresponding
-    // functionality at optimization-time is instrumented elsewhere (e.g.,
-    // simplify, load-elim, etc.).
-    switch (inst->op()) {
-      X(HintLocInner)
-      X(StLoc)
-      X(AssertType)
-      X(AssertLoc)
-      X(AssertStk)
-      X(CheckStk)
-      X(CheckLoc)
-      X(LdLoc)
-      X(LdStk)
-      X(CastStk)
-      X(CoerceStk)
-      X(CheckCtxThis)
-      X(LdCtx)
-      X(DecRefThis)
-      default: break;
-    }
+  switch (inst->op()) {
+    X(HintLocInner)
+    X(StLoc)
+    X(AssertType)
+    X(AssertLoc)
+    X(AssertStk)
+    X(CheckStk)
+    X(CheckLoc)
+    X(LdLoc)
+    X(LdStk)
+    X(CastStk)
+    X(CoerceStk)
+    X(CheckCtxThis)
+    X(LdCtx)
+    X(DecRefThis)
+    default: break;
   }
 #undef X
   return nullptr;
@@ -675,135 +670,6 @@ void IRBuilder::exceptionStackBoundary() {
   m_exnStack.stackDeficit  = m_state.stackDeficit();
   m_exnStack.evalStack     = m_state.evalStack();
   m_exnStack.sp            = m_state.sp();
-}
-
-/*
- * reoptimize() runs a trace through a second pass of IRBuilder
- * optimizations, like this:
- *
- *   reset state.
- *   move all blocks to a temporary list.
- *   compute immediate dominators.
- *   for each block in trace order:
- *     if we have a snapshot state for this block:
- *       use snapshot state.
- *     move all instructions to a temporary list.
- *     for each instruction:
- *       optimizeWork - simplify again
- *       if not simplified:
- *         append existing instruction and update state.
- *       else:
- *         if the instruction has a result, insert a mov from the
- *         simplified tmp to the original tmp and discard the instruction.
- *     if the last conditional branch was turned into a jump, remove the
- *     fall-through edge to the next block.
- */
-void IRBuilder::reoptimize() {
-  m_reoptimizing = true;
-  SCOPE_EXIT { m_reoptimizing = false; };
-
-  Timer _t(Timer::optimize_reoptimize);
-  FTRACE(5, "ReOptimize:vvvvvvvvvvvvvvvvvvvv\n");
-  SCOPE_EXIT { FTRACE(5, "ReOptimize:^^^^^^^^^^^^^^^^^^^^\n"); };
-  always_assert(m_savedBlocks.empty());
-
-  if (splitCriticalEdges(m_unit)) {
-    printUnit(6, m_unit, "after splitting critical edges for reoptimize");
-  }
-
-  m_state = FrameStateMgr{m_initialMarker};
-  m_enableSimplification = RuntimeOption::EvalHHIRSimplification;
-  if (!m_enableSimplification) return;
-  setConstrainGuards(false);
-
-  // We need to use fixed-point for loops, otherwise legacy reoptimize will not
-  // handle the CFG's back-edges correctly.
-  auto const use_fixed_point = RuntimeOption::EvalJitLoops;
-
-  auto const rpoBlocks = rpoSortCfg(m_unit);
-  boost::dynamic_bitset<> reachable(m_unit.numBlocks());
-  reachable.set(m_unit.entry()->id());
-
-  if (use_fixed_point) {
-    auto const rpoIDs = numberBlocks(m_unit, rpoBlocks);
-    m_state.computeFixedPoint(rpoBlocks, rpoIDs);
-  } else {
-    m_state.setLegacyReoptimize();
-  }
-
-  for (auto block : rpoBlocks) {
-    ITRACE(5, "reoptimize entering block: {}\n", block->id());
-    Indent _i;
-
-    // Skip block if it's unreachable.
-    if (!reachable.test(block->id())) continue;
-
-    if (use_fixed_point) {
-      m_state.loadBlock(block);
-    } else {
-      m_state.startBlock(block);
-    }
-    m_curBlock = block;
-
-    auto nextBlock = block->next();
-    auto backMarker = block->back().marker();
-    auto instructions = block->moveInstrs();
-    assertx(block->empty());
-    while (!instructions.empty()) {
-      auto* inst = &instructions.front();
-      instructions.pop_front();
-
-      // optimizeWork below may create new instructions, and will use
-      // m_nextMarker to decide where they are. Use the marker from this
-      // instruction.
-      assertx(inst->marker().valid());
-      setCurMarker(inst->marker());
-
-      auto const tmp = optimizeInst(inst, CloneFlag::No, block);
-      SSATmp* dst = inst->dst(0);
-
-      if (dst != tmp) {
-        // The result of optimization has a different destination than the inst.
-        // Generate a mov(tmp->dst) to get result into dst.
-        assertx(inst->op() != DefLabel);
-        assertx(block->empty() || !block->back().isBlockEnd() || inst->next());
-        auto src = tmp->inst()->is(Mov) ? tmp->inst()->src(0) : tmp;
-        if (inst->next()) {
-          // If the last instruction is a guard, insert the mov on the
-          // fall-through edge (inst->next()).
-          auto nextBlk = inst->next();
-          nextBlk->insert(nextBlk->begin(),
-                          m_unit.gen(dst, Mov, inst->marker(), src));
-        } else {
-          appendInstruction(m_unit.gen(dst, Mov, inst->marker(), src));
-        }
-      }
-
-      if (inst->block() == nullptr && inst->isBlockEnd()) {
-        // We're not re-adding the block-end instruction. Unset its edges.
-        inst->setTaken(nullptr);
-        inst->setNext(nullptr);
-      }
-    }
-
-    if (block->empty() || !block->back().isBlockEnd()) {
-      // Our block-end instruction was eliminated (most likely a Jmp* converted
-      // to a nop). Replace it with a jump to the next block.
-      appendInstruction(m_unit.gen(Jmp, backMarker, nextBlock));
-    }
-    assertx(block->back().isBlockEnd());
-    if (!block->back().isTerminal() && !block->next()) {
-      // We converted the block-end instruction to a different one.
-      // Set its next block appropriately.
-      block->back().setNext(nextBlock);
-    }
-    // Mark successor blocks as reachable.
-    if (block->back().next())  reachable.set(block->back().next()->id());
-    if (block->back().taken()) reachable.set(block->back().taken()->id());
-    if (!use_fixed_point) {
-      m_state.finishBlock(block);
-    }
-  }
 }
 
 /*

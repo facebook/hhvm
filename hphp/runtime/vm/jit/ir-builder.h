@@ -249,12 +249,6 @@ public:
   void popBlock();
 
   /*
-   * Run another pass of IRBuilder-managed optimizations on this
-   * unit.
-   */
-  void reoptimize();
-
-  /*
    * Conditionally-append a new instruction to the current Block, depending on
    * what some optimizations have to say about it.
    */
@@ -341,7 +335,6 @@ private:
 
   bool m_enableSimplification{false};
   bool m_constrainGuards;
-  bool m_reoptimizing{false};
 
   GuardConstraints m_constraints;
 

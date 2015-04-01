@@ -16,13 +16,17 @@
 
 #include "hphp/runtime/vm/jit/opt.h"
 
-#include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/timer.h"
+
+#include "hphp/util/trace.h"
+
+#include <boost/dynamic_bitset.hpp>
 
 namespace HPHP { namespace jit {
 
@@ -31,7 +35,7 @@ namespace HPHP { namespace jit {
 void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   Timer _t(Timer::optimize);
 
-  auto finishPass = [&](const char* msg) {
+  auto const finishPass = [&] (const char* msg) {
     if (msg) {
       printUnit(6, unit, folly::format("after {}", msg).str().c_str());
     }
@@ -44,20 +48,36 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     }
   };
 
-  auto doPass = [&](void (*fn)(IRUnit&), const char* msg = nullptr) {
+  auto const doPass = [&] (void (*fn)(IRUnit&), const char* msg = nullptr) {
     fn(unit);
     finishPass(msg);
   };
 
-  auto dce = [&](const char* which) {
+  auto const dce = [&] (const char* which) {
     if (!RuntimeOption::EvalHHIRDeadCodeElim) return;
     eliminateDeadCode(unit);
     finishPass(folly::format("{} DCE", which).str().c_str());
   };
 
-  auto const doReoptimize = RuntimeOption::EvalHHIRExtraOptPass &&
-                            RuntimeOption::EvalHHIRSimplification;
+  auto const simplifyPass = [] (IRUnit& unit) {
+    boost::dynamic_bitset<> reachable(unit.numBlocks());
+    reachable.set(unit.entry()->id());
 
+    auto const blocks = rpoSortCfg(unit);
+
+    for (auto block : blocks) {
+      // Skip unreachable blocks, or simplify() cries.
+      if (!reachable.test(block->id())) continue;
+
+      for (auto& inst : *block) simplify(unit, &inst);
+
+      if (auto const b = block->back().next())  reachable.set(b->id());
+      if (auto const b = block->back().taken()) reachable.set(b->id());
+    }
+  };
+
+  auto const doSimplify = RuntimeOption::EvalHHIRExtraOptPass &&
+                          RuntimeOption::EvalHHIRSimplification;
   auto const hasLoop = RuntimeOption::EvalJitLoops && cfgHasLoop(unit);
 
   auto const traceMode = kind != TransKind::Optimize ||
@@ -75,9 +95,8 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     auto changed = relaxGuards(unit, *irBuilder.guards(), flags);
     if (changed) finishPass("guard relaxation");
 
-    if (doReoptimize) {
-      irBuilder.reoptimize();
-      finishPass("guard relaxation reoptimize");
+    if (doSimplify) {
+      doPass(simplifyPass, "guard relaxation simplify");
     }
   }
 
@@ -91,10 +110,9 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     doPass(optimizePredictions, "prediction opts");
   }
 
-  if (doReoptimize) {
-    irBuilder.reoptimize();
-    finishPass("reoptimize");
-    dce("reoptimize");
+  if (doSimplify) {
+    doPass(simplifyPass, "simplify");
+    dce("simplify");
   }
 
   if (RuntimeOption::EvalHHIRGlobalValueNumbering) {
@@ -131,4 +149,6 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   }
 }
 
-} }
+//////////////////////////////////////////////////////////////////////
+
+}}

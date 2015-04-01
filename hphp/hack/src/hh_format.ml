@@ -48,7 +48,7 @@ let debug () fnl =
         flush stdout
       end;
 
-      let content = Format_hack.program modes filepath content in
+      let content = Format_hack.program modes FormatConfig.default_config filepath content in
       let content =
         match content with
         | Format_hack.Success content -> content
@@ -63,7 +63,7 @@ let debug () fnl =
       in
 
       (* Checking for idempotence *)
-      let content2 = Format_hack.program modes filepath content in
+      let content2 = Format_hack.program modes FormatConfig.default_config filepath content in
       let content2 =
         match content2 with
         | Format_hack.Success content2 -> content2
@@ -173,9 +173,9 @@ let parse_args() =
 (* Formats a file in place *)
 (*****************************************************************************)
 
-let format_in_place modes filepath =
+let format_in_place modes config filepath =
   let filename = Relative_path.to_absolute filepath in
-  match Format_hack.program modes filepath (Utils.cat filename) with
+  match Format_hack.program modes config filepath (Utils.cat filename) with
   | Format_hack.Success result ->
       let oc = open_out filename in
       output_string oc result;
@@ -192,14 +192,14 @@ let format_in_place modes filepath =
 (* Formats all the hack files in a directory (in place) *)
 (*****************************************************************************)
 
-let job_in_place modes acc fnl =
+let job_in_place modes config acc fnl =
   List.fold_left begin fun acc filename ->
-    match format_in_place modes filename with
+    match format_in_place modes config filename with
     | None -> acc
     | Some err -> err :: acc
   end acc fnl
 
-let directory modes dir =
+let directory modes config dir =
   let path = Path.mk_path dir in
   let next = compose
     (rev_rev_map (Relative_path.create Relative_path.Root))
@@ -208,7 +208,7 @@ let directory modes dir =
   let messages =
     MultiWorker.call
       (Some workers)
-      ~job:(job_in_place modes)
+      ~job:(job_in_place modes config)
       ~neutral:[]
       ~merge:List.rev_append
       ~next
@@ -219,8 +219,8 @@ let directory modes dir =
 (* Applies the formatter directly to a string. *)
 (*****************************************************************************)
 
-let format_string modes file from to_ content =
-  match Format_hack.region modes file from to_ content with
+let format_string modes config file from to_ content =
+  match Format_hack.region modes config file from to_ content with
   | Format_hack.Success content ->
       output_string stdout content
   | Format_hack.Internal_error ->
@@ -248,9 +248,9 @@ let read_stdin () =
   with End_of_file ->
     Buffer.contents buf
 
-let format_stdin modes from to_ =
+let format_stdin modes config from to_ =
   let content = read_stdin () in
-  format_string modes Relative_path.default from to_ content
+  format_string modes config Relative_path.default from to_ content
 
 (*****************************************************************************)
 (* The main entry point. *)
@@ -271,33 +271,35 @@ let () =
     | Some root -> Path.string_of_path (Path.mk_path root)
   in
   Relative_path.set_path_prefix Relative_path.Root root;
+  let config_filename = Relative_path.concat Relative_path.Root ".hhconfig" in
+  let config = FormatConfig.load config_filename in
   match files with
   | [] when diff ->
       let diff = read_stdin () in
       let file_and_modified_lines = Format_diff.parse_diff diff in
-      Format_diff.apply modes in_place ~diff:file_and_modified_lines
+      Format_diff.apply modes config in_place ~diff:file_and_modified_lines
   | _ when diff ->
       Printf.fprintf stderr "--diff mode expects no files\n";
       exit 2
   | [] when in_place ->
       Printf.fprintf stderr "Cannot modify stdin in-place\n";
       exit 2
-  | [] -> format_stdin modes from to_
+  | [] -> format_stdin modes config from to_
   | [dir] when Sys.is_directory dir ->
       if debug
       then debug_directory dir
-      else directory modes dir
+      else directory modes config dir
   | [filename] ->
       let filename = Path.string_of_path (Path.mk_path filename) in
       let filepath = Relative_path.create Relative_path.Root filename in
       if in_place
       then
-        match format_in_place modes filepath with
+        match format_in_place modes config filepath with
         | None -> ()
         | Some error ->
             Printf.fprintf stderr "Error: %s\n" error;
             exit 2
-      else format_string modes filepath from to_ (Utils.cat filename)
+      else format_string modes config filepath from to_ (Utils.cat filename)
   | _ ->
       Printf.fprintf stderr "More than one file given\n";
       exit 2

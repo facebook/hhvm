@@ -357,17 +357,17 @@ let apply_blocks outc blocks lines =
 let parse_diff diff_text =
   ParseDiff.go diff_text
 
-let rec apply modes in_place ~diff:file_and_lines_modified =
+let rec apply modes config in_place ~diff:file_and_lines_modified =
   List.iter begin fun (filepath, modified_lines) ->
     let filename = Relative_path.to_absolute filepath in
     let file_content = Utils.cat filename in
-    apply_file modes in_place filepath file_content modified_lines
+    apply_file modes config in_place filepath file_content modified_lines
   end file_and_lines_modified
 
-and apply_file modes in_place filepath file_content modified_lines =
+and apply_file modes config in_place filepath file_content modified_lines =
   let filename = Relative_path.to_absolute filepath in
   let result =
-    Format_hack.program_with_source_metadata modes filepath file_content in
+    Format_hack.program_with_source_metadata modes config filepath file_content in
   match result with
   | Format_hack.Success formatted_content ->
       apply_formatted in_place filename formatted_content file_content

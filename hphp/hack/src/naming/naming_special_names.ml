@@ -161,9 +161,10 @@ end
 module Typehints = struct
 
   let void     = "void"
-  let num      = "num"
   let resource = "resource"
+  let num      = "num"
   let arraykey = "arraykey"
+  let noreturn = "noreturn"
   let mixed    = "mixed"
   let this     = "this"
 

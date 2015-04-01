@@ -1439,12 +1439,21 @@ and check_shape_keys_validity env pos keys =
         let env, pos, info = get_field_info env witness in
         List.fold_left (check_field pos info) env rest_keys
 
+and set_valid_rvalue p env x ty =
+    let ty = match ty with
+      | r, Tprim Tnoreturn ->
+        let () = Errors.noreturn_usage p
+          (Reason.to_string "A noreturn function always throws or exits" r)
+        in r, Tany
+      | _ -> ty
+    in let env = Env.set_local env x ty in
+    env, ty
+
 and assign p env e1 ty2 =
   let env, ty2 = convert_array_as_tuple env ty2 in
   match e1 with
   | (_, Lvar (_, x)) ->
-      let env = Env.set_local env x ty2 in
-      env, ty2
+    set_valid_rvalue p env x ty2
   | (_, List el) ->
       let env, folded_ty2 = TUtils.fold_unresolved env ty2 in
       let env, folded_ety2 = Env.expand_type env folded_ty2 in
@@ -1532,21 +1541,21 @@ and assign p env e1 ty2 =
                     (_, Id (_, member_name)),
                     _) ->
           let env, local = Env.FakeMembers.make p env obj member_name in
-          (match obj with
-          | _, This ->
-              Typing_suggest.save_member member_name env exp_real_type ty2;
-          | _ -> ());
-          let env = Env.set_local env local ty2 in
-          env, ty2
+          let () = (match obj with
+            | _, This ->
+              Typing_suggest.save_member member_name env exp_real_type ty2
+            | _ -> ()
+          ) in
+          set_valid_rvalue p env local ty2
       | _, Class_get (x, (_, y)) ->
           let env, local = Env.FakeMembers.make_static p env x y in
-          let env = Env.set_local env local ty2 in
+          let env, ty3 = set_valid_rvalue p env local ty2 in
           (match x with
           | CIself
           | CIstatic ->
               Typing_suggest.save_member y env exp_real_type ty2;
           | _ -> ());
-          env, ty2
+          env, ty3
       | _ -> env, ty2
       )
   | _, Array_get ((_, Lvar (_, lvar)) as shape, Some (p1, (String _ as e)))
@@ -1559,7 +1568,7 @@ and assign p env e1 ty2 =
       let env, shape_ty = expr env shape in
       let field = shape_field_name p1 e in
       let env, shape_ty = TUtils.grow_shape p e1 field ty2 env shape_ty in
-      let env = Env.set_local env lvar shape_ty in
+      let env, _ty = set_valid_rvalue p env lvar shape_ty in
 
       (* We still need to call assign_simple, because shape_ty could be more
        * than just a shape. It could be an unresolved type where some elements

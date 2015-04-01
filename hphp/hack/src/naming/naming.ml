@@ -803,6 +803,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
     | x when x = SN.Typehints.num  -> N.Hprim N.Tnum
     | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
     | x when x = SN.Typehints.arraykey -> N.Hprim N.Tarraykey
+    | x when x = SN.Typehints.noreturn -> N.Hprim N.Tnoreturn
     | x when x = SN.Typehints.mixed -> N.Hmixed
     | x when x = SN.Typehints.shape ->
         Errors.shape_typehint p;

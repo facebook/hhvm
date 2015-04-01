@@ -925,10 +925,27 @@ struct PDORequestData final : RequestEventHandler {
   void requestInit() override {}
 
   void requestShutdown() override {
+    for (auto iter = m_persistent_connections.begin();
+         iter != m_persistent_connections.end(); ++iter) {
+      PDOResource *pdo = *iter;
+      if (!pdo) {
+        // Dead handle in the set
+        continue;
+      }
+      if (pdo->conn()->support(PDOConnection::MethodCheckLiveness) &&
+          !pdo->conn()->checkLiveness()) {
+        // Dead connection in the handle
+        continue;
+      }
+      // All seems right, save it
+      pdo->persistentSave();
+    }
   }
 
 public:
+  std::set<PDOResource*> m_persistent_connections;
 };
+IMPLEMENT_STATIC_REQUEST_LOCAL(PDORequestData, s_pdo_request_data);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PDO
@@ -1022,12 +1039,18 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
       if (s_connections.count(shashkey)) {
         auto const conn = s_connections[shashkey];
         data->m_dbh = makeSmartPtr<PDOResource>(conn);
+        data->m_dbh->persistentRestore();
 
         /* is the connection still alive ? */
         if (conn->support(PDOConnection::MethodCheckLiveness) &&
             !conn->checkLiveness()) {
           /* nope... need to kill it */
+          s_pdo_request_data->m_persistent_connections.erase(data->m_dbh.get());
           data->m_dbh = nullptr;
+        } else {
+          /* Yep, use it and mark it for saving at rshutdown */
+          s_pdo_request_data->m_persistent_connections.insert(
+            data->m_dbh.get());
         }
       }
 
@@ -1071,6 +1094,7 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
     if (is_persistent) {
       assert(!shashkey.empty());
       s_connections[shashkey] = data->m_dbh->conn();
+      s_pdo_request_data->m_persistent_connections.insert(data->m_dbh.get());
     }
 
     data->m_dbh->conn()->driver = driver;

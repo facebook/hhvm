@@ -920,17 +920,6 @@ static bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
                         const Variant& value);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-struct PDORequestData final : RequestEventHandler {
-  void requestInit() override {}
-
-  void requestShutdown() override {
-  }
-
-public:
-};
-
-///////////////////////////////////////////////////////////////////////////////
 // PDO
 
 namespace {

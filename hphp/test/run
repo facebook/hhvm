@@ -501,7 +501,6 @@ function hhvm_cmd_impl() {
     isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
     isset($options['llvm']) ? '-vEval.JitLLVM=2' : '',
     isset($options['require-llvm']) ? '-vEval.JitLLVM=3' : '',
-    isset($options['bccf']) ? '-vEval.HHIRBytecodeControlFlow=1' : '',
     extra_args($options),
   );
   if (!isset($options['cores'])) {

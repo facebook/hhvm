@@ -425,16 +425,6 @@ static inline bool loopsDefault() {
 #endif
 }
 
-static inline bool controlFlowDefault() {
-#if defined(HHVM_JIT_LOOPS_BY_DEFAULT) || \
-    defined(HHVM_CONTROL_FLOW) ||         \
-    defined(HHVM_WHOLE_CFG)
-  return true;
-#else
-  return false;
-#endif
-}
-
 static inline bool evalJitDefault() {
 #if defined(__APPLE__) || defined(__CYGWIN__)
   return false;

@@ -1103,7 +1103,8 @@ bool IRBuilder::startBlock(Block* block, bool hasUnprocessedPred) {
 
   m_state.startBlock(m_curBlock, hasUnprocessedPred);
   if (sp() == nullptr) {
-    always_assert(RuntimeOption::EvalHHIRBytecodeControlFlow);
+    always_assert(RuntimeOption::EvalJitPGORegionSelector == "wholecfg" ||
+                  RuntimeOption::EvalJitLoops);
     // XXX(t2288359): This can go away once we don't redefine StkPtrs mid-trace.
     TRACE_PUNT("Control flow merge with different StkPtrs");
   }

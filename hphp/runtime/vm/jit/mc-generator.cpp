@@ -1516,9 +1516,10 @@ MCGenerator::translateWork(const TranslArgs& args) {
   UndoMarker undoGlobalData(code.data());
 
   setUseLLVM(
-    // HHIRBytecodeControlFlow causes vmsp stack manipulations we can't handle
-    // right now: t4810319
-    !RuntimeOption::EvalHHIRBytecodeControlFlow &&
+    // Regions with bytecode-level control flow cause vmsp stack
+    // manipulations we can't handle right now: t4810319
+    RuntimeOption::EvalJitPGORegionSelector == "hottrace" &&
+    !RuntimeOption::EvalJitLoops &&
     (RuntimeOption::EvalJitLLVM > 1 ||
      (RuntimeOption::EvalJitLLVM && m_tx.mode() == TransKind::Optimize))
   );

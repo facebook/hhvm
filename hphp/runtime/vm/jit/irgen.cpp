@@ -274,7 +274,7 @@ void finishHHBC(HTS& env) {
 void prepareForHHBCMergePoint(HTS& env) {
   spillStack(env);
 
-  // For EvalHHIRBytecodeControlFlow we need to make sure the spOffset
+  // For bytecode-level merge points, we need to make sure the spOffset
   // is the same on all incoming edges going to a merge point.  This
   // would "just happen" if we didn't still have instructions that
   // redefine StkPtrs, but calls still need to do that for now, so we

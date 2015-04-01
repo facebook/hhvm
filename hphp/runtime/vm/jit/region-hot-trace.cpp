@@ -138,36 +138,23 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       region->addArc(predBlockId, newFirstBlockId);
     }
 
-    // With bytecode control-flow, we add all forward arcs in the TransCFG
-    // that are induced by the blocks in the region, as a simple way
-    // to expose control-flow for now.
-    // This can go away once Task #4075822 is done.
-    if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+    // When Eval.JitLoops is set, insert back-edges in the region if
+    // they exist in the TransCFG.
+    if (RuntimeOption::EvalJitLoops) {
       assertx(hasTransId(newFirstBlockId));
       auto newTransId = getTransId(newFirstBlockId);
-      auto& blocks = region->blocks();
-      for (auto iOther = 0; iOther < blocks.size(); iOther++) {
-        auto other = blocks[iOther];
-        auto otherFirstBlockId = other.get()->id();
-        if (!hasTransId(otherFirstBlockId)) continue;
-        auto otherTransId = getTransId(otherFirstBlockId);
-        auto otherRegion = profData->transRegion(otherTransId);
-        auto otherLastBlockId = otherRegion->blocks().back()->id();
-        // When loops are off, stop once we hit the newTransId we just inserted.
-        if (!RuntimeOption::EvalJitLoops && otherTransId == newTransId) break;
-        if (cfg.hasArc(otherTransId, newTransId) &&
-            preCondsAreSatisfied(newFirstBlock,
-                                 blockPostConds[otherLastBlockId])) {
-          region->addArc(otherLastBlockId, newFirstBlockId);
-        }
-        // When Eval.JitLoops is set, insert back-edges in the
-        // region if they exist in the TransCFG.
-        if (RuntimeOption::EvalJitLoops &&
-            cfg.hasArc(newTransId, otherTransId) &&
-            // Don't add the arc if the last opcode in the source block ends the
-            // region.
-            !breaksRegion(*profData->transLastInstr(newTransId))) {
-          region->addArc(newLastBlockId, otherFirstBlockId);
+      // Don't add the arc if the last opcode in the source block ends
+      // the region.
+      if (!breaksRegion(*profData->transLastInstr(newTransId))) {
+        auto& blocks = region->blocks();
+        for (auto iOther = 0; iOther < blocks.size(); iOther++) {
+          auto other = blocks[iOther];
+          auto otherFirstBlockId = other.get()->id();
+          if (!hasTransId(otherFirstBlockId)) continue;
+          auto otherTransId = getTransId(otherFirstBlockId);
+          if (cfg.hasArc(newTransId, otherTransId)) {
+            region->addArc(newLastBlockId, otherFirstBlockId);
+          }
         }
       }
     }

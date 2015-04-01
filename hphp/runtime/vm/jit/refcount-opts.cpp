@@ -725,7 +725,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
       if (inState.state.frames != firstFrames) {
         // Task #5216936: add support for merging states with
         // different FrameStacks, and get rid of the TRACE_PUNT below.
-        if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+        if (RuntimeOption::EvalJitPGORegionSelector != "hottrace" ||
+            RuntimeOption::EvalJitLoops) {
           TRACE_PUNT("refcount-opts needs support for merging states with "
                      "different FrameStacks");
         }

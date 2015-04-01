@@ -8,8 +8,6 @@
  *
  *)
 
-include Sys_utils
-
 let () = Random.self_init ()
 let debug = ref false
 let profile = ref false

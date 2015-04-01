@@ -8,7 +8,7 @@
  *
  *)
 
-open Utils
+open Sys_utils
 module List = List_ext
 module Sys = Sys_ext
 module CE = Common_exns

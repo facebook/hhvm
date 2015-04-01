@@ -35,11 +35,11 @@ let _operations root op file : bool =
     let lock_file = lock_name root file in
     let fd = match SMap.get lock_file !lock_fds with
       | None ->
-          let old_umask = Unix.umask 0o111 in
-          let fd = Unix.descr_of_out_channel (open_out lock_file) in
-          ignore (Unix.umask old_umask);
-          lock_fds := SMap.add lock_file fd !lock_fds;
-          fd
+          Sys_utils.with_umask 0o111 begin fun () ->
+            let fd = Unix.descr_of_out_channel (open_out lock_file) in
+            lock_fds := SMap.add lock_file fd !lock_fds;
+            fd
+          end
       | Some fd -> fd
     in
     let _ = Unix.lockf fd op 1 in

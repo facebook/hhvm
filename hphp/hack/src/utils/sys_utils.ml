@@ -72,3 +72,10 @@ let logname =
   try Sys.getenv "USER" with Not_found ->
   try Sys.getenv "LOGNAME" with Not_found ->
   exec_read "logname"
+
+let with_umask umask f =
+  let old_umask = ref 0 in
+  Utils.with_context
+    ~enter:(fun () -> old_umask := Unix.umask umask)
+    ~exit:(fun () -> Unix.umask !old_umask)
+    ~do_:f

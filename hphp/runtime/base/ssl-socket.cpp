@@ -349,7 +349,7 @@ SmartPtr<SSLSocket> SSLSocket::Create(
 }
 
 bool SSLSocket::waitForData() {
-  if (m_ssl_active && SSL_pending(m_handle)) {
+  if (m_data->m_ssl_active && SSL_pending(m_data->m_handle)) {
     return true;
   }
 

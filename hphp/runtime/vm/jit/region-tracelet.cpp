@@ -235,6 +235,12 @@ RegionDescPtr RegionFormer::go() {
       continue;
     }
 
+    if (!instrAllowsFallThru(m_inst.op())) {
+      FTRACE(1, "selectTracelet: tracelet broken after instruction with no "
+             "fall-through {}\n", m_inst);
+      break;
+    }
+
     // We successfully translated the instruction, so update m_sk.
     m_sk.advance(m_curBlock->unit());
 

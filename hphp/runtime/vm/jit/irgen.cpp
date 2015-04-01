@@ -155,7 +155,10 @@ void prepareEntry(HTS& env) {
 void prepareForSideExit(HTS& env) { spillStack(env); }
 
 void endRegion(HTS& env) {
-  auto const nextSk = curSrcKey(env).advanced(curUnit(env));
+  auto const curSk  = curSrcKey(env);
+  if (!instrAllowsFallThru(curSk.op())) return; // nothing to do here
+
+  auto const nextSk = curSk.advanced(curUnit(env));
   endRegion(env, nextSk);
 }
 
@@ -166,18 +169,6 @@ void endRegion(HTS& env, SrcKey nextSk) {
     // try to go to the next part of it.
     return;
   }
-  if (nextSk.offset() >= curFunc(env)->past()) {
-    // We have fallen off the end of the func's bytecodes. This
-    // happens when the function's bytecodes end with an unconditional
-    // backwards jump so that nextSk.offset() is out of bounds and
-    // causes an assertion failure in unit.cpp. The common case for
-    // this comes from the default value funclets, which are placed
-    // after the end of the function, with an unconditional branch
-    // back to the start of the function. So you should see this in
-    // any function with default params.
-    return;
-  }
-  prepareForNextHHBC(env, nullptr, nextSk, true);
   spillStack(env);
   gen(env, AdjustSP, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
       sp(env));

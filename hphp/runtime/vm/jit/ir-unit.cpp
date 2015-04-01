@@ -97,10 +97,12 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case AsyncRetCtrl:
       return inst.marker().sk().op() != Op::Await;
 
-    // A ReqBindJmp ends a unit and its marker corresponds to the next
-    // instruction to execute.
-    case ReqBindJmp:
-      return sk.succOffsets().count(instSk.offset());
+    // A ReqBindJmp ends a unit and it jumps to the next instruction
+    // to execute.
+    case ReqBindJmp: {
+      auto destOffset = inst.extra<ReqBindJmp>()->dest.offset();
+      return sk.succOffsets().count(destOffset);
+    }
 
     default:
       return false;

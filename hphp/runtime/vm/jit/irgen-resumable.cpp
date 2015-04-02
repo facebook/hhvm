@@ -333,10 +333,15 @@ void emitContValid(HTS& env) {
   push(env, gen(env, ContValid, cont));
 }
 
+void emitContStarted(HTS& env) {
+  assert(curClass(env));
+  auto const cont = ldThis(env);
+  push(env, gen(env, ContStarted, cont));
+}
+
 void emitContKey(HTS& env) {
   assertx(curClass(env));
   auto const cont = ldThis(env);
-  gen(env, ContStartedCheck, makeExitSlow(env), cont);
   auto const offset = cns(env, offsetof(c_Generator, m_key));
   auto const value = gen(env, LdContField, Type::Cell, cont, offset);
   pushIncRef(env, value);
@@ -345,7 +350,6 @@ void emitContKey(HTS& env) {
 void emitContCurrent(HTS& env) {
   assertx(curClass(env));
   auto const cont = ldThis(env);
-  gen(env, ContStartedCheck, makeExitSlow(env), cont);
   auto const offset = cns(env, offsetof(c_Generator, m_value));
   auto const value = gen(env, LdContField, Type::Cell, cont, offset);
   pushIncRef(env, value);

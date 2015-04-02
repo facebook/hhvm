@@ -8805,17 +8805,41 @@ enum GeneratorMethod {
   METH_VALID,
   METH_CURRENT,
   METH_KEY,
+  METH_REWIND,
 };
 typedef hphp_hash_map<const StringData*, GeneratorMethod,
                       string_data_hash, string_data_same> ContMethMap;
 
 static int32_t emitGeneratorMethod(UnitEmitter& ue,
                                    FuncEmitter* fe,
-                                   GeneratorMethod m) {
+                                   GeneratorMethod m,
+                                   bool isAsync) {
   static const StringData* valStr = makeStaticString("value");
 
   Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
   fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
+
+  if (!isAsync) {
+    // Create a dummy Emitter, so it's possible to emit jump instructions
+    EmitterVisitor ev(ue);
+    Emitter e(ConstructPtr(), ue, ev);
+    LocationPtr dummyLoc(new Location());
+    e.setTempLocation(dummyLoc);
+
+    // Check if the generator has started yet
+    Label started;
+    e.ContStarted();
+    e.JmpNZ(started);
+
+    // If it hasn't started, perform one "next" operation before
+    // the actual operation (auto-priming)
+    e.ContCheck(false);
+    e.Null();
+    e.ContEnter();
+    e.PopC();
+    started.set(e);
+  }
+
   switch (m) {
     case METH_SEND:
     case METH_RAISE:
@@ -8868,7 +8892,11 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
       ue.emitOp(OpRetC);
       break;
     }
-
+    case METH_REWIND: {
+      ue.emitOp(OpNull);
+      ue.emitOp(OpRetC);
+      break;
+    }
     default:
       not_reached();
   }
@@ -8904,6 +8932,7 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   genMethods[makeStaticString("valid")] = METH_VALID;
   genMethods[makeStaticString("current")] = METH_CURRENT;
   genMethods[makeStaticString("key")] = METH_KEY;
+  genMethods[makeStaticString("rewind")] = METH_REWIND;
 
   // Build up extClassHash, a hashtable that maps class names to structures
   // containing C++ function pointers for the class's methods and constructors
@@ -8998,11 +9027,11 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       if (e.name->isame(asyncGenCls) &&
           (cmeth = folly::get_ptr(asyncGenMethods, methName))) {
         auto methCpy = *cmeth;
-        stackPad = emitGeneratorMethod(*ue, fe, methCpy);
+        stackPad = emitGeneratorMethod(*ue, fe, methCpy, true);
       } else if (e.name->isame(generatorCls) &&
           (cmeth = folly::get_ptr(genMethods, methName))) {
         auto methCpy = *cmeth;
-        stackPad = emitGeneratorMethod(*ue, fe, methCpy);
+        stackPad = emitGeneratorMethod(*ue, fe, methCpy, false);
       } else if (e.name->isame(waitHandleCls) && methName->isame(gwhMeth)) {
         stackPad = emitGetWaitHandleMethod(*ue, fe);
       } else {

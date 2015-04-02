@@ -4204,6 +4204,12 @@ ContValid    []  ->  [C:Bool]
   Check generator validity. $this must be a Generator object. Pushes true
   onto the stack if the generator can be iterated further, false otherwise.
 
+ContStarted    []  ->  [C:Bool]
+
+  Check whether a generator was started. $this must be a Generator object.
+  Pushes true onto the stack if the generator has already been run once,
+  false otherwise.
+
 ContKey    []  ->  [C]
 
   Get generator key. $this must be a Generator object. Pushes the most

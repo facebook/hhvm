@@ -14,10 +14,11 @@ $a1 = 1;
 $a2 = -999999999;
 $x = $foo($a1, $a2);
 $a2 = 2;
-$x->next();
+$x->rewind();
 $y1 = clone $x;
 $y2 = clone $x;
-foreach ($y1 as $v) {
+for ($y1->next(); $y1->valid(); $y1->next()) {
+  $v = $y1->current();
   $v1 = (int)($v / 10000);
   $v2 = $v % 10000;
   echo $v1 . " " . $v2 . "\n";
@@ -26,7 +27,8 @@ foreach ($y1 as $v) {
 echo "--------\n";
 var_dump($a1, $a2);
 echo "========\n";
-foreach ($y2 as $v) {
+for ($y2->next(); $y2->valid(); $y2->next()) {
+  $v = $y2->current();
   $v1 = (int)($v / 10000);
   $v2 = $v % 10000;
   echo $v1 . " " . $v2 . "\n";
@@ -35,7 +37,8 @@ foreach ($y2 as $v) {
 echo "--------\n";
 var_dump($a1, $a2);
 echo "========\n";
-foreach ($x as $v) {
+for ($x->next(); $x->valid(); $x->next()) {
+  $v = $x->current();
   $v1 = (int)($v / 10000);
   $v2 = $v % 10000;
   echo $v1 . " " . $v2 . "\n";

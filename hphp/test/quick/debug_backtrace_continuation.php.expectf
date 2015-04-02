@@ -12,7 +12,7 @@ array(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(10)
+    int(9)
     ["function"]=>
     string(4) "send"
     ["class"]=>
@@ -33,7 +33,7 @@ array(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(26)
+    int(24)
     ["function"]=>
     string(10) "my_wrapper"
     ["args"]=>
@@ -59,7 +59,7 @@ array(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(23)
+    int(21)
     ["function"]=>
     string(4) "send"
     ["class"]=>
@@ -80,7 +80,7 @@ array(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(27)
+    int(25)
     ["function"]=>
     string(16) "my_class_wrapper"
     ["args"]=>

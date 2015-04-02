@@ -18,7 +18,7 @@ function genFoo($a) {
 
 function foo($a) {
   $gen1 = genFoo($a);
-  $gen1->next();
+  $gen1->rewind();
   while ($gen1->valid()) {
     $val = $gen1->current();
     var_dump($val);

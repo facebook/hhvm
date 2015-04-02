@@ -16,7 +16,7 @@ for ($mode = 0;
   echo "Testing mode $mode:\n";
   $gen = gen($mode);
   try {
-    $gen->next();
+    $gen->rewind();
     while ($gen->valid()) {
       var_dump($gen->current());
       $gen->next();

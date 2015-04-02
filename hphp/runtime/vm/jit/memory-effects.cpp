@@ -886,12 +886,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ContArIncKey:
   case ContArUpdateIdx:
   case ContValid:
+  case ContStarted:
   case IncProfCounter:
   case IncStat:
   case IncStatGrouped:
   case CountBytecode:
   case ContPreNext:
-  case ContStartedCheck:
   case ConvArrToBool:
   case ConvArrToDbl:
   case ConvArrToInt:

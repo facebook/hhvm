@@ -18,12 +18,13 @@ open Sys_utils
 
 type mode =
   | Ai
-  | Suggest
+  | Autocomplete
   | Color
-  | Coverage
-  | Prolog
-  | Lint
   | Errors
+  | Coverage
+  | Lint
+  | Prolog
+  | Suggest
 
 type options = {
   filename : string;
@@ -143,21 +144,24 @@ let parse_options () =
     "--ai",
       Arg.Unit (set_mode Ai),
       "Run the abstract interpreter";
-    "--suggest",
-      Arg.Unit (set_mode Suggest),
-      "Suggest missing typehints";
+    "--auto-complete",
+      Arg.Unit (set_mode Autocomplete),
+      "Produce autocomplete suggestions";
     "--color",
       Arg.Unit (set_mode Color),
       "Produce color output";
     "--coverage",
       Arg.Unit (set_mode Coverage),
       "Produce coverage output";
-    "--prolog",
-      Arg.Unit (set_mode Prolog),
-      "Produce prolog facts";
     "--lint",
       Arg.Unit (set_mode Lint),
       "Produce lint errors";
+    "--prolog",
+      Arg.Unit (set_mode Prolog),
+      "Produce prolog facts";
+    "--suggest",
+      Arg.Unit (set_mode Suggest),
+      "Suggest missing typehints";
   ] in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
   let fn = match !fn_ref with
@@ -253,9 +257,16 @@ let print_prolog files_info =
   end files_info [] in
   PrologMain.output_facts stdout facts
 
-let handle_mode mode files_info errors lint_errors ai_results =
+let handle_mode mode filename nenv files_info errors lint_errors ai_results =
   match mode with
   | Ai -> ()
+  | Autocomplete ->
+      let file = cat (Relative_path.to_absolute filename) in
+      let result = ServerAutoComplete.auto_complete nenv file in
+      List.iter begin fun r ->
+        let open AutocompleteService in
+        Printf.printf "%s %s\n" r.res_name r.res_ty
+      end result
   | Color ->
       Relative_path.Map.iter begin fun fn fileinfo ->
         if fn = builtins_filename then () else begin
@@ -271,8 +282,6 @@ let handle_mode mode files_info errors lint_errors ai_results =
           print_coverage fn type_acc;
         end
       end files_info
-  | Prolog ->
-      print_prolog files_info
   | Lint ->
       let lint_errors =
         Relative_path.Map.fold begin fun fn fileinfo lint_errors ->
@@ -290,6 +299,8 @@ let handle_mode mode files_info errors lint_errors ai_results =
         exit 2
       end
       else Printf.printf "No lint errors\n"
+  | Prolog ->
+      print_prolog files_info
   | Suggest
   | Errors ->
       let errors = Relative_path.Map.fold begin fun _ fileinfo errors ->
@@ -317,7 +328,7 @@ let main_hack { filename; mode; } =
        let lint_results, inner_results = Lint.do_ f in
        [], lint_results, inner_results in
   let filename = Relative_path.create Relative_path.Dummy filename in
-  let ai_results, lint_errors, (errors, files_info) =
+  let ai_results, lint_errors, (errors, (nenv, files_info)) =
     outer_do begin fun () ->
       Errors.do_ begin fun () ->
         let parsed_files = parse_file filename in
@@ -353,10 +364,10 @@ let main_hack { filename; mode; } =
           Typing_decl.make_env nenv all_classes fn
         end files_info;
 
-        files_info
+        nenv, files_info
       end
     end in
-  handle_mode mode files_info errors lint_errors ai_results
+  handle_mode mode filename nenv files_info errors lint_errors ai_results
 
 (* command line driver *)
 let _ =

@@ -2230,6 +2230,9 @@ struct DecodedInstruction {
   uint8_t* picAddress() const;
   bool setPicAddress(uint8_t* target);
 
+  bool hasOffset() const { return m_offSz != 0; }
+  int32_t offset() const;
+
   bool hasImmediate() const { return m_immSz; }
   int64_t immediate() const;
   bool setImmediate(int64_t value);
@@ -2237,6 +2240,7 @@ struct DecodedInstruction {
   bool isBranch(bool allowCond = true) const;
   bool isCall() const;
   bool isJmp() const;
+  bool isLea() const;
   ConditionCode jccCondCode() const;
   bool shrinkBranch();
   void widenBranch();

@@ -71,6 +71,11 @@ SimplifyResult simplify(IRUnit&, const IRInstruction*, bool typesMightRelax);
  */
 void simplify(IRUnit&, IRInstruction*);
 
+/*
+ * Perform a simplification pass in the entire unit.
+ */
+void simplify(IRUnit&);
+
 //////////////////////////////////////////////////////////////////////
 
 /*

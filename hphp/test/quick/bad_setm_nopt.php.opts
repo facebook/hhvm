@@ -1,2 +1,2 @@
 -vEval.HHIRRefcountOpts=false
--vEval.HHIRExtraOptPass=false
+-vEval.HHIRSimplification=false

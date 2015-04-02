@@ -59,25 +59,6 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     finishPass(folly::format("{} DCE", which).str().c_str());
   };
 
-  auto const simplifyPass = [] (IRUnit& unit) {
-    boost::dynamic_bitset<> reachable(unit.numBlocks());
-    reachable.set(unit.entry()->id());
-
-    auto const blocks = rpoSortCfg(unit);
-
-    for (auto block : blocks) {
-      // Skip unreachable blocks, or simplify() cries.
-      if (!reachable.test(block->id())) continue;
-
-      for (auto& inst : *block) simplify(unit, &inst);
-
-      if (auto const b = block->back().next())  reachable.set(b->id());
-      if (auto const b = block->back().taken()) reachable.set(b->id());
-    }
-  };
-
-  auto const doSimplify = RuntimeOption::EvalHHIRExtraOptPass &&
-                          RuntimeOption::EvalHHIRSimplification;
   auto const hasLoop = RuntimeOption::EvalJitLoops && cfgHasLoop(unit);
 
   auto const traceMode = kind != TransKind::Optimize ||
@@ -95,8 +76,8 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     auto changed = relaxGuards(unit, *irBuilder.guards(), flags);
     if (changed) finishPass("guard relaxation");
 
-    if (doSimplify) {
-      doPass(simplifyPass, "guard relaxation simplify");
+    if (RuntimeOption::EvalHHIRSimplification) {
+      doPass(simplify, "guard relaxation simplify");
     }
   }
 
@@ -110,8 +91,8 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     doPass(optimizePredictions, "prediction opts");
   }
 
-  if (doSimplify) {
-    doPass(simplifyPass, "simplify");
+  if (RuntimeOption::EvalHHIRSimplification) {
+    doPass(simplify, "simplify");
     dce("simplify");
   }
 

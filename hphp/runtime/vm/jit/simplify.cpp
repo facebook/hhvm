@@ -2249,6 +2249,24 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
 
 //////////////////////////////////////////////////////////////////////
 
+void simplify(IRUnit& unit) {
+  boost::dynamic_bitset<> reachable(unit.numBlocks());
+  reachable.set(unit.entry()->id());
+
+  auto const blocks = rpoSortCfg(unit);
+
+  for (auto block : blocks) {
+    if (!reachable.test(block->id())) continue;
+
+    for (auto& inst : *block) simplify(unit, &inst);
+
+    if (auto const b = block->back().next())  reachable.set(b->id());
+    if (auto const b = block->back().taken()) reachable.set(b->id());
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+
 void copyProp(IRInstruction* inst) {
   for (uint32_t i = 0; i < inst->numSrcs(); i++) {
     auto tmp     = inst->src(i);

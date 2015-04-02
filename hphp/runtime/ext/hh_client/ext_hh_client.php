@@ -178,10 +178,12 @@ function typecheck(string $client_name = 'hh_client'): TypecheckResult {
   return $result;
 }
 
+/**
+ * This is deliberately an unconfigurable convenience wrapper. If you want
+ * full configurability, call typecheck() and use the TypecheckResult
+ * yourself.
+ */
 function typecheck_and_error(): void {
-  // This is deliberately an unconfigurable convenience wrapper. If you want
-  // full configurability, call typecheck() and use the TypecheckResult
-  // yourself.
   typecheck()->triggerError();
 }
 

@@ -62,6 +62,7 @@
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-inline.h"
+#include "hphp/runtime/vm/hh-utils.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -1315,6 +1316,8 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out) {
 template <bool debugger>
 void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
   assert(m_mergeState & MergeState::Merged);
+
+  autoTypecheck(this);
 
   Func** it = mi->funcHoistableBegin();
   Func** fend = mi->funcEnd();

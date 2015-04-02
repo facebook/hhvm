@@ -372,6 +372,7 @@ HackStrictOption
   RuntimeOption::IconvIgnoreCorrect = HackStrictOption::OFF,
   RuntimeOption::MinMaxAllowDegenerate = HackStrictOption::OFF;
 bool RuntimeOption::LookForTypechecker = true;
+bool RuntimeOption::AutoTypecheck = false;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -1056,6 +1057,9 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     // assumed to know what you're doing.
     Config::Bind(LookForTypechecker, ini, lang["LookForTypechecker"],
                  !EnableHipHopSyntax);
+    // Experimental and off for now; will eventually default to something like
+    // !EnableHipHopSyntax
+    Config::Bind(AutoTypecheck, ini, lang["AutoTypecheck"], false);
   }
   {
     Hdf server = config["Server"];

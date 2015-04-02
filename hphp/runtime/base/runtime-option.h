@@ -362,6 +362,7 @@ public:
   static HackStrictOption IconvIgnoreCorrect;
   static HackStrictOption MinMaxAllowDegenerate;
   static bool LookForTypechecker;
+  static bool AutoTypecheck;
 
   static int64_t HeapSizeMB;
   static int64_t HeapResetCountBase;

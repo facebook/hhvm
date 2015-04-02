@@ -79,3 +79,15 @@ let with_umask umask f =
     ~enter:(fun () -> old_umask := Unix.umask umask)
     ~exit:(fun () -> Unix.umask !old_umask)
     ~do_:f
+
+let with_timeout timeout ~on_timeout ~do_ =
+  let old_handler = ref Sys.Signal_default in
+  let old_timeout = ref 0 in
+  Utils.with_context
+    ~enter:(fun () ->
+      old_handler := Sys.signal Sys.sigalrm (Sys.Signal_handle on_timeout);
+      old_timeout := Unix.alarm timeout)
+    ~exit:(fun () ->
+      ignore (Unix.alarm !old_timeout);
+      Sys.set_signal Sys.sigalrm !old_handler)
+    ~do_

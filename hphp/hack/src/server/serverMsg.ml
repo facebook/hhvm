@@ -8,7 +8,7 @@
  *
  *)
 
-open ServerUtils
+open Sys_utils
 
 (**
  * Commands and responses hh_server deals with

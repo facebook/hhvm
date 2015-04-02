@@ -11,7 +11,6 @@
 open Utils
 open Sys_utils
 open ServerEnv
-open ServerUtils
 
 exception State_not_found
 

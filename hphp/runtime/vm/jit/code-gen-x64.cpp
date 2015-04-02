@@ -5233,6 +5233,20 @@ void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
   v << decqm{v.cns(counterAddr)[0], v.makeReg()};
 }
 
+void CodeGenerator::cgDbgTraceCall(IRInstruction* inst) {
+  auto const spOff = inst->extra<DbgTraceCall>()->offset.offset;
+  cgCallHelper(
+    vmain(),
+    CppCall::direct(traceCallback),
+    callDest(inst),
+    SyncOptions::kNoSyncPoint,
+    argGroup(inst)
+      .ssa(0)
+      .addr(srcLoc(inst, 1).reg(), cellsToBytes(spOff))
+      .imm(inst->marker().bcOff())
+  );
+}
+
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
   ifRefCountedType(
     vmain(), inst->src(0)->type(), srcLoc(inst, 0),

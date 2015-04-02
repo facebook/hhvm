@@ -1029,6 +1029,7 @@ X(EndCatch,                     IRSPOffsetData);
 X(AdjustSP,                     IRSPOffsetData);
 X(DbgTrashStk,                  IRSPOffsetData);
 X(DbgTrashFrame,                IRSPOffsetData);
+X(DbgTraceCall,                 IRSPOffsetData);
 X(LdPropAddr,                   PropOffset);
 X(NewCol,                       NewColData);
 

@@ -960,6 +960,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdWHState:
   case LookupClsRDSHandle:
   case GetCtxFwdCallDyn:
+  case DbgTraceCall:
     return may_load_store(AEmpty, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:

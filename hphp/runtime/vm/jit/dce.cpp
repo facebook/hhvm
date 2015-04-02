@@ -189,6 +189,7 @@ bool canDCE(IRInstruction* inst) {
     assertx(!inst->isControlFlow());
     return true;
 
+  case DbgTraceCall:
   case AKExistsObj:
   case AdjustSP:
   case ResetSP:

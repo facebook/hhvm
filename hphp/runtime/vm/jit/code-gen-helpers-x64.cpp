@@ -368,18 +368,6 @@ void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
              v.makeTuple({})};
 }
 
-void emitTraceCall(CodeBlock& cb, Offset pcOff) {
-  Asm a { cb };
-  // call to a trace function
-  a.    lea    (rip[(int64_t)a.frontier()], rcx);
-  a.    movq   (rVmFp, rdi);
-  a.    movq   (rVmSp, rsi);
-  a.    movq   (pcOff, rdx);
-  // do the call; may use a trampoline
-  emitCall(a, reinterpret_cast<TCA>(traceCallback),
-           RegSet().add(rcx).add(rdi).add(rsi).add(rdx));
-}
-
 void emitTestSurpriseFlags(Asm& a, PhysReg rds) {
   static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
                 "Codegen assumes a SurpriseFlag fits in a 32-bit int");

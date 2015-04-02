@@ -96,8 +96,6 @@ void emitImmStoreq(Asm& as, Immed64 imm, MemoryRef ref);
 
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg);
 
-void emitTraceCall(CodeBlock& cb, Offset pcOff);
-
 /*
  * Tests the surprise flags for the current thread. Should be used
  * before a jnz to surprise handling code.

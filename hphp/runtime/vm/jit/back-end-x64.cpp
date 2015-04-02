@@ -168,10 +168,6 @@ struct BackEnd final : jit::BackEnd {
     a.    popf  ();
   }
 
-  void emitTraceCall(CodeBlock& cb, Offset pcOff) override {
-    x64::emitTraceCall(cb, pcOff);
-  }
-
   void prepareForTestAndSmash(CodeBlock& cb, int testBytes,
                               TestAndSmashFlags flags) override {
     using namespace x64;
@@ -542,10 +538,6 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       mcg->cgFixups().setBlocks(nullptr, nullptr, nullptr);
       mcg->code.unlock();
     };
-
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
-      emitTraceCall(mainCode, unit.bcOff());
-    }
 
     CodegenState state(unit, asmInfo, *frozenCode);
     auto const blocks = rpoSortCfg(unit);

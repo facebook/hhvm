@@ -1898,6 +1898,11 @@ To string conversions:
   Assert that S0 is of type T at runtime. If the assertion fails, execution is
   aborted via a hardware exception.
 
+| DbgTraceCall<spOffset>, ND, S(FramePtr) S(StkPtr), NF
+
+  When EvalHHIRGenerateAsserts is on, this instruction is inserted at the
+  start of each region, to emit some sanity checking code.
+
 | RBTraceEntry, ND, NA, NF
 
 | RBTraceMsg, ND, NA, NF

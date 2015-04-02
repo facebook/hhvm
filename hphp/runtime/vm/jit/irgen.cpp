@@ -145,6 +145,15 @@ void ringbufferMsg(IRGS& env,
 
 void prepareEntry(IRGS& env) {
   /*
+   * If assertions are on, before we do anything, each region makes a call to a
+   * C++ function that checks the state of everything.
+   */
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    auto const data = IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) };
+    gen(env, DbgTraceCall, data, fp(env), sp(env));
+  }
+
+  /*
    * We automatically hoist a load of the context to the beginning of every
    * region.  The reason is that it's trivially CSEable, so we might as well
    * make it available everywhere.  If nothing uses it, it'll just be DCE'd.

@@ -203,10 +203,6 @@ struct BackEnd : public jit::BackEnd {
     a.    Str   (rAsm, rAsm2[disp]);
   }
 
-  void emitTraceCall(CodeBlock& cb, Offset pcOff) override {
-    // TODO(2967396) implement properly
-  }
-
   void prepareForTestAndSmash(CodeBlock& cb, int testBytes,
                               TestAndSmashFlags flags) override {
     // Nothing. See prepareForSmash().
@@ -506,10 +502,6 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       mcg->cgFixups().setBlocks(nullptr, nullptr, nullptr);
       mcg->code.unlock();
     };
-
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
-      emitTraceCall(mainCode, unit.bcOff());
-    }
 
     CodegenState state(unit, asmInfo, *frozenCode);
     auto const blocks = rpoSortCfg(unit);

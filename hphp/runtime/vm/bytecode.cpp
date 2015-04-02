@@ -2641,6 +2641,10 @@ StrNR ExecutionContext::createFunction(const String& args,
   m_createdFuncs.push_back(unit);
   unit->merge();
 
+  // At the end of the request we clear the m_createdFunc map, JIT'ing the unit
+  // would be a waste of time and TC space.
+  unit->setInterpretOnly();
+
   // Technically we shouldn't have to eval the unit right now (it'll execute
   // the pseudo-main, which should be empty) and could get away with just
   // mergeFuncs. However, Zend does it this way, as proven by the fact that you

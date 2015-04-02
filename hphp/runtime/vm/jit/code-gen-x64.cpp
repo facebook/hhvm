@@ -2917,12 +2917,10 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   auto const syncSP = v.makeReg();
   v << lea{rSP[cellsToBytes(extra->spOffset.offset)], syncSP};
   v << syncvmsp{syncSP};
-  v << copy2{pc, after, argNumToRegName[0], argNumToRegName[1]};
 
   auto done = v.makeBlock();
-  v << callstub{target, argSet(2) | kCrossTraceRegs,
-                x64::abi.all(), makeFixup(inst->marker())};
-  v << unwind{{done, m_state.labels[inst->taken()]}};
+  v << vcallstub{target, v.makeTuple({pc, after}),
+                 {done, m_state.labels[inst->taken()]}};
   v = done;
   v << defvmsp{dstLoc(inst, 0).reg()};
 }

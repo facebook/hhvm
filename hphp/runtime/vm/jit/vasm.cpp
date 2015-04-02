@@ -41,6 +41,7 @@ folly::Range<Vlabel*> succs(Vinstr& inst) {
     case Vinstr::phijmp:    return {&inst.phijmp_.target, 1};
     case Vinstr::phijcc:    return {inst.phijcc_.targets, 2};
     case Vinstr::unwind:    return {inst.unwind_.targets, 2};
+    case Vinstr::vcallstub: return {inst.vcallstub_.targets, 2};
     case Vinstr::vinvoke:   return {inst.vinvoke_.targets, 2};
     case Vinstr::cbcc:      return {inst.cbcc_.targets, 2};
     case Vinstr::tbcc:      return {inst.tbcc_.targets, 2};

@@ -60,7 +60,7 @@ struct Vunit;
   O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]), U(sf) U(args), Dn)\
   O(bindjcc, I(cc) I(target) I(trflags), U(sf) U(args), Dn)\
   O(bindjmp, I(target) I(trflags), U(args), Dn)\
-  O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
+  O(callstub, I(target), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
   /* vasm intrinsics */\
   O(copy, Inone, UH(s,d), DH(d,s))\
@@ -86,6 +86,7 @@ struct Vunit;
   O(unwind, Inone, Un, Dn)\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
+  O(vcallstub, I(target), U(args), Dn)\
   O(landingpad, Inone, Un, Dn)\
   O(countbytecode, Inone, U(base), D(sf))\
   O(defvmsp, Inone, Un, D(d))\
@@ -237,21 +238,39 @@ struct Vunit;
 // Service requests.
 
 struct bindaddr { TCA* dest; SrcKey sk; };
+
+/*
+ * PHP function call: Smashable call with custom ABI.
+ */
 struct bindcall { TCA stub; RegSet args; Vlabel targets[2]; };
+
+/*
+ * PHP function call: Non-smashable call with same ABI as bindcall.
+ */
+struct callstub { TCA target; RegSet args; };
+
 struct bindjcc1st { ConditionCode cc; VregSF sf; SrcKey targets[2];
                     RegSet args; };
 struct bindjcc { ConditionCode cc; VregSF sf; SrcKey target;
                  TransFlags trflags; RegSet args; };
 struct bindjmp { SrcKey target; TransFlags trflags; RegSet args; };
-struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
 struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // VASM intrinsics.
 
+/*
+ * Copies of different arities. All copies happen in parallel, meaning operand
+ * order doesn't matter when a PhysReg appears as both a src and dst.
+ */
 struct copy { Vreg s, d; };
 struct copy2 { Vreg64 s0, s1, d0, d1; };
 struct copyargs { Vtuple s, d; };
+
+/*
+ * Causes any attached debugger to trap. Process may abort if no debugger is
+ * attached.
+ */
 struct debugtrap {};
 
 /*
@@ -277,10 +296,23 @@ struct store { Vreg s; Vptr d; };
 struct svcreq { ServiceRequest req; Vtuple args; TCA stub_block; };
 struct syncpoint { Fixup fix; };
 struct unwind { Vlabel targets[2]; };
+
+/*
+ * Function call, without or with exception edges, respectively. Contains
+ * information about a C++ helper call needed for lowering to different target
+ * architectures.
+ */
 struct vcall { CppCall call; VcallArgsId args; Vtuple d;
                Fixup fixup; DestType destType; bool nothrow; };
 struct vinvoke { CppCall call; VcallArgsId args; Vtuple d; Vlabel targets[2];
                  Fixup fixup; DestType destType; bool smashable; };
+
+/*
+ * Non-smashable PHP function call with exception edges and additional
+ * integer arguments.
+ */
+struct vcallstub { TCA target; Vtuple args; Vlabel targets[2]; };
+
 struct landingpad {};
 struct countbytecode { Vreg base; VregSF sf; };
 

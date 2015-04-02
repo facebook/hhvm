@@ -411,7 +411,6 @@ void Vgen::emit(bindjmp& i) {
 
 void Vgen::emit(callstub& i) {
   emit(call{i.target, i.args});
-  emit(syncpoint{i.fix});
 }
 
 void Vgen::emit(fallback& i) {
@@ -1014,6 +1013,27 @@ void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
   }
 }
 
+void lower_vcallstub(Vunit& unit, Vlabel b) {
+  auto& code = unit.blocks[b].code;
+  // vcallstub can only appear at the end of a block.
+  auto const inst = code.back().get<vcallstub>();
+  auto const origin = code.back().origin;
+
+  auto argRegs = kCrossTraceRegs;
+  auto const& srcs = unit.tuples[inst.args];
+  jit::vector<Vreg> dsts;
+  for (int i = 0; i < srcs.size(); ++i) {
+    dsts.emplace_back(argNumToRegName[i]);
+    argRegs |= argNumToRegName[i];
+  }
+
+  code.back() = copyargs{unit.makeTuple(srcs), unit.makeTuple(std::move(dsts))};
+  code.emplace_back(callstub{inst.target, argRegs});
+  code.back().origin = origin;
+  code.emplace_back(unwind{{inst.targets[0], inst.targets[1]}});
+  code.back().origin = origin;
+}
+
 /*
  * Lower a few abstractions to facilitate straightforward x64 codegen.
  */
@@ -1029,9 +1049,13 @@ void lowerForX64(Vunit& unit, const Abi& abi) {
 
   PostorderWalker{unit}.dfs([&](Vlabel ib) {
     assertx(!blocks[ib].code.empty());
-    if (blocks[ib].code.back().op == Vinstr::svcreq) {
+    auto& back = blocks[ib].code.back();
+    if (back.op == Vinstr::svcreq) {
       lower_svcreq(unit, Vlabel{ib}, blocks[ib].code.back());
+    } else if (back.op == Vinstr::vcallstub) {
+      lower_vcallstub(unit, Vlabel{ib});
     }
+
     for (size_t ii = 0; ii < blocks[ib].code.size(); ++ii) {
       auto& inst = blocks[ib].code[ii];
       switch (inst.op) {

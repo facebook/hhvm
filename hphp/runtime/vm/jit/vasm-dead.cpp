@@ -212,6 +212,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::ud2:
     case Vinstr::unwind:
     case Vinstr::vcall:
+    case Vinstr::vcallstub:
     case Vinstr::vinvoke:
     case Vinstr::vretm:
     case Vinstr::vret:

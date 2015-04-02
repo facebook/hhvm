@@ -501,10 +501,7 @@ struct LLVMEmitter {
     , m_function(llvm::Function::Create(
       llvm::FunctionType::get(
           llvm::Type::getVoidTy(m_context),
-          std::vector<llvm::Type*>({
-              llvm::IntegerType::get(m_context, 64),
-              llvm::IntegerType::get(m_context, 64),
-              llvm::IntegerType::get(m_context, 64)}),
+          std::vector<llvm::Type*>(3, llvm::IntegerType::get(m_context, 64)),
           false),
       llvm::Function::ExternalLinkage, "", m_module.get()))
     , m_irb(m_context,
@@ -622,20 +619,16 @@ struct LLVMEmitter {
     m_tcMM->registerSymbolAddress("personality0", 0xbadbad);
 
     m_traceletFnTy = llvm::FunctionType::get(
-      m_void,
-      std::vector<llvm::Type*>({m_int64, m_int64, m_int64}),
-      false
+      m_void, std::vector<llvm::Type*>(3, m_int64), false
     );
     m_bindcallFnTy = llvm::FunctionType::get(
-      m_int64,
-      std::vector<llvm::Type*>({m_int64, m_int64, m_int64, m_int64}),
-      false
+      m_int64, std::vector<llvm::Type*>(4, m_int64), false
     );
 
     static_assert(offsetof(TypedValue, m_data) == 0, "");
     static_assert(offsetof(TypedValue, m_type) == 8, "");
     m_typedValueType = llvm::StructType::get(
-        m_context, std::vector<llvm::Type*>({m_int64, m_int8}),
+        m_context, std::vector<llvm::Type*>{m_int64, m_int8},
         /*isPacked*/ false);
 
     // The hacky way of tuning LLVM command-line parameters. This has to live
@@ -1353,6 +1346,7 @@ O(andli) \
 O(andq) \
 O(andqi) \
 O(bindcall) \
+O(vcallstub) \
 O(bindjcc1st) \
 O(bindjcc) \
 O(bindjmp) \
@@ -1494,6 +1488,7 @@ O(countbytecode)
       case Vinstr::call:
       case Vinstr::callm:
       case Vinstr::callr:
+      case Vinstr::callstub:
       case Vinstr::unwind:
       case Vinstr::nothrow:
       case Vinstr::syncpoint:
@@ -1512,7 +1507,6 @@ O(countbytecode)
                            size_t(label), show(m_unit, inst));
 
       // Not yet implemented opcodes:
-      case Vinstr::callstub:
       case Vinstr::contenter:
       case Vinstr::mccall:
       case Vinstr::mcprep:
@@ -1710,6 +1704,26 @@ void LLVMEmitter::emit(const bindcall& inst) {
 
   // bindcall is followed by a defvmsp to copy rVmSp into a Vreg, but it's not
   // in this block. Pass the value to our next block.
+  m_incomingVmSp[inst.targets[0]] = call;
+}
+
+void LLVMEmitter::emit(const vcallstub& inst) {
+  // vcallstub is like bindcall but it's not smashable and it can take extra
+  // arguments.
+  auto funcName = folly::sformat("vcallstub_{}", inst.target);
+  std::vector<llvm::Value*> args{
+    value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp), m_int64Undef
+  };
+  for (auto arg : m_unit.tuples[inst.args]) args.emplace_back(value(arg));
+  std::vector<llvm::Type*> argTypes(args.size(), m_int64);
+  auto funcTy = llvm::FunctionType::get(m_int64, argTypes, false);
+  auto func = emitFuncPtr(funcName, funcTy, uint64_t(inst.target));
+  auto next = block(inst.targets[0]);
+  auto unwind = block(inst.targets[1]);
+  auto call = m_irb.CreateInvoke(func, next, unwind, args);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_PHP);
+
+  // Forward the new vmsp to the next block, just like bindcall.
   m_incomingVmSp[inst.targets[0]] = call;
 }
 

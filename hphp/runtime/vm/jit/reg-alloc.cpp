@@ -244,11 +244,11 @@ void getEffects(const Abi& abi, const Vinstr& i,
           break;
       }
       break;
-    case Vinstr::callstub:
-      defs = i.callstub_.kills;
-      break;
     case Vinstr::bindcall:
     case Vinstr::contenter:
+    case Vinstr::callstub:
+      // All three of these are php-level function calls, so they kill most
+      // registers.
       defs = abi.all();
       switch (arch()) {
         case Arch::ARM:
@@ -277,6 +277,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
       break;
     case Vinstr::vcall:
     case Vinstr::vinvoke:
+    case Vinstr::vcallstub:
       always_assert(false && "Unsupported instruction in vxls");
     default:
       break;

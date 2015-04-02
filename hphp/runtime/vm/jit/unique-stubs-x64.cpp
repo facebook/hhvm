@@ -425,23 +425,22 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   uniqueStubs.fcallArrayHelper = a.frontier();
 
   /*
-   * When translating FCallArray, we have a pre-live ActRec on the
-   * stack and an Array of the parameters.  This stub uses the
-   * interpreter functions to enter the ActRec, but those functions
-   * may also tell us not to run it.  We reach this stub using a call
-   * instruction from the TC.
+   * When translating FCallArray, we have a pre-live ActRec on the stack and an
+   * Array of the parameters.  This stub uses the interpreter functions to
+   * enter the ActRec, but those functions may also tell us not to run it.  We
+   * reach this stub using a call instruction from the TC.
    *
-   * In the case we're told to run it, we pop the return IP from the
-   * call and put it in the pre-live ActRec, link it as the frame
-   * pointer, and then jump directly to the prologue for the function
-   * being called.  This is done to keep the return stack buffer
-   * balanced with the call to this stub.  If we're told not to
-   * (e.g. the call_user_func_array was intercepted), we just return
-   * to our caller in the TC after re-loading the VM regs (the
+   * In the case we're told to run it, we pop the return IP from the call and
+   * put it in the pre-live ActRec, link it as the frame pointer, and then jump
+   * directly to the prologue for the function being called.  This is done to
+   * keep the return stack buffer balanced with the call to this stub.  If
+   * we're told not to (e.g. the call_user_func_array was intercepted), we just
+   * return to our caller in the TC after re-loading the VM regs (the
    * interpreter will have popped the pre-live ActRec for us).
    *
-   * NOTE: we're assuming we don't need to save registers, because we
-   * don't ever have live registers across php-level calls.
+   * NOTE: Our ABI for php-level calls only has two callee-saved registers:
+   * rVmFp and rVmTl, so we're allowed to use any other regs without saving
+   * them.
    */
 
   Label noCallee;
@@ -449,9 +448,7 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   auto const rPCOff  = argNumToRegName[0];
   auto const rPCNext = argNumToRegName[1];
   auto const rBC     = r13;
-  auto const rEC     = r15;
 
-  emitGetGContext(a, rEC);
   a.    storeq (rVmFp, rVmTl[rds::kVmfpOff]);
   a.    storeq (rVmSp, rVmTl[rds::kVmspOff]);
 

@@ -42,7 +42,9 @@ namespace HPHP { namespace jit { namespace arm {
 
 TRACE_SET_MOD(hhir);
 
-struct BackEnd : public jit::BackEnd {
+namespace {
+
+struct BackEnd final : jit::BackEnd {
   BackEnd() {}
   ~BackEnd() {}
 
@@ -451,8 +453,10 @@ private:
   }
 };
 
+}
+
 std::unique_ptr<jit::BackEnd> newBackEnd() {
-  return std::unique_ptr<jit::BackEnd>{ folly::make_unique<BackEnd>() };
+  return folly::make_unique<BackEnd>();
 }
 
 static size_t genBlock(CodegenState& state, Vout& v, Vout& vc, Block* block) {

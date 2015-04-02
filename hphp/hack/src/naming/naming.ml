@@ -368,11 +368,11 @@ module Env = struct
           p, name
     )
 
-  (* Is called bad_style, but it is still an error ... Whatever *)
-  let bad_style env (p, x) =
-    let p' = SMap.get x !(env.all_locals) in
-    match p' with None -> assert false | Some p' ->
-      Errors.different_scope p x p'
+  (* Is called check_bad_style, but it is still an error ... Whatever *)
+  let check_bad_style env (p, x) =
+    match SMap.get x !(env.all_locals) with
+    | Some p' -> Errors.different_scope p x p'
+    | None -> ()
 
   let is_superglobal =
     let l = [
@@ -433,8 +433,7 @@ module Env = struct
         match lcl with
         | Some lcl -> p, snd lcl
         | None when not !Autocomplete.auto_complete ->
-            if SMap.mem x !(env.all_locals)
-            then bad_style env (p, x);
+            check_bad_style env (p, x);
             handle_undefined_variable (genv, env) (p, x)
         | None -> p, Ident.tmp()
     in

@@ -491,7 +491,8 @@ and stmt env = function
       let parent_lenv = env.Env.lenv in
       let env = Env.freeze_local_env env in
       let env = block env b in
-      let (env, _) = expr env e in
+      let env, ty = expr env e in
+      Async.enforce_not_awaitable env (fst e) ty;
       let after_block = env.Env.lenv in
       let alias_depth =
         if env.Env.in_loop then 1 else Typing_alias.get_depth st in
@@ -512,7 +513,8 @@ and stmt env = function
       in
       condition env false e
   | While (e, b) as st ->
-      let (env, _) = expr env e in
+      let env, ty = expr env e in
+      Async.enforce_not_awaitable env (fst e) ty;
       let parent_lenv = env.Env.lenv in
       let env = Env.freeze_local_env env in
       let alias_depth =
@@ -548,8 +550,8 @@ and stmt env = function
       condition env false e2
   | Switch (e, cl) ->
       Nast_terminality.SafeCase.check (fst e) cl;
-      (* XXX why is this env discarded? *)
-      let _denv, ty = expr env e in
+      let env, ty = expr env e in
+      Async.enforce_not_awaitable env (fst e) ty;
       let env = check_exhaustiveness env (fst e) ty cl in
       let parent_lenv = env.Env.lenv in
       let env, cl = case_list parent_lenv ty env cl in

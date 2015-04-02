@@ -5,6 +5,8 @@ object(HH\Vector)#5 (2) {
   [1]=>
   int(2)
 }
+string(9) "HH\Vector"
+string(5) "count"
 object(HH\Vector)#6 (2) {
   [0]=>
   int(1)

@@ -7,6 +7,8 @@ $v = Vector {
   Vector {1, 2}
 };
 var_dump($v->map(meth_caller('HH\Vector', 'count')));
+var_dump(meth_caller('HH\Vector', 'count')->getClassName());
+var_dump(meth_caller('HH\Vector', 'count')->getMethodName());
 
 class C {
   public static function isOdd($i) { return $i % 2 == 1;}

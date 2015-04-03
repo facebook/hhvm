@@ -46,7 +46,9 @@ namespace HPHP {
 
 const StaticString
   s_name("name"),
+  s_class("class"),
   s___name("__name"),
+  s___class("__class"),
   s_version("version"),
   s_info("info"),
   s_ini("ini"),
@@ -63,7 +65,6 @@ const StaticString
   s_line2("line2"),
   s_doc("doc"),
   s_modifiers("modifiers"),
-  s_class("class"),
   s_prototype("prototype"),
   s_ref("ref"),
   s_index("index"),
@@ -104,7 +105,8 @@ const StaticString
   s_type_hint("type_hint"),
   s_accessible("accessible"),
   s_reflectionexception("ReflectionException"),
-  s_reflectionextension("ReflectionExtension");
+  s_reflectionextension("ReflectionExtension"),
+  s_reflectionmethod("ReflectionMethod");
 
 Class* get_cls(const Variant& class_or_object) {
   Class* cls = nullptr;
@@ -1443,20 +1445,67 @@ static Variant reflection_extension_name_get(const Object& this_) {
   return name->toString();
 }
 
+static Variant reflection_method_name_get(const Object& this_) {
+  auto name = this_->o_realProp(s___name.get(), ObjectData::RealPropUnchecked,
+                                s_reflectionmethod.get());
+  return name->toString();
+}
+
+void reflection_cannot_set(const Object& this_, const String& name) {
+  auto msg = folly::format("Cannot set read-only property {}::${}",
+                           this_->getVMClass()->name()->data(),
+                           name.data()).str();
+  throw Object(Reflection::AllocReflectionExceptionObject(String(msg)));
+}
+
+void reflection_method_name_set(const Object& this_, Variant& value) {
+  reflection_cannot_set(this_, "name");
+}
+
+static Variant reflection_method_class_get(const Object& this_) {
+  auto klass = this_->o_realProp(s___class.get(), ObjectData::RealPropUnchecked,
+                                s_reflectionmethod.get());
+  return klass->toString();
+}
+
+void reflection_method_class_set(const Object& this_, Variant& value) {
+  reflection_cannot_set(this_, "class");
+}
+
 static Native::PropAccessor reflection_extension_Accessors[] = {
   {"name",              reflection_extension_name_get,
                         nullptr, nullptr, nullptr}, // name is read only
   {nullptr, nullptr, nullptr, nullptr, nullptr}
 };
 
+static Native::PropAccessor reflection_method_Accessors[] = {
+  {"name",              reflection_method_name_get,
+                        reflection_method_name_set,
+                        nullptr, nullptr}, // name is read only
+  {"class",             reflection_method_class_get,
+                        reflection_method_class_set,
+                        nullptr, nullptr}, // class is read only
+  {nullptr, nullptr, nullptr, nullptr, nullptr}
+};
+
 static Native::PropAccessorMap reflection_extension_accessorsMap
 ((Native::PropAccessor*)reflection_extension_Accessors);
+
+static Native::PropAccessorMap reflection_method_accessorsMap
+((Native::PropAccessor*)reflection_method_Accessors);
 
 struct reflection_extension_PropHandler :
   Native::MapPropHandler<reflection_extension_PropHandler> {
 
   static constexpr Native::PropAccessorMap& map =
     reflection_extension_accessorsMap;
+};
+
+struct reflection_method_PropHandler :
+  Native::MapPropHandler<reflection_method_PropHandler> {
+
+  static constexpr Native::PropAccessorMap& map =
+    reflection_method_accessorsMap;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1622,6 +1671,8 @@ class ReflectionExtension final : public Extension {
 
     Native::registerNativePropHandler
       <reflection_extension_PropHandler>(s_reflectionextension);
+    Native::registerNativePropHandler
+      <reflection_method_PropHandler>(s_reflectionmethod);
 
     loadSystemlib();
     loadSystemlib("reflection-classes");

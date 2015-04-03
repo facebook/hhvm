@@ -640,9 +640,10 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
  * The ReflectionMethod class reports information about a method.
  */
 class ReflectionMethod extends ReflectionFunctionAbstract {
-
-  public string $name; // should be readonly (PHP compatibility)
-  public string $class; // should be readonly (PHP compatibility)
+  // $name and $class are the userland properties, implemented with NPH
+  // as read only properties.
+  private string $__name;
+  private string $__class;
 
   private /*string*/ $originalClass;
   private /*bool*/ $forcedAccessible = false;
@@ -694,8 +695,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
         "Method $classname::$name() does not exist");
     }
 
-    $this->name = $this->getName();
-    $this->class = $this->getDeclaringClassname();
+    $this->__name = $this->getName();
+    $this->__class = $this->getDeclaringClassname();
   }
 
   /**

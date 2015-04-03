@@ -10,5 +10,5 @@
  */
 
 async function foo(): Awaitable<void> {
-  return null;
+  return;
 }

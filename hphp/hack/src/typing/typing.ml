@@ -349,48 +349,21 @@ and fun_ ?(abstract=false) env unsafe hret pos b fun_type =
     env
   end
 
-and fun_implicit_return env pos ret b = function
-  | FSync -> implicit_return_noasync pos env ret
-  | FAsync -> implicit_return_async b pos env ret (Reason.Rno_return_async pos)
-  | FGenerator
-  | FAsyncGenerator -> env
-
-(* A function without a terminal block has an implicit return null *)
-and implicit_return_noasync p env ret =
-  let rty = Reason.Rno_return p, Tprim Nast.Tvoid in
-  Typing_suggest.save_return env ret rty;
-  Type.sub_type p Reason.URreturn env ret rty
-
-(* An async function without a yield result() has an implicit
- * yield result(null) if it is a generator or an implicit
- * return null if it is an async function
- *)
-and implicit_return_async b p env ret reason =
-  let type_var = Env.fresh_type () in
-  let rty_core = Toption type_var in
-  let suggest_core =
-    (* OK, this is pretty obnoxious. In principle, a function with no call to
-     * yield result() can be either Awaitable<void> or Awaitable<?anything> due
-     * to the special case around yield result(null). In practice, you almost
-     * certainly meant Awaitable<void> and we should suggest that. IMO we
-     * should extend this HasYieldResult check beyond just type suggestions,
-     * or come up with something better than yield result(null) for
-     * Awaitable<void>, but the former is a ton of cleanup in www and I have
-     * no ideas on the latter right now, so let's just use this heuristic.
-     *
-     * These semantics also unfortunately got extended to async functions --
-     * normally an omitted return will mean the function has a return type of
-     * void, but for async functions we implicitly assume return null.
-     *
-     * The check for is_suggest_mode is superflouous (save_return will do it)
-     * and is just to avoid the potentially expensive HasYieldResult call if
-     * we know we won't ever care. *)
-    if !is_suggest_mode && NastVisitor.HasReturn.block b
-    then rty_core
-    else Tprim Nast.Tvoid in
-  let mk_rty core = reason, Tapply ((p, SN.Classes.cAwaitable), [reason, core]) in
-  Typing_suggest.save_return env ret (mk_rty suggest_core);
-  Type.sub_type p Reason.URreturn env ret (mk_rty rty_core)
+and fun_implicit_return env pos ret _b = function
+  | FGenerator | FAsyncGenerator -> env
+  | FSync ->
+    (* A function without a terminal block has an implicit return; the
+     * "void" type *)
+    let rty = Reason.Rno_return pos, Tprim Nast.Tvoid in
+    Typing_suggest.save_return env ret rty;
+    Type.sub_type pos Reason.URreturn env ret rty
+  | FAsync ->
+    (* An async function without a terminal block has an implicit return;
+     * the Awaitable<void> type *)
+    let r = Reason.Rno_return_async pos in
+    let rty = r, Tapply ((pos, SN.Classes.cAwaitable), [r, Tprim Nast.Tvoid]) in
+    Typing_suggest.save_return env ret rty;
+    Type.sub_type pos Reason.URreturn env ret rty
 
 and block env stl =
   List.fold_left stmt env stl
@@ -444,7 +417,7 @@ and stmt env = function
         | FSync -> (Reason.Rwitness p, Tprim Tvoid)
         | FGenerator
         | FAsyncGenerator -> any (* Return type checked against the "yield". *)
-        | FAsync -> (Reason.Rwitness p, Tapply ((p, SN.Classes.cAwaitable), [(Reason.Rwitness p, Toption (Env.fresh_type ()))])) in
+        | FAsync -> (Reason.Rwitness p, Tapply ((p, SN.Classes.cAwaitable), [(Reason.Rwitness p, Tprim Tvoid)])) in
       let expected_return = Env.get_return env in
       Typing_suggest.save_return env expected_return rty;
       let env = Type.sub_type p Reason.URreturn env expected_return rty in

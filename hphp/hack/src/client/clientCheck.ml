@@ -219,7 +219,7 @@ let rec main args retries =
     | MODE_LINT fnl ->
         let ic, oc = connect args in
         let fnl = List.fold_left begin fun acc fn ->
-          match realpath fn with
+          match Sys_utils.realpath fn with
           | Some path -> path :: acc
           | None ->
               prerr_endlinef "Could not find file '%s'" fn;

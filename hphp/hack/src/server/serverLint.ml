@@ -10,7 +10,6 @@
 
 open ServerEnv
 open Utils
-open Sys_utils
 
 module Json = Hh_json
 module RP = Relative_path

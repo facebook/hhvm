@@ -11,7 +11,7 @@
 
 async function trything(): Awaitable<void> {
   try {
-    return null;
+    return;
   } catch (Exception $e) {
   }
 }
@@ -20,7 +20,7 @@ async function trything2(): Awaitable<void> {
   try {
     something();
   } catch (Exception $e) {
-    return null;
+    return;
   }
 }
 
@@ -28,4 +28,5 @@ async function nullable(): Awaitable<?int> {
   if (coin_flip()) {
     return 123;
   }
+  return null;
 }

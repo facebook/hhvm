@@ -18,7 +18,7 @@ async function r_nullable(): Awaitable<?int> {
 }
 
 async function r_void(): Awaitable<void> {
-  return null;
+  return;
 }
 
 async function rstring(): Awaitable<string> {

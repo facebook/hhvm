@@ -205,7 +205,6 @@ UNSUPPORTED_FILES_CONVERTER = {
         'IUseDynamicYield_trait8.php',
         'anon_yield.php',
         'array_option_unify.php',
-        'array_option_unify2.php',
         'async_anon_function_explicit_return.php',
         'async_anon_function_explicit_return_wrong_type.php',
         'async_function_explicit_null_return_wrong_type.php',

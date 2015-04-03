@@ -15,28 +15,43 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_H_
-#define incl_HPHP_EXT_ASIO_H_
+#ifndef incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_
+#define incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/asio/async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/async-generator.h"
-#include "hphp/runtime/ext/asio/async-generator-wait-handle.h"
-#include "hphp/runtime/ext/asio/await-all-wait-handle.h"
-#include "hphp/runtime/ext/asio/condition-wait-handle.h"
-#include "hphp/runtime/ext/asio/external-thread-event-wait-handle.h"
-#include "hphp/runtime/ext/asio/gen-array-wait-handle.h"
-#include "hphp/runtime/ext/asio/gen-map-wait-handle.h"
-#include "hphp/runtime/ext/asio/gen-vector-wait-handle.h"
-#include "hphp/runtime/ext/asio/reschedule-wait-handle.h"
-#include "hphp/runtime/ext/asio/sleep-wait-handle.h"
-#include "hphp/runtime/ext/asio/static-wait-handle.h"
-#include "hphp/runtime/ext/asio/waitable-wait-handle.h"
+#include "hphp/runtime/ext/asio/wait-handle.h"
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+// class StaticWaitHandle
 
-Object HHVM_FUNCTION(asio_get_running);
+/**
+ * A static wait handle is a wait handle that is statically finished. The result
+ * of the operation is always available and waiting for the wait handle finishes
+ * immediately.
+ */
+class c_StaticWaitHandle final : public c_WaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(StaticWaitHandle)
 
+  explicit c_StaticWaitHandle(Class* cls = c_StaticWaitHandle::classof())
+    : c_WaitHandle(cls) {}
+  ~c_StaticWaitHandle() {
+    assert(isFinished());
+    tvRefcountedDecRef(&m_resultOrException);
+  }
+
+  void t___construct();
+
+ public:
+  static c_StaticWaitHandle* CreateSucceeded(Cell result); // nothrow
+  static c_StaticWaitHandle* CreateFailed(ObjectData* exception);
+
+ private:
+  void setState(uint8_t state) { setKindState(Kind::Static, state); }
+};
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_ASIO_H_
+#endif // incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_

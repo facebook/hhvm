@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/resumable.h"
-#include "hphp/runtime/ext/asio/await_all_wait_handle.h"
+#include "hphp/runtime/ext/asio/await-all-wait-handle.h"
 
 namespace HPHP {
 

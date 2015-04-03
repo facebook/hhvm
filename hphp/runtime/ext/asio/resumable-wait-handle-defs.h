@@ -15,28 +15,33 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_H_
-#define incl_HPHP_EXT_ASIO_H_
+#ifndef incl_HPHP_EXT_ASIO_RESUMABLE_WAIT_HANDLE_DEFS_H_
+#define incl_HPHP_EXT_ASIO_RESUMABLE_WAIT_HANDLE_DEFS_H_
 
-#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/asio/resumable-wait-handle.h"
 #include "hphp/runtime/ext/asio/async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/async-generator.h"
 #include "hphp/runtime/ext/asio/async-generator-wait-handle.h"
-#include "hphp/runtime/ext/asio/await-all-wait-handle.h"
-#include "hphp/runtime/ext/asio/condition-wait-handle.h"
-#include "hphp/runtime/ext/asio/external-thread-event-wait-handle.h"
-#include "hphp/runtime/ext/asio/gen-array-wait-handle.h"
-#include "hphp/runtime/ext/asio/gen-map-wait-handle.h"
-#include "hphp/runtime/ext/asio/gen-vector-wait-handle.h"
-#include "hphp/runtime/ext/asio/reschedule-wait-handle.h"
-#include "hphp/runtime/ext/asio/sleep-wait-handle.h"
-#include "hphp/runtime/ext/asio/static-wait-handle.h"
-#include "hphp/runtime/ext/asio/waitable-wait-handle.h"
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-Object HHVM_FUNCTION(asio_get_running);
-
+inline void c_ResumableWaitHandle::resume() {
+  switch (getKind()) {
+    case Kind::AsyncFunction:  return asAsyncFunction()->resume();
+    case Kind::AsyncGenerator: return asAsyncGenerator()->resume();
+    default:                   not_reached();
+  }
 }
 
-#endif // incl_HPHP_EXT_ASIO_H_
+inline void c_ResumableWaitHandle::exitContext(context_idx_t ctx_idx) {
+  switch (getKind()) {
+    case Kind::AsyncFunction:  return asAsyncFunction()->exitContext(ctx_idx);
+    case Kind::AsyncGenerator: return asAsyncGenerator()->exitContext(ctx_idx);
+    default:                   not_reached();
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}
+
+#endif // incl_HPHP_EXT_ASIO_RESUMABLE_WAIT_HANDLE_DEFS_H_

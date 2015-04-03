@@ -3,6 +3,7 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,62 +15,48 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_EXT_ASIO_SERVER_TASK_WAIT_HANDLE_H_
-#define incl_EXT_ASIO_SERVER_TASK_WAIT_HANDLE_H_
-
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
+#include <thread>
+#include "hphp/runtime/ext/asio/asio-session.h"
+#include "hphp/runtime/ext/asio/external-thread-event-wait-handle.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * A ServerTaskEvent is an external thread ASIO event where the external thread
- * is an HPHP server job.
- *
- * The templated server class is expected to implement a TaskResult method.
- * At present, only XboxServer uses this event, so we adopt its particular
- * interface.
- */
-template<class TServer, class TTransport>
-class ServerTaskEvent final : public AsioExternalThreadEvent {
- public:
-  ServerTaskEvent() {}
+AsioExternalThreadEvent::AsioExternalThreadEvent(ObjectData* priv_data)
+    : m_queue(AsioSession::Get()->getExternalThreadEventQueue()),
+      m_state(Waiting) {
+  m_waitHandle = c_ExternalThreadEventWaitHandle::Create(this, priv_data);
+}
 
-  ~ServerTaskEvent() {
-    if (m_job) m_job->decRefCount();
+void AsioExternalThreadEvent::abandon() {
+  assert(m_state.load() == Waiting);
+  assert(m_waitHandle->hasExactlyOneRef());
+  m_state.store(Abandoned);
+  m_waitHandle->abandon(false);
+}
+
+bool AsioExternalThreadEvent::cancel() {
+  uint32_t/*state_t*/ expected(Waiting);
+  if (m_state.compare_exchange_strong(expected, Canceled)) {
+    return true;
   }
 
-  void finish() {
-    markAsFinished();
+  assert(expected == Finished);
+  return false;
+}
+
+void AsioExternalThreadEvent::markAsFinished() {
+  uint32_t/*state_t*/ expected(Waiting);
+  if (m_state.compare_exchange_strong(expected, Finished)) {
+    // transfer ownership
+    m_queue->send(m_waitHandle);
+  } else {
+    // web request died, destroy object
+    assert(expected == Canceled);
+    release();
   }
-
-  void setJob(TTransport *job) {
-    job->incRefCount();
-    m_job = job;
-  }
-
- protected:
-  void unserialize(Cell& result) override final {
-    if (UNLIKELY(!m_job)) {
-      throw Object(SystemLib::AllocInvalidOperationExceptionObject(
-        "The async operation was incorrectly initialized."));
-    }
-
-    Variant ret;
-
-    int code = TServer::TaskResult(m_job, 0, ret);
-    if (code != 200) {
-      throw Object(SystemLib::AllocExceptionObject(ret));
-    }
-
-    cellDup(*ret.asCell(), result);
-  }
-
- private:
-  TTransport *m_job;
-};
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-#endif // incl_EXT_ASIO_SERVER_TASK_WAIT_HANDLE_H_

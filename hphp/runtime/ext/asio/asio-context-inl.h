@@ -15,28 +15,30 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_H_
-#define incl_HPHP_EXT_ASIO_H_
-
-#include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/asio/async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/async-generator.h"
-#include "hphp/runtime/ext/asio/async-generator-wait-handle.h"
-#include "hphp/runtime/ext/asio/await-all-wait-handle.h"
-#include "hphp/runtime/ext/asio/condition-wait-handle.h"
-#include "hphp/runtime/ext/asio/external-thread-event-wait-handle.h"
-#include "hphp/runtime/ext/asio/gen-array-wait-handle.h"
-#include "hphp/runtime/ext/asio/gen-map-wait-handle.h"
-#include "hphp/runtime/ext/asio/gen-vector-wait-handle.h"
-#include "hphp/runtime/ext/asio/reschedule-wait-handle.h"
-#include "hphp/runtime/ext/asio/sleep-wait-handle.h"
-#include "hphp/runtime/ext/asio/static-wait-handle.h"
-#include "hphp/runtime/ext/asio/waitable-wait-handle.h"
+#ifndef incl_HPHP_EXT_ASIO_CONTEXT_H_
+#error "This should only be included by asio-context.h"
+#endif
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-Object HHVM_FUNCTION(asio_get_running);
-
+template <class TWaitHandle>
+uint32_t AsioContext::registerTo(smart::vector<TWaitHandle*>& vec,
+                                 TWaitHandle* wh) {
+  vec.push_back(wh);
+  return vec.size() - 1;
 }
 
-#endif // incl_HPHP_EXT_ASIO_H_
+template <class TWaitHandle>
+void AsioContext::unregisterFrom(smart::vector<TWaitHandle*>& vec,
+                                 uint32_t idx) {
+  assert(idx < vec.size());
+  if (idx != vec.size() - 1) {
+    vec[idx] = vec.back();
+    vec[idx]->setContextVectorIndex(idx);
+  }
+  vec.pop_back();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}

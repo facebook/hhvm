@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/types.h"
 
-#include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/ext_hotprofiler.h"
 #include "hphp/runtime/ext/intervaltimer/ext_intervaltimer.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"

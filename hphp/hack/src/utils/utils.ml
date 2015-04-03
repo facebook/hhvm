@@ -145,11 +145,6 @@ let fst3 = function x, _, _ -> x
 let snd3 = function _, x, _ -> x
 let thd3 = function _, _, x -> x
 
-let internal_error s =
-  Printf.fprintf stderr
-    "You just found a bug!\nShoot me an email: julien.verlaguet@fb.com";
-  exit 2
-
 let opt f env = function
   | None -> env, None
   | Some x -> let env, x = f env x in env, Some x

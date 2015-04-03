@@ -1843,6 +1843,7 @@ class ReflectionClass implements Reflector {
     $ret->name  = $name;
     $ret->info  = $prop_info;
     $ret->class = $this->getName();
+    $ret->cls   = $this;
     return $ret;
   }
 

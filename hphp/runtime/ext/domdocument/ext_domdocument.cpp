@@ -2969,6 +2969,9 @@ void HHVM_METHOD(DOMCdataSection, __construct,
 
 #define CHECK_DOC(docp)                                                        \
   auto domdoc = Native::data<DOMNode>(obj.get());                              \
+  CHECK_THIS_DOC(docp, domdoc);                                                \
+
+#define CHECK_THIS_DOC(docp, domdoc)                                           \
   xmlDocPtr docp = (xmlDocPtr)(domdoc ? domdoc->nodep() : nullptr);            \
   if (docp == nullptr) {                                                       \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
@@ -2977,6 +2980,9 @@ void HHVM_METHOD(DOMCdataSection, __construct,
 
 #define CHECK_WRITE_DOC(docp)                                                  \
   auto domdoc = Native::data<DOMNode>(obj.get());                              \
+  CHECK_WRITE_THIS_DOC(docp, domdoc)                                           \
+
+#define CHECK_WRITE_THIS_DOC(docp, domdoc)                                     \
   xmlDocPtr docp = (xmlDocPtr)(domdoc ? domdoc->nodep() : nullptr);            \
   if (docp == nullptr) {                                                       \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
@@ -3527,6 +3533,7 @@ TypedValue* HHVM_MN(DOMDocument, loadXML)(ActRec* ar) {
 
 void HHVM_METHOD(DOMDocument, normalizeDocument) {
   auto* data = Native::data<DOMNode>(this_);
+  CHECK_WRITE_THIS_DOC(docp, data);
   dom_normalize(data->nodep());
 }
 

@@ -117,7 +117,8 @@ let builtins = "<?hh // decl\n"^
   "}\n"^
   "function array_map($x, $y, ...);\n"^
   "function idx<Tk, Tv>(?KeyedContainer<Tk, Tv> $c, $i, $d = null) {}\n"^
-  "final class stdClass {}\n"
+  "final class stdClass {}\n" ^
+  "function rand($x, $y): int;\n"
 
 (*****************************************************************************)
 (* Helpers *)

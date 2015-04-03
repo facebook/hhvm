@@ -906,13 +906,10 @@ and expr_ in_cond is_lvalue env (p, e) =
     (match class_ with
     | None -> unbound_name env pos_cname
     | Some class_ ->
-        let env, params = lfold begin fun env _ ->
-          TUtils.in_var env (Reason.Rwitness p, Tunresolved [])
-        end env class_.tc_tparams in
+        let params = List.map begin fun (_, (p, n), cstr) ->
+          Reason.Rwitness p, Tgeneric (n, cstr)
+        end class_.tc_tparams in
         let obj_type = Reason.Rwitness p, Tapply (pos_cname, params) in
-        (* We need to instantiate the object because it could have
-         * type parameters.
-         *)
         let env, fty =
           obj_get ~is_method:true ~nullsafe:None env obj_type
                  (CI (pos, class_name)) meth_name (fun x -> x) in
@@ -926,16 +923,20 @@ and expr_ in_cond is_lvalue env (p, e) =
             let param = Tgeneric (class_name, Some obj_type) in
             let param = Reason.Rwitness pos, param in
             let fty = { fty with
-                        ft_tparams = [tparam];
-                        ft_params = [None, param] } in
+                        ft_tparams = tparam :: class_.tc_tparams @ fty.ft_tparams;
+                        ft_params = (None, param) :: fty.ft_params } in
             let env, fty = Inst.instantiate_ft env fty in
+            let fun_arity = match fty.ft_arity with
+              | Fstandard (min, max) -> Fstandard (min + 1, max + 1)
+              | Fvariadic (min, x) -> Fvariadic (min + 1, x)
+              | Fellipsis min -> Fellipsis (min + 1) in
             let caller = {
               ft_pos = pos;
               ft_unsafe = false;
               ft_deprecated = None;
               ft_abstract = false;
-              ft_arity = Fstandard (1, 1);
-              ft_tparams = [];
+              ft_arity = fun_arity;
+              ft_tparams = fty.ft_tparams;
               ft_params = fty.ft_params;
               ft_ret = fty.ft_ret;
             } in

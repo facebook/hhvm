@@ -114,6 +114,7 @@ UNSUPPORTED_FILES_UNPARSER = {
         'xhp_parse.php',
     ],
     "Call with splat": [
+        'meth_caller9.php',
         'parent_construct1.php',
         'unpack_call1.php',
         'unpack_call2.php',

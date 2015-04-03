@@ -21,11 +21,6 @@
 #ifndef incl_EXT_LIST_EXT_H_
 #define incl_EXT_LIST_EXT_H_
 
-// Super temporary
-#ifndef USE_CMAKE
-#include "hphp/facebook/extensions/phpmc/ext_phpmc.h"
-#endif
-
 #include "hphp/runtime/ext/array/ext_array_idl.h"
 #include "hphp/runtime/ext/async_mysql/ext_async_mysql.h"
 #include "hphp/runtime/ext/ext_closure.h"

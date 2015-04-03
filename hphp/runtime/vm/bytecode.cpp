@@ -1758,13 +1758,15 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
     ExtraArgs* extraArgs = ExtraArgs::allocateUninit(extra);
     PackedArrayInit ai(extra);
     if (UNLIKELY(nextra_regular > 0)) {
-      for (int i = 0; i < nextra_regular; ++i) {
-        TypedValue* to = extraArgs->getExtraArg(i);
-        const TypedValue* from = stack.top();
+      // The arguments are pushed in order, so we should refer them by
+      // index instead of taking the top, that would lead to reverse order.
+      for (int i = nextra_regular - 1; i >= 0; --i) {
+        TypedValue* to = extraArgs->getExtraArg(nextra_regular - i - 1);
+        const TypedValue* from = stack.indTV(i);
         if (from->m_type == KindOfRef && from->m_data.pref->isReferenced()) {
-          refDup(*from, *to);
+          refCopy(*from, *to);
         } else {
-          cellDup(*tvToCell(from), *to);
+          cellCopy(*tvToCell(from), *to);
         }
         if (hasVarParam) {
           // appendWithRef bumps the refcount: this accounts for the fact
@@ -1772,21 +1774,14 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
           // to being in (both) ExtraArgs and the variadic args
           ai.appendWithRef(tvAsCVarRef(from));
         }
-        stack.discard();
       }
+      stack.ndiscard(nextra_regular);
     }
     for (int i = nextra_regular; i < extra; ++i, ++iter) {
       TypedValue* to = extraArgs->getExtraArg(i);
       const TypedValue* from = iter.secondRefPlus().asTypedValue();
-      if (from->m_type == KindOfRef && from->m_data.pref->isReferenced()) {
-        refDup(*from, *to);
-      } else {
-        cellDup(*tvToCell(from), *to);
-      }
+      tvDupWithRef(*from, *to);
       if (hasVarParam) {
-        // appendWithRef bumps the refcount: this accounts for the fact
-        // that the extra args values went from being present in
-        // arrayArgs to being in (both) ExtraArgs and the variadic args
         ai.appendWithRef(iter.secondRefPlus());
       }
     }
@@ -1808,10 +1803,14 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
     } else {
       PackedArrayInit ai(extra);
       if (UNLIKELY(nextra_regular > 0)) {
-        for (int i = 0; i < nextra_regular; ++i) {
+        // The arguments are pushed in order, so we should refer them by
+        // index instead of taking the top, that would lead to reverse order.
+        for (int i = nextra_regular - 1; i >= 0; --i) {
           // appendWithRef bumps the refcount and splits if necessary,
           // to compensate for the upcoming pop from the stack
-          ai.appendWithRef(tvAsVariant(stack.top()));
+          ai.appendWithRef(tvAsVariant(stack.indTV(i)));
+        }
+        for (int i = 0; i < nextra_regular; ++i) {
           stack.popTV();
         }
       }

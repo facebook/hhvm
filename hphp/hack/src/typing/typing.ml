@@ -238,10 +238,6 @@ and make_param_type_ ~for_body default env param =
         let _r, ty = default() in
         let r = Reason.Rwitness param_pos in
         env, (r, ty)
-      | Some (p, (Hprim Tvoid)) ->
-        let r = Reason.Rwitness param_pos in
-        Errors.void_parameter p;
-        env, (r, Tany)
       (* if the code is strict, use the type-hint *)
       | Some x when Env.is_strict env -> Typing_hint.hint env x
       (* This code is there because we used to be more tolerant in
@@ -284,8 +280,7 @@ and check_param env param (_, ty) =
 
 and bind_param env (_, ty1) param =
   let env, ty2 = opt expr env param.param_expr in
-  let ty2 =
-    match ty2 with
+  let ty2 = match ty2 with
     | None    -> Reason.none, Tany
     | Some ty -> ty
   in
@@ -713,11 +708,12 @@ and bind_as_expr env ty aexpr =
     | Taccess (_, _)) -> assert false
 
 and expr env e =
-  raw_expr false env e
+  raw_expr ~in_cond:false env e
 
-and raw_expr in_cond env e =
+and raw_expr ~in_cond env e =
   debug_last_pos := fst e;
-  let env, ty = expr_ in_cond false env e in
+  let valkind = `other in
+  let env, ty = expr_ ~in_cond ~valkind env e in
   let () = match !expr_hook with
     | Some f -> f e (Typing_expand.fully_expand env ty)
     | None -> () in
@@ -725,9 +721,10 @@ and raw_expr in_cond env e =
   env, ty
 
 and lvalue env e =
-  expr_ false true env e
+  let valkind = `lvalue in
+  expr_ ~in_cond:false ~valkind env e
 
-and expr_ in_cond is_lvalue env (p, e) =
+and expr_ ~in_cond ~(valkind: [> `lvalue | `rvalue | `other ]) env (p, e) =
   match e with
   | Any -> env, (Reason.Rwitness p, Tany)
   | Array [] -> env, (Reason.Rwitness p, Tarray (None, None))
@@ -989,12 +986,14 @@ and expr_ in_cond is_lvalue env (p, e) =
       env, ty
   | Array_get (e, None) ->
       let env, ty1 = expr env e in
+      let is_lvalue = (valkind == `lvalue) in
       array_append is_lvalue p env ty1
   | Array_get (e1, Some e2) ->
       let env, ty1 = expr env e1 in
       let env, ty1 = TUtils.fold_unresolved env ty1 in
       let env, ety1 = Env.expand_type env ty1 in
       let env, ty2 = expr env e2 in
+      let is_lvalue = (valkind == `lvalue) in
       array_get is_lvalue p env ty1 ety1 e2 ty2
   | Call (Cnormal, (_, Id (_, hh_show)), [x], [])
       when hh_show = SN.PseudoFunctions.hh_show ->
@@ -1453,15 +1452,25 @@ and check_shape_keys_validity env pos keys =
         let env, pos, info = get_field_info env witness in
         List.fold_left (check_field pos info) env rest_keys
 
+and check_valid_rvalue p ty ty_ret =
+  match ty with
+    | r, Tprim Tnoreturn ->
+      let () = Errors.noreturn_usage p
+        (Reason.to_string "A noreturn function always throws or exits" r)
+      in r, Tany
+    | r, Tprim Tvoid ->
+      let () = Errors.void_usage p
+        (Reason.to_string "A void function doesn't return a value" r)
+      in r, Tany
+    | _ -> ty_ret
+
 and set_valid_rvalue p env x ty =
-    let ty = match ty with
-      | r, Tprim Tnoreturn ->
-        let () = Errors.noreturn_usage p
-          (Reason.to_string "A noreturn function always throws or exits" r)
-        in r, Tany
-      | _ -> ty
-    in let env = Env.set_local env x ty in
-    env, ty
+  let env, folded_ty = TUtils.fold_unresolved env ty in
+  let env, folded_ety = Env.expand_type env folded_ty in
+
+  let ty = check_valid_rvalue p folded_ety ty in
+  let env = Env.set_local env x ty in
+  env, ty
 
 and assign p env e1 ty2 =
   let env, ty2 = convert_array_as_tuple env ty2 in
@@ -1597,6 +1606,11 @@ and assign p env e1 ty2 =
 
 and assign_simple p env e1 ty2 =
   let env, ty1 = lvalue env e1 in
+
+  let env, folded_ty2 = TUtils.fold_unresolved env ty2 in
+  let env, folded_ety2 = Env.expand_type env folded_ty2 in
+  let ty2 = check_valid_rvalue p folded_ety2 ty2 in
+
   let env, ty2 = TUtils.unresolved env ty2 in
   let env = Type.sub_type p (Reason.URassign) env ty1 ty2 in
   env, ty2
@@ -3158,7 +3172,7 @@ and condition_isset env = function
  * conditional statements.
  *)
 and condition env tparamet =
-  let expr = raw_expr true in function
+  let expr = raw_expr ~in_cond:true in function
   | _, Expr_list [] -> env
   | _, Expr_list [x] ->
       let env, _ = expr env x in

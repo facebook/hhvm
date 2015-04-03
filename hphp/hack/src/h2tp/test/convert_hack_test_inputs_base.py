@@ -275,6 +275,7 @@ UNSUPPORTED_FILES_CONVERTER = {
         'mixed_option.php',
         'namespace_async_1.php',
         'namespace_async_2.php',
+        'noreturn_option2.php',
         'noreturn_typehint_basic.php',
         'preparable.php',
         'this5.php',

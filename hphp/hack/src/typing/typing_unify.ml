@@ -193,9 +193,9 @@ and unify_ env r1 ty1 r2 ty2 =
                match ty2 with
                | Tapply ((_, y), _) -> y = x
                | Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _)
-                | Toption _ | Tvar _ | Tabstract (_, _, _) | Ttuple _
-                | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
-                | Tshape _ | Taccess (_, _) -> false
+               | Toption _ | Tvar _ | Tabstract (_, _, _) | Ttuple _
+               | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
+               | Tshape _ | Taccess (_, _) -> false
              end
              ~do_:(fun error -> Errors.this_final id (Reason.to_pos r1) error)
           );

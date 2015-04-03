@@ -180,7 +180,10 @@ and hint_ p env = function
         | None -> env, None in
       env, Tgeneric (x, cstr_opt)
   | Hoption (_, Hprim Tvoid) ->
-      Errors.nullable_void p;
+      Errors.option_return_only_typehint p `void;
+      env, Tany
+  | Hoption (_, Hprim Tnoreturn) ->
+      Errors.option_return_only_typehint p `noreturn;
       env, Tany
   | Hoption (_, Hmixed) ->
       Errors.option_mixed p;

@@ -18,9 +18,9 @@ class A {
     if (true) {
       $this->x = $x;
     } else {
-      $y = $this->init();
+      $y = f();
+      $this->init();
     }
-
   }
 
   private function init(): void {
@@ -36,4 +36,8 @@ class B extends A {
     $x = new A(0);
   }
 
+}
+
+function f(): int {
+  return 10;
 }

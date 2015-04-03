@@ -714,21 +714,29 @@ let make_env old_env ~funs ~classes ~typedefs ~consts =
 (* Naming of type hints *)
 (*****************************************************************************)
 
-let rec hint ?(is_static_var=false) ?(allow_this=false) env (p, h) =
-  p, hint_ ~allow_this is_static_var p env h
+let rec hint
+    ?(is_static_var=false)
+    ?(allow_this=false)
+    ?(allow_retonly=false) env (p, h) =
+  p, hint_ ~allow_this ~allow_retonly is_static_var p env h
 
-and hint_ ~allow_this is_static_var p env x =
+and hint_ ~allow_this ~allow_retonly is_static_var p env x =
   let hint = hint ~is_static_var ~allow_this in
   match x with
-  | Htuple hl -> N.Htuple (List.map (hint env) hl)
-  | Hoption h -> N.Hoption (hint env h)
-  | Hfun (hl, opt, h) -> N.Hfun (List.map (hint env) hl, opt, hint env h)
-  | Happly ((_, x) as id, hl) -> hint_id ~allow_this env is_static_var id hl
+  | Htuple hl -> N.Htuple (List.map (hint ~allow_retonly env) hl)
+  | Hoption h ->
+    (* void/noreturn are permitted for Typing.option_return_only_typehint *)
+    N.Hoption (hint ~allow_retonly env h)
+  | Hfun (hl, opt, h) ->
+    N.Hfun (List.map (hint env) hl, opt,
+            hint ~allow_retonly:true env h)
+  | Happly ((_, x) as id, hl) ->
+    hint_id ~allow_this ~allow_retonly env is_static_var id hl
   | Haccess ((pos, root_id) as root, id, ids) ->
     (* Using a thunk to avoid computing this_ty in cases when we do not need it
      *)
-    let this_ty () = hint_id ~allow_this env is_static_var
-        (pos, SN.Typehints.this) [] in
+    let this_ty () = hint_id ~allow_this ~allow_retonly env is_static_var
+      (pos, SN.Typehints.this) [] in
     let self_ty () =
       match this_ty() with
       | N.Habstr (x, Some (_, self)) when x = SN.Typehints.this -> snd self
@@ -751,7 +759,7 @@ and hint_ ~allow_this is_static_var p env x =
           N.Habstr (SN.Typehints.type_hole,
             Some (Ast.Constraint_as, (pos, self_ty ())))
       | _ ->
-          (match hint_id ~allow_this env is_static_var root [] with
+          (match hint_id ~allow_this ~allow_retonly env is_static_var root [] with
           | N.Happly _ as h -> h
           | _ -> Errors.invalid_type_access_root root; N.Hany
           )
@@ -767,7 +775,7 @@ and hint_ ~allow_this is_static_var p env x =
       end ShapeMap.empty fdl
   end
 
-and hint_id ~allow_this env is_static_var (p, x as id) hl =
+and hint_id ~allow_this ~allow_retonly env is_static_var (p, x as id) hl =
   Naming_hooks.dispatch_hint_hook id;
   let params = (fst env).type_params in
   if   is_alok_type_name id && not (SMap.mem x params)
@@ -783,6 +791,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
     match x with
       | x when x.[0] = '\\' &&
         ( x = ("\\"^SN.Typehints.void)
+        || x = ("\\"^SN.Typehints.noreturn)
         || x = ("\\"^SN.Typehints.int)
         || x = ("\\"^SN.Typehints.bool)
         || x = ("\\"^SN.Typehints.float)
@@ -799,15 +808,21 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
         ) ->
         Errors.primitive_toplevel p;
         N.Hany
-    | x when x = SN.Typehints.void -> N.Hprim N.Tvoid
+    | x when x = SN.Typehints.void && allow_retonly -> N.Hprim N.Tvoid
+    | x when x = SN.Typehints.void ->
+      Errors.return_only_typehint p `void;
+      N.Hany
+    | x when x = SN.Typehints.noreturn && allow_retonly -> N.Hprim N.Tnoreturn
+    | x when x = SN.Typehints.noreturn ->
+      Errors.return_only_typehint p `noreturn;
+      N.Hany
     | x when x = SN.Typehints.num  -> N.Hprim N.Tnum
     | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
     | x when x = SN.Typehints.arraykey -> N.Hprim N.Tarraykey
-    | x when x = SN.Typehints.noreturn -> N.Hprim N.Tnoreturn
     | x when x = SN.Typehints.mixed -> N.Hmixed
     | x when x = SN.Typehints.shape ->
-        Errors.shape_typehint p;
-        N.Hany
+      Errors.shape_typehint p;
+      N.Hany
     | x when x = SN.Typehints.this && allow_this ->
         if hl != []
         then Errors.this_no_argument p;
@@ -865,11 +880,12 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
       let data_type_covariance =
         (cname = SN.FB.cDataType || cname = SN.FB.cDataTypeImplProvider) in
       let awaitable_covariance =
-        (cname = SN.Classes.cAwaitable || cname = SN.Classes.cWaitHandle) in
+        (cname = SN.Classes.cAwaitable || cname = SN.Classes.cWaitHandle
+         || cname = SN.Classes.cWaitableWaitHandle) in
       let allow_this = allow_this &&
         (awaitable_covariance || gen_read_api_covariance ||
          privacy_policy_contravariance || data_type_covariance) in
-      N.Happly (name, hintl ~allow_this env hl)
+      N.Happly (name, hintl ~allow_this ~allow_retonly:true env hl)
   end
 
 (* Hints that are valid both as casts and type annotations.  Neither
@@ -877,7 +893,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
  * instance, 'object' is not a valid annotation.  Thus callers will
  * have to handle the remaining cases. *)
 and try_castable_hint ?(allow_this=false) env p x hl =
-  let hint = hint ~allow_this in
+  let hint = hint ~allow_this ~allow_retonly:false in
   let canon = String.lowercase x in
   let opt_hint = match canon with
     | nm when nm = SN.Typehints.int    -> Some (N.Hprim N.Tint)
@@ -919,7 +935,8 @@ and get_constraint env tparam =
 
 and constraint_ env (ck, h) = ck, hint env h
 
-and hintl ~allow_this env l = List.map (hint ~allow_this env) l
+and hintl ~allow_this ~allow_retonly env l =
+  List.map (hint ~allow_this ~allow_retonly env) l
 
 (*****************************************************************************)
 (* All the methods and static methods of an interface are "implicitly"
@@ -1000,7 +1017,7 @@ and class_ genv c =
   let v_names  = List.fold_right SSet.add v_names SSet.empty in
   let sm_names = List.map (fun x -> snd x.N.m_name) smethods in
   let sm_names = List.fold_right SSet.add sm_names SSet.empty in
-  let parents  = List.map (hint ~allow_this:true env) c.c_extends in
+  let parents  = List.map (hint ~allow_this:true ~allow_retonly:false env) c.c_extends in
   let parents  = match c.c_kind with
     (* Make enums implicitly extend the BuiltinEnum class in order to provide
      * utility methods. *)
@@ -1465,7 +1482,7 @@ and method_ env m =
    * both depend upon the processing of the unnamed ast *)
   let attrs = user_attributes env m.m_user_attributes in
   let method_type = fun_kind env m.m_fun_kind in
-  let ret = opt_map (hint ~allow_this:true env) m.m_ret in
+  let ret = opt_map (hint ~allow_this:true ~allow_retonly:true env) m.m_ret in
   N.({ m_unsafe     = unsafe ;
        m_final      = final  ;
        m_visibility = vis    ;
@@ -1553,7 +1570,7 @@ and fun_ genv f =
   let genv = Env.make_fun_genv genv tparams f in
   let lenv = Env.empty_local () in
   let env = genv, lenv in
-  let h = opt_map (hint ~allow_this:true env) f.f_ret in
+  let h = opt_map (hint ~allow_this:true ~allow_retonly:true env) f.f_ret in
   let variadicity, paraml = fun_paraml env f.f_params in
   let x = Env.fun_id env f.f_name in
   List.iter check_constraint f.f_tparams;
@@ -2114,7 +2131,7 @@ and expr_ env = function
   | Ref (p, e_) -> expr_ env e_
 
 and expr_lambda env f =
-  let h = opt_map (hint ~allow_this:true env) f.f_ret in
+  let h = opt_map (hint ~allow_this:true ~allow_retonly:true env) f.f_ret in
   let unsafe = List.mem Unsafe f.f_body in
   let variadicity, paraml = fun_paraml env f.f_params in
   (* The bodies of lambdas go through naming in the containing local

@@ -20,6 +20,7 @@ module Classes = struct
 
   let cAwaitable = "\\Awaitable"
   let cWaitHandle = "\\WaitHandle"
+  let cWaitableWaitHandle = "\\WaitableWaitHandle"
   let cGenerator = "\\Generator"
   let cAsyncGenerator = "\\AsyncGenerator"
   let cFormatString = "\\FormatString" (* deprecated - defined in user code *)

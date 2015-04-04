@@ -174,6 +174,9 @@ void StandardExtension::initMisc() {
     Native::registerConstant<KindOfInt64>(s_T_PAAMAYIM_NEKUDOTAYIM.get(),
                                           get_user_token_id(T_DOUBLE_COLON));
 
+    Native::registerConstant<KindOfBoolean>(makeStaticString("true"), true);
+    Native::registerConstant<KindOfBoolean>(makeStaticString("false"), false);
+    Native::registerConstant<KindOfNull>(makeStaticString("null"));
     loadSystemlib("std_misc");
   }
 

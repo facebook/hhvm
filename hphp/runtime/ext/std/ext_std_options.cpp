@@ -1261,6 +1261,11 @@ void StandardExtension::initOptions() {
   ASSERTCONST(QUIET_EVAL);
 #undef ASSERTCONST
 
+  Native::registerConstant<KindOfString>(
+    makeStaticString("PHP_SAPI"),
+    makeStaticString(RuntimeOption::ExecutionMode)
+  );
+
   loadSystemlib("std_options");
 }
 

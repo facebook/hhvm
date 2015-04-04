@@ -329,7 +329,6 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
   cns->setDynamic(ar, "PHP_BINARY", true);
   cns->setDynamic(ar, "PHP_BINDIR", true);
   cns->setDynamic(ar, "PHP_OS", true);
-  cns->setDynamic(ar, "PHP_SAPI", true);
   cns->setDynamic(ar, "SID", true);
 
   for (auto sym : cns->getSymbols()) {

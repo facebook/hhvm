@@ -2,26 +2,6 @@
     "preamble": "",
     "consts": [
         {
-            "name": "CLOCK_MONOTONIC",
-            "value": 1
-        },
-        {
-            "name": "CLOCK_PROCESS_CPUTIME_ID",
-            "value": 2
-        },
-        {
-            "name": "CLOCK_REALTIME",
-            "value": 0
-        },
-        {
-            "name": "CLOCK_THREAD_CPUTIME_ID",
-            "value": 3
-        },
-        {
-            "name": "CL_EXPUNGE",
-            "value": 32768
-        },
-        {
             "name": "CONNECTION_ABORTED",
             "value": 1
         },
@@ -32,14 +12,6 @@
         {
             "name": "CONNECTION_TIMEOUT",
             "value": 2
-        },
-        {
-            "name": "CP_MOVE",
-            "value": 2
-        },
-        {
-            "name": "CP_UID",
-            "value": 1
         },
         {
             "name": "CREDITS_ALL",
@@ -310,30 +282,6 @@
             "value": 4
         },
         {
-            "name": "ENC7BIT",
-            "value": 0
-        },
-        {
-            "name": "ENC8BIT",
-            "value": 1
-        },
-        {
-            "name": "ENCBASE64",
-            "value": 3
-        },
-        {
-            "name": "ENCBINARY",
-            "value": 2
-        },
-        {
-            "name": "ENCOTHER",
-            "value": 5
-        },
-        {
-            "name": "ENCQUOTEDPRINTABLE",
-            "value": 4
-        },
-        {
             "name": "ENT_COMPAT",
             "value": 2
         },
@@ -364,26 +312,6 @@
         {
             "name": "EXIF_USE_MBSTRING",
             "value": 0
-        },
-        {
-            "name": "FT_INTERNAL",
-            "value": 8
-        },
-        {
-            "name": "FT_NOT",
-            "value": 4
-        },
-        {
-            "name": "FT_PEEK",
-            "value": 2
-        },
-        {
-            "name": "FT_PREFETCHTEXT",
-            "value": 32
-        },
-        {
-            "name": "FT_UID",
-            "value": 1
         },
         {
             "name": "GLOBAL_STATE_IGNORE",
@@ -680,34 +608,6 @@
         {
             "name": "INTL_MAX_LOCALE_LEN",
             "value": 80
-        },
-        {
-            "name": "LATT_HASCHILDREN",
-            "value": 32
-        },
-        {
-            "name": "LATT_HASNOCHILDREN",
-            "value": 64
-        },
-        {
-            "name": "LATT_MARKED",
-            "value": 4
-        },
-        {
-            "name": "LATT_NOINFERIORS",
-            "value": 1
-        },
-        {
-            "name": "LATT_NOSELECT",
-            "value": 2
-        },
-        {
-            "name": "LATT_REFERRAL",
-            "value": 16
-        },
-        {
-            "name": "LATT_UNMARKED",
-            "value": 8
         },
         {
             "name": "LC_ALL",
@@ -1010,52 +910,8 @@
             "value": 2
         },
         {
-            "name": "NIL",
-            "value": 0
-        },
-        {
             "name": "NOEXPR",
             "value": 327681
-        },
-        {
-            "name": "NULL",
-            "value": null
-        },
-        {
-            "name": "OP_ANONYMOUS",
-            "value": 4
-        },
-        {
-            "name": "OP_DEBUG",
-            "value": 1
-        },
-        {
-            "name": "OP_EXPUNGE",
-            "value": 128
-        },
-        {
-            "name": "OP_HALFOPEN",
-            "value": 64
-        },
-        {
-            "name": "OP_PROTOTYPE",
-            "value": 32
-        },
-        {
-            "name": "OP_READONLY",
-            "value": 2
-        },
-        {
-            "name": "OP_SECURE",
-            "value": 256
-        },
-        {
-            "name": "OP_SHORTCACHE",
-            "value": 8
-        },
-        {
-            "name": "OP_SILENT",
-            "value": 16
         },
         {
             "name": "PASSWORD_BCRYPT",
@@ -1224,42 +1080,6 @@
             "value": 65536
         },
         {
-            "name": "SA_ALL",
-            "value": 31
-        },
-        {
-            "name": "SA_MESSAGES",
-            "value": 1
-        },
-        {
-            "name": "SA_RECENT",
-            "value": 2
-        },
-        {
-            "name": "SA_UIDNEXT",
-            "value": 8
-        },
-        {
-            "name": "SA_UIDVALIDITY",
-            "value": 16
-        },
-        {
-            "name": "SA_UNSEEN",
-            "value": 4
-        },
-        {
-            "name": "SE_FREE",
-            "value": 2
-        },
-        {
-            "name": "SE_NOPREFETCH",
-            "value": 4
-        },
-        {
-            "name": "SE_UID",
-            "value": 1
-        },
-        {
             "name": "SIGABRT",
             "value": 6
         },
@@ -1424,130 +1244,6 @@
             "value": 2
         },
         {
-            "name": "SOAP_1_1",
-            "value": 1
-        },
-        {
-            "name": "SOAP_1_2",
-            "value": 2
-        },
-        {
-            "name": "SOAP_ACTOR_NEXT",
-            "value": 1
-        },
-        {
-            "name": "SOAP_ACTOR_NONE",
-            "value": 2
-        },
-        {
-            "name": "SOAP_ACTOR_UNLIMATERECEIVER",
-            "value": 3
-        },
-        {
-            "name": "SOAP_AUTHENTICATION_BASIC",
-            "value": 0
-        },
-        {
-            "name": "SOAP_AUTHENTICATION_DIGEST",
-            "value": 1
-        },
-        {
-            "name": "SOAP_COMPRESSION_ACCEPT",
-            "value": 32
-        },
-        {
-            "name": "SOAP_COMPRESSION_DEFLATE",
-            "value": 16
-        },
-        {
-            "name": "SOAP_COMPRESSION_GZIP",
-            "value": 0
-        },
-        {
-            "name": "SOAP_DOCUMENT",
-            "value": 2
-        },
-        {
-            "name": "SOAP_ENCODED",
-            "value": 1
-        },
-        {
-            "name": "SOAP_ENC_ARRAY",
-            "value": 300
-        },
-        {
-            "name": "SOAP_ENC_OBJECT",
-            "value": 301
-        },
-        {
-            "name": "SOAP_FUNCTIONS_ALL",
-            "value": 999
-        },
-        {
-            "name": "SOAP_LITERAL",
-            "value": 2
-        },
-        {
-            "name": "SOAP_PERSISTENCE_REQUEST",
-            "value": 2
-        },
-        {
-            "name": "SOAP_PERSISTENCE_SESSION",
-            "value": 1
-        },
-        {
-            "name": "SOAP_RPC",
-            "value": 1
-        },
-        {
-            "name": "SOAP_SINGLE_ELEMENT_ARRAYS",
-            "value": 1
-        },
-        {
-            "name": "SOAP_USE_XSI_ARRAY_TYPE",
-            "value": 4
-        },
-        {
-            "name": "SOAP_WAIT_ONE_WAY_CALLS",
-            "value": 2
-        },
-        {
-            "name": "SORTARRIVAL",
-            "value": 1
-        },
-        {
-            "name": "SORTCC",
-            "value": 5
-        },
-        {
-            "name": "SORTDATE",
-            "value": 0
-        },
-        {
-            "name": "SORTFROM",
-            "value": 2
-        },
-        {
-            "name": "SORTSIZE",
-            "value": 6
-        },
-        {
-            "name": "SORTSUBJECT",
-            "value": 3
-        },
-        {
-            "name": "SORTTO",
-            "value": 4
-        },
-        {
-            "name": "SO_FREE",
-            "value": 8
-        },
-        {
-            "name": "SO_NOSERVER",
-            "value": 16
-        },
-        {
             "name": "SQLT_AFC",
             "value": 96
         },
@@ -1652,18 +1348,6 @@
             "value": 1
         },
         {
-            "name": "ST_SET",
-            "value": 4
-        },
-        {
-            "name": "ST_SILENT",
-            "value": 2
-        },
-        {
-            "name": "ST_UID",
-            "value": 1
-        },
-        {
             "name": "SUNFUNCS_RET_DOUBLE",
             "value": 2
         },
@@ -1678,42 +1362,6 @@
         {
             "name": "THOUSEP",
             "value": 65537
-        },
-        {
-            "name": "TYPEAPPLICATION",
-            "value": 3
-        },
-        {
-            "name": "TYPEAUDIO",
-            "value": 4
-        },
-        {
-            "name": "TYPEIMAGE",
-            "value": 5
-        },
-        {
-            "name": "TYPEMESSAGE",
-            "value": 2
-        },
-        {
-            "name": "TYPEMODEL",
-            "value": 7
-        },
-        {
-            "name": "TYPEMULTIPART",
-            "value": 1
-        },
-        {
-            "name": "TYPEOTHER",
-            "value": 8
-        },
-        {
-            "name": "TYPETEXT",
-            "value": 0
-        },
-        {
-            "name": "TYPEVIDEO",
-            "value": 6
         },
         {
             "name": "UPLOAD_ERR_EXTENSION",

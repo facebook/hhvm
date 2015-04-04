@@ -2,50 +2,6 @@
     "preamble": "",
     "consts": [
         {
-            "name": "CONNECTION_ABORTED",
-            "value": 1
-        },
-        {
-            "name": "CONNECTION_NORMAL",
-            "value": 0
-        },
-        {
-            "name": "CONNECTION_TIMEOUT",
-            "value": 2
-        },
-        {
-            "name": "CREDITS_ALL",
-            "value": 4294967295
-        },
-        {
-            "name": "CREDITS_DOCS",
-            "value": 16
-        },
-        {
-            "name": "CREDITS_FULLPAGE",
-            "value": 32
-        },
-        {
-            "name": "CREDITS_GENERAL",
-            "value": 2
-        },
-        {
-            "name": "CREDITS_GROUP",
-            "value": 1
-        },
-        {
-            "name": "CREDITS_MODULES",
-            "value": 8
-        },
-        {
-            "name": "CREDITS_QA",
-            "value": 64
-        },
-        {
-            "name": "CREDITS_SAPI",
-            "value": 4
-        },
-        {
             "name": "CRYPT_BLOWFISH",
             "value": 1
         },

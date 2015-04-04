@@ -1266,6 +1266,14 @@ void StandardExtension::initOptions() {
     makeStaticString(RuntimeOption::ExecutionMode)
   );
 
+#define REGINT(n, v) Native::registerConstant<KindOfInt64> \
+                       (makeStaticString("" #n), v)
+  REGINT(CLOCK_MONOTONIC, 1);
+  REGINT(CLOCK_PROCESS_CPUTIME_ID, 2);
+  REGINT(CLOCK_REALTIME, 0);
+  REGINT(CLOCK_THREAD_CPUTIME_ID, 3);
+#undef REGINT
+
   loadSystemlib("std_options");
 }
 

@@ -2264,6 +2264,7 @@ public:
 
     REGINT(CODESET, 14);
     REGINT(ALT_DIGITS, 13119);
+    REGINT("CHAR_MAX", 127);
 #undef REGINT
 
     loadSystemlib();

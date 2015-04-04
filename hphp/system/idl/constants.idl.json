@@ -2,18 +2,6 @@
     "preamble": "",
     "consts": [
         {
-            "name": "CASE_LOWER",
-            "value": 0
-        },
-        {
-            "name": "CASE_UPPER",
-            "value": 1
-        },
-        {
-            "name": "CHAR_MAX",
-            "value": 127
-        },
-        {
             "name": "CLOCK_MONOTONIC",
             "value": 1
         },
@@ -44,14 +32,6 @@
         {
             "name": "CONNECTION_TIMEOUT",
             "value": 2
-        },
-        {
-            "name": "COUNT_NORMAL",
-            "value": 0
-        },
-        {
-            "name": "COUNT_RECURSIVE",
-            "value": 1
         },
         {
             "name": "CP_MOVE",
@@ -1558,38 +1538,6 @@
         {
             "name": "SORTTO",
             "value": 4
-        },
-        {
-            "name": "SORT_ASC",
-            "value": 4
-        },
-        {
-            "name": "SORT_DESC",
-            "value": 3
-        },
-        {
-            "name": "SORT_FLAG_CASE",
-            "value": 8
-        },
-        {
-            "name": "SORT_LOCALE_STRING",
-            "value": 5
-        },
-        {
-            "name": "SORT_NATURAL",
-            "value": 6
-        },
-        {
-            "name": "SORT_NUMERIC",
-            "value": 1
-        },
-        {
-            "name": "SORT_REGULAR",
-            "value": 0
-        },
-        {
-            "name": "SORT_STRING",
-            "value": 2
         },
         {
             "name": "SO_FREE",

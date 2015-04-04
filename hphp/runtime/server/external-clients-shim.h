@@ -14,47 +14,40 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HOST_HEALTH_MONITOR_TYPES_H_
-#define incl_HPHP_HOST_HEALTH_MONITOR_TYPES_H_
+#ifndef incl_HPHP_HEALTH_MONITOR_EXTERNAL_CLIENT_SHIM_H_
+#define incl_HPHP_HEALTH_MONITOR_EXTERNAL_CLIENT_SHIM_H_
 
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/util/hdf.h"
+#include "hphp/runtime/ext/apache/ext_apache.h"
+#include "hphp/runtime/server/server-stats.h"
+#include "hphp/util/health-monitor-types.h"
 
 namespace HPHP {
 
-/*
- * The enum type for describing various system health level.
- * The system health monitor will expose one of the listed
- * health level.
- */
-enum class HealthLevel {
-  Bold = 0,
-  Moderate = 1,
-  Cautious = 2,
-  NoMore = 3,
-  BackOff = 4
-};
+struct ExternalClientShim : IHostHealthObserver {
+  ExternalClientShim():
+    m_status(HealthLevel::Bold) {
+  }
+  virtual void notifyNewStatus(HealthLevel newStatus) final {
+    m_status = newStatus;
 
-/*
- * The interface of specific system metrics used by the system
- * health monitor.
- */
-struct IHealthMonitorMetric {
-  virtual ~IHealthMonitorMetric() { } // make compiler happy
-  virtual HealthLevel evaluate() = 0;
-  virtual bool enabled() = 0;
-  virtual void setConfig(const IniSettingMap&, const Hdf&) = 0;
-};
+    // Push (asynchronuously if necessary) new system health status to
+    // external clients, i.e., fb303, ODS, HealthMon, etc.
 
-/*
- * The interface for observers which subscribe the output of
- * the system health monitor.
- */
-struct IHostHealthObserver {
-  virtual ~IHostHealthObserver() { } // make compiler happy
-  virtual void notifyNewStatus(HealthLevel newStatus) = 0;
-  virtual HealthLevel getStatus() = 0;
+    // push to ServerStats
+    ServerStats::SetServerHealthLevel(m_status);
+
+    // push to ApacheExtension
+    ApacheExtension::UpdateHealthLevel(m_status);
+
+  }
+
+  virtual HealthLevel getStatus() {
+    return m_status;
+  }
+ private:
+  HealthLevel m_status;
 };
 
 }
+
 #endif

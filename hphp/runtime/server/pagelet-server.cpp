@@ -15,10 +15,14 @@
 */
 
 #include "hphp/runtime/server/pagelet-server.h"
+
+#include <folly/experimental/Singleton.h>
+
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
+#include "hphp/runtime/server/host-health-monitor.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -353,6 +357,9 @@ void PageletServer::Restart() {
          RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds,
          RuntimeOption::PageletServerThreadDropStack,
          nullptr);
+      auto monitor = folly::Singleton<HostHealthMonitor>::get();
+      monitor->subscribe(s_dispatcher);
+      monitor->start();
     }
     Logger::Info("pagelet server started");
     s_dispatcher->start();

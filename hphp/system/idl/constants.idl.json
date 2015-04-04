@@ -386,10 +386,6 @@
             "value": 0
         },
         {
-            "name": "FALSE",
-            "value": false
-        },
-        {
             "name": "FT_INTERNAL",
             "value": 8
         },
@@ -1734,10 +1730,6 @@
         {
             "name": "THOUSEP",
             "value": 65537
-        },
-        {
-            "name": "TRUE",
-            "value": true
         },
         {
             "name": "TYPEAPPLICATION",

@@ -2,14 +2,6 @@
     "preamble": "",
     "consts": [
         {
-            "name": "ALT_DIGITS",
-            "value": 131119
-        },
-        {
-            "name": "APACHE_MAP",
-            "value": 200
-        },
-        {
             "name": "CASE_LOWER",
             "value": 0
         },
@@ -1784,14 +1776,6 @@
             "value": 6
         },
         {
-            "name": "UNKNOWN_TYPE",
-            "value": 999998
-        },
-        {
-            "name": "UPLOAD_ERR_CANT_WRITE",
-            "value": 7
-        },
-        {
             "name": "UPLOAD_ERR_EXTENSION",
             "value": 8
         },
@@ -1822,22 +1806,6 @@
         {
             "name": "WNOHANG",
             "value": 1
-        },
-        {
-            "name": "WSDL_CACHE_BOTH",
-            "value": 3
-        },
-        {
-            "name": "WSDL_CACHE_DISK",
-            "value": 1
-        },
-        {
-            "name": "WSDL_CACHE_MEMORY",
-            "value": 2
-        },
-        {
-            "name": "WSDL_CACHE_NONE",
-            "value": 0
         },
         {
             "name": "WUNTRACED",
@@ -2090,202 +2058,6 @@
         {
             "name": "XML_TEXT_NODE",
             "value": 3
-        },
-        {
-            "name": "XSD_1999_NAMESPACE",
-            "value": "http:\/\/www.w3.org\/1999\/XMLSchema"
-        },
-        {
-            "name": "XSD_1999_TIMEINSTANT",
-            "value": 401
-        },
-        {
-            "name": "XSD_ANYTYPE",
-            "value": 145
-        },
-        {
-            "name": "XSD_ANYURI",
-            "value": 117
-        },
-        {
-            "name": "XSD_ANYXML",
-            "value": 147
-        },
-        {
-            "name": "XSD_BASE64BINARY",
-            "value": 116
-        },
-        {
-            "name": "XSD_BOOLEAN",
-            "value": 102
-        },
-        {
-            "name": "XSD_BYTE",
-            "value": 137
-        },
-        {
-            "name": "XSD_DATE",
-            "value": 109
-        },
-        {
-            "name": "XSD_DATETIME",
-            "value": 107
-        },
-        {
-            "name": "XSD_DECIMAL",
-            "value": 103
-        },
-        {
-            "name": "XSD_DOUBLE",
-            "value": 105
-        },
-        {
-            "name": "XSD_DURATION",
-            "value": 106
-        },
-        {
-            "name": "XSD_ENTITIES",
-            "value": 130
-        },
-        {
-            "name": "XSD_ENTITY",
-            "value": 129
-        },
-        {
-            "name": "XSD_FLOAT",
-            "value": 104
-        },
-        {
-            "name": "XSD_GDAY",
-            "value": 113
-        },
-        {
-            "name": "XSD_GMONTH",
-            "value": 114
-        },
-        {
-            "name": "XSD_GMONTHDAY",
-            "value": 112
-        },
-        {
-            "name": "XSD_GYEAR",
-            "value": 111
-        },
-        {
-            "name": "XSD_GYEARMONTH",
-            "value": 110
-        },
-        {
-            "name": "XSD_HEXBINARY",
-            "value": 115
-        },
-        {
-            "name": "XSD_ID",
-            "value": 126
-        },
-        {
-            "name": "XSD_IDREF",
-            "value": 127
-        },
-        {
-            "name": "XSD_IDREFS",
-            "value": 128
-        },
-        {
-            "name": "XSD_INT",
-            "value": 135
-        },
-        {
-            "name": "XSD_INTEGER",
-            "value": 131
-        },
-        {
-            "name": "XSD_LANGUAGE",
-            "value": 122
-        },
-        {
-            "name": "XSD_LONG",
-            "value": 134
-        },
-        {
-            "name": "XSD_NAME",
-            "value": 124
-        },
-        {
-            "name": "XSD_NAMESPACE",
-            "value": "http:\/\/www.w3.org\/2001\/XMLSchema"
-        },
-        {
-            "name": "XSD_NCNAME",
-            "value": 125
-        },
-        {
-            "name": "XSD_NEGATIVEINTEGER",
-            "value": 133
-        },
-        {
-            "name": "XSD_NMTOKEN",
-            "value": 123
-        },
-        {
-            "name": "XSD_NMTOKENS",
-            "value": 144
-        },
-        {
-            "name": "XSD_NONNEGATIVEINTEGER",
-            "value": 138
-        },
-        {
-            "name": "XSD_NONPOSITIVEINTEGER",
-            "value": 132
-        },
-        {
-            "name": "XSD_NORMALIZEDSTRING",
-            "value": 120
-        },
-        {
-            "name": "XSD_NOTATION",
-            "value": 119
-        },
-        {
-            "name": "XSD_POSITIVEINTEGER",
-            "value": 143
-        },
-        {
-            "name": "XSD_QNAME",
-            "value": 118
-        },
-        {
-            "name": "XSD_SHORT",
-            "value": 136
-        },
-        {
-            "name": "XSD_STRING",
-            "value": 101
-        },
-        {
-            "name": "XSD_TIME",
-            "value": 108
-        },
-        {
-            "name": "XSD_TOKEN",
-            "value": 121
-        },
-        {
-            "name": "XSD_UNSIGNEDBYTE",
-            "value": 142
-        },
-        {
-            "name": "XSD_UNSIGNEDINT",
-            "value": 140
-        },
-        {
-            "name": "XSD_UNSIGNEDLONG",
-            "value": 139
-        },
-        {
-            "name": "XSD_UNSIGNEDSHORT",
-            "value": 141
         },
         {
             "name": "ZEND_THREAD_SAFE",

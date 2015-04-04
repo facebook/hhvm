@@ -2263,6 +2263,7 @@ public:
     REGINT(NOEXPR, 327681);
 
     REGINT(CODESET, 14);
+    REGINT(ALT_DIGITS, 13119);
 #undef REGINT
 
     loadSystemlib();

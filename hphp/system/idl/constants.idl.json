@@ -2,88 +2,8 @@
     "preamble": "",
     "consts": [
         {
-            "name": "ABDAY_1",
-            "value": 131072
-        },
-        {
-            "name": "ABDAY_2",
-            "value": 131073
-        },
-        {
-            "name": "ABDAY_3",
-            "value": 131074
-        },
-        {
-            "name": "ABDAY_4",
-            "value": 131075
-        },
-        {
-            "name": "ABDAY_5",
-            "value": 131076
-        },
-        {
-            "name": "ABDAY_6",
-            "value": 131077
-        },
-        {
-            "name": "ABDAY_7",
-            "value": 131078
-        },
-        {
-            "name": "ABMON_1",
-            "value": 131086
-        },
-        {
-            "name": "ABMON_10",
-            "value": 131095
-        },
-        {
-            "name": "ABMON_11",
-            "value": 131096
-        },
-        {
-            "name": "ABMON_12",
-            "value": 131097
-        },
-        {
-            "name": "ABMON_2",
-            "value": 131087
-        },
-        {
-            "name": "ABMON_3",
-            "value": 131088
-        },
-        {
-            "name": "ABMON_4",
-            "value": 131089
-        },
-        {
-            "name": "ABMON_5",
-            "value": 131090
-        },
-        {
-            "name": "ABMON_6",
-            "value": 131091
-        },
-        {
-            "name": "ABMON_7",
-            "value": 131092
-        },
-        {
-            "name": "ABMON_8",
-            "value": 131093
-        },
-        {
-            "name": "ABMON_9",
-            "value": 131094
-        },
-        {
             "name": "ALT_DIGITS",
             "value": 131119
-        },
-        {
-            "name": "AM_STR",
-            "value": 131110
         },
         {
             "name": "APACHE_MAP",
@@ -120,10 +40,6 @@
         {
             "name": "CL_EXPUNGE",
             "value": 32768
-        },
-        {
-            "name": "CODESET",
-            "value": 14
         },
         {
             "name": "CONNECTION_ABORTED",
@@ -184,10 +100,6 @@
         {
             "name": "CREDITS_SAPI",
             "value": 4
-        },
-        {
-            "name": "CRNCYSTR",
-            "value": 262159
         },
         {
             "name": "CRYPT_BLOWFISH",
@@ -252,34 +164,6 @@
         {
             "name": "DATE_W3C",
             "value": "Y-m-d\\TH:i:sP"
-        },
-        {
-            "name": "DAY_1",
-            "value": 131079
-        },
-        {
-            "name": "DAY_2",
-            "value": 131080
-        },
-        {
-            "name": "DAY_3",
-            "value": 131081
-        },
-        {
-            "name": "DAY_4",
-            "value": 131082
-        },
-        {
-            "name": "DAY_5",
-            "value": 131083
-        },
-        {
-            "name": "DAY_6",
-            "value": 131084
-        },
-        {
-            "name": "DAY_7",
-            "value": 131085
         },
         {
             "name": "DEBUG_LOG_AGENT",
@@ -454,14 +338,6 @@
             "value": 4
         },
         {
-            "name": "D_FMT",
-            "value": 131113
-        },
-        {
-            "name": "D_T_FMT",
-            "value": 131112
-        },
-        {
             "name": "ENC7BIT",
             "value": 0
         },
@@ -512,22 +388,6 @@
         {
             "name": "ENT_FB_UTF8_ONLY",
             "value": 65536
-        },
-        {
-            "name": "ERA",
-            "value": 131116
-        },
-        {
-            "name": "ERA_D_FMT",
-            "value": 131118
-        },
-        {
-            "name": "ERA_D_T_FMT",
-            "value": 131120
-        },
-        {
-            "name": "ERA_T_FMT",
-            "value": 131121
         },
         {
             "name": "EXIF_USE_MBSTRING",
@@ -1160,54 +1020,6 @@
         {
             "name": "MCC_ACCESSPOINT_UP",
             "value": 1
-        },
-        {
-            "name": "MON_1",
-            "value": 131098
-        },
-        {
-            "name": "MON_10",
-            "value": 131107
-        },
-        {
-            "name": "MON_11",
-            "value": 131108
-        },
-        {
-            "name": "MON_12",
-            "value": 131109
-        },
-        {
-            "name": "MON_2",
-            "value": 131099
-        },
-        {
-            "name": "MON_3",
-            "value": 131100
-        },
-        {
-            "name": "MON_4",
-            "value": 131101
-        },
-        {
-            "name": "MON_5",
-            "value": 131102
-        },
-        {
-            "name": "MON_6",
-            "value": 131103
-        },
-        {
-            "name": "MON_7",
-            "value": 131104
-        },
-        {
-            "name": "MON_8",
-            "value": 131105
-        },
-        {
-            "name": "MON_9",
-            "value": 131106
         },
         {
             "name": "MSG_EAGAIN",
@@ -2474,10 +2286,6 @@
         {
             "name": "XSD_UNSIGNEDSHORT",
             "value": 141
-        },
-        {
-            "name": "YESEXPR",
-            "value": 327680
         },
         {
             "name": "ZEND_THREAD_SAFE",

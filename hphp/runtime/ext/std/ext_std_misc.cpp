@@ -177,6 +177,7 @@ void StandardExtension::initMisc() {
     Native::registerConstant<KindOfBoolean>(makeStaticString("true"), true);
     Native::registerConstant<KindOfBoolean>(makeStaticString("false"), false);
     Native::registerConstant<KindOfNull>(makeStaticString("null"));
+    Native::registerConstant<KindOfNull>(makeStaticString("NULL"));
     loadSystemlib("std_misc");
   }
 

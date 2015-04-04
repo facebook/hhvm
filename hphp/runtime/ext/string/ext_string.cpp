@@ -2185,6 +2185,86 @@ public:
     HHVM_FE(soundex);
     HHVM_FE(metaphone);
 
+#define ABDAY(v) Native::registerConstant<KindOfInt64> \
+                  (makeStaticString("ABDAY_" #v), 131071 + v)
+    ABDAY(1);
+    ABDAY(2);
+    ABDAY(3);
+    ABDAY(4);
+    ABDAY(5);
+    ABDAY(6);
+    ABDAY(7);
+#undef ABDAY
+
+#define DAY(v) Native::registerConstant<KindOfInt64> \
+                  (makeStaticString("DAY_" #v), 131078 + v)
+    DAY(1);
+    DAY(2);
+    DAY(3);
+    DAY(4);
+    DAY(5);
+    DAY(6);
+    DAY(7);
+#undef DAY
+
+#define ABMONTH(v) Native::registerConstant<KindOfInt64> \
+                  (makeStaticString("ABMON_" #v), 131085 + v)
+    ABMONTH(1);
+    ABMONTH(2);
+    ABMONTH(3);
+    ABMONTH(4);
+    ABMONTH(5);
+    ABMONTH(6);
+    ABMONTH(7);
+    ABMONTH(8);
+    ABMONTH(9);
+    ABMONTH(10);
+    ABMONTH(11);
+    ABMONTH(12);
+#undef ABMONTH
+
+#define MONTH(v) Native::registerConstant<KindOfInt64> \
+                  (makeStaticString("MON_" #v), 131097 + v)
+    MONTH(1);
+    MONTH(2);
+    MONTH(3);
+    MONTH(4);
+    MONTH(5);
+    MONTH(6);
+    MONTH(7);
+    MONTH(8);
+    MONTH(9);
+    MONTH(10);
+    MONTH(11);
+    MONTH(12);
+#undef MONTH
+
+#define REGINT(n, v) Native::registerConstant<KindOfInt64> \
+                       (makeStaticString("" #n), v)
+    REGINT(AM_STR, 131110);
+    REGINT(PM_STR, 131111);
+    REGINT(D_T_FMT, 131112);
+    REGINT(D_FMT, 131113);
+    REGINT(T_FMT, 131114);
+    REGINT(T_FMT_AMPM, 131115);
+    REGINT(ERA, 131116);
+    REGINT(ERA_D_FMT, 131118);
+    REGINT(ERA_D_T_FMT, 131120);
+    REGINT(ERA_T_FMT, 131121);
+
+    REGINT(CURRENCY_SYMBOL, 262159);
+    REGINT(CRNCYSTR, 262159);
+    REGINT(DECIMAL_POINT, 65536);
+    REGINT(RADIXCHAR, 65536);
+    REGINT(THOUSANDS_SEP, 65537);
+    REGINT(THOUSEP, 65537);
+
+    REGINT(YESEXPR, 327680);
+    REGINT(NOEXPR, 327681);
+
+    REGINT(CODESET, 14);
+#undef REGINT
+
     loadSystemlib();
   }
 } s_string_extension;

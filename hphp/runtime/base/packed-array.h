@@ -51,6 +51,7 @@ struct MixedArray;
  * details.
  */
 struct PackedArray {
+  static constexpr uint32_t MaxSize = 0xFFFFFFFFul;
   static void Release(ArrayData*);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t ki);
   static const TypedValue* NvGetStr(const ArrayData*, const StringData*);

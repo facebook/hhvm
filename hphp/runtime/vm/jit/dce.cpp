@@ -153,6 +153,7 @@ bool canDCE(IRInstruction* inst) {
   case NewArray:
   case NewMixedArray:
   case NewLikeArray:
+  case LdPackedArrayElemAddr:
   case NewCol:
   case FreeActRec:
   case DefInlineFP:
@@ -456,9 +457,6 @@ bool canDCE(IRInstruction* inst) {
   case ProfilePackedArray:
   case ProfileStructArray:
   case CheckPackedArrayBounds:
-  case CheckTypePackedArrayElem:
-  case IsPackedArrayElemNull:
-  case LdPackedArrayElem:
   case LdStructArrayElem:
   case LdVectorSize:
   case VectorDoCow:

@@ -52,7 +52,7 @@ namespace jit {
  * union of that location with "inside of a Ref".  These classify PtrTo* types
  * into some categories that cannot possibly alias, without any smarter
  * analysis needed to prove it.  There is also a union for the various
- * locations things can point after a fully generic member operation (see Mem
+ * locations things can point after a fully generic member operation (see Memb
  * below).
  *
  * The reason we have the category "Ref|Foo" for each of these Foos is that it
@@ -78,7 +78,7 @@ enum class Ptr : uint8_t {
   SProp   = 0x06,
   MIS     = 0x07,
   /*
-   * Mem is a number of possible locations that result from the more generic
+   * Memb is a number of possible locations that result from the more generic
    * types of member operations.
    *
    * This is a pointer to something living either an object property, an array
@@ -238,8 +238,8 @@ Ptr remove_ref(Ptr);
   IRTP(PtrToSPropInit,   SProp, kInit << kPtrShift)               \
   IRTP(PtrToMISGen,        MIS, kGen << kPtrShift)                \
   IRTP(PtrToMISInit,       MIS, kInit << kPtrShift)               \
-  IRTP(PtrToMemGen,       Memb, kGen << kPtrShift)                \
-  IRTP(PtrToMemInit,      Memb, kInit << kPtrShift)               \
+  IRTP(PtrToMembGen,      Memb, kGen << kPtrShift)                \
+  IRTP(PtrToMembInit,     Memb, kInit << kPtrShift)               \
   IRTP(PtrToClsInitGen,ClsInit, kGen << kPtrShift)                \
   IRTP(PtrToClsCnsGen,  ClsCns, kGen << kPtrShift)                \
                                                                   \

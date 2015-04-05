@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_HHVM_HHIR_SIMPLIFIER_H_
 #define incl_HPHP_HHVM_HHIR_SIMPLIFIER_H_
 
+#include <folly/Optional.h>
+
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -101,11 +103,27 @@ bool canSimplifyAssertType(const IRInstruction* inst,
 void copyProp(IRInstruction*);
 
 /*
- * Checks whether a packed array bounds check is unnecessary.  We share this
- * logic with gen time so that cases that are visible immediately don't require
- * generating IR with control flow that we have to clean up later.
+ * Statically checks whether a packed array access is within bounds. We share
+ * this logic with gen time so that cases that are visible immediately don't
+ * require generating IR with control flow that we have to clean up later.
+ *
+ * @return: no value if runtime checking is necessary, true if guaranteed within
+ * bound, false if always out of bound.
  */
-bool packedArrayBoundsCheckUnnecessary(Type arrayType, int64_t key);
+folly::Optional<bool>
+packedArrayBoundsStaticCheck(Type arrayType, int64_t key);
+
+
+/*
+ * Get the type of `arr[idx]` for a packed array, considering constness,
+ * staticness, and RAT types.
+ *
+ * Note that this function does not require the existence of `arr[idx]`. If we
+ * can statically determine that the access is out of bound, InitNull is
+ * returned. Otherwise we return a type `t`, so that when the access is within
+ * bounds, `arr[idx].isA(t)` holds.
+ */
+Type packedArrayElemType(SSATmp* arr, SSATmp* idx);
 
 //////////////////////////////////////////////////////////////////////
 

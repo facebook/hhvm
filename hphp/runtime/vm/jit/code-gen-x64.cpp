@@ -3570,94 +3570,30 @@ void CodeGenerator::cgCheckPackedArrayBounds(IRInstruction* inst) {
   v << jcc{CC_BE, sf, {label(inst->next()), label(inst->taken())}};
 }
 
-void CodeGenerator::cgLdPackedArrayElem(IRInstruction* inst) {
-  auto const idx = inst->src(1);
-  auto const rArr = srcLoc(inst, 0).reg();
-  auto const rIdx = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-
-  if (idx->hasConstVal()) {
-    auto const offset = sizeof(ArrayData) + idx->intVal() * sizeof(TypedValue);
-    if (deltaFits(offset, sz::dword)) {
-      emitLoad(inst->dst(), dstLoc(inst, 0), rArr[offset]);
-      return;
-    }
-  }
-
-  /*
-   * gcc 4.8 did something more like:
-   *
-   *    lea 1(%base), %scratch   ; sizeof(ArrayData) == sizeof(TypedValue)
-   *    salq $4, %scratch
-   *    movq (%base,%scratch,1), %r1
-   *    movzxb 8(%base,%scratch,1), %r2
-   *
-   * Using this way for now (which is more like what clang produced)
-   * just because it was 2 bytes smaller.
-   */
-  static_assert(sizeof(TypedValue) == 16, "");
-  auto scaled_idx = v.makeReg();
-  v << shlqi{0x4, rIdx, scaled_idx, v.makeReg()}; // multiply by 16
-  emitLoad(inst->dst(), dstLoc(inst, 0), rArr[scaled_idx + sizeof(ArrayData)]);
-}
-
-void CodeGenerator::cgCheckTypePackedArrayElem(IRInstruction* inst) {
-  auto const idx  = inst->src(1);
-  auto const rArr = srcLoc(inst, 0).reg();
-  auto const rIdx = srcLoc(inst, 1).reg();
-  auto& v = vmain();
-
-  if (idx->hasConstVal()) {
-    auto const offset = sizeof(ArrayData) + idx->intVal() * sizeof(TypedValue);
-    if (deltaFits(offset, sz::dword)) {
-      emitTypeCheck(
-        inst->typeParam(),
-        rArr[offset + TVOFF(m_type)],
-        rArr[offset + TVOFF(m_data)],
-        inst->taken()
-      );
-      return;
-    }
-  }
-
-  static_assert(sizeof(TypedValue) == 16, "");
-  auto scaled_idx = v.makeReg();
-  v << shlqi{0x4, rIdx, scaled_idx, v.makeReg()}; // multiply by 16
-  emitTypeCheck(
-    inst->typeParam(),
-    rArr[scaled_idx + TVOFF(m_type)],
-    rArr[scaled_idx + TVOFF(m_data)],
-    inst->taken()
-  );
-}
-
-void CodeGenerator::cgIsPackedArrayElemNull(IRInstruction* inst) {
+void CodeGenerator::cgLdPackedArrayElemAddr(IRInstruction* inst) {
   auto const idx = inst->src(1);
   auto const rArr = srcLoc(inst, 0).reg();
   auto const rIdx = srcLoc(inst, 1).reg();
   auto const dst = dstLoc(inst, 0).reg();
   auto& v = vmain();
-  auto const sf = v.makeReg();
 
   if (idx->hasConstVal()) {
-    auto elem_offset = sizeof(ArrayData) + idx->intVal() * sizeof(TypedValue);
-    auto type_offset = elem_offset + TVOFF(m_type);
-    if (deltaFits(type_offset, sz::dword)) {
-      emitCmpTVType(v, sf, KindOfNull, rArr[type_offset]);
-      goto do_check;
+    auto const offset = sizeof(ArrayData) + idx->intVal() * sizeof(TypedValue);
+    if (deltaFits(offset, sz::dword)) {
+      v << lea{rArr[offset], dst};
+      return;
     }
   }
 
-  {
-    static_assert(sizeof(TypedValue) == 16, "");
-    auto scaled_idx = v.makeReg();
-    auto type_offset = sizeof(ArrayData) + TVOFF(m_type);
-    v << shlqi{0x4, rIdx, scaled_idx, v.makeReg()};
-    emitCmpTVType(v, sf, KindOfNull, rArr[scaled_idx + type_offset]);
-  }
-
-do_check:
-  v << setcc{CC_NE, sf, dst};
+  static_assert(sizeof(TypedValue) == 16 && sizeof(ArrayData) == 16, "");
+  /*
+   * This computes `rArr + rIdx * sizeof(TypedValue) + sizeof(ArrayData)`. The
+   * logic of `scaaledIdx * 16` is split in the following two instructions, in
+   * order to save a byte in the shl instruction.
+   */
+  auto scaledIdx = v.makeReg();
+  v << shlli{1, rIdx, scaledIdx, v.makeReg()};
+  v << lea{Vptr{rArr, scaledIdx, 8, 16}, dst};
 }
 
 void CodeGenerator::cgCheckBounds(IRInstruction* inst) {

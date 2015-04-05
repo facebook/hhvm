@@ -254,7 +254,6 @@ Flags handle_general_effects(Local& env,
                              GeneralEffects m) {
   switch (inst.op()) {
   case CheckTypeMem:
-  case CheckTypePackedArrayElem:
   case CheckLoc:
   case CheckStk:
     if (auto const tloc = find_tracked(env, inst, m.loads)) {
@@ -434,7 +433,6 @@ void reduce_inst(Local& env, IRInstruction& inst, const FReducible& flags) {
 
   switch (inst.op()) {
   case CheckTypeMem:
-  case CheckTypePackedArrayElem:
   case CheckLoc:
   case CheckStk:
     reduce_to(CheckType, inst.typeParam());

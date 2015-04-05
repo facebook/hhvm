@@ -247,7 +247,7 @@ Type allocObjReturn(const IRInstruction* inst) {
 }
 
 Type arrElemReturn(const IRInstruction* inst) {
-  assertx(inst->is(LdPackedArrayElem, LdStructArrayElem, ArrayGet));
+  assertx(inst->is(LdStructArrayElem, ArrayGet));
   assertx(!inst->hasTypeParam() || inst->typeParam() <= Type::Gen);
 
   auto resultType = inst->hasTypeParam() ? inst->typeParam() : Type::Gen;

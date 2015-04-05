@@ -1289,18 +1289,38 @@ void numberStackInputs(MTS& env) {
 
 SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
   assertx(base->isA(Type::Arr) &&
-         base->type().arrSpec().kind() == ArrayData::kPackedKind);
+          base->type().arrSpec().kind() == ArrayData::kPackedKind &&
+          key->isA(Type::Int));
 
   auto doLdElem = [&] {
-    auto res = gen(env, LdPackedArrayElem, base, key);
+    auto const type = packedArrayElemType(base, key).ptr(Ptr::Arr);
+    auto addr = gen(env, LdPackedArrayElemAddr, type, base, key);
+    auto res = gen(env, LdMem, type.deref(), addr);
     auto unboxed = unbox(env, res, nullptr);
     gen(env, IncRef, unboxed);
     return unboxed;
   };
 
-  if (key->hasConstVal() &&
-      packedArrayBoundsCheckUnnecessary(base->type(), key->intVal())) {
-    return doLdElem();
+  if (key->hasConstVal()) {
+    int64_t idx = key->intVal();
+    if (base->hasConstVal()) {
+      const ArrayData* arr = base->arrVal();
+      if (idx < 0 || idx >= arr->size()) {
+        gen(env, RaiseArrayIndexNotice, key);
+        return cns(env, Type::InitNull);
+      }
+      auto const value = arr->nvGet(idx);
+      return cns(env, *value);
+    }
+
+    auto const check = packedArrayBoundsStaticCheck(base->type(), idx);
+    if (check.hasValue()) {
+      if (check.value()) {
+        return doLdElem();
+      }
+      gen(env, RaiseArrayIndexNotice, key);
+      return cns(env, Type::InitNull);
+    }
   }
 
   return cond(
@@ -1480,6 +1500,32 @@ void emitPairGet(MTS& env, SSATmp* key) {
 void emitPackedArrayIsset(MTS& env) {
   assertx(env.base.type.arrSpec().kind() == ArrayData::kPackedKind);
   auto const key = getKey(env);
+
+  auto const type = packedArrayElemType(env.base.value, key);
+  if (type <= Type::Null) {             // not set, or null
+    env.result = cns(env, false);
+    return;
+  }
+
+  if (key->hasConstVal()) {
+    auto const idx = key->intVal();
+    auto const check = packedArrayBoundsStaticCheck(env.base.type, idx);
+    if (check.hasValue()) {
+      if (check.value()) {
+        if (!type.maybe(Type::Null)) {
+          env.result = cns(env, true);
+          return;
+        }
+        auto const elemAddr = gen(env, LdPackedArrayElemAddr,
+                                  type.ptr(Ptr::Arr), env.base.value, key);
+        env.result = gen(env, IsNTypeMem, Type::Null, elemAddr);
+      } else {
+        env.result = cns(env, false);
+      }
+      return;
+    }
+  }
+
   env.result = cond(
     env,
     0,
@@ -1487,7 +1533,9 @@ void emitPackedArrayIsset(MTS& env) {
       gen(env, CheckPackedArrayBounds, taken, env.base.value, key);
     },
     [&] { // Next:
-      return gen(env, IsPackedArrayElemNull, env.base.value, key);
+      auto const elemAddr = gen(env, LdPackedArrayElemAddr,
+                                type.ptr(Ptr::Arr), env.base.value, key);
+      return gen(env, IsNTypeMem, Type::Null, elemAddr);
     },
     [&] { // Taken:
       return cns(env, false);

@@ -51,8 +51,7 @@ bool shouldHHIRRelaxGuards() {
 #define DBoxPtr        return false;
 #define DAllocObj      return false; // fixed type from ExtraData
 #define DArrPacked     return false; // fixed type
-#define DArrElem       assertx(inst->is(LdPackedArrayElem, LdStructArrayElem, \
-                                       ArrayGet));                           \
+#define DArrElem       assertx(inst->is(LdStructArrayElem, ArrayGet));    \
                          return typeMightRelax(inst->src(0));
 #define DThis          return false; // fixed type from ctx class
 #define DCtx           return false;

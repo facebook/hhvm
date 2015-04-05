@@ -505,7 +505,6 @@ bool isRawLoad(const IRInstruction* inst) {
     case LdStk:
     case LdElem:
     case LdContField:
-    case LdPackedArrayElem:
     case LdLocPseudoMain:
       return true;
 

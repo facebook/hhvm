@@ -1782,21 +1782,10 @@ SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
   if (!idx->hasConstVal()) return nullptr;
 
   auto const idxVal = (uint64_t)idx->intVal();
-  if (idxVal >= 0xffffffffull) {
-    // ArrayData can't hold more than 2^32 - 1 elements, so this is
-    // always going to fail.
+  auto const check = packedArrayBoundsStaticCheck(array->type(), idxVal);
+  if (check.hasValue()) {
+    if (check.value()) return gen(env, Nop);
     return gen(env, Jmp, inst->taken());
-  }
-
-  if (array->hasConstVal(Type::Arr)) {
-    if (idxVal >= array->arrVal()->size()) {
-      return gen(env, Jmp, inst->taken());
-    }
-    return gen(env, Nop);
-  }
-
-  if (packedArrayBoundsCheckUnnecessary(array->type(), idxVal)) {
-    return gen(env, Nop);
   }
 
   return nullptr;
@@ -1824,11 +1813,6 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
     return arr->arrVal()->nvGet(idx->strVal());
   }();
   return value ? cns(env, *value) : nullptr;
-}
-
-SSATmp* simplifyLdPackedArrayElem(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->hasConstVal()) return arrIntKeyImpl(env, inst);
-  return nullptr;
 }
 
 SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
@@ -2029,7 +2013,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CastCtxThis)
   X(LdObjClass)
   X(LdObjInvoke)
-  X(LdPackedArrayElem)
   X(Mov)
   X(TakeStk)
   X(UnboxPtr)
@@ -2282,15 +2265,67 @@ void copyProp(IRInstruction* inst) {
   }
 }
 
-bool packedArrayBoundsCheckUnnecessary(Type arrayType, int64_t idxVal) {
+folly::Optional<bool>
+packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
+  if (idxVal < 0 || idxVal > PackedArray::MaxSize) return false;
+
+  if (arrayType.hasConstVal()) {
+    return idxVal < arrayType.arrVal()->size();
+  }
+
   auto const at = arrayType.arrSpec().type();
-  if (!at) return false;
+  if (!at) return folly::none;
+
   using A = RepoAuthType::Array;
   switch (at->tag()) {
   case A::Tag::Packed:
-    return idxVal < at->size() && at->emptiness() == A::Empty::No;
+    if (idxVal < at->size() && at->emptiness() == A::Empty::No) {
+      return true;
+    }
   case A::Tag::PackedN:
-    return idxVal == 0 && at->emptiness() == A::Empty::No;
+    if (idxVal == 0 && at->emptiness() == A::Empty::No) {
+      return true;
+    }
+  }
+  return folly::none;
+}
+
+Type packedArrayElemType(SSATmp* arr, SSATmp* idx) {
+  assertx(arr->isA(Type::Arr) &&
+          arr->type().arrSpec().kind() == ArrayData::kPackedKind &&
+          idx->isA(Type::Int));
+
+  if (arr->hasConstVal() && idx->hasConstVal()) {
+    auto const idxVal = idx->intVal();
+    if (idxVal >= 0 && idxVal < arr->arrVal()->size()) {
+      return Type(arr->arrVal()->nvGet(idxVal)->m_type);
+    }
+    return Type::InitNull;
+  }
+
+  Type t = arr->isA(Type::StaticArr) ? Type::InitCell : Type::Gen;
+
+  auto const at = arr->type().arrSpec().type();
+  if (!at) return t;
+
+  switch (at->tag()) {
+    case RepoAuthType::Array::Tag::Packed:
+    {
+      if (idx->hasConstVal(Type::Int)) {
+        auto const idxVal = idx->intVal();
+        if (idxVal >= 0 && idxVal < at->size()) {
+          return typeFromRAT(at->packedElem(idxVal)) & t;
+        }
+        return Type::InitNull;
+      }
+      Type elemType = Type::Bottom;
+      for (uint32_t i = 0; i < at->size(); ++i) {
+        elemType |= typeFromRAT(at->packedElem(i));
+      }
+      return elemType & t;
+    }
+    case RepoAuthType::Array::Tag::PackedN:
+      return typeFromRAT(at->elemType()) & t;
   }
   not_reached();
 }

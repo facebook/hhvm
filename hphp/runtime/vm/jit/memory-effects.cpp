@@ -73,6 +73,18 @@ AliasClass pointee(const SSATmp* ptr) {
     return AMIStateAny;
   }
 
+  if (ptr->type() <= Type::PtrToArrGen) {
+    auto const sinst = canonical(ptr)->inst();
+    if (sinst->is(LdPackedArrayElemAddr)) {
+      if (sinst->src(1)->hasConstVal() && sinst->src(1)->intVal() >= 0) {
+        return AElemI { sinst->src(0),
+                        safe_cast<uint64_t>(sinst->src(1)->intVal()) };
+      }
+      return AElemIAny;
+    }
+    return AElemAny;
+  }
+
   /*
    * None of the above worked, so try to make the smallest union we can based
    * on the pointer type.
@@ -531,29 +543,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       inst.src(1)
     };
 
-  // TODO(#5575265): use LdMem for this instruction.
-  case LdPackedArrayElem:
-    if (inst.src(1)->hasConstVal() && inst.src(1)->intVal() >= 0) {
-      return PureLoad {
-        AElemI { inst.src(0), safe_cast<uint64_t>(inst.src(1)->intVal()) }
-      };
-    }
-    return PureLoad { AElemIAny };
-
   case LdStructArrayElem:
     assertx(inst.src(1)->strVal()->isStatic());
     return PureLoad { AElemS { inst.src(0), inst.src(1)->strVal() } };
-
-  // TODO(#5575265): replace this instruction with CheckTypeMem.
-  case CheckTypePackedArrayElem:
-  case IsPackedArrayElemNull:
-    if (inst.src(1)->hasConstVal() && inst.src(1)->intVal() >= 0) {
-      return may_load_store(
-        AElemI { inst.src(0), safe_cast<uint64_t>(inst.src(1)->intVal()) },
-        AEmpty
-      );
-    }
-    return may_load_store(AElemIAny, AEmpty);
 
   case InitPackedArrayLoop:
     {
@@ -785,6 +777,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case JmpZero:
   case LdPropAddr:
   case LdStkAddr:
+  case LdPackedArrayElemAddr:
   case LteDbl:
   case LteInt:
   case LtInt:

@@ -56,15 +56,24 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
   }
   assert(obj->instanceof(c_Map::classof()));
   auto deps = SmartPtr<c_Map>::attach(c_Map::Clone(obj));
+  auto ctx_idx = std::numeric_limits<context_idx_t>::max();
   for (ssize_t iter_pos = deps->iter_begin();
        deps->iter_valid(iter_pos);
        iter_pos = deps->iter_next(iter_pos)) {
 
     auto* current = tvAssertCell(deps->iter_value(iter_pos));
-    if (UNLIKELY(!c_WaitHandle::fromCell(current))) {
+    auto const child = c_WaitHandle::fromCell(current);
+    if (UNLIKELY(!child)) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected dependencies to be a map of WaitHandle instances"));
       throw e;
+    }
+
+    if (!child->isFinished()) {
+      ctx_idx = std::min(
+        ctx_idx,
+        static_cast<c_WaitableWaitHandle*>(child)->getContextIdx()
+      );
     }
   }
 
@@ -89,7 +98,7 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       auto my_wh = makeSmartPtr<c_GenMapWaitHandle>();
-      my_wh->initialize(exception, deps.get(), iter_pos, child_wh);
+      my_wh->initialize(exception, deps.get(), iter_pos, ctx_idx, child_wh);
 
       AsioSession* session = AsioSession::Get();
       if (UNLIKELY(session->hasOnGenMapCreateCallback())) {
@@ -108,9 +117,15 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
   }
 }
 
-void c_GenMapWaitHandle::initialize(const Object& exception, c_Map* deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
+void c_GenMapWaitHandle::initialize(
+  const Object& exception,
+  c_Map* deps,
+  ssize_t iter_pos,
+  context_idx_t ctx_idx,
+  c_WaitableWaitHandle* child
+) {
   setState(STATE_BLOCKED);
-  setContextIdx(child->getContextIdx());
+  setContextIdx(ctx_idx);
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;

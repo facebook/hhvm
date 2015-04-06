@@ -57,7 +57,8 @@ class c_GenVectorWaitHandle final : public c_WaitableWaitHandle {
  private:
   void setState(uint8_t state) { setKindState(Kind::GenVector, state); }
   void initialize(const Object& exception, c_Vector* deps,
-                  int64_t iter_pos, c_WaitableWaitHandle* child);
+                  int64_t iter_pos, context_idx_t ctx_idx,
+                  c_WaitableWaitHandle* child);
 
   Object m_exception;
   SmartPtr<c_Vector> m_deps;

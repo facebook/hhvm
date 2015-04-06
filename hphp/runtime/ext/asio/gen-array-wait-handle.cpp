@@ -99,7 +99,10 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
      * We need to finish unboxing any refs in our dependency array,
      * and then create a GenArrayWaitHandle to wrap it.
      */
+    assert(child->instanceof(c_WaitableWaitHandle::classof()));
+    auto const child_wh = static_cast<c_WaitableWaitHandle*>(child);
     auto const current_pos = arrIter.currentPos();
+    auto ctx_idx = child_wh->getContextIdx();
     arrIter.advance();
     for (; !arrIter.empty(); arrIter.advance()) {
       auto const future = arrIter.current();
@@ -107,13 +110,18 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
         tvUnbox(future);
       }
       if (IS_NULL_TYPE(future->m_type)) continue;
-      if (UNLIKELY(!c_WaitHandle::fromCell(future))) fail();
+      auto const future_wh = c_WaitHandle::fromCell(future);
+      if (UNLIKELY(!future_wh)) fail();
+      if (!future_wh->isFinished()) {
+        ctx_idx = std::min(
+          ctx_idx,
+          static_cast<c_WaitableWaitHandle*>(future_wh)->getContextIdx()
+        );
+      }
     }
 
-    assert(child->instanceof(c_WaitableWaitHandle::classof()));
-    auto const child_wh = static_cast<c_WaitableWaitHandle*>(child);
     auto my_wh = makeSmartPtr<c_GenArrayWaitHandle>();
-    my_wh->initialize(exception, depCopy, current_pos, child_wh);
+    my_wh->initialize(exception, depCopy, current_pos, ctx_idx, child_wh);
 
     auto const session = AsioSession::Get();
     if (UNLIKELY(session->hasOnGenArrayCreateCallback())) {
@@ -134,9 +142,15 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
   }
 }
 
-void c_GenArrayWaitHandle::initialize(const Object& exception, const Array& deps, ssize_t iter_pos, c_WaitableWaitHandle* child) {
+void c_GenArrayWaitHandle::initialize(
+  const Object& exception,
+  const Array& deps,
+  ssize_t iter_pos,
+  context_idx_t ctx_idx,
+  c_WaitableWaitHandle* child
+) {
   setState(STATE_BLOCKED);
-  setContextIdx(child->getContextIdx());
+  setContextIdx(ctx_idx);
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;

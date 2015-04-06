@@ -57,7 +57,8 @@ class c_GenMapWaitHandle final : public c_WaitableWaitHandle {
  private:
   void setState(uint8_t state) { setKindState(Kind::GenMap, state); }
   void initialize(const Object& exception, c_Map* deps,
-                  ssize_t iter_pos, c_WaitableWaitHandle* child);
+                  ssize_t iter_pos, context_idx_t ctx_idx,
+                  c_WaitableWaitHandle* child);
 
   Object m_exception;
   SmartPtr<c_Map> m_deps;

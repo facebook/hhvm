@@ -57,13 +57,22 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
   }
   assert(obj->instanceof(c_Vector::classof()));
   auto deps = SmartPtr<c_Vector>::attach(c_Vector::Clone(obj));
+  auto ctx_idx = std::numeric_limits<context_idx_t>::max();
   for (int64_t iter_pos = 0; iter_pos < deps->size(); ++iter_pos) {
     Cell* current = deps->at(iter_pos);
 
-    if (UNLIKELY(!c_WaitHandle::fromCell(current))) {
+    auto const child = c_WaitHandle::fromCell(current);
+    if (UNLIKELY(!child)) {
       Object e(SystemLib::AllocInvalidArgumentExceptionObject(
         "Expected dependencies to be a vector of WaitHandle instances"));
       throw e;
+    }
+
+    if (!child->isFinished()) {
+      ctx_idx = std::min(
+        ctx_idx,
+        static_cast<c_WaitableWaitHandle*>(child)->getContextIdx()
+      );
     }
   }
 
@@ -85,7 +94,7 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       auto my_wh = makeSmartPtr<c_GenVectorWaitHandle>();
-      my_wh->initialize(exception, deps.get(), iter_pos, child_wh);
+      my_wh->initialize(exception, deps.get(), iter_pos, ctx_idx, child_wh);
       AsioSession* session = AsioSession::Get();
       if (UNLIKELY(session->hasOnGenVectorCreateCallback())) {
         session->onGenVectorCreate(my_wh.get(), dependencies);
@@ -102,9 +111,15 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
   }
 }
 
-void c_GenVectorWaitHandle::initialize(const Object& exception, c_Vector* deps, int64_t iter_pos, c_WaitableWaitHandle* child) {
+void c_GenVectorWaitHandle::initialize(
+  const Object& exception,
+  c_Vector* deps,
+  int64_t iter_pos,
+  context_idx_t ctx_idx,
+  c_WaitableWaitHandle* child
+) {
   setState(STATE_BLOCKED);
-  setContextIdx(child->getContextIdx());
+  setContextIdx(ctx_idx);
   m_exception = exception;
   m_deps = deps;
   m_iterPos = iter_pos;

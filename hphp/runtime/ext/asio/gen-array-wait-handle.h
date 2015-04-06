@@ -55,7 +55,8 @@ class c_GenArrayWaitHandle final : public c_WaitableWaitHandle {
  private:
   void setState(uint8_t state) { setKindState(Kind::GenArray, state); }
   void initialize(const Object& exception, const Array& deps,
-                  ssize_t iter_pos, c_WaitableWaitHandle* child);
+                  ssize_t iter_pos, context_idx_t ctx_idx,
+                  c_WaitableWaitHandle* child);
 
  private:
   Object m_exception;

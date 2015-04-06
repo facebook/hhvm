@@ -58,6 +58,7 @@ module type MapSig = sig
   val merge : (key -> 'a option -> 'b option -> 'c option)
     -> 'a t -> 'b t -> 'c t
   val choose : 'a t -> key * 'a
+  val split: key -> 'a t -> 'a t * 'a option * 'a t
   val keys: 'a t -> key list
   val values: 'a t -> 'a list
 

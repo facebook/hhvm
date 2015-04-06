@@ -1874,13 +1874,14 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
   auto const callee = inst->extra<CallBuiltin>()->callee;
   auto const args = inst->srcs();
 
-  auto const cls = callee->cls();
-  bool const arg2Collection = args.size() == 3 &&
-                              args[2]->type() < Type::Obj &&
-                              cls != nullptr &&
-                              cls->isCollectionClass();
 
-  if (arg2Collection) {
+  bool const arg2IsCollection = args.size() == 3 &&
+    args[2]->isA(Type::Obj) &&
+    args[2]->type().clsSpec() &&
+    args[2]->type().clsSpec().cls()->isCollectionClass() &&
+    !mightRelax(env, args[2]);
+
+  if (arg2IsCollection) {
     if (callee->name()->isame(s_isEmpty.get())) {
       FTRACE(3, "simplifying collection: {}\n", callee->name()->data());
       return gen(env, ColIsEmpty, args[2]);
@@ -1895,11 +1896,13 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyIsWaitHandle(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->type() < Type::Obj) {
-    auto const cls = inst->src(0)->type().clsSpec().cls();
-    if (cls && cls->classof(c_WaitHandle::classof())) {
-      return cns(env, true);
-    }
+  if (mightRelax(env, inst->src(0))) return nullptr;
+
+  bool baseIsWaitHandle = inst->src(0)->isA(Type::Obj) &&
+    inst->src(0)->type().clsSpec() &&
+    inst->src(0)->type().clsSpec().cls()->classof(c_WaitHandle::classof());
+  if (baseIsWaitHandle) {
+    return cns(env, true);
   }
   return nullptr;
 }

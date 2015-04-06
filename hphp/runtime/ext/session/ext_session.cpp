@@ -134,7 +134,9 @@ struct SessionRequestData final : Session {
   void destroy() {
     id.reset();
     session_status = Session::None;
-    ps_session_handler = nullptr;
+    // Note: we should not destroy user save handler here
+    // (if the session is restarted during request, the handler
+    // should be alive), it's destroyed only in the request shutdown.
   }
 
   void requestShutdownImpl();
@@ -1217,8 +1219,8 @@ static bool ini_on_update_save_dir(const std::string& value) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static int php_session_destroy() {
-  int retval = true;
+static bool php_session_destroy() {
+  bool retval = true;
 
   if (s_session->session_status != Session::Active) {
     raise_warning("Trying to destroy uninitialized session");
@@ -1230,7 +1232,10 @@ static int php_session_destroy() {
     raise_warning("Session object destruction failed");
   }
 
-  s_session->requestShutdownImpl();
+  if (mod_is_open()) {
+    s_session->mod->close();
+  }
+
   s_session->destroy();
 
   return retval;
@@ -1782,22 +1787,7 @@ static bool HHVM_FUNCTION(session_start) {
 }
 
 static bool HHVM_FUNCTION(session_destroy) {
-  bool retval = true;
-
-  if (s_session->session_status != Session::Active) {
-    raise_warning("Trying to destroy uninitialized session");
-    return false;
-  }
-
-  if (!s_session->mod->destroy(s_session->id.data())) {
-    retval = false;
-    raise_warning("Session object destruction failed");
-  }
-
-  s_session->requestShutdownImpl();
-  s_session->destroy();
-
-  return retval;
+  return php_session_destroy();
 }
 
 static void HHVM_FUNCTION(session_unset) {

@@ -1,0 +1,12 @@
+array(2) {
+  ["foo"]=>
+  int(10)
+  ["bar"]=>
+  int(20)
+}
+string(7) "s_write"
+string(32) "%s"
+string(18) "foo|i:10;bar|i:20;"
+string(7) "s_write"
+string(32) "%s"
+string(0) ""

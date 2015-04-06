@@ -1941,11 +1941,10 @@ void MCGenerator::recordGdbTranslation(SrcKey sk,
 }
 
 void MCGenerator::recordGdbStub(const CodeBlock& cb,
-                                const TCA start, const char* name) {
-  if (!RuntimeOption::EvalJitNoGdb) {
-    m_debugInfo.recordStub(rangeFrom(cb, start, &cb == &code.cold()),
-                           name);
-  }
+                                const TCA start,
+                                const std::string& name) {
+  if (RuntimeOption::EvalJitNoGdb) return;
+  m_debugInfo.recordStub(rangeFrom(cb, start, &cb == &code.cold()), name);
 }
 
 std::vector<UsageInfo> MCGenerator::getUsageInfo() {

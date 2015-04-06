@@ -16,16 +16,18 @@
 #ifndef TRANSLATOR_DEBUG_H_
 #define TRANSLATOR_DEBUG_H_
 
+#include <string>
+
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/debug/dwarf.h"
 
-namespace HPHP {
-namespace Debug {
+namespace HPHP { namespace Debug {
 
-class DebugInfo {
- public:
+//////////////////////////////////////////////////////////////////////
+
+struct DebugInfo {
   DebugInfo();
   ~DebugInfo();
 
@@ -33,8 +35,7 @@ class DebugInfo {
                       const Func* func,
                       const Op* instr, bool exit,
                       bool inPrologue);
-  void recordStub(TCRange range,
-                  const char* name);
+  void recordStub(TCRange range, const std::string&);
   void recordPerfMap(TCRange range, const Func* func, bool exit,
                      bool inPrologue);
   void recordBCInstr(TCRange range, uint32_t op);
@@ -94,7 +95,8 @@ std::string lookupFunction(const Func* func,
                            bool inPrologue,
                            bool pseudoWithFileName);
 
-}
-}
+//////////////////////////////////////////////////////////////////////
+
+}}
 
 #endif

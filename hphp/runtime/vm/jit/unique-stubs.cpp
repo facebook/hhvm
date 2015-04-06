@@ -47,9 +47,7 @@ TCA UniqueStubs::add(const char* name, TCA start) {
           }()
          );
 
-  mcg->recordGdbStub(
-    cb, start, strdup(folly::sformat("HHVM::{}", name).c_str())
-  );
+  mcg->recordGdbStub(cb, start, folly::sformat("HHVM::{}", name));
 
   auto const newStub = StubRange{name, start, end};
   auto lower = std::lower_bound(m_ranges.begin(), m_ranges.end(), newStub);

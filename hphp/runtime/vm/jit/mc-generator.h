@@ -256,7 +256,7 @@ public:
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
   void traceCodeGen(IRGS&);
-  void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
+  void recordGdbStub(const CodeBlock& cb, TCA start, const std::string& name);
 
   /*
    * Dump translation cache.  True if successful.

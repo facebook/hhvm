@@ -136,19 +136,25 @@ struct ThreadLocalNode {
 };
 
 struct ThreadLocalManager {
+  template<class T>
+  static void PushTop(ThreadLocalNode<T>& node) {
+    auto key = GetManager().m_key;
+    auto tmp = pthread_getspecific(key);
+    ThreadLocalSetValue(key, &node);
+    node.m_next = tmp;
+  }
+
+ private:
   ThreadLocalManager() : m_key(0) {
     ThreadLocalCreateKey(&m_key, ThreadLocalManager::OnThreadExit);
   };
-  void * getTop() {
-    return pthread_getspecific(m_key);
-  }
-  void setTop(void * p) {
-    ThreadLocalSetValue(m_key, p);
-  }
   static void OnThreadExit(void *p);
   pthread_key_t m_key;
 
-  static ThreadLocalManager s_manager;
+  static ThreadLocalManager& GetManager() {
+    static ThreadLocalManager m;
+    return m;
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -203,8 +209,7 @@ template<typename T>
 void ThreadLocal<T>::create() {
   if (m_node.m_on_thread_exit_fn == nullptr) {
     m_node.m_on_thread_exit_fn = ThreadLocalOnThreadExit<T>;
-    m_node.m_next = ThreadLocalManager::s_manager.getTop();
-    ThreadLocalManager::s_manager.setTop((void*)(&m_node));
+    ThreadLocalManager::PushTop(m_node);
   }
   assert(m_node.m_p == nullptr);
   m_node.m_p = new T();
@@ -249,8 +254,7 @@ template<typename T>
 void ThreadLocalNoCheck<T>::create() {
   if (m_node.m_on_thread_exit_fn == nullptr) {
     m_node.m_on_thread_exit_fn = ThreadLocalOnThreadExit<T>;
-    m_node.m_next = ThreadLocalManager::s_manager.getTop();
-    ThreadLocalManager::s_manager.setTop((void*)(&m_node));
+    ThreadLocalManager::PushTop(m_node);
   }
   assert(m_node.m_p == nullptr);
   m_node.m_p = new T();

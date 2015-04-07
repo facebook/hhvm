@@ -6,13 +6,13 @@ function leak_test($output)
 {
     $a = memory_get_usage(true);
     for ($i = 0; $i < 1000; $i++) {
-        parse_ini_file('./ini_parse_memory_leak_test.ini', true);
+        $data=parse_ini_file('./ini_parse_memory_leak_test.ini', true);
     }
     $b = memory_get_usage(true);
     $first_leak = $b - $a;
 
     for ($i = 0; $i < 2000; $i++) {
-        parse_ini_file('./ini_parse_memory_leak_test.ini', true);
+        $data=parse_ini_file('./ini_parse_memory_leak_test.ini', true);
     }
 
     $c = memory_get_usage(true);

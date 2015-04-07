@@ -40,13 +40,25 @@ TRACE_SET_MOD(mcg);
 namespace {
 
 void emitStackCheck(X64Assembler& a, int funcDepth, Offset pc) {
-  using namespace reg;
+  using reg::rax;
+  assertx(kScratchCrossTraceRegs.contains(rax));
+
   funcDepth += kStackCheckPadding * sizeof(Cell);
 
-  int stackMask = cellsToBytes(RuntimeOption::EvalVMStackElms) - 1;
-  a.    movq   (rVmSp, rAsm);  // copy to destroy
-  a.    andq   (stackMask, rAsm);
-  a.    subq   (funcDepth + Stack::sSurprisePageSize, rAsm);
+  /*
+   * rStashedAR points to the bottom of the callee's ActRec.  We're checking
+   * for `funcDepth' additional space below it, which includes everything
+   * maxStackCells() includes for the callee (see comment in func.h).  If
+   * nPassed > nparams, the stack might currently be deeper than that, but
+   * we're going to be removing the excess nPassed (and the caller already
+   * checked it was ok to go that deep in their maxStackCells) before we start
+   * using our space.
+   */
+  auto const stackMask =
+    int32_t{cellsToBytes(RuntimeOption::EvalVMStackElms) - 1};
+  a.    movq   (rStashedAR, rax);  // copy to destroy
+  a.    andq   (stackMask, rax);
+  a.    subq   (funcDepth + Stack::sSurprisePageSize, rax);
   a.    jl     (mcg->tx().uniqueStubs.stackOverflowHelper);
 }
 
@@ -68,7 +80,7 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
   assertx(kScratchCrossTraceRegs.contains(rax));
   assertx(kScratchCrossTraceRegs.contains(rdx));
 
-  auto funcImm = Immed64(func);
+  auto const funcImm = Immed64(func);
   int nBytes, offset;
 
   // Ensure the immediate is safely smashable
@@ -121,8 +133,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   auto const numNonVariadicParams = func->numNonVariadicParams();
   auto const& paramInfo = func->params();
-
-  Offset entryOffset = func->getEntryForNumArgs(nPassed);
+  auto const entryOffset = func->getEntryForNumArgs(nPassed);
 
   Asm a { mcg->code.main() };
 

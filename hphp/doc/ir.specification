@@ -1153,9 +1153,9 @@ To string conversions:
   off the stack given by S0, at `offset'. This instruction assumes it can take
   the values from the stack without increfing them.
 
-| NewCol, D(Obj), C(Int) C(Int), PRc
+| NewCol<type,size>, D(Obj), NA, PRc
 
-  Create a new collection, with type S0 and size S1.
+  Create a new collection of `type' with space for `size' elements reserved.
 
 | Clone, D(Obj), S(Obj), PRc|Er
 

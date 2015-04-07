@@ -183,7 +183,6 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}}},
     {AllocPackedArray,   MixedArray::MakePackedUninitialized, DSSA, SNone,
                            {{extra(&PackedArrayData::size)}}},
-    {NewCol,             newColHelper, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ColAddNewElemC,     colAddNewElemCHelper, DSSA, SSync,
                            {{SSA, 0}, {TV, 1}}},
     {ColAddElemC,        colAddElemCHelper, DSSA, SSync,

@@ -651,11 +651,14 @@ void BaseVector::reserve(int64_t sz) {
   }
 }
 
-BaseVector::BaseVector(Class* cls, HeaderKind kind)
-    : ExtCollectionObjectData(cls, kind)
-    , m_size(0), m_capacity(0), m_data(packedData(staticEmptyArray()))
-    , m_version(0) {
-}
+BaseVector::BaseVector(Class* cls, HeaderKind kind, uint32_t cap /* = 0 */)
+  : ExtCollectionObjectData(cls, kind)
+  , m_size(0)
+  , m_capacity(cap)
+  , m_data(packedData(cap == 0 ? staticEmptyArray()
+                               : MixedArray::MakeReserve(cap)))
+  , m_version(0)
+{}
 
 /**
  * Delegate the responsibility for freeing the buffer to the immutable copy,
@@ -740,9 +743,9 @@ c_ImmVector* c_ImmVector::Clone(ObjectData* obj) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Vector::c_Vector(Class* cls /* = c_Vector::classof() */)
-  : BaseVector(cls, HeaderKind::Vector) {
-}
+c_Vector::c_Vector(Class* cls, uint32_t cap /* = 0 */)
+  : BaseVector(cls, HeaderKind::Vector, cap)
+{}
 
 void BaseVector::t___construct(const Variant& iterable /* = null_variant */) {
   if (iterable.isNull()) return;
@@ -1434,9 +1437,9 @@ Object c_ImmVector::t_values() {
 
 // Non PHP methods.
 
-c_ImmVector::c_ImmVector(Class* cls)
-  : BaseVector(cls, HeaderKind::ImmVector) {
-}
+c_ImmVector::c_ImmVector(Class* cls, uint32_t cap /* = 0 */)
+  : BaseVector(cls, HeaderKind::ImmVector, cap)
+{}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1481,10 +1484,14 @@ struct HashCollection::EmptyMixedInitializer {
 HashCollection::EmptyMixedInitializer
 HashCollection::s_empty_mixed_initializer;
 
-HashCollection::HashCollection(Class* cls, HeaderKind kind)
-    : ExtCollectionObjectData(cls, kind)
-    , m_size(0), m_version(0), m_data(mixedData(staticEmptyMixedArray())) {
-}
+HashCollection::HashCollection(Class* cls, HeaderKind kind,
+                               uint32_t cap /* = 0 */)
+  : ExtCollectionObjectData(cls, kind)
+  , m_size(0), m_version(0)
+  , m_data(mixedData(cap == 0 ? staticEmptyMixedArray()
+                              : static_cast<MixedArray*>(
+                                MixedArray::MakeReserveMixed(cap))))
+{}
 
 Array HashCollection::t_toarray() {
   if (!m_size) {
@@ -1942,13 +1949,14 @@ HashCollection::Elm& HashCollection::allocElmFront(int32_t* ei) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Map::c_Map(Class* cls) : BaseMap(cls, HeaderKind::Map) {
-}
+c_Map::c_Map(Class* cls, uint32_t cap /* = 0 */)
+  : BaseMap(cls, HeaderKind::Map, cap)
+{}
 
 // Protected (Internal)
 
-BaseMap::BaseMap(Class* cls, HeaderKind kind)
-  : HashCollection(cls, kind)
+BaseMap::BaseMap(Class* cls, HeaderKind kind, uint32_t cap /* = 0*/)
+  : HashCollection(cls, kind, cap)
 {}
 
 BaseMap::~BaseMap() {
@@ -3555,7 +3563,8 @@ void c_MapIterator::t_rewind() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_ImmMap::c_ImmMap(Class* cb) : BaseMap(cb, HeaderKind::ImmMap)
+c_ImmMap::c_ImmMap(Class* cb, uint32_t cap /* = 0 */)
+  : BaseMap(cb, HeaderKind::ImmMap, cap)
 {}
 
 c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
@@ -4458,8 +4467,8 @@ BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
 
 // Protected (Internal)
 
-BaseSet::BaseSet(Class* cls, HeaderKind kind)
-  : HashCollection(cls, kind)
+BaseSet::BaseSet(Class* cls, HeaderKind kind, uint32_t cap /* = 0 */)
+  : HashCollection(cls, kind, cap)
 {}
 
 BaseSet::~BaseSet() {
@@ -4514,9 +4523,9 @@ void BaseSet::throwBadValueType() {
 ///////////////////////////////////////////////////////////////////////////////
 // Set
 
-c_Set::c_Set(Class* cls /* = c_Set::classof() */)
-  : BaseSet(cls, HeaderKind::Set) {
-}
+c_Set::c_Set(Class* cls, uint32_t cap /* = 0 */)
+  : BaseSet(cls, HeaderKind::Set, cap)
+{}
 
 void BaseSet::t___construct(const Variant& iterable /* = null_variant */) {
   addAll(iterable);
@@ -4785,8 +4794,9 @@ Object c_ImmSet::ti_fromarrays(int _argc, const Array& _argv) {
   return BaseSet::php_fromArrays<c_ImmSet>(_argc, _argv);
 }
 
-c_ImmSet::c_ImmSet(Class* cls) : BaseSet(cls, HeaderKind::ImmSet) {
-}
+c_ImmSet::c_ImmSet(Class* cls, uint32_t cap /* = 0 */)
+  : BaseSet(cls, HeaderKind::ImmSet, cap)
+{}
 
 void c_ImmSet::Unserialize(ObjectData* obj, VariableUnserializer* uns,
     int64_t sz, char type) {
@@ -4886,8 +4896,7 @@ c_Pair::c_Pair(Class* cb)
 c_Pair::c_Pair(NoInit, Class* cb)
   : ExtObjectDataFlags(cb, HeaderKind::Pair)
   , m_size(0)
-{
-}
+{}
 
 c_Pair::~c_Pair() {
   if (LIKELY(m_size == 2)) {
@@ -5970,20 +5979,28 @@ bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2) {
 
 ObjectData* newCollectionHelper(CollectionType type, uint32_t size) {
   assert(isValidCollection(type));
-  ObjectData* obj;
   switch (type) {
-    case CollectionType::Vector: obj = newobj<c_Vector>(); break;
-    case CollectionType::Map: obj = newobj<c_Map>(); break;
-    case CollectionType::Set: obj = newobj<c_Set>(); break;
-    case CollectionType::Pair: obj = newobj<c_Pair>(c_Pair::NoInit{}); break;
-    case CollectionType::ImmVector: obj = newobj<c_ImmVector>(); break;
-    case CollectionType::ImmMap: obj = newobj<c_ImmMap>(); break;
-    case CollectionType::ImmSet: obj = newobj<c_ImmSet>(); break;
+    case CollectionType::Vector:
+      return newobj<c_Vector>(c_Vector::classof(), size);
+    case CollectionType::Map:
+      return newobj<c_Map>(c_Map::classof(), size);
+    case CollectionType::Set:
+      return newobj<c_Set>(c_Set::classof(), size);
+    case CollectionType::Pair:
+      return newobj<c_Pair>(c_Pair::NoInit{});
+    case CollectionType::ImmVector:
+      return newobj<c_ImmVector>(c_ImmVector::classof(), size);
+    case CollectionType::ImmMap:
+      return newobj<c_ImmMap>(c_ImmMap::classof(), size);
+    case CollectionType::ImmSet:
+      return newobj<c_ImmSet>(c_ImmSet::classof(), size);
   }
-  // Reserve enough room for nElms elements in advance
-  if (size) {
-    collectionReserve(obj, size);
-  }
+  not_reached();
+}
+
+ObjectData* newPairHelper() {
+  auto* obj = newobj<c_Pair>(c_Pair::NoInit{});
+  obj->incRefCount();
   return obj;
 }
 

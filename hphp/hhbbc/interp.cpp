@@ -23,6 +23,7 @@
 #include <folly/Optional.h>
 
 #include "hphp/util/trace.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-comparisons.h"

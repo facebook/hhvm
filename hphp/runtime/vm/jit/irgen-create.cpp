@@ -311,8 +311,11 @@ void emitAddNewElemC(IRGS& env) {
 }
 
 void emitNewCol(IRGS& env, int type, int size) {
-  push(env,
-    gen(env, NewCol, cns(env, type), cns(env, size)));
+  auto const extra = NewColData {
+    static_cast<CollectionType>(type),
+    static_cast<uint32_t>(size)
+  };
+  push(env, gen(env, NewCol, extra));
 }
 
 void emitColAddElemC(IRGS& env) {

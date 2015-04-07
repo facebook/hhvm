@@ -15,6 +15,7 @@
 */
 #include "hphp/hhbbc/class-util.h"
 
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/index.h"
@@ -28,16 +29,7 @@ namespace {
 
 const StaticString
   s_SimpleXMLElement("SimpleXMLElement"),
-  s_Vector("HH\\Vector"),
-  s_Map("HH\\Map"),
-  s_Set("HH\\Set"),
-  s_Pair("HH\\Pair"),
-  s_ImmVector("HH\\ImmVector"),
-  s_ImmSet("HH\\ImmSet"),
-  s_ImmMap("HH\\ImmMap"),
-  s_Closure("Closure");
-
-const StaticString
+  s_Closure("Closure"),
   s_86pinit("86pinit"),
   s_86sinit("86sinit"),
   s_MockClass("__MockClass");
@@ -53,13 +45,7 @@ bool has_magic_bool_conversion(res::Class cls) {
 
 bool is_collection(res::Class cls) {
   auto const name = cls.name();
-  return name->isame(s_Vector.get()) ||
-    name->isame(s_Map.get()) ||
-    name->isame(s_Set.get()) ||
-    name->isame(s_Pair.get()) ||
-    name->isame(s_ImmVector.get()) ||
-    name->isame(s_ImmSet.get()) ||
-    name->isame(s_ImmMap.get());
+  return isCollectionTypeName(name);
 }
 
 bool could_have_magic_bool_conversion(Type t) {
@@ -93,27 +79,6 @@ bool is_special_method_name(SString name) {
 
 bool is_mock_class(borrowed_ptr<const php::Class> cls) {
   return cls->userAttributes.count(s_MockClass.get());
-}
-
-SString collectionTypeToString(CollectionType ctype) {
-  assert(isValidCollection(ctype));
-  switch (ctype) {
-  case CollectionType::Vector:
-    return s_Vector.get();
-  case CollectionType::Map:
-    return s_Map.get();
-  case CollectionType::Set:
-    return s_Set.get();
-  case CollectionType::Pair:
-    return s_Pair.get();
-  case CollectionType::ImmVector:
-    return s_ImmVector.get();
-  case CollectionType::ImmSet:
-    return s_ImmSet.get();
-  case CollectionType::ImmMap:
-    return s_ImmMap.get();
-  }
-  not_reached();
 }
 
 bool is_closure(const php::Class& c) {

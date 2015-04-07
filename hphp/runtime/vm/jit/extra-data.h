@@ -19,6 +19,7 @@
 
 #include <algorithm>
 
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/ext/ext_generator.h"
 
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -889,6 +890,22 @@ struct ContEnterData : IRExtraData {
   Offset returnBCOffset;
 };
 
+struct NewColData : IRExtraData {
+  explicit NewColData(CollectionType type, uint32_t size)
+    : type(type)
+    , size(size)
+  {}
+
+  std::string show() const {
+    return folly::sformat("{}, {}",
+                          collectionTypeToString(type)->toCppString(),
+                          size);
+  }
+
+  CollectionType type;
+  uint32_t size;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -1013,6 +1030,7 @@ X(AdjustSP,                     IRSPOffsetData);
 X(DbgTrashStk,                  IRSPOffsetData);
 X(DbgTrashFrame,                IRSPOffsetData);
 X(LdPropAddr,                   PropOffset);
+X(NewCol,                       NewColData);
 
 #undef X
 

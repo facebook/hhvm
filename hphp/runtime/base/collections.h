@@ -17,39 +17,33 @@
 #ifndef incl_HPHP_COLLECTIONS_H_
 #define incl_HPHP_COLLECTIONS_H_
 
+#include <folly/Optional.h>
+
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
 
-struct CtResult { bool valid; CollectionType type; };
-inline CtResult stringToCollectionType(const char* str, size_t len) {
-  switch (len) {
-    case 6:
-      if (!strcasecmp(str, "hh\\set")) return {true, CollectionType::Set};
-      if (!strcasecmp(str, "hh\\map")) return {true, CollectionType::Map};
-      break;
-    case 7:
-      if (!strcasecmp(str, "hh\\pair")) return {true, CollectionType::Pair};
-      break;
-    case 9:
-      if (!strcasecmp(str, "hh\\vector")) return {true, CollectionType::Vector};
-      if (!strcasecmp(str, "hh\\immmap")) return {true, CollectionType::ImmMap};
-      if (!strcasecmp(str, "hh\\immset")) return {true, CollectionType::ImmSet};
-      break;
-    case 12:
-      if (!strcasecmp(str, "hh\\immvector")) {
-        return {true, CollectionType::ImmVector};
-      }
-      break;
-    default:
-      break;
-  }
-  return {false};
+/*
+ * Returns a collection type name given a CollectionType.
+ */
+StringData* collectionTypeToString(CollectionType ctype);
+
+/*
+ * Returns a CollectionType given a name, folly::none if name is not a
+ * collection type.
+ */
+folly::Optional<CollectionType> stringToCollectionType(const StringData* name);
+
+inline folly::Optional<CollectionType>
+stringToCollectionType(const std::string& s) {
+  return stringToCollectionType(StringData::Make(s.c_str()));
 }
 
-inline CtResult stringToCollectionType(const std::string& s) {
-  return stringToCollectionType(s.c_str(), s.size());
+inline bool isCollectionTypeName(const StringData* str) {
+  return stringToCollectionType(str).hasValue();
 }
+
 }
 
 #endif

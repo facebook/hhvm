@@ -1038,12 +1038,6 @@ Cell lookupClassConstantTv(TypedValue* cache,
 
 //////////////////////////////////////////////////////////////////////
 
-ObjectData* newColHelper(CollectionType type, uint32_t size) {
-  ObjectData* obj = newCollectionHelper(type, size);
-  obj->incRefCount();
-  return obj;
-}
-
 ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {
   if (coll->isCollection()) {
     collectionInitAppend(coll, &value);

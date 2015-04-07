@@ -438,7 +438,7 @@ bool Class::isCppSerializable() const {
 
 bool Class::isCollectionClass() const {
   auto s = name();
-  return stringToCollectionType(s->data(), s->size()).valid;
+  return isCollectionTypeName(s);
 }
 
 

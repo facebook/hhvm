@@ -130,7 +130,6 @@ CALL_OPCODE(NewArray)
 CALL_OPCODE(NewMixedArray)
 CALL_OPCODE(NewLikeArray)
 CALL_OPCODE(AllocPackedArray)
-CALL_OPCODE(NewCol)
 CALL_OPCODE(Clone)
 CALL_OPCODE(AllocObj)
 CALL_OPCODE(CustomInstanceInit)
@@ -235,6 +234,7 @@ DELEGATE_OPCODE(EqInt)
 DELEGATE_OPCODE(NeqInt)
 
 DELEGATE_OPCODE(ConvBoolToInt)
+DELEGATE_OPCODE(NewCol)
 
 /////////////////////////////////////////////////////////////////////
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,

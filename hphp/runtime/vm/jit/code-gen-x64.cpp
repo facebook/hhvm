@@ -307,8 +307,8 @@ ArgGroup CodeGenerator::argGroup(const IRInstruction* inst) const {
 void CodeGenerator::cgInst(IRInstruction* inst) {
   switch (inst->op()) {
 #define O(name, dsts, srcs, flags)                                \
-    case name: FTRACE(7, "cg" #name "\n");                          \
-      cg ## name (inst);                                   \
+    case name: FTRACE(7, "cg" #name "\n");                        \
+      cg ## name (inst);                                          \
       break;
     IR_OPCODES
 #undef O
@@ -403,7 +403,6 @@ CALL_OPCODE(NewArray)
 CALL_OPCODE(NewMixedArray)
 CALL_OPCODE(NewLikeArray)
 CALL_OPCODE(AllocPackedArray)
-CALL_OPCODE(NewCol)
 CALL_OPCODE(Clone)
 CALL_OPCODE(AllocObj)
 CALL_OPCODE(CustomInstanceInit)
@@ -4531,6 +4530,35 @@ void CodeGenerator::cgJmpSSwitchDest(IRInstruction* inst) {
   auto& v = vmain();
   v << syncvmsp{srcLoc(inst, 1).reg()};
   v << jmpr{srcLoc(inst, 0).reg(), kCrossTraceRegs};
+}
+
+void CodeGenerator::cgNewCol(IRInstruction* inst) {
+  auto& v = vmain();
+  auto const dest = callDest(inst);
+  auto args = argGroup(inst);
+  if (inst->extra<NewCol>()->type != CollectionType::Pair) {
+    args.imm(inst->extra<NewCol>()->size);
+  }
+  auto const target = [&]() -> CppCall {
+    switch(inst->extra<NewCol>()->type) {
+      case CollectionType::Vector:
+        return CppCall::direct(newColHelper<c_Vector>);
+      case CollectionType::Map:
+        return CppCall::direct(newColHelper<c_Map>);
+      case CollectionType::Set:
+        return CppCall::direct(newColHelper<c_Set>);
+      case CollectionType::Pair:
+        return CppCall::direct(newPairHelper);
+      case CollectionType::ImmVector:
+        return CppCall::direct(newColHelper<c_ImmVector>);
+      case CollectionType::ImmMap:
+        return CppCall::direct(newColHelper<c_ImmMap>);
+      case CollectionType::ImmSet:
+        return CppCall::direct(newColHelper<c_ImmSet>);
+    }
+    not_reached();
+  }();
+  cgCallHelper(v, target, dest, SyncOptions::kSyncPoint, args);
 }
 
 void CodeGenerator::cgCheckInit(IRInstruction* inst) {

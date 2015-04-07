@@ -322,8 +322,8 @@ void print(std::ostream& os, const Block* block, AreaIndex area,
           disasmRange(os, instRange.begin(), instRange.end());
           os << '\n';
           if (currentArea == area) {
-            assertx(instRange.end() >= blockRange.start());
-            assertx(instRange.end() <= blockRange.end());
+            assert_no_log(instRange.end() >= blockRange.start());
+            assert_no_log(instRange.end() <= blockRange.end());
             blockRange = TcaRange(instRange.end(), blockRange.end());
           }
         }

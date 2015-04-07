@@ -368,6 +368,8 @@ void PageletServer::Restart() {
 
 void PageletServer::Stop() {
   if (s_dispatcher) {
+    auto monitor = folly::Singleton<HostHealthMonitor>::get();
+    monitor->stop();
     s_dispatcher->stop();
     Lock l(s_dispatchMutex);
     delete s_dispatcher;

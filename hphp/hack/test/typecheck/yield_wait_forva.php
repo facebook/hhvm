@@ -37,7 +37,6 @@ async function gen_int_opt(): Awaitable<?int> {
   if (coin_flip()) {
     return 123;
   }
-  return null;
 }
 
 async function gen_string(): Awaitable<string> {

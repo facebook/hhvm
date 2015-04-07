@@ -10,5 +10,7 @@
  */
 
 async function foo(): Awaitable<array> {
-  return null;
+  if (coin_flip) {
+    return array();
+  }
 }

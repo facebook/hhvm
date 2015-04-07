@@ -14,5 +14,4 @@ async function genFoo(): Awaitable<?int> {
     return 123;
   } catch (Exception $e) {
   }
-  return null;
 }

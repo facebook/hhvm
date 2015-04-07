@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,7 +9,6 @@
  *
  */
 
-async function foo(): Awaitable<void> {
+async function foo(): Awaitable<array> {
   return null;
 }
-

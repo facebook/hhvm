@@ -447,7 +447,7 @@ void MethodStatement::setSpecialMethod(ClassScopePtr classScope) {
         m_originalClassName.c_str(), m_originalName.c_str());
     }
     // Fatal if any arguments are variadic
-    if (m_params && hasRefParam()) {
+    if (m_params && getFunctionScope()->hasVariadicParam()) {
       parseTimeFatal(Compiler::InvalidMagicMethod,
                      "Method %s::%s() cannot take a variadic argument",
                      m_originalClassName.c_str(), m_originalName.c_str());

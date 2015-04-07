@@ -97,10 +97,9 @@ module CompareTypes = struct
         let acc = ty_opt (subst, same) ty1 ty3 in
         let acc = ty_opt acc ty2 ty4 in
         acc
-    | Tgeneric (s1, x), Tgeneric (s2, y) ->
+    | Tgeneric (s1, cstr1), Tgeneric (s2, cstr2) ->
         let same = same && s1 = s2 in
-        let acc = ty_opt (subst, same) x y in
-        acc
+        constraint_ (subst, same) cstr1 cstr2
     | Toption ty1, Toption ty2 ->
         ty acc ty1 ty2
     | Tprim x, Tprim y ->
@@ -144,6 +143,12 @@ module CompareTypes = struct
     else List.fold_left2 ty acc tyl1 tyl2
 
   and ty_opt acc ty1 ty2 = cmp_opt ty acc ty1 ty2
+
+  and constraint_ (subst, same) cstr_opt1 cstr_opt2 =
+    match cstr_opt1, cstr_opt2 with
+      | Some (ck1, ty1), Some (ck2, ty2) when ck1 = ck2 ->
+          ty (subst, same) ty1 ty2
+      | _ -> subst, false
 
   and fun_type acc ft1 ft2 =
     let acc = pos acc ft1.ft_pos ft2.ft_pos in
@@ -190,7 +195,7 @@ module CompareTypes = struct
   and tparam acc (variance1, sid1, x1) (variance2, sid2, x2) =
     let acc = variance acc variance1 variance2 in
     let acc = string_id acc sid1 sid2 in
-    let acc = ty_opt acc x1 x2 in
+    let acc = constraint_ acc x1 x2 in
     acc
 
   and class_elt (subst, same) celt1 celt2 =
@@ -335,9 +340,9 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Tmixed as x          -> x
     | Tarray (ty1, ty2)    -> Tarray (ty_opt ty1, ty_opt ty2)
     | Tprim _ as x         -> x
-    | Tgeneric (s, t)      -> Tgeneric (s, ty_opt t)
+    | Tgeneric (s, cstr_opt) -> Tgeneric (s, constraint_ cstr_opt)
     | Ttuple tyl           -> Ttuple (List.map (ty) tyl)
-    | Tunresolved tyl           -> Tunresolved (List.map (ty) tyl)
+    | Tunresolved tyl      -> Tunresolved (List.map (ty) tyl)
     | Toption x            -> Toption (ty x)
     | Tfun ft              -> Tfun (fun_type ft)
     | Tapply (sid, xl)     -> Tapply (string_id sid, List.map (ty) xl)
@@ -350,9 +355,13 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
 
   and ty_opt x = opt_map ty x
 
+  and constraint_ = function
+    | None -> None
+    | Some (ck, x) -> Some (ck, ty x)
+
   and fun_type ft =
     { ft with
-      ft_tparams = List.map (type_param) ft.ft_tparams ;
+      ft_tparams = List.map type_param ft.ft_tparams   ;
       ft_params  = List.map fun_param ft.ft_params     ;
       ft_ret     = ty ft.ft_ret                        ;
       ft_pos     = pos ft.ft_pos                       ;
@@ -377,8 +386,8 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       ttc_origin = tc.ttc_origin;
     }
 
-  and type_param (variance, sid, y) =
-    variance, string_id sid, ty_opt y
+  and type_param (variance, sid, x) =
+    variance, string_id sid, constraint_ x
 
   and class_type tc =
     { tc_final                 = tc.tc_final                          ;

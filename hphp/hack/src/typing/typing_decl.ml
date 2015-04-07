@@ -95,7 +95,8 @@ let check_arity pos class_name class_type class_parameters =
 
 let make_substitution self_ty pos class_name class_type class_parameters =
   check_arity pos class_name class_type class_parameters;
-  let this_ty = (fst self_ty, Tgeneric ("this", Some self_ty)) in
+  let this_ty = (fst self_ty,
+    Tgeneric ("this", Some (Ast.Constraint_as, self_ty))) in
   Inst.make_subst_with_this this_ty class_type.tc_tparams class_parameters
 
 (*-------------------------- end copypasta *)
@@ -602,7 +603,8 @@ and class_const_decl c (env, acc) (h, id, e) =
       | Some h, None ->
         let env, h_ty = Typing_hint.hint env h in
         let pos, name = id in
-        env, (Reason.Rwitness pos, Tgeneric (c_name^"::"^name, Some h_ty))
+        env, (Reason.Rwitness pos,
+          Tgeneric (c_name^"::"^name, Some (Ast.Constraint_as, h_ty)))
       | None, Some e -> begin
         let rec infer_const (p, expr_) = match expr_ with
           | String _
@@ -631,7 +633,8 @@ and class_const_decl c (env, acc) (h, id, e) =
         let pos, name = id in
         if c.c_mode = FileInfo.Mstrict then Errors.missing_typehint pos;
         let r = Reason.Rwitness pos in
-        let const_ty = r, Tgeneric (c_name^"::"^name, Some (r, Tany)) in
+        let const_ty = r, Tgeneric (c_name^"::"^name,
+          Some (Ast.Constraint_as, (r, Tany))) in
         env, const_ty
   in
   let ce = { ce_final = true; ce_is_xhp_attr = false; ce_override = false;

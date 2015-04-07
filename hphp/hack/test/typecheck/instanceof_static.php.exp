@@ -1,2 +1,2 @@
-generic this<App \C<>>
+generic this as <App \C<>>
 No errors

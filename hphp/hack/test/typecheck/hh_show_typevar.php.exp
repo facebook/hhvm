@@ -1,0 +1,5 @@
+generic Ta super <generic Tb as <App \Foo<>>>
+generic Tb as <App \Foo<>>
+generic Ta as <generic Tb super <App \Foo<>>>
+generic Tb super <App \Foo<>>
+No errors

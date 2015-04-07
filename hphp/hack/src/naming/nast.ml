@@ -48,7 +48,7 @@ and hint_ =
   | Hany
   | Hmixed
   | Htuple of hint list
-  | Habstr of string * hint option
+  | Habstr of string * (Ast.constraint_kind * hint) option
   | Harray of hint option * hint option
   | Hprim of tprim
   | Hoption of hint
@@ -63,7 +63,8 @@ and hint_ =
   *
   * Class  => Happly "Class"
   * self   => Happly of the class of definition
-  * static => Habstr ("static", Habstr ("this", Happly of class of definition))
+  * static => Habstr ("static",
+  *           Habstr ("this", (Constraint_as, Happly of class of definition)))
   * Type const access can be chained such as
   *
   * Class::TC1::TC2::TC3
@@ -122,7 +123,7 @@ and user_attribute = {
   ua_params: expr list (* user attributes are restricted to scalar values *)
 }
 
-and tparam = Ast.variance * sid * hint option
+and tparam = Ast.variance * sid * (Ast.constraint_kind * hint) option
 
 (* expr = None indicates an abstract const *)
 and class_const = hint option * sid * expr option

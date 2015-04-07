@@ -1,0 +1,14 @@
+File "super_constraint_4.php", line 12, characters 10-13:
+Invalid return type (Typing[4110])
+File "super_constraint_4.php", line 8, characters 38-40:
+This is an object of type Foo
+File "super_constraint_4.php", line 8, characters 61-64:
+It is incompatible with an object of type Blah
+File "super_constraint_4.php", line 8, characters 23-25:
+Considering the constraint on 'Tx1'
+File "super_constraint_4.php", line 11, characters 4-5:
+Considering the constraint on 'Tx'
+File "super_constraint_4.php", line 8, characters 49-51:
+Considering the constraint on 'Ty1'
+File "super_constraint_4.php", line 9, characters 3-4:
+Considering the constraint on 'Ty'

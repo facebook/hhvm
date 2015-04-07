@@ -12,6 +12,7 @@ open Utils
 open Typing_defs
 
 module N = Nast
+module SN = Naming_special_names
 module Reason = Typing_reason
 module Env = Typing_env
 module ShapeMap = Nast.ShapeMap
@@ -35,6 +36,9 @@ let unify x = !unify_ref x
 type sub_type = Env.env -> ty -> ty -> Env.env
 let (sub_type_ref: sub_type ref) = ref not_implemented
 let sub_type x = !sub_type_ref x
+
+(* Convenience function for creating `this` types *)
+let this_of ty = Tgeneric (SN.Typehints.this, Some (Ast.Constraint_as, ty))
 
 (*****************************************************************************)
 (* Returns true if a type is optional *)

@@ -455,8 +455,8 @@ and check_no_class_tparams class_tparams (pos, ty)  =
     | Hany | Hmixed | Hprim _ -> ()
     (* We have found a type parameter. Make sure its name does not match
      * a name in class_tparams *)
-    | Habstr (tparam_name, ty_) ->
-        maybe_check_tparams ty_;
+    | Habstr (tparam_name, cstr_opt) ->
+        maybe_check_tparams (opt_map snd cstr_opt);
         matches_class_tparam tparam_name
     | Harray (ty1, ty2) ->
         maybe_check_tparams ty1;

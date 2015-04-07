@@ -97,6 +97,78 @@ and subtype_tparam env variance super child =
 and sub_type env ty_super ty_sub =
   sub_type_with_uenv env (TUEnv.empty, ty_super) (TUEnv.empty, ty_sub)
 
+and get_super_typevar_set_ env set ty_super =
+  let env, ety_super = Env.expand_type env ty_super in
+  match ety_super with
+  | _, Tgeneric (x_super, cstr_opt) ->
+    let set = SSet.add x_super set in
+    (match cstr_opt with
+     | Some (Ast.Constraint_super, ty) -> get_super_typevar_set_ env set ty
+     | _ -> set)
+  | _ -> set
+
+(* If ty_super is a typevar, this function returns a set of the names of all
+ * typevars that are known to be subtypes of ty_super via "super" constraints,
+ * including ty_super itself. If ty_super is not a typevar, this returns the
+ * empty set. *)
+and get_super_typevar_set env ty_super =
+  get_super_typevar_set_ env SSet.empty ty_super
+
+and match_typevars_ env super_typevar_set ty_sub =
+  let env, ety_sub = Env.expand_type env ty_sub in
+  match ety_sub with
+  | _, Tgeneric (x_sub, cstr_opt) ->
+    if SSet.mem x_sub super_typevar_set then true else
+    (match cstr_opt with
+     | Some (Ast.Constraint_as, ty_sub) ->
+         match_typevars_ env super_typevar_set ty_sub
+     | _ -> false)
+  | _ -> false
+
+(* This function traverses over all the typevars known to be supertypes of
+ * ty_sub via "as" constraints (including ty_sub itself), and returns true
+ * if any of these typevars are in the set of typevars known to be subtypes
+ * of ty_super (as computed by get_super_typevar_set). Otherwise, this
+ * function returns false. *)
+and match_typevars env ty_super ty_sub =
+  match_typevars_ env (get_super_typevar_set env ty_super) ty_sub
+
+and typevars_subtype_ env (uenv_super, ety_super) (uenv_sub, ety_sub) =
+  match ety_super, ety_sub with
+  | _, (r_sub, Tgeneric (x_sub, Some (Ast.Constraint_as, ty_sub))) ->
+    Errors.try_
+      (fun () ->
+        let env, ety_sub = Env.expand_type env ty_sub in
+        typevars_subtype_ env (uenv_super, ety_super) (uenv_sub, ety_sub))
+      (fun l -> Reason.explain_generic_constraint r_sub x_sub l; env)
+  | (r_super, Tgeneric (x_super, Some (Ast.Constraint_super, ty_super))), _ ->
+    Errors.try_
+      (fun () ->
+        let env, ety_super = Env.expand_type env ty_super in
+        typevars_subtype_ env (uenv_super, ety_super) (uenv_sub, ety_sub))
+      (fun l -> Reason.explain_generic_constraint r_super x_super l; env)
+  | _ ->
+    sub_type_with_uenv env (uenv_super, ety_super) (uenv_sub, ety_sub)
+
+(* Checks if one typevar is a subtype of another typevar. *)
+and typevars_subtype env (uenv_super, ety_super) (uenv_sub, ety_sub) =
+  (* First, check if there exists some typevar that is a subtype of
+     ety_super (via "super" constraints) AND that is a supertype of ety_sub
+     (via "as" constraints). If such a typevar exists, then ety_sub must be a
+     subtype of ety_super. *)
+  if match_typevars env ety_super ety_sub then env else
+  (* Otherwise, traverse "super" constraints starting at ety_super,
+     traverse "as" constraints starting at ety_sub, and then check if the
+     latter is a subtype of the former. This logic is needed to support cases
+     such as `Tu as C, Tv super C` when we're checking if Tu is a subtype of
+     Tv.
+
+     Note that `Tu as Tv super Tw as C` cannot be a subtype of `Tx super C`
+     because `Tv` is not constrained in any way by `C`. Thus, if we encounter
+     any `super` constraints in the subtype or `as` constraints in the
+     supertype, it is safe to say that we have a type error. *)
+  typevars_subtype_ env (uenv_super, ety_super) (uenv_sub, ety_sub)
+
 (**
  * Checks that ty_sub is a subtype of ty_super, and returns an env.
  *
@@ -145,20 +217,24 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       List.fold_left begin fun env x ->
         sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, x)
       end env tyl
-  | (_, Tapply _), (r_sub, Tgeneric (x, Some ty_sub))
-  | (_, Tprim _), (r_sub, Tgeneric (x, Some ty_sub)) ->
+  | (_, Tapply _), (r_sub, Tgeneric (x, Some (Ast.Constraint_as, ty_sub)))
+  | (_, Tprim _), (r_sub, Tgeneric (x, Some (Ast.Constraint_as, ty_sub))) ->
       (Errors.try_
          (fun () -> sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
          (fun l -> Reason.explain_generic_constraint r_sub x l; env)
       )
-  | (_, Tgeneric ("this", Some ty_super)), (_, Tgeneric ("this", Some ty_sub)) ->
-      sub_type env ty_super ty_sub
-  | (_, Tgeneric (x_super, _)), (r_sub, Tgeneric (x_sub, Some ty_sub)) ->
-      if x_super = x_sub then env else
+  | (r_super, Tgeneric (x, Some (Ast.Constraint_super, ty))), (_, Tapply _)
+  | (r_super, Tgeneric (x, Some (Ast.Constraint_super, ty))), (_, Tprim _) ->
       (Errors.try_
-         (fun () -> sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
-         (fun l -> Reason.explain_generic_constraint r_sub x_sub l; env)
+         (fun () -> sub_type_with_uenv env (uenv_super, ty) (uenv_sub, ty_sub))
+         (fun l -> Reason.explain_generic_constraint r_super x l; env)
       )
+  | (_, Tgeneric ("this", Some (_, ty_super))),
+    (_, Tgeneric ("this", Some (_, ty_sub))) ->
+      sub_type env ty_super ty_sub
+  | (_, Tgeneric (_, _)), (_, Tgeneric (_, Some (Ast.Constraint_as, _)))
+  | (_, Tgeneric (_, Some (Ast.Constraint_super, _))), (_, Tgeneric (_, _)) ->
+      typevars_subtype env (uenv_super, ety_super) (uenv_sub, ety_sub)
   (* Dirty covariance hacks *)
   | (_, (Tapply ((_, name_super), [ty_super]))), (_, (Tapply ((_, name_sub), [ty_sub])))
     when name_super = SN.Classes.cAwaitable &&
@@ -392,7 +468,7 @@ and sub_string p env ty2 =
   | (_, Tprim _) ->
       env
   | (_, Tabstract (_, _, Some ty))
-  | (_, Tgeneric (_, Some ty)) ->
+  | (_, Tgeneric (_, Some (Ast.Constraint_as, ty))) ->
       sub_string p env ty
   | (r, Taccess taccess) ->
       let env, ety2 = TAccess.expand env r taccess in

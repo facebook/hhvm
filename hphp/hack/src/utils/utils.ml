@@ -142,10 +142,6 @@ let spf = Printf.sprintf
 let print_endlinef fmt = Printf.ksprintf print_endline fmt
 let prerr_endlinef fmt = Printf.ksprintf prerr_endline fmt
 
-let fst3 = function x, _, _ -> x
-let snd3 = function _, x, _ -> x
-let thd3 = function _, _, x -> x
-
 let opt f env = function
   | None -> env, None
   | Some x -> let env, x = f env x in env, Some x

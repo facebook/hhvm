@@ -244,13 +244,18 @@ let unparser _env =
     | Covariant -> u_todo "Covariant" (fun () -> StrEmpty )
     | Contravariant -> u_todo "Contravariant" (fun () -> StrEmpty )
     | Invariant -> u_todo "Invariant" (fun () -> StrEmpty )
+  and u_constraint_kind =
+    function
+    | Constraint_as -> u_todo "as" (fun () -> StrEmpty)
+    | Constraint_super -> u_todo "super" (fun () -> StrEmpty)
   and u_tparam (v2, v3, v4) =
     u_todo "tparam"
       (fun () ->
          let v1 = Str "tparam"
          and v2 = u_variance v2
          and v3 = u_id v3
-         and v4 = u_of_option u_hint v4
+         and v4 = u_of_option (fun (ck, h) ->
+           StrWords [u_constraint_kind ck; u_hint h]) v4
          in StrWords [ v1; v2; v3; v4 ])
   and u_tconstraint v = u_of_option u_hint v
   and u_typedef_kind =

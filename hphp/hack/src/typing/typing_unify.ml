@@ -180,10 +180,12 @@ and unify_ env r1 ty1 r2 ty2 =
           env, Tabstract (id, argl, tcstr)
   | Tgeneric (x1, None), Tgeneric (x2, None) when x1 = x2 ->
       env, Tgeneric (x1, None)
-  | Tgeneric (x1, Some ty1), Tgeneric (x2, Some ty2) when x1 = x2 ->
+  | Tgeneric (x1, Some (ck1, ty1)), Tgeneric (x2, Some (ck2, ty2))
+    when x1 = x2 && ck1 = ck2 ->
       let env, ty = unify env ty1 ty2 in
-      env, Tgeneric (x1, Some ty)
-  | Tgeneric ("this", Some ((_, Tapply ((_, x) as id, _) as ty))), _ ->
+      env, Tgeneric (x1, Some (ck1, ty))
+  | Tgeneric ("this",
+      Some (Ast.Constraint_as, (_, Tapply ((_, x) as id, _) as ty))), _ ->
       let class_ = Env.get_class env x in
       (* For final class C, there is no difference between this<X> and X *)
       (match class_ with
@@ -205,7 +207,7 @@ and unify_ env r1 ty1 r2 ty2 =
           );
           env, Tany
         )
-  | _, Tgeneric ("this", Some (_, Tapply _)) ->
+  | _, Tgeneric ("this", Some (Ast.Constraint_as, (_, Tapply _))) ->
       unify_ env r2 ty2 r1 ty1
   | (Ttuple _ as ty), Tarray (None, None)
   | Tarray (None, None), (Ttuple _ as ty) ->

@@ -40,7 +40,7 @@ type canon_names_map = string SMap.t
 let canon_key = String.lowercase
 
 (* <T as A>, A is a type constraint *)
-type type_constraint = hint option
+type type_constraint = (Ast.constraint_kind * hint) option
 
 type genv = {
 
@@ -731,7 +731,7 @@ and hint_ ~allow_this is_static_var p env x =
         (pos, SN.Typehints.this) [] in
     let self_ty () =
       match this_ty() with
-      | N.Habstr (x, Some self) when x = SN.Typehints.this -> snd self
+      | N.Habstr (x, Some (_, self)) when x = SN.Typehints.this -> snd self
       | _ -> N.Hany
     in
     let root_ty =
@@ -748,7 +748,8 @@ and hint_ ~allow_this is_static_var p env x =
           Errors.invalid_type_access_root root; N.Hany
       (* Create a type hole that we will fill during the local typing *)
       | x when x = SN.Typehints.this && allow_this ->
-          N.Habstr (SN.Typehints.type_hole, Some (pos, self_ty()))
+          N.Habstr (SN.Typehints.type_hole,
+            Some (Ast.Constraint_as, (pos, self_ty ())))
       | _ ->
           (match hint_id ~allow_this env is_static_var root [] with
           | N.Happly _ as h -> h
@@ -768,7 +769,6 @@ and hint_ ~allow_this is_static_var p env x =
 
 and hint_id ~allow_this env is_static_var (p, x as id) hl =
   Naming_hooks.dispatch_hint_hook id;
-  let hint = hint ~allow_this in
   let params = (fst env).type_params in
   if   is_alok_type_name id && not (SMap.mem x params)
   then Errors.typeparam_alok id;
@@ -818,11 +818,10 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
         | Some c ->
           let tparaml = (fst env).type_paraml in
           let tparaml = List.map begin fun (param_pos, param_name) ->
-            let _, cstr = get_constraint env param_name in
-            let cstr = opt_map (hint env) cstr in
-            param_pos, N.Habstr (param_name, cstr)
+            param_pos, N.Habstr (param_name, get_constraint env param_name)
           end tparaml in
-          N.Habstr (SN.Typehints.this, Some (fst c.c_name, N.Happly (c.c_name, tparaml))))
+          N.Habstr (SN.Typehints.this, Some (Ast.Constraint_as,
+            (fst c.c_name, N.Happly (c.c_name, tparaml)))))
     | x when x = SN.Typehints.this ->
         (match (fst env).cclass with
         | None ->
@@ -837,8 +836,7 @@ and hint_id ~allow_this env is_static_var (p, x as id) hl =
     | _ when SMap.mem x params ->
         if hl <> [] then
         Errors.tparam_with_tparam p x;
-        let env, gen_constraint = get_constraint env x in
-        N.Habstr (x, opt_map (hint env) gen_constraint)
+        N.Habstr (x, get_constraint env x)
     | _ ->
         (* In the future, when we have proper covariant support, we can
          * allow SN.Typehints.this to instantiate any covariant type variable.
@@ -915,7 +913,9 @@ and get_constraint env tparam =
   let genv, lenv = env in
   let genv = { genv with type_params = SMap.add tparam None params } in
   let env = genv, lenv in
-  env, gen_constraint
+  Option.map gen_constraint (constraint_ env)
+
+and constraint_ env (ck, h) = ck, hint env h
 
 and hintl ~allow_this env l = List.map (hint ~allow_this env) l
 
@@ -1106,8 +1106,10 @@ and type_paraml env tparams =
     tparams in
   List.rev ret
 
-and type_param env (variance, param_name, param_constraint) =
-  variance, param_name, opt_map (hint env) param_constraint
+and type_param env (variance, param_name, cstr_opt) =
+  variance,
+  param_name,
+  Option.map cstr_opt (constraint_ env)
 
 and class_use env x acc =
   match x with
@@ -1516,13 +1518,13 @@ and fun_param ?(allow_this=false) env param =
   }
 
 and make_constraints paraml =
-  List.fold_right begin fun (_, (_, x), hl) acc ->
-    SMap.add x hl acc
+  List.fold_right begin fun (_, (_, x), cstr_opt) acc ->
+    SMap.add x cstr_opt acc
   end paraml SMap.empty
 
 and extend_params genv paraml =
-  let params = List.fold_right begin fun (_, (_, x), hopt) acc ->
-    SMap.add x hopt acc
+  let params = List.fold_right begin fun (_, (_, x), cstr_opt) acc ->
+    SMap.add x cstr_opt acc
   end paraml genv.type_params in
   { genv with type_params = params }
 
@@ -2205,7 +2207,7 @@ let typedef genv tdef =
   List.iter check_constraint tdef.t_tparams;
   let tparaml = type_paraml env tdef.t_tparams in
   List.iter begin function
-    | (_, _, Some (pos, _)) ->
+    | (_, _, Some (_, (pos, _))) ->
         Errors.typedef_constraint pos;
     | _ -> ()
   end tparaml;

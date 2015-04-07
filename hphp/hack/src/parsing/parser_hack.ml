@@ -941,8 +941,9 @@ and class_param_name env =
 
 and class_parameter_constraint env =
   match L.token env.file env.lb with
-  | Tword when Lexing.lexeme env.lb = "as" ->
-      Some (hint env)
+  | Tword when Lexing.lexeme env.lb = "as" -> Some (Constraint_as, hint env)
+  | Tword when Lexing.lexeme env.lb = "super" ->
+      Some (Constraint_super, hint env)
   | _ -> L.back env.lb; None
 
 (*****************************************************************************)

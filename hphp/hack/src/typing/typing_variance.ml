@@ -408,7 +408,7 @@ and type_ root variance env (reason, ty) =
     let env = type_option root variance env ty1 in
     let env = type_option root variance env ty2 in
     env
-  | Tgeneric (name, ty) ->
+  | Tgeneric (name, cstr_opt) ->
       let pos = Reason.to_pos reason in
       (* This section makes the position more precise.
        * Say we find a return type that is a tuple (int, int, T).
@@ -427,7 +427,9 @@ and type_ root variance env (reason, ty) =
         | x -> x
       in
       let env = add_variance env name variance in
-      let env = type_option root variance env ty in
+      let env = match cstr_opt with
+        | Some (Ast.Constraint_as, ty) -> type_ root variance env ty
+        | _ -> env in
       env
   | Toption ty ->
       type_ root variance env ty

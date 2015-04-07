@@ -229,8 +229,9 @@ let rec debug stack env (r, ty) =
       o s;
       (match x with
       | None -> ()
-      | Some x -> o "<"; debug stack env x; o ">"
-      )
+      | Some (Ast.Constraint_as, x) -> o " as <"; debug stack env x; o ">"
+      | Some (Ast.Constraint_super, x) ->
+          o " super <"; debug stack env x; o ">")
   | Tvar x ->
       let env, x = get_var env x in
       if ISet.mem x stack

@@ -59,7 +59,11 @@ and gconst = {
     cst_namespace: Namespace_env.env;
   }
 
-and tparam = variance * id * hint option
+and constraint_kind =
+  | Constraint_as
+  | Constraint_super
+
+and tparam = variance * id * (constraint_kind * hint) option
 
 and tconstraint = hint option
 

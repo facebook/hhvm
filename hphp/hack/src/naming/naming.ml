@@ -911,6 +911,8 @@ and get_constraint env tparam =
   let params = (fst env).type_params in
   let gen_constraint = SMap.find_unsafe tparam params in
   let genv, lenv = env in
+  (* this prevents an infinite loop from occurring since hint invokes
+   * get_constraint *)
   let genv = { genv with type_params = SMap.add tparam None params } in
   let env = genv, lenv in
   Option.map gen_constraint (constraint_ env)

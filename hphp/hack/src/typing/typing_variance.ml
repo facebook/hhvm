@@ -46,6 +46,8 @@ type position_descr =
                                    * typedef:
                                    * A<T1, ..>, T1 is (Rtype_argument "A")
                                    *)
+  | Rconstraint_as
+  | Rconstraint_super
 
 type position_variance =
   | Pcovariant
@@ -137,6 +139,10 @@ let reason_to_string ~sign (_, descr, variance) =
         "This type parameter was declared as %s (cf '%s')"
         (variance_to_string variance)
         name
+  | Rconstraint_super ->
+      "`super` constraints are covariant"
+  | Rconstraint_as ->
+      "`as` constraints are contravariant"
 
 let detailed_message variance pos stack =
   match stack with
@@ -409,7 +415,12 @@ and type_ root variance env (reason, ty) =
     let env = type_option root variance env ty1 in
     let env = type_option root variance env ty2 in
     env
-  | Tgeneric (name, cstr_opt) ->
+  | Tgeneric ("this", _) ->
+      (* `this` constraints are bivariant (otherwise any class that used the
+       * `this` type would not be able to use covariant type params) *)
+      env
+  | Tgeneric (_, Some cstr) -> constraint_ root env cstr
+  | Tgeneric (name, None) ->
       let pos = Reason.to_pos reason in
       (* This section makes the position more precise.
        * Say we find a return type that is a tuple (int, int, T).
@@ -428,9 +439,6 @@ and type_ root variance env (reason, ty) =
         | x -> x
       in
       let env = add_variance env name variance in
-      let env = match cstr_opt with
-        | Some (Ast.Constraint_as, ty) -> type_ root variance env ty
-        | _ -> env in
       env
   | Toption ty ->
       type_ root variance env ty
@@ -478,3 +486,81 @@ and type_ root variance env (reason, ty) =
       Nast.ShapeMap.fold begin fun _field_name ty env ->
         type_ root variance env ty
       end ty_map env
+
+(* `as` constraints must be contravariant and `super` constraints covariant. To
+ * see why, suppose that we allow the wrong variance:
+ *
+ *   class Foo<+T> {
+ *     public function bar<Tu as T>(Tu $x) {}
+ *   }
+ *
+ * Let A and B be classes, with B a subtype of A. Then
+ *
+ *   function f(Foo<A> $x) {
+ *     $x->(new A());
+ *   }
+ *
+ * typechecks. However, covariance means that we could call `f()` with an
+ * instance of B. However, B::bar would expect its argument $x to be a subtype
+ * of B, but we would be passing an instance of A to it, which should be a type
+ * error. In other words, `as` constraints are upper type bounds, and since
+ * subtypes must have more relaxed constraints than their supertypes, `as`
+ * constraints must be contravariant. (Reversing this argument shows that
+ * `super` constraints must be covariant.)
+ *
+ * The preceding discussion might lead one to think that the constraints should
+ * have the same variance as the class parameter types, i.e. that `as`
+ * constraints used in the return type should be covariant. In particular,
+ * suppose
+ *
+ *   class Foo<-T> {
+ *     public function bar<Tu as T>(Tu $x): Tu { ... }
+ *     public function baz<Tu as T>(): Tu { ... }
+ *   }
+ *
+ *   class A {}
+ *   class B extends A {
+ *     public function qux() {}
+ *   }
+ *
+ *   function f(Foo<B> $x) {
+ *     $x->baz()->qux();
+ *   }
+ *
+ * Now `f($x)` could be a runtime error if `$x` was an instance of Foo<A>, and
+ * it seems like we should enforce covariance on Tu. However, the real problem
+ * is that constraints apply to _instantiation_, not usage. As far as Hack
+ * knows, $x->bar() could be of any type, since we have not provided any clues
+ * about how `Tu` should be instantiated. In fact `$x->bar()->whatever()`
+ * succeeds as well, because `Tu` is of type Tany -- though in an ideal world
+ * we would make it Tmixed in order to ensure soundness. Also, the signature
+ * of `baz()` doesn't entirely make sense -- why constrain Tu if it it's only
+ * getting used in one place?
+ *
+ * Thus, if one wants type safety, how `$x` _should_ be used is
+ *
+ *   function f(Foo<B> $x) {
+ *     $x->bar(new B()))->qux();
+ *   }
+ *
+ * Thus we can see that, if `$x` is used correctly (or if we enforced correct
+ * use by returning Tmixed for uninstantiated type variables), we would always
+ * know the exact type of Tu, and Tu can be validly used in both co- and
+ * contravariant positions.
+ *
+ * Remark: This is far more intuitive if you think about how Vector::concat is
+ * typed with its `Tu super T` type in both the parameter and return type
+ * positions. Uninstantiated `super` types are less likely to cause confusion,
+ * however -- you can't imagine doing very much with a returned value that is
+ * some (unspecified) supertype of a class.
+ *)
+and constraint_ root env cstr =
+  match cstr with
+  | Ast.Constraint_as, (r, _ as ty) ->
+      let pos = Reason.to_pos r in
+      let reason = pos, Rconstraint_as, Pcontravariant in
+      type_ root (Vcontravariant [reason]) env ty
+  | Ast.Constraint_super, (r, _ as ty) ->
+      let pos = Reason.to_pos r in
+      let reason = pos, Rconstraint_super, Pcovariant in
+      type_ root (Vcovariant [reason]) env ty

@@ -834,16 +834,16 @@ class CompactReader {
         AccessFlags::Error).toArray();
       String format = spec.rvalAt(PHPTransport::s_format,
         AccessFlags::None).toString();
-      Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
-        ret = newobj<c_Map>();
-        auto const data = ret.getObjectData();
-        if (size) static_cast<BaseMap*>(data)->reserve(size);
+        auto ret(makeSmartPtr<c_Map>());
+        if (size) ret->reserve(size);
         for (uint32_t i = 0; i < size; i++) {
           Variant key = readField(keySpec, keyType);
           Variant value = readField(valueSpec, valueType);
-          BaseMap::OffsetSet(data, key.asCell(), value.asCell());
+          BaseMap::OffsetSet(ret.get(), key.asCell(), value.asCell());
         }
+        readCollectionEnd();
+        return Variant(std::move(ret));
       } else {
         ArrayInit ainit(size, ArrayInit::Mixed{});
         for (uint32_t i = 0; i < size; i++) {
@@ -851,11 +851,9 @@ class CompactReader {
           Variant value = readField(valueSpec, valueType);
           ainit.setKeyUnconverted(key, value);
         }
-        ret = ainit.toArray();
+        readCollectionEnd();
+        return ainit.toArray();
       }
-
-      readCollectionEnd();
-      return ret;
     }
 
     Variant readList(const Array& spec) {
@@ -867,25 +865,22 @@ class CompactReader {
                                     AccessFlags::Error_Key).toArray();
       String format = spec.rvalAt(PHPTransport::s_format,
         AccessFlags::None).toString();
-      Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
-        auto const pvec = newobj<c_Vector>();
-        ret = pvec;
+        auto const pvec(makeSmartPtr<c_Vector>());
         if (size) pvec->reserve(size);
         for (uint32_t i = 0; i < size; i++) {
-          Variant value = readField(valueSpec, valueType);
-          pvec->t_add(value);
+          pvec->t_add(readField(valueSpec, valueType));
         }
+        readCollectionEnd();
+        return Variant(std::move(pvec));
       } else {
         PackedArrayInit pai(size);
         for (auto i = uint32_t{0}; i < size; ++i) {
           pai.append(readField(valueSpec, valueType));
         }
-        ret = pai.toArray();
+        readCollectionEnd();
+        return pai.toArray();
       }
-
-      readCollectionEnd();
-      return ret;
     }
 
     Variant readSet(const Array& spec) {
@@ -897,7 +892,6 @@ class CompactReader {
                                     AccessFlags::Error_Key).toArray();
       String format = spec.rvalAt(PHPTransport::s_format,
         AccessFlags::None).toString();
-      Variant ret;
       if (format.equal(PHPTransport::s_collection)) {
         auto set_ret = makeSmartPtr<c_Set>();
         if (size) set_ret->reserve(size);
@@ -906,8 +900,8 @@ class CompactReader {
           Variant value = readField(valueSpec, valueType);
           set_ret->t_add(value);
         }
-
-        ret = Variant(std::move(set_ret));
+        readCollectionEnd();
+        return Variant(std::move(set_ret));
       } else {
         // Note: the Mixed{} is just out of uncertainty right now.
         // These probably are generally string keys and this should
@@ -917,12 +911,9 @@ class CompactReader {
           Variant value = readField(valueSpec, valueType);
           ainit.setKeyUnconverted(value, true);
         }
-        ret = ainit.toArray();
+        readCollectionEnd();
+        return ainit.toArray();
       }
-
-
-      readCollectionEnd();
-      return ret;
     }
 
     void readMapBegin(TType &keyType, TType &valueType, uint32_t &size) {

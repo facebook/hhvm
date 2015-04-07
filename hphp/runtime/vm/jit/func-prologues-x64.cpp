@@ -468,10 +468,13 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   a.    decq   (rInvName);
   a.    storeq (0, rStashedAR[AROFF(m_varEnv)]);
   if (nPassed != 0) { // for zero args, we use the empty array
-    a.  movq   (rStashedAR, argNumToRegName[0]);
-    a.  subq   (rVmSp, argNumToRegName[0]);
-    a.  shrq   (0x4, argNumToRegName[0]);
-    a.  movq   (rVmSp, argNumToRegName[1]);
+    static_assert(sizeof(Cell) == 16, "");
+    a.  loadl  (rStashedAR[AROFF(m_numArgsAndFlags)], eax);
+    a.  movq   (rStashedAR, argNumToRegName[1]);
+    a.  andl   (ActRec::kNumArgsMask, eax);
+    a.  movl   (eax, r32(argNumToRegName[0]));
+    a.  shll   (0x4, eax);
+    a.  subq   (rax, argNumToRegName[1]);
     emitCall(a, reinterpret_cast<CodeAddress>(
       MkPacked{MixedArray::MakePacked}), argSet(2));
     callFixup = a.frontier();

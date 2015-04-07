@@ -143,7 +143,6 @@ struct TranslArgs {
 
   SrcKey sk;
   bool align;
-  bool dryRun{false};
   bool setFuncBody{false};
   TransFlags flags{0};
   TransID transId{kInvalidTransID};

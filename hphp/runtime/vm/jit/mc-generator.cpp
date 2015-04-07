@@ -1644,11 +1644,6 @@ MCGenerator::translateWork(const TranslArgs& args) {
     }
   }
 
-  if (args.dryRun) {
-    resetState();
-    return start;
-  }
-
   if (transKindToRecord == TransKind::Interp) {
     assertCleanState();
     FTRACE(1, "emitting dispatchBB interp request for failed translation\n");

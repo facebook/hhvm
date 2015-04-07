@@ -424,13 +424,14 @@ and class_decl tcopt c =
     | Some {ce_type = (_, Tfun ({ft_abstract = true; _})); _} -> false
     | _ -> true in
   let impl = c.c_extends @ c.c_implements @ c.c_uses in
+  let env, impl = lmap Typing_hint.hint env impl in
   let impl = match SMap.get SN.Members.__toString m with
     | Some {ce_type = (_, Tfun ft); _} when cls_name <> SN.Classes.cStringish ->
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
       let pos = ft.ft_pos in
-      let h = (pos, Nast.Happly ((pos, SN.Classes.cStringish), [])) in
-      h :: impl
+      let ty = (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), [])) in
+      ty :: impl
     | _ -> impl
   in
   let self = Typing.get_self_from_c env c in

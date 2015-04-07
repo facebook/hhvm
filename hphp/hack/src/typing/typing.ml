@@ -3340,7 +3340,6 @@ and string2 env idl =
  ) env idl
 
 and get_implements ~with_checks ~this (env: Env.env) ht =
-  let env, ht = Typing_hint.hint env ht in
   match ht with
   | _, Tapply ((p, c), paraml) ->
       let class_ = Env.get_class_dep env c in
@@ -3453,11 +3452,12 @@ and get_self_from_c env c =
 and class_def_ env_up c tc =
   let env = Env.set_self_id env_up (snd c.c_name) in
   let env = Env.set_mode env c.c_mode in
-  if not (Env.is_decl env) then Typing_variance.class_ (snd c.c_name) tc;
   let env = Env.set_root env (Dep.Class (snd c.c_name)) in
   let pc, _ = c.c_name in
-  let impl = c.c_extends @ c.c_implements @ c.c_uses in
+  let env, impl =
+    lmap Typing_hint.hint env (c.c_extends @ c.c_implements @ c.c_uses) in
   let env = Typing_hint.check_tparams_instantiable env c.c_tparams in
+  if not (Env.is_decl env) then Typing_variance.class_ (snd c.c_name) tc impl;
   let self = get_self_from_c env c in
   let env, impl_dimpl =
     lfold (get_implements ~with_checks:true ~this:self) env impl in
@@ -3483,7 +3483,7 @@ and class_def_ env_up c tc =
   end;
   if not (Env.is_decl env) || is_hhi (Pos.filename (fst c.c_name))
   then begin
-    List.iter (class_implements env c) impl;
+    List.iter (class_implements_type env c) impl;
     SMap.iter (fun _ ty -> class_implements_type env c ty) dimpl;
     List.iter (class_var_def env false c) c.c_vars;
     List.iter (method_def env) c.c_methods;
@@ -3543,10 +3543,6 @@ and class_constr_def env c =
   match c.c_constructor with
   | None -> ()
   | Some m -> method_def env m
-
-and class_implements env c1 h =
-  let env, ctype2 = Typing_hint.hint env h in
-  class_implements_type env c1 ctype2
 
 and class_implements_type env c1 ctype2 =
   let env, params = lfold begin fun env (_, (p, s), param) ->

@@ -47,7 +47,7 @@ val get_implements:
   with_checks:bool ->
   this:Typing_defs.ty ->
   Typing_env.env ->
-  Nast.hint ->
+  Typing_defs.ty ->
   Typing_env.env * (Typing_defs.ty SMap.t * Typing_defs.ty SMap.t)
 
 val get_self_from_c: Typing_env.env -> Nast.class_ -> Typing_defs.ty

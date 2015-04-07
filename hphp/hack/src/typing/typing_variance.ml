@@ -167,7 +167,7 @@ let make_variance reason pos = function
   | Ast.Contravariant ->
       Vcontravariant [pos, reason, Pcontravariant]
   | Ast.Invariant ->
-      Vinvariant ([pos, reason, Pcovariant], [pos, reason, Pcontravariant])
+      Vinvariant ([pos, reason, Pinvariant], [pos, reason, Pinvariant])
 
 (*****************************************************************************)
 (* Adds a new usage of a type to the environment.
@@ -333,10 +333,11 @@ let get_class_variance root (pos, class_name) =
 (* The entry point (for classes). *)
 (*****************************************************************************)
 
-let rec class_ class_name class_type =
+let rec class_ class_name class_type impl =
   let root = Typing_deps.Dep.Class class_name in
   let tparams = class_type.tc_tparams in
   let env = SMap.empty in
+  let env = List.fold_left (type_ root Vboth) env impl in
   let env = SMap.fold (class_member root) class_type.tc_cvars env in
   let env = SMap.fold (class_method root) class_type.tc_methods env in
   List.iter (check_variance env) tparams

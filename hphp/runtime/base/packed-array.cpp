@@ -69,8 +69,7 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
 
   ad->m_sizeAndPos       = oldSize | int64_t{old->m_pos} << 32;
   ad->m_kindAndCount     = ArrayData::kMixedKind << 24; // capcode=0, count=0
-  ad->m_capAndUsed       = uint64_t{oldSize} << 32 | cap; // used=oldSize
-  ad->m_tableMask        = mask;
+  ad->m_mask_used        = mask | uint64_t{oldSize} << 32; // used=oldSize
   ad->m_nextKI           = oldSize;
 
   assert(ad->m_kind == ArrayData::kMixedKind);
@@ -78,8 +77,8 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
   assert(ad->m_pos == old->m_pos);
   assert(ad->m_count == 0);
   assert(ad->m_used == oldSize);
-  assert(ad->m_cap == cap);
-  assert(ad->m_tableMask == mask);
+  assert(ad->capacity() == cap);
+  assert(ad->m_mask == mask);
   assert(ad->m_nextKI == oldSize);
   // Can't checkInvariants yet, since we haven't populated the payload.
   return ad;
@@ -96,7 +95,7 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
 MixedArray* PackedArray::ToMixed(ArrayData* old) {
   auto const oldSize = old->m_size;
   auto const ad      = ToMixedHeader(old, oldSize + 1);
-  auto const mask    = ad->m_tableMask;
+  auto const mask    = ad->m_mask;
   auto dstData       = ad->data();
   auto dstHash       = ad->hashTab();
   auto const srcData = packedData(old);
@@ -148,7 +147,7 @@ MixedArray* PackedArray::ToMixedCopy(const ArrayData* old) {
     ++dstData;
     ++dstHash;
   }
-  auto const mask = ad->m_tableMask;
+  auto const mask = ad->m_mask;
   for (; i <= mask; ++i) {
     *dstHash++ = MixedArray::Empty;
   }
@@ -172,7 +171,7 @@ MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
   auto const ad      = ToMixedHeader(old, neededSize);
   ad->m_count = 1;
   auto const oldSize = old->m_size;
-  auto const mask    = ad->m_tableMask;
+  auto const mask    = ad->m_mask;
   auto dstData       = ad->data();
   auto dstHash       = ad->hashTab();
   auto const srcData = packedData(old);

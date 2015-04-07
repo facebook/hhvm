@@ -1471,9 +1471,7 @@ struct HashCollection::EmptyMixedInitializer {
     ad->m_size      = 0;
     ad->m_pos       = 0;
     ad->m_count     = 0;
-    ad->m_used      = 0;
-    ad->m_cap       = 0;
-    ad->m_tableMask = 0;
+    ad->m_mask_used = 0;
     ad->m_nextKI    = 0;
     ad->hashTab()[0] = Empty;
 

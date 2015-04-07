@@ -145,7 +145,7 @@ size_t getMemSize(const ArrayData* arr) {
   case ArrayData::ArrayKind::kMixedKind: {
     auto const mixed = MixedArray::asMixed(arr);
     auto size = sizeof(MixedArray) +
-                sizeof(MixedArray::Elm) * (mixed->m_cap - mixed->m_used);
+                sizeof(MixedArray::Elm) * (mixed->capacity() - mixed->m_used);
     auto elms = mixed->data();
     auto last = elms + mixed->m_used;
     for (auto ptr = elms; ptr != last; ++ptr) {

@@ -168,8 +168,7 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
 
   ad->m_sizeAndPos   = 1; // size=1, pos=0
   ad->m_kindAndCount = MixedArray::kMixedKind << 24; // capcode=0, count=0
-  ad->m_capAndUsed   = uint64_t{1} << 32 | cap;
-  ad->m_tableMask    = mask;
+  ad->m_mask_used    = mask | uint64_t{1} << 32; // used=1
   ad->m_nextKI       = 0;
 
   auto const data = reinterpret_cast<MixedArray::Elm*>(ad + 1);
@@ -192,7 +191,7 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
   assert(ad->m_count == 0);
-  assert(ad->m_cap == cap);
+  assert(ad->capacity() == cap);
   assert(ad->m_used == 1);
   assert(ad->checkInvariants());
   return { ad, &lval };
@@ -210,8 +209,7 @@ EmptyArray::MakeMixed(int64_t key, TypedValue val) {
 
   ad->m_sizeAndPos    = 1; // size=1, pos=0
   ad->m_kindAndCount  = MixedArray::kMixedKind << 24; // capcode=0, count=0
-  ad->m_capAndUsed    = uint64_t{1} << 32 | cap;
-  ad->m_tableMask     = mask;
+  ad->m_mask_used     = mask | uint64_t{1} << 32; // used=1
   ad->m_nextKI        = (key >= 0) ? key + 1 : 0;
 
   auto const data = reinterpret_cast<MixedArray::Elm*>(ad + 1);
@@ -233,7 +231,7 @@ EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
   assert(ad->m_count == 0);
-  assert(ad->m_cap == cap);
+  assert(ad->capacity() == cap);
   assert(ad->m_used == 1);
   assert(ad->checkInvariants());
   return { ad, &lval };

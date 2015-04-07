@@ -109,7 +109,10 @@ module Program : Server.SERVER_PROGRAM = struct
           | _ -> ()
         end env.ServerEnv.files_info
     | ServerMsg.AUTOCOMPLETE content ->
-        ServerAutoComplete.auto_complete env content oc
+        let result = ServerAutoComplete.auto_complete env.nenv content in
+        print_endline "Auto-complete";
+        Marshal.to_channel oc result [];
+        flush oc
     | ServerMsg.IDENTIFY_FUNCTION (content, line, char) ->
         ServerIdentifyFunction.go content line char oc
     | ServerMsg.OUTLINE content ->

@@ -41,47 +41,47 @@ TRACE_SET_MOD(hhir);
 //////////////////////////////////////////////////////////////////////
 // Convenient short-hand state accessors
 
-inline SSATmp* fp(const HTS& env) { return env.irb->fp(); }
-inline SSATmp* sp(const HTS& env) { return env.irb->sp(); }
+inline SSATmp* fp(const IRGS& env) { return env.irb->fp(); }
+inline SSATmp* sp(const IRGS& env) { return env.irb->sp(); }
 
-inline Offset bcOff(const HTS& env) {
+inline Offset bcOff(const IRGS& env) {
   return env.bcStateStack.back().offset();
 }
 
-inline bool resumed(const HTS& env) {
+inline bool resumed(const IRGS& env) {
   return env.bcStateStack.back().resumed();
 }
 
-inline const Func* curFunc(const HTS& env) {
+inline const Func* curFunc(const IRGS& env) {
   return env.bcStateStack.back().func();
 }
 
-inline const Unit* curUnit(const HTS& env) {
+inline const Unit* curUnit(const IRGS& env) {
   return curFunc(env)->unit();
 }
 
-inline const Class* curClass(const HTS& env) {
+inline const Class* curClass(const IRGS& env) {
   return curFunc(env)->cls();
 }
 
-inline SrcKey curSrcKey(const HTS& env) {
+inline SrcKey curSrcKey(const IRGS& env) {
   return env.bcStateStack.back();
 }
 
-inline SrcKey nextSrcKey(const HTS& env) {
+inline SrcKey nextSrcKey(const IRGS& env) {
   auto srcKey = curSrcKey(env);
   srcKey.advance(curUnit(env));
   return srcKey;
 }
 
-inline Offset nextBcOff(const HTS& env) {
+inline Offset nextBcOff(const IRGS& env) {
   return nextSrcKey(env).offset();
 }
 
 //////////////////////////////////////////////////////////////////////
 // Control-flow helpers.
 
-inline void hint(HTS& env, Block::Hint h) {
+inline void hint(IRGS& env, Block::Hint h) {
   env.irb->curBlock()->setHint(h);
 }
 
@@ -152,7 +152,7 @@ template<> struct BranchImpl<SSATmp*> {
  * flow paths, causing an explosion of required CPU time and/or memory.
  */
 template<class Branch, class Next, class Taken>
-SSATmp* cond(HTS& env,
+SSATmp* cond(IRGS& env,
              unsigned producedRefs,
              Branch branch,
              Next next,
@@ -185,7 +185,7 @@ SSATmp* cond(HTS& env,
  * the branch emitted in the branch lambda is {not,} taken.
  */
 template<class Branch, class Next, class Taken>
-void ifThenElse(HTS& env, Branch branch, Next next, Taken taken) {
+void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
   auto const taken_block = env.unit.defBlock();
   auto const done_block = env.unit.defBlock();
   branch(taken_block);
@@ -217,7 +217,7 @@ void ifThenElse(HTS& env, Branch branch, Next next, Taken taken) {
  * emitted in the branch lambda is taken.
  */
 template<class Branch, class Taken>
-void ifThen(HTS& env, Branch branch, Taken taken) {
+void ifThen(IRGS& env, Branch branch, Taken taken) {
   auto const taken_block = env.unit.defBlock();
   auto const done_block = env.unit.defBlock();
   branch(taken_block);
@@ -247,7 +247,7 @@ void ifThen(HTS& env, Branch branch, Taken taken) {
  * taken.
  */
 template<class Branch, class Next>
-void ifElse(HTS& env, Branch branch, Next next) {
+void ifElse(IRGS& env, Branch branch, Next next) {
   auto const done_block = env.unit.defBlock();
   branch(done_block);
   next();
@@ -264,7 +264,7 @@ void ifElse(HTS& env, Branch branch, Next next) {
 
 //////////////////////////////////////////////////////////////////////
 
-inline BCMarker makeMarker(HTS& env, Offset bcOff) {
+inline BCMarker makeMarker(IRGS& env, Offset bcOff) {
   auto stackOff = env.irb->syncedSpLevel() +
     env.irb->evalStack().size() - env.irb->stackDeficit();
 
@@ -279,14 +279,14 @@ inline BCMarker makeMarker(HTS& env, Offset bcOff) {
   };
 }
 
-inline void updateMarker(HTS& env) {
+inline void updateMarker(IRGS& env) {
   env.irb->setCurMarker(makeMarker(env, bcOff(env)));
 }
 
 //////////////////////////////////////////////////////////////////////
 // Eval stack manipulation
 
-inline IRSPOffset offsetFromIRSP(const HTS& env, BCSPOffset offsetFromInstr) {
+inline IRSPOffset offsetFromIRSP(const IRGS& env, BCSPOffset offsetFromInstr) {
   int32_t const virtDelta = env.irb->evalStack().size() -
     env.irb->stackDeficit();
   auto const curSPTop = env.irb->syncedSpLevel() + virtDelta;
@@ -302,13 +302,13 @@ inline IRSPOffset offsetFromIRSP(const HTS& env, BCSPOffset offsetFromInstr) {
   return ret;
 }
 
-inline BCSPOffset offsetFromBCSP(const HTS& env, FPAbsOffset offsetFromFP) {
+inline BCSPOffset offsetFromBCSP(const IRGS& env, FPAbsOffset offsetFromFP) {
   auto const curSPTop = env.irb->syncedSpLevel() +
     env.irb->evalStack().size() - env.irb->stackDeficit();
   return toBCSPOffset(offsetFromFP, curSPTop);
 }
 
-inline SSATmp* pop(HTS& env, Type type, TypeConstraint tc = DataTypeSpecific) {
+inline SSATmp* pop(IRGS& env, Type type, TypeConstraint tc = DataTypeSpecific) {
   auto const opnd = env.irb->evalStack().pop();
   env.irb->constrainValue(opnd, tc);
 
@@ -330,35 +330,35 @@ inline SSATmp* pop(HTS& env, Type type, TypeConstraint tc = DataTypeSpecific) {
   return opnd;
 }
 
-inline SSATmp* popC(HTS& env, TypeConstraint tc = DataTypeSpecific) {
+inline SSATmp* popC(IRGS& env, TypeConstraint tc = DataTypeSpecific) {
   return pop(env, Type::Cell, tc);
 }
 
-inline SSATmp* popA(HTS& env) { return pop(env, Type::Cls); }
-inline SSATmp* popV(HTS& env) { return pop(env, Type::BoxedInitCell); }
-inline SSATmp* popR(HTS& env) { return pop(env, Type::Gen); }
-inline SSATmp* popF(HTS& env) { return pop(env, Type::Gen); }
+inline SSATmp* popA(IRGS& env) { return pop(env, Type::Cls); }
+inline SSATmp* popV(IRGS& env) { return pop(env, Type::BoxedInitCell); }
+inline SSATmp* popR(IRGS& env) { return pop(env, Type::Gen); }
+inline SSATmp* popF(IRGS& env) { return pop(env, Type::Gen); }
 
-inline void discard(HTS& env, uint32_t n) {
+inline void discard(IRGS& env, uint32_t n) {
   for (auto i = uint32_t{0}; i < n; ++i) {
     pop(env, Type::StkElem, DataTypeGeneric); // don't care about the values
   }
 }
 
-inline void popDecRef(HTS& env,
+inline void popDecRef(IRGS& env,
                       Type type,
                       TypeConstraint tc = DataTypeCountness) {
   auto const val = pop(env, type, tc);
   gen(env, DecRef, val);
 }
 
-inline SSATmp* push(HTS& env, SSATmp* tmp) {
+inline SSATmp* push(IRGS& env, SSATmp* tmp) {
   FTRACE(2, "pushing {}\n", *tmp->inst());
   env.irb->evalStack().push(tmp);
   return tmp;
 }
 
-inline SSATmp* pushIncRef(HTS& env,
+inline SSATmp* pushIncRef(IRGS& env,
                           SSATmp* tmp,
                           TypeConstraint tc = DataTypeCountness) {
   env.irb->constrainValue(tmp, tc);
@@ -366,7 +366,7 @@ inline SSATmp* pushIncRef(HTS& env,
   return push(env, tmp);
 }
 
-inline void extendStack(HTS& env, uint32_t index, Type type) {
+inline void extendStack(IRGS& env, uint32_t index, Type type) {
   // DataTypeGeneric is used in here because nobody's actually looking at the
   // values, we're just inserting LdStks into the eval stack to be consumed
   // elsewhere.
@@ -380,7 +380,7 @@ inline void extendStack(HTS& env, uint32_t index, Type type) {
   push(env, tmp);
 }
 
-inline SSATmp* top(HTS& env,
+inline SSATmp* top(IRGS& env,
                    Type type,
                    BCSPOffset index = BCSPOffset{0},
                    TypeConstraint tc = DataTypeSpecific) {
@@ -389,32 +389,32 @@ inline SSATmp* top(HTS& env,
     extendStack(env, index.offset, type);
     tmp = env.irb->evalStack().top(index.offset);
   }
-  assert(tmp);
+  assertx(tmp);
   env.irb->constrainValue(tmp, tc);
   return tmp;
 }
 
-inline SSATmp* topC(HTS& env,
+inline SSATmp* topC(IRGS& env,
                     BCSPOffset i = BCSPOffset{0},
                     TypeConstraint tc = DataTypeSpecific) {
   return top(env, Type::Cell, i, tc);
 }
 
-inline SSATmp* topF(HTS& env,
+inline SSATmp* topF(IRGS& env,
                     BCSPOffset i = BCSPOffset{0},
                     TypeConstraint tc = DataTypeSpecific) {
   return top(env, Type::Gen, i, tc);
 }
 
-inline SSATmp* topV(HTS& env, BCSPOffset i = BCSPOffset{0}) {
+inline SSATmp* topV(IRGS& env, BCSPOffset i = BCSPOffset{0}) {
   return top(env, Type::BoxedInitCell, i);
 }
 
-inline SSATmp* topR(HTS& env, BCSPOffset i = BCSPOffset{0}) {
+inline SSATmp* topR(IRGS& env, BCSPOffset i = BCSPOffset{0}) {
   return top(env, Type::Gen, i);
 }
 
-inline Type topType(HTS& env,
+inline Type topType(IRGS& env,
                     BCSPOffset idx,
                     TypeConstraint constraint = DataTypeSpecific) {
   FTRACE(5, "Asking for type of stack elem {}\n", idx.offset);
@@ -429,7 +429,7 @@ inline Type topType(HTS& env,
 //////////////////////////////////////////////////////////////////////
 // Eval stack---SpillStack machinery
 
-inline void spillStack(HTS& env) {
+inline void spillStack(IRGS& env) {
   auto const toSpill = env.irb->evalStack();
   for (auto idx = toSpill.size(); idx-- > 0;) {
     gen(env,
@@ -444,17 +444,17 @@ inline void spillStack(HTS& env) {
 //////////////////////////////////////////////////////////////////////
 // Frame
 
-inline SSATmp* ldThis(HTS& env) {
+inline SSATmp* ldThis(IRGS& env) {
   auto const ctx = gen(env, LdCtx, fp(env));
   return gen(env, CastCtxThis, ctx);
 }
 
-inline SSATmp* ldCtx(HTS& env) {
+inline SSATmp* ldCtx(IRGS& env) {
   if (env.irb->thisAvailable()) return ldThis(env);
   return gen(env, LdCtx, fp(env));
 }
 
-inline SSATmp* unbox(HTS& env, SSATmp* val, Block* exit) {
+inline SSATmp* unbox(IRGS& env, SSATmp* val, Block* exit) {
   auto const type = val->type();
   // If we don't have an exit the LdRef can't be a guard.
   auto const inner = exit ? (type & Type::BoxedCell).inner() : Type::Cell;
@@ -489,7 +489,7 @@ inline SSATmp* unbox(HTS& env, SSATmp* val, Block* exit) {
 // Type helpers
 
 inline Type relaxToGuardable(Type ty) {
-  assert(ty <= Type::Gen);
+  assertx(ty <= Type::Gen);
   ty = ty.unspecialize();
 
   if (ty.isKnownDataType()) return ty;
@@ -517,22 +517,22 @@ inline bool classIsUniqueInterface(const Class* cls) {
   return classIsUnique(cls) && isInterface(cls);
 }
 
-inline bool classIsPersistentOrCtxParent(HTS& env, const Class* cls) {
+inline bool classIsPersistentOrCtxParent(IRGS& env, const Class* cls) {
   if (!cls) return false;
   if (classHasPersistentRDS(cls)) return true;
   if (!curClass(env)) return false;
   return curClass(env)->classof(cls);
 }
 
-inline bool classIsUniqueOrCtxParent(HTS& env, const Class* cls) {
+inline bool classIsUniqueOrCtxParent(IRGS& env, const Class* cls) {
   if (!cls) return false;
   if (classIsUnique(cls)) return true;
   if (!curClass(env)) return false;
   return curClass(env)->classof(cls);
 }
 
-inline SSATmp* ldCls(HTS& env, SSATmp* className) {
-  assert(className->isA(Type::Str));
+inline SSATmp* ldCls(IRGS& env, SSATmp* className) {
+  assertx(className->isA(Type::Str));
   if (className->hasConstVal()) {
     if (auto const cls = Unit::lookupClass(className->strVal())) {
       if (classIsPersistentOrCtxParent(env, cls)) return cns(env, cls);
@@ -545,11 +545,11 @@ inline SSATmp* ldCls(HTS& env, SSATmp* className) {
 //////////////////////////////////////////////////////////////////////
 // Local variables
 
-inline SSATmp* ldLoc(HTS& env,
+inline SSATmp* ldLoc(IRGS& env,
                      uint32_t locId,
                      Block* exit,
                      TypeConstraint tc) {
-  assert(IMPLIES(exit == nullptr, !curFunc(env)->isPseudoMain()));
+  assertx(IMPLIES(exit == nullptr, !curFunc(env)->isPseudoMain()));
 
   auto const opStr = curFunc(env)->isPseudoMain()
     ? "LdLocPseudoMain"
@@ -558,8 +558,8 @@ inline SSATmp* ldLoc(HTS& env,
 
   if (curFunc(env)->isPseudoMain()) {
     auto const type = relaxToGuardable(env.irb->predictedLocalType(locId));
-    assert(!type.isSpecialized());
-    assert(type == type.dropConstVal());
+    assertx(!type.isSpecialized());
+    assertx(type == type.dropConstVal());
 
     // We don't support locals being type Gen, so if we ever get into such a
     // case, we need to punt.
@@ -578,7 +578,7 @@ inline SSATmp* ldLoc(HTS& env,
  *       type for this local.  This check may be optimized away if we can
  *       determine that the inner type must match the tracked type.
  */
-inline SSATmp* ldLocInner(HTS& env,
+inline SSATmp* ldLocInner(IRGS& env,
                           uint32_t locId,
                           Block* ldrefExit,
                           Block* ldPMExit,
@@ -609,7 +609,7 @@ inline SSATmp* ldLocInner(HTS& env,
  * caller requires the catch trace to be generated at a point earlier than when
  * it calls this function.
  */
-inline SSATmp* ldLocInnerWarn(HTS& env,
+inline SSATmp* ldLocInnerWarn(IRGS& env,
                               uint32_t id,
                               Block* ldrefExit,
                               Block* ldPMExit,
@@ -649,7 +649,7 @@ inline SSATmp* ldLocInnerWarn(HTS& env,
  * Generate a store to a local without doing anything else.  This function just
  * handles using StLocPseudoMain if we're in a pseudomain.
  */
-inline SSATmp* stLocRaw(HTS& env, uint32_t id, SSATmp* fp, SSATmp* newVal) {
+inline SSATmp* stLocRaw(IRGS& env, uint32_t id, SSATmp* fp, SSATmp* newVal) {
   return gen(
     env,
     curFunc(env)->isPseudoMain() ? StLocPseudoMain : StLoc,
@@ -671,14 +671,14 @@ inline SSATmp* stLocRaw(HTS& env, uint32_t id, SSATmp* fp, SSATmp* newVal) {
  * Pre: !newVal->type().maybe(Type::BoxedCell)
  * Pre: exit != nullptr if the local may be boxed
  */
-inline SSATmp* stLocImpl(HTS& env,
+inline SSATmp* stLocImpl(IRGS& env,
                          uint32_t id,
                          Block* ldrefExit,
                          Block* ldPMExit,
                          SSATmp* newVal,
                          bool decRefOld,
                          bool incRefNew) {
-  assert(!newVal->type().maybe(Type::BoxedCell));
+  assertx(!newVal->type().maybe(Type::BoxedCell));
 
   auto const cat = decRefOld ? DataTypeCountness : DataTypeGeneric;
   auto const oldLoc = ldLoc(env, id, ldPMExit, cat);
@@ -724,7 +724,7 @@ inline SSATmp* stLocImpl(HTS& env,
   );
 }
 
-inline SSATmp* stLoc(HTS& env,
+inline SSATmp* stLoc(IRGS& env,
                      uint32_t id,
                      Block* ldrefExit,
                      Block* ldPMExit,
@@ -734,7 +734,7 @@ inline SSATmp* stLoc(HTS& env,
   return stLocImpl(env, id, ldrefExit, ldPMExit, newVal, decRefOld, incRefNew);
 }
 
-inline SSATmp* stLocNRC(HTS& env,
+inline SSATmp* stLocNRC(IRGS& env,
                         uint32_t id,
                         Block* ldrefExit,
                         Block* ldPMExit,
@@ -744,7 +744,7 @@ inline SSATmp* stLocNRC(HTS& env,
   return stLocImpl(env, id, ldrefExit, ldPMExit, newVal, decRefOld, incRefNew);
 }
 
-inline SSATmp* pushStLoc(HTS& env,
+inline SSATmp* pushStLoc(IRGS& env,
                          uint32_t id,
                          Block* ldrefExit,
                          Block* ldPMExit,
@@ -765,15 +765,15 @@ inline SSATmp* pushStLoc(HTS& env,
   return push(env, ret);
 }
 
-inline SSATmp* ldLocAddr(HTS& env, uint32_t locId) {
+inline SSATmp* ldLocAddr(IRGS& env, uint32_t locId) {
   env.irb->constrainLocal(locId, DataTypeSpecific, "LdLocAddr");
   return gen(env, LdLocAddr, Type::PtrToFrameGen, LocalId(locId), fp(env));
 }
 
-inline SSATmp* ldStkAddr(HTS& env, BCSPOffset relOffset) {
+inline SSATmp* ldStkAddr(IRGS& env, BCSPOffset relOffset) {
   // You're almost certainly doing it wrong if you want to get the address of a
   // stack cell that's in irb->evalStack().
-  assert(relOffset >= static_cast<int32_t>(env.irb->evalStack().size()));
+  assertx(relOffset >= static_cast<int32_t>(env.irb->evalStack().size()));
   auto const offset = offsetFromIRSP(env, relOffset);
   env.irb->constrainStack(offset, DataTypeSpecific);
   return gen(
@@ -785,8 +785,8 @@ inline SSATmp* ldStkAddr(HTS& env, BCSPOffset relOffset) {
   );
 }
 
-inline void decRefLocalsInline(HTS& env) {
-  assert(!curFunc(env)->isPseudoMain());
+inline void decRefLocalsInline(IRGS& env) {
+  assertx(!curFunc(env)->isPseudoMain());
   for (int id = curFunc(env)->numLocals() - 1; id >= 0; --id) {
     auto const loc = ldLoc(env, id, nullptr, DataTypeGeneric);
     gen(env, DecRef, loc);

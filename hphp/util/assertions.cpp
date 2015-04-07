@@ -33,8 +33,8 @@ __thread AssertDetailImpl* AssertDetailImpl::s_head = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void AssertDetailImpl::log_impl(const AssertDetailImpl* adi) {
-  if (!adi) return;
+bool AssertDetailImpl::log_impl(const AssertDetailImpl* adi) {
+  if (!adi) return false;
   log_impl(adi->m_next);
 
   auto const title = folly::format("{:-^80}\n", adi->m_name).str();
@@ -42,9 +42,11 @@ void AssertDetailImpl::log_impl(const AssertDetailImpl* adi) {
 
   fprintf(stderr, "\n%s%s\n", title.c_str(), msg.c_str());
   if (s_logger) s_logger(title.c_str(), msg);
+
+  return true;
 }
 
-void AssertDetailImpl::log() { log_impl(s_head); }
+bool AssertDetailImpl::log() { return log_impl(s_head); }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -57,8 +59,15 @@ void assert_log_failure(const char* e, const std::string& msg) {
       s_logger("Assertion Message", msg);
     }
   }
-  AssertDetailImpl::log();
+  auto const detailed = AssertDetailImpl::log();
   fprintf(stderr, "\n");
+
+  // Reprint the original message, so readers don't necessarily have to page up
+  // through all the detail to find it.  We also printed it first, just in case
+  // one of the detailers wanted to segfault.
+  if (detailed) {
+    fprintf(stderr, "\nAssertion failure: %s\n%s\n", e, msg.c_str());
+  }
 }
 
 void assert_fail(const char* e, const char* file,

@@ -18,6 +18,8 @@
 
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
+
 // This file does ugly things with macros so include last.
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
 
@@ -285,7 +287,7 @@ void CodeGenerator::cgElemUX(IRInstruction* i)    { cgElemImpl(i); }
 void CodeGenerator::cgElemArrayImpl(IRInstruction* inst) {
   auto const key     = inst->src(1);
   bool const warn    = inst->op() == ElemArrayW;
-  auto const keyInfo = checkStrictlyInteger(key);
+  auto const keyInfo = checkStrictlyInteger(key->type());
   BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE,
               keyInfo.type,
               keyInfo.checkForInt,
@@ -311,11 +313,13 @@ void CodeGenerator::cgElemArray(IRInstruction* i)  { cgElemArrayImpl(i); }
 void CodeGenerator::cgElemArrayW(IRInstruction* i) { cgElemArrayImpl(i); }
 
 void CodeGenerator::cgArrayGet(IRInstruction* inst) {
-  auto const key     = inst->src(1);
-  auto const keyInfo = checkStrictlyInteger(key);
+  auto const arrIsStatic = inst->src(0)->isA(Type::StaticArr);
+  auto const key         = inst->src(1);
+  auto const keyInfo     = checkStrictlyInteger(key->type());
   BUILD_OPTAB(ARRAYGET_HELPER_TABLE,
               keyInfo.type,
-              keyInfo.checkForInt);
+              keyInfo.checkForInt,
+              arrIsStatic);
 
   auto args = argGroup(inst).ssa(0);
   if (keyInfo.converted) {
@@ -415,7 +419,7 @@ void CodeGenerator::cgVGetElem(IRInstruction* inst) {
 void CodeGenerator::cgArraySetImpl(IRInstruction* inst) {
   bool const setRef  = inst->op() == ArraySetRef;
   auto const key     = inst->src(1);
-  auto const keyInfo = checkStrictlyInteger(key);
+  auto const keyInfo = checkStrictlyInteger(key->type());
   BUILD_OPTAB(ARRAYSET_HELPER_TABLE,
               keyInfo.type,
               keyInfo.checkForInt,
@@ -461,7 +465,7 @@ void CodeGenerator::cgSetElem(IRInstruction* inst) {
 
 void CodeGenerator::cgArrayIsset(IRInstruction* inst) {
   auto const key     = inst->src(1);
-  auto const keyInfo = checkStrictlyInteger(key);
+  auto const keyInfo = checkStrictlyInteger(key->type());
   BUILD_OPTAB(ARRAY_ISSET_HELPER_TABLE,
               keyInfo.type,
               keyInfo.checkForInt);
@@ -519,7 +523,7 @@ void CodeGenerator::cgEmptyElem(IRInstruction* i) { cgIssetEmptyElemImpl(i); }
 
 void CodeGenerator::cgArrayIdx(IRInstruction* inst) {
   auto const key     = inst->src(1);
-  auto const keyInfo = checkStrictlyInteger(key);
+  auto const keyInfo = checkStrictlyInteger(key->type());
 
   auto const target = [&] () -> CppCall {
     if (keyInfo.checkForInt) {

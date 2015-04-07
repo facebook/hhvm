@@ -21,7 +21,7 @@ struct Class;
 struct StringData;
 }
 namespace HPHP { namespace jit {
-struct HTS;
+struct IRGS;
 struct SSATmp;
 struct Block;
 }}
@@ -30,8 +30,8 @@ namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* ldClsPropAddrKnown(HTS&, const Class*, const StringData*);
-SSATmp* ldClsPropAddr(HTS&, SSATmp*, SSATmp*, bool);
+SSATmp* ldClsPropAddrKnown(IRGS&, const Class*, const StringData*);
+SSATmp* ldClsPropAddr(IRGS&, SSATmp*, SSATmp*, bool);
 
 //////////////////////////////////////////////////////////////////////
 

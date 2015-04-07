@@ -37,9 +37,7 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags,
   , m_attr_kind_count(flags | kind << 24)
 {
   assert(o_attribute == flags && !m_count);
-  assert(m_kind == HeaderKind::Object ||
-         m_kind == HeaderKind::ResumableObj ||
-         m_kind == HeaderKind::AwaitAllWH);
+  assert(isObjectKind(kind));
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
   instanceInit(cls);
@@ -103,9 +101,6 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
     */
     obj->callCustomInstanceInit();
   }
-  if (UNLIKELY(cls->hasNativePropHandler())) {
-    obj->setAttribute(ObjectData::Attribute::HasNativePropHandler);
-  }
   return obj;
 }
 
@@ -149,17 +144,16 @@ inline bool ObjectData::isCollection() const {
 }
 
 inline bool ObjectData::isMutableCollection() const {
-  return Collection::isMutableType(getCollectionType());
+  return isCollection() && HPHP::isMutableCollection(collectionType());
 }
 
 inline bool ObjectData::isImmutableCollection() const {
-  return Collection::isImmutableType(getCollectionType());
+  return isCollection() && HPHP::isImmutableCollection(collectionType());
 }
 
-inline Collection::Type ObjectData::getCollectionType() const {
-  return isCollection() ?
-    static_cast<Collection::Type>(o_subclass_u8) :
-    Collection::Type::InvalidType;
+inline CollectionType ObjectData::collectionType() const {
+  assert(isValidCollection(static_cast<CollectionType>(m_kind)));
+  return static_cast<CollectionType>(m_kind);
 }
 
 inline bool ObjectData::isIterator() const {
@@ -210,14 +204,6 @@ inline double ObjectData::toDouble() const {
     return toDoubleImpl();
   }
   return toInt64();
-}
-
-inline uint8_t& ObjectData::subclass_u8() {
-  return o_subclass_u8;
-}
-
-inline uint8_t ObjectData::subclass_u8() const {
-  return o_subclass_u8;
 }
 
 inline const Func* ObjectData::methodNamed(const StringData* sd) const {

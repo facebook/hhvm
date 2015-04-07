@@ -18,6 +18,8 @@
 
 #include <folly/Format.h>
 
+#include "hphp/util/assertions.h"
+
 namespace HPHP { namespace jit {
 
 namespace {
@@ -38,10 +40,10 @@ StackMaps parseStackMaps(const uint8_t* ptr) {
   readValue(ptr, maps.version);
   uint8_t reserved8;
   readValue(ptr, reserved8);
-  assert(reserved8 == 0);
+  assertx(reserved8 == 0);
   uint16_t reserved16;
   readValue(ptr, reserved16);
-  assert(reserved16 == 0);
+  assertx(reserved16 == 0);
 
   uint32_t numFunctions, numConstants, numRecords;
   readValue(ptr, numFunctions);
@@ -76,7 +78,7 @@ StackMaps parseStackMaps(const uint8_t* ptr) {
       using Location = StackMaps::Record::Location;
       Location loc;
       readValue(ptr, loc.kind);
-      assert(loc.kind >= Location::Kind::Register &&
+      assertx(loc.kind >= Location::Kind::Register &&
              loc.kind <= Location::Kind::ConstIndex);
 
       ptr += sizeof(uint8_t); // Reserved (location flags)
@@ -97,7 +99,7 @@ StackMaps parseStackMaps(const uint8_t* ptr) {
     }
 
     if ((reinterpret_cast<intptr_t>(ptr) % 8) != 0) ptr += sizeof(uint32_t);
-    assert((reinterpret_cast<intptr_t>(ptr) % 8) == 0);
+    assertx((reinterpret_cast<intptr_t>(ptr) % 8) == 0);
 
     maps.records.emplace(record.id, std::move(record));
   }

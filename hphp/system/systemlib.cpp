@@ -20,110 +20,134 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/base/execution-context.h"
 
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
+#include <vector>
 
-#define ALLOC_OBJECT_STUB_RETURN(name)                                    \
-  ObjectData::newInstance(SystemLib::s_##name##Class)
+namespace HPHP { namespace SystemLib {
+/////////////////////////////////////////////////////////////////////////////
 
-#define ALLOC_OBJECT_STUB(name)                                           \
-  ObjectData* SystemLib::Alloc##name##Object() {                          \
-    return ALLOC_OBJECT_STUB_RETURN(name);                                \
-  }
+bool s_inited = false;
+bool s_anyNonPersistentBuiltins = false;
+std::string s_source;
+Unit* s_unit = nullptr;
+Unit* s_hhas_unit = nullptr;
+Unit* s_nativeFuncUnit = nullptr;
+Unit* s_nativeClassUnit = nullptr;
+Func* s_nullFunc = nullptr;
 
-bool SystemLib::s_inited = false;
-bool SystemLib::s_anyNonPersistentBuiltins = false;
-std::string SystemLib::s_source = "";
-HPHP::Unit* SystemLib::s_unit = nullptr;
-HPHP::Unit* SystemLib::s_hhas_unit = nullptr;
-HPHP::Unit* SystemLib::s_nativeFuncUnit = nullptr;
-HPHP::Unit* SystemLib::s_nativeClassUnit = nullptr;
-HPHP::Func* SystemLib::s_nullFunc = nullptr;
+/////////////////////////////////////////////////////////////////////////////
 
 #define DEFINE_SYSTEMLIB_CLASS(cls)       \
-  HPHP::Class* SystemLib::s_ ## cls ## Class = nullptr;
+  Class* s_ ## cls ## Class = nullptr;
 SYSTEMLIB_CLASSES(DEFINE_SYSTEMLIB_CLASS)
 #undef DEFINE_SYSTEMLIB_CLASS
 
-ObjectData* SystemLib::AllocStdClassObject() {
-  return ObjectData::newInstance(SystemLib::s_stdclassClass);
+ObjectData* AllocStdClassObject() {
+  return ObjectData::newInstance(s_stdclassClass);
 }
 
-ObjectData* SystemLib::AllocPinitSentinel() {
-  return ObjectData::newInstance(SystemLib::s_pinitSentinelClass);
+ObjectData* AllocPinitSentinel() {
+  return ObjectData::newInstance(s_pinitSentinelClass);
 }
 
 #define CREATE_AND_CONSTRUCT(clsname, params)                               \
   ObjectData* inst =                                                        \
-    ObjectData::newInstance(SystemLib::s_##clsname##Class);                 \
+    ObjectData::newInstance(s_##clsname##Class);                            \
   TypedValue ret;                                                           \
   {                                                                         \
     /* Increment refcount across call to ctor, so the object doesn't */     \
     /* get destroyed when ctor's frame is torn down */                      \
     CountableHelper cnt(inst);                                              \
-    g_context->invokeFunc(&ret,                                           \
-                            SystemLib::s_##clsname##Class->getCtor(),       \
-                            params,                                         \
-                            inst);                                          \
+    g_context->invokeFunc(&ret,                                             \
+                          s_##clsname##Class->getCtor(),                    \
+                          params,                                           \
+                          inst);                                            \
   }                                                                         \
   tvRefcountedDecRef(&ret);                                                 \
   return inst;
 
-ObjectData* SystemLib::AllocExceptionObject(const Variant& message) {
+ObjectData* AllocExceptionObject(const Variant& message) {
   CREATE_AND_CONSTRUCT(Exception, make_packed_array(message));
 }
 
-ObjectData* SystemLib::AllocBadMethodCallExceptionObject(const Variant& message) {
+ObjectData* AllocBadMethodCallExceptionObject(const Variant& message) {
   CREATE_AND_CONSTRUCT(BadMethodCallException, make_packed_array(message));
 }
 
-ObjectData* SystemLib::AllocInvalidArgumentExceptionObject(const Variant& message) {
+ObjectData* AllocInvalidArgumentExceptionObject(const Variant& message) {
   CREATE_AND_CONSTRUCT(InvalidArgumentException, make_packed_array(message));
 }
 
-ObjectData* SystemLib::AllocRuntimeExceptionObject(const Variant& message) {
+ObjectData* AllocRuntimeExceptionObject(const Variant& message) {
   CREATE_AND_CONSTRUCT(RuntimeException, make_packed_array(message));
 }
 
-ObjectData* SystemLib::AllocOutOfBoundsExceptionObject(const Variant& message) {
+ObjectData* AllocOutOfBoundsExceptionObject(const Variant& message) {
   CREATE_AND_CONSTRUCT(OutOfBoundsException, make_packed_array(message));
 }
 
-ObjectData* SystemLib::AllocInvalidOperationExceptionObject(const Variant& message) {
+ObjectData* AllocInvalidOperationExceptionObject(const Variant& message) {
   CREATE_AND_CONSTRUCT(InvalidOperationException, make_packed_array(message));
 }
 
-ObjectData* SystemLib::AllocDOMExceptionObject(const Variant& message, const Variant& code) {
+ObjectData* AllocDOMExceptionObject(const Variant& message,
+                                    const Variant& code) {
   CREATE_AND_CONSTRUCT(DOMException, make_packed_array(message, code));
 }
 
-ObjectData*
-SystemLib::AllocSoapFaultObject(const Variant& code,
-                                const Variant& message,
-                                const Variant& actor /* = null_variant */,
-                                const Variant& detail /* = null_variant */,
-                                const Variant& name /* = null_variant */,
-                                const Variant& header /* = null_variant */) {
+ObjectData* AllocSoapFaultObject(const Variant& code,
+                                 const Variant& message,
+                                 const Variant& actor /* = null_variant */,
+                                 const Variant& detail /* = null_variant */,
+                                 const Variant& name /* = null_variant */,
+                                 const Variant& header /* = null_variant */) {
   CREATE_AND_CONSTRUCT(SoapFault, make_packed_array(code, message, actor,
-                                                 detail, name, header));
+                                                    detail, name, header));
 }
 
-ObjectData* SystemLib::AllocLazyKVZipIterableObject(const Variant& mp) {
+ObjectData* AllocLazyKVZipIterableObject(const Variant& mp) {
   CREATE_AND_CONSTRUCT(LazyKVZipIterable, make_packed_array(mp));
 }
 
-ObjectData* SystemLib::AllocLazyIterableViewObject(const Variant& iterable) {
+ObjectData* AllocLazyIterableViewObject(const Variant& iterable) {
   CREATE_AND_CONSTRUCT(LazyIterableView, make_packed_array(iterable));
 }
 
-ObjectData* SystemLib::AllocLazyKeyedIterableViewObject(const Variant& iterable) {
+ObjectData* AllocLazyKeyedIterableViewObject(const Variant& iterable) {
   CREATE_AND_CONSTRUCT(LazyKeyedIterableView, make_packed_array(iterable));
 }
 
 #undef CREATE_AND_CONSTRUCT
 
+#define ALLOC_OBJECT_STUB(name)                                           \
+  ObjectData* Alloc##name##Object() {                                     \
+    return ObjectData::newInstance(s_##name##Class);                      \
+  }
+
 ALLOC_OBJECT_STUB(Directory);
 ALLOC_OBJECT_STUB(PDOException);
 
-///////////////////////////////////////////////////////////////////////////////
+#undef ALLOC_OBJECT_STUB
+
+/////////////////////////////////////////////////////////////////////////////
+
+static std::vector<Unit*> s_persistent_units;
+
+/* To be called during process startup ONLY, before threads are spun up.
+ * Typically this will be called by HPHP::Extension::moduleInit to load an
+ * extension-specific systemlib file, or to load the main systemlib.
+ */
+void addPersistentUnit(Unit* unit) {
+  s_persistent_units.push_back(unit);
 }
+
+/* Typically called between requests in non-RepoAuthoritative mode
+ * when function renaming is enabled.
+ */
+void mergePersistentUnits() {
+  for (auto unit : s_persistent_units) {
+    unit->merge();
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////
+}} // namespace HPHP::SystemLib

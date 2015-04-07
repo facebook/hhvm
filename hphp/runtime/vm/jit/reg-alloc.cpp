@@ -33,13 +33,98 @@ using NativeCalls::CallMap;
 
 TRACE_SET_MOD(hhir);
 
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+/*
+ * Return true if this instruction can load a TypedValue using a 16-byte load
+ * into a SIMD register.
+ */
+bool loadsCell(Opcode op) {
+  switch (op) {
+  case LdStk:
+  case LdLoc:
+  case LdMem:
+  case LdContField:
+  case LdElem:
+  case LdRef:
+  case LdStaticLocCached:
+  case LookupCns:
+  case LookupClsCns:
+  case CGetProp:
+  case VGetProp:
+  case ArrayGet:
+  case MapGet:
+  case CGetElem:
+  case VGetElem:
+  case ArrayIdx:
+  case GenericIdx:
+    switch (arch()) {
+    case Arch::X64: return true;
+    case Arch::ARM: return false;
+    }
+    not_reached();
+
+  default:
+    return false;
+  }
+}
+
+/*
+ * Returns true if the instruction can store source operand srcIdx to
+ * memory as a cell using a 16-byte store.  (implying its okay to
+ * clobber TypedValue.m_aux)
+ */
+bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
+  switch (arch()) {
+  case Arch::X64: break;
+  case Arch::ARM: return false;
+  }
+
+  // If this function returns true for an operand, then the register allocator
+  // may give it an XMM register, and the instruction will store the whole 16
+  // bytes into memory.  Therefore it's important *not* to return true if the
+  // TypedValue.m_aux field in memory has important data.  This is the case for
+  // MixedArray elements, Map elements, and RefData inner values.  We don't
+  // have StMem in here since it sometimes stores to RefDatas.
+  switch (inst.op()) {
+  case StRetVal:
+  case StLoc:
+  case StLocNT:
+    return srcIdx == 1;
+
+  case StElem:
+    return srcIdx == 2;
+
+  case StStk:
+    return srcIdx == 1;
+
+  case CallBuiltin:
+    return srcIdx < inst.numSrcs();
+
+  default:
+    return false;
+  }
+}
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
 PhysReg forceAlloc(const SSATmp& tmp) {
   if (tmp.type() <= Type::Bottom) return InvalidReg;
 
   auto inst = tmp.inst();
   auto opc = inst->op();
 
-  auto const forceStkPtrs = arch() != Arch::X64;
+  auto const forceStkPtrs = [&] {
+    switch (arch()) {
+    case Arch::X64: return false;
+    case Arch::ARM: return true;
+    }
+    not_reached();
+  }();
 
   if (forceStkPtrs && tmp.isA(Type::StkPtr)) {
     assert_flog(
@@ -74,7 +159,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
 // possible (when all uses and defs can be wide). These will be assigned
 // SIMD registers later.
 void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
-                const BlockList& blocks, BackEnd* backend) {
+                const BlockList& blocks) {
   // visit instructions to find tmps eligible to use SIMD registers
   auto const try_wide = RuntimeOption::EvalHHIRAllocSIMDRegs;
   boost::dynamic_bitset<> not_wide(unit.numTmps());
@@ -84,13 +169,13 @@ void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
       for (uint32_t i = 0, n = inst.numSrcs(); i < n; i++) {
         auto s = inst.src(i);
         tmps[s] = s;
-        if (!try_wide || !backend->storesCell(inst, i)) {
+        if (!try_wide || !storesCell(inst, i)) {
           not_wide.set(s->id());
         }
       }
       for (auto& d : inst.dsts()) {
         tmps[&d] = &d;
-        if (!try_wide || inst.isControlFlow() || !backend->loadsCell(inst)) {
+        if (!try_wide || inst.isControlFlow() || !loadsCell(inst.op())) {
           not_wide.set(d.id());
         }
       }
@@ -150,8 +235,13 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::callr:
       defs = abi.all() - abi.calleeSaved;
       switch (arch()) {
-        case Arch::ARM: defs.add(PhysReg(arm::rLinkReg)); break;
-        case Arch::X64: break;
+        case Arch::ARM:
+          defs.add(PhysReg(arm::rLinkReg));
+          defs.remove(PhysReg(arm::rVmFp));
+          break;
+        case Arch::X64:
+          defs.remove(reg::rbp);
+          break;
       }
       break;
     case Vinstr::callstub:
@@ -160,6 +250,14 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::bindcall:
     case Vinstr::contenter:
       defs = abi.all();
+      switch (arch()) {
+        case Arch::ARM:
+          defs.remove(PhysReg(arm::rVmFp));
+          break;
+        case Arch::X64:
+          defs -= reg::rbp | x64::rVmTl;
+          break;
+      }
       break;
     case Vinstr::cqo:
       uses = RegSet(reg::rax);
@@ -184,5 +282,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
       break;
   }
 }
+
+//////////////////////////////////////////////////////////////////////
 
 }}

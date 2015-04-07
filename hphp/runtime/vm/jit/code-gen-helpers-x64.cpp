@@ -59,7 +59,7 @@ TRACE_SET_MOD(hhir);
 void moveToAlign(CodeBlock& cb,
                  const size_t align /* =kJmpTargetAlign */) {
   X64Assembler a { cb };
-  assert(folly::isPowTwo(align));
+  assertx(folly::isPowTwo(align));
   size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));
   if (leftInBlock == align) return;
   if (leftInBlock > 2) {
@@ -84,11 +84,11 @@ void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
 void emitEagerVMRegSave(Asm& as, PhysReg rds, RegSaveFlags flags) {
   bool saveFP = bool(flags & RegSaveFlags::SaveFP);
   bool savePC = bool(flags & RegSaveFlags::SavePC);
-  assert((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
+  assertx((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
          RegSaveFlags::None);
 
   Reg64 pcReg = rdi;
-  assert(!kCrossCallRegs.contains(rdi));
+  assertx(!kCrossCallRegs.contains(rdi));
 
   as.   storeq (rVmSp, rds[rds::kVmspOff]);
   if (savePC) {
@@ -113,10 +113,10 @@ void emitEagerVMRegSave(Asm& as, PhysReg rds, RegSaveFlags flags) {
 void emitEagerVMRegSave(Vout& v, Vreg rds, RegSaveFlags flags) {
   bool saveFP = bool(flags & RegSaveFlags::SaveFP);
   bool savePC = bool(flags & RegSaveFlags::SavePC);
-  assert((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
+  assertx((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
          RegSaveFlags::None);
 
-  assert(!kCrossCallRegs.contains(rdi));
+  assertx(!kCrossCallRegs.contains(rdi));
 
   v << store{rVmSp, rds[rds::kVmspOff]};
   if (savePC) {
@@ -241,8 +241,8 @@ void emitAssertRefCount(Vout& v, Vreg base) {
 // after execution, but might do so in strange ways. Do not count on
 // being able to smash dest to a different register in the future, e.g.
 void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg) {
-  assert(srcReg != InvalidReg);
-  assert(dstReg != InvalidReg);
+  assertx(srcReg != InvalidReg);
+  assertx(dstReg != InvalidReg);
 
   if (srcReg == dstReg) return;
 

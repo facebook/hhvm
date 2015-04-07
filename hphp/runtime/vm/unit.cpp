@@ -42,7 +42,6 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/autoload-handler.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -771,10 +770,9 @@ const Cell* Unit::lookupCns(const StringData* cnsName) {
       return &tv;
     }
     if (UNLIKELY(tv.m_data.pref != nullptr)) {
-      ClassInfo::ConstantInfo* ci =
-        (ClassInfo::ConstantInfo*)(void*)tv.m_data.pref;
-      auto const tvRet = const_cast<Variant&>(
-        ci->getDeferredValue()).asTypedValue();
+      auto callback =
+        reinterpret_cast<SystemConstantCallback>(tv.m_data.pref);
+      const Cell* tvRet = callback().asTypedValue();
       assert(cellIsPlausible(*tvRet));
       if (LIKELY(tvRet->m_type != KindOfUninit)) {
         return tvRet;
@@ -855,21 +853,22 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
   return defCnsHelper(handle, value, cnsName);
 }
 
-void Unit::defDynamicSystemConstant(const StringData* cnsName,
-                                    const void* data) {
+bool Unit::defSystemConstantCallback(const StringData* cnsName,
+                                     SystemConstantCallback callback) {
   static const bool kServer = RuntimeOption::ServerExecutionMode();
   // Zend doesn't define the STD* streams in server mode so we don't either
   if (UNLIKELY(kServer &&
        (s_stdin.equal(cnsName) ||
         s_stdout.equal(cnsName) ||
         s_stderr.equal(cnsName)))) {
-    return;
+    return false;
   }
   auto const handle = makeCnsHandle(cnsName, true);
   assert(handle);
   TypedValue* cns = &rds::handleToRef<TypedValue>(handle);
   assert(cns->m_type == KindOfUninit);
-  cns->m_data.pref = (RefData*)data;
+  cns->m_data.pref = reinterpret_cast<RefData*>(callback);
+  return true;
 }
 
 

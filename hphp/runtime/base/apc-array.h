@@ -36,11 +36,9 @@ class APCLocalArray;
  */
 struct APCArray {
   // Entry point to create an APCArray of any kind
-  static APCHandle* MakeShared(ArrayData* data,
-                               size_t& size,
-                               bool inner,
-                               bool unserializeObj);
-  static APCHandle* MakeShared();
+  static APCHandle::Pair MakeSharedArray(ArrayData* data, bool inner,
+                                         bool unserializeObj);
+  static APCHandle::Pair MakeSharedEmptyArray();
 
   static Variant MakeArray(const APCHandle* handle);
 
@@ -132,12 +130,8 @@ private:
   //
   // Create API
   //
-  static APCHandle* MakeShared(ArrayData* data,
-                               size_t& size,
-                               bool unserializeObj);
-  static APCHandle* MakePackedShared(ArrayData* data,
-                                     size_t& size,
-                                     bool unserializeObj);
+  static APCHandle::Pair MakeHash(ArrayData* data, bool unserializeObj);
+  static APCHandle::Pair MakePacked(ArrayData* data, bool unserializeObj);
 
   void setPacked() { m_handle.setPacked(); }
 

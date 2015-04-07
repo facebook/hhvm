@@ -31,6 +31,7 @@
   TIMER_NAME(optimize_predictionOpts)           \
   TIMER_NAME(optimize_realxGuards)              \
   TIMER_NAME(optimize_refcountOpts)             \
+  TIMER_NAME(optimize_refcountOpts2)            \
   TIMER_NAME(optimize_relaxGuards)              \
   TIMER_NAME(optimize_reoptimize)               \
   TIMER_NAME(regalloc)                          \
@@ -43,6 +44,7 @@
   TIMER_NAME(translateTracelet)                 \
   TIMER_NAME(translateTracelet_irGeneration)    \
   TIMER_NAME(vasm_xls)                          \
+  TIMER_NAME(vasm_xls_spill)                    \
   TIMER_NAME(vasm_jumps)                        \
   TIMER_NAME(vasm_gen)                          \
   TIMER_NAME(vasm_lower)                        \
@@ -61,7 +63,7 @@ namespace HPHP { namespace jit {
  * timing early, in case it's not reasonable to add a new scope just for
  * timing.
  *
- * The name given to the constructor may be any string, though by convention
+ * There are no rules about the values in the Name enum, though by convention
  * any components are separated with underscores. For example, we use Timers
  * for optimize, optimize_dce, optimize_jumpOpts, and others.
  *

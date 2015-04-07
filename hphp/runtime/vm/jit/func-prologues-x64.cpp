@@ -27,11 +27,11 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
+#include "hphp/runtime/vm/jit/relocation.h"
 
 namespace HPHP { namespace jit { namespace x64 {
 
 //////////////////////////////////////////////////////////////////////
-
 
 TRACE_SET_MOD(mcg);
 
@@ -65,8 +65,8 @@ void maybeEmitStackCheck(X64Assembler& a, const Func* func) {
 
 TCA emitFuncGuard(X64Assembler& a, const Func* func) {
   using namespace reg;
-  assert(kScratchCrossTraceRegs.contains(rax));
-  assert(kScratchCrossTraceRegs.contains(rdx));
+  assertx(kScratchCrossTraceRegs.contains(rax));
+  assertx(kScratchCrossTraceRegs.contains(rdx));
 
   auto funcImm = Immed64(func);
   int nBytes, offset;
@@ -93,7 +93,7 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
       be an 8-byte immediate, and patch it up afterwards.
     */
     a.  movq   (0xdeadbeeffeedface, rdx);
-    assert(((uint64_t*)a.frontier())[-1] == 0xdeadbeeffeedface);
+    assertx(((uint64_t*)a.frontier())[-1] == 0xdeadbeeffeedface);
     ((uint64_t*)a.frontier())[-1] = uintptr_t(func);
     a.  cmpq   (rax, rdx);
   } else {
@@ -101,8 +101,8 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
   }
   a.    jnz    (mcg->tx().uniqueStubs.funcPrologueRedispatch);
 
-  assert(funcPrologueToGuard(a.frontier(), func) == aStart);
-  assert(funcPrologueHasGuard(a.frontier(), func));
+  assertx(funcPrologueToGuard(a.frontier(), func) == aStart);
+  assertx(funcPrologueHasGuard(a.frontier(), func));
   return a.frontier();
 }
 
@@ -127,7 +127,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   Asm a { mcg->code.main() };
 
   if (mcg->tx().mode() == TransKind::Proflogue) {
-    assert(shouldPGOFunc(*func));
+    assertx(shouldPGOFunc(*func));
     TransID transId  = mcg->tx().profData()->curTransID();
     auto counterAddr = mcg->tx().profData()->transCounterAddr(transId);
     a.movq(counterAddr, rAsm);
@@ -158,7 +158,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
                : TCA(jit::shuffleExtraArgsMayUseVV),
                argSet(1));
     } else {
-      assert(func->hasVariadicCaptureParam());
+      assertx(func->hasVariadicCaptureParam());
       emitCall(a, TCA(jit::shuffleExtraArgsVariadic), argSet(1));
     }
     // We'll fix rVmSp below.
@@ -195,7 +195,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       }
     }
   } else if (func->hasVariadicCaptureParam()) {
-    assert(!func->isMagic());
+    assertx(!func->isMagic());
     int offset = cellsToBytes(-1);
     emitStoreTVType(a, KindOfArray, rVmSp[offset + TVOFF(m_type)]);
     emitImmStoreq(a, staticEmptyArray(), rVmSp[offset + TVOFF(m_data)]);
@@ -260,7 +260,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   // the way if there are a modest number of locals to update;
   // otherwise, do it in a compact loop.
   int numUninitLocals = func->numLocals() - numLocals;
-  assert(numUninitLocals >= 0);
+  assertx(numUninitLocals >= 0);
   if (numUninitLocals > 0) {
 
     // If there are too many locals, then emitting a loop to initialize locals
@@ -352,7 +352,7 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   auto& frozenCode = mcg->code.frozen();
   Asm a { mainCode };
   TCA start = mainCode.frontier();
-  assert(mcg->cgFixups().empty());
+  assertx(mcg->cgFixups().empty());
   if (dvs.size() == 1) {
     a.  cmpl  (dvs[0].first, rVmFp[AROFF(m_numArgsAndFlags)]);
     emitBindJ(mainCode, frozenCode, CC_LE, SrcKey(func, dvs[0].second, false));
@@ -366,12 +366,22 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
     }
     emitBindJ(mainCode, frozenCode, CC_None, SrcKey(func, func->base(), false));
   }
+  if (RuntimeOption::EvalPerfRelocate) {
+    GrowableVector<IncomingBranch> incomingBranches;
+    SrcKey sk = SrcKey(func, dvs[0].second, false);
+    recordPerfRelocMap(start, mainCode.frontier(),
+                       frozenCode.frontier(), frozenCode.frontier(),
+                       sk, 0,
+                       incomingBranches,
+                       mcg->cgFixups());
+  }
+
   mcg->cgFixups().process(nullptr);
   return start;
 }
 
 SrcKey emitFuncPrologue(Func* func, int nPassed, TCA& start) {
-  assert(!func->isMagic());
+  assertx(!func->isMagic());
   Asm a { mcg->code.main() };
 
   start = emitFuncGuard(a, func);
@@ -391,16 +401,16 @@ SrcKey emitFuncPrologue(Func* func, int nPassed, TCA& start) {
 }
 
 SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
-  assert(func->isMagic());
-  assert(func->numParams() == 2);
-  assert(!func->hasVariadicCaptureParam());
+  assertx(func->isMagic());
+  assertx(func->numParams() == 2);
+  assertx(!func->hasVariadicCaptureParam());
   using namespace reg;
   using MkPacked = ArrayData* (*)(uint32_t, const TypedValue*);
 
   Asm a { mcg->code.main() };
   Label not_magic_call;
   auto const rInvName = r13;
-  assert(!kCrossCallRegs.contains(r13));
+  assertx(!kCrossCallRegs.contains(r13));
 
   auto skFuncBody = SrcKey {};
   auto callFixup  = TCA { nullptr };

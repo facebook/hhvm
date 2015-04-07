@@ -40,20 +40,20 @@ constexpr auto kFuncGuardShortLen = 14;
 
 template<typename T>
 T* funcPrologueToGuardImm(jit::TCA prologue) {
-  assert(arch() == Arch::X64);
-  assert(sizeof(T) == 4 || sizeof(T) == 8);
+  assertx(arch() == Arch::X64);
+  assertx(sizeof(T) == 4 || sizeof(T) == 8);
   T* retval = (T*)(prologue - (sizeof(T) == 8 ?
                                kFuncGuardLen - kFuncMovImm :
                                kFuncGuardShortLen - kFuncCmpImm));
   // We padded these so the immediate would fit inside a cache line
-  assert(((uintptr_t(retval) ^ (uintptr_t(retval + 1) - 1)) &
+  assertx(((uintptr_t(retval) ^ (uintptr_t(retval + 1) - 1)) &
           ~kCacheLineMask) == 0);
 
   return retval;
 }
 
 inline bool funcPrologueHasGuard(jit::TCA prologue, const Func* func) {
-  assert(arch() == Arch::X64);
+  assertx(arch() == Arch::X64);
   intptr_t iptr = uintptr_t(func);
   if (deltaFits(iptr, sz::dword)) {
     return *funcPrologueToGuardImm<int32_t>(prologue) == iptr;
@@ -62,7 +62,7 @@ inline bool funcPrologueHasGuard(jit::TCA prologue, const Func* func) {
 }
 
 inline TCA funcPrologueToGuard(TCA prologue, const Func* func) {
-  assert(arch() == Arch::X64);
+  assertx(arch() == Arch::X64);
   if (!prologue || prologue == mcg->tx().uniqueStubs.fcallHelperThunk) {
     return prologue;
   }

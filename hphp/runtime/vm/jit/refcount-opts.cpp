@@ -192,7 +192,7 @@ struct Value {
   }
 
   IncSet popRef() {
-    assert(!pendingIncs.empty());
+    assertx(!pendingIncs.empty());
     auto incs = std::move(pendingIncs.back());
     pendingIncs.pop_back();
     return incs;
@@ -293,8 +293,8 @@ struct FrameStack {
   /* Push a new frame representing a newly defined FramePtr for an inlined
    * call. */
   void pushInline(const IRInstruction* fpInst) {
-    assert(!preLive.empty());
-    assert(fpInst->is(DefInlineFP));
+    assertx(!preLive.empty());
+    assertx(fpInst->is(DefInlineFP));
     live[fpInst] = std::move(preLive.back());
     preLive.pop_back();
   }
@@ -302,12 +302,12 @@ struct FrameStack {
   /* Pop an inlined frame to represent an InlineReturn, forgetting what we know
    * about its $this pointer. */
   void popInline(const IRInstruction* fpInst) {
-    assert(fpInst->is(DefInlineFP));
-    assert(live.size() >= 2);
+    assertx(fpInst->is(DefInlineFP));
+    assertx(live.size() >= 2);
     auto it = live.find(fpInst);
-    assert(it != live.end());
+    assertx(it != live.end());
 
-    assert(dead.count(fpInst) == 0);
+    assertx(dead.count(fpInst) == 0);
     dead[fpInst] = std::move(it->second);
     live.erase(it);
   }
@@ -315,7 +315,7 @@ struct FrameStack {
   /* Pop a non-inlined frame. This is only called if a trace includes a RetC in
    * the outermost function. */
   void pop() {
-    assert(live.size() == 1);
+    assertx(live.size() == 1);
     live.erase(live.begin());
   }
 
@@ -461,7 +461,7 @@ struct SinkPointsMap {
 Point idForEdge(const Block* from, const Block* to, const IdMap& ids) {
   auto* next = from->next();
   auto* taken = from->taken();
-  assert(next || taken);
+  assertx(next || taken);
 
   auto before = [&](const IRInstruction& inst) {
     ITRACE(6, "id for B{} -> B{} is before {}\n", from->id(), to->id(), inst);
@@ -474,17 +474,17 @@ Point idForEdge(const Block* from, const Block* to, const IdMap& ids) {
 
   if (next && taken) {
     // from has two outgoing edges. Use the beginning of to.
-    assert(to->numPreds() == 1 && !to->empty());
+    assertx(to->numPreds() == 1 && !to->empty());
     auto it = to->begin();
-    assert(it != to->end() && !it->is(DefLabel, BeginCatch));
+    assertx(it != to->end() && !it->is(DefLabel, BeginCatch));
     return before(*it);
   } else {
     // from has one outgoing edges. Use the end of from.
-    assert(!from->empty());
+    assertx(!from->empty());
     auto it = from->end();
     --it;
     if (it->isControlFlow()) {
-      assert(it->isTerminal());
+      assertx(it->isTerminal());
       return before(*it);
     } else {
       return after(*it);
@@ -505,7 +505,6 @@ bool isRawLoad(const IRInstruction* inst) {
     case LdStk:
     case LdElem:
     case LdContField:
-    case LdPackedArrayElem:
     case LdLocPseudoMain:
       return true;
 
@@ -536,9 +535,9 @@ struct SinkPointAnalyzer : private LocalStateHook {
   {}
 
   SinkPointsMap find() {
-    assert(!m_blocks.empty());
+    assertx(!m_blocks.empty());
     auto& fpInst = m_blocks.front()->front();
-    assert(fpInst.is(DefFP));
+    assertx(fpInst.is(DefFP));
     m_state.frames.live[&fpInst] = Frame();
 
     for (auto* block : m_blocks) {
@@ -551,7 +550,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       m_block = block;
 
       if (block != m_blocks.front()) {
-        assert(m_savedStates.count(block) == 1);
+        assertx(m_savedStates.count(block) == 1);
         m_state = mergeStates(std::move(m_savedStates[block]));
         m_savedStates.erase(block);
       }
@@ -563,8 +562,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
         // in reverse postorder.
         //
         // TODO(#4887242): Get pre-header from Loop data structure.
-        assert(oldBlock->numSuccs() == 1);
-        assert(oldBlock->taken() == block);
+        assertx(oldBlock->numSuccs() == 1);
+        assertx(oldBlock->taken() == block);
 
         // Need to set m_inst as startBlock will consume values upon entering
         // a loop header, and it will need to know where to place the sink
@@ -655,7 +654,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     };
     ONTRACE(3, doTrace());
 
-    assert(!states.empty());
+    assertx(!states.empty());
     /*
      * Short circuit the easy, common case: one incoming state.  (This
      * is just to save JIT time.)
@@ -725,7 +724,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
       if (inState.state.frames != firstFrames) {
         // Task #5216936: add support for merging states with
         // different FrameStacks, and get rid of the TRACE_PUNT below.
-        if (RuntimeOption::EvalHHIRBytecodeControlFlow) {
+        if (RuntimeOption::EvalJitPGORegionSelector != "hottrace" ||
+            RuntimeOption::EvalJitLoops) {
           TRACE_PUNT("refcount-opts needs support for merging states with "
                      "different FrameStacks");
         }
@@ -737,7 +737,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
         if (inPair.second.empty()) continue;
 
         auto* value = inPair.first;
-        assert(!value->inst()->isPassthrough());
+        assertx(!value->inst()->isPassthrough());
         const bool existed = mergedValues.count(value);
         auto& mergedState = mergedValues[value];
         if (existed) {
@@ -776,7 +776,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       auto const mergedDelta = mergedState.optDelta();
       for (auto& inBlock : pair.second.inBlocks) {
         auto& inState = inBlock.value;
-        assert(inState.optDelta() >= mergedDelta);
+        assertx(inState.optDelta() >= mergedDelta);
 
         Point insertId = idForEdge(inBlock.from, m_block, m_ids);
         while (inState.optDelta() > mergedDelta) {
@@ -790,7 +790,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
       // Only put the merged state in the result if it provides useful
       // information.
-      assert(mergedState.optCount() >= 0);
+      assertx(mergedState.optCount() >= 0);
       if (mergedState.realCount || mergedState.fromLoad) {
         retState.values[pair.first] = mergedState;
       }
@@ -870,7 +870,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       jit::flat_set<SSATmp*> ancestors;
       for (auto* val : tmps) {
         // trueRoot shouldn't be in the set
-        assert(val->inst()->isPassthrough());
+        assertx(val->inst()->isPassthrough());
         passthrough(val);
 
         // For each ancestor of val, if it's not yet in ancestors, add it and
@@ -889,11 +889,11 @@ struct SinkPointAnalyzer : private LocalStateHook {
       // There should now be exactly one value in tmps that isn't
       // ancestors. This is the value to use in the merge map. The sets are
       // sorted, so walk them in parallel to find the discrepancy.
-      assert(ancestors.size() == tmps.size() - 1);
+      assertx(ancestors.size() == tmps.size() - 1);
       SSATmp* mostDerived = nullptr;
 
       for (auto tIt = tmps.begin(), aIt = ancestors.begin(); ; ++tIt, ++aIt) {
-        assert(tIt != tmps.end());
+        assertx(tIt != tmps.end());
         if (aIt == ancestors.end() || *tIt != *aIt) {
           mostDerived = *tIt;
           break;
@@ -1022,13 +1022,13 @@ struct SinkPointAnalyzer : private LocalStateHook {
     // for some situations in inlined functions.  Right now this code is
     // relying on other passes (simplifier and ir-builder) to make this work.
     auto const ctx = jit::canonical(root->inst()->src(0));
-    assert(ctx->inst()->is(LdCtx));
+    assertx(ctx->inst()->is(LdCtx));
 
     auto* fpInst = ctx->inst()->src(0)->inst();
     auto it = m_state.frames.live.find(fpInst);
     if (it == m_state.frames.live.end()) {
       it = m_state.frames.dead.find(fpInst);
-      assert(it != m_state.frames.dead.end());
+      assertx(it != m_state.frames.dead.end());
     }
     return it->second.mainThis;
   }
@@ -1106,7 +1106,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
       auto const& valState = m_state.values[src];
       // Record DecRefs that won't go to 0
-      assert(IMPLIES(m_inst->is(DecRefNZ), valState.realCount > 1));
+      assertx(IMPLIES(m_inst->is(DecRefNZ), valState.realCount > 1));
       if (valState.realCount > 1) {
         m_ret.decRefs[m_ids.before(m_inst)] = valState.realCount;
       }
@@ -1124,7 +1124,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
         auto& valState = m_state.values[canonical(this_)];
         if (valState.realCount == 0) {
-          assert(valState.fromLoad);
+          assertx(valState.fromLoad);
           ++valState.realCount;
         }
         ITRACE(3, " after: {}\n", show(valState));
@@ -1202,7 +1202,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
       auto& valState = m_state.values[canonical(src)];
       const SinkPoint sp(m_ids.before(m_inst), src, false);
-      assert(IMPLIES(valState.optCount() == 0, valState.realCount == 0));
+      assertx(IMPLIES(valState.optCount() == 0, valState.realCount == 0));
       if (m_inst->consumesReference(i)) {
         consumeValue(canonical(src), valState, sp);
       }
@@ -1285,7 +1285,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
    * reference to consume, this is either a bug in this analysis pass or the
    * incoming IR, so abort with a (hopefully) helpful error. */
   void consumeValueImpl(SSATmp* value, bool eraseOnly) {
-    assert(value);
+    assertx(value);
     if (!value->type().maybe(Type::Counted)) return;
 
     auto* root = canonical(value);
@@ -1306,12 +1306,12 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
   void consumeValue(SSATmp* value, Value& valState, SinkPoint sinkPoint) {
     ITRACE(3, "consuming value {}\n", *value->inst());
-    assert(value == canonical(value));
+    assertx(value == canonical(value));
     Indent _i;
 
     ITRACE(3, "before: {}\n", show(valState));
-    assert(valState.realCount >= 0);
-    assert(valState.optCount() >= 0);
+    assertx(valState.realCount >= 0);
+    assertx(valState.optCount() >= 0);
 
     assertCanConsume(value);
 
@@ -1416,7 +1416,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
   /* Completely resolve the delta between realCount and optCount. */
   void resolveValueImpl(SSATmp* const origVal, bool eraseOnly) {
-    assert(origVal);
+    assertx(origVal);
 
     if (!origVal->type().maybe(Type::Counted)) return;
     auto* value = canonical(origVal);
@@ -1440,7 +1440,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
   void replaceValue(SSATmp* oldVal, SSATmp* newVal) {
     ITRACE(3, "replacing {} with {}\n", *oldVal, *newVal);
 
-    assert(canonical(oldVal) == canonical(newVal) &&
+    assertx(canonical(oldVal) == canonical(newVal) &&
            oldVal != newVal);
     m_state.canon[canonical(newVal)] = newVal;
   }
@@ -1449,8 +1449,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
   void refineLocalValue(SSATmp* oldVal, SSATmp* newVal) {
     if ( oldVal->type().maybe(Type::Counted) &&
         !newVal->type().maybe(Type::Counted)) {
-      assert(newVal->inst()->is(CheckType, AssertType));
-      assert(newVal->inst()->src(0) == oldVal);
+      assertx(newVal->inst()->is(CheckType, AssertType));
+      assertx(newVal->inst()->src(0) == oldVal);
       // Similar to what we do when processing the CheckType directly, we
       // "consume" the value on behalf of the CheckType.
       oldVal = canonical(oldVal);
@@ -1471,10 +1471,10 @@ struct SinkPointAnalyzer : private LocalStateHook {
       // or for some situations in inlined functions.  Right now this code is
       // relying on other passes (simplifier and ir-builder) to make this work.
       auto const ctx = canonical(m_inst->src(0));
-      assert(ctx->inst()->is(LdCtx));
+      assertx(ctx->inst()->is(LdCtx));
 
       auto* fpInst = ctx->inst()->src(0)->inst();
-      assert(m_state.frames.live.count(fpInst));
+      assertx(m_state.frames.live.count(fpInst));
       auto& frame = m_state.frames.live[fpInst];
       frame.currentThis = m_inst->dst();
       if (frame.mainThis == nullptr) {
@@ -1490,7 +1490,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     }
 
     if (m_inst->isPassthrough()) {
-      assert(m_inst->numDsts() == 1);
+      assertx(m_inst->numDsts() == 1);
       auto* dst = m_inst->dst();
       auto* src = m_inst->src(0);
       if (dst->type().maybe(Type::Counted)) {
@@ -1536,7 +1536,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       if (!dst->type().maybe(Type::Counted)) continue;
 
       if (m_inst->producesReference(i) || isRawLoad(m_inst)) {
-        assert(!m_state.values.count(dst));
+        assertx(!m_state.values.count(dst));
         ITRACE(3, "defining value {}\n", *m_inst);
         Indent _i;
 
@@ -1927,6 +1927,10 @@ void eliminateTakes(const BlockList& blocks) {
   }
 }
 
+}
+
+void eliminateTakes(const IRUnit& unit) {
+  eliminateTakes(rpoSortCfg(unit));
 }
 
 /* optimizeRefcounts attempts to remove IncRef/DecRef pairs when we can prove

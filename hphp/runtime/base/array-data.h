@@ -83,7 +83,6 @@ protected:
 public:
   IMPLEMENT_COUNTABLE_METHODS
   void setRefCount(RefCount n) { m_count = n; }
-  template<class F> void scan(F&) const;
 
   /**
    * Create a new ArrayData with specified array element(s).

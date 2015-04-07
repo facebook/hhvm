@@ -75,13 +75,6 @@ let lint_all genv code oc =
   flush oc
 
 let go genv fnl oc =
-  let fnl = List.fold_left begin fun acc fn ->
-    match realpath fn with
-    | Some path -> path :: acc
-    | None ->
-        Printf.fprintf stderr "Could not find file '%s'" fn;
-        acc
-  end [] fnl in
   let fnl = rev_rev_map (Relative_path.create Relative_path.Root) fnl in
   let errs =
     if List.length fnl > 10
@@ -94,6 +87,9 @@ let go genv fnl oc =
         ~next:(Bucket.make fnl)
     else
       lint [] fnl in
+  let errs = List.sort begin fun x y ->
+    Pos.compare (Lint.get_pos x) (Lint.get_pos y)
+  end errs in
   let errs = rev_rev_map Lint.to_absolute errs in
   Marshal.to_channel oc (errs : result) [];
   flush oc

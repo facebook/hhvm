@@ -59,8 +59,6 @@ class Extension : public IDebuggable {
 public:
   static bool IsSystemlibPath(const std::string& path);
 
-  static void MergeSystemlib();
-
   // Look for "ext.{namehash}" in the binary and compile/merge it
   void loadSystemlib(const std::string& name = "");
 

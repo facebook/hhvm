@@ -19,7 +19,7 @@
 #include <cstdint>
 
 namespace HPHP { namespace jit {
-struct HTS;
+struct IRGS;
 struct Type;
 }}
 
@@ -27,7 +27,7 @@ namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
-void assertTypeLocal(HTS&, uint32_t id, Type);
+void assertTypeLocal(IRGS&, uint32_t id, Type);
 
 //////////////////////////////////////////////////////////////////////
 

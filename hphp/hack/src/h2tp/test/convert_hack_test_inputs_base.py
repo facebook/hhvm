@@ -98,6 +98,7 @@ UNSUPPORTED_FILES_UNPARSER = {
         'xhp_attr_11.php',
         'xhp_attr_12.php',
         'xhp_attr_13.php',
+        'xhp_attr_14.php',
         'xhp_hint.php',
     ],
     "XhpAttr": [
@@ -113,6 +114,7 @@ UNSUPPORTED_FILES_UNPARSER = {
         'xhp_parse.php',
     ],
     "Call with splat": [
+        'meth_caller9.php',
         'parent_construct1.php',
         'unpack_call1.php',
         'unpack_call2.php',
@@ -264,10 +266,11 @@ UNSUPPORTED_FILES_CONVERTER = {
         'mixed_option.php',
         'namespace_async_1.php',
         'namespace_async_2.php',
+        'noreturn_typehint_basic.php',
         'preparable.php',
+        'this5.php',
         'this_tparam.php',
         'this_tparam2.php',
-        'this5.php',
         'try_generator.php',
         'typing_ok_sub_type_continuation.php',
         'unused_awaitable.php',

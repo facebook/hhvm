@@ -22,7 +22,7 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
-void surpriseCheck(HTS& env, Offset relOffset) {
+void surpriseCheck(IRGS& env, Offset relOffset) {
   if (relOffset <= 0) {
     auto const exit = makeExitSlow(env);
     gen(env, CheckSurpriseFlags, exit);
@@ -34,7 +34,7 @@ void surpriseCheck(HTS& env, Offset relOffset) {
  * starts with a DefLabel expecting a StkPtr, this function will return an
  * intermediate block that passes the current sp.
  */
-Block* getBlock(HTS& env, Offset offset) {
+Block* getBlock(IRGS& env, Offset offset) {
   // If hasBlock returns true, then IRUnit already has a block for that offset
   // and makeBlock will just return it.  This will be the proper successor
   // block set by Translator::setSuccIRBlocks.  Otherwise, the given offset
@@ -60,16 +60,16 @@ Block* getBlock(HTS& env, Offset offset) {
 
 //////////////////////////////////////////////////////////////////////
 
-void jmpImpl(HTS& env, Offset offset, JmpFlags flags) {
+void jmpImpl(IRGS& env, Offset offset, JmpFlags flags) {
   if (flags & JmpFlagNextIsMerge) {
     prepareForHHBCMergePoint(env);
   }
   auto target = getBlock(env, offset);
-  assert(target != nullptr);
+  assertx(target != nullptr);
   gen(env, Jmp, target);
 }
 
-void implCondJmp(HTS& env, Offset taken, bool negate, SSATmp* src) {
+void implCondJmp(IRGS& env, Offset taken, bool negate, SSATmp* src) {
   auto const flags = instrJmpFlags(*env.currentNormalizedInstruction);
   if (flags & JmpFlagEndsRegion) {
     spillStack(env);
@@ -78,7 +78,7 @@ void implCondJmp(HTS& env, Offset taken, bool negate, SSATmp* src) {
     prepareForHHBCMergePoint(env);
   }
   auto const target = getBlock(env, taken);
-  assert(target != nullptr);
+  assertx(target != nullptr);
   auto const boolSrc = gen(env, ConvCellToBool, src);
   gen(env, DecRef, src);
   gen(env, negate ? JmpZero : JmpNZero, target, boolSrc);
@@ -86,24 +86,24 @@ void implCondJmp(HTS& env, Offset taken, bool negate, SSATmp* src) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitJmp(HTS& env, Offset relOffset) {
+void emitJmp(IRGS& env, Offset relOffset) {
   surpriseCheck(env, relOffset);
   auto const offset = bcOff(env) + relOffset;
   jmpImpl(env, offset, instrJmpFlags(*env.currentNormalizedInstruction));
 }
 
-void emitJmpNS(HTS& env, Offset relOffset) {
+void emitJmpNS(IRGS& env, Offset relOffset) {
   jmpImpl(env, bcOff(env) + relOffset,
     instrJmpFlags(*env.currentNormalizedInstruction));
 }
 
-void emitJmpZ(HTS& env, Offset relOffset) {
+void emitJmpZ(IRGS& env, Offset relOffset) {
   surpriseCheck(env, relOffset);
   auto const takenOff = bcOff(env) + relOffset;
   implCondJmp(env, takenOff, true, popC(env));
 }
 
-void emitJmpNZ(HTS& env, Offset relOffset) {
+void emitJmpNZ(IRGS& env, Offset relOffset) {
   surpriseCheck(env, relOffset);
   auto const takenOff = bcOff(env) + relOffset;
   implCondJmp(env, takenOff, false, popC(env));
@@ -111,7 +111,7 @@ void emitJmpNZ(HTS& env, Offset relOffset) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitSwitch(HTS& env,
+void emitSwitch(IRGS& env,
                 const ImmVector& iv,
                 int64_t base,
                 int32_t bounded) {
@@ -119,8 +119,8 @@ void emitSwitch(HTS& env,
 
   SSATmp* const switchVal = popC(env);
   Type type = switchVal->type();
-  assert(IMPLIES(!(type <= (Type::Int | Type::Null)), bounded));
-  assert(IMPLIES(bounded, iv.size() > 2));
+  assertx(IMPLIES(!(type <= (Type::Int | Type::Null)), bounded));
+  assertx(IMPLIES(bounded, iv.size() > 2));
   SSATmp* index;
   SSATmp* ssabase = cns(env, base);
   SSATmp* ssatargets = cns(env, nTargets);
@@ -187,7 +187,7 @@ void emitSwitch(HTS& env,
   gen(env, JmpSwitchDest, data, index, sp(env));
 }
 
-void emitSSwitch(HTS& env, const ImmVector& iv) {
+void emitSSwitch(IRGS& env, const ImmVector& iv) {
   const int numCases = iv.size() - 1;
 
   /*

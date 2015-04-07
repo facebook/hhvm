@@ -50,7 +50,7 @@ TransRec::TransRec(SrcKey                      _src,
 
   if (!region) return;
 
-  assert(!region->empty());
+  assertx(!region->empty());
   for (auto& block : region->blocks()) {
     auto sk = block->start();
     blocks.emplace_back(Block{sk.unit()->md5(), sk.offset(),

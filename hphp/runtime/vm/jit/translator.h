@@ -61,7 +61,7 @@ struct Block;
 struct IRTranslator;
 struct NormalizedInstruction;
 struct ProfData;
-struct HTS;
+struct IRGS;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
@@ -640,7 +640,7 @@ int locPhysicalOffset(int32_t localIndex);
  * Take a NormalizedInstruction and turn it into a call to the appropriate ht
  * functions.  Updates the bytecode marker, handles interp one flags, etc.
  */
-void translateInstr(HTS&, const NormalizedInstruction&);
+void translateInstr(IRGS&, const NormalizedInstruction&);
 
 extern bool tc_dump();
 

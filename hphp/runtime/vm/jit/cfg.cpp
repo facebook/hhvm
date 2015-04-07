@@ -13,9 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/vm/jit/cfg.h"
+
 #include <algorithm>
+#include <limits>
+
 #include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -24,6 +26,87 @@
 namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(hhir);
+
+namespace {
+
+//////////////////////////////////////////////////////////////////////
+
+// If edge is critical, split it by inserting an intermediate block.
+// A critical edge is an edge from a block with multiple successors to
+// a block with multiple predecessors.
+void splitCriticalEdge(IRUnit& unit, Edge* edge) {
+  if (!edge) return;
+
+  auto* to = edge->to();
+  auto* branch = edge->inst();
+  auto* from = branch->block();
+  if (to->numPreds() <= 1 || from->numSuccs() <= 1) return;
+
+  splitEdge(unit, from, to);
+}
+
+// Visits all back-edges in a CFG.
+template <class Visitor>
+struct BackEdgeVisitor {
+  BackEdgeVisitor(const IRUnit& unit, Visitor& visitor)
+    : m_path(unit.numBlocks())
+    , m_visited(unit.numBlocks())
+    , m_visitor(visitor)
+  {}
+
+  using BitSet = boost::dynamic_bitset<>;
+
+  void walk(Edge* e) {
+    if (e == nullptr) return;
+
+    auto const block = e->to();
+    auto const id = block->id();
+
+    // If we're revisiting a block in our current search, then we've
+    // found a backedge.
+    if (m_path.test(id)) {
+      // The entry block can't be a loop header.
+      assertx(!block->isEntry());
+
+      m_visitor(e);
+    }
+
+    // Otherwise if we're getting back to a block that's already been
+    // visited, but it hasn't been visited in this path, then we can
+    // prune this search.
+    if (m_visited.test(id)) return;
+
+    m_visited.set(id);
+    m_path.set(id);
+
+    // Normally blocks cannot be empty, but this is used in printing and we want
+    // to be able to print malformed blocks.
+    if (!block->empty()) {
+      walk(block->takenEdge());
+      walk(block->nextEdge());
+    }
+
+    m_path.set(id, false);
+  }
+
+private:
+  BitSet m_path;
+  BitSet m_visited;
+  Visitor& m_visitor;
+};
+
+template <class Visitor>
+void backEdgeWalk(const IRUnit& unit, Visitor visitor) {
+  BackEdgeVisitor<Visitor> bev(unit, visitor);
+
+  auto const entry = unit.entry();
+  bev.walk(entry->takenEdge());
+  bev.walk(entry->nextEdge());
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
 
 BlockList poSortCfg(const IRUnit& unit) {
   auto blocks = BlockList{};
@@ -39,19 +122,14 @@ BlockList poSortCfg(const IRUnit& unit) {
 BlockList rpoSortCfg(const IRUnit& unit) {
   auto blocks = poSortCfg(unit);
   std::reverse(blocks.begin(), blocks.end());
-  assert(blocks.size() <= unit.numBlocks());
+  assertx(blocks.size() <= unit.numBlocks());
   return blocks;
 }
 
-BlocksWithIds rpoSortCfgWithIds(const IRUnit& unit) {
-  auto ret = BlocksWithIds{rpoSortCfg(unit), {unit, 0xffffffff}};
-
-  uint32_t id = 0;
-  for (auto block : ret.blocks) {
-    ret.ids[block] = id++;
-  }
-  assert(id == ret.blocks.size());
-
+BlockIDs numberBlocks(const IRUnit& unit, const BlockList& input) {
+  auto ret = BlockIDs { unit, std::numeric_limits<uint32_t>::max() };
+  auto id = uint32_t{0};
+  for (auto block : input) ret[block] = id++;
   return ret;
 }
 
@@ -63,7 +141,7 @@ Block* splitEdge(IRUnit& unit, Block* from, Block* to) {
   if (branch.taken() == to) {
     branch.setTaken(middle);
   } else {
-    assert(branch.next() == to);
+    assertx(branch.next() == to);
     branch.setNext(middle);
   }
 
@@ -73,23 +151,6 @@ Block* splitEdge(IRUnit& unit, Block* from, Block* to) {
     middle->setHint(unlikely);
   }
   return middle;
-}
-
-namespace {
-
-// If edge is critical, split it by inserting an intermediate block.
-// A critical edge is an edge from a block with multiple successors to
-// a block with multiple predecessors.
-void splitCriticalEdge(IRUnit& unit, Edge* edge) {
-  if (!edge) return;
-
-  auto* to = edge->to();
-  auto* branch = edge->inst();
-  auto* from = branch->block();
-  if (to->numPreds() <= 1 || from->numSuccs() <= 1) return;
-
-  splitEdge(unit, from, to);
-}
 }
 
 bool splitCriticalEdges(IRUnit& unit) {
@@ -162,10 +223,9 @@ bool removeUnreachable(IRUnit& unit) {
  * dominator.  This is the case for the entry block and any blocks not
  * reachable from the entry block.
  */
-IdomVector findDominators(const IRUnit& unit, const BlocksWithIds& blockIds) {
-  auto& blocks = blockIds.blocks;
-  auto& rpoIds = blockIds.ids;
-
+IdomVector findDominators(const IRUnit& unit,
+                          const BlockList& blocks,
+                          const BlockIDs& rpoIDs) {
   // Calculate immediate dominators with the iterative two-finger algorithm.
   // When it terminates, idom[post-id] will contain the post-id of the
   // immediate dominator of each block.  idom[start] will be -1.  This is
@@ -192,8 +252,8 @@ IdomVector findDominators(const IRUnit& unit, const BlocksWithIds& blockIds) {
         // find earliest common predecessor of p1 and p2
         // (lower RPO ids are earlier in flow and in dom-tree).
         do {
-          while (rpoIds[p1] < rpoIds[p2]) p2 = idom[p2];
-          while (rpoIds[p2] < rpoIds[p1]) p1 = idom[p1];
+          while (rpoIDs[p1] < rpoIDs[p2]) p2 = idom[p2];
+          while (rpoIDs[p2] < rpoIDs[p1]) p1 = idom[p1];
         } while (p1 != p2);
       }
       if (idom[block] != p1) {
@@ -207,74 +267,11 @@ IdomVector findDominators(const IRUnit& unit, const BlocksWithIds& blockIds) {
 }
 
 bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms) {
-  assert(b1 != nullptr && b2 != nullptr);
+  assertx(b1 != nullptr && b2 != nullptr);
   for (auto b = b2; b != nullptr; b = idoms[b]) {
     if (b == b1) return true;
   }
   return false;
-}
-
-namespace {
-
-// Visits all back-edges in a CFG.
-template <class Visitor>
-struct BackEdgeVisitor {
-  BackEdgeVisitor(const IRUnit& unit, Visitor& visitor)
-    : m_path(unit.numBlocks())
-    , m_visited(unit.numBlocks())
-    , m_visitor(visitor)
-  {}
-
-  using BitSet = boost::dynamic_bitset<>;
-
-  void walk(Edge* e) {
-    if (e == nullptr) return;
-
-    auto const block = e->to();
-    auto const id = block->id();
-
-    // If we're revisiting a block in our current search, then we've
-    // found a backedge.
-    if (m_path.test(id)) {
-      // The entry block can't be a loop header.
-      assert(!block->isEntry());
-
-      m_visitor(e);
-    }
-
-    // Otherwise if we're getting back to a block that's already been
-    // visited, but it hasn't been visited in this path, then we can
-    // prune this search.
-    if (m_visited.test(id)) return;
-
-    m_visited.set(id);
-    m_path.set(id);
-
-    // Normally blocks cannot be empty, but this is used in printing and we want
-    // to be able to print malformed blocks.
-    if (!block->empty()) {
-      walk(block->takenEdge());
-      walk(block->nextEdge());
-    }
-
-    m_path.set(id, false);
-  }
-
-private:
-  BitSet m_path;
-  BitSet m_visited;
-  Visitor& m_visitor;
-};
-
-template <class Visitor>
-void backEdgeWalk(const IRUnit& unit, Visitor visitor) {
-  BackEdgeVisitor<Visitor> bev(unit, visitor);
-
-  auto const entry = unit.entry();
-  bev.walk(entry->takenEdge());
-  bev.walk(entry->nextEdge());
-}
-
 }
 
 bool insertLoopPreHeaders(IRUnit& unit) {
@@ -293,7 +290,7 @@ bool insertLoopPreHeaders(IRUnit& unit) {
     }
 
     // Header can't be the entry block.
-    assert(fwdPreds.size() != 0);
+    assertx(fwdPreds.size() != 0);
 
     // Already have a pre-header, so do nothing.
     if (fwdPreds.size() == 1) continue;
@@ -311,7 +308,7 @@ bool insertLoopPreHeaders(IRUnit& unit) {
     for (auto const pred : fwdPreds) {
       auto& branch = pred->from()->back();
 
-      assert(branch.taken() == header || branch.next() == header);
+      assertx(branch.taken() == header || branch.next() == header);
 
       if (branch.taken() == header) branch.setTaken(preheader);
       if (branch.next() == header) branch.setNext(preheader);

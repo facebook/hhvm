@@ -21,11 +21,12 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/pass-tracer.h"
 #include <unordered_map>
 
 namespace HPHP { namespace jit {
 
-TRACE_SET_MOD(gvn);
+TRACE_SET_MOD(hhir_gvn);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -50,7 +51,7 @@ struct CongruenceHasher {
 
     for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
       auto src = inst->src(i);
-      assert(m_vnTable[src].value);
+      assertx(m_vnTable[src].value);
       result = folly::hash::hash_128_to_64(
         result,
         reinterpret_cast<size_t>(m_vnTable[src].value)
@@ -94,13 +95,13 @@ struct CongruenceComparator {
     for (uint32_t i = 0; i < instA->numSrcs(); ++i) {
       auto srcA = instA->src(i);
       auto srcB = instB->src(i);
-      assert(m_vnTable[srcA].value);
-      assert(m_vnTable[srcB].value);
+      assertx(m_vnTable[srcA].value);
+      assertx(m_vnTable[srcB].value);
       if (m_vnTable[srcA].value != m_vnTable[srcB].value) return false;
     }
 
     if (instA->hasExtra()) {
-      assert(instB->hasExtra());
+      assertx(instB->hasExtra());
       if (!equalsExtra(instA->op(), instA->rawExtra(), instB->rawExtra())) {
         return false;
       }
@@ -218,7 +219,9 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdAFWHActRec:
   case LdResumableArObj:
   case LdMIStateAddr:
+  case LdPackedArrayElemAddr:
   case OrdStr:
+  case AKExistsArr:
     return true;
   default:
     return false;
@@ -242,7 +245,7 @@ bool visitDefLabel(
   ValueNumberTable& updates,
   NameTable& nameTable
 ) {
-  assert(inst->is(DefLabel));
+  assertx(inst->is(DefLabel));
   bool changed = false;
 
   /*
@@ -272,9 +275,9 @@ bool visitDefLabel(
     for (auto& pred : block->preds()) {
       auto fromBlock = pred.from();
       auto& jmp = fromBlock->back();
-      assert(jmp.is(Jmp));
+      assertx(jmp.is(Jmp));
       auto src = jmp.src(i);
-      assert(vnTable[src].value);
+      assertx(vnTable[src].value);
       auto srcVN = vnTable[src].value;
 
       // Update forwardedDst if this is the first src we've seen that doesn't
@@ -295,10 +298,10 @@ bool visitDefLabel(
       break;
     }
 
-    assert(vnTable[dst].value);
+    assertx(vnTable[dst].value);
     if (canForwardDst && vnTable[dst].value != forwardedDst) {
-      TRACE(2, "gvn: forwarded through DefLabel: %p (old) -> %p (new)\n",
-        dst, forwardedDst);
+      FTRACE(1, "forwarded through DefLabel: {} (old) -> {} (new)\n",
+        *dst, *forwardedDst);
       updates[dst] = ValueNumberMetadata { dst, forwardedDst };
       changed = true;
     }
@@ -321,9 +324,9 @@ bool visitInstruction(
 
   if (!supportsGVN(inst)) return false;
 
-  assert(inst->numDsts() == 1);
+  assertx(inst->numDsts() == 1);
   auto dst = inst->dst(0);
-  assert(dst);
+  assertx(dst);
 
   SSATmp* temp;
   auto iter = nameTable.find(inst);
@@ -334,14 +337,17 @@ bool visitInstruction(
     temp = iter->second;
   }
 
-  assert(temp);
+  assertx(temp);
 
-  assert(vnTable[dst].value);
+  assertx(vnTable[dst].value);
   if (temp != vnTable[dst].value) {
     updates[dst] = ValueNumberMetadata { dst, temp };
-    TRACE(2, "\ngvn: instruction %s\n", inst->toString().c_str());
-    TRACE(2, "gvn: updated value number for dst to dst of %s\n",
-      temp->inst()->toString().c_str());
+    FTRACE(1,
+      "instruction {}\n"
+      "updated value number for dst to dst of {}\n",
+      *inst,
+      *temp->inst()
+    );
     return true;
   }
   return false;
@@ -367,7 +373,9 @@ void applyLocalUpdates(ValueNumberTable& global, ValueNumberTable& local) {
   }
 }
 
-void runAnalysis(IRUnit& unit, BlockList& blocks, ValueNumberTable& vnTable) {
+void runAnalysis(const IRUnit& unit,
+                 const BlockList& blocks,
+                 ValueNumberTable& vnTable) {
   for (auto block : blocks) {
     for (auto& inst : *block) {
       initWithInstruction(&inst, vnTable);
@@ -405,13 +413,13 @@ bool canReplaceWith(
   const SSATmp* dst,
   const SSATmp* other
 ) {
-  assert(other->type() <= dst->type());
+  assertx(other->type() <= dst->type());
   return is_tmp_usable(idoms, other, dst->inst()->block());
 }
 
 void tryReplaceInstruction(
   IRUnit& unit,
-  IdomVector& idoms,
+  const IdomVector& idoms,
   IRInstruction* inst,
   ValueNumberTable& table
 ) {
@@ -421,9 +429,13 @@ void tryReplaceInstruction(
     if (valueNumber == s) continue;
     if (!valueNumber) continue;
     if (!canReplaceWith(idoms, s, valueNumber)) continue;
-    TRACE(2, "\ngvn: instruction %s\n", inst->toString().c_str());
-    TRACE(2, "gvn: replacing src %d with dst of %s\n",
-      i, valueNumber->inst()->toString().c_str());
+    FTRACE(1,
+      "instruction {}\n"
+      "replacing src {} with dst of {}\n",
+      *inst,
+      i,
+      *valueNumber->inst()
+    );
     inst->setSrc(i, valueNumber);
     if (valueNumber->inst()->producesReference(0)) {
       auto prevInst = valueNumber->inst();
@@ -436,8 +448,8 @@ void tryReplaceInstruction(
 
 void replaceRedundantComputations(
   IRUnit& unit,
-  IdomVector& idoms,
-  BlockList& blocks,
+  const IdomVector& idoms,
+  const BlockList& blocks,
   ValueNumberTable& table
 ) {
   for (auto block : blocks) {
@@ -452,16 +464,21 @@ void replaceRedundantComputations(
 /////////////////////////////////////////////////////////////////////////
 
 void gvn(IRUnit& unit) {
-  auto rpoBlocksWithIds = rpoSortCfgWithIds(unit);
-  auto& rpoBlocks = rpoBlocksWithIds.blocks;
-  auto dominators = findDominators(unit, rpoBlocksWithIds);
+  PassTracer tracer{&unit, Trace::hhir_gvn, "gvn"};
+
+  auto const rpoBlocks = rpoSortCfg(unit);
+  auto const idoms = findDominators(
+    unit,
+    rpoBlocks,
+    numberBlocks(unit, rpoBlocks)
+  );
   ValueNumberTable vnTable(unit, ValueNumberMetadata{});
 
   // This is an implementation of the RPO version of the global value numbering
   // algorithm presented in the 1996 paper "SCC-based Value Numbering" by
   // Cooper and Simpson.
   runAnalysis(unit, rpoBlocks, vnTable);
-  replaceRedundantComputations(unit, dominators, rpoBlocks, vnTable);
+  replaceRedundantComputations(unit, idoms, rpoBlocks, vnTable);
 }
 
-} } // namespace HPHP::jit
+}}

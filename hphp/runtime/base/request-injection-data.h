@@ -250,10 +250,15 @@ private:
   std::string getDefaultIncludePath();
   int64_t getErrorReportingLevel() { return m_errorReportingLevel; }
   void setErrorReportingLevel(int level) { m_errorReportingLevel = level; }
-  std::string getVariablesOrder() const { return m_variablesOrder; }
+
+  const std::string& getVariablesOrder() const {
+    return m_variablesOrder;
+  }
+
   void setVariablesOrder(std::string variablesOrder) {
     m_variablesOrder = variablesOrder;
   }
+
   std::string getRequestOrder() const { return m_requestOrder; }
   void setRequestOrder(std::string requestOrder) {
     m_requestOrder = requestOrder;

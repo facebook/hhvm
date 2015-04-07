@@ -150,8 +150,7 @@ std::string DebuggerProxy::getSandboxId() {
 void DebuggerProxy::getThreads(std::vector<DThreadInfoPtr> &threads) {
   TRACE(2, "DebuggerProxy::getThreads\n");
   Lock lock(this);
-  std::stack<void *> &interrupts =
-    ThreadInfo::s_threadInfo->m_reqInjectionData.interrupts;
+  auto& interrupts = RID().interrupts;
   assert(!interrupts.empty());
   if (!interrupts.empty()) {
     CmdInterrupt *tint = (CmdInterrupt*)interrupts.top();

@@ -1,0 +1,1 @@
+getWaitHandle abs (function(): WaitHandle<T>)

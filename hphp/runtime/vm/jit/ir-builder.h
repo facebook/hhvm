@@ -20,7 +20,6 @@
 #include <functional>
 
 #include <folly/ScopeGuard.h>
-#include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -250,20 +249,13 @@ public:
   void popBlock();
 
   /*
-   * Run another pass of IRBuilder-managed optimizations on this
-   * unit.
-   */
-  void reoptimize();
-
-  /*
    * Conditionally-append a new instruction to the current Block, depending on
    * what some optimizations have to say about it.
    */
   enum class CloneFlag { Yes, No };
   SSATmp* optimizeInst(IRInstruction* inst,
                        CloneFlag doClone,
-                       Block* srcBlock,
-                       const folly::Optional<IdomVector>&);
+                       Block* srcBlock);
 
 
 private:
@@ -281,7 +273,7 @@ private:
   SSATmp* gen(Opcode op, Args&&... args) {
     return makeInstruction(
       [this] (IRInstruction* inst) {
-        return optimizeInst(inst, CloneFlag::Yes, nullptr, folly::none);
+        return optimizeInst(inst, CloneFlag::Yes, nullptr);
       },
       op,
       m_curMarker,

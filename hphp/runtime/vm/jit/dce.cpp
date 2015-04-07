@@ -153,6 +153,7 @@ bool canDCE(IRInstruction* inst) {
   case NewArray:
   case NewMixedArray:
   case NewLikeArray:
+  case LdPackedArrayElemAddr:
   case NewCol:
   case FreeActRec:
   case DefInlineFP:
@@ -164,7 +165,7 @@ bool canDCE(IRInstruction* inst) {
   case CountArrayFast:
   case CountCollection:
   case Nop:
-  case AKExists:
+  case AKExistsArr:
   case LdBindAddr:
   case LdSwitchDblIndex:
   case LdSwitchStrIndex:
@@ -186,9 +187,10 @@ bool canDCE(IRInstruction* inst) {
   case LdUnwinderValue:
   case LdColArray:
   case OrdStr:
-    assert(!inst->isControlFlow());
+    assertx(!inst->isControlFlow());
     return true;
 
+  case AKExistsObj:
   case AdjustSP:
   case ResetSP:
   case StStk:
@@ -298,6 +300,7 @@ bool canDCE(IRInstruction* inst) {
   case NativeImpl:
   case CallBuiltin:
   case RetCtrl:
+  case AsyncRetCtrl:
   case StRetVal:
   case RetAdjustStk:
   case ReleaseVVOrExit:
@@ -387,8 +390,8 @@ bool canDCE(IRInstruction* inst) {
   case DbgAssertRefCount:
   case DbgAssertPtr:
   case DbgAssertType:
-  case DbgAssertRetAddr:
-  case RBTrace:
+  case RBTraceEntry:
+  case RBTraceMsg:
   case ZeroErrorLevel:
   case RestoreErrorLevel:
   case IterInit:
@@ -454,9 +457,6 @@ bool canDCE(IRInstruction* inst) {
   case ProfilePackedArray:
   case ProfileStructArray:
   case CheckPackedArrayBounds:
-  case CheckTypePackedArrayElem:
-  case IsPackedArrayElemNull:
-  case LdPackedArrayElem:
   case LdStructArrayElem:
   case LdVectorSize:
   case VectorDoCow:
@@ -543,7 +543,7 @@ void removeDeadInstructions(IRUnit& unit, const DceState& state) {
       // For now, all control flow instructions are essential. If we ever
       // change this, we'll need to be careful about unlinking dead CF
       // instructions here.
-      assert(IMPLIES(inst.isControlFlow(), !state[inst].isDead()));
+      assertx(IMPLIES(inst.isControlFlow(), !state[inst].isDead()));
       return state[inst].isDead();
     });
   });
@@ -611,7 +611,7 @@ bool findWeakActRecUses(const BlockList& blocks,
   bool killedFrames = false;
 
   auto const incWeak = [&] (const IRInstruction* inst, const SSATmp* src) {
-    assert(src->isA(Type::FramePtr));
+    assertx(src->isA(Type::FramePtr));
     auto const frameInst = src->inst();
     if (frameInst->op() == DefInlineFP) {
       ITRACE(3, "weak use of {} from {}\n", *frameInst, *inst);
@@ -632,7 +632,7 @@ bool findWeakActRecUses(const BlockList& blocks,
     case InlineReturn:
       {
         auto const frameInst = inst->src(0)->inst();
-        assert(frameInst->is(DefInlineFP));
+        assertx(frameInst->is(DefInlineFP));
         auto const frameUses = uses[frameInst->dst()];
         auto const weakUses  = state[frameInst].weakUseCount();
         /*
@@ -696,12 +696,12 @@ void performActRecFixups(const BlockList& blocks,
     for (auto& inst : *block) {
       ITRACE(5, "{}\n", inst.toString());
 
-      if (auto const fp = inst.marker().m_fp) {
+      if (auto const fp = inst.marker().fp()) {
         if (state[fp->inst()].isDead()) {
           always_assert(fp->inst()->is(DefInlineFP));
           auto const prev = fp->inst()->src(2);
-          inst.marker().m_fp = prev;
-          assert(!state[prev->inst()].isDead());
+          inst.marker() = inst.marker().adjustFP(prev);
+          assertx(!state[prev->inst()].isDead());
         }
       }
 
@@ -728,7 +728,7 @@ void performActRecFixups(const BlockList& blocks,
       case DecRef:
         if (inst.marker().func() != outerFunc) {
           ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);
-          inst.marker() = inst.marker().adjustSp({safeDepth});
+          inst.marker() = inst.marker().adjustSP(FPAbsOffset{safeDepth});
         }
         break;
 

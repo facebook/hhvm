@@ -58,7 +58,7 @@ struct Vunit;
   O(bindaddr, I(dest) I(sk), Un, Dn)\
   O(bindcall, I(stub), U(args), Dn)\
   O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]), U(sf) U(args), Dn)\
-  O(bindjcc, I(cc) I(target), U(sf) U(args), Dn)\
+  O(bindjcc, I(cc) I(target) I(trflags), U(sf) U(args), Dn)\
   O(bindjmp, I(target) I(trflags), U(args), Dn)\
   O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
@@ -73,7 +73,6 @@ struct Vunit;
   O(ldimmq, I(s) I(saveflags), Un, D(d))\
   O(fallback, I(dest), U(args), Dn)\
   O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
-  O(kpcall, I(target) I(callee) I(prologIndex), U(args), Dn)\
   O(load, Inone, U(s), D(d))\
   O(mccall, I(target), U(args), Dn)\
   O(mcprep, Inone, Un, D(d))\
@@ -94,9 +93,8 @@ struct Vunit;
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(sar, Inone, U(s0) U(s1), D(d) D(sf))\
   O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
-  O(ldretaddr, Inone, U(s), D(d))\
-  O(movretaddr, Inone, U(s), D(d))\
-  O(retctrl, Inone, U(s), Dn)\
+  O(vretm, Inone, U(retAddr) U(prevFp) U(args), D(d))\
+  O(vret, Inone, U(retAddr) U(args), Dn)\
   O(absdbl, Inone, U(s), D(d))\
   /* arm instructions */\
   O(asrv, Inone, U(sl) U(sr), D(d))\
@@ -188,11 +186,9 @@ struct Vunit;
   O(orqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
   O(orqim, I(s0), U(m), D(sf))\
   O(pop, Inone, Un, D(d))\
-  O(popm, Inone, U(m), Dn)\
   O(psllq, I(s0), UH(s1,d), DH(d,s1))\
   O(psrlq, I(s0), UH(s1,d), DH(d,s1))\
   O(push, Inone, U(s), Dn)\
-  O(pushm, Inone, U(s), Dn)\
   O(ret, Inone, U(args), Dn)\
   O(roundsd, I(dir), U(s), D(d))\
   O(sarq, Inone, UH(s,d), DH(d,s) D(sf))\
@@ -270,8 +266,6 @@ struct ldimmq { Immed64 s; Vreg d; bool saveflags; };
 struct fallback { SrcKey dest; TransFlags trflags; RegSet args; };
 struct fallbackcc { ConditionCode cc; VregSF sf; SrcKey dest;
                     TransFlags trflags; RegSet args; };
-struct kpcall { CodeAddress target; const Func* callee; unsigned prologIndex;
-                RegSet args; };
 struct load { Vptr s; Vreg d; };
 struct mccall { CodeAddress target; RegSet args; };
 struct mcprep { Vreg64 d; };
@@ -309,10 +303,17 @@ struct syncvmsp { Vreg s; };
 struct srem { Vreg s0, s1, d; };
 struct sar { Vreg s0, s1, d; VregSF sf; };
 struct shl { Vreg s0, s1, d; VregSF sf; };
-struct ldretaddr { Vptr s; Vreg d; };
-struct movretaddr { Vreg s, d; };
-struct retctrl { Vreg s; };
 struct absdbl { Vreg s, d; };
+
+/*
+ * Pushes retAddr, loads prevFp into d, and executes a ret instruction.
+ */
+struct vretm { Vptr retAddr; Vptr prevFp; Vreg d; RegSet args; };
+
+/*
+ * Pushes retAddr and executes a ret instruction.
+ */
+struct vret { Vreg retAddr; RegSet args; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // ARM.
@@ -372,8 +373,22 @@ struct andqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct call { CodeAddress target; RegSet args; };
 struct callm { Vptr target; RegSet args; };
 struct callr { Vreg64 target; RegSet args; };
+
+/*
+ * Implements the equivalent of:
+ *
+ *    t1 = load t
+ *    d = condition ? t1 : f
+ *
+ * Note that t is unconditionally dereferenced.
+ */
 struct cloadq { ConditionCode cc; VregSF sf; Vreg64 f; Vptr t; Vreg64 d; };
+
+/*
+ * Implements d = condition ? t : f.
+ */
 struct cmovq { ConditionCode cc; VregSF sf; Vreg64 f, t, d; };
+
 // compares are att-style: s1-s0 => sf
 struct cmpb  { Vreg8  s0; Vreg8  s1; VregSF sf; };
 struct cmpbi { Immed  s0; Vreg8  s1; VregSF sf; };
@@ -440,9 +455,7 @@ struct orq { Vreg64 s0, s1, d; VregSF sf; };
 struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct orqim { Immed s0; Vptr m; VregSF sf; };
 struct pop { Vreg64 d; };
-struct popm { Vptr m; };
 struct push { Vreg64 s; };
-struct pushm { Vptr s; };
 struct ret { RegSet args; };
 struct roundsd { RoundDirection dir; VregDbl s, d; };
 struct setcc { ConditionCode cc; VregSF sf; Vreg8 d; };
@@ -569,11 +582,11 @@ bool isBlockEnd(const Vinstr& inst);
   template<> struct Vinstr::matcher<name> {      \
     using type = jit::name;                      \
     static type& get(Vinstr& inst) {             \
-      assert(inst.op == name);                   \
+      assertx(inst.op == name);                   \
       return inst.name##_;                       \
     }                                            \
     static const type& get(const Vinstr& inst) { \
-      assert(inst.op == name);                   \
+      assertx(inst.op == name);                   \
       return inst.name##_;                       \
     }                                            \
   };

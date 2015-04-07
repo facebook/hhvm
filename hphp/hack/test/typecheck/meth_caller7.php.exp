@@ -1,0 +1,6 @@
+File "meth_caller7.php", line 9, characters 15-16:
+Invalid argument (Typing[4110])
+File "meth_caller7.php", line 4, characters 24-26:
+This is an int
+File "meth_caller7.php", line 9, characters 15-16:
+It is incompatible with a string

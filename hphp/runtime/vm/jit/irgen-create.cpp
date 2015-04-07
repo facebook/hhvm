@@ -30,7 +30,7 @@ const StaticString s_uuinvoke("__invoke");
 
 //////////////////////////////////////////////////////////////////////
 
-void initProps(HTS& env, const Class* cls) {
+void initProps(IRGS& env, const Class* cls) {
   cls->initPropHandle();
   ifThen(
     env,
@@ -50,7 +50,7 @@ void initProps(HTS& env, const Class* cls) {
 
 //////////////////////////////////////////////////////////////////////
 
-void initSProps(HTS& env, const Class* cls) {
+void initSProps(IRGS& env, const Class* cls) {
   cls->initSPropHandles();
   if (rds::isPersistentHandle(cls->sPropInitHandle())) return;
   ifThen(
@@ -65,7 +65,7 @@ void initSProps(HTS& env, const Class* cls) {
   );
 }
 
-SSATmp* allocObjFast(HTS& env, const Class* cls) {
+SSATmp* allocObjFast(IRGS& env, const Class* cls) {
   auto registerObj = [&] (SSATmp* obj) {
     if (RuntimeOption::EnableObjDestructCall && cls->getDtor()) {
       gen(env, RegisterLiveObj, obj);
@@ -83,7 +83,7 @@ SSATmp* allocObjFast(HTS& env, const Class* cls) {
   // Make sure our property init vectors are all set up.
   const bool props = cls->pinitVec().size() > 0;
   const bool sprops = cls->numStaticProperties() > 0;
-  assert((props || sprops) == cls->needInitialization());
+  assertx((props || sprops) == cls->needInitialization());
   if (cls->needInitialization()) {
     if (props) initProps(env, cls);
     if (sprops) initSProps(env, cls);
@@ -118,13 +118,13 @@ SSATmp* allocObjFast(HTS& env, const Class* cls) {
  * this code is reachable it will always use the same closure Class*,
  * so we can just burn it into the TC without using RDS.
  */
-void emitCreateCl(HTS& env, int32_t numParams, const StringData* clsName) {
+void emitCreateCl(IRGS& env, int32_t numParams, const StringData* clsName) {
   auto const cls = Unit::lookupClassOrUniqueClass(clsName);
   auto const invokeFunc = cls->lookupMethod(s_uuinvoke.get());
   auto const clonedFunc = invokeFunc->cloneAndSetClass(
     const_cast<Class*>(curClass(env))
   );
-  assert(cls && (cls->attrs() & AttrUnique));
+  assertx(cls && (cls->attrs() & AttrUnique));
 
   auto const closure = allocObjFast(env, cls);
   gen(env, IncRef, closure);
@@ -160,7 +160,7 @@ void emitCreateCl(HTS& env, int32_t numParams, const StringData* clsName) {
   // Closure static variables are per instance, and need to start
   // uninitialized.  After numParams use vars, the remaining instance
   // properties hold any static locals.
-  assert(cls->numDeclProperties() ==
+  assertx(cls->numDeclProperties() ==
          clonedFunc->numStaticLocals() + numParams);
   for (int32_t numDeclProperties = cls->numDeclProperties();
       propId < numDeclProperties;
@@ -177,19 +177,19 @@ void emitCreateCl(HTS& env, int32_t numParams, const StringData* clsName) {
   push(env, closure);
 }
 
-void emitNewArray(HTS& env, int32_t capacity) {
+void emitNewArray(IRGS& env, int32_t capacity) {
   if (capacity == 0) {
     push(env, cns(env, staticEmptyArray()));
   } else {
     if (auto newCap = PackedArray::getMaxCapInPlaceFast(capacity)) {
-      assert(newCap > static_cast<uint32_t>(capacity));
+      assertx(newCap > static_cast<uint32_t>(capacity));
       capacity = newCap;
     }
     push(env, gen(env, NewArray, cns(env, capacity)));
   }
 }
 
-void emitNewMixedArray(HTS& env, int32_t capacity) {
+void emitNewMixedArray(IRGS& env, int32_t capacity) {
   if (capacity == 0) {
     push(env, cns(env, staticEmptyArray()));
   } else {
@@ -197,7 +197,7 @@ void emitNewMixedArray(HTS& env, int32_t capacity) {
   }
 }
 
-void emitNewLikeArrayL(HTS& env, int32_t id, int32_t capacity) {
+void emitNewLikeArrayL(IRGS& env, int32_t id, int32_t capacity) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makeExit(env);
   auto const ld = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
@@ -212,7 +212,7 @@ void emitNewLikeArrayL(HTS& env, int32_t id, int32_t capacity) {
   push(env, arr);
 }
 
-void emitNewPackedArray(HTS& env, int32_t numArgs) {
+void emitNewPackedArray(IRGS& env, int32_t numArgs) {
   if (numArgs > kPackedCapCodeThreshold) {
     PUNT(NewPackedArray-UnrealisticallyHuge);
   }
@@ -252,7 +252,7 @@ void emitNewPackedArray(HTS& env, int32_t numArgs) {
   push(env, array);
 }
 
-void emitNewStructArray(HTS& env, const ImmVector& immVec) {
+void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
   auto const numArgs = immVec.size();
   auto const ids = immVec.vec32();
 
@@ -275,7 +275,7 @@ void emitNewStructArray(HTS& env, const ImmVector& immVec) {
   push(env, gen(env, NewStructArray, extra, sp(env)));
 }
 
-void emitAddElemC(HTS& env) {
+void emitAddElemC(IRGS& env) {
   // This is just to peek at the type; it'll be consumed for real down below and
   // we don't want to constrain it if we're just going to InterpOne.
   auto const kt = topC(env, BCSPOffset{1}, DataTypeGeneric)->type();
@@ -299,7 +299,7 @@ void emitAddElemC(HTS& env) {
   push(env, gen(env, op, arr, key, val));
 }
 
-void emitAddNewElemC(HTS& env) {
+void emitAddNewElemC(IRGS& env) {
   if (!topC(env, BCSPOffset{1})->isA(Type::Arr)) {
     return interpOne(env, Type::Arr, 2);
   }
@@ -310,12 +310,15 @@ void emitAddNewElemC(HTS& env) {
   push(env, gen(env, AddNewElem, arr, val));
 }
 
-void emitNewCol(HTS& env, int type, int size) {
-  push(env,
-    gen(env, NewCol, cns(env, type), cns(env, size)));
+void emitNewCol(IRGS& env, int type, int size) {
+  auto const extra = NewColData {
+    static_cast<CollectionType>(type),
+    static_cast<uint32_t>(size)
+  };
+  push(env, gen(env, NewCol, extra));
 }
 
-void emitColAddElemC(HTS& env) {
+void emitColAddElemC(IRGS& env) {
   if (!topC(env, BCSPOffset{2})->isA(Type::Obj)) {
     return interpOne(env, Type::Obj, 3);
   }
@@ -332,7 +335,7 @@ void emitColAddElemC(HTS& env) {
   gen(env, DecRef, key);
 }
 
-void emitColAddNewElemC(HTS& env) {
+void emitColAddNewElemC(IRGS& env) {
   if (!topC(env, BCSPOffset{1})->isA(Type::Obj)) {
     return interpOne(env, Type::Obj, 2);
   }
@@ -343,7 +346,7 @@ void emitColAddNewElemC(HTS& env) {
   push(env, gen(env, ColAddNewElemC, coll, val));
 }
 
-void emitStaticLocInit(HTS& env, int32_t locId, const StringData* name) {
+void emitStaticLocInit(IRGS& env, int32_t locId, const StringData* name) {
   if (curFunc(env)->isPseudoMain()) PUNT(StaticLocInit);
 
   auto const ldPMExit = makePseudoMainExit(env);
@@ -378,7 +381,7 @@ void emitStaticLocInit(HTS& env, int32_t locId, const StringData* name) {
   // our Cell was not ref-counted.
 }
 
-void emitStaticLoc(HTS& env, int32_t locId, const StringData* name) {
+void emitStaticLoc(IRGS& env, int32_t locId, const StringData* name) {
   if (curFunc(env)->isPseudoMain()) PUNT(StaticLoc);
 
   auto const ldPMExit = makePseudoMainExit(env);

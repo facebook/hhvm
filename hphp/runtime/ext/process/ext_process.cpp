@@ -863,7 +863,8 @@ static bool pre_proc_open(const Array& descriptorspec,
           raise_warning("Missing mode parameter for 'file'");
           break;
         }
-        if (!item.openFile(descarr[int64_t(1)].toString(), descarr[int64_t(2)].toString())) {
+        if (!item.openFile(descarr[int64_t(1)].toString(),
+                           descarr[int64_t(2)].toString())) {
           break;
         }
       } else {
@@ -881,7 +882,8 @@ static bool pre_proc_open(const Array& descriptorspec,
 }
 
 static Variant post_proc_open(const String& cmd, Variant &pipes,
-                              const Variant& env, std::vector<DescriptorItem> &items,
+                              const Variant& env,
+                              std::vector<DescriptorItem> &items,
                               pid_t child) {
   if (child < 0) {
     /* failed to fork() */

@@ -16,9 +16,9 @@
 #include "hphp/runtime/vm/jit/opt.h"
 
 #include <cstdint>
-#include <tuple>
-#include <utility>
 
+#include <boost/variant.hpp>
+#include <folly/Optional.h>
 #include <folly/ScopeGuard.h>
 
 #include "hphp/util/dataflow-worklist.h"
@@ -29,9 +29,12 @@
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
+#include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 
 namespace HPHP { namespace jit {
@@ -90,17 +93,17 @@ struct BlockInfo {
 };
 
 struct Global {
-  explicit Global(IRUnit& unit, BlocksWithIds&& sortedBlocks)
+  explicit Global(IRUnit& unit)
     : unit(unit)
-    , idoms(findDominators(unit, sortedBlocks))
-    , rpoBlocks(std::move(sortedBlocks.blocks))
+    , rpoBlocks(rpoSortCfg(unit))
+    , idoms(findDominators(unit, rpoBlocks, numberBlocks(unit, rpoBlocks)))
     , ainfo(collect_aliases(unit, rpoBlocks))
     , blockInfo(unit, BlockInfo{})
   {}
 
   IRUnit& unit;
-  IdomVector idoms;
   BlockList rpoBlocks;
+  IdomVector idoms;
   AliasAnalysis ainfo;
 
   /*
@@ -144,25 +147,25 @@ struct Local {
   State state;
 };
 
-struct Flags {
-  /*
-   * If set, the instruction was a pure load and the value was known to be
-   * available in `replaceable'.
-   */
-  SSATmp* replaceable{nullptr};
+struct FNone {};
+/*
+ * The instruction was a pure load, and its value was known to be available in
+ * `knownValue', with best known type `knownType'.
+ */
+struct FRedundant { SSATmp* knownValue; Type knownType; };
+/*
+ * Like FRedundant, but the load is impure---rather than killing it, we can
+ * factor out the load.
+ */
+struct FReducible { SSATmp* knownValue; Type knownType; };
+/*
+ * The instruction can be legally replaced with a Jmp to either its next or
+ * taken edge.
+ */
+struct FJmpNext {};
+struct FJmpTaken {};
 
-  /*
-   * If set, the instruction was a pure load, and `replaceable' is not nullptr,
-   * this will be the best type we know for the value at this point.
-   */
-  Type knownType;
-
-  /*
-   * If true, the instruction was a conditional jump that can be converted to
-   * an unconditional jump to it's next() edge.
-   */
-  bool convertToJmp{false};
-};
+using Flags = boost::variant<FNone,FRedundant,FReducible,FJmpNext,FJmpTaken>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -176,22 +179,26 @@ TrackedLoc* find_tracked(Local& env,
                          AliasClass acls) {
   auto const meta = env.global.ainfo.find(canonicalize(acls));
   if (!meta) return nullptr;
-  assert(meta->index < kMaxTrackedALocs);
+  assertx(meta->index < kMaxTrackedALocs);
   return env.state.avail[meta->index] ? &env.state.tracked[meta->index]
                                       : nullptr;
 }
 
-std::pair<SSATmp*,Type> load(Local& env,
-                             const IRInstruction& inst,
-                             AliasClass acls) {
+Flags load(Local& env,
+           const IRInstruction& inst,
+           AliasClass acls) {
   acls = canonicalize(acls);
+
   auto const meta = env.global.ainfo.find(acls);
-  if (!meta) return { nullptr, Type::Gen };
+  if (!meta) return FNone{};
   assert(meta->index < kMaxTrackedALocs);
+
   auto& tracked = env.state.tracked[meta->index];
 
   if (env.state.avail[meta->index]) {
-    if (tracked.knownValue) return { tracked.knownValue, tracked.knownType };
+    if (tracked.knownValue) {
+      return FRedundant { tracked.knownValue, tracked.knownType };
+    }
     /*
      * We didn't have a value, but we had an available type.  This can happen
      * at control flow joins right now (since we don't have support for
@@ -211,14 +218,14 @@ std::pair<SSATmp*,Type> load(Local& env,
 
     FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
     FTRACE(5, "       av: {}\n", show(env.state.avail));
-    return { tracked.knownValue, tracked.knownType };
+    return FRedundant { tracked.knownValue, tracked.knownType };
   }
 
   tracked.knownValue = inst.dst();
 
   FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
   FTRACE(5, "       av: {}\n", show(env.state.avail));
-  return { nullptr, Type::Gen };
+  return FNone{};
 }
 
 void store(Local& env, AliasClass acls, SSATmp* value) {
@@ -242,30 +249,86 @@ void store(Local& env, AliasClass acls, SSATmp* value) {
   FTRACE(5, "       av: {}\n", show(env.state.avail));
 }
 
-void handle_general_effects(Local& env,
-                            const IRInstruction& inst,
-                            GeneralEffects m,
-                            Flags& flags) {
-  store(env, m.stores, nullptr);
-
+Flags handle_general_effects(Local& env,
+                             const IRInstruction& inst,
+                             GeneralEffects m) {
   switch (inst.op()) {
-  /*
-   * We could handle CheckLoc, but right now ir-builder does all that, so
-   * it's not here yet.
-   */
   case CheckTypeMem:
-  case CheckTypePackedArrayElem:
+  case CheckLoc:
+  case CheckStk:
     if (auto const tloc = find_tracked(env, inst, m.loads)) {
       if (tloc->knownType <= inst.typeParam()) {
-        flags.convertToJmp = true;
-        return;
+        return FJmpNext{};
       }
       tloc->knownType &= inst.typeParam();
+
+      if (tloc->knownType <= Type::Bottom) {
+        // i.e., !maybe(inst.typeParam()); fail check.
+        return FJmpTaken{};
+      }
+      if (tloc->knownValue) {
+        return FReducible { tloc->knownValue, tloc->knownType };
+      }
     }
     break;
+
+  case CastStk:
+  case CoerceStk:
+    assert(m.loads.stack());
+
+    // We only care about the stack component, since we only optimize the case
+    // where we don't need to reenter.
+    if (auto const tloc = find_tracked(env, inst, *m.loads.stack())) {
+      if (inst.op() == CastStk &&
+          inst.typeParam() == Type::NullableObj &&
+          tloc->knownType <= Type::Null) {
+        // If we're casting Null to NullableObj, we still need to call
+        // tvCastToNullableObjectInPlace.  See comment there and t3879280 for
+        // details.
+        break;
+      }
+      if (tloc->knownType <= inst.typeParam()) {
+        return FJmpNext{};
+      }
+    }
+    break;
+
   default:
     break;
   }
+
+  store(env, m.stores, nullptr);
+
+  return FNone{};
+}
+
+Flags handle_assert(Local& env, const IRInstruction& inst) {
+  auto const tloc = [&]() -> TrackedLoc* {
+    folly::Optional<AliasClass> acls;
+
+    switch (inst.op()) {
+    case AssertLoc:
+      acls = AFrame { inst.src(0), inst.extra<AssertLoc>()->locId };
+      break;
+    case AssertStk:
+      acls = AStack { inst.src(0), inst.extra<AssertStk>()->offset.offset, 1 };
+      break;
+    default:
+      break;
+    }
+    if (!acls) return nullptr;
+    return find_tracked(env, inst, *acls);
+  }();
+
+  if (tloc) {
+    tloc->knownType &= inst.typeParam();
+
+    if (tloc->knownValue) {
+      return FReducible { tloc->knownValue, tloc->knownType };
+    }
+  }
+
+  return FNone{};
 }
 
 void refine_value(Local& env, SSATmp* newVal, SSATmp* oldVal) {
@@ -308,16 +371,18 @@ Flags analyze_inst(Local& env,
     [&] (PureStoreNT m)    { store(env, m.dst, m.value); },
     [&] (PureSpillFrame m) { store(env, m.dst, nullptr); },
 
-    [&] (PureLoad m) {
-      std::tie(flags.replaceable, flags.knownType) = load(env, inst, m.src);
-    },
+    [&] (PureLoad m)       { flags = load(env, inst, m.src); },
 
-    [&] (GeneralEffects m) { handle_general_effects(env, inst, m, flags); }
+    [&] (GeneralEffects m) { flags = handle_general_effects(env, inst, m); }
   );
 
   switch (inst.op()) {
   case CheckType:
     refine_value(env, inst.dst(), inst.src(0));
+    break;
+  case AssertLoc:
+  case AssertStk:
+    flags = handle_assert(env, inst);
     break;
   default:
     break;
@@ -330,6 +395,65 @@ Flags analyze_inst(Local& env,
 
 //////////////////////////////////////////////////////////////////////
 
+bool can_replace(const Local& env,
+                 const IRInstruction& inst,
+                 const SSATmp* what,
+                 Type knownType) {
+  if (inst.dst() && !(knownType <= inst.dst()->type())) {
+    /*
+     * It's possible we could assert the intersection of the types, but
+     * it's not entirely clear what situations this would happen in, so
+     * let's just not do it in this case for now.
+     */
+    FTRACE(2, "      knownType wasn't substitutable; not right now\n");
+    return false;
+  }
+  return is_tmp_usable(env.global.idoms, what, inst.block());
+}
+
+void reduce_inst(Local& env, IRInstruction& inst, const FReducible& flags) {
+  if (!can_replace(env, inst, flags.knownValue, flags.knownType)) return;
+
+  DEBUG_ONLY Opcode oldOp = inst.op();
+  DEBUG_ONLY Opcode newOp;
+
+  auto const reduce_to = [&] (Opcode op, Type typeParam) {
+    auto block = inst.block();
+    auto taken = hasEdges(op) ? inst.taken() : nullptr;
+
+    auto newInst = env.global.unit.gen(op, inst.marker(), taken,
+                                       typeParam, flags.knownValue);
+    if (hasEdges(op)) newInst->setNext(inst.next());
+
+    block->insert(++block->iteratorTo(&inst), newInst);
+    inst.convertToNop();
+
+    newOp = op;
+  };
+
+  switch (inst.op()) {
+  case CheckTypeMem:
+  case CheckLoc:
+  case CheckStk:
+    reduce_to(CheckType, inst.typeParam());
+    break;
+
+  case AssertLoc:
+  case AssertStk:
+    reduce_to(AssertType, flags.knownType);
+    break;
+
+  default: always_assert(false);
+  }
+
+  FTRACE(2, "      reducible: {} = {} {}\n",
+         opcodeName(oldOp),
+         opcodeName(newOp),
+         flags.knownValue->toString());
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void optimize_block(Local& env, Block* blk) {
   if (!env.state.initialized) {
     FTRACE(2, "  unreachable\n");
@@ -337,41 +461,37 @@ void optimize_block(Local& env, Block* blk) {
   }
 
   for (auto& inst : *blk) {
+    simplify(env.global.unit, &inst);
+
     auto const flags = analyze_inst(env, inst, [&] (Block*, const State&) {});
 
-    auto const can_replace = [&] (SSATmp* what, Type knownType) -> bool {
-      if (knownType == Type::Bottom) {
-        // Unreachable code, but we're not allowed to create IR instructions
-        // with a typeParam of Bottom.
-        return false;
-      }
-      if (!(knownType <= inst.dst()->type())) {
-        /*
-         * It's possible we could assert the intersection of the types, but
-         * it's not entirely clear what situations this would happen in, so
-         * let's just not do it in this case for now.
-         */
-        FTRACE(2, "      knownType wasn't substitutable; not right now\n");
-        return false;
-      }
-      return is_tmp_usable(env.global.idoms, what, inst.block());
-    };
+    match<void>(
+      flags,
+      [&] (FNone) {},
+      [&] (FRedundant flags) {
+        if (!can_replace(env, inst, flags.knownValue, flags.knownType)) return;
 
-    if (flags.replaceable && can_replace(flags.replaceable, flags.knownType)) {
-      FTRACE(2, "      redundant: {} :: {} = {}\n",
-        inst.dst()->toString(),
-        flags.knownType.toString(),
-        flags.replaceable->toString());
-      env.global.unit.replace(&inst, AssertType, flags.knownType,
-        flags.replaceable);
-      continue;
-    }
+        FTRACE(2, "      redundant: {} :: {} = {}\n",
+               inst.dst()->toString(),
+               flags.knownType.toString(),
+               flags.knownValue->toString());
 
-    if (flags.convertToJmp) {
-      FTRACE(2, "      unnecessary\n");
-      env.global.unit.replace(&inst, Jmp, inst.next());
-      continue;
-    }
+        env.global.unit.replace(&inst, AssertType, flags.knownType,
+                                flags.knownValue);
+      },
+      [&] (FReducible flags) { reduce_inst(env, inst, flags); },
+      [&] (FJmpNext) {
+        FTRACE(2, "      unnecessary\n");
+        env.global.unit.replace(&inst, Jmp, inst.next());
+      },
+      [&] (FJmpTaken) {
+        FTRACE(2, "      unnecessary\n");
+        env.global.unit.replace(&inst, Jmp, inst.taken());
+      }
+    );
+
+    // Re-simplify AssertType if we produced any.
+    if (inst.is(AssertType)) simplify(env.global.unit, &inst);
   }
 }
 
@@ -470,7 +590,7 @@ void analyze(Global& genv) {
 
 /*
  * This pass does some analysis to try to avoid PureLoad instructions, or
- * remove unnecessary CheckTypeMem instructions.
+ * remove unnecessary Check instructions.
  *
  * The way it works is to do an abstract interpretation of the IRUnit, where
  * we're tracking changes to abstract memory locations (TrackedLoc).  This pass
@@ -489,7 +609,7 @@ void analyze(Global& genv) {
 void optimizeLoads(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_load, "optimizeLoads"};
 
-  auto genv = Global { unit, rpoSortCfgWithIds(unit) };
+  auto genv = Global { unit };
   if (genv.ainfo.locations.size() == 0) {
     FTRACE(1, "no memory accesses to possibly optimize\n");
     return;

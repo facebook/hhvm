@@ -19,6 +19,7 @@
 
 #include <algorithm>
 
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/ext/ext_generator.h"
 
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -699,7 +700,7 @@ struct InterpOneData : IRExtraData {
       cellsPopped,
       cellsPushed
     );
-    assert(!smashesAllLocals || !nChangedLocals);
+    assertx(!smashesAllLocals || !nChangedLocals);
     if (smashesAllLocals) ret += ", smashes all locals";
     if (nChangedLocals) {
       for (auto i = 0; i < nChangedLocals; ++i) {
@@ -747,28 +748,33 @@ struct CoerceData : IRExtraData {
   int64_t argNum;
 };
 
-struct RBTraceData : IRExtraData {
-  RBTraceData(Trace::RingBufferType t, SrcKey sk)
+struct RBEntryData : IRExtraData {
+  RBEntryData(Trace::RingBufferType t, SrcKey sk)
     : type(t)
     , sk(sk)
-    , msg(nullptr)
   {}
 
-  RBTraceData(Trace::RingBufferType t, const StringData* msg)
-    : type(t)
-    , sk()
-    , msg(msg)
-  {
-    assert(msg->isStatic());
-  }
-
   std::string show() const {
-    auto const data = msg ? msg->data() : showShort(sk);
-    return folly::format("{}: {}", ringbufferName(type), data).str();
+    return folly::sformat("{}: {}", ringbufferName(type), showShort(sk));
   }
 
   Trace::RingBufferType type;
   SrcKey sk;
+};
+
+struct RBMsgData : IRExtraData {
+  RBMsgData(Trace::RingBufferType t, const StringData* msg)
+    : type(t)
+    , msg(msg)
+  {
+    assertx(msg->isStatic());
+  }
+
+  std::string show() const {
+    return folly::sformat("{}: {}", ringbufferName(type), msg->data());
+  }
+
+  Trace::RingBufferType type;
   const StringData* msg;
 };
 
@@ -884,6 +890,22 @@ struct ContEnterData : IRExtraData {
   Offset returnBCOffset;
 };
 
+struct NewColData : IRExtraData {
+  explicit NewColData(CollectionType type, uint32_t size)
+    : type(type)
+    , size(size)
+  {}
+
+  std::string show() const {
+    return folly::sformat("{}, {}",
+                          collectionTypeToString(type)->toCppString(),
+                          size);
+  }
+
+  CollectionType type;
+  uint32_t size;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -956,6 +978,7 @@ X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);
 X(CallArray,                    CallArrayData);
 X(RetCtrl,                      RetCtrlData);
+X(AsyncRetCtrl,                 IRSPOffsetData);
 X(LdArrFuncCtx,                 IRSPOffsetData);
 X(LdArrFPushCuf,                IRSPOffsetData);
 X(LdStrFPushCuf,                IRSPOffsetData);
@@ -976,7 +999,8 @@ X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
-X(RBTrace,                      RBTraceData);
+X(RBTraceEntry,                 RBEntryData);
+X(RBTraceMsg,                   RBMsgData);
 X(OODeclExists,                 ClassKindData);
 X(NewStructArray,               NewStructData);
 X(AllocPackedArray,             PackedArrayData);
@@ -1006,33 +1030,34 @@ X(AdjustSP,                     IRSPOffsetData);
 X(DbgTrashStk,                  IRSPOffsetData);
 X(DbgTrashFrame,                IRSPOffsetData);
 X(LdPropAddr,                   PropOffset);
+X(NewCol,                       NewColData);
 
 #undef X
 
 //////////////////////////////////////////////////////////////////////
 
 template<bool hasExtra, Opcode opc, class T> struct AssertExtraTypes {
-  static void doassert() {
-    assert(!"called extra on an opcode without extra data");
+  static void doassertx() {
+    assertx(!"called extra on an opcode without extra data");
   }
   static void doassert_same() {
-    assert(!"called extra on an opcode without extra data");
+    assertx(!"called extra on an opcode without extra data");
   }
 };
 
 template<Opcode opc, class T> struct AssertExtraTypes<true,opc,T> {
   typedef typename IRExtraDataType<opc>::type ExtraType;
 
-  static void doassert() {
+  static void doassertx() {
     if (!std::is_base_of<T,ExtraType>::value) {
-      assert(!"extra<T> was called with an extra data "
+      assertx(!"extra<T> was called with an extra data "
               "type that doesn't match the opcode type");
     }
   }
   static void doassert_same() {
     if (!std::is_same<T,ExtraType>::value) {
       fprintf(stderr, "opcode = %s\n", opcodeName(opc));   \
-      assert(!"extra<T> was called with an extra data type that "
+      assertx(!"extra<T> was called with an extra data type that "
              "doesn't exactly match the opcode type");
     }
   }
@@ -1045,7 +1070,7 @@ template<class T> void assert_opcode_extra(Opcode opc) {
   case opcode:                                  \
     AssertExtraTypes<                           \
       OpHasExtraData<opcode>::value,opcode,T    \
-    >::doassert();                              \
+    >::doassertx();                              \
     break;
   switch (opc) { IR_OPCODES default: not_reached(); }
 #undef O

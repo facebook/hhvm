@@ -28,7 +28,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void implAGet(HTS& env, SSATmp* classSrc) {
+void implAGet(IRGS& env, SSATmp* classSrc) {
   if (classSrc->type() <= Type::Str) {
     push(env, ldCls(env, classSrc));
     return;
@@ -36,7 +36,7 @@ void implAGet(HTS& env, SSATmp* classSrc) {
   push(env, gen(env, LdObjClass, classSrc));
 }
 
-void checkThis(HTS& env, SSATmp* ctx) {
+void checkThis(IRGS& env, SSATmp* ctx) {
   ifThen(
     env,
     [&] (Block* taken) {
@@ -54,7 +54,7 @@ void checkThis(HTS& env, SSATmp* ctx) {
 
 }
 
-void emitAGetC(HTS& env) {
+void emitAGetC(IRGS& env) {
   auto const name = topC(env);
   if (name->type().subtypeOfAny(Type::Obj, Type::Str)) {
     popC(env);
@@ -65,7 +65,7 @@ void emitAGetC(HTS& env) {
   }
 }
 
-void emitAGetL(HTS& env, int32_t id) {
+void emitAGetL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const src = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
@@ -76,7 +76,7 @@ void emitAGetL(HTS& env, int32_t id) {
   }
 }
 
-void emitCGetL(HTS& env, int32_t id) {
+void emitCGetL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   // Mimic hhbc guard relaxation for now.
@@ -85,14 +85,20 @@ void emitCGetL(HTS& env, int32_t id) {
   pushIncRef(env, ldLocInnerWarn(env, id, ldrefExit, ldPMExit, cat));
 }
 
-void emitPushL(HTS& env, int32_t id) {
+void emitCUGetL(IRGS& env, int32_t id) {
+  auto const ldrefExit = makeExit(env);
+  auto const ldPMExit = makePseudoMainExit(env);
+  pushIncRef(env, ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeGeneric));
+}
+
+void emitPushL(IRGS& env, int32_t id) {
   assertTypeLocal(env, id, Type::InitCell);  // bytecode invariant
   auto* locVal = ldLoc(env, id, makeExit(env), DataTypeGeneric);
   push(env, locVal);
   stLocRaw(env, id, fp(env), cns(env, Type::Uninit));
 }
 
-void emitCGetL2(HTS& env, int32_t id) {
+void emitCGetL2(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const oldTop = pop(env, Type::StkElem);
@@ -107,7 +113,7 @@ void emitCGetL2(HTS& env, int32_t id) {
   push(env, oldTop);
 }
 
-void emitVGetL(HTS& env, int32_t id) {
+void emitVGetL(IRGS& env, int32_t id) {
   auto value = ldLoc(env, id, makeExit(env), DataTypeCountnessInit);
   auto const t = value->type();
   always_assert(t <= Type::Cell || t <= Type::BoxedCell);
@@ -122,13 +128,13 @@ void emitVGetL(HTS& env, int32_t id) {
   pushIncRef(env, value);
 }
 
-void emitUnsetL(HTS& env, int32_t id) {
+void emitUnsetL(IRGS& env, int32_t id) {
   auto const prev = ldLoc(env, id, makeExit(env), DataTypeCountness);
   stLocRaw(env, id, fp(env), cns(env, Type::Uninit));
   gen(env, DecRef, prev);
 }
 
-void emitBindL(HTS& env, int32_t id) {
+void emitBindL(IRGS& env, int32_t id) {
   if (curFunc(env)->isPseudoMain()) {
     interpOne(env, Type::BoxedInitCell, 1);
     return;
@@ -145,7 +151,7 @@ void emitBindL(HTS& env, int32_t id) {
   gen(env, DecRef, oldValue);
 }
 
-void emitSetL(HTS& env, int32_t id) {
+void emitSetL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
 
@@ -156,7 +162,7 @@ void emitSetL(HTS& env, int32_t id) {
   pushStLoc(env, id, ldrefExit, ldPMExit, src);
 }
 
-void emitInitThisLoc(HTS& env, int32_t id) {
+void emitInitThisLoc(IRGS& env, int32_t id) {
   if (!curClass(env)) {
     // Do nothing if this is null
     return;
@@ -171,7 +177,7 @@ void emitInitThisLoc(HTS& env, int32_t id) {
   gen(env, DecRef, oldLoc);
 }
 
-void emitPrint(HTS& env) {
+void emitPrint(IRGS& env) {
   auto const type = topC(env)->type();
   if (!type.subtypeOfAny(Type::Int, Type::Bool, Type::Null, Type::Str)) {
     interpOne(env, Type::Int, 1);
@@ -188,7 +194,7 @@ void emitPrint(HTS& env) {
   } else if (type <= Type::Bool) {
     op = PrintBool;
   } else {
-    assert(type <= Type::Null);
+    assertx(type <= Type::Null);
     op = Nop;
   }
   // the print helpers decref their arg, so don't decref pop'ed value
@@ -198,7 +204,7 @@ void emitPrint(HTS& env) {
   push(env, cns(env, 1));
 }
 
-void emitUnbox(HTS& env) {
+void emitUnbox(IRGS& env) {
   auto const exit = makeExit(env);
   auto const srcBox = popV(env);
   auto const unboxed = unbox(env, srcBox, exit);
@@ -206,19 +212,19 @@ void emitUnbox(HTS& env) {
   gen(env, DecRef, srcBox);
 }
 
-void emitThis(HTS& env) {
+void emitThis(IRGS& env) {
   auto const ctx = gen(env, LdCtx, fp(env));
   checkThis(env, ctx);
   auto const this_ = gen(env, CastCtxThis, ctx);
   pushIncRef(env, this_);
 }
 
-void emitCheckThis(HTS& env) {
+void emitCheckThis(IRGS& env) {
   auto const ctx = gen(env, LdCtx, fp(env));
   checkThis(env, ctx);
 }
 
-void emitBareThis(HTS& env, BareThisOp subop) {
+void emitBareThis(IRGS& env, BareThisOp subop) {
   if (!curClass(env)) {
     interpOne(env, Type::InitNull, 0); // will raise notice and push null
     return;
@@ -232,14 +238,14 @@ void emitBareThis(HTS& env, BareThisOp subop) {
   pushIncRef(env, gen(env, CastCtxThis, ctx));
 }
 
-void emitClone(HTS& env) {
+void emitClone(IRGS& env) {
   if (!topC(env)->isA(Type::Obj)) PUNT(Clone-NonObj);
   auto const obj        = popC(env);
   push(env, gen(env, Clone, obj));
   gen(env, DecRef, obj);
 }
 
-void emitLateBoundCls(HTS& env) {
+void emitLateBoundCls(IRGS& env) {
   auto const clss = curClass(env);
   if (!clss) {
     // no static context class, so this will raise an error
@@ -250,7 +256,7 @@ void emitLateBoundCls(HTS& env) {
   push(env, gen(env, LdClsCtx, ctx));
 }
 
-void emitSelf(HTS& env) {
+void emitSelf(IRGS& env) {
   auto const clss = curClass(env);
   if (clss == nullptr) {
     interpOne(env, Type::Cls, 0);
@@ -259,7 +265,7 @@ void emitSelf(HTS& env) {
   }
 }
 
-void emitParent(HTS& env) {
+void emitParent(IRGS& env) {
   auto const clss = curClass(env);
   if (clss == nullptr || clss->parent() == nullptr) {
     interpOne(env, Type::Cls, 0);
@@ -268,13 +274,13 @@ void emitParent(HTS& env) {
   }
 }
 
-void emitNameA(HTS& env) {
+void emitNameA(IRGS& env) {
   push(env, gen(env, LdClsName, popA(env)));
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCastArray(HTS& env) {
+void emitCastArray(IRGS& env) {
   auto const src = popC(env);
   push(
     env,
@@ -291,76 +297,76 @@ void emitCastArray(HTS& env) {
   );
 }
 
-void emitCastBool(HTS& env) {
+void emitCastBool(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToBool, src));
   gen(env, DecRef, src);
 }
 
-void emitCastDouble(HTS& env) {
+void emitCastDouble(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToDbl, src));
   gen(env, DecRef, src);
 }
 
-void emitCastInt(HTS& env) {
+void emitCastInt(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToInt, src));
   gen(env, DecRef, src);
 }
 
-void emitCastObject(HTS& env) {
+void emitCastObject(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToObj, src));
 }
 
-void emitCastString(HTS& env) {
+void emitCastString(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, ConvCellToStr, src));
   gen(env, DecRef, src);
 }
 
-void emitIncStat(HTS& env, int32_t counter, int32_t value) {
+void emitIncStat(IRGS& env, int32_t counter, int32_t value) {
   if (!Stats::enabled()) return;
   gen(env, IncStat, cns(env, counter), cns(env, value), cns(env, false));
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void emitPopA(HTS& env) { popA(env); }
-void emitPopC(HTS& env) { popDecRef(env, Type::Cell, DataTypeGeneric); }
-void emitPopV(HTS& env) { popDecRef(env,
+void emitPopA(IRGS& env) { popA(env); }
+void emitPopC(IRGS& env) { popDecRef(env, Type::Cell, DataTypeGeneric); }
+void emitPopV(IRGS& env) { popDecRef(env,
                                     Type::BoxedInitCell,
                                     DataTypeGeneric); }
-void emitPopR(HTS& env) { popDecRef(env, Type::Gen, DataTypeGeneric); }
+void emitPopR(IRGS& env) { popDecRef(env, Type::Gen, DataTypeGeneric); }
 
-void emitDir(HTS& env)  { push(env, cns(env, curUnit(env)->dirpath())); }
-void emitFile(HTS& env) { push(env, cns(env, curUnit(env)->filepath())); }
+void emitDir(IRGS& env)  { push(env, cns(env, curUnit(env)->dirpath())); }
+void emitFile(IRGS& env) { push(env, cns(env, curUnit(env)->filepath())); }
 
-void emitDup(HTS& env) { pushIncRef(env, topC(env)); }
-
-//////////////////////////////////////////////////////////////////////
-
-void emitArray(HTS& env, const ArrayData* x)   { push(env, cns(env, x)); }
-void emitString(HTS& env, const StringData* s) { push(env, cns(env, s)); }
-void emitInt(HTS& env, int64_t val)            { push(env, cns(env, val)); }
-void emitDouble(HTS& env, double val)          { push(env, cns(env, val)); }
-void emitTrue(HTS& env)                        { push(env, cns(env, true)); }
-void emitFalse(HTS& env)                       { push(env, cns(env, false)); }
-
-void emitNull(HTS& env)       { push(env, cns(env, Type::InitNull)); }
-void emitNullUninit(HTS& env) { push(env, cns(env, Type::Uninit)); }
+void emitDup(IRGS& env) { pushIncRef(env, topC(env)); }
 
 //////////////////////////////////////////////////////////////////////
 
-void emitNop(HTS&)                {}
-void emitBoxRNop(HTS&)            {}
-void emitUnboxRNop(HTS&)          {}
-void emitRGetCNop(HTS&)           {}
-void emitFPassC(HTS&, int32_t)    {}
-void emitFPassVNop(HTS&, int32_t) {}
-void emitDefClsNop(HTS&, Id)      {}
-void emitBreakTraceHint(HTS&)     {}
+void emitArray(IRGS& env, const ArrayData* x)   { push(env, cns(env, x)); }
+void emitString(IRGS& env, const StringData* s) { push(env, cns(env, s)); }
+void emitInt(IRGS& env, int64_t val)            { push(env, cns(env, val)); }
+void emitDouble(IRGS& env, double val)          { push(env, cns(env, val)); }
+void emitTrue(IRGS& env)                        { push(env, cns(env, true)); }
+void emitFalse(IRGS& env)                       { push(env, cns(env, false)); }
+
+void emitNull(IRGS& env)       { push(env, cns(env, Type::InitNull)); }
+void emitNullUninit(IRGS& env) { push(env, cns(env, Type::Uninit)); }
+
+//////////////////////////////////////////////////////////////////////
+
+void emitNop(IRGS&)                {}
+void emitBoxRNop(IRGS&)            {}
+void emitUnboxRNop(IRGS&)          {}
+void emitRGetCNop(IRGS&)           {}
+void emitFPassC(IRGS&, int32_t)    {}
+void emitFPassVNop(IRGS&, int32_t) {}
+void emitDefClsNop(IRGS&, Id)      {}
+void emitBreakTraceHint(IRGS&)     {}
 
 //////////////////////////////////////////////////////////////////////
 

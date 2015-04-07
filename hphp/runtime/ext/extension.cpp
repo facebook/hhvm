@@ -41,10 +41,6 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(redis, NO_EXTENSION_VERSION_YET);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static std::vector<Unit*> s_systemlib_units;
-
-/////////////////////////////////////////////////////////////////////////////
-
 Extension::Extension(litstr name, const char *version /* = "" */)
     : m_name(name)
     , m_version(version ? version : "") {
@@ -58,12 +54,6 @@ const static std::string
 bool Extension::IsSystemlibPath(const std::string& name) {
   return !name.compare(0, s_systemlibPhpName.length(), s_systemlibPhpName) ||
          !name.compare(0, s_systemlibHhasName.length(), s_systemlibHhasName);
-}
-
-void Extension::MergeSystemlib() {
-  for (auto &unit : s_systemlib_units) {
-    unit->merge();
-  }
 }
 
 void Extension::CompileSystemlib(const std::string &slib,
@@ -88,7 +78,7 @@ void Extension::CompileSystemlib(const std::string &slib,
   }
 
   unit->merge();
-  s_systemlib_units.push_back(unit);
+  SystemLib::addPersistentUnit(unit);
 }
 
 /**

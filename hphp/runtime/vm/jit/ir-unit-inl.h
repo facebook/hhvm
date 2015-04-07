@@ -83,7 +83,7 @@ private:
   Ret go2(IRInstruction* inst, SSATmp* t1, SSAs... ts) {
     SSATmp* ssas[] = { t1, ts... };
     auto const nSrcs = 1 + sizeof...(ts);
-    for (unsigned i = 0; debug && i < nSrcs; ++i) assert(ssas[i]);
+    for (unsigned i = 0; debug && i < nSrcs; ++i) assertx(ssas[i]);
 
     inst->initializeSrcs(nSrcs, ssas);
     return stop(inst);
@@ -101,7 +101,7 @@ private:
    * Call the lambda on the initialized IRInstruction.
    */
   Ret stop(IRInstruction* inst) {
-    assert(checkOperandTypes(inst));
+    assertx(checkOperandTypes(inst));
     return func(inst);
   }
 
@@ -124,7 +124,7 @@ private:
    * Setter for exit label.
    */
   void setter(IRInstruction* inst, Block* target) {
-    assert(!target || inst->hasEdges());
+    assertx(!target || inst->hasEdges());
     inst->setTaken(target);
   }
 

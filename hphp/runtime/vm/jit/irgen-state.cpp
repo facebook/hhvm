@@ -33,7 +33,7 @@ BCMarker initial_marker(TransContext ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-HTS::HTS(TransContext context)
+IRGS::IRGS(TransContext context)
   : context(context)
   , unit(context)
   , irb(new IRBuilder(unit, initial_marker(context)))
@@ -47,36 +47,36 @@ HTS::HTS(TransContext context)
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(const HTS& hts) {
+std::string show(const IRGS& irgs) {
   std::ostringstream out;
   auto header = [&](const std::string& str) {
     out << folly::format("+{:-^82}+\n", str);
   };
 
-  const int32_t frameCells = irgen::resumed(hts)
+  const int32_t frameCells = irgen::resumed(irgs)
     ? 0
-    : irgen::curFunc(hts)->numSlotsInFrame();
-  auto const stackDepth = hts.irb->syncedSpLevel().offset +
-      safe_cast<int32_t>(hts.irb->evalStack().size()) -
-      safe_cast<int32_t>(hts.irb->stackDeficit()) - frameCells;
-  assert(stackDepth >= 0);
+    : irgen::curFunc(irgs)->numSlotsInFrame();
+  auto const stackDepth = irgs.irb->syncedSpLevel().offset +
+      safe_cast<int32_t>(irgs.irb->evalStack().size()) -
+      safe_cast<int32_t>(irgs.irb->stackDeficit()) - frameCells;
+  assertx(stackDepth >= 0);
   auto spOffset = stackDepth;
   auto elem = [&](const std::string& str) {
     out << folly::format("| {:<80} |\n",
                          folly::format("{:>2}: {}",
                                        stackDepth - spOffset, str));
-    assert(spOffset > 0);
+    assertx(spOffset > 0);
     --spOffset;
   };
 
-  auto fpi = irgen::curFunc(hts)->findFPI(irgen::bcOff(hts));
+  auto fpi = irgen::curFunc(irgs)->findFPI(irgen::bcOff(irgs));
   auto checkFpi = [&]() {
     if (fpi && spOffset + frameCells == fpi->m_fpOff) {
       auto fpushOff = fpi->m_fpushOff;
-      auto after = fpushOff + instrLen((Op*)irgen::curUnit(hts)->at(fpushOff));
+      auto after = fpushOff + instrLen((Op*)irgen::curUnit(irgs)->at(fpushOff));
       std::ostringstream msg;
       msg << "ActRec from ";
-      irgen::curUnit(hts)->prettyPrint(
+      irgen::curUnit(irgs)->prettyPrint(
         msg,
         Unit::PrintOpts().range(fpushOff, after)
                          .noLineNumbers()
@@ -84,11 +84,11 @@ std::string show(const HTS& hts) {
                          .noFuncs()
       );
       auto msgStr = msg.str();
-      assert(msgStr.back() == '\n');
+      assertx(msgStr.back() == '\n');
       msgStr.erase(msgStr.size() - 1);
       for (unsigned i = 0; i < kNumActRecCells; ++i) elem(msgStr);
       fpi = fpi->m_parentIndex != -1
-        ? &irgen::curFunc(hts)->fpitab()[fpi->m_parentIndex]
+        ? &irgen::curFunc(irgs)->fpitab()[fpi->m_parentIndex]
         : nullptr;
       return true;
     }
@@ -97,27 +97,27 @@ std::string show(const HTS& hts) {
 
   header(folly::format(" {} stack element(s); m_evalStack: ",
                        stackDepth).str());
-  for (auto i = 0; i < hts.irb->evalStack().size(); ++i) {
+  for (auto i = 0; i < irgs.irb->evalStack().size(); ++i) {
     while (checkFpi());
-    auto const value = irgen::top(const_cast<HTS&>(hts),
+    auto const value = irgen::top(const_cast<IRGS&>(irgs),
       Type::StkElem, BCSPOffset{i}, DataTypeGeneric);
     elem(value->inst()->toString());
   }
 
   header(" in-memory ");
-  for (auto i = hts.irb->evalStack().size(); spOffset > 0; ) {
-    assert(i < irgen::curFunc(hts)->maxStackCells());
+  for (auto i = irgs.irb->evalStack().size(); spOffset > 0; ) {
+    assertx(i < irgen::curFunc(irgs)->maxStackCells());
     if (checkFpi()) {
       i += kNumActRecCells;
       continue;
     }
 
-    auto const stkTy = hts.irb->stackType(
-      irgen::offsetFromIRSP(hts, BCSPOffset{i}),
+    auto const stkTy = irgs.irb->stackType(
+      irgen::offsetFromIRSP(irgs, BCSPOffset{i}),
       DataTypeGeneric
     );
-    auto const stkVal = hts.irb->stackValue(
-      irgen::offsetFromIRSP(hts, BCSPOffset{i}),
+    auto const stkVal = irgs.irb->stackValue(
+      irgen::offsetFromIRSP(irgs, BCSPOffset{i}),
       DataTypeGeneric
     );
 
@@ -135,15 +135,16 @@ std::string show(const HTS& hts) {
   header("");
   out << "\n";
 
-  header(folly::format(" {} local(s) ", irgen::curFunc(hts)->numLocals()).str());
-  for (unsigned i = 0; i < irgen::curFunc(hts)->numLocals(); ++i) {
-    auto const localValue = hts.irb->localValue(i, DataTypeGeneric);
+  header(folly::format(" {} local(s) ",
+                       irgen::curFunc(irgs)->numLocals()).str());
+  for (unsigned i = 0; i < irgen::curFunc(irgs)->numLocals(); ++i) {
+    auto const localValue = irgs.irb->localValue(i, DataTypeGeneric);
     auto const localTy = localValue ? localValue->type()
-                                    : hts.irb->localType(i, DataTypeGeneric);
+                                    : irgs.irb->localType(i, DataTypeGeneric);
     auto str = localValue ? localValue->inst()->toString()
                           : localTy.toString();
     if (localTy <= Type::BoxedCell) {
-      auto const pred = hts.irb->predictedInnerType(i);
+      auto const pred = irgs.irb->predictedInnerType(i);
       if (pred != Type::Bottom) {
         str += folly::sformat(" (predict inner: {})", pred.toString());
       }
@@ -158,4 +159,3 @@ std::string show(const HTS& hts) {
 //////////////////////////////////////////////////////////////////////
 
 }}
-

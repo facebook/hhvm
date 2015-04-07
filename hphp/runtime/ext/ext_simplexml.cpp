@@ -31,33 +31,6 @@ namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION_VERSION(SimpleXML, 0.1);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-class XmlDocWrapper : public SweepableResourceData {
-public:
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(XmlDocWrapper)
-
-  XmlDocWrapper(xmlDocPtr doc, Object node = nullptr)
-    : doc(doc), node(node) {
-  }
-
-  ~XmlDocWrapper() {
-    XmlDocWrapper::sweep();
-  }
-
-  void sweep() {
-    if (doc && node.isNull()) {
-      xmlFreeDoc(doc);
-    }
-  }
-
-  xmlDocPtr doc;
-
-private:
-  // Hold onto the original owner of the doc so it doesn't get free()d.
-  Object node;
-};
-
-///////////////////////////////////////////////////////////////////////////////
 // Helpers
 
 #define SKIP_TEXT(__p) \
@@ -122,8 +95,7 @@ static Object _node_as_zval(c_SimpleXMLElement* sxe, xmlNodePtr node,
                             SXE_ITER itertype, const char* name,
                             const xmlChar* nsprefix, bool isprefix) {
   Object obj = create_object(sxe->getClassName(), Array(), false);
-  c_SimpleXMLElement* subnode = obj.getTyped<c_SimpleXMLElement>();
-  subnode->document = sxe->document;
+  auto subnode = cast<c_SimpleXMLElement>(obj);
   subnode->iter.type = itertype;
   if (name) {
     subnode->iter.name = xmlStrdup((xmlChar*)name);
@@ -132,7 +104,7 @@ static Object _node_as_zval(c_SimpleXMLElement* sxe, xmlNodePtr node,
     subnode->iter.nsprefix = xmlStrdup(nsprefix);
     subnode->iter.isprefix = isprefix;
   }
-  subnode->node = node;
+  subnode->node = libxml_register_node(node);
   return obj;
 }
 
@@ -229,8 +201,8 @@ next_iter:
 static void php_sxe_move_forward_iterator(c_SimpleXMLElement* sxe) {
   xmlNodePtr node = nullptr;
   if (!sxe->iter.data.isNull()) {
-    c_SimpleXMLElement* intern = sxe->iter.data.getTyped<c_SimpleXMLElement>();
-    node = intern->node;
+    auto intern = cast<c_SimpleXMLElement>(sxe->iter.data);
+    node = intern->nodep();
     sxe->iter.data = nullptr;
   }
 
@@ -245,7 +217,7 @@ static xmlNodePtr php_sxe_reset_iterator(c_SimpleXMLElement* sxe,
     sxe->iter.data = nullptr;
   }
 
-  xmlNodePtr node = sxe->node;
+  xmlNodePtr node = sxe->nodep();
   if (node) {
     switch (sxe->iter.type) {
       case SXE_ITER_ELEMENT:
@@ -282,7 +254,7 @@ static xmlNodePtr php_sxe_get_first_node(c_SimpleXMLElement* sxe,
     php_sxe_reset_iterator(sxe, true);
     xmlNodePtr retnode = nullptr;
     if (!sxe->iter.data.isNull()) {
-      retnode = sxe->iter.data.getTyped<c_SimpleXMLElement>()->node;
+      retnode = cast<c_SimpleXMLElement>(sxe->iter.data)->nodep();
     }
     return retnode;
   } else {
@@ -291,7 +263,7 @@ static xmlNodePtr php_sxe_get_first_node(c_SimpleXMLElement* sxe,
 }
 
 xmlNodePtr simplexml_export_node(c_SimpleXMLElement* sxe) {
-  return php_sxe_get_first_node(sxe, sxe->node);
+  return php_sxe_get_first_node(sxe, sxe->nodep());
 }
 
 static Variant cast_object(char* contents, int type) {
@@ -313,7 +285,7 @@ static Variant cast_object(char* contents, int type) {
 
 static Object sxe_prop_dim_read(c_SimpleXMLElement* sxe, const Variant& member,
                                 bool elements, bool attribs) {
-  xmlNodePtr node = sxe->node;
+  xmlNodePtr node = sxe->nodep();
 
   String name = "";
   if (member.isNull() || member.isInteger()) {
@@ -390,8 +362,8 @@ static Object sxe_prop_dim_read(c_SimpleXMLElement* sxe, const Variant& member,
     }
 
     if (elements) {
-      if (!sxe->node) {
-        sxe->node = node;
+      if (!sxe->nodep()) {
+        sxe->node = libxml_register_node(node);
       }
       if (member.isNull() || member.isInteger()) {
         long cnt = 0;
@@ -421,7 +393,7 @@ static Object sxe_prop_dim_read(c_SimpleXMLElement* sxe, const Variant& member,
 #if SXE_ELEMENT_BY_NAME
         int newtype;
 
-        node = sxe->node;
+        node = sxe->nodep();
         node = sxe_get_element_by_name(sxe, node, &name.data(), &newtype);
         if (node) {
           return_value = _node_as_zval(sxe, node, newtype, name.data(),
@@ -462,7 +434,7 @@ static void change_node_zval(xmlNodePtr node, const Variant& value) {
 
 static void sxe_prop_dim_delete(c_SimpleXMLElement* sxe, const Variant& member,
                                 bool elements, bool attribs) {
-  xmlNodePtr node = sxe->node;
+  xmlNodePtr node = sxe->nodep();
 
   if (member.isInteger()) {
     if (sxe->iter.type != SXE_ITER_ATTRLIST) {
@@ -498,8 +470,7 @@ static void sxe_prop_dim_delete(c_SimpleXMLElement* sxe, const Variant& member,
               match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix,
                        sxe->iter.isprefix)) {
             if (nodendx == member.toInt64()) {
-              xmlUnlinkNode((xmlNodePtr) attr);
-              php_libxml_node_free_resource((xmlNodePtr) attr);
+              libxml_register_node((xmlNodePtr) attr)->unlink();
               break;
             }
             nodendx++;
@@ -514,8 +485,7 @@ static void sxe_prop_dim_delete(c_SimpleXMLElement* sxe, const Variant& member,
               !xmlStrcmp(attr->name, (xmlChar*)member.toString().data()) &&
               match_ns(sxe, (xmlNodePtr) attr, sxe->iter.nsprefix,
                        sxe->iter.isprefix)) {
-            xmlUnlinkNode((xmlNodePtr) attr);
-            php_libxml_node_free_resource((xmlNodePtr) attr);
+            libxml_register_node((xmlNodePtr) attr)->unlink();
             break;
           }
           attr = anext;
@@ -530,8 +500,7 @@ static void sxe_prop_dim_delete(c_SimpleXMLElement* sxe, const Variant& member,
         }
         node = sxe_get_element_by_offset(sxe, member.toInt64(), node, nullptr);
         if (node) {
-          xmlUnlinkNode(node);
-          php_libxml_node_free_resource(node);
+          libxml_register_node(node)->unlink();
         }
       } else {
         node = node->children;
@@ -542,8 +511,7 @@ static void sxe_prop_dim_delete(c_SimpleXMLElement* sxe, const Variant& member,
           SKIP_TEXT(node);
 
           if (!xmlStrcmp(node->name, (xmlChar*)member.toString().data())) {
-            xmlUnlinkNode(node);
-            php_libxml_node_free_resource(node);
+            libxml_register_node(node)->unlink();
           }
 
 next_iter:
@@ -556,7 +524,7 @@ next_iter:
 
 static bool sxe_prop_dim_exists(c_SimpleXMLElement* sxe, const Variant& member,
                                 bool check_empty, bool elements, bool attribs) {
-  xmlNodePtr node = sxe->node;
+  xmlNodePtr node = sxe->nodep();
 
   if (member.isInteger()) {
     if (sxe->iter.type != SXE_ITER_ATTRLIST) {
@@ -685,13 +653,12 @@ static Variant _get_base_node_value(c_SimpleXMLElement* sxe_ref,
     }
   } else {
     Object obj = create_object(sxe_ref->getClassName(), Array(), false);
-    c_SimpleXMLElement* subnode = obj.getTyped<c_SimpleXMLElement>();
-    subnode->document = sxe_ref->document;
+    auto subnode = cast<c_SimpleXMLElement>(obj);
     if (nsprefix && *nsprefix) {
       subnode->iter.nsprefix = xmlStrdup((xmlChar*)nsprefix);
       subnode->iter.isprefix = isprefix;
     }
-    subnode->node = node;
+    subnode->node = libxml_register_node(node);
     return obj;
   }
   return init_null();
@@ -722,7 +689,7 @@ static void sxe_get_prop_hash(c_SimpleXMLElement* sxe, bool is_debug,
 
   Object iter_data = nullptr;
   bool use_iter = false;
-  xmlNodePtr node = sxe->node;
+  xmlNodePtr node = sxe->nodep();
   if (!node) {
     return;
   }
@@ -740,7 +707,7 @@ static void sxe_get_prop_hash(c_SimpleXMLElement* sxe, bool is_debug,
                      sxe->iter.isprefix)) {
           zattr.set(String((char*)attr->name),
                     sxe_xmlNodeListGetString(
-                      sxe->document.getTyped<XmlDocWrapper>()->doc,
+                      sxe->docp(),
                       attr->children,
                       1));
         }
@@ -752,7 +719,7 @@ static void sxe_get_prop_hash(c_SimpleXMLElement* sxe, bool is_debug,
     }
   }
 
-  node = sxe->node;
+  node = sxe->nodep();
   node = php_sxe_get_first_node(sxe, node);
 
   if (node && sxe->iter.type != SXE_ITER_ATTRLIST) {
@@ -836,22 +803,19 @@ static Variant sxe_object_cast(c_SimpleXMLElement* sxe, int8_t type) {
   if (sxe->iter.type != SXE_ITER_NONE) {
     xmlNodePtr node = php_sxe_get_first_node(sxe, nullptr);
     if (node) {
-      contents =
-        xmlNodeListGetString(sxe->document.getTyped<XmlDocWrapper>()->doc,
-                             node->children,
-                             1);
+      contents = xmlNodeListGetString(sxe->docp(), node->children, 1);
     }
   } else {
-    xmlDocPtr doc = sxe->document.getTyped<XmlDocWrapper>()->doc;
-    if (!sxe->node) {
+    xmlDocPtr doc = sxe->docp();
+    if (!sxe->nodep()) {
       if (doc) {
-        sxe->node = xmlDocGetRootElement(doc);
+        sxe->node = libxml_register_node(xmlDocGetRootElement(doc));
       }
     }
 
-    if (sxe->node) {
-      if (sxe->node->children) {
-        contents = xmlNodeListGetString(doc, sxe->node->children, 1);
+    if (sxe->nodep()) {
+      if (sxe->nodep()->children) {
+        contents = xmlNodeListGetString(doc, sxe->nodep()->children, 1);
       }
     }
   }
@@ -867,7 +831,7 @@ static Variant sxe_object_cast(c_SimpleXMLElement* sxe, int8_t type) {
 static bool sxe_prop_dim_write(c_SimpleXMLElement* sxe, const Variant& member,
                                const Variant& value, bool elements, bool attribs,
                                xmlNodePtr* pnewnode) {
-  xmlNodePtr node = sxe->node;
+  xmlNodePtr node = sxe->nodep();
 
   if (member.isNull() || member.isInteger()) {
     if (sxe->iter.type != SXE_ITER_ATTRLIST) {
@@ -1011,8 +975,7 @@ next_iter:
       if (!value.isNull()) {
         xmlNodePtr tempnode;
         while ((tempnode = (xmlNodePtr) newnode->children)) {
-          xmlUnlinkNode(tempnode);
-          php_libxml_node_free_resource(tempnode);
+          libxml_register_node(tempnode)->unlink();
         }
         change_node_zval(newnode, value);
       }
@@ -1094,8 +1057,8 @@ static Class* class_from_name(const String& class_name, const char* callee) {
 Variant f_simplexml_import_dom(
   const Object& node,
   const String& class_name /* = "SimpleXMLElement" */) {
-  DOMNode* domnode = toDOMNode(node.get());
-  xmlNodePtr nodep = domnode->m_node;
+  auto domnode = Native::data<DOMNode>(node.get());
+  xmlNodePtr nodep = domnode->nodep();
 
   if (nodep) {
     if (nodep->doc == nullptr) {
@@ -1114,9 +1077,8 @@ Variant f_simplexml_import_dom(
       return init_null();
     }
     Object obj = create_object(cls->nameStr(), Array(), false);
-    c_SimpleXMLElement* sxe = obj.getTyped<c_SimpleXMLElement>();
-    sxe->document = Resource(newres<XmlDocWrapper>(nodep->doc, node));
-    sxe->node = nodep;
+    auto sxe = cast<c_SimpleXMLElement>(obj);
+    sxe->node = libxml_register_node(nodep);
     return obj;
   } else {
     raise_warning("Invalid Nodetype to import");
@@ -1144,9 +1106,8 @@ Variant f_simplexml_load_string(
   }
 
   Object obj = create_object(cls->nameStr(), Array(), false);
-  c_SimpleXMLElement* sxe = obj.getTyped<c_SimpleXMLElement>();
-  sxe->document = Resource(newres<XmlDocWrapper>(doc));
-  sxe->node = xmlDocGetRootElement(doc);
+  auto sxe = cast<c_SimpleXMLElement>(obj);
+  sxe->node = libxml_register_node(xmlDocGetRootElement(doc));
   sxe->iter.nsprefix = ns.size() ? xmlStrdup((xmlChar*)ns.data()) : nullptr;
   sxe->iter.isprefix = is_prefix;
   return obj;
@@ -1188,9 +1149,8 @@ Variant f_simplexml_load_file(const String& filename,
   }
 
   Object obj = create_object(cls->nameStr(), Array(), false);
-  c_SimpleXMLElement* sxe = obj.getTyped<c_SimpleXMLElement>();
-  sxe->document = Resource(newres<XmlDocWrapper>(doc));
-  sxe->node = xmlDocGetRootElement(doc);
+  auto sxe = cast<c_SimpleXMLElement>(obj);
+  sxe->node = libxml_register_node(xmlDocGetRootElement(doc));
   sxe->iter.nsprefix = ns.size() ? xmlStrdup((xmlChar*)ns.data()) : nullptr;
   sxe->iter.isprefix = is_prefix;
   return obj;
@@ -1200,8 +1160,7 @@ Variant f_simplexml_load_file(const String& filename,
 // SimpleXMLElement
 
 c_SimpleXMLElement::c_SimpleXMLElement(Class* cb) :
-  SimpleXMLElementBase(cb),
-  document(nullptr), node(nullptr), xpath(nullptr)
+  SimpleXMLElementBase(cb), node(nullptr), xpath(nullptr)
 {
   iter.name     = nullptr;
   iter.nsprefix = nullptr;
@@ -1245,8 +1204,7 @@ void c_SimpleXMLElement::t___construct(const String& data,
   }
   iter.nsprefix = !ns.empty() ? xmlStrdup((xmlChar*)ns.data()) : nullptr;
   iter.isprefix = is_prefix;
-  document = Resource(newres<XmlDocWrapper>(docp));
-  node = xmlDocGetRootElement(docp);
+  node = libxml_register_node(xmlDocGetRootElement(docp));
 }
 
 Variant c_SimpleXMLElement::t_xpath(const String& path) {
@@ -1255,16 +1213,16 @@ Variant c_SimpleXMLElement::t_xpath(const String& path) {
   }
 
   if (!xpath) {
-    xpath = xmlXPathNewContext(document.getTyped<XmlDocWrapper>()->doc);
+    xpath = xmlXPathNewContext(docp());
   }
-  if (!node) {
-    node = xmlDocGetRootElement(document.getTyped<XmlDocWrapper>()->doc);
+  if (!nodep()) {
+    node = libxml_register_node(xmlDocGetRootElement(docp()));
   }
 
-  xmlNodePtr nodeptr = php_sxe_get_first_node(this, this->node);
+  xmlNodePtr nodeptr = php_sxe_get_first_node(this, this->nodep());
   xpath->node = nodeptr;
 
-  xmlNsPtr* ns = xmlGetNsList(document.getTyped<XmlDocWrapper>()->doc, nodeptr);
+  xmlNsPtr* ns = xmlGetNsList(docp(), nodeptr);
   int64_t nsnbr = 0;
   if (ns != nullptr) {
     while (ns[nsnbr] != nullptr) {
@@ -1326,7 +1284,7 @@ Variant c_SimpleXMLElement::t_xpath(const String& path) {
 bool c_SimpleXMLElement::t_registerxpathnamespace(const String& prefix,
                                                   const String& ns) {
   if (!xpath) {
-    xpath = xmlXPathNewContext(document.getTyped<XmlDocWrapper>()->doc);
+    xpath = xmlXPathNewContext(docp());
   }
 
   if (xmlXPathRegisterNs(xpath,
@@ -1342,14 +1300,14 @@ Variant c_SimpleXMLElement::t_savexml(const String& filename /* = "" */) {
 }
 
 Variant c_SimpleXMLElement::t_asxml(const String& filename /* = "" */) {
-  xmlNodePtr node = this->node;
+  xmlNodePtr node = this->nodep();
   xmlOutputBufferPtr outbuf = nullptr;
 
   if (filename.size()) {
     node = php_sxe_get_first_node(this, node);
 
     if (node) {
-      xmlDocPtr doc = document.getTyped<XmlDocWrapper>()->doc;
+      xmlDocPtr doc = docp();
       if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
         int bytes;
         bytes = xmlSaveFile(filename.data(), doc);
@@ -1377,7 +1335,7 @@ Variant c_SimpleXMLElement::t_asxml(const String& filename /* = "" */) {
   node = php_sxe_get_first_node(this, node);
 
   if (node) {
-    xmlDocPtr doc = document.getTyped<XmlDocWrapper>()->doc;
+    xmlDocPtr doc = docp();
     if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
       xmlChar* strval;
       int strval_len;
@@ -1416,7 +1374,7 @@ Variant c_SimpleXMLElement::t_asxml(const String& filename /* = "" */) {
 
 Array c_SimpleXMLElement::t_getnamespaces(bool recursive /* = false */) {
   Array ret = Array::Create();
-  xmlNodePtr node = this->node;
+  xmlNodePtr node = this->nodep();
   node = php_sxe_get_first_node(this, node);
   if (node) {
     if (node->type == XML_ELEMENT_NODE) {
@@ -1431,8 +1389,8 @@ Array c_SimpleXMLElement::t_getnamespaces(bool recursive /* = false */) {
 Array c_SimpleXMLElement::t_getdocnamespaces(bool recursive /* = false */,
                                              bool from_root /* = true */) {
   xmlNodePtr node =
-    from_root ? xmlDocGetRootElement(document.getTyped<XmlDocWrapper>()->doc) :
-                this->node;
+    from_root ? xmlDocGetRootElement(docp())
+              : this->nodep();
   Array ret = Array::Create();
   sxe_add_registered_namespaces(this, node, recursive, ret);
   return ret;
@@ -1444,14 +1402,14 @@ Object c_SimpleXMLElement::t_children(const String& ns /* = "" */,
     return Object(); /* attributes don't have attributes */
   }
 
-  xmlNodePtr node = this->node;
+  xmlNodePtr node = this->nodep();
   node = php_sxe_get_first_node(this, node);
   return _node_as_zval(this, node, SXE_ITER_CHILD, nullptr,
                        (xmlChar*)ns.data(), is_prefix);
 }
 
 String c_SimpleXMLElement::t_getname() {
-  xmlNodePtr node = this->node;
+  xmlNodePtr node = this->nodep();
   node = php_sxe_get_first_node(this, node);
   if (node) {
     return String((char*)node->name);
@@ -1465,7 +1423,7 @@ Object c_SimpleXMLElement::t_attributes(const String& ns /* = "" */,
     return Object(); /* attributes don't have attributes */
   }
 
-  xmlNodePtr node = this->node;
+  xmlNodePtr node = this->nodep();
   node = php_sxe_get_first_node(this, node);
   return _node_as_zval(this, node, SXE_ITER_ATTRLIST, nullptr,
                        (xmlChar*)ns.data(), is_prefix);
@@ -1479,7 +1437,7 @@ Variant c_SimpleXMLElement::t_addchild(const String& qname,
     return init_null();
   }
 
-  xmlNodePtr node = this->node;
+  xmlNodePtr node = this->nodep();
 
   if (iter.type == SXE_ITER_ATTRLIST) {
     raise_warning("Cannot add element to attributes");
@@ -1536,7 +1494,7 @@ void c_SimpleXMLElement::t_addattribute(const String& qname,
     return;
   }
 
-  xmlNodePtr node = this->node;
+  xmlNodePtr node = this->nodep();
   node = php_sxe_get_first_node(this, node);
 
   if (node && node->type != XML_ELEMENT_NODE) {
@@ -1617,7 +1575,6 @@ c_SimpleXMLElement* c_SimpleXMLElement::Clone(ObjectData* obj) {
   auto sxe = static_cast<c_SimpleXMLElement*>(obj);
   c_SimpleXMLElement *clone =
     static_cast<c_SimpleXMLElement*>(obj->cloneImpl());
-  clone->document = sxe->document;
 
   clone->iter.isprefix = sxe->iter.isprefix;
   if (sxe->iter.name != nullptr) {
@@ -1628,10 +1585,9 @@ c_SimpleXMLElement* c_SimpleXMLElement::Clone(ObjectData* obj) {
   }
   clone->iter.type = sxe->iter.type;
 
-  if (sxe->node) {
-    clone->node = xmlDocCopyNode(sxe->node,
-                                 sxe->document.getTyped<XmlDocWrapper>()->doc,
-                                 1);
+  if (sxe->nodep()) {
+    clone->node =
+      libxml_register_node(xmlDocCopyNode(sxe->nodep(), sxe->docp(), 1));
   }
 
   return clone;
@@ -1665,7 +1621,7 @@ Array c_SimpleXMLElement::ToArray(const ObjectData* obj) {
 Variant c_SimpleXMLElement::t_getiterator() {
   Object obj = create_object(c_SimpleXMLElementIterator::classof()->nameStr(),
                              Array(), false);
-  c_SimpleXMLElementIterator* iter = obj.getTyped<c_SimpleXMLElementIterator>();
+  auto iter = cast<c_SimpleXMLElementIterator>(obj);
   iter->sxe = this;
   iter->sxe->incRefCount();
   return obj;
@@ -1717,8 +1673,9 @@ Variant c_SimpleXMLElementIterator::t_current() {
 
 Variant c_SimpleXMLElementIterator::t_key() {
   Object curobj = sxe->iter.data;
-  xmlNodePtr curnode = curobj.isNull() ?
-                         nullptr : curobj.getTyped<c_SimpleXMLElement>()->node;
+  xmlNodePtr curnode = curobj.isNull()
+    ? nullptr
+    : cast<c_SimpleXMLElement>(curobj)->nodep();
   if (curnode) {
     return String((char*)curnode->name);
   } else {

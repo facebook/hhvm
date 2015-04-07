@@ -218,7 +218,6 @@ void ListAssignment::analyzeProgram(AnalysisResultPtr ar) {
   if (m_variables) m_variables->analyzeProgram(ar);
   if (m_array) m_array->analyzeProgram(ar);
   FunctionScopePtr func = getFunctionScope();
-  if (func) func->disableInline();
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     if (m_variables) {
       for (int i = 0; i < m_variables->getCount(); i++) {

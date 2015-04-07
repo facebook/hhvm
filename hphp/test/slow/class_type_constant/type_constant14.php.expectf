@@ -1,0 +1,1 @@
+Fatal error: Cannot override previously defined type constant I::T in C in %stest/slow/class_type_constant/type_constant14.php on line 7

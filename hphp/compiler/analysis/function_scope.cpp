@@ -63,11 +63,8 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
       m_method(method), m_refReturn(reference), m_virtual(false),
       m_hasOverride(false), m_overriding(false),
       m_volatile(false), m_persistent(false), m_pseudoMain(inPseudoMain),
-      m_magicMethod(false), m_system(false), m_inlineable(false),
-      m_containsThis(false), m_containsBareThis(0), m_nrvoFix(true),
-      m_inlineAsExpr(false), m_inlineSameContext(false),
-      m_contextSensitive(false),
-      m_directInvoke(false),
+      m_magicMethod(false), m_system(false),
+      m_containsThis(false), m_containsBareThis(0),
       m_generator(false),
       m_async(false),
       m_noLSB(false), m_nextLSB(false),
@@ -127,13 +124,9 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_overriding(orig->m_overriding), m_volatile(orig->m_volatile),
       m_persistent(orig->m_persistent),
       m_pseudoMain(orig->m_pseudoMain), m_magicMethod(orig->m_magicMethod),
-      m_system(!user), m_inlineable(orig->m_inlineable),
+      m_system(!user),
       m_containsThis(orig->m_containsThis),
-      m_containsBareThis(orig->m_containsBareThis), m_nrvoFix(orig->m_nrvoFix),
-      m_inlineAsExpr(orig->m_inlineAsExpr),
-      m_inlineSameContext(orig->m_inlineSameContext),
-      m_contextSensitive(orig->m_contextSensitive),
-      m_directInvoke(orig->m_directInvoke),
+      m_containsBareThis(orig->m_containsBareThis),
       m_generator(orig->m_generator),
       m_async(orig->m_async),
       m_noLSB(orig->m_noLSB),
@@ -149,9 +142,7 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
 
 void FunctionScope::init(AnalysisResultConstPtr ar) {
   m_dynamicInvoke = false;
-  bool canInline = true;
   if (m_pseudoMain) {
-    canInline = false;
     m_variables->forceVariants(ar, VariableTable::AnyVars);
     setReturnType(ar, Type::Variant);
   }
@@ -207,8 +198,6 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
     MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
     StatementListPtr stmts = stmt->getStmts();
     if (stmts) {
-      if (stmts->getRecursiveCount() > Option::InlineFunctionThreshold)
-        canInline = false;
       for (int i = 0; i < stmts->getCount(); i++) {
         StatementPtr stmt = (*stmts)[i];
         stmt->setFileLevel();
@@ -219,10 +208,7 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
         }
       }
     }
-  } else {
-    canInline = false;
   }
-  m_inlineable = canInline;
 }
 
 FunctionScope::FunctionScope(bool method, const std::string &name,
@@ -233,11 +219,8 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_method(method), m_refReturn(reference), m_virtual(false),
       m_hasOverride(false), m_overriding(false),
       m_volatile(false), m_persistent(false), m_pseudoMain(false),
-      m_magicMethod(false), m_system(true), m_inlineable(false),
-      m_containsThis(false), m_containsBareThis(0), m_nrvoFix(true),
-      m_inlineAsExpr(false), m_inlineSameContext(false),
-      m_contextSensitive(false),
-      m_directInvoke(false),
+      m_magicMethod(false), m_system(true),
+      m_containsThis(false), m_containsBareThis(0),
       m_generator(false),
       m_async(false),
       m_noLSB(false), m_nextLSB(false),
@@ -537,15 +520,6 @@ bool FunctionScope::mayUseVV() const {
      variables->getAttribute(VariableTable::ContainsGetDefinedVars) ||
      (!Option::EnableHipHopSyntax &&
       variables->getAttribute(VariableTable::ContainsDynamicFunctionCall)));
-}
-
-bool FunctionScope::needsClassParam() {
-  if (!isStatic()) return false;
-  ClassScopeRawPtr cls = getContainingClass();
-  if (!ClassScope::NeedStaticArray(cls, FunctionScopeRawPtr(this))) {
-    return false;
-  }
-  return getVariables()->hasStatic();
 }
 
 TypePtr FunctionScope::setParamType(AnalysisResultConstPtr ar, int index,

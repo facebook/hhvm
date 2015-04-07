@@ -24,9 +24,9 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
-#include "hphp/runtime/ext/asio/asio_blockable.h"
-#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_wait_handle.h"
+#include "hphp/runtime/ext/asio/asio-blockable.h"
+#include "hphp/runtime/ext/asio/async-function-wait-handle.h"
+#include "hphp/runtime/ext/asio/static-wait-handle.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 
 namespace HPHP { namespace jit { namespace NativeCalls {
@@ -183,7 +183,6 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}}},
     {AllocPackedArray,   MixedArray::MakePackedUninitialized, DSSA, SNone,
                            {{extra(&PackedArrayData::size)}}},
-    {NewCol,             newColHelper, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ColAddNewElemC,     colAddNewElemCHelper, DSSA, SSync,
                            {{SSA, 0}, {TV, 1}}},
     {ColAddElemC,        colAddElemCHelper, DSSA, SSync,
@@ -339,7 +338,7 @@ bool CallMap::hasInfo(Opcode op) {
 
 const CallInfo& CallMap::info(Opcode op) {
   auto it = s_callMap.m_map.find(op);
-  assert(it != s_callMap.m_map.end());
+  assertx(it != s_callMap.m_map.end());
   return it->second;
 }
 

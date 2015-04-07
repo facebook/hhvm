@@ -50,6 +50,9 @@ public:
   static int64_t GetLoadCount();
   static int64_t GetStoreCount();
   static bool SetPerfEvents(const StringSlice& events);
+  static void IncInstructionCount(int64_t amount);
+  static void IncLoadCount(int64_t amount);
+  static void IncStoreCount(int64_t amount);
 
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data);
@@ -91,6 +94,9 @@ public:
   static int64_t GetLoadCount() { return 0; }
   static int64_t GetStoreCount() { return 0; }
   static bool SetPerfEvents(const StringSlice& events) { return false; }
+  static void IncInstructionCount(int64_t amount) {}
+  static void IncLoadCount(int64_t amount) {}
+  static void IncStoreCount(int64_t amount) {}
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data) { }
   static void ClearPerfEvents() { }

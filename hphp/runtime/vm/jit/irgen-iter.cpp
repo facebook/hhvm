@@ -31,12 +31,12 @@ namespace {
  * which is the offset corresponding to the branch being taken.
  */
 Offset iterBranchTarget(const NormalizedInstruction& i) {
-  assert(instrJumpOffset(reinterpret_cast<const Op*>(i.pc())) != nullptr);
+  assertx(instrJumpOffset(reinterpret_cast<const Op*>(i.pc())) != nullptr);
   return i.offset() + i.imm[1].u_BA;
 }
 
 template<class Lambda>
-void implMIterInit(HTS& env, Offset relOffset, Lambda genFunc) {
+void implMIterInit(IRGS& env, Offset relOffset, Lambda genFunc) {
   // TODO MIterInit doesn't check iterBranchTarget; this might be bug ...
 
   auto const exit  = makeExit(env);
@@ -63,7 +63,7 @@ void implMIterInit(HTS& env, Offset relOffset, Lambda genFunc) {
 
 }
 
-void emitIterInit(HTS& env,
+void emitIterInit(IRGS& env,
                   int32_t iterId,
                   Offset relOffset,
                   int32_t valLocalId) {
@@ -81,7 +81,7 @@ void emitIterInit(HTS& env,
   implCondJmp(env, targetOffset, true, res);
 }
 
-void emitIterInitK(HTS& env,
+void emitIterInitK(IRGS& env,
                    int32_t iterId,
                    Offset relOffset,
                    int32_t valLocalId,
@@ -100,7 +100,7 @@ void emitIterInitK(HTS& env,
   implCondJmp(env, targetOffset, true, res);
 }
 
-void emitIterNext(HTS& env,
+void emitIterNext(IRGS& env,
                   int32_t iterId,
                   Offset relOffset,
                   int32_t valLocalId) {
@@ -116,7 +116,7 @@ void emitIterNext(HTS& env,
   implCondJmp(env, targetOffset, false, res);
 }
 
-void emitIterNextK(HTS& env,
+void emitIterNextK(IRGS& env,
                    int32_t iterId,
                    Offset relOffset,
                    int32_t valLocalId,
@@ -133,7 +133,7 @@ void emitIterNextK(HTS& env,
   implCondJmp(env, targetOffset, false, res);
 }
 
-void emitWIterInit(HTS& env,
+void emitWIterInit(IRGS& env,
                    int32_t iterId,
                    Offset relOffset,
                    int32_t valLocalId) {
@@ -151,7 +151,7 @@ void emitWIterInit(HTS& env,
   implCondJmp(env, targetOffset, true, res);
 }
 
-void emitWIterInitK(HTS& env,
+void emitWIterInitK(IRGS& env,
                     int32_t iterId,
                     Offset relOffset,
                     int32_t valLocalId,
@@ -170,7 +170,7 @@ void emitWIterInitK(HTS& env,
   implCondJmp(env, targetOffset, true, res);
 }
 
-void emitWIterNext(HTS& env,
+void emitWIterNext(IRGS& env,
                    int32_t iterId,
                    Offset relOffset,
                    int32_t valLocalId) {
@@ -186,7 +186,7 @@ void emitWIterNext(HTS& env,
   implCondJmp(env, targetOffset, false, res);
 }
 
-void emitWIterNextK(HTS& env,
+void emitWIterNextK(IRGS& env,
                     int32_t iterId,
                     Offset relOffset,
                     int32_t valLocalId,
@@ -203,7 +203,7 @@ void emitWIterNextK(HTS& env,
   implCondJmp(env, targetOffset, false, res);
 }
 
-void emitMIterInit(HTS& env,
+void emitMIterInit(IRGS& env,
                    int32_t iterId,
                    Offset relOffset,
                    int32_t valLocalId) {
@@ -219,7 +219,7 @@ void emitMIterInit(HTS& env,
   });
 }
 
-void emitMIterInitK(HTS& env,
+void emitMIterInitK(IRGS& env,
                     int32_t iterId,
                     Offset relOffset,
                     int32_t valLocalId,
@@ -236,7 +236,7 @@ void emitMIterInitK(HTS& env,
   });
 }
 
-void emitMIterNext(HTS& env,
+void emitMIterNext(IRGS& env,
                    int32_t iterId,
                    Offset relOffset,
                    int32_t valLocalId) {
@@ -251,7 +251,7 @@ void emitMIterNext(HTS& env,
   implCondJmp(env, bcOff(env) + relOffset, false, res);
 }
 
-void emitMIterNextK(HTS& env,
+void emitMIterNextK(IRGS& env,
                     int32_t iterId,
                     Offset relOffset,
                     int32_t valLocalId,
@@ -267,15 +267,15 @@ void emitMIterNextK(HTS& env,
   implCondJmp(env, bcOff(env) + relOffset, false, res);
 }
 
-void emitIterFree(HTS& env, int32_t iterId) {
+void emitIterFree(IRGS& env, int32_t iterId) {
   gen(env, IterFree, IterId(iterId), fp(env));
 }
 
-void emitMIterFree(HTS& env, int32_t iterId) {
+void emitMIterFree(IRGS& env, int32_t iterId) {
   gen(env, MIterFree, IterId(iterId), fp(env));
 }
 
-void emitIterBreak(HTS& env,
+void emitIterBreak(IRGS& env,
                    const ImmVector& iv,
                    Offset relOffset) {
   always_assert(env.currentNormalizedInstruction->endsRegion);
@@ -294,7 +294,7 @@ void emitIterBreak(HTS& env,
   gen(env, Jmp, makeExit(env, bcOff(env) + relOffset));
 }
 
-void emitDecodeCufIter(HTS& env, int32_t iterId, Offset relOffset) {
+void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
   auto const src        = popC(env);
   auto const type       = src->type();
   if (type.subtypeOfAny(Type::Arr, Type::Str, Type::Obj)) {
@@ -316,7 +316,7 @@ void emitDecodeCufIter(HTS& env, int32_t iterId, Offset relOffset) {
   }
 }
 
-void emitCIterFree(HTS& env, int32_t iterId) {
+void emitCIterFree(IRGS& env, int32_t iterId) {
   gen(env, CIterFree, IterId(iterId), fp(env));
 }
 

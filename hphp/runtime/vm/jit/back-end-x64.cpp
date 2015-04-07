@@ -29,7 +29,6 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/reg-alloc-x64.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -37,6 +36,7 @@
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-llvm.h"
+#include "hphp/runtime/vm/jit/relocation.h"
 
 namespace HPHP { namespace jit {
 
@@ -53,10 +53,11 @@ namespace x64 {
 
 TRACE_SET_MOD(hhir);
 
-struct BackEnd : public jit::BackEnd {
-  BackEnd() {}
-  ~BackEnd() {}
+namespace {
 
+//////////////////////////////////////////////////////////////////////
+
+struct BackEnd final : jit::BackEnd {
   Abi abi() override {
     return x64::abi;
   }
@@ -79,14 +80,6 @@ struct BackEnd : public jit::BackEnd {
 
   PhysReg rVmTl() override {
     return x64::rVmTl;
-  }
-
-  bool storesCell(const IRInstruction& inst, uint32_t srcIdx) override {
-    return x64::storesCell(inst, srcIdx);
-  }
-
-  bool loadsCell(const IRInstruction& inst) override {
-    return x64::loadsCell(inst.op());
   }
 
   /*
@@ -117,25 +110,6 @@ struct BackEnd : public jit::BackEnd {
     CALLEE_SAVED_BARRIER();
   }
 
-  void moveToAlign(CodeBlock& cb,
-                   MoveToAlignFlags alignment
-                   = MoveToAlignFlags::kJmpTargetAlign) override {
-    size_t x64Alignment;
-
-    switch (alignment) {
-    case MoveToAlignFlags::kJmpTargetAlign:
-      x64Alignment = kJmpTargetAlign;
-      break;
-    case MoveToAlignFlags::kNonFallthroughAlign:
-      x64Alignment = jit::kNonFallthroughAlign;
-      break;
-    case MoveToAlignFlags::kCacheLineAlign:
-      x64Alignment = kCacheLineSize;
-      break;
-    }
-    x64::moveToAlign(cb, x64Alignment);
-  }
-
   UniqueStubs emitUniqueStubs() override {
     return x64::emitUniqueStubs();
   }
@@ -144,6 +118,10 @@ struct BackEnd : public jit::BackEnd {
                          ServiceRequest req,
                          const ServiceReqArgVec& argv) override {
     return x64::emitServiceReqWork(cb, start, flags, req, argv);
+  }
+
+  size_t reusableStubSize() const override {
+    return x64::reusableStubSize();
   }
 
   void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
@@ -194,43 +172,19 @@ struct BackEnd : public jit::BackEnd {
     x64::emitTraceCall(cb, pcOff);
   }
 
-  bool isSmashable(Address frontier, int nBytes, int offset = 0) override {
-    assert(nBytes <= int(kCacheLineSize));
-    uintptr_t iFrontier = uintptr_t(frontier) + offset;
-    uintptr_t lastByte = uintptr_t(frontier) + nBytes - 1;
-    return (iFrontier & ~kCacheLineMask) == (lastByte & ~kCacheLineMask);
-  }
-
- private:
-  void prepareForSmashImpl(CodeBlock& cb, int nBytes, int offset) {
-    if (!isSmashable(cb.frontier(), nBytes, offset)) {
-      X64Assembler a { cb };
-      int gapSize = (~(uintptr_t(a.frontier()) + offset) & kCacheLineMask) + 1;
-      a.emitNop(gapSize);
-      assert(isSmashable(a.frontier(), nBytes, offset));
-    }
-  }
-
- public:
-  void prepareForSmash(CodeBlock& cb, int nBytes, int offset = 0) override {
-    prepareForSmashImpl(cb, nBytes, offset);
-    mcg->cgFixups().m_alignFixups.emplace(cb.frontier(),
-                                          std::make_pair(nBytes, offset));
-  }
-
   void prepareForTestAndSmash(CodeBlock& cb, int testBytes,
                               TestAndSmashFlags flags) override {
     using namespace x64;
     switch (flags) {
       case TestAndSmashFlags::kAlignJcc:
         prepareForSmash(cb, testBytes + kJmpccLen, testBytes);
-        assert(isSmashable(cb.frontier() + testBytes, kJmpccLen));
+        assertx(isSmashable(cb.frontier() + testBytes, kJmpccLen));
         break;
       case TestAndSmashFlags::kAlignJccImmediate:
         prepareForSmash(cb,
                         testBytes + kJmpccLen,
                         testBytes + kJmpccLen - kJmpImmBytes);
-        assert(isSmashable(cb.frontier() + testBytes, kJmpccLen,
+        assertx(isSmashable(cb.frontier() + testBytes, kJmpccLen,
                            kJmpccLen - kJmpImmBytes));
         break;
       case TestAndSmashFlags::kAlignJccAndJmp:
@@ -244,478 +198,27 @@ struct BackEnd : public jit::BackEnd {
         mcg->cgFixups().m_alignFixups.emplace(
           cb.frontier(), std::make_pair(testBytes + kJmpccLen + kJmpLen,
                                         testBytes + kJmpccLen));
-        assert(isSmashable(cb.frontier() + testBytes, kJmpccLen));
-        assert(isSmashable(cb.frontier() + testBytes + kJmpccLen, kJmpLen));
+        assertx(isSmashable(cb.frontier() + testBytes, kJmpccLen));
+        assertx(isSmashable(cb.frontier() + testBytes + kJmpccLen, kJmpLen));
         break;
     }
   }
 
-  bool supportsRelocation() const override {
-    return true;
-  }
-
-  typedef hphp_hash_set<void*> WideJmpSet;
-  struct JmpOutOfRange : std::exception {};
-
-  size_t relocate(RelocationInfo& rel,
-                  CodeBlock& destBlock,
-                  TCA start, TCA end,
-                  CodeGenFixups& fixups,
-                  TCA* exitAddr) override {
-    WideJmpSet wideJmps;
-    while (true) {
-      try {
-        return relocateImpl(rel, destBlock, start, end,
-                            fixups, exitAddr, wideJmps);
-      } catch (JmpOutOfRange& j) {
-      }
-    }
-  }
-
-  size_t relocateImpl(RelocationInfo& rel,
-                      CodeBlock& destBlock,
-                      TCA start, TCA end,
-                      CodeGenFixups& fixups,
-                      TCA* exitAddr,
-                      WideJmpSet& wideJmps) {
-    TCA src = start;
-    size_t range = end - src;
-    bool hasInternalRefs = false;
-    bool internalRefsNeedUpdating = false;
-    TCA destStart = destBlock.frontier();
-    size_t asm_count{0};
-    TCA jmpDest = nullptr;
-    TCA keepNopLow = nullptr;
-    TCA keepNopHigh = nullptr;
-    try {
-      while (src != end) {
-        assert(src < end);
-        DecodedInstruction di(src);
-        asm_count++;
-
-        int destRange = 0;
-        auto af = fixups.m_alignFixups.equal_range(src);
-        while (af.first != af.second) {
-          auto low = src + af.first->second.second;
-          auto hi = src + af.first->second.first;
-          assert(low < hi);
-          if (!keepNopLow || keepNopLow > low) keepNopLow = low;
-          if (!keepNopHigh || keepNopHigh < hi) keepNopHigh = hi;
-          TCA tmp = destBlock.frontier();
-          prepareForSmashImpl(destBlock,
-                              af.first->second.first, af.first->second.second);
-          if (destBlock.frontier() != tmp) {
-            destRange += destBlock.frontier() - tmp;
-            internalRefsNeedUpdating = true;
-          }
-          ++af.first;
-        }
-
-        bool preserveAlignment = keepNopLow && keepNopHigh &&
-          keepNopLow <= src && keepNopHigh > src;
-        TCA target = nullptr;
-        TCA dest = destBlock.frontier();
-        destBlock.bytes(di.size(), src);
-        DecodedInstruction d2(dest);
-        if (di.hasPicOffset()) {
-          if (di.isBranch(false)) {
-            target = di.picAddress();
-          }
-          /*
-           * Rip-relative offsets that point outside the range
-           * being moved need to be adjusted so they continue
-           * to point at the right thing
-           */
-          if (size_t(di.picAddress() - start) >= range) {
-            bool DEBUG_ONLY success = d2.setPicAddress(di.picAddress());
-            assert(success);
-          } else {
-            if (!preserveAlignment && d2.isBranch()) {
-              if (wideJmps.count(src)) {
-                if (d2.size() < kJmpLen) {
-                  d2.widenBranch();
-                  internalRefsNeedUpdating = true;
-                }
-              } else if (d2.shrinkBranch()) {
-                internalRefsNeedUpdating = true;
-              }
-            }
-            hasInternalRefs = true;
-          }
-        }
-        if (di.hasImmediate()) {
-          if (fixups.m_addressImmediates.count(src)) {
-            if (size_t(di.immediate() - (uint64_t)start) < range) {
-              hasInternalRefs = internalRefsNeedUpdating = true;
-            }
-          } else {
-            if (fixups.m_addressImmediates.count((TCA)~uintptr_t(src))) {
-              // Handle weird, encoded offset, used by cgLdObjMethod
-              always_assert(di.immediate() == ((uintptr_t(src) << 1) | 1));
-              bool DEBUG_ONLY success =
-                d2.setImmediate(((uintptr_t)dest << 1) | 1);
-              assert(success);
-            }
-            /*
-             * An immediate that points into the range being moved, but which
-             * isn't tagged as an addressImmediate, is most likely a bug
-             * and its instruction's address needs to be put into
-             * fixups.m_addressImmediates. But it could just happen by bad
-             * luck, so just log it.
-             */
-            if (size_t(di.immediate() - (uint64_t)start) < range) {
-              FTRACE(3,
-                     "relocate: instruction at {} has immediate 0x{:x}"
-                     "which looks like an address that needs relocating\n",
-                     src, di.immediate());
-            }
-          }
-        }
-
-        if (src == start) {
-          // for the start of the range, we only want to overwrite the "after"
-          // address (since the "before" address could belong to the previous
-          // tracelet, which could be being relocated to a completely different
-          // address. recordRange will do that for us, so just make sure we
-          // have the right address setup.
-          destStart = dest;
-        } else {
-          rel.recordAddress(src, dest - destRange, destRange);
-        }
-        if (preserveAlignment && di.size() == kJmpLen &&
-            di.isNop() && src + kJmpLen == end) {
-          smashJmp(dest, src + kJmpLen);
-          dest += kJmpLen;
-        } else if (di.isNop() && !preserveAlignment) {
-          internalRefsNeedUpdating = true;
-        } else {
-          dest += d2.size();
-        }
-        jmpDest = target;
-        assert(dest <= destBlock.frontier());
-        destBlock.setFrontier(dest);
-        src += di.size();
-        if (keepNopHigh && src >= keepNopHigh) {
-          keepNopLow = keepNopHigh = nullptr;
-        }
-      }
-
-      if (exitAddr) {
-        *exitAddr = jmpDest;
-      }
-
-      rel.recordRange(start, end, destStart, destBlock.frontier());
-
-      if (hasInternalRefs && internalRefsNeedUpdating) {
-        src = start;
-        bool ok = true;
-        while (src != end) {
-          DecodedInstruction di(src);
-          TCA newPicAddress = nullptr;
-          int64_t newImmediate = 0;
-          if (di.hasPicOffset() &&
-              size_t(di.picAddress() - start) < range) {
-            newPicAddress = rel.adjustedAddressAfter(di.picAddress());
-            always_assert(newPicAddress);
-          }
-          if (di.hasImmediate() &&
-              size_t((TCA)di.immediate() - start) < range &&
-              fixups.m_addressImmediates.count(src)) {
-            newImmediate =
-              (int64_t)rel.adjustedAddressAfter((TCA)di.immediate());
-            always_assert(newImmediate);
-          }
-          if (newImmediate || newPicAddress) {
-            TCA dest = rel.adjustedAddressAfter(src);
-            DecodedInstruction d2(dest);
-            if (newPicAddress) {
-              if (!d2.setPicAddress(newPicAddress)) {
-                always_assert(d2.isBranch() && d2.size() == 2);
-                wideJmps.insert(src);
-                ok = false;
-              }
-            }
-            if (newImmediate) {
-              if (!d2.setImmediate(newImmediate)) {
-                always_assert(false);
-              }
-            }
-          }
-          src += di.size();
-        }
-        if (!ok) {
-          throw JmpOutOfRange();
-        }
-      }
-      rel.markAddressImmediates(fixups.m_addressImmediates);
-    } catch (...) {
-      rel.rewind(start, end);
-      destBlock.setFrontier(destStart);
-      throw;
-    }
-    return asm_count;
-  }
-
-  template <typename T>
-  void fixupStateVector(StateVector<T, TcaRange>& sv, RelocationInfo& rel) {
-    for (auto& ii : sv) {
-      if (!ii.empty()) {
-        /*
-         * We have to be careful with before/after here.
-         * If we relocate two consecutive regions of memory,
-         * but relocate them to two different destinations, then
-         * the end address of the first region is also the start
-         * address of the second region; so adjustedAddressBefore(end)
-         * gives us the relocated address of the end of the first
-         * region, while adjustedAddressAfter(end) gives us the
-         * relocated address of the start of the second region.
-         */
-        auto s = rel.adjustedAddressAfter(ii.begin());
-        auto e = rel.adjustedAddressBefore(ii.end());
-        if (e || s) {
-          if (!s) s = ii.begin();
-          if (!e) e = ii.end();
-          ii = TcaRange(s, e);
-        }
-      }
-    }
-  }
-
-  void adjustForRelocation(RelocationInfo& rel) override {
-    for (const auto& range : rel.srcRanges()) {
-      adjustForRelocation(rel, range.first, range.second);
-    }
-  }
-
-  void adjustForRelocation(RelocationInfo& rel,
-                           TCA srcStart, TCA srcEnd) override {
-    auto start = rel.adjustedAddressAfter(srcStart);
-    auto end = rel.adjustedAddressBefore(srcEnd);
-    if (!start) {
-      start = srcStart;
-      end = srcEnd;
-    } else {
-      always_assert(end);
-    }
-    while (start != end) {
-      assert(start < end);
-      DecodedInstruction di(start);
-
-      if (di.hasPicOffset()) {
-        /*
-         * A pointer into something that has been relocated needs to be
-         * updated.
-         */
-        if (TCA adjusted = rel.adjustedAddressAfter(di.picAddress())) {
-          di.setPicAddress(adjusted);
-        }
-      }
-
-      if (di.hasImmediate()) {
-        /*
-         * Similarly for addressImmediates - and see comment above
-         * for non-address immediates.
-         */
-        if (TCA adjusted = rel.adjustedAddressAfter((TCA)di.immediate())) {
-          if (rel.isAddressImmediate(start)) {
-            di.setImmediate((int64_t)adjusted);
-          } else {
-            FTRACE(3,
-                   "relocate: instruction at {} has immediate 0x{:x}"
-                   "which looks like an address that needs relocating\n",
-                   start, di.immediate());
-          }
-        }
-      }
-
-      start += di.size();
-
-      if (start == end && di.isNop() &&
-          di.size() == kJmpLen &&
-          rel.adjustedAddressAfter(srcEnd)) {
-
-        smashJmp(start - di.size(), rel.adjustedAddressAfter(end));
-      }
-    }
-  }
-
-  /*
-   * Adjusts the addresses in asmInfo and fixups to match the new
-   * location of the code.
-   * This will not "hook up" the relocated code in any way, so is safe
-   * to call before the relocated code is ready to run.
-   */
-  void adjustMetaDataForRelocation(RelocationInfo& rel,
-                                   AsmInfo* asmInfo,
-                                   CodeGenFixups& fixups) override {
-    auto& ip = fixups.m_inProgressTailJumps;
-    for (size_t i = 0; i < ip.size(); ++i) {
-      IncomingBranch& ib = const_cast<IncomingBranch&>(ip[i]);
-      TCA adjusted = rel.adjustedAddressAfter(ib.toSmash());
-      always_assert(adjusted);
-      ib.adjust(adjusted);
-    }
-
-    for (auto& fixup : fixups.m_pendingFixups) {
-      /*
-       * Pending fixups always point after the call instruction,
-       * so use the "before" address, since there may be nops
-       * before the next actual instruction.
-       */
-      if (TCA adjusted = rel.adjustedAddressBefore(fixup.m_tca)) {
-        fixup.m_tca = adjusted;
-      }
-    }
-
-    for (auto& ct : fixups.m_pendingCatchTraces) {
-      /*
-       * Similar to fixups - this is a return address so get
-       * the address returned to.
-       */
-      if (CTCA adjusted = rel.adjustedAddressBefore(ct.first)) {
-        ct.first = adjusted;
-      }
-      /*
-       * But the target is an instruction, so skip over any nops
-       * that might have been inserted (eg for alignment).
-       */
-      if (TCA adjusted = rel.adjustedAddressAfter(ct.second)) {
-        ct.second = adjusted;
-      }
-    }
-
-    for (auto& jt : fixups.m_pendingJmpTransIDs) {
-      if (TCA adjusted = rel.adjustedAddressAfter(jt.first)) {
-        jt.first = adjusted;
-      }
-    }
-
-    /*
-     * Most of the time we want to adjust to a corresponding "before" address
-     * with the exception of the start of the range where "before" can point to
-     * the end of a previous range.
-     */
-    if (!fixups.m_bcMap.empty()) {
-      auto const aStart = fixups.m_bcMap[0].aStart;
-      auto const acoldStart = fixups.m_bcMap[0].acoldStart;
-      auto const afrozenStart = fixups.m_bcMap[0].afrozenStart;
-      for (auto& tbc : fixups.m_bcMap) {
-        if (TCA adjusted = (tbc.aStart == aStart
-                              ? rel.adjustedAddressAfter(aStart)
-                              : rel.adjustedAddressBefore(tbc.aStart))) {
-          tbc.aStart = adjusted;
-        }
-        if (TCA adjusted = (tbc.acoldStart == acoldStart
-                              ? rel.adjustedAddressAfter(acoldStart)
-                              : rel.adjustedAddressBefore(tbc.acoldStart))) {
-          tbc.acoldStart = adjusted;
-        }
-        if (TCA adjusted = (tbc.afrozenStart == afrozenStart
-                              ? rel.adjustedAddressAfter(afrozenStart)
-                              : rel.adjustedAddressBefore(tbc.afrozenStart))) {
-          tbc.afrozenStart = adjusted;
-        }
-      }
-    }
-
-    decltype(fixups.m_addressImmediates) updatedAI;
-    for (auto addrImm : fixups.m_addressImmediates) {
-      if (TCA adjusted = rel.adjustedAddressAfter(addrImm)) {
-        updatedAI.insert(adjusted);
-      } else if (TCA odd = rel.adjustedAddressAfter((TCA)~uintptr_t(addrImm))) {
-        // just for cgLdObjMethod
-        updatedAI.insert((TCA)~uintptr_t(odd));
-      } else {
-        updatedAI.insert(addrImm);
-      }
-    }
-    updatedAI.swap(fixups.m_addressImmediates);
-
-    decltype(fixups.m_alignFixups) updatedAF;
-    for (auto af : fixups.m_alignFixups) {
-      if (TCA adjusted = rel.adjustedAddressAfter(af.first)) {
-        updatedAF.emplace(adjusted, af.second);
-      } else {
-        updatedAF.emplace(af);
-      }
-    }
-    updatedAF.swap(fixups.m_alignFixups);
-
-    if (asmInfo) {
-      fixupStateVector(asmInfo->asmInstRanges, rel);
-      fixupStateVector(asmInfo->asmBlockRanges, rel);
-      fixupStateVector(asmInfo->coldInstRanges, rel);
-      fixupStateVector(asmInfo->coldBlockRanges, rel);
-      fixupStateVector(asmInfo->frozenInstRanges, rel);
-      fixupStateVector(asmInfo->frozenBlockRanges, rel);
-    }
-  }
-
-  void adjustCodeForRelocation(RelocationInfo& rel,
-                               CodeGenFixups& fixups) override {
-    for (auto addr : fixups.m_reusedStubs) {
-      /*
-       * The stubs are terminated by a ud2. Check for it.
-       */
-      while (addr[0] != 0x0f || addr[1] != 0x0b) {
-        DecodedInstruction di(addr);
-        if (di.hasPicOffset()) {
-          if (TCA adjusted = rel.adjustedAddressAfter(di.picAddress())) {
-            di.setPicAddress(adjusted);
-          }
-        }
-        addr += di.size();
-      }
-    }
-
-    for (auto codePtr : fixups.m_codePointers) {
-      if (TCA adjusted = rel.adjustedAddressAfter(*codePtr)) {
-        *codePtr = adjusted;
-      }
-    }
-  }
-
- private:
-  void smashJmpOrCall(TCA addr, TCA dest, bool isCall) {
-    // Unconditional rip-relative jmps can also be encoded with an EB as the
-    // first byte, but that means the delta is 1 byte, and we shouldn't be
-    // encoding smashable jumps that way.
-    assert(kJmpLen == kCallLen);
-    always_assert(isSmashable(addr, x64::kJmpLen));
-
-    auto& cb = mcg->code.blockFor(addr);
-    CodeCursor cursor { cb, addr };
-    X64Assembler a { cb };
-    if (dest > addr && dest - addr <= x64::kJmpLen) {
-      assert(!isCall);
-      a.  emitNop(dest - addr);
-    } else if (isCall) {
-      a.  call   (dest);
-    } else {
-      a.  jmp    (dest);
-    }
-  }
-
- public:
   void smashJmp(TCA jmpAddr, TCA newDest) override {
-    assert(MCGenerator::canWrite());
-    FTRACE(2, "smashJmp: {} -> {}\n", jmpAddr, newDest);
-    smashJmpOrCall(jmpAddr, newDest, false);
+    return x64::smashJmp(jmpAddr, newDest);
   }
 
   void smashCall(TCA callAddr, TCA newDest) override {
-    assert(MCGenerator::canWrite());
-    FTRACE(2, "smashCall: {} -> {}\n", callAddr, newDest);
-    smashJmpOrCall(callAddr, newDest, true);
+    x64::smashCall(callAddr, newDest);
   }
 
   void smashJcc(TCA jccAddr, TCA newDest) override {
-    assert(MCGenerator::canWrite());
+    assertx(MCGenerator::canWrite());
     FTRACE(2, "smashJcc: {} -> {}\n", jccAddr, newDest);
     // Make sure the encoding is what we expect. It has to be a rip-relative jcc
     // with a 4-byte delta.
-    assert(*jccAddr == 0x0F && (*(jccAddr + 1) & 0xF0) == 0x80);
-    assert(isSmashable(jccAddr, x64::kJmpccLen));
+    assertx(*jccAddr == 0x0F && (*(jccAddr + 1) & 0xF0) == 0x80);
+    assertx(isSmashable(jccAddr, x64::kJmpccLen));
 
     // Can't use the assembler to write out a new instruction, because we have
     // to preserve the condition code.
@@ -729,23 +232,23 @@ struct BackEnd : public jit::BackEnd {
   void emitSmashableJump(CodeBlock& cb, TCA dest, ConditionCode cc) override {
     X64Assembler a { cb };
     if (cc == CC_None) {
-      assert(isSmashable(cb.frontier(), x64::kJmpLen));
+      assertx(isSmashable(cb.frontier(), x64::kJmpLen));
       a.  jmp(dest);
     } else {
-      assert(isSmashable(cb.frontier(), x64::kJmpccLen));
+      assertx(isSmashable(cb.frontier(), x64::kJmpccLen));
       a.  jcc(cc, dest);
     }
   }
 
   TCA smashableCallFromReturn(TCA retAddr) override {
     auto addr = retAddr - x64::kCallLen;
-    assert(isSmashable(addr, x64::kCallLen));
+    assertx(isSmashable(addr, x64::kCallLen));
     return addr;
   }
 
   void emitSmashableCall(CodeBlock& cb, TCA dest) override {
     X64Assembler a { cb };
-    assert(isSmashable(cb.frontier(), x64::kCallLen));
+    assertx(isSmashable(cb.frontier(), x64::kCallLen));
     a.  call(dest);
   }
 
@@ -807,7 +310,61 @@ struct BackEnd : public jit::BackEnd {
   }
 
   void genCodeImpl(IRUnit& unit, AsmInfo*) override;
+
+private:
+  void do_moveToAlign(CodeBlock& cb, MoveToAlignFlags alignment) override {
+    size_t x64Alignment;
+
+    switch (alignment) {
+    case MoveToAlignFlags::kJmpTargetAlign:
+      x64Alignment = kJmpTargetAlign;
+      break;
+    case MoveToAlignFlags::kNonFallthroughAlign:
+      x64Alignment = jit::kNonFallthroughAlign;
+      break;
+    case MoveToAlignFlags::kCacheLineAlign:
+      x64Alignment = kCacheLineSize;
+      break;
+    }
+    x64::moveToAlign(cb, x64Alignment);
+  }
+
+  bool do_isSmashable(Address frontier, int nBytes, int offset) override {
+    return x64::isSmashable(frontier, nBytes, offset);
+  }
+
+  void do_prepareForSmash(CodeBlock& cb, int nBytes, int offset) override {
+    prepareForSmashImpl(cb, nBytes, offset);
+    mcg->cgFixups().m_alignFixups.emplace(cb.frontier(),
+                                          std::make_pair(nBytes, offset));
+  }
 };
+
+//////////////////////////////////////////////////////////////////////
+
+void smashJmpOrCall(TCA addr, TCA dest, bool isCall) {
+  // Unconditional rip-relative jmps can also be encoded with an EB as the
+  // first byte, but that means the delta is 1 byte, and we shouldn't be
+  // encoding smashable jumps that way.
+  assertx(kJmpLen == kCallLen);
+  always_assert(isSmashable(addr, kJmpLen));
+
+  auto& cb = mcg->code.blockFor(addr);
+  CodeCursor cursor { cb, addr };
+  X64Assembler a { cb };
+  if (dest > addr && dest - addr <= kJmpLen) {
+    assertx(!isCall);
+    a.  emitNop(dest - addr);
+  } else if (isCall) {
+    a.  call   (dest);
+  } else {
+    a.  jmp    (dest);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
 
 std::unique_ptr<jit::BackEnd> newBackEnd() {
   return folly::make_unique<BackEnd>();
@@ -835,7 +392,8 @@ UNUSED const Abi vasm_abi {
   .simdUnreserved = vasm_simd,
   .simdReserved = x64::abi.simd() - vasm_simd,
   .calleeSaved = x64::kCalleeSaved,
-  .sf = x64::abi.sf
+  .sf = x64::abi.sf,
+  .canSpill = true
 };
 
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
@@ -847,10 +405,9 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   CodeBlock mainCode;
   CodeBlock coldCode;
   const bool useLLVM = mcg->useLLVM();
-  bool relocate = false;
+  bool do_relocate = false;
   if (!useLLVM &&
       RuntimeOption::EvalJitRelocationSize &&
-      supportsRelocation() &&
       coldCodeIn.canEmit(RuntimeOption::EvalJitRelocationSize * 3)) {
     /*
      * This is mainly to exercise the relocator, and ensure that its
@@ -871,7 +428,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
                   RuntimeOption::EvalJitRelocationSize + off,
                   RuntimeOption::EvalJitRelocationSize - off, "cgRelocMain");
 
-    relocate = true;
+    do_relocate = true;
   } else {
     /*
      * Use separate code blocks, so that attempts to use the mcg's
@@ -916,11 +473,12 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       state.labels[i] = vunit.makeBlock(AreaIndex::Main);
     }
     // create vregs for all relevant SSATmps
-    assignRegs(unit, vunit, state, blocks, this);
+    assignRegs(unit, vunit, state, blocks);
     vunit.entry = state.labels[unit.entry()];
     vasm.main(mainCode);
     vasm.cold(coldCode);
     vasm.frozen(*frozenCode);
+
     for (auto block : blocks) {
       auto& v = block->hint() == Block::Hint::Unlikely ? vasm.cold() :
                block->hint() == Block::Hint::Unused ? vasm.frozen() :
@@ -931,13 +489,13 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       vunit.blocks[b].area = v.area();
       v.use(b);
       hhir_count += genBlock(state, v, vasm.cold(), block);
-      assert(v.closed());
-      assert(vasm.main().empty() || vasm.main().closed());
-      assert(vasm.cold().empty() || vasm.cold().closed());
-      assert(vasm.frozen().empty() || vasm.frozen().closed());
+      assertx(v.closed());
+      assertx(vasm.main().empty() || vasm.main().closed());
+      assertx(vasm.cold().empty() || vasm.cold().closed());
+      assertx(vasm.frozen().empty() || vasm.frozen().closed());
     }
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
-    assert(check(vunit));
+    assertx(check(vunit));
 
     if (useLLVM) {
       try {
@@ -956,7 +514,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   }
 
   auto bcMap = &mcg->cgFixups().m_bcMap;
-  if (relocate && !bcMap->empty()) {
+  if (do_relocate && !bcMap->empty()) {
     TRACE(1, "BCMAPS before relocation\n");
     for (UNUSED auto& map : *bcMap) {
       TRACE(1, "%s %-6d %p %p %p\n", map.md5.toString().c_str(),
@@ -964,33 +522,32 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     }
   }
 
-  assert(coldCodeIn.frontier() == coldStart);
-  assert(mainCodeIn.frontier() == mainStart);
+  assertx(coldCodeIn.frontier() == coldStart);
+  assertx(mainCodeIn.frontier() == mainStart);
 
-  if (relocate) {
+  if (do_relocate) {
     if (asmInfo) {
       printUnit(kRelocationLevel, unit, " before relocation ", asmInfo);
     }
 
-    auto& be = mcg->backEnd();
     RelocationInfo rel;
     size_t asm_count{0};
-    asm_count += be.relocate(rel, mainCodeIn,
-                             mainCode.base(), mainCode.frontier(),
-                             mcg->cgFixups(), nullptr);
+    asm_count += relocate(rel, mainCodeIn,
+                          mainCode.base(), mainCode.frontier(),
+                          mcg->cgFixups(), nullptr);
 
-    asm_count += be.relocate(rel, coldCodeIn,
-                             coldCode.base(), coldCode.frontier(),
-                             mcg->cgFixups(), nullptr);
+    asm_count += relocate(rel, coldCodeIn,
+                          coldCode.base(), coldCode.frontier(),
+                          mcg->cgFixups(), nullptr);
     TRACE(1, "hhir-inst-count %ld asm %ld\n", hhir_count, asm_count);
 
     if (frozenCode != &coldCode) {
       rel.recordRange(frozenStart, frozenCode->frontier(),
                       frozenStart, frozenCode->frontier());
     }
-    be.adjustForRelocation(rel);
-    be.adjustMetaDataForRelocation(rel, asmInfo, mcg->cgFixups());
-    be.adjustCodeForRelocation(rel, mcg->cgFixups());
+    adjustForRelocation(rel);
+    adjustMetaDataForRelocation(rel, asmInfo, mcg->cgFixups());
+    adjustCodeForRelocation(rel, mcg->cgFixups());
 
     if (asmInfo) {
       static int64_t mainDeltaTot = 0, coldDeltaTot = 0;
@@ -1014,8 +571,8 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     auto& ip = mcg->cgFixups().m_inProgressTailJumps;
     for (size_t i = 0; i < ip.size(); ++i) {
       const auto& ib = ip[i];
-      assert(!mainCode.contains(ib.toSmash()));
-      assert(!coldCode.contains(ib.toSmash()));
+      assertx(!mainCode.contains(ib.toSmash()));
+      assertx(!coldCode.contains(ib.toSmash()));
     }
     memset(mainCode.base(), 0xcc, mainCode.frontier() - mainCode.base());
     memset(coldCode.base(), 0xcc, coldCode.frontier() - coldCode.base());
@@ -1029,5 +586,36 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     printUnit(kCodeGenLevel, unit, " after code gen ", asmInfo);
   }
 }
+
+//////////////////////////////////////////////////////////////////////
+
+bool isSmashable(Address frontier, int nBytes, int offset /* = 0 */) {
+  assertx(nBytes <= int(kCacheLineSize));
+  uintptr_t iFrontier = uintptr_t(frontier) + offset;
+  uintptr_t lastByte = uintptr_t(frontier) + nBytes - 1;
+  return (iFrontier & ~kCacheLineMask) == (lastByte & ~kCacheLineMask);
+}
+
+void prepareForSmashImpl(CodeBlock& cb, int nBytes, int offset) {
+  if (isSmashable(cb.frontier(), nBytes, offset)) return;
+  X64Assembler a { cb };
+  int gapSize = (~(uintptr_t(a.frontier()) + offset) & kCacheLineMask) + 1;
+  a.emitNop(gapSize);
+  assertx(isSmashable(a.frontier(), nBytes, offset));
+}
+
+void smashJmp(TCA jmpAddr, TCA newDest) {
+  assertx(MCGenerator::canWrite());
+  FTRACE(2, "smashJmp: {} -> {}\n", jmpAddr, newDest);
+  smashJmpOrCall(jmpAddr, newDest, false);
+}
+
+void smashCall(TCA callAddr, TCA newDest) {
+  assertx(MCGenerator::canWrite());
+  FTRACE(2, "smashCall: {} -> {}\n", callAddr, newDest);
+  smashJmpOrCall(callAddr, newDest, true);
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }}}

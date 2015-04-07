@@ -39,9 +39,6 @@ namespace jit {
 
 struct TypeConstraint;
 
-constexpr size_t kReservedRSPSpillSpace = RESERVED_STACK_SPILL_SPACE;
-constexpr size_t kReservedRSPTotalSpace = RESERVED_STACK_TOTAL_SPACE;
-
 //////////////////////////////////////////////////////////////////////
 
 /* Helper functions for translated code */
@@ -198,7 +195,6 @@ TypedValue lookupClassConstantTv(TypedValue* cache,
                                  const StringData* cls,
                                  const StringData* cns);
 
-ObjectData* newColHelper(uint32_t type, uint32_t size);
 ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value);
 ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
                               TypedValue value);

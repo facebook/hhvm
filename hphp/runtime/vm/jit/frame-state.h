@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/type-source.h"
 #include "hphp/runtime/vm/jit/local-effects.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 
 namespace HPHP {
 
@@ -64,7 +65,7 @@ struct EvalStack {
   }
 
   void replace(uint32_t offset, SSATmp* tmp) {
-    assert(offset < m_vector.size());
+    assertx(offset < m_vector.size());
     uint32_t index = m_vector.size() - 1 - offset;
     m_vector[index] = tmp;
   }
@@ -97,10 +98,12 @@ struct SlotState {
   SSATmp* value{nullptr};
 
   /*
-   * The current type of the local or stack slot.  We may have a tracked type
-   * even if we don't have an available value.  This happens across PHP-level
-   * calls, for example, or at some joint points where we couldn't find the
-   * same available value for all incoming edges.
+   * The current type of the local or stack slot.  We may have a
+   * tracked type even if we don't have an available value.  This
+   * happens across PHP-level calls, for example, or at some joint
+   * points where we couldn't find the same available value for all
+   * incoming edges.  However, whenever we have a value, the type of
+   * the SSATmp must match this `type' field.
    */
   Type type{Stack ? Type::StkElem : Type::Gen};
 
@@ -159,8 +162,8 @@ struct FrameState {
   /*
    * Tracking of the not-in-memory state of the virtual execution stack:
    *
-   *   During HhbcTranslator's run over the bytecode, these stacks contain
-   *   SSATmp values representing the execution stack state since the last
+   *   During the IR-generation step, these stacks contain SSATmp
+   *   values representing the execution stack state since the last
    *   spillStack() call.
    *
    *   The EvalStack contains cells that need to be spilled in order to
@@ -288,7 +291,7 @@ struct FrameStateMgr final : private LocalStateHook {
    * Iterates through a control-flow graph, until a fixed-point is
    * reached. Must be called before this FrameStateMgr has any state.
    */
-  void computeFixedPoint(const BlocksWithIds&);
+  void computeFixedPoint(const BlockList&, const BlockIDs&);
 
   /*
    * Loads the in-state for a block. Requires that the block has already been
@@ -391,7 +394,7 @@ private:
 
 private:
   FrameState& cur() {
-    assert(!m_stack.empty());
+    assertx(!m_stack.empty());
     return m_stack.back();
   }
   const FrameState& cur() const {

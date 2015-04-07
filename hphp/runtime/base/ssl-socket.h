@@ -63,6 +63,7 @@ struct SSLSocket : Socket {
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
+  bool waitForData();
   virtual int64_t readImpl(char *buffer, int64_t length) override;
   virtual int64_t writeImpl(const char *buffer, int64_t length) override;
   virtual bool checkLiveness() override;

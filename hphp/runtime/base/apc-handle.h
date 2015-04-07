@@ -85,15 +85,17 @@ namespace HPHP {
  *
  */
 struct APCHandle {
+  struct Pair {
+    APCHandle* handle;
+    size_t size;
+  };
+
   /*
    * Create an instance of an APC object according to the type of source and
    * the various flags. This is the only entry point to create APC entities.
    */
-  static APCHandle* Create(const Variant& source,
-                           size_t& size,
-                           bool serialized,
-                           bool inner = false,
-                           bool unserializeObj = false);
+  static Pair Create(const Variant& source, bool serialized,
+                     bool inner = false, bool unserializeObj = false);
 
   /*
    * Memory management API.

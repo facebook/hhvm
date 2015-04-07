@@ -84,7 +84,7 @@ void forwardJmp(Vunit& unit, jit::flat_set<size_t>& catch_blocks,
     // If the dest started with a landingpad, copy one to middle. The dest's
     // will be erased at the end of the pass.
     catch_blocks.insert(destLabel);
-    assert(middle.code.empty());
+    assertx(middle.code.empty());
     middle.code.emplace_back(landingpad{});
     middle.code.back().origin = origin;
   }
@@ -127,7 +127,7 @@ bool splitCriticalEdges(Vunit& unit) {
   // Remove any landingpad{} instructions that were hoisted to split edges.
   for (auto block : catch_blocks) {
     auto& code = unit.blocks[block].code;
-    assert(code.front().op == Vinstr::landingpad);
+    assertx(code.front().op == Vinstr::landingpad);
     code.front() = nop{};
   }
 

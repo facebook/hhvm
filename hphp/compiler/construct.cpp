@@ -162,7 +162,6 @@ void Construct::dumpNode(int spc) {
   std::string type_info = "";
   unsigned id = 0;
   ExpressionPtr idPtr = ExpressionPtr();
-  ExpressionPtr idCsePtr = ExpressionPtr();
   int ef = 0;
 
   if (Statement *s = dynamic_cast<Statement*>(this)) {
@@ -173,7 +172,6 @@ void Construct::dumpNode(int spc) {
   } else if (Expression *e = dynamic_cast<Expression*>(this)) {
     id = e->getCanonID();
     idPtr = e->getCanonLVal();
-    idCsePtr = e->getCanonCsePtr();
 
     ef = e->getLocalEffects();
 
@@ -212,9 +210,6 @@ void Construct::dumpNode(int spc) {
     }
     if (c & Expression::DeepReference) {
       scontext += "|DeepReference";
-    }
-    if (c & Expression::NoRefWrapper) {
-      scontext += "|NoRefWrapper";
     }
     if (c & Expression::ObjectContext) {
       scontext += "|ObjectContext";
@@ -269,16 +264,6 @@ void Construct::dumpNode(int spc) {
       } else {
         type_info += ":";
       }
-      if (e->getImplementedType()) {
-        type_info += ";" + e->getImplementedType()->toString();
-      } else {
-        type_info += ";";
-      }
-      if (e->getAssertedType()) {
-        type_info += "!" + e->getAssertedType()->toString();
-      } else {
-        type_info += "!";
-      }
       type_info = "{" + type_info + "} ";
     }
   } else {
@@ -303,11 +288,6 @@ void Construct::dumpNode(int spc) {
     std::cout << "idp=0x" <<
       std::hex << std::setfill('0') << std::setw(10) <<
       (int64_t)idPtr.get() << " ";
-  }
-  if (idCsePtr) {
-    std::cout << "idcsep=0x" <<
-      std::hex << std::setfill('0') << std::setw(10) <<
-      (int64_t)idCsePtr.get() << " ";
   }
 
   if (value != "") {
@@ -361,17 +341,8 @@ void Construct::dumpNode(int spc) {
 
   string objstr;
   if (dynamic_cast<SimpleVariable*>(this) != nullptr) {
-    if (isNeededValid()) {
-      if (isNeeded()) {
-        objstr += "Object";
-      } else {
-        objstr += "NotObject";
-      }
-    } else {
-      objstr = "NoObjInfo";
-    }
+    objstr = " (NoObjInfo)";
   }
-  if (objstr != "") objstr = " (" + objstr + ")";
 
   string noremoved;
   if (isNoRemove()) {

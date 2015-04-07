@@ -310,49 +310,9 @@ private:
   static void IteratorObjInit(ArrayIter* iter, ObjectData* obj);
 
   typedef void(*InitFuncPtr)(ArrayIter*,ObjectData*);
-  static const InitFuncPtr initFuncTable[Collection::MaxNumTypes];
+  static const InitFuncPtr initFuncTable[];
 
   void destruct();
-
-  BaseVector* getVector() const {
-    assert(hasCollection());
-    assert(getCollectionType() == Collection::VectorType ||
-           getCollectionType() == Collection::ImmVectorType);
-    return (BaseVector*)((intptr_t)m_obj & ~1);
-  }
-  BaseMap* getMap() const {
-    assert(hasCollection());
-    assert(Collection::isMapType(getCollectionType()));
-    return (BaseMap*)((intptr_t)m_obj & ~1);
-  }
-  BaseSet* getSet() const {
-    assert(hasCollection());
-    assert(getCollectionType() == Collection::SetType ||
-           getCollectionType() == Collection::ImmSetType);
-    return (BaseSet*)((intptr_t)m_obj & ~1);
-  }
-  c_Pair* getPair() const {
-    assert(hasCollection() && getCollectionType() == Collection::PairType);
-    return (c_Pair*)((intptr_t)m_obj & ~1);
-  }
-  c_ImmVector* getImmVector() const {
-    assert(hasCollection() &&
-           getCollectionType() == Collection::ImmVectorType);
-
-    return (c_ImmVector*)((intptr_t)m_obj & ~1);
-  }
-  c_ImmSet* getImmSet() {
-    assert(hasCollection() && getCollectionType() == Collection::ImmSetType);
-    return (c_ImmSet*)((intptr_t)m_obj & ~1);
-  }
-  Collection::Type getCollectionType() const {
-    ObjectData* obj = getObject();
-    return obj->getCollectionType();
-  }
-  ObjectData* getIteratorObj() const {
-    assert(hasIteratorObj());
-    return getObject();
-  }
 
   void setArrayData(const ArrayData* ad) {
     assert((intptr_t(ad) & 1) == 0);

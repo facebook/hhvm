@@ -65,16 +65,24 @@ template<bool Stack>
 bool merge_into(SlotState<Stack>& dst, const SlotState<Stack>& src) {
   auto changed = false;
 
+  if (merge_util(dst.type, dst.type | src.type)) {
+    changed = true;
+  }
+
   // Get the least common ancestor across both states.
   if (merge_util(dst.value, least_common_ancestor(dst.value, src.value))) {
     changed = true;
+    assert(dst.value == nullptr || dst.type <= dst.value->type());
+
+    // We keep the invariant that the known value either has the same
+    // type as the known type or be nullptr.  Otherwise, we may end up
+    // using a value with a more general type than is known about it.
+    if (dst.value && dst.type < dst.value->type()) {
+      dst.value = nullptr;
+    }
   }
 
   if (merge_into(dst.typeSrcs, src.typeSrcs)) {
-    changed = true;
-  }
-
-  if (merge_util(dst.type, dst.type | src.type)) {
     changed = true;
   }
 
@@ -224,7 +232,7 @@ FrameStateMgr::FrameStateMgr(BCMarker marker) {
 }
 
 bool FrameStateMgr::update(const IRInstruction* inst) {
-  assert(m_status != Status::None);
+  assertx(m_status != Status::None);
   ITRACE(3, "FrameStateMgr::update processing {}\n", *inst);
   Indent _i;
 
@@ -259,7 +267,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   }
 
   local_effects(*this, inst, *this);
-  assert(checkInvariants());
+  assertx(checkInvariants());
 
   switch (inst->op()) {
   case DefInlineFP:    trackDefInlineFP(inst);  break;
@@ -281,7 +289,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
       // What we're considering sync'd to memory is popping an actrec, popping
       // args, and pushing a return value.
       if (m_status == Status::Building) {
-        assert(cur().syncedSpLevel == inst->marker().spOff());
+        assertx(cur().syncedSpLevel == inst->marker().spOff());
       } else {
         cur().syncedSpLevel = inst->marker().spOff();
       }
@@ -308,7 +316,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
       setStackType(extra->spOffset + kNumActRecCells, Type::Gen);
       // A CallArray pops the ActRec, an array arg, and pushes a return value.
       if (m_status == Status::Building) {
-        assert(cur().syncedSpLevel == inst->marker().spOff());
+        assertx(cur().syncedSpLevel == inst->marker().spOff());
       } else {
         cur().syncedSpLevel = inst->marker().spOff();
       }
@@ -326,7 +334,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
       setStackType(extra->spOffset, Type::Gen);
       // ContEnter pops a cell and pushes a yielded value.
       if (m_status == Status::Building) {
-        assert(cur().syncedSpLevel == inst->marker().spOff());
+        assertx(cur().syncedSpLevel == inst->marker().spOff());
       } else {
         cur().syncedSpLevel = inst->marker().spOff();
       }
@@ -462,8 +470,8 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
     cur().syncedSpLevel += extra.cellsPushed;
     cur().syncedSpLevel -= extra.cellsPopped;
-    assert(cur().evalStack.size() == 0);
-    assert(cur().stackDeficit == 0);
+    assertx(cur().evalStack.size() == 0);
+    assertx(cur().stackDeficit == 0);
     break;
   }
 
@@ -508,7 +516,7 @@ void FrameStateMgr::walkAllInlinedLocals(
     }
   };
 
-  assert(!m_stack.empty());
+  assertx(!m_stack.empty());
   auto const thisFrame = m_stack.size() - 1;
   if (!skipThisFrame) doBody(m_stack[thisFrame].locals, thisFrame);
   for (auto i = uint32_t{0}; i < thisFrame; ++i) {
@@ -531,7 +539,7 @@ void FrameStateMgr::forEachLocalValue(
  * known types at the end of `block'.
  */
 void FrameStateMgr::collectPostConds(Block* block) {
-  assert(block->isExitNoThrow());
+  assertx(block->isExitNoThrow());
   PostConditions& pConds = m_exitPostConds[block];
   pConds.clear();
 
@@ -574,13 +582,13 @@ bool FrameStateMgr::hasStateFor(Block* block) const {
 void FrameStateMgr::startBlock(Block* block,
                                bool hasUnprocessedPred /* = false */) {
   ITRACE(3, "FrameStateMgr::startBlock: {}\n", block->id());
-  assert(m_status != Status::None);
+  assertx(m_status != Status::None);
   auto const it = m_states.find(block);
   auto const end = m_states.end();
 
   DEBUG_ONLY auto const predsAllowed =
     it != end || block->isEntry() || RuntimeOption::EvalJitLoops;
-  assert(IMPLIES(block->numPreds() > 0, predsAllowed));
+  assertx(IMPLIES(block->numPreds() > 0, predsAllowed));
 
   if (it != end) {
     if (m_status == Status::Building) {
@@ -599,7 +607,7 @@ void FrameStateMgr::startBlock(Block* block,
       if (debug) save(block);
     }
   }
-  assert(!m_stack.empty());
+  assertx(!m_stack.empty());
 
   // Don't reset state for unprocessed predecessors if we're trying to reach a
   // fixed-point.
@@ -614,7 +622,7 @@ void FrameStateMgr::startBlock(Block* block,
 }
 
 bool FrameStateMgr::finishBlock(Block* block) {
-  assert(block->back().isTerminal() == !block->next());
+  assertx(block->back().isTerminal() == !block->next());
 
   if (block->isExitNoThrow()) {
     collectPostConds(block);
@@ -634,7 +642,7 @@ void FrameStateMgr::pauseBlock(Block* block) {
 }
 
 void FrameStateMgr::unpauseBlock(Block* block) {
-  assert(hasStateFor(block));
+  assertx(hasStateFor(block));
   m_stack = *m_states[block].paused;
 }
 
@@ -656,7 +664,7 @@ bool FrameStateMgr::save(Block* block) {
     changed = merge_into(it->second.in, m_stack);
     ITRACE(4, "Merged state: {}\n", show(*this));
   } else {
-    assert(!m_stack.empty());
+    assertx(!m_stack.empty());
     m_states[block].in = m_stack;
   }
 
@@ -675,7 +683,7 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   // passed in the StkPtr that represents the stack prior to the
   // ActRec being allocated.
   cur().syncedSpLevel = savedSPOff;
-  assert(cur().spValue == savedSP);
+  assertx(cur().spValue == savedSP);
   cur().spValue = savedSP;  // TODO(#5868870): this isn't needed anymore
 
   /*
@@ -711,7 +719,7 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
 
 void FrameStateMgr::trackInlineReturn() {
   m_stack.pop_back();
-  assert(!m_stack.empty());
+  assertx(!m_stack.empty());
 }
 
 bool FrameStateMgr::checkInvariants() const {
@@ -737,8 +745,8 @@ void FrameStateMgr::clearForUnprocessedPred() {
   // Forget any information about stack values in memory. Note that
   // the stack must be fully sync'ed to memory at merge points.
   for (auto& state : m_stack) {
-    assert(state.evalStack.empty());
-    assert(state.stackDeficit == 0);
+    assertx(state.evalStack.empty());
+    assertx(state.stackDeficit == 0);
     for (auto& stk : state.memoryStack) {
       stk = StackState{};
     }
@@ -773,34 +781,35 @@ const StackState& FrameStateMgr::stackState(IRSPOffset offset) const {
   return const_cast<FrameStateMgr&>(*this).stackState(offset);
 }
 
-void FrameStateMgr::computeFixedPoint(const BlocksWithIds& blocks) {
+void FrameStateMgr::computeFixedPoint(const BlockList& blocks,
+                                      const BlockIDs& rpoIDs) {
   ITRACE(4, "FrameStateMgr computing fixed-point\n");
 
-  assert(m_status == Status::None);  // we should have a clear state
+  assertx(m_status == Status::None);  // we should have a clear state
   m_status = Status::RunningFixedPoint;
 
-  auto const entry = blocks.blocks[0];
+  auto const entry = blocks[0];
   DEBUG_ONLY auto const entryMarker = entry->front().marker();
   // So that we can actually call startBlock on the entry block.
-  assert(m_stack.size() == 1);
+  assertx(m_stack.size() == 1);
   m_states[entry].in = m_stack;
-  assert(m_states[entry].in.back().curFunc == entryMarker.func());
+  assertx(m_states[entry].in.back().curFunc == entryMarker.func());
 
   // Use a worklist of RPO ids. That way, when we remove an active item to
   // process, we'll always pick the block earliest in RPO.
-  auto worklist = dataflow_worklist<uint32_t>(blocks.blocks.size());
+  auto worklist = dataflow_worklist<uint32_t>(blocks.size());
 
   // Start with entry.
   worklist.push(0);
 
   while (!worklist.empty()) {
     auto const rpoId = worklist.pop();
-    auto const block = blocks.blocks[rpoId];
+    auto const block = blocks[rpoId];
 
     ITRACE(5, "Processing block {}\n", block->id());
 
     auto const insert = [&] (Block* block) {
-      if (block != nullptr) worklist.push(blocks.ids[block]);
+      if (block != nullptr) worklist.push(rpoIDs[block]);
     };
 
     startBlock(block);
@@ -817,15 +826,15 @@ void FrameStateMgr::computeFixedPoint(const BlocksWithIds& blocks) {
 
 void FrameStateMgr::loadBlock(Block* block) {
   auto const it = m_states.find(block);
-  assert(it != m_states.end());
+  assertx(it != m_states.end());
   m_stack = it->second.in;
-  assert(!m_stack.empty());
+  assertx(!m_stack.empty());
 }
 
 const PostConditions& FrameStateMgr::postConds(Block* exitBlock) const {
-  assert(exitBlock->isExitNoThrow());
+  assertx(exitBlock->isExitNoThrow());
   auto it = m_exitPostConds.find(exitBlock);
-  assert(it != m_exitPostConds.end());
+  assertx(it != m_exitPostConds.end());
   return it->second;
 }
 
@@ -838,7 +847,9 @@ void FrameStateMgr::syncEvalStack() {
 
 SSATmp* FrameStateMgr::localValue(uint32_t id) const {
   always_assert(id < cur().locals.size());
-  return cur().locals[id].value;
+  auto const& local = cur().locals[id];
+  assert(local.value == nullptr || local.value->type() == local.type);
+  return local.value;
 }
 
 TypeSourceSet FrameStateMgr::localTypeSources(uint32_t id) const {
@@ -867,7 +878,9 @@ Type FrameStateMgr::predictedStackType(IRSPOffset offset) const {
 }
 
 SSATmp* FrameStateMgr::stackValue(IRSPOffset offset) const {
-  return stackState(offset).value;
+  const auto& state = stackState(offset);
+  assert(state.value == nullptr || state.value->type() == state.type);
+  return state.value;
 }
 
 TypeSourceSet FrameStateMgr::stackTypeSources(IRSPOffset offset) const {
@@ -915,6 +928,10 @@ void FrameStateMgr::refineStackType(IRSPOffset offset,
   auto const newType = state.type & ty;
   ITRACE(2, "stk[{}] updating type {} as {} -> {}\n", offset.offset,
     state.type, ty, newType);
+  // If the type gets more refined, we need to forget the old value.
+  // Otherwise, we may end up using a value with a more general type
+  // than is known about the stack slot.
+  if (newType != state.type) state.value = nullptr;
   state.type = newType;
   state.predictedType = newType;
   state.typeSrcs.clear();
@@ -990,6 +1007,10 @@ void FrameStateMgr::refineLocalType(uint32_t id,
   auto& local = cur().locals[id];
   auto const newType = local.type & type;
   ITRACE(2, "updating local {}'s type: {} -> {}\n", id, local.type, newType);
+  // If the type gets more refined, we need to forget the old value.
+  // Otherwise, we may end up using a value with a more general type
+  // than is known about the local.
+  if (newType != local.type) local.value = nullptr;
   local.type = newType;
   local.predictedType = newType;
   local.typeSrcs.clear();
@@ -1027,7 +1048,7 @@ void FrameStateMgr::setBoxedLocalPrediction(uint32_t id, Type type) {
  * point to that cell can have their inner type predictions updated.
  */
 void FrameStateMgr::updateLocalRefPredictions(SSATmp* boxedCell, SSATmp* val) {
-  assert(boxedCell->type() <= Type::BoxedCell);
+  assertx(boxedCell->type() <= Type::BoxedCell);
   for (auto id = uint32_t{0}; id < cur().locals.size(); ++id) {
     if (canonical(cur().locals[id].value) == canonical(boxedCell)) {
       setBoxedLocalPrediction(id, boxType(val->type()));
@@ -1046,7 +1067,7 @@ void FrameStateMgr::setLocalTypeSource(uint32_t id, TypeSource typeSrc) {
  * m_stack.
  */
 jit::vector<LocalState>& FrameStateMgr::locals(unsigned inlineIdx) {
-  assert(inlineIdx < m_stack.size());
+  assertx(inlineIdx < m_stack.size());
   return m_stack[inlineIdx].locals;
 }
 

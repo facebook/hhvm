@@ -21,6 +21,7 @@
 #include <limits>
 
 #include "hphp/util/low-ptr.h"
+#include "hphp/runtime/base/header-kind.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,8 +66,6 @@ class Func;
 class VariableSerializer;
 class VariableUnserializer;
 
-///////////////////////////////////////////////////////////////////////////////
-
 using LowClassPtr  = LowPtr<Class>;
 using LowFuncPtr   = LowPtr<Func>;
 using LowStringPtr = LowPtr<const StringData>;
@@ -80,78 +79,6 @@ enum class Mode {
   ColValue = 2,
   ColKey = 3,
 };
-}
-
-namespace Collection {
-
-enum Type : uint8_t { // Stored in ObjectData::o_subclassData.
-  // Values must be contiguous integers (for ArrayIter::initFuncTable).
-  InvalidType = 0,
-  VectorType = 1,
-  MapType = 2,
-  SetType = 3,
-  PairType = 4,
-  ImmVectorType = 5,
-  ImmMapType = 6,
-  ImmSetType = 7,
-};
-
-constexpr size_t MaxNumTypes = 8;
-
-inline Type stringToType(const char* str, size_t len) {
-  switch (len) {
-    case 6:
-      if (!strcasecmp(str, "hh\\set")) return SetType;
-      if (!strcasecmp(str, "hh\\map")) return MapType;
-      break;
-    case 7:
-      if (!strcasecmp(str, "hh\\pair")) return PairType;
-      break;
-    case 9:
-      if (!strcasecmp(str, "hh\\vector")) return VectorType;
-      if (!strcasecmp(str, "hh\\immmap")) return ImmMapType;
-      if (!strcasecmp(str, "hh\\immset")) return ImmSetType;
-      break;
-    case 12:
-      if (!strcasecmp(str, "hh\\immvector")) return ImmVectorType;
-      break;
-    default:
-      break;
-  }
-  return InvalidType;
-}
-inline Type stringToType(const std::string& s) {
-  return stringToType(s.c_str(), s.size());
-}
-inline bool isVectorType(Collection::Type ctype) {
-  return (ctype == Collection::VectorType ||
-          ctype == Collection::ImmVectorType);
-}
-inline bool isMapType(Collection::Type ctype) {
-  return (ctype == Collection::MapType ||
-          ctype == Collection::ImmMapType);
-}
-inline bool isSetType(Collection::Type ctype) {
-  return (ctype == Collection::SetType ||
-          ctype == Collection::ImmSetType);
-}
-inline bool isInvalidType(Collection::Type ctype) {
-  return (ctype == Collection::InvalidType ||
-          static_cast<size_t>(ctype) >= Collection::MaxNumTypes);
-}
-inline bool isMutableType(Collection::Type ctype) {
-  return (ctype == Collection::VectorType ||
-          ctype == Collection::MapType ||
-          ctype == Collection::SetType);
-}
-inline bool isImmutableType(Collection::Type ctype) {
-  return !isMutableType(ctype);
-}
-
-inline bool isTypeWithPossibleIntStringKeys(Collection::Type ctype) {
-  return Collection::isSetType(ctype) || Collection::isMapType(ctype);
-}
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -294,4 +221,4 @@ constexpr FuncId DummyFuncId = -2;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_TYPES_H_
+#endif

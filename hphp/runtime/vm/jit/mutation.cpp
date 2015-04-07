@@ -151,7 +151,7 @@ void cloneToBlock(const BlockList& rpoBlocks,
 
   auto targetIt = target->skipHeader();
   for (auto it = first; it != last; ++it) {
-    assert(!it->isControlFlow());
+    assertx(!it->isControlFlow());
 
     FTRACE(5, "cloneToBlock({}): {}\n", target->id(), it->toString());
     auto const newInst = unit.clone(&*it);
@@ -192,7 +192,7 @@ void moveToBlock(Block::iterator const first,
   auto targetIt = target->skipHeader();
   for (auto it = first; it != last;) {
     auto const inst = &*it;
-    assert(!inst->isControlFlow());
+    assertx(!inst->isControlFlow());
 
     FTRACE(5, "moveToBlock({}): {}\n",
            target->id(),
@@ -227,13 +227,16 @@ void retypeDests(IRInstruction* inst, const IRUnit* unit) {
  * 4. if again==true, goto step 1
  */
 void reflowTypes(IRUnit& unit) {
-  auto blocklist = rpoSortCfgWithIds(unit);
-  auto isBackEdge = [&](Block* from, Block* to) {
-    return blocklist.ids[from] > blocklist.ids[to];
+  auto const blocks = rpoSortCfg(unit);
+  auto const ids    = numberBlocks(unit, blocks);
+
+  auto isBackEdge = [&] (Block* from, Block* to) {
+    return ids[from] > ids[to];
   };
+
   for (bool again = true; again;) {
     again = false;
-    for (auto* block : blocklist.blocks) {
+    for (auto* block : blocks) {
       FTRACE(5, "reflowTypes: visiting block {}\n", block->id());
       for (auto& inst : *block) retypeDests(&inst, &unit);
       auto& jmp = block->back();

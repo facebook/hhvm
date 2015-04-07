@@ -44,7 +44,7 @@ SSATmp* canonical(SSATmp* value) {
 //////////////////////////////////////////////////////////////////////
 
 Block* findDefiningBlock(const SSATmp* t) {
-  assert(!t->inst()->is(DefConst));
+  assertx(!t->inst()->is(DefConst));
   auto const srcInst = t->inst();
 
   /*
@@ -87,7 +87,7 @@ SSATmp* least_common_ancestor(SSATmp* s1, SSATmp* s2) {
   IdSet<SSATmp> seen;
 
   auto const step = [] (SSATmp* v) {
-    assert(v != nullptr);
+    assertx(v != nullptr);
     return v->inst()->isPassthrough() ?
       v->inst()->getPassthroughValue() :
       nullptr;

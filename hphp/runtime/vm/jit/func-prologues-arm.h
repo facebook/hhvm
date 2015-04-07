@@ -33,17 +33,17 @@ struct Func;
 namespace jit { namespace arm {
 
 inline const Func** funcPrologueToGuardImmPtr(jit::TCA prologue) {
-  assert(arch() == Arch::ARM);
+  assertx(arch() == Arch::ARM);
   return reinterpret_cast<const Func**>(prologue) - 1;
 }
 
 inline bool funcPrologueHasGuard(jit::TCA prologue, const Func* func) {
-  assert(arch() == Arch::ARM);
+  assertx(arch() == Arch::ARM);
   return *funcPrologueToGuardImmPtr(prologue) == func;
 }
 
 inline TCA funcPrologueToGuard(TCA prologue, const Func* func) {
-  assert(arch() == Arch::ARM);
+  assertx(arch() == Arch::ARM);
   if (!prologue || prologue == mcg->tx().uniqueStubs.fcallHelperThunk) {
     return prologue;
   }

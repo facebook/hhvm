@@ -65,7 +65,7 @@ enum FuncFlags {
   HasOptFunction                = (1 << 23),
   AllowIntercept                = (1 << 24),
   NoProfile                     = (1 << 25),
-  ContextSensitive              = (1 << 26),
+  // unused (1 << 26),
   NoDefaultSweep                = (1 << 27),
   IsSystem                      = (1 << 28),
   IsTrait                       = (1 << 29),

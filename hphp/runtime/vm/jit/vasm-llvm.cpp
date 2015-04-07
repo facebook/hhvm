@@ -19,6 +19,8 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/disasm.h"
 
+#include "hphp/runtime/base/arch.h"
+
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
@@ -26,7 +28,6 @@
 #include "hphp/runtime/vm/jit/llvm-locrecs.h"
 #include "hphp/runtime/vm/jit/llvm-stack-maps.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/reserved-stack.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
@@ -335,7 +336,7 @@ struct TCMemoryManager : public llvm::RTDyldMemoryManager {
 
     // We override/ignore the alignment and use skew value to compensate.
     uint8_t* ret = code.alloc<uint8_t>(1, Size);
-    assert(Alignment < x64::kCacheLineSize &&
+    assertx(Alignment < x64::kCacheLineSize &&
            "alignment exceeds cache line size");
     always_assert(
       codeSkew == (reinterpret_cast<size_t>(ret) & (x64::kCacheLineSize - 1)) &&
@@ -513,6 +514,7 @@ struct LLVMEmitter {
     , m_valueInfo(unit.next_vr)
     , m_blocks(unit.blocks.size())
     , m_incomingVmFp(unit.blocks.size())
+    , m_incomingVmSp(unit.blocks.size())
     , m_unit(unit)
     , m_areas(areas)
   {
@@ -610,6 +612,11 @@ struct LLVMEmitter {
     m_traceletFnTy = llvm::FunctionType::get(
       m_void,
       std::vector<llvm::Type*>({m_int64, m_int64, m_int64}),
+      false
+    );
+    m_bindcallFnTy = llvm::FunctionType::get(
+      m_int64,
+      std::vector<llvm::Type*>({m_int64, m_int64, m_int64, m_int64}),
       false
     );
 
@@ -998,11 +1005,15 @@ struct LLVMEmitter {
     );
   }
 
+  llvm::Value* cnsDbl(double d) {
+    return llvm::ConstantFP::get(m_irb.getDoubleTy(), d);
+  }
+
   /*
    * Truncate val to i<bits>
    */
   llvm::Value* narrow(llvm::Value* val, size_t bits) {
-    assert(val->getType()->isIntegerTy());
+    assertx(val->getType()->isIntegerTy());
     return m_irb.CreateTrunc(val, intNType(bits));
   }
 
@@ -1010,7 +1021,7 @@ struct LLVMEmitter {
    * Zero-extend val to i<bits>
    */
   llvm::Value* zext(llvm::Value* val, size_t bits) {
-    assert(val->getType()->isIntegerTy());
+    assertx(val->getType()->isIntegerTy());
     return m_irb.CreateZExt(val, intNType(bits));
   }
 
@@ -1096,7 +1107,7 @@ private:
       // Update LLVM phi instructions if they've already been emitted; otherwise
       // enqueue useInfo so that phidef() can emit the uses.
       if (m_phis.size() != 0) {
-        assert(m_phis.size() == useInfo.uses.size());
+        assertx(m_phis.size() == useInfo.uses.size());
         for (auto phiInd = 0; phiInd < m_phis.size(); ++phiInd) {
           addIncoming(e, useInfo, phiInd);
         }
@@ -1107,8 +1118,8 @@ private:
 
     void phidef(LLVMEmitter& e, llvm::BasicBlock* toLabel,
                 const VregList& defs) {
-      assert(m_phis.size() == 0);
-      assert(m_pendingPreds.size() > 0);
+      assertx(m_phis.size() == 0);
+      assertx(m_pendingPreds.size() > 0);
 
       m_toLabel = toLabel;
       m_defs = defs;
@@ -1195,8 +1206,9 @@ VASM_OPCODES
   llvm::IRBuilder<true, llvm::ConstantFolder, IRBuilderVasmInserter> m_irb;
   std::unique_ptr<TCMemoryManager> m_tcMM;
 
-  // Function type used for tail calls to other tracelets.
+  // Function types used for call to tracelets/PHP functions.
   llvm::FunctionType* m_traceletFnTy{nullptr};
+  llvm::FunctionType* m_bindcallFnTy{nullptr};
 
   // Mimic HHVM's TypedValue.
   llvm::StructType* m_typedValueType{nullptr};
@@ -1212,8 +1224,9 @@ VASM_OPCODES
   // Vlabel -> llvm::BasicBlock map
   jit::vector<llvm::BasicBlock*> m_blocks;
 
-  // Vlabel -> Value for rVmFp entering a vasm block
+  // Vlabel -> Value for rVmFp/rVmSp entering a vasm block
   jit::vector<llvm::Value*> m_incomingVmFp;
+  jit::vector<llvm::Value*> m_incomingVmSp;
 
   jit::hash_map<llvm::BasicBlock*, PhiInfo> m_phiInfos;
 
@@ -1276,6 +1289,7 @@ VASM_OPCODES
 
 void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
   Timer timer(Timer::llvm_irGeneration);
+  SCOPE_ASSERT_DETAIL("LLVM Module") { return showModule(m_module.get()); };
 
   // Make sure all the llvm blocks are emitted in the order given by
   // layoutBlocks, regardless of which ones we need to use as jump targets
@@ -1291,11 +1305,16 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
     m_irb.SetInsertPoint(block(label));
 
     // If this isn't the first block of the unit, load the incoming value of
-    // rVmFp from our pred(s).
+    // rVmFp/rVmSp from our pred(s).
     if (label != labels.front()) {
-      auto& inFp = m_incomingVmFp[label];
+      auto inFp = m_incomingVmFp[label];
       always_assert(inFp);
       defineValue(x64::rVmFp, inFp);
+
+      // Only some instructions propagate a value for rVmSp to their
+      // successor(s).
+      auto inSp = m_incomingVmSp[label];
+      if (inSp) defineValue(x64::rVmSp, inSp);
     }
 
     for (auto& inst : b.code) {
@@ -1321,6 +1340,7 @@ O(andl) \
 O(andli) \
 O(andq) \
 O(andqi) \
+O(bindcall) \
 O(bindjcc1st) \
 O(bindjcc) \
 O(bindjmp) \
@@ -1440,9 +1460,8 @@ O(xorbi) \
 O(xorq) \
 O(xorqi) \
 O(landingpad) \
-O(ldretaddr) \
-O(movretaddr) \
-O(retctrl) \
+O(vretm) \
+O(vret) \
 O(absdbl) \
 O(phijmp) \
 O(phijcc) \
@@ -1472,9 +1491,7 @@ O(countbytecode)
       case Vinstr::shlq:
       case Vinstr::ret:
       case Vinstr::push:
-      case Vinstr::pushm:
       case Vinstr::pop:
-      case Vinstr::popm:
       case Vinstr::psllq:
       case Vinstr::psrlq:
       case Vinstr::fallthru:
@@ -1483,10 +1500,8 @@ O(countbytecode)
                            size_t(label), show(m_unit, inst));
 
       // Not yet implemented opcodes:
-      case Vinstr::bindcall:
       case Vinstr::callstub:
       case Vinstr::contenter:
-      case Vinstr::kpcall:
       case Vinstr::mccall:
       case Vinstr::mcprep:
       case Vinstr::cmpsd:
@@ -1521,8 +1536,9 @@ O(countbytecode)
       inFp = value(x64::rVmFp);
     }
 
-    // Any values for these ABI registers aren't meant to last past the end of
-    // the block.
+    // Make sure we don't let any values from this block go to the next RPO
+    // block. PhysReg values are explicitly passed along edges as needed (see
+    // above).
     defineValue(x64::rVmSp, nullptr);
     defineValue(x64::rVmFp, nullptr);
     defineValue(x64::rStashedAR, nullptr);
@@ -1663,6 +1679,26 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   call->setMetadata(llvm::LLVMContext::MD_locrec,
                     llvm::MDNode::get(m_context, cns(id)));
   m_bindjmps.emplace_back(LLVMBindJmp{id, reqIp, inst.target, inst.trflags});
+}
+
+void LLVMEmitter::emit(const bindcall& inst) {
+  // All bindcall instructions use the same stub so we have to provide a unique
+  // name to ensure LLVM doesn't collapse the calls together.
+  auto funcName = m_tcMM->getUniqueSymbolName("bindcall_");
+  auto func = emitFuncPtr(funcName, m_bindcallFnTy, uint64_t(inst.stub));
+  std::vector<llvm::Value*> args{
+    value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp),
+    value(x64::rStashedAR)
+  };
+  auto next = block(inst.targets[0]);
+  auto unwind = block(inst.targets[1]);
+  auto call = m_irb.CreateInvoke(func, next, unwind, args);
+  call->setCallingConv(llvm::CallingConv::X86_64_HHVM_PHP);
+  call->setSmashable();
+
+  // bindcall is followed by a defvmsp to copy rVmSp into a Vreg, but it's not
+  // in this block. Pass the value to our next block.
+  m_incomingVmSp[inst.targets[0]] = call;
 }
 
 // Emitting a real REQ_BIND_(JUMPCC_FIRST|JCC) only makes sense if we can
@@ -1816,7 +1852,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
                               (int)call.kind());
 
     case CppCall::Kind::Destructor: {
-      assert(vargs.args.size() == 1);
+      assertx(vargs.args.size() == 1);
       llvm::Value* type = value(call.reg());
       type = m_irb.CreateLShr(type, kShiftDataTypeToDestrIndex, "typeIdx");
 
@@ -1857,25 +1893,27 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
   switch (destType) {
   case DestType::None:
     // nothing to do
-    assert(dests.size() == 0);
+    assertx(dests.size() == 0);
     break;
   case DestType::SSA:
   case DestType::Byte:
   case DestType::Dbl:
-    assert(dests.size() == 1);
+    assertx(dests.size() == 1);
     defineValue(dests[0], callInst);
     break;
   case DestType::TV: {
-    assert(dests.size() == 2);
     static_assert(offsetof(TypedValue, m_data) == 0, "");
     static_assert(offsetof(TypedValue, m_type) == 8, "");
+    assertx(dests.size() <= 2 && dests.size() >= 1);
     defineValue(dests[0], m_irb.CreateExtractValue(callInst, 0)); // m_data
-    auto type = m_irb.CreateExtractValue(callInst, 1);
-    defineValue(dests[1], zext(type, 64)); // m_type
+    if (dests.size() == 2) {
+      auto type = m_irb.CreateExtractValue(callInst, 1);
+      defineValue(dests[1], zext(type, 64)); // m_type
+    }
     break;
   }
   case DestType::SIMD: {
-    assert(dests.size() == 1);
+    assertx(dests.size() == 1);
     // Do we want to pack it manually into a <2 x i64>? Or bitcast to X86_MMX?
     // Leave it as TypedValue for now and see what LLVM optimizer does.
     defineValue(dests[0], callInst);
@@ -1966,7 +2004,7 @@ void LLVMEmitter::emit(const copy2& inst) {
 void LLVMEmitter::emit(const copyargs& inst) {
   auto& srcs = m_unit.tuples[inst.s];
   auto& dsts = m_unit.tuples[inst.d];
-  assert(srcs.size() == dsts.size());
+  assertx(srcs.size() == dsts.size());
   for (unsigned i = 0, n = srcs.size(); i < n; ++i) {
     defineValue(dsts[i], value(srcs[i]));
   }
@@ -2023,8 +2061,8 @@ void LLVMEmitter::emit(const fallback& inst) {
   } else {
     // Emit a custom REQ_RETRANSLATE
     auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
-    ServiceReqArgVec args;
-    packServiceReqArgs(args, inst.dest.offset(), inst.trflags.packed);
+    auto const args = packServiceReqArgs(inst.dest.offset(),
+                                         inst.trflags.packed);
     stub = mcg->backEnd().emitServiceReqWork(
       frozen, frozen.frontier(), SRFlags::Persist, REQ_RETRANSLATE, args);
   }
@@ -2284,7 +2322,7 @@ void LLVMEmitter::emit(const ldimml& inst) {
 }
 
 void LLVMEmitter::emit(const ldimmq& inst) {
-  assert(inst.d.isVirt());
+  assertx(inst.d.isVirt());
   defineValue(inst.d, cns(inst.s.q()));
 }
 
@@ -2488,20 +2526,22 @@ UNUSED void LLVMEmitter::emitAsm(const std::string& asmStatement,
   call->setCallingConv(llvm::CallingConv::C);
 }
 
-void LLVMEmitter::emit(const ldretaddr& inst) {
-  auto const ptr = m_irb.CreateBitCast(emitPtr(inst.s, 8),
-                                       ptrType(ptrType(m_traceletFnTy)),
-                                       "bcast");
-  defineValue(inst.d, m_irb.CreateLoad(ptr));
-}
+void LLVMEmitter::emit(const vretm& inst) {
+  assert_not_implemented(inst.args == x64::kCrossTraceRegs);
+  auto const retPtr = emitPtr(inst.retAddr, ptrType(ptrType(m_traceletFnTy)));
+  auto const retAddr = m_irb.CreateLoad(retPtr);
+  auto const prevFp = m_irb.CreateLoad(emitPtr(inst.prevFp, 64));
+  defineValue(inst.d, prevFp);
 
-void LLVMEmitter::emit(const movretaddr& inst) {
-  defineValue(inst.d, m_irb.CreatePtrToInt(value(inst.s), m_int64));
-}
-
-void LLVMEmitter::emit(const retctrl& inst) {
   // "Return" with a tail call to the loaded address
-  emitTraceletTailCall(value(inst.s));
+  emitTraceletTailCall(retAddr);
+}
+
+void LLVMEmitter::emit(const vret& inst) {
+  assert_not_implemented(inst.args == x64::kCrossTraceRegs);
+  auto const retAddr = m_irb.CreateIntToPtr(value(inst.retAddr),
+                                            ptrType(m_traceletFnTy));
+  emitTraceletTailCall(retAddr);
 }
 
 void LLVMEmitter::emit(const absdbl& inst) {
@@ -2578,17 +2618,44 @@ void LLVMEmitter::emit(const shrqi& inst) {
 }
 
 void LLVMEmitter::emit(const sqrtsd& inst) {
-  auto sqrtFunc = llvm::Intrinsic::getDeclaration(
-    m_module.get(),
-    llvm::Intrinsic::sqrt,
-    std::vector<llvm::Type*>{m_irb.getDoubleTy()}
-  );
-  defineValue(inst.d, m_irb.CreateCall(sqrtFunc, asDbl(value(inst.s))));
+  // The square root of a negative number in vasm is NaN, but the llvm sqrt
+  // intrinsic is undefined for negative inputs. On x86, we can use an sse2
+  // intrinsic to get the right behavior with a single instruction, but on
+  // other platforms we emit a runtime check. We also skip the x64-specific
+  // path when the input is a constant, since llvm doesn't know how to constant
+  // fold the sse2 intrinsic.
+
+  auto dblVal = asDbl(value(inst.s));
+  if (arch() == Arch::X64 && !llvm::isa<llvm::Constant>(dblVal)) {
+    auto sqrtFunc = llvm::Intrinsic::getDeclaration(
+      m_module.get(),
+      llvm::Intrinsic::x86_sse2_sqrt_sd
+    );
+
+    llvm::Value* vec = llvm::UndefValue::get(
+      llvm::VectorType::get(m_irb.getDoubleTy(), 2));
+    vec = m_irb.CreateInsertElement(vec, dblVal, cns(0));
+    vec = m_irb.CreateCall(sqrtFunc, vec);
+    defineValue(inst.d, m_irb.CreateExtractElement(vec, cns(0)));
+  } else {
+    auto sqrtFunc = llvm::Intrinsic::getDeclaration(
+      m_module.get(),
+      llvm::Intrinsic::sqrt,
+      std::vector<llvm::Type*>{m_irb.getDoubleTy()}
+    );
+
+    auto lt = m_irb.CreateFCmpOLT(dblVal, cnsDbl(0.0));
+    auto NaN = llvm::ConstantFP::get(
+      m_context, llvm::APFloat::getNaN(llvm::APFloat::IEEEdouble));
+    defineValue(inst.d,
+                m_irb.CreateSelect(lt, NaN,
+                                   m_irb.CreateCall(sqrtFunc, dblVal)));
+  }
 }
 
 void LLVMEmitter::emit(const store& inst) {
   auto val = value(inst.s);
-  assert(val->getType()->getPrimitiveSizeInBits() == 64);
+  assertx(val->getType()->getPrimitiveSizeInBits() == 64);
   m_irb.CreateStore(val, emitPtr(inst.d, ptrType(val->getType())));
 }
 

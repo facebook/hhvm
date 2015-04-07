@@ -116,7 +116,7 @@ OpInfo g_opInfo[] = {
 ///////////////////////////////////////////////////////////////////////////////
 
 const StringData* findClassName(SSATmp* cls) {
-  assert(cls->isA(Type::Cls));
+  assertx(cls->isA(Type::Cls));
 
   if (cls->hasConstVal()) {
     return cls->clsVal()->preClass()->name();
@@ -125,7 +125,7 @@ const StringData* findClassName(SSATmp* cls) {
   IRInstruction* clsInst = cls->inst();
   if (clsInst->op() == LdCls || clsInst->op() == LdClsCached) {
     SSATmp* clsName = clsInst->src(0);
-    assert(clsName->isA(Type::Str));
+    assertx(clsName->isA(Type::Str));
     if (clsName->hasConstVal()) {
       return clsName->strVal();
     }
@@ -219,7 +219,7 @@ bool isDblQueryOp(Opcode opc) {
 }
 
 Opcode negateQueryOp(Opcode opc) {
-  assert(isQueryOp(opc));
+  assertx(isQueryOp(opc));
   switch (opc) {
   case Gt:                  return Lte;
   case Gte:                 return Lt;
@@ -253,7 +253,7 @@ Opcode negateQueryOp(Opcode opc) {
 }
 
 Opcode commuteQueryOp(Opcode opc) {
-  assert(isQueryOp(opc));
+  assertx(isQueryOp(opc));
   switch (opc) {
   case Gt:    return Lt;
   case Gte:   return Lte;
@@ -280,7 +280,7 @@ Opcode commuteQueryOp(Opcode opc) {
 }
 
 Opcode queryToIntQueryOp(Opcode opc) {
-  assert(isQueryOp(opc));
+  assertx(isQueryOp(opc));
   switch (opc) {
   case Gt:    return GtInt;
   case Gte:   return GteInt;
@@ -299,7 +299,7 @@ Opcode queryToIntQueryOp(Opcode opc) {
 }
 
 Opcode queryToDblQueryOp(Opcode opc) {
-  assert(isQueryOp(opc));
+  assertx(isQueryOp(opc));
   switch (opc) {
   case Gt:    return GtDbl;
   case Gte:   return GteDbl;

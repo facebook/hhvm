@@ -114,6 +114,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
@@ -123,8 +124,6 @@
 namespace HPHP {
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
-
-TRACE_SET_MOD(emitter)
 
 using uchar = unsigned char;
 
@@ -223,12 +222,10 @@ class FuncFinisher {
 
  public:
   FuncFinisher(EmitterVisitor* ev, Emitter& e, FuncEmitter* fe)
-    : m_ev(ev), m_e(e), m_fe(fe) {
-      TRACE(2, "FuncFinisher constructed: %s\n", m_fe->name->data());
-    }
+    : m_ev(ev), m_e(e), m_fe(fe)
+  {}
 
   ~FuncFinisher() {
-    TRACE(2, "Finishing func: %s\n", m_fe->name->data());
     m_ev->finishFunc(m_e, m_fe);
   }
 };
@@ -437,6 +434,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 
 #define PUSH_CV getEmitterVisitor().pushEvalStack(StackSym::C)
 #define PUSH_UV PUSH_CV
+#define PUSH_CUV PUSH_CV
 #define PUSH_VV getEmitterVisitor().pushEvalStack(StackSym::V)
 #define PUSH_AV getEmitterVisitor().pushEvalStack(StackSym::A)
 #define PUSH_RV getEmitterVisitor().pushEvalStack(StackSym::R)
@@ -663,6 +661,7 @@ static int32_t countStackValues(const std::vector<uchar>& immVec) {
 #undef PUSH_FOUR
 #undef PUSH_CV
 #undef PUSH_UV
+#undef PUSH_CUV
 #undef PUSH_VV
 #undef PUSH_HV
 #undef PUSH_AV
@@ -2615,15 +2614,6 @@ static StringData* getClassName(ExpressionPtr e) {
   ClassScopeRawPtr cls;
   if (e->isThis()) {
     cls = e->getOriginalClass();
-    if (TypePtr t = e->getAssertedType()) {
-      if (t->isSpecificObject()) {
-        AnalysisResultConstPtr ar = e->getScope()->getContainingProgram();
-        ClassScopeRawPtr c2 = t->getClass(ar, e->getScope());
-        if (c2 && c2->derivesFrom(ar, cls->getName(), true, false)) {
-          cls = c2;
-        }
-      }
-    }
   } else if (TypePtr t = e->getActualType()) {
     if (t->isSpecificObject()) {
       cls = t->getClass(e->getScope()->getContainingProgram(), e->getScope());
@@ -3711,19 +3701,17 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           }
           const std::string* clsName = nullptr;
           cls->getString(clsName);
-          int cType = Collection::stringToType(*clsName);
-          if (cType == Collection::PairType) {
-            if (nElms != 2) {
-              throw IncludeTimeFatalException(b,
-                "Pair objects must have exactly 2 elements");
-            }
-          } else if (cType == Collection::InvalidType) {
+          auto ct = stringToCollectionType(*clsName);
+          if (!ct.hasValue()) {
             throw IncludeTimeFatalException(b,
               "Cannot use collection initialization for non-collection class");
+          } else if (ct == CollectionType::Pair && nElms != 2) {
+            throw IncludeTimeFatalException(b,
+                "Pair objects must have exactly 2 elements");
           }
-          bool kvPairs = (cType == Collection::MapType ||
-                          cType == Collection::ImmMapType);
-          e.NewCol(cType, nElms);
+          bool kvPairs = (ct == CollectionType::Map ||
+                          ct == CollectionType::ImmMap);
+          e.NewCol(int(ct.value()), nElms);
           if (kvPairs) {
             for (int i = 0; i < nElms; i++) {
               ArrayPairExpressionPtr ap(
@@ -4646,7 +4634,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         // the new anonymous class, with the use variables as arguments.
         ExpressionListPtr valuesList(ce->getClosureValues());
         for (int i = 0; i < useCount; ++i) {
-          emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
+          ce->type() == ClosureType::Short
+            ? emitLambdaCaptureArg(e, (*valuesList)[i])
+            : emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
         }
 
         // The parser generated a unique name for the function,
@@ -5231,16 +5221,19 @@ EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
     permissiveKind = PassByRefKind::WarnOnCell;
   }
 
-  // this only happens for calls that have been morphed into bytecode
-  // e.g. idx(), abs(), strlen(), etc..
-  // It is to allow the following code to work
-  // function f(&$arg) {...}
-  // f(idx($array, 'key')); <- this fails otherwise
-  if (exp->allowCellByRef()) {
-    return PassByRefKind::AllowCell;
-  }
-
   switch (exp->getKindOf()) {
+    case Expression::KindOfSimpleFunctionCall: {
+      SimpleFunctionCallPtr sfc(
+        static_pointer_cast<SimpleFunctionCall>(exp));
+      // this only happens for calls that have been morphed into bytecode
+      // e.g. idx(), abs(), strlen(), etc..
+      // It is to allow the following code to work
+      // function f(&$arg) {...}
+      // f(idx($array, 'key')); <- this fails otherwise
+      if (sfc->hasBeenChangedToBytecode()) {
+        return PassByRefKind::AllowCell;
+      }
+    } break;
     case Expression::KindOfNewObjectExpression:
     case Expression::KindOfIncludeExpression:
     case Expression::KindOfSimpleVariable:
@@ -5294,6 +5287,26 @@ void EmitterVisitor::emitBuiltinCallArg(Emitter& e,
     emitCGet(e);
   }
   return;
+}
+
+static bool isNormalLocalVariable(const ExpressionPtr& expr) {
+  SimpleVariable* sv = static_cast<SimpleVariable*>(expr.get());
+  return (expr->is(Expression::KindOfSimpleVariable) &&
+          !sv->isSuperGlobal() &&
+          !sv->isThis());
+}
+
+void EmitterVisitor::emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp) {
+  // Constant folding may lead this to be not a var anymore,
+  // so we should not be emitting *GetL in this case.
+  if (!isNormalLocalVariable(exp)) {
+    visit(exp);
+    return;
+  }
+  auto const sv = static_cast<SimpleVariable*>(exp.get());
+  Id locId = m_curFunc->lookupVarId(makeStaticString(sv->getName()));
+  emitVirtualLocal(locId);
+  e.CUGetL(locId);
 }
 
 void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
@@ -7271,13 +7284,6 @@ void EmitterVisitor::emitVirtualLocal(int localId) {
 
   m_evalStack.push(StackSym::L);
   m_evalStack.setInt(localId);
-}
-
-static bool isNormalLocalVariable(const ExpressionPtr& expr) {
-  SimpleVariable* sv = static_cast<SimpleVariable*>(expr.get());
-  return (expr->is(Expression::KindOfSimpleVariable) &&
-          !sv->isSuperGlobal() &&
-          !sv->isThis());
 }
 
 template<class Expr>

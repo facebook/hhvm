@@ -1153,9 +1153,9 @@ To string conversions:
   off the stack given by S0, at `offset'. This instruction assumes it can take
   the values from the stack without increfing them.
 
-| NewCol, D(Obj), C(Int) C(Int), PRc
+| NewCol<type,size>, D(Obj), NA, PRc
 
-  Create a new collection, with type S0 and size S1.
+  Create a new collection of `type' with space for `size' elements reserved.
 
 | Clone, D(Obj), S(Obj), PRc|Er
 
@@ -1222,12 +1222,15 @@ To string conversions:
 
   Unlinks a frame constructed by DefInlineFP.
 
-| CallArray, D(StkPtr), S(StkPtr) S(FramePtr), Er
+| CallArray<spOffset,returnOff,after,destroyLocals>, D(StkPtr),
+|                                                    S(StkPtr) S(FramePtr),
+|                                                    Er
 
-  Invoke function corresponding to the current FPI with array args. S0 points
-  to the stack resulting after the ActRec for the function and the array of its
-  arguments is pushed. CallArray pops the array off the stack, pushes the
-  elements of the array as arguments, and invokes the function in the ActRec.
+  Invoke function corresponding to the current FPI with array args. S0+spOffset
+  points to the stack resulting after the ActRec for the function and the array
+  of its arguments is pushed. CallArray pops the array off the stack, pushes
+  the elements of the array as arguments, and invokes the function in the
+  ActRec.
 
 | Call<offset,numParams,returnOff,funcd,destroyLocals>, D(StkPtr),
 |                                                       S(StkPtr) S(FramePtr),
@@ -1268,18 +1271,19 @@ To string conversions:
 
 | LdRetAddr, D(RetAddr), S(FramePtr), NF
 
-  Load the return address off of the activation record pointed to by S0. The
-  return address D is normally provided to a RetCtrl. Between a LdRetAddr and a
-  RetCtrl, a FreeActRec is normally emitted to free the activation record S0.
-  This is the reason why LdRetAddr is a separate instruction from RetCtrl.
+  Load the saved return address from S0 into D.
 
-| RetCtrl<spOff,suspendingResumed>, ND, S(StkPtr) S(FramePtr) S(RetAddr), T
+| RetCtrl<spOff,suspendingResumed>, ND, S(StkPtr) S(FramePtr), T
 
-  Ensure that S0 + `spOff' (in cells) is stored in rVmSp and S1 is stored in
-  rVmFp and then execute a hardware procedure-return using the return address
-  specified by S2.  `suspendingResumed' indicates whether this instruction is
-  actually returning from a function or suspending a resumable (as in a yield
-  or a suspended await).
+  Ensure that S0 + `spOff' (in cells) is stored in rVmSp, S1's saved frame
+  pointer is stored in rVmFp, and return to the saved return address in
+  S1. `suspendingResumed' indicates when this instruction is suspending a
+  resumable rather than performing a normal function return.
+
+| AsyncRetCtrl<spOff>, ND, S(StkPtr) S(FramePtr) S(RetAddr), T
+
+  Ensure that S0 + `spOff` (in cells) is stored in rVmSp, S1 is stored in
+  rVmFp, and return to the address in S2.
 
 | StRetVal, ND, S(FramePtr) S(Gen), CRc
 
@@ -1619,10 +1623,14 @@ To string conversions:
 
   Has the effects of the php + operator on the two source arrays.
 
-| AKExists, D(Bool), S(Cell) S(Cell), NF
+| AKExistsArr, D(Bool), S(Arr) S(InitNull,Int,Str), NF
 
-  Has the effects of array_key_exists(S0, S1). Note that S0 does not need to be
-  an array---if it is an Obj the ArrayAccess API will be used, etc.
+  Has the effects of array_key_exists(S0, S1).
+
+| AKExistsObj, D(Bool), S(Obj) S(InitNull,Int,Str), Er
+
+  Has the effects of array_key_exists(S0, S1) on an object S0. This either does
+  collection accesses, or uses the ArrayAccess API.
 
 | ArrayIdx, D(Cell), S(Arr) S(Int,Str) S(Cell), PRc
 
@@ -1908,12 +1916,9 @@ To string conversions:
   Assert that S0 is of type T at runtime. If the assertion fails, execution is
   aborted via a hardware exception.
 
-| DbgAssertRetAddr, ND, NA, NF
+| RBTraceEntry, ND, NA, NF
 
-  Assert that the current hardware return address is the expected value. If the
-  assertion fails, execution is aborted via a hardware exception.
-
-| RBTrace, ND, NA, NF
+| RBTraceMsg, ND, NA, NF
 
   Ring buffer tracing.
 
@@ -2082,15 +2087,15 @@ fields of that struct for holding intermediate values.
   calls.)  If it is not a defining BaseG it can also return the
   init_null_variant, so for now it returns a PtrToRMembCell.
 
-| PropX, D(PtrToMemGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), Er
+| PropX, D(PtrToMembGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), Er
 
   Lookup intermediate property in S0, with key S1.
 
-| PropQ, D(PtrToMemGen), S(Obj,PtrToGen) S(StaticStr) S(PtrToMISGen), Er
+| PropQ, D(PtrToMembGen), S(Obj,PtrToGen) S(StaticStr) S(PtrToMISGen), Er
 
   A nullsafe version of PropX, returns null if the base S0 is null.
 
-| PropDX, D(PtrToMemGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), MProp|Er
+| PropDX, D(PtrToMembGen), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), MProp|Er
 
   Like PropX, but used for intermediate element lookups that may modify the
   base.
@@ -2143,29 +2148,29 @@ fields of that struct for holding intermediate values.
 
   Returns true iff the property with key S1 in base S0 is set.
 
-| ElemX, D(PtrToMemGen), S(PtrToGen) S(Cell) S(PtrToMISGen), Er
+| ElemX, D(PtrToMembGen), S(PtrToGen) S(Cell) S(PtrToMISGen), Er
 
   Get intermediate element with key S1 from base S0. The base will not be
   modified.
 
-| ElemArray, D(PtrToMemGen), S(PtrToGen) S(Int,Str), Er
+| ElemArray, D(PtrToMembGen), S(PtrToGen) S(Int,Str), Er
 
-| ElemArrayW, D(PtrToMemGen), S(PtrToGen) S(Int,Str), Er
+| ElemArrayW, D(PtrToMembGen), S(PtrToGen) S(Int,Str), Er
 
   Similar to ElemX, but assumes the base S0 is an array and the key S1 is an
   int/str.  The ElemArrayW version is for Warn member instrs.
 
-| ElemDX, D(PtrToMemGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|Er
+| ElemDX, D(PtrToMembGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|Er
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base.
 
-| ElemUX, D(PtrToMemGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|Er
+| ElemUX, D(PtrToMembGen), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|Er
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base as part of an unset operation.
 
-| ArrayGet, D(Cell), S(Arr) S(Int,Str), PRc|Er
+| ArrayGet, DArrElem, S(Arr) S(Int,Str), PRc|Er
 
   Get element with key S1 from base S0.
 
@@ -2311,20 +2316,9 @@ fields of that struct for holding intermediate values.
   Checks that the index in S1 is within the bounds of the packed array in S0.
   Branches to B if the index is out of bounds.
 
-| CheckTypePackedArrayElem<T>, ND, AK(Packed) S(Int), B
+| LdPackedArrayElemAddr<T>, DParamPtr(Arr), AK(Packed) S(Int), NF
 
-  If the array element at S0[S1] is not type T, take the branch.
-
-| IsPackedArrayElemNull, D(Bool), AK(Packed) S(Int), NF
-
-  Returns true if the element at index S1 of the packed array in S0 is not
-  null.
-
-| LdPackedArrayElem<T>, DArrElem, AK(Packed) S(Int), NF
-
-  Loads the element of the packed array in S0 at index S1. If the type param T
-  is specified, the destination type intersects it with whatever we'd know from
-  the type of S0.
+  Load the address of the element at index S1 of the packed array in S0.
 
 | LdVectorSize, D(Int), S(Obj), NF
 

@@ -1,0 +1,1 @@
+Fatal error: C cannot inherit the type constant T from I, because it was previously inherited as a constant from P in %stest/slow/class_type_constant/type_constant13.php on line 11

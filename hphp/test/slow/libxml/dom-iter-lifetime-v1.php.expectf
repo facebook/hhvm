@@ -1,0 +1,6 @@
+string(3) "buz"
+string(3) "xen"
+
+Warning: Invalid State Error in %s/dom-iter-lifetime-v1.php on line 20
+NULL
+string(11) "DOMDocument"

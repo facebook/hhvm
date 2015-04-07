@@ -22,9 +22,10 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/struct-array.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/resumable.h"
-#include "hphp/runtime/ext/asio/await_all_wait_handle.h"
+#include "hphp/runtime/ext/asio/await-all-wait-handle.h"
 
 namespace HPHP {
 
@@ -45,7 +46,10 @@ struct Header {
     StringData str_;
     ArrayData arr_;
     MixedArray mixed_;
+    StructArray struct_;
     APCLocalArray apc_;
+    ProxyArray proxy_;
+    GlobalsArray globals_;
     ObjectData obj_;
     ResourceData res_;
     RefData ref_;
@@ -88,6 +92,13 @@ inline size_t Header::size() const {
       return str_.heapSize();
     case HeaderKind::Object:
     case HeaderKind::ResumableObj:
+    case HeaderKind::Vector:
+    case HeaderKind::Map:
+    case HeaderKind::Set:
+    case HeaderKind::Pair:
+    case HeaderKind::ImmVector:
+    case HeaderKind::ImmMap:
+    case HeaderKind::ImmSet:
       // [ObjectData][subclass][props]
       return obj_.heapSize();
     case HeaderKind::AwaitAllWH:
@@ -207,6 +218,19 @@ struct BigHeap::iterator {
 template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
   for (auto i = begin(), lim = end(); i != lim;) {
     auto h = &*i; ++i;
+    if (h->kind_ == HeaderKind::BigObj) {
+      // skip BigNode
+      h = reinterpret_cast<Header*>((&h->big_)+1);
+      if (h->kind_ == HeaderKind::Debug) {
+        // skip DebugHeader
+        h = reinterpret_cast<Header*>((&h->debug_)+1);
+      }
+    }
+    if (h->kind_ == HeaderKind::Debug ||
+        h->kind_ == HeaderKind::Hole) {
+      // no valid pointer can point here.
+      continue;
+    }
     fn(h);
   }
 }
@@ -219,6 +243,13 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
       case HeaderKind::Object:
       case HeaderKind::ResumableObj:
       case HeaderKind::AwaitAllWH:
+      case HeaderKind::Vector:
+      case HeaderKind::Map:
+      case HeaderKind::Set:
+      case HeaderKind::Pair:
+      case HeaderKind::ImmVector:
+      case HeaderKind::ImmMap:
+      case HeaderKind::ImmSet:
         ptrs.push_back(&i->obj_);
         break;
       case HeaderKind::Resumable:
@@ -228,8 +259,11 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
         ptrs.push_back(Native::obj(&i->native_));
         break;
       case HeaderKind::BigObj: {
-        Header* h = reinterpret_cast<Header*>(&i->big_ + 1);
-        if (h->kind() == HeaderKind::Object) {
+        auto h = reinterpret_cast<Header*>(&i->big_ + 1);
+        if (h->kind() == HeaderKind::Debug) {
+          h = reinterpret_cast<Header*>(&h->debug_ + 1);
+        }
+        if (isObjectKind(h->kind())) {
           ptrs.push_back(reinterpret_cast<ObjectData*>(h));
           break;
         }

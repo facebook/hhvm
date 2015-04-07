@@ -418,7 +418,7 @@ public:
   F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(bool, JitTimer,                    kJitTimerDefault)                \
-  F(bool, RecordSubprocessTimes,       false)                           \
+  F(bool, RecordSubprocessTimes,       true)                            \
   F(bool, AllowHhas,                   false)                           \
   /* CheckReturnTypeHints:
      0 - No checks or enforcement for return type hints.
@@ -447,6 +447,7 @@ public:
   F(bool, PerfPidMap,                  true)                            \
   F(bool, PerfDataMap,                 false)                           \
   F(bool, KeepPerfPidMap,              false)                           \
+  F(int32_t, PerfRelocate,             0)                               \
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      10 << 20)                        \
   F(bool, ProfileBC,                   false)                           \
@@ -474,12 +475,10 @@ public:
   F(bool, JitDisabledByHphpd,          false)                           \
   F(bool, JitTransCounters,            false)                           \
   F(bool, JitPseudomain,               jitPseudomainDefault())          \
-  F(bool, HHIRBytecodeControlFlow,     controlFlowDefault())            \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
-  F(bool, HHIRRefcountOpts,            refcountOptsDefault())           \
+  F(bool, HHIRRefcountOpts,            true)                            \
   F(bool, HHIRRefcountOptsAlwaysSink,  false)                           \
-  F(bool, HHIRExtraOptPass,            true)                            \
   F(uint32_t, HHIRNumFreeRegs,         64)                              \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
   F(uint32_t, HHIRInliningMaxCost,     13)                              \
@@ -500,8 +499,8 @@ public:
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
   F(bool, HHIRAllocSIMDRegs,           true)                            \
+  F(bool, HHIRStressSpill,             false)                           \
   /* Region compiler flags */                                           \
-  F(bool,     JitLoops,                loopsDefault())                  \
   F(string,   JitRegionSelector,       regionSelectorDefault())         \
   F(bool,     JitPGO,                  pgoDefault())                    \
   F(string,   JitPGORegionSelector,    pgoRegionSelectorDefault())      \
@@ -511,6 +510,7 @@ public:
   F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
   F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
   F(bool,     JitPGOArrayGetStress,    false)                           \
+  F(bool,     JitLoops,                loopsDefault())                  \
   F(uint32_t, HotFuncCount,            4100)                            \
   F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             true)                            \

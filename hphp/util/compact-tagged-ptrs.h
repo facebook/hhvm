@@ -42,7 +42,12 @@ namespace HPHP {
 
 template<class T, class TagType = uint32_t>
 struct CompactTaggedPtr {
+  using Opaque = uintptr_t;
   CompactTaggedPtr() { set(TagType{}, 0); }
+
+  // for save and restore
+  explicit CompactTaggedPtr(Opaque v) : m_data(v) {}
+  Opaque getOpaque() const { return m_data; }
 
   void set(TagType ttag, T* ptr) {
     auto const tag = static_cast<uint64_t>(ttag);
@@ -68,7 +73,13 @@ private:
 
 template<class T, class TagType = uint32_t>
 struct CompactTaggedPtr {
+  using Opaque = std::pair<T*,uint32_t>;
+
   CompactTaggedPtr() { set(TagType{}, 0); }
+
+  // for save and restore
+  explicit CompactTaggedPtr(Opaque v) : m_ptr(v.first), m_size(v.second) {}
+  Opaque getOpaque() const { return std::make_pair(m_ptr, m_size); }
 
   void set(TagType ttag, T* ptr) {
     auto const tag = static_cast<uint32_t>(ttag);

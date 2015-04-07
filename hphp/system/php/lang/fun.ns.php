@@ -9,13 +9,19 @@ namespace __SystemLib {
       $this->class = $class;
       $this->method = $method;
     }
-    public function __invoke($x) {
+    public function __invoke($x, ...$args) {
       invariant(
         $x instanceof $this->class,
         'object must be an instance of ('.$this->class.'), instead it is ('.
         (\is_object($x) ? \get_class($x) : \gettype($x)).')'
       );
-      return $x->{$this->method}();
+      return $x->{$this->method}(...$args);
+    }
+    public function getClassName(): string {
+      return $this->class;
+    }
+    public function getMethodName(): string {
+      return $this->method;
     }
   };
 }

@@ -66,25 +66,25 @@ enum class SimpleOp {
  * Minstr Translation State.  Member instructions are complex enough that we
  * need our own state environment while processing one.
  *
- * This is implicitly convertible to HTS so you can use ht-internal functions
- * on it.  Effectively MTS <: HTS (except the dot operator).
+ * This is implicitly convertible to IRGS so you can use ht-internal functions
+ * on it.  Effectively MTS <: IRGS (except the dot operator).
  */
 struct MTS {
-  explicit MTS(HTS& hts, Op effectiveOp)
-    : hts(hts)
+  explicit MTS(IRGS& irgs, Op effectiveOp)
+    : irgs(irgs)
     , op(effectiveOp)
-    , immVec(hts.currentNormalizedInstruction->immVec)
-    , immVecM(hts.currentNormalizedInstruction->immVecM)
-    , ni(*hts.currentNormalizedInstruction)
-    , irb(*hts.irb)
-    , unit(hts.unit)
+    , immVec(irgs.currentNormalizedInstruction->immVec)
+    , immVecM(irgs.currentNormalizedInstruction->immVecM)
+    , ni(*irgs.currentNormalizedInstruction)
+    , irb(*irgs.irb)
+    , unit(irgs.unit)
     , mii(getMInstrInfo(effectiveOp))
     , iInd(mii.valCount())
   {}
-  /* implicit */ operator HTS&() { return hts; }
-  /* implicit */ operator const HTS&() const { return hts; }
+  /* implicit */ operator IRGS&() { return irgs; }
+  /* implicit */ operator const IRGS&() const { return irgs; }
 
-  HTS& hts;
+  IRGS& irgs;
   Op op;
   ImmVector immVec;
   jit::vector<MemberCode> immVecM;
@@ -215,7 +215,7 @@ void specializeBaseIfPossible(MTS& env, Type baseType) {
 // Returns a pointer to the base of the current MInstrState struct, or a null
 // pointer if it's not needed.
 SSATmp* misPtr(MTS& env) {
-  assert(env.base.value && "misPtr called before emitBaseOp");
+  assertx(env.base.value && "misPtr called before emitBaseOp");
   if (env.needMIS) return env.misBase;
   return cns(env, Type::cns(nullptr, Type::PtrToMISUninit));
 }
@@ -223,18 +223,18 @@ SSATmp* misPtr(MTS& env) {
 // Returns a pointer to a particular field in the MInstrState structure.  Must
 // not be called if !env.needsMIS.
 SSATmp* misLea(MTS& env, ptrdiff_t offset) {
-  assert(env.needMIS);
+  assertx(env.needMIS);
   return gen(env, LdMIStateAddr, env.misBase,
     cns(env, safe_cast<int32_t>(offset)));
 }
 
-SSATmp* ptrToInitNull(HTS& env) {
+SSATmp* ptrToInitNull(IRGS& env) {
   // Nothing is allowed to write anything to the init null variant, so this
   // inner type is always true.
   return cns(env, Type::cns(&init_null_variant, Type::PtrToMembInitNull));
 }
 
-SSATmp* ptrToUninit(HTS& env) {
+SSATmp* ptrToUninit(IRGS& env) {
   // Nothing can write to the uninit null variant either, so the inner type
   // here is also always true.
   return cns(env, Type::cns(&null_variant, Type::PtrToMembUninit));
@@ -408,7 +408,7 @@ SSATmp* getInput(MTS& env, unsigned i, TypeConstraint tc) {
   auto const& dl = *env.ni.inputs[i];
   auto const& l = dl.location;
 
-  assert(!!env.stackInputs.count(i) == (l.space == Location::Stack));
+  assertx(!!env.stackInputs.count(i) == (l.space == Location::Stack));
   switch (l.space) {
     case Location::Stack:
       return top(env, Type::StkElem, env.stackInputs[i], tc);
@@ -443,7 +443,7 @@ void setBase(MTS& env,
 }
 
 SSATmp* getBase(MTS& env, TypeConstraint tc) {
-  assert(env.iInd == env.mii.valCount());
+  assertx(env.iInd == env.mii.valCount());
   return getInput(env, env.iInd, tc);
 }
 
@@ -451,7 +451,7 @@ SSATmp* getKey(MTS& env) {
   auto key = getInput(env, env.iInd, DataTypeSpecific);
   auto const keyType = key->type();
 
-  assert(keyType <= Type::Cell || keyType <= Type::BoxedCell);
+  assertx(keyType <= Type::Cell || keyType <= Type::BoxedCell);
   if (keyType <= Type::BoxedCell) {
     key = gen(env, LdRef, Type::InitCell, key);
   }
@@ -460,7 +460,7 @@ SSATmp* getKey(MTS& env) {
 
 SSATmp* getValue(MTS& env) {
   // If an instruction takes an rhs, it's always input 0.
-  assert(env.mii.valCount() == 1);
+  assertx(env.mii.valCount() == 1);
   const int kValIdx = 0;
   return getInput(env, kValIdx, DataTypeSpecific);
 }
@@ -646,12 +646,12 @@ void emitBaseLCR(MTS& env) {
       ).ptr(Ptr::Frame)
     );
   } else {
-    assert(baseDL.location.space == Location::Stack);
+    assertx(baseDL.location.space == Location::Stack);
     // Make sure the stack is clean before getting a pointer to one of its
     // elements.
     spillStack(env);
     env.irb.exceptionStackBoundary();
-    assert(env.stackInputs.count(env.iInd));
+    assertx(env.stackInputs.count(env.iInd));
     auto const stkType = env.irb.stackType(
       offsetFromIRSP(env, env.stackInputs[env.iInd]),
       DataTypeGeneric);
@@ -661,8 +661,8 @@ void emitBaseLCR(MTS& env) {
       stkType.ptr(Ptr::Stk)
     );
   }
-  assert(env.base.value->type() <= Type::PtrToGen);
-  assert(env.base.type <= Type::PtrToGen);
+  assertx(env.base.value->type() <= Type::PtrToGen);
+  assertx(env.base.type <= Type::PtrToGen);
 
   // TODO(t2598894): We do this for consistency with the old guard relaxation
   // code, but may change it in the future.
@@ -776,9 +776,9 @@ SSATmp* checkInitProp(MTS& env,
                       bool doWarn,
                       bool doDefine) {
   auto const key = getKey(env);
-  assert(key->isA(Type::StaticStr));
-  assert(baseAsObj->isA(Type::Obj));
-  assert(propAddr->type() <= Type::PtrToGen);
+  assertx(key->isA(Type::StaticStr));
+  assertx(baseAsObj->isA(Type::Obj));
+  assertx(propAddr->type() <= Type::PtrToGen);
 
   auto const needsCheck =
     Type::Uninit <= propAddr->type().deref() &&
@@ -814,7 +814,7 @@ SSATmp* checkInitProp(MTS& env,
 }
 
 void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
-  assert(!(mia & MIA_warn) || !(mia & MIA_unset));
+  assertx(!(mia & MIA_warn) || !(mia & MIA_unset));
   const bool doWarn   = mia & MIA_warn;
   const bool doDefine = mia & MIA_define || mia & MIA_unset;
 
@@ -823,7 +823,7 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
   SCOPE_EXIT {
     // After this function, m_base is either a pointer to init_null_variant or
     // a property in the object that we've verified isn't uninit.
-    assert(env.base.type <= Type::PtrToGen);
+    assertx(env.base.type <= Type::PtrToGen);
   };
 
   /*
@@ -1011,7 +1011,7 @@ void emitElem(MTS& env) {
     return;
   }
 
-  assert(!(define && unset));
+  assertx(!(define && unset));
   if (unset) {
     auto const uninit = ptrToUninit(env);
     auto const baseType = env.base.type.strip();
@@ -1069,7 +1069,7 @@ void emitIntermediateOp(MTS& env) {
       ++env.iInd;
       break;
     case MW:
-      assert(env.mii.newElem());
+      assertx(env.mii.newElem());
       emitNewElem(env);
       break;
     case InvalidMemberCode:
@@ -1085,6 +1085,10 @@ bool needFirstRatchet(const MTS& env) {
     if (mcodeIsElem(env.immVecM[0])) return false;
     return true;
   }
+
+  // Using the specialized type here is safe because we only elide the first
+  // ratchet if the first member instruction is a property access, in which
+  // case we have constrained the specialized type of the base in emitBaseLCR
   if (firstTy < Type::Obj && firstTy.clsSpec()) {
     auto const klass = firstTy.clsSpec().cls();
     auto const no_overrides = AttrNoOverrideMagicGet|
@@ -1096,6 +1100,15 @@ bool needFirstRatchet(const MTS& env) {
       // contains Uninit---if not we can still return false.  See
       // mightCallMagicPropMethod.
       return true;
+    }
+
+    if (klass->hasNativePropHandler()) {
+      const Class* cls = nullptr;
+      auto propInfo = getPropertyOffset(env.ni, curClass(env), cls, env.mii,
+                                        0, env.mii.valCount() + 1);
+      // For native properties if the property is declared then we know don't
+      // call the native handler
+      if (propInfo.offset == -1) return true;
     }
     if (mcodeIsProp(env.immVecM[0])) return false;
     return true;
@@ -1183,7 +1196,7 @@ void emitRatchetRefs(MTS& env) {
       gen(env, StMem, misRefAddr, cns(env, Type::Uninit));
 
       // Adjust base pointer.
-      assert(env.base.type <= Type::PtrToGen);
+      assertx(env.base.type <= Type::PtrToGen);
       return misRef2Addr;
     },
     [&] { // Taken: tvRef is Uninit. Do nothing.
@@ -1218,7 +1231,7 @@ void emitMPre(MTS& env) {
     // exception paths from here out will need to clean up the tvRef{,2}
     // storage, so install a custom catch creator.
     auto const penv = &env;
-    env.hts.catchCreator = [penv] { return makeMISCatch(*penv); };
+    env.irgs.catchCreator = [penv] { return makeMISCatch(*penv); };
   }
 
   /*
@@ -1253,7 +1266,7 @@ void numberStackInputs(MTS& env) {
     const Location& l = env.ni.inputs[i]->location;
     switch (l.space) {
       case Location::Stack:
-        assert(stackIdx >= 0);
+        assertx(stackIdx >= 0);
         env.stackInputs[i] = BCSPOffset{stackIdx--};
         break;
 
@@ -1261,12 +1274,12 @@ void numberStackInputs(MTS& env) {
         break;
     }
   }
-  assert(stackIdx == (stackRhs ? 0 : -1));
+  assertx(stackIdx == (stackRhs ? 0 : -1));
 
   if (stackRhs) {
     // If this instruction does have an RHS, it will be input 0 at
     // stack offset 0.
-    assert(env.mii.valCount() == 1);
+    assertx(env.mii.valCount() == 1);
     env.stackInputs[0] = BCSPOffset{0};
   }
 }
@@ -1275,19 +1288,39 @@ void numberStackInputs(MTS& env) {
 // "Simple op" handlers.
 
 SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
-  assert(base->isA(Type::Arr) &&
-         base->type().arrSpec().kind() == ArrayData::kPackedKind);
+  assertx(base->isA(Type::Arr) &&
+          base->type().arrSpec().kind() == ArrayData::kPackedKind &&
+          key->isA(Type::Int));
 
   auto doLdElem = [&] {
-    auto res = gen(env, LdPackedArrayElem, base, key);
+    auto const type = packedArrayElemType(base, key).ptr(Ptr::Arr);
+    auto addr = gen(env, LdPackedArrayElemAddr, type, base, key);
+    auto res = gen(env, LdMem, type.deref(), addr);
     auto unboxed = unbox(env, res, nullptr);
     gen(env, IncRef, unboxed);
     return unboxed;
   };
 
-  if (key->hasConstVal() &&
-      packedArrayBoundsCheckUnnecessary(base->type(), key->intVal())) {
-    return doLdElem();
+  if (key->hasConstVal()) {
+    int64_t idx = key->intVal();
+    if (base->hasConstVal()) {
+      const ArrayData* arr = base->arrVal();
+      if (idx < 0 || idx >= arr->size()) {
+        gen(env, RaiseArrayIndexNotice, key);
+        return cns(env, Type::InitNull);
+      }
+      auto const value = arr->nvGet(idx);
+      return cns(env, *value);
+    }
+
+    auto const check = packedArrayBoundsStaticCheck(base->type(), idx);
+    if (check.hasValue()) {
+      if (check.value()) {
+        return doLdElem();
+      }
+      gen(env, RaiseArrayIndexNotice, key);
+      return cns(env, Type::InitNull);
+    }
   }
 
   return cond(
@@ -1308,11 +1341,11 @@ SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
 }
 
 SSATmp* emitStructArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
-  assert(base->isA(Type::Arr));
-  assert(base->type().arrSpec().kind() == ArrayData::kStructKind);
-  assert(base->type().arrSpec().shape());
-  assert(key->hasConstVal(Type::Str));
-  assert(key->strVal()->isStatic());
+  assertx(base->isA(Type::Arr));
+  assertx(base->type().arrSpec().kind() == ArrayData::kStructKind);
+  assertx(base->type().arrSpec().shape());
+  assertx(key->hasConstVal(Type::Str));
+  assertx(key->strVal()->isStatic());
 
   const auto keyStr = key->strVal();
   const auto shape = base->type().arrSpec().shape();
@@ -1334,7 +1367,7 @@ SSATmp* emitArrayGet(MTS& env, SSATmp* key) {
 }
 
 void emitProfiledPackedArrayGet(MTS& env, SSATmp* key) {
-  TargetProfile<NonPackedArrayProfile> prof(env.hts.context,
+  TargetProfile<NonPackedArrayProfile> prof(env.irgs.context,
                                             env.irb.curMarker(),
                                             s_PackedArray.get());
   if (prof.profiling()) {
@@ -1374,7 +1407,7 @@ void emitProfiledPackedArrayGet(MTS& env, SSATmp* key) {
 }
 
 void emitProfiledStructArrayGet(MTS& env, SSATmp* key) {
-  TargetProfile<StructArrayProfile> prof(env.hts.context,
+  TargetProfile<StructArrayProfile> prof(env.irgs.context,
                                          env.irb.curMarker(),
                                          s_StructArray.get());
   if (prof.profiling()) {
@@ -1423,12 +1456,12 @@ void emitProfiledStructArrayGet(MTS& env, SSATmp* key) {
 }
 
 void emitStringGet(MTS& env, SSATmp* key) {
-  assert(key->isA(Type::Int));
+  assertx(key->isA(Type::Int));
   env.result = gen(env, StringGet, env.base.value, key);
 }
 
 void emitVectorGet(MTS& env, SSATmp* key) {
-  assert(key->isA(Type::Int));
+  assertx(key->isA(Type::Int));
   if (key->hasConstVal() && key->intVal() < 0) {
     PUNT(emitVectorGet);
   }
@@ -1443,7 +1476,7 @@ void emitVectorGet(MTS& env, SSATmp* key) {
 }
 
 void emitPairGet(MTS& env, SSATmp* key) {
-  assert(key->isA(Type::Int));
+  assertx(key->isA(Type::Int));
   static_assert(sizeof(TypedValue) == 16,
                 "TypedValue size expected to be 16 bytes");
   if (key->hasConstVal()) {
@@ -1465,8 +1498,34 @@ void emitPairGet(MTS& env, SSATmp* key) {
 }
 
 void emitPackedArrayIsset(MTS& env) {
-  assert(env.base.type.arrSpec().kind() == ArrayData::kPackedKind);
+  assertx(env.base.type.arrSpec().kind() == ArrayData::kPackedKind);
   auto const key = getKey(env);
+
+  auto const type = packedArrayElemType(env.base.value, key);
+  if (type <= Type::Null) {             // not set, or null
+    env.result = cns(env, false);
+    return;
+  }
+
+  if (key->hasConstVal()) {
+    auto const idx = key->intVal();
+    auto const check = packedArrayBoundsStaticCheck(env.base.type, idx);
+    if (check.hasValue()) {
+      if (check.value()) {
+        if (!type.maybe(Type::Null)) {
+          env.result = cns(env, true);
+          return;
+        }
+        auto const elemAddr = gen(env, LdPackedArrayElemAddr,
+                                  type.ptr(Ptr::Arr), env.base.value, key);
+        env.result = gen(env, IsNTypeMem, Type::Null, elemAddr);
+      } else {
+        env.result = cns(env, false);
+      }
+      return;
+    }
+  }
+
   env.result = cond(
     env,
     0,
@@ -1474,7 +1533,9 @@ void emitPackedArrayIsset(MTS& env) {
       gen(env, CheckPackedArrayBounds, taken, env.base.value, key);
     },
     [&] { // Next:
-      return gen(env, IsPackedArrayElemNull, env.base.value, key);
+      auto const elemAddr = gen(env, LdPackedArrayElemAddr,
+                                type.ptr(Ptr::Arr), env.base.value, key);
+      return gen(env, IsNTypeMem, Type::Null, elemAddr);
     },
     [&] { // Taken:
       return cns(env, false);
@@ -1483,10 +1544,10 @@ void emitPackedArrayIsset(MTS& env) {
 }
 
 void emitArraySet(MTS& env, SSATmp* key, SSATmp* value) {
-  assert(env.iInd == env.mii.valCount() + 1);
+  assertx(env.iInd == env.mii.valCount() + 1);
   const int baseStkIdx = env.mii.valCount();
-  assert(key->type() <= Type::Cell);
-  assert(value->type() <= Type::Cell);
+  assertx(key->type() <= Type::Cell);
+  assertx(value->type() <= Type::Cell);
 
   auto const& base = *env.ni.inputs[env.mii.valCount()];
   bool const setRef = base.rtt <= Type::BoxedCell;
@@ -1495,7 +1556,7 @@ void emitArraySet(MTS& env, SSATmp* key, SSATmp* value) {
   // call destructors so it has a sync point in nativecalls.cpp, but exceptions
   // are swallowed at destructor boundaries right now: #2182869.
   if (setRef) {
-    assert(base.location.space == Location::Local ||
+    assertx(base.location.space == Location::Local ||
            base.location.space == Location::Stack);
     auto const box = getInput(env, baseStkIdx, DataTypeSpecific);
     gen(env, ArraySetRef, env.base.value, key, value, box);
@@ -1529,7 +1590,7 @@ void emitArraySet(MTS& env, SSATmp* key, SSATmp* value) {
 }
 
 void emitVectorSet(MTS& env, SSATmp* key, SSATmp* value) {
-  assert(key->isA(Type::Int));
+  assertx(key->isA(Type::Int));
   if (key->hasConstVal() && key->intVal() < 0) {
     PUNT(emitVectorSet); // will throw
   }
@@ -1820,7 +1881,7 @@ void emitSetElem(MTS& env) {
       env.result = result;
       gen(env, DecRef, value);
     } else {
-      assert(t == (Type::CountedStr | Type::Nullptr));
+      assertx(t == (Type::CountedStr | Type::Nullptr));
       // Base might be a string. Assume the result is value, then inform
       // emitMPost that it needs to test the actual result.
       env.result = value;
@@ -1925,7 +1986,7 @@ void emitFinalMOp(MTS& env) {
     break;
 
   case MW:
-    assert(env.mii.getAttr(MW) & MIA_final);
+    assertx(env.mii.getAttr(MW) & MIA_final);
     static MemFun newOps[] = {
 #   define MII(instr, attrs, bS, iS, vC, fN) \
       &emit##fN,
@@ -2069,7 +2130,7 @@ void emitMPost(MTS& env) {
   if (env.result) {
     push(env, env.result);
   } else {
-    assert(env.op == Op::UnsetM ||
+    assertx(env.op == Op::UnsetM ||
            env.op == Op::SetWithRefLM ||
            env.op == Op::SetWithRefRM);
   }
@@ -2079,13 +2140,13 @@ void emitMPost(MTS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void implMInstr(HTS& hts, Op effectiveOp) {
-  if (curFunc(hts)->isPseudoMain()) {
-    interpOne(hts, *hts.currentNormalizedInstruction);
+void implMInstr(IRGS& irgs, Op effectiveOp) {
+  if (curFunc(irgs)->isPseudoMain()) {
+    interpOne(irgs, *irgs.currentNormalizedInstruction);
     return;
   }
 
-  auto env = MTS { hts, effectiveOp };
+  auto env = MTS { irgs, effectiveOp };
   numberStackInputs(env); // Assign stack slots to our stack inputs
   emitMPre(env);          // Emit the base and every intermediate op
   emitFinalMOp(env);      // Emit the final operation
@@ -2096,21 +2157,21 @@ void implMInstr(HTS& hts, Op effectiveOp) {
 
 }
 
-void emitBindM(HTS& env, int)                 { implMInstr(env, Op::BindM); }
-void emitCGetM(HTS& env, int)                 { implMInstr(env, Op::CGetM); }
-void emitEmptyM(HTS& env, int)                { implMInstr(env, Op::EmptyM); }
-void emitIncDecM(HTS& env, IncDecOp, int)     { implMInstr(env, Op::IncDecM); }
-void emitIssetM(HTS& env, int)                { implMInstr(env, Op::IssetM); }
-void emitSetM(HTS& env, int)                  { implMInstr(env, Op::SetM); }
-void emitSetOpM(HTS& env, SetOpOp, int)       { implMInstr(env, Op::SetOpM); }
-void emitUnsetM(HTS& env, int)                { implMInstr(env, Op::UnsetM); }
-void emitVGetM(HTS& env, int)                 { implMInstr(env, Op::VGetM); }
+void emitBindM(IRGS& env, int)                 { implMInstr(env, Op::BindM); }
+void emitCGetM(IRGS& env, int)                 { implMInstr(env, Op::CGetM); }
+void emitEmptyM(IRGS& env, int)                { implMInstr(env, Op::EmptyM); }
+void emitIncDecM(IRGS& env, IncDecOp, int)     { implMInstr(env, Op::IncDecM); }
+void emitIssetM(IRGS& env, int)                { implMInstr(env, Op::IssetM); }
+void emitSetM(IRGS& env, int)                  { implMInstr(env, Op::SetM); }
+void emitSetOpM(IRGS& env, SetOpOp, int)       { implMInstr(env, Op::SetOpM); }
+void emitUnsetM(IRGS& env, int)                { implMInstr(env, Op::UnsetM); }
+void emitVGetM(IRGS& env, int)                 { implMInstr(env, Op::VGetM); }
 
-void emitSetWithRefLM(HTS& env, int, int32_t) {
+void emitSetWithRefLM(IRGS& env, int, int32_t) {
   implMInstr(env, Op::SetWithRefLM);
 }
 
-void emitSetWithRefRM(HTS& env, int) {
+void emitSetWithRefRM(IRGS& env, int) {
   implMInstr(env, Op::SetWithRefRM);
 }
 

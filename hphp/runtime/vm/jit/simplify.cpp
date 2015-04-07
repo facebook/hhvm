@@ -20,18 +20,22 @@
 #include <sstream>
 #include <type_traits>
 
+#include "hphp/util/overflow.h"
+#include "hphp/util/trace.h"
+
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
-#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
-#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/punt.h"
+#include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/util/overflow.h"
 
 namespace HPHP { namespace jit {
 
@@ -89,7 +93,7 @@ SSATmp* gen(State& env, Opcode op, BCMarker marker, Args&&... args) {
       if (newDest || env.newInsts.size() != prevNewCount) {
         return newDest;
       } else {
-        assert(inst->isTransient());
+        assertx(inst->isTransient());
         inst = env.unit.clone(inst);
         env.newInsts.push_back(inst);
 
@@ -104,7 +108,7 @@ SSATmp* gen(State& env, Opcode op, BCMarker marker, Args&&... args) {
 
 template<class... Args>
 SSATmp* gen(State& env, Opcode op, Args&&... args) {
-  assert(!env.insts.empty());
+  assertx(!env.insts.empty());
   return gen(env, op, env.insts.top()->marker(), std::forward<Args>(args)...);
 }
 
@@ -571,7 +575,7 @@ SSATmp* simplifyMulInt(State& env, const IRInstruction* inst) {
     return a > 0 && folly::isPowTwo<uint64_t>(a);
   };
   auto log2 = [](int64_t a) {
-    assert(a > 0);
+    assertx(a > 0);
     return folly::findLastSet<uint64_t>(a) - 1;
   };
 
@@ -650,8 +654,7 @@ SSATmp* simplifyDivDbl(State& env, const IRInstruction* inst) {
   // X / 0 -> bool(false)
   if (src2Val == 0.0) {
     // Ideally we'd generate a RaiseWarning and return false here, but we need
-    // a catch trace for that and we can't make a catch trace without
-    // HhbcTranslator.
+    // a catch trace for that and we can't make a catch trace here.
     return nullptr;
   }
 
@@ -737,7 +740,7 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
   case XorBool:
     if (inst->src(1)->hasConstVal(true)) {
       // This is safe to add a new use to because inst->src(0) is a bool.
-      assert(inst->src(0)->isA(Type::Bool));
+      assertx(inst->src(0)->isA(Type::Bool));
       return inst->src(0);
     }
     return nullptr;
@@ -774,7 +777,7 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
     // This is safe because instanceofs don't take reference counted arguments.
-    assert(!inst->src(0)->type().maybe(Type::Counted) &&
+    assertx(!inst->src(0)->type().maybe(Type::Counted) &&
            !inst->src(1)->type().maybe(Type::Counted));
     return gen(
       env,
@@ -882,7 +885,7 @@ SSATmp* cmpImpl(State& env,
     return cns(env, bool(cmpOp(opName, 0, 0)));
   }
 
-  assert(type1 <= Type::Gen && type2 <= Type::Gen);
+  assertx(type1 <= Type::Gen && type2 <= Type::Gen);
 
   // Need both types to be unboxed to simplify, and the code below assumes the
   // types are known DataTypes.
@@ -1143,8 +1146,8 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   // Testing for StaticStr will make you miss out on CountedStr, and vice versa,
   // and similarly for arrays. PHP treats both types of string the same, so if
   // the distinction matters to you here, be careful.
-  assert(IMPLIES(type <= Type::Str, type == Type::Str));
-  assert(IMPLIES(type <= Type::Arr, type == Type::Arr));
+  assertx(IMPLIES(type <= Type::Str, type == Type::Str));
+  assertx(IMPLIES(type <= Type::Arr, type == Type::Arr));
 
   // The types are disjoint; the result must be false.
   if (!srcType.maybe(type)) {
@@ -1616,8 +1619,8 @@ SSATmp* simplifyBoxPtr(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyCheckInit(State& env, const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
-  assert(!srcType.maybe(Type::PtrToGen));
-  assert(inst->taken());
+  assertx(!srcType.maybe(Type::PtrToGen));
+  assertx(inst->taken());
   if (!srcType.maybe(Type::Uninit)) return gen(env, Nop);
   return nullptr;
 }
@@ -1627,20 +1630,28 @@ SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
 
   if (!srcType.maybe(typeParam)) {
-    /* This check will always fail. Convert the check into a Jmp. The rest of
-     * the block will be unreachable. */
+    // This check will always fail. Convert the check into a Jmp. The rest of
+    // the block will be unreachable.
     gen(env, Jmp, inst->taken());
     return inst->src(0);
   }
 
   auto const newType = srcType & typeParam;
   if (srcType <= newType) {
-    /* The type of the src is the same or more refined than type, so the guard
-     * is unnecessary. */
+    // The type of the src is the same or more refined than type, so the guard
+    // is unnecessary.
     return inst->src(0);
   }
 
   return nullptr;
+}
+
+SSATmp* simplifyAssertType(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+
+  return canSimplifyAssertType(inst, src->type(), mightRelax(env, src))
+    ? src
+    : nullptr;
 }
 
 SSATmp* decRefImpl(State& env, const IRInstruction* inst) {
@@ -1771,21 +1782,10 @@ SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
   if (!idx->hasConstVal()) return nullptr;
 
   auto const idxVal = (uint64_t)idx->intVal();
-  if (idxVal >= 0xffffffffull) {
-    // ArrayData can't hold more than 2^32 - 1 elements, so this is
-    // always going to fail.
+  auto const check = packedArrayBoundsStaticCheck(array->type(), idxVal);
+  if (check.hasValue()) {
+    if (check.value()) return gen(env, Nop);
     return gen(env, Jmp, inst->taken());
-  }
-
-  if (array->hasConstVal(Type::Arr)) {
-    if (idxVal >= array->arrVal()->size()) {
-      return gen(env, Jmp, inst->taken());
-    }
-    return gen(env, Nop);
-  }
-
-  if (packedArrayBoundsCheckUnnecessary(array->type(), idxVal)) {
-    return gen(env, Nop);
   }
 
   return nullptr;
@@ -1794,7 +1794,7 @@ SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
 SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
-  assert(arr->hasConstVal(Type::Arr));
+  assertx(arr->hasConstVal(Type::Arr));
   if (!idx->hasConstVal()) return nullptr;
   auto const value = arr->arrVal()->nvGet(idx->intVal());
   return value ? cns(env, *value) : nullptr;
@@ -1803,7 +1803,7 @@ SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
 SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
-  assert(arr->hasConstVal(Type::Arr));
+  assertx(arr->hasConstVal(Type::Arr));
   if (!idx->hasConstVal()) return nullptr;
   auto const value = [&] {
     int64_t val;
@@ -1813,11 +1813,6 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
     return arr->arrVal()->nvGet(idx->strVal());
   }();
   return value ? cns(env, *value) : nullptr;
-}
-
-SSATmp* simplifyLdPackedArrayElem(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->hasConstVal()) return arrIntKeyImpl(env, inst);
-  return nullptr;
 }
 
 SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
@@ -1879,13 +1874,14 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
   auto const callee = inst->extra<CallBuiltin>()->callee;
   auto const args = inst->srcs();
 
-  auto const cls = callee->cls();
-  bool const arg2Collection = args.size() == 3 &&
-                              args[2]->type() < Type::Obj &&
-                              cls != nullptr &&
-                              cls->isCollectionClass();
 
-  if (arg2Collection) {
+  bool const arg2IsCollection = args.size() == 3 &&
+    args[2]->isA(Type::Obj) &&
+    args[2]->type().clsSpec() &&
+    args[2]->type().clsSpec().cls()->isCollectionClass() &&
+    !mightRelax(env, args[2]);
+
+  if (arg2IsCollection) {
     if (callee->name()->isame(s_isEmpty.get())) {
       FTRACE(3, "simplifying collection: {}\n", callee->name()->data());
       return gen(env, ColIsEmpty, args[2]);
@@ -1900,11 +1896,13 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyIsWaitHandle(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->type() < Type::Obj) {
-    auto const cls = inst->src(0)->type().clsSpec().cls();
-    if (cls && cls->classof(c_WaitHandle::classof())) {
-      return cns(env, true);
-    }
+  if (mightRelax(env, inst->src(0))) return nullptr;
+
+  bool baseIsWaitHandle = inst->src(0)->isA(Type::Obj) &&
+    inst->src(0)->type().clsSpec() &&
+    inst->src(0)->type().clsSpec().cls()->classof(c_WaitHandle::classof());
+  if (baseIsWaitHandle) {
+    return cns(env, true);
   }
   return nullptr;
 }
@@ -1914,7 +1912,7 @@ SSATmp* simplifyAdjustSP(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyOrdStr(State& env, const IRInstruction *inst) {
+SSATmp* simplifyOrdStr(State& env, const IRInstruction* inst) {
   const auto src = inst->src(0);
   if (src->hasConstVal(Type::Str)) {
     // a static string is passed in, resolve with a constant.
@@ -1924,12 +1922,31 @@ SSATmp* simplifyOrdStr(State& env, const IRInstruction *inst) {
   return nullptr;
 }
 
+SSATmp* ldImpl(State& env, const IRInstruction* inst) {
+  if (env.typesMightRelax) return nullptr;
+
+  auto const t = inst->typeParam();
+
+  return t.hasConstVal() ||
+         t.subtypeOfAny(Type::Uninit, Type::InitNull, Type::Nullptr)
+    ? cns(env, t)
+    : nullptr;
+}
+
+SSATmp* simplifyLdLoc(State& env, const IRInstruction* inst) {
+  return ldImpl(env, inst);
+}
+
+SSATmp* simplifyLdStk(State& env, const IRInstruction* inst) {
+  return ldImpl(env, inst);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   env.insts.push(inst);
   SCOPE_EXIT {
-    assert(env.insts.top() == inst);
+    assertx(env.insts.top() == inst);
     env.insts.pop();
   };
 
@@ -1944,6 +1961,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(Ceil)
   X(CheckInit)
   X(CheckType)
+  X(AssertType)
   X(CheckPackedArrayBounds)
   X(CoerceCellToBool)
   X(CoerceCellToDbl)
@@ -1998,7 +2016,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CastCtxThis)
   X(LdObjClass)
   X(LdObjInvoke)
-  X(LdPackedArrayElem)
   X(Mov)
   X(TakeStk)
   X(UnboxPtr)
@@ -2035,6 +2052,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ArrayGet)
   X(AdjustSP)
   X(OrdStr)
+  X(LdLoc)
+  X(LdStk)
   default: break;
   }
 #undef X
@@ -2047,19 +2066,88 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
+bool canSimplifyAssertType(const IRInstruction* inst,
+                           const Type srcType,
+                           bool srcMightRelax) {
+  assert(inst->is(AssertType, AssertLoc, AssertStk));
+
+  auto const typeParam = inst->typeParam();
+
+  if (!srcType.maybe(typeParam)) {
+    // If both types are boxed, this is okay and even expected as a means to
+    // update the hint for the inner type.
+    if (srcType <= Type::BoxedCell &&
+        typeParam <= Type::BoxedCell) {
+      return false;
+    }
+
+    // We got external information (probably from static analysis) that
+    // conflicts with what we've built up so far.  There's no reasonable way to
+    // continue here: we can't properly fatal the request because we can't make
+    // a catch trace or SpillStack without IRGS, and we can't punt on
+    // just this instruction because we might not be in the initial translation
+    // phase, and we can't just plow on forward since we'll probably generate
+    // malformed IR.  Since this case is very rare, just punt on the whole
+    // trace so it gets interpreted.
+    TRACE_PUNT("Invalid AssertTypeOp");
+  }
+
+  // Asserting in these situations doesn't add any information.
+  if (typeParam == Type::Cls && srcType <= Type::Cls) return true;
+  if (typeParam == Type::Gen && srcType <= Type::Gen) return true;
+
+  auto const newType = srcType & typeParam;
+
+  if (srcType <= newType) {
+    // The src type is at least as good as the new type.  Eliminate this
+    // AssertType if the src type won't relax.  We do this to avoid eliminating
+    // apparently redundant assert opcodes that may become useful after prior
+    // guards are relaxed.
+    if (!srcMightRelax) return true;
+
+    if (srcType < newType) {
+      // This can happen because of limitations in how Type::operator& handles
+      // specialized types: sometimes it returns a Type that's wider than it
+      // needs to be.  It shouldn't affect correctness but it can cause us to
+      // miss out on some perf.
+      FTRACE_MOD(Trace::hhir, 1,
+                 "Suboptimal AssertTypeOp: refineType({}, {}) -> {} in {}\n",
+                 srcType, typeParam, newType, *inst);
+
+      // We don't currently support intersecting RepoAuthType::Arrays
+      // (t4473238), so we might be here because srcType and typeParam have
+      // different RATArrays.  If that's the case, and if typeParam provides no
+      // other useful information, we can unconditionally eliminate this
+      // instruction: RATArrays never come from guards so we can't miss out on
+      // anything by doing so.
+      if (srcType < Type::Arr &&
+          srcType.arrSpec().type() &&
+          typeParam < Type::Arr &&
+          typeParam.arrSpec().type() &&
+          !typeParam.arrSpec().kind()) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 SimplifyResult simplify(IRUnit& unit,
                         const IRInstruction* origInst,
                         bool typesMightRelax) {
   auto env = State { unit, typesMightRelax };
   auto const newDst = simplifyWork(env, origInst);
 
-  assert(validate(env, newDst, origInst));
+  assertx(validate(env, newDst, origInst));
 
   return SimplifyResult { std::move(env.newInsts), newDst };
 }
 
 void simplify(IRUnit& unit, IRInstruction* origInst) {
-  assert(!origInst->isTransient());
+  assertx(!origInst->isTransient());
 
   copyProp(origInst);
   auto res = simplify(unit, origInst, false);
@@ -2079,7 +2167,7 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
     }
 
     auto last = res.instrs.back();
-    assert(last->isBlockEnd());
+    assertx(last->isBlockEnd());
 
     if (!last->isTerminal() && !last->next()) {
       // We converted the block-end instruction to a different one.  Set its
@@ -2117,7 +2205,7 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
     origInst->dst()->setType(res.dst->type());
   } else {
     if (out_size == 1) {
-      assert(origInst->dst() == last->dst());
+      assertx(origInst->dst() == last->dst());
       FTRACE(1, "    {}\n", last->toString());
 
       // We only have a single instruction, so just become it.
@@ -2147,6 +2235,24 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
 
 //////////////////////////////////////////////////////////////////////
 
+void simplify(IRUnit& unit) {
+  boost::dynamic_bitset<> reachable(unit.numBlocks());
+  reachable.set(unit.entry()->id());
+
+  auto const blocks = rpoSortCfg(unit);
+
+  for (auto block : blocks) {
+    if (!reachable.test(block->id())) continue;
+
+    for (auto& inst : *block) simplify(unit, &inst);
+
+    if (auto const b = block->back().next())  reachable.set(b->id());
+    if (auto const b = block->back().taken()) reachable.set(b->id());
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+
 void copyProp(IRInstruction* inst) {
   for (uint32_t i = 0; i < inst->numSrcs(); i++) {
     auto tmp     = inst->src(i);
@@ -2158,19 +2264,71 @@ void copyProp(IRInstruction* inst) {
 
     // We're assuming that all of our src instructions have already been
     // copyPropped.
-    assert(!inst->src(i)->inst()->is(Mov));
+    assertx(!inst->src(i)->inst()->is(Mov));
   }
 }
 
-bool packedArrayBoundsCheckUnnecessary(Type arrayType, int64_t idxVal) {
+folly::Optional<bool>
+packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
+  if (idxVal < 0 || idxVal > PackedArray::MaxSize) return false;
+
+  if (arrayType.hasConstVal()) {
+    return idxVal < arrayType.arrVal()->size();
+  }
+
   auto const at = arrayType.arrSpec().type();
-  if (!at) return false;
+  if (!at) return folly::none;
+
   using A = RepoAuthType::Array;
   switch (at->tag()) {
   case A::Tag::Packed:
-    return idxVal < at->size() && at->emptiness() == A::Empty::No;
+    if (idxVal < at->size() && at->emptiness() == A::Empty::No) {
+      return true;
+    }
   case A::Tag::PackedN:
-    return idxVal == 0 && at->emptiness() == A::Empty::No;
+    if (idxVal == 0 && at->emptiness() == A::Empty::No) {
+      return true;
+    }
+  }
+  return folly::none;
+}
+
+Type packedArrayElemType(SSATmp* arr, SSATmp* idx) {
+  assertx(arr->isA(Type::Arr) &&
+          arr->type().arrSpec().kind() == ArrayData::kPackedKind &&
+          idx->isA(Type::Int));
+
+  if (arr->hasConstVal() && idx->hasConstVal()) {
+    auto const idxVal = idx->intVal();
+    if (idxVal >= 0 && idxVal < arr->arrVal()->size()) {
+      return Type(arr->arrVal()->nvGet(idxVal)->m_type);
+    }
+    return Type::InitNull;
+  }
+
+  Type t = arr->isA(Type::StaticArr) ? Type::InitCell : Type::Gen;
+
+  auto const at = arr->type().arrSpec().type();
+  if (!at) return t;
+
+  switch (at->tag()) {
+    case RepoAuthType::Array::Tag::Packed:
+    {
+      if (idx->hasConstVal(Type::Int)) {
+        auto const idxVal = idx->intVal();
+        if (idxVal >= 0 && idxVal < at->size()) {
+          return typeFromRAT(at->packedElem(idxVal)) & t;
+        }
+        return Type::InitNull;
+      }
+      Type elemType = Type::Bottom;
+      for (uint32_t i = 0; i < at->size(); ++i) {
+        elemType |= typeFromRAT(at->packedElem(i));
+      }
+      return elemType & t;
+    }
+    case RepoAuthType::Array::Tag::PackedN:
+      return typeFromRAT(at->elemType()) & t;
   }
   not_reached();
 }

@@ -62,20 +62,18 @@ enum class MoveToAlignFlags {
   kCacheLineAlign,
 };
 
-class BackEnd;
+struct BackEnd;
 
 std::unique_ptr<BackEnd> newBackEnd();
 
-class BackEnd {
- protected:
-  BackEnd();
- public:
+struct BackEnd {
   virtual ~BackEnd();
 
   virtual Abi abi() = 0;
   virtual size_t cacheLineSize() = 0;
+
   size_t cacheLineMask() {
-    assert((cacheLineSize() & (cacheLineSize()-1)) == 0);
+    assertx((cacheLineSize() & (cacheLineSize()-1)) == 0);
     return cacheLineSize() - 1;
   }
 
@@ -83,17 +81,20 @@ class BackEnd {
   virtual PhysReg rVmSp() = 0;
   virtual PhysReg rVmFp() = 0;
   virtual PhysReg rVmTl() = 0;
-  virtual bool storesCell(const IRInstruction& inst, uint32_t srcIdx) = 0;
-  virtual bool loadsCell(const IRInstruction& inst) = 0;
 
   virtual void enterTCHelper(TCA start, ActRec* stashedAR) = 0;
-  virtual void moveToAlign(CodeBlock& cb,
-                           MoveToAlignFlags alignment
-                           = MoveToAlignFlags::kJmpTargetAlign) = 0;
+
+  void moveToAlign(CodeBlock& cb,
+                   MoveToAlignFlags alignment =
+                     MoveToAlignFlags::kJmpTargetAlign) {
+    do_moveToAlign(cb, alignment);
+  }
+
   virtual UniqueStubs emitUniqueStubs() = 0;
   virtual TCA emitServiceReqWork(CodeBlock& cb, TCA start,
                                  SRFlags flags, ServiceRequest req,
                                  const ServiceReqArgVec& argv) = 0;
+  virtual size_t reusableStubSize() const = 0;
   virtual void emitInterpReq(CodeBlock& mainCode, CodeBlock& coldCode,
                              SrcKey sk) = 0;
   virtual bool funcPrologueHasGuard(TCA prologue, const Func* func) = 0;
@@ -105,16 +106,23 @@ class BackEnd {
   virtual void funcPrologueSmashGuard(TCA prologue, const Func* func) = 0;
   virtual void emitIncStat(CodeBlock& cb, intptr_t disp, int n) = 0;
   virtual void emitTraceCall(CodeBlock& cb, Offset pcOff) = 0;
+
   /*
    * Returns true if the given current frontier can have an nBytes-long
    * instruction written that will be smashable later.
    */
-  virtual bool isSmashable(Address frontier, int nBytes, int offset = 0) = 0;
+  bool isSmashable(Address frontier, int nBytes, int offset = 0) {
+    return do_isSmashable(frontier, nBytes, offset);
+  }
+
   /*
    * Call before emitting a test-jcc sequence. Inserts a nop gap such that after
    * writing a testBytes-long instruction, the frontier will be smashable.
    */
-  virtual void prepareForSmash(CodeBlock& cb, int nBytes, int offset = 0) = 0;
+  void prepareForSmash(CodeBlock& cb, int nBytes, int offset = 0) {
+    do_prepareForSmash(cb, nBytes, offset);
+  }
+
   virtual void prepareForTestAndSmash(CodeBlock& cb, int testBytes,
                                       TestAndSmashFlags flags) = 0;
 
@@ -151,68 +159,13 @@ class BackEnd {
 
   virtual void genCodeImpl(IRUnit& unit, AsmInfo*) = 0;
 
-  virtual bool supportsRelocation() const { return false; }
+protected:
+  BackEnd() {}
 
-  /*
-   * Relocate code in the range start, end into dest, and record
-   * information about what was done to rel.
-   * On exit, internal references (references into the source range)
-   * will have been adjusted (ie they are still references into the
-   * relocated code). External code references continue to point to
-   * the same address as before relocation.
-   */
-  virtual size_t relocate(RelocationInfo& rel, CodeBlock& dest,
-                          TCA start, TCA end,
-                          CodeGenFixups& fixups,
-                          TCA* exitAddr) {
-    always_assert(false);
-    return 0;
-  }
-
-  /*
-   * This should be called after calling relocate on all relevant ranges. It
-   * will adjust all references into the original src ranges to point into the
-   * corresponding relocated ranges.
-   */
-  virtual void adjustForRelocation(RelocationInfo& rel) {
-    always_assert(false);
-  }
-
-  /*
-   * This will update a single range that was not relocated, but that
-   * might refer to relocated code (such as the cold code corresponding
-   * to a tracelet). Unless its guaranteed to be all position independent,
-   * its "fixups" should have been passed into a relocate call earlier.
-   */
-  virtual void adjustForRelocation(RelocationInfo& rel, TCA start, TCA end) {
-    always_assert(false);
-  }
-
-  /*
-   * Adjust the contents of fixups and asmInfo based on the relocation
-   * already performed on rel. This will not cause any of the relocated
-   * code to be "hooked up", and its not safe to do so until all of the
-   * CodeGenFixups have been processed.
-   */
-  virtual void adjustMetaDataForRelocation(RelocationInfo& rel,
-                                           AsmInfo* asmInfo,
-                                           CodeGenFixups& fixups) {
-    always_assert(false);
-  }
-
-  /*
-   * Adjust potentially live references that point into the relocated
-   * area.
-   * Must not be called until its safe to run the relocated code.
-   */
-  virtual void adjustCodeForRelocation(RelocationInfo& rel,
-                                       CodeGenFixups& fixups) {
-    always_assert(false);
-  }
-
-  virtual void findFixups(TCA start, TCA end, CodeGenFixups& fixups) {
-    always_assert(false);
-  }
+private:
+  virtual void do_moveToAlign(CodeBlock&, MoveToAlignFlags) = 0;
+  virtual bool do_isSmashable(Address, int, int) = 0;
+  virtual void do_prepareForSmash(CodeBlock&, int, int) = 0;
 };
 
 }}

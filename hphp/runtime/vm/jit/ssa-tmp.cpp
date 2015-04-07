@@ -35,13 +35,8 @@ namespace {
 int typeNeededWords(Type t) {
   if (t.subtypeOfAny(Type::Uninit,
                      Type::InitNull,
-                     Type::RetAddr,
                      Type::Nullptr)) {
     // These don't need a register because their values are static or unused.
-    //
-    // RetAddr doesn't take any register because currently we only target x86,
-    // which takes the return address from the stack.  This knowledge should be
-    // moved to a machine-specific section once we target other architectures.
     return 0;
   }
   if (t.maybe(Type::Nullptr)) {
@@ -53,11 +48,11 @@ int typeNeededWords(Type t) {
   }
   if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.
-    assert(IMPLIES(t <= Type::StkElem, t.isKnownDataType()));
+    assertx(IMPLIES(t <= Type::StkElem, t.isKnownDataType()));
     return 1;
   }
 
-  assert(t <= Type::StkElem);
+  assertx(t <= Type::StkElem);
 
   // XXX(t4592459): This will return 2 for Type::Null, even though it only
   // needs 1 register (one for the type, none for the value). This is to work

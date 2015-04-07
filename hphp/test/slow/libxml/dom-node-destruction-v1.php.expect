@@ -1,0 +1,11 @@
+Enter main()
+Enter bar()
+Enter foo()
+Initializing DOMElement #0: foo
+Initializing DOMElement #1: bar
+Destructing DOMElement #1: bar
+Leave foo()
+Querying DOMElement #0: foo
+Leave bar()
+Destructing DOMElement #0: foo
+Leave main()

@@ -939,20 +939,7 @@ String HHVM_FUNCTION(xml_error_string,
 
 String HHVM_FUNCTION(utf8_decode,
                      const String& data) {
-  String str = String(data.size(), ReserveString);
-  char *newbuf = str.mutableData();
-  int newlen = 0;
-  const char *s = data.data();
-
-  UTF8To16Decoder decoder(s, data.size(), true);
-  for (int b = decoder.decode(); b != UTF8_END; b = decoder.decode()) {
-    newbuf[newlen] = (char) b;
-    ++newlen;
-  }
-
-  assert(newlen <= data.size());
-  str.shrink(newlen);
-  return str;
+  return xml_utf8_decode(data.c_str(), data.size(), "ISO-8859-1");
 }
 
 String HHVM_FUNCTION(utf8_encode,

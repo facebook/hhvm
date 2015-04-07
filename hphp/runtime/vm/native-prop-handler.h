@@ -44,7 +44,7 @@ ALWAYS_INLINE Variant prop_not_handled() {
   return uninit_null();
 }
 
-NativePropHandler* getNativePropHandler(const String& className);
+NativePropHandler* getNativePropHandler(const StringData* className);
 
 /**
  * Handler for a class with custom handling functions.

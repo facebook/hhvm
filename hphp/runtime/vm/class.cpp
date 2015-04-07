@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -437,8 +438,7 @@ bool Class::isCppSerializable() const {
 
 bool Class::isCollectionClass() const {
   auto s = name();
-  return Collection::stringToType(s->data(), s->size()) !=
-         Collection::InvalidType;
+  return isCollectionTypeName(s);
 }
 
 
@@ -1434,6 +1434,11 @@ void Class::setODAttributes() {
   if (lookupMethod(s_unset.get()     )) { m_ODAttrs |= ObjectData::UseUnset; }
   if (lookupMethod(s_call.get()      )) { m_ODAttrs |= ObjectData::HasCall;  }
   if (lookupMethod(s_clone.get()     )) { m_ODAttrs |= ObjectData::HasClone; }
+
+  if ((isBuiltin() && Native::getNativePropHandler(name())) ||
+      (m_parent && m_parent->hasNativePropHandler())) {
+    m_ODAttrs |= ObjectData::HasNativePropHandler;
+  }
 }
 
 void Class::setConstants() {
@@ -1462,12 +1467,23 @@ void Class::setConstants() {
         builder.add(iConst.m_name, iConst);
         continue;
       }
+      auto& existingConst = builder[existing->second];
+
+      if (iConst.isType() != existingConst.isType()) {
+        raise_error("%s cannot inherit the %sconstant %s from %s, because it "
+                    "was previously inherited as a %sconstant from %s",
+                    m_preClass->name()->data(),
+                    iConst.isType() ? "type " : "",
+                    iConst.m_name->data(),
+                    iConst.m_class->name()->data(),
+                    iConst.isType() ? "" : "type ",
+                    existingConst.m_class->name()->data());
+      }
 
       if (iConst.isAbstract()) {
         continue;
       }
 
-      auto& existingConst = builder[existing->second];
       if (existingConst.isAbstract()) {
         existingConst.m_class = iConst.m_class;
         existingConst.m_val = iConst.m_val;
@@ -1475,8 +1491,13 @@ void Class::setConstants() {
       }
 
       if (existingConst.m_class != iConst.m_class) {
-        raise_error("Cannot inherit previously-inherited constant %s",
-                    iConst.m_name->data());
+        raise_error("%s cannot inherit the %sconstant %s from %s, because it "
+                    "was previously inherited from %s",
+                    m_preClass->name()->data(),
+                    iConst.isType() ? "type " : "",
+                    iConst.m_name->data(),
+                    iConst.m_class->name()->data(),
+                    existingConst.m_class->name()->data());
       }
       builder.add(iConst.m_name, iConst);
     }
@@ -1492,9 +1513,11 @@ void Class::setConstants() {
       // overridden.
       if (definingClass->attrs() & AttrInterface) {
         for (auto interface : declInterfaces()) {
-          if (interface->hasConstant(preConst->name())) {
-            raise_error("Cannot override previously defined constant "
+          if (interface->hasConstant(preConst->name()) ||
+              interface->hasTypeConstant(preConst->name())) {
+            raise_error("Cannot override previously defined %sconstant "
                         "%s::%s in %s",
+                        builder[it2->second].isType() ? "type " : "",
                         builder[it2->second].m_class->name()->data(),
                         preConst->name()->data(),
                         m_preClass->name()->data());
@@ -1505,7 +1528,18 @@ void Class::setConstants() {
       if (preConst->isAbstract() &&
           !builder[it2->second].isAbstract()) {
         raise_error("Cannot re-declare as abstract previously defined "
-                    "constant %s::%s in %s",
+                    "%sconstant %s::%s in %s",
+                    builder[it2->second].isType() ? "type " : "",
+                    builder[it2->second].m_class->name()->data(),
+                    preConst->name()->data(),
+                    m_preClass->name()->data());
+      }
+
+      if (preConst->isType() != builder[it2->second].isType()) {
+        raise_error("Cannot re-declare as a %sconstant previously defined "
+                    "%sconstant %s::%s in %s",
+                    preConst->isType() ? "type " : "",
+                    preConst->isType() ? "" : "type ",
                     builder[it2->second].m_class->name()->data(),
                     preConst->name()->data(),
                     m_preClass->name()->data());
@@ -1528,9 +1562,10 @@ void Class::setConstants() {
     for (Slot i = 0; i < builder.size(); i++) {
       const Const& constant = builder[i];
       if (constant.isAbstract()) {
-        raise_error("Class %s contains abstract constant (%s) and "
+        raise_error("Class %s contains abstract %sconstant (%s) and "
                     "must therefore be declared abstract or define "
                     "the remaining constants",
+                    constant.isType() ? "type " : "",
                     m_preClass->name()->data(),
                     constant.m_name->data());
       }
@@ -1544,8 +1579,9 @@ void Class::setConstants() {
       const Const& constant = builder[i];
       if (constant.isAbstract()) {
         raise_error(
-          "Class %s contains abstract constant (%s) and "
+          "Class %s contains abstract %sconstant (%s) and "
           "therefore cannot be declared 'abstract final'",
+          constant.isType() ? "type " : "",
           m_preClass->name()->data(), constant.m_name->data());
       }
     }
@@ -2353,18 +2389,21 @@ void Class::setNativeDataInfo() {
   }
 }
 
-bool Class::hasNativePropHandler() {
-  return getNativePropHandler() != nullptr;
+bool Class::hasNativePropHandler() const {
+  return m_ODAttrs & ObjectData::HasNativePropHandler;
 }
 
-Native::NativePropHandler* Class::getNativePropHandler() {
+const Native::NativePropHandler* Class::getNativePropHandler() const {
+  assert(hasNativePropHandler());
+
   for (auto cls = this; cls; cls = cls->parent()) {
-    auto propHandler = Native::getNativePropHandler(StrNR(cls->name()));
+    auto propHandler = Native::getNativePropHandler(cls->name());
     if (propHandler != nullptr) {
       return propHandler;
     }
   }
-  return nullptr;
+
+  not_reached();
 }
 
 void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  const {

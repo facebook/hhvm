@@ -93,7 +93,8 @@ struct RegionDesc {
    */
   SrcKey            lastSrcKey() const;
 
-  Block*            addBlock(SrcKey sk, int length, FPAbsOffset spOffset);
+  Block*            addBlock(SrcKey sk, int length, FPAbsOffset spOffset,
+                             uint16_t inlineLevel);
   void              deleteBlock(BlockId bid);
   void              renumberBlock(BlockId oldId, BlockId newId);
   void              addArc(BlockId src, BlockId dst);
@@ -166,12 +167,12 @@ struct RegionDesc::Location {
   Tag tag() const { return m_tag; };
 
   uint32_t localId() const {
-    assert(m_tag == Tag::Local);
+    assertx(m_tag == Tag::Local);
     return m_local.locId;
   }
 
   FPAbsOffset offsetFromFP() const {
-    assert(m_tag == Tag::Stack);
+    assertx(m_tag == Tag::Stack);
     return m_stack.offsetFromFP;
   }
 
@@ -272,7 +273,7 @@ class RegionDesc::Block {
   typedef boost::container::flat_map<SrcKey, const Func*> KnownFuncMap;
 
   explicit Block(const Func* func, bool resumed, Offset start, int length,
-                 FPAbsOffset initSpOff);
+                 FPAbsOffset initSpOff, uint16_t inlineLevel);
 
   Block& operator=(const Block&) = delete;
 
@@ -291,6 +292,7 @@ class RegionDesc::Block {
   bool        empty()             const { return length() == 0; }
   bool        contains(SrcKey sk) const;
   FPAbsOffset initialSpOffset()   const { return m_initialSpOffset; }
+  uint16_t    inlineLevel()       const { return m_inlineLevel; }
 
   void setId(BlockId id) {
     m_id = id;
@@ -303,7 +305,7 @@ class RegionDesc::Block {
    * one or more blocks from the callee.
    */
   void setInlinedCallee(const Func* callee) {
-    assert(callee);
+    assertx(callee);
     m_inlinedCallee = callee;
   }
   const Func* inlinedCallee() const {
@@ -377,7 +379,7 @@ private:
   int            m_length;
   FPAbsOffset    m_initialSpOffset;
   const Func*    m_inlinedCallee;
-
+  uint16_t       m_inlineLevel; // 0 means the outer-most function
   TypePredMap    m_typePreds;
   ParamByRefMap  m_byRefs;
   RefPredMap     m_refPreds;

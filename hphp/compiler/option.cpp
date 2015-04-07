@@ -138,8 +138,8 @@ int Option::GetScannerType() {
 
 int Option::InvokeFewArgsCount = 6;
 int Option::InlineFunctionThreshold = -1;
-bool Option::EliminateDeadCode = true;
-bool Option::LocalCopyProp = true;
+bool Option::EliminateDeadCode = false;
+bool Option::LocalCopyProp = false;
 int Option::AutoInline = 0;
 bool Option::VariableCoalescing = false;
 bool Option::ArrayAccessIdempotent = false;
@@ -283,8 +283,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(AllVolatile, ini, config["AllVolatile"]);
 
   Config::Bind(GenerateDocComments, ini, config["GenerateDocComments"], true);
-  Config::Bind(EliminateDeadCode, ini, config["EliminateDeadCode"], true);
-  Config::Bind(LocalCopyProp, ini, config["LocalCopyProp"], true);
+  Config::Bind(EliminateDeadCode, ini, config["EliminateDeadCode"], false);
+  Config::Bind(LocalCopyProp, ini, config["LocalCopyProp"], false);
   Config::Bind(AutoInline, ini, config["AutoInline"], 0);
   Config::Bind(VariableCoalescing, ini, config["VariableCoalescing"], false);
   Config::Bind(ArrayAccessIdempotent, ini, config["ArrayAccessIdempotent"],

@@ -114,8 +114,6 @@ public:
   bool isDynamicInvoke() const { return m_dynamicInvoke; }
   void setDynamicInvoke();
   bool hasImpl() const;
-  void setDirectInvoke() { m_directInvoke = true; }
-  bool hasDirectInvoke() const { return m_directInvoke; }
   bool isParamCoerceMode() const;
   bool mayContainThis();
   bool isClosure() const;
@@ -124,14 +122,6 @@ public:
   bool isAsync() const { return m_async; }
   void setAsync(bool f) { m_async = f; }
 
-  bool needsClassParam();
-
-  void setInlineSameContext(bool f) { m_inlineSameContext = f; }
-  bool getInlineSameContext() const { return m_inlineSameContext; }
-  void setContextSensitive(bool f) { m_contextSensitive = f; }
-  bool getContextSensitive() const { return m_contextSensitive; }
-  void setInlineAsExpr(bool f) { m_inlineAsExpr = f; }
-  bool getInlineAsExpr() const { return m_inlineAsExpr; }
   int nextInlineIndex() { return ++m_inlineIndex; }
 
   bool usesLSB() const { return !m_noLSB; }
@@ -300,14 +290,6 @@ public:
   bool isPersistent() const { return m_persistent; }
   void setPersistent(bool p) { m_persistent = p; }
 
-  bool isInlined() const { return m_inlineable; }
-  void disableInline() { m_inlineable = false; }
-
-  /* Whether we need to worry about the named return value optimization
-     for this function */
-  void setNRVOFix(bool flag) { m_nrvoFix = flag; }
-  bool getNRVOFix() const { return m_nrvoFix; }
-
   /* Indicates if a function may need to use a VarEnv or varargs (aka
    * extraArgs) at run time */
   bool mayUseVV() const;
@@ -341,10 +323,6 @@ public:
   }
   bool isMagicMethod() const {
     return m_magicMethod;
-  }
-
-  void setStmtCloned(StatementPtr stmt) {
-    m_stmtCloned = stmt;
   }
 
   void setClosureVars(ExpressionListPtr closureVars) {
@@ -440,15 +418,9 @@ private:
   unsigned m_pseudoMain : 1;
   unsigned m_magicMethod : 1;
   unsigned m_system : 1;
-  unsigned m_inlineable : 1;
   unsigned m_containsThis : 1; // contains a usage of $this?
   unsigned m_containsBareThis : 2; // $this outside object-context,
                                    // 2 if in reference context
-  unsigned m_nrvoFix : 1;
-  unsigned m_inlineAsExpr : 1;
-  unsigned m_inlineSameContext : 1;
-  unsigned m_contextSensitive : 1;
-  unsigned m_directInvoke : 1;
   unsigned m_generator : 1;
   unsigned m_async : 1;
   unsigned m_noLSB : 1;
@@ -458,7 +430,6 @@ private:
   unsigned m_localRedeclaring : 1;
 
   int m_redeclaring; // multiple definition of the same function
-  StatementPtr m_stmtCloned; // cloned method body stmt
   int m_inlineIndex;
   FunctionOptPtr m_optFunction;
   ExpressionListPtr m_closureVars;

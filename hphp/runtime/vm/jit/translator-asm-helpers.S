@@ -11,7 +11,6 @@
  *   r9  / x6:  ActRec* stashedAR
  */
 
-#include "hphp/runtime/vm/jit/reserved-stack.h"
 #include "hphp/util/etch-helpers.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,8 +34,8 @@ ETCH_NAME(enterTCHelper):
   mov %r8,  %r12          // rVmTl
   mov %rsi, %rbp          // rVmFp
 
-  sub $RESERVED_STACK_TOTAL_SPACE, %rsp
-  CFI2(adjust_cfa_offset, RESERVED_STACK_TOTAL_SPACE)
+  sub $8, %rsp // align native stack
+  CFI2(adjust_cfa_offset, 8)
 
   /*
    * If we're entering the TC at a function prologue, make it look like we got
@@ -71,8 +70,8 @@ ETCH_NAME(enterTCExit):
    */
   mov %rbx, 0x10(%r12)
   mov %rbp, 0x20(%r12)
-  add $RESERVED_STACK_TOTAL_SPACE, %rsp
-  CFI2(adjust_cfa_offset, -RESERVED_STACK_TOTAL_SPACE)
+  add $8, %rsp
+  CFI2(adjust_cfa_offset, -8)
 
   // Epilogue
   pop %rbp

@@ -292,7 +292,7 @@ class BaseVector : public ExtCollectionObjectData {
 
  protected:
 
-  explicit BaseVector(Class* cls);
+  explicit BaseVector(Class* cls, HeaderKind, uint32_t cap = 0);
   /*virtual*/ ~BaseVector();
 
   Cell* data() const { return m_data; }
@@ -483,7 +483,7 @@ class c_Vector : public BaseVector {
   DECLARE_CLASS_NO_SWEEP(Vector)
 
  public:
-  explicit c_Vector(Class* cls = c_Vector::classof());
+  explicit c_Vector(Class* cls = c_Vector::classof(), uint32_t cap = 0);
 
   static c_Vector* Clone(ObjectData* obj);
 
@@ -623,7 +623,7 @@ class c_ImmVector : public BaseVector {
   static Object ti_fromkeysof(const Variant& container);
 
  public:
-  explicit c_ImmVector(Class* cls = c_ImmVector::classof());
+  explicit c_ImmVector(Class* cls = c_ImmVector::classof(), uint32_t cap = 0);
 
   static c_ImmVector* Clone(ObjectData* obj);
 
@@ -658,7 +658,7 @@ ALWAYS_INLINE MixedArray* staticEmptyMixedArray() {
 
 class HashCollection : public ExtCollectionObjectData {
  public:
-  explicit HashCollection(Class* cls);
+  explicit HashCollection(Class* cls, HeaderKind, uint32_t cap = 0);
 
   typedef MixedArray::Elm Elm;
 
@@ -1319,7 +1319,7 @@ class BaseMap : public HashCollection {
   }
 
  protected: // BaseMap is an abstract class
-  explicit BaseMap(Class* cls);
+  explicit BaseMap(Class* cls, HeaderKind, uint32_t cap = 0);
   ~BaseMap();
 
  public:
@@ -1480,7 +1480,7 @@ class c_Map : public BaseMap {
   DECLARE_CLASS_NO_SWEEP(Map)
 
  public:
-  explicit c_Map(Class* cls = c_Map::classof());
+  explicit c_Map(Class* cls = c_Map::classof(), uint32_t cap = 0);
 
   static c_Map* Clone(ObjectData* obj);
 
@@ -1530,7 +1530,7 @@ class c_ImmMap : public BaseMap {
   DECLARE_CLASS_NO_SWEEP(ImmMap)
 
  public:
-  explicit c_ImmMap(Class* cls = c_ImmMap::classof());
+  explicit c_ImmMap(Class* cls = c_ImmMap::classof(), uint32_t cap = 0);
 
   static c_ImmMap* Clone(ObjectData* obj);
 
@@ -1776,7 +1776,7 @@ class BaseSet : public HashCollection {
 
  protected:
   // BaseSet is an abstract class.
-  explicit BaseSet(Class* cls);
+  explicit BaseSet(Class* cls, HeaderKind, uint32_t cap = 0);
   /* virtual */ ~BaseSet();
 
  private:
@@ -1809,7 +1809,8 @@ class c_Set : public BaseSet {
  public:
   // PHP-land methods.
 
-  explicit c_Set(Class* cls = c_Set::classof());
+  explicit c_Set(Class* cls = c_Set::classof(), uint32_t cap = 0);
+
   Object t_add(const Variant& val);
   Object t_addall(const Variant& val);
   Object t_addallkeysof(const Variant& val);
@@ -1885,7 +1886,7 @@ class c_ImmSet : public BaseSet {
   String t___tostring();
 
  public:
-  explicit c_ImmSet(Class* cls = c_ImmSet::classof());
+  explicit c_ImmSet(Class* cls = c_ImmSet::classof(), uint32_t cap = 0);
 
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
@@ -2119,7 +2120,13 @@ ObjectData* collectionDeepCopySet(c_Set* mp);
 ObjectData* collectionDeepCopyImmSet(c_ImmSet* st);
 ObjectData* collectionDeepCopyPair(c_Pair* pair);
 
-ObjectData* newCollectionHelper(uint32_t type, uint32_t size);
+ObjectData* newCollectionHelper(CollectionType type, uint32_t size);
+ObjectData* newPairHelper();
+template<typename T> ObjectData* newColHelper(uint32_t size) {
+  auto* obj = newobj<T>(T::classof(), size);
+  obj->incRefCount();
+  return obj;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

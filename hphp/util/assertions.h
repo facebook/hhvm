@@ -88,9 +88,10 @@ void register_assert_fail_logger(AssertFailLogger);
  */
 struct AssertDetailImpl {
   /*
-   * Prints the results of all registered detailers to stderr.
+   * Prints the results of all registered detailers to stderr.  Returns true if
+   * we had any registered detailers.
    */
-  static void log();
+  static bool log();
 
 protected:
   explicit AssertDetailImpl(const char* name)
@@ -118,7 +119,7 @@ protected:
   AssertDetailImpl& operator=(const AssertDetailImpl&) = delete;
 
 private:
-  static void log_impl(const AssertDetailImpl*);
+  static bool log_impl(const AssertDetailImpl*);
   virtual std::string run() const = 0;
 
 private:
@@ -228,12 +229,14 @@ struct FailedAssertion : std::exception {
 
 #ifndef NDEBUG
 #define assert(e) always_assert(e)
+#define assertx(e) always_assert(e)
 #define assert_log(e, l) always_assert_log(e, l)
 #define assert_flog(e, ...) always_assert_flog(e, __VA_ARGS__)
 #define assert_throw(e) always_assert_throw(e)
 #define assert_throw_log(e, l) always_assert_throw_log(e, l)
 #else
 #define assert(e) static_cast<void>(0)
+#define assertx(e) static_cast<void>(0)
 #define assert_log(e, l) static_cast<void>(0)
 #define assert_flog(e, ...) static_cast<void>(0)
 #define assert_throw(e) static_cast<void>(0)

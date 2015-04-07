@@ -647,6 +647,7 @@ static void print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrNoOverride){ out << " (nooverride)"; }
   if (attrs & AttrInterceptable) { out << " (interceptable)"; }
   if (attrs & AttrPersistent) { out << " (persistent)"; }
+  if (attrs & AttrMayUseVV) { out << " (mayusevv)"; }
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {

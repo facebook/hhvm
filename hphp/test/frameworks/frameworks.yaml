@@ -101,6 +101,10 @@
       - doctrine2/tests/Doctrine/Tests/ORM/Functional/IdentityMapTest.php
       - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/YamlClassMetadataExporterTest.php
       - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/XmlClassMetadataExporterTest.php
+      - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/PhpClassMetadataExporterTest.php
+      - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/AbstractClassMetadataExporterTest.php
+      - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/AnnotationClassMetadataExporterTest.php
+      - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/ClassMetadataExporterTest.php
   drupal:
     url: https://github.com/drupal/drupal.git
     branch: 8.0-alpha13
@@ -575,6 +579,8 @@
     commit: 006a9573cee3d30a721f137facd5467f4e63bed8
     install_root: ratchet
     test_root: ratchet
+    flakey:
+      - ratchet/tests/unit/Server/IoServerTest.php
   reactphp:
     url: https://github.com/reactphp/react.git
     branch: v0.4.1
@@ -692,19 +698,6 @@
       - yii/tests/framework/caching/CFileCacheTest.php
       - yii/tests/framework/caching/CDbCacheTest.php
       - yii/tests/framework/caching/CDirectoryCacheDependencyTest.php
-  zf2:
-    url: https://github.com/zendframework/zf2.git
-    branch: release-2.3.2
-    commit: 0b74b66dc07ff88140287bdf67d230c1bd32ee0c
-    install_root: zf2
-    test_root: zf2/tests
-    test_find_mode: token
-    flakey:
-      - zf2/tests/ZendTest/Authentication/Adapter/Http/AuthTest.php
-    blacklist:
-      - zf2/tests/ZendTest/Code/Generator/ParameterGeneratorTest.php
-      - zf2/tests/ZendTest/Code/Generator/PropertyGeneratorTest.php
-      - zf2/tests/ZendTest/Code/Generator/ValueGeneratorTest.php
   html5php:
     url: https://github.com/Masterminds/html5-php.git
     branch: "2.0.0"

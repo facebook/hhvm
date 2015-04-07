@@ -62,7 +62,6 @@ NOOP_OPCODE(HintStkInner)
 
 // When implemented this shouldn't be a nop, but there's no reason to make us
 // punt on everything until then.
-NOOP_OPCODE(DbgAssertRetAddr)
 NOOP_OPCODE(CountBytecode)
 
 #undef NOOP_OPCODE
@@ -131,7 +130,6 @@ CALL_OPCODE(NewArray)
 CALL_OPCODE(NewMixedArray)
 CALL_OPCODE(NewLikeArray)
 CALL_OPCODE(AllocPackedArray)
-CALL_OPCODE(NewCol)
 CALL_OPCODE(Clone)
 CALL_OPCODE(AllocObj)
 CALL_OPCODE(CustomInstanceInit)
@@ -236,6 +234,7 @@ DELEGATE_OPCODE(EqInt)
 DELEGATE_OPCODE(NeqInt)
 
 DELEGATE_OPCODE(ConvBoolToInt)
+DELEGATE_OPCODE(NewCol)
 
 /////////////////////////////////////////////////////////////////////
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
@@ -247,12 +246,12 @@ void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
 #define PUNT_OPCODE(name)                                               \
   void CodeGenerator::cg##name(IRInstruction* inst) {                   \
     cgPunt(__FILE__, __LINE__, #name, m_curInst->marker().bcOff(),      \
-           curFunc(), resumed(), m_curInst->marker().profTransId());    \
+           curFunc(), resumed(), m_curInst->marker().profTransID());    \
   }
 
 #define CG_PUNT(instr)                                              \
     cgPunt(__FILE__, __LINE__, #instr, m_curInst->marker().bcOff(), \
-           curFunc(), resumed(), m_curInst->marker().profTransId())
+           curFunc(), resumed(), m_curInst->marker().profTransID())
 
 //////////////////////////////////////////////////////////////////////
 PUNT_OPCODE(ArrayIdx)
@@ -336,7 +335,6 @@ PUNT_OPCODE(CheckCold)
 PUNT_OPCODE(CheckBounds)
 PUNT_OPCODE(LdVectorSize)
 PUNT_OPCODE(CheckPackedArrayBounds)
-PUNT_OPCODE(IsPackedArrayElemNull)
 PUNT_OPCODE(VectorHasImmCopy)
 PUNT_OPCODE(VectorDoCow)
 PUNT_OPCODE(UnboxPtr)
@@ -347,7 +345,7 @@ PUNT_OPCODE(LdLocAddr)
 PUNT_OPCODE(LdMem)
 PUNT_OPCODE(LdContField)
 PUNT_OPCODE(LdElem)
-PUNT_OPCODE(LdPackedArrayElem)
+PUNT_OPCODE(LdPackedArrayElemAddr)
 PUNT_OPCODE(CheckRefInner)
 PUNT_OPCODE(LdStructArrayElem)
 PUNT_OPCODE(LdRef)
@@ -404,6 +402,7 @@ PUNT_OPCODE(FreeActRec)
 PUNT_OPCODE(CallArray)
 PUNT_OPCODE(NativeImpl)
 PUNT_OPCODE(RetCtrl)
+PUNT_OPCODE(AsyncRetCtrl)
 PUNT_OPCODE(StRetVal)
 PUNT_OPCODE(RetAdjustStk)
 PUNT_OPCODE(StMem)
@@ -429,7 +428,8 @@ PUNT_OPCODE(ResetSP)
 PUNT_OPCODE(VerifyParamCls)
 PUNT_OPCODE(VerifyRetCls)
 PUNT_OPCODE(ConcatCellCell)
-PUNT_OPCODE(AKExists)
+PUNT_OPCODE(AKExistsArr)
+PUNT_OPCODE(AKExistsObj)
 PUNT_OPCODE(ContEnter)
 PUNT_OPCODE(ContPreNext)
 PUNT_OPCODE(ContStartedCheck)
@@ -499,7 +499,8 @@ PUNT_OPCODE(MapIsset)
 PUNT_OPCODE(IssetElem)
 PUNT_OPCODE(EmptyElem)
 PUNT_OPCODE(IncStat)
-PUNT_OPCODE(RBTrace)
+PUNT_OPCODE(RBTraceEntry)
+PUNT_OPCODE(RBTraceMsg)
 PUNT_OPCODE(IncTransCounter)
 PUNT_OPCODE(IncProfCounter)
 PUNT_OPCODE(DbgAssertType)
@@ -516,7 +517,6 @@ PUNT_OPCODE(StContArResume)
 PUNT_OPCODE(LdContResumeAddr)
 PUNT_OPCODE(ContArIncIdx)
 PUNT_OPCODE(StContArState)
-PUNT_OPCODE(CheckTypePackedArrayElem)
 PUNT_OPCODE(OrdStr)
 
 #undef PUNT_OPCODE
@@ -650,7 +650,7 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
 
   auto& v = vmain();
   if (type.isKnownDataType()) {
-    assert(IS_REFCOUNTED_TYPE(type.toDataType()));
+    assertx(IS_REFCOUNTED_TYPE(type.toDataType()));
     increfMaybeStatic(v);
   } else {
     auto const sf = v.makeReg();
@@ -847,14 +847,14 @@ void CodeGenerator::cgCallHelper(Vout& v,
     case DestType::SIMD: CG_PUNT(cgCall-ReturnSIMD);
     case DestType::SSA:
     case DestType::Byte:
-      assert(dstReg1 == InvalidReg);
+      assertx(dstReg1 == InvalidReg);
       v << copy{PhysReg(vixl::x0), dstReg0};
       break;
     case DestType::None:
-      assert(dstReg0 == InvalidReg && dstReg1 == InvalidReg);
+      assertx(dstReg0 == InvalidReg && dstReg1 == InvalidReg);
       break;
     case DestType::Dbl:
-      assert(dstReg1 == InvalidReg);
+      assertx(dstReg1 == InvalidReg);
       v << copy{PhysReg(vixl::d0), dstReg0};
       break;
   }
@@ -900,7 +900,7 @@ CallDest CodeGenerator::callDestDbl(const IRInstruction* inst) const {
 template <class JmpFn>
 void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
                                       JmpFn doJcc) {
-  assert(inst->numSrcs() == 7);
+  assertx(inst->numSrcs() == 7);
 
   DEBUG_ONLY SSATmp* nParamsTmp = inst->src(1);
   DEBUG_ONLY SSATmp* firstBitNumTmp = inst->src(2);
@@ -914,18 +914,18 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
 
   // Get values in place
   auto funcPtrReg = funcPtrLoc.reg();
-  assert(funcPtrReg.isValid());
+  assertx(funcPtrReg.isValid());
 
   auto nParamsReg = nParamsLoc.reg();
 
   auto firstBitNum = static_cast<uint32_t>(firstBitNumTmp->intVal());
   auto mask64Reg = mask64Loc.reg();
   uint64_t mask64 = mask64Tmp->intVal();
-  assert(mask64);
+  assertx(mask64);
 
   auto vals64Reg = vals64Loc.reg();
   uint64_t vals64 = vals64Tmp->intVal();
-  assert((vals64 & mask64) == vals64);
+  assertx((vals64 & mask64) == vals64);
 
   auto thenBody = [&](Vout& v) {
     auto bitsOff = sizeof(uint64_t) * (firstBitNum / 64);
@@ -960,7 +960,7 @@ void CodeGenerator::emitReffinessTest(IRInstruction* inst, Vreg sf,
 
   auto& v = vmain();
   if (firstBitNum == 0) {
-    assert(nParamsTmp->hasConstVal());
+    assertx(nParamsTmp->hasConstVal());
     // This is the first 64 bits. No need to check nParams.
     thenBody(v);
   } else {
@@ -1021,7 +1021,7 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
-  assert(m_state.unit.bcOff() == inst->marker().bcOff());
+  assertx(m_state.unit.bcOff() == inst->marker().bcOff());
   auto const destSK = SrcKey(curFunc(), m_state.unit.bcOff(), resumed());
   auto& v = vmain();
   v << fallback{destSK};
@@ -1091,28 +1091,32 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   if (returnType.isReferenceType()) {
     // this should use some kind of cmov
-    assert(isBuiltinByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
+    assertx(isBuiltinByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
     v << load{mis[returnOffset + TVOFF(m_data)], dst};
-    condZero(v, dst, dstType, [&](Vout& v) {
-      return v.cns(KindOfNull);
-    }, [&](Vout& v) {
-      return v.cns(returnType.toDataType());
-    });
+    if (dstType.isValid()) {
+      condZero(v, dst, dstType, [&](Vout& v) {
+          return v.cns(KindOfNull);
+        }, [&](Vout& v) {
+          return v.cns(returnType.toDataType());
+        });
+    }
     return;
   }
 
   if (returnType <= Type::Cell || returnType <= Type::BoxedCell) {
     // this should use some kind of cmov
     static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
-    assert(isBuiltinByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
+    assertx(isBuiltinByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
     auto tmp_dst_type = v.makeReg();
     v << load{mis[returnOffset + TVOFF(m_data)], dst};
-    v << loadzbl{mis[returnOffset + TVOFF(m_type)], tmp_dst_type};
-    condZero(v, tmp_dst_type, dstType, [&](Vout& v) {
-      return v.cns(KindOfNull);
-    }, [&](Vout& v) {
-      return tmp_dst_type;
-    });
+    if (dstType.isValid()) {
+      v << loadzbl{mis[returnOffset + TVOFF(m_type)], tmp_dst_type};
+      condZero(v, tmp_dst_type, dstType, [&](Vout& v) {
+          return v.cns(KindOfNull);
+        }, [&](Vout& v) {
+          return tmp_dst_type;
+        });
+    }
     return;
   }
 
@@ -1123,7 +1127,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   // stack args are not supported yet
-  assert(m_state.catch_offsets[inst->block()] == 0);
+  assertx(m_state.catch_offsets[inst->block()] == 0);
 }
 
 static void unwindResumeHelper() {
@@ -1166,7 +1170,7 @@ void CodeGenerator::emitLoadTypedValue(Vout& v, Vloc dst, Vreg base,
 
 void CodeGenerator::emitStoreTypedValue(Vout& v, Vreg base, ptrdiff_t offset,
                                         Vloc src) {
-  assert(src.numWords() == 2);
+  assertx(src.numWords() == 2);
   auto reg0 = src.reg(0);
   auto reg1 = src.reg(1);
   v << store{reg0, base[offset + TVOFF(m_data)]};
@@ -1228,7 +1232,7 @@ void CodeGenerator::cgStLocPseudoMain(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdStk(IRInstruction* inst) {
-  assert(inst->taken() == nullptr);
+  assertx(inst->taken() == nullptr);
   auto src = srcLoc(0).reg();
   auto offset = cellsToBytes(inst->extra<LdStk>()->offset.offset);
   emitLoad(vmain(), inst->dst()->type(), dstLoc(0), src, offset);

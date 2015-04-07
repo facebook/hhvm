@@ -312,10 +312,12 @@ function map_convenience_filename($file) {
     'facebook'   => 'hphp/facebook/test',
 
     // Subsets of zend tests.
-    'zend_ext'   => 'hphp/test/zend/good/ext',
-    'zend_Zend'  => 'hphp/test/zend/good/Zend',
-    'zend_tests' => 'hphp/test/zend/good/tests',
-    'zend_bad'   => 'hphp/test/zend/bad',
+    'zend_ext'    => 'hphp/test/zend/good/ext',
+    'zend_ext_am' => 'hphp/test/zend/good/ext/[a-m]*',
+    'zend_ext_nz' => 'hphp/test/zend/good/ext/[n-z]*',
+    'zend_Zend'   => 'hphp/test/zend/good/Zend',
+    'zend_tests'  => 'hphp/test/zend/good/tests',
+    'zend_bad'    => 'hphp/test/zend/bad',
   );
 
   if (!isset($mappage[$file])) {
@@ -352,6 +354,12 @@ function find_tests($files, array $options = null) {
   if ($files == array('all')) {
     $files = array('quick', 'slow', 'spec', 'zend', 'fastcgi');
   }
+  $ft = array();
+  foreach ($files as $file) {
+    $globbed = glob(map_convenience_filename($file));
+    $ft = array_merge($ft, $globbed);
+  }
+  $files = $ft;
   foreach ($files as &$file) {
     $file = map_convenience_filename($file);
     if (!@stat($file)) {
@@ -493,7 +501,6 @@ function hhvm_cmd_impl() {
     isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
     isset($options['llvm']) ? '-vEval.JitLLVM=2' : '',
     isset($options['require-llvm']) ? '-vEval.JitLLVM=3' : '',
-    isset($options['bccf']) ? '-vEval.HHIRBytecodeControlFlow=1' : '',
     extra_args($options),
   );
   if (!isset($options['cores'])) {

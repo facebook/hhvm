@@ -86,7 +86,7 @@ namespace {
  */
 
 bool has_ref(Ptr p) {
-  assert(p != Ptr::Unk);
+  assertx(p != Ptr::Unk);
   return static_cast<uint32_t>(p) & kPtrRefBit;
 }
 
@@ -182,7 +182,7 @@ IR_TYPES
 }
 
 std::string Type::constValString() const {
-  assert(hasConstVal() || subtypeOfAny(Uninit, InitNull, Nullptr));
+  assertx(hasConstVal() || subtypeOfAny(Uninit, InitNull, Nullptr));
 
   if (*this <= Bool) {
     return m_boolVal ? "true" : "false";
@@ -339,7 +339,7 @@ std::string Type::toString() const {
   IRT_PRIMITIVE
 # undef IRT
 # undef IRTP
-  assert(!parts.empty());
+  assertx(!parts.empty());
   if (parts.size() == 1) {
     return parts.front();
   }
@@ -356,11 +356,11 @@ bool Type::checkValid() const {
   // Note: be careful, the Type::Foo objects aren't all constructed yet in this
   // function.
   if (m_extra) {
-    assert((!(m_bits & kAnyObj) || !(m_bits & kAnyArr)) &&
+    assertx((!(m_bits & kAnyObj) || !(m_bits & kAnyArr)) &&
            "Conflicting specialization");
   }
   if ((m_bits >> kPtrShift) == 0) { // !maybe(PtrToGen)
-    assert(m_ptrKind == 0);
+    assertx(m_ptrKind == 0);
   }
   static_assert(static_cast<uint32_t>(Ptr::Unk) == 0, "");
 
@@ -368,8 +368,8 @@ bool Type::checkValid() const {
 }
 
 Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
-  assert(inner != KindOfRef);
-  assert(inner == KindOfUninit || outer == KindOfRef);
+  assertx(inner != KindOfRef);
+  assertx(inner == KindOfUninit || outer == KindOfRef);
 
   switch (outer) {
     case KindOfUninit        : return kUninit;
@@ -384,15 +384,15 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfObject        : return kObj;
     case KindOfClass         : return kCls;
     case KindOfRef:
-      assert(inner != KindOfUninit);
+      assertx(inner != KindOfUninit);
       return bitsFromDataType(inner, KindOfUninit) << kBoxShift;
   }
   not_reached();
 }
 
 DataType Type::toDataType() const {
-  assert(!maybe(PtrToGen) || m_bits == kBottom);
-  assert(isKnownDataType());
+  assertx(!maybe(PtrToGen) || m_bits == kBottom);
+  assertx(isKnownDataType());
 
   // Order is important here: types must progress from more specific
   // to less specific to return the most specific DataType.
@@ -544,7 +544,7 @@ Type Type::operator-(Type rhs) const {
     // If `lhs' was a constant, we should not have somehow developed a
     // specialization in this process (with the exception of array constants,
     // which pretend to be ArrayKind specializations).
-    assert(!ty.isSpecialized() || ty.arrSpec());
+    assertx(!ty.isSpecialized() || ty.arrSpec());
     ty.m_hasConstVal = true;
     ty.m_extra = lhs.m_extra;
   }
@@ -555,7 +555,7 @@ Type Type::operator-(Type rhs) const {
 // Conversions.
 
 Type typeFromTV(const TypedValue* tv) {
-  assert(tv->m_type == KindOfClass || tvIsPlausible(*tv));
+  assertx(tv->m_type == KindOfClass || tvIsPlausible(*tv));
 
   if (tv->m_type == KindOfObject) {
     auto const cls = tv->m_data.pobj->getVMClass();
@@ -652,7 +652,7 @@ Type typeFromRAT(RepoAuthType ty) {
 //////////////////////////////////////////////////////////////////////
 
 Type ldRefReturn(Type typeParam) {
-  assert(typeParam <= Type::Cell);
+  assertx(typeParam <= Type::Cell);
   // Guarding on specialized types and uncommon unions like {Int|Bool} is
   // expensive enough that we only want to do it in situations where we've
   // manually confirmed the benefit.

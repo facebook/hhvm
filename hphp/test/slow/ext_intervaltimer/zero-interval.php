@@ -1,9 +1,14 @@
 <?hh
 
 function busy() {}
-
-$t = new IntervalTimer(0, 0.1, ($w) ==> { echo "ping\n"; });
+$x = 0;
+$t = new IntervalTimer(
+  0, 0.1,
+  ($w) ==> {
+    global $x;
+    $x++;
+    echo "ping\n";
+  });
 $t->start();
-$n = microtime(true);
-while (microtime(true) < $n + 0.3) { busy(); }
+while ($x < 1) { busy(); }
 $t->stop();

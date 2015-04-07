@@ -31,7 +31,7 @@ namespace HPHP { namespace jit {
 // Vout.
 
 Vout& Vout::operator<<(const Vinstr& inst) {
-  assert(!closed());
+  assertx(!closed());
 
   auto& code = m_unit.blocks[m_block].code;
   code.emplace_back(inst);
@@ -57,7 +57,7 @@ Vout Vout::makeBlock() {
 // Vasm.
 
 Vout& Vasm::add(CodeBlock& cb, AreaIndex area) {
-  assert(size_t(area) == m_areas.size());
+  assertx(size_t(area) == m_areas.size());
 
   auto b = m_unit.makeBlock(area);
   m_areas.emplace_back(Area { Vout{m_unit, b}, cb, cb.frontier() });
@@ -89,8 +89,8 @@ Vauto::~Vauto() {
       if (!main().closed()) {
         main() << fallthru{};
       }
-      assert(areas.size() < 2 || cold().empty() || cold().closed());
-      assert(areas.size() < 3 || frozen().empty() || frozen().closed());
+      assertx(areas.size() < 2 || cold().empty() || cold().closed());
+      assertx(areas.size() < 3 || frozen().empty() || frozen().closed());
 
       Trace::Bump bumper{Trace::printir, 10}; // prevent spurious printir
 

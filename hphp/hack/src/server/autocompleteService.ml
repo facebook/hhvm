@@ -50,6 +50,7 @@ let autocomplete_results = ref []
 
 let auto_complete_suffix = "AUTO332"
 let suffix_len = String.length auto_complete_suffix
+let strip_suffix s = String.sub s 0 (String.length s - suffix_len)
 let is_auto_complete x =
   if !autocomplete_results = []
   then begin
@@ -207,9 +208,7 @@ let get_constructor_ty c =
 let compute_complete_global funs classes =
   let completion_type = !Autocomplete.argument_global_type in
   let gname = Utils.strip_ns !Autocomplete.auto_complete_for_global in
-  let gname =
-    String.sub gname 0 (String.length gname - suffix_len)
-  in
+  let gname = strip_suffix gname in
   let result_count = ref 0 in
   try
     List.iter begin fun name ->
@@ -240,9 +239,43 @@ let compute_complete_global funs classes =
     end classes;
     if should_complete_fun completion_type
     then begin
+      (* Disgusting hack alert!
+       *
+       * In PHP/Hack, namespaced function lookup falls back into the global
+       * namespace if no function in the current namespace exists. The
+       * typechecker knows everything that exists, and resolves all of this
+       * during naming -- meaning that by the time that we get to typing, not
+       * only has "gname" been fully qualified, but we've lost whatever it
+       * might have looked like originally. This makes it tough to do the full
+       * namespace fallback behavior here -- we'd like to know if whatever
+       * "gname" corresponds to in the source code has a '\' to qualify it, but
+       * since it's already fully qualified here, we can't know.
+       *
+       * Except, we can kinda reverse engineer and figure it out. We have the
+       * positional information, which we can use to figure out how long the
+       * original source code token was, and then figure out what portion of
+       * "gname" that corresponds to, and see if it has a '\'. Since fully
+       * qualifying a name will always prepend, this all works.
+       *)
+      let gname_gns = match !Autocomplete.auto_complete_pos with
+        | None -> None
+        | Some p ->
+            let len =
+              p.Pos.pos_end.Lexing.pos_cnum -
+              p.Pos.pos_start.Lexing.pos_cnum -
+              suffix_len in
+            let start = String.length gname - len in
+            if String.contains_from gname start '\\'
+            then None else Some (strip_all_ns gname)
+      in
       List.iter begin fun name ->
         if !result_count > 100 then raise Exit;
-        if str_starts_with (strip_ns name) gname
+        let stripped_name = strip_ns name in
+        let matches_gname = str_starts_with stripped_name gname in
+        let matches_gname_gns = match gname_gns with
+          | None -> false
+          | Some s -> str_starts_with stripped_name s in
+        if matches_gname || matches_gname_gns
         then match (Typing_env.Funs.get name) with
           | Some fun_ ->
             incr result_count;
@@ -250,7 +283,7 @@ let compute_complete_global funs classes =
               Typing_reason.Rwitness fun_.Typing_defs.ft_pos,
               Typing_defs.Tfun fun_
             in
-            add_result (Utils.strip_ns name) ty
+            add_result stripped_name ty
           | _ -> ()
       end funs
     end

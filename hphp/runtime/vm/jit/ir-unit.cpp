@@ -58,12 +58,12 @@ Block* IRUnit::defBlock(Block::Hint hint) {
 }
 
 SSATmp* IRUnit::cns(Type type) {
-  assert(type.hasConstVal() ||
+  assertx(type.hasConstVal() ||
          type.subtypeOfAny(Type::Uninit, Type::InitNull, Type::Nullptr));
   IRInstruction inst(DefConst, BCMarker{});
   inst.setTypeParam(type);
   if (SSATmp* tmp = m_constTable.lookup(&inst)) {
-    assert(tmp->type() == type);
+    assertx(tmp->type() == type);
     return tmp;
   }
   return m_constTable.insert(clone(&inst)->dst());
@@ -90,17 +90,19 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case RaiseError:
       return instSk == sk;;
 
-    // The RetCtrl is generally ending a bytecode instruction, with
-    // the exception being in an Await bytecode instruction, where we
-    // consider the end of the bytecode instruction to be the
-    // non-suspending path.
+    // The RetCtrl is generally ending a bytecode instruction, with the
+    // exception being in an Await bytecode instruction, where we consider the
+    // end of the bytecode instruction to be the non-suspending path.
     case RetCtrl:
+    case AsyncRetCtrl:
       return inst.marker().sk().op() != Op::Await;
 
-    // A ReqBindJmp ends a unit and its marker corresponds to the next
-    // instruction to execute.
-    case ReqBindJmp:
-      return sk.succOffsets().count(instSk.offset());
+    // A ReqBindJmp ends a unit and it jumps to the next instruction
+    // to execute.
+    case ReqBindJmp: {
+      auto destOffset = inst.extra<ReqBindJmp>()->dest.offset();
+      return sk.succOffsets().count(destOffset);
+    }
 
     default:
       return false;

@@ -18,6 +18,7 @@
                         "type": null
                     },
                     "flags": [
+                      "IsFinal"
                     ],
                     "args": [
                     ]
@@ -28,6 +29,7 @@
                         "type": "StringMap"
                     },
                     "flags": [
+                      "IsFinal"
                     ],
                     "args": [
                     ]
@@ -35,6 +37,7 @@
                 {
                     "name": "__get",
                     "flags": [
+                      "IsFinal"
                     ],
                     "return": {
                         "type": "Variant"
@@ -49,6 +52,7 @@
                 {
                     "name": "__set",
                     "flags": [
+                      "IsFinal"
                     ],
                     "return": {
                         "type": "Variant"
@@ -67,6 +71,7 @@
                 {
                     "name": "__isset",
                     "flags": [
+                      "IsFinal"
                     ],
                     "return": {
                         "type": "Boolean"
@@ -81,6 +86,7 @@
                 {
                     "name": "__unset",
                     "flags": [
+                      "IsFinal"
                     ],
                     "return": {
                         "type": "Variant"
@@ -98,6 +104,7 @@
                         "type": "Object"
                     },
                     "flags": [
+                      "IsFinal",
                       "IsStatic"
                     ],
                     "args": [
@@ -122,6 +129,7 @@
                         "type": "Object"
                     },
                     "flags": [
+                      "IsFinal"
                     ],
                     "args": [
                         {

@@ -73,6 +73,18 @@ AliasClass pointee(const SSATmp* ptr) {
     return AMIStateAny;
   }
 
+  if (ptr->type() <= Type::PtrToArrGen) {
+    auto const sinst = canonical(ptr)->inst();
+    if (sinst->is(LdPackedArrayElemAddr)) {
+      if (sinst->src(1)->hasConstVal() && sinst->src(1)->intVal() >= 0) {
+        return AElemI { sinst->src(0),
+                        safe_cast<uint64_t>(sinst->src(1)->intVal()) };
+      }
+      return AElemIAny;
+    }
+    return AElemAny;
+  }
+
   /*
    * None of the above worked, so try to make the smallest union we can based
    * on the pointer type.
@@ -181,7 +193,7 @@ GeneralEffects may_load_store_kill(AliasClass loads,
 GeneralEffects may_load_store_move(AliasClass loads,
                                    AliasClass stores,
                                    AliasClass move) {
-  assert(move <= loads);
+  assertx(move <= loads);
   return GeneralEffects { loads, stores, move, AEmpty };
 }
 
@@ -246,6 +258,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       stack_below(inst.src(0), inst.extra<RetCtrl>()->spOffset.offset - 1)
     };
 
+  case AsyncRetCtrl:
+    return ReturnEffects {
+      stack_below(inst.src(0), inst.extra<AsyncRetCtrl>()->offset.offset - 1)
+    };
+
   case GenericRetDecRefs:
     /*
      * The may-store information here is AUnknown: even though we know it
@@ -286,15 +303,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefInlineFP:
     return may_load_store(
       AFrameAny | inline_fp_frame(&inst),
-     /*
-      * Note that although DefInlineFP is going to store some things into the
-      * memory for the new frame (m_soff, etc), it's as part of converting it
-      * from a pre-live frame to a live frame.  We don't need to report those
-      * effects on memory because they are logically to a 'different location
-      * class' (i.e. an activation record for the callee) than the AStack
-      * locations that represented the pre-live ActRec, even though they are at
-      * the same physical addresses in memory.
-      */
+      /*
+       * Note that although DefInlineFP is going to store some things into the
+       * memory for the new frame (m_soff, etc), it's as part of converting it
+       * from a pre-live frame to a live frame.  We don't need to report those
+       * effects on memory because they are logically to a 'different location
+       * class' (i.e. an activation record for the callee) than the AStack
+       * locations that represented the pre-live ActRec, even though they are at
+       * the same physical addresses in memory.
+       */
       AEmpty
     );
 
@@ -354,29 +371,23 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       };
     }
 
-  /*
-   * CallBuiltin takes args either as php values (subtypes of Gen) or as
-   * PtrToStkGen args that it writes/reads.  The `stack' set for its call
-   * effects need only contain those portions of the stack.  See DefInlineFP
-   * for discussion of how live ActRecs for inlined calls fit into that.
-   */
   case CallBuiltin:
     {
       auto const extra = inst.extra<CallBuiltin>();
-      AliasClass stk = AEmpty;
-      for (auto i = uint32_t{2}; i < inst.numSrcs(); ++i) {
-        if (inst.src(i)->type() <= Type::PtrToGen) {
-          auto const cls = pointee(inst.src(i));
-          if (cls.maybe(AStackAny)) {
-            stk = stk | cls;
+      auto const stk = [&] () -> AliasClass {
+        AliasClass ret = AEmpty;
+        for (auto i = uint32_t{2}; i < inst.numSrcs(); ++i) {
+          if (inst.src(i)->type() <= Type::PtrToGen) {
+            auto const cls = pointee(inst.src(i));
+            if (cls.maybe(AStackAny)) {
+              ret = ret | cls;
+            }
           }
         }
-      }
-      return CallEffects {
-        extra->destroyLocals,
-        stack_below(inst.src(1), extra->spOffset.offset - 1),
-        stk
-      };
+        return ret;
+      }();
+      auto const locs = extra->destroyLocals ? AFrameAny : AEmpty;
+      return may_reenter(inst, may_load_store(stk | AHeapAny | locs, locs));
     }
 
   // Resumable suspension takes everything from the frame and moves it into the
@@ -532,29 +543,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       inst.src(1)
     };
 
-  // TODO(#5575265): use LdMem for this instruction.
-  case LdPackedArrayElem:
-    if (inst.src(1)->hasConstVal() && inst.src(1)->intVal() >= 0) {
-      return PureLoad {
-        AElemI { inst.src(0), safe_cast<uint64_t>(inst.src(1)->intVal()) }
-      };
-    }
-    return PureLoad { AElemIAny };
-
   case LdStructArrayElem:
-    assert(inst.src(1)->strVal()->isStatic());
+    assertx(inst.src(1)->strVal()->isStatic());
     return PureLoad { AElemS { inst.src(0), inst.src(1)->strVal() } };
-
-  // TODO(#5575265): replace this instruction with CheckTypeMem.
-  case CheckTypePackedArrayElem:
-  case IsPackedArrayElemNull:
-    if (inst.src(1)->hasConstVal() && inst.src(1)->intVal() >= 0) {
-      return may_load_store(
-        AElemI { inst.src(0), safe_cast<uint64_t>(inst.src(1)->intVal()) },
-        AEmpty
-      );
-    }
-    return may_load_store(AElemIAny, AEmpty);
 
   case InitPackedArrayLoop:
     {
@@ -581,8 +572,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case ArrayIdx:
-  case AKExists:
     return may_load_store(AHeapAny, AHeapAny);
+
+  case AKExistsArr:
+    return may_load_store(AHeapAny, AHeapAny);
+  case AKExistsObj:
+    return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
 
   //////////////////////////////////////////////////////////////////////
   // Member instructions
@@ -615,7 +610,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VGetElem:
     // Right now we generally can't limit any of these better than general
     // re-entry rules, since they can raise warnings and re-enter.
-    assert(inst.src(0)->type() <= Type::PtrToGen);
+    assertx(inst.src(0)->type() <= Type::PtrToGen);
     return may_reenter(inst, may_load_store(
       AHeapAny | all_pointees(inst),
       AHeapAny | all_pointees(inst)
@@ -782,6 +777,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case JmpZero:
   case LdPropAddr:
   case LdStkAddr:
+  case LdPackedArrayElemAddr:
   case LteDbl:
   case LteInt:
   case LtInt:
@@ -908,7 +904,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InterfaceSupportsStr:
   case IsWaitHandle:
   case DbgAssertRefCount:
-  case DbgAssertRetAddr:
   case NSame:
   case Same:
   case Gt:
@@ -921,7 +916,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdBindAddr:
   case LdAsyncArParentChain:
   case LdSSwitchDestFast:
-  case RBTrace:
+  case RBTraceEntry:
+  case RBTraceMsg:
   case ConvIntToBool:
   case ConvIntToDbl:
   case ConvStrToArr:   // decrefs src, but src is a string
@@ -1201,7 +1197,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
 
 MemEffects memory_effects(const IRInstruction& inst) {
   auto const ret = memory_effects_impl(inst);
-  assert(check_effects(inst, ret));
+  assertx(check_effects(inst, ret));
   return ret;
 }
 

@@ -2,7 +2,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/vm/native-data.h"
-#include "hphp/runtime/ext/asio/asio_external_thread_event.h"
+#include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 
 #include "mcrouter/config.h" // @nolint
 #include "mcrouter/options.h" // @nolint

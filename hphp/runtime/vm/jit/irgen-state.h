@@ -42,7 +42,7 @@ struct FPIInfo {
 };
 
 /*
- * HHBC Translation State.
+ * IR-Generation State.
  *
  * This structure contains the main state bag for the HHIR frontend, which
  * translates HHBC into HHIR.  The parse-time state in HHIR is relatively
@@ -51,11 +51,11 @@ struct FPIInfo {
  * represent all operations on generic types some simple type analysis is
  * required to determine high-level compilation strategy.
  */
-struct HTS {
-  explicit HTS(TransContext);
+struct IRGS {
+  explicit IRGS(TransContext);
 
   /*
-   * TODO: refactor this code eventually so HTS doesn't own its IRUnit (or its
+   * TODO: refactor this code eventually so IRGS doesn't own its IRUnit (or its
    * IRBuilder).  The IRUnit should be the result of running the code in the ht
    * module.
    */
@@ -68,6 +68,11 @@ struct HTS {
    * are in. We push and pop as we deal with inlined calls.
    */
   std::vector<SrcKey> bcStateStack;
+
+  /*
+   * The current inlining level.  0 means we're not inlining.
+   */
+  uint16_t inlineLevel{0};
 
   /*
    * The id of the profiling translation for the code we're currently
@@ -123,7 +128,7 @@ struct HTS {
 /*
  * Debug-printable string.
  */
-std::string show(const HTS&);
+std::string show(const IRGS&);
 
 //////////////////////////////////////////////////////////////////////
 

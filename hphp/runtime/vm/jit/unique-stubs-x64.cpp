@@ -129,11 +129,12 @@ void emitCallToExit(UniqueStubs& uniqueStubs) {
   asm_label(a, ok);
   }
 
-  // Emulate a ret without actually doing one to avoid unbalancing the return
-  // stack buffer. The call from enterTCHelper() that got us into the TC was
-  // popped off the RSB by the ret that got us to this stub.
-  a.pop(rax);
-  a.jmp(rax);
+  // Emulate a ret to enterTCExit without actually doing one to avoid
+  // unbalancing the return stack buffer. The call from enterTCHelper() that
+  // got us into the TC was popped off the RSB by the ret that got us to this
+  // stub.
+  a.addq(8, rsp);
+  a.jmp(TCA(enterTCExit));
 
   // On a backtrace, gdb tries to locate the calling frame at address
   // returnRIP-1. However, for the first VM frame, there is no code at
@@ -373,9 +374,9 @@ void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
   moveToAlign(cb);
   uniqueStubs.funcPrologueRedispatch = a.frontier();
 
-  assert(kScratchCrossTraceRegs.contains(rax));
-  assert(kScratchCrossTraceRegs.contains(rdx));
-  assert(kScratchCrossTraceRegs.contains(rcx));
+  assertx(kScratchCrossTraceRegs.contains(rax));
+  assertx(kScratchCrossTraceRegs.contains(rdx));
+  assertx(kScratchCrossTraceRegs.contains(rcx));
 
   Label actualDispatch;
   Label numParamsCheck;

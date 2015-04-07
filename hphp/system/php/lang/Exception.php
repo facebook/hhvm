@@ -54,8 +54,19 @@ class Exception {
    */
   public function __construct($message = '', $code = 0,
                               Exception $previous = null) {
-    $this->message = $message;
-    $this->code = $code;
+
+    // Child classes may just override the protected property
+    // without implementing a constructor or calling parent one.
+    // In this case we should not override it from the param.
+
+    if ($message !== '' || $this->message === '') {
+      $this->message = $message;
+    }
+
+    if ($code !== 0 || $this->code === 0) {
+      $this->code = $code;
+    }
+
     $this->previous = $previous;
   }
 

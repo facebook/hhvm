@@ -34,7 +34,7 @@ TypedValue* baseGImpl(TypedValue key) {
   StringData* name = prepareKey(key);
   SCOPE_EXIT { decRefStr(name); };
   VarEnv* varEnv = g_context->m_globalVarEnv;
-  assert(varEnv != nullptr);
+  assertx(varEnv != nullptr);
   base = varEnv->lookup(name);
   if (base == nullptr) {
     if (warn) {
@@ -298,7 +298,7 @@ TypedValue incDecPropImpl(
 ) {
   auto result = make_tv<KindOfUninit>();
   HPHP::IncDecProp<true, isObj>(ctx, op, base, key, result);
-  assert(result.m_type != KindOfRef);
+  assertx(result.m_type != KindOfRef);
   return result;
 }
 
@@ -429,7 +429,7 @@ const TypedValue* elemArrayNotFound(const StringData* k) {
 
 template<KeyType keyType, bool checkForInt, bool warn>
 inline const TypedValue* elemArrayImpl(TypedValue* a, key_type<keyType> key) {
-  assert(a->m_type == KindOfArray);
+  assertx(a->m_type == KindOfArray);
   auto const ad = a->m_data.parr;
   auto const ret = checkForInt ? checkedGet(ad, key) : ad->nvGet(key);
   return ret ? ret : elemArrayNotFound<warn>(key);
@@ -457,26 +457,33 @@ ELEM_ARRAY_HELPER_TABLE(X)
 TypedValue arrayGetNotFound(int64_t k);
 TypedValue arrayGetNotFound(const StringData* k);
 
-template<KeyType keyType, bool checkForInt>
+template<KeyType keyType, bool checkForInt, bool arrIsStatic>
 TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
   auto ret = checkForInt ? checkedGet(a, key) : a->nvGet(key);
   if (ret) {
-    ret = tvToCell(ret);
-    tvRefcountedIncRef(ret);
+    if (arrIsStatic) {
+      tvAssertCell(ret);
+    } else {
+      ret = tvToCell(ret);
+      tvRefcountedIncRef(ret);
+    }
     return *ret;
   }
   return arrayGetNotFound(key);
 }
 
-#define ARRAYGET_HELPER_TABLE(m)               \
-  /* name        keyType     checkForInt   */  \
-  m(arrayGetS,   KeyType::Str,   false)        \
-  m(arrayGetSi,  KeyType::Str,    true)        \
-  m(arrayGetI,   KeyType::Int,   false)
+#define ARRAYGET_HELPER_TABLE(m)                           \
+  /* name        keyType     checkForInt   arrIsStatic */  \
+  m(arrayGetSC,  KeyType::Str,   false,    false)          \
+  m(arrayGetSU,  KeyType::Str,   false,     true)          \
+  m(arrayGetSiC, KeyType::Str,    true,    false)          \
+  m(arrayGetSiU, KeyType::Str,    true,     true)          \
+  m(arrayGetIC,  KeyType::Int,   false,    false)          \
+  m(arrayGetIU,  KeyType::Int,   false,     true)
 
-#define X(nm, keyType, checkForInt)                  \
-inline TypedValue nm(ArrayData* a, key_type<keyType> key) {\
-  return arrayGetImpl<keyType, checkForInt>(a, key);\
+#define X(nm, keyType, checkForInt, isStatic)                  \
+inline TypedValue nm(ArrayData* a, key_type<keyType> key) {    \
+  return arrayGetImpl<keyType, checkForInt, isStatic>(a, key); \
 }
 ARRAYGET_HELPER_TABLE(X)
 #undef X
@@ -572,7 +579,7 @@ typename ShuffleReturn<setRef>::return_type
 arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   static_assert(keyType != KeyType::Any,
                 "KeyType::Any is not supported in arraySetMImpl");
-  assert(cellIsPlausible(value));
+  assertx(cellIsPlausible(value));
   const bool copy = a->hasMultipleRefs();
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
                                : uncheckedSet(a, key, value, copy);

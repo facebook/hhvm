@@ -25,15 +25,15 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void bindMem(HTS& env, SSATmp* ptr, SSATmp* src) {
+void bindMem(IRGS& env, SSATmp* ptr, SSATmp* src) {
   auto const prevValue = gen(env, LdMem, ptr->type().deref(), ptr);
   pushIncRef(env, src);
   gen(env, StMem, ptr, src);
   gen(env, DecRef, prevValue);
 }
 
-void destroyName(HTS& env, SSATmp* name) {
-  assert(name == topC(env));
+void destroyName(IRGS& env, SSATmp* name) {
+  assertx(name == topC(env));
   popDecRef(env, name->type());
 }
 
@@ -43,7 +43,7 @@ void destroyName(HTS& env, SSATmp* name) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* ldClsPropAddrKnown(HTS& env,
+SSATmp* ldClsPropAddrKnown(IRGS& env,
                            const Class* cls,
                            const StringData* name) {
   initSProps(env, cls); // calls init; must be above sPropHandle()
@@ -57,7 +57,7 @@ SSATmp* ldClsPropAddrKnown(HTS& env,
   return gen(env, LdRDSAddr, RDSHandleData { handle }, ptrTy);
 }
 
-SSATmp* ldClsPropAddr(HTS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
+SSATmp* ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
   /*
    * We can use ldClsPropAddrKnown if either we know which property it is and
    * that it is visible && accessible, or we know it is a property on this
@@ -90,7 +90,7 @@ SSATmp* ldClsPropAddr(HTS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCGetS(HTS& env) {
+void emitCGetS(IRGS& env) {
   auto const ssaPropName = topC(env, BCSPOffset{1});
 
   if (!ssaPropName->isA(Type::Str)) {
@@ -106,7 +106,7 @@ void emitCGetS(HTS& env) {
   pushIncRef(env, ldMem);
 }
 
-void emitSetS(HTS& env) {
+void emitSetS(IRGS& env) {
   auto const ssaPropName = topC(env, BCSPOffset{2});
 
   if (!ssaPropName->isA(Type::Str)) {
@@ -122,7 +122,7 @@ void emitSetS(HTS& env) {
   bindMem(env, ptr, value);
 }
 
-void emitVGetS(HTS& env) {
+void emitVGetS(IRGS& env) {
   auto const ssaPropName = topC(env, BCSPOffset{1});
 
   if (!ssaPropName->isA(Type::Str)) {
@@ -142,7 +142,7 @@ void emitVGetS(HTS& env) {
   pushIncRef(env, val);
 }
 
-void emitBindS(HTS& env) {
+void emitBindS(IRGS& env) {
   auto const ssaPropName = topC(env, BCSPOffset{2});
 
   if (!ssaPropName->isA(Type::Str)) {
@@ -157,7 +157,7 @@ void emitBindS(HTS& env) {
   bindMem(env, propAddr, value);
 }
 
-void emitIssetS(HTS& env) {
+void emitIssetS(IRGS& env) {
   auto const ssaPropName = topC(env, BCSPOffset{1});
   if (!ssaPropName->isA(Type::Str)) {
     PUNT(IssetS-PropNameNotString);
@@ -183,7 +183,7 @@ void emitIssetS(HTS& env) {
   push(env, ret);
 }
 
-void emitEmptyS(HTS& env) {
+void emitEmptyS(IRGS& env) {
   auto const ssaPropName = topC(env, BCSPOffset{1});
   if (!ssaPropName->isA(Type::Str)) {
     PUNT(EmptyS-PropNameNotString);
@@ -212,7 +212,7 @@ void emitEmptyS(HTS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCGetG(HTS& env) {
+void emitCGetG(IRGS& env) {
   auto const exit = makeExitSlow(env);
   auto const name = topC(env);
   if (!name->isA(Type::Str)) PUNT(CGetG-NonStrName);
@@ -224,7 +224,7 @@ void emitCGetG(HTS& env) {
   );
 }
 
-void emitVGetG(HTS& env) {
+void emitVGetG(IRGS& env) {
   auto const name = topC(env);
   if (!name->isA(Type::Str)) PUNT(VGetG-NonStrName);
   auto const ptr = gen(env, LdGblAddrDef, name);
@@ -235,7 +235,7 @@ void emitVGetG(HTS& env) {
   );
 }
 
-void emitBindG(HTS& env) {
+void emitBindG(IRGS& env) {
   auto const name = topC(env, BCSPOffset{1});
   if (!name->isA(Type::Str)) PUNT(BindG-NameNotStr);
   auto const box = popV(env);
@@ -244,7 +244,7 @@ void emitBindG(HTS& env) {
   bindMem(env, ptr, box);
 }
 
-void emitSetG(HTS& env) {
+void emitSetG(IRGS& env) {
   auto const name = topC(env, BCSPOffset{1});
   if (!name->isA(Type::Str)) PUNT(SetG-NameNotStr);
   auto const value   = popC(env, DataTypeCountness);
@@ -253,7 +253,7 @@ void emitSetG(HTS& env) {
   bindMem(env, unboxed, value);
 }
 
-void emitIssetG(HTS& env) {
+void emitIssetG(IRGS& env) {
   auto const name = topC(env, BCSPOffset{0});
   if (!name->isA(Type::Str)) PUNT(IssetG-NameNotStr);
 
@@ -274,7 +274,7 @@ void emitIssetG(HTS& env) {
   push(env, ret);
 }
 
-void emitEmptyG(HTS& env) {
+void emitEmptyG(IRGS& env) {
   auto const name = topC(env);
   if (!name->isA(Type::Str)) PUNT(EmptyG-NameNotStr);
 
@@ -298,7 +298,7 @@ void emitEmptyG(HTS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCheckProp(HTS& env, const StringData* propName) {
+void emitCheckProp(IRGS& env, const StringData* propName) {
   auto const cctx = gen(env, LdCctx, fp(env));
   auto const cls = gen(env, LdClsCtx, cctx);
   auto const propInitVec = gen(env, LdClsInitData, cls);
@@ -311,7 +311,7 @@ void emitCheckProp(HTS& env, const StringData* propName) {
   push(env, gen(env, IsNType, Type::Uninit, curVal));
 }
 
-void emitInitProp(HTS& env, const StringData* propName, InitPropOp op) {
+void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
   auto const val = popC(env);
   auto const ctx = curClass(env);
 

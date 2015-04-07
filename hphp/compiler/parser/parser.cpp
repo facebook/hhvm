@@ -2424,10 +2424,9 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"Awaitable", "HH\\Awaitable"},
     (AliasEntry){"AsyncGenerator", "HH\\AsyncGenerator"},
     (AliasEntry){"WaitHandle", "HH\\WaitHandle"},
-    // Keep in sync with order in hphp/runtime/ext/asio/wait_handle.h
+    // Keep in sync with order in hphp/runtime/ext/asio/wait-handle.h
     (AliasEntry){"StaticWaitHandle", "HH\\StaticWaitHandle"},
     (AliasEntry){"WaitableWaitHandle", "HH\\WaitableWaitHandle"},
-    (AliasEntry){"BlockableWaitHandle", "HH\\BlockableWaitHandle"},
     (AliasEntry){"ResumableWaitHandle", "HH\\ResumableWaitHandle"},
     (AliasEntry){"AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle"},
     (AliasEntry){"AsyncGeneratorWaitHandle", "HH\\AsyncGeneratorWaitHandle"},

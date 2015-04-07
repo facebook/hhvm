@@ -77,7 +77,7 @@ struct Vconst {
   /* implicit */ Vconst(uint32_t i) : kind(Long), val(i) {}
   /* implicit */ Vconst(uint64_t i) : kind(Quad), val(i) {}
   /* implicit */ Vconst(Vptr tl) : kind(ThreadLocal), disp(tl.disp) {
-    assert(!tl.base.isValid() &&
+    assertx(!tl.base.isValid() &&
            !tl.index.isValid() &&
            tl.seg == Vptr::FS);
   }

@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/base/static-string-table.h"
 
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/debug/debug.h"
@@ -278,9 +277,9 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
         tbl->set(key, tvAsVariant(&tv), true);
       } else if (tv.m_data.pref) {
         StrNR key(const_cast<StringData*>(to_sdata(it->first)));
-        ClassInfo::ConstantInfo* ci =
-          (ClassInfo::ConstantInfo*)(void*)tv.m_data.pref;
-        auto cns = ci->getDeferredValue();
+        auto callback =
+          reinterpret_cast<Unit::SystemConstantCallback>(tv.m_data.pref);
+        auto cns = callback();
         if (cns.isInitialized()) {
           tbl->set(key, cns, true);
         }

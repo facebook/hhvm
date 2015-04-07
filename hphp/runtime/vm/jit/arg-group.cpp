@@ -46,7 +46,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
     return;
   }
   if (val) {
-    assert(loc.reg(0) != InvalidReg);
+    assertx(loc.reg(0) != InvalidReg);
     m_srcReg = loc.reg(0);
     m_kind = Kind::Reg;
     // zero extend any boolean value that we pass to the helper in case
@@ -55,7 +55,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
     return;
   }
   if (tmp->numWords() > 1) {
-    assert(loc.reg(1) != InvalidReg);
+    assertx(loc.reg(1) != InvalidReg);
     m_srcReg = loc.reg(1);
     // Since val is false then we're passing tmp's type. TypeReg lets
     // CodeGenerator know that the value might require some massaging

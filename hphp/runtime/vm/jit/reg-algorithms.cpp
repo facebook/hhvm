@@ -42,7 +42,7 @@ bool cycleHasSIMDReg(const CycleInfo& cycle, MovePlan& moves) {
 jit::vector<VMoveInfo>
 doVregMoves(Vunit& unit, MovePlan& moves) {
   constexpr auto N = 64;
-  assert(std::max(x64::abi.all().size(), arm::abi.all().size()) <= N);
+  assertx(std::max(x64::abi.all().size(), arm::abi.all().size()) <= N);
   jit::vector<VMoveInfo> howTo;
   CycleInfo cycle_mem[N];
   List<CycleInfo> cycles(cycle_mem, 0, N);
@@ -63,7 +63,7 @@ doVregMoves(Vunit& unit, MovePlan& moves) {
 
     // Begin walking a path from reg.
     for (auto node = reg;;) {
-      assert(nextIndex < N);
+      assertx(nextIndex < N);
       index[node] = nextIndex++;
       auto next = moves[node];
       if (next != InvalidReg) {
@@ -89,7 +89,7 @@ doVregMoves(Vunit& unit, MovePlan& moves) {
   {
     PhysReg q[N];
     int qBack = 0;
-    auto enque = [&](PhysReg r) { assert(qBack < N); q[qBack++] = r; };
+    auto enque = [&](PhysReg r) { assertx(qBack < N); q[qBack++] = r; };
     for (auto node : outDegree) {
       if (outDegree[node] == 0) enque(node);
     }
@@ -136,14 +136,14 @@ doVregMoves(Vunit& unit, MovePlan& moves) {
 
 jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
   constexpr auto N = 64;
-  assert(std::max(x64::abi.all().size(), arm::abi.all().size()) <= N);
+  assertx(std::max(x64::abi.all().size(), arm::abi.all().size()) <= N);
   jit::vector<MoveInfo> howTo;
   CycleInfo cycle_mem[N];
   List<CycleInfo> cycles(cycle_mem, 0, N);
   PhysReg::Map<int> outDegree;
   PhysReg::Map<int> index;
 
-  assert(moves[rTmp] == InvalidReg);
+  assertx(moves[rTmp] == InvalidReg);
   for (auto reg : moves) {
     // Ignore moves from a register to itself
     if (reg == moves[reg]) moves[reg] = InvalidReg;
@@ -158,7 +158,7 @@ jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
 
     // Begin walking a path from reg.
     for (auto node = reg;;) {
-      assert(nextIndex < N);
+      assertx(nextIndex < N);
       index[node] = nextIndex++;
       auto next = moves[node];
       if (next != InvalidReg) {
@@ -184,7 +184,7 @@ jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
   {
     PhysReg q[N];
     int qBack = 0;
-    auto enque = [&](PhysReg r) { assert(qBack < N); q[qBack++] = r; };
+    auto enque = [&](PhysReg r) { assertx(qBack < N); q[qBack++] = r; };
     for (auto node : outDegree) {
       if (outDegree[node] == 0) enque(node);
     }

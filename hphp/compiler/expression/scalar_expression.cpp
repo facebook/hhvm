@@ -256,7 +256,7 @@ TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar,
     break;
   }
 
-  return checkTypesImpl(ar, type, actualType, coerce);
+  return checkTypesImpl(ar, type, actualType);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

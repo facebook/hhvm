@@ -68,7 +68,7 @@ void append_vec(std::vector<char>& v,
 }
 
 void sync_regstate(_Unwind_Context* context) {
-  assert(tl_regState == VMRegState::DIRTY);
+  assertx(tl_regState == VMRegState::DIRTY);
 
   uintptr_t frameRbp = _Unwind_GetGR(context, Debug::RBP);
   uintptr_t frameRip = _Unwind_GetGR(context, Debug::RIP);
@@ -183,9 +183,9 @@ tc_unwind_personality(int version,
   // any other runtimes but this may change in the future.
   DEBUG_ONLY constexpr uint64_t kMagicClass = 0x474e5543432b2b00;
   DEBUG_ONLY constexpr uint64_t kMagicDependentClass = 0x474e5543432b2b01;
-  assert(exceptionClass == kMagicClass ||
+  assertx(exceptionClass == kMagicClass ||
          exceptionClass == kMagicDependentClass);
-  assert(version == 1);
+  assertx(version == 1);
 
   auto const& ti = typeInfoFromUnwindException(exceptionObj);
   auto const std_exception = exceptionFromUnwindException(exceptionObj);
@@ -203,7 +203,7 @@ tc_unwind_personality(int version,
     int status;
     auto* exnType = __cxa_demangle(ti.name(), nullptr, nullptr, &status);
     SCOPE_EXIT { free(exnType); };
-    assert(status == 0);
+    assertx(status == 0);
     FTRACE(1, "unwind {} exn {}: regState: {} ip: {} type: {}\n",
            unwindType, exceptionObj,
            tl_regState == VMRegState::DIRTY ? "dirty" : "clean",
@@ -297,7 +297,7 @@ TCA tc_unwind_resume(ActRec*& fp) {
     if (isDebuggerReturnHelper(savedRip)) {
       // If this frame had its return address smashed by the debugger, the real
       // catch trace is saved in a side table.
-      assert(catchTrace == nullptr);
+      assertx(catchTrace == nullptr);
       catchTrace = popDebuggerCatch(fp);
     }
     unwindPreventReturnToTC(fp);

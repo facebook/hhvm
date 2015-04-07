@@ -1,6 +1,6 @@
 #include "hphp/runtime/base/file-await.h"
 #include "hphp/runtime/base/file.h"
-#include "hphp/runtime/ext/asio/static_wait_handle.h"
+#include "hphp/runtime/ext/asio/static-wait-handle.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////

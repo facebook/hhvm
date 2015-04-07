@@ -53,7 +53,7 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   , m_extra(inst->m_extra ? cloneExtra(op(), inst->m_extra, arena)
                           : nullptr)
 {
-  assert(!isTransient());
+  assertx(!isTransient());
   std::copy(inst->m_srcs, inst->m_srcs + inst->m_numSrcs, m_srcs);
   if (hasEdges()) {
     m_edges = new (arena) Edge[2];
@@ -88,7 +88,7 @@ void IRInstruction::convertToNop() {
 }
 
 void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
-  assert(other->isTransient() || m_numDsts == other->m_numDsts);
+  assertx(other->isTransient() || m_numDsts == other->m_numDsts);
   auto& arena = unit.arena();
 
   if (hasEdges()) clearEdges();
@@ -102,7 +102,7 @@ void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
   std::copy(other->m_srcs, other->m_srcs + m_numSrcs, m_srcs);
 
   if (hasEdges()) {
-    assert(other->hasEdges());  // m_op is from other now
+    assertx(other->hasEdges());  // m_op is from other now
     m_edges = new (arena) Edge[2];
     m_edges[0].setInst(this);
     m_edges[1].setInst(this);
@@ -184,7 +184,7 @@ bool IRInstruction::killsSource(int idx) const {
     case ConvObjToArr:
     case ConvCellToArr:
     case ConvCellToObj:
-      assert(idx == 0);
+      assertx(idx == 0);
       return true;
     case ArraySet:
     case ArraySetRef:
@@ -198,7 +198,7 @@ bool IRInstruction::killsSource(int idx) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 void IRInstruction::setOpcode(Opcode newOpc) {
-  assert(hasEdges() || !jit::hasEdges(newOpc)); // cannot allocate new edges
+  assertx(hasEdges() || !jit::hasEdges(newOpc)); // cannot allocate new edges
   if (hasEdges() && !jit::hasEdges(newOpc)) {
     clearEdges();
   }
@@ -207,8 +207,8 @@ void IRInstruction::setOpcode(Opcode newOpc) {
 
 SSATmp* IRInstruction::dst(unsigned i) const {
   if (i == 0 && m_numDsts == 0) return nullptr;
-  assert(i < m_numDsts);
-  assert(naryDst() || i == 0);
+  assertx(i < m_numDsts);
+  assertx(naryDst() || i == 0);
   return hasDst() ? dst() : &m_dst[i];
 }
 
@@ -247,30 +247,39 @@ Type allocObjReturn(const IRInstruction* inst) {
 }
 
 Type arrElemReturn(const IRInstruction* inst) {
-  assert(inst->op() == LdPackedArrayElem || inst->op() == LdStructArrayElem);
-  assert(!inst->hasTypeParam() || inst->typeParam() <= Type::Gen);
-  auto const tyParam = inst->hasTypeParam() ? inst->typeParam() : Type::Gen;
+  assertx(inst->is(LdStructArrayElem, ArrayGet));
+  assertx(!inst->hasTypeParam() || inst->typeParam() <= Type::Gen);
+
+  auto resultType = inst->hasTypeParam() ? inst->typeParam() : Type::Gen;
+  if (inst->is(ArrayGet)) {
+    resultType = resultType & Type::InitCell;
+  }
+
+  // Elements of a static array are uncounted
+  if (inst->src(0)->isA(Type::StaticArr)) {
+    resultType = resultType & Type::UncountedInit;
+  }
 
   auto const arrTy = inst->src(0)->type().arrSpec().type();
-  if (!arrTy) return tyParam;
+  if (!arrTy) return resultType;
 
   using T = RepoAuthType::Array::Tag;
 
   switch (arrTy->tag()) {
     case T::Packed:
-      {
-        auto const idx = inst->src(1);
-        if (!idx->hasConstVal()) return Type::Gen;
-        if (idx->intVal() >= 0 && idx->intVal() < arrTy->size()) {
-          return typeFromRAT(arrTy->packedElem(idx->intVal())) & tyParam;
-        }
+    {
+      auto const idx = inst->src(1);
+      if (idx->hasConstVal() &&
+          idx->intVal() >= 0 && idx->intVal() < arrTy->size()) {
+        return typeFromRAT(arrTy->packedElem(idx->intVal())) & resultType;
       }
-      return Type::Gen;
+      return resultType;
+    }
     case T::PackedN:
-      return typeFromRAT(arrTy->elemType()) & tyParam;
+      return typeFromRAT(arrTy->elemType()) & resultType;
   }
 
-  return tyParam;
+  not_reached();
 }
 
 Type thisReturn(const IRInstruction* inst) {
@@ -291,7 +300,7 @@ Type ctxReturn(const IRInstruction* inst) {
 }
 
 Type setElemReturn(const IRInstruction* inst) {
-  assert(inst->op() == SetElem);
+  assertx(inst->op() == SetElem);
   auto baseType = inst->src(minstrBaseIdx(inst->op()))->type().strip();
 
   // If the base is a Str, the result will always be a CountedStr (or
@@ -306,7 +315,7 @@ Type setElemReturn(const IRInstruction* inst) {
 }
 
 Type builtinReturn(const IRInstruction* inst) {
-  assert(inst->op() == CallBuiltin);
+  assertx(inst->op() == CallBuiltin);
 
   Type t = inst->typeParam();
   if (t.isSimpleType() || t == Type::Cell) {
@@ -323,13 +332,13 @@ Type builtinReturn(const IRInstruction* inst) {
 Type outputType(const IRInstruction* inst, int dstId) {
   using namespace TypeNames;
   using TypeNames::TCA;
-#define ND              assert(0 && "outputType requires HasDest or NaryDest");
+#define ND              assertx(0 && "outputType requires HasDest or NaryDest");
 #define D(type)         return type;
 #define DofS(n)         return inst->src(n)->type();
 #define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
 #define DParamMayRelax  return inst->typeParam();
 #define DParam          return inst->typeParam();
-#define DParamPtr(k)    assert(inst->typeParam() <= Type::Gen.ptr(Ptr::k)); \
+#define DParamPtr(k)    assertx(inst->typeParam() <= Type::Gen.ptr(Ptr::k)); \
                         return inst->typeParam();
 #define DUnboxPtr       return unboxPtr(inst->src(0)->type());
 #define DBoxPtr         return boxPtr(inst->src(0)->type());
@@ -373,7 +382,6 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DBuiltin
 #undef DSubtract
 #undef DCns
-
 }
 
 }}

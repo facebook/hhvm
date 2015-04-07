@@ -127,7 +127,7 @@ inline ServiceReqArgInfo RipRelative(TCA addr) {
   };
 }
 
-typedef jit::vector<ServiceReqArgInfo> ServiceReqArgVec;
+using ServiceReqArgVec = jit::vector<ServiceReqArgInfo>;
 
 union ServiceReqArg {
   TCA tca;

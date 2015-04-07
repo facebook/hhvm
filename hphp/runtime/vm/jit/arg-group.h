@@ -71,8 +71,8 @@ public:
   Vreg srcReg() const { return m_srcReg; }
   Kind kind() const { return m_kind; }
   void setDstReg(PhysReg reg) { m_dstReg = reg; }
-  Immed64 imm() const { assert(m_kind == Kind::Imm); return m_imm64; }
-  Immed disp() const { assert(m_kind == Kind::Addr); return m_disp32; }
+  Immed64 imm() const { assertx(m_kind == Kind::Imm); return m_imm64; }
+  Immed disp() const { assertx(m_kind == Kind::Addr); return m_disp32; }
   bool isZeroExtend() const { return m_zeroExtend; }
   bool done() const { return m_done; }
   void markDone() { m_done = true; }
@@ -121,7 +121,7 @@ private:
  *       .reg(rax)
  *       .immPtr(makeStaticString("Yo"))
  *       ;
- *   assert(args.size() == 3);
+ *   assertx(args.size() == 3);
  */
 struct ArgGroup {
   typedef jit::vector<ArgDesc> ArgVec;
@@ -136,18 +136,18 @@ struct ArgGroup {
   size_t numStackArgs() const { return m_stkArgs.size(); }
 
   ArgDesc& gpArg(size_t i) {
-    assert(i < m_gpArgs.size());
+    assertx(i < m_gpArgs.size());
     return m_gpArgs[i];
   }
   const ArgDesc& gpArg(size_t i) const {
     return const_cast<ArgGroup*>(this)->gpArg(i);
   }
   const ArgDesc& simdArg(size_t i) const {
-    assert(i < m_simdArgs.size());
+    assertx(i < m_simdArgs.size());
     return m_simdArgs[i];
   }
   const ArgDesc& stkArg(size_t i) const {
-    assert(i < m_stkArgs.size());
+    assertx(i < m_stkArgs.size());
     return m_stkArgs[i];
   }
   ArgDesc& operator[](size_t i) = delete;

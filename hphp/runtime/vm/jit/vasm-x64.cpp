@@ -82,7 +82,6 @@ private:
   void emit(ldimmq& i);
   void emit(fallback& i);
   void emit(fallbackcc i);
-  void emit(kpcall& i);
   void emit(load& i);
   void emit(mccall& i);
   void emit(mcprep& i);
@@ -91,6 +90,8 @@ private:
   void emit(syncpoint i);
   void emit(unwind i);
   void emit(landingpad& i) {}
+  void emit(vretm& i);
+  void emit(vret& i);
 
   // instructions
   void emit(andb& i) { commuteSF(i); a->andb(i.s0, i.d); }
@@ -169,11 +170,9 @@ private:
   void emit(orqi& i) { binary(i); a->orq(i.s0, i.d); }
   void emit(orqim& i) { a->orq(i.s0, i.m); }
   void emit(pop& i) { a->pop(i.d); }
-  void emit(popm& i) { a->pop(i.m); }
   void emit(psllq& i) { binary(i); a->psllq(i.s0, i.d); }
   void emit(psrlq& i) { binary(i); a->psrlq(i.s0, i.d); }
   void emit(push& i) { a->push(i.s); }
-  void emit(pushm& i) { a->push(i.s); }
   void emit(roundsd& i) { a->roundsd(i.dir, i.s, i.d); }
   void emit(ret& i) { a->ret(); }
   void emit(sarq& i) { unary(i); a->sarq(i.d); }
@@ -238,7 +237,7 @@ private:
 
 private:
   Vasm::Area& area(AreaIndex i) {
-    assert((unsigned)i < areas.size());
+    assertx((unsigned)i < areas.size());
     return areas[(unsigned)i];
   }
 
@@ -260,7 +259,7 @@ private:
 // prepare a binary op that is not commutative.  s0 must be a different
 // register than s1 so we don't clobber it.
 template<class Inst> void Vgen::noncommute(Inst& i) {
-  assert(i.s1 == i.d || i.s0 != i.d); // do not clobber s0
+  assertx(i.s1 == i.d || i.s0 != i.d); // do not clobber s0
   binary(i);
 }
 
@@ -306,7 +305,14 @@ void Vgen::emit(cloadq& i) {
   auto m = i.t;
   always_assert(!m.index.isValid()); // not supported, but could be later.
   if (i.f != i.d) {
-    always_assert(i.d != m.base); // don't clobber base
+    if (i.d == m.base) {
+      // We can't move f over d or we'll clobber the Vptr we need to load from.
+      // Since cload does the load unconditionally anyway, we can just load and
+      // cmov.
+      a->loadq(i.t, i.d);
+      a->cmov_reg64_reg64(ccNegate(i.cc), i.f, i.d);
+      return;
+    }
     a->movq(i.f, i.d);
   }
   a->cload_reg64_disp_reg64(i.cc, m.base, m.disp, i.d);
@@ -345,7 +351,7 @@ void Vgen::emit(copy i) {
     if (i.d.isGP()) {                 // GP => GP
       a->movq(i.s, i.d);
     } else {                             // GP => XMM
-      assert(i.d.isSIMD());
+      assertx(i.d.isSIMD());
       // This generates a movq x86 instruction, which zero extends
       // the 64-bit value in srcReg into a 128-bit XMM register
       a->movq_rx(i.s, i.d);
@@ -354,7 +360,7 @@ void Vgen::emit(copy i) {
     if (i.d.isGP()) {                 // XMM => GP
       a->movq_xr(i.s, i.d);
     } else {                             // XMM => XMM
-      assert(i.d.isSIMD());
+      assertx(i.d.isSIMD());
       // This copies all 128 bits in XMM,
       // thus avoiding partial register stalls
       a->movdqa(i.s, i.d);
@@ -363,9 +369,9 @@ void Vgen::emit(copy i) {
 }
 
 void Vgen::emit(copy2& i) {
-  assert(i.s0.isValid() && i.s1.isValid() && i.d0.isValid() && i.d1.isValid());
+  assertx(i.s0.isValid() && i.s1.isValid() && i.d0.isValid() && i.d1.isValid());
   auto s0 = i.s0, s1 = i.s1, d0 = i.d0, d1 = i.d1;
-  assert(d0 != d1);
+  assertx(d0 != d1);
   if (d0 == s1) {
     if (d1 == s0) {
       a->xchgq(d0, d1);
@@ -382,16 +388,7 @@ void Vgen::emit(copy2& i) {
 }
 
 void Vgen::emit(bindaddr& i) {
-  mcg->setJmpTransID((TCA)i.dest);
-  *i.dest = emitEphemeralServiceReq(
-    frozen(),
-    mcg->getFreeStub(frozen(), &mcg->cgFixups()),
-    REQ_BIND_ADDR,
-    i.dest,
-    i.sk.toAtomicInt(),
-    TransFlags{}.packed
-  );
-  mcg->cgFixups().m_codePointers.insert(i.dest);
+  *i.dest = emitBindAddr(a->code(), frozen(), i.dest, i.sk);
 }
 
 void Vgen::emit(bindcall& i) {
@@ -401,22 +398,7 @@ void Vgen::emit(bindcall& i) {
 }
 
 void Vgen::emit(bindjcc1st& i) {
-  backend.prepareForTestAndSmash(a->code(), 0,
-                                 TestAndSmashFlags::kAlignJccAndJmp);
-  auto const patchAddr = a->frontier();
-  auto const jccStub =
-    emitEphemeralServiceReq(frozen(),
-                            mcg->getFreeStub(frozen(), &mcg->cgFixups()),
-                            REQ_BIND_JMPCC_FIRST,
-                            RipRelative(patchAddr),
-                            i.targets[1].toAtomicInt(),
-                            i.targets[0].toAtomicInt(),
-                            ccServiceReqArgInfo(i.cc));
-
-  mcg->setJmpTransID(a->frontier());
-  a->jcc(i.cc, jccStub);
-  mcg->setJmpTransID(a->frontier());
-  a->jmp(jccStub);
+  emitBindJmpccFirst(a->code(), frozen(), i.cc, i.targets[0], i.targets[1]);
 }
 
 void Vgen::emit(bindjcc& i) {
@@ -443,14 +425,6 @@ void Vgen::emit(fallbackcc i) {
   } else {
     destSR->emitFallbackJumpCustom(a->code(), frozen(), i.dest, i.trflags);
   }
-}
-
-void Vgen::emit(kpcall& i) {
-  backend.prepareForSmash(a->code(), kCallLen);
-  mcg->tx().profData()->addPrologueMainCaller(i.callee, i.prologIndex,
-                                              a->frontier());
-  always_assert(backend.isSmashable(a->frontier(), kCallLen));
-  a->call(i.target);
 }
 
 static void emitSimdImm(X64Assembler* a, int64_t val, Vreg d) {
@@ -516,7 +490,7 @@ void Vgen::emit(load& i) {
   if (i.d.isGP()) {
     a->loadq(mref, i.d);
   } else {
-    assert(i.d.isSIMD());
+    assertx(i.d.isSIMD());
     a->movsd(mref, i.d);
   }
 }
@@ -555,7 +529,7 @@ void Vgen::emit(store& i) {
   if (i.s.isGP()) {
     a->storeq(i.s, i.d);
   } else {
-    assert(i.s.isSIMD());
+    assertx(i.s.isSIMD());
     a->movsd(i.s, i.d);
   }
 }
@@ -611,6 +585,17 @@ void Vgen::emit(unwind i) {
   emit(jmp{i.targets[0]});
 }
 
+void Vgen::emit(vretm& i) {
+  a->push(i.retAddr);
+  a->loadq(i.prevFp, i.d);
+  a->ret();
+}
+
+void Vgen::emit(vret& i) {
+  a->push(i.retAddr);
+  a->ret();
+}
+
 // overall emitter
 void Vgen::emit(jit::vector<Vlabel>& labels) {
   // Some structures here track where we put things just for debug printing.
@@ -640,7 +625,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
   }
 
   for (int i = 0, n = labels.size(); i < n; ++i) {
-    assert(checkBlockEnd(unit, labels[i]));
+    assertx(checkBlockEnd(unit, labels[i]));
 
     auto b = labels[i];
     auto& block = unit.blocks[b];
@@ -710,15 +695,15 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
   }
 
   for (auto& p : jccs) {
-    assert(addrs[p.target]);
+    assertx(addrs[p.target]);
     X64Assembler::patchJcc(p.instr, addrs[p.target]);
   }
   for (auto& p : jmps) {
-    assert(addrs[p.target]);
+    assertx(addrs[p.target]);
     X64Assembler::patchJmp(p.instr, addrs[p.target]);
   }
   for (auto& p : calls) {
-    assert(addrs[p.target]);
+    assertx(addrs[p.target]);
     X64Assembler::patchCall(p.instr, addrs[p.target]);
   }
   for (auto& p : catches) {
@@ -727,7 +712,7 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
   for (auto& p : ldpoints) {
     auto after_lea = p.instr + 7;
     auto d = points[p.pos] - after_lea;
-    assert(deltaFits(d, sz::dword));
+    assertx(deltaFits(d, sz::dword));
     ((int32_t*)after_lea)[-1] = d;
   }
 
@@ -822,7 +807,7 @@ void vector_splice(V& out, size_t idx, size_t count, V& in) {
 // at the end of a block, so we can just keep appending to the same
 // block.
 void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
-  assert(unit.tuples[inst.svcreq_.args].size() < kNumServiceReqArgRegs);
+  assertx(unit.tuples[inst.svcreq_.args].size() < kNumServiceReqArgRegs);
   auto svcreq = inst.svcreq_; // copy it
   auto origin = inst.origin;
   auto& argv = unit.tuples[svcreq.args];
@@ -948,7 +933,7 @@ void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
     // block.
     if (auto rspOffset = ((stkArgs.size() + 1) & ~1) * sizeof(uintptr_t)) {
       auto& taken = unit.blocks[targets[1]].code;
-      assert(taken.front().op == Vinstr::landingpad ||
+      assertx(taken.front().op == Vinstr::landingpad ||
              taken.front().op == Vinstr::jmp);
       Vinstr v{lea{rsp[rspOffset], rsp}};
       v.origin = taken.front().origin;
@@ -973,8 +958,16 @@ void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
       // the lower bits, so shift the type result register.
       static_assert(offsetof(TypedValue, m_data) == 0, "");
       static_assert(offsetof(TypedValue, m_type) == 8, "");
-      assert(dests.size() == 2);
-      v << copy2{reg::rax, reg::rdx, dests[0], dests[1]};
+      if (dests.size() == 2) {
+        v << copy2{reg::rax, reg::rdx, dests[0], dests[1]};
+      } else {
+        // We have cases where we statically know the type but need the value
+        // from native call. Even if the type does not really need a register
+        // (e.g., InitNull), a Vreg is still allocated in assignRegs(), so the
+        // following assertion holds.
+        assertx(dests.size() == 1);
+        v << copy{reg::rax, dests[0]};
+      }
       break;
     }
     case DestType::SIMD: {
@@ -982,24 +975,24 @@ void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
       // the lower bits, so shift the type result register.
       static_assert(offsetof(TypedValue, m_data) == 0, "");
       static_assert(offsetof(TypedValue, m_type) == 8, "");
-      assert(dests.size() == 1);
+      assertx(dests.size() == 1);
       pack2(v, reg::rax, reg::rdx, dests[0]);
       break;
     }
     case DestType::SSA:
     case DestType::Byte:
       // copy the single-register result to dests[0]
-      assert(dests.size() == 1);
-      assert(dests[0].isValid());
+      assertx(dests.size() == 1);
+      assertx(dests[0].isValid());
       v << copy{reg::rax, dests[0]};
       break;
     case DestType::None:
-      assert(dests.empty());
+      assertx(dests.empty());
       break;
     case DestType::Dbl:
       // copy the single-register result to dests[0]
-      assert(dests.size() == 1);
-      assert(dests[0].isValid());
+      assertx(dests.size() == 1);
+      assertx(dests[0].isValid());
       v << copy{reg::xmm0, dests[0]};
       break;
   }
@@ -1035,7 +1028,7 @@ void lowerForX64(Vunit& unit, const Abi& abi) {
   auto& blocks = unit.blocks;
 
   PostorderWalker{unit}.dfs([&](Vlabel ib) {
-    assert(!blocks[ib].code.empty());
+    assertx(!blocks[ib].code.empty());
     if (blocks[ib].code.back().op == Vinstr::svcreq) {
       lower_svcreq(unit, Vlabel{ib}, blocks[ib].code.back());
     }
@@ -1077,18 +1070,6 @@ void lowerForX64(Vunit& unit, const Abi& abi) {
 
         case Vinstr::movtql:
           inst = copy{inst.movtql_.s, inst.movtql_.d};
-          break;
-
-        case Vinstr::ldretaddr:
-          inst = pushm{inst.ldretaddr_.s};
-          break;
-
-        case Vinstr::movretaddr:
-          inst = load{*rsp, inst.movretaddr_.d};
-          break;
-
-        case Vinstr::retctrl:
-          inst = ret{kCrossTraceRegs};
           break;
 
         case Vinstr::countbytecode:

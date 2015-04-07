@@ -469,6 +469,9 @@ const ConstantMap& getConstants() {
   return s_constant_map;
 }
 
+using NativeConstantCallback = const Variant& (*)();
+bool registerConstant(const StringData*, NativeConstantCallback);
+
 //////////////////////////////////////////////////////////////////////////////
 // Class Constants
 

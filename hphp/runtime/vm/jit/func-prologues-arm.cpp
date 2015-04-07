@@ -61,7 +61,7 @@ TCA emitFuncGuard(vixl::MacroAssembler& a, Func* func) {
 
   if (!a.isFrontierAligned(8)) {
     a. Nop   ();
-    assert(a.isFrontierAligned(8));
+    assertx(a.isFrontierAligned(8));
   }
   a.   bind  (&redispatchStubAddr);
   a.   dc64  (mcg->tx().uniqueStubs.funcPrologueRedispatch);
@@ -71,8 +71,8 @@ TCA emitFuncGuard(vixl::MacroAssembler& a, Func* func) {
   a.   dc64  (func);
   a.   bind  (&success);
 
-  assert(funcPrologueToGuard(a.frontier(), func) == start);
-  assert(funcPrologueHasGuard(a.frontier(), func));
+  assertx(funcPrologueToGuard(a.frontier(), func) == start);
+  assertx(funcPrologueHasGuard(a.frontier(), func));
 
   return a.frontier();
 }
@@ -203,7 +203,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     numLocals += numUseVars + 1;
   }
 
-  assert(func->numLocals() >= numLocals);
+  assertx(func->numLocals() >= numLocals);
   auto numUninitLocals = func->numLocals() - numLocals;
   if (numUninitLocals > 0) {
     if (numUninitLocals > kLocalsToInitializeInline) {
@@ -296,13 +296,13 @@ int shuffleArgsForMagicCall(ActRec* ar) {
   }
   const Func* f UNUSED = ar->m_func;
   f->validate();
-  assert(f->name()->isame(s_call.get())
+  assertx(f->name()->isame(s_call.get())
          || f->name()->isame(s_callStatic.get()));
-  assert(f->numParams() == 2);
-  assert(!f->hasVariadicCaptureParam());
-  assert(ar->hasInvName());
+  assertx(f->numParams() == 2);
+  assertx(!f->hasVariadicCaptureParam());
+  assertx(ar->hasInvName());
   StringData* invName = ar->getInvName();
-  assert(invName);
+  assertx(invName);
   ar->setVarEnv(nullptr);
   int nargs = ar->numArgs();
 
@@ -383,7 +383,7 @@ SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& coldCode,
     // emit rb
 
     emitStackCheck(cellsToBytes(func->maxStackCells()), func->base());
-    assert(func->numParams() == 2);
+    assertx(func->numParams() == 2);
     // Special __call prologue
     a.   Mov   (argReg(0), rStashedAR);
     auto fixupAddr = emitCall(a, CppCall::direct(shuffleArgsForMagicCall));

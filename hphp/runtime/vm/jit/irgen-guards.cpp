@@ -33,7 +33,7 @@ enum class ProfGuard { CheckLoc, CheckStk };
  * collected profiling information. Str -> StaticStr is the only supported
  * refinement for now.
  */
-void profiledGuard(HTS& env,
+void profiledGuard(IRGS& env,
                    Type type,
                    ProfGuard kind,
                    int32_t id, // locId or stackOff
@@ -56,8 +56,8 @@ void profiledGuard(HTS& env,
 
 uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
   uint64_t retval = 0;
-  assert(i % 64 == 0);
-  assert(i < bits.size());
+  assertx(i % 64 == 0);
+  assertx(i < bits.size());
   while (i < bits.size()) {
     retval |= bits[i] << (i % 64);
     if ((++i % 64) == 0) {
@@ -71,13 +71,13 @@ uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
 
 }
 
-void assertTypeLocal(HTS& env, uint32_t locId, Type type) {
+void assertTypeLocal(IRGS& env, uint32_t locId, Type type) {
   gen(env, AssertLoc, type, LocalId(locId), fp(env));
 }
 
-void checkTypeLocal(HTS& env, uint32_t locId, Type type, Offset dest,
+void checkTypeLocal(IRGS& env, uint32_t locId, Type type, Offset dest,
                     bool outerOnly) {
-  assert(type <= Type::Cell || type <= Type::BoxedInitCell);
+  assertx(type <= Type::Cell || type <= Type::BoxedInitCell);
 
   auto exit = env.irb->guardFailBlock();
   if (exit == nullptr) exit = makeExit(env, dest);
@@ -98,11 +98,11 @@ void checkTypeLocal(HTS& env, uint32_t locId, Type type, Offset dest,
   }
 }
 
-void assertTypeStack(HTS& env, BCSPOffset idx, Type type) {
+void assertTypeStack(IRGS& env, BCSPOffset idx, Type type) {
   if (idx.offset < env.irb->evalStack().size()) {
     // We're asserting a new type so we don't care about the previous type.
     auto const tmp = top(env, Type::StkElem, idx, DataTypeGeneric);
-    assert(tmp);
+    assertx(tmp);
     env.irb->evalStack().replace(idx.offset, gen(env, AssertType, type, tmp));
   } else {
     gen(env, AssertStk, type,
@@ -110,12 +110,12 @@ void assertTypeStack(HTS& env, BCSPOffset idx, Type type) {
   }
 }
 
-void checkTypeStack(HTS& env,
+void checkTypeStack(IRGS& env,
                     BCSPOffset idx,
                     Type type,
                     Offset dest,
                     bool outerOnly) {
-  assert(type <= Type::Cell || type <= Type::BoxedInitCell);
+  assertx(type <= Type::Cell || type <= Type::BoxedInitCell);
 
   if (type <= Type::BoxedInitCell) {
     spillStack(env); // don't bother with the case that it's not spilled.
@@ -146,7 +146,7 @@ void checkTypeStack(HTS& env,
     // CheckType only cares about its input type if the simplifier does
     // something with it and that's handled if and when it happens.
     auto const tmp = top(env, Type::StkElem, idx, DataTypeGeneric);
-    assert(tmp);
+    assertx(tmp);
     env.irb->evalStack().replace(idx.offset,
                                  gen(env, CheckType, type, exit, tmp));
     return;
@@ -159,8 +159,8 @@ void checkTypeStack(HTS& env,
 
 //////////////////////////////////////////////////////////////////////
 
-void assertTypeLocation(HTS& env, const RegionDesc::Location& loc, Type type) {
-  assert(type <= Type::StkElem);
+void assertTypeLocation(IRGS& env, const RegionDesc::Location& loc, Type type) {
+  assertx(type <= Type::StkElem);
   using T = RegionDesc::Location::Tag;
   switch (loc.tag()) {
   case T::Stack:
@@ -172,12 +172,12 @@ void assertTypeLocation(HTS& env, const RegionDesc::Location& loc, Type type) {
   }
 }
 
-void checkTypeLocation(HTS& env,
+void checkTypeLocation(IRGS& env,
                        const RegionDesc::Location& loc,
                        Type type,
                        Offset dest,
                        bool outerOnly) {
-  assert(type <= Type::Gen);
+  assertx(type <= Type::Gen);
   using T = RegionDesc::Location::Tag;
   switch (loc.tag()) {
   case T::Stack:
@@ -190,7 +190,7 @@ void checkTypeLocation(HTS& env,
   }
 }
 
-void checkRefs(HTS& env,
+void checkRefs(IRGS& env,
                int64_t entryArDelta,
                const std::vector<bool>& mask,
                const std::vector<bool>& vals,
@@ -201,7 +201,7 @@ void checkRefs(HTS& env,
   SSATmp* nParams = nullptr;
 
   for (unsigned i = 0; i < mask.size(); i += 64) {
-    assert(i < vals.size());
+    assertx(i < vals.size());
 
     uint64_t mask64 = packBitVec(mask, i);
     if (mask64 == 0) {

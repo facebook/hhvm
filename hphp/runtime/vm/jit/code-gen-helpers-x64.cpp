@@ -77,65 +77,6 @@ void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
   emitImmStoreq(v, intptr_t(pc), rds[rds::kVmpcOff]);
 }
 
-// emitEagerVMRegSave --
-//   Inline. Saves regs in-place in the TC. This is an unusual need;
-//   you probably want to lazily save these regs via recordCall and
-//   its ilk.
-void emitEagerVMRegSave(Asm& as, PhysReg rds, RegSaveFlags flags) {
-  bool saveFP = bool(flags & RegSaveFlags::SaveFP);
-  bool savePC = bool(flags & RegSaveFlags::SavePC);
-  assertx((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
-         RegSaveFlags::None);
-
-  Reg64 pcReg = rdi;
-  assertx(!kCrossCallRegs.contains(rdi));
-
-  as.   storeq (rVmSp, rds[rds::kVmspOff]);
-  if (savePC) {
-    // We're going to temporarily abuse rVmSp to hold the current unit.
-    Reg64 rBC = rVmSp;
-    as. push   (rBC);
-    // m_fp -> m_func -> m_unit -> m_bc + pcReg
-    as. loadq  (rVmFp[AROFF(m_func)], rBC);
-    as. loadq  (rBC[Func::unitOff()], rBC);
-    as. loadq  (rBC[Unit::bcOff()], rBC);
-    as. addq   (rBC, pcReg);
-    as. storeq (pcReg, rds[rds::kVmpcOff]);
-    as. pop    (rBC);
-  }
-  if (saveFP) {
-    as. storeq (rVmFp, rds[rds::kVmfpOff]);
-  }
-}
-
-// Save vmsp, and optionally vmfp and vmpc. If saving vmpc,
-// the bytecode offset is expected to be in rdi and is clobbered
-void emitEagerVMRegSave(Vout& v, Vreg rds, RegSaveFlags flags) {
-  bool saveFP = bool(flags & RegSaveFlags::SaveFP);
-  bool savePC = bool(flags & RegSaveFlags::SavePC);
-  assertx((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
-         RegSaveFlags::None);
-
-  assertx(!kCrossCallRegs.contains(rdi));
-
-  v << store{rVmSp, rds[rds::kVmspOff]};
-  if (savePC) {
-    PhysReg pc{rdi};
-    auto func = v.makeReg();
-    auto unit = v.makeReg();
-    auto bc = v.makeReg();
-    // m_fp -> m_func -> m_unit -> m_bc + pcReg
-    v << load{rVmFp[AROFF(m_func)], func};
-    v << load{func[Func::unitOff()], unit};
-    v << load{unit[Unit::bcOff()], bc};
-    v << addq{bc, pc, pc, v.makeReg()};
-    v << store{pc, rds[rds::kVmpcOff]};
-  }
-  if (saveFP) {
-    v << store{rVmFp, rds[rds::kVmfpOff]};
-  }
-}
-
 void emitGetGContext(Vout& v, Vreg dest) {
   emitTLSLoad<ExecutionContext>(v, g_context, dest);
 }

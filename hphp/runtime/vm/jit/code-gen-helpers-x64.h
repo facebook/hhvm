@@ -54,8 +54,6 @@ constexpr size_t kJmpTargetAlign = 16;
 void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 
 void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp);
-void emitEagerVMRegSave(Asm& as, PhysReg rds, RegSaveFlags flags);
-void emitEagerVMRegSave(Vout& as, Vreg rds, RegSaveFlags flags);
 void emitGetGContext(Asm& as, PhysReg dest);
 void emitGetGContext(Vout& as, Vreg dest);
 

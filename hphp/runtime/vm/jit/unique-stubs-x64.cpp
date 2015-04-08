@@ -272,14 +272,38 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   moveToAlign(mcg->code.cold());
   uniqueStubs.stackOverflowHelper = a.frontier();
 
-  // We are called from emitStackCheck, with the new stack frame in
-  // rStashedAR. Get the caller's PC into rdi and save it off.
-  a.    loadq  (rVmFp[AROFF(m_func)], rax);
+  assert(kScratchCrossTraceRegs.contains(rax));
+  assert(kScratchCrossTraceRegs.contains(rcx));
+  assert(kScratchCrossTraceRegs.contains(rdi));
+
+  // First get vmsp synchronized.  This stub is only called from function
+  // prologues, where we can figure out the stack top based on the
+  // partially-constructed ActRec's argument count.
+  a.    loadl  (rStashedAR[AROFF(m_numArgsAndFlags)], eax);
+  a.    andl   (ActRec::kNumArgsMask, eax);
+  a.    shll   (0x4, eax);    static_assert(sizeof(Cell) == 16, "");
+  a.    neg    (rax);
+  a.    lea    (rStashedAR[rax], rdi);
+  a.    storeq (rdi, rVmTl[rds::kVmspOff]);
+
+  // Get the caller's PC using the soff.
+  a.    loadq  (rVmFp[AROFF(m_func)], rcx);
   a.    loadl  (rStashedAR[AROFF(m_soff)], edi);
-  a.    loadq  (rax[Func::sharedOff()], rax);
+  a.    loadq  (rcx[Func::sharedOff()], rax);
   a.    loadl  (rax[Func::sharedBaseOff()], eax);
   a.    addl   (eax, edi);
-  emitEagerVMRegSave(a, rVmTl, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
+
+  // rcx = caller m_func (still rcx) -> m_unit -> m_bc
+  a.    loadq  (rcx[Func::unitOff()], rcx);
+  a.    loadq  (rcx[Unit::bcOff()], rcx);
+
+  // Add m_bc to the return offset, and store it in RDS.
+  a.    addq   (rcx, rdi);
+  a.    storeq (rdi, rVmTl[rds::kVmpcOff]);
+
+  // Synchronize FP.
+  a.    storeq (rVmFp, rVmTl[rds::kVmfpOff]);
+
   // The stack overflow is logically thrown from the caller so rStashedAR
   // hasn't yet been copied to rVmFp. But there might be a catch trace attached
   // to the call that got us here, so we need to link rStashedAR into the frame

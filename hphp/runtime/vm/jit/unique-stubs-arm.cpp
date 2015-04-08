@@ -151,7 +151,7 @@ void emitFCallArrayHelper(UniqueStubs& us) {
 }
 
 void emitFCallHelperThunk(UniqueStubs& us) {
-  TCA (*helper)(ActRec*, void*) = &fcallHelper;
+  TCA (*helper)(ActRec*) = &fcallHelper;
   MacroAssembler a { mcg->code.main() };
 
   us.fcallHelperThunk = a.frontier();
@@ -186,7 +186,7 @@ void emitFCallHelperThunk(UniqueStubs& us) {
 }
 
 void emitFuncBodyHelperThunk(UniqueStubs& us) {
-  TCA (*helper)(ActRec*, void*) = &funcBodyHelper;
+  TCA (*helper)(ActRec*) = &funcBodyHelper;
   MacroAssembler a { mcg->code.main() };
 
   us.funcBodyHelperThunk = a.frontier();

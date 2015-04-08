@@ -513,7 +513,7 @@ asm_label(a, noCallee);
 //////////////////////////////////////////////////////////////////////
 
 void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
-  TCA (*helper)(ActRec*, void*) = &fcallHelper;
+  TCA (*helper)(ActRec*) = &fcallHelper;
   Asm a { mcg->code.main() };
 
   moveToAlign(mcg->code.main());
@@ -525,10 +525,9 @@ void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
   // dispatch to the function body. In the first case, there's a call, in the
   // second, there's a jmp.  We can differentiate by comparing r15 and rVmFp
   a.    movq   (rStashedAR, argNumToRegName[0]);
-  a.    movq   (rVmSp, argNumToRegName[1]);
   a.    cmpq   (rStashedAR, rVmFp);
   a.    jne8   (popAndXchg);
-  emitCall(a, CppCall::direct(helper), argSet(2));
+  emitCall(a, CppCall::direct(helper), argSet(1));
   a.    jmp    (rax);
   // The ud2 is a hint to the processor that the fall-through path of the
   // indirect jump (which it statically predicts as most likely) is not
@@ -548,7 +547,7 @@ asm_label(a, popAndXchg);
   // frames, however, so switch it into rbp in case fcallHelper throws.
   a.    pop    (rStashedAR[AROFF(m_savedRip)]);
   a.    xchgq  (rStashedAR, rVmFp);
-  emitCall(a, CppCall::direct(helper), argSet(2));
+  emitCall(a, CppCall::direct(helper), argSet(1));
   a.    testq  (rax, rax);
   a.    js8    (skip);
   a.    xchgq  (rStashedAR, rVmFp);
@@ -567,7 +566,7 @@ asm_label(a, skip);
 }
 
 void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
-  TCA (*helper)(ActRec*,void*) = &funcBodyHelper;
+  TCA (*helper)(ActRec*) = &funcBodyHelper;
   Asm a { mcg->code.main() };
 
   moveToAlign(mcg->code.main());
@@ -576,8 +575,7 @@ void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
   // This helper is called via a direct jump from the TC (from
   // fcallArrayHelper). So the stack parity is already correct.
   a.    movq   (rVmFp, argNumToRegName[0]);
-  a.    movq   (rVmSp, argNumToRegName[1]);
-  emitCall(a, CppCall::direct(helper), argSet(2));
+  emitCall(a, CppCall::direct(helper), argSet(1));
   a.    jmp    (rax);
   a.    ud2    ();
 

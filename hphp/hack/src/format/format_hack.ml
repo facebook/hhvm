@@ -1205,7 +1205,15 @@ and name env =
 
 and name_loop env =
   match token env with
-  | Tpercent | Tcolon | Tminus | Tword | Tbslash ->
+  (* names can contain colons, but cannot end with them *)
+  | Tcolon when attempt env begin fun env ->
+      match token env with
+        | Tword -> true
+        | _ -> false
+    end ->
+      last_token env;
+      name_loop env
+  | Tpercent | Tminus | Tword | Tbslash ->
       last_token env;
       name_loop env
   | _ ->

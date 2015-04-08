@@ -492,12 +492,11 @@ inline Type relaxToGuardable(Type ty) {
   assertx(ty <= Type::Gen);
   ty = ty.unspecialize();
 
-  if (ty.isKnownDataType()) return ty;
-
+  if (ty <= Type::BoxedCell)      return Type::BoxedCell;
+  if (ty.isKnownDataType())       return ty;
   if (ty <= Type::UncountedInit)  return Type::UncountedInit;
   if (ty <= Type::Uncounted)      return Type::Uncounted;
   if (ty <= Type::Cell)           return Type::Cell;
-  if (ty <= Type::BoxedCell)      return Type::BoxedCell;
   if (ty <= Type::Gen)            return Type::Gen;
   not_reached();
 }

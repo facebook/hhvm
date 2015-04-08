@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/base/thread-safe-setlocale.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
@@ -1871,6 +1872,8 @@ void hphp_session_init() {
   init_thread_locals();
   TI().onSessionInit();
   MM().resetExternalStats();
+
+  g_thread_safe_locale_handler->reset();
   Treadmill::startRequest();
 
 #ifdef ENABLE_SIMPLE_COUNTER
@@ -1963,6 +1966,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
 
 void hphp_context_shutdown() {
   // Run shutdown handlers. This may cause user code to run.
+  g_thread_safe_locale_handler->reset();
+
   auto const context = g_context.getNoCheck();
   context->destructObjects();
   context->onRequestShutdown();

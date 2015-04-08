@@ -1,0 +1,1 @@
+-v Server.DefaultDocument=setlocale.php -v Server.SourceRoot=`pwd` -v PageletServer.ThreadCount=1

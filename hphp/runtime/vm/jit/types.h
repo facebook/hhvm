@@ -105,8 +105,10 @@ struct TransFlags {
 
 static_assert(sizeof(TransFlags) <= sizeof(uint64_t), "Too many TransFlags!");
 
-// Enumeration representing the various areas that we emit code.
-enum class AreaIndex : unsigned { Main, Cold, Frozen, Max };
+// Enumeration representing the various areas that we emit code. kNumAreas must
+// be kept up to date.
+enum class AreaIndex : unsigned { Main, Cold, Frozen };
+constexpr size_t kNumAreas = 3;
 
 inline std::string areaAsString(AreaIndex area) {
   switch (area) {
@@ -116,12 +118,8 @@ inline std::string areaAsString(AreaIndex area) {
     return "Cold";
   case AreaIndex::Frozen:
     return "Frozen";
-  case AreaIndex::Max:
-    not_reached();
-    return "";
   }
-  not_reached();
-  return "";
+  always_assert(false);
 }
 
 }}

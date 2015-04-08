@@ -407,6 +407,7 @@ public:
   F(bool,     JitLLVMPrintAfterAll,    false)                           \
   F(uint32_t, JitLLVMSizeLevel,        0)                               \
   F(uint32_t, JitLLVMSplitHotCold,     1)                               \
+  F(string,   JitLLVMCompare,          "")                              \
   F(string,   JitCPU,                  "native")                        \
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitAHotSize,             ahotDefault())                   \

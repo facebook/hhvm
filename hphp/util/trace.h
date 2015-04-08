@@ -117,9 +117,9 @@ namespace Trace {
       TM(hhir_load)     \
       TM(hhir_refineTmps) \
       TM(hhir_gvn)      \
+      TM(hhir_refcount) \
       TM(llvm)          \
       TM(llvm_count)    \
-      TM(hhir_refcount) \
       TM(inlining)      \
       TM(instancebits)  \
       TM(intercept)     \

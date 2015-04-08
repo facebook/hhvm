@@ -764,7 +764,20 @@ struct LLVMEmitter {
       ee->finalizeObject();
     }
 
-    m_module.release();
+    SCOPE_EXIT { m_module.release(); };
+
+    if (!RuntimeOption::EvalJitLLVMCompare.empty()) {
+      jit::vector<std::string> code;
+      Disasm disasm;
+      for (auto const& area : m_areas) {
+        std::ostringstream str;
+        disasm.disasm(str, area.start, area.code.frontier());
+        code.emplace_back(str.str());
+      }
+      throw CompareLLVMCodeGen(std::move(code),
+                               showModule(m_module.get()),
+                               m_areas[0].code.frontier() - m_areas[0].start);
+    }
 
     if (RuntimeOption::EvalJitLLVMDiscard) return;
 
@@ -2925,7 +2938,7 @@ void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
   FTRACE(2, "\nTrying to emit LLVM IR for Vunit:\n{}\n", show(unit));
 
   jit::vector<UndoMarker> undoAll = {UndoMarker(mcg->globalData())};
-  for(auto const& area : areas) {
+  for (auto const& area : areas) {
     undoAll.emplace_back(area.code);
   }
 
@@ -2940,10 +2953,10 @@ void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
     FTRACE(1, "LLVM codegen failed: {}\n", e.what());
 
     // Undo any code/data we may have allocated.
-    for(auto& marker : undoAll) {
+    for (auto& marker : undoAll) {
       marker.undo();
     }
-    throw e;
+    throw;
   } catch (const std::exception& e) {
     always_assert_flog(false,
                        "Unexpected exception during LLVM codegen: {}\n",

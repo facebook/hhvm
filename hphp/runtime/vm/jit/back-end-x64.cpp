@@ -396,6 +396,91 @@ UNUSED const Abi vasm_abi {
   .canSpill = true
 };
 
+/*
+ * Print side-by-side code dumps comparing vasm output with LLVM.
+ */
+static void printLLVMComparison(const IRUnit& ir_unit,
+                                const Vunit& vasm_unit,
+                                const Vasm::AreaList& areas,
+                                const CompareLLVMCodeGen* compare) {
+  auto const vasm_size = areas[0].code.frontier() - areas[0].start;
+  auto const percentage = compare->main_size * 100 / vasm_size;
+
+  // We accept a few different formats for the runtime option:
+  // - "all": print all tracelets
+  // - "<x": print when llvm code is < x% the size of vasm
+  // - ">x" or "x": print when llvm code is > x% the size of vasm
+  // - "=x": print when llvm code is = x% the size of vasm
+  folly::StringPiece mode(RuntimeOption::EvalJitLLVMCompare);
+  if (mode.empty()) return;
+  if (mode != "all") {
+    auto pred = '>';
+    switch (mode[0]) {
+      case '<':
+      case '=':
+      case '>':
+        pred = mode[0];
+        mode.pop_front();
+        break;
+
+      default:
+        break;
+    }
+    auto const threshold = folly::to<int>(mode);
+    if ((pred == '<' && percentage >= threshold) ||
+        (pred == '=' && percentage != threshold) ||
+        (pred == '>' && percentage <= threshold)) {
+      return;
+    }
+  }
+
+  Trace::ftraceRelease(
+    "{:-^121}\n{}\n{:-^121}\n{}\n{:-^121}\n{}\n",
+    folly::sformat(
+      " vasm: {} bytes | llvm: {} bytes | llvm is {}% of vasm",
+      vasm_size, compare->main_size, percentage
+    ),
+    ir_unit,
+    " vasm unit ",
+    show(vasm_unit),
+    " llvm IR ",
+    compare->llvm
+  );
+
+  auto const& llvmAreas = compare->disasm;
+  assert(llvmAreas.size() == areas.size());
+  Disasm disasm;
+
+  for (auto i = 0; i < kNumAreas; ++i) {
+    std::ostringstream vasmOut;
+    auto& area = areas[i];
+    disasm.disasm(vasmOut, area.start, area.code.frontier());
+    auto const vasmCode = vasmOut.str();
+
+    std::vector<folly::StringPiece> llvmLines, vasmLines;
+    folly::split('\n', llvmAreas[i], llvmLines);
+    folly::split('\n', vasmCode, vasmLines);
+
+    Trace::ftraceRelease("{:-^121}\n", folly::sformat(" area {} ", i));
+    for (auto llvmIt = llvmLines.begin(), vasmIt = vasmLines.begin();
+         llvmIt != llvmLines.end() || vasmIt != vasmLines.end(); ) {
+      folly::StringPiece llvmLine, vasmLine;
+      if (llvmIt != llvmLines.end()) {
+        llvmLine = *llvmIt;
+        ++llvmIt;
+      }
+      if (vasmIt != vasmLines.end()) {
+        vasmLine = *vasmIt;
+        ++vasmIt;
+      }
+      if (vasmLine.empty() && llvmLine.empty()) continue;
+
+      Trace::ftraceRelease("{:60.60} {:.60}\n", vasmLine, llvmLine);
+    }
+    Trace::ftraceRelease("\n");
+  }
+}
+
 void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   Timer _t(Timer::codeGen);
   CodeBlock& mainCodeIn   = mcg->code.main();
@@ -498,14 +583,19 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     assertx(check(vunit));
 
     if (useLLVM) {
+      auto& areas = vasm.areas();
       try {
-        genCodeLLVM(vunit, vasm.areas(), sortBlocks(vunit));
+        genCodeLLVM(vunit, areas, sortBlocks(vunit));
       } catch (const FailedLLVMCodeGen& e) {
         FTRACE(1, "LLVM codegen failed ({}); falling back to x64 backend\n",
                e.what());
         mcg->setUseLLVM(false);
         vasm.optimizeX64();
         vasm.finishX64(vasm_abi, state.asmInfo);
+
+        if (auto compare = dynamic_cast<const CompareLLVMCodeGen*>(&e)) {
+          printLLVMComparison(unit, vasm.unit(), areas, compare);
+        }
       }
     } else {
       vasm.optimizeX64();

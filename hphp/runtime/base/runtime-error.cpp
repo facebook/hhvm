@@ -27,7 +27,7 @@ namespace HPHP {
 static int64_t g_warning_counter = 0;
 static int64_t g_notice_counter = 0;
 
-bool checkReportLevel(ErrorMode mode) {
+static inline bool checkReportLevel(ErrorMode mode) {
   int errnum = static_cast<int>(mode);
   if (!g_context->errorNeedsHandling(errnum, true,
                               ExecutionContext::ErrorThrowMode::Never)) {
@@ -44,7 +44,7 @@ bool checkReportLevel(ErrorMode mode) {
 
 #define CHECK_REPORT_LEVEL(mode) \
    if (checkReportLevel(mode)) { \
-      return ; \
+      return; \
    } 
    
 /*
@@ -58,7 +58,7 @@ void raise_error(const std::string &msg) {
 }
 
 void raise_error(const char *fmt, ...) {
-  CHECK_REPORT_LEVEL(ErrorMode::ERROR)
+  CHECK_REPORT_LEVEL(ErrorMode::ERROR);
   std::string msg;
   va_list ap;
   va_start(ap, fmt);
@@ -85,7 +85,7 @@ void raise_recoverable_error(const std::string &msg) {
 }
 
 void raise_recoverable_error_without_first_frame(const std::string &msg) {
-  CHECK_REPORT_LEVEL(ErrorMode::RECOVERABLE_ERROR)
+  CHECK_REPORT_LEVEL(ErrorMode::RECOVERABLE_ERROR);
   raise_message(ErrorMode::RECOVERABLE_ERROR, true, msg);
 }
 
@@ -117,7 +117,7 @@ void raise_disallowed_dynamic_call(const std::string& msg) {
 }
 
 void raise_recoverable_error(const char *fmt, ...) {
-  CHECK_REPORT_LEVEL(ErrorMode::RECOVERABLE_ERROR)
+  CHECK_REPORT_LEVEL(ErrorMode::RECOVERABLE_ERROR);
   std::string msg;
   va_list ap;
   va_start(ap, fmt);
@@ -131,12 +131,12 @@ void raise_strict_warning(const std::string &msg) {
 }
 
 void raise_strict_warning_without_first_frame(const std::string &msg) {
-  CHECK_REPORT_LEVEL(ErrorMode::STRICT)
+  CHECK_REPORT_LEVEL(ErrorMode::STRICT);
   raise_message(ErrorMode::STRICT, true, msg);
 }
 
 void raise_strict_warning(const char *fmt, ...) {
-  CHECK_REPORT_LEVEL(ErrorMode::STRICT)
+  CHECK_REPORT_LEVEL(ErrorMode::STRICT);
   std::string msg;
   va_list ap;
   va_start(ap, fmt);
@@ -150,12 +150,12 @@ void raise_warning(const std::string &msg) {
 }
 
 void raise_warning_without_first_frame(const std::string &msg) {
-  CHECK_REPORT_LEVEL(ErrorMode::WARNING)
+  CHECK_REPORT_LEVEL(ErrorMode::WARNING);
   raise_message(ErrorMode::WARNING, true, msg);
 }
 
 void raise_warning(const char *fmt, ...) {
-  CHECK_REPORT_LEVEL(ErrorMode::WARNING)
+  CHECK_REPORT_LEVEL(ErrorMode::WARNING);
   std::string msg;
   va_list ap;
   va_start(ap, fmt);
@@ -219,12 +219,12 @@ void raise_notice(const std::string &msg) {
 }
 
 void raise_notice_without_first_frame(const std::string &msg) {
-  CHECK_REPORT_LEVEL(ErrorMode::NOTICE)
+  CHECK_REPORT_LEVEL(ErrorMode::NOTICE);
   raise_message(ErrorMode::NOTICE, true, msg);
 }
 
 void raise_notice(const char *fmt, ...) {
-  CHECK_REPORT_LEVEL(ErrorMode::NOTICE)
+  CHECK_REPORT_LEVEL(ErrorMode::NOTICE);
   std::string msg;
   va_list ap;
   va_start(ap, fmt);
@@ -238,12 +238,12 @@ void raise_deprecated(const std::string &msg) {
 }
 
 void raise_deprecated_without_first_frame(const std::string &msg) {
-  CHECK_REPORT_LEVEL(ErrorMode::PHP_DEPRECATED)
+  CHECK_REPORT_LEVEL(ErrorMode::PHP_DEPRECATED);
   raise_message(ErrorMode::PHP_DEPRECATED, true, msg);
 }
 
 void raise_deprecated(const char *fmt, ...) {
-  CHECK_REPORT_LEVEL(ErrorMode::PHP_DEPRECATED)
+  CHECK_REPORT_LEVEL(ErrorMode::PHP_DEPRECATED);
   std::string msg;
   va_list ap;
   va_start(ap, fmt);
@@ -323,9 +323,6 @@ void raise_message(ErrorMode mode,
     HANDLE_ERROR(false, Always, "\nFatal error: ", skipTop);
   } else if (mode == ErrorMode::RECOVERABLE_ERROR) {
     HANDLE_ERROR(true, IfUnhandled, "\nCatchable fatal error: ", skipTop);
-  } else if (!g_context->errorNeedsHandling(errnum, true,
-                              ExecutionContext::ErrorThrowMode::Never)) {
-    return;
   } else if (mode == ErrorMode::WARNING) {
     HANDLE_ERROR(true, Never, "\nWarning: ", skipTop);
   }  else {

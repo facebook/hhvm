@@ -3333,6 +3333,26 @@ void rcgraph_opts(Env& env) {
 
 }
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * This is vestigial and will be removed soon.
+ */
+
+void eliminateTakes(const BlockList& blocks) {
+  for (auto b : blocks) {
+    for (auto& inst : *b) {
+      if (inst.is(TakeStk, TakeRef)) {
+        inst.convertToNop();
+      }
+    }
+  }
+}
+
+void eliminateTakes(const IRUnit& unit) { eliminateTakes(rpoSortCfg(unit)); }
+
+//////////////////////////////////////////////////////////////////////
+
 void optimizeRefcounts2(IRUnit& unit) {
   Timer timer(Timer::optimize_refcountOpts2);
   splitCriticalEdges(unit);

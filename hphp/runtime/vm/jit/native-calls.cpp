@@ -185,7 +185,7 @@ static CallMap s_callMap {
                            {{extra(&PackedArrayData::size)}}},
     {ColAddNewElemC,     colAddNewElemCHelper, DSSA, SSync,
                            {{SSA, 0}, {TV, 1}}},
-    {ColAddElemC,        colAddElemCHelper, DSSA, SSync,
+    {MapAddElemC,        colAddElemCHelper, DSSA, SSync,
                            {{SSA, 0}, {TV, 1}, {TV, 2}}},
     {AllocObj,           newInstance, DSSA, SSync,
                            {{SSA, 0}}},

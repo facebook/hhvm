@@ -3737,24 +3737,18 @@ OPTBLD_INLINE void iopColAddNewElemC(IOP_ARGS) {
   pc++;
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
-  if (c2->m_type == KindOfObject && c2->m_data.pobj->isCollection()) {
-    collectionInitAppend(c2->m_data.pobj, c1);
-  } else {
-    raise_error("ColAddNewElemC: $2 must be a collection");
-  }
+  assert(c2->m_type == KindOfObject && c2->m_data.pobj->isCollection());
+  collectionInitAppend(c2->m_data.pobj, c1);
   vmStack().popC();
 }
 
-OPTBLD_INLINE void iopColAddElemC(IOP_ARGS) {
+OPTBLD_INLINE void iopMapAddElemC(IOP_ARGS) {
   pc++;
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
   Cell* c3 = vmStack().indC(2);
-  if (c3->m_type == KindOfObject && c3->m_data.pobj->isCollection()) {
-    collectionInitSet(c3->m_data.pobj, c2, c1);
-  } else {
-    raise_error("ColAddElemC: $3 must be a collection");
-  }
+  assert(c3->m_type == KindOfObject && c3->m_data.pobj->isCollection());
+  collectionInitSet(c3->m_data.pobj, c2, c1);
   vmStack().popC();
   vmStack().popC();
 }

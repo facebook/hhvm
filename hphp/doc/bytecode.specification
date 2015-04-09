@@ -1129,19 +1129,17 @@ ColFromArray <coll type>    [C:Arr]  ->  [C:Obj]
   not in collections; thus not all collections can be created using this
   instruction.
 
-ColAddElemC    [C C C]  ->  [C:Obj]
+MapAddElemC    [C C C]  ->  [C:Obj]
 
-  Collection add key/value pair. If $3 is a collection object, this instruction
-  executes $3[$2] = $1 and then pushes $3 onto the stack.
-
-  If $3 is not a collection object, this instruction throws a fatal error.
+  Collection add key/value pair. $3 must be an instance of HH\Map or
+  HH\ImmMap. This instruction executes $3[$2] = $1 and then pushes $3 onto the
+  stack.
 
 ColAddNewElemC    [C C]  ->  [C:Obj]
 
-  Collection add value. If $2 is a collection object, this instruction executes
-  $2[] = $1 and then pushes $2 onto the stack.
-
-  If $2 is not a collection object, this instruction throws a fatal error.
+  Collection add value. $2 must be an instance of HH\Pair, HH\Set, or
+  HH\Vector.  This instruction executes $2[] = $1 and then pushes $2 onto the
+  stack.
 
 Cns <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Resource]
 

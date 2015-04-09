@@ -1035,27 +1035,19 @@ Cell lookupClassConstantTv(TypedValue* cache,
 //////////////////////////////////////////////////////////////////////
 
 ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {
-  if (coll->isCollection()) {
-    collectionInitAppend(coll, &value);
-    // consume the input value. the collection setter either threw or created a
-    // reference to value, so we can use a cheaper decref.
-    tvRefcountedDecRefNZ(value);
-  } else {
-    raise_error("ColAddNewElemC: $2 must be a collection");
-  }
+  collectionInitAppend(coll, &value);
+  // consume the input value. the collection setter either threw or created a
+  // reference to value, so we can use a cheaper decref.
+  tvRefcountedDecRefNZ(value);
   return coll;
 }
 
 ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
                               TypedValue value) {
-  if (coll->isCollection()) {
-    collectionInitSet(coll, &key, &value);
-    // consume the input value. the collection setter either threw or created a
-    // reference to value, so we can use a cheaper decref.
-    tvRefcountedDecRefNZ(value);
-  } else {
-    raise_error("ColAddNewElemC: $2 must be a collection");
-  }
+  collectionInitSet(coll, &key, &value);
+  // consume the input value. the collection setter either threw or created a
+  // reference to value, so we can use a cheaper decref.
+  tvRefcountedDecRefNZ(value);
   return coll;
 }
 

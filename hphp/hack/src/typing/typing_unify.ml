@@ -64,12 +64,6 @@ and unify_with_uenv env (uenv1, ty1) (uenv2, ty2) =
   | (r2, Tmixed), (_, Toption ty1)
   | (_, Toption ty1), (r2, Tmixed) ->
     unify_with_uenv env (TUEnv.empty, ty1) (TUEnv.empty, (r2, Tmixed))
-  | (r1, (Tprim Nast.Tvoid as ty1')), (r2, (Toption ty as ty2')) ->
-     (* When we are in async functions, we allow people to write Awaitable<void>
-      * and then do yield result(null) *)
-      if Env.allow_null_as_void env
-      then unify_with_uenv env (uenv1, ty1) (uenv2, ty)
-      else (TUtils.uerror r1 ty1' r2 ty2'; env, (r1, ty1'))
   (* It might look like you can combine the next two cases, but you can't --
    * if both sides are a Tapply the "when" guard will only check ty1, so if ty2
    * is a typedef it won't get expanded. So we need an explicit check for both.

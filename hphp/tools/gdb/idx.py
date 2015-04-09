@@ -17,7 +17,13 @@ from hashes import hash_of
 # These are only designed to work for gcc-4.8.1.
 
 def atomic_get(atomic):
-    return atomic['_M_b']['_M_p']
+    inner = rawtype(atomic.type).template_argument(0)
+
+    if inner.code == gdb.TYPE_CODE_PTR:
+        return atomic['_M_b']['_M_p']
+    else:
+        return atomic['_M_i']
+
 
 
 def vector_at(vec, idx):

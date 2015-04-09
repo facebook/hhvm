@@ -2919,7 +2919,7 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   v << syncvmsp{syncSP};
 
   auto done = v.makeBlock();
-  v << vcallstub{target, v.makeTuple({pc, after}),
+  v << vcallstub{target, kCrossTraceRegs, v.makeTuple({pc, after}),
                  {done, m_state.labels[inst->taken()]}};
   v = done;
   v << defvmsp{dstLoc(inst, 0).reg()};
@@ -4701,7 +4701,8 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
   auto const adjustedSp = v.makeReg();
   v << lea{srcLoc(inst, 0).reg()[cellsToBytes(spOff.offset)], adjustedSp};
   v << syncvmsp{adjustedSp};
-  v << ldimml{pcOff, r32(rAsm)};
+  v << ldimmq{pcOff, rAsm}; // pcOff is int32_t but ldimmq keeps the type
+                            // system happy and generates the same code.
   assertx(mcg->tx().uniqueStubs.interpOneCFHelpers.count(op));
   v << jmpi{mcg->tx().uniqueStubs.interpOneCFHelpers[op],
             kCrossTraceRegs | rAsm};

@@ -806,21 +806,21 @@ void vector_splice(V& out, size_t idx, size_t count, V& in) {
 // at the end of a block, so we can just keep appending to the same
 // block.
 void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
-  assertx(unit.tuples[inst.svcreq_.args].size() < kNumServiceReqArgRegs);
+  assertx(unit.tuples[inst.svcreq_.extraArgs].size() < kNumServiceReqArgRegs);
   auto svcreq = inst.svcreq_; // copy it
   auto origin = inst.origin;
-  auto& argv = unit.tuples[svcreq.args];
+  auto& argv = unit.tuples[svcreq.extraArgs];
   unit.blocks[b].code.pop_back(); // delete the svcreq instruction
   Vout v(unit, b, origin);
 
-  RegSet arg_regs = kCrossTraceRegs;
+  RegSet arg_regs = svcreq.args;
   VregList arg_dests;
   for (int i = 0, n = argv.size(); i < n; ++i) {
     PhysReg d{serviceReqArgRegs[i]};
     arg_dests.push_back(d);
     arg_regs |= d;
   }
-  v << copyargs{svcreq.args, v.makeTuple(arg_dests)};
+  v << copyargs{svcreq.extraArgs, v.makeTuple(arg_dests)};
   if (svcreq.stub_block) {
     v << leap{rip[(int64_t)svcreq.stub_block], rAsm};
   } else {
@@ -1019,8 +1019,8 @@ void lower_vcallstub(Vunit& unit, Vlabel b) {
   auto const inst = code.back().get<vcallstub>();
   auto const origin = code.back().origin;
 
-  auto argRegs = kCrossTraceRegs;
-  auto const& srcs = unit.tuples[inst.args];
+  auto argRegs = inst.args;
+  auto const& srcs = unit.tuples[inst.extraArgs];
   jit::vector<Vreg> dsts;
   for (int i = 0; i < srcs.size(); ++i) {
     dsts.emplace_back(argNumToRegName[i]);

@@ -81,12 +81,12 @@ struct Vunit;
   O(phijmp, Inone, U(uses), Dn)\
   O(phijcc, I(cc), U(uses) U(sf), Dn)\
   O(store, Inone, U(s) U(d), Dn)\
-  O(svcreq, I(req) I(stub_block), U(args), Dn)\
+  O(svcreq, I(req) I(stub_block), U(args) U(extraArgs), Dn)\
   O(syncpoint, I(fix), Un, Dn)\
   O(unwind, Inone, Un, Dn)\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
-  O(vcallstub, I(target), U(args), Dn)\
+  O(vcallstub, I(target), U(args) U(extraArgs), Dn)\
   O(landingpad, Inone, Un, Dn)\
   O(countbytecode, Inone, U(base), D(sf))\
   O(defvmsp, Inone, Un, D(d))\
@@ -293,7 +293,8 @@ struct phidef { Vtuple defs; };
 struct phijmp { Vlabel target; Vtuple uses; };
 struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
 struct store { Vreg s; Vptr d; };
-struct svcreq { ServiceRequest req; Vtuple args; TCA stub_block; };
+struct svcreq { ServiceRequest req; RegSet args; Vtuple extraArgs;
+                TCA stub_block; };
 struct syncpoint { Fixup fix; };
 struct unwind { Vlabel targets[2]; };
 
@@ -311,7 +312,8 @@ struct vinvoke { CppCall call; VcallArgsId args; Vtuple d; Vlabel targets[2];
  * Non-smashable PHP function call with exception edges and additional
  * integer arguments.
  */
-struct vcallstub { TCA target; Vtuple args; Vlabel targets[2]; };
+struct vcallstub { TCA target; RegSet args; Vtuple extraArgs;
+                   Vlabel targets[2]; };
 
 struct landingpad {};
 struct countbytecode { Vreg base; VregSF sf; };

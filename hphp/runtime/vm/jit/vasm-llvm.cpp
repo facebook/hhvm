@@ -1194,7 +1194,9 @@ VASM_OPCODES
   llvm::Value* emitFuncPtr(const std::string& name,
                            llvm::FunctionType* type,
                            uint64_t address);
-  llvm::CallInst* emitTraceletTailCall(llvm::Value* target);
+  llvm::CallInst* emitTraceletTailCall(llvm::Value* target, RegSet argRegs);
+  std::vector<llvm::Value*> makePhysRegArgs(
+    RegSet argRegs, std::initializer_list<PhysReg> order);
 
   // Emit code for the pointer. Return value is of the given type, or
   // <i{bits} *> for the second overload.
@@ -1561,6 +1563,7 @@ O(countbytecode)
     defineValue(x64::rVmSp, nullptr);
     defineValue(x64::rVmFp, nullptr);
     defineValue(x64::rStashedAR, nullptr);
+    defineValue(x64::rAsm, nullptr);
   }
 
   timer.stop();
@@ -1690,7 +1693,7 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   );
   auto stubName = folly::sformat("bindjmpStub_{}", reqIp);
   auto stubFunc = emitFuncPtr(stubName, m_traceletFnTy, uint64_t(reqIp));
-  auto call = emitTraceletTailCall(stubFunc);
+  auto call = emitTraceletTailCall(stubFunc, inst.args);
   call->setSmashable();
 
   auto id = m_nextLocRec++;
@@ -1705,10 +1708,8 @@ void LLVMEmitter::emit(const bindcall& inst) {
   // name to ensure LLVM doesn't collapse the calls together.
   auto funcName = m_tcMM->getUniqueSymbolName("bindcall_");
   auto func = emitFuncPtr(funcName, m_bindcallFnTy, uint64_t(inst.stub));
-  std::vector<llvm::Value*> args{
-    value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp),
-    value(x64::rStashedAR)
-  };
+  auto args = makePhysRegArgs(
+    inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, x64::rStashedAR});
   auto next = block(inst.targets[0]);
   auto unwind = block(inst.targets[1]);
   auto call = m_irb.CreateInvoke(func, next, unwind, args);
@@ -1724,10 +1725,9 @@ void LLVMEmitter::emit(const vcallstub& inst) {
   // vcallstub is like bindcall but it's not smashable and it can take extra
   // arguments.
   auto funcName = folly::sformat("vcallstub_{}", inst.target);
-  std::vector<llvm::Value*> args{
-    value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp), m_int64Undef
-  };
-  for (auto arg : m_unit.tuples[inst.args]) args.emplace_back(value(arg));
+  auto args = makePhysRegArgs(
+    inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, x64::rStashedAR});
+  for (auto arg : m_unit.tuples[inst.extraArgs]) args.emplace_back(value(arg));
   std::vector<llvm::Type*> argTypes(args.size(), m_int64);
   auto funcTy = llvm::FunctionType::get(m_int64, argTypes, false);
   auto func = emitFuncPtr(funcName, funcTy, uint64_t(inst.target));
@@ -1747,18 +1747,18 @@ void LLVMEmitter::emit(const bindjcc1st& inst) {
   emitJcc(
     inst.sf, inst.cc, "jcc1",
     [&] {
-      emit(bindjmp{inst.targets[1]});
+      emit(bindjmp{inst.targets[1], TransFlags{}, inst.args});
     }
   );
 
-  emit(bindjmp{inst.targets[0]});
+  emit(bindjmp{inst.targets[0], TransFlags{}, inst.args});
 }
 
 void LLVMEmitter::emit(const bindjcc& inst) {
   emitJcc(
     inst.sf, inst.cc, "jcc",
     [&] {
-      emit(bindjmp{inst.target, inst.trflags});
+      emit(bindjmp{inst.target, inst.trflags, inst.args});
     }
   );
 }
@@ -1798,10 +1798,36 @@ llvm::Value* LLVMEmitter::emitFuncPtr(const std::string& name,
   return funcPtr;
 }
 
-llvm::CallInst* LLVMEmitter::emitTraceletTailCall(llvm::Value* target) {
-  std::vector<llvm::Value*> args{
-    value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp)
-  };
+/*
+ * Return a vector of values for the PhysRegs in `order', using undef for any
+ * PhysRegs that aren't in argRegs.
+ */
+std::vector<llvm::Value*> LLVMEmitter::makePhysRegArgs(
+  RegSet argRegs,
+  std::initializer_list<PhysReg> order
+) {
+  RegSet passed;
+  std::vector<llvm::Value*> ret;
+  ret.reserve(order.size());
+
+  for (auto reg : order) {
+    if (argRegs.contains(reg)) {
+      ret.emplace_back(value(reg));
+      passed.add(reg);
+    } else {
+      ret.emplace_back(m_int64Undef);
+    }
+  }
+
+  always_assert_flog(passed == argRegs,
+                     "argRegs = {}, but only passed {}",
+                     show(argRegs), show(passed));
+  return ret;
+}
+
+llvm::CallInst* LLVMEmitter::emitTraceletTailCall(llvm::Value* target,
+                                                  RegSet argRegs) {
+  auto args = makePhysRegArgs(argRegs, {x64::rVmSp, x64::rVmTl, x64::rVmFp});
   auto call = m_irb.CreateCall(target, args);
   call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TC);
   call->setTailCallKind(llvm::CallInst::TCK_MustTail);
@@ -2109,7 +2135,7 @@ void LLVMEmitter::emit(const fallback& inst) {
   auto func = emitFuncPtr(folly::sformat("reqRetranslate_{}", stub),
                           m_traceletFnTy,
                           uint64_t(stub));
-  auto call = emitTraceletTailCall(func);
+  auto call = emitTraceletTailCall(func, inst.args);
   call->setSmashable();
 
   LLVMFallback req{m_nextLocRec++, inst.dest};
@@ -2315,31 +2341,19 @@ void LLVMEmitter::emit(const jmp& inst) {
 
 void LLVMEmitter::emit(const jmpr& inst) {
   auto func = m_irb.CreateIntToPtr(value(inst.target), ptrType(m_traceletFnTy));
-  emitTraceletTailCall(func);
+  emitTraceletTailCall(func, inst.args);
 }
 
 void LLVMEmitter::emit(const jmpm& inst) {
   auto func = m_irb.CreateLoad(emitPtr(inst.target,
                                        ptrType(ptrType(m_traceletFnTy))));
-  emitTraceletTailCall(func);
+  emitTraceletTailCall(func, inst.args);
 }
 
 void LLVMEmitter::emit(const jmpi& inst) {
-  std::vector<llvm::Value*> args;
-  std::vector<llvm::Type*> argTypes;
-
-  if (inst.target == mcg->tx().uniqueStubs.endCatchHelper) {
-    assert_not_implemented(inst.args == (x64::rVmTl | x64::rVmFp));
-    args = {m_int64Undef, value(x64::rVmTl), value(x64::rVmFp)};
-    argTypes.resize(3, m_int64);
-  } else {
-    assert_not_implemented(inst.args == (x64::kCrossTraceRegs | x64::rAsm));
-    args = {
-      value(x64::rVmSp), value(x64::rVmTl), value(x64::rVmFp),
-      zext(value(x64::rAsm), 64)
-    };
-    argTypes.resize(4, m_int64);
-  }
+  auto args = makePhysRegArgs(
+    inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, x64::rAsm});
+  std::vector<llvm::Type*> argTypes(args.size(), m_int64);
 
   auto func = emitFuncPtr(
     folly::sformat("jmpi_{}", inst.target),
@@ -2361,7 +2375,6 @@ void LLVMEmitter::emit(const ldimml& inst) {
 }
 
 void LLVMEmitter::emit(const ldimmq& inst) {
-  assertx(inst.d.isVirt());
   defineValue(inst.d, cns(inst.s.q()));
 }
 
@@ -2566,21 +2579,19 @@ UNUSED void LLVMEmitter::emitAsm(const std::string& asmStatement,
 }
 
 void LLVMEmitter::emit(const vretm& inst) {
-  assert_not_implemented(inst.args == x64::kCrossTraceRegs);
   auto const retPtr = emitPtr(inst.retAddr, ptrType(ptrType(m_traceletFnTy)));
   auto const retAddr = m_irb.CreateLoad(retPtr);
   auto const prevFp = m_irb.CreateLoad(emitPtr(inst.prevFp, 64));
   defineValue(inst.d, prevFp);
 
   // "Return" with a tail call to the loaded address
-  emitTraceletTailCall(retAddr);
+  emitTraceletTailCall(retAddr, inst.args);
 }
 
 void LLVMEmitter::emit(const vret& inst) {
-  assert_not_implemented(inst.args == x64::kCrossTraceRegs);
   auto const retAddr = m_irb.CreateIntToPtr(value(inst.retAddr),
                                             ptrType(m_traceletFnTy));
-  emitTraceletTailCall(retAddr);
+  emitTraceletTailCall(retAddr, inst.args);
 }
 
 void LLVMEmitter::emit(const absdbl& inst) {
@@ -2764,17 +2775,12 @@ void LLVMEmitter::emit(const subsd& inst) {
 }
 
 void LLVMEmitter::emit(const svcreq& inst) {
-  std::vector<llvm::Value*> args{
-    value(x64::rVmSp),
-    value(x64::rVmTl),
-    value(x64::rVmFp),
-    cns(reinterpret_cast<uintptr_t>(inst.stub_block)),
-    cns(uint64_t{inst.req})
-  };
-  for (auto arg : m_unit.tuples[inst.args]) {
+  auto args = makePhysRegArgs(inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp});
+  args.emplace_back(cns(reinterpret_cast<uintptr_t>(inst.stub_block)));
+  args.emplace_back(cns(uint64_t{inst.req}));
+  for (auto arg : m_unit.tuples[inst.extraArgs]) {
     args.push_back(value(arg));
   }
-
   std::vector<llvm::Type*> argTypes(args.size(), m_int64);
   auto funcType = llvm::FunctionType::get(m_void, argTypes, false);
   auto func = emitFuncPtr(folly::to<std::string>("handleSRHelper_",

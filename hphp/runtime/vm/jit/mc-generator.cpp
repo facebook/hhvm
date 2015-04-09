@@ -2222,7 +2222,7 @@ void emitServiceReq(Vout& v, TCA stub_block,
       }
     }
   }
-  v << svcreq{req, v.makeTuple(args), stub_block};
+  v << svcreq{req, x64::kCrossTraceRegs, v.makeTuple(args), stub_block};
 }
 
 } // HPHP::jit

@@ -27,8 +27,9 @@ let map program =
     else () in
 
   let detect_invalid_fun_kind p = function
-    | FSync -> ()
-    | _ -> unsupported (p, "async is currently not supported.") in
+    | FSync | FGenerator -> ()
+    | FAsync | FAsyncGenerator ->
+      unsupported (p, "async is currently not supported.") in
 
   let detect_invalid_fun {f_user_attributes; f_fun_kind; f_name = (p, _); _} =
     detect_invalid_attributes p f_user_attributes;

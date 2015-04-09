@@ -200,9 +200,15 @@ and fun_ = {
   f_namespace       : Namespace_env.env;
 }
 
+and fun_decl_kind =
+  | FDeclAsync
+  | FDeclSync
+
 and fun_kind =
-  | FAsync
   | FSync
+  | FAsync
+  | FGenerator
+  | FAsyncGenerator
 
 and hint = Pos.t * hint_
 and hint_ =

@@ -559,8 +559,8 @@ let unparser _env =
     u_fun_ fun_ = u_fun_with_use fun_ StrEmpty
   and u_fun_kind =
     function
-    | FAsync -> Str "async"
-    | FSync -> StrEmpty
+    | FAsync | FAsyncGenerator -> Str "async"
+    | FSync | FGenerator -> StrEmpty
   and u_hint (v2, v3) = StrList [u_pos_t v2; u_hint_ v3]
   and u_hint_ =
     function

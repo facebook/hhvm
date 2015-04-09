@@ -96,7 +96,7 @@ and genv = {
   self_id : string     ;
   self    : ty         ;
   static  : bool       ;
-  fun_kind : Nast.fun_kind;
+  fun_kind : Ast.fun_kind;
   anons   : anon IMap.t;
   droot   : Typing_deps.Dep.variant option  ;
   file    : Relative_path.t;
@@ -286,7 +286,7 @@ let empty tcopt file = {
     self    = Reason.none, Tany;
     static  = false;
     parent  = Reason.none, Tany;
-    fun_kind = FSync;
+    fun_kind = Ast.FSync;
     anons   = IMap.empty;
     droot   = None;
     file    = file;

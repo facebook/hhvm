@@ -135,22 +135,19 @@ let rec fun_decl (tcopt:TypecheckerOptions.t) f =
   ()
 
 and fun_decl_in_env env f =
-  (* XXX: this is a dependency on the function body to get declaration info *)
-
   let mandatory_init = true in
   let env, arity_min, params = make_params env mandatory_init 0 f.f_params in
-  let named_body = Nast.assert_named_body f.f_body in
-  let env, ret_ty = match f.f_ret, named_body.fnb_fun_kind with
+  let env, ret_ty = match f.f_ret, f.f_fun_kind with
     (* The utility in making FAsync to always be Awaitable is the "unused
      * awaitable" check, which doesn't apply to these. *)
-    | None, FGenerator
-    | None, FAsyncGenerator
+    | None, Ast.FGenerator
+    | None, Ast.FAsyncGenerator
     (* If there is no return type annotation, we clearly should make
      * it Tany but also want a witness so that we can point *somewhere*
      * in event of error. The function name itself isn't great, but is
      * better than nothing. *)
-    | None, FSync -> env, (Reason.Rwitness (fst f.f_name), Tany)
-    | None, FAsync ->
+    | None, Ast.FSync -> env, (Reason.Rwitness (fst f.f_name), Tany)
+    | None, Ast.FAsync ->
       let pos = fst f.f_name in
       env, (Reason.Rasync_ret pos,
             Tapply ((pos, SN.Classes.cAwaitable), [(Reason.Rwitness pos, Tany)]))
@@ -317,7 +314,7 @@ and fun_def env _ f =
       let env, params =
         lfold (make_param_type_ ~for_body:true Env.fresh_type) env f_params in
       let env = List.fold_left2 bind_param env params f_params in
-      let env = fun_ env hret (fst f.f_name) f.f_body in
+      let env = fun_ env hret (fst f.f_name) f.f_body f.f_fun_kind in
       let env = fold_fun_list env env.Env.todo in
       if Env.is_strict env then begin
         List.iter2 (check_param env) f_params params;
@@ -331,12 +328,12 @@ and fun_def env _ f =
 (* function used to type closures, functions and methods *)
 (*****************************************************************************)
 
-and fun_ ?(abstract=false) env hret pos b =
+and fun_ ?(abstract=false) env hret pos b f_kind =
   Env.with_return env begin fun env ->
     debug_last_pos := pos;
     let env = Env.set_return env hret in
     let nb = Nast.assert_named_body b in
-    let env = Env.set_fn_kind env nb.fnb_fun_kind in
+    let env = Env.set_fn_kind env f_kind in
     let env = block env nb.fnb_nast in
     let ret = Env.get_return env in
     let env =
@@ -346,20 +343,20 @@ and fun_ ?(abstract=false) env hret pos b =
         Env.is_decl env ||
         !auto_complete
       then env
-      else fun_implicit_return env pos ret nb.fnb_nast nb.fnb_fun_kind in
+      else fun_implicit_return env pos ret nb.fnb_nast f_kind in
     debug_last_pos := Pos.none;
     env
   end
 
 and fun_implicit_return env pos ret _b = function
-  | FGenerator | FAsyncGenerator -> env
-  | FSync ->
+  | Ast.FGenerator | Ast.FAsyncGenerator -> env
+  | Ast.FSync ->
     (* A function without a terminal block has an implicit return; the
      * "void" type *)
     let rty = Reason.Rno_return pos, Tprim Nast.Tvoid in
     Typing_suggest.save_return env ret rty;
     Type.sub_type pos Reason.URreturn env ret rty
-  | FAsync ->
+  | Ast.FAsync ->
     (* An async function without a terminal block has an implicit return;
      * the Awaitable<void> type *)
     let r = Reason.Rno_return_async pos in
@@ -416,10 +413,10 @@ and stmt env = function
       else LEnv.intersect env parent_lenv lenv1 lenv2
   | Return (p, None) ->
       let rty = match Env.get_fn_kind env with
-        | FSync -> (Reason.Rwitness p, Tprim Tvoid)
-        | FGenerator
-        | FAsyncGenerator -> any (* Return type checked against the "yield". *)
-        | FAsync -> (Reason.Rwitness p, Tapply ((p, SN.Classes.cAwaitable), [(Reason.Rwitness p, Tprim Tvoid)])) in
+        | Ast.FSync -> (Reason.Rwitness p, Tprim Tvoid)
+        | Ast.FGenerator
+        | Ast.FAsyncGenerator -> any (* Return type checked against the "yield". *)
+        | Ast.FAsync -> (Reason.Rwitness p, Tapply ((p, SN.Classes.cAwaitable), [(Reason.Rwitness p, Tprim Tvoid)])) in
       let expected_return = Env.get_return env in
       Typing_suggest.save_return env expected_return rty;
       let env = Type.sub_type p Reason.URreturn env expected_return rty in
@@ -428,10 +425,10 @@ and stmt env = function
       let pos = fst e in
       let env, rty = expr env e in
       let rty = match Env.get_fn_kind env with
-        | FSync -> rty
-        | FGenerator
-        | FAsyncGenerator -> any (* Is an error, but caught in NastCheck. *)
-        | FAsync -> (Reason.Rwitness p), Tapply ((p, SN.Classes.cAwaitable), [rty]) in
+        | Ast.FSync -> rty
+        | Ast.FGenerator
+        | Ast.FAsyncGenerator -> any (* Is an error, but caught in NastCheck. *)
+        | Ast.FAsync -> (Reason.Rwitness p), Tapply ((p, SN.Classes.cAwaitable), [rty]) in
       let expected_return = Env.get_return env in
       (match snd (Env.expand_type env expected_return) with
       | r, Tprim Tvoid ->
@@ -1097,10 +1094,10 @@ and expr_ ~in_cond ~(valkind: [> `lvalue | `rvalue | `other ]) env (p, e) =
       let env, value = yield_field_value env af in
       let send = Env.fresh_type () in
       let rty = match Env.get_fn_kind env with
-        | FGenerator ->
+        | Ast.FGenerator ->
             Reason.Ryield_gen p,
             Tapply ((p, SN.Classes.cGenerator), [key; value; send])
-        | FAsyncGenerator ->
+        | Ast.FAsyncGenerator ->
             Reason.Ryield_asyncgen p,
             Tapply ((p, SN.Classes.cAsyncGenerator), [key; value; send])
         | _ -> assert false in (* Naming should never allow this *)
@@ -1277,13 +1274,13 @@ and anon_make anon_lenv p f =
           | None -> TUtils.in_var env (Reason.Rnone, Tunresolved [])
           | Some x -> Typing_hint.hint env x in
         let env = Env.set_return env hret in
-        let env = Env.set_fn_kind env nb.fnb_fun_kind in
+        let env = Env.set_fn_kind env f.f_fun_kind in
         let env = block env nb.fnb_nast in
         let env =
           if Nast_terminality.Terminal.block nb.fnb_nast
             || nb.fnb_unsafe || !auto_complete
           then env
-          else fun_implicit_return env p hret nb.fnb_nast nb.fnb_fun_kind
+          else fun_implicit_return env p hret nb.fnb_nast f.f_fun_kind
         in
         is_typing_self := false;
         env, hret
@@ -1631,11 +1628,11 @@ and array_field_key env = function
 and yield_field_key env = function
   | Nast.AFvalue (p, _) ->
       env, (match Env.get_fn_kind env with
-        | FSync
-        | FAsync -> assert false
-        | FGenerator ->
+        | Ast.FSync
+        | Ast.FAsync -> assert false
+        | Ast.FGenerator ->
             (Reason.Rwitness p, Tprim Tint)
-        | FAsyncGenerator ->
+        | Ast.FAsyncGenerator ->
             (Reason.Ryield_asyncnull p, Toption (Env.fresh_type ())))
   | Nast.AFkvalue (x, _) ->
       expr env x
@@ -3681,7 +3678,7 @@ and method_def env m =
     List.iter2 (check_param env) m_params params;
   end;
   let env = List.fold_left2 bind_param env params m_params in
-  let env = fun_ ~abstract:m.m_abstract env ret (fst m.m_name) m.m_body in
+  let env = fun_ ~abstract:m.m_abstract env ret (fst m.m_name) m.m_body m.m_fun_kind in
   let env = List.fold_left (fun env f -> f env) env (Env.get_todo env) in
   match m.m_ret with
     | None when Env.is_strict env && snd m.m_name <> SN.Members.__destruct ->

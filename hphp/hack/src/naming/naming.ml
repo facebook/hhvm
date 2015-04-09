@@ -140,13 +140,6 @@ type lenv = {
    *)
   unbound_mode: unbound_mode;
 
-  (* The presence of "yield" in the function body changes the type of the
-   * function into a generator, with no other syntactic indications
-   * elsewhere. For the sanity of the typechecker, we flatten this out into
-   * fun_kind, but need to track if we've seen a "yield" in order to do so.
-   *)
-  has_yield: bool ref;
-
   (* The presence of an "UNSAFE" in the function body changes the
    * verifiability of the function's return type, since the unsafe
    * block could return. For the sanity of the typechecker, we flatten
@@ -218,7 +211,6 @@ module Env = struct
     all_locals = ref SMap.empty;
     pending_locals = ref SMap.empty;
     unbound_mode = UBMErr;
-    has_yield = ref false;
     has_unsafe = ref false;
   }
 
@@ -1445,14 +1437,9 @@ and typeconst env t =
        c_tconst_type = type_;
      })
 
-and fun_kind env ft =
+and fun_kind env fun_type =
   let has_unsafe = !((snd env).has_unsafe) in
-  let ret_kind = match !((snd env).has_yield), ft with
-    | false, Ast.FSync -> N.FSync
-    | false, Ast.FAsync -> N.FAsync
-    | true, Ast.FSync -> N.FGenerator
-    | true, Ast.FAsync -> N.FAsyncGenerator
-  in has_unsafe, ret_kind
+  has_unsafe, fun_type
 
 and method_ env m =
   let genv, lenv = env in
@@ -1484,7 +1471,6 @@ and method_ env m =
   let body = N.NamedBody {
     N.fnb_nast = body_nast;
     fnb_unsafe = unsafe;
-    fnb_fun_kind = f_kind;
   } in
   N.({ m_final      = final  ;
        m_visibility = vis    ;
@@ -1493,6 +1479,7 @@ and method_ env m =
        m_tparams    = tparam_l;
        m_params     = paraml ;
        m_body       = body   ;
+       m_fun_kind   = f_kind ;
        m_user_attributes = attrs;
        m_ret        = ret    ;
        m_variadic   = variadicity;
@@ -1592,7 +1579,6 @@ and fun_ genv f =
   let body = N.NamedBody {
     N.fnb_nast = body_nast;
     fnb_unsafe = unsafe;
-    fnb_fun_kind = f_kind;
   } in
   let named_fun = {
     N.f_mode = f.f_mode;
@@ -1601,6 +1587,7 @@ and fun_ genv f =
     f_tparams = f_tparams;
     f_params = paraml;
     f_body = body;
+    f_fun_kind = f_kind;
     f_variadic = variadicity;
     f_user_attributes = user_attributes env f.f_user_attributes;
   } in
@@ -2012,8 +1999,8 @@ and expr_ env = function
      the cases above *)
   | Call (e, el, uel) ->
       N.Call (N.Cnormal, expr env e, exprl env el, exprl env uel)
-  | Yield_break -> (snd env).has_yield := true; N.Yield_break
-  | Yield e -> (snd env).has_yield := true; N.Yield (afield env e)
+  | Yield_break -> N.Yield_break
+  | Yield e -> N.Yield (afield env e)
   | Await e -> N.Await (expr env e)
   | List el -> N.List (exprl env el)
   | Expr_list el -> N.Expr_list (exprl env el)
@@ -2134,23 +2121,19 @@ and expr_ env = function
 
 and expr_lambda env f =
   let h = opt_map (hint ~allow_this:true ~allow_retonly:true env) f.f_ret in
-  let previous_unsafe, previous_yield =
-    !((snd env).has_unsafe), !((snd env).has_yield) in
+  let previous_unsafe = !((snd env).has_unsafe) in
   (* save unsafe and yield state *)
   (snd env).has_unsafe := false;
-  (snd env).has_yield := false;
   let variadicity, paraml = fun_paraml env f.f_params in
   (* The bodies of lambdas go through naming in the containing local
    * environment *)
   let body_nast = block env f.f_body in
   let unsafe, f_kind = fun_kind env f.f_fun_kind in
-  (* restore unsafe and yield state *)
+  (* restore unsafe state *)
   (snd env).has_unsafe := previous_unsafe;
-  (snd env).has_yield := previous_yield;
   let body = N.NamedBody {
     N.fnb_unsafe = unsafe;
     fnb_nast = body_nast;
-    fnb_fun_kind = f_kind;
   } in {
     N.f_mode = (fst env).in_mode;
     f_ret = h;
@@ -2158,6 +2141,7 @@ and expr_lambda env f =
     f_params = paraml;
     f_tparams = [];
     f_body = body;
+    f_fun_kind = f_kind;
     f_variadic = variadicity;
     f_user_attributes = user_attributes env f.f_user_attributes;
   }

@@ -282,6 +282,7 @@ UNSUPPORTED_FILES_CONVERTER = {
         'void_usage_placeholder.php',
         'weird.php',
         'yield_blank_result.php',
+        'yield_decl.php',
         'yield_implicit_result.php',
         'yield_jan_test_case.php',
         'yield_return3.php',

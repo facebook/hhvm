@@ -150,18 +150,16 @@ and class_var = {
 }
 
 and method_ = {
-  m_unsafe          : bool                      ;
-  m_final           : bool                      ;
-  m_abstract        : bool                      ;
-  m_visibility      : visibility                ;
-  m_name            : sid                       ;
-  m_tparams         : tparam list               ;
-  m_variadic        : fun_variadicity           ;
-  m_params          : fun_param list            ;
-  m_body            : body_block                ;
-  m_user_attributes : user_attribute list   ;
-  m_ret             : hint option               ;
-  m_fun_kind        : fun_kind                  ;
+  m_final           : bool                ;
+  m_abstract        : bool                ;
+  m_visibility      : visibility          ;
+  m_name            : sid                 ;
+  m_tparams         : tparam list         ;
+  m_variadic        : fun_variadicity     ;
+  m_params          : fun_param list      ;
+  m_body            : func_body           ;
+  m_user_attributes : user_attribute list ;
+  m_ret             : hint option         ;
 }
 
 and fun_kind =
@@ -197,14 +195,12 @@ and fun_variadicity = (* does function take varying number of args? *)
 
 and fun_ = {
   f_mode     : FileInfo.mode;
-  f_unsafe   : bool;
   f_ret      : hint option;
   f_name     : sid;
   f_tparams  : tparam list;
   f_variadic : fun_variadicity;
   f_params   : fun_param list;
-  f_body     : body_block;
-  f_fun_kind : fun_kind;
+  f_body     : func_body;
   f_user_attributes : user_attribute list;
 }
 
@@ -217,9 +213,32 @@ and gconst = {
   cst_value: expr option;
 }
 
-and body_block =
-  | UnnamedBody of Ast.block
-  | NamedBody of block
+and func_body =
+  | UnnamedBody of func_unnamed_body
+  | NamedBody of func_named_body
+
+and func_unnamed_body = {
+  (* Unnamed AST for the function body *)
+  fub_ast       : Ast.block;
+  (* Declared function kind *)
+  fub_decl_kind : Ast.fun_kind;
+  (* Unnamed AST for the function type params *)
+  fub_tparams   : Ast.tparam list;
+  (* Namespace info *)
+  fub_namespace : Namespace_env.env;
+}
+
+and func_named_body = {
+  (* Named AST for the function body *)
+  fnb_nast     : block;
+  (* True if there are any UNSAFE blocks; the presence of any unsafe
+   * block in the function makes comparing the function body to the
+   * declared return type impossible, since that block could return *)
+  fnb_unsafe   : bool;
+  (* Sync vs Async is determined via declaration, but Generator vs
+   * Non-generator requires looking for 'yield' in the body *)
+  fnb_fun_kind : fun_kind;
+}
 
 and stmt =
   | Expr of expr

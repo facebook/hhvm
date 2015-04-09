@@ -1470,12 +1470,11 @@ and method_ env m =
   let tparam_l = type_paraml env m.m_tparams in
   (* Naming method body: *)
   let unsafe = is_unsafe_body m.m_body in
-  let body =
+  let body_nast =
     match genv.in_mode with
     | FileInfo.Mpartial | FileInfo.Mstrict ->
         block env m.m_body
     | FileInfo.Mdecl -> [] in
-  let body = N.NamedBody body in
   (* If not naming: ... *)
   (* let body = N.UnnamedBody m.m_body in *)
   (* ... and don't forget that fun_kind (generators) and unsafe
@@ -1483,8 +1482,12 @@ and method_ env m =
   let attrs = user_attributes env m.m_user_attributes in
   let method_type = fun_kind env m.m_fun_kind in
   let ret = opt_map (hint ~allow_this:true ~allow_retonly:true env) m.m_ret in
-  N.({ m_unsafe     = unsafe ;
-       m_final      = final  ;
+  let body = N.NamedBody {
+    N.fnb_nast = body_nast;
+    fnb_unsafe = unsafe;
+    fnb_fun_kind = method_type;
+  } in
+  N.({ m_final      = final  ;
        m_visibility = vis    ;
        m_abstract   = abs    ;
        m_name       = name   ;
@@ -1494,7 +1497,6 @@ and method_ env m =
        m_user_attributes = attrs;
        m_ret        = ret    ;
        m_variadic   = variadicity;
-       m_fun_kind   = method_type;
      })
 
 and kind (final, abs, vis) = function
@@ -1577,32 +1579,32 @@ and fun_ genv f =
   let f_tparams = type_paraml env f.f_tparams in
   (* Naming func body: *)
   let unsafe = is_unsafe_body f.f_body in
-  let body =
+  let body_nast =
     match genv.in_mode with
     | FileInfo.Mstrict | FileInfo.Mpartial -> block env f.f_body
     | FileInfo.Mdecl -> []
   in
-  let body = N.NamedBody body in
   (* If not naming: ... *)
   (* let body = N.UnnamedBody f.f_body in *)
   (* let unsafe = false in *)
   (* ... and don't forget that fun_kind (generators) and unsafe
    * both depend upon the processing of the unnamed ast *)
   let kind = fun_kind env f.f_fun_kind in
-  let named_fun =
-    {
-      N.f_unsafe = unsafe;
-      f_mode = f.f_mode;
-      f_ret = h;
-      f_name = x;
-      f_tparams = f_tparams;
-      f_params = paraml;
-      f_body = body;
-      f_variadic = variadicity;
-      f_fun_kind = kind;
-      f_user_attributes = user_attributes env f.f_user_attributes;
-    }
-  in
+  let body = N.NamedBody {
+    N.fnb_nast = body_nast;
+    fnb_unsafe = unsafe;
+    fnb_fun_kind = kind;
+  } in
+  let named_fun = {
+    N.f_mode = f.f_mode;
+    f_ret = h;
+    f_name = x;
+    f_tparams = f_tparams;
+    f_params = paraml;
+    f_body = body;
+    f_variadic = variadicity;
+    f_user_attributes = user_attributes env f.f_user_attributes;
+  } in
   Naming_hooks.dispatch_fun_named_hook named_fun;
   named_fun
 
@@ -2136,19 +2138,20 @@ and expr_lambda env f =
   let variadicity, paraml = fun_paraml env f.f_params in
   (* The bodies of lambdas go through naming in the containing local
    * environment *)
-  let named_body = block env f.f_body in
-  let body = N.NamedBody named_body in
+  let body_nast = block env f.f_body in
   let f_kind = fun_kind env f.f_fun_kind in
-  {
-    N.f_unsafe = unsafe;
-    f_mode = (fst env).in_mode;
+  let body = N.NamedBody {
+    N.fnb_unsafe = unsafe;
+    fnb_nast = body_nast;
+    fnb_fun_kind = f_kind;
+  } in {
+    N.f_mode = (fst env).in_mode;
     f_ret = h;
     f_name = f.f_name;
     f_params = paraml;
     f_tparams = [];
     f_body = body;
     f_variadic = variadicity;
-    f_fun_kind = f_kind;
     f_user_attributes = user_attributes env f.f_user_attributes;
   }
 

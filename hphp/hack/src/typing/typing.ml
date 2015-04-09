@@ -135,9 +135,12 @@ let rec fun_decl (tcopt:TypecheckerOptions.t) f =
   ()
 
 and fun_decl_in_env env f =
+  (* XXX: this is a dependency on the function body to get declaration info *)
+
   let mandatory_init = true in
   let env, arity_min, params = make_params env mandatory_init 0 f.f_params in
-  let env, ret_ty = match f.f_ret, f.f_fun_kind with
+  let named_body = Nast.assert_named_body f.f_body in
+  let env, ret_ty = match f.f_ret, named_body.fnb_fun_kind with
     (* The utility in making FAsync to always be Awaitable is the "unused
      * awaitable" check, which doesn't apply to these. *)
     | None, FGenerator
@@ -292,7 +295,8 @@ and bind_param env (_, ty1) param =
 (* Now we are actually checking stuff! *)
 (*****************************************************************************)
 and fun_def env _ f =
-  NastCheck.fun_ env f (Nast.assert_named_body f.f_body);
+  let nb = (Nast.assert_named_body f.f_body) in
+  NastCheck.fun_ env f nb;
   (* Fresh type environment is actually unnecessary, but I prefer to
    * have a guarantee that we are using a clean typing environment. *)
   Env.fresh_tenv env (
@@ -314,7 +318,7 @@ and fun_def env _ f =
       let env, params =
         lfold (make_param_type_ ~for_body:true Env.fresh_type) env f_params in
       let env = List.fold_left2 bind_param env params f_params in
-      let env = fun_ env f.f_unsafe hret (fst f.f_name) f.f_body f.f_fun_kind in
+      let env = fun_ env hret (fst f.f_name) f.f_body in
       let env = fold_fun_list env env.Env.todo in
       if Env.is_strict env then begin
         List.iter2 (check_param env) f_params params;
@@ -328,22 +332,22 @@ and fun_def env _ f =
 (* function used to type closures, functions and methods *)
 (*****************************************************************************)
 
-and fun_ ?(abstract=false) env unsafe hret pos b fun_type =
+and fun_ ?(abstract=false) env hret pos b =
   Env.with_return env begin fun env ->
     debug_last_pos := pos;
     let env = Env.set_return env hret in
-    let env = Env.set_fn_kind env fun_type in
-    let b = Nast.assert_named_body b in
-    let env = block env b in
+    let nb = Nast.assert_named_body b in
+    let env = Env.set_fn_kind env nb.fnb_fun_kind in
+    let env = block env nb.fnb_nast in
     let ret = Env.get_return env in
     let env =
-      if Nast_terminality.Terminal.block b ||
+      if Nast_terminality.Terminal.block nb.fnb_nast ||
         abstract ||
-        unsafe ||
+        nb.fnb_unsafe ||
         Env.is_decl env ||
         !auto_complete
       then env
-      else fun_implicit_return env pos ret b fun_type in
+      else fun_implicit_return env pos ret nb.fnb_nast nb.fnb_fun_kind in
     debug_last_pos := Pos.none;
     env
   end
@@ -1256,6 +1260,7 @@ and anon_check_param env param =
 
 and anon_make anon_lenv p f =
   let is_typing_self = ref false in
+  let nb = Nast.assert_named_body f.f_body in
   fun env tyl ->
     if !is_typing_self
     then begin
@@ -1274,13 +1279,13 @@ and anon_make anon_lenv p f =
           | None -> TUtils.in_var env (Reason.Rnone, Tunresolved [])
           | Some x -> Typing_hint.hint env x in
         let env = Env.set_return env hret in
-        let env = Env.set_fn_kind env f.f_fun_kind in
-        let body = Nast.assert_named_body f.f_body in
-        let env = block env body in
+        let env = Env.set_fn_kind env nb.fnb_fun_kind in
+        let env = block env nb.fnb_nast in
         let env =
-          if Nast_terminality.Terminal.block body || f.f_unsafe || !auto_complete
+          if Nast_terminality.Terminal.block nb.fnb_nast
+            || nb.fnb_unsafe || !auto_complete
           then env
-          else fun_implicit_return env p hret body f.f_fun_kind
+          else fun_implicit_return env p hret nb.fnb_nast nb.fnb_fun_kind
         in
         is_typing_self := false;
         env, hret
@@ -3675,8 +3680,7 @@ and method_def env m =
     List.iter2 (check_param env) m_params params;
   end;
   let env = List.fold_left2 bind_param env params m_params in
-  let env = fun_ ~abstract:m.m_abstract env m.m_unsafe
-      ret (fst m.m_name) m.m_body m.m_fun_kind in
+  let env = fun_ ~abstract:m.m_abstract env ret (fst m.m_name) m.m_body in
   let env = List.fold_left (fun env f -> f env) env (Env.get_todo env) in
   match m.m_ret with
     | None when Env.is_strict env && snd m.m_name <> SN.Members.__destruct ->

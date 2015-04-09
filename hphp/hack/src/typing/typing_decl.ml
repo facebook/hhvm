@@ -739,9 +739,12 @@ and typeconst_decl c (env, acc) {
       env, acc
 
 and method_decl env m =
+  (* XXX: this is a dependency on the function body to get declaration info *)
+
   let env, arity_min, params = Typing.make_params env true 0 m.m_params in
+  let named_body = Nast.assert_named_body m.m_body in
   let env, ret =
-    match m.m_ret, m.m_fun_kind with
+    match m.m_ret, named_body.fnb_fun_kind with
       | None, FGenerator
       | None, FAsyncGenerator
       | None, FSync -> env, (Reason.Rwitness (fst m.m_name), Tany)
@@ -763,7 +766,7 @@ and method_decl env m =
   let env, tparams = lfold Typing.type_param env m.m_tparams in
   let ft = {
     ft_pos      = fst m.m_name;
-    ft_unsafe   = m.m_unsafe;
+    ft_unsafe   = named_body.fnb_unsafe;
     ft_deprecated =
       Attrs.deprecated ~kind:"method" m.m_name m.m_user_attributes;
     ft_abstract = m.m_abstract;

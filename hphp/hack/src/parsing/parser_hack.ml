@@ -1781,7 +1781,7 @@ and ignore_body env =
       ignore (expr_heredoc env);
       ignore_body env
   | Tword when (Lexing.lexeme env.lb) = "function" && peek env = Tlp ->
-  (* this covers the async case as well *)
+      (* this covers the async case as well *)
       let pos = Pos.make env.file env.lb in
       ignore (expr_anon_fun env pos ~sync:FSync);
       ignore_body env

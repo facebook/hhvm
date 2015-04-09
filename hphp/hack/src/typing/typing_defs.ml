@@ -183,7 +183,6 @@ and taccess_type = ty * Nast.sid list
  * A function has a min and max arity because of optional arguments *)
 and fun_type = {
   ft_pos       : Pos.t;
-  ft_unsafe    : bool            ;
   ft_deprecated: string option   ;
   ft_abstract  : bool            ;
   ft_arity     : fun_arity       ;

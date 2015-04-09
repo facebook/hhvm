@@ -233,7 +233,9 @@ and func_named_body = {
   fnb_nast     : block;
   (* True if there are any UNSAFE blocks; the presence of any unsafe
    * block in the function makes comparing the function body to the
-   * declared return type impossible, since that block could return *)
+   * declared return type impossible, since that block could return;
+   * functions declared in Mdecl are by definition UNSAFE
+   *)
   fnb_unsafe   : bool;
   (* Sync vs Async is determined via declaration, but Generator vs
    * Non-generator requires looking for 'yield' in the body *)

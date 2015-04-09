@@ -766,7 +766,6 @@ and method_decl env m =
   let env, tparams = lfold Typing.type_param env m.m_tparams in
   let ft = {
     ft_pos      = fst m.m_name;
-    ft_unsafe   = named_body.fnb_unsafe;
     ft_deprecated =
       Attrs.deprecated ~kind:"method" m.m_name m.m_user_attributes;
     ft_abstract = m.m_abstract;

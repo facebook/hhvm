@@ -101,52 +101,59 @@ type unbound_mode =
 (* The local environment *)
 type lenv = {
 
-    (* The set of locals *)
-    locals: map ref;
+  (* The set of locals *)
+  locals: map ref;
 
-    (* The set of constants *)
-    consts: map ref;
+  (* The set of constants *)
+  consts: map ref;
 
-    (* We keep all the locals, even if we are in a different scope
-     * to provide better error messages.
-     * if you write:
-     * if(...) {
-     *   $x = ...;
-     * }
-     * Technically, passed this point, $x is unbound.
-     * But it is much better to keep it somewhere, so that you can
-     * say it is bound, but in a different scope.
-     *)
-    all_locals: Pos.t SMap.t ref;
+  (* We keep all the locals, even if we are in a different scope
+   * to provide better error messages.
+   * if you write:
+   * if(...) {
+   *   $x = ...;
+   * }
+   * Technically, passed this point, $x is unbound.
+   * But it is much better to keep it somewhere, so that you can
+   * say it is bound, but in a different scope.
+   *)
+  all_locals: Pos.t SMap.t ref;
 
-    (* Some statements can define new variables afterwards, e.g.,
-     * if (...) {
-     *    $x = ...;
-     * } else {
-     *    $x = ...;
-     * }
-     * We need to give $x the same name in both branches, but we don't want
-     * $x to actually be a local until after the if block. So we stash it here,
-     * to indicate a name has been pre-allocated, but that the variable isn't
-     * actually defined yet.
-     *)
-    pending_locals: map ref;
+  (* Some statements can define new variables afterwards, e.g.,
+   * if (...) {
+   *    $x = ...;
+   * } else {
+   *    $x = ...;
+   * }
+   * We need to give $x the same name in both branches, but we don't want
+   * $x to actually be a local until after the if block. So we stash it here,
+   * to indicate a name has been pre-allocated, but that the variable isn't
+   * actually defined yet.
+   *)
+  pending_locals: map ref;
 
-    (* Tag controlling what we do when we encounter an unbound name.
-     * This is used when processing a lambda expression body that has
-     * an automatic use list.
-     *
-     * See expr_lambda for details.
-     *)
-    unbound_mode: unbound_mode;
+  (* Tag controlling what we do when we encounter an unbound name.
+   * This is used when processing a lambda expression body that has
+   * an automatic use list.
+   *
+   * See expr_lambda for details.
+   *)
+  unbound_mode: unbound_mode;
 
-    (* The presence of "yield" in the function body changes the type of the
-     * function into a generator, with no other syntactic indications
-     * elsewhere. For the sanity of the typechecker, we flatten this out into
-     * fun_kind, but need to track if we've seen a "yield" in order to do so.
-     *)
-    has_yield: bool ref;
-  }
+  (* The presence of "yield" in the function body changes the type of the
+   * function into a generator, with no other syntactic indications
+   * elsewhere. For the sanity of the typechecker, we flatten this out into
+   * fun_kind, but need to track if we've seen a "yield" in order to do so.
+   *)
+  has_yield: bool ref;
+
+  (* The presence of an "UNSAFE" in the function body changes the
+   * verifiability of the function's return type, since the unsafe
+   * block could return. For the sanity of the typechecker, we flatten
+   * this out, but need to track if we've seen an "UNSAFE" in order to
+   * do so. *)
+  has_unsafe: bool ref;
+}
 
 (* The environment VISIBLE to the outside world. *)
 type env = {
@@ -212,6 +219,7 @@ module Env = struct
     pending_locals = ref SMap.empty;
     unbound_mode = UBMErr;
     has_yield = ref false;
+    has_unsafe = ref false;
   }
 
   let empty_global nenv = {
@@ -982,16 +990,6 @@ let check_tparams_shadow class_tparam_names methods =
   List.iter (check_method_tparams class_tparam_names) methods
 
 (*****************************************************************************)
-(* Check if the body of a method/function is UNSAFE *)
-(*****************************************************************************)
-
-let rec is_unsafe_body = function
-  | [] -> false
-  | Block x :: rl -> is_unsafe_body x || is_unsafe_body rl
-  | Unsafe :: _ -> true
-  | _ :: rl -> is_unsafe_body rl
-
-(*****************************************************************************)
 (* The entry point to CHECK the program, and transform the program *)
 (*****************************************************************************)
 
@@ -1448,11 +1446,13 @@ and typeconst env t =
      })
 
 and fun_kind env ft =
-  match !((snd env).has_yield), ft with
-  | false, Ast.FSync -> N.FSync
-  | false, Ast.FAsync -> N.FAsync
-  | true, Ast.FSync -> N.FGenerator
-  | true, Ast.FAsync -> N.FAsyncGenerator
+  let has_unsafe = !((snd env).has_unsafe) in
+  let ret_kind = match !((snd env).has_yield), ft with
+    | false, Ast.FSync -> N.FSync
+    | false, Ast.FAsync -> N.FAsync
+    | true, Ast.FSync -> N.FGenerator
+    | true, Ast.FAsync -> N.FAsyncGenerator
+  in has_unsafe, ret_kind
 
 and method_ env m =
   let genv, lenv = env in
@@ -1469,23 +1469,22 @@ and method_ env m =
   List.iter check_constraint m.m_tparams;
   let tparam_l = type_paraml env m.m_tparams in
   (* Naming method body: *)
-  let unsafe = is_unsafe_body m.m_body in
   let body_nast =
     match genv.in_mode with
-    | FileInfo.Mpartial | FileInfo.Mstrict ->
-        block env m.m_body
+    | FileInfo.Mpartial | FileInfo.Mstrict -> block env m.m_body
     | FileInfo.Mdecl -> [] in
   (* If not naming: ... *)
   (* let body = N.UnnamedBody m.m_body in *)
   (* ... and don't forget that fun_kind (generators) and unsafe
    * both depend upon the processing of the unnamed ast *)
   let attrs = user_attributes env m.m_user_attributes in
-  let method_type = fun_kind env m.m_fun_kind in
+  let unsafe_in_body, f_kind = fun_kind env m.m_fun_kind in
+  let unsafe = (genv.in_mode = FileInfo.Mdecl) || unsafe_in_body in
   let ret = opt_map (hint ~allow_this:true ~allow_retonly:true env) m.m_ret in
   let body = N.NamedBody {
     N.fnb_nast = body_nast;
     fnb_unsafe = unsafe;
-    fnb_fun_kind = method_type;
+    fnb_fun_kind = f_kind;
   } in
   N.({ m_final      = final  ;
        m_visibility = vis    ;
@@ -1578,7 +1577,6 @@ and fun_ genv f =
   List.iter check_constraint f.f_tparams;
   let f_tparams = type_paraml env f.f_tparams in
   (* Naming func body: *)
-  let unsafe = is_unsafe_body f.f_body in
   let body_nast =
     match genv.in_mode with
     | FileInfo.Mstrict | FileInfo.Mpartial -> block env f.f_body
@@ -1589,11 +1587,12 @@ and fun_ genv f =
   (* let unsafe = false in *)
   (* ... and don't forget that fun_kind (generators) and unsafe
    * both depend upon the processing of the unnamed ast *)
-  let kind = fun_kind env f.f_fun_kind in
+  let unsafe_in_body, f_kind = fun_kind env f.f_fun_kind in
+  let unsafe = (genv.in_mode = FileInfo.Mdecl) || unsafe_in_body in
   let body = N.NamedBody {
     N.fnb_nast = body_nast;
     fnb_unsafe = unsafe;
-    fnb_fun_kind = kind;
+    fnb_fun_kind = f_kind;
   } in
   let named_fun = {
     N.f_mode = f.f_mode;
@@ -1608,12 +1607,13 @@ and fun_ genv f =
   Naming_hooks.dispatch_fun_named_hook named_fun;
   named_fun
 
-and cut_and_flatten ?(replacement=Noop) = function
+and cut_and_flatten ?(replacement=Noop) env = function
   | [] -> []
-  | Unsafe :: _ -> [replacement]
+  | Unsafe :: _ -> (snd env).has_unsafe := true ; [replacement]
   | Block b :: rest ->
-      (cut_and_flatten ~replacement b) @ (cut_and_flatten ~replacement rest)
-  | x :: rest -> x :: (cut_and_flatten ~replacement rest)
+      (cut_and_flatten ~replacement env b) @
+        (cut_and_flatten ~replacement env rest)
+  | x :: rest -> x :: (cut_and_flatten ~replacement env rest)
 
 and stmt env st =
   match st with
@@ -1745,7 +1745,7 @@ and try_stmt env st b cl fb =
   result
 
 and block ?(new_scope=true) env stl =
-  let stl = cut_and_flatten stl in
+  let stl = cut_and_flatten env stl in
   if new_scope
   then
     Env.scope env (
@@ -1754,7 +1754,7 @@ and block ?(new_scope=true) env stl =
   else List.map (stmt env) stl
 
 and branch env stmt_l =
-  let stmt_l = cut_and_flatten stmt_l in
+  let stmt_l = cut_and_flatten env stmt_l in
   let genv, lenv = env in
   let lenv_copy = !(lenv.locals) in
   let lenv_all_locals_copy = !(lenv.all_locals) in
@@ -2134,12 +2134,19 @@ and expr_ env = function
 
 and expr_lambda env f =
   let h = opt_map (hint ~allow_this:true ~allow_retonly:true env) f.f_ret in
-  let unsafe = List.mem Unsafe f.f_body in
+  let previous_unsafe, previous_yield =
+    !((snd env).has_unsafe), !((snd env).has_yield) in
+  (* save unsafe and yield state *)
+  (snd env).has_unsafe := false;
+  (snd env).has_yield := false;
   let variadicity, paraml = fun_paraml env f.f_params in
   (* The bodies of lambdas go through naming in the containing local
    * environment *)
   let body_nast = block env f.f_body in
-  let f_kind = fun_kind env f.f_fun_kind in
+  let unsafe, f_kind = fun_kind env f.f_fun_kind in
+  (* restore unsafe and yield state *)
+  (snd env).has_unsafe := previous_unsafe;
+  (snd env).has_yield := previous_yield;
   let body = N.NamedBody {
     N.fnb_unsafe = unsafe;
     fnb_nast = body_nast;
@@ -2181,13 +2188,13 @@ and casel env l =
 
 and case env acc = function
   | Default b ->
-    let b = cut_and_flatten ~replacement:Fallthrough b in
+    let b = cut_and_flatten ~replacement:Fallthrough env b in
     let all_locals, b = branch env b in
     let acc = SMap.union all_locals acc in
     acc, N.Default b
   | Case (e, b) ->
     let e = expr env e in
-    let b = cut_and_flatten ~replacement:Fallthrough b in
+    let b = cut_and_flatten ~replacement:Fallthrough env b in
     let all_locals, b = branch env b in
     let acc = SMap.union all_locals acc in
     acc, N.Case (e, b)

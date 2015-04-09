@@ -202,7 +202,6 @@ and hint_ p env = function
       in
       env, Tfun {
         ft_pos = p;
-        ft_unsafe = false;
         ft_deprecated = None;
         ft_abstract = false;
         ft_arity = arity;

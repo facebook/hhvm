@@ -167,7 +167,6 @@ and fun_decl_in_env env f =
   let env, tparams = lfold type_param env f.f_tparams in
   let ft = {
     ft_pos         = fst f.f_name;
-    ft_unsafe      = false;
     ft_deprecated  =
       Attributes.deprecated ~kind:"function" f.f_name f.f_user_attributes;
     ft_abstract    = false;
@@ -912,7 +911,6 @@ and expr_ ~in_cond ~(valkind: [> `lvalue | `rvalue | `other ]) env (p, e) =
               | Fellipsis min -> Fellipsis (min + 1) in
             let caller = {
               ft_pos = pos;
-              ft_unsafe = false;
               ft_deprecated = None;
               ft_abstract = false;
               ft_arity = fun_arity;
@@ -1809,7 +1807,6 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
               r_fty,
               Tfun {
                 ft_pos = fty.ft_pos;
-                ft_unsafe = false;
                 ft_deprecated = None;
                 ft_abstract = false;
                 ft_arity = Fstandard (arity, arity); ft_tparams = [];

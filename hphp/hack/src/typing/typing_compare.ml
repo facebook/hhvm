@@ -156,8 +156,7 @@ module CompareTypes = struct
     let acc = fun_arity acc ft1.ft_arity ft2.ft_arity in
     let acc = fun_params acc ft1.ft_params ft2.ft_params in
     let subst, same = ty acc ft1.ft_ret ft2.ft_ret in
-    subst, same &&
-      ft1.ft_unsafe = ft2.ft_unsafe && ft1.ft_abstract = ft2.ft_abstract
+    subst, same && ft1.ft_abstract = ft2.ft_abstract
 
   and fun_arity acc arity1 arity2 =
     let subst, same = acc in

@@ -1577,6 +1577,12 @@ let ambiguous_inheritance pos class_ origin (error: error) =
   let code, msgl = error in
   add_list code (msgl @ [pos, message])
 
+let explain_contravariance pos c_name error =
+  let message = "Considering that this type argument is contravariant "^
+                "with respect to " ^ strip_ns c_name in
+  let code, msgl = error in
+  add_list code (msgl @ [pos, message])
+
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)
 (*****************************************************************************)

@@ -76,20 +76,25 @@ let rec subtype_funs_generic ~check_return env r_super ft_super r_sub
   let env, _ = Unify.unify_funs env r_sub ft_sub r_sub orig_ft_sub in
   env
 
-and subtype_tparams env variancel super_tyl children_tyl =
+and subtype_tparams env c_name variancel super_tyl children_tyl =
   match variancel, super_tyl, children_tyl with
   | [], [], [] -> env
   | [], _, _
   | _, [], _
   | _, _, [] -> env
   | variance :: variancel, super :: superl, child :: childrenl ->
-      let env = subtype_tparam env variance super child in
-      subtype_tparams env variancel superl childrenl
+      let env = subtype_tparam env c_name variance super child in
+      subtype_tparams env c_name variancel superl childrenl
 
-and subtype_tparam env variance super child =
+and subtype_tparam env c_name variance (r_super, _ as super) child =
   match variance with
   | Ast.Covariant -> sub_type env super child
-  | Ast.Contravariant -> super_type env super child
+  | Ast.Contravariant ->
+      Errors.try_
+        (fun () -> super_type env super child)
+        (fun err ->
+          let pos = Reason.to_pos r_super in
+          Errors.explain_contravariance pos c_name err; env)
   | Ast.Invariant -> fst (Unify.unify env super child)
 
 (* Distinction b/w sub_type and sub_type_with_uenv similar to unify and
@@ -354,7 +359,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
             let variancel =
               List.map (fun (variance, _, _) -> variance) tc_tparams
             in
-            subtype_tparams env variancel tyl_super tyl_sub
+            subtype_tparams env cid_super variancel tyl_super tyl_sub
       else fst (Unify.unify env ety_super ety_sub)
     else begin
       let class_ = Env.get_class env cid_sub in
@@ -485,7 +490,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
           let variancel =
             List.map (fun (variance, _, _) -> variance) tparams
           in
-          subtype_tparams env variancel tyl_super tyl_sub
+          subtype_tparams env name_super variancel tyl_super tyl_sub
       | _ -> env
       )
   | _, (_, Tabstract (_, _, Some x)) ->

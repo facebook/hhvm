@@ -77,7 +77,6 @@ void implCns(IRGS& env,
     auto const c1 = gen(env, LdCns, cnsNameTmp);
     result = cond(
       env,
-      1,
       [&] (Block* taken) { // branch
         gen(env, CheckInit, taken, c1);
       },

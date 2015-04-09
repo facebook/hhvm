@@ -1360,16 +1360,7 @@ void find_alias_sets(Env& env) {
       return;
     }
 
-    // TODO(#6317780): CastCtxThis should be passthrough, but it breaks
-    // the old refcount-opts.cpp, so work around it here for now.
-    auto const canon = [&] () -> SSATmp* {
-      auto ret = canonical(tmp);
-      while (ret->inst()->is(CastCtxThis)) {
-        ret = canonical(ret->inst()->src(0));
-      }
-      return ret;
-    }();
-
+    auto const canon = canonical(tmp);
     if (env.asetMap[canon] != -1) {
       id = env.asetMap[canon];
     } else {
@@ -3335,26 +3326,8 @@ void rcgraph_opts(Env& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * This is vestigial and will be removed soon.
- */
-
-void eliminateTakes(const BlockList& blocks) {
-  for (auto b : blocks) {
-    for (auto& inst : *b) {
-      if (inst.is(TakeStk, TakeRef)) {
-        inst.convertToNop();
-      }
-    }
-  }
-}
-
-void eliminateTakes(const IRUnit& unit) { eliminateTakes(rpoSortCfg(unit)); }
-
-//////////////////////////////////////////////////////////////////////
-
 void optimizeRefcounts2(IRUnit& unit) {
-  Timer timer(Timer::optimize_refcountOpts2);
+  Timer timer(Timer::optimize_refcountOpts);
   splitCriticalEdges(unit);
 
   PassTracer tracer{&unit, Trace::hhir_refcount, "optimizeRefcounts"};

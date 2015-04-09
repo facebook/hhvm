@@ -81,10 +81,6 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     }
   }
 
-  // This is vestigial (it removes some instructions needed by the old refcount
-  // opts pass), and will be removed soon.
-  eliminateTakes(unit);
-
   dce("initial");
 
   if (RuntimeOption::EvalHHIRPredictionOpts) {
@@ -106,15 +102,6 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     dce("loadelim");
   }
 
-  /*
-   * Note: doing this pass this late might not be ideal, in particular because
-   * we've already turned some StLoc instructions into StLocNT.
-   *
-   * But right now there are assumptions preventing us from doing it before
-   * refcount opts.  (Refcount opts needs to see all the StLocs explicitly
-   * because it makes assumptions about whether references are consumed based
-   * on that.)
-   */
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
     doPass(optimizeStores);
     dce("storeelim");

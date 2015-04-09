@@ -265,8 +265,6 @@ SSATmp* simplifyCheckCtxThis(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyCastCtxThis(State& env, const IRInstruction* inst) {
-  // TODO(#5623596): this transformation is required for correctness in
-  // refcount opts right now.
   if (inst->src(0)->type() <= TObj) return inst->src(0);
   return nullptr;
 }
@@ -1760,15 +1758,6 @@ SSATmp* simplifyJmpNZero(State& env, const IRInstruction* i) {
   return condJmpImpl(env, i);
 }
 
-SSATmp* simplifyTakeStk(State& env, const IRInstruction* inst) {
-  if (!inst->src(0)->type().maybe(TCounted) &&
-      !mightRelax(env, inst->src(0))) {
-    return gen(env, Nop);
-  }
-
-  return nullptr;
-}
-
 SSATmp* simplifyAssertNonNull(State& env, const IRInstruction* inst) {
   if (!inst->src(0)->type().maybe(TNullptr)) {
     return inst->src(0);
@@ -2017,7 +2006,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdObjClass)
   X(LdObjInvoke)
   X(Mov)
-  X(TakeStk)
   X(UnboxPtr)
   X(JmpZero)
   X(JmpNZero)

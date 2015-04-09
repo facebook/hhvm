@@ -115,10 +115,6 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retval) {
 
   auto const retAddr = gen(env, LdRetAddr, fp(env));
   gen(env, FreeActRec, fp(env));
-
-  // Decref the AsyncFunctionWaitHandle.  The TakeRef informs refcount-opts
-  // that we're going to consume the reference.
-  gen(env, TakeRef, resumableObj);
   gen(env, DecRef, resumableObj);
 
   gen(

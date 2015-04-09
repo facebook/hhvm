@@ -622,7 +622,6 @@ void emitFPushClsMethodD(IRGS& env,
   // path. If that fails, slow exit.
   auto const func = cond(
     env,
-    0,
     [&] (Block* taken) {
       auto const mcFunc = gen(env, LdClsMethodCacheFunc, data);
       return gen(env, CheckNonNull, taken, mcFunc);
@@ -743,7 +742,6 @@ void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
   auto const data = ClsMethodData{cls->name(), methName};
   auto const funcTmp = cond(
     env,
-    0,
     [&](Block* taken) {
       auto const fcacheFunc = gen(env, LdClsMethodFCacheFunc, data);
       return gen(env, CheckNonNull, taken, fcacheFunc);

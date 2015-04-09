@@ -393,7 +393,6 @@ void emitStaticLoc(IRGS& env, int32_t locId, const StringData* name) {
 
   auto const res = cond(
     env,
-    0,
     [&] (Block* taken) {
       gen(env, CheckStaticLocInit, taken, box);
     },

@@ -32,8 +32,6 @@ struct FrameStateMgr;
 /*
  * The main optimization passes.
  */
-void optimizeRefcounts(IRUnit&, FrameStateMgr&&);
-void eliminateTakes(const IRUnit&);
 void optimizeRefcounts2(IRUnit&);
 void optimizePredictions(IRUnit&);
 void gvn(IRUnit&);

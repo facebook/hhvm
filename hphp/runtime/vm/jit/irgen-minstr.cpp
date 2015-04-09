@@ -790,7 +790,6 @@ SSATmp* checkInitProp(MTS& env,
 
   return cond(
     env,
-    0,
     [&] (Block* taken) {
       gen(env, CheckInitMem, taken, propAddr);
     },
@@ -861,7 +860,6 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
    */
   auto const newBase = cond(
     env,
-    0,
     [&] (Block* taken) {
       gen(env, CheckTypeMem, TObj, taken, env.base.value);
     },
@@ -1178,7 +1176,6 @@ void emitRatchetRefs(MTS& env) {
 
   setBase(env, cond(
     env,
-    0,
     [&] (Block* taken) {
       gen(env, CheckInitMem, taken, misRefAddr);
     },
@@ -1325,7 +1322,6 @@ SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
 
   return cond(
     env,
-    1,
     [&] (Block* taken) {
       gen(env, CheckPackedArrayBounds, taken, base, key);
     },
@@ -1528,7 +1524,6 @@ void emitPackedArrayIsset(MTS& env) {
 
   env.result = cond(
     env,
-    0,
     [&] (Block* taken) {
       gen(env, CheckPackedArrayBounds, taken, env.base.value, key);
     },

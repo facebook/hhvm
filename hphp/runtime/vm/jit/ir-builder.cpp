@@ -514,10 +514,7 @@ SSATmp* IRBuilder::preOptimizeCoerceStk(IRInstruction* inst) {
 
 SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   auto const offset = inst->extra<LdStk>()->offset;
-  if (auto tmp = stackValue(offset, DataTypeGeneric)) {
-    gen(TakeStk, tmp);
-    return tmp;
-  }
+  if (auto tmp = stackValue(offset, DataTypeGeneric)) return tmp;
   // The types may not be compatible in the presence of unreachable code.
   // Don't try to optimize the code in this case, and just let
   // unreachable code elimination take care of it later.

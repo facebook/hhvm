@@ -234,7 +234,6 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
      * const.
      */
     return (inst.is(ReDefSP) && src->isA(TStkPtr)) ||
-           inst.is(TakeStk) ||
            src->isA(TStkPtr) ||
            src->isA(TFramePtr) ||
            src->inst()->is(DefConst);

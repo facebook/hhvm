@@ -159,7 +159,6 @@ bool canDCE(IRInstruction* inst) {
   case DefInlineFP:
   case LdRetAddr:
   case Mov:
-  case TakeRef:
   case ReDefSP:
   case CountArray:
   case CountArrayFast:
@@ -252,7 +251,6 @@ bool canDCE(IRInstruction* inst) {
   case Jmp:
   case DefLabel:
   case Box:
-  case TakeStk:
   case LdLocPseudoMain:
   case LdVectorBase:
   case LdPairBase:

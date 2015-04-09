@@ -809,8 +809,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Nop:
   case ClsNeq:
   case Mod:
-  case TakeRef:
-  case TakeStk:
   case Conjure:
   case DefMIStateBase:
   case Halt:

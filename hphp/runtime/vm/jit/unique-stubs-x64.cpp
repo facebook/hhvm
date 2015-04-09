@@ -110,7 +110,11 @@ TCA emitDebuggerRetFromInterpretedGenFrame() {
 
 //////////////////////////////////////////////////////////////////////
 
+#ifdef __aarch64__
+void enterTCExit() { }
+#else
 extern "C" void enterTCExit();
+#endif
 
 void emitCallToExit(UniqueStubs& uniqueStubs) {
   Asm a { mcg->code.main() };

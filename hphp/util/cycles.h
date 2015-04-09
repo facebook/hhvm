@@ -36,6 +36,10 @@ inline uint64_t cpuCycles() {
   uint64_t tb;
   asm volatile("mfspr %0, 268" : "=r" (tb));
   return tb;
+#elif __aarch64__
+  uint64_t tb;
+  asm volatile("mrs %0, cntvct_el0" : "=r" (tb));
+  return tb;
 #else
   not_implemented();
 #endif
@@ -46,6 +50,8 @@ inline void cpuRelax() {
   asm volatile("pause");
 #elif __powerpc64__
   asm volatile("or 31,31,31");
+#elif __aarch64__
+  asm volatile("wfe");
 #endif
 }
 

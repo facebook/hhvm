@@ -169,7 +169,9 @@ void emitServiceReqImpl(CodeBlock& stub,
    * Jump to the helper that will pack our args into a struct and call into
    * MCGenerator::handleServiceRequest().
    */
+#ifndef __aarch64__
   as.    jmp(TCA(handleSRHelper));
+#endif
 
   if (debug || !persist) {
     /*

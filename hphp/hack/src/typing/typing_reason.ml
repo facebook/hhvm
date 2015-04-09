@@ -37,6 +37,7 @@ type t =
   | Rnull_check      of Pos.t
   | Rnot_in_cstr     of Pos.t
   | Rthrow           of Pos.t
+  | Rplaceholder     of Pos.t
   | Rattr            of Pos.t
   | Rxhp             of Pos.t
   | Rret_div         of Pos.t
@@ -92,6 +93,7 @@ let rec to_string prefix r =
   | Rnull_check      _ -> [(p, prefix ^ " because this was checked to see if the value was null")]
   | Rnot_in_cstr     _ -> [(p, prefix ^ " because it is not always defined in __construct")]
   | Rthrow           _ -> [(p, prefix ^ " because it is used as an exception")]
+  | Rplaceholder     _ -> [(p, prefix ^ " ($_ is a placeholder variable not meant to be used)")]
   | Rattr            _ -> [(p, prefix ^ " because it is used in an attribute")]
   | Rxhp             _ -> [(p, prefix ^ " because it is used as an XML element")]
   | Rret_div         _ -> [(p, prefix ^ " because it is the result of a division (/)")]
@@ -182,6 +184,7 @@ and to_pos = function
   | Rnull_check  p -> p
   | Rnot_in_cstr p -> p
   | Rthrow       p -> p
+  | Rplaceholder p -> p
   | Rattr        p -> p
   | Rxhp         p -> p
   | Rret_div     p -> p

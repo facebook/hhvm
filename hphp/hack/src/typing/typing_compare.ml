@@ -305,6 +305,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Rnull_check p          -> Rnull_check (pos p)
     | Rnot_in_cstr p         -> Rnot_in_cstr (pos p)
     | Rthrow p               -> Rthrow (pos p)
+    | Rplaceholder p         -> Rplaceholder (pos p)
     | Rattr p                -> Rattr (pos p)
     | Rxhp p                 -> Rxhp (pos p)
     | Rret_div p             -> Rret_div (pos p)

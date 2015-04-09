@@ -312,7 +312,7 @@ and expr_ env acc p e =
   | Smethod_id _
   | Method_caller _
   | Id _ -> acc
-  | Lvar _ -> acc
+  | Lvar _ | Lplaceholder _ -> acc
   | Obj_get ((_, This), (_, Id (_, vx as v)), _) ->
       if SSet.mem vx env.cvars && not (SSet.mem vx acc)
       then (Errors.read_before_write v; acc)

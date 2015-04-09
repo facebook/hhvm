@@ -395,7 +395,7 @@ let variable env =
       Pos.make env.file env.lb, Lexing.lexeme env.lb
   | _ ->
       error_expect env "variable";
-      Pos.make env.file env.lb, "$_"
+      Pos.make env.file env.lb, "$_" (* SpecialIdents.placeholder *)
 
 (* &$variable *)
 let ref_variable env =

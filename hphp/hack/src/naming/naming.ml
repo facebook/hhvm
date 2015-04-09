@@ -667,7 +667,7 @@ let check_repetition s param =
   let x = snd param.param_id in
   if SSet.mem x s
   then Errors.already_bound (fst param.param_id) x;
-  SSet.add x s
+  if x <> SN.SpecialIdents.placeholder then SSet.add x s else s
 
 (* Check that a name is not a typedef *)
 let no_typedef (genv, _) cid =
@@ -1833,7 +1833,9 @@ and expr_ env = function
         N.String x
       | _ -> N.Id (Env.global_const env x)
       )
-  | Lvar (_, "$this") -> N.This
+  | Lvar (_, x) when x = SN.SpecialIdents.this -> N.This
+  | Lvar ((_pos, x) as sid) when x = SN.SpecialIdents.placeholder ->
+    N.Lplaceholder sid
   | Lvar x ->
       N.Lvar (Env.lvar env x)
   | Obj_get (e1, (p, _ as e2), nullsafe) ->
@@ -2072,7 +2074,8 @@ and expr_ env = function
       N.New (make_class_id env (p, SN.Classes.cUnknown), exprl env el, exprl env uel)
   | Efun (f, idl) ->
       let idl = List.map fst idl in
-      let idl = List.filter (function (_, "$this") -> false | _ -> true) idl in
+      let idl = List.filter
+        (function (_, x) -> (x <> SN.SpecialIdents.this)) idl in
       let idl' = List.map (Env.lvar env) idl in
       let env = (fst env, Env.empty_local ()) in
       List.iter2 (Env.add_lvar env) idl idl';
@@ -2149,7 +2152,7 @@ and make_class_id env (p, x as cid) =
         let () = Errors.static_outside_class p in
         N.CI (p, SN.Classes.cUnknown)
       else N.CIstatic
-    | x when x = "$this" -> N.CIvar (p, N.This)
+    | x when x = SN.SpecialIdents.this -> N.CIvar (p, N.This)
     | x when x.[0] = '$' -> N.CIvar (p, N.Lvar (Env.lvar env cid))
     | _ -> N.CI (Env.class_name env cid)
 

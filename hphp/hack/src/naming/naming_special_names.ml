@@ -130,6 +130,13 @@ module SpecialFunctions = struct
 
 end
 
+module SpecialIdents = struct
+
+  let this = "$this"
+  let placeholder = "$_"
+
+end
+
 module PseudoFunctions = struct
 
   let empty = "\\empty"

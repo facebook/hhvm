@@ -370,7 +370,8 @@ let fill_type_hole env cid cid_ty ty =
         let name = "expr#"^string_of_int(Ident.tmp()) in
         Reason.Rwitness p, Tabstract ((p, fill_name name), [], Some cid_ty)
     | CIvar (p, This) ->
-        Reason.Rwitness p, Tabstract ((p, fill_name "$this"), [], Some cid_ty)
+        Reason.Rwitness p, Tabstract ((p, fill_name SN.SpecialIdents.this),
+                                      [], Some cid_ty)
     | _ ->
       let name = class_id_to_str cid in
       Reason.Rwitness pos, Tabstract ((pos, fill_name name), [], Some cid_ty)

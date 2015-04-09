@@ -289,6 +289,7 @@ UNSUPPORTED_FILES_CONVERTER = {
         'unused_awaitable5.php',
         'unused_awaitable6.php',
         'void_option2.php',
+        'void_usage_placeholder.php',
         'weird.php',
         'yield_blank_result.php',
         'yield_implicit_result.php',

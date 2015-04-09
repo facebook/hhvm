@@ -113,7 +113,8 @@ module CheckFunctionType = struct
     | _, Id _
     | _, Class_get _
     | _, Class_const _
-    | _, Lvar _ -> ()
+    | _, Lvar _
+    | _, Lplaceholder _ -> ()
     | _, Array afl ->
         liter afield f_type afl;
         ()
@@ -612,7 +613,7 @@ and expr_ env = function
   | Id _
   | Class_get _
   | Class_const _
-  | Lvar _ -> ()
+  | Lvar _ | Lplaceholder _ -> ()
   | Array afl ->
       liter afield env afl;
       ()

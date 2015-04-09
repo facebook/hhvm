@@ -263,6 +263,7 @@ and expr_ =
   | This
   | Id of sid
   | Lvar of id
+  | Lplaceholder of sid
   | Fun_id of sid
   | Method_id of expr * pstring
   (* meth_caller('Class name', 'method name') *)
@@ -336,7 +337,7 @@ let class_id_to_str cid =
     | CIparent -> SN.Classes.cParent
     | CIself -> SN.Classes.cSelf
     | CIstatic -> SN.Classes.cStatic
-    | CIvar (_, This) -> "$this"
+    | CIvar (_, This) -> SN.SpecialIdents.this
     | CIvar (_, Lvar (_, x)) -> "$"^string_of_int(x)
     | CIvar _ -> assert false
     | CI (_, x) -> x

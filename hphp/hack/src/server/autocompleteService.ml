@@ -173,7 +173,7 @@ let autocomplete_lvar_typing id env =
     (* Add $this if we're in a instance method *)
     let ty = Typing_env.get_self env in
     if not (Typing_env.is_static env) && (fst ty) <> Reason.Rnone
-    then add_result "$this" ty
+    then add_result Naming_special_names.SpecialIdents.this ty
   end
 
 let should_complete_class completion_type class_kind =

@@ -966,6 +966,10 @@ and expr_ in_cond is_lvalue env (p, e) =
         )
       )
     )
+  | Lplaceholder (p, _name) ->
+    let r = Reason.Rplaceholder p in
+    let ty = r, Tprim Tvoid in
+    env, ty
   | Lvar ((_, x) as id) ->
       Typing_hooks.dispatch_lvar_hook id env;
       let env, x = Env.get_local env x in
@@ -1464,6 +1468,9 @@ and assign p env e1 ty2 =
   match e1 with
   | (_, Lvar (_, x)) ->
     set_valid_rvalue p env x ty2
+  | (_, Lplaceholder _) ->
+    let placeholder_ty = Reason.Rplaceholder p, (Tprim Tvoid) in
+    env, placeholder_ty
   | (_, List el) ->
       let env, folded_ty2 = TUtils.fold_unresolved env ty2 in
       let env, folded_ety2 = Env.expand_type env folded_ty2 in

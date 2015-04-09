@@ -19,7 +19,6 @@ type t =
   | Rforeach         of Pos.t (* Because it is iterated in a foreach loop *)
   | Rasyncforeach    of Pos.t (* Because it is iterated "await as" in foreach *)
   | Raccess          of Pos.t
-  | Rcall            of Pos.t
   | Rarith           of Pos.t
   | Rarith_ret       of Pos.t
   | Rstring2         of Pos.t
@@ -75,7 +74,6 @@ let rec to_string prefix r =
   | Rforeach         _ -> [(p, prefix ^ " because this is used in a foreach statement")]
   | Rasyncforeach    _ -> [(p, prefix ^ " because this is used in a foreach statement with \"await as\"")]
   | Raccess          _ -> [(p, prefix ^ " because one of its elements is accessed")]
-  | Rcall            _ -> [(p, prefix ^ " because this is used as a function")]
   | Rarith           _ -> [(p, prefix ^ " because this is used in an arithmetic operation")]
   | Rarith_ret       _ -> [(p, prefix ^ " because this is the result of an arithmetic operation")]
   | Rstring2         _ -> [(p, prefix ^ " because this is used in a string")]
@@ -166,7 +164,6 @@ and to_pos = function
   | Rforeach     p -> p
   | Rasyncforeach p -> p
   | Raccess   p -> p
-  | Rcall        p -> p
   | Rarith       p -> p
   | Rarith_ret   p -> p
   | Rstring2     p -> p

@@ -154,7 +154,6 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   auto const may_reenter_is_ok =
     (inst.taken() && inst.taken()->isCatch()) ||
     inst.is(DecRef,
-            DecRefThis,
             ReleaseVVOrExit,
             CIterFree,
             MIterFree,
@@ -982,8 +981,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // also may generally write to the eval stack below an offset (see
   // alias-class.h above AStack for more).
 
-  case DecRefThis:
-    return may_reenter(inst, may_load_store(AEmpty, AEmpty));
   case DecRef:
     if (inst.src(0)->type().maybe(TArr | TObj)) {
       // Could re-enter to run a destructor.

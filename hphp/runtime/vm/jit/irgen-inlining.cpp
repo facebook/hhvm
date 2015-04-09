@@ -143,9 +143,7 @@ void endInlinedCommon(IRGS& env) {
   assertx(!resumed(env));
 
   decRefLocalsInline(env);
-  if (curFunc(env)->mayHaveThis()) {
-    gen(env, DecRefThis, fp(env));
-  }
+  decRefThis(env);
 
   /*
    * Pop the ActRec and restore the stack and frame pointers.  It's

@@ -1399,11 +1399,6 @@ To string conversions:
 
   If the Ctx in S0 is a $this pointer, IncRef it.
 
-| DecRefThis, ND, S(FramePtr), NF
-
-  DecRef the $this pointer in the ActRec S0, if it had one. Does nothing if
-  there was a class context or null $this on the ActRec.
-
 | DecRef, ND, S(Gen), K|CRc
 
   Decrease the reference count of S0 by one, and call a destructor for types

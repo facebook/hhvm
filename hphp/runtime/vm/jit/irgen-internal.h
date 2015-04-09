@@ -749,6 +749,24 @@ inline void decRefLocalsInline(IRGS& env) {
   }
 }
 
+inline void decRefThis(IRGS& env) {
+  if (!curFunc(env)->mayHaveThis()) return;
+  auto const ctx = ldCtx(env);
+  ifThenElse(
+    env,
+    [&] (Block* taken) {
+      gen(env, CheckCtxThis, taken, ctx);
+    },
+    [&] {  // Next: it's a this
+      auto const this_ = gen(env, CastCtxThis, ctx);
+      gen(env, DecRef, this_);
+    },
+    [&] {  // Taken: static context, or psuedomain w/o a $this
+      // No op.
+    }
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}}

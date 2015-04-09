@@ -85,7 +85,7 @@ void freeLocalsAndThis(IRGS& env) {
     gen(env, GenericRetDecRefs, fp(env));
   }
 
-  if (curFunc(env)->mayHaveThis()) gen(env, DecRefThis, fp(env));
+  decRefThis(env);
 }
 
 void normalReturn(IRGS& env, SSATmp* retval) {

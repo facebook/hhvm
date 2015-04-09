@@ -2416,31 +2416,6 @@ void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
   ifThen(v, CC_Z, sf, [&](Vout& v) { emitIncRef(v, src); });
 }
 
-void CodeGenerator::cgDecRefThis(IRInstruction* inst) {
-  auto fpReg = srcLoc(inst, 0).reg();
-  auto& v = vmain();
-  auto rthis = v.makeReg(); // Load AR->m_this into rthis
-  v << load{fpReg[AROFF(m_this)], rthis};
-
-  auto decrefIfAvailable = [&](Vout& v) {
-    // Check if this is available and we're not in a static context instead
-    auto const sf = v.makeReg();
-    v << testbi{1, rthis, sf};
-    ifThen(v, CC_Z, sf, [&](Vout& v) {
-      cgDecRefStaticType(v, inst, TObj, rthis);
-    });
-  };
-
-  if (getFunc(inst->marker())->isPseudoMain()) {
-    // In pseudo-mains, emit check for presence of m_this
-    auto const sf = v.makeReg();
-    v << testq{rthis, rthis, sf};
-    ifThen(v, CC_NZ, sf, [&](Vout& v) { decrefIfAvailable(v); });
-  } else {
-    decrefIfAvailable(v);
-  }
-}
-
 void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
   auto const rFp       = srcLoc(inst, 0).reg();
   auto const numLocals = getFunc(inst->marker())->numLocals();
@@ -2573,30 +2548,6 @@ CodeGenerator::cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
   v << cmplim{1, dataReg[FAST_REFCOUNT_OFFSET], sf};
   ifThenElse(v, vcold(), CC_E, sf, destroy, static_check_and_decl,
              unlikelyDestroy);
-}
-
-//
-// Generates dec-ref of a typed value with statically known type.
-//
-void CodeGenerator::cgDecRefStaticType(Vout& v,
-                                       const IRInstruction* inst,
-                                       Type type, Vreg dataReg) {
-  assertx(type != TCell && type != TGen);
-  assertx(type.isKnownDataType());
-
-  if (!type.maybe(TCounted)) return;
-
-  auto done = v.makeBlock();
-  cgCheckStaticBitAndDecRef(v, inst, done, type, dataReg, [&] (Vout& v) {
-    cgCallHelper(v,
-                 mcg->getDtorCall(type.toDataType()),
-                 kVoidDest,
-                 SyncOptions::kSyncPoint,
-                 argGroup(inst)
-                 .reg(dataReg));
-  });
-  if (!v.closed()) v << jmp{done};
-  v = done;
 }
 
 void CodeGenerator::cgDecRef(IRInstruction *inst) {

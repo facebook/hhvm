@@ -145,8 +145,6 @@ private:
   void cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
                                  Vlabel done, Type type,
                                  Vreg dataReg, F destroyImpl);
-  void cgDecRefStaticType(Vout&, const IRInstruction* inst, Type type,
-                          Vreg dataReg);
 
   void cgIterNextCommon(IRInstruction* inst);
   void cgIterInitCommon(IRInstruction* inst);

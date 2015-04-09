@@ -1944,9 +1944,9 @@ void pure_spill_frame(Env& env,
    * If the frame becomes live via DefInlineFP, we don't need to treat it as
    * memory support for this set anymore, for the same reason that LdCtx
    * doesn't need that.  The only way that reference can be DecRef'd in a
-   * semantically correct program is in a return sequence, which will contain
-   * either a DecRef or DecRefThis (or unwinding), and if it's done inside this
-   * region, we will see the instructions and handle that.
+   * semantically correct program is in a return sequence, and if it's done
+   * inside this region, we will see the relevant DecRef instructions and
+   * handle that.
    */
   create_store_support(env, state, psf.ctx, ctx, add_node);
 }
@@ -2071,9 +2071,6 @@ void rc_analyze_inst(Env& env,
       ++aset.lower_bound;
       FTRACE(3, "    {} lb: {}\n", asetID, aset.lower_bound);
     });
-    return;
-  case DecRefThis:
-    pessimize_all(env, state, add_node);
     return;
   case DecRef:
   case DecRefNZ:

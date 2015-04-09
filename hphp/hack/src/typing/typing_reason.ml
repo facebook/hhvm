@@ -305,12 +305,13 @@ let none = Rnone
 (* When the subtyping fails because of a constraint. *)
 (*****************************************************************************)
 
-let explain_generic_constraint reason name error =
+let explain_generic_constraint p_inst reason name error =
   match reason with
   | Rexpr_dep_type _ ->
       let msgl =
         to_string ("Considering the constraint on '"^name^"'") reason in
       Errors.explain_type_constant msgl error
-  | Rtype_access (_, _, reason) | reason ->
+  | Rtype_access (_, _, reason)
+  | reason ->
       let pos = to_pos reason in
-      Errors.explain_constraint pos name error
+      Errors.explain_constraint p_inst pos name error

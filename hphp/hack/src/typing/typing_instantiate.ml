@@ -133,7 +133,7 @@ and instantiate subst env (r, ty) =
                   Errors.try_
                     (fun () -> check_constraint env ck ty x_ty)
                     (fun l ->
-                      Reason.explain_generic_constraint r x l;
+                      Reason.explain_generic_constraint env.Env.pos r x l;
                       env
                     )
                 end

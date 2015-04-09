@@ -959,13 +959,19 @@ let missing_field pos1 pos2 name =
     [pos1, "The field '"^name^"' is missing";
      pos2, "The field '"^name^"' is defined"]
 
-let explain_constraint pos name (error: error) =
+let explain_constraint p_inst pos name (error : error) =
+  let inst_msg = "Some type constraint(s) here are violated" in
   let code, msgl = error in
+  (* There may be multiple constraints instantiated at one spot; avoid
+   * duplicating the instantiation message *)
+  let msgl = match msgl with
+    | (p, x) :: rest when x = inst_msg && p = p_inst -> rest
+    | _ -> msgl in
   let name = Utils.strip_ns name in
-  add_list code (
-    msgl @
-      [pos, "Considering the constraint on '"^name^"'"]
-  )
+  add_list code begin
+    [p_inst, inst_msg;
+     pos, "'"^name^"' is a constrained type"] @ msgl
+  end
 
 let explain_type_constant reason_msgl (error: error) =
   let code, msgl = error in

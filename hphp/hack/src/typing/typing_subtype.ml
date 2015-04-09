@@ -152,13 +152,15 @@ and typevars_subtype_ env (uenv_super, ety_super) (uenv_sub, ety_sub) =
       (fun () ->
         let env, ety_sub = Env.expand_type env ty_sub in
         typevars_subtype_ env (uenv_super, ety_super) (uenv_sub, ety_sub))
-      (fun l -> Reason.explain_generic_constraint r_sub x_sub l; env)
+      (fun l ->
+        Reason.explain_generic_constraint env.Env.pos r_sub x_sub l; env)
   | (r_super, Tgeneric (x_super, Some (Ast.Constraint_super, ty_super))), _ ->
     Errors.try_
       (fun () ->
         let env, ety_super = Env.expand_type env ty_super in
         typevars_subtype_ env (uenv_super, ety_super) (uenv_sub, ety_sub))
-      (fun l -> Reason.explain_generic_constraint r_super x_super l; env)
+      (fun l ->
+        Reason.explain_generic_constraint env.Env.pos r_super x_super l; env)
   | _ ->
     sub_type_with_uenv env (uenv_super, ety_super) (uenv_sub, ety_sub)
 
@@ -279,13 +281,15 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tprim _), (r_sub, Tgeneric (x, Some (Ast.Constraint_as, ty_sub))) ->
       (Errors.try_
          (fun () -> sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
-         (fun l -> Reason.explain_generic_constraint r_sub x l; env)
+         (fun l ->
+           Reason.explain_generic_constraint env.Env.pos r_sub x l; env)
       )
   | (r_super, Tgeneric (x, Some (Ast.Constraint_super, ty))), (_, Tapply _)
   | (r_super, Tgeneric (x, Some (Ast.Constraint_super, ty))), (_, Tprim _) ->
       (Errors.try_
          (fun () -> sub_type_with_uenv env (uenv_super, ty) (uenv_sub, ty_sub))
-         (fun l -> Reason.explain_generic_constraint r_super x l; env)
+         (fun l ->
+           Reason.explain_generic_constraint env.Env.pos r_super x l; env)
       )
   | (_, Tgeneric ("this", Some (_, ty_super))),
     (_, Tgeneric ("this", Some (_, ty_sub))) ->

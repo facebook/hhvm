@@ -2577,7 +2577,7 @@ and obj_get_ ~is_method ~nullsafe env ty1 cid (p, s as id)
                 let env, member_ =
                   TGen.rename env new_name SN.Typehints.this member_ in
                 let env, member_ =
-                      TAccess.fill_type_hole env cid this_ty member_ in
+                  TAccess.fill_type_hole env cid this_ty member_ in
                 env, member_, Some (mem_pos, vis)
             )
         )

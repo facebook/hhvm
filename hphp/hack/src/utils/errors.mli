@@ -25,7 +25,7 @@ val typeparam_alok : Pos.t * string -> unit
 val unexpected_eof : Pos.t -> unit
 val missing_field : Pos.t -> Pos.t -> string -> unit
 val generic_class_var : Pos.t -> unit
-val explain_constraint : Pos.t -> string -> error -> unit
+val explain_constraint : Pos.t -> Pos.t -> string -> error -> unit
 val explain_type_constant : (Pos.t * string) list -> error -> unit
 val unexpected_arrow : Pos.t -> string -> unit
 val missing_arrow : Pos.t -> string -> unit

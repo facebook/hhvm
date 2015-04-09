@@ -1,8 +1,10 @@
 File "super_constraint_8.php", line 11, characters 11-17:
-This is an object of type B (Typing[4110])
+Some type constraint(s) here are violated (Typing[4110])
+File "super_constraint_8.php", line 4, characters 35-36:
+'Tu' is a constrained type
+File "super_constraint_8.php", line 11, characters 11-17:
+This is an object of type B
 File "super_constraint_8.php", line 10, characters 16-16:
 It is incompatible with an object of type A
 File "super_constraint_8.php", line 4, characters 32-32:
   via this generic T
-File "super_constraint_8.php", line 4, characters 35-36:
-Considering the constraint on 'Tu'

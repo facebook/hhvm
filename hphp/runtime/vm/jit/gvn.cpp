@@ -154,17 +154,11 @@ bool supportsGVN(const IRInstruction* inst) {
   case ConvBoolToStr:
   case ConvClsToCctx:
   case Gt:
-  case GtX:
   case Gte:
-  case GteX:
   case Lt:
-  case LtX:
   case Lte:
-  case LteX:
   case Eq:
-  case EqX:
   case Neq:
-  case NeqX:
   case Same:
   case NSame:
   case GtInt:

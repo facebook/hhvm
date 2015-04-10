@@ -49,8 +49,8 @@ TEST(CFG, InsertPreHeaders_Simple) {
   auto b4 = unit.defBlock();
   auto b5 = unit.defBlock();
 
-  auto val1 = unit.gen(Conjure, dummy, Type::Bool);
-  auto val2 = unit.gen(Conjure, dummy, Type::Bool);
+  auto val1 = unit.gen(Conjure, dummy, TBool);
+  auto val2 = unit.gen(Conjure, dummy, TBool);
 
   b0->push_back(unit.gen(JmpZero, dummy, b1, val1->dst()));
   b0->back().setNext(b2);
@@ -104,8 +104,8 @@ TEST(CFG, InsertPreHeaders_MultiBackEdge) {
   auto b3 = unit.defBlock();
   auto b4 = unit.defBlock();
 
-  auto val1 = unit.gen(Conjure, dummy, Type::Bool);
-  auto val2 = unit.gen(Conjure, dummy, Type::Bool);
+  auto val1 = unit.gen(Conjure, dummy, TBool);
+  auto val2 = unit.gen(Conjure, dummy, TBool);
 
   b0->push_back(unit.gen(JmpZero, dummy, b1, val1->dst()));
   b0->back().setNext(b2);

@@ -257,8 +257,8 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       ret.all_stack.set(meta.index);
       for (auto& kv : conflict_stkptrs) {
         if (kv.first != stk->base) {
-          if (kv.first->type() <= Type::StkPtr ||
-              stk->base->type() <= Type::StkPtr) {
+          if (kv.first->type() <= TStkPtr ||
+              stk->base->type() <= TStkPtr) {
             meta.conflicts |= kv.second;
           }
         }

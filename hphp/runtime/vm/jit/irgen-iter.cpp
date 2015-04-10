@@ -46,7 +46,7 @@ void implMIterInit(IRGS& env, Offset relOffset, Lambda genFunc) {
     offsetFromIRSP(env, BCSPOffset{0}));
   auto const src   = topV(env);
 
-  if (!pred.subtypeOfAny(Type::Arr, Type::Obj)) {
+  if (!pred.subtypeOfAny(TArr, TObj)) {
     PUNT(MIterInit-unsupportedSrcType);
   }
 
@@ -69,11 +69,11 @@ void emitIterInit(IRGS& env,
                   int32_t valLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
-  if (!src->type().subtypeOfAny(Type::Arr, Type::Obj)) PUNT(IterInit);
+  if (!src->type().subtypeOfAny(TArr, TObj)) PUNT(IterInit);
   auto const res = gen(
     env,
     IterInit,
-    Type::Bool,
+    TBool,
     IterData(iterId, -1, valLocalId),
     src,
     fp(env)
@@ -88,11 +88,11 @@ void emitIterInitK(IRGS& env,
                    int32_t keyLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
-  if (!src->type().subtypeOfAny(Type::Arr, Type::Obj)) PUNT(IterInitK);
+  if (!src->type().subtypeOfAny(TArr, TObj)) PUNT(IterInitK);
   auto const res = gen(
     env,
     IterInitK,
-    Type::Bool,
+    TBool,
     IterData(iterId, keyLocalId, valLocalId),
     src,
     fp(env)
@@ -109,7 +109,7 @@ void emitIterNext(IRGS& env,
   auto const res = gen(
     env,
     IterNext,
-    Type::Bool,
+    TBool,
     IterData(iterId, -1, valLocalId),
     fp(env)
   );
@@ -126,7 +126,7 @@ void emitIterNextK(IRGS& env,
   auto const res = gen(
     env,
     IterNextK,
-    Type::Bool,
+    TBool,
     IterData(iterId, keyLocalId, valLocalId),
     fp(env)
   );
@@ -139,11 +139,11 @@ void emitWIterInit(IRGS& env,
                    int32_t valLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
-  if (!src->type().subtypeOfAny(Type::Arr, Type::Obj)) PUNT(WIterInit);
+  if (!src->type().subtypeOfAny(TArr, TObj)) PUNT(WIterInit);
   auto const res = gen(
     env,
     WIterInit,
-    Type::Bool,
+    TBool,
     IterData(iterId, -1, valLocalId),
     src,
     fp(env)
@@ -158,11 +158,11 @@ void emitWIterInitK(IRGS& env,
                     int32_t keyLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
-  if (!src->type().subtypeOfAny(Type::Arr, Type::Obj)) PUNT(WIterInitK);
+  if (!src->type().subtypeOfAny(TArr, TObj)) PUNT(WIterInitK);
   auto const res = gen(
     env,
     WIterInitK,
-    Type::Bool,
+    TBool,
     IterData(iterId, keyLocalId, valLocalId),
     src,
     fp(env)
@@ -179,7 +179,7 @@ void emitWIterNext(IRGS& env,
   auto const res = gen(
     env,
     WIterNext,
-    Type::Bool,
+    TBool,
     IterData(iterId, -1, valLocalId),
     fp(env)
   );
@@ -196,7 +196,7 @@ void emitWIterNextK(IRGS& env,
   auto const res = gen(
     env,
     WIterNextK,
-    Type::Bool,
+    TBool,
     IterData(iterId, keyLocalId, valLocalId),
     fp(env)
   );
@@ -244,7 +244,7 @@ void emitMIterNext(IRGS& env,
   auto const res = gen(
     env,
     MIterNext,
-    Type::Bool,
+    TBool,
     IterData(iterId, -1, valLocalId),
     fp(env)
   );
@@ -260,7 +260,7 @@ void emitMIterNextK(IRGS& env,
   auto const res = gen(
     env,
     MIterNextK,
-    Type::Bool,
+    TBool,
     IterData(iterId, keyLocalId, valLocalId),
     fp(env)
   );
@@ -297,11 +297,11 @@ void emitIterBreak(IRGS& env,
 void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
   auto const src        = popC(env);
   auto const type       = src->type();
-  if (type.subtypeOfAny(Type::Arr, Type::Str, Type::Obj)) {
+  if (type.subtypeOfAny(TArr, TStr, TObj)) {
     auto const res = gen(
       env,
       DecodeCufIter,
-      Type::Bool,
+      TBool,
       IterId(iterId),
       src,
       fp(env)

@@ -485,7 +485,7 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
     return;
   }
   always_assert(src_arity >= 1);
-  if (src_arity == 2 && destType <= Type::Bool) {
+  if (src_arity == 2 && destType <= TBool) {
     v << movtqb{src.reg(0), dst.reg(0)};
   } else {
     v << copy{src.reg(0), dst.reg(0)};
@@ -505,7 +505,7 @@ void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0) {
 }
 
 Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
-  if (!src->isA(Type::Bool)) return reg;
+  if (!src->isA(TBool)) return reg;
   // zero-extend the bool from a byte to a quad
   auto extended = v.makeReg();
   v << movzbq{reg, extended};

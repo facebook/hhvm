@@ -46,9 +46,9 @@ const Func* findCuf(Op op,
   invName = nullptr;
 
   const StringData* str =
-    callable->hasConstVal(Type::Str) ? callable->strVal() : nullptr;
+    callable->hasConstVal(TStr) ? callable->strVal() : nullptr;
   const ArrayData* arr =
-    callable->hasConstVal(Type::Arr) ? callable->arrVal() : nullptr;
+    callable->hasConstVal(TArr) ? callable->arrVal() : nullptr;
 
   StringData* sclass = nullptr;
   StringData* sname = nullptr;
@@ -123,7 +123,7 @@ void fpushObjMethodUnknown(IRGS& env,
                            bool shouldFatal) {
   spillStack(env);
   fpushActRec(env,
-              cns(env, Type::Nullptr),  // Will be set by LdObjMethod
+              cns(env, TNullptr),  // Will be set by LdObjMethod
               obj,
               numParams,
               nullptr);
@@ -259,8 +259,8 @@ void fpushFuncArr(IRGS& env, int32_t numParams) {
   auto const arr = popC(env);
   fpushActRec(
     env,
-    cns(env, Type::Nullptr),
-    cns(env, Type::Nullptr),
+    cns(env, TNullptr),
+    cns(env, TNullptr),
     numParams,
     nullptr
   );
@@ -283,17 +283,17 @@ void fpushCufUnknown(IRGS& env, Op op, int32_t numParams) {
     PUNT(fpushCufUnknown-nonFPushCuf);
   }
 
-  if (topC(env)->isA(Type::Obj)) return fpushFuncObj(env, numParams);
+  if (topC(env)->isA(TObj)) return fpushFuncObj(env, numParams);
 
-  if (!topC(env)->type().subtypeOfAny(Type::Arr, Type::Str)) {
+  if (!topC(env)->type().subtypeOfAny(TArr, TStr)) {
     PUNT(fpushCufUnknown);
   }
 
   auto const callable = popC(env);
   fpushActRec(
     env,
-    cns(env, Type::Nullptr),
-    cns(env, Type::Nullptr),
+    cns(env, TNullptr),
+    cns(env, TNullptr),
     numParams,
     nullptr
   );
@@ -309,7 +309,7 @@ void fpushCufUnknown(IRGS& env, Op op, int32_t numParams) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  auto const opcode = callable->isA(Type::Arr) ? LdArrFPushCuf
+  auto const opcode = callable->isA(TArr) ? LdArrFPushCuf
                                                : LdStrFPushCuf;
   gen(env, opcode, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
     callable, sp(env), fp(env));
@@ -382,7 +382,7 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
       ctx = clsMethodCtx(env, callee, cls);
     }
   } else {
-    ctx = cns(env, Type::Nullptr);
+    ctx = cns(env, TNullptr);
     if (!rds::isPersistentHandle(callee->funcHandle())) {
       // The miss path is complicated and rare. Punt for now.
       func = gen(env, LdFuncCachedSafe, LdFuncCachedData(callee->name()));
@@ -391,7 +391,7 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
   }
 
   auto const defaultVal = safe ? popC(env) : nullptr;
-  popDecRef(env, Type::Cell); // callable
+  popDecRef(env, TCell); // callable
   if (safe) {
     push(env, defaultVal);
     push(env, safeFlag);
@@ -408,7 +408,7 @@ void fpushFuncCommon(IRGS& env,
     if (func->isNameBindingImmutable(curUnit(env))) {
       fpushActRec(env,
                   cns(env, func),
-                  cns(env, Type::Nullptr),
+                  cns(env, TNullptr),
                   numParams,
                   nullptr);
       return;
@@ -420,7 +420,7 @@ void fpushFuncCommon(IRGS& env,
     : gen(env, LdFuncCached, LdFuncCachedData { name });
   fpushActRec(env,
               ssaFunc,
-              cns(env, Type::Nullptr),
+              cns(env, TNullptr),
               numParams,
               nullptr);
 }
@@ -568,17 +568,17 @@ void emitFPushFuncU(IRGS& env,
 }
 
 void emitFPushFunc(IRGS& env, int32_t numParams) {
-  if (topC(env)->isA(Type::Obj)) return fpushFuncObj(env, numParams);
-  if (topC(env)->isA(Type::Arr)) return fpushFuncArr(env, numParams);
+  if (topC(env)->isA(TObj)) return fpushFuncObj(env, numParams);
+  if (topC(env)->isA(TArr)) return fpushFuncArr(env, numParams);
 
-  if (!topC(env)->isA(Type::Str)) {
+  if (!topC(env)->isA(TStr)) {
     PUNT(FPushFunc_not_Str);
   }
 
   auto const funcName = popC(env);
   fpushActRec(env,
               gen(env, LdFunc, funcName),
-              cns(env, Type::Nullptr),
+              cns(env, TNullptr),
               numParams,
               nullptr);
 }
@@ -588,7 +588,7 @@ void emitFPushObjMethodD(IRGS& env,
                          const StringData* methodName,
                          ObjMethodOp subop) {
   auto const obj = popC(env);
-  if (!obj->isA(Type::Obj)) PUNT(FPushObjMethodD-nonObj);
+  if (!obj->isA(TObj)) PUNT(FPushObjMethodD-nonObj);
   fpushObjMethodCommon(env, obj, methodName, numParams,
     true /* shouldFatal */);
 }
@@ -649,7 +649,7 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
   auto const clsVal  = popA(env);
   auto const methVal = popC(env);
 
-  if (!methVal->isA(Type::Str) || !clsVal->isA(Type::Cls)) {
+  if (!methVal->isA(TStr) || !clsVal->isA(TCls)) {
     PUNT(FPushClsMethod-unknownType);
   }
 
@@ -690,8 +690,8 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
   }
 
   fpushActRec(env,
-              cns(env, Type::Nullptr),
-              cns(env, Type::Nullptr),
+              cns(env, TNullptr),
+              cns(env, TNullptr),
               numParams,
               nullptr);
   spillStack(env);
@@ -712,10 +712,10 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
 void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
   auto const exitBlock = makeExitSlow(env);
 
-  auto classTmp = top(env, Type::Cls);
+  auto classTmp = top(env, TCls);
   auto methodTmp = topC(env, BCSPOffset{1}, DataTypeGeneric);
-  assertx(classTmp->isA(Type::Cls));
-  if (!classTmp->hasConstVal() || !methodTmp->hasConstVal(Type::Str)) {
+  assertx(classTmp->isA(TCls));
+  if (!classTmp->hasConstVal() || !methodTmp->hasConstVal(TStr)) {
     PUNT(FPushClsMethodF-unknownClassOrMethod);
   }
   env.irb->constrainValue(methodTmp, DataTypeSpecific);
@@ -841,7 +841,7 @@ void emitFPassV(IRGS& env, int32_t argNum) {
   }
 
   auto const tmp = popV(env);
-  pushIncRef(env, gen(env, LdRef, Type::InitCell, tmp));
+  pushIncRef(env, gen(env, LdRef, TInitCell, tmp));
   gen(env, DecRef, tmp);
   spillStack(env);
 }

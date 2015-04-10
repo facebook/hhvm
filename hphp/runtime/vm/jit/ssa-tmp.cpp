@@ -33,28 +33,28 @@ void SSATmp::setInstruction(IRInstruction* inst, int dstId) {
 
 namespace {
 int typeNeededWords(Type t) {
-  if (t.subtypeOfAny(Type::Uninit,
-                     Type::InitNull,
-                     Type::Nullptr)) {
+  if (t.subtypeOfAny(TUninit,
+                     TInitNull,
+                     TNullptr)) {
     // These don't need a register because their values are static or unused.
     return 0;
   }
-  if (t.maybe(Type::Nullptr)) {
-    return typeNeededWords(t - Type::Nullptr);
+  if (t.maybe(TNullptr)) {
+    return typeNeededWords(t - TNullptr);
   }
-  if (t <= Type::Ctx || t <= Type::PtrToGen) {
+  if (t <= TCtx || t <= TPtrToGen) {
     // Ctx and PtrTo* may be statically unknown but always need just 1 register.
     return 1;
   }
   if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.
-    assertx(IMPLIES(t <= Type::StkElem, t.isKnownDataType()));
+    assertx(IMPLIES(t <= TStkElem, t.isKnownDataType()));
     return 1;
   }
 
-  assertx(t <= Type::StkElem);
+  assertx(t <= TStkElem);
 
-  // XXX(t4592459): This will return 2 for Type::Null, even though it only
+  // XXX(t4592459): This will return 2 for TNull, even though it only
   // needs 1 register (one for the type, none for the value). This is to work
   // around limitations in codegen; see the task for details. It does mean we
   // will be loading and storing garbage m_data for Null values but that's fine

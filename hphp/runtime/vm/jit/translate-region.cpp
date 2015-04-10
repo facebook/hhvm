@@ -196,7 +196,7 @@ void emitPredictionGuards(IRGS& irgs,
     auto const& pred = typePreds.next();
     auto type = pred.type;
     auto loc  = pred.location;
-    if (type <= Type::Cls) {
+    if (type <= TCls) {
       // Do not generate guards for class; instead assert the type.
       assertx(loc.tag() == RegionDesc::Location::Tag::Stack);
       irgen::assertTypeLocation(irgs, loc, type);

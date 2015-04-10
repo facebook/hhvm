@@ -626,13 +626,13 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
   SSATmp* src = inst->src(0);
   auto loc = srcLoc(0);
   Type type = src->type();
-  if (!type.maybe(Type::Counted)) return;
+  if (!type.maybe(TCounted)) return;
 
   auto increfMaybeStatic = [&](Vout& v) {
     auto base = loc.reg(0);
     auto rCount = v.makeReg();
     v << loadl{base[FAST_REFCOUNT_OFFSET], rCount};
-    if (!type.maybe(Type::Static)) {
+    if (!type.maybe(TStatic)) {
       auto count1 = v.makeReg();
       v << addli{1, rCount, count1, v.makeReg()};
       v << storel{count1, base[FAST_REFCOUNT_OFFSET]};
@@ -876,7 +876,7 @@ CallDest CodeGenerator::callDest(Vreg reg0, Vreg reg1) const {
 CallDest CodeGenerator::callDest(const IRInstruction* inst) const {
   if (!inst->numDsts()) return kVoidDest;
   auto loc = dstLoc(0);
-  return { inst->dst()->isA(Type::Bool) ? DestType::Byte : DestType::SSA,
+  return { inst->dst()->isA(TBool) ? DestType::Byte : DestType::SSA,
            loc.reg(0), loc.reg(1) };
 }
 
@@ -1103,7 +1103,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
     return;
   }
 
-  if (returnType <= Type::Cell || returnType <= Type::BoxedCell) {
+  if (returnType <= TCell || returnType <= TBoxedCell) {
     // this should use some kind of cmov
     static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
     assertx(isBuiltinByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
@@ -1200,12 +1200,12 @@ void CodeGenerator::emitStore(Vout& v, Vreg base, ptrdiff_t offset,
     auto dt = type.toDataType();
     v << storeb{v.cns(dt), base[offset + TVOFF(m_type)]};
   }
-  if (type <= Type::Null) {
+  if (type <= TNull) {
     return;
   }
 
   auto data = srcLoc.reg();
-  if (src->isA(Type::Bool)) {
+  if (src->isA(TBool)) {
     auto extended = v.makeReg();
     v << movzbl{data, extended};
     data = extended;

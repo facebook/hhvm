@@ -641,7 +641,7 @@ struct CheckDefinedClsData : IRExtraData {
  */
 struct InterpOneData : IRExtraData {
   struct LocalType {
-    explicit LocalType(uint32_t id = 0, Type type = Type::Bottom)
+    explicit LocalType(uint32_t id = 0, Type type = TBottom)
       : id(id)
       , type(type)
     {}

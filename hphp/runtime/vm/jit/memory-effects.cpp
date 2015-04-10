@@ -31,13 +31,13 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 AliasClass pointee(const SSATmp* ptr) {
-  always_assert(ptr->type() <= Type::PtrToGen);
+  always_assert(ptr->type() <= TPtrToGen);
 
   /*
    * First check various kinds of known locations.
    */
 
-  if (ptr->type() <= Type::PtrToFrameGen) {
+  if (ptr->type() <= TPtrToFrameGen) {
     auto const sinst = canonical(ptr)->inst();
     if (sinst->is(LdLocAddr)) {
       return AFrame { sinst->src(0), sinst->extra<LdLocAddr>()->locId };
@@ -45,7 +45,7 @@ AliasClass pointee(const SSATmp* ptr) {
     return AFrameAny;
   }
 
-  if (ptr->type() <= Type::PtrToStkGen) {
+  if (ptr->type() <= TPtrToStkGen) {
     auto const sinst = canonical(ptr)->inst();
     if (sinst->is(LdStkAddr)) {
       return AStack { sinst->src(0),
@@ -54,7 +54,7 @@ AliasClass pointee(const SSATmp* ptr) {
     return AStackAny;
   }
 
-  if (ptr->type() <= Type::PtrToPropGen) {
+  if (ptr->type() <= TPtrToPropGen) {
     auto const sinst = canonical(ptr)->inst();
     if (sinst->is(LdPropAddr)) {
       return AProp {
@@ -65,7 +65,7 @@ AliasClass pointee(const SSATmp* ptr) {
     return APropAny;
   }
 
-  if (ptr->type() <= Type::PtrToMISGen) {
+  if (ptr->type() <= TPtrToMISGen) {
     auto const sinst = canonical(ptr)->inst();
     if (sinst->is(LdMIStateAddr)) {
       return AMIState { safe_cast<int32_t>(sinst->src(1)->intVal()) };
@@ -73,7 +73,7 @@ AliasClass pointee(const SSATmp* ptr) {
     return AMIStateAny;
   }
 
-  if (ptr->type() <= Type::PtrToArrGen) {
+  if (ptr->type() <= TPtrToArrGen) {
     auto const sinst = canonical(ptr)->inst();
     if (sinst->is(LdPackedArrayElemAddr)) {
       if (sinst->src(1)->hasConstVal() && sinst->src(1)->intVal() >= 0) {
@@ -94,14 +94,14 @@ AliasClass pointee(const SSATmp* ptr) {
    */
   auto const pty = ptr->type();
   auto ret = AliasClass{AEmpty};
-  if (pty.maybe(Type::PtrToStkGen))     ret = ret | AStackAny;
-  if (pty.maybe(Type::PtrToFrameGen))   ret = ret | AFrameAny;
-  if (pty.maybe(Type::PtrToPropGen))    ret = ret | APropAny;
-  if (pty.maybe(Type::PtrToArrGen))     ret = ret | AElemAny;
-  if (pty.maybe(Type::PtrToMISGen))     ret = ret | AMIStateAny;
-  if (pty.maybe(Type::PtrToRefGen))     ret = ret | AHeapAny;
-  if (pty.maybe(Type::PtrToClsInitGen)) ret = ret | AHeapAny;
-  if (pty.maybe(Type::PtrToClsCnsGen))  ret = ret | AHeapAny;
+  if (pty.maybe(TPtrToStkGen))     ret = ret | AStackAny;
+  if (pty.maybe(TPtrToFrameGen))   ret = ret | AFrameAny;
+  if (pty.maybe(TPtrToPropGen))    ret = ret | APropAny;
+  if (pty.maybe(TPtrToArrGen))     ret = ret | AElemAny;
+  if (pty.maybe(TPtrToMISGen))     ret = ret | AMIStateAny;
+  if (pty.maybe(TPtrToRefGen))     ret = ret | AHeapAny;
+  if (pty.maybe(TPtrToClsInitGen)) ret = ret | AHeapAny;
+  if (pty.maybe(TPtrToClsCnsGen))  ret = ret | AHeapAny;
   return ret;
 }
 
@@ -110,7 +110,7 @@ AliasClass pointee(const SSATmp* ptr) {
 AliasClass all_pointees(const IRInstruction& inst) {
   auto ret = AliasClass{AEmpty};
   for (auto& src : inst.srcs()) {
-    if (src->type() <= Type::PtrToGen) {
+    if (src->type() <= TPtrToGen) {
       ret = ret | pointee(src);
     }
   }
@@ -377,7 +377,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const stk = [&] () -> AliasClass {
         AliasClass ret = AEmpty;
         for (auto i = uint32_t{2}; i < inst.numSrcs(); ++i) {
-          if (inst.src(i)->type() <= Type::PtrToGen) {
+          if (inst.src(i)->type() <= TPtrToGen) {
             auto const cls = pointee(inst.src(i));
             if (cls.maybe(AStackAny)) {
               ret = ret | cls;
@@ -488,14 +488,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // hooked up yet.
   case StElem:
     return PureStore {
-      inst.src(0)->type() <= Type::PtrToRMembCell
+      inst.src(0)->type() <= TPtrToRMembCell
         ? AHeapAny | AMIStateAny
         : AUnknown,
       inst.src(2)
     };
   case LdElem:
     return PureLoad {
-      inst.src(0)->type() <= Type::PtrToRMembCell
+      inst.src(0)->type() <= TPtrToRMembCell
         ? AHeapAny | AMIStateAny
         : AUnknown
     };
@@ -610,7 +610,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VGetElem:
     // Right now we generally can't limit any of these better than general
     // re-entry rules, since they can raise warnings and re-enter.
-    assertx(inst.src(0)->type() <= Type::PtrToGen);
+    assertx(inst.src(0)->type() <= TPtrToGen);
     return may_reenter(inst, may_load_store(
       AHeapAny | all_pointees(inst),
       AHeapAny | all_pointees(inst)
@@ -987,7 +987,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DecRefThis:
     return may_reenter(inst, may_load_store(AEmpty, AEmpty));
   case DecRef:
-    if (inst.src(0)->type().maybe(Type::Arr | Type::Obj)) {
+    if (inst.src(0)->type().maybe(TArr | TObj)) {
       // Could re-enter to run a destructor.
       return may_reenter(inst, may_load_store(AEmpty, AEmpty));
     }
@@ -1125,14 +1125,14 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
 
   auto check_fp = [&] (SSATmp* fp) {
     always_assert_flog(
-      fp->type() <= Type::FramePtr,
+      fp->type() <= TFramePtr,
       "Non frame pointer in memory effects"
     );
   };
 
   auto check_obj = [&] (SSATmp* obj) {
     always_assert_flog(
-      obj->type() <= Type::Obj,
+      obj->type() <= TObj,
       "Non obj pointer in memory effects"
     );
   };

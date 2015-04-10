@@ -98,10 +98,10 @@ inline unsigned buildBitmask(T c, Args... args) {
 // to helper functions.
 inline KeyType getKeyType(const SSATmp* key) {
   DEBUG_ONLY auto const keyType = key->type();
-  assertx(keyType <= Type::Cell);
+  assertx(keyType <= TCell);
 
-  if (key->isA(Type::Str)) return KeyType::Str;
-  if (key->isA(Type::Int)) return KeyType::Int;
+  if (key->isA(TStr)) return KeyType::Str;
+  if (key->isA(TInt)) return KeyType::Int;
   return KeyType::Any;
 }
 

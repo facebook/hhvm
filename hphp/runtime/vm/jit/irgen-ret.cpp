@@ -69,7 +69,7 @@ void freeLocalsAndThis(IRGS& env) {
     if (localCount > 0 && count > kTooPolyRet) return false;
     auto numRefCounted = int{0};
     for (auto i = uint32_t{0}; i < localCount; ++i) {
-      if (env.irb->localType(i, DataTypeGeneric).maybe(Type::Counted)) {
+      if (env.irb->localType(i, DataTypeGeneric).maybe(TCounted)) {
         ++numRefCounted;
       }
     }
@@ -133,12 +133,12 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retval) {
 
 void generatorReturn(IRGS& env, SSATmp* retval) {
   // Clear generator's key and value.
-  auto const oldKey = gen(env, LdContArKey, Type::Cell, fp(env));
-  gen(env, StContArKey, fp(env), cns(env, Type::InitNull));
+  auto const oldKey = gen(env, LdContArKey, TCell, fp(env));
+  gen(env, StContArKey, fp(env), cns(env, TInitNull));
   gen(env, DecRef, oldKey);
 
-  auto const oldValue = gen(env, LdContArValue, Type::Cell, fp(env));
-  gen(env, StContArValue, fp(env), cns(env, Type::InitNull));
+  auto const oldValue = gen(env, LdContArValue, TCell, fp(env));
+  gen(env, StContArValue, fp(env), cns(env, TInitNull));
   gen(env, DecRef, oldValue);
 
   gen(env,
@@ -147,7 +147,7 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
       fp(env));
 
   // Push return value of next()/send()/raise().
-  push(env, cns(env, Type::InitNull));
+  push(env, cns(env, TInitNull));
 
   spillStack(env);
   gen(
@@ -192,9 +192,9 @@ void emitRetC(IRGS& env) {
 
   if (isInlining(env)) {
     assertx(!resumed(env));
-    retFromInlined(env, Type::Cell);
+    retFromInlined(env, TCell);
   } else {
-    implRet(env, Type::Cell);
+    implRet(env, TCell);
   }
 }
 
@@ -202,9 +202,9 @@ void emitRetV(IRGS& env) {
   assertx(!resumed(env));
   assertx(!curFunc(env)->isResumable());
   if (isInlining(env)) {
-    retFromInlined(env, Type::BoxedInitCell);
+    retFromInlined(env, TBoxedInitCell);
   } else {
-    implRet(env, Type::BoxedInitCell);
+    implRet(env, TBoxedInitCell);
   }
 }
 

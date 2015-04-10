@@ -116,7 +116,7 @@ OpInfo g_opInfo[] = {
 ///////////////////////////////////////////////////////////////////////////////
 
 const StringData* findClassName(SSATmp* cls) {
-  assertx(cls->isA(Type::Cls));
+  assertx(cls->isA(TCls));
 
   if (cls->hasConstVal()) {
     return cls->clsVal()->preClass()->name();
@@ -125,7 +125,7 @@ const StringData* findClassName(SSATmp* cls) {
   IRInstruction* clsInst = cls->inst();
   if (clsInst->op() == LdCls || clsInst->op() == LdClsCached) {
     SSATmp* clsName = clsInst->src(0);
-    assertx(clsName->isA(Type::Str));
+    assertx(clsName->isA(TStr));
     if (clsName->hasConstVal()) {
       return clsName->strVal();
     }

@@ -45,7 +45,7 @@ Block* getBlock(IRGS& env, Offset offset) {
   if (!block->empty()) {
     auto& label = block->front();
     if (label.is(DefLabel) && label.numDsts() > 0 &&
-        label.dst(0)->isA(Type::StkPtr)) {
+        label.dst(0)->isA(TStkPtr)) {
       auto middle = env.unit.defBlock();
       ITRACE(2, "getBlock returning B{} to pass sp to B{}\n",
              middle->id(), block->id());
@@ -119,7 +119,7 @@ void emitSwitch(IRGS& env,
 
   SSATmp* const switchVal = popC(env);
   Type type = switchVal->type();
-  assertx(IMPLIES(!(type <= (Type::Int | Type::Null)), bounded));
+  assertx(IMPLIES(!(type <= (TInt | TNull)), bounded));
   assertx(IMPLIES(bounded, iv.size() > 2));
   SSATmp* index;
   SSATmp* ssabase = cns(env, base);
@@ -133,35 +133,35 @@ void emitSwitch(IRGS& env,
     zeroOff = defaultOff;
   }
 
-  if (type <= Type::Null) {
+  if (type <= TNull) {
     gen(env, Jmp, makeExit(env, zeroOff));
     return;
   }
-  if (type <= Type::Bool) {
+  if (type <= TBool) {
     Offset nonZeroOff = bcOff(env) + iv.vec32()[iv.size() - 2];
     gen(env, JmpNZero, makeExit(env, nonZeroOff), switchVal);
     gen(env, Jmp, makeExit(env, zeroOff));
     return;
   }
 
-  if (type <= Type::Int) {
+  if (type <= TInt) {
     // No special treatment needed
     index = switchVal;
-  } else if (type <= Type::Dbl) {
+  } else if (type <= TDbl) {
     // switch(Double|String|Obj)Helper do bounds-checking for us, so
     // we need to make sure the default case is in the jump table,
     // and don't emit our own bounds-checking code
     bounded = false;
     index = gen(env, LdSwitchDblIndex, switchVal, ssabase, ssatargets);
-  } else if (type <= Type::Str) {
+  } else if (type <= TStr) {
     bounded = false;
     index = gen(env, LdSwitchStrIndex, switchVal, ssabase, ssatargets);
-  } else if (type <= Type::Obj) {
+  } else if (type <= TObj) {
     // switchObjHelper can throw exceptions and reenter the VM so we use the
     // catch block here.
     bounded = false;
     index = gen(env, LdSwitchObjIndex, switchVal, ssabase, ssatargets);
-  } else if (type <= Type::Arr) {
+  } else if (type <= TArr) {
     gen(env, DecRef, switchVal);
     gen(env, Jmp, makeExit(env, defaultOff));
     return;
@@ -198,7 +198,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
    * conversion routines.
    */
   const bool fastPath =
-    topC(env)->isA(Type::Str) &&
+    topC(env)->isA(TStr) &&
     std::none_of(iv.strvec(), iv.strvec() + numCases,
       [&](const StrVecItem& item) {
         return curUnit(env)->lookupLitstrId(item.str)->isNumeric();

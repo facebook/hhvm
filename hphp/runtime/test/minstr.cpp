@@ -28,53 +28,53 @@ namespace HPHP { namespace jit {
   << folly::format("Expected {}, got {}", (exp).toString(), (act).toString()) \
 
 TEST(MInstrEffects, Basic) {
-  MInstrEffects elem(SetElem, Type::PtrToArr);
-  EXPECT_TEQ(Type::PtrToArr, elem.baseType);
+  MInstrEffects elem(SetElem, TPtrToArr);
+  EXPECT_TEQ(TPtrToArr, elem.baseType);
   EXPECT_FALSE(elem.baseTypeChanged);
   EXPECT_TRUE(elem.baseValChanged);
 
-  MInstrEffects prop(SetProp, Type::Obj);
-  EXPECT_TEQ(Type::Obj, prop.baseType);
+  MInstrEffects prop(SetProp, TObj);
+  EXPECT_TEQ(TObj, prop.baseType);
   EXPECT_FALSE(prop.baseTypeChanged);
   EXPECT_FALSE(prop.baseValChanged);
 }
 
 TEST(MInstrEffects, BadArrayKey) {
-  MInstrEffects effects(SetElem, Type::PtrToArr);
-  EXPECT_TEQ(Type::PtrToArr, effects.baseType);
+  MInstrEffects effects(SetElem, TPtrToArr);
+  EXPECT_TEQ(TPtrToArr, effects.baseType);
   EXPECT_FALSE(effects.baseTypeChanged);
   EXPECT_TRUE(effects.baseValChanged);
 }
 
 TEST(MInstrEffects, NonObjProp) {
-  MInstrEffects effects(SetProp, Type::PtrToInt);
-  EXPECT_TEQ(Type::PtrToInt, effects.baseType);
+  MInstrEffects effects(SetProp, TPtrToInt);
+  EXPECT_TEQ(TPtrToInt, effects.baseType);
   EXPECT_FALSE(effects.baseTypeChanged);
   EXPECT_FALSE(effects.baseValChanged);
 }
 
 TEST(MInstrEffects, NonArrElem) {
-  MInstrEffects effects(SetElem, Type::PtrToDbl);
-  EXPECT_TEQ(Type::PtrToDbl, effects.baseType);
+  MInstrEffects effects(SetElem, TPtrToDbl);
+  EXPECT_TEQ(TPtrToDbl, effects.baseType);
   EXPECT_FALSE(effects.baseTypeChanged);
   EXPECT_FALSE(effects.baseValChanged);
 }
 
 TEST(MInstrEffects, PromoteNull) {
-  MInstrEffects elem(SetElem, Type::PtrToNull);
-  EXPECT_TEQ(Type::PtrToArr, elem.baseType);
+  MInstrEffects elem(SetElem, TPtrToNull);
+  EXPECT_TEQ(TPtrToArr, elem.baseType);
   EXPECT_TRUE(elem.baseTypeChanged);
   EXPECT_TRUE(elem.baseValChanged);
 
-  MInstrEffects prop(SetProp, Type::PtrToUninit);
-  EXPECT_TEQ(Type::PtrToObj, prop.baseType);
+  MInstrEffects prop(SetProp, TPtrToUninit);
+  EXPECT_TEQ(TPtrToObj, prop.baseType);
   EXPECT_TRUE(prop.baseTypeChanged);
   EXPECT_TRUE(prop.baseValChanged);
 }
 
 TEST(MInstrEffects, UnknownBase) {
-  MInstrEffects effects(SetElem, Type::PtrToCell);
-  EXPECT_TEQ(Type::PtrToCell - Type::PtrToNull, effects.baseType);
+  MInstrEffects effects(SetElem, TPtrToCell);
+  EXPECT_TEQ(TPtrToCell - TPtrToNull, effects.baseType);
   EXPECT_TRUE(effects.baseTypeChanged);
   EXPECT_TRUE(effects.baseValChanged);
 }

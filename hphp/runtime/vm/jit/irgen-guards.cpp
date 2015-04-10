@@ -77,20 +77,20 @@ void assertTypeLocal(IRGS& env, uint32_t locId, Type type) {
 
 void checkTypeLocal(IRGS& env, uint32_t locId, Type type, Offset dest,
                     bool outerOnly) {
-  assertx(type <= Type::Cell || type <= Type::BoxedInitCell);
+  assertx(type <= TCell || type <= TBoxedInitCell);
 
   auto exit = env.irb->guardFailBlock();
   if (exit == nullptr) exit = makeExit(env, dest);
 
-  if (type <= Type::Cell) {
+  if (type <= TCell) {
     profiledGuard(env, type, ProfGuard::CheckLoc, locId, exit);
     return;
   }
 
-  profiledGuard(env, Type::BoxedInitCell, ProfGuard::CheckLoc, locId, exit);
+  profiledGuard(env, TBoxedInitCell, ProfGuard::CheckLoc, locId, exit);
   gen(env, HintLocInner, type, LocalId { locId }, fp(env));
 
-  if (!outerOnly && type.inner() < Type::InitCell) {
+  if (!outerOnly && type.inner() < TInitCell) {
     auto const exit = makeExit(env);
     auto const ldPMExit = makePseudoMainExit(env);
     auto const val = ldLoc(env, locId, ldPMExit, DataTypeSpecific);
@@ -101,7 +101,7 @@ void checkTypeLocal(IRGS& env, uint32_t locId, Type type, Offset dest,
 void assertTypeStack(IRGS& env, BCSPOffset idx, Type type) {
   if (idx.offset < env.irb->evalStack().size()) {
     // We're asserting a new type so we don't care about the previous type.
-    auto const tmp = top(env, Type::StkElem, idx, DataTypeGeneric);
+    auto const tmp = top(env, TStkElem, idx, DataTypeGeneric);
     assertx(tmp);
     env.irb->evalStack().replace(idx.offset, gen(env, AssertType, type, tmp));
   } else {
@@ -115,20 +115,20 @@ void checkTypeStack(IRGS& env,
                     Type type,
                     Offset dest,
                     bool outerOnly) {
-  assertx(type <= Type::Cell || type <= Type::BoxedInitCell);
+  assertx(type <= TCell || type <= TBoxedInitCell);
 
-  if (type <= Type::BoxedInitCell) {
+  if (type <= TBoxedInitCell) {
     spillStack(env); // don't bother with the case that it's not spilled.
     auto const exit = makeExit(env, dest);
     auto const soff = RelOffsetData { idx, offsetFromIRSP(env, idx) };
-    profiledGuard(env, Type::BoxedInitCell, ProfGuard::CheckStk,
+    profiledGuard(env, TBoxedInitCell, ProfGuard::CheckStk,
                   idx.offset, exit);
     env.irb->constrainStack(soff.irSpOffset, DataTypeSpecific);
     gen(env, HintStkInner, type, soff, sp(env));
 
     // Check inner type eargerly only at the beginning of a region.
-    if (!outerOnly && type.inner() < Type::InitCell) {
-      auto stk = gen(env, LdStk, Type::BoxedInitCell,
+    if (!outerOnly && type.inner() < TInitCell) {
+      auto stk = gen(env, LdStk, TBoxedInitCell,
                      IRSPOffsetData{soff.irSpOffset}, sp(env));
       gen(env, CheckRefInner,
           env.irb->stackInnerTypePrediction(soff.irSpOffset),
@@ -145,7 +145,7 @@ void checkTypeStack(IRGS& env,
            idx.offset, type.toString());
     // CheckType only cares about its input type if the simplifier does
     // something with it and that's handled if and when it happens.
-    auto const tmp = top(env, Type::StkElem, idx, DataTypeGeneric);
+    auto const tmp = top(env, TStkElem, idx, DataTypeGeneric);
     assertx(tmp);
     env.irb->evalStack().replace(idx.offset,
                                  gen(env, CheckType, type, exit, tmp));
@@ -160,7 +160,7 @@ void checkTypeStack(IRGS& env,
 //////////////////////////////////////////////////////////////////////
 
 void assertTypeLocation(IRGS& env, const RegionDesc::Location& loc, Type type) {
-  assertx(type <= Type::StkElem);
+  assertx(type <= TStkElem);
   using T = RegionDesc::Location::Tag;
   switch (loc.tag()) {
   case T::Stack:
@@ -177,7 +177,7 @@ void checkTypeLocation(IRGS& env,
                        Type type,
                        Offset dest,
                        bool outerOnly) {
-  assertx(type <= Type::Gen);
+  assertx(type <= TGen);
   using T = RegionDesc::Location::Tag;
   switch (loc.tag()) {
   case T::Stack:

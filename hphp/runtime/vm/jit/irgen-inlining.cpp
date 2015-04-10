@@ -128,7 +128,7 @@ void beginInlining(IRGS& env,
      * Here we need to be generating hopefully-dead stores to initialize
      * non-parameter locals to KindOfUninit in case we have to leave the trace.
      */
-    stLocRaw(env, i, calleeFP, cns(env, Type::Uninit));
+    stLocRaw(env, i, calleeFP, cns(env, TUninit));
   }
 
   env.fpiActiveStack.push(std::make_pair(env.fpiStack.top().returnSP,
@@ -201,8 +201,8 @@ void inlSingletonSLoc(IRGS& env, const Func* func, const Op* op) {
   gen(env, CheckStaticLocInit, exit, box);
 
   // Side exit if the static local is null.
-  auto const value  = gen(env, LdRef, Type::InitCell, box);
-  auto const isnull = gen(env, IsType, Type::InitNull, value);
+  auto const value  = gen(env, LdRef, TInitCell, box);
+  auto const isnull = gen(env, IsType, TInitNull, value);
   gen(env, JmpNZero, exit, isnull);
 
   // Return the singleton.
@@ -244,7 +244,7 @@ void inlSingletonSProp(IRGS& env,
   auto const value   = gen(env, LdMem, unboxed->type().deref(), unboxed);
 
   // Side exit if the static property is null.
-  auto isnull = gen(env, IsType, Type::Null, value);
+  auto isnull = gen(env, IsType, TNull, value);
   gen(env, JmpNZero, exitBlock, isnull);
 
   // Return the singleton.

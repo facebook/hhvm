@@ -218,13 +218,13 @@ SSATmp* IRInstruction::dst(unsigned i) const {
 namespace {
 
 Type unboxPtr(Type t) {
-  t = t - Type::PtrToBoxedCell;
+  t = t - TPtrToBoxedCell;
   return t.deref().ptr(add_ref(t.ptrKind()));
 }
 
 Type boxPtr(Type t) {
   auto const rawBoxed = t.deref().unbox().box();
-  auto const noNull = rawBoxed - Type::BoxedUninit;
+  auto const noNull = rawBoxed - TBoxedUninit;
   return noNull.ptr(remove_ref(t.ptrKind()));
 }
 
@@ -239,7 +239,7 @@ Type allocObjReturn(const IRInstruction* inst) {
     case AllocObj:
       return inst->src(0)->hasConstVal()
         ? Type::ExactObj(inst->src(0)->clsVal())
-        : Type::Obj;
+        : TObj;
 
     default:
       always_assert(false && "Invalid opcode returning AllocObj");
@@ -248,16 +248,16 @@ Type allocObjReturn(const IRInstruction* inst) {
 
 Type arrElemReturn(const IRInstruction* inst) {
   assertx(inst->is(LdStructArrayElem, ArrayGet));
-  assertx(!inst->hasTypeParam() || inst->typeParam() <= Type::Gen);
+  assertx(!inst->hasTypeParam() || inst->typeParam() <= TGen);
 
-  auto resultType = inst->hasTypeParam() ? inst->typeParam() : Type::Gen;
+  auto resultType = inst->hasTypeParam() ? inst->typeParam() : TGen;
   if (inst->is(ArrayGet)) {
-    resultType = resultType & Type::InitCell;
+    resultType = resultType & TInitCell;
   }
 
   // Elements of a static array are uncounted
-  if (inst->src(0)->isA(Type::StaticArr)) {
-    resultType = resultType & Type::UncountedInit;
+  if (inst->src(0)->isA(TStaticArr)) {
+    resultType = resultType & TUncountedInit;
   }
 
   auto const arrTy = inst->src(0)->type().arrSpec().type();
@@ -287,16 +287,16 @@ Type thisReturn(const IRInstruction* inst) {
 
   // If the function is a cloned closure which may have a re-bound $this which
   // is not a subclass of the context return an unspecialized type.
-  if (func->hasForeignThis()) return Type::Obj;
+  if (func->hasForeignThis()) return TObj;
 
   if (auto const cls = func->cls()) {
     return Type::SubObj(cls);
   }
-  return Type::Obj;
+  return TObj;
 }
 
 Type ctxReturn(const IRInstruction* inst) {
-  return thisReturn(inst) | Type::Cctx;
+  return thisReturn(inst) | TCctx;
 }
 
 Type setElemReturn(const IRInstruction* inst) {
@@ -306,23 +306,23 @@ Type setElemReturn(const IRInstruction* inst) {
   // If the base is a Str, the result will always be a CountedStr (or
   // an exception). If the base might be a str, the result wil be
   // CountedStr or Nullptr. Otherwise, the result is always Nullptr.
-  if (baseType <= Type::Str) {
-    return Type::CountedStr;
-  } else if (baseType.maybe(Type::Str)) {
-    return Type::CountedStr | Type::Nullptr;
+  if (baseType <= TStr) {
+    return TCountedStr;
+  } else if (baseType.maybe(TStr)) {
+    return TCountedStr | TNullptr;
   }
-  return Type::Nullptr;
+  return TNullptr;
 }
 
 Type builtinReturn(const IRInstruction* inst) {
   assertx(inst->op() == CallBuiltin);
 
   Type t = inst->typeParam();
-  if (t.isSimpleType() || t == Type::Cell) {
+  if (t.isSimpleType() || t == TCell) {
     return t;
   }
-  if (t.isReferenceType() || t == Type::BoxedCell) {
-    return t | Type::InitNull;
+  if (t.isReferenceType() || t == TBoxedCell) {
+    return t | TInitNull;
   }
   not_reached();
 }
@@ -338,7 +338,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
 #define DParamMayRelax  return inst->typeParam();
 #define DParam          return inst->typeParam();
-#define DParamPtr(k)    assertx(inst->typeParam() <= Type::Gen.ptr(Ptr::k)); \
+#define DParamPtr(k)    assertx(inst->typeParam() <= TGen.ptr(Ptr::k)); \
                         return inst->typeParam();
 #define DUnboxPtr       return unboxPtr(inst->src(0)->type());
 #define DBoxPtr         return boxPtr(inst->src(0)->type());
@@ -347,12 +347,12 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DArrPacked      return Type::Array(ArrayData::kPackedKind);
 #define DThis           return thisReturn(inst);
 #define DCtx            return ctxReturn(inst);
-#define DMulti          return Type::Bottom;
+#define DMulti          return TBottom;
 #define DSetElem        return setElemReturn(inst);
 #define DBuiltin        return builtinReturn(inst);
 #define DSubtract(n, t) return inst->src(n)->type() - t;
-#define DCns            return Type::Uninit | Type::InitNull | Type::Bool | \
-                               Type::Int | Type::Dbl | Type::Str | Type::Res;
+#define DCns            return TUninit | TInitNull | TBool | \
+                               TInt | TDbl | TStr | TRes;
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 

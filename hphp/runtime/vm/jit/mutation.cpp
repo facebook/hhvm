@@ -52,7 +52,7 @@ void retypeDst(IRInstruction* inst, int num) {
    * tmps at each incoming Jmp.
    */
   if (inst->op() == DefLabel) {
-    Type type = Type::Bottom;
+    Type type = TBottom;
     inst->block()->forEachSrc(num, [&] (IRInstruction*, SSATmp* tmp) {
       type = type | tmp->type();
     });

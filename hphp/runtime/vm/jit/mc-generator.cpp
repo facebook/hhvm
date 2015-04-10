@@ -382,8 +382,8 @@ static void populateLiveContext(RegionContext& ctx) {
       // the Type.
       auto const objOrCls =
         ar->hasThis()  ? Type::SubObj(ar->getThis()->getVMClass()) :
-        ar->hasClass() ? Type::Cls
-                       : Type::Nullptr;
+        ar->hasClass() ? TCls
+                       : TNullptr;
 
       ctx.preLiveARs.push_back({
         stackOff,

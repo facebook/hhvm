@@ -105,7 +105,7 @@ struct SlotState {
    * incoming edges.  However, whenever we have a value, the type of
    * the SSATmp must match this `type' field.
    */
-  Type type{Stack ? Type::StkElem : Type::Gen};
+  Type type{Stack ? TStkElem : TGen};
 
   /*
    * Prediction for the type of a local or stack slot, if it's boxed or if
@@ -114,7 +114,7 @@ struct SlotState {
    * Invariants:
    *   always a subtype of `type'
    */
-  Type predictedType{Stack ? Type::StkElem : Type::Gen};
+  Type predictedType{Stack ? TStkElem : TGen};
 
   /*
    * The sources of the currently known type. They may be values. If the value

@@ -29,10 +29,10 @@ namespace {
 
 bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   auto checkArith = [](Type ty) {
-    return ty.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl);
+    return ty.subtypeOfAny(TInt, TBool, TDbl);
   };
   auto checkBitOp = [](Type ty) {
-    return ty.subtypeOfAny(Type::Int, Type::Bool);
+    return ty.subtypeOfAny(TInt, TBool);
   };
 
   switch (op) {
@@ -105,19 +105,19 @@ bool isBitOp(Op op) {
 
 SSATmp* promoteBool(IRGS& env, SSATmp* src) {
   // booleans in arithmetic and bitwise operations get cast to ints
-  return src->type() <= Type::Bool ? gen(env, ConvBoolToInt, src) : src;
+  return src->type() <= TBool ? gen(env, ConvBoolToInt, src) : src;
 }
 
 Opcode promoteBinaryDoubles(IRGS& env, Op op, SSATmp*& src1, SSATmp*& src2) {
   auto const type1 = src1->type();
   auto const type2 = src2->type();
   auto opc = intArithOp(op);
-  if (type1 <= Type::Dbl) {
+  if (type1 <= TDbl) {
     opc = dblArithOp(op);
-    if (type2 <= Type::Int) {
+    if (type2 <= TInt) {
       src2 = gen(env, ConvIntToDbl, src2);
     }
-  } else if (type2 <= Type::Dbl) {
+  } else if (type2 <= TDbl) {
     opc = dblArithOp(op);
     src1 = gen(env, ConvIntToDbl, src1);
   }
@@ -152,7 +152,7 @@ void binaryArith(IRGS& env, Op op) {
   auto const opc = promoteBinaryDoubles(env, op, src1, src2);
 
   if (opc == AddIntO || opc == SubIntO || opc == MulIntO) {
-    assertx(src1->isA(Type::Int) && src2->isA(Type::Int));
+    assertx(src1->isA(TInt) && src2->isA(TInt));
     push(env, gen(env, opc, exitSlow, src1, src2));
   } else {
     push(env, gen(env, opc, src1, src2));
@@ -161,11 +161,11 @@ void binaryArith(IRGS& env, Op op) {
 
 // Implementation function that only handles integer or double inc/dec.
 SSATmp* implIncDec(IRGS& env, bool pre, bool inc, bool over, SSATmp* src) {
-  assertx(src->type() <= Type::Int || src->type() <= Type::Dbl);
+  assertx(src->type() <= TInt || src->type() <= TDbl);
 
   Opcode op;
 
-  if (src->type() <= Type::Dbl) {
+  if (src->type() <= TDbl) {
     op = inc ? AddDbl : SubDbl;
   } else if (!over) {
     op = inc ? AddInt : SubInt;
@@ -173,7 +173,7 @@ SSATmp* implIncDec(IRGS& env, bool pre, bool inc, bool over, SSATmp* src) {
     op = inc ? AddIntO : SubIntO;
   }
 
-  auto const one = src->type() <= Type::Int ? cns(env, 1) : cns(env, 1.0);
+  auto const one = src->type() <= TInt ? cns(env, 1) : cns(env, 1.0);
   auto const res =
     op == AddIntO || op == SubIntO
       ? gen(env, op, makeExitSlow(env), src, one)
@@ -197,12 +197,12 @@ SSATmp* implIncDec(IRGS& env, bool pre, bool inc, bool over, SSATmp* src) {
  * 3. Array comparisons can throw if recursion is detected.
  */
 bool cmpOpTypesMayReenter(Type t0, Type t1) {
-  assertx(t0 != Type::Gen && t1 != Type::Gen);
-  auto const badObjConvs = Type::Int | Type::Dbl | Type::Str;
-  return (t0.maybe(Type::Obj) && t1.maybe(badObjConvs)) ||
-         (t0.maybe(badObjConvs) && t1.maybe(Type::Obj)) ||
-         (t0.maybe(Type::Obj) && t1.maybe(Type::Obj)) ||
-         (t0.maybe(Type::Arr) && t1.maybe(Type::Arr));
+  assertx(t0 != TGen && t1 != TGen);
+  auto const badObjConvs = TInt | TDbl | TStr;
+  return (t0.maybe(TObj) && t1.maybe(badObjConvs)) ||
+         (t0.maybe(badObjConvs) && t1.maybe(TObj)) ||
+         (t0.maybe(TObj) && t1.maybe(TObj)) ||
+         (t0.maybe(TArr) && t1.maybe(TArr));
 }
 
 Opcode matchReentrantCmp(Opcode opc) {
@@ -227,8 +227,8 @@ void implCmp(IRGS& env, Opcode opc) {
       PUNT(LtGtOp-UnknownInput);
     }
     auto const ok =
-      leftType.subtypeOfAny(Type::Null, Type::Bool, Type::Int, Type::Dbl) &&
-      rightType.subtypeOfAny(Type::Null, Type::Bool, Type::Int, Type::Dbl);
+      leftType.subtypeOfAny(TNull, TBool, TInt, TDbl) &&
+      rightType.subtypeOfAny(TNull, TBool, TInt, TDbl);
     if (!ok) {
       PUNT(LtGtOp-NotOk);
     }
@@ -252,8 +252,8 @@ void implCmp(IRGS& env, Opcode opc) {
 }
 
 void implAdd(IRGS& env, Op op) {
-  if (topC(env, BCSPOffset{0})->type() <= Type::Arr &&
-      topC(env, BCSPOffset{1})->type() <= Type::Arr) {
+  if (topC(env, BCSPOffset{0})->type() <= TArr &&
+      topC(env, BCSPOffset{1})->type() <= TArr) {
     auto const tr = popC(env);
     auto const tl = popC(env);
     // The ArrayAdd helper decrefs its args, so don't decref pop'ed values.
@@ -283,9 +283,9 @@ void emitConcatN(IRGS& env, int32_t n) {
   auto const t2 = popC(env);
   auto const t3 = popC(env);
 
-  if (!(t1->type() <= Type::Str) ||
-      !(t2->type() <= Type::Str) ||
-      !(t3->type() <= Type::Str)) {
+  if (!(t1->type() <= TStr) ||
+      !(t2->type() <= TStr) ||
+      !(t3->type() <= TStr)) {
     PUNT(ConcatN);
   }
 
@@ -298,7 +298,7 @@ void emitConcatN(IRGS& env, int32_t n) {
 
   always_assert(n == 4);
   auto const t4 = popC(env);
-  if (!(t4->type() <= Type::Str)) PUNT(ConcatN);
+  if (!(t4->type() <= TStr)) PUNT(ConcatN);
 
   push(env, gen(env, ConcatStr4, t4, t3, t2, t1));
   gen(env, DecRef, t3);
@@ -341,8 +341,8 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
    * boxed locals.
    */
   bool const isAdd = (*subOpc == Op::Add || *subOpc == Op::AddO);
-  if (isAdd && (env.irb->localType(id, DataTypeSpecific) <= Type::Arr) &&
-      topC(env)->isA(Type::Arr)) {
+  if (isAdd && (env.irb->localType(id, DataTypeSpecific) <= TArr) &&
+      topC(env)->isA(TArr)) {
     /*
      * ArrayAdd decrefs its sources and returns a new array with
      * refcount == 1. That covers the local, so incref once more for
@@ -423,17 +423,17 @@ void emitIncDecL(IRGS& env, int32_t id, IncDecOp subop) {
     DataTypeSpecific
   );
 
-  if (src->type() <= Type::Bool) {
+  if (src->type() <= TBool) {
     push(env, src);
     return;
   }
 
-  if (src->type().subtypeOfAny(Type::Arr, Type::Obj)) {
+  if (src->type().subtypeOfAny(TArr, TObj)) {
     pushIncRef(env, src);
     return;
   }
 
-  if (src->type() <= Type::Null) {
+  if (src->type() <= TNull) {
     push(env, inc && pre ? cns(env, 1) : src);
     if (inc) {
       stLoc(env, id, ldrefExit, ldPMExit, cns(env, 1));
@@ -441,7 +441,7 @@ void emitIncDecL(IRGS& env, int32_t id, IncDecOp subop) {
     return;
   }
 
-  if (!src->type().subtypeOfAny(Type::Int, Type::Dbl)) {
+  if (!src->type().subtypeOfAny(TInt, TDbl)) {
     PUNT(IncDecL);
   }
 
@@ -482,26 +482,26 @@ void emitShr(IRGS& env) {
 }
 
 void emitPow(IRGS& env) {
-  interpOne(env, Type::UncountedInit, 2);
+  interpOne(env, TUncountedInit, 2);
 }
 
 void emitBitNot(IRGS& env) {
   auto const srcType = topC(env)->type();
-  if (srcType <= Type::Int) {
+  if (srcType <= TInt) {
     auto const src = popC(env);
     push(env, gen(env, XorInt, src, cns(env, -1)));
     return;
   }
 
-  if (srcType <= Type::Dbl) {
+  if (srcType <= TDbl) {
     auto const src = gen(env, ConvDblToInt, popC(env));
     push(env, gen(env, XorInt, src, cns(env, -1)));
     return;
   }
 
-  auto const resultType = srcType <= Type::Str ? Type::Str
-                        : srcType.needsReg() ? Type::Cell
-                        : Type::Int;
+  auto const resultType = srcType <= TStr ? TStr
+                        : srcType.needsReg() ? TCell
+                        : TInt;
   interpOne(env, resultType, 1);
 }
 
@@ -517,12 +517,12 @@ void emitDiv(IRGS& env) {
   auto const dividendType = topC(env, BCSPOffset{1})->type();
 
   auto isNumeric = [&] (Type type) {
-    return type.subtypeOfAny(Type::Int, Type::Dbl, Type::Bool);
+    return type.subtypeOfAny(TInt, TDbl, TBool);
   };
 
   // not going to bother with string division etc.
   if (!isNumeric(divisorType) || !isNumeric(dividendType)) {
-    interpOne(env, Type::UncountedInit, 2);
+    interpOne(env, TUncountedInit, 2);
     return;
   }
 
@@ -530,15 +530,15 @@ void emitDiv(IRGS& env) {
   auto dividend = topC(env, BCSPOffset{1});
 
   // we can't codegen this but we may be able to special case it away
-  if (!divisor->isA(Type::Dbl) && !dividend->isA(Type::Dbl)) {
+  if (!divisor->isA(TDbl) && !dividend->isA(TDbl)) {
     // TODO(#2570625): support integer-integer division, move this to
     // simplifier:
     if (divisor->hasConstVal()) {
       int64_t divisorVal;
-      if (divisor->isA(Type::Int)) {
+      if (divisor->isA(TInt)) {
         divisorVal = divisor->intVal();
       } else {
-        assertx(divisor->isA(Type::Bool));
+        assertx(divisor->isA(TBool));
         divisorVal = divisor->boolVal();
       }
 
@@ -553,10 +553,10 @@ void emitDiv(IRGS& env) {
 
       if (dividend->hasConstVal()) {
         int64_t dividendVal;
-        if (dividend->isA(Type::Int)) {
+        if (dividend->isA(TInt)) {
           dividendVal = dividend->intVal();
         } else {
-          assertx(dividend->isA(Type::Bool));
+          assertx(dividend->isA(TBool));
           dividendVal = dividend->boolVal();
         }
         popC(env);
@@ -570,17 +570,17 @@ void emitDiv(IRGS& env) {
       }
       /* fall through */
     }
-    interpOne(env, Type::UncountedInit, 2);
+    interpOne(env, TUncountedInit, 2);
     return;
   }
 
   auto make_double = [&] (SSATmp* src) {
-    if (src->isA(Type::Int)) {
+    if (src->isA(TInt)) {
       return gen(env, ConvIntToDbl, src);
-    } else if (src->isA(Type::Bool)) {
+    } else if (src->isA(TBool)) {
       return gen(env, ConvBoolToDbl, src);
     }
-    assertx(src->isA(Type::Dbl));
+    assertx(src->isA(TDbl));
     return src;
   };
 

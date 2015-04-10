@@ -872,7 +872,7 @@ void mrinfo_step_impl(Env& env,
      * invariants on a memory location, but only if the value being stored is
      * possibly counted.
      */
-    if (value->type().maybe(Type::Counted)) {
+    if (value->type().maybe(TCounted)) {
       kill(env.ainfo.may_alias(canonicalize(dst)));
     }
   };
@@ -1331,7 +1331,7 @@ void find_alias_sets(Env& env) {
   auto frame_to_ctx = sparse_idptr_map<SSATmp,ASetID>(env.unit.numTmps());
 
   auto add = [&] (SSATmp* tmp) {
-    if (!tmp->type().maybe(Type::Counted)) return;
+    if (!tmp->type().maybe(TCounted)) return;
 
     auto& id = env.asetMap[tmp];
     if (id != -1) return;
@@ -1397,7 +1397,7 @@ void find_alias_sets(Env& env) {
       auto& ai = env.asets[i];
       auto& aj = env.asets[j];
       bool const may_alias =
-        (ai.widestType & aj.widestType).maybe(Type::Counted);
+        (ai.widestType & aj.widestType).maybe(TCounted);
       if (may_alias) {
         ai.may_alias.insert(j);
         aj.may_alias.insert(i);
@@ -1600,7 +1600,7 @@ bool merge_into(Env& env, RCState& dst, const RCState& src) {
 template<class Fn>
 void for_aset(Env& env, RCState& state, SSATmp* tmp, Fn fn) {
   auto const asetID = env.asetMap[tmp];
-  if (asetID == -1) { assertx(!tmp->type().maybe(Type::Counted)); return; }
+  if (asetID == -1) { assertx(!tmp->type().maybe(TCounted)); return; }
   if (state.asets[asetID].pessimized) return;
   fn(asetID);
 }
@@ -1696,7 +1696,7 @@ template<class NAdder>
 void observe_for_is_referenced(Env& env, RCState& state, NAdder add_node) {
   FTRACE(3, "    observe_for_is_referenced\n");
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
-    if (env.asets[asetID].widestType.maybe(Type::BoxedCell)) {
+    if (env.asets[asetID].widestType.maybe(TBoxedCell)) {
       add_node(asetID, NReq{2});
     }
   }

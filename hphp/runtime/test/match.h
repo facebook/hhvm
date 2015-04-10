@@ -59,7 +59,7 @@ bool match(const IRInstruction* inst, SSATmp* hd, SSATmps... tl) {
     // by pointer) is too restrictive; compare the constant values.
     auto const type = expected->type();
     if (type.hasConstVal() ||
-        type.subtypeOfAny(Type::Uninit, Type::InitNull, Type::Nullptr)) {
+        type.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
       return type == actual->type();
     }
     return expected == actual;

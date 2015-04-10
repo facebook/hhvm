@@ -129,7 +129,7 @@ void local_effects(const FrameStateMgr& frameState,
           auto& loc = *it;
           // If changing the inner type of a boxed local, also drop the
           // information about inner types for any other boxed locals.
-          if (loc.type <= Type::BoxedCell) hook.dropLocalRefsInnerTypes();
+          if (loc.type <= TBoxedCell) hook.dropLocalRefsInnerTypes();
           hook.setLocalType(loc.id, loc.type);
         }
       }

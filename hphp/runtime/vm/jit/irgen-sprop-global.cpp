@@ -93,7 +93,7 @@ SSATmp* ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
 void emitCGetS(IRGS& env) {
   auto const ssaPropName = topC(env, BCSPOffset{1});
 
-  if (!ssaPropName->isA(Type::Str)) {
+  if (!ssaPropName->isA(TStr)) {
     PUNT(CGetS-PropNameNotString);
   }
 
@@ -109,7 +109,7 @@ void emitCGetS(IRGS& env) {
 void emitSetS(IRGS& env) {
   auto const ssaPropName = topC(env, BCSPOffset{2});
 
-  if (!ssaPropName->isA(Type::Str)) {
+  if (!ssaPropName->isA(TStr)) {
     PUNT(SetS-PropNameNotString);
   }
 
@@ -125,7 +125,7 @@ void emitSetS(IRGS& env) {
 void emitVGetS(IRGS& env) {
   auto const ssaPropName = topC(env, BCSPOffset{1});
 
-  if (!ssaPropName->isA(Type::Str)) {
+  if (!ssaPropName->isA(TStr)) {
     PUNT(VGetS-PropNameNotString);
   }
 
@@ -136,7 +136,7 @@ void emitVGetS(IRGS& env) {
   auto const val = gen(
     env,
     LdMem,
-    Type::BoxedInitCell,
+    TBoxedInitCell,
     gen(env, BoxPtr, propAddr)
   );
   pushIncRef(env, val);
@@ -145,7 +145,7 @@ void emitVGetS(IRGS& env) {
 void emitBindS(IRGS& env) {
   auto const ssaPropName = topC(env, BCSPOffset{2});
 
-  if (!ssaPropName->isA(Type::Str)) {
+  if (!ssaPropName->isA(TStr)) {
     PUNT(BindS-PropNameNotString);
   }
 
@@ -159,7 +159,7 @@ void emitBindS(IRGS& env) {
 
 void emitIssetS(IRGS& env) {
   auto const ssaPropName = topC(env, BCSPOffset{1});
-  if (!ssaPropName->isA(Type::Str)) {
+  if (!ssaPropName->isA(TStr)) {
     PUNT(IssetS-PropNameNotString);
   }
   auto const ssaCls = popA(env);
@@ -172,7 +172,7 @@ void emitIssetS(IRGS& env) {
       return gen(env, CheckNonNull, taken, propAddr);
     },
     [&] (SSATmp* ptr) { // Next: property or global exists
-      return gen(env, IsNTypeMem, Type::Null, gen(env, UnboxPtr, ptr));
+      return gen(env, IsNTypeMem, TNull, gen(env, UnboxPtr, ptr));
     },
     [&] { // Taken: LdClsPropAddr* returned Nullptr because it isn't defined
       return cns(env, false);
@@ -185,7 +185,7 @@ void emitIssetS(IRGS& env) {
 
 void emitEmptyS(IRGS& env) {
   auto const ssaPropName = topC(env, BCSPOffset{1});
-  if (!ssaPropName->isA(Type::Str)) {
+  if (!ssaPropName->isA(TStr)) {
     PUNT(EmptyS-PropNameNotString);
   }
 
@@ -215,29 +215,29 @@ void emitEmptyS(IRGS& env) {
 void emitCGetG(IRGS& env) {
   auto const exit = makeExitSlow(env);
   auto const name = topC(env);
-  if (!name->isA(Type::Str)) PUNT(CGetG-NonStrName);
+  if (!name->isA(TStr)) PUNT(CGetG-NonStrName);
   auto const ptr = gen(env, LdGblAddr, exit, name);
   destroyName(env, name);
   pushIncRef(
     env,
-    gen(env, LdMem, Type::Cell, gen(env, UnboxPtr, ptr))
+    gen(env, LdMem, TCell, gen(env, UnboxPtr, ptr))
   );
 }
 
 void emitVGetG(IRGS& env) {
   auto const name = topC(env);
-  if (!name->isA(Type::Str)) PUNT(VGetG-NonStrName);
+  if (!name->isA(TStr)) PUNT(VGetG-NonStrName);
   auto const ptr = gen(env, LdGblAddrDef, name);
   destroyName(env, name);
   pushIncRef(
     env,
-    gen(env, LdMem, Type::BoxedInitCell, gen(env, BoxPtr, ptr))
+    gen(env, LdMem, TBoxedInitCell, gen(env, BoxPtr, ptr))
   );
 }
 
 void emitBindG(IRGS& env) {
   auto const name = topC(env, BCSPOffset{1});
-  if (!name->isA(Type::Str)) PUNT(BindG-NameNotStr);
+  if (!name->isA(TStr)) PUNT(BindG-NameNotStr);
   auto const box = popV(env);
   auto const ptr = gen(env, LdGblAddrDef, name);
   destroyName(env, name);
@@ -246,7 +246,7 @@ void emitBindG(IRGS& env) {
 
 void emitSetG(IRGS& env) {
   auto const name = topC(env, BCSPOffset{1});
-  if (!name->isA(Type::Str)) PUNT(SetG-NameNotStr);
+  if (!name->isA(TStr)) PUNT(SetG-NameNotStr);
   auto const value   = popC(env, DataTypeCountness);
   auto const unboxed = gen(env, UnboxPtr, gen(env, LdGblAddrDef, name));
   destroyName(env, name);
@@ -255,7 +255,7 @@ void emitSetG(IRGS& env) {
 
 void emitIssetG(IRGS& env) {
   auto const name = topC(env, BCSPOffset{0});
-  if (!name->isA(Type::Str)) PUNT(IssetG-NameNotStr);
+  if (!name->isA(TStr)) PUNT(IssetG-NameNotStr);
 
   auto const ret = cond(
     env,
@@ -264,7 +264,7 @@ void emitIssetG(IRGS& env) {
       return gen(env, LdGblAddr, taken, name);
     },
     [&] (SSATmp* ptr) { // Next: global exists
-      return gen(env, IsNTypeMem, Type::Null, gen(env, UnboxPtr, ptr));
+      return gen(env, IsNTypeMem, TNull, gen(env, UnboxPtr, ptr));
     },
     [&] { // Taken: global doesn't exist
       return cns(env, false);
@@ -276,7 +276,7 @@ void emitIssetG(IRGS& env) {
 
 void emitEmptyG(IRGS& env) {
   auto const name = topC(env);
-  if (!name->isA(Type::Str)) PUNT(EmptyG-NameNotStr);
+  if (!name->isA(TStr)) PUNT(EmptyG-NameNotStr);
 
   auto const ret = cond(
     env,
@@ -286,7 +286,7 @@ void emitEmptyG(IRGS& env) {
     },
     [&] (SSATmp* ptr) { // Next: global exists
       auto const unboxed = gen(env, UnboxPtr, ptr);
-      auto const val     = gen(env, LdMem, Type::Cell, unboxed);
+      auto const val     = gen(env, LdMem, TCell, unboxed);
       return gen(env, XorBool, gen(env, ConvCellToBool, val), cns(env, true));
     },
     [&] { // Taken: global doesn't exist
@@ -308,7 +308,7 @@ void emitCheckProp(IRGS& env, const StringData* propName) {
 
   auto const curVal = gen(env, LdElem, propInitVec,
     cns(env, idx * sizeof(TypedValue)));
-  push(env, gen(env, IsNType, Type::Uninit, curVal));
+  push(env, gen(env, IsNType, TUninit, curVal));
 }
 
 void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
@@ -327,7 +327,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
         env,
         LdRDSAddr,
         RDSHandleData { handle },
-        Type::PtrToSPropCell
+        TPtrToSPropCell
       );
     }
     break;

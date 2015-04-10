@@ -125,7 +125,7 @@ DEBUG_ONLY bool validate(const State& env,
                          SSATmp* newDst,
                          const IRInstruction* origInst) {
   auto known_available = [&] (SSATmp* src) -> bool {
-    if (!src->type().maybe(Type::Counted)) return true;
+    if (!src->type().maybe(TCounted)) return true;
     for (auto& oldSrc : origInst->srcs()) {
       if (oldSrc == src) return true;
     }
@@ -257,8 +257,8 @@ DEBUG_ONLY bool validate(const State& env,
 SSATmp* simplifyCheckCtxThis(State& env, const IRInstruction* inst) {
   auto const func = inst->marker().func();
   auto const srcTy = inst->src(0)->type();
-  if (srcTy <= Type::Obj) return gen(env, Nop);
-  if (!func->mayHaveThis() || !srcTy.maybe(Type::Obj)) {
+  if (srcTy <= TObj) return gen(env, Nop);
+  if (!func->mayHaveThis() || !srcTy.maybe(TObj)) {
     return gen(env, Jmp, inst->taken());
   }
   return nullptr;
@@ -267,21 +267,21 @@ SSATmp* simplifyCheckCtxThis(State& env, const IRInstruction* inst) {
 SSATmp* simplifyCastCtxThis(State& env, const IRInstruction* inst) {
   // TODO(#5623596): this transformation is required for correctness in
   // refcount opts right now.
-  if (inst->src(0)->type() <= Type::Obj) return inst->src(0);
+  if (inst->src(0)->type() <= TObj) return inst->src(0);
   return nullptr;
 }
 
 SSATmp* simplifyLdClsCtx(State& env, const IRInstruction* inst) {
   SSATmp* ctx = inst->src(0);
-  if (ctx->hasConstVal(Type::Cctx)) {
+  if (ctx->hasConstVal(TCctx)) {
     return cns(env, ctx->cctxVal().cls());
   }
   Type ctxType = ctx->type();
-  if (ctxType <= Type::Obj) {
+  if (ctxType <= TObj) {
     // this pointer... load its class ptr
     return gen(env, LdObjClass, ctx);
   }
-  if (ctxType <= Type::Cctx) {
+  if (ctxType <= TCctx) {
     return gen(env, LdClsCctx, ctx);
   }
   return nullptr;
@@ -290,7 +290,7 @@ SSATmp* simplifyLdClsCtx(State& env, const IRInstruction* inst) {
 SSATmp* simplifyLdObjClass(State& env, const IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
 
-  if (mightRelax(env, inst->src(0)) || !(ty < Type::Obj)) return nullptr;
+  if (mightRelax(env, inst->src(0)) || !(ty < TObj)) return nullptr;
 
   if (auto const exact = ty.clsSpec().exactCls()) return cns(env, exact);
   return nullptr;
@@ -309,7 +309,7 @@ SSATmp* simplifyLdObjInvoke(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyGetCtxFwdCall(State& env, const IRInstruction* inst) {
   auto const srcCtx = inst->src(0);
-  if (srcCtx->isA(Type::Cctx)) return srcCtx;
+  if (srcCtx->isA(TCctx)) return srcCtx;
   return nullptr;
 }
 
@@ -336,9 +336,9 @@ SSATmp* constImpl(State& env, SSATmp* src1, SSATmp* src2, Oper op) {
 
   auto both = [&](Type ty) { return src1->type() <= ty && src2->type() <= ty; };
 
-  if (both(Type::Bool)) return cns(env, op(src1->boolVal(), src2->boolVal()));
-  if (both(Type::Int))  return cns(env, op(src1->intVal(), src2->intVal()));
-  if (both(Type::Dbl))  return cns(env, op(src1->dblVal(), src2->dblVal()));
+  if (both(TBool)) return cns(env, op(src1->boolVal(), src2->boolVal()));
+  if (both(TInt))  return cns(env, op(src1->intVal(), src2->intVal()));
+  if (both(TDbl))  return cns(env, op(src1->dblVal(), src2->dblVal()));
   return nullptr;
 }
 
@@ -356,7 +356,7 @@ SSATmp* commutativeImpl(State& env,
   }
 
   // Only handle integer operations for now.
-  if (!src1->isA(Type::Int) || !src2->isA(Type::Int)) return nullptr;
+  if (!src1->isA(TInt) || !src2->isA(TInt)) return nullptr;
 
   auto const inst1 = src1->inst();
   auto const inst2 = src2->inst();
@@ -740,7 +740,7 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
   case XorBool:
     if (inst->src(1)->hasConstVal(true)) {
       // This is safe to add a new use to because inst->src(0) is a bool.
-      assertx(inst->src(0)->isA(Type::Bool));
+      assertx(inst->src(0)->isA(TBool));
       return inst->src(0);
     }
     return nullptr;
@@ -762,12 +762,12 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
     // transformation always holds on that type (and we could only plausibly do
     // it for static ones anyway, because of the !maybeCounted restriction we
     // have below).
-    auto const unsafeTypes = Type::Dbl|Type::Arr;
+    auto const unsafeTypes = TDbl|TArr;
     auto const safeToFold =
       !s0->type().maybe(unsafeTypes) && !s1->type().maybe(unsafeTypes) &&
       // We can't add new uses to reference counted types without a more
       // advanced availability analysis.
-      !s0->type().maybe(Type::Counted) && !s1->type().maybe(Type::Counted);
+      !s0->type().maybe(TCounted) && !s1->type().maybe(TCounted);
     if (safeToFold) {
       return gen(env, negateQueryOp(op), s0, s1);
     }
@@ -777,8 +777,8 @@ SSATmp* xorTrueImpl(State& env, SSATmp* src) {
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
     // This is safe because instanceofs don't take reference counted arguments.
-    assertx(!inst->src(0)->type().maybe(Type::Counted) &&
-           !inst->src(1)->type().maybe(Type::Counted));
+    assertx(!inst->src(0)->type().maybe(TCounted) &&
+           !inst->src(1)->type().maybe(TCounted));
     return gen(
       env,
       negateQueryOp(op),
@@ -880,17 +880,17 @@ SSATmp* cmpImpl(State& env,
   auto const type2 = src2->type();
 
   // Identity optimization
-  if (src1 == src2 && !type1.maybe(Type::Dbl)) {
+  if (src1 == src2 && !type1.maybe(TDbl)) {
     // (val1 == val1) does not simplify to true when val1 is a NaN
     return cns(env, bool(cmpOp(opName, 0, 0)));
   }
 
-  assertx(type1 <= Type::Gen && type2 <= Type::Gen);
+  assertx(type1 <= TGen && type2 <= TGen);
 
   // Need both types to be unboxed to simplify, and the code below assumes the
   // types are known DataTypes.
-  if (!type1.isKnownDataType() || type1.maybe(Type::BoxedCell) ||
-      !type2.isKnownDataType() || type2.maybe(Type::BoxedCell)) {
+  if (!type1.isKnownDataType() || type1.maybe(TBoxedCell) ||
+      !type2.isKnownDataType() || type2.maybe(TBoxedCell)) {
     return nullptr;
   }
 
@@ -898,14 +898,14 @@ SSATmp* cmpImpl(State& env,
   if (opName == Same || opName == NSame) {
     // OpSame and OpNSame do not perform type juggling
     if (type1.toDataType() != type2.toDataType() &&
-        !(type1 <= Type::Str && type2 <= Type::Str)) {
+        !(type1 <= TStr && type2 <= TStr)) {
       return cns(env, opName == NSame);
     }
     // Here src1 and src2 are same type, treating Str and StaticStr as the
     // same.
 
     // Constant fold if they are both constant strings.
-    if (type1 <= Type::Str && type2 <= Type::Str) {
+    if (type1 <= TStr && type2 <= TStr) {
       if (src1->hasConstVal() && src2->hasConstVal()) {
         auto const str1 = src1->strVal();
         auto const str2 = src2->strVal();
@@ -917,7 +917,7 @@ SSATmp* cmpImpl(State& env,
 
     // If type is a primitive type - simplify to Eq/Neq.  Str was already
     // removed above.
-    auto const badTypes = Type::Obj | Type::Res | Type::Arr;
+    auto const badTypes = TObj | TRes | TArr;
     if (type1.maybe(badTypes) || type2.maybe(badTypes)) {
       return nullptr;
     }
@@ -929,25 +929,25 @@ SSATmp* cmpImpl(State& env,
   // ---------------------------------------------------------------------
 
   // Null cmp Null
-  if (type1 <= Type::Null && type2 <= Type::Null) {
+  if (type1 <= TNull && type2 <= TNull) {
     return cns(env, bool(cmpOp(opName, 0, 0)));
   }
 
   // const cmp const
   if (src1->hasConstVal() && src2->hasConstVal()) {
     // StaticStr cmp StaticStr
-    if (src1->isA(Type::StaticStr) &&
-        src2->isA(Type::StaticStr)) {
+    if (src1->isA(TStaticStr) &&
+        src2->isA(TStaticStr)) {
       int cmp = src1->strVal()->compare(src2->strVal());
       return cns(env, bool(cmpOp(opName, cmp, 0)));
     }
     // ConstInt cmp ConstInt
-    if (src1->isA(Type::Int) && src2->isA(Type::Int)) {
+    if (src1->isA(TInt) && src2->isA(TInt)) {
       return cns(env, bool(
         cmpOp(opName, src1->intVal(), src2->intVal())));
     }
     // ConstBool cmp ConstBool
-    if (src1->isA(Type::Bool) && src2->isA(Type::Bool)) {
+    if (src1->isA(TBool) && src2->isA(TBool)) {
       return cns(env, bool(
         cmpOp(opName, src1->boolVal(), src2->boolVal())));
     }
@@ -959,7 +959,7 @@ SSATmp* cmpImpl(State& env,
   // ---------------------------------------------------------------------
 
   // Perform constant-bool optimizations
-  if (src2->hasConstVal(Type::Bool)) {
+  if (src2->hasConstVal(TBool)) {
     bool b = src2->boolVal();
 
     // The result of the comparison might be independent of the truth
@@ -985,15 +985,15 @@ SSATmp* cmpImpl(State& env,
   }
 
   // Lower to int-comparison if possible.
-  if (!isIntQueryOp(opName) && type1 <= Type::Int && type2 <= Type::Int) {
+  if (!isIntQueryOp(opName) && type1 <= TInt && type2 <= TInt) {
     return newInst(queryToIntQueryOp(opName), src1, src2);
   }
 
   // Dbl-dbl or dbl-int comparison lower to dbl-comparison
   if (!isDblQueryOp(opName) &&
-      (type1 <= Type::Dbl || type2 <= Type::Dbl) &&
-      (type1.subtypeOfAny(Type::Int, Type::Dbl) &&
-       type2.subtypeOfAny(Type::Int, Type::Dbl))) {
+      (type1 <= TDbl || type2 <= TDbl) &&
+      (type1.subtypeOfAny(TInt, TDbl) &&
+       type2.subtypeOfAny(TInt, TDbl))) {
     return newInst(queryToDblQueryOp(opName),
                    gen(env, ConvCellToDbl, src1),
                    gen(env, ConvCellToDbl, src2));
@@ -1005,7 +1005,7 @@ SSATmp* cmpImpl(State& env,
   // ---------------------------------------------------------------------
 
   if (type1.toDataType() == type2.toDataType() ||
-      (type1 <= Type::Str && type2 <= Type::Str)) {
+      (type1 <= TStr && type2 <= TStr)) {
     if (src1->hasConstVal() && !src2->hasConstVal()) {
       return newInst(commuteQueryOp(opName), src2, src1);
     }
@@ -1018,43 +1018,43 @@ SSATmp* cmpImpl(State& env,
   // ---------------------------------------------------------------------
 
   // nulls get canonicalized to the right
-  if (type1 <= Type::Null) {
+  if (type1 <= TNull) {
     return newInst(commuteQueryOp(opName), src2, src1);
   }
 
   // case 1a: null cmp string. Convert null to ""
-  if (type1 <= Type::Str && type2 <= Type::Null) {
+  if (type1 <= TStr && type2 <= TNull) {
     return newInst(opName, src1, cns(env, s_empty.get()));
   }
 
   // case 1b: null cmp object. Convert null to false and the object to true
-  if (type1 <= Type::Obj && type2 <= Type::Null) {
+  if (type1 <= TObj && type2 <= TNull) {
     return newInst(opName, cns(env, true), cns(env, false));
   }
 
   // case 2a: null cmp anything. Convert null to false
-  if (type2 <= Type::Null) {
+  if (type2 <= TNull) {
     return newInst(opName, src1, cns(env, false));
   }
 
   // bools get canonicalized to the right
-  if (src1->isA(Type::Bool)) {
+  if (src1->isA(TBool)) {
     return newInst(commuteQueryOp(opName), src2, src1);
   }
 
   // case 2b: bool cmp anything. Convert anything to bool
-  if (src2->isA(Type::Bool)) {
+  if (src2->isA(TBool)) {
     if (src1->hasConstVal()) {
-      if (src1->isA(Type::Int)) {
+      if (src1->isA(TInt)) {
         return newInst(opName, cns(env, bool(src1->intVal())), src2);
-      } else if (src1->isA(Type::Str)) {
+      } else if (src1->isA(TStr)) {
         auto str = src1->strVal();
         return newInst(opName, cns(env, str->toBoolean()), src2);
       }
     }
 
     // Optimize comparison between int and const bool
-    if (src1->isA(Type::Int) && src2->hasConstVal()) {
+    if (src1->isA(TInt) && src2->hasConstVal()) {
       // Based on the const bool optimization (above) opName should be Eq
       always_assert(opName == Eq);
       return newInst(src2->boolVal() ? Neq : Eq, src1, cns(env, 0));
@@ -1068,12 +1068,12 @@ SSATmp* cmpImpl(State& env,
   // performed above.
 
   // strings get canonicalized to the left
-  if (type2 <= Type::Str) {
+  if (type2 <= TStr) {
     return newInst(commuteQueryOp(opName), src2, src1);
   }
 
   // ints get canonicalized to the right
-  if (src1->isA(Type::Int)) {
+  if (src1->isA(TInt)) {
     return newInst(commuteQueryOp(opName), src2, src1);
   }
 
@@ -1082,7 +1082,7 @@ SSATmp* cmpImpl(State& env,
   //  cases (specifically, string-int). Other cases (like string-string)
   //  are dealt with earlier, while other cases (like number-resource)
   //  are not caught at all (and end up exiting this macro at the bottom).
-  if (src1->hasConstVal(Type::Str) && src2->isA(Type::Int)) {
+  if (src1->hasConstVal(TStr) && src2->isA(TInt)) {
     auto str = src1->strVal();
     int64_t si; double sd;
     auto st = str->isNumericWithVal(si, sd, true /* allow errors */);
@@ -1099,10 +1099,10 @@ SSATmp* cmpImpl(State& env,
   // performed above
 
   // case 6: array cmp anything. Array is greater
-  if (src1->isA(Type::Arr)) {
+  if (src1->isA(TArr)) {
     return cns(env, bool(cmpOp(opName, 1, 0)));
   }
-  if (src2->isA(Type::Arr)) {
+  if (src2->isA(TArr)) {
     return cns(env, bool(cmpOp(opName, 0, 1)));
   }
 
@@ -1146,8 +1146,8 @@ SSATmp* isTypeImpl(State& env, const IRInstruction* inst) {
   // Testing for StaticStr will make you miss out on CountedStr, and vice versa,
   // and similarly for arrays. PHP treats both types of string the same, so if
   // the distinction matters to you here, be careful.
-  assertx(IMPLIES(type <= Type::Str, type == Type::Str));
-  assertx(IMPLIES(type <= Type::Arr, type == Type::Arr));
+  assertx(IMPLIES(type <= TStr, type == TStr));
+  assertx(IMPLIES(type <= TArr, type == TArr));
 
   // The types are disjoint; the result must be false.
   if (!srcType.maybe(type)) {
@@ -1169,7 +1169,7 @@ SSATmp* simplifyInstanceOf(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
 
-  if (src2->isA(Type::Nullptr)) return cns(env, false);
+  if (src2->isA(TNullptr)) return cns(env, false);
 
   if (!src1->hasConstVal() || !src2->hasConstVal()) return nullptr;
 
@@ -1200,7 +1200,7 @@ SSATmp* simplifyIsNType(State& env, const IRInstruction* i) {
 SSATmp* simplifyIsScalarType(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->type().isKnownDataType()) {
-    return cns(env, src->isA(Type::Int | Type::Dbl | Type::Str | Type::Bool));
+    return cns(env, src->isA(TInt | TDbl | TStr | TBool));
   }
   return nullptr;
 }
@@ -1210,13 +1210,13 @@ SSATmp* simplifyConcatCellCell(State& env, const IRInstruction* inst) {
   auto const src2       = inst->src(1);
   auto const catchBlock = inst->taken();
 
-  if (src1->isA(Type::Str) && src2->isA(Type::Str)) { // StrStr
+  if (src1->isA(TStr) && src2->isA(TStr)) { // StrStr
     return gen(env, ConcatStrStr, catchBlock, src1, src2);
   }
-  if (src1->isA(Type::Int) && src2->isA(Type::Str)) { // IntStr
+  if (src1->isA(TInt) && src2->isA(TStr)) { // IntStr
     return gen(env, ConcatIntStr, catchBlock, src1, src2);
   }
-  if (src1->isA(Type::Str) && src2->isA(Type::Int)) { // StrInt
+  if (src1->isA(TStr) && src2->isA(TInt)) { // StrInt
     return gen(env, ConcatStrInt, catchBlock, src1, src2);
   }
 
@@ -1224,7 +1224,7 @@ SSATmp* simplifyConcatCellCell(State& env, const IRInstruction* inst) {
   // only have access to one here.
   return nullptr;
 
-  if (src1->isA(Type::Int)) { // IntCell
+  if (src1->isA(TInt)) { // IntCell
     auto* asStr = gen(env, ConvCellToStr, catchBlock, src2);
     auto* result = gen(env, ConcatIntStr, src1, asStr);
     // ConcatIntStr doesn't consume its second input so we have to decref it
@@ -1232,13 +1232,13 @@ SSATmp* simplifyConcatCellCell(State& env, const IRInstruction* inst) {
     gen(env, DecRef, asStr);
     return result;
   }
-  if (src2->isA(Type::Int)) { // CellInt
+  if (src2->isA(TInt)) { // CellInt
     auto const asStr = gen(env, ConvCellToStr, catchBlock, src1);
     // concat promises to decref its first argument. we need to do it here
     gen(env, DecRef, src1);
     return gen(env, ConcatStrInt, asStr, src2);
   }
-  if (src1->isA(Type::Str)) { // StrCell
+  if (src1->isA(TStr)) { // StrCell
     auto* asStr = gen(env, ConvCellToStr, catchBlock, src2);
     auto* result = gen(env, ConcatStrStr, src1, asStr);
     // ConcatStrStr doesn't consume its second input so we have to decref it
@@ -1246,7 +1246,7 @@ SSATmp* simplifyConcatCellCell(State& env, const IRInstruction* inst) {
     gen(env, DecRef, asStr);
     return result;
   }
-  if (src2->isA(Type::Str)) { // CellStr
+  if (src2->isA(TStr)) { // CellStr
     auto const asStr = gen(env, ConvCellToStr, catchBlock, src1);
     // concat promises to decref its first argument. we need to do it here
     gen(env, DecRef, src1);
@@ -1259,8 +1259,8 @@ SSATmp* simplifyConcatCellCell(State& env, const IRInstruction* inst) {
 SSATmp* simplifyConcatStrStr(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
-  if (src1->hasConstVal(Type::StaticStr) &&
-      src2->hasConstVal(Type::StaticStr)) {
+  if (src1->hasConstVal(TStaticStr) &&
+      src2->hasConstVal(TStaticStr)) {
     auto const str1 = const_cast<StringData*>(src1->strVal());
     auto const str2 = const_cast<StringData*>(src2->strVal());
     auto const sval = String::attach(concat_ss(str1, str2));
@@ -1429,13 +1429,13 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
   auto const src     = inst->src(0);
   auto const srcType = src->type();
 
-  if (srcType <= Type::Bool) return src;
-  if (srcType <= Type::Null) return cns(env, false);
-  if (srcType <= Type::Arr)  return gen(env, ConvArrToBool, src);
-  if (srcType <= Type::Dbl)  return gen(env, ConvDblToBool, src);
-  if (srcType <= Type::Int)  return gen(env, ConvIntToBool, src);
-  if (srcType <= Type::Str)  return gen(env, ConvStrToBool, src);
-  if (srcType <= Type::Obj) {
+  if (srcType <= TBool) return src;
+  if (srcType <= TNull) return cns(env, false);
+  if (srcType <= TArr)  return gen(env, ConvArrToBool, src);
+  if (srcType <= TDbl)  return gen(env, ConvDblToBool, src);
+  if (srcType <= TInt)  return gen(env, ConvIntToBool, src);
+  if (srcType <= TStr)  return gen(env, ConvStrToBool, src);
+  if (srcType <= TObj) {
     if (auto cls = srcType.clsSpec().cls()) {
       // We need to exclude interfaces like ConstSet.  For now, just
       // skip anything that's an interface.
@@ -1450,7 +1450,7 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
     }
     return gen(env, ConvObjToBool, src);
   }
-  if (srcType <= Type::Res)  return nullptr; // No specialization yet
+  if (srcType <= TRes)  return nullptr; // No specialization yet
 
   return nullptr;
 }
@@ -1460,21 +1460,21 @@ SSATmp* simplifyConvCellToStr(State& env, const IRInstruction* inst) {
   auto const srcType    = src->type();
   auto const catchTrace = inst->taken();
 
-  if (srcType <= Type::Bool)   return gen(env, ConvBoolToStr, src);
-  if (srcType <= Type::Null)   return cns(env, s_empty.get());
-  if (srcType <= Type::Arr)  {
+  if (srcType <= TBool)   return gen(env, ConvBoolToStr, src);
+  if (srcType <= TNull)   return cns(env, s_empty.get());
+  if (srcType <= TArr)  {
     gen(env, RaiseNotice, catchTrace,
         cns(env, makeStaticString("Array to string conversion")));
     return cns(env, s_Array.get());
   }
-  if (srcType <= Type::Dbl)    return gen(env, ConvDblToStr, src);
-  if (srcType <= Type::Int)    return gen(env, ConvIntToStr, src);
-  if (srcType <= Type::Str) {
+  if (srcType <= TDbl)    return gen(env, ConvDblToStr, src);
+  if (srcType <= TInt)    return gen(env, ConvIntToStr, src);
+  if (srcType <= TStr) {
     gen(env, IncRef, src);
     return src;
   }
-  if (srcType <= Type::Obj)    return gen(env, ConvObjToStr, catchTrace, src);
-  if (srcType <= Type::Res)    return gen(env, ConvResToStr, catchTrace, src);
+  if (srcType <= TObj)    return gen(env, ConvObjToStr, catchTrace, src);
+  if (srcType <= TRes)    return gen(env, ConvResToStr, catchTrace, src);
 
   return nullptr;
 }
@@ -1483,14 +1483,14 @@ SSATmp* simplifyConvCellToInt(State& env, const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
 
-  if (srcType <= Type::Int)  return src;
-  if (srcType <= Type::Null) return cns(env, 0);
-  if (srcType <= Type::Arr)  return gen(env, ConvArrToInt, src);
-  if (srcType <= Type::Bool) return gen(env, ConvBoolToInt, src);
-  if (srcType <= Type::Dbl)  return gen(env, ConvDblToInt, src);
-  if (srcType <= Type::Str)  return gen(env, ConvStrToInt, src);
-  if (srcType <= Type::Obj)  return gen(env, ConvObjToInt, inst->taken(), src);
-  if (srcType <= Type::Res)  return nullptr; // No specialization yet
+  if (srcType <= TInt)  return src;
+  if (srcType <= TNull) return cns(env, 0);
+  if (srcType <= TArr)  return gen(env, ConvArrToInt, src);
+  if (srcType <= TBool) return gen(env, ConvBoolToInt, src);
+  if (srcType <= TDbl)  return gen(env, ConvDblToInt, src);
+  if (srcType <= TStr)  return gen(env, ConvStrToInt, src);
+  if (srcType <= TObj)  return gen(env, ConvObjToInt, inst->taken(), src);
+  if (srcType <= TRes)  return nullptr; // No specialization yet
 
   return nullptr;
 }
@@ -1499,14 +1499,14 @@ SSATmp* simplifyConvCellToDbl(State& env, const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
 
-  if (srcType <= Type::Dbl)  return src;
-  if (srcType <= Type::Null) return cns(env, 0.0);
-  if (srcType <= Type::Arr)  return gen(env, ConvArrToDbl, src);
-  if (srcType <= Type::Bool) return gen(env, ConvBoolToDbl, src);
-  if (srcType <= Type::Int)  return gen(env, ConvIntToDbl, src);
-  if (srcType <= Type::Str)  return gen(env, ConvStrToDbl, src);
-  if (srcType <= Type::Obj)  return gen(env, ConvObjToDbl, inst->taken(), src);
-  if (srcType <= Type::Res)  return nullptr; // No specialization yet
+  if (srcType <= TDbl)  return src;
+  if (srcType <= TNull) return cns(env, 0.0);
+  if (srcType <= TArr)  return gen(env, ConvArrToDbl, src);
+  if (srcType <= TBool) return gen(env, ConvBoolToDbl, src);
+  if (srcType <= TInt)  return gen(env, ConvIntToDbl, src);
+  if (srcType <= TStr)  return gen(env, ConvStrToDbl, src);
+  if (srcType <= TObj)  return gen(env, ConvObjToDbl, inst->taken(), src);
+  if (srcType <= TRes)  return nullptr; // No specialization yet
 
   return nullptr;
 }
@@ -1515,7 +1515,7 @@ SSATmp* simplifyConvObjToBool(State& env, const IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
 
   if (!typeMightRelax(inst->src(0)) &&
-      ty < Type::Obj &&
+      ty < TObj &&
       ty.clsSpec().cls() &&
       ty.clsSpec().cls()->isCollectionClass()) {
     return gen(env, ColIsNEmpty, inst->src(0));
@@ -1524,7 +1524,7 @@ SSATmp* simplifyConvObjToBool(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyConvCellToObj(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->isA(Type::Obj)) return inst->src(0);
+  if (inst->src(0)->isA(TObj)) return inst->src(0);
   return nullptr;
 }
 
@@ -1532,8 +1532,8 @@ SSATmp* simplifyCoerceCellToBool(State& env, const IRInstruction* inst) {
   auto const src     = inst->src(0);
   auto const srcType = src->type();
 
-  if (srcType.subtypeOfAny(Type::Bool, Type::Null, Type::Dbl,
-                           Type::Int, Type::Str)) {
+  if (srcType.subtypeOfAny(TBool, TNull, TDbl,
+                           TInt, TStr)) {
     return gen(env, ConvCellToBool, src);
   }
 
@@ -1547,12 +1547,12 @@ SSATmp* simplifyCoerceCellToInt(State& env, const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
 
-  if (srcType.subtypeOfAny(Type::Int, Type::Bool, Type::Null, Type::Dbl,
-                           Type::Bool)) {
+  if (srcType.subtypeOfAny(TInt, TBool, TNull, TDbl,
+                           TBool)) {
     return gen(env, ConvCellToInt, inst->taken(), src);
   }
 
-  if (srcType <= Type::Str) return gen(env, CoerceStrToInt, inst->taken(),
+  if (srcType <= TStr) return gen(env, CoerceStrToInt, inst->taken(),
                                        *inst->extra<CoerceCellToInt>(), src);
 
   // We actually know that any other type will fail causing us to side exit
@@ -1565,12 +1565,12 @@ SSATmp* simplifyCoerceCellToDbl(State& env, const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
 
-  if (srcType.subtypeOfAny(Type::Int, Type::Bool, Type::Null, Type::Dbl,
-                           Type::Bool)) {
+  if (srcType.subtypeOfAny(TInt, TBool, TNull, TDbl,
+                           TBool)) {
     return gen(env, ConvCellToDbl, inst->taken(), src);
   }
 
-  if (srcType <= Type::Str) return gen(env, CoerceStrToDbl, inst->taken(),
+  if (srcType <= TStr) return gen(env, CoerceStrToDbl, inst->taken(),
                                        *inst->extra<CoerceCellToDbl>(), src);
 
   // We actually know that any other type will fail causing us to side exit
@@ -1604,14 +1604,14 @@ SSATmp* simplifyCeil(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyUnboxPtr(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->isA(Type::PtrToCell)) {
+  if (inst->src(0)->isA(TPtrToCell)) {
     return inst->src(0);
   }
   return nullptr;
 }
 
 SSATmp* simplifyBoxPtr(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->isA(Type::PtrToBoxedCell)) {
+  if (inst->src(0)->isA(TPtrToBoxedCell)) {
     return inst->src(0);
   }
   return nullptr;
@@ -1619,9 +1619,9 @@ SSATmp* simplifyBoxPtr(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyCheckInit(State& env, const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
-  assertx(!srcType.maybe(Type::PtrToGen));
+  assertx(!srcType.maybe(TPtrToGen));
   assertx(inst->taken());
-  if (!srcType.maybe(Type::Uninit)) return gen(env, Nop);
+  if (!srcType.maybe(TUninit)) return gen(env, Nop);
   return nullptr;
 }
 
@@ -1656,7 +1656,7 @@ SSATmp* simplifyAssertType(State& env, const IRInstruction* inst) {
 
 SSATmp* decRefImpl(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (!mightRelax(env, src) && !src->type().maybe(Type::Counted)) {
+  if (!mightRelax(env, src) && !src->type().maybe(TCounted)) {
     return gen(env, Nop);
   }
   return nullptr;
@@ -1672,7 +1672,7 @@ SSATmp* simplifyDecRefNZ(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyIncRef(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (!mightRelax(env, src) && !src->type().maybe(Type::Counted)) {
+  if (!mightRelax(env, src) && !src->type().maybe(TCounted)) {
     return gen(env, Nop);
   }
   return nullptr;
@@ -1680,9 +1680,9 @@ SSATmp* simplifyIncRef(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyIncRefCtx(State& env, const IRInstruction* inst) {
   auto const ctx = inst->src(0);
-  if (ctx->isA(Type::Obj)) {
+  if (ctx->isA(TObj)) {
     return gen(env, IncRef, ctx);
-  } else if (!mightRelax(env, ctx) && !ctx->type().maybe(Type::Counted)) {
+  } else if (!mightRelax(env, ctx) && !ctx->type().maybe(TCounted)) {
     return gen(env, Nop);
   }
 
@@ -1696,7 +1696,7 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
 
   // After other simplifications below (isConvIntOrPtrToBool), we can
   // end up with a non-Bool input.  Nothing more to do in this case.
-  if (!src->isA(Type::Bool)) {
+  if (!src->isA(TBool)) {
     return nullptr;
   }
 
@@ -1714,7 +1714,7 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
 
   // Pull negations into the jump.
   if (srcOpcode == XorBool && srcInst->src(1)->hasConstVal(true)) {
-    if (!srcInst->src(0)->type().maybe(Type::Counted)) {
+    if (!srcInst->src(0)->type().maybe(TCounted)) {
       return gen(
         env,
         inst->op() == JmpZero ? JmpNZero : JmpZero,
@@ -1730,7 +1730,7 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
    * may have dec refs between the src instruction and the jump.
    */
   for (auto& src : srcInst->srcs()) {
-    if (src->type().maybe(Type::Counted)) return nullptr;
+    if (src->type().maybe(TCounted)) return nullptr;
   }
 
   // If the source is conversion of an int or pointer to boolean, we
@@ -1741,7 +1741,7 @@ SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
       return true;
     case ConvCellToBool:
       return instr->src(0)->type().subtypeOfAny(
-        Type::Func, Type::Cls, Type::VarEnv, Type::TCA);
+        TFunc, TCls, TVarEnv, TTCA);
     default:
       return false;
     }
@@ -1761,7 +1761,7 @@ SSATmp* simplifyJmpNZero(State& env, const IRInstruction* i) {
 }
 
 SSATmp* simplifyTakeStk(State& env, const IRInstruction* inst) {
-  if (!inst->src(0)->type().maybe(Type::Counted) &&
+  if (!inst->src(0)->type().maybe(TCounted) &&
       !mightRelax(env, inst->src(0))) {
     return gen(env, Nop);
   }
@@ -1770,7 +1770,7 @@ SSATmp* simplifyTakeStk(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyAssertNonNull(State& env, const IRInstruction* inst) {
-  if (!inst->src(0)->type().maybe(Type::Nullptr)) {
+  if (!inst->src(0)->type().maybe(TNullptr)) {
     return inst->src(0);
   }
   return nullptr;
@@ -1794,7 +1794,7 @@ SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
 SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
-  assertx(arr->hasConstVal(Type::Arr));
+  assertx(arr->hasConstVal(TArr));
   if (!idx->hasConstVal()) return nullptr;
   auto const value = arr->arrVal()->nvGet(idx->intVal());
   return value ? cns(env, *value) : nullptr;
@@ -1803,7 +1803,7 @@ SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
 SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
-  assertx(arr->hasConstVal(Type::Arr));
+  assertx(arr->hasConstVal(TArr));
   if (!idx->hasConstVal()) return nullptr;
   auto const value = [&] {
     int64_t val;
@@ -1817,8 +1817,8 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal()) {
-    if (inst->src(1)->type() <= Type::Int) return arrIntKeyImpl(env, inst);
-    if (inst->src(1)->type() <= Type::Str) return arrStrKeyImpl(env, inst);
+    if (inst->src(1)->type() <= TInt) return arrIntKeyImpl(env, inst);
+    if (inst->src(1)->type() <= TStr) return arrStrKeyImpl(env, inst);
   }
   return nullptr;
 }
@@ -1827,14 +1827,14 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
   auto const val = inst->src(0);
   auto const ty = val->type();
 
-  if (ty <= Type::Null) return cns(env, 0);
+  if (ty <= TNull) return cns(env, 0);
 
-  auto const oneTy = Type::Bool | Type::Int | Type::Dbl | Type::Str | Type::Res;
+  auto const oneTy = TBool | TInt | TDbl | TStr | TRes;
   if (ty <= oneTy) return cns(env, 1);
 
-  if (ty <= Type::Arr) return gen(env, CountArray, val);
+  if (ty <= TArr) return gen(env, CountArray, val);
 
-  if (ty < Type::Obj) {
+  if (ty < TObj) {
     auto const cls = ty.clsSpec().cls();
     if (!mightRelax(env, val) && cls != nullptr && cls->isCollectionClass()) {
       return gen(env, CountCollection, val);
@@ -1867,7 +1867,7 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  return src->hasConstVal(Type::Cls) ? cns(env, src->clsVal()->name()) :nullptr;
+  return src->hasConstVal(TCls) ? cns(env, src->clsVal()->name()) :nullptr;
 }
 
 SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
@@ -1876,7 +1876,7 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
 
 
   bool const arg2IsCollection = args.size() == 3 &&
-    args[2]->isA(Type::Obj) &&
+    args[2]->isA(TObj) &&
     args[2]->type().clsSpec() &&
     args[2]->type().clsSpec().cls()->isCollectionClass() &&
     !mightRelax(env, args[2]);
@@ -1898,7 +1898,7 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
 SSATmp* simplifyIsWaitHandle(State& env, const IRInstruction* inst) {
   if (mightRelax(env, inst->src(0))) return nullptr;
 
-  bool baseIsWaitHandle = inst->src(0)->isA(Type::Obj) &&
+  bool baseIsWaitHandle = inst->src(0)->isA(TObj) &&
     inst->src(0)->type().clsSpec() &&
     inst->src(0)->type().clsSpec().cls()->classof(c_WaitHandle::classof());
   if (baseIsWaitHandle) {
@@ -1914,7 +1914,7 @@ SSATmp* simplifyAdjustSP(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyOrdStr(State& env, const IRInstruction* inst) {
   const auto src = inst->src(0);
-  if (src->hasConstVal(Type::Str)) {
+  if (src->hasConstVal(TStr)) {
     // a static string is passed in, resolve with a constant.
     unsigned char first = src->strVal()->data()[0];
     return cns(env, int64_t{first});
@@ -1928,7 +1928,7 @@ SSATmp* ldImpl(State& env, const IRInstruction* inst) {
   auto const t = inst->typeParam();
 
   return t.hasConstVal() ||
-         t.subtypeOfAny(Type::Uninit, Type::InitNull, Type::Nullptr)
+         t.subtypeOfAny(TUninit, TInitNull, TNullptr)
     ? cns(env, t)
     : nullptr;
 }
@@ -2076,8 +2076,8 @@ bool canSimplifyAssertType(const IRInstruction* inst,
   if (!srcType.maybe(typeParam)) {
     // If both types are boxed, this is okay and even expected as a means to
     // update the hint for the inner type.
-    if (srcType <= Type::BoxedCell &&
-        typeParam <= Type::BoxedCell) {
+    if (srcType <= TBoxedCell &&
+        typeParam <= TBoxedCell) {
       return false;
     }
 
@@ -2093,8 +2093,8 @@ bool canSimplifyAssertType(const IRInstruction* inst,
   }
 
   // Asserting in these situations doesn't add any information.
-  if (typeParam == Type::Cls && srcType <= Type::Cls) return true;
-  if (typeParam == Type::Gen && srcType <= Type::Gen) return true;
+  if (typeParam == TCls && srcType <= TCls) return true;
+  if (typeParam == TGen && srcType <= TGen) return true;
 
   auto const newType = srcType & typeParam;
 
@@ -2106,7 +2106,7 @@ bool canSimplifyAssertType(const IRInstruction* inst,
     if (!srcMightRelax) return true;
 
     if (srcType < newType) {
-      // This can happen because of limitations in how Type::operator& handles
+      // This can happen because of limitations in how Toperator& handles
       // specialized types: sometimes it returns a Type that's wider than it
       // needs to be.  It shouldn't affect correctness but it can cause us to
       // miss out on some perf.
@@ -2120,9 +2120,9 @@ bool canSimplifyAssertType(const IRInstruction* inst,
       // other useful information, we can unconditionally eliminate this
       // instruction: RATArrays never come from guards so we can't miss out on
       // anything by doing so.
-      if (srcType < Type::Arr &&
+      if (srcType < TArr &&
           srcType.arrSpec().type() &&
-          typeParam < Type::Arr &&
+          typeParam < TArr &&
           typeParam.arrSpec().type() &&
           !typeParam.arrSpec().kind()) {
         return true;
@@ -2294,19 +2294,19 @@ packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
 }
 
 Type packedArrayElemType(SSATmp* arr, SSATmp* idx) {
-  assertx(arr->isA(Type::Arr) &&
+  assertx(arr->isA(TArr) &&
           arr->type().arrSpec().kind() == ArrayData::kPackedKind &&
-          idx->isA(Type::Int));
+          idx->isA(TInt));
 
   if (arr->hasConstVal() && idx->hasConstVal()) {
     auto const idxVal = idx->intVal();
     if (idxVal >= 0 && idxVal < arr->arrVal()->size()) {
       return Type(arr->arrVal()->nvGet(idxVal)->m_type);
     }
-    return Type::InitNull;
+    return TInitNull;
   }
 
-  Type t = arr->isA(Type::StaticArr) ? Type::InitCell : Type::Gen;
+  Type t = arr->isA(TStaticArr) ? TInitCell : TGen;
 
   auto const at = arr->type().arrSpec().type();
   if (!at) return t;
@@ -2314,14 +2314,14 @@ Type packedArrayElemType(SSATmp* arr, SSATmp* idx) {
   switch (at->tag()) {
     case RepoAuthType::Array::Tag::Packed:
     {
-      if (idx->hasConstVal(Type::Int)) {
+      if (idx->hasConstVal(TInt)) {
         auto const idxVal = idx->intVal();
         if (idxVal >= 0 && idxVal < at->size()) {
           return typeFromRAT(at->packedElem(idxVal)) & t;
         }
-        return Type::InitNull;
+        return TInitNull;
       }
-      Type elemType = Type::Bottom;
+      Type elemType = TBottom;
       for (uint32_t i = 0; i < at->size(); ++i) {
         elemType |= typeFromRAT(at->packedElem(i));
       }

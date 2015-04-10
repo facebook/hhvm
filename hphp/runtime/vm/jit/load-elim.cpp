@@ -62,7 +62,7 @@ struct TrackedLoc {
    * refined than knownValue->type().  Always at least as refined as
    * knownValue->type(), if knownValue is not nullptr.
    */
-  Type knownType{Type::Top};
+  Type knownType{TTop};
 };
 
 /*
@@ -212,8 +212,8 @@ Flags load(Local& env,
     env.state.avail.set(meta->index);
   }
   if (tracked.knownType.hasConstVal() ||
-      tracked.knownType.subtypeOfAny(Type::Uninit, Type::InitNull,
-                                     Type::Nullptr)) {
+      tracked.knownType.subtypeOfAny(TUninit, TInitNull,
+                                     TNullptr)) {
     tracked.knownValue = env.global.unit.cns(tracked.knownType);
 
     FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
@@ -242,7 +242,7 @@ void store(Local& env, AliasClass acls, SSATmp* value) {
 
   auto& current = env.state.tracked[meta->index];
   current.knownValue = value;
-  current.knownType = value ? value->type() : Type::Top;
+  current.knownType = value ? value->type() : TTop;
   env.state.avail.set(meta->index);
   FTRACE(4, "       {} <- {}\n", show(acls),
     value ? value->toString() : std::string("<>"));
@@ -262,7 +262,7 @@ Flags handle_general_effects(Local& env,
       }
       tloc->knownType &= inst.typeParam();
 
-      if (tloc->knownType <= Type::Bottom) {
+      if (tloc->knownType <= TBottom) {
         // i.e., !maybe(inst.typeParam()); fail check.
         return FJmpTaken{};
       }
@@ -280,8 +280,8 @@ Flags handle_general_effects(Local& env,
     // where we don't need to reenter.
     if (auto const tloc = find_tracked(env, inst, *m.loads.stack())) {
       if (inst.op() == CastStk &&
-          inst.typeParam() == Type::NullableObj &&
-          tloc->knownType <= Type::Null) {
+          inst.typeParam() == TNullableObj &&
+          tloc->knownType <= TNull) {
         // If we're casting Null to NullableObj, we still need to call
         // tvCastToNullableObjectInPlace.  See comment there and t3879280 for
         // details.

@@ -245,7 +245,7 @@ private:
 
   ArgGroup& memberKeyImpl(int i, bool allowInt) {
     auto key = m_inst->src(i);
-    if (key->isA(Type::Str) || (allowInt && key->isA(Type::Int))) {
+    if (key->isA(TStr) || (allowInt && key->isA(TInt))) {
       return ssa(i);
     }
     return typedValue(i);

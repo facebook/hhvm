@@ -62,7 +62,12 @@ def unordered_map_at(umap, idx):
 # HHVM accessors.
 
 def atomic_vector_at(av, idx):
-    return atomic_get(rawptr(av['m_vals'])[idx])
+    size = av['m_size']
+
+    if idx < size:
+        return atomic_get(rawptr(av['m_vals'])[idx])
+    else:
+        return atomic_vector_at(atomic_get(av['m_next']), idx - size)
 
 
 def fixed_vector_at(fv, idx):

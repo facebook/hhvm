@@ -2603,6 +2603,7 @@ void zend_ini_scan(const std::string &str, int scanner_mode, const std::string &
 void zend_ini_scan_cleanup() {
   yy_delete_buffer(SCNG(state));
   SCNG(state) = nullptr;
+  yylex_destroy();
 }
 
 void zend_ini_on_section(const std::string &name) {

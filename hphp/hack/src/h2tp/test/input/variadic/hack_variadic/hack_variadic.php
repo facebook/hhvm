@@ -17,3 +17,4 @@ echo(Bar::var_bar(1, 2, 3)."\n");
 echo(Bar::var_bar()."\n");
 echo(var_php_variadic("10")."\n");
 echo(var_php_variadic("10", 1, array())."\n");
+echo(var_php_variadic("10", 1, array(), ...array(1, 2, 3))."\n");

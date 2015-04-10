@@ -803,13 +803,17 @@ let unparser _env =
         StrList [hintStr; Str "::"; constStr]
     | Call (funExpr, paramExprs, unpackParamExprs) ->
       let funStr = u_expr_nested funExpr in
-      let paramExprs = match funStr with
+      let paramStr = match funStr with
       | Str "echo" when List.length paramExprs > 1 ->
-          StrList [StrBlank; u_of_list_comma u_expr paramExprs]
-      | _ -> u_of_list_parens_comma u_expr paramExprs in
-      if unpackParamExprs <> [] then
-        u_todo "Call with splat" (fun () -> StrEmpty)
-      else StrList [ funStr; paramExprs]
+        if unpackParamExprs <> [] then
+          u_todo "echo with ... ?" (fun () -> StrEmpty)
+        else StrList [StrBlank; u_of_list_comma u_expr paramExprs]
+      | _ ->
+        let listExprs =
+          (List.map u_expr paramExprs) @
+            (List.map (fun e -> StrList [Str "..." ; u_expr e]) unpackParamExprs) in
+        StrParens (StrCommaList listExprs)
+      in StrList [ funStr; paramStr ]
     | Int i -> u_pstring i
     | Float f -> u_pstring f
     | String s -> StrList [Str "'"; u_pstring s; Str "'"]
@@ -843,11 +847,12 @@ let unparser _env =
           u_expr_nested hintExpr;
         ];
     | New (klass, paramExprs, unpackParamExprs) ->
-      let klassStr = u_expr klass
-      and paramStr = u_of_list_parens_comma u_expr paramExprs in
-      if unpackParamExprs <> [] then
-        u_todo "Call with splat" (fun () -> StrEmpty)
-      else StrList [ Str "new"; StrBlank ; klassStr; paramStr]
+      let klassStr = u_expr klass in
+      let listExprs =
+        (List.map u_expr paramExprs) @
+          (List.map (fun e -> StrList [Str "..." ; u_expr e]) unpackParamExprs) in
+      let paramStr = StrParens (StrCommaList listExprs) in
+      StrList [ Str "new"; StrBlank ; klassStr; paramStr]
     | Efun (fun_, uselist) ->
       let useStr = match uselist with
         | [] -> StrEmpty

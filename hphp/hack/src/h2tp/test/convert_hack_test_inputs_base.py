@@ -123,17 +123,6 @@ UNSUPPORTED_FILES_UNPARSER = {
         'string_expressions12.php',
         'xhp_parse.php',
     ],
-    "Call with splat": [
-        'meth_caller9.php',
-        'parent_construct1.php',
-        'unpack_call1.php',
-        'unpack_call2.php',
-        'unpack_call3.php',
-        'unpack_call4.php',
-        'unpack_call5.php',
-        'unpack_call6.php',
-        'unpack_call7.php',
-    ],
     "TypeConst": [
         'tconst/abstract_type_in_concrete_class.php',
         'tconst/access_expand_error_1.php',

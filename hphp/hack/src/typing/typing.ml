@@ -1455,8 +1455,11 @@ and check_shape_keys_validity env pos keys =
         let env, pos, info = get_field_info env witness in
         List.fold_left (check_field pos info) env rest_keys
 
-and check_valid_rvalue p ty ty_ret =
-  match ty with
+and check_valid_rvalue p env ty =
+  let env, folded_ty = TUtils.fold_unresolved env ty in
+  let _deliberately_discarded_env, folded_ety =
+    Env.expand_type env folded_ty in
+  match folded_ety with
     | r, Tprim Tnoreturn ->
       let () = Errors.noreturn_usage p
         (Reason.to_string "A noreturn function always throws or exits" r)
@@ -1465,13 +1468,10 @@ and check_valid_rvalue p ty ty_ret =
       let () = Errors.void_usage p
         (Reason.to_string "A void function doesn't return a value" r)
       in r, Tany
-    | _ -> ty_ret
+    | _ -> ty
 
 and set_valid_rvalue p env x ty =
-  let env, folded_ty = TUtils.fold_unresolved env ty in
-  let env, folded_ety = Env.expand_type env folded_ty in
-
-  let ty = check_valid_rvalue p folded_ety ty in
+  let ty = check_valid_rvalue p env ty in
   let env = Env.set_local env x ty in
   env, ty
 
@@ -1607,15 +1607,13 @@ and assign p env e1 ty2 =
   | _ ->
       assign_simple p env e1 ty2
 
-and assign_simple p env e1 ty2 =
+and assign_simple pos env e1 ty2 =
   let env, ty1 = lvalue env e1 in
 
-  let env, folded_ty2 = TUtils.fold_unresolved env ty2 in
-  let env, folded_ety2 = Env.expand_type env folded_ty2 in
-  let ty2 = check_valid_rvalue p folded_ety2 ty2 in
+  let ty2 = check_valid_rvalue pos env ty2 in
 
   let env, ty2 = TUtils.unresolved env ty2 in
-  let env = Type.sub_type p (Reason.URassign) env ty1 ty2 in
+  let env = Type.sub_type pos (Reason.URassign) env ty1 ty2 in
   env, ty2
 
 and array_field_value env = function
@@ -2889,7 +2887,12 @@ and call_ pos env fty el uel =
       call_ pos env fty el uel
   | _, (Tany | Tunresolved []) ->
     let el = el @ uel in
-    let env, _ = lmap expr env el in
+    let env, _ = lmap
+      (fun env elt -> begin
+        let env, arg_ty = expr env elt in
+        let arg_ty = check_valid_rvalue pos env arg_ty in
+        env, arg_ty
+      end) env el in
     Typing_hooks.dispatch_fun_call_hooks [] (List.map fst (el @ uel)) env;
     env, (Reason.Rnone, Tany)
   | r, Tunresolved tyl ->
@@ -2930,11 +2933,12 @@ and call_ pos env fty el uel =
     env, (Reason.Rnone, Tany)
   )
 
-and call_param todos env (name, x) (pos, arg) =
+and call_param todos env (name, x) (pos, arg_ty) =
   (match name with
   | None -> ()
-  | Some name -> Typing_suggest.save_param name env x arg
+  | Some name -> Typing_suggest.save_param name env x arg_ty
   );
+  let arg_ty = check_valid_rvalue pos env arg_ty in
   (* We solve for Tanon types after all the other params because we want to
    * typecheck the lambda bodies with as much type information as possible. For
    * example, in array_map(fn, x), we might be able to use the type of x to
@@ -2944,15 +2948,15 @@ and call_param todos env (name, x) (pos, arg) =
    * in practice the reverse situation is more likely. This rearrangement is
    * particularly useful since higher-order functions usually put fn before x.
    *)
-  match arg with
+  match arg_ty with
   | _, Tanon _ ->
       todos := (fun env ->
-                Type.sub_type pos Reason.URparam env x arg) :: !todos;
+                Type.sub_type pos Reason.URparam env x arg_ty) :: !todos;
       env
   | _, (Tany | Tmixed | Tarray (_, _) | Tgeneric (_,_) | Toption _ | Tprim _
     | Tvar _ | Tfun _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _
     | Tunresolved _ | Tobject | Tshape _ | Taccess (_, _)) ->
-      Type.sub_type pos Reason.URparam env x arg
+    Type.sub_type pos Reason.URparam env x arg_ty
 
 and bad_call p ty =
   Errors.bad_call p (Typing_print.error ty)

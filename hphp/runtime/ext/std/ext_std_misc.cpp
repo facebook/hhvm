@@ -177,12 +177,18 @@ void StandardExtension::initMisc() {
     bindTokenConstants();
     Native::registerConstant<KindOfInt64>(s_T_PAAMAYIM_NEKUDOTAYIM.get(),
                                           get_user_token_id(T_DOUBLE_COLON));
-    Native::registerConstant<KindOfInt64>(makeStaticString("CONNECTION_ABORTED"),
-                                          k_CONNECTION_ABORTED);
-    Native::registerConstant<KindOfInt64>(makeStaticString("CONNECTION_NORMAL"),
-                                          k_CONNECTION_NORMAL);
-    Native::registerConstant<KindOfInt64>(makeStaticString("CONNECTION_TIMEOUT"),
-                                          k_CONNECTION_TIMEOUT);
+    Native::registerConstant<KindOfInt64>(
+      makeStaticString("CONNECTION_ABORTED"),
+      k_CONNECTION_ABORTED
+    );
+    Native::registerConstant<KindOfInt64>(
+      makeStaticString("CONNECTION_NORMAL"),
+      k_CONNECTION_NORMAL
+    );
+    Native::registerConstant<KindOfInt64>(
+      makeStaticString("CONNECTION_TIMEOUT"),
+      k_CONNECTION_TIMEOUT
+    );
 
     Native::registerConstant<KindOfBoolean>(makeStaticString("true"), true);
     Native::registerConstant<KindOfBoolean>(makeStaticString("TRUE"), true);

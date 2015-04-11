@@ -642,8 +642,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
 class ReflectionMethod extends ReflectionFunctionAbstract {
   // $name and $class are the userland properties, implemented with NPH
   // as read only properties.
-  private string $__name;
-  private string $__class;
+  private ?string $__name;
+  private ?string $__class;
 
   private /*string*/ $originalClass;
   private /*bool*/ $forcedAccessible = false;

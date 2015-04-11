@@ -75,7 +75,7 @@ and check_typedef seen env (r, t) =
   | Toption ty -> check_typedef seen env ty
   | Tprim _ -> ()
   | Tvar _ ->
-      (* This can happen after intantiantion of the typedef.
+      (* This can happen after instantiantion of the typedef.
        * Having a cyclic typedef defined this way is fine, because of the
        * type variable, it will be handled gracefully.
        * Besides, it's not that the typedef depends on itself, it's that

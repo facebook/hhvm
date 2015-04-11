@@ -32,11 +32,7 @@ module SN = Naming_special_names
  * of position we are dealing with. This type keeps track of that.
  *)
 type position_descr =
-  | Rinit                         (* The kind used when no kind makes sense,
-                                   * because no position is available.
-                                   * This can happen with Typedefs not using
-                                   * their type parameter.
-                                   *)
+  | Rtypedef
   | Rmember                       (* Instance variable  *)
   | Rtype_parameter               (* The declaration site of a type-parameter
                                    *)
@@ -125,7 +121,8 @@ let reason_to_string ~sign (_, descr, variance) =
   else ""
   )^
   match descr with
-  | Rinit -> assert false
+  | Rtypedef ->
+      "Aliased types are covariant"
   | Rmember ->
       "A non private class member is always invariant"
   | Rtype_parameter ->
@@ -358,7 +355,7 @@ and typedef type_name =
       let root = Typing_deps.Dep.Class type_name in
       let env = SMap.empty in
       let pos = Reason.to_pos (fst ty) in
-      let reason_covariant = [pos, Rinit, Pcovariant] in
+      let reason_covariant = [pos, Rtypedef, Pcovariant] in
       let env = type_ root (Vcovariant reason_covariant) env ty in
       List.iter (check_variance env) tparams
   | _ -> ()
@@ -369,9 +366,7 @@ and class_member root _member_name member env =
   | _ ->
       let reason, _ as ty = member.ce_type in
       let pos = Reason.to_pos reason in
-      let reason_covariant = [pos, Rmember, Pcovariant] in
-      let reason_contravariant = [pos, Rmember, Pcontravariant] in
-      let variance = Vinvariant (reason_covariant, reason_contravariant) in
+      let variance = make_variance Rmember pos Ast.Invariant in
       type_ root variance env ty
 
 and class_method root _method_name method_ env =

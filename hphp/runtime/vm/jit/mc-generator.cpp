@@ -1785,33 +1785,29 @@ void MCGenerator::codeEmittedThisRequest(size_t& requestEntry,
 }
 
 namespace {
-struct DebuggerCatchInfo {
-  TCA catchBlock;
-  const ActRec* fp;
-};
-
-__thread std::deque<DebuggerCatchInfo>* tl_debuggerCatches{nullptr};
+__thread std::unordered_map<const ActRec*, TCA>* tl_debuggerCatches{nullptr};
 }
 
 void pushDebuggerCatch(const ActRec* fp) {
   if (!tl_debuggerCatches) {
-    tl_debuggerCatches = new std::deque<DebuggerCatchInfo>();
+    tl_debuggerCatches = new std::unordered_map<const ActRec*, TCA>();
   }
 
   auto optCatchBlock = mcg->getCatchTrace(TCA(fp->m_savedRip));
   always_assert(optCatchBlock && *optCatchBlock);
   auto catchBlock = *optCatchBlock;
   FTRACE(1, "Pushing debugger catch {} with fp {}\n", catchBlock, fp);
-  tl_debuggerCatches->emplace_back(DebuggerCatchInfo{catchBlock, fp});
+  tl_debuggerCatches->emplace(fp, catchBlock);
 }
 
 TCA popDebuggerCatch(const ActRec* fp) {
   always_assert(tl_debuggerCatches);
-  auto info = tl_debuggerCatches->front();
-  always_assert(info.fp == fp);
-  tl_debuggerCatches->pop_front();
-  FTRACE(1, "Popped debugger catch {} for fp {}\n", info.catchBlock, info.fp);
-  return info.catchBlock;
+  auto const it = tl_debuggerCatches->find(fp);
+  always_assert(it != tl_debuggerCatches->end());
+  auto const catchBlock = it->second;
+  tl_debuggerCatches->erase(it);
+  FTRACE(1, "Popped debugger catch {} for fp {}\n", catchBlock, fp);
+  return catchBlock;
 }
 
 void MCGenerator::requestInit() {

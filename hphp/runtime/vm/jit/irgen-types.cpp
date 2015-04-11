@@ -48,10 +48,10 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
   auto const ldPMExit = makePseudoMainExit(env);
   auto val = isReturnType ? topR(env)
                           : ldLoc(env, id, ldPMExit, DataTypeSpecific);
-  assertx(val->type() <= Type::Cell || val->type() <= Type::BoxedCell);
+  assertx(val->type() <= TCell || val->type() <= TBoxedCell);
 
   auto const valType = [&]() -> Type {
-    if (val->type() <= Type::Cell) return val->type();
+    if (val->type() <= TCell) return val->type();
     if (isReturnType) PUNT(VerifyReturnTypeBoxed);
     auto const pred = env.irb->predictedInnerType(id);
     gen(env, CheckRefInner, pred, makeExit(env), val);
@@ -76,10 +76,10 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
     return;
   }
 
-  if (tc.isNullable() && valType <= Type::InitNull) return;
+  if (tc.isNullable() && valType <= TInitNull) return;
 
   if (!isReturnType && tc.isArray() && !tc.isSoft() && !func->mustBeRef(id) &&
-      valType <= Type::Obj) {
+      valType <= TObj) {
     PUNT(VerifyParamType-collectionToArray);
     return;
   }
@@ -107,13 +107,13 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
   }
   assertx(result == AnnotAction::ObjectCheck);
 
-  if (!(valType <= Type::Obj)) {
+  if (!(valType <= TObj)) {
     // For RepoAuthoritative mode, if tc is a type alias we can optimize
     // in some cases
     if (tc.isObject() && RuntimeOption::RepoAuthoritative) {
       auto const td = tc.namedEntity()->getCachedTypeAlias();
       if (tc.namedEntity()->isPersistentTypeAlias() && td &&
-          ((td->nullable && valType <= Type::Null) ||
+          ((td->nullable && valType <= TNull) ||
            annotCompat(valType.toDataType(), td->type,
              td->klass ? td->klass->name() : nullptr) == AnnotAction::Pass)) {
         env.irb->constrainValue(val, TypeConstraint(DataTypeSpecific));
@@ -169,7 +169,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
    * would pass. If we don't know, we still have to emit them because valType
    * might be a subtype of its specialized object type.
    */
-  if (valType < Type::Obj && valType.clsSpec()) {
+  if (valType < TObj && valType.clsSpec()) {
     auto const cls = valType.clsSpec().cls();
     if (!env.irb->constrainValue(val, TypeConstraint(cls).setWeak()) &&
         ((knownConstraint && cls->classof(knownConstraint)) ||
@@ -278,14 +278,14 @@ folly::Optional<Type> ratToAssertType(IRGS& env, RepoAuthType rat) {
       auto const cls = Unit::lookupClassOrUniqueClass(rat.clsName());
 
       if (!classIsUniqueOrCtxParent(env, cls)) {
-        ty |= Type::Obj; // Kill specialization.
+        ty |= TObj; // Kill specialization.
       }
       return ty;
     }
 
     // Type assertions can't currently handle Init-ness.
     case T::InitCell:
-      return Type::Cell;
+      return TCell;
     case T::InitGen:
       return folly::none;
 
@@ -323,14 +323,14 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
    * types, but if it's Gen/Cell we're going to PUNT because it's
    * natural to translate that case with control flow TODO(#2020251)
    */
-  if (Type::Obj < src->type()) {
+  if (TObj < src->type()) {
     PUNT(InstanceOfD_MaybeObj);
   }
-  if (!src->isA(Type::Obj)) {
-    bool res = ((src->isA(Type::Arr) && interface_supports_array(className))) ||
-      (src->isA(Type::Str) && interface_supports_string(className)) ||
-      (src->isA(Type::Int) && interface_supports_int(className)) ||
-      (src->isA(Type::Dbl) && interface_supports_double(className));
+  if (!src->isA(TObj)) {
+    bool res = ((src->isA(TArr) && interface_supports_array(className))) ||
+      (src->isA(TStr) && interface_supports_string(className)) ||
+      (src->isA(TInt) && interface_supports_int(className)) ||
+      (src->isA(TDbl) && interface_supports_double(className));
     return cns(env, res);
   }
 
@@ -387,7 +387,7 @@ void emitInstanceOf(IRGS& env) {
   auto const t1 = popC(env);
   auto const t2 = popC(env); // t2 instanceof t1
 
-  if (t1->isA(Type::Obj) && t2->isA(Type::Obj)) {
+  if (t1->isA(TObj) && t2->isA(TObj)) {
     auto const c2 = gen(env, LdObjClass, t2);
     auto const c1 = gen(env, LdObjClass, t1);
     push(env, gen(env, InstanceOf, c2, c1));
@@ -396,9 +396,9 @@ void emitInstanceOf(IRGS& env) {
     return;
   }
 
-  if (!t1->isA(Type::Str)) PUNT(InstanceOf-NotStr);
+  if (!t1->isA(TStr)) PUNT(InstanceOf-NotStr);
 
-  if (t2->isA(Type::Obj)) {
+  if (t2->isA(TObj)) {
     auto const rds = gen(env, LookupClsRDSHandle, t1);
     auto const c1  = gen(env, DerefClsRDSHandle, rds);
     auto const c2  = gen(env, LdObjClass, t2);
@@ -410,10 +410,10 @@ void emitInstanceOf(IRGS& env) {
 
   push(
     env,
-    t2->isA(Type::Arr) ? gen(env, InterfaceSupportsArr, t1) :
-    t2->isA(Type::Int) ? gen(env, InterfaceSupportsInt, t1) :
-    t2->isA(Type::Str) ? gen(env, InterfaceSupportsStr, t1) :
-    t2->isA(Type::Dbl) ? gen(env, InterfaceSupportsDbl, t1) :
+    t2->isA(TArr) ? gen(env, InterfaceSupportsArr, t1) :
+    t2->isA(TInt) ? gen(env, InterfaceSupportsInt, t1) :
+    t2->isA(TStr) ? gen(env, InterfaceSupportsStr, t1) :
+    t2->isA(TDbl) ? gen(env, InterfaceSupportsDbl, t1) :
     cns(env, false)
   );
   gen(env, DecRef, t2);
@@ -436,8 +436,8 @@ void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {
   auto const tAutoload = popC(env);
   auto const tCls = popC(env);
 
-  assertx(tCls->isA(Type::Str)); // result of CastString
-  assertx(tAutoload->isA(Type::Bool)); // result of CastBool
+  assertx(tCls->isA(TStr)); // result of CastString
+  assertx(tAutoload->isA(TBool)); // result of CastBool
 
   ClassKind kind;
   switch (subop) {
@@ -461,7 +461,7 @@ void emitIssetL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const ld = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
-  push(env, gen(env, IsNType, Type::Null, ld));
+  push(env, gen(env, IsNType, TNull, ld));
 }
 
 void emitEmptyL(IRGS& env, int32_t id) {

@@ -244,13 +244,18 @@ let unparser _env =
     | Covariant -> u_todo "Covariant" (fun () -> StrEmpty )
     | Contravariant -> u_todo "Contravariant" (fun () -> StrEmpty )
     | Invariant -> u_todo "Invariant" (fun () -> StrEmpty )
+  and u_constraint_kind =
+    function
+    | Constraint_as -> u_todo "as" (fun () -> StrEmpty)
+    | Constraint_super -> u_todo "super" (fun () -> StrEmpty)
   and u_tparam (v2, v3, v4) =
     u_todo "tparam"
       (fun () ->
          let v1 = Str "tparam"
          and v2 = u_variance v2
          and v3 = u_id v3
-         and v4 = u_of_option u_hint v4
+         and v4 = u_of_option (fun (ck, h) ->
+           StrWords [u_constraint_kind ck; u_hint h]) v4
          in StrWords [ v1; v2; v3; v4 ])
   and u_tconstraint v = u_of_option u_hint v
   and u_typedef_kind =
@@ -798,13 +803,17 @@ let unparser _env =
         StrList [hintStr; Str "::"; constStr]
     | Call (funExpr, paramExprs, unpackParamExprs) ->
       let funStr = u_expr_nested funExpr in
-      let paramExprs = match funStr with
+      let paramStr = match funStr with
       | Str "echo" when List.length paramExprs > 1 ->
-          StrList [StrBlank; u_of_list_comma u_expr paramExprs]
-      | _ -> u_of_list_parens_comma u_expr paramExprs in
-      if unpackParamExprs <> [] then
-        u_todo "Call with splat" (fun () -> StrEmpty)
-      else StrList [ funStr; paramExprs]
+        if unpackParamExprs <> [] then
+          u_todo "echo with ... ?" (fun () -> StrEmpty)
+        else StrList [StrBlank; u_of_list_comma u_expr paramExprs]
+      | _ ->
+        let listExprs =
+          (List.map u_expr paramExprs) @
+            (List.map (fun e -> StrList [Str "..." ; u_expr e]) unpackParamExprs) in
+        StrParens (StrCommaList listExprs)
+      in StrList [ funStr; paramStr ]
     | Int i -> u_pstring i
     | Float f -> u_pstring f
     | String s -> StrList [Str "'"; u_pstring s; Str "'"]
@@ -838,11 +847,12 @@ let unparser _env =
           u_expr_nested hintExpr;
         ];
     | New (klass, paramExprs, unpackParamExprs) ->
-      let klassStr = u_expr klass
-      and paramStr = u_of_list_parens_comma u_expr paramExprs in
-      if unpackParamExprs <> [] then
-        u_todo "Call with splat" (fun () -> StrEmpty)
-      else StrList [ Str "new"; StrBlank ; klassStr; paramStr]
+      let klassStr = u_expr klass in
+      let listExprs =
+        (List.map u_expr paramExprs) @
+          (List.map (fun e -> StrList [Str "..." ; u_expr e]) unpackParamExprs) in
+      let paramStr = StrParens (StrCommaList listExprs) in
+      StrList [ Str "new"; StrBlank ; klassStr; paramStr]
     | Efun (fun_, uselist) ->
       let useStr = match uselist with
         | [] -> StrEmpty

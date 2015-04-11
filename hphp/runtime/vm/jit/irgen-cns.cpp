@@ -29,7 +29,7 @@ namespace {
 // The TypedValue may be a non-scalar, but it must have a static value.
 SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
   switch (tv->m_type) {
-    case KindOfNull:          return cns(env, Type::InitNull);
+    case KindOfNull:          return cns(env, TInitNull);
     case KindOfBoolean:       return cns(env, !!tv->m_data.num);
     case KindOfInt64:         return cns(env, tv->m_data.num);
     case KindOfDouble:        return cns(env, tv->m_data.dbl);
@@ -88,7 +88,7 @@ void implCns(IRGS& env,
         hint(env, Block::Hint::Unlikely);
         // We know that c1 is Uninit in this branch but we have to encode this
         // in the IR.
-        gen(env, AssertType, Type::Uninit, c1);
+        gen(env, AssertType, TUninit, c1);
 
         if (fallbackNameTmp) {
           return gen(env,
@@ -154,9 +154,9 @@ void emitClsCnsD(IRGS& env,
     env,
     LdRDSAddr,
     RDSHandleData { link.handle() },
-    Type::Cell.ptr(Ptr::ClsCns)
+    TCell.ptr(Ptr::ClsCns)
   );
-  auto const guardType = Type::UncountedInit;
+  auto const guardType = TUncountedInit;
 
   ifThen(
     env,

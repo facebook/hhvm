@@ -47,6 +47,7 @@ type env = {
   genv : genv;
   todo : tfun list;
   in_loop : bool;
+  grow_super : bool;
 }
 and genv
 and anon = env -> fun_params -> env * ty
@@ -68,7 +69,7 @@ val debugl : ISet.t -> env -> ty list -> unit
 val debug : env -> ty -> unit
 val empty_fake_members : fake_members
 val empty_local : local_env
-val empty : Relative_path.t -> env
+val empty : TypecheckerOptions.t -> Relative_path.t -> env
 val add_class : Classes.key -> Classes.t -> unit
 val add_typedef : Typedefs.key -> Typedef.tdef -> unit
 val is_typedef : Typedefs.key -> bool
@@ -99,6 +100,7 @@ val set_return : env -> ty -> env
 val with_return : env -> (env -> env) -> env
 val allow_null_as_void : env -> bool
 val is_static : env -> bool
+val grow_super : env -> bool
 val get_self : env -> ty
 val get_self_id : env -> string
 val get_parent : env -> ty
@@ -119,6 +121,7 @@ val set_root : env -> Typing_deps.Dep.variant -> env
 val get_mode : env -> FileInfo.mode
 val is_strict : env -> bool
 val is_decl : env -> bool
+val get_options: env -> TypecheckerOptions.t
 val get_last_call : env -> Pos.t
 val lost_info : string -> ISet.t -> env -> ty -> env * ty
 val forget_members : env -> Pos.t -> env

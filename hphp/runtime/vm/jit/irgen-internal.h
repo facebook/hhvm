@@ -331,17 +331,17 @@ inline SSATmp* pop(IRGS& env, Type type, TypeConstraint tc = DataTypeSpecific) {
 }
 
 inline SSATmp* popC(IRGS& env, TypeConstraint tc = DataTypeSpecific) {
-  return pop(env, Type::Cell, tc);
+  return pop(env, TCell, tc);
 }
 
-inline SSATmp* popA(IRGS& env) { return pop(env, Type::Cls); }
-inline SSATmp* popV(IRGS& env) { return pop(env, Type::BoxedInitCell); }
-inline SSATmp* popR(IRGS& env) { return pop(env, Type::Gen); }
-inline SSATmp* popF(IRGS& env) { return pop(env, Type::Gen); }
+inline SSATmp* popA(IRGS& env) { return pop(env, TCls); }
+inline SSATmp* popV(IRGS& env) { return pop(env, TBoxedInitCell); }
+inline SSATmp* popR(IRGS& env) { return pop(env, TGen); }
+inline SSATmp* popF(IRGS& env) { return pop(env, TGen); }
 
 inline void discard(IRGS& env, uint32_t n) {
   for (auto i = uint32_t{0}; i < n; ++i) {
-    pop(env, Type::StkElem, DataTypeGeneric); // don't care about the values
+    pop(env, TStkElem, DataTypeGeneric); // don't care about the values
   }
 }
 
@@ -375,7 +375,7 @@ inline void extendStack(IRGS& env, uint32_t index, Type type) {
     return;
   }
 
-  auto const tmp = pop(env, Type::StkElem, DataTypeGeneric);
+  auto const tmp = pop(env, TStkElem, DataTypeGeneric);
   extendStack(env, index - 1, type);
   push(env, tmp);
 }
@@ -397,21 +397,21 @@ inline SSATmp* top(IRGS& env,
 inline SSATmp* topC(IRGS& env,
                     BCSPOffset i = BCSPOffset{0},
                     TypeConstraint tc = DataTypeSpecific) {
-  return top(env, Type::Cell, i, tc);
+  return top(env, TCell, i, tc);
 }
 
 inline SSATmp* topF(IRGS& env,
                     BCSPOffset i = BCSPOffset{0},
                     TypeConstraint tc = DataTypeSpecific) {
-  return top(env, Type::Gen, i, tc);
+  return top(env, TGen, i, tc);
 }
 
 inline SSATmp* topV(IRGS& env, BCSPOffset i = BCSPOffset{0}) {
-  return top(env, Type::BoxedInitCell, i);
+  return top(env, TBoxedInitCell, i);
 }
 
 inline SSATmp* topR(IRGS& env, BCSPOffset i = BCSPOffset{0}) {
-  return top(env, Type::Gen, i);
+  return top(env, TGen, i);
 }
 
 inline Type topType(IRGS& env,
@@ -457,13 +457,13 @@ inline SSATmp* ldCtx(IRGS& env) {
 inline SSATmp* unbox(IRGS& env, SSATmp* val, Block* exit) {
   auto const type = val->type();
   // If we don't have an exit the LdRef can't be a guard.
-  auto const inner = exit ? (type & Type::BoxedCell).inner() : Type::Cell;
+  auto const inner = exit ? (type & TBoxedCell).inner() : TCell;
 
-  if (type <= Type::Cell) {
+  if (type <= TCell) {
     env.irb->constrainValue(val, DataTypeCountness);
     return val;
   }
-  if (type <= Type::BoxedCell) {
+  if (type <= TBoxedCell) {
     gen(env, CheckRefInner, inner, exit, val);
     return gen(env, LdRef, inner, val);
   }
@@ -472,7 +472,7 @@ inline SSATmp* unbox(IRGS& env, SSATmp* val, Block* exit) {
     env,
     0,
     [&](Block* taken) {
-      return gen(env, CheckType, Type::BoxedCell, taken, val);
+      return gen(env, CheckType, TBoxedCell, taken, val);
     },
     [&](SSATmp* box) { // Next: val is a ref
       env.irb->constrainValue(box, DataTypeCountness);
@@ -480,7 +480,7 @@ inline SSATmp* unbox(IRGS& env, SSATmp* val, Block* exit) {
       return gen(env, LdRef, inner, box);
     },
     [&] { // Taken: val is unboxed
-      return gen(env, AssertType, Type::Cell, val);
+      return gen(env, AssertType, TCell, val);
     }
   );
 }
@@ -489,16 +489,15 @@ inline SSATmp* unbox(IRGS& env, SSATmp* val, Block* exit) {
 // Type helpers
 
 inline Type relaxToGuardable(Type ty) {
-  assertx(ty <= Type::Gen);
+  assertx(ty <= TGen);
   ty = ty.unspecialize();
 
-  if (ty.isKnownDataType()) return ty;
-
-  if (ty <= Type::UncountedInit)  return Type::UncountedInit;
-  if (ty <= Type::Uncounted)      return Type::Uncounted;
-  if (ty <= Type::Cell)           return Type::Cell;
-  if (ty <= Type::BoxedCell)      return Type::BoxedCell;
-  if (ty <= Type::Gen)            return Type::Gen;
+  if (ty <= TBoxedCell)      return TBoxedCell;
+  if (ty.isKnownDataType())       return ty;
+  if (ty <= TUncountedInit)  return TUncountedInit;
+  if (ty <= TUncounted)      return TUncounted;
+  if (ty <= TCell)           return TCell;
+  if (ty <= TGen)            return TGen;
   not_reached();
 }
 
@@ -532,7 +531,7 @@ inline bool classIsUniqueOrCtxParent(IRGS& env, const Class* cls) {
 }
 
 inline SSATmp* ldCls(IRGS& env, SSATmp* className) {
-  assertx(className->isA(Type::Str));
+  assertx(className->isA(TStr));
   if (className->hasConstVal()) {
     if (auto const cls = Unit::lookupClass(className->strVal())) {
       if (classIsPersistentOrCtxParent(env, cls)) return cns(env, cls);
@@ -563,11 +562,11 @@ inline SSATmp* ldLoc(IRGS& env,
 
     // We don't support locals being type Gen, so if we ever get into such a
     // case, we need to punt.
-    if (type == Type::Gen) PUNT(LdGbl-Gen);
+    if (type == TGen) PUNT(LdGbl-Gen);
     return gen(env, LdLocPseudoMain, type, exit, LocalId(locId), fp(env));
   }
 
-  return gen(env, LdLoc, Type::Gen, LocalId(locId), fp(env));
+  return gen(env, LdLoc, TGen, LocalId(locId), fp(env));
 }
 
 /*
@@ -587,14 +586,14 @@ inline SSATmp* ldLocInner(IRGS& env,
   // gets us that.
   auto const loc = ldLoc(env, locId, ldPMExit, DataTypeCountness);
 
-  if (loc->type() <= Type::Cell) {
+  if (loc->type() <= TCell) {
     env.irb->constrainValue(loc, constraint);
     return loc;
   }
 
   // Handle the Boxed case manually outside of unbox() so we can use the
   // local's predicted type.
-  if (loc->type() <= Type::BoxedCell) {
+  if (loc->type() <= TBoxedCell) {
     auto const predTy = env.irb->predictedInnerType(locId);
     gen(env, CheckRefInner, predTy, ldrefExit, loc);
     return gen(env, LdRef, predTy, loc);
@@ -621,13 +620,13 @@ inline SSATmp* ldLocInnerWarn(IRGS& env,
     if (varName != nullptr) {
       gen(env, RaiseUninitLoc, cns(env, varName));
     }
-    return cns(env, Type::InitNull);
+    return cns(env, TInitNull);
   };
 
   env.irb->constrainLocal(id, DataTypeCountnessInit, "ldLocInnerWarn");
 
-  if (locVal->type() <= Type::Uninit) return warnUninit();
-  if (!locVal->type().maybe(Type::Uninit)) return locVal;
+  if (locVal->type() <= TUninit) return warnUninit();
+  if (!locVal->type().maybe(TUninit)) return locVal;
 
   // The local might be Uninit so we have to check at runtime.
   return cond(
@@ -637,7 +636,7 @@ inline SSATmp* ldLocInnerWarn(IRGS& env,
       gen(env, CheckInit, taken, locVal);
     },
     [&] { // Next: local is InitCell.
-      return gen(env, AssertType, Type::InitCell, locVal);
+      return gen(env, AssertType, TInitCell, locVal);
     },
     [&] { // Taken: local is Uninit
       return warnUninit();
@@ -668,7 +667,7 @@ inline SSATmp* stLocRaw(IRGS& env, uint32_t id, SSATmp* fp, SSATmp* newVal) {
  * stack, it should set 'incRefNew' so that 'newVal' will have its ref-count
  * incremented.
  *
- * Pre: !newVal->type().maybe(Type::BoxedCell)
+ * Pre: !newVal->type().maybe(TBoxedCell)
  * Pre: exit != nullptr if the local may be boxed
  */
 inline SSATmp* stLocImpl(IRGS& env,
@@ -678,7 +677,7 @@ inline SSATmp* stLocImpl(IRGS& env,
                          SSATmp* newVal,
                          bool decRefOld,
                          bool incRefNew) {
-  assertx(!newVal->type().maybe(Type::BoxedCell));
+  assertx(!newVal->type().maybe(TBoxedCell));
 
   auto const cat = decRefOld ? DataTypeCountness : DataTypeGeneric;
   auto const oldLoc = ldLoc(env, id, ldPMExit, cat);
@@ -710,14 +709,14 @@ inline SSATmp* stLocImpl(IRGS& env,
     return newVal;
   };
 
-  if (oldLoc->type() <= Type::Cell) return unboxed_case();
-  if (oldLoc->type() <= Type::BoxedCell) return boxed_case(oldLoc);
+  if (oldLoc->type() <= TCell) return unboxed_case();
+  if (oldLoc->type() <= TBoxedCell) return boxed_case(oldLoc);
 
   return cond(
     env,
     0,
     [&] (Block* taken) {
-      return gen(env, CheckType, Type::BoxedCell, taken, oldLoc);
+      return gen(env, CheckType, TBoxedCell, taken, oldLoc);
     },
     boxed_case,
     unboxed_case
@@ -767,7 +766,7 @@ inline SSATmp* pushStLoc(IRGS& env,
 
 inline SSATmp* ldLocAddr(IRGS& env, uint32_t locId) {
   env.irb->constrainLocal(locId, DataTypeSpecific, "LdLocAddr");
-  return gen(env, LdLocAddr, Type::PtrToFrameGen, LocalId(locId), fp(env));
+  return gen(env, LdLocAddr, TPtrToFrameGen, LocalId(locId), fp(env));
 }
 
 inline SSATmp* ldStkAddr(IRGS& env, BCSPOffset relOffset) {
@@ -779,7 +778,7 @@ inline SSATmp* ldStkAddr(IRGS& env, BCSPOffset relOffset) {
   return gen(
     env,
     LdStkAddr,
-    Type::PtrToStkGen,
+    TPtrToStkGen,
     IRSPOffsetData { offset },
     sp(env)
   );

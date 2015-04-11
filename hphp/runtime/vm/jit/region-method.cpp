@@ -167,7 +167,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
     case LTag::Local:
       if (lt.location.localId() < context.func->numParams()) {
         // Only predict objectness, not the specific class type.
-        auto const type = lt.type < Type::Obj ? Type::Obj : lt.type;
+        auto const type = lt.type < TObj ? TObj : lt.type;
         ret->entry()->addPredicted(startSK, {lt.location, type});
       }
       break;

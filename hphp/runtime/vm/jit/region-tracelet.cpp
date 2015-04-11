@@ -160,7 +160,7 @@ RegionDescPtr RegionFormer::go() {
 
   for (auto const& lt : m_ctx.liveTypes) {
     auto t = lt.type;
-    if (t <= Type::Cls) {
+    if (t <= TCls) {
       irgen::assertTypeLocation(m_irgs, lt.location, t);
       m_curBlock->addPredicted(m_sk, RegionDesc::TypePred{lt.location, t});
     } else {
@@ -508,7 +508,7 @@ bool RegionFormer::tryInline(uint32_t& instrSize) {
   for (unsigned i = numArgs; i < numParams; ++i) {
     // These locals will be populated by DV init funclets but they'll start
     // out as Uninit.
-    ctx.liveTypes.push_back({RegionDesc::Location::Local{i}, Type::Uninit});
+    ctx.liveTypes.push_back({RegionDesc::Location::Local{i}, TUninit});
   }
 
   FTRACE(1, "selectTracelet analyzing callee {} with context:\n{}",
@@ -594,7 +594,7 @@ bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
   auto& rtt = m_inst.inputs[i]->rtt;
   if (ii.dontGuard) return true;
 
-  if (m_profiling && rtt <= Type::BoxedCell &&
+  if (m_profiling && rtt <= TBoxedCell &&
       (m_region->blocks().size() > 1 || !m_region->entry()->empty())) {
     // We don't want side exits when profiling, so only allow instructions that
     // consume refs at the beginning of the region.
@@ -608,7 +608,7 @@ bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
     return false;
   }
 
-  if (!(rtt <= Type::BoxedCell) ||
+  if (!(rtt <= TBoxedCell) ||
       m_inst.ignoreInnerType ||
       ii.dontGuardInner) {
     return true;
@@ -687,11 +687,11 @@ void RegionFormer::recordDependencies() {
 
   auto guardMap = std::map<RegionDesc::Location,Type>{};
   visitGuards(unit, [&](const RegionDesc::Location& loc, Type type) {
-    if (type <= Type::Cls) return;
+    if (type <= TCls) return;
     auto inret = guardMap.insert(std::make_pair(loc, type));
     if (inret.second) return;
     auto& oldTy = inret.first->second;
-    if (oldTy == Type::Gen) {
+    if (oldTy == TGen) {
       // This is the case that we see an inner type prediction for a GuardLoc
       // that got relaxed to Gen.
       return;
@@ -700,7 +700,7 @@ void RegionFormer::recordDependencies() {
   });
 
   for (auto& kv : guardMap) {
-    if (kv.second == Type::Gen) {
+    if (kv.second == TGen) {
       // Guard was relaxed to Gen---don't record it.
       continue;
     }

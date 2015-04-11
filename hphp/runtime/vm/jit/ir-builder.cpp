@@ -257,7 +257,7 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
 
 SSATmp* IRBuilder::preOptimizeHintLocInner(IRInstruction* inst) {
   auto const locId = inst->extra<HintLocInner>()->locId;
-  if (!(localType(locId, DataTypeGeneric) <= Type::BoxedCell) ||
+  if (!(localType(locId, DataTypeGeneric) <= TBoxedCell) ||
       predictedInnerType(locId).box() <= inst->typeParam()) {
     inst->convertToNop();
     return nullptr;
@@ -366,7 +366,7 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
   if (func->isStatic()) {
     if (fpInst->is(DefInlineFP)) {
       auto const ctx = fpInst->extra<DefInlineFP>()->ctx;
-      if (ctx->hasConstVal(Type::Cls)) {
+      if (ctx->hasConstVal(TCls)) {
         inst->convertToNop();
         return m_unit.cns(ConstCctx::cctx(ctx->clsVal()));
       }
@@ -385,7 +385,7 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
     // check that we haven't nuked the SSATmp
     if (!m_state.frameMaySpanCall()) {
       auto const ctx = fpInst->extra<DefInlineFP>()->ctx;
-      if (ctx->isA(Type::Obj)) return ctx;
+      if (ctx->isA(TObj)) return ctx;
     }
   }
   return nullptr;
@@ -415,7 +415,7 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   // The types may not be compatible in the presence of unreachable code.
   // Unreachable code elimination will take care of it later.
   if (!type.maybe(inst->typeParam())) {
-    inst->setTypeParam(Type::Bottom);
+    inst->setTypeParam(TBottom);
     return nullptr;
   }
   // If FrameStateMgr's type isn't as good as the type param, we're missing
@@ -425,7 +425,7 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
 
   if (typeMightRelax()) return nullptr;
   if (inst->typeParam().hasConstVal() ||
-      inst->typeParam().subtypeOfAny(Type::Uninit, Type::InitNull)) {
+      inst->typeParam().subtypeOfAny(TUninit, TInitNull)) {
     return m_unit.cns(inst->typeParam());
   }
 
@@ -445,21 +445,21 @@ SSATmp* IRBuilder::preOptimizeStLoc(IRInstruction* inst) {
    * There's no need to store the type if it's going to be the same
    * KindOfFoo.  We'll still have to store string types because we
    * aren't specific about storing KindOfStaticString
-   * vs. KindOfString, and a Type::Null might mean KindOfUninit or
+   * vs. KindOfString, and a TNull might mean KindOfUninit or
    * KindOfNull.
    */
-  auto const bothBoxed = curType <= Type::BoxedCell &&
-                         newType <= Type::BoxedCell;
+  auto const bothBoxed = curType <= TBoxedCell &&
+                         newType <= TBoxedCell;
   auto const sameUnboxed = [&] {
-    auto avoidable = { Type::Uninit,
-                       Type::InitNull,
-                       Type::Bool,
-                       Type::Int,
-                       Type::Dbl,
+    auto avoidable = { TUninit,
+                       TInitNull,
+                       TBool,
+                       TInt,
+                       TDbl,
                        // No strings.
-                       Type::Arr,
-                       Type::Obj,
-                       Type::Res };
+                       TArr,
+                       TObj,
+                       TRes };
     for (auto t : avoidable) {
       if (curType <= t && newType <= t) return true;
     }
@@ -482,7 +482,7 @@ SSATmp* IRBuilder::preOptimizeCastStk(IRInstruction* inst) {
     DataTypeGeneric
   );
   if (typeMightRelax(curVal)) return nullptr;
-  if (inst->typeParam() == Type::NullableObj && curType <= Type::Null) {
+  if (inst->typeParam() == TNullableObj && curType <= TNull) {
     // If we're casting Null to NullableObj, we still need to call
     // tvCastToNullableObjectInPlace. See comment there and t3879280 for
     // details.
@@ -527,7 +527,7 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
 
   if (typeMightRelax()) return nullptr;
   if (inst->typeParam().hasConstVal() ||
-      inst->typeParam().subtypeOfAny(Type::Uninit, Type::InitNull)) {
+      inst->typeParam().subtypeOfAny(TUninit, TInitNull)) {
     return m_unit.cns(inst->typeParam());
   }
 
@@ -903,13 +903,13 @@ Type IRBuilder::localType(uint32_t id, TypeConstraint tc) {
 
 Type IRBuilder::predictedInnerType(uint32_t id) {
   auto const ty = m_state.predictedLocalType(id);
-  assertx(ty <= Type::BoxedCell);
+  assertx(ty <= TBoxedCell);
   return ldRefReturn(ty.unbox());
 }
 
 Type IRBuilder::stackInnerTypePrediction(IRSPOffset offset) const {
   auto const ty = m_state.predictedStackType(offset);
-  assertx(ty <= Type::BoxedCell);
+  assertx(ty <= TBoxedCell);
   return ldRefReturn(ty.unbox());
 }
 

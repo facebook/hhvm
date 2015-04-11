@@ -42,7 +42,7 @@ struct ArraySpec {
   /*
    * Constructors.
    */
-  ArraySpec();
+  constexpr ArraySpec();
   explicit ArraySpec(ArrayData::ArrayKind kind);
   explicit ArraySpec(const RepoAuthType::Array* arrTy);
   ArraySpec(ArrayData::ArrayKind kind, const RepoAuthType::Array* arrTy);
@@ -142,7 +142,7 @@ struct ClassSpec {
   /*
    * Constructors.
    */
-  ClassSpec();
+  constexpr ClassSpec();
   ClassSpec(const Class* cls, SubTag);
   ClassSpec(const Class* cls, ExactTag);
 

@@ -684,7 +684,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       ITRACE(3, "producing refs for dests of {}\n", label);
       Indent _i;
       for (auto i = 0U, n = label.numDsts(); i < n; ++i) {
-        if (!label.dst(i)->type().maybe(Type::Counted)) continue;
+        if (!label.dst(i)->type().maybe(TCounted)) continue;
 
         auto refs = refsVec[i];
         if (refs == 0) continue;
@@ -693,7 +693,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
         Indent _i;
         m_block->forEachSrc(
           i, [&](IRInstruction* jmp, SSATmp* src) {
-            if (!src->type().maybe(Type::Counted)) return;
+            if (!src->type().maybe(TCounted)) return;
 
             auto it = find_if(states.begin(), states.end(),
                               [jmp](const IncomingState& s) {
@@ -939,7 +939,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       // We only consider an IncRef optimizable if it's not an IncRefCtx/TakeRef
       // and the value doesn't have an optimized count of 0. This prevents any
       // subsequent instructions from taking in a source with count 0.
-      if (src->type().maybe(Type::Counted)) {
+      if (src->type().maybe(TCounted)) {
         auto& valState = m_state.values[canonical(src)];
         if (valState.optCount() > 0 && m_inst->is(IncRef)) {
           auto const id = m_ids.before(m_inst);
@@ -955,7 +955,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       // TakeStk is used to indicate that we've logically popped a value off
       // the stack, in place of a LdStk.
       auto* src = m_inst->src(0);
-      if (src->type().maybe(Type::Counted)) {
+      if (src->type().maybe(TCounted)) {
         m_state.values[canonical(src)].fromLoad = true;
       }
     } else if (m_inst->is(Jmp)) {
@@ -1101,7 +1101,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     if (m_inst->is(DecRef, DecRefNZ)) {
       auto* src = m_inst->src(0);
 
-      if (!src->type().maybe(Type::Counted)) return;
+      if (!src->type().maybe(TCounted)) return;
       src = canonical(src);
 
       auto const& valState = m_state.values[src];
@@ -1112,7 +1112,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       }
     } else if (m_inst->is(SpillFrame)) {
       auto* this_ = m_inst->src(2);
-      if (this_->isA(Type::Obj)) {
+      if (this_->isA(TObj)) {
         m_state.frames.pushPreLive(Frame(canonical(this_), this_));
         // When spilling an Object to a pre-live ActRec, we can reliably track
         // the reference in the frame. This allows us to optimize away many
@@ -1178,7 +1178,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       Indent _i;
       auto src = m_inst->src(i);
 
-      if (src->isA(Type::StkPtr) && src->inst()->is(SpillFrame) &&
+      if (src->isA(TStkPtr) && src->inst()->is(SpillFrame) &&
           !m_inst->is(DefInlineFP,
                       Call,
                       CallArray,
@@ -1189,7 +1189,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
           // If the StkPtr being consumed points to a pre-live ActRec, observe
           // its $this pointer since many of our helper functions decref it.
           auto this_ = src->inst()->src(2);
-          if (this_->isA(Type::Obj)) {
+          if (this_->isA(TObj)) {
             auto const sinkPoint = SinkPoint(m_ids.before(m_inst), this_,
               false);
             this_ = canonical(this_);
@@ -1198,7 +1198,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
         }
       }
 
-      if (!src->type().maybe(Type::Counted)) continue;
+      if (!src->type().maybe(TCounted)) continue;
 
       auto& valState = m_state.values[canonical(src)];
       const SinkPoint sp(m_ids.before(m_inst), src, false);
@@ -1286,7 +1286,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
    * incoming IR, so abort with a (hopefully) helpful error. */
   void consumeValueImpl(SSATmp* value, bool eraseOnly) {
     assertx(value);
-    if (!value->type().maybe(Type::Counted)) return;
+    if (!value->type().maybe(TCounted)) return;
 
     auto* root = canonical(value);
     consumeValue(root, m_state.values[root],
@@ -1298,7 +1298,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
   // Just like consumeValue, except the sync point is after the current
   // instruction.
   void consumeValueAfter(SSATmp* value) {
-    if (!value->type().maybe(Type::Counted)) return;
+    if (!value->type().maybe(TCounted)) return;
     auto const root = canonical(value);
     consumeValue(root, m_state.values[root],
                  SinkPoint(m_ids.after(m_inst), value, false));
@@ -1418,7 +1418,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
   void resolveValueImpl(SSATmp* const origVal, bool eraseOnly) {
     assertx(origVal);
 
-    if (!origVal->type().maybe(Type::Counted)) return;
+    if (!origVal->type().maybe(TCounted)) return;
     auto* value = canonical(origVal);
 
     ITRACE(3, "resolving value {}\n", *value->inst());
@@ -1447,8 +1447,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
 
   // Helper for refineLocalValues.
   void refineLocalValue(SSATmp* oldVal, SSATmp* newVal) {
-    if ( oldVal->type().maybe(Type::Counted) &&
-        !newVal->type().maybe(Type::Counted)) {
+    if ( oldVal->type().maybe(TCounted) &&
+        !newVal->type().maybe(TCounted)) {
       assertx(newVal->inst()->is(CheckType, AssertType));
       assertx(newVal->inst()->src(0) == oldVal);
       // Similar to what we do when processing the CheckType directly, we
@@ -1493,7 +1493,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       assertx(m_inst->numDsts() == 1);
       auto* dst = m_inst->dst();
       auto* src = m_inst->src(0);
-      if (dst->type().maybe(Type::Counted)) {
+      if (dst->type().maybe(TCounted)) {
         replaceValue(src, dst);
       }
 
@@ -1506,8 +1506,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
         // the floor. This will result in any IncRefs of this value being sunk
         // to the CheckType's taken branch, and erased completely from the path
         // falling through the CheckType.
-        if (!dst->type().maybe(Type::Counted) &&
-             src->type().maybe(Type::Counted)) {
+        if (!dst->type().maybe(TCounted) &&
+             src->type().maybe(TCounted)) {
           auto* src = canonical(dst);
           auto& valState = m_state.values[src];
 
@@ -1516,8 +1516,8 @@ struct SinkPointAnalyzer : private LocalStateHook {
                  *src, show(valState), valState.optDelta());
           if (valState.realCount) --valState.realCount;
           while (valState.optDelta()) valState.popRef();
-        } else if ( dst->type().maybe(Type::Counted) &&
-                   !src->type().maybe(Type::Counted)) {
+        } else if ( dst->type().maybe(TCounted) &&
+                   !src->type().maybe(TCounted)) {
           // Going from notCounted to maybeCounted. This sounds silly, but it's
           // possible so we have to handle it "correctly". Treat it like a
           // load instruction.
@@ -1533,7 +1533,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
     for (uint32_t i = 0; i < m_inst->numDsts(); ++i) {
       auto dst = m_inst->dst(i);
 
-      if (!dst->type().maybe(Type::Counted)) continue;
+      if (!dst->type().maybe(TCounted)) continue;
 
       if (m_inst->producesReference(i) || isRawLoad(m_inst)) {
         assertx(!m_state.values.count(dst));
@@ -1567,7 +1567,7 @@ struct SinkPointAnalyzer : private LocalStateHook {
       consumeLocal(id);
     }
 
-    if (newVal && newVal->type().maybe(Type::Counted)) {
+    if (newVal && newVal->type().maybe(TCounted)) {
       ITRACE(3, "{} is now in a local, adding tracked reference\n",
              *newVal);
       Indent _i;
@@ -1657,7 +1657,7 @@ void updateCounts(Block* b, TmpDelta& delta) {
   for (auto& inst: *b) {
     if (inst.is(IncRef, DecRef, DecRefNZ)) {
       SSATmp* src = canonical(inst.src(0));
-      if (!src->type().maybe(Type::Counted)) continue;
+      if (!src->type().maybe(TCounted)) continue;
 
       if (inst.is(IncRef)) {
         delta[src]++;

@@ -190,7 +190,7 @@ Type predictedTypeFromLocation(IRGS& env, const Location& loc) {
           offsetFromIRSP(env, i),
           DataTypeGeneric
         );
-        if (stackTy <= Type::BoxedCell) {
+        if (stackTy <= TBoxedCell) {
           return env.irb->stackInnerTypePrediction(
             offsetFromIRSP(env, i)).box();
         }
@@ -205,11 +205,11 @@ Type predictedTypeFromLocation(IRGS& env, const Location& loc) {
       return Type::cns(loc.offset);
     case Location::This:
       // Don't specialize $this for cloned closures which may have been re-bound
-      if (curFunc(env)->hasForeignThis()) return Type::Obj;
+      if (curFunc(env)->hasForeignThis()) return TObj;
       if (auto const cls = curFunc(env)->cls()) {
         return Type::SubObj(cls);
       }
-      return Type::Obj;
+      return TObj;
 
     case Location::Iter:
     case Location::Invalid:

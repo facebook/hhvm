@@ -395,7 +395,7 @@ let variable env =
       Pos.make env.file env.lb, Lexing.lexeme env.lb
   | _ ->
       error_expect env "variable";
-      Pos.make env.file env.lb, "$_"
+      Pos.make env.file env.lb, "$_" (* SpecialIdents.placeholder *)
 
 (* &$variable *)
 let ref_variable env =
@@ -941,8 +941,9 @@ and class_param_name env =
 
 and class_parameter_constraint env =
   match L.token env.file env.lb with
-  | Tword when Lexing.lexeme env.lb = "as" ->
-      Some (hint env)
+  | Tword when Lexing.lexeme env.lb = "as" -> Some (Constraint_as, hint env)
+  | Tword when Lexing.lexeme env.lb = "super" ->
+      Some (Constraint_super, hint env)
   | _ -> L.back env.lb; None
 
 (*****************************************************************************)
@@ -1780,7 +1781,7 @@ and ignore_body env =
       ignore (expr_heredoc env);
       ignore_body env
   | Tword when (Lexing.lexeme env.lb) = "function" && peek env = Tlp ->
-  (* this covers the async case as well *)
+      (* this covers the async case as well *)
       let pos = Pos.make env.file env.lb in
       ignore (expr_anon_fun env pos ~sync:FSync);
       ignore_body env

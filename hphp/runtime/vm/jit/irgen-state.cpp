@@ -100,7 +100,7 @@ std::string show(const IRGS& irgs) {
   for (auto i = 0; i < irgs.irb->evalStack().size(); ++i) {
     while (checkFpi());
     auto const value = irgen::top(const_cast<IRGS&>(irgs),
-      Type::StkElem, BCSPOffset{i}, DataTypeGeneric);
+      TStkElem, BCSPOffset{i}, DataTypeGeneric);
     elem(value->inst()->toString());
   }
 
@@ -122,7 +122,7 @@ std::string show(const IRGS& irgs) {
     );
 
     std::ostringstream elemStr;
-    if (stkTy == Type::StkElem) {
+    if (stkTy == TStkElem) {
       elem("unknown");
     } else if (stkVal) {
       elem(stkVal->inst()->toString());
@@ -143,9 +143,9 @@ std::string show(const IRGS& irgs) {
                                     : irgs.irb->localType(i, DataTypeGeneric);
     auto str = localValue ? localValue->inst()->toString()
                           : localTy.toString();
-    if (localTy <= Type::BoxedCell) {
+    if (localTy <= TBoxedCell) {
       auto const pred = irgs.irb->predictedInnerType(i);
-      if (pred != Type::Bottom) {
+      if (pred != TBottom) {
         str += folly::sformat(" (predict inner: {})", pred.toString());
       }
     }

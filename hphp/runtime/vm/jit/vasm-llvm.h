@@ -37,11 +37,29 @@ struct Vunit;
  * Thrown when the LLVM backend encounters something it doesn't support.
  */
 struct FailedLLVMCodeGen : public std::runtime_error {
- public:
   template<typename... Args>
   explicit FailedLLVMCodeGen(Args&&... args)
     : std::runtime_error(folly::sformat(std::forward<Args>(args)...))
   {}
+};
+
+/*
+ * Thrown when the llvm_compare trace module is active, to allow comparing LLVM
+ * and vasm output.
+ */
+struct CompareLLVMCodeGen : FailedLLVMCodeGen {
+  explicit CompareLLVMCodeGen(jit::vector<std::string>&& disasm,
+                              std::string&& llvm,
+                              size_t main_size)
+    : FailedLLVMCodeGen("Discarding LLVM code for comparison")
+    , disasm(std::move(disasm))
+    , llvm(std::move(llvm))
+    , main_size(main_size)
+  {}
+
+  jit::vector<std::string> disasm;
+  std::string llvm;
+  size_t main_size;
 };
 
 /*

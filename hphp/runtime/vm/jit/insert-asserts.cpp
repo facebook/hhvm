@@ -52,7 +52,7 @@ void insertAfter(IRInstruction* definer, IRInstruction* inst) {
 void insertRefCountAsserts(IRUnit& unit, IRInstruction& inst) {
   for (auto& dst : inst.dsts()) {
     auto const t = dst.type();
-    if (t <= Type::Gen && t.maybe(Type::Counted)) {
+    if (t <= TGen && t.maybe(TCounted)) {
       insertAfter(&inst, unit.gen(DbgAssertRefCount, inst.marker(), &dst));
     }
   }
@@ -65,7 +65,7 @@ void insertStkAssert(IRUnit& unit,
   auto const addr = unit.gen(
     LdStkAddr,
     where->marker(),
-    Type::PtrToStkGen,
+    TPtrToStkGen,
     IRSPOffsetData { off },
     sp
   );
@@ -83,7 +83,7 @@ void visit(IRUnit& unit, Block* block) {
 
     switch (inst.op()) {
     case StStk:
-      if (inst.src(1)->type() <= Type::Gen) {
+      if (inst.src(1)->type() <= TGen) {
         insertStkAssert(unit, &inst, inst.src(0), inst.extra<StStk>()->offset);
       }
       break;

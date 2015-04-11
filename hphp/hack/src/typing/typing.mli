@@ -16,10 +16,10 @@ val debug_print_last_pos:
   'a -> unit
 
 val fun_decl:
-  Nast.fun_ -> unit
+  TypecheckerOptions.t -> Nast.fun_ -> unit
 
 val gconst_decl:
-  Nast.gconst -> unit
+  TypecheckerOptions.t -> Nast.gconst -> unit
 
 val fun_def:
   Typing_env.env -> 'a -> Nast.fun_ -> unit
@@ -47,7 +47,7 @@ val get_implements:
   with_checks:bool ->
   this:Typing_defs.ty ->
   Typing_env.env ->
-  Nast.hint ->
+  Typing_defs.ty ->
   Typing_env.env * (Typing_defs.ty SMap.t * Typing_defs.ty SMap.t)
 
 val get_self_from_c: Typing_env.env -> Nast.class_ -> Typing_defs.ty

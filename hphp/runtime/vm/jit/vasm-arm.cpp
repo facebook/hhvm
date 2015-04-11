@@ -544,7 +544,7 @@ void Vgen::emit(tbcc& i) {
 void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
   auto svcreq = inst.svcreq_; // copy it
   auto origin = inst.origin;
-  auto& argv = unit.tuples[svcreq.args];
+  auto& argv = unit.tuples[svcreq.extraArgs];
   unit.blocks[b].code.pop_back(); // delete the svcreq instruction
   Vout v(unit, b, origin);
 
@@ -555,7 +555,7 @@ void lower_svcreq(Vunit& unit, Vlabel b, Vinstr& inst) {
     arg_dests.push_back(d);
     arg_regs |= d;
   }
-  v << copyargs{svcreq.args, v.makeTuple(arg_dests)};
+  v << copyargs{svcreq.extraArgs, v.makeTuple(arg_dests)};
   // Save VM regs
   PhysReg vmfp{rVmFp}, vmsp{rVmSp}, sp{vixl::sp}, rdsp{rVmTl};
   v << store{vmfp, rdsp[rds::kVmfpOff]};

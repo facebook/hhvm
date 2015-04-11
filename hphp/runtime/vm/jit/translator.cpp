@@ -82,14 +82,14 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
                            unsigned mInd, unsigned iInd) {
   if (mInd == 0) {
     auto const baseIndex = mii.valCount();
-    baseClass = ni.inputs[baseIndex]->rtt < Type::Obj
+    baseClass = ni.inputs[baseIndex]->rtt < TObj
       ? ni.inputs[baseIndex]->rtt.clsSpec().cls()
       : nullptr;
   }
   if (!baseClass) return PropInfo();
 
   auto keyType = ni.inputs[iInd]->rtt;
-  if (!keyType.hasConstVal(Type::Str)) return PropInfo();
+  if (!keyType.hasConstVal(TStr)) return PropInfo();
   auto const name = keyType.strVal();
 
   // If we are not in repo-authoriative mode, we need to check that
@@ -180,7 +180,7 @@ static const struct {
   { OpArray,       {None,             Stack1,       OutArrayImm,       1 }},
   { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
   { OpNewMixedArray,  {None,          Stack1,       OutArray,          1 }},
-  { OpNewLikeArrayL,  {None,          Stack1,       OutArray,          1 }},
+  { OpNewLikeArrayL,  {Local,         Stack1,       OutArray,          1 }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpNewStructArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutArray,         -2 }},
@@ -275,8 +275,8 @@ static const struct {
   { OpCGetL,       {Local,            Stack1,       OutCInputL,        1 }},
   { OpCGetL2,      {Stack1|Local,     StackIns1,    OutCInputL,        1 }},
   { OpCGetL3,      {StackTop2|Local,  StackIns2,    OutCInputL,        1 }},
-  // In OpCUGetL we rely on OutCInputL returning Type::Cell (which covers Uninit
-  // values) instead of Type::InitCell.
+  // In OpCUGetL we rely on OutCInputL returning TCell (which covers Uninit
+  // values) instead of TInitCell.
   { OpCUGetL,      {Local,            Stack1,       OutCInputL,        1 }},
   { OpPushL,       {Local,            Stack1|Local, OutCInputL,        1 }},
   { OpCGetN,       {Stack1,           Stack1,       OutUnknown,        0 }},
@@ -1329,12 +1329,12 @@ static Type flavorToType(FlavorDesc f) {
   switch (f) {
     case NOV: not_reached();
 
-    case CV: return Type::Cell;  // TODO(#3029148) this could be InitCell
-    case CUV: return Type::Cell;
-    case UV: return Type::Uninit;
-    case VV: return Type::BoxedInitCell;
-    case AV: return Type::Cls;
-    case RV: case FV: case CVV: case CVUV: return Type::Gen;
+    case CV: return TCell;  // TODO(#3029148) this could be InitCell
+    case CUV: return TCell;
+    case UV: return TUninit;
+    case VV: return TBoxedInitCell;
+    case AV: return TCls;
+    case RV: case FV: case CVV: case CVUV: return TGen;
   }
   not_reached();
 }
@@ -1350,7 +1350,7 @@ void translateInstr(IRGS& irgs, const NormalizedInstruction& ni) {
   auto pc = reinterpret_cast<const Op*>(ni.pc());
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
     auto const type = flavorToType(instrInputFlavor(pc, i));
-    if (type != Type::Gen) {
+    if (type != TGen) {
       // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
       // is a little unsure of itself.
       irgen::assertTypeStack(irgs, BCSPOffset{i}, type);

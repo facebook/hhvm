@@ -1,0 +1,6 @@
+File "covariance_decl_conflict.php", line 3, characters 12-12:
+Illegal usage of a covariant type parameter (Typing[4120])
+File "covariance_decl_conflict.php", line 4, characters 12-12:
+This is where the parameter was declared as covariant (+)
+File "covariance_decl_conflict.php", line 3, characters 12-12:
+The type parameter was declared as contravariant (-)

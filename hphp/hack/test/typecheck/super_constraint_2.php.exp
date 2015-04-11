@@ -1,0 +1,10 @@
+File "super_constraint_2.php", line 22, characters 22-23:
+Some type constraint(s) here are violated (Typing[4110])
+File "super_constraint_2.php", line 10, characters 52-53:
+'Tu' is a constrained type
+File "super_constraint_2.php", line 21, characters 33-45:
+This is an object of type FooDerived123
+File "super_constraint_2.php", line 21, characters 21-26:
+It is incompatible with an object of type Foo123
+File "super_constraint_2.php", line 10, characters 32-32:
+  via this generic T

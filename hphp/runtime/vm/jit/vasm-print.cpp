@@ -192,7 +192,7 @@ struct FormatVisitor {
   }
 
   void print(RegSet regs) {
-    regs.forEach([&](Vreg r) { print(r); });
+    str << sep() << show(regs);
   }
 
   void print(Vreg r) {

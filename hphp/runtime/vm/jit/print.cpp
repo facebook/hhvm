@@ -313,7 +313,7 @@ void print(std::ostream& os, const Block* block, AreaIndex area,
       // There can be asm ranges in areas other than the one this blocks claims
       // to be in so we have to iterate all the areas to be sure to get
       // everything.
-      for (auto i = 0; i < static_cast<int>(AreaIndex::Max); ++i) {
+      for (auto i = 0; i < kNumAreas; ++i) {
         AreaIndex currentArea = static_cast<AreaIndex>(i);
         TcaRange instRange = asmInfo->instRangesForArea(currentArea)[inst];
         if (!instRange.empty()) {
@@ -322,8 +322,8 @@ void print(std::ostream& os, const Block* block, AreaIndex area,
           disasmRange(os, instRange.begin(), instRange.end());
           os << '\n';
           if (currentArea == area) {
-            assertx(instRange.end() >= blockRange.start());
-            assertx(instRange.end() <= blockRange.end());
+            assert_no_log(instRange.end() >= blockRange.start());
+            assert_no_log(instRange.end() <= blockRange.end());
             blockRange = TcaRange(instRange.end(), blockRange.end());
           }
         }

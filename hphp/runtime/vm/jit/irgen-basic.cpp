@@ -29,7 +29,7 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 void implAGet(IRGS& env, SSATmp* classSrc) {
-  if (classSrc->type() <= Type::Str) {
+  if (classSrc->type() <= TStr) {
     push(env, ldCls(env, classSrc));
     return;
   }
@@ -56,12 +56,12 @@ void checkThis(IRGS& env, SSATmp* ctx) {
 
 void emitAGetC(IRGS& env) {
   auto const name = topC(env);
-  if (name->type().subtypeOfAny(Type::Obj, Type::Str)) {
+  if (name->type().subtypeOfAny(TObj, TStr)) {
     popC(env);
     implAGet(env, name);
     gen(env, DecRef, name);
   } else {
-    interpOne(env, Type::Cls, 1);
+    interpOne(env, TCls, 1);
   }
 }
 
@@ -69,7 +69,7 @@ void emitAGetL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const src = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
-  if (src->type().subtypeOfAny(Type::Obj, Type::Str)) {
+  if (src->type().subtypeOfAny(TObj, TStr)) {
     implAGet(env, src);
   } else {
     PUNT(AGetL);
@@ -92,16 +92,16 @@ void emitCUGetL(IRGS& env, int32_t id) {
 }
 
 void emitPushL(IRGS& env, int32_t id) {
-  assertTypeLocal(env, id, Type::InitCell);  // bytecode invariant
+  assertTypeLocal(env, id, TInitCell);  // bytecode invariant
   auto* locVal = ldLoc(env, id, makeExit(env), DataTypeGeneric);
   push(env, locVal);
-  stLocRaw(env, id, fp(env), cns(env, Type::Uninit));
+  stLocRaw(env, id, fp(env), cns(env, TUninit));
 }
 
 void emitCGetL2(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const oldTop = pop(env, Type::StkElem);
+  auto const oldTop = pop(env, TStkElem);
   auto const val = ldLocInnerWarn(
     env,
     id,
@@ -116,11 +116,11 @@ void emitCGetL2(IRGS& env, int32_t id) {
 void emitVGetL(IRGS& env, int32_t id) {
   auto value = ldLoc(env, id, makeExit(env), DataTypeCountnessInit);
   auto const t = value->type();
-  always_assert(t <= Type::Cell || t <= Type::BoxedCell);
+  always_assert(t <= TCell || t <= TBoxedCell);
 
-  if (t <= Type::Cell) {
-    if (value->isA(Type::Uninit)) {
-      value = cns(env, Type::InitNull);
+  if (t <= TCell) {
+    if (value->isA(TUninit)) {
+      value = cns(env, TInitNull);
     }
     value = gen(env, Box, value);
     stLocRaw(env, id, fp(env), value);
@@ -130,13 +130,13 @@ void emitVGetL(IRGS& env, int32_t id) {
 
 void emitUnsetL(IRGS& env, int32_t id) {
   auto const prev = ldLoc(env, id, makeExit(env), DataTypeCountness);
-  stLocRaw(env, id, fp(env), cns(env, Type::Uninit));
+  stLocRaw(env, id, fp(env), cns(env, TUninit));
   gen(env, DecRef, prev);
 }
 
 void emitBindL(IRGS& env, int32_t id) {
   if (curFunc(env)->isPseudoMain()) {
-    interpOne(env, Type::BoxedInitCell, 1);
+    interpOne(env, TBoxedInitCell, 1);
     return;
   }
 
@@ -179,22 +179,22 @@ void emitInitThisLoc(IRGS& env, int32_t id) {
 
 void emitPrint(IRGS& env) {
   auto const type = topC(env)->type();
-  if (!type.subtypeOfAny(Type::Int, Type::Bool, Type::Null, Type::Str)) {
-    interpOne(env, Type::Int, 1);
+  if (!type.subtypeOfAny(TInt, TBool, TNull, TStr)) {
+    interpOne(env, TInt, 1);
     return;
   }
 
   auto const cell = popC(env);
 
   Opcode op;
-  if (type <= Type::Str) {
+  if (type <= TStr) {
     op = PrintStr;
-  } else if (type <= Type::Int) {
+  } else if (type <= TInt) {
     op = PrintInt;
-  } else if (type <= Type::Bool) {
+  } else if (type <= TBool) {
     op = PrintBool;
   } else {
-    assertx(type <= Type::Null);
+    assertx(type <= TNull);
     op = Nop;
   }
   // the print helpers decref their arg, so don't decref pop'ed value
@@ -226,7 +226,7 @@ void emitCheckThis(IRGS& env) {
 
 void emitBareThis(IRGS& env, BareThisOp subop) {
   if (!curClass(env)) {
-    interpOne(env, Type::InitNull, 0); // will raise notice and push null
+    interpOne(env, TInitNull, 0); // will raise notice and push null
     return;
   }
   auto const ctx = gen(env, LdCtx, fp(env));
@@ -239,7 +239,7 @@ void emitBareThis(IRGS& env, BareThisOp subop) {
 }
 
 void emitClone(IRGS& env) {
-  if (!topC(env)->isA(Type::Obj)) PUNT(Clone-NonObj);
+  if (!topC(env)->isA(TObj)) PUNT(Clone-NonObj);
   auto const obj        = popC(env);
   push(env, gen(env, Clone, obj));
   gen(env, DecRef, obj);
@@ -249,7 +249,7 @@ void emitLateBoundCls(IRGS& env) {
   auto const clss = curClass(env);
   if (!clss) {
     // no static context class, so this will raise an error
-    interpOne(env, Type::Cls, 0);
+    interpOne(env, TCls, 0);
     return;
   }
   auto const ctx = ldCtx(env);
@@ -259,7 +259,7 @@ void emitLateBoundCls(IRGS& env) {
 void emitSelf(IRGS& env) {
   auto const clss = curClass(env);
   if (clss == nullptr) {
-    interpOne(env, Type::Cls, 0);
+    interpOne(env, TCls, 0);
   } else {
     push(env, cns(env, clss));
   }
@@ -268,7 +268,7 @@ void emitSelf(IRGS& env) {
 void emitParent(IRGS& env) {
   auto const clss = curClass(env);
   if (clss == nullptr || clss->parent() == nullptr) {
-    interpOne(env, Type::Cls, 0);
+    interpOne(env, TCls, 0);
   } else {
     push(env, cns(env, clss->parent()));
   }
@@ -285,13 +285,13 @@ void emitCastArray(IRGS& env) {
   push(
     env,
     [&] {
-      if (src->isA(Type::Arr))  return src;
-      if (src->isA(Type::Null)) return cns(env, staticEmptyArray());
-      if (src->isA(Type::Bool)) return gen(env, ConvBoolToArr, src);
-      if (src->isA(Type::Dbl))  return gen(env, ConvDblToArr, src);
-      if (src->isA(Type::Int))  return gen(env, ConvIntToArr, src);
-      if (src->isA(Type::Str))  return gen(env, ConvStrToArr, src);
-      if (src->isA(Type::Obj))  return gen(env, ConvObjToArr, src);
+      if (src->isA(TArr))  return src;
+      if (src->isA(TNull)) return cns(env, staticEmptyArray());
+      if (src->isA(TBool)) return gen(env, ConvBoolToArr, src);
+      if (src->isA(TDbl))  return gen(env, ConvDblToArr, src);
+      if (src->isA(TInt))  return gen(env, ConvIntToArr, src);
+      if (src->isA(TStr))  return gen(env, ConvStrToArr, src);
+      if (src->isA(TObj))  return gen(env, ConvObjToArr, src);
       return gen(env, ConvCellToArr, src);
     }()
   );
@@ -334,11 +334,11 @@ void emitIncStat(IRGS& env, int32_t counter, int32_t value) {
 //////////////////////////////////////////////////////////////////////
 
 void emitPopA(IRGS& env) { popA(env); }
-void emitPopC(IRGS& env) { popDecRef(env, Type::Cell, DataTypeGeneric); }
+void emitPopC(IRGS& env) { popDecRef(env, TCell, DataTypeGeneric); }
 void emitPopV(IRGS& env) { popDecRef(env,
-                                    Type::BoxedInitCell,
+                                    TBoxedInitCell,
                                     DataTypeGeneric); }
-void emitPopR(IRGS& env) { popDecRef(env, Type::Gen, DataTypeGeneric); }
+void emitPopR(IRGS& env) { popDecRef(env, TGen, DataTypeGeneric); }
 
 void emitDir(IRGS& env)  { push(env, cns(env, curUnit(env)->dirpath())); }
 void emitFile(IRGS& env) { push(env, cns(env, curUnit(env)->filepath())); }
@@ -354,8 +354,8 @@ void emitDouble(IRGS& env, double val)          { push(env, cns(env, val)); }
 void emitTrue(IRGS& env)                        { push(env, cns(env, true)); }
 void emitFalse(IRGS& env)                       { push(env, cns(env, false)); }
 
-void emitNull(IRGS& env)       { push(env, cns(env, Type::InitNull)); }
-void emitNullUninit(IRGS& env) { push(env, cns(env, Type::Uninit)); }
+void emitNull(IRGS& env)       { push(env, cns(env, TInitNull)); }
+void emitNullUninit(IRGS& env) { push(env, cns(env, TUninit)); }
 
 //////////////////////////////////////////////////////////////////////
 

@@ -393,8 +393,8 @@ TCA funcBodyHelper(ActRec* ar, void* sp);
 int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 
 // Both emitIncStat()s push/pop flags but don't clobber any registers.
-extern void emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index,
-                        int n = 1, bool force = false);
+void emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index,
+                 int n = 1, bool force = false);
 
 inline void emitIncStat(CodeBlock& cb, Stats::StatCounter stat, int n = 1,
                         bool force = false) {

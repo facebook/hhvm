@@ -297,17 +297,11 @@ void emitFreeLocalsHelpers(UniqueStubs& uniqueStubs) {
   Label release;
   Label loopHead;
 
-  /*
-   * Note: the IR currently requires that we preserve r13 across calls to these
-   * free locals helpers.  These helpers assume the stack is balanced (rsp%16
-   * == 0) on entry, unlike normal ABI calls where the stack was balanced
-   * before the call, and now has the return address on the stack (rsp%16 ==
-   * 8).
-   */
-  auto const rIter     = r14;
-  auto const rFinished = r15;
-  auto const rType     = esi;
-  auto const rData     = rdi;
+  auto const rData     = argNumToRegName[0]; // not live coming in, but used
+                                             // for destructor calls
+  auto const rIter     = argNumToRegName[1]; // live coming in
+  auto const rFinished = rdx;
+  auto const rType     = rcx;
   int const tvSize     = sizeof(TypedValue);
 
   auto& cb = mcg->code.hot().available() > 512 ?
@@ -325,23 +319,28 @@ asm_label(a, release);
   });
   a.    ret    ();
 asm_label(a, doRelease);
-  a.    jmp    (lookupDestructor(a, PhysReg(rType)));
+  a.    push    (rIter);
+  a.    push    (rFinished);
+  a.    call    (lookupDestructor(a, PhysReg(rType)));
+  mcg->fixupMap().recordIndirectFixup(a.frontier(), 3);
+  a.    pop     (rFinished);
+  a.    pop     (rIter);
+  a.    ret     ();
 
-  moveToAlign(cb, kJmpTargetAlign);
-  uniqueStubs.freeManyLocalsHelper = a.frontier();
-  a.    lea    (rVmFp[-(jit::kNumFreeLocalsHelpers * sizeof(Cell))],
-                rFinished);
-
-  auto emitDecLocal = [&] {
+  auto emitDecLocal = [&]() {
     Label skipDecRef;
 
     emitLoadTVType(a, rIter[TVOFF(m_type)], rType);
     emitCmpTVType(a, KindOfRefCountThreshold, rType);
     a.  jle8   (skipDecRef);
     a.  call   (release);
-    mcg->fixupMap().recordIndirectFixup(a.frontier(), 0);
   asm_label(a, skipDecRef);
   };
+
+  moveToAlign(cb, kJmpTargetAlign);
+  uniqueStubs.freeManyLocalsHelper = a.frontier();
+  a.    lea    (rVmFp[-(jit::kNumFreeLocalsHelpers * sizeof(Cell))],
+                rFinished);
 
   // Loop for the first few locals, but unroll the final kNumFreeLocalsHelpers.
 asm_label(a, loopHead);
@@ -361,9 +360,10 @@ asm_label(a, loopHead);
   a.    ret    ();
 
   // Keep me small!
-  always_assert(a.frontier() - stubBegin <= 4 * kX64CacheLineSize);
+  always_assert(Stats::enabled() ||
+                (a.frontier() - stubBegin <= 4 * kX64CacheLineSize));
 
-  uniqueStubs.add("freeLocalsHelpers", uniqueStubs.freeManyLocalsHelper);
+  uniqueStubs.add("freeLocalsHelpers", stubBegin);
 }
 
 void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
@@ -425,23 +425,22 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   uniqueStubs.fcallArrayHelper = a.frontier();
 
   /*
-   * When translating FCallArray, we have a pre-live ActRec on the
-   * stack and an Array of the parameters.  This stub uses the
-   * interpreter functions to enter the ActRec, but those functions
-   * may also tell us not to run it.  We reach this stub using a call
-   * instruction from the TC.
+   * When translating FCallArray, we have a pre-live ActRec on the stack and an
+   * Array of the parameters.  This stub uses the interpreter functions to
+   * enter the ActRec, but those functions may also tell us not to run it.  We
+   * reach this stub using a call instruction from the TC.
    *
-   * In the case we're told to run it, we pop the return IP from the
-   * call and put it in the pre-live ActRec, link it as the frame
-   * pointer, and then jump directly to the prologue for the function
-   * being called.  This is done to keep the return stack buffer
-   * balanced with the call to this stub.  If we're told not to
-   * (e.g. the call_user_func_array was intercepted), we just return
-   * to our caller in the TC after re-loading the VM regs (the
+   * In the case we're told to run it, we pop the return IP from the call and
+   * put it in the pre-live ActRec, link it as the frame pointer, and then jump
+   * directly to the prologue for the function being called.  This is done to
+   * keep the return stack buffer balanced with the call to this stub.  If
+   * we're told not to (e.g. the call_user_func_array was intercepted), we just
+   * return to our caller in the TC after re-loading the VM regs (the
    * interpreter will have popped the pre-live ActRec for us).
    *
-   * NOTE: we're assuming we don't need to save registers, because we
-   * don't ever have live registers across php-level calls.
+   * NOTE: Our ABI for php-level calls only has two callee-saved registers:
+   * rVmFp and rVmTl, so we're allowed to use any other regs without saving
+   * them.
    */
 
   Label noCallee;
@@ -449,9 +448,7 @@ void emitFCallArrayHelper(UniqueStubs& uniqueStubs) {
   auto const rPCOff  = argNumToRegName[0];
   auto const rPCNext = argNumToRegName[1];
   auto const rBC     = r13;
-  auto const rEC     = r15;
 
-  emitGetGContext(a, rEC);
   a.    storeq (rVmFp, rVmTl[rds::kVmfpOff]);
   a.    storeq (rVmSp, rVmTl[rds::kVmspOff]);
 

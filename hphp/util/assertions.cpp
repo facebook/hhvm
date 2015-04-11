@@ -80,6 +80,20 @@ void assert_fail(const char* e, const char* file,
   std::abort();
 }
 
+void assert_fail_no_log(
+  const char* e,
+  const char* file,
+  unsigned int line,
+  const char* func,
+  const std::string& msg
+) {
+  auto const assertion = folly::sformat("{}:{}: {}: assertion `{}' failed.",
+    file, line, func, e);
+  fprintf(stderr, "\nAssertion failure: %s\n%s\n",
+    assertion.c_str(), msg.c_str());
+  std::abort();
+}
+
 void register_assert_fail_logger(AssertFailLogger l) {
   s_logger = l;
 }

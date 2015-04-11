@@ -31,6 +31,22 @@ int PhysReg::getNumSIMD() {
   return mcg->backEnd().abi().simd().size();
 }
 
+std::string show(RegSet regs) {
+  auto& backEnd = mcg->backEnd();
+  std::ostringstream out;
+  auto sep = "";
+
+  out << '{';
+  regs.forEach([&](PhysReg r) {
+    out << sep;
+    backEnd.streamPhysReg(out, r);
+    sep = ", ";
+  });
+  out << '}';
+
+  return out.str();
+}
+
 PhysRegSaverParity::PhysRegSaverParity(int parity, Vout& v,
                                        RegSet regs)
     : m_as(nullptr)

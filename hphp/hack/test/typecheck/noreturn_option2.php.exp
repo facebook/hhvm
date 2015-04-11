@@ -1,0 +1,2 @@
+File "noreturn_option2.php", line 12, characters 31-39:
+?noreturn is a nonsensical typehint; a function cannot both never return and return null. (Typing[4066])

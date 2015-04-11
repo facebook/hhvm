@@ -551,7 +551,7 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
 
 void RegionDesc::Block::addPredicted(SrcKey sk, TypePred pred) {
   FTRACE(2, "Block::addPredicted({}, {})\n", showShort(sk), show(pred));
-  assertx(pred.type <= Type::StkElem);
+  assertx(pred.type <= TStkElem);
   assertx(contains(sk));
   m_typePreds.insert(std::make_pair(sk, pred));
 }

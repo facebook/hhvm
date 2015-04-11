@@ -17,7 +17,13 @@ from hashes import hash_of
 # These are only designed to work for gcc-4.8.1.
 
 def atomic_get(atomic):
-    return atomic['_M_b']['_M_p']
+    inner = rawtype(atomic.type).template_argument(0)
+
+    if inner.code == gdb.TYPE_CODE_PTR:
+        return atomic['_M_b']['_M_p']
+    else:
+        return atomic['_M_i']
+
 
 
 def vector_at(vec, idx):
@@ -56,7 +62,12 @@ def unordered_map_at(umap, idx):
 # HHVM accessors.
 
 def atomic_vector_at(av, idx):
-    return atomic_get(rawptr(av['m_vals'])[idx])
+    size = av['m_size']
+
+    if idx < size:
+        return atomic_get(rawptr(av['m_vals'])[idx])
+    else:
+        return atomic_vector_at(atomic_get(av['m_next']), idx - size)
 
 
 def fixed_vector_at(fv, idx):

@@ -82,9 +82,14 @@ type env = {
   genv    : genv       ;
   todo    : tfun list  ;
   in_loop : bool       ;
+  (* when encountering Tunresolved in the supertype, do we allow it to grow?
+   * if false, this allows the opposite, i.e. Tunresolved can grow in the
+   * subtype. *)
+  grow_super : bool      ;
 }
 
 and genv = {
+  tcopt   : TypecheckerOptions.t;
   mode    : FileInfo.mode;
   return  : ty         ;
   parent  : ty         ;
@@ -171,7 +176,6 @@ let make_ft p params ret_ty =
   let arity = List.length params in
   {
     ft_pos      = p;
-    ft_unsafe   = false;
     ft_deprecated = None;
     ft_abstract = false;
     ft_arity    = Fstandard (arity, arity);
@@ -229,8 +233,9 @@ let rec debug stack env (r, ty) =
       o s;
       (match x with
       | None -> ()
-      | Some x -> o "<"; debug stack env x; o ">"
-      )
+      | Some (Ast.Constraint_as, x) -> o " as <"; debug stack env x; o ">"
+      | Some (Ast.Constraint_super, x) ->
+          o " super <"; debug stack env x; o ">")
   | Tvar x ->
       let env, x = get_var env x in
       if ISet.mem x stack
@@ -266,14 +271,16 @@ let empty_fake_members = {
 
 let empty_local = empty_fake_members, IMap.empty
 
-let empty file = {
+let empty tcopt file = {
   pos     = Pos.none;
   tenv    = IMap.empty;
   subst   = IMap.empty;
   lenv    = empty_local;
   todo    = [];
   in_loop = false;
+  grow_super = true;
   genv    = {
+    tcopt   = tcopt;
     mode    = FileInfo.Mstrict;
     return  = fresh_type();
     self_id = "";
@@ -414,6 +421,9 @@ let get_construct env class_ =
 let get_todo env =
   env.todo
 
+let grow_super env =
+  env.grow_super
+
 let get_return env =
   env.genv.return
 
@@ -498,6 +508,8 @@ let get_mode env = env.genv.mode
 
 let is_strict env = get_mode env = FileInfo.Mstrict
 let is_decl env = get_mode env = FileInfo.Mdecl
+
+let get_options env = env.genv.tcopt
 
 (*
 let debug_env env =

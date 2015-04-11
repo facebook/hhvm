@@ -173,7 +173,7 @@ let autocomplete_lvar_typing id env =
     (* Add $this if we're in a instance method *)
     let ty = Typing_env.get_self env in
     if not (Typing_env.is_static env) && (fst ty) <> Reason.Rnone
-    then add_result "$this" ty
+    then add_result Naming_special_names.SpecialIdents.this ty
   end
 
 let should_complete_class completion_type class_kind =
@@ -353,7 +353,9 @@ let get_results funs classes =
   let results = !autocomplete_results in
   let env = match !ac_env with
     | Some e -> e
-    | None -> Typing_env.empty Relative_path.default
+    | None ->
+      let tcopt = TypecheckerOptions.permissive in
+      Typing_env.empty tcopt Relative_path.default
   in
   let results = List.map begin fun x ->
     let desc_string = match x.desc with

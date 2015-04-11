@@ -126,7 +126,7 @@ struct Vasm {
   using AreaList = jit::vector<Area>;
 
   Vasm() {
-    m_areas.reserve(size_t(AreaIndex::Max));
+    m_areas.reserve(kNumAreas);
   }
 
   /*

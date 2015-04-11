@@ -51,7 +51,7 @@ ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
     m_kind = Kind::Reg;
     // zero extend any boolean value that we pass to the helper in case
     // the helper expects it (e.g., as TypedValue)
-    if (tmp->isA(Type::Bool)) m_zeroExtend = true;
+    if (tmp->isA(TBool)) m_zeroExtend = true;
     return;
   }
   if (tmp->numWords() > 1) {

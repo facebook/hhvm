@@ -53,6 +53,7 @@ bool isBlockEnd(const Vinstr& inst) {
     // terminal
     case Vinstr::ud2:
     case Vinstr::unwind:
+    case Vinstr::vcallstub:
     case Vinstr::vinvoke:
     case Vinstr::ret:
     case Vinstr::vretm:

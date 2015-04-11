@@ -611,7 +611,7 @@ bool findWeakActRecUses(const BlockList& blocks,
   bool killedFrames = false;
 
   auto const incWeak = [&] (const IRInstruction* inst, const SSATmp* src) {
-    assertx(src->isA(Type::FramePtr));
+    assertx(src->isA(TFramePtr));
     auto const frameInst = src->inst();
     if (frameInst->op() == DefInlineFP) {
       ITRACE(3, "weak use of {} from {}\n", *frameInst, *inst);

@@ -411,7 +411,6 @@ void Vgen::emit(bindjmp& i) {
 
 void Vgen::emit(callstub& i) {
   emit(call{i.target, i.args});
-  emit(syncpoint{i.fix});
 }
 
 void Vgen::emit(fallback& i) {
@@ -807,21 +806,21 @@ void vector_splice(V& out, size_t idx, size_t count, V& in) {
 // at the end of a block, so we can just keep appending to the same
 // block.
 void lower_svcreq(Vunit& unit, Vlabel b, const Vinstr& inst) {
-  assertx(unit.tuples[inst.svcreq_.args].size() < kNumServiceReqArgRegs);
+  assertx(unit.tuples[inst.svcreq_.extraArgs].size() < kNumServiceReqArgRegs);
   auto svcreq = inst.svcreq_; // copy it
   auto origin = inst.origin;
-  auto& argv = unit.tuples[svcreq.args];
+  auto& argv = unit.tuples[svcreq.extraArgs];
   unit.blocks[b].code.pop_back(); // delete the svcreq instruction
   Vout v(unit, b, origin);
 
-  RegSet arg_regs = kCrossTraceRegs;
+  RegSet arg_regs = svcreq.args;
   VregList arg_dests;
   for (int i = 0, n = argv.size(); i < n; ++i) {
     PhysReg d{serviceReqArgRegs[i]};
     arg_dests.push_back(d);
     arg_regs |= d;
   }
-  v << copyargs{svcreq.args, v.makeTuple(arg_dests)};
+  v << copyargs{svcreq.extraArgs, v.makeTuple(arg_dests)};
   if (svcreq.stub_block) {
     v << leap{rip[(int64_t)svcreq.stub_block], rAsm};
   } else {
@@ -1014,6 +1013,27 @@ void lowerVcall(Vunit& unit, Vlabel b, size_t iInst) {
   }
 }
 
+void lower_vcallstub(Vunit& unit, Vlabel b) {
+  auto& code = unit.blocks[b].code;
+  // vcallstub can only appear at the end of a block.
+  auto const inst = code.back().get<vcallstub>();
+  auto const origin = code.back().origin;
+
+  auto argRegs = inst.args;
+  auto const& srcs = unit.tuples[inst.extraArgs];
+  jit::vector<Vreg> dsts;
+  for (int i = 0; i < srcs.size(); ++i) {
+    dsts.emplace_back(argNumToRegName[i]);
+    argRegs |= argNumToRegName[i];
+  }
+
+  code.back() = copyargs{unit.makeTuple(srcs), unit.makeTuple(std::move(dsts))};
+  code.emplace_back(callstub{inst.target, argRegs});
+  code.back().origin = origin;
+  code.emplace_back(unwind{{inst.targets[0], inst.targets[1]}});
+  code.back().origin = origin;
+}
+
 /*
  * Lower a few abstractions to facilitate straightforward x64 codegen.
  */
@@ -1029,9 +1049,13 @@ void lowerForX64(Vunit& unit, const Abi& abi) {
 
   PostorderWalker{unit}.dfs([&](Vlabel ib) {
     assertx(!blocks[ib].code.empty());
-    if (blocks[ib].code.back().op == Vinstr::svcreq) {
+    auto& back = blocks[ib].code.back();
+    if (back.op == Vinstr::svcreq) {
       lower_svcreq(unit, Vlabel{ib}, blocks[ib].code.back());
+    } else if (back.op == Vinstr::vcallstub) {
+      lower_vcallstub(unit, Vlabel{ib});
     }
+
     for (size_t ii = 0; ii < blocks[ib].code.size(); ++ii) {
       auto& inst = blocks[ib].code[ii];
       switch (inst.op) {

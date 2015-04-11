@@ -1,0 +1,2 @@
+File "retonly_type_member.php", line 7, characters 17-24:
+The noreturn typehint can only be used to describe a function return type (Naming[2063])

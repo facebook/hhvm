@@ -46,7 +46,7 @@ struct StkPtrInfo {
  * number is not the actual difference between the two pointers.)
  */
 StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
-  assertx(sp->type() <= Type::StkPtr);
+  assertx(sp->type() <= TStkPtr);
 
   auto const inst = sp->inst();
   switch (inst->op()) {
@@ -109,7 +109,7 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
 }
 
 AStack canonicalize_stk(AStack stk) {
-  if (stk.base->type() <= Type::FramePtr) return stk;
+  if (stk.base->type() <= TFramePtr) return stk;
   auto const info = canonicalize_stkptr(stk.base);
   return AStack { info.fp, stk.offset + info.offset.offset, stk.size };
 }
@@ -258,8 +258,8 @@ bool AliasClass::checkInvariants() const {
   case STag::Prop:    break;
   case STag::ElemI:   break;
   case STag::Stack:
-    assertx(m_stack.base->type() <= Type::StkPtr ||
-           m_stack.base->type() <= Type::FramePtr);
+    assertx(m_stack.base->type() <= TStkPtr ||
+           m_stack.base->type() <= TFramePtr);
     assertx(m_stack.size != 0);  // use AEmpty if you want that
     assertx(m_stack.size > 0);
     break;
@@ -470,8 +470,8 @@ bool AliasClass::maybeData(AliasClass o) const {
    */
   case STag::Stack:
     if (m_stack.base != o.m_stack.base) {
-      return !(m_stack.base->type() <= Type::FramePtr &&
-               o.m_stack.base->type() <= Type::FramePtr);
+      return !(m_stack.base->type() <= TFramePtr &&
+               o.m_stack.base->type() <= TFramePtr);
     }
     {
       // True if there's a non-empty intersection of the two stack slot

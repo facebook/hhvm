@@ -392,6 +392,8 @@ inline RegSet operator|(RegSet regs, PhysReg r) {
   return regs.add(r);
 }
 
+std::string show(RegSet regs);
+
 static_assert(std::is_trivially_destructible<RegSet>::value,
               "RegSet must have a trivial destructor");
 

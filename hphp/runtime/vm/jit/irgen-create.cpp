@@ -170,7 +170,7 @@ void emitCreateCl(IRGS& env, int32_t numParams, const StringData* clsName) {
       StClosureArg,
       PropByteOffset(cls->declPropOffset(propId)),
       closure,
-      cns(env, Type::Uninit)
+      cns(env, TUninit)
     );
   }
 
@@ -203,7 +203,7 @@ void emitNewLikeArrayL(IRGS& env, int32_t id, int32_t capacity) {
   auto const ld = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
 
   SSATmp* arr;
-  if (ld->isA(Type::Arr)) {
+  if (ld->isA(TArr)) {
     arr = gen(env, NewLikeArray, ld, cns(env, capacity));
   } else {
     capacity = (capacity ? capacity : MixedArray::SmallSize);
@@ -280,12 +280,12 @@ void emitAddElemC(IRGS& env) {
   // we don't want to constrain it if we're just going to InterpOne.
   auto const kt = topC(env, BCSPOffset{1}, DataTypeGeneric)->type();
   Opcode op;
-  if (kt <= Type::Int) {
+  if (kt <= TInt) {
     op = AddElemIntKey;
-  } else if (kt <= Type::Str) {
+  } else if (kt <= TStr) {
     op = AddElemStrKey;
   } else {
-    interpOne(env, Type::Arr, 3);
+    interpOne(env, TArr, 3);
     return;
   }
 
@@ -300,8 +300,8 @@ void emitAddElemC(IRGS& env) {
 }
 
 void emitAddNewElemC(IRGS& env) {
-  if (!topC(env, BCSPOffset{1})->isA(Type::Arr)) {
-    return interpOne(env, Type::Arr, 2);
+  if (!topC(env, BCSPOffset{1})->isA(TArr)) {
+    return interpOne(env, TArr, 2);
   }
 
   auto const val = popC(env);
@@ -319,12 +319,12 @@ void emitNewCol(IRGS& env, int type, int size) {
 }
 
 void emitColAddElemC(IRGS& env) {
-  if (!topC(env, BCSPOffset{2})->isA(Type::Obj)) {
-    return interpOne(env, Type::Obj, 3);
+  if (!topC(env, BCSPOffset{2})->isA(TObj)) {
+    return interpOne(env, TObj, 3);
   }
   if (!topC(env, BCSPOffset{1}, DataTypeGeneric)->type().
-      subtypeOfAny(Type::Int, Type::Str)) {
-    interpOne(env, Type::Obj, 3);
+      subtypeOfAny(TInt, TStr)) {
+    interpOne(env, TObj, 3);
     return;
   }
 
@@ -336,8 +336,8 @@ void emitColAddElemC(IRGS& env) {
 }
 
 void emitColAddNewElemC(IRGS& env) {
-  if (!topC(env, BCSPOffset{1})->isA(Type::Obj)) {
-    return interpOne(env, Type::Obj, 2);
+  if (!topC(env, BCSPOffset{1})->isA(TObj)) {
+    return interpOne(env, TObj, 2);
   }
 
   auto const val = popC(env);
@@ -388,7 +388,7 @@ void emitStaticLoc(IRGS& env, int32_t locId, const StringData* name) {
 
   auto const box = curFunc(env)->isClosureBody() ?
     gen(env, ClosureStaticLocInit,
-             cns(env, name), fp(env), cns(env, Type::Uninit)) :
+             cns(env, name), fp(env), cns(env, TUninit)) :
     gen(env, LdStaticLocCached, StaticLocName { curFunc(env), name });
 
   auto const res = cond(
@@ -411,7 +411,7 @@ void emitStaticLoc(IRGS& env, int32_t locId, const StringData* name) {
        * generate a fallthrough trace here that is cold (the code that
        * initializes the static local).  TODO(#2894612).
        */
-      gen(env, StaticLocInitCached, box, cns(env, Type::InitNull));
+      gen(env, StaticLocInitCached, box, cns(env, TInitNull));
       return cns(env, false);
     });
   gen(env, IncRef, box);

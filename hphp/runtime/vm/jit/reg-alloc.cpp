@@ -113,7 +113,7 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
 //////////////////////////////////////////////////////////////////////
 
 PhysReg forceAlloc(const SSATmp& tmp) {
-  if (tmp.type() <= Type::Bottom) return InvalidReg;
+  if (tmp.type() <= TBottom) return InvalidReg;
 
   auto inst = tmp.inst();
   auto opc = inst->op();
@@ -126,7 +126,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
     not_reached();
   }();
 
-  if (forceStkPtrs && tmp.isA(Type::StkPtr)) {
+  if (forceStkPtrs && tmp.isA(TStkPtr)) {
     assert_flog(
       opc == DefSP ||
       opc == ReDefSP ||
@@ -145,7 +145,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
 
   // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
   // we have a pointer to an AR that is not in rVmFp.
-  if (opc != LdContActRec && opc != LdAFWHActRec && tmp.isA(Type::FramePtr)) {
+  if (opc != LdContActRec && opc != LdAFWHActRec && tmp.isA(TFramePtr)) {
     return mcg->backEnd().rVmFp();
   }
 
@@ -194,9 +194,9 @@ void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
     if (tmp->inst()->is(DefConst)) {
       auto const type = tmp->type();
       Vreg c;
-      if (type.subtypeOfAny(Type::Null, Type::Nullptr)) {
+      if (type.subtypeOfAny(TNull, TNullptr)) {
         c = vunit.makeConst(0);
-      } else if (type <= Type::Bool) {
+      } else if (type <= TBool) {
         c = vunit.makeConst(tmp->boolVal());
       } else {
         c = vunit.makeConst(tmp->rawVal());
@@ -244,11 +244,11 @@ void getEffects(const Abi& abi, const Vinstr& i,
           break;
       }
       break;
-    case Vinstr::callstub:
-      defs = i.callstub_.kills;
-      break;
     case Vinstr::bindcall:
     case Vinstr::contenter:
+    case Vinstr::callstub:
+      // All three of these are php-level function calls, so they kill most
+      // registers.
       defs = abi.all();
       switch (arch()) {
         case Arch::ARM:
@@ -277,6 +277,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
       break;
     case Vinstr::vcall:
     case Vinstr::vinvoke:
+    case Vinstr::vcallstub:
       always_assert(false && "Unsupported instruction in vxls");
     default:
       break;

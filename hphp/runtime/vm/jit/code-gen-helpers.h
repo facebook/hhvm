@@ -89,11 +89,11 @@ struct ArrayKeyInfo {
 inline ArrayKeyInfo checkStrictlyInteger(Type key) {
   auto ret = ArrayKeyInfo{};
 
-  if (key <= Type::Int) {
+  if (key <= TInt) {
     ret.type = KeyType::Int;
     return ret;
   }
-  assertx(key <= Type::Str);
+  assertx(key <= TStr);
   ret.type = KeyType::Str;
   if (key.hasConstVal()) {
     int64_t i;

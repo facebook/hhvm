@@ -1,0 +1,6 @@
+File "covariance_typedef_decl_bad_2.php", line 3, characters 14-14:
+Illegal usage of a contravariant type parameter (Typing[4121])
+File "covariance_typedef_decl_bad_2.php", line 3, characters 9-9:
+This is where the parameter was declared as contravariant (-)
+File "covariance_typedef_decl_bad_2.php", line 3, characters 14-14:
+Aliased types are covariant

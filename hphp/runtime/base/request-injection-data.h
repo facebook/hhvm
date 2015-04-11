@@ -115,7 +115,7 @@ private:
   /* INI settings. */
   bool m_logErrors;
   bool m_trackErrors;
-  bool m_htmlErrors;
+  bool m_htmlErrors{false};
   bool m_safeFileAccess;
 
   /* Pointer to surprise flags stored in RDS. */

@@ -233,10 +233,10 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
      * assigned to registers if needed by the instructions using the
      * const.
      */
-    return (inst.is(ReDefSP) && src->isA(Type::StkPtr)) ||
+    return (inst.is(ReDefSP) && src->isA(TStkPtr)) ||
            inst.is(TakeStk) ||
-           src->isA(Type::StkPtr) ||
-           src->isA(Type::FramePtr) ||
+           src->isA(TStkPtr) ||
+           src->isA(TFramePtr) ||
            src->inst()->is(DefConst);
   };
 
@@ -285,7 +285,7 @@ namespace {
  * Return a union type containing all the types in the argument list.
  */
 Type buildUnion() {
-  return Type::Bottom;
+  return TBottom;
 }
 
 template<class... Args>
@@ -403,7 +403,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
     checkDst(inst->hasTypeParam(),
       "Missing paramType for DParamPtr instruction");
     if (inst->hasTypeParam()) {
-      checkDst(inst->typeParam() <= Type::Gen.ptr(kind),
+      checkDst(inst->typeParam() <= TGen.ptr(kind),
                "Invalid paramType for DParamPtr instruction");
     }
   };
@@ -415,7 +415,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
     }
   };
 
-#define IRT(name, ...) UNUSED static const Type name = Type::name;
+#define IRT(name, ...) UNUSED static constexpr Type name = T##name;
 #define IRTP(name, ...) IRT(name)
   IR_TYPES
 #undef IRT
@@ -433,7 +433,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
                         ++curSrc;                                       \
                       }
 #define C(T)          check(src()->hasConstVal(T) ||     \
-                            src()->isA(Type::Bottom),    \
+                            src()->isA(TBottom),    \
                             Type(),                      \
                             "constant " #T);             \
                       ++curSrc;

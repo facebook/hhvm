@@ -382,8 +382,8 @@ static void populateLiveContext(RegionContext& ctx) {
       // the Type.
       auto const objOrCls =
         ar->hasThis()  ? Type::SubObj(ar->getThis()->getVMClass()) :
-        ar->hasClass() ? Type::Cls
-                       : Type::Nullptr;
+        ar->hasClass() ? TCls
+                       : TNullptr;
 
       ctx.preLiveARs.push_back({
         stackOff,
@@ -2222,7 +2222,7 @@ void emitServiceReq(Vout& v, TCA stub_block,
       }
     }
   }
-  v << svcreq{req, v.makeTuple(args), stub_block};
+  v << svcreq{req, x64::kCrossTraceRegs, v.makeTuple(args), stub_block};
 }
 
 } // HPHP::jit

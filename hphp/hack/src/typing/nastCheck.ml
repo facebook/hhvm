@@ -113,7 +113,8 @@ module CheckFunctionType = struct
     | _, Id _
     | _, Class_get _
     | _, Class_const _
-    | _, Lvar _ -> ()
+    | _, Lvar _
+    | _, Lplaceholder _ -> ()
     | _, Array afl ->
         liter afield f_type afl;
         ()
@@ -265,8 +266,8 @@ and func env f named_body =
   } in
   maybe hint env f.f_ret;
   List.iter (fun_param env) f.f_params;
-  block env named_body;
-  CheckFunctionType.block f.f_fun_kind named_body
+  block env named_body.fnb_nast;
+  CheckFunctionType.block named_body.fnb_fun_kind named_body.fnb_nast
 
 and hint env (p, h) =
   hint_ env p h
@@ -410,12 +411,13 @@ and check_is_trait env (h : hint) =
 and interface c =
   (* make sure that interfaces only have empty public methods *)
   List.iter begin fun m ->
-    if m.m_body <> (UnnamedBody []) && m.m_body <> (NamedBody [])
-    then Errors.abstract_body (fst m.m_name)
-    else ();
-    if m.m_visibility <> Public
-    then Errors.not_public_interface (fst m.m_name)
-    else ()
+    (match m.m_body with
+      | UnnamedBody { fub_ast = [] ; _}
+      | NamedBody { fnb_nast = [] ; _} ->
+        if m.m_visibility <> Public
+        then Errors.not_public_interface (fst m.m_name)
+        else ()
+      | _ -> Errors.abstract_body (fst m.m_name))
   end (c.c_static_methods @ c.c_methods);
   (* make sure that interfaces don't have any member variables *)
   match c.c_vars with
@@ -455,8 +457,8 @@ and check_no_class_tparams class_tparams (pos, ty)  =
     | Hany | Hmixed | Hprim _ -> ()
     (* We have found a type parameter. Make sure its name does not match
      * a name in class_tparams *)
-    | Habstr (tparam_name, ty_) ->
-        maybe_check_tparams ty_;
+    | Habstr (tparam_name, cstr_opt) ->
+        maybe_check_tparams (opt_map snd cstr_opt);
         matches_class_tparam tparam_name
     | Harray (ty1, ty2) ->
         maybe_check_tparams ty1;
@@ -500,12 +502,12 @@ and method_ (env, is_static) m =
   let named_body = assert_named_body m.m_body in
   check__toString m is_static;
   liter fun_param env m.m_params;
-  block env named_body;
+  block env named_body.fnb_nast;
   maybe hint env m.m_ret;
-  CheckFunctionType.block m.m_fun_kind named_body;
-  if m.m_abstract && named_body <> []
+  CheckFunctionType.block named_body.fnb_fun_kind named_body.fnb_nast;
+  if m.m_abstract && named_body.fnb_nast <> []
   then Errors.abstract_with_body m.m_name;
-  if not (Env.is_decl env.tenv) && not m.m_abstract && named_body = []
+  if not (Env.is_decl env.tenv) && not m.m_abstract && named_body.fnb_nast = []
   then Errors.not_abstract_without_body m.m_name;
   (match env.class_name with
   | Some cname ->
@@ -612,7 +614,7 @@ and expr_ env = function
   | Id _
   | Class_get _
   | Class_const _
-  | Lvar _ -> ()
+  | Lvar _ | Lplaceholder _ -> ()
   | Array afl ->
       liter afield env afl;
       ()

@@ -197,7 +197,7 @@ bool check_invariants(const FrameState& state) {
         local.value->toString()
       );
       always_assert_flog(
-        local.type == Type::Gen,
+        local.type == TGen,
         "We should never be tracking non-predicted types for locals in "
           "a pseudomain right now.  Local {} had type {}",
         id,
@@ -285,7 +285,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
       // The return value is known to be at least a Gen.
       setStackType(
         extra->spOffset + kNumActRecCells + extra->numParams - 1,
-        Type::Gen);
+        TGen);
       // What we're considering sync'd to memory is popping an actrec, popping
       // args, and pushing a return value.
       if (m_status == Status::Building) {
@@ -313,7 +313,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
         setStackValue(extra->spOffset + i, nullptr);
       }
       clearStackForCall();
-      setStackType(extra->spOffset + kNumActRecCells, Type::Gen);
+      setStackType(extra->spOffset + kNumActRecCells, TGen);
       // A CallArray pops the ActRec, an array arg, and pushes a return value.
       if (m_status == Status::Building) {
         assertx(cur().syncedSpLevel == inst->marker().spOff());
@@ -331,7 +331,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
       auto const extra = inst->extra<ContEnter>();
       for (auto& st : m_stack) st.frameMaySpanCall = true;
       clearStackForCall();
-      setStackType(extra->spOffset, Type::Gen);
+      setStackType(extra->spOffset, TGen);
       // ContEnter pops a cell and pushes a yielded value.
       if (m_status == Status::Building) {
         assertx(cur().syncedSpLevel == inst->marker().spOff());
@@ -495,7 +495,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
           auto const ty = effects.baseType.derefIfPtr();
           setStackType(
             offset,
-            ty <= Type::BoxedCell ? Type::BoxedInitCell : ty
+            ty <= TBoxedCell ? TBoxedInitCell : ty
           );
         }
       }
@@ -555,7 +555,7 @@ void FrameStateMgr::collectPostConds(Block* block) {
       const auto fpRel   = bcSpOff - bcSpRel;
       const auto irSpRel = toIRSPOffset(bcSpRel, bcSpOff, irSpOff);
       const auto type    = stackType(irSpRel);
-      if (type < Type::Gen) {
+      if (type < TGen) {
         FTRACE(1, "Stack({}, {}): {}\n", bcSpRel.offset, fpRel.offset, type);
         pConds.push_back({RegionDesc::Location::Stack{fpRel}, type});
       }
@@ -565,7 +565,7 @@ void FrameStateMgr::collectPostConds(Block* block) {
   if (fp() != nullptr) {
     for (unsigned i = 0; i < func()->numLocals(); i++) {
       auto t = localType(i);
-      if (t != Type::Gen) {
+      if (t != TGen) {
         FTRACE(1, "Local {}: {}\n", i, t.toString());
         pConds.push_back({ RegionDesc::Location::Local{i}, t });
       }
@@ -892,7 +892,7 @@ void FrameStateMgr::setStackValue(IRSPOffset offset, SSATmp* value) {
   FTRACE(2, "stk[{}] := {}\n", offset.offset,
     value ? value->toString() : std::string("<>"));
   stk.value         = value;
-  stk.type          = value ? value->type() : Type::StkElem;
+  stk.type          = value ? value->type() : TStkElem;
   stk.predictedType = stk.type;
   stk.typeSrcs.clear();
   if (value) {
@@ -957,7 +957,7 @@ void FrameStateMgr::clearLocals() {
 void FrameStateMgr::setLocalValue(uint32_t id, SSATmp* value) {
   always_assert(id < cur().locals.size());
   cur().locals[id].value = value;
-  auto const newType = value ? value->type() : Type::Gen;
+  auto const newType = value ? value->type() : TGen;
   cur().locals[id].type = newType;
 
   /*
@@ -969,7 +969,7 @@ void FrameStateMgr::setLocalValue(uint32_t id, SSATmp* value) {
       auto const inst = value->inst();
       switch (inst->op()) {
       case LdLoc:
-        if (value->type() <= Type::BoxedCell) {
+        if (value->type() <= TBoxedCell) {
           // Keep the same prediction as this local.
           return cur().locals[inst->extra<LdLoc>()->locId].predictedType;
         }
@@ -1038,7 +1038,7 @@ void FrameStateMgr::setLocalType(uint32_t id, Type type) {
 
 void FrameStateMgr::setBoxedLocalPrediction(uint32_t id, Type type) {
   always_assert(id < cur().locals.size());
-  always_assert(type <= Type::BoxedCell);
+  always_assert(type <= TBoxedCell);
 
   cur().locals[id].predictedType = cur().locals[id].type & type;
 }
@@ -1048,7 +1048,7 @@ void FrameStateMgr::setBoxedLocalPrediction(uint32_t id, Type type) {
  * point to that cell can have their inner type predictions updated.
  */
 void FrameStateMgr::updateLocalRefPredictions(SSATmp* boxedCell, SSATmp* val) {
-  assertx(boxedCell->type() <= Type::BoxedCell);
+  assertx(boxedCell->type() <= TBoxedCell);
   for (auto id = uint32_t{0}; id < cur().locals.size(); ++id) {
     if (canonical(cur().locals[id].value) == canonical(boxedCell)) {
       setBoxedLocalPrediction(id, boxType(val->type()));
@@ -1126,9 +1126,9 @@ void FrameStateMgr::killLocalsForCall(bool callDestroysLocals) {
 void FrameStateMgr::dropLocalRefsInnerTypes() {
   for (auto& frame : m_stack) {
     for (auto& local : frame.locals) {
-      if (local.type <= Type::BoxedCell) {
-        local.type          = Type::BoxedInitCell;
-        local.predictedType = Type::BoxedInitCell;
+      if (local.type <= TBoxedCell) {
+        local.type          = TBoxedInitCell;
+        local.predictedType = TBoxedInitCell;
       }
     }
   }

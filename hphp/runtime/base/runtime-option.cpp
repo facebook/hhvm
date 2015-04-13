@@ -946,7 +946,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(RepoCommit, ini, repo["Commit"], true);
     Config::Bind(RepoDebugInfo, ini, repo["DebugInfo"], true);
     Config::Bind(RepoAuthoritative, ini, repo["Authoritative"], false);
-    Config::Bind(RepoPreload, ini, repo["Preload"], RepoAuthoritative);
+    Config::Bind(RepoPreload, ini, repo["Preload"], false);
   }
   {
     Hdf eval = config["Eval"];

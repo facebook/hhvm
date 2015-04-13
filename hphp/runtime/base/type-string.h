@@ -131,7 +131,7 @@ public:
   /* implicit */ String(int     n);
   /* implicit */ String(int64_t n);
   /* implicit */ String(double  n);
-  /* implicit */ String(litstr  s)
+  /* implicit */ String(const char* s)
   : m_str(LIKELY((bool)s) ? StringData::Make(s, CopyString)
                           : nullptr, IsUnowned{}) { }
 
@@ -286,18 +286,18 @@ public:
     return *this;
   }
   String& operator=(const StaticString& v);
-  String& operator=(litstr v);
+  String& operator=(const char* v);
   String& operator=(const Variant& v);
   String& operator=(const std::string &s);
   // These should be members, but g++ doesn't yet support the rvalue
   // reference notation on lhs (http://goo.gl/LuCTo).
-  friend String&& operator+(String&& lhs, litstr rhs);
+  friend String&& operator+(String&& lhs, const char* rhs);
   friend String&& operator+(String&& lhs, String&& rhs);
   friend String operator+(String&& lhs, const String & rhs);
   friend String operator+(const String & lhs, String&& rhs);
-  friend String operator+(const String& lhs, litstr rhs);
+  friend String operator+(const String& lhs, const char* rhs);
   friend String operator+(const String & lhs, const String & rhs);
-  String &operator += (litstr  v);
+  String &operator += (const char* v);
   String &operator += (const String& v);
   String &operator += (const StringSlice& slice);
   String &operator += (const MutableSlice& slice);
@@ -316,12 +316,12 @@ public:
    * generation always uses explicit functions like same(), less() etc. that
    * are type specialized and unambiguous.
    */
-  bool operator == (litstr  v) const = delete;
-  bool operator != (litstr  v) const = delete;
-  bool operator >= (litstr  v) const = delete;
-  bool operator <= (litstr  v) const = delete;
-  bool operator >  (litstr  v) const = delete;
-  bool operator <  (litstr  v) const = delete;
+  bool operator == (const char* v) const = delete;
+  bool operator != (const char* v) const = delete;
+  bool operator >= (const char* v) const = delete;
+  bool operator <= (const char* v) const = delete;
+  bool operator >  (const char* v) const = delete;
+  bool operator <  (const char* v) const = delete;
   bool operator == (const String& v) const;
   bool operator != (const String& v) const;
   bool operator >= (const String& v) const = delete;
@@ -342,7 +342,7 @@ public:
   char   toByte   () const { return m_str ? m_str->toByte   () : 0;}
   short  toInt16  () const { return m_str ? m_str->toInt16  () : 0;}
   int    toInt32  () const { return m_str ? m_str->toInt32  () : 0;}
-  int64_t  toInt64  () const { return m_str ? m_str->toInt64  () : 0;}
+  int64_t toInt64 () const { return m_str ? m_str->toInt64  () : 0;}
   double toDouble () const { return m_str ? m_str->toDouble () : 0;}
   VarNR  toKey   () const;
   std::string toCppString() const { return std::string(c_str(), size()); }
@@ -350,32 +350,32 @@ public:
   /**
    * Comparisons
    */
-  bool same (litstr  v2) const = delete;
+  bool same (const char* v2) const = delete;
   bool same (const StringData *v2) const;
   bool same (const String& v2) const;
   bool same (const Array& v2) const;
   bool same (const Object& v2) const;
   bool same (const Resource& v2) const;
-  bool equal(litstr  v2) const = delete;
+  bool equal(const char* v2) const = delete;
   bool equal(const StringData *v2) const;
   bool equal(const String& v2) const;
   bool equal(const Array& v2) const;
   bool equal(const Object& v2) const;
   bool equal(const Resource& v2) const;
-  bool less (litstr  v2) const = delete;
+  bool less (const char* v2) const = delete;
   bool less (const StringData *v2) const;
   bool less (const String& v2) const;
   bool less (const Array& v2) const;
   bool less (const Object& v2) const;
   bool less (const Resource& v2) const;
-  bool more (litstr  v2) const = delete;
+  bool more (const char* v2) const = delete;
   bool more (const StringData *v2) const;
   bool more (const String& v2) const;
   bool more (const Array& v2) const;
   bool more (const Object& v2) const;
   bool more (const Resource& v2) const;
 
-  int compare(litstr v2) const;
+  int compare(const char* v2) const;
   int compare(const String& v2) const;
 
   /**
@@ -385,9 +385,11 @@ public:
   String rvalAt(char    key) const { return rvalAtImpl(key);}
   String rvalAt(short   key) const { return rvalAtImpl(key);}
   String rvalAt(int     key) const { return rvalAtImpl(key);}
-  String rvalAt(int64_t   key) const { return rvalAtImpl(key);}
+  String rvalAt(int64_t key) const { return rvalAtImpl(key);}
   String rvalAt(double  key) const { return rvalAtImpl((int64_t)key);}
-  String rvalAt(litstr  key) const { return rvalAtImpl(String(key).toInt32());}
+  String rvalAt(const char* key) const {
+    return rvalAtImpl(String(key).toInt32());
+  }
   String rvalAt(const StringData *key) const {
     not_reached();
     return rvalAtImpl(key ? key->toInt32() : 0);
@@ -569,8 +571,8 @@ class StaticString : public String {
 public:
   friend class StringUtil;
 
-  explicit StaticString(litstr s);
-  StaticString(litstr s, int length); // binary string
+  explicit StaticString(const char* s);
+  StaticString(const char* s, int length); // binary string
   explicit StaticString(std::string s);
   ~StaticString() {
     // prevent ~SmartPtr from destroying contents.

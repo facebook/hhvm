@@ -80,7 +80,7 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant::Variant(litstr v) {
+Variant::Variant(const char* v) {
   m_type = KindOfString;
   m_data.pstr = StringData::Make(v);
   m_data.pstr->incRefCount();

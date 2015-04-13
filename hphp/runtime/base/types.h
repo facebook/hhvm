@@ -83,26 +83,6 @@ enum class Mode {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * Many functions may elect to take "litstr" separately from "String" class.
- * This code specialization helps speed a lot by not instantiating a String
- * object to box an otherwise literal value. This also means, though not
- * obviously thus dangerous not to know, whenever a function takes a parameter
- * with type of "litstr", one can only pass in a literal string that has
- * a "permanent" memory address to be stored. To make this really clear, I
- * invented "litstr" as a typedef-ed name for "const char *" that expects a
- * literal string only. Therefore, throughout this entire runtime library,
- *
- *   litstr == literal string
- *   const char * == any C-string pointer
- *
- * TODO(#2298051): The above comment regarding "any C-string pointer" isn't
- * really true anymore.
- */
-using litstr = const char*;
-
-///////////////////////////////////////////////////////////////////////////////
-
 using VRefParam = const class VRefParamValue&;
 using RefResult = const class RefResultValue&;
 

@@ -98,7 +98,7 @@ struct Variant : private TypedValue {
     m_type = KindOfDouble; m_data.dbl = v;
   }
 
-  /* implicit */ Variant(litstr  v);
+  /* implicit */ Variant(const char* v);
   /* implicit */ Variant(const std::string &v);
   /* implicit */ Variant(const StaticString &v) noexcept {
     m_type = KindOfStaticString;
@@ -926,7 +926,7 @@ struct Variant : private TypedValue {
   void set(int     v) noexcept;
   void set(int64_t   v) noexcept;
   void set(double  v) noexcept;
-  void set(litstr  v) = delete;
+  void set(const char* v) = delete;
   void set(const std::string & v) {
     return set(String(v));
   }
@@ -1189,7 +1189,7 @@ public:
     return asVariant()->isNull();
   }
 private:
-  /* implicit */ VarNR(litstr  v) = delete;
+  /* implicit */ VarNR(const char* v) = delete;
   /* implicit */ VarNR(const std::string & v) = delete;
 
   void init(DataType dt) {
@@ -1270,8 +1270,7 @@ ALWAYS_INLINE Variant init_null() {
   return Variant(Variant::NullInit());
 }
 
-// TODO(#2298051) litstr must die
-inline Variant &concat_assign(Variant &v1, litstr s2) = delete;
+inline Variant &concat_assign(Variant &v1, const char* s2) = delete;
 
 inline Variant &concat_assign(Variant &v1, const String& s2) {
   if (v1.getType() == KindOfString) {

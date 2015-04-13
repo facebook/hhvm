@@ -82,7 +82,7 @@ let builtins = "<?hh // decl\n"^
   "final class Set<Tv> implements ConstSet<Tv> {}\n"^
   "final class ImmSet<Tv> implements ConstSet<Tv> {}\n"^
   "class Exception { public function __construct(string $x) {} }\n"^
-  "class Generator<Tk, Tv, Ts> implements KeyedIterator<Tk, Tv> {\n"^
+  "class Generator<+Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {\n"^
   "  public function next(): void;\n"^
   "  public function current(): Tv;\n"^
   "  public function key(): Tk;\n"^
@@ -97,7 +97,7 @@ let builtins = "<?hh // decl\n"^
   "interface Countable { public function count(): int; }\n"^
   "interface AsyncIterator<Tv> {}\n"^
   "interface AsyncKeyedIterator<Tk, Tv> extends AsyncIterator<Tv> {}\n"^
-  "class AsyncGenerator<Tk, Tv, Ts> implements AsyncKeyedIterator<Tk, Tv> {\n"^
+  "class AsyncGenerator<+Tk, +Tv, -Ts> implements AsyncKeyedIterator<Tk, Tv> {\n"^
   "  public function next(): Awaitable<?(Tk, Tv)> {}\n"^
   "  public function send(?Ts $v): Awaitable<?(Tk, Tv)> {}\n"^
   "  public function raise(Exception $e): Awaitable<?(Tk, Tv)> {}"^

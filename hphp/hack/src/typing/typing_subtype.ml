@@ -330,19 +330,6 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       let env = sub_type env t1_super t1_sub in
       let env = sub_type env t2_super t2_sub in
       sub_type env t3_super t3_sub
-  | (_, (Tapply ((_, name_super), [tk_super; tv_super; ts_super]))),
-    (_, (Tapply ((_, name_sub), [tk_sub; tv_sub; ts_sub])))
-    when name_super = name_sub && (name_super = SN.Classes.cGenerator) ->
-      (* Currently, we are only covariant in the type of the value yielded. I
-       * think we could also be covariant in the type of the key yielded and
-       * also *contravariant* in the type of the value sent in, but since this
-       * code is new and no one is relying on those two yet, let's see if we can
-       * get away with being invariant and if anyone complains we can
-       * reconsider. TODO(#4534682) come back to this. *)
-      let env = sub_type env tv_super tv_sub in
-      let env, _ = Unify.unify env tk_super tk_sub in
-      let env, _ = Unify.unify env ts_super ts_sub in
-      env
   | (p_super, (Tapply (x_super, tyl_super) as ty_super_)),
       (p_sub, (Tapply (x_sub, tyl_sub) as ty_sub_))
       when Typing_env.get_enum_constraint (snd x_sub) = None  ->

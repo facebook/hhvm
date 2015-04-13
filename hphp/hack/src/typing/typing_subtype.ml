@@ -298,13 +298,6 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tgeneric (_, Some (Ast.Constraint_super, _))), (_, Tgeneric (_, _)) ->
       typevars_subtype env (uenv_super, ety_super) (uenv_sub, ety_sub)
   (* Dirty covariance hacks *)
-  | (_, (Tapply ((_, name_super), [ty_super]))), (_, (Tapply ((_, name_sub), [ty_sub])))
-    when name_super = SN.Classes.cAwaitable &&
-      name_sub = SN.Classes.cAwaitable ->
-      let old_allow_null_as_void = Env.allow_null_as_void env in
-      let env = Env.set_allow_null_as_void env in
-      let env = sub_type env ty_super ty_sub in
-      Env.set_allow_null_as_void ~allow:old_allow_null_as_void env
   | (_, (Tapply ((_, name_super), [ty_super]))),
     (_, (Tapply ((_, name_sub), [ty_sub])))
     when name_super = name_sub &&

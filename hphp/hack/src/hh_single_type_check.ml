@@ -43,10 +43,10 @@ let builtins = "<?hh // decl\n"^
   "interface KeyedContainer<Tk, Tv> extends Container<Tv>, KeyedTraversable<Tk,Tv> {}\n"^
   "interface KeyedIterator<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterator<Tv> {}\n"^
   "interface KeyedIterable<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {}\n"^
-  "interface Awaitable<T> {"^
+  "interface Awaitable<+T> {"^
   "  public function getWaitHandle(): WaitHandle<T>;"^
   "}\n"^
-  "interface WaitHandle<T> extends Awaitable<T> {}\n"^
+  "interface WaitHandle<+T> extends Awaitable<T> {}\n"^
   "interface ConstVector<+Tv> extends KeyedIterable<int, Tv>, KeyedContainer<int, Tv>{"^
   "  public function map<Tu>((function(Tv): Tu) $callback): ConstVector<Tu>;"^
   "}\n"^

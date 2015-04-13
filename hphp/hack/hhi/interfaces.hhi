@@ -128,7 +128,7 @@ interface ArrayAccess<Tk, Tv> {
   public function offsetUnset(Tk $key): void;
 }
 
-interface Awaitable<T> {
+interface Awaitable<+T> {
   public function getWaitHandle(): WaitHandle<T>;
 }
 

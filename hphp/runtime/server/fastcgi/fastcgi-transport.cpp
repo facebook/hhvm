@@ -215,7 +215,7 @@ void FastCGITransport::onHeader(std::unique_ptr<folly::IOBuf> key_chain,
   Cursor valCur(value_chain.get());
   auto value = valCur.readFixedString(value_chain->computeChainDataLength());
 
-  m_requestParams.emplace(key, value);
+  m_requestParams[key] = value;
 }
 
 void FastCGITransport::onHeadersComplete() {

@@ -1,3 +1,51 @@
+"Gadd" 9-Apr-2015
+ - Add catch traces to PHP-level calls
+ - Run class initializers before ObjectData constructor
+ - Avoid crash when invoking error handler from RetC
+ - Call-time pass-by-reference is removed
+ - Add xdebug_var_dump
+ - Heap Tracer
+ - [ini] Bind more options of collection types
+ - [hack] Support static checks on double-quoted strings
+ - Scan all of RDS
+ - Partial HNI conversion of fb.idl.json
+ - [hack] Allow class constants to be treated as static strings
+ - [hh][typeconst] Add basic reflection support for type constants
+ - [hphpd] Re-enable disabled breakpoints if trying to set them again
+ - Support static property as foreach target
+ - [ini] Make getting settings that are containers act correctly
+ - Don't truncate regions to one bytecode in region-tracelet
+ - SmartPtr cleanup
+ - Don't attempt a Live translation after failing an Optimize translation
+ - Disable ext_string hasExactlyOneRef opts
+ - Add a dump-repo command
+ - More efficient functions for reading/writing via afdt sockets
+ - [hack] Make socket/logs world-writable
+ - [hh][typeconst] Forbid constants from implementing abstract type constants
+ - Fix an issue with inlining and unreachable code
+ - OBC HNI Conversion
+ - FBML HNI conversion
+ - [asio] Kill BlockableWaitHandle
+ - Merge collection types into header kind
+ - Disable LocalCopyProp and EliminateDeadCode in hphpc's preOptimize
+ - New refcount optimizations
+ - Make the new refcount opts pass the default (remove calls to the old one)
+ - Add a checkCfg pass that ensures each SSATmp is defined only once
+ - Restructure mark loop, fix a couple bugs
+ - Disable guard relaxation in wholecfg mode
+ - StringBuffer HNI conversion
+ - Using Linux perf mechanism to implement clock_gettime()
+ - Add perf based code relocation step
+ - Track sub process times in LightProcess
+ - Enqueue ambiguous pointers after filtering
+ - Allocate vxls spill space on demand
+ - [hhvm] Add hh_client extension and \HH\Client\typecheck()
+ - Implement bindcall in LLVM backend
+ - Remove zf2
+ - [hhvm] Improve behavior of hack lambdas for uninit vars
+ - Track the main hardware counters for light processes
+ - Use health monitor for pagelets
+
 "Fry" 27-Mar-2015
  - Fix Reflection: Variadic parameters not marked as optional
  - Fix unnecessary dns lookups on startup of hhvm in non-server mode.

@@ -277,20 +277,6 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
 (****************************************************************************)
 (* ### End Tunresolved madness ### *)
 (****************************************************************************)
-  | (_, Tapply _), (r_sub, Tgeneric (x, Some (Ast.Constraint_as, ty_sub)))
-  | (_, Tprim _), (r_sub, Tgeneric (x, Some (Ast.Constraint_as, ty_sub))) ->
-      (Errors.try_
-         (fun () -> sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
-         (fun l ->
-           Reason.explain_generic_constraint env.Env.pos r_sub x l; env)
-      )
-  | (r_super, Tgeneric (x, Some (Ast.Constraint_super, ty))), (_, Tapply _)
-  | (r_super, Tgeneric (x, Some (Ast.Constraint_super, ty))), (_, Tprim _) ->
-      (Errors.try_
-         (fun () -> sub_type_with_uenv env (uenv_super, ty) (uenv_sub, ty_sub))
-         (fun l ->
-           Reason.explain_generic_constraint env.Env.pos r_super x l; env)
-      )
   | (_, Tgeneric ("this", Some (_, ty_super))),
     (_, Tgeneric ("this", Some (_, ty_sub))) ->
       sub_type env ty_super ty_sub
@@ -491,6 +477,19 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
           (fun () -> fst (Unify.unify env ty_super ty_sub))
           (fun _ -> sub_type env ty_super base)
       | None -> assert false)
+  (* If all else fails we fall back to the super/as constraint on a generics. *)
+  | _, (r_sub, Tgeneric (x, Some (Ast.Constraint_as, ty_sub))) ->
+      (Errors.try_
+         (fun () -> sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
+         (fun l ->
+           Reason.explain_generic_constraint env.Env.pos r_sub x l; env)
+      )
+  | (r_super, Tgeneric (x, Some (Ast.Constraint_super, ty))), _ ->
+      (Errors.try_
+         (fun () -> sub_type_with_uenv env (uenv_super, ty) (uenv_sub, ty_sub))
+         (fun l ->
+           Reason.explain_generic_constraint env.Env.pos r_super x l; env)
+      )
   | (_, (Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Tvar _
     | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
     | Tobject | Tshape _)

@@ -1,0 +1,4 @@
+Parsing error
+File "/data/users/dreeves/fbcode-hg/hphp/hack/test/typecheck/subtype_bug_6.php", line 18, characters 1-4:
+Expected expression (Parsing[1002])
+

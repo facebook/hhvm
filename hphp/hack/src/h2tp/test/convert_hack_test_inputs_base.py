@@ -422,6 +422,7 @@ OTHER_UNPARSEABLE_FILES = [
     'strict_call_tany3.php',
     'strict_call_tany4.php',
     'strict_method_call.php',
+    'subtype_bug_6.php',
     'typedef_as6.php',
     'typedef_string_concat1.php',
     'typedef_as5.php',

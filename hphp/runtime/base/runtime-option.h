@@ -420,7 +420,7 @@ public:
   F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(bool, JitTimer,                    kJitTimerDefault)                \
-  F(bool, RecordSubprocessTimes,       true)                            \
+  F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
   /* CheckReturnTypeHints:
      0 - No checks or enforcement for return type hints.

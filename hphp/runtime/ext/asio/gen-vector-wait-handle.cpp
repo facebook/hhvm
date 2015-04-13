@@ -149,7 +149,6 @@ void c_GenVectorWaitHandle::onUnblocked() {
       auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
 
       try {
-        child_wh->enterContext(getContextIdx());
         detectCycle(child_wh);
         child_wh->getParentChain()
           .addParent(m_blockable, AsioBlockable::Kind::GenVectorWaitHandle);
@@ -182,47 +181,6 @@ String c_GenVectorWaitHandle::getName() {
 c_WaitableWaitHandle* c_GenVectorWaitHandle::getChild() {
   assert(getState() == STATE_BLOCKED);
   return static_cast<c_WaitableWaitHandle*>(m_deps->at(m_iterPos)->m_data.pobj);
-}
-
-void c_GenVectorWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
-  assert(getState() == STATE_BLOCKED);
-
-  // recursively import current child
-  {
-    assert(m_iterPos < m_deps->size());
-    Cell* current = tvAssertCell(m_deps->at(m_iterPos));
-
-    assert(current->m_type == KindOfObject);
-    assert(current->m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
-    auto child_wh = static_cast<c_WaitableWaitHandle*>(current->m_data.pobj);
-    child_wh->enterContext(ctx_idx);
-  }
-
-  // import ourselves
-  setContextIdx(ctx_idx);
-
-  // try to import other children
-  try {
-    for (int64_t iter_pos = m_iterPos + 1;
-         iter_pos < m_deps->size();
-         ++iter_pos) {
-
-      Cell* current = tvAssertCell(m_deps->at(iter_pos));
-      assert(current->m_type == KindOfObject);
-      assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
-      auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
-
-      if (child->isFinished()) {
-        continue;
-      }
-
-      assert(child->instanceof(c_WaitableWaitHandle::classof()));
-      auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
-      child_wh->enterContext(ctx_idx);
-    }
-  } catch (const Object& cycle_exception) {
-    // exception will be eventually processed by onUnblocked()
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

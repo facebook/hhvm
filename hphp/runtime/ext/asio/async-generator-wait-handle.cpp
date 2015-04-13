@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
+#include "hphp/runtime/ext/asio/asio-context-enter.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/async-generator.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -102,7 +103,7 @@ void c_AsyncGeneratorWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
   assert(!child->isFinished());
 
   // import child into the current context, throw on cross-context cycles
-  child->enterContext(getContextIdx());
+  asio::enter_context(child, getContextIdx());
 
   // detect cycles
   detectCycle(child);
@@ -172,34 +173,6 @@ c_WaitableWaitHandle* c_AsyncGeneratorWaitHandle::getChild() {
   } else {
     assert(getState() == STATE_SCHEDULED || getState() == STATE_RUNNING);
     return nullptr;
-  }
-}
-
-void c_AsyncGeneratorWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
-  switch (getState()) {
-    case STATE_BLOCKED:
-      // enter child into new context recursively
-      assert(m_child);
-      m_child->enterContext(ctx_idx);
-      setContextIdx(ctx_idx);
-      break;
-
-    case STATE_SCHEDULED:
-      // reschedule so that we get run
-      setContextIdx(ctx_idx);
-      getContext()->schedule(this);
-      incRefCount();
-      break;
-
-    case STATE_RUNNING: {
-      Object e(SystemLib::AllocInvalidOperationExceptionObject(
-          "Detected cross-context dependency cycle. You are trying to depend "
-          "on something that is running you serially."));
-      throw e;
-    }
-
-    default:
-      assert(false);
   }
 }
 

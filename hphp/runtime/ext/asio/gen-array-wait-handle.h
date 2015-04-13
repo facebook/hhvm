@@ -50,7 +50,7 @@ class c_GenArrayWaitHandle final : public c_WaitableWaitHandle {
   void onUnblocked();
   String getName();
   c_WaitableWaitHandle* getChild();
-  void enterContextImpl(context_idx_t ctx_idx);
+  template<typename T> void forEachChild(T fn);
 
  private:
   void setState(uint8_t state) { setKindState(Kind::GenArray, state); }
@@ -64,6 +64,7 @@ class c_GenArrayWaitHandle final : public c_WaitableWaitHandle {
   ssize_t m_iterPos;
   AsioBlockable m_blockable;
 
+ public:
   static const int8_t STATE_BLOCKED = 2;
 };
 
@@ -74,5 +75,7 @@ inline c_GenArrayWaitHandle* c_WaitHandle::asGenArray() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#include "hphp/runtime/ext/asio/gen-array-wait-handle-inl.h"
 
 #endif // incl_HPHP_EXT_ASIO_GEN_ARRAY_WAIT_HANDLE_H_

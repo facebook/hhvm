@@ -146,12 +146,5 @@ c_WaitableWaitHandle* c_ConditionWaitHandle::getChild() {
   return m_child;
 }
 
-void c_ConditionWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
-  assert(getState() == STATE_BLOCKED);
-
-  m_child->enterContext(ctx_idx);
-  setContextIdx(ctx_idx);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -183,7 +183,6 @@ void c_GenArrayWaitHandle::onUnblocked() {
 
       try {
         m_iterPos = arrIter.currentPos();
-        child_wh->enterContext(getContextIdx());
         detectCycle(child_wh);
         child_wh->getParentChain()
           .addParent(m_blockable, AsioBlockable::Kind::GenArrayWaitHandle);
@@ -219,54 +218,6 @@ c_WaitableWaitHandle* c_GenArrayWaitHandle::getChild() {
   assert(getState() == STATE_BLOCKED);
   return static_cast<c_WaitableWaitHandle*>(
     m_deps->getValueRef(m_iterPos).asTypedValue()->m_data.pobj);
-}
-
-void c_GenArrayWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
-  assert(getState() == STATE_BLOCKED);
-
-  // recursively import current child
-  {
-    assert(m_iterPos != m_deps->iter_end());
-    auto const current = tvAssertCell(
-      m_deps->getValueRef(m_iterPos).asTypedValue());
-
-    assert(current->m_type == KindOfObject);
-    assert(current->m_data.pobj->instanceof(c_WaitableWaitHandle::classof()));
-    auto child_wh = static_cast<c_WaitableWaitHandle*>(current->m_data.pobj);
-    child_wh->enterContext(ctx_idx);
-  }
-
-  // import ourselves
-  setContextIdx(ctx_idx);
-
-  // try to import other children
-  try {
-    auto iter_limit = m_deps->iter_end();
-    for (size_t iter_pos = m_deps->iter_advance(m_iterPos);
-         iter_pos != iter_limit;
-         iter_pos = m_deps->iter_advance(iter_pos)) {
-
-      auto const current = tvAssertCell(
-        m_deps->getValueRef(iter_pos).asTypedValue());
-      if (IS_NULL_TYPE(current->m_type)) {
-        continue;
-      }
-
-      assert(current->m_type == KindOfObject);
-      assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
-      auto child = static_cast<c_WaitHandle*>(current->m_data.pobj);
-
-      if (child->isFinished()) {
-        continue;
-      }
-
-      assert(child->instanceof(c_WaitableWaitHandle::classof()));
-      auto child_wh = static_cast<c_WaitableWaitHandle*>(child);
-      child_wh->enterContext(ctx_idx);
-    }
-  } catch (const Object& cycle_exception) {
-    // exception will be eventually processed by onUnblocked()
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

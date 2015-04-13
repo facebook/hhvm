@@ -43,18 +43,18 @@ class c_SleepWaitHandle final : public c_WaitableWaitHandle {
  public:
   void process();
   String getName();
-  void enterContextImpl(context_idx_t ctx_idx);
   void exitContext(context_idx_t ctx_idx);
   AsioSession::TimePoint getWakeTime() const { return m_waketime; };
+  void registerToContext();
+  void unregisterFromContext();
 
  private:
   void setState(uint8_t state) { setKindState(Kind::Sleep, state); }
   void initialize(int64_t usecs);
-  void registerToContext();
-  void unregisterFromContext();
 
   AsioSession::TimePoint m_waketime;
 
+ public:
   static const int8_t STATE_WAITING = 2;
 };
 

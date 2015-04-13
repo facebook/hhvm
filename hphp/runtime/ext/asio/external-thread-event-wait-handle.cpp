@@ -174,17 +174,6 @@ String c_ExternalThreadEventWaitHandle::getName() {
   return s_externalThreadEvent;
 }
 
-void c_ExternalThreadEventWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
-  assert(getState() == STATE_WAITING);
-
-  if (isInContext()) {
-    unregisterFromContext();
-  }
-
-  setContextIdx(ctx_idx);
-  registerToContext();
-}
-
 void c_ExternalThreadEventWaitHandle::exitContext(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx));
   assert(getState() == STATE_WAITING);

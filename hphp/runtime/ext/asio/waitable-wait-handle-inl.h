@@ -63,28 +63,6 @@ inline AsioBlockableChain& c_WaitableWaitHandle::getParentChain() {
   return m_parentChain;
 }
 
-inline void
-c_WaitableWaitHandle::enterContext(context_idx_t ctx_idx) {
-  assert(ctx_idx <= AsioSession::Get()->getCurrentContextIdx());
-
-  // If this wait handle is being finished and there is a parent A that is being
-  // unblocked and a parent B that was not unblocked yet, it is possible that
-  // the parent A triggered an enterContext() that reaches us back thru the
-  // parent B. Unfortunately, the condition below is not enough even if parent's
-  // context is guaranteed to be equal or smaller. The issue is that a context
-  // of a finished wait handle is no longer accessible.
-  if (UNLIKELY(isFinished())) {
-    return;
-  }
-
-  // Already in a more specific context?
-  if (LIKELY(getContextIdx() >= ctx_idx)) {
-    return;
-  }
-
-  enterContextImpl(ctx_idx);
-}
-
 // Throws if establishing a dependency from this to child would form a cycle.
 inline void
 c_WaitableWaitHandle::detectCycle(c_WaitableWaitHandle* child) const {

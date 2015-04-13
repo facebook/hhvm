@@ -310,7 +310,6 @@ void c_AwaitAllWaitHandle::blockOnCurrent() {
 
   if (checkCycle) {
     try {
-      child->enterContext(getContextIdx());
       detectCycle(child);
     } catch (const Object& cycle_exception) {
       markAsFailed(cycle_exception);
@@ -342,36 +341,6 @@ c_WaitableWaitHandle* c_AwaitAllWaitHandle::getChild() {
   assert(getState() == STATE_BLOCKED);
   assert(m_cur >= 0);
   return m_children[m_cur];
-}
-
-void c_AwaitAllWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
-  assert(getState() == STATE_BLOCKED);
-  assert(m_cur >= 0);
-
-  // recursively import current child
-  m_children[m_cur]->enterContext(ctx_idx);
-
-  // import ourselves
-  setContextIdx(ctx_idx);
-
-  // try to import other children
-  auto cur = m_cur;
-  auto child = &m_children[cur];
-
-  while (cur > 0) {
-    --cur;
-    --child;
-
-    if ((*child)->isFinished()) {
-      continue;
-    }
-
-    try {
-      (*child)->enterContext(ctx_idx);
-    } catch (const Object& cycle_exception) {
-      // exception will be eventually processed by onUnblocked()
-    }
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -155,6 +155,7 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   c_GenVectorWaitHandle* asGenVector();
   c_ConditionWaitHandle* asCondition();
   c_RescheduleWaitHandle* asReschedule();
+  c_ResumableWaitHandle* asResumable();
   c_SleepWaitHandle* asSleep();
   c_ExternalThreadEventWaitHandle* asExternalThreadEvent();
 

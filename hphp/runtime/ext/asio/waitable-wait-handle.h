@@ -54,18 +54,16 @@ class c_WaitableWaitHandle : public c_WaitHandle {
 
   context_idx_t getContextIdx() const;
   void setContextIdx(context_idx_t ctx_idx);
+  bool isInContext() const;
   AsioContext* getContext() const;
   AsioBlockableChain& getParentChain();
-  void enterContext(context_idx_t ctx_idx);
   void join();
   String getName();
 
  protected:
-  bool isInContext() const;
   c_WaitableWaitHandle* getChild();
   bool isDescendantOf(c_WaitableWaitHandle* wait_handle) const;
   void detectCycle(c_WaitableWaitHandle* child) const;
-  void enterContextImpl(context_idx_t ctx_idx);
 
  private:
   ObjectData* createCycleException(c_WaitableWaitHandle* child) const;

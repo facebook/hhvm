@@ -61,7 +61,7 @@ void c_RescheduleWaitHandle::initialize(uint32_t queue, uint32_t priority) {
   m_priority = priority;
 
   if (isInContext()) {
-    getContext()->schedule(this, m_queue, m_priority);
+    scheduleInContext();
   }
 }
 
@@ -81,10 +81,7 @@ String c_RescheduleWaitHandle::getName() {
   return s_reschedule;
 }
 
-void c_RescheduleWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
-  assert(getState() == STATE_SCHEDULED);
-
-  setContextIdx(ctx_idx);
+void c_RescheduleWaitHandle::scheduleInContext() {
   getContext()->schedule(this, m_queue, m_priority);
 }
 
@@ -112,7 +109,7 @@ void c_RescheduleWaitHandle::exitContext(context_idx_t ctx_idx) {
 
   // reschedule if still in a context
   if (isInContext()) {
-    getContext()->schedule(this, m_queue, m_priority);
+    scheduleInContext();
   }
 
   // recursively move all wait handles blocked by us

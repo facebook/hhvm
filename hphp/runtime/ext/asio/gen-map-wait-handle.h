@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_ASIO_GEN_MAP_WAIT_HANDLE_H_
 
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/ext/asio/waitable-wait-handle.h"
 
@@ -52,7 +53,7 @@ class c_GenMapWaitHandle final : public c_WaitableWaitHandle {
   void onUnblocked();
   String getName();
   c_WaitableWaitHandle* getChild();
-  void enterContextImpl(context_idx_t ctx_idx);
+  template<typename T> void forEachChild(T fn);
 
  private:
   void setState(uint8_t state) { setKindState(Kind::GenMap, state); }
@@ -65,6 +66,7 @@ class c_GenMapWaitHandle final : public c_WaitableWaitHandle {
   ssize_t m_iterPos;
   AsioBlockable m_blockable;
 
+ public:
   static const int8_t STATE_BLOCKED = 2;
 };
 
@@ -75,5 +77,7 @@ inline c_GenMapWaitHandle* c_WaitHandle::asGenMap() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#include "hphp/runtime/ext/asio/gen-map-wait-handle-inl.h"
 
 #endif // incl_HPHP_EXT_ASIO_GEN_MAP_WAIT_HANDLE_H_

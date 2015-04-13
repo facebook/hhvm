@@ -20,9 +20,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 
@@ -32,7 +35,8 @@ const StaticString
   s_empty(""),
   s_emptyArr("array()"),
   s_true("true"),
-  s_false("false");
+  s_false("false"),
+  s_86metadata("86metadata");
 
 ///////////////////////////////////////////////////////////////////////////////
 bool HHVM_FUNCTION(autoload_set_paths,
@@ -82,6 +86,26 @@ Variant HHVM_FUNCTION(serialize_memoize_param, const Variant& param) {
   return fb_compact_serialize(param, FBCompactSerializeBehavior::MemoizeParam);
 }
 
+void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata) {
+  VMRegAnchor _;
+  auto fp = vmfp();
+  if (fp && fp->skipFrame()) fp = g_context->getPrevVMState(fp);
+  if (UNLIKELY(!fp)) return;
+
+  if (LIKELY(!fp->hasVarEnv())) {
+    auto const local = fp->func()->lookupVarId(s_86metadata.get());
+    if (local != kInvalidId) {
+      cellSet(*metadata.asCell(), *tvAssertCell(frame_local(fp, local)));
+      return;
+    }
+
+    fp->setVarEnv(VarEnv::createLocal(fp));
+  }
+
+  assert(fp->hasVarEnv());
+  fp->getVarEnv()->set(s_86metadata.get(), metadata.asTypedValue());
+}
+
 static class HHExtension final : public Extension {
  public:
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
@@ -90,6 +114,7 @@ static class HHExtension final : public Extension {
     HHVM_NAMED_FE(HH\\could_include, HHVM_FN(could_include));
     HHVM_NAMED_FE(HH\\serialize_memoize_param,
                   HHVM_FN(serialize_memoize_param));
+    HHVM_NAMED_FE(HH\\set_frame_metadata, HHVM_FN(set_frame_metadata));
     loadSystemlib();
   }
 } s_hh_extension;

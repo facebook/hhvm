@@ -36,6 +36,8 @@ const StaticString
   s_type("type"),
   s_include("include"),
   s_main("{main}"),
+  s_metadata("metadata"),
+  s_86metadata("86metadata"),
   s_arrow("->"),
   s_double_colon("::");
 
@@ -266,6 +268,23 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         }
       }
       frame.set(s_args, args);
+    }
+
+    if (btArgs.m_withMetadata && !isReturning) {
+      if (UNLIKELY(fp->hasVarEnv())) {
+        auto tv = fp->getVarEnv()->lookup(s_86metadata.get());
+        if (tv != nullptr && tv->m_type != KindOfUninit) {
+          frame.set(s_metadata, tvAsVariant(tv));
+        }
+      } else {
+        auto local = fp->func()->lookupVarId(s_86metadata.get());
+        if (local != kInvalidId) {
+          auto tv = frame_local(fp, local);
+          if (tv->m_type != KindOfUninit) {
+            frame.set(s_metadata, tvAsVariant(tv));
+          }
+        }
+      }
     }
 
     bt.append(frame.toVariant());

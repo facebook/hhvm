@@ -2201,10 +2201,13 @@ and case env acc = function
 
 and catchl env l = lfold (catch env) SMap.empty l
 and catch env acc (x1, x2, b) =
-  let x2 = Env.new_lvar env x2 in
-  let all_locals, b = branch env b in
-  let acc = SMap.union all_locals acc in
-  acc, (Env.class_name env x1, x2, b)
+  Env.scope env (
+  fun env ->
+    let x2 = Env.new_lvar env x2 in
+    let all_locals, b = branch env b in
+    let acc = SMap.union all_locals acc in
+    acc, (Env.class_name env x1, x2, b)
+  )
 
 and afield env = function
   | AFvalue e -> N.AFvalue (expr env e)

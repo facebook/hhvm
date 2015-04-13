@@ -119,6 +119,11 @@ and check_constraint env ck ty x_ty =
       end
 
 and instantiate subst env (r, ty) =
+  (* PERF: If subst is empty then instantiation is a no-op. We can save a
+   * significant amount of CPU by avoiding recursively deconstructing the ty
+   * data type.
+   *)
+  if SMap.is_empty subst then env, (r, ty) else
   match ty with
   | Tgeneric (x, cstr_opt) ->
       (match SMap.get x subst with

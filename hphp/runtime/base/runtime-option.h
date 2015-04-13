@@ -401,10 +401,11 @@ public:
   F(bool,     JitLLVMCounters,         false)                           \
   F(bool,     JitLLVMDiscard,          false)                           \
   F(bool,     JitLLVMFastISel,         false)                           \
+  F(bool,     JitLLVMMinSize,          true)                            \
   F(uint32_t, JitLLVMOptLevel,         2)                               \
   F(bool,     JitLLVMOptSize,          true)                            \
-  F(bool,     JitLLVMMinSize,          true)                            \
   F(bool,     JitLLVMPrintAfterAll,    false)                           \
+  F(bool,     JitLLVMRetOpt,           true)                            \
   F(uint32_t, JitLLVMSizeLevel,        0)                               \
   F(uint32_t, JitLLVMSplitHotCold,     1)                               \
   F(string,   JitLLVMCompare,          "")                              \

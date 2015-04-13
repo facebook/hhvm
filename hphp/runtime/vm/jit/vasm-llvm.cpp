@@ -2579,19 +2579,29 @@ UNUSED void LLVMEmitter::emitAsm(const std::string& asmStatement,
 }
 
 void LLVMEmitter::emit(const vretm& inst) {
+  // We emit volatile loads for return addresses to prevent LLVM from
+  // generating move from memory to register via another register.
   auto const retPtr = emitPtr(inst.retAddr, ptrType(ptrType(m_traceletFnTy)));
-  auto const retAddr = m_irb.CreateLoad(retPtr);
-  auto const prevFp = m_irb.CreateLoad(emitPtr(inst.prevFp, 64));
+  auto const retAddr = m_irb.CreateLoad(retPtr, true);
+  auto const prevFp = m_irb.CreateLoad(emitPtr(inst.prevFp, 64), true);
   defineValue(inst.d, prevFp);
 
   // "Return" with a tail call to the loaded address
-  emitTraceletTailCall(retAddr, inst.args);
+  auto call = emitTraceletTailCall(retAddr, inst.args);
+  if (RuntimeOption::EvalJitLLVMRetOpt) {
+    call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TCR);
+    call->setTailCallKind(llvm::CallInst::TCK_Tail);
+  }
 }
 
 void LLVMEmitter::emit(const vret& inst) {
   auto const retAddr = m_irb.CreateIntToPtr(value(inst.retAddr),
                                             ptrType(m_traceletFnTy));
-  emitTraceletTailCall(retAddr, inst.args);
+  auto call = emitTraceletTailCall(retAddr, inst.args);
+  if (RuntimeOption::EvalJitLLVMRetOpt) {
+    call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TCR);
+    call->setTailCallKind(llvm::CallInst::TCK_Tail);
+  }
 }
 
 void LLVMEmitter::emit(const absdbl& inst) {

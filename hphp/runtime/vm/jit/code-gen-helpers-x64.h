@@ -62,7 +62,15 @@ void emitGetGContext(Vout& as, Vreg dest);
 void emitTransCounterInc(Asm& a);
 void emitTransCounterInc(Vout&);
 
-void emitDecRef(Vout& v, Vreg base);
+/*
+ * Emit a decrement on the m_count field of `base', which must contain a
+ * reference counted heap object.  This helper also conditionally makes some
+ * sanity checks on the reference count of the object.
+ *
+ * Returns: the status flags register for the decrement instruction.
+ */
+Vreg emitDecRef(Vout& v, Vreg base);
+
 void emitIncRef(Asm& as, PhysReg base);
 void emitIncRef(Vout& v, Vreg base);
 void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype);

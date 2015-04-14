@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/type-conversions.h"
 
 #include "hphp/util/functional.h"
+#include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/text-util.h"
 
@@ -92,10 +93,26 @@ using TimeZoneCacheEntry = std::pair<const char*, timelib_tzinfo*>;
 
 TimeZoneCache* s_tzCache;
 
+using TimeZoneValidityCache =
+  folly::AtomicHashArray<const char*, bool, cstr_hash, ahm_eqstr>;
+using TimeZoneValidityCacheEntry = std::pair<const char*, bool>;
+
+TimeZoneValidityCache* s_tzvCache;
+
+// Mac's setlocale() is not thread safe, so a lock is needed when calling
+// timelib_timezone_id_is_valid().
+#ifdef __APPLE__
+Mutex *s_tzvMutex = nullptr;
+#endif
+
 void timezone_init() {
   // Allocate enough space to cache all possible timezones, if needed.
   constexpr size_t kMaxTimeZoneCache = 1000;
   s_tzCache = TimeZoneCache::create(kMaxTimeZoneCache).release();
+  s_tzvCache = TimeZoneValidityCache::create(kMaxTimeZoneCache).release();
+#ifdef __APPLE__
+  s_tzvMutex = new Mutex();
+#endif
 }
 
 const timelib_tzdb *TimeZone::GetDatabase() {
@@ -170,7 +187,28 @@ SmartPtr<TimeZone> TimeZone::Current() {
 }
 
 bool TimeZone::SetCurrent(const String& zone) {
-  if (!IsValid(zone)) {
+  bool valid;
+  const char* name = zone.data();
+  auto const it = s_tzvCache->find(name);
+  if (it != s_tzvCache->end()) {
+    valid = it->second;
+  } else {
+#ifdef __APPLE__
+    Lock lock(*s_tzvMutex);
+#endif
+    valid = IsValid(zone);
+
+    auto key = strdup(name);
+    auto result = s_tzvCache->insert(TimeZoneValidityCacheEntry(name, valid));
+    if (!result.second) {
+      // The cache should never fill up since zones are finite.
+      always_assert(result.first != s_tzvCache->end());
+      // A collision occurred, so we don't need our strdup'ed key.
+      free(key);
+    }
+  }
+
+  if (!valid) {
     raise_notice("Timezone ID '%s' is invalid", zone.data());
     return false;
   }

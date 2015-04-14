@@ -1106,10 +1106,6 @@ To string conversions:
 
   Call the custom instance constructor of an extension class.
 
-| CustomInstanceInit, DofS(0), S(Obj), Er
-
-  Call the custom instance initializer of object S0.
-
 | NewArray, D(Arr), C(Int), PRc
 
   Allocate a new array with the expected capacity S0.

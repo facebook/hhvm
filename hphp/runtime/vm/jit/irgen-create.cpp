@@ -66,6 +66,10 @@ void initSProps(IRGS& env, const Class* cls) {
 }
 
 SSATmp* allocObjFast(IRGS& env, const Class* cls) {
+  // CustomInstance classes always go through IR:AllocObj and
+  // ObjectData::newInstance()
+  assert(!cls->callsCustomInstanceInit());
+
   auto registerObj = [&] (SSATmp* obj) {
     if (RuntimeOption::EnableObjDestructCall && cls->getDtor()) {
       gen(env, RegisterLiveObj, obj);
@@ -99,12 +103,6 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
 
   // Initialize the properties
   gen(env, InitObjProps, ClassData(cls), ssaObj);
-
-  // Call a custom initializer if one exists
-  if (cls->callsCustomInstanceInit()) {
-    return registerObj(gen(env, CustomInstanceInit, ssaObj));
-  }
-
   return registerObj(ssaObj);
 }
 

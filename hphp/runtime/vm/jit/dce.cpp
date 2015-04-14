@@ -286,7 +286,6 @@ bool canDCE(IRInstruction* inst) {
   case InitSProps:
   case InitObjProps:
   case ConstructInstance:
-  case CustomInstanceInit:
   case AllocPackedArray:
   case InitPackedArray:
   case InitPackedArrayLoop:

@@ -189,8 +189,6 @@ static CallMap s_callMap {
                            {{SSA, 0}, {TV, 1}, {TV, 2}}},
     {AllocObj,           newInstance, DSSA, SSync,
                            {{SSA, 0}}},
-    {CustomInstanceInit, &ObjectData::callCustomInstanceInit,
-                           DSSA, SSync, {{SSA, 0}}},
     {InitProps,          &Class::initProps, DNone, SSync,
                            {{extra(&ClassData::cls)}}},
     {InitSProps,         &Class::initSProps, DNone, SSync,

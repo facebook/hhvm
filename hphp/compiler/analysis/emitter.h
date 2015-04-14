@@ -616,8 +616,9 @@ private:
   };
 
 private:
-  static const size_t kMinStringSwitchCases = 8;
-  static const bool systemlibDefinesIdx =
+  static constexpr size_t kMinIntSwitchCases = 2;
+  static constexpr size_t kMinStringSwitchCases = 8;
+  static constexpr bool systemlibDefinesIdx =
 #ifdef FACEBOOK
     true
 #else

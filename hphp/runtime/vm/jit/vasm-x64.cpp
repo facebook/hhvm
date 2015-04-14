@@ -148,7 +148,7 @@ private:
   void emit(jmpi& i) { a->jmp(i.target); }
   void emit(lea& i);
   void emit(leap& i) { a->lea(i.s, i.d); }
-  void emit(loaddqu& i) { a->movdqu(i.s, i.d); }
+  void emit(loadups& i) { a->movups(i.s, i.d); }
   void emit(loadtqb& i) { a->loadb(i.s, i.d); }
   void emit(loadl& i) { a->loadl(i.s, i.d); }
   void emit(loadqp& i) { a->loadq(i.s, i.d); }
@@ -184,7 +184,7 @@ private:
   void emit(shrli& i) { binary(i); a->shrl(i.s0, i.d); }
   void emit(shrqi& i) { binary(i); a->shrq(i.s0, i.d); }
   void emit(sqrtsd& i) { a->sqrtsd(i.s, i.d); }
-  void emit(storedqu& i) { a->movdqu(i.s, i.m); }
+  void emit(storeups& i) { a->movups(i.s, i.m); }
   void emit(storeb& i) { a->storeb(i.s, i.m); }
   void emit(storebi& i);
   void emit(storel& i) { a->storel(i.s, i.m); }

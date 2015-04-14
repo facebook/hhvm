@@ -162,7 +162,7 @@ struct Vunit;
   O(jmpi, I(target), U(args), Dn)\
   O(lea, Inone, U(s), D(d))\
   O(leap, I(s), Un, D(d))\
-  O(loaddqu, Inone, U(s), D(d))\
+  O(loadups, Inone, U(s), D(d))\
   O(loadtqb, Inone, U(s), D(d))\
   O(loadl, Inone, U(s), D(d))\
   O(loadqp, I(s), Un, D(d))\
@@ -203,7 +203,7 @@ struct Vunit;
   O(sqrtsd, Inone, U(s), D(d))\
   O(storeb, Inone, U(s) U(m), Dn)\
   O(storebi, I(s), U(m), Dn)\
-  O(storedqu, Inone, U(s) U(m), Dn)\
+  O(storeups, Inone, U(s) U(m), Dn)\
   O(storel, Inone, U(s) U(m), Dn)\
   O(storeli, I(s), U(m), Dn)\
   O(storeqi, I(s), U(m), Dn)\
@@ -460,7 +460,7 @@ struct jmpm { Vptr target; RegSet args; };
 struct jmpi { TCA target; RegSet args; };
 struct lea { Vptr s; Vreg64 d; };
 struct leap { RIPRelativeRef s; Vreg64 d; };
-struct loaddqu { Vptr s; Vreg128 d; };
+struct loadups { Vptr s; Vreg128 d; };
 struct loadtqb { Vptr s; Vreg8 d; };
 struct loadl { Vptr s; Vreg32 d; };
 struct loadqp { RIPRelativeRef s; Vreg64 d; };
@@ -506,7 +506,7 @@ struct shrqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct sqrtsd { VregDbl s, d; };
 struct storeb { Vreg8 s; Vptr m; };
 struct storebi { Immed s; Vptr m; };
-struct storedqu { Vreg128 s; Vptr m; };
+struct storeups { Vreg128 s; Vptr m; };
 struct storel { Vreg32 s; Vptr m; };
 struct storeli { Immed s; Vptr m; };
 struct storeqi { Immed s; Vptr m; };

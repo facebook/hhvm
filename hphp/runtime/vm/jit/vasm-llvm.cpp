@@ -1410,7 +1410,7 @@ O(ldimmb) \
 O(ldimml) \
 O(ldimmq) \
 O(lea) \
-O(loaddqu) \
+O(loadups) \
 O(load) \
 O(loadtqb) \
 O(loadl) \
@@ -1450,7 +1450,7 @@ O(sqrtsd) \
 O(store) \
 O(storeb) \
 O(storebi) \
-O(storedqu) \
+O(storeups) \
 O(storel) \
 O(storeli) \
 O(storeqi) \
@@ -2383,8 +2383,8 @@ void LLVMEmitter::emit(const lea& inst) {
   defineValue(inst.d, value);
 }
 
-void LLVMEmitter::emit(const loaddqu& inst) {
-  // This will need to change if we ever use loaddqu with values that aren't
+void LLVMEmitter::emit(const loadups& inst) {
+  // This will need to change if we ever use loadups with values that aren't
   // TypedValues. Ideally, we'd leave this kind of decision to llvm anyway.
   auto value = m_irb.CreateLoad(emitPtr(inst.s, ptrType(m_typedValueType)));
   defineValue(inst.d, value);
@@ -2727,8 +2727,8 @@ void LLVMEmitter::emit(const storebi& inst) {
   m_irb.CreateStore(cns(inst.s.b()), emitPtr(inst.m, 8));
 }
 
-void LLVMEmitter::emit(const storedqu& inst) {
-  // Like loaddqu, this will need to change if we ever use storedqu with values
+void LLVMEmitter::emit(const storeups& inst) {
+  // Like loadups, this will need to change if we ever use storeups with values
   // that aren't TypedValues.
   m_irb.CreateStore(value(inst.s), emitPtr(inst.m, ptrType(m_typedValueType)));
 }

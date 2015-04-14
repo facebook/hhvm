@@ -3344,7 +3344,7 @@ void CodeGenerator::emitStoreTypedValue(Vptr dst, SSATmp* src, Vloc loc) {
     // Whole typed value is stored in single SIMD reg srcReg0
     assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
     assertx(!srcReg1.isValid());
-    v << storedqu{srcReg0, refTVData(dst)};
+    v << storeups{srcReg0, refTVData(dst)};
     return;
   }
 
@@ -3401,7 +3401,7 @@ void CodeGenerator::emitLoadTypedValue(SSATmp* dst, Vloc dstLoc, Vptr ref) {
   auto& v = vmain();
   if (dstLoc.isFullSIMD()) {
     // Whole typed value is stored in single SIMD reg valueDstReg
-    v << loaddqu{refTVData(ref), valueDstReg};
+    v << loadups{refTVData(ref), valueDstReg};
     return;
   }
   auto const typeDstReg = dstLoc.reg(1);
@@ -5437,8 +5437,8 @@ void CodeGenerator::cgInitPackedArrayLoop(IRInstruction* inst) {
   // Load the value from the stack and store into the array. It's safe
   // to copy all 16 bytes of the value because packed arrays don't use
   // The TypedValueAux::m_aux field.
-  v << loaddqu{sp[j1 * 8], value};
-  v << storedqu{value, arrReg[i1 * 8] + firstEntry};
+  v << loadups{sp[j1 * 8], value};
+  v << storeups{value, arrReg[i1 * 8] + firstEntry};
   // Increment the loop variable by 2 because we can only scale by at most 8.
   v << lea{i1[2], i2};
   auto subFlags = v.makeReg();

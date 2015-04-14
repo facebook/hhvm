@@ -60,7 +60,7 @@ PhysRegSaverParity::PhysRegSaverParity(int parity, Vout& v,
     v << subqi{16 * xmm.size(), reg::rsp, reg::rsp, v.makeReg()};
     int offset = 0;
     xmm.forEach([&](PhysReg pr) {
-      v << storedqu{pr, reg::rsp[offset]};
+      v << storeups{pr, reg::rsp[offset]};
       offset += 16;
     });
   }
@@ -105,7 +105,7 @@ void PhysRegSaverParity::emitPops(Vout& v, RegSet regs) {
   if (!xmm.empty()) {
     int offset = 0;
     xmm.forEach([&](PhysReg pr) {
-      v << loaddqu{reg::rsp[offset], pr};
+      v << loadups{reg::rsp[offset], pr};
       offset += 16;
     });
     auto const sf = v.makeReg();

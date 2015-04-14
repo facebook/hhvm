@@ -1771,7 +1771,7 @@ void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
       stores.emplace_back(store{src, ptr});
     } else {
       assertx(src.isSIMD());
-      stores.emplace_back(storedqu{src, ptr});
+      stores.emplace_back(storeups{src, ptr});
     }
   }
   auto origin = code[j].origin;
@@ -1819,7 +1819,7 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
         loads.emplace_back(load{ptr, dst});
       } else {
         assertx(dst.isSIMD());
-        loads.emplace_back(loaddqu{ptr, dst});
+        loads.emplace_back(loadups{ptr, dst});
       }
     }
   }

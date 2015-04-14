@@ -4283,7 +4283,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         {
           FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
           for (int i = 0; i < numParams; i++) {
-            emitFuncCallArg(e, (*params)[i], i);
+            emitFuncCallArg(e, (*params)[i], i,
+                            ne->hasUnpack() && i + 1 == numParams);
           }
         }
 
@@ -4346,7 +4347,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           // $obj->name(...)
           //           ^^^^^
           for (int i = 0; i < numParams; i++) {
-            emitFuncCallArg(e, (*params)[i], i);
+            emitFuncCallArg(e, (*params)[i], i,
+                            om->hasUnpack() && i + 1 == numParams);
           }
         }
         if (om->hasUnpack()) {
@@ -4857,7 +4859,7 @@ bool EmitterVisitor::emitHHInvariant(Emitter& e, SimpleFunctionCallPtr call) {
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     for (auto i = uint32_t{1}; i < params->getCount(); ++i) {
-      emitFuncCallArg(e, (*params)[i], i - 1);
+      emitFuncCallArg(e, (*params)[i], i - 1, false);
     }
   }
   e.FCall(params->getCount() - 1);
@@ -5377,7 +5379,8 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
 
 void EmitterVisitor::emitFuncCallArg(Emitter& e,
                                      ExpressionPtr exp,
-                                     int paramId) {
+                                     int paramId,
+                                     bool isSplat) {
   visit(exp);
   if (checkIfStackEmpty("FPass*")) return;
 
@@ -5386,7 +5389,12 @@ void EmitterVisitor::emitFuncCallArg(Emitter& e,
   // TODO(4599368): if dealing with an unpack, would need to kick out of
   // the pass-by-ref behavior and defer that to FCallUnpack
 
-  emitFPass(e, paramId, getPassByRefKind(exp));
+  auto kind = getPassByRefKind(exp);
+  if (isSplat) {
+    emitConvertToCell(e);
+    kind = PassByRefKind::AllowCell;
+  }
+  emitFPass(e, paramId, kind);
 }
 
 void EmitterVisitor::emitFPass(Emitter& e, int paramId,
@@ -7662,7 +7670,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
     {
       FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
       for (int i = 0; i < numParams; i++) {
-        emitFuncCallArg(e, (*params)[i], i);
+        emitFuncCallArg(e, (*params)[i], i, unpack && i + 1 == numParams);
       }
     }
     if (unpack) {

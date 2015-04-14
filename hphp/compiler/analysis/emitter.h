@@ -781,7 +781,8 @@ public:
   void emitFuncCall(Emitter& e, FunctionCallPtr node,
                     const char* nameOverride = nullptr,
                     ExpressionListPtr paramsOverride = nullptr);
-  void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId);
+  void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId,
+                       bool isSplat);
   void emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
                          bool byRef);
   void emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp);

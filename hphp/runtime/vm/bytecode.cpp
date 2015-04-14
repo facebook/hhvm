@@ -6375,13 +6375,15 @@ static bool doFCallArray(PC& pc, int numStackValues,
         cleanupParamsAndActRec(vmStack(), ar, nullptr, nullptr);
         raise_warning("call_user_func_array() expects parameter 2 to be array");
         return false;
-      case CallArrOnInvalidContainer::WarnAndContinue:
-        tvRefcountedDecRef(c1);
+      case CallArrOnInvalidContainer::WarnAndContinue: {
+        Cell tmp = *c1;
         // argument_unpacking RFC dictates "containers and Traversables"
         raise_warning_unsampled("Only containers may be unpacked");
         c1->m_type = KindOfArray;
         c1->m_data.parr = staticEmptyArray();
+        tvRefcountedDecRef(&tmp);
         break;
+      }
     }
   }
 

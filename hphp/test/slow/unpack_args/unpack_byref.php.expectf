@@ -1,0 +1,1 @@
+Fatal error: Unpacking unsupported for calls to functions that take any arguments by reference in %s/slow/unpack_args/unpack_byref.php on line 5

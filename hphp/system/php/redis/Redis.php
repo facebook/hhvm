@@ -1263,7 +1263,7 @@ class Redis {
           ($type === self::TYPE_BULK && is_numeric($resp))) {
         return (float)$resp;
       }
-      return null;
+      return false;
     }
     $this->multiHandler[] = [ 'cb' => [$this,'processDoubleResponse'] ];
     if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {

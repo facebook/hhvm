@@ -31,6 +31,8 @@ val typedef_def:
 val expr:
   Typing_env.env -> Nast.expr -> Typing_env.env * Typing_defs.ty
 
+val ret_from_fun_kind: Pos.t -> Ast.fun_kind -> Typing_defs.ty
+
 val make_param_ty:
   Typing_env.env -> Typing_reason.t -> Nast.fun_param ->
   Typing_env.env * (string option * Typing_defs.ty)

@@ -32,7 +32,7 @@ type t =
   | Rstmt            of Pos.t
   | Rno_return       of Pos.t
   | Rno_return_async of Pos.t
-  | Rasync_ret       of Pos.t
+  | Rret_fun_kind    of Pos.t * Ast.fun_kind
   | Rhint            of Pos.t
   | Rnull_check      of Pos.t
   | Rnot_in_cstr     of Pos.t
@@ -88,7 +88,12 @@ let rec to_string prefix r =
   | Rstmt            _ -> [(p, prefix ^ " because this is a statement")]
   | Rno_return       _ -> [(p, prefix ^ " because this function implicitly returns void")]
   | Rno_return_async _ -> [(p, prefix ^ " because this async function implicitly returns Awaitable<void>")]
-  | Rasync_ret       _ -> [(p, prefix ^ " (result of 'async function')")]
+  | Rret_fun_kind    (_, kind) ->
+    [(p, match kind with
+      | Ast.FAsyncGenerator -> prefix ^ " (result of 'async function' containing a 'yield')"
+      | Ast.FGenerator -> prefix ^ " (result of function containing a 'yield')"
+      | Ast.FAsync -> prefix ^ " (result of 'async function')"
+      | Ast.FSync -> prefix)]
   | Rhint            _ -> [(p, prefix)]
   | Rnull_check      _ -> [(p, prefix ^ " because this was checked to see if the value was null")]
   | Rnot_in_cstr     _ -> [(p, prefix ^ " because it is not always defined in __construct")]
@@ -179,7 +184,7 @@ and to_pos = function
   | Rstmt        p -> p
   | Rno_return   p -> p
   | Rno_return_async p -> p
-  | Rasync_ret   p -> p
+  | Rret_fun_kind (p, _) -> p
   | Rhint        p -> p
   | Rnull_check  p -> p
   | Rnot_in_cstr p -> p

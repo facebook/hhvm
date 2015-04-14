@@ -333,6 +333,7 @@ UNSUPPORTED_FILES_CONVERTER = {
         'forbid_await_in_sync_functions3.php',
         'forbid_await_in_sync_functions4.php',
         'forbid_await_in_sync_functions5.php',
+        'function_decl_untyped.php',
         'functional_generator.php',
         'genva_allows_awaiting_on_multiple_awaitables.php',
         'iface_require_extends5.php',

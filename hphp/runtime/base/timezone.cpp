@@ -199,11 +199,10 @@ bool TimeZone::SetCurrent(const String& zone) {
     valid = IsValid(zone);
 
     auto key = strdup(name);
-    auto result = s_tzvCache->insert(TimeZoneValidityCacheEntry(name, valid));
+    auto result = s_tzvCache->insert(TimeZoneValidityCacheEntry(key, valid));
     if (!result.second) {
-      // The cache should never fill up since zones are finite.
-      always_assert(result.first != s_tzvCache->end());
-      // A collision occurred, so we don't need our strdup'ed key.
+      // The cache is full or a collision occurred, and we don't need our
+      // strdup'ed key.
       free(key);
     }
   }

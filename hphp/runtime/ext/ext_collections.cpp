@@ -572,7 +572,7 @@ void BaseVector::Unserialize(const char* vectorType,
     auto tv = &bvec->m_data[bvec->m_size];
     tv->m_type = KindOfNull;
     bvec->incSize();
-    tvAsVariant(tv).unserialize(uns, Uns::Mode::ColValue);
+    unserializeVariant(tvAsVariant(tv), uns, UnserializeMode::ColValue);
   }
 }
 
@@ -3447,7 +3447,7 @@ void BaseMap::Unserialize(ObjectData* obj,
   mp->reserve(sz);
   for (int64_t i = 0; i < sz; ++i) {
     Variant k;
-    k.unserialize(uns, Uns::Mode::ColKey);
+    unserializeVariant(k, uns, UnserializeMode::ColKey);
     int32_t* p;
     Elm* e = nullptr;
     if (k.isInteger()) {
@@ -3474,7 +3474,7 @@ void BaseMap::Unserialize(ObjectData* obj,
     }
     e->data.m_type = KindOfNull;
 do_unserialize:
-    tvAsVariant(&e->data).unserialize(uns, Uns::Mode::ColValue);
+    unserializeVariant(tvAsVariant(&e->data), uns, UnserializeMode::ColValue);
   }
 }
 
@@ -3867,11 +3867,11 @@ void BaseSet::Unserialize(const char* setType, ObjectData* obj,
   auto st = static_cast<BaseSet*>(obj);
   st->reserve(sz);
   for (int64_t i = 0; i < sz; ++i) {
-    Variant k;
     // When unserializing an element of a Set, we use Mode::ColKey for now.
     // This will make the unserializer to reserve an id for the element
     // but won't allow referencing the element via 'r' or 'R'.
-    k.unserialize(uns, Uns::Mode::ColKey);
+    Variant k;
+    unserializeVariant(k, uns, UnserializeMode::ColKey);
     int32_t* p;
     Elm* e = nullptr;
     if (k.isInteger()) {
@@ -5377,8 +5377,8 @@ void c_Pair::Unserialize(ObjectData* obj,
   pair->m_size = 2;
   pair->elm0.m_type = KindOfNull;
   pair->elm1.m_type = KindOfNull;
-  tvAsVariant(&pair->elm0).unserialize(uns, Uns::Mode::ColValue);
-  tvAsVariant(&pair->elm1).unserialize(uns, Uns::Mode::ColValue);
+  unserializeVariant(tvAsVariant(&pair->elm0), uns, UnserializeMode::ColValue);
+  unserializeVariant(tvAsVariant(&pair->elm1), uns, UnserializeMode::ColValue);
 }
 
 Object c_Pair::t_tovector() { return materializeImpl<c_Vector>(this); }

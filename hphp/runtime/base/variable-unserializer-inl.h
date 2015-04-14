@@ -91,15 +91,15 @@ inline void VariableUnserializer::expectChar(char expected) {
   }
 }
 
-inline void VariableUnserializer::add(Variant* v, Uns::Mode mode) {
-  if (mode == Uns::Mode::Value) {
+inline void VariableUnserializer::add(Variant* v, UnserializeMode mode) {
+  if (mode == UnserializeMode::Value) {
     m_refs.emplace_back(RefInfo(v));
-  } else if (mode == Uns::Mode::Key) {
+  } else if (mode == UnserializeMode::Key) {
     // do nothing
-  } else if (mode == Uns::Mode::ColValue) {
+  } else if (mode == UnserializeMode::ColValue) {
     m_refs.emplace_back(RefInfo::makeNonRefable(v));
   } else {
-    assert(mode == Uns::Mode::ColKey);
+    assert(mode == UnserializeMode::ColKey);
     // We don't currently support using the 'r' encoding to refer
     // to collection keys, but eventually we'll need to make this
     // work to allow objects as keys. For now we encode collections

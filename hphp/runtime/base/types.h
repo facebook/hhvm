@@ -72,17 +72,6 @@ using LowStringPtr = LowPtr<const StringData>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace Uns {
-enum class Mode {
-  Value = 0,
-  Key = 1,
-  ColValue = 2,
-  ColKey = 3,
-};
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 using VRefParam = const class VRefParamValue&;
 using RefResult = const class RefResultValue&;
 

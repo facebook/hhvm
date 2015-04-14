@@ -24,6 +24,7 @@
 #include "hphp/util/timer.h"
 
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-stats.h"
@@ -277,7 +278,7 @@ APCHandle* ConcurrentTableSharedStore::unserialize(const String& key,
 
     VariableUnserializer vu(sAddr, sval->getSerializedSize(), sType);
     Variant v;
-    v.unserialize(&vu);
+    unserializeVariant(v, &vu);
     auto const pair = APCHandle::Create(v, sval->isSerializedObj());
     sval->data = pair.handle;
     sval->dataSize = pair.size;

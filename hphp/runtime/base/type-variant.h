@@ -758,9 +758,6 @@ struct Variant : private TypedValue {
     return ObjNR(getObjectData());
   }
 
-  void unserialize(VariableUnserializer *unserializer,
-                   Uns::Mode mode = Uns::Mode::Value);
-
   /*
    * Low level access that should be restricted to internal use.
    */

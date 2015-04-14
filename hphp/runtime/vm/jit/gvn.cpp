@@ -293,7 +293,9 @@ bool visitDefLabel(
     }
 
     assertx(vnTable[dst].value);
-    if (canForwardDst && vnTable[dst].value != forwardedDst) {
+    if (canForwardDst &&
+        vnTable[dst].value != forwardedDst &&
+        supportsGVN(forwardedDst->inst())) {
       FTRACE(1, "forwarded through DefLabel: {} (old) -> {} (new)\n",
         *dst, *forwardedDst);
       updates[dst] = ValueNumberMetadata { dst, forwardedDst };

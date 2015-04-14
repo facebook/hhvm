@@ -716,29 +716,30 @@ void Variant::setEvalScalar() {
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 
-void Variant::serialize(VariableSerializer *serializer,
-                        bool isArrayKey /* = false */,
-                        bool skipNestCheck /* = false */,
-                        bool noQuotes /* = false */) const {
-  if (m_type == KindOfRef) {
+void serializeVariant(const Variant& self, VariableSerializer *serializer,
+                      bool isArrayKey /* = false */,
+                      bool skipNestCheck /* = false */,
+                      bool noQuotes /* = false */) {
+  auto tv = self.asTypedValue();
+  if (tv->m_type == KindOfRef) {
     // Ugly, but behavior is different for serialize
     if (serializer->getType() == VariableSerializer::Type::Serialize ||
         serializer->getType() == VariableSerializer::Type::APCSerialize ||
         serializer->getType() == VariableSerializer::Type::DebuggerSerialize) {
-      if (serializer->incNestedLevel(m_data.pref->var())) {
-        serializer->writeOverflow(m_data.pref->var());
+      if (serializer->incNestedLevel(tv->m_data.pref->var())) {
+        serializer->writeOverflow(tv->m_data.pref->var());
       } else {
         // Tell the inner variant to skip the nesting check for data inside
-        m_data.pref->var()->serialize(serializer, isArrayKey, true);
+        serializeVariant(*tv->m_data.pref->var(), serializer, isArrayKey, true);
       }
-      serializer->decNestedLevel(m_data.pref->var());
+      serializer->decNestedLevel(tv->m_data.pref->var());
     } else {
-      m_data.pref->var()->serialize(serializer, isArrayKey);
+      serializeVariant(*tv->m_data.pref->var(), serializer, isArrayKey);
     }
     return;
   }
 
-  switch (m_type) {
+  switch (tv->m_type) {
     case KindOfUninit:
     case KindOfNull:
       assert(!isArrayKey);
@@ -747,36 +748,36 @@ void Variant::serialize(VariableSerializer *serializer,
 
     case KindOfBoolean:
       assert(!isArrayKey);
-      serializer->write(m_data.num != 0);
+      serializer->write(tv->m_data.num != 0);
       return;
 
     case KindOfInt64:
-      serializer->write(m_data.num);
+      serializer->write(tv->m_data.num);
       return;
 
     case KindOfDouble:
-      serializer->write(m_data.dbl);
+      serializer->write(tv->m_data.dbl);
       return;
 
     case KindOfStaticString:
     case KindOfString:
-      serializer->write(m_data.pstr->data(),
-                        m_data.pstr->size(), isArrayKey, noQuotes);
+      serializer->write(tv->m_data.pstr->data(),
+                        tv->m_data.pstr->size(), isArrayKey, noQuotes);
       return;
 
     case KindOfArray:
       assert(!isArrayKey);
-      m_data.parr->serialize(serializer, skipNestCheck);
+      tv->m_data.parr->serialize(serializer, skipNestCheck);
       return;
 
     case KindOfObject:
       assert(!isArrayKey);
-      m_data.pobj->serialize(serializer);
+      tv->m_data.pobj->serialize(serializer);
       return;
 
     case KindOfResource:
       assert(!isArrayKey);
-      m_data.pres->serialize(serializer);
+      tv->m_data.pres->serialize(serializer);
       return;
 
     case KindOfRef:

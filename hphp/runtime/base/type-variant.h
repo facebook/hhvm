@@ -758,21 +758,10 @@ struct Variant : private TypedValue {
     return ObjNR(getObjectData());
   }
 
-  /**
-   * Output functions
-   */
-  /* The last param noQuotes indicates to serializer to not put the output in
-   * double quotes (used when printing the output of a __toDebugDisplay() of
-   * an object when it is a string.
-   */
-  void serialize(VariableSerializer *serializer,
-                 bool isArrayKey = false,
-                 bool skipNestCheck = false,
-                 bool noQuotes = false) const;
   void unserialize(VariableUnserializer *unserializer,
                    Uns::Mode mode = Uns::Mode::Value);
 
-  /**
+  /*
    * Low level access that should be restricted to internal use.
    */
   int64_t *getInt64Data() const {

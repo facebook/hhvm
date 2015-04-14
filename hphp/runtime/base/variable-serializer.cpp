@@ -593,7 +593,7 @@ void VariableSerializer::write(const Variant& v, bool isArrayKey /* = false */) 
     write(v.toObject());
     return;
   }
-  v.serialize(this, isArrayKey);
+  serializeVariant(v, this, isArrayKey);
 }
 
 void VariableSerializer::writeNull() {

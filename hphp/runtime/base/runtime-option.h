@@ -398,6 +398,7 @@ public:
   F(uint32_t, JitLLVM,                 jitLLVMDefault())                \
   F(uint32_t, JitLLVMKeepSize,         0)                               \
   F(bool,     JitLLVMBasicOpt,         true)                            \
+  F(string,   JitLLVMCompare,          "")                              \
   F(bool,     JitLLVMCondTail,         true)                            \
   F(bool,     JitLLVMCounters,         false)                           \
   F(bool,     JitLLVMDiscard,          false)                           \
@@ -409,7 +410,7 @@ public:
   F(bool,     JitLLVMRetOpt,           true)                            \
   F(uint32_t, JitLLVMSizeLevel,        0)                               \
   F(uint32_t, JitLLVMSplitHotCold,     1)                               \
-  F(string,   JitLLVMCompare,          "")                              \
+  F(bool,     JitLLVMVolatileIncDec,   true)                            \
   F(string,   JitCPU,                  "native")                        \
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitAHotSize,             ahotDefault())                   \

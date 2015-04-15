@@ -2094,7 +2094,7 @@ void LLVMEmitter::emit(const decl& inst) {
 
 void LLVMEmitter::emit(const declm& inst) {
   auto ptr = emitPtr(inst.m, 32);
-  auto load = m_irb.CreateLoad(ptr);
+  auto load = m_irb.CreateLoad(ptr, RuntimeOption::EvalJitLLVMVolatileIncDec);
   auto sub = m_irb.CreateAdd(load, m_int32NegOne, "",
                              /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, sub);
@@ -2163,7 +2163,7 @@ void LLVMEmitter::emit(const fallbackcc& inst) {
 
 void LLVMEmitter::emit(const incwm& inst) {
   auto ptr = emitPtr(inst.m, 16);
-  auto oldVal = m_irb.CreateLoad(ptr);
+  auto oldVal = m_irb.CreateLoad(ptr, RuntimeOption::EvalJitLLVMVolatileIncDec);
   auto newVal = m_irb.CreateAdd(oldVal, m_int16One, "",
                                 /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, newVal);
@@ -2177,7 +2177,7 @@ void LLVMEmitter::emit(const incl& inst) {
 
 void LLVMEmitter::emit(const inclm& inst) {
   auto ptr = emitPtr(inst.m, 32);
-  auto load = m_irb.CreateLoad(ptr);
+  auto load = m_irb.CreateLoad(ptr, RuntimeOption::EvalJitLLVMVolatileIncDec);
   auto add = m_irb.CreateAdd(load, m_int32One, "",
                              /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, add);
@@ -2475,7 +2475,8 @@ void LLVMEmitter::emit(const mul& inst) {
 }
 
 void LLVMEmitter::emit(const neg& inst) {
-  defineValue(inst.d, m_irb.CreateSub(m_int64Zero, value(inst.s)));
+  defineValue(inst.d, m_irb.CreateSub(m_int64Zero, value(inst.s), "",
+                                      /* NUW = */ false, /* NSW = */ true));
 }
 
 void LLVMEmitter::emit(const nop& inst) {

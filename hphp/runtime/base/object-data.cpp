@@ -565,8 +565,12 @@ static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
 
   ctx.func = ctx.cls->lookupMethod(s.get());
   if (ctx.func) {
-    if (ctx.func->attrs() & AttrStatic) {
-      // If we found a method and its static, null out this_
+    // Null out this_ for static methods, unless it's a closure.
+    //
+    // Closures will sort out $this for themselves downstream, and
+    // they need this one because it's the closure object.
+    if ((ctx.func->attrs() & AttrStatic) &&
+        !ctx.func->isClosureBody()) {
       ctx.this_ = nullptr;
     }
   } else {

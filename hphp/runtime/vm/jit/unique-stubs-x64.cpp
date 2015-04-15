@@ -513,7 +513,7 @@ asm_label(a, noCallee);
 //////////////////////////////////////////////////////////////////////
 
 void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
-  TCA (*helper)(ActRec*) = &fcallHelper;
+  TCA (*helper)(ActRec*, bool) = &fcallHelper;
   Asm a { mcg->code.main() };
 
   moveToAlign(mcg->code.main());
@@ -521,17 +521,20 @@ void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
 
   Label popAndXchg, skip;
 
-  // fcallHelper is used for prologues, and (in the case of closures) for
-  // dispatch to the function body. In the first case, there's a call, in the
-  // second, there's a jmp.  We can differentiate by comparing r15 and rVmFp
-  a.    movq   (rStashedAR, argNumToRegName[0]);
-  a.    cmpq   (rStashedAR, rVmFp);
-  a.    jne8   (popAndXchg);
-  emitCall(a, CppCall::direct(helper), argSet(1));
+  // fcallHelper is used for prologues, and (in the case of cloned closures)
+  // for dispatch to the function body. In the first case, there's a call, in
+  // the second, there's a jmp.  We can differentiate by loading the func out
+  // of the actrec and asking it if it's a cloned closure.
+  a.    loadq  (rStashedAR[AROFF(m_func)], argNumToRegName[0]);
+  emitCall(a, CppCall::method(&Func::isClonedClosure), argSet(1));
+  a.    movb   (al, rbyte(argNumToRegName[1]));  // live for helper calls below
+  a.    movq   (rStashedAR, argNumToRegName[0]); // live for helper calls below
+  a.    testb  (al, al);
+  a.    jz8    (popAndXchg);
+
+  // Cloned closure case:
+  emitCall(a, CppCall::direct(helper), argSet(2));
   a.    jmp    (rax);
-  // The ud2 is a hint to the processor that the fall-through path of the
-  // indirect jump (which it statically predicts as most likely) is not
-  // possible.
   a.    ud2    ();
 
   // fcallHelper may call doFCall. doFCall changes the return ip
@@ -547,7 +550,7 @@ asm_label(a, popAndXchg);
   // frames, however, so switch it into rbp in case fcallHelper throws.
   a.    pop    (rStashedAR[AROFF(m_savedRip)]);
   a.    xchgq  (rStashedAR, rVmFp);
-  emitCall(a, CppCall::direct(helper), argSet(1));
+  emitCall(a, CppCall::direct(helper), argSet(2));
   a.    testq  (rax, rax);
   a.    js8    (skip);
   a.    xchgq  (rStashedAR, rVmFp);

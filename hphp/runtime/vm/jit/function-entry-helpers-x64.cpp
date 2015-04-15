@@ -47,8 +47,7 @@ static void setupAfterPrologue(ActRec* fp, void* sp) {
   }
 }
 
-TCA fcallHelper(ActRec* ar) {
-  auto const isClonedClosure = ar->m_func->isClonedClosure();
+TCA fcallHelper(ActRec* ar, bool isClonedClosure) {
   void* const sp = isClonedClosure
     ? reinterpret_cast<Cell*>(ar) - ar->m_func->numSlotsInFrame()
     : reinterpret_cast<Cell*>(ar) - ar->numArgs();

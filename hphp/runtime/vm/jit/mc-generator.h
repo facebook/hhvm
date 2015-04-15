@@ -387,8 +387,8 @@ private:
   size_t             m_totalSize;
 };
 
-TCA fcallHelper(ActRec* ar);
-TCA funcBodyHelper(ActRec* ar);
+TCA fcallHelper(ActRec*, bool isClonedClosure);
+TCA funcBodyHelper(ActRec*);
 int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 
 // Both emitIncStat()s push/pop flags but don't clobber any registers.

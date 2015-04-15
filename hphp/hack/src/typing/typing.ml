@@ -1677,14 +1677,16 @@ and call_parent_construct pos env el uel =
 (* parent::method() in a class definition invokes the specific parent
  * version of the method ... it better be callable *)
 and check_abstract_parent_meth mname pos fty =
-  (match fty with
-    | r, Tfun { ft_abstract = true; _ } ->
-      Errors.parent_abstract_call mname pos (Reason.to_pos r)
-    | _, (Tany | Tmixed | Tarray (_, _) | Tgeneric (_, _) | Toption _ | Tprim _
-      | Tvar _ | Tfun _ | Tapply (_, _) | Tabstract (_, _, _) | Ttuple _
-      | Tanon _ | Tunresolved _ | Tobject | Tshape _
-      | Taccess (_, _)) -> ());
+  if is_abstract_ft fty then Errors.parent_abstract_call mname pos (Reason.to_pos (fst fty)) ;
   fty
+
+and is_abstract_ft fty = match fty with
+  | _r, Tfun { ft_abstract = true; _ } -> true
+  | _r, (Tany | Tmixed | Tarray (_, _) | Tgeneric (_, _) | Toption _ | Tprim _
+            | Tvar _ | Tfun _ | Tapply (_, _) | Tabstract (_, _, _) | Ttuple _
+            | Tanon _ | Tunresolved _ | Tobject | Tshape _
+            | Taccess (_, _))
+    -> false
 
 (* Depending on the kind of expression we are dealing with
  * The typing of call is different.
@@ -1986,18 +1988,33 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
       let env, fty = class_get ~is_method:true ~is_const:false env ty1 m e1 in
       let env, fty = Env.expand_type env fty in
       let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
+      let () = match e1 with
+        | CIself when is_abstract_ft fty ->
+          (match Env.get_self env with
+            | _, Tapply ((_, self), _) ->
+              (* at runtime, self:: in a trait is a call to whatever
+               * self:: is in the context of the non-trait "use"-ing
+               * the trait's code *)
+              (match Env.get_class env self with
+                | Some { tc_kind = Ast.Ctrait; _ } -> ()
+                | _ -> Errors.self_abstract_call (snd m) p (Reason.to_pos (fst fty))
+              )
+            | _ -> ())
+        | CI c when is_abstract_ft fty ->
+          Errors.classname_abstract_call (snd c) (snd m) p (Reason.to_pos (fst fty))
+        | _ -> () in
       call p env fty el uel
   | Obj_get(e1, (_, Id m), nullflavor) ->
-      let is_method = call_type = Cnormal in
-      let env, ty1 = expr env e1 in
-      let nullsafe =
-        (match nullflavor with
-          | OG_nullthrows -> None
-          | OG_nullsafe -> Some p
-        ) in
-      let fn = (fun (env, fty, _) ->
-        let env, fty = Env.expand_type env fty in
-        let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
+    let is_method = call_type = Cnormal in
+    let env, ty1 = expr env e1 in
+    let nullsafe =
+      (match nullflavor with
+        | OG_nullthrows -> None
+        | OG_nullsafe -> Some p
+      ) in
+    let fn = (fun (env, fty, _) ->
+      let env, fty = Env.expand_type env fty in
+      let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
         let env, method_ = call p env fty el uel in
         env, method_, None) in
       let env =

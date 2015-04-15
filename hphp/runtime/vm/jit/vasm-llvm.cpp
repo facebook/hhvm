@@ -627,9 +627,11 @@ struct LLVMEmitter {
 
     static_assert(offsetof(TypedValue, m_data) == 0, "");
     static_assert(offsetof(TypedValue, m_type) == 8, "");
-    m_typedValueType = llvm::StructType::get(
-        m_context, std::vector<llvm::Type*>{m_int64, m_int8},
-        /*isPacked*/ false);
+    m_tvStructType = llvm::StructType::get(
+      m_context, std::vector<llvm::Type*>{m_int64, m_int8},
+      /*isPacked*/ false
+    );
+    m_tvVectorType = llvm::VectorType::get(m_int64, 2);
 
     // The hacky way of tuning LLVM command-line parameters. This has to live
     // till a better debug option control library is implemented.
@@ -675,9 +677,7 @@ struct LLVMEmitter {
     std::string err;
     llvm::raw_string_ostream stream(err);
     always_assert_flog(!llvm::verifyModule(*m_module, &stream),
-                       "LLVM verifier failed:\n{}\n{:-^80}\n{}\n{:-^80}\n{}",
-                       stream.str(), " vasm unit ", show(m_unit),
-                       " llvm module ", showModule(m_module.get()));
+                       "LLVM verifier failed:\n{}\n", stream.str());
   }
 
   /*
@@ -1232,8 +1232,10 @@ VASM_OPCODES
   llvm::FunctionType* m_traceletFnTy{nullptr};
   llvm::FunctionType* m_bindcallFnTy{nullptr};
 
-  // Mimic HHVM's TypedValue.
-  llvm::StructType* m_typedValueType{nullptr};
+  // Mimic HHVM's TypedValue, as a struct type and a Vector for full
+  // loads/stores.
+  llvm::StructType* m_tvStructType{nullptr};
+  llvm::VectorType* m_tvVectorType{nullptr};
 
   // Saved LLVM intrinsics.
   llvm::Function* m_llvmFrameAddress{nullptr};
@@ -1489,7 +1491,8 @@ O(absdbl) \
 O(phijmp) \
 O(phijcc) \
 O(phidef) \
-O(countbytecode)
+O(countbytecode) \
+O(unpcklpd)
 #define O(name) case Vinstr::name: emit(inst.name##_); break;
   SUPPORTED_OPS
 #undef O
@@ -1529,7 +1532,6 @@ O(countbytecode)
       case Vinstr::mcprep:
       case Vinstr::cmpsd:
       case Vinstr::ucomisd:
-      case Vinstr::unpcklpd:
       // ARM opcodes:
       case Vinstr::asrv:
       case Vinstr::brk:
@@ -1870,7 +1872,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     break;
   case DestType::SIMD:
   case DestType::TV:
-    returnType = m_typedValueType;
+    returnType = m_tvStructType;
     break;
   }
 
@@ -1971,22 +1973,24 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     assertx(dests.size() == 1);
     defineValue(dests[0], callInst);
     break;
+  case DestType::SIMD:
   case DestType::TV: {
     static_assert(offsetof(TypedValue, m_data) == 0, "");
     static_assert(offsetof(TypedValue, m_type) == 8, "");
     assertx(dests.size() <= 2 && dests.size() >= 1);
-    defineValue(dests[0], m_irb.CreateExtractValue(callInst, 0)); // m_data
-    if (dests.size() == 2) {
-      auto type = m_irb.CreateExtractValue(callInst, 1);
-      defineValue(dests[1], zext(type, 64)); // m_type
+    auto const data = m_irb.CreateExtractValue(callInst, 0);
+    auto const type = zext(m_irb.CreateExtractValue(callInst, 1), 64);
+
+    if (destType == DestType::TV) {
+      defineValue(dests[0], data);
+      if (dests.size() == 2) defineValue(dests[1], type);
+    } else {
+      assertx(dests.size() == 1);
+      llvm::Value* packed = llvm::UndefValue::get(m_tvVectorType);
+      packed = m_irb.CreateInsertElement(packed, data, cns(0));
+      packed = m_irb.CreateInsertElement(packed, type, cns(1));
+      defineValue(dests[0], packed);
     }
-    break;
-  }
-  case DestType::SIMD: {
-    assertx(dests.size() == 1);
-    // Do we want to pack it manually into a <2 x i64>? Or bitcast to X86_MMX?
-    // Leave it as TypedValue for now and see what LLVM optimizer does.
-    defineValue(dests[0], callInst);
     break;
   }
   }
@@ -2391,8 +2395,9 @@ void LLVMEmitter::emit(const lea& inst) {
 void LLVMEmitter::emit(const loadups& inst) {
   // This will need to change if we ever use loadups with values that aren't
   // TypedValues. Ideally, we'd leave this kind of decision to llvm anyway.
-  auto value = m_irb.CreateLoad(emitPtr(inst.s, ptrType(m_typedValueType)));
-  defineValue(inst.d, value);
+  auto vec = m_irb.CreateLoad(emitPtr(inst.s, ptrType(m_tvVectorType)));
+  vec->setAlignment(sizeof(intptr_t));
+  defineValue(inst.d, vec);
 }
 
 void LLVMEmitter::emit(const load& inst) {
@@ -2736,7 +2741,8 @@ void LLVMEmitter::emit(const storebi& inst) {
 void LLVMEmitter::emit(const storeups& inst) {
   // Like loadups, this will need to change if we ever use storeups with values
   // that aren't TypedValues.
-  m_irb.CreateStore(value(inst.s), emitPtr(inst.m, ptrType(m_typedValueType)));
+  auto vecPtr = emitPtr(inst.m, ptrType(m_tvVectorType));
+  m_irb.CreateStore(value(inst.s), vecPtr)->setAlignment(sizeof(intptr_t));
 }
 
 void LLVMEmitter::emit(const storel& inst) {
@@ -2882,9 +2888,9 @@ void LLVMEmitter::emit(const xorqi& inst) {
 }
 
 void LLVMEmitter::emit(const landingpad& inst) {
-  // This is far from correct, but it's enough to keep the llvm verifier happy
-  // for now.
-  auto pad = m_irb.CreateLandingPad(m_typedValueType, m_personalityFunc, 0);
+  // m_personalityFunc is a dummy value because we just extract the information
+  // we need from the .gcc_except_table section rather than using it directly.
+  auto pad = m_irb.CreateLandingPad(m_tvStructType, m_personalityFunc, 0);
   pad->setCleanup(true);
 }
 
@@ -2892,6 +2898,14 @@ void LLVMEmitter::emit(const countbytecode& inst) {
   auto ptr = emitPtr(inst.base[g_bytecodesLLVM.handle()], 64);
   auto load = m_irb.CreateLoad(ptr);
   m_irb.CreateStore(m_irb.CreateAdd(load, m_int64One), ptr);
+}
+
+void LLVMEmitter::emit(const unpcklpd& inst) {
+  llvm::Value* dest = llvm::UndefValue::get(m_tvVectorType);
+  // Flipped operand order is due to ATT style in vasm.
+  dest = m_irb.CreateInsertElement(dest, value(inst.s1), cns(0));
+  dest = m_irb.CreateInsertElement(dest, value(inst.s0), cns(1));
+  defineValue(inst.d, dest);
 }
 
 void LLVMEmitter::emitTrap() {

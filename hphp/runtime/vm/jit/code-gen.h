@@ -71,10 +71,10 @@ struct CodegenState {
   StateVector<SSATmp,Vloc> locs;
 };
 
-// Generate machine code; converts to vasm or llvm, further optimizes,
-// emits code into main/cold/frozen sections, allocates rds and global
-// data, and adds fixup metadata.
-void genCode(IRUnit&);
+// Generate machine code; converts to vasm, optionally converts to llvm,
+// further optimizes, emits code into main/cold/frozen sections, allocates rds
+// and global data, and adds fixup metadata.
+void genCode(IRUnit& unit);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

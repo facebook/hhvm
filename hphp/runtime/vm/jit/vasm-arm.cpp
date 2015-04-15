@@ -670,26 +670,27 @@ void lowerForARM(Vunit& unit) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-void Vasm::finishARM(const Abi& abi, AsmInfo* asmInfo) {
-  optimizeExits(m_unit);
-  lower(m_unit);
-  if (!m_unit.constants.empty()) {
-    foldImms<arm::ImmFolder>(m_unit);
+void finishARM(Vunit& unit, Vasm::AreaList& areas,
+               const Abi& abi, AsmInfo* asmInfo) {
+  optimizeExits(unit);
+  lower(unit);
+  if (!unit.constants.empty()) {
+    foldImms<arm::ImmFolder>(unit);
   }
-  lowerForARM(m_unit);
-  if (m_unit.needsRegAlloc()) {
+  lowerForARM(unit);
+  if (unit.needsRegAlloc()) {
     Timer _t(Timer::vasm_xls);
-    removeDeadCode(m_unit);
-    allocateRegisters(m_unit, abi);
+    removeDeadCode(unit);
+    allocateRegisters(unit, abi);
   }
-  if (m_unit.blocks.size() > 1) {
+  if (unit.blocks.size() > 1) {
     Timer _t(Timer::vasm_jumps);
-    optimizeJmps(m_unit);
+    optimizeJmps(unit);
   }
 
   Timer _t(Timer::vasm_gen);
-  auto blocks = layoutBlocks(m_unit);
-  Vgen(m_unit, m_areas, asmInfo).emit(blocks);
+  auto blocks = layoutBlocks(unit);
+  Vgen(unit, areas, asmInfo).emit(blocks);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

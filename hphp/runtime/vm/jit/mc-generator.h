@@ -236,7 +236,17 @@ public:
   bool addDbgGuards(const Unit* unit);
   bool addDbgGuard(const Func* func, Offset offset, bool resumed);
   bool freeRequestStub(TCA stub);
-  TCA getFreeStub(CodeBlock& unused, CodeGenFixups* fixups);
+
+  /*
+   * Return a TCA suitable for emitting an ephemeral stub. A reused stub will
+   * be returned if one is available. Otherwise, frozen.frontier() will be
+   * returned.
+   *
+   * If not nullptr, isReused will be set to whether or not a reused stub was
+   * returned.
+   */
+  TCA getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups,
+                  bool* isReused = nullptr);
   void registerCatchBlock(CTCA ip, TCA block);
   folly::Optional<TCA> getCatchTrace(CTCA ip) const;
   CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
@@ -247,17 +257,6 @@ public:
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
   void traceCodeGen(IRGS&);
   void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
-
-  /*
-   * Set/get if we're going to try using LLVM as the codegen backend for the
-   * current translation.
-   */
-  void setUseLLVM(bool llvm) {
-    m_useLLVM = llvm;
-  }
-  bool useLLVM() const {
-    return m_useLLVM;
-  }
 
   /*
    * Dump translation cache.  True if successful.
@@ -371,7 +370,6 @@ private:
 private:
   std::unique_ptr<BackEnd> m_backEnd;
   Translator         m_tx;
-  bool               m_useLLVM{false};
 
   // maps jump addresses to the ID of translation containing them.
   TcaTransIDMap      m_jmpToTransID;

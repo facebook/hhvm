@@ -1317,8 +1317,11 @@ MCGenerator::freeRequestStub(TCA stub) {
   return true;
 }
 
-TCA MCGenerator::getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups) {
+TCA MCGenerator::getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups,
+                             bool* isReused) {
   TCA ret = m_freeStubs.maybePop();
+  if (isReused) *isReused = ret;
+
   if (ret) {
     Stats::inc(Stats::Astub_Reused);
     always_assert(m_freeStubs.peek() == nullptr ||
@@ -1509,28 +1512,23 @@ MCGenerator::translateWork(const TranslArgs& args) {
   TCA        realFrozenStart   = code.realFrozen().frontier();
   SrcRec&    srcRec            = *m_tx.getSrcRec(sk);
   TransKind  transKindToRecord = TransKind::Interp;
-  UndoMarker undoA(code.main());
-  UndoMarker undoAcold(code.cold());
-  UndoMarker undoAfrozen(code.frozen());
-  UndoMarker undoGlobalData(code.data());
+  UndoMarker undo[] = {
+    UndoMarker{code.main()},
+    UndoMarker{code.cold()},
+    UndoMarker{code.frozen()},
+    UndoMarker{code.data()},
+  };
 
-  setUseLLVM(
+  auto const useLLVM =
     // Regions with bytecode-level control flow cause vmsp stack
     // manipulations we can't handle right now: t4810319
     RuntimeOption::EvalJitPGORegionSelector == "hottrace" &&
     !RuntimeOption::EvalJitLoops &&
     (RuntimeOption::EvalJitLLVM > 1 ||
-     (RuntimeOption::EvalJitLLVM && m_tx.mode() == TransKind::Optimize))
-  );
-  SCOPE_EXIT {
-    setUseLLVM(false);
-  };
+     (RuntimeOption::EvalJitLLVM && m_tx.mode() == TransKind::Optimize));
 
   auto resetState = [&] {
-    undoA.undo();
-    undoAcold.undo();
-    undoAfrozen.undo();
-    undoGlobalData.undo();
+    for (auto& u : undo) u.undo();
     m_fixups.clear();
   };
 
@@ -1579,7 +1577,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
         initSpOffset,
         sk.resumed(),
         sk.func(),
-        region.get()
+        region.get(),
+        useLLVM
       };
 
       IRGS irgs { transContext };
@@ -1675,7 +1674,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
               realColdStart,   code.realCold().frontier()   - realColdStart,
               realFrozenStart, code.realFrozen().frontier() - realFrozenStart,
               region, m_fixups.m_bcMap,
-              useLLVM());
+              useLLVM);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);

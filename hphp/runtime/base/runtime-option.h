@@ -396,6 +396,7 @@ public:
   F(bool, Jit,                         evalJitDefault())                \
   F(bool, SimulateARM,                 simulateARMDefault())            \
   F(uint32_t, JitLLVM,                 jitLLVMDefault())                \
+  F(uint32_t, JitLLVMKeepSize,         0)                               \
   F(bool,     JitLLVMBasicOpt,         true)                            \
   F(bool,     JitLLVMCondTail,         true)                            \
   F(bool,     JitLLVMCounters,         false)                           \

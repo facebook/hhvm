@@ -489,9 +489,8 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
 
   CodeBlock mainCode;
   CodeBlock coldCode;
-  const bool useLLVM = mcg->useLLVM();
   bool do_relocate = false;
-  if (!useLLVM &&
+  if (!unit.context().useLLVM &&
       RuntimeOption::EvalJitRelocationSize &&
       coldCodeIn.canEmit(RuntimeOption::EvalJitRelocationSize * 3)) {
     /*
@@ -582,24 +581,61 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
     assertx(check(vunit));
 
-    if (useLLVM) {
+    if (unit.context().useLLVM) {
       auto& areas = vasm.areas();
+      auto x64_unit = vunit;
+      auto vasm_size = std::numeric_limits<size_t>::max();
+
+      jit::vector<UndoMarker> undoAll = {UndoMarker(mcg->globalData())};
+      for (auto const& area : areas) undoAll.emplace_back(area.code);
+      auto resetCode = [&] {
+        for (auto& marker : undoAll) marker.undo();
+        mcg->cgFixups().clear();
+      };
+      auto optimized = false;
+
+      // When EvalJitLLVMKeepSize is non-zero, we'll throw away the LLVM code
+      // and use vasm's output instead if the LLVM code is more than x% the
+      // size of the vasm code. First we generate and throw away code with
+      // vasm, just to see how big it is. The cost of this is trivial compared
+      // to the LLVM code generation.
+      if (RuntimeOption::EvalJitLLVMKeepSize) {
+        optimizeX64(x64_unit, vasm_abi);
+        optimized = true;
+        emitX64(x64_unit, areas, nullptr);
+        vasm_size = areas[0].code.frontier() - areas[0].start;
+        resetCode();
+      }
+
       try {
-        genCodeLLVM(vunit, areas, sortBlocks(vunit));
+        genCodeLLVM(vunit, areas);
+
+        auto const llvm_size = areas[0].code.frontier() - areas[0].start;
+        if (llvm_size * 100 / vasm_size > RuntimeOption::EvalJitLLVMKeepSize) {
+          throw FailedLLVMCodeGen("LLVM size {}, vasm size {}\n",
+                                  llvm_size, vasm_size);
+        }
       } catch (const FailedLLVMCodeGen& e) {
-        FTRACE(1, "LLVM codegen failed ({}); falling back to x64 backend\n",
-               e.what());
-        mcg->setUseLLVM(false);
-        vasm.optimizeX64();
-        vasm.finishX64(vasm_abi, state.asmInfo);
+        FTRACE_MOD(Trace::llvm,
+                   1, "LLVM codegen failed ({}); falling back to x64 backend\n",
+                   e.what());
+        always_assert_flog(
+          RuntimeOption::EvalJitLLVM < 3,
+          "Mandatory LLVM codegen failed with reason `{}' on unit:\n{}",
+          e.what(), show(vunit)
+        );
+
+        resetCode();
+        if (!optimized) optimizeX64(x64_unit, vasm_abi);
+        emitX64(x64_unit, areas, state.asmInfo);
 
         if (auto compare = dynamic_cast<const CompareLLVMCodeGen*>(&e)) {
           printLLVMComparison(unit, vasm.unit(), areas, compare);
         }
       }
     } else {
-      vasm.optimizeX64();
-      vasm.finishX64(vasm_abi, state.asmInfo);
+      optimizeX64(vunit, vasm_abi);
+      emitX64(vunit, vasm.areas(), state.asmInfo);
     }
   }
 

@@ -172,7 +172,7 @@ bool check(Vunit& unit) {
   return true;
 }
 
-bool checkBlockEnd(Vunit& unit, Vlabel b) {
+bool checkBlockEnd(const Vunit& unit, Vlabel b) {
   assertx(!unit.blocks[b].code.empty());
   auto& block = unit.blocks[b];
   auto n = block.code.size();

@@ -542,7 +542,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     }
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
     assertx(check(vunit));
-    vasm.finishARM(arm::abi, state.asmInfo);
+    finishARM(vasm.unit(), vasm.areas(), arm::abi, state.asmInfo);
   }
 
   assertx(coldCodeIn.frontier() == coldStart);

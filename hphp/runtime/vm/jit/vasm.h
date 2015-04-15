@@ -109,7 +109,7 @@ bool check(Vunit&);
 /*
  * Check that each block has exactly one terminal instruction at the end.
  */
-bool checkBlockEnd(Vunit& v, Vlabel b);
+bool checkBlockEnd(const Vunit& v, Vlabel b);
 
 /*
  * Passes.

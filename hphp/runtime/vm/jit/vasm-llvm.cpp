@@ -887,8 +887,9 @@ struct LLVMEmitter {
         visitJmps(it->second, doBindJmp);
       }
 
-      // The jump was optimized out. Free the stub.
-      if (!found) {
+      // The jump was optimized out. Free the stub, but only if it was a reused
+      // stub.
+      if (!found && req.stubReused) {
         FTRACE(2, "  no corresponding code found. Freeing stub.\n");
         mcg->freeRequestStub(req.stub);
       }
@@ -1104,6 +1105,7 @@ private:
   struct LLVMBindJmp {
     uint32_t id;
     TCA stub;
+    bool stubReused;
     SrcKey target;
     TransFlags trflags;
   };
@@ -1683,9 +1685,10 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   // emitter, so that's what we do here.
 
   auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
+  bool reused;
   auto reqIp = emitEphemeralServiceReq(
     frozen,
-    mcg->getFreeStub(frozen, &mcg->cgFixups()),
+    mcg->getFreeStub(frozen, &mcg->cgFixups(), &reused),
     REQ_BIND_JMP,
     RipRelative(mcg->code.base()),
     inst.target.toAtomicInt(),
@@ -1700,7 +1703,9 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   FTRACE(2, "Adding bindjmp locrec {} for {}\n", id, llshow(call));
   call->setMetadata(llvm::LLVMContext::MD_locrec,
                     llvm::MDNode::get(m_context, cns(id)));
-  m_bindjmps.emplace_back(LLVMBindJmp{id, reqIp, inst.target, inst.trflags});
+  m_bindjmps.emplace_back(
+    LLVMBindJmp{id, reqIp, reused, inst.target, inst.trflags}
+  );
 }
 
 void LLVMEmitter::emit(const bindcall& inst) {
@@ -2948,30 +2953,14 @@ llvm::Type* LLVMEmitter::ptrIntNType(size_t bits, bool inFS) const {
 
 } // unnamed namespace
 
-void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
-                 const jit::vector<Vlabel>& labels) {
-  Timer _t(Timer::llvm);
+void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas) {
+  Timer timer(Timer::llvm);
   FTRACE(2, "\nTrying to emit LLVM IR for Vunit:\n{}\n", show(unit));
 
-  jit::vector<UndoMarker> undoAll = {UndoMarker(mcg->globalData())};
-  for (auto const& area : areas) {
-    undoAll.emplace_back(area.code);
-  }
-
   try {
+    auto const labels = sortBlocks(unit);
     LLVMEmitter(unit, areas).emit(labels);
   } catch (const FailedLLVMCodeGen& e) {
-    always_assert_flog(
-      RuntimeOption::EvalJitLLVM < 3,
-      "Mandatory LLVM codegen failed with reason `{}' on unit:\n{}",
-      e.what(), show(unit)
-    );
-    FTRACE(1, "LLVM codegen failed: {}\n", e.what());
-
-    // Undo any code/data we may have allocated.
-    for (auto& marker : undoAll) {
-      marker.undo();
-    }
     throw;
   } catch (const std::exception& e) {
     always_assert_flog(false,
@@ -2986,8 +2975,7 @@ void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
 
 namespace HPHP { namespace jit {
 
-void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
-                 const jit::vector<Vlabel>& labels) {
+void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas) {
   throw FailedLLVMCodeGen("This build does not support the LLVM backend");
 }
 

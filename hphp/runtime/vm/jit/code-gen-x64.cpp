@@ -305,6 +305,8 @@ ArgGroup CodeGenerator::argGroup(const IRInstruction* inst) const {
 }
 
 void CodeGenerator::cgInst(IRInstruction* inst) {
+  SCOPE_ASSERT_DETAIL("cgInst") { return inst->toString(); };
+
   switch (inst->op()) {
 #define O(name, dsts, srcs, flags)                                \
     case name: FTRACE(7, "cg" #name "\n");                        \

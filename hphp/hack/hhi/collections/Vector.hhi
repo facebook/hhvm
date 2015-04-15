@@ -96,7 +96,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
   public function skip(int $n): Vector<Tv>;
   public function skipWhile((function(Tv): bool) $fn): Vector<Tv>;
   public function slice(int $start, int $len): Vector<Tv>;
-  public function concat(Traversable<Tv> $traversable): Vector<Tv>;
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Vector<Tu>;
   public function firstValue(): ?Tv;
   public function firstKey(): ?int;
   public function lastValue(): ?Tv;
@@ -144,7 +144,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * Returns true if the specified key is present in the Vector, returns
    * false otherwise.
    */
-  public function containsKey(int $k): bool;
+  public function containsKey<Tu super int>(Tu $k): bool;
 
   /**
    * Append a copy of a value to the end of the Vector, assigning the next
@@ -210,7 +210,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * Returns the index of the first element that matches the search value.
    * If no element matches the search value, this function returns -1.
    */
-  public function linearSearch(Tv $search_value): int;
+  public function linearSearch<Tu super Tv>(Tu $search_value): int;
 
   /**
    * Shuffles the values of the Vector randomly in place.
@@ -237,7 +237,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
   public function items(): Iterable<Tv>;
 }
 
-class VectorIterator<Tv> implements KeyedIterator<int, Tv> {
+class VectorIterator<+Tv> implements KeyedIterator<int, Tv> {
   public function __construct();
   public function rewind(): void;
   public function current(): Tv;

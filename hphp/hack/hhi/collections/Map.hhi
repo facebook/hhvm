@@ -92,7 +92,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public function skip(int $n): Map<Tk, Tv>;
   public function skipWhile((function(Tv): bool) $fn): Map<Tk, Tv>;
   public function slice(int $start, int $len): Map<Tk, Tv>;
-  public function concat(Traversable<Tv> $traversable): Vector<Tv>;
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Vector<Tu>;
   public function firstValue(): ?Tv;
   public function firstKey(): ?Tk;
   public function lastValue(): ?Tv;
@@ -139,8 +139,8 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   /**
    * Returns true if the specified key is present in the Map, false otherwise.
    */
-  public function contains(Tk $k): bool;
-  public function containsKey(Tk $k): bool;
+  public function contains<Tu super Tk>(Tu $k): bool;
+  public function containsKey<Tu super Tk>(Tu $k): bool;
 
   /**
    * Add a key/value Pair to this Map. "$mp->add($p)" is semantically
@@ -187,7 +187,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public function items(): Iterable<Pair<Tk, Tv>>;
 }
 
-class MapIterator<Tk, Tv> implements KeyedIterator<Tk, Tv> {
+class MapIterator<Tk, +Tv> implements KeyedIterator<Tk, Tv> {
   public function __construct();
   public function current(): Tv;
   public function key(): Tk;

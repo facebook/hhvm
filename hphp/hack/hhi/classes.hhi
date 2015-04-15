@@ -15,14 +15,14 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-final class AsyncGenerator<+Tk, +Tv, -Ts>
+final class AsyncGenerator<Tk, +Tv, -Ts>
     implements AsyncKeyedIterator<Tk, Tv> {
   public function next(): Awaitable<?(Tk, Tv)> {}
   public function send(?Ts $v): Awaitable<?(Tk, Tv)> {}
   public function raise(Exception $e): Awaitable<?(Tk, Tv)> {}
 }
 
-final class Generator<+Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {
+final class Generator<Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {
   public function getOrigFuncName(): string {}
   public function current(): Tv {}
   public function key(): Tk {}
@@ -68,7 +68,7 @@ abstract class ResumableWaitHandle<+T> extends WaitableWaitHandle<T> {
 final class AsyncFunctionWaitHandle<+T> extends ResumableWaitHandle<T> {
 }
 
-final class AsyncGeneratorWaitHandle<+Tk, +Tv>
+final class AsyncGeneratorWaitHandle<Tk, +Tv>
   extends ResumableWaitHandle<?(Tk, Tv)> {
 }
 

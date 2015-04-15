@@ -3538,7 +3538,7 @@ and class_def_ env_up c tc =
   let env, impl =
     lmap Typing_hint.hint env (c.c_extends @ c.c_implements @ c.c_uses) in
   let env = Typing_hint.check_tparams_instantiable env c.c_tparams in
-  if not (Env.is_decl env) then Typing_variance.class_ (snd c.c_name) tc impl;
+  Typing_variance.class_ (snd c.c_name) tc impl;
   let self = get_self_from_c env c in
   let env, impl_dimpl =
     lfold (get_implements ~with_checks:true ~this:self) env impl in

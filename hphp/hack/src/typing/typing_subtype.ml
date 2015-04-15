@@ -280,27 +280,12 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   (* Dirty covariance hacks *)
   | (_, (Tapply ((_, name_super), [ty_super]))),
     (_, (Tapply ((_, name_sub), [ty_sub])))
-    when name_super = name_sub &&
-      (name_super = SN.Collections.cTraversable
-       || name_super = SN.Collections.cContainer
-       || name_super = SN.Collections.cIterable
-       || name_super = SN.Collections.cIterator
-       || name_super = SN.Collections.cImmVector
-       || name_super = SN.Collections.cImmSet
-       || name_super = SN.FB.cDataTypeImplProvider) ->
+    when name_super = name_sub && name_super = SN.FB.cDataTypeImplProvider ->
       sub_type env ty_super ty_sub
   | (_, (Tapply ((_, name_super), [tk_super; tv_super]))),
     (_, (Tapply ((_, name_sub), [tk_sub; tv_sub])))
     when name_super = name_sub &&
-      (name_super = SN.Collections.cKeyedTraversable
-       || name_super = SN.Collections.cKeyedContainer
-       || name_super = SN.Collections.cIndexish
-       || name_super = SN.Collections.cKeyedIterable
-       || name_super = SN.Collections.cKeyedIterator
-       || name_super = SN.Collections.cConstMap
-       || name_super = SN.Collections.cImmMap
-       || name_super = SN.Collections.cPair
-       || name_super = SN.FB.cGenReadApi
+      (name_super = SN.FB.cGenReadApi
        || name_super = SN.FB.cGenReadIdxApi) ->
       let env = sub_type env tk_super tk_sub in
       sub_type env tv_super tv_sub

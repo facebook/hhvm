@@ -562,8 +562,7 @@ and stmt env = function
   | Throw (_, e) ->
     let p = fst e in
     let env, ty = expr env e in
-    let exn_ty = Reason.Rthrow p, Tapply ((p, SN.Classes.cException), []) in
-    Type.sub_type p (Reason.URthrow) env exn_ty ty
+    exception_ty p env ty
   | Continue _
   | Break _ -> env
 
@@ -652,8 +651,10 @@ and catch parent_lenv after_try env (ety, exn, b) =
   let env = { env with Env.lenv = after_try } in
   let env = LEnv.fully_integrate env parent_lenv in
   let cid = CI ety in
-  let env = instantiable_cid (fst ety) env cid in
-  let env, ety = static_class_id (fst ety) env cid in
+  let ety_p = (fst ety) in
+  let env = instantiable_cid ety_p env cid in
+  let env, ety = static_class_id ety_p env cid in
+  let env = exception_ty ety_p env ety in
   let env = Env.set_local env (snd exn) ety in
   let env = block env b in
   (* Only keep the local bindings if this catch is non-terminal *)
@@ -1377,6 +1378,10 @@ and instantiable_cid p env cid =
     | Some ((pos, name), class_) when class_.tc_kind = Ast.Cabstract && class_.tc_final ->
         Errors.uninstantiable_class pos class_.tc_pos name; env
     | None | Some _ -> env)
+
+and exception_ty pos env ty =
+    let exn_ty = Reason.Rthrow pos, Tapply ((pos, SN.Classes.cException), []) in
+    Type.sub_type pos (Reason.URthrow) env exn_ty ty
 
 (* While converting code from PHP to Hack, some arrays are used
  * as tuples. Example: array('', 0). Since the elements have

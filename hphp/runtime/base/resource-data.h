@@ -79,6 +79,7 @@ class ResourceData {
   }
 
   int32_t o_getId() const { return o_id; }
+  int32_t getId() const { return o_id; }
   void o_setId(int id); // only for BuiltinFiles
 
   const String& o_getClassName() const;

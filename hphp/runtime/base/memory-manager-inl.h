@@ -438,6 +438,62 @@ inline bool MemoryManager::checkContains(void* p) const {
 
 //////////////////////////////////////////////////////////////////////
 
+template <typename T>
+MemoryManager::RootId MemoryManager::addRoot(SmartPtr<T>&& ptr) {
+  assert(ptr);
+  const RootId token = ptr->getId();
+  getRootMap<T>().emplace(token, std::move(ptr));
+  return token;
+}
+
+template <typename T>
+MemoryManager::RootId MemoryManager::addRoot(const SmartPtr<T>& ptr) {
+  assert(ptr);
+  const RootId token = ptr->getId();
+  getRootMap<T>()[token] = ptr;
+  return token;
+}
+
+template <typename T>
+SmartPtr<T> MemoryManager::lookupRoot(RootId token) const {
+  auto& handleMap = getRootMap<T>();
+  auto itr = handleMap.find(token);
+  return itr != handleMap.end() ? unsafe_cast_or_null<T>(itr->second) : nullptr;
+}
+
+template <typename T>
+SmartPtr<T> MemoryManager::removeRoot(RootId token) {
+  auto& handleMap = getRootMap<T>();
+  auto itr = handleMap.find(token);
+  if(itr != handleMap.end()) {
+    auto ptr = std::move(itr->second);
+    handleMap.erase(itr);
+    return unsafe_cast_or_null<T>(ptr);
+  }
+  return nullptr;
+}
+
+template <typename T>
+bool MemoryManager::removeRoot(const SmartPtr<T>& ptr) {
+  return (bool)removeRoot<T>(ptr->getId());
+}
+
+template <typename F>
+void MemoryManager::scanRootMaps(F& m) const {
+  if (m_objectRoots) {
+    for(const auto& root : *m_objectRoots) {
+      scan(root.second, m);
+    }
+  }
+  if (m_resourceRoots) {
+    for(const auto& root : *m_resourceRoots) {
+      scan(root.second, m);
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 #endif

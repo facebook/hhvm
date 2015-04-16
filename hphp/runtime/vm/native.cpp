@@ -153,7 +153,9 @@ void callFunc(const Func* func, void *ctx,
   auto const numArgs = func->numParams();
   auto retType = func->returnType();
 
-  if (retType && isBuiltinByRef(retType)) {
+  if (!retType) {
+    GP_args[GP_count++] = (int64_t)&ret;
+  } else if (isBuiltinByRef(retType)) {
     GP_args[GP_count++] = (int64_t)&ret.m_data;
   }
 
@@ -172,9 +174,7 @@ void callFunc(const Func* func, void *ctx,
 
   if (!retType) {
     // A folly::none return signifies Variant.
-    Variant *v = (Variant*)&ret;
-
-    *v = callFuncVariantImpl(f, GP_args, GP_count, SIMD_args, SIMD_count);
+    callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count);
     if (ret.m_type == KindOfUninit) {
       ret.m_type = KindOfNull;
     }

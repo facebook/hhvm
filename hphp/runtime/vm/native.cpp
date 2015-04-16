@@ -153,6 +153,10 @@ void callFunc(const Func* func, void *ctx,
   auto const numArgs = func->numParams();
   auto retType = func->returnType();
 
+  if (retType && isBuiltinByRef(retType)) {
+    GP_args[GP_count++] = (int64_t)&ret.m_data;
+  }
+
   if (ctx) {
     GP_args[GP_count++] = (int64_t)ctx;
   }
@@ -168,7 +172,9 @@ void callFunc(const Func* func, void *ctx,
 
   if (!retType) {
     // A folly::none return signifies Variant.
-    ret = *callFuncVariantImpl(f, GP_args, GP_count, SIMD_args, SIMD_count).asTypedValue();
+    Variant *v = (Variant*)&ret;
+
+    *v = callFuncVariantImpl(f, GP_args, GP_count, SIMD_args, SIMD_count);
     if (ret.m_type == KindOfUninit) {
       ret.m_type = KindOfNull;
     }
@@ -195,22 +201,13 @@ void callFunc(const Func* func, void *ctx,
       return;
 
     case KindOfStaticString:
-      ret.m_data.pstr = callFuncStaticStringImpl(f, GP_args, GP_count, SIMD_args, SIMD_count).detach();
-      if (ret.m_data.pstr != NULL) ret.m_type = KindOfStaticString;
-      return;
     case KindOfString:
-      ret.m_data.pstr = callFuncStringImpl(f, GP_args, GP_count, SIMD_args, SIMD_count).detach();
-      if (ret.m_data.pstr != NULL) ret.m_type = KindOfString;
-      return;
     case KindOfArray:
-      ret.m_data.parr = callFuncArrayImpl(f, GP_args, GP_count, SIMD_args, SIMD_count).detach();
-      if (ret.m_data.parr != NULL) ret.m_type = KindOfArray;
-      return;
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
       assert(isBuiltinByRef(ret.m_type));
-      ret.m_data.num = callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count);
+      callFuncInt64Impl(f, GP_args, GP_count, SIMD_args, SIMD_count);
       if (ret.m_data.num == 0) {
         ret.m_type = KindOfNull;
       }

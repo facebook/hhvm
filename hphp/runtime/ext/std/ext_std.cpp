@@ -1,5 +1,8 @@
 #include "hphp/runtime/ext/std/ext_std.h"
+
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/version.h"
+#include "hphp/util/repo-schema.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
@@ -8,7 +11,12 @@ const StaticString
   s_HHVM_VERSION_ID("HHVM_VERSION_ID"),
   s_HHVM_VERSION("HHVM_VERSION"),
   s_HPHP_VERSION("HPHP_VERSION"),
-  s_HHVM_VERSION_string(HHVM_VERSION);
+  s_HHVM_VERSION_string(HHVM_VERSION),
+  s_HHVM_DEBUG("HHVM_DEBUG"),
+  s_HHVM_COMPILER_ID("HHVM_COMPILER_ID"),
+  s_HHVM_COMPILER_ID_string(kCompilerId),
+  s_HHVM_REPO_SCHEMA("HHVM_REPO_SCHEMA"),
+  s_HHVM_REPO_SCHEMA_string(kRepoSchemaId);
 
 void StandardExtension::initStandard() {
   // define('HHVM_VERSION_ID', XXYYZZ);
@@ -28,6 +36,21 @@ void StandardExtension::initStandard() {
   Native::registerConstant<KindOfStaticString>(
     s_HPHP_VERSION.get(),
     s_HHVM_VERSION_string.get()
+  );
+
+  Native::registerConstant<KindOfBoolean>(
+    s_HHVM_DEBUG.get(),
+    debug
+  );
+
+  Native::registerConstant<KindOfStaticString>(
+    s_HHVM_COMPILER_ID.get(),
+    s_HHVM_COMPILER_ID_string.get()
+  );
+
+  Native::registerConstant<KindOfStaticString>(
+    s_HHVM_REPO_SCHEMA.get(),
+    s_HHVM_REPO_SCHEMA_string.get()
   );
 }
 

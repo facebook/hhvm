@@ -566,15 +566,12 @@ struct PropInfo {
   RepoAuthType repoAuthType;
 };
 
-PropInfo getPropertyOffset(const NormalizedInstruction& ni,
+PropInfo getPropertyOffset(const IRGS& env,
+                           const NormalizedInstruction& ni,
                            const Class* ctx,
                            const Class*& baseClass,
                            const MInstrInfo& mii,
                            unsigned mInd, unsigned iInd);
-
-PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
-                                Class* ctx, const MInstrInfo& mii);
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Other instruction information.

@@ -76,18 +76,20 @@ int locPhysicalOffset(int32_t localIndex) {
   return -(localIndex + 1);
 }
 
-PropInfo getPropertyOffset(const NormalizedInstruction& ni,
+PropInfo getPropertyOffset(const IRGS& env,
+                           const NormalizedInstruction& ni,
                            const Class* ctx, const Class*& baseClass,
                            const MInstrInfo& mii,
                            unsigned mInd, unsigned iInd) {
   if (mInd == 0) {
     auto const baseIndex = mii.valCount();
-    baseClass = ni.inputs[baseIndex]->rtt < TObj
-      ? ni.inputs[baseIndex]->rtt.clsSpec().cls()
-      : nullptr;
+    auto const type = irgen::predictedTypeFromLocation(
+      const_cast<IRGS&>(env), ni.inputs[baseIndex]->location);
+    baseClass = type <= TObj ? type.clsSpec().cls() : nullptr;
   }
   if (!baseClass) return PropInfo();
 
+  // TODO: This use of rtt is not guaranteed to be correctly guarded on.
   auto keyType = ni.inputs[iInd]->rtt;
   if (!keyType.hasConstVal(TStr)) return PropInfo();
   auto const name = keyType.strVal();
@@ -125,15 +127,6 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
     baseClass->declPropOffset(idx),
     baseClass->declPropRepoAuthType(idx)
   );
-}
-
-PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
-                                Class* ctx, const MInstrInfo& mii) {
-  unsigned mInd = ni.immVecM.size() - 1;
-  unsigned iInd = mii.valCount() + 1 + mInd;
-
-  const Class* cls = nullptr;
-  return getPropertyOffset(ni, ctx, cls, mii, mInd, iInd);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

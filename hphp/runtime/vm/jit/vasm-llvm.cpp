@@ -697,12 +697,15 @@ struct LLVMEmitter {
     auto module = m_module.get();
     auto tcMM = m_tcMM.release();
     auto cpu = RuntimeOption::EvalJitCPU;
+    std::vector<std::string> attrs;
+    folly::split(" ", RuntimeOption::EvalJitLLVMAttrs, attrs, true);
     if (cpu == "native") cpu = llvm::sys::getHostCPUName();
     FTRACE(1, "Creating ExecutionEngine with CPU '{}'\n", cpu);
     std::string errStr;
     std::unique_ptr<llvm::ExecutionEngine> ee(
       llvm::EngineBuilder(module)
       .setMCPU(cpu)
+      .setMAttrs(attrs)
       .setErrorStr(&errStr)
       .setUseMCJIT(true)
       .setMCJITMemoryManager(tcMM)

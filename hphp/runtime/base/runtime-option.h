@@ -411,6 +411,7 @@ public:
   F(uint32_t, JitLLVMSizeLevel,        0)                               \
   F(uint32_t, JitLLVMSplitHotCold,     1)                               \
   F(bool,     JitLLVMVolatileIncDec,   true)                            \
+  F(string,   JitLLVMAttrs,            "")                              \
   F(string,   JitCPU,                  "native")                        \
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitAHotSize,             ahotDefault())                   \

@@ -2709,11 +2709,14 @@ bool isPackedInit(ExpressionPtr init_expr, int* size,
       // If we have a key...
       if (ap->getName() != nullptr) {
         // ...and it has no scalar value, bail.
-        if (!ap->getScalarValue(key)) return false;
+        if (!ap->getName()->getScalarValue(key)) return false;
 
         if (key.isInteger()) {
           // If it's an integer key, check if it's the next packed index.
           if (key.asInt64Val() != *size) return false;
+        } else if (key.isBoolean()) {
+          // Bool to Int conversion
+          if (static_cast<int>(key.asBooleanVal()) != *size) return false;
         } else {
           // Give up if it's not a string.
           if (!key.isString()) return false;

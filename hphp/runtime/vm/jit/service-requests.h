@@ -163,12 +163,6 @@ static_assert(sizeof(ServiceReqInfo) == 0x30,
  */
 extern "C" void handleSRHelper();
 
-/*
- * Assembly stub used by the unwinder to reload vmsp() and vmfp() into their
- * ABI registers then jump somewhere in the TC.
- */
-extern "C" void handleSRResumeTC();
-
 //////////////////////////////////////////////////////////////////////
 
 /*

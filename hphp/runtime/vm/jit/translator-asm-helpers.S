@@ -112,10 +112,8 @@ ETCH_NAME(handleSRHelper):
   add $0x30, %rsp
   CFI2(adjust_cfa_offset, -0x30)
 
-  .globl ETCH_NAME(handleSRResumeTC)
-ETCH_NAME(handleSRResumeTC):
-  // rVmTl and rStashedAR were preserved by the callee but vmsp and vmfp
-  // might've changed if we interpreted anything. Reload them.
+  // rVmTl was preserved by the callee, but vmsp and vmfp might've changed if
+  // we interpreted anything. Reload them.
   mov 0x10(%r12), %rbx
   mov 0x20(%r12), %rbp
 

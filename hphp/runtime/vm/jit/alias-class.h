@@ -84,7 +84,7 @@ struct AProp  { SSATmp* obj; uint32_t offset; };
  * A integer index inside of an array, with base `arr'.  The `arr' tmp is any
  * kind of array (not necessarily kPackedKind or whatnot).
  */
-struct AElemI { SSATmp* arr; uint64_t idx; };
+struct AElemI { SSATmp* arr; int64_t idx; };
 
 /*
  * A location inside of an array, with base `arr', with a string key.  The

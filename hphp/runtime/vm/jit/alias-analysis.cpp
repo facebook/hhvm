@@ -154,7 +154,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
    * colliding in that regard is assumed to possibly alias.
    */
   auto conflict_prop_offset = jit::hash_map<uint32_t,ALocBits>{};
-  auto conflict_array_index = jit::hash_map<uint64_t,ALocBits>{};
+  auto conflict_array_index = jit::hash_map<int64_t,ALocBits>{};
 
   /*
    * Stack offset conflict sets: any stack alias class based off a different

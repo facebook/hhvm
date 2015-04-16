@@ -77,8 +77,7 @@ AliasClass pointee(const SSATmp* ptr) {
     auto const sinst = canonical(ptr)->inst();
     if (sinst->is(LdPackedArrayElemAddr)) {
       if (sinst->src(1)->hasConstVal() && sinst->src(1)->intVal() >= 0) {
-        return AElemI { sinst->src(0),
-                        safe_cast<uint64_t>(sinst->src(1)->intVal()) };
+        return AElemI { sinst->src(0), sinst->src(1)->intVal() };
       }
       return AElemIAny;
     }

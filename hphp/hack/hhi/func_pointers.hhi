@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh // decl   /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,9 +10,9 @@
  */
 
 // The functions in this file are defined in HHVM and known to the
-// typechecker. They do not appear in .hhi files because there's no
-// typechecker annotation syntax that describes how they are used to infer
-// type info.
+// typechecker. There's no typechecker annotation syntax capable of
+// describing how they are used to infer type info; these .hhi declarations
+// are strictly for documentation purposes.
 
 /**
  * fun is a special function used to create an opaque "pointer" to a
@@ -85,3 +85,25 @@ function class_meth(string $cls_name, string $meth_name); // becomes:
 function inst_meth($inst, string $meth_name); // becomes:
 // function inst_meth<Tobj>(Tobj inst, 'method')
 //   : (function(<params of Tobj::method>): <the return type of Tobj::method>)
+
+/**
+ * A way to have a variable type checked as a more specific type than it is
+ * currently declared. A source transformation in the runtime modifies code
+ * that looks like:
+ *
+ *   invariant(<condition>, 'sprintf format: %s %d', 'string', ...);
+ *
+ * ... is transformed to be:
+ *
+ *   if (!(<condition>)) { // an Exception is thrown
+ *     invariant_violation('sprintf format: %s', 'string', ...);
+ *   }
+ *   // <condition> is known to be true in the code below
+ *
+ * See http://docs.hhvm.com/manual/en/hack.otherrulesandfeatures.invariant.php
+ * for more information.
+ */
+function invariant(
+  $condition, // e.g. is_int($x) or ($y instanceof SomeClass)
+  \HH\FormatString<PlainSprintf> $f, ...$f_args
+): void;

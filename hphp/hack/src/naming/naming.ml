@@ -1608,7 +1608,6 @@ and stmt env st =
   | Unsafe               -> assert false
   | Fallthrough          -> N.Fallthrough
   | Noop                 -> N.Noop
-  | Expr e               -> N.Expr (expr env e)
   | Break p              -> N.Break p
   | Continue p           -> N.Continue p
   | Throw e              -> let terminal = not (fst env).in_try in
@@ -1622,6 +1621,33 @@ and stmt env st =
   | Switch (e, cl)       -> switch_stmt env st e cl
   | Foreach (e, aw, ae, b)-> foreach_stmt env e aw ae b
   | Try (b, cl, fb)      -> try_stmt env st b cl fb
+  | Expr (cp, Call ((p, Id (fp, fn)), el, uel))
+      when fn = SN.SpecialFunctions.invariant ->
+    (* invariant is subject to a source-code transform in the HHVM
+     * runtime: the arguments to invariant are lazily evaluated only in
+     * the case in which the invariant condition does not hold. So:
+     *
+     *   invariant_violation(<condition>, <format>, <format_args...>)
+     *
+     * ... is rewritten as:
+     *
+     *   if (!<condition>) { invariant_violation(<format>, <format_args...>); }
+     *)
+    (match el with
+      | [] | [_]  ->
+        Errors.naming_too_few_arguments p;
+        N.Expr (cp, N.Any)
+      | (cond_p, cond) :: el ->
+        let violation = (cp, Call
+          ((p, Id (fp, SN.SpecialFunctions.invariant_violation)), el, uel)) in
+        if cond <> False then
+          let b1, b2 = [Expr violation], [Noop] in
+          let cond = cond_p, Unop (Unot, (cond_p, cond)) in
+          if_stmt env st cond b1 b2
+        else (* a false <condition> means unconditional invariant_violation *)
+          N.Expr (expr env violation)
+    )
+  | Expr e               -> N.Expr (expr env e)
 
 and if_stmt env st e b1 b2 =
   let e = expr env e in
@@ -1939,16 +1965,6 @@ and expr_ env = function
       if List.length el <> 1
       then Errors.assert_arity p;
       N.Assert (N.AE_assert (expr env (List.hd el)))
-  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.invariant ->
-      arg_unpack_unexpected uel ;
-      (match el with
-      | st :: format :: el ->
-          let el = exprl env el in
-          N.Assert (N.AE_invariant (expr env st, expr env format, el))
-        | _ ->
-          Errors.naming_too_few_arguments p;
-          N.Any
-      )
   | Call ((p, Id (_, cn)), el, uel)
       when cn = SN.SpecialFunctions.invariant_violation ->
       arg_unpack_unexpected uel ;

@@ -408,11 +408,6 @@ and expr_ env acc p e =
   | Binop (_, e1, e2) ->
       let acc = expr acc e1 in
       expr acc e2
-  | Assert (AE_invariant (e1, e2, el)) ->
-      let acc = expr acc e1 in
-      let acc = expr acc e2 in
-      let acc = exprl acc el in
-      acc
   | Eif (e1, None, e3) ->
       let acc = expr acc e1 in
       expr acc e3

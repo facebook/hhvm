@@ -174,7 +174,7 @@ void emitResumeInterpHelpers(UniqueStubs& uniqueStubs) {
   a.    jmp8   (resumeHelper);
 
   uniqueStubs.resumeHelperRet = a.frontier();
-  a.    pop   (rStashedAR[AROFF(m_savedRip)]);
+  a.    pop   (rVmFp[AROFF(m_savedRip)]);
   uniqueStubs.resumeHelper = a.frontier();
   a.    movb  (0, rbyte(argNumToRegName[1])); // interpFirst
 asm_label(a, resumeHelper);
@@ -275,47 +275,8 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
 
   moveToAlign(mcg->code.cold());
   uniqueStubs.stackOverflowHelper = a.frontier();
-
-  assert(kScratchCrossTraceRegs.contains(rax));
-  assert(kScratchCrossTraceRegs.contains(rcx));
-  assert(kScratchCrossTraceRegs.contains(rdi));
-
-  // First get vmsp synchronized.  This stub is only called from function
-  // prologues, where we can figure out the stack top based on the
-  // partially-constructed ActRec's argument count.
-  a.    loadl  (rStashedAR[AROFF(m_numArgsAndFlags)], eax);
-  a.    andl   (ActRec::kNumArgsMask, eax);
-  a.    shll   (0x4, eax);    static_assert(sizeof(Cell) == 16, "");
-  a.    neg    (rax);
-  a.    lea    (rStashedAR[rax], rdi);
-  a.    storeq (rdi, rVmTl[rds::kVmspOff]);
-
-  // Get the caller's PC using the soff.
-  a.    loadq  (rVmFp[AROFF(m_func)], rcx);
-  a.    loadl  (rStashedAR[AROFF(m_soff)], edi);
-  a.    loadq  (rcx[Func::sharedOff()], rax);
-  a.    loadl  (rax[Func::sharedBaseOff()], eax);
-  a.    addl   (eax, edi);
-
-  // rcx = caller m_func (still rcx) -> m_unit -> m_bc
-  a.    loadq  (rcx[Func::unitOff()], rcx);
-  a.    loadq  (rcx[Unit::bcOff()], rcx);
-
-  // Add m_bc to the return offset, and store it in RDS.
-  a.    addq   (rcx, rdi);
-  a.    storeq (rdi, rVmTl[rds::kVmpcOff]);
-
-  // Synchronize FP.
-  a.    storeq (rVmFp, rVmTl[rds::kVmfpOff]);
-
-  // The stack overflow is logically thrown from the caller so rStashedAR
-  // hasn't yet been copied to rVmFp. But there might be a catch trace attached
-  // to the call that got us here, so we need to link rStashedAR into the frame
-  // chain before throwing.
-  a.    movq   (rStashedAR, rbp);
-  a.    loadq  (rip[intptr_t(&mcg)], argNumToRegName[0]);
-  a.    movq   (rStashedAR, argNumToRegName[1]);
-  a.    call   (TCA(getMethodPtr(&MCGenerator::handleStackOverflow)));
+  a.    movq   (rVmFp, argNumToRegName[0]);
+  emitCall(a, CppCall::direct(handleStackOverflow), argSet(1));
 
   uniqueStubs.add("stackOverflowHelper", uniqueStubs.stackOverflowHelper);
 }
@@ -412,8 +373,8 @@ void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
   // rax := called func
   // edx := num passed parameters
   // ecx := num declared parameters
-  a.    loadq  (rStashedAR[AROFF(m_func)], rax);
-  a.    loadl  (rStashedAR[AROFF(m_numArgsAndFlags)], edx);
+  a.    loadq  (rVmFp[AROFF(m_func)], rax);
+  a.    loadl  (rVmFp[AROFF(m_numArgsAndFlags)], edx);
   a.    andl   (0x1fffffff, edx);
   a.    loadl  (rax[Func::paramCountsOff()], ecx);
   // see Func::finishedEmittingParams and Func::numParams for rationale
@@ -529,10 +490,10 @@ void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
   // for dispatch to the function body. In the first case, there's a call, in
   // the second, there's a jmp.  We can differentiate by loading the func out
   // of the actrec and asking it if it's a cloned closure.
-  a.    loadq  (rStashedAR[AROFF(m_func)], argNumToRegName[0]);
+  a.    loadq  (rVmFp[AROFF(m_func)], argNumToRegName[0]);
   emitCall(a, CppCall::method(&Func::isClonedClosure), argSet(1));
   a.    movb   (al, rbyte(argNumToRegName[1]));  // live for helper calls below
-  a.    movq   (rStashedAR, argNumToRegName[0]); // live for helper calls below
+  a.    movq   (rVmFp, argNumToRegName[0]); // live for helper calls below
   a.    testb  (al, al);
   a.    jz8    (popAndXchg);
 
@@ -551,20 +512,14 @@ void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
   // fcallHelper, and then push it back from r15 + m_savedRip after
   // fcallHelper returns in case it has changed it.
 asm_label(a, popAndXchg);
-  // There is a brief span from enterTCAtPrologue until the function
-  // is entered where rbp is *below* the new actrec, and is missing
-  // a number of c++ frames. The new actrec is linked onto the c++
-  // frames, however, so switch it into rbp in case fcallHelper throws.
-  a.    pop    (rStashedAR[AROFF(m_savedRip)]);
-  a.    xchgq  (rStashedAR, rVmFp);
+  a.    pop    (rVmFp[AROFF(m_savedRip)]);
   emitCall(a, CppCall::direct(helper), argSet(2));
   if (debug) {
     a.  movq   (0x1, rVmSp);  // "assert" nothing reads it
   }
   a.    testq  (rax, rax);
   a.    js8    (skip);
-  a.    xchgq  (rStashedAR, rVmFp);
-  a.    push   (rStashedAR[AROFF(m_savedRip)]);
+  a.    push   (rVmFp[AROFF(m_savedRip)]);
   a.    jmp    (rax);
   a.    ud2    ();
 
@@ -638,15 +593,15 @@ void emitBindCallStubs(UniqueStubs& uniqueStubs) {
     auto& cb = mcg->code.cold();
     auto const start = cb.frontier();
     Asm a{cb};
-    a.  loadq(rip[intptr_t(&mcg)], argNumToRegName[0]);
-    a.  loadq(*rsp, argNumToRegName[1]); // reconstruct toSmash from savedRip
-    a.  subq (kCallLen, argNumToRegName[1]);
-    a.  movq (rStashedAR, argNumToRegName[2]);
-    a.  movb (immutable, rbyte(argNumToRegName[3]));
-    a.  subq (8, rsp); // align stack
-    a.  call (TCA(getMethodPtr(&MCGenerator::handleBindCall)));
-    a.  addq (8, rsp);
-    a.  jmp  (rax);
+    a.  loadq  (rip[intptr_t(&mcg)], argNumToRegName[0]);
+    a.  loadq  (*rsp, argNumToRegName[1]); // reconstruct toSmash from savedRip
+    a.  subq   (kCallLen, argNumToRegName[1]);
+    a.  movq   (rVmFp, argNumToRegName[2]);
+    a.  movb   (immutable, rbyte(argNumToRegName[3]));
+    a.  subq   (8, rsp); // align stack
+    a.  call   (TCA(getMethodPtr(&MCGenerator::handleBindCall)));
+    a.  addq   (8, rsp);
+    a.  jmp    (rax);
     return start;
   };
 

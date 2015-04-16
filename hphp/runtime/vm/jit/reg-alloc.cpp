@@ -241,18 +241,18 @@ void getEffects(const Abi& abi, const Vinstr& i,
       }
       break;
     case Vinstr::bindcall:
-    case Vinstr::contenter:
-    case Vinstr::callstub:
-      // All three of these are php-level function calls, so they kill most
-      // registers.
       defs = abi.all();
       switch (arch()) {
-        case Arch::ARM:
-          defs.remove(PhysReg(arm::rVmFp));
-          break;
-        case Arch::X64:
-          defs -= reg::rbp | x64::rVmTl;
-          break;
+      case Arch::ARM: break;
+      case Arch::X64: defs.remove(x64::rVmTl); break;
+      }
+      break;
+    case Vinstr::contenter:
+    case Vinstr::callstub:
+      defs = abi.all();
+      switch (arch()) {
+      case Arch::ARM: defs.remove(PhysReg(arm::rVmFp)); break;
+      case Arch::X64: defs -= reg::rbp | x64::rVmTl; break;
       }
       break;
     case Vinstr::cqo:

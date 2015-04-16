@@ -40,12 +40,6 @@ void emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
 
 //////////////////////////////////////////////////////////////////////
 
-void emitStoreRetIntoActRec(vixl::MacroAssembler& a) {
-  a.  Str  (rLinkReg, rStashedAR[AROFF(m_savedRip)]);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
   switch (call.kind()) {
   case CppCall::Kind::Direct:

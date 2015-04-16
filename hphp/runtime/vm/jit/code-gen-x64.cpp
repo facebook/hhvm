@@ -2958,16 +2958,17 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   }
 
   // Emit a smashable call that initially calls a recyclable service request
-  // stub. The stub and the eventual targets take rStashedAR as an argument.
+  // stub.  The stub and the eventual targets take rVmFp as an argument,
+  // pointing to the callee ActRec.
   auto& us = mcg->tx().uniqueStubs;
   auto addr = callee ? us.immutableBindCallStub : us.bindCallStub;
   debug_trashsp(v);
-  v << lea{sync_sp[cellsToBytes(argc)], rStashedAR};
+  v << lea{sync_sp[cellsToBytes(argc)], rVmFp};
   if (debug && RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, kUninitializedRIP, rStashedAR[AROFF(m_savedRip)]);
+    emitImmStoreq(v, kUninitializedRIP, rVmFp[AROFF(m_savedRip)]);
   }
   auto next = v.makeBlock();
-  v << bindcall{addr, kCrossCallRegs, {next, catchBlock}};
+  v << bindcall{addr, kCrossCallRegs, {{next, catchBlock}}};
   m_state.catch_calls[inst->taken()] = CatchCall::PHP;
   v = next;
 }

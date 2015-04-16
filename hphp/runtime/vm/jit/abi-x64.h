@@ -116,13 +116,6 @@ const RegSet kXMMRegs = kXMMUnreserved | kXMMReserved;
  */
 
 /*
- * When preparing to call a function prologue, the callee's frame
- * pointer (the new ActRec) is placed into this register.  rVmFp still
- * points to the caller's ActRec when the prologue is entered.
- */
-constexpr PhysReg rStashedAR = reg::r15;
-
-/*
  * Registers that are live between all tracelets.
  */
 const RegSet kCrossTraceRegs     = rVmFp | rVmSp | rVmTl;
@@ -132,8 +125,7 @@ const RegSet kCrossTraceRegsNoSP = rVmFp | rVmTl;
  * Registers that are live during a PHP function call, between the caller and
  * the callee.
  */
-const RegSet kCrossCallRegs =
-  kCrossTraceRegs | rStashedAR;
+const RegSet kCrossCallRegs = kCrossTraceRegs; // TODO(#6849123)
 
 /*
  * Registers that can safely be used for scratch purposes in-between

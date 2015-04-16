@@ -46,8 +46,8 @@ void emitStackCheck(X64Assembler& a, int funcDepth, Offset pc) {
   funcDepth += kStackCheckPadding * sizeof(Cell);
 
   /*
-   * rStashedAR points to the bottom of the callee's ActRec.  We're checking
-   * for `funcDepth' additional space below it, which includes everything
+   * rVmFp points to the bottom of the callee's ActRec.  We're checking for
+   * `funcDepth' additional space below it, which includes everything
    * maxStackCells() includes for the callee (see comment in func.h).  If
    * nPassed > nparams, the stack might currently be deeper than that, but
    * we're going to be removing the excess nPassed (and the caller already
@@ -56,7 +56,7 @@ void emitStackCheck(X64Assembler& a, int funcDepth, Offset pc) {
    */
   auto const stackMask =
     int32_t{cellsToBytes(RuntimeOption::EvalVMStackElms) - 1};
-  a.    movq   (rStashedAR, rax);  // copy to destroy
+  a.    movq   (rVmFp, rax);  // copy to destroy
   a.    andq   (stackMask, rax);
   a.    subq   (funcDepth + Stack::sSurprisePageSize, rax);
   a.    jl     (mcg->tx().uniqueStubs.stackOverflowHelper);
@@ -97,7 +97,7 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
 
   TCA aStart DEBUG_ONLY = a.frontier();
   if (!funcImm.fits(sz::dword)) {
-    a.  loadq  (rStashedAR[AROFF(m_func)], rax);
+    a.  loadq  (rVmFp[AROFF(m_func)], rax);
     /*
       Although func doesnt fit in a signed 32-bit immediate, it may still
       fit in an unsigned one. Rather than deal with yet another case
@@ -109,7 +109,7 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
     ((uint64_t*)a.frontier())[-1] = uintptr_t(func);
     a.  cmpq   (rax, rdx);
   } else {
-    a.  cmpq   (funcImm.l(), rStashedAR[AROFF(m_func)]);
+    a.  cmpq   (funcImm.l(), rVmFp[AROFF(m_func)]);
   }
   a.    jnz    (mcg->tx().uniqueStubs.funcPrologueRedispatch);
 
@@ -160,7 +160,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       shuffleExtraArgsVariadic((ActRec*)nullptr);
       trimExtraArgs((ActRec*)nullptr);
     }
-    a.    movq   (rStashedAR, argNumToRegName[0]);
+    a.    movq   (rVmFp, argNumToRegName[0]);
 
     if (LIKELY(func->discardExtraArgs())) {
       emitCall(a, TCA(trimExtraArgs), argSet(1));
@@ -178,20 +178,20 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     if (numNonVariadicParams - nPassed <= kMaxParamsInitUnroll) {
       for (auto i = nPassed; i < numNonVariadicParams; i++) {
         auto const offset = cellsToBytes(-i - 1);
-        emitStoreTVType(a, KindOfUninit, rStashedAR[offset + TVOFF(m_type)]);
+        emitStoreTVType(a, KindOfUninit, rVmFp[offset + TVOFF(m_type)]);
       }
       if (func->hasVariadicCaptureParam()) {
         auto const offset = cellsToBytes(-numNonVariadicParams - 1);
-        emitStoreTVType(a, KindOfArray, rStashedAR[offset + TVOFF(m_type)]);
+        emitStoreTVType(a, KindOfArray, rVmFp[offset + TVOFF(m_type)]);
         emitImmStoreq(a, staticEmptyArray(),
-                      rStashedAR[offset + TVOFF(m_data)]);
+                      rVmFp[offset + TVOFF(m_data)]);
       }
     } else {
       Label loopTop;
       assertx(kScratchCrossTraceRegs.contains(rax));
       assertx(kScratchCrossTraceRegs.contains(rdx));
-      a.    lea    (rStashedAR[-cellsToBytes(nPassed + 1)], rdx);
-      a.    lea    (rStashedAR[-cellsToBytes(numNonVariadicParams + 1)], rax);
+      a.    lea    (rVmFp[-cellsToBytes(nPassed + 1)], rdx);
+      a.    lea    (rVmFp[-cellsToBytes(numNonVariadicParams + 1)], rax);
     asm_label(a, loopTop);
       emitStoreUninitNull(a, 0, rdx);
       a.    subq   (int32_t{sizeof(Cell)}, rdx);
@@ -207,12 +207,9 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     assertx(nPassed == numNonVariadicParams);
     assertx(!func->isMagic());
     auto const offset = cellsToBytes(-nPassed - 1);
-    emitStoreTVType(a, KindOfArray, rStashedAR[offset + TVOFF(m_type)]);
-    emitImmStoreq(a, staticEmptyArray(), rStashedAR[offset + TVOFF(m_data)]);
+    emitStoreTVType(a, KindOfArray, rVmFp[offset + TVOFF(m_type)]);
+    emitImmStoreq(a, staticEmptyArray(), rVmFp[offset + TVOFF(m_data)]);
   }
-
-  // Args are kosher. Frame linkage: set fp = ar.
-  a.    movq   (rStashedAR, rVmFp);
 
   int numLocals = func->numParams();
   if (func->isClosureBody()) {
@@ -336,10 +333,9 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
   if (func->isClosureBody() && func->cls()) {
     int entry = nPassed <= numNonVariadicParams
       ? nPassed : numNonVariadicParams + 1;
-    // Relying on rStashedAR == rVmFp here
-    a.    loadq   (rStashedAR[AROFF(m_func)], rax);
-    a.    loadq   (rax[Func::prologueTableOff() + sizeof(TCA)*entry],
-                   rax);
+    a.    loadq   (rVmFp[AROFF(m_func)], rax); // XXX: redundant load; we just
+                                               // stored this
+    a.    loadq   (rax[Func::prologueTableOff() + sizeof(TCA)*entry], rax);
     a.    jmp     (rax);
   } else {
     emitBindJ(
@@ -412,7 +408,7 @@ SrcKey emitFuncPrologue(Func* func, int nPassed, TCA& start) {
   }
 
   if (RuntimeOption::EvalJitTransCounters) emitTransCounterInc(a);
-  a.    pop    (rStashedAR[AROFF(m_savedRip)]);
+  a.    pop    (rVmFp[AROFF(m_savedRip)]);
   maybeEmitStackCheck(a, func);
   return emitPrologueWork(func, nPassed);
 }
@@ -451,7 +447,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   // Main prologue entry point is here.
   start = emitFuncGuard(a, func);
   if (RuntimeOption::EvalJitTransCounters) emitTransCounterInc(a);
-  a.    pop    (rStashedAR[AROFF(m_savedRip)]);
+  a.    pop    (rVmFp[AROFF(m_savedRip)]);
   maybeEmitStackCheck(a, func);
 
   /*
@@ -464,7 +460,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
    * be jumping over the magic call shuffle, to the prologue for 2
    * args below.
    */
-  a.    loadq  (rStashedAR[AROFF(m_invName)], rInvName);
+  a.    loadq  (rVmFp[AROFF(m_invName)], rInvName);
   a.    testb  (1, rbyte(rInvName));
   if (nPassed == 2) {
     a.  jz8    (not_magic_call);
@@ -472,11 +468,11 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
     not_magic_call.jccAuto(a, CC_Z);
   }
   a.    decq   (rInvName);
-  a.    storeq (0, rStashedAR[AROFF(m_varEnv)]);
+  a.    storeq (0, rVmFp[AROFF(m_varEnv)]);
   if (nPassed != 0) { // for zero args, we use the empty array
     static_assert(sizeof(Cell) == 16, "");
-    a.  loadl  (rStashedAR[AROFF(m_numArgsAndFlags)], eax);
-    a.  movq   (rStashedAR, argNumToRegName[1]);
+    a.  loadl  (rVmFp[AROFF(m_numArgsAndFlags)], eax);
+    a.  movq   (rVmFp, argNumToRegName[1]);
     a.  andl   (ActRec::kNumArgsMask, eax);
     a.  movl   (eax, r32(argNumToRegName[0]));
     a.  shll   (0x4, eax);
@@ -486,14 +482,14 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
     callFixup = a.frontier();
   }
   if (nPassed != 2) {
-    a.  storel (2, rStashedAR[AROFF(m_numArgsAndFlags)]);
+    a.  storel (2, rVmFp[AROFF(m_numArgsAndFlags)]);
   }
 
   // Magic calls expect two arguments---first the name of the called
   // function, and then a packed array of the arguments to the
   // function.  These are where these two TV's will be.
-  auto const strTV   = rStashedAR - cellsToBytes(1);
-  auto const arrayTV = rStashedAR - cellsToBytes(2);
+  auto const strTV   = rVmFp - cellsToBytes(1);
+  auto const arrayTV = rVmFp - cellsToBytes(2);
 
   // Store the two arguments for the magic call.
   emitStoreTVType(a, KindOfString, strTV[TVOFF(m_type)]);

@@ -1306,10 +1306,34 @@ TCA MCGenerator::handleResume(bool interpFirst) {
   return start;
 }
 
-void MCGenerator::handleStackOverflow(ActRec* stashedAR) {
-  tl_regState = VMRegState::CLEAN; // regs were synced in stackOverflowHelper
+void handleStackOverflow(ActRec* calleeAR) {
+  /*
+   * First synchronize registers.
+   *
+   * We're called in two situations: either this is the first frame after a
+   * re-entry, in which case calleeAR->m_sfp is enterTCHelper's native stack,
+   * or we're called in the middle of one VM entry (from a func prologue).  We
+   * want to raise the exception from the caller's FCall instruction in the
+   * second case, and in the first case we have to raise in a special way
+   * inside this re-entry.
+   *
+   * Either way the stack depth is below the calleeAR by numArgs, because we
+   * haven't run func prologue duties yet.
+   */
+  auto& unsafeRegs = vmRegsUnsafe();
+  auto const isReentry = calleeAR == vmFirstAR();
+  auto const arToSync = isReentry ? calleeAR : calleeAR->m_sfp;
+  unsafeRegs.fp = arToSync;
+  unsafeRegs.stack.top() =
+    reinterpret_cast<Cell*>(calleeAR) - calleeAR->numArgs();
+  auto const func_base = arToSync->func()->base();
+  // calleeAR m_soff is 0 in the re-entry case, so we'll set pc to the func
+  // base.  But it also doesn't matter because we're going to throw a special
+  // VMReenterStackOverflow in that case so the unwinder won't worry about it.
+  unsafeRegs.pc = arToSync->func()->unit()->at(func_base + calleeAR->m_soff);
+  tl_regState = VMRegState::CLEAN;
 
-  if (stashedAR->m_sfp == vmfp()) {
+  if (!isReentry) {
     /*
      * The normal case - we were called via FCall, or FCallArray.  We need to
      * construct the pc of the fcall from the return address (which will be
@@ -1327,7 +1351,7 @@ void MCGenerator::handleStackOverflow(ActRec* stashedAR) {
      * We were called via re-entry.  Leak the params and the actrec, and tell
      * the unwinder that there's nothing left to do in this "entry".
      */
-    vmsp() = reinterpret_cast<Cell*>(stashedAR + 1);
+    vmsp() = reinterpret_cast<Cell*>(calleeAR + 1);
     throw VMReenterStackOverflow();
   }
   not_reached();

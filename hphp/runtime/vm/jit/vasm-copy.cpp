@@ -146,10 +146,36 @@ void for_all_defs(Env& env, const Vinstr& inst, F f) {
   defs.forEach(f);
 }
 
-void analyze_inst_physical(Env& env, State& state, Vinstr& inst) {
+void analyze_inst_physical(Env& env,
+                           State& state,
+                           Vinstr& inst,
+                           Vinstr* next) {
   for_all_defs(env, inst, [&] (Vreg dst) {
     if (!dst.isPhys()) return;
     if (auto const idx = phys_reg_index(dst)) {
+      /*
+       * A common pattern for us is to load an address into the frame pointer
+       * right before a bindcall.  In this case, if the frame pointer was not
+       * altered before this redefinition, it will effectively still be
+       * not-altered after the bindcall, because bindcall restores it to the
+       * previous value.
+       *
+       * We don't need to worry about not setting the altered flag in between
+       * this instruction and the bindcall, because bindcall's uses are only of
+       * a RegSet---we cannot mis-optimize any of its args based on the state
+       * we're tracking for the frame pointer.
+       *
+       * We also skip over bindcall's definition of rVmFp for this reason.
+       * Really bindcall only preserves rbp if we properly set up the rbp arg
+       * to it, but the program is ill-formed if it's not doing that so it's ok
+       * to just ignore that definition here.
+       */
+      if (next && next->op == Vinstr::bindcall && dst == x64::rVmFp) {
+        FTRACE(3, "      post-dominated by bindcall---preserving frame ptr\n");
+        return;
+      }
+      if (inst.op == Vinstr::bindcall && dst == x64::rVmFp) return;
+
       FTRACE(3, "      kill {}\n", show(dst));
       state.phys_altered[*idx] = true;
     }
@@ -171,9 +197,12 @@ void analyze_physical(Env& env) {
     auto& binfo = env.blockInfos[label];
 
     auto state = binfo.stateIn;
-    for (auto& inst : blk.code) {
+    for (auto it = begin(blk.code); it != end(blk.code); ++it) {
+      auto& inst = *it;
       FTRACE(2, "    {}\n", show(env.unit, inst));
-      analyze_inst_physical(env, state, inst);
+      auto const next_it = std::next(it);
+      auto const next_inst = next_it != end(blk.code) ? &*next_it : nullptr;
+      analyze_inst_physical(env, state, inst, next_inst);
     }
 
     for (auto s : succs(blk.code.back())) {
@@ -313,11 +342,14 @@ void optimize(Env& env) {
     auto& binfo = env.blockInfos[label];
 
     auto state = binfo.stateIn;
-    for (auto& inst : blk.code) {
+    for (auto it = begin(blk.code); it != end(blk.code); ++it) {
+      auto& inst = *it;
       FTRACE(2, "    {}\n", show(env.unit, inst));
       optimize_inst(env, state, inst);
       analyze_inst_virtual(env, inst);
-      analyze_inst_physical(env, state, inst);
+      auto const next_it = std::next(it);
+      auto const next_inst = next_it != end(blk.code) ? &*next_it : nullptr;
+      analyze_inst_physical(env, state, inst, next_inst);
     }
   }
 }

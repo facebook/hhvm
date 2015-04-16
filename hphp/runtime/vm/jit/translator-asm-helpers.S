@@ -8,7 +8,7 @@
  *   rdx / x2:  unsigned char* start
  *   rcx / x4:  ActRec* firstAR
  *   r8  / x5:  uint8_t* targetCacheBase
- *   r9  / x6:  ActRec* stashedAR
+ *   r9  / x6:  ActRec* calleeAR
  */
 
 #include "hphp/util/etch-helpers.h"
@@ -39,14 +39,14 @@ ETCH_NAME(enterTCHelper):
 
   /*
    * If we're entering the TC at a function prologue, make it look like we got
-   * there via a bindcall by pushing return addresses, setting rStashedAR, then
-   * jumping to the prologue.
+   * there via a bindcall by pushing return addresses, setting the callee frame
+   * pointer, then jumping to the prologue.
    */
   test %r9, %r9
   jz ETCH_LABEL(enterTCHelper$callTC)
   push $enterTCExit
   push 0x8(%r9)
-  mov %r9, %r15
+  mov %r9, %rbp
   jmp *%rdx
 
   /*

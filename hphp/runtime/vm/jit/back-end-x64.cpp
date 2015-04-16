@@ -96,8 +96,7 @@ struct BackEnd final : jit::BackEnd {
    */
   static_assert(x64::rVmSp == rbx &&
                 x64::rVmFp == rbp &&
-                x64::rVmTl == r12 &&
-                x64::rStashedAR == r15,
+                x64::rVmTl == r12,
                 "__enterTCHelper needs to be modified to use the correct ABI");
 
   void enterTCHelper(TCA start, ActRec* stashedAR) override {

@@ -242,7 +242,21 @@ struct Vunit;
 /*
  * PHP function call: Smashable call with custom ABI.
  */
-struct bindcall { TCA stub; RegSet args; Vlabel targets[2]; };
+struct bindcall {
+  explicit bindcall(TCA stub,
+                    RegSet args,
+                    std::array<Vlabel,2> targets)
+    : stub{stub}
+    , args{args}
+  {
+    this->targets[0] = targets[0];
+    this->targets[1] = targets[1];
+  }
+
+  TCA stub;
+  RegSet args;
+  Vlabel targets[2];
+};
 
 /*
  * PHP function call: Non-smashable call with same ABI as bindcall.

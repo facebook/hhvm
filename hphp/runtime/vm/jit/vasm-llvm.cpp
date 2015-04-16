@@ -642,7 +642,7 @@ struct LLVMEmitter {
       m_void, std::vector<llvm::Type*>(3, m_int64), false /* isVarArg */
     );
     m_bindcallFnTy = llvm::FunctionType::get(
-      m_int64Pair, std::vector<llvm::Type*>(4, m_int64), false /* isVarArg */
+      m_int64Pair, std::vector<llvm::Type*>(3, m_int64), false /* isVarArg */
     );
 
     static_assert(offsetof(TypedValue, m_data) == 0, "");
@@ -1708,7 +1708,6 @@ void LLVMEmitter::handleOutgoingPhysRegs(
   // above).
   defineValue(x64::rVmSp, nullptr);
   defineValue(x64::rVmFp, nullptr);
-  defineValue(x64::rStashedAR, nullptr);
   defineValue(x64::rAsm, nullptr);
 }
 
@@ -1847,7 +1846,7 @@ void LLVMEmitter::emit(const bindcall& inst) {
   auto funcName = m_tcMM->getUniqueSymbolName("bindcall_");
   auto func = emitFuncPtr(funcName, m_bindcallFnTy, uint64_t(inst.stub));
   auto args = makePhysRegArgs(
-    inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, x64::rStashedAR});
+    inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp});
   auto next = makeBlock("_next");
   next->moveAfter(m_irb.GetInsertBlock());
   auto unwind = block(inst.targets[1]);
@@ -1871,7 +1870,7 @@ void LLVMEmitter::emit(const vcallstub& inst) {
   // arguments.
   auto funcName = folly::sformat("vcallstub_{}", inst.target);
   auto args = makePhysRegArgs(
-    inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, x64::rStashedAR});
+    inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, reg::r15});
   for (auto arg : m_unit.tuples[inst.extraArgs]) args.emplace_back(value(arg));
   std::vector<llvm::Type*> argTypes(args.size(), m_int64);
   auto funcTy = llvm::FunctionType::get(m_int64Pair, argTypes, false);

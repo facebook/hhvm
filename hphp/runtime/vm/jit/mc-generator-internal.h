@@ -274,12 +274,6 @@ emitCopyTo(X64Assembler& a,
   emitStoreTVType(a, r32(scratch), dest[destOff + TVOFF(m_type)]);
 }
 
-// Pops the return address pushed by fcall and stores it into the
-// actrec in rStashedAR.
-inline void emitPopRetIntoActRec(X64Assembler& a) {
-  a.    pop  (x64::rStashedAR[AROFF(m_savedRip)]);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

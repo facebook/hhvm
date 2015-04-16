@@ -312,11 +312,6 @@ public:
    */
   TCA handleResume(bool interpFirst);
 
-  /*
-   * Handle a VM stack overflow condition by throwing an appropriate exception.
-   */
-  void handleStackOverflow(ActRec* stashedAR);
-
 private:
   /*
    * Service request handlers.
@@ -448,6 +443,11 @@ enum TransPerfCounter {
 
 extern __thread int64_t s_perfCounters[];
 #define INC_TPC(n) ++jit::s_perfCounters[jit::tpc_##n];
+
+/*
+ * Handle a VM stack overflow condition by throwing an appropriate exception.
+ */
+void handleStackOverflow(ActRec* calleeAR);
 
 }}
 

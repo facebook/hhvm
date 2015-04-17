@@ -164,7 +164,7 @@ inline bool ObjectData::getAttribute(Attribute attr) const {
   return o_attribute & attr;
 }
 
-inline void ObjectData::setAttribute(Attribute attr) const {
+inline void ObjectData::setAttribute(Attribute attr) {
   o_attribute |= attr;
 }
 

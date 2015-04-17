@@ -778,7 +778,7 @@ void StringData::incrementHelper() {
   }
 }
 
-void StringData::preCompute() const {
+void StringData::preCompute() {
   StringSlice s = slice();
   m_hash = hash_string_unsafe(s.ptr, s.len);
   assert(m_hash >= 0);
@@ -789,12 +789,12 @@ void StringData::preCompute() const {
   }
 }
 
-void StringData::setStatic() const {
+void StringData::setStatic() {
   m_count = StaticValue;
   preCompute();
 }
 
-void StringData::setUncounted() const {
+void StringData::setUncounted() {
   m_count = UncountedValue;
   preCompute();
 }

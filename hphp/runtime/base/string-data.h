@@ -469,9 +469,9 @@ private:
   void delist();
   void incrementHelper();
   bool checkSane() const;
-  void preCompute() const;
-  void setStatic() const;
-  void setUncounted() const;
+  void preCompute();
+  void setStatic();
+  void setUncounted();
 
 private:
   char* m_data;

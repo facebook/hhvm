@@ -721,7 +721,7 @@ static xmlDocPtr dom_document_parser(DOMDocument* domdoc, int mode,
       // entity loading path, which is locked down by default for security
       // reasons.
       auto stream = File::Open(file_dest, "rb");
-      if (!stream->isInvalid()) {
+      if (stream && !stream->isInvalid()) {
         ctxt = xmlCreateIOParserCtxt(nullptr, nullptr,
                                      libxml_streams_IO_read,
                                      libxml_streams_IO_close,

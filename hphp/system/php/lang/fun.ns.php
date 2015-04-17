@@ -17,6 +17,12 @@ namespace __SystemLib {
       );
       return $x->{$this->method}(...$args);
     }
+    public function getClassName(): string {
+      return $this->class;
+    }
+    public function getMethodName(): string {
+      return $this->method;
+    }
   };
 }
 

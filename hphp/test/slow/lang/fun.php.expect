@@ -17,3 +17,5 @@ object(HH\Vector)#7 (2) {
   [1]=>
   int(3)
 }
+string(12) "Hello World!"
+int(1337)

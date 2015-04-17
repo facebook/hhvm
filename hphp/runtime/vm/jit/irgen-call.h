@@ -32,7 +32,8 @@ void fpushActRec(IRGS& env,
                  SSATmp* func,
                  SSATmp* objOrClass,
                  int32_t numArgs,
-                 const StringData* invName);
+                 const StringData* invName,
+                 bool fromFPushCtor);
 
 //////////////////////////////////////////////////////////////////////
 

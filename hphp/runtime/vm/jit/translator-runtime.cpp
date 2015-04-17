@@ -747,7 +747,7 @@ void lookupClsMethodHelper(Class* cls,
     ar->m_func = f;
     if (res == LookupResult::MagicCallFound ||
         res == LookupResult::MagicCallStaticFound) {
-      ar->setInvName(meth);
+      ar->setMagicDispatch(meth);
       meth->incRefCount();
     }
   } catch (...) {
@@ -804,10 +804,9 @@ void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff) {
   if (func->cls()) {
     assertx(!func->cls()->isZombie());
   }
-  if (fp->hasVarEnv()) {
+  if ((func->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
     assertx(fp->getVarEnv()->getFP() == fp);
   }
-  // TODO: validate this pointer from actrec
   int numLocals = func->numLocals();
   assertx(sp <= (Cell*)fp - func->numSlotsInFrame() || fp->resumed());
 
@@ -879,7 +878,7 @@ void loadFuncContextImpl(FooNR callableNR, ActRec* preLiveAR, ActRec* fp) {
     preLiveAR->setClass(cls);
   }
   if (UNLIKELY(invName != nullptr)) {
-    preLiveAR->setInvName(invName);
+    preLiveAR->setMagicDispatch(invName);
   }
 }
 
@@ -1098,11 +1097,10 @@ static void sync_regstate_to_caller(ActRec* preLive) {
 }
 
 #define SHUFFLE_EXTRA_ARGS_PRELUDE()                                    \
-  assertx(!ar->hasInvName());                                            \
   const Func* f = ar->m_func;                                           \
   int numParams = f->numNonVariadicParams();                            \
   int numArgs = ar->numArgs();                                          \
-  assertx(numArgs > numParams);                                          \
+  assertx(numArgs > numParams);                                         \
   int numExtra = numArgs - numParams;                                   \
   TRACE(1, "extra args: %d args, function %s takes only %d, ar %p\n",   \
         numArgs, f->name()->data(), numParams, ar);                     \
@@ -1150,10 +1148,7 @@ void shuffleExtraArgsMayUseVV(ActRec* ar) {
   assertx(!f->hasVariadicCaptureParam());
   assertx(f->attrs() & AttrMayUseVV);
 
-  {
-    assertx(!ar->hasExtraArgs());
-    ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
-  }
+  ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
 }
 
 void shuffleExtraArgsVariadic(ActRec* ar) {
@@ -1183,7 +1178,6 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
   assertx(f->attrs() & AttrMayUseVV);
 
   {
-    assertx(!ar->hasExtraArgs());
     ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
 
     auto varArgsArray = Array::attach(MixedArray::MakePacked(numExtra, tvArgs));

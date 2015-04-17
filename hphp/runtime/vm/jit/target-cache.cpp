@@ -197,8 +197,8 @@ void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
       if (fatal) return raiseFatal(ar, cls, name, ctx);
       return nullFunc(ar, name);
     }
-    ar->setInvName(name);
-    assertx(!(func->attrs() & AttrStatic));
+    ar->setMagicDispatch(name);
+    assert(!(func->attrs() & AttrStatic));
     ar->m_func   = func;
     mce->m_key   = reinterpret_cast<uintptr_t>(cls) | 0x1u;
     mce->m_value = func;
@@ -236,7 +236,7 @@ void readMagicOrStatic(Entry* mce,
 
   auto const isMagic = mceKey & 0x1u;
   if (UNLIKELY(isMagic)) {
-    ar->setInvName(name);
+    ar->setMagicDispatch(name);
     assertx(!(mceKey & 0x2u));
     return;
   }

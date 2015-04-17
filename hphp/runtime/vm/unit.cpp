@@ -1510,7 +1510,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
             if (!fp) {
               ve = g_context->m_globalVarEnv;
             } else {
-              if (fp->hasVarEnv()) {
+              if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
                 ve = fp->m_varEnv;
               } else {
                 // Nothing to do. If there is no varEnv, the enclosing

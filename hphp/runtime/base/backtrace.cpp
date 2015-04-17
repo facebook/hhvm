@@ -209,6 +209,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       }
     }
 
+    bool const mayUseVV = fp->m_func->attrs() & AttrMayUseVV;
+
     auto const withNames = btArgs.m_withArgNames;
     auto const withValues = btArgs.m_withArgValues;
     if (!btArgs.m_withArgNames && !btArgs.m_withArgValues) {
@@ -227,7 +229,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       auto const nargs = fp->numArgs();
       auto const nformals = std::min<int>(nparams, nargs);
 
-      if (UNLIKELY(fp->hasVarEnv() && fp->getVarEnv()->getFP() != fp)) {
+      if (UNLIKELY(mayUseVV) &&
+          UNLIKELY(fp->hasVarEnv() && fp->getVarEnv()->getFP() != fp)) {
         // VarEnv is attached to eval or debugger frame, other than the current
         // frame. Access locals thru VarEnv.
         auto varEnv = fp->getVarEnv();
@@ -261,7 +264,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       }
 
       // Builtin extra args are not stored in varenv.
-      if (nargs > nparams && fp->hasExtraArgs()) {
+      if (UNLIKELY(mayUseVV) && nargs > nparams && fp->hasExtraArgs()) {
         for (int i = nparams; i < nargs; i++) {
           auto arg = fp->getExtraArg(i - nparams);
           args.append(tvAsVariant(arg));
@@ -271,7 +274,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     }
 
     if (btArgs.m_withMetadata && !isReturning) {
-      if (UNLIKELY(fp->hasVarEnv())) {
+      if (UNLIKELY(mayUseVV) && UNLIKELY(fp->hasVarEnv())) {
         auto tv = fp->getVarEnv()->lookup(s_86metadata.get());
         if (tv != nullptr && tv->m_type != KindOfUninit) {
           frame.set(s_metadata, tvAsVariant(tv));

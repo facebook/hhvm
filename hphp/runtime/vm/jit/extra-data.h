@@ -299,21 +299,12 @@ struct ActRecInfo : IRExtraData {
   IRSPOffset spOffset;
   const StringData* invName;  // may be nullptr
   int32_t numArgs;
-
-  bool isFromFPushCtor() const {
-    ActRec ar;
-    ar.m_numArgsAndFlags = numArgs;
-    return ar.isFromFPushCtor();
-  }
+  bool fromFPushCtor;
 
   std::string show() const {
-    ActRec ar;
-    ar.m_numArgsAndFlags = numArgs;
     return folly::to<std::string>(spOffset.offset, ',',
-                                  ar.numArgs(),
-                                  ar.isFromFPushCtor() ? ",ctor" : "",
-                                  ar.resumed() ? ",res" : "",
-                                  ar.localsDecRefd() ? ",ldrd" : "",
+                                  numArgs,
+                                  fromFPushCtor ? ",ctor" : "",
                                   invName ? " M" : "");
   }
 };

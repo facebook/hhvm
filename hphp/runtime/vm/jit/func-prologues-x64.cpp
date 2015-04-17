@@ -151,6 +151,8 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     mcg->tx().profData()->setProfiling(func->getFuncId());
   }
 
+  auto invNameAlreadyOK = false;
+
   if (nPassed > numNonVariadicParams) {
     // Too many args; a weird case, so call out to an appropriate helper.
     // Stash ar somewhere callee-saved.
@@ -174,6 +176,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       assertx(func->hasVariadicCaptureParam());
       emitCall(a, TCA(shuffleExtraArgsVariadic), argSet(1));
     }
+    invNameAlreadyOK = true;
   } else if (nPassed < numNonVariadicParams) {
     if (numNonVariadicParams - nPassed <= kMaxParamsInitUnroll) {
       for (auto i = nPassed; i < numNonVariadicParams; i++) {
@@ -209,6 +212,12 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
     auto const offset = cellsToBytes(-nPassed - 1);
     emitStoreTVType(a, KindOfArray, rVmFp[offset + TVOFF(m_type)]);
     emitImmStoreq(a, staticEmptyArray(), rVmFp[offset + TVOFF(m_data)]);
+  }
+
+  if (!invNameAlreadyOK) {
+    if (func->attrs() & AttrMayUseVV) {
+      a.    storeq (0, rVmFp[AROFF(m_invName)]);
+    }
   }
 
   int numLocals = func->numParams();
@@ -460,13 +469,15 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
    * be jumping over the magic call shuffle, to the prologue for 2
    * args below.
    */
-  a.    loadq  (rVmFp[AROFF(m_invName)], rInvName);
-  a.    testb  (1, rbyte(rInvName));
+  a.    loadl  (rVmFp[AROFF(m_numArgsAndFlags)], eax);
+  a.    andl   (static_cast<int32_t>(ActRec::Flags::MagicDispatch), eax);
+  a.    cmpl   (static_cast<int32_t>(ActRec::Flags::MagicDispatch), eax);
   if (nPassed == 2) {
-    a.  jz8    (not_magic_call);
+    a.  jnz8   (not_magic_call);
   } else {
-    not_magic_call.jccAuto(a, CC_Z);
+    not_magic_call.jccAuto(a, CC_NZ);
   }
+  a.    loadq  (rVmFp[AROFF(m_invName)], rInvName);
   a.    decq   (rInvName);
   a.    storeq (0, rVmFp[AROFF(m_varEnv)]);
   if (nPassed != 0) { // for zero args, we use the empty array

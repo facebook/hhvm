@@ -1387,7 +1387,7 @@ Array ExecutionContext::getCallerInfo() {
 }
 
 Array getDefinedVariables(const ActRec* fp) {
-  if (fp->hasVarEnv()) {
+  if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
     return fp->m_varEnv->getDefinedVariables();
   }
   auto const func = fp->m_func;
@@ -1416,19 +1416,19 @@ ActRec* ExecutionContext::getFrameAtDepth(int frame) {
     fp = getPrevVMState(fp);
   }
   if (UNLIKELY(!fp || fp->localsDecRefd())) return nullptr;
-  assert(!fp->hasInvName());
+  assert(!fp->magicDispatch() || !fp->hasInvName());
   return fp;
 }
 
 VarEnv* ExecutionContext::getOrCreateVarEnv(int frame) {
   auto const fp = getFrameAtDepth(frame);
+  if (!(fp->func()->attrs() & AttrMayUseVV)) {
+    raise_error("Could not create variable environment");
+  }
   if (!fp->hasVarEnv()) {
-    if (!(fp->func()->attrs() & AttrMayUseVV)) {
-      raise_error("Could not create variable environment");
-    }
     fp->setVarEnv(VarEnv::createLocal(fp));
   }
-  return fp->m_varEnv;
+  return fp->getVarEnv();
 }
 
 VarEnv* ExecutionContext::hasVarEnv(int frame) {
@@ -1472,7 +1472,6 @@ NEVER_INLINE
 static void shuffleExtraStackArgs(ActRec* ar) {
   const Func* func = ar->m_func;
   assert(func);
-  assert(!ar->m_varEnv);
 
   // the last (variadic) param is included in numParams (since it has a
   // name), but the arg in that slot should be included as the first
@@ -1523,11 +1522,11 @@ static void shuffleExtraStackArgs(ActRec* ar) {
 }
 
 static void shuffleMagicArgs(ActRec* ar) {
+  assert(ar->magicDispatch());
+
   // We need to put this where the first argument is
-  StringData* invName = ar->getInvName();
-  int nargs = ar->numArgs();
-  ar->setVarEnv(nullptr);
-  assert(!ar->hasVarEnv() && !ar->hasInvName());
+  auto const invName = ar->clearMagicDispatch();
+  int const nargs = ar->numArgs();
 
   // We need to make an array containing all the arguments passed by
   // the caller and put it where the second argument is.
@@ -1551,6 +1550,7 @@ static void shuffleMagicArgs(ActRec* ar) {
   stack.pushArrayNoRc(argArray.detach());
 
   ar->setNumArgs(2);
+  ar->setVarEnv(nullptr);
 }
 
 /*
@@ -1618,7 +1618,7 @@ static NEVER_INLINE void cleanupParamsAndActRec(Stack& stack,
 
 static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
                                                Stack& stack, int nregular) {
-  assert(ar != nullptr && ar->hasInvName());
+  assert(ar != nullptr && ar->magicDispatch() && ar->hasInvName());
   assert(!cellIsNull(&args));
   assert(nregular >= 0);
   assert((stack.top() + nregular) == (void*) ar);
@@ -1629,9 +1629,7 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
           f->name()->isame(s___callStatic.get())));
 
   // We'll need to make this the first argument
-  StringData* invName = ar->getInvName();
-  ar->setVarEnv(nullptr);
-  assert(!ar->hasVarEnv() && !ar->hasInvName());
+  auto const invName = ar->clearMagicDispatch();
 
   auto nargs = getContainerSize(args);
 
@@ -1682,6 +1680,7 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
   }
 
   ar->setNumArgs(2);
+  ar->setVarEnv(nullptr);
 }
 
 // offset is the number of params already on the stack to which the
@@ -1693,24 +1692,20 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
                              int nregular,
                              bool doCufRefParamChecks,
                              TypedValue* retval) {
-  assert(ar != nullptr);
   assert(!cellIsNull(&args));
   assert(nregular >= 0);
   assert((stack.top() + nregular) == (void*) ar);
-  const Func* f = ar->m_func;
+  const Func* const f = ar->m_func;
   assert(f);
 
-  assert(!ar->hasExtraArgs());
-
   assert(isContainer(args));
-  int nargs = nregular + getContainerSize(args);
-  assert(!ar->hasVarEnv() || (0 == nargs));
-  if (UNLIKELY(ar->hasInvName())) {
+  int const nargs = nregular + getContainerSize(args);
+  if (UNLIKELY(ar->magicDispatch())) {
     shuffleMagicArrayArgs(ar, args, stack, nregular);
     return true;
   }
 
-  int nparams = f->numNonVariadicParams();
+  int const nparams = f->numNonVariadicParams();
   int nextra_regular = std::max(nregular - nparams, 0);
   ArrayIter iter(args);
   if (LIKELY(nextra_regular == 0)) {
@@ -1751,8 +1746,14 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
       // argArray was exhausted, so there are no "extra" arguments but there
       // may be a deficit of non-variadic arguments, and the need to push an
       // empty array for the variadic argument ... that work is left to
-      // prepareFuncEntry
+      // prepareFuncEntry.  Since the stack state is going to be considered
+      // "trimmed" over there, we need to null the extraArgs/varEnv field if
+      // the function could read it.
       ar->initNumArgs(nargs);
+      ar->trashVarEnv();
+      if (!debug || (ar->func()->attrs() & AttrMayUseVV)) {
+        ar->setVarEnv(nullptr);
+      }
       return true;
     }
   }
@@ -1868,24 +1869,14 @@ static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
   const int nparams = func->numNonVariadicParams();
   auto& stack = vmStack();
 
-  if (UNLIKELY(ar->m_varEnv != nullptr)) {
-    // m_varEnv != nullptr means we have a varEnv, extraArgs, or an invName.
-    if (ar->hasInvName()) {
-      // shuffleMagicArgs deals with everything. no need for further
-      // argument munging
-      shuffleMagicArgs(ar);
-    } else if (ar->hasVarEnv()) {
-      assert(func->isPseudoMain());
-      pushLocalsAndIterators(func);
-      ar->m_varEnv->enterFP(vmfp(), ar);
-      vmfp() = ar;
-      pc = func->getEntry();
-      // Nothing more to do; get out
-      return;
-    } else {
-      assert(ar->hasExtraArgs());
-      assert(nparams < ar->numArgs());
-    }
+  if (stk == StackArgsState::Trimmed &&
+      (ar->func()->attrs() & AttrMayUseVV) &&
+      ar->hasExtraArgs()) {
+    assert(nparams < ar->numArgs());
+  } else if (UNLIKELY(ar->magicDispatch())) {
+    // shuffleMagicArgs deals with everything. no need for further
+    // argument munging
+    shuffleMagicArgs(ar);
   } else {
     int nargs = ar->numArgs();
     if (UNLIKELY(nargs > nparams)) {
@@ -1925,6 +1916,9 @@ static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
       }
       if (UNLIKELY(func->hasVariadicCaptureParam())) {
         stack.pushArrayNoRc(staticEmptyArray());
+      }
+      if (func->attrs() & AttrMayUseVV) {
+        ar->setVarEnv(nullptr);
       }
     }
   }
@@ -1992,14 +1986,17 @@ static void enterVMAtAsyncFunc(ActRec* enterFnAr, Resumable* resumable,
   }
 }
 
-static void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
+static void enterVMAtFunc(ActRec* enterFnAr,
+                          StackArgsState stk,
+                          VarEnv* varEnv) {
   assert(enterFnAr);
   assert(!enterFnAr->resumed());
   Stats::inc(Stats::VMEnter);
 
   const bool useJit = RID().getJit();
   const bool useJitPrologue = useJit && vmfp()
-    && !enterFnAr->m_varEnv
+    && !enterFnAr->magicDispatch()
+    && !varEnv
     && (stk != StackArgsState::Trimmed);
   // The jit prologues only know how to do limited amounts of work; cannot
   // be used for magic call/pseudo-main/extra-args already determined or
@@ -2015,7 +2012,17 @@ static void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
     return;
   }
 
-  prepareFuncEntry(enterFnAr, vmpc(), stk);
+  if (UNLIKELY(varEnv != nullptr)) {
+    enterFnAr->setVarEnv(varEnv);
+    assert(enterFnAr->func()->isPseudoMain());
+    pushLocalsAndIterators(enterFnAr->func());
+    enterFnAr->m_varEnv->enterFP(vmfp(), enterFnAr);
+    vmfp() = enterFnAr;
+    vmpc() = enterFnAr->func()->getEntry();
+  } else {
+    prepareFuncEntry(enterFnAr, vmpc(), stk);
+  }
+
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(vmStack(), enterFnAr->m_func, 0);
   assert(vmfp()->func()->contains(vmpc()));
@@ -2048,8 +2055,9 @@ static void enterVMAtCurPC() {
  * async function will throw an 'exception' upon entering VM if passed.
  */
 static void enterVM(ActRec* ar, StackArgsState stk,
-                    Resumable* resumable = nullptr,
-                    ObjectData* exception = nullptr) {
+                    Resumable* resumable,
+                    ObjectData* exception,
+                    VarEnv* varEnv) {
   assert(ar);
   assert(!ar->sfp());
   assert(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
@@ -2081,8 +2089,9 @@ resume:
     if (first) {
       first = false;
       if (!resumable) {
-        enterVMAtFunc(ar, stk);
+        enterVMAtFunc(ar, stk, varEnv);
       } else {
+        assert(varEnv == nullptr);
         enterVMAtAsyncFunc(ar, resumable, exception);
       }
     } else {
@@ -2202,12 +2211,12 @@ void ExecutionContext::invokeFunc(TypedValue* retptr,
     ar->setThis(nullptr);
   }
   auto numPassedArgs = cellIsNull(&args) ? 0 : getContainerSize(args);
-  if (invName) {
-    ar->setInvName(invName);
-  } else {
-    ar->setVarEnv(varEnv);
-  }
   ar->initNumArgs(numPassedArgs);
+  if (invName) {
+    ar->setMagicDispatch(invName);
+  } else {
+    ar->trashVarEnv();
+  }
 
 #ifdef HPHP_TRACE
   if (vmfp() == nullptr) {
@@ -2248,7 +2257,8 @@ void ExecutionContext::invokeFunc(TypedValue* retptr,
       popVMState();
     };
 
-    enterVM(ar, varEnv ? StackArgsState::Untrimmed : StackArgsState::Trimmed);
+    enterVM(ar, varEnv ? StackArgsState::Untrimmed : StackArgsState::Trimmed,
+            nullptr, nullptr, varEnv);
 
     // retptr might point somewhere that is affected by (push|pop)VMState, so
     // don't write to it until after we pop the nested VM state.
@@ -2306,9 +2316,9 @@ void ExecutionContext::invokeFuncFew(TypedValue* retptr,
   ar->m_this = (ObjectData*)thisOrCls;
   ar->initNumArgs(argc);
   if (UNLIKELY(invName != nullptr)) {
-    ar->setInvName(invName);
+    ar->setMagicDispatch(invName);
   } else {
-    ar->m_varEnv = nullptr;
+    ar->trashVarEnv();
   }
 
 #ifdef HPHP_TRACE
@@ -2342,7 +2352,7 @@ void ExecutionContext::invokeFuncFew(TypedValue* retptr,
       popVMState();
     };
 
-    enterVM(ar, StackArgsState::Untrimmed);
+    enterVM(ar, StackArgsState::Untrimmed, nullptr, nullptr, nullptr);
 
     // retptr might point somewhere that is affected by (push|pop)VMState, so
     // don't write to it until after we pop the nested VM state.
@@ -2373,7 +2383,7 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
   pushVMState(savedSP);
   SCOPE_EXIT { popVMState(); };
 
-  enterVM(fp, StackArgsState::Untrimmed, resumable);
+  enterVM(fp, StackArgsState::Untrimmed, resumable, nullptr, nullptr);
 }
 
 void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
@@ -2394,7 +2404,7 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   pushVMState(vmStack().top());
   SCOPE_EXIT { popVMState(); };
 
-  enterVM(fp, StackArgsState::Untrimmed, resumable, exception);
+  enterVM(fp, StackArgsState::Untrimmed, resumable, exception, nullptr);
 }
 
 void ExecutionContext::invokeUnit(TypedValue* retval, const Unit* unit) {
@@ -2480,7 +2490,6 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   ar->m_func = func;
   ar->initNumArgs(0);
   assert(vmfp());
-  assert(!vmfp()->hasInvName());
   ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
   pushLocalsAndIterators(func);
   if (!vmfp()->hasVarEnv()) {
@@ -2905,7 +2914,7 @@ static inline void lookup_var(ActRec* fp,
   if (id != kInvalidId) {
     val = frame_local(fp, id);
   } else {
-    assert(!fp->hasInvName());
+    assert(fp->func()->attrs() & AttrMayUseVV);
     if (fp->hasVarEnv()) {
       val = fp->m_varEnv->lookup(name);
     } else {
@@ -2919,12 +2928,12 @@ static inline void lookupd_var(ActRec* fp,
                                TypedValue* key,
                                TypedValue*& val) {
   name = lookup_name(key);
-  const Func* func = fp->m_func;
+  auto const func = fp->m_func;
   Id id = func->lookupVarId(name);
   if (id != kInvalidId) {
     val = frame_local(fp, id);
   } else {
-    assert(!fp->hasInvName());
+    assert(func->attrs() & AttrMayUseVV);
     if (!fp->hasVarEnv()) {
       fp->setVarEnv(VarEnv::createLocal(fp));
     }
@@ -5576,7 +5585,6 @@ OPTBLD_INLINE void iopUnsetN(IOP_ARGS) {
   TypedValue* tv1 = vmStack().topTV();
   TypedValue* tv = nullptr;
   lookup_var(vmfp(), name, tv1, tv);
-  assert(!vmfp()->hasInvName());
   if (tv != nullptr) {
     tvUnset(tv);
   }
@@ -5630,7 +5638,7 @@ OPTBLD_INLINE ActRec* fPushFuncImpl(const Func* func, int numArgs) {
   ActRec* ar = vmStack().allocA();
   ar->m_func = func;
   ar->initNumArgs(numArgs);
-  ar->setVarEnv(nullptr);
+  ar->trashVarEnv();
   return ar;
 }
 
@@ -5703,7 +5711,7 @@ OPTBLD_INLINE void iopFPushFunc(IOP_ARGS) {
     assert(arrCls != nullptr);
 
     vmStack().discard();
-    ActRec* ar = fPushFuncImpl(func, numArgs);
+    auto const ar = fPushFuncImpl(func, numArgs);
     if (arrThis) {
       arrThis->incRefCount();
       ar->setThis(arrThis);
@@ -5711,7 +5719,7 @@ OPTBLD_INLINE void iopFPushFunc(IOP_ARGS) {
       ar->setClass(arrCls);
     }
     if (UNLIKELY(invName != nullptr)) {
-      ar->setInvName(invName);
+      ar->setMagicDispatch(invName);
     }
     decRefArr(origArr);
     return;
@@ -5780,9 +5788,9 @@ void fPushObjMethodImpl(Class* cls, StringData* name, ObjectData* obj,
   }
   ar->initNumArgs(numArgs);
   if (res == LookupResult::MagicCallFound) {
-    ar->setInvName(name);
+    ar->setMagicDispatch(name);
   } else {
-    ar->setVarEnv(nullptr);
+    ar->trashVarEnv();
     decRefStr(name);
   }
 }
@@ -5793,7 +5801,7 @@ void fPushNullObjMethod(int numArgs) {
   ar->m_func = SystemLib::s_nullFunc;
   ar->setThis(nullptr);
   ar->initNumArgs(numArgs);
-  ar->setVarEnv(nullptr);
+  ar->trashVarEnv();
 }
 
 static void throw_call_non_object(const char* methodName,
@@ -5895,9 +5903,9 @@ void pushClsMethodImpl(Class* cls, StringData* name, ObjectData* obj,
   ar->initNumArgs(numArgs);
   if (res == LookupResult::MagicCallFound ||
       res == LookupResult::MagicCallStaticFound) {
-    ar->setInvName(name);
+    ar->setMagicDispatch(name);
   } else {
-    ar->setVarEnv(nullptr);
+    ar->trashVarEnv();
     decRefStr(const_cast<StringData*>(name));
   }
 }
@@ -5978,7 +5986,7 @@ OPTBLD_INLINE void iopFPushCtor(IOP_ARGS) {
   ar->setThis(this_);
   ar->initNumArgs(numArgs);
   ar->setFromFPushCtor();
-  ar->setVarEnv(nullptr);
+  ar->trashVarEnv();
 }
 
 OPTBLD_INLINE void iopFPushCtorD(IOP_ARGS) {
@@ -6008,7 +6016,7 @@ OPTBLD_INLINE void iopFPushCtorD(IOP_ARGS) {
   ar->setThis(this_);
   ar->initNumArgs(numArgs);
   ar->setFromFPushCtor();
-  ar->setVarEnv(nullptr);
+  ar->trashVarEnv();
 }
 
 OPTBLD_INLINE void iopDecodeCufIter(IOP_ARGS) {
@@ -6064,13 +6072,13 @@ OPTBLD_INLINE void iopFPushCufIter(IOP_ARGS) {
   ar->m_func = f;
   ar->m_this = (ObjectData*)o;
   if (o && !(uintptr_t(o) & 1)) ar->m_this->incRefCount();
+  ar->initNumArgs(numArgs);
   if (n) {
-    ar->setInvName(n);
+    ar->setMagicDispatch(n);
     n->incRefCount();
   } else {
-    ar->setVarEnv(nullptr);
+    ar->trashVarEnv();
   }
-  ar->initNumArgs(numArgs);
 }
 
 OPTBLD_INLINE void doFPushCuf(PC& pc, bool forward, bool safe) {
@@ -6111,9 +6119,9 @@ OPTBLD_INLINE void doFPushCuf(PC& pc, bool forward, bool safe) {
   }
   ar->initNumArgs(numArgs);
   if (invName) {
-    ar->setInvName(invName);
+    ar->setMagicDispatch(invName);
   } else {
-    ar->setVarEnv(nullptr);
+    ar->trashVarEnv();
   }
   tvRefcountedDecRef(&func);
 }

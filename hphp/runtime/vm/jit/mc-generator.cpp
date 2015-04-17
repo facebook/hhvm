@@ -290,7 +290,8 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
 }
 
 static bool liveFrameIsPseudoMain() {
-  ActRec* ar = (ActRec*)vmfp();
+  auto const ar = vmfp();
+  if (!(ar->func()->attrs() & AttrMayUseVV)) return false;
   return ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope();
 }
 
@@ -1350,8 +1351,13 @@ void handleStackOverflow(ActRec* calleeAR) {
     /*
      * We were called via re-entry.  Leak the params and the actrec, and tell
      * the unwinder that there's nothing left to do in this "entry".
+     *
+     * Also, the caller hasn't set up the m_invName area on the ActRec (unless
+     * it was a magic call), since it's the prologue's responsibility if it's a
+     * non-magic call.  We can just null it out since we're fatalling.
      */
     vmsp() = reinterpret_cast<Cell*>(calleeAR + 1);
+    calleeAR->setVarEnv(nullptr);
     throw VMReenterStackOverflow();
   }
   not_reached();

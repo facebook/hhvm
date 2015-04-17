@@ -259,10 +259,6 @@ struct ActRec {
   // skip this frame if it is for a builtin function
   bool skipFrame() const;
 
-  static constexpr int kNumArgsBits = 29;
-  static constexpr int kNumArgsMask = (1 << kNumArgsBits) - 1;
-  static constexpr int kFlagsMask   = ~kNumArgsMask;
-
   enum Flags : uint32_t {
     None          = 0,
 
@@ -271,10 +267,16 @@ struct ActRec {
     // down (locals freed).
     LocalsDecRefd = (1u << 29),
 
-    // These two bits are mutually exclusive.
+    // Mutually exclusive execution mode states in these 2 bits.
     InResumed     = (1u << 30),
     FromFPushCtor = (1u << 31),
+    MagicDispatch = InResumed|FromFPushCtor,
   };
+
+  static constexpr int kNumArgsBits = 29;
+  static constexpr int kNumArgsMask = (1 << kNumArgsBits) - 1;
+  static constexpr int kFlagsMask   = ~kNumArgsMask;
+  static constexpr int kExecutionModeMask = ~LocalsDecRefd;
 
   int32_t numArgs() const { return m_numArgsAndFlags & kNumArgsMask; }
   Flags flags() const {
@@ -283,10 +285,13 @@ struct ActRec {
 
   bool localsDecRefd() const { return flags() & LocalsDecRefd; }
   bool resumed() const {
-    return (flags() & ~LocalsDecRefd) == InResumed;
+    return (flags() & kExecutionModeMask) == InResumed;
   }
   bool isFromFPushCtor() const {
-    return (flags() & ~LocalsDecRefd) == FromFPushCtor;
+    return (flags() & kExecutionModeMask) == FromFPushCtor;
+  }
+  bool magicDispatch() const {
+    return (flags() & kExecutionModeMask) == MagicDispatch;
   }
 
   static uint32_t encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
@@ -313,6 +318,25 @@ struct ActRec {
   void setFromFPushCtor() {
     assert(flags() == Flags::None);
     m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), FromFPushCtor);
+  }
+
+  void setMagicDispatch(StringData* invName) {
+    assert(flags() == Flags::None);
+    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), MagicDispatch);
+    m_invName = reinterpret_cast<StringData*>(
+      reinterpret_cast<intptr_t>(invName) | kInvNameBit
+    );
+  }
+
+  StringData* clearMagicDispatch() {
+    assert(magicDispatch());
+    auto const invName = getInvName();
+    m_numArgsAndFlags = encodeNumArgsAndFlags(
+      numArgs(),
+      static_cast<Flags>(flags() & (~MagicDispatch & kFlagsMask))
+    );
+    trashVarEnv();
+    return invName;
   }
 
   static void* encodeThis(ObjectData* obj, Class* cls) {
@@ -370,25 +394,30 @@ struct ActRec {
   static constexpr int8_t kHasClassBit = 0x1;
   static constexpr int8_t kClassMask   = ~kHasClassBit;
 
-  inline bool hasThis() const {
+  bool hasThis() const {
     return m_this && !(reinterpret_cast<intptr_t>(m_this) & kHasClassBit);
   }
-  inline ObjectData* getThis() const {
+
+  ObjectData* getThis() const {
     assert(hasThis());
     return m_this;
   }
-  inline void setThis(ObjectData* val) {
+
+  void setThis(ObjectData* val) {
     m_this = val;
   }
-  inline bool hasClass() const {
+
+  bool hasClass() const {
     return reinterpret_cast<intptr_t>(m_cls) & kHasClassBit;
   }
-  inline Class* getClass() const {
+
+  Class* getClass() const {
     assert(hasClass());
     return reinterpret_cast<Class*>(
       reinterpret_cast<intptr_t>(m_cls) & kClassMask);
   }
-  inline void setClass(Class* val) {
+
+  void setClass(Class* val) {
     m_cls = reinterpret_cast<Class*>(
       reinterpret_cast<intptr_t>(val) | kHasClassBit);
   }
@@ -399,42 +428,60 @@ struct ActRec {
   static constexpr int8_t kExtraArgsBit  = 0x2;
   static constexpr int8_t kExtraArgsMask = ~kExtraArgsBit;
 
-  inline bool hasVarEnv() const {
+  static constexpr uintptr_t kTrashedVarEnvSlot = 0xfeeefeee000f000f;
+
+  void trashVarEnv() {
+    if (debug) setVarEnv(reinterpret_cast<VarEnv*>(kTrashedVarEnvSlot));
+  }
+
+  bool checkVarEnv() const {
+    always_assert(m_varEnv != reinterpret_cast<VarEnv*>(kTrashedVarEnvSlot));
+    return true;
+  }
+
+  bool hasVarEnv() const {
+    assert(checkVarEnv());
     return m_varEnv &&
       !(reinterpret_cast<intptr_t>(m_varEnv) & (kInvNameBit | kExtraArgsBit));
   }
-  inline bool hasInvName() const {
+
+  bool hasInvName() const {
+    assert(magicDispatch());
+    assert(checkVarEnv());
     return reinterpret_cast<intptr_t>(m_invName) & kInvNameBit;
   }
-  inline bool hasExtraArgs() const {
+
+  bool hasExtraArgs() const {
+    assert(checkVarEnv());
     return reinterpret_cast<intptr_t>(m_extraArgs) & kExtraArgsBit;
   }
-  inline VarEnv* getVarEnv() const {
+
+  VarEnv* getVarEnv() const {
     assert(hasVarEnv());
     return m_varEnv;
   }
-  inline StringData* getInvName() const {
+
+  StringData* getInvName() const {
     assert(hasInvName());
     return reinterpret_cast<StringData*>(
       reinterpret_cast<intptr_t>(m_invName) & kInvNameMask);
   }
-  inline ExtraArgs* getExtraArgs() const {
+
+  ExtraArgs* getExtraArgs() const {
+    if (!hasExtraArgs()) return nullptr;
     return reinterpret_cast<ExtraArgs*>(
       reinterpret_cast<intptr_t>(m_extraArgs) & kExtraArgsMask);
   }
-  inline void setVarEnv(VarEnv* val) {
+
+  void setVarEnv(VarEnv* val) {
     m_varEnv = val;
   }
-  inline void setInvName(StringData* val) {
-    m_invName = reinterpret_cast<StringData*>(
-      reinterpret_cast<intptr_t>(val) | kInvNameBit);
-  }
-  inline void setExtraArgs(ExtraArgs* val) {
+
+  void setExtraArgs(ExtraArgs* val) {
     m_extraArgs = reinterpret_cast<ExtraArgs*>(
       reinterpret_cast<intptr_t>(val) | kExtraArgsBit);
   }
 
-  // Accessors for extra arg queries.
   TypedValue* getExtraArg(unsigned ind) const {
     assert(hasExtraArgs() || hasVarEnv());
     return hasExtraArgs() ? getExtraArgs()->getExtraArg(ind) :
@@ -681,11 +728,9 @@ public:
     assert(m_top != m_base);
     ActRec* ar = (ActRec*)m_top;
     if (ar->hasThis()) decRefObj(ar->getThis());
-    if (ar->hasInvName()) decRefStr(ar->getInvName());
-
-    // This should only be used on a pre-live ActRec.
-    assert(!ar->hasVarEnv());
-    assert(!ar->hasExtraArgs());
+    if (ar->magicDispatch()) {
+      decRefStr(ar->getInvName());
+    }
     discardAR();
   }
 

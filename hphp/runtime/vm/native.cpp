@@ -321,7 +321,7 @@ static inline int32_t minNumArgs(ActRec* ar) {
 }
 
 const StringData* getInvokeName(ActRec* ar) {
-  if (ar->hasInvName()) {
+  if (ar->magicDispatch() && ar->hasInvName()) {
     return ar->getInvName();
   }
   auto func = ar->m_func;

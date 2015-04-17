@@ -60,7 +60,7 @@ struct Resumable {
                       Offset resumeOffset, size_t objSize) {
     assert(fp);
     assert(fp->resumed() == clone);
-    DEBUG_ONLY auto const func = fp->func();
+    auto const func = fp->func();
     assert(func);
     assert(func->isResumable());
     assert(func->contains(resumeOffset));
@@ -86,7 +86,8 @@ struct Resumable {
       actRec->setResumed();
 
       // Suspend VarEnv if needed
-      if (UNLIKELY(fp->hasVarEnv())) {
+      if (UNLIKELY(func->attrs() & AttrMayUseVV) &&
+          UNLIKELY(fp->hasVarEnv())) {
         fp->getVarEnv()->suspend(fp, actRec);
       }
     } else {

@@ -92,7 +92,8 @@ void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata) {
   if (fp && fp->skipFrame()) fp = g_context->getPrevVMState(fp);
   if (UNLIKELY(!fp)) return;
 
-  if (LIKELY(!fp->hasVarEnv())) {
+  if (LIKELY(!(fp->func()->attrs() & AttrMayUseVV)) ||
+      LIKELY(!fp->hasVarEnv())) {
     auto const local = fp->func()->lookupVarId(s_86metadata.get());
     if (LIKELY(local != kInvalidId)) {
       cellSet(*metadata.asCell(), *tvAssertCell(frame_local(fp, local)));

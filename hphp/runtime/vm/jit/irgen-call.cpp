@@ -126,7 +126,8 @@ void fpushObjMethodUnknown(IRGS& env,
               cns(env, TNullptr),  // Will be set by LdObjMethod
               obj,
               numParams,
-              nullptr);
+              nullptr,
+              false);
   spillStack(env);
   auto const objCls = gen(env, LdObjClass, obj);
 
@@ -207,7 +208,8 @@ void fpushObjMethodCommon(IRGS& env,
                       funcTmp,
                       objOrCls,
                       numParams,
-                      magicCall ? methodName : nullptr);
+                      magicCall ? methodName : nullptr,
+                      false);
           return;
         }
       } else {
@@ -238,7 +240,8 @@ void fpushObjMethodCommon(IRGS& env,
                 cns(env, func),
                 objOrCls,
                 numParams,
-                magicCall ? methodName : nullptr);
+                magicCall ? methodName : nullptr,
+                false);
     return;
   }
 
@@ -250,7 +253,7 @@ void fpushFuncObj(IRGS& env, int32_t numParams) {
   auto const obj      = popC(env);
   auto const cls      = gen(env, LdObjClass, obj);
   auto const func     = gen(env, LdObjInvoke, slowExit, cls);
-  fpushActRec(env, func, obj, numParams, nullptr);
+  fpushActRec(env, func, obj, numParams, nullptr, false);
 }
 
 void fpushFuncArr(IRGS& env, int32_t numParams) {
@@ -262,7 +265,8 @@ void fpushFuncArr(IRGS& env, int32_t numParams) {
     cns(env, TNullptr),
     cns(env, TNullptr),
     numParams,
-    nullptr
+    nullptr,
+    false
   );
   spillStack(env);
 
@@ -295,7 +299,8 @@ void fpushCufUnknown(IRGS& env, Op op, int32_t numParams) {
     cns(env, TNullptr),
     cns(env, TNullptr),
     numParams,
-    nullptr
+    nullptr,
+    false
   );
   spillStack(env);
 
@@ -397,7 +402,7 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
     push(env, safeFlag);
   }
 
-  fpushActRec(env, func, ctx, numArgs, invName);
+  fpushActRec(env, func, ctx, numArgs, invName, false);
 }
 
 void fpushFuncCommon(IRGS& env,
@@ -410,7 +415,8 @@ void fpushFuncCommon(IRGS& env,
                   cns(env, func),
                   cns(env, TNullptr),
                   numParams,
-                  nullptr);
+                  nullptr,
+                  false);
       return;
     }
   }
@@ -422,7 +428,8 @@ void fpushFuncCommon(IRGS& env,
               ssaFunc,
               cns(env, TNullptr),
               numParams,
-              nullptr);
+              nullptr,
+              false);
 }
 
 void implUnboxR(IRGS& env) {
@@ -448,7 +455,8 @@ void fpushActRec(IRGS& env,
                  SSATmp* func,
                  SSATmp* objOrClass,
                  int32_t numArgs,
-                 const StringData* invName) {
+                 const StringData* invName,
+                 bool fromFPushCtor) {
   spillStack(env);
   auto const returnSPOff = env.irb->syncedSpLevel();
 
@@ -456,6 +464,7 @@ void fpushActRec(IRGS& env,
   info.spOffset = offsetFromIRSP(env, BCSPOffset{-int32_t{kNumActRecCells}});
   info.numArgs = numArgs;
   info.invName = invName;
+  info.fromFPushCtor = fromFPushCtor;
   gen(
     env,
     SpillFrame,
@@ -506,11 +515,7 @@ void emitFPushCtor(IRGS& env, int32_t numParams) {
   auto const obj  = gen(env, AllocObj, cls);
   gen(env, IncRef, obj);
   pushIncRef(env, obj);
-  auto numArgsAndFlags = ActRec::encodeNumArgsAndFlags(
-    numParams,
-    ActRec::Flags::FromFPushCtor
-  );
-  fpushActRec(env, func, obj, numArgsAndFlags, nullptr);
+  fpushActRec(env, func, obj, numParams, nullptr, true /* fromFPushCtor */);
 }
 
 void emitFPushCtorD(IRGS& env,
@@ -555,11 +560,7 @@ void emitFPushCtorD(IRGS& env,
                              : gen(env, AllocObj, ssaCls);
   gen(env, IncRef, obj);
   pushIncRef(env, obj);
-  auto numArgsAndFlags = ActRec::encodeNumArgsAndFlags(
-    numParams,
-    ActRec::Flags::FromFPushCtor
-  );
-  fpushActRec(env, ssaFunc, obj, numArgsAndFlags, nullptr);
+  fpushActRec(env, ssaFunc, obj, numParams, nullptr, true /* FromFPushCtor */);
 }
 
 void emitFPushFuncD(IRGS& env, int32_t nargs, const StringData* name) {
@@ -586,7 +587,8 @@ void emitFPushFunc(IRGS& env, int32_t numParams) {
               gen(env, LdFunc, funcName),
               cns(env, TNullptr),
               numParams,
-              nullptr);
+              nullptr,
+              false);
 }
 
 void emitFPushObjMethodD(IRGS& env,
@@ -616,7 +618,8 @@ void emitFPushClsMethodD(IRGS& env,
                 cns(env, func),
                 objOrCls,
                 numParams,
-                func && magicCall ? methodName : nullptr);
+                func && magicCall ? methodName : nullptr,
+                false);
     return;
   }
 
@@ -647,7 +650,8 @@ void emitFPushClsMethodD(IRGS& env,
               func,
               clsCtx,
               numParams,
-              nullptr);
+              nullptr,
+              false);
 }
 
 void emitFPushClsMethod(IRGS& env, int32_t numParams) {
@@ -688,7 +692,7 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
         auto funcTmp = clsVal->hasConstVal()
           ? cns(env, func)
           : gen(env, LdClsMethod, clsVal, cns(env, -(func->methodSlot() + 1)));
-        fpushActRec(env, funcTmp, clsVal, numParams, nullptr);
+        fpushActRec(env, funcTmp, clsVal, numParams, nullptr, false);
         return;
       }
     }
@@ -698,7 +702,8 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
               cns(env, TNullptr),
               cns(env, TNullptr),
               numParams,
-              nullptr);
+              nullptr,
+              false);
   spillStack(env);
 
   /*
@@ -741,7 +746,7 @@ void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
     auto const funcTmp = cns(env, vmfunc);
     auto const newCtxTmp = gen(env, GetCtxFwdCall, curCtxTmp, funcTmp);
     fpushActRec(env, funcTmp, newCtxTmp, numParams,
-      (magicCall ? methName : nullptr));
+      magicCall ? methName : nullptr, false);
     return;
   }
 
@@ -773,7 +778,8 @@ void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
               funcTmp,
               ctx,
               numParams,
-              magicCall ? methName : nullptr);
+              magicCall ? methName : nullptr,
+              false);
 }
 
 //////////////////////////////////////////////////////////////////////

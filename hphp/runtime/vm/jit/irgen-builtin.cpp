@@ -540,13 +540,12 @@ struct CatchMaker {
 private:
   void prepareForCatch() const {
     if (inlining()) {
-      auto flags = m_kind == Kind::InliningCtor ? ActRec::Flags::FromFPushCtor
-                                                : ActRec::Flags::None;
       fpushActRec(env,
                   cns(env, m_callee),
                   m_params.thiz ? m_params.thiz : cns(env, TNullptr),
-                  ActRec::encodeNumArgsAndFlags(m_params.size(), flags),
-                  nullptr);
+                  m_params.size(),
+                  nullptr,
+                  m_kind == Kind::InliningCtor);
     }
     for (auto i = uint32_t{0}; i < m_params.size(); ++i) {
       // TODO(#4313939): it's not actually necessary to push these

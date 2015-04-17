@@ -101,7 +101,7 @@ void beginInlining(IRGS& env,
   DefInlineFPData data;
   data.target        = target;
   data.retBCOff      = returnBcOffset;
-  data.fromFPushCtor = sframe->extra<ActRecInfo>()->isFromFPushCtor();
+  data.fromFPushCtor = sframe->extra<ActRecInfo>()->fromFPushCtor;
   data.ctx           = sframe->src(2);
   data.retSPOff      = prevSPOff;
   data.spOffset      = offsetFromIRSP(env, BCSPOffset{0}).offset;

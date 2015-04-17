@@ -2617,12 +2617,12 @@ void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
-  auto const nArgs = inst->extra<CufIterSpillFrame>()->args;
-  auto const iterId = inst->extra<CufIterSpillFrame>()->iterId;
+  auto const extra = inst->extra<CufIterSpillFrame>();
+  auto const nArgs = extra->args;
+  auto const iterId = extra->iterId;
   auto const itOff = iterOffset(inst->marker(), iterId);
 
-  auto const spOffset = cellsToBytes(
-    inst->extra<CufIterSpillFrame>()->spOffset.offset);
+  auto const spOffset = cellsToBytes(extra->spOffset.offset);
   auto spReg = srcLoc(inst, 0).reg();
   auto fpReg = srcLoc(inst, 1).reg();
   auto& v = vmain();
@@ -2657,22 +2657,28 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
     auto name2 = v.makeReg();
     v << orqi{ActRec::kInvNameBit, name, name2, v.makeReg()};
     v << store{name2, spReg[spOffset + int(AROFF(m_invName))]};
+    auto const encoded = ActRec::encodeNumArgsAndFlags(
+      safe_cast<int32_t>(nArgs),
+      ActRec::Flags::MagicDispatch
+    );
+    v << storeli{static_cast<int32_t>(encoded),
+                 spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
   }, [&](Vout& v) {
     v << store{name, spReg[spOffset + int(AROFF(m_invName))]};
+    v << storeli{safe_cast<int32_t>(nArgs),
+                 spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
   });
-  v << storeli{safe_cast<int32_t>(nArgs),
-               spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
 }
 
 void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   auto const func      = inst->src(1);
   auto const objOrCls  = inst->src(2);
-  auto const magicName = inst->extra<SpillFrame>()->invName;
-  auto const nArgs     = inst->extra<SpillFrame>()->numArgs;
+  auto const extra     = inst->extra<SpillFrame>();
+  auto const magicName = extra->invName;
+  auto const nArgs     = extra->numArgs;
   auto& v              = vmain();
 
-  auto const spOffset = cellsToBytes(
-    inst->extra<SpillFrame>()->spOffset.offset);
+  auto const spOffset = cellsToBytes(extra->spOffset.offset);
 
   auto spReg = srcLoc(inst, 0).reg();
   // actRec->m_this
@@ -2701,15 +2707,20 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     int offset_m_this = spOffset + int(AROFF(m_this));
     v << storeqi{0, spReg[offset_m_this]};
   }
+
   // actRec->m_invName
   // ActRec::m_invName is encoded as a pointer with bit kInvNameBit
   // set to distinguish it from m_varEnv and m_extrArgs
-  uintptr_t invName = !magicName
-    ? 0
-    : reinterpret_cast<uintptr_t>(magicName) | ActRec::kInvNameBit;
-  emitImmStoreq(v, invName, spReg[spOffset + int(AROFF(m_invName))]);
-  // actRec->m_func  and possibly actRec->m_cls
-  // Note m_cls is unioned with m_this and may overwrite previous value
+  if (magicName) {
+    auto const invName =
+      reinterpret_cast<uintptr_t>(magicName) | ActRec::kInvNameBit;
+    emitImmStoreq(v, invName, spReg[spOffset] + int{AROFF(m_invName)});
+  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot,
+                  spReg[spOffset] + int{AROFF(m_invName)});
+  }
+
+  // actRec->m_func
   if (func->isA(TNullptr)) {
     // No need to store the null---we're always about to run another
     // instruction that will populate the Func.
@@ -2722,7 +2733,18 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     v << store{funcLoc.reg(0), spReg[offset_m_func]};
   }
 
-  v << storeli{nArgs, spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
+  auto flags = ActRec::Flags::None;
+  if (extra->fromFPushCtor) {
+    flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::FromFPushCtor);
+  }
+  if (magicName) {
+    flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::MagicDispatch);
+  }
+  auto const encoded = static_cast<int32_t>(ActRec::encodeNumArgsAndFlags(
+    nArgs,
+    flags
+  ));
+  v << storeli{encoded, spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
 }
 
 void CodeGenerator::cgStClosureFunc(IRInstruction* inst) {
@@ -2927,6 +2949,9 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     auto retAddr = (int64_t)mcg->tx().uniqueStubs.retHelper;
     v << store{v.cns(retAddr),
                sync_sp[cellsToBytes(argc) + AROFF(m_savedRip)]};
+    if (callee->attrs() & AttrMayUseVV) {
+      v << storeqi{0, sync_sp[cellsToBytes(argc) + AROFF(m_invName)]};
+    }
     v << lea{sync_sp[cellsToBytes(argc)], rVmFp};
     emitCheckSurpriseFlagsEnter(v, vc, rds, Fixup(0, argc), catchBlock);
     BuiltinFunction builtinFuncPtr = callee->builtinFuncPtr();

@@ -121,9 +121,9 @@ template<bool unwinding>
 void ALWAYS_INLINE
 frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
   assert(numLocals == fp->m_func->numLocals());
-  assert(!fp->hasInvName());
   // Check if the frame has a VarEnv or if it has extraArgs
-  if (UNLIKELY(fp->m_varEnv != nullptr)) {
+  if (UNLIKELY(fp->func()->attrs() & AttrMayUseVV) &&
+      UNLIKELY(fp->m_varEnv != nullptr)) {
     if (fp->hasVarEnv()) {
       // If there is a VarEnv, free the locals and the VarEnv
       // by calling the detach method.
@@ -179,7 +179,6 @@ frame_free_locals_inl(ActRec* fp, int numLocals, TypedValue* rv) {
 void ALWAYS_INLINE
 frame_free_inl(ActRec* fp, TypedValue* rv) { // For frames with no locals
   assert(0 == fp->m_func->numLocals());
-  assert(!fp->hasInvName());
   assert(fp->m_varEnv == nullptr);
   assert(fp->hasThis());
   decRefObj(fp->getThis());

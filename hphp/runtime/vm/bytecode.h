@@ -237,7 +237,7 @@ struct ActRec {
     struct {
       union {
         ObjectData* m_this;    // This.
-        Class* m_cls;      // Late bound class.
+        Class* m_cls;          // Late bound class.
       };
       union {
         VarEnv* m_varEnv;       // Variable environment; only used when the

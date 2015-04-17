@@ -46,8 +46,14 @@ fwrite($fp, "static_assert(kNumSIMDRegs == " . NUM_SIMD_ARGS.
 
 $callerArgs = 'BuiltinFunction f, int64_t* GP, int GP_count, '.
               'double* SIMD, int SIMD_count';
-foreach(['double'=>'Double','int64_t'=>'Int64'] as $ret => $name) {
-  fwrite($fp, "${ret} callFunc{$name}Impl({$callerArgs}) {\n");
+foreach(['double'=>'Double','int64_t'=>'Int64','void'=>'POD'] as $ret => $name) {
+  $rettypearray = [];
+  if ($name == 'POD') {
+    fwrite($fp, "void callFunc{$name}Impl(void *ret, {$callerArgs}) {\n");
+    $rettypearray[] = "void*";
+  } else {
+    fwrite($fp, "${ret} callFunc{$name}Impl({$callerArgs}) {\n");
+  }
   fwrite($fp, "  switch (GP_count) {\n");
   $gpargs = [];
   for($gp = 0; $gp <= NUM_GP_ARGS; ++$gp) {
@@ -56,16 +62,35 @@ foreach(['double'=>'Double','int64_t'=>'Int64'] as $ret => $name) {
     $simdargs = [];
     for($simd = 0; $simd <= NUM_SIMD_ARGS; ++$simd) {
       $argsD = implode(',', array_merge($simdargs, $gpargs));
+      $argsD1 = implode(',', array_merge($rettypearray, $simdargs, $gpargs));
       $argsC = [];
+      $argsC1 = [];
+      if ($name == 'POD') {
+	$argsC1[] = "ret";
+      }
       for ($i = 0; $i < $simd; ++$i) {
         $argsC[] = "SIMD[$i]";
+        $argsC1[] = "SIMD[$i]";
       }
       for ($i = 0; $i < $gp; ++$i) {
         $argsC[] = "GP[$i]";
+        $argsC1[] = "GP[$i]";
       }
       $argsC = implode(',', $argsC);
+      $argsC1 = implode(',', $argsC1);
       fwrite($fp, "        case ${simd}:\n");
-      fwrite($fp, "          return ((${ret} (*)(${argsD}))f)(${argsC});\n");
+      if ($name == 'POD') {
+        fwrite($fp, "          {\n");
+        fwrite($fp, "#ifdef __aarch64__\n");
+        fwrite($fp, "              asm(\"mov x8, %0\"::\"r\"(ret):\"x8\"); \n");
+        fwrite($fp, "              ((${ret} (*)(${argsD}))f)(${argsC});\n");
+        fwrite($fp, "#else\n");
+        fwrite($fp, "              ((${ret} (*)(${argsD1}))f)(${argsC1});\n");
+        fwrite($fp, "#endif\n");
+        fwrite($fp, "            return; } \n");
+      } else {
+        fwrite($fp, "          return ((${ret} (*)(${argsD}))f)(${argsC});\n");
+      }
       $simdargs[] = 'double';
     }
     fwrite($fp, "        default: not_reached();\n");

@@ -1468,3 +1468,2814 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
   }
 }
 
+void callFuncPODImpl(void *ret, BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+  switch (GP_count) {
+    case 0:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)())f)();
+#else
+              ((void (*)(void*))f)(ret);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double))f)(SIMD[0]);
+#else
+              ((void (*)(void*,double))f)(ret,SIMD[0]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double))f)(SIMD[0],SIMD[1]);
+#else
+              ((void (*)(void*,double,double))f)(ret,SIMD[0],SIMD[1]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double))f)(SIMD[0],SIMD[1],SIMD[2]);
+#else
+              ((void (*)(void*,double,double,double))f)(ret,SIMD[0],SIMD[1],SIMD[2]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+#else
+              ((void (*)(void*,double,double,double,double))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+#else
+              ((void (*)(void*,double,double,double,double,double))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 1:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t))f)(GP[0]);
+#else
+              ((void (*)(void*,int64_t))f)(ret,GP[0]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t))f)(SIMD[0],GP[0]);
+#else
+              ((void (*)(void*,double,int64_t))f)(ret,SIMD[0],GP[0]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t))f)(SIMD[0],SIMD[1],GP[0]);
+#else
+              ((void (*)(void*,double,double,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0]);
+#else
+              ((void (*)(void*,double,double,double,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 2:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t))f)(GP[0],GP[1]);
+#else
+              ((void (*)(void*,int64_t,int64_t))f)(ret,GP[0],GP[1]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 3:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 4:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 5:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 6:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 7:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 8:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 9:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 10:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 11:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 12:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 13:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 14:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 15:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 16:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 17:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 18:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 19:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 20:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 21:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 22:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 23:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 24:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 25:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 26:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 27:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 28:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 29:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 30:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 31:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    case 32:
+      switch (SIMD_count) {
+        case 0:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#else
+              ((void (*)(void*,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#endif
+            return; } 
+        case 1:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#else
+              ((void (*)(void*,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#endif
+            return; } 
+        case 2:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#else
+              ((void (*)(void*,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#endif
+            return; } 
+        case 3:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#else
+              ((void (*)(void*,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#endif
+            return; } 
+        case 4:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#else
+              ((void (*)(void*,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#endif
+            return; } 
+        case 5:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#else
+              ((void (*)(void*,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#endif
+            return; } 
+        case 6:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#endif
+            return; } 
+        case 7:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#endif
+            return; } 
+        case 8:
+          {
+#ifdef __aarch64__
+              asm("mov x8, %0"::"r"(ret):"x8"); 
+              ((void (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#else
+              ((void (*)(void*,double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(ret,SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+#endif
+            return; } 
+        default: not_reached();
+      }
+    default: not_reached();
+  }
+}
+

@@ -540,13 +540,12 @@ struct CatchMaker {
 private:
   void prepareForCatch() const {
     if (inlining()) {
+      auto flags = m_kind == Kind::InliningCtor ? ActRec::Flags::FromFPushCtor
+                                                : ActRec::Flags::None;
       fpushActRec(env,
                   cns(env, m_callee),
                   m_params.thiz ? m_params.thiz : cns(env, TNullptr),
-                  ActRec::encodeNumArgs(m_params.size(),
-                                        false /* localsDecRefd */,
-                                        false /* resumed */,
-                                        m_kind == Kind::InliningCtor),
+                  ActRec::encodeNumArgsAndFlags(m_params.size(), flags),
                   nullptr);
     }
     for (auto i = uint32_t{0}; i < m_params.size(); ++i) {

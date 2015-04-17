@@ -506,7 +506,10 @@ void emitFPushCtor(IRGS& env, int32_t numParams) {
   auto const obj  = gen(env, AllocObj, cls);
   gen(env, IncRef, obj);
   pushIncRef(env, obj);
-  auto numArgsAndFlags = ActRec::encodeNumArgs(numParams, false, false, true);
+  auto numArgsAndFlags = ActRec::encodeNumArgsAndFlags(
+    numParams,
+    ActRec::Flags::FromFPushCtor
+  );
   fpushActRec(env, func, obj, numArgsAndFlags, nullptr);
 }
 
@@ -552,7 +555,10 @@ void emitFPushCtorD(IRGS& env,
                              : gen(env, AllocObj, ssaCls);
   gen(env, IncRef, obj);
   pushIncRef(env, obj);
-  auto numArgsAndFlags = ActRec::encodeNumArgs(numParams, false, false, true);
+  auto numArgsAndFlags = ActRec::encodeNumArgsAndFlags(
+    numParams,
+    ActRec::Flags::FromFPushCtor
+  );
   fpushActRec(env, ssaFunc, obj, numArgsAndFlags, nullptr);
 }
 

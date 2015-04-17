@@ -5952,7 +5952,8 @@ OPTBLD_INLINE void iopFPushCtor(IOP_ARGS) {
   ActRec* ar = vmStack().allocA();
   ar->m_func = f;
   ar->setThis(this_);
-  ar->initNumArgsFromFPushCtor(numArgs);
+  ar->initNumArgs(numArgs);
+  ar->setFromFPushCtor();
   ar->setVarEnv(nullptr);
 }
 
@@ -5981,7 +5982,8 @@ OPTBLD_INLINE void iopFPushCtorD(IOP_ARGS) {
   ActRec* ar = vmStack().allocA();
   ar->m_func = f;
   ar->setThis(this_);
-  ar->initNumArgsFromFPushCtor(numArgs);
+  ar->initNumArgs(numArgs);
+  ar->setFromFPushCtor();
   ar->setVarEnv(nullptr);
 }
 

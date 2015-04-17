@@ -224,10 +224,8 @@ struct ActRec {
       uint32_t m_soff;         // Saved offset of caller from beginning of
                                //   caller's Func's bytecode.
 
-      // Bits 0-28 are the number of function args.
-      // Bit 29 is whether the locals were already decrefd (used by unwinder)
-      // Bit 30 is whether this ActRec is embedded in a Resumable object.
-      // Bit 31 is whether this ActRec came from FPushCtor*.
+      // Bits 0-28 are the number of function args.  Bits 29-31 are values from
+      // the Flags enum.
       uint32_t m_numArgsAndFlags;
     };
   };
@@ -261,78 +259,60 @@ struct ActRec {
   // skip this frame if it is for a builtin function
   bool skipFrame() const;
 
-  /**
-   * Accessors for the packed m_numArgsAndFlags field. We track
-   * whether ActRecs came from FPushCtor* so that during unwinding we
-   * can set the flag not to call destructors for objects whose
-   * constructors exit via an exception.
-   */
-
   static constexpr int kNumArgsBits = 29;
   static constexpr int kNumArgsMask = (1 << kNumArgsBits) - 1;
   static constexpr int kFlagsMask   = ~kNumArgsMask;
 
-  static constexpr int kLocalsDecRefdShift = kNumArgsBits;
-  static constexpr int kResumedShift       = kNumArgsBits + 1;
-  static constexpr int kFPushCtorShift     = kNumArgsBits + 2;
+  enum Flags : uint32_t {
+    None          = 0,
 
-  static_assert(kFPushCtorShift <= 8 * sizeof(int32_t) - 1,
-                "Out of bits in ActRec");
+    // This bit can be independently set on ActRecs with any other flag state.
+    // It's used by the unwinder to know that an ActRec has been partially torn
+    // down (locals freed).
+    LocalsDecRefd = (1u << 29),
 
-  static constexpr int kLocalsDecRefdMask = 1 << kLocalsDecRefdShift;
-  static constexpr int kResumedMask       = 1 << kResumedShift;
-  static constexpr int kFPushCtorMask     = 1 << kFPushCtorShift;
+    // These two bits are mutually exclusive.
+    InResumed     = (1u << 30),
+    FromFPushCtor = (1u << 31),
+  };
 
-  int32_t numArgs() const {
-    return m_numArgsAndFlags & kNumArgsMask;
+  int32_t numArgs() const { return m_numArgsAndFlags & kNumArgsMask; }
+  Flags flags() const {
+    return static_cast<Flags>(m_numArgsAndFlags & kFlagsMask);
   }
 
-  bool localsDecRefd() const {
-    return m_numArgsAndFlags & kLocalsDecRefdMask;
-  }
-
+  bool localsDecRefd() const { return flags() & LocalsDecRefd; }
   bool resumed() const {
-    return m_numArgsAndFlags & kResumedMask;
+    return (flags() & ~LocalsDecRefd) == InResumed;
   }
-
-  void setResumed() {
-    m_numArgsAndFlags |= kResumedMask;
-  }
-
   bool isFromFPushCtor() const {
-    return m_numArgsAndFlags & kFPushCtorMask;
+    return (flags() & ~LocalsDecRefd) == FromFPushCtor;
   }
 
-  static inline uint32_t
-  encodeNumArgs(uint32_t numArgs, bool localsDecRefd, bool resumed,
-                bool isFPushCtor) {
-    assert((numArgs & kFlagsMask) == 0);
-    return numArgs |
-      (localsDecRefd << kLocalsDecRefdShift) |
-      (resumed       << kResumedShift) |
-      (isFPushCtor   << kFPushCtorShift);
+  static uint32_t encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
+    assert((numArgs & ~kNumArgsMask) == 0);
+    assert((uint32_t{flags} & ~kFlagsMask) == 0);
+    return numArgs | flags;
   }
 
   void initNumArgs(uint32_t numArgs) {
-    m_numArgsAndFlags = encodeNumArgs(numArgs, false, false, false);
-  }
-
-  void initNumArgsFromResumable(uint32_t numArgs) {
-    m_numArgsAndFlags = encodeNumArgs(numArgs, false, true, false);
-  }
-
-  void initNumArgsFromFPushCtor(uint32_t numArgs) {
-    m_numArgsAndFlags = encodeNumArgs(numArgs, false, false, true);
+    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs, Flags::None);
   }
 
   void setNumArgs(uint32_t numArgs) {
-    m_numArgsAndFlags = encodeNumArgs(numArgs, localsDecRefd(), resumed(),
-                                      isFromFPushCtor());
+    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs, flags());
   }
 
   void setLocalsDecRefd() {
-    assert(!localsDecRefd());
-    m_numArgsAndFlags |= kLocalsDecRefdMask;
+    m_numArgsAndFlags = m_numArgsAndFlags | LocalsDecRefd;
+  }
+  void setResumed() {
+    assert(flags() == Flags::None);
+    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), InResumed);
+  }
+  void setFromFPushCtor() {
+    assert(flags() == Flags::None);
+    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), FromFPushCtor);
   }
 
   static void* encodeThis(ObjectData* obj, Class* cls) {
@@ -373,7 +353,7 @@ struct ActRec {
     return m_func;
   }
 
-  /**
+  /*
    * To conserve space, we use unions for pairs of mutually exclusive
    * fields (fields that are not used at the same time). We use unions
    * for m_this/m_cls and m_varEnv/m_invName.

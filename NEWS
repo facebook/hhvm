@@ -1,3 +1,19 @@
+"Harris" 23-Apr-2015
+ - Fix preloadRepo
+ - [asio] Two round enterContext()
+ - Handle emptiness correctly in arrElemReturn
+ - Turn off RecordSubprocessTimes by default
+ - Ability to attach metadata to a stack frame
+ - [h2tp] support parameter unpacking calls
+ - fix memory leak while parse ini file
+ - Stop the health monitor when the pagelet server stops
+ - Avoid some overhead dealing with NewCol
+ - [hhvm] Session: Preserve user save handler on session_destroy
+ - Fix mapping the shared area of RDS in Cygwin.
+ - Make ThreadManager initialization explicit, rather than load-time
+ - Fix fread on an SSL socket potentially waiting for data from socket when
+   OpenSSL already has data
+
 "Gadd" 9-Apr-2015
  - Add catch traces to PHP-level calls
  - Run class initializers before ObjectData constructor

@@ -95,6 +95,11 @@ struct AliasAnalysis {
   ALocBits all_refs;
 
   /*
+   * Return the number of distinct locations we're tracking by id
+   */
+  size_t count() const { return locations_inv.size(); }
+
+  /*
    * Return a set of locations that we've assigned ids to that may alias a
    * given AliasClass.  Note that (as usual) memory locations we haven't
    * assigned bits to may still be affected, but this module only reports

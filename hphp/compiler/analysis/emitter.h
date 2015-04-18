@@ -783,7 +783,7 @@ public:
                     const char* nameOverride = nullptr,
                     ExpressionListPtr paramsOverride = nullptr);
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId,
-                       bool isSplat);
+                       bool isUnpack);
   void emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
                          bool byRef);
   void emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp);

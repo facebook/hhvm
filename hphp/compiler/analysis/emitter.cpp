@@ -5383,17 +5383,22 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
 void EmitterVisitor::emitFuncCallArg(Emitter& e,
                                      ExpressionPtr exp,
                                      int paramId,
-                                     bool isSplat) {
+                                     bool isUnpack) {
   visit(exp);
   if (checkIfStackEmpty("FPass*")) return;
 
   // TODO(4599379): if dealing with an unpack, here is where we'd want to
   // emit a bytecode to traverse any containers;
-  // TODO(4599368): if dealing with an unpack, would need to kick out of
-  // the pass-by-ref behavior and defer that to FCallUnpack
 
   auto kind = getPassByRefKind(exp);
-  if (isSplat) {
+  if (isUnpack) {
+    // This deals with the case where the called function has a
+    // by ref param at the index of the unpack (because we don't
+    // want to box the unpack itself).
+    // But note that unless the user created the array manually,
+    // and added reference params at the correct places, we'll
+    // still get warnings, and the array elements will not be
+    // passed by reference.
     emitConvertToCell(e);
     kind = PassByRefKind::AllowCell;
   }

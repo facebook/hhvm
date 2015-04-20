@@ -253,7 +253,8 @@ static Array get_defined_vars() {
 }
 
 Array HHVM_FUNCTION(get_defined_vars) {
-  raise_disallowed_dynamic_call("extract should not be called dynamically");
+  raise_disallowed_dynamic_call("get_defined_vars should not be "
+    "called dynamically");
   return get_defined_vars();
 }
 

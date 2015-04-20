@@ -176,6 +176,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   /**
    * Returns a Map containing the key/value pairs from the specified array.
    */
+  <<__Deprecated('Use `new Map()` instead.')>>
   public static function fromArray(array<Tk, Tv> $arr): Map<Tk, Tv>;
 
   public static function fromItems(?Traversable<Pair<Tk, Tv>> $items)

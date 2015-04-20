@@ -283,25 +283,6 @@ c_AsyncFunctionWaitHandle *getWaitHandleAtAsyncStackPosition(int position) {
   return objToContinuationWaitHandle(depStack[position].toObject());
 }
 
-static Array getVariables(const ActRec *fp) {
-  if (fp->hasVarEnv()) {
-    return fp->m_varEnv->getDefinedVariables();
-  } else {
-    const Func *func = fp->m_func;
-    auto numLocals = func->numNamedLocals();
-    ArrayInit ret(numLocals, ArrayInit::Map{});
-    for (Id id = 0; id < numLocals; ++id) {
-      TypedValue* ptv = frame_local(fp, id);
-      if (ptv->m_type == KindOfUninit) {
-        continue;
-      }
-      Variant name(func->localVarName(id), Variant::StaticStrInit{});
-      ret.add(name, tvAsVariant(ptv));
-    }
-    return ret.toArray();
-  }
-}
-
 bool CmdVariable::onServer(DebuggerProxy &proxy) {
   if (m_type == KindOfVariableAsync) {
     //we only do variable inspection on continuation wait handles
@@ -310,16 +291,15 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
     if (frame != nullptr) {
       auto fp = frame->actRec();
       if (fp != nullptr) {
-        m_variables = getVariables(fp);
+        m_variables = getDefinedVariables(fp);
       }
     }
-  }
-  else if (m_frame < 0) {
+  } else if (m_frame < 0) {
     m_variables = g_context->m_globalVarEnv->getDefinedVariables();
     m_global = true;
   } else {
     m_variables = g_context->getLocalDefinedVariables(m_frame);
-    m_global = g_context->getVarEnv(m_frame) == g_context->m_globalVarEnv;
+    m_global = g_context->hasVarEnv(m_frame) == g_context->m_globalVarEnv;
     auto oThis = g_context->getThis();
     if (nullptr != oThis) {
       TypedValue tvThis;

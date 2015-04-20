@@ -1056,6 +1056,7 @@ bool doFCallArrayTC(PC pc);
 bool doFCall(ActRec* ar, PC& pc);
 jit::TCA dispatchBB();
 void pushLocalsAndIterators(const Func* func, int nparams = 0);
+Array getDefinedVariables(const ActRec*);
 
 ///////////////////////////////////////////////////////////////////////////////
 

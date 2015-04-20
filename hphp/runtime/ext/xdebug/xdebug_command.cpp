@@ -29,6 +29,7 @@
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/url/ext_url.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/system/constants.h"
 
 namespace HPHP {
@@ -1095,14 +1096,11 @@ struct ContextGetCmd : XDebugCommand {
         break;
       }
       case XDebugContext::LOCAL: {
-        // Grab the in scope variables
-        VarEnv* var_env = g_context->getVarEnv(m_depth);
-        if (var_env == nullptr) {
-          throw XDebugServer::ERROR_INVALID_ARGS;
-        }
+        VMRegAnchor regAnchor;
+        auto const fp = g_context->getFrameAtDepth(m_depth);
+        auto const vars = getDefinedVariables(fp);
 
         // Add each variable, filtering out superglobals
-        Array vars = var_env->getDefinedVariables();
         for (ArrayIter iter(vars); iter; ++iter) {
           String name = iter.first().toString();
           if (is_superglobal(name)) {

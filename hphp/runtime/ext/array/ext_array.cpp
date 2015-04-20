@@ -1176,7 +1176,7 @@ Array HHVM_FUNCTION(compact,
                     const Array& args /* = null array */) {
   raise_disallowed_dynamic_call("compact should not be called dynamically");
   Array ret = Array::attach(MixedArray::MakeReserve(args.size() + 1));
-  VarEnv* v = g_context->getVarEnv();
+  VarEnv* v = g_context->getOrCreateVarEnv();
   if (v) {
     compact(v, ret, varname);
     compact(v, ret, args);
@@ -1189,7 +1189,7 @@ Array HHVM_FUNCTION(__SystemLib_compact_sl,
                     const Variant& varname,
                     const Array& args /* = null array */) {
   Array ret = Array::attach(MixedArray::MakeReserve(args.size() + 1));
-  VarEnv* v = g_context->getVarEnv();
+  VarEnv* v = g_context->getOrCreateVarEnv();
   if (v) {
     compact(v, ret, varname);
     compact(v, ret, args);

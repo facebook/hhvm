@@ -1381,10 +1381,27 @@ Array ExecutionContext::getCallerInfo() {
   return result;
 }
 
-VarEnv* ExecutionContext::getVarEnv(int frame) {
-  VMRegAnchor _;
+Array getDefinedVariables(const ActRec* fp) {
+  if (fp->hasVarEnv()) {
+    return fp->m_varEnv->getDefinedVariables();
+  }
+  auto const func = fp->m_func;
+  auto const numLocals = func->numNamedLocals();
+  ArrayInit ret(numLocals, ArrayInit::Map{});
+  for (Id id = 0; id < numLocals; ++id) {
+    TypedValue* ptv = frame_local(fp, id);
+    if (ptv->m_type == KindOfUninit) {
+      continue;
+    }
+    Variant name(func->localVarName(id), Variant::StaticStrInit{});
+    ret.add(name, tvAsVariant(ptv));
+  }
+  return ret.toArray();
+}
 
-  ActRec* fp = vmfp();
+ActRec* ExecutionContext::getFrameAtDepth(int frame) {
+  VMRegAnchor _;
+  auto fp = vmfp();
   for (; frame > 0; --frame) {
     if (!fp) break;
     fp = getPrevVMState(fp);
@@ -1395,10 +1412,26 @@ VarEnv* ExecutionContext::getVarEnv(int frame) {
   }
   if (UNLIKELY(!fp || fp->localsDecRefd())) return nullptr;
   assert(!fp->hasInvName());
+  return fp;
+}
+
+VarEnv* ExecutionContext::getOrCreateVarEnv(int frame) {
+  auto const fp = getFrameAtDepth(frame);
   if (!fp->hasVarEnv()) {
+    if (!(fp->func()->attrs() & AttrMayUseVV)) {
+      raise_error("Could not create variable environment");
+    }
     fp->setVarEnv(VarEnv::createLocal(fp));
   }
   return fp->m_varEnv;
+}
+
+VarEnv* ExecutionContext::hasVarEnv(int frame) {
+  auto const fp = getFrameAtDepth(frame);
+  if (fp->func()->attrs() & AttrMayUseVV) {
+    if (fp->hasVarEnv()) return fp->getVarEnv();
+  }
+  return nullptr;
 }
 
 void ExecutionContext::setVar(StringData* name, const TypedValue* v) {
@@ -1427,22 +1460,7 @@ Array ExecutionContext::getLocalDefinedVariables(int frame) {
   if (!fp) {
     return empty_array();
   }
-  assert(!fp->hasInvName());
-  if (fp->hasVarEnv()) {
-    return fp->m_varEnv->getDefinedVariables();
-  }
-  const Func *func = fp->m_func;
-  auto numLocals = func->numNamedLocals();
-  ArrayInit ret(numLocals, ArrayInit::Map{});
-  for (Id id = 0; id < numLocals; ++id) {
-    TypedValue* ptv = frame_local(fp, id);
-    if (ptv->m_type == KindOfUninit) {
-      continue;
-    }
-    Variant name(func->localVarName(id), Variant::StaticStrInit{});
-    ret.add(name, tvAsVariant(ptv));
-  }
-  return ret.toArray();
+  return getDefinedVariables(fp);
 }
 
 NEVER_INLINE

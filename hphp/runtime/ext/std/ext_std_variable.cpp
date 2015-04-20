@@ -248,7 +248,7 @@ Variant HHVM_FUNCTION(unserialize, const String& str,
 
 ALWAYS_INLINE
 static Array get_defined_vars() {
-  VarEnv* v = g_context->getVarEnv();
+  VarEnv* v = g_context->getOrCreateVarEnv();
   return v ? v->getDefinedVariables() : empty_array();
 }
 
@@ -362,7 +362,7 @@ int64_t extract_impl(VRefParam vref_array,
   }
 
   VMRegAnchor _;
-  auto const varEnv = g_context->getVarEnv();
+  auto const varEnv = g_context->getOrCreateVarEnv();
   if (!varEnv) return 0;
 
   if (UNLIKELY(reference)) {

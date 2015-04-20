@@ -401,7 +401,9 @@ public:
    */
   const Func* getPrevFunc(const ActRec*);
 
-  VarEnv* getVarEnv(int frame = 0);
+  ActRec* getFrameAtDepth(int frame = 0);
+  VarEnv* getOrCreateVarEnv(int frame = 0);
+  VarEnv* hasVarEnv(int frame = 0);
   void setVar(StringData* name, const TypedValue* v);
   void bindVar(StringData* name, TypedValue* v);
   Array getLocalDefinedVariables(int frame);

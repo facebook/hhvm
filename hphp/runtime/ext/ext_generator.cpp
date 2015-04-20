@@ -107,9 +107,7 @@ void c_Generator::copyVars(ActRec* srcFp) {
     dstFp->getThis()->incRefCount();
   }
 
-  if (LIKELY(srcFp->m_varEnv == nullptr)) {
-    return;
-  }
+  if (LIKELY(srcFp->m_varEnv == nullptr)) return;
 
   if (srcFp->hasExtraArgs()) {
     dstFp->setExtraArgs(srcFp->getExtraArgs()->clone(dstFp));

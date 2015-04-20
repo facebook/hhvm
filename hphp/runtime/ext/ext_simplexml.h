@@ -20,7 +20,6 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/ext_simplexml_include.h"
-#include "hphp/runtime/ext/libxml/ext_libxml.h"
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -101,15 +100,8 @@ struct c_SimpleXMLElement : SimpleXMLElementBase {
   static double  ToDouble(const ObjectData* obj) noexcept;
   static Array   ToArray(const ObjectData* obj);
 
-  xmlNodePtr nodep() const {
-    return node ? node->nodep() : nullptr;
-  }
-
-  xmlDocPtr docp() const {
-    return node ? node->docp() : nullptr;
-  }
-
-  XMLNode node;
+  Resource   document;
+  xmlNodePtr node;
   xmlXPathContextPtr xpath;
   struct {
     xmlChar* name;

@@ -842,7 +842,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
           } else {
             yy_pop_state(yyscanner);
           }
-          RETTOKEN(T_ECHO); //return T_OPEN_TAG_WITH_ECHO;
+          RETTOKEN(T_OPEN_TAG_WITH_ECHO); //return T_OPEN_TAG_WITH_ECHO;
         } else {
           if (YY_START == INITIAL) {
             BEGIN(ST_IN_SCRIPTING);

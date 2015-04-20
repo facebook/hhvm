@@ -320,8 +320,13 @@ void checkMIState(MTS& env) {
   }
 
   // CGetM or SetM with no unknown property offsets
-  const bool simpleProp = !unknownOffsets && (isCGetM || isSetM) &&
-    !constrainBase(env, TypeConstraint(baseType.clsSpec().cls()).setWeak());
+  const bool simpleProp = [&]() {
+    if (!isCGetM && !isSetM) return false;
+    if (unknownOffsets) return false;
+    auto cls = baseType.clsSpec().cls();
+    if (!cls) return false;
+    return !constrainBase(env, TypeConstraint(cls).setWeak());
+  }();
 
   // SetM with only one vector element, for props and elems
   const bool singleSet = isSingle && isSetM;

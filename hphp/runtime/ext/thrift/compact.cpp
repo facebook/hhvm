@@ -674,7 +674,7 @@ class CompactReader {
           }
 
         case T_BYTE:
-          return readUByte();
+          return transport.readI8();
 
         case T_I16:
         case T_I32:

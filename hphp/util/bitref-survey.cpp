@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/array-data.h"
+#include <mutex>
 
 namespace HPHP {
 
@@ -25,6 +26,8 @@ namespace HPHP {
 
 TRACE_SET_MOD(bitref);
 BitrefSurvey *g_survey;
+uint64_t arr_empty_count;
+std::mutex m;
 
 inline BitrefSurvey *survey() {
   if (!g_survey) {
@@ -54,8 +57,11 @@ void survey_request_end() {
 }
 
 void BitrefSurvey::cow_check_occurred(RefCount refcount, bool bitref, bool isArray) {
+  m.lock();
+
   check_count++;
   isArray ? arr_check_count++ : str_check_count++;
+  //assert(check_count == arr_check_count + str_check_count);
   if ((uint32_t)refcount > 1) {
     //assert(bitref);
     //'necessary' copy
@@ -78,10 +84,17 @@ void BitrefSurvey::cow_check_occurred(RefCount refcount, bool bitref, bool isArr
     bitref_copy_count++;
     isArray ? arr_bitref_copy_count++ : str_bitref_copy_count++;
   }
+  m.unlock();
 }
 
 void BitrefSurvey::cow_check_occurred(ArrayData* ad) {
   cow_check_occurred(ad->getCount(), check_one_bit_ref_array(ad->m_kind), true);
+  if (ad->kind() == ArrayData::kEmptyKind) {
+    // Arrays with kEmptyKind should be static, so always copied
+    // log them here to get an idea of what percentage of copies are
+    // of the empty, static array
+    arr_empty_count++;
+  }
 }
 
 void BitrefSurvey::cow_check_occurred(StringData* sd) {
@@ -121,8 +134,11 @@ void BitrefSurvey::survey_request_end() {
       str_bitref_copy_pc, str_avoided, str_avoided_pc);
 
   TRACE(1, "--------------------------------------------------------------------------------\n");
+  TRACE(1, "Number of empty arrays: %10ld (%5.2f%% of copied arrays)\n",
+      arr_empty_count, ((double)arr_empty_count / (double)arr_bitref_copy_count) * 100);
+  TRACE(1, "--------------------------------------------------------------------------------\n");
   TRACE(1, "\n");
-
+  /*
   check_count = 0;
   arr_check_count = 0;
   str_check_count = 0;
@@ -138,6 +154,9 @@ void BitrefSurvey::survey_request_end() {
   bitref_copy_count = 0;
   arr_bitref_copy_count = 0;
   str_bitref_copy_count = 0;
+
+  arr_empty_count = 0;
+  */
 }
 
 ///////////////////////////////////////////////////////////////////////////////

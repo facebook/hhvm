@@ -427,17 +427,29 @@ void ThreadLocalOnThreadCleanup(void *key) {
   }
 }
 
-inline void ThreadLocalSetCleanupHandler(darwin_pthread_handler *handler,
-                                         pthread_key_t key,
+inline void ThreadLocalSetCleanupHandler(pthread_key_t key,
                                          void (*del)(void*)) {
   pthread_t self = pthread_self();
   // Prevent from adding the handler for multiple times.
-  if (self->__cleanup_stack != handler) {
-    handler->__routine = del;
-    handler->__arg = (void*)key;
-    handler->__next = self->__cleanup_stack;
-    self->__cleanup_stack = handler;
+  darwin_pthread_handler *current = self->__cleanup_stack;
+  while (current) {
+    if (current->__arg == (void*)key) {
+      return;
+    }
+    current = current->__next;
   }
+
+  darwin_pthread_handler *handler = new darwin_pthread_handler();
+  handler->__routine = del;
+  handler->__arg = (void*)key;
+  handler->__next = self->__cleanup_stack;
+  self->__cleanup_stack = handler;
+
+  // Free the handler on thread exit.
+  pthread_key_t handler_key;
+  ThreadLocalCreateKey(&handler_key,
+                       ThreadLocalOnThreadExit<darwin_pthread_handler>);
+  ThreadLocalSetValue(handler_key, handler);
 }
 #endif
 
@@ -466,9 +478,7 @@ public:
       obj = new T();
       ThreadLocalSetValue(m_key, obj);
 #ifdef __APPLE__
-      ThreadLocalSetCleanupHandler(
-          const_cast<darwin_pthread_handler*>(&m_cleanup_handler),
-          m_key, ThreadLocalOnThreadCleanup<T>);
+      ThreadLocalSetCleanupHandler(m_key, ThreadLocalOnThreadCleanup<T>);
 #endif
     }
     return obj;
@@ -498,10 +508,6 @@ public:
 
 private:
   pthread_key_t m_key;
-
-#ifdef __APPLE__
-  darwin_pthread_handler m_cleanup_handler;
-#endif
 };
 
 template<typename T>
@@ -547,10 +553,6 @@ public:
 public:
   void setNull() { ThreadLocalSetValue(m_key, nullptr); }
   pthread_key_t m_key;
-
-#ifdef __APPLE__
-  darwin_pthread_handler m_cleanup_handler;
-#endif
 };
 
 template<typename T>
@@ -560,9 +562,7 @@ T *ThreadLocalNoCheck<T>::getCheck() const {
     obj = new T();
     ThreadLocalSetValue(m_key, obj);
 #ifdef __APPLE__
-    ThreadLocalSetCleanupHandler(
-        const_cast<darwin_pthread_handler*>(&m_cleanup_handler),
-        m_key, ThreadLocalOnThreadCleanup<T>);
+    ThreadLocalSetCleanupHandler(m_key, ThreadLocalOnThreadCleanup<T>);
 #endif
   }
   return obj;
@@ -622,10 +622,6 @@ private:
   static pthread_key_t s_key;
   static bool s_inited; // pthread_key_t has no portable valid sentinel
 
-#ifdef __APPLE__
-  static darwin_pthread_handler s_cleanup_handler;
-#endif
-
   static pthread_key_t getKey() {
     if (!s_inited) {
       s_inited = true;
@@ -648,7 +644,7 @@ T *ThreadLocalSingleton<T>::getCheck() {
     T::Create(obj);
     ThreadLocalSetValue(s_key, obj);
 #ifdef __APPLE__
-    ThreadLocalSetCleanupHandler(&s_cleanup_handler, s_key,
+    ThreadLocalSetCleanupHandler(s_key,
                                  ThreadLocalSingletonOnThreadCleanup<T>);
 #endif
   }
@@ -659,11 +655,6 @@ template<typename T>
 pthread_key_t ThreadLocalSingleton<T>::s_key;
 template<typename T>
 bool ThreadLocalSingleton<T>::s_inited = false;
-
-#ifdef __APPLE__
-template<typename T>
-darwin_pthread_handler ThreadLocalSingleton<T>::s_cleanup_handler;
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // some classes don't need new/delete at all

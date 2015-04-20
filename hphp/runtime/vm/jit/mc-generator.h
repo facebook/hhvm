@@ -279,11 +279,6 @@ public:
   CodeCache code;
 
   /*
-   * Check if function prologue already exists.
-   */
-  bool checkCachedPrologue(const Func*, int prologueIndex, TCA&) const;
-
-  /*
    * This function is called by translated code to handle service requests,
    * which usually involve some kind of jump smashing. The returned address
    * will never be null, and indicates where the caller should resume
@@ -347,8 +342,14 @@ private:
 
   TCA lookupTranslation(SrcKey sk) const;
   TCA retranslateOpt(TransID transId, bool align);
+
+  /*
+   * Prologue-generation helpers.
+   */
   TCA regeneratePrologues(Func* func, SrcKey triggerSk);
   TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk);
+  TCA emitFuncPrologue(Func* func, int nPassed);
+  bool checkCachedPrologue(const Func*, int prologueIndex, TCA&) const;
 
   void invalidateSrcKey(SrcKey sk);
   void invalidateFuncProfSrcKeys(const Func* func);

@@ -49,9 +49,9 @@ Object c_RescheduleWaitHandle::ti_create(int64_t queue, int priority) {
     throw e;
   }
 
-  c_RescheduleWaitHandle* wh = newobj<c_RescheduleWaitHandle>();
+  auto wh = makeSmartPtr<c_RescheduleWaitHandle>();
   wh->initialize(static_cast<uint32_t>(queue), static_cast<uint32_t>(priority));
-  return wh;
+  return Object(std::move(wh));
 }
 
 void c_RescheduleWaitHandle::initialize(uint32_t queue, uint32_t priority) {

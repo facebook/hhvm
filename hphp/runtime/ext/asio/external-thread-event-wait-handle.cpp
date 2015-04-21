@@ -66,11 +66,12 @@ void c_ExternalThreadEventWaitHandle::sweep() {
   }
 }
 
-c_ExternalThreadEventWaitHandle* c_ExternalThreadEventWaitHandle::Create(
+SmartPtr<c_ExternalThreadEventWaitHandle>
+c_ExternalThreadEventWaitHandle::Create(
   AsioExternalThreadEvent* event,
   ObjectData* priv_data
 ) {
-  auto wh = newobj<c_ExternalThreadEventWaitHandle>();
+  auto wh = makeSmartPtr<c_ExternalThreadEventWaitHandle>();
   wh->initialize(event, priv_data);
   return wh;
 }
@@ -84,9 +85,6 @@ void c_ExternalThreadEventWaitHandle::initialize(
   setContextIdx(session->getCurrentContextIdx());
   m_event = event;
   m_privData = priv_data;
-
-  // this wait handle is owned by existence of unprocessed event
-  incRefCount();
 
   if (isInContext()) {
     registerToContext();

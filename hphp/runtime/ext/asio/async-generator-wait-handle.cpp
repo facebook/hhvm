@@ -57,10 +57,9 @@ c_AsyncGeneratorWaitHandle::Create(c_AsyncGenerator* gen,
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
   assert(!child->isFinished());
 
-  auto const waitHandle = newobj<c_AsyncGeneratorWaitHandle>();
-  waitHandle->incRefCount();
+  auto waitHandle = makeSmartPtr<c_AsyncGeneratorWaitHandle>();
   waitHandle->initialize(gen, child);
-  return waitHandle;
+  return waitHandle.detach();
 }
 
 void c_AsyncGeneratorWaitHandle::initialize(c_AsyncGenerator* gen,

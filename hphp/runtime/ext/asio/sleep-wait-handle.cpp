@@ -45,9 +45,9 @@ Object c_SleepWaitHandle::ti_create(int64_t usecs) {
     throw e;
   }
 
-  c_SleepWaitHandle* wh = newobj<c_SleepWaitHandle>();
+  auto wh = makeSmartPtr<c_SleepWaitHandle>();
   wh->initialize(usecs);
-  return wh;
+  return Object(std::move(wh));
 }
 
 void c_SleepWaitHandle::initialize(int64_t usecs) {

@@ -112,6 +112,10 @@ XMLReader::~XMLReader() {
 
 void XMLReader::close() {
   SYNC_VM_REGS_SCOPED();
+  if (m_stream) {
+    m_stream->close();
+    m_stream = nullptr;
+  }
   if (m_ptr) {
     xmlFreeTextReader(m_ptr);
     m_ptr = nullptr;
@@ -149,16 +153,18 @@ bool HHVM_METHOD(XMLReader, open,
 
   if (!valid_file.empty()) {
     // Manually create the IO context to support custom stream wrappers.
-    auto stream = File::Open(valid_file, "rb");
-    if (!stream->isInvalid()) {
+    data->m_stream = File::Open(valid_file, "rb");
+    if (!data->m_stream->isInvalid()) {
+      // The XML context is owned by the native data attached to 'this_'.
+      // The File is also owned by the native data so it does not need
+      // to be cleaned up by an XML callback.  The libxml_streams_IO_nop_close
+      // callback does nothing.
       reader = xmlReaderForIO(libxml_streams_IO_read,
-                              libxml_streams_IO_close,
-                              stream.get(),
+                              libxml_streams_IO_nop_close,
+                              &data->m_stream,
                               valid_file.data(),
                               str_encoding.data(),
                               options);
-      // The xmlTextReaderPtr owns a reference to stream.
-      if (reader) stream.get()->incRefCount();
     }
   }
 

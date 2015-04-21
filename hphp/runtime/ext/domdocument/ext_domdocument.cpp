@@ -705,6 +705,8 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, int mode,
 
   xmlInitParser();
 
+  SmartPtr<File> stream;
+
   if (mode == DOM_LOAD_FILE) {
     String file_dest = libxml_get_valid_file_path(source);
     if (!file_dest.empty()) {
@@ -712,16 +714,16 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, int mode,
       // xmlCreateFileParserCtxt, but it allows us to bypass the external
       // entity loading path, which is locked down by default for security
       // reasons.
-      auto stream = File::Open(file_dest, "rb");
+      stream = File::Open(file_dest, "rb");
       if (!stream->isInvalid()) {
+        // The XML context is also deleted in this function, so the ownership
+        // of the File is kept locally in 'stream'.
+        // The libxml_streams_IO_nop_close callback does nothing.
         ctxt = xmlCreateIOParserCtxt(nullptr, nullptr,
                                      libxml_streams_IO_read,
-                                     libxml_streams_IO_close,
-                                     stream.get(),
+                                     libxml_streams_IO_nop_close,
+                                     &stream,
                                      XML_CHAR_ENCODING_NONE);
-
-        // We're storing a reference in the xmlParserCtxt
-        if (ctxt) stream.get()->incRefCount();
       }
     }
   } else {
@@ -1141,7 +1143,7 @@ static String domClassname(xmlNodePtr obj) {
 Variant php_dom_create_object(xmlNodePtr obj,
                               SmartPtr<XMLDocumentData> doc) {
   String clsname = domClassname(obj);
-  if (!clsname.get()) {
+  if (!clsname) {
     raise_warning("Unsupported node type: %d", obj->type);
     return init_null();
   }
@@ -1164,7 +1166,7 @@ Variant php_dom_create_object(xmlNodePtr obj,
   if (!nodeobj->node()) {
     nodeobj->setNode(node);
   }
-  assert(nodeobj->node().get() == node.get());
+  assert(nodeobj->node() == node);
 
   if (doc) {
     nodeobj->setDoc(std::move(doc));
@@ -1190,7 +1192,7 @@ static Variant create_node_object(xmlNodePtr obj) {
 }
 
 static Variant create_node_object(xmlNodePtr obj, Object docObj) {
-  if (docObj.get()) {
+  if (docObj) {
     auto doc = Native::data<DOMNode>(docObj.get());
     return create_node_object(obj, doc->doc());
   }
@@ -1293,7 +1295,7 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
     list_data->m_doc = docData;
     list_data->m_baseobjptr = retval;
     list_data->m_nodetype = DOM_NODESET;
-    ret = node_list;
+    ret = std::move(node_list);
     break;
   }
   case XPATH_BOOLEAN:

@@ -33,6 +33,7 @@ String libxml_get_valid_file_path(const char* source);
 int libxml_streams_IO_read(void* context, char* buffer, int len);
 int libxml_streams_IO_write(void* context, const char* buffer, int len);
 int libxml_streams_IO_close(void* context);
+int libxml_streams_IO_nop_close(void* context);
 
 void php_libxml_node_free(xmlNodePtr node);
 void php_libxml_node_free_resource(xmlNodePtr node);

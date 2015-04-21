@@ -875,7 +875,7 @@ private:
     std::is_base_of<ResourceData,T>::value,
     RootMap<ResourceData>&
   >::type getRootMap() {
-    if (!m_resourceRoots) {
+    if (UNLIKELY(!m_resourceRoots)) {
       m_resourceRoots = smart_new<RootMap<ResourceData>>();
     }
     return *m_resourceRoots;
@@ -886,7 +886,7 @@ private:
     std::is_base_of<ObjectData,T>::value,
     RootMap<ObjectData>&
   >::type getRootMap() {
-    if (!m_objectRoots) {
+    if (UNLIKELY(!m_objectRoots)) {
       m_objectRoots = smart_new<RootMap<ObjectData>>();
     }
     return *m_objectRoots;
@@ -897,7 +897,7 @@ private:
     std::is_base_of<ResourceData,T>::value,
     const RootMap<ResourceData>&
   >::type getRootMap() const {
-    if (!m_resourceRoots) {
+    if (UNLIKELY(!m_resourceRoots)) {
       m_resourceRoots = smart_new<RootMap<ResourceData>>();
     }
     return *m_resourceRoots;
@@ -908,7 +908,7 @@ private:
     std::is_base_of<ObjectData,T>::value,
     const RootMap<ObjectData>&
   >::type getRootMap() const {
-    if (!m_objectRoots) {
+    if (UNLIKELY(!m_objectRoots)) {
       m_objectRoots = smart_new<RootMap<ObjectData>>();
     }
     return *m_objectRoots;

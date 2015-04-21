@@ -1127,13 +1127,16 @@ Variant f_simplexml_load_file(const String& filename,
   if (stream->isInvalid()) return false;
 
   xmlDocPtr doc = nullptr;
+
+  // The XML context is also deleted in this function, so the ownership
+  // of the File is kept locally in 'stream'. The libxml_streams_IO_nop_close
+  // callback does nothing.
   xmlParserCtxtPtr ctxt = xmlCreateIOParserCtxt(nullptr, nullptr,
                                                 libxml_streams_IO_read,
-                                                libxml_streams_IO_close,
-                                                stream.get(),
+                                                libxml_streams_IO_nop_close,
+                                                &stream,
                                                 XML_CHAR_ENCODING_NONE);
   if (ctxt == nullptr) return false;
-  stream.get()->incRefCount();
   SCOPE_EXIT { xmlFreeParserCtxt(ctxt); };
 
   if (ctxt->directory == nullptr) {
@@ -1657,12 +1660,7 @@ c_SimpleXMLElementIterator::c_SimpleXMLElementIterator(Class* cb) :
     ExtObjectData(cb), sxe(nullptr) {
 }
 
-c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() {
-  if (sxe) {
-    decRefObj(sxe);
-    sxe = nullptr;
-  }
-}
+c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() { }
 
 void c_SimpleXMLElementIterator::t___construct() {
 }
@@ -1684,12 +1682,12 @@ Variant c_SimpleXMLElementIterator::t_key() {
 }
 
 Variant c_SimpleXMLElementIterator::t_next() {
-  php_sxe_move_forward_iterator(sxe);
+  php_sxe_move_forward_iterator(sxe.get());
   return init_null();
 }
 
 Variant c_SimpleXMLElementIterator::t_rewind() {
-  php_sxe_reset_iterator(sxe, true);
+  php_sxe_reset_iterator(sxe.get(), true);
   return init_null();
 }
 

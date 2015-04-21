@@ -71,7 +71,7 @@ public:
                                  xmlreader_read_one_char_t internal_function);
   bool set_relaxng_schema(String source, int type);
 
-  SmartPtr<File> m_uri;
+  SmartPtr<File> m_stream; // input stream
   xmlTextReaderPtr m_ptr;
   xmlParserInputBufferPtr m_input;
   void* m_schema;

@@ -425,6 +425,7 @@ public:
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
+  F(bool, LogThreadCreateBacktraces,   false)                           \
   /* CheckReturnTypeHints:
      0 - No checks or enforcement for return type hints.
      1 - Raises E_WARNING if a return type hint fails.

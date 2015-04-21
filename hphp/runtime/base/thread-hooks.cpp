@@ -35,18 +35,20 @@ PthreadInfo::PthreadInfo(start_routine_t start, void* arg) :
     start_routine(start), start_routine_arg(arg) {
   pid = getpid();
 
-  num_frames = backtrace(reinterpret_cast<void **>(&parent_bt),
-                         max_num_frames);
-  parent_bt_names = backtrace_symbols(
-    reinterpret_cast<void *const*>(&parent_bt),
-    num_frames);
-  if (!parent_bt_names) {
-    Logger::Error("pthread_create: unable to get backtrace symbols");
-  }
-  start_name_ptr = backtrace_symbols(
-    reinterpret_cast<void *const *>(&start_routine), 1);
-  if (!start_name_ptr) {
-    Logger::Error("pthread_create: unable to get start_routine name");
+  if (RuntimeOption::EvalLogThreadCreateBacktraces) {
+    num_frames = backtrace(reinterpret_cast<void **>(&parent_bt),
+                           max_num_frames);
+    parent_bt_names = backtrace_symbols(
+      reinterpret_cast<void *const*>(&parent_bt),
+      num_frames);
+    if (!parent_bt_names) {
+      Logger::Error("pthread_create: unable to get backtrace symbols");
+    }
+    start_name_ptr = backtrace_symbols(
+      reinterpret_cast<void *const *>(&start_routine), 1);
+    if (!start_name_ptr) {
+      Logger::Error("pthread_create: unable to get start_routine name");
+    }
   }
 }
 

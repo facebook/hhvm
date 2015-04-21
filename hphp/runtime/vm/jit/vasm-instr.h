@@ -87,7 +87,7 @@ struct Vunit;
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vcallstub, I(target), U(args) U(extraArgs), Dn)\
-  O(landingpad, Inone, Un, Dn)\
+  O(landingpad, I(fromPHPCall), Un, Dn)\
   O(countbytecode, Inone, U(base), D(sf))\
   O(defvmsp, Inone, Un, D(d))\
   O(syncvmsp, Inone, U(s), Dn)\
@@ -315,7 +315,7 @@ struct vinvoke { CppCall call; VcallArgsId args; Vtuple d; Vlabel targets[2];
 struct vcallstub { TCA target; RegSet args; Vtuple extraArgs;
                    Vlabel targets[2]; };
 
-struct landingpad {};
+struct landingpad { bool fromPHPCall; };
 struct countbytecode { Vreg base; VregSF sf; };
 
 /*

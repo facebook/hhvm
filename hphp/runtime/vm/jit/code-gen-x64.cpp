@@ -586,8 +586,12 @@ void CodeGenerator::cgLdUnwinderValue(IRInstruction* inst) {
 
 void CodeGenerator::cgBeginCatch(IRInstruction* inst) {
   auto& v = vmain();
-  v << landingpad{};
+  auto const callType = m_state.catch_calls[inst->block()];
+  always_assert(callType != CatchCall::Uninit &&
+                "Tried to emit BeginCatch with Uninit call type. "
+                "Catch blocks must be emitted after their predecessors.");
 
+  v << landingpad{callType == CatchCall::PHP};
   emitIncStat(v, Stats::TC_CatchTrace);
 }
 
@@ -792,6 +796,7 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
   if (do_catch) {
     v << vinvoke{call, argsId, dstId, {targets[0], targets[1]},
         syncFixup, dstInfo.type, sync == SyncOptions::kSmashableAndSyncPoint};
+    m_state.catch_calls[inst->taken()] = CatchCall::CPP;
     v = targets[0];
   } else {
     v << vcall{call, argsId, dstId, syncFixup, dstInfo.type, nothrow};
@@ -2863,6 +2868,7 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   auto done = v.makeBlock();
   v << vcallstub{target, kCrossTraceRegs, v.makeTuple({pc, after}),
                  {done, m_state.labels[inst->taken()]}};
+  m_state.catch_calls[inst->taken()] = CatchCall::PHP;
   v = done;
   v << defvmsp{dstLoc(inst, 0).reg()};
 }
@@ -2914,6 +2920,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     auto next = v.makeBlock();
     v << vinvoke{CppCall::direct(builtinFuncPtr), v.makeVcallArgs({{rVmFp}}),
                  v.makeTuple({}), {next, catchBlock}, Fixup(0, argc)};
+    m_state.catch_calls[inst->taken()] = CatchCall::CPP;
     v = next;
     // The native implementation already put the return value on the stack for
     // us, and handled cleaning up the arguments.  We have to update the frame
@@ -2938,6 +2945,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
     }
     auto next = v.makeBlock();
     v << bindcall{addr, kCrossCallRegs, {next, catchBlock}};
+    m_state.catch_calls[inst->taken()] = CatchCall::PHP;
     v = next;
     v << defvmsp{rNewSP};
   }
@@ -3223,6 +3231,7 @@ void CodeGenerator::cgNativeImpl(IRInstruction* inst) {
     {m_state.labels[inst->next()], m_state.labels[inst->taken()]},
     makeFixup(inst->marker(), SyncOptions::kSyncPoint)
   };
+  m_state.catch_calls[inst->taken()] = CatchCall::CPP;
 }
 
 void CodeGenerator::cgCastCtxThis(IRInstruction* inst) {
@@ -4670,6 +4679,7 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
   v << lea{curSpReg[cellsToBytes(spOff.offset)], sync_sp};
   v << syncvmsp{sync_sp};
   v << contenter{curFpReg, addrReg, kCrossTraceRegs, {next, catchBlock}};
+  m_state.catch_calls[inst->taken()] = CatchCall::PHP;
   v = next;
   // curFpReg->m_savedRip will point here, and the next HHIR opcode must
   // also start here.

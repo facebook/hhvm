@@ -635,11 +635,14 @@ struct LLVMEmitter {
     // avoid hitting assertions from LLVM relocations.
     m_tcMM->registerSymbolAddress("personality0", 0xbadbad);
 
+    m_int64Pair = llvm::StructType::get(
+      m_context, std::vector<llvm::Type*>(2, m_int64), false /* isPacked */
+    );
     m_traceletFnTy = llvm::FunctionType::get(
-      m_void, std::vector<llvm::Type*>(3, m_int64), false
+      m_void, std::vector<llvm::Type*>(3, m_int64), false /* isVarArg */
     );
     m_bindcallFnTy = llvm::FunctionType::get(
-      m_int64, std::vector<llvm::Type*>(4, m_int64), false
+      m_int64Pair, std::vector<llvm::Type*>(4, m_int64), false /* isVarArg */
     );
 
     static_assert(offsetof(TypedValue, m_data) == 0, "");
@@ -1059,6 +1062,18 @@ struct LLVMEmitter {
   }
 
   /*
+   * Create a new llvm block using the current block's name with `suffix'
+   * appended to it. The block will be inserted at the end of the current
+   * function.
+   */
+  llvm::BasicBlock* makeBlock(folly::StringPiece suffix) {
+    auto const curName = m_irb.GetInsertBlock()->getName().str();
+    return llvm::BasicBlock::Create(
+      m_context, folly::to<std::string>(curName, suffix), m_function
+    );
+  }
+
+  /*
    * Generate an llvm::Value representing the given integral constant, with an
    * approprate bit width.
    */
@@ -1283,6 +1298,7 @@ VASM_OPCODES
   std::unique_ptr<TCMemoryManager> m_tcMM;
 
   // Function types used for call to tracelets/PHP functions.
+  llvm::StructType* m_int64Pair{nullptr};
   llvm::FunctionType* m_traceletFnTy{nullptr};
   llvm::FunctionType* m_bindcallFnTy{nullptr};
 
@@ -1387,9 +1403,12 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
     // If this isn't the first block of the unit, load the incoming value of
     // rVmFp/rVmSp from our pred(s).
     if (label != labels.front()) {
-      auto inFp = m_incomingVmFp[label];
-      always_assert(inFp);
-      defineValue(x64::rVmFp, inFp);
+      if (auto inFp = m_incomingVmFp[label]) {
+        defineValue(x64::rVmFp, inFp);
+      } else {
+        // Only catch blocks are allowed to not have an incoming vmfp.
+        always_assert(b.code.front().op == Vinstr::landingpad);
+      }
 
       // Only some instructions propagate a value for rVmSp to their
       // successor(s).
@@ -1627,6 +1646,13 @@ void LLVMEmitter::handleOutgoingPhysRegs(
   // create phis at all back-edge targets and rely on LLVM to clean up the
   // unnecessary ones.
   for (auto succ : succs(b)) {
+    // Catch traces from PHP calls have a weird ABI and define their own value
+    // for rVmFp from the landingpad instruction, so we skip those here.
+    auto& front = m_unit.blocks[succ].code.front();
+    if (front.op == Vinstr::landingpad && front.landingpad_.fromPHPCall) {
+      continue;
+    }
+
     auto& inFp = m_incomingVmFp[succ];
     auto const outFp = value(x64::rVmFp);
     auto const target = block(succ);
@@ -1649,7 +1675,8 @@ void LLVMEmitter::handleOutgoingPhysRegs(
     if ((inFp == nullptr && backedge_targets.test(succ)) ||
                (inFp != nullptr && inFp != outFp)) {
       FTRACE(2, "Creating phi node for {}\n", succ);
-      auto const phi = llvm::PHINode::Create(m_int64, 2, "", target);
+      auto const phi = llvm::PHINode::Create(m_int64, 2, "rVmFp");
+      target->getInstList().insert(target->begin(), phi);
       inFp = phi;
       phi->addIncoming(outFp, m_irb.GetInsertBlock());
       if (inFp != nullptr) {
@@ -1760,15 +1787,9 @@ template<typename Taken>
 void LLVMEmitter::emitJcc(Vreg sf, ConditionCode cc, const char* takenName,
                           Taken taken) {
   auto blockName = m_irb.GetInsertBlock()->getName().str();
-  auto nextBlock =
-    llvm::BasicBlock::Create(m_context,
-                             folly::to<std::string>(blockName, '_'),
-                             m_function);
+  auto nextBlock = makeBlock("_");
   nextBlock->moveAfter(m_irb.GetInsertBlock());
-  auto takenBlock =
-    llvm::BasicBlock::Create(m_context,
-                             folly::to<std::string>(blockName, "_", takenName),
-                             m_function);
+  auto takenBlock = makeBlock(folly::to<std::string>("_", takenName));
   takenBlock->moveAfter(nextBlock);
 
   auto cond = emitCmpForCC(sf, cc);
@@ -1821,15 +1842,22 @@ void LLVMEmitter::emit(const bindcall& inst) {
   auto func = emitFuncPtr(funcName, m_bindcallFnTy, uint64_t(inst.stub));
   auto args = makePhysRegArgs(
     inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, x64::rStashedAR});
-  auto next = block(inst.targets[0]);
+  auto next = makeBlock("_next");
+  next->moveAfter(m_irb.GetInsertBlock());
   auto unwind = block(inst.targets[1]);
   auto call = m_irb.CreateInvoke(func, next, unwind, args);
   call->setCallingConv(llvm::CallingConv::X86_64_HHVM_PHP);
   call->setSmashable();
+  m_irb.SetInsertPoint(next);
+
+  // Register the new value of rVmFp.
+  defineValue(x64::rVmFp, m_irb.CreateExtractValue(call, 1, "rVmFp"));
 
   // bindcall is followed by a defvmsp to copy rVmSp into a Vreg, but it's not
-  // in this block. Pass the value to our next block.
-  m_incomingVmSp[inst.targets[0]] = call;
+  // in this block. Pass the value to our next block. This is necessary because
+  // rVmSp's value isn't automatically propagated between blocks like rVmFp is.
+  m_incomingVmSp[inst.targets[0]] = m_irb.CreateExtractValue(call, 0, "rVmSp");
+  m_irb.CreateBr(block(inst.targets[0]));
 }
 
 void LLVMEmitter::emit(const vcallstub& inst) {
@@ -1840,15 +1868,19 @@ void LLVMEmitter::emit(const vcallstub& inst) {
     inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, x64::rStashedAR});
   for (auto arg : m_unit.tuples[inst.extraArgs]) args.emplace_back(value(arg));
   std::vector<llvm::Type*> argTypes(args.size(), m_int64);
-  auto funcTy = llvm::FunctionType::get(m_int64, argTypes, false);
+  auto funcTy = llvm::FunctionType::get(m_int64Pair, argTypes, false);
   auto func = emitFuncPtr(funcName, funcTy, uint64_t(inst.target));
-  auto next = block(inst.targets[0]);
+  auto next = makeBlock("_next");
+  next->moveAfter(m_irb.GetInsertBlock());
   auto unwind = block(inst.targets[1]);
   auto call = m_irb.CreateInvoke(func, next, unwind, args);
   call->setCallingConv(llvm::CallingConv::X86_64_HHVM_PHP);
+  m_irb.SetInsertPoint(next);
 
-  // Forward the new vmsp to the next block, just like bindcall.
-  m_incomingVmSp[inst.targets[0]] = call;
+  // Register new rVmSp/rVmFp, just like bindcall.
+  defineValue(x64::rVmFp, m_irb.CreateExtractValue(call, 1, "rVmFp"));
+  m_incomingVmSp[inst.targets[0]] = m_irb.CreateExtractValue(call, 0, "rVmSp");
+  m_irb.CreateBr(block(inst.targets[0]));
 }
 
 // Emitting a real REQ_BIND_(JUMPCC_FIRST|JCC) only makes sense if we can
@@ -2994,8 +3026,15 @@ void LLVMEmitter::emit(const xorqi& inst) {
 void LLVMEmitter::emit(const landingpad& inst) {
   // m_personalityFunc is a dummy value because we just extract the information
   // we need from the .gcc_except_table section rather than using it directly.
-  auto pad = m_irb.CreateLandingPad(m_tvStructType, m_personalityFunc, 0);
+  auto pad = m_irb.CreateLandingPad(m_int64Pair, m_personalityFunc, 0);
   pad->setCleanup(true);
+
+  if (inst.fromPHPCall) {
+    // bindcall destroys all registers, so tc_unwind_resume gives us the
+    // correct value of rVmFp in the second unwinder scratch register.
+    auto newFp = m_irb.CreateExtractValue(pad, 1, "rVmFp");
+    defineValue(x64::rVmFp, newFp);
+  }
 }
 
 void LLVMEmitter::emit(const countbytecode& inst) {

@@ -2319,7 +2319,7 @@ index fdec333..ec9ee65 100644
    }
  
 diff --git lib/Target/X86/X86CallingConv.td lib/Target/X86/X86CallingConv.td
-index 899a960..f2d9d4f 100644
+index 899a960..796dce0 100644
 --- lib/Target/X86/X86CallingConv.td
 +++ lib/Target/X86/X86CallingConv.td
 @@ -162,6 +162,15 @@ def RetCC_X86_64_WebKit_JS : CallingConv<[
@@ -2331,8 +2331,8 @@ index 899a960..f2d9d4f 100644
 +  // Promote all types to i64
 +  CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
 +
-+  // Return: RBX
-+  CCIfType<[i64], CCAssignToReg<[RBX]>>
++  // Return: RBX and RBP
++  CCIfType<[i64], CCAssignToReg<[RBX, RBP]>>
 +]>;
 +
  // X86-64 AnyReg return-value convention. No explicit register is specified for
@@ -2408,8 +2408,8 @@ index 899a960..f2d9d4f 100644
                                                    (sequence "ZMM%u", 16, 31),
                                                    K4, K5, K6, K7)>;
 +
-+// rVmTl and rVmFp are preserved for PHP calls in HHVM.
-+def CSR_64_HHVM_PHP : CalleeSavedRegs<(add R12, RBP)>;
++// rVmTl is preserved for PHP calls in HHVM.
++def CSR_64_HHVM_PHP : CalleeSavedRegs<(add R12)>;
 diff --git lib/Target/X86/X86FastISel.cpp lib/Target/X86/X86FastISel.cpp
 index a5bbf72..6bbec33 100644
 --- lib/Target/X86/X86FastISel.cpp
@@ -3000,10 +3000,10 @@ index 0000000..b0fb073
 +
 diff --git test/CodeGen/X86/hhvm-cc.ll test/CodeGen/X86/hhvm-cc.ll
 new file mode 100644
-index 0000000..e394223
+index 0000000..eb80923
 --- /dev/null
 +++ test/CodeGen/X86/hhvm-cc.ll
-@@ -0,0 +1,103 @@
+@@ -0,0 +1,106 @@
 +; RUN: llc -stack-alignment=8 < %s | FileCheck %s
 +
 +; 80 - HHVM_C
@@ -3049,16 +3049,19 @@ index 0000000..e394223
 +  ret i64 %retval
 +}
 +
-+declare hhvm_php void @php_func(i64, i64, i64, i64)
++declare hhvm_php {i64, i64} @php_func(i64, i64, i64, i64)
 +
-+define hhvm_tc void @test_php(i64 %a, i64 %b, i64 %c) nounwind {
++define hhvm_tc i64 @test_php(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
 +; CHECK-LABEL:  test_php:
 +; CHECK-NEXT:   {{^#.*}}
 +; CHECK-NEXT:   movl $42, %r15
-+; CHECK-NEXT:   jmp php_func
-+  tail call hhvm_php void @php_func(i64 %a, i64 %b, i64 %c, i64 42)
-+  ret void
++; CHECK-NEXT:   callq php_func
++; CHECK-NEXT:   movq %rbp, %rbx
++; CHECK-NEXT:   retq
++  %pair = call hhvm_php {i64, i64} @php_func(i64 %a, i64 %b, i64 %c, i64 42)
++  %fp = extractvalue {i64, i64} %pair, 1
++  ret i64 %fp
 +}
 +
 +declare hhvm_sr void @svcreq(i64, i64, i64, i64, i64, i64, i64, i64, i64, i64)

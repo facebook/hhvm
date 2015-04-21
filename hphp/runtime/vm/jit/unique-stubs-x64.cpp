@@ -84,6 +84,7 @@ TCA emitDebuggerRetFromInterpretedFrame() {
   a.  storel(eax, rVmTl[unwinderDebuggerReturnOffOff()]);
   a.  storeq(rVmSp, rVmTl[unwinderDebuggerReturnSPOff()]);
   a.  call  (TCA(popDebuggerCatch));
+  a.  movq  (rVmFp, rdx); // llvm catch traces expect rVmFp to be in rdx.
   a.  jmp   (rax);
 
   return ret;
@@ -103,6 +104,7 @@ TCA emitDebuggerRetFromInterpretedGenFrame() {
   a.  storel(eax, rVmTl[unwinderDebuggerReturnOffOff()]);
   a.  storeq(rVmSp, rVmTl[unwinderDebuggerReturnSPOff()]);
   a.  call  (TCA(popDebuggerCatch));
+  a.  movq  (rVmFp, rdx); // llvm catch traces expect rVmFp to be in rdx.
   a.  jmp   (rax);
 
   return ret;
@@ -180,6 +182,7 @@ asm_label(a, resumeHelper);
 asm_label(a, resumeRaw);
   a.    loadq (rVmTl[rds::kVmspOff], rVmSp);
   a.    loadq (rVmTl[rds::kVmfpOff], rVmFp);
+  a.    movq  (rVmFp, rdx); // llvm catch traces expect rVmFp to be in rdx.
   a.    jmp   (rax);
 
   uniqueStubs.add("resumeInterpHelpers", uniqueStubs.interpHelper);
@@ -241,16 +244,14 @@ void emitCatchHelper(UniqueStubs& uniqueStubs) {
   a.    cmpq (0, rVmTl[unwinderDebuggerReturnSPOff()]);
   a.    jne8 (debuggerReturn);
 
-  // Normal endCatch situation: call back to tc_unwind_resume.
-  a.    push (rax); // align stack
-  a.    push (rVmFp);
-  a.    movq (rsp, argNumToRegName[0]);
+  // Normal endCatch situation: call back to tc_unwind_resume, which returns
+  // the catch trace (or null) in rax and the new vmfp in rdx.
+  a.    movq (rVmFp, argNumToRegName[0]);
   a.    call (TCA(tc_unwind_resume));
-  a.    pop  (rVmFp);
-  a.    pop  (rdx); // un-align stack. rax is live.
+  a.    movq (rdx, rVmFp);
   a.    testq(rax, rax);
   a.    jz8  (resumeCppUnwind);
-  a.    jmp  (rax);
+  a.    jmp  (rax);  // rdx is still live if we're going to code from llvm
 
 asm_label(a, resumeCppUnwind);
   a.    loadq(rVmTl[unwinderExnOff()], argNumToRegName[0]);

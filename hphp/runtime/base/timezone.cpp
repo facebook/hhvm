@@ -190,7 +190,9 @@ Array TimeZone::GetNamesToCountryCodes() {
     // When country code is unknown or not in use anymore, ?? is used instead.
     // There is no known better way to extract this information out.
     const char* infoString = (const char*)&tzdb->data[table[i].pos];
-    const char* countryCode = &infoString[5];
+
+    // Note using the external timezone database does not store zero for the string
+    const char countryCode[3] = {infoString[5], infoString[6], 0};
 
     ret.set(String(table[i].id, CopyString), String(countryCode, CopyString));
   }

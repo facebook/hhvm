@@ -24,6 +24,7 @@
 
 #include "hphp/util/safe-cast.h"
 
+#include <boost/dynamic_bitset.hpp>
 #include <folly/Range.h>
 #include <iosfwd>
 
@@ -144,6 +145,13 @@ jit::vector<Vlabel> sortBlocks(const Vunit& unit);
  * with each section.
  */
 jit::vector<Vlabel> layoutBlocks(const Vunit& unit);
+
+/*
+ * Return a bitset, keyed by Vlabel, indicating which blocks are targets of
+ * backedges.
+ */
+boost::dynamic_bitset<> backedgeTargets(const Vunit& unit,
+                                        const jit::vector<Vlabel>& rpoBlocks);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

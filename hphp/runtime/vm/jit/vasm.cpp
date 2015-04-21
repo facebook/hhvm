@@ -63,6 +63,21 @@ folly::Range<const Vlabel*> succs(const Vblock& block) {
   return succs(const_cast<Vblock&>(block)).castToConst();
 }
 
+boost::dynamic_bitset<> backedgeTargets(const Vunit& unit,
+                                        const jit::vector<Vlabel>& rpoBlocks) {
+  boost::dynamic_bitset<> ret(unit.blocks.size());
+  boost::dynamic_bitset<> seen(unit.blocks.size());
+
+  for (auto label : rpoBlocks) {
+    seen.set(label);
+    for (auto target : succs(unit.blocks[label])) {
+      if (seen.test(target)) ret.set(target);
+    }
+  }
+
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

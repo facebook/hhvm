@@ -48,6 +48,7 @@
 #include <llvm/ExecutionEngine/ObjectCache.h>
 #include <llvm/ExecutionEngine/RuntimeDyld.h>
 #include <llvm/IR/AssemblyAnnotationWriter.h>
+#include <llvm/IR/CFG.h>
 #include <llvm/IR/ConstantFolder.h>
 #include <llvm/IR/DataLayout.h>
 #include <llvm/IR/DerivedTypes.h>
@@ -1059,6 +1060,13 @@ struct LLVMEmitter {
    */
   void emit(const jit::vector<Vlabel>& labels);
 
+  /*
+   * Propagate special-cased physregs along edges to b's successors, creating
+   * phi nodes when needed.
+   */
+  void handleOutgoingPhysRegs(const Vblock& b,
+                              const boost::dynamic_bitset<>& backedge_targets);
+
 private:
 
   /*
@@ -1318,6 +1326,8 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
   Timer timer(Timer::llvm_irGeneration);
   SCOPE_ASSERT_DETAIL("LLVM Module") { return showModule(m_module.get()); };
 
+  auto const backedge_targets = backedgeTargets(m_unit, labels);
+
   // Make sure all the llvm blocks are emitted in the order given by
   // layoutBlocks, regardless of which ones we need to use as jump targets
   // first.
@@ -1554,23 +1564,7 @@ O(unpcklpd)
       });
     }
 
-    // Since rVmFp isn't SSA in vasm code, we manually propagate its value
-    // across control flow edges.
-    for (auto label : succs(b)) {
-      auto& inFp = m_incomingVmFp[label];
-      // If this assertion fails it's either a bug in the incoming code or it
-      // just means we'll need to insert phi nodes to merge the value.
-      always_assert(inFp == nullptr || inFp == value(x64::rVmFp));
-      inFp = value(x64::rVmFp);
-    }
-
-    // Make sure we don't let any values from this block go to the next RPO
-    // block. PhysReg values are explicitly passed along edges as needed (see
-    // above).
-    defineValue(x64::rVmSp, nullptr);
-    defineValue(x64::rVmFp, nullptr);
-    defineValue(x64::rStashedAR, nullptr);
-    defineValue(x64::rAsm, nullptr);
+    handleOutgoingPhysRegs(b, backedge_targets);
   }
 
   timer.stop();
@@ -1579,6 +1573,70 @@ O(unpcklpd)
   if (RuntimeOption::EvalJitLLVMDiscard) {
     throw FailedLLVMCodeGen("Discarding all hard work");
   }
+}
+
+void LLVMEmitter::handleOutgoingPhysRegs(
+  const Vblock& b,
+  const boost::dynamic_bitset<>& backedge_targets
+) {
+  // rVmFp isn't SSA in vasm code, so we manually propagate its value across
+  // control flow edges, creating phi nodes when appropriate. We conservatively
+  // create phis at all back-edge targets and rely on LLVM to clean up the
+  // unnecessary ones.
+  for (auto succ : succs(b)) {
+    auto& inFp = m_incomingVmFp[succ];
+    auto const outFp = value(x64::rVmFp);
+    auto const target = block(succ);
+
+    // When inFp already comes from a phi node in the successor, add this new
+    // incoming value.
+    if (inFp != nullptr &&
+        llvm::isa<llvm::PHINode>(inFp) &&
+        llvm::cast<llvm::Instruction>(inFp)->getParent() == target) {
+      auto const phi = llvm::cast<llvm::PHINode>(inFp);
+      phi->addIncoming(outFp, m_irb.GetInsertBlock());
+      FTRACE(2, "Add incoming phi value {} to {} for {}\n",
+             llshow(outFp), llshow(phi), succ);
+      continue;
+    }
+
+    // Either this is our first time seeing a backedge target or we're
+    // providing a value that differs from existing predecessors. Either way,
+    // create a phi node at the beginning of succ.
+    if ((inFp == nullptr && backedge_targets.test(succ)) ||
+               (inFp != nullptr && inFp != outFp)) {
+      FTRACE(2, "Creating phi node for {}\n", succ);
+      auto const phi = llvm::PHINode::Create(m_int64, 2, "", target);
+      inFp = phi;
+      phi->addIncoming(outFp, m_irb.GetInsertBlock());
+      if (inFp != nullptr) {
+        // Also add the old incoming value to the phi node. We know that the
+        // successor has one or more predecessors other than the current block
+        // that all provide the same value, so register inFp from all of them.
+        for (auto it = llvm::pred_begin(target), end = llvm::pred_end(target);
+             it != end; ++it) {
+          if (*it == m_irb.GetInsertBlock()) continue;
+          phi->addIncoming(outFp, *it);
+        }
+      }
+      continue;
+    }
+
+    if (inFp == nullptr) {
+      // First time seeing this successor, and it's not a backedge target.
+      inFp = outFp;
+    } else {
+      always_assert(inFp == outFp);
+    }
+  }
+
+  // Make sure we don't let any values from this block go to the next RPO
+  // block. PhysReg values are explicitly passed along edges as needed (see
+  // above).
+  defineValue(x64::rVmSp, nullptr);
+  defineValue(x64::rVmFp, nullptr);
+  defineValue(x64::rStashedAR, nullptr);
+  defineValue(x64::rAsm, nullptr);
 }
 
 llvm::Value* LLVMEmitter::getGlobal(const std::string& name,

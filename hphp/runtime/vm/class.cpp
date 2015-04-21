@@ -1068,7 +1068,8 @@ void Class::setSpecial() {
   // Use 86ctor(), since no program-supplied constructor exists
   m_ctor = findSpecialMethod(this, s_86ctor.get());
   assert(m_ctor && "class had no user-defined constructor or 86ctor");
-  assert((m_ctor->attrs() & ~(AttrBuiltin|AttrAbstract|AttrInterceptable)) ==
+  assert((m_ctor->attrs() & ~(AttrBuiltin|AttrAbstract|
+                              AttrInterceptable|AttrMayUseVV)) ==
          (AttrPublic|AttrNoInjection|AttrPhpLeafFn));
 }
 

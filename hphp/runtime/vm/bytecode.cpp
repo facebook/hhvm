@@ -348,6 +348,7 @@ VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
   , m_depth(1)
   , m_global(false)
 {
+  assert(fp->func()->attrs() & AttrMayUseVV);
   TRACE(3, "Creating lazily attached VarEnv %p on stack\n", this);
 }
 
@@ -359,6 +360,7 @@ VarEnv::VarEnv(const VarEnv* varEnv, ActRec* fp)
 {
   assert(varEnv->m_depth == 1);
   assert(!varEnv->m_global);
+  assert(fp->func()->attrs() & AttrMayUseVV);
 
   TRACE(3, "Cloning VarEnv %p to %p\n", varEnv, this);
 }
@@ -406,6 +408,7 @@ void VarEnv::enterFP(ActRec* oldFP, ActRec* newFP) {
     m_nvTable.detach(oldFP);
   }
 
+  assert(newFP->func()->attrs() & AttrMayUseVV);
   m_nvTable.attach(newFP);
   m_depth++;
 }
@@ -427,7 +430,9 @@ void VarEnv::exitFP(ActRec* fp) {
       smart_delete(this);
     }
   } else {
-    m_nvTable.attach(g_context->getPrevVMState(fp));
+    auto const prevFP = g_context->getPrevVMState(fp);
+    assert(prevFP->func()->attrs() & AttrMayUseVV);
+    m_nvTable.attach(prevFP);
   }
 }
 
@@ -460,7 +465,7 @@ bool VarEnv::unset(const StringData* name) {
   return true;
 }
 
-static const StaticString s_closure_var("0Closure");
+const StaticString s_closure_var("0Closure");
 
 Array VarEnv::getDefinedVariables() const {
   Array ret = Array::Create();
@@ -469,7 +474,7 @@ Array VarEnv::getDefinedVariables() const {
   for (; iter.valid(); iter.next()) {
     auto const sd = iter.curKey();
     auto const tv = iter.curVal();
-    // Closures have an interal 0Closure variable (see emitter.cpp:6539)
+    // Closures have an interal 0Closure variable
     if (s_closure_var.equal(sd)) {
       continue;
     }
@@ -2706,6 +2711,7 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
                                        Unit* unit,
                                        int frame) {
   assert(retval);
+  always_assert(!RuntimeOption::RepoAuthoritative);
 
   bool failed = true;
   ActRec *fp = vmfp();

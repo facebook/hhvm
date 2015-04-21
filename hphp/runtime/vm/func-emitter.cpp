@@ -187,7 +187,11 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     }
     attrs = Attr(attrs & ~AttrPersistent);
   }
-  if (RuntimeOption::EvalJitEnableRenameFunction &&
+  if (!RuntimeOption::RepoAuthoritative) {
+    // In non-RepoAuthoritative mode, any function could get a VarEnv because
+    // of evalPHPDebugger.
+    attrs |= AttrMayUseVV;
+  } else if (RuntimeOption::EvalJitEnableRenameFunction &&
       !name->empty() &&
       !Func::isSpecial(name) &&
       !isClosureBody) {

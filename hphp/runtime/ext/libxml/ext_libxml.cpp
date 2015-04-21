@@ -155,6 +155,7 @@ void XMLDocumentData::sweep() {
     cleanup();
   }
   m_destruct = true;
+  if (m_doc) m_doc->detachNode();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

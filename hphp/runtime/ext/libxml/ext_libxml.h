@@ -135,9 +135,7 @@ struct XMLDocumentData : XMLNodeData {
     , m_recover(false)
     , m_destruct(false)
   {
-    assert(p->type == XML_HTML_DOCUMENT_NODE ||
-           p->type == XML_DOCUMENT_NODE ||
-           p->type == XML_DOCUMENT_TYPE_NODE);
+    assert(p->type == XML_HTML_DOCUMENT_NODE || p->type == XML_DOCUMENT_NODE);
   }
 
   xmlDocPtr docp() const { return (xmlDocPtr)m_node; }
@@ -172,8 +170,7 @@ inline XMLNode libxml_register_node(xmlNodePtr p) {
   }
 
   if (p->type == XML_HTML_DOCUMENT_NODE ||
-      p->type == XML_DOCUMENT_NODE ||
-      p->type == XML_DOCUMENT_TYPE_NODE) {
+      p->type == XML_DOCUMENT_NODE) {
     assert(p->doc == (xmlDocPtr)p);
 
     return makeSmartPtr<XMLDocumentData>((xmlDocPtr)p);
@@ -190,7 +187,7 @@ inline XMLNodeData::XMLNodeData(xmlNodePtr p) : m_node(p) {
   assert(p && !p->_private);
   m_node->_private = this;
 
-  if (p && p != (xmlNodePtr)p->doc && p->doc) {
+  if (p->doc && p != (xmlNodePtr)p->doc) {
     m_doc = libxml_register_node((xmlNodePtr)p->doc)->doc();
     m_doc->attachNode();
   }
@@ -216,8 +213,7 @@ inline SmartPtr<XMLDocumentData> XMLNodeData::doc() {
   if (!m_node) return nullptr;
 
   if (m_node->type == XML_HTML_DOCUMENT_NODE ||
-      m_node->type == XML_DOCUMENT_NODE ||
-      m_node->type == XML_DOCUMENT_TYPE_NODE) {
+      m_node->type == XML_DOCUMENT_NODE) {
     return SmartPtr<XMLDocumentData>(static_cast<XMLDocumentData*>(this));
   }
 

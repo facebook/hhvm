@@ -1315,18 +1315,22 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
 
 static void node_list_unlink(xmlNodePtr node) {
   while (node != nullptr) {
-    if (node->type == XML_ENTITY_REF_NODE) break;
-    node_list_unlink(node->children);
-    switch (node->type) {
-    case XML_ATTRIBUTE_DECL:
-    case XML_DTD_NODE:
-    case XML_DOCUMENT_TYPE_NODE:
-    case XML_ENTITY_DECL:
-    case XML_ATTRIBUTE_NODE:
-    case XML_TEXT_NODE:
-      break;
-    default:
-      node_list_unlink((xmlNodePtr)node->properties);
+    if (node->_private) {
+      libxml_register_node(node)->unlink(); // release node if unused
+    } else {
+      if (node->type == XML_ENTITY_REF_NODE) break;
+      node_list_unlink(node->children);
+      switch (node->type) {
+      case XML_ATTRIBUTE_DECL:
+      case XML_DTD_NODE:
+      case XML_DOCUMENT_TYPE_NODE:
+      case XML_ENTITY_DECL:
+      case XML_ATTRIBUTE_NODE:
+      case XML_TEXT_NODE:
+        break;
+      default:
+        node_list_unlink((xmlNodePtr)node->properties);
+      }
     }
     node = node->next;
   }
@@ -2078,7 +2082,7 @@ Variant HHVM_METHOD(DOMNode, appendChild,
     }
     if (lastattr != nullptr && lastattr->type != XML_ATTRIBUTE_DECL) {
       if (lastattr != (xmlAttrPtr)child) {
-        xmlUnlinkNode((xmlNodePtr)lastattr);
+        libxml_register_node((xmlNodePtr)lastattr)->unlink();
       }
     }
   } else if (child->type == XML_DOCUMENT_FRAG_NODE) {
@@ -2223,7 +2227,7 @@ Variant HHVM_METHOD(DOMNode, insertBefore,
       }
       if (lastattr != nullptr && lastattr->type != XML_ATTRIBUTE_DECL) {
         if (lastattr != (xmlAttrPtr)child) {
-          xmlUnlinkNode((xmlNodePtr)lastattr);
+          libxml_register_node((xmlNodePtr)lastattr)->unlink();
         } else {
           return create_node_object(child, data->doc());
         }
@@ -2262,7 +2266,7 @@ Variant HHVM_METHOD(DOMNode, insertBefore,
         lastattr = xmlHasNsProp(parentp, child->name, child->ns->href);
       if (lastattr != nullptr && lastattr->type != XML_ATTRIBUTE_DECL) {
         if (lastattr != (xmlAttrPtr)child) {
-          xmlUnlinkNode((xmlNodePtr)lastattr);
+          libxml_register_node((xmlNodePtr)lastattr)->unlink();
         } else {
           return create_node_object(child, data->doc());
         }

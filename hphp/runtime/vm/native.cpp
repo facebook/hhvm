@@ -324,14 +324,7 @@ const StringData* getInvokeName(ActRec* ar) {
   if (ar->magicDispatch() && ar->hasInvName()) {
     return ar->getInvName();
   }
-  auto func = ar->m_func;
-  auto cls = func->cls();
-  if (!cls) {
-    return func->name();
-  }
-  String clsname(const_cast<StringData*>(cls->name()));
-  String funcname(const_cast<StringData*>(func->name()));
-  return makeStaticString(clsname + "::" + funcname);
+  return ar->func()->fullName();
 }
 
 template<bool variadic>

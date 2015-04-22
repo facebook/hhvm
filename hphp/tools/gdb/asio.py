@@ -59,6 +59,30 @@ class WaitHandle():
     def state(self):
         return (self.wh['m_kind_state'] & 0xf).cast(T('uint8_t'))
 
+    def state_str(self):
+        kind = self.kind_str()
+        state = self.state()
+        res = 'INVALID'
+
+        # Each WaitHandle has its own states...
+        if state == 0:
+            res = 'SUCCEEDED'
+        elif state == 1:
+            res = 'FAILED'
+        elif state == 2:
+            if kind == 'Sleep' or kind == 'ExternalThreadEvent':
+                res = 'WAITING'
+            elif kind == 'Reschedule':
+                res = 'SCHEDULED'
+            else:
+                res = 'BLOCKED'
+        elif state == 3 and kind == 'Resumable':
+            res = 'SCHEDULED'
+        elif state == 4 and kind == 'Resumable':
+            res = 'RUNNING'
+
+        return res
+
     def finished(self):
         return self.state() <= K('HPHP::c_WaitHandle::STATE_FAILED')
 
@@ -154,20 +178,32 @@ def asio_context(ctx_idx=None):
 #------------------------------------------------------------------------------
 # ASIO stacktraces.
 
-def asio_stacktrace(wh):
+def asio_stacktrace(wh, limit=None):
+    """Produce a list of async frames by following a WaitHandle's parent chain.
+    The stacktrace ends at the WaitHandle::join().
+
+    The whole chain is walked even if `limit' is provided---the return
+    stacktrace will have `limit' or fewer entries if there were `limit' or
+    fewer frames, and `limit' + 1 frames otherwise, where the last frame is the
+    WaitHandle::join().
+    """
     stacktrace = []
+    count = 0
 
     for wh in WaitHandle(wh).chain():
         resumable = wh.resumable()
 
-        if resumable is not None:
-            stacktrace.append(frame.create_resumable(
-                len(stacktrace), resumable))
+        if resumable is None:
+            continue
+
+        if limit is None or count < limit:
+            stacktrace.append(frame.create_resumable(count, resumable))
+        count += 1
 
     ar = asio_context(wh['m_contextIdx'])['m_savedFP']
 
     if ar != nullptr():
-        stacktrace.append(frame.create_php(idx=len(stacktrace), ar=ar))
+        stacktrace.append(frame.create_php(idx=count, ar=ar))
 
     return stacktrace
 
@@ -193,7 +229,103 @@ The format used is the same as that used by `walkstk'.
             print('asyncstk: Argument must be a WaitHandle object or pointer.')
             return
 
-        for frm in frame.stringify_stacktrace(stacktrace):
-            print(frm)
+        for s in frame.stringify_stacktrace(stacktrace):
+            print(s)
 
 AsyncStkCommand()
+
+
+#------------------------------------------------------------------------------
+# `info asio' command.
+
+class InfoAsioCommand(gdb.Command):
+    """Metadata about the currently in-scope AsioContext"""
+
+    def __init__(self):
+        super(InfoAsioCommand, self).__init__('info asio', gdb.COMMAND_STATUS)
+
+    def invoke(self, args, from_tty):
+        asio_session = V('HPHP::AsioSession::s_current')['m_p']
+
+        contexts = asio_session['m_contexts']
+        num_contexts = sizeof(contexts)
+
+        if num_contexts == 0:
+            print('Not currently in the scope of an AsioContext')
+            return
+
+        asio_ctx = asio_context()
+
+        # Count the number of contexts, and print the topmost.
+        print('\n%d stacked AsioContext%s (current: (%s) %s)' % (
+            int(num_contexts),
+            plural_suffix(num_contexts),
+            str(asio_ctx.type),
+            str(asio_ctx)))
+
+        # Get the current vmfp().
+        header_ptype = T('HPHP::rds::Header').pointer()
+        vmfp = V('HPHP::rds::tl_base').cast(header_ptype)['vmRegs']['fp']
+
+        wh_ptype = T('HPHP::c_WaitableWaitHandle').pointer()
+
+        # Find the most recent join().
+        for i, fp in izip(count(), frame.gen_php(vmfp)):
+            if nameof(fp['m_func']) == 'HH\WaitHandle::join':
+                break
+
+        if nameof(fp['m_func']) != 'HH\WaitHandle::join':
+            print("...but couldn't find join().  Something is wrong.\n")
+            return
+
+        wh = fp['m_this'].cast(wh_ptype)
+
+        print('\nCurrently %s WaitHandle: (%s) %s [state: %s]' % (
+            'joining' if i == 0 else 'executing',
+            str(wh.type),
+            str(wh),
+            WaitHandle(wh).state_str()))
+
+        # Dump the async stacktrace.
+        for s in frame.stringify_stacktrace(asio_stacktrace(wh)):
+            print('    %s' % s)
+
+        # Count the number of queued runnables.
+        queue_size = sizeof(asio_ctx['m_runnableQueue'])
+        print('%d other resumable%s queued' % (
+            int(queue_size),
+            plural_suffix(queue_size)))
+
+        sleeps = asio_ctx['m_sleepEvents']
+        externals = asio_ctx['m_externalThreadEvents']
+
+        num_sleeps = sizeof(sleeps)
+        num_externals = sizeof(externals)
+
+        # Count sleep and external thread events.
+        print('')
+        print('%d pending sleep event%s' % (
+            int(num_sleeps), plural_suffix(num_sleeps)))
+        print('%d pending external thread event%s' % (
+            int(num_externals), plural_suffix(num_externals)))
+
+        # Dump sleep and external thread event stacktraces.
+        for vec in [sleeps, externals]:
+            for i in xrange(int(sizeof(vec))):
+                wh = idx.vector_at(vec, i)
+                stacktrace = frame.stringify_stacktrace(asio_stacktrace(wh, 3))
+
+                print('\n(%s) %s [state: %s]' % (
+                    str(wh.type), str(wh), WaitHandle(wh).state_str()))
+
+                if len(stacktrace) == 4:
+                    for s in stacktrace[0:-1]:
+                        print('    %s' % s)
+                    print('     ...')
+                    print('    %s' % stacktrace[-1])
+                else:
+                    for s in stacktrace:
+                        print('    %s' % s)
+        print('')
+
+InfoAsioCommand()

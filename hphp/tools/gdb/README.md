@@ -286,3 +286,30 @@ WaitHandle, ending at the synchronous join().
     #3  0x7fa159e9fc30 @ {suspended}: [PHP] Logger::writeToDB() at /path/to/logging/and/other/stuff/file.php:28
     #4  0x7fa15c70bc30 @ {suspended}: [PHP] PSP::__invoke() at /path/to/path/to/path/to/file.php:39
     #5  0x7fa133c3ff40 @ 0x????????: [PHP] HH\WaitHandle::join()
+
+
+### info asio
+
+The `info asio` command provides a metadata dump about the current state of the
+ASIO scheduler in the current thread.
+
+Some of the stacktraces provided are truncated; full stacktraces can be
+obtained by pointing the `asyncstk` command at the appropriate WaitHandle.
+
+    (gdb) i asio
+    1 stacked AsioContext (current: (HPHP::AsioContext *) 0x7fa131c13210)
+
+    Currently executing WaitHandle: (HPHP::c_WaitableWaitHandle *) 0x7fa131c0c0c0 [state: BLOCKED]
+        #0  0x7fa131c0c080 @ {suspended}: [PHP] Asio::__invoke() at /path/to/fancy/abstraction.php
+        #1  0x7fa133c3fee0 @ 0x????????: [PHP] HH\WaitHandle::join()
+    0 other resumables queued
+
+    1 pending sleep event
+    0 pending external thread events
+
+    (HPHP::c_SleepWaitHandle *) 0x7fa131cc2360 [state: WAITING]
+        #0  0x7fa15c724e60 @ {suspended}: [PHP] gen_usleep() at /path/to/some/file.php:22
+        #1  0x7fa15c71d940 @ {suspended}: [PHP] DBClient::genRetryOnFailure() at /path/to/fancier/file.php:280
+        #2  0x7fa15c71ce70 @ {suspended}: [PHP] DBClient::gen() at /path/to/fancier/file.php:801
+         ...
+        #8  0x7fa133c3fee0 @ 0x????????: [PHP] HH\WaitHandle::join()

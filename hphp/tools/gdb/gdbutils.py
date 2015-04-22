@@ -44,6 +44,10 @@ def gdbprint(val, ty=None):
     gdb.execute('print (%s)%s' % (str(ty), str(val)))
 
 
+def plural_suffix(num, suffix='s'):
+    return '' if num == 1 else suffix
+
+
 #------------------------------------------------------------------------------
 # Intel CRC32.
 

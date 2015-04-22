@@ -8,7 +8,6 @@ GDB commands related to the HHVM stack.
 import gdb
 from gdbutils import *
 import frame
-from nameof import nameof
 
 
 #------------------------------------------------------------------------------

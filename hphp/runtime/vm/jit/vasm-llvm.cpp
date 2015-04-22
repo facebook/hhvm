@@ -40,6 +40,7 @@
 
 #ifdef USE_LLVM
 
+#include <llvm/ADT/Triple.h>
 #include <llvm/Analysis/Passes.h>
 #include <llvm/CodeGen/MachineFunctionAnalysis.h>
 #include <llvm/CodeGen/Passes.h>
@@ -56,10 +57,12 @@
 #include <llvm/IR/InlineAsm.h>
 #include <llvm/IR/Intrinsics.h>
 #include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/TypeBuilder.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/IRReader/IRReader.h>
+#include <llvm/InitializePasses.h>
 #include <llvm/PassManager.h>
 #include <llvm/Support/CommandLine.h>
 #include <llvm/Support/ErrorHandling.h>
@@ -70,6 +73,7 @@
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/Target/TargetLibraryInfo.h>
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Transforms/IPO.h>
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
@@ -516,7 +520,7 @@ struct LLVMEmitter {
           llvm::Type::getVoidTy(m_context),
           std::vector<llvm::Type*>(3, llvm::IntegerType::get(m_context, 64)),
           false),
-      llvm::Function::ExternalLinkage, "", m_module.get()))
+      llvm::Function::ExternalLinkage, "tracelet", m_module.get()))
     , m_irb(m_context,
             llvm::ConstantFolder(),
             IRBuilderVasmInserter(*this))
@@ -730,6 +734,25 @@ struct LLVMEmitter {
       .create());
     always_assert_flog(ee, "ExecutionEngine creation failed: {}\n", errStr);
 
+    llvm::PassManager pm;
+    if (!RuntimeOption::EvalJitLLVMBasicOpt) {
+      auto TLI =
+        new llvm::TargetLibraryInfo(llvm::Triple(module->getTargetTriple()));
+      pm.add(TLI);
+      auto& Registry = *llvm::PassRegistry::getPassRegistry();
+      llvm::initializeCore(Registry);
+      llvm::initializeScalarOpts(Registry);
+      llvm::initializeVectorization(Registry);
+      llvm::initializeIPO(Registry);
+      llvm::initializeAnalysis(Registry);
+      llvm::initializeIPA(Registry);
+      llvm::initializeTransformUtils(Registry);
+      llvm::initializeInstCombine(Registry);
+      llvm::initializeTarget(Registry);
+      llvm::initializeCodeGenPreparePass(Registry);
+      llvm::initializeAtomicExpandLoadLinkedPass(Registry);
+    }
+
     llvm::LLVMTargetMachine* targetMachine =
       static_cast<llvm::LLVMTargetMachine*>(ee->getTargetMachine());
 
@@ -760,7 +783,13 @@ struct LLVMEmitter {
       llvm::PassManagerBuilder PM;
       PM.OptLevel = RuntimeOption::EvalJitLLVMOptLevel;
       PM.SizeLevel = RuntimeOption::EvalJitLLVMSizeLevel;
+      PM.Inliner = llvm::createFunctionInliningPass(PM.OptLevel, PM.SizeLevel);
+      PM.DisableUnitAtATime = false;
+      PM.SLPVectorize = RuntimeOption::EvalJitLLVMSLPVectorize;
+      PM.BBVectorize = RuntimeOption::EvalJitLLVMBBVectorize;
+      PM.LoadCombine = RuntimeOption::EvalJitLLVMLoadCombine;
       PM.populateFunctionPassManager(*fpm);
+      PM.populateModulePassManager(pm);
     }
 
     {
@@ -770,7 +799,9 @@ struct LLVMEmitter {
         fpm->run(*it);
       }
       fpm->doFinalization();
+      pm.run(*module);
     }
+
     FTRACE(2, "{:-^80}\n{}\n", " LLVM IR after optimizing ",
            showModule(module));
 

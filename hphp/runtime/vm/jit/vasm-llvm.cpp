@@ -251,7 +251,19 @@ jit::vector<EHInfo> parse_gcc_except_table(const uint8_t* ptr,
     if (landingPad == UINT32_MAX) continue;
     if (!RuntimeOption::EvalJitLLVMSplitHotCold && landingPad == 0) continue;
 
-    auto rangeBase = (actionEntry == 0) ? funcStart : coldStart;
+    auto rangeBase = funcStart;
+    if (actionEntry) {
+      rangeBase = coldStart;
+      // Skip over nop's at the start of the section since all offsets are
+      // recorded from the beginning of "real" code.
+      // TODO(#6836929): this has to be removed once we fix the underlying
+      // issue with smashable instructions at the start of a section.
+      while (42) {
+        DecodedInstruction di(rangeBase);
+        if (!di.isNop()) break;
+        rangeBase += di.size();
+      }
+    }
     FTRACE(2, "Adding entry: [{},{}): landingPad {}\n",
            rangeBase + start, rangeBase + start + length, lpStart + landingPad);
     ret.emplace_back(EHInfo{rangeBase + start,

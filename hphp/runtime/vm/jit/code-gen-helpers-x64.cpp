@@ -312,14 +312,14 @@ void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
 void emitTestSurpriseFlags(Asm& a, PhysReg rds) {
   static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
                 "Codegen assumes a SurpriseFlag fits in a 32-bit int");
-  a.testl(-1, rds[rds::kSurpriseFlagsOff]);
+  a.cmpl(0, rds[rds::kSurpriseFlagsOff]);
 }
 
 Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
   static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
                 "Codegen assumes a SurpriseFlag fits in a 32-bit int");
   auto const sf = v.makeReg();
-  v << testlim{-1, rds[rds::kSurpriseFlagsOff], sf};
+  v << cmplim{0, rds[rds::kSurpriseFlagsOff], sf};
   return sf;
 }
 

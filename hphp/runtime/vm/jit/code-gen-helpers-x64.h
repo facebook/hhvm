@@ -95,7 +95,7 @@ void emitImmStoreq(Asm& as, Immed64 imm, MemoryRef ref);
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg);
 
 /*
- * Tests the surprise flags for the current thread. Should be used
+ * Test the current thread's surprise flags for a nonzero value. Should be used
  * before a jnz to surprise handling code.
  */
 void emitTestSurpriseFlags(Asm& as, PhysReg rds);

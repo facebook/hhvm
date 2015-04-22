@@ -226,9 +226,6 @@ about to be loaded, using a separate CheckRefInner instruction.
   Check that type of the given localId on the frame S0 is T; if not, branch to
   block B.
 
-  Returns a new frame pointer representing the same frame as S0 but with the
-  knowledge that the checked local has type T.
-
 | AssertLoc<T,localId>, ND, S(FramePtr), NF
 
   Asserts that type of the supplied local on the frame S0 is T. This is used

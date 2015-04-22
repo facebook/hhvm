@@ -87,7 +87,7 @@ void IRInstruction::convertToNop() {
   m_extra        = nullptr;
 }
 
-void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
+void IRInstruction::become(IRUnit& unit, const IRInstruction* other) {
   assertx(other->isTransient() || m_numDsts == other->m_numDsts);
   auto& arena = unit.arena();
 

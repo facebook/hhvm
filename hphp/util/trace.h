@@ -112,6 +112,7 @@ namespace Trace {
       TM(vasm_copy)     \
       TM(hhir)          \
       TM(hhirTracelets) \
+      TM(hhir_cfg)      \
       TM(hhir_dce)      \
       TM(hhir_store)    \
       TM(hhir_alias)    \

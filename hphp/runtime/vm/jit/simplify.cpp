@@ -254,6 +254,27 @@ DEBUG_ONLY bool validate(const State& env,
  * value of the simplified instruction sequence.
  */
 
+SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
+  // Replace a conditional branch with a Jmp if both branches go to the same
+  // block. Only work if the instruction does not have side effect.
+  // JmpZero/JmpNZero is handled separately.
+  assertx(inst->is(CheckTypeMem,
+                   CheckLoc,
+                   CheckStk,
+                   CheckInit,
+                   CheckInitMem,
+                   CheckInitProps,
+                   CheckInitSProps,
+                   CheckPackedArrayBounds,
+                   CheckStaticLocInit,
+                   CheckRefInner,
+                   CheckCtxThis));
+  if (inst->next() != nullptr && inst->next() == inst->taken()) {
+    return gen(env, Jmp, inst->next());
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyCheckCtxThis(State& env, const IRInstruction* inst) {
   auto const func = inst->marker().func();
   auto const srcTy = inst->src(0)->type();
@@ -261,7 +282,7 @@ SSATmp* simplifyCheckCtxThis(State& env, const IRInstruction* inst) {
   if (!func->mayHaveThis() || !srcTy.maybe(TObj)) {
     return gen(env, Jmp, inst->taken());
   }
-  return nullptr;
+  return mergeBranchDests(env, inst);
 }
 
 SSATmp* simplifyCastCtxThis(State& env, const IRInstruction* inst) {
@@ -1620,6 +1641,26 @@ SSATmp* simplifyCheckInit(State& env, const IRInstruction* inst) {
   assertx(!srcType.maybe(TPtrToGen));
   assertx(inst->taken());
   if (!srcType.maybe(TUninit)) return gen(env, Nop);
+  return mergeBranchDests(env, inst);
+}
+
+SSATmp* simplifyCheckInitMem(State& env, const IRInstruction* inst) {
+  return mergeBranchDests(env, inst);
+}
+
+SSATmp* simplifyCheckInitProps(State& env, const IRInstruction* inst) {
+  return mergeBranchDests(env, inst);
+}
+
+SSATmp* simplifyCheckInitSProps(State& env, const IRInstruction* inst) {
+  return mergeBranchDests(env, inst);
+}
+
+SSATmp* simplifyInitObjProps(State& env, const IRInstruction* inst) {
+  auto const cls = inst->extra<InitObjProps>()->cls;
+  if (cls->getODAttrs() == 0 && cls->numDeclProperties() == 0) {
+    return gen(env, Nop);
+  }
   return nullptr;
 }
 
@@ -1627,9 +1668,8 @@ SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
   auto const typeParam = inst->typeParam();
   auto const srcType = inst->src(0)->type();
 
-  if (!srcType.maybe(typeParam)) {
-    // This check will always fail. Convert the check into a Jmp. The rest of
-    // the block will be unreachable.
+  if (!srcType.maybe(typeParam) || inst->next() == inst->taken()) {
+    // Convert the check into a Jmp.
     gen(env, Jmp, inst->taken());
     return inst->src(0);
   }
@@ -1644,12 +1684,44 @@ SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyCheckTypeMem(State& env, const IRInstruction* inst) {
+  if (inst->next() == inst->taken() ||
+      inst->typeParam() == TBottom) {
+    return gen(env, Jmp, inst->taken());
+  }
+
+  return nullptr;
+}
+
 SSATmp* simplifyAssertType(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
 
   return canSimplifyAssertType(inst, src->type(), mightRelax(env, src))
     ? src
     : nullptr;
+}
+
+SSATmp* simplifyCheckLoc(State& env, const IRInstruction* inst) {
+  return mergeBranchDests(env, inst);
+}
+
+SSATmp* simplifyCheckStk(State& env, const IRInstruction* inst) {
+  return mergeBranchDests(env, inst);
+}
+
+SSATmp* simplifyCheckStaticLocInit(State& env, const IRInstruction* inst) {
+  return mergeBranchDests(env, inst);
+}
+
+SSATmp* simplifyCheckRefInner(State& env, const IRInstruction* inst) {
+  return mergeBranchDests(env, inst);
+}
+
+SSATmp* simplifyDefLabel(State& env, const IRInstruction* inst) {
+  if (inst->numDsts() == 0) {
+    return gen(env, Nop);
+  }
+  return nullptr;
 }
 
 SSATmp* decRefImpl(State& env, const IRInstruction* inst) {
@@ -1688,75 +1760,54 @@ SSATmp* simplifyIncRefCtx(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* condJmpImpl(State& env, const IRInstruction* inst) {
-  auto const src       = inst->src(0);
-  auto const srcInst   = src->inst();
-  auto const srcOpcode = srcInst->op();
-
-  // After other simplifications below (isConvIntOrPtrToBool), we can
-  // end up with a non-Bool input.  Nothing more to do in this case.
-  if (!src->isA(TBool)) {
-    return nullptr;
+  assertx(inst->is(JmpZero, JmpNZero));
+  // Both ways go to the same block.
+  if (inst->taken() == inst->next()) {
+    assertx(inst->taken() != nullptr);
+    return gen(env, Jmp, inst->taken());
   }
+
+  auto const src = inst->src(0);
+  auto const srcInst = src->inst();
 
   // Constant propagate.
   if (src->hasConstVal()) {
-    bool val = src->boolVal();
-    if (inst->op() == JmpZero) {
-      val = !val;
-    }
-    if (val) {
+    bool val = src->isA(TBool) ? src->boolVal()
+                               : static_cast<bool>(src->intVal());
+    if (val == inst->is(JmpNZero)) {
+      // always taken
+      assertx(inst->taken());
       return gen(env, Jmp, inst->taken());
     }
+    // Never taken. Since simplify() is also run when building the IR,
+    // inst->next() could be nullptr at this moment.
     return gen(env, Nop);
   }
 
-  // Pull negations into the jump.
-  if (srcOpcode == XorBool && srcInst->src(1)->hasConstVal(true)) {
-    if (!srcInst->src(0)->type().maybe(TCounted)) {
-      return gen(
-        env,
-        inst->op() == JmpZero ? JmpNZero : JmpZero,
-        inst->taken(),
-        srcInst->src(0)
-      );
-    }
+  // Absorb negations.
+  if (srcInst->is(XorBool) && srcInst->src(1)->hasConstVal(true)) {
+    return gen(env,
+               inst->op() == JmpZero ? JmpNZero : JmpZero,
+               inst->taken(),
+               srcInst->src(0)
+              );
   }
-
-  /*
-   * Try to combine the src inst with the Jmp.  We can't do any combinations of
-   * the src instruction with the jump if the src's are refcounted, since we
-   * may have dec refs between the src instruction and the jump.
-   */
-  for (auto& src : srcInst->srcs()) {
-    if (src->type().maybe(TCounted)) return nullptr;
-  }
-
-  // If the source is conversion of an int or pointer to boolean, we
-  // can test the int/ptr value directly.
-  auto isConvIntOrPtrToBool = [&](const IRInstruction* instr) {
-    switch (instr->op()) {
-    case ConvIntToBool:
-      return true;
-    case ConvCellToBool:
-      return instr->src(0)->type().subtypeOfAny(
-        TFunc, TCls, TVarEnv, TTCA);
-    default:
-      return false;
-    }
-  };
-  if (isConvIntOrPtrToBool(srcInst)) {
-    // We can just check the int or ptr directly. Borrow the Conv's src.
+  // Absorb ConvIntToBool.
+  if (srcInst->is(ConvIntToBool)) {
     return gen(env, inst->op(), inst->taken(), srcInst->src(0));
   }
+
   return nullptr;
 }
 
 SSATmp* simplifyJmpZero(State& env, const IRInstruction* i) {
   return condJmpImpl(env, i);
 }
+
 SSATmp* simplifyJmpNZero(State& env, const IRInstruction* i) {
   return condJmpImpl(env, i);
 }
+
 
 SSATmp* simplifyAssertNonNull(State& env, const IRInstruction* inst) {
   if (!inst->src(0)->type().maybe(TNullptr)) {
@@ -1768,7 +1819,7 @@ SSATmp* simplifyAssertNonNull(State& env, const IRInstruction* inst) {
 SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
   auto const array = inst->src(0);
   auto const idx   = inst->src(1);
-  if (!idx->hasConstVal()) return nullptr;
+  if (!idx->hasConstVal()) return mergeBranchDests(env, inst);
 
   auto const idxVal = (uint64_t)idx->intVal();
   auto const check = packedArrayBoundsStaticCheck(array->type(), idxVal);
@@ -1777,7 +1828,7 @@ SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
     return gen(env, Jmp, inst->taken());
   }
 
-  return nullptr;
+  return mergeBranchDests(env, inst);
 }
 
 SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
@@ -1949,7 +2000,15 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CallBuiltin)
   X(Ceil)
   X(CheckInit)
+  X(CheckInitMem)
+  X(CheckInitProps)
+  X(CheckInitSProps)
+  X(CheckLoc)
+  X(CheckRefInner)
+  X(CheckStk)
+  X(CheckStaticLocInit)
   X(CheckType)
+  X(CheckTypeMem)
   X(AssertType)
   X(CheckPackedArrayBounds)
   X(CoerceCellToBool)
@@ -1987,12 +2046,14 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CountArray)
   X(DecRef)
   X(DecRefNZ)
+  X(DefLabel)
   X(DivDbl)
   X(ExtendsClass)
   X(Floor)
   X(GetCtxFwdCall)
   X(IncRef)
   X(IncRefCtx)
+  X(InitObjProps)
   X(InstanceOf)
   X(InstanceOfIface)
   X(IsNType)

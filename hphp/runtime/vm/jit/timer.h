@@ -27,7 +27,7 @@
   TIMER_NAME(collectPostConditions)             \
   TIMER_NAME(optimize)                          \
   TIMER_NAME(optimize_dce)                      \
-  TIMER_NAME(optimize_jumpOpts)                 \
+  TIMER_NAME(optimize_cleancfg)                 \
   TIMER_NAME(optimize_predictionOpts)           \
   TIMER_NAME(optimize_realxGuards)              \
   TIMER_NAME(optimize_refcountOpts)             \

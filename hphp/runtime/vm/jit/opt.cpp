@@ -78,6 +78,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
 
     if (RuntimeOption::EvalHHIRSimplification) {
       doPass(simplify, "guard relaxation simplify");
+      doPass(cleanCfg);
     }
   }
 
@@ -90,6 +91,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   if (RuntimeOption::EvalHHIRSimplification) {
     doPass(simplify, "simplify");
     dce("simplify");
+    doPass(cleanCfg);
   }
 
   if (RuntimeOption::EvalHHIRGlobalValueNumbering) {

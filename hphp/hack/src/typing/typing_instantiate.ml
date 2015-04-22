@@ -100,11 +100,11 @@ and instantiate_ft env ft =
   env, { ft with ft_arity = arity; ft_params = params; ft_ret = ret }
 
 and check_constraint env ck cstr_ty ty =
-  let env, cstr_ty = TUtils.localize_phase env cstr_ty in
   let env, ty = TUtils.localize_phase env ty in
-  let env, ety = Env.expand_type env cstr_ty in
-  let env, ex_ty = Env.expand_type env ty in
-  match snd ety, snd ex_ty with
+  let env, cstr_ty = TUtils.localize_phase env cstr_ty in
+  let env, ety = Env.expand_type env ty in
+  let env, ecstr_ty = Env.expand_type env cstr_ty in
+  match snd ecstr_ty, snd ety with
   | _, Tany ->
       (* This branch is only reached when we have an unbound type variable,
        * when this is the case, the constraint should always succeed.
@@ -139,8 +139,28 @@ and check_constraint env ck cstr_ty ty =
              * grow_super is true.) The return type hint provides the
              * supertype we want, and we just have to check that the hint is
              * consistent with all the types in the Tunresolved.
+             *
+             * Note that since Tu = mixed is always a solution, a `super`
+             * constraint itself should never create a type error. That is,
+             * it should only result in the type growing as a Tunresolved.
+             * Errors will only arise when we encounter conflicting type hints.
+             * Thus we ensure that ty is wrapped in a Tunresolved here.
              *)
-            TUtils.sub_type env ty cstr_ty
+            let env = match ty, ety with
+              | (_, Tvar _), (_, Tunresolved _) -> env
+              | (_, Tvar n), (r, _) ->
+                  let ety = r, Tunresolved [ety] in
+                  let env = Env.add env n ety in
+                  env
+              | _ ->
+                  (* I don't think ty will ever be anything but a Tvar...
+                   * might be able to assert false here *)
+                  env in
+            (* If cstr_ty is a Tvar, we don't want to unify that Tvar with
+             * ty; we merely want the constraint itself to be added to the
+             * ty's list of unresolved types. Thus we pass the expanded
+             * constraint type. *)
+            TUtils.sub_type env ty ecstr_ty
       end
 
 and instantiate: type a. a subst -> env -> a ty -> env * a ty =

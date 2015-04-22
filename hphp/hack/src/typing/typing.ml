@@ -3443,9 +3443,7 @@ and get_implements ~with_checks ~this (env: Env.env) ht =
                   ignore (Type.sub_type_decl p Reason.URnone env cstr ty);
               | Some (Ast.Constraint_super, cstr) ->
                   let cstr = snd (Inst.instantiate subst env cstr) in
-                  ignore (Env.invert_grow_super env begin fun env ->
-                    Type.sub_type_decl p Reason.URnone env ty cstr
-                  end)
+                  ignore (Type.sub_type_decl p Reason.URnone env ty cstr);
             else ()
           end class_.tc_tparams paraml;
           let sub_implements =

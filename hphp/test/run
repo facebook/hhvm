@@ -1124,7 +1124,6 @@ function generate_diff($wanted, $wanted_re, $output)
       }
       $w = $wanted === $wanted_re ? $r : $w2;
     } else {
-      echo "Wanted re: $wanted_re\n";
       $r = explode("\n", $wanted_re);
     }
   }

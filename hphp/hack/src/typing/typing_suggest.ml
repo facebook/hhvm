@@ -37,7 +37,7 @@ module TUtils = Typing_utils
 (* List of types found in a file. *)
 (*****************************************************************************)
 
-let (types: (Env.env * Pos.t * hint_kind * Typing_defs.ty) list ref) = ref []
+let (types: (Env.env * Pos.t * hint_kind * locl ty) list ref) = ref []
 let (initalized_members: (SSet.t SMap.t) ref) = ref SMap.empty
 
 let add_type env pos k type_ =
@@ -142,13 +142,12 @@ let get_implements (_, x) =
   match Env.Classes.get x with
   | None -> SSet.empty
   | Some { tc_ancestors = tyl; _ } ->
-      SMap.fold begin fun _ ty set ->
+      SMap.fold begin fun _ (ty: decl ty) set ->
         match ty with
         | _, Tapply ((_, x), []) -> SSet.add x set
-        | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _)
-          | Toption _ | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _
-          | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
-          | Tshape _ | Taccess (_, _)) -> raise Exit
+        | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Tfun _
+          | Toption _ | Tapply (_, _) | Ttuple _ | Tshape _ | Taccess (_, _)) ->
+          raise Exit
       end tyl SSet.empty
 
 (** normalizes a "guessed" type. We basically want to bailout whenever

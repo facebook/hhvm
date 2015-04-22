@@ -32,7 +32,7 @@ end
 
 (* a function type *)
 module Fun = struct
-  type t = Typing_defs.fun_type
+  type t = decl Typing_defs.fun_type
   let prefix = Prefix.make()
 end
 
@@ -42,7 +42,8 @@ module Typedef = struct
     | Public
     | Private
 
-  type tdef = visibility * Typing_defs.tparam list * ty option * ty * Pos.t
+  type tdef =
+    visibility * Typing_defs.tparam list * decl ty option * decl ty * Pos.t
 
   type tdef_or_error =
     | Error
@@ -53,7 +54,7 @@ module Typedef = struct
 end
 
 module GConst = struct
-  type t = ty
+  type t = decl ty
   let prefix = Prefix.make()
 end
 
@@ -71,12 +72,12 @@ type fake_members = {
   valid     : SSet.t;
 }
 
-type local = ty list * ty
+type local = locl ty list * locl ty
 type local_env = fake_members * local IMap.t
 
 type env = {
   pos     : Pos.t      ;
-  tenv    : ty  IMap.t ;
+  tenv    : locl ty  IMap.t ;
   subst   : int IMap.t ;
   lenv    : local_env  ;
   genv    : genv       ;
@@ -91,10 +92,10 @@ type env = {
 and genv = {
   tcopt   : TypecheckerOptions.t;
   mode    : FileInfo.mode;
-  return  : ty         ;
-  parent  : ty         ;
+  return  : locl ty         ;
+  parent  : decl ty         ;
   self_id : string     ;
-  self    : ty         ;
+  self    : decl ty         ;
   static  : bool       ;
   fun_kind : Ast.fun_kind;
   anons   : anon IMap.t;
@@ -105,7 +106,7 @@ and genv = {
 (* An anonymous function
  * the environment + the fun parameters + the captured identifiers
 *)
-and anon = env -> fun_params -> env * ty
+and anon = env -> locl fun_params -> env * locl ty
 and tfun = env -> env
 
 let fresh () =
@@ -153,7 +154,8 @@ let get_type_unsafe env x =
       env, (Reason.none, Tany)
   | Some ty -> env, ty
 
-let expand_type env x =
+let expand_type: type a. _ -> a ty -> _ * a ty =
+  fun env x ->
   match x with
   | _, Tvar x -> get_type env x
   | x -> env, x

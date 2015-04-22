@@ -417,46 +417,6 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeStLoc(IRInstruction* inst) {
-  // Guard relaxation might change the current local type, so don't try to
-  // change to StLocNT until after relaxation happens.
-  if (typeMightRelax()) return nullptr;
-
-  auto locId = inst->extra<StLoc>()->locId;
-  auto const curType = localType(locId, DataTypeGeneric);
-  auto const newType = inst->src(1)->type();
-
-  /*
-   * There's no need to store the type if it's going to be the same
-   * KindOfFoo.  We'll still have to store string types because we
-   * aren't specific about storing KindOfStaticString
-   * vs. KindOfString, and a TNull might mean KindOfUninit or
-   * KindOfNull.
-   */
-  auto const bothBoxed = curType <= TBoxedCell &&
-                         newType <= TBoxedCell;
-  auto const sameUnboxed = [&] {
-    auto avoidable = { TUninit,
-                       TInitNull,
-                       TBool,
-                       TInt,
-                       TDbl,
-                       // No strings.
-                       TArr,
-                       TObj,
-                       TRes };
-    for (auto t : avoidable) {
-      if (curType <= t && newType <= t) return true;
-    }
-    return false;
-  };
-  if (bothBoxed || sameUnboxed()) {
-    inst->setOpcode(StLocNT);
-  }
-
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeCastStk(IRInstruction* inst) {
   auto const curType = stackType(
     inst->extra<CastStk>()->offset,
@@ -520,7 +480,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst);
   switch (inst->op()) {
   X(HintLocInner)
-  X(StLoc)
   X(AssertType)
   X(AssertLoc)
   X(AssertStk)

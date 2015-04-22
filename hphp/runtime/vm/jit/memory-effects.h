@@ -87,11 +87,8 @@ struct PureLoad       { AliasClass src; };
  * any other work.  Instructions with these memory effects can be removed if we
  * know the value being stored does not change the value of the location, or if
  * we know the location can never be loaded from again.
- *
- * The NT variation means it is not storing a type tag.
  */
 struct PureStore    { AliasClass dst; SSATmp* value; };
-struct PureStoreNT  { AliasClass dst; SSATmp* value; };
 
 /*
  * Spilling pre-live ActRecs are somewhat unusual, but effectively still just
@@ -194,7 +191,6 @@ struct UnknownEffects {};
 using MemEffects = boost::variant< GeneralEffects
                                  , PureLoad
                                  , PureStore
-                                 , PureStoreNT
                                  , PureSpillFrame
                                  , IterEffects
                                  , IterEffects2

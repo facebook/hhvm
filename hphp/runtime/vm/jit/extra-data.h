@@ -926,7 +926,6 @@ X(LdLoc,                        LocalId);
 X(LdLocPseudoMain,              LocalId);
 X(StLoc,                        LocalId);
 X(StLocPseudoMain,              LocalId);
-X(StLocNT,                      LocalId);
 X(IterFree,                     IterId);
 X(MIterFree,                    IterId);
 X(CIterFree,                    IterId);

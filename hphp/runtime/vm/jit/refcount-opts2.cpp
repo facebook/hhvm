@@ -889,7 +889,6 @@ void mrinfo_step_impl(Env& env,
     [&] (GeneralEffects)   {},
     [&] (UnknownEffects)   { kill(ALocBits{}.set()); },
     [&] (PureStore x)      { do_store(x.dst, x.value); },
-    [&] (PureStoreNT x)    { do_store(x.dst, x.value); },
 
     /*
      * Note that loads do not kill a location.  In fact, it's possible that the
@@ -1305,7 +1304,6 @@ void remove_trivial_incdecs(Env& env) {
         // object reference counts.
         [&] (PureLoad) {},
         [&] (PureStore) {},
-        [&] (PureStoreNT) {},
         [&] (PureSpillFrame) {},
         [&] (IrrelevantEffects) {},
 
@@ -1992,7 +1990,6 @@ void analyze_mem_effects(Env& env,
 
     [&] (CallEffects e) { handle_call(env, state, inst, e, add_node); },
     [&] (PureStore x)   { pure_store(env, state, x.dst, x.value, add_node); },
-    [&] (PureStoreNT x) { pure_store(env, state, x.dst, x.value, add_node); },
     [&] (PureLoad x)    { pure_load(env, state, x.src, inst.dst(), add_node); },
 
     [&] (PureSpillFrame x) {
@@ -2034,7 +2031,6 @@ bool consumes_reference_next_not_taken(const IRInstruction& inst,
   // The following have the old CRc flag, but don't observe or consume from
   // this module's perspective.  We'll clean this up when the old pass is gone.
   case StLoc:
-  case StLocNT:
   case StStk:
   case SpillFrame:
   case StMem:

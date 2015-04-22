@@ -2358,12 +2358,6 @@ void CodeGenerator::cgStLoc(IRInstruction* inst) {
   emitStore(ptr[off], inst->src(1), srcLoc(inst, 1), Width::Full);
 }
 
-void CodeGenerator::cgStLocNT(IRInstruction* inst) {
-  auto ptr = srcLoc(inst, 0).reg();
-  auto off = localOffset(inst->extra<StLocNT>()->locId);
-  emitStore(ptr[off], inst->src(1), srcLoc(inst, 1), Width::Value);
-}
-
 void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
   auto& v = vmain();
   emitEagerSyncPoint(v, reinterpret_cast<const Op*>(inst->marker().sk().pc()),

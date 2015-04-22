@@ -1313,11 +1313,6 @@ To string conversions:
 
   Store S1 to local number localId on the frame pointed to by S0.
 
-| StLocNT<localId>, ND, S(FramePtr) S(Gen), CRc
-
-  Store S1 to local number localId on the frame pointed to by S0, without
-  storing the type.
-
 | StLocPseudoMain<localId>, ND, S(FramePtr) S(Gen), CRc
 
   Behaves just like StLoc, except the hard requirement that it is only emitted

@@ -58,7 +58,6 @@ void visit_locations(const BlockList& blocks, Visit visit) {
                                     visit(x.kills); },
         [&] (PureLoad x)          { visit(x.src); },
         [&] (PureStore x)         { visit(x.dst); },
-        [&] (PureStoreNT x)       { visit(x.dst); },
         [&] (PureSpillFrame x)    { visit(x.dst); visit(x.ctx); },
         [&] (ExitEffects x)       { visit(x.live); visit(x.kills); }
       );

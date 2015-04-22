@@ -53,7 +53,6 @@ void local_effects(const FrameStateMgr& frameState,
       hook.updateLocalRefPredictions(inst->src(0), inst->src(1));
       break;
 
-    case StLocNT:
     case StLoc:
       hook.setLocalValue(inst->extra<LocalId>()->locId, inst->src(1));
       break;

@@ -134,7 +134,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case StContArKey:
     case StRetVal:
     case StLoc:
-    case StLocNT:
     case AFWHBlockOn:
       // Consume the value being stored, not the thing it's being stored into
       return srcNo == 1;

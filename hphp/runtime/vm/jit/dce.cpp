@@ -306,7 +306,6 @@ bool canDCE(IRInstruction* inst) {
   case StMem:
   case StElem:
   case StLoc:
-  case StLocNT:
   case StLocPseudoMain:
   case StRef:
   case EagerSyncVMRegs:
@@ -621,7 +620,6 @@ bool findWeakActRecUses(const BlockList& blocks,
 
     switch (inst->op()) {
     // We don't need to generate stores to a frame if it can be eliminated.
-    case StLocNT:
     case StLoc:
       incWeak(inst, inst->src(0));
       break;
@@ -708,7 +706,6 @@ void performActRecFixups(const BlockList& blocks,
              inst, state[inst].weakUseCount(), uses[inst.dst()]);
         break;
 
-      case StLocNT:
       case StLoc:
         if (state[inst.src(0)->inst()].isDead()) {
           ITRACE(3, "marking {} as dead\n", inst);

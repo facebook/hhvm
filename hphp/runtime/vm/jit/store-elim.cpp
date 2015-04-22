@@ -255,22 +255,6 @@ void visit(Local& env, IRInstruction& inst) {
         removeDead(env, inst);
       }
       addKillSet(env, it->second);
-    },
-
-    /*
-     * A PureStoreNT means it's writing the local's m_data, but not its m_type.
-     * If the local is dead, we don't need to do this.  However, we can't count
-     * it as a redefinition (can't add to KILL), because it only partially
-     * defines it.
-     *
-     * Normally this pass should run before we've lowered StLocs into StLocNTs
-     * where we can, but we must support this anyway for correctness.
-     */
-    [&] (PureStoreNT l) {
-      auto bit = pure_store_bit(env, l.dst);
-      if (isDead(env, bit)) {
-        removeDead(env, inst);
-      }
     }
   );
 }

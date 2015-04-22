@@ -447,12 +447,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       inst.src(1)
     };
 
-  case StLocNT:
-    return PureStoreNT {
-      AFrame { inst.src(0), inst.extra<StLocNT>()->locId },
-      inst.src(1)
-    };
-
   case LdLoc:
     return PureLoad { AFrame { inst.src(0), inst.extra<LocalId>()->locId } };
 
@@ -1168,8 +1162,6 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     [&] (PureLoad x)         { check(x.src); },
     [&] (PureStore x)        { check(x.dst);
                                always_assert(x.value != nullptr); },
-    [&] (PureStoreNT x)      { check(x.dst);
-                               always_assert(x.value != nullptr); },
     [&] (PureSpillFrame x)   { check(x.dst); check(x.ctx);
                                always_assert(x.ctx <= x.dst); },
     [&] (IterEffects x)      { check_fp(x.fp); check(x.kills); },
@@ -1214,9 +1206,6 @@ MemEffects canonicalize(MemEffects me) {
     },
     [&] (PureStore x) -> R {
       return PureStore { canonicalize(x.dst), x.value };
-    },
-    [&] (PureStoreNT x) -> R {
-      return PureStoreNT { canonicalize(x.dst), x.value };
     },
     [&] (PureSpillFrame x) -> R {
       return PureSpillFrame { canonicalize(x.dst), canonicalize(x.ctx) };
@@ -1276,7 +1265,6 @@ std::string show(MemEffects effects) {
     },
     [&] (PureLoad x)        { return sformat("ld({})", show(x.src)); },
     [&] (PureStore x)       { return sformat("st({})", show(x.dst)); },
-    [&] (PureStoreNT x)     { return sformat("stNT({})", show(x.dst)); },
     [&] (ReturnEffects x)   { return sformat("return({})", show(x.kills)); },
     [&] (IterEffects)       { return "IterEffects"; },
     [&] (IterEffects2)      { return "IterEffects2"; },

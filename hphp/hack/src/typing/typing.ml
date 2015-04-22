@@ -3649,7 +3649,7 @@ and class_var_def env is_static c cv =
       let var_type = Reason.Rwitness pos, Tany in
       (match cv.cv_expr with
       | None ->
-          Typing_suggest.uninitalized_member (snd c.c_name) name env var_type ty;
+          Typing_suggest.uninitialized_member (snd c.c_name) name env var_type ty;
           ()
       | Some _ ->
           Typing_suggest.save_member name env var_type ty;

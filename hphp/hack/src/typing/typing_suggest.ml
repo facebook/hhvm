@@ -38,7 +38,7 @@ module TUtils = Typing_utils
 (*****************************************************************************)
 
 let (types: (Env.env * Pos.t * hint_kind * locl ty) list ref) = ref []
-let (initalized_members: (SSet.t SMap.t) ref) = ref SMap.empty
+let (initialized_members: (SSet.t SMap.t) ref) = ref SMap.empty
 
 let add_type env pos k type_ =
   let new_type = (
@@ -87,8 +87,8 @@ let save_param name env x arg = save_type (Kparam name) env x arg
  * }
  *
  *)
-let uninitalized_member cname mname env x arg = if !is_suggest_mode then begin
-  match SMap.get cname !initalized_members with
+let uninitialized_member cname mname env x arg = if !is_suggest_mode then begin
+  match SMap.get cname !initialized_members with
     (* No static initalizer and no initalization in the constructor means that
      * this variable can be used before it's written to, and thus must be
      * nullable. *)
@@ -96,7 +96,7 @@ let uninitalized_member cname mname env x arg = if !is_suggest_mode then begin
       if not (SSet.mem mname inits)
       then save_member mname env x (fst x, Toption arg)
 
-    (* Some constructions, such as traits, don't calculate initalized members.
+    (* Some constructions, such as traits, don't calculate initialized members.
      * TODO: this will suggest wrong types for some member variables defined in
      * traits, since they might be nullable, but that depends on the constructor
      * of the class that includes the trait (!). Not sure how to deal with this
@@ -104,8 +104,8 @@ let uninitalized_member cname mname env x arg = if !is_suggest_mode then begin
     | None -> ()
 end
 
-let save_initalized_members cname inits = if !is_suggest_mode then begin
-  initalized_members := SMap.add cname inits !initalized_members
+let save_initialized_members cname inits = if !is_suggest_mode then begin
+  initialized_members := SMap.add cname inits !initialized_members
 end
 
 (* Normally, when we unify ?int and int, we don't want

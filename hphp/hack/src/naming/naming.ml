@@ -1379,10 +1379,10 @@ and class_var_ env (x, e) =
     match (fst env).in_mode with
     | FileInfo.Mstrict | FileInfo.Mpartial -> opt_map (expr env) e
     (* Consider every member variable defined in a class in decl mode to be
-     * initalized by giving it a magic value of type Tany (you can't actually
+     * initialized by giving it a magic value of type Tany (you can't actually
      * write this cast in PHP). Classes might inherit from our decl mode class
      * that are themselves not in decl, and there's no way to figure out what
-     * variables are initalized in a decl class without typechecking its
+     * variables are initialized in a decl class without typechecking its
      * initalizers and constructor, which we don't want to do, so just assume
      * we're covered. *)
     | FileInfo.Mdecl ->

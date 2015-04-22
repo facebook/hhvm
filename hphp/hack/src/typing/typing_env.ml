@@ -421,6 +421,13 @@ let get_todo env =
 let grow_super env =
   env.grow_super
 
+let invert_grow_super env f =
+  let old = env.grow_super in
+  let env = { env with grow_super = not old } in
+  let env = f env in
+  let env = { env with grow_super = old } in
+  env
+
 let get_return env =
   env.genv.return
 

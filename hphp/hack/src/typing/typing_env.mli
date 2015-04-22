@@ -100,6 +100,7 @@ val set_return : env -> ty -> env
 val with_return : env -> (env -> env) -> env
 val is_static : env -> bool
 val grow_super : env -> bool
+val invert_grow_super : env -> (env -> env) -> env
 val get_self : env -> ty
 val get_self_id : env -> string
 val get_parent : env -> ty

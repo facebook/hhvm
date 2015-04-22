@@ -97,25 +97,46 @@ and instantiate_ft env ft =
   let params = List.map2 (fun x y -> x, y) names params in
   env, { ft with ft_arity = arity; ft_params = params; ft_ret = ret }
 
-and check_constraint env ck ty x_ty =
-  let env, ety = Env.expand_type env ty in
-  let env, ex_ty = Env.expand_type env x_ty in
+and check_constraint env ck cstr_ty ty =
+  let env, ety = Env.expand_type env cstr_ty in
+  let env, ex_ty = Env.expand_type env ty in
   match snd ety, snd ex_ty with
   | _, Tany ->
       (* This branch is only reached when we have an unbound type variable,
        * when this is the case, the constraint should always succeed.
        *)
       env
-  | Tany, _ -> fst (TUtils.unify env ty x_ty)
+  | Tany, _ -> fst (TUtils.unify env cstr_ty ty)
   | (Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _ | Tvar _
     | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
     | Tunresolved _ | Tobject | Tshape _
     | Taccess _), _ -> begin
         match ck with
         | Ast.Constraint_as ->
-            TUtils.sub_type env ty x_ty
+            TUtils.sub_type env cstr_ty ty
         | Ast.Constraint_super ->
-            TUtils.super_type env ty x_ty
+            (* invert_grow_super is intentionally not used here. Consider
+             * the following:
+             *
+             * class A {}
+             * class B extends A {}
+             * class C extends A {}
+             * class Foo<T> {
+             *   public function bar<Tu super T>(Tu $x): Tu {}
+             * }
+             * function f(Foo<C> $x, B $y): A {
+             *   return $x->bar($y);
+             * }
+             *
+             * C is not a supertype of B. However, this doesn't mean the
+             * constraint is violated: All's good if Tu = A. Figuring out the
+             * most specific supertype is expensive, though, so we just put the
+             * constraint into a Tunresolved. (Tunresolved only grows if
+             * grow_super is true.) The return type hint provides the
+             * supertype we want, and we just have to check that the hint is
+             * consistent with all the types in the Tunresolved.
+             *)
+            TUtils.sub_type env ty cstr_ty
       end
 
 and instantiate subst env (r, ty) =

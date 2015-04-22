@@ -91,7 +91,8 @@ and subtype_tparam env c_name variance (r_super, _ as super) child =
   | Ast.Covariant -> sub_type env super child
   | Ast.Contravariant ->
       Errors.try_
-        (fun () -> super_type env super child)
+        (fun () ->
+          Env.invert_grow_super env (fun env -> sub_type env child super))
         (fun err ->
           let pos = Reason.to_pos r_super in
           Errors.explain_contravariance pos c_name err; env)
@@ -101,13 +102,6 @@ and subtype_tparam env c_name variance (r_super, _ as super) child =
  * unify_with_uenv, see comment there. *)
 and sub_type env ty_super ty_sub =
   sub_type_with_uenv env (TUEnv.empty, ty_super) (TUEnv.empty, ty_sub)
-
-and super_type env ty_super ty_sub =
-  let old_gs = Env.grow_super env in
-  let env =
-    sub_type_with_uenv { env with Env.grow_super = not old_gs }
-      (TUEnv.empty, ty_sub) (TUEnv.empty, ty_super) in
-  { env with Env.grow_super = old_gs }
 
 and get_super_typevar_set_ env set ty_super =
   let env, ety_super = Env.expand_type env ty_super in
@@ -486,7 +480,8 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       )
   | (r_super, Tgeneric (x, Some (Ast.Constraint_super, ty))), _ ->
       (Errors.try_
-         (fun () -> sub_type_with_uenv env (uenv_super, ty) (uenv_sub, ty_sub))
+         (fun () ->
+           sub_type_with_uenv env (uenv_super, ty) (uenv_sub, ty_sub))
          (fun l ->
            Reason.explain_generic_constraint env.Env.pos r_super x l; env)
       )
@@ -560,4 +555,3 @@ let subtype_funs_no_return = subtype_funs_generic ~check_return:false
 (*****************************************************************************)
 
 let () = Typing_utils.sub_type_ref := sub_type
-let () = Typing_utils.super_type_ref := super_type

@@ -16,6 +16,7 @@ localdir = path.dirname(path.realpath(path.expanduser(__file__)))
 if sys.path[0] != localdir:
     sys.path.insert(0, localdir)
 
+import asio
 import hhbc
 import idx
 import lookup

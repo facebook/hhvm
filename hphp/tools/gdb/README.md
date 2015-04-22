@@ -273,3 +273,16 @@ stack, incorporating code and stack pointers, function names, and filepaths.
     #67 {inline frame} @ 0x346ccaf: HPHP::execute_program_impl at hphp/.../base/program-functions.cpp:1569
     #68 0x7fff52a60750 @ 0x346ccaf: HPHP::execute_program() at hphp/.../base/program-functions.cpp:956
     #69 0x7fff52a60830 @ 0x1eefac0: main() at hphp/.../hhvm/main.cpp:611
+
+
+### asyncstk
+
+The `asyncstk` command prints out the async function PHP stack for a given
+WaitHandle, ending at the synchronous join().
+
+    #0  0x7fa15c724e60 @ {suspended}: [PHP] gen_usleep() at /path/to/some/file.php:22
+    #1  0x7fa15c71d940 @ {suspended}: [PHP] DBClient::genRetryOnFailure() at /path/to/fancier/file.php:280
+    #2  0x7fa15c71ce70 @ {suspended}: [PHP] DBClient::gen() at /path/to/fancier/file.php:801
+    #3  0x7fa159e9fc30 @ {suspended}: [PHP] Logger::writeToDB() at /path/to/logging/and/other/stuff/file.php:28
+    #4  0x7fa15c70bc30 @ {suspended}: [PHP] PSP::__invoke() at /path/to/path/to/path/to/file.php:39
+    #5  0x7fa133c3ff40 @ 0x????????: [PHP] HH\WaitHandle::join()

@@ -176,11 +176,18 @@ def T(name):
 
 @memoized
 def V(name):
-    return gdb.lookup_symbol(name)[0].value()
+    try:
+        return gdb.lookup_symbol(name)[0].value()
+    except gdb.error:
+        return gdb.lookup_symbol(name)[0].value(gdb.selected_frame())
 
 @memoized
 def K(name):
     return gdb.lookup_global_symbol(name).value()
+
+@memoized
+def nullptr():
+    return gdb.Value(0).cast(T('void').pointer())
 
 
 #------------------------------------------------------------------------------

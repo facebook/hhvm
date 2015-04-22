@@ -16,7 +16,12 @@ def sizeof(container):
     container = deref(container)
     t = template_type(rawtype(container.type))
 
-    if t == 'HPHP::FixedStringMap':
+    if t == 'std::vector':
+        impl = container['_M_impl']
+        return impl['_M_finish'] - impl['_M_start']
+    elif t == 'std::priority_queue':
+        return sizeof(container['c'])
+    elif t == 'HPHP::FixedStringMap':
         return container['m_extra']
     elif t == 'HPHP::IndexedStringMap':
         return container['m_map']['m_extra']

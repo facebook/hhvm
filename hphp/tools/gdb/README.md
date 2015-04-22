@@ -58,8 +58,37 @@ wrappers.  Qualifiers (const/volatile) are also stripped.
     ---Type <return> to continue, or q <return> to quit---
 
 
-Commands
---------
+Context setters
+---------------
+
+### unit
+
+The `unit` command sets or prints the current context Unit.  This is primarily
+used for printing out literal strings without having to supply an explicit Unit
+argument.
+
+    (gdb) p $1
+    $2 = (const HPHP::Func *) 0x2b83e520
+    (gdb) p $1->m_unit
+    $3 = (HPHP::Unit *) 0x2b7ee680
+    (gdb) unit $3
+    $4 = (const HPHP::Unit *) 0x2b7ee680
+    (gdb) unit
+    $5 = (const HPHP::Unit *) 0x2b7ee680
+
+
+### repo
+
+The `repo` subcommands `repo set-central` and `repo set-local` set the central
+or local repo path respectively.  Setting one or both of these repos enables
+other commands to produce more detailed output where appropriate---e.g.,
+stacktrace functions will be able to find PHP function line numbers.
+
+The `repo show` subcommand displays the repo paths that have been set.
+
+
+Utilities
+---------
 
 ### idx
 
@@ -104,22 +133,6 @@ Funcs or Classes.
     $2 = (const HPHP::Func *) 0x2b83e520
     (gdb) nameof $1
     "ServiceMemoizer::__call_async"
-
-
-### unit
-
-The `unit` command sets or prints the current context Unit.  This is primarily
-used for printing out literal strings without having to supply an explicit Unit
-argument.
-
-    (gdb) p $1
-    $2 = (const HPHP::Func *) 0x2b83e520
-    (gdb) p $1->m_unit
-    $3 = (HPHP::Unit *) 0x2b7ee680
-    (gdb) unit $3
-    $4 = (const HPHP::Unit *) 0x2b7ee680
-    (gdb) unit
-    $5 = (const HPHP::Unit *) 0x2b7ee680
 
 
 ### lookup
@@ -187,6 +200,9 @@ If no Unit is set, the raw IDs are printed instead.
     0x7f2b2f9460ae+90: FPushObjMethodD 0 "getWaitHandle" 0
 
 
+Stacktraces
+-----------
+
 ### walkstk
 
 The `walkstk` command prints out the native stack interleaved with the PHP
@@ -232,11 +248,11 @@ stack, incorporating code and stack pointers, function names, and filepaths.
     #36 0x7fff52a5ce50 @ 0x2c281cb: HPHP::c_WaitHandle::t_join() at hphp/.../asio/wait_handle.cpp:68
     #37 0x7fff52a5ce80 @ 0x2547d25: HPHP::tg_10WaitHandle_join() at hphp/.../idl/asio.ext_hhvm.cpp:287
     #38 0x7f40f7a7fc40 @ 0xc013ff2: [PHP] HH\WaitHandle::join()
-    #38 0x7f40f7a7fcc0 @ 0xb04be8b: [PHP] prep()
-    #38 0x7f40f7a7fda0 @ 0xc13c03e: [PHP] Logger::log()
-    #38 0x7f40f7a7fde0 @ 0xc043b45: [PHP] LoggerConfig::log()
-    #38 0x7f40f7a7fe50 @ 0x125971b9: [PHP] WebBaseController::__invoke()
-    #38 0x7f40f458c530 @ 0xc1136b4: [PHP] PSP::__invoke()
+    #38 0x7f40f7a7fcc0 @ 0xb04be8b: [PHP] prep() at path/to/prep.php:17
+    #38 0x7f40f7a7fda0 @ 0xc13c03e: [PHP] Logger::log() at path/to/logger.php:42
+    #38 0x7f40f7a7fde0 @ 0xc043b45: [PHP] LoggerConfig::log() at path/to/logger-config.php:69
+    #38 0x7f40f7a7fe50 @ 0x125971b9: [PHP] Closure$WebBaseController::__construct() at path/to/this/thing.php:27
+    #38 0x7f40f458c530 @ 0xc1136b4: [PHP] Closure$PSP::__construct() at path/to/this/other/thing.php:104
     #38 0x7fff52a5d2a0 @ 0xb000010: <unknown>
     #39 {inline frame} @ 0x35a88f9: enterTCHelper at hphp/.../jit/translator-asm-helpers.S:66
     #40 0x7fff52a5d2e0 @ 0x35a88f9: HPHP::jit::x64::BackEnd::enterTCHelper() at hphp/.../jit/back-end-x64.cpp:118
@@ -252,9 +268,9 @@ stack, incorporating code and stack pointers, function names, and filepaths.
     #50 0x7fff52a5d5b0 @ 0x2c281cb: HPHP::c_WaitHandle::t_join() at hphp/.../asio/wait_handle.cpp:68
     #51 0x7fff52a5d5e0 @ 0x2547d25: HPHP::tg_10WaitHandle_join() at hphp/.../idl/asio.ext_hhvm.cpp:287
     #52 0x7f40f7a7fe80 @ 0xc013ff2: [PHP] HH\WaitHandle::join()
-    #52 0x7f40f7a7ff00 @ 0xb01fd6f: [PHP] prep()
-    #52 0x7f40f7a7ff70 @ 0x12532489: [PHP] PSP::run()
-    #52 0x7f40f7a7ffc0 @ 0x1252b3ac: [PHP] PSP::__invoke()
+    #52 0x7f40f7a7ff00 @ 0xb01fd6f: [PHP] prep() at path/to/prep.php:17
+    #52 0x7f40f7a7ff70 @ 0x12532489: [PHP] PSP::run() at path/to/this/other/thing.php:181
+    #52 0x7f40f7a7ffc0 @ 0x1252b3ac: [PHP] Closure$PSP::doStuff() at path/to/this/other/thing.php:287
     #52 0x7fff52a5da00 @ 0xb000010: <unknown>
     #53 {inline frame} @ 0x35a88f9: enterTCHelper at hphp/.../jit/translator-asm-helpers.S:66
     #54 0x7fff52a5da40 @ 0x35a88f9: HPHP::jit::x64::BackEnd::enterTCHelper() at hphp/.../jit/back-end-x64.cpp:118

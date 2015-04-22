@@ -25,7 +25,6 @@ def atomic_get(atomic):
         return atomic['_M_i']
 
 
-
 def vector_at(vec, idx):
     vec = vec['_M_impl']
 
@@ -35,10 +34,10 @@ def vector_at(vec, idx):
         return vec['_M_start'][idx]
 
 
-def unordered_map_at(umap, idx):
+def unordered_map_at(umap, key):
     h = umap['_M_h']
 
-    bucket = h['_M_buckets'][hash_of(idx) % h['_M_bucket_count']]
+    bucket = h['_M_buckets'][hash_of(key) % h['_M_bucket_count']]
     if bucket == 0x0:
         return None
 
@@ -50,7 +49,7 @@ def unordered_map_at(umap, idx):
         # Hashtable nodes contain only a pointer to the next node in the
         # bucket, but are always immediately followed by the value pair.
         value = (node + 1).cast(value_type)
-        if idx == value['first']:
+        if key == value['first']:
             return value['second']
 
         node = node['_M_nxt']
@@ -59,7 +58,76 @@ def unordered_map_at(umap, idx):
 
 
 #------------------------------------------------------------------------------
+# Boost accessors.
+
+def boost_flat_map_at(flat_map, key):
+    vec = flat_map['m_flat_tree']['m_data']['m_vect']['members_']
+
+    first = vec['m_start']
+    last = first + vec['m_size']
+    diff = last - first
+
+    # Find lower bound.
+    while diff > 0:
+        half = diff >> 1
+        middle = first
+        middle += half
+
+        if middle['first'] < key:
+            middle += 1
+            first = middle
+            diff = diff - half - 1
+        else:
+            diff = half
+
+    if first != last and key < first['first']:
+        first = last
+
+    return first['second'] if first != last else None
+
+
+#------------------------------------------------------------------------------
+# TBB accessors.
+
+def tbb_atomic_get(atomic):
+    return atomic['rep']['value']
+
+
+def tbb_chm_at(chm, key):
+    h = hash_of(key) & tbb_atomic_get(chm['my_mask'])
+
+    # This simulates an Intel BSR (i.e., lg2) on h|1.
+    s = len('{0:b}'.format(int(h | 1))) - 1     # segment_idx
+    h -= 1 << s & ~1                            # segment_base
+
+    # bucket_accessor b(this, h & m) <=> this->get_bucket(h & m).
+    seg = chm['my_table'][s]
+    b = seg[h].address
+
+    if b['node_list'] == V('tbb::interface5::internal::rehash_req'):
+        # Rehash required, so just give up.
+        return None
+
+    node_ptype = T(str(rawtype(chm.type)) + '::node').pointer()
+    node = b['node_list'].cast(node_ptype)
+
+    # search_bucket(key, b).
+    while node.cast(T('size_t')) > 63 and key != node['item']['first']:
+        node = node['next'].cast(node_ptype)
+
+    if node == nullptr():
+        return None
+
+    return node['item']['second']
+
+
+#------------------------------------------------------------------------------
 # HHVM accessors.
+
+def thread_local_get(tl):
+    # Only works if USE_GCC_FAST_TLS was defined; deal with it.
+    return tl['m_node']['m_p']
+
 
 def atomic_vector_at(av, idx):
     size = av['m_size']
@@ -169,6 +237,10 @@ def idx_accessors():
     return {
         'std::vector':              vector_at,
         'std::unordered_map':       unordered_map_at,
+        'boost::container::flat_map':
+                                    boost_flat_map_at,
+        'tbb::interface5::concurrent_hash_map':
+                                    tbb_chm_at,
         'HPHP::AtomicVector':       atomic_vector_at,
         'HPHP::FixedVector':        fixed_vector_at,
         'HPHP::FixedStringMap':     fixed_string_map_at,

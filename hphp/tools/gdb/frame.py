@@ -7,9 +7,87 @@ Helpers for collecting and printing frame data.
 
 import os
 import gdb
+import bisect
+import sqlite3
+import struct
+
 from gdbutils import *
 import idx
 from nameof import nameof
+import repo
+
+
+#------------------------------------------------------------------------------
+# PHP frame info.
+
+def php_filename(func):
+    filename = rawptr(rawptr(func['m_shared'])['m_originalFilename'])
+
+    if filename == nullptr():
+        filename = rawptr(func['m_unit']['m_filepath'])
+
+    return string_data_val(filename)
+
+
+def php_line_number_from_repo(func, pc):
+    unit = func['m_unit']
+    repo_id = unit['m_repoId']
+    sn = int(unit['m_sn'])
+
+    conn = repo.get(repo_id)
+    if conn is None:
+        return None
+
+    # Query for the line table.
+    c = conn.cursor()
+    table = repo.table('UnitLineTable')
+    c.execute('SELECT data FROM %s WHERE unitSn == ?;' % table, (sn,))
+
+    row = c.fetchone()
+    if row is None:
+        return None
+    buf = row[0]
+
+    # Unpack the line table structure.
+    line_table = []
+
+    decoder = repo.Decoder(buf)
+    size = decoder.decode()
+
+    for i in xrange(size):
+        line_table.append({
+            'm_pastOffset': decoder.decode(),
+            'm_val':        decoder.decode(),
+        })
+
+    if not decoder.finished():
+        # Something went wrong.
+        return None
+
+    # Find the upper bound for our PC.  Note that this relies on the Python
+    # dict comparison operator comparing componentwise lexicographically based
+    # on the alphabetical ordering of keys.
+    key = {'m_pastOffset': int(pc), 'm_val': -1}
+    i = bisect.bisect_right(line_table, key)
+
+    if i == len(line_table):
+        return None
+
+    return line_table[i]['m_val']
+
+
+def php_line_number(func, pc):
+    unit = func['m_unit']
+
+    line_info = V('HPHP::(anonymous namespace)::s_lineInfo')
+    line_map = idx.tbb_chm_at(line_info, unit)
+
+    if line_map is not None:
+        line = idx.boost_flat_map_at(line_map, pc)
+        if line is not None:
+            return line
+
+    return php_line_number_from_repo(func, pc)
 
 
 #------------------------------------------------------------------------------
@@ -58,18 +136,18 @@ def create_php(idx, ar, rip='0x????????', pc=None):
 
     All arguments are expected to be gdb.Values, except `idx'.
     """
-
     func = ar['m_func']
-    unit = func['m_unit']
+    shared = rawptr(func['m_shared'])
 
     # Pull the function name.
-    func_name = nameof(func)
+    if not shared['m_isClosureBody']:
+        func_name = nameof(func)
+    else:
+        func_name = nameof(func['m_baseCls'])
+        func_name = func_name[:func_name.find(';')]
+
     if len(func_name) == 0:
         func_name = '<pseudomain>'
-
-    # Pull the PC from Func::base() and ar->m_soff if necessary.
-    if pc is None:
-        pc = rawptr(func['m_shared'])['m_base'] + ar['m_soff']
 
     frame = {
         'idx':  idx,
@@ -82,12 +160,20 @@ def create_php(idx, ar, rip='0x????????', pc=None):
         # Builtins don't have source files.
         return frame
 
-    # Pull the filename from the Func or its Unit.
-    filename = rawptr(rawptr(func['m_shared'])['m_originalFilename'])
-    if filename == nullptr():
-        filename = rawptr(unit['m_filepath'])
+    # Pull the PC from Func::base() and ar->m_soff if necessary.
+    if pc is None:
+        pc = shared['m_base'] + ar['m_soff']
 
-    frame['file'] = string_data_val(filename)
+    # Adjust it for calls.
+    op_ptype = T('HPHP::Op').pointer()
+    op = (func['m_unit']['m_bc'] + pc).cast(op_ptype).dereference()
+
+    if op in [V('HPHP::Op::' + x) for x in
+              ['PopR', 'UnboxR', 'UnboxRNop']]:
+        pc -= 1
+
+    frame['file'] = php_filename(func)
+    frame['line'] = php_line_number(func, pc)
 
     return frame
 
@@ -123,11 +209,13 @@ def stringify(frame, sp_len=0):
     fmt = '#{idx:<2d} {sp:<{sp_len}s} @ {rip}: {func}'
     out = fmt.format(sp_len=sp_len, **frame)
 
-    if 'file' in frame:
-        out += ' at ' + frame['file']
+    filename = frame.get('file')
+    line = frame.get('line')
 
-        if 'line' in frame:
-            out += ':' + str(frame['line'])
+    if filename is not None:
+        out += ' at ' + filename
+        if line is not None:
+            out += ':' + str(line)
 
     return out
 

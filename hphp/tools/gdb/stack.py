@@ -86,7 +86,7 @@ The output backtrace has the following format:
                 try:
                     print(frame.stringify(frame.create_php(
                         idx=i + 1, ar=sp.cast(ar_type), rip=rip)))
-                except:
+                except gdb.MemoryError:
                     if mcg is None:
                         # We guessed wrong about whether we're in the TC.
                         skip_tc = True

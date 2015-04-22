@@ -22,6 +22,7 @@ import idx
 import lookup
 import nameof
 import pretty
+import repo
 import sizeof
 import stack
 import unit

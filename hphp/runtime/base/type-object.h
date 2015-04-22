@@ -112,7 +112,8 @@ public:
    * o.getTyped<T>(true,  true) -> dyn_cast_or_null<T>(o)
    */
   template<typename T>
-  T *getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
+  [[deprecated("Please use one of the cast family of functions instead.")]]
+  SmartPtr<T> getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
     static_assert(std::is_base_of<ObjectData, T>::value, "");
 
     ObjectData *cur = get();
@@ -129,7 +130,7 @@ public:
       return nullptr;
     }
 
-    return static_cast<T*>(cur);
+    return SmartPtr<T>(static_cast<T*>(cur));
   }
 
   template<typename T>

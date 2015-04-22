@@ -147,7 +147,6 @@ bool Option::DumpAst = false;
 bool Option::WholeProgram = true;
 bool Option::UseHHBBC = !getenv("HHVM_DISABLE_HHBBC2");
 bool Option::RecordErrors = true;
-std::string Option::DocJson;
 
 bool Option::AllDynamic = true;
 bool Option::AllVolatile = false;

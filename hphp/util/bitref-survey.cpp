@@ -18,6 +18,8 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/array-data.h"
+#include "folly/stats/Histogram.h"
+#include "folly/stats/Histogram-defs.h"
 #include <mutex>
 
 namespace HPHP {
@@ -26,8 +28,10 @@ namespace HPHP {
 
 TRACE_SET_MOD(bitref);
 BitrefSurvey *g_survey;
-uint64_t arr_empty_count;
+uint64_t arr_empty_count, str_empty_count;
 std::mutex m;
+folly::Histogram<uint32_t> str_rc_copy_histogram(8, 1, 2048);
+folly::Histogram<uint32_t> arr_rc_copy_histogram(8, 1, 2048);
 
 inline BitrefSurvey *survey() {
   if (!g_survey) {
@@ -61,7 +65,6 @@ void BitrefSurvey::cow_check_occurred(RefCount refcount, bool bitref, bool isArr
 
   check_count++;
   isArray ? arr_check_count++ : str_check_count++;
-  //assert(check_count == arr_check_count + str_check_count);
   if ((uint32_t)refcount > 1) {
     //assert(bitref);
     //'necessary' copy
@@ -89,19 +92,33 @@ void BitrefSurvey::cow_check_occurred(RefCount refcount, bool bitref, bool isArr
 
 void BitrefSurvey::cow_check_occurred(ArrayData* ad) {
   cow_check_occurred(ad->getCount(), check_one_bit_ref_array(ad->m_kind), true);
+  m.lock();
   if (ad->kind() == ArrayData::kEmptyKind) {
     // Arrays with kEmptyKind should be static, so always copied
     // log them here to get an idea of what percentage of copies are
     // of the empty, static array
     arr_empty_count++;
   }
+  if ((uint32_t)ad->getCount() > 1) {
+    arr_rc_copy_histogram.addValue(ad->m_size);
+  }
+  m.unlock();
 }
 
 void BitrefSurvey::cow_check_occurred(StringData* sd) {
   cow_check_occurred(sd->getCount(), check_one_bit_ref(sd->m_kind), false);
+  m.lock();
+  if (sd->m_len == 0) {
+    str_empty_count++;
+  }
+  if ((uint32_t)sd->getCount() > 1) {
+    str_rc_copy_histogram.addValue(sd->m_len);
+  }
+  m.unlock();
 }
 
 void BitrefSurvey::survey_request_end() {
+  m.lock();
   uint64_t avoided = check_count - bitref_copy_count;
   double avoided_pc = ((double)avoided / (double)check_count) * 100;
   uint64_t arr_avoided = arr_check_count - arr_bitref_copy_count;
@@ -134,10 +151,37 @@ void BitrefSurvey::survey_request_end() {
       str_bitref_copy_pc, str_avoided, str_avoided_pc);
 
   TRACE(1, "--------------------------------------------------------------------------------\n");
-  TRACE(1, "Number of empty arrays: %10ld (%5.2f%% of copied arrays)\n",
-      arr_empty_count, ((double)arr_empty_count / (double)arr_bitref_copy_count) * 100);
+  TRACE(1, "# []: %8ld (%5.2f%% of rc array copies, %5.2f%% of 1bit array copies)\n",
+      arr_empty_count,
+      ((double)arr_empty_count / (double)arr_rc_copy_count) * 100,
+      ((double)arr_empty_count / (double)arr_bitref_copy_count) * 100);
+  TRACE(1, "# \"\": %8ld (%5.2f%% of rc string copies, %5.2f%% of 1bit string copies)\n",
+      str_empty_count,
+      ((double)str_empty_count / (double)str_rc_copy_count) * 100,
+      ((double)str_empty_count / (double)str_bitref_copy_count) * 100);
+  
   TRACE(1, "--------------------------------------------------------------------------------\n");
+  
+  unsigned int numBuckets = str_rc_copy_histogram.getNumBuckets();
+  TRACE(1, "String length:    0-   0 %8lu\n", str_rc_copy_histogram.getBucketByIndex(0).count);
+  for (unsigned int n = 1; n < numBuckets - 1; n++) {
+    TRACE(1, "               %4u-%4u %8lu\n", str_rc_copy_histogram.getBucketMin(n),
+        str_rc_copy_histogram.getBucketMax(n), str_rc_copy_histogram.getBucketByIndex(n).count);
+  }
+  TRACE(1, "               2048+     %8lu\n", str_rc_copy_histogram.getBucketByIndex(numBuckets - 1).count);
+  
+  TRACE(1, "--------------------------------------------------------------------------------\n");
+
+  numBuckets = arr_rc_copy_histogram.getNumBuckets();
+  TRACE(1, "Array length :    0-   0 %8lu\n", arr_rc_copy_histogram.getBucketByIndex(0).count);
+  for (unsigned int n = 1; n < numBuckets - 1; n++) {
+    TRACE(1, "               %4u-%4u %8lu\n", arr_rc_copy_histogram.getBucketMin(n),
+        arr_rc_copy_histogram.getBucketMax(n), arr_rc_copy_histogram.getBucketByIndex(n).count);
+  }
+  TRACE(1, "               2048+     %8lu\n", arr_rc_copy_histogram.getBucketByIndex(numBuckets - 1).count);
+
   TRACE(1, "\n");
+  m.unlock();
   /*
   check_count = 0;
   arr_check_count = 0;

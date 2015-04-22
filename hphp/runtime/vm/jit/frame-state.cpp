@@ -666,19 +666,12 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   auto const savedSPOff = inst->extra<DefInlineFP>()->retSPOff;
   auto const calleeFP   = inst->dst();
   auto const calleeSP   = inst->src(0);
-  auto const savedSP    = inst->src(1);
-
-  // Saved IRBuilder state will include the "return" fp/sp.
-  // Whatever the current fpValue is is good enough, but we have to be
-  // passed in the StkPtr that represents the stack prior to the
-  // ActRec being allocated.
-  cur().syncedSpLevel = savedSPOff;
-  assertx(cur().spValue == savedSP);
-  cur().spValue = savedSP;  // TODO(#5868870): this isn't needed anymore
 
   /*
-   * Push a new state for the inlined callee.
+   * Push a new state for the inlined callee; saving the state we'll need to
+   * pop on return.
    */
+  cur().syncedSpLevel = savedSPOff;
   auto stateCopy = m_stack.back();
   m_stack.emplace_back(std::move(stateCopy));
 
@@ -697,7 +690,7 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
 
   // XXX: we're setting spOffset to keep some invariants about it true,
   // although, we don't really define it as part of the DefInlineFP---there's
-  // going to be a ReDefSp coming that does it.  TODO(#5868870): can this be
+  // going to be a ReDefSP coming that does it.  TODO(#5868870): can this be
   // improved to set spOffset relative to the new fp in a non-lying way?
   cur().spOffset = cur().syncedSpLevel;
 

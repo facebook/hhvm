@@ -2308,7 +2308,7 @@ void CodeGenerator::cgLdSSwitchDestSlow(IRInstruction* inst) {
  */
 void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
   auto const callerSP = srcLoc(inst, 0).reg();
-  auto const callerFP = srcLoc(inst, 2).reg();
+  auto const callerFP = srcLoc(inst, 1).reg();
   auto const fakeRet  = mcg->tx().uniqueStubs.retInlHelper;
   auto const extra    = inst->extra<DefInlineFP>();
   auto const retBCOff = extra->retBCOff;

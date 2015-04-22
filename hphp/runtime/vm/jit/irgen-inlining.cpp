@@ -32,40 +32,21 @@ bool isInlining(const IRGS& env) {
  * that looks like this:
  *
  *   fp0  = DefFP
- *   sp0  = DefSP<offset>
+ *   sp   = DefSP<offset>
  *
  *   // ... normal stuff happens ...
- *   // sp_pre = some SpillStack, or maybe the DefSP
  *
  *   // FPI region:
- *     sp1   = SpillStack sp_pre, ...
- *     sp2   = SpillFrame sp1, ...
- *     // ... possibly more spillstacks due to argument expressions
- *     sp3   = SpillStack sp2, -argCount
- *     fp2   = DefInlineFP<func,retBC,retSP,off> sp2 sp1
- *     sp4   = ReDefSP<spOffset,spansCall> sp1 fp2
+ *     SpillFrame sp, ...
+ *     // ... probably some StStks due to argument expressions
+ *     fp2   = DefInlineFP<func,retBC,retSP,off> sp
  *
  *         // ... callee body ...
  *
- *           = InlineReturn fp2
+ *     InlineReturn fp2
  *
- * [ sp5  = ResetSP<spOffset> fp0 ]
- *
- * The rest of the code then depends on sp5, and not any of the StkPtr
- * tree going through the callee body.  The sp5 tmp has the same view
- * of the stack as sp1 did, which represents what the stack looks like
- * before the return address is pushed but after the activation record
- * is popped.
- *
- * In DCE we attempt to remove the SpillFrame, InlineReturn, and
- * DefInlineFP instructions if they aren't needed.
- *
- * ReDefSP takes sp1, the stack pointer from before the inlined frame.
- * This SSATmp may be used for determining stack types in the
- * simplifier, or stack values if the inlined body doesn't contain a
- * call---these instructions both take an extradata `spansCall' which
- * is true iff a Call occured anywhere between the the definition of
- * its first argument and itself.
+ * In DCE we attempt to remove the InlineReturn and DefInlineFP instructions if
+ * they aren't needed.
  */
 void beginInlining(IRGS& env,
                    unsigned numParams,
@@ -88,6 +69,11 @@ void beginInlining(IRGS& env,
   auto const prevSPOff = env.fpiStack.top().returnSPOff;
   spillStack(env);
   auto const calleeSP  = sp(env);
+
+  always_assert_flog(
+    prevSP == calleeSP,
+    "FPI stack pointer and callee stack pointer didn't match in beginInlining"
+  );
 
   always_assert_flog(
     env.fpiStack.top().spillFrame != nullptr,
@@ -117,7 +103,7 @@ void beginInlining(IRGS& env,
   env.inlineLevel++;
   updateMarker(env);
 
-  auto const calleeFP = gen(env, DefInlineFP, data, calleeSP, prevSP, fp(env));
+  auto const calleeFP = gen(env, DefInlineFP, data, calleeSP, fp(env));
   gen(env, ReDefSP, StackOffset{target->numLocals()}, fp(env));
 
   for (unsigned i = 0; i < numParams; ++i) {

@@ -695,7 +695,7 @@ void performActRecFixups(const BlockList& blocks,
       if (auto const fp = inst.marker().fp()) {
         if (state[fp->inst()].isDead()) {
           always_assert(fp->inst()->is(DefInlineFP));
-          auto const prev = fp->inst()->src(2);
+          auto const prev = fp->inst()->src(1);
           inst.marker() = inst.marker().adjustFP(prev);
           assertx(!state[prev->inst()].isDead());
         }

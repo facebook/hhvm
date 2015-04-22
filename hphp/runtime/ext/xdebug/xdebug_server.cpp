@@ -731,7 +731,7 @@ bool XDebugServer::readInput() {
     }
 
     // Read into the buffer
-    size_t res = recv(m_socket, (void*) &m_buffer[bytes_read], bytes_left, 0);
+    auto const res = recv(m_socket, &m_buffer[bytes_read], bytes_left, 0);
     if (res <= 0) {
       return false;
     }

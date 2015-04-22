@@ -540,6 +540,8 @@ std::string RuntimeOption::DebuggerDefaultSandboxPath;
 std::string RuntimeOption::DebuggerStartupDocument;
 int RuntimeOption::DebuggerSignalTimeout = 1;
 
+bool RuntimeOption::XDebugChrome = false;
+
 std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
 
@@ -1032,6 +1034,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
       Config::Bind(DebuggerRpcHostDomain, ini, debugger["RPC.HostDomain"]);
       Config::Bind(DebuggerDefaultRpcTimeout, ini,
                    debugger["RPC.DefaultTimeout"], 30);
+
+      Config::Bind(XDebugChrome, ini, debugger["XDebugChrome"], false);
     }
   }
   {

@@ -55,7 +55,7 @@ struct BacktraceArgs {
   }
 
   /**
-   * Return the metadata associated with each frame having $__metadata local.
+   * Return the metadata associated with each frame having 86metadata local.
    */
   BacktraceArgs& withMetadata(bool withMetadata = true) {
     m_withMetadata = withMetadata;

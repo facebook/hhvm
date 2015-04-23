@@ -1124,6 +1124,7 @@ const StaticString s_parse_str("parse_str");
 const StaticString s_parse_strNative("__SystemLib\\parse_str");
 const StaticString s_assert("assert");
 const StaticString s_assertNative("__SystemLib\\assert");
+const StaticString s_set_frame_metadata("HH\\set_frame_metadata");
 
 bool funcByNameDestroysLocals(const StringData* fname) {
   if (!fname) return false;
@@ -1132,7 +1133,8 @@ bool funcByNameDestroysLocals(const StringData* fname) {
          fname->isame(s_parse_str.get()) ||
          fname->isame(s_parse_strNative.get()) ||
          fname->isame(s_assert.get()) ||
-         fname->isame(s_assertNative.get());
+         fname->isame(s_assertNative.get()) ||
+         fname->isame(s_set_frame_metadata.get());
 }
 
 bool builtinFuncDestroysLocals(const Func* callee) {

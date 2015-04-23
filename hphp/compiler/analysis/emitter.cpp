@@ -6642,6 +6642,11 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
     }
   }
 
+  // assign id to 86metadata local representing frame metadata
+  if (meth->mayCallSetFrameMetadata()) {
+    fe->allocVarId(makeStaticString("86metadata"));
+  }
+
   // assign ids to local variables
   if (!fe->isMemoizeWrapper) {
     assignLocalVariableIds(meth->getFunctionScope());

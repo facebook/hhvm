@@ -64,13 +64,23 @@ MethodStatement::MethodStatement
  ExpressionListPtr params, TypeAnnotationPtr retTypeAnnotation,
  StatementListPtr stmt, int attr, const string &docComment,
  ExpressionListPtr attrList, bool method /* = true */)
-  : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES),
-    m_method(method), m_ref(ref), m_hasCallToGetArgs(false), m_attribute(attr),
-    m_cppLength(-1), m_autoPropCount(0), m_modifiers(modifiers),
-    m_originalName(name), m_params(params),
-    m_retTypeAnnotation(retTypeAnnotation), m_stmt(stmt),
-    m_docComment(docComment), m_attrList(attrList) {
-  m_name = toLower(name);
+  : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES)
+  , m_method(method)
+  , m_ref(ref)
+  , m_hasCallToGetArgs(false)
+  , m_mayCallSetFrameMetadata(false)
+  , m_attribute(attr)
+  , m_cppLength(-1)
+  , m_autoPropCount(0)
+  , m_modifiers(modifiers)
+  , m_name(toLower(name))
+  , m_originalName(name)
+  , m_params(params)
+  , m_retTypeAnnotation(retTypeAnnotation)
+  , m_stmt(stmt)
+  , m_docComment(docComment)
+  , m_attrList(attrList)
+{
   checkParameters();
 }
 
@@ -80,13 +90,23 @@ MethodStatement::MethodStatement
  ExpressionListPtr params, TypeAnnotationPtr retTypeAnnotation,
  StatementListPtr stmt, int attr, const string &docComment,
  ExpressionListPtr attrList, bool method /* = true */)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(MethodStatement)),
-    m_method(method), m_ref(ref), m_hasCallToGetArgs(false), m_attribute(attr),
-    m_cppLength(-1), m_autoPropCount(0), m_modifiers(modifiers),
-    m_originalName(name), m_params(params),
-    m_retTypeAnnotation(retTypeAnnotation), m_stmt(stmt),
-    m_docComment(docComment), m_attrList(attrList) {
-  m_name = toLower(name);
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(MethodStatement))
+  , m_method(method)
+  , m_ref(ref)
+  , m_hasCallToGetArgs(false)
+  , m_mayCallSetFrameMetadata(false)
+  , m_attribute(attr)
+  , m_cppLength(-1)
+  , m_autoPropCount(0)
+  , m_modifiers(modifiers)
+  , m_name(toLower(name))
+  , m_originalName(name)
+  , m_params(params)
+  , m_retTypeAnnotation(retTypeAnnotation)
+  , m_stmt(stmt)
+  , m_docComment(docComment)
+  , m_attrList(attrList)
+{
   checkParameters();
 }
 

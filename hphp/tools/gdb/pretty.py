@@ -16,7 +16,7 @@ from sizeof import sizeof
 #------------------------------------------------------------------------------
 # Legacy iteration.
 
-class _BaseIterator:
+class _BaseIterator(object):
     """Base iterator for Python 2 compatibility (in Python 3, next() is renamed
     to __next__()).  See http://legacy.python.org/dev/peps/pep-3114/.
     """
@@ -30,7 +30,7 @@ class _BaseIterator:
 #------------------------------------------------------------------------------
 # StringData.
 
-class StringDataPrinter:
+class StringDataPrinter(object):
     RECOGNIZE = '^HPHP::StringData$'
 
     def __init__(self, val):
@@ -46,7 +46,7 @@ class StringDataPrinter:
 #------------------------------------------------------------------------------
 # TypedValue.
 
-class TypedValuePrinter:
+class TypedValuePrinter(object):
     RECOGNIZE = '^HPHP::(TypedValue|Cell|Ref|Variant|VarNR)$'
 
     def __init__(self, val):
@@ -109,7 +109,7 @@ class TypedValuePrinter:
 #------------------------------------------------------------------------------
 # Pointers.
 
-class PtrPrinter:
+class PtrPrinter(object):
     def _string(self):
         inner = self._pointer().dereference()
         inner_type = rawtype(inner.type)
@@ -179,7 +179,7 @@ class LowPtrPrinter(PtrPrinter):
 #------------------------------------------------------------------------------
 # ArrayData.
 
-class ArrayDataPrinter:
+class ArrayDataPrinter(object):
     RECOGNIZE = '^HPHP::(ArrayData|MixedArray|ProxyArray)$'
 
     class _packed_iterator(_BaseIterator):
@@ -279,7 +279,7 @@ class ArrayDataPrinter:
 #------------------------------------------------------------------------------
 # ObjectData.
 
-class ObjectDataPrinter:
+class ObjectDataPrinter(object):
     RECOGNIZE = '^HPHP::(ObjectData)$'
 
     class _iterator(_BaseIterator):
@@ -327,7 +327,7 @@ class ObjectDataPrinter:
 #------------------------------------------------------------------------------
 # RefData.
 
-class RefDataPrinter:
+class RefDataPrinter(object):
     RECOGNIZE = '^HPHP::RefData$'
 
     def __init__(self, val):

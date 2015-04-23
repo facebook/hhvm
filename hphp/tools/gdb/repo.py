@@ -45,7 +45,7 @@ def table(prefix):
 #------------------------------------------------------------------------------
 # Decoder.
 
-class Decoder():
+class Decoder(object):
     def __init__(self, buf):
         self.buf = buf
         self.off = 0

@@ -156,6 +156,7 @@ final class Set<Tv> implements MutableSet<Tv> {
   /**
    * Returns a Set containing the values from the specified array.
    */
+  <<__Deprecated('Use `new Set()` instead.')>>
   public static function fromArray<T>(array<T, Tv> $arr): Set<Tv>;
 
   public static function fromArrays(...): Set<Tv>;

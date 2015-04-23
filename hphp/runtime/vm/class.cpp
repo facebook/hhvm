@@ -129,10 +129,8 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
 ///////////////////////////////////////////////////////////////////////////////
 // Class.
 
-#ifndef __aarch64__
 static_assert(sizeof(Class) == (use_lowptr ? 256 : 288),
                "Change this only on purpose");
-#endif
 
 namespace {
 

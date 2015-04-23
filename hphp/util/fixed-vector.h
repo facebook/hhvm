@@ -34,7 +34,7 @@ namespace HPHP {
  */
 template<class T>
 struct FixedVector {
-  typedef uint32_t size_type;
+  typedef uint16_t size_type;
   typedef T value_type;
   typedef T* iterator;
   typedef const T* const_iterator;

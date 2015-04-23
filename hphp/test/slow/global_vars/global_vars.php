@@ -20,7 +20,7 @@ foreach($args as $arg) {
   // it should be fixed in ini level. so compatible with it for now
   $arg_str = $arg ? " -dvariables_order=$arg " : " ";
 
-  $cmd = PHP_BINARY . $arg_str .  __FILE__ . " dummy";
+  $cmd = PHP_BINARY . $arg_str . __FILE__ . " dummy";
 
   $proc = proc_open($cmd, $descriptorspec, $pipes);
   if (!$proc) {

@@ -11,13 +11,13 @@ abstract final class CacheKeys {
 }
 
 function typecheck_impl(string $client_name): TypecheckResult {
-  $cmd = sprintf('which %s > /dev/null 2>&1', escapeshellarg($client_name));
+  $cmd = \sprintf('which %s > /dev/null 2>&1', \escapeshellarg($client_name));
   $ret = null;
   $output_arr = null;
-  exec($cmd, $output_arr, $ret);
+  \exec($cmd, $output_arr, $ret);
 
   if ($ret !== 0) {
-    $error_text = sprintf(
+    $error_text = \sprintf(
       'Hack typechecking failed: typechecker command not found: %s',
       $client_name,
     );
@@ -25,15 +25,15 @@ function typecheck_impl(string $client_name): TypecheckResult {
     return new TypecheckResult(TypecheckStatus::COMMAND_NOT_FOUND, $error_text);
   }
 
-  $cmd = sprintf(
+  $cmd = \sprintf(
     '%s --timeout 0 --retries 0 --json %s 2>&1',
-    escapeshellarg($client_name),
-    escapeshellarg(dirname($_SERVER['SCRIPT_FILENAME'])),
+    \escapeshellarg($client_name),
+    \escapeshellarg(\dirname($_SERVER['SCRIPT_FILENAME'])),
   );
 
   $ret = null;
   $output_arr = null;
-  $output = exec($cmd, $output_arr, $ret);
+  $output = \exec($cmd, $output_arr, $ret);
 
   // 4 -> busy
   // 6 -> just started up
@@ -48,23 +48,23 @@ function typecheck_impl(string $client_name): TypecheckResult {
     );
   }
 
-  $json = json_decode($output, true);
-  $passed = ($ret === 0) && hphp_array_idx($json, 'passed', false);
+  $json = \json_decode($output, true);
+  $passed = ($ret === 0) && \hphp_array_idx($json, 'passed', false);
 
   if ($passed) {
     return new TypecheckResult(TypecheckStatus::SUCCESS, null, $json);
   } else {
-    $errors = hphp_array_idx($json, 'errors', null);
+    $errors = \hphp_array_idx($json, 'errors', null);
     if ($errors) {
-      $first_msg = reset(reset($errors)['message']);
-      $error_text = sprintf(
+      $first_msg = \reset(\reset($errors)['message']);
+      $error_text = \sprintf(
         'Hack type error: %s at %s line %d',
         $first_msg['descr'],
         $first_msg['path'],
         $first_msg['line'],
       );
     } else {
-      $error_text = sprintf('Hack typechecking failed: %s', $output);
+      $error_text = \sprintf('Hack typechecking failed: %s', $output);
     }
 
     return new TypecheckResult(TypecheckStatus::TYPE_ERROR, $error_text, $json);
@@ -100,19 +100,19 @@ final class TypecheckResult implements \JsonSerializable {
   }
 
   public function triggerError(
-    int $type_error_level = E_RECOVERABLE_ERROR,
-    int $client_error_level = E_RECOVERABLE_ERROR,
+    int $type_error_level = \E_RECOVERABLE_ERROR,
+    int $client_error_level = \E_RECOVERABLE_ERROR,
   ): void {
     switch ($this->status) {
     case TypecheckStatus::SUCCESS:
       // No error to trigger.
       break;
     case TypecheckStatus::TYPE_ERROR:
-      trigger_error($this->error, $type_error_level);
+      \trigger_error($this->error, $type_error_level);
       break;
     case TypecheckStatus::SERVER_BUSY:
     case TypecheckStatus::COMMAND_NOT_FOUND:
-      trigger_error($this->error, $client_error_level);
+      \trigger_error($this->error, $client_error_level);
       break;
     }
   }
@@ -158,8 +158,8 @@ function typecheck(string $client_name = 'hh_client'): TypecheckResult {
   // Fetch times from cache and from the stamp file. Both will return "false" on
   // error (no cached time or the stamp doesn't exist). The latter will also
   // emit a warning, which we don't care about, so suppress it.
-  $cached_time = apc_fetch(CacheKeys::TIME_CACHE_KEY);
-  $time = (int)@filemtime('/tmp/hh_server/stamp');
+  $cached_time = \apc_fetch(CacheKeys::TIME_CACHE_KEY);
+  $time = (int)@\filemtime('/tmp/hh_server/stamp');
 
   // If we actually have something in cache, and the times match, use it. Note
   // that we still don't care if the stamp file actually exists -- we just treat
@@ -167,12 +167,12 @@ function typecheck(string $client_name = 'hh_client'): TypecheckResult {
   // doesn't exist and become nonzero when hh_server starts up and creates it,
   // which is what we want.
   if ($cached_time !== false && (int)$cached_time === $time) {
-    $result = apc_fetch(CacheKeys::RESULT_CACHE_KEY);
+    $result = \apc_fetch(CacheKeys::RESULT_CACHE_KEY);
   } else {
     $result = \__SystemLib\HH\Client\typecheck_impl($client_name);
 
-    apc_store(CacheKeys::TIME_CACHE_KEY, $time);
-    apc_store(CacheKeys::RESULT_CACHE_KEY, $result);
+    \apc_store(CacheKeys::TIME_CACHE_KEY, $time);
+    \apc_store(CacheKeys::RESULT_CACHE_KEY, $result);
   }
 
   return $result;

@@ -126,12 +126,6 @@ final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    */
   public function getIterator(): MapIterator<Tk, Tv>;
 
-  /**
-   * Returns an ImmMap containing the key/value pairs from the specified
-   * array.
-   */
-  public static function fromArray(array $arr): ImmMap<Tk, Tv>;
-
   public static function fromItems(?Traversable<Pair<Tk, Tv>> $items):
     ImmMap<Tk, Tv>;
 

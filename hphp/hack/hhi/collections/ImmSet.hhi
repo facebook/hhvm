@@ -58,11 +58,6 @@ final class ImmSet<Tv> implements ConstSet<Tv> {
    */
   public function getIterator(): SetIterator<Tv>;
 
-  /**
-   * Returns an ImmSet containing the values from the specified array.
-   */
-  public static function fromArray(array $arr): ImmSet<Tv>;
-
   public static function fromItems(?Traversable<Tv> $items): ImmSet<Tv>;
 
   public static function fromArrays(...): ImmSet<Tv>;

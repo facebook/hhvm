@@ -189,6 +189,23 @@ let get_shape_field_name = function
   | SFlit (_, s) -> s
   | SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
 
+(* When printing out types (by hh_show()), TVars are printed with an
+ * associated identifier. We reindex them (in the order of appearance) to be
+ * consecutive integers starting from zero, because the internal identifier
+ * can change due to unrelated reasons, which breaks tests. *)
+let printable_tvar_ids = ref IMap.empty
+
+let get_printable_tvar_id x =
+  match IMap.get x !printable_tvar_ids with
+    | None ->
+        let res = (IMap.cardinal !printable_tvar_ids) + 1 in
+        printable_tvar_ids := IMap.add
+          x
+          res
+          !printable_tvar_ids;
+       res
+    | Some v -> v
+
 let rec debug stack env (r, ty) =
   let o = print_string in
   (match r with Reason.Rlost_info _ -> o "~lost" | _ -> ());
@@ -244,7 +261,7 @@ let rec debug stack env (r, ty) =
       else
         let stack = ISet.add x stack in
         let _, y = get_var env x in
-        o "["; o (string_of_int y); o "]";
+        o "["; o (string_of_int (get_printable_tvar_id y)); o "]";
         (match get_type env x with
         | _, (_, Tany) -> o (Ident.debug x)
         | _, ty -> debug stack env ty)

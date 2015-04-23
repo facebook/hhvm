@@ -113,8 +113,11 @@ bool ConcurrentTableSharedStore::clear() {
     iter->second.data.match(
       [&] (APCHandle* handle) {
         handle->unreferenceRoot(iter->second.dataSize);
+        return 0;
       },
-      [&] (char*) {}
+      [&] (char*) {
+        return 0;
+      }
     );
     const void* vpKey = iter->first;
     free(const_cast<void*>(vpKey));
@@ -169,10 +172,12 @@ bool ConcurrentTableSharedStore::eraseImpl(const String& key,
       }
 
       eraseAcc(acc);
+      return 0;
     },
     [&] (char* file) {
       assert(!expired);  // primed keys never say true to expired()
       eraseAcc(acc);
+      return 0;
     }
   );
 
@@ -502,12 +507,14 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
             // If ApcTTLLimit is set, then only primed keys can have
             // expire == 0.
             overwritePrime = sval->expire == 0;
+            return 0;
           },
           [&] (char*) {
             // Was inFile, but won't be anymore.
             sval->data = nullptr;
             sval->dataSize = 0;
             overwritePrime = true;
+            return 0;
           }
         );
       } else {
@@ -571,8 +578,11 @@ void ConcurrentTableSharedStore::prime(const std::vector<KeyValuePair>& vars) {
       sval.data.match(
         [&] (APCHandle* handle) {
           handle->unreferenceRoot(sval.dataSize);
+          return 0;
         },
-        [&] (char*) {}
+        [&] (char*) {
+          return 0;
+        }
       );
       sval.data     = nullptr;
       sval.dataSize = 0;

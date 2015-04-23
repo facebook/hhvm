@@ -366,7 +366,8 @@ public:
 private:
   struct FunctionContext {
     FunctionContext()
-      : hasNonEmptyReturn(false)
+      : hasCallToGetArgs(false)
+      , hasNonEmptyReturn(false)
       , isGenerator(false)
       , isAsync(false)
     {}
@@ -375,6 +376,7 @@ private:
       assert(!isGenerator || !hasNonEmptyReturn);
     }
 
+    bool hasCallToGetArgs;  // function calls func_get_args() or similar
     bool hasNonEmptyReturn; // function contains a non-empty return statement
     bool isGenerator;       // function determined to be a generator
     bool isAsync;           // function determined to be async
@@ -402,7 +404,6 @@ private:
   StatementListPtr m_tree;
   std::string m_error;
 
-  std::vector<bool> m_hasCallToGetArgs;
   std::vector<StringToExpressionPtrVecMap> m_staticVars;
   bool m_lambdaMode;
   bool m_closureGenerator;

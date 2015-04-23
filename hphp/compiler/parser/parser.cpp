@@ -505,8 +505,8 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
           stripped == "func_get_args" ||
           stripped == "func_get_arg") {
         funcName = stripped;
-        if (m_hasCallToGetArgs.size() > 0) {
-          m_hasCallToGetArgs.back() = true;
+        if (m_funcContexts.size() > 0) {
+          m_funcContexts.back().hasCallToGetArgs = true;
         }
       }
       // Auto import a few functions from the HH namespace
@@ -1034,7 +1034,6 @@ void Parser::onFunctionStart(Token &name, bool doPushComment /* = true */) {
   newScope();
   m_funcContexts.push_back(FunctionContext());
   m_funcName = name.text();
-  m_hasCallToGetArgs.push_back(false);
   m_staticVars.push_back(StringToExpressionPtrVecMap());
 }
 
@@ -1234,12 +1233,10 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
   // check and set generator/async flags
   FunctionContext funcContext = m_funcContexts.back();
   checkFunctionContext(funcName, funcContext, modifiersExp, ref->num());
+  mth->setHasCallToGetArgs(funcContext.hasCallToGetArgs);
   mth->getFunctionScope()->setGenerator(funcContext.isGenerator);
   mth->getFunctionScope()->setAsync(modifiersExp->isAsync());
   m_funcContexts.pop_back();
-
-  mth->setHasCallToGetArgs(m_hasCallToGetArgs.back());
-  m_hasCallToGetArgs.pop_back();
 
   LocationPtr loc = popFuncLocation();
   if (reloc) {

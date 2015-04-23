@@ -794,11 +794,13 @@ void StringData::preCompute() const {
 
 void StringData::setStatic() const {
   m_count = StaticValue;
+  m_kind = static_cast<HeaderKind>(set_one_bit_ref(static_cast<uint8_t>(m_kind)));
   preCompute();
 }
 
 void StringData::setUncounted() const {
   m_count = UncountedValue;
+  m_kind = static_cast<HeaderKind>(set_one_bit_ref(static_cast<uint8_t>(m_kind)));
   preCompute();
 }
 

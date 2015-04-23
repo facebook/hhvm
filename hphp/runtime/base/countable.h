@@ -229,6 +229,7 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
     m_kind = (ArrayKind) set_one_bit_ref(m_kind); \
   }                                             \
   bool isStatic() const {                       \
+    if (m_count == StaticValue)assert(check_one_bit_ref_array(m_kind)); \
     return m_count == StaticValue;              \
   }                                             \
   void setUncounted() const {                   \
@@ -237,6 +238,7 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
     m_kind = (ArrayKind) set_one_bit_ref(m_kind); \
   }                                             \
   bool isUncounted() const {                    \
+    if (m_count == UncountedValue) assert(check_one_bit_ref_array(m_kind)); \
     return m_count == UncountedValue;           \
   }                                             \
   IMPLEMENT_COUNTABLE_METHODS_ARRAY_NO_STATIC

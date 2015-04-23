@@ -99,8 +99,11 @@ void BitrefSurvey::cow_check_occurred(ArrayData* ad) {
     // of the empty, static array
     arr_empty_count++;
   }
-  if ((uint32_t)ad->getCount() > 1) {
+  if ((uint32_t)ad->getCount() > 1) { //includes static
     arr_rc_copy_histogram.addValue(ad->m_size);
+    if (!check_refcount_ns(ad->getCount())) {
+      assert(check_one_bit_ref_array(ad->m_kind));
+    }
   }
   m.unlock();
 }
@@ -111,8 +114,11 @@ void BitrefSurvey::cow_check_occurred(StringData* sd) {
   if (sd->m_len == 0) {
     str_empty_count++;
   }
-  if ((uint32_t)sd->getCount() > 1) {
+  if ((uint32_t)sd->getCount() > 1) { //includes static
     str_rc_copy_histogram.addValue(sd->m_len);
+    if (!check_refcount_ns(sd->getCount())) {
+      assert(check_one_bit_ref(sd->m_kind));
+    }
   }
   m.unlock();
 }

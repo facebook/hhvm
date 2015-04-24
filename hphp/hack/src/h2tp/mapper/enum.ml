@@ -16,14 +16,14 @@
 
 module M = Map_ast
 module CE = Common_exns
+module List = Core_list
 open Ast
 open Ast_ext
-open Utils
 
 let create_class_vars p elts =
-  map_filter (function | Const (_, csts) -> Some csts | _ -> None) elts |>
+  List.filter_map ~f:(function Const (_, csts) -> Some csts | _ -> None) elts |>
   List.concat |>
-  List.map (fun ((p, name), e) -> AFkvalue ((p, String (p, name)), e)) |>
+  List.map ~f:(fun ((p, name), e) -> AFkvalue ((p, String (p, name)), e)) |>
   fun afields -> ClassVars (
     [Private; Static;],
     None,

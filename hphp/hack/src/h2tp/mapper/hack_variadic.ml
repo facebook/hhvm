@@ -20,8 +20,8 @@
 *)
 
 module M = Map_ast
+module List = Core_list
 open Ast
-open Utils
 
 let strip_hack_variadic = function
   | {param_is_variadic = true; param_id = (_, "..."); _} -> None
@@ -30,5 +30,5 @@ let strip_hack_variadic = function
 let map =
   M.mk_program_mapper { M.default_mapper with
     M.k_fun_params = (fun (k, _) params ->
-      k (map_filter strip_hack_variadic params));
+      k (List.filter_map ~f:strip_hack_variadic params));
   }

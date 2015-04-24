@@ -10,7 +10,6 @@
 
 open Utils
 module Sys = Sys_ext
-module List = List_ext
 module CE = Common_exns
 module Parser_hack = Parser_hack_ext
 

@@ -299,13 +299,6 @@ let try_with_channel oc f1 f2 =
     close_out oc;
     f2 e
 
-let rec filter_some = function
-  | [] -> []
-  | None :: l -> filter_some l
-  | Some e :: l -> e :: filter_some l
-
-let map_filter f xs = xs |> List.map f |> filter_some
-
 let rec cut_after n = function
   | [] -> []
   | l when n <= 0 -> []

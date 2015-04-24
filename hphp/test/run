@@ -254,7 +254,7 @@ function get_options($argv) {
     'arm' => '',
     'llvm' => '',
     'force-llvm' => '',
-    'bccf' => '',
+    'wholecfg' => '',
     'hhas-round-trip' => '',
     'color' => 'c',
     'no-fun' => '',
@@ -501,6 +501,7 @@ function hhvm_cmd_impl() {
     mode_cmd($options),
     isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
     isset($options['llvm']) ? '-vEval.JitLLVM=2' : '',
+    isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
     isset($options['require-llvm']) ? '-vEval.JitLLVM=3' : '',
     extra_args($options),
   );

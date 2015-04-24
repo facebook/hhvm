@@ -274,14 +274,6 @@ void finishHHBC(IRGS& env) {
 
 void prepareForHHBCMergePoint(IRGS& env) {
   spillStack(env);
-
-  // For bytecode-level merge points, we need to make sure the spOffset
-  // is the same on all incoming edges going to a merge point.  This
-  // would "just happen" if we didn't still have instructions that
-  // redefine StkPtrs, but calls still need to do that for now, so we
-  // need this hack.
-  auto spOff = IRSPOffset{-(env.irb->syncedSpLevel() - env.irb->spOffset())};
-  gen(env, AdjustSP, IRSPOffsetData { spOff }, sp(env));
 }
 
 FPInvOffset logicalStackDepth(const IRGS& env) {

@@ -908,12 +908,7 @@ bool IRBuilder::startBlock(Block* block, bool hasUnprocessedPred) {
   m_curBlock = block;
 
   m_state.startBlock(m_curBlock, hasUnprocessedPred);
-  if (sp() == nullptr) {
-    always_assert(RuntimeOption::EvalJitPGORegionSelector == "wholecfg" ||
-                  RuntimeOption::EvalJitLoops);
-    // XXX(t2288359): This can go away once we don't redefine StkPtrs mid-trace.
-    TRACE_PUNT("Control flow merge with different StkPtrs");
-  }
+  always_assert(sp() != nullptr);
   always_assert(fp() != nullptr);
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
@@ -924,7 +919,7 @@ bool IRBuilder::startBlock(Block* block, bool hasUnprocessedPred) {
 Block* IRBuilder::makeBlock(Offset offset) {
   auto it = m_offsetToBlockMap.find(offset);
   if (it == m_offsetToBlockMap.end()) {
-    auto* block = m_unit.defBlock();
+    auto const block = m_unit.defBlock();
     m_offsetToBlockMap.insert(std::make_pair(offset, block));
     return block;
   }

@@ -126,16 +126,11 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   // locals.
   always_assert(src.locals.size() == dst.locals.size());
 
-  if (dst.spValue != src.spValue) {
-    // We have two different sp definitions but we know they're equal because
-    // spOffset matched.
-    //
-    // TODO(#4810319): we should be able to just require the spValues are the
-    // same after we can fix things like Call not to need to redefine the stack
-    // pointer.
-    dst.spValue = nullptr;
-    changed = true;
-  }
+  // We must always have the same spValue at a merge point.  We sometimes
+  // redefine spValue still (TODO #2288359), but only before we're about to do
+  // something that leaves the region, so it should not show up here (without a
+  // bug).
+  always_assert(dst.spValue == src.spValue);
 
   // This is available iff it's available in both states
   if (merge_util(dst.thisAvailable, dst.thisAvailable && src.thisAvailable)) {
@@ -733,7 +728,6 @@ bool FrameStateMgr::checkInvariants() const {
 void FrameStateMgr::clearForUnprocessedPred() {
   FTRACE(1, "clearForUnprocessedPred\n");
 
-  cur().spValue      = nullptr;
   cur().stackDeficit = 0;
   cur().evalStack    = EvalStack();
 

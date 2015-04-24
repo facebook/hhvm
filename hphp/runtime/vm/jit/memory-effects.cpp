@@ -998,6 +998,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
      */
     return may_reenter(inst, may_load_store(AStackAny, AStackAny));
 
+  case LookupClsMethod: { // autoload, and it writes part of the new actrec
+    AliasClass effects = AStack {
+      inst.src(2),
+      inst.extra<LookupClsMethod>()->offset.offset,
+      int32_t{kNumActRecCells}
+    };
+    return may_reenter(inst, may_load_store(effects, effects));
+  }
+
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
   case BaseG:
@@ -1039,7 +1048,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdFuncCachedU:  // autoload
   case LdSwitchObjIndex:  // decrefs arg
   case LookupClsCns:      // autoload
-  case LookupClsMethod:   // autoload
   case LookupClsMethodCache:  // autoload
   case LookupClsMethodFCache: // autoload
   case LookupCns:

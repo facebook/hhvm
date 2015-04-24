@@ -1468,7 +1468,7 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
   }
 }
 
-void callFuncPODImpl(void *ret, BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+void callFuncNonPODImpl(void *ret, BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
   switch (GP_count) {
     case 0:
       switch (SIMD_count) {

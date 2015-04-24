@@ -33,10 +33,13 @@ inline uint64_t cpuCycles() {
   return lo | (hi << 32);
 #elif __powerpc64__
   // This returns a time-base
+  // which is not always the same as the core frequency.
   uint64_t tb;
   asm volatile("mfspr %0, 268" : "=r" (tb));
   return tb;
 #elif __aarch64__
+  // This returns the virtual timer which is not exactly
+  // the core cycles but has a different frequency.
   uint64_t tb;
   asm volatile("mrs %0, cntvct_el0" : "=r" (tb));
   return tb;
@@ -51,7 +54,7 @@ inline void cpuRelax() {
 #elif __powerpc64__
   asm volatile("or 31,31,31");
 #elif __aarch64__
-  asm volatile("wfe");
+  asm volatile("yield");
 #endif
 }
 

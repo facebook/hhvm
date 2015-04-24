@@ -304,10 +304,8 @@ let process_fun_call fun_args used_args env =
          * happen on the way up because autocomplete pos needs to get set
          * before this is called *)
         let argument_index = ref (-1) in
-        let index = ref 0 in
-        List.iter begin fun arg ->
-          if is_target pos arg then argument_index := !index;
-          incr index
+        List.iteri begin fun index arg ->
+          if is_target pos arg then argument_index := index;
         end used_args;
         begin try
           let _, arg_ty = List.nth fun_args !argument_index in

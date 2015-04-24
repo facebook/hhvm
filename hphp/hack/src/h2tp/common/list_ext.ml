@@ -9,7 +9,6 @@
  *)
 
 include List
-open Utils
 
 let rec first pred = function
   | [] -> None

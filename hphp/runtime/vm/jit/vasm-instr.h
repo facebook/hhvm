@@ -302,7 +302,7 @@ struct fallback {
 };
 
 struct bindaddr {
-  explicit bindaddr(TCA* dest, SrcKey sk, FPAbsOffset spOff)
+  explicit bindaddr(TCA* dest, SrcKey sk, FPInvOffset spOff)
     : dest(dest)
     , sk(sk)
     , spOff(spOff)
@@ -310,14 +310,14 @@ struct bindaddr {
 
   TCA* dest;
   SrcKey sk;
-  FPAbsOffset spOff;
+  FPInvOffset spOff;
 };
 
 struct bindjcc1st {
   explicit bindjcc1st(ConditionCode cc,
                       VregSF sf,
                       std::array<SrcKey,2> targets,
-                      FPAbsOffset spOff,
+                      FPInvOffset spOff,
                       RegSet args)
     : cc{cc}
     , sf{sf}
@@ -331,7 +331,7 @@ struct bindjcc1st {
   ConditionCode cc;
   VregSF sf;
   SrcKey targets[2];
-  FPAbsOffset spOff;
+  FPInvOffset spOff;
   RegSet args;
 };
 
@@ -339,7 +339,7 @@ struct bindjcc {
   explicit bindjcc(ConditionCode cc,
                    VregSF sf,
                    SrcKey target,
-                   FPAbsOffset spOff,
+                   FPInvOffset spOff,
                    TransFlags trflags,
                    RegSet args)
     : cc{cc}
@@ -353,14 +353,14 @@ struct bindjcc {
   ConditionCode cc;
   VregSF sf;
   SrcKey target;
-  FPAbsOffset spOff;
+  FPInvOffset spOff;
   TransFlags trflags;
   RegSet args;
 };
 
 struct bindjmp {
   explicit bindjmp(SrcKey target,
-                   FPAbsOffset spOff,
+                   FPInvOffset spOff,
                    TransFlags trflags,
                    RegSet args)
     : target{target}
@@ -370,7 +370,7 @@ struct bindjmp {
   {}
 
   SrcKey target;
-  FPAbsOffset spOff;
+  FPInvOffset spOff;
   TransFlags trflags;
   RegSet args;
 };

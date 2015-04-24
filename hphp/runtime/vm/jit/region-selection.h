@@ -93,7 +93,7 @@ struct RegionDesc {
    */
   SrcKey            lastSrcKey() const;
 
-  Block*            addBlock(SrcKey sk, int length, FPAbsOffset spOffset,
+  Block*            addBlock(SrcKey sk, int length, FPInvOffset spOffset,
                              uint16_t inlineLevel);
   void              deleteBlock(BlockId bid);
   void              renumberBlock(BlockId oldId, BlockId newId);
@@ -158,7 +158,7 @@ struct RegionDesc::Location {
   };
   struct Local { uint32_t locId;  };
   struct Stack {
-    FPAbsOffset offsetFromFP;
+    FPInvOffset offsetFromFP;
   };
 
   /* implicit */ Location(Local l) : m_tag{Tag::Local}, m_local(l) {}
@@ -171,7 +171,7 @@ struct RegionDesc::Location {
     return m_local.locId;
   }
 
-  FPAbsOffset offsetFromFP() const {
+  FPInvOffset offsetFromFP() const {
     assertx(m_tag == Tag::Stack);
     return m_stack.offsetFromFP;
   }
@@ -273,7 +273,7 @@ class RegionDesc::Block {
   typedef boost::container::flat_map<SrcKey, const Func*> KnownFuncMap;
 
   explicit Block(const Func* func, bool resumed, Offset start, int length,
-                 FPAbsOffset initSpOff, uint16_t inlineLevel);
+                 FPInvOffset initSpOff, uint16_t inlineLevel);
 
   Block& operator=(const Block&) = delete;
 
@@ -291,13 +291,13 @@ class RegionDesc::Block {
   int         length()            const { return m_length; }
   bool        empty()             const { return length() == 0; }
   bool        contains(SrcKey sk) const;
-  FPAbsOffset initialSpOffset()   const { return m_initialSpOffset; }
+  FPInvOffset initialSpOffset()   const { return m_initialSpOffset; }
   uint16_t    inlineLevel()       const { return m_inlineLevel; }
 
   void setId(BlockId id) {
     m_id = id;
   }
-  void setInitialSpOffset(FPAbsOffset sp) { m_initialSpOffset = sp; }
+  void setInitialSpOffset(FPInvOffset sp) { m_initialSpOffset = sp; }
 
   /*
    * Set and get whether or not this block ends with an inlined FCall. Inlined
@@ -377,7 +377,7 @@ private:
   const Offset   m_start;
   Offset         m_last;
   int            m_length;
-  FPAbsOffset    m_initialSpOffset;
+  FPInvOffset    m_initialSpOffset;
   const Func*    m_inlinedCallee;
   uint16_t       m_inlineLevel; // 0 means the outer-most function
   TypePredMap    m_typePreds;
@@ -403,7 +403,7 @@ struct RegionContext {
 
   const Func* func;
   Offset bcOffset;
-  FPAbsOffset spOffset;
+  FPInvOffset spOffset;
   bool resumed;
   jit::vector<LiveType> liveTypes;
   jit::vector<PreLiveAR> preLiveARs;

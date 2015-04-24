@@ -135,7 +135,7 @@ SrcKey RegionDesc::lastSrcKey() const {
 
 RegionDesc::Block* RegionDesc::addBlock(SrcKey      sk,
                                         int         length,
-                                        FPAbsOffset spOffset,
+                                        FPInvOffset spOffset,
                                         uint16_t    inlineLevel) {
   m_blocks.push_back(
     std::make_shared<Block>(sk.func(), sk.resumed(), sk.offset(), length,
@@ -487,7 +487,7 @@ RegionDesc::Block::Block(const Func* func,
                          bool        resumed,
                          Offset      start,
                          int         length,
-                         FPAbsOffset initSpOff,
+                         FPInvOffset initSpOff,
                          uint16_t    inlineLevel)
   : m_id(s_nextId--)
   , m_func(func)

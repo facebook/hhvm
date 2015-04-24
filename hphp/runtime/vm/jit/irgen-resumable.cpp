@@ -69,7 +69,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset, int numIters) {
   // copying local variables and iterators.
   auto const func = curFunc(env);
   auto const resumeSk = SrcKey(func, resumeOffset, true);
-  auto const data = LdBindAddrData { resumeSk, absSPOff(env) };
+  auto const data = LdBindAddrData { resumeSk, invSPOff(env) };
   auto const resumeAddr = gen(env, LdBindAddr, data);
   auto const waitHandle =
     gen(env,
@@ -113,7 +113,7 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
 
   // Suspend the async function.
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, true);
-  auto const data = LdBindAddrData { resumeSk, absSPOff(env) };
+  auto const data = LdBindAddrData { resumeSk, invSPOff(env) };
   auto const resumeAddr = gen(env, LdBindAddr, data);
   gen(env, StAsyncArResume, ResumeOffset { resumeOffset }, fp(env),
     resumeAddr);
@@ -144,7 +144,7 @@ void yieldImpl(IRGS& env, Offset resumeOffset) {
 
   // Resumable::setResumeAddr(resumeAddr, resumeOffset)
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, true);
-  auto const data = LdBindAddrData { resumeSk, absSPOff(env) };
+  auto const data = LdBindAddrData { resumeSk, invSPOff(env) };
   auto const resumeAddr = gen(env, LdBindAddr, data);
   gen(env, StContArResume, ResumeOffset { resumeOffset }, fp(env), resumeAddr);
 
@@ -220,7 +220,7 @@ void emitCreateCont(IRGS& env) {
   // variables and iterators.
   auto const func = curFunc(env);
   auto const resumeSk = SrcKey(func, resumeOffset, true);
-  auto const data = LdBindAddrData { resumeSk, absSPOff(env) + 1 };
+  auto const data = LdBindAddrData { resumeSk, invSPOff(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, data);
   auto const cont =
     gen(env,

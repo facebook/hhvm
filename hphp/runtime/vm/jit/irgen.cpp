@@ -181,7 +181,7 @@ void endRegion(IRGS& env, SrcKey nextSk) {
   spillStack(env);
   gen(env, AdjustSP, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
       sp(env));
-  gen(env, ReqBindJmp, ReqBindJmpData { nextSk, absSPOff(env) }, sp(env));
+  gen(env, ReqBindJmp, ReqBindJmpData { nextSk, invSPOff(env) }, sp(env));
 }
 
 // All accesses to the stack and locals in this function use DataTypeGeneric so
@@ -283,7 +283,7 @@ void prepareForHHBCMergePoint(IRGS& env) {
   gen(env, AdjustSP, IRSPOffsetData { spOff }, sp(env));
 }
 
-FPAbsOffset logicalStackDepth(const IRGS& env) {
+FPInvOffset logicalStackDepth(const IRGS& env) {
   // Negate the offsetFromIRSP because it is an offset from the actual StkPtr
   // (so negative values go deeper on the stack), but this function deals with
   // logical stack depths (where more positive values are deeper).

@@ -30,15 +30,15 @@ namespace HPHP { namespace jit {
  */
 inline IRSPOffset toIRSPOffset(
   BCSPOffset offsetFromInstr,
-  FPAbsOffset curSPTop,
-  FPAbsOffset spOffset
+  FPInvOffset curSPTop,
+  FPInvOffset spOffset
 ) {
-  auto const absSPOff = curSPTop - offsetFromInstr.offset;
-  auto const ret = -static_cast<int32_t>(absSPOff - spOffset);
+  auto const invSPOff = curSPTop - offsetFromInstr.offset;
+  auto const ret = -static_cast<int32_t>(invSPOff - spOffset);
   return IRSPOffset{ret};
 }
 
-inline BCSPOffset toBCSPOffset(FPAbsOffset offsetFromFP, FPAbsOffset curSPTop) {
+inline BCSPOffset toBCSPOffset(FPInvOffset offsetFromFP, FPInvOffset curSPTop) {
   return BCSPOffset{curSPTop - offsetFromFP};
 }
 

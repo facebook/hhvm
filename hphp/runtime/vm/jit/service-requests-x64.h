@@ -43,7 +43,7 @@ namespace x64 {
 TCA emitServiceReqWork(CodeBlock& cb,
                        TCA start,
                        SRFlags flags,
-                       folly::Optional<FPAbsOffset> spOff,
+                       folly::Optional<FPInvOffset> spOff,
                        ServiceRequest req,
                        const ServiceReqArgVec&);
 
@@ -56,7 +56,7 @@ void emitBindJ(CodeBlock& cb,
                CodeBlock& frozen,
                jit::ConditionCode cc,
                SrcKey dest,
-               FPAbsOffset spOff,
+               FPInvOffset spOff,
                TransFlags trflags);
 
 /*
@@ -66,7 +66,7 @@ TCA emitRetranslate(CodeBlock& cb,
                     CodeBlock& frozen,
                     jit::ConditionCode cc,
                     SrcKey dest,
-                    folly::Optional<FPAbsOffset> spOff,
+                    folly::Optional<FPInvOffset> spOff,
                     TransFlags trflags);
 
 /*
@@ -77,7 +77,7 @@ TCA emitRetranslate(CodeBlock& cb,
  * emitted around the service request code.
  */
 TCA emitBindAddr(CodeBlock& cb, CodeBlock& frozen, TCA* addr, SrcKey sk,
-                 FPAbsOffset spOff);
+                 FPInvOffset spOff);
 
 /*
  * Emit a REQ_BIND_JMPCC_FIRST service request in `frozen' and the
@@ -89,7 +89,7 @@ void emitBindJmpccFirst(CodeBlock& cb,
                         ConditionCode cc,
                         SrcKey targetSk0,
                         SrcKey targetSk1,
-                        FPAbsOffset spOff);
+                        FPInvOffset spOff);
 
 // An intentionally funny-looking-in-core-dumps constant for uninitialized
 // instruction pointers.

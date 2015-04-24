@@ -73,7 +73,7 @@ template<Opcode op> struct IRExtraDataType;
 struct IRExtraData {};
 
 struct LdBindAddrData : IRExtraData {
-  explicit LdBindAddrData(SrcKey sk, FPAbsOffset spOff)
+  explicit LdBindAddrData(SrcKey sk, FPInvOffset spOff)
     : sk(sk)
     , spOff(spOff)
   {}
@@ -81,7 +81,7 @@ struct LdBindAddrData : IRExtraData {
   std::string show() const { return showShort(sk); }
 
   SrcKey sk;
-  FPAbsOffset spOff;
+  FPInvOffset spOff;
 };
 
 struct LdSSwitchData : IRExtraData {
@@ -111,7 +111,7 @@ struct LdSSwitchData : IRExtraData {
   int64_t     numCases;
   const Elm*  cases;
   SrcKey      defaultSk;
-  FPAbsOffset spOff;
+  FPInvOffset spOff;
 };
 
 struct JmpSwitchData : IRExtraData {
@@ -132,7 +132,7 @@ struct JmpSwitchData : IRExtraData {
   int32_t cases;       // number of cases
   SrcKey  defaultSk;   // srckey of default case
   SrcKey* targets;     // srckeys for all targets
-  FPAbsOffset spOff;
+  FPInvOffset spOff;
 };
 
 struct LocalId : IRExtraData {
@@ -275,7 +275,7 @@ struct ReqRetranslateData : IRExtraData {
  */
 struct ReqBindJmpData : IRExtraData {
   explicit ReqBindJmpData(const SrcKey& dest,
-                          FPAbsOffset spOff,
+                          FPInvOffset spOff,
                           TransFlags trflags = TransFlags{})
     : dest(dest)
     , spOff(spOff)
@@ -288,7 +288,7 @@ struct ReqBindJmpData : IRExtraData {
   }
 
   SrcKey dest;
-  FPAbsOffset spOff;
+  FPInvOffset spOff;
   TransFlags trflags;
 };
 
@@ -336,8 +336,8 @@ struct RelOffsetData : IRExtraData {
 
   std::string show() const {
     return folly::to<std::string>(
-      "BcSpOff ", bcSpOffset.offset, ", ",
-      "IrSpOff ", irSpOffset.offset
+      "BCSPOff ", bcSpOffset.offset, ", ",
+      "IRSPOff ", irSpOffset.offset
     );
   }
 
@@ -430,8 +430,8 @@ struct DefInlineFPData : IRExtraData {
   bool fromFPushCtor;
   SSATmp* ctx;       // Ctx, Cls or Nullptr.
   Offset retBCOff;
-  FPAbsOffset retSPOff;
-  IRSPOffset spOffset; // offset from caller SP to bottom of callee's ActRec
+  FPInvOffset retSPOff;
+  IRSPOffset spOffset;  // offset from caller SP to bottom of callee's ActRec
 };
 
 struct CallArrayData : IRExtraData {

@@ -78,7 +78,7 @@ inline Offset nextBcOff(const IRGS& env) {
   return nextSrcKey(env).offset();
 }
 
-inline FPAbsOffset absSPOff(const IRGS& env) {
+inline FPInvOffset invSPOff(const IRGS& env) {
   return env.irb->syncedSpLevel() +
     env.irb->evalStack().size() - env.irb->stackDeficit();
 }
@@ -230,7 +230,7 @@ void ifElse(IRGS& env, Branch branch, Next next) {
 //////////////////////////////////////////////////////////////////////
 
 inline BCMarker makeMarker(IRGS& env, Offset bcOff) {
-  auto const stackOff = absSPOff(env);
+  auto const stackOff = invSPOff(env);
 
   FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
          bcOff, stackOff.offset, curFunc(env)->fullName()->data());
@@ -266,7 +266,7 @@ inline IRSPOffset offsetFromIRSP(const IRGS& env, BCSPOffset offsetFromInstr) {
   return ret;
 }
 
-inline BCSPOffset offsetFromBCSP(const IRGS& env, FPAbsOffset offsetFromFP) {
+inline BCSPOffset offsetFromBCSP(const IRGS& env, FPInvOffset offsetFromFP) {
   auto const curSPTop = env.irb->syncedSpLevel() +
     env.irb->evalStack().size() - env.irb->stackDeficit();
   return toBCSPOffset(offsetFromFP, curSPTop);

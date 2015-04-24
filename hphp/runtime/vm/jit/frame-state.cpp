@@ -340,7 +340,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
   case RetAdjustStk:
     cur().spValue = inst->dst();
-    cur().spOffset = FPAbsOffset{-2};
+    cur().spOffset = FPInvOffset{-2};
     cur().memoryStack.clear();
     break;
 
@@ -351,13 +351,13 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
   case ReDefSP:
     cur().spValue = inst->dst();
-    cur().spOffset = FPAbsOffset{inst->extra<ReDefSP>()->offset};
+    cur().spOffset = FPInvOffset{inst->extra<ReDefSP>()->offset};
     break;
 
   case DefSP:
   case ResetSP:
     cur().spValue = inst->dst();
-    cur().spOffset = FPAbsOffset{inst->extra<StackOffset>()->offset};
+    cur().spOffset = FPInvOffset{inst->extra<StackOffset>()->offset};
     break;
 
   case AdjustSP:
@@ -535,10 +535,10 @@ void FrameStateMgr::collectPostConds(Block* block) {
 
   if (sp() != nullptr) {
     const auto& lastInst = block->back();
-    const FPAbsOffset bcSpOff = lastInst.marker().spOff();
-    const FPAbsOffset irSpOff = spOffset();
+    const FPInvOffset bcSpOff = lastInst.marker().spOff();
+    const FPInvOffset irSpOff = spOffset();
     const bool resumed = lastInst.marker().resumed();
-    const auto skipCells = FPAbsOffset{resumed ? 0 : func()->numSlotsInFrame()};
+    const auto skipCells = FPInvOffset{resumed ? 0 : func()->numSlotsInFrame()};
     const auto evalStkCells = bcSpOff - skipCells;
     for (int32_t i = 0; i < evalStkCells; i++) {
       const auto bcSpRel = BCSPOffset{i};
@@ -686,7 +686,7 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   cur().thisAvailable    = target->cls() != nullptr && !target->isStatic();
   cur().curFunc          = target;
   cur().frameMaySpanCall = false;
-  cur().syncedSpLevel    = FPAbsOffset{target->numLocals()};
+  cur().syncedSpLevel    = FPInvOffset{target->numLocals()};
 
   // XXX: we're setting spOffset to keep some invariants about it true,
   // although, we don't really define it as part of the DefInlineFP---there's

@@ -180,7 +180,7 @@ void emitSwitch(IRGS& env,
   data.cases       = iv.size();
   data.defaultSk   = SrcKey { curSrcKey(env), defaultOff };
   data.targets     = &targets[0];
-  data.spOff       = absSPOff(env);
+  data.spOff       = invSPOff(env);
 
   spillStack(env);
   gen(env, AdjustSP, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
@@ -220,7 +220,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   data.cases      = &cases[0];
   data.defaultSk  = SrcKey{curSrcKey(env),
                            bcOff(env) + iv.strvec()[iv.size() - 1].dest};
-  data.spOff      = absSPOff(env);
+  data.spOff      = invSPOff(env);
 
   auto const dest = gen(env,
                         fastPath ? LdSSwitchDestFast

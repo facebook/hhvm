@@ -99,7 +99,7 @@ struct BackEnd {
     CodeBlock& cb,
     TCA start,
     SRFlags flags,
-    folly::Optional<FPAbsOffset> spOff,
+    folly::Optional<FPInvOffset> spOff,
     ServiceRequest req,
     const ServiceReqArgVec& argv) = 0;
 
@@ -111,7 +111,7 @@ struct BackEnd {
    */
   virtual void emitInterpReq(CodeBlock& code,
                              SrcKey sk,
-                             FPAbsOffset spOff) = 0;
+                             FPInvOffset spOff) = 0;
 
   virtual bool funcPrologueHasGuard(TCA prologue, const Func* func) = 0;
   virtual TCA funcPrologueToGuard(TCA prologue, const Func* func) = 0;

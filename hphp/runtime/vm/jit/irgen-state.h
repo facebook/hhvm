@@ -37,7 +37,7 @@ struct SSATmp;
 
 struct FPIInfo {
   SSATmp* returnSP;
-  FPAbsOffset returnSPOff; // return's logical sp offset; stkptr might differ
+  FPInvOffset returnSPOff; // return's logical sp offset; stkptr might differ
   IRInstruction* spillFrame;
 };
 
@@ -114,7 +114,7 @@ struct IRGS {
    * offset pair to this stack to prevent it from being erroneously
    * popped during an FCall.
    */
-  std::stack<std::pair<SSATmp*,FPAbsOffset>> fpiActiveStack;
+  std::stack<std::pair<SSATmp*,FPInvOffset>> fpiActiveStack;
 
   /*
    * The function to use to create catch blocks when instructions that can

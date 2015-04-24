@@ -168,9 +168,9 @@ extern "C" void handleSRHelper();
 /*
  * Return the VM stack offset a service request was associated with.  This
  * function is only legal to call with service requests that were created with
- * an FPAbsOffset.  (TODO: list of when we do that.)
+ * an FPInvOffset.  (TODO: list of when we do that.)
  */
-FPAbsOffset serviceReqSPOff(TCA);
+FPInvOffset serviceReqSPOff(TCA);
 
 /*
  * A REQ_BIND_JMP service request passes an address of a jump that can be

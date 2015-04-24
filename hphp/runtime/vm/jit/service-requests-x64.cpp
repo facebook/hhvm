@@ -124,7 +124,7 @@ void padStub(CodeBlock& stub) {
 
 void emitServiceReqImpl(CodeBlock& stub,
                         SRFlags flags,
-                        folly::Optional<FPAbsOffset> spOff,
+                        folly::Optional<FPInvOffset> spOff,
                         ServiceRequest req,
                         const ServiceReqArgVec& argv) {
   const bool persist = flags & SRFlags::Persist;
@@ -210,7 +210,7 @@ size_t reusableStubSize() {
 TCA emitServiceReqWork(CodeBlock& cb,
                        TCA start,
                        SRFlags flags,
-                       folly::Optional<FPAbsOffset> spOff,
+                       folly::Optional<FPInvOffset> spOff,
                        ServiceRequest req,
                        const ServiceReqArgVec& argv) {
   auto const is_reused = start != cb.frontier();
@@ -227,10 +227,10 @@ void emitBindJ(CodeBlock& cb,
                CodeBlock& frozen,
                ConditionCode cc,
                SrcKey dest,
-               FPAbsOffset spOff,
+               FPInvOffset spOff,
                TransFlags trflags) {
   auto const smashInfo = emitBindJPre(cb, frozen, cc);
-  auto optSPOff = folly::Optional<FPAbsOffset>{};
+  auto optSPOff = folly::Optional<FPInvOffset>{};
   if (!dest.resumed()) optSPOff = spOff;
   auto const sr = emitEphemeralServiceReq(
     frozen,
@@ -248,7 +248,7 @@ TCA emitRetranslate(CodeBlock& cb,
                     CodeBlock& frozen,
                     jit::ConditionCode cc,
                     SrcKey dest,
-                    folly::Optional<FPAbsOffset> spOff,
+                    folly::Optional<FPInvOffset> spOff,
                     TransFlags trflags) {
   auto const toSmash = emitBindJPre(cb, frozen, cc);
   auto const sr = emitServiceReq(
@@ -268,7 +268,7 @@ TCA emitBindAddr(CodeBlock& cb,
                  CodeBlock& frozen,
                  TCA* addr,
                  SrcKey sk,
-                 FPAbsOffset spOff) {
+                 FPInvOffset spOff) {
   const bool needsJump = cb.base() == frozen.base();
   TCA jumpAddr = nullptr;
 
@@ -278,7 +278,7 @@ TCA emitBindAddr(CodeBlock& cb,
     as.jmp(jumpAddr);
   }
 
-  auto optSPOff = folly::Optional<FPAbsOffset>{};
+  auto optSPOff = folly::Optional<FPInvOffset>{};
   if (!sk.resumed()) optSPOff = spOff;
 
   auto const sr = emitEphemeralServiceReq(
@@ -309,7 +309,7 @@ void emitBindJmpccFirst(CodeBlock& cb,
                         ConditionCode cc,
                         SrcKey targetSk0,
                         SrcKey targetSk1,
-                        FPAbsOffset spOff) {
+                        FPInvOffset spOff) {
   mcg->backEnd().prepareForTestAndSmash(cb, 0,
                                         TestAndSmashFlags::kAlignJccAndJmp);
   Asm as{cb};
@@ -321,7 +321,7 @@ void emitBindJmpccFirst(CodeBlock& cb,
 
   always_assert_flog(targetSk0.resumed() == targetSk1.resumed(),
                      "jmpcc service request was confused about resumables");
-  auto optSPOff = folly::Optional<FPAbsOffset>{};
+  auto optSPOff = folly::Optional<FPInvOffset>{};
   if (!targetSk0.resumed()) optSPOff = spOff;
 
   auto const sr = emitEphemeralServiceReq(

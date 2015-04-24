@@ -114,7 +114,7 @@ struct TransContext {
 
   TransID transID;  // May be kInvalidTransID if not for a real translation.
   Offset initBcOffset;
-  FPAbsOffset initSpOffset;
+  FPInvOffset initSpOffset;
   bool resumed;
   const Func* func;
 

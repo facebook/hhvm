@@ -234,7 +234,7 @@ struct SrcRec {
    * Pre: this SrcRec is for a non-resumed SrcKey
    * Pre: setAnchorTranslation has been called
    */
-  FPAbsOffset nonResumedSPOff() const;
+  FPInvOffset nonResumedSPOff() const;
 
   const GrowableVector<IncomingBranch>& incomingBranches() const {
     return m_incomingBranches;

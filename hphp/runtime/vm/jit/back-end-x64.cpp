@@ -116,7 +116,7 @@ struct BackEnd final : jit::BackEnd {
   TCA emitServiceReqWork(CodeBlock& cb,
                          TCA start,
                          SRFlags flags,
-                         folly::Optional<FPAbsOffset> spOff,
+                         folly::Optional<FPInvOffset> spOff,
                          ServiceRequest req,
                          const ServiceReqArgVec& argv) override {
     return x64::emitServiceReqWork(cb, start, flags, spOff, req, argv);
@@ -128,7 +128,7 @@ struct BackEnd final : jit::BackEnd {
 
   void emitInterpReq(CodeBlock& mainCode,
                      SrcKey sk,
-                     FPAbsOffset spOff) override {
+                     FPInvOffset spOff) override {
     Asm a { mainCode };
     // Add a counter for the translation if requested
     if (RuntimeOption::EvalJitTransCounters) {

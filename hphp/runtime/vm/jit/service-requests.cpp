@@ -39,14 +39,14 @@ void only_x64() {
 
 //////////////////////////////////////////////////////////////////////
 
-FPAbsOffset serviceReqSPOff(TCA addr) {
+FPInvOffset serviceReqSPOff(TCA addr) {
   only_x64();
 
   DecodedInstruction instr(addr);
   always_assert(instr.isLea());
   auto const offBytes = safe_cast<int32_t>(instr.offset());
   always_assert((offBytes % sizeof(Cell)) == 0);
-  return FPAbsOffset{-(offBytes / int32_t{sizeof(Cell)})};
+  return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
 }
 
 void adjustBindJmpPatchableJmpAddress(TCA addr,

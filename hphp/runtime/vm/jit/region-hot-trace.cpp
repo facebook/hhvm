@@ -30,7 +30,7 @@ TRACE_SET_MOD(pgo);
  */
 static void discardPoppedTypes(
   PostConditions& pConds,
-  FPAbsOffset curSpOffset
+  FPInvOffset curSpOffset
 ) {
   for (auto it = pConds.begin(); it != pConds.end(); ) {
     if (it->location.tag() == RegionDesc::Location::Tag::Stack &&

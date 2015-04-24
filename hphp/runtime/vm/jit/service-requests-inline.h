@@ -75,7 +75,7 @@ inline bool isEphemeralServiceReq(ServiceRequest sr) {
 template<typename... Arg>
 TCA emitServiceReq(CodeBlock& cb,
                    SRFlags flags,
-                   folly::Optional<FPAbsOffset> spOff,
+                   folly::Optional<FPInvOffset> spOff,
                    ServiceRequest sr,
                    Arg... a) {
   // These should reuse stubs. Use emitEphemeralServiceReq.
@@ -95,7 +95,7 @@ TCA emitServiceReq(CodeBlock& cb,
 template<typename... Arg>
 TCA emitEphemeralServiceReq(CodeBlock& cb,
                             TCA start,
-                            folly::Optional<FPAbsOffset> spOff,
+                            folly::Optional<FPInvOffset> spOff,
                             ServiceRequest sr,
                             Arg... a) {
   assertx(isEphemeralServiceReq(sr) || sr == REQ_RETRANSLATE);

@@ -83,7 +83,7 @@ private:
 
   const Func* curFunc() const;
   const Unit* curUnit() const;
-  FPAbsOffset curSpOffset() const;
+  FPInvOffset curSpOffset() const;
   bool resumed() const;
 
   bool prepareInstruction();
@@ -129,7 +129,7 @@ const Unit* RegionFormer::curUnit() const {
   return irgen::curUnit(m_irgs);
 }
 
-FPAbsOffset RegionFormer::curSpOffset() const {
+FPInvOffset RegionFormer::curSpOffset() const {
   return irgen::logicalStackDepth(m_irgs);
 }
 
@@ -497,7 +497,7 @@ bool RegionFormer::tryInline(uint32_t& instrSize) {
   RegionContext ctx;
   ctx.func = callee;
   ctx.bcOffset = callee->getEntryForNumArgs(numArgs);
-  ctx.spOffset = FPAbsOffset{safe_cast<int32_t>(callee->numSlotsInFrame())};
+  ctx.spOffset = FPInvOffset{safe_cast<int32_t>(callee->numSlotsInFrame())};
   ctx.resumed = false;
   for (int i = 0; i < numArgs; ++i) {
     auto type = irgen::publicTopType(m_irgs, BCSPOffset{i});

@@ -49,7 +49,7 @@ bool branchesToItself(SrcKey sk) {
  */
 void exitRequest(IRGS& env, TransFlags flags, SrcKey target) {
   auto const curBcOff = bcOff(env);
-  auto const spOff = absSPOff(env);
+  auto const spOff = invSPOff(env);
   if (env.firstBcInst && target.offset() == curBcOff) {
     // The case where the instruction may branch back to itself is
     // handled in implMakeExit.

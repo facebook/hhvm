@@ -36,12 +36,12 @@ inline const Unit* liveUnit() { return liveFunc()->unit(); }
 inline Class* liveClass() { return liveFunc()->cls(); }
 inline bool liveResumed() { return liveFrame()->resumed(); }
 
-inline jit::FPAbsOffset liveSpOff() {
+inline jit::FPInvOffset liveSpOff() {
   Cell* fp = reinterpret_cast<Cell*>(vmfp());
   if (liveFrame()->resumed()) {
     fp = (Cell*)Stack::resumableStackBase((ActRec*)fp);
   }
-  return jit::FPAbsOffset{safe_cast<int32_t>(fp - vmsp())};
+  return jit::FPInvOffset{safe_cast<int32_t>(fp - vmsp())};
 }
 
 namespace jit {

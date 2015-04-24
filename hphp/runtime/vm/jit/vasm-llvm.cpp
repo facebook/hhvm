@@ -904,7 +904,7 @@ struct LLVMEmitter {
           // instruction, we have to create new stubs for the duplicates to
           // avoid reusing the ephemeral stubs before they're done.
           auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
-          auto optSPOff = folly::Optional<FPAbsOffset>{};
+          auto optSPOff = folly::Optional<FPInvOffset>{};
           if (!req.target.resumed()) optSPOff = req.spOff;
           auto newStub = emitEphemeralServiceReq(
             frozen,
@@ -1177,7 +1177,7 @@ private:
     TCA stub;
     bool stubReused;
     SrcKey target;
-    FPAbsOffset spOff;
+    FPInvOffset spOff;
     TransFlags trflags;
   };
 
@@ -1815,7 +1815,7 @@ void LLVMEmitter::emit(const bindjmp& inst) {
 
   auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
   bool reused;
-  auto optSPOff = folly::Optional<FPAbsOffset>{};
+  auto optSPOff = folly::Optional<FPInvOffset>{};
   if (!inst.target.resumed()) optSPOff = inst.spOff;
   auto reqIp = emitEphemeralServiceReq(
     frozen,
@@ -1918,7 +1918,7 @@ void LLVMEmitter::emit(const bindaddr& inst) {
   auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
   mcg->setJmpTransID((TCA)inst.dest);
 
-  auto optSPOff = folly::Optional<FPAbsOffset>{};
+  auto optSPOff = folly::Optional<FPInvOffset>{};
   if (!inst.sk.resumed()) optSPOff = inst.spOff;
 
   *inst.dest = emitEphemeralServiceReq(
@@ -2284,7 +2284,7 @@ void LLVMEmitter::emit(const fallback& inst) {
     auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
     auto const args = packServiceReqArgs(inst.dest.offset(),
                                          inst.trflags.packed);
-    auto optSPOff = folly::Optional<FPAbsOffset>{};
+    auto optSPOff = folly::Optional<FPInvOffset>{};
     if (!inst.dest.resumed()) optSPOff = sr->nonResumedSPOff();
     stub = mcg->backEnd().emitServiceReqWork(
       frozen,

@@ -352,7 +352,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
       mcg->code.frozen(),
       CC_None,
       funcBody,
-      FPAbsOffset{func->numSlotsInFrame()},
+      FPInvOffset{func->numSlotsInFrame()},
       TransFlags{}
     );
   }
@@ -369,7 +369,7 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   Asm a { mainCode };
   auto const start = mainCode.frontier();
   assertx(mcg->cgFixups().empty());
-  auto const spOff = FPAbsOffset{func->numSlotsInFrame()};
+  auto const spOff = FPInvOffset{func->numSlotsInFrame()};
 
   if (dvs.size() == 1) {
     a.  cmpl  (dvs[0].first, rVmFp[AROFF(m_numArgsAndFlags)]);

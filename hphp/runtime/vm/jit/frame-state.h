@@ -145,7 +145,7 @@ struct FrameState {
    * Tracking of in-memory state of the evaluation stack.
    */
   SSATmp* spValue{nullptr};
-  FPAbsOffset spOffset;   // delta from vmfp to spvalue
+  FPInvOffset spOffset;   // delta from vmfp to spvalue
 
   /*
    * m_thisAvailable tracks whether the current frame is known to have a
@@ -178,7 +178,7 @@ struct FrameState {
    * being used in LegacyReoptimize mode.
    */
   uint32_t stackDeficit{0};
-  FPAbsOffset syncedSpLevel{0};
+  FPInvOffset syncedSpLevel{0};
   EvalStack evalStack;
 
   /*
@@ -305,7 +305,7 @@ struct FrameStateMgr final : private LocalStateHook {
   const PostConditions& postConds(Block*) const;
 
   const Func* func() const { return cur().curFunc; }
-  FPAbsOffset spOffset() const { return cur().spOffset; }
+  FPInvOffset spOffset() const { return cur().spOffset; }
   SSATmp* sp() const { return cur().spValue; }
   SSATmp* fp() const { return cur().fpValue; }
   bool thisAvailable() const { return cur().thisAvailable; }
@@ -317,7 +317,7 @@ struct FrameStateMgr final : private LocalStateHook {
   void clearStackDeficit() { cur().stackDeficit = 0; }
   void setStackDeficit(uint32_t d) { cur().stackDeficit = d; }
   EvalStack& evalStack() { return cur().evalStack; }
-  FPAbsOffset syncedSpLevel() const { return cur().syncedSpLevel; }
+  FPInvOffset syncedSpLevel() const { return cur().syncedSpLevel; }
   void syncEvalStack();
 
   Type localType(uint32_t id) const;

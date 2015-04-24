@@ -39,8 +39,8 @@ namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 struct ExnStackState {
-  FPAbsOffset spOffset;
-  FPAbsOffset syncedSpLevel;
+  FPInvOffset spOffset;
+  FPInvOffset syncedSpLevel;
   uint32_t stackDeficit;
   EvalStack evalStack;
   SSATmp* sp;
@@ -117,7 +117,7 @@ struct IRBuilder {
   IRUnit& unit() const { return m_unit; }
   BCMarker curMarker() const { return m_curMarker; }
   const Func* curFunc() const { return m_state.func(); }
-  FPAbsOffset spOffset() { return m_state.spOffset(); }
+  FPInvOffset spOffset() { return m_state.spOffset(); }
   SSATmp* sp() const { return m_state.sp(); }
   SSATmp* fp() const { return m_state.fp(); }
   uint32_t stackDeficit() const { return m_state.stackDeficit(); }
@@ -126,7 +126,7 @@ struct IRBuilder {
   void setStackDeficit(uint32_t d) { m_state.setStackDeficit(d); }
   void syncEvalStack() { m_state.syncEvalStack(); }
   EvalStack& evalStack() { return m_state.evalStack(); }
-  FPAbsOffset syncedSpLevel() const { return m_state.syncedSpLevel(); }
+  FPInvOffset syncedSpLevel() const { return m_state.syncedSpLevel(); }
   bool thisAvailable() const { return m_state.thisAvailable(); }
   void setThisAvailable() { m_state.setThisAvailable(); }
   Type localType(uint32_t id, TypeConstraint tc);
@@ -325,8 +325,8 @@ private:
   jit::vector<BlockState> m_savedBlocks;
   Block* m_curBlock;
   ExnStackState m_exnStack{
-    FPAbsOffset{0},
-    FPAbsOffset{0},
+    FPInvOffset{0},
+    FPInvOffset{0},
     0,
     EvalStack{},
     nullptr

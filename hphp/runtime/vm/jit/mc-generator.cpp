@@ -434,7 +434,7 @@ MCGenerator::createTranslation(const TranslArgs& args) {
     }
   }
 
-  auto const srcRecSPOff = [&] () -> folly::Optional<FPAbsOffset> {
+  auto const srcRecSPOff = [&] () -> folly::Optional<FPInvOffset> {
     if (sk.resumed()) return folly::none;
     return liveSpOff();
   }();
@@ -992,7 +992,7 @@ MCGenerator::bindJmpccFirst(TCA toSmash,
    * that the original service request used, so we can use it again on the one
    * we're about to create.
    */
-  auto const optSPOff = [&] () -> folly::Optional<FPAbsOffset> {
+  auto const optSPOff = [&] () -> folly::Optional<FPInvOffset> {
     if (isResumed) return folly::none;
     return serviceReqSPOff(jmpTarget);
   }();
@@ -1626,7 +1626,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
     assertx(m_fixups.empty());
   };
 
-  FPAbsOffset initSpOffset =
+  FPInvOffset initSpOffset =
     args.region ? args.region->entry()->initialSpOffset()
                 : liveSpOff();
 

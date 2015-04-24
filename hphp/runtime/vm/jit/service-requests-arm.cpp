@@ -44,7 +44,7 @@ size_t reusableStubSize() {
 TCA emitServiceReqWork(CodeBlock& cb,
                        TCA start,
                        SRFlags flags,
-                       folly::Optional<FPAbsOffset> spOff,
+                       folly::Optional<FPInvOffset> spOff,
                        ServiceRequest req,
                        const ServiceReqArgVec& argv) {
   MacroAssembler a { cb };

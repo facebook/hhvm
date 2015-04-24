@@ -105,7 +105,7 @@ TCA SrcRec::getFallbackTranslation() const {
   return m_anchorTranslation;
 }
 
-FPAbsOffset SrcRec::nonResumedSPOff() const {
+FPInvOffset SrcRec::nonResumedSPOff() const {
   return serviceReqSPOff(getFallbackTranslation());
 }
 
@@ -148,7 +148,7 @@ void SrcRec::emitFallbackJumpCustom(CodeBlock& cb,
                                     TransFlags trflags,
                                     ConditionCode cc) {
   // Another platform dependency (the same one as above). TODO(2990497)
-  auto optSPOff = folly::Optional<FPAbsOffset>{};
+  auto optSPOff = folly::Optional<FPInvOffset>{};
   if (!sk.resumed()) optSPOff = nonResumedSPOff();
   auto toSmash = x64::emitRetranslate(cb, frozen, cc, sk, optSPOff, trflags);
   registerFallbackJump(toSmash, cc);

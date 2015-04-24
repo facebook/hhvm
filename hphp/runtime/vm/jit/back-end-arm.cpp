@@ -154,7 +154,7 @@ struct BackEnd final : jit::BackEnd {
   TCA emitServiceReqWork(CodeBlock& cb,
                          TCA start,
                          SRFlags flags,
-                         folly::Optional<FPAbsOffset> spOff,
+                         folly::Optional<FPInvOffset> spOff,
                          ServiceRequest req,
                          const ServiceReqArgVec& argv) override {
     return arm::emitServiceReqWork(cb, start, flags, spOff, req, argv);
@@ -166,7 +166,7 @@ struct BackEnd final : jit::BackEnd {
 
   void emitInterpReq(CodeBlock& mainCode,
                      SrcKey sk,
-                     FPAbsOffset spOff) override {
+                     FPInvOffset spOff) override {
     if (RuntimeOption::EvalJitTransCounters) {
       vixl::MacroAssembler a { mainCode };
       arm::emitTransCounterInc(a);

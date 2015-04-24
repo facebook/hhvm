@@ -422,7 +422,7 @@ struct DefInlineFPData : IRExtraData {
       fromFPushCtor ? "ctor," : "",
       retBCOff, ',',
       retSPOff.offset, ',',
-      spOffset
+      spOffset.offset
     );
   }
 
@@ -431,7 +431,7 @@ struct DefInlineFPData : IRExtraData {
   SSATmp* ctx;       // Ctx, Cls or Nullptr.
   Offset retBCOff;
   FPAbsOffset retSPOff;
-  int32_t spOffset;  // offset from caller SP to callee SP
+  IRSPOffset spOffset; // offset from caller SP to bottom of callee's ActRec
 };
 
 struct CallArrayData : IRExtraData {

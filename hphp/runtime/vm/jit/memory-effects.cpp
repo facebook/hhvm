@@ -1287,7 +1287,7 @@ std::string show(MemEffects effects) {
 AliasClass inline_fp_frame(const IRInstruction* inst) {
   return AStack {
     inst->src(0),
-    inst->extra<DefInlineFP>()->spOffset + int32_t{kNumActRecCells} - 1,
+    inst->extra<DefInlineFP>()->spOffset.offset + int32_t{kNumActRecCells} - 1,
     int32_t{kNumActRecCells}
   };
 }

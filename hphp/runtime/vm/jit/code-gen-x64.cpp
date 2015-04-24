@@ -2312,7 +2312,7 @@ void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
   auto const fakeRet  = mcg->tx().uniqueStubs.retInlHelper;
   auto const extra    = inst->extra<DefInlineFP>();
   auto const retBCOff = extra->retBCOff;
-  auto const offset   = cellsToBytes(extra->spOffset);
+  auto const offset   = cellsToBytes(extra->spOffset.offset);
   auto& v = vmain();
   v << store{callerFP, callerSP[offset + AROFF(m_sfp)]};
   emitImmStoreq(v, intptr_t(fakeRet), callerSP[offset + AROFF(m_savedRip)]);

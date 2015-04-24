@@ -90,7 +90,7 @@ void beginInlining(IRGS& env,
   data.fromFPushCtor = sframe->extra<ActRecInfo>()->fromFPushCtor;
   data.ctx           = sframe->src(2);
   data.retSPOff      = prevSPOff;
-  data.spOffset      = offsetFromIRSP(env, BCSPOffset{0}).offset;
+  data.spOffset      = offsetFromIRSP(env, BCSPOffset{0});
 
   // Push state and update the marker before emitting any instructions so
   // they're all given markers in the callee.

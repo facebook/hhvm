@@ -36,11 +36,11 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
   method on_tmixed acc = acc
   method on_tarray: type a. _ -> a ty option -> a ty option -> _ =
     fun acc ty1_opt ty2_opt ->
-    let acc = opt_fold_left this#on_type acc ty1_opt in
-    let acc = opt_fold_left this#on_type acc ty2_opt in
+    let acc = Option.fold ~f:this#on_type ~init:acc ty1_opt in
+    let acc = Option.fold ~f:this#on_type ~init:acc ty2_opt in
     acc
   method on_tgeneric: type a. _ -> _ -> (_ * a ty) option -> _ =
-    fun acc _ cstr -> opt_fold_left this#on_type acc (opt_map snd cstr)
+    fun acc _ cstr -> Option.fold ~f:this#on_type ~init:acc (opt_map snd cstr)
   method on_toption: type a. _ -> a ty -> _ =
     fun acc ty -> this#on_type acc ty
   method on_tprim acc _ = acc
@@ -49,11 +49,12 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     fun acc {ft_params; ft_tparams; ft_ret; _} ->
     let acc = List.fold_left this#on_type acc (List.map snd ft_params) in
     let tparams = List.map (fun (_, _, x) -> opt_map snd x) ft_tparams in
-    let acc = List.fold_left (opt_fold_left this#on_type) acc tparams in
+    let acc = List.fold_left (fun acc tp ->
+      Option.fold ~f:this#on_type ~init:acc tp) acc tparams in
     this#on_type acc ft_ret
   method on_tabstract acc _ tyl ty_opt =
     let acc = List.fold_left this#on_type acc tyl in
-    let acc = opt_fold_left this#on_type acc ty_opt in
+    let acc = Option.fold ~f:this#on_type ~init:acc ty_opt in
     acc
   method on_tapply: type a. _ -> _ -> a ty list -> _ =
     fun acc _ tyl -> List.fold_left this#on_type acc tyl

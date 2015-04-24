@@ -245,7 +245,7 @@ end = struct
         (match ty2_opt with
         | None -> true
         | Some ty -> this#on_type acc ty) ||
-        (opt_fold_left this#on_type acc ty1_opt)
+        (Option.fold ~f:this#on_type ~init:acc ty1_opt)
     end
   let check ty = visitor#on_type false ty
 end

@@ -89,7 +89,7 @@ struct BackEnd final : jit::BackEnd {
    */
 #ifdef __aarch64__  
   #define CALLEE_SAVED_BARRIER()                                    \
-      asm volatile("" : : : "r0", "r1", "r2", "r3", "r4");
+      asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28");
 #else
   #define CALLEE_SAVED_BARRIER()                                    \
       asm volatile("" : : : "rbx", "r12", "r13", "r14", "r15");

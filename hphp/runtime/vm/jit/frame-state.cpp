@@ -349,13 +349,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     cur().fpValue = nullptr;
     break;
 
-  case ReDefSP:
-    cur().spValue = inst->dst();
-    cur().spOffset = FPInvOffset{inst->extra<ReDefSP>()->offset};
-    break;
-
   case DefSP:
-  case ResetSP:
     cur().spValue = inst->dst();
     cur().spOffset = FPInvOffset{inst->extra<StackOffset>()->offset};
     break;
@@ -662,10 +656,13 @@ bool FrameStateMgr::save(Block* block) {
 }
 
 void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
-  auto const target     = inst->extra<DefInlineFP>()->target;
-  auto const savedSPOff = inst->extra<DefInlineFP>()->retSPOff;
+  auto const extra      = inst->extra<DefInlineFP>();
+  auto const target     = extra->target;
+  auto const savedSPOff = extra->retSPOff;
   auto const calleeFP   = inst->dst();
   auto const calleeSP   = inst->src(0);
+
+  always_assert(calleeSP == cur().spValue);
 
   /*
    * Push a new state for the inlined callee; saving the state we'll need to
@@ -682,27 +679,42 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
    * just don't inline calls to object methods with a null $this.
    */
   cur().fpValue          = calleeFP;
-  cur().spValue          = calleeSP;
   cur().thisAvailable    = target->cls() != nullptr && !target->isStatic();
   cur().curFunc          = target;
   cur().frameMaySpanCall = false;
   cur().syncedSpLevel    = FPInvOffset{target->numLocals()};
 
-  // XXX: we're setting spOffset to keep some invariants about it true,
-  // although, we don't really define it as part of the DefInlineFP---there's
-  // going to be a ReDefSP coming that does it.  TODO(#5868870): can this be
-  // improved to set spOffset relative to the new fp in a non-lying way?
-  cur().spOffset = cur().syncedSpLevel;
+  /*
+   * To set up spOffset, we want the FPInvOffset for the new fpValue and
+   * spValue.  We're not changing spValue while we inline, but we're changing
+   * fpValue, so this needs to change.  We know where the new fpValue is
+   * pointing (relative to the spValue, which we aren't changing).  So we just
+   * need to do a change of coordinates, which turns out to be an indentity map
+   * here:
+   *
+   *    fpValue = spValue + extra->spOffset (an IRSPOffset)
+   * So,
+   *    spValue = fpValue - extra->spOffset (an FPInvOffset)
+   */
+  cur().spOffset = FPInvOffset{extra->spOffset.offset};
+  FTRACE(6, "DefInlineFP setting spOffset: {}\n", cur().spOffset.offset);
 
+  /*
+   * Initialize tracked memory state for locals and stack slots to empty
+   * values.
+   */
   cur().locals.clear();
   cur().locals.resize(target->numLocals());
   cur().memoryStack.clear();
-  cur().memoryStack.resize(cur().syncedSpLevel.offset);
+  cur().memoryStack.resize(std::max(cur().syncedSpLevel.offset,
+                                    cur().spOffset.offset));
 }
 
 void FrameStateMgr::trackInlineReturn() {
+  DEBUG_ONLY auto const cur_SP = cur().spValue;
   m_stack.pop_back();
   assertx(!m_stack.empty());
+  assertx(cur_SP == cur().spValue); // inlining may not change spValue
 }
 
 bool FrameStateMgr::checkInvariants() const {

@@ -782,9 +782,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case MulIntO:
   case NeqDbl:
   case NeqInt:
-  case ReDefSP:
   case AdjustSP:
-  case ResetSP:
   case SubDbl:
   case SubInt:
   case SubIntO:

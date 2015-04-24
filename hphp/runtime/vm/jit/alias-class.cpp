@@ -53,12 +53,6 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
   case DefSP:
     return StkPtrInfo { inst->src(0),
       FPRelOffset{-inst->extra<DefSP>()->offset} };
-  case ResetSP:
-    return StkPtrInfo { inst->src(0),
-      FPRelOffset{-inst->extra<ResetSP>()->offset} };
-  case ReDefSP:
-    return StkPtrInfo { inst->src(0),
-      FPRelOffset{-inst->extra<ReDefSP>()->offset} };
   case RetAdjustStk:
     return StkPtrInfo { inst->src(0), FPRelOffset{2} };
 

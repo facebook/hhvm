@@ -2326,24 +2326,6 @@ void CodeGenerator::cgInlineReturn(IRInstruction* inst) {
   vmain() << load{fpReg[AROFF(m_sfp)], rVmFp};
 }
 
-void CodeGenerator::cgReDefSP(IRInstruction* inst) {
-  // TODO(#2288359): this instruction won't be necessary (for
-  // non-generator frames) when we don't track rVmSp independently
-  // from rVmFp.  In generator frames we'll have to track offsets from
-  // a DefResumableSP or something similar.
-  auto fp  = srcLoc(inst, 0).reg();
-  auto dst = dstLoc(inst, 0).reg();
-  auto off = -cellsToBytes(inst->extra<ReDefSP>()->offset);
-  vmain() << lea{fp[off], dst};
-}
-
-void CodeGenerator::cgResetSP(IRInstruction* inst) {
-  auto fp  = srcLoc(inst, 0).reg();
-  auto dst = dstLoc(inst, 0).reg();
-  auto off = -cellsToBytes(inst->extra<ResetSP>()->offset);
-  vmain() << lea{fp[off], dst};
-}
-
 void CodeGenerator::cgAdjustSP(IRInstruction* inst) {
   auto const rsrc = srcLoc(inst, 0).reg();
   auto const rdst = dstLoc(inst, 0).reg();

@@ -160,7 +160,6 @@ bool canDCE(IRInstruction* inst) {
   case DefInlineFP:
   case LdRetAddr:
   case Mov:
-  case ReDefSP:
   case CountArray:
   case CountArrayFast:
   case CountCollection:
@@ -193,7 +192,6 @@ bool canDCE(IRInstruction* inst) {
   case DbgTraceCall:
   case AKExistsObj:
   case AdjustSP:
-  case ResetSP:
   case StStk:
   case SpillFrame:
   case CufIterSpillFrame:

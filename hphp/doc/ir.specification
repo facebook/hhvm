@@ -1428,20 +1428,6 @@ To string conversions:
   This instruction is used at the beginning of tracelets to represent the state
   of the stack on entry and does not emit code.
 
-| ReDefSP<offset>, D(StkPtr), S(FramePtr), NF
-
-  Re-define a stack in terms of a frame pointer S0 and an offset, putting the
-  resulting pointer in D.
-
-  This instruction is used when entering an inlined call, and it will generally
-  be DCE'd when the actrec can be eliminated.
-
-| ResetSP<offset>, D(StkPtr), S(FramePtr), NF
-
-  Reset the stack pointer given the `offset' from the frame pointer in S0.
-  This instruction is not a candidate for DCE.
-  This instruction is only needed until TODO(#2288359).
-
 | AdjustSP<offset>, D(StkPtr), S(StkPtr), NF
 
   Define a new StkPtr by adding `offset' cells to S0.  Note that because of

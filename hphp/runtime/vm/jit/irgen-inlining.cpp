@@ -104,7 +104,6 @@ void beginInlining(IRGS& env,
   updateMarker(env);
 
   auto const calleeFP = gen(env, DefInlineFP, data, calleeSP, fp(env));
-  gen(env, ReDefSP, StackOffset{target->numLocals()}, fp(env));
 
   for (unsigned i = 0; i < numParams; ++i) {
     stLocRaw(env, i, calleeFP, params[i]);
@@ -131,11 +130,6 @@ void endInlinedCommon(IRGS& env) {
   decRefLocalsInline(env);
   decRefThis(env);
 
-  /*
-   * Pop the ActRec and restore the stack and frame pointers.  It's
-   * important that this does endInlining before pushing the return
-   * value so stack offsets are properly tracked.
-   */
   gen(env, InlineReturn, fp(env));
 
   // Return to the caller function.  Careful between here and the
@@ -147,7 +141,6 @@ void endInlinedCommon(IRGS& env) {
   env.fpiActiveStack.pop();
 
   updateMarker(env);
-  gen(env, ResetSP, StackOffset{env.irb->spOffset().offset}, fp(env));
 
   /*
    * After the end of inlining, we are restoring to a previously defined stack

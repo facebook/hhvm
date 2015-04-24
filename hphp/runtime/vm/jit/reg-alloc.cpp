@@ -128,8 +128,6 @@ PhysReg forceAlloc(const SSATmp& tmp) {
   if (forceStkPtrs && tmp.isA(TStkPtr)) {
     assert_flog(
       opc == DefSP ||
-      opc == ReDefSP ||
-      opc == ResetSP ||
       opc == AdjustSP ||
       opc == RetAdjustStk ||
       opc == Mov,

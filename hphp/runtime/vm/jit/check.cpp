@@ -223,18 +223,12 @@ bool checkCfg(const IRUnit& unit) {
 bool checkTmpsSpanningCalls(const IRUnit& unit) {
   auto ignoreSrc = [&](IRInstruction& inst, SSATmp* src) {
     /*
-     * ReDefSP, TakeStk, and FramePtr/StkPtr-typed tmps are used only for stack
-     * analysis in the simplifier and therefore may live across calls. In
-     * particular, ReDefSP are used to bridge the logical stack of the caller
-     * when a callee is inlined so that analysis does not scan into the callee
-     * stack when searching for a type of value in the caller.
+     * FramePtr/StkPtr-typed tmps may live across calls.
      *
-     * Tmps defined by DefConst are always available and may be
-     * assigned to registers if needed by the instructions using the
-     * const.
+     * Tmps defined by DefConst are always available and may be assigned to
+     * registers if needed by the instructions using the const.
      */
-    return (inst.is(ReDefSP) && src->isA(TStkPtr)) ||
-           src->isA(TStkPtr) ||
+    return src->isA(TStkPtr) ||
            src->isA(TFramePtr) ||
            src->inst()->is(DefConst);
   };

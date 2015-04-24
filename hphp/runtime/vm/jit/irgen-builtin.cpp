@@ -795,8 +795,8 @@ void builtinCall(IRGS& env,
   }
 
   // If we're not inlining, we've spilled the stack and are about to do things
-  // that can throw.  If we are inlining, we've done various DefInlineFP and
-  // ReDefSP type stuff and possibly also spilled the stack.
+  // that can throw.  If we are inlining, we've done various DefInlineFP-type
+  // stuff and possibly also spilled the stack.
   env.irb->exceptionStackBoundary();
 
   auto const retType = [&]() -> Type {

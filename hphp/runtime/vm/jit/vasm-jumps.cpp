@@ -177,6 +177,9 @@ void optimizeJmps(Vunit& unit) {
   };
   bool changed = false;
   bool ever_changed = false;
+  // The number of incoming edges from (reachable) predecessors for each block.
+  // It is maintained as an upper bound of the actual value during the
+  // transformation.
   jit::vector<int> npreds(unit.blocks.size(), 0);
   do {
     if (changed) {
@@ -188,8 +191,9 @@ void optimizeJmps(Vunit& unit) {
         npreds[s]++;
       }
     });
-    // give entry an extra predecessor to prevent cloning it
+    // give entry an extra predecessor to prevent cloning it.
     npreds[unit.entry]++;
+
     PostorderWalker{unit}.dfs([&](Vlabel b) {
       auto& block = unit.blocks[b];
       auto& code = block.code;
@@ -199,6 +203,7 @@ void optimizeJmps(Vunit& unit) {
         if (ss[0] == ss[1]) {
           // both edges have same target, change to jmp
           code.back() = jmp{ss[0]};
+          --npreds[ss[0]];
           changed = true;
         } else {
           auto jcc_i = code.back().jcc_;
@@ -221,26 +226,30 @@ void optimizeJmps(Vunit& unit) {
           }
         }
       }
-      if (code.back().op == Vinstr::jmp) {
-        auto& s = code.back().jmp_.target;
+
+      for (auto& s : succs(block)) {
         if (isEmpty(s, Vinstr::jmp)) {
           // skip over s
+          --npreds[s];
           s = unit.blocks[s].code.back().jmp_.target;
+          ++npreds[s];
           changed = true;
-        } else if (npreds[s] == 1 || isEmpty(s, Vinstr::jcc)) {
+        }
+      }
+
+      if (code.back().op == Vinstr::jmp) {
+        auto s = code.back().jmp_.target;
+        if (npreds[s] == 1 || isEmpty(s, Vinstr::jcc)) {
           // overwrite jmp with copy of s
           auto& code2 = unit.blocks[s].code;
           code.pop_back();
           code.insert(code.end(), code2.begin(), code2.end());
-          changed = true;
-        }
-      } else {
-        for (auto& s : succs(block)) {
-          if (isEmpty(s, Vinstr::jmp)) {
-            // skip over s
-            s = unit.blocks[s].code.back().jmp_.target;
-            changed = true;
+          if (--npreds[s]) {
+            for (auto ss : succs(block)) {
+              ++npreds[ss];
+            }
           }
+          changed = true;
         }
       }
     });

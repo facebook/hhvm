@@ -22,6 +22,7 @@
   HPHPD_CLIENT_SETTING(PrintLevel,          int,   5)             \
   HPHPD_CLIENT_SETTING(StackArgs,           bool,  true)          \
   HPHPD_CLIENT_SETTING(MaxCodeLines,        int,   -1)            \
+  HPHPD_CLIENT_SETTING(ContextLines,        int,   1)             \
   HPHPD_CLIENT_SETTING(SmallStep,           bool,  false)         \
   HPHPD_CLIENT_SETTING(ShortPrintCharCount, int,   200)           \
 

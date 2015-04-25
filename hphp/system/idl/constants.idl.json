@@ -620,7 +620,7 @@
         },
         {
             "name": "HPHP_TRIM_CHARLIST",
-            "value": "\n\r\t\u000b\u0000 "
+            "value": "\f\n\r\t\u000b\u0000 "
         },
         {
             "name": "HTML_ENTITIES",

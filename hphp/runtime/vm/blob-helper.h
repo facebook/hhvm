@@ -357,6 +357,12 @@ struct BlobDecoder {
     }
   }
 
+  void decode(void*& t) {
+    uint64_t temp;
+    decode(temp);
+    t = (void*)(temp);
+  }
+
   template<class T>
   BlobDecoder& operator()(T& t) {
     decode(t);

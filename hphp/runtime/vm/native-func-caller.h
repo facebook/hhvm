@@ -1468,3 +1468,3663 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
   }
 }
 
+Variant&& callFuncVariantImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+  switch (GP_count) {
+    case 0:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)())f)();
+        case 1:
+          return ((Variant&& (*)(double))f)(SIMD[0]);
+        case 2:
+          return ((Variant&& (*)(double,double))f)(SIMD[0],SIMD[1]);
+        case 3:
+          return ((Variant&& (*)(double,double,double))f)(SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 1:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t))f)(GP[0]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t))f)(SIMD[0],GP[0]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t))f)(SIMD[0],SIMD[1],GP[0]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0]);
+        default: not_reached();
+      }
+    case 2:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t))f)(GP[0],GP[1]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1]);
+        default: not_reached();
+      }
+    case 3:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2]);
+        default: not_reached();
+      }
+    case 4:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3]);
+        default: not_reached();
+      }
+    case 5:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        default: not_reached();
+      }
+    case 6:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        default: not_reached();
+      }
+    case 7:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        default: not_reached();
+      }
+    case 8:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        default: not_reached();
+      }
+    case 9:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        default: not_reached();
+      }
+    case 10:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        default: not_reached();
+      }
+    case 11:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        default: not_reached();
+      }
+    case 12:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        default: not_reached();
+      }
+    case 13:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        default: not_reached();
+      }
+    case 14:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        default: not_reached();
+      }
+    case 15:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        default: not_reached();
+      }
+    case 16:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        default: not_reached();
+      }
+    case 17:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        default: not_reached();
+      }
+    case 18:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        default: not_reached();
+      }
+    case 19:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        default: not_reached();
+      }
+    case 20:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        default: not_reached();
+      }
+    case 21:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        default: not_reached();
+      }
+    case 22:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        default: not_reached();
+      }
+    case 23:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        default: not_reached();
+      }
+    case 24:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        default: not_reached();
+      }
+    case 25:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        default: not_reached();
+      }
+    case 26:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        default: not_reached();
+      }
+    case 27:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        default: not_reached();
+      }
+    case 28:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        default: not_reached();
+      }
+    case 29:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        default: not_reached();
+      }
+    case 30:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        default: not_reached();
+      }
+    case 31:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        default: not_reached();
+      }
+    case 32:
+      switch (SIMD_count) {
+        case 0:
+          return ((Variant&& (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 1:
+          return ((Variant&& (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 2:
+          return ((Variant&& (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 3:
+          return ((Variant&& (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 4:
+          return ((Variant&& (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 5:
+          return ((Variant&& (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 6:
+          return ((Variant&& (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 7:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 8:
+          return ((Variant&& (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        default: not_reached();
+      }
+    default: not_reached();
+  }
+}
+
+StaticString callFuncStaticStringImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+  switch (GP_count) {
+    case 0:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)())f)();
+        case 1:
+          return ((StaticString (*)(double))f)(SIMD[0]);
+        case 2:
+          return ((StaticString (*)(double,double))f)(SIMD[0],SIMD[1]);
+        case 3:
+          return ((StaticString (*)(double,double,double))f)(SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 1:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t))f)(GP[0]);
+        case 1:
+          return ((StaticString (*)(double,int64_t))f)(SIMD[0],GP[0]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t))f)(SIMD[0],SIMD[1],GP[0]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0]);
+        default: not_reached();
+      }
+    case 2:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t))f)(GP[0],GP[1]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1]);
+        default: not_reached();
+      }
+    case 3:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2]);
+        default: not_reached();
+      }
+    case 4:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3]);
+        default: not_reached();
+      }
+    case 5:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        default: not_reached();
+      }
+    case 6:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        default: not_reached();
+      }
+    case 7:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        default: not_reached();
+      }
+    case 8:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        default: not_reached();
+      }
+    case 9:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        default: not_reached();
+      }
+    case 10:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        default: not_reached();
+      }
+    case 11:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        default: not_reached();
+      }
+    case 12:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        default: not_reached();
+      }
+    case 13:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        default: not_reached();
+      }
+    case 14:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        default: not_reached();
+      }
+    case 15:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        default: not_reached();
+      }
+    case 16:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        default: not_reached();
+      }
+    case 17:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        default: not_reached();
+      }
+    case 18:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        default: not_reached();
+      }
+    case 19:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        default: not_reached();
+      }
+    case 20:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        default: not_reached();
+      }
+    case 21:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        default: not_reached();
+      }
+    case 22:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        default: not_reached();
+      }
+    case 23:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        default: not_reached();
+      }
+    case 24:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        default: not_reached();
+      }
+    case 25:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        default: not_reached();
+      }
+    case 26:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        default: not_reached();
+      }
+    case 27:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        default: not_reached();
+      }
+    case 28:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        default: not_reached();
+      }
+    case 29:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        default: not_reached();
+      }
+    case 30:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        default: not_reached();
+      }
+    case 31:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        default: not_reached();
+      }
+    case 32:
+      switch (SIMD_count) {
+        case 0:
+          return ((StaticString (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 1:
+          return ((StaticString (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 2:
+          return ((StaticString (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 3:
+          return ((StaticString (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 4:
+          return ((StaticString (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 5:
+          return ((StaticString (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 6:
+          return ((StaticString (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 7:
+          return ((StaticString (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 8:
+          return ((StaticString (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        default: not_reached();
+      }
+    default: not_reached();
+  }
+}
+
+String callFuncStringImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+  switch (GP_count) {
+    case 0:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)())f)();
+        case 1:
+          return ((String (*)(double))f)(SIMD[0]);
+        case 2:
+          return ((String (*)(double,double))f)(SIMD[0],SIMD[1]);
+        case 3:
+          return ((String (*)(double,double,double))f)(SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((String (*)(double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((String (*)(double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 1:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t))f)(GP[0]);
+        case 1:
+          return ((String (*)(double,int64_t))f)(SIMD[0],GP[0]);
+        case 2:
+          return ((String (*)(double,double,int64_t))f)(SIMD[0],SIMD[1],GP[0]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0]);
+        default: not_reached();
+      }
+    case 2:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t))f)(GP[0],GP[1]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1]);
+        default: not_reached();
+      }
+    case 3:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2]);
+        default: not_reached();
+      }
+    case 4:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3]);
+        default: not_reached();
+      }
+    case 5:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        default: not_reached();
+      }
+    case 6:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        default: not_reached();
+      }
+    case 7:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        default: not_reached();
+      }
+    case 8:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        default: not_reached();
+      }
+    case 9:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        default: not_reached();
+      }
+    case 10:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        default: not_reached();
+      }
+    case 11:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        default: not_reached();
+      }
+    case 12:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        default: not_reached();
+      }
+    case 13:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        default: not_reached();
+      }
+    case 14:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        default: not_reached();
+      }
+    case 15:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        default: not_reached();
+      }
+    case 16:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        default: not_reached();
+      }
+    case 17:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        default: not_reached();
+      }
+    case 18:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        default: not_reached();
+      }
+    case 19:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        default: not_reached();
+      }
+    case 20:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        default: not_reached();
+      }
+    case 21:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        default: not_reached();
+      }
+    case 22:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        default: not_reached();
+      }
+    case 23:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        default: not_reached();
+      }
+    case 24:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        default: not_reached();
+      }
+    case 25:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        default: not_reached();
+      }
+    case 26:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        default: not_reached();
+      }
+    case 27:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        default: not_reached();
+      }
+    case 28:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        default: not_reached();
+      }
+    case 29:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        default: not_reached();
+      }
+    case 30:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        default: not_reached();
+      }
+    case 31:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        default: not_reached();
+      }
+    case 32:
+      switch (SIMD_count) {
+        case 0:
+          return ((String (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 1:
+          return ((String (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 2:
+          return ((String (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 3:
+          return ((String (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 4:
+          return ((String (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 5:
+          return ((String (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 6:
+          return ((String (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 7:
+          return ((String (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 8:
+          return ((String (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        default: not_reached();
+      }
+    default: not_reached();
+  }
+}
+
+Array callFuncArrayImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+  switch (GP_count) {
+    case 0:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)())f)();
+        case 1:
+          return ((Array (*)(double))f)(SIMD[0]);
+        case 2:
+          return ((Array (*)(double,double))f)(SIMD[0],SIMD[1]);
+        case 3:
+          return ((Array (*)(double,double,double))f)(SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((Array (*)(double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 1:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t))f)(GP[0]);
+        case 1:
+          return ((Array (*)(double,int64_t))f)(SIMD[0],GP[0]);
+        case 2:
+          return ((Array (*)(double,double,int64_t))f)(SIMD[0],SIMD[1],GP[0]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0]);
+        default: not_reached();
+      }
+    case 2:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t))f)(GP[0],GP[1]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1]);
+        default: not_reached();
+      }
+    case 3:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2]);
+        default: not_reached();
+      }
+    case 4:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3]);
+        default: not_reached();
+      }
+    case 5:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        default: not_reached();
+      }
+    case 6:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        default: not_reached();
+      }
+    case 7:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        default: not_reached();
+      }
+    case 8:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        default: not_reached();
+      }
+    case 9:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        default: not_reached();
+      }
+    case 10:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        default: not_reached();
+      }
+    case 11:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        default: not_reached();
+      }
+    case 12:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        default: not_reached();
+      }
+    case 13:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        default: not_reached();
+      }
+    case 14:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        default: not_reached();
+      }
+    case 15:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        default: not_reached();
+      }
+    case 16:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        default: not_reached();
+      }
+    case 17:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        default: not_reached();
+      }
+    case 18:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        default: not_reached();
+      }
+    case 19:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        default: not_reached();
+      }
+    case 20:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        default: not_reached();
+      }
+    case 21:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        default: not_reached();
+      }
+    case 22:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        default: not_reached();
+      }
+    case 23:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        default: not_reached();
+      }
+    case 24:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        default: not_reached();
+      }
+    case 25:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        default: not_reached();
+      }
+    case 26:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        default: not_reached();
+      }
+    case 27:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        default: not_reached();
+      }
+    case 28:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        default: not_reached();
+      }
+    case 29:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        default: not_reached();
+      }
+    case 30:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        default: not_reached();
+      }
+    case 31:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        default: not_reached();
+      }
+    case 32:
+      switch (SIMD_count) {
+        case 0:
+          return ((Array (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 1:
+          return ((Array (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 2:
+          return ((Array (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 3:
+          return ((Array (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 4:
+          return ((Array (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 5:
+          return ((Array (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 6:
+          return ((Array (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 7:
+          return ((Array (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 8:
+          return ((Array (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        default: not_reached();
+      }
+    default: not_reached();
+  }
+}
+
+TypedValue callFuncTVImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+  switch (GP_count) {
+    case 0:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)())f)();
+        case 1:
+          return ((TypedValue (*)(double))f)(SIMD[0]);
+        case 2:
+          return ((TypedValue (*)(double,double))f)(SIMD[0],SIMD[1]);
+        case 3:
+          return ((TypedValue (*)(double,double,double))f)(SIMD[0],SIMD[1],SIMD[2]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7]);
+        default: not_reached();
+      }
+    case 1:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t))f)(GP[0]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t))f)(SIMD[0],GP[0]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t))f)(SIMD[0],SIMD[1],GP[0]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0]);
+        default: not_reached();
+      }
+    case 2:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t))f)(GP[0],GP[1]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1]);
+        default: not_reached();
+      }
+    case 3:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2]);
+        default: not_reached();
+      }
+    case 4:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3]);
+        default: not_reached();
+      }
+    case 5:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4]);
+        default: not_reached();
+      }
+    case 6:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5]);
+        default: not_reached();
+      }
+    case 7:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6]);
+        default: not_reached();
+      }
+    case 8:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7]);
+        default: not_reached();
+      }
+    case 9:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8]);
+        default: not_reached();
+      }
+    case 10:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9]);
+        default: not_reached();
+      }
+    case 11:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10]);
+        default: not_reached();
+      }
+    case 12:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11]);
+        default: not_reached();
+      }
+    case 13:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12]);
+        default: not_reached();
+      }
+    case 14:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13]);
+        default: not_reached();
+      }
+    case 15:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14]);
+        default: not_reached();
+      }
+    case 16:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15]);
+        default: not_reached();
+      }
+    case 17:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16]);
+        default: not_reached();
+      }
+    case 18:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17]);
+        default: not_reached();
+      }
+    case 19:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18]);
+        default: not_reached();
+      }
+    case 20:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19]);
+        default: not_reached();
+      }
+    case 21:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20]);
+        default: not_reached();
+      }
+    case 22:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21]);
+        default: not_reached();
+      }
+    case 23:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22]);
+        default: not_reached();
+      }
+    case 24:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23]);
+        default: not_reached();
+      }
+    case 25:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24]);
+        default: not_reached();
+      }
+    case 26:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25]);
+        default: not_reached();
+      }
+    case 27:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26]);
+        default: not_reached();
+      }
+    case 28:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27]);
+        default: not_reached();
+      }
+    case 29:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28]);
+        default: not_reached();
+      }
+    case 30:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29]);
+        default: not_reached();
+      }
+    case 31:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30]);
+        default: not_reached();
+      }
+    case 32:
+      switch (SIMD_count) {
+        case 0:
+          return ((TypedValue (*)(int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 1:
+          return ((TypedValue (*)(double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 2:
+          return ((TypedValue (*)(double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 3:
+          return ((TypedValue (*)(double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 4:
+          return ((TypedValue (*)(double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 5:
+          return ((TypedValue (*)(double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 6:
+          return ((TypedValue (*)(double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 7:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        case 8:
+          return ((TypedValue (*)(double,double,double,double,double,double,double,double,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t,int64_t))f)(SIMD[0],SIMD[1],SIMD[2],SIMD[3],SIMD[4],SIMD[5],SIMD[6],SIMD[7],GP[0],GP[1],GP[2],GP[3],GP[4],GP[5],GP[6],GP[7],GP[8],GP[9],GP[10],GP[11],GP[12],GP[13],GP[14],GP[15],GP[16],GP[17],GP[18],GP[19],GP[20],GP[21],GP[22],GP[23],GP[24],GP[25],GP[26],GP[27],GP[28],GP[29],GP[30],GP[31]);
+        default: not_reached();
+      }
+    default: not_reached();
+  }
+}
+

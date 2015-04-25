@@ -87,8 +87,13 @@ struct BackEnd final : jit::BackEnd {
    * when we call it from C++, we have to tell gcc to clobber all the other
    * callee-saved registers.
    */
+#ifdef __aarch64__  
+  #define CALLEE_SAVED_BARRIER()                                    \
+      asm volatile("" : : : "r0", "r1", "r2", "r3", "r4");
+#else
   #define CALLEE_SAVED_BARRIER()                                    \
       asm volatile("" : : : "rbx", "r12", "r13", "r14", "r15");
+#endif
 
   /*
    * enterTCHelper is a handwritten assembly function that transfers control in

@@ -19,6 +19,7 @@
 
 #include <chrono>
 #include <memory>
+#include <boost/noncopyable.hpp>
 
 #include "hphp/runtime/server/takeover-agent.h"
 #include "hphp/runtime/server/transport.h"

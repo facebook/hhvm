@@ -15,10 +15,7 @@ namespace __SystemLib {
         'object must be an instance of ('.$this->class.'), instead it is ('.
         (\is_object($x) ? \get_class($x) : \gettype($x)).')'
       );
-
-      return $args
-        ? call_user_func_array(array($x, $this->method), $args)
-        : $x->{$this->method}();
+      return $x->{$this->method}(...$args);
     }
     public function getClassName(): string {
       return $this->class;

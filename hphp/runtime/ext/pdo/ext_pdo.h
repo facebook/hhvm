@@ -106,6 +106,11 @@ extern const int64_t q_PDO$$MYSQL_ATTR_COMPRESS;
 extern const int64_t q_PDO$$MYSQL_ATTR_DIRECT_QUERY;
 extern const int64_t q_PDO$$MYSQL_ATTR_FOUND_ROWS;
 extern const int64_t q_PDO$$MYSQL_ATTR_IGNORE_SPACE;
+extern const int64_t q_PDO$$MYSQL_ATTR_SSL_CA;
+extern const int64_t q_PDO$$MYSQL_ATTR_SSL_CAPATH;
+extern const int64_t q_PDO$$MYSQL_ATTR_SSL_CERT;
+extern const int64_t q_PDO$$MYSQL_ATTR_SSL_CIPHER;
+extern const int64_t q_PDO$$MYSQL_ATTR_SSL_KEY;
 extern const StaticString q_PDO$$ERR_NONE;
 
 const StaticString s_PARAM_BOOL("PARAM_BOOL");
@@ -191,6 +196,11 @@ const StaticString s_MYSQL_ATTR_COMPRESS("MYSQL_ATTR_COMPRESS");
 const StaticString s_MYSQL_ATTR_DIRECT_QUERY("MYSQL_ATTR_DIRECT_QUERY");
 const StaticString s_MYSQL_ATTR_FOUND_ROWS("MYSQL_ATTR_FOUND_ROWS");
 const StaticString s_MYSQL_ATTR_IGNORE_SPACE("MYSQL_ATTR_IGNORE_SPACE");
+const StaticString s_MYSQL_ATTR_SSL_CA("MYSQL_ATTR_SSL_CA");
+const StaticString s_MYSQL_ATTR_SSL_CAPATH("MYSQL_ATTR_SSL_CAPATH");
+const StaticString s_MYSQL_ATTR_SSL_CERT("MYSQL_ATTR_SSL_CERT");
+const StaticString s_MYSQL_ATTR_SSL_CIPHER("MYSQL_ATTR_SSL_CIPHER");
+const StaticString s_MYSQL_ATTR_SSL_KEY("MYSQL_ATTR_SSL_KEY");
 const StaticString s_ERR_NONE("ERR_NONE");
 
 

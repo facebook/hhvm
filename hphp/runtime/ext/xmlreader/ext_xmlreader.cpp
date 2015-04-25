@@ -675,20 +675,18 @@ Variant HHVM_METHOD(XMLReader, __get,
 Variant HHVM_METHOD(XMLReader, expand,
                     const Variant& basenode /* = null */) {
   auto* data = Native::data<XMLReader>(this_);
-  Object doc;
+  SmartPtr<XMLDocumentData> doc;
   xmlDocPtr docp = nullptr;
   SYNC_VM_REGS_SCOPED();
 
   if (!basenode.isNull()) {
-    DOMNode *dombasenode = toDOMNode(basenode.toObject().get());
+    auto dombasenode = Native::data<DOMNode>(basenode.toObject().get());
     doc = dombasenode->doc();
-    docp = (xmlDocPtr) toDOMNode(doc.get())->m_node;
+    docp = doc->docp();
     if (docp == nullptr) {
       raise_warning("Invalid State Error");
       return false;
     }
-  } else {
-    doc = DOMDocument::newInstance();
   }
 
   if (data->m_ptr) {
@@ -702,7 +700,7 @@ Variant HHVM_METHOD(XMLReader, expand,
         raise_notice("Cannot expand this node type");
         return false;
       } else {
-        return php_dom_create_object(nodec, doc, false);
+        return php_dom_create_object(nodec, doc);
       }
     }
   }

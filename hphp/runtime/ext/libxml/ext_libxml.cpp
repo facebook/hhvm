@@ -128,6 +128,36 @@ const StaticString
   s_LIBXML_ERR_FATAL("LIBXML_ERR_FATAL");
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void XMLNodeData::sweep() {
+  if (m_node) {
+    assert(this == m_node->_private);
+    php_libxml_node_free_resource(m_node);
+  }
+
+  if (m_doc) m_doc->detachNode();
+}
+
+void XMLDocumentData::cleanup() {
+  assert(!m_liveNodes);
+  auto docp = (xmlDocPtr)m_node;
+  if (docp->URL) {
+    xmlFree((void*)docp->URL);
+    docp->URL = nullptr;
+  }
+  xmlFreeDoc(docp);
+
+  m_node = nullptr; // don't let XMLNode try to cleanup
+}
+
+void XMLDocumentData::sweep() {
+  if (!m_liveNodes) {
+    cleanup();
+  }
+  m_destruct = true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Callbacks and helpers
 //
 // Note that these stream callbacks may re-enter the VM via a user-defined
@@ -333,6 +363,10 @@ void libxml_add_error(const std::string &msg) {
 
 void php_libxml_node_free(xmlNodePtr node) {
   if (node) {
+    if (node->_private) {
+      // XXX: we may be sweeping- so don't create a smart pointer
+      reinterpret_cast<XMLNodeData*>(node->_private)->reset();
+    }
     switch (node->type) {
     case XML_ATTRIBUTE_NODE:
       xmlFreeProp((xmlAttrPtr) node);
@@ -376,6 +410,7 @@ static void php_libxml_node_free_list(xmlNodePtr node) {
       switch (node->type) {
       /* Skip property freeing for the following types */
       case XML_NOTATION_NODE:
+      case XML_ENTITY_DECL:
         break;
       case XML_ENTITY_REF_NODE:
         php_libxml_node_free_list((xmlNodePtr) node->properties);
@@ -388,7 +423,6 @@ static void php_libxml_node_free_list(xmlNodePtr node) {
       case XML_ATTRIBUTE_DECL:
       case XML_DTD_NODE:
       case XML_DOCUMENT_TYPE_NODE:
-      case XML_ENTITY_DECL:
       case XML_NAMESPACE_DECL:
       case XML_TEXT_NODE:
         php_libxml_node_free_list(node->children);

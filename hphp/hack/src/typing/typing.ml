@@ -1170,7 +1170,7 @@ and expr_ ~in_cond ~(valkind: [> `lvalue | `rvalue | `other ]) env (p, e) =
           (* Check that the declared type of the XHP attribute matches the
            * expression type *)
           let attrdec =
-            SMap.filter (fun _ cvar -> cvar.ce_is_xhp_attr) class_.tc_cvars in
+            SMap.filter (fun _ prop -> prop.ce_is_xhp_attr) class_.tc_props in
           let env = List.fold_left begin fun env attr ->
             let namepstr, valpty = attr in
             let valp, valty = valpty in

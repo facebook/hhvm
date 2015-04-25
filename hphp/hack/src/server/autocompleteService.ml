@@ -131,8 +131,8 @@ let autocomplete_method is_static class_ id env cid =
     let results =
       if is_static
       then SMap.union class_.tc_smethods
-                      (SMap.union class_.tc_consts class_.tc_scvars)
-      else SMap.union class_.tc_methods class_.tc_cvars
+                      (SMap.union class_.tc_consts class_.tc_sprops)
+      else SMap.union class_.tc_methods class_.tc_props
     in
     let results = SMap.filter begin fun _ x ->
       match Typing.is_visible env x.ce_visibility cid with
@@ -152,7 +152,7 @@ let autocomplete_cmethod = autocomplete_method false
 let autocomplete_lvar_naming _ id locals =
   if is_auto_complete (snd id)
   then begin
-    Autocomplete.argument_global_type := Some Autocomplete.Acvar;
+    Autocomplete.argument_global_type := Some Autocomplete.Acprop;
     (* Store the position and a map of name to ident so we can add
      * types at this point later *)
     Autocomplete.auto_complete_pos := Some (fst id);

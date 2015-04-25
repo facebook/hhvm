@@ -175,8 +175,8 @@ let instantiate_members subst env members =
   SMap.map_env (Inst.instantiate_ce subst) env members
 
 let make_all_members class_ = [
-  class_.tc_cvars;
-  class_.tc_scvars;
+  class_.tc_props;
+  class_.tc_sprops;
   class_.tc_methods;
   class_.tc_smethods;
 ]

@@ -433,8 +433,8 @@ module PrintClass = struct
     let tc_tparams = tparam_list c.tc_tparams in
     let tc_consts = class_elt_smap c.tc_consts in
     let tc_typeconsts = typeconst_smap c.tc_typeconsts in
-    let tc_cvars = class_elt_smap c.tc_cvars in
-    let tc_scvars = class_elt_smap c.tc_scvars in
+    let tc_props = class_elt_smap c.tc_props in
+    let tc_sprops = class_elt_smap c.tc_sprops in
     let tc_methods = class_elt_smap_with_breaks c.tc_methods in
     let tc_smethods = class_elt_smap_with_breaks c.tc_smethods in
     let tc_construct = constructor c.tc_construct in
@@ -454,8 +454,8 @@ module PrintClass = struct
     "tc_tparams: "^tc_tparams^"\n"^
     "tc_consts: "^tc_consts^"\n"^
     "tc_typeconsts: "^tc_typeconsts^"\n"^
-    "tc_cvars: "^tc_cvars^"\n"^
-    "tc_scvars: "^tc_scvars^"\n"^
+    "tc_props: "^tc_props^"\n"^
+    "tc_sprops: "^tc_sprops^"\n"^
     "tc_methods: "^tc_methods^"\n"^
     "tc_smethods: "^tc_smethods^"\n"^
     "tc_construct: "^tc_construct^"\n"^

@@ -35,8 +35,8 @@ type inherited = {
   ih_cstr     : class_elt option * bool (* consistency required *);
   ih_consts   : class_elt SMap.t ;
   ih_typeconsts : typeconst_type SMap.t ;
-  ih_cvars    : class_elt SMap.t ;
-  ih_scvars   : class_elt SMap.t ;
+  ih_props    : class_elt SMap.t ;
+  ih_sprops   : class_elt SMap.t ;
   ih_methods  : class_elt SMap.t ;
   ih_smethods : class_elt SMap.t ;
 }
@@ -45,8 +45,8 @@ let empty = {
   ih_cstr     = None, false;
   ih_consts   = SMap.empty;
   ih_typeconsts = SMap.empty;
-  ih_cvars    = SMap.empty;
-  ih_scvars   = SMap.empty;
+  ih_props    = SMap.empty;
+  ih_sprops   = SMap.empty;
   ih_methods  = SMap.empty;
   ih_smethods = SMap.empty;
 }
@@ -169,8 +169,8 @@ let add_inherited inherited acc = {
   ih_consts   = add_members inherited.ih_consts acc.ih_consts;
   ih_typeconsts =
     SMap.fold add_typeconst inherited.ih_typeconsts acc.ih_typeconsts;
-  ih_cvars    = add_members inherited.ih_cvars acc.ih_cvars;
-  ih_scvars   = add_members inherited.ih_scvars acc.ih_scvars;
+  ih_props    = add_members inherited.ih_props acc.ih_props;
+  ih_sprops   = add_members inherited.ih_sprops acc.ih_sprops;
   ih_methods  = add_methods inherited.ih_methods acc.ih_methods;
   ih_smethods = add_methods inherited.ih_smethods acc.ih_smethods;
 }
@@ -209,8 +209,8 @@ let map_inherited f inh =
     ih_cstr     = (opt_map f (fst inh.ih_cstr)), (snd inh.ih_cstr);
     ih_typeconsts = inh.ih_typeconsts;
     ih_consts   = SMap.map f inh.ih_consts;
-    ih_cvars    = SMap.map f inh.ih_cvars;
-    ih_scvars   = SMap.map f inh.ih_scvars;
+    ih_props    = SMap.map f inh.ih_props;
+    ih_sprops   = SMap.map f inh.ih_sprops;
     ih_methods  = SMap.map f inh.ih_methods;
     ih_smethods = SMap.map f inh.ih_smethods;
   }
@@ -236,8 +236,8 @@ let apply_fn_to_class_elts fn class_type = {
   class_type with
   tc_consts = fn class_type.tc_consts;
   tc_typeconsts = class_type.tc_typeconsts;
-  tc_cvars = fn class_type.tc_cvars;
-  tc_scvars = fn class_type.tc_scvars;
+  tc_props = fn class_type.tc_props;
+  tc_sprops = fn class_type.tc_sprops;
   tc_methods = fn class_type.tc_methods;
   tc_smethods = fn class_type.tc_smethods;
 }
@@ -265,8 +265,8 @@ let inherit_hack_class c env p class_name class_type argl =
   let env, typeconsts = SMap.map_env (Inst.instantiate_typeconst subst)
     env class_type.tc_typeconsts in
   let env, consts   = instantiate env class_type.tc_consts in
-  let env, cvars    = instantiate env class_type.tc_cvars in
-  let env, scvars   = instantiate env class_type.tc_scvars in
+  let env, props    = instantiate env class_type.tc_props in
+  let env, sprops   = instantiate env class_type.tc_sprops in
   let env, methods  = instantiate env class_type.tc_methods in
   let env, smethods = instantiate env class_type.tc_smethods in
   let cstr          = Env.get_construct env class_type in
@@ -275,8 +275,8 @@ let inherit_hack_class c env p class_name class_type argl =
     ih_cstr     = cstr;
     ih_consts   = consts;
     ih_typeconsts = typeconsts;
-    ih_cvars    = cvars;
-    ih_scvars   = scvars;
+    ih_props    = props;
+    ih_sprops   = sprops;
     ih_methods  = methods;
     ih_smethods = smethods;
   } in
@@ -300,12 +300,12 @@ let inherit_hack_class_constants_only env p class_name class_type argl =
 let inherit_hack_xhp_attrs_only env p class_name class_type argl =
   let subst = make_substitution p class_name class_type argl in
   (* Filter out properties that are not XHP attributes *)
-  let cvars =
+  let props =
     SMap.fold begin fun name class_elt acc ->
       if class_elt.ce_is_xhp_attr then SMap.add name class_elt acc else acc
-    end class_type.tc_cvars SMap.empty in
-  let env, cvars = SMap.map_env (Inst.instantiate_ce subst) env cvars in
-  let result = { empty with ih_cvars = cvars; } in
+    end class_type.tc_props SMap.empty in
+  let env, props = SMap.map_env (Inst.instantiate_ce subst) env props in
+  let result = { empty with ih_props = props; } in
   env, result
 
 (*****************************************************************************)

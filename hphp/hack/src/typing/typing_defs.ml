@@ -255,8 +255,8 @@ and class_type = {
   tc_tparams             : tparam list   ;
   tc_consts              : class_elt SMap.t;
   tc_typeconsts          : typeconst_type SMap.t;
-  tc_cvars               : class_elt SMap.t;
-  tc_scvars              : class_elt SMap.t;
+  tc_props               : class_elt SMap.t;
+  tc_sprops              : class_elt SMap.t;
   tc_methods             : class_elt SMap.t;
   tc_smethods            : class_elt SMap.t;
   tc_construct           : class_elt option * bool;

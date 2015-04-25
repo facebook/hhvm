@@ -394,10 +394,10 @@ let get_gconst env cst_name =
 let get_static_member is_method env class_ mid =
   add_wclass env class_.tc_name;
   let dep = if is_method then Dep.SMethod (class_.tc_name, mid)
-  else Dep.SCVar (class_.tc_name, mid) in
+  else Dep.SProp (class_.tc_name, mid) in
   Typing_deps.add_idep env.genv.droot dep;
   if is_method then SMap.get mid class_.tc_smethods
-  else SMap.get mid class_.tc_scvars
+  else SMap.get mid class_.tc_sprops
 
 let suggest_member members mid =
   let members = SMap.fold begin fun x ce acc ->
@@ -409,7 +409,7 @@ let suggest_member members mid =
 
 let suggest_static_member is_method class_ mid =
   let mid = String.lowercase mid in
-  let members = if is_method then class_.tc_smethods else class_.tc_scvars in
+  let members = if is_method then class_.tc_smethods else class_.tc_sprops in
   suggest_member members mid
 
 let method_exists class_ mid =
@@ -418,14 +418,14 @@ let method_exists class_ mid =
 let get_member is_method env class_ mid =
   add_wclass env class_.tc_name;
   let dep = if is_method then Dep.Method (class_.tc_name, mid)
-  else Dep.CVar (class_.tc_name, mid) in
+  else Dep.Prop (class_.tc_name, mid) in
   Typing_deps.add_idep env.genv.droot dep;
   if is_method then (SMap.get mid class_.tc_methods)
-  else SMap.get mid class_.tc_cvars
+  else SMap.get mid class_.tc_props
 
 let suggest_member is_method class_ mid =
   let mid = String.lowercase mid in
-  let members = if is_method then class_.tc_methods else class_.tc_cvars in
+  let members = if is_method then class_.tc_methods else class_.tc_props in
   suggest_member members mid
 
 let get_construct env class_ =

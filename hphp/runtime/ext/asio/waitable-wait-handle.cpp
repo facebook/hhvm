@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/asio/waitable-wait-handle.h"
 
 #include "hphp/runtime/ext/asio/asio-context.h"
+#include "hphp/runtime/ext/asio/asio-context-enter.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/async-generator-wait-handle.h"
@@ -74,7 +75,7 @@ void c_WaitableWaitHandle::join() {
 
   // import this wait handle to the newly created context
   // throws if cross-context cycle found
-  enterContext(session->getCurrentContextIdx());
+  asio::enter_context(this, session->getCurrentContextIdx());
 
   // run queues until we are finished
   session->getCurrentContext()->runUntil(this);
@@ -113,34 +114,6 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
     case Kind::Reschedule:          return nullptr;
     case Kind::Sleep:               return nullptr;
     case Kind::ExternalThreadEvent: return nullptr;
-  }
-  not_reached();
-}
-
-void c_WaitableWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
-  switch (getKind()) {
-    case Kind::Static:
-      not_reached();
-    case Kind::AsyncFunction:
-      return asAsyncFunction()->enterContextImpl(ctx_idx);
-    case Kind::AsyncGenerator:
-      return asAsyncGenerator()->enterContextImpl(ctx_idx);
-    case Kind::AwaitAll:
-      return asAwaitAll()->enterContextImpl(ctx_idx);
-    case Kind::GenArray:
-      return asGenArray()->enterContextImpl(ctx_idx);
-    case Kind::GenMap:
-      return asGenMap()->enterContextImpl(ctx_idx);
-    case Kind::GenVector:
-      return asGenVector()->enterContextImpl(ctx_idx);
-    case Kind::Condition:
-      return asCondition()->enterContextImpl(ctx_idx);
-    case Kind::Reschedule:
-      return asReschedule()->enterContextImpl(ctx_idx);
-    case Kind::Sleep:
-      return asSleep()->enterContextImpl(ctx_idx);
-    case Kind::ExternalThreadEvent:
-      return asExternalThreadEvent()->enterContextImpl(ctx_idx);
   }
   not_reached();
 }

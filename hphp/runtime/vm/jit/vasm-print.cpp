@@ -273,7 +273,12 @@ void printBlock(std::ostream& out, const Vunit& unit,
   for (auto p : preds[b]) out << ", B" << size_t(p);
   out << color(ANSI_COLOR_END);
 
-  if (!block.code.empty() && !block.code.front().origin) out << '\n';
+  if (block.code.empty()) {
+    out << "        <empty>\n";
+    return;
+  }
+
+  if (!block.code.front().origin) out << '\n';
 
   const IRInstruction* currentOrigin = nullptr;
   for (auto& inst : block.code) {

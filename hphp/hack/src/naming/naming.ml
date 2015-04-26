@@ -140,13 +140,6 @@ type lenv = {
    *)
   unbound_mode: unbound_mode;
 
-  (* The presence of "yield" in the function body changes the type of the
-   * function into a generator, with no other syntactic indications
-   * elsewhere. For the sanity of the typechecker, we flatten this out into
-   * fun_kind, but need to track if we've seen a "yield" in order to do so.
-   *)
-  has_yield: bool ref;
-
   (* The presence of an "UNSAFE" in the function body changes the
    * verifiability of the function's return type, since the unsafe
    * block could return. For the sanity of the typechecker, we flatten
@@ -218,7 +211,6 @@ module Env = struct
     all_locals = ref SMap.empty;
     pending_locals = ref SMap.empty;
     unbound_mode = UBMErr;
-    has_yield = ref false;
     has_unsafe = ref false;
   }
 
@@ -1387,10 +1379,10 @@ and class_var_ env (x, e) =
     match (fst env).in_mode with
     | FileInfo.Mstrict | FileInfo.Mpartial -> opt_map (expr env) e
     (* Consider every member variable defined in a class in decl mode to be
-     * initalized by giving it a magic value of type Tany (you can't actually
+     * initialized by giving it a magic value of type Tany (you can't actually
      * write this cast in PHP). Classes might inherit from our decl mode class
      * that are themselves not in decl, and there's no way to figure out what
-     * variables are initalized in a decl class without typechecking its
+     * variables are initialized in a decl class without typechecking its
      * initalizers and constructor, which we don't want to do, so just assume
      * we're covered. *)
     | FileInfo.Mdecl ->
@@ -1445,14 +1437,9 @@ and typeconst env t =
        c_tconst_type = type_;
      })
 
-and fun_kind env ft =
+and fun_kind env fun_type =
   let has_unsafe = !((snd env).has_unsafe) in
-  let ret_kind = match !((snd env).has_yield), ft with
-    | false, Ast.FSync -> N.FSync
-    | false, Ast.FAsync -> N.FAsync
-    | true, Ast.FSync -> N.FGenerator
-    | true, Ast.FAsync -> N.FAsyncGenerator
-  in has_unsafe, ret_kind
+  has_unsafe, fun_type
 
 and method_ env m =
   let genv, lenv = env in
@@ -1484,7 +1471,6 @@ and method_ env m =
   let body = N.NamedBody {
     N.fnb_nast = body_nast;
     fnb_unsafe = unsafe;
-    fnb_fun_kind = f_kind;
   } in
   N.({ m_final      = final  ;
        m_visibility = vis    ;
@@ -1493,6 +1479,7 @@ and method_ env m =
        m_tparams    = tparam_l;
        m_params     = paraml ;
        m_body       = body   ;
+       m_fun_kind   = f_kind ;
        m_user_attributes = attrs;
        m_ret        = ret    ;
        m_variadic   = variadicity;
@@ -1592,7 +1579,6 @@ and fun_ genv f =
   let body = N.NamedBody {
     N.fnb_nast = body_nast;
     fnb_unsafe = unsafe;
-    fnb_fun_kind = f_kind;
   } in
   let named_fun = {
     N.f_mode = f.f_mode;
@@ -1601,6 +1587,7 @@ and fun_ genv f =
     f_tparams = f_tparams;
     f_params = paraml;
     f_body = body;
+    f_fun_kind = f_kind;
     f_variadic = variadicity;
     f_user_attributes = user_attributes env f.f_user_attributes;
   } in
@@ -1621,7 +1608,6 @@ and stmt env st =
   | Unsafe               -> assert false
   | Fallthrough          -> N.Fallthrough
   | Noop                 -> N.Noop
-  | Expr e               -> N.Expr (expr env e)
   | Break p              -> N.Break p
   | Continue p           -> N.Continue p
   | Throw e              -> let terminal = not (fst env).in_try in
@@ -1635,6 +1621,33 @@ and stmt env st =
   | Switch (e, cl)       -> switch_stmt env st e cl
   | Foreach (e, aw, ae, b)-> foreach_stmt env e aw ae b
   | Try (b, cl, fb)      -> try_stmt env st b cl fb
+  | Expr (cp, Call ((p, Id (fp, fn)), el, uel))
+      when fn = SN.SpecialFunctions.invariant ->
+    (* invariant is subject to a source-code transform in the HHVM
+     * runtime: the arguments to invariant are lazily evaluated only in
+     * the case in which the invariant condition does not hold. So:
+     *
+     *   invariant_violation(<condition>, <format>, <format_args...>)
+     *
+     * ... is rewritten as:
+     *
+     *   if (!<condition>) { invariant_violation(<format>, <format_args...>); }
+     *)
+    (match el with
+      | [] | [_]  ->
+        Errors.naming_too_few_arguments p;
+        N.Expr (cp, N.Any)
+      | (cond_p, cond) :: el ->
+        let violation = (cp, Call
+          ((p, Id (fp, SN.SpecialFunctions.invariant_violation)), el, uel)) in
+        if cond <> False then
+          let b1, b2 = [Expr violation], [Noop] in
+          let cond = cond_p, Unop (Unot, (cond_p, cond)) in
+          if_stmt env st cond b1 b2
+        else (* a false <condition> means unconditional invariant_violation *)
+          N.Expr (expr env violation)
+    )
+  | Expr e               -> N.Expr (expr env e)
 
 and if_stmt env st e b1 b2 =
   let e = expr env e in
@@ -1952,16 +1965,6 @@ and expr_ env = function
       if List.length el <> 1
       then Errors.assert_arity p;
       N.Assert (N.AE_assert (expr env (List.hd el)))
-  | Call ((p, Id (_, cn)), el, uel) when cn = SN.SpecialFunctions.invariant ->
-      arg_unpack_unexpected uel ;
-      (match el with
-      | st :: format :: el ->
-          let el = exprl env el in
-          N.Assert (N.AE_invariant (expr env st, expr env format, el))
-        | _ ->
-          Errors.naming_too_few_arguments p;
-          N.Any
-      )
   | Call ((p, Id (_, cn)), el, uel)
       when cn = SN.SpecialFunctions.invariant_violation ->
       arg_unpack_unexpected uel ;
@@ -2012,8 +2015,8 @@ and expr_ env = function
      the cases above *)
   | Call (e, el, uel) ->
       N.Call (N.Cnormal, expr env e, exprl env el, exprl env uel)
-  | Yield_break -> (snd env).has_yield := true; N.Yield_break
-  | Yield e -> (snd env).has_yield := true; N.Yield (afield env e)
+  | Yield_break -> N.Yield_break
+  | Yield e -> N.Yield (afield env e)
   | Await e -> N.Await (expr env e)
   | List el -> N.List (exprl env el)
   | Expr_list el -> N.Expr_list (exprl env el)
@@ -2134,23 +2137,19 @@ and expr_ env = function
 
 and expr_lambda env f =
   let h = opt_map (hint ~allow_this:true ~allow_retonly:true env) f.f_ret in
-  let previous_unsafe, previous_yield =
-    !((snd env).has_unsafe), !((snd env).has_yield) in
+  let previous_unsafe = !((snd env).has_unsafe) in
   (* save unsafe and yield state *)
   (snd env).has_unsafe := false;
-  (snd env).has_yield := false;
   let variadicity, paraml = fun_paraml env f.f_params in
   (* The bodies of lambdas go through naming in the containing local
    * environment *)
   let body_nast = block env f.f_body in
   let unsafe, f_kind = fun_kind env f.f_fun_kind in
-  (* restore unsafe and yield state *)
+  (* restore unsafe state *)
   (snd env).has_unsafe := previous_unsafe;
-  (snd env).has_yield := previous_yield;
   let body = N.NamedBody {
     N.fnb_unsafe = unsafe;
     fnb_nast = body_nast;
-    fnb_fun_kind = f_kind;
   } in {
     N.f_mode = (fst env).in_mode;
     f_ret = h;
@@ -2158,6 +2157,7 @@ and expr_lambda env f =
     f_params = paraml;
     f_tparams = [];
     f_body = body;
+    f_fun_kind = f_kind;
     f_variadic = variadicity;
     f_user_attributes = user_attributes env f.f_user_attributes;
   }
@@ -2201,10 +2201,13 @@ and case env acc = function
 
 and catchl env l = lfold (catch env) SMap.empty l
 and catch env acc (x1, x2, b) =
-  let x2 = Env.new_lvar env x2 in
-  let all_locals, b = branch env b in
-  let acc = SMap.union all_locals acc in
-  acc, (Env.class_name env x1, x2, b)
+  Env.scope env (
+  fun env ->
+    let x2 = Env.new_lvar env x2 in
+    let all_locals, b = branch env b in
+    let acc = SMap.union all_locals acc in
+    acc, (Env.class_name env x1, x2, b)
+  )
 
 and afield env = function
   | AFvalue e -> N.AFvalue (expr env e)

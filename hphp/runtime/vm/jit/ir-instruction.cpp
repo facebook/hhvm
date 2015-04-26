@@ -87,7 +87,7 @@ void IRInstruction::convertToNop() {
   m_extra        = nullptr;
 }
 
-void IRInstruction::become(IRUnit& unit, IRInstruction* other) {
+void IRInstruction::become(IRUnit& unit, const IRInstruction* other) {
   assertx(other->isTransient() || m_numDsts == other->m_numDsts);
   auto& arena = unit.arena();
 
@@ -134,7 +134,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
     case StContArKey:
     case StRetVal:
     case StLoc:
-    case StLocNT:
     case AFWHBlockOn:
       // Consume the value being stored, not the thing it's being stored into
       return srcNo == 1;
@@ -252,34 +251,40 @@ Type arrElemReturn(const IRInstruction* inst) {
 
   auto resultType = inst->hasTypeParam() ? inst->typeParam() : TGen;
   if (inst->is(ArrayGet)) {
-    resultType = resultType & TInitCell;
+    resultType &= TInitCell;
   }
 
   // Elements of a static array are uncounted
   if (inst->src(0)->isA(TStaticArr)) {
-    resultType = resultType & TUncountedInit;
+    resultType &= TUncountedInit;
   }
 
   auto const arrTy = inst->src(0)->type().arrSpec().type();
   if (!arrTy) return resultType;
 
   using T = RepoAuthType::Array::Tag;
+  using E = RepoAuthType::Array::Empty;
 
   switch (arrTy->tag()) {
     case T::Packed:
     {
       auto const idx = inst->src(1);
       if (idx->hasConstVal() &&
-          idx->intVal() >= 0 && idx->intVal() < arrTy->size()) {
-        return typeFromRAT(arrTy->packedElem(idx->intVal())) & resultType;
+          idx->intVal() >= 0 &&
+          idx->intVal() < arrTy->size()) {
+        resultType &= typeFromRAT(arrTy->packedElem(idx->intVal()));
       }
-      return resultType;
+      break;
     }
     case T::PackedN:
-      return typeFromRAT(arrTy->elemType()) & resultType;
+      resultType &= typeFromRAT(arrTy->elemType());
+      break;
   }
 
-  not_reached();
+  if (arrTy->emptiness() == E::Maybe) {
+    resultType |= TInitNull;
+  }
+  return resultType;
 }
 
 Type thisReturn(const IRInstruction* inst) {

@@ -925,7 +925,6 @@ SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
 
   return cond(
     env,
-    0, // references produced
     [&] (Block* taken) {
       auto isObj = gen(env, IsType, TObj, src);
       gen(env, JmpZero, taken, isObj);

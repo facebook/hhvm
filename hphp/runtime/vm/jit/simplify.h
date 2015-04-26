@@ -102,13 +102,15 @@ bool canSimplifyAssertType(const IRInstruction* inst,
  */
 void copyProp(IRInstruction*);
 
+//////////////////////////////////////////////////////////////////////
+
 /*
- * Statically checks whether a packed array access is within bounds. We share
+ * Statically check whether a packed array access is within bounds.  We share
  * this logic with gen time so that cases that are visible immediately don't
  * require generating IR with control flow that we have to clean up later.
  *
- * @return: no value if runtime checking is necessary, true if guaranteed within
- * bound, false if always out of bound.
+ * Return no value if runtime checking is necessary, true if guaranteed within
+ * bounds, false if always out of bounds.
  */
 folly::Optional<bool>
 packedArrayBoundsStaticCheck(Type arrayType, int64_t key);
@@ -118,10 +120,12 @@ packedArrayBoundsStaticCheck(Type arrayType, int64_t key);
  * Get the type of `arr[idx]` for a packed array, considering constness,
  * staticness, and RAT types.
  *
- * Note that this function does not require the existence of `arr[idx]`. If we
- * can statically determine that the access is out of bound, InitNull is
- * returned. Otherwise we return a type `t`, so that when the access is within
- * bounds, `arr[idx].isA(t)` holds.
+ * Note that this function does not require the existence of `arr[idx]`.  If we
+ * can statically determine that the access is out of bounds, InitNull is
+ * returned.  Otherwise we return a type `t`, such that when the access is
+ * within bounds, `arr[idx].isA(t)` holds.  (Thus, if this function is used in
+ * contexts where the bounds are not statically known, TInitNull must be
+ * unioned in for correctness.)
  */
 Type packedArrayElemType(SSATmp* arr, SSATmp* idx);
 

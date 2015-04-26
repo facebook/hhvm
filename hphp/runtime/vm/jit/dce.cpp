@@ -159,7 +159,6 @@ bool canDCE(IRInstruction* inst) {
   case DefInlineFP:
   case LdRetAddr:
   case Mov:
-  case TakeRef:
   case ReDefSP:
   case CountArray:
   case CountArrayFast:
@@ -190,6 +189,7 @@ bool canDCE(IRInstruction* inst) {
     assertx(!inst->isControlFlow());
     return true;
 
+  case DbgTraceCall:
   case AKExistsObj:
   case AdjustSP:
   case ResetSP:
@@ -252,7 +252,6 @@ bool canDCE(IRInstruction* inst) {
   case Jmp:
   case DefLabel:
   case Box:
-  case TakeStk:
   case LdLocPseudoMain:
   case LdVectorBase:
   case LdPairBase:
@@ -288,7 +287,6 @@ bool canDCE(IRInstruction* inst) {
   case InitSProps:
   case InitObjProps:
   case ConstructInstance:
-  case CustomInstanceInit:
   case AllocPackedArray:
   case InitPackedArray:
   case InitPackedArrayLoop:
@@ -308,7 +306,6 @@ bool canDCE(IRInstruction* inst) {
   case StMem:
   case StElem:
   case StLoc:
-  case StLocNT:
   case StLocPseudoMain:
   case StRef:
   case EagerSyncVMRegs:
@@ -317,7 +314,6 @@ bool canDCE(IRInstruction* inst) {
   case ReqRetranslateOpt:
   case IncRef:
   case IncRefCtx:
-  case DecRefThis:
   case DecRef:
   case DecRefNZ:
   case DefFP:
@@ -624,7 +620,6 @@ bool findWeakActRecUses(const BlockList& blocks,
 
     switch (inst->op()) {
     // We don't need to generate stores to a frame if it can be eliminated.
-    case StLocNT:
     case StLoc:
       incWeak(inst, inst->src(0));
       break;
@@ -711,7 +706,6 @@ void performActRecFixups(const BlockList& blocks,
              inst, state[inst].weakUseCount(), uses[inst.dst()]);
         break;
 
-      case StLocNT:
       case StLoc:
         if (state[inst.src(0)->inst()].isDead()) {
           ITRACE(3, "marking {} as dead\n", inst);

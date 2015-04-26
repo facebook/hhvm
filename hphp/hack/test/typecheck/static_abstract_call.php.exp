@@ -1,0 +1,4 @@
+File "static_abstract_call.php", line 10, characters 3-8:
+Cannot call C::f(); it is abstract (Typing[4073])
+File "static_abstract_call.php", line 5, characters 35-35:
+Declaration is here

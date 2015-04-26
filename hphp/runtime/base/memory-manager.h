@@ -21,6 +21,7 @@
 #include <vector>
 #include <utility>
 #include <set>
+#include <unordered_map>
 
 #include <folly/Memory.h>
 
@@ -29,11 +30,13 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/thread-local.h"
 
+#include "hphp/runtime/base/imarker.h"
 #include "hphp/runtime/base/memory-usage-stats.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/smart-ptr.h"
 
 // used for mmapping contiguous heap space
 // If used, anonymous pages are not cleared when mapped with mmap. It is not
@@ -44,6 +47,7 @@ namespace HPHP {
 struct APCLocalArray;
 struct MemoryManager;
 struct ObjectData;
+struct ResourceData;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -114,6 +118,77 @@ template<class T> void smart_delete(T* p);
  */
 template<class T> T* smart_new_array(size_t count);
 template<class T> void smart_delete_array(T* t, size_t count);
+
+//////////////////////////////////////////////////////////////////////
+
+namespace smart {
+
+// STL-style allocator for the smart allocator.  (Unfortunately we
+// can't use allocator_traits yet.)
+//
+// You can also use smart::Allocator as a model of folly's
+// SimpleAllocator where appropriate.
+//
+
+template <class T>
+struct Allocator {
+  typedef T              value_type;
+  typedef T*             pointer;
+  typedef const T*       const_pointer;
+  typedef T&             reference;
+  typedef const T&       const_reference;
+  typedef std::size_t    size_type;
+  typedef std::ptrdiff_t difference_type;
+
+  template <class U>
+  struct rebind {
+    typedef Allocator<U> other;
+  };
+
+  pointer address(reference value) const {
+    return &value;
+  }
+  const_pointer address(const_reference value) const {
+    return &value;
+  }
+
+  Allocator() noexcept {}
+  Allocator(const Allocator&) noexcept {}
+  template<class U> Allocator(const Allocator<U>&) noexcept {}
+  ~Allocator() noexcept {}
+
+  size_type max_size() const {
+    return std::numeric_limits<std::size_t>::max() / sizeof(T);
+  }
+
+  pointer allocate(size_type num, const void* = 0) {
+    pointer ret = (pointer)smart_malloc(num * sizeof(T));
+    return ret;
+  }
+
+  template<class U, class... Args>
+  void construct(U* p, Args&&... args) {
+    ::new ((void*)p) U(std::forward<Args>(args)...);
+  }
+
+  void destroy(pointer p) {
+    p->~T();
+  }
+
+  void deallocate(pointer p, size_type num) {
+    smart_free(p);
+  }
+
+  template<class U> bool operator==(const Allocator<U>&) const {
+    return true;
+  }
+
+  template<class U> bool operator!=(const Allocator<U>&) const {
+    return false;
+  }
+};
+
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -429,6 +504,11 @@ struct MemoryManager {
   static void OnThreadExit(MemoryManager*);
 
   /*
+   * Id that is used when registering roots with the memory manager.
+   */
+  using RootId = size_t;
+
+  /*
    * This is an RAII wrapper to temporarily mask counting allocations
    * from stats tracking in a scoped region.
    *
@@ -656,6 +736,19 @@ struct MemoryManager {
   void addSweepable(Sweepable*);
 
   /*
+   * Methods for maintaining maps of root objects keyed by RootIds.
+   * The id/object associations are only valid for a single request.
+   * This interface is useful for extensions that cannot physically
+   * hold on to a SmartPtr, etc. or other handle class.
+   */
+  template <typename T> RootId addRoot(SmartPtr<T>&& ptr);
+  template <typename T> RootId addRoot(const SmartPtr<T>& ptr);
+  template <typename T> SmartPtr<T> lookupRoot(RootId tok) const;
+  template <typename T> bool removeRoot(const SmartPtr<T>& ptr);
+  template <typename T> SmartPtr<T> removeRoot(RootId token);
+  template <typename F> void scanRootMaps(F& m) const;
+
+  /*
    * Heap iterator methods.
    */
   template<class Fn> void forEachObject(Fn);
@@ -764,6 +857,63 @@ private:
   BigHeap::iterator begin();
   BigHeap::iterator end();
 
+  void dropRootMaps();
+  void deleteRootMaps();
+
+  template <typename T>
+  using RootMap =
+    std::unordered_map<
+      RootId,
+      SmartPtr<T>,
+      std::hash<RootId>,
+      std::equal_to<RootId>,
+      smart::Allocator<std::pair<const RootId,SmartPtr<T>>>
+    >;
+
+  template <typename T>
+  typename std::enable_if<
+    std::is_base_of<ResourceData,T>::value,
+    RootMap<ResourceData>&
+  >::type getRootMap() {
+    if (UNLIKELY(!m_resourceRoots)) {
+      m_resourceRoots = smart_new<RootMap<ResourceData>>();
+    }
+    return *m_resourceRoots;
+  }
+
+  template <typename T>
+  typename std::enable_if<
+    std::is_base_of<ObjectData,T>::value,
+    RootMap<ObjectData>&
+  >::type getRootMap() {
+    if (UNLIKELY(!m_objectRoots)) {
+      m_objectRoots = smart_new<RootMap<ObjectData>>();
+    }
+    return *m_objectRoots;
+  }
+
+  template <typename T>
+  typename std::enable_if<
+    std::is_base_of<ResourceData,T>::value,
+    const RootMap<ResourceData>&
+  >::type getRootMap() const {
+    if (UNLIKELY(!m_resourceRoots)) {
+      m_resourceRoots = smart_new<RootMap<ResourceData>>();
+    }
+    return *m_resourceRoots;
+  }
+
+  template <typename T>
+  typename std::enable_if<
+    std::is_base_of<ObjectData,T>::value,
+    const RootMap<ObjectData>&
+  >::type getRootMap() const {
+    if (UNLIKELY(!m_objectRoots)) {
+      m_objectRoots = smart_new<RootMap<ObjectData>>();
+    }
+    return *m_objectRoots;
+  }
+
 private:
   struct SweepableList: Sweepable {
     SweepableList() : Sweepable(Init{}) {}
@@ -786,6 +936,9 @@ private:
 #endif
   std::vector<NativeNode*> m_natives;
   SweepableList m_sweepables;
+
+  mutable RootMap<ResourceData>* m_resourceRoots{nullptr};
+  mutable RootMap<ObjectData>* m_objectRoots{nullptr};
 
   bool m_sweeping;
   bool m_statsIntervalActive;

@@ -102,6 +102,9 @@ struct hash_set: std::unordered_set<T,V,W> {
   hash_set() : std::unordered_set<T,V,W>(0) {}
 };
 
+template<class T, class C = std::less<T>>
+using set = std::set<T, C>;
+
 template<class T>
 using unique_ptr = std::unique_ptr<T>;
 

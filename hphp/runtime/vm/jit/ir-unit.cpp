@@ -34,12 +34,9 @@ IRUnit::IRUnit(TransContext context)
   , m_entry(defBlock())
 {}
 
-IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker,
-                                const jit::vector<uint32_t>& producedRefs) {
+IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
   IRInstruction inst(DefLabel, marker);
-  IRInstruction* label = clone(&inst);
-  always_assert(producedRefs.size() == numDst);
-  m_labelRefs[label] = producedRefs;
+  auto const label = clone(&inst);
   if (numDst > 0) {
     SSATmp* dsts = (SSATmp*) m_arena.alloc(numDst * sizeof(SSATmp));
     for (unsigned i = 0; i < numDst; ++i) {
@@ -112,7 +109,7 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
 Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk) {
   Block* mainExit = nullptr;
 
-  FTRACE(5, "findMainExitBlock: starting on unit:\n{}\n", unit);
+  FTRACE(5, "findMainExitBlock: starting on unit:\n{}\n", show(unit));
 
   for (auto block : rpoSortCfg(unit)) {
     if (endsUnitAtSrcKey(block, lastSk)) {

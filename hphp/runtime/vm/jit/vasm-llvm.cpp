@@ -40,6 +40,7 @@
 
 #ifdef USE_LLVM
 
+#include <llvm/ADT/Triple.h>
 #include <llvm/Analysis/Passes.h>
 #include <llvm/CodeGen/MachineFunctionAnalysis.h>
 #include <llvm/CodeGen/Passes.h>
@@ -48,6 +49,7 @@
 #include <llvm/ExecutionEngine/ObjectCache.h>
 #include <llvm/ExecutionEngine/RuntimeDyld.h>
 #include <llvm/IR/AssemblyAnnotationWriter.h>
+#include <llvm/IR/CFG.h>
 #include <llvm/IR/ConstantFolder.h>
 #include <llvm/IR/DataLayout.h>
 #include <llvm/IR/DerivedTypes.h>
@@ -55,10 +57,12 @@
 #include <llvm/IR/InlineAsm.h>
 #include <llvm/IR/Intrinsics.h>
 #include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/TypeBuilder.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/IRReader/IRReader.h>
+#include <llvm/InitializePasses.h>
 #include <llvm/PassManager.h>
 #include <llvm/Support/CommandLine.h>
 #include <llvm/Support/ErrorHandling.h>
@@ -69,6 +73,7 @@
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/Target/TargetLibraryInfo.h>
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Transforms/IPO.h>
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
@@ -250,7 +255,19 @@ jit::vector<EHInfo> parse_gcc_except_table(const uint8_t* ptr,
     if (landingPad == UINT32_MAX) continue;
     if (!RuntimeOption::EvalJitLLVMSplitHotCold && landingPad == 0) continue;
 
-    auto rangeBase = (actionEntry == 0) ? funcStart : coldStart;
+    auto rangeBase = funcStart;
+    if (actionEntry) {
+      rangeBase = coldStart;
+      // Skip over nop's at the start of the section since all offsets are
+      // recorded from the beginning of "real" code.
+      // TODO(#6836929): this has to be removed once we fix the underlying
+      // issue with smashable instructions at the start of a section.
+      while (42) {
+        DecodedInstruction di(rangeBase);
+        if (!di.isNop()) break;
+        rangeBase += di.size();
+      }
+    }
     FTRACE(2, "Adding entry: [{},{}): landingPad {}\n",
            rangeBase + start, rangeBase + start + length, lpStart + landingPad);
     ret.emplace_back(EHInfo{rangeBase + start,
@@ -503,7 +520,7 @@ struct LLVMEmitter {
           llvm::Type::getVoidTy(m_context),
           std::vector<llvm::Type*>(3, llvm::IntegerType::get(m_context, 64)),
           false),
-      llvm::Function::ExternalLinkage, "", m_module.get()))
+      llvm::Function::ExternalLinkage, "tracelet", m_module.get()))
     , m_irb(m_context,
             llvm::ConstantFolder(),
             IRBuilderVasmInserter(*this))
@@ -618,18 +635,23 @@ struct LLVMEmitter {
     // avoid hitting assertions from LLVM relocations.
     m_tcMM->registerSymbolAddress("personality0", 0xbadbad);
 
+    m_int64Pair = llvm::StructType::get(
+      m_context, std::vector<llvm::Type*>(2, m_int64), false /* isPacked */
+    );
     m_traceletFnTy = llvm::FunctionType::get(
-      m_void, std::vector<llvm::Type*>(3, m_int64), false
+      m_void, std::vector<llvm::Type*>(3, m_int64), false /* isVarArg */
     );
     m_bindcallFnTy = llvm::FunctionType::get(
-      m_int64, std::vector<llvm::Type*>(4, m_int64), false
+      m_int64Pair, std::vector<llvm::Type*>(4, m_int64), false /* isVarArg */
     );
 
     static_assert(offsetof(TypedValue, m_data) == 0, "");
     static_assert(offsetof(TypedValue, m_type) == 8, "");
-    m_typedValueType = llvm::StructType::get(
-        m_context, std::vector<llvm::Type*>{m_int64, m_int8},
-        /*isPacked*/ false);
+    m_tvStructType = llvm::StructType::get(
+      m_context, std::vector<llvm::Type*>{m_int64, m_int8},
+      /*isPacked*/ false
+    );
+    m_tvVectorType = llvm::VectorType::get(m_int64, 2);
 
     // The hacky way of tuning LLVM command-line parameters. This has to live
     // till a better debug option control library is implemented.
@@ -675,9 +697,7 @@ struct LLVMEmitter {
     std::string err;
     llvm::raw_string_ostream stream(err);
     always_assert_flog(!llvm::verifyModule(*m_module, &stream),
-                       "LLVM verifier failed:\n{}\n{:-^80}\n{}\n{:-^80}\n{}",
-                       stream.str(), " vasm unit ", show(m_unit),
-                       " llvm module ", showModule(m_module.get()));
+                       "LLVM verifier failed:\n{}\n", stream.str());
   }
 
   /*
@@ -697,12 +717,15 @@ struct LLVMEmitter {
     auto module = m_module.get();
     auto tcMM = m_tcMM.release();
     auto cpu = RuntimeOption::EvalJitCPU;
+    std::vector<std::string> attrs;
+    folly::split(" ", RuntimeOption::EvalJitLLVMAttrs, attrs, true);
     if (cpu == "native") cpu = llvm::sys::getHostCPUName();
     FTRACE(1, "Creating ExecutionEngine with CPU '{}'\n", cpu);
     std::string errStr;
     std::unique_ptr<llvm::ExecutionEngine> ee(
       llvm::EngineBuilder(module)
       .setMCPU(cpu)
+      .setMAttrs(attrs)
       .setErrorStr(&errStr)
       .setUseMCJIT(true)
       .setMCJITMemoryManager(tcMM)
@@ -713,6 +736,25 @@ struct LLVMEmitter {
       .setTargetOptions(targetOptions)
       .create());
     always_assert_flog(ee, "ExecutionEngine creation failed: {}\n", errStr);
+
+    llvm::PassManager pm;
+    if (!RuntimeOption::EvalJitLLVMBasicOpt) {
+      auto TLI =
+        new llvm::TargetLibraryInfo(llvm::Triple(module->getTargetTriple()));
+      pm.add(TLI);
+      auto& Registry = *llvm::PassRegistry::getPassRegistry();
+      llvm::initializeCore(Registry);
+      llvm::initializeScalarOpts(Registry);
+      llvm::initializeVectorization(Registry);
+      llvm::initializeIPO(Registry);
+      llvm::initializeAnalysis(Registry);
+      llvm::initializeIPA(Registry);
+      llvm::initializeTransformUtils(Registry);
+      llvm::initializeInstCombine(Registry);
+      llvm::initializeTarget(Registry);
+      llvm::initializeCodeGenPreparePass(Registry);
+      llvm::initializeAtomicExpandLoadLinkedPass(Registry);
+    }
 
     llvm::LLVMTargetMachine* targetMachine =
       static_cast<llvm::LLVMTargetMachine*>(ee->getTargetMachine());
@@ -744,7 +786,13 @@ struct LLVMEmitter {
       llvm::PassManagerBuilder PM;
       PM.OptLevel = RuntimeOption::EvalJitLLVMOptLevel;
       PM.SizeLevel = RuntimeOption::EvalJitLLVMSizeLevel;
+      PM.Inliner = llvm::createFunctionInliningPass(PM.OptLevel, PM.SizeLevel);
+      PM.DisableUnitAtATime = false;
+      PM.SLPVectorize = RuntimeOption::EvalJitLLVMSLPVectorize;
+      PM.BBVectorize = RuntimeOption::EvalJitLLVMBBVectorize;
+      PM.LoadCombine = RuntimeOption::EvalJitLLVMLoadCombine;
       PM.populateFunctionPassManager(*fpm);
+      PM.populateModulePassManager(pm);
     }
 
     {
@@ -754,7 +802,9 @@ struct LLVMEmitter {
         fpm->run(*it);
       }
       fpm->doFinalization();
+      pm.run(*module);
     }
+
     FTRACE(2, "{:-^80}\n{}\n", " LLVM IR after optimizing ",
            showModule(module));
 
@@ -887,8 +937,9 @@ struct LLVMEmitter {
         visitJmps(it->second, doBindJmp);
       }
 
-      // The jump was optimized out. Free the stub.
-      if (!found) {
+      // The jump was optimized out. Free the stub, but only if it was a reused
+      // stub.
+      if (!found && req.stubReused) {
         FTRACE(2, "  no corresponding code found. Freeing stub.\n");
         mcg->freeRequestStub(req.stub);
       }
@@ -1011,6 +1062,18 @@ struct LLVMEmitter {
   }
 
   /*
+   * Create a new llvm block using the current block's name with `suffix'
+   * appended to it. The block will be inserted at the end of the current
+   * function.
+   */
+  llvm::BasicBlock* makeBlock(folly::StringPiece suffix) {
+    auto const curName = m_irb.GetInsertBlock()->getName().str();
+    return llvm::BasicBlock::Create(
+      m_context, folly::to<std::string>(curName, suffix), m_function
+    );
+  }
+
+  /*
    * Generate an llvm::Value representing the given integral constant, with an
    * approprate bit width.
    */
@@ -1054,6 +1117,13 @@ struct LLVMEmitter {
    * emit LLVM IR for the given list of vasm blocks.
    */
   void emit(const jit::vector<Vlabel>& labels);
+
+  /*
+   * Propagate special-cased physregs along edges to b's successors, creating
+   * phi nodes when needed.
+   */
+  void handleOutgoingPhysRegs(const Vblock& b,
+                              const boost::dynamic_bitset<>& backedge_targets);
 
 private:
 
@@ -1104,6 +1174,7 @@ private:
   struct LLVMBindJmp {
     uint32_t id;
     TCA stub;
+    bool stubReused;
     SrcKey target;
     TransFlags trflags;
   };
@@ -1227,11 +1298,14 @@ VASM_OPCODES
   std::unique_ptr<TCMemoryManager> m_tcMM;
 
   // Function types used for call to tracelets/PHP functions.
+  llvm::StructType* m_int64Pair{nullptr};
   llvm::FunctionType* m_traceletFnTy{nullptr};
   llvm::FunctionType* m_bindcallFnTy{nullptr};
 
-  // Mimic HHVM's TypedValue.
-  llvm::StructType* m_typedValueType{nullptr};
+  // Mimic HHVM's TypedValue, as a struct type and a Vector for full
+  // loads/stores.
+  llvm::StructType* m_tvStructType{nullptr};
+  llvm::VectorType* m_tvVectorType{nullptr};
 
   // Saved LLVM intrinsics.
   llvm::Function* m_llvmFrameAddress{nullptr};
@@ -1311,6 +1385,8 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
   Timer timer(Timer::llvm_irGeneration);
   SCOPE_ASSERT_DETAIL("LLVM Module") { return showModule(m_module.get()); };
 
+  auto const backedge_targets = backedgeTargets(m_unit, labels);
+
   // Make sure all the llvm blocks are emitted in the order given by
   // layoutBlocks, regardless of which ones we need to use as jump targets
   // first.
@@ -1327,9 +1403,12 @@ void LLVMEmitter::emit(const jit::vector<Vlabel>& labels) {
     // If this isn't the first block of the unit, load the incoming value of
     // rVmFp/rVmSp from our pred(s).
     if (label != labels.front()) {
-      auto inFp = m_incomingVmFp[label];
-      always_assert(inFp);
-      defineValue(x64::rVmFp, inFp);
+      if (auto inFp = m_incomingVmFp[label]) {
+        defineValue(x64::rVmFp, inFp);
+      } else {
+        // Only catch blocks are allowed to not have an incoming vmfp.
+        always_assert(b.code.front().op == Vinstr::landingpad);
+      }
 
       // Only some instructions propagate a value for rVmSp to their
       // successor(s).
@@ -1410,7 +1489,7 @@ O(ldimmb) \
 O(ldimml) \
 O(ldimmq) \
 O(lea) \
-O(loaddqu) \
+O(loadups) \
 O(load) \
 O(loadtqb) \
 O(loadl) \
@@ -1450,7 +1529,7 @@ O(sqrtsd) \
 O(store) \
 O(storeb) \
 O(storebi) \
-O(storedqu) \
+O(storeups) \
 O(storel) \
 O(storeli) \
 O(storeqi) \
@@ -1487,7 +1566,8 @@ O(absdbl) \
 O(phijmp) \
 O(phijcc) \
 O(phidef) \
-O(countbytecode)
+O(countbytecode) \
+O(unpcklpd)
 #define O(name) case Vinstr::name: emit(inst.name##_); break;
   SUPPORTED_OPS
 #undef O
@@ -1527,7 +1607,6 @@ O(countbytecode)
       case Vinstr::mcprep:
       case Vinstr::cmpsd:
       case Vinstr::ucomisd:
-      case Vinstr::unpcklpd:
       // ARM opcodes:
       case Vinstr::asrv:
       case Vinstr::brk:
@@ -1547,23 +1626,7 @@ O(countbytecode)
       });
     }
 
-    // Since rVmFp isn't SSA in vasm code, we manually propagate its value
-    // across control flow edges.
-    for (auto label : succs(b)) {
-      auto& inFp = m_incomingVmFp[label];
-      // If this assertion fails it's either a bug in the incoming code or it
-      // just means we'll need to insert phi nodes to merge the value.
-      always_assert(inFp == nullptr || inFp == value(x64::rVmFp));
-      inFp = value(x64::rVmFp);
-    }
-
-    // Make sure we don't let any values from this block go to the next RPO
-    // block. PhysReg values are explicitly passed along edges as needed (see
-    // above).
-    defineValue(x64::rVmSp, nullptr);
-    defineValue(x64::rVmFp, nullptr);
-    defineValue(x64::rStashedAR, nullptr);
-    defineValue(x64::rAsm, nullptr);
+    handleOutgoingPhysRegs(b, backedge_targets);
   }
 
   timer.stop();
@@ -1572,6 +1635,78 @@ O(countbytecode)
   if (RuntimeOption::EvalJitLLVMDiscard) {
     throw FailedLLVMCodeGen("Discarding all hard work");
   }
+}
+
+void LLVMEmitter::handleOutgoingPhysRegs(
+  const Vblock& b,
+  const boost::dynamic_bitset<>& backedge_targets
+) {
+  // rVmFp isn't SSA in vasm code, so we manually propagate its value across
+  // control flow edges, creating phi nodes when appropriate. We conservatively
+  // create phis at all back-edge targets and rely on LLVM to clean up the
+  // unnecessary ones.
+  for (auto succ : succs(b)) {
+    // Catch traces from PHP calls have a weird ABI and define their own value
+    // for rVmFp from the landingpad instruction, so we skip those here.
+    auto& front = m_unit.blocks[succ].code.front();
+    if (front.op == Vinstr::landingpad && front.landingpad_.fromPHPCall) {
+      continue;
+    }
+
+    auto& inFp = m_incomingVmFp[succ];
+    auto const outFp = value(x64::rVmFp);
+    auto const target = block(succ);
+
+    // When inFp already comes from a phi node in the successor, add this new
+    // incoming value.
+    if (inFp != nullptr &&
+        llvm::isa<llvm::PHINode>(inFp) &&
+        llvm::cast<llvm::Instruction>(inFp)->getParent() == target) {
+      auto const phi = llvm::cast<llvm::PHINode>(inFp);
+      phi->addIncoming(outFp, m_irb.GetInsertBlock());
+      FTRACE(2, "Add incoming phi value {} to {} for {}\n",
+             llshow(outFp), llshow(phi), succ);
+      continue;
+    }
+
+    // Either this is our first time seeing a backedge target or we're
+    // providing a value that differs from existing predecessors. Either way,
+    // create a phi node at the beginning of succ.
+    if ((inFp == nullptr && backedge_targets.test(succ)) ||
+               (inFp != nullptr && inFp != outFp)) {
+      FTRACE(2, "Creating phi node for {}\n", succ);
+      auto const phi = llvm::PHINode::Create(m_int64, 2, "rVmFp");
+      target->getInstList().insert(target->begin(), phi);
+      inFp = phi;
+      phi->addIncoming(outFp, m_irb.GetInsertBlock());
+      if (inFp != nullptr) {
+        // Also add the old incoming value to the phi node. We know that the
+        // successor has one or more predecessors other than the current block
+        // that all provide the same value, so register inFp from all of them.
+        for (auto it = llvm::pred_begin(target), end = llvm::pred_end(target);
+             it != end; ++it) {
+          if (*it == m_irb.GetInsertBlock()) continue;
+          phi->addIncoming(outFp, *it);
+        }
+      }
+      continue;
+    }
+
+    if (inFp == nullptr) {
+      // First time seeing this successor, and it's not a backedge target.
+      inFp = outFp;
+    } else {
+      always_assert(inFp == outFp);
+    }
+  }
+
+  // Make sure we don't let any values from this block go to the next RPO
+  // block. PhysReg values are explicitly passed along edges as needed (see
+  // above).
+  defineValue(x64::rVmSp, nullptr);
+  defineValue(x64::rVmFp, nullptr);
+  defineValue(x64::rStashedAR, nullptr);
+  defineValue(x64::rAsm, nullptr);
 }
 
 llvm::Value* LLVMEmitter::getGlobal(const std::string& name,
@@ -1652,15 +1787,9 @@ template<typename Taken>
 void LLVMEmitter::emitJcc(Vreg sf, ConditionCode cc, const char* takenName,
                           Taken taken) {
   auto blockName = m_irb.GetInsertBlock()->getName().str();
-  auto nextBlock =
-    llvm::BasicBlock::Create(m_context,
-                             folly::to<std::string>(blockName, '_'),
-                             m_function);
+  auto nextBlock = makeBlock("_");
   nextBlock->moveAfter(m_irb.GetInsertBlock());
-  auto takenBlock =
-    llvm::BasicBlock::Create(m_context,
-                             folly::to<std::string>(blockName, "_", takenName),
-                             m_function);
+  auto takenBlock = makeBlock(folly::to<std::string>("_", takenName));
   takenBlock->moveAfter(nextBlock);
 
   auto cond = emitCmpForCC(sf, cc);
@@ -1683,9 +1812,10 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   // emitter, so that's what we do here.
 
   auto& frozen = m_areas[size_t(AreaIndex::Frozen)].code;
+  bool reused;
   auto reqIp = emitEphemeralServiceReq(
     frozen,
-    mcg->getFreeStub(frozen, &mcg->cgFixups()),
+    mcg->getFreeStub(frozen, &mcg->cgFixups(), &reused),
     REQ_BIND_JMP,
     RipRelative(mcg->code.base()),
     inst.target.toAtomicInt(),
@@ -1700,7 +1830,9 @@ void LLVMEmitter::emit(const bindjmp& inst) {
   FTRACE(2, "Adding bindjmp locrec {} for {}\n", id, llshow(call));
   call->setMetadata(llvm::LLVMContext::MD_locrec,
                     llvm::MDNode::get(m_context, cns(id)));
-  m_bindjmps.emplace_back(LLVMBindJmp{id, reqIp, inst.target, inst.trflags});
+  m_bindjmps.emplace_back(
+    LLVMBindJmp{id, reqIp, reused, inst.target, inst.trflags}
+  );
 }
 
 void LLVMEmitter::emit(const bindcall& inst) {
@@ -1710,15 +1842,22 @@ void LLVMEmitter::emit(const bindcall& inst) {
   auto func = emitFuncPtr(funcName, m_bindcallFnTy, uint64_t(inst.stub));
   auto args = makePhysRegArgs(
     inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, x64::rStashedAR});
-  auto next = block(inst.targets[0]);
+  auto next = makeBlock("_next");
+  next->moveAfter(m_irb.GetInsertBlock());
   auto unwind = block(inst.targets[1]);
   auto call = m_irb.CreateInvoke(func, next, unwind, args);
   call->setCallingConv(llvm::CallingConv::X86_64_HHVM_PHP);
   call->setSmashable();
+  m_irb.SetInsertPoint(next);
+
+  // Register the new value of rVmFp.
+  defineValue(x64::rVmFp, m_irb.CreateExtractValue(call, 1, "rVmFp"));
 
   // bindcall is followed by a defvmsp to copy rVmSp into a Vreg, but it's not
-  // in this block. Pass the value to our next block.
-  m_incomingVmSp[inst.targets[0]] = call;
+  // in this block. Pass the value to our next block. This is necessary because
+  // rVmSp's value isn't automatically propagated between blocks like rVmFp is.
+  m_incomingVmSp[inst.targets[0]] = m_irb.CreateExtractValue(call, 0, "rVmSp");
+  m_irb.CreateBr(block(inst.targets[0]));
 }
 
 void LLVMEmitter::emit(const vcallstub& inst) {
@@ -1729,15 +1868,19 @@ void LLVMEmitter::emit(const vcallstub& inst) {
     inst.args, {x64::rVmSp, x64::rVmTl, x64::rVmFp, x64::rStashedAR});
   for (auto arg : m_unit.tuples[inst.extraArgs]) args.emplace_back(value(arg));
   std::vector<llvm::Type*> argTypes(args.size(), m_int64);
-  auto funcTy = llvm::FunctionType::get(m_int64, argTypes, false);
+  auto funcTy = llvm::FunctionType::get(m_int64Pair, argTypes, false);
   auto func = emitFuncPtr(funcName, funcTy, uint64_t(inst.target));
-  auto next = block(inst.targets[0]);
+  auto next = makeBlock("_next");
+  next->moveAfter(m_irb.GetInsertBlock());
   auto unwind = block(inst.targets[1]);
   auto call = m_irb.CreateInvoke(func, next, unwind, args);
   call->setCallingConv(llvm::CallingConv::X86_64_HHVM_PHP);
+  m_irb.SetInsertPoint(next);
 
-  // Forward the new vmsp to the next block, just like bindcall.
-  m_incomingVmSp[inst.targets[0]] = call;
+  // Register new rVmSp/rVmFp, just like bindcall.
+  defineValue(x64::rVmFp, m_irb.CreateExtractValue(call, 1, "rVmFp"));
+  m_incomingVmSp[inst.targets[0]] = m_irb.CreateExtractValue(call, 0, "rVmSp");
+  m_irb.CreateBr(block(inst.targets[0]));
 }
 
 // Emitting a real REQ_BIND_(JUMPCC_FIRST|JCC) only makes sense if we can
@@ -1865,7 +2008,7 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     break;
   case DestType::SIMD:
   case DestType::TV:
-    returnType = m_typedValueType;
+    returnType = m_tvStructType;
     break;
   }
 
@@ -1966,22 +2109,24 @@ void LLVMEmitter::emitCall(const Vinstr& inst) {
     assertx(dests.size() == 1);
     defineValue(dests[0], callInst);
     break;
+  case DestType::SIMD:
   case DestType::TV: {
     static_assert(offsetof(TypedValue, m_data) == 0, "");
     static_assert(offsetof(TypedValue, m_type) == 8, "");
     assertx(dests.size() <= 2 && dests.size() >= 1);
-    defineValue(dests[0], m_irb.CreateExtractValue(callInst, 0)); // m_data
-    if (dests.size() == 2) {
-      auto type = m_irb.CreateExtractValue(callInst, 1);
-      defineValue(dests[1], zext(type, 64)); // m_type
+    auto const data = m_irb.CreateExtractValue(callInst, 0);
+    auto const type = zext(m_irb.CreateExtractValue(callInst, 1), 64);
+
+    if (destType == DestType::TV) {
+      defineValue(dests[0], data);
+      if (dests.size() == 2) defineValue(dests[1], type);
+    } else {
+      assertx(dests.size() == 1);
+      llvm::Value* packed = llvm::UndefValue::get(m_tvVectorType);
+      packed = m_irb.CreateInsertElement(packed, data, cns(0));
+      packed = m_irb.CreateInsertElement(packed, type, cns(1));
+      defineValue(dests[0], packed);
     }
-    break;
-  }
-  case DestType::SIMD: {
-    assertx(dests.size() == 1);
-    // Do we want to pack it manually into a <2 x i64>? Or bitcast to X86_MMX?
-    // Leave it as TypedValue for now and see what LLVM optimizer does.
-    defineValue(dests[0], callInst);
     break;
   }
   }
@@ -2089,7 +2234,7 @@ void LLVMEmitter::emit(const decl& inst) {
 
 void LLVMEmitter::emit(const declm& inst) {
   auto ptr = emitPtr(inst.m, 32);
-  auto load = m_irb.CreateLoad(ptr);
+  auto load = m_irb.CreateLoad(ptr, RuntimeOption::EvalJitLLVMVolatileIncDec);
   auto sub = m_irb.CreateAdd(load, m_int32NegOne, "",
                              /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, sub);
@@ -2158,7 +2303,7 @@ void LLVMEmitter::emit(const fallbackcc& inst) {
 
 void LLVMEmitter::emit(const incwm& inst) {
   auto ptr = emitPtr(inst.m, 16);
-  auto oldVal = m_irb.CreateLoad(ptr);
+  auto oldVal = m_irb.CreateLoad(ptr, RuntimeOption::EvalJitLLVMVolatileIncDec);
   auto newVal = m_irb.CreateAdd(oldVal, m_int16One, "",
                                 /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, newVal);
@@ -2172,7 +2317,7 @@ void LLVMEmitter::emit(const incl& inst) {
 
 void LLVMEmitter::emit(const inclm& inst) {
   auto ptr = emitPtr(inst.m, 32);
-  auto load = m_irb.CreateLoad(ptr);
+  auto load = m_irb.CreateLoad(ptr, RuntimeOption::EvalJitLLVMVolatileIncDec);
   auto add = m_irb.CreateAdd(load, m_int32One, "",
                              /* NUW = */ false, /* NSW = */ true);
   defineFlagTmp(inst.sf, add);
@@ -2383,11 +2528,12 @@ void LLVMEmitter::emit(const lea& inst) {
   defineValue(inst.d, value);
 }
 
-void LLVMEmitter::emit(const loaddqu& inst) {
-  // This will need to change if we ever use loaddqu with values that aren't
+void LLVMEmitter::emit(const loadups& inst) {
+  // This will need to change if we ever use loadups with values that aren't
   // TypedValues. Ideally, we'd leave this kind of decision to llvm anyway.
-  auto value = m_irb.CreateLoad(emitPtr(inst.s, ptrType(m_typedValueType)));
-  defineValue(inst.d, value);
+  auto vec = m_irb.CreateLoad(emitPtr(inst.s, ptrType(m_tvVectorType)));
+  vec->setAlignment(sizeof(intptr_t));
+  defineValue(inst.d, vec);
 }
 
 void LLVMEmitter::emit(const load& inst) {
@@ -2470,7 +2616,8 @@ void LLVMEmitter::emit(const mul& inst) {
 }
 
 void LLVMEmitter::emit(const neg& inst) {
-  defineValue(inst.d, m_irb.CreateSub(m_int64Zero, value(inst.s)));
+  defineValue(inst.d, m_irb.CreateSub(m_int64Zero, value(inst.s), "",
+                                      /* NUW = */ false, /* NSW = */ true));
 }
 
 void LLVMEmitter::emit(const nop& inst) {
@@ -2579,19 +2726,29 @@ UNUSED void LLVMEmitter::emitAsm(const std::string& asmStatement,
 }
 
 void LLVMEmitter::emit(const vretm& inst) {
+  // We emit volatile loads for return addresses to prevent LLVM from
+  // generating move from memory to register via another register.
   auto const retPtr = emitPtr(inst.retAddr, ptrType(ptrType(m_traceletFnTy)));
-  auto const retAddr = m_irb.CreateLoad(retPtr);
-  auto const prevFp = m_irb.CreateLoad(emitPtr(inst.prevFp, 64));
+  auto const retAddr = m_irb.CreateLoad(retPtr, true);
+  auto const prevFp = m_irb.CreateLoad(emitPtr(inst.prevFp, 64), true);
   defineValue(inst.d, prevFp);
 
   // "Return" with a tail call to the loaded address
-  emitTraceletTailCall(retAddr, inst.args);
+  auto call = emitTraceletTailCall(retAddr, inst.args);
+  if (RuntimeOption::EvalJitLLVMRetOpt) {
+    call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TCR);
+    call->setTailCallKind(llvm::CallInst::TCK_Tail);
+  }
 }
 
 void LLVMEmitter::emit(const vret& inst) {
   auto const retAddr = m_irb.CreateIntToPtr(value(inst.retAddr),
                                             ptrType(m_traceletFnTy));
-  emitTraceletTailCall(retAddr, inst.args);
+  auto call = emitTraceletTailCall(retAddr, inst.args);
+  if (RuntimeOption::EvalJitLLVMRetOpt) {
+    call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TCR);
+    call->setTailCallKind(llvm::CallInst::TCK_Tail);
+  }
 }
 
 void LLVMEmitter::emit(const absdbl& inst) {
@@ -2717,10 +2874,11 @@ void LLVMEmitter::emit(const storebi& inst) {
   m_irb.CreateStore(cns(inst.s.b()), emitPtr(inst.m, 8));
 }
 
-void LLVMEmitter::emit(const storedqu& inst) {
-  // Like loaddqu, this will need to change if we ever use storedqu with values
+void LLVMEmitter::emit(const storeups& inst) {
+  // Like loadups, this will need to change if we ever use storeups with values
   // that aren't TypedValues.
-  m_irb.CreateStore(value(inst.s), emitPtr(inst.m, ptrType(m_typedValueType)));
+  auto vecPtr = emitPtr(inst.m, ptrType(m_tvVectorType));
+  m_irb.CreateStore(value(inst.s), vecPtr)->setAlignment(sizeof(intptr_t));
 }
 
 void LLVMEmitter::emit(const storel& inst) {
@@ -2866,16 +3024,31 @@ void LLVMEmitter::emit(const xorqi& inst) {
 }
 
 void LLVMEmitter::emit(const landingpad& inst) {
-  // This is far from correct, but it's enough to keep the llvm verifier happy
-  // for now.
-  auto pad = m_irb.CreateLandingPad(m_typedValueType, m_personalityFunc, 0);
+  // m_personalityFunc is a dummy value because we just extract the information
+  // we need from the .gcc_except_table section rather than using it directly.
+  auto pad = m_irb.CreateLandingPad(m_int64Pair, m_personalityFunc, 0);
   pad->setCleanup(true);
+
+  if (inst.fromPHPCall) {
+    // bindcall destroys all registers, so tc_unwind_resume gives us the
+    // correct value of rVmFp in the second unwinder scratch register.
+    auto newFp = m_irb.CreateExtractValue(pad, 1, "rVmFp");
+    defineValue(x64::rVmFp, newFp);
+  }
 }
 
 void LLVMEmitter::emit(const countbytecode& inst) {
   auto ptr = emitPtr(inst.base[g_bytecodesLLVM.handle()], 64);
   auto load = m_irb.CreateLoad(ptr);
   m_irb.CreateStore(m_irb.CreateAdd(load, m_int64One), ptr);
+}
+
+void LLVMEmitter::emit(const unpcklpd& inst) {
+  llvm::Value* dest = llvm::UndefValue::get(m_tvVectorType);
+  // Flipped operand order is due to ATT style in vasm.
+  dest = m_irb.CreateInsertElement(dest, value(inst.s1), cns(0));
+  dest = m_irb.CreateInsertElement(dest, value(inst.s0), cns(1));
+  defineValue(inst.d, dest);
 }
 
 void LLVMEmitter::emitTrap() {
@@ -2938,30 +3111,14 @@ llvm::Type* LLVMEmitter::ptrIntNType(size_t bits, bool inFS) const {
 
 } // unnamed namespace
 
-void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
-                 const jit::vector<Vlabel>& labels) {
-  Timer _t(Timer::llvm);
+void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas) {
+  Timer timer(Timer::llvm);
   FTRACE(2, "\nTrying to emit LLVM IR for Vunit:\n{}\n", show(unit));
 
-  jit::vector<UndoMarker> undoAll = {UndoMarker(mcg->globalData())};
-  for (auto const& area : areas) {
-    undoAll.emplace_back(area.code);
-  }
-
   try {
+    auto const labels = sortBlocks(unit);
     LLVMEmitter(unit, areas).emit(labels);
   } catch (const FailedLLVMCodeGen& e) {
-    always_assert_flog(
-      RuntimeOption::EvalJitLLVM < 3,
-      "Mandatory LLVM codegen failed with reason `{}' on unit:\n{}",
-      e.what(), show(unit)
-    );
-    FTRACE(1, "LLVM codegen failed: {}\n", e.what());
-
-    // Undo any code/data we may have allocated.
-    for (auto& marker : undoAll) {
-      marker.undo();
-    }
     throw;
   } catch (const std::exception& e) {
     always_assert_flog(false,
@@ -2976,8 +3133,7 @@ void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
 
 namespace HPHP { namespace jit {
 
-void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
-                 const jit::vector<Vlabel>& labels) {
+void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas) {
   throw FailedLLVMCodeGen("This build does not support the LLVM backend");
 }
 

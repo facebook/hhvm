@@ -86,11 +86,6 @@ struct IRUnit {
    */
   explicit IRUnit(TransContext context);
 
-  /*
-   * Stringify the IRUnit.
-   */
-  std::string toString() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Instruction creation.
@@ -192,7 +187,6 @@ struct IRUnit {
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Blocks, constants, and labels.
 
   /*
    * Add a block to the IRUnit's arena.
@@ -208,20 +202,8 @@ struct IRUnit {
 
   /*
    * Create a DefLabel instruction.
-   *
-   * This function also takes care of bookkeeping needed for refcount-opts.
    */
-  IRInstruction* defLabel(unsigned numDst, BCMarker marker,
-                          const jit::vector<uint32_t>& producedRefs);
-
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Optimization pass information.
-
-  const LabelRefs& labelRefs() const;
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Data members.
+  IRInstruction* defLabel(unsigned numDst, BCMarker marker);
 
 private:
   // Contains Block, IRInstruction, and SSATmp objects.
@@ -240,10 +222,14 @@ private:
 
   // Entry point.
   Block* m_entry;
-
-  // Information collected for optimization passes.
-  LabelRefs m_labelRefs;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Create a debug string for an IRUnit.
+ */
+std::string show(const IRUnit&);
 
 //////////////////////////////////////////////////////////////////////
 

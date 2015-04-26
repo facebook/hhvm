@@ -33,8 +33,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT = 1;
-const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS = 2;
+const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT = (1 << 0);
+const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS = (1 << 1);
+const int64_t k_DEBUG_BACKTRACE_PROVIDE_METADATA = (1 << 16);
 
 const int64_t k_E_ERROR = (1 << 0);
 const int64_t k_E_WARNING = (1 << 1);
@@ -61,9 +62,11 @@ const int64_t k_E_ALL = k_E_ERROR | k_E_WARNING | k_E_PARSE | k_E_NOTICE |
 Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
                                      int64_t limit /* = 0 */) {
   bool provide_object = options & k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
+  bool provide_metadata = options & k_DEBUG_BACKTRACE_PROVIDE_METADATA;
   bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
   return createBacktrace(BacktraceArgs()
                          .withThis(provide_object)
+                         .withMetadata(provide_metadata)
                          .ignoreArgs(ignore_args)
                          .setLimit(limit));
 }
@@ -307,6 +310,7 @@ void StandardExtension::initErrorFunc() {
                   (makeStaticString(#v), k_##v);
   INTCONST(DEBUG_BACKTRACE_PROVIDE_OBJECT);
   INTCONST(DEBUG_BACKTRACE_IGNORE_ARGS);
+  INTCONST(DEBUG_BACKTRACE_PROVIDE_METADATA);
   INTCONST(E_ERROR);
   INTCONST(E_WARNING);
   INTCONST(E_PARSE);

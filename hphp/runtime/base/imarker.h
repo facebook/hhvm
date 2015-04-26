@@ -20,6 +20,7 @@ namespace HPHP {
 struct Array;
 struct String;
 struct Variant;
+template <typename T> struct SmartPtr;
 
 // Interface for marking.
 struct IMarker {
@@ -30,6 +31,9 @@ struct IMarker {
 protected:
   ~IMarker() {}
 };
+
+template <typename T, typename F>
+void scan(const SmartPtr<T>& ptr, F& mark);
 
 }
 #endif

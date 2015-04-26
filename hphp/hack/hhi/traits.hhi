@@ -15,19 +15,25 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-trait StrictIterable<Tv> implements Iterable<Tv> {
+trait StrictIterable<+Tv> implements Iterable<Tv> {
   public function toArray(): array {
     return array();
   }
   public function toValuesArray(): array {
     return array();
   }
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toVector(): Vector<Tv> {
     return Vector {};
   }
   public function toImmVector(): ImmVector<Tv> {
     return ImmVector {};
   }
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toSet(): Set<Tv> {
     return Set {};
   }
@@ -64,7 +70,7 @@ trait StrictIterable<Tv> implements Iterable<Tv> {
   public function slice(int $start, int $len): Iterable<Tv> {
     return Vector {};
   }
-  public function concat(Traversable<Tv> $traversable): Iterable<Tv> {
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Iterable<Tu> {
     return Vector {};
   }
   public function firstValue(): ?Tv {
@@ -75,7 +81,7 @@ trait StrictIterable<Tv> implements Iterable<Tv> {
   }
 }
 
-trait StrictKeyedIterable<Tk,Tv> implements KeyedIterable<Tk,Tv> {
+trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
   public function toArray(): array {
     return array();
   }
@@ -85,18 +91,27 @@ trait StrictKeyedIterable<Tk,Tv> implements KeyedIterable<Tk,Tv> {
   public function toKeysArray(): array {
     return array();
   }
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toVector(): Vector<Tv> {
     return Vector {};
   }
   public function toImmVector(): ImmVector<Tv> {
     return ImmVector {};
   }
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toMap(): Map<Tk, Tv> {
     return Map {};
   }
   public function toImmMap(): ImmMap<Tk, Tv> {
     return ImmMap {};
   }
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toSet(): Set<Tv> {
     return Set {};
   }
@@ -148,7 +163,7 @@ trait StrictKeyedIterable<Tk,Tv> implements KeyedIterable<Tk,Tv> {
   public function slice(int $start, int $len): KeyedIterable<Tk, Tv> {
     return Map {};
   }
-  public function concat(Traversable<Tv> $traversable): Iterable<Tv> {
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Iterable<Tu> {
     return Map {};
   }
   public function firstValue(): ?Tv {
@@ -165,19 +180,25 @@ trait StrictKeyedIterable<Tk,Tv> implements KeyedIterable<Tk,Tv> {
   }
 }
 
-trait LazyIterable<Tv> implements Iterable<Tv> {
+trait LazyIterable<+Tv> implements Iterable<Tv> {
   public function toArray(): array {
     return array();
   }
   public function toValuesArray(): array {
     return array();
   }
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toVector(): Vector<Tv> {
     return Vector {};
   }
   public function toImmVector(): ImmVector<Tv> {
     return ImmVector {};
   }
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toSet(): Set<Tv> {
     return Set {};
   }
@@ -214,7 +235,7 @@ trait LazyIterable<Tv> implements Iterable<Tv> {
   public function slice(int $start, int $len): Iterable<Tv> {
     return Vector {};
   }
-  public function concat(Traversable<Tv> $traversable): Iterable<Tv> {
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Iterable<Tu> {
     return Vector {};
   }
   public function firstValue(): ?Tv {
@@ -225,7 +246,7 @@ trait LazyIterable<Tv> implements Iterable<Tv> {
   }
 }
 
-trait LazyKeyedIterable<Tk,Tv> implements KeyedIterable<Tk,Tv> {
+trait LazyKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
   public function toArray(): array {
     return array();
   }
@@ -235,18 +256,27 @@ trait LazyKeyedIterable<Tk,Tv> implements KeyedIterable<Tk,Tv> {
   public function toKeysArray(): array {
     return array();
   }
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toVector(): Vector<Tv> {
     return Vector {};
   }
   public function toImmVector(): ImmVector<Tv> {
     return ImmVector {};
   }
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toMap(): Map<Tk, Tv> {
     return Map {};
   }
   public function toImmMap(): ImmMap<Tk, Tv> {
     return ImmMap {};
   }
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toSet(): Set<Tv> {
     return Set {};
   }
@@ -298,7 +328,7 @@ trait LazyKeyedIterable<Tk,Tv> implements KeyedIterable<Tk,Tv> {
   public function slice(int $start, int $len): KeyedIterable<Tk, Tv> {
     return Map {};
   }
-  public function concat(Traversable<Tv> $traversable): Iterable<Tv> {
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Iterable<Tv> {
     return Map {};
   }
   public function firstValue(): ?Tv {
@@ -314,4 +344,3 @@ trait LazyKeyedIterable<Tk,Tv> implements KeyedIterable<Tk,Tv> {
     return null;
   }
 }
-

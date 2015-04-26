@@ -45,9 +45,9 @@ Object c_SleepWaitHandle::ti_create(int64_t usecs) {
     throw e;
   }
 
-  c_SleepWaitHandle* wh = newobj<c_SleepWaitHandle>();
+  auto wh = makeSmartPtr<c_SleepWaitHandle>();
   wh->initialize(usecs);
-  return wh;
+  return Object(std::move(wh));
 }
 
 void c_SleepWaitHandle::initialize(int64_t usecs) {
@@ -91,17 +91,6 @@ void c_SleepWaitHandle::process() {
 
 String c_SleepWaitHandle::getName() {
   return s_sleep;
-}
-
-void c_SleepWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
-  assert(getState() == STATE_WAITING);
-
-  if (isInContext()) {
-    unregisterFromContext();
-  }
-
-  setContextIdx(ctx_idx);
-  registerToContext();
 }
 
 void c_SleepWaitHandle::exitContext(context_idx_t ctx_idx) {

@@ -77,8 +77,7 @@ AliasClass pointee(const SSATmp* ptr) {
     auto const sinst = canonical(ptr)->inst();
     if (sinst->is(LdPackedArrayElemAddr)) {
       if (sinst->src(1)->hasConstVal() && sinst->src(1)->intVal() >= 0) {
-        return AElemI { sinst->src(0),
-                        safe_cast<uint64_t>(sinst->src(1)->intVal()) };
+        return AElemI { sinst->src(0), sinst->src(1)->intVal() };
       }
       return AElemIAny;
     }
@@ -154,7 +153,6 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   auto const may_reenter_is_ok =
     (inst.taken() && inst.taken()->isCatch()) ||
     inst.is(DecRef,
-            DecRefThis,
             ReleaseVVOrExit,
             CIterFree,
             MIterFree,
@@ -446,12 +444,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StLoc:
     return PureStore {
       AFrame { inst.src(0), inst.extra<StLoc>()->locId },
-      inst.src(1)
-    };
-
-  case StLocNT:
-    return PureStoreNT {
-      AFrame { inst.src(0), inst.extra<StLocNT>()->locId },
       inst.src(1)
     };
 
@@ -809,8 +801,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Nop:
   case ClsNeq:
   case Mod:
-  case TakeRef:
-  case TakeStk:
   case Conjure:
   case DefMIStateBase:
   case Halt:
@@ -963,6 +953,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdWHState:
   case LookupClsRDSHandle:
   case GetCtxFwdCallDyn:
+  case DbgTraceCall:
     return may_load_store(AEmpty, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:
@@ -984,8 +975,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // also may generally write to the eval stack below an offset (see
   // alias-class.h above AStack for more).
 
-  case DecRefThis:
-    return may_reenter(inst, may_load_store(AEmpty, AEmpty));
   case DecRef:
     if (inst.src(0)->type().maybe(TArr | TObj)) {
       // Could re-enter to run a destructor.
@@ -1039,7 +1028,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvCellToArr:  // decrefs src, may read obj props
   case ConvCellToObj:  // decrefs src
   case ConvObjToArr:   // decrefs src
-  case CustomInstanceInit:
   case GenericIdx:
   case InitProps:
   case InitSProps:
@@ -1174,8 +1162,6 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     [&] (PureLoad x)         { check(x.src); },
     [&] (PureStore x)        { check(x.dst);
                                always_assert(x.value != nullptr); },
-    [&] (PureStoreNT x)      { check(x.dst);
-                               always_assert(x.value != nullptr); },
     [&] (PureSpillFrame x)   { check(x.dst); check(x.ctx);
                                always_assert(x.ctx <= x.dst); },
     [&] (IterEffects x)      { check_fp(x.fp); check(x.kills); },
@@ -1220,9 +1206,6 @@ MemEffects canonicalize(MemEffects me) {
     },
     [&] (PureStore x) -> R {
       return PureStore { canonicalize(x.dst), x.value };
-    },
-    [&] (PureStoreNT x) -> R {
-      return PureStoreNT { canonicalize(x.dst), x.value };
     },
     [&] (PureSpillFrame x) -> R {
       return PureSpillFrame { canonicalize(x.dst), canonicalize(x.ctx) };
@@ -1282,7 +1265,6 @@ std::string show(MemEffects effects) {
     },
     [&] (PureLoad x)        { return sformat("ld({})", show(x.src)); },
     [&] (PureStore x)       { return sformat("st({})", show(x.dst)); },
-    [&] (PureStoreNT x)     { return sformat("stNT({})", show(x.dst)); },
     [&] (ReturnEffects x)   { return sformat("return({})", show(x.kills)); },
     [&] (IterEffects)       { return "IterEffects"; },
     [&] (IterEffects2)      { return "IterEffects2"; },

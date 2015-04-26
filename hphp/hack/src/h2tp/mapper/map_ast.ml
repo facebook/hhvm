@@ -435,7 +435,11 @@ let mk_mapper = fun m_in ->
           f_namespace = v_f_namespace;
         }
     in m_in.k_fun_ (k, all_mappers) fun_
-  and map_fun_kind = function | FAsync -> FAsync | FSync -> FSync
+  and map_fun_kind = function
+    | FAsync -> FAsync
+    | FAsyncGenerator -> FAsyncGenerator
+    | FSync -> FSync
+    | FGenerator -> FGenerator
   and map_hint (v1, v2) =
     let v1 = map_pos_t v1 and v2 = map_hint_ v2 in (v1, v2)
   and map_hint_ =

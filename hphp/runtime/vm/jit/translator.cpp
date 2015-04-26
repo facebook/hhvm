@@ -76,18 +76,20 @@ int locPhysicalOffset(int32_t localIndex) {
   return -(localIndex + 1);
 }
 
-PropInfo getPropertyOffset(const NormalizedInstruction& ni,
+PropInfo getPropertyOffset(const IRGS& env,
+                           const NormalizedInstruction& ni,
                            const Class* ctx, const Class*& baseClass,
                            const MInstrInfo& mii,
                            unsigned mInd, unsigned iInd) {
   if (mInd == 0) {
     auto const baseIndex = mii.valCount();
-    baseClass = ni.inputs[baseIndex]->rtt < TObj
-      ? ni.inputs[baseIndex]->rtt.clsSpec().cls()
-      : nullptr;
+    auto const type = irgen::predictedTypeFromLocation(
+      const_cast<IRGS&>(env), ni.inputs[baseIndex]->location);
+    baseClass = type <= TObj ? type.clsSpec().cls() : nullptr;
   }
   if (!baseClass) return PropInfo();
 
+  // TODO: This use of rtt is not guaranteed to be correctly guarded on.
   auto keyType = ni.inputs[iInd]->rtt;
   if (!keyType.hasConstVal(TStr)) return PropInfo();
   auto const name = keyType.strVal();
@@ -125,15 +127,6 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
     baseClass->declPropOffset(idx),
     baseClass->declPropRepoAuthType(idx)
   );
-}
-
-PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
-                                Class* ctx, const MInstrInfo& mii) {
-  unsigned mInd = ni.immVecM.size() - 1;
-  unsigned iInd = mii.valCount() + 1 + mInd;
-
-  const Class* cls = nullptr;
-  return getPropertyOffset(ni, ctx, cls, mii, mInd, iInd);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1131,6 +1124,7 @@ const StaticString s_parse_str("parse_str");
 const StaticString s_parse_strNative("__SystemLib\\parse_str");
 const StaticString s_assert("assert");
 const StaticString s_assertNative("__SystemLib\\assert");
+const StaticString s_set_frame_metadata("HH\\set_frame_metadata");
 
 bool funcByNameDestroysLocals(const StringData* fname) {
   if (!fname) return false;
@@ -1139,7 +1133,8 @@ bool funcByNameDestroysLocals(const StringData* fname) {
          fname->isame(s_parse_str.get()) ||
          fname->isame(s_parse_strNative.get()) ||
          fname->isame(s_assert.get()) ||
-         fname->isame(s_assertNative.get());
+         fname->isame(s_assertNative.get()) ||
+         fname->isame(s_set_frame_metadata.get());
 }
 
 bool builtinFuncDestroysLocals(const Func* callee) {

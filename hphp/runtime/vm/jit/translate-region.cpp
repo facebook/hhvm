@@ -732,7 +732,7 @@ TranslateResult translateRegion(IRGS& irgs,
                                 TransFlags trflags,
                                 PostConditions& pConds) {
   SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
-  SCOPE_ASSERT_DETAIL("IRUnit") { return irgs.unit.toString(); };
+  SCOPE_ASSERT_DETAIL("IRUnit") { return show(irgs.unit); };
 
   auto irGenResult = irGenRegion(irgs, region, toInterp, trflags);
   if (irGenResult != TranslateResult::Success) return irGenResult;
@@ -746,7 +746,7 @@ TranslateResult translateRegion(IRGS& irgs,
     auto  lastSrcKey = region.lastSrcKey();
     Block* mainExit = findMainExitBlock(unit, lastSrcKey);
     FTRACE(2, "translateRegion: mainExit: B{}\nUnit: {}\n",
-           mainExit->id(), unit);
+           mainExit->id(), show(unit));
     assertx(mainExit);
     pConds = irgs.irb->postConds(mainExit);
   }

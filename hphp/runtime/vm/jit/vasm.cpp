@@ -63,6 +63,21 @@ folly::Range<const Vlabel*> succs(const Vblock& block) {
   return succs(const_cast<Vblock&>(block)).castToConst();
 }
 
+boost::dynamic_bitset<> backedgeTargets(const Vunit& unit,
+                                        const jit::vector<Vlabel>& rpoBlocks) {
+  boost::dynamic_bitset<> ret(unit.blocks.size());
+  boost::dynamic_bitset<> seen(unit.blocks.size());
+
+  for (auto label : rpoBlocks) {
+    seen.set(label);
+    for (auto target : succs(unit.blocks[label])) {
+      if (seen.test(target)) ret.set(target);
+    }
+  }
+
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -82,9 +97,7 @@ struct BlockSorter {
   }
 
   void dfs(Vlabel b) {
-    assert_no_log(size_t(b) < unit.blocks.size() &&
-      !unit.blocks[b].code.empty());
-
+    assert_no_log(size_t(b) < unit.blocks.size());
     if (visited.test(b)) return;
     visited.set(b);
 
@@ -119,7 +132,7 @@ jit::vector<Vlabel> sortBlocks(const Vunit& unit) {
   std::stable_partition(s.blocks.begin(), s.blocks.end(), [&] (Vlabel b) {
     auto& block = unit.blocks[b];
     auto& code = block.code;
-    return code.back().op != Vinstr::fallthru;
+    return !code.empty() && code.back().op != Vinstr::fallthru;
   });
 
   return s.blocks;

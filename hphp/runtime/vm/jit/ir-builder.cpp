@@ -391,21 +391,6 @@ SSATmp* IRBuilder::preOptimizeLdCtx(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeDecRefThis(IRInstruction* inst) {
-  /*
-   * If $this is available, convert to an instruction sequence that doesn't
-   * need to test $this is available.  (Hopefully we GVN the load, too.)
-   */
-  if (thisAvailable()) {
-    auto const ctx   = gen(LdCtx, m_state.fp());
-    auto const thiss = gen(CastCtxThis, ctx);
-    gen(DecRef, thiss);
-    inst->convertToNop();
-  }
-
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   auto const locId = inst->extra<LdLoc>()->locId;
   if (auto tmp = localValue(locId, DataTypeGeneric)) return tmp;
@@ -427,46 +412,6 @@ SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
   if (inst->typeParam().hasConstVal() ||
       inst->typeParam().subtypeOfAny(TUninit, TInitNull)) {
     return m_unit.cns(inst->typeParam());
-  }
-
-  return nullptr;
-}
-
-SSATmp* IRBuilder::preOptimizeStLoc(IRInstruction* inst) {
-  // Guard relaxation might change the current local type, so don't try to
-  // change to StLocNT until after relaxation happens.
-  if (typeMightRelax()) return nullptr;
-
-  auto locId = inst->extra<StLoc>()->locId;
-  auto const curType = localType(locId, DataTypeGeneric);
-  auto const newType = inst->src(1)->type();
-
-  /*
-   * There's no need to store the type if it's going to be the same
-   * KindOfFoo.  We'll still have to store string types because we
-   * aren't specific about storing KindOfStaticString
-   * vs. KindOfString, and a TNull might mean KindOfUninit or
-   * KindOfNull.
-   */
-  auto const bothBoxed = curType <= TBoxedCell &&
-                         newType <= TBoxedCell;
-  auto const sameUnboxed = [&] {
-    auto avoidable = { TUninit,
-                       TInitNull,
-                       TBool,
-                       TInt,
-                       TDbl,
-                       // No strings.
-                       TArr,
-                       TObj,
-                       TRes };
-    for (auto t : avoidable) {
-      if (curType <= t && newType <= t) return true;
-    }
-    return false;
-  };
-  if (bothBoxed || sameUnboxed()) {
-    inst->setOpcode(StLocNT);
   }
 
   return nullptr;
@@ -514,10 +459,7 @@ SSATmp* IRBuilder::preOptimizeCoerceStk(IRInstruction* inst) {
 
 SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   auto const offset = inst->extra<LdStk>()->offset;
-  if (auto tmp = stackValue(offset, DataTypeGeneric)) {
-    gen(TakeStk, tmp);
-    return tmp;
-  }
+  if (auto tmp = stackValue(offset, DataTypeGeneric)) return tmp;
   // The types may not be compatible in the presence of unreachable code.
   // Don't try to optimize the code in this case, and just let
   // unreachable code elimination take care of it later.
@@ -537,21 +479,19 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
 SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst);
   switch (inst->op()) {
-    X(HintLocInner)
-    X(StLoc)
-    X(AssertType)
-    X(AssertLoc)
-    X(AssertStk)
-    X(CheckStk)
-    X(CheckLoc)
-    X(LdLoc)
-    X(LdStk)
-    X(CastStk)
-    X(CoerceStk)
-    X(CheckCtxThis)
-    X(LdCtx)
-    X(DecRefThis)
-    default: break;
+  X(HintLocInner)
+  X(AssertType)
+  X(AssertLoc)
+  X(AssertStk)
+  X(CheckStk)
+  X(CheckLoc)
+  X(LdLoc)
+  X(LdStk)
+  X(CastStk)
+  X(CoerceStk)
+  X(CheckCtxThis)
+  X(LdCtx)
+  default: break;
   }
 #undef X
   return nullptr;

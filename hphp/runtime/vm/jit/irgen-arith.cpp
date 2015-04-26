@@ -642,7 +642,6 @@ void emitMod(IRGS& env) {
   // php semantics are to return zero.
   auto const res = cond(
     env,
-    0,
     [&] (Block* taken) {
       auto const negone = gen(env, Eq, tr, cns(env, -1));
       gen(env, JmpNZero, taken, negone);

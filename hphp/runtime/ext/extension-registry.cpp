@@ -93,20 +93,20 @@ void registerExtension(Extension* ext) {
   (*s_exts)[name] = ext;
 }
 
-void unregisterExtension(litstr name) {
+void unregisterExtension(const char* name) {
   assert(s_exts);
   assert(s_exts->find(name) != s_exts->end());
   s_exts->erase(name);
 }
 
-bool isLoaded(litstr name, bool enabled_only /*= true */) {
+bool isLoaded(const char* name, bool enabled_only /*= true */) {
   assert(s_exts);
   auto it = s_exts->find(name);
   return (it != s_exts->end()) &&
          (!enabled_only || it->second->moduleEnabled());
 }
 
-Extension* get(litstr name, bool enabled_only /*= true */) {
+Extension* get(const char* name, bool enabled_only /*= true */) {
   assert(s_exts);
   auto it = s_exts->find(name);
   if ((it != s_exts->end()) &&

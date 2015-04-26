@@ -158,15 +158,10 @@ and method_ = {
   m_variadic        : fun_variadicity     ;
   m_params          : fun_param list      ;
   m_body            : func_body           ;
+  m_fun_kind        : Ast.fun_kind;
   m_user_attributes : user_attribute list ;
   m_ret             : hint option         ;
 }
-
-and fun_kind =
-  | FSync
-  | FGenerator
-  | FAsync
-  | FAsyncGenerator
 
 and visibility =
   | Private
@@ -201,6 +196,7 @@ and fun_ = {
   f_variadic : fun_variadicity;
   f_params   : fun_param list;
   f_body     : func_body;
+  f_fun_kind : Ast.fun_kind;
   f_user_attributes : user_attribute list;
 }
 
@@ -220,8 +216,6 @@ and func_body =
 and func_unnamed_body = {
   (* Unnamed AST for the function body *)
   fub_ast       : Ast.block;
-  (* Declared function kind *)
-  fub_decl_kind : Ast.fun_kind;
   (* Unnamed AST for the function type params *)
   fub_tparams   : Ast.tparam list;
   (* Namespace info *)
@@ -237,9 +231,6 @@ and func_named_body = {
    * functions declared in Mdecl are by definition UNSAFE
    *)
   fnb_unsafe   : bool;
-  (* Sync vs Async is determined via declaration, but Generator vs
-   * Non-generator requires looking for 'yield' in the body *)
-  fnb_fun_kind : fun_kind;
 }
 
 and stmt =
@@ -320,14 +311,19 @@ and expr_ =
   | Assert of assert_expr
   | Clone of expr
 
+(* These are "very special" constructs that we look for in, among
+ * other places, terminality checks. invariant does not appear here
+ * because it gets rewritten to If + AE_invariant_violation.
+ *
+ * TODO: get rid of assert_expr entirely in favor of rewriting to if
+ * and noreturn *)
 and assert_expr =
   | AE_assert of expr
-  | AE_invariant of expr * expr * expr list
   | AE_invariant_violation of expr * expr list
 
 and case =
-| Default of block
-| Case of expr * block
+  | Default of block
+  | Case of expr * block
 
 and catch = sid * id * block
 
@@ -343,9 +339,9 @@ and special_func =
   | Gen_array_va_rec of expr list
 
 type def =
- | Fun of fun_
- | Class of class_
- | Typedef of typedef
+  | Fun of fun_
+  | Class of class_
+  | Typedef of typedef
 
 type program = def list
 

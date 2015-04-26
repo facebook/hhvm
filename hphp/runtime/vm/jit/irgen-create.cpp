@@ -66,6 +66,10 @@ void initSProps(IRGS& env, const Class* cls) {
 }
 
 SSATmp* allocObjFast(IRGS& env, const Class* cls) {
+  // CustomInstance classes always go through IR:AllocObj and
+  // ObjectData::newInstance()
+  assert(!cls->callsCustomInstanceInit());
+
   auto registerObj = [&] (SSATmp* obj) {
     if (RuntimeOption::EnableObjDestructCall && cls->getDtor()) {
       gen(env, RegisterLiveObj, obj);
@@ -99,12 +103,6 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
 
   // Initialize the properties
   gen(env, InitObjProps, ClassData(cls), ssaObj);
-
-  // Call a custom initializer if one exists
-  if (cls->callsCustomInstanceInit()) {
-    return registerObj(gen(env, CustomInstanceInit, ssaObj));
-  }
-
   return registerObj(ssaObj);
 }
 
@@ -213,7 +211,7 @@ void emitNewLikeArrayL(IRGS& env, int32_t id, int32_t capacity) {
 }
 
 void emitNewPackedArray(IRGS& env, int32_t numArgs) {
-  if (numArgs > kPackedCapCodeThreshold) {
+  if (numArgs > CapCode::Threshold) {
     PUNT(NewPackedArray-UnrealisticallyHuge);
   }
 
@@ -393,7 +391,6 @@ void emitStaticLoc(IRGS& env, int32_t locId, const StringData* name) {
 
   auto const res = cond(
     env,
-    0,
     [&] (Block* taken) {
       gen(env, CheckStaticLocInit, taken, box);
     },

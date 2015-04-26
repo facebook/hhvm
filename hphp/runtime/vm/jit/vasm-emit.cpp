@@ -81,7 +81,7 @@ const Abi vauto_abi {
 };
 
 Vauto::~Vauto() {
-  UNUSED auto& areas = this->areas();
+  auto& areas = this->areas();
 
   for (auto& b : unit().blocks) {
     if (!b.code.empty()) {
@@ -96,11 +96,11 @@ Vauto::~Vauto() {
 
       switch (arch()) {
         case Arch::X64:
-          optimizeX64();
-          finishX64(vauto_abi, nullptr);
+          optimizeX64(unit(), vauto_abi);
+          emitX64(unit(), areas, nullptr);
           break;
         case Arch::ARM:
-          finishARM(vauto_abi, nullptr);
+          finishARM(unit(), areas, vauto_abi, nullptr);
           break;
       }
       return;

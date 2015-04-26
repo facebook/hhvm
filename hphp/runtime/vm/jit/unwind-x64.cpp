@@ -270,9 +270,9 @@ tc_unwind_personality(int version,
   return _URC_CONTINUE_UNWIND;
 }
 
-TCA tc_unwind_resume(ActRec*& fp) {
+TCUnwindInfo tc_unwind_resume(ActRec* fp) {
   while (true) {
-    auto newFp = fp->m_sfp;
+    auto const newFp = fp->m_sfp;
     ITRACE(1, "tc_unwind_resume processing fp: {} savedRip: {:#x} newFp: {}\n",
            fp, fp->m_savedRip, newFp);
     Trace::Indent indent;
@@ -289,8 +289,7 @@ TCA tc_unwind_resume(ActRec*& fp) {
     auto savedRip = reinterpret_cast<TCA>(fp->m_savedRip);
     if (savedRip == mcg->tx().uniqueStubs.callToExit) {
       ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
-      fp = newFp;
-      return nullptr;
+      return {nullptr, newFp};
     }
 
     auto catchTrace = lookup_catch_trace(savedRip, unwindRdsInfo->exn);
@@ -313,7 +312,7 @@ TCA tc_unwind_resume(ActRec*& fp) {
     if (catchTrace) {
       ITRACE(1, "tc_unwind_resume returning catch trace {} with fp: {}\n",
              catchTrace, fp);
-      return catchTrace;
+      return {catchTrace, fp};
     }
 
     ITRACE(1, "No catch trace entry for {}; continuing\n",

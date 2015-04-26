@@ -755,10 +755,10 @@ class HashCollection : public ExtCollectionObjectData {
     arrayData()->m_size = m_size;
   }
   inline uint32_t cap() const {
-    return arrayData()->m_cap;
+    return arrayData()->capacity();
   }
   inline uint32_t tableMask() const {
-    return arrayData()->m_tableMask;
+    return arrayData()->m_mask;
   }
   inline uint32_t posLimit() const {
     return arrayData()->m_used;

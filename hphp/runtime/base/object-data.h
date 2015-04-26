@@ -177,7 +177,7 @@ struct ObjectData {
   CollectionType collectionType() const; // asserts(isCollection())
 
   bool getAttribute(Attribute) const;
-  void setAttribute(Attribute) const;
+  void setAttribute(Attribute);
 
   bool noDestruct() const;
   void setNoDestruct();
@@ -421,7 +421,7 @@ private:
   int o_id; // Numeric identifier of this object (used for var_dump())
   union {
     struct {
-      mutable uint16_t o_attribute;
+      uint16_t o_attribute;
       uint8_t m_pad; // reserved for MM
       HeaderKind m_kind;
       mutable RefCount m_count;

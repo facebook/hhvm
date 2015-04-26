@@ -84,6 +84,7 @@ TCA emitDebuggerRetFromInterpretedFrame() {
   a.  storel(eax, rVmTl[unwinderDebuggerReturnOffOff()]);
   a.  storeq(rVmSp, rVmTl[unwinderDebuggerReturnSPOff()]);
   a.  call  (TCA(popDebuggerCatch));
+  a.  movq  (rVmFp, rdx); // llvm catch traces expect rVmFp to be in rdx.
   a.  jmp   (rax);
 
   return ret;
@@ -103,6 +104,7 @@ TCA emitDebuggerRetFromInterpretedGenFrame() {
   a.  storel(eax, rVmTl[unwinderDebuggerReturnOffOff()]);
   a.  storeq(rVmSp, rVmTl[unwinderDebuggerReturnSPOff()]);
   a.  call  (TCA(popDebuggerCatch));
+  a.  movq  (rVmFp, rdx); // llvm catch traces expect rVmFp to be in rdx.
   a.  jmp   (rax);
 
   return ret;
@@ -180,6 +182,7 @@ asm_label(a, resumeHelper);
 asm_label(a, resumeRaw);
   a.    loadq (rVmTl[rds::kVmspOff], rVmSp);
   a.    loadq (rVmTl[rds::kVmfpOff], rVmFp);
+  a.    movq  (rVmFp, rdx); // llvm catch traces expect rVmFp to be in rdx.
   a.    jmp   (rax);
 
   uniqueStubs.add("resumeInterpHelpers", uniqueStubs.interpHelper);
@@ -241,16 +244,14 @@ void emitCatchHelper(UniqueStubs& uniqueStubs) {
   a.    cmpq (0, rVmTl[unwinderDebuggerReturnSPOff()]);
   a.    jne8 (debuggerReturn);
 
-  // Normal endCatch situation: call back to tc_unwind_resume.
-  a.    push (rax); // align stack
-  a.    push (rVmFp);
-  a.    movq (rsp, argNumToRegName[0]);
+  // Normal endCatch situation: call back to tc_unwind_resume, which returns
+  // the catch trace (or null) in rax and the new vmfp in rdx.
+  a.    movq (rVmFp, argNumToRegName[0]);
   a.    call (TCA(tc_unwind_resume));
-  a.    pop  (rVmFp);
-  a.    pop  (rdx); // un-align stack. rax is live.
+  a.    movq (rdx, rVmFp);
   a.    testq(rax, rax);
   a.    jz8  (resumeCppUnwind);
-  a.    jmp  (rax);
+  a.    jmp  (rax);  // rdx is still live if we're going to code from llvm
 
 asm_label(a, resumeCppUnwind);
   a.    loadq(rVmTl[unwinderExnOff()], argNumToRegName[0]);
@@ -272,14 +273,38 @@ void emitStackOverflowHelper(UniqueStubs& uniqueStubs) {
   moveToAlign(mcg->code.cold());
   uniqueStubs.stackOverflowHelper = a.frontier();
 
-  // We are called from emitStackCheck, with the new stack frame in
-  // rStashedAR. Get the caller's PC into rdi and save it off.
-  a.    loadq  (rVmFp[AROFF(m_func)], rax);
+  assert(kScratchCrossTraceRegs.contains(rax));
+  assert(kScratchCrossTraceRegs.contains(rcx));
+  assert(kScratchCrossTraceRegs.contains(rdi));
+
+  // First get vmsp synchronized.  This stub is only called from function
+  // prologues, where we can figure out the stack top based on the
+  // partially-constructed ActRec's argument count.
+  a.    loadl  (rStashedAR[AROFF(m_numArgsAndFlags)], eax);
+  a.    andl   (ActRec::kNumArgsMask, eax);
+  a.    shll   (0x4, eax);    static_assert(sizeof(Cell) == 16, "");
+  a.    neg    (rax);
+  a.    lea    (rStashedAR[rax], rdi);
+  a.    storeq (rdi, rVmTl[rds::kVmspOff]);
+
+  // Get the caller's PC using the soff.
+  a.    loadq  (rVmFp[AROFF(m_func)], rcx);
   a.    loadl  (rStashedAR[AROFF(m_soff)], edi);
-  a.    loadq  (rax[Func::sharedOff()], rax);
+  a.    loadq  (rcx[Func::sharedOff()], rax);
   a.    loadl  (rax[Func::sharedBaseOff()], eax);
   a.    addl   (eax, edi);
-  emitEagerVMRegSave(a, rVmTl, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
+
+  // rcx = caller m_func (still rcx) -> m_unit -> m_bc
+  a.    loadq  (rcx[Func::unitOff()], rcx);
+  a.    loadq  (rcx[Unit::bcOff()], rcx);
+
+  // Add m_bc to the return offset, and store it in RDS.
+  a.    addq   (rcx, rdi);
+  a.    storeq (rdi, rVmTl[rds::kVmpcOff]);
+
+  // Synchronize FP.
+  a.    storeq (rVmFp, rVmTl[rds::kVmfpOff]);
+
   // The stack overflow is logically thrown from the caller so rStashedAR
   // hasn't yet been copied to rVmFp. But there might be a catch trace attached
   // to the call that got us here, so we need to link rStashedAR into the frame
@@ -489,7 +514,7 @@ asm_label(a, noCallee);
 //////////////////////////////////////////////////////////////////////
 
 void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
-  TCA (*helper)(ActRec*, void*) = &fcallHelper;
+  TCA (*helper)(ActRec*, bool) = &fcallHelper;
   Asm a { mcg->code.main() };
 
   moveToAlign(mcg->code.main());
@@ -497,18 +522,20 @@ void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
 
   Label popAndXchg, skip;
 
-  // fcallHelper is used for prologues, and (in the case of closures) for
-  // dispatch to the function body. In the first case, there's a call, in the
-  // second, there's a jmp.  We can differentiate by comparing r15 and rVmFp
-  a.    movq   (rStashedAR, argNumToRegName[0]);
-  a.    movq   (rVmSp, argNumToRegName[1]);
-  a.    cmpq   (rStashedAR, rVmFp);
-  a.    jne8   (popAndXchg);
+  // fcallHelper is used for prologues, and (in the case of cloned closures)
+  // for dispatch to the function body. In the first case, there's a call, in
+  // the second, there's a jmp.  We can differentiate by loading the func out
+  // of the actrec and asking it if it's a cloned closure.
+  a.    loadq  (rStashedAR[AROFF(m_func)], argNumToRegName[0]);
+  emitCall(a, CppCall::method(&Func::isClonedClosure), argSet(1));
+  a.    movb   (al, rbyte(argNumToRegName[1]));  // live for helper calls below
+  a.    movq   (rStashedAR, argNumToRegName[0]); // live for helper calls below
+  a.    testb  (al, al);
+  a.    jz8    (popAndXchg);
+
+  // Cloned closure case:
   emitCall(a, CppCall::direct(helper), argSet(2));
   a.    jmp    (rax);
-  // The ud2 is a hint to the processor that the fall-through path of the
-  // indirect jump (which it statically predicts as most likely) is not
-  // possible.
   a.    ud2    ();
 
   // fcallHelper may call doFCall. doFCall changes the return ip
@@ -543,7 +570,7 @@ asm_label(a, skip);
 }
 
 void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
-  TCA (*helper)(ActRec*,void*) = &funcBodyHelper;
+  TCA (*helper)(ActRec*) = &funcBodyHelper;
   Asm a { mcg->code.main() };
 
   moveToAlign(mcg->code.main());
@@ -552,8 +579,7 @@ void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
   // This helper is called via a direct jump from the TC (from
   // fcallArrayHelper). So the stack parity is already correct.
   a.    movq   (rVmFp, argNumToRegName[0]);
-  a.    movq   (rVmSp, argNumToRegName[1]);
-  emitCall(a, CppCall::direct(helper), argSet(2));
+  emitCall(a, CppCall::direct(helper), argSet(1));
   a.    jmp    (rax);
   a.    ud2    ();
 

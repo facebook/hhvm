@@ -90,8 +90,6 @@ public:
   }
   // Move assignment
   SmartPtr& operator=(SmartPtr&& src) {
-    // a = std::move(a), ILLEGAL per C++11 17.6.4.9
-    assert(this != &src);
     std::swap(m_px, src.m_px);
     return *this;
   }
@@ -312,7 +310,7 @@ inline SmartPtr<T> unsafe_cast_or_null(const P& p) {
 template <typename T, typename P>
 inline SmartPtr<T> cast(const P& p) {
   if (p) {
-    if(p->template instanceof<T>()) {
+    if (p->template instanceof<T>()) {
       return SmartPtr<T>(static_cast<T*>(p.get()));
     } else {
       throw_invalid_object_type(getClassNameCstr(p.get()));
@@ -328,7 +326,7 @@ inline SmartPtr<T> cast(const P& p) {
 template <typename T, typename P>
 inline SmartPtr<T> cast_or_null(const P& p) {
   if (p) {
-    if(p->template instanceof<T>()) {
+    if (p->template instanceof<T>()) {
       return SmartPtr<T>(static_cast<T*>(p.get()));
     } else {
       throw_invalid_object_type(getClassNameCstr(p.get()));
@@ -344,7 +342,7 @@ inline SmartPtr<T> cast_or_null(const P& p) {
 template <typename T, typename P>
 inline SmartPtr<T> dyn_cast(const P& p) {
   if (p) {
-    if(p->template instanceof<T>()) {
+    if (p->template instanceof<T>()) {
       return SmartPtr<T>(static_cast<T*>(p.get()));
     } else {
       return nullptr;

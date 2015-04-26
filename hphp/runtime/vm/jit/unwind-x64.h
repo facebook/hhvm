@@ -156,7 +156,11 @@ tc_unwind_personality(int version,
                       _Unwind_Exception* exceptionObj,
                       _Unwind_Context* context);
 
-TCA tc_unwind_resume(ActRec*& fp);
+struct TCUnwindInfo {
+  TCA catchTrace;
+  ActRec* fp;
+};
+TCUnwindInfo tc_unwind_resume(ActRec* fp);
 
 //////////////////////////////////////////////////////////////////////
 

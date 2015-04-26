@@ -105,7 +105,6 @@ struct BackEnd {
   virtual TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) = 0;
   virtual void funcPrologueSmashGuard(TCA prologue, const Func* func) = 0;
   virtual void emitIncStat(CodeBlock& cb, intptr_t disp, int n) = 0;
-  virtual void emitTraceCall(CodeBlock& cb, Offset pcOff) = 0;
 
   /*
    * Returns true if the given current frontier can have an nBytes-long

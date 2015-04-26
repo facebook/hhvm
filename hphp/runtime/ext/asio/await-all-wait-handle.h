@@ -59,7 +59,8 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   String getName();
   void onUnblocked();
   c_WaitableWaitHandle* getChild();
-  void enterContextImpl(context_idx_t ctx_idx);
+  template<typename T> void forEachChild(T fn);
+
   size_t heapSize() const { return heapSize(m_cap); }
   static size_t heapSize(unsigned count) {
     return sizeof(c_AwaitAllWaitHandle) + count * sizeof(c_WaitableWaitHandle*);
@@ -82,6 +83,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   AsioBlockable m_blockable;
   c_WaitableWaitHandle* m_children[0]; // allocated off the end
 
+ public:
   static const int8_t STATE_BLOCKED = 2;
 };
 
@@ -92,5 +94,7 @@ inline c_AwaitAllWaitHandle* c_WaitHandle::asAwaitAll() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#include "hphp/runtime/ext/asio/await-all-wait-handle-inl.h"
 
 #endif // incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_

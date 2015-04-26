@@ -226,9 +226,6 @@ about to be loaded, using a separate CheckRefInner instruction.
   Check that type of the given localId on the frame S0 is T; if not, branch to
   block B.
 
-  Returns a new frame pointer representing the same frame as S0 but with the
-  knowledge that the checked local has type T.
-
 | AssertLoc<T,localId>, ND, S(FramePtr), NF
 
   Asserts that type of the supplied local on the frame S0 is T. This is used
@@ -724,11 +721,6 @@ To string conversions:
 
   Loads from S0 at offset (in cells), and puts the value in D as type T.
 
-| TakeStk, ND, S(StkElem), NF
-
-  Does nothing at runtime. Acts as a hint to the optimizer that the code is
-  taking ownership of a reference to S0.
-
 | LdLoc<T,localId>, DParamMayRelax, S(FramePtr), NF
 
   Loads local slot localId from the frame S0 and puts the value in D as type T.
@@ -808,7 +800,7 @@ To string conversions:
   Check that the context (m_this or m_cls) in S0 is a non-null $this
   pointer. If not, branch to B.
 
-| CastCtxThis, DThis, S(Ctx), NF
+| CastCtxThis, DThis, S(Ctx), P
 
   Convert a Ctx known to contain a $this pointer to a specific object type,
   based on the marker func for this instruction.
@@ -1111,10 +1103,6 @@ To string conversions:
 
   Call the custom instance constructor of an extension class.
 
-| CustomInstanceInit, DofS(0), S(Obj), Er
-
-  Call the custom instance initializer of object S0.
-
 | NewArray, D(Arr), C(Int), PRc
 
   Allocate a new array with the expected capacity S0.
@@ -1325,11 +1313,6 @@ To string conversions:
 
   Store S1 to local number localId on the frame pointed to by S0.
 
-| StLocNT<localId>, ND, S(FramePtr) S(Gen), CRc
-
-  Store S1 to local number localId on the frame pointed to by S0, without
-  storing the type.
-
 | StLocPseudoMain<localId>, ND, S(FramePtr) S(Gen), CRc
 
   Behaves just like StLoc, except the hard requirement that it is only emitted
@@ -1360,6 +1343,7 @@ To string conversions:
 
   For debugging purposes.  Store kTVTrashFillHeap to a heap slot pointed to by
   S0.
+
 
 11. Trace exits
 
@@ -1403,11 +1387,6 @@ To string conversions:
 
   If the Ctx in S0 is a $this pointer, IncRef it.
 
-| DecRefThis, ND, S(FramePtr), NF
-
-  DecRef the $this pointer in the ActRec S0, if it had one. Does nothing if
-  there was a class context or null $this on the ActRec.
-
 | DecRef, ND, S(Gen), K|CRc
 
   Decrease the reference count of S0 by one, and call a destructor for types
@@ -1424,11 +1403,6 @@ To string conversions:
   Decrease the reference count of S0 by one, do not check if it goes to zero.
   This instruction can be used for more efficient code when it is provable that
   the reference count cannot go to zero.
-
-| TakeRef, ND, S(Gen), NF
-
-  Produce reference, but do not modify the reference count. Used to inform
-  refcount optimizer about implicitly owned references.
 
 
 13. Misc
@@ -1915,6 +1889,11 @@ To string conversions:
 
   Assert that S0 is of type T at runtime. If the assertion fails, execution is
   aborted via a hardware exception.
+
+| DbgTraceCall<spOffset>, ND, S(FramePtr) S(StkPtr), NF
+
+  When EvalHHIRGenerateAsserts is on, this instruction is inserted at the
+  start of each region, to emit some sanity checking code.
 
 | RBTraceEntry, ND, NA, NF
 

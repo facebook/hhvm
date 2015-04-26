@@ -81,7 +81,6 @@ void emitStackOverflowHelper(UniqueStubs& us) {
   // The VM-reg-save helper will read the current BC offset out of argReg(0).
   a.  Add  (argReg(0).W(), rAsm.W(), rAsm2.W());
 
-  emitEagerVMRegSave(a, rVmTl, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
   not_implemented();
 
   us.add("stackOverflowHelper", us.stackOverflowHelper);
@@ -152,42 +151,14 @@ void emitFCallArrayHelper(UniqueStubs& us) {
 }
 
 void emitFCallHelperThunk(UniqueStubs& us) {
-  TCA (*helper)(ActRec*, void*) = &fcallHelper;
   MacroAssembler a { mcg->code.main() };
-
   us.fcallHelperThunk = a.frontier();
-  vixl::Label popAndXchg, jmpRet;
-
-  a.   Mov   (argReg(0), rStashedAR);
-  a.   Mov   (argReg(1), rVmSp);
-  a.   Cmp   (rVmFp, rStashedAR);
-  a.   B     (&popAndXchg, vixl::ne);
-  emitCall(a, CppCall::direct(helper));
-  a.   Br    (rReturnReg);
-
-  a.   bind  (&popAndXchg);
-  emitXorSwap(a, rStashedAR, rVmFp);
-  // Put return address into ActRec.
-  a.   Str   (rLinkReg, rVmFp[AROFF(m_savedRip)]);
-  emitCall(a, CppCall::direct(helper));
-  // Put return address back in the link register.
-  a.   Ldr   (rLinkReg, rVmFp[AROFF(m_savedRip)]);
-  emitXorSwap(a, rStashedAR, rVmFp);
-  a.   Cmp   (rReturnReg, 0);
-  a.   B     (&jmpRet, vixl::gt);
-  a.   Neg   (rReturnReg, rReturnReg);
-  a.   Ldr   (rVmFp, rVmTl[rds::kVmfpOff]);
-  a.   Ldr   (rVmSp, rVmTl[rds::kVmspOff]);
-
-  a.   bind  (&jmpRet);
-
-  a.   Br    (rReturnReg);
-
+  a.   Brk   (0);
   us.add("fcallHelperThunk", us.fcallHelperThunk);
 }
 
 void emitFuncBodyHelperThunk(UniqueStubs& us) {
-  TCA (*helper)(ActRec*, void*) = &funcBodyHelper;
+  TCA (*helper)(ActRec*) = &funcBodyHelper;
   MacroAssembler a { mcg->code.main() };
 
   us.funcBodyHelperThunk = a.frontier();

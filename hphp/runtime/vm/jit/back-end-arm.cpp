@@ -42,7 +42,9 @@ namespace HPHP { namespace jit { namespace arm {
 
 TRACE_SET_MOD(hhir);
 
-struct BackEnd : public jit::BackEnd {
+namespace {
+
+struct BackEnd final : jit::BackEnd {
   BackEnd() {}
   ~BackEnd() {}
 
@@ -201,10 +203,6 @@ struct BackEnd : public jit::BackEnd {
     a.    Ldr   (rAsm, rAsm2[disp]);
     a.    Add   (rAsm, rAsm, n);
     a.    Str   (rAsm, rAsm2[disp]);
-  }
-
-  void emitTraceCall(CodeBlock& cb, Offset pcOff) override {
-    // TODO(2967396) implement properly
   }
 
   void prepareForTestAndSmash(CodeBlock& cb, int testBytes,
@@ -455,8 +453,10 @@ private:
   }
 };
 
+}
+
 std::unique_ptr<jit::BackEnd> newBackEnd() {
-  return std::unique_ptr<jit::BackEnd>{ folly::make_unique<BackEnd>() };
+  return folly::make_unique<BackEnd>();
 }
 
 static size_t genBlock(CodegenState& state, Vout& v, Vout& vc, Block* block) {
@@ -507,10 +507,6 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       mcg->code.unlock();
     };
 
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
-      emitTraceCall(mainCode, unit.bcOff());
-    }
-
     CodegenState state(unit, asmInfo, *frozenCode);
     auto const blocks = rpoSortCfg(unit);
     Vasm vasm;
@@ -542,7 +538,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     }
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
     assertx(check(vunit));
-    vasm.finishARM(arm::abi, state.asmInfo);
+    finishARM(vasm.unit(), vasm.areas(), arm::abi, state.asmInfo);
   }
 
   assertx(coldCodeIn.frontier() == coldStart);

@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/asio/wait-handle.h"
 
 #include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/asio/asio-context-enter.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/waitable-wait-handle.h"
 
@@ -56,7 +57,7 @@ void c_WaitHandle::t_import() {
 
   assert(instanceof(c_WaitableWaitHandle::classof()));
   auto const ctx_idx = AsioSession::Get()->getCurrentContextIdx();
-  static_cast<c_WaitableWaitHandle*>(this)->enterContext(ctx_idx);
+  asio::enter_context(static_cast<c_WaitableWaitHandle*>(this), ctx_idx);
 }
 
 Variant c_WaitHandle::t_join() {

@@ -1,0 +1,5 @@
+App \AsyncGenerator<X, X, X, >
+App \Generator<X, X, X, >
+App \Awaitable<X, >
+X
+No errors

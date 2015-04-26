@@ -18,6 +18,7 @@
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
@@ -36,28 +37,44 @@ struct ValueNumberMetadata {
   SSATmp* key;
   SSATmp* value;
 };
-typedef StateVector<SSATmp, ValueNumberMetadata> ValueNumberTable;
+
+using ValueNumberTable = StateVector<SSATmp, ValueNumberMetadata>;
+using DstIndex = int32_t;
 
 struct CongruenceHasher {
-  explicit CongruenceHasher(const ValueNumberTable& vnTable)
-    : m_vnTable(vnTable)
+  using KeyType = std::pair<IRInstruction*, DstIndex>;
+
+  explicit CongruenceHasher(const ValueNumberTable& globalTable)
+    : m_globalTable(globalTable)
   {
   }
 
-  size_t operator()(IRInstruction* inst) const {
-    // Note: this doesn't take commutativity or associativity into account, but
-    // it might be nice to do so for the opcodes where it makes sense.
-    size_t result = static_cast<size_t>(inst->op());
+  size_t hashDefLabel(KeyType key) const {
+    auto inst = key.first;
+    auto idx = key.second;
 
-    for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
-      auto src = inst->src(i);
-      assertx(m_vnTable[src].value);
-      result = folly::hash::hash_128_to_64(
-        result,
-        reinterpret_cast<size_t>(m_vnTable[src].value)
-      );
+    // We use a set (instead of an unordered_set) because we want a fixed and
+    // well-defined iteration order while we're accumulating the hash below.
+    jit::set<SSATmp*> values;
+    for (auto& pred : inst->block()->preds()) {
+      auto fromBlock = pred.from();
+      auto& jmp = fromBlock->back();
+      auto src = jmp.src(idx);
+      assertx(m_globalTable[src].value);
+      values.emplace(m_globalTable[src].value);
     }
 
+    auto result = static_cast<size_t>(inst->op());
+    for (auto value : values) {
+      result = folly::hash::hash_128_to_64(
+        result,
+        reinterpret_cast<size_t>(value)
+      );
+    }
+    return hashSharedImpl(inst, result);
+  }
+
+  size_t hashSharedImpl(IRInstruction* inst, size_t result) const {
     if (inst->hasExtra()) {
       result = folly::hash::hash_128_to_64(
         result,
@@ -72,17 +89,92 @@ struct CongruenceHasher {
     return result;
   }
 
+  size_t hashSrcs(KeyType key, size_t result) const {
+    auto inst = key.first;
+    for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
+      auto src = inst->src(i);
+      assertx(m_globalTable[src].value);
+      result = folly::hash::hash_128_to_64(
+        result,
+        reinterpret_cast<size_t>(m_globalTable[src].value)
+      );
+    }
+    return result;
+  }
+
+  size_t operator()(KeyType key) const {
+    auto inst = key.first;
+
+    if (inst->is(DefLabel)) return hashDefLabel(key);
+
+    // Note: this doesn't take commutativity or associativity into account, but
+    // it might be nice to do so for the opcodes where it makes sense.
+    size_t result = static_cast<size_t>(inst->op());
+    result = hashSrcs(key, result);
+    return hashSharedImpl(inst, result);
+  }
+
 private:
-  const ValueNumberTable& m_vnTable;
+  const ValueNumberTable& m_globalTable;
 };
 
 struct CongruenceComparator {
-  explicit CongruenceComparator(const ValueNumberTable& vnTable)
-    : m_vnTable(vnTable)
+  using KeyType = std::pair<IRInstruction*, DstIndex>;
+
+  explicit CongruenceComparator(const ValueNumberTable& globalTable)
+    : m_globalTable(globalTable)
   {
   }
 
-  bool operator()(IRInstruction* instA, IRInstruction* instB) const {
+  bool compareDefLabelSrcs(KeyType keyA, KeyType keyB) const {
+    auto instA = keyA.first;
+    auto instB = keyB.first;
+    auto idxA = keyA.second;
+    auto idxB = keyB.second;
+
+    assert(instA->op() == instB->op());
+    assert(instA->is(DefLabel));
+
+    jit::hash_set<SSATmp*> valuesA;
+    jit::hash_set<SSATmp*> valuesB;
+
+    auto fillValueSet = [&](
+        IRInstruction* inst,
+        int32_t idx,
+        std::unordered_set<SSATmp*>& values
+    ) {
+      for (auto& pred : inst->block()->preds()) {
+        auto fromBlock = pred.from();
+        auto& jmp = fromBlock->back();
+        auto src = jmp.src(idx);
+        assertx(m_globalTable[src].value);
+        values.emplace(m_globalTable[src].value);
+      }
+    };
+    fillValueSet(instA, idxA, valuesA);
+    fillValueSet(instB, idxB, valuesB);
+    return valuesA == valuesB;
+  }
+
+  bool compareSrcs(KeyType keyA, KeyType keyB) const {
+    auto instA = keyA.first;
+    auto instB = keyB.first;
+
+    for (uint32_t i = 0; i < instA->numSrcs(); ++i) {
+      auto srcA = instA->src(i);
+      auto srcB = instB->src(i);
+      assertx(m_globalTable[srcA].value);
+      assertx(m_globalTable[srcB].value);
+      if (m_globalTable[srcA].value != m_globalTable[srcB].value) return false;
+    }
+
+    return true;
+  }
+
+  bool operator()(KeyType keyA, KeyType keyB) const {
+    auto instA = keyA.first;
+    auto instB = keyB.first;
+
     // Note: this doesn't take commutativity or associativity into account, but
     // it might be nice to do so for the opcodes where it makes sense.
     if (instA->op() != instB->op()) return false;
@@ -92,31 +184,36 @@ struct CongruenceComparator {
       return false;
     }
 
-    for (uint32_t i = 0; i < instA->numSrcs(); ++i) {
-      auto srcA = instA->src(i);
-      auto srcB = instB->src(i);
-      assertx(m_vnTable[srcA].value);
-      assertx(m_vnTable[srcB].value);
-      if (m_vnTable[srcA].value != m_vnTable[srcB].value) return false;
-    }
-
     if (instA->hasExtra()) {
       assertx(instB->hasExtra());
       if (!equalsExtra(instA->op(), instA->rawExtra(), instB->rawExtra())) {
         return false;
       }
     }
+
+    if (instA->is(DefLabel)) {
+      if (!compareDefLabelSrcs(keyA, keyB)) return false;
+    } else if (!compareSrcs(keyA, keyB)) {
+      return false;
+    }
+
     return true;
   }
 
 private:
-  const ValueNumberTable& m_vnTable;
+  const ValueNumberTable& m_globalTable;
 };
 
-typedef std::unordered_map<
-  IRInstruction*, SSATmp*,
+using NameTable = std::unordered_map<
+  std::pair<IRInstruction*, DstIndex>, SSATmp*,
   CongruenceHasher,
-  CongruenceComparator> NameTable;
+  CongruenceComparator>;
+
+struct GVNState {
+  ValueNumberTable* localTable{nullptr};
+  ValueNumberTable* globalTable{nullptr};
+  NameTable* nameTable{nullptr};
+};
 
 bool supportsGVN(const IRInstruction* inst) {
   switch (inst->op()) {
@@ -154,17 +251,11 @@ bool supportsGVN(const IRInstruction* inst) {
   case ConvBoolToStr:
   case ConvClsToCctx:
   case Gt:
-  case GtX:
   case Gte:
-  case GteX:
   case Lt:
-  case LtX:
   case Lte:
-  case LteX:
   case Eq:
-  case EqX:
   case Neq:
-  case NeqX:
   case Same:
   case NSame:
   case GtInt:
@@ -222,6 +313,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdPackedArrayElemAddr:
   case OrdStr:
   case AKExistsArr:
+  case DefLabel:
     return true;
   default:
     return false;
@@ -239,146 +331,68 @@ void initWithInstruction(IRInstruction* inst, ValueNumberTable& table) {
   }
 }
 
-bool visitDefLabel(
-  IRInstruction* inst,
-  ValueNumberTable& vnTable,
-  ValueNumberTable& updates,
-  NameTable& nameTable
-) {
-  assertx(inst->is(DefLabel));
-  bool changed = false;
-
-  /*
-   * We can forward value numbers through DefLabels if all of the predecessor
-   * blocks agree on the value number of the things being joined. We look at
-   * each dst separately, and there are two main cases we care about:
-   *
-   * x_2 = phi(x_1, x_1) => x_1
-   * x_2 = phi(x_1, x_2) => x_1
-   *
-   * where x_1 and x_2 is the value number of the variable being joined.
-   *
-   * The first is the case where all the predecssors agree on the value number
-   * of the inputs to the phi.
-   *
-   * The second case handles the situation where the phi uses the variable it's
-   * defining (as in the case of a loop back edge), so obviously the value
-   * number of the dst should be the other value number flowing into the phi.
-   */
-  for (uint32_t i = 0; i < inst->numDsts(); ++i) {
-    auto dst = inst->dst(i);
-    auto block = inst->block();
-    // The forwardedDst is the first value number we see that's not dst.
-    auto forwardedDst = dst;
-    bool canForwardDst = true;
-
-    for (auto& pred : block->preds()) {
-      auto fromBlock = pred.from();
-      auto& jmp = fromBlock->back();
-      assertx(jmp.is(Jmp));
-      auto src = jmp.src(i);
-      assertx(vnTable[src].value);
-      auto srcVN = vnTable[src].value;
-
-      // Update forwardedDst if this is the first src we've seen that doesn't
-      // match our original dst.
-      if (forwardedDst == dst && srcVN != dst) {
-        forwardedDst = srcVN;
-      }
-
-      // If we see either our original dst or the first non-matching dst, we're
-      // okay so we keep going.
-      if (srcVN == forwardedDst) continue;
-      if (srcVN == dst) continue;
-
-      // At this point, the value number does not match the other forwardedDst
-      // we've seen (so it can't be case 1) and it doesn't match dst (so it
-      // can't be case 2), so we have to give up.
-      canForwardDst = false;
-      break;
-    }
-
-    assertx(vnTable[dst].value);
-    if (canForwardDst && vnTable[dst].value != forwardedDst) {
-      FTRACE(1, "forwarded through DefLabel: {} (old) -> {} (new)\n",
-        *dst, *forwardedDst);
-      updates[dst] = ValueNumberMetadata { dst, forwardedDst };
-      changed = true;
-    }
-  }
-
-  return changed;
-}
-
 bool visitInstruction(
-  IRInstruction* inst,
-  ValueNumberTable& vnTable,
-  ValueNumberTable& updates,
-  NameTable& nameTable
+  GVNState& env,
+  IRInstruction* inst
 ) {
-  if (isCallOp(inst->op())) nameTable.clear();
+  auto& globalTable = *env.globalTable;
+  auto& localTable = *env.localTable;
+  auto& nameTable = *env.nameTable;
 
-  if (inst->is(DefLabel)) {
-    return visitDefLabel(inst, vnTable, updates, nameTable);
-  }
+  if (isCallOp(inst->op())) nameTable.clear();
 
   if (!supportsGVN(inst)) return false;
 
-  assertx(inst->numDsts() == 1);
-  auto dst = inst->dst(0);
-  assertx(dst);
-
-  SSATmp* temp;
-  auto iter = nameTable.find(inst);
-  if (iter == nameTable.end()) {
-    temp = dst;
-    nameTable.insert(std::make_pair(inst, dst));
-  } else {
-    temp = iter->second;
-  }
-
-  assertx(temp);
-
-  assertx(vnTable[dst].value);
-  if (temp != vnTable[dst].value) {
-    updates[dst] = ValueNumberMetadata { dst, temp };
-    FTRACE(1,
-      "instruction {}\n"
-      "updated value number for dst to dst of {}\n",
-      *inst,
-      *temp->inst()
-    );
-    return true;
-  }
-  return false;
-}
-
-bool visitBlock(
-  Block* block,
-  ValueNumberTable& vnTable,
-  ValueNumberTable& updates,
-  NameTable& nameTable
-) {
   bool changed = false;
-  for (auto& inst : *block) {
-    changed = visitInstruction(&inst, vnTable, updates, nameTable) || changed;
+  for (auto dstIdx = 0; dstIdx < inst->numDsts(); ++dstIdx) {
+    auto dst = inst->dst(dstIdx);
+    assertx(dst);
+
+    auto result = nameTable.emplace(std::make_pair(inst, dstIdx), dst);
+    SSATmp* temp = result.second ? dst : result.first->second;
+    assertx(temp);
+
+    assertx(globalTable[dst].value);
+    if (temp != globalTable[dst].value) {
+      localTable[dst] = ValueNumberMetadata { dst, temp };
+      FTRACE(1,
+        "instruction {}\n"
+        "updated value number for dst to dst of {}\n",
+        *inst,
+        *temp->inst()
+      );
+      changed = true;
+    }
   }
   return changed;
 }
 
-void applyLocalUpdates(ValueNumberTable& global, ValueNumberTable& local) {
+bool visitBlock(
+  GVNState& env,
+  Block* block
+) {
+  bool changed = false;
+  for (auto& inst : *block) {
+    changed = visitInstruction(env, &inst) || changed;
+  }
+  return changed;
+}
+
+void applyLocalUpdates(ValueNumberTable& local, ValueNumberTable& global) {
   for (auto metadata : local) {
     if (!metadata.key) continue;
     global[metadata.key] = metadata;
   }
 }
 
-void runAnalysis(const IRUnit& unit,
-                 const BlockList& blocks,
-                 ValueNumberTable& vnTable) {
+void runAnalysis(
+  GVNState& env,
+  const IRUnit& unit,
+  const BlockList& blocks
+) {
   for (auto block : blocks) {
     for (auto& inst : *block) {
-      initWithInstruction(&inst, vnTable);
+      initWithInstruction(&inst, *env.globalTable);
     }
   }
 
@@ -388,23 +402,23 @@ void runAnalysis(const IRUnit& unit,
     // iteration of the fixed point. If we change the global ValueNumberTable
     // during the pass, the hash values of the SSATmps will change which is
     // apparently a no-no for unordered_map.
-    ValueNumberTable localUpdates(unit, ValueNumberMetadata{});
+    ValueNumberTable localTable(unit, ValueNumberMetadata{});
+    env.localTable = &localTable;
     {
-      CongruenceHasher hash(vnTable);
-      CongruenceComparator pred(vnTable);
+      CongruenceHasher hash(*env.globalTable);
+      CongruenceComparator pred(*env.globalTable);
       NameTable nameTable(0, hash, pred);
+      env.nameTable = &nameTable;
 
       changed = false;
       for (auto block : blocks) {
-        changed = visitBlock(
-          block,
-          vnTable,
-          localUpdates,
-          nameTable
-        ) || changed;
+        changed = visitBlock(env, block) || changed;
       }
+
+      env.nameTable = nullptr;
     }
-    applyLocalUpdates(vnTable, localUpdates);
+    applyLocalUpdates(localTable, *env.globalTable);
+    env.localTable = nullptr;
   }
 }
 
@@ -466,19 +480,23 @@ void replaceRedundantComputations(
 void gvn(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_gvn, "gvn"};
 
+  GVNState state;
   auto const rpoBlocks = rpoSortCfg(unit);
   auto const idoms = findDominators(
     unit,
     rpoBlocks,
     numberBlocks(unit, rpoBlocks)
   );
-  ValueNumberTable vnTable(unit, ValueNumberMetadata{});
+
+  ValueNumberTable globalTable(unit, ValueNumberMetadata{});
+  state.globalTable = &globalTable;
 
   // This is an implementation of the RPO version of the global value numbering
   // algorithm presented in the 1996 paper "SCC-based Value Numbering" by
   // Cooper and Simpson.
-  runAnalysis(unit, rpoBlocks, vnTable);
-  replaceRedundantComputations(unit, idoms, rpoBlocks, vnTable);
+  runAnalysis(state, unit, rpoBlocks);
+  replaceRedundantComputations(unit, idoms, rpoBlocks, globalTable);
+  state.globalTable = nullptr;
 }
 
 }}

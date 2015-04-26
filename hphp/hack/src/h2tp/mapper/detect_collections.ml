@@ -10,7 +10,7 @@
 
 module M = Map_ast
 module CE = Common_exns
-module List = List_ext
+module List = Core_list
 open Ast
 open Ast_ext
 
@@ -28,14 +28,14 @@ let map program =
 
   let rec detect_collection_hint = function
     | (_, Hoption h) -> detect_collection_hint h
-    | (_, Hfun (hs, _, h)) -> List.iter detect_collection_hint (h::hs)
-    | (_, Htuple hs) -> List.iter detect_collection_hint hs
+    | (_, Hfun (hs, _, h)) -> List.iter ~f:detect_collection_hint (h::hs)
+    | (_, Htuple hs) -> List.iter ~f:detect_collection_hint hs
     | (p, Happly ((_, name), hs)) ->
         if is_collection_str name
         then error p;
-        List.iter detect_collection_hint hs
+        List.iter ~f:detect_collection_hint hs
     | (_, Hshape sfields) ->
-        List.iter (fun (_, h) -> detect_collection_hint h) sfields
+        List.iter ~f:(fun (_, h) -> detect_collection_hint h) sfields
     | (_, Haccess (_, _, _)) -> () in
 
   let in_hintOpt = function
@@ -48,7 +48,7 @@ let map program =
 
   let in_class = function
     | {c_extends = e_hints; c_implements = i_hints; _} ->
-        List.iter detect_collection_hint (e_hints @ i_hints) in
+        List.iter ~f:detect_collection_hint (e_hints @ i_hints) in
 
   let in_def = function
     | Typedef {t_kind = Alias h; _ }
@@ -63,6 +63,6 @@ let map program =
     M.k_def = (fun (k, _) def -> in_def def; k def);
   } in
   ignore (mapper program);
-  if List.not_empty !errors
+  if not (List.is_empty !errors)
   then raise (CE.CompoundError !errors);
   program (* this mapper does no mapping *)

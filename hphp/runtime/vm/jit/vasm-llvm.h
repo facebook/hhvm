@@ -65,10 +65,11 @@ struct CompareLLVMCodeGen : FailedLLVMCodeGen {
 /*
  * Emit machine code for unit using the LLVM backend.
  *
- * Throws FailedLLVMCodeGen on failure.
+ * Throws FailedLLVMCodeGen on failure. Any code/data emitted to the given
+ * areas is *not* cleaned up on failure; the caller must decide how to clean
+ * up.
  */
-void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas,
-                 const jit::vector<Vlabel>& labels);
+void genCodeLLVM(const Vunit& unit, Vasm::AreaList& areas);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

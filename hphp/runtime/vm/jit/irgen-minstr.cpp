@@ -155,14 +155,14 @@ Block* makeCatchSet(MTS& env);
 
 //////////////////////////////////////////////////////////////////////
 
-void constrainBase(MTS& env, TypeConstraint tc) {
+bool constrainBase(MTS& env, TypeConstraint tc) {
   // Member operations only care about the inner type of the base if it's
   // boxed, so this handles the logic of using the inner constraint when
   // appropriate.
   if (env.base.type.maybe(TBoxedCell)) {
     tc.category = DataTypeCountness;
   }
-  env.irb.constrainValue(env.base.value, tc);
+  return env.irb.constrainValue(env.base.value, tc);
 }
 
 bool constrainCollectionOpBase(MTS& env) {
@@ -262,8 +262,8 @@ bool mInstrHasUnknownOffsets(MTS& env) {
     auto const mc = env.immVecM[mi];
     if (mcodeIsProp(mc)) {
       const Class* cls = nullptr;
-      auto propInfo = getPropertyOffset(env.ni, curClass(env), cls, mii, mi,
-        ii);
+      auto propInfo = getPropertyOffset(env, env.ni, curClass(env), cls, mii,
+        mi, ii);
       if (propInfo.offset == -1 ||
           mightCallMagicPropMethod(mii.getAttr(mc), cls, propInfo)) {
         return true;
@@ -320,7 +320,13 @@ void checkMIState(MTS& env) {
   }
 
   // CGetM or SetM with no unknown property offsets
-  const bool simpleProp = !unknownOffsets && (isCGetM || isSetM);
+  const bool simpleProp = [&]() {
+    if (!isCGetM && !isSetM) return false;
+    if (unknownOffsets) return false;
+    auto cls = baseType.clsSpec().cls();
+    if (!cls) return false;
+    return !constrainBase(env, TypeConstraint(cls).setWeak());
+  }();
 
   // SetM with only one vector element, for props and elems
   const bool singleSet = isSingle && isSetM;
@@ -733,7 +739,7 @@ PropInfo getCurrentPropertyOffset(MTS& env, const Class*& knownCls) {
    */
   if (!knownCls) return PropInfo{};
 
-  auto const info = getPropertyOffset(env.ni, curClass(env), knownCls,
+  auto const info = getPropertyOffset(env, env.ni, curClass(env), knownCls,
                                       env.mii, env.mInd, env.iInd);
   if (info.offset == -1) return info;
 
@@ -790,7 +796,6 @@ SSATmp* checkInitProp(MTS& env,
 
   return cond(
     env,
-    0,
     [&] (Block* taken) {
       gen(env, CheckInitMem, taken, propAddr);
     },
@@ -861,7 +866,6 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
    */
   auto const newBase = cond(
     env,
-    0,
     [&] (Block* taken) {
       gen(env, CheckTypeMem, TObj, taken, env.base.value);
     },
@@ -1104,8 +1108,8 @@ bool needFirstRatchet(const MTS& env) {
 
     if (klass->hasNativePropHandler()) {
       const Class* cls = nullptr;
-      auto propInfo = getPropertyOffset(env.ni, curClass(env), cls, env.mii,
-                                        0, env.mii.valCount() + 1);
+      auto propInfo = getPropertyOffset(env, env.ni, curClass(env), cls,
+                                        env.mii, 0, env.mii.valCount() + 1);
       // For native properties if the property is declared then we know don't
       // call the native handler
       if (propInfo.offset == -1) return true;
@@ -1178,7 +1182,6 @@ void emitRatchetRefs(MTS& env) {
 
   setBase(env, cond(
     env,
-    0,
     [&] (Block* taken) {
       gen(env, CheckInitMem, taken, misRefAddr);
     },
@@ -1325,7 +1328,6 @@ SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
 
   return cond(
     env,
-    1,
     [&] (Block* taken) {
       gen(env, CheckPackedArrayBounds, taken, base, key);
     },
@@ -1528,7 +1530,6 @@ void emitPackedArrayIsset(MTS& env) {
 
   env.result = cond(
     env,
-    0,
     [&] (Block* taken) {
       gen(env, CheckPackedArrayBounds, taken, env.base.value, key);
     },

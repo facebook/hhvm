@@ -30,26 +30,6 @@ namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * SaveFP uses rVmFp, as usual. SavePC requires the caller to have
- * placed the PC offset of the instruction about to be executed in
- * rdi.
- */
-enum class RegSaveFlags {
-  None = 0,
-  SaveFP = 1,
-  SavePC = 2
-};
-inline RegSaveFlags operator|(const RegSaveFlags& l, const RegSaveFlags& r) {
-  return RegSaveFlags(int(r) | int(l));
-}
-inline RegSaveFlags operator&(const RegSaveFlags& l, const RegSaveFlags& r) {
-  return RegSaveFlags(int(r) & int(l));
-}
-inline RegSaveFlags operator~(const RegSaveFlags& f) {
-  return RegSaveFlags(~int(f));
-}
-
 template <class T, class F>
 Vreg cond(Vout& v, ConditionCode cc, Vreg sf, Vreg dst, T t, F f) {
   auto fblock = v.makeBlock();

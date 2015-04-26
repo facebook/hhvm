@@ -58,6 +58,14 @@ TEST(SmartPtr, Refcounts) {
   }
 }
 
+TEST(SmartPtr, Assignment) {
+  auto ptr = makeSmartPtr<DummyResource>();
+  auto* tmp = ptr.get();
+  ptr = ptr;
+  EXPECT_TRUE(ptr->hasExactlyOneRef());
+  EXPECT_TRUE(ptr.get() == tmp);
+}
+
 TEST(SmartPtr, Operators) {
   {
     SmartPtr<DummyResource> p1;

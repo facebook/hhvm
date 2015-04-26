@@ -536,9 +536,13 @@ private:
   int32_t* hashTab() const {
     return const_cast<int32_t*>(
       reinterpret_cast<int32_t const*>(
-        data() + m_cap
+        data() + capacity()
       )
     );
+  }
+
+  uint32_t capacity() const {
+    return computeMaxElms(m_mask);
   }
 
   bool isZombie() const { return m_used + 1 == 0; }
@@ -549,17 +553,14 @@ public:
 
 private:
   // Some of these are packed into qword-sized unions so we can
-  // combine stores during initialization.  (gcc won't do it on its
-  // own.)
+  // combine stores during initialization. (gcc won't do it on its own.)
   union {
     struct {
-      uint32_t m_cap;       // Number of Elms we can use before having to grow.
+      uint32_t m_mask;      // Bitmask used when indexing into the hash table.
       uint32_t m_used;      // Number of used elements (values or tombstones)
     };
-    uint64_t m_capAndUsed;
+    uint64_t m_mask_used;
   };
-  uint32_t m_tableMask;     // Bitmask used when indexing into the hash table.
-  UNUSED uint32_t m_unused2;
   int64_t  m_nextKI;        // Next integer key to use for append.
 };
 

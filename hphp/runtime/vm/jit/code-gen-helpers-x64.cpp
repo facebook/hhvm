@@ -77,65 +77,6 @@ void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
   emitImmStoreq(v, intptr_t(pc), rds[rds::kVmpcOff]);
 }
 
-// emitEagerVMRegSave --
-//   Inline. Saves regs in-place in the TC. This is an unusual need;
-//   you probably want to lazily save these regs via recordCall and
-//   its ilk.
-void emitEagerVMRegSave(Asm& as, PhysReg rds, RegSaveFlags flags) {
-  bool saveFP = bool(flags & RegSaveFlags::SaveFP);
-  bool savePC = bool(flags & RegSaveFlags::SavePC);
-  assertx((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
-         RegSaveFlags::None);
-
-  Reg64 pcReg = rdi;
-  assertx(!kCrossCallRegs.contains(rdi));
-
-  as.   storeq (rVmSp, rds[rds::kVmspOff]);
-  if (savePC) {
-    // We're going to temporarily abuse rVmSp to hold the current unit.
-    Reg64 rBC = rVmSp;
-    as. push   (rBC);
-    // m_fp -> m_func -> m_unit -> m_bc + pcReg
-    as. loadq  (rVmFp[AROFF(m_func)], rBC);
-    as. loadq  (rBC[Func::unitOff()], rBC);
-    as. loadq  (rBC[Unit::bcOff()], rBC);
-    as. addq   (rBC, pcReg);
-    as. storeq (pcReg, rds[rds::kVmpcOff]);
-    as. pop    (rBC);
-  }
-  if (saveFP) {
-    as. storeq (rVmFp, rds[rds::kVmfpOff]);
-  }
-}
-
-// Save vmsp, and optionally vmfp and vmpc. If saving vmpc,
-// the bytecode offset is expected to be in rdi and is clobbered
-void emitEagerVMRegSave(Vout& v, Vreg rds, RegSaveFlags flags) {
-  bool saveFP = bool(flags & RegSaveFlags::SaveFP);
-  bool savePC = bool(flags & RegSaveFlags::SavePC);
-  assertx((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
-         RegSaveFlags::None);
-
-  assertx(!kCrossCallRegs.contains(rdi));
-
-  v << store{rVmSp, rds[rds::kVmspOff]};
-  if (savePC) {
-    PhysReg pc{rdi};
-    auto func = v.makeReg();
-    auto unit = v.makeReg();
-    auto bc = v.makeReg();
-    // m_fp -> m_func -> m_unit -> m_bc + pcReg
-    v << load{rVmFp[AROFF(m_func)], func};
-    v << load{func[Func::unitOff()], unit};
-    v << load{unit[Unit::bcOff()], bc};
-    v << addq{bc, pc, pc, v.makeReg()};
-    v << store{pc, rds[rds::kVmpcOff]};
-  }
-  if (saveFP) {
-    v << store{rVmFp, rds[rds::kVmfpOff]};
-  }
-}
-
 void emitGetGContext(Vout& v, Vreg dest) {
   emitTLSLoad<ExecutionContext>(v, g_context, dest);
 }
@@ -184,10 +125,11 @@ void emitTransCounterInc(Asm& a) {
   emitTransCounterInc(Vauto(a.code()).main());
 }
 
-void emitDecRef(Vout& v, Vreg base) {
+Vreg emitDecRef(Vout& v, Vreg base) {
   auto const sf = v.makeReg();
   v << declm{base[FAST_REFCOUNT_OFFSET], sf};
   emitAssertFlagsNonNegative(v, sf);
+  return sf;
 }
 
 void emitIncRef(Vout& v, Vreg base) {
@@ -367,29 +309,17 @@ void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
              v.makeTuple({})};
 }
 
-void emitTraceCall(CodeBlock& cb, Offset pcOff) {
-  Asm a { cb };
-  // call to a trace function
-  a.    lea    (rip[(int64_t)a.frontier()], rcx);
-  a.    movq   (rVmFp, rdi);
-  a.    movq   (rVmSp, rsi);
-  a.    movq   (pcOff, rdx);
-  // do the call; may use a trampoline
-  emitCall(a, reinterpret_cast<TCA>(traceCallback),
-           RegSet().add(rcx).add(rdi).add(rsi).add(rdx));
-}
-
 void emitTestSurpriseFlags(Asm& a, PhysReg rds) {
   static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
                 "Codegen assumes a SurpriseFlag fits in a 32-bit int");
-  a.testl(-1, rds[rds::kSurpriseFlagsOff]);
+  a.cmpl(0, rds[rds::kSurpriseFlagsOff]);
 }
 
 Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
   static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
                 "Codegen assumes a SurpriseFlag fits in a 32-bit int");
   auto const sf = v.makeReg();
-  v << testlim{-1, rds[rds::kSurpriseFlagsOff], sf};
+  v << cmplim{0, rds[rds::kSurpriseFlagsOff], sf};
   return sf;
 }
 

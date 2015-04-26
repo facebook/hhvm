@@ -81,12 +81,11 @@ void forwardJmp(Vunit& unit, jit::flat_set<size_t>& catch_blocks,
     middle.code.back().origin = origin;
     return;
   } else if (headInst.op == Vinstr::landingpad) {
-    // If the dest started with a landingpad, copy one to middle. The dest's
+    // If the dest started with a landingpad, copy it to middle. The dest's
     // will be erased at the end of the pass.
     catch_blocks.insert(destLabel);
     assertx(middle.code.empty());
-    middle.code.emplace_back(landingpad{});
-    middle.code.back().origin = origin;
+    middle.code.emplace_back(headInst);
   }
 
   middle.code.emplace_back(jmp{destLabel});

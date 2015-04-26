@@ -101,7 +101,6 @@ struct CompilerOptions {
   int optimizeLevel;
   string filecache;
   bool dump;
-  string docjson;
   bool coredump;
   bool nofork;
   string optimizations;
@@ -298,9 +297,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("dump",
      value<bool>(&po.dump)->default_value(false),
      "dump the program graph")
-    ("docjson",
-     value<string>(&po.docjson)->default_value(""),
-     "Filename to generate a JSON file for PHP docs")
     ("coredump",
      value<bool>(&po.coredump)->default_value(false),
      "turn on coredump")
@@ -483,17 +479,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     }
   }
 
-  if (!po.docjson.empty()) {
-    if (po.target != "run" &&
-        po.target != "hhbc") {
-      Logger::Error(
-        "Cannot generate doc JSON file unless target is "
-        "'hhbc', or 'run'");
-    } else {
-      Option::DocJson = po.docjson;
-    }
-  }
-
   if (po.optimizeLevel == -1) {
     po.optimizeLevel = 1;
   }
@@ -649,11 +634,6 @@ int process(const CompilerOptions &po) {
   ar->setFinish([&po,&timer,&package](AnalysisResultPtr ar) {
       if (Option::DumpAst) {
         ar->dump();
-      }
-
-      if (!Option::DocJson.empty()) {
-        Timer timer(Timer::WallTime, "Saving doc JSON file");
-        ar->docJson(Option::DocJson);
       }
 
       // saving stats

@@ -229,13 +229,17 @@ void DwarfInfo::compactChunks() {
 
 static Mutex s_lock(RankLeaf);
 
-DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
-  const Func *func, const Op* instr, bool exit, bool inPrologue) {
+DwarfChunk* DwarfInfo::addTracelet(TCRange range,
+                                   folly::Optional<std::string> name,
+                                   const Func *func,
+                                   const Op* instr,
+                                   bool exit,
+                                   bool inPrologue) {
   DwarfChunk* chunk = nullptr;
   FunctionInfo* f = new FunctionInfo(range, exit);
   const Unit* unit = func ? func->unit(): nullptr;
   if (name) {
-    f->name = std::string(name);
+    f->name = *name;
   } else {
     assert(func != nullptr);
     f->name = lookupFunction(func, exit, inPrologue, true);
@@ -250,8 +254,8 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
   const TCA end = range.end();
 
   Lock lock(s_lock);
-  FuncDB::iterator it = m_functions.lower_bound(range.begin());
-  FunctionInfo* fi = it->second;
+  auto const it = m_functions.lower_bound(range.begin());
+  auto const fi = it->second;
   if (it != m_functions.end() && fi->name == f->name &&
       fi->file == f->file &&
       start > fi->range.begin() &&
@@ -261,7 +265,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range, const char* name,
     fi->range.extend(end);
     m_functions[end] = fi;
     m_functions.erase(it);
-    delete(f);
+    delete f;
     f = m_functions[end];
     assert(f->m_chunk != nullptr);
     f->m_chunk->clearSynced();

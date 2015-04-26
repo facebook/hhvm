@@ -27,11 +27,10 @@
   TIMER_NAME(collectPostConditions)             \
   TIMER_NAME(optimize)                          \
   TIMER_NAME(optimize_dce)                      \
-  TIMER_NAME(optimize_jumpOpts)                 \
+  TIMER_NAME(optimize_cleancfg)                 \
   TIMER_NAME(optimize_predictionOpts)           \
   TIMER_NAME(optimize_realxGuards)              \
   TIMER_NAME(optimize_refcountOpts)             \
-  TIMER_NAME(optimize_refcountOpts2)            \
   TIMER_NAME(optimize_relaxGuards)              \
   TIMER_NAME(optimize_reoptimize)               \
   TIMER_NAME(regalloc)                          \
@@ -49,6 +48,7 @@
   TIMER_NAME(vasm_gen)                          \
   TIMER_NAME(vasm_lower)                        \
   TIMER_NAME(vasm_copy)                         \
+  TIMER_NAME(vasm_optimize)                     \
   TIMER_NAME(llvm)                              \
   TIMER_NAME(llvm_irGeneration)                 \
   TIMER_NAME(llvm_optimize)                     \

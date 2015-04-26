@@ -1,0 +1,27 @@
+int(1)
+object(HH\Vector)#5 (2) {
+  [0]=>
+  int(3)
+  [1]=>
+  int(2)
+}
+string(9) "HH\Vector"
+string(5) "count"
+object(HH\Vector)#6 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(3)
+}
+object(HH\Vector)#7 (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(3)
+}
+string(12) "Hello World!"
+int(1337)
+int(0)
+
+Warning: Parameter 1 to C::ref() expected to be a reference, value give%s
+int(0)

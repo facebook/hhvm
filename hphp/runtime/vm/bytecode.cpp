@@ -2684,6 +2684,10 @@ StrNR ExecutionContext::createFunction(const String& args,
   m_createdFuncs.push_back(unit);
   unit->merge();
 
+  // At the end of the request we clear the m_createdFunc map, JIT'ing the unit
+  // would be a waste of time and TC space.
+  unit->setInterpretOnly();
+
   // Technically we shouldn't have to eval the unit right now (it'll execute
   // the pseudo-main, which should be empty) and could get away with just
   // mergeFuncs. However, Zend does it this way, as proven by the fact that you
@@ -6375,13 +6379,15 @@ static bool doFCallArray(PC& pc, int numStackValues,
         cleanupParamsAndActRec(vmStack(), ar, nullptr, nullptr);
         raise_warning("call_user_func_array() expects parameter 2 to be array");
         return false;
-      case CallArrOnInvalidContainer::WarnAndContinue:
-        tvRefcountedDecRef(c1);
+      case CallArrOnInvalidContainer::WarnAndContinue: {
+        Cell tmp = *c1;
         // argument_unpacking RFC dictates "containers and Traversables"
         raise_warning_unsampled("Only containers may be unpacked");
         c1->m_type = KindOfArray;
         c1->m_data.parr = staticEmptyArray();
+        tvRefcountedDecRef(&tmp);
         break;
+      }
     }
   }
 
@@ -6398,14 +6404,6 @@ static bool doFCallArray(PC& pc, int numStackValues,
           vmfp()->unit()->entry(),
           int(vmfp()->m_func->base()));
     ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
-
-    if (UNLIKELY((CallArrOnInvalidContainer::WarnAndContinue == onInvalid)
-                 && func->anyByRef())) {
-      raise_error("Unpacking unsupported for calls to functions that"
-                  " take any arguments by reference");
-      vmStack().pushNull();
-      return false;
-    }
 
     auto prepResult = prepareArrayArgs(ar, args, vmStack(), numStackValues,
                                        /* ref param checks */ true, nullptr);

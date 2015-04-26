@@ -48,8 +48,8 @@ class c_RescheduleWaitHandle final : public c_WaitableWaitHandle {
  public:
   void run();
   String getName();
-  void enterContextImpl(context_idx_t ctx_idx);
   void exitContext(context_idx_t ctx_idx);
+  void scheduleInContext();
 
  private:
   void setState(uint8_t state) { setKindState(Kind::Reschedule, state); }
@@ -58,6 +58,7 @@ class c_RescheduleWaitHandle final : public c_WaitableWaitHandle {
   uint32_t m_queue;
   uint32_t m_priority;
 
+ public:
   static const int8_t STATE_SCHEDULED = 2;
 };
 

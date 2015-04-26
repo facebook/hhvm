@@ -106,7 +106,7 @@ void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
     }
     m_nextKI = m_size;
   } else {
-    auto mask = m_tableMask;
+    auto mask = m_mask;
     auto data = this->data();
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data[pos];

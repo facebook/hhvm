@@ -90,6 +90,40 @@ struct LibXmlRequestData final : RequestEventHandler {
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(LibXmlRequestData, tl_libxml_request_data);
 
+namespace {
+
+// This function takes ownership of a SmartPtr<File> and returns
+// a void* token that can be used to lookup the File later.  This
+// is so a reference to the file can be stored in an XML context
+// object as a void*.  The set of remembered files is cleared out
+// during MemoryManager reset.  The ext_libxml extension is the only
+// XML extension that should be storing streams in the MemoryManager
+// since it has no other place to safely store a SmartPtr.
+// The other XML extensions either own the SmartPtr<File> locally
+// or are able to store it in a object.
+inline void* rememberStream(SmartPtr<File>&& stream) {
+  return reinterpret_cast<void*>(MM().addRoot(std::move(stream)));
+}
+
+// This function returns the File associated with the given token.
+// If the token is not in the MemoryManager map, it means a pointer to
+// the File has been stored directly in the XML context.
+inline SmartPtr<File> getStream(void* userData) {
+  auto token = reinterpret_cast<MemoryManager::RootId>(userData);
+  auto res = MM().lookupRoot<File>(token);
+  return res ? res : *reinterpret_cast<SmartPtr<File>*>(token);
+}
+
+// This closes and deletes the File associated with the given token.
+// It is used by the XML callback that destroys a context.
+inline bool forgetStream(void* userData) {
+  auto token = reinterpret_cast<MemoryManager::RootId>(userData);
+  auto ptr = MM().removeRoot<File>(token);
+  return ptr->close();
+}
+
+}
+
 static Class* s_LibXMLError_class;
 
 const StaticString
@@ -155,6 +189,7 @@ void XMLDocumentData::sweep() {
     cleanup();
   }
   m_destruct = true;
+  if (m_doc) m_doc->detachNode();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -179,8 +214,8 @@ static SmartPtr<File> libxml_streams_IO_open_wrapper(
    */
   if (read_only) {
     int pathIndex = 0;
-    Stream::Wrapper * wrapper = Stream::getWrapperFromURI(strFilename,
-                                                          &pathIndex);
+    Stream::Wrapper* wrapper = Stream::getWrapperFromURI(strFilename,
+                                                         &pathIndex);
     if (dynamic_cast<FileStreamWrapper*>(wrapper)) {
       if (!HHVM_FN(file_exists)(strFilename)) {
         return nullptr;
@@ -191,18 +226,17 @@ static SmartPtr<File> libxml_streams_IO_open_wrapper(
   // PHP unescapes the URI here, but that should properly be done by the
   // wrapper.  The wrapper should expect a valid URI, e.g. file:///foo%20bar
   return File::Open(strFilename, mode, 0,
-      tl_libxml_request_data->m_streams_context);
+                    tl_libxml_request_data->m_streams_context);
 }
 
 int libxml_streams_IO_read(void* context, char* buffer, int len) {
   ITRACE(1, "libxml_IO_read({}, {}, {})\n", context, (void*)buffer, len);
   Trace::Indent _i;
 
-  Resource stream(static_cast<ResourceData*>(context));
+  auto stream = getStream(context);
   assert(len >= 0);
-  Variant ret = HHVM_FN(fread)(stream, len);
-  if (ret.isString()) {
-    const String& str = ret.asCStrRef();
+  if (len > 0) {
+    String str = stream->read(len);
     if (str.size() <= len) {
       std::memcpy(buffer, str.data(), str.size());
       return str.size();
@@ -216,14 +250,9 @@ int libxml_streams_IO_write(void* context, const char* buffer, int len) {
   ITRACE(1, "libxml_IO_write({}, {}, {})\n", context, (void*)buffer, len);
   Trace::Indent _i;
 
-  Resource stream(static_cast<ResourceData*>(context));
-  String strBuffer(StringData::Make(buffer, len, CopyString));
-  Variant ret = HHVM_FN(fwrite)(stream, strBuffer);
-  if (ret.isInteger() && ret.asInt64Val() < INT_MAX) {
-    return (int)ret.asInt64Val();
-  } else {
-    return -1;
-  }
+  auto stream = getStream(context);
+  int64_t ret = stream->write(String(buffer, len, CopyString));
+  return (ret < INT_MAX) ? ret : -1;
 }
 
 int libxml_streams_IO_close(void* context) {
@@ -236,12 +265,11 @@ int libxml_streams_IO_close(void* context) {
     return 0;
   }
 
-  Resource stream(static_cast<ResourceData*>(context));
-  // Release the reference owned by context. Guaranteed to not go to zero since
-  // we just created one belonging to stream.
-  stream.get()->decRefCount();
+  return forgetStream(context) ? 0 : -1;
+}
 
-  return HHVM_FN(fclose)(stream) ? 0 : -1;
+int libxml_streams_IO_nop_close(void* context) {
+  return 0;
 }
 
 static xmlExternalEntityLoader s_default_entity_loader = nullptr;
@@ -293,7 +321,7 @@ libxml_create_input_buffer(const char* URI, xmlCharEncoding enc) {
   // Allocate the Input buffer front-end.
   xmlParserInputBufferPtr ret = xmlAllocParserInputBuffer(enc);
   if (ret != nullptr) {
-    ret->context = stream.detach();
+    ret->context = rememberStream(std::move(stream));
     ret->readcallback = libxml_streams_IO_read;
     ret->closecallback = libxml_streams_IO_close;
   }
@@ -322,7 +350,7 @@ libxml_create_output_buffer(const char *URI,
   // Allocate the Output buffer front-end.
   xmlOutputBufferPtr ret = xmlAllocOutputBuffer(encoder);
   if (ret != nullptr) {
-    ret->context = stream.detach();
+    ret->context = rememberStream(std::move(stream));
     ret->writecallback = libxml_streams_IO_write;
     ret->closecallback = libxml_streams_IO_close;
   }

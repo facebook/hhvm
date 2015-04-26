@@ -64,9 +64,9 @@ Object c_ConditionWaitHandle::ti_create(const Variant& child) {
   assert(child_wh->instanceof(c_WaitableWaitHandle::classof()));
   auto const child_wwh = static_cast<c_WaitableWaitHandle*>(child_wh);
 
-  c_ConditionWaitHandle* wh = newobj<c_ConditionWaitHandle>();
+  auto wh = makeSmartPtr<c_ConditionWaitHandle>();
   wh->initialize(child_wwh);
-  return wh;
+  return Object(std::move(wh));
 }
 
 void c_ConditionWaitHandle::t_succeed(const Variant& result) {
@@ -144,13 +144,6 @@ String c_ConditionWaitHandle::getName() {
 c_WaitableWaitHandle* c_ConditionWaitHandle::getChild() {
   assert(getState() == STATE_BLOCKED);
   return m_child;
-}
-
-void c_ConditionWaitHandle::enterContextImpl(context_idx_t ctx_idx) {
-  assert(getState() == STATE_BLOCKED);
-
-  m_child->enterContext(ctx_idx);
-  setContextIdx(ctx_idx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -29,9 +29,9 @@ inline bool toBoolean(bool    v) { return v;}
 inline bool toBoolean(char    v) { return v;}
 inline bool toBoolean(short   v) { return v;}
 inline bool toBoolean(int     v) { return v;}
-inline bool toBoolean(int64_t   v) { return v;}
+inline bool toBoolean(int64_t v) { return v;}
 inline bool toBoolean(double  v) { return v;}
-inline bool toBoolean(litstr  v) = delete;
+inline bool toBoolean(const char* v) = delete;
 inline bool toBoolean(const StringData *v) {
   return v ? v->toBoolean() : false;
 }
@@ -50,9 +50,9 @@ inline int toInt32(bool    v) { return v ? 1 : 0;}
 inline int toInt32(char    v) { return v;}
 inline int toInt32(short   v) { return v;}
 inline int toInt32(int     v) { return v;}
-inline int toInt32(int64_t   v) { return v;}
+inline int toInt32(int64_t v) { return v;}
 inline int toInt32(double  v) { return (int)v;}
-inline int toInt32(litstr  v) = delete;
+inline int toInt32(const char* v) = delete;
 inline int toInt32(const StringData *v) { return v ? v->toInt32() : 0;}
 inline int toInt32(const String& v) { return toInt32(v.get());}
 inline int toInt32(const ArrayData *v) { return (v && !v->empty()) ? 1 : 0;}
@@ -65,7 +65,7 @@ inline int64_t toInt64(bool    v) { return v ? 1 : 0;}
 inline int64_t toInt64(char    v) { return v;}
 inline int64_t toInt64(short   v) { return v;}
 inline int64_t toInt64(int     v) { return v;}
-inline int64_t toInt64(int64_t   v) { return v;}
+inline int64_t toInt64(int64_t v) { return v;}
 inline int64_t toInt64(double  v) {
   // If v >= 0 is false and v < 0 is false, then v is NaN. In that case, on
   // Intel, you get 0x800..00, a.k.a. the minimum int64_t. We mimic that on all
@@ -74,7 +74,7 @@ inline int64_t toInt64(double  v) {
           ? (v > std::numeric_limits<uint64_t>::max() ? 0u : (uint64_t)v)
           : (v < 0 ? (int64_t)v : std::numeric_limits<int64_t>::min()));
 }
-inline int64_t toInt64(litstr  v) = delete;
+inline int64_t toInt64(const char* v) = delete;
 inline int64_t toInt64(const StringData *v) { return v ? v->toInt64() : 0;}
 inline int64_t toInt64(const String& v) { return toInt64(v.get());}
 inline int64_t toInt64(const ArrayData *v) { return (v && !v->empty()) ? 1 : 0;}
@@ -87,9 +87,9 @@ inline double toDouble(bool    v) { return v ? 1 : 0;}
 inline double toDouble(char    v) { return v;}
 inline double toDouble(short   v) { return v;}
 inline double toDouble(int     v) { return v;}
-inline double toDouble(int64_t   v) { return v;}
+inline double toDouble(int64_t v) { return v;}
 inline double toDouble(double  v) { return v;}
-inline double toDouble(litstr  v) = delete;
+inline double toDouble(const char* v) = delete;
 inline double toDouble(const StringData *v) { return v? v->toDouble() : 0;}
 inline double toDouble(const String& v) { return toDouble(v.get());}
 inline double toDouble(const ArrayData *v) {
@@ -104,9 +104,9 @@ inline String toString(bool    v) { return v ? "1" : "";}
 inline String toString(char    v) { return (int64_t)v;}
 inline String toString(short   v) { return (int64_t)v;}
 inline String toString(int     v) { return (int64_t)v;}
-inline String toString(int64_t   v) { return v;}
+inline String toString(int64_t v) { return v;}
 inline String toString(double  v) { return v;}
-inline String toString(litstr  v) = delete;
+inline String toString(const char* v) = delete;
 inline String toString(StringData *v) {
   return v ? String(v) : empty_string();
 }
@@ -127,9 +127,9 @@ inline Array toArray(bool    v) { return Array::Create(v);}
 inline Array toArray(char    v) { return Array::Create(v);}
 inline Array toArray(short   v) { return Array::Create(v);}
 inline Array toArray(int     v) { return Array::Create(v);}
-inline Array toArray(int64_t   v) { return Array::Create(v);}
+inline Array toArray(int64_t v) { return Array::Create(v);}
 inline Array toArray(double  v) { return Array::Create(v);}
-inline Array toArray(litstr  v) = delete;
+inline Array toArray(const char* v) = delete;
 inline Array toArray(StringData *v) {
   return v ? Array::Create(v) : Array::Create();
 }

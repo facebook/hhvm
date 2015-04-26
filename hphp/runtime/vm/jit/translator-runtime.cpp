@@ -832,10 +832,11 @@ void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff) {
   );
 }
 
-void traceCallback(ActRec* fp, Cell* sp, Offset pcOff, void* rip) {
+void traceCallback(ActRec* fp, Cell* sp, Offset pcOff) {
   if (Trace::moduleEnabled(Trace::hhirTracelets)) {
     FTRACE(0, "{} {} {} {} {}\n",
-           fp->m_func->fullName()->data(), pcOff, rip, fp, sp);
+           fp->m_func->fullName()->data(), pcOff, fp, sp,
+           __builtin_return_address(0));
   }
   checkFrame(fp, sp, /*fullCheck*/true, pcOff);
 }

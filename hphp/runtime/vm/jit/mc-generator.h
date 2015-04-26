@@ -236,7 +236,17 @@ public:
   bool addDbgGuards(const Unit* unit);
   bool addDbgGuard(const Func* func, Offset offset, bool resumed);
   bool freeRequestStub(TCA stub);
-  TCA getFreeStub(CodeBlock& unused, CodeGenFixups* fixups);
+
+  /*
+   * Return a TCA suitable for emitting an ephemeral stub. A reused stub will
+   * be returned if one is available. Otherwise, frozen.frontier() will be
+   * returned.
+   *
+   * If not nullptr, isReused will be set to whether or not a reused stub was
+   * returned.
+   */
+  TCA getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups,
+                  bool* isReused = nullptr);
   void registerCatchBlock(CTCA ip, TCA block);
   folly::Optional<TCA> getCatchTrace(CTCA ip) const;
   CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
@@ -246,18 +256,7 @@ public:
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
   void traceCodeGen(IRGS&);
-  void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
-
-  /*
-   * Set/get if we're going to try using LLVM as the codegen backend for the
-   * current translation.
-   */
-  void setUseLLVM(bool llvm) {
-    m_useLLVM = llvm;
-  }
-  bool useLLVM() const {
-    return m_useLLVM;
-  }
+  void recordGdbStub(const CodeBlock& cb, TCA start, const std::string& name);
 
   /*
    * Dump translation cache.  True if successful.
@@ -278,11 +277,6 @@ public:
   void codeEmittedThisRequest(size_t& requestEntry, size_t& now) const;
 public:
   CodeCache code;
-
-  /*
-   * Check if function prologue already exists.
-   */
-  bool checkCachedPrologue(const Func*, int prologueIndex, TCA&) const;
 
   /*
    * This function is called by translated code to handle service requests,
@@ -348,8 +342,14 @@ private:
 
   TCA lookupTranslation(SrcKey sk) const;
   TCA retranslateOpt(TransID transId, bool align);
+
+  /*
+   * Prologue-generation helpers.
+   */
   TCA regeneratePrologues(Func* func, SrcKey triggerSk);
   TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk);
+  TCA emitFuncPrologue(Func* func, int nPassed);
+  bool checkCachedPrologue(const Func*, int prologueIndex, TCA&) const;
 
   void invalidateSrcKey(SrcKey sk);
   void invalidateFuncProfSrcKeys(const Func* func);
@@ -371,7 +371,6 @@ private:
 private:
   std::unique_ptr<BackEnd> m_backEnd;
   Translator         m_tx;
-  bool               m_useLLVM{false};
 
   // maps jump addresses to the ID of translation containing them.
   TcaTransIDMap      m_jmpToTransID;
@@ -388,8 +387,8 @@ private:
   size_t             m_totalSize;
 };
 
-TCA fcallHelper(ActRec* ar, void* sp);
-TCA funcBodyHelper(ActRec* ar, void* sp);
+TCA fcallHelper(ActRec*, bool isClonedClosure);
+TCA funcBodyHelper(ActRec*);
 int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 
 // Both emitIncStat()s push/pop flags but don't clobber any registers.

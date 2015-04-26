@@ -150,21 +150,6 @@ let opt_map f = function
   | None -> None
   | Some x -> Some (f x)
 
-let opt_map_default f default x =
-  match x with
-  | None -> default
-  | Some x -> f x
-
-let opt_fold_left f x y =
-  match y with
-  | None -> x
-  | Some y -> f x y
-
-let rec cat_opts = function
-  | [] -> []
-  | Some x :: xs -> x :: cat_opts xs
-  | None :: xs -> cat_opts xs
-
 let rec lmap f env l =
   match l with
   | [] -> env, []
@@ -201,14 +186,6 @@ let imap_inter_list = function
   | [] -> IMap.empty
   | x :: rl ->
       List.fold_left imap_inter x rl
-
-let partition_smap f m =
-  SMap.fold (
-  fun x ty (acc1, acc2) ->
-    if f x
-    then SMap.add x ty acc1, acc2
-    else acc1, SMap.add x ty acc2
- ) m (SMap.empty, SMap.empty)
 
 (* This is a significant misnomer... you may want fold_left_env instead. *)
 let lfold = lmap
@@ -308,16 +285,6 @@ let try_with_channel oc f1 f2 =
   with e ->
     close_out oc;
     f2 e
-
-let pipe (x : 'a)  (f : 'a -> 'b) : 'b = f x
-let (|>) = pipe
-
-let rec filter_some = function
-  | [] -> []
-  | None :: l -> filter_some l
-  | Some e :: l -> e :: filter_some l
-
-let map_filter f xs = xs |> List.map f |> filter_some
 
 let rec cut_after n = function
   | [] -> []

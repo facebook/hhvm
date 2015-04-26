@@ -155,7 +155,7 @@ void DebugInfo::generatePidMapOverlay() {
   return;
 }
 
-void DebugInfo::recordStub(TCRange range, const char* name) {
+void DebugInfo::recordStub(TCRange range, const std::string& name) {
   if (range.isAcold()) {
     m_acoldDwarfInfo.addTracelet(range, name, nullptr, nullptr, false, false);
   } else {
@@ -219,10 +219,11 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
 void DebugInfo::recordTracelet(TCRange range, const Func* func,
     const Op* instr, bool exit, bool inPrologue) {
   if (range.isAcold()) {
-    m_acoldDwarfInfo.addTracelet(range, nullptr, func,
-                                  instr, exit, inPrologue);
+    m_acoldDwarfInfo.addTracelet(range, folly::none, func,
+                                 instr, exit, inPrologue);
   } else {
-    m_aDwarfInfo.addTracelet(range, nullptr, func, instr, exit, inPrologue);
+    m_aDwarfInfo.addTracelet(range, folly::none, func, instr, exit,
+                             inPrologue);
   }
 }
 

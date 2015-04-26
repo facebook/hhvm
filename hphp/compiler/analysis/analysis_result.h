@@ -161,7 +161,6 @@ public:
   void analyzeProgramFinal();
   void dump();
 
-  void docJson(const std::string &filename);
   void visitFiles(void (*cb)(AnalysisResultPtr, StatementPtr, void*),
                   void *data);
 

@@ -2709,11 +2709,14 @@ bool isPackedInit(ExpressionPtr init_expr, int* size,
       // If we have a key...
       if (ap->getName() != nullptr) {
         // ...and it has no scalar value, bail.
-        if (!ap->getScalarValue(key)) return false;
+        if (!ap->getName()->getScalarValue(key)) return false;
 
         if (key.isInteger()) {
           // If it's an integer key, check if it's the next packed index.
           if (key.asInt64Val() != *size) return false;
+        } else if (key.isBoolean()) {
+          // Bool to Int conversion
+          if (static_cast<int>(key.asBooleanVal()) != *size) return false;
         } else {
           // Give up if it's not a string.
           if (!key.isString()) return false;
@@ -4283,7 +4286,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         {
           FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
           for (int i = 0; i < numParams; i++) {
-            emitFuncCallArg(e, (*params)[i], i);
+            emitFuncCallArg(e, (*params)[i], i,
+                            ne->hasUnpack() && i + 1 == numParams);
           }
         }
 
@@ -4346,7 +4350,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           // $obj->name(...)
           //           ^^^^^
           for (int i = 0; i < numParams; i++) {
-            emitFuncCallArg(e, (*params)[i], i);
+            emitFuncCallArg(e, (*params)[i], i,
+                            om->hasUnpack() && i + 1 == numParams);
           }
         }
         if (om->hasUnpack()) {
@@ -4857,7 +4862,7 @@ bool EmitterVisitor::emitHHInvariant(Emitter& e, SimpleFunctionCallPtr call) {
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
     for (auto i = uint32_t{1}; i < params->getCount(); ++i) {
-      emitFuncCallArg(e, (*params)[i], i - 1);
+      emitFuncCallArg(e, (*params)[i], i - 1, false);
     }
   }
   e.FCall(params->getCount() - 1);
@@ -5377,16 +5382,27 @@ void EmitterVisitor::emitBuiltinDefaultArg(Emitter& e, Variant& v,
 
 void EmitterVisitor::emitFuncCallArg(Emitter& e,
                                      ExpressionPtr exp,
-                                     int paramId) {
+                                     int paramId,
+                                     bool isUnpack) {
   visit(exp);
   if (checkIfStackEmpty("FPass*")) return;
 
   // TODO(4599379): if dealing with an unpack, here is where we'd want to
   // emit a bytecode to traverse any containers;
-  // TODO(4599368): if dealing with an unpack, would need to kick out of
-  // the pass-by-ref behavior and defer that to FCallUnpack
 
-  emitFPass(e, paramId, getPassByRefKind(exp));
+  auto kind = getPassByRefKind(exp);
+  if (isUnpack) {
+    // This deals with the case where the called function has a
+    // by ref param at the index of the unpack (because we don't
+    // want to box the unpack itself).
+    // But note that unless the user created the array manually,
+    // and added reference params at the correct places, we'll
+    // still get warnings, and the array elements will not be
+    // passed by reference.
+    emitConvertToCell(e);
+    kind = PassByRefKind::AllowCell;
+  }
+  emitFPass(e, paramId, kind);
 }
 
 void EmitterVisitor::emitFPass(Emitter& e, int paramId,
@@ -5932,8 +5948,9 @@ MaybeDataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
   if (t == KindOfInt64) {
     int64_t base = caseMap.begin()->first;
     int64_t nTargets = caseMap.rbegin()->first - base + 1;
-    // Fail if the cases are too sparse
-    if ((float)caseMap.size() / nTargets < 0.5) {
+    // Fail if there aren't enough cases or they're too sparse.
+    if (caseMap.size() < kMinIntSwitchCases ||
+        (float)caseMap.size() / nTargets < 0.5) {
       return folly::none;
     }
   } else if (t == KindOfString) {
@@ -6623,6 +6640,11 @@ void EmitterVisitor::emitMethodMetadata(MethodStatementPtr meth,
     for (auto& useVar : *useVars) {
       fe->allocVarId(useVar.first);
     }
+  }
+
+  // assign id to 86metadata local representing frame metadata
+  if (meth->mayCallSetFrameMetadata()) {
+    fe->allocVarId(makeStaticString("86metadata"));
   }
 
   // assign ids to local variables
@@ -7662,7 +7684,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
     {
       FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
       for (int i = 0; i < numParams; i++) {
-        emitFuncCallArg(e, (*params)[i], i);
+        emitFuncCallArg(e, (*params)[i], i, unpack && i + 1 == numParams);
       }
     }
     if (unpack) {

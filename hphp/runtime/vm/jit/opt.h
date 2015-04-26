@@ -32,13 +32,12 @@ struct FrameStateMgr;
 /*
  * The main optimization passes.
  */
-void optimizeRefcounts(IRUnit&, FrameStateMgr&&);
-void eliminateTakes(const IRUnit&);
 void optimizeRefcounts2(IRUnit&);
 void optimizePredictions(IRUnit&);
 void gvn(IRUnit&);
 void optimizeLoads(IRUnit&);
 void optimizeStores(IRUnit&);
+void cleanCfg(IRUnit&);
 
 /*
  * DCE runs in between various passes.

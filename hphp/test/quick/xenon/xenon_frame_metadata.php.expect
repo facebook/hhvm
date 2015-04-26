@@ -1,0 +1,4 @@
+calling bar(hello)
+calling bar(world)
+foo hello
+foo world

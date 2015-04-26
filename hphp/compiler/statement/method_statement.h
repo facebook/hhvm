@@ -122,6 +122,9 @@ public:
   void setHasCallToGetArgs(bool f) { m_hasCallToGetArgs = f; }
   bool hasCallToGetArgs() const { return m_hasCallToGetArgs; }
 
+  void setMayCallSetFrameMetadata(bool f) { m_mayCallSetFrameMetadata = f; }
+  bool mayCallSetFrameMetadata() const { return m_mayCallSetFrameMetadata; }
+
 private:
   void checkParameters();
 
@@ -129,6 +132,7 @@ protected:
   bool m_method;
   bool m_ref;
   bool m_hasCallToGetArgs;
+  bool m_mayCallSetFrameMetadata;
   int m_attribute;
   int m_cppLength;
   int m_autoPropCount;

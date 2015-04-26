@@ -9,7 +9,7 @@
  *)
 
 open Utils
-module List = List_ext
+module List = Core_list
 
 type unparsed =
   | StrEmpty
@@ -49,14 +49,14 @@ let dump strs =
     | StrBraces s -> add "("; add "StrBraces "; process s; add ")"
   and items cons ss =
     add "(";
-    List.iter process cons;
+    List.iter ~f:process cons;
     indent_level := !indent_level + 2;
     match ss with
     | [] -> add ")"
     | (s::ss) ->
         newline ();
         process s;
-        List.iter (fun s -> add ","; newline (); process s) ss;
+        List.iter ~f:(fun s -> add ","; newline (); process s) ss;
         add ")";
         indent_level := !indent_level - 2 in
   process strs;
@@ -84,10 +84,10 @@ let to_string strs =
         intersperse StrSemi ss |> process_list;
     | StrParens s -> add "("; process s; add ")";
     | StrBraces s -> add "{"; process s; add "}";
-  and nonempty = List.filter (fun s -> s <> StrEmpty)
-  and process_list ss = nonempty ss |> List.iter process
-  and intersperse sep ss = nonempty ss |> List.intersperse sep
-  and words ss = intersperse StrBlank ss |> List.iter process in
+  and nonempty = List.filter ~f:(fun s -> s <> StrEmpty)
+  and process_list ss = nonempty ss |> List.iter ~f:process
+  and intersperse sep ss = nonempty ss |> List.intersperse ~sep
+  and words ss = intersperse StrBlank ss |> List.iter ~f:process in
   process strs;
   let res = Buffer.contents buf in
   Buffer.reset buf;

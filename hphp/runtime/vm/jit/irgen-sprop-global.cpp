@@ -166,7 +166,6 @@ void emitIssetS(IRGS& env) {
 
   auto const ret = cond(
     env,
-    0,
     [&] (Block* taken) {
       auto propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, false);
       return gen(env, CheckNonNull, taken, propAddr);
@@ -192,7 +191,6 @@ void emitEmptyS(IRGS& env) {
   auto const ssaCls = popA(env);
   auto const ret = cond(
     env,
-    0,
     [&] (Block* taken) {
       auto propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, false);
       return gen(env, CheckNonNull, taken, propAddr);
@@ -259,7 +257,6 @@ void emitIssetG(IRGS& env) {
 
   auto const ret = cond(
     env,
-    0,
     [&] (Block* taken) {
       return gen(env, LdGblAddr, taken, name);
     },
@@ -280,7 +277,6 @@ void emitEmptyG(IRGS& env) {
 
   auto const ret = cond(
     env,
-    0,
     [&] (Block* taken) {
       return gen(env, LdGblAddr, taken, name);
     },

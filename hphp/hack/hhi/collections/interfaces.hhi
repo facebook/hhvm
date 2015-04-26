@@ -6,7 +6,7 @@ interface ConstCollection<+Te> extends Countable {
   public function items(): Iterable<Te>;
 }
 
-interface OutputCollection<Te> {
+interface OutputCollection<-Te> {
   public function add(Te $e): this;
   public function addAll(?Traversable<Te> $traversable): this;
 }
@@ -17,7 +17,7 @@ interface Collection<Te> extends ConstCollection<Te>,
 }
 
 interface ConstSetAccess<+Tm> {
-  public function contains(Tm $m): bool;
+  public function contains<Tu super Tm>(Tu $m): bool;
 }
 
 interface SetAccess<Tm> extends ConstSetAccess<Tm> {
@@ -27,7 +27,7 @@ interface SetAccess<Tm> extends ConstSetAccess<Tm> {
 interface ConstIndexAccess<Tk, +Tv> {
   public function at(Tk $k): Tv;
   public function get(Tk $k): ?Tv;
-  public function containsKey(Tk $k): bool;
+  public function containsKey<Tu super Tk>(Tu $k): bool;
 }
 
 interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
@@ -63,12 +63,12 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
   public function skip(int $n): ConstVector<Tv>;
   public function skipWhile((function(Tv): bool) $fn): ConstVector<Tv>;
   public function slice(int $start, int $len): ConstVector<Tv>;
-  public function concat(Traversable<Tv> $traversable): ConstVector<Tv>;
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): ConstVector<Tu>;
   public function firstValue(): ?Tv;
   public function firstKey(): ?int;
   public function lastValue(): ?Tv;
   public function lastKey(): ?int;
-  public function linearSearch(Tv $search_value): int;
+  public function linearSearch<Tu super Tv>(Tu $search_value): int;
 }
 
 interface MutableVector<Tv> extends ConstVector<Tv>,
@@ -89,12 +89,12 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
   public function skip(int $n): MutableVector<Tv>;
   public function skipWhile((function(Tv): bool) $fn): MutableVector<Tv>;
   public function slice(int $start, int $len): MutableVector<Tv>;
-  public function concat(Traversable<Tv> $traversable): MutableVector<Tv>;
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): MutableVector<Tu>;
   public function firstValue(): ?Tv;
   public function firstKey(): ?int;
   public function lastValue(): ?Tv;
   public function lastKey(): ?int;
-  public function linearSearch(Tv $search_value): int;
+  public function linearSearch<Tu super Tv>(Tu $search_value): int;
 }
 
 interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
@@ -116,7 +116,7 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
   public function skip(int $n): ConstMap<Tk, Tv>;
   public function skipWhile((function(Tv): bool) $fn): ConstMap<Tk, Tv>;
   public function slice(int $start, int $len): ConstMap<Tk, Tv>;
-  public function concat(Traversable<Tv> $traversable): ConstVector<Tv>;
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): ConstVector<Tu>;
   public function firstValue(): ?Tv;
   public function firstKey(): ?Tk;
   public function lastValue(): ?Tv;
@@ -141,7 +141,7 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
   public function skip(int $n): MutableMap<Tk, Tv>;
   public function skipWhile((function(Tv): bool) $fn): MutableMap<Tk, Tv>;
   public function slice(int $start, int $len): MutableMap<Tk, Tv>;
-  public function concat(Traversable<Tv> $traversable): MutableVector<Tv>;
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): MutableVector<Tu>;
   public function firstValue(): ?Tv;
   public function firstKey(): ?Tk;
   public function lastValue(): ?Tv;
@@ -164,7 +164,7 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
   public function skip(int $n): ConstSet<Tv>;
   public function skipWhile((function(Tv): bool) $fn): ConstSet<Tv>;
   public function slice(int $start, int $len): ConstSet<Tv>;
-  public function concat(Traversable<Tv> $traversable): ConstVector<Tv>;
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): ConstVector<Tu>;
   public function firstValue(): ?Tv;
   public function firstKey(): mixed;
   public function lastValue(): ?Tv;
@@ -186,7 +186,7 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
   public function skip(int $n): MutableSet<Tv>;
   public function skipWhile((function(Tv): bool) $fn): MutableSet<Tv>;
   public function slice(int $start, int $len): MutableSet<Tv>;
-  public function concat(Traversable<Tv> $traversable): MutableVector<Tv>;
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): MutableVector<Tu>;
   public function firstValue(): ?Tv;
   public function firstKey(): mixed;
   public function lastValue(): ?Tv;

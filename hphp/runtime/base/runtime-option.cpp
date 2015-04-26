@@ -459,6 +459,11 @@ static inline uint32_t jitLLVMDefault() {
 #endif
 }
 
+static inline bool jitLLVMSLPVectorizeDefault() {
+  return RuntimeOption::EvalJitLLVMOptLevel > 1 &&
+         RuntimeOption::EvalJitLLVMSizeLevel < 2;
+}
+
 static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }
@@ -539,6 +544,8 @@ int RuntimeOption::DebuggerDefaultRpcTimeout = 30;
 std::string RuntimeOption::DebuggerDefaultSandboxPath;
 std::string RuntimeOption::DebuggerStartupDocument;
 int RuntimeOption::DebuggerSignalTimeout = 1;
+
+bool RuntimeOption::XDebugChrome = false;
 
 std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
@@ -946,7 +953,7 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(RepoCommit, ini, repo["Commit"], true);
     Config::Bind(RepoDebugInfo, ini, repo["DebugInfo"], true);
     Config::Bind(RepoAuthoritative, ini, repo["Authoritative"], false);
-    Config::Bind(RepoPreload, ini, repo["Preload"], RepoAuthoritative);
+    Config::Bind(RepoPreload, ini, repo["Preload"], false);
   }
   {
     Hdf eval = config["Eval"];
@@ -1032,6 +1039,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
       Config::Bind(DebuggerRpcHostDomain, ini, debugger["RPC.HostDomain"]);
       Config::Bind(DebuggerDefaultRpcTimeout, ini,
                    debugger["RPC.DefaultTimeout"], 30);
+
+      Config::Bind(XDebugChrome, ini, debugger["XDebugChrome"], false);
     }
   }
   {

@@ -595,9 +595,8 @@ MixedArray* StructArray::ToMixedHeader(size_t neededSize) {
   auto const ad      = smartAllocArray(cap, mask);
 
   ad->m_sizeAndPos       = 0; // We'll set size and pos later.
-  ad->m_kindAndCount     = MixedArray::kMixedKind << 24;
-  ad->m_capAndUsed       = cap; // Used will be set as we initialize the array.
-  ad->m_tableMask        = mask;
+  ad->m_kindAndCount     = MixedArray::kMixedKind << 24; // count=0
+  ad->m_mask_used        = mask; // used=0
   ad->m_nextKI           = 0; // There were never any numeric indices.
 
   assert(ad->m_kind == ArrayData::kMixedKind);
@@ -605,7 +604,8 @@ MixedArray* StructArray::ToMixedHeader(size_t neededSize) {
   assert(ad->m_pos == 0);
   assert(ad->m_count == 0);
   assert(ad->m_used == 0);
-  assert(ad->m_cap == cap);
+  assert(ad->m_mask == mask);
+  assert(ad->capacity() == cap);
   return ad;
 }
 
@@ -616,7 +616,7 @@ MixedArray* StructArray::ToMixed(StructArray* old) {
   auto shape         = old->shape();
 
   memset(ad->hashTab(), static_cast<uint8_t>(MixedArray::Empty),
-    sizeof(int32_t) * (ad->m_tableMask + 1));
+    sizeof(int32_t) * (ad->m_mask + 1));
 
   for (auto i = 0; i < oldSize; ++i) {
     auto key = const_cast<StringData*>(shape->keyForOffset(i));
@@ -643,7 +643,7 @@ MixedArray* StructArray::ToMixedCopy(const StructArray* old) {
   auto shape         = old->shape();
 
   memset(ad->hashTab(), static_cast<uint8_t>(MixedArray::Empty),
-    sizeof(int32_t) * (ad->m_tableMask + 1));
+    sizeof(int32_t) * (ad->m_mask + 1));
 
   for (auto i = 0; i < oldSize; ++i) {
     auto key = const_cast<StringData*>(shape->keyForOffset(i));
@@ -669,7 +669,7 @@ MixedArray* StructArray::ToMixedCopyReserve(
   auto shape         = old->shape();
 
   memset(ad->hashTab(), static_cast<uint8_t>(MixedArray::Empty),
-    sizeof(int32_t) * (ad->m_tableMask + 1));
+    sizeof(int32_t) * (ad->m_mask + 1));
 
   for (auto i = 0; i < oldSize; ++i) {
     auto key = const_cast<StringData*>(shape->keyForOffset(i));

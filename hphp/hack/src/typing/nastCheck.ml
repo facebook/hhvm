@@ -32,13 +32,13 @@ module Env = Typing_env
 
 module CheckFunctionType = struct
   let rec stmt f_type st = match f_type, st with
-    | FSync, Return (_, None)
-    | FAsync, Return (_, None) -> ()
-    | FSync, Return (_, Some e)
-    | FAsync, Return (_, Some e) ->
+    | Ast.FSync, Return (_, None)
+    | Ast.FAsync, Return (_, None) -> ()
+    | Ast.FSync, Return (_, Some e)
+    | Ast.FAsync, Return (_, Some e) ->
         expr f_type e;
         ()
-    | (FGenerator | FAsyncGenerator), Return (p, e) ->
+    | (Ast.FGenerator | Ast.FAsyncGenerator), Return (p, e) ->
         (match e with
         None -> ()
         | Some _ -> Errors.return_in_gen p);
@@ -68,7 +68,7 @@ module CheckFunctionType = struct
     | _, Switch (_, cl) ->
         liter case f_type cl;
         ()
-    | (FSync | FGenerator), Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _) ->
+    | (Ast.FSync | Ast.FGenerator), Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _) ->
         Errors.await_in_sync_function p;
         ()
     | _, Foreach (_, _, b) ->
@@ -176,23 +176,23 @@ module CheckFunctionType = struct
         ()
     | _, Efun _ -> ()
 
-    | FGenerator, Yield_break
-    | FAsyncGenerator, Yield_break -> ()
-    | FGenerator, Yield af
-    | FAsyncGenerator, Yield af -> afield f_type af; ()
+    | Ast.FGenerator, Yield_break
+    | Ast.FAsyncGenerator, Yield_break -> ()
+    | Ast.FGenerator, Yield af
+    | Ast.FAsyncGenerator, Yield af -> afield f_type af; ()
 
     (* Should never happen -- presence of yield should make us FGenerator or
      * FAsyncGenerator. *)
-    | FSync, Yield_break
-    | FAsync, Yield_break
-    | FSync, Yield _
-    | FAsync, Yield _ -> assert false
+    | Ast.FSync, Yield_break
+    | Ast.FAsync, Yield_break
+    | Ast.FSync, Yield _
+    | Ast.FAsync, Yield _ -> assert false
 
-    | FGenerator, Await _
-    | FSync, Await _ -> Errors.await_in_sync_function p
+    | Ast.FGenerator, Await _
+    | Ast.FSync, Await _ -> Errors.await_in_sync_function p
 
-    | FAsync, Await e
-    | FAsyncGenerator, Await e -> expr f_type e; ()
+    | Ast.FAsync, Await e
+    | Ast.FAsyncGenerator, Await e -> expr f_type e; ()
 
     | _, Special_func func ->
       (match func with
@@ -210,9 +210,6 @@ module CheckFunctionType = struct
         ()
     | _, Assert (AE_invariant_violation (e, el)) ->
         liter expr f_type (e :: el);
-        ()
-    | _, Assert (AE_invariant (e1, e2, el)) ->
-        liter expr f_type (e1 :: e2 :: el);
         ()
     | _, Shape fdm ->
         ShapeMap.iter (fun _ v -> expr f_type v) fdm;
@@ -267,7 +264,7 @@ and func env f named_body =
   maybe hint env f.f_ret;
   List.iter (fun_param env) f.f_params;
   block env named_body.fnb_nast;
-  CheckFunctionType.block named_body.fnb_fun_kind named_body.fnb_nast
+  CheckFunctionType.block f.f_fun_kind named_body.fnb_nast
 
 and hint env (p, h) =
   hint_ env p h
@@ -504,7 +501,7 @@ and method_ (env, is_static) m =
   liter fun_param env m.m_params;
   block env named_body.fnb_nast;
   maybe hint env m.m_ret;
-  CheckFunctionType.block named_body.fnb_fun_kind named_body.fnb_nast;
+  CheckFunctionType.block m.m_fun_kind named_body.fnb_nast;
   if m.m_abstract && named_body.fnb_nast <> []
   then Errors.abstract_with_body m.m_name;
   if not (Env.is_decl env.tenv) && not m.m_abstract && named_body.fnb_nast = []
@@ -679,10 +676,6 @@ and expr_ env = function
       hint env h;
       expr env e;
       ()
-  | Assert (AE_invariant (e1, e2, el)) ->
-      expr env e1;
-      expr env e2;
-      liter expr env el
   | Binop (_, e1, e2) ->
       expr env e1;
       expr env e2;

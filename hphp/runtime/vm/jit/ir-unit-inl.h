@@ -257,15 +257,10 @@ inline uint32_t IRUnit::numIds(const IRInstruction*) const {
   return numInsts();
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T> SSATmp* IRUnit::cns(T val) {
   return cns(Type::cns(val));
-}
-
-inline const LabelRefs& IRUnit::labelRefs() const {
-  return m_labelRefs;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

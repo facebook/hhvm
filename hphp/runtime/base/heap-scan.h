@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/imarker.h"
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/ext/extension-registry.h"
 
 namespace HPHP {
@@ -187,6 +188,13 @@ template<class F> void scanRoots(F& mark) {
   // Extension thread locals
   ExtMarker<F> xm(mark);
   ExtensionRegistry::scanExtensionRoots(xm);
+  // Root maps
+  MM().scanRootMaps(mark);
+}
+
+template <typename T, typename F>
+void scan(const SmartPtr<T>& ptr, F& mark) {
+  ptr->scan(mark);
 }
 
 }

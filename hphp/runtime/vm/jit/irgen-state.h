@@ -52,7 +52,7 @@ struct FPIInfo {
  * required to determine high-level compilation strategy.
  */
 struct IRGS {
-  explicit IRGS(TransContext);
+  explicit IRGS(TransContext ctx);
 
   /*
    * TODO: refactor this code eventually so IRGS doesn't own its IRUnit (or its

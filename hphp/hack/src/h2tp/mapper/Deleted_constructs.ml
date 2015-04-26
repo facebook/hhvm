@@ -51,8 +51,8 @@
 *)
 
 module M = Map_ast
+module List = Core_list
 open Ast
-open Utils
 
 let delete_method_attributes m =
   {m with m_user_attributes = []}
@@ -78,5 +78,5 @@ let map =
     M.k_fun_param = (fun (k, _) p  -> k (delete_param_attributes p));
     M.k_class_ = (fun (k, _) c -> k (delete_class_attributes c));
     M.k_c_body = (fun (k, _) _ body ->
-      k (map_filter delete_class_body_declarations body));
+      k (List.filter_map ~f:delete_class_body_declarations body));
   }

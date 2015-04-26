@@ -43,6 +43,10 @@ hashes = {
 def hash_of(value):
     t = value.type
 
+    if t.code == gdb.TYPE_CODE_PTR:
+        # pointer_hash<> is just hash_int64().
+        return hash_int64(value.cast(T('intptr_t')))
+
     for (htype, hfunc) in hashes.iteritems():
         try:  # Skip over nonexistent types.
             if t == T(htype):

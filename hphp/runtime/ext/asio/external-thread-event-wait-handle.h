@@ -45,8 +45,8 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   static void ti_setonfailcallback(const Variant& callback);
 
  public:
-  static c_ExternalThreadEventWaitHandle* Create(AsioExternalThreadEvent* event,
-                                                 ObjectData* priv_data);
+  static SmartPtr<c_ExternalThreadEventWaitHandle>
+    Create(AsioExternalThreadEvent* event, ObjectData* priv_data);
 
   c_ExternalThreadEventWaitHandle* getNextToProcess() {
     assert(getState() == STATE_WAITING);
@@ -61,15 +61,14 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   void abandon(bool sweeping);
   void process();
   String getName();
-  void enterContextImpl(context_idx_t ctx_idx);
   void exitContext(context_idx_t ctx_idx);
+  void registerToContext();
+  void unregisterFromContext();
 
  private:
   void setState(uint8_t s) { setKindState(Kind::ExternalThreadEvent, s); }
   void initialize(AsioExternalThreadEvent* event, ObjectData* priv_data);
   void destroyEvent(bool sweeping = false);
-  void registerToContext();
-  void unregisterFromContext();
 
  private:
   c_ExternalThreadEventWaitHandle* m_nextToProcess;
@@ -77,7 +76,9 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   Object m_privData;
   SweepableMember<c_ExternalThreadEventWaitHandle> m_sweepable;
 
+ public:
   static const uint8_t STATE_WAITING = 2;
+
   friend struct SweepableMember<c_ExternalThreadEventWaitHandle>;
 };
 

@@ -616,8 +616,9 @@ private:
   };
 
 private:
-  static const size_t kMinStringSwitchCases = 8;
-  static const bool systemlibDefinesIdx =
+  static constexpr size_t kMinIntSwitchCases = 2;
+  static constexpr size_t kMinStringSwitchCases = 8;
+  static constexpr bool systemlibDefinesIdx =
 #ifdef FACEBOOK
     true
 #else
@@ -781,7 +782,8 @@ public:
   void emitFuncCall(Emitter& e, FunctionCallPtr node,
                     const char* nameOverride = nullptr,
                     ExpressionListPtr paramsOverride = nullptr);
-  void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId);
+  void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId,
+                       bool isUnpack);
   void emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
                          bool byRef);
   void emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp);

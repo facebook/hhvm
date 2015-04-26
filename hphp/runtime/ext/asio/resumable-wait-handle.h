@@ -52,11 +52,14 @@ class c_ResumableWaitHandle : public c_WaitableWaitHandle {
   void exitContext(context_idx_t ctx_idx);
 
   static const int8_t STATE_BLOCKED   = 2;
-
- protected:
   static const int8_t STATE_SCHEDULED = 3;
   static const int8_t STATE_RUNNING   = 4;
 };
+
+inline c_ResumableWaitHandle* c_WaitHandle::asResumable() {
+  assert(getKind() == Kind::AsyncFunction || getKind() == Kind::AsyncGenerator);
+  return static_cast<c_ResumableWaitHandle*>(this);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

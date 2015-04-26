@@ -586,15 +586,87 @@ MCGenerator::checkCachedPrologue(const Func* func, int paramIdx,
   return false;
 }
 
-TCA
-MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
-                             bool forRegeneratePrologue) {
+TCA MCGenerator::emitFuncPrologue(Func* func, int nPassed) {
+  const bool   funcIsMagic = func->isMagic();
+  const int    numParams   = func->numNonVariadicParams();
+  const int    paramIndex  = nPassed <= numParams ? nPassed : numParams + 1;
+  const Offset entry       = func->getEntryForNumArgs(nPassed);
+  const SrcKey funcBody(func, entry, false);
+
+  CodeCache::Selector cbSel(CodeCache::Selector::Args(code)
+                            .profile(m_tx.mode() == TransKind::Proflogue)
+                            .hot(RuntimeOption::EvalHotFuncCount &&
+                                 (func->attrs() & AttrHot) && m_tx.useAHot()));
+
+  assertx(m_fixups.empty());
+  // If we're close to a cache line boundary, just burn some space to
+  // try to keep the func and its body on fewer total lines.
+  if (((uintptr_t)code.main().frontier() & backEnd().cacheLineMask()) >=
+      (backEnd().cacheLineSize() / 2)) {
+    backEnd().moveToAlign(code.main(), MoveToAlignFlags::kCacheLineAlign);
+  }
+  m_fixups.m_alignFixups.emplace(
+    code.main().frontier(), std::make_pair(backEnd().cacheLineSize() / 2, 0));
+
+  // Careful: this isn't necessarily the real entry point. For funcIsMagic
+  // prologues, this is just a possible prologue.
+  TCA aStart    = code.main().frontier();
+  TCA start     = aStart;
+  TCA coldStart = code.cold().frontier();
+  TCA realColdStart   = mcg->code.realCold().frontier();
+  TCA realFrozenStart = mcg->code.realFrozen().frontier();
+
+  auto const skFuncBody = backEnd().emitFuncPrologue(
+    code.main(), code.cold(), func, funcIsMagic, nPassed, start, aStart);
+  if (RuntimeOption::EvalPerfRelocate) {
+    GrowableVector<IncomingBranch> incomingBranches;
+    recordPerfRelocMap(aStart, code.main().frontier(),
+                       coldStart, code.cold().frontier(),
+                       funcBody, paramIndex,
+                       incomingBranches,
+                       m_fixups);
+  }
+  m_fixups.process(nullptr);
+
+  assertx(backEnd().funcPrologueHasGuard(start, func));
+  TRACE(2, "funcPrologue mcg %p %s(%d) setting prologue %p\n",
+        this, func->fullName()->data(), nPassed, start);
+  assertx(isValidCodeAddress(start));
+  func->setPrologue(paramIndex, start);
+
+  assertx(m_tx.mode() == TransKind::Prologue ||
+          m_tx.mode() == TransKind::Proflogue);
+  TransRec tr(skFuncBody,
+              m_tx.mode(),
+              aStart,          code.main().frontier()       - aStart,
+              realColdStart,   code.realCold().frontier()   - realColdStart,
+              realFrozenStart, code.realFrozen().frontier() - realFrozenStart);
+  m_tx.addTranslation(tr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTraceletToVtune(func->unit(), func, tr);
+  }
+
+  if (m_tx.profData()) {
+    m_tx.profData()->addTransPrologue(m_tx.mode(), skFuncBody, paramIndex);
+  }
+
+  recordGdbTranslation(skFuncBody, func,
+                       code.main(), aStart,
+                       false, true);
+  recordBCInstr(OpFuncPrologue, aStart, code.main().frontier(), false);
+
+  m_numTrans++;
+  assertx(m_numTrans <= RuntimeOption::EvalJitGlobalTranslationLimit);
+
+  return start;
+}
+
+TCA MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
+                                 bool forRegeneratePrologue) {
   func->validate();
   TRACE(1, "funcPrologue %s(%d)\n", func->fullName()->data(), nPassed);
   int const numParams = func->numNonVariadicParams();
   int paramIndex = nPassed <= numParams ? nPassed : numParams + 1;
-
-  bool const funcIsMagic = func->isMagic();
 
   // Do a quick test before grabbing the write lease
   TCA prologue;
@@ -642,72 +714,26 @@ MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
   }
   SCOPE_EXIT{ m_tx.setMode(TransKind::Invalid); };
 
-  CodeCache::Selector cbSel(CodeCache::Selector::Args(code)
-                            .profile(m_tx.mode() == TransKind::Proflogue)
-                            .hot(RuntimeOption::EvalHotFuncCount &&
-                                 (func->attrs() & AttrHot) && m_tx.useAHot()));
+  try {
+    return emitFuncPrologue(func, nPassed);
+  } catch (const DataBlockFull& dbFull) {
 
-  assertx(m_fixups.empty());
-  // If we're close to a cache line boundary, just burn some space to
-  // try to keep the func and its body on fewer total lines.
-  if (((uintptr_t)code.main().frontier() & backEnd().cacheLineMask()) >=
-      (backEnd().cacheLineSize() / 2)) {
-    backEnd().moveToAlign(code.main(), MoveToAlignFlags::kCacheLineAlign);
+    // Fail hard if the block isn't code.hot.
+    always_assert_flog(dbFull.name == "hot",
+                       "data block = {}\nmessage: {}\n",
+                       dbFull.name, dbFull.what());
+
+    // Otherwise, fall back to code.main and retry.
+    assertx(m_tx.useAHot());
+    m_tx.setUseAHot(false);
+    m_fixups.clear();
+    try {
+      return emitFuncPrologue(func, nPassed);
+    } catch (const DataBlockFull& dbFull) {
+      always_assert_flog(0, "data block = {}\nmessage: {}\n",
+                         dbFull.name, dbFull.what());
+    }
   }
-  m_fixups.m_alignFixups.emplace(
-    code.main().frontier(), std::make_pair(backEnd().cacheLineSize() / 2, 0));
-
-  // Careful: this isn't necessarily the real entry point. For funcIsMagic
-  // prologues, this is just a possible prologue.
-  TCA aStart    = code.main().frontier();
-  TCA start     = aStart;
-  TCA coldStart = code.cold().frontier();
-  TCA realColdStart   = mcg->code.realCold().frontier();
-  TCA realFrozenStart = mcg->code.realFrozen().frontier();
-
-  auto const skFuncBody = backEnd().emitFuncPrologue(
-    code.main(), code.cold(), func, funcIsMagic, nPassed, start, aStart);
-  if (RuntimeOption::EvalPerfRelocate) {
-    GrowableVector<IncomingBranch> incomingBranches;
-    recordPerfRelocMap(aStart, code.main().frontier(),
-                       coldStart, code.cold().frontier(),
-                       funcBody, paramIndex,
-                       incomingBranches,
-                       m_fixups);
-  }
-  m_fixups.process(nullptr);
-
-  assertx(backEnd().funcPrologueHasGuard(start, func));
-  TRACE(2, "funcPrologue mcg %p %s(%d) setting prologue %p\n",
-        this, func->fullName()->data(), nPassed, start);
-  assertx(isValidCodeAddress(start));
-  func->setPrologue(paramIndex, start);
-
-  assertx(m_tx.mode() == TransKind::Prologue ||
-         m_tx.mode() == TransKind::Proflogue);
-  TransRec tr(skFuncBody,
-              m_tx.mode(),
-              aStart,          code.main().frontier()       - aStart,
-              realColdStart,   code.realCold().frontier()   - realColdStart,
-              realFrozenStart, code.realFrozen().frontier() - realFrozenStart);
-  m_tx.addTranslation(tr);
-  if (RuntimeOption::EvalJitUseVtuneAPI) {
-    reportTraceletToVtune(func->unit(), func, tr);
-  }
-
-  if (m_tx.profData()) {
-    m_tx.profData()->addTransPrologue(m_tx.mode(), skFuncBody, paramIndex);
-  }
-
-  recordGdbTranslation(skFuncBody, func,
-                       code.main(), aStart,
-                       false, true);
-  recordBCInstr(OpFuncPrologue, aStart, code.main().frontier(), false);
-
-  m_numTrans++;
-  assertx(m_numTrans <= RuntimeOption::EvalJitGlobalTranslationLimit);
-
-  return start;
 }
 
 /**
@@ -1317,8 +1343,11 @@ MCGenerator::freeRequestStub(TCA stub) {
   return true;
 }
 
-TCA MCGenerator::getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups) {
+TCA MCGenerator::getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups,
+                             bool* isReused) {
   TCA ret = m_freeStubs.maybePop();
+  if (isReused) *isReused = ret;
+
   if (ret) {
     Stats::inc(Stats::Astub_Reused);
     always_assert(m_freeStubs.peek() == nullptr ||
@@ -1509,28 +1538,19 @@ MCGenerator::translateWork(const TranslArgs& args) {
   TCA        realFrozenStart   = code.realFrozen().frontier();
   SrcRec&    srcRec            = *m_tx.getSrcRec(sk);
   TransKind  transKindToRecord = TransKind::Interp;
-  UndoMarker undoA(code.main());
-  UndoMarker undoAcold(code.cold());
-  UndoMarker undoAfrozen(code.frozen());
-  UndoMarker undoGlobalData(code.data());
-
-  setUseLLVM(
-    // Regions with bytecode-level control flow cause vmsp stack
-    // manipulations we can't handle right now: t4810319
-    RuntimeOption::EvalJitPGORegionSelector == "hottrace" &&
-    !RuntimeOption::EvalJitLoops &&
-    (RuntimeOption::EvalJitLLVM > 1 ||
-     (RuntimeOption::EvalJitLLVM && m_tx.mode() == TransKind::Optimize))
-  );
-  SCOPE_EXIT {
-    setUseLLVM(false);
+  UndoMarker undo[] = {
+    UndoMarker{code.main()},
+    UndoMarker{code.cold()},
+    UndoMarker{code.frozen()},
+    UndoMarker{code.data()},
   };
 
+  auto const useLLVM =
+    (RuntimeOption::EvalJitLLVM > 1 ||
+     (RuntimeOption::EvalJitLLVM && m_tx.mode() == TransKind::Optimize));
+
   auto resetState = [&] {
-    undoA.undo();
-    undoAcold.undo();
-    undoAfrozen.undo();
-    undoGlobalData.undo();
+    for (auto& u : undo) u.undo();
     m_fixups.clear();
   };
 
@@ -1579,7 +1599,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
         initSpOffset,
         sk.resumed(),
         sk.func(),
-        region.get()
+        region.get(),
+        useLLVM
       };
 
       IRGS irgs { transContext };
@@ -1621,11 +1642,6 @@ MCGenerator::translateWork(const TranslArgs& args) {
              m_tx.mode() == TransKind::Optimize);
       transKindToRecord = m_tx.mode();
     }
-  }
-
-  if (args.dryRun) {
-    resetState();
-    return start;
   }
 
   if (transKindToRecord == TransKind::Interp) {
@@ -1675,7 +1691,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
               realColdStart,   code.realCold().frontier()   - realColdStart,
               realFrozenStart, code.realFrozen().frontier() - realFrozenStart,
               region, m_fixups.m_bcMap,
-              useLLVM());
+              useLLVM);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
@@ -1785,33 +1801,29 @@ void MCGenerator::codeEmittedThisRequest(size_t& requestEntry,
 }
 
 namespace {
-struct DebuggerCatchInfo {
-  TCA catchBlock;
-  const ActRec* fp;
-};
-
-__thread std::deque<DebuggerCatchInfo>* tl_debuggerCatches{nullptr};
+__thread std::unordered_map<const ActRec*, TCA>* tl_debuggerCatches{nullptr};
 }
 
 void pushDebuggerCatch(const ActRec* fp) {
   if (!tl_debuggerCatches) {
-    tl_debuggerCatches = new std::deque<DebuggerCatchInfo>();
+    tl_debuggerCatches = new std::unordered_map<const ActRec*, TCA>();
   }
 
   auto optCatchBlock = mcg->getCatchTrace(TCA(fp->m_savedRip));
   always_assert(optCatchBlock && *optCatchBlock);
   auto catchBlock = *optCatchBlock;
   FTRACE(1, "Pushing debugger catch {} with fp {}\n", catchBlock, fp);
-  tl_debuggerCatches->emplace_back(DebuggerCatchInfo{catchBlock, fp});
+  tl_debuggerCatches->emplace(fp, catchBlock);
 }
 
 TCA popDebuggerCatch(const ActRec* fp) {
   always_assert(tl_debuggerCatches);
-  auto info = tl_debuggerCatches->front();
-  always_assert(info.fp == fp);
-  tl_debuggerCatches->pop_front();
-  FTRACE(1, "Popped debugger catch {} for fp {}\n", info.catchBlock, info.fp);
-  return info.catchBlock;
+  auto const it = tl_debuggerCatches->find(fp);
+  always_assert(it != tl_debuggerCatches->end());
+  auto const catchBlock = it->second;
+  tl_debuggerCatches->erase(it);
+  FTRACE(1, "Popped debugger catch {} for fp {}\n", catchBlock, fp);
+  return catchBlock;
 }
 
 void MCGenerator::requestInit() {
@@ -1924,11 +1936,10 @@ void MCGenerator::recordGdbTranslation(SrcKey sk,
 }
 
 void MCGenerator::recordGdbStub(const CodeBlock& cb,
-                                const TCA start, const char* name) {
-  if (!RuntimeOption::EvalJitNoGdb) {
-    m_debugInfo.recordStub(rangeFrom(cb, start, &cb == &code.cold()),
-                           name);
-  }
+                                const TCA start,
+                                const std::string& name) {
+  if (RuntimeOption::EvalJitNoGdb) return;
+  m_debugInfo.recordStub(rangeFrom(cb, start, &cb == &code.cold()), name);
 }
 
 std::vector<UsageInfo> MCGenerator::getUsageInfo() {

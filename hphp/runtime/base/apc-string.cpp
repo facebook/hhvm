@@ -20,14 +20,14 @@ namespace HPHP {
 
 APCHandle::Pair
 APCString::MakeSharedString(DataType type, StringData* data) {
-  auto const len = data->size();
-  auto const cap = roundUpPackedCap(static_cast<uint32_t>(len));
-  auto const capCode = packedCapToCode(cap);
+  auto const len = static_cast<uint32_t>(data->size());
+  auto const cc = CapCode::ceil(len);
+  auto const cap = cc.decode();
   auto apcStr = new (cap + 1) APCString(type);
   auto size = cap + 1 + sizeof(APCString);
 
   apcStr->m_str.m_data        = reinterpret_cast<char*>(apcStr + 1);
-  apcStr->m_str.m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
+  apcStr->m_str.m_capAndCount = cc.code | (HeaderKind::String << 24); // count=0
   apcStr->m_str.m_len         = len; // don't store hash
 
   apcStr->m_str.m_data[len] = 0;

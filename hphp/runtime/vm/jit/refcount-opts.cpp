@@ -18,7 +18,7 @@
 
 /*
 
-Welcome to refcount-opts2.  Theoretically reading this block comment first will
+Welcome to refcount-opts.  Theoretically reading this block comment first will
 make the rest of this file make more sense.
 
 

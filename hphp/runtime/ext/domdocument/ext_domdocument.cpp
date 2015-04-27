@@ -2031,11 +2031,20 @@ Variant HHVM_METHOD(DOMNode, appendChild,
                     const Object& newnode) {
   auto* data = Native::data<DOMNode>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return init_null();
+  }
+
   if (!dom_node_children_valid(nodep)) {
     return false;
   }
   auto* newdomnode = Native::data<DOMNode>(newnode.get());
   xmlNodePtr child = newdomnode->nodep();
+  if (!child) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return init_null();
+  }
   xmlNodePtr new_child = nullptr;
   bool stricterror = data->doc() ? data->doc()->m_stricterror : true;
 
@@ -2105,6 +2114,10 @@ Variant HHVM_METHOD(DOMNode, cloneNode,
                     bool deep /* = false */) {
   auto* data = Native::data<DOMNode>(this_);
   xmlNodePtr n = data->nodep();
+  if (!n) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return init_null();
+  }
   xmlNode* node = xmlDocCopyNode(n, n->doc, deep);
   if (!node) {
     return false;
@@ -2141,12 +2154,20 @@ Variant HHVM_METHOD(DOMNode, cloneNode,
 int64_t HHVM_METHOD(DOMNode, getLineNo) {
   auto* data = Native::data<DOMNode>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return 0;
+  }
   return xmlGetLineNo(nodep);
 }
 
 bool HHVM_METHOD(DOMNode, hasAttributes) {
   auto* data = Native::data<DOMNode>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   if (nodep->type != XML_ELEMENT_NODE) {
     return false;
   }
@@ -2156,6 +2177,10 @@ bool HHVM_METHOD(DOMNode, hasAttributes) {
 bool HHVM_METHOD(DOMNode, hasChildNodes) {
   auto* data = Native::data<DOMNode>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   if (!dom_node_children_valid(nodep)) {
     return false;
   }
@@ -2167,11 +2192,19 @@ Variant HHVM_METHOD(DOMNode, insertBefore,
                     const Variant& refnode /* = null */) {
   auto* data = Native::data<DOMNode>(this_);
   xmlNodePtr parentp = data->nodep();
+  if (!parentp) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   if (!dom_node_children_valid(parentp)) {
     return false;
   }
   auto* domchildnode = Native::data<DOMNode>(newnode.get());
   xmlNodePtr child = domchildnode->nodep();
+  if (!child) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlNodePtr new_child = nullptr;
   bool stricterror = data->doc() ? data->doc()->m_stricterror : true;
 
@@ -2195,7 +2228,7 @@ Variant HHVM_METHOD(DOMNode, insertBefore,
   if (!refnode.isNull()) {
     auto* domrefnode = Native::data<DOMNode>(refnode.toObject().get());
     xmlNodePtr refp = domrefnode->nodep();
-    if (refp->parent != parentp) {
+    if (!refp || refp->parent != parentp) {
       php_dom_throw_error(NOT_FOUND_ERR, stricterror);
       return false;
     }
@@ -2293,6 +2326,10 @@ bool HHVM_METHOD(DOMNode, isDefaultNamespace,
                  const String& namespaceuri) {
   auto* data = Native::data<DOMNode>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlNsPtr nsptr;
   if (nodep->type == XML_DOCUMENT_NODE ||
       nodep->type == XML_HTML_DOCUMENT_NODE) {
@@ -2330,6 +2367,10 @@ Variant HHVM_METHOD(DOMNode, lookupNamespaceUri,
 
   auto* data = Native::data<DOMNode>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return init_null();
+  }
   xmlNsPtr nsptr;
   if (nodep->type == XML_DOCUMENT_NODE ||
       nodep->type == XML_HTML_DOCUMENT_NODE) {
@@ -2356,6 +2397,10 @@ Variant HHVM_METHOD(DOMNode, lookupPrefix,
                     const String& prefix) {
   auto* data = Native::data<DOMNode>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return init_null();
+  }
   xmlNodePtr lookupp;
   xmlNsPtr nsptr;
   if (prefix.size() > 0) {
@@ -2389,6 +2434,10 @@ Variant HHVM_METHOD(DOMNode, lookupPrefix,
 
 void HHVM_METHOD(DOMNode, normalize) {
   auto* data = Native::data<DOMNode>(this_);
+  if (!data->nodep()) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return;
+  }
   dom_normalize(data->nodep());
 }
 
@@ -2397,11 +2446,19 @@ Variant HHVM_METHOD(DOMNode, removeChild,
   auto* data = Native::data<DOMNode>(this_);
   xmlNodePtr children;
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   if (!dom_node_children_valid(nodep)) {
     return false;
   }
   auto* domnode2 = Native::data<DOMNode>(node.get());
   xmlNodePtr child = domnode2->nodep();
+  if (!child) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   bool stricterror = data->doc() ? data->doc()->m_stricterror : true;
   if (dom_node_is_read_only(nodep) ||
     (child->parent != nullptr && dom_node_is_read_only(child->parent))) {
@@ -2430,13 +2487,25 @@ Variant HHVM_METHOD(DOMNode, replaceChild,
   auto* data = Native::data<DOMNode>(this_);
   int foundoldchild = 0;
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   if (!dom_node_children_valid(nodep)) {
     return false;
   }
   auto* domnewchildnode = Native::data<DOMNode>(newchildobj.get());
   xmlNodePtr newchild = domnewchildnode->nodep();
+  if (!newchild) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   auto* domoldchildnode = Native::data<DOMNode>(oldchildobj.get());
   xmlNodePtr oldchild = domoldchildnode->nodep();
+  if (!oldchild) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlNodePtr children = nodep->children;
   if (!children) {
     return false;
@@ -2494,6 +2563,10 @@ Variant HHVM_METHOD(DOMNode, c14n,
                     const Variant& xpath /* = null */,
                     const Variant& ns_prefixes /* = null */) {
   auto* data = Native::data<DOMNode>(this_);
+  if (!data->nodep()) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   return dom_canonicalization(data->nodep(), "", exclusive, with_comments,
                               xpath, ns_prefixes, 0);
 }
@@ -2505,6 +2578,10 @@ Variant HHVM_METHOD(DOMNode, c14nfile,
                     const Variant& xpath /* = null */,
                     const Variant& ns_prefixes /* = null */) {
   auto* data = Native::data<DOMNode>(this_);
+  if (!data->nodep()) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   return dom_canonicalization(data->nodep(), uri, exclusive,
                               with_comments, xpath, ns_prefixes, 1);
 }
@@ -2512,6 +2589,10 @@ Variant HHVM_METHOD(DOMNode, c14nfile,
 Variant HHVM_METHOD(DOMNode, getNodePath) {
   auto* data = Native::data<DOMNode>(this_);
   xmlNodePtr n = data->nodep();
+  if (!n) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return init_null();
+  }
   char *value = (char*)xmlGetNodePath(n);
   if (value) {
     String ret(value, CopyString);
@@ -2629,6 +2710,10 @@ Array HHVM_METHOD(DOMAttr, __debuginfo) {
 bool HHVM_METHOD(DOMAttr, isId) {
   auto data = Native::data<DOMNode>(this_);
   xmlAttrPtr attrp = (xmlAttrPtr)data->nodep();
+  if (!attrp) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   return attrp->atype == XML_ATTRIBUTE_ID;
 }
 
@@ -2691,6 +2776,10 @@ bool HHVM_METHOD(DOMCharacterData, appendData,
                  const String& arg) {
   auto data = Native::data<DOMNode>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   // Implement logic from libxml xmlTextConcat to add support for
   // comments and PI
   if ((nodep->content == (xmlChar *) &(nodep->properties)) ||
@@ -2711,6 +2800,10 @@ bool HHVM_METHOD(DOMCharacterData, deleteData,
                  int64_t count) {
   auto data = Native::data<DOMNode>(this_);
   xmlNodePtr node = data->nodep();
+  if (!node) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlChar *cur, *substring, *second;
   cur = xmlNodeGetContent(node);
   if (cur == nullptr) {
@@ -2744,6 +2837,10 @@ bool HHVM_METHOD(DOMCharacterData, insertData,
                  const String& data) {
   auto native_data = Native::data<DOMNode>(this_);
   xmlNodePtr node = native_data->nodep();
+  if (!node) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlChar *cur, *first, *second;
   cur = xmlNodeGetContent(node);
   if (cur == nullptr) {
@@ -2772,6 +2869,10 @@ bool HHVM_METHOD(DOMCharacterData, replaceData,
                  const String& data) {
   auto native_data = Native::data<DOMNode>(this_);
   xmlNodePtr node = native_data->nodep();
+  if (!node) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlChar *cur, *substring, *second = nullptr;
   cur = xmlNodeGetContent(node);
   if (cur == nullptr) {
@@ -2810,6 +2911,10 @@ String HHVM_METHOD(DOMCharacterData, substringData,
                    int64_t count) {
   auto native_data = Native::data<DOMNode>(this_);
   xmlNodePtr node = native_data->nodep();
+  if (!node) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlChar *cur, *substring;
   cur = xmlNodeGetContent(node);
   if (cur == nullptr) {
@@ -2909,11 +3014,19 @@ Array HHVM_METHOD(DOMText, __debuginfo) {
 
 bool HHVM_METHOD(DOMText, isWhitespaceInElementContent) {
   auto data = Native::data<DOMNode>(this_);
+  if (!data->nodep()) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   return xmlIsBlankNode(data->nodep());
 }
 
 bool HHVM_METHOD(DOMText, isElementContentWhitespace) {
   auto data = Native::data<DOMNode>(this_);
+  if (!data->nodep()) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   return xmlIsBlankNode(data->nodep());
 }
 
@@ -2921,6 +3034,10 @@ Variant HHVM_METHOD(DOMText, splitText,
                     int64_t offset) {
   auto data = Native::data<DOMNode>(this_);
   xmlNodePtr node = data->nodep();
+  if (!node) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlChar *cur, *first, *second;
   xmlNodePtr nnode;
   if (node->type != XML_TEXT_NODE && node->type != XML_CDATA_SECTION_NODE) {
@@ -3658,6 +3775,10 @@ Variant save_html_or_xml(DOMNode* obj,
   if (!node.isNull()) {
     DOMNode* domnode = Native::data<DOMNode>(node.get());
     xmlNodePtr node = domnode->nodep();
+    if (!node) {
+      php_dom_throw_error(INVALID_STATE_ERR, 0);
+      return false;
+    }
     /* Dump contents of Node */
     if (node->doc != docp) {
       php_dom_throw_error(WRONG_DOCUMENT_ERR, obj->doc()->m_stricterror);
@@ -3771,6 +3892,10 @@ bool HHVM_METHOD(DOMDocumentFragment, appendXML,
                  const String& data) {
   auto native_data = Native::data<DOMNode>(this_);
   xmlNodePtr nodep = native_data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   bool stricterror = native_data->doc()
     ? native_data->doc()->m_stricterror
     : true;
@@ -4003,6 +4128,10 @@ String HHVM_METHOD(DOMElement, getAttribute,
                    const String& name) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return empty_string();
+  }
   xmlChar *value = nullptr;
   xmlNodePtr attr;
   attr = dom_get_dom1_attribute(nodep, (xmlChar*)name.data());
@@ -4030,6 +4159,10 @@ Variant HHVM_METHOD(DOMElement, getAttributeNode,
                     const String& name) {
   auto data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlNodePtr attrp;
   attrp = dom_get_dom1_attribute(nodep, (xmlChar*)name.data());
   if (attrp == nullptr) {
@@ -4062,6 +4195,10 @@ Object HHVM_METHOD(DOMElement, getAttributeNodeNS,
                    const String& localname) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr elemp = data->nodep();
+  if (!elemp) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return Object();
+  }
   xmlAttrPtr attrp;
   attrp = xmlHasNsProp(elemp, (xmlChar*)localname.data(),
                        (xmlChar*)namespaceuri.data());
@@ -4078,6 +4215,10 @@ String HHVM_METHOD(DOMElement, getAttributeNS,
                    const String& localname) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr elemp = data->nodep();
+  if (!elemp) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return empty_string();
+  }
   xmlNsPtr nsptr;
   xmlChar *strattr;
   strattr = xmlGetNsProp(elemp, (xmlChar*)localname.data(),
@@ -4116,6 +4257,10 @@ bool HHVM_METHOD(DOMElement, hasAttribute,
                  const String& name) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   return dom_get_dom1_attribute(nodep, (xmlChar*)name.data()) != nullptr;
 }
 
@@ -4124,6 +4269,10 @@ bool HHVM_METHOD(DOMElement, hasAttributeNS,
                  const String& localname) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr elemp = data->nodep();
+  if (!elemp) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlNs *nsp;
   xmlChar *value = xmlGetNsProp(elemp, (xmlChar*)localname.data(),
                                 (xmlChar*)namespaceuri.data());
@@ -4146,6 +4295,10 @@ bool HHVM_METHOD(DOMElement, removeAttribute,
                  const String& name) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlNodePtr attrp;
   bool stricterror = data->doc() ? data->doc()->m_stricterror : true;
   if (dom_node_is_read_only(nodep)) {
@@ -4173,8 +4326,16 @@ Variant HHVM_METHOD(DOMElement, removeAttributeNode,
                     const Object& oldattr) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   auto attr = Native::data<DOMNode>(oldattr.get());
   xmlAttrPtr attrp = (xmlAttrPtr)attr->nodep();
+  if (!attrp) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   bool stricterror = data->doc() ? data->doc()->m_stricterror : true;
   if (dom_node_is_read_only(nodep)) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
@@ -4194,6 +4355,10 @@ Variant HHVM_METHOD(DOMElement, removeAttributeNS,
                     const String& localname) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlAttr *attrp;
   xmlNsPtr nsptr;
   bool stricterror = data->doc() ? data->doc()->m_stricterror : true;
@@ -4231,6 +4396,10 @@ Variant HHVM_METHOD(DOMElement, setAttribute,
                     const String& value) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlNodePtr attr = nullptr;
   int name_valid;
   if (name.empty()) {
@@ -4278,8 +4447,16 @@ Variant HHVM_METHOD(DOMElement, setAttributeNode,
                     const Object& newattr) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   auto domattr = Native::data<DOMNode>(newattr.get());
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->nodep();
+  if (!attrp) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlAttr *existattrp = nullptr;
   bool stricterror = data->doc() ? data->doc()->m_stricterror : true;
   if (dom_node_is_read_only(nodep)) {
@@ -4315,8 +4492,16 @@ Variant HHVM_METHOD(DOMElement, setAttributeNodeNS,
   xmlNs *nsp;
   xmlAttr *existattrp = nullptr;
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   auto domattr = Native::data<DOMNode>(newattr.get());
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->nodep();
+  if (!attrp) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   bool stricterror = data->doc() ? data->doc()->m_stricterror : true;
   if (dom_node_is_read_only(nodep)) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
@@ -4356,6 +4541,10 @@ Variant HHVM_METHOD(DOMElement, setAttributeNS,
                     const String& value) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr elemp = data->nodep();
+  if (!elemp) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return false;
+  }
   xmlNsPtr nsptr;
   xmlNode *nodep;
   xmlAttr *attr;
@@ -4457,6 +4646,10 @@ Variant HHVM_METHOD(DOMElement, setIDAttribute,
                     bool isid) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return init_null();
+  }
   xmlAttrPtr attrp;
   bool stricterror = data->doc() ? data->doc()->m_stricterror : true;
   if (dom_node_is_read_only(nodep)) {
@@ -4477,8 +4670,16 @@ Variant HHVM_METHOD(DOMElement, setIDAttributeNode,
                     bool isid) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr nodep = data->nodep();
+  if (!nodep) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return init_null();
+  }
   auto domattr = Native::data<DOMNode>(idattr.get());
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->nodep();
+  if (!attrp) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return init_null();
+  }
   bool stricterror = data->doc() ? data->doc()->m_stricterror : true;
   if (dom_node_is_read_only(nodep)) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
@@ -4498,6 +4699,10 @@ Variant HHVM_METHOD(DOMElement, setIDAttributeNS,
                     bool isid) {
   auto* data = Native::data<DOMElement>(this_);
   xmlNodePtr elemp = data->nodep();
+  if (!elemp) {
+    php_dom_throw_error(INVALID_STATE_ERR, 0);
+    return init_null();
+  }
   xmlAttrPtr attrp;
   bool stricterror = data->doc() ? data->doc()->m_stricterror : true;
   if (dom_node_is_read_only(elemp)) {
@@ -5057,6 +5262,10 @@ Variant HHVM_METHOD(DOMImplementation, createDocument,
   if (!obj_doctypeobj.isNull()) {
     auto *domdoctype = Native::data<DOMNode>(obj_doctypeobj.get());
     doctype = (xmlDtdPtr)domdoctype->nodep();
+    if (!doctype) {
+      php_dom_throw_error(INVALID_STATE_ERR, 0);
+      return false;
+    }
     if (doctype->type == XML_DOCUMENT_TYPE_NODE) {
       raise_warning("Invalid DocumentType object");
       return false;
@@ -5327,7 +5536,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
       intern->m_node_list.append(retval);
       auto* node_data = Native::data<DOMNode>(retval.toObject().get());
       xmlNode *nodep = node_data->nodep();
-      valuePush(ctxt, xmlXPathNewNodeSet(nodep));
+      if (nodep) valuePush(ctxt, xmlXPathNewNodeSet(nodep));
     } else if (retval.is(KindOfBoolean)) {
       valuePush(ctxt, xmlXPathNewBoolean(retval.toBoolean()));
     } else if (retval.isObject()) {
@@ -5519,6 +5728,10 @@ Variant HHVM_METHOD(DOMNodeIterator, key) {
   if (data->m_keyIsNamed) {
     DOMNode* node_data = Native::data<DOMNode>(data->m_curobj.get());
     xmlNodePtr curnode = node_data->nodep();
+    if (!curnode) {
+      php_dom_throw_error(INVALID_STATE_ERR, 0);
+      return false;
+    }
     return String((const char *)curnode->name, CopyString);
   }
   return data->m_index;
@@ -5538,11 +5751,19 @@ Variant HHVM_METHOD(DOMNodeIterator, next) {
     curnode = node_data->node();
     if (data->m_objmap->m_nodetype == XML_ATTRIBUTE_NODE ||
         data->m_objmap->m_nodetype == XML_ELEMENT_NODE) {
+      if (!curnode->nodep()) {
+        php_dom_throw_error(INVALID_STATE_ERR, 0);
+        return false;
+      }
       curnode = libxml_register_node(curnode->nodep()->next);
     } else {
       /* Nav the tree evey time as this is LIVE */
       xmlNodePtr basenode =
         data->m_objmap->getBaseNodeData()->nodep();
+      if (!basenode) {
+        php_dom_throw_error(INVALID_STATE_ERR, 0);
+        return false;
+      }
       if (basenode && (basenode->type == XML_DOCUMENT_NODE ||
                        basenode->type == XML_HTML_DOCUMENT_NODE)) {
         basenode = xmlDocGetRootElement((xmlDoc *) basenode);
@@ -5571,7 +5792,7 @@ Variant HHVM_METHOD(DOMNodeIterator, next) {
     ++data->m_index;
   }
 err:
-  if (curnode) {
+  if (curnode && curnode->nodep()) {
     auto doc = data->m_objmap->getBaseNodeData()->doc();
     data->m_curobj = create_node_object(curnode->nodep(), doc).toObject();
   } else {

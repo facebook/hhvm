@@ -471,15 +471,10 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
 }
 
 void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
-  // Null out $this for the exiting function, it has been decref'd so it's
-  // garbage.
+  // The locals are already gone. Null out everything.
   ar->setThisOrClassAllowNull(nullptr);
-
-  // The locals are already gone. Mark them as decref'd so that if this hook
-  // fails and unwinder kicks in, it won't try to decref them again.
   ar->setLocalsDecRefd();
-
-  // TODO(#5758054): does this need setVarEnv(nullptr) ?
+  ar->setVarEnv(nullptr);
 
   try {
     ssize_t flags = CheckSurprise();
@@ -505,7 +500,12 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
   }
 }
 
-void EventHook::onFunctionUnwind(const ActRec* ar, const Fault& fault) {
+void EventHook::onFunctionUnwind(ActRec* ar, const Fault& fault) {
+  // The locals are already gone. Null out everything.
+  ar->setThisOrClassAllowNull(nullptr);
+  ar->setLocalsDecRefd();
+  ar->setVarEnv(nullptr);
+
   // TODO(#2329497) can't CheckSurprise() yet, unwinder unable to replace fault
   auto const flags = GetSurpriseFlags();
   onFunctionExit(ar, nullptr, &fault, flags);

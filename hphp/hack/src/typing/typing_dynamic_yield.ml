@@ -57,7 +57,7 @@ let rec decl env methods =
 and check_yield_types env p hret =
   let type_var = Env.fresh_type() in
   let r = Reason.Rwitness p in
-  let expected_type = r, Tapply ((p, SN.Classes.cAwaitable), [type_var]) in
+  let expected_type = r, Tclass ((p, SN.Classes.cAwaitable), [type_var]) in
   let env = Type.sub_type p (Reason.URdynamic_yield) env expected_type hret in
   (* Fully expand to make doubly sure we don't leak any type variables *)
   env, Typing_expand.fully_expand env type_var

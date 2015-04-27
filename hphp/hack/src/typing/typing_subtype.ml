@@ -189,12 +189,6 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
   match ety_super, ety_sub with
-  | (r, Tapply ((_, x), argl)), _ when Typing_env.is_typedef x ->
-      let env, ty_super = TDef.expand_typedef env r x argl in
-      sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
-  | _, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef x ->
-      let env, ty_sub = TDef.expand_typedef env r x argl in
-      sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
   | _, (r, Taccess taccess) ->
       let env, ty_sub = TAccess.expand env r taccess in
       sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)
@@ -278,25 +272,25 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tgeneric (_, Some (Ast.Constraint_super, _))), (_, Tgeneric (_, _)) ->
       typevars_subtype env (uenv_super, ety_super) (uenv_sub, ety_sub)
   (* Dirty covariance hacks *)
-  | (_, (Tapply ((_, name_super), [ty_super]))),
-    (_, (Tapply ((_, name_sub), [ty_sub])))
+  | (_, (Tclass ((_, name_super), [ty_super]))),
+    (_, (Tclass ((_, name_sub), [ty_sub])))
     when name_super = name_sub && name_super = SN.FB.cDataTypeImplProvider ->
       sub_type env ty_super ty_sub
-  | (_, (Tapply ((_, name_super), [tk_super; tv_super]))),
-    (_, (Tapply ((_, name_sub), [tk_sub; tv_sub])))
+  | (_, (Tclass ((_, name_super), [tk_super; tv_super]))),
+    (_, (Tclass ((_, name_sub), [tk_sub; tv_sub])))
     when name_super = name_sub &&
       (name_super = SN.FB.cGenReadApi
        || name_super = SN.FB.cGenReadIdxApi) ->
       let env = sub_type env tk_super tk_sub in
       sub_type env tv_super tv_sub
-  | (_, (Tapply ((_, name_super), [t1_super; t2_super; t3_super]))),
-    (_, (Tapply ((_, name_sub), [t1_sub; t2_sub; t3_sub])))
+  | (_, (Tclass ((_, name_super), [t1_super; t2_super; t3_super]))),
+    (_, (Tclass ((_, name_sub), [t1_sub; t2_sub; t3_sub])))
     when name_super = name_sub && (name_super = SN.FB.cDataType) ->
       let env = sub_type env t1_super t1_sub in
       let env = sub_type env t2_super t2_sub in
       sub_type env t3_super t3_sub
-  | (p_super, (Tapply (x_super, tyl_super) as ty_super_)),
-      (p_sub, (Tapply (x_sub, tyl_sub) as ty_sub_))
+  | (p_super, (Tclass (x_super, tyl_super) as ty_super_)),
+      (p_sub, (Tclass (x_sub, tyl_sub) as ty_sub_))
       when Typing_env.get_enum_constraint (snd x_sub) = None  ->
     let cid_super, cid_sub = (snd x_super), (snd x_sub) in
     if cid_super = cid_sub then
@@ -362,7 +356,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tmixed), _ -> env
   | (_, Tprim Nast.Tnum), (_, Tprim (Nast.Tint | Nast.Tfloat)) -> env
   | (_, Tprim Nast.Tarraykey), (_, Tprim (Nast.Tint | Nast.Tstring)) -> env
-  | (_, Tapply ((_, coll), [tv_super])), (_, Tarray (ty3, ty4))
+  | (_, Tclass ((_, coll), [tv_super])), (_, Tarray (ty3, ty4))
     when (coll = SN.Collections.cTraversable ||
         coll = SN.Collections.cContainer) ->
       (match ty3, ty4 with
@@ -372,7 +366,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
       | Some _ty3, Some ty4 ->
           sub_type env tv_super ty4
       )
-  | (_, Tapply ((_, coll), [tk_super; tv_super])), (r, Tarray (ty3, ty4))
+  | (_, Tclass ((_, coll), [tk_super; tv_super])), (r, Tarray (ty3, ty4))
     when (coll = SN.Collections.cKeyedTraversable
          || coll = SN.Collections.cKeyedContainer
          || coll = SN.Collections.cIndexish) ->
@@ -388,13 +382,13 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
               sub_type env tv_super ty4
           )
       )
-  | (_, Tapply ((_, stringish), _)), (_, Tprim Nast.Tstring)
+  | (_, Tclass ((_, stringish), _)), (_, Tprim Nast.Tstring)
     when stringish = SN.Classes.cStringish -> env
-  | (_, Tapply ((_, xhp_child), _)), (_, Tarray _)
-  | (_, Tapply ((_, xhp_child), _)), (_, Tprim Nast.Tint)
-  | (_, Tapply ((_, xhp_child), _)), (_, Tprim Nast.Tfloat)
-  | (_, Tapply ((_, xhp_child), _)), (_, Tprim Nast.Tstring)
-  | (_, Tapply ((_, xhp_child), _)), (_, Tprim Nast.Tnum)
+  | (_, Tclass ((_, xhp_child), _)), (_, Tarray _)
+  | (_, Tclass ((_, xhp_child), _)), (_, Tprim Nast.Tint)
+  | (_, Tclass ((_, xhp_child), _)), (_, Tprim Nast.Tfloat)
+  | (_, Tclass ((_, xhp_child), _)), (_, Tprim Nast.Tstring)
+  | (_, Tclass ((_, xhp_child), _)), (_, Tprim Nast.Tnum)
     when xhp_child = SN.Classes.cXHPChild -> env
   | (_, (Tarray (Some ty_super, None))), (_, (Tarray (Some ty_sub, None))) ->
       sub_type env ty_super ty_sub
@@ -449,7 +443,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
          (fun () -> fst (Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub)))
          (fun _ -> sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, x))
   (* Handle enums with subtyping constraints. *)
-  | _, (_, (Tapply ((_, x), [])))
+  | _, (_, (Tclass ((_, x), [])))
     when Typing_env.get_enum_constraint x <> None ->
     (match Typing_env.get_enum_constraint x with
       | Some base ->
@@ -475,8 +469,8 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
            Reason.explain_generic_constraint env.Env.pos r_super x l; env)
       )
   | (_, (Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Tvar _
-    | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
-    | Tobject | Tshape _)
+    | Tabstract (_, _, _) | Ttuple _ | Tanon (_, _) | Tfun _
+    | Tobject | Tshape _ | Tclass (_, _))
     ), _ -> fst (Unify.unify env ty_super ty_sub)
 
 and is_sub_type env ty_super ty_sub =
@@ -498,10 +492,7 @@ and sub_string p env ty2 =
   | (r, Taccess taccess) ->
       let env, ety2 = TAccess.expand env r taccess in
       sub_string p env ety2
-  | (r2, Tapply ((_, x), argl)) when Typing_env.is_typedef x ->
-      let env, ty2 = Typing_tdef.expand_typedef env r2 x argl in
-      sub_string p env ty2
-  | (r2, Tapply (x, _)) ->
+  | (r2, Tclass (x, _)) ->
       let class_ = Env.get_class env (snd x) in
       (match class_ with
       | None -> env

@@ -219,7 +219,7 @@ let rec debug stack env (r, ty) =
   | Tarray _ -> assert false
   | Tmixed -> o "mixed"
   | Tabstract (x, argl, _)
-  | Tapply (x, argl) ->
+  | Tclass (x, argl) ->
       Printf.printf "App %s" (snd x);
       o "<"; List.iter (fun x -> debug stack env x; o ", ") argl;
       o ">"

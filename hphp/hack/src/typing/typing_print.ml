@@ -53,6 +53,8 @@ module ErrorString = struct
     | Tanon _    -> "a function"
     | Tfun _     -> "a function"
     | Tgeneric (x, y)    -> generic (x, y)
+    | Tclass ((_, x), _) ->
+       "an object of type "^(strip_ns x)
     | Tabstract ((_, x), _, _) ->
        "an object of type "^(strip_ns x)
     | Tapply ((_, x), _) -> "an object of type "^(strip_ns x)
@@ -108,8 +110,9 @@ module ErrorString = struct
       List.fold_left (fun acc (_, sid) -> acc^"::"^sid)
         ("the type constant "^strip_ns x) ids in
     match snd root_ty with
-    | Tgeneric (x, _)
+    | Tgeneric (x, _) -> f x
     | Tapply ((_, x), _) -> f x
+    | Tclass ((_, x), _) -> f x
     | Tabstract ((_, x), _, _) -> f x
     | Taccess _ as x ->
         List.fold_left (fun acc (_, sid) -> acc^"::"^sid)
@@ -148,22 +151,27 @@ module Suggest = struct
     | Tapply ((_, cid), [])  -> Utils.strip_ns cid
     | Tapply ((_, cid), [x]) -> (Utils.strip_ns cid)^"<"^type_ x^">"
     | Tapply ((_, cid), l)   -> (Utils.strip_ns cid)^"<"^list l^">"
+    | Tclass ((_, cid), []) -> Utils.strip_ns cid
     | Tabstract ((_, cid), [], _)  -> Utils.strip_ns cid
+    | Tclass ((_, cid), [x]) -> (Utils.strip_ns cid)^"<"^type_ x^">"
     | Tabstract ((_, cid), [x], _) -> (Utils.strip_ns cid)^"<"^type_ x^">"
+    | Tclass ((_, cid), l) -> (Utils.strip_ns cid)^"<"^list l^">"
     | Tabstract ((_, cid), l, _)   -> (Utils.strip_ns cid)^"<"^list l^">"
     | Tobject                -> "..."
     | Tshape _               -> "..."
     | Taccess (root_ty, ids) ->
-        (match snd root_ty with
-        | Tgeneric (x, _)
-        | Tapply ((_, x), _) ->
+        let x =
+          match snd root_ty with
+          | Tgeneric (x, _) -> Some x
+          | Tapply ((_, x), _) -> Some x
+          | Tclass ((_, x), _) -> Some x
+          | Tabstract ((_, x), _, _) -> Some x
+          | _ -> None in
+        (match x with
+         | None -> "..."
+         | Some x ->
             List.fold_left (fun acc (_, sid) -> acc^"::"^sid)
-              (strip_ns x) ids
-        | Tabstract ((_, x), _, _) ->
-           List.fold_left (fun acc (_, sid) -> acc^"::"^sid)
-             (strip_ns x) ids
-        | _ ->
-            "..."
+                           (strip_ns x) ids
         )
 
   and list: type a. a ty list -> string = function
@@ -212,8 +220,9 @@ module Full = struct
     | Tarray (Some x, None) -> o "array<"; k x; o ">"
     | Tarray (Some x, Some y) -> o "array<"; k x; o ", "; k y; o ">"
     | Tarray (None, Some _) -> assert false
+    | Tclass ((_, s), []) -> o s
     | Tabstract ((_, s), [], _) -> o s
-    | Tapply ((_, s), [])
+    | Tapply ((_, s), []) -> o s
     | Tgeneric (s, _) -> o s
     | Taccess (root_ty, ids) ->
         k root_ty;
@@ -231,6 +240,7 @@ module Full = struct
       (match ft.ft_ret with
         | (Reason.Rdynamic_yield _, _) -> o " [DynamicYield]"
         | _ -> ())
+    | Tclass ((_, s), tyl) -> o s; o "<"; list k tyl; o ">"
     | Tabstract ((_, s), tyl, _) -> o s; o "<"; list k tyl; o ">"
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
     *)

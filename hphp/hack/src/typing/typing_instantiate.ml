@@ -69,11 +69,8 @@ let rec instantiate_fun env fty el =
       let env, ft = instantiate_ft env ft in
       let fty = r, Tfun ft in
       env, fty
-  | r, Tapply ((_, x), argl) when Typing_env.is_typedef x ->
-      let env, fty = TUtils.expand_typedef env r x argl in
-      instantiate_fun env fty el
   | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
-    | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
+    | Tvar _ | Tabstract (_, _, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
     | Tunresolved _ | Tobject | Tshape _ | Taccess (_, _)) -> env, fty
 
 and instantiate_ft env ft =
@@ -112,7 +109,7 @@ and check_constraint env ck cstr_ty ty =
       env
   | Tany, _ -> fst (TUtils.unify env cstr_ty ty)
   | (Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _ | Tvar _
-    | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
+    | Tabstract (_, _, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
     | Tunresolved _ | Tobject | Tshape _
     | Taccess _), _ -> begin
         match ck with
@@ -265,6 +262,9 @@ and instantiate_: type a. a subst -> env -> a ty_ -> env * a ty_ =
       in
       let env, tyl = lfold (instantiate subst) env tyl in
       env, Tabstract (x, tyl, tcstr)
+  | Tclass (x, tyl) ->
+     let env, tyl = lfold (instantiate subst) env tyl in
+     env, Tclass (x, tyl)
   | Tapply (x, tyl) ->
       let env, tyl = lfold (instantiate subst) env tyl in
       env, Tapply (x, tyl)

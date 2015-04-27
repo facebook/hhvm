@@ -31,6 +31,12 @@ type locl = private LoclPhase
 
 type 'phase ty = Reason.t * 'phase ty_
 and _ ty_ =
+  (*========== Following Types Exist Only in the Declared Phase ==========*)
+
+  (* Either an object type or a type alias, ty list are the arguments *)
+  | Tapply : Nast.sid * decl ty list -> decl ty_
+
+  (*========== Following Types Exist in Both Phases ==========*)
   (* "Any" is the type of a variable with a missing annotation, and "mixed" is
    * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
    * Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -87,8 +93,6 @@ and _ ty_ =
    * of indirection before you get to Tfun -- see Tanon below. *)
   | Tfun : 'phase fun_type -> 'phase ty_
 
-  (* Object type, ty list are the arguments *)
-  | Tapply : Nast.sid * 'phase ty list -> 'phase ty_
 
   (* Tuple, with ordered list of the types of the elements of the tuple. *)
   | Ttuple : 'phase ty list -> 'phase ty_
@@ -186,6 +190,9 @@ and _ ty_ =
    *   ../test/typecheck/return_unknown_class.php
    *)
   | Tobject : locl ty_
+
+  (* An instance of a class or interface, ty list are the arguments *)
+  | Tclass : Nast.sid * locl ty list -> locl ty_
 
 and 'phase taccess_type = 'phase ty * Nast.sid list
 
@@ -344,6 +351,16 @@ module Phase = struct
   let decl ty = DeclTy ty
   let locl ty = LoclTy ty
 end
+
+(* Tracks information about how a type was expanded *)
+type ety_env = {
+  typedef_expansions : (Pos.t * string) list;
+}
+let empty_ety_env = {
+  typedef_expansions = [];
+}
+
+type ety = ety_env * locl ty
 
 (* The identifier for this *)
 let this = Ident.make "$this"

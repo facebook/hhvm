@@ -27,6 +27,8 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(pgo);
 
+namespace {
+
 struct DFS {
   DFS(const ProfData* p, const TransCFG& c, TransIDSet& ts, TransIDVec* tv)
       : m_profData(p)
@@ -119,6 +121,8 @@ struct DFS {
   jit::hash_set<TransID>       m_visited;
   jit::vector<RegionDesc::Arc> m_arcs;
 };
+
+}
 
 /*
  * Constructs a region, beginning with triggerId, that includes as much of the

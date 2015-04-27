@@ -157,6 +157,18 @@ public:
   // Transfer ownership of our reference to this resource.
   ResourceData *detach() { return m_res.detach(); }
 private:
+  template <typename T>
+  friend typename std::enable_if<
+    std::is_base_of<ResourceData,T>::value,
+    ResourceData*
+  >::type deref(const Resource& r) { return r.get(); }
+
+  template <typename T>
+  friend typename std::enable_if<
+    std::is_base_of<ResourceData,T>::value,
+    ResourceData*
+  >::type detach(Resource&& r) { return r.detach(); }
+
   static void compileTimeAssertions();
 
   const char* classname_cstr() const;

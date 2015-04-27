@@ -220,4 +220,60 @@ TEST(Variant, Casts) {
   }
 }
 
+TEST(Variant, MoveCasts) {
+  {
+    auto res = unsafe_cast_or_null<DummyResource>(
+      Variant(makeSmartPtr<DummyResource>()));
+    EXPECT_NE(res, nullptr);
+    auto res2 = dyn_cast<DummyResource>(
+      Variant(makeSmartPtr<DummyResource>()));
+    EXPECT_NE(res2, nullptr);
+    auto res3 = dyn_cast<File>(
+      Variant(makeSmartPtr<DummyResource>()));
+    EXPECT_EQ(res3, nullptr);
+  }
+  {
+    auto res = unsafe_cast_or_null<c_Vector>(
+      Variant(makeSmartPtr<c_Vector>()));
+    EXPECT_NE(res, nullptr);
+    auto res2 = dyn_cast<c_Vector>(
+      Variant(makeSmartPtr<c_Vector>()));
+    EXPECT_NE(res2, nullptr);
+    auto res3 = dyn_cast<c_Map>(
+      Variant(makeSmartPtr<c_Vector>()));
+    EXPECT_EQ(res3, nullptr);
+  }
+  {
+    auto dummy = makeSmartPtr<DummyResource>();
+    dummy->incRefCount(); // the RefData constructor steals it's input.
+    auto ref = SmartPtr<RefData>::attach(
+      RefData::Make(*Variant(dummy).asTypedValue()));
+    Variant dummyRef(ref);
+    EXPECT_FALSE(ref->hasExactlyOneRef());
+    auto res = cast<DummyResource>(dummyRef);
+    EXPECT_EQ(res, dummy);
+  }
+  {
+    auto dummy = makeSmartPtr<DummyResource>();
+    dummy->incRefCount(); // the RefData constructor steals it's input.
+    Variant dummyRef(
+      SmartPtr<RefData>::attach(RefData::Make(*Variant(dummy).asTypedValue())));
+    //EXPECT_TRUE(dummyRef.getRefData()->hasExactlyOneRef());
+    auto res = cast<DummyResource>(std::move(dummyRef));
+    EXPECT_EQ(res, dummy);
+  }
+  {
+    auto dummy = makeSmartPtr<DummyResource>();
+    dummy->incRefCount(); // the RefData constructor steals it's input.
+    auto ref = SmartPtr<RefData>::attach(
+      RefData::Make(*Variant(dummy).asTypedValue()));
+    Variant dummyRef(ref.get());
+    EXPECT_FALSE(ref->hasExactlyOneRef());
+    auto res = cast<DummyResource>(std::move(dummyRef));
+    EXPECT_EQ(res, dummy);
+    EXPECT_TRUE(dummyRef.isNull());
+    EXPECT_EQ(dummy.use_count(), 2);
+  }
+}
+
 }

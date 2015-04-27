@@ -241,7 +241,7 @@ struct isSmartPtr<SmartPtr<T>> {
 };
 
 template <typename T>
-inline const T* deref(const SmartPtr<T>& p) { return p.get(); }
+inline T* deref(const SmartPtr<T>& p) { return p.get(); }
 
 template <typename T>
 inline const T* deref(const T* p) { return p; }
@@ -266,98 +266,126 @@ typename std::enable_if<
   return !(a == b);
 }
 
-const char* getClassNameCstr(const ResourceData* p);
-const char* getClassNameCstr(const ObjectData* p);
+template <typename T, typename P>
+inline auto detach(P&& p) -> decltype(p.detach()) {
+  return p.detach();
+}
+
+template <typename T, typename P>
+inline auto deref(const P& p) -> decltype(p.get()) {
+  return p.get();
+}
+
+const char* getClassNameCstr(const ResourceData* r);
+const char* getClassNameCstr(const ObjectData* o);
+
+template <typename T, typename P>
+inline const char* getClassNameCstr(const P& v) {
+  return getClassNameCstr(deref<T>(v));
+}
+
 extern void throw_null_pointer_exception() ATTRIBUTE_NORETURN;
 extern void throw_invalid_object_type(const char* clsName) ATTRIBUTE_NORETURN;
+
+template <typename T>
+inline bool is_null(const T& p) {
+  return !p;
+}
+
+template <typename T, typename P>
+inline bool isa_non_null(const P& p) {
+  assert(!is_null(p));
+  return p->template instanceof<T>();
+}
 
 // Is pointer contained in p castable to a T?
 template <typename T, typename P>
 inline bool isa(const P& p) {
-  return p && p->template instanceof<T>();
+  return !is_null(p) && isa_non_null<T>(p);
 }
 
 // Is pointer contained in p null or castable to a T?
 template <typename T, typename P>
 inline bool isa_or_null(const P& p) {
-  return !p || p->template instanceof<T>();
-}
-
-// Perform an unsafe cast operation on p.  The value p is assumed
-// to be castable to T (checked by assertion).  Null pointers will
-// result in an exception.
-template <typename T, typename P>
-inline SmartPtr<T> unsafe_cast(const P& p) {
-  if (p) {
-    assert(isa<T>(p));
-    return SmartPtr<T>(static_cast<T*>(p.get()));
-  } else {
-    throw_null_pointer_exception();
-  }
+  return is_null(p) || isa_non_null<T>(p);
 }
 
 // Perform an unsafe cast operation on p.  The value p is assumed
 // to be castable to T (checked by assertion).  Null pointers will
 // be passed through.
 template <typename T, typename P>
-inline SmartPtr<T> unsafe_cast_or_null(const P& p) {
-  assert(isa_or_null<T>(p));
-  return SmartPtr<T>(static_cast<T*>(p.get()));
+struct unsafe_cast_helper {
+  SmartPtr<T> operator()(P&& p) const {
+    return SmartPtr<T>::attach(static_cast<T*>(detach<T>(std::move(p))));
+  }
+  SmartPtr<T> operator()(const P& p) const {
+    return SmartPtr<T>(static_cast<T*>(deref<T>(p)));
+  }
+};
+
+template <typename T, typename P>
+inline SmartPtr<T> unsafe_cast_or_null(P&& p) {
+  using decayedP = typename std::decay<P>::type;
+  return unsafe_cast_helper<T,decayedP>()(std::forward<P>(p));
+}
+
+// Perform an unsafe cast operation on p.  The value p is assumed
+// to be castable to T (checked by assertion).  Null pointers will
+// result in an exception.
+template <typename T, typename P>
+inline SmartPtr<T> unsafe_cast(P&& p) {
+  if (!is_null(p)) {
+    return unsafe_cast_or_null<T>(std::forward<P>(p));
+  }
+  throw_null_pointer_exception();
 }
 
 // Perform a cast operation on p.  If p is null or not castable to
 // a T, an exception will be thrown.
 template <typename T, typename P>
-inline SmartPtr<T> cast(const P& p) {
-  if (p) {
-    if (p->template instanceof<T>()) {
-      return SmartPtr<T>(static_cast<T*>(p.get()));
-    } else {
-      throw_invalid_object_type(getClassNameCstr(p.get()));
+inline SmartPtr<T> cast(P&& p) {
+  if (!is_null(p)) {
+    if (isa_non_null<T>(p)) {
+      return unsafe_cast_or_null<T>(std::forward<P>(p));
     }
-  } else {
-    throw_null_pointer_exception();
+    throw_invalid_object_type(getClassNameCstr<T>(p));
   }
+  throw_null_pointer_exception();
 }
 
 // Perform a cast operation on p.  If p is not castable to
 // a T, an exception will be thrown.  Null pointers will be
 // passed through.
 template <typename T, typename P>
-inline SmartPtr<T> cast_or_null(const P& p) {
-  if (p) {
-    if (p->template instanceof<T>()) {
-      return SmartPtr<T>(static_cast<T*>(p.get()));
-    } else {
-      throw_invalid_object_type(getClassNameCstr(p.get()));
+inline SmartPtr<T> cast_or_null(P&& p) {
+  if (!is_null(p)) {
+    if (isa_non_null<T>(p)) {
+      return unsafe_cast_or_null<T>(std::forward<P>(p));
     }
-  } else {
-    return nullptr;
+    throw_invalid_object_type(getClassNameCstr<T>(p));
   }
+  return nullptr;
 }
 
 // Perform a cast operation on p.  If p not castable to
 // a T, a null value is returned.  If p is null, an exception
 // is thrown.
 template <typename T, typename P>
-inline SmartPtr<T> dyn_cast(const P& p) {
-  if (p) {
-    if (p->template instanceof<T>()) {
-      return SmartPtr<T>(static_cast<T*>(p.get()));
-    } else {
-      return nullptr;
+inline SmartPtr<T> dyn_cast(P&& p) {
+  if (!is_null(p)) {
+    if (isa_non_null<T>(p)) {
+      return unsafe_cast_or_null<T>(std::forward<P>(p));
     }
-  } else {
-    throw_null_pointer_exception();
+    return nullptr;
   }
+  throw_null_pointer_exception();
 }
-
 
 // Perform a cast operation on p.  If p is null or not castable to
 // a T, a null value is returned.
 template <typename T, typename P>
-inline SmartPtr<T> dyn_cast_or_null(const P& p) {
-  return isa<T>(p) ? SmartPtr<T>(static_cast<T*>(p.get())) : nullptr;
+inline SmartPtr<T> dyn_cast_or_null(P&& p) {
+  return isa<T>(p) ? unsafe_cast_or_null<T>(std::forward<P>(p)) : nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

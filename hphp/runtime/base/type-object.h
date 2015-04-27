@@ -182,6 +182,18 @@ public:
   }
 
 private:
+  template <typename T>
+  friend typename std::enable_if<
+    std::is_base_of<ObjectData,T>::value,
+    ObjectData*
+  >::type deref(const Object& o) { return o.get(); }
+
+  template <typename T>
+  friend typename std::enable_if<
+    std::is_base_of<ObjectData,T>::value,
+    ObjectData*
+  >::type detach(Object&& o) { return o.detach(); }
+
   static void compileTimeAssertions();
 
   const char* classname_cstr() const;

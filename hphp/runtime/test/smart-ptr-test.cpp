@@ -175,4 +175,13 @@ TEST(SmartPtr, Casts) {
   }
 }
 
+TEST(SmartPtr, MoveCasts) {
+  auto res = unsafe_cast_or_null<DummyResource>(makeSmartPtr<DummyResource>());
+  EXPECT_NE(res, nullptr);
+  auto res2 = dyn_cast<DummyResource>(makeSmartPtr<DummyResource>());
+  EXPECT_NE(res2, nullptr);
+  auto res3 = dyn_cast<DummyResource2>(makeSmartPtr<DummyResource>());
+  EXPECT_EQ(res3, nullptr);
+}
+
 }

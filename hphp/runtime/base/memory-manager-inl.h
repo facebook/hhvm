@@ -33,7 +33,11 @@ static_assert(
 
 //////////////////////////////////////////////////////////////////////
 
-inline MemoryManager& MM() { return *MemoryManager::TlsWrapper::getNoCheck(); }
+inline MemoryManager& MM() {
+  return *MemoryManager::TlsWrapper::getNoCheck();
+}
+
+//////////////////////////////////////////////////////////////////////
 
 template<class T, class... Args> T* smart_new(Args&&... args) {
   auto const mem = smart_malloc(sizeof(T));
@@ -183,6 +187,11 @@ ALWAYS_INLINE void* MemoryManager::debugPreFree(void* p, size_t, size_t) {
 
 //////////////////////////////////////////////////////////////////////
 
+inline uint32_t MemoryManager::estimateSmartCap(uint32_t requested) {
+  return requested <= kMaxSmartSize ? smartSizeClass(requested)
+                                    : requested;
+}
+
 inline uint32_t MemoryManager::bsr(uint32_t x) {
 #if defined(__i386__) || defined(__x86_64__)
   uint32_t ret;
@@ -245,10 +254,6 @@ inline uint32_t MemoryManager::smartSizeClass(uint32_t reqBytes) {
     return std::min(ret, uint32_t(kMaxSmartSize));
   }
   return ret;
-}
-
-inline bool MemoryManager::sweeping() {
-  return !TlsWrapper::isNull() && MM().m_sweeping;
 }
 
 inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
@@ -426,6 +431,10 @@ inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }
 
 //////////////////////////////////////////////////////////////////////
 
+inline bool MemoryManager::empty() const {
+  return m_heap.empty();
+}
+
 inline bool MemoryManager::contains(void *p) const {
   return m_heap.contains(p);
 }
@@ -434,6 +443,16 @@ inline bool MemoryManager::checkContains(void* p) const {
   // Be conservative if the smart allocator is disabled.
   assert(RuntimeOption::DisableSmartAllocator || contains(p));
   return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+inline bool MemoryManager::sweeping() {
+  return !TlsWrapper::isNull() && MM().m_sweeping;
+}
+
+inline StringDataNode& MemoryManager::getStringList() {
+  return m_strings;
 }
 
 //////////////////////////////////////////////////////////////////////

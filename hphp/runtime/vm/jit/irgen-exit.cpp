@@ -54,9 +54,10 @@ void exitRequest(IRGS& env, TransFlags flags, SrcKey target) {
     // The case where the instruction may branch back to itself is
     // handled in implMakeExit.
     assertx(!branchesToItself(curSrcKey(env)));
-    gen(env, ReqRetranslate, ReqRetranslateData { flags }, sp(env));
+    gen(env, ReqRetranslate, ReqRetranslateData { flags }, sp(env), fp(env));
   } else {
-    gen(env, ReqBindJmp, ReqBindJmpData { target, spOff, flags }, sp(env));
+    gen(env, ReqBindJmp, ReqBindJmpData { target, spOff, flags }, sp(env),
+      fp(env));
   }
 }
 
@@ -123,7 +124,8 @@ Block* makeExitOpt(IRGS& env, TransID transId) {
   gen(env,
       ReqRetranslateOpt,
       ReqRetransOptData{transId, SrcKey{curSrcKey(env), targetBcOff}},
-      sp(env));
+      sp(env),
+      fp(env));
   return exit;
 }
 

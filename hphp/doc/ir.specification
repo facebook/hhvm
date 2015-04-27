@@ -639,12 +639,12 @@ To string conversions:
 
   Conditionally jump to based on S0.
 
-| JmpSSwitchDest, ND, S(TCA) S(StkPtr), T
+| JmpSSwitchDest, ND, S(TCA) S(StkPtr) S(FramePtr), T
 
   Jump to the target of a sswitch statement, leaving the region, where the
   target TCA is S0.
 
-| JmpSwitchDest, ND, S(Int) S(StkPtr), T
+| JmpSwitchDest, ND, S(Int) S(StkPtr) S(FramePtr), T
 
   Jump to the target of a switch statement, leaving the region, using table
   metadata <JmpSwitchData> and index S0.
@@ -1358,11 +1358,11 @@ To string conversions:
 
   Sync the given vmfp and vmsp to their in-memory locations.
 
-| ReqBindJmp<bcOff,transFlags>, ND, S(StkPtr), T
+| ReqBindJmp<bcOff,transFlags>, ND, S(StkPtr) S(FramePtr), T
 
   Emit a jump to a REQ_BIND_JMP service request to the target offset bcOff.
 
-| ReqRetranslate<transFlags>, ND, S(StkPtr), T
+| ReqRetranslate<transFlags>, ND, S(StkPtr) S(FramePtr), T
 
   Emit a jump to a service request that will chain to a retranslation of this
   tracelet.
@@ -1370,7 +1370,7 @@ To string conversions:
   This instruction is used in exit traces for a type prediction that occurs at
   the first bytecode offset of a tracelet.
 
-| ReqRetranslateOpt<transId,bcOff>, ND, S(StkPtr), T
+| ReqRetranslateOpt<transId,bcOff>, ND, S(StkPtr) S(FramePtr), T
 
   Emit a service request to retranslate, with a higher optimization gear,
   translation transID, which starts at bcOff. This instruction is used in exit

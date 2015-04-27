@@ -185,7 +185,7 @@ void emitSwitch(IRGS& env,
   spillStack(env);
   gen(env, AdjustSP, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
     sp(env));
-  gen(env, JmpSwitchDest, data, index, sp(env));
+  gen(env, JmpSwitchDest, data, index, sp(env), fp(env));
 }
 
 void emitSSwitch(IRGS& env, const ImmVector& iv) {
@@ -230,7 +230,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   gen(env, DecRef, testVal);
   gen(env, AdjustSP, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
     sp(env));
-  gen(env, JmpSSwitchDest, dest, sp(env));
+  gen(env, JmpSSwitchDest, dest, sp(env), fp(env));
 }
 
 //////////////////////////////////////////////////////////////////////

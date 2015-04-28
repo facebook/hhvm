@@ -102,11 +102,11 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
   public static function fromItems(?Traversable<Tv> $items): ImmVector<Tv>;
 
   /**
-   * Returns a Vector built from the keys of the specified container.
+   * Returns an ImmVector built from the keys of the specified container.
    */
-  public static function fromKeysOf<Tk,Tv2>(
-    ?KeyedContainer<Tk,Tv2> $container
-  ): Vector<Tk>;
+  public static function fromKeysOf<Tk>(
+    ?KeyedContainer<Tk, mixed> $container,
+  ): ImmVector<Tk>;
 
   public function __toString(): string;
 

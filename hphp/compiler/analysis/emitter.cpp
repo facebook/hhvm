@@ -2759,2073 +2759,2078 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
   Emitter e(node, m_ue, *this);
 
-  if (StatementPtr s = dynamic_pointer_cast<Statement>(node)) {
-    switch (s->getKindOf()) {
-      case Statement::KindOfBlockStatement:
-      case Statement::KindOfStatementList:
-        visitKids(node);
-        return false;
+  switch (node->getKindOf()) {
+  case Construct::KindOfBlockStatement:
+  case Construct::KindOfStatementList:
+    visitKids(node);
+    return false;
 
-      case Statement::KindOfTypedefStatement: {
-        emitMakeUnitFatal(e, "Type statements are currently only allowed at "
-                             "the top-level");
-        return false;
+  case Construct::KindOfTypedefStatement: {
+    emitMakeUnitFatal(e, "Type statements are currently only allowed at "
+                         "the top-level");
+    return false;
+  }
+
+  case Construct::KindOfContinueStatement:
+  case Construct::KindOfBreakStatement: {
+    auto s = static_pointer_cast<Statement>(node);
+    BreakStatementPtr bs(static_pointer_cast<BreakStatement>(s));
+    uint64_t destLevel = bs->getDepth();
+
+    if (destLevel > m_regions.back()->getMaxBreakContinueDepth()) {
+      std::ostringstream msg;
+      msg << "Cannot break/continue " << destLevel << " level";
+      if (destLevel > 1) {
+        msg << "s";
       }
+      emitMakeUnitFatal(e, msg.str().c_str());
+      return false;
+    }
 
-      case Statement::KindOfContinueStatement:
-      case Statement::KindOfBreakStatement: {
-        BreakStatementPtr bs(static_pointer_cast<BreakStatement>(s));
-        uint64_t destLevel = bs->getDepth();
+    if (bs->is(Construct::KindOfBreakStatement)) {
+      emitBreak(e, destLevel, bs);
+    } else {
+      emitContinue(e, destLevel, bs);
+    }
 
-        if (destLevel > m_regions.back()->getMaxBreakContinueDepth()) {
-          std::ostringstream msg;
-          msg << "Cannot break/continue " << destLevel << " level";
-          if (destLevel > 1) {
-            msg << "s";
-          }
-          emitMakeUnitFatal(e, msg.str().c_str());
-          return false;
+    return false;
+  }
+
+  case Construct::KindOfDoStatement: {
+    auto s = static_pointer_cast<Statement>(node);
+    auto region = createRegion(s, Region::Kind::LoopOrSwitch);
+    DoStatementPtr ds(static_pointer_cast<DoStatement>(s));
+
+    Label top(e);
+    Label& condition =
+      registerContinue(ds, region.get(), 1, false)->m_label;
+    Label& exit =
+      registerBreak(ds, region.get(), 1, false)->m_label;
+    {
+      enterRegion(region);
+      SCOPE_EXIT { leaveRegion(region); };
+      visit(ds->getBody());
+    }
+    condition.set(e);
+    {
+      ExpressionPtr c = ds->getCondExp();
+      Emitter condEmitter(c, m_ue, *this);
+      visitIfCondition(c, condEmitter, top, exit, false);
+    }
+
+    if (exit.isUsed()) exit.set(e);
+    return false;
+  }
+
+  case Construct::KindOfCaseStatement: {
+    // Should never be called. Handled in visitSwitch.
+    not_reached();
+  }
+
+  case Construct::KindOfCatchStatement: {
+    // Store the current exception object in the appropriate local variable
+    CatchStatementPtr cs(static_pointer_cast<CatchStatement>(node));
+    StringData* vName = makeStaticString(cs->getVariable()->getName());
+    Id i = m_curFunc->lookupVarId(vName);
+    emitVirtualLocal(i);
+    e.Catch();
+    emitSet(e);
+    emitPop(e);
+    visit(cs->getStmt());
+    return false;
+  }
+
+  case Construct::KindOfEchoStatement: {
+    EchoStatementPtr es(static_pointer_cast<EchoStatement>(node));
+    ExpressionListPtr exps = es->getExpressionList();
+    int count = exps->getCount();
+    for (int i = 0; i < count; i++) {
+      visit((*exps)[i]);
+      emitConvertToCell(e);
+      e.Print();
+      e.PopC();
+    }
+    return false;
+  }
+
+  case Construct::KindOfExpStatement: {
+    auto s = static_pointer_cast<Statement>(node);
+    ExpStatementPtr es(static_pointer_cast<ExpStatement>(s));
+    if (visit(es->getExpression())) {
+      emitPop(e);
+    }
+    return false;
+  }
+
+  case Construct::KindOfForStatement: {
+    auto s = static_pointer_cast<Statement>(node);
+    auto region = createRegion(s, Region::Kind::LoopOrSwitch);
+    ForStatementPtr fs(static_pointer_cast<ForStatement>(s));
+
+    if (visit(fs->getInitExp())) {
+      emitPop(e);
+    }
+    Label preCond(e);
+    Label& preInc = registerContinue(fs, region.get(), 1, false)->m_label;
+    Label& fail = registerBreak(fs, region.get(), 1, false)->m_label;
+    ExpressionPtr condExp = fs->getCondExp();
+    auto emit_cond = [&] (Label& tru, bool truFallthrough) {
+      if (!condExp) return;
+      Emitter condEmitter(condExp, m_ue, *this);
+      visitIfCondition(condExp, condEmitter, tru, fail, truFallthrough);
+    };
+    Label top;
+    emit_cond(top, true);
+    top.set(e);
+    {
+      enterRegion(region);
+      SCOPE_EXIT { leaveRegion(region); };
+      visit(fs->getBody());
+    }
+    preInc.set(e);
+    if (visit(fs->getIncExp())) {
+      emitPop(e);
+    }
+    if (!condExp) {
+      e.Jmp(top);
+    } else {
+      emit_cond(top, false);
+    }
+    if (fail.isUsed()) fail.set(e);
+    return false;
+  }
+
+  case Construct::KindOfForEachStatement: {
+    ForEachStatementPtr fe(static_pointer_cast<ForEachStatement>(node));
+    if (fe->isAwaitAs()) {
+      emitForeachAwaitAs(e, fe);
+    } else {
+      emitForeach(e, fe);
+    }
+    return false;
+  }
+
+  case Construct::KindOfGlobalStatement: {
+    ExpressionListPtr vars(
+      static_pointer_cast<GlobalStatement>(node)->getVars());
+    for (int i = 0, n = vars->getCount(); i < n; i++) {
+      ExpressionPtr var((*vars)[i]);
+      if (var->is(Construct::KindOfSimpleVariable)) {
+        SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(var));
+        if (sv->isSuperGlobal()) {
+          continue;
         }
-
-        if (bs->is(Statement::KindOfBreakStatement)) {
-          emitBreak(e, destLevel, bs);
-        } else {
-          emitContinue(e, destLevel, bs);
-        }
-
-        return false;
-      }
-
-      case Statement::KindOfDoStatement: {
-        auto region = createRegion(s, Region::Kind::LoopOrSwitch);
-        DoStatementPtr ds(static_pointer_cast<DoStatement>(s));
-
-        Label top(e);
-        Label& condition =
-          registerContinue(ds, region.get(), 1, false)->m_label;
-        Label& exit =
-          registerBreak(ds, region.get(), 1, false)->m_label;
-        {
-          enterRegion(region);
-          SCOPE_EXIT { leaveRegion(region); };
-          visit(ds->getBody());
-        }
-        condition.set(e);
-        {
-          ExpressionPtr c = ds->getCondExp();
-          Emitter condEmitter(c, m_ue, *this);
-          visitIfCondition(c, condEmitter, top, exit, false);
-        }
-
-        if (exit.isUsed()) exit.set(e);
-        return false;
-      }
-
-      case Statement::KindOfCaseStatement: {
-        // Should never be called. Handled in visitSwitch.
-        not_reached();
-      }
-
-      case Statement::KindOfCatchStatement: {
-        // Store the current exception object in the appropriate local variable
-        CatchStatementPtr cs(static_pointer_cast<CatchStatement>(node));
-        StringData* vName = makeStaticString(cs->getVariable()->getName());
-        Id i = m_curFunc->lookupVarId(vName);
+        StringData* nLiteral = makeStaticString(sv->getName());
+        Id i = m_curFunc->lookupVarId(nLiteral);
         emitVirtualLocal(i);
-        e.Catch();
+        e.String(nLiteral);
+        markGlobalName(e);
+        e.VGetG();
+        emitBind(e);
+        e.PopV();
+      } else if (var->is(Construct::KindOfDynamicVariable)) {
+        // global $<exp> =& $GLOBALS[<exp>]
+        DynamicVariablePtr dv(static_pointer_cast<DynamicVariable>(var));
+        // Get the variable name as a cell, for the LHS
+        visit(dv->getSubExpression());
+        emitConvertToCell(e);
+        // Copy the variable name, for indexing into $GLOBALS
+        e.Dup();
+        markNameSecond(e);
+        markGlobalName(e);
+        e.VGetG();
+        e.BindN();
+        e.PopV();
+      } else {
+        not_implemented();
+      }
+    }
+    return false;
+  }
+
+  case Construct::KindOfIfStatement: {
+    IfStatementPtr ifp(static_pointer_cast<IfStatement>(node));
+    StatementListPtr branches(ifp->getIfBranches());
+    int nb = branches->getCount();
+    Label done;
+    for (int i = 0; i < nb; i++) {
+      IfBranchStatementPtr branch(
+        static_pointer_cast<IfBranchStatement>((*branches)[i]));
+      Label fals;
+      if (branch->getCondition()) {
+        Label tru;
+        Emitter condEmitter(branch->getCondition(), m_ue, *this);
+        visitIfCondition(branch->getCondition(), condEmitter,
+                         tru, fals, true);
+        if (tru.isUsed()) {
+          tru.set(e);
+        }
+      }
+      visit(branch->getStmt());
+      if (currentPositionIsReachable() && i + 1 < nb) {
+        e.Jmp(done);
+      }
+      if (fals.isUsed()) {
+        fals.set(e);
+      }
+    }
+    if (done.isUsed()) {
+      done.set(e);
+    }
+    return false;
+  }
+
+  case Construct::KindOfIfBranchStatement:
+    not_reached(); // handled by KindOfIfStatement
+
+  case Construct::KindOfReturnStatement: {
+    ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(node));
+
+    char retSym = StackSym::C;
+    if (visit(r->getRetExp())) {
+      if (r->getRetExp()->getContext() & Expression::RefValue) {
+        emitConvertToVar(e);
+        retSym = StackSym::V;
+      } else {
+        emitConvertToCell(e);
+      }
+    } else {
+      e.Null();
+    }
+    assert(m_evalStack.size() == 1);
+    assert(IMPLIES(m_curFunc->isAsync || m_curFunc->isGenerator,
+                   retSym == StackSym::C));
+    emitReturn(e, retSym, r);
+    return false;
+  }
+
+  case Construct::KindOfStaticStatement: {
+    ExpressionListPtr vars(
+      static_pointer_cast<StaticStatement>(node)->getVars());
+    for (int i = 0, n = vars->getCount(); i < n; i++) {
+      ExpressionPtr se((*vars)[i]);
+      assert(se->is(Construct::KindOfAssignmentExpression));
+      AssignmentExpressionPtr ae(
+        static_pointer_cast<AssignmentExpression>(se));
+      ExpressionPtr var(ae->getVariable());
+      ExpressionPtr value(ae->getValue());
+      assert(var->is(Construct::KindOfSimpleVariable));
+      SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(var));
+      StringData* name = makeStaticString(sv->getName());
+      Id local = m_curFunc->lookupVarId(name);
+
+      if (m_staticEmitted.insert(sv->getName()).second) {
+        Func::SVInfo svInfo;
+        svInfo.name = name;
+        std::ostringstream os;
+        CodeGenerator cg(&os, CodeGenerator::PickledPHP);
+        AnalysisResultPtr ar(new AnalysisResult());
+        value->outputPHP(cg, ar);
+        svInfo.phpCode = makeStaticString(os.str());
+        m_curFunc->staticVars.push_back(svInfo);
+      }
+
+      if (value->isScalar()) {
+        emitVirtualLocal(local);
+        visit(value);
+        emitConvertToCell(e);
+        e.StaticLocInit(local, name);
+      } else {
+        Label done;
+        emitVirtualLocal(local);
+        e.StaticLoc(local, name);
+        e.JmpNZ(done);
+
+        emitVirtualLocal(local);
+        visit(value);
+        emitConvertToCell(e);
         emitSet(e);
         emitPop(e);
-        visit(cs->getStmt());
-        return false;
+
+        done.set(e);
       }
+    }
+    return false;
+  }
 
-      case Statement::KindOfEchoStatement: {
-        EchoStatementPtr es(static_pointer_cast<EchoStatement>(node));
-        ExpressionListPtr exps = es->getExpressionList();
-        int count = exps->getCount();
-        for (int i = 0; i < count; i++) {
-          visit((*exps)[i]);
-          emitConvertToCell(e);
-          e.Print();
-          e.PopC();
-        }
-        return false;
-      }
+  case Construct::KindOfSwitchStatement: {
+    auto s = static_pointer_cast<Statement>(node);
+    auto region = createRegion(s, Region::Kind::LoopOrSwitch);
+    SwitchStatementPtr sw(static_pointer_cast<SwitchStatement>(node));
 
-      case Statement::KindOfExpStatement: {
-        ExpStatementPtr es(static_pointer_cast<ExpStatement>(s));
-        if (visit(es->getExpression())) {
-          emitPop(e);
-        }
-        return false;
-      }
+    StatementListPtr cases(sw->getCases());
+    if (!cases) {
+      visit(sw->getExp());
+      emitPop(e);
+      return false;
+    }
+    uint ncase = cases->getCount();
+    std::vector<Label> caseLabels(ncase);
+    Label& brkTarget = registerBreak(sw, region.get(), 1, false)->m_label;
+    Label& contTarget =
+      registerContinue(sw, region.get(), 1, false)->m_label;
+    // There are two different ways this can go.  If the subject is a simple
+    // variable, then we have to evaluate it every time we compare against a
+    // case condition.  Otherwise, we evaluate it once and store it in an
+    // unnamed local.  This is because (a) switch statements are equivalent
+    // to a series of if-elses, and (b) Zend has some weird evaluation order
+    // rules.  For example, "$a == ++$a" is true but "$a[0] == ++$a[0]" is
+    // false.  In particular, if a case condition modifies the switch
+    // subject, things behave differently depending on whether the subject
+    // is a simple variable.
+    ExpressionPtr subject = sw->getExp();
+    bool simpleSubject = subject->is(Construct::KindOfSimpleVariable)
+      && !static_pointer_cast<SimpleVariable>(subject)->getAlwaysStash();
+    Id tempLocal = -1;
+    Offset start = InvalidAbsoluteOffset;
 
-      case Statement::KindOfForStatement: {
-        auto region = createRegion(s, Region::Kind::LoopOrSwitch);
-        ForStatementPtr fs(static_pointer_cast<ForStatement>(s));
+    bool enabled = RuntimeOption::EnableEmitSwitch;
+    SimpleFunctionCallPtr
+      call(dynamic_pointer_cast<SimpleFunctionCall>(subject));
 
-        if (visit(fs->getInitExp())) {
-          emitPop(e);
-        }
-        Label preCond(e);
-        Label& preInc = registerContinue(fs, region.get(), 1, false)->m_label;
-        Label& fail = registerBreak(fs, region.get(), 1, false)->m_label;
-        ExpressionPtr condExp = fs->getCondExp();
-        auto emit_cond = [&] (Label& tru, bool truFallthrough) {
-          if (!condExp) return;
-          Emitter condEmitter(condExp, m_ue, *this);
-          visitIfCondition(condExp, condEmitter, tru, fail, truFallthrough);
-        };
-        Label top;
-        emit_cond(top, true);
-        top.set(e);
-        {
-          enterRegion(region);
-          SCOPE_EXIT { leaveRegion(region); };
-          visit(fs->getBody());
-        }
-        preInc.set(e);
-        if (visit(fs->getIncExp())) {
-          emitPop(e);
-        }
-        if (!condExp) {
-          e.Jmp(top);
-        } else {
-          emit_cond(top, false);
-        }
-        if (fail.isUsed()) fail.set(e);
-        return false;
-      }
-
-      case Statement::KindOfForEachStatement: {
-        ForEachStatementPtr fe(static_pointer_cast<ForEachStatement>(node));
-        if (fe->isAwaitAs()) {
-          emitForeachAwaitAs(e, fe);
-        } else {
-          emitForeach(e, fe);
-        }
-        return false;
-      }
-
-      case Statement::KindOfGlobalStatement: {
-        ExpressionListPtr vars(
-          static_pointer_cast<GlobalStatement>(node)->getVars());
-        for (int i = 0, n = vars->getCount(); i < n; i++) {
-          ExpressionPtr var((*vars)[i]);
-          if (var->is(Expression::KindOfSimpleVariable)) {
-            SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(var));
-            if (sv->isSuperGlobal()) {
-              continue;
-            }
-            StringData* nLiteral = makeStaticString(sv->getName());
-            Id i = m_curFunc->lookupVarId(nLiteral);
-            emitVirtualLocal(i);
-            e.String(nLiteral);
-            markGlobalName(e);
-            e.VGetG();
-            emitBind(e);
-            e.PopV();
-          } else if (var->is(Expression::KindOfDynamicVariable)) {
-            // global $<exp> =& $GLOBALS[<exp>]
-            DynamicVariablePtr dv(static_pointer_cast<DynamicVariable>(var));
-            // Get the variable name as a cell, for the LHS
-            visit(dv->getSubExpression());
-            emitConvertToCell(e);
-            // Copy the variable name, for indexing into $GLOBALS
-            e.Dup();
-            markNameSecond(e);
-            markGlobalName(e);
-            e.VGetG();
-            e.BindN();
-            e.PopV();
-          } else {
-            not_implemented();
-          }
-        }
-        return false;
-      }
-
-      case Statement::KindOfIfStatement: {
-        IfStatementPtr ifp(static_pointer_cast<IfStatement>(node));
-        StatementListPtr branches(ifp->getIfBranches());
-        int nb = branches->getCount();
-        Label done;
-        for (int i = 0; i < nb; i++) {
-          IfBranchStatementPtr branch(
-            static_pointer_cast<IfBranchStatement>((*branches)[i]));
-          Label fals;
-          if (branch->getCondition()) {
-            Label tru;
-            Emitter condEmitter(branch->getCondition(), m_ue, *this);
-            visitIfCondition(branch->getCondition(), condEmitter,
-                             tru, fals, true);
-            if (tru.isUsed()) {
-              tru.set(e);
-            }
-          }
-          visit(branch->getStmt());
-          if (currentPositionIsReachable() && i + 1 < nb) {
-            e.Jmp(done);
-          }
-          if (fals.isUsed()) {
-            fals.set(e);
-          }
-        }
-        if (done.isUsed()) {
-          done.set(e);
-        }
-        return false;
-      }
-
-      case Statement::KindOfIfBranchStatement:
-        not_reached(); // handled by KindOfIfStatement
-
-      case Statement::KindOfReturnStatement: {
-        ReturnStatementPtr r(static_pointer_cast<ReturnStatement>(node));
-
-        char retSym = StackSym::C;
-        if (visit(r->getRetExp())) {
-          if (r->getRetExp()->getContext() & Expression::RefValue) {
-            emitConvertToVar(e);
-            retSym = StackSym::V;
-          } else {
-            emitConvertToCell(e);
-          }
-        } else {
-          e.Null();
-        }
-        assert(m_evalStack.size() == 1);
-        assert(IMPLIES(m_curFunc->isAsync || m_curFunc->isGenerator,
-                       retSym == StackSym::C));
-        emitReturn(e, retSym, r);
-        return false;
-      }
-
-      case Statement::KindOfStaticStatement: {
-        ExpressionListPtr vars(
-          static_pointer_cast<StaticStatement>(node)->getVars());
-        for (int i = 0, n = vars->getCount(); i < n; i++) {
-          ExpressionPtr se((*vars)[i]);
-          assert(se->is(Expression::KindOfAssignmentExpression));
-          AssignmentExpressionPtr ae(
-            static_pointer_cast<AssignmentExpression>(se));
-          ExpressionPtr var(ae->getVariable());
-          ExpressionPtr value(ae->getValue());
-          assert(var->is(Expression::KindOfSimpleVariable));
-          SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(var));
-          StringData* name = makeStaticString(sv->getName());
-          Id local = m_curFunc->lookupVarId(name);
-
-          if (m_staticEmitted.insert(sv->getName()).second) {
-            Func::SVInfo svInfo;
-            svInfo.name = name;
-            std::ostringstream os;
-            CodeGenerator cg(&os, CodeGenerator::PickledPHP);
-            AnalysisResultPtr ar(new AnalysisResult());
-            value->outputPHP(cg, ar);
-            svInfo.phpCode = makeStaticString(os.str());
-            m_curFunc->staticVars.push_back(svInfo);
-          }
-
-          if (value->isScalar()) {
-            emitVirtualLocal(local);
-            visit(value);
-            emitConvertToCell(e);
-            e.StaticLocInit(local, name);
-          } else {
-            Label done;
-            emitVirtualLocal(local);
-            e.StaticLoc(local, name);
-            e.JmpNZ(done);
-
-            emitVirtualLocal(local);
-            visit(value);
-            emitConvertToCell(e);
-            emitSet(e);
-            emitPop(e);
-
-            done.set(e);
-          }
-        }
-        return false;
-      }
-
-      case Statement::KindOfSwitchStatement: {
-        auto region = createRegion(s, Region::Kind::LoopOrSwitch);
-        SwitchStatementPtr sw(static_pointer_cast<SwitchStatement>(node));
-
-        StatementListPtr cases(sw->getCases());
-        if (!cases) {
+    SwitchState state;
+    bool didSwitch = false;
+    if (enabled) {
+      MaybeDataType stype = analyzeSwitch(sw, state);
+      if (stype) {
+        e.incStat(stype == KindOfInt64 ? Stats::Switch_Integer
+                                       : Stats::Switch_String,
+                  1);
+        if (state.cases.empty()) {
+          // If there are no non-default cases, evaluate the subject for
+          // side effects and fall through. If there's a default case it
+          // will be emitted immediately after this.
           visit(sw->getExp());
           emitPop(e);
-          return false;
+        } else if (stype == KindOfInt64) {
+          emitIntegerSwitch(e, sw, caseLabels, brkTarget, state);
+        } else {
+          assert(IS_STRING_TYPE(*stype));
+          emitStringSwitch(e, sw, caseLabels, brkTarget, state);
         }
-        uint ncase = cases->getCount();
-        std::vector<Label> caseLabels(ncase);
-        Label& brkTarget = registerBreak(sw, region.get(), 1, false)->m_label;
-        Label& contTarget =
-          registerContinue(sw, region.get(), 1, false)->m_label;
-        // There are two different ways this can go.  If the subject is a simple
-        // variable, then we have to evaluate it every time we compare against a
-        // case condition.  Otherwise, we evaluate it once and store it in an
-        // unnamed local.  This is because (a) switch statements are equivalent
-        // to a series of if-elses, and (b) Zend has some weird evaluation order
-        // rules.  For example, "$a == ++$a" is true but "$a[0] == ++$a[0]" is
-        // false.  In particular, if a case condition modifies the switch
-        // subject, things behave differently depending on whether the subject
-        // is a simple variable.
-        ExpressionPtr subject = sw->getExp();
-        bool simpleSubject = subject->is(Expression::KindOfSimpleVariable)
-          && !static_pointer_cast<SimpleVariable>(subject)->getAlwaysStash();
-        Id tempLocal = -1;
-        Offset start = InvalidAbsoluteOffset;
-
-        bool enabled = RuntimeOption::EnableEmitSwitch;
-        SimpleFunctionCallPtr
-          call(dynamic_pointer_cast<SimpleFunctionCall>(subject));
-
-        SwitchState state;
-        bool didSwitch = false;
-        if (enabled) {
-          MaybeDataType stype = analyzeSwitch(sw, state);
-          if (stype) {
-            e.incStat(stype == KindOfInt64 ? Stats::Switch_Integer
-                                           : Stats::Switch_String,
-                      1);
-            if (state.cases.empty()) {
-              // If there are no non-default cases, evaluate the subject for
-              // side effects and fall through. If there's a default case it
-              // will be emitted immediately after this.
-              visit(sw->getExp());
-              emitPop(e);
-            } else if (stype == KindOfInt64) {
-              emitIntegerSwitch(e, sw, caseLabels, brkTarget, state);
-            } else {
-              assert(IS_STRING_TYPE(*stype));
-              emitStringSwitch(e, sw, caseLabels, brkTarget, state);
-            }
-            didSwitch = true;
-          }
-        }
-        if (!didSwitch) {
-          e.incStat(Stats::Switch_Generic, 1);
-          if (!simpleSubject) {
-            // Evaluate the subject once and stash it in a local
-            tempLocal = m_curFunc->allocUnnamedLocal();
-            emitVirtualLocal(tempLocal);
-            visit(subject);
-            emitConvertToCell(e);
-            emitSet(e);
-            emitPop(e);
-            start = m_ue.bcPos();
-          }
-
-          int defI = -1;
-          for (uint i = 0; i < ncase; i++) {
-            CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
-            ExpressionPtr condition = c->getCondition();
-            if (condition) {
-              if (simpleSubject) {
-                // Evaluate the subject every time.
-                visit(subject);
-                emitConvertToCellOrLoc(e);
-                visit(condition);
-                emitConvertToCell(e);
-                emitConvertSecondToCell(e);
-              } else {
-                emitVirtualLocal(tempLocal);
-                emitCGet(e);
-                visit(condition);
-                emitConvertToCell(e);
-              }
-              e.Eq();
-              e.JmpNZ(caseLabels[i]);
-            } else if (LIKELY(defI == -1)) {
-              // Default clause.
-              defI = i;
-            } else {
-              throw IncludeTimeFatalException(
-                c, "Switch statements may only contain one default: clause");
-            }
-          }
-          if (defI != -1) {
-            e.Jmp(caseLabels[defI]);
-          } else {
-            e.Jmp(brkTarget);
-          }
-        }
-        for (uint i = 0; i < ncase; i++) {
-          caseLabels[i].set(e);
-          CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
-          enterRegion(region);
-          SCOPE_EXIT { leaveRegion(region); };
-          visit(c->getStatement());
-        }
-        if (brkTarget.isUsed()) brkTarget.set(e);
-        if (contTarget.isUsed()) contTarget.set(e);
-        if (!didSwitch && !simpleSubject) {
-          // Null out temp local, to invoke any needed refcounting
-          assert(tempLocal >= 0);
-          assert(start != InvalidAbsoluteOffset);
-          newFaultRegionAndFunclet(start, m_ue.bcPos(),
-                                   new UnsetUnnamedLocalThunklet(tempLocal));
-          emitVirtualLocal(tempLocal);
-          emitUnset(e);
-          m_curFunc->freeUnnamedLocal(tempLocal);
-        }
-        return false;
-      }
-
-      case Statement::KindOfThrowStatement: {
-        visitKids(node);
-        emitConvertToCell(e);
-        e.Throw();
-        return false;
-      }
-
-      case Statement::KindOfFinallyStatement: {
-        auto region = createRegion(s, Region::Kind::Finally);
-        enterRegion(region);
-        SCOPE_EXIT { leaveRegion(region); };
-
-        FinallyStatementPtr fs = static_pointer_cast<FinallyStatement>(node);
-        visit(fs->getBody());
-        return false;
-      }
-
-      case Statement::KindOfTryStatement: {
-        auto region = createRegion(s, Region::Kind::TryFinally);
-        if (!m_evalStack.empty()) {
-          InvariantViolation(
-            "Emitter detected that the evaluation stack is not empty "
-            "at the beginning of a try region: %d", m_ue.bcPos());
-        }
-
-        TryStatementPtr ts = static_pointer_cast<TryStatement>(node);
-
-        FinallyStatementPtr f(static_pointer_cast<FinallyStatement>
-                              (ts->getFinally()));
-
-        Offset start = m_ue.bcPos();
-        Offset end;
-        Label after;
-
-        {
-          if (f) {
-            enterRegion(region);
-          }
-          SCOPE_EXIT {
-            if (f) {
-              leaveRegion(region);
-            }
-          };
-
-          visit(ts->getBody());
-
-          StatementListPtr catches = ts->getCatches();
-          int catch_count = catches->getCount();
-          if (catch_count > 0) {
-            // include the jump out of the try-catch block in the
-            // exception handler address range
-            e.Jmp(after);
-          }
-          end = m_ue.bcPos();
-          if (!m_evalStack.empty()) {
-            InvariantViolation("Emitter detected that the evaluation stack "
-                               "is not empty at the end of a try region: %d",
-                               end);
-          }
-
-          if (catch_count > 0) {
-            CatchRegion* r = new CatchRegion(start, end);
-            m_catchRegions.push_back(r);
-
-            bool firstHandler = true;
-            for (int i = 0; i < catch_count; i++) {
-              CatchStatementPtr c(static_pointer_cast<CatchStatement>
-                                  ((*catches)[i]));
-              StringData* eName = makeStaticString(c->getClassName());
-
-              // If there's already a catch of this class, skip;
-              // the first one wins
-              if (r->m_names.find(eName) == r->m_names.end()) {
-                // Don't let execution of the try body, or the
-                // previous catch body,
-                // fall into here.
-                if (!firstHandler) {
-                  e.Jmp(after);
-                } else {
-                  firstHandler = false;
-                }
-
-                Label* label = new Label(e);
-                r->m_names.insert(eName);
-                r->m_catchLabels.push_back(std::pair<StringData*, Label*>(eName,
-                                                                      label));
-                visit(c);
-              }
-            }
-          }
-        }
-
-        Offset end_catches = m_ue.bcPos();
-        if (after.isUsed()) after.set(e);
-
-        if (f) {
-          region->m_finallyLabel.set(e);
-          visit(f);
-          emitFinallyEpilogue(e, region.get());
-          auto func = getFunclet(f);
-          if (func == nullptr) {
-            auto thunklet =
-              new FinallyThunklet(f, m_curFunc->numLiveIterators());
-            func = addFunclet(f, thunklet);
-          }
-          newFaultRegion(start, end_catches, &func->m_entry);
-        }
-
-        return false;
-      }
-
-      case Statement::KindOfUnsetStatement: {
-        ExpressionListPtr exps(
-          static_pointer_cast<UnsetStatement>(node)->getExps());
-        for (int i = 0, n = exps->getCount(); i < n; i++) {
-          emitVisitAndUnset(e, (*exps)[i]);
-        }
-        return false;
-      }
-
-      case Statement::KindOfWhileStatement: {
-        auto region = createRegion(s, Region::Kind::LoopOrSwitch);
-        WhileStatementPtr ws(static_pointer_cast<WhileStatement>(s));
-        ExpressionPtr condExp(ws->getCondExp());
-        Label& lcontinue = registerContinue(ws, region.get(), 1,
-          false)->m_label;
-        Label& fail = registerBreak(ws, region.get(), 1, false)->m_label;
-        Label top;
-        auto emit_cond = [&] (Label& tru, bool truFallthrough) {
-          Emitter condEmitter(condExp, m_ue, *this);
-          visitIfCondition(condExp, condEmitter, tru, fail, truFallthrough);
-        };
-        emit_cond(top, true);
-        top.set(e);
-        {
-          enterRegion(region);
-          SCOPE_EXIT { leaveRegion(region); };
-          visit(ws->getBody());
-        }
-        if (lcontinue.isUsed()) lcontinue.set(e);
-        emit_cond(top, false);
-        if (fail.isUsed()) fail.set(e);
-        return false;
-      }
-
-      case Statement::KindOfInterfaceStatement:
-      case Statement::KindOfClassStatement: {
-        emitClass(e, node->getClassScope(), false);
-        return false;
-      }
-
-      case Statement::KindOfClassVariable:
-      case Statement::KindOfClassConstant:
-      case Statement::KindOfMethodStatement:
-        // handled by emitClass
-        not_reached();
-
-      case Statement::KindOfFunctionStatement: {
-        MethodStatementPtr m(static_pointer_cast<MethodStatement>(node));
-        // Only called for fn defs not on the top level
-        assert(!node->getClassScope()); // Handled directly by emitClass().
-        StringData* nName = makeStaticString(m->getOriginalName());
-        FuncEmitter* fe = m_ue.newFuncEmitter(nName);
-        e.DefFunc(fe->id());
-        postponeMeth(m, fe, false);
-        return false;
-      }
-
-      case Statement::KindOfGotoStatement: {
-        GotoStatementPtr g(static_pointer_cast<GotoStatement>(node));
-        StringData* nName = makeStaticString(g->label());
-        emitGoto(e, nName, g);
-        return false;
-      }
-
-      case Statement::KindOfLabelStatement: {
-        LabelStatementPtr l(static_pointer_cast<LabelStatement>(node));
-        StringData* nName = makeStaticString(l->label());
-        registerGoto(l, m_regions.back().get(), nName, false)
-          ->m_label.set(e);
-        return false;
-      }
-      case Statement::KindOfUseTraitStatement:
-      case Statement::KindOfClassRequireStatement:
-      case Statement::KindOfTraitPrecStatement:
-      case Statement::KindOfTraitAliasStatement: {
-        not_implemented();
+        didSwitch = true;
       }
     }
-  } else {
-    ExpressionPtr ex = static_pointer_cast<Expression>(node);
-    switch (ex->getKindOf()) {
-      case Expression::KindOfUnaryOpExpression: {
-        UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(node));
-        int op = u->getOp();
+    if (!didSwitch) {
+      e.incStat(Stats::Switch_Generic, 1);
+      if (!simpleSubject) {
+        // Evaluate the subject once and stash it in a local
+        tempLocal = m_curFunc->allocUnnamedLocal();
+        emitVirtualLocal(tempLocal);
+        visit(subject);
+        emitConvertToCell(e);
+        emitSet(e);
+        emitPop(e);
+        start = m_ue.bcPos();
+      }
 
-        if (op == T_UNSET) {
-          // php doesnt have an unset expression, but hphp's optimizations
-          // sometimes introduce them
-          ExpressionPtr exp(u->getExpression());
-          if (exp->is(Expression::KindOfExpressionList)) {
-            ExpressionListPtr exps(
-              static_pointer_cast<ExpressionList>(exp));
-            if (exps->getListKind() == ExpressionList::ListKindParam) {
-              for (int i = 0, n = exps->getCount(); i < n; i++) {
-                emitVisitAndUnset(e, (*exps)[i]);
-              }
-              e.Null();
-              return true;
-            }
+      int defI = -1;
+      for (uint i = 0; i < ncase; i++) {
+        CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
+        ExpressionPtr condition = c->getCondition();
+        if (condition) {
+          if (simpleSubject) {
+            // Evaluate the subject every time.
+            visit(subject);
+            emitConvertToCellOrLoc(e);
+            visit(condition);
+            emitConvertToCell(e);
+            emitConvertSecondToCell(e);
+          } else {
+            emitVirtualLocal(tempLocal);
+            emitCGet(e);
+            visit(condition);
+            emitConvertToCell(e);
           }
-          emitVisitAndUnset(e, exp);
+          e.Eq();
+          e.JmpNZ(caseLabels[i]);
+        } else if (LIKELY(defI == -1)) {
+          // Default clause.
+          defI = i;
+        } else {
+          throw IncludeTimeFatalException(
+            c, "Switch statements may only contain one default: clause");
+        }
+      }
+      if (defI != -1) {
+        e.Jmp(caseLabels[defI]);
+      } else {
+        e.Jmp(brkTarget);
+      }
+    }
+    for (uint i = 0; i < ncase; i++) {
+      caseLabels[i].set(e);
+      CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
+      enterRegion(region);
+      SCOPE_EXIT { leaveRegion(region); };
+      visit(c->getStatement());
+    }
+    if (brkTarget.isUsed()) brkTarget.set(e);
+    if (contTarget.isUsed()) contTarget.set(e);
+    if (!didSwitch && !simpleSubject) {
+      // Null out temp local, to invoke any needed refcounting
+      assert(tempLocal >= 0);
+      assert(start != InvalidAbsoluteOffset);
+      newFaultRegionAndFunclet(start, m_ue.bcPos(),
+                               new UnsetUnnamedLocalThunklet(tempLocal));
+      emitVirtualLocal(tempLocal);
+      emitUnset(e);
+      m_curFunc->freeUnnamedLocal(tempLocal);
+    }
+    return false;
+  }
+
+  case Construct::KindOfThrowStatement: {
+    visitKids(node);
+    emitConvertToCell(e);
+    e.Throw();
+    return false;
+  }
+
+  case Construct::KindOfFinallyStatement: {
+    auto s = static_pointer_cast<Statement>(node);
+    auto region = createRegion(s, Region::Kind::Finally);
+    enterRegion(region);
+    SCOPE_EXIT { leaveRegion(region); };
+
+    FinallyStatementPtr fs = static_pointer_cast<FinallyStatement>(node);
+    visit(fs->getBody());
+    return false;
+  }
+
+  case Construct::KindOfTryStatement: {
+    auto s = static_pointer_cast<Statement>(node);
+    auto region = createRegion(s, Region::Kind::TryFinally);
+    if (!m_evalStack.empty()) {
+      InvariantViolation(
+        "Emitter detected that the evaluation stack is not empty "
+        "at the beginning of a try region: %d", m_ue.bcPos());
+    }
+
+    TryStatementPtr ts = static_pointer_cast<TryStatement>(node);
+
+    FinallyStatementPtr f(static_pointer_cast<FinallyStatement>
+                          (ts->getFinally()));
+
+    Offset start = m_ue.bcPos();
+    Offset end;
+    Label after;
+
+    {
+      if (f) {
+        enterRegion(region);
+      }
+      SCOPE_EXIT {
+        if (f) {
+          leaveRegion(region);
+        }
+      };
+
+      visit(ts->getBody());
+
+      StatementListPtr catches = ts->getCatches();
+      int catch_count = catches->getCount();
+      if (catch_count > 0) {
+        // include the jump out of the try-catch block in the
+        // exception handler address range
+        e.Jmp(after);
+      }
+      end = m_ue.bcPos();
+      if (!m_evalStack.empty()) {
+        InvariantViolation("Emitter detected that the evaluation stack "
+                           "is not empty at the end of a try region: %d",
+                           end);
+      }
+
+      if (catch_count > 0) {
+        CatchRegion* r = new CatchRegion(start, end);
+        m_catchRegions.push_back(r);
+
+        bool firstHandler = true;
+        for (int i = 0; i < catch_count; i++) {
+          CatchStatementPtr c(static_pointer_cast<CatchStatement>
+                              ((*catches)[i]));
+          StringData* eName = makeStaticString(c->getClassName());
+
+          // If there's already a catch of this class, skip;
+          // the first one wins
+          if (r->m_names.find(eName) == r->m_names.end()) {
+            // Don't let execution of the try body, or the
+            // previous catch body,
+            // fall into here.
+            if (!firstHandler) {
+              e.Jmp(after);
+            } else {
+              firstHandler = false;
+            }
+
+            Label* label = new Label(e);
+            r->m_names.insert(eName);
+            r->m_catchLabels.push_back(std::pair<StringData*, Label*>(eName,
+                                                                  label));
+            visit(c);
+          }
+        }
+      }
+    }
+
+    Offset end_catches = m_ue.bcPos();
+    if (after.isUsed()) after.set(e);
+
+    if (f) {
+      region->m_finallyLabel.set(e);
+      visit(f);
+      emitFinallyEpilogue(e, region.get());
+      auto func = getFunclet(f);
+      if (func == nullptr) {
+        auto thunklet =
+          new FinallyThunklet(f, m_curFunc->numLiveIterators());
+        func = addFunclet(f, thunklet);
+      }
+      newFaultRegion(start, end_catches, &func->m_entry);
+    }
+
+    return false;
+  }
+
+  case Construct::KindOfUnsetStatement: {
+    ExpressionListPtr exps(
+      static_pointer_cast<UnsetStatement>(node)->getExps());
+    for (int i = 0, n = exps->getCount(); i < n; i++) {
+      emitVisitAndUnset(e, (*exps)[i]);
+    }
+    return false;
+  }
+
+  case Construct::KindOfWhileStatement: {
+    auto s = static_pointer_cast<Statement>(node);
+    auto region = createRegion(s, Region::Kind::LoopOrSwitch);
+    WhileStatementPtr ws(static_pointer_cast<WhileStatement>(s));
+    ExpressionPtr condExp(ws->getCondExp());
+    Label& lcontinue = registerContinue(ws, region.get(), 1,
+      false)->m_label;
+    Label& fail = registerBreak(ws, region.get(), 1, false)->m_label;
+    Label top;
+    auto emit_cond = [&] (Label& tru, bool truFallthrough) {
+      Emitter condEmitter(condExp, m_ue, *this);
+      visitIfCondition(condExp, condEmitter, tru, fail, truFallthrough);
+    };
+    emit_cond(top, true);
+    top.set(e);
+    {
+      enterRegion(region);
+      SCOPE_EXIT { leaveRegion(region); };
+      visit(ws->getBody());
+    }
+    if (lcontinue.isUsed()) lcontinue.set(e);
+    emit_cond(top, false);
+    if (fail.isUsed()) fail.set(e);
+    return false;
+  }
+
+  case Construct::KindOfInterfaceStatement:
+  case Construct::KindOfClassStatement: {
+    emitClass(e, node->getClassScope(), false);
+    return false;
+  }
+
+  case Construct::KindOfClassVariable:
+  case Construct::KindOfClassConstant:
+  case Construct::KindOfMethodStatement:
+    // handled by emitClass
+    not_reached();
+
+  case Construct::KindOfFunctionStatement: {
+    MethodStatementPtr m(static_pointer_cast<MethodStatement>(node));
+    // Only called for fn defs not on the top level
+    assert(!node->getClassScope()); // Handled directly by emitClass().
+    StringData* nName = makeStaticString(m->getOriginalName());
+    FuncEmitter* fe = m_ue.newFuncEmitter(nName);
+    e.DefFunc(fe->id());
+    postponeMeth(m, fe, false);
+    return false;
+  }
+
+  case Construct::KindOfGotoStatement: {
+    GotoStatementPtr g(static_pointer_cast<GotoStatement>(node));
+    StringData* nName = makeStaticString(g->label());
+    emitGoto(e, nName, g);
+    return false;
+  }
+
+  case Construct::KindOfLabelStatement: {
+    LabelStatementPtr l(static_pointer_cast<LabelStatement>(node));
+    StringData* nName = makeStaticString(l->label());
+    registerGoto(l, m_regions.back().get(), nName, false)
+      ->m_label.set(e);
+    return false;
+  }
+  case Construct::KindOfStatement:
+  case Construct::KindOfUseTraitStatement:
+  case Construct::KindOfClassRequireStatement:
+  case Construct::KindOfTraitPrecStatement:
+  case Construct::KindOfTraitAliasStatement: {
+    not_implemented();
+  }
+  case Construct::KindOfUnaryOpExpression: {
+    UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(node));
+    int op = u->getOp();
+
+    if (op == T_UNSET) {
+      // php doesnt have an unset expression, but hphp's optimizations
+      // sometimes introduce them
+      ExpressionPtr exp(u->getExpression());
+      if (exp->is(Construct::KindOfExpressionList)) {
+        ExpressionListPtr exps(
+          static_pointer_cast<ExpressionList>(exp));
+        if (exps->getListKind() == ExpressionList::ListKindParam) {
+          for (int i = 0, n = exps->getCount(); i < n; i++) {
+            emitVisitAndUnset(e, (*exps)[i]);
+          }
           e.Null();
           return true;
         }
-        if (op == T_ARRAY) {
-          int num_elems;
-          std::vector<std::string> keys;
-
-          if (u->isScalar()) {
-            TypedValue tv;
-            tvWriteUninit(&tv);
-            initScalar(tv, u);
-            if (m_staticArrays.empty()) {
-              e.Array(tv.m_data.parr);
-            }
-
-          } else if (isPackedInit(u->getExpression(), &num_elems)) {
-            // evaluate array values onto stack
-            auto el = static_pointer_cast<ExpressionList>(u->getExpression());
-            for (int i = 0; i < num_elems; i++) {
-              auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
-              visit(ap->getValue());
-              emitConvertToCell(e);
-            }
-            e.NewPackedArray(num_elems);
-
-          } else if (isStructInit(u->getExpression(), keys)) {
-            auto el = static_pointer_cast<ExpressionList>(u->getExpression());
-            for (int i = 0, n = keys.size(); i < n; i++) {
-              auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
-              visit(ap->getValue());
-              emitConvertToCell(e);
-            }
-            e.NewStructArray(keys);
-
-          } else {
-            assert(m_staticArrays.empty());
-            auto capacityHint = MixedArray::SmallSize;
-
-            ExpressionPtr ex = u->getExpression();
-            if (ex->getKindOf() == Expression::KindOfExpressionList) {
-              auto el = static_pointer_cast<ExpressionList>(ex);
-
-              int capacity = el->getCount();
-              if (capacity > 0) {
-                capacityHint = capacity;
-              }
-            }
-
-            if (isPackedInit(ex, &num_elems, false /* ignore size */)) {
-              e.NewArray(capacityHint);
-            } else {
-              e.NewMixedArray(capacityHint);
-            }
-            visit(ex);
-          }
-          return true;
-        } else if (op == T_ISSET) {
-          ExpressionListPtr list =
-            dynamic_pointer_cast<ExpressionList>(u->getExpression());
-          if (list) {
-            // isset($a, $b, ...)  ==>  isset($a) && isset($b) && ...
-            Label done;
-            int n = list->getCount();
-            for (int i = 0; i < n - 1; ++i) {
-              visit((*list)[i]);
-              emitIsset(e);
-              e.Dup();
-              e.JmpZ(done);
-              emitPop(e);
-            }
-            // Treat the last one specially; let it fall through
-            visit((*list)[n - 1]);
-            emitIsset(e);
-            done.set(e);
-          } else {
-            // Simple case
-            visit(u->getExpression());
-            emitIsset(e);
-          }
-          return true;
-        } else if (op == '+' || op == '-') {
-          e.Int(0);
-        }
-
-        Id oldErrorLevelLoc = -1;
-        Offset start = InvalidAbsoluteOffset;
-        if (op == '@') {
-          oldErrorLevelLoc = m_curFunc->allocUnnamedLocal();
-          emitVirtualLocal(oldErrorLevelLoc);
-          auto idx = m_evalStack.size() - 1;
-          e.Silence(m_evalStack.getLoc(idx), SilenceOp::Start);
-          start = m_ue.bcPos();
-        }
-
-        ExpressionPtr exp = u->getExpression();
-        if (exp && visit(exp)) {
-          if (op != T_EMPTY && op != T_INC && op != T_DEC) {
-            emitConvertToCell(e);
-          }
-        } else if (op == T_EXIT) {
-          // exit without an expression is treated as exit(0)
-          e.Int(0);
-        } else {
-          // __FILE__ and __DIR__ are special unary ops that don't
-          // have expressions
-          assert(op == T_FILE || op == T_DIR);
-        }
-        switch (op) {
-          case T_INC:
-          case T_DEC: {
-            // $this++ is a no-op
-            if (auto var = dynamic_pointer_cast<SimpleVariable>(exp)) {
-              if (var->isThis()) break;
-            }
-
-            auto const cop = [&] {
-              if (op == T_INC) {
-                if (RuntimeOption::IntsOverflowToInts) {
-                  return u->getFront() ? IncDecOp::PreInc : IncDecOp::PostInc;
-                }
-                return u->getFront() ? IncDecOp::PreIncO : IncDecOp::PostIncO;
-              }
-              if (RuntimeOption::IntsOverflowToInts) {
-                return u->getFront() ? IncDecOp::PreDec : IncDecOp::PostDec;
-              }
-              return u->getFront() ? IncDecOp::PreDecO : IncDecOp::PostDecO;
-            }();
-            emitIncDec(e, cop);
-            break;
-          }
-          case T_EMPTY: emitEmpty(e); break;
-          case T_CLONE: e.Clone(); break;
-          case '+':
-            RuntimeOption::IntsOverflowToInts ? e.Add() : e.AddO();
-            break;
-          case '-':
-            RuntimeOption::IntsOverflowToInts ? e.Sub() : e.SubO();
-            break;
-          case '!': e.Not(); break;
-          case '~': e.BitNot(); break;
-          case '(': break;
-          case T_INT_CAST: e.CastInt(); break;
-          case T_DOUBLE_CAST: e.CastDouble(); break;
-          case T_STRING_CAST: e.CastString(); break;
-          case T_ARRAY_CAST: e.CastArray(); break;
-          case T_OBJECT_CAST: e.CastObject(); break;
-          case T_BOOL_CAST: e.CastBool(); break;
-          case T_UNSET_CAST: emitPop(e); e.Null(); break;
-          case T_EXIT: e.Exit(); break;
-          case '@': {
-            assert(oldErrorLevelLoc >= 0);
-            assert(start != InvalidAbsoluteOffset);
-            newFaultRegionAndFunclet(start, m_ue.bcPos(),
-              new RestoreErrorReportingThunklet(oldErrorLevelLoc));
-            emitRestoreErrorReporting(e, oldErrorLevelLoc);
-            m_curFunc->freeUnnamedLocal(oldErrorLevelLoc);
-            break;
-          }
-          case T_PRINT: e.Print(); break;
-          case T_EVAL: e.Eval(); break;
-          case T_FILE: {
-            e.File();
-            break;
-          }
-          case T_DIR: {
-            e.Dir();
-            break;
-          }
-          default:
-            assert(false);
-        }
-        return true;
       }
+      emitVisitAndUnset(e, exp);
+      e.Null();
+      return true;
+    }
+    if (op == T_ARRAY) {
+      int num_elems;
+      std::vector<std::string> keys;
 
-      case Expression::KindOfAssignmentExpression: {
-        AssignmentExpressionPtr ae(
-          static_pointer_cast<AssignmentExpression>(node));
-        ExpressionPtr rhs = ae->getValue();
-        Id tempLocal = -1;
-        Offset start = InvalidAbsoluteOffset;
-
-        if (ae->isRhsFirst()) {
-          assert(!rhs->hasContext(Expression::RefValue));
-          tempLocal = emitVisitAndSetUnnamedL(e, rhs);
-          start = m_ue.bcPos();
+      if (u->isScalar()) {
+        TypedValue tv;
+        tvWriteUninit(&tv);
+        initScalar(tv, u);
+        if (m_staticArrays.empty()) {
+          e.Array(tv.m_data.parr);
         }
 
-        visit(ae->getVariable());
-        emitClsIfSPropBase(e);
-
-        if (ae->isRhsFirst()) {
-          emitPushAndFreeUnnamedL(e, tempLocal, start);
-        } else {
-          visit(rhs);
-        }
-
-        if (rhs->hasContext(Expression::RefValue)) {
-          emitConvertToVar(e);
-          emitBind(e);
-          if (ae->hasAnyContext(Expression::AccessContext|
-                                Expression::ObjectContext|
-                                Expression::ExistContext)) {
-            /*
-             * hphpc optimizations can result in
-             * ($x =& $y)->foo or ($x =& $y)['foo'] or empty($x =& $y)
-             */
-            emitConvertToCellIfVar(e);
-          }
-        } else {
+      } else if (isPackedInit(u->getExpression(), &num_elems)) {
+        // evaluate array values onto stack
+        auto el = static_pointer_cast<ExpressionList>(u->getExpression());
+        for (int i = 0; i < num_elems; i++) {
+          auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
+          visit(ap->getValue());
           emitConvertToCell(e);
-          emitSet(e);
         }
-        return true;
-      }
+        e.NewPackedArray(num_elems);
 
-      case Expression::KindOfBinaryOpExpression: {
-        BinaryOpExpressionPtr b(static_pointer_cast<BinaryOpExpression>(node));
-        int op = b->getOp();
-        if (b->isAssignmentOp()) {
-          visit(b->getExp1());
-          emitClsIfSPropBase(e);
+      } else if (isStructInit(u->getExpression(), keys)) {
+        auto el = static_pointer_cast<ExpressionList>(u->getExpression());
+        for (int i = 0, n = keys.size(); i < n; i++) {
+          auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
+          visit(ap->getValue());
+          emitConvertToCell(e);
+        }
+        e.NewStructArray(keys);
+
+      } else {
+        assert(m_staticArrays.empty());
+        auto capacityHint = MixedArray::SmallSize;
+
+        ExpressionPtr ex = u->getExpression();
+        if (ex->getKindOf() == Construct::KindOfExpressionList) {
+          auto el = static_pointer_cast<ExpressionList>(ex);
+
+          int capacity = el->getCount();
+          if (capacity > 0) {
+            capacityHint = capacity;
+          }
+        }
+
+        if (isPackedInit(ex, &num_elems, false /* ignore size */)) {
+          e.NewArray(capacityHint);
+        } else {
+          e.NewMixedArray(capacityHint);
+        }
+        visit(ex);
+      }
+      return true;
+    } else if (op == T_ISSET) {
+      ExpressionListPtr list =
+        dynamic_pointer_cast<ExpressionList>(u->getExpression());
+      if (list) {
+        // isset($a, $b, ...)  ==>  isset($a) && isset($b) && ...
+        Label done;
+        int n = list->getCount();
+        for (int i = 0; i < n - 1; ++i) {
+          visit((*list)[i]);
+          emitIsset(e);
+          e.Dup();
+          e.JmpZ(done);
+          emitPop(e);
+        }
+        // Treat the last one specially; let it fall through
+        visit((*list)[n - 1]);
+        emitIsset(e);
+        done.set(e);
+      } else {
+        // Simple case
+        visit(u->getExpression());
+        emitIsset(e);
+      }
+      return true;
+    } else if (op == '+' || op == '-') {
+      e.Int(0);
+    }
+
+    Id oldErrorLevelLoc = -1;
+    Offset start = InvalidAbsoluteOffset;
+    if (op == '@') {
+      oldErrorLevelLoc = m_curFunc->allocUnnamedLocal();
+      emitVirtualLocal(oldErrorLevelLoc);
+      auto idx = m_evalStack.size() - 1;
+      e.Silence(m_evalStack.getLoc(idx), SilenceOp::Start);
+      start = m_ue.bcPos();
+    }
+
+    ExpressionPtr exp = u->getExpression();
+    if (exp && visit(exp)) {
+      if (op != T_EMPTY && op != T_INC && op != T_DEC) {
+        emitConvertToCell(e);
+      }
+    } else if (op == T_EXIT) {
+      // exit without an expression is treated as exit(0)
+      e.Int(0);
+    } else {
+      // __FILE__ and __DIR__ are special unary ops that don't
+      // have expressions
+      assert(op == T_FILE || op == T_DIR);
+    }
+    switch (op) {
+      case T_INC:
+      case T_DEC: {
+        // $this++ is a no-op
+        if (auto var = dynamic_pointer_cast<SimpleVariable>(exp)) {
+          if (var->isThis()) break;
+        }
+
+        auto const cop = [&] {
+          if (op == T_INC) {
+            if (RuntimeOption::IntsOverflowToInts) {
+              return u->getFront() ? IncDecOp::PreInc : IncDecOp::PostInc;
+            }
+            return u->getFront() ? IncDecOp::PreIncO : IncDecOp::PostIncO;
+          }
+          if (RuntimeOption::IntsOverflowToInts) {
+            return u->getFront() ? IncDecOp::PreDec : IncDecOp::PostDec;
+          }
+          return u->getFront() ? IncDecOp::PreDecO : IncDecOp::PostDecO;
+        }();
+        emitIncDec(e, cop);
+        break;
+      }
+      case T_EMPTY: emitEmpty(e); break;
+      case T_CLONE: e.Clone(); break;
+      case '+':
+        RuntimeOption::IntsOverflowToInts ? e.Add() : e.AddO();
+        break;
+      case '-':
+        RuntimeOption::IntsOverflowToInts ? e.Sub() : e.SubO();
+        break;
+      case '!': e.Not(); break;
+      case '~': e.BitNot(); break;
+      case '(': break;
+      case T_INT_CAST: e.CastInt(); break;
+      case T_DOUBLE_CAST: e.CastDouble(); break;
+      case T_STRING_CAST: e.CastString(); break;
+      case T_ARRAY_CAST: e.CastArray(); break;
+      case T_OBJECT_CAST: e.CastObject(); break;
+      case T_BOOL_CAST: e.CastBool(); break;
+      case T_UNSET_CAST: emitPop(e); e.Null(); break;
+      case T_EXIT: e.Exit(); break;
+      case '@': {
+        assert(oldErrorLevelLoc >= 0);
+        assert(start != InvalidAbsoluteOffset);
+        newFaultRegionAndFunclet(start, m_ue.bcPos(),
+          new RestoreErrorReportingThunklet(oldErrorLevelLoc));
+        emitRestoreErrorReporting(e, oldErrorLevelLoc);
+        m_curFunc->freeUnnamedLocal(oldErrorLevelLoc);
+        break;
+      }
+      case T_PRINT: e.Print(); break;
+      case T_EVAL: e.Eval(); break;
+      case T_FILE: {
+        e.File();
+        break;
+      }
+      case T_DIR: {
+        e.Dir();
+        break;
+      }
+      default:
+        assert(false);
+    }
+    return true;
+  }
+
+  case Construct::KindOfAssignmentExpression: {
+    AssignmentExpressionPtr ae(
+      static_pointer_cast<AssignmentExpression>(node));
+    ExpressionPtr rhs = ae->getValue();
+    Id tempLocal = -1;
+    Offset start = InvalidAbsoluteOffset;
+
+    if (ae->isRhsFirst()) {
+      assert(!rhs->hasContext(Expression::RefValue));
+      tempLocal = emitVisitAndSetUnnamedL(e, rhs);
+      start = m_ue.bcPos();
+    }
+
+    visit(ae->getVariable());
+    emitClsIfSPropBase(e);
+
+    if (ae->isRhsFirst()) {
+      emitPushAndFreeUnnamedL(e, tempLocal, start);
+    } else {
+      visit(rhs);
+    }
+
+    if (rhs->hasContext(Expression::RefValue)) {
+      emitConvertToVar(e);
+      emitBind(e);
+      if (ae->hasAnyContext(Expression::AccessContext|
+                            Expression::ObjectContext|
+                            Expression::ExistContext)) {
+        /*
+         * hphpc optimizations can result in
+         * ($x =& $y)->foo or ($x =& $y)['foo'] or empty($x =& $y)
+         */
+        emitConvertToCellIfVar(e);
+      }
+    } else {
+      emitConvertToCell(e);
+      emitSet(e);
+    }
+    return true;
+  }
+
+  case Construct::KindOfBinaryOpExpression: {
+    BinaryOpExpressionPtr b(static_pointer_cast<BinaryOpExpression>(node));
+    int op = b->getOp();
+    if (b->isAssignmentOp()) {
+      visit(b->getExp1());
+      emitClsIfSPropBase(e);
+      visit(b->getExp2());
+      emitConvertToCell(e);
+      emitSetOp(e, op);
+      return true;
+    }
+
+    if (b->isShortCircuitOperator()) {
+      Label tru, fls, done;
+      visitIfCondition(b, e, tru, fls, false);
+      if (fls.isUsed()) fls.set(e);
+      if (currentPositionIsReachable()) {
+        e.False();
+        e.Jmp(done);
+      }
+      if (tru.isUsed()) tru.set(e);
+      if (currentPositionIsReachable()) {
+        e.True();
+      }
+      done.set(e);
+      return true;
+    }
+
+    if (op == T_INSTANCEOF) {
+      visit(b->getExp1());
+      emitConvertToCell(e);
+      ExpressionPtr second = b->getExp2();
+      if (second->isScalar()) {
+        ScalarExpressionPtr scalar =
+          dynamic_pointer_cast<ScalarExpression>(second);
+        bool notQuoted = scalar && !scalar->isQuoted();
+        std::string s = second->getLiteralString();
+        if (s == "static" && notQuoted) {
+          // Can't resolve this to a literal name at emission time
+          static const StringData* fname
+            = makeStaticString("get_called_class");
+          Offset fpiStart = m_ue.bcPos();
+          e.FPushFuncD(0, fname);
+          {
+            FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+          }
+          e.FCall(0);
+          e.UnboxR();
+          e.InstanceOf();
+        } else if (s != "") {
+          ClassScopeRawPtr cls = second->getOriginalClass();
+          bool isTrait = cls && cls->isTrait();
+          bool isSelf = s == "self" && notQuoted;
+          bool isParent = s == "parent" && notQuoted;
+
+          if (isTrait && (isSelf || isParent)) {
+            emitConvertToCell(e);
+            if (s == "self" && notQuoted) {
+              e.Self();
+            } else if (s == "parent" && notQuoted) {
+              e.Parent();
+            }
+
+            e.NameA();
+            e.InstanceOf();
+          } else {
+            if (cls) {
+              if (isSelf) {
+                s = cls->getOriginalName();
+              } else if (isParent) {
+                s = cls->getOriginalParent();
+              }
+            }
+
+            StringData* nLiteral = makeStaticString(s);
+            e.InstanceOfD(nLiteral);
+          }
+        } else {
           visit(b->getExp2());
           emitConvertToCell(e);
-          emitSetOp(e, op);
-          return true;
+          e.InstanceOf();
         }
-
-        if (b->isShortCircuitOperator()) {
-          Label tru, fls, done;
-          visitIfCondition(b, e, tru, fls, false);
-          if (fls.isUsed()) fls.set(e);
-          if (currentPositionIsReachable()) {
-            e.False();
-            e.Jmp(done);
-          }
-          if (tru.isUsed()) tru.set(e);
-          if (currentPositionIsReachable()) {
-            e.True();
-          }
-          done.set(e);
-          return true;
-        }
-
-        if (op == T_INSTANCEOF) {
-          visit(b->getExp1());
-          emitConvertToCell(e);
-          ExpressionPtr second = b->getExp2();
-          if (second->isScalar()) {
-            ScalarExpressionPtr scalar =
-              dynamic_pointer_cast<ScalarExpression>(second);
-            bool notQuoted = scalar && !scalar->isQuoted();
-            std::string s = second->getLiteralString();
-            if (s == "static" && notQuoted) {
-              // Can't resolve this to a literal name at emission time
-              static const StringData* fname
-                = makeStaticString("get_called_class");
-              Offset fpiStart = m_ue.bcPos();
-              e.FPushFuncD(0, fname);
-              {
-                FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-              }
-              e.FCall(0);
-              e.UnboxR();
-              e.InstanceOf();
-            } else if (s != "") {
-              ClassScopeRawPtr cls = second->getOriginalClass();
-              bool isTrait = cls && cls->isTrait();
-              bool isSelf = s == "self" && notQuoted;
-              bool isParent = s == "parent" && notQuoted;
-
-              if (isTrait && (isSelf || isParent)) {
-                emitConvertToCell(e);
-                if (s == "self" && notQuoted) {
-                  e.Self();
-                } else if (s == "parent" && notQuoted) {
-                  e.Parent();
-                }
-
-                e.NameA();
-                e.InstanceOf();
-              } else {
-                if (cls) {
-                  if (isSelf) {
-                    s = cls->getOriginalName();
-                  } else if (isParent) {
-                    s = cls->getOriginalParent();
-                  }
-                }
-
-                StringData* nLiteral = makeStaticString(s);
-                e.InstanceOfD(nLiteral);
-              }
-            } else {
-              visit(b->getExp2());
-              emitConvertToCell(e);
-              e.InstanceOf();
-            }
-          } else {
-            visit(b->getExp2());
-            emitConvertToCell(e);
-            e.InstanceOf();
-          }
-          return true;
-        }
-
-        if (op == T_COLLECTION) {
-          ScalarExpressionPtr cls =
-            static_pointer_cast<ScalarExpression>(b->getExp1());
-          int nElms = 0;
-          ExpressionListPtr el;
-          if (b->getExp2()) {
-            el = static_pointer_cast<ExpressionList>(b->getExp2());
-            nElms = el->getCount();
-          }
-          const std::string* clsName = nullptr;
-          cls->getString(clsName);
-          auto ct = stringToCollectionType(*clsName);
-          if (!ct.hasValue()) {
-            throw IncludeTimeFatalException(b,
-              "Cannot use collection initialization for non-collection class");
-          } else if (ct == CollectionType::Pair && nElms != 2) {
-            throw IncludeTimeFatalException(b,
-                "Pair objects must have exactly 2 elements");
-          }
-          bool kvPairs = (ct == CollectionType::Map ||
-                          ct == CollectionType::ImmMap);
-          e.NewCol(int(ct.value()), nElms);
-          if (kvPairs) {
-            for (int i = 0; i < nElms; i++) {
-              ArrayPairExpressionPtr ap(
-                static_pointer_cast<ArrayPairExpression>((*el)[i]));
-              ExpressionPtr key = ap->getName();
-              if (!key) {
-                throw IncludeTimeFatalException(ap,
-                  "Keys must be specified for Map initialization");
-              }
-              visit(key);
-              emitConvertToCell(e);
-              visit(ap->getValue());
-              emitConvertToCell(e);
-              e.ColAddElemC();
-            }
-          } else {
-            for (int i = 0; i < nElms; i++) {
-              ArrayPairExpressionPtr ap(
-                static_pointer_cast<ArrayPairExpression>((*el)[i]));
-              ExpressionPtr key = ap->getName();
-              if ((bool)key) {
-                throw IncludeTimeFatalException(ap,
-                  "Keys may not be specified for Vector, Set, or Pair "
-                  "initialization");
-              }
-              visit(ap->getValue());
-              emitConvertToCell(e);
-              e.ColAddNewElemC();
-            }
-          }
-          return true;
-        }
-
-        visit(b->getExp1());
-        emitConvertToCellOrLoc(e);
+      } else {
         visit(b->getExp2());
         emitConvertToCell(e);
-        emitConvertSecondToCell(e);
-        switch (op) {
-          case T_LOGICAL_XOR: e.Xor(); break;
-          case '|': e.BitOr(); break;
-          case '&': e.BitAnd(); break;
-          case '^': e.BitXor(); break;
-          case '.': e.Concat(); break;
-          case '+':
-            RuntimeOption::IntsOverflowToInts ? e.Add() : e.AddO();
-            break;
-          case '-':
-            RuntimeOption::IntsOverflowToInts ? e.Sub() : e.SubO();
-            break;
-          case '*':
-            RuntimeOption::IntsOverflowToInts ? e.Mul() : e.MulO();
-            break;
-          case '/': e.Div(); break;
-          case '%': e.Mod(); break;
-          case T_SL: e.Shl(); break;
-          case T_SR: e.Shr(); break;
-          case T_IS_IDENTICAL: e.Same(); break;
-          case T_IS_NOT_IDENTICAL: e.NSame(); break;
-          case T_IS_EQUAL: e.Eq(); break;
-          case T_IS_NOT_EQUAL: e.Neq(); break;
-          case '<': e.Lt(); break;
-          case T_IS_SMALLER_OR_EQUAL: e.Lte(); break;
-          case '>': e.Gt(); break;
-          case T_IS_GREATER_OR_EQUAL: e.Gte(); break;
-          case T_POW: e.Pow(); break;
-          default: assert(false);
-        }
-        return true;
+        e.InstanceOf();
       }
+      return true;
+    }
 
-      case Expression::KindOfClassConstantExpression: {
-        ClassConstantExpressionPtr cc(
-          static_pointer_cast<ClassConstantExpression>(node));
-        auto const nName = makeStaticString(cc->getConName());
-        auto const getOriginalClassName = [&] {
-          const std::string& clsName = cc->getOriginalClassName();
-          return makeStaticString(clsName);
-        };
-
-        // We treat ::class as a class constant in the AST and the
-        // parser, but at the bytecode and runtime level it isn't
-        // one.
-        auto const emitClsCns = [&] {
-          if (cc->isColonColonClass()) {
-            e.NameA();
-            return;
-          }
-          e.ClsCns(nName);
-        };
-        auto const noClassAllowed = [&] {
-          auto const nCls = getOriginalClassName();
-          std::ostringstream s;
-          s << "Cannot access " << nCls->data() << "::" << nName->data() <<
-               " when no class scope is active";
-          throw IncludeTimeFatalException(e.getNode(), s.str().c_str());
-        };
-
-        if (cc->isStatic()) {
-          // static::Constant
-          e.LateBoundCls();
-          emitClsCns();
-        } else if (cc->getClass()) {
-          // $x::Constant
-          ExpressionPtr cls(cc->getClass());
-          visit(cls);
-          emitAGet(e);
-          emitClsCns();
-        } else if (cc->getOriginalClass() &&
-                   !cc->getOriginalClass()->isTrait()) {
-          // C::Constant inside a class
-          auto nCls = getOriginalClassName();
-          if (cc->isColonColonClass()) {
-            e.String(nCls);
-          } else {
-            e.ClsCnsD(nName, nCls);
-          }
-        } else if (cc->isSelf()) {
-          // self::Constant inside trait or pseudomain
-          e.Self();
-          if (cc->isColonColonClass() &&
-              cc->getFunctionScope()->inPseudoMain()) {
-            noClassAllowed();
-          }
-          emitClsCns();
-        } else if (cc->isParent()) {
-          // parent::Constant inside trait or pseudomain
-          e.Parent();
-          if (cc->isColonColonClass() &&
-              cc->getFunctionScope()->inPseudoMain()) {
-            noClassAllowed();
-          }
-          emitClsCns();
-        } else {
-          // C::Constant inside a trait or pseudomain
-          // Be careful to keep this case here after the isSelf and
-          // isParent cases because StaticClassName::resolveClass()
-          // will set cc->originalClassName to the trait's name for
-          // the isSelf and isParent cases, but self and parent must
-          // be resolved dynamically when used inside of traits.
-          auto nCls = getOriginalClassName();
-          if (cc->isColonColonClass()) noClassAllowed();
-          e.ClsCnsD(nName, nCls);
-        }
-        return true;
+    if (op == T_COLLECTION) {
+      ScalarExpressionPtr cls =
+        static_pointer_cast<ScalarExpression>(b->getExp1());
+      int nElms = 0;
+      ExpressionListPtr el;
+      if (b->getExp2()) {
+        el = static_pointer_cast<ExpressionList>(b->getExp2());
+        nElms = el->getCount();
       }
-
-      case Expression::KindOfConstantExpression: {
-        ConstantExpressionPtr c(static_pointer_cast<ConstantExpression>(node));
-        if (c->isNull()) {
-          e.Null();
-        } else if (c->isBoolean()) {
-          if (c->getBooleanValue()) {
-            e.True();
-          } else {
-            e.False();
-          }
-          return true;
-        } else {
-          std::string nameStr = c->getOriginalName();
-          StringData* nName = makeStaticString(nameStr);
-          if (c->hadBackslash()) {
-            e.CnsE(nName);
-          } else {
-            const std::string& nonNSName = c->getNonNSOriginalName();
-            if (nonNSName != nameStr) {
-              StringData* nsName = nName;
-              nName = makeStaticString(nonNSName);
-              e.CnsU(nsName, nName);
-            } else {
-              e.Cns(makeStaticString(c->getName()));
-            }
-          }
-        }
-        return true;
+      const std::string* clsName = nullptr;
+      cls->getString(clsName);
+      auto ct = stringToCollectionType(*clsName);
+      if (!ct.hasValue()) {
+        throw IncludeTimeFatalException(b,
+          "Cannot use collection initialization for non-collection class");
+      } else if (ct == CollectionType::Pair && nElms != 2) {
+        throw IncludeTimeFatalException(b,
+            "Pair objects must have exactly 2 elements");
       }
-
-      case Expression::KindOfEncapsListExpression: {
-        EncapsListExpressionPtr el(
-          static_pointer_cast<EncapsListExpression>(node));
-        ExpressionListPtr args(el->getExpressions());
-        int n = args ? args->getCount() : 0;
-        int i = 0;
-        FPIRegionRecorder* fpi = nullptr;
-        if (el->getType() == '`') {
-          const static StringData* s_shell_exec =
-            makeStaticString("shell_exec");
-          Offset fpiStart = m_ue.bcPos();
-          e.FPushFuncD(1, s_shell_exec);
-          fpi = new FPIRegionRecorder(this, m_ue, m_evalStack, fpiStart);
-        }
-
-        if (n) {
-          visit((*args)[i++]);
-          emitConvertToCellOrLoc(e);
-          if (i == n) {
-            emitConvertToCell(e);
-            e.CastString();
-          } else {
-            while (i < n) {
-              visit((*args)[i++]);
-              emitConvertToCell(e);
-              emitConvertSecondToCell(e);
-              e.Concat();
-            }
+      bool kvPairs = (ct == CollectionType::Map ||
+                      ct == CollectionType::ImmMap);
+      e.NewCol(int(ct.value()), nElms);
+      if (kvPairs) {
+        for (int i = 0; i < nElms; i++) {
+          ArrayPairExpressionPtr ap(
+            static_pointer_cast<ArrayPairExpression>((*el)[i]));
+          ExpressionPtr key = ap->getName();
+          if (!key) {
+            throw IncludeTimeFatalException(ap,
+              "Keys must be specified for Map initialization");
           }
-        } else {
-          e.String(staticEmptyString());
-        }
-
-        if (el->getType() == '`') {
+          visit(key);
           emitConvertToCell(e);
-          e.FPassC(0);
-          delete fpi;
-          e.FCall(1);
-        }
-        return true;
-      }
-
-      case Expression::KindOfArrayElementExpression: {
-        ArrayElementExpressionPtr ae(
-          static_pointer_cast<ArrayElementExpression>(node));
-        if (!ae->isSuperGlobal() || !ae->getOffset()) {
-          visit(ae->getVariable());
-          // XHP syntax allows for expressions like "($a =& $b)[0]". We
-          // handle this by unboxing the var produced by "($a =& $b)".
-          emitConvertToCellIfVar(e);
-        }
-
-        ExpressionPtr offset = ae->getOffset();
-        Variant v;
-        if (!ae->isSuperGlobal() && offset &&
-            offset->getScalarValue(v) && (v.isInteger() || v.isString())) {
-          if (v.isString()) {
-            m_evalStack.push(StackSym::T);
-            m_evalStack.setString(
-              makeStaticString(v.toCStrRef().get()));
-          } else {
-            m_evalStack.push(StackSym::I);
-            m_evalStack.setInt(v.asInt64Val());
-          }
-          markElem(e);
-        } else if (visit(offset)) {
-          emitConvertToCellOrLoc(e);
-          if (ae->isSuperGlobal()) {
-            markGlobalName(e);
-          } else {
-            markElem(e);
-          }
-        } else {
-          markNewElem(e);
-        }
-        if (!ae->hasAnyContext(Expression::AccessContext|
-                               Expression::ObjectContext)) {
-          m_tempLoc = ae->getLocation();
-        }
-        return true;
-      }
-
-      case Expression::KindOfSimpleFunctionCall: {
-        SimpleFunctionCallPtr call(
-          static_pointer_cast<SimpleFunctionCall>(node));
-        ExpressionListPtr params = call->getParams();
-
-        if (call->isFatalFunction()) {
-          if (params && params->getCount() == 1) {
-            ExpressionPtr p = (*params)[0];
-            Variant v;
-            if (p->getScalarValue(v)) {
-              assert(v.isString());
-              StringData* msg = makeStaticString(v.toString());
-              auto exn = IncludeTimeFatalException(call, "%s", msg->data());
-              exn.setParseFatal(call->isParseFatalFunction());
-              throw exn;
-            }
-            not_reached();
-          }
-        } else if (emitCallUserFunc(e, call)) {
-          return true;
-        } else if (call->isCallToFunction("array_key_exists")) {
-          if (params && params->getCount() == 2) {
-            visit((*params)[0]);
-            emitConvertToCell(e);
-            visit((*params)[1]);
-            emitConvertToCell(e);
-            call->changeToBytecode();
-            e.AKExists();
-            return true;
-          }
-        } else if (call->isCallToFunction("hh\\invariant")) {
-          if (emitHHInvariant(e, call)) return true;
-        } else if (call->isCallToFunction("idx") &&
-                   call->isOptimizable() &&
-                   systemlibDefinesIdx &&
-                   !Option::JitEnableRenameFunction) {
-          if (params && (params->getCount() == 2 || params->getCount() == 3)) {
-            visit((*params)[0]);
-            emitConvertToCell(e);
-            visit((*params)[1]);
-            emitConvertToCell(e);
-            if (params->getCount() == 2) {
-              e.Null();
-            } else {
-              visit((*params)[2]);
-              emitConvertToCell(e);
-            }
-            call->changeToBytecode();
-            e.Idx();
-            return true;
-          }
-        } else if (call->isCallToFunction("hphp_array_idx")) {
-          if (params && params->getCount() == 3) {
-            visit((*params)[0]);
-            emitConvertToCell(e);
-            visit((*params)[1]);
-            emitConvertToCell(e);
-            visit((*params)[2]);
-            emitConvertToCell(e);
-            call->changeToBytecode();
-            e.ArrayIdx();
-            return true;
-          }
-        } else if (call->isCallToFunction("strlen")) {
-          if (params && params->getCount() == 1) {
-            visit((*params)[0]);
-            emitConvertToCell(e);
-            call->changeToBytecode();
-            e.Strlen();
-            return true;
-          }
-        } else if (call->isCallToFunction("define")) {
-          if (params && params->getCount() == 2) {
-            ExpressionPtr p0 = (*params)[0];
-            Variant v0;
-            if (p0->getScalarValue(v0) && v0.isString()) {
-              const StringData* cname =
-                makeStaticString(v0.toString());
-              visit((*params)[1]);
-              emitConvertToCell(e);
-              e.DefCns(cname);
-              return true;
-            }
-          }
-        } else if (emitSystemLibVarEnvFunc(e, call)) {
-          return true;
-        } else if (call->isCallToFunction("array_slice") &&
-                   params && params->getCount() == 2 &&
-                   !Option::JitEnableRenameFunction) {
-          ExpressionPtr p0 = (*params)[0];
-          ExpressionPtr p1 = (*params)[1];
-          Variant v1;
-          if (p0->getKindOf() == Expression::KindOfSimpleFunctionCall &&
-              p1->getScalarValue(v1) && v1.isInteger()) {
-            SimpleFunctionCallPtr innerCall(
-              static_pointer_cast<SimpleFunctionCall>(p0));
-            ExpressionListPtr innerParams = innerCall->getParams();
-            if (innerCall->isCallToFunction("func_get_args") &&
-                (!innerParams || innerParams->getCount() == 0)) {
-              params->removeElement(0);
-              emitFuncCall(e, innerCall,
-                           "__SystemLib\\func_slice_args", params);
-              return true;
-            }
-          }
-          // fall through
-        } else if ((call->isCallToFunction("class_exists") ||
-                    call->isCallToFunction("interface_exists") ||
-                    call->isCallToFunction("trait_exists"))
-                   && params
-                   && (params->getCount() == 1 || params->getCount() == 2)) {
-          // Push name
-          emitNameString(e, (*params)[0]);
+          visit(ap->getValue());
           emitConvertToCell(e);
-          e.CastString();
-
-          // Push autoload, defaulting to true
-          if (params->getCount() == 1) {
-            e.True();
-          } else {
-            visit((*params)[1]);
-            emitConvertToCell(e);
-            e.CastBool();
-          }
-          if (call->isCallToFunction("class_exists")) {
-            e.OODeclExists(OODeclExistsOp::Class);
-          } else if (call->isCallToFunction("interface_exists")) {
-            e.OODeclExists(OODeclExistsOp::Interface);
-          } else {
-            assert(call->isCallToFunction("trait_exists"));
-            e.OODeclExists(OODeclExistsOp::Trait);
-          }
-          return true;
-        } else if (call->isCallToFunction("get_class") &&
-                   !params &&
-                   call->getClassScope() &&
-                   !call->getClassScope()->isTrait()) {
-          StringData* name =
-            makeStaticString(call->getClassScope()->getOriginalName());
-          e.String(name);
-          return true;
+          e.ColAddElemC();
         }
-#define TYPE_CONVERT_INSTR(what, What)                                 \
-        else if (call->isCallToFunction(#what"val") &&                 \
-                 params && params->getCount() == 1) {                  \
-          visit((*params)[0]);                                         \
-          emitConvertToCell(e);                                        \
-          e.Cast ## What();                                            \
-          return true;                                                 \
-        }
-      TYPE_CONVERT_INSTR(bool, Bool)
-      TYPE_CONVERT_INSTR(int, Int)
-      TYPE_CONVERT_INSTR(double, Double)
-      TYPE_CONVERT_INSTR(float, Double)
-      TYPE_CONVERT_INSTR(str, String)
-#undef TYPE_CONVERT_INSTR
-
-#define TYPE_CHECK_INSTR(what, What)                    \
-        else if (call->isCallToFunction("is_"#what) &&  \
-                 params && params->getCount() == 1) {   \
-          visit((*call->getParams())[0]);               \
-          emitIsType(e, IsTypeOp::What);                \
-          return true;                                  \
-        }
-
-      TYPE_CHECK_INSTR(null, Null)
-      TYPE_CHECK_INSTR(object, Obj)
-      TYPE_CHECK_INSTR(array, Arr)
-      TYPE_CHECK_INSTR(string, Str)
-      TYPE_CHECK_INSTR(int, Int)
-      TYPE_CHECK_INSTR(integer, Int)
-      TYPE_CHECK_INSTR(long, Int)
-      TYPE_CHECK_INSTR(bool, Bool)
-      TYPE_CHECK_INSTR(double, Dbl)
-      TYPE_CHECK_INSTR(real, Dbl)
-      TYPE_CHECK_INSTR(float, Dbl)
-      TYPE_CHECK_INSTR(scalar, Scalar)
-#undef TYPE_CHECK_INSTR
-        // fall through
-      }
-      case Expression::KindOfDynamicFunctionCall: {
-        emitFuncCall(e, static_pointer_cast<FunctionCall>(node));
-        return true;
-      }
-
-      case Expression::KindOfIncludeExpression: {
-        IncludeExpressionPtr ie(static_pointer_cast<IncludeExpression>(node));
-        if (ie->isReqLit()) {
-          StringData* nValue = makeStaticString(ie->includePath());
-          e.String(nValue);
-        } else {
-          visit(ie->getExpression());
-          emitConvertToCell(e);
-        }
-        switch (ie->getOp()) {
-          case T_INCLUDE:
-            e.Incl();
-            break;
-          case T_INCLUDE_ONCE:
-            e.InclOnce();
-            break;
-          case T_REQUIRE:
-            e.Req();
-            break;
-          case T_REQUIRE_ONCE:
-            if (ie->isDocumentRoot()) {
-              e.ReqDoc();
-            } else {
-              e.ReqOnce();
-            }
-            break;
-        }
-        return true;
-      }
-
-      case Expression::KindOfListAssignment: {
-        ListAssignmentPtr la(static_pointer_cast<ListAssignment>(node));
-        ExpressionPtr rhs = la->getArray();
-
-        // listAssignmentVisitLHS should have handled this
-        assert(rhs);
-
-        bool nullRHS = la->getRHSKind() == ListAssignment::Null;
-        // Assign RHS to temp local, unless it's already a simple variable
-        bool simpleRHS = rhs->is(Expression::KindOfSimpleVariable)
-          && !static_pointer_cast<SimpleVariable>(rhs)->getAlwaysStash();
-        Id tempLocal = -1;
-        Offset start = InvalidAbsoluteOffset;
-
-        if (!simpleRHS && la->isRhsFirst()) {
-          tempLocal = emitVisitAndSetUnnamedL(e, rhs);
-          start = m_ue.bcPos();
-        }
-
-        // We use "index chains" to deal with nested list assignment.  We will
-        // end up with one index chain per expression we need to assign to.
-        // The helper function will populate indexChains.
-        std::vector<IndexChain*> indexChains;
-        IndexChain workingChain;
-        listAssignmentVisitLHS(e, la, workingChain, indexChains);
-
-        if (!simpleRHS && !la->isRhsFirst()) {
-          assert(tempLocal == -1);
-          assert(start == InvalidAbsoluteOffset);
-          tempLocal = emitVisitAndSetUnnamedL(e, rhs);
-          start = m_ue.bcPos();
-        }
-
-        // Assign elements.
-        if (nullRHS) {
-          listAssignmentAssignElements(e, indexChains, nullptr);
-        } else if (simpleRHS) {
-          listAssignmentAssignElements(e, indexChains, [&] { visit(rhs); });
-        } else {
-          listAssignmentAssignElements(
-            e, indexChains,
-            [&] { emitVirtualLocal(tempLocal); }
-          );
-        }
-
-        // Leave the RHS on the stack
-        if (simpleRHS) {
-          visit(rhs);
-        } else {
-          emitPushAndFreeUnnamedL(e, tempLocal, start);
-        }
-
-        return true;
-      }
-
-      case Expression::KindOfNewObjectExpression: {
-        NewObjectExpressionPtr ne(
-          static_pointer_cast<NewObjectExpression>(node));
-        ExpressionListPtr params(ne->getParams());
-        int numParams = params ? params->getCount() : 0;
-        ClassScopeRawPtr cls = ne->getOriginalClass();
-
-        Offset fpiStart;
-        if (ne->isStatic()) {
-          // new static()
-          e.LateBoundCls();
-          fpiStart = m_ue.bcPos();
-          e.FPushCtor(numParams);
-        } else if (ne->getOriginalName().empty()) {
-          // new $x()
-          visit(ne->getNameExp());
-          emitAGet(e);
-          fpiStart = m_ue.bcPos();
-          e.FPushCtor(numParams);
-        } else if ((ne->isSelf() || ne->isParent()) &&
-                   (!cls || cls->isTrait() ||
-                    (ne->isParent() && cls->getOriginalParent().empty()))) {
-          if (ne->isSelf()) {
-            // new self() inside a trait or code statically not inside any class
-            e.Self();
-          } else {
-            // new parent() inside a trait, code statically not inside any
-            // class, or a class with no parent
-            e.Parent();
-          }
-          fpiStart = m_ue.bcPos();
-          e.FPushCtor(numParams);
-        } else {
-          // new C() inside trait or pseudomain
-          fpiStart = m_ue.bcPos();
-          e.FPushCtorD(numParams,
-                       makeStaticString(ne->getOriginalClassName()));
-        }
-
-        {
-          FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-          for (int i = 0; i < numParams; i++) {
-            emitFuncCallArg(e, (*params)[i], i,
-                            ne->hasUnpack() && i + 1 == numParams);
-          }
-        }
-
-        if (ne->hasUnpack()) {
-          e.FCallUnpack(numParams);
-        } else {
-          e.FCall(numParams);
-        }
-        e.PopR();
-        return true;
-      }
-
-      case Expression::KindOfObjectMethodExpression: {
-        ObjectMethodExpressionPtr om(
-          static_pointer_cast<ObjectMethodExpression>(node));
-        // $obj->name(...)
-        // ^^^^
-        visit(om->getObject());
-        m_tempLoc = om->getLocation();
-        emitConvertToCell(e);
-        ExpressionListPtr params(om->getParams());
-        int numParams = params ? params->getCount() : 0;
-
-        Offset fpiStart = 0;
-        ExpressionPtr methName = om->getNameExp();
-        bool useDirectForm = false;
-        if (methName->is(Expression::KindOfScalarExpression)) {
-          ScalarExpressionPtr sval(
-            static_pointer_cast<ScalarExpression>(methName));
-          const std::string& methStr = sval->getOriginalLiteralString();
-          if (!methStr.empty()) {
-            // $obj->name(...)
-            //       ^^^^
-            // Use getOriginalLiteralString(), which hasn't been
-            // case-normalized, since __call() needs to preserve
-            // the case.
-            StringData* nameLiteral = makeStaticString(methStr);
-            fpiStart = m_ue.bcPos();
-            e.FPushObjMethodD(
-              numParams,
-              nameLiteral,
-              om->isNullSafe() ? ObjMethodOp::NullSafe : ObjMethodOp::NullThrows
-            );
-            useDirectForm = true;
-          }
-        }
-        if (!useDirectForm) {
-          // $obj->{...}(...)
-          //       ^^^^^
-          visit(methName);
-          emitConvertToCell(e);
-          fpiStart = m_ue.bcPos();
-          e.FPushObjMethod(
-            numParams,
-            om->isNullSafe() ? ObjMethodOp::NullSafe : ObjMethodOp::NullThrows
-          );
-        }
-        {
-          FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-          // $obj->name(...)
-          //           ^^^^^
-          for (int i = 0; i < numParams; i++) {
-            emitFuncCallArg(e, (*params)[i], i,
-                            om->hasUnpack() && i + 1 == numParams);
-          }
-        }
-        if (om->hasUnpack()) {
-          e.FCallUnpack(numParams);
-        } else {
-          e.FCall(numParams);
-        }
-        return true;
-      }
-
-      case Expression::KindOfObjectPropertyExpression: {
-        ObjectPropertyExpressionPtr op(
-          static_pointer_cast<ObjectPropertyExpression>(node));
-        if (op->isNullSafe() &&
-            op->hasAnyContext(
-                Expression::RefValue
-              | Expression::LValue
-              | Expression::DeepReference
-            ) && !op->hasContext(Expression::InvokeArgument)
-        ) {
-          throw IncludeTimeFatalException(op,
-            Strings::NULLSAFE_PROP_WRITE_ERROR);
-        }
-        ExpressionPtr obj = op->getObject();
-        SimpleVariablePtr sv = dynamic_pointer_cast<SimpleVariable>(obj);
-        if (sv && sv->isThis() && sv->hasContext(Expression::ObjectContext)) {
-          e.CheckThis();
-          m_evalStack.push(StackSym::H);
-        } else {
-          visit(obj);
-        }
-        StringData* clsName = getClassName(op->getObject());
-        if (clsName) {
-          m_evalStack.setKnownCls(clsName, false);
-        }
-        emitNameString(e, op->getProperty(), true);
-        if (!op->hasAnyContext(Expression::AccessContext|
-                               Expression::ObjectContext)) {
-          m_tempLoc = op->getLocation();
-        }
-        markProp(
-          e,
-          op->isNullSafe()
-            ? PropAccessType::NullSafe
-            : PropAccessType::Normal
-        );
-        return true;
-      }
-
-      case Expression::KindOfQOpExpression: {
-        QOpExpressionPtr q(static_pointer_cast<QOpExpression>(node));
-        if (q->getYes()) {
-          // <expr> ? <expr> : <expr>
-          Label tru, fals, done;
-          {
-            Emitter condEmitter(q->getCondition(), m_ue, *this);
-            visitIfCondition(q->getCondition(), condEmitter,
-                             tru, fals, true);
-          }
-          if (tru.isUsed()) {
-            tru.set(e);
-          }
-          if (currentPositionIsReachable()) {
-            visit(q->getYes());
-            emitConvertToCell(e);
-            e.Jmp(done);
-          }
-          if (fals.isUsed()) fals.set(e);
-          if (currentPositionIsReachable()) {
-            visit(q->getNo());
-            emitConvertToCell(e);
-          }
-          if (done.isUsed()) {
-            done.set(e);
-            m_evalStack.cleanTopMeta();
-          }
-        } else {
-          // <expr> ?: <expr>
-          Label done;
-          visit(q->getCondition());
-          emitConvertToCell(e);
-          e.Dup();
-          e.JmpNZ(done);
-          e.PopC();
-          visit(q->getNo());
-          emitConvertToCell(e);
-          done.set(e);
-          m_evalStack.cleanTopMeta();
-        }
-        return true;
-      }
-
-      case Expression::KindOfScalarExpression: {
-        Variant v;
-        ex->getScalarValue(v);
-        switch (v.getType()) {
-          case KindOfInt64:
-            e.Int(v.getInt64());
-            return true;
-
-          case KindOfDouble:
-            e.Double(v.getDouble());
-            return true;
-
-          case KindOfStaticString:
-          case KindOfString: {
-            StringData* nValue = makeStaticString(v.getStringData());
-            e.String(nValue);
-            return true;
-          }
-
-          case KindOfUninit:
-          case KindOfNull:
-          case KindOfBoolean:
-          case KindOfArray:
-          case KindOfObject:
-          case KindOfResource:
-          case KindOfRef:
-          case KindOfClass:
-            break;
-        }
-        not_reached();
-      }
-
-      case Expression::KindOfSimpleVariable: {
-        SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(node));
-        if (sv->isThis()) {
-          if (sv->hasContext(Expression::ObjectContext)) {
-            e.This();
-          } else if (sv->getFunctionScope()->needsLocalThis()) {
-            static const StringData* thisStr = makeStaticString("this");
-            Id thisId = m_curFunc->lookupVarId(thisStr);
-            emitVirtualLocal(thisId);
-          } else {
-            if (sv->isGuarded()) {
-              e.This();
-            } else {
-              auto const subop = sv->hasContext(Expression::ExistContext)
-                ? BareThisOp::NoNotice
-                : BareThisOp::Notice;
-              e.BareThis(subop);
-            }
-          }
-        } else {
-          StringData* nLiteral = makeStaticString(sv->getName());
-          if (sv->isSuperGlobal()) {
-            e.String(nLiteral);
-            markGlobalName(e);
-            return true;
-          }
-          Id i = m_curFunc->lookupVarId(nLiteral);
-          emitVirtualLocal(i);
-          if (sv->getAlwaysStash() &&
-              !sv->hasAnyContext(Expression::ExistContext |
-                                 Expression::RefValue |
-                                 Expression::LValue |
-                                 Expression::RefParameter)) {
-            emitConvertToCell(e);
-          }
-        }
-
-        return true;
-      }
-
-      case Expression::KindOfDynamicVariable: {
-        DynamicVariablePtr dv(static_pointer_cast<DynamicVariable>(node));
-        visit(dv->getSubExpression());
-        emitConvertToCellOrLoc(e);
-        markName(e);
-        return true;
-      }
-
-      case Expression::KindOfStaticMemberExpression: {
-        StaticMemberExpressionPtr sm(
-          static_pointer_cast<StaticMemberExpression>(node));
-        emitVirtualClassBase(e, sm.get());
-        emitNameString(e, sm->getExp());
-        markSProp(e);
-        return true;
-      }
-
-      case Expression::KindOfArrayPairExpression: {
-        ArrayPairExpressionPtr ap(
-          static_pointer_cast<ArrayPairExpression>(node));
-
-        ExpressionPtr key = ap->getName();
-        if (!m_staticArrays.empty()) {
-          ExpressionPtr val = ap->getValue();
-
-          TypedValue tvVal;
-          initScalar(tvVal, val);
-
-          if (key != nullptr) {
-            assert(key->isScalar());
-            TypedValue tvKey = make_tv<KindOfNull>();
-            if (!key->getScalarValue(tvAsVariant(&tvKey))) {
-              InvariantViolation("Expected scalar value for array key\n");
-              always_assert(0);
-            }
-            m_staticArrays.back().set(tvAsCVarRef(&tvKey),
-                                      tvAsVariant(&tvVal));
-          } else {
-            m_staticArrays.back().append(tvAsCVarRef(&tvVal));
-          }
-        } else {
-          // Assume new array is on top of stack
-          bool hasKey = (bool)key;
-          if (hasKey) {
-            visit(key);
-            emitConvertToCellOrLoc(e);
+      } else {
+        for (int i = 0; i < nElms; i++) {
+          ArrayPairExpressionPtr ap(
+            static_pointer_cast<ArrayPairExpression>((*el)[i]));
+          ExpressionPtr key = ap->getName();
+          if ((bool)key) {
+            throw IncludeTimeFatalException(ap,
+              "Keys may not be specified for Vector, Set, or Pair "
+              "initialization");
           }
           visit(ap->getValue());
-          if (ap->isRef()) {
-            emitConvertToVar(e);
-            if (hasKey) {
-              emitConvertSecondToCell(e);
-              e.AddElemV();
-            } else {
-              e.AddNewElemV();
-            }
-          } else {
-            emitConvertToCell(e);
-            if (hasKey) {
-              emitConvertSecondToCell(e);
-              e.AddElemC();
-            } else {
-              e.AddNewElemC();
-            }
-          }
-        }
-        return true;
-      }
-      case Expression::KindOfExpressionList: {
-        ExpressionListPtr el(static_pointer_cast<ExpressionList>(node));
-        int nelem = el->getCount(), i;
-        bool pop = el->getListKind() != ExpressionList::ListKindParam;
-        int keep = el->getListKind() == ExpressionList::ListKindLeft ?
-          0 : nelem - 1;
-        int cnt = 0;
-        for (i = 0; i < nelem; i++) {
-          ExpressionPtr p((*el)[i]);
-          if (visit(p)) {
-            if (pop && i != keep) {
-              emitPop(e);
-            } else {
-              cnt++;
-            }
-          }
-        }
-        return cnt != 0;
-      }
-      case Expression::KindOfParameterExpression: {
-        not_implemented();
-      }
-      case Expression::KindOfModifierExpression: {
-        not_implemented();
-      }
-      case Expression::KindOfUserAttribute: {
-        not_implemented();
-      }
-      case Expression::KindOfClosureExpression: {
-        // Closures are implemented by anonymous classes that extend Closure.
-        // There is one anonymous class per closure body.
-        ClosureExpressionPtr ce(static_pointer_cast<ClosureExpression>(node));
-
-        // Build a convenient list of use-variables. Each one corresponds to:
-        // (a) an instance variable, to store the value until call time
-        // (b) a parameter of the generated constructor
-        // (c) an argument to the constructor at the definition site
-        // (d) a line of code in the generated constructor;
-        // (e) a line of code in the generated prologue to the closure body
-        ExpressionListPtr useList(ce->getClosureVariables());
-        ClosureUseVarVec useVars;
-        int useCount = (useList ? useList->getCount() : 0);
-        if (useList) {
-          for (int i = 0; i < useCount; ++i) {
-            ParameterExpressionPtr var(
-              static_pointer_cast<ParameterExpression>((*useList)[i]));
-            StringData* varName = makeStaticString(var->getName());
-            useVars.push_back(ClosureUseVar(varName, var->isRef()));
-          }
-        }
-
-        // We're still at the closure definition site. Emit code to instantiate
-        // the new anonymous class, with the use variables as arguments.
-        ExpressionListPtr valuesList(ce->getClosureValues());
-        for (int i = 0; i < useCount; ++i) {
-          ce->type() == ClosureType::Short
-            ? emitLambdaCaptureArg(e, (*valuesList)[i])
-            : emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
-        }
-
-        // The parser generated a unique name for the function,
-        // use that for the class
-        std::string clsName = ce->getClosureFunction()->getOriginalName();
-
-        if (m_curFunc->isPseudoMain()) {
-          std::ostringstream oss;
-          oss << clsName << '$' << std::hex <<
-            m_curFunc->ue().md5().q[1] << m_curFunc->ue().md5().q[0] << '$';
-          clsName = oss.str();
-        }
-
-        if (Option::WholeProgram) {
-          int my_id;
-          {
-            EmittedClosures::accessor acc;
-            s_emittedClosures.insert(acc, makeStaticString(clsName));
-            my_id = ++acc->second;
-          }
-          if (my_id > 1) {
-            // The closure was from a trait, so we need a unique name in the
-            // implementing class. _ is different from the #, which is used for
-            // many closures in the same func in ParserBase::newClosureName
-            folly::toAppend('_', my_id, &clsName);
-          }
-        }
-
-        auto ssClsName = makeStaticString(clsName);
-        e.CreateCl(useCount, ssClsName);
-
-        // From here on out, we're creating a new class to hold the closure.
-        const static StringData* parentName = makeStaticString("Closure");
-        const Location* sLoc = ce->getLocation().get();
-        PreClassEmitter* pce = m_ue.newPreClassEmitter(
-          ssClsName, PreClass::ClosureHoistable);
-
-        auto const attrs = AttrNoOverride | AttrUnique | AttrPersistent;
-
-        pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
-                  attrs, parentName, nullptr);
-
-        // Instance properties---one for each use var, and one for
-        // each static local.
-        TypedValue uninit;
-        tvWriteUninit(&uninit);
-        for (auto& useVar : useVars) {
-          pce->addProperty(useVar.first, AttrPrivate, nullptr, nullptr,
-                           &uninit, RepoAuthType{});
-        }
-
-        // The __invoke method. This is the body of the closure, preceded by
-        // code that pulls the object's instance variables into locals.
-        static const StringData* invokeName = makeStaticString("__invoke");
-        FuncEmitter* invoke = m_ue.newMethodEmitter(invokeName, pce);
-        invoke->isClosureBody = true;
-        pce->addMethod(invoke);
-        MethodStatementPtr body(
-          static_pointer_cast<MethodStatement>(ce->getClosureFunction()));
-        postponeMeth(body, invoke, false, new ClosureUseVarVec(useVars));
-
-        return true;
-      }
-      case Expression::KindOfYieldExpression: {
-        YieldExpressionPtr y(static_pointer_cast<YieldExpression>(node));
-
-        registerYieldAwait(y);
-        assert(m_evalStack.size() == 0);
-
-        // evaluate key passed to yield, if applicable
-        ExpressionPtr keyExp = y->getKeyExpression();
-        if (keyExp) {
-          m_curFunc->isPairGenerator = true;
-          visit(keyExp);
           emitConvertToCell(e);
+          e.ColAddNewElemC();
         }
+      }
+      return true;
+    }
 
-        // evaluate value expression passed to yield
-        visit(y->getValueExpression());
-        emitConvertToCell(e);
+    visit(b->getExp1());
+    emitConvertToCellOrLoc(e);
+    visit(b->getExp2());
+    emitConvertToCell(e);
+    emitConvertSecondToCell(e);
+    switch (op) {
+      case T_LOGICAL_XOR: e.Xor(); break;
+      case '|': e.BitOr(); break;
+      case '&': e.BitAnd(); break;
+      case '^': e.BitXor(); break;
+      case '.': e.Concat(); break;
+      case '+':
+        RuntimeOption::IntsOverflowToInts ? e.Add() : e.AddO();
+        break;
+      case '-':
+        RuntimeOption::IntsOverflowToInts ? e.Sub() : e.SubO();
+        break;
+      case '*':
+        RuntimeOption::IntsOverflowToInts ? e.Mul() : e.MulO();
+        break;
+      case '/': e.Div(); break;
+      case '%': e.Mod(); break;
+      case T_SL: e.Shl(); break;
+      case T_SR: e.Shr(); break;
+      case T_IS_IDENTICAL: e.Same(); break;
+      case T_IS_NOT_IDENTICAL: e.NSame(); break;
+      case T_IS_EQUAL: e.Eq(); break;
+      case T_IS_NOT_EQUAL: e.Neq(); break;
+      case '<': e.Lt(); break;
+      case T_IS_SMALLER_OR_EQUAL: e.Lte(); break;
+      case '>': e.Gt(); break;
+      case T_IS_GREATER_OR_EQUAL: e.Gte(); break;
+      case T_POW: e.Pow(); break;
+      default: assert(false);
+    }
+    return true;
+  }
 
-        // suspend generator
-        if (keyExp) {
-          assert(m_evalStack.size() == 2);
-          e.YieldK();
+  case Construct::KindOfClassConstantExpression: {
+    ClassConstantExpressionPtr cc(
+      static_pointer_cast<ClassConstantExpression>(node));
+    auto const nName = makeStaticString(cc->getConName());
+    auto const getOriginalClassName = [&] {
+      const std::string& clsName = cc->getOriginalClassName();
+      return makeStaticString(clsName);
+    };
+
+    // We treat ::class as a class constant in the AST and the
+    // parser, but at the bytecode and runtime level it isn't
+    // one.
+    auto const emitClsCns = [&] {
+      if (cc->isColonColonClass()) {
+        e.NameA();
+        return;
+      }
+      e.ClsCns(nName);
+    };
+    auto const noClassAllowed = [&] {
+      auto const nCls = getOriginalClassName();
+      std::ostringstream s;
+      s << "Cannot access " << nCls->data() << "::" << nName->data() <<
+           " when no class scope is active";
+      throw IncludeTimeFatalException(e.getNode(), s.str().c_str());
+    };
+
+    if (cc->isStatic()) {
+      // static::Constant
+      e.LateBoundCls();
+      emitClsCns();
+    } else if (cc->getClass()) {
+      // $x::Constant
+      ExpressionPtr cls(cc->getClass());
+      visit(cls);
+      emitAGet(e);
+      emitClsCns();
+    } else if (cc->getOriginalClass() &&
+               !cc->getOriginalClass()->isTrait()) {
+      // C::Constant inside a class
+      auto nCls = getOriginalClassName();
+      if (cc->isColonColonClass()) {
+        e.String(nCls);
+      } else {
+        e.ClsCnsD(nName, nCls);
+      }
+    } else if (cc->isSelf()) {
+      // self::Constant inside trait or pseudomain
+      e.Self();
+      if (cc->isColonColonClass() &&
+          cc->getFunctionScope()->inPseudoMain()) {
+        noClassAllowed();
+      }
+      emitClsCns();
+    } else if (cc->isParent()) {
+      // parent::Constant inside trait or pseudomain
+      e.Parent();
+      if (cc->isColonColonClass() &&
+          cc->getFunctionScope()->inPseudoMain()) {
+        noClassAllowed();
+      }
+      emitClsCns();
+    } else {
+      // C::Constant inside a trait or pseudomain
+      // Be careful to keep this case here after the isSelf and
+      // isParent cases because StaticClassName::resolveClass()
+      // will set cc->originalClassName to the trait's name for
+      // the isSelf and isParent cases, but self and parent must
+      // be resolved dynamically when used inside of traits.
+      auto nCls = getOriginalClassName();
+      if (cc->isColonColonClass()) noClassAllowed();
+      e.ClsCnsD(nName, nCls);
+    }
+    return true;
+  }
+
+  case Construct::KindOfConstantExpression: {
+    ConstantExpressionPtr c(static_pointer_cast<ConstantExpression>(node));
+    if (c->isNull()) {
+      e.Null();
+    } else if (c->isBoolean()) {
+      if (c->getBooleanValue()) {
+        e.True();
+      } else {
+        e.False();
+      }
+      return true;
+    } else {
+      std::string nameStr = c->getOriginalName();
+      StringData* nName = makeStaticString(nameStr);
+      if (c->hadBackslash()) {
+        e.CnsE(nName);
+      } else {
+        const std::string& nonNSName = c->getNonNSOriginalName();
+        if (nonNSName != nameStr) {
+          StringData* nsName = nName;
+          nName = makeStaticString(nonNSName);
+          e.CnsU(nsName, nName);
         } else {
-          assert(m_evalStack.size() == 1);
-          e.Yield();
+          e.Cns(makeStaticString(c->getName()));
         }
-
-        // continue with the received result on the stack
-        assert(m_evalStack.size() == 1);
-        return true;
-      }
-      case Expression::KindOfAwaitExpression: {
-        AwaitExpressionPtr await(static_pointer_cast<AwaitExpression>(node));
-
-        registerYieldAwait(await);
-        assert(m_evalStack.size() == 0);
-
-        // If we know statically that it's a subtype of WaitHandle, we
-        // don't need to make a call.
-        bool const isKnownWaitHandle = [&] {
-          auto const expr = await->getExpression();
-          auto const ar = expr->getScope()->getContainingProgram();
-          auto const type = expr->getActualType();
-          return type && Type::SubType(ar, type,
-                           Type::GetType(Type::KindOfObject, "HH\\WaitHandle"));
-        }();
-
-        Label resume;
-
-        // evaluate expression passed to await
-        visit(await->getExpression());
-        emitConvertToCell(e);
-
-        // if expr is null, just continue
-        e.Dup();
-        emitIsType(e, IsTypeOp::Null);
-        e.JmpNZ(resume);
-
-        if (!isKnownWaitHandle) {
-          Label likely;
-          const static StringData* nWaitHandle =
-            makeStaticString("HH\\WaitHandle");
-
-          e.Dup();
-          e.InstanceOfD(nWaitHandle);
-          e.JmpNZ(likely);
-          emitConstMethodCallNoParams(e, "getWaitHandle");
-          likely.set(e);
-        }
-        assert(m_evalStack.size() == 1);
-
-        // TODO(#3197024): if isKnownWaitHandle, we should put an
-        // AssertObjStk so the Await type check can be avoided.
-        e.Await(m_pendingIters.size());
-
-        resume.set(e);
-        return true;
-      }
-      case Expression::KindOfQueryExpression: {
-        QueryExpressionPtr query(static_pointer_cast<QueryExpression>(node));
-        auto args = *query->getQueryArguments();
-        auto numArgs = args.getCount();
-        visit(args[0]);
-        emitConvertToCell(e);
-        auto fpiStart = m_ue.bcPos();
-        StringData* executeQuery = makeStaticString("executeQuery");
-        e.FPushObjMethodD(numArgs+1, executeQuery, ObjMethodOp::NullThrows);
-        {
-          FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-          e.String(query->getQueryString());
-          emitFPass(e, 0, PassByRefKind::ErrorOnCell);
-          auto selectCallback = query->getSelectClosure();
-          if (selectCallback != nullptr) {
-            visit(selectCallback);
-            emitConvertToCell(e);
-          } else {
-            e.Null();
-          }
-          emitFPass(e, 1, PassByRefKind::ErrorOnCell);
-          for (int i = 1; i < numArgs; i++) {
-            visit(args[i]);
-            emitConvertToCell(e);
-            emitFPass(e, i+1, PassByRefKind::ErrorOnCell);
-          }
-        }
-        e.FCall(numArgs+1);
-        e.UnboxR();
-        return true;
-      }
-      case Expression::KindOfFromClause:
-      case Expression::KindOfLetClause:
-      case Expression::KindOfWhereClause:
-      case Expression::KindOfSelectClause:
-      case Expression::KindOfIntoClause:
-      case Expression::KindOfJoinClause:
-      case Expression::KindOfGroupClause:
-      case Expression::KindOfOrderbyClause:
-      case Expression::KindOfOrdering: {
-        not_reached();
       }
     }
+    return true;
+  }
+
+  case Construct::KindOfEncapsListExpression: {
+    EncapsListExpressionPtr el(
+      static_pointer_cast<EncapsListExpression>(node));
+    ExpressionListPtr args(el->getExpressions());
+    int n = args ? args->getCount() : 0;
+    int i = 0;
+    FPIRegionRecorder* fpi = nullptr;
+    if (el->getType() == '`') {
+      const static StringData* s_shell_exec =
+        makeStaticString("shell_exec");
+      Offset fpiStart = m_ue.bcPos();
+      e.FPushFuncD(1, s_shell_exec);
+      fpi = new FPIRegionRecorder(this, m_ue, m_evalStack, fpiStart);
+    }
+
+    if (n) {
+      visit((*args)[i++]);
+      emitConvertToCellOrLoc(e);
+      if (i == n) {
+        emitConvertToCell(e);
+        e.CastString();
+      } else {
+        while (i < n) {
+          visit((*args)[i++]);
+          emitConvertToCell(e);
+          emitConvertSecondToCell(e);
+          e.Concat();
+        }
+      }
+    } else {
+      e.String(staticEmptyString());
+    }
+
+    if (el->getType() == '`') {
+      emitConvertToCell(e);
+      e.FPassC(0);
+      delete fpi;
+      e.FCall(1);
+    }
+    return true;
+  }
+
+  case Construct::KindOfArrayElementExpression: {
+    ArrayElementExpressionPtr ae(
+      static_pointer_cast<ArrayElementExpression>(node));
+    if (!ae->isSuperGlobal() || !ae->getOffset()) {
+      visit(ae->getVariable());
+      // XHP syntax allows for expressions like "($a =& $b)[0]". We
+      // handle this by unboxing the var produced by "($a =& $b)".
+      emitConvertToCellIfVar(e);
+    }
+
+    ExpressionPtr offset = ae->getOffset();
+    Variant v;
+    if (!ae->isSuperGlobal() && offset &&
+        offset->getScalarValue(v) && (v.isInteger() || v.isString())) {
+      if (v.isString()) {
+        m_evalStack.push(StackSym::T);
+        m_evalStack.setString(
+          makeStaticString(v.toCStrRef().get()));
+      } else {
+        m_evalStack.push(StackSym::I);
+        m_evalStack.setInt(v.asInt64Val());
+      }
+      markElem(e);
+    } else if (visit(offset)) {
+      emitConvertToCellOrLoc(e);
+      if (ae->isSuperGlobal()) {
+        markGlobalName(e);
+      } else {
+        markElem(e);
+      }
+    } else {
+      markNewElem(e);
+    }
+    if (!ae->hasAnyContext(Expression::AccessContext|
+                           Expression::ObjectContext)) {
+      m_tempLoc = ae->getLocation();
+    }
+    return true;
+  }
+
+  case Construct::KindOfSimpleFunctionCall: {
+    SimpleFunctionCallPtr call(
+      static_pointer_cast<SimpleFunctionCall>(node));
+    ExpressionListPtr params = call->getParams();
+
+    if (call->isFatalFunction()) {
+      if (params && params->getCount() == 1) {
+        ExpressionPtr p = (*params)[0];
+        Variant v;
+        if (p->getScalarValue(v)) {
+          assert(v.isString());
+          StringData* msg = makeStaticString(v.toString());
+          auto exn = IncludeTimeFatalException(call, "%s", msg->data());
+          exn.setParseFatal(call->isParseFatalFunction());
+          throw exn;
+        }
+        not_reached();
+      }
+    } else if (emitCallUserFunc(e, call)) {
+      return true;
+    } else if (call->isCallToFunction("array_key_exists")) {
+      if (params && params->getCount() == 2) {
+        visit((*params)[0]);
+        emitConvertToCell(e);
+        visit((*params)[1]);
+        emitConvertToCell(e);
+        call->changeToBytecode();
+        e.AKExists();
+        return true;
+      }
+    } else if (call->isCallToFunction("hh\\invariant")) {
+      if (emitHHInvariant(e, call)) return true;
+    } else if (call->isCallToFunction("idx") &&
+               call->isOptimizable() &&
+               systemlibDefinesIdx &&
+               !Option::JitEnableRenameFunction) {
+      if (params && (params->getCount() == 2 || params->getCount() == 3)) {
+        visit((*params)[0]);
+        emitConvertToCell(e);
+        visit((*params)[1]);
+        emitConvertToCell(e);
+        if (params->getCount() == 2) {
+          e.Null();
+        } else {
+          visit((*params)[2]);
+          emitConvertToCell(e);
+        }
+        call->changeToBytecode();
+        e.Idx();
+        return true;
+      }
+    } else if (call->isCallToFunction("hphp_array_idx")) {
+      if (params && params->getCount() == 3) {
+        visit((*params)[0]);
+        emitConvertToCell(e);
+        visit((*params)[1]);
+        emitConvertToCell(e);
+        visit((*params)[2]);
+        emitConvertToCell(e);
+        call->changeToBytecode();
+        e.ArrayIdx();
+        return true;
+      }
+    } else if (call->isCallToFunction("strlen")) {
+      if (params && params->getCount() == 1) {
+        visit((*params)[0]);
+        emitConvertToCell(e);
+        call->changeToBytecode();
+        e.Strlen();
+        return true;
+      }
+    } else if (call->isCallToFunction("define")) {
+      if (params && params->getCount() == 2) {
+        ExpressionPtr p0 = (*params)[0];
+        Variant v0;
+        if (p0->getScalarValue(v0) && v0.isString()) {
+          const StringData* cname =
+            makeStaticString(v0.toString());
+          visit((*params)[1]);
+          emitConvertToCell(e);
+          e.DefCns(cname);
+          return true;
+        }
+      }
+    } else if (emitSystemLibVarEnvFunc(e, call)) {
+      return true;
+    } else if (call->isCallToFunction("array_slice") &&
+               params && params->getCount() == 2 &&
+               !Option::JitEnableRenameFunction) {
+      ExpressionPtr p0 = (*params)[0];
+      ExpressionPtr p1 = (*params)[1];
+      Variant v1;
+      if (p0->getKindOf() == Construct::KindOfSimpleFunctionCall &&
+          p1->getScalarValue(v1) && v1.isInteger()) {
+        SimpleFunctionCallPtr innerCall(
+          static_pointer_cast<SimpleFunctionCall>(p0));
+        ExpressionListPtr innerParams = innerCall->getParams();
+        if (innerCall->isCallToFunction("func_get_args") &&
+            (!innerParams || innerParams->getCount() == 0)) {
+          params->removeElement(0);
+          emitFuncCall(e, innerCall,
+                       "__SystemLib\\func_slice_args", params);
+          return true;
+        }
+      }
+      // fall through
+    } else if ((call->isCallToFunction("class_exists") ||
+                call->isCallToFunction("interface_exists") ||
+                call->isCallToFunction("trait_exists"))
+               && params
+               && (params->getCount() == 1 || params->getCount() == 2)) {
+      // Push name
+      emitNameString(e, (*params)[0]);
+      emitConvertToCell(e);
+      e.CastString();
+
+      // Push autoload, defaulting to true
+      if (params->getCount() == 1) {
+        e.True();
+      } else {
+        visit((*params)[1]);
+        emitConvertToCell(e);
+        e.CastBool();
+      }
+      if (call->isCallToFunction("class_exists")) {
+        e.OODeclExists(OODeclExistsOp::Class);
+      } else if (call->isCallToFunction("interface_exists")) {
+        e.OODeclExists(OODeclExistsOp::Interface);
+      } else {
+        assert(call->isCallToFunction("trait_exists"));
+        e.OODeclExists(OODeclExistsOp::Trait);
+      }
+      return true;
+    } else if (call->isCallToFunction("get_class") &&
+               !params &&
+               call->getClassScope() &&
+               !call->getClassScope()->isTrait()) {
+      StringData* name =
+        makeStaticString(call->getClassScope()->getOriginalName());
+      e.String(name);
+      return true;
+    }
+#define TYPE_CONVERT_INSTR(what, What)                             \
+    else if (call->isCallToFunction(#what"val") &&                 \
+             params && params->getCount() == 1) {                  \
+      visit((*params)[0]);                                         \
+      emitConvertToCell(e);                                        \
+      e.Cast ## What();                                            \
+      return true;                                                 \
+    }
+  TYPE_CONVERT_INSTR(bool, Bool)
+  TYPE_CONVERT_INSTR(int, Int)
+  TYPE_CONVERT_INSTR(double, Double)
+  TYPE_CONVERT_INSTR(float, Double)
+  TYPE_CONVERT_INSTR(str, String)
+#undef TYPE_CONVERT_INSTR
+
+#define TYPE_CHECK_INSTR(what, What)                \
+    else if (call->isCallToFunction("is_"#what) &&  \
+             params && params->getCount() == 1) {   \
+      visit((*call->getParams())[0]);               \
+      emitIsType(e, IsTypeOp::What);                \
+      return true;                                  \
+    }
+
+  TYPE_CHECK_INSTR(null, Null)
+  TYPE_CHECK_INSTR(object, Obj)
+  TYPE_CHECK_INSTR(array, Arr)
+  TYPE_CHECK_INSTR(string, Str)
+  TYPE_CHECK_INSTR(int, Int)
+  TYPE_CHECK_INSTR(integer, Int)
+  TYPE_CHECK_INSTR(long, Int)
+  TYPE_CHECK_INSTR(bool, Bool)
+  TYPE_CHECK_INSTR(double, Dbl)
+  TYPE_CHECK_INSTR(real, Dbl)
+  TYPE_CHECK_INSTR(float, Dbl)
+  TYPE_CHECK_INSTR(scalar, Scalar)
+#undef TYPE_CHECK_INSTR
+    // fall through
+  }
+  case Construct::KindOfDynamicFunctionCall: {
+    emitFuncCall(e, static_pointer_cast<FunctionCall>(node));
+    return true;
+  }
+
+  case Construct::KindOfIncludeExpression: {
+    IncludeExpressionPtr ie(static_pointer_cast<IncludeExpression>(node));
+    if (ie->isReqLit()) {
+      StringData* nValue = makeStaticString(ie->includePath());
+      e.String(nValue);
+    } else {
+      visit(ie->getExpression());
+      emitConvertToCell(e);
+    }
+    switch (ie->getOp()) {
+      case T_INCLUDE:
+        e.Incl();
+        break;
+      case T_INCLUDE_ONCE:
+        e.InclOnce();
+        break;
+      case T_REQUIRE:
+        e.Req();
+        break;
+      case T_REQUIRE_ONCE:
+        if (ie->isDocumentRoot()) {
+          e.ReqDoc();
+        } else {
+          e.ReqOnce();
+        }
+        break;
+    }
+    return true;
+  }
+
+  case Construct::KindOfListAssignment: {
+    ListAssignmentPtr la(static_pointer_cast<ListAssignment>(node));
+    ExpressionPtr rhs = la->getArray();
+
+    // listAssignmentVisitLHS should have handled this
+    assert(rhs);
+
+    bool nullRHS = la->getRHSKind() == ListAssignment::Null;
+    // Assign RHS to temp local, unless it's already a simple variable
+    bool simpleRHS = rhs->is(Construct::KindOfSimpleVariable)
+      && !static_pointer_cast<SimpleVariable>(rhs)->getAlwaysStash();
+    Id tempLocal = -1;
+    Offset start = InvalidAbsoluteOffset;
+
+    if (!simpleRHS && la->isRhsFirst()) {
+      tempLocal = emitVisitAndSetUnnamedL(e, rhs);
+      start = m_ue.bcPos();
+    }
+
+    // We use "index chains" to deal with nested list assignment.  We will
+    // end up with one index chain per expression we need to assign to.
+    // The helper function will populate indexChains.
+    std::vector<IndexChain*> indexChains;
+    IndexChain workingChain;
+    listAssignmentVisitLHS(e, la, workingChain, indexChains);
+
+    if (!simpleRHS && !la->isRhsFirst()) {
+      assert(tempLocal == -1);
+      assert(start == InvalidAbsoluteOffset);
+      tempLocal = emitVisitAndSetUnnamedL(e, rhs);
+      start = m_ue.bcPos();
+    }
+
+    // Assign elements.
+    if (nullRHS) {
+      listAssignmentAssignElements(e, indexChains, nullptr);
+    } else if (simpleRHS) {
+      listAssignmentAssignElements(e, indexChains, [&] { visit(rhs); });
+    } else {
+      listAssignmentAssignElements(
+        e, indexChains,
+        [&] { emitVirtualLocal(tempLocal); }
+      );
+    }
+
+    // Leave the RHS on the stack
+    if (simpleRHS) {
+      visit(rhs);
+    } else {
+      emitPushAndFreeUnnamedL(e, tempLocal, start);
+    }
+
+    return true;
+  }
+
+  case Construct::KindOfNewObjectExpression: {
+    NewObjectExpressionPtr ne(
+      static_pointer_cast<NewObjectExpression>(node));
+    ExpressionListPtr params(ne->getParams());
+    int numParams = params ? params->getCount() : 0;
+    ClassScopeRawPtr cls = ne->getOriginalClass();
+
+    Offset fpiStart;
+    if (ne->isStatic()) {
+      // new static()
+      e.LateBoundCls();
+      fpiStart = m_ue.bcPos();
+      e.FPushCtor(numParams);
+    } else if (ne->getOriginalName().empty()) {
+      // new $x()
+      visit(ne->getNameExp());
+      emitAGet(e);
+      fpiStart = m_ue.bcPos();
+      e.FPushCtor(numParams);
+    } else if ((ne->isSelf() || ne->isParent()) &&
+               (!cls || cls->isTrait() ||
+                (ne->isParent() && cls->getOriginalParent().empty()))) {
+      if (ne->isSelf()) {
+        // new self() inside a trait or code statically not inside any class
+        e.Self();
+      } else {
+        // new parent() inside a trait, code statically not inside any
+        // class, or a class with no parent
+        e.Parent();
+      }
+      fpiStart = m_ue.bcPos();
+      e.FPushCtor(numParams);
+    } else {
+      // new C() inside trait or pseudomain
+      fpiStart = m_ue.bcPos();
+      e.FPushCtorD(numParams,
+                   makeStaticString(ne->getOriginalClassName()));
+    }
+
+    {
+      FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+      for (int i = 0; i < numParams; i++) {
+        emitFuncCallArg(e, (*params)[i], i,
+                        ne->hasUnpack() && i + 1 == numParams);
+      }
+    }
+
+    if (ne->hasUnpack()) {
+      e.FCallUnpack(numParams);
+    } else {
+      e.FCall(numParams);
+    }
+    e.PopR();
+    return true;
+  }
+
+  case Construct::KindOfObjectMethodExpression: {
+    ObjectMethodExpressionPtr om(
+      static_pointer_cast<ObjectMethodExpression>(node));
+    // $obj->name(...)
+    // ^^^^
+    visit(om->getObject());
+    m_tempLoc = om->getLocation();
+    emitConvertToCell(e);
+    ExpressionListPtr params(om->getParams());
+    int numParams = params ? params->getCount() : 0;
+
+    Offset fpiStart = 0;
+    ExpressionPtr methName = om->getNameExp();
+    bool useDirectForm = false;
+    if (methName->is(Construct::KindOfScalarExpression)) {
+      ScalarExpressionPtr sval(
+        static_pointer_cast<ScalarExpression>(methName));
+      const std::string& methStr = sval->getOriginalLiteralString();
+      if (!methStr.empty()) {
+        // $obj->name(...)
+        //       ^^^^
+        // Use getOriginalLiteralString(), which hasn't been
+        // case-normalized, since __call() needs to preserve
+        // the case.
+        StringData* nameLiteral = makeStaticString(methStr);
+        fpiStart = m_ue.bcPos();
+        e.FPushObjMethodD(
+          numParams,
+          nameLiteral,
+          om->isNullSafe() ? ObjMethodOp::NullSafe : ObjMethodOp::NullThrows
+        );
+        useDirectForm = true;
+      }
+    }
+    if (!useDirectForm) {
+      // $obj->{...}(...)
+      //       ^^^^^
+      visit(methName);
+      emitConvertToCell(e);
+      fpiStart = m_ue.bcPos();
+      e.FPushObjMethod(
+        numParams,
+        om->isNullSafe() ? ObjMethodOp::NullSafe : ObjMethodOp::NullThrows
+      );
+    }
+    {
+      FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+      // $obj->name(...)
+      //           ^^^^^
+      for (int i = 0; i < numParams; i++) {
+        emitFuncCallArg(e, (*params)[i], i,
+                        om->hasUnpack() && i + 1 == numParams);
+      }
+    }
+    if (om->hasUnpack()) {
+      e.FCallUnpack(numParams);
+    } else {
+      e.FCall(numParams);
+    }
+    return true;
+  }
+
+  case Construct::KindOfObjectPropertyExpression: {
+    ObjectPropertyExpressionPtr op(
+      static_pointer_cast<ObjectPropertyExpression>(node));
+    if (op->isNullSafe() &&
+        op->hasAnyContext(
+            Expression::RefValue
+          | Expression::LValue
+          | Expression::DeepReference
+        ) && !op->hasContext(Expression::InvokeArgument)
+    ) {
+      throw IncludeTimeFatalException(op,
+        Strings::NULLSAFE_PROP_WRITE_ERROR);
+    }
+    ExpressionPtr obj = op->getObject();
+    SimpleVariablePtr sv = dynamic_pointer_cast<SimpleVariable>(obj);
+    if (sv && sv->isThis() && sv->hasContext(Expression::ObjectContext)) {
+      e.CheckThis();
+      m_evalStack.push(StackSym::H);
+    } else {
+      visit(obj);
+    }
+    StringData* clsName = getClassName(op->getObject());
+    if (clsName) {
+      m_evalStack.setKnownCls(clsName, false);
+    }
+    emitNameString(e, op->getProperty(), true);
+    if (!op->hasAnyContext(Expression::AccessContext|
+                           Expression::ObjectContext)) {
+      m_tempLoc = op->getLocation();
+    }
+    markProp(
+      e,
+      op->isNullSafe()
+        ? PropAccessType::NullSafe
+        : PropAccessType::Normal
+    );
+    return true;
+  }
+
+  case Construct::KindOfQOpExpression: {
+    QOpExpressionPtr q(static_pointer_cast<QOpExpression>(node));
+    if (q->getYes()) {
+      // <expr> ? <expr> : <expr>
+      Label tru, fals, done;
+      {
+        Emitter condEmitter(q->getCondition(), m_ue, *this);
+        visitIfCondition(q->getCondition(), condEmitter,
+                         tru, fals, true);
+      }
+      if (tru.isUsed()) {
+        tru.set(e);
+      }
+      if (currentPositionIsReachable()) {
+        visit(q->getYes());
+        emitConvertToCell(e);
+        e.Jmp(done);
+      }
+      if (fals.isUsed()) fals.set(e);
+      if (currentPositionIsReachable()) {
+        visit(q->getNo());
+        emitConvertToCell(e);
+      }
+      if (done.isUsed()) {
+        done.set(e);
+        m_evalStack.cleanTopMeta();
+      }
+    } else {
+      // <expr> ?: <expr>
+      Label done;
+      visit(q->getCondition());
+      emitConvertToCell(e);
+      e.Dup();
+      e.JmpNZ(done);
+      e.PopC();
+      visit(q->getNo());
+      emitConvertToCell(e);
+      done.set(e);
+      m_evalStack.cleanTopMeta();
+    }
+    return true;
+  }
+
+  case Construct::KindOfScalarExpression: {
+    auto ex = static_pointer_cast<Expression>(node);
+    Variant v;
+    ex->getScalarValue(v);
+    switch (v.getType()) {
+      case KindOfInt64:
+        e.Int(v.getInt64());
+        return true;
+
+      case KindOfDouble:
+        e.Double(v.getDouble());
+        return true;
+
+      case KindOfStaticString:
+      case KindOfString: {
+        StringData* nValue = makeStaticString(v.getStringData());
+        e.String(nValue);
+        return true;
+      }
+
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfBoolean:
+      case KindOfArray:
+      case KindOfObject:
+      case KindOfResource:
+      case KindOfRef:
+      case KindOfClass:
+        break;
+    }
+    not_reached();
+  }
+
+  case Construct::KindOfSimpleVariable: {
+    SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(node));
+    if (sv->isThis()) {
+      if (sv->hasContext(Expression::ObjectContext)) {
+        e.This();
+      } else if (sv->getFunctionScope()->needsLocalThis()) {
+        static const StringData* thisStr = makeStaticString("this");
+        Id thisId = m_curFunc->lookupVarId(thisStr);
+        emitVirtualLocal(thisId);
+      } else {
+        if (sv->isGuarded()) {
+          e.This();
+        } else {
+          auto const subop = sv->hasContext(Expression::ExistContext)
+            ? BareThisOp::NoNotice
+            : BareThisOp::Notice;
+          e.BareThis(subop);
+        }
+      }
+    } else {
+      StringData* nLiteral = makeStaticString(sv->getName());
+      if (sv->isSuperGlobal()) {
+        e.String(nLiteral);
+        markGlobalName(e);
+        return true;
+      }
+      Id i = m_curFunc->lookupVarId(nLiteral);
+      emitVirtualLocal(i);
+      if (sv->getAlwaysStash() &&
+          !sv->hasAnyContext(Expression::ExistContext |
+                             Expression::RefValue |
+                             Expression::LValue |
+                             Expression::RefParameter)) {
+        emitConvertToCell(e);
+      }
+    }
+
+    return true;
+  }
+
+  case Construct::KindOfDynamicVariable: {
+    DynamicVariablePtr dv(static_pointer_cast<DynamicVariable>(node));
+    visit(dv->getSubExpression());
+    emitConvertToCellOrLoc(e);
+    markName(e);
+    return true;
+  }
+
+  case Construct::KindOfStaticMemberExpression: {
+    StaticMemberExpressionPtr sm(
+      static_pointer_cast<StaticMemberExpression>(node));
+    emitVirtualClassBase(e, sm.get());
+    emitNameString(e, sm->getExp());
+    markSProp(e);
+    return true;
+  }
+
+  case Construct::KindOfArrayPairExpression: {
+    ArrayPairExpressionPtr ap(
+      static_pointer_cast<ArrayPairExpression>(node));
+
+    ExpressionPtr key = ap->getName();
+    if (!m_staticArrays.empty()) {
+      ExpressionPtr val = ap->getValue();
+
+      TypedValue tvVal;
+      initScalar(tvVal, val);
+
+      if (key != nullptr) {
+        assert(key->isScalar());
+        TypedValue tvKey = make_tv<KindOfNull>();
+        if (!key->getScalarValue(tvAsVariant(&tvKey))) {
+          InvariantViolation("Expected scalar value for array key\n");
+          always_assert(0);
+        }
+        m_staticArrays.back().set(tvAsCVarRef(&tvKey),
+                                  tvAsVariant(&tvVal));
+      } else {
+        m_staticArrays.back().append(tvAsCVarRef(&tvVal));
+      }
+    } else {
+      // Assume new array is on top of stack
+      bool hasKey = (bool)key;
+      if (hasKey) {
+        visit(key);
+        emitConvertToCellOrLoc(e);
+      }
+      visit(ap->getValue());
+      if (ap->isRef()) {
+        emitConvertToVar(e);
+        if (hasKey) {
+          emitConvertSecondToCell(e);
+          e.AddElemV();
+        } else {
+          e.AddNewElemV();
+        }
+      } else {
+        emitConvertToCell(e);
+        if (hasKey) {
+          emitConvertSecondToCell(e);
+          e.AddElemC();
+        } else {
+          e.AddNewElemC();
+        }
+      }
+    }
+    return true;
+  }
+  case Construct::KindOfExpressionList: {
+    ExpressionListPtr el(static_pointer_cast<ExpressionList>(node));
+    int nelem = el->getCount(), i;
+    bool pop = el->getListKind() != ExpressionList::ListKindParam;
+    int keep = el->getListKind() == ExpressionList::ListKindLeft ?
+      0 : nelem - 1;
+    int cnt = 0;
+    for (i = 0; i < nelem; i++) {
+      ExpressionPtr p((*el)[i]);
+      if (visit(p)) {
+        if (pop && i != keep) {
+          emitPop(e);
+        } else {
+          cnt++;
+        }
+      }
+    }
+    return cnt != 0;
+  }
+  case Construct::KindOfParameterExpression: {
+    not_implemented();
+  }
+  case Construct::KindOfModifierExpression: {
+    not_implemented();
+  }
+  case Construct::KindOfUserAttribute: {
+    not_implemented();
+  }
+  case Construct::KindOfClosureExpression: {
+    // Closures are implemented by anonymous classes that extend Closure.
+    // There is one anonymous class per closure body.
+    ClosureExpressionPtr ce(static_pointer_cast<ClosureExpression>(node));
+
+    // Build a convenient list of use-variables. Each one corresponds to:
+    // (a) an instance variable, to store the value until call time
+    // (b) a parameter of the generated constructor
+    // (c) an argument to the constructor at the definition site
+    // (d) a line of code in the generated constructor;
+    // (e) a line of code in the generated prologue to the closure body
+    ExpressionListPtr useList(ce->getClosureVariables());
+    ClosureUseVarVec useVars;
+    int useCount = (useList ? useList->getCount() : 0);
+    if (useList) {
+      for (int i = 0; i < useCount; ++i) {
+        ParameterExpressionPtr var(
+          static_pointer_cast<ParameterExpression>((*useList)[i]));
+        StringData* varName = makeStaticString(var->getName());
+        useVars.push_back(ClosureUseVar(varName, var->isRef()));
+      }
+    }
+
+    // We're still at the closure definition site. Emit code to instantiate
+    // the new anonymous class, with the use variables as arguments.
+    ExpressionListPtr valuesList(ce->getClosureValues());
+    for (int i = 0; i < useCount; ++i) {
+      ce->type() == ClosureType::Short
+        ? emitLambdaCaptureArg(e, (*valuesList)[i])
+        : emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
+    }
+
+    // The parser generated a unique name for the function,
+    // use that for the class
+    std::string clsName = ce->getClosureFunction()->getOriginalName();
+
+    if (m_curFunc->isPseudoMain()) {
+      std::ostringstream oss;
+      oss << clsName << '$' << std::hex <<
+        m_curFunc->ue().md5().q[1] << m_curFunc->ue().md5().q[0] << '$';
+      clsName = oss.str();
+    }
+
+    if (Option::WholeProgram) {
+      int my_id;
+      {
+        EmittedClosures::accessor acc;
+        s_emittedClosures.insert(acc, makeStaticString(clsName));
+        my_id = ++acc->second;
+      }
+      if (my_id > 1) {
+        // The closure was from a trait, so we need a unique name in the
+        // implementing class. _ is different from the #, which is used for
+        // many closures in the same func in ParserBase::newClosureName
+        folly::toAppend('_', my_id, &clsName);
+      }
+    }
+
+    auto ssClsName = makeStaticString(clsName);
+    e.CreateCl(useCount, ssClsName);
+
+    // From here on out, we're creating a new class to hold the closure.
+    const static StringData* parentName = makeStaticString("Closure");
+    const Location* sLoc = ce->getLocation().get();
+    PreClassEmitter* pce = m_ue.newPreClassEmitter(
+      ssClsName, PreClass::ClosureHoistable);
+
+    auto const attrs = AttrNoOverride | AttrUnique | AttrPersistent;
+
+    pce->init(sLoc->line0, sLoc->line1, m_ue.bcPos(),
+              attrs, parentName, nullptr);
+
+    // Instance properties---one for each use var, and one for
+    // each static local.
+    TypedValue uninit;
+    tvWriteUninit(&uninit);
+    for (auto& useVar : useVars) {
+      pce->addProperty(useVar.first, AttrPrivate, nullptr, nullptr,
+                       &uninit, RepoAuthType{});
+    }
+
+    // The __invoke method. This is the body of the closure, preceded by
+    // code that pulls the object's instance variables into locals.
+    static const StringData* invokeName = makeStaticString("__invoke");
+    FuncEmitter* invoke = m_ue.newMethodEmitter(invokeName, pce);
+    invoke->isClosureBody = true;
+    pce->addMethod(invoke);
+    MethodStatementPtr body(
+      static_pointer_cast<MethodStatement>(ce->getClosureFunction()));
+    postponeMeth(body, invoke, false, new ClosureUseVarVec(useVars));
+
+    return true;
+  }
+  case Construct::KindOfYieldExpression: {
+    YieldExpressionPtr y(static_pointer_cast<YieldExpression>(node));
+
+    registerYieldAwait(y);
+    assert(m_evalStack.size() == 0);
+
+    // evaluate key passed to yield, if applicable
+    ExpressionPtr keyExp = y->getKeyExpression();
+    if (keyExp) {
+      m_curFunc->isPairGenerator = true;
+      visit(keyExp);
+      emitConvertToCell(e);
+    }
+
+    // evaluate value expression passed to yield
+    visit(y->getValueExpression());
+    emitConvertToCell(e);
+
+    // suspend generator
+    if (keyExp) {
+      assert(m_evalStack.size() == 2);
+      e.YieldK();
+    } else {
+      assert(m_evalStack.size() == 1);
+      e.Yield();
+    }
+
+    // continue with the received result on the stack
+    assert(m_evalStack.size() == 1);
+    return true;
+  }
+  case Construct::KindOfAwaitExpression: {
+    AwaitExpressionPtr await(static_pointer_cast<AwaitExpression>(node));
+
+    registerYieldAwait(await);
+    assert(m_evalStack.size() == 0);
+
+    // If we know statically that it's a subtype of WaitHandle, we
+    // don't need to make a call.
+    bool const isKnownWaitHandle = [&] {
+      auto const expr = await->getExpression();
+      auto const ar = expr->getScope()->getContainingProgram();
+      auto const type = expr->getActualType();
+      return type && Type::SubType(ar, type,
+                       Type::GetType(Type::KindOfObject, "HH\\WaitHandle"));
+    }();
+
+    Label resume;
+
+    // evaluate expression passed to await
+    visit(await->getExpression());
+    emitConvertToCell(e);
+
+    // if expr is null, just continue
+    e.Dup();
+    emitIsType(e, IsTypeOp::Null);
+    e.JmpNZ(resume);
+
+    if (!isKnownWaitHandle) {
+      Label likely;
+      const static StringData* nWaitHandle =
+        makeStaticString("HH\\WaitHandle");
+
+      e.Dup();
+      e.InstanceOfD(nWaitHandle);
+      e.JmpNZ(likely);
+      emitConstMethodCallNoParams(e, "getWaitHandle");
+      likely.set(e);
+    }
+    assert(m_evalStack.size() == 1);
+
+    // TODO(#3197024): if isKnownWaitHandle, we should put an
+    // AssertObjStk so the Await type check can be avoided.
+    e.Await(m_pendingIters.size());
+
+    resume.set(e);
+    return true;
+  }
+  case Construct::KindOfQueryExpression: {
+    QueryExpressionPtr query(static_pointer_cast<QueryExpression>(node));
+    auto args = *query->getQueryArguments();
+    auto numArgs = args.getCount();
+    visit(args[0]);
+    emitConvertToCell(e);
+    auto fpiStart = m_ue.bcPos();
+    StringData* executeQuery = makeStaticString("executeQuery");
+    e.FPushObjMethodD(numArgs+1, executeQuery, ObjMethodOp::NullThrows);
+    {
+      FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+      e.String(query->getQueryString());
+      emitFPass(e, 0, PassByRefKind::ErrorOnCell);
+      auto selectCallback = query->getSelectClosure();
+      if (selectCallback != nullptr) {
+        visit(selectCallback);
+        emitConvertToCell(e);
+      } else {
+        e.Null();
+      }
+      emitFPass(e, 1, PassByRefKind::ErrorOnCell);
+      for (int i = 1; i < numArgs; i++) {
+        visit(args[i]);
+        emitConvertToCell(e);
+        emitFPass(e, i+1, PassByRefKind::ErrorOnCell);
+      }
+    }
+    e.FCall(numArgs+1);
+    e.UnboxR();
+    return true;
+  }
+  case Construct::KindOfExpression:
+  case Construct::KindOfFromClause:
+  case Construct::KindOfLetClause:
+  case Construct::KindOfWhereClause:
+  case Construct::KindOfSelectClause:
+  case Construct::KindOfIntoClause:
+  case Construct::KindOfJoinClause:
+  case Construct::KindOfGroupClause:
+  case Construct::KindOfOrderbyClause:
+  case Construct::KindOfOrdering: {
+    not_reached();
+  }
   }
 
   not_reached();

@@ -43,18 +43,28 @@ using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define DEC_EXPR_NAMES(x,t) #x
+#define DEC_EXPR_NAMES(x,t) #x,
 const char *Expression::Names[] = {
   DECLARE_EXPRESSION_TYPES(DEC_EXPR_NAMES)
 };
+#undef DEC_EXPR_NAMES
 
-#define DEC_EXPR_CLASSES(x,t) Expression::t
+const char* Expression::nameOfKind(Construct::KindOf kind) {
+  assert(kind > Construct::KindOfExpression);
+  auto const idx = static_cast<int32_t>(kind) -
+    static_cast<int32_t>(Construct::KindOfExpression);
+  assert(idx > 0);
+  return Names[idx];
+}
+
+#define DEC_EXPR_CLASSES(x,t) Expression::t,
 Expression::ExprClass Expression::Classes[] = {
   DECLARE_EXPRESSION_TYPES(DEC_EXPR_CLASSES)
 };
+#undef DEC_EXPR_CLASSES
 
 Expression::Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS)
-    : Construct(scope, loc), m_context(RValue), m_kindOf(kindOf),
+    : Construct(scope, loc, kindOf), m_context(RValue),
       m_originalScopeSet(false), m_unused(false), m_canon_id(0), m_error(0),
       m_canonPtr() {
 }
@@ -142,7 +152,11 @@ bool Expression::hasSubExpr(ExpressionPtr sub) const {
 }
 
 Expression::ExprClass Expression::getExprClass() const {
-  ExprClass cls = Classes[m_kindOf];
+  assert(m_kindOf > Construct::KindOfExpression);
+  auto const idx = static_cast<int32_t>(m_kindOf) -
+    static_cast<int32_t>(Construct::KindOfExpression);
+  assert(idx > 0);
+  ExprClass cls = Classes[idx];
   if (cls == Update) {
     ExpressionPtr k = getStoreVariable();
     if (!k || !(k->hasContext(OprLValue))) cls = Expression::None;

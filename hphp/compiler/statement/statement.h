@@ -23,7 +23,7 @@
 
 #define STATEMENT_CONSTRUCTOR_BASE_PARAMETERS                           \
   BlockScopePtr scope, LabelScopePtr labelScope, LocationPtr loc, \
-  Statement::KindOf kindOf
+  Construct::KindOf kindOf
 #define STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES                     \
   scope, labelScope, loc, kindOf
 #define STATEMENT_CONSTRUCTOR_PARAMETERS                                \
@@ -51,63 +51,17 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(LabelScope);
 
-#define DECLARE_STATEMENT_TYPES(x)              \
-    x(FunctionStatement),                       \
-    x(ClassStatement),                          \
-    x(InterfaceStatement),                      \
-    x(ClassVariable),                           \
-    x(ClassConstant),                           \
-    x(MethodStatement),                         \
-    x(StatementList),                           \
-    x(BlockStatement),                          \
-    x(IfBranchStatement),                       \
-    x(IfStatement),                             \
-    x(WhileStatement),                          \
-    x(DoStatement),                             \
-    x(ForStatement),                            \
-    x(SwitchStatement),                         \
-    x(CaseStatement),                           \
-    x(BreakStatement),                          \
-    x(ContinueStatement),                       \
-    x(ReturnStatement),                         \
-    x(GlobalStatement),                         \
-    x(StaticStatement),                         \
-    x(EchoStatement),                           \
-    x(UnsetStatement),                          \
-    x(ExpStatement),                            \
-    x(ForEachStatement),                        \
-    x(FinallyStatement),                        \
-    x(CatchStatement),                          \
-    x(TryStatement),                            \
-    x(ThrowStatement),                          \
-    x(GotoStatement),                           \
-    x(LabelStatement),                          \
-    x(UseTraitStatement),                       \
-    x(ClassRequireStatement),                   \
-    x(TraitPrecStatement),                      \
-    x(TraitAliasStatement),                     \
-    x(TypedefStatement)
-
 class Statement : public Construct {
-public:
-#define DEC_STMT_ENUM(x) KindOf##x
-  enum KindOf {
-    DECLARE_STATEMENT_TYPES(DEC_STMT_ENUM)
-    /* KindOfCount = 29 */
-  };
+private:
   static const char *Names[];
+
+public:
+  static const char* nameOfKind(Construct::KindOf);
 
 protected:
   Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS);
 
 public:
-
-  /**
-   * Type checking without RTTI.
-   */
-  bool is(KindOf type) const { return m_kindOf == type;}
-  KindOf getKindOf() const { return m_kindOf;}
-
   /**
    * This is to avoid dynamic casting to StatementList in Parser.
    */
@@ -148,7 +102,6 @@ public:
   void setLabelScope(LabelScopePtr labelScope) { m_labelScope = labelScope; }
 
 protected:
-  KindOf m_kindOf;
   int m_silencerCountMax;
   int m_silencerCountCurrent;
   LabelScopePtr m_labelScope;

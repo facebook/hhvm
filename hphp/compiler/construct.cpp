@@ -37,9 +37,14 @@ using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Construct::Construct(BlockScopePtr scope, LocationPtr loc)
-    : m_blockScope(scope), m_flagsVal(0), m_loc(loc),
-      m_containedEffects(0), m_effectsTag(0) {
+Construct::Construct(BlockScopePtr scope, LocationPtr loc, KindOf kindOf)
+  : m_blockScope(scope)
+  , m_flagsVal(0)
+  , m_kindOf(kindOf)
+  , m_loc(loc)
+  , m_containedEffects(0)
+  , m_effectsTag(0)
+{
 }
 
 void Construct::resetScope(BlockScopeRawPtr scope, bool resetOrigScope) {
@@ -164,19 +169,22 @@ void Construct::dumpNode(int spc) {
   ExpressionPtr idPtr = ExpressionPtr();
   int ef = 0;
 
-  if (Statement *s = dynamic_cast<Statement*>(this)) {
-    Statement::KindOf stype = s->getKindOf();
-    name = Statement::Names[stype];
+  if (isStatement()) {
+    Statement *s = static_cast<Statement*>(this);
+    auto stype = s->getKindOf();
+    name = Statement::nameOfKind(stype);
     value = s->getName();
     type = (int)stype;
-  } else if (Expression *e = dynamic_cast<Expression*>(this)) {
+  } else {
+    assert(isExpression());
+    Expression *e = static_cast<Expression*>(this);
     id = e->getCanonID();
     idPtr = e->getCanonLVal();
 
     ef = e->getLocalEffects();
 
     Expression::KindOf etype = e->getKindOf();
-    name = Expression::Names[etype];
+    name = Expression::nameOfKind(etype);
     switch (etype) {
       case Expression::KindOfSimpleFunctionCall:
         value = static_cast<SimpleFunctionCall*>(e)->getName();
@@ -266,8 +274,6 @@ void Construct::dumpNode(int spc) {
       }
       type_info = "{" + type_info + "} ";
     }
-  } else {
-    not_reached();
   }
 
   int s = spc;

@@ -65,15 +65,125 @@ public:
   }
 };
 
+#define DECLARE_STATEMENT_TYPES(x) \
+  x(Statement)              \
+  x(FunctionStatement)      \
+  x(ClassStatement)         \
+  x(InterfaceStatement)     \
+  x(ClassVariable)          \
+  x(ClassConstant)          \
+  x(MethodStatement)        \
+  x(StatementList)          \
+  x(BlockStatement)         \
+  x(IfBranchStatement)      \
+  x(IfStatement)            \
+  x(WhileStatement)         \
+  x(DoStatement)            \
+  x(ForStatement)           \
+  x(SwitchStatement)        \
+  x(CaseStatement)          \
+  x(BreakStatement)         \
+  x(ContinueStatement)      \
+  x(ReturnStatement)        \
+  x(GlobalStatement)        \
+  x(StaticStatement)        \
+  x(EchoStatement)          \
+  x(UnsetStatement)         \
+  x(ExpStatement)           \
+  x(ForEachStatement)       \
+  x(FinallyStatement)       \
+  x(CatchStatement)         \
+  x(TryStatement)           \
+  x(ThrowStatement)         \
+  x(GotoStatement)          \
+  x(LabelStatement)         \
+  x(UseTraitStatement)      \
+  x(ClassRequireStatement)  \
+  x(TraitPrecStatement)     \
+  x(TraitAliasStatement)    \
+  x(TypedefStatement)
+
+#define DECLARE_EXPRESSION_TYPES(x)     \
+  x(Expression,                  None) \
+  x(ExpressionList,              None) \
+  x(AssignmentExpression,       Store) \
+  x(SimpleVariable,              Load) \
+  x(DynamicVariable,             Load) \
+  x(StaticMemberExpression,      Load) \
+  x(ArrayElementExpression,      Load) \
+  x(DynamicFunctionCall,         Call) \
+  x(SimpleFunctionCall,          Call) \
+  x(ScalarExpression,            None) \
+  x(ObjectPropertyExpression,    Load) \
+  x(ObjectMethodExpression,      Call) \
+  x(ListAssignment,             Store) \
+  x(NewObjectExpression,         Call) \
+  x(UnaryOpExpression,         Update) \
+  x(IncludeExpression,           Call) \
+  x(BinaryOpExpression,        Update) \
+  x(QOpExpression,               None) \
+  x(ArrayPairExpression,         None) \
+  x(ClassConstantExpression,    Const) \
+  x(ParameterExpression,         None) \
+  x(ModifierExpression,          None) \
+  x(ConstantExpression,         Const) \
+  x(EncapsListExpression,        None) \
+  x(ClosureExpression,           None) \
+  x(YieldExpression,             None) \
+  x(AwaitExpression,             None) \
+  x(UserAttribute,               None) \
+  x(QueryExpression,             None) \
+  x(FromClause,                  None) \
+  x(LetClause,                   None) \
+  x(WhereClause,                 None) \
+  x(SelectClause,                None) \
+  x(IntoClause,                  None) \
+  x(JoinClause,                  None) \
+  x(GroupClause,                 None) \
+  x(OrderbyClause,               None) \
+  x(Ordering,                    None)
+
 /**
  * Base class of Expression and Statement.
  */
 class Construct : public std::enable_shared_from_this<Construct>,
                   public JSON::CodeError::ISerializable {
-protected:
-  Construct(BlockScopePtr scope, LocationPtr loc);
 public:
   virtual ~Construct() {}
+
+#define DEC_STATEMENT_ENUM(x) KindOf##x,
+#define DEC_EXPRESSION_ENUM(x,t) KindOf##x,
+  enum KindOf {
+    DECLARE_STATEMENT_TYPES(DEC_STATEMENT_ENUM)
+    DECLARE_EXPRESSION_TYPES(DEC_EXPRESSION_ENUM)
+  };
+#undef DEC_EXPRESSION_ENUM
+#undef DEC_STATEMENT_ENUM
+
+protected:
+  Construct(BlockScopePtr scope, LocationPtr loc, KindOf);
+
+public:
+  /**
+   * Type checking without RTTI.
+   */
+  bool is(KindOf type) const {
+    assert(m_kindOf != KindOfStatement);
+    assert(m_kindOf != KindOfExpression);
+    return m_kindOf == type;
+  }
+  KindOf getKindOf() const {
+    assert(m_kindOf != KindOfStatement);
+    assert(m_kindOf != KindOfExpression);
+    return m_kindOf;
+  }
+
+  bool isStatement() const {
+    return !isExpression();
+  }
+  bool isExpression() const {
+    return m_kindOf > KindOfExpression;
+  }
 
   enum Effect {
     NoEffect = 0,
@@ -297,6 +407,7 @@ private:
     } m_flags;
   };
 protected:
+  KindOf m_kindOf;
   LocationPtr m_loc;
   mutable int m_containedEffects;
   mutable int m_effectsTag;

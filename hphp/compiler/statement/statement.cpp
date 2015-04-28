@@ -22,14 +22,23 @@ using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define DEC_STMT_NAMES(x) #x
+#define DEC_STMT_NAMES(x) #x,
 const char *Statement::Names[] = {
   DECLARE_STATEMENT_TYPES(DEC_STMT_NAMES)
 };
+#undef DEC_STMT_NAMES
+
+const char* Statement::nameOfKind(Construct::KindOf kind) {
+  assert(kind > Construct::KindOfStatement);
+  assert(kind < Construct::KindOfExpression);
+  auto const idx = static_cast<int32_t>(kind) -
+    static_cast<int32_t>(Construct::KindOfStatement);
+  assert(idx > 0);
+  return Names[idx];
+}
 
 Statement::Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS)
-  : Construct(scope, loc),
-    m_kindOf(kindOf),
+  : Construct(scope, loc, kindOf),
     m_labelScope(labelScope) {
   assert(m_labelScope != nullptr);
 }

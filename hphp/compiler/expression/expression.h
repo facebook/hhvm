@@ -51,52 +51,13 @@ DECLARE_BOOST_TYPES(Statement);
 DECLARE_EXTENDED_BOOST_TYPES(Expression);
 class Variant;
 
-#define DECLARE_EXPRESSION_TYPES(x)             \
-  x(ExpressionList, None),                      \
-    x(AssignmentExpression, Store),             \
-    x(SimpleVariable, Load),                    \
-    x(DynamicVariable, Load),                   \
-    x(StaticMemberExpression, Load),            \
-    x(ArrayElementExpression, Load),            \
-    x(DynamicFunctionCall, Call),               \
-    x(SimpleFunctionCall, Call),                \
-    x(ScalarExpression, None),                  \
-    x(ObjectPropertyExpression, Load),          \
-    x(ObjectMethodExpression, Call),            \
-    x(ListAssignment, Store),                   \
-    x(NewObjectExpression, Call),               \
-    x(UnaryOpExpression, Update),               \
-    x(IncludeExpression, Call),                 \
-    x(BinaryOpExpression, Update),              \
-    x(QOpExpression, None),                     \
-    x(ArrayPairExpression, None),               \
-    x(ClassConstantExpression, Const),          \
-    x(ParameterExpression, None),               \
-    x(ModifierExpression, None),                \
-    x(ConstantExpression, Const),               \
-    x(EncapsListExpression, None),              \
-    x(ClosureExpression, None),                 \
-    x(YieldExpression, None),                   \
-    x(AwaitExpression, None),                   \
-    x(UserAttribute, None),                     \
-    x(QueryExpression, None),                   \
-    x(FromClause, None),                        \
-    x(LetClause, None),                         \
-    x(WhereClause, None),                       \
-    x(SelectClause, None),                      \
-    x(IntoClause, None),                        \
-    x(JoinClause, None),                        \
-    x(GroupClause, None),                       \
-    x(OrderbyClause, None),                     \
-    x(Ordering, None)
-
 class Expression : public Construct {
-public:
-#define DEC_EXPR_ENUM(x,t) KindOf##x
-  enum KindOf {
-    DECLARE_EXPRESSION_TYPES(DEC_EXPR_ENUM)
-  };
+private:
   static const char *Names[];
+
+public:
+  static const char* nameOfKind(Construct::KindOf);
+
   enum ExprClass {
     None,
     Load = 1,
@@ -231,11 +192,6 @@ public:
   }
   ExpressionPtr getCanonTypeInfPtr() const;
 
-  /**
-   * Type checking without RTTI.
-   */
-  bool is(KindOf kindOf) const { return m_kindOf == kindOf;}
-  KindOf getKindOf() const { return m_kindOf;}
   virtual bool isTemporary() const { return false; }
   virtual bool isScalar() const { return false; }
   bool isArray() const;
@@ -325,7 +281,6 @@ protected:
   int m_argNum;
 
 private:
-  KindOf m_kindOf;
   bool m_originalScopeSet;
   bool m_unused;
   unsigned m_canon_id;

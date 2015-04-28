@@ -1787,9 +1787,9 @@ void drop_support_bit(Env& env, RCState& state, uint32_t bit) {
   }
 }
 
-void drop_support(Env& env, RCState& state, AliasClass acls) {
-  FTRACE(3, "    drop support {}\n", show(acls));
-  for_each_bit(env.ainfo.must_alias(acls), [&] (uint32_t bit) {
+void drop_support_bits(Env& env, RCState& state, ALocBits bits) {
+  FTRACE(3, "    drop support {}\n", show(bits));
+  for_each_bit(bits, [&] (uint32_t bit) {
     drop_support_bit(env, state, bit);
   });
 }
@@ -1815,7 +1815,7 @@ void create_store_support(Env& env,
 
       /*
        * This exact bit can't be set anymore (because the caller of this
-       * function cleared it in drop_support).
+       * function cleared it via a call to drop_support_bit, if we had a meta).
        *
        * Since we're doing a store, we don't need to worry about whether other
        * bits from meta->conflicts are supporting something, even if one of
@@ -1863,7 +1863,7 @@ void handle_call(Env& env,
   if (e.destroys_locals) bset |= env.ainfo.all_frame;
   bset |= env.ainfo.may_alias(e.stack);
   bset |= env.ainfo.may_alias(AHeapAny);
-  bset &= ~env.ainfo.must_alias(e.kills);
+  bset &= ~env.ainfo.expand(e.kills);
   reduce_support_bits(env, state, bset, add_node);
 }
 
@@ -1909,7 +1909,9 @@ void pure_store(Env& env,
    * First, handle the effects of the store on memory support.  See the docs
    * above in "Effects of Pure Stores on Memory Support" for an explanation.
    */
-  drop_support(env, state, dst);
+  if (auto const meta = env.ainfo.find(dst)) {
+    drop_support_bit(env, state, meta->index);
+  }
 
   /*
    * Now handle the effects of the store on the aset for the value being
@@ -1929,7 +1931,7 @@ void pure_spill_frame(Env& env,
    * store over kNumActRecCells stack slots, and just like normal PureStores we
    * can drop any support bits for them without reducing their lower bounds.
    */
-  drop_support(env, state, psf.dst);
+  drop_support_bits(env, state, env.ainfo.expand(psf.stk));
 
   /*
    * Now the effects on the set being stored.  Pre-live frames are slightly
@@ -1970,7 +1972,7 @@ void analyze_mem_effects(Env& env,
       // Locations that are killed don't need to be tracked as memory support
       // anymore, because nothing can load that pointer (and then decref it)
       // anymore without storing over the location first.
-      drop_support(env, state, x.kills);
+      drop_support_bits(env, state, env.ainfo.expand(x.kills));
       // Locations in the stores set may be stored to with a 'normal write
       // barrier', decreffing the pointer that used to be there.
       reduce_support(env, state, x.stores, add_node);
@@ -2085,7 +2087,8 @@ void rc_analyze_inst(Env& env,
     // changes some stack AliasClasses to not exist anymore.  See comments in
     // pure_spill_frame for an explanation of why we don't need any support
     // bits on this now.
-    drop_support(env, state, canonicalize(inline_fp_frame(&inst)));
+    drop_support_bits(env, state,
+      env.ainfo.expand(canonicalize(inline_fp_frame(&inst))));
     break;
   default:
     break;

@@ -368,7 +368,7 @@ Flags analyze_inst(Local& env,
     [&] (ExitEffects)       { clear_everything(env); },
 
     [&] (PureStore m)      { store(env, m.dst, m.value); },
-    [&] (PureSpillFrame m) { store(env, m.dst, nullptr); },
+    [&] (PureSpillFrame m) { store(env, m.stk, nullptr); },
 
     [&] (PureLoad m)       { flags = load(env, inst, m.src); },
 

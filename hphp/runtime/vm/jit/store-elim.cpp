@@ -154,7 +154,7 @@ void load(Local& env, AliasClass acls) {
 }
 
 void kill(Local& env, AliasClass acls) {
-  addKillSet(env, env.global.ainfo.must_alias(canonicalize(acls)));
+  addKillSet(env, env.global.ainfo.expand(canonicalize(acls)));
 }
 
 folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
@@ -246,7 +246,7 @@ void visit(Local& env, IRInstruction& inst) {
     },
 
     [&] (PureSpillFrame l) {
-      auto const it = env.global.ainfo.stack_ranges.find(canonicalize(l.dst));
+      auto const it = env.global.ainfo.stack_ranges.find(canonicalize(l.stk));
       if (it == end(env.global.ainfo.stack_ranges)) return;
       // If all the bits corresponding to the stack range are dead, we can
       // eliminate this instruction.  We can also count all of them as

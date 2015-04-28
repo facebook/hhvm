@@ -58,7 +58,7 @@ void visit_locations(const BlockList& blocks, Visit visit) {
                                     visit(x.kills); },
         [&] (PureLoad x)          { visit(x.src); },
         [&] (PureStore x)         { visit(x.dst); },
-        [&] (PureSpillFrame x)    { visit(x.dst); visit(x.ctx); },
+        [&] (PureSpillFrame x)    { visit(x.stk); visit(x.ctx); },
         [&] (ExitEffects x)       { visit(x.live); visit(x.kills); }
       );
     }
@@ -128,13 +128,13 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
   return ret;
 }
 
-ALocBits AliasAnalysis::must_alias(AliasClass acls) const {
+ALocBits AliasAnalysis::expand(AliasClass acls) const {
   if (auto const info = find(acls)) return ALocBits{}.set(info->index);
 
   auto ret = ALocBits{};
 
-  auto const it = stk_must_alias_map.find(acls);
-  if (it != end(stk_must_alias_map)) ret |= it->second;
+  auto const it = stk_expand_map.find(acls);
+  if (it != end(stk_expand_map)) ret |= it->second;
 
   if (AFrameAny <= acls) ret |= all_frame;
 
@@ -193,7 +193,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
      * that, when they can re-enter and do things to the stack in some range
      * (below the re-entry depth, for example), but also affect some other type
      * of memory (CastStk, for example).  In particular this means we want that
-     * AliasClass to have an entry in the stk_must_alias_map, so we'll populate
+     * AliasClass to have an entry in the stk_expand_map, so we'll populate
      * it later.  Currently most of these situations should probably bail at
      * kMaxExpandedStackRange, although there are some situations that won't
      * (e.g. instructions like CoerceStk, which will have an AHeapAny (from
@@ -201,7 +201,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
      */
     if (auto const stk = acls.stack()) {
       if (stk->size > 1) {
-        ret.stk_must_alias_map[AliasClass { *stk }];
+        ret.stk_expand_map[AliasClass { *stk }];
       }
       if (stk->size > kMaxExpandedStackRange) return;
 
@@ -281,24 +281,20 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
 
     /*
      * Note: this is probably more complex than it needs to be, because we're
-     * iterating the stk_must_alias_map for each location.  Since
-     * kMaxTrackedALocs is bounded by a constant, it's kinda
-     * O(stk_must_alias_map), but not in a good way.  The number of locations
-     * is currently generally small, so this is probably ok for now---but if we
-     * remove the limit we may need to revisit this so it can't blow up.
+     * iterating the stk_expand_map for each location.  Since kMaxTrackedALocs
+     * is bounded by a constant, it's kinda O(stk_expand_map), but not in a
+     * good way.  The number of locations is currently generally small, so this
+     * is probably ok for now---but if we remove the limit we may need to
+     * revisit this so it can't blow up.
      */
     if (kv.first.is_stack()) {
-      for (auto& maEnt : ret.stk_must_alias_map) {
-        if (kv.first <= maEnt.first) {
-          FTRACE(2, "  ({}) {} must_alias {}\n",
+      for (auto& ent : ret.stk_expand_map) {
+        if (kv.first <= ent.first) {
+          FTRACE(2, "  ({}) {} <= {}\n",
             kv.second.index,
             show(kv.first),
-            show(maEnt.first));
-          maEnt.second.set(kv.second.index);
-        } else {
-          FTRACE(3, "  !must_alias: {} and {}\n",
-            show(kv.first),
-            show(maEnt.first));
+            show(ent.first));
+          ent.second.set(kv.second.index);
         }
       }
     }
@@ -334,8 +330,8 @@ std::string show(const AliasAnalysis& linfo) {
     "all frame",  show(linfo.all_frame),
     "all stack",  show(linfo.all_stack)
   );
-  for (auto& kv : linfo.stk_must_alias_map) {
-    folly::format(&ret, " ma {: <17}       : {}\n",
+  for (auto& kv : linfo.stk_expand_map) {
+    folly::format(&ret, " stk_expand {: <17}       : {}\n",
       show(kv.first),
       show(kv.second));
   }

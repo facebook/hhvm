@@ -94,32 +94,41 @@ struct AliasAnalysis {
   ALocBits all_mistate;
 
   /*
-   * Sets of alias classes that are used by must_alias.
-   *
-   * Note: right now this is only populated for stack locations.  You will have
-   * to add more to collect_aliases if you have a new use case.
-   */
-  jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> stk_must_alias_map;
-
-  /*
    * Return a set of locations that we've assigned ids to that may alias a
    * given AliasClass.  Note that (as usual) memory locations we haven't
    * assigned bits to may still be affected, but this module only reports
    * effects on locations assigned bits.
+   *
+   * This function may conservatively return more bits than actually may
+   * overlap `acls'.
    */
   ALocBits may_alias(AliasClass acls) const;
 
   /*
-   * Return a set of locations that we've assigned ids to that must be
-   * contained in `acls'.  This function will conservatively return an empty
-   * set.
+   * Return a set of locations that we've assigned ids to that are definitely
+   * contained in `acls'.  This function may conservatively return a smaller
+   * set of bits: every bit that is set in the returned ALocBits is contained
+   * in `acls', but there may be locations contained in `acls' that don't have
+   * a bit set in the returned vector.
+   *
+   * This should generally be used with AliasClasses that are exhaustive,
+   * must-style information.  That is, AliasClasses that should be interpreted
+   * as referring to every point they contain.  Right now, the primary example
+   * of that sort of AliasClasses is the class of locations in `kills' sets in
+   * certain memory effects structs: these sets indicate every location inside
+   * the class is affected.
    *
    * Right now, this function will work for specific AliasClasses we've
    * assigned ids---for larger classes, it only supports stack ranges observed
    * during alias collection, AFrameAny, and some cases of unions of those---if
-   * you need more, it will need some additions.
+   * you need more to work, the implementation will need some improvements.
    */
-  ALocBits must_alias(AliasClass acls) const;
+  ALocBits expand(AliasClass acls) const;
+
+  /*
+   * Sets of alias classes that are used by expand().
+   */
+  jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> stk_expand_map;
 
   /*
    * Map from frame SSATmp ids to the location bits for all of the frame's

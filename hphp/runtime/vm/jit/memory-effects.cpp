@@ -1184,8 +1184,8 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     [&] (PureLoad x)         { check(x.src); },
     [&] (PureStore x)        { check(x.dst);
                                always_assert(x.value != nullptr); },
-    [&] (PureSpillFrame x)   { check(x.dst); check(x.ctx);
-                               always_assert(x.ctx <= x.dst); },
+    [&] (PureSpillFrame x)   { check(x.stk); check(x.ctx);
+                               always_assert(x.ctx <= x.stk); },
     [&] (IterEffects x)      { check_fp(x.fp); check(x.kills); },
     [&] (IterEffects2 x)     { check_fp(x.fp); check(x.kills); },
     [&] (ExitEffects x)      { check(x.live); check(x.kills); },
@@ -1230,7 +1230,7 @@ MemEffects canonicalize(MemEffects me) {
       return PureStore { canonicalize(x.dst), x.value };
     },
     [&] (PureSpillFrame x) -> R {
-      return PureSpillFrame { canonicalize(x.dst), canonicalize(x.ctx) };
+      return PureSpillFrame { canonicalize(x.stk), canonicalize(x.ctx) };
     },
     [&] (ExitEffects x) -> R {
       return ExitEffects { canonicalize(x.live), canonicalize(x.kills) };
@@ -1283,7 +1283,7 @@ std::string show(MemEffects effects) {
       return sformat("interp({})", show(x.kills));
     },
     [&] (PureSpillFrame x) {
-      return sformat("stFrame({} ; {})", show(x.dst), show(x.ctx));
+      return sformat("stFrame({} ; {})", show(x.stk), show(x.ctx));
     },
     [&] (PureLoad x)        { return sformat("ld({})", show(x.src)); },
     [&] (PureStore x)       { return sformat("st({})", show(x.dst)); },

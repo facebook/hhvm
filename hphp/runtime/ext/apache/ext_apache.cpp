@@ -145,10 +145,9 @@ void ApacheExtension::moduleInit() {
 }
 
 void ApacheExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
-  Hdf apache = config["Apache"];
   Enable = RuntimeOption::ServerExecutionMode() ||
            Config::GetBool(ini,
-                           config["Apache"]["EnableInCLI"],
+                           config, "Apache.EnableInCLI",
                            RuntimeOption::EnableHipHopSyntax);
 }
 

@@ -61,6 +61,11 @@ public:
   ~Hdf();
 
   /**
+   * Is this an empty Hdf?
+   */
+  bool isEmpty() const;
+
+  /**
    * Close current and make a copy of the specified.
    */
   void assign(const Hdf &hdf);

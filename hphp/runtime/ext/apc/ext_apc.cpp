@@ -111,46 +111,56 @@ typedef ConcurrentTableSharedStore::KeyValuePair KeyValuePair;
 typedef ConcurrentTableSharedStore::DumpMode DumpMode;
 
 void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
-  Hdf apc = config["Server"]["APC"];
-
-  Config::Bind(Enable, ini, apc["EnableApc"], true);
-  Config::Bind(EnableConstLoad, ini, apc["EnableConstLoad"], false);
-  Config::Bind(ForceConstLoadToAPC, ini, apc["ForceConstLoadToAPC"], true);
-  Config::Bind(PrimeLibrary, ini, apc["PrimeLibrary"]);
-  Config::Bind(LoadThread, ini, apc["LoadThread"], 2);
-  Config::Bind(CompletionKeys, ini, apc["CompletionKeys"]);
-  std::string tblType = Config::GetString(ini, apc["TableType"], "concurrent");
+  Config::Bind(Enable, ini, config, "Server.APC.EnableApc", true);
+  Config::Bind(EnableConstLoad, ini, config, "Server.APC.EnableConstLoad",
+               false);
+  Config::Bind(ForceConstLoadToAPC, ini, config,
+               "Server.APC.ForceConstLoadToAPC", true);
+  Config::Bind(PrimeLibrary, ini, config, "Server.APC.PrimeLibrary");
+  Config::Bind(LoadThread, ini, config, "Server.APC.LoadThread", 2);
+  Config::Bind(CompletionKeys, ini, config, "Server.APC.CompletionKeys");
+  std::string tblType = Config::GetString(ini, config, "Server.APC.TableType",
+                                          "concurrent");
   if (strcasecmp(tblType.c_str(), "concurrent") == 0) {
     TableType = TableTypes::ConcurrentTable;
   } else {
     throw std::runtime_error("invalid apc table type");
   }
-  Config::Bind(EnableApcSerialize, ini, apc["EnableApcSerialize"], true);
-  Config::Bind(ExpireOnSets, ini, apc["ExpireOnSets"]);
-  Config::Bind(PurgeFrequency, ini, apc["PurgeFrequency"], 4096);
-  Config::Bind(PurgeRate, ini, apc["PurgeRate"], -1);
+  Config::Bind(EnableApcSerialize, ini, config, "Server.APC.EnableApcSerialize",
+               true);
+  Config::Bind(ExpireOnSets, ini, config, "Server.APC.ExpireOnSets");
+  Config::Bind(PurgeFrequency, ini, config, "Server.APC.PurgeFrequency", 4096);
+  Config::Bind(PurgeRate, ini, config, "Server.APC.PurgeRate", -1);
 
-  Config::Bind(AllowObj, ini, apc["AllowObject"]);
-  Config::Bind(TTLLimit, ini, apc["TTLLimit"], -1);
+  Config::Bind(AllowObj, ini, config, "Server.APC.AllowObject");
+  Config::Bind(TTLLimit, ini, config, "Server.APC.TTLLimit", -1);
 
-  Hdf fileStorage = apc["FileStorage"];
-  Config::Bind(UseFileStorage, ini, fileStorage["Enable"]);
-  FileStorageChunkSize = Config::GetInt64(ini, fileStorage["ChunkSize"],
+  // FileStorage
+  Config::Bind(UseFileStorage, ini, config, "Server.APC.FileStorage.Enable");
+  FileStorageChunkSize = Config::GetInt64(ini, config,
+                                          "Server.APC.FileStorage.ChunkSize",
                                           1LL << 29);
-  FileStorageMaxSize = Config::GetInt64(ini, fileStorage["MaxSize"], 1LL << 32);
-  Config::Bind(FileStoragePrefix, ini, fileStorage["Prefix"], "/tmp/apc_store");
-  Config::Bind(FileStorageFlagKey, ini, fileStorage["FlagKey"], "_madvise_out");
-  Config::Bind(FileStorageAdviseOutPeriod, ini, fileStorage["AdviseOutPeriod"],
-               1800);
-  Config::Bind(FileStorageKeepFileLinked, ini, fileStorage["KeepFileLinked"]);
-  Config::Bind(KeyMaturityThreshold, ini, apc["KeyMaturityThreshold"], 20);
-  Config::Bind(MaximumCapacity, ini, apc["MaximumCapacity"], 0);
-  Config::Bind(KeyFrequencyUpdatePeriod, ini, apc["KeyFrequencyUpdatePeriod"],
-               1000);
+  FileStorageMaxSize = Config::GetInt64(ini, config,
+                                        "Server.APC.FileStorage.MaxSize",
+                                        1LL << 32);
+  Config::Bind(FileStoragePrefix, ini, config, "Server.APC.FileStorage.Prefix",
+               "/tmp/apc_store");
+  Config::Bind(FileStorageFlagKey, ini, config,
+               "Server.APC.FileStorage.FlagKey", "_madvise_out");
+  Config::Bind(FileStorageAdviseOutPeriod, ini, config,
+               "Server.APC.FileStorage.AdviseOutPeriod", 1800);
+  Config::Bind(FileStorageKeepFileLinked, ini, config,
+               "Server.APC.FileStorage.KeepFileLinked");
 
-  Config::Bind(NoTTLPrefix, ini, apc["NoTTLPrefix"]);
+  Config::Bind(KeyMaturityThreshold, ini, config,
+               "Server.APC.KeyMaturityThreshold", 20);
+  Config::Bind(MaximumCapacity, ini, config, "Server.APC.MaximumCapacity", 0);
+  Config::Bind(KeyFrequencyUpdatePeriod, ini, config,
+               "Server.APC.KeyFrequencyUpdatePeriod", 1000);
 
-  Config::Bind(UseUncounted, ini, apc["MemModelTreadmill"],
+  Config::Bind(NoTTLPrefix, ini, config, "Server.APC.NoTTLPrefix");
+
+  Config::Bind(UseUncounted, ini, config, "Server.APC.MemModelTreadmill",
                RuntimeOption::ServerExecutionMode());
 
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enabled", &Enable);

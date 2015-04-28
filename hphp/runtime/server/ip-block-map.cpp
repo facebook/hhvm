@@ -152,9 +152,11 @@ bool IpBlockMap::ReadIPv6Address(const char *text,
 }
 
 void IpBlockMap::LoadIpList(std::shared_ptr<Acl> acl,
-                            const IniSetting::Map& ini, Hdf hdf, bool allow) {
-  for (Hdf child = hdf.firstChild(); child.exists(); child = child.next()) {
-    std::string ip = Config::GetString(ini, child);
+                            const IniSetting::Map& ini, const Hdf& hdf,
+                            const std::string& name, bool allow) {
+  for (Hdf child = hdf[name].firstChild(); child.exists();
+       child = child.next()) {
+    std::string ip = Config::GetString(ini, child, "", "", false);
 
     int bits;
     struct in6_addr address;
@@ -167,24 +169,24 @@ void IpBlockMap::LoadIpList(std::shared_ptr<Acl> acl,
   }
 }
 
-IpBlockMap::IpBlockMap(const IniSetting::Map& ini, Hdf config) {
+IpBlockMap::IpBlockMap(const IniSetting::Map& ini, const Hdf& config) {
   for (Hdf hdf = config.firstChild(); hdf.exists(); hdf = hdf.next()) {
     auto acl = std::make_shared<Acl>();
     // sgrimm note: not sure AllowFirst is relevant with my implementation
     // since we always search for the narrowest matching rule -- it really
     // just sets whether we deny or allow by default, I think.
-    bool allow = Config::GetBool(ini, hdf["AllowFirst"], false);
+    bool allow = Config::GetBool(ini, hdf, "AllowFirst", false);
     if (allow) {
       acl->m_networks.setAllowed(true);
-      LoadIpList(acl, ini, hdf["Ip.Deny"], false);
-      LoadIpList(acl, ini, hdf["Ip.Allow"], true);
+      LoadIpList(acl, ini, hdf, "Ip.Deny", false);
+      LoadIpList(acl, ini, hdf, "Ip.Allow", true);
     } else {
       acl->m_networks.setAllowed(false);
-      LoadIpList(acl, ini, hdf["Ip.Allow"], true);
-      LoadIpList(acl, ini, hdf["Ip.Deny"], false);
+      LoadIpList(acl, ini, hdf, "Ip.Allow", true);
+      LoadIpList(acl, ini, hdf, "Ip.Deny", false);
     }
 
-    std::string location = Config::GetString(ini, hdf["Location"]);
+    std::string location = Config::GetString(ini, hdf, "Location", "", false);
     if (!location.empty() && location[0] == '/') {
       location = location.substr(1);
     }

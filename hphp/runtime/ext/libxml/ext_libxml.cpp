@@ -626,13 +626,13 @@ class LibXMLExtension final : public Extension {
     }
 
     void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
-      Hdf libxml = config["Eval"]["Libxml"];
 
       // Grab the external entity whitelist and set up the map, then register
       // the callback for external entity loading. data: is always supported
       // since it doesn't reference data outside of the current document.
       std::vector<std::string> whitelist;
-      auto whitelistStr = Config::GetString(ini, libxml["ExtEntityWhitelist"]);
+      auto whitelistStr = Config::GetString(ini, config,
+                                            "Eval.Libxml.ExtEntityWhitelist");
       folly::split(',', whitelistStr, whitelist, true);
 
       s_ext_entity_whitelist.reserve(1 + whitelist.size());

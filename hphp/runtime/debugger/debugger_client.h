@@ -73,11 +73,14 @@ struct DebuggerClient {
 public:
   static void LoadColors(const IniSetting::Map& ini, Hdf hdf);
   static const char *LoadColor(const IniSetting::Map& ini, Hdf hdf,
+                               const std::string& setting,
                                const char *defaultName);
   static const char *LoadBgColor(const IniSetting::Map& ini, Hdf hdf,
+                                 const std::string& setting,
                                  const char *defaultName);
   static void LoadCodeColor(CodeColor index, const IniSetting::Map& ini,
-                            Hdf hdf, const char *defaultName);
+                            Hdf hdf, const std::string& setting,
+                            const char *defaultName);
 
   /**
    * Starts/stops a debugger client.

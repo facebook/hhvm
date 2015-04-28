@@ -43,15 +43,14 @@ struct HostHealthMonitorExtension final : public Extension {
   HostHealthMonitorExtension() : Extension("hosthealthmonitor", "1.0") {}
 
   void moduleLoad(const IniSetting::Map& ini, Hdf globalConfig) override {
-    Hdf config = globalConfig["HealthMonitor"];
-    Config::Bind(Enabled, ini, config["EnableHealthMonitor"], true);
-    Config::Bind(WaitBeforeStart, ini, config["WaitBeforeStart"], 100000);
-    Config::Bind(UpdateFreq, ini, config["UpdateFreq"], 3000);
-
-    // set config for metrics
-    Hdf metrics_config = config["Metrics"];
+    Config::Bind(Enabled, ini, globalConfig,
+                 "HealthMonitor.EnableHealthMonitor", true);
+    Config::Bind(WaitBeforeStart, ini, globalConfig,
+                 "HealthMonitor.WaitBeforeStart", 100000);
+    Config::Bind(UpdateFreq, ini, globalConfig, "HealthMonitor.UpdateFreq",
+                 3000);
     for (auto const metric : GetHealthMonitorMetrics()) {
-      metric->setConfig(ini, metrics_config);
+      metric->setConfig(ini, globalConfig, "HealthMonitor.Metrics.CPUDelay");
     }
   }
 } s_host_health_monitor_extension;

@@ -43,7 +43,8 @@ struct IHealthMonitorMetric {
   virtual ~IHealthMonitorMetric() { } // make compiler happy
   virtual HealthLevel evaluate() = 0;
   virtual bool enabled() = 0;
-  virtual void setConfig(const IniSettingMap&, const Hdf&) = 0;
+  virtual void setConfig(const IniSettingMap&, const Hdf&,
+                         const std::string& name) = 0;
 };
 
 /*

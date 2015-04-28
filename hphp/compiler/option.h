@@ -271,8 +271,10 @@ private:
   static StringBag OptionStrings;
 
   static void LoadRootHdf(const IniSettingMap& ini, const Hdf &roots,
+                          const std::string& name,
                           std::map<std::string, std::string> &map);
   static void LoadRootHdf(const IniSettingMap& ini, const Hdf &roots,
+                          const std::string& name,
                           std::vector<std::string> &vec);
   static void OnLoad();
 

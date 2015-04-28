@@ -813,29 +813,28 @@ static void loadEnvConfig(std::map<std::string, std::string>& envCfg) {
 
 // Stores our HDF-specified values (only integral values for now) across
 // requests.
-static std::map<const char*, int> hdf_values;
+static std::map<const char*, int> config_values;
 
 void XDebugExtension::moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf) {
-  assert(hdf_values.empty());
+  assert(config_values.empty());
 
   auto debugger = xdebug_hdf["Eval"]["Debugger"];
 
   // Get everything as bools.
   #define XDEBUG_OPT(T, name, sym, val) { \
-    auto key = "XDebug" #sym; \
-    if (debugger[key].exists()) { \
-      hdf_values[#sym] = debugger[key].configGetBool(val);  \
-    } \
+    std::string key = "XDebug" #sym; \
+    config_values[#sym] = Config::GetBool(ini, xdebug_hdf, \
+                                       "Eval.Debugger." + key, val); \
   }
   XDEBUG_HDF_CFG
   #undef XDEBUG_OPT
 
   // But patch up overload_var_dump since it's actually an int.
-  hdf_values["OverloadVarDump"] =
-    debugger["XDebugOverloadVarDump"].configGetInt32(1);
+  config_values["OverloadVarDump"] =
+    Config::GetInt32(ini, xdebug_hdf, "Eval.Debugger.XDebugOverloadVarDump", 1);
 
   // XDebug is disabled by default.
-  Config::Bind(Enable, ini, debugger["XDebugEnable"], false);
+  Config::Bind(Enable, ini, xdebug_hdf, "Eval.Debugger.XDebugEnable", false);
 }
 
 void XDebugExtension::moduleInit() {
@@ -922,8 +921,8 @@ void XDebugExtension::requestInit() {
 
   #define XDEBUG_OPT(T, name, sym, val) { \
     /* HDF values take priority over INI. */ \
-    auto iter = hdf_values.find(#sym); \
-    XDEBUG_GLOBAL(sym) = iter != hdf_values.end() \
+    auto iter = config_values.find(#sym); \
+    XDEBUG_GLOBAL(sym) = iter != config_values.end() \
       ? iter->second \
       : xdebug_init_opt<T>(name, val, env_cfg); \
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL, XDEBUG_INI(name), \

@@ -38,7 +38,7 @@ public:
                               int &significant_bits);
 
 public:
-  explicit IpBlockMap(const IniSetting::Map& ini, Hdf config);
+  explicit IpBlockMap(const IniSetting::Map& ini, const Hdf& config);
 
   bool isBlocking(const std::string &command, const std::string &ip) const;
 
@@ -84,7 +84,7 @@ private:
   hphp_string_hash_map<std::shared_ptr<Acl>,Acl> m_acls; // location => acl
 
   static void LoadIpList(std::shared_ptr<Acl> acl, const IniSetting::Map& ini,
-                         Hdf hdf, bool allow);
+                         const Hdf& hdf, const std::string& name, bool allow);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

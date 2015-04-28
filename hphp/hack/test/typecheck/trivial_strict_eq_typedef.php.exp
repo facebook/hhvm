@@ -4,5 +4,3 @@ File "trivial_strict_eq_typedef.php", line 15, characters 10-11:
 This is a string
 File "trivial_strict_eq_typedef.php", line 14, characters 15-17:
 This is an int
-File "trivial_strict_eq_typedef.php", line 12, characters 6-8:
-Typedef definition comes from here

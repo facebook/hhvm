@@ -1,0 +1,10 @@
+Derived message
+12345
+Foo
+12345
+Foo
+10
+
+Fatal error: Uncaught exception 'DerivedException' with message 'Derived message' in %s:29
+Stack trace:
+#0 {main}

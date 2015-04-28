@@ -80,7 +80,7 @@ Timer::~Timer() {
 int64_t Timer::stop() {
   if (!RuntimeOption::EvalJitTimer) return 0;
 
-  assert(!m_finished);
+  assertx(!m_finished);
   auto const finish = getCPUTimeNanos();
   auto const elapsed = finish - m_start;
 

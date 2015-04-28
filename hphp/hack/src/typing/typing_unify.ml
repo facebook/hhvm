@@ -64,22 +64,6 @@ and unify_with_uenv env (uenv1, ty1) (uenv2, ty2) =
   | (r2, Tmixed), (_, Toption ty1)
   | (_, Toption ty1), (r2, Tmixed) ->
     unify_with_uenv env (TUEnv.empty, ty1) (TUEnv.empty, (r2, Tmixed))
-  | (r1, (Tprim Nast.Tvoid as ty1')), (r2, (Toption ty as ty2')) ->
-     (* When we are in async functions, we allow people to write Awaitable<void>
-      * and then do yield result(null) *)
-      if Env.allow_null_as_void env
-      then unify_with_uenv env (uenv1, ty1) (uenv2, ty)
-      else (TUtils.uerror r1 ty1' r2 ty2'; env, (r1, ty1'))
-  (* It might look like you can combine the next two cases, but you can't --
-   * if both sides are a Tapply the "when" guard will only check ty1, so if ty2
-   * is a typedef it won't get expanded. So we need an explicit check for both.
-   *)
-  | (r, Tapply ((_, x), argl)), ty2 when Typing_env.is_typedef x ->
-      let env, ty1 = TDef.expand_typedef env r x argl in
-      unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
-  | ty2, (r, Tapply ((_, x), argl)) when Typing_env.is_typedef x ->
-      let env, ty1 = TDef.expand_typedef env r x argl in
-      unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
   | (r, Taccess taccess), _ ->
       let env, ty1 = TAccess.expand env r taccess in
       unify_with_uenv env (uenv1, ty1) (uenv2, ty2)
@@ -135,8 +119,8 @@ and unify_ env r1 ty1 r2 ty2 =
       let env, ft2 = Inst.instantiate_ft env ft2 in
       let env, ft = unify_funs env r1 ft1 r2 ft2 in
       env, Tfun ft
-  | Tapply (((p1, x1) as id), argl1),
-      Tapply ((p2, x2), argl2) when String.compare x1 x2 = 0 ->
+  | Tclass (((p1, x1) as id), argl1),
+      Tclass ((p2, x2), argl2) when String.compare x1 x2 = 0 ->
         (* We handle the case where a generic A<T> is used as A *)
         let argl1 =
           if argl1 = [] && not (Env.is_strict env)
@@ -157,7 +141,7 @@ and unify_ env r1 ty1 r2 ty2 =
         end
         else
           let env, argl = lfold2 unify env argl1 argl2 in
-          env, Tapply (id, argl)
+          env, Tclass (id, argl)
   | Tabstract (((p1, x1) as id), argl1, tcstr1),
       Tabstract ((p2, x2), argl2, tcstr2) when String.compare x1 x2 = 0 ->
         if List.length argl1 <> List.length argl2
@@ -180,10 +164,12 @@ and unify_ env r1 ty1 r2 ty2 =
           env, Tabstract (id, argl, tcstr)
   | Tgeneric (x1, None), Tgeneric (x2, None) when x1 = x2 ->
       env, Tgeneric (x1, None)
-  | Tgeneric (x1, Some ty1), Tgeneric (x2, Some ty2) when x1 = x2 ->
+  | Tgeneric (x1, Some (ck1, ty1)), Tgeneric (x2, Some (ck2, ty2))
+    when x1 = x2 && ck1 = ck2 ->
       let env, ty = unify env ty1 ty2 in
-      env, Tgeneric (x1, Some ty)
-  | Tgeneric ("this", Some ((_, Tapply ((_, x) as id, _) as ty))), _ ->
+      env, Tgeneric (x1, Some (ck1, ty))
+  | Tgeneric ("this",
+      Some (Ast.Constraint_as, (_, Tclass ((_, x) as id, _) as ty))), _ ->
       let class_ = Env.get_class env x in
       (* For final class C, there is no difference between this<X> and X *)
       (match class_ with
@@ -195,17 +181,17 @@ and unify_ env r1 ty1 r2 ty2 =
              (fun () -> TUtils.uerror r1 ty1 r2 ty2)
              ~when_: begin fun () ->
                match ty2 with
-               | Tapply ((_, y), _) -> y = x
+               | Tclass ((_, y), _) -> y = x
                | Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _)
-                | Toption _ | Tvar _ | Tabstract (_, _, _) | Ttuple _
-                | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
-                | Tshape _ | Taccess (_, _) -> false
+               | Toption _ | Tvar _ | Tabstract (_, _, _) | Ttuple _
+               | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
+               | Tshape _ | Taccess (_, _) -> false
              end
              ~do_:(fun error -> Errors.this_final id (Reason.to_pos r1) error)
           );
           env, Tany
         )
-  | _, Tgeneric ("this", Some (_, Tapply _)) ->
+  | _, Tgeneric ("this", Some (Ast.Constraint_as, (_, Tclass _))) ->
       unify_ env r2 ty2 r1 ty1
   | (Ttuple _ as ty), Tarray (None, None)
   | Tarray (None, None), (Ttuple _ as ty) ->
@@ -243,8 +229,8 @@ and unify_ env r1 ty1 r2 ty2 =
         let env, _ = unify env ft.ft_ret ret in
         env, Tfun ft)
   | Tobject, Tobject
-  | Tobject, Tapply _
-  | Tapply _, Tobject -> env, Tobject
+  | Tobject, Tclass _
+  | Tclass _, Tobject -> env, Tobject
   | Tshape fdm1, Tshape fdm2 ->
       let f env x y = fst (unify env x y) in
       (* We do it both direction to verify that no field is missing *)
@@ -258,7 +244,7 @@ and unify_ env r1 ty1 r2 ty2 =
   | _, Taccess _ ->
       unify_ env r2 ty2 r1 ty1
   | (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
-      | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
+      | Tvar _ | Tabstract (_, _, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _), _ ->
         (* Make sure to add a dependency on any classes referenced here, even if
          * we're in an error state (i.e., where we are right now). The need for
@@ -299,7 +285,7 @@ and unify_ env r1 ty1 r2 ty2 =
          * the dep) anyways.
          *)
         let add env = function
-          | Tapply ((_, cid), _) -> Env.add_wclass env cid
+          | Tclass ((_, cid), _) -> Env.add_wclass env cid
           | _ -> () in
         add env ty1;
         add env ty2;

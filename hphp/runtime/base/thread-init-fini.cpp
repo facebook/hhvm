@@ -24,7 +24,7 @@
 #include "hphp/util/async-func.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/hardware-counter.h"
-#include "hphp/runtime/ext/asio/asio_session.h"
+#include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/base/intercept.h"
 

@@ -2,7 +2,7 @@
 #define incl_HPHP_FILE_AWAIT_H
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/asio/asio_external_thread_event.h"
+#include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/asio/socket-event.h"
 
 namespace HPHP {

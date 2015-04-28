@@ -1,2 +1,2 @@
 File "void_option2.php", line 12, characters 31-35:
-?void is a nonsensical typehint (Typing[4066])
+?void is a nonsensical typehint; a function cannot both only return implicitly and return null. (Typing[4066])

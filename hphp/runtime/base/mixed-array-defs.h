@@ -79,8 +79,8 @@ inline bool validPos(int32_t pos) {
 ALWAYS_INLINE
 bool MixedArray::isFull() const {
   assert(!isPacked());
-  assert(m_used <= m_cap);
-  return m_used == m_cap;
+  assert(m_used <= capacity());
+  return m_used == capacity();
 }
 
 inline void MixedArray::initHash(int32_t* hash, size_t tableSize) {
@@ -127,7 +127,7 @@ MixedArray::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
 
 ALWAYS_INLINE
 int32_t* MixedArray::findForNewInsert(size_t h0) const {
-  return findForNewInsert(hashTab(), m_tableMask, h0);
+  return findForNewInsert(hashTab(), m_mask, h0);
 }
 
 inline bool MixedArray::isTombstone(ssize_t pos) const {
@@ -203,7 +203,7 @@ inline const MixedArray* MixedArray::asMixed(const ArrayData* ad) {
 }
 
 inline size_t MixedArray::hashSize() const {
-  return m_tableMask + 1;
+  return m_mask + 1;
 }
 
 inline size_t MixedArray::computeMaxElms(uint32_t tableMask) {
@@ -439,7 +439,7 @@ MixedArray* mallocArray(uint32_t cap, uint32_t mask) {
 
 ALWAYS_INLINE
 size_t MixedArray::heapSize() const {
-  return computeAllocBytes(m_cap, m_tableMask);
+  return computeAllocBytes(capacity(), m_mask);
 }
 
 //////////////////////////////////////////////////////////////////////

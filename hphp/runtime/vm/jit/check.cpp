@@ -139,9 +139,9 @@ bool checkBlock(Block* b) {
  * 7. The entry block starts with a DefFP instruction.
  */
 bool checkCfg(const IRUnit& unit) {
-  auto const blocksIds = rpoSortCfgWithIds(unit);
-  auto const& blocks = blocksIds.blocks;
-  jit::hash_set<const Edge*> edges;
+  auto const blocks = rpoSortCfg(unit);
+  auto const rpoIDs = numberBlocks(unit, blocks);
+  auto edges        = jit::hash_set<const Edge*>{};
 
   // Entry block can't have predecessors.
   always_assert(unit.entry()->numPreds() == 0);
@@ -169,22 +169,53 @@ bool checkCfg(const IRUnit& unit) {
     }
   }
 
-  // Visit every instruction and make sure their sources are defined in a block
-  // that dominates the block containing the instruction.
-  auto const idoms = findDominators(unit, blocksIds);
-  forEachInst(blocks, [&] (const IRInstruction* inst) {
-    for (auto src : inst->srcs()) {
-      if (src->inst()->is(DefConst)) continue;
-      auto const dom = findDefiningBlock(src);
-      always_assert_flog(
-        dom && dominates(dom, inst->block(), idoms),
-        "src '{}' in '{}' came from '{}', which is not a "
-        "DefConst and is not defined at this use site",
-        src->toString(), inst->toString(),
-        src->inst()->toString()
-      );
+  auto defined_set = jit::sparse_idptr_set<SSATmp>{unit.numTmps()};
+
+  /*
+   * Visit every instruction and make sure their sources are either defined in
+   * a block that strictly dominates the block containing the instruction, or
+   * defined earlier in the same block as the instruction.
+   */
+  auto const idoms = findDominators(unit, blocks, rpoIDs);
+  for (auto& blk : blocks) {
+    for (auto& inst : blk->instrs()) {
+      for (auto src : inst.srcs()) {
+        if (src->inst()->is(DefConst)) continue;
+        auto const dom = findDefiningBlock(src);
+        auto const locally_defined =
+          src->inst()->block() == inst.block() && defined_set.contains(src);
+        auto const strictly_dominates =
+          src->inst()->block() != inst.block() &&
+          dom && dominates(dom, inst.block(), idoms);
+        always_assert_flog(
+          locally_defined || strictly_dominates,
+          "src '{}' in '{}' came from '{}', which is not a "
+          "DefConst and is not defined at this use site",
+          src->toString(), inst.toString(),
+          src->inst()->toString()
+        );
+      }
+      for (auto& dst : inst.dsts()) defined_set.insert(&dst);
     }
-  });
+    defined_set.clear();
+  }
+
+  /*
+   * Check that each dst is defined only once.
+   */
+  defined_set.clear();
+  for (auto& blk : blocks) {
+    for (auto& inst : blk->instrs()) {
+      for (auto& dst : inst.dsts()) {
+        always_assert_flog(
+          !defined_set.contains(&dst),
+          "SSATmp ({}) was defined multiple times",
+          dst.toString()
+        );
+        defined_set.insert(&dst);
+      }
+    }
+  }
 
   return true;
 }
@@ -202,10 +233,9 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
      * assigned to registers if needed by the instructions using the
      * const.
      */
-    return (inst.is(ReDefSP) && src->isA(Type::StkPtr)) ||
-           inst.is(TakeStk) ||
-           src->isA(Type::StkPtr) ||
-           src->isA(Type::FramePtr) ||
+    return (inst.is(ReDefSP) && src->isA(TStkPtr)) ||
+           src->isA(TStkPtr) ||
+           src->isA(TFramePtr) ||
            src->inst()->is(DefConst);
   };
 
@@ -222,15 +252,15 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
       }
       if (isCallOp(inst.op())) {
         live.forEach([&](uint32_t tmp) {
-          auto msg = folly::format("checkTmpsSpanningCalls failed\n"
-                                   "  instruction: {}\n"
-                                   "  src:         t{}\n"
-                                   "\n"
-                                   "Unit:\n"
-                                   "{}\n",
-                                   inst.toString(),
-                                   tmp,
-                                   unit.toString()).str();
+          auto msg = folly::sformat("checkTmpsSpanningCalls failed\n"
+                                    "  instruction: {}\n"
+                                    "  src:         t{}\n"
+                                    "\n"
+                                    "Unit:\n"
+                                    "{}\n",
+                                    inst.toString(),
+                                    tmp,
+                                    show(unit));
           std::cerr << msg;
           FTRACE(1, "{}", msg);
           isValid = false;
@@ -254,7 +284,7 @@ namespace {
  * Return a union type containing all the types in the argument list.
  */
 Type buildUnion() {
-  return Type::Bottom;
+  return TBottom;
 }
 
 template<class... Args>
@@ -372,7 +402,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
     checkDst(inst->hasTypeParam(),
       "Missing paramType for DParamPtr instruction");
     if (inst->hasTypeParam()) {
-      checkDst(inst->typeParam() <= Type::Gen.ptr(kind),
+      checkDst(inst->typeParam() <= TGen.ptr(kind),
                "Invalid paramType for DParamPtr instruction");
     }
   };
@@ -384,7 +414,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
     }
   };
 
-#define IRT(name, ...) UNUSED static const Type name = Type::name;
+#define IRT(name, ...) UNUSED static constexpr Type name = T##name;
 #define IRTP(name, ...) IRT(name)
   IR_TYPES
 #undef IRT
@@ -401,10 +431,10 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
                         check(src()->isA(t), t, nullptr);               \
                         ++curSrc;                                       \
                       }
-#define C(type)       check(src()->isConst() && \
-                            src()->isA(type),   \
-                            Type(),             \
-                            "constant " #type); \
+#define C(T)          check(src()->hasConstVal(T) ||     \
+                            src()->isA(TBottom),    \
+                            Type(),                      \
+                            "constant " #T);             \
                       ++curSrc;
 #define CStr          C(StaticStr)
 #define SVar(...)     checkVariadic(buildUnion(__VA_ARGS__));

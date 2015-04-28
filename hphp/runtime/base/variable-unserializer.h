@@ -25,6 +25,13 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+enum class UnserializeMode {
+  Value = 0,
+  Key = 1,
+  ColValue = 2,
+  ColKey = 3,
+};
+
 struct VariableUnserializer {
 
   /*
@@ -91,7 +98,7 @@ struct VariableUnserializer {
   /*
    * Push v onto the vector of refs for future reference.
    */
-  void add(Variant* v, Uns::Mode mode);
+  void add(Variant* v, UnserializeMode mode);
 
   /*
    * Used by the 'r' encoding to get a reference.
@@ -136,6 +143,9 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void unserializeVariant(Variant&, VariableUnserializer *unserializer,
+                        UnserializeMode mode = UnserializeMode::Value);
 
 }
 

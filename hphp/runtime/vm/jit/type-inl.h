@@ -28,6 +28,35 @@
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////
+// Predefined Types
+
+constexpr inline Type::Type(bits_t bits, Ptr kind)
+  : m_bits(bits)
+  , m_ptrKind(static_cast<std::underlying_type<Ptr>::type>(kind))
+  , m_hasConstVal(false)
+  , m_extra(0)
+{}
+
+#define IRT(name, ...) constexpr Type T##name{Type::k##name, Ptr::Unk};
+#define IRTP(name, ptr, ...) constexpr Type T##name{Type::k##name, Ptr::ptr};
+IR_TYPES
+#undef IRT
+#undef IRTP
+
+/*
+ * Abbreviated namespace for predefined types.
+ *
+ * Used for macro codegen for types declared in ir.specification.
+ */
+namespace TypeNames {
+#define IRT(name, ...) UNUSED constexpr Type name = T##name;
+#define IRTP(name, ...) IRT(name)
+  IR_TYPES
+#undef IRT
+#undef IRTP
+};
+
 namespace type_detail {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -61,21 +90,21 @@ typename std::enable_if<
   std::is_integral<T>::value || std::is_enum<T>::value,
   Type
 >::type for_const(T) {
-  return std::is_same<T,bool>::value ? Type::Bool : Type::Int;
+  return std::is_same<T,bool>::value ? TBool : TInt;
 }
 inline Type for_const(const StringData* sd) {
-  assert(sd->isStatic());
-  return Type::StaticStr;
+  assertx(sd->isStatic());
+  return TStaticStr;
 }
 inline Type for_const(const ArrayData* ad) {
-  assert(ad->isStatic());
+  assertx(ad->isStatic());
   return Type::StaticArray(ad->kind());
 }
-inline Type for_const(double)        { return Type::Dbl; }
-inline Type for_const(const Func*)   { return Type::Func; }
-inline Type for_const(const Class*)  { return Type::Cls; }
-inline Type for_const(ConstCctx)     { return Type::Cctx; }
-inline Type for_const(TCA)           { return Type::TCA; }
+inline Type for_const(double)        { return TDbl; }
+inline Type for_const(const Func*)   { return TFunc; }
+inline Type for_const(const Class*)  { return TCls; }
+inline Type for_const(ConstCctx)     { return TCctx; }
+inline Type for_const(TCA)           { return TTCA; }
 
 ///////////////////////////////////////////////////////////////////////////////
 }
@@ -164,7 +193,7 @@ inline bool Type::operator<=(Type rhs) const {
 
   // If `rhs' is a constant, we must be the same constant.
   if (rhs.m_hasConstVal) {
-    assert(!rhs.isUnion());
+    assertx(!rhs.isUnion());
     return lhs.m_hasConstVal && lhs.m_extra == rhs.m_extra;
   }
 
@@ -202,7 +231,7 @@ inline bool Type::subtypeOfAny() const {
 }
 
 inline bool Type::maybe(Type t2) const {
-  return (*this & t2) != Bottom;
+  return (*this & t2) != TBottom;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -214,26 +243,26 @@ inline bool Type::isUnion() const {
 }
 
 inline bool Type::isKnownDataType() const {
-  assert(*this <= StkElem);
+  assertx(*this <= TStkElem);
 
   // Some unions correspond to single KindOfs.
-  return subtypeOfAny(Str, Arr, BoxedCell) || !isUnion();
+  return subtypeOfAny(TStr, TArr, TBoxedCell) || !isUnion();
 }
 
 inline bool Type::needsReg() const {
-  return *this <= StkElem && !isKnownDataType();
+  return *this <= TStkElem && !isKnownDataType();
 }
 
 inline bool Type::needsValueReg() const {
-  return !subtypeOfAny(Null, Nullptr);
+  return !subtypeOfAny(TNull, TNullptr);
 }
 
 inline bool Type::isSimpleType() const {
-  return subtypeOfAny(Bool, Int, Dbl, Null);
+  return subtypeOfAny(TBool, TInt, TDbl, TNull);
 }
 
 inline bool Type::isReferenceType() const {
-  return subtypeOfAny(Str, Arr, Obj, Res);
+  return subtypeOfAny(TStr, TArr, TObj, TRes);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -241,7 +270,7 @@ inline bool Type::isReferenceType() const {
 
 template<typename T>
 Type Type::cns(T val, Type ret) {
-  assert(!ret.m_hasConstVal);
+  assertx(!ret.m_hasConstVal);
   ret.m_hasConstVal = true;
 
   static_assert(sizeof(T) <= sizeof(ret),
@@ -263,12 +292,12 @@ Type Type::cns(T val) {
 }
 
 inline Type Type::cns(std::nullptr_t) {
-  return Type::Nullptr;
+  return TNullptr;
 }
 
 inline Type Type::cns(const TypedValue& tv) {
-  if (tv.m_type == KindOfUninit) return Type::Uninit;
-  if (tv.m_type == KindOfNull)   return Type::InitNull;
+  if (tv.m_type == KindOfUninit) return TUninit;
+  if (tv.m_type == KindOfNull)   return TInitNull;
 
   auto ret = [&] {
     switch (tv.m_type) {
@@ -303,9 +332,9 @@ inline Type Type::cns(const TypedValue& tv) {
 
 inline Type Type::dropConstVal() const {
   if (!m_hasConstVal) return *this;
-  assert(!isUnion());
+  assertx(!isUnion());
 
-  if (*this <= StaticArr) {
+  if (*this <= TStaticArr) {
     return Type::StaticArray(arrVal()->kind());
   }
   return Type(m_bits, ptrKind());
@@ -314,40 +343,40 @@ inline Type Type::dropConstVal() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Constant introspection.
 
-inline bool Type::isConst() const {
-  return m_hasConstVal || subtypeOfAny(Uninit, InitNull, Nullptr);
+inline bool Type::hasConstVal() const {
+  return m_hasConstVal;
 }
 
-inline bool Type::isConst(Type t) const {
-  return isConst() && *this <= t;
+inline bool Type::hasConstVal(Type t) const {
+  return hasConstVal() && *this <= t;
 }
 
 template<typename T>
-bool Type::isConst(T val) const {
-  return *this <= cns(val);
+bool Type::hasConstVal(T val) const {
+  return hasConstVal(cns(val));
 }
 
 inline uint64_t Type::rawVal() const {
-  assert(isConst());
+  assertx(hasConstVal());
   return m_extra;
 }
 
-#define IMPLEMENT_CNS_VAL(TypeName, name, valtype)  \
-  inline valtype Type::name##Val() const {          \
-    assert(*this <= TypeName && m_hasConstVal);     \
-    return m_##name##Val;                           \
+#define IMPLEMENT_CNS_VAL(TypeName, name, valtype)      \
+  inline valtype Type::name##Val() const {              \
+    assertx(hasConstVal(TypeName));                      \
+    return m_##name##Val;                               \
   }
 
-IMPLEMENT_CNS_VAL(Bool,       bool, bool)
-IMPLEMENT_CNS_VAL(Int,        int,  int64_t)
-IMPLEMENT_CNS_VAL(Dbl,        dbl,  double)
-IMPLEMENT_CNS_VAL(StaticStr,  str,  const StringData*)
-IMPLEMENT_CNS_VAL(StaticArr,  arr,  const ArrayData*)
-IMPLEMENT_CNS_VAL(Func,       func, const HPHP::Func*)
-IMPLEMENT_CNS_VAL(Cls,        cls,  const Class*)
-IMPLEMENT_CNS_VAL(Cctx,       cctx, ConstCctx)
-IMPLEMENT_CNS_VAL(TCA,        tca,  jit::TCA)
-IMPLEMENT_CNS_VAL(RDSHandle,  rdsHandle,  rds::Handle)
+IMPLEMENT_CNS_VAL(TBool,       bool, bool)
+IMPLEMENT_CNS_VAL(TInt,        int,  int64_t)
+IMPLEMENT_CNS_VAL(TDbl,        dbl,  double)
+IMPLEMENT_CNS_VAL(TStaticStr,  str,  const StringData*)
+IMPLEMENT_CNS_VAL(TStaticArr,  arr,  const ArrayData*)
+IMPLEMENT_CNS_VAL(TFunc,       func, const HPHP::Func*)
+IMPLEMENT_CNS_VAL(TCls,        cls,  const Class*)
+IMPLEMENT_CNS_VAL(TCctx,       cctx, ConstCctx)
+IMPLEMENT_CNS_VAL(TTCA,        tca,  jit::TCA)
+IMPLEMENT_CNS_VAL(TRDSHandle,  rdsHandle,  rds::Handle)
 
 #undef IMPLEMENT_CNS_VAL
 
@@ -355,36 +384,36 @@ IMPLEMENT_CNS_VAL(RDSHandle,  rdsHandle,  rds::Handle)
 // Specialized type creation.
 
 inline Type Type::Array(ArrayData::ArrayKind kind) {
-  return Type(Type::Arr, ArraySpec(kind));
+  return Type(TArr, ArraySpec(kind));
 }
 
 inline Type Type::Array(const RepoAuthType::Array* rat) {
-  return Type(Type::Arr, ArraySpec(rat));
+  return Type(TArr, ArraySpec(rat));
 }
 
 inline Type Type::Array(const Shape* shape) {
-  return Type(Type::Arr, ArraySpec(shape));
+  return Type(TArr, ArraySpec(shape));
 }
 
 inline Type Type::StaticArray(ArrayData::ArrayKind kind) {
-  return Type(Type::StaticArr, ArraySpec(kind));
+  return Type(TStaticArr, ArraySpec(kind));
 }
 
 inline Type Type::StaticArray(const RepoAuthType::Array* rat) {
-  return Type(Type::StaticArr, ArraySpec(rat));
+  return Type(TStaticArr, ArraySpec(rat));
 }
 
 inline Type Type::StaticArray(const Shape* shape) {
-  return Type(Type::StaticArr, ArraySpec(shape));
+  return Type(TStaticArr, ArraySpec(shape));
 }
 
 inline Type Type::SubObj(const Class* cls) {
   if (cls->attrs() & AttrNoOverride) return ExactObj(cls);
-  return Type(Type::Obj, ClassSpec(cls, ClassSpec::SubTag{}));
+  return Type(TObj, ClassSpec(cls, ClassSpec::SubTag{}));
 }
 
 inline Type Type::ExactObj(const Class* cls) {
-  return Type(Type::Obj, ClassSpec(cls, ClassSpec::ExactTag{}));
+  return Type(TObj, ClassSpec(cls, ClassSpec::ExactTag{}));
 }
 
 inline Type Type::unspecialize() const {
@@ -420,7 +449,7 @@ inline ArraySpec Type::arrSpec() const {
   if (m_hasConstVal) {
     return ArraySpec(arrVal()->kind());
   }
-  assert(m_arrSpec != ArraySpec::Bottom);
+  assertx(m_arrSpec != ArraySpec::Bottom);
   return m_arrSpec;
 }
 
@@ -434,7 +463,7 @@ inline ClassSpec Type::clsSpec() const {
   if (m_hasConstVal) {
     return ClassSpec(clsVal(), ClassSpec::ExactTag{});
   }
-  assert(m_clsSpec != ClassSpec::Bottom);
+  assertx(m_clsSpec != ClassSpec::Bottom);
   return m_clsSpec;
 }
 
@@ -446,41 +475,41 @@ inline TypeSpec Type::spec() const {
 // Inner types.
 
 inline Type Type::box() const {
-  assert(*this <= Cell);
+  assertx(*this <= TCell);
   // Boxing Uninit returns InitNull but that logic doesn't belong here.
-  assert(!maybe(Uninit) || *this == Cell);
+  assertx(!maybe(TUninit) || *this == TCell);
   return Type(m_bits << kBoxShift,
               ptrKind(),
               isSpecialized() && !m_hasConstVal ? m_extra : 0);
 }
 
 inline Type Type::inner() const {
-  assert(*this <= BoxedCell);
+  assertx(*this <= TBoxedCell);
   return Type(m_bits >> kBoxShift, Ptr::Unk, m_extra);
 }
 
 inline Type Type::unbox() const {
-  assert(*this <= Gen);
-  return (*this & Cell) | (*this & BoxedCell).inner();
+  assertx(*this <= TGen);
+  return (*this & TCell) | (*this & TBoxedCell).inner();
 }
 
 inline Type Type::ptr(Ptr kind) const {
-  assert(*this <= Gen);
+  assertx(*this <= TGen);
   return Type(m_bits << kPtrShift,
               kind,
               isSpecialized() && !m_hasConstVal ? m_extra : 0);
 }
 
 inline Type Type::deref() const {
-  assert(*this <= PtrToGen);
+  assertx(*this <= TPtrToGen);
   return Type(m_bits >> kPtrShift,
               Ptr::Unk /* no longer a pointer */,
               isSpecialized() ? m_extra : 0);
 }
 
 inline Type Type::derefIfPtr() const {
-  assert(*this <= (Gen | PtrToGen));
-  return *this <= PtrToGen ? deref() : *this;
+  assertx(*this <= (TGen | TPtrToGen));
+  return *this <= TPtrToGen ? deref() : *this;
 }
 
 inline Type Type::strip() const {
@@ -492,7 +521,7 @@ inline Ptr Type::ptrKind() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Private methods.
+// Private constructors.
 
 inline Type::Type(bits_t bits, Ptr kind, uintptr_t extra /* = 0 */)
   : m_bits(bits)
@@ -500,7 +529,7 @@ inline Type::Type(bits_t bits, Ptr kind, uintptr_t extra /* = 0 */)
   , m_hasConstVal(false)
   , m_extra(extra)
 {
-  assert(checkValid());
+  assertx(checkValid());
 }
 
 inline Type::Type(Type t, ArraySpec arraySpec)
@@ -509,8 +538,8 @@ inline Type::Type(Type t, ArraySpec arraySpec)
   , m_hasConstVal(false)
   , m_arrSpec(arraySpec)
 {
-  assert(checkValid());
-  assert(m_arrSpec != ArraySpec::Bottom);
+  assertx(checkValid());
+  assertx(m_arrSpec != ArraySpec::Bottom);
 }
 
 inline Type::Type(Type t, ClassSpec classSpec)
@@ -519,9 +548,10 @@ inline Type::Type(Type t, ClassSpec classSpec)
   , m_hasConstVal(false)
   , m_clsSpec(classSpec)
 {
-  assert(checkValid());
-  assert(m_clsSpec != ClassSpec::Bottom);
+  assertx(checkValid());
+  assertx(m_clsSpec != ClassSpec::Bottom);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }}

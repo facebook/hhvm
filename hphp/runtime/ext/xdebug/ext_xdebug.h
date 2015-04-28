@@ -85,13 +85,9 @@ struct XDebugServer;
   XDEBUG_OPT(bool, "auto_trace", AutoTrace, false) \
   XDEBUG_OPT(int, "cli_color", CliColor, 0) \
   XDEBUG_OPT(bool, "collect_assignments", CollectAssignments, false) \
-  XDEBUG_OPT(bool, "collect_includes", CollectIncludes, true) \
   XDEBUG_OPT(int, "collect_params", CollectParams, 0) \
   XDEBUG_OPT(bool, "collect_return", CollectReturn, false) \
   XDEBUG_OPT(bool, "collect_vars", CollectVars, false) \
-  XDEBUG_OPT(bool, "default_enable", DefaultEnable, true) \
-  XDEBUG_OPT(bool, "dump_globals", DumpGlobals, true) \
-  XDEBUG_OPT(bool, "dump_once", DumpOnce, true) \
   XDEBUG_OPT(bool, "dump_undefined", DumpUndefined, false) \
   XDEBUG_OPT(std::string, "file_link_format", FileLinkFormat, "") \
   XDEBUG_OPT(bool, "force_display_errors", ForceDisplayErrors, false) \
@@ -99,17 +95,14 @@ struct XDebugServer;
   XDEBUG_OPT(double, "framebuf_expansion", FramebufExpansion, 1.5) \
   XDEBUG_OPT(std::string, "idekey", IdeKey, "") \
   XDEBUG_OPT(std::string, "manual_url", ManualUrl, "http://www.php.net") \
-  XDEBUG_OPT(int, "overload_var_dump", OverloadVarDump, true) \
   XDEBUG_OPT(bool, "profiler_append", ProfilerAppend, false) \
   XDEBUG_OPT(bool, "profiler_enable", ProfilerEnable, false) \
   XDEBUG_OPT(bool, "profiler_enable_trigger", ProfilerEnableTrigger, false) \
   XDEBUG_OPT(std::string, "profiler_output_dir", ProfilerOutputDir, "/tmp") \
   XDEBUG_OPT(std::string, "profiler_output_name", ProfilerOutputName, \
              "cachegrind.out.%t") \
-  XDEBUG_OPT(bool, "remote_autostart", RemoteAutostart, false) \
   XDEBUG_OPT(bool, "remote_connect_back", RemoteConnectBack, false) \
   XDEBUG_OPT(int, "remote_cookie_expire_time", RemoteCookieExpireTime, 3600) \
-  XDEBUG_OPT(bool, "remote_enable", RemoteEnable, false) \
   XDEBUG_OPT(std::string, "remote_handler", RemoteHandler, "dbgp") \
   XDEBUG_OPT(std::string, "remote_host", RemoteHost, "localhost") \
   XDEBUG_OPT(std::string, "remote_log", RemoteLog, "") \
@@ -133,6 +126,16 @@ struct XDebugServer;
   XDEBUG_OPT(bool, "scream", Scream, false) \
   XDEBUG_OPT(int, "force_error_reporting", ForceErrorReporting, 0) \
   XDEBUG_OPT(int, "halt_level", HaltLevel, 0) \
+
+// Config options that can also be set from HDF configs.
+#define XDEBUG_HDF_CFG \
+  XDEBUG_OPT(bool, "collect_includes", CollectIncludes, true) \
+  XDEBUG_OPT(bool, "default_enable", DefaultEnable, true) \
+  XDEBUG_OPT(bool, "dump_globals", DumpGlobals, true) \
+  XDEBUG_OPT(bool, "dump_once", DumpOnce, true) \
+  XDEBUG_OPT(int, "overload_var_dump", OverloadVarDump, 1) \
+  XDEBUG_OPT(bool, "remote_autostart", RemoteAutostart, false) \
+  XDEBUG_OPT(bool, "remote_enable", RemoteEnable, false) \
 
 // xdebug.dump.* settings
 #define XDEBUG_DUMP_CFG \
@@ -197,6 +200,7 @@ struct XDebugExtension final : Extension {
   #define XDEBUG_OPT(T, name, sym, val) static DECLARE_THREAD_LOCAL(T, sym);
   XDEBUG_CFG
   XDEBUG_MAPPED_CFG
+  XDEBUG_HDF_CFG
   XDEBUG_DUMP_CFG
   XDEBUG_PROF_CFG
   XDEBUG_CUSTOM_GLOBALS

@@ -17,7 +17,7 @@
 #ifndef incl_EXT_ASIO_SERVER_TASK_WAIT_HANDLE_H_
 #define incl_EXT_ASIO_SERVER_TASK_WAIT_HANDLE_H_
 
-#include "hphp/runtime/ext/asio/asio_external_thread_event.h"
+#include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

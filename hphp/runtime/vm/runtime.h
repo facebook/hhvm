@@ -17,8 +17,8 @@
 #define incl_HPHP_VM_RUNTIME_H_
 
 #include "hphp/runtime/ext/ext_generator.h"
-#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
-#include "hphp/runtime/ext/asio/async_generator.h"
+#include "hphp/runtime/ext/asio/async-function-wait-handle.h"
+#include "hphp/runtime/ext/asio/async-generator.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func.h"
@@ -250,12 +250,10 @@ RefData* lookupStaticFromClosure(ObjectData* closure,
  * be set up before you use those parts of the runtime.
  */
 
-typedef StringData* (*CompileStringAST)(String, String);
 typedef Unit* (*CompileStringFn)(const char*, int, const MD5&, const char*);
 typedef Unit* (*BuildNativeFuncUnitFn)(const HhbcExtFuncInfo*, ssize_t);
 typedef Unit* (*BuildNativeClassUnitFn)(const HhbcExtClassInfo*, ssize_t);
 
-extern CompileStringAST g_hphp_compiler_serialize_code_model_for;
 extern CompileStringFn g_hphp_compiler_parse;
 extern BuildNativeFuncUnitFn g_hphp_build_native_func_unit;
 extern BuildNativeClassUnitFn g_hphp_build_native_class_unit;

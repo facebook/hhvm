@@ -26,7 +26,7 @@ and terminal_ in_try = function
                  | Call ((_, Id (_, "invariant")), (_, False) :: _ :: _, [])
                  | Call ((_, Id (_, "invariant_violation")), _ :: _, [])))
   | Return _
-  | Expr (_, Call ((_, Id (_, "exit")), _, _)) -> raise Exit
+  | Expr (_, Call ((_, Id (_, ("exit" | "die"))), _, _)) -> raise Exit
   | If (_, b1, b2) ->
       (try terminal in_try b1; () with Exit ->
         terminal in_try b2)
@@ -156,7 +156,7 @@ module HintCycle = struct
     | Happly ((_, x), []) when SMap.mem x params ->
         let stack = SSet.add x stack in
         (match SMap.get x params with
-        | Some (Some param) ->
+        | Some (Some (_, param)) ->
             hint stack params param
         | _ -> ()
         )
@@ -169,8 +169,8 @@ module HintCycle = struct
 
   and hintl stack params l = List.iter (hint stack params) l
 
-  let check_constraint cstrs (_, _, hopt) =
-    match hopt with
+  let check_constraint cstrs (_, _, cstr_opt) =
+    match cstr_opt with
     | None -> ()
-    | Some h -> hint SSet.empty cstrs h
+    | Some (_, h) -> hint SSet.empty cstrs h
 end

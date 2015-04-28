@@ -91,19 +91,17 @@ class AliasManager {
   enum { SameAccess, SameLValueAccess, InterfAccess,
     DisjointAccess, NotAccess };
 
-  explicit AliasManager(int opt);
+  AliasManager();
   ~AliasManager();
 
   void clear();
   void beginScope();
   void endScope();
   void resetScope();
-  bool insertForDict(ExpressionPtr e);
   ExpressionPtr getCanonical(ExpressionPtr e);
 
   void gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m);
   int optimize(AnalysisResultConstPtr ar, MethodStatementPtr s);
-  void finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m);
 
   void setChanged() {
     if (!m_noAdd) {
@@ -117,7 +115,6 @@ class AliasManager {
 
   int checkAnyInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
                      int &depth, int &effects, bool forLval = false);
-  bool hasWildRefs() const { return m_wildRefs; }
   bool couldBeAliased(SimpleVariablePtr sv);
 
   AnalysisResultConstPtr getAnalysisResult() { return m_arp; }
@@ -137,7 +134,6 @@ class AliasManager {
       ExpressionPtr e,
       ExpressionPtr rep);
 
-  void doFinal(MethodStatementPtr m);
   enum { MaxBuckets = 0x10000 };
   enum { FallThrough, CondBranch, Branch, Converge };
   enum { NoCopyProp = 1, NoDeadStore = 2 };
@@ -147,24 +143,9 @@ class AliasManager {
     ExpressionPtrList   m_exprs;
   };
 
-  void performReferencedAndNeededAnalysis(MethodStatementPtr m);
-
   typedef std::set<std::string> StringSet;
-
-  class LoopInfo {
-  public:
-    explicit LoopInfo(StatementPtr s);
-
-    StatementPtr m_stmt;
-    StatementPtrVec m_inner;
-    bool m_valid;
-    StringSet m_candidates;
-    StringSet m_excluded;
-  };
-
   typedef hphp_hash_map<unsigned, BucketMapEntry> BucketMap;
   typedef std::vector<CondStackElem> CondStack;
-  typedef std::vector<LoopInfo> LoopInfoVec;
 
   void mergeScope();
 
@@ -190,8 +171,7 @@ class AliasManager {
   int checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
                   int &depth, int &effects, bool forLval = false);
   int findInterf(ExpressionPtr rv, bool isLoad, ExpressionPtr &rep,
-                 int *flags = 0, bool allowLval = false);
-  void applyAssign(ExpressionPtr lhs, ExpressionPtr rhs);
+                 int *flags = 0);
   void processAccessChain(ExpressionPtr e);
   void processAccessChainLA(ListAssignmentPtr e);
 
@@ -203,10 +183,6 @@ class AliasManager {
   ExpressionPtr canonicalizeRecur(ExpressionPtr e);
   StatementPtr canonicalizeRecur(StatementPtr e, int &ret);
 
-  void invalidateChainRoots(StatementPtr s);
-  void nullSafeDisableCSE(StatementPtr parent, ExpressionPtr kid);
-  void disableCSE(StatementPtr s);
-
   int collectAliasInfoRecur(ConstructPtr cs, bool unused);
 
   void beginInExpression(StatementPtr parent, ExpressionPtr kid);
@@ -216,13 +192,6 @@ class AliasManager {
            (m_exprIdx == -1 && !m_exprParent));
     return m_exprIdx != -1;
   }
-
-  /**
-   * Take e and walk down the expression chain, marking all
-   * interferences as "altered". It is assumed that e is
-   * a store (has modifications)
-   */
-  void markAllLocalExprAltered(ExpressionPtr e);
 
   BucketMapEntry            m_accessList;
   BucketMap                 m_bucketMap;
@@ -239,21 +208,10 @@ class AliasManager {
   AnalysisResultConstPtr    m_arp;
   VariableTablePtr          m_variables;
 
-  LoopInfoVec               m_loopInfo;
-
-  std::string               m_returnVar;
-  int                       m_nrvoFix;
-
   int                       m_inCall;
-  bool                      m_inlineAsExpr;
   bool                      m_noAdd;
-  bool                      m_preOpt;
-  bool                      m_postOpt;
   bool                      m_cleared;
   bool                      m_inPseudoMain;
-  bool                      m_genAttrs;
-  bool                      m_hasDeadStore;
-  bool                      m_hasChainRoot;
   BlockScopeRawPtr          m_scope;
 
   ExpressionPtr             m_expr;

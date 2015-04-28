@@ -1,0 +1,4 @@
+File "self_abstract_call.php", line 8, characters 5-13:
+Cannot call self::f(); it is abstract. Did you mean static::f()? (Typing[4073])
+File "self_abstract_call.php", line 5, characters 35-35:
+Declaration is here

@@ -192,10 +192,10 @@ public:
 void HHVM_METHOD(DateInterval, __construct,
                  const String& interval_spec);
 Variant HHVM_METHOD(DateInterval, __get,
-                    Variant member);
+                    const Variant& member);
 Variant HHVM_METHOD(DateInterval, __set,
-                    Variant member,
-                    Variant value);
+                    const Variant& member,
+                    const Variant& value);
 Object HHVM_STATIC_METHOD(DateInterval, createFromDateString,
                           const String& time);
 String HHVM_METHOD(DateInterval, format,

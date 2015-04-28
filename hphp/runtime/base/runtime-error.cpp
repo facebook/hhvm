@@ -32,7 +32,7 @@ namespace HPHP {
  */
 
 void raise_error(const std::string &msg) {
-  raise_message(ErrorConstants::ErrorModes::ERROR, false, msg);
+  raise_message(ErrorMode::ERROR, false, msg);
 }
 
 void raise_error(const char *fmt, ...) {
@@ -49,8 +49,7 @@ void raise_error(const char *fmt, ...) {
  * depending on the runtime option unlike the regular raise_error.
  */
 void raise_error_without_first_frame(const std::string &msg) {
-  int errnum = static_cast<int>(ErrorConstants::ErrorModes::ERROR);
-  g_context->handleError(msg, errnum, false,
+  g_context->handleError(msg, static_cast<int>(ErrorMode::ERROR), false,
                          RuntimeOption::CallUserHandlerOnFatals ?
                          ExecutionContext::ErrorThrowMode::IfUnhandled :
                          ExecutionContext::ErrorThrowMode::Always,
@@ -59,11 +58,11 @@ void raise_error_without_first_frame(const std::string &msg) {
 }
 
 void raise_recoverable_error(const std::string &msg) {
-  raise_message(ErrorConstants::ErrorModes::RECOVERABLE_ERROR, false, msg);
+  raise_message(ErrorMode::RECOVERABLE_ERROR, false, msg);
 }
 
 void raise_recoverable_error_without_first_frame(const std::string &msg) {
-  raise_message(ErrorConstants::ErrorModes::RECOVERABLE_ERROR, true, msg);
+  raise_message(ErrorMode::RECOVERABLE_ERROR, true, msg);
 }
 
 void raise_typehint_error(const std::string& msg) {
@@ -105,11 +104,11 @@ void raise_recoverable_error(const char *fmt, ...) {
 static int64_t g_notice_counter = 0;
 
 void raise_strict_warning(const std::string &msg) {
-  raise_message(ErrorConstants::ErrorModes::STRICT, false, msg);
+  raise_message(ErrorMode::STRICT, false, msg);
 }
 
 void raise_strict_warning_without_first_frame(const std::string &msg) {
-  raise_message(ErrorConstants::ErrorModes::STRICT, true, msg);
+  raise_message(ErrorMode::STRICT, true, msg);
 }
 
 void raise_strict_warning(const char *fmt, ...) {
@@ -124,11 +123,11 @@ void raise_strict_warning(const char *fmt, ...) {
 static int64_t g_warning_counter = 0;
 
 void raise_warning(const std::string &msg) {
-  raise_message(ErrorConstants::ErrorModes::WARNING, false, msg);
+  raise_message(ErrorMode::WARNING, false, msg);
 }
 
 void raise_warning_without_first_frame(const std::string &msg) {
-  raise_message(ErrorConstants::ErrorModes::WARNING, true, msg);
+  raise_message(ErrorMode::WARNING, true, msg);
 }
 
 void raise_warning(const char *fmt, ...) {
@@ -178,7 +177,7 @@ void raise_warning_unsampled(const std::string &msg) {
       RuntimeOption::RaiseDebuggingFrequency != 0) {
     return;
   }
-  raise_message(ErrorConstants::ErrorModes::WARNING, false, msg);
+  raise_message(ErrorMode::WARNING, false, msg);
 }
 
 void raise_warning_unsampled(const char *fmt, ...) {
@@ -191,11 +190,11 @@ void raise_warning_unsampled(const char *fmt, ...) {
 }
 
 void raise_notice(const std::string &msg) {
-  raise_message(ErrorConstants::ErrorModes::NOTICE, false, msg);
+  raise_message(ErrorMode::NOTICE, false, msg);
 }
 
 void raise_notice_without_first_frame(const std::string &msg) {
-  raise_message(ErrorConstants::ErrorModes::NOTICE, true, msg);
+  raise_message(ErrorMode::NOTICE, true, msg);
 }
 
 void raise_notice(const char *fmt, ...) {
@@ -208,11 +207,11 @@ void raise_notice(const char *fmt, ...) {
 }
 
 void raise_deprecated(const std::string &msg) {
-  raise_message(ErrorConstants::ErrorModes::PHP_DEPRECATED, false, msg);
+  raise_message(ErrorMode::PHP_DEPRECATED, false, msg);
 }
 
 void raise_deprecated_without_first_frame(const std::string &msg) {
-  raise_message(ErrorConstants::ErrorModes::PHP_DEPRECATED, true, msg);
+  raise_message(ErrorMode::PHP_DEPRECATED, true, msg);
 }
 
 void raise_deprecated(const char *fmt, ...) {
@@ -221,7 +220,7 @@ void raise_deprecated(const char *fmt, ...) {
   va_start(ap, fmt);
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
-  raise_message(ErrorConstants::ErrorModes::PHP_DEPRECATED, false, msg);
+  raise_message(ErrorMode::PHP_DEPRECATED, false, msg);
 }
 
 void raise_param_type_warning(
@@ -252,8 +251,8 @@ void raise_param_type_warning(
     func_name = "func_num_args";
   }
   assert(param_num > 0);
-  String expected_type_str = getDataTypeString(expected_type);
-  String actual_type_str = getDataTypeString(actual_type);
+  auto expected_type_str = getDataTypeString(expected_type);
+  auto actual_type_str = getDataTypeString(actual_type);
   raise_warning(
     "%s() expects parameter %d to be %s, %s given",
     func_name,
@@ -262,7 +261,7 @@ void raise_param_type_warning(
     actual_type_str.c_str());
 }
 
-void raise_message(ErrorConstants::ErrorModes mode,
+void raise_message(ErrorMode mode,
                    const char *fmt,
                    va_list ap) {
   std::string msg;
@@ -270,7 +269,7 @@ void raise_message(ErrorConstants::ErrorModes mode,
   raise_message(mode, false, msg);
 }
 
-void raise_message(ErrorConstants::ErrorModes mode,
+void raise_message(ErrorMode mode,
                    const char *fmt,
                    ...) {
   std::string msg;
@@ -287,18 +286,18 @@ void raise_message(ErrorConstants::ErrorModes mode,
                          str,                                           \
                          skip);
 
-void raise_message(ErrorConstants::ErrorModes mode,
+void raise_message(ErrorMode mode,
                    bool skipTop,
                    const std::string &msg) {
   int errnum = static_cast<int>(mode);
-  if (mode == ErrorConstants::ErrorModes::ERROR) {
+  if (mode == ErrorMode::ERROR) {
     HANDLE_ERROR(false, Always, "\nFatal error: ", skipTop);
-  } else if (mode == ErrorConstants::ErrorModes::RECOVERABLE_ERROR) {
+  } else if (mode == ErrorMode::RECOVERABLE_ERROR) {
     HANDLE_ERROR(true, IfUnhandled, "\nCatchable fatal error: ", skipTop);
   } else if (!g_context->errorNeedsHandling(errnum, true,
                               ExecutionContext::ErrorThrowMode::Never)) {
     return;
-  } else if (mode == ErrorConstants::ErrorModes::WARNING) {
+  } else if (mode == ErrorMode::WARNING) {
     if (RuntimeOption::WarningFrequency <= 0 ||
         (g_warning_counter++) % RuntimeOption::WarningFrequency != 0) {
       return;
@@ -309,13 +308,13 @@ void raise_message(ErrorConstants::ErrorModes mode,
     return;
   } else {
     switch (mode) {
-      case ErrorConstants::ErrorModes::STRICT:
+      case ErrorMode::STRICT:
         HANDLE_ERROR(true, Never, "\nStrict Warning: ", skipTop);
         break;
-      case ErrorConstants::ErrorModes::NOTICE:
+      case ErrorMode::NOTICE:
         HANDLE_ERROR(true, Never, "\nNotice: ", skipTop);
         break;
-      case ErrorConstants::ErrorModes::PHP_DEPRECATED:
+      case ErrorMode::PHP_DEPRECATED:
         HANDLE_ERROR(true, Never, "\nDeprecated: ", skipTop);
         break;
       default:

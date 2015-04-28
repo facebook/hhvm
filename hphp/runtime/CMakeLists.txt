@@ -18,10 +18,15 @@ if(NOT ENABLE_FASTCGI)
   endforeach(file ${CXX_SOURCES})
 endif()
 
+if(NOT ENABLE_PROXYGEN_SERVER)
+  foreach (file ${CXX_SOURCES})
+    if (${file} MATCHES "/proxygen/")
+      list(REMOVE_ITEM CXX_SOURCES ${file})
+    endif()
+  endforeach(file ${CXX_SOURCES})
+endif()
+
 if(NOT HAVE_CUSTOM_LIBEVENT)
-  # Not working with off-the-shelf libevent
-  list(REMOVE_ITEM CXX_SOURCES
-       "${CMAKE_CURRENT_SOURCE_DIR}/server/server-name-indication.cpp")
   foreach (file ${CXX_SOURCES})
     if(${file} MATCHES "/server/libevent-")
       list(REMOVE_ITEM CXX_SOURCES ${file})

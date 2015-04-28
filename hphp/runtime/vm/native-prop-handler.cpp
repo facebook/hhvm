@@ -41,8 +41,8 @@ void registerNativePropHandler(const String& className,
   s_nativePropHandlerMap[className.get()] = propHandler;
 }
 
-NativePropHandler* getNativePropHandler(const String& className) {
-  auto it = s_nativePropHandlerMap.find(className.get());
+NativePropHandler* getNativePropHandler(const StringData* className) {
+  auto it = s_nativePropHandlerMap.find(className);
   if (it == s_nativePropHandlerMap.end()) {
     return nullptr;
   }

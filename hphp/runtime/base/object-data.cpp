@@ -565,8 +565,12 @@ static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
 
   ctx.func = ctx.cls->lookupMethod(s.get());
   if (ctx.func) {
-    if (ctx.func->attrs() & AttrStatic) {
-      // If we found a method and its static, null out this_
+    // Null out this_ for static methods, unless it's a closure.
+    //
+    // Closures will sort out $this for themselves downstream, and
+    // they need this one because it's the closure object.
+    if ((ctx.func->attrs() & AttrStatic) &&
+        !ctx.func->isClosureBody()) {
       ctx.this_ = nullptr;
     }
   } else {
@@ -755,7 +759,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       raise_warning("Attempted to serialize unserializable builtin class %s",
         getVMClass()->preClass()->name()->data());
       Variant placeholder = init_null();
-      placeholder.serialize(serializer);
+      serializeVariant(placeholder, serializer);
       return;
     }
     if (getAttribute(HasSleep)) {
@@ -850,7 +854,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       raise_notice("serialize(): __sleep should return an array only "
                    "containing the names of instance-variables to "
                    "serialize");
-      uninit_null().serialize(serializer);
+      serializeVariant(uninit_null(), serializer);
     }
   } else {
     if (isCollection()) {
@@ -877,7 +881,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
         Variant* debugDispVal = const_cast<ObjectData*>(this)->  // XXX
           o_realProp(s_PHP_DebugDisplay, 0);
         if (debugDispVal) {
-          debugDispVal->serialize(serializer, false, false, true);
+          serializeVariant(*debugDispVal, serializer, false, false, true);
           return;
         }
       }

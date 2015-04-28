@@ -1620,6 +1620,11 @@ class SocketsExtension final : public Extension {
 
     SOCK_CONST(IPV6_UNICAST_HOPS);
 
+#define REGISTER_LONG_CONSTANT(name, val, flags) \
+  Native::registerConstant<KindOfInt64>(makeStaticString(name), val)
+#include "hphp/runtime/ext/sockets/unix_socket_constants.h"
+#undef REGISTER_LONG_CONSTANT
+
     HHVM_FE(socket_create);
     HHVM_FE(socket_create_listen);
     HHVM_FE(socket_create_pair);

@@ -285,6 +285,13 @@ inline bool Class::hasConstant(const StringData* clsCnsName) const {
     !m_constants[clsCnsInd].isType();
 }
 
+inline bool Class::hasTypeConstant(const StringData* typeConstName) const {
+  auto typeConstInd = m_constants.findIndex(typeConstName);
+  return (typeConstInd != kInvalidSlot) &&
+    !m_constants[typeConstInd].isAbstract() &&
+    m_constants[typeConstInd].isType();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Interfaces and traits.
 

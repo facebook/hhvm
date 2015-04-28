@@ -41,7 +41,7 @@ inline vixl::FPRegister x2simd(PhysReg x64reg) {
 inline constexpr unsigned maxArgReg() { return 7; }
 
 inline vixl::Register argReg(unsigned index) {
-  assert(index <= maxArgReg());
+  assertx(index <= maxArgReg());
   return vixl::Register::XRegFromCode(index);
 }
 
@@ -63,7 +63,7 @@ inline vixl::Condition convertCC(jit::ConditionCode cc) {
     // ARM has no parity flag
     always_assert(false);
   }
-  assert(cc >= 0 && cc <= 0xF);
+  assertx(cc >= 0 && cc <= 0xF);
 
   using namespace vixl;
 

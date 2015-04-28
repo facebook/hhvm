@@ -74,11 +74,10 @@ bool effectful(Vinstr& inst) {
     case Vinstr::imul:
     case Vinstr::incl:
     case Vinstr::incq:
-    case Vinstr::ldretaddr:
     case Vinstr::lea:
     case Vinstr::leap:
     case Vinstr::load:
-    case Vinstr::loaddqu:
+    case Vinstr::loadups:
     case Vinstr::loadl:
     case Vinstr::loadqp:
     case Vinstr::loadsd:
@@ -89,7 +88,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::lslv:
     case Vinstr::movb:
     case Vinstr::movl:
-    case Vinstr::movretaddr:
     case Vinstr::movtqb:
     case Vinstr::movtql:
     case Vinstr::movzbl:
@@ -185,7 +183,6 @@ bool effectful(Vinstr& inst) {
     case Vinstr::jmpm:
     case Vinstr::jmpr:
     case Vinstr::jmpi:
-    case Vinstr::kpcall:
     case Vinstr::landingpad:
     case Vinstr::mccall:
     case Vinstr::mcprep:
@@ -196,15 +193,12 @@ bool effectful(Vinstr& inst) {
     case Vinstr::phijcc:
     case Vinstr::phijmp:
     case Vinstr::pop:
-    case Vinstr::popm:
     case Vinstr::push:
-    case Vinstr::pushm:
     case Vinstr::ret:
-    case Vinstr::retctrl:
     case Vinstr::store:
     case Vinstr::storeb:
     case Vinstr::storebi:
-    case Vinstr::storedqu:
+    case Vinstr::storeups:
     case Vinstr::storel:
     case Vinstr::storeli:
     case Vinstr::storeqi:
@@ -218,7 +212,10 @@ bool effectful(Vinstr& inst) {
     case Vinstr::ud2:
     case Vinstr::unwind:
     case Vinstr::vcall:
+    case Vinstr::vcallstub:
     case Vinstr::vinvoke:
+    case Vinstr::vretm:
+    case Vinstr::vret:
       return true;
   }
   always_assert(false);
@@ -274,7 +271,7 @@ void removeDeadCode(Vunit& unit) {
         }
       }
       if (mutate) {
-        assert(live == livein[b]);
+        assertx(live == livein[b]);
       } else {
         if (live != livein[b]) {
           livein[b] = live;

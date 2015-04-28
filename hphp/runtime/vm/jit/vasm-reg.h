@@ -129,7 +129,7 @@ struct Vr {
    */
   explicit Vr(size_t rn) : rn(rn) {}
   /* implicit */ Vr(Vreg r) : rn(size_t(r)) {
-    assert(allowable(r) || !r.isValid());
+    assertx(allowable(r) || !r.isValid());
   }
   /* implicit */ Vr(Reg r) : Vr{Vreg(r)} {}
   /* implicit */ Vr(PhysReg pr) : Vr{Vreg(pr)} {}

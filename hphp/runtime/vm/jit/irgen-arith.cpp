@@ -29,10 +29,10 @@ namespace {
 
 bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   auto checkArith = [](Type ty) {
-    return ty.subtypeOfAny(Type::Int, Type::Bool, Type::Dbl);
+    return ty.subtypeOfAny(TInt, TBool, TDbl);
   };
   auto checkBitOp = [](Type ty) {
-    return ty.subtypeOfAny(Type::Int, Type::Bool);
+    return ty.subtypeOfAny(TInt, TBool);
   };
 
   switch (op) {
@@ -103,28 +103,28 @@ bool isBitOp(Op op) {
   }
 }
 
-SSATmp* promoteBool(HTS& env, SSATmp* src) {
+SSATmp* promoteBool(IRGS& env, SSATmp* src) {
   // booleans in arithmetic and bitwise operations get cast to ints
-  return src->type() <= Type::Bool ? gen(env, ConvBoolToInt, src) : src;
+  return src->type() <= TBool ? gen(env, ConvBoolToInt, src) : src;
 }
 
-Opcode promoteBinaryDoubles(HTS& env, Op op, SSATmp*& src1, SSATmp*& src2) {
+Opcode promoteBinaryDoubles(IRGS& env, Op op, SSATmp*& src1, SSATmp*& src2) {
   auto const type1 = src1->type();
   auto const type2 = src2->type();
   auto opc = intArithOp(op);
-  if (type1 <= Type::Dbl) {
+  if (type1 <= TDbl) {
     opc = dblArithOp(op);
-    if (type2 <= Type::Int) {
+    if (type2 <= TInt) {
       src2 = gen(env, ConvIntToDbl, src2);
     }
-  } else if (type2 <= Type::Dbl) {
+  } else if (type2 <= TDbl) {
     opc = dblArithOp(op);
     src1 = gen(env, ConvIntToDbl, src1);
   }
   return opc;
 }
 
-void binaryBitOp(HTS& env, Op op) {
+void binaryBitOp(IRGS& env, Op op) {
   auto const type2 = topC(env, BCSPOffset{0})->type();
   auto const type1 = topC(env, BCSPOffset{1})->type();
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
@@ -137,7 +137,7 @@ void binaryBitOp(HTS& env, Op op) {
   push(env, gen(env, bitOp(op), src1, src2));
 }
 
-void binaryArith(HTS& env, Op op) {
+void binaryArith(IRGS& env, Op op) {
   auto const type2 = topC(env, BCSPOffset{0})->type();
   auto const type1 = topC(env, BCSPOffset{1})->type();
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
@@ -152,7 +152,7 @@ void binaryArith(HTS& env, Op op) {
   auto const opc = promoteBinaryDoubles(env, op, src1, src2);
 
   if (opc == AddIntO || opc == SubIntO || opc == MulIntO) {
-    assert(src1->isA(Type::Int) && src2->isA(Type::Int));
+    assertx(src1->isA(TInt) && src2->isA(TInt));
     push(env, gen(env, opc, exitSlow, src1, src2));
   } else {
     push(env, gen(env, opc, src1, src2));
@@ -160,12 +160,12 @@ void binaryArith(HTS& env, Op op) {
 }
 
 // Implementation function that only handles integer or double inc/dec.
-SSATmp* implIncDec(HTS& env, bool pre, bool inc, bool over, SSATmp* src) {
-  assert(src->type() <= Type::Int || src->type() <= Type::Dbl);
+SSATmp* implIncDec(IRGS& env, bool pre, bool inc, bool over, SSATmp* src) {
+  assertx(src->type() <= TInt || src->type() <= TDbl);
 
   Opcode op;
 
-  if (src->type() <= Type::Dbl) {
+  if (src->type() <= TDbl) {
     op = inc ? AddDbl : SubDbl;
   } else if (!over) {
     op = inc ? AddInt : SubInt;
@@ -173,7 +173,7 @@ SSATmp* implIncDec(HTS& env, bool pre, bool inc, bool over, SSATmp* src) {
     op = inc ? AddIntO : SubIntO;
   }
 
-  auto const one = src->type() <= Type::Int ? cns(env, 1) : cns(env, 1.0);
+  auto const one = src->type() <= TInt ? cns(env, 1) : cns(env, 1.0);
   auto const res =
     op == AddIntO || op == SubIntO
       ? gen(env, op, makeExitSlow(env), src, one)
@@ -197,12 +197,12 @@ SSATmp* implIncDec(HTS& env, bool pre, bool inc, bool over, SSATmp* src) {
  * 3. Array comparisons can throw if recursion is detected.
  */
 bool cmpOpTypesMayReenter(Type t0, Type t1) {
-  assert(t0 != Type::Gen && t1 != Type::Gen);
-  auto const badObjConvs = Type::Int | Type::Dbl | Type::Str;
-  return (t0.maybe(Type::Obj) && t1.maybe(badObjConvs)) ||
-         (t0.maybe(badObjConvs) && t1.maybe(Type::Obj)) ||
-         (t0.maybe(Type::Obj) && t1.maybe(Type::Obj)) ||
-         (t0.maybe(Type::Arr) && t1.maybe(Type::Arr));
+  assertx(t0 != TGen && t1 != TGen);
+  auto const badObjConvs = TInt | TDbl | TStr;
+  return (t0.maybe(TObj) && t1.maybe(badObjConvs)) ||
+         (t0.maybe(badObjConvs) && t1.maybe(TObj)) ||
+         (t0.maybe(TObj) && t1.maybe(TObj)) ||
+         (t0.maybe(TArr) && t1.maybe(TArr));
 }
 
 Opcode matchReentrantCmp(Opcode opc) {
@@ -217,7 +217,7 @@ Opcode matchReentrantCmp(Opcode opc) {
   }
 }
 
-void implCmp(HTS& env, Opcode opc) {
+void implCmp(IRGS& env, Opcode opc) {
   // The following if-block is historical behavior from ir-translator: this
   // should be re-evaluated.
   if (opc == Lt || opc == Lte || opc == Gt || opc == Gte) {
@@ -227,8 +227,8 @@ void implCmp(HTS& env, Opcode opc) {
       PUNT(LtGtOp-UnknownInput);
     }
     auto const ok =
-      leftType.subtypeOfAny(Type::Null, Type::Bool, Type::Int, Type::Dbl) &&
-      rightType.subtypeOfAny(Type::Null, Type::Bool, Type::Int, Type::Dbl);
+      leftType.subtypeOfAny(TNull, TBool, TInt, TDbl) &&
+      rightType.subtypeOfAny(TNull, TBool, TInt, TDbl);
     if (!ok) {
       PUNT(LtGtOp-NotOk);
     }
@@ -251,9 +251,9 @@ void implCmp(HTS& env, Opcode opc) {
   gen(env, DecRef, src1);
 }
 
-void implAdd(HTS& env, Op op) {
-  if (topC(env, BCSPOffset{0})->type() <= Type::Arr &&
-      topC(env, BCSPOffset{1})->type() <= Type::Arr) {
+void implAdd(IRGS& env, Op op) {
+  if (topC(env, BCSPOffset{0})->type() <= TArr &&
+      topC(env, BCSPOffset{1})->type() <= TArr) {
     auto const tr = popC(env);
     auto const tl = popC(env);
     // The ArrayAdd helper decrefs its args, so don't decref pop'ed values.
@@ -267,7 +267,7 @@ void implAdd(HTS& env, Op op) {
 
 }
 
-void emitConcat(HTS& env) {
+void emitConcat(IRGS& env) {
   auto const tr         = popC(env);
   auto const tl         = popC(env);
   // ConcatCellCell consumes only first ref, not second.
@@ -276,16 +276,16 @@ void emitConcat(HTS& env) {
   gen(env, DecRef, tr);
 }
 
-void emitConcatN(HTS& env, int32_t n) {
+void emitConcatN(IRGS& env, int32_t n) {
   if (n == 2) return emitConcat(env);
 
   auto const t1 = popC(env);
   auto const t2 = popC(env);
   auto const t3 = popC(env);
 
-  if (!(t1->type() <= Type::Str) ||
-      !(t2->type() <= Type::Str) ||
-      !(t3->type() <= Type::Str)) {
+  if (!(t1->type() <= TStr) ||
+      !(t2->type() <= TStr) ||
+      !(t3->type() <= TStr)) {
     PUNT(ConcatN);
   }
 
@@ -298,7 +298,7 @@ void emitConcatN(HTS& env, int32_t n) {
 
   always_assert(n == 4);
   auto const t4 = popC(env);
-  if (!(t4->type() <= Type::Str)) PUNT(ConcatN);
+  if (!(t4->type() <= TStr)) PUNT(ConcatN);
 
   push(env, gen(env, ConcatStr4, t4, t3, t2, t1));
   gen(env, DecRef, t3);
@@ -306,7 +306,7 @@ void emitConcatN(HTS& env, int32_t n) {
   gen(env, DecRef, t1);
 }
 
-void emitSetOpL(HTS& env, int32_t id, SetOpOp subop) {
+void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
   auto const subOpc = [&]() -> folly::Optional<Op> {
     switch (subop) {
     case SetOpOp::PlusEqual:   return Op::Add;
@@ -341,8 +341,8 @@ void emitSetOpL(HTS& env, int32_t id, SetOpOp subop) {
    * boxed locals.
    */
   bool const isAdd = (*subOpc == Op::Add || *subOpc == Op::AddO);
-  if (isAdd && (env.irb->localType(id, DataTypeSpecific) <= Type::Arr) &&
-      topC(env)->isA(Type::Arr)) {
+  if (isAdd && (env.irb->localType(id, DataTypeSpecific) <= TArr) &&
+      topC(env)->isA(TArr)) {
     /*
      * ArrayAdd decrefs its sources and returns a new array with
      * refcount == 1. That covers the local, so incref once more for
@@ -408,7 +408,7 @@ void emitSetOpL(HTS& env, int32_t id, SetOpOp subop) {
   pushStLoc(env, id, ldrefExit, ldPMExit, result);
 }
 
-void emitIncDecL(HTS& env, int32_t id, IncDecOp subop) {
+void emitIncDecL(IRGS& env, int32_t id, IncDecOp subop) {
   auto const pre = isPre(subop);
   auto const inc = isInc(subop);
   auto const over = isIncDecO(subop);
@@ -423,17 +423,17 @@ void emitIncDecL(HTS& env, int32_t id, IncDecOp subop) {
     DataTypeSpecific
   );
 
-  if (src->type() <= Type::Bool) {
+  if (src->type() <= TBool) {
     push(env, src);
     return;
   }
 
-  if (src->type().subtypeOfAny(Type::Arr, Type::Obj)) {
+  if (src->type().subtypeOfAny(TArr, TObj)) {
     pushIncRef(env, src);
     return;
   }
 
-  if (src->type() <= Type::Null) {
+  if (src->type() <= TNull) {
     push(env, inc && pre ? cns(env, 1) : src);
     if (inc) {
       stLoc(env, id, ldrefExit, ldPMExit, cns(env, 1));
@@ -441,7 +441,7 @@ void emitIncDecL(HTS& env, int32_t id, IncDecOp subop) {
     return;
   }
 
-  if (!src->type().subtypeOfAny(Type::Int, Type::Dbl)) {
+  if (!src->type().subtypeOfAny(TInt, TDbl)) {
     PUNT(IncDecL);
   }
 
@@ -449,7 +449,7 @@ void emitIncDecL(HTS& env, int32_t id, IncDecOp subop) {
   stLoc(env, id, ldrefExit, ldPMExit, res);
 }
 
-void emitXor(HTS& env) {
+void emitXor(IRGS& env) {
   auto const btr = popC(env);
   auto const btl = popC(env);
   auto const tr = gen(env, ConvCellToBool, btr);
@@ -459,7 +459,7 @@ void emitXor(HTS& env) {
   gen(env, DecRef, btr);
 }
 
-void emitShl(HTS& env) {
+void emitShl(IRGS& env) {
   auto const shiftAmount    = popC(env);
   auto const lhs            = popC(env);
   auto const lhsInt         = gen(env, ConvCellToInt, lhs);
@@ -470,7 +470,7 @@ void emitShl(HTS& env) {
   gen(env, DecRef, shiftAmount);
 }
 
-void emitShr(HTS& env) {
+void emitShr(IRGS& env) {
   auto const shiftAmount    = popC(env);
   auto const lhs            = popC(env);
   auto const lhsInt         = gen(env, ConvCellToInt, lhs);
@@ -481,48 +481,48 @@ void emitShr(HTS& env) {
   gen(env, DecRef, shiftAmount);
 }
 
-void emitPow(HTS& env) {
-  interpOne(env, Type::UncountedInit, 2);
+void emitPow(IRGS& env) {
+  interpOne(env, TUncountedInit, 2);
 }
 
-void emitBitNot(HTS& env) {
+void emitBitNot(IRGS& env) {
   auto const srcType = topC(env)->type();
-  if (srcType <= Type::Int) {
+  if (srcType <= TInt) {
     auto const src = popC(env);
     push(env, gen(env, XorInt, src, cns(env, -1)));
     return;
   }
 
-  if (srcType <= Type::Dbl) {
+  if (srcType <= TDbl) {
     auto const src = gen(env, ConvDblToInt, popC(env));
     push(env, gen(env, XorInt, src, cns(env, -1)));
     return;
   }
 
-  auto const resultType = srcType <= Type::Str ? Type::Str
-                        : srcType.needsReg() ? Type::Cell
-                        : Type::Int;
+  auto const resultType = srcType <= TStr ? TStr
+                        : srcType.needsReg() ? TCell
+                        : TInt;
   interpOne(env, resultType, 1);
 }
 
 
-void emitNot(HTS& env) {
+void emitNot(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, XorBool, gen(env, ConvCellToBool, src), cns(env, true)));
   gen(env, DecRef, src);
 }
 
-void emitDiv(HTS& env) {
+void emitDiv(IRGS& env) {
   auto const divisorType  = topC(env, BCSPOffset{0})->type();
   auto const dividendType = topC(env, BCSPOffset{1})->type();
 
   auto isNumeric = [&] (Type type) {
-    return type.subtypeOfAny(Type::Int, Type::Dbl, Type::Bool);
+    return type.subtypeOfAny(TInt, TDbl, TBool);
   };
 
   // not going to bother with string division etc.
   if (!isNumeric(divisorType) || !isNumeric(dividendType)) {
-    interpOne(env, Type::UncountedInit, 2);
+    interpOne(env, TUncountedInit, 2);
     return;
   }
 
@@ -530,15 +530,15 @@ void emitDiv(HTS& env) {
   auto dividend = topC(env, BCSPOffset{1});
 
   // we can't codegen this but we may be able to special case it away
-  if (!divisor->isA(Type::Dbl) && !dividend->isA(Type::Dbl)) {
+  if (!divisor->isA(TDbl) && !dividend->isA(TDbl)) {
     // TODO(#2570625): support integer-integer division, move this to
     // simplifier:
-    if (divisor->isConst()) {
+    if (divisor->hasConstVal()) {
       int64_t divisorVal;
-      if (divisor->isA(Type::Int)) {
+      if (divisor->isA(TInt)) {
         divisorVal = divisor->intVal();
       } else {
-        assert(divisor->isA(Type::Bool));
+        assertx(divisor->isA(TBool));
         divisorVal = divisor->boolVal();
       }
 
@@ -551,12 +551,12 @@ void emitDiv(HTS& env) {
         return;
       }
 
-      if (dividend->isConst()) {
+      if (dividend->hasConstVal()) {
         int64_t dividendVal;
-        if (dividend->isA(Type::Int)) {
+        if (dividend->isA(TInt)) {
           dividendVal = dividend->intVal();
         } else {
-          assert(dividend->isA(Type::Bool));
+          assertx(dividend->isA(TBool));
           dividendVal = dividend->boolVal();
         }
         popC(env);
@@ -570,17 +570,17 @@ void emitDiv(HTS& env) {
       }
       /* fall through */
     }
-    interpOne(env, Type::UncountedInit, 2);
+    interpOne(env, TUncountedInit, 2);
     return;
   }
 
   auto make_double = [&] (SSATmp* src) {
-    if (src->isA(Type::Int)) {
+    if (src->isA(TInt)) {
       return gen(env, ConvIntToDbl, src);
-    } else if (src->isA(Type::Bool)) {
+    } else if (src->isA(TBool)) {
       return gen(env, ConvBoolToDbl, src);
     }
-    assert(src->isA(Type::Dbl));
+    assertx(src->isA(TDbl));
     return src;
   };
 
@@ -607,7 +607,7 @@ void emitDiv(HTS& env) {
   push(env, divVal);
 }
 
-void emitMod(HTS& env) {
+void emitMod(IRGS& env) {
   auto const btr = popC(env);
   auto const btl = popC(env);
   auto const tr = gen(env, ConvCellToInt, btr);
@@ -642,7 +642,6 @@ void emitMod(HTS& env) {
   // php semantics are to return zero.
   auto const res = cond(
     env,
-    0,
     [&] (Block* taken) {
       auto const negone = gen(env, Eq, tr, cns(env, -1));
       gen(env, JmpNZero, taken, negone);
@@ -660,26 +659,26 @@ void emitMod(HTS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitBitAnd(HTS& env) { binaryBitOp(env, Op::BitAnd); }
-void emitBitOr(HTS& env)  { binaryBitOp(env, Op::BitOr); }
-void emitBitXor(HTS& env) { binaryBitOp(env, Op::BitXor); }
+void emitBitAnd(IRGS& env) { binaryBitOp(env, Op::BitAnd); }
+void emitBitOr(IRGS& env)  { binaryBitOp(env, Op::BitOr); }
+void emitBitXor(IRGS& env) { binaryBitOp(env, Op::BitXor); }
 
-void emitSub(HTS& env)    { binaryArith(env, Op::Sub); }
-void emitMul(HTS& env)    { binaryArith(env, Op::Mul); }
-void emitSubO(HTS& env)   { binaryArith(env, Op::SubO); }
-void emitMulO(HTS& env)   { binaryArith(env, Op::MulO); }
+void emitSub(IRGS& env)    { binaryArith(env, Op::Sub); }
+void emitMul(IRGS& env)    { binaryArith(env, Op::Mul); }
+void emitSubO(IRGS& env)   { binaryArith(env, Op::SubO); }
+void emitMulO(IRGS& env)   { binaryArith(env, Op::MulO); }
 
-void emitGt(HTS& env)     { implCmp(env, Gt);    }
-void emitGte(HTS& env)    { implCmp(env, Gte);   }
-void emitLt(HTS& env)     { implCmp(env, Lt);    }
-void emitLte(HTS& env)    { implCmp(env, Lte);   }
-void emitEq(HTS& env)     { implCmp(env, Eq);    }
-void emitNeq(HTS& env)    { implCmp(env, Neq);   }
-void emitSame(HTS& env)   { implCmp(env, Same);  }
-void emitNSame(HTS& env)  { implCmp(env, NSame); }
+void emitGt(IRGS& env)     { implCmp(env, Gt);    }
+void emitGte(IRGS& env)    { implCmp(env, Gte);   }
+void emitLt(IRGS& env)     { implCmp(env, Lt);    }
+void emitLte(IRGS& env)    { implCmp(env, Lte);   }
+void emitEq(IRGS& env)     { implCmp(env, Eq);    }
+void emitNeq(IRGS& env)    { implCmp(env, Neq);   }
+void emitSame(IRGS& env)   { implCmp(env, Same);  }
+void emitNSame(IRGS& env)  { implCmp(env, NSame); }
 
-void emitAdd(HTS& env)    { implAdd(env, Op::Add); }
-void emitAddO(HTS& env)   { implAdd(env, Op::AddO); }
+void emitAdd(IRGS& env)    { implAdd(env, Op::Add); }
+void emitAddO(IRGS& env)   { implAdd(env, Op::AddO); }
 
 //////////////////////////////////////////////////////////////////////
 

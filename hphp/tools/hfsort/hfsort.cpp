@@ -60,7 +60,7 @@ void readSymbols(FILE *file) {
           }
         }
       }
-      cg.addFunc(Func(cg.funcs.size(), name, addr, size));
+      cg.addFunc(Func(cg.funcs.size(), name, addr, size, 0));
     }
   }
 }
@@ -76,7 +76,7 @@ void readPerfData(gzFile file, bool computeArcWeight) {
   char line[BUFLEN];
 
   while (gzgets(file, line, BUFLEN) != Z_NULL) {
-    TRACE(2, "readPerfData: line: %s\n", line);
+    HFTRACE(2, "readPerfData: line: %s\n", line);
     if (line[0] == '#') continue;
     if (isspace(line[0])) continue;
 
@@ -85,14 +85,14 @@ void readPerfData(gzFile file, bool computeArcWeight) {
     FuncId idTop = getFuncId(line);
     if (idTop == InvalidId) continue;
     cg.funcs[idTop].samples++;
-    TRACE(2, "readPerfData: idTop: %u %s\n", idTop,
-          cg.funcs[idTop].mangledNames[0].c_str());
+    HFTRACE(2, "readPerfData: idTop: %u %s\n", idTop,
+            cg.funcs[idTop].mangledNames[0].c_str());
     if (gzgets(file, line, BUFLEN) == Z_NULL) error("reading perf data");
     FuncId idCaller = getFuncId(line);
     if (idCaller != InvalidId) {
       if (computeArcWeight) cg.incArcWeight(idCaller, idTop);
-      TRACE(2, "readPerfData: idCaller: %u %s\n", idCaller,
-            cg.funcs[idCaller].mangledNames[0].c_str());
+      HFTRACE(2, "readPerfData: idCaller: %u %s\n", idCaller,
+              cg.funcs[idCaller].mangledNames[0].c_str());
     }
   }
 
@@ -113,7 +113,7 @@ void readEdgcntData(FILE* file) {
   char     kind;
   uint32_t count;
 
-  TRACE(1, "=== use edgcnt profile to build callgraph\n\n");
+  HFTRACE(1, "=== use edgcnt profile to build callgraph\n\n");
 
   while (fgets(line, BUFLEN, file)) {
     if (sscanf(line, "%lx %lx %c %u %*x", &src, &dst, &kind, &count) == 4) {
@@ -145,27 +145,28 @@ void print(const std::vector<Cluster*>& clusters) {
   uint32_t totalSize = 0;
   uint32_t curPage   = 0;
   uint32_t hotfuncs  = 0;
-  TRACE(1, "============== page 0 ==============\n");
+  HFTRACE(1, "============== page 0 ==============\n");
   for (auto cluster : clusters) {
-    TRACE(1, "-------- density = %.3lf (%u / %u) arcWeight = %.1lf --------\n",
-          (double) cluster->samples / cluster->size,
-          cluster->samples, cluster->size, cluster->arcWeight);
+    HFTRACE(1,
+            "-------- density = %.3lf (%u / %u) arcWeight = %.1lf --------\n",
+            (double) cluster->samples / cluster->size,
+            cluster->samples, cluster->size, cluster->arcWeight);
     for (FuncId fid : cluster->funcs) {
       if (cg.funcs[fid].samples > 0) {
         hotfuncs++;
         int space = 0;
         for (const auto& mangledName : cg.funcs[fid].mangledNames) {
           fprintf(outfile, "%.*s*.text.%s\n",
-                    space, " ", mangledName.c_str());
+                  space, " ", mangledName.c_str());
           space = 1;
         }
-        TRACE(1, "start = %6u : %s\n", totalSize,
-              cg.funcs[fid].toString().c_str());
+        HFTRACE(1, "start = %6u : %s\n", totalSize,
+                cg.funcs[fid].toString().c_str());
         totalSize += cg.funcs[fid].size;
         uint32_t newPage = totalSize / kPageSize;
         if (newPage != curPage) {
           curPage = newPage;
-          TRACE(1, "============== page %u ==============\n", curPage);
+          HFTRACE(1, "============== page %u ==============\n", curPage);
         }
       }
     }
@@ -251,10 +252,10 @@ int main(int argc, char* argv[]) {
   std::vector<Cluster*> clusters;
 
   if (algorithm == Algorithm::Hfsort) {
-    TRACE(1, "=== algorithm : hfsort\n\n");
+    HFTRACE(1, "=== algorithm : hfsort\n\n");
     clusters = clusterize();
   } else {
-    TRACE(1, "=== algorithm : pettis-hansen\n\n");
+    HFTRACE(1, "=== algorithm : pettis-hansen\n\n");
     assert(algorithm == Algorithm::PettisHansen);
     clusters = pettisAndHansen();
   }

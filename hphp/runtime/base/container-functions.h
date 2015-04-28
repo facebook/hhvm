@@ -66,6 +66,15 @@ inline size_t getContainerSize(const Variant& v) {
   return getContainerSize(*v.asCell());
 }
 
+inline bool isPackedContainer(const Cell c) {
+  assert(isContainer(c));
+  if (c.m_type == KindOfArray) {
+    return c.m_data.parr->isPacked();
+  }
+
+  return isVectorCollection(c.m_data.pobj->collectionType());
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

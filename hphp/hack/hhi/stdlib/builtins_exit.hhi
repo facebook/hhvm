@@ -10,5 +10,5 @@
  */
 
 // exit and die terminate the request
-function exit($exit_code_or_message = 0): void; // really "noreturn"
-function die($exit_code_or_message = 0): void; // really "noreturn"
+function exit($exit_code_or_message = 0): noreturn;
+function die($exit_code_or_message = 0): noreturn;

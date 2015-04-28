@@ -51,10 +51,10 @@ ArraySpec ArraySpec::operator|(const ArraySpec& rhs) const {
   auto new_type = lhs.type() == rhs.type() ? lhs.type() : nullptr;
 
   // If the shapes were nontrivial and equal, the specs would be equal.
-  assert(!lhs.shape() || lhs.shape() != rhs.shape());
+  assertx(!lhs.shape() || lhs.shape() != rhs.shape());
 
   // Nontrivial kind /and/ type unions would imply equal kinds and types.
-  assert(!new_kind || !new_type);
+  assertx(!new_kind || !new_type);
 
   if (new_kind) return ArraySpec(*new_kind);
   if (new_type) return ArraySpec(new_type);
@@ -132,7 +132,7 @@ ClassSpec ClassSpec::operator|(const ClassSpec& rhs) const {
   if (lhs <= rhs) return rhs;
   if (rhs <= lhs) return lhs;
 
-  assert(lhs.cls() && rhs.cls());
+  assertx(lhs.cls() && rhs.cls());
 
   // We're unwilling to unify with interfaces, so just return Top.
   if (!isNormalClass(lhs.cls()) || !isNormalClass(rhs.cls())) {
@@ -153,7 +153,7 @@ ClassSpec ClassSpec::operator&(const ClassSpec& rhs) const {
   if (lhs <= rhs) return lhs;
   if (rhs <= lhs) return rhs;
 
-  assert(lhs.cls() && rhs.cls());
+  assertx(lhs.cls() && rhs.cls());
 
   // If neither class is an interface, their intersection is trivial.
   if (isNormalClass(lhs.cls()) && isNormalClass(rhs.cls())) {

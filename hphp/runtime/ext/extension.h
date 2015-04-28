@@ -59,8 +59,6 @@ class Extension : public IDebuggable {
 public:
   static bool IsSystemlibPath(const std::string& path);
 
-  static void MergeSystemlib();
-
   // Look for "ext.{namehash}" in the binary and compile/merge it
   void loadSystemlib(const std::string& name = "");
 
@@ -68,10 +66,10 @@ public:
   static void CompileSystemlib(const std::string &slib,
                                const std::string &name);
 public:
-  explicit Extension(litstr name, const char *version = "");
+  explicit Extension(const char* name, const char* version = "");
   virtual ~Extension() {}
 
-  const char *getVersion() const { return m_version.c_str();}
+  const char* getVersion() const { return m_version.c_str();}
 
   // override these functions to implement module specific init/shutdown
   // sequences and information display.

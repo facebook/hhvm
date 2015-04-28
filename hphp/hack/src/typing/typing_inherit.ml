@@ -22,6 +22,7 @@ open Typing_defs
 
 module Env = Typing_env
 module Inst = Typing_instantiate
+module TUtils = Typing_utils
 type env = Env.env
 
 (*****************************************************************************)
@@ -182,10 +183,10 @@ let check_arity pos class_name class_type class_parameters =
 let make_substitution ?this:(this=None) pos class_name class_type class_parameters =
   check_arity pos class_name class_type class_parameters;
   match this with
-  | None -> Inst.make_subst class_type.tc_tparams class_parameters
-  | Some this ->
-      let this_ty = (fst this, Tgeneric ("this", Some this)) in
-      Inst.make_subst_with_this this_ty class_type.tc_tparams class_parameters
+  | None -> Inst.make_subst Phase.decl class_type.tc_tparams class_parameters
+  | Some (r, _ as this) ->
+      let this_ty = r, TUtils.this_of this in
+      Inst.make_subst_with_this ~phase:Phase.decl ~this:this_ty class_type.tc_tparams class_parameters
 
 let constructor env subst (cstr, consistent) = match cstr with
   | None -> env, (None, consistent)

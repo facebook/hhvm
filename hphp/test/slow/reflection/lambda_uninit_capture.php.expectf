@@ -1,0 +1,9 @@
+bool(true)
+array(2) {
+  ["y"]=>
+  int(1)
+  ["x"]=>
+  NULL
+}
+
+Notice: Undefined variable: x in %s on line 5

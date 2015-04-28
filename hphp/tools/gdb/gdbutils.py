@@ -44,6 +44,10 @@ def gdbprint(val, ty=None):
     gdb.execute('print (%s)%s' % (str(ty), str(val)))
 
 
+def plural_suffix(num, suffix='s'):
+    return '' if num == 1 else suffix
+
+
 #------------------------------------------------------------------------------
 # Intel CRC32.
 
@@ -176,11 +180,18 @@ def T(name):
 
 @memoized
 def V(name):
-    return gdb.lookup_symbol(name)[0].value()
+    try:
+        return gdb.lookup_symbol(name)[0].value()
+    except gdb.error:
+        return gdb.lookup_symbol(name)[0].value(gdb.selected_frame())
 
 @memoized
 def K(name):
     return gdb.lookup_global_symbol(name).value()
+
+@memoized
+def nullptr():
+    return gdb.Value(0).cast(T('void').pointer())
 
 
 #------------------------------------------------------------------------------
@@ -214,7 +225,7 @@ def rawptr(val):
     if name == 'HPHP::default_ptr':
         return val['m_p']
 
-    if name == 'HPHP::SmartPtr' or name == 'HPHP::AtomicSmartPtr':
+    if name == 'HPHP::SmartPtr' or name == 'HPHP::AtomicSharedPtr':
         return val['m_px']
 
     if name == 'HPHP::LowPtr' or name == 'HPHP::LowPtrImpl':

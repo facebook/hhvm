@@ -55,7 +55,7 @@ void DynamicFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       resolveClass();
     }
     if (m_params) {
-      m_params->markParams(canInvokeFewArgs());
+      m_params->markParams();
     }
 
     if (!m_class && m_className.empty()) {

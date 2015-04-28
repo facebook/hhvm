@@ -15,45 +15,51 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-interface Traversable<Tv> {}
+interface Traversable<+Tv> {}
 
-interface KeyedTraversable<Tk, Tv> extends Traversable<Tv> {}
+interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
 
-interface Container<Tv> extends Traversable<Tv> {}
+interface Container<+Tv> extends Traversable<Tv> {}
 
-interface KeyedContainer<Tk, Tv> extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
+interface KeyedContainer<+Tk, +Tv> extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
 
-interface Indexish<Tk, Tv> extends KeyedContainer<Tk, Tv> {}
+interface Indexish<+Tk, +Tv> extends KeyedContainer<Tk, Tv> {}
 
-interface Iterator<Tv> extends Traversable<Tv> {
+interface Iterator<+Tv> extends Traversable<Tv> {
   public function current(): Tv;
   public function next(): void;
   public function rewind(): void;
   public function valid(): bool;
 }
 
-interface AsyncIterator<Tv> {
+interface AsyncIterator<+Tv> {
   public function next(): Awaitable<?(mixed, Tv)>;
 }
 
-interface AsyncKeyedIterator<Tk, Tv> extends AsyncIterator<Tv> {
+interface AsyncKeyedIterator<+Tk, +Tv> extends AsyncIterator<Tv> {
   public function next(): Awaitable<?(Tk, Tv)>;
 }
 
-interface KeyedIterator<Tk, Tv> extends KeyedTraversable<Tk,Tv>, Iterator<Tv> {
+interface KeyedIterator<+Tk, +Tv> extends KeyedTraversable<Tk,Tv>, Iterator<Tv> {
   public function key(): Tk;
 }
 
-interface IteratorAggregate<Tv> extends Traversable<Tv> {
+interface IteratorAggregate<+Tv> extends Traversable<Tv> {
   public function getIterator(): Iterator<Tv>;
 }
 
-interface Iterable<Tv> extends IteratorAggregate<Tv> {
+interface Iterable<+Tv> extends IteratorAggregate<Tv> {
   public function getIterator(): Iterator<Tv>;
   public function toArray(): array;
   public function toValuesArray(): array;
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toVector(): Vector<Tv>;
   public function toImmVector(): ImmVector<Tv>;
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe.
+   * See #6853603. */
   public function toSet(): Set<Tv>;
   public function toImmSet(): ImmSet<Tv>;
   public function lazy(): Iterable<Tv>;
@@ -66,14 +72,19 @@ interface Iterable<Tv> extends IteratorAggregate<Tv> {
   public function skip(int $n): Iterable<Tv>;
   public function skipWhile((function(Tv): bool) $fn): Iterable<Tv>;
   public function slice(int $start, int $len): Iterable<Tv>;
-  public function concat(Traversable<Tv> $traversable): Iterable<Tv>;
+  public function concat<Tu super Tv>(
+    Traversable<Tu> $traversable
+  ): Iterable<Tu>;
   public function firstValue(): ?Tv;
   public function lastValue(): ?Tv;
 }
 
-interface KeyedIterable<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {
+interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {
   public function getIterator(): KeyedIterator<Tk, Tv>;
   public function toKeysArray(): array;
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toMap(): Map<Tk, Tv>;
   public function toImmMap(): ImmMap<Tk, Tv>;
   public function lazy(): KeyedIterable<Tk, Tv>;
@@ -92,7 +103,9 @@ interface KeyedIterable<Tk, Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {
   public function skip(int $n): KeyedIterable<Tk, Tv>;
   public function skipWhile((function(Tv): bool) $fn): KeyedIterable<Tk, Tv>;
   public function slice(int $start, int $len): KeyedIterable<Tk, Tv>;
-  public function concat(Traversable<Tv> $traversable): Iterable<Tv>;
+  public function concat<Tu super Tv>(
+    Traversable<Tu> $traversable
+  ): Iterable<Tu>;
   public function firstValue(): ?Tv;
   public function firstKey(): ?Tk;
   public function lastValue(): ?Tv;
@@ -128,7 +141,7 @@ interface ArrayAccess<Tk, Tv> {
   public function offsetUnset(Tk $key): void;
 }
 
-interface Awaitable<T> {
+interface Awaitable<+T> {
   public function getWaitHandle(): WaitHandle<T>;
 }
 

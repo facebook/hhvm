@@ -53,7 +53,9 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrNoOverrideMagicGet,   C,       "nov_get");          \
   X(AttrNoOverrideMagicSet,   C,       "nov_set");          \
   X(AttrNoOverrideMagicIsset, C,       "nov_isset");        \
-  X(AttrNoOverrideMagicUnset, C,       "nov_unset");
+  X(AttrNoOverrideMagicUnset, C,       "nov_unset");        \
+  X(AttrMayUseVV,             F,       "mayusevv");         \
+  /* */
 
 }
 

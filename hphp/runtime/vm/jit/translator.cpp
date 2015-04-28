@@ -76,20 +76,22 @@ int locPhysicalOffset(int32_t localIndex) {
   return -(localIndex + 1);
 }
 
-PropInfo getPropertyOffset(const NormalizedInstruction& ni,
+PropInfo getPropertyOffset(const IRGS& env,
+                           const NormalizedInstruction& ni,
                            const Class* ctx, const Class*& baseClass,
                            const MInstrInfo& mii,
                            unsigned mInd, unsigned iInd) {
   if (mInd == 0) {
     auto const baseIndex = mii.valCount();
-    baseClass = ni.inputs[baseIndex]->rtt < Type::Obj
-      ? ni.inputs[baseIndex]->rtt.clsSpec().cls()
-      : nullptr;
+    auto const type = irgen::predictedTypeFromLocation(
+      const_cast<IRGS&>(env), ni.inputs[baseIndex]->location);
+    baseClass = type <= TObj ? type.clsSpec().cls() : nullptr;
   }
   if (!baseClass) return PropInfo();
 
+  // TODO: This use of rtt is not guaranteed to be correctly guarded on.
   auto keyType = ni.inputs[iInd]->rtt;
-  if (!keyType.isConst(Type::Str)) return PropInfo();
+  if (!keyType.hasConstVal(TStr)) return PropInfo();
   auto const name = keyType.strVal();
 
   // If we are not in repo-authoriative mode, we need to check that
@@ -125,15 +127,6 @@ PropInfo getPropertyOffset(const NormalizedInstruction& ni,
     baseClass->declPropOffset(idx),
     baseClass->declPropRepoAuthType(idx)
   );
-}
-
-PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
-                                Class* ctx, const MInstrInfo& mii) {
-  unsigned mInd = ni.immVecM.size() - 1;
-  unsigned iInd = mii.valCount() + 1 + mInd;
-
-  const Class* cls = nullptr;
-  return getPropertyOffset(ni, ctx, cls, mii, mInd, iInd);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -180,7 +173,7 @@ static const struct {
   { OpArray,       {None,             Stack1,       OutArrayImm,       1 }},
   { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
   { OpNewMixedArray,  {None,          Stack1,       OutArray,          1 }},
-  { OpNewLikeArrayL,  {None,          Stack1,       OutArray,          1 }},
+  { OpNewLikeArrayL,  {Local,         Stack1,       OutArray,          1 }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpNewStructArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutArray,         -2 }},
@@ -275,6 +268,9 @@ static const struct {
   { OpCGetL,       {Local,            Stack1,       OutCInputL,        1 }},
   { OpCGetL2,      {Stack1|Local,     StackIns1,    OutCInputL,        1 }},
   { OpCGetL3,      {StackTop2|Local,  StackIns2,    OutCInputL,        1 }},
+  // In OpCUGetL we rely on OutCInputL returning TCell (which covers Uninit
+  // values) instead of TInitCell.
+  { OpCUGetL,      {Local,            Stack1,       OutCInputL,        1 }},
   { OpPushL,       {Local,            Stack1|Local, OutCInputL,        1 }},
   { OpCGetN,       {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpCGetG,       {Stack1,           Stack1,       OutUnknown,        0 }},
@@ -508,12 +504,12 @@ static void initInstrInfo() {
 }
 
 const InstrInfo& getInstrInfo(Op op) {
-  assert(instrInfoInited);
+  assertx(instrInfoInited);
   return instrInfo[op];
 }
 
 static int numHiddenStackInputs(const NormalizedInstruction& ni) {
-  assert(ni.immVec.isValid());
+  assertx(ni.immVec.isValid());
   return ni.immVec.numStackValues();
 }
 
@@ -539,7 +535,7 @@ int64_t countOperands(uint64_t mask) {
       mask &= ~pair[0];
     }
   }
-  assert(mask == 0);
+  assertx(mask == 0);
   return count;
 }
 }
@@ -565,7 +561,7 @@ int64_t getStackPopped(PC pc) {
   int64_t count = 0;
 
   // All instructions with these properties are handled above
-  assert((mask & (StackN | BStackN)) == 0);
+  assertx((mask & (StackN | BStackN)) == 0);
 
   if (mask & MVector) {
     count += getImmVector((Op*)pc).numStackValues();
@@ -633,7 +629,7 @@ bool isAlwaysNop(Op op) {
 static void addMVectorInputs(NormalizedInstruction& ni,
                              int& currentStackOffset,
                              std::vector<InputInfo>& inputs) {
-  assert(ni.immVec.isValid());
+  assertx(ni.immVec.isValid());
   ni.immVecM.reserve(ni.immVec.size());
 
   int UNUSED stackCount = 0;
@@ -672,7 +668,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
     if (lcode == LH) {
       inputs.emplace_back(Location(Location::This));
     } else {
-      assert(lcode == LL || lcode == LGL || lcode == LNL);
+      assertx(lcode == LL || lcode == LGL || lcode == LNL);
       if (location.hasImm()) {
         push_local(location.imm);
       }
@@ -682,7 +678,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
     if (lcode == LSL) {
       // We'll get the trailing stack value after pushing all the
       // member vector elements.
-      assert(location.hasImm());
+      assertx(location.hasImm());
       push_local(location.imm);
     } else {
       push_stack();
@@ -713,7 +709,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
       } else if (memberCodeImmIsString(mcode)) {
         inputs.emplace_back(Location(Location::Litstr, imm));
       } else {
-        assert(memberCodeImmIsInt(mcode));
+        assertx(memberCodeImmIsInt(mcode));
         inputs.emplace_back(Location(Location::Litint, imm));
       }
     } else {
@@ -726,7 +722,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
     push_stack();
   }
 
-  assert(stackCount == ni.immVec.numStackValues());
+  assertx(stackCount == ni.immVec.numStackValues());
 
   SKTRACE(2, ni.source, "M-vector using %d hidden stack "
                         "inputs, %d locals\n", stackCount, localCount);
@@ -754,7 +750,7 @@ static void getInputsImpl(NormalizedInstruction* ni,
 #endif
   if (isAlwaysNop(ni->op())) return;
 
-  assert(inputs.empty());
+  assertx(inputs.empty());
   always_assert_flog(
     instrInfo.count(ni->op()),
     "Invalid opcode in getInputsImpl: {}\n",
@@ -967,6 +963,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::CGetL:
   case Op::CGetL2:
   case Op::CGetS:
+  case Op::CUGetL:
   case Op::CIterFree:
   case Op::CastArray:
   case Op::CastDouble:
@@ -1127,6 +1124,7 @@ const StaticString s_parse_str("parse_str");
 const StaticString s_parse_strNative("__SystemLib\\parse_str");
 const StaticString s_assert("assert");
 const StaticString s_assertNative("__SystemLib\\assert");
+const StaticString s_set_frame_metadata("HH\\set_frame_metadata");
 
 bool funcByNameDestroysLocals(const StringData* fname) {
   if (!fname) return false;
@@ -1135,11 +1133,12 @@ bool funcByNameDestroysLocals(const StringData* fname) {
          fname->isame(s_parse_str.get()) ||
          fname->isame(s_parse_strNative.get()) ||
          fname->isame(s_assert.get()) ||
-         fname->isame(s_assertNative.get());
+         fname->isame(s_assertNative.get()) ||
+         fname->isame(s_set_frame_metadata.get());
 }
 
 bool builtinFuncDestroysLocals(const Func* callee) {
-  assert(callee && callee->isCPPBuiltin());
+  assertx(callee && callee->isCPPBuiltin());
   auto const fname = callee->name();
   return funcByNameDestroysLocals(fname);
 }
@@ -1148,8 +1147,8 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller) {
   // We don't handle these two cases, because we don't compile functions
   // containing them:
-  assert(caller->lookupVarId(s_php_errormsg.get()) == -1);
-  assert(caller->lookupVarId(s_http_response_header.get()) == -1);
+  assertx(caller->lookupVarId(s_php_errormsg.get()) == -1);
+  assertx(caller->lookupVarId(s_http_response_header.get()) == -1);
 
   auto* unit = caller->unit();
   auto checkTaintId = [&](Id id) {
@@ -1161,7 +1160,7 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
   if (!isFCallStar(inst.op()))     return false;
 
   const FPIEnt *fpi = caller->findFPI(inst.source.offset());
-  assert(fpi);
+  assertx(fpi);
   Op* fpushPc = (Op*)unit->at(fpi->m_fpushOff);
   auto const op = *fpushPc;
 
@@ -1289,9 +1288,9 @@ const char* show(TranslateResult r) {
 #define FOUR(x0,x1,x2,x3) , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3)
 #define NA                   /*  */
 
-static void translateDispatch(HTS& hts,
+static void translateDispatch(IRGS& irgs,
                               const NormalizedInstruction& ni) {
-#define O(nm, imms, ...) case Op::nm: irgen::emit##nm(hts imms); return;
+#define O(nm, imms, ...) case Op::nm: irgen::emit##nm(irgs imms); return;
   switch (ni.op()) { OPCODES }
 #undef O
 }
@@ -1325,54 +1324,51 @@ static Type flavorToType(FlavorDesc f) {
   switch (f) {
     case NOV: not_reached();
 
-    case CV: return Type::Cell;  // TODO(#3029148) this could be InitCell
-    case UV: return Type::Uninit;
-    case VV: return Type::BoxedInitCell;
-    case AV: return Type::Cls;
-    case RV: case FV: case CVV: case CVUV: return Type::Gen;
+    case CV: return TCell;  // TODO(#3029148) this could be InitCell
+    case CUV: return TCell;
+    case UV: return TUninit;
+    case VV: return TBoxedInitCell;
+    case AV: return TCls;
+    case RV: case FV: case CVV: case CVUV: return TGen;
   }
   not_reached();
 }
 
-void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
+void translateInstr(IRGS& irgs, const NormalizedInstruction& ni) {
   irgen::prepareForNextHHBC(
-    hts,
+    irgs,
     &ni,
-    ni.source.offset(),
-    ni.endsRegion && !irgen::isInlining(hts)
+    ni.source,
+    ni.endsRegion && !irgen::isInlining(irgs)
   );
 
   auto pc = reinterpret_cast<const Op*>(ni.pc());
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
     auto const type = flavorToType(instrInputFlavor(pc, i));
-    if (type != Type::Gen) {
+    if (type != TGen) {
       // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
       // is a little unsure of itself.
-      irgen::assertTypeStack(hts, BCSPOffset{i}, type);
+      irgen::assertTypeStack(irgs, BCSPOffset{i}, type);
     }
   }
 
   FTRACE(1, "\n{:-^60}\n", folly::format("Translating {}: {} with stack:\n{}",
                                          ni.offset(), ni.toString(),
-                                         show(hts)));
+                                         show(irgs)));
 
-  irgen::ringbuffer(hts, Trace::RBTypeBytecodeStart, ni.source, 2);
-  irgen::emitIncStat(hts, Stats::Instr_TC, 1);
+  irgen::ringbufferEntry(irgs, Trace::RBTypeBytecodeStart, ni.source, 2);
+  irgen::emitIncStat(irgs, Stats::Instr_TC, 1);
   if (Trace::moduleEnabledRelease(Trace::llvm_count, 1) ||
       RuntimeOption::EvalJitLLVMCounters) {
-    irgen::gen(hts, CountBytecode);
-  }
-
-  if (RuntimeOption::EvalHHIRGenerateAsserts >= 2) {
-    irgen::gen(hts, DbgAssertRetAddr);
+    irgen::gen(irgs, CountBytecode);
   }
 
   if (isAlwaysNop(ni.op())) {
     // Do nothing
   } else if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
-    irgen::interpOne(hts, ni);
+    irgen::interpOne(irgs, ni);
   } else {
-    translateDispatch(hts, ni);
+    translateDispatch(irgs, ni);
   }
 }
 
@@ -1390,7 +1386,7 @@ uint64_t* Translator::getTransCounterAddr() {
     bzero(chunk, size);
     m_transCounters.push_back(chunk);
   }
-  assert(id / transCountersPerChunk < m_transCounters.size());
+  assertx(id / transCountersPerChunk < m_transCounters.size());
   return &(m_transCounters[id / transCountersPerChunk]
            [id % transCountersPerChunk]);
 }
@@ -1424,7 +1420,7 @@ void Translator::addTranslation(const TransRec& transRec) {
 
 uint64_t Translator::getTransCounter(TransID transId) const {
   if (!isTransDBEnabled()) return -1ul;
-  assert(transId < m_translations.size());
+  assertx(transId < m_translations.size());
 
   uint64_t counter;
 
@@ -1458,7 +1454,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
   if (res == LookupResult::MethodNotFound) return nullptr;
 
-  assert(res == LookupResult::MethodFoundWithThis ||
+  assertx(res == LookupResult::MethodFoundWithThis ||
          res == LookupResult::MethodFoundNoThis ||
          (staticLookup ?
           res == LookupResult::MagicCallStaticFound :
@@ -1510,7 +1506,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
 void invalidatePath(const std::string& path) {
   TRACE(1, "invalidatePath: abspath %s\n", path.c_str());
-  assert(path.size() >= 1 && path[0] == '/');
+  assertx(path.size() >= 1 && path[0] == '/');
   Treadmill::enqueue([path] {
     /*
      * inotify saw this path change. Now poke the unit loader; it will

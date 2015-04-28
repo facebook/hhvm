@@ -73,7 +73,7 @@ struct FrameStateMgr;
  *     DSetElem     single dst is a subset of CountedStr|Nullptr depending on
  *                    sources
  *     DBuiltin     single dst for CallBuiltin. This can return complex data
- *                    types such as (Type::Str | Type::Null)
+ *                    types such as (TStr | TNull)
  *     DSubtract(N,t) single dest has type of src N with t removed
  *     DCns         single dst's type is the union of legal types for PHP
  *                    constants
@@ -141,7 +141,7 @@ bool isCallOp(Opcode opc);
 bool isGuardOp(Opcode opc);
 
 /*
- * A "query op" is any instruction returning Type::Bool that is
+ * A "query op" is any instruction returning TBool that is
  * negateable.
  */
 bool isQueryOp(Opcode opc);

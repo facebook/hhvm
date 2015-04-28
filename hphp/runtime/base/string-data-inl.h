@@ -126,12 +126,11 @@ inline char* StringData::mutableData() const {
 inline int StringData::size() const { return m_len; }
 inline bool StringData::empty() const { return size() == 0; }
 inline uint32_t StringData::capacity() const {
-  assert(kind() == HeaderKind::String);
-  return packedCodeToCap(m_capCode - (kind() << 24));
+  return m_cap.decode();
 }
 
 inline size_t StringData::heapSize() const {
-  return isFlat() ? sizeof(StringData) + capacity() :
+  return isFlat() ? sizeof(StringData) + 1 + capacity() :
          sizeof(StringData) + sizeof(SharedPayload);
 }
 

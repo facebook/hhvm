@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/cap-code.h"
 
 namespace HPHP {
 
@@ -468,18 +469,9 @@ private:
   void delist();
   void incrementHelper();
   bool checkSane() const;
-  void preCompute() const;
-  void setStatic() const;
-  void setUncounted() const;
-
-  HeaderKind kind() const {
-    //mask out bitref
-    return HeaderKind (static_cast<uint8_t>(m_kind) & ~(1 << 7));
-  }
-public:
-  template<class F> void scan(F& mark) const {
-    if (isShared()) mark(sharedPayload()->shared);
-  }
+  void preCompute();
+  void setStatic();
+  void setUncounted();
 
 private:
   char* m_data;
@@ -490,8 +482,12 @@ private:
   union {
     struct {
       union {
-        struct { char m_pad[3]; mutable HeaderKind m_kind; };
-        uint32_t m_capCode;
+        struct {
+          CapCode m_cap;
+          char m_pad;
+          HeaderKind m_kind;
+        };
+        uint32_t m_cap_kind;
       };
       mutable RefCount m_count;
     };

@@ -79,6 +79,7 @@ class ResourceData {
   }
 
   int32_t o_getId() const { return o_id; }
+  int32_t getId() const { return o_id; }
   void o_setId(int id); // only for BuiltinFiles
 
   const String& o_getClassName() const;
@@ -240,7 +241,8 @@ typename std::enable_if<
   std::is_convertible<T*, ResourceData*>::value,
   SmartPtr<T>
 >::type makeSmartPtr(Args&&... args) {
-  return SmartPtr<T>(newres<T>(std::forward<Args>(args)...));
+  using NonNull = typename SmartPtr<T>::NonNull;
+  return SmartPtr<T>(newres<T>(std::forward<Args>(args)...), NonNull{});
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -340,6 +340,7 @@ namespace bc {
 
 #define PUSH_UV  if (i == 0) return TUninit
 #define PUSH_CV  if (i == 0) return TInitCell
+#define PUSH_CUV if (i == 0) return TCell
 #define PUSH_AV  if (i == 0) return TCls
 #define PUSH_VV  if (i == 0) return TRef
 #define PUSH_FV  if (i == 0) return TInitGen
@@ -400,6 +401,7 @@ OPCODES
 
 #undef PUSH_UV
 #undef PUSH_CV
+#undef PUSH_CUV
 #undef PUSH_AV
 #undef PUSH_VV
 #undef PUSH_FV

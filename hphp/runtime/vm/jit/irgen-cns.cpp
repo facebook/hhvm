@@ -27,9 +27,9 @@ namespace {
 
 // Return a constant SSATmp representing a static value held in a TypedValue.
 // The TypedValue may be a non-scalar, but it must have a static value.
-SSATmp* staticTVCns(HTS& env, const TypedValue* tv) {
+SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
   switch (tv->m_type) {
-    case KindOfNull:          return cns(env, Type::InitNull);
+    case KindOfNull:          return cns(env, TInitNull);
     case KindOfBoolean:       return cns(env, !!tv->m_data.num);
     case KindOfInt64:         return cns(env, tv->m_data.num);
     case KindOfDouble:        return cns(env, tv->m_data.dbl);
@@ -47,11 +47,11 @@ SSATmp* staticTVCns(HTS& env, const TypedValue* tv) {
   always_assert(false);
 }
 
-void implCns(HTS& env,
+void implCns(IRGS& env,
              const StringData* name,
              const StringData* fallbackName,
              bool error) {
-  assert(fallbackName == nullptr || !error);
+  assertx(fallbackName == nullptr || !error);
   auto const cnsNameTmp = cns(env, name);
   auto const tv = Unit::lookupPersistentCns(name);
   SSATmp* result = nullptr;
@@ -64,7 +64,7 @@ void implCns(HTS& env,
     if (tv->m_type == KindOfUninit) {
       // KindOfUninit is a dynamic system constant. always a slow
       // lookup.
-      assert(!fallbackNameTmp);
+      assertx(!fallbackNameTmp);
       if (error) {
         result = gen(env, LookupCnsE, cnsNameTmp);
       } else {
@@ -77,7 +77,6 @@ void implCns(HTS& env,
     auto const c1 = gen(env, LdCns, cnsNameTmp);
     result = cond(
       env,
-      1,
       [&] (Block* taken) { // branch
         gen(env, CheckInit, taken, c1);
       },
@@ -88,7 +87,7 @@ void implCns(HTS& env,
         hint(env, Block::Hint::Unlikely);
         // We know that c1 is Uninit in this branch but we have to encode this
         // in the IR.
-        gen(env, AssertType, Type::Uninit, c1);
+        gen(env, AssertType, TUninit, c1);
 
         if (fallbackNameTmp) {
           return gen(env,
@@ -110,21 +109,21 @@ void implCns(HTS& env,
 
 }
 
-void emitCns(HTS& env, const StringData* name) {
+void emitCns(IRGS& env, const StringData* name) {
   implCns(env, name, nullptr, false);
 }
 
-void emitCnsE(HTS& env, const StringData* name) {
+void emitCnsE(IRGS& env, const StringData* name) {
   implCns(env, name, nullptr, true);
 }
 
-void emitCnsU(HTS& env,
+void emitCnsU(IRGS& env,
               const StringData* name,
               const StringData* fallback) {
   implCns(env, name, fallback, false);
 }
 
-void emitClsCnsD(HTS& env,
+void emitClsCnsD(IRGS& env,
                  const StringData* cnsNameStr,
                  const StringData* clsNameStr) {
   auto const clsCnsName = ClsCnsName { clsNameStr, cnsNameStr };
@@ -154,9 +153,9 @@ void emitClsCnsD(HTS& env,
     env,
     LdRDSAddr,
     RDSHandleData { link.handle() },
-    Type::Cell.ptr(Ptr::ClsCns)
+    TCell.ptr(Ptr::ClsCns)
   );
-  auto const guardType = Type::UncountedInit;
+  auto const guardType = TUncountedInit;
 
   ifThen(
     env,

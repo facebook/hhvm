@@ -28,20 +28,20 @@ inline Vreg::Vreg(PhysReg r) {
 }
 
 inline Vreg::operator Reg64() const {
-  assert(isGP());
+  assertx(isGP());
   return Reg64(rn - G0);
 }
 inline Vreg::operator RegXMM() const {
-  assert(isSIMD());
+  assertx(isSIMD());
   return RegXMM(rn - X0);
 }
 inline Vreg::operator RegSF() const {
-  assert(isSF());
+  assertx(isSF());
   return RegSF(rn - S0);
 }
 
 inline PhysReg Vreg::physReg() const {
-  assert(!isValid() || isPhys());
+  assertx(!isValid() || isPhys());
   return !isValid() ? InvalidReg :
          isGP() ? PhysReg(/* implicit */operator Reg64()) :
          isSIMD() ? PhysReg(/* implicit */operator RegXMM()) :
@@ -106,7 +106,7 @@ inline bool Vr<Reg,Kind,Bits>::allowable(Vreg r) {
 
 template<class Reg, VregKind Kind, int Bits>
 inline Reg Vr<Reg,Kind,Bits>::asReg() const {
-  assert(isPhys());
+  assertx(isPhys());
   return isGP()         ? Reg(rn) :
          isSIMD()       ? Reg(rn-Vreg::X0) :
          /* isSF() ? */   Reg(rn-Vreg::S0);
@@ -164,7 +164,7 @@ inline MemoryRef Vptr::mr() const {
 }
 
 inline Vptr::operator MemoryRef() const {
-  assert(seg == DS);
+  assertx(seg == DS);
   return mr();
 }
 

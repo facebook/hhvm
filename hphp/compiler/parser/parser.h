@@ -366,18 +366,31 @@ public:
 private:
   struct FunctionContext {
     FunctionContext()
-      : hasNonEmptyReturn(false)
+      : hasCallToGetArgs(false)
+      , hasNonEmptyReturn(false)
       , isGenerator(false)
       , isAsync(false)
+      , mayCallSetFrameMetadata(false)
     {}
 
     void checkFinalAssertions() {
       assert(!isGenerator || !hasNonEmptyReturn);
     }
 
-    bool hasNonEmptyReturn; // function contains a non-empty return statement
-    bool isGenerator;       // function determined to be a generator
-    bool isAsync;           // function determined to be async
+    // Function contains a call to func_num_args, func_get_args or func_get_arg.
+    bool hasCallToGetArgs;
+
+    // Function contains a non-empty return statement.
+    bool hasNonEmptyReturn;
+
+    // Function determined to be a generator.
+    bool isGenerator;
+
+    // Function determined to be async.
+    bool isAsync;
+
+    // Function may contain a call to set_frame_metadata.
+    bool mayCallSetFrameMetadata;
   };
 
   enum class FunctionType {
@@ -402,7 +415,6 @@ private:
   StatementListPtr m_tree;
   std::string m_error;
 
-  std::vector<bool> m_hasCallToGetArgs;
   std::vector<StringToExpressionPtrVecMap> m_staticVars;
   bool m_lambdaMode;
   bool m_closureGenerator;

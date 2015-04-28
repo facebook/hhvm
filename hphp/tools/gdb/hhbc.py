@@ -62,7 +62,7 @@ def uints_by_size():
             4: 'uint32_t',
             8: 'uint64_t'}
 
-class HHBC:
+class HHBC(object):
     """
     Namespace for HHBC inspection helpers.
     """

@@ -19,7 +19,7 @@
 #include <folly/Optional.h>
 
 namespace HPHP { namespace jit {
-struct HTS;
+struct IRGS;
 struct Type;
 struct InterpOneData;
 }}
@@ -28,9 +28,9 @@ namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
-void interpOne(HTS&, int popped);
-void interpOne(HTS&, Type t, int popped);
-void interpOne(HTS&, folly::Optional<Type>, int popped, int pushed,
+void interpOne(IRGS&, int popped);
+void interpOne(IRGS&, Type t, int popped);
+void interpOne(IRGS&, folly::Optional<Type>, int popped, int pushed,
   InterpOneData&);
 
 //////////////////////////////////////////////////////////////////////

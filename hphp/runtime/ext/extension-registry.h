@@ -11,17 +11,17 @@ namespace HPHP { namespace ExtensionRegistry {
 
 void registerExtension(Extension* ext);
 
-void unregisterExtension(litstr name);
+void unregisterExtension(const char* name);
 inline void unregisterExtension(const String& name) {
   unregisterExtension(name.data());
 }
 
-bool isLoaded(litstr name, bool enabled_only = true);
+bool isLoaded(const char* name, bool enabled_only = true);
 inline bool isLoaded(const String& name, bool enabled_only = true) {
   return isLoaded(name.data(), enabled_only);
 }
 
-Extension* get(litstr name, bool enabled_only = true);
+Extension* get(const char* name, bool enabled_only = true);
 inline Extension* get(const String& name, bool enabled_only = true) {
   return get(name.data(), enabled_only);
 }

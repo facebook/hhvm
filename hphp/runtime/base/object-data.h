@@ -76,7 +76,7 @@ struct ObjectData {
     HasDynPropArr = 0x0800, // has a dynamic properties array
     IsCppBuiltin  = 0x1000, // has custom C++ subclass
     IsCollection  = 0x2000, // it's a collection (and the specific type is
-                            // stored in o_subclass_u8)
+                            // one of the CollectionType HeaderKind values
     HasPropEmpty  = 0x4000, // has custom propEmpty logic
     HasNativePropHandler    // class has native magic props handler
                   = 0x8000,
@@ -170,15 +170,14 @@ struct ObjectData {
   // Whether the object implements Iterator.
   bool isIterator() const;
 
-  // Whether the object is a collection.
+  // Whether the object is a collection, [and [not] mutable].
   bool isCollection() const;
   bool isMutableCollection() const;
   bool isImmutableCollection() const;
-
-  Collection::Type getCollectionType() const;
+  CollectionType collectionType() const; // asserts(isCollection())
 
   bool getAttribute(Attribute) const;
-  void setAttribute(Attribute) const;
+  void setAttribute(Attribute);
 
   bool noDestruct() const;
   void setNoDestruct();
@@ -280,9 +279,6 @@ struct ObjectData {
  protected:
   TypedValue* propVec();
   const TypedValue* propVec() const;
-
-  uint8_t& subclass_u8();
-  uint8_t subclass_u8() const;
 
  public:
   ObjectData* callCustomInstanceInit();
@@ -403,9 +399,6 @@ struct ObjectData {
   static constexpr ptrdiff_t attributeOff() {
     return offsetof(ObjectData, o_attribute);
   }
-  static constexpr ptrdiff_t whStateOffset() {
-    return offsetof(ObjectData, o_subclass_u8);
-  }
 
 private:
   friend struct MemoryProfile;
@@ -433,9 +426,9 @@ private:
   int o_id; // Numeric identifier of this object (used for var_dump())
   union {
     struct {
-      mutable uint16_t o_attribute;
-      uint8_t o_subclass_u8; // for subclasses
-      mutable HeaderKind m_kind;
+      uint16_t o_attribute;
+      uint8_t m_pad; // reserved for MM
+      HeaderKind m_kind;
       mutable RefCount m_count;
     };
     uint64_t m_attr_kind_count;
@@ -445,8 +438,8 @@ private:
   union {
     struct {
       mutable uint16_t o_attribute;
-      uint8_t o_subclass_u8; // for subclasses
-      mutable HeaderKind m_kind;
+      uint8_t m_pad; // reserved for MM
+      HeaderKind m_kind;
       mutable RefCount m_count;
     };
     uint64_t m_attr_kind_count;
@@ -455,6 +448,7 @@ private:
 #endif
 };
 
+struct GlobalsArray;
 typedef GlobalsArray GlobalVariables;
 
 struct CountableHelper : private boost::noncopyable {
@@ -525,7 +519,8 @@ typename std::enable_if<
   std::is_convertible<T*, ObjectData*>::value,
   SmartPtr<T>
 >::type makeSmartPtr(Args&&... args) {
-  return SmartPtr<T>(newobj<T>(std::forward<Args>(args)...));
+  using NonNull = typename SmartPtr<T>::NonNull;
+  return SmartPtr<T>(newobj<T>(std::forward<Args>(args)...), NonNull{});
 }
 
 ///////////////////////////////////////////////////////////////////////////////

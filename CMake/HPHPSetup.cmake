@@ -66,6 +66,7 @@ set(HHVM_LINK_LIBRARIES
   hphp_zend
   hphp_util
   hphp_hhbbc
+  jit_sort
   vixl neo)
 
 if(ENABLE_FASTCGI)

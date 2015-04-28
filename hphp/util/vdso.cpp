@@ -16,6 +16,10 @@
 
 #include "hphp/util/vdso.h"
 
+#ifdef FACEBOOK
+#include "common/time/ClockGettimeNS.h"
+#endif
+
 #define _GNU_SOURCE 1
 #include <dlfcn.h>
 
@@ -53,6 +57,13 @@ int Vdso::ClockGetTime(int clk_id, timespec *ts) {
 }
 
 ALWAYS_INLINE int64_t Vdso::clockGetTimeNS(int clk_id) {
+#ifdef FACEBOOK
+  uint64_t time;
+
+  if (clk_id == CLOCK_THREAD_CPUTIME_ID &&
+      !fb_perf_get_thread_cputime_ns(&time))
+    return time;
+#endif
   if (m_clock_gettime_ns) {
     return m_clock_gettime_ns(clk_id);
   }
@@ -60,6 +71,17 @@ ALWAYS_INLINE int64_t Vdso::clockGetTimeNS(int clk_id) {
 }
 
 ALWAYS_INLINE int Vdso::clockGetTime(int clk_id, timespec *ts) {
+#ifdef FACEBOOK
+  uint64_t time;
+  constexpr uint64_t sec_to_ns = 1000000000;
+
+  if (clk_id == CLOCK_THREAD_CPUTIME_ID &&
+      !fb_perf_get_thread_cputime_ns(&time)) {
+    ts->tv_sec = time / sec_to_ns;
+    ts->tv_nsec = time % sec_to_ns;
+    return 0;
+  }
+#endif
   if (m_clock_gettime) {
     memset(ts, 0, sizeof(*ts));
     return m_clock_gettime(clk_id, ts);

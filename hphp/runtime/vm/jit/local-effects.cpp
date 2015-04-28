@@ -53,7 +53,6 @@ void local_effects(const FrameStateMgr& frameState,
       hook.updateLocalRefPredictions(inst->src(0), inst->src(1));
       break;
 
-    case StLocNT:
     case StLoc:
       hook.setLocalValue(inst->extra<LocalId>()->locId, inst->src(1));
       break;
@@ -119,7 +118,7 @@ void local_effects(const FrameStateMgr& frameState,
     case InterpOne:
     case InterpOneCF: {
       auto const& id = *inst->extra<InterpOneData>();
-      assert(!id.smashesAllLocals || id.nChangedLocals == 0);
+      assertx(!id.smashesAllLocals || id.nChangedLocals == 0);
       if (id.smashesAllLocals || inst->marker().func()->isPseudoMain()) {
         hook.clearLocals();
       } else {
@@ -129,7 +128,7 @@ void local_effects(const FrameStateMgr& frameState,
           auto& loc = *it;
           // If changing the inner type of a boxed local, also drop the
           // information about inner types for any other boxed locals.
-          if (loc.type <= Type::BoxedCell) hook.dropLocalRefsInnerTypes();
+          if (loc.type <= TBoxedCell) hook.dropLocalRefsInnerTypes();
           hook.setLocalType(loc.id, loc.type);
         }
       }

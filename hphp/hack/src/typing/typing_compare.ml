@@ -88,32 +88,23 @@ module CompareTypes = struct
     let acc = ty_ acc x y in
     acc
 
-  and ty_ (subst, same as acc) ty1 ty2 =
+  and ty_ (subst, same as acc) (ty1: decl ty_) (ty2: decl ty_) =
     match ty1, ty2 with
-    | Tobject, Tobject
     | Tany, Tany
     | Tmixed, Tmixed -> acc
     | Tarray (ty1, ty2), Tarray (ty3, ty4) ->
         let acc = ty_opt (subst, same) ty1 ty3 in
         let acc = ty_opt acc ty2 ty4 in
         acc
-    | Tgeneric (s1, x), Tgeneric (s2, y) ->
+    | Tgeneric (s1, cstr1), Tgeneric (s2, cstr2) ->
         let same = same && s1 = s2 in
-        let acc = ty_opt (subst, same) x y in
-        acc
+        constraint_ (subst, same) cstr1 cstr2
     | Toption ty1, Toption ty2 ->
         ty acc ty1 ty2
     | Tprim x, Tprim y ->
         subst, same && x = y
-    | Tvar x, Tvar y ->
-        subst, same && x = y
     | Tfun f1, Tfun f2 ->
         fun_type acc f1 f2
-    | Tabstract (sid1, tyl1, cstr1), Tabstract (sid2, tyl2, cstr2) ->
-        let acc = ty_opt acc cstr1 cstr2 in
-        let acc = string_id acc sid1 sid2 in
-        let acc = tyl acc tyl1 tyl2 in
-        acc
     | Tapply (sid1, tyl1), Tapply (sid2, tyl2) ->
         let acc = string_id acc sid1 sid2 in
         let acc = tyl acc tyl1 tyl2 in
@@ -122,11 +113,8 @@ module CompareTypes = struct
       when List.length ids1 = List.length ids2 ->
         let acc = ty acc root_ty1 root_ty2 in
         List.fold_left2 string_id acc ids1 ids2
-    | Tunresolved tyl1, Tunresolved tyl2
     | Ttuple tyl1, Ttuple tyl2 ->
         tyl acc tyl1 tyl2
-    | Tanon (arity1, id1), Tanon (arity2, id2) ->
-        subst, same && arity1 = arity2 && id1 = id2
     | Tshape fdm1, Tshape fdm2 ->
         ShapeMap.fold begin fun name v1 acc ->
           match ShapeMap.get name fdm2 with
@@ -134,9 +122,8 @@ module CompareTypes = struct
           | Some v2 ->
               ty acc v1 v2
         end fdm1 acc
-    | (Tanon _ | Tany | Tmixed | Tarray (_, _) | Tshape _ | Taccess (_, _) |
-      Tgeneric (_, _)| Toption _| Tprim _| Tvar _| Tabstract _ |
-      Tfun _| Tapply (_, _) | Ttuple _| Tunresolved _| Tobject), _ -> default
+    | (Tany | Tmixed | Tarray (_, _) | Tfun _ | Taccess (_, _) | Tgeneric (_, _)
+       | Toption _ | Tprim _ | Tshape _| Tapply (_, _) | Ttuple _), _ -> default
 
   and tyl acc tyl1 tyl2 =
     if List.length tyl1 <> List.length tyl2
@@ -145,14 +132,19 @@ module CompareTypes = struct
 
   and ty_opt acc ty1 ty2 = cmp_opt ty acc ty1 ty2
 
+  and constraint_ (subst, same) cstr_opt1 cstr_opt2 =
+    match cstr_opt1, cstr_opt2 with
+      | Some (ck1, ty1), Some (ck2, ty2) when ck1 = ck2 ->
+          ty (subst, same) ty1 ty2
+      | _ -> subst, false
+
   and fun_type acc ft1 ft2 =
     let acc = pos acc ft1.ft_pos ft2.ft_pos in
     let acc = tparam_list acc ft1.ft_tparams ft2.ft_tparams in
     let acc = fun_arity acc ft1.ft_arity ft2.ft_arity in
     let acc = fun_params acc ft1.ft_params ft2.ft_params in
     let subst, same = ty acc ft1.ft_ret ft2.ft_ret in
-    subst, same &&
-      ft1.ft_unsafe = ft2.ft_unsafe && ft1.ft_abstract = ft2.ft_abstract
+    subst, same && ft1.ft_abstract = ft2.ft_abstract
 
   and fun_arity acc arity1 arity2 =
     let subst, same = acc in
@@ -190,7 +182,7 @@ module CompareTypes = struct
   and tparam acc (variance1, sid1, x1) (variance2, sid2, x2) =
     let acc = variance acc variance1 variance2 in
     let acc = string_id acc sid1 sid2 in
-    let acc = ty_opt acc x1 x2 in
+    let acc = constraint_ acc x1 x2 in
     acc
 
   and class_elt (subst, same) celt1 celt2 =
@@ -282,7 +274,6 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Rforeach p             -> Rforeach (pos p)
     | Rasyncforeach p        -> Rasyncforeach (pos p)
     | Raccess p              -> Raccess (pos p)
-    | Rcall p                -> Rcall (pos p)
     | Rarith p               -> Rarith (pos p)
     | Rarith_ret p           -> Rarith_ret (pos p)
     | Rstring2 p             -> Rstring2 (pos p)
@@ -296,11 +287,12 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Rstmt p                -> Rstmt (pos p)
     | Rno_return p           -> Rno_return (pos p)
     | Rno_return_async p     -> Rno_return_async (pos p)
-    | Rasync_ret p           -> Rasync_ret (pos p)
+    | Rret_fun_kind (p, k)   -> Rret_fun_kind (pos p, k)
     | Rhint p                -> Rhint (pos p)
     | Rnull_check p          -> Rnull_check (pos p)
     | Rnot_in_cstr p         -> Rnot_in_cstr (pos p)
     | Rthrow p               -> Rthrow (pos p)
+    | Rplaceholder p         -> Rplaceholder (pos p)
     | Rattr p                -> Rattr (pos p)
     | Rxhp p                 -> Rxhp (pos p)
     | Rret_div p             -> Rret_div (pos p)
@@ -328,31 +320,29 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
   let rec ty (p, x) =
     reason p, ty_ x
 
-  and ty_ = function
-    | Tanon _              -> failwith "TraversePos: Unexpected Tanon"
-    | Tvar _               -> failwith "TraversePos: Unexpected Tvar"
+  and ty_: decl ty_ -> decl ty_ = function
     | Tany
     | Tmixed as x          -> x
     | Tarray (ty1, ty2)    -> Tarray (ty_opt ty1, ty_opt ty2)
     | Tprim _ as x         -> x
-    | Tgeneric (s, t)      -> Tgeneric (s, ty_opt t)
+    | Tgeneric (s, cstr_opt) -> Tgeneric (s, constraint_ cstr_opt)
     | Ttuple tyl           -> Ttuple (List.map (ty) tyl)
-    | Tunresolved tyl           -> Tunresolved (List.map (ty) tyl)
     | Toption x            -> Toption (ty x)
     | Tfun ft              -> Tfun (fun_type ft)
     | Tapply (sid, xl)     -> Tapply (string_id sid, List.map (ty) xl)
     | Taccess (root_ty, ids) ->
         Taccess (ty root_ty, List.map string_id ids)
-    | Tabstract (sid, xl, x) ->
-        Tabstract (string_id sid, List.map (ty) xl, ty_opt x)
-    | Tobject as x         -> x
     | Tshape fdm           -> Tshape (ShapeMap.map ty fdm)
 
   and ty_opt x = opt_map ty x
 
+  and constraint_ = function
+    | None -> None
+    | Some (ck, x) -> Some (ck, ty x)
+
   and fun_type ft =
     { ft with
-      ft_tparams = List.map (type_param) ft.ft_tparams ;
+      ft_tparams = List.map type_param ft.ft_tparams   ;
       ft_params  = List.map fun_param ft.ft_params     ;
       ft_ret     = ty ft.ft_ret                        ;
       ft_pos     = pos ft.ft_pos                       ;
@@ -377,8 +367,8 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       ttc_origin = tc.ttc_origin;
     }
 
-  and type_param (variance, sid, y) =
-    variance, string_id sid, ty_opt y
+  and type_param (variance, sid, x) =
+    variance, string_id sid, constraint_ x
 
   and class_type tc =
     { tc_final                 = tc.tc_final                          ;

@@ -32,7 +32,7 @@ end
 
 (* a function type *)
 module Fun = struct
-  type t = Typing_defs.fun_type
+  type t = decl Typing_defs.fun_type
   let prefix = Prefix.make()
 end
 
@@ -42,7 +42,8 @@ module Typedef = struct
     | Public
     | Private
 
-  type tdef = visibility * Typing_defs.tparam list * ty option * ty * Pos.t
+  type tdef =
+    visibility * Typing_defs.tparam list * decl ty option * decl ty * Pos.t
 
   type tdef_or_error =
     | Error
@@ -53,7 +54,7 @@ module Typedef = struct
 end
 
 module GConst = struct
-  type t = ty
+  type t = decl ty
   let prefix = Prefix.make()
 end
 
@@ -71,28 +72,32 @@ type fake_members = {
   valid     : SSet.t;
 }
 
-type local = ty list * ty
+type local = locl ty list * locl ty
 type local_env = fake_members * local IMap.t
 
 type env = {
   pos     : Pos.t      ;
-  tenv    : ty  IMap.t ;
+  tenv    : locl ty  IMap.t ;
   subst   : int IMap.t ;
   lenv    : local_env  ;
   genv    : genv       ;
   todo    : tfun list  ;
   in_loop : bool       ;
+  (* when encountering Tunresolved in the supertype, do we allow it to grow?
+   * if false, this allows the opposite, i.e. Tunresolved can grow in the
+   * subtype. *)
+  grow_super : bool      ;
 }
 
 and genv = {
+  tcopt   : TypecheckerOptions.t;
   mode    : FileInfo.mode;
-  return  : ty         ;
-  parent  : ty         ;
+  return  : locl ty         ;
+  parent  : decl ty         ;
   self_id : string     ;
-  self    : ty         ;
+  self    : decl ty         ;
   static  : bool       ;
-  allow_null_as_void : bool;
-  fun_kind : Nast.fun_kind;
+  fun_kind : Ast.fun_kind;
   anons   : anon IMap.t;
   droot   : Typing_deps.Dep.variant option  ;
   file    : Relative_path.t;
@@ -101,7 +106,7 @@ and genv = {
 (* An anonymous function
  * the environment + the fun parameters + the captured identifiers
 *)
-and anon = env -> fun_params -> env * ty
+and anon = env -> locl fun_params -> env * locl ty
 and tfun = env -> env
 
 let fresh () =
@@ -149,7 +154,8 @@ let get_type_unsafe env x =
       env, (Reason.none, Tany)
   | Some ty -> env, ty
 
-let expand_type env x =
+let expand_type: type a. _ -> a ty -> _ * a ty =
+  fun env x ->
   match x with
   | _, Tvar x -> get_type env x
   | x -> env, x
@@ -171,7 +177,6 @@ let make_ft p params ret_ty =
   let arity = List.length params in
   {
     ft_pos      = p;
-    ft_unsafe   = false;
     ft_deprecated = None;
     ft_abstract = false;
     ft_arity    = Fstandard (arity, arity);
@@ -183,6 +188,23 @@ let make_ft p params ret_ty =
 let get_shape_field_name = function
   | SFlit (_, s) -> s
   | SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
+
+(* When printing out types (by hh_show()), TVars are printed with an
+ * associated identifier. We reindex them (in the order of appearance) to be
+ * consecutive integers starting from zero, because the internal identifier
+ * can change due to unrelated reasons, which breaks tests. *)
+let printable_tvar_ids = ref IMap.empty
+
+let get_printable_tvar_id x =
+  match IMap.get x !printable_tvar_ids with
+    | None ->
+        let res = (IMap.cardinal !printable_tvar_ids) + 1 in
+        printable_tvar_ids := IMap.add
+          x
+          res
+          !printable_tvar_ids;
+       res
+    | Some v -> v
 
 let rec debug stack env (r, ty) =
   let o = print_string in
@@ -197,7 +219,7 @@ let rec debug stack env (r, ty) =
   | Tarray _ -> assert false
   | Tmixed -> o "mixed"
   | Tabstract (x, argl, _)
-  | Tapply (x, argl) ->
+  | Tclass (x, argl) ->
       Printf.printf "App %s" (snd x);
       o "<"; List.iter (fun x -> debug stack env x; o ", ") argl;
       o ">"
@@ -222,14 +244,16 @@ let rec debug stack env (r, ty) =
       | Tnum -> o "Tnum"
       | Tresource -> o "Tresource"
       | Tarraykey -> o "Tarraykey"
+      | Tnoreturn -> o "Tnoreturn"
       )
   | Tgeneric (s, x) ->
       o "generic ";
       o s;
       (match x with
       | None -> ()
-      | Some x -> o "<"; debug stack env x; o ">"
-      )
+      | Some (Ast.Constraint_as, x) -> o " as <"; debug stack env x; o ">"
+      | Some (Ast.Constraint_super, x) ->
+          o " super <"; debug stack env x; o ">")
   | Tvar x ->
       let env, x = get_var env x in
       if ISet.mem x stack
@@ -237,7 +261,7 @@ let rec debug stack env (r, ty) =
       else
         let stack = ISet.add x stack in
         let _, y = get_var env x in
-        o "["; o (string_of_int y); o "]";
+        o "["; o (string_of_int (get_printable_tvar_id y)); o "]";
         (match get_type env x with
         | _, (_, Tany) -> o (Ident.debug x)
         | _, ty -> debug stack env ty)
@@ -265,22 +289,23 @@ let empty_fake_members = {
 
 let empty_local = empty_fake_members, IMap.empty
 
-let empty file = {
+let empty tcopt file = {
   pos     = Pos.none;
   tenv    = IMap.empty;
   subst   = IMap.empty;
   lenv    = empty_local;
   todo    = [];
   in_loop = false;
+  grow_super = true;
   genv    = {
+    tcopt   = tcopt;
     mode    = FileInfo.Mstrict;
     return  = fresh_type();
     self_id = "";
     self    = Reason.none, Tany;
     static  = false;
     parent  = Reason.none, Tany;
-    allow_null_as_void = false;
-    fun_kind = FSync;
+    fun_kind = Ast.FSync;
     anons   = IMap.empty;
     droot   = None;
     file    = file;
@@ -328,7 +353,6 @@ let add_wclass env x =
 (* When we want to type something with a fresh typing environment *)
 let fresh_tenv env f =
   let genv = env.genv in
-  let genv = { genv with allow_null_as_void = false } in
   f { env with todo = []; tenv = IMap.empty; genv = genv; in_loop = false }
 
 let get_class env x =
@@ -413,6 +437,16 @@ let get_construct env class_ =
 let get_todo env =
   env.todo
 
+let grow_super env =
+  env.grow_super
+
+let invert_grow_super env f =
+  let old = env.grow_super in
+  let env = { env with grow_super = not old } in
+  let env = f env in
+  let env = { env with grow_super = old } in
+  env
+
 let get_return env =
   env.genv.return
 
@@ -426,7 +460,6 @@ let with_return env f =
   let env = f env in
   set_return env ret
 
-let allow_null_as_void env = env.genv.allow_null_as_void
 let is_static env = env.genv.static
 let get_self env = env.genv.self
 let get_self_id env = env.genv.self_id
@@ -440,11 +473,6 @@ let get_fun env x =
   let dep = Dep.Fun x in
   Typing_deps.add_idep env.genv.droot dep;
   Funs.get x
-
-let set_allow_null_as_void ?(allow=true) env =
-  let genv = env.genv in
-  let genv = { genv with allow_null_as_void = allow } in
-  { env with genv = genv }
 
 let set_fn_kind env fn_type =
   let genv = env.genv in
@@ -497,6 +525,8 @@ let get_mode env = env.genv.mode
 
 let is_strict env = get_mode env = FileInfo.Mstrict
 let is_decl env = get_mode env = FileInfo.Mdecl
+
+let get_options env = env.genv.tcopt
 
 (*
 let debug_env env =

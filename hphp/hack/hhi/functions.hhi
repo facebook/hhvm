@@ -46,11 +46,13 @@ function get_class_constants($class_name): array;
 // do **not** use this in your code, call newv() instead
 function hphp_create_object<T>(string $class_name, array $argv): T;
 
-// autoload-map
 namespace HH {
+  // autoload-map
   function could_include($file): bool;
   function autoload_set_paths(
     \Indexish<string, \Indexish<string, string>> $map,
     string $root,
   ): bool;
+
+  function set_frame_metadata(mixed $metadata): void;
 }

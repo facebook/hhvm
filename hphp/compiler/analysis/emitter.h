@@ -616,8 +616,9 @@ private:
   };
 
 private:
-  static const size_t kMinStringSwitchCases = 8;
-  static const bool systemlibDefinesIdx =
+  static constexpr size_t kMinIntSwitchCases = 2;
+  static constexpr size_t kMinStringSwitchCases = 8;
+  static constexpr bool systemlibDefinesIdx =
 #ifdef FACEBOOK
     true
 #else
@@ -781,9 +782,11 @@ public:
   void emitFuncCall(Emitter& e, FunctionCallPtr node,
                     const char* nameOverride = nullptr,
                     ExpressionListPtr paramsOverride = nullptr);
-  void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId);
+  void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId,
+                       bool isUnpack);
   void emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
                          bool byRef);
+  void emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp);
   void emitBuiltinDefaultArg(Emitter& e, Variant& v,
                              MaybeDataType t, int paramId);
   void emitClass(Emitter& e, ClassScopePtr cNode, bool topLevel);
@@ -910,8 +913,6 @@ void emitAllHHBC(AnalysisResultPtr&& ar);
 
 
 extern "C" {
-  StringData* hphp_compiler_serialize_code_model_for(String code,
-                                                     String prefix);
   Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
                             const char* filename);
   Unit* hphp_build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,

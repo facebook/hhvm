@@ -21,6 +21,7 @@ module TGen = Typing_generic
 
 type env = {
   tenv : Env.env;
+  ety_env : ety_env;
   (* Keeps track of all the expansions that occur when expanding a Taccess.
    * This is necessary to check for potential cycles while expanding, as well
    * as providing detailed information in the Reason.t of the resulting type.
@@ -44,8 +45,9 @@ type env = {
   ids : string list;
 }
 
-let empty_env env reason = {
+let empty_env env ety_env reason = {
   tenv = env;
+  ety_env = ety_env;
   expansions = [];
   orig_reason = reason;
   is_generic = false;
@@ -54,15 +56,19 @@ let empty_env env reason = {
 }
 
 let fill_type_hole_ env ty hole_ty =
-  let subst = Inst.make_subst
+  let subst = Inst.make_subst Phase.locl
     [Ast.Invariant, (Pos.none, SN.Typehints.type_hole), None]
     [hole_ty] in
   Inst.instantiate subst env ty
 
-let rec expand env reason (root, ids) =
-  let expand_env = empty_env env reason in
+let rec expand_with_env ety_env env reason (root, ids) =
+  let expand_env = empty_env env ety_env reason in
   let expand_env, ty = expand_ expand_env root ids in
-  expand_env.tenv, ty
+  expand_env.tenv, (expand_env.ety_env, ty)
+
+and expand env r t =
+  let env, (_, ty) = expand_with_env empty_ety_env env r t in
+  env, ty
 
 (* The root of a type access is a type. When expanding a type access this type
  * needs to resolve to the name of a class so we can look up if a given type
@@ -94,19 +100,10 @@ and expand_ env root_ty ids =
           expand_ env root (ids2 @ ids)
       | Toption ty ->
           expand_ env ty ids
-      | Tapply ((_, tdef), tyl) when Env.is_typedef tdef ->
-          let tenv, ty =
-            TUtils.expand_typedef env.tenv (fst root_ty) tdef tyl in
-          let env = { env with
-            tenv = tenv;
-            expansions = List.fold_left (fun acc (_, s) -> acc^"::"^s) tdef ids
-              :: env.expansions;
-          } in
-          expand_ env ty ids
-      | Tapply ((class_pos, class_name), _) ->
+      | Tclass ((class_pos, class_name), _) ->
           begin
             try
-              let env, ty = create_root_from_type_constant
+              let env, ty, ety_env = create_root_from_type_constant
                 env class_pos class_name root_ty head in
               (* check for cycles before expanding further *)
               let seen =
@@ -119,7 +116,18 @@ and expand_ env root_ty ids =
                   raise Exit
                 )
                 else cur_tconst :: env.expansions in
-              expand_ { env with expansions = seen } ty tail
+              let env =
+                if tail = []
+                then {
+                  env with
+                  expansions = seen;
+                  ety_env = ety_env;
+                }
+                else {
+                  env with
+                  expansions = seen
+                } in
+              expand_ env ty tail
             with
               Exit -> env, (Reason.none, Tany)
           end
@@ -136,14 +144,16 @@ and expand_ env root_ty ids =
             env, ty
           else
             env, (Reason.Rexpr_dep_type (fst ty, p ,x), snd ty)
-      | Tgeneric (x, Some ty) ->
+      | Tgeneric (x, Some (Ast.Constraint_as, ty)) ->
           (* If we haven't filled the type hole at this point we fill
            * it with self
            *)
-          let ty, x =
+          let (tenv, ty), x =
             if x = SN.Typehints.type_hole
-            then Env.get_self env.tenv, SN.Typehints.this
-            else ty, x in
+            then
+              TUtils.localize env.tenv (Env.get_self env.tenv), SN.Typehints.this
+            else (env.tenv, ty), x in
+          let env = { env with tenv = tenv } in
           expand_generic env x ty ids
       | Tunresolved tyl ->
           let tyl =
@@ -215,7 +225,7 @@ and expand_generic env name root ids =
   then env, ty
   else env, (
     fst ty,
-    Tgeneric ((String.concat "::" (name :: (List.rev env.ids))), Some ty)
+    Tgeneric ((String.concat "::" (name :: (List.rev env.ids))), Some (Ast.Constraint_as, ty))
   )
 
 (* The function takes a "step" forward in the expansion. We look up the type
@@ -249,16 +259,19 @@ and create_root_from_type_constant env class_pos class_name root_ty (pos, tconst
     | {ttc_constraint = ty; _} ->
         { env with ids = tconst :: env.ids }, (
           Reason.Rwitness (fst typeconst.ttc_name),
-          Tgeneric (strip_ns class_name^"::"^tconst, ty)
+          let cstr = opt_map (fun ty -> Ast.Constraint_as, ty) ty in
+          Tgeneric (strip_ns class_name^"::"^tconst, cstr)
         ) in
-  let tenv, tconst_ty = fill_type_hole_ env.tenv tconst_ty root_ty in
-  { env with tenv = tenv }, tconst_ty
+  let tenv, (ety_env, tconst_ty) =
+    TUtils.localize_with_env ~ety_env:env.ety_env env.tenv tconst_ty in
+  let tenv, tconst_ty = fill_type_hole_ tenv tconst_ty root_ty in
+  { env with tenv = tenv }, tconst_ty, ety_env
 
 (* Following code checks for cycles that may occur when expanding a Taccess.
  * This is mainly copy-pasta from Typing_tdef.ml. We should see if its possible
  * to provide a more generic cycle detection utility function.
  * *)
-and check_tconst env (r, ty) =
+and check_tconst env (_, ty) =
   match ty with
   | Tany -> ()
   | Tmixed -> ()
@@ -266,26 +279,26 @@ and check_tconst env (r, ty) =
       check_tconst_opt env ty1;
       check_tconst_opt env ty2;
       ()
-  | Tgeneric (_, ty) ->
-      check_tconst_opt env ty
+  | Tgeneric (_, Some (_, ty)) ->
+      check_tconst env ty
+  | Tgeneric (_, None) -> ()
   | Toption ty -> check_tconst env ty
   | Tprim _ -> ()
   | Tvar _ -> ()
   | Tfun fty -> check_fun_tconst env fty
-  | Tapply ((_, tdef), tyl) when Typing_env.is_typedef tdef ->
-      let tenv, ty = TUtils.expand_typedef env.tenv r tdef tyl in
-      check_tconst { env with tenv = tenv } ty
   | Tabstract (_, tyl, cstr) ->
       check_tconst_list env tyl;
       check_tconst_opt env cstr
-  | Tunresolved tyl
-  | Tapply (_, tyl)
   | Ttuple tyl ->
+      check_tconst_list env tyl
+  | Tunresolved tyl ->
       check_tconst_list env tyl
   | Taccess (root, ids) ->
       let env, ty = expand_ env root ids in
       check_tconst env ty
   | Tanon _ -> assert false
+  | Tclass (_, tyl) ->
+     check_tconst_list env tyl
   | Tobject -> ()
   | Tshape tym ->
       Nast.ShapeMap.iter (fun _ v -> check_tconst env v) tym
@@ -294,7 +307,6 @@ and check_tconst_list env x =
   List.iter (check_tconst env) x
 
 and check_fun_tconst env ft =
-  check_tconst_tparam_list env ft.ft_tparams;
   check_tconst_fun_param_list env ft.ft_params;
   (match ft.ft_arity with
     | Fvariadic (_, p) -> check_tconst_fun_param env p
@@ -307,12 +319,6 @@ and check_tconst_fun_param_list env x =
 
 and check_tconst_fun_param env (_, ty) =
   check_tconst env ty
-
-and check_tconst_tparam_list env x =
-  List.iter (check_tconst_tparam env) x
-
-and check_tconst_tparam env (_, _, x) =
-  check_tconst_opt env x
 
 and check_tconst_opt env = function
   | None -> ()
@@ -348,9 +354,8 @@ let fill_type_hole env cid cid_ty ty =
     | CIparent | CIstatic when not (Env.is_static env) ->
         let cid = CIvar (pos, This) in
         let env, ty = Env.get_local env this in
-        let this_ty =
-          Reason.Rwitness pos, Tgeneric (SN.Typehints.this, Some ty) in
-        let env, cid_ty = Inst.instantiate_this env cid_ty this_ty in
+        let this_ty = Reason.Rwitness pos, TUtils.this_of ty in
+        let env, cid_ty = Inst.instantiate_this Phase.locl env cid_ty this_ty in
         env, cid, cid_ty
     | cid -> env, cid, cid_ty
   in
@@ -367,7 +372,8 @@ let fill_type_hole env cid cid_ty ty =
         let name = "expr#"^string_of_int(Ident.tmp()) in
         Reason.Rwitness p, Tabstract ((p, fill_name name), [], Some cid_ty)
     | CIvar (p, This) ->
-        Reason.Rwitness p, Tabstract ((p, fill_name "$this"), [], Some cid_ty)
+        Reason.Rwitness p, Tabstract ((p, fill_name SN.SpecialIdents.this),
+                                      [], Some cid_ty)
     | _ ->
       let name = class_id_to_str cid in
       Reason.Rwitness pos, Tabstract ((pos, fill_name name), [], Some cid_ty)

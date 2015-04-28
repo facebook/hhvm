@@ -122,8 +122,7 @@ size_t getMemSize(const ArrayData* arr) {
   switch (arr->kind()) {
   case ArrayData::ArrayKind::kPackedKind: {
     auto size = sizeof(ArrayData) +
-      (packedCodeToCap(arr->m_packedCapCode) - arr->m_size) *
-      sizeof(TypedValue);
+                sizeof(TypedValue) * (arr->m_cap.decode() - arr->m_size);
     auto const values = reinterpret_cast<const TypedValue*>(arr + 1);
     auto const last = values + arr->m_size;
     for (auto ptr = values; ptr != last; ++ptr) {
@@ -146,7 +145,7 @@ size_t getMemSize(const ArrayData* arr) {
   case ArrayData::ArrayKind::kMixedKind: {
     auto const mixed = MixedArray::asMixed(arr);
     auto size = sizeof(MixedArray) +
-                sizeof(MixedArray::Elm) * (mixed->m_cap - mixed->m_used);
+                sizeof(MixedArray::Elm) * (mixed->capacity() - mixed->m_used);
     auto elms = mixed->data();
     auto last = elms + mixed->m_used;
     for (auto ptr = elms; ptr != last; ++ptr) {

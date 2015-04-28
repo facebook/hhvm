@@ -23,7 +23,6 @@
 #include <iomanip>
 #include <cinttypes>
 
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <libgen.h>
@@ -66,6 +65,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/hh-utils.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/php-debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -81,12 +81,12 @@
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/array/ext_array.h"
-#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
-#include "hphp/runtime/ext/asio/async_generator.h"
-#include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_wait_handle.h"
-#include "hphp/runtime/ext/asio/wait_handle.h"
-#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
+#include "hphp/runtime/ext/asio/async-function-wait-handle.h"
+#include "hphp/runtime/ext/asio/async-generator.h"
+#include "hphp/runtime/ext/asio/async-generator-wait-handle.h"
+#include "hphp/runtime/ext/asio/static-wait-handle.h"
+#include "hphp/runtime/ext/asio/wait-handle.h"
+#include "hphp/runtime/ext/asio/waitable-wait-handle.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
@@ -1760,13 +1760,15 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
     ExtraArgs* extraArgs = ExtraArgs::allocateUninit(extra);
     PackedArrayInit ai(extra);
     if (UNLIKELY(nextra_regular > 0)) {
-      for (int i = 0; i < nextra_regular; ++i) {
-        TypedValue* to = extraArgs->getExtraArg(i);
-        const TypedValue* from = stack.top();
+      // The arguments are pushed in order, so we should refer them by
+      // index instead of taking the top, that would lead to reverse order.
+      for (int i = nextra_regular - 1; i >= 0; --i) {
+        TypedValue* to = extraArgs->getExtraArg(nextra_regular - i - 1);
+        const TypedValue* from = stack.indTV(i);
         if (from->m_type == KindOfRef && from->m_data.pref->isReferenced()) {
-          refDup(*from, *to);
+          refCopy(*from, *to);
         } else {
-          cellDup(*tvToCell(from), *to);
+          cellCopy(*tvToCell(from), *to);
         }
         if (hasVarParam) {
           // appendWithRef bumps the refcount: this accounts for the fact
@@ -1774,21 +1776,14 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
           // to being in (both) ExtraArgs and the variadic args
           ai.appendWithRef(tvAsCVarRef(from));
         }
-        stack.discard();
       }
+      stack.ndiscard(nextra_regular);
     }
     for (int i = nextra_regular; i < extra; ++i, ++iter) {
       TypedValue* to = extraArgs->getExtraArg(i);
       const TypedValue* from = iter.secondRefPlus().asTypedValue();
-      if (from->m_type == KindOfRef && from->m_data.pref->isReferenced()) {
-        refDup(*from, *to);
-      } else {
-        cellDup(*tvToCell(from), *to);
-      }
+      tvDupWithRef(*from, *to);
       if (hasVarParam) {
-        // appendWithRef bumps the refcount: this accounts for the fact
-        // that the extra args values went from being present in
-        // arrayArgs to being in (both) ExtraArgs and the variadic args
         ai.appendWithRef(iter.secondRefPlus());
       }
     }
@@ -1810,10 +1805,14 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
     } else {
       PackedArrayInit ai(extra);
       if (UNLIKELY(nextra_regular > 0)) {
-        for (int i = 0; i < nextra_regular; ++i) {
+        // The arguments are pushed in order, so we should refer them by
+        // index instead of taking the top, that would lead to reverse order.
+        for (int i = nextra_regular - 1; i >= 0; --i) {
           // appendWithRef bumps the refcount and splits if necessary,
           // to compensate for the upcoming pop from the stack
-          ai.appendWithRef(tvAsVariant(stack.top()));
+          ai.appendWithRef(tvAsVariant(stack.indTV(i)));
+        }
+        for (int i = 0; i < nextra_regular; ++i) {
           stack.popTV();
         }
       }
@@ -1963,7 +1962,7 @@ static void enterVMAtAsyncFunc(ActRec* enterFnAr, Resumable* resumable,
     throw e;
   }
 
-  const bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
+  const bool useJit = RID().getJit();
   if (LIKELY(useJit && resumable->resumeAddr())) {
     Stats::inc(Stats::VMEnter);
     mcg->enterTCAfterPrologue(resumable->resumeAddr());
@@ -1977,7 +1976,7 @@ static void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk) {
   assert(!enterFnAr->resumed());
   Stats::inc(Stats::VMEnter);
 
-  const bool useJit = ThreadInfo::s_threadInfo->m_reqInjectionData.getJit();
+  const bool useJit = RID().getJit();
   const bool useJitPrologue = useJit && vmfp()
     && !enterFnAr->m_varEnv
     && (stk != StackArgsState::Trimmed);
@@ -2013,7 +2012,7 @@ static void enterVMAtCurPC() {
   assert(vmpc());
   assert(vmfp()->func()->contains(vmpc()));
   Stats::inc(Stats::VMEnter);
-  if (ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
+  if (RID().getJit()) {
     mcg->enterTC();
   } else {
     dispatch();
@@ -2377,46 +2376,6 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   enterVM(fp, StackArgsState::Untrimmed, resumable, exception);
 }
 
-namespace {
-
-std::atomic<bool> s_foundHHConfig(false);
-void checkHHConfig(const Unit* unit) {
-
-  if (!RuntimeOption::EvalAuthoritativeMode &&
-      RuntimeOption::LookForTypechecker &&
-      !s_foundHHConfig &&
-      unit->isHHFile()) {
-    const std::string &s = unit->filepath()->toCppString();
-    boost::filesystem::path p(s);
-
-    while (p != "/") {
-      p.remove_filename();
-      p /= ".hhconfig";
-
-      if (boost::filesystem::exists(p)) {
-        break;
-      }
-
-      p.remove_filename();
-    }
-
-    if (p == "/") {
-      raise_error(
-        "%s appears to be a Hack file, but you do not appear to be running "
-        "the Hack typechecker. See the documentation at %s for information on "
-        "getting it running. You can also set Hack.Lang.LookForTypechecker=0 "
-        "to disable this check (not recommended).",
-        s.c_str(),
-        "http://docs.hhvm.com/manual/en/install.hack.bootstrapping.php"
-      );
-    } else {
-      s_foundHHConfig = true;
-    }
-  }
-}
-
-}
-
 void ExecutionContext::invokeUnit(TypedValue* retval, const Unit* unit) {
   checkHHConfig(unit);
 
@@ -2686,6 +2645,10 @@ StrNR ExecutionContext::createFunction(const String& args,
   unit->renameFunc(oldName, newName);
   m_createdFuncs.push_back(unit);
   unit->merge();
+
+  // At the end of the request we clear the m_createdFunc map, JIT'ing the unit
+  // would be a waste of time and TC space.
+  unit->setInterpretOnly();
 
   // Technically we shouldn't have to eval the unit right now (it'll execute
   // the pseudo-main, which should be empty) and could get away with just
@@ -3722,7 +3685,7 @@ OPTBLD_INLINE void iopAddNewElemV(IOP_ARGS) {
 
 OPTBLD_INLINE void iopNewCol(IOP_ARGS) {
   pc++;
-  auto cType = decode_iva(pc);
+  auto cType = static_cast<CollectionType>(decode_iva(pc));
   auto nElms = decode_iva(pc);
   ObjectData* obj = newCollectionHelper(cType, nElms);
   vmStack().pushObject(obj);
@@ -4452,7 +4415,7 @@ OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
     if (reinterpret_cast<TCA>(savedRip) != mcg->tx().uniqueStubs.callToExit) {
       savedRip = 0;
     }
-  } else if (!ThreadInfo::s_threadInfo->m_reqInjectionData.getJit()) {
+  } else if (!RID().getJit()) {
     // We entered this frame in the TC but the jit is now disabled, probably
     // because a debugger is attached. If we leave this frame in the
     // interpreter, we might be skipping a catch block that our caller expects
@@ -4669,6 +4632,14 @@ OPTBLD_INLINE void iopCGetL(IOP_ARGS) {
   Cell* to = vmStack().allocC();
   TypedValue* fr = frame_local(vmfp(), local);
   cgetl_body(vmfp(), fr, to, local);
+}
+
+OPTBLD_INLINE void iopCUGetL(IOP_ARGS) {
+  pc++;
+  const auto local = decode_la(pc);
+  auto to = vmStack().allocTV();
+  auto fr = frame_local(vmfp(), local);
+  tvDup(*tvToCell(fr), *to);
 }
 
 OPTBLD_INLINE void iopCGetL2(IOP_ARGS) {
@@ -5754,8 +5725,14 @@ OPTBLD_INLINE void iopFPushFuncU(IOP_ARGS) {
 void fPushObjMethodImpl(Class* cls, StringData* name, ObjectData* obj,
                         int numArgs) {
   const Func* f;
-  LookupResult res = g_context->lookupObjMethod(f, cls, name,
-                                         arGetContextClass(vmfp()), true);
+  LookupResult res;
+  try {
+    res = g_context->lookupObjMethod(
+      f, cls, name, arGetContextClass(vmfp()), true);
+  } catch (...) {
+    decRefObj(obj);
+    throw;
+  }
   assert(f);
   ActRec* ar = vmStack().allocA();
   ar->m_func = f;
@@ -6364,13 +6341,15 @@ static bool doFCallArray(PC& pc, int numStackValues,
         cleanupParamsAndActRec(vmStack(), ar, nullptr, nullptr);
         raise_warning("call_user_func_array() expects parameter 2 to be array");
         return false;
-      case CallArrOnInvalidContainer::WarnAndContinue:
-        tvRefcountedDecRef(c1);
+      case CallArrOnInvalidContainer::WarnAndContinue: {
+        Cell tmp = *c1;
         // argument_unpacking RFC dictates "containers and Traversables"
         raise_warning_unsampled("Only containers may be unpacked");
         c1->m_type = KindOfArray;
         c1->m_data.parr = staticEmptyArray();
+        tvRefcountedDecRef(&tmp);
         break;
+      }
     }
   }
 
@@ -6387,14 +6366,6 @@ static bool doFCallArray(PC& pc, int numStackValues,
           vmfp()->unit()->entry(),
           int(vmfp()->m_func->base()));
     ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
-
-    if (UNLIKELY((CallArrOnInvalidContainer::WarnAndContinue == onInvalid)
-                 && func->anyByRef())) {
-      raise_error("Unpacking unsupported for calls to functions that"
-                  " take any arguments by reference");
-      vmStack().pushNull();
-      return false;
-    }
 
     auto prepResult = prepareArrayArgs(ar, args, vmStack(), numStackValues,
                                        /* ref param checks */ true, nullptr);
@@ -6793,7 +6764,7 @@ OPTBLD_INLINE void iopEval(IOP_ARGS) {
 
   vmStack().popC();
   if (unit->parseFatal(msg, line)) {
-    int errnum = static_cast<int>(ErrorConstants::ErrorModes::WARNING);
+    auto const errnum = static_cast<int>(ErrorMode::WARNING);
     if (vm->errorNeedsLogging(errnum)) {
       // manual call to Logger instead of logError as we need to use
       // evalFileName and line as the exception doesn't track the eval()
@@ -7513,12 +7484,11 @@ void recordCodeCoverage(PC pc) {
   assert(line != -1);
 
   if (unit != s_prev_unit || line != s_prev_line) {
-    ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
     s_prev_unit = unit;
     s_prev_line = line;
     const StringData* filepath = unit->filepath();
     assert(filepath->isStatic());
-    info->m_coverage->Record(filepath->data(), line, line);
+    TI().m_coverage->Record(filepath->data(), line, line);
   }
 }
 
@@ -7626,8 +7596,7 @@ TCA dispatchImpl() {
   assert(sizeof(optabDirect) / sizeof(const void *) == Op_count);
   assert(sizeof(optabDbg) / sizeof(const void *) == Op_count);
   const void **optab = optabDirect;
-  bool collectCoverage = ThreadInfo::s_threadInfo->
-    m_reqInjectionData.getCoverage();
+  bool collectCoverage = RID().getCoverage();
   if (collectCoverage) {
     optab = optabCover;
   }
@@ -7847,7 +7816,7 @@ void ExecutionContext::requestInit() {
    */
   if (UNLIKELY(SystemLib::s_anyNonPersistentBuiltins)) {
     SystemLib::s_unit->merge();
-    Extension::MergeSystemlib();
+    SystemLib::mergePersistentUnits();
     if (SystemLib::s_hhas_unit) SystemLib::s_hhas_unit->merge();
     SystemLib::s_nativeFuncUnit->merge();
     SystemLib::s_nativeClassUnit->merge();
@@ -7870,9 +7839,15 @@ void ExecutionContext::requestInit() {
 #endif
 
   if (Logger::UseRequestLog) Logger::SetThreadHook(&threadLogger, this);
+
+  // Needs to be last (or nearly last): might cause unit merging to call an
+  // extension function in the VM; this is bad if systemlib itself hasn't been
+  // merged.
+  autoTypecheckRequestInit();
 }
 
 void ExecutionContext::requestExit() {
+  autoTypecheckRequestExit();
   MemoryProfile::finishProfiling();
 
   manageAPCHandle();

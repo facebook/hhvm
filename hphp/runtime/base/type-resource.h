@@ -105,7 +105,8 @@ public:
    * r.getTyped<T>(true,  true) -> dyn_cast_or_null<T>(r)
    */
   template<typename T>
-  T* getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
+  [[deprecated("Please use one of the cast family of functions instead.")]]
+  SmartPtr<T> getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
     static_assert(std::is_base_of<ResourceData, T>::value, "");
 
     ResourceData *cur = get();
@@ -125,7 +126,7 @@ public:
 
     // Assert that casting does not adjust the 'this' pointer
     assert((void*)px == (void*)cur);
-    return px;
+    return SmartPtr<T>(px);
   }
 
   template<typename T>
@@ -156,6 +157,18 @@ public:
   // Transfer ownership of our reference to this resource.
   ResourceData *detach() { return m_res.detach(); }
 private:
+  template <typename T>
+  friend typename std::enable_if<
+    std::is_base_of<ResourceData,T>::value,
+    ResourceData*
+  >::type deref(const Resource& r) { return r.get(); }
+
+  template <typename T>
+  friend typename std::enable_if<
+    std::is_base_of<ResourceData,T>::value,
+    ResourceData*
+  >::type detach(Resource&& r) { return r.detach(); }
+
   static void compileTimeAssertions();
 
   const char* classname_cstr() const;

@@ -113,7 +113,7 @@ public:
     Declaration  = LValue | 2,   // global or static stmt, or delayed var
     NoLValueWrapper = 4,         // ok to not have lval() wrapper
     RefValue  = 8,               // &exp
-    NoRefWrapper = 0x10,         // ok to not have ref() wrapper
+    // Unused       0x10,
     ObjectContext = 0x20,        // $obj->
     InParameterExpression = 0x40,// for default value expression
     ExistContext = 0x80,         // isset(...) or empty(...) recursively
@@ -201,10 +201,6 @@ public:
   /**
    * Implementing Construct.
    */
-  void collectCPPTemps(ExpressionPtrVec &collection);
-  void disableCSE();
-  bool hasChainRoots();
-  std::string genCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar);
   BlockScopeRawPtr getOriginalScope();
   void setOriginalScope(BlockScopeRawPtr scope);
   ClassScopeRawPtr getOriginalClass();
@@ -233,8 +229,6 @@ public:
   ExpressionPtr getCanonLVal() const {
     return m_canonPtr;
   }
-  ExpressionPtr getNextCanonCsePtr() const;
-  ExpressionPtr getCanonCsePtr() const;
   ExpressionPtr getCanonTypeInfPtr() const;
 
   /**
@@ -248,7 +242,6 @@ public:
   bool isCollection() const;
   virtual bool isRefable(bool checkError = false) const { return false; }
   virtual bool getScalarValue(Variant &value) { return false; }
-  FileScopeRawPtr getUsedScalarScope(CodeGenerator& cg);
   bool getEffectiveScalar(Variant &value);
   virtual ExpressionPtr clone() {
     assert(false);
@@ -257,7 +250,6 @@ public:
   virtual bool isThis() const { return false;}
   virtual bool isLiteralString() const { return false;}
   virtual bool isLiteralNull() const { return false;}
-  bool isUnquotedScalar() const;
   virtual std::string getLiteralString() const { return "";}
   virtual bool containsDynamicConstant(AnalysisResultPtr ar) const {
     return false;
@@ -292,12 +284,10 @@ public:
    * If not, raise a CodeError.
    */
   TypePtr checkTypesImpl(AnalysisResultConstPtr ar, TypePtr expectedType,
-                         TypePtr actualType, bool coerce);
+                         TypePtr actualType);
 
   TypePtr getActualType()      { return m_actualType;      }
   TypePtr getExpectedType()    { return m_expectedType;    }
-  TypePtr getImplementedType() { return m_implementedType; }
-  TypePtr getAssertedType()    { return m_assertedType;    }
 
   void setActualType(TypePtr actualType) {
     m_actualType = actualType;
@@ -305,23 +295,7 @@ public:
   void setExpectedType(TypePtr expectedType) {
     m_expectedType = expectedType;
   }
-  void setImplementedType(TypePtr implementedType) {
-    m_implementedType = implementedType;
-  }
-  void setAssertedType(TypePtr assertedType) {
-    m_assertedType = assertedType;
-  }
   TypePtr getType();
-  TypePtr getGenType();
-  TypePtr getCPPType();
-
-  bool isTypeAssertion() const {
-    return isNoRemove() && m_assertedType;
-  }
-
-  virtual bool allowCellByRef() const {
-    return false;
-  }
 
   static ExpressionPtr MakeConstant(AnalysisResultConstPtr ar,
                                     BlockScopePtr scope,
@@ -331,15 +305,9 @@ public:
                                             BlockScopePtr scope,
                                             LocationPtr loc,
                                             const Variant &value);
-  static void CheckPassByReference(AnalysisResultPtr ar,
-                                   ExpressionPtr param);
 
   static bool CheckNeededRHS(ExpressionPtr value);
   static bool CheckNeeded(ExpressionPtr variable, ExpressionPtr value);
-  static bool CheckVarNR(ExpressionPtr value, TypePtr expectedType = TypePtr());
-
-  static bool GetCseTempInfo(
-      AnalysisResultPtr ar, ExpressionPtr p, TypePtr &t);
 
   bool isUnused() const { return m_unused; }
   void setUnused(bool u) { m_unused = u; }
@@ -366,8 +334,6 @@ private:
 protected:
   TypePtr m_actualType;
   TypePtr m_expectedType; // null if the same as m_actualType
-  TypePtr m_implementedType; // null if the same as m_actualType
-  TypePtr m_assertedType;
 
   void setTypes(AnalysisResultConstPtr ar, TypePtr actualType,
                 TypePtr expectedType);
@@ -376,12 +342,6 @@ protected:
   void resetTypes();
  private:
   static ExprClass Classes[];
-
-  /**
-   * Returns true if a type cast is needed, and sets src/dst type
-   */
-  bool getTypeCastPtrs(
-      AnalysisResultPtr ar, TypePtr &srcType, TypePtr &dstType);
 
   BlockScopeRawPtr m_originalScope;
   ExpressionPtr m_canonPtr;

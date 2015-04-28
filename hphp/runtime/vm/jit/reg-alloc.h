@@ -24,60 +24,47 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
-#ifdef VOID
-#undef VOID
-#endif
-
 namespace HPHP { namespace jit {
 
-class IRUnit;
+struct IRUnit;
 struct Vunit;
 struct Vinstr;
 struct CodegenState;
-class BackEnd;
 
 // Native stack layout:
-// |               |
-// +---------------+
-// |  saved %rbp   |
-// +---------------+
-// |               |  <-- spill[kReservedRSPSpillSpace - 1]
-// |  spill slots  |  <-- spill[..]
-// |               |  <-- spill[1]
-// |               |  <-- spill[0]
+// | enterTCHelper |
 // +---------------+
 // |  return addr  |
+// |  saved %rbp   |
+// +---------------+
+// |               | ...up to kMaxSpillSlots
+// |  spill slots  | <-- spill[1]
+// |               | <-- spill[0]
 // +---------------+
 //
-// We need to increase spill indexes by 1 to avoid overwriting the
-// return address.
 
 /*
  * Return the byte offset to a spill slot
  */
 inline uint32_t slotOffset(uint32_t slot) {
-  return (slot + 1) * sizeof(uint64_t);
+  return slot * sizeof(uint64_t);
 }
 
 /*
  * return true if the offset of this spill slot is 16-byte aligned
  */
 inline bool isSlotAligned(uint32_t slot) {
-  return slot % 2 == 1;
+  return slot % 2 == 0;
 }
 
-// This value must be consistent with the number of pre-allocated
-// bytes for spill locations in __enterTCHelper in mc-generator.cpp.
-// Be careful when changing this value.
-const size_t NumPreAllocatedSpillLocs = kReservedRSPSpillSpace /
-                                        sizeof(uint64_t);
+const size_t kMaxSpillSlots = 128;
 
 // Return InvalidReg, or a specific register to force tmp to use
 PhysReg forceAlloc(const SSATmp& tmp);
 
 // Assign virtual registers to all SSATmps used or defined in reachable blocks.
 void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
-                const BlockList& blocks, BackEnd*);
+                const BlockList& blocks);
 
 // Return the set of physical registers implicitly accessed (used or defined)
 void getEffects(const Abi& abi, const Vinstr& i,

@@ -35,42 +35,39 @@ namespace HPHP {
 
 enum class HackStrictOption;
 
-class ErrorConstants {
-public:
-  enum class ErrorModes {
-    ERROR = 1,
-    WARNING = 2,
-    PARSE = 4, // not supported
-    NOTICE = 8,
-    CORE_ERROR = 16, // not supported
-    CORE_WARNING = 32, // not supported
-    COMPILE_ERROR = 64, // not supported
-    COMPILE_WARNING = 128, // not supported
-    USER_ERROR = 256,
-    USER_WARNING = 512,
-    USER_NOTICE = 1024,
-    STRICT = 2048,
-    RECOVERABLE_ERROR = 4096,
-    PHP_DEPRECATED = 8192, // DEPRECATED conflicts with macro definitions
-    USER_DEPRECATED = 16384,
+enum class ErrorMode {
+  ERROR = 1,
+  WARNING = 2,
+  PARSE = 4, // not supported
+  NOTICE = 8,
+  CORE_ERROR = 16, // not supported
+  CORE_WARNING = 32, // not supported
+  COMPILE_ERROR = 64, // not supported
+  COMPILE_WARNING = 128, // not supported
+  USER_ERROR = 256,
+  USER_WARNING = 512,
+  USER_NOTICE = 1024,
+  STRICT = 2048,
+  RECOVERABLE_ERROR = 4096,
+  PHP_DEPRECATED = 8192, // DEPRECATED conflicts with macro definitions
+  USER_DEPRECATED = 16384,
 
-    /**
-     * PHP's fatal errors cannot be fed into error handler. HipHop can. We
-     * still need "ERROR" bit, so old PHP error handler can see this error.
-     * The extra 24th bit will help people who want to find out if it's
-     * a fatal error only HipHop throws or not.
-     */
-    FATAL_ERROR = ERROR | (1 << 24), // 16777217
+  /*
+   * PHP's fatal errors cannot be fed into error handler. HipHop can. We
+   * still need "ERROR" bit, so old PHP error handler can see this error.
+   * The extra 24th bit will help people who want to find out if it's
+   * a fatal error only HipHop throws or not.
+   */
+  FATAL_ERROR = ERROR | (1 << 24), // 16777217
 
-    PHP_ALL = ERROR | WARNING | PARSE | NOTICE | CORE_ERROR | CORE_WARNING |
-        COMPILE_ERROR | COMPILE_WARNING | USER_ERROR | USER_WARNING |
-        USER_NOTICE | RECOVERABLE_ERROR | PHP_DEPRECATED | USER_DEPRECATED,
+  PHP_ALL = ERROR | WARNING | PARSE | NOTICE | CORE_ERROR | CORE_WARNING |
+    COMPILE_ERROR | COMPILE_WARNING | USER_ERROR | USER_WARNING |
+    USER_NOTICE | RECOVERABLE_ERROR | PHP_DEPRECATED | USER_DEPRECATED,
 
-    HPHP_ALL = PHP_ALL | FATAL_ERROR,
+  HPHP_ALL = PHP_ALL | FATAL_ERROR,
 
-    // Errors that can be upgraded to E_USER_ERROR
-    UPGRADEABLE_ERROR = WARNING | USER_WARNING | NOTICE | USER_NOTICE
-  };
+  /* Errors that can be upgraded to E_USER_ERROR. */
+  UPGRADEABLE_ERROR = WARNING | USER_WARNING | NOTICE | USER_NOTICE
 };
 
 void raise_error(const std::string &msg);
@@ -93,15 +90,9 @@ void raise_deprecated(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
 void raise_deprecated_without_first_frame(const std::string &msg);
 void raise_warning_unsampled(const std::string &msg);
 void raise_warning_unsampled(const char *fmt, ...) ATTRIBUTE_PRINTF(1, 2);
-void raise_message(ErrorConstants::ErrorModes mode,
-                   const char *fmt,
-                   va_list ap);
-void raise_message(ErrorConstants::ErrorModes mode,
-                   const char *fmt,
-                   ...) ATTRIBUTE_PRINTF(2, 3);
-void raise_message(ErrorConstants::ErrorModes mode,
-                   bool skipTop,
-                   const std::string &msg);
+void raise_message(ErrorMode mode, const char *fmt, va_list ap);
+void raise_message(ErrorMode mode, const char *fmt, ...) ATTRIBUTE_PRINTF(2, 3);
+void raise_message(ErrorMode mode, bool skipTop, const std::string& msg);
 void raise_param_type_warning(
     const char* func_name,
     int param_num,

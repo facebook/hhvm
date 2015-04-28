@@ -35,20 +35,6 @@ TRACE_SET_MOD(hhir);
 
 namespace {
 
-struct CheckInfo { Opcode op; bool hasOffset; };
-
-/*
- * Lookup memory check information corresponding to a load instruction.
- */
-folly::Optional<CheckInfo> checkInfoForLoad(Opcode op) {
-  switch (op) {
-  case LdMem:             return CheckInfo { CheckTypeMem, false };
-  case LdPackedArrayElem: return CheckInfo { CheckTypePackedArrayElem, true };
-  default:                return folly::none;
-  }
-  not_reached();
-}
-
 template<class InputIterator>
 bool instructionsAreSinkable(InputIterator first, InputIterator last) {
   for (; first != last; ++first) {
@@ -59,7 +45,6 @@ bool instructionsAreSinkable(InputIterator first, InputIterator last) {
     case DecRefNZ:
     case IncRef:
     case LdMem:
-    case LdPackedArrayElem:
       continue;
     default:
       FTRACE(5, "unsinkable: {}\n", first->toString());
@@ -108,8 +93,7 @@ void optimizePredictions(IRUnit& unit) {
    */
   auto doOpt = [&] (IRInstruction* checkType) -> bool {
     auto const load = checkType->src(0)->inst();
-    auto const checkInfo = checkInfoForLoad(load->op());
-    if (!checkInfo) return false;
+    if (!load->is(LdMem)) return false;
     if (!typeSufficientlyGeneric(load->dst()->type())) return false;
 
     FTRACE(5, "candidate: {}\n", load->toString());
@@ -135,23 +119,12 @@ void optimizePredictions(IRUnit& unit) {
      * the code after it has to move to either the taken block (exit) or the
      * fallthrough block (specialized).
      */
-    auto const newCheckType =
-      checkInfo->hasOffset
-        ? unit.gen(
-            checkInfo->op,
-            checkType->marker(),
-            checkType->typeParam(),
-            exit,
-            load->src(0),
-            load->src(1)
-          )
-        : unit.gen(
-            checkInfo->op,
-            checkType->marker(),
-            checkType->typeParam(),
-            exit,
-            load->src(0)
-          );
+    auto const newCheckType = unit.gen(CheckTypeMem,
+                                       checkType->marker(),
+                                       checkType->typeParam(),
+                                       exit,
+                                       load->src(0)
+                                      );
     newCheckType->setNext(specialized);
     mainBlock->insert(mainBlock->iteratorTo(load), newCheckType);
 

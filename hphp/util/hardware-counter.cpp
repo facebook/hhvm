@@ -106,9 +106,14 @@ public:
     uint64_t values[3];
     if (readRaw(values)) {
       if (!values[2]) return 0;
-      return (double)values[0] * values[1] / values[2];
+      int64_t value = (double)values[0] * values[1] / values[2];
+      return value + extra;
     }
     return 0;
+  }
+
+  void incCount(int64_t amount) {
+    extra += amount;
   }
 
   bool readRaw(uint64_t* values) {
@@ -135,6 +140,7 @@ public:
   void reset() {
     if (m_err || !useCounters()) return;
     init_if_not();
+    extra = 0;
     if (m_fd > 0) {
       if (ioctl (m_fd, PERF_EVENT_IOC_RESET, 0) < 0) {
         Logger::Warning("perf_event failed to reset with: %s",
@@ -160,6 +166,7 @@ private:
   struct perf_event_attr pe;
   bool inited;
   uint64_t reset_values[3];
+  uint64_t extra{0};
 
   void close() {
     if (m_fd > 0) {
@@ -249,6 +256,22 @@ int64_t HardwareCounter::GetStoreCount() {
 
 int64_t HardwareCounter::getStoreCount() {
   return m_storeCounter->read();
+}
+
+void HardwareCounter::IncInstructionCount(int64_t amount) {
+  s_counter->m_instructionCounter->incCount(amount);
+}
+
+void HardwareCounter::IncLoadCount(int64_t amount) {
+  if (!s_counter->m_countersSet) {
+    s_counter->m_loadCounter->incCount(amount);
+  }
+}
+
+void HardwareCounter::IncStoreCount(int64_t amount) {
+  if (!s_counter->m_countersSet) {
+    s_counter->m_storeCounter->incCount(amount);
+  }
 }
 
 struct PerfTable perfTable[] = {

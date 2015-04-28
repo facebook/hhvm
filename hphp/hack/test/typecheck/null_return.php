@@ -10,7 +10,11 @@
  */
 
 function foo(): ?int {
-  if (true) {
+  if (condition()) {
     return 10;
   }
+}
+
+function condition(): bool {
+  return true;
 }

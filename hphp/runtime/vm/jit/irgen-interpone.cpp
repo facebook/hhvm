@@ -32,31 +32,31 @@ namespace {
 
 Type arithOpResult(Type t1, Type t2) {
   if (!t1.isKnownDataType() || !t2.isKnownDataType()) {
-    return Type::Cell;
+    return TCell;
   }
 
   auto both = t1 | t2;
-  if (both.maybe(Type::Dbl)) return Type::Dbl;
-  if (both.maybe(Type::Arr)) return Type::Arr;
-  if (both.maybe(Type::Str)) return Type::Cell;
-  return Type::Int;
+  if (both.maybe(TDbl)) return TDbl;
+  if (both.maybe(TArr)) return TArr;
+  if (both.maybe(TStr)) return TCell;
+  return TInt;
 }
 
 Type arithOpOverResult(Type t1, Type t2) {
-  if (t1 <= Type::Int && t2 <= Type::Int) {
-    return Type::Int | Type::Dbl;
+  if (t1 <= TInt && t2 <= TInt) {
+    return TInt | TDbl;
   }
   return arithOpResult(t1, t2);
 }
 
 Type bitOpResult(Type t1, Type t2) {
   if (!t1.isKnownDataType() || !t2.isKnownDataType()) {
-    return Type::Cell;
+    return TCell;
   }
 
   auto both = t1 | t2;
-  if (both <= Type::Str) return Type::Str;
-  return Type::Int;
+  if (both <= TStr) return TStr;
+  return TInt;
 }
 
 Type setOpResult(Type locType, Type valType, SetOpOp op) {
@@ -67,15 +67,15 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
   case SetOpOp::PlusEqualO:
   case SetOpOp::MinusEqualO:
   case SetOpOp::MulEqualO:   return arithOpOverResult(locType.unbox(), valType);
-  case SetOpOp::ConcatEqual: return Type::Str;
+  case SetOpOp::ConcatEqual: return TStr;
   case SetOpOp::PowEqual:
   case SetOpOp::DivEqual:
-  case SetOpOp::ModEqual:    return Type::UncountedInit;
+  case SetOpOp::ModEqual:    return TUncountedInit;
   case SetOpOp::AndEqual:
   case SetOpOp::OrEqual:
   case SetOpOp::XorEqual:    return bitOpResult(locType.unbox(), valType);
   case SetOpOp::SlEqual:
-  case SetOpOp::SrEqual:     return Type::Int;
+  case SetOpOp::SrEqual:     return TInt;
   }
   not_reached();
 }
@@ -91,7 +91,7 @@ uint32_t localInputId(const NormalizedInstruction& inst) {
   }
 }
 
-folly::Optional<Type> interpOutputType(HTS& env,
+folly::Optional<Type> interpOutputType(IRGS& env,
                                        const NormalizedInstruction& inst,
                                        folly::Optional<Type>& checkTypeType) {
   using namespace jit::InstrFlags;
@@ -99,15 +99,15 @@ folly::Optional<Type> interpOutputType(HTS& env,
     auto locId = localInputId(inst);
     static_assert(std::is_unsigned<typeof(locId)>::value,
                   "locId should be unsigned");
-    assert(locId < curFunc(env)->numLocals());
+    assertx(locId < curFunc(env)->numLocals());
     return env.irb->localType(locId, DataTypeSpecific);
   };
 
   auto boxed = [&] (Type t) -> Type {
-    if (t == Type::Gen) return Type::BoxedInitCell;
-    assert(t <= Type::Cell || t <= Type::BoxedCell);
-    checkTypeType = t <= Type::BoxedCell ? t : boxType(t);
-    return Type::BoxedInitCell;
+    if (t == TGen) return TBoxedInitCell;
+    assertx(t <= TCell || t <= TBoxedCell);
+    checkTypeType = t <= TBoxedCell ? t : boxType(t);
+    return TBoxedInitCell;
   };
 
   auto outFlag = getInstrInfo(inst.op()).type;
@@ -118,27 +118,27 @@ folly::Optional<Type> interpOutputType(HTS& env,
   }
 
   switch (outFlag) {
-    case OutNull:        return Type::InitNull;
-    case OutNullUninit:  return Type::Uninit;
-    case OutString:      return Type::Str;
-    case OutStringImm:   return Type::StaticStr;
-    case OutDouble:      return Type::Dbl;
+    case OutNull:        return TInitNull;
+    case OutNullUninit:  return TUninit;
+    case OutString:      return TStr;
+    case OutStringImm:   return TStaticStr;
+    case OutDouble:      return TDbl;
     case OutIsTypeL:
     case OutBoolean:
     case OutPredBool:
-    case OutBooleanImm:  return Type::Bool;
-    case OutInt64:       return Type::Int;
-    case OutArray:       return Type::Arr;
-    case OutArrayImm:    return Type::Arr; // Should be StaticArr: t2124292
+    case OutBooleanImm:  return TBool;
+    case OutInt64:       return TInt;
+    case OutArray:       return TArr;
+    case OutArrayImm:    return TArr; // Should be StaticArr: t2124292
     case OutObject:
-    case OutThisObject:  return Type::Obj;
-    case OutResource:    return Type::Res;
+    case OutThisObject:  return TObj;
+    case OutResource:    return TRes;
 
     case OutFDesc:       return folly::none;
-    case OutUnknown:     return Type::Gen;
+    case OutUnknown:     return TGen;
 
-    case OutCns:         return Type::Cell;
-    case OutVUnknown:    return Type::BoxedInitCell;
+    case OutCns:         return TCell;
+    case OutVUnknown:    return TBoxedInitCell;
 
     case OutSameAsInput: return topType(env, BCSPOffset{0});
     case OutVInput:      return boxed(topType(env, BCSPOffset{0}));
@@ -153,47 +153,47 @@ folly::Optional<Type> interpOutputType(HTS& env,
     case OutBitOp:
       return bitOpResult(topType(env, BCSPOffset{0}),
                          inst.op() == HPHP::OpBitNot ?
-                            Type::Bottom : topType(env, BCSPOffset{1}));
+                            TBottom : topType(env, BCSPOffset{1}));
     case OutSetOp:      return setOpResult(localType(),
                           topType(env, BCSPOffset{0}),
                           SetOpOp(inst.imm[1].u_OA));
     case OutIncDec: {
       auto ty = localType().unbox();
-      return ty <= Type::Dbl ? ty : Type::Cell;
+      return ty <= TDbl ? ty : TCell;
     }
     case OutStrlen:
-      return topType(env, BCSPOffset{0}) <= Type::Str ?
-        Type::Int : Type::UncountedInit;
-    case OutClassRef:   return Type::Cls;
+      return topType(env, BCSPOffset{0}) <= TStr ?
+        TInt : TUncountedInit;
+    case OutClassRef:   return TCls;
     case OutFPushCufSafe: return folly::none;
 
     case OutNone:       return folly::none;
 
     case OutCInput: {
       auto ttype = topType(env, BCSPOffset{0});
-      if (ttype <= Type::Cell) return ttype;
+      if (ttype <= TCell) return ttype;
       // All instructions that are OutCInput or OutCInputL cannot push uninit or
       // a ref, so only specific inner types need to be checked.
-      if (ttype.unbox() < Type::InitCell) {
+      if (ttype.unbox() < TInitCell) {
         checkTypeType = ttype.unbox();
       }
-      return Type::Cell;
+      return TCell;
     }
 
     case OutCInputL: {
       auto ltype = localType();
-      if (ltype <= Type::Cell) return ltype;
-      if (ltype.unbox() < Type::InitCell) {
+      if (ltype <= TCell) return ltype;
+      if (ltype.unbox() < TInitCell) {
         checkTypeType = ltype.unbox();
       }
-      return Type::Cell;
+      return TCell;
     }
   }
   not_reached();
 }
 
 jit::vector<InterpOneData::LocalType>
-interpOutputLocals(HTS& env,
+interpOutputLocals(IRGS& env,
                    const NormalizedInstruction& inst,
                    bool& smashesAllLocals,
                    folly::Optional<Type> pushedType) {
@@ -213,8 +213,8 @@ interpOutputLocals(HTS& env,
   auto const func = curFunc(env);
 
   auto handleBoxiness = [&] (Type testTy, Type useTy) {
-    return testTy <= Type::BoxedCell ? Type::BoxedInitCell :
-           testTy.maybe(Type::BoxedCell) ? Type::Gen :
+    return testTy <= TBoxedCell ? TBoxedInitCell :
+           testTy.maybe(TBoxedCell) ? TGen :
            useTy;
   };
 
@@ -245,9 +245,9 @@ interpOutputLocals(HTS& env,
 
     case OpSetOpL:
     case OpIncDecL: {
-      assert(pushedType.hasValue());
+      assertx(pushedType.hasValue());
       auto locType = env.irb->localType(localInputId(inst), DataTypeSpecific);
-      assert(locType < Type::Gen || curFunc(env)->isPseudoMain());
+      assertx(locType < TGen || curFunc(env)->isPseudoMain());
 
       auto stackType = pushedType.value();
       setImmLocType(0, handleBoxiness(locType, stackType));
@@ -255,11 +255,11 @@ interpOutputLocals(HTS& env,
     }
 
     case OpStaticLocInit:
-      setImmLocType(0, Type::BoxedInitCell);
+      setImmLocType(0, TBoxedInitCell);
       break;
 
     case OpInitThisLoc:
-      setImmLocType(0, Type::Cell);
+      setImmLocType(0, TCell);
       break;
 
     case OpSetL: {
@@ -271,15 +271,15 @@ interpOutputLocals(HTS& env,
     }
     case OpVGetL:
     case OpBindL: {
-      assert(pushedType.hasValue());
-      assert(*pushedType <= Type::BoxedCell);
+      assertx(pushedType.hasValue());
+      assertx(*pushedType <= TBoxedCell);
       setImmLocType(0, pushedType.value());
       break;
     }
 
     case OpUnsetL:
     case OpPushL:
-      setImmLocType(0, Type::Uninit);
+      setImmLocType(0, TUninit);
       break;
 
     case OpSetM:
@@ -294,7 +294,7 @@ interpOutputLocals(HTS& env,
         case LL: {
           auto const& mii = getMInstrInfo(inst.mInstrOp());
           auto const& base = inst.inputs[mii.valCount()]->location;
-          assert(base.space == Location::Local);
+          assertx(base.space == Location::Local);
 
           // MInstrEffects expects to be used in the context of a normally
           // translated instruction, not an interpOne. The two important
@@ -317,8 +317,8 @@ interpOutputLocals(HTS& env,
           MInstrEffects effects(op, baseType);
           if (effects.baseValChanged) {
             auto const ty = effects.baseType.deref();
-            assert((ty <= Type::Cell ||
-                    ty <= Type::BoxedCell) ||
+            assertx((ty <= TCell ||
+                    ty <= TBoxedCell) ||
                     curFunc(env)->isPseudoMain());
             setLocType(base.offset, handleBoxiness(ty, ty));
           }
@@ -337,24 +337,24 @@ interpOutputLocals(HTS& env,
 
     case OpMIterInitK:
     case OpMIterNextK:
-      setImmLocType(3, Type::Cell);
+      setImmLocType(3, TCell);
       /* fallthrough */
     case OpMIterInit:
     case OpMIterNext:
-      setImmLocType(2, Type::BoxedInitCell);
+      setImmLocType(2, TBoxedInitCell);
       break;
 
     case OpIterInitK:
     case OpWIterInitK:
     case OpIterNextK:
     case OpWIterNextK:
-      setImmLocType(3, Type::Cell);
+      setImmLocType(3, TCell);
       /* fallthrough */
     case OpIterInit:
     case OpWIterInit:
     case OpIterNext:
     case OpWIterNext:
-      setImmLocType(2, Type::Gen);
+      setImmLocType(2, TGen);
       break;
 
     case OpVerifyParamType: {
@@ -362,15 +362,15 @@ interpOutputLocals(HTS& env,
       auto const& tc = func->params()[paramId].typeConstraint;
       auto locType = env.irb->localType(localInputId(inst), DataTypeSpecific);
       if (tc.isArray() && !tc.isSoft() && !func->mustBeRef(paramId) &&
-          (locType <= Type::Obj || locType.maybe(Type::BoxedCell))) {
-        setImmLocType(0, handleBoxiness(locType, Type::Cell));
+          (locType <= TObj || locType.maybe(TBoxedCell))) {
+        setImmLocType(0, handleBoxiness(locType, TCell));
       }
       break;
     }
 
     case OpSilence:
       if (static_cast<SilenceOp>(inst.imm[0].u_OA) == SilenceOp::Start) {
-        setImmLocType(inst.imm[0].u_LA, Type::Int);
+        setImmLocType(inst.imm[0].u_LA, TInt);
       }
       break;
 
@@ -385,7 +385,7 @@ interpOutputLocals(HTS& env,
 
 }
 
-void interpOne(HTS& env, const NormalizedInstruction& inst) {
+void interpOne(IRGS& env, const NormalizedInstruction& inst) {
   folly::Optional<Type> checkTypeType;
   auto stackType = interpOutputType(env, inst, checkTypeType);
   auto popped = getStackPopped(inst.pc());
@@ -412,17 +412,17 @@ void interpOne(HTS& env, const NormalizedInstruction& inst) {
   }
 }
 
-void interpOne(HTS& env, int popped) {
+void interpOne(IRGS& env, int popped) {
   InterpOneData idata { offsetFromIRSP(env, BCSPOffset{0}) };
   interpOne(env, folly::none, popped, 0, idata);
 }
 
-void interpOne(HTS& env, Type outType, int popped) {
+void interpOne(IRGS& env, Type outType, int popped) {
   InterpOneData idata { offsetFromIRSP(env, BCSPOffset{0}) };
   interpOne(env, outType, popped, 1, idata);
 }
 
-void interpOne(HTS& env,
+void interpOne(IRGS& env,
                folly::Optional<Type> outType,
                int popped,
                int pushed,
@@ -452,7 +452,7 @@ void interpOne(HTS& env,
     sp(env),
     fp(env)
   );
-  assert(env.irb->stackDeficit() == 0);
+  assertx(env.irb->stackDeficit() == 0);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -464,49 +464,49 @@ void interpOne(HTS& env,
 
 #define INTERP interpOne(env, *env.currentNormalizedInstruction);
 
-void emitFPushObjMethod(HTS& env, int32_t, ObjMethodOp) { INTERP }
+void emitFPushObjMethod(IRGS& env, int32_t, ObjMethodOp) { INTERP }
 
-void emitLowInvalid(HTS& env)                { std::abort(); }
-void emitCGetL3(HTS& env, int32_t)           { INTERP }
-void emitBox(HTS& env)                       { INTERP }
-void emitBoxR(HTS& env)                      { INTERP }
-void emitAddElemV(HTS& env)                  { INTERP }
-void emitAddNewElemV(HTS& env)               { INTERP }
-void emitClsCns(HTS& env, const StringData*) { INTERP }
-void emitExit(HTS& env)                      { INTERP }
-void emitFatal(HTS& env, FatalOp)            { INTERP }
-void emitUnwind(HTS& env)                    { INTERP }
-void emitThrow(HTS& env)                     { INTERP }
-void emitCGetN(HTS& env)                     { INTERP }
-void emitVGetN(HTS& env)                     { INTERP }
-void emitIssetN(HTS& env)                    { INTERP }
-void emitEmptyN(HTS& env)                    { INTERP }
-void emitSetN(HTS& env)                      { INTERP }
-void emitSetOpN(HTS& env, SetOpOp)           { INTERP }
-void emitSetOpG(HTS& env, SetOpOp)           { INTERP }
-void emitSetOpS(HTS& env, SetOpOp)           { INTERP }
-void emitIncDecN(HTS& env, IncDecOp)         { INTERP }
-void emitIncDecG(HTS& env, IncDecOp)         { INTERP }
-void emitIncDecS(HTS& env, IncDecOp)         { INTERP }
-void emitBindN(HTS& env)                     { INTERP }
-void emitUnsetN(HTS& env)                    { INTERP }
-void emitUnsetG(HTS& env)                    { INTERP }
-void emitFPassN(HTS& env, int32_t)           { INTERP }
-void emitFCallUnpack(HTS& env, int32_t)      { INTERP }
-void emitCufSafeArray(HTS& env)              { INTERP }
-void emitCufSafeReturn(HTS& env)             { INTERP }
-void emitIncl(HTS& env)                      { INTERP }
-void emitInclOnce(HTS& env)                  { INTERP }
-void emitReq(HTS& env)                       { INTERP }
-void emitReqDoc(HTS& env)                    { INTERP }
-void emitReqOnce(HTS& env)                   { INTERP }
-void emitEval(HTS& env)                      { INTERP }
-void emitDefTypeAlias(HTS& env, int32_t)     { INTERP }
-void emitDefCns(HTS& env, const StringData*) { INTERP }
-void emitDefCls(HTS& env, int32_t)           { INTERP }
-void emitDefFunc(HTS& env, int32_t)          { INTERP }
-void emitCatch(HTS& env)                     { INTERP }
-void emitHighInvalid(HTS& env)               { std::abort(); }
+void emitLowInvalid(IRGS& env)                { std::abort(); }
+void emitCGetL3(IRGS& env, int32_t)           { INTERP }
+void emitBox(IRGS& env)                       { INTERP }
+void emitBoxR(IRGS& env)                      { INTERP }
+void emitAddElemV(IRGS& env)                  { INTERP }
+void emitAddNewElemV(IRGS& env)               { INTERP }
+void emitClsCns(IRGS& env, const StringData*) { INTERP }
+void emitExit(IRGS& env)                      { INTERP }
+void emitFatal(IRGS& env, FatalOp)            { INTERP }
+void emitUnwind(IRGS& env)                    { INTERP }
+void emitThrow(IRGS& env)                     { INTERP }
+void emitCGetN(IRGS& env)                     { INTERP }
+void emitVGetN(IRGS& env)                     { INTERP }
+void emitIssetN(IRGS& env)                    { INTERP }
+void emitEmptyN(IRGS& env)                    { INTERP }
+void emitSetN(IRGS& env)                      { INTERP }
+void emitSetOpN(IRGS& env, SetOpOp)           { INTERP }
+void emitSetOpG(IRGS& env, SetOpOp)           { INTERP }
+void emitSetOpS(IRGS& env, SetOpOp)           { INTERP }
+void emitIncDecN(IRGS& env, IncDecOp)         { INTERP }
+void emitIncDecG(IRGS& env, IncDecOp)         { INTERP }
+void emitIncDecS(IRGS& env, IncDecOp)         { INTERP }
+void emitBindN(IRGS& env)                     { INTERP }
+void emitUnsetN(IRGS& env)                    { INTERP }
+void emitUnsetG(IRGS& env)                    { INTERP }
+void emitFPassN(IRGS& env, int32_t)           { INTERP }
+void emitFCallUnpack(IRGS& env, int32_t)      { INTERP }
+void emitCufSafeArray(IRGS& env)              { INTERP }
+void emitCufSafeReturn(IRGS& env)             { INTERP }
+void emitIncl(IRGS& env)                      { INTERP }
+void emitInclOnce(IRGS& env)                  { INTERP }
+void emitReq(IRGS& env)                       { INTERP }
+void emitReqDoc(IRGS& env)                    { INTERP }
+void emitReqOnce(IRGS& env)                   { INTERP }
+void emitEval(IRGS& env)                      { INTERP }
+void emitDefTypeAlias(IRGS& env, int32_t)     { INTERP }
+void emitDefCns(IRGS& env, const StringData*) { INTERP }
+void emitDefCls(IRGS& env, int32_t)           { INTERP }
+void emitDefFunc(IRGS& env, int32_t)          { INTERP }
+void emitCatch(IRGS& env)                     { INTERP }
+void emitHighInvalid(IRGS& env)               { std::abort(); }
 
 //////////////////////////////////////////////////////////////////////
 

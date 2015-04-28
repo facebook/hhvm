@@ -765,7 +765,7 @@ void Array::unserialize(VariableUnserializer *uns) {
     operator=(ArrayInit(size, ArrayInit::Mixed{}).toArray());
     for (int64_t i = 0; i < size; i++) {
       Variant key;
-      key.unserialize(uns, Uns::Mode::Key);
+      unserializeVariant(key, uns, UnserializeMode::Key);
       if (!key.isString() && !key.isInteger()) {
         throw Exception("Invalid key");
       }
@@ -777,7 +777,7 @@ void Array::unserialize(VariableUnserializer *uns) {
       if (UNLIKELY(IS_REFCOUNTED_TYPE(value.getRawType()))) {
         uns->putInOverwrittenList(value);
       }
-      value.unserialize(uns);
+      unserializeVariant(value, uns);
 
       if (i < (size - 1)) {
         auto lastChar = uns->peekBack();

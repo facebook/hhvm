@@ -197,8 +197,25 @@ MemoryManager::MemoryManager()
   m_bypassSlabAlloc = RuntimeOption::DisableSmartAllocator;
 }
 
+void MemoryManager::dropRootMaps() {
+  m_objectRoots = nullptr;
+  m_resourceRoots = nullptr;
+}
+
+void MemoryManager::deleteRootMaps() {
+  if (m_objectRoots) {
+    smart_delete(m_objectRoots);
+    m_objectRoots = nullptr;
+  }
+  if (m_resourceRoots) {
+    smart_delete(m_resourceRoots);
+    m_resourceRoots = nullptr;
+  }
+}
+
 void MemoryManager::resetRuntimeOptions() {
   if (debug) {
+    deleteRootMaps();
     checkHeap();
     // check that every allocation in heap has been freed before reset
     for (auto h = begin(), lim = end(); h != lim; ++h) {
@@ -476,6 +493,9 @@ void MemoryManager::resetAllocator() {
   }
   DEBUG_ONLY auto nstrings = StringData::sweepAll();
 
+  // cleanup root maps
+  dropRootMaps();
+
   // free the heap
   m_heap.reset();
 
@@ -594,7 +614,9 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
 namespace {
 DEBUG_ONLY const char* header_names[] = {
   "Packed", "Struct", "Mixed", "Empty", "Apc", "Globals", "Proxy",
-  "String", "Object", "ResumableObj", "AwaitAllWH", "Resource", "Ref",
+  "String", "Resource", "Ref",
+  "Object", "ResumableObj", "AwaitAllWH",
+  "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
   "Resumable", "Native", "SmallMalloc", "BigMalloc", "BigObj",
   "Free", "Hole", "Debug"
 };
@@ -698,6 +720,13 @@ void MemoryManager::checkHeap() {
       case HeaderKind::Object:
       case HeaderKind::ResumableObj:
       case HeaderKind::AwaitAllWH:
+      case HeaderKind::Vector:
+      case HeaderKind::Map:
+      case HeaderKind::Set:
+      case HeaderKind::Pair:
+      case HeaderKind::ImmVector:
+      case HeaderKind::ImmMap:
+      case HeaderKind::ImmSet:
       case HeaderKind::Resource:
       case HeaderKind::Ref:
       case HeaderKind::Resumable:

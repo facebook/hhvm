@@ -30,7 +30,7 @@ bool TypeSource::operator<(const TypeSource& rhs) const {
     return int(kind) < int(rhs.kind);
   }
   if (isGuard()) return guard->id() < rhs.guard->id();
-  assert(isValue());
+  assertx(isValue());
   return value->id() < rhs.value->id();
 }
 

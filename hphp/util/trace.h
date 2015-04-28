@@ -98,11 +98,9 @@ namespace Trace {
       TM(debuggerflow)  \
       TM(debuginfo)     \
       TM(dispatchBB)    \
-      TM(emitter)       \
       TM(fixup)         \
       TM(fr)            \
       TM(gc)            \
-      TM(gvn)           \
       TM(heap)          \
       TM(hhas)          \
       TM(hhbbc)         \
@@ -113,16 +111,19 @@ namespace Trace {
       TM(hhbbc_time)    \
       TM(hhbc)          \
       TM(vasm)          \
+      TM(vasm_copy)     \
       TM(hhir)          \
       TM(hhirTracelets) \
+      TM(hhir_cfg)      \
       TM(hhir_dce)      \
       TM(hhir_store)    \
       TM(hhir_alias)    \
       TM(hhir_load)     \
       TM(hhir_refineTmps) \
+      TM(hhir_gvn)      \
+      TM(hhir_refcount) \
       TM(llvm)          \
       TM(llvm_count)    \
-      TM(hhir_refcount) \
       TM(inlining)      \
       TM(instancebits)  \
       TM(intercept)     \

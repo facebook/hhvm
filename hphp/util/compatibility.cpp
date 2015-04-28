@@ -15,6 +15,7 @@
 */
 
 #include "hphp/util/compatibility.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/vdso.h"
 
 #include <cstdarg>
@@ -63,7 +64,7 @@ int dprintf(int fd, const char *format, ...) {
 }
 #endif
 
-int gettime(clockid_t which_clock, struct timespec *tp) {
+static int gettime_helper(clockid_t which_clock, struct timespec *tp) {
 #if defined(__CYGWIN__)
   // let's bypass trying to load vdso
   return clock_gettime(which_clock, tp);
@@ -81,6 +82,25 @@ int gettime(clockid_t which_clock, struct timespec *tp) {
   }
   return clock_gettime(which_clock, tp);
 #endif
+}
+
+__thread int64_t s_extra_request_microseconds;
+int gettime(clockid_t which_clock, struct timespec* tp) {
+  auto ret = gettime_helper(which_clock, tp);
+#ifdef CLOCK_THREAD_CPUTIME_ID
+  if (which_clock == CLOCK_THREAD_CPUTIME_ID) {
+    always_assert(tp->tv_nsec < 1000000000);
+
+    tp->tv_sec += s_extra_request_microseconds / 1000000;
+    auto res = tp->tv_nsec + (s_extra_request_microseconds % 1000000) * 1000;
+    if (res > 1000000000) {
+      res -= 1000000000;
+      tp->tv_sec += 1;
+    }
+    tp->tv_nsec = res;
+  }
+#endif
+  return ret;
 }
 
 int64_t gettime_diff_us(const timespec &start, const timespec &end) {

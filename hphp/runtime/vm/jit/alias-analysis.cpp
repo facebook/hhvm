@@ -58,7 +58,6 @@ void visit_locations(const BlockList& blocks, Visit visit) {
                                     visit(x.kills); },
         [&] (PureLoad x)          { visit(x.src); },
         [&] (PureStore x)         { visit(x.dst); },
-        [&] (PureStoreNT x)       { visit(x.dst); },
         [&] (PureSpillFrame x)    { visit(x.dst); visit(x.ctx); },
         [&] (ExitEffects x)       { visit(x.live); visit(x.kills); }
       );
@@ -154,7 +153,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
    * colliding in that regard is assumed to possibly alias.
    */
   auto conflict_prop_offset = jit::hash_map<uint32_t,ALocBits>{};
-  auto conflict_array_index = jit::hash_map<uint64_t,ALocBits>{};
+  auto conflict_array_index = jit::hash_map<int64_t,ALocBits>{};
 
   /*
    * Stack offset conflict sets: any stack alias class based off a different
@@ -257,8 +256,8 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       ret.all_stack.set(meta.index);
       for (auto& kv : conflict_stkptrs) {
         if (kv.first != stk->base) {
-          if (kv.first->type() <= Type::StkPtr ||
-              stk->base->type() <= Type::StkPtr) {
+          if (kv.first->type() <= TStkPtr ||
+              stk->base->type() <= TStkPtr) {
             meta.conflicts |= kv.second;
           }
         }

@@ -139,14 +139,9 @@ private:
   void emitInitObjProps(const IRInstruction* inst, Vreg dstReg,
                         const Class* cls, size_t nProps);
 
+  void decRefImpl(Vout& v, const IRInstruction*);
   bool decRefDestroyIsUnlikely(const IRInstruction* inst,
                                OptDecRefProfile& profile, Type type);
-  template <typename F>
-  void cgCheckStaticBitAndDecRef(Vout& v, const IRInstruction* inst,
-                                 Vlabel done, Type type,
-                                 Vreg dataReg, F destroyImpl);
-  void cgDecRefStaticType(Vout&, const IRInstruction* inst, Type type,
-                          Vreg dataReg);
 
   void cgIterNextCommon(IRInstruction* inst);
   void cgIterInitCommon(IRInstruction* inst);

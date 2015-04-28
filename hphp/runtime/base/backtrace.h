@@ -55,6 +55,14 @@ struct BacktraceArgs {
   }
 
   /**
+   * Return the metadata associated with each frame having 86metadata local.
+   */
+  BacktraceArgs& withMetadata(bool withMetadata = true) {
+    m_withMetadata = withMetadata;
+    return *this;
+  }
+
+  /**
    * Do not return function arguments for frames on the stack.
    */
   BacktraceArgs& ignoreArgs(bool ignoreArgs = true) {
@@ -105,14 +113,15 @@ struct BacktraceArgs {
   }
 
 private:
-  bool m_skipTop = false;
-  bool m_withSelf = false;
-  bool m_withThis = false;
-  bool m_withPseudoMain = false;
-  bool m_withArgValues = true;
-  bool m_withArgNames = false;
-  int m_limit = 0;
-  VMParserFrame* m_parserFrame = nullptr;
+  bool m_skipTop{false};
+  bool m_withSelf{false};
+  bool m_withThis{false};
+  bool m_withMetadata{false};
+  bool m_withPseudoMain{false};
+  bool m_withArgValues{true};
+  bool m_withArgNames{false};
+  int m_limit{0};
+  VMParserFrame* m_parserFrame{nullptr};
 };
 
 Array createBacktrace(const BacktraceArgs& backtraceArgs);

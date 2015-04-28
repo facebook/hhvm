@@ -22,7 +22,7 @@ namespace HPHP { namespace jit {
 // Vout.
 
 inline Vout& Vout::operator=(const Vout& v) {
-  assert(&v.m_unit == &m_unit);
+  assertx(&v.m_unit == &m_unit);
   m_block = v.m_block;
   m_origin = v.m_origin;
   return *this;
@@ -70,7 +70,7 @@ inline Vreg Vout::cns(T v) {
 // Vasm.
 
 inline Vasm::Area& Vasm::area(AreaIndex i) {
-  assert((unsigned)i < m_areas.size());
+  assertx((unsigned)i < m_areas.size());
   return m_areas[(unsigned)i];
 }
 

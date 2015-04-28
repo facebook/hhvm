@@ -115,7 +115,7 @@ private:
   /* INI settings. */
   bool m_logErrors;
   bool m_trackErrors;
-  bool m_htmlErrors;
+  bool m_htmlErrors{false};
   bool m_safeFileAccess;
 
   /* Pointer to surprise flags stored in RDS. */
@@ -250,10 +250,15 @@ private:
   std::string getDefaultIncludePath();
   int64_t getErrorReportingLevel() { return m_errorReportingLevel; }
   void setErrorReportingLevel(int level) { m_errorReportingLevel = level; }
-  std::string getVariablesOrder() const { return m_variablesOrder; }
+
+  const std::string& getVariablesOrder() const {
+    return m_variablesOrder;
+  }
+
   void setVariablesOrder(std::string variablesOrder) {
     m_variablesOrder = variablesOrder;
   }
+
   std::string getRequestOrder() const { return m_requestOrder; }
   void setRequestOrder(std::string requestOrder) {
     m_requestOrder = requestOrder;

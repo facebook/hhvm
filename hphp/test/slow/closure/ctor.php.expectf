@@ -1,0 +1,1 @@
+Fatal error: Cannot override final method Closure::__construct() in %s/hphp/test/slow/closure/ctor.php on line 3

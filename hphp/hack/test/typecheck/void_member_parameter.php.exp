@@ -1,2 +1,2 @@
 File "void_member_parameter.php", line 13, characters 21-24:
-Cannot have a void parameter (Typing[4114])
+The void typehint can only be used to describe a function return type (Naming[2063])

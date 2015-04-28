@@ -243,7 +243,7 @@ char String::charAt(int pos) const {
 ///////////////////////////////////////////////////////////////////////////////
 // assignments
 
-String& String::operator=(litstr s) {
+String& String::operator=(const char* s) {
   m_str = s ? StringData::Make(s, CopyString) : nullptr;
   return *this;
 }
@@ -264,7 +264,7 @@ String& String::operator=(Variant&& var) {
 ///////////////////////////////////////////////////////////////////////////////
 // concatenation and increments
 
-String &String::operator+=(litstr s) {
+String &String::operator+=(const char* s) {
   if (s && *s) {
     if (empty()) {
       m_str = StringData::Make(s, CopyString);
@@ -320,12 +320,12 @@ String& String::operator+=(const MutableSlice& slice) {
   return (*this += StringSlice(slice.begin(), slice.size()));
 }
 
-String&& operator+(String&& lhs, litstr rhs) {
+String&& operator+(String&& lhs, const char* rhs) {
   lhs += rhs;
   return std::move(lhs);
 }
 
-String operator+(const String & lhs, litstr rhs) {
+String operator+(const String & lhs, const char* rhs) {
   if (lhs.empty()) return rhs;
   if (!rhs || !*rhs) return lhs;
   return StringData::Make(lhs.slice(), rhs);
@@ -445,7 +445,7 @@ bool String::more(const Resource& v2) const {
   return HPHP::more(get(), v2);
 }
 
-int String::compare(litstr v2) const {
+int String::compare(const char* v2) const {
   int lengthDiff = length() - strlen(v2);
   if(lengthDiff == 0)
     return memcmp(data(), v2, length());
@@ -545,10 +545,10 @@ void String::dump() const {
 ///////////////////////////////////////////////////////////////////////////////
 // StaticString
 
-StaticString::StaticString(litstr s)
+StaticString::StaticString(const char* s)
 : String(makeStaticString(s), NoIncRef{}) { }
 
-StaticString::StaticString(litstr s, int length)
+StaticString::StaticString(const char* s, int length)
 : String(makeStaticString(s, length), NoIncRef{}) { }
 
 StaticString::StaticString(std::string s)
@@ -574,7 +574,7 @@ const StaticString
   s_resource("resource"),
   s_ref("reference");
 
-String getDataTypeString(DataType t) {
+StaticString getDataTypeString(DataType t) {
   switch (t) {
     case KindOfUninit:
     case KindOfNull:       return s_NULL;

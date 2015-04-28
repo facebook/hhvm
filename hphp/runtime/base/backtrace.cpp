@@ -36,25 +36,28 @@ const StaticString
   s_type("type"),
   s_include("include"),
   s_main("{main}"),
+  s_metadata("metadata"),
+  s_86metadata("86metadata"),
   s_arrow("->"),
   s_double_colon("::");
 
 static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
   if (fp && fp->func() && fp->resumed() && fp->func()->isAsyncFunction()) {
     c_WaitableWaitHandle* currentWaitHandle = frame_afwh(fp);
+    if (currentWaitHandle->isFinished()) {
+      /*
+       * It's possible in very rare cases (it will return a truncated stack):
+       * 1) async function which WaitHandle is not referenced by anything
+       *      else finishes
+       * 2) its return value is an object with destructor
+       * 3) this destructor gets called as part of destruction of the
+       *      WaitHandleobject, which happens right before FP is adjusted
+      */
+      return nullptr;
+    }
+
     auto const contextIdx = currentWaitHandle->getContextIdx();
     while (currentWaitHandle != nullptr) {
-      if (currentWaitHandle->isFinished()) {
-        /*
-         * It's possible in very rare cases (it will return a truncated stack):
-         * 1) async function which WaitHandle is not referenced by anything
-         *      else finishes
-         * 2) its return value is an object with destructor
-         * 3) this destructor gets called as part of destruction of the
-         *      WaitHandleobject, which happens right before FP is adjusted
-        */
-        break;
-      }
       auto p = currentWaitHandle->getParentChain().firstInContext(contextIdx);
       if (p == nullptr) break;
 
@@ -265,6 +268,23 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         }
       }
       frame.set(s_args, args);
+    }
+
+    if (btArgs.m_withMetadata && !isReturning) {
+      if (UNLIKELY(fp->hasVarEnv())) {
+        auto tv = fp->getVarEnv()->lookup(s_86metadata.get());
+        if (tv != nullptr && tv->m_type != KindOfUninit) {
+          frame.set(s_metadata, tvAsVariant(tv));
+        }
+      } else {
+        auto local = fp->func()->lookupVarId(s_86metadata.get());
+        if (local != kInvalidId) {
+          auto tv = frame_local(fp, local);
+          if (tv->m_type != KindOfUninit) {
+            frame.set(s_metadata, tvAsVariant(tv));
+          }
+        }
+      }
     }
 
     bt.append(frame.toVariant());

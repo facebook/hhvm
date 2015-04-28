@@ -24,6 +24,7 @@
 
 #include "hphp/util/safe-cast.h"
 
+#include <boost/dynamic_bitset.hpp>
 #include <folly/Range.h>
 #include <iosfwd>
 
@@ -51,20 +52,25 @@ extern rds::Link<uint64_t> g_bytecodesVasm;
 #define DECLARE_VNUM(Vnum, check, prefix)                 \
 struct Vnum {                                             \
   Vnum() {}                                               \
-  explicit Vnum(size_t n) : n(safe_cast<unsigned>(n)) {}  \
+  explicit Vnum(size_t n) : n(safe_cast<uint32_t>(n)) {}  \
                                                           \
   /* implicit */ operator size_t() const {                \
-    if (check) assert(n != 0xffffffff);                   \
+    if (check) assertx(n != kInvalidId);                   \
     return n;                                             \
   }                                                       \
                                                           \
+  bool isValid() const {                                  \
+    return n != kInvalidId;                               \
+  }                                                       \
+                                                          \
   std::string toString() const {                          \
-    if (n == 0xffffffff) return prefix "?";               \
+    if (n == kInvalidId) return prefix "?";               \
     return folly::to<std::string>(prefix, n);             \
   }                                                       \
                                                           \
 private:                                                  \
-  unsigned n{0xffffffff};                                 \
+  static constexpr uint32_t kInvalidId = 0xffffffff;      \
+  uint32_t n{kInvalidId};                                 \
 }
 
 /*
@@ -104,7 +110,7 @@ bool check(Vunit&);
 /*
  * Check that each block has exactly one terminal instruction at the end.
  */
-bool checkBlockEnd(Vunit& v, Vlabel b);
+bool checkBlockEnd(const Vunit& v, Vlabel b);
 
 /*
  * Passes.
@@ -139,6 +145,13 @@ jit::vector<Vlabel> sortBlocks(const Vunit& unit);
  * with each section.
  */
 jit::vector<Vlabel> layoutBlocks(const Vunit& unit);
+
+/*
+ * Return a bitset, keyed by Vlabel, indicating which blocks are targets of
+ * backedges.
+ */
+boost::dynamic_bitset<> backedgeTargets(const Vunit& unit,
+                                        const jit::vector<Vlabel>& rpoBlocks);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

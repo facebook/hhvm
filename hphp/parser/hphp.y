@@ -624,6 +624,7 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %token T_DECLARE
 %token T_ENDDECLARE
 %token T_AS
+%token T_SUPER
 %token T_SWITCH
 %token T_ENDSWITCH
 %token T_CASE
@@ -771,6 +772,7 @@ top_statement:
 
 ident:
     T_STRING                           { $$ = $1;}
+  | T_SUPER                            { $$ = $1;}
   | T_XHP_ATTRIBUTE                    { $$ = $1;}
   | T_XHP_CATEGORY                     { $$ = $1;}
   | T_XHP_CHILDREN                     { $$ = $1;}
@@ -3042,15 +3044,19 @@ hh_opt_return_type:
   | ':' hh_type                        { only_in_hh_syntax(_p); $$ = $2; }
 ;
 
+hh_constraint:
+    T_AS hh_type
+ |  T_SUPER hh_type
+
 hh_typevar_list:
     hh_typevar_list ','
     hh_typevar_variance ident          { _p->addTypeVar($4.text()); }
  |  hh_typevar_variance ident          { _p->addTypeVar($2.text()); }
  |  hh_typevar_list ','
     hh_typevar_variance ident
-    T_AS hh_type                       { _p->addTypeVar($4.text()); }
+    hh_constraint                      { _p->addTypeVar($4.text()); }
  |  hh_typevar_variance ident
-    T_AS hh_type                       { _p->addTypeVar($2.text()); }
+    hh_constraint                      { _p->addTypeVar($2.text()); }
 ;
 
 hh_typevar_variance:

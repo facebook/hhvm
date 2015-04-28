@@ -9,13 +9,13 @@
 async function gen1($a) {
   error_log('In gen1');
   error_log('Finished in gen1');
-  await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+  await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
   return $a + 1;
 }
 
 async function gen2($a) {
   error_log('In gen2');
-  await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+  await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
   $x = gen1($a)->join();
   error_log('Finished in gen2');
   return $x;
@@ -24,7 +24,7 @@ async function gen2($a) {
 async function genBar($a) {
   error_log('In genBar');
   var_dump($a);
-  await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+  await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
   error_log('Finished in genBar');
   return $a + 2;
 }

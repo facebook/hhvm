@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/cap-code.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,7 +87,6 @@ public:
     m_count = n;
     if (m_count > 1) m_kind = (ArrayKind) set_one_bit_ref(m_kind);
   }
-  template<class F> void scan(F&) const;
 
   /**
    * Create a new ArrayData with specified array element(s).
@@ -440,15 +440,11 @@ protected:
     struct {
       union {
         struct {
-          UNUSED uint16_t m_unused1;
-          UNUSED uint8_t m_unused0;
-          mutable ArrayKind m_kind;
+          CapCode m_cap;
+          uint8_t m_pad;
+          ArrayKind m_kind;
         };
-        // Packed arrays overlay their encoded capacity with the kind field.
-        // kPackedKind is zero, and aliases the top byte of m_packedCapCode,
-        // so it won't influence the encoded capacity. For details on the
-        // encoding see the definition of packedCapToCode().
-        uint32_t m_packedCapCode;
+        uint32_t m_cap_kind;
       };
       mutable RefCount m_count;
     };

@@ -67,6 +67,7 @@ Vreg Vunit::makeConst(bool v)     { return make_const(*this, v); }
 Vreg Vunit::makeConst(uint32_t v) { return make_const(*this, v); }
 Vreg Vunit::makeConst(uint64_t v) { return make_const(*this, v); }
 Vreg Vunit::makeConst(Vptr v)     { return make_const(*this, v); }
+Vreg Vunit::makeConst(Vconst::Kind k) { return make_const(*this, k); }
 
 Vreg Vunit::makeConst(double d) {
   union { double d; uint64_t i; } u;

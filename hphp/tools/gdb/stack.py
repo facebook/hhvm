@@ -5,9 +5,9 @@ GDB commands related to the HHVM stack.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
-import os
 import gdb
 from gdbutils import *
+import frame
 
 
 #------------------------------------------------------------------------------
@@ -19,29 +19,10 @@ class WalkstkCommand(gdb.Command):
 The output backtrace has the following format:
 
     #<bt frame> <sp> @ <rip>: <function> [at <filename>:<line>]
-
-Filename and line number information is only included for C++ functions.
 """
 
     def __init__(self):
         super(WalkstkCommand, self).__init__('walkstk', gdb.COMMAND_STACK)
-
-
-    def print_frame(self, i, sp, rip, func, loc):
-        out = '#%-2d %s @ 0x%x: %s' % (i, str(sp), int(str(rip)), func)
-
-        # Munge and print the code location if we have one.
-        if loc is not None and loc.symtab is not None:
-            filename = loc.symtab.filename
-
-            if 'hphp' in filename:
-                head, base = os.path.split(filename)
-                _, basedir = os.path.split(head)
-                filename = 'hphp/.../' + basedir + '/' + base
-
-            out += ' at ' + filename + ':' + str(loc.line)
-
-        print(out)
 
 
     def invoke(self, args, from_tty):
@@ -82,17 +63,18 @@ Filename and line number information is only included for C++ functions.
             rip = sp[1]
             sp = sp[0].cast(sp_type)
 
-            func = '<unknown>'
-            loc = None
-
             if mcg is not None:
                 in_tc = rip >= tc_base and rip < tc_end
             elif not skip_tc:
                 # TC frames look like unnamed normal native frames.
-                next_frame = native_frame.older()
-                in_tc = (next_frame is not None and
-                         next_frame.name() is None and
-                         next_frame.type() == gdb.NORMAL_FRAME)
+                try:
+                    next_frame = native_frame.older()
+                    in_tc = (next_frame is not None and
+                             next_frame.name() is None and
+                             next_frame.type() == gdb.NORMAL_FRAME)
+                except AttributeError:
+                    # No older frame.
+                    in_tc = False
             else:
                 in_tc = False
                 skip_tc = False
@@ -101,17 +83,16 @@ Filename and line number information is only included for C++ functions.
             # executing in the TC.
             if in_tc:
                 ar_type = T('HPHP::ActRec').pointer()
-                sd_type = T('HPHP::StringData').pointer()
                 try:
-                    name = sp.cast(ar_type)['m_func']['m_fullName']
-                    name = name['m_raw'].cast(sd_type)['m_data'].string()
-                    if len(name):
-                        func = '[PHP] ' + name + '()'
-                    else:
-                        func = '[PHP] <pseudomain>'
-                except:
+                    print(frame.stringify(frame.create_php(
+                        idx=i + 1, ar=sp.cast(ar_type), rip=rip)))
+                except gdb.MemoryError:
                     if mcg is None:
+                        # We guessed wrong about whether we're in the TC.
                         skip_tc = True
+
+                    print(frame.stringify(frame.create_native(
+                        idx=i + 1, sp=sp, rip=rip)))
 
             # Pop native frames until we find our current %sp.
             else:
@@ -120,16 +101,17 @@ Filename and line number information is only included for C++ functions.
                 while (native_frame is not None
                        and rip != native_frame.pc()):
                     if inlines > 0 and native_frame.name() is not None:
-                        self.print_frame(i, '{inline frame}', rip,
-                                         native_frame.name(),
-                                         native_frame.find_sal())
+                        print(frame.stringify(frame.create_native(
+                            idx=i,
+                            sp='{inline frame}',
+                            rip=rip,
+                            native_frame=native_frame)))
+
                     i += 1
                     inlines += 1
                     native_frame = native_frame.older()
 
-                func = native_frame.name() + '()'
-                loc = native_frame.find_sal()
-
-            self.print_frame(i + 1 if in_tc else i, sp, rip, func, loc)
+                print(frame.stringify(frame.create_native(
+                    idx=i, sp=sp, rip=rip, native_frame=native_frame)))
 
 WalkstkCommand()

@@ -42,14 +42,14 @@ struct Location {
   explicit Location(Space spc)
     : space(spc)
   {
-    assert(spc == This);
+    assertx(spc == This);
     offset = 0;
   }
 
   Location(Space spc, int64_t off)
     : space(spc)
   {
-    assert(spc != Stack);
+    assertx(spc != Stack);
     offset = off;
   }
 

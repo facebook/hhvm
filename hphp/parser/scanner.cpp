@@ -236,9 +236,11 @@ bool Scanner::tryParseTypeList(TokenStore::iterator& pos) {
       nextLookahead(pos);
     }
     if (!tryParseNSType(pos)) return false;
-    if (pos->t == T_AS) {
+    if (pos->t == T_AS || pos->t == T_SUPER) {
       nextLookahead(pos);
-      if (!tryParseNSType(pos)) return false;
+      if (!tryParseNSType(pos)) {
+        return false;
+      }
     }
     if (pos->t != ',') return true;
     nextLookahead(pos);
@@ -418,6 +420,7 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
   for (;;) {
     switch (pos->t) {
       case T_STRING:
+      case T_SUPER:
       case T_XHP_ATTRIBUTE:
       case T_XHP_CATEGORY:
       case T_XHP_CHILDREN:

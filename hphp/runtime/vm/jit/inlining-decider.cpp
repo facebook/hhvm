@@ -43,7 +43,7 @@ bool traceRefusal(const Func* caller, const Func* callee, const char* why) {
   if (Trace::enabled) {
     UNUSED auto calleeName = callee ? callee->fullName()->data()
                                     : "(unknown)";
-    assert(caller);
+    assertx(caller);
 
     FTRACE(1, "InliningDecider: refusing {}() <- {}{}\t<reason: {}>\n",
            caller->fullName()->data(), calleeName, callee ? "()" : "", why);
@@ -109,7 +109,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee) {
  * Check that we don't have any missing or extra arguments.
  */
 bool checkNumArgs(SrcKey callSK, const Func* callee) {
-  assert(callee);
+  assertx(callee);
 
   auto refuse = [&] (const char* why) {
     return traceRefusal(callSK.func(), callee, why);
@@ -143,7 +143,7 @@ bool checkNumArgs(SrcKey callSK, const Func* callee) {
  */
 bool checkFPIRegion(SrcKey callSK, const Func* callee,
                     const RegionDesc& region) {
-  assert(callee);
+  assertx(callee);
 
   auto refuse = [&] (const char* why) {
     return traceRefusal(callSK.func(), callee, why);
@@ -264,7 +264,7 @@ namespace {
  * Check if a builtin is inlinable.
  */
 bool isInlinableCPPBuiltin(const Func* f) {
-  assert(f->isCPPBuiltin());
+  assertx(f->isCPPBuiltin());
 
   // The callee needs to be callable with FCallBuiltin, because NativeImpl
   // requires a frame.
@@ -341,8 +341,8 @@ bool isInliningVVSafe(Op op) {
 bool InliningDecider::shouldInline(const Func* callee,
                                    const RegionDesc& region) {
   auto sk = region.empty() ? SrcKey() : region.start();
-  assert(callee);
-  assert(sk.func() == callee);
+  assertx(callee);
+  assertx(sk.func() == callee);
 
   int cost = 0;
 

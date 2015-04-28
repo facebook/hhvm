@@ -61,7 +61,7 @@ struct Block;
 struct IRTranslator;
 struct NormalizedInstruction;
 struct ProfData;
-struct HTS;
+struct IRGS;
 
 static const uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
@@ -123,6 +123,13 @@ struct TransContext {
    * nullptr---only used for debug output.
    */
   const RegionDesc* regionDesc;
+
+  /*
+   * Whether or not we should attempt to use LLVM for codegen. Note that this
+   * being true doesn't guarantee the output will come from LLVM; we can punt
+   * back to vasm for a number of reasons.
+   */
+  const bool useLLVM;
 };
 
 /*
@@ -136,7 +143,6 @@ struct TranslArgs {
 
   SrcKey sk;
   bool align;
-  bool dryRun{false};
   bool setFuncBody{false};
   TransFlags flags{0};
   TransID transId{kInvalidTransID};
@@ -559,15 +565,12 @@ struct PropInfo {
   RepoAuthType repoAuthType;
 };
 
-PropInfo getPropertyOffset(const NormalizedInstruction& ni,
+PropInfo getPropertyOffset(const IRGS& env,
+                           const NormalizedInstruction& ni,
                            const Class* ctx,
                            const Class*& baseClass,
                            const MInstrInfo& mii,
                            unsigned mInd, unsigned iInd);
-
-PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
-                                Class* ctx, const MInstrInfo& mii);
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Other instruction information.
@@ -640,7 +643,7 @@ int locPhysicalOffset(int32_t localIndex);
  * Take a NormalizedInstruction and turn it into a call to the appropriate ht
  * functions.  Updates the bytecode marker, handles interp one flags, etc.
  */
-void translateInstr(HTS&, const NormalizedInstruction&);
+void translateInstr(IRGS&, const NormalizedInstruction&);
 
 extern bool tc_dump();
 

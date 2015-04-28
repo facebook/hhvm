@@ -100,6 +100,7 @@
                     "name": "setOnIOWaitEnterCallback",
                     "desc": "Set callback for when the scheduler enters I/O wait",
                     "flags": [
+                        "IsFinal",
                         "IsStatic",
                         "HipHopSpecific"
                     ],
@@ -118,6 +119,7 @@
                     "name": "setOnIOWaitExitCallback",
                     "desc": "Set callback for when the scheduler exits I/O wait",
                     "flags": [
+                        "IsFinal",
                         "IsStatic",
                         "HipHopSpecific"
                     ],
@@ -136,6 +138,7 @@
                     "name": "setOnJoinCallback",
                     "desc": "Set callback for when join() is called",
                     "flags": [
+                        "IsFinal",
                         "IsStatic",
                         "HipHopSpecific"
                     ],
@@ -154,6 +157,7 @@
                     "name": "getWaitHandle",
                     "desc": "Return this wait handle (for Awaitable interface)",
                     "flags": [
+                        "IsFinal"
                     ],
                     "return": {
                         "type": "Object"
@@ -165,6 +169,7 @@
                     "name": "import",
                     "desc": "Import this wait handle to the current scheduler context",
                     "flags": [
+                        "IsFinal"
                     ],
                     "return": {
                         "type": null
@@ -176,6 +181,7 @@
                     "name": "join",
                     "desc": "Wait until this wait handle is finished and return its result (operates in a new scheduler context)",
                     "flags": [
+                        "IsFinal"
                     ],
                     "return": {
                         "type": "Variant",
@@ -188,6 +194,7 @@
                     "name": "result",
                     "desc": "Return the wait handle's result if it is already finished (and valid), throw an exception otherwise",
                     "flags": [
+                        "IsFinal"
                     ],
                     "return": {
                         "type": "Variant",
@@ -200,6 +207,7 @@
                     "name": "isFinished",
                     "desc": "Check if this wait handle finished (succeeded or failed)",
                     "flags": [
+                        "IsFinal"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -212,6 +220,7 @@
                     "name": "isSucceeded",
                     "desc": "Check if this wait handle succeeded",
                     "flags": [
+                        "IsFinal"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -224,6 +233,7 @@
                     "name": "isFailed",
                     "desc": "Check if this wait handle failed",
                     "flags": [
+                        "IsFinal"
                     ],
                     "return": {
                         "type": "Boolean",
@@ -236,6 +246,7 @@
                     "name": "getID",
                     "desc": "Get unique ID of this wait handle (amongst existing ones)",
                     "flags": [
+                        "IsFinal"
                     ],
                     "return": {
                         "type": "Int64",
@@ -248,6 +259,7 @@
                     "name": "getName",
                     "desc": "Get name of the operation behind this wait handle",
                     "flags": [
+                        "IsFinal"
                     ],
                     "return": {
                         "type": "String",
@@ -260,6 +272,7 @@
                     "name": "getExceptionIfFailed",
                     "desc": "Get exception if this wait handle has failed, or null",
                     "flags": [
+                        "IsFinal"
                     ],
                     "return": {
                         "type": "Object",
@@ -310,6 +323,7 @@
                     "name": "getContextIdx",
                     "desc": "Get index of the scheduler context this wait handle operates in",
                     "flags": [
+                      "IsFinal"
                     ],
                     "return": {
                         "type": "Int32",
@@ -322,6 +336,7 @@
                     "name": "getCreator",
                     "desc": "Get wait handle that created this wait handle",
                     "flags": [
+                      "IsFinal"
                     ],
                     "return": {
                         "type": "Object",
@@ -334,10 +349,11 @@
                     "name": "getParents",
                     "desc": "Get wait handles blocked on this wait handle",
                     "flags": [
+                      "IsFinal"
                     ],
                     "return": {
                         "type": "VariantVec",
-                        "desc": "An array of BlockableWaitHandles blocked on this wait handle"
+                        "desc": "An array of WaitableWaitHandles blocked on this wait handle"
                     },
                     "args": [
                     ]
@@ -346,6 +362,7 @@
                     "name": "getDependencyStack",
                     "desc": "Get the dependency stack for this wait handle",
                     "flags": [
+                      "IsFinal"
                     ],
                     "return": {
                         "type": "VariantVec",
@@ -359,22 +376,8 @@
             ]
         },
         {
-            "name": "HH\\BlockableWaitHandle",
-            "parent": "HH\\WaitableWaitHandle",
-            "desc": "A wait handle that can be blocked on a dependency",
-            "flags": [
-                "IsAbstract",
-                "IsCppAbstract",
-                "NoDefaultSweep"
-            ],
-            "funcs": [
-            ],
-            "consts": [
-            ]
-        },
-        {
             "name": "HH\\ResumableWaitHandle",
-            "parent": "HH\\BlockableWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle that can resume execution of PHP code",
             "flags": [
                 "IsAbstract",
@@ -386,6 +389,7 @@
                     "name": "setOnCreateCallback",
                     "desc": "Set callback to be called when a ResumableWaitHandle is created",
                     "flags": [
+                        "IsFinal",
                         "IsStatic",
                         "HipHopSpecific"
                     ],
@@ -404,6 +408,7 @@
                     "name": "setOnAwaitCallback",
                     "desc": "Set callback to be called when an async function blockingly awaits",
                     "flags": [
+                        "IsFinal",
                         "IsStatic",
                         "HipHopSpecific"
                     ],
@@ -422,6 +427,7 @@
                     "name": "setOnSuccessCallback",
                     "desc": "Set callback to be called when a ResumableWaitHandle finishes successfully",
                     "flags": [
+                        "IsFinal",
                         "IsStatic",
                         "HipHopSpecific"
                     ],
@@ -440,6 +446,7 @@
                     "name": "setOnFailCallback",
                     "desc": "Set callback to be called when a ResumableWaitHandle fails",
                     "flags": [
+                        "IsFinal",
                         "IsStatic",
                         "HipHopSpecific"
                     ],
@@ -509,7 +516,7 @@
         },
         {
             "name": "HH\\AwaitAllWaitHandle",
-            "parent": "HH\\BlockableWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle that waits for a list of other wait handles",
             "flags": [
                 "IsFinal",
@@ -595,7 +602,7 @@
         },
         {
             "name": "HH\\GenArrayWaitHandle",
-            "parent": "HH\\BlockableWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle representing an array of asynchronous operations",
             "flags": [
                 "IsFinal",
@@ -644,7 +651,7 @@
         },
         {
             "name": "HH\\GenMapWaitHandle",
-            "parent": "HH\\BlockableWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle representing a map of asynchronous operations",
             "flags": [
                 "IsFinal",
@@ -693,7 +700,7 @@
         },
         {
             "name": "HH\\GenVectorWaitHandle",
-            "parent": "HH\\BlockableWaitHandle",
+            "parent": "HH\\WaitableWaitHandle",
             "desc": "A wait handle representing a vector of asynchronous operations",
             "flags": [
                 "IsFinal",
@@ -898,6 +905,7 @@
                     "name": "setOnCreateCallback",
                     "desc": "Set callback to be called when a SleepWaitHandle is created",
                     "flags": [
+                        "IsFinal",
                         "IsStatic",
                         "HipHopSpecific"
                     ],
@@ -916,6 +924,7 @@
                     "name": "setOnSuccessCallback",
                     "desc": "Set callback to be called when a SleepWaitHandle finishes successfully",
                     "flags": [
+                        "IsFinal",
                         "IsStatic",
                         "HipHopSpecific"
                     ],

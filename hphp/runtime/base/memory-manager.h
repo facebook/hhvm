@@ -21,6 +21,7 @@
 #include <vector>
 #include <utility>
 #include <set>
+#include <unordered_map>
 
 #include <folly/Memory.h>
 
@@ -29,10 +30,13 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/thread-local.h"
 
+#include "hphp/runtime/base/imarker.h"
 #include "hphp/runtime/base/memory-usage-stats.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sweepable.h"
+#include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/smart-ptr.h"
 
 // used for mmapping contiguous heap space
 // If used, anonymous pages are not cleared when mapped with mmap. It is not
@@ -43,6 +47,7 @@ namespace HPHP {
 struct APCLocalArray;
 struct MemoryManager;
 struct ObjectData;
+struct ResourceData;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -116,23 +121,76 @@ template<class T> void smart_delete_array(T* t, size_t count);
 
 //////////////////////////////////////////////////////////////////////
 
-enum class HeaderKind : uint8_t {
-  // ArrayKind aliases
-  Packed, Struct, Mixed, Empty, Apc, Globals, Proxy,
-  // Other ordinary refcounted heap objects
-  String, Object, ResumableObj, AwaitAllWH, Resource, Ref,
-  Resumable, // ResumableNode followed by Frame, Resumable, ObjectData
-  Native, // a NativeData header preceding an HNI ObjectData
-  SmallMalloc, // small smart_malloc'd block
-  BigMalloc, // big smart_malloc'd block
-  BigObj, // big size-tracked object (valid header follows BigNode)
-  Free, // small block in a FreeList
-  Hole, // wasted space not in any freelist
-  Debug // a DebugHeader
+namespace smart {
+
+// STL-style allocator for the smart allocator.  (Unfortunately we
+// can't use allocator_traits yet.)
+//
+// You can also use smart::Allocator as a model of folly's
+// SimpleAllocator where appropriate.
+//
+
+template <class T>
+struct Allocator {
+  typedef T              value_type;
+  typedef T*             pointer;
+  typedef const T*       const_pointer;
+  typedef T&             reference;
+  typedef const T&       const_reference;
+  typedef std::size_t    size_type;
+  typedef std::ptrdiff_t difference_type;
+
+  template <class U>
+  struct rebind {
+    typedef Allocator<U> other;
+  };
+
+  pointer address(reference value) const {
+    return &value;
+  }
+  const_pointer address(const_reference value) const {
+    return &value;
+  }
+
+  Allocator() noexcept {}
+  Allocator(const Allocator&) noexcept {}
+  template<class U> Allocator(const Allocator<U>&) noexcept {}
+  ~Allocator() noexcept {}
+
+  size_type max_size() const {
+    return std::numeric_limits<std::size_t>::max() / sizeof(T);
+  }
+
+  pointer allocate(size_type num, const void* = 0) {
+    pointer ret = (pointer)smart_malloc(num * sizeof(T));
+    return ret;
+  }
+
+  template<class U, class... Args>
+  void construct(U* p, Args&&... args) {
+    ::new ((void*)p) U(std::forward<Args>(args)...);
+  }
+
+  void destroy(pointer p) {
+    p->~T();
+  }
+
+  void deallocate(pointer p, size_type num) {
+    smart_free(p);
+  }
+
+  template<class U> bool operator==(const Allocator<U>&) const {
+    return true;
+  }
+
+  template<class U> bool operator!=(const Allocator<U>&) const {
+    return false;
+  }
 };
 
-const size_t HeaderKindOffset = 11;
-const unsigned NumHeaderKinds = (uint8_t)HeaderKind::Debug+1;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * Debug mode header.
@@ -360,7 +418,11 @@ struct MemBlock {
   size_t size; // bytes
 };
 
-// allocator for slabs and big blocks
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Allocator for slabs and big blocks.
+ */
 struct BigHeap {
   struct iterator;
   BigHeap() {}
@@ -399,8 +461,14 @@ struct BigHeap {
   std::vector<BigNode*> m_bigs;
 };
 
-// Contiguous Heap handles allocations and provides a contiguous address space
-// for requests. To turn on build with CONTIGUOUS_HEAP = 1
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * ContiguousHeap handles allocations and provides a contiguous address space
+ * for requests.
+ *
+ * To turn on build with CONTIGUOUS_HEAP = 1.
+ */
 struct ContiguousHeap : BigHeap {
   bool contains(void* ptr) const;
 
@@ -416,6 +484,7 @@ struct ContiguousHeap : BigHeap {
   void flush();
 
   ~ContiguousHeap();
+
  private:
   // Contiguous Heap Pointers
   char* m_base = nullptr;
@@ -435,22 +504,31 @@ struct ContiguousHeap : BigHeap {
   void  createRequestHeap();
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 struct MemoryManager {
   /*
    * Lifetime managed with a ThreadLocalSingleton.  Use MM() to access
    * the current thread's MemoryManager.
    */
-  typedef ThreadLocalSingleton<MemoryManager> TlsWrapper;
+  using TlsWrapper = ThreadLocalSingleton<MemoryManager>;
+
   static void Create(void*);
   static void Delete(MemoryManager*);
   static void OnThreadExit(MemoryManager*);
 
+  /////////////////////////////////////////////////////////////////////////////
+
   /*
-   * This is an RAII wrapper to temporarily mask counting allocations
-   * from stats tracking in a scoped region.
+   * Id that is used when registering roots with the memory manager.
+   */
+  using RootId = size_t;
+
+  /*
+   * This is an RAII wrapper to temporarily mask counting allocations from
+   * stats tracking in a scoped region.
    *
    * Usage:
-   *
    *   MemoryManager::MaskAlloc masker(MM());
    */
   struct MaskAlloc;
@@ -460,18 +538,11 @@ struct MemoryManager {
    */
   struct SuppressOOM;
 
-  /*
-   * Returns true iff a sweep is in progress.  I.e., is the current
-   * thread running inside a call to MemoryManager::sweep().
-   *
-   * It is legal to call this function even when the current thread's
-   * MemoryManager may not be set up (i.e. between requests).
-   */
-  static bool sweeping();
+  /////////////////////////////////////////////////////////////////////////////
+  // Allocation.
 
   /*
-   * Return the smart size class for a given requested allocation
-   * size.
+   * Return the smart size class for a given requested allocation size.
    *
    * The return value is greater than or equal to the parameter, and
    * less than or equal to MaxSmallSize.
@@ -481,12 +552,10 @@ struct MemoryManager {
   static uint32_t smartSizeClass(uint32_t requested);
 
   /*
-   * Return a lower bound estimate of the capacity that will be returned
-   * for the requested size.
+   * Return a lower bound estimate of the capacity that will be returned for
+   * the requested size.
    */
-  static uint32_t estimateSmartCap(uint32_t requested) {
-    return requested <= kMaxSmartSize ? smartSizeClass(requested) : requested;
-  }
+  static uint32_t estimateSmartCap(uint32_t requested);
 
   /*
    * Allocate/deallocate a smart-allocated memory block in a given
@@ -555,24 +624,38 @@ struct MemoryManager {
   MemBlock smartMallocSizeBigLogged(size_t size);
   void smartFreeSizeBigLogged(void* vp, size_t size);
 
-  /*
-   * During session shutdown, before resetAllocator(), this phase runs
-   * through the sweep lists running cleanup for anything that needs
-   * to run custom tear down logic before we throw away the
-   * request-local memory.
-   */
-  void sweep();
+  /////////////////////////////////////////////////////////////////////////////
+  // Cleanup.
 
   /*
-   * Returns ptr to head node of m_strings linked list. This used by
-   * StringData during a reset, enlist, and delist
+   * Prepare for being idle for a while by releasing or madvising as much as
+   * possible.
    */
-  StringDataNode& getStringList() { return m_strings; }
+  void flush();
+
+  /*
+   * Release all the request-local allocations.
+   *
+   * Zeros all the free lists and may return some underlying storage to the
+   * system allocator.  This also resets all internally-stored memory usage
+   * stats.
+   *
+   * This is called after sweep in the end-of-request path.
+   */
+  void resetAllocator();
+
+  /*
+   * Reset all runtime options for MemoryManager.
+   */
+  void resetRuntimeOptions();
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Heap introspection.
 
   /*
    * Return true if there are no allocated slabs.
    */
-  bool empty() const { return m_heap.empty(); }
+  bool empty() const;
 
   /*
    * Whether `p' points into memory owned by `m_heap'.  checkContains() will
@@ -581,28 +664,37 @@ struct MemoryManager {
   bool contains(void* p) const;
   bool checkContains(void* p) const;
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Stats.
+
   /*
-   * Release all the request-local allocations.  Zeros all the free
-   * lists and may return some underlying storage to the system
-   * allocator. This also resets all internally-stored memory usage stats.
+   * Get access to the current memory allocation stats, without refreshing them
+   * first.
+   */
+  MemoryUsageStats& getStatsNoRefresh();
+
+  /*
+   * Get most recent stats, updating the tracked stats in the MemoryManager
+   * object.
+   */
+  MemoryUsageStats& getStats();
+
+  /*
+   * Get most recent stats data, as one would with getStats(), but without
+   * altering the underlying data stored in the MemoryManager.
    *
-   * This is called after sweep in the end-of-request path.
+   * Used for obtaining debug info.
    */
-  void resetAllocator();
+  MemoryUsageStats getStatsCopy();
 
   /*
-   * Prepare for being idle for a while by releasing or madvising
-   * as much as possible.
+   * Open and close respectively a stats-tracking interval.
+   *
+   * Return whether or not the tracking state was changed as a result of the
+   * call.
    */
-  void flush();
-
-  /*
-   * Reset all stats that are synchronzied externally from the memory manager.
-   * Used between sessions and to signal that external sync is now safe to
-   * begin (after shared structure initialization that should not be counted is
-   * complete.)
-   */
-  void resetExternalStats();
+  bool startStatsInterval();
+  bool stopStatsInterval();
 
   /*
    * How much memory this thread has allocated or deallocated.
@@ -611,31 +703,16 @@ struct MemoryManager {
   int64_t getDeallocated() const;
 
   /*
-   * Get access to the current memory allocation stats, without
-   * refreshing them first.
-   */
-  MemoryUsageStats& getStatsNoRefresh();
-
-  /*
-   * Get most recent stats, updating the tracked stats in the
-   * MemoryManager object.
-   */
-  MemoryUsageStats& getStats();
-
-  /*
-   * Get most recent stats data, as one would with getStats(), but
-   * without altering the underlying data stored in the MemoryManager.
+   * Reset all stats that are synchronzied externally from the memory manager.
    *
-   * Used for obtaining debug info.
+   * Used between sessions and to signal that external sync is now safe to
+   * begin (after shared structure initialization that should not be counted is
+   * complete.)
    */
-  MemoryUsageStats getStatsCopy();
+  void resetExternalStats();
 
-  /*
-   * Open and close respectively a stats-tracking interval. Return whether or
-   * not the tracking state was changed as a result of the call.
-   */
-  bool startStatsInterval();
-  bool stopStatsInterval();
+  /////////////////////////////////////////////////////////////////////////////
+  // OOMs.
 
   /*
    * Whether an allocation of `size' would run the request out of memory.
@@ -662,6 +739,25 @@ struct MemoryManager {
    */
   void resetCouldOOM(bool state = true);
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Sweeping.
+
+  /*
+   * Returns true iff a sweep is in progress---i.e., is the current thread
+   * running inside a call to MemoryManager::sweep()?
+   *
+   * It is legal to call this function even when the current thread's
+   * MemoryManager may not be set up (i.e. between requests).
+   */
+  static bool sweeping();
+
+  /*
+   * During session shutdown, before resetAllocator(), this phase runs through
+   * the sweep lists, running cleanup for anything that needs to run custom
+   * tear down logic before we throw away the request-local memory.
+   */
+  void sweep();
+
   /*
    * Methods for maintaining dedicated sweep lists of sweepable NativeData
    * objects, APCLocalArray instances, and Sweepables.
@@ -671,17 +767,6 @@ struct MemoryManager {
   void addApcArray(APCLocalArray*);
   void removeApcArray(APCLocalArray*);
   void addSweepable(Sweepable*);
-
-  /*
-   * Heap iterator methods.
-   */
-  template<class Fn> void forEachObject(Fn);
-  template<class Fn> void forEachHeader(Fn);
-
-  /*
-   * Reset all runtime options for Memory Manager
-   */
-  void resetRuntimeOptions();
 
   /////////////////////////////////////////////////////////////////////////////
   // Request profiling.
@@ -710,11 +795,42 @@ struct MemoryManager {
    */
   static void requestShutdown();
 
+  /////////////////////////////////////////////////////////////////////////////
+
   /*
-   * Run the experimental heap-tracer. has no effect other than
-   * possibly asserting.
+   * Returns ptr to head node of m_strings linked list. This used by
+   * StringData during a reset, enlist, and delist
+   */
+  StringDataNode& getStringList();
+
+  /*
+   * Methods for maintaining maps of root objects keyed by RootIds.
+   *
+   * The id/object associations are only valid for a single request.  This
+   * interface is useful for extensions that cannot physically hold on to a
+   * SmartPtr, etc. or other handle class.
+   */
+  template <typename T> RootId addRoot(SmartPtr<T>&& ptr);
+  template <typename T> RootId addRoot(const SmartPtr<T>& ptr);
+  template <typename T> SmartPtr<T> lookupRoot(RootId tok) const;
+  template <typename T> bool removeRoot(const SmartPtr<T>& ptr);
+  template <typename T> SmartPtr<T> removeRoot(RootId token);
+  template <typename F> void scanRootMaps(F& m) const;
+
+  /*
+   * Heap iterator methods.
+   */
+  template<class Fn> void forEachObject(Fn);
+  template<class Fn> void forEachHeader(Fn);
+
+  /*
+   * Run the experimental heap-tracer.
+   *
+   * Has no effect other than possibly asserting.
    */
   void traceHeap();
+
+  /////////////////////////////////////////////////////////////////////////////
 
 private:
   friend void* smart_malloc(size_t nbytes);
@@ -728,6 +844,21 @@ private:
     FreeNode* head = nullptr;
   };
 
+  struct SweepableList : Sweepable {
+    SweepableList() : Sweepable(Init{}) {}
+    void sweep() {}
+  };
+
+  template <typename T>
+  using RootMap =
+    std::unordered_map<
+      RootId,
+      SmartPtr<T>,
+      std::hash<RootId>,
+      std::equal_to<RootId>,
+      smart::Allocator<std::pair<const RootId,SmartPtr<T>>>
+    >;
+
   /*
    * Request-local heap profiling context.
    */
@@ -737,6 +868,8 @@ private:
     bool thread_prof_active{false};
     std::string filename;
   };
+
+  /////////////////////////////////////////////////////////////////////////////
 
 private:
   MemoryManager();
@@ -781,11 +914,54 @@ private:
   BigHeap::iterator begin();
   BigHeap::iterator end();
 
-private:
-  struct SweepableList: Sweepable {
-    SweepableList() : Sweepable(Init{}) {}
-    void sweep() {}
-  };
+  void dropRootMaps();
+  void deleteRootMaps();
+
+  template <typename T>
+  typename std::enable_if<
+    std::is_base_of<ResourceData,T>::value,
+    RootMap<ResourceData>&
+  >::type getRootMap() {
+    if (UNLIKELY(!m_resourceRoots)) {
+      m_resourceRoots = smart_new<RootMap<ResourceData>>();
+    }
+    return *m_resourceRoots;
+  }
+
+  template <typename T>
+  typename std::enable_if<
+    std::is_base_of<ObjectData,T>::value,
+    RootMap<ObjectData>&
+  >::type getRootMap() {
+    if (UNLIKELY(!m_objectRoots)) {
+      m_objectRoots = smart_new<RootMap<ObjectData>>();
+    }
+    return *m_objectRoots;
+  }
+
+  template <typename T>
+  typename std::enable_if<
+    std::is_base_of<ResourceData,T>::value,
+    const RootMap<ResourceData>&
+  >::type getRootMap() const {
+    if (UNLIKELY(!m_resourceRoots)) {
+      m_resourceRoots = smart_new<RootMap<ResourceData>>();
+    }
+    return *m_resourceRoots;
+  }
+
+  template <typename T>
+  typename std::enable_if<
+    std::is_base_of<ObjectData,T>::value,
+    const RootMap<ObjectData>&
+  >::type getRootMap() const {
+    if (UNLIKELY(!m_objectRoots)) {
+      m_objectRoots = smart_new<RootMap<ObjectData>>();
+    }
+    return *m_objectRoots;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
 
 private:
   TRACE_SET_MOD(smartalloc);
@@ -803,6 +979,9 @@ private:
 #endif
   std::vector<NativeNode*> m_natives;
   SweepableList m_sweepables;
+
+  mutable RootMap<ResourceData>* m_resourceRoots{nullptr};
+  mutable RootMap<ObjectData>* m_objectRoots{nullptr};
 
   bool m_sweeping;
   bool m_statsIntervalActive;

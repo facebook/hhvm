@@ -21,33 +21,46 @@
 
 namespace HPHP { namespace jit {
 
+//////////////////////////////////////////////////////////////////////
+
 inline ServiceReqArgInfo ccServiceReqArgInfo(jit::ConditionCode cc) {
   return ServiceReqArgInfo{ServiceReqArgInfo::CondCode, { uint64_t(cc) }};
 }
 
-template<typename T>
-typename std::enable_if<
-  // Only allow for things with a sensible cast to uint64_t.
-  std::is_integral<T>::value || std::is_pointer<T>::value ||
-  std::is_enum<T>::value
-  >::type packServiceReqArg(ServiceReqArgVec& args, T arg) {
-  // By default, assume we meant to pass an immediate arg.
-  args.push_back({ ServiceReqArgInfo::Immediate, { uint64_t(arg) } });
-}
+//////////////////////////////////////////////////////////////////////
 
-inline void packServiceReqArg(ServiceReqArgVec& args,
-                       const ServiceReqArgInfo& argInfo) {
-  args.push_back(argInfo);
-}
+struct SRArgMaker {
+  ServiceReqArgVec& argv;
 
-template<typename T, typename... Arg>
-void packServiceReqArgs(ServiceReqArgVec& argv, T arg, Arg... args) {
-  packServiceReqArg(argv, arg);
-  packServiceReqArgs(argv, args...);
-}
+  template<class Head, class... Tail>
+  void go(Head h, Tail... tail) {
+    pack(h);
+    go(tail...);
+  }
+  void go() {}
 
-inline void packServiceReqArgs(ServiceReqArgVec& argv) {
-  // Recursive base case.
+private:
+  template<class T>
+  typename std::enable_if<
+    std::is_integral<T>::value ||
+      std::is_pointer<T>::value ||
+      std::is_enum<T>::value
+  >::type pack(T arg) {
+    // For things with a sensible cast to uint64_T, we assume we meant to pass
+    // an immediate arg.
+    argv.push_back({ ServiceReqArgInfo::Immediate, { uint64_t(arg) } });
+  }
+
+  void pack(const ServiceReqArgInfo& argInfo) {
+    argv.push_back(argInfo);
+  }
+};
+
+template<class... Args>
+ServiceReqArgVec packServiceReqArgs(Args&&... args) {
+  auto ret = ServiceReqArgVec{};
+  SRArgMaker{ret}.go(std::forward<Args>(args)...);
+  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -61,28 +74,19 @@ inline bool isEphemeralServiceReq(ServiceRequest sr) {
 template<typename... Arg>
 TCA emitServiceReq(CodeBlock& cb, SRFlags flags, ServiceRequest sr, Arg... a) {
   // These should reuse stubs. Use emitEphemeralServiceReq.
-  assert(!isEphemeralServiceReq(sr));
+  assertx(!isEphemeralServiceReq(sr));
 
-  ServiceReqArgVec argv;
-  packServiceReqArgs(argv, a...);
+  auto const argv = packServiceReqArgs(a...);
   return mcg->backEnd().emitServiceReqWork(cb, cb.frontier(),
                                            flags | SRFlags::Persist,
                                            sr, argv);
 }
 
 template<typename... Arg>
-TCA emitServiceReq(CodeBlock& cb, ServiceRequest sr, Arg... a) {
-  return emitServiceReq(cb, SRFlags::None, sr, a...);
-}
-
-template<typename... Arg>
 TCA emitEphemeralServiceReq(CodeBlock& cb, TCA start, ServiceRequest sr,
                             Arg... a) {
-  assert(isEphemeralServiceReq(sr) ||
-         sr == REQ_RETRANSLATE);
-
-  ServiceReqArgVec argv;
-  packServiceReqArgs(argv, a...);
+  assertx(isEphemeralServiceReq(sr) || sr == REQ_RETRANSLATE);
+  auto const argv = packServiceReqArgs(a...);
   return mcg->backEnd().emitServiceReqWork(cb, start, SRFlags::None, sr, argv);
 }
 

@@ -23,6 +23,7 @@
 #include <folly/Optional.h>
 
 #include "hphp/util/trace.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-comparisons.h"
@@ -287,7 +288,8 @@ void in(ISS& env, const bc::AddNewElemV&) {
 }
 
 void in(ISS& env, const bc::NewCol& op) {
-  auto const name = collectionTypeToString(op.arg1);
+  auto const type = static_cast<CollectionType>(op.arg1);
+  auto const name = collectionTypeToString(type);
   push(env, objExact(env.index.builtin_class(name)));
 }
 
@@ -709,6 +711,16 @@ void in(ISS& env, const bc::NativeImpl&) {
 void in(ISS& env, const bc::CGetL& op) {
   if (!locCouldBeUninit(env, op.loc1)) { nothrow(env); constprop(env); }
   push(env, locAsCell(env, op.loc1));
+}
+
+void in(ISS& env, const bc::CUGetL& op) {
+  auto const ty = locRaw(env, op.loc1);
+  if (ty.subtypeOf(TUninit)) {
+    return reduce(env, bc::NullUninit {});
+  }
+  nothrow(env);
+  if (!ty.couldBe(TUninit)) constprop(env);
+  push(env, ty.subtypeOf(TCell) ? ty : TCell);
 }
 
 void in(ISS& env, const bc::PushL& op) {

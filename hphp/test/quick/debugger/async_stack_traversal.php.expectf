@@ -5,7 +5,7 @@ But wont break until file async_stack_traversal.php has been loaded.
 r
 int(43)
 Breakpoint 1 reached at gen1() on line 7 of %s/async_stack_traversal.php
-   6   await RescheduleWaitHandle::Create(1, 1);
+   6   await RescheduleWaitHandle::Create(0, 0);
    7*  return $a + 1;
    8 }
 
@@ -40,7 +40,7 @@ $a = 45
 $v1 = "v1-gen1"
 c
 Breakpoint 1 reached at gen1() on line 7 of %s/async_stack_traversal.php
-   6   await RescheduleWaitHandle::Create(1, 1);
+   6   await RescheduleWaitHandle::Create(0, 0);
    7*  return $a + 1;
    8 }
 

@@ -152,7 +152,7 @@ let mk_mapper = fun m_in ->
   and map_tparam (v1, v2, v3) =
     let v1 = map_variance v1
     and v2 = map_id v2
-    and v3 = map_hint_option v3
+    and v3 = map_of_option (fun (ck, h) -> ck, map_hint h) v3
     in (v1, v2, v3)
   and map_tconstraint v = map_hint_option v
   and map_typedef_kind =
@@ -435,7 +435,11 @@ let mk_mapper = fun m_in ->
           f_namespace = v_f_namespace;
         }
     in m_in.k_fun_ (k, all_mappers) fun_
-  and map_fun_kind = function | FAsync -> FAsync | FSync -> FSync
+  and map_fun_kind = function
+    | FAsync -> FAsync
+    | FAsyncGenerator -> FAsyncGenerator
+    | FSync -> FSync
+    | FGenerator -> FGenerator
   and map_hint (v1, v2) =
     let v1 = map_pos_t v1 and v2 = map_hint_ v2 in (v1, v2)
   and map_hint_ =

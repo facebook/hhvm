@@ -158,24 +158,10 @@ Array ClassInfo::GetClassLike(unsigned mask, unsigned value) {
   return ret;
 }
 
-ClassInfo::ConstantInfo::ConstantInfo() :
-    valueLen(0), callback(nullptr), deferred(true) {
-}
-
-const Variant& ClassInfo::ConstantInfo::getDeferredValue() const {
-  assert(deferred);
-  if (callback) {
-    const Variant& (*f)()=(const Variant&(*)())callback;
-    return (*f)();
-  }
-  EnvConstants* g = get_env_constants();
-  return g->stgv_Variant[valueLen];
+ClassInfo::ConstantInfo::ConstantInfo() : valueLen(0) {
 }
 
 Variant ClassInfo::ConstantInfo::getValue() const {
-  if (deferred) {
-    return getDeferredValue();
-  }
   if (!svalue.empty()) {
     try {
       VariableUnserializer vu(svalue.data(), svalue.size(),
@@ -194,13 +180,11 @@ void ClassInfo::ConstantInfo::setValue(const Variant& value) {
   VariableSerializer vs(VariableSerializer::Type::Serialize);
   String s = vs.serialize(value, true);
   svalue = std::string(s.data(), s.size());
-  deferred = false;
 }
 
 void ClassInfo::ConstantInfo::setStaticValue(const Variant& v) {
   value = v;
   value.setEvalScalar();
-  deferred = false;
 }
 
 void ClassInfo::InitializeSystemConstants() {
@@ -208,25 +192,19 @@ void ClassInfo::InitializeSystemConstants() {
   const ConstantMap &scm = s_systemFuncs->getConstants();
   for (ConstantMap::const_iterator it = scm.begin(); it != scm.end(); ++it) {
     ConstantInfo* ci = it->second;
-    if (ci->isDynamic()) {
-      Unit::defDynamicSystemConstant(ci->name.get(), ci);
-    } else {
-      Variant v = ci->getValue();
-      bool DEBUG_ONLY res = Unit::defCns(ci->name.get(),
-                                             v.asTypedValue(), true);
-      assert(res);
-    }
+    Variant v = ci->getValue();
+    bool DEBUG_ONLY res = Unit::defCns(ci->name.get(),
+                                           v.asTypedValue(), true);
+    assert(res);
   }
 }
 
-Array ClassInfo::GetSystemConstants(bool get_dynamic_constants /* = false */) {
+Array ClassInfo::GetSystemConstants() {
   assert(s_loaded);
   Array res;
   const ConstantMap &scm = s_systemFuncs->getConstants();
   for (ConstantMap::const_iterator it = scm.begin(); it != scm.end(); ++it) {
-    if (get_dynamic_constants || !it->second->isDynamic()) {
-      res.set(it->second->name, it->second->getValue());
-    }
+    res.set(it->second->name, it->second->getValue());
   }
   return res;
 }
@@ -513,7 +491,9 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     const char *len_or_cw = *p++;
     constant->valueText = *p++;
 
+    assert(constant->valueText);
     if (uintptr_t(constant->valueText) > 0x100) {
+      // Serialized value from an IDL entry with a value: element
       constant->valueLen = (int64_t)len_or_cw;
       VariableUnserializer vu(constant->valueText,
                               constant->valueLen,
@@ -525,19 +505,14 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
       } catch (Exception&) {
         assert(false);
       }
-    } else if (constant->valueText) {
+    } else {
       DataType dt = DataType((int)uintptr_t(constant->valueText) - 2);
+      assert(dt != kInvalidDataType);
       constant->valueLen = 0;
       constant->valueText = nullptr;
       Variant v;
-      if (dt == kInvalidDataType) {
-        constant->valueLen = intptr_t(len_or_cw);
-      } else {
-        v = ClassInfo::GetVariant(dt, len_or_cw);
-        constant->setStaticValue(v);
-      }
-    } else {
-      constant->callback = (void*)len_or_cw;
+      v = ClassInfo::GetVariant(dt, len_or_cw);
+      constant->setStaticValue(v);
     }
 
     assert(m_constants.find(constant->name) == m_constants.end());

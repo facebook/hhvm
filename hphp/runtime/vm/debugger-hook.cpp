@@ -38,7 +38,7 @@ using StepOutState = RequestInjectionData::StepOutState;
 
 void DebugHookHandler::detach(ThreadInfo* ti /* = nullptr */) {
   // legacy hphpd code expects no failure if no hook handler is attached
-  ti = (ti != nullptr) ? ti : ThreadInfo::s_threadInfo.getNoCheck();
+  ti = (ti != nullptr) ? ti : &TI();
   if (!isDebuggerAttached(ti)) {
     return;
   }
@@ -48,7 +48,7 @@ void DebugHookHandler::detach(ThreadInfo* ti /* = nullptr */) {
   // do not remove/delete m_hookHandler, its a singleton, and
   // code in another thread could be using it.
 
-  if (ti == ThreadInfo::s_threadInfo.getNoCheck()) {
+  if (ti == &TI()) {
     // Clear the pc filters
     // We can only do this for the current thread
     ti->m_reqInjectionData.m_breakPointFilter.clear();
@@ -74,14 +74,14 @@ int DebugHookHandler::s_numAttached = 0;
 //////////////////////////////////////////////////////////////////////////
 // Helpers
 
+namespace {
+
 // Ensure we interpret all code at the given offsets. This sets up a guard for
 // each piece of translated code to ensure we punt to the interpreter when the
 // debugger is attached.
-static void blacklistRangesInJit(const Unit* unit,
-                                 const OffsetRangeVec& offsets) {
-  for (OffsetRangeVec::const_iterator it = offsets.begin();
-       it != offsets.end(); ++it) {
-    for (PC pc = unit->at(it->m_base); pc < unit->at(it->m_past);
+void blacklistRangesInJit(const Unit* unit, const OffsetRangeVec& offsets) {
+  for (auto const& range : offsets) {
+    for (PC pc = unit->at(range.m_base); pc < unit->at(range.m_past);
          pc += instrLen((Op*)pc)) {
       mcg->tx().addDbgBLPC(pc);
     }
@@ -96,19 +96,21 @@ static void blacklistRangesInJit(const Unit* unit,
 }
 
 // Ensure we interpret an entire function when the debugger is attached.
-static void blacklistFuncInJit(const Func* f) {
-  Unit* unit = f->unit();
+void blacklistFuncInJit(const Func* f) {
+  auto unit = f->unit();
   OffsetRangeVec ranges;
   ranges.push_back(OffsetRange(f->base(), f->past()));
   blacklistRangesInJit(unit, ranges);
 }
 
-static PCFilter* getBreakPointFilter() {
-  return &ThreadInfo::s_threadInfo->m_reqInjectionData.m_breakPointFilter;
+PCFilter* getBreakPointFilter() {
+  return &RID().m_breakPointFilter;
 }
 
-static PCFilter* getFlowFilter() {
-  return &ThreadInfo::s_threadInfo->m_reqInjectionData.m_flowFilter;
+PCFilter* getFlowFilter() {
+  return &RID().m_flowFilter;
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -126,7 +128,7 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
     TRACE(5, "NoBreak flag is on\n");
     return;
   }
-  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  auto& req_data = RID();
   // Short-circuit for cases where we're executing a line of code that we know
   // we don't need an interrupt for, e.g., stepping over a line of code.
   if (UNLIKELY(req_data.m_flowFilter.checkPC(pc))) {
@@ -143,7 +145,7 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
   }
 
   // Notify the hook handler. This is necessary for compatibility with hphpd
-  DebugHookHandler* handler = getHookHandler();
+  auto handler = getHookHandler();
   handler->onOpcode(pc);
 
   // Try to grab needed context information
@@ -244,14 +246,14 @@ void phpDebuggerRequestShutdownHook() {
 // Hook called on function entry. Since function entry breakpoints are handled
 // by onOpcode, this just handles pushing the active line breakpoint
 void phpDebuggerFuncEntryHook(const ActRec* ar) {
-  ThreadInfo::s_threadInfo->m_reqInjectionData.pushActiveLineBreak(-1);
+  RID().pushActiveLineBreak(-1);
 }
 
 // Hook called on function exit. onOpcode handles function exit breakpoints,
 // this just handles stack-related manipulations. This handles returns,
 // suspends, and exceptions.
 void phpDebuggerFuncExitHook(const ActRec* ar) {
-  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  auto& req_data = RID();
   req_data.popActiveLineBreak();
 
   // If the step out command is active and if our stack depth has decreased,
@@ -329,26 +331,26 @@ void phpDebuggerDefFuncHook(const Func* func) {
 
 void phpDebuggerContinue() {
   // Short-circuit other commands
-  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  auto& req_data = RID();
   req_data.setDebuggerStepIn(false);
   req_data.setDebuggerStepOut(StepOutState::NONE);
   req_data.setDebuggerNext(false);
 
   // Clear the flow filter
-  PCFilter* flow_filter = getFlowFilter();
+  auto flow_filter = getFlowFilter();
   flow_filter->clear();
 }
 
 void phpDebuggerStepIn() {
   // If this is called in the middle of a flow command we short-circuit the
   // other commands
-  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  auto& req_data = RID();
   req_data.setDebuggerStepIn(true);
   req_data.setDebuggerStepOut(StepOutState::NONE);
   req_data.setDebuggerNext(false);
 
   // Ensure the flow filter is fresh
-  PCFilter* flow_filter = getFlowFilter();
+  auto flow_filter = getFlowFilter();
   flow_filter->clear();
 
   // Check if the site is valid.
@@ -394,13 +396,13 @@ void phpDebuggerStepIn() {
 void phpDebuggerStepOut() {
   // If this is called in the middle of a flow command we short-circuit the
   // other commands
-  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  auto& req_data = RID();
   req_data.setDebuggerStepIn(false);
   req_data.setDebuggerStepOut(StepOutState::STEPPING);
   req_data.setDebuggerNext(false);
 
   // Clear the flow filter
-  PCFilter* flow_filter = getFlowFilter();
+  auto flow_filter = getFlowFilter();
   flow_filter->clear();
 
   // Store the current stack depth
@@ -409,7 +411,7 @@ void phpDebuggerStepOut() {
 
 void phpDebuggerNext() {
   // Grab the request data and set up a step in
-  RequestInjectionData& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  auto& req_data = RID();
   phpDebuggerStepIn();
 
   // Special case the top-level pseudo-main. What the user expects is a
@@ -465,7 +467,7 @@ void phpAddBreakPointFuncEntry(const Func* f) {
 
   // Add to the breakpoint filter and the func entry filter
   getBreakPointFilter()->addPC(pc);
-  ThreadInfo::s_threadInfo->m_reqInjectionData.m_callBreakPointFilter.addPC(pc);
+  RID().m_callBreakPointFilter.addPC(pc);
 
   // Blacklist the location
   if (RuntimeOption::EvalJit) {
@@ -489,8 +491,7 @@ void phpAddBreakPointFuncExit(const Func* f) {
 
     // Add pc to the breakpoint filter and the func exit filter
     getBreakPointFilter()->addPC(pc);
-    ThreadInfo::s_threadInfo->
-      m_reqInjectionData.m_retBreakPointFilter.addPC(pc);
+    RID().m_retBreakPointFilter.addPC(pc);
 
     // Blacklist the location
     if (RuntimeOption::EvalJit && mcg->tx().addDbgBLPC(pc)) {
@@ -510,14 +511,13 @@ bool phpAddBreakPointLine(const Unit* unit, int line) {
 
   // Add to the breakpoint filter and the line filter
   phpAddBreakPointRange(unit, offsets);
-  ThreadInfo::s_threadInfo->
-    m_reqInjectionData.m_lineBreakPointFilter.addRanges(unit, offsets);
+  RID().m_lineBreakPointFilter.addRanges(unit, offsets);
   return true;
 }
 
 void phpRemoveBreakPoint(const Unit* unit, Offset offset) {
-  PC pc = unit->at(offset);
-  ThreadInfo::s_threadInfo->m_reqInjectionData.m_breakPointFilter.removePC(pc);
+  auto const pc = unit->at(offset);
+  RID().m_breakPointFilter.removePC(pc);
 }
 
 void phpRemoveBreakPointFuncEntry(const Func* f) {
@@ -525,19 +525,18 @@ void phpRemoveBreakPointFuncEntry(const Func* f) {
   // filter
   auto base = f->isGenerator() ? BaseGenerator::userBase(f) : f->base();
   auto pc = f->unit()->at(base);
-  ThreadInfo::s_threadInfo->
-    m_reqInjectionData.m_callBreakPointFilter.removePC(pc);
+  RID().m_callBreakPointFilter.removePC(pc);
 }
 
 void phpRemoveBreakPointFuncExit(const Func* f) {
   // See note in debugger-hook.h. This can only remove from the function exit
   // filter
   const Unit* unit = f->unit();
+  auto& req_data = RID();
   for (PC pc = unit->at(f->base()); pc < unit->at(f->past());
        pc += instrLen((Op*) pc)) {
     if (*reinterpret_cast<const Op*>(pc) == OpRetC) {
-      ThreadInfo::s_threadInfo->
-        m_reqInjectionData.m_retBreakPointFilter.removePC(pc);
+      req_data.m_retBreakPointFilter.removePC(pc);
     }
   }
 }
@@ -552,11 +551,10 @@ void phpRemoveBreakPointLine(const Unit* unit, int line) {
 }
 
 bool phpHasBreakpoint(const Unit* unit, Offset offset) {
-  if (!ThreadInfo::s_threadInfo->
-      m_reqInjectionData.m_breakPointFilter.isNull()) {
-    PC pc = unit->at(offset);
-    return ThreadInfo::s_threadInfo->
-      m_reqInjectionData.m_breakPointFilter.checkPC(pc);
+  auto& req_data = RID();
+  if (!req_data.m_breakPointFilter.isNull()) {
+    auto const pc = unit->at(offset);
+    return req_data.m_breakPointFilter.checkPC(pc);
   }
   return false;
 }

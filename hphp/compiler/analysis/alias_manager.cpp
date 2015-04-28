@@ -76,14 +76,12 @@ using std::string;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-AliasManager::AliasManager(int opt) :
+AliasManager::AliasManager() :
     m_bucketList(0), m_nextID(1), m_changes(0), m_replaced(0),
-    m_wildRefs(false), m_nrvoFix(0), m_inCall(0), m_inlineAsExpr(true),
-    m_noAdd(false), m_preOpt(opt<0), m_postOpt(opt>0),
-    m_cleared(false), m_inPseudoMain(false), m_genAttrs(false),
-    m_hasDeadStore(false), m_hasChainRoot(false),
+    m_wildRefs(false), m_inCall(0),
+    m_noAdd(false),
+    m_cleared(false), m_inPseudoMain(false),
     m_exprIdx(-1) {
-  always_assert(!m_postOpt && "postOpt support has been partially disabled");
 }
 
 AliasManager::~AliasManager() {
@@ -213,14 +211,7 @@ void BucketMapEntry::import(ExpressionPtrList &from) {
 
 void AliasManager::add(BucketMapEntry &em, ExpressionPtr e) {
   if (!m_noAdd) em.add(e);
-  if (!m_genAttrs) e->setCanonID(m_nextID++);
-}
-
-bool AliasManager::insertForDict(ExpressionPtr e) {
-  ExpressionPtr c = getCanonical(e);
-  if (c == e) return true;
-  e->setCanonID(c->getCanonID());
-  return false;
+  e->setCanonID(m_nextID++);
 }
 
 ExpressionPtr AliasManager::getCanonical(ExpressionPtr e) {
@@ -234,8 +225,8 @@ ExpressionPtr AliasManager::getCanonical(ExpressionPtr e) {
   if (!c) {
     add(em, e);
     c = e;
-    if (!m_genAttrs) e->setCanonPtr(ExpressionPtr());
-  } else if (!m_genAttrs) {
+    e->setCanonPtr(ExpressionPtr());
+  } else {
     e->setCanonID(c->getCanonID());
     e->setCanonPtr(c);
   }
@@ -754,7 +745,7 @@ void AliasManager::killLocals() {
         if (e->hasAllContext(Expression::LValue | Expression::UnsetContext) ||
             e->hasAllContext(Expression::Declaration)) {
           if (!(effects & emask) && okToKill(e, true)) {
-            bool ok = (m_postOpt || !e->is(Expression::KindOfSimpleVariable));
+            bool ok = (!e->is(Expression::KindOfSimpleVariable));
             if (!ok) {
               Symbol *sym = spc(SimpleVariable,e)->getSymbol();
               ok =
@@ -859,8 +850,7 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e,
         }
         SimpleVariablePtr sv = static_pointer_cast<SimpleVariable>(var);
         if (sv->couldBeAliased() &&
-            (sv->isNeededValid() ? sv->isNeeded() :
-             !sv->getSymbol() || sv->getSymbol()->isNeeded())) {
+            (!sv->getSymbol() || sv->getSymbol()->isNeeded())) {
           return InterfAccess;
         }
       }
@@ -1039,11 +1029,10 @@ int AliasManager::findInterf0(
 }
 
 int AliasManager::findInterf(ExpressionPtr rv, bool isLoad,
-                             ExpressionPtr &rep, int *flags /* = 0 */,
-                             bool allowLval /* = false */) {
+                             ExpressionPtr &rep, int *flags /* = 0 */) {
   BucketMapEntry &lvs = m_accessList;
   return findInterf0(rv, isLoad, rep, lvs.rbegin(), lvs.rend(),
-      flags, allowLval);
+      flags, false);
 }
 
 ExpressionPtr AliasManager::canonicalizeNonNull(ExpressionPtr e) {
@@ -1091,15 +1080,6 @@ void AliasManager::setCanonPtrForArrayCSE(
     }
     if (rep0 && rep0->is(Expression::KindOfArrayElementExpression)) {
       e->setCanonPtr(rep0);
-      ExpressionPtr match(e->getNextCanonCsePtr());
-      if (match && !match->isChainRoot()) {
-        ExpressionPtr matchNext(match->getNextCanonCsePtr());
-        if (!matchNext) {
-          // make match a new CSE chain root
-          match->setChainRoot();
-          m_hasChainRoot = true;
-        }
-      }
     }
   }
 }
@@ -1148,7 +1128,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
       (!doAccessChains && e->hasContext(Expression::AccessContext))) {
     ExpressionPtr ret;
     if (!m_noAdd) {
-      if (m_preOpt) ret = e->preOptimize(m_arp);
+      ret = e->preOptimize(m_arp);
       if (ret) {
         return canonicalizeRecurNonNull(ret);
       }
@@ -1179,7 +1159,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
 
   ExpressionPtr ret;
   if (!m_noAdd && !doAccessChains) {
-    if (m_preOpt) ret = e->preOptimize(m_arp);
+    ret = e->preOptimize(m_arp);
     if (ret) {
       return canonicalizeRecurNonNull(ret);
     }
@@ -1188,7 +1168,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
   e->setVisited();
   e->clearLocalExprAltered();
   e->setCanonPtr(ExpressionPtr());
-  e->clearChainRoot();
   e->setCanonID(0);
 
   switch (e->getKindOf()) {
@@ -1198,7 +1177,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
     case Expression::KindOfNewObjectExpression:
     case Expression::KindOfIncludeExpression:
     case Expression::KindOfListAssignment:
-      markAllLocalExprAltered(e);
       add(m_accessList, e);
       break;
 
@@ -1208,7 +1186,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
         e->recomputeEffects();
         return ae->replaceValue(ae->getValue());
       }
-      markAllLocalExprAltered(ae->getVariable());
       ExpressionPtr rep;
       int interf = findInterf(ae->getVariable(), false, rep);
       if (interf == SameAccess) {
@@ -1318,7 +1295,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
     case Expression::KindOfStaticMemberExpression:
       if (e->hasContext(Expression::UnsetContext) &&
           e->hasContext(Expression::LValue)) {
-        markAllLocalExprAltered(e);
         if (Option::EliminateDeadCode) {
           ExpressionPtr rep;
           int interf = findInterf(e, false, rep);
@@ -1432,7 +1408,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
         In the case of assignment, or binary op assignment, its added
         after the rhs has been fully processed too.
       */
-      bool doArrayCSE = Option::ArrayAccessIdempotent && m_postOpt;
       if (e->hasContext(Expression::AccessContext)) {
         always_assert(doAccessChains);
         if (e->getContext() & (Expression::LValue|
@@ -1442,7 +1417,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                                Expression::UnsetContext)) {
           ExpressionPtr rep;
           int interf =
-            findInterf(e, true, rep, nullptr, doArrayCSE);
+            findInterf(e, true, rep, nullptr);
           add(m_accessList, e);
           if (interf == SameAccess) {
             if (e->getKindOf() == rep->getKindOf()) {
@@ -1502,7 +1477,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                                Expression::UnsetContext))) {
         ExpressionPtr rep;
         int interf =
-          findInterf(e, true, rep, nullptr, doArrayCSE);
+          findInterf(e, true, rep, nullptr);
         if (!m_inPseudoMain && interf == DisjointAccess && !m_cleared &&
             e->is(Expression::KindOfSimpleVariable) &&
             !e->isThis()) {
@@ -1529,7 +1504,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
             add(m_accessList, e);
             e->setCanonID(rep->getCanonID());
             e->setCanonPtr(rep);
-            if (doArrayCSE) setCanonPtrForArrayCSE(e, rep);
             return ExpressionPtr();
           }
           if (Option::LocalCopyProp &&
@@ -1608,7 +1582,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
                                   lhs, rhs, rop))));
       }
       if (rop) {
-        markAllLocalExprAltered(bop);
         ExpressionPtr lhs = bop->getExp1();
         ExpressionPtr alt;
         int flags = 0;
@@ -1706,7 +1679,6 @@ ExpressionPtr AliasManager::canonicalizeNode(
         case T_INC:
         case T_DEC:
           {
-            markAllLocalExprAltered(e);
             ExpressionPtr alt;
             int interf = findInterf(uop->getExpression(), true, alt);
             if (interf == SameAccess) {
@@ -2082,7 +2054,7 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
 
   s->setVisited();
   StatementPtr rep;
-  if (m_preOpt) rep = s->preOptimize(m_arp);
+  rep = s->preOptimize(m_arp);
   if (rep) {
     s = canonicalizeRecur(rep, ret);
     return s ? s : rep;
@@ -2104,7 +2076,6 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       case Statement::KindOfMethodStatement:
       case Statement::KindOfClassStatement:
       case Statement::KindOfInterfaceStatement:
-        m_inlineAsExpr = false;
         return 0;
       default:
         break;
@@ -2121,7 +2092,6 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
   }
 
   if (s) {
-    bool inlineOk = false;
     Statement::KindOf skind = s->getKindOf();
     switch (skind) {
       case Statement::KindOfGlobalStatement:
@@ -2150,10 +2120,6 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         }
         break;
       }
-      case Statement::KindOfExpStatement:
-      case Statement::KindOfStatementList:
-        inlineOk = true;
-        break;
       case Statement::KindOfCatchStatement:
         {
           CatchStatementPtr c(spc(CatchStatement, s));
@@ -2164,24 +2130,6 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
             // not optimal, I don't believe there is a compelling reason to
             // optimize for this case.
             m_variables->setAttribute(VariableTable::ContainsLDynamicVariable);
-          }
-        }
-        break;
-      case Statement::KindOfReturnStatement:
-        inlineOk = true;
-        if (m_nrvoFix >= 0) {
-          ExpressionPtr e = spc(ReturnStatement, s)->getRetExp();
-          if (!e || !e->is(Expression::KindOfSimpleVariable)) {
-            m_nrvoFix = -1;
-          } else {
-            SimpleVariablePtr sv = spc(SimpleVariable, e);
-            const std::string &n = sv->getName();
-            if (!m_nrvoFix) {
-              m_returnVar = n;
-              m_nrvoFix = 1;
-            } else if (m_returnVar != n) {
-              m_nrvoFix = -1;
-            }
           }
         }
         break;
@@ -2204,12 +2152,8 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       default:
         break;
     }
-    if (!inlineOk) {
-      m_inlineAsExpr = false;
-    }
   } else {
     ExpressionPtr e = spc(Expression, cs);
-    if (e->getContext() & Expression::DeadStore) m_hasDeadStore = true;
     e->setCanonID(0);
     if (!kidCost) {
       if (!nkid) {
@@ -2363,11 +2307,6 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         }
         break;
       }
-      case Expression::KindOfClosureExpression:
-        // currently disable inlining for scopes with closure
-        // expressions. TODO: revisit this later
-        m_inlineAsExpr = false;
-        break;
       case Expression::KindOfUnaryOpExpression:
         if (Option::EnableEval > Option::NoEval && spc(UnaryOpExpression, e)->
             getOp() == T_EVAL) {
@@ -2446,63 +2385,26 @@ void AliasManager::gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m) {
 
   func->setContainsThis(false);
   func->setContainsBareThis(false);
-  func->setInlineSameContext(false);
   func->setNextLSB(false);
 
-  int i, nkid = m->getKidCount(), cost = 0;
+  int i, nkid = m->getKidCount();
   for (i = 0; i < nkid; i++) {
     ConstructPtr cp(m->getNthKid(i));
-    int c = collectAliasInfoRecur(cp, false);
-    if (cp == m->getStmts()) cost = c;
+    collectAliasInfoRecur(cp, false);
   }
-
-  if (m_inlineAsExpr) {
-    if (cost > Option::AutoInline ||
-        func->allowsVariableArguments() ||
-        m_variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
-        m_variables->getAttribute(VariableTable::ContainsExtract) ||
-        m_variables->getAttribute(VariableTable::ContainsCompact) ||
-        m_variables->getAttribute(VariableTable::ContainsGetDefinedVars)) {
-      m_inlineAsExpr = false;
-    }
-  }
-  func->setInlineAsExpr(m_inlineAsExpr);
 
   if (!func->nextLSB()) {
     if (func->usesLSB()) {
       func->clearUsesLSB();
       m_changes = true;
     }
-  } else {
-    func->setInlineSameContext(true);
   }
-}
-
-void AliasManager::doFinal(MethodStatementPtr m) {
-  FunctionScopeRawPtr func = m->getFunctionScope();
-  if (func->isRefReturn()) {
-    m_nrvoFix = -1;
-  } else if (m_nrvoFix > 0) {
-    Symbol *sym = m_variables->getSymbol(m_returnVar);
-    if (sym && !sym->isParameter() &&
-        (m_wildRefs || sym->isReferenced() ||
-         ((sym->isGlobal() || sym->isStatic()) &&
-          m_variables->needLocalCopy(sym)))) {
-      // do nothing
-    } else {
-      m_nrvoFix = -1;
-    }
-  }
-
-  func->setNRVOFix(m_nrvoFix > 0);
 }
 
 int AliasManager::optimize(AnalysisResultConstPtr ar, MethodStatementPtr m) {
   gatherInfo(ar, m);
 
   bool runCanon = Option::LocalCopyProp || Option::EliminateDeadCode;
-
-  m_hasChainRoot = false;
 
   if (runCanon) {
     for (int i = 0, nkid = m->getKidCount(); i < nkid; i++) {
@@ -2513,119 +2415,9 @@ int AliasManager::optimize(AnalysisResultConstPtr ar, MethodStatementPtr m) {
       canonicalizeKid(m, m->getNthKid(i), i);
       killLocals();
     }
-
-    if (m_hasChainRoot && m_postOpt) {
-      // need to do possible invalidation for label statements
-      invalidateChainRoots(m->getStmts());
-    }
-  }
-
-  if (!m_replaced && !m_changes && m_postOpt) {
-    doFinal(m);
   }
 
   return m_replaced ? -1 : m_changes ? 1 : 0;
-}
-
-void AliasManager::finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m) {
-  gatherInfo(ar, m);
-  doFinal(m);
-}
-
-void AliasManager::invalidateChainRoots(StatementPtr s) {
-  if (!s) return;
-  if (FunctionWalker::SkipRecurse(s)) return;
-  switch (s->getKindOf()) {
-  case Statement::KindOfStatementList:
-    {
-      StatementListPtr slist(spc(StatementList, s));
-      // start from the last statement -
-      // if we find a child stmt with
-      // a reachable label, we must invalidate
-      // all statements before
-      bool disable = false;
-      for (int i = s->getKidCount(); i--; ) {
-        StatementPtr kid((*slist)[i]);
-        invalidateChainRoots(kid);
-        if (!disable && kid->hasReachableLabel()) {
-          disable = true;
-        }
-        if (disable) disableCSE(kid);
-      }
-    }
-    break;
-  case Statement::KindOfDoStatement:
-    {
-      // need to disable CSE in the top level body
-      // otherwise we'd have to declare all CSE temps like:
-      //   declare_temps;
-      //   do { ... } while (cond);
-      DoStatementPtr ds(static_pointer_cast<DoStatement>(s));
-      disableCSE(ds->getBody());
-    }
-    // fall through
-  default:
-    for (int i = s->getKidCount(); i--; ) {
-      invalidateChainRoots(s->getNthStmt(i));
-    }
-    break;
-  }
-}
-
-void AliasManager::nullSafeDisableCSE(StatementPtr parent, ExpressionPtr kid) {
-  assert(parent);
-  if (!kid) return;
-  kid->disableCSE();
-}
-
-void AliasManager::disableCSE(StatementPtr s) {
-  if (!s) return;
-  switch (s->getKindOf()) {
-  case Statement::KindOfIfBranchStatement: {
-    IfBranchStatementPtr is(static_pointer_cast<IfBranchStatement>(s));
-    nullSafeDisableCSE(s, is->getCondition());
-    break;
-  }
-  case Statement::KindOfSwitchStatement: {
-    SwitchStatementPtr ss(static_pointer_cast<SwitchStatement>(s));
-    nullSafeDisableCSE(s, ss->getExp());
-    break;
-  }
-  case Statement::KindOfForStatement: {
-    ForStatementPtr fs(static_pointer_cast<ForStatement>(s));
-    nullSafeDisableCSE(s, fs->getInitExp());
-    nullSafeDisableCSE(s, fs->getCondExp());
-    nullSafeDisableCSE(s, fs->getIncExp());
-    break;
-  }
-  case Statement::KindOfForEachStatement: {
-    ForEachStatementPtr fs(static_pointer_cast<ForEachStatement>(s));
-    nullSafeDisableCSE(s, fs->getArrayExp());
-    nullSafeDisableCSE(s, fs->getNameExp());
-    nullSafeDisableCSE(s, fs->getValueExp());
-    break;
-  }
-  case Statement::KindOfWhileStatement: {
-    WhileStatementPtr ws(static_pointer_cast<WhileStatement>(s));
-    nullSafeDisableCSE(s, ws->getCondExp());
-    break;
-  }
-  case Statement::KindOfDoStatement: {
-    DoStatementPtr ds(static_pointer_cast<DoStatement>(s));
-    nullSafeDisableCSE(s, ds->getCondExp());
-    break;
-  }
-  default:
-    for (int i = s->getKidCount(); i--; ) {
-      ConstructPtr c(s->getNthKid(i));
-      if (StatementPtr skid = dpc(Statement, c)) {
-        disableCSE(skid);
-      } else {
-        nullSafeDisableCSE(s, dpc(Expression, c));
-      }
-    }
-    break;
-  }
 }
 
 void AliasManager::beginInExpression(StatementPtr parent, ExpressionPtr kid) {
@@ -2650,26 +2442,3 @@ void AliasManager::endInExpression(StatementPtr requestor) {
   }
 }
 
-void AliasManager::markAllLocalExprAltered(ExpressionPtr e) {
-  if (!m_postOpt) return;
-  assert(isInExpression());
-  assert(m_exprIdx <= (int)m_accessList.size());
-  e->setLocalExprAltered();
-  ExpressionPtrList::reverse_iterator it(m_accessList.rbegin());
-  int curIdx = m_accessList.size() - 1;
-  bool found = m_exprBeginStack.empty();
-  for (; curIdx >= m_exprIdx; --curIdx, ++it) {
-    ExpressionPtr p(*it);
-    if (!found && p == m_exprBeginStack.back()) {
-      found = true;
-    }
-    if (found) {
-      bool isLoad; int depth, effects;
-      int interf = checkAnyInterf(e, p, isLoad, depth, effects);
-      if (interf == InterfAccess ||
-          interf == SameAccess) {
-        p->setLocalExprAltered();
-      }
-    }
-  }
-}

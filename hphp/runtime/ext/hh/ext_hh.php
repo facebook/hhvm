@@ -58,4 +58,11 @@ function could_include(string $file) : bool;
 <<__Native>>
 function serialize_memoize_param(mixed $param): arraykey;
 
+/**
+ * Attach metadata to the caller's stack frame. The metadata can be retrieved
+ * using debug_backtrace(DEBUG_BACKTRACE_PROVIDE_METADATA).
+ */
+<<__Native>>
+function set_frame_metadata(mixed $metadata): void;
+
 }

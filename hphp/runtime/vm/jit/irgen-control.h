@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/jmpflags.h"
 
 namespace HPHP { namespace jit {
-struct HTS;
+struct IRGS;
 struct Block;
 struct SSATmp;
 }}
@@ -34,14 +34,14 @@ namespace HPHP { namespace jit { namespace irgen {
  * starts with a DefLabel expecting a StkPtr, this function will return an
  * intermediate block that passes the current sp.
  */
-Block* getBlock(HTS& env, Offset offset);
+Block* getBlock(IRGS& env, Offset offset);
 
 /*
  * Helpers for unconditional and conditional jumps.
  */
-void surpriseCheck(HTS&, Offset);
-void jmpImpl(HTS&, Offset, JmpFlags);
-void implCondJmp(HTS&, Offset taken, bool negate, SSATmp*);
+void surpriseCheck(IRGS&, Offset);
+void jmpImpl(IRGS&, Offset, JmpFlags);
+void implCondJmp(IRGS&, Offset taken, bool negate, SSATmp*);
 
 //////////////////////////////////////////////////////////////////////
 

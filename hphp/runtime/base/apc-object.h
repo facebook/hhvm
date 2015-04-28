@@ -41,12 +41,11 @@ struct APCObject {
   /*
    * Create an APCObject from an ObjectData*; returns its APCHandle.
    */
-  static APCHandle* Construct(ObjectData* data, size_t& size);
+  static APCHandle::Pair Construct(ObjectData* data);
 
   // Return an APCObject instance from a serialized version of the
   // object.  May return null.
-  static APCHandle* MakeAPCObject(
-      APCHandle* obj, size_t& size, const Variant& value);
+  static APCHandle::Pair MakeAPCObject(APCHandle* obj, const Variant& value);
 
   // Return an instance of a PHP object from the given object handle
   static Variant MakeObject(const APCHandle* handle);
@@ -83,10 +82,10 @@ private:
   APCObject& operator=(const APCObject&) = delete;
 
 private:
-  static APCHandle* MakeShared(String data, size_t& size) {
-    auto const handle = APCString::MakeShared(KindOfObject, data.get(), size);
-    handle->setSerializedObj();
-    return handle;
+  static APCHandle::Pair MakeSharedObj(String data) {
+    auto const pair = APCString::MakeSharedString(KindOfObject, data.get());
+    pair.handle->setSerializedObj();
+    return pair;
   }
 
 private:

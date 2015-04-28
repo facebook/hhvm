@@ -1979,7 +1979,7 @@ Index::lookup_closure_use_vars(borrowed_ptr<const php::Func> func) const {
   if (!numUseVars) return {};
   auto const it = m_data->closureUseVars.find(func->cls);
   if (it == end(m_data->closureUseVars)) {
-    return std::vector<Type>(numUseVars, TInitGen);
+    return std::vector<Type>(numUseVars, TGen);
   }
   return it->second;
 }

@@ -24,6 +24,7 @@ namespace HPHP { namespace HHBBC {
 
 const StaticString s_http_response_header("http_response_header");
 const StaticString s_php_errormsg("php_errormsg");
+const StaticString s_86metadata("86metadata");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -44,7 +45,8 @@ bool is_volatile_local(borrowed_ptr<const php::Func> func,
   // changed through $GLOBALS), but for now we don't bother.
   if (!l->name) return false;
   return l->name->same(s_http_response_header.get()) ||
-         l->name->same(s_php_errormsg.get());
+         l->name->same(s_php_errormsg.get()) ||
+         l->name->same(s_86metadata.get());
 }
 
 //////////////////////////////////////////////////////////////////////

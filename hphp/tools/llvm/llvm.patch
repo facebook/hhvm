@@ -109,16 +109,17 @@ index 0000000..8cba261
 +
 +#endif // LLVM_LOCRECS
 diff --git include/llvm/CodeGen/MachineInstr.h include/llvm/CodeGen/MachineInstr.h
-index d7f5341..e481362 100644
+index d7f5341..142a941 100644
 --- include/llvm/CodeGen/MachineInstr.h
 +++ include/llvm/CodeGen/MachineInstr.h
-@@ -65,7 +65,8 @@ public:
+@@ -65,7 +65,9 @@ public:
      FrameSetup   = 1 << 0,              // Instruction is used as a part of
                                          // function frame setup code.
      BundledPred  = 1 << 1,              // Instruction has bundled predecessors.
 -    BundledSucc  = 1 << 2               // Instruction has bundled successors.
 +    BundledSucc  = 1 << 2,              // Instruction has bundled successors.
-+    Smashable    = 1 << 3               // Instruction is marked as smashable.
++    Smashable    = 1 << 3,              // Instruction is marked as smashable.
++    TCR          = 1 << 4               // Instruction is marked as TCR.
    };
  private:
    const MCInstrDesc *MCID;              // Instruction descriptor.
@@ -155,10 +156,10 @@ index 6d8d056..186b64f 100644
    ///
    bool hasDebugInfo() const { return DbgInfoAvailable; }
 diff --git include/llvm/CodeGen/SelectionDAGNodes.h include/llvm/CodeGen/SelectionDAGNodes.h
-index 9ab60ff..6162301 100644
+index 9ab60ff..e2eebe0 100644
 --- include/llvm/CodeGen/SelectionDAGNodes.h
 +++ include/llvm/CodeGen/SelectionDAGNodes.h
-@@ -134,6 +134,10 @@ public:
+@@ -134,6 +134,14 @@ public:
    /// set the SDNode
    void setNode(SDNode *N) { Node = N; }
  
@@ -166,10 +167,14 @@ index 9ab60ff..6162301 100644
 +
 +  inline void setSmashable(bool v = true);
 +
++  inline bool getTCR() const;
++
++  inline void setTCR(bool v = true);
++
    inline SDNode *operator->() const { return Node; }
  
    bool operator==(const SDValue &O) const {
-@@ -355,11 +359,14 @@ private:
+@@ -355,11 +363,14 @@ private:
    /// nodes corresponding to it.
    uint16_t HasDebugValue : 1;
  
@@ -185,7 +190,7 @@ index 9ab60ff..6162301 100644
  
  private:
    /// NodeId - Unique id per SDNode in the DAG.
-@@ -435,6 +442,10 @@ public:
+@@ -435,6 +446,16 @@ public:
    /// setHasDebugValue - set this bit.
    void setHasDebugValue(bool b) { HasDebugValue = b; }
  
@@ -193,10 +198,16 @@ index 9ab60ff..6162301 100644
 +
 +  void setSmashable(bool v = true) { Smashable = v; }
 +
++  bool getTCR() const { return SubclassData & 1; }
++
++  void setTCR(bool v = true) {
++    SubclassData = (SubclassData & ~1) | (v ? 1 : 0);
++  }
++
    /// use_empty - Return true if there are no uses of this node.
    ///
    bool use_empty() const { return UseList == nullptr; }
-@@ -747,7 +758,7 @@ protected:
+@@ -747,7 +768,7 @@ protected:
    SDNode(unsigned Opc, unsigned Order, const DebugLoc dl, SDVTList VTs,
           ArrayRef<SDValue> Ops)
      : NodeType(Opc), OperandsNeedDelete(true), HasDebugValue(false),
@@ -205,7 +216,7 @@ index 9ab60ff..6162301 100644
        OperandList(Ops.size() ? new SDUse[Ops.size()] : nullptr),
        ValueList(VTs.VTs), UseList(nullptr),
        NumOperands(Ops.size()), NumValues(VTs.NumVTs),
-@@ -763,6 +774,7 @@ protected:
+@@ -763,6 +784,7 @@ protected:
    /// set later with InitOperands.
    SDNode(unsigned Opc, unsigned Order, const DebugLoc dl, SDVTList VTs)
      : NodeType(Opc), OperandsNeedDelete(false), HasDebugValue(false),
@@ -213,7 +224,7 @@ index 9ab60ff..6162301 100644
        SubclassData(0), NodeId(-1), OperandList(nullptr), ValueList(VTs.VTs),
        UseList(nullptr), NumOperands(0), NumValues(VTs.NumVTs), debugLoc(dl),
        IROrder(Order) {}
-@@ -893,6 +905,12 @@ inline SDValue::SDValue(SDNode *node, unsigned resno)
+@@ -893,6 +915,18 @@ inline SDValue::SDValue(SDNode *node, unsigned resno)
  inline unsigned SDValue::getOpcode() const {
    return Node->getOpcode();
  }
@@ -222,6 +233,12 @@ index 9ab60ff..6162301 100644
 +}
 +inline void SDValue::setSmashable(bool v) {
 +  Node->setSmashable(v);
++}
++inline bool SDValue::getTCR() const {
++  return Node->getTCR();
++}
++inline void SDValue::setTCR(bool v) {
++  Node->setTCR(v);
 +}
  inline EVT SDValue::getValueType() const {
    return Node->getValueType(ResNo);
@@ -289,10 +306,10 @@ index df08257..a8f4334 100644
  #undef CALLSITE_DELEGATE_SETTER
  
 diff --git include/llvm/IR/CallingConv.h include/llvm/IR/CallingConv.h
-index 1eaf4f7..c6fed7d 100644
+index 1eaf4f7..33a0eef 100644
 --- include/llvm/IR/CallingConv.h
 +++ include/llvm/IR/CallingConv.h
-@@ -137,7 +137,24 @@ namespace CallingConv {
+@@ -137,7 +137,28 @@ namespace CallingConv {
      /// convention differs from the more common \c X86_64_SysV convention
      /// in a number of ways, most notably in that XMM registers used to pass
      /// arguments are shadowed by GPRs, and vice versa.
@@ -309,11 +326,15 @@ index 1eaf4f7..c6fed7d 100644
 +    /// \brief HHVM calling convention used for service requests.
 +    /// Supports tail call elimination.
 +    X86_64_HHVM_SR = 82,
-+      //
++
 +    /// \brief Calling convention used by HipHop Virtual Machine (HHVM) to
 +    /// perform calls to and from translation cache. No registers are preserved.
 +    /// It supports tail/sibling call elimination.
-+    X86_64_HHVM_TC = 83
++    X86_64_HHVM_TC = 83,
++
++    /// \brief Calling convention used by HHVM to return from translation cache
++    /// by performing a tail call using push+ret instructions.
++    X86_64_HHVM_TCR = 84
 +
    };
  } // End CallingConv namespace
@@ -772,10 +793,10 @@ index 0f90961..1e27628 100644
        IsVarArg = Value;
        return *this;
 diff --git lib/AsmParser/LLLexer.cpp lib/AsmParser/LLLexer.cpp
-index 04dcd2b..3cb19e9 100644
+index 04dcd2b..3b2ade6 100644
 --- lib/AsmParser/LLLexer.cpp
 +++ lib/AsmParser/LLLexer.cpp
-@@ -599,6 +599,10 @@ lltok::Kind LLLexer::LexIdentifier() {
+@@ -599,6 +599,11 @@ lltok::Kind LLLexer::LexIdentifier() {
    KEYWORD(anyregcc);
    KEYWORD(preserve_mostcc);
    KEYWORD(preserve_allcc);
@@ -783,10 +804,11 @@ index 04dcd2b..3cb19e9 100644
 +  KEYWORD(hhvm_php);
 +  KEYWORD(hhvm_sr);
 +  KEYWORD(hhvm_tc);
++  KEYWORD(hhvm_tcr);
  
    KEYWORD(cc);
    KEYWORD(c);
-@@ -642,6 +646,7 @@ lltok::Kind LLLexer::LexIdentifier() {
+@@ -642,6 +647,7 @@ lltok::Kind LLLexer::LexIdentifier() {
    KEYWORD(sanitize_address);
    KEYWORD(sanitize_thread);
    KEYWORD(sanitize_memory);
@@ -795,7 +817,7 @@ index 04dcd2b..3cb19e9 100644
    KEYWORD(zeroext);
  
 diff --git lib/AsmParser/LLParser.cpp lib/AsmParser/LLParser.cpp
-index 0fa5301..f7d67cb 100644
+index 0fa5301..1b78709 100644
 --- lib/AsmParser/LLParser.cpp
 +++ lib/AsmParser/LLParser.cpp
 @@ -1030,6 +1030,7 @@ bool LLParser::ParseFnAttributeValuePairs(AttrBuilder &B,
@@ -822,7 +844,7 @@ index 0fa5301..f7d67cb 100644
      case lltok::kw_ssp:
      case lltok::kw_sspreq:
      case lltok::kw_sspstrong:
-@@ -1507,6 +1510,10 @@ bool LLParser::ParseOptionalDLLStorageClass(unsigned &Res) {
+@@ -1507,6 +1510,11 @@ bool LLParser::ParseOptionalDLLStorageClass(unsigned &Res) {
  ///   ::= 'anyregcc'
  ///   ::= 'preserve_mostcc'
  ///   ::= 'preserve_allcc'
@@ -830,10 +852,11 @@ index 0fa5301..f7d67cb 100644
 +///   ::= 'hhvm_php'
 +///   ::= 'hhvm_sr'
 +///   ::= 'hhvm_tc'
++///   ::= 'hhvm_tcr'
  ///   ::= 'cc' UINT
  ///
  bool LLParser::ParseOptionalCallingConv(CallingConv::ID &CC) {
-@@ -1533,6 +1540,10 @@ bool LLParser::ParseOptionalCallingConv(CallingConv::ID &CC) {
+@@ -1533,6 +1541,11 @@ bool LLParser::ParseOptionalCallingConv(CallingConv::ID &CC) {
    case lltok::kw_anyregcc:       CC = CallingConv::AnyReg; break;
    case lltok::kw_preserve_mostcc:CC = CallingConv::PreserveMost; break;
    case lltok::kw_preserve_allcc: CC = CallingConv::PreserveAll; break;
@@ -841,11 +864,12 @@ index 0fa5301..f7d67cb 100644
 +  case lltok::kw_hhvm_php:       CC = CallingConv::X86_64_HHVM_PHP; break;
 +  case lltok::kw_hhvm_sr:        CC = CallingConv::X86_64_HHVM_SR; break;
 +  case lltok::kw_hhvm_tc:        CC = CallingConv::X86_64_HHVM_TC; break;
++  case lltok::kw_hhvm_tcr:       CC = CallingConv::X86_64_HHVM_TCR; break;
    case lltok::kw_cc: {
        unsigned ArbitraryCC;
        Lex.Lex();
 diff --git lib/AsmParser/LLToken.h lib/AsmParser/LLToken.h
-index b28699e..41b4990 100644
+index b28699e..833c73c 100644
 --- lib/AsmParser/LLToken.h
 +++ lib/AsmParser/LLToken.h
 @@ -95,6 +95,8 @@ namespace lltok {
@@ -853,7 +877,7 @@ index b28699e..41b4990 100644
      kw_webkit_jscc, kw_anyregcc,
      kw_preserve_mostcc, kw_preserve_allcc,
 +    kw_hhvm_c, kw_hhvm_php,
-+    kw_hhvm_sr, kw_hhvm_tc,
++    kw_hhvm_sr, kw_hhvm_tc, kw_hhvm_tcr,
  
      // Attributes:
      kw_attributes,
@@ -957,7 +981,7 @@ index 05f6a68..c71849a 100644
                               unsigned PadTo) const {
    if (isVerbose() && Desc)
 diff --git lib/CodeGen/AsmPrinter/EHStreamer.cpp lib/CodeGen/AsmPrinter/EHStreamer.cpp
-index 73f62bf..d033517 100644
+index 73f62bf..f05ead6 100644
 --- lib/CodeGen/AsmPrinter/EHStreamer.cpp
 +++ lib/CodeGen/AsmPrinter/EHStreamer.cpp
 @@ -18,10 +18,13 @@
@@ -974,7 +998,7 @@ index 73f62bf..d033517 100644
  
  using namespace llvm;
  
-@@ -208,8 +211,31 @@ computeCallSiteTable(SmallVectorImpl<CallSiteEntry> &CallSites,
+@@ -208,8 +211,30 @@ computeCallSiteTable(SmallVectorImpl<CallSiteEntry> &CallSites,
    // Whether the last CallSite entry was for an invoke.
    bool PreviousIsInvoke = false;
  
@@ -989,10 +1013,9 @@ index 73f62bf..d033517 100644
 +        llvm::report_fatal_error("2nd hot-cold split detected", false);
 +      // We are switching from hot to cold. This should only happen outside of
 +      // try-range.
-+      // FIXME: add assertion.
 +      SwitchedSections = true;
-+      if (SawPotentiallyThrowing && Asm->MAI->isExceptionHandlingDwarf()) {
-+        auto EndHot = 
++      if (LastLabel && Asm->MAI->isExceptionHandlingDwarf()) {
++        auto EndHot =
 +          Asm->GetTempSymbol("eh_func_end", Asm->getFunctionNumber());
 +        CallSiteEntry Site = { LastLabel, EndHot, nullptr, 0 };
 +        CallSites.push_back(Site);
@@ -1006,7 +1029,7 @@ index 73f62bf..d033517 100644
      for (const auto &MI : MBB) {
        if (!MI.isEHLabel()) {
          if (MI.isCall())
-@@ -282,6 +308,7 @@ computeCallSiteTable(SmallVectorImpl<CallSiteEntry> &CallSites,
+@@ -282,6 +307,7 @@ computeCallSiteTable(SmallVectorImpl<CallSiteEntry> &CallSites,
          PreviousIsInvoke = true;
        }
      }
@@ -1014,7 +1037,7 @@ index 73f62bf..d033517 100644
    }
  
    // If some instruction between the previous try-range and the end of the
-@@ -442,7 +469,14 @@ void EHStreamer::emitExceptionTable() {
+@@ -442,7 +468,14 @@ void EHStreamer::emitExceptionTable() {
                                                    Asm->getFunctionNumber()));
  
    // Emit the LSDA header.
@@ -1030,7 +1053,7 @@ index 73f62bf..d033517 100644
    Asm->EmitEncodingByte(TTypeEncoding, "@TType");
  
    // The type infos need to be aligned. GCC does this by inserting padding just
-@@ -546,28 +580,56 @@ void EHStreamer::emitExceptionTable() {
+@@ -546,28 +579,56 @@ void EHStreamer::emitExceptionTable() {
      // Add extra padding if it wasn't added to the TType base offset.
      Asm->EmitULEB128(CallSiteTableLength, "Call site table length", SizeAlign);
  
@@ -1096,7 +1119,7 @@ index 73f62bf..d033517 100644
        if (VerboseAsm)
          Asm->OutStreamer.AddComment(Twine("  Call between ") +
                                      BeginLabel->getName() + " and " +
-@@ -579,12 +641,23 @@ void EHStreamer::emitExceptionTable() {
+@@ -579,12 +640,23 @@ void EHStreamer::emitExceptionTable() {
        if (!S.PadLabel) {
          if (VerboseAsm)
            Asm->OutStreamer.AddComment("    has no landing pad");
@@ -1122,7 +1145,7 @@ index 73f62bf..d033517 100644
        }
  
        // Offset of the first associated action record, relative to the start of
-@@ -597,7 +670,9 @@ void EHStreamer::emitExceptionTable() {
+@@ -597,7 +669,9 @@ void EHStreamer::emitExceptionTable() {
            Asm->OutStreamer.AddComment("  On action: " +
                                        Twine((S.Action - 1) / 2 + 1));
        }
@@ -1286,40 +1309,211 @@ index 4976e35..587eefb 100644
    VariableDbgInfos.clear();
  }
 diff --git lib/CodeGen/PrologEpilogInserter.cpp lib/CodeGen/PrologEpilogInserter.cpp
-index 9d332ca..74a15c0 100644
+index 9d332ca..982b777 100644
 --- lib/CodeGen/PrologEpilogInserter.cpp
 +++ lib/CodeGen/PrologEpilogInserter.cpp
-@@ -656,8 +656,14 @@ void PEI::calculateFrameObjectOffsets(MachineFunction &Fn) {
+@@ -402,19 +402,21 @@ void PEI::insertCSRSpillsAndRestores(MachineFunction &Fn) {
+ static inline void
+ AdjustStackOffset(MachineFrameInfo *MFI, int FrameIdx,
+                   bool StackGrowsDown, int64_t &Offset,
+-                  unsigned &MaxAlign) {
++                  unsigned &MaxAlign, unsigned Skew) {
+   // If the stack grows down, add the object size to find the lowest address.
+   if (StackGrowsDown)
+     Offset += MFI->getObjectSize(FrameIdx);
+ 
+   unsigned Align = MFI->getObjectAlignment(FrameIdx);
++  if (Skew >= Align)
++    Skew = 0;
+ 
+   // If the alignment of this object is greater than that of the stack, then
+   // increase the stack alignment to match.
+   MaxAlign = std::max(MaxAlign, Align);
+ 
+   // Adjust to alignment boundary.
+-  Offset = (Offset + Align - 1) / Align * Align;
++  Offset = (Offset + Align - 1 - Skew) / Align * Align + Skew;
+ 
+   if (StackGrowsDown) {
+     DEBUG(dbgs() << "alloc FI(" << FrameIdx << ") at SP[" << -Offset << "]\n");
+@@ -432,12 +434,12 @@ static void
+ AssignProtectedObjSet(const StackObjSet &UnassignedObjs,
+                       SmallSet<int, 16> &ProtectedObjs,
+                       MachineFrameInfo *MFI, bool StackGrowsDown,
+-                      int64_t &Offset, unsigned &MaxAlign) {
++                      int64_t &Offset, unsigned &MaxAlign, unsigned Skew) {
+ 
+   for (StackObjSet::const_iterator I = UnassignedObjs.begin(),
+         E = UnassignedObjs.end(); I != E; ++I) {
+     int i = *I;
+-    AdjustStackOffset(MFI, i, StackGrowsDown, Offset, MaxAlign);
++    AdjustStackOffset(MFI, i, StackGrowsDown, Offset, MaxAlign, Skew);
+     ProtectedObjs.insert(i);
+   }
+ }
+@@ -465,6 +467,14 @@ void PEI::calculateFrameObjectOffsets(MachineFunction &Fn) {
+          && "Local area offset should be in direction of stack growth");
+   int64_t Offset = LocalAreaOffset;
+ 
++  // For HHVM calling convention we need to apply skew to alignment of
++  // all objects on the stack.
++  unsigned Skew = 0;
++  if (LLVM_UNLIKELY(Fn.getFunction()->getCallingConv() ==
++                    CallingConv::X86_64_HHVM_TC)) {
++    Skew = 8;
++  }
++
+   // If there are fixed sized objects that are preallocated in the local area,
+   // non-fixed objects can't be allocated right at the start of local area.
+   // We currently don't support filling in holes in between fixed sized
+@@ -494,8 +504,9 @@ void PEI::calculateFrameObjectOffsets(MachineFunction &Fn) {
+       Offset += MFI->getObjectSize(i);
+ 
+       unsigned Align = MFI->getObjectAlignment(i);
++      unsigned ObjectSkew = Align > Skew ? Skew : 0;
+       // Adjust to alignment boundary
+-      Offset = (Offset+Align-1)/Align*Align;
++      Offset = (Offset+Align-1-ObjectSkew)/Align*Align+ObjectSkew;
+ 
+       MFI->setObjectOffset(i, -Offset);        // Set the computed offset
+     }
+@@ -503,8 +514,9 @@ void PEI::calculateFrameObjectOffsets(MachineFunction &Fn) {
+     int MaxCSFI = MaxCSFrameIndex, MinCSFI = MinCSFrameIndex;
+     for (int i = MaxCSFI; i >= MinCSFI ; --i) {
+       unsigned Align = MFI->getObjectAlignment(i);
++      unsigned ObjectSkew = Align > Skew ? Skew : 0;
+       // Adjust to alignment boundary
+-      Offset = (Offset+Align-1)/Align*Align;
++      Offset = (Offset+Align-1-ObjectSkew)/Align*Align+ObjectSkew;
+ 
+       MFI->setObjectOffset(i, Offset);
+       Offset += MFI->getObjectSize(i);
+@@ -526,7 +538,7 @@ void PEI::calculateFrameObjectOffsets(MachineFunction &Fn) {
+     RS->getScavengingFrameIndices(SFIs);
+     for (SmallVectorImpl<int>::iterator I = SFIs.begin(),
+            IE = SFIs.end(); I != IE; ++I)
+-      AdjustStackOffset(MFI, *I, StackGrowsDown, Offset, MaxAlign);
++      AdjustStackOffset(MFI, *I, StackGrowsDown, Offset, MaxAlign, Skew);
+   }
+ 
+   // FIXME: Once this is working, then enable flag will change to a target
+@@ -535,9 +547,10 @@ void PEI::calculateFrameObjectOffsets(MachineFunction &Fn) {
+   // will continue to use the existing code path.
+   if (MFI->getUseLocalStackAllocationBlock()) {
+     unsigned Align = MFI->getLocalFrameMaxAlign();
++    unsigned LocalSkew = Align > Skew ? Skew : 0;
+ 
+     // Adjust to alignment boundary.
+-    Offset = (Offset + Align - 1) / Align * Align;
++    Offset = (Offset + Align - 1 - LocalSkew) / Align * Align + LocalSkew;
+ 
+     DEBUG(dbgs() << "Local frame base offset: " << Offset << "\n");
+ 
+@@ -564,7 +577,7 @@ void PEI::calculateFrameObjectOffsets(MachineFunction &Fn) {
+     StackObjSet AddrOfObjs;
+ 
+     AdjustStackOffset(MFI, MFI->getStackProtectorIndex(), StackGrowsDown,
+-                      Offset, MaxAlign);
++                      Offset, MaxAlign, Skew);
+ 
+     // Assign large stack objects first.
+     for (unsigned i = 0, e = MFI->getObjectIndexEnd(); i != e; ++i) {
+@@ -597,11 +610,11 @@ void PEI::calculateFrameObjectOffsets(MachineFunction &Fn) {
+     }
+ 
+     AssignProtectedObjSet(LargeArrayObjs, ProtectedObjs, MFI, StackGrowsDown,
+-                          Offset, MaxAlign);
++                          Offset, MaxAlign, Skew);
+     AssignProtectedObjSet(SmallArrayObjs, ProtectedObjs, MFI, StackGrowsDown,
+-                          Offset, MaxAlign);
++                          Offset, MaxAlign, Skew);
+     AssignProtectedObjSet(AddrOfObjs, ProtectedObjs, MFI, StackGrowsDown,
+-                          Offset, MaxAlign);
++                          Offset, MaxAlign, Skew);
+   }
+ 
+   // Then assign frame offsets to stack objects that are not used to spill
+@@ -621,7 +634,7 @@ void PEI::calculateFrameObjectOffsets(MachineFunction &Fn) {
+     if (ProtectedObjs.count(i))
+       continue;
+ 
+-    AdjustStackOffset(MFI, i, StackGrowsDown, Offset, MaxAlign);
++    AdjustStackOffset(MFI, i, StackGrowsDown, Offset, MaxAlign, Skew);
+   }
+ 
+   // Make sure the special register scavenging spill slot is closest to the
+@@ -631,7 +644,7 @@ void PEI::calculateFrameObjectOffsets(MachineFunction &Fn) {
+     RS->getScavengingFrameIndices(SFIs);
+     for (SmallVectorImpl<int>::iterator I = SFIs.begin(),
+            IE = SFIs.end(); I != IE; ++I)
+-      AdjustStackOffset(MFI, *I, StackGrowsDown, Offset, MaxAlign);
++      AdjustStackOffset(MFI, *I, StackGrowsDown, Offset, MaxAlign, Skew);
+   }
+ 
+   if (!TFI.targetHandlesStackFrameRounding()) {
+@@ -656,8 +669,10 @@ void PEI::calculateFrameObjectOffsets(MachineFunction &Fn) {
      // If the frame pointer is eliminated, all frame offsets will be relative to
      // SP not FP. Align to MaxAlign so this works.
      StackAlign = std::max(StackAlign, MaxAlign);
-+    unsigned Adjustment = 0;
-+    if (LLVM_UNLIKELY(Fn.getFunction()->getCallingConv() ==
-+                      CallingConv::X86_64_HHVM_TC)) {
-+      Adjustment = 8;
-+    }
++    unsigned StackSkew = StackAlign > Skew ? Skew : 0;
      unsigned AlignMask = StackAlign - 1;
 -    Offset = (Offset + AlignMask) & ~uint64_t(AlignMask);
-+    Offset = (Offset - Adjustment + AlignMask) & ~uint64_t(AlignMask);
-+    Offset += Adjustment;
++    Offset = ((Offset + AlignMask - StackSkew) & ~uint64_t(AlignMask))
++             + StackSkew;
    }
  
    // Update frame info to pretend that this is part of the stack...
 diff --git lib/CodeGen/SelectionDAG/InstrEmitter.cpp lib/CodeGen/SelectionDAG/InstrEmitter.cpp
-index 6661aca..dd6f04e 100644
+index 6661aca..6b6e5e3 100644
 --- lib/CodeGen/SelectionDAG/InstrEmitter.cpp
 +++ lib/CodeGen/SelectionDAG/InstrEmitter.cpp
-@@ -775,6 +775,8 @@ EmitMachineNode(SDNode *Node, bool IsClone, bool IsCloned,
+@@ -775,6 +775,10 @@ EmitMachineNode(SDNode *Node, bool IsClone, bool IsCloned,
  
    // Create the new machine instruction.
    MachineInstrBuilder MIB = BuildMI(*MF, Node->getDebugLoc(), II);
 +  if (Node->getSmashable())
 +    MIB.setMIFlag(MachineInstr::Smashable);
++  if (Node->getTCR())
++    MIB.setMIFlag(MachineInstr::TCR);
  
    // Add result register values for things that are defined by this
    // instruction.
+diff --git lib/CodeGen/SelectionDAG/TargetLowering.cpp lib/CodeGen/SelectionDAG/TargetLowering.cpp
+index 1bd3d29..683f45c 100644
+--- lib/CodeGen/SelectionDAG/TargetLowering.cpp
++++ lib/CodeGen/SelectionDAG/TargetLowering.cpp
+@@ -1576,15 +1576,20 @@ TargetLowering::SimplifySetCC(EVT VT, SDValue N0, SDValue N1,
+     if (Cond == ISD::SETLE || Cond == ISD::SETULE) {
+       if (C1 == MaxVal) return DAG.getConstant(1, VT);   // X <= MAX --> true
+       // X <= C0 --> X < (C0 + 1)
+-      APInt C = C1 + 1;
+-      ISD::CondCode NewCC = (Cond == ISD::SETLE) ? ISD::SETLT : ISD::SETULT;
+-      if ((DCI.isBeforeLegalizeOps() ||
+-           isCondCodeLegal(NewCC, VT.getSimpleVT())) &&
+-          (!N1C->isOpaque() || (N1C->isOpaque() && C.getBitWidth() <= 64 &&
+-                                isLegalICmpImmediate(C.getSExtValue())))) {
+-        return DAG.getSetCC(dl, VT, N0,
+-                            DAG.getConstant(C, N1.getValueType()),
+-                            NewCC);
++      // We don't do this for MinSize functions as it may result in larger
++      // code for X86.
++      if (!DAG.getMachineFunction().getFunction()->getAttributes().
++          hasAttribute(AttributeSet::FunctionIndex, Attribute::MinSize)) {
++        APInt C = C1 + 1;
++        ISD::CondCode NewCC = (Cond == ISD::SETLE) ? ISD::SETLT : ISD::SETULT;
++        if ((DCI.isBeforeLegalizeOps() ||
++             isCondCodeLegal(NewCC, VT.getSimpleVT())) &&
++            (!N1C->isOpaque() || (N1C->isOpaque() && C.getBitWidth() <= 64 &&
++                                  isLegalICmpImmediate(C.getSExtValue())))) {
++          return DAG.getSetCC(dl, VT, N0,
++                              DAG.getConstant(C, N1.getValueType()),
++                              NewCC);
++        }
+       }
+     }
+ 
 diff --git lib/CodeGen/TailDuplication.cpp lib/CodeGen/TailDuplication.cpp
-index 4377236..fd92a0a 100644
+index 4377236..7215413 100644
 --- lib/CodeGen/TailDuplication.cpp
 +++ lib/CodeGen/TailDuplication.cpp
 @@ -38,6 +38,7 @@ using namespace llvm;
@@ -1342,7 +1536,7 @@ index 4377236..fd92a0a 100644
  static cl::opt<unsigned>
  TailDupLimit("tail-dup-limit", cl::init(~0U), cl::Hidden);
  
-@@ -773,6 +779,77 @@ TailDuplicatePass::TailDuplicate(MachineBasicBlock *TailBB,
+@@ -773,6 +779,89 @@ TailDuplicatePass::TailDuplicate(MachineBasicBlock *TailBB,
      assert(TailBB != PredBB &&
             "Single-block loop should have been rejected earlier!");
      // EH edges are ignored by AnalyzeBranch.
@@ -1358,6 +1552,29 @@ index 4377236..fd92a0a 100644
 +      if (PredBB->getLandingPadSuccessor())
 +        continue;
 +
++      MachineBasicBlock *TBB = nullptr, *FBB = nullptr;
++      SmallVector<MachineOperand, 4> Cond;
++      if (TII->AnalyzeBranch(*PredBB, TBB, FBB, Cond))
++        continue;
++
++      // Ignore unconditional jumps.
++      if (Cond.empty())
++        continue;
++
++      // TODO(#6211350): if TailBB is a fallthrough we can reverse
++      // the branch condition and do optimization. Ignore for now.
++      //
++      // TODO#2 (#6810283): If we have a conditional branch followed by an
++      // uncoditional one, both could be tail duplicated. Sadly, once
++      // one of the branches is converted to a call, AnalyzeBranch()
++      // will fail to do the analysis. For now we only optimize the
++      // conditional branch.
++      // Note that we could do a regular tail duplication optimization for
++      // the unconditonal branch even without the conditional tail call 
++      // duplication.
++      if (TBB != TailBB)
++        continue;
++
 +      // Skip to 'real' instructions.
 +      auto I = TailBB->SkipPHIsAndLabels(TailBB->begin());
 +
@@ -1366,53 +1583,42 @@ index 4377236..fd92a0a 100644
 +      if (I == TailBB->end())
 +        continue;
 +
-+      auto &TailCall = *I;
-+      auto &CondJump = *PredBB->getLastNonDebugInstr();
-+
-+      // Ignore switch with 2 targets.
-+      if (CondJump.isIndirectBranch())
-+        continue;
-+
-+      if (PredBB->isLayoutSuccessor(TailBB)) {
-+        // TODO(#6211350): if TailBB is a fallthrough we can reverse
-+        // the branch condition and do optimization.
-+        continue;
-+      }
-+
 +      // If the only instruction in TailBB is a direct tail call, we can
 +      // substitute conditional instruction destination.
-+      if (TailCall.isCall() && TailCall.isReturn() &&
-+          !TailCall.isIndirectBranch()) {
++      auto &TailCall = *I;
++      if (!TailCall.isCall() || !TailCall.isReturn() ||
++          TailCall.isIndirectBranch())
++        continue;
 +
-+        // 'jmp *$dst(%rip)' is considered a direct branch when it's
-+        // a tail call. We catch it here.
-+        auto& CallOperand = TailCall.getOperand(0);
-+        if (CallOperand.isReg())
-+          continue;
++      // 'jmp *$dst(%rip)' is considered a direct branch when it's
++      // a tail call. We catch it here.
++      auto& CallOperand = TailCall.getOperand(0);
++      if (CallOperand.isReg())
++        continue;
 +
-+        DEBUG(dbgs() << "\nTail-duplicating (with condition) into PredBB: "
-+                     << *PredBB << "From Succ: " << *TailBB);
-+        TDBBs.push_back(PredBB);
++      DEBUG(dbgs() << "\nTail-duplicating (with condition) into PredBB: "
++                   << *PredBB << "From Succ: " << *TailBB);
++      TDBBs.push_back(PredBB);
 +
-+        CondJump.getOperand(0) = CallOperand;
++      auto &CondJump = *PredBB->getFirstTerminator();
++      CondJump.getOperand(0) = CallOperand;
 +
-+        if (TailCall.getFlag(MachineInstr::Smashable))
-+          CondJump.setFlag(MachineInstr::Smashable);
++      if (TailCall.getFlag(MachineInstr::Smashable))
++        CondJump.setFlag(MachineInstr::Smashable);
 +
-+        // Ideally we would like to merge debug info here.
-+        if (!CondJump.getDebugLoc().getLocRec() &&
-+            TailCall.getDebugLoc().getLocRec())
-+          CondJump.setDebugLoc(TailCall.getDebugLoc());
++      // Ideally we would like to merge debug info here.
++      if (!CondJump.getDebugLoc().getLocRec() &&
++          TailCall.getDebugLoc().getLocRec())
++        CondJump.setDebugLoc(TailCall.getDebugLoc());
 +
-+        // Update CFG.
-+        PredBB->removeSuccessor(TailBB);
-+        for (MachineBasicBlock::succ_iterator I = TailBB->succ_begin(),
-+               E = TailBB->succ_end(); I != E; ++I)
-+          PredBB->addSuccessor(*I, MBPI->getEdgeWeight(TailBB, I));
++      // Update CFG.
++      PredBB->removeSuccessor(TailBB);
++      for (MachineBasicBlock::succ_iterator I = TailBB->succ_begin(),
++             E = TailBB->succ_end(); I != E; ++I)
++        PredBB->addSuccessor(*I, MBPI->getEdgeWeight(TailBB, I));
 +
-+        Changed = true;
-+        ++NumCondTailDups;
-+      }
++      Changed = true;
++      ++NumCondTailDups;
 +
 +      continue;
 +    }
@@ -1558,10 +1764,10 @@ index 526fe55..04e4699 100644
        StubMap::const_iterator i = Stubs.find(Value);
        uintptr_t StubAddress;
 diff --git lib/IR/AsmWriter.cpp lib/IR/AsmWriter.cpp
-index 8f91225..35d1f01 100644
+index 8f91225..842b118 100644
 --- lib/IR/AsmWriter.cpp
 +++ lib/IR/AsmWriter.cpp
-@@ -89,6 +89,10 @@ static void PrintCallingConv(unsigned cc, raw_ostream &Out) {
+@@ -89,6 +89,11 @@ static void PrintCallingConv(unsigned cc, raw_ostream &Out) {
    case CallingConv::X86_64_Win64:  Out << "x86_64_win64cc"; break;
    case CallingConv::SPIR_FUNC:     Out << "spir_func"; break;
    case CallingConv::SPIR_KERNEL:   Out << "spir_kernel"; break;
@@ -1569,10 +1775,11 @@ index 8f91225..35d1f01 100644
 +  case CallingConv::X86_64_HHVM_PHP:  Out<< "hhvm_php"; break;
 +  case CallingConv::X86_64_HHVM_SR:   Out << "hhvm_sr"; break;
 +  case CallingConv::X86_64_HHVM_TC:   Out << "hhvm_tc"; break;
++  case CallingConv::X86_64_HHVM_TCR:  Out << "hhvm_tcr"; break;
    }
  }
  
-@@ -2104,6 +2108,9 @@ void AssemblyWriter::printInstruction(const Instruction &I) {
+@@ -2104,6 +2109,9 @@ void AssemblyWriter::printInstruction(const Instruction &I) {
                               TheModule);
      }
    }
@@ -2112,7 +2319,7 @@ index fdec333..ec9ee65 100644
    }
  
 diff --git lib/Target/X86/X86CallingConv.td lib/Target/X86/X86CallingConv.td
-index 899a960..77214a4 100644
+index 899a960..796dce0 100644
 --- lib/Target/X86/X86CallingConv.td
 +++ lib/Target/X86/X86CallingConv.td
 @@ -162,6 +162,15 @@ def RetCC_X86_64_WebKit_JS : CallingConv<[
@@ -2124,14 +2331,14 @@ index 899a960..77214a4 100644
 +  // Promote all types to i64
 +  CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
 +
-+  // Return: RBX
-+  CCIfType<[i64], CCAssignToReg<[RBX]>>
++  // Return: RBX and RBP
++  CCIfType<[i64], CCAssignToReg<[RBX, RBP]>>
 +]>;
 +
  // X86-64 AnyReg return-value convention. No explicit register is specified for
  // the return-value. The register allocator is allowed and expected to choose
  // any free register.
-@@ -197,6 +206,11 @@ def RetCC_X86_64 : CallingConv<[
+@@ -197,6 +206,12 @@ def RetCC_X86_64 : CallingConv<[
    CCIfCC<"CallingConv::X86_64_Win64", CCDelegateTo<RetCC_X86_Win64_C>>,
    CCIfCC<"CallingConv::X86_64_SysV", CCDelegateTo<RetCC_X86_64_C>>,
  
@@ -2139,11 +2346,12 @@ index 899a960..77214a4 100644
 +  CCIfCC<"CallingConv::X86_64_HHVM_PHP", CCDelegateTo<RetCC_X86_64_HHVM>>,
 +  CCIfCC<"CallingConv::X86_64_HHVM_SR", CCDelegateTo<RetCC_X86_64_HHVM>>,
 +  CCIfCC<"CallingConv::X86_64_HHVM_TC", CCDelegateTo<RetCC_X86_64_HHVM>>,
++  CCIfCC<"CallingConv::X86_64_HHVM_TCR", CCDelegateTo<RetCC_X86_64_HHVM>>,
 +
    // Mingw64 and native Win64 use Win64 CC
    CCIfSubtarget<"isTargetWin64()", CCDelegateTo<RetCC_X86_Win64_C>>,
  
-@@ -278,6 +292,33 @@ def CC_X86_64_C : CallingConv<[
+@@ -278,6 +293,39 @@ def CC_X86_64_C : CallingConv<[
             CCAssignToStack<64, 64>>
  ]>;
  
@@ -2174,10 +2382,16 @@ index 899a960..77214a4 100644
 +  CCIfType<[i64], CCAssignToReg<[RBX, R12, RBP]>>
 +]>;
 +
++// Calling convention for HHVM's return from TC on X86-64
++def CC_X86_64_HHVM_TCR : CallingConv<[
++  // Pass HHVM's rVmSp, rVmTl, and rVmFp.
++  CCIfType<[i64], CCAssignToReg<[RBX, R12, RBP]>>
++]>;
++
  // Calling convention used on Win64
  def CC_X86_Win64_C : CallingConv<[
    // FIXME: Handle byval stuff.
-@@ -592,6 +633,10 @@ def CC_X86_64 : CallingConv<[
+@@ -592,6 +640,11 @@ def CC_X86_64 : CallingConv<[
    CCIfCC<"CallingConv::AnyReg", CCDelegateTo<CC_X86_64_AnyReg>>,
    CCIfCC<"CallingConv::X86_64_Win64", CCDelegateTo<CC_X86_Win64_C>>,
    CCIfCC<"CallingConv::X86_64_SysV", CCDelegateTo<CC_X86_64_C>>,
@@ -2185,16 +2399,17 @@ index 899a960..77214a4 100644
 +  CCIfCC<"CallingConv::X86_64_HHVM_PHP", CCDelegateTo<CC_X86_64_HHVM_PHP>>,
 +  CCIfCC<"CallingConv::X86_64_HHVM_SR", CCDelegateTo<CC_X86_64_HHVM_SR>>,
 +  CCIfCC<"CallingConv::X86_64_HHVM_TC", CCDelegateTo<CC_X86_64_HHVM_TC>>,
++  CCIfCC<"CallingConv::X86_64_HHVM_TCR", CCDelegateTo<CC_X86_64_HHVM_TCR>>,
  
    // Mingw64 and native Win64 use Win64 CC
    CCIfSubtarget<"isTargetWin64()", CCDelegateTo<CC_X86_Win64_C>>,
-@@ -662,3 +707,6 @@ def CSR_64_Intel_OCL_BI_AVX    : CalleeSavedRegs<(add CSR_64,
+@@ -662,3 +715,6 @@ def CSR_64_Intel_OCL_BI_AVX    : CalleeSavedRegs<(add CSR_64,
  def CSR_64_Intel_OCL_BI_AVX512 : CalleeSavedRegs<(add RBX, RDI, RSI, R14, R15,
                                                    (sequence "ZMM%u", 16, 31),
                                                    K4, K5, K6, K7)>;
 +
-+// rVmTl and rVmFp are preserved for PHP calls in HHVM.
-+def CSR_64_HHVM_PHP : CalleeSavedRegs<(add R12, RBP)>;
++// rVmTl is preserved for PHP calls in HHVM.
++def CSR_64_HHVM_PHP : CalleeSavedRegs<(add R12)>;
 diff --git lib/Target/X86/X86FastISel.cpp lib/Target/X86/X86FastISel.cpp
 index a5bbf72..6bbec33 100644
 --- lib/Target/X86/X86FastISel.cpp
@@ -2209,10 +2424,52 @@ index a5bbf72..6bbec33 100644
    if (CS && !CS->paramHasAttr(1, Attribute::StructRet))
      return 0;
 diff --git lib/Target/X86/X86FrameLowering.cpp lib/Target/X86/X86FrameLowering.cpp
-index 58e15c7..0425f02 100644
+index 58e15c7..fe54aef 100644
 --- lib/Target/X86/X86FrameLowering.cpp
 +++ lib/Target/X86/X86FrameLowering.cpp
-@@ -1034,6 +1034,9 @@ void X86FrameLowering::emitEpilogue(MachineFunction &MF,
+@@ -1004,11 +1004,14 @@ void X86FrameLowering::emitEpilogue(MachineFunction &MF,
+                    UseLEA, TII, *RegInfo);
+     }
+ 
++    // Check if we need to tailcall via push+ret sequence (e.g. for HHVM).
++    bool isTCR = MBBI->getFlag(MachineInstr::TCR);
++
+     // Jump to label or value in register.
+     if (RetOpcode == X86::TCRETURNdi || RetOpcode == X86::TCRETURNdi64) {
+-      MachineInstrBuilder MIB =
+-        BuildMI(MBB, MBBI, DL, TII.get((RetOpcode == X86::TCRETURNdi)
+-                                       ? X86::TAILJMPd : X86::TAILJMPd64));
++      auto opcode = isTCR ? X86::PUSH64i32 : ((RetOpcode == X86::TCRETURNdi)
++                                             ? X86::TAILJMPd : X86::TAILJMPd64);
++      MachineInstrBuilder MIB = BuildMI(MBB, MBBI, DL, TII.get(opcode));
+       if (JumpTarget.isGlobal())
+         MIB.addGlobalAddress(JumpTarget.getGlobal(), JumpTarget.getOffset(),
+                              JumpTarget.getTargetFlags());
+@@ -1018,22 +1021,28 @@ void X86FrameLowering::emitEpilogue(MachineFunction &MF,
+                               JumpTarget.getTargetFlags());
+       }
+     } else if (RetOpcode == X86::TCRETURNmi || RetOpcode == X86::TCRETURNmi64) {
+-      MachineInstrBuilder MIB =
+-        BuildMI(MBB, MBBI, DL, TII.get((RetOpcode == X86::TCRETURNmi)
+-                                       ? X86::TAILJMPm : X86::TAILJMPm64));
++      auto opcode = isTCR ? X86::PUSH64rmm : ((RetOpcode == X86::TCRETURNmi)
++                                             ? X86::TAILJMPm : X86::TAILJMPm64);
++      MachineInstrBuilder MIB = BuildMI(MBB, MBBI, DL, TII.get(opcode));
+       for (unsigned i = 0; i != 5; ++i)
+         MIB.addOperand(MBBI->getOperand(i));
+     } else if (RetOpcode == X86::TCRETURNri64) {
+-      BuildMI(MBB, MBBI, DL, TII.get(X86::TAILJMPr64)).
++      BuildMI(MBB, MBBI, DL, TII.get(isTCR ? X86::PUSH64r : X86::TAILJMPr64)).
+         addReg(JumpTarget.getReg(), RegState::Kill);
+     } else {
+-      BuildMI(MBB, MBBI, DL, TII.get(X86::TAILJMPr)).
++      BuildMI(MBB, MBBI, DL, TII.get(isTCR ? X86::PUSH32r : X86::TAILJMPr)).
+         addReg(JumpTarget.getReg(), RegState::Kill);
+     }
+ 
++    if (isTCR)
++      BuildMI(MBB, MBBI, DL, TII.get(X86::RETL));
++
      MachineInstr *NewMI = std::prev(MBBI);
      NewMI->copyImplicitOps(MF, MBBI);
  
@@ -2223,21 +2480,22 @@ index 58e15c7..0425f02 100644
      MBB.erase(MBBI);
    } else if ((RetOpcode == X86::RETQ || RetOpcode == X86::RETL ||
 diff --git lib/Target/X86/X86ISelLowering.cpp lib/Target/X86/X86ISelLowering.cpp
-index 70760c1..176f226 100644
+index 70760c1..be8f077 100644
 --- lib/Target/X86/X86ISelLowering.cpp
 +++ lib/Target/X86/X86ISelLowering.cpp
-@@ -2190,7 +2190,9 @@ CreateCopyOfByValArgument(SDValue Src, SDValue Dst, SDValue Chain,
+@@ -2190,7 +2190,10 @@ CreateCopyOfByValArgument(SDValue Src, SDValue Dst, SDValue Chain,
  /// supports tail call optimization.
  static bool IsTailCallConvention(CallingConv::ID CC) {
    return (CC == CallingConv::Fast || CC == CallingConv::GHC ||
 -          CC == CallingConv::HiPE);
 +          CC == CallingConv::HiPE || CC == CallingConv::X86_64_HHVM_PHP ||
 +          CC == CallingConv::X86_64_HHVM_SR ||
-+          CC == CallingConv::X86_64_HHVM_TC);
++          CC == CallingConv::X86_64_HHVM_TC ||
++          CC == CallingConv::X86_64_HHVM_TCR);
  }
  
  /// \brief Return true if the calling convention is a C calling convention.
-@@ -3028,10 +3030,16 @@ X86TargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
+@@ -3028,10 +3031,17 @@ X86TargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
      // This isn't right, although it's probably harmless on x86; liveouts
      // should be computed from returns not tail calls.  Consider a void
      // function making a tail call to a function returning int.
@@ -2246,6 +2504,7 @@ index 70760c1..176f226 100644
 +    // Propagate attribute
 +    SDValue result = DAG.getNode(X86ISD::TC_RETURN, dl, NodeTys, Ops);
 +    result.setSmashable(CLI.Smashable);
++    result.setTCR(CallConv == CallingConv::X86_64_HHVM_TCR);
 +    return result;
    }
  
@@ -2255,7 +2514,7 @@ index 70760c1..176f226 100644
    InFlag = Chain.getValue(1);
  
    // Create the CALLSEQ_END node.
-@@ -3540,6 +3548,9 @@ bool X86::isCalleePop(CallingConv::ID CallingConv,
+@@ -3540,6 +3550,9 @@ bool X86::isCalleePop(CallingConv::ID CallingConv,
    if (IsVarArg)
      return false;
  
@@ -2265,7 +2524,7 @@ index 70760c1..176f226 100644
    switch (CallingConv) {
    default:
      return false;
-@@ -3549,12 +3560,6 @@ bool X86::isCalleePop(CallingConv::ID CallingConv,
+@@ -3549,12 +3562,6 @@ bool X86::isCalleePop(CallingConv::ID CallingConv,
      return !is64Bit;
    case CallingConv::X86_ThisCall:
      return !is64Bit;
@@ -2277,6 +2536,20 @@ index 70760c1..176f226 100644
 -    return TailCallOpt;
    }
  }
+ 
+@@ -3594,8 +3601,11 @@ static unsigned TranslateX86CC(ISD::CondCode SetCCOpcode, bool isFP,
+       }
+       if (SetCCOpcode == ISD::SETLT && RHSC->getZExtValue() == 1) {
+         // X < 1   -> X <= 0
+-        RHS = DAG.getConstant(0, RHS.getValueType());
+-        return X86::COND_LE;
++        if (!DAG.getMachineFunction().getFunction()->getAttributes().
++            hasAttribute(AttributeSet::FunctionIndex, Attribute::MinSize)) {
++          RHS = DAG.getConstant(0, RHS.getValueType());
++          return X86::COND_LE;
++        }
+       }
+     }
  
 diff --git lib/Target/X86/X86InstrInfo.cpp lib/Target/X86/X86InstrInfo.cpp
 index 0d46f70..3130db8 100644
@@ -2460,40 +2733,115 @@ index 892396b..187ada4 100644
 +    OutStreamer.EmitBundleAlignMode(CurrentBundleAlignMode);
  }
 diff --git lib/Target/X86/X86RegisterInfo.cpp lib/Target/X86/X86RegisterInfo.cpp
-index 97f86e2..a6d128a 100644
+index 97f86e2..116fe92 100644
 --- lib/Target/X86/X86RegisterInfo.cpp
 +++ lib/Target/X86/X86RegisterInfo.cpp
-@@ -224,7 +224,11 @@ X86RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
+@@ -224,7 +224,12 @@ X86RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
    switch (MF->getFunction()->getCallingConv()) {
    case CallingConv::GHC:
    case CallingConv::HiPE:
 +  case CallingConv::X86_64_HHVM_SR:
 +  case CallingConv::X86_64_HHVM_TC:
++  case CallingConv::X86_64_HHVM_TCR:
      return CSR_NoRegs_SaveList;
 +  case CallingConv::X86_64_HHVM_PHP:
 +    return CSR_64_HHVM_PHP_SaveList;
    case CallingConv::AnyReg:
      if (HasAVX)
        return CSR_64_AllRegs_AVX_SaveList;
-@@ -277,7 +281,11 @@ X86RegisterInfo::getCallPreservedMask(CallingConv::ID CC) const {
+@@ -277,7 +282,12 @@ X86RegisterInfo::getCallPreservedMask(CallingConv::ID CC) const {
    switch (CC) {
    case CallingConv::GHC:
    case CallingConv::HiPE:
 +  case CallingConv::X86_64_HHVM_SR:
 +  case CallingConv::X86_64_HHVM_TC:
++  case CallingConv::X86_64_HHVM_TCR:
      return CSR_NoRegs_RegMask;
 +  case CallingConv::X86_64_HHVM_PHP:
 +    return CSR_64_HHVM_PHP_RegMask;
    case CallingConv::AnyReg:
      if (HasAVX)
        return CSR_64_AllRegs_AVX_RegMask;
+diff --git lib/Transforms/InstCombine/InstCombineCompares.cpp lib/Transforms/InstCombine/InstCombineCompares.cpp
+index 3a50113..c8ed22e 100644
+--- lib/Transforms/InstCombine/InstCombineCompares.cpp
++++ lib/Transforms/InstCombine/InstCombineCompares.cpp
+@@ -2541,8 +2541,11 @@ Instruction *InstCombiner::visitICmpInst(ICmpInst &I) {
+                           Builder->getInt(CI->getValue()+1));
+     case ICmpInst::ICMP_SLE:
+       assert(!CI->isMaxValue(true));                  // A <=s MAX -> TRUE
+-      return new ICmpInst(ICmpInst::ICMP_SLT, Op0,
+-                          Builder->getInt(CI->getValue()+1));
++      if (!MinimizeSize) {
++        return new ICmpInst(ICmpInst::ICMP_SLT, Op0,
++                            Builder->getInt(CI->getValue()+1));
++      }
++      break;
+     case ICmpInst::ICMP_UGE:
+       assert(!CI->isMinValue(false));                 // A >=u MIN -> TRUE
+       return new ICmpInst(ICmpInst::ICMP_UGT, Op0,
+@@ -2776,7 +2779,8 @@ Instruction *InstCombiner::visitICmpInst(ICmpInst &I) {
+         return ReplaceInstUsesWith(I, ConstantInt::getFalse(I.getType()));
+       break;
+     case ICmpInst::ICMP_SLE:
+-      assert(!isa<ConstantInt>(Op1) && "ICMP_SLE with ConstantInt not folded!");
++      assert((MinimizeSize || !isa<ConstantInt>(Op1))
++             && "ICMP_SLE with ConstantInt not folded!");
+       if (Op0Max.sle(Op1Min))          // A <=s B -> true if max(A) <= min(B)
+         return ReplaceInstUsesWith(I, ConstantInt::getTrue(I.getType()));
+       if (Op0Min.sgt(Op1Max))          // A <=s B -> false if min(A) > max(B)
+@@ -3009,25 +3013,27 @@ Instruction *InstCombiner::visitICmpInst(ICmpInst &I) {
+       return new ICmpInst(Pred, Y, Z);
+     }
+ 
+-    // icmp slt (X + -1), Y -> icmp sle X, Y
+-    if (A && NoOp0WrapProblem && Pred == CmpInst::ICMP_SLT &&
+-        match(B, m_AllOnes()))
+-      return new ICmpInst(CmpInst::ICMP_SLE, A, Op1);
++    if (!MinimizeSize) {
++      // icmp slt (X + -1), Y -> icmp sle X, Y
++      if (A && NoOp0WrapProblem && Pred == CmpInst::ICMP_SLT &&
++          match(B, m_AllOnes()))
++        return new ICmpInst(CmpInst::ICMP_SLE, A, Op1);
+ 
+-    // icmp sge (X + -1), Y -> icmp sgt X, Y
+-    if (A && NoOp0WrapProblem && Pred == CmpInst::ICMP_SGE &&
+-        match(B, m_AllOnes()))
+-      return new ICmpInst(CmpInst::ICMP_SGT, A, Op1);
++      // icmp sge (X + -1), Y -> icmp sgt X, Y
++      if (A && NoOp0WrapProblem && Pred == CmpInst::ICMP_SGE &&
++          match(B, m_AllOnes()))
++        return new ICmpInst(CmpInst::ICMP_SGT, A, Op1);
+ 
+-    // icmp sle (X + 1), Y -> icmp slt X, Y
+-    if (A && NoOp0WrapProblem && Pred == CmpInst::ICMP_SLE &&
+-        match(B, m_One()))
+-      return new ICmpInst(CmpInst::ICMP_SLT, A, Op1);
++      // icmp sle (X + 1), Y -> icmp slt X, Y
++      if (A && NoOp0WrapProblem && Pred == CmpInst::ICMP_SLE &&
++          match(B, m_One()))
++        return new ICmpInst(CmpInst::ICMP_SLT, A, Op1);
+ 
+-    // icmp sgt (X + 1), Y -> icmp sge X, Y
+-    if (A && NoOp0WrapProblem && Pred == CmpInst::ICMP_SGT &&
+-        match(B, m_One()))
+-      return new ICmpInst(CmpInst::ICMP_SGE, A, Op1);
++      // icmp sgt (X + 1), Y -> icmp sge X, Y
++      if (A && NoOp0WrapProblem && Pred == CmpInst::ICMP_SGT &&
++          match(B, m_One()))
++        return new ICmpInst(CmpInst::ICMP_SGE, A, Op1);
++    }
+ 
+     // if C1 has greater magnitude than C2:
+     //  icmp (X + C1), (Y + C2) -> icmp (X + C3), Y
 diff --git test/CodeGen/X86/cond-tail.ll test/CodeGen/X86/cond-tail.ll
 new file mode 100644
-index 0000000..d0a132d
+index 0000000..6d3cbfd
 --- /dev/null
 +++ test/CodeGen/X86/cond-tail.ll
-@@ -0,0 +1,59 @@
-+; RUN: llc -cond-tail-dup -mtriple=x86_64-unknown-linux -mcpu=corei7 < %s | FileCheck %s
+@@ -0,0 +1,96 @@
++; RUN: llc -cond-tail-dup -mtriple=x86_64-unknown-linux -mcpu=corei7 < %s | FileCheck %s 
++; RUN: llc -disable-branch-fold -cond-tail-dup -mtriple=x86_64-unknown-linux -mcpu=corei7 < %s | FileCheck %s
 +
 +; Check that conditional tail call is created with all the
 +; appropriate attributes such as smashable and !locrec.
@@ -2521,11 +2869,47 @@ index 0000000..d0a132d
 +
 +}
 +
++; Check that we are replacing conditional jump in non-fallthrough
++; basic block.
++define i32 @no_fallthrough_test(i32 %a, i32 %b) nounwind {
++; CHECK-LABEL: no_fallthrough_test
++; CHECK:       .bundle_align_mode 6
++; CHECK:       jg foo
++; CHECK:       .bundle_align_mode 6
++; CHECK:       jmp goo
++; CHECK:       .bundle_align_mode 6
++; CHECK:       jle goo
++; CHECK:       .bundle_align_mode 6
++; CHECK:       jmp foo
++
++entry:
++  %cmp = icmp sgt i32 %a, %b
++  br i1 %cmp, label %if.then, label %if.else
++
++if.then:
++
++  %cmp1 = icmp sgt i32 %a, 0
++  br i1 %cmp1, label %normal, label %failure.cold
++
++if.else:
++
++  %cmp2 = icmp sgt i32 %b, 0
++  br i1 %cmp2, label %normal, label %failure.cold
++
++normal:
++  %call = tail call i32 @foo(i32 %a) nounwind smashable, !locrec !{i32 44}
++  ret i32 %call
++
++failure.cold:
++  %call1 = tail call i32 @goo(i32 %a) nounwind smashable, !locrec !{i32 45}
++  ret i32 %call1
++}
++
 +declare i32 @foo(i32) nounwind
 +
 +declare i32 @goo(i32) nounwind
 +
-+; We should not attempt to optimize indirect ail call.
++; We should not attempt to optimize indirect tail call.
 +@far = external global i32 (...)*
 +@car = external global i32 (...)*
 +
@@ -2551,6 +2935,40 @@ index 0000000..d0a132d
 +  %retval.0 = phi i32 [ %call, %if.then ], [ %call1, %if.end ]
 +  ret i32 %retval.0
 +}
++
+diff --git test/CodeGen/X86/decmin.ll test/CodeGen/X86/decmin.ll
+new file mode 100644
+index 0000000..0347245
+--- /dev/null
++++ test/CodeGen/X86/decmin.ll
+@@ -0,0 +1,28 @@
++; RUN: opt -O2 -S < %s | llc -march=x86-64
++target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
++target triple = "x86_64-unknown-linux-gnu"
++
++; CHECK-LABEL:  foo:
++; CHECK-NEXT:   mov
++; CHECK-NEXT:   cmp
++; CHECK-NEXT:   jle
++define i32 @foo() minsize {
++entry:
++  %t0 = load i64* inttoptr (i64 140615373291568 to i64*)
++  %t1 = add nsw i64 %t0, -1
++  store i64 %t1, i64* inttoptr (i64 140615373291568 to i64*)
++
++; jcc        LE, %84, B10, else B11
++  %t2 = icmp sle i64 %t1, 0
++  br i1 %t2, label %if.end, label %if.then
++
++if.then:                                          ; preds = %entry
++  %call = tail call i32 @bar() nounwind
++  br label %if.end
++
++if.end:                                           ; preds = %entry, %if.then
++  ret i32 undef
++}
++
++declare i32 @bar() nounwind
 +
 diff --git test/CodeGen/X86/func_align.ll test/CodeGen/X86/func_align.ll
 new file mode 100644
@@ -2582,16 +3000,17 @@ index 0000000..b0fb073
 +
 diff --git test/CodeGen/X86/hhvm-cc.ll test/CodeGen/X86/hhvm-cc.ll
 new file mode 100644
-index 0000000..a34201e
+index 0000000..eb80923
 --- /dev/null
 +++ test/CodeGen/X86/hhvm-cc.ll
-@@ -0,0 +1,90 @@
+@@ -0,0 +1,106 @@
 +; RUN: llc -stack-alignment=8 < %s | FileCheck %s
 +
 +; 80 - HHVM_C
 +; 81 - HHVM_PHP
 +; 82 - HHVM_SR
 +; 83 - HHVM_TC
++; 84 - HHVM_TCR
 +target triple = "x86_64-linux-gnu"
 +
 +declare hhvm_tc void @bar(i64, i64, i64)
@@ -2630,16 +3049,19 @@ index 0000000..a34201e
 +  ret i64 %retval
 +}
 +
-+declare hhvm_php void @php_func(i64, i64, i64, i64)
++declare hhvm_php {i64, i64} @php_func(i64, i64, i64, i64)
 +
-+define hhvm_tc void @test_php(i64 %a, i64 %b, i64 %c) nounwind {
++define hhvm_tc i64 @test_php(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
 +; CHECK-LABEL:  test_php:
 +; CHECK-NEXT:   {{^#.*}}
 +; CHECK-NEXT:   movl $42, %r15
-+; CHECK-NEXT:   jmp php_func
-+  tail call hhvm_php void @php_func(i64 %a, i64 %b, i64 %c, i64 42)
-+  ret void
++; CHECK-NEXT:   callq php_func
++; CHECK-NEXT:   movq %rbp, %rbx
++; CHECK-NEXT:   retq
++  %pair = call hhvm_php {i64, i64} @php_func(i64 %a, i64 %b, i64 %c, i64 42)
++  %fp = extractvalue {i64, i64} %pair, 1
++  ret i64 %fp
 +}
 +
 +declare hhvm_sr void @svcreq(i64, i64, i64, i64, i64, i64, i64, i64, i64, i64)
@@ -2676,21 +3098,63 @@ index 0000000..a34201e
 +  ret void
 +}
 +
++declare hhvm_tcr void @ret_addr(i64, i64, i64)
++
++define hhvm_tc void @test_return(i64 %a, i64 %b, i64 %c) nounwind {
++entry:
++; CHECK-LABEL:  test_return:
++; CHECK-NEXT:   {{^#.*}}
++; CHECK-NEXT:   pushq
++; CHECK-NEXT:   retl
++  tail call hhvm_tcr void @ret_addr(i64 %a, i64 %b, i64 %c)
++  ret void
++}
++
 diff --git test/CodeGen/X86/hhvm-stack.ll test/CodeGen/X86/hhvm-stack.ll
 new file mode 100644
-index 0000000..6112c05
+index 0000000..1ff5b7e
 --- /dev/null
 +++ test/CodeGen/X86/hhvm-stack.ll
-@@ -0,0 +1,13 @@
+@@ -0,0 +1,43 @@
 +; RUN: llc < %s | FileCheck %s
 +
 +declare hhvm_c void @helper(i64, i64, i64)
++declare hhvm_c void @helper2(<2 x double>, i64)
 +
 +define hhvm_tc void @test_helper(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
 +; CHECK-LABEL:  test_helper:
 +; CHECK-NOT:    push
-+; CHECK:        callq helper
++; CHECK:        subq $32, %rsp
++; CHECK:        movaps  16(%rsp), %xmm0
++; CHECK:        callq helper2
++  %t1 = alloca <2 x double>, align 16
++  %t2 = alloca i64, align 8
++  %t3 = alloca i64, align 8
++  %load3 = load i64 *%t3
++  call hhvm_c void @helper(i64 %c, i64 %load3, i64 42)
++  %load = load <2 x double> *%t1
++  %load2 = load i64 *%t2
++  call hhvm_c void @helper2(<2 x double> %load, i64 %load2)
++  ret void
++}
++
++define hhvm_tc void @test_helper2(i64 %a, i64 %b, i64 %c) nounwind {
++entry:
++; CHECK-LABEL:  test_helper2:
++; CHECK-NOT:    push
++; CHECK:        subq $16, %rsp
++  %t1 = alloca i64, align 8
++  %load = load i64 *%t1
++  call hhvm_c void @helper(i64 %c, i64 %load, i64 42)
++  ret void
++}
++
++define hhvm_tc void @test_helper3(i64 %a, i64 %b, i64 %c) nounwind {
++entry:
++; CHECK-LABEL:  test_helper3:
++; CHECK-NOT:    push
++; CHECK-NOT:    subq
 +  call hhvm_c void @helper(i64 %c, i64 7, i64 42)
 +  ret void
 +}
@@ -3191,7 +3655,7 @@ index 0000000..006fe54
 +!0 = metadata !{i32 1, metadata !"code_skew", i32 60}
 +!llvm.module.flags = !{ !0 }
 diff --git utils/vim/llvm.vim utils/vim/llvm.vim
-index 2b91823..8d245bd 100644
+index 2b91823..42f34f7 100644
 --- utils/vim/llvm.vim
 +++ utils/vim/llvm.vim
 @@ -16,7 +16,7 @@ syn case match
@@ -3209,7 +3673,7 @@ index 2b91823..8d245bd 100644
  syn keyword llvmKeyword dllexport dllimport except extern_weak external fastcc
 -syn keyword llvmKeyword filter gc global hidden initialexec inlinehint inreg
 +syn keyword llvmKeyword filter gc global hhvm_c hhvm_php hhvm_sr hhvm_tc
-+syn keyword llvmKeyword hidden initialexec inlinehint inreg
++syn keyword llvmKeyword hhvm_tcr hidden initialexec inlinehint inreg
  syn keyword llvmKeyword intel_ocl_bicc inteldialect internal
  syn keyword llvmKeyword linkonce linkonce_odr
  syn keyword llvmKeyword localdynamic localexec minsize module monotonic

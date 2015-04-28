@@ -126,7 +126,7 @@ struct Vasm {
   using AreaList = jit::vector<Area>;
 
   Vasm() {
-    m_areas.reserve(size_t(AreaIndex::Max));
+    m_areas.reserve(kNumAreas);
   }
 
   /*
@@ -152,13 +152,6 @@ struct Vasm {
   Vout& cold(X64Assembler& a) { return cold(a.code()); }
   Vout& frozen(X64Assembler& a) { return frozen(a.code()); }
 
-  /*
-   * Finishers.
-   */
-  void optimizeX64();
-  void finishX64(const Abi&, AsmInfo* asmInfo);
-  void finishARM(const Abi&, AsmInfo* asmInfo);
-
 private:
   Area& area(AreaIndex i);
   Vout& add(CodeBlock &cb, AreaIndex area);
@@ -167,6 +160,23 @@ private:
   Vunit m_unit;
   AreaList m_areas; // indexed by AreaIndex
 };
+
+/*
+ * Optimize, lower for x64, register allocator, and perform more optimizations
+ * on unit.
+ */
+void optimizeX64(Vunit& unit, const Abi&);
+
+/*
+ * Emit code for the given unit using the given code areas. The unit should
+ * have already been through optimizeX64().
+ */
+void emitX64(const Vunit&, Vasm::AreaList&, AsmInfo*);
+
+/*
+ * Optimize, register allocate, and emit ARM code for the given unit.
+ */
+void finishARM(Vunit&, Vasm::AreaList&, const Abi&, AsmInfo* asmInfo);
 
 /*
  * Vauto is a convenience helper for emitting small amounts of machine code

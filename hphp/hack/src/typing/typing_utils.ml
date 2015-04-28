@@ -12,6 +12,7 @@ open Utils
 open Typing_defs
 
 module N = Nast
+module SN = Naming_special_names
 module Reason = Typing_reason
 module Env = Typing_env
 module ShapeMap = Nast.ShapeMap
@@ -23,32 +24,33 @@ module ShapeMap = Nast.ShapeMap
 let not_implemented _ = failwith "Function not implemented"
 
 type expand_typedef =
-    Env.env -> Reason.t -> string -> ty list -> Env.env * ty
-
+    ety_env -> Env.env -> Reason.t -> string -> locl ty list -> Env.env * ety
 let (expand_typedef_ref : expand_typedef ref) = ref not_implemented
 let expand_typedef x = !expand_typedef_ref x
 
-type unify = Env.env -> ty -> ty -> Env.env * ty
+type unify = Env.env -> locl ty -> locl ty -> Env.env * locl ty
 let (unify_ref: unify ref) = ref not_implemented
 let unify x = !unify_ref x
 
-type sub_type = Env.env -> ty -> ty -> Env.env
+type sub_type = Env.env -> locl ty -> locl ty -> Env.env
 let (sub_type_ref: sub_type ref) = ref not_implemented
 let sub_type x = !sub_type_ref x
+
+(* Convenience function for creating `this` types *)
+let this_of ty = Tgeneric (SN.Typehints.this, Some (Ast.Constraint_as, ty))
 
 (*****************************************************************************)
 (* Returns true if a type is optional *)
 (*****************************************************************************)
 
-let rec is_option env ty =
+let rec is_option: type a. _ -> a ty -> _ =
+  fun env ty ->
   let _, ety = Env.expand_type env ty in
-  match ety with
-  | _, Toption _ -> true
-  | _, Tunresolved tyl ->
+  match snd ety with
+  | Toption _ -> true
+  | Tunresolved tyl ->
       List.exists (is_option env) tyl
-  | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Tvar _
-    | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
-    | Tobject | Tshape _ | Taccess (_, _)) -> false
+  | _ -> false
 
 (*****************************************************************************)
 (* Unification error *)
@@ -182,8 +184,9 @@ let is_array_as_tuple env ty =
       | _ -> false
       )
   | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
-    | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
+    | Tvar _ | Tabstract (_, _, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
     | Tfun _ | Tunresolved _ | Tobject | Tshape _ | Taccess (_, _)) -> false
+
 
 (*****************************************************************************)
 (* Adds a new field to all the shapes found in a given type.
@@ -231,7 +234,7 @@ let min_vis_opt vis_opt1 vis_opt2 =
 (*****************************************************************************)
 
 module HasTany : sig
-  val check: ty -> bool
+  val check: locl ty -> bool
 end = struct
   let visitor =
     object(this)
@@ -242,7 +245,83 @@ end = struct
         (match ty2_opt with
         | None -> true
         | Some ty -> this#on_type acc ty) ||
-        (opt_fold_left this#on_type acc ty1_opt)
+        (Option.fold ~f:this#on_type ~init:acc ty1_opt)
     end
   let check ty = visitor#on_type false ty
 end
+
+(*****************************************************************************)
+(* Transforms a declaration level type into a localized type. This performs
+ * common operations that are necessary for this operation, specifically:
+ *   > Expand newtype/types
+ *   > ...
+ *
+ * When keep track of additional information while localizing a type such as
+ * what type defs were expanded to detect potentially recursive definitions..
+ *)
+(*****************************************************************************)
+
+let rec localize_with_env ?(ety_env = empty_ety_env) env (dty: decl ty): _ * ety =
+  match dty with
+  | _, (Tany | Tmixed | Tprim _ | Tgeneric (_, None)) as x-> env, (ety_env, x)
+  | r, Tarray (ty1, ty2) ->
+      let env, ty1 = opt (localize ~ety_env) env ty1 in
+      let env, ty2 = opt (localize ~ety_env) env ty2 in
+      env, (ety_env, (r, Tarray (ty1, ty2)))
+  | r, Tgeneric (s, Some (ck, ty)) ->
+      let env, ty = localize ~ety_env env ty in
+      env, (ety_env, (r, Tgeneric (s, Some (ck, ty))))
+  | r, Toption ty ->
+     let env, ty = localize ~ety_env env ty in
+     env, (ety_env, (r, Toption ty))
+  | r, Tfun ft ->
+     let env, ft = localize_ft ~ety_env env ft in
+     env, (ety_env, (r, Tfun ft))
+  | r, Tapply ((_, x), argl) when Env.is_typedef x ->
+     let env, argl = lfold (localize ~ety_env) env argl in
+     expand_typedef ety_env env r x argl
+  | r, Tapply (cls, tyl) ->
+     let env, tyl = lfold (localize ~ety_env) env tyl in
+     env, (ety_env, (r, Tclass (cls, tyl)))
+  | r, Ttuple tyl ->
+     let env, tyl = lfold (localize ~ety_env) env tyl in
+     env, (ety_env, (r, Ttuple tyl))
+  | r, Taccess (root_ty, ids) ->
+     let env, root_ty = localize ~ety_env env root_ty in
+     env, (ety_env, (r, Taccess (root_ty, ids)))
+  | r, Tshape tym ->
+     let env, tym = ShapeMap.map_env (localize ~ety_env) env tym in
+     env, (ety_env, (r, Tshape tym))
+
+and localize ?(ety_env = empty_ety_env) env ty =
+  let env, (_, ty) = localize_with_env ~ety_env env ty in
+  env, ty
+
+and localize_ft ?(ety_env = empty_ety_env) env ft =
+  let names, params = List.split ft.ft_params in
+  let env, params = lfold (localize ~ety_env) env params in
+  let env, arity = match ft.ft_arity with
+    | Fvariadic (min, (name, var_ty)) ->
+       let env, var_ty = localize ~ety_env env var_ty in
+       env, Fvariadic (min, (name, var_ty))
+    | Fellipsis _ | Fstandard (_, _) as x -> env, x in
+  let env, ret = localize ~ety_env env ft.ft_ret in
+  let params = List.map2 (fun x y -> x, y) names params in
+  env, { ft with ft_arity = arity; ft_params = params; ft_ret = ret }
+
+let localize_phase ?(ety_env = empty_ety_env) env phase_ty =
+  match phase_ty with
+  | DeclTy ty ->
+     localize ~ety_env env ty
+  | LoclTy ty ->
+     env, ty
+
+let unify_phase env pty1 pty2 =
+  let env, ty1 = localize_phase env pty1 in
+  let env, ty2 = localize_phase env pty2 in
+  unify env ty1 ty2
+
+let sub_type_phase env pty1 pty2 =
+  let env, ty1 = localize_phase env pty1 in
+  let env, ty2 = localize_phase env pty2 in
+  sub_type env ty1 ty2

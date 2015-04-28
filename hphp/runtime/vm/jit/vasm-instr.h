@@ -58,9 +58,9 @@ struct Vunit;
   O(bindaddr, I(dest) I(sk), Un, Dn)\
   O(bindcall, I(stub), U(args), Dn)\
   O(bindjcc1st, I(cc) I(targets[0]) I(targets[1]), U(sf) U(args), Dn)\
-  O(bindjcc, I(cc) I(target), U(sf) U(args), Dn)\
+  O(bindjcc, I(cc) I(target) I(trflags), U(sf) U(args), Dn)\
   O(bindjmp, I(target) I(trflags), U(args), Dn)\
-  O(callstub, I(target) I(kills) I(fix), U(args), Dn)\
+  O(callstub, I(target), U(args), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
   /* vasm intrinsics */\
   O(copy, Inone, UH(s,d), DH(d,s))\
@@ -73,7 +73,6 @@ struct Vunit;
   O(ldimmq, I(s) I(saveflags), Un, D(d))\
   O(fallback, I(dest), U(args), Dn)\
   O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
-  O(kpcall, I(target) I(callee) I(prologIndex), U(args), Dn)\
   O(load, Inone, U(s), D(d))\
   O(mccall, I(target), U(args), Dn)\
   O(mcprep, Inone, Un, D(d))\
@@ -82,21 +81,21 @@ struct Vunit;
   O(phijmp, Inone, U(uses), Dn)\
   O(phijcc, I(cc), U(uses) U(sf), Dn)\
   O(store, Inone, U(s) U(d), Dn)\
-  O(svcreq, I(req) I(stub_block), U(args), Dn)\
+  O(svcreq, I(req) I(stub_block), U(args) U(extraArgs), Dn)\
   O(syncpoint, I(fix), Un, Dn)\
   O(unwind, Inone, Un, Dn)\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
-  O(landingpad, Inone, Un, Dn)\
+  O(vcallstub, I(target), U(args) U(extraArgs), Dn)\
+  O(landingpad, I(fromPHPCall), Un, Dn)\
   O(countbytecode, Inone, U(base), D(sf))\
   O(defvmsp, Inone, Un, D(d))\
   O(syncvmsp, Inone, U(s), Dn)\
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(sar, Inone, U(s0) U(s1), D(d) D(sf))\
   O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
-  O(ldretaddr, Inone, U(s), D(d))\
-  O(movretaddr, Inone, U(s), D(d))\
-  O(retctrl, Inone, U(s), Dn)\
+  O(vretm, Inone, U(retAddr) U(prevFp) U(args), D(d))\
+  O(vret, Inone, U(retAddr) U(args), Dn)\
   O(absdbl, Inone, U(s), D(d))\
   /* arm instructions */\
   O(asrv, Inone, U(sl) U(sr), D(d))\
@@ -163,7 +162,7 @@ struct Vunit;
   O(jmpi, I(target), U(args), Dn)\
   O(lea, Inone, U(s), D(d))\
   O(leap, I(s), Un, D(d))\
-  O(loaddqu, Inone, U(s), D(d))\
+  O(loadups, Inone, U(s), D(d))\
   O(loadtqb, Inone, U(s), D(d))\
   O(loadl, Inone, U(s), D(d))\
   O(loadqp, I(s), Un, D(d))\
@@ -188,11 +187,9 @@ struct Vunit;
   O(orqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
   O(orqim, I(s0), U(m), D(sf))\
   O(pop, Inone, Un, D(d))\
-  O(popm, Inone, U(m), Dn)\
   O(psllq, I(s0), UH(s1,d), DH(d,s1))\
   O(psrlq, I(s0), UH(s1,d), DH(d,s1))\
   O(push, Inone, U(s), Dn)\
-  O(pushm, Inone, U(s), Dn)\
   O(ret, Inone, U(args), Dn)\
   O(roundsd, I(dir), U(s), D(d))\
   O(sarq, Inone, UH(s,d), DH(d,s) D(sf))\
@@ -206,7 +203,7 @@ struct Vunit;
   O(sqrtsd, Inone, U(s), D(d))\
   O(storeb, Inone, U(s) U(m), Dn)\
   O(storebi, I(s), U(m), Dn)\
-  O(storedqu, Inone, U(s) U(m), Dn)\
+  O(storeups, Inone, U(s) U(m), Dn)\
   O(storel, Inone, U(s) U(m), Dn)\
   O(storeli, I(s), U(m), Dn)\
   O(storeqi, I(s), U(m), Dn)\
@@ -241,21 +238,39 @@ struct Vunit;
 // Service requests.
 
 struct bindaddr { TCA* dest; SrcKey sk; };
+
+/*
+ * PHP function call: Smashable call with custom ABI.
+ */
 struct bindcall { TCA stub; RegSet args; Vlabel targets[2]; };
+
+/*
+ * PHP function call: Non-smashable call with same ABI as bindcall.
+ */
+struct callstub { TCA target; RegSet args; };
+
 struct bindjcc1st { ConditionCode cc; VregSF sf; SrcKey targets[2];
                     RegSet args; };
 struct bindjcc { ConditionCode cc; VregSF sf; SrcKey target;
                  TransFlags trflags; RegSet args; };
 struct bindjmp { SrcKey target; TransFlags trflags; RegSet args; };
-struct callstub { CodeAddress target; RegSet args, kills; Fixup fix; };
 struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // VASM intrinsics.
 
+/*
+ * Copies of different arities. All copies happen in parallel, meaning operand
+ * order doesn't matter when a PhysReg appears as both a src and dst.
+ */
 struct copy { Vreg s, d; };
 struct copy2 { Vreg64 s0, s1, d0, d1; };
 struct copyargs { Vtuple s, d; };
+
+/*
+ * Causes any attached debugger to trap. Process may abort if no debugger is
+ * attached.
+ */
 struct debugtrap {};
 
 /*
@@ -270,8 +285,6 @@ struct ldimmq { Immed64 s; Vreg d; bool saveflags; };
 struct fallback { SrcKey dest; TransFlags trflags; RegSet args; };
 struct fallbackcc { ConditionCode cc; VregSF sf; SrcKey dest;
                     TransFlags trflags; RegSet args; };
-struct kpcall { CodeAddress target; const Func* callee; unsigned prologIndex;
-                RegSet args; };
 struct load { Vptr s; Vreg d; };
 struct mccall { CodeAddress target; RegSet args; };
 struct mcprep { Vreg64 d; };
@@ -280,14 +293,29 @@ struct phidef { Vtuple defs; };
 struct phijmp { Vlabel target; Vtuple uses; };
 struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
 struct store { Vreg s; Vptr d; };
-struct svcreq { ServiceRequest req; Vtuple args; TCA stub_block; };
+struct svcreq { ServiceRequest req; RegSet args; Vtuple extraArgs;
+                TCA stub_block; };
 struct syncpoint { Fixup fix; };
 struct unwind { Vlabel targets[2]; };
+
+/*
+ * Function call, without or with exception edges, respectively. Contains
+ * information about a C++ helper call needed for lowering to different target
+ * architectures.
+ */
 struct vcall { CppCall call; VcallArgsId args; Vtuple d;
                Fixup fixup; DestType destType; bool nothrow; };
 struct vinvoke { CppCall call; VcallArgsId args; Vtuple d; Vlabel targets[2];
                  Fixup fixup; DestType destType; bool smashable; };
-struct landingpad {};
+
+/*
+ * Non-smashable PHP function call with exception edges and additional
+ * integer arguments.
+ */
+struct vcallstub { TCA target; RegSet args; Vtuple extraArgs;
+                   Vlabel targets[2]; };
+
+struct landingpad { bool fromPHPCall; };
 struct countbytecode { Vreg base; VregSF sf; };
 
 /*
@@ -309,10 +337,17 @@ struct syncvmsp { Vreg s; };
 struct srem { Vreg s0, s1, d; };
 struct sar { Vreg s0, s1, d; VregSF sf; };
 struct shl { Vreg s0, s1, d; VregSF sf; };
-struct ldretaddr { Vptr s; Vreg d; };
-struct movretaddr { Vreg s, d; };
-struct retctrl { Vreg s; };
 struct absdbl { Vreg s, d; };
+
+/*
+ * Pushes retAddr, loads prevFp into d, and executes a ret instruction.
+ */
+struct vretm { Vptr retAddr; Vptr prevFp; Vreg d; RegSet args; };
+
+/*
+ * Pushes retAddr and executes a ret instruction.
+ */
+struct vret { Vreg retAddr; RegSet args; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // ARM.
@@ -372,8 +407,22 @@ struct andqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct call { CodeAddress target; RegSet args; };
 struct callm { Vptr target; RegSet args; };
 struct callr { Vreg64 target; RegSet args; };
+
+/*
+ * Implements the equivalent of:
+ *
+ *    t1 = load t
+ *    d = condition ? t1 : f
+ *
+ * Note that t is unconditionally dereferenced.
+ */
 struct cloadq { ConditionCode cc; VregSF sf; Vreg64 f; Vptr t; Vreg64 d; };
+
+/*
+ * Implements d = condition ? t : f.
+ */
 struct cmovq { ConditionCode cc; VregSF sf; Vreg64 f, t, d; };
+
 // compares are att-style: s1-s0 => sf
 struct cmpb  { Vreg8  s0; Vreg8  s1; VregSF sf; };
 struct cmpbi { Immed  s0; Vreg8  s1; VregSF sf; };
@@ -411,7 +460,7 @@ struct jmpm { Vptr target; RegSet args; };
 struct jmpi { TCA target; RegSet args; };
 struct lea { Vptr s; Vreg64 d; };
 struct leap { RIPRelativeRef s; Vreg64 d; };
-struct loaddqu { Vptr s; Vreg128 d; };
+struct loadups { Vptr s; Vreg128 d; };
 struct loadtqb { Vptr s; Vreg8 d; };
 struct loadl { Vptr s; Vreg32 d; };
 struct loadqp { RIPRelativeRef s; Vreg64 d; };
@@ -440,9 +489,7 @@ struct orq { Vreg64 s0, s1, d; VregSF sf; };
 struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct orqim { Immed s0; Vptr m; VregSF sf; };
 struct pop { Vreg64 d; };
-struct popm { Vptr m; };
 struct push { Vreg64 s; };
-struct pushm { Vptr s; };
 struct ret { RegSet args; };
 struct roundsd { RoundDirection dir; VregDbl s, d; };
 struct setcc { ConditionCode cc; VregSF sf; Vreg8 d; };
@@ -459,7 +506,7 @@ struct shrqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct sqrtsd { VregDbl s, d; };
 struct storeb { Vreg8 s; Vptr m; };
 struct storebi { Immed s; Vptr m; };
-struct storedqu { Vreg128 s; Vptr m; };
+struct storeups { Vreg128 s; Vptr m; };
 struct storel { Vreg32 s; Vptr m; };
 struct storeli { Immed s; Vptr m; };
 struct storeqi { Immed s; Vptr m; };
@@ -569,11 +616,11 @@ bool isBlockEnd(const Vinstr& inst);
   template<> struct Vinstr::matcher<name> {      \
     using type = jit::name;                      \
     static type& get(Vinstr& inst) {             \
-      assert(inst.op == name);                   \
+      assertx(inst.op == name);                   \
       return inst.name##_;                       \
     }                                            \
     static const type& get(const Vinstr& inst) { \
-      assert(inst.op == name);                   \
+      assertx(inst.op == name);                   \
       return inst.name##_;                       \
     }                                            \
   };

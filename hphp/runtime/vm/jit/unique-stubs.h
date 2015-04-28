@@ -39,14 +39,13 @@ struct UniqueStubs {
   TCA callToExit;
 
   /*
-   * Returning from a function when the ActRec was pushed by the
-   * interpreter.  The return IP on the ActRec will be set to one of
-   * these stubs, so if someone tries to execute a return instruction,
-   * we get a chance to set up state for a POST_INTERP_RET service
-   * request.
+   * Returning from a function when the ActRec was pushed by the interpreter.
+   * The return IP on the ActRec will be set to one of these stubs, so if
+   * someone tries to execute a return instruction, we get a chance to set up
+   * state for a POST_INTERP_RET service request.
    *
-   * Generators need a different stub because the ActRec for a
-   * generator is in the heap.
+   * Generators need a different stub because the ActRec for a generator is in
+   * the heap.
    */
   TCA retHelper;
   TCA genRetHelper;  // version for generators

@@ -25,7 +25,6 @@
 #include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/code_generator.h"
-#include <boost/graph/adjacency_list.hpp>
 #include <set>
 #include <vector>
 #include "hphp/compiler/json.h"
@@ -69,9 +68,6 @@ public:
     VariadicArgumentParam    = 0x10000,// ...$ capture of variable arguments
     ContainsAssert           = 0x20000,// contains call to assert()
   };
-
-  typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;
-  typedef boost::graph_traits<Graph>::vertex_descriptor vertex_descriptor;
 
 public:
   FileScope(const std::string &fileName, int fileSize, const MD5 &md5);
@@ -159,14 +155,6 @@ public:
     return m_typeAliasNames;
   }
 
-  /**
-   * Called only by World
-   */
-  vertex_descriptor vertex() { return m_vertex; }
-  void setVertex(vertex_descriptor vertex) {
-    m_vertex = vertex;
-  }
-
   void setSystem();
   bool isSystem() const { return m_system; }
 
@@ -178,14 +166,11 @@ public:
 
   void analyzeProgram(AnalysisResultPtr ar);
 
-  bool checkClass(const std::string &cls);
   void visit(AnalysisResultPtr ar,
              void (*cb)(AnalysisResultPtr, StatementPtr, void*),
              void *data);
   const std::string &pseudoMainName();
-  void outputFileCPP(AnalysisResultPtr ar, CodeGenerator &cg);
   bool load();
-  std::string outputFilebase() const;
 
   FunctionScopeRawPtr getPseudoMain() const {
     return m_pseudoMain;
@@ -209,8 +194,6 @@ private:
   StringToFunctionScopePtrVecMap *m_redeclaredFunctions;
   StringToClassScopePtrVecMap m_classes;      // name => class
   FunctionScopeRawPtr m_pseudoMain;
-
-  vertex_descriptor m_vertex;
 
   std::string m_pseudoMainName;
   std::set<std::string> m_redecBases;

@@ -53,9 +53,11 @@ bool isBlockEnd(const Vinstr& inst) {
     // terminal
     case Vinstr::ud2:
     case Vinstr::unwind:
+    case Vinstr::vcallstub:
     case Vinstr::vinvoke:
     case Vinstr::ret:
-    case Vinstr::retctrl:
+    case Vinstr::vretm:
+    case Vinstr::vret:
     case Vinstr::fallthru:
     // arm specific
     case Vinstr::hcunwind:

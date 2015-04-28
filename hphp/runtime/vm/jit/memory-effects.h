@@ -87,11 +87,8 @@ struct PureLoad       { AliasClass src; };
  * any other work.  Instructions with these memory effects can be removed if we
  * know the value being stored does not change the value of the location, or if
  * we know the location can never be loaded from again.
- *
- * The NT variation means it is not storing a type tag.
  */
 struct PureStore    { AliasClass dst; SSATmp* value; };
-struct PureStoreNT  { AliasClass dst; SSATmp* value; };
 
 /*
  * Spilling pre-live ActRecs are somewhat unusual, but effectively still just
@@ -120,7 +117,7 @@ struct IterEffects2   { SSATmp* fp;
  * Calls are somewhat special enough that they get a top-level effect.
  *
  * The `destroys_locals' flag indicates whether the call can change locals in
- * the calling frame (e.g. extract() or parse_str().)
+ * the calling frame (e.g. extract() or parse_str(), when called with FCall).
  *
  * The `kills' set are locations that cannot be read by this instruction unless
  * it writes to them first, and which it generally may write to.  (This is used
@@ -131,6 +128,9 @@ struct IterEffects2   { SSATmp* fp;
  * (e.g. debug_backtrace, or pointers to stack slots to a CallBuiltin).
  * Locations in any intersection between `stack' and `kills' may be assumed to
  * be killed.
+ *
+ * Note that calls that have been weakened to CallBuiltin use GeneralEffects,
+ * not CallEffects.
  */
 struct CallEffects    { bool destroys_locals;
                         AliasClass kills;
@@ -191,7 +191,6 @@ struct UnknownEffects {};
 using MemEffects = boost::variant< GeneralEffects
                                  , PureLoad
                                  , PureStore
-                                 , PureStoreNT
                                  , PureSpillFrame
                                  , IterEffects
                                  , IterEffects2

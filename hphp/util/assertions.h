@@ -72,6 +72,12 @@ void assert_fail(const char* e,
                  const char* func,
                  const std::string& msg) __attribute__((__noreturn__));
 
+void assert_fail_no_log(const char* e,
+                        const char* file,
+                        unsigned int line,
+                        const char* func,
+                        const std::string& msg) __attribute__((__noreturn__));
+
 void assert_log_failure(const char* title, const std::string& msg);
 
 /*
@@ -88,9 +94,10 @@ void register_assert_fail_logger(AssertFailLogger);
  */
 struct AssertDetailImpl {
   /*
-   * Prints the results of all registered detailers to stderr.
+   * Prints the results of all registered detailers to stderr.  Returns true if
+   * we had any registered detailers.
    */
-  static void log();
+  static bool log();
 
 protected:
   explicit AssertDetailImpl(const char* name)
@@ -118,7 +125,7 @@ protected:
   AssertDetailImpl& operator=(const AssertDetailImpl&) = delete;
 
 private:
-  static void log_impl(const AssertDetailImpl*);
+  static bool log_impl(const AssertDetailImpl*);
   virtual std::string run() const = 0;
 
 private:
@@ -212,10 +219,15 @@ struct FailedAssertion : std::exception {
 #define assert_fail_impl(e, msg) \
   ::HPHP::assert_fail(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__, msg)
 
+#define assert_fail_impl_no_log(e, msg) \
+  ::HPHP::assert_fail_no_log(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__, msg)
+
 #define assert_throw_fail_impl(e) \
   throw ::HPHP::FailedAssertion(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__)
 
 #define always_assert(e)            assert_impl(e, assert_fail_impl(e, ""))
+#define always_assert_no_log(e)    assert_impl(e, \
+                                        assert_fail_impl_no_log(e, ""))
 #define always_assert_log(e, l)     assert_impl(e, assert_fail_impl(e, l()))
 #define always_assert_flog(e, ...)  assert_impl(e, assert_fail_impl(e,        \
                                         ::folly::format(__VA_ARGS__).str()))
@@ -228,12 +240,16 @@ struct FailedAssertion : std::exception {
 
 #ifndef NDEBUG
 #define assert(e) always_assert(e)
+#define assertx(e) always_assert(e)
+#define assert_no_log(e) always_assert_no_log(e)
 #define assert_log(e, l) always_assert_log(e, l)
 #define assert_flog(e, ...) always_assert_flog(e, __VA_ARGS__)
 #define assert_throw(e) always_assert_throw(e)
 #define assert_throw_log(e, l) always_assert_throw_log(e, l)
 #else
 #define assert(e) static_cast<void>(0)
+#define assertx(e) static_cast<void>(0)
+#define assert_no_log(e) static_cast<void>(0)
 #define assert_log(e, l) static_cast<void>(0)
 #define assert_flog(e, ...) static_cast<void>(0)
 #define assert_throw(e) static_cast<void>(0)

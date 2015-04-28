@@ -64,6 +64,12 @@ function test_call_array_equivalent($args) {
   echo "\n";
 }
 
+function variadic_with_func_get_args(...$args) {
+  echo '* ', __FUNCTION__, "\n";
+  var_dump(func_get_args());
+  var_dump($args);
+}
+
 /* TODO(t4599363): support multiple unpacks
 function test_call_array_equivalent_multi($args) {
   echo "= ", __FUNCTION__, " =", "\n";
@@ -79,6 +85,12 @@ function test_call_array_equivalent_multi($args) {
   $inst->variadic(...$args, ...$args);
   echo "\n";
 } */
+
+class dtor {
+  function __destruct() {
+    echo "dtor::__destruct\n";
+  }
+}
 
 function test_param_mix($args) {
   echo "= ", __FUNCTION__, " =", "\n";
@@ -98,7 +110,11 @@ function test_param_mix($args) {
   echo "\n";
 
   $prefix2 = 'also passed regularly';
-  variadic($prefix, $prefix2, ...$args);
+  $prefix3 = 'arg that ensures more args passed than declared';
+  variadic($prefix, $prefix2, $prefix3, ...$args);
+  variadic_with_func_get_args($prefix, $prefix2, ...$args);
+  variadic_with_func_get_args(new dtor, new dtor, ...[new dtor]);
+  echo "-- after destruct\n";
   regular($prefix, $prefix2, ...$args);
   regular($prefix, $prefix2, ...$args);
   variadic($prefix, $prefix2, ...$args);

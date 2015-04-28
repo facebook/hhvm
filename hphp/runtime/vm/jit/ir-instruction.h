@@ -93,7 +93,7 @@ struct IRInstruction {
    *
    * Pre: other->isTransient() || numDsts() == other->numDsts()
    */
-  void become(IRUnit&, IRInstruction* other);
+  void become(IRUnit&, const IRInstruction* other);
 
   /*
    * Replace the instruction in-place with a Nop.

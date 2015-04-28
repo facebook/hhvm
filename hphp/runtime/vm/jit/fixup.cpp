@@ -25,9 +25,11 @@
 
 namespace HPHP { namespace jit {
 
-bool
-FixupMap::getFrameRegs(const ActRec* ar, const ActRec* prevAr,
-                       VMRegs* outVMRegs) const {
+//////////////////////////////////////////////////////////////////////
+
+bool FixupMap::getFrameRegs(const ActRec* ar,
+                            const ActRec* prevAr,
+                            VMRegs* outVMRegs) const {
   CTCA tca = (CTCA)ar->m_savedRip;
   // Non-obvious off-by-one fun: if the *return address* points into the TC,
   // then the frame we were running on in the TC is actually the previous
@@ -39,24 +41,22 @@ FixupMap::getFrameRegs(const ActRec* ar, const ActRec* prevAr,
     // Note: if indirect fixups happen frequently enough, we could
     // just compare savedRip to be less than some threshold where
     // stubs in a.code stop.
-    assert(prevAr);
+    assertx(prevAr);
     auto pRealRip = ent->indirect.returnIpDisp +
       uintptr_t(prevAr->m_sfp);
     ent = m_fixups.find(*reinterpret_cast<CTCA*>(pRealRip));
-    assert(ent && !ent->isIndirect());
+    assertx(ent && !ent->isIndirect());
   }
   regsFromActRec(tca, ar, ent->fixup, outVMRegs);
   return true;
 }
 
-void
-FixupMap::recordIndirectFixup(CodeAddress frontier, int dwordsPushed) {
+void FixupMap::recordIndirectFixup(CodeAddress frontier, int dwordsPushed) {
   recordIndirectFixup(frontier, IndirectFixup((2 + dwordsPushed) * 8));
 }
 
-void
-FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
-  assert(RuntimeOption::EvalJit);
+void FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
+  assertx(RuntimeOption::EvalJit);
 
   TRACE(1, "fixup(begin):\n");
 
@@ -65,7 +65,7 @@ FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
   do {
     auto* prevRbp = rbp;
     rbp = nextRbp;
-    assert(rbp && "Missing fixup for native call");
+    assertx(rbp && "Missing fixup for native call");
     nextRbp = rbp->m_sfp;
     TRACE(2, "considering frame %p, %p\n", rbp, (void*)rbp->m_savedRip);
 
@@ -92,17 +92,16 @@ FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
   always_assert(false);
 }
 
-void
-FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
+void FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
   TRACE(1, "fixup(begin):\n");
 
   auto isVMFrame = [] (ActRec* ar, const vixl::Simulator* sim) {
     // If this assert is failing, you may have forgotten a sync point somewhere
-    assert(ar);
+    assertx(ar);
     bool ret =
       uintptr_t(ar) - s_stackLimit >= s_stackSize &&
       !sim->is_on_stack(ar);
-    assert(!ret || isValidVMStackAddress(ar) || ar->resumed());
+    assertx(!ret || isValidVMStackAddress(ar) || ar->resumed());
     return ret;
   };
 
@@ -149,8 +148,7 @@ FixupMap::fixupWorkSimulated(ExecutionContext* ec) const {
   always_assert(false);
 }
 
-void
-FixupMap::fixup(ExecutionContext* ec) const {
+void FixupMap::fixup(ExecutionContext* ec) const {
   if (RuntimeOption::EvalSimulateARM) {
     // Walking the C++ stack doesn't work in simulation mode. Fortunately, the
     // execution context has a stack of simulators, which we consult instead.
@@ -166,8 +164,7 @@ FixupMap::fixup(ExecutionContext* ec) const {
 /* This is somewhat hacky. It decides which helpers/builtins should
  * use eager vmreganchor based on profile information. Using eager
  * vmreganchor for all helper calls is a perf regression. */
-bool
-FixupMap::eagerRecord(const Func* func) {
+bool FixupMap::eagerRecord(const Func* func) {
   const char* list[] = {
     "func_get_args",
     "__SystemLib\\func_get_args_sl",
@@ -187,5 +184,7 @@ FixupMap::eagerRecord(const Func* func) {
     !strcmp(func->cls()->name()->data(), "HH\\WaitHandle") &&
     !strcmp(func->name()->data(), "join");
 }
+
+//////////////////////////////////////////////////////////////////////
 
 }}

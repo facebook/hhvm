@@ -1,0 +1,4 @@
+File "parent_unrelated.php", line 14, characters 19-29:
+You are extending a class that needs to be initialized
+Make sure you call parent::__construct.
+ (NastCheck[3012])

@@ -59,7 +59,7 @@ T* handleToPtr(rds::Handle h) {
 
 template<class Cache>
 typename Cache::Pair* keyToPair(Cache* cache, const StringData* k) {
-  assert(folly::isPowTwo(Cache::kNumLines));
+  assertx(folly::isPowTwo(Cache::kNumLines));
   return cache->m_pairs + (k->hash() & (Cache::kNumLines - 1));
 }
 
@@ -101,13 +101,13 @@ const Func* FuncCache::lookup(rds::Handle handle, StringData* sd) {
   }
   // DecRef the string here; more compact than doing so in callers.
   decRefStr(sd);
-  assert(stringMatches(pair->m_key, pair->m_value->name()));
+  assertx(stringMatches(pair->m_key, pair->m_value->name()));
   pair->m_value->validate();
   return pair->m_value;
 }
 
 void invalidateForRenameFunction(const StringData* name) {
-  assert(name);
+  assertx(name);
   std::lock_guard<std::mutex> g(funcCacheMutex);
   for (auto& h : funcCacheEntries) {
     memset(h.get(), 0, sizeof *h);
@@ -198,7 +198,7 @@ void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
       return nullFunc(ar, name);
     }
     ar->setInvName(name);
-    assert(!(func->attrs() & AttrStatic));
+    assertx(!(func->attrs() & AttrStatic));
     ar->m_func   = func;
     mce->m_key   = reinterpret_cast<uintptr_t>(cls) | 0x1u;
     mce->m_value = func;
@@ -237,11 +237,11 @@ void readMagicOrStatic(Entry* mce,
   auto const isMagic = mceKey & 0x1u;
   if (UNLIKELY(isMagic)) {
     ar->setInvName(name);
-    assert(!(mceKey & 0x2u));
+    assertx(!(mceKey & 0x2u));
     return;
   }
 
-  assert(mceKey & 0x2u);
+  assertx(mceKey & 0x2u);
   if (LIKELY(!mceValue->isClosureBody())) {
     auto const obj = ar->getThis();
     if (debug) ar->setThis(nullptr); // suppress assert in setClass
@@ -272,10 +272,10 @@ void handleSlowPath(Entry* mce,
                     Class* cls,
                     Class* ctx,
                     uintptr_t mcePrime) {
-  assert(ar->hasThis());
-  assert(ar->getThis()->getVMClass() == cls);
-  assert(IMPLIES(mce->m_key, mce->m_value));
-  assert(name->isStatic());
+  assertx(ar->hasThis());
+  assertx(ar->getThis()->getVMClass() == cls);
+  assertx(IMPLIES(mce->m_key, mce->m_value));
+  assertx(name->isStatic());
 
   // Check for a hit in the request local cache---since we've failed
   // on the immediate smashed in the TC.
@@ -314,7 +314,7 @@ void handleSlowPath(Entry* mce,
                                       mceValue);
     }
   }
-  assert(!(mceValue->attrs() & AttrStatic));
+  assertx(!(mceValue->attrs() & AttrStatic));
 
   // Note: if you manually CSE mceValue->methodSlot() here, gcc 4.8
   // will strangely generate two loads instead of one.
@@ -348,7 +348,7 @@ void handleSlowPath(Entry* mce,
   // an instance of it last time).
   if (UNLIKELY(mceValue->attrs() & AttrPrivate)) {
     auto const oldCls = mceValue->cls();
-    assert(!(oldCls->attrs() & AttrInterface));
+    assertx(!(oldCls->attrs() & AttrInterface));
     if (cls->classVecLen() >= oldCls->classVecLen() &&
         cls->classVec()[oldCls->classVecLen() - 1] == oldCls) {
       // cls <: oldCls -- choose the same function as last time.
@@ -364,7 +364,7 @@ void handleSlowPath(Entry* mce,
   // We can use the invoked name `name' to compare with cand, but note
   // that function names are case insensitive, so it's not necessarily
   // true that mceValue->name() == name bitwise.
-  assert(mceValue->name()->isame(name));
+  assertx(mceValue->name()->isame(name));
   if (LIKELY(cand->name() == name)) {
     if (LIKELY(cand->attrs() & AttrPublic)) {
       // If the candidate function is public, then it has to be the
@@ -397,7 +397,7 @@ void handleSlowPath(Entry* mce,
     // call the new implementation too.  We also know the new function
     // can't be static, because the last one wasn't.
     if (LIKELY(cand->baseCls() == mceValue->baseCls())) {
-      assert(!(cand->attrs() & AttrStatic));
+      assertx(!(cand->attrs() & AttrStatic));
       ar->m_func   = cand;
       mce->m_value = cand;
       mce->m_key   = reinterpret_cast<uintptr_t>(cls);
@@ -452,7 +452,7 @@ void handlePrimeCacheInit(Entry* mce,
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
     always_assert(mcg->backEnd().isSmashable(addr, kMovLen));
     //XX these assume the immediate move was to r10
-    //assert(addr[0] == 0x49 && addr[1] == 0xba);
+    //assertx(addr[0] == 0x49 && addr[1] == 0xba);
     auto const ptr = reinterpret_cast<uintptr_t*>(addr + kMovImmOff);
     if (!(*ptr & 1)) {
       return false;
@@ -494,7 +494,7 @@ void handlePrimeCacheInit(Entry* mce,
 
   uintptr_t imm = 0x2; /* not a Class, but clear low bit */
   if (cacheable) {
-    assert(!(mce->m_value->attrs() & AttrStatic));
+    assertx(!(mce->m_value->attrs() & AttrStatic));
     imm = fval << 32 | cval;
   }
   if (!smashMov(movAddr, imm)) {
@@ -586,7 +586,7 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
     thiz->m_func = f;
     return f;
   }
-  assert(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
+  assertx(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
 
   // Indicate to the IR that it should take even slower path
   return nullptr;
@@ -595,7 +595,7 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
 const Func*
 StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
                            const StringData* methName, TypedValue* vmfp) {
-  assert(cls);
+  assertx(cls);
   StaticMethodFCache* thiz = static_cast<StaticMethodFCache*>
     (handleToPtr(handle));
   Stats::inc(Stats::TgtCache_StaticMethodFMiss);
@@ -607,7 +607,7 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
                                          nullptr,
                                          arGetContextClass((ActRec*)vmfp),
                                          false /*raise*/);
-  assert(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
+  assertx(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
   if (LIKELY(res == LookupResult::MethodFoundNoThis && !f->isAbstract())) {
     // We called lookupClsMethod with a NULL this and got back a method that
     // may or may not be static. This implies that lookupClsMethod, given the

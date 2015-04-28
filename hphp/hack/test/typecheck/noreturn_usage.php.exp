@@ -1,0 +1,4 @@
+File "noreturn_usage.php", line 10, characters 3-32:
+You are using the return value of a noreturn function (Typing[4133])
+File "noreturn_usage.php", line 3, characters 15-22:
+A noreturn function always throws or exits

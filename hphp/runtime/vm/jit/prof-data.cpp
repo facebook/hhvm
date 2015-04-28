@@ -50,7 +50,7 @@ T* ProfCounters<T>::getAddr(uint32_t id) {
     std::fill_n(chunk, kCountersPerChunk, m_initVal);
     m_chunks.push_back(chunk);
   }
-  assert(id / kCountersPerChunk < m_chunks.size());
+  assertx(id / kCountersPerChunk < m_chunks.size());
   return &(m_chunks[id / kCountersPerChunk][id % kCountersPerChunk]);
 }
 
@@ -83,7 +83,7 @@ void PrologueCallersRec::clearAllCallers() {
 
 void PrologueToTransMap::add(FuncId funcId, int numArgs, TransID transId) {
   auto pid = PrologueID(funcId, numArgs);
-  assert(m_prologueIdToTransId.find(pid) == m_prologueIdToTransId.end());
+  assertx(m_prologueIdToTransId.find(pid) == m_prologueIdToTransId.end());
   m_prologueIdToTransId[pid] = transId;
 }
 
@@ -105,7 +105,7 @@ ProfTransRec::ProfTransRec(TransID       id,
     , m_lastBcOff(lastBcOff)
     , m_region(region)
     , m_sk(sk) {
-  assert(region == nullptr || (!region->empty() && region->start() == sk));
+  assertx(region == nullptr || (!region->empty() && region->start() == sk));
 }
 
 ProfTransRec::ProfTransRec(TransID       id,
@@ -116,7 +116,7 @@ ProfTransRec::ProfTransRec(TransID       id,
     , m_lastBcOff(-1)
     , m_region(nullptr)
     , m_sk(sk) {
-  assert(kind == TransKind::Anchor || kind == TransKind::Optimize ||
+  assertx(kind == TransKind::Anchor || kind == TransKind::Optimize ||
          kind == TransKind::Interp || kind == TransKind::Live);
 }
 
@@ -129,7 +129,7 @@ ProfTransRec::ProfTransRec(TransID       id,
     , m_prologueArgs(nArgs)
     , m_region(nullptr)
     , m_sk(sk) {
-  assert(kind == TransKind::Prologue || kind == TransKind::Proflogue);
+  assertx(kind == TransKind::Prologue || kind == TransKind::Proflogue);
   if (kind == TransKind::Proflogue) {
     // we only need to keep track of the callers for Proflogues
     m_prologueCallers = folly::make_unique<PrologueCallersRec>();
@@ -149,7 +149,7 @@ SrcKey ProfTransRec::srcKey() const {
 }
 
 SrcKey ProfTransRec::lastSrcKey() const {
-  assert(m_kind == TransKind::Profile);
+  assertx(m_kind == TransKind::Profile);
   return SrcKey(m_sk.func(), m_lastBcOff, m_sk.resumed());
 }
 
@@ -158,12 +158,12 @@ Offset ProfTransRec::startBcOff() const {
 }
 
 Offset ProfTransRec::lastBcOff() const {
-  assert(m_kind == TransKind::Profile);
+  assertx(m_kind == TransKind::Profile);
   return m_lastBcOff;
 }
 
 int ProfTransRec::prologueArgs() const {
-  assert(m_kind == TransKind::Proflogue);
+  assertx(m_kind == TransKind::Proflogue);
   return m_prologueArgs;
 }
 
@@ -176,12 +176,12 @@ FuncId ProfTransRec::funcId() const {
 }
 
 RegionDescPtr ProfTransRec::region() const {
-  assert(kind() == TransKind::Profile);
+  assertx(kind() == TransKind::Profile);
   return m_region;
 }
 
 PrologueCallersRec* ProfTransRec::prologueCallers() const {
-  assert(kind() == TransKind::Proflogue);
+  assertx(kind() == TransKind::Proflogue);
   return m_prologueCallers.get();
 }
 
@@ -206,22 +206,22 @@ bool ProfData::hasTransRec(TransID id) const {
 }
 
 SrcKey ProfData::transSrcKey(TransID id) const {
-  assert(id < m_transRecs.size());
+  assertx(id < m_transRecs.size());
   return m_transRecs[id]->srcKey();
 }
 
 SrcKey ProfData::transLastSrcKey(TransID id) const {
-  assert(id < m_transRecs.size());
+  assertx(id < m_transRecs.size());
   return m_transRecs[id]->lastSrcKey();
 }
 
 Offset ProfData::transStartBcOff(TransID id) const {
-  assert(id < m_transRecs.size());
+  assertx(id < m_transRecs.size());
   return m_transRecs[id]->startBcOff();
 }
 
 Offset ProfData::transLastBcOff(TransID id) const {
-  assert(id < m_transRecs.size());
+  assertx(id < m_transRecs.size());
   return m_transRecs[id]->lastBcOff();
 }
 
@@ -238,40 +238,40 @@ Offset ProfData::transStopBcOff(TransID id) const {
 }
 
 FuncId ProfData::transFuncId(TransID id) const {
-  assert(id < m_transRecs.size());
+  assertx(id < m_transRecs.size());
   return m_transRecs[id]->funcId();
 }
 
 Func* ProfData::transFunc(TransID id) const {
-  assert(id < m_transRecs.size());
+  assertx(id < m_transRecs.size());
   return m_transRecs[id]->func();
 }
 
 const TransIDVec& ProfData::funcProfTransIDs(FuncId funcId) const {
   auto it = m_funcProfTrans.find(funcId);
-  assert(it != m_funcProfTrans.end());
+  assertx(it != m_funcProfTrans.end());
   return it->second;
 }
 
 TransKind ProfData::transKind(TransID id) const {
-  assert(id < m_numTrans);
+  assertx(id < m_numTrans);
   return m_transRecs[id]->kind();
 }
 
 bool ProfData::isKindProfile(TransID id) const {
-  assert(id < m_numTrans);
+  assertx(id < m_numTrans);
   // we don't keep ProfTransRecs for non-profile translations
   if (m_transRecs[id] == nullptr) return false;
   return m_transRecs[id]->kind() == TransKind::Profile;
 }
 
 int64_t ProfData::absTransCounter(TransID id) const {
-  assert(id < m_numTrans);
+  assertx(id < m_numTrans);
   return RuntimeOption::EvalJitPGOThreshold - m_counters.get(id);
 }
 
 int64_t ProfData::transCounter(TransID id) const {
-  assert(id < m_numTrans);
+  assertx(id < m_numTrans);
   return m_counters.get(id);
 }
 
@@ -329,7 +329,7 @@ void ProfData::setProfiling(FuncId funcId) {
 }
 
 RegionDescPtr ProfData::transRegion(TransID id) const {
-  assert(id < m_transRecs.size());
+  assertx(id < m_transRecs.size());
   const ProfTransRec& pTransRec = *m_transRecs[id];
   return pTransRec.region();
 }
@@ -339,9 +339,9 @@ TransID ProfData::addTransProfile(const RegionDescPtr&  region,
   TransID transId   = m_numTrans++;
   Offset  lastBcOff = region->lastSrcKey().offset();
 
-  assert(region);
+  assertx(region);
   DEBUG_ONLY size_t nBlocks = region->blocks().size();
-  assert(nBlocks == 1 || (nBlocks > 1 && region->entry()->inlinedCallee()));
+  assertx(nBlocks == 1 || (nBlocks > 1 && region->entry()->inlinedCallee()));
   region->renumberBlock(region->entry()->id(), transId);
 
   region->blocks().back()->setPostConditions(pconds);
@@ -375,7 +375,7 @@ TransID ProfData::addTransProfile(const RegionDescPtr&  region,
 
 TransID ProfData::addTransPrologue(TransKind kind, SrcKey sk,
                                    int nArgs) {
-  assert(kind == TransKind::Prologue || kind == TransKind::Proflogue);
+  assertx(kind == TransKind::Prologue || kind == TransKind::Proflogue);
   TransID transId = m_numTrans++;
   m_transRecs.emplace_back(new ProfTransRec(transId, kind, sk, nArgs));
   if (kind == TransKind::Proflogue) {
@@ -386,7 +386,7 @@ TransID ProfData::addTransPrologue(TransKind kind, SrcKey sk,
 }
 
 TransID ProfData::addTransNonProf(TransKind kind, SrcKey sk) {
-  assert(kind == TransKind::Anchor || kind == TransKind::Interp ||
+  assertx(kind == TransKind::Anchor || kind == TransKind::Interp ||
          kind == TransKind::Live   || kind == TransKind::Optimize);
   TransID transId = m_numTrans++;
   m_transRecs.emplace_back(nullptr);
@@ -397,12 +397,12 @@ PrologueCallersRec* ProfData::findPrologueCallersRec(const Func* func,
                                                      int nArgs) const {
   TransID tid = prologueTransId(func, nArgs);
   if (tid == kInvalidTransID) {
-    assert(RuntimeOption::EvalJitPGOHotOnly && !(func->attrs() & AttrHot));
+    assertx(RuntimeOption::EvalJitPGOHotOnly && !(func->attrs() & AttrHot));
     return nullptr;
   }
-  assert(transKind(tid) == TransKind::Proflogue);
+  assertx(transKind(tid) == TransKind::Proflogue);
   PrologueCallersRec* prologueCallers = m_transRecs[tid]->prologueCallers();
-  assert(prologueCallers);
+  assertx(prologueCallers);
   return prologueCallers;
 }
 

@@ -1101,7 +1101,7 @@ private:
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
   };
 
-  typedef AtomicSmartPtr<SharedData> SharedDataPtr;
+  typedef AtomicSharedPtr<SharedData> SharedDataPtr;
 
   /*
    * SharedData accessors for internal use.

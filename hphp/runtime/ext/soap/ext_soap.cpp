@@ -162,7 +162,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // forward declarations
 
-static void throw_soap_server_fault(litstr code, litstr fault);
+static void throw_soap_server_fault(const char* code, const char* fault);
 static void model_to_string(sdlContentModelPtr model, StringBuffer &buf,
                             int level);
 static void header_if_not_sent(const String& str);
@@ -1860,7 +1860,7 @@ static void send_soap_server_fault(
   }
 }
 
-static void throw_soap_server_fault(litstr code, litstr fault) {
+static void throw_soap_server_fault(const char* code, const char* fault) {
   send_soap_server_fault(
     std::shared_ptr<sdlFunction>(), create_soap_fault(code, fault),
                          nullptr);
@@ -2701,8 +2701,8 @@ Variant HHVM_METHOD(SoapClient, __soapcall,
 }
 
 Variant HHVM_METHOD(SoapClient, __call,
-                    Variant name,
-                    Variant args) {
+                    const Variant& name,
+                    const Variant& args) {
   return HHVM_MN(SoapClient, __soapcall)(this_, name.toString(),
                                          args.toArray());
 }

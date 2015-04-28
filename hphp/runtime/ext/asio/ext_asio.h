@@ -19,20 +19,19 @@
 #define incl_HPHP_EXT_ASIO_H_
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/asio/async_function_wait_handle.h"
-#include "hphp/runtime/ext/asio/async_generator.h"
-#include "hphp/runtime/ext/asio/async_generator_wait_handle.h"
-#include "hphp/runtime/ext/asio/await_all_wait_handle.h"
-#include "hphp/runtime/ext/asio/blockable_wait_handle.h"
-#include "hphp/runtime/ext/asio/condition_wait_handle.h"
-#include "hphp/runtime/ext/asio/external_thread_event_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_array_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_map_wait_handle.h"
-#include "hphp/runtime/ext/asio/gen_vector_wait_handle.h"
-#include "hphp/runtime/ext/asio/reschedule_wait_handle.h"
-#include "hphp/runtime/ext/asio/sleep_wait_handle.h"
-#include "hphp/runtime/ext/asio/static_wait_handle.h"
-#include "hphp/runtime/ext/asio/waitable_wait_handle.h"
+#include "hphp/runtime/ext/asio/async-function-wait-handle.h"
+#include "hphp/runtime/ext/asio/async-generator.h"
+#include "hphp/runtime/ext/asio/async-generator-wait-handle.h"
+#include "hphp/runtime/ext/asio/await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/condition-wait-handle.h"
+#include "hphp/runtime/ext/asio/external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/gen-array-wait-handle.h"
+#include "hphp/runtime/ext/asio/gen-map-wait-handle.h"
+#include "hphp/runtime/ext/asio/gen-vector-wait-handle.h"
+#include "hphp/runtime/ext/asio/reschedule-wait-handle.h"
+#include "hphp/runtime/ext/asio/sleep-wait-handle.h"
+#include "hphp/runtime/ext/asio/static-wait-handle.h"
+#include "hphp/runtime/ext/asio/waitable-wait-handle.h"
 
 namespace HPHP {
 

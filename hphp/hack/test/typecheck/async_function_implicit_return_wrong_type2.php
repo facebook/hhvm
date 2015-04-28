@@ -10,7 +10,11 @@
  */
 
 async function f(): Awaitable<int> {
-  if (true) {
+  if (condition()) {
     return 1;
   }
+}
+
+function condition(): bool {
+  return true;
 }

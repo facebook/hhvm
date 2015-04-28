@@ -49,44 +49,43 @@ NEVER_INLINE void throw_string_too_large(size_t len) {
 }
 
 // Allocate memory for a string, return the pointer to uninitialized
-// memory, and the encoded capCode value to use.
+// memory, and the encoded CapCode value to use.
 ALWAYS_INLINE
-std::pair<StringData*,uint32_t> allocFlatForLen(size_t len) {
-  static_assert(StringData::MaxSize + 1 < kMaxPackedCap, "");
+std::pair<StringData*,CapCode> allocFlatForLen(size_t len) {
+  static_assert(StringData::MaxSize + 1 < CapCode::Max, "");
+  static_assert(CapCode::Threshold >= kCapOverhead, "");
 
-  if (LIKELY(len <= kPackedCapCodeThreshold - kCapOverhead)) {
+  if (LIKELY(len <= CapCode::Threshold - kCapOverhead)) {
     // fast path for most small strings
-    auto need = len + kCapOverhead;
-    auto cap = MemoryManager::smartSizeClass(need);
-    auto sd = static_cast<StringData*>(MM().smartMallocSizeLogged(cap));
-    assert(cap <= kPackedCapCodeThreshold);
-    return std::make_pair(sd, cap - kCapOverhead);
+    auto need = MemoryManager::smartSizeClass(len + kCapOverhead);
+    auto sd = static_cast<StringData*>(MM().smartMallocSizeLogged(need));
+    // size class rounding ensures need >= (len+kCapOverhead), but rounding up
+    // might have caused our capacity value (need - kCapOverhead) to
+    // cross CapCode::Threshold. Truncate it to an encodable value. This is
+    // safe because floor either returns the value exactly (fine), or returns
+    // an encoded value >= Threshold, which is safe if we're on this path.
+    auto cc = CapCode::floor(need - kCapOverhead);
+    assert(cc.decode() >= len);
+    return std::make_pair(sd, cc);
   }
-
   if (UNLIKELY(len > StringData::MaxSize)) {
     throw_string_too_large(len);
   }
-
-  auto const encodable = roundUpPackedCap(len);
-  auto const need = encodable + kCapOverhead;
+  auto const encoded = CapCode::ceil(len);
+  auto const need = encoded.decode() + kCapOverhead;
   if (LIKELY(need <= kMaxSmartSize)) {
     auto cap = MemoryManager::smartSizeClass(need);
-    if (!isEncodableCap(cap - kCapOverhead)) {
-      cap -= (cap - kCapOverhead) & 0xFF;
-      assert(isEncodableCap(cap - kCapOverhead));
-    }
-    auto const sd = static_cast<StringData*>(MM().smartMallocSizeLogged(cap));
-    return std::make_pair(sd, packedCapToCode(cap - kCapOverhead));
+    auto cc = CapCode::floor(cap - kCapOverhead);
+    assert(cc.decode() >= len);
+    auto const sd = static_cast<StringData*>(
+        MM().smartMallocSizeLogged(cc.decode() + kCapOverhead)
+    );
+    return std::make_pair(sd, cc);
   }
-
   auto const block = MM().smartMallocSizeBigLogged<true>(need);
-  auto cap = block.size;
-  if (!isEncodableCap(cap - kCapOverhead)) {
-    cap -= (cap - kCapOverhead) & 0xFF;
-    assert(isEncodableCap(cap - kCapOverhead));
-  }
-  return std::make_pair(static_cast<StringData*>(block.ptr),
-                        packedCapToCode(cap - kCapOverhead));
+  auto cc = CapCode::floor(block.size - kCapOverhead);
+  assert(cc.decode() >= len);
+  return std::make_pair(static_cast<StringData*>(block.ptr), cc);
 }
 
 ALWAYS_INLINE
@@ -117,16 +116,15 @@ StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
     throw_string_too_large(sl.len);
   }
 
-  auto const encodable = roundUpPackedCap(sl.len);
-  auto const need = encodable + kCapOverhead;
+  auto const cc = CapCode::ceil(sl.len);
+  auto const need = cc.decode() + kCapOverhead;
   auto const sd = static_cast<StringData*>(
     trueStatic ? low_malloc(need) : malloc(need)
   );
   auto const data = reinterpret_cast<char*>(sd + 1);
-  auto const capCode = packedCapToCode(encodable);
 
   sd->m_data        = data;
-  sd->m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
+  sd->m_capAndCount = (HeaderKind::String << 24) | cc.code; // count=0
   sd->m_lenAndHash  = sl.len; // hash=0
 
   data[sl.len] = 0;
@@ -164,7 +162,7 @@ StringData* StringData::MakeEmpty() {
   auto const data = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_capAndCount = HeaderKind::String << 24; // capCode=0 count=0
+  sd->m_capAndCount = HeaderKind::String << 24; // cap=0 count=0
   sd->m_lenAndHash  = 0; // len=0, hash=0
   data[0] = 0;
 
@@ -226,11 +224,11 @@ unsigned StringData::sweepAll() {
 StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   auto const allocRet = allocFlatForLen(sl.len);
   auto const sd       = allocRet.first;
-  auto const capCode  = allocRet.second;
+  auto const cc       = allocRet.second;
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data         = data;
-  sd->m_capAndCount  = HeaderKind::String << 24 | capCode; // count=0
+  sd->m_capAndCount  = (HeaderKind::String << 24) | cc.code; // count=0
   sd->m_lenAndHash   = sl.len; // hash=0
 
   data[sl.len] = 0;
@@ -258,12 +256,12 @@ StringData* StringData::Make(const char* data, size_t len, CopyStringMode) {
 StringData* StringData::Make(size_t reserveLen) {
   auto const allocRet = allocFlatForLen(reserveLen);
   auto const sd       = allocRet.first;
-  auto const capCode  = allocRet.second;
+  auto const cc       = allocRet.second;
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   data[0] = 0;
   sd->m_data        = data;
-  sd->m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
+  sd->m_capAndCount = (HeaderKind::String << 24) | cc.code; // count=0
   sd->m_lenAndHash  = 0; // len=hash=0
 
   assert(sd->m_count == 0);
@@ -288,11 +286,11 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2) {
   auto const len      = r1.len + r2.len;
   auto const allocRet = allocFlatForLen(len);
   auto const sd       = allocRet.first;
-  auto const capCode  = allocRet.second;
+  auto const cc       = allocRet.second;
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
+  sd->m_capAndCount = (HeaderKind::String << 24) | cc.code; // count=0
   sd->m_lenAndHash  = len; // hash=0
 
   memcpy(data, r1.ptr, r1.len);
@@ -314,11 +312,11 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   auto const len      = r1.len + r2.len + r3.len;
   auto const allocRet = allocFlatForLen(len);
   auto const sd       = allocRet.first;
-  auto const capCode  = allocRet.second;
+  auto const cc       = allocRet.second;
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
+  sd->m_capAndCount = (HeaderKind::String << 24) | cc.code; // count=0
   sd->m_lenAndHash  = len; // hash=0
 
   void* p;
@@ -338,11 +336,11 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   auto const len      = r1.len + r2.len + r3.len + r4.len;
   auto const allocRet = allocFlatForLen(len);
   auto const sd       = allocRet.first;
-  auto const capCode  = allocRet.second;
+  auto const cc       = allocRet.second;
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
+  sd->m_capAndCount = (HeaderKind::String << 24) | cc.code; // count=0
   sd->m_lenAndHash  = len; // hash=0
 
   void* p;
@@ -379,8 +377,7 @@ StringData* StringData::MakeAPCSlowPath(const APCString* shared) {
   );
   auto const data = shared->getStringData();
   sd->m_data = const_cast<char*>(data->m_data);
-  // count=0, kind=data->kind with bitref masked out
-  sd->m_capAndCount = data->m_capCode & ~(1 << 7); 
+  sd->m_capAndCount = data->m_cap_kind; // count=0, cap_kind=data->cap_kind
   sd->m_lenAndHash = data->m_lenAndHash;
   sd->sharedPayload()->shared = shared;
   sd->enlist();
@@ -388,7 +385,7 @@ StringData* StringData::MakeAPCSlowPath(const APCString* shared) {
 
   assert(sd->m_len == data->size());
   assert(sd->m_count == 0);
-  assert(sd->m_capCode == data->m_capCode);
+  assert(sd->m_cap_kind == data->m_cap_kind);
   assert(sd->m_hash == data->m_hash);
   assert(sd->m_kind == HeaderKind::String);
   assert(sd->isShared());
@@ -413,16 +410,16 @@ StringData* StringData::Make(const APCString* shared) {
   assert(hash != 0);
 
   static_assert(SmallStringReserve + sizeof(StringData) + 1 <
-                kPackedCapCodeThreshold, "");
+                CapCode::Threshold, "");
   auto const need = sizeof(StringData) + len + 1;
   auto const cap = MemoryManager::smartSizeClass(need);
   auto const sd = static_cast<StringData*>(MM().smartMallocSize(cap));
   auto const pdst = reinterpret_cast<char*>(sd + 1);
-  auto const capCode = cap - kCapOverhead;
-  assert(capCode == packedCapToCode(cap - kCapOverhead));
+  auto const cc = CapCode::ceil(cap - kCapOverhead);
+  assert(cc.code == cap - kCapOverhead);
 
   sd->m_data = pdst;
-  sd->m_capAndCount = HeaderKind::String << 24 | capCode; // count=0
+  sd->m_capAndCount = (HeaderKind::String << 24) | cc.code; // count=0
   sd->m_lenAndHash = len | int64_t{hash} << 32;
 
   pdst[len] = 0;
@@ -781,7 +778,7 @@ void StringData::incrementHelper() {
   }
 }
 
-void StringData::preCompute() const {
+void StringData::preCompute() {
   StringSlice s = slice();
   m_hash = hash_string_unsafe(s.ptr, s.len);
   assert(m_hash >= 0);
@@ -792,13 +789,13 @@ void StringData::preCompute() const {
   }
 }
 
-void StringData::setStatic() const {
+void StringData::setStatic() {
   m_count = StaticValue;
   m_kind = static_cast<HeaderKind>(set_one_bit_ref(static_cast<uint8_t>(m_kind)));
   preCompute();
 }
 
-void StringData::setUncounted() const {
+void StringData::setUncounted() {
   m_count = UncountedValue;
   m_kind = static_cast<HeaderKind>(set_one_bit_ref(static_cast<uint8_t>(m_kind)));
   preCompute();

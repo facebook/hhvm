@@ -26,5 +26,4 @@ async function test(): Awaitable<void> {
   );
 
   await gen_array_rec($a);
-  return null;
 }

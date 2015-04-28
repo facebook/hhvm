@@ -104,9 +104,9 @@ static UBool enumCharType_callback(CallCtx* ctx,
 
 void HHVM_STATIC_METHOD(IntlChar, enumCharTypes, const Variant& callback) {
   CallCtx ctx;
+  CallerFrame cf;
   ctx.func = nullptr;
   if (!callback.isNull()) {
-    CallerFrame cf;
     vm_decode_function(callback, cf(), false, ctx);
   }
   if (!ctx.func) {
@@ -175,9 +175,9 @@ void HHVM_STATIC_METHOD(IntlChar, enumCharNames,
   GETCP_VOID(vStart, start);
   GETCP_VOID(vLimit, limit);
   CallCtx ctx;
+  CallerFrame cf;
   ctx.func = nullptr;
   if (!callback.isNull()) {
-    CallerFrame cf;
     vm_decode_function(callback, cf(), false, ctx);
   }
   if (!ctx.func) {

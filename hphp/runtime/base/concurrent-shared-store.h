@@ -138,14 +138,11 @@ struct ConcurrentTableSharedStore {
   struct KeyValuePair {
     KeyValuePair() : value(nullptr), sAddr(nullptr) {}
     const char* key;
-    int len;
     APCHandle* value;
     char* sAddr;
     int32_t sSize;
-
-    bool inMem() const {
-      return value != nullptr;
-    }
+    int len;
+    bool inMem() const { return value != nullptr; }
   };
 
   ConcurrentTableSharedStore() = default;

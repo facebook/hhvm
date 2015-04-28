@@ -22,7 +22,7 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
-void surpriseCheck(HTS& env, Offset relOffset) {
+void surpriseCheck(IRGS& env, Offset relOffset) {
   if (relOffset <= 0) {
     auto const exit = makeExitSlow(env);
     gen(env, CheckSurpriseFlags, exit);
@@ -34,7 +34,7 @@ void surpriseCheck(HTS& env, Offset relOffset) {
  * starts with a DefLabel expecting a StkPtr, this function will return an
  * intermediate block that passes the current sp.
  */
-Block* getBlock(HTS& env, Offset offset) {
+Block* getBlock(IRGS& env, Offset offset) {
   // If hasBlock returns true, then IRUnit already has a block for that offset
   // and makeBlock will just return it.  This will be the proper successor
   // block set by Translator::setSuccIRBlocks.  Otherwise, the given offset
@@ -45,7 +45,7 @@ Block* getBlock(HTS& env, Offset offset) {
   if (!block->empty()) {
     auto& label = block->front();
     if (label.is(DefLabel) && label.numDsts() > 0 &&
-        label.dst(0)->isA(Type::StkPtr)) {
+        label.dst(0)->isA(TStkPtr)) {
       auto middle = env.unit.defBlock();
       ITRACE(2, "getBlock returning B{} to pass sp to B{}\n",
              middle->id(), block->id());
@@ -60,16 +60,16 @@ Block* getBlock(HTS& env, Offset offset) {
 
 //////////////////////////////////////////////////////////////////////
 
-void jmpImpl(HTS& env, Offset offset, JmpFlags flags) {
+void jmpImpl(IRGS& env, Offset offset, JmpFlags flags) {
   if (flags & JmpFlagNextIsMerge) {
     prepareForHHBCMergePoint(env);
   }
   auto target = getBlock(env, offset);
-  assert(target != nullptr);
+  assertx(target != nullptr);
   gen(env, Jmp, target);
 }
 
-void implCondJmp(HTS& env, Offset taken, bool negate, SSATmp* src) {
+void implCondJmp(IRGS& env, Offset taken, bool negate, SSATmp* src) {
   auto const flags = instrJmpFlags(*env.currentNormalizedInstruction);
   if (flags & JmpFlagEndsRegion) {
     spillStack(env);
@@ -78,7 +78,7 @@ void implCondJmp(HTS& env, Offset taken, bool negate, SSATmp* src) {
     prepareForHHBCMergePoint(env);
   }
   auto const target = getBlock(env, taken);
-  assert(target != nullptr);
+  assertx(target != nullptr);
   auto const boolSrc = gen(env, ConvCellToBool, src);
   gen(env, DecRef, src);
   gen(env, negate ? JmpZero : JmpNZero, target, boolSrc);
@@ -86,24 +86,24 @@ void implCondJmp(HTS& env, Offset taken, bool negate, SSATmp* src) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitJmp(HTS& env, Offset relOffset) {
+void emitJmp(IRGS& env, Offset relOffset) {
   surpriseCheck(env, relOffset);
   auto const offset = bcOff(env) + relOffset;
   jmpImpl(env, offset, instrJmpFlags(*env.currentNormalizedInstruction));
 }
 
-void emitJmpNS(HTS& env, Offset relOffset) {
+void emitJmpNS(IRGS& env, Offset relOffset) {
   jmpImpl(env, bcOff(env) + relOffset,
     instrJmpFlags(*env.currentNormalizedInstruction));
 }
 
-void emitJmpZ(HTS& env, Offset relOffset) {
+void emitJmpZ(IRGS& env, Offset relOffset) {
   surpriseCheck(env, relOffset);
   auto const takenOff = bcOff(env) + relOffset;
   implCondJmp(env, takenOff, true, popC(env));
 }
 
-void emitJmpNZ(HTS& env, Offset relOffset) {
+void emitJmpNZ(IRGS& env, Offset relOffset) {
   surpriseCheck(env, relOffset);
   auto const takenOff = bcOff(env) + relOffset;
   implCondJmp(env, takenOff, false, popC(env));
@@ -111,7 +111,7 @@ void emitJmpNZ(HTS& env, Offset relOffset) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitSwitch(HTS& env,
+void emitSwitch(IRGS& env,
                 const ImmVector& iv,
                 int64_t base,
                 int32_t bounded) {
@@ -119,8 +119,8 @@ void emitSwitch(HTS& env,
 
   SSATmp* const switchVal = popC(env);
   Type type = switchVal->type();
-  assert(IMPLIES(!(type <= (Type::Int | Type::Null)), bounded));
-  assert(IMPLIES(bounded, iv.size() > 2));
+  assertx(IMPLIES(!(type <= (TInt | TNull)), bounded));
+  assertx(IMPLIES(bounded, iv.size() > 2));
   SSATmp* index;
   SSATmp* ssabase = cns(env, base);
   SSATmp* ssatargets = cns(env, nTargets);
@@ -133,35 +133,35 @@ void emitSwitch(HTS& env,
     zeroOff = defaultOff;
   }
 
-  if (type <= Type::Null) {
+  if (type <= TNull) {
     gen(env, Jmp, makeExit(env, zeroOff));
     return;
   }
-  if (type <= Type::Bool) {
+  if (type <= TBool) {
     Offset nonZeroOff = bcOff(env) + iv.vec32()[iv.size() - 2];
     gen(env, JmpNZero, makeExit(env, nonZeroOff), switchVal);
     gen(env, Jmp, makeExit(env, zeroOff));
     return;
   }
 
-  if (type <= Type::Int) {
+  if (type <= TInt) {
     // No special treatment needed
     index = switchVal;
-  } else if (type <= Type::Dbl) {
+  } else if (type <= TDbl) {
     // switch(Double|String|Obj)Helper do bounds-checking for us, so
     // we need to make sure the default case is in the jump table,
     // and don't emit our own bounds-checking code
     bounded = false;
     index = gen(env, LdSwitchDblIndex, switchVal, ssabase, ssatargets);
-  } else if (type <= Type::Str) {
+  } else if (type <= TStr) {
     bounded = false;
     index = gen(env, LdSwitchStrIndex, switchVal, ssabase, ssatargets);
-  } else if (type <= Type::Obj) {
+  } else if (type <= TObj) {
     // switchObjHelper can throw exceptions and reenter the VM so we use the
     // catch block here.
     bounded = false;
     index = gen(env, LdSwitchObjIndex, switchVal, ssabase, ssatargets);
-  } else if (type <= Type::Arr) {
+  } else if (type <= TArr) {
     gen(env, DecRef, switchVal);
     gen(env, Jmp, makeExit(env, defaultOff));
     return;
@@ -187,7 +187,7 @@ void emitSwitch(HTS& env,
   gen(env, JmpSwitchDest, data, index, sp(env));
 }
 
-void emitSSwitch(HTS& env, const ImmVector& iv) {
+void emitSSwitch(IRGS& env, const ImmVector& iv) {
   const int numCases = iv.size() - 1;
 
   /*
@@ -198,7 +198,7 @@ void emitSSwitch(HTS& env, const ImmVector& iv) {
    * conversion routines.
    */
   const bool fastPath =
-    topC(env)->isA(Type::Str) &&
+    topC(env)->isA(TStr) &&
     std::none_of(iv.strvec(), iv.strvec() + numCases,
       [&](const StrVecItem& item) {
         return curUnit(env)->lookupLitstrId(item.str)->isNumeric();

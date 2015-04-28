@@ -127,7 +127,7 @@ inline TypeSpec TypeSpec::operator-(const TypeSpec& rhs) const {
 ///////////////////////////////////////////////////////////////////////////////
 // ArraySpec.
 
-inline ArraySpec::ArraySpec()
+constexpr inline ArraySpec::ArraySpec()
   : m_sort(IsTop)
   , m_kind(ArrayData::ArrayKind{})
   , m_ptr(0)
@@ -198,7 +198,7 @@ inline ArraySpec::SortOf operator&(ArraySpec::SortOf l, ArraySpec::SortOf r) {
 ///////////////////////////////////////////////////////////////////////////////
 // ClassSpec.
 
-inline ClassSpec::ClassSpec()
+constexpr inline ClassSpec::ClassSpec()
   : m_sort(IsTop)
   , m_ptr(0)
 {}

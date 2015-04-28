@@ -13,10 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
-#include "asm-x64.h"
+#include "hphp/util/asm-x64.h"
 
 #include <folly/Format.h>
+
+#include "hphp/util/safe-cast.h"
 
 namespace HPHP { namespace jit {
 
@@ -416,6 +417,12 @@ std::string DecodedInstruction::toString() {
   return str;
 }
 
+int32_t DecodedInstruction::offset() const {
+  assert(hasOffset());
+  auto const addr = m_ip + m_size;
+  return safe_cast<int32_t>(readValue(addr - m_offSz, m_offSz));
+}
+
 uint8_t* DecodedInstruction::picAddress() const {
   assert(hasPicOffset());
   uint8_t* addr = m_ip + m_size;
@@ -473,6 +480,11 @@ bool DecodedInstruction::isCall() const {
 bool DecodedInstruction::isJmp() const {
   if (m_map_select != 0) return false;
   return m_opcode == 0xe9;
+}
+
+bool DecodedInstruction::isLea() const {
+  if (m_map_select != 0) return false;
+  return m_opcode == 0x8d;
 }
 
 ConditionCode DecodedInstruction::jccCondCode() const {

@@ -9,6 +9,7 @@
  *)
 
 open Utils
+open Sys_utils
 open ServerEnv
 
 exception State_not_found
@@ -17,6 +18,7 @@ module type SERVER_PROGRAM = sig
   module EventLogger : sig
     val init: Path.path -> float -> unit
     val init_done: string -> unit
+    val load_script_done: unit -> unit
     val load_read_end: string -> unit
     val load_recheck_end: unit -> unit
     val load_failed: string -> unit
@@ -54,19 +56,15 @@ end
 
 module MainInit : sig
   val go:
-    Path.path ->        (* server root - one server at a time per root *)
+    ServerArgs.options ->
     Path.path list ->   (* other watched paths *)
     (unit -> env) ->    (* init function to run while we have init lock *)
     env
 end = struct
 
   let other_server_running() =
-    Printf.printf "Error: another server is already running?\n";
+    Hh_logger.log "Error: another server is already running?\n";
     exit 1
-
-  let init_message() =
-    Printf.printf "Initializing Server (This might take some time)\n";
-    flush stdout
 
   let grab_lock root =
     if not (Lock.grab root "lock")
@@ -78,26 +76,27 @@ end = struct
   let release_init_lock root =
     ignore(Lock.release root "init")
 
-  let ready_message() =
-    Printf.printf "Server is READY\n";
-    flush stdout;
-    ()
-
   (* This code is only executed when the options --check is NOT present *)
-  let go root watch_paths init_fun =
+  let go options watch_paths init_fun =
+    let root = ServerArgs.root options in
+    let send_signal () = match ServerArgs.waiting_client options with
+      | None -> ()
+      | Some pid -> (try Unix.kill pid Sys.sigusr1 with _ -> ()) in
     let t = Unix.gettimeofday () in
     grab_lock root;
-    init_message();
+    Hh_logger.log "Initializing Server (This might take some time)";
     grab_init_lock root;
+    send_signal ();
     (* note: we only run periodical tasks on the root, not extras *)
     ServerPeriodical.init root;
     (* watch root and extra paths *)
     ServerDfind.dfind_init (root :: watch_paths);
     let env = init_fun () in
     release_init_lock root;
-    ready_message ();
+    Hh_logger.log "Server is READY";
+    send_signal ();
     let t' = Unix.gettimeofday () in
-    Printf.printf "Took %f seconds to initialize.\n" (t' -. t);
+    Hh_logger.log "Took %f seconds to initialize." (t' -. t);
     env
 end
 
@@ -117,11 +116,11 @@ end = struct
     let env = ref env in
     while true do
       if not (Lock.check root "lock") then begin
-        Printf.printf "Lost %s lock; reacquiring.\n" Program.name;
+        Hh_logger.log "Lost %s lock; reacquiring.\n" Program.name;
         Program.EventLogger.lock_lost root "lock";
         if not (Lock.grab root "lock")
         then
-          Printf.printf "Failed to reacquire lock; terminating.\n";
+          Hh_logger.log "Failed to reacquire lock; terminating.\n";
           Program.EventLogger.lock_stolen root "lock";
           die()
       end;
@@ -133,7 +132,7 @@ end = struct
       let config = Program.config_filename () in
       if Relative_path.Set.mem config updates &&
         not (Program.validate_config genv) then begin
-        Printf.fprintf stderr
+        Hh_logger.log
           "%s changed in an incompatible way; please restart %s.\n"
           (Relative_path.suffix config)
           Program.name;
@@ -170,36 +169,43 @@ end = struct
       let cmd = Printf.sprintf "%s %s %s" cmd
         (Filename.quote (Path.string_of_path (ServerArgs.root genv.options)))
         (Filename.quote Build_id.build_id_ohai) in
-      Printf.fprintf stderr "Running load script: %s\n%!" cmd;
-      let ic = Unix.open_process_in cmd in
-      let state_fn = begin
-        try input_line ic
-        with End_of_file -> raise State_not_found
-      end in
-      let to_recheck = ref [] in
-      begin
-        try while true do to_recheck := input_line ic :: !to_recheck done
-        with End_of_file -> ()
-      end;
-      assert (Unix.close_process_in ic = Unix.WEXITED 0);
-      Printf.fprintf stderr
+      Hh_logger.log "Running load script: %s\n%!" cmd;
+      let state_fn, to_recheck =
+        with_timeout (ServerConfig.load_script_timeout genv.config)
+        ~on_timeout:(fun _ -> failwith "Load script timed out")
+        ~do_:begin fun () ->
+          let ic = Unix.open_process_in cmd in
+          let state_fn = begin
+            try input_line ic
+            with End_of_file -> raise State_not_found
+          end in
+          let to_recheck = ref [] in
+          begin
+            try while true do to_recheck := input_line ic :: !to_recheck done
+            with End_of_file -> ()
+          end;
+          assert (Unix.close_process_in ic = Unix.WEXITED 0);
+          state_fn, !to_recheck
+        end in
+      Hh_logger.log
         "Load state found at %s. %d files to recheck\n%!"
-        state_fn (List.length !to_recheck);
-      let env = load genv state_fn !to_recheck in
+        state_fn (List.length to_recheck);
+      Program.EventLogger.load_script_done ();
+      let env = load genv state_fn to_recheck in
       Program.EventLogger.init_done "load";
       env
     with
     | State_not_found ->
-        Printf.fprintf stderr "Load state not found!\n";
-        Printf.fprintf stderr "Starting from a fresh state instead...\n%!";
+        Hh_logger.log "Load state not found!";
+        Hh_logger.log "Starting from a fresh state instead...";
         let env = Program.init genv env in
         Program.EventLogger.init_done "load_state_not_found";
         env
     | e ->
         let msg = Printexc.to_string e in
-        Printf.fprintf stderr "Load error: %s\n%!" msg;
+        Hh_logger.log "Load error: %s" msg;
         Printexc.print_backtrace stderr;
-        Printf.fprintf stderr "Starting from a fresh state instead...\n%!";
+        Hh_logger.log "Starting from a fresh state instead...";
         Program.EventLogger.load_failed msg;
         let env = Program.init genv env in
         Program.EventLogger.init_done "load_error";
@@ -252,15 +258,14 @@ end = struct
       Program.run_once_and_exit genv env
     else
       let watch_paths = Program.get_watch_paths options in
-      let env = MainInit.go root watch_paths program_init in
+      let env = MainInit.go options watch_paths program_init in
       let socket = Socket.init_unix_socket root in
       serve genv env socket
 
   let get_log_file root =
-    let user = Sys_utils.logname in
     let tmp_dir = Tmp.get_dir() in
     let root_part = Path.slash_escaped_string_of_path root in
-    Printf.sprintf "%s/%s-%s.log" tmp_dir user root_part
+    Printf.sprintf "%s/%s.log" tmp_dir root_part
 
   let daemonize options =
     (* detach ourselves from the parent process *)
@@ -268,23 +273,24 @@ end = struct
     if pid == 0
     then begin
       ignore(Unix.setsid());
-      (* close stdin/stdout/stderr *)
-      let fd = Unix.openfile "/dev/null" [Unix.O_RDONLY; Unix.O_CREAT] 0o777 in
-      Unix.dup2 fd Unix.stdin;
-      Unix.close fd;
-      let file = get_log_file (ServerArgs.root options) in
-      (try Sys.rename file (file ^ ".old") with _ -> ());
-      let fd = Unix.openfile file [Unix.O_WRONLY; Unix.O_CREAT; Unix.O_APPEND] 0o777 in
-      Unix.dup2 fd Unix.stdout;
-      Unix.dup2 fd Unix.stderr;
-      Unix.close fd;
+      with_umask 0o111 begin fun () ->
+        (* close stdin/stdout/stderr *)
+        let fd = Unix.openfile "/dev/null" [Unix.O_RDONLY; Unix.O_CREAT] 0o777 in
+        Unix.dup2 fd Unix.stdin;
+        Unix.close fd;
+        let file = get_log_file (ServerArgs.root options) in
+        (try Sys.rename file (file ^ ".old") with _ -> ());
+        let fd = Unix.openfile file [Unix.O_WRONLY; Unix.O_CREAT; Unix.O_APPEND] 0o666 in
+        Unix.dup2 fd Unix.stdout;
+        Unix.dup2 fd Unix.stderr;
+        Unix.close fd
+      end
       (* child process is ready *)
     end else begin
       (* let original parent exit *)
-      Printf.fprintf stderr "Spawned %s (child pid=%d)\n" (Program.name) pid;
-      Printf.fprintf stderr
-        "Logs will go to %s\n" (get_log_file (ServerArgs.root options));
-      flush stdout;
+      Printf.eprintf "Spawned %s (child pid=%d)\n" (Program.name) pid;
+      Printf.eprintf
+        "Logs will go to %s\n%!" (get_log_file (ServerArgs.root options));
       raise Exit
     end
 

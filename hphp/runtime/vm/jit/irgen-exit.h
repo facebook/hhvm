@@ -30,7 +30,7 @@
 
 namespace HPHP { struct StringData; }
 namespace HPHP { namespace jit {
-struct HTS;
+struct IRGS;
 struct Block;
 }}
 
@@ -47,20 +47,20 @@ namespace HPHP { namespace jit { namespace irgen {
  *
  * Both functions use the current state to create the block.
  */
-Block* makeExit(HTS&, Offset targetBcOff = -1);
-Block* makeExit(HTS&, TransFlags trflags);
+Block* makeExit(IRGS&, Offset targetBcOff = -1);
+Block* makeExit(IRGS&, TransFlags trflags);
 
 /*
  * Has the effects of makeExit(env) if the current function is a psuedomain,
  * and otherwise returns nullptr.
  */
-Block* makePseudoMainExit(HTS&);
+Block* makePseudoMainExit(IRGS&);
 
 /*
  * Create a block that exits the current region by making a retranslate opt
  * service request.  Must not be used inside of an inlined function.
  */
-Block* makeExitOpt(HTS&, TransID);
+Block* makeExitOpt(IRGS&, TransID);
 
 /*
  * Create a block that side exits the current region, after first calling the
@@ -69,7 +69,7 @@ Block* makeExitOpt(HTS&, TransID);
  *
  * The block is created with the current state.
  */
-Block* makeExitSlow(HTS&);
+Block* makeExitSlow(IRGS&);
 
 //////////////////////////////////////////////////////////////////////
 

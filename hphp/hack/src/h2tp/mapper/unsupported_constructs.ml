@@ -10,7 +10,7 @@
 
 module M = Map_ast
 module CE = Common_exns
-module List = List_ext
+module List = Core_list
 open Ast
 open Ast_ext
 
@@ -22,13 +22,14 @@ let map program =
     () in
 
   let detect_invalid_attributes p attributes =
-    if List.exists (fun { ua_name; _ } -> "__Memoize" = snd ua_name) attributes
+    if List.exists ~f:(fun { ua_name; _ } -> "__Memoize" = snd ua_name) attributes
     then unsupported (p, "__Memoize is currently not supported.")
     else () in
 
   let detect_invalid_fun_kind p = function
-    | FSync -> ()
-    | _ -> unsupported (p, "async is currently not supported.") in
+    | FSync | FGenerator -> ()
+    | FAsync | FAsyncGenerator ->
+      unsupported (p, "async is currently not supported.") in
 
   let detect_invalid_fun {f_user_attributes; f_fun_kind; f_name = (p, _); _} =
     detect_invalid_attributes p f_user_attributes;
@@ -44,7 +45,7 @@ let map program =
     | (Some "\\HH\\Pair", _) ->
         unsupported (p, "Invalid initialization of Pair")
     | (Some "\\HH\\Map", _) | (Some "\\HH\\ImmMap", _) ->
-        List.iter begin function
+        List.iter ~f:begin function
           | AFkvalue _ -> ()
           | AFvalue (p, _) ->
               unsupported (p, "Invalid Initialization of " ^ name)
@@ -69,8 +70,8 @@ let map program =
     | _ -> () in
 
   let detect_invalid_class_elt = function
-    | ClassVars (kinds, _, class_vars) when not (List.mem Static kinds) ->
-        List.iter detect_invalid_class_var class_vars;
+    | ClassVars (kinds, _, class_vars) when not (List.mem kinds Static) ->
+        List.iter ~f:detect_invalid_class_var class_vars;
         ()
     | _ -> () in
 
@@ -97,6 +98,6 @@ let map program =
     M.k_expr = (fun (k, _) e -> detect_invalid_expr e; k e);
   } in
   ignore (mapper program);
-  if List.not_empty !errors
+  if not (List.is_empty !errors)
   then raise (CE.CompoundError !errors);
   program (* this mapper does no mapping *)

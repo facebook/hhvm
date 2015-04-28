@@ -34,12 +34,9 @@ IRUnit::IRUnit(TransContext context)
   , m_entry(defBlock())
 {}
 
-IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker,
-                                const jit::vector<uint32_t>& producedRefs) {
+IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
   IRInstruction inst(DefLabel, marker);
-  IRInstruction* label = clone(&inst);
-  always_assert(producedRefs.size() == numDst);
-  m_labelRefs[label] = producedRefs;
+  auto const label = clone(&inst);
   if (numDst > 0) {
     SSATmp* dsts = (SSATmp*) m_arena.alloc(numDst * sizeof(SSATmp));
     for (unsigned i = 0; i < numDst; ++i) {
@@ -58,11 +55,12 @@ Block* IRUnit::defBlock(Block::Hint hint) {
 }
 
 SSATmp* IRUnit::cns(Type type) {
-  assert(type.isConst());
+  assertx(type.hasConstVal() ||
+         type.subtypeOfAny(TUninit, TInitNull, TNullptr));
   IRInstruction inst(DefConst, BCMarker{});
   inst.setTypeParam(type);
   if (SSATmp* tmp = m_constTable.lookup(&inst)) {
-    assert(tmp->type() == type);
+    assertx(tmp->type() == type);
     return tmp;
   }
   return m_constTable.insert(clone(&inst)->dst());
@@ -89,17 +87,19 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case RaiseError:
       return instSk == sk;;
 
-    // The RetCtrl is generally ending a bytecode instruction, with
-    // the exception being in an Await bytecode instruction, where we
-    // consider the end of the bytecode instruction to be the
-    // non-suspending path.
+    // The RetCtrl is generally ending a bytecode instruction, with the
+    // exception being in an Await bytecode instruction, where we consider the
+    // end of the bytecode instruction to be the non-suspending path.
     case RetCtrl:
+    case AsyncRetCtrl:
       return inst.marker().sk().op() != Op::Await;
 
-    // A ReqBindJmp ends a unit and its marker corresponds to the next
-    // instruction to execute.
-    case ReqBindJmp:
-      return sk.succOffsets().count(instSk.offset());
+    // A ReqBindJmp ends a unit and it jumps to the next instruction
+    // to execute.
+    case ReqBindJmp: {
+      auto destOffset = inst.extra<ReqBindJmp>()->dest.offset();
+      return sk.succOffsets().count(destOffset);
+    }
 
     default:
       return false;
@@ -109,7 +109,7 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
 Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk) {
   Block* mainExit = nullptr;
 
-  FTRACE(5, "findMainExitBlock: starting on unit:\n{}\n", unit);
+  FTRACE(5, "findMainExitBlock: starting on unit:\n{}\n", show(unit));
 
   for (auto block : rpoSortCfg(unit)) {
     if (endsUnitAtSrcKey(block, lastSk)) {

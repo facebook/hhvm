@@ -135,6 +135,10 @@ void StandardExtension::threadInitMisc() {
     );
   }
 
+static void bindTokenConstants();
+static int get_user_token_id(int internal_id);
+const StaticString s_T_PAAMAYIM_NEKUDOTAYIM("T_PAAMAYIM_NEKUDOTAYIM");
+
 void StandardExtension::initMisc() {
     HHVM_FALIAS(HH\\server_warmup_status, server_warmup_status);
     HHVM_FE(connection_aborted);
@@ -166,6 +170,10 @@ void StandardExtension::initMisc() {
         false
       #endif
      );
+    bindTokenConstants();
+    Native::registerConstant<KindOfInt64>(s_T_PAAMAYIM_NEKUDOTAYIM.get(),
+                                          get_user_token_id(T_DOUBLE_COLON));
+
     loadSystemlib("std_misc");
   }
 
@@ -634,7 +642,8 @@ const int UserTokenId_T_POW = 432;
 const int UserTokenId_T_POW_EQUAL = 433;
 const int UserTokenId_T_NULLSAFE_OBJECT_OPERATOR = 434;
 const int UserTokenId_T_HASHBANG = 435;
-const int MaxUserTokenId = 436; // Marker, not a real user token ID
+const int UserTokenId_T_SUPER = 436;
+const int MaxUserTokenId = 437; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP
@@ -814,21 +823,17 @@ String HHVM_FUNCTION(hphp_to_string, const Variant& v) {
   return v.toString();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-}
-
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP
 #undef YYTOKEN
-#define YYTOKEN(num, name)                      \
-  extern const int64_t k_##name = get_user_token_id(num);
-#define YYTOKEN_MAP namespace HPHP
+#define YYTOKEN_MAP static void bindTokenConstants()
+#define YYTOKEN(num, name) Native::registerConstant<KindOfInt64> \
+  (makeStaticString(#name), get_user_token_id(num));
 
 #include "hphp/parser/hphp.tab.hpp" // nolint
 
-namespace HPHP {
-extern const int64_t k_T_PAAMAYIM_NEKUDOTAYIM = k_T_DOUBLE_COLON;
-}
-
 #undef YYTOKEN_MAP
 #undef YYTOKEN
+
+///////////////////////////////////////////////////////////////////////////////
+}

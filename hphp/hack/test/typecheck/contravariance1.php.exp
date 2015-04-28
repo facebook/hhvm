@@ -1,0 +1,8 @@
+File "contravariance1.php", line 13, characters 5-20:
+Invalid argument (Typing[4110])
+File "contravariance1.php", line 13, characters 13-19:
+This is an object of type B
+File "contravariance1.php", line 10, characters 16-16:
+It is incompatible with an object of type A
+File "contravariance1.php", line 10, characters 16-16:
+Considering that this type argument is contravariant with respect to Foo

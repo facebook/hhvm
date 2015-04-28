@@ -47,19 +47,19 @@ bool branchesToItself(SrcKey sk) {
  * In all other cases, a ReqBindJmp is generated.
  *
  */
-void exitRequest(HTS& env, TransFlags flags, SrcKey target) {
+void exitRequest(IRGS& env, TransFlags flags, SrcKey target) {
   auto const curBcOff = bcOff(env);
   if (env.firstBcInst && target.offset() == curBcOff) {
     // The case where the instruction may branch back to itself is
     // handled in implMakeExit.
-    assert(!branchesToItself(curSrcKey(env)));
+    assertx(!branchesToItself(curSrcKey(env)));
     gen(env, ReqRetranslate, ReqRetranslateData { flags }, sp(env));
   } else {
     gen(env, ReqBindJmp, ReqBindJmpData { target, flags }, sp(env));
   }
 }
 
-Block* implMakeExit(HTS& env, TransFlags trflags, Offset targetBcOff) {
+Block* implMakeExit(IRGS& env, TransFlags trflags, Offset targetBcOff) {
   auto const curBcOff = bcOff(env);
   if (targetBcOff == -1) targetBcOff = curBcOff;
 
@@ -86,15 +86,15 @@ Block* implMakeExit(HTS& env, TransFlags trflags, Offset targetBcOff) {
 
 }
 
-Block* makeExit(HTS& env, Offset targetBcOff /* = -1 */) {
+Block* makeExit(IRGS& env, Offset targetBcOff /* = -1 */) {
   return implMakeExit(env, TransFlags{}, targetBcOff);
 }
 
-Block* makeExit(HTS& env, TransFlags flags) {
+Block* makeExit(IRGS& env, TransFlags flags) {
   return implMakeExit(env, flags, -1);
 }
 
-Block* makeExitSlow(HTS& env) {
+Block* makeExitSlow(IRGS& env) {
   auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
   interpOne(env, *env.currentNormalizedInstruction);
@@ -105,14 +105,14 @@ Block* makeExitSlow(HTS& env) {
   return exit;
 }
 
-Block* makePseudoMainExit(HTS& env) {
+Block* makePseudoMainExit(IRGS& env) {
   return curFunc(env)->isPseudoMain()
     ? makeExit(env)
     : nullptr;
 }
 
-Block* makeExitOpt(HTS& env, TransID transId) {
-  assert(!isInlining(env));
+Block* makeExitOpt(IRGS& env, TransID transId) {
+  assertx(!isInlining(env));
   auto const targetBcOff = bcOff(env);
   auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher blockPusher(*env.irb, makeMarker(env, targetBcOff), exit);

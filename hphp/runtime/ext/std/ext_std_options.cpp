@@ -910,11 +910,6 @@ Variant HHVM_FUNCTION(php_uname, const String& mode /*="" */) {
   }
 }
 
-static bool HHVM_FUNCTION(phpinfo, int64_t what /*=0 */) {
-  g_context->write("HipHop\n");
-  return false;
-}
-
 static Variant HHVM_FUNCTION(phpversion, const String& extension /*="" */) {
   Extension *ext;
 
@@ -1228,7 +1223,6 @@ void StandardExtension::initOptions() {
   HHVM_FE(hphp_memory_stop_interval);
   HHVM_FE(php_sapi_name);
   HHVM_FE(php_uname);
-  HHVM_FE(phpinfo);
   HHVM_FE(phpversion);
   HHVM_FE(putenv);
   HHVM_FE(set_time_limit);

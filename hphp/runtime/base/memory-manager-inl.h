@@ -33,7 +33,11 @@ static_assert(
 
 //////////////////////////////////////////////////////////////////////
 
-inline MemoryManager& MM() { return *MemoryManager::TlsWrapper::getNoCheck(); }
+inline MemoryManager& MM() {
+  return *MemoryManager::TlsWrapper::getNoCheck();
+}
+
+//////////////////////////////////////////////////////////////////////
 
 template<class T, class... Args> T* smart_new(Args&&... args) {
   auto const mem = smart_malloc(sizeof(T));
@@ -183,6 +187,11 @@ ALWAYS_INLINE void* MemoryManager::debugPreFree(void* p, size_t, size_t) {
 
 //////////////////////////////////////////////////////////////////////
 
+inline uint32_t MemoryManager::estimateSmartCap(uint32_t requested) {
+  return requested <= kMaxSmartSize ? smartSizeClass(requested)
+                                    : requested;
+}
+
 inline uint32_t MemoryManager::bsr(uint32_t x) {
 #if defined(__i386__) || defined(__x86_64__)
   uint32_t ret;
@@ -245,10 +254,6 @@ inline uint32_t MemoryManager::smartSizeClass(uint32_t reqBytes) {
     return std::min(ret, uint32_t(kMaxSmartSize));
   }
   return ret;
-}
-
-inline bool MemoryManager::sweeping() {
-  return !TlsWrapper::isNull() && MM().m_sweeping;
 }
 
 inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
@@ -426,6 +431,10 @@ inline void MemoryManager::resetExternalStats() { resetStatsImpl(false); }
 
 //////////////////////////////////////////////////////////////////////
 
+inline bool MemoryManager::empty() const {
+  return m_heap.empty();
+}
+
 inline bool MemoryManager::contains(void *p) const {
   return m_heap.contains(p);
 }
@@ -434,6 +443,72 @@ inline bool MemoryManager::checkContains(void* p) const {
   // Be conservative if the smart allocator is disabled.
   assert(RuntimeOption::DisableSmartAllocator || contains(p));
   return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+inline bool MemoryManager::sweeping() {
+  return !TlsWrapper::isNull() && MM().m_sweeping;
+}
+
+inline StringDataNode& MemoryManager::getStringList() {
+  return m_strings;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+template <typename T>
+MemoryManager::RootId MemoryManager::addRoot(SmartPtr<T>&& ptr) {
+  assert(ptr);
+  const RootId token = ptr->getId();
+  getRootMap<T>().emplace(token, std::move(ptr));
+  return token;
+}
+
+template <typename T>
+MemoryManager::RootId MemoryManager::addRoot(const SmartPtr<T>& ptr) {
+  assert(ptr);
+  const RootId token = ptr->getId();
+  getRootMap<T>()[token] = ptr;
+  return token;
+}
+
+template <typename T>
+SmartPtr<T> MemoryManager::lookupRoot(RootId token) const {
+  auto& handleMap = getRootMap<T>();
+  auto itr = handleMap.find(token);
+  return itr != handleMap.end() ? unsafe_cast_or_null<T>(itr->second) : nullptr;
+}
+
+template <typename T>
+SmartPtr<T> MemoryManager::removeRoot(RootId token) {
+  auto& handleMap = getRootMap<T>();
+  auto itr = handleMap.find(token);
+  if(itr != handleMap.end()) {
+    auto ptr = std::move(itr->second);
+    handleMap.erase(itr);
+    return unsafe_cast_or_null<T>(ptr);
+  }
+  return nullptr;
+}
+
+template <typename T>
+bool MemoryManager::removeRoot(const SmartPtr<T>& ptr) {
+  return (bool)removeRoot<T>(ptr->getId());
+}
+
+template <typename F>
+void MemoryManager::scanRootMaps(F& m) const {
+  if (m_objectRoots) {
+    for(const auto& root : *m_objectRoots) {
+      scan(root.second, m);
+    }
+  }
+  if (m_resourceRoots) {
+    for(const auto& root : *m_resourceRoots) {
+      scan(root.second, m);
+    }
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

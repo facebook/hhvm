@@ -48,7 +48,7 @@ typedef hphp_hash_map<uint64_t,const uint64_t*> LiteralMap;
 struct Label;
 struct MCGenerator;
 struct AsmInfo;
-struct HTS;
+struct IRGS;
 
 extern "C" MCGenerator* mcg;
 
@@ -69,10 +69,12 @@ struct FreeStubList {
     uint64_t  m_freed;
   };
   static const uint64_t kStubFree = 0;
-  StubNode* m_list;
   FreeStubList() : m_list(nullptr) {}
+  TCA peek() { return (TCA)m_list; }
   TCA maybePop();
   void push(TCA stub);
+ private:
+  StubNode* m_list;
 };
 
 struct PendingFixup {
@@ -114,50 +116,14 @@ struct CodeGenFixups {
   void clear();
 };
 
-struct RelocationInfo {
-  RelocationInfo() {}
-
-  void recordRange(TCA start, TCA end,
-                   TCA destStart, TCA destEnd);
-  void recordAddress(TCA src, TCA dest, int range);
-  TCA adjustedAddressAfter(TCA addr) const;
-  TCA adjustedAddressBefore(TCA addr) const;
-  CTCA adjustedAddressAfter(CTCA addr) const {
-    return adjustedAddressAfter(const_cast<TCA>(addr));
-  }
-  CTCA adjustedAddressBefore(CTCA addr) const {
-    return adjustedAddressBefore(const_cast<TCA>(addr));
-  }
-  void rewind(TCA start, TCA end);
-  void markAddressImmediates(const std::set<TCA>& ai) {
-    m_addressImmediates.insert(ai.begin(), ai.end());
-  }
-  bool isAddressImmediate(TCA ip) {
-    return m_addressImmediates.count(ip);
-  }
-  typedef std::vector<std::pair<TCA,TCA>> RangeVec;
-  const RangeVec& srcRanges() { return m_srcRanges; }
-  const RangeVec& dstRanges() { return m_dstRanges; }
- private:
-  RangeVec m_srcRanges;
-  RangeVec m_dstRanges;
-  /*
-   * maps from src address, to range of destination address
-   * This is because we could insert nops before the instruction
-   * corresponding to src. Most things want the address of the
-   * instruction corresponding to the src instruction; but eg
-   * the fixup map would want the address of the nop.
-   */
-  std::map<TCA,std::pair<TCA,TCA>> m_adjustedAddresses;
-  std::set<TCA> m_addressImmediates;
-};
-
 struct UsageInfo {
   std::string m_name;
   size_t m_used;
   size_t m_capacity;
   bool m_global;
-} ;
+};
+
+struct TransRelocInfo;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -189,6 +155,7 @@ public:
   Translator& tx() { return m_tx; }
   FixupMap& fixupMap() { return m_fixupMap; }
   CodeGenFixups& cgFixups() { return m_fixups; }
+  FreeStubList& freeStubList() { return m_freeStubs; }
   LiteralMap& literals() { return m_literals; }
   void recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff);
 
@@ -245,12 +212,12 @@ public:
     enterTC(m_tx.uniqueStubs.resumeHelper, nullptr);
   }
   void enterTCAtPrologue(ActRec *ar, TCA start) {
-    assert(ar);
-    assert(start);
+    assertx(ar);
+    assertx(start);
     enterTC(start, ar);
   }
   void enterTCAfterPrologue(TCA start) {
-    assert(start);
+    assertx(start);
     enterTC(start, nullptr);
   }
 
@@ -269,7 +236,17 @@ public:
   bool addDbgGuards(const Unit* unit);
   bool addDbgGuard(const Func* func, Offset offset, bool resumed);
   bool freeRequestStub(TCA stub);
-  TCA getFreeStub(CodeBlock& unused, CodeGenFixups* fixups);
+
+  /*
+   * Return a TCA suitable for emitting an ephemeral stub. A reused stub will
+   * be returned if one is available. Otherwise, frozen.frontier() will be
+   * returned.
+   *
+   * If not nullptr, isReused will be set to whether or not a reused stub was
+   * returned.
+   */
+  TCA getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups,
+                  bool* isReused = nullptr);
   void registerCatchBlock(CTCA ip, TCA block);
   folly::Optional<TCA> getCatchTrace(CTCA ip) const;
   CatchTraceMap& catchTraceMap() { return m_catchTraceMap; }
@@ -278,19 +255,8 @@ public:
   bool profileSrcKey(SrcKey sk) const;
   void getPerfCounters(Array& ret);
   bool reachedTranslationLimit(SrcKey, const SrcRec&) const;
-  void traceCodeGen(HTS&);
-  void recordGdbStub(const CodeBlock& cb, TCA start, const char* name);
-
-  /*
-   * Set/get if we're going to try using LLVM as the codegen backend for the
-   * current translation.
-   */
-  void setUseLLVM(bool llvm) {
-    m_useLLVM = llvm;
-  }
-  bool useLLVM() const {
-    return m_useLLVM;
-  }
+  void traceCodeGen(IRGS&);
+  void recordGdbStub(const CodeBlock& cb, TCA start, const std::string& name);
 
   /*
    * Dump translation cache.  True if successful.
@@ -311,11 +277,6 @@ public:
   void codeEmittedThisRequest(size_t& requestEntry, size_t& now) const;
 public:
   CodeCache code;
-
-  /*
-   * Check if function prologue already exists.
-   */
-  bool checkCachedPrologue(const Func*, int prologueIndex, TCA&) const;
 
   /*
    * This function is called by translated code to handle service requests,
@@ -381,8 +342,14 @@ private:
 
   TCA lookupTranslation(SrcKey sk) const;
   TCA retranslateOpt(TransID transId, bool align);
+
+  /*
+   * Prologue-generation helpers.
+   */
   TCA regeneratePrologues(Func* func, SrcKey triggerSk);
   TCA regeneratePrologue(TransID prologueTransId, SrcKey triggerSk);
+  TCA emitFuncPrologue(Func* func, int nPassed);
+  bool checkCachedPrologue(const Func*, int prologueIndex, TCA&) const;
 
   void invalidateSrcKey(SrcKey sk);
   void invalidateFuncProfSrcKeys(const Func* func);
@@ -404,7 +371,6 @@ private:
 private:
   std::unique_ptr<BackEnd> m_backEnd;
   Translator         m_tx;
-  bool               m_useLLVM{false};
 
   // maps jump addresses to the ID of translation containing them.
   TcaTransIDMap      m_jmpToTransID;
@@ -421,13 +387,13 @@ private:
   size_t             m_totalSize;
 };
 
-TCA fcallHelper(ActRec* ar, void* sp);
-TCA funcBodyHelper(ActRec* ar, void* sp);
+TCA fcallHelper(ActRec*, bool isClonedClosure);
+TCA funcBodyHelper(ActRec*);
 int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 
 // Both emitIncStat()s push/pop flags but don't clobber any registers.
-extern void emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index,
-                        int n = 1, bool force = false);
+void emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index,
+                 int n = 1, bool force = false);
 
 inline void emitIncStat(CodeBlock& cb, Stats::StatCounter stat, int n = 1,
                         bool force = false) {

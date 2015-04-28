@@ -17,7 +17,7 @@
 #define incl_HPHP_JIT_IRGEN_INLINING_H_
 
 namespace HPHP { namespace jit {
-struct HTS;
+struct IRGS;
 struct Type;
 }}
 
@@ -25,8 +25,8 @@ namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
-void endInlinedCommon(HTS&);
-void retFromInlined(HTS&, Type);
+void endInlinedCommon(IRGS&);
+void retFromInlined(IRGS&, Type);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -71,15 +71,15 @@ inline StringData* StringData::Make(const StringData* s1, const char* lit2) {
 
 inline void StringData::setRefCount(RefCount n) {
   m_count = n;
-  if (m_count > 1) m_kind = static_cast<HeaderKind>(set_one_bit_ref(static_cast<uint8_t>(m_kind)));
+  if (m_count > 1) m_pad = 1;
 }
 inline bool StringData::isStatic() const {
-  if (m_count == StaticValue) assert(check_one_bit_ref(m_kind));
+  if (m_count == StaticValue) assert(check_one_bit_ref(m_pad));
   return m_count == StaticValue;
 }
 
 inline bool StringData::isUncounted() const {
-  if (m_count == UncountedValue) assert(check_one_bit_ref(m_kind));
+  if (m_count == UncountedValue) assert(check_one_bit_ref(m_pad));
   return m_count == UncountedValue;
 }
 

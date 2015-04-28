@@ -406,8 +406,7 @@ private:
   const char* classname_cstr() const;
 
   HeaderKind kind() const {
-    //mask out bitref
-    return HeaderKind (static_cast<uint8_t>(m_kind) & ~(1 << 7));
+    return m_kind;
   }
 
   static void compileTimeAssertions();
@@ -427,7 +426,7 @@ private:
   union {
     struct {
       uint16_t o_attribute;
-      uint8_t m_pad; // reserved for MM
+      mutable uint8_t m_pad; // reserved for MM
       HeaderKind m_kind;
       mutable RefCount m_count;
     };
@@ -438,7 +437,7 @@ private:
   union {
     struct {
       mutable uint16_t o_attribute;
-      uint8_t m_pad; // reserved for MM
+      mutable uint8_t m_pad; // reserved for MM
       HeaderKind m_kind;
       mutable RefCount m_count;
     };

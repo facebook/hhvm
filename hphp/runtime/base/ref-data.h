@@ -258,8 +258,7 @@ private:
   }
 
   HeaderKind kind() const {
-    //mask out bitref
-    return HeaderKind (static_cast<uint8_t>(m_kind) & ~(1 << 7));
+    return m_kind;
   }
 
 private:
@@ -275,7 +274,7 @@ private:
       // gcc and clang to coalesce mutations into byte-sized ops.
       mutable uint8_t m_cow:1;
       mutable uint8_t m_z:7;
-      uint8_t m_pad;
+      mutable uint8_t m_pad;
       HeaderKind m_kind;
       mutable RefCount m_count; // refcount field
     };

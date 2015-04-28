@@ -473,6 +473,9 @@ private:
   void setStatic();
   void setUncounted();
 
+  HeaderKind kind() const {
+    return m_kind;
+  }
 private:
   char* m_data;
 
@@ -484,7 +487,7 @@ private:
       union {
         struct {
           CapCode m_cap;
-          char m_pad;
+          mutable char m_pad;
           HeaderKind m_kind;
         };
         uint32_t m_cap_kind;

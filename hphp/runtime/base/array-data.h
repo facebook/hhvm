@@ -85,7 +85,7 @@ public:
   IMPLEMENT_COUNTABLE_METHODS
   void setRefCount(RefCount n) {
     m_count = n;
-    if (m_count > 1) m_kind = (ArrayKind) set_one_bit_ref(m_kind);
+    if (m_count > 1) m_pad = 1;
   }
 
   /**
@@ -115,8 +115,7 @@ public:
    * return the array kind for fast typechecks
    */
   ArrayKind kind() const {
-    //mask out bitref
-    return ArrayKind (m_kind & ~(1 << 7));
+    return m_kind;
   }
 
   /**
@@ -441,7 +440,7 @@ protected:
       union {
         struct {
           CapCode m_cap;
-          uint8_t m_pad;
+          mutable uint8_t m_pad;
           ArrayKind m_kind;
         };
         uint32_t m_cap_kind;

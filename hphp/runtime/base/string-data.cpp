@@ -791,13 +791,13 @@ void StringData::preCompute() {
 
 void StringData::setStatic() {
   m_count = StaticValue;
-  m_kind = static_cast<HeaderKind>(set_one_bit_ref(static_cast<uint8_t>(m_kind)));
+  m_pad = 1;
   preCompute();
 }
 
 void StringData::setUncounted() {
   m_count = UncountedValue;
-  m_kind = static_cast<HeaderKind>(set_one_bit_ref(static_cast<uint8_t>(m_kind)));
+  m_pad = 1;
   preCompute();
 }
 

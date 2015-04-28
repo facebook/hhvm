@@ -20,11 +20,8 @@
 #include <cstdint>
 #include <cstddef>
 #include "hphp/util/assertions.h"
-#include "hphp/runtime/base/memory-manager.h"
-#include "hphp/util/trace.h"
 
 namespace HPHP {
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -92,16 +89,8 @@ inline bool check_refcount_ns_nz(int32_t count) {
   return check_refcount_ns(count - 1);
 }
 
-inline bool check_one_bit_ref(HeaderKind kind) {
-  return (static_cast<uint8_t>(kind) & (1 << 7)) > 0;
-}
-
-inline bool check_one_bit_ref_array(uint8_t kind) {
-  return (kind & (1 << 7)) > 0;
-}
-
-inline uint8_t set_one_bit_ref(uint8_t kind) {
-  return kind | (1 << 7);
+inline bool check_one_bit_ref(uint8_t pad) {
+  return pad == 1;
 }
 
 /**
@@ -121,31 +110,21 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
                                                                         \
   bool hasMultipleRefs() const {                                        \
     assert(check_refcount(m_count));                                    \
-    TRACE_SET_MOD(countable);                                           \
-    if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",         \
-        m_count, check_one_bit_ref(m_kind));                            \
-      assert(check_one_bit_ref(m_kind)); }                              \
+    if ((uint32_t)m_count > 1) assert(check_one_bit_ref(m_pad));        \
     return (uint32_t)m_count > 1;                                       \
   }                                                                     \
                                                                         \
   bool hasExactlyOneRef() const {                                       \
     assert(check_refcount(m_count));                                    \
-    TRACE_SET_MOD(countable);                                           \
-    if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",         \
-        m_count, check_one_bit_ref(m_kind));                            \
-      assert(check_one_bit_ref(m_kind)); }                              \
+    if ((uint32_t)m_count > 1) assert(check_one_bit_ref(m_pad));        \
     return (uint32_t)m_count == 1;                                      \
   }                                                                     \
                                                                         \
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \
     assert(check_refcount(m_count));                                    \
-    TRACE_SET_MOD(countable);                                           \
     if (isRefCounted()) { ++m_count; }                                  \
-    if (m_count > 1) {                                                  \
-      m_kind = static_cast<HeaderKind>(set_one_bit_ref(static_cast<uint8_t>(m_kind))); \
-      FTRACE(1, "incRefCount1 : m_count = {}\n", m_count);              \
-    }                                                                   \
+    if (m_count > 1) m_pad = 1;                                         \
   }                                                                     \
                                                                         \
   RefCount decRefCount() const {                                        \
@@ -164,84 +143,26 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
     if (decReleaseCheck()) release();                                   \
   }
 
-#define IMPLEMENT_COUNTABLE_METHODS_ARRAY_NO_STATIC                     \
-  RefCount getCount() const {                                           \
-    assert(check_refcount(m_count));                                    \
-    return m_count;                                                     \
-  }                                                                     \
-                                                                        \
-  bool isRefCounted() const {                                           \
-    assert(check_refcount(m_count));                                    \
-    return m_count >= 0;                                                \
-  }                                                                     \
-                                                                        \
-  bool hasMultipleRefs() const {                                        \
-    assert(check_refcount(m_count));                                    \
-    TRACE_SET_MOD(countable);                                           \
-    if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",         \
-        m_count, check_one_bit_ref_array(m_kind));                      \
-      assert(check_one_bit_ref_array(m_kind));                          \
-    }                                                                   \
-    return (uint32_t)m_count > 1;                                       \
-  }                                                                     \
-                                                                        \
-  bool hasExactlyOneRef() const {                                       \
-    assert(check_refcount(m_count));                                    \
-    TRACE_SET_MOD(countable);                                           \
-    if (m_count > 1) { FTRACE(1, "m_count = {}, bitref = {}\n",         \
-        m_count, check_one_bit_ref_array(m_kind));                      \
-      assert(check_one_bit_ref_array(m_kind)); };                       \
-    return (uint32_t)m_count == 1;                                      \
-  }                                                                     \
-                                                                        \
-  void incRefCount() const {                                            \
-    assert(!MemoryManager::sweeping());                                 \
-    assert(check_refcount(m_count));                                    \
-    if (isRefCounted()) { ++m_count; }                                  \
-    TRACE_SET_MOD(countable);                                           \
-    if (m_count > 1) {                                                  \
-      m_kind = (ArrayKind) set_one_bit_ref(m_kind);                     \
-      assert(check_one_bit_ref_array(m_kind));                          \
-      FTRACE(1, "incRefCount2 : m_count = {}\n", m_count);              \
-    }                                                                   \
-  }                                                                     \
-                                                                        \
-  RefCount decRefCount() const {                                        \
-    assert(!MemoryManager::sweeping());                                 \
-    assert(check_refcount_nz(m_count));                                 \
-    return isRefCounted() ? --m_count : m_count;                        \
-  }                                                                     \
-  ALWAYS_INLINE bool decReleaseCheck() {                                \
-    assert(!MemoryManager::sweeping());                                 \
-    assert(check_refcount_nz(m_count));                                 \
-    if (m_count == 1) return true;                                      \
-    if (m_count > 1) --m_count;                                         \
-    return false;                                                       \
-  }                                                                     \
-  ALWAYS_INLINE void decRefAndRelease() {                               \
-    if (decReleaseCheck()) release();                                   \
-  }
-
-#define IMPLEMENT_COUNTABLE_METHODS             \
-  void setStatic() const {                      \
-    assert(check_refcount(m_count));            \
-    m_count = StaticValue;                      \
-    m_kind = (ArrayKind) set_one_bit_ref(m_kind); \
-  }                                             \
-  bool isStatic() const {                       \
-    if (m_count == StaticValue)assert(check_one_bit_ref_array(m_kind)); \
-    return m_count == StaticValue;              \
-  }                                             \
-  void setUncounted() const {                   \
-    assert(check_refcount(m_count));            \
-    m_count = UncountedValue;                   \
-    m_kind = (ArrayKind) set_one_bit_ref(m_kind); \
-  }                                             \
-  bool isUncounted() const {                    \
-    if (m_count == UncountedValue) assert(check_one_bit_ref_array(m_kind)); \
-    return m_count == UncountedValue;           \
-  }                                             \
-  IMPLEMENT_COUNTABLE_METHODS_ARRAY_NO_STATIC
+#define IMPLEMENT_COUNTABLE_METHODS                                  \
+  void setStatic() const {                                           \
+    assert(check_refcount(m_count));                                 \
+    m_count = StaticValue;                                           \
+    m_pad = 1;                                                       \
+  }                                                                  \
+  bool isStatic() const {                                            \
+    if (m_count == StaticValue) assert(check_one_bit_ref(m_pad));    \
+    return m_count == StaticValue;                                   \
+  }                                                                  \
+  void setUncounted() const {                                        \
+    assert(check_refcount(m_count));                                 \
+    m_count = UncountedValue;                                        \
+    m_pad = 1;                                                       \
+  }                                                                  \
+  bool isUncounted() const {                                         \
+    if (m_count == UncountedValue) assert(check_one_bit_ref(m_pad)); \
+    return m_count == UncountedValue;                                \
+  }                                                                  \
+  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
 #define IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC         \
   RefCount getCount() const {                           \
@@ -253,22 +174,13 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
                                                         \
   bool hasMultipleRefs() const {                        \
     assert(check_refcount_ns(m_count));                 \
-    TRACE_SET_MOD(countable);                           \
-    if (m_count > 1) {                                  \
-      FTRACE(1, "m_count = {}, bitref = {}\n",          \
-          m_count, check_one_bit_ref(m_kind));          \
-      assert(check_one_bit_ref(m_kind));                \
-    }                                                   \
+    if (m_count > 1) assert(check_one_bit_ref(m_pad));  \
     return m_count > 1;                                 \
   }                                                     \
                                                         \
   bool hasExactlyOneRef() const {                       \
     assert(check_refcount(m_count));                    \
-    TRACE_SET_MOD(countable);                           \
-    if (m_count > 1) {                                  \
-      FTRACE(1, "m_count = {}, bitref = {}\n",          \
-          m_count, check_one_bit_ref(m_kind));          \
-      assert(check_one_bit_ref(m_kind)); }              \
+    if (m_count > 1) assert(check_one_bit_ref(m_pad));  \
     return m_count == 1;                                \
   }                                                     \
                                                         \
@@ -276,11 +188,7 @@ inline uint8_t set_one_bit_ref(uint8_t kind) {
     assert(!MemoryManager::sweeping());                 \
     assert(check_refcount_ns(m_count));                 \
     ++m_count;                                          \
-    TRACE_SET_MOD(countable);                           \
-    if (m_count > 1) {                                  \
-      m_kind = static_cast<HeaderKind>(set_one_bit_ref(static_cast<uint8_t>(m_kind))); \
-      FTRACE(1, "incRefCount3 : m_count = {}\n", m_count); \
-    }                                                   \
+    if (m_count > 1) m_pad = 1;                         \
   }                                                     \
                                                         \
   RefCount decRefCount() const {                        \

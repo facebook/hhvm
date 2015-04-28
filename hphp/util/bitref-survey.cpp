@@ -66,7 +66,7 @@ void BitrefSurvey::cow_check_occurred(RefCount refcount, bool bitref, bool isArr
   check_count++;
   isArray ? arr_check_count++ : str_check_count++;
   if ((uint32_t)refcount > 1) {
-    //assert(bitref);
+    assert(bitref);
     //'necessary' copy
     rc_copy_count++;
     isArray ? arr_rc_copy_count++ : str_rc_copy_count++;
@@ -91,34 +91,29 @@ void BitrefSurvey::cow_check_occurred(RefCount refcount, bool bitref, bool isArr
 }
 
 void BitrefSurvey::cow_check_occurred(ArrayData* ad) {
-  cow_check_occurred(ad->getCount(), check_one_bit_ref_array(ad->m_kind), true);
+  cow_check_occurred(ad->getCount(), check_one_bit_ref(ad->m_pad), true);
   m.lock();
   if (ad->kind() == ArrayData::kEmptyKind) {
     // Arrays with kEmptyKind should be static, so always copied
     // log them here to get an idea of what percentage of copies are
     // of the empty, static array
     arr_empty_count++;
+    //TODO check zero length, compare to global static array, see dif in 3 measurements
   }
   if ((uint32_t)ad->getCount() > 1) { //includes static
     arr_rc_copy_histogram.addValue(ad->m_size);
-    if (!check_refcount_ns(ad->getCount())) {
-      assert(check_one_bit_ref_array(ad->m_kind));
-    }
   }
   m.unlock();
 }
 
 void BitrefSurvey::cow_check_occurred(StringData* sd) {
-  cow_check_occurred(sd->getCount(), check_one_bit_ref(sd->m_kind), false);
+  cow_check_occurred(sd->getCount(), check_one_bit_ref(sd->m_pad), false);
   m.lock();
   if (sd->m_len == 0) {
     str_empty_count++;
   }
   if ((uint32_t)sd->getCount() > 1) { //includes static
     str_rc_copy_histogram.addValue(sd->m_len);
-    if (!check_refcount_ns(sd->getCount())) {
-      assert(check_one_bit_ref(sd->m_kind));
-    }
   }
   m.unlock();
 }

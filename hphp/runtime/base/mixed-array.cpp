@@ -262,7 +262,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     ad->compact(false);
   }
 
-  //assert(ad->m_kind == other.m_kind);
+  assert(ad->m_kind == other.m_kind);
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
   assert(ad->m_count == 0);

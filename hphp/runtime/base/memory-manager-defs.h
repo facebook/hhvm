@@ -33,9 +33,8 @@ namespace HPHP {
 struct Header {
   size_t size() const;
   HeaderKind kind() const {
-    HeaderKind actual_kind = HeaderKind (static_cast<uint8_t>(kind_) & ~(1 << 7));
-    assert(unsigned(actual_kind) <= NumHeaderKinds);
-    return actual_kind;
+    assert(unsigned(kind_) <= NumHeaderKinds);
+    return kind_;
   }
   union {
     struct {

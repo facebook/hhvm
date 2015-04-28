@@ -8,9 +8,9 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-interface GenReadApi<Tk, Tv> {}
+interface GenReadApi<Tk, +Tv> {}
 
-class GenReadApiClass<Tk, Tv> implements GenReadApi<Tk, Tv> {
+class GenReadApiClass<Tk, +Tv> implements GenReadApi<Tk, Tv> {
   public function __construct(private Tv $v) {}
 }
 
@@ -26,9 +26,9 @@ final class Bar extends Foo {
   }
 }
 
-interface GenReadIdxApi<Tk, Tv> {}
+interface GenReadIdxApi<Tk, +Tv> {}
 
-class GenReadIdxApiClass<Tk, Tv> implements GenReadIdxApi<Tk, Tv> {
+class GenReadIdxApiClass<Tk, +Tv> implements GenReadIdxApi<Tk, Tv> {
   public function __construct(private Tv $v) {}
 }
 

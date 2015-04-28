@@ -271,24 +271,6 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tgeneric (_, _)), (_, Tgeneric (_, Some (Ast.Constraint_as, _)))
   | (_, Tgeneric (_, Some (Ast.Constraint_super, _))), (_, Tgeneric (_, _)) ->
       typevars_subtype env (uenv_super, ety_super) (uenv_sub, ety_sub)
-  (* Dirty covariance hacks *)
-  | (_, (Tclass ((_, name_super), [ty_super]))),
-    (_, (Tclass ((_, name_sub), [ty_sub])))
-    when name_super = name_sub && name_super = SN.FB.cDataTypeImplProvider ->
-      sub_type env ty_super ty_sub
-  | (_, (Tclass ((_, name_super), [tk_super; tv_super]))),
-    (_, (Tclass ((_, name_sub), [tk_sub; tv_sub])))
-    when name_super = name_sub &&
-      (name_super = SN.FB.cGenReadApi
-       || name_super = SN.FB.cGenReadIdxApi) ->
-      let env = sub_type env tk_super tk_sub in
-      sub_type env tv_super tv_sub
-  | (_, (Tclass ((_, name_super), [t1_super; t2_super; t3_super]))),
-    (_, (Tclass ((_, name_sub), [t1_sub; t2_sub; t3_sub])))
-    when name_super = name_sub && (name_super = SN.FB.cDataType) ->
-      let env = sub_type env t1_super t1_sub in
-      let env = sub_type env t2_super t2_sub in
-      sub_type env t3_super t3_sub
   | (p_super, (Tclass (x_super, tyl_super) as ty_super_)),
       (p_sub, (Tclass (x_sub, tyl_sub) as ty_sub_))
       when Typing_env.get_enum_constraint (snd x_sub) = None  ->

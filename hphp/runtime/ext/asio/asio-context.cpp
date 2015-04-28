@@ -102,8 +102,9 @@ void AsioContext::exit(context_idx_t ctx_idx) {
 }
 
 void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue,
-                           uint32_t priority) {
+                           int64_t priority) {
   assert(queue == QUEUE_DEFAULT || queue == QUEUE_NO_PENDING_IO);
+  assert(!(priority < 0));
 
   auto& dst_queue = queue == QUEUE_DEFAULT ? m_priorityQueueDefault :
                     m_priorityQueueNoPendingIO;

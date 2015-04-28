@@ -25,8 +25,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class RescheduleWaitHandle
 
-extern const int64_t q_RescheduleWaitHandle$$QUEUE_DEFAULT;
-extern const int64_t q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO;
+constexpr int64_t q_RescheduleWaitHandle$$QUEUE_DEFAULT =
+  AsioContext::QUEUE_DEFAULT;
+constexpr int64_t q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO =
+  AsioContext::QUEUE_NO_PENDING_IO;
 
 /**
  * A wait handle that is enqueued into a given priority queue and once desired
@@ -43,7 +45,7 @@ class c_RescheduleWaitHandle final : public c_WaitableWaitHandle {
     : c_WaitableWaitHandle(cls) {}
   ~c_RescheduleWaitHandle() {}
 
-  static Object ti_create(int64_t queue, int priority);
+  static Object ti_create(int64_t queue, int64_t priority);
 
  public:
   void run();
@@ -53,10 +55,10 @@ class c_RescheduleWaitHandle final : public c_WaitableWaitHandle {
 
  private:
   void setState(uint8_t state) { setKindState(Kind::Reschedule, state); }
-  void initialize(uint32_t queue, uint32_t priority);
+  void initialize(uint32_t queue, int64_t priority);
 
   uint32_t m_queue;
-  uint32_t m_priority;
+  int64_t m_priority;
 
  public:
   static const int8_t STATE_SCHEDULED = 2;

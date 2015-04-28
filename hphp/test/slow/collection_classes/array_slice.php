@@ -7,6 +7,7 @@ function main() {
   var_dump(array_slice($input, 2, null));
   var_dump(array_slice($input, -2, 1));
   var_dump(array_slice($input, 0, 3));
+  var_dump(array_slice($input, 0, 5));
 
   // note the differences in the array keys
   var_dump(array_slice($input, 2, -1));
@@ -30,5 +31,8 @@ function main() {
 
   var_dump(array_slice(Set {"a", "b", "c"}, 1, 2, true));
   var_dump(array_slice(ImmSet {"a", "b", "c"}, 1, 2, false));
+
+  var_dump(array_slice(Map{12 => 1, 6 => 2}, 0, 2, true));
+  var_dump(array_slice(Map{12 => 1, 6 => 2}, 0, 2, false));
 }
 main();

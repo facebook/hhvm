@@ -26,6 +26,18 @@ array(3) {
   [2]=>
   string(1) "c"
 }
+array(5) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+  [4]=>
+  string(1) "e"
+}
 array(2) {
   [0]=>
   string(1) "c"
@@ -85,4 +97,16 @@ array(2) {
   string(1) "b"
   [1]=>
   string(1) "c"
+}
+array(2) {
+  [12]=>
+  int(1)
+  [6]=>
+  int(2)
+}
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
 }

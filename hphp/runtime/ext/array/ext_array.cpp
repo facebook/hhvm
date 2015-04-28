@@ -882,23 +882,41 @@ Variant HHVM_FUNCTION(array_slice,
     return empty_array();
   }
 
-  // PackedArrayInit can't be used because non-numeric keys are preserved
-  // even when preserve_keys is false
-  Array ret = Array::attach(MixedArray::MakeReserve(len));
+  bool input_is_packed = isPackedContainer(cell_input);
+
+  // If the slice covers the entire input container, we can just nop when
+  // preserve_keys is true, or when preserve_keys is false but the container
+  // is packed so we know the keys already map to [0,N].
+  if (offset == 0 && len == num_in && (preserve_keys || input_is_packed)) {
+    return input.toArray();
+  }
+
   int pos = 0;
   ArrayIter iter(input);
   for (; pos < offset && iter; ++pos, ++iter) {}
-  for (; pos < (offset + len) && iter; ++pos, ++iter) {
-    Variant key(iter.first());
-    bool doAppend = !preserve_keys && key.isNumeric();
-    const Variant& v = iter.secondRefPlus();
-    if (doAppend) {
-      ret.appendWithRef(v);
-    } else {
-      ret.setWithRef(key, v, true);
+
+  if (input_is_packed && (offset == 0 || !preserve_keys)) {
+    PackedArrayInit ret(len);
+    for (; pos < (offset + len) && iter; ++pos, ++iter) {
+      ret.appendWithRef(iter.secondRefPlus());
     }
+    return ret.toVariant();
+  } else {
+    // Otherwise PackedArrayInit can't be used because non-numeric keys are
+    // preserved even when preserve_keys is false
+    Array ret = Array::attach(MixedArray::MakeReserve(len));
+    for (; pos < (offset + len) && iter; ++pos, ++iter) {
+      Variant key(iter.first());
+      bool doAppend = !preserve_keys && key.isNumeric();
+      const Variant& v = iter.secondRefPlus();
+      if (doAppend) {
+        ret.appendWithRef(v);
+      } else {
+        ret.setWithRef(key, v, true);
+      }
+    }
+    return ret;
   }
-  return ret;
 }
 
 Variant HHVM_FUNCTION(array_splice,

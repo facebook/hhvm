@@ -1508,7 +1508,9 @@ and assign p env e1 ty2 =
           let env, ty2 = TAccess.expand env r taccess in
           assign p env e1 ty2
       | _, Tclass ((_, x), [elt_type])
-        when x = SN.Collections.cVector || x = SN.Collections.cImmVector ->
+        when x = SN.Collections.cVector
+          || x = SN.Collections.cImmVector
+          || x = SN.Collections.cConstVector ->
           let env, _ = lfold begin fun env e ->
             assign (fst e) env e elt_type
           end env el in

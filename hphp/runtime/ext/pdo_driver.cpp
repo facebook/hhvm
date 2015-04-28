@@ -59,8 +59,6 @@ PDOResource* PDODriver::createResource(const String& datasource,
     Array err;
     bool hasError = conn->fetchErr(nullptr, err);
 
-    rsrc->release();
-
     if (hasError && !err.empty()) {
       throw_pdo_exception(s_general_error_code, uninit_null(), "[%ld]: %s",
                           err[0].toInt64(), err[1].toString().data());

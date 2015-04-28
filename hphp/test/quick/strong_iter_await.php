@@ -15,14 +15,14 @@ async function bar() {
 
 async function main() {
   $wait_handles = Vector {};
-  $wait_handles[] = foo()->getWaitHandle();
-  $wait_handles[] = bar()->getWaitHandle();
+  $wait_handles[] = foo();
+  $wait_handles[] = bar();
   return GenVectorWaitHandle::create($wait_handles);
 }
 
 async function main2() {
   $x = main();
-  $x->join();
+  HH\Asio\join($x);
 }
 
-main2()->join();
+HH\Asio\join(main2());

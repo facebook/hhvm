@@ -13,5 +13,5 @@ async function await1() {
   return 1 + $b;
 }
 
-var_dump(ret1()->join());
-var_dump(await1()->join());
+var_dump(HH\Asio\join(ret1()));
+var_dump(HH\Asio\join(await1()));

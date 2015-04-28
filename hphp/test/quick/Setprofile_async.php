@@ -16,7 +16,7 @@ async function gen1($a) {
 async function gen2($a) {
   error_log('In gen2');
   await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
-  $x = gen1($a)->join();
+  $x = HH\Asio\join(gen1($a));
   error_log('Finished in gen2');
   return $x;
 }
@@ -52,7 +52,7 @@ function proffunc($event, $name, $info) {
 
 function main($a) {
   fb_setprofile('proffunc');
-  $result = genFoo($a)->join();
+  $result = HH\Asio\join(genFoo($a));
   var_dump($result);
   fb_setprofile(null);
 }

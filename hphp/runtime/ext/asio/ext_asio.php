@@ -21,3 +21,45 @@ function asio_get_running_in_context(int $ctx_idx): ResumableWaitHandle;
 function asio_get_running(): ResumableWaitHandle;
 
 } // namespace
+
+namespace HH\Asio {
+
+/**
+ * Wait for a given Awaitable to finish and return its result.
+ *
+ * Launches a new instance of scheduler to drive asynchronous execution
+ * until the provided Awaitable is finished.
+ */
+function join<T>(Awaitable<T> $awaitable): T {
+  invariant(
+    $awaitable instanceof WaitHandle,
+    'unsupported user-land Awaitable',
+  );
+  return $awaitable->join();
+}
+
+/**
+ * Get result of an already finished Awaitable.
+ *
+ * Throws an InvalidOperationException if the Awaitable is not finished.
+ */
+function result<T>(Awaitable<T> $awaitable): T {
+  invariant(
+    $awaitable instanceof WaitHandle,
+    'unsupported user-land Awaitable',
+  );
+  return $awaitable->result();
+}
+
+/**
+ * Check whether the given Awaitable has finished.
+ */
+function has_finished<T>(Awaitable<T> $awaitable): bool {
+  invariant(
+    $awaitable instanceof WaitHandle,
+    'unsupported user-land Awaitable',
+  );
+  return $awaitable->isFinished();
+}
+
+} // namespace

@@ -28,9 +28,9 @@ async function test2() {
 
 $t = test();
 echo "\n";
-$t->join();
+HH\Asio\join($t);
 echo "\n";
 $t2 = test2();
 echo "\n";
-$t2->join();
+HH\Asio\join($t2);
 echo "\n";

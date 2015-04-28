@@ -4,5 +4,6 @@ Warning: AsyncFunctionWaitHandle fail callback raised a fatal error: Maximum exe
 Fatal error: Uncaught exception 'Exception' with message 'x' in %s/async/fail_callback_timeout.php:9
 Stack trace:
 #0 (): heh()
-#1 %s/async/fail_callback_timeout.php(16): HH\WaitHandle->join()
-#2 {main}
+#1 (): HH\WaitHandle->join()
+#2 %s/async/fail_callback_timeout.php(16): HH\Asio\join()
+#3 {main}

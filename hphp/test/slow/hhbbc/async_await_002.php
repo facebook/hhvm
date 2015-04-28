@@ -73,4 +73,4 @@ async function go() {
   await $x->genThings();
 }
 $y = go();
-$y->join();
+HH\Asio\join($y);

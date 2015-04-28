@@ -11,12 +11,12 @@ function reschedule() {
 function t(WaitHandle $wh, $a): void {
   echo $wh->getName(), ' ', count($a), "\nbefore: ";
   foreach ($a as $k => $aa) {
-    echo "$k:", $aa->isFinished() ? 1 : 0, ",";
+    echo "$k:", HH\Asio\has_finished($aa) ? 1 : 0, ",";
   }
   echo "\nafter : ";
-  $wh->join();
+  HH\Asio\join($wh);
   foreach ($a as $k => $aa) {
-    echo "$k:", $aa->isFinished() ? 1 : 0, ",";
+    echo "$k:", HH\Asio\has_finished($aa) ? 1 : 0, ",";
   }
   echo "\n";
 }
@@ -112,12 +112,12 @@ $finished = () ==> {
   foreach ($handles as $hs) {
     echo count($hs), "\t";
     foreach ($hs as $h) {
-      echo $h->isFinished() ? 1 : 0;
+      echo HH\Asio\has_finished($h) ? 1 : 0;
     }
     echo "\n";
   }
 };
 $finished();
-$wh->join();
+HH\Asio\join($wh);
 $finished();
 echo "done\n";

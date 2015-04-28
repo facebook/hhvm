@@ -15,7 +15,7 @@ function main() {
   $x = bar();
 
   try {
-    var_dump($x->join());
+    var_dump(HH\Asio\join($x));
   } catch (Blah $x) {
     echo "caught exception\n";
   }

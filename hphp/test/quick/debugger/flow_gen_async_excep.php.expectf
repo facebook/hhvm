@@ -82,7 +82,7 @@ Break at genFoo() on line 38 of %s/flow_gen_async_excep.php
 next
 Break at foo() on line 42 of %s/flow_gen_async_excep.php
   41 function foo($a) {
-  42*  $result = genFoo($a)->join();
+  42*  $result = HH\Asio\join(genFoo($a));
   43   var_dump($result);
 
 break clear all

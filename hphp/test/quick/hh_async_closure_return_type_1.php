@@ -154,7 +154,7 @@ function testfunc() {}
 
 function call_wrapper($fn, $arg) {
   try {
-    $fn($arg)->join();
+    HH\Asio\join($fn($arg));
   } catch (Exception $e) {
     echo "Caught exception: " . $e->getMessage() . "\n";
   }
@@ -190,13 +190,13 @@ function main() {
   echo "\ncalling f21\n";
   try {
     $f = $c->f21();
-    $f()->join();
+    HH\Asio\join($f());
   } catch (Exception $e) {
     echo "Caught exception: " . $e->getMessage() . "\n";
   }
   try {
     $f = $c->f21_soft();
-    $f()->join();
+    HH\Asio\join($f());
   } catch (Exception $e) {
     echo "Caught exception: " . $e->getMessage() . "\n";
   }

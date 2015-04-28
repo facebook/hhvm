@@ -32,6 +32,6 @@ class F {
   }
 }
 
-$global()->join();
-inFunc()->join();
-F::inMeth()->join();
+HH\Asio\join($global());
+HH\Asio\join(inFunc());
+HH\Asio\join(F::inMeth());

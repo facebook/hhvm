@@ -21,7 +21,7 @@ async function genFoo($a) {
 }
 
 function foo($a) {
-  $result = genFoo($a)->join();
+  $result = HH\Asio\join(genFoo($a));
   var_dump($result);
 }
 

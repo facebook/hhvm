@@ -1,4 +1,4 @@
-array(3) {
+array(4) {
   [0]=>
   array(4) {
     ["file"]=>
@@ -24,11 +24,7 @@ array(3) {
     }
   }
   [2]=>
-  array(6) {
-    ["file"]=>
-    string(%d) "%s"
-    ["line"]=>
-    int(13)
+  array(4) {
     ["function"]=>
     string(4) "join"
     ["class"]=>
@@ -39,8 +35,23 @@ array(3) {
     array(0) {
     }
   }
+  [3]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(13)
+    ["function"]=>
+    string(12) "HH\Asio\join"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      object(HH\AsyncFunctionWaitHandle)#%d (0) {
+      }
+    }
+  }
 }
-array(3) {
+array(4) {
   [0]=>
   array(4) {
     ["file"]=>
@@ -68,11 +79,7 @@ array(3) {
     string(8) "I am foo"
   }
   [2]=>
-  array(6) {
-    ["file"]=>
-    string(%d) "%s"
-    ["line"]=>
-    int(14)
+  array(4) {
     ["function"]=>
     string(4) "join"
     ["class"]=>
@@ -81,6 +88,21 @@ array(3) {
     string(2) "->"
     ["args"]=>
     array(0) {
+    }
+  }
+  [3]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(14)
+    ["function"]=>
+    string(12) "HH\Asio\join"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      object(HH\AsyncFunctionWaitHandle)#%d (0) {
+      }
     }
   }
 }

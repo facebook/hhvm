@@ -34,4 +34,4 @@ async function test() {
   return 42;
 }
 
-test()->join();
+HH\Asio\join(test());

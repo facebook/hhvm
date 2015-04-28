@@ -37,5 +37,5 @@ async function c() {
 }
 
 $k = c();
-$l->join();
-$k->join();
+HH\Asio\join($l);
+HH\Asio\join($k);

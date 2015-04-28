@@ -10,5 +10,5 @@ async function foo($options) {
   await bar($options);
 }
 
-foo(0)->join();
-foo(DEBUG_BACKTRACE_PROVIDE_METADATA)->join();
+HH\Asio\join(foo(0));
+HH\Asio\join(foo(DEBUG_BACKTRACE_PROVIDE_METADATA));

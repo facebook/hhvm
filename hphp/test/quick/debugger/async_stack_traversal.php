@@ -10,7 +10,7 @@ async function gen1($a) {
 async function gen2($a) {
   $v1 = "v1-gen2";
   await RescheduleWaitHandle::Create(0, $a);
-  $x = gen1($a)->join();
+  $x = HH\Asio\join(gen1($a));
   return $x;
 }
 
@@ -33,7 +33,7 @@ async function genFoo($a) {
 }
 
 function main($a) {
-  genFoo($a)->join();
+  HH\Asio\join(genFoo($a));
 }
 
 main(42);

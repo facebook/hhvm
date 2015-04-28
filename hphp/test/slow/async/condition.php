@@ -85,4 +85,4 @@ async function run() {
   await run_one('condition_block_nice_fail');
 }
 
-run()->join();
+HH\Asio\join(run());

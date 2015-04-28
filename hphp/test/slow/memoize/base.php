@@ -72,8 +72,8 @@ class B extends A {
 
 // Test async
 $a = new A();
-echo $a->testAsync()->join().' ';
-echo $a->testAsync()->join()."\n";
+echo HH\Asio\join($a->testAsync()).' ';
+echo HH\Asio\join($a->testAsync())."\n";
 
 // Test Inheritence
 $b = new B();

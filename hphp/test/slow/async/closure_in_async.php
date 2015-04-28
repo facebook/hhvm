@@ -14,10 +14,10 @@ async function test() {
   };
 
   var_dump($closure(0));
-  var_dump($asyncclosure(1)->join());
+  var_dump(HH\Asio\join($asyncclosure(1)));
   await block();
   var_dump($closure(2));
-  var_dump($asyncclosure(3)->join());
+  var_dump(HH\Asio\join($asyncclosure(3)));
 }
 
-test()->join();
+HH\Asio\join(test());

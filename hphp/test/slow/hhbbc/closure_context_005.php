@@ -18,7 +18,7 @@ function main() {
   $x = new Foo;
   var_dump($x->getter());
   $z = $x->f();
-  $z = $z()->join();
+  $z = HH\Asio\join($z());
   var_dump($z);
   $z();
   var_dump($x->getter());

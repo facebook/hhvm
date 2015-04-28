@@ -17,8 +17,8 @@ class Foo {
 function main() {
   $x = new Foo;
   var_dump($x->getter());
-  $z = $x->genFoo()->join();
-  $z = $z()->join();
+  $z = HH\Asio\join($x->genFoo());
+  $z = HH\Asio\join($z());
   var_dump($z);
   $z();
   var_dump($x->getter());

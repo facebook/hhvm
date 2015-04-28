@@ -35,14 +35,14 @@ function main() {
   $f = async function (...$args) {
     var_dump($args);
   };
-  $f('a', 'b')->join();
+  HH\Asio\join($f('a', 'b'));
 
   echo 'blocking async closure', "\n";
   $f = async function (...$args) {
     await block();
     var_dump($args);
   };
-  $f('a', 'b')->join();
+  HH\Asio\join($f('a', 'b'));
 
   $c = new CWithClosures('prop-a');
   $c->test('a');

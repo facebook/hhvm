@@ -12,12 +12,12 @@ async function static_exception_create($exception) {
 function main() {
   // Make new wait handles with valid values.
   $srwh = static_result_create(42);
-  $r = $srwh->join();
+  $r = HH\Asio\join($srwh);
   var_dump($r); // Shows 42 correctly.
 
   $sewh = static_exception_create(new Exception("Hi!"));
   try {
-    $r = $sewh->join();
+    $r = HH\Asio\join($sewh);
   } catch (Exception $e) {
     var_dump($e->getMessage()); // Shows "Hi!" correctly.
   }

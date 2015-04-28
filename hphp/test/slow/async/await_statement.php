@@ -12,5 +12,5 @@ async function g() {
   return $b;
 }
 
-$r = g()->join();
+$r = HH\Asio\join(g());
 var_dump($r);

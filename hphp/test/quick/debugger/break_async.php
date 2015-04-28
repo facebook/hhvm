@@ -10,7 +10,7 @@ async function gen1($a) {
 
 async function gen2($a) {
   error_log('In gen2');
-  $x = gen1($a)->join();
+  $x = HH\Asio\join(gen1($a));
   error_log('Finished in gen2');
   return $x;
 }
@@ -40,7 +40,7 @@ async function genFoo($a) {
 }
 
 function main($a) {
-  $result = genFoo($a)->join();
+  $result = HH\Asio\join(genFoo($a));
   var_dump($result);
 }
 

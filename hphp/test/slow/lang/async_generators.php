@@ -110,6 +110,10 @@ async function main($exit_type) {
   } while ($res);
 }
 
+function my_join(WaitHandle $awaitable) {
+  return $awaitable->join();
+}
+
 echo "start\n";
 for ($exit_type = 0; $exit_type < 4; ++$exit_type) {
   echo "--------------------testing $exit_type--------------------\n";

@@ -25,11 +25,11 @@ async function genBlocking(...$args) {
 
 function main() {
   echo "* eager async *\n";
-  $result = genEager('a', 'b', 'c')->join();
+  $result = HH\Asio\join(genEager('a', 'b', 'c'));
   var_dump($result);
 
   echo "* blocking async *\n";
-  $result = genBlocking('a', 'b', 'c')->join();
+  $result = HH\Asio\join(genBlocking('a', 'b', 'c'));
   var_dump($result);
 
   echo "* generator *\n";

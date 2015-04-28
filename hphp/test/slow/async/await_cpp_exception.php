@@ -22,4 +22,4 @@ async function crash() {
   echo "should have exited!\n";
 }
 
-crash()->join();
+HH\Asio\join(crash());

@@ -13,7 +13,7 @@ set_time_limit(6);
 AsyncFunctionWaitHandle::setOnFailCallback(() ==> a());
 $x = heh();
 try {
-  $x->join();
+  HH\Asio\join($x);
 } catch (exception $y) {
 }
 while (true) { mt_rand(); }

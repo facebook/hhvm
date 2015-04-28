@@ -20,7 +20,7 @@ class A {
 
   async function gen2($a) {
     await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
-    $x = $this->gen1($a)->join();
+    $x = HH\Asio\join($this->gen1($a));
     return $x;
   }
 
@@ -44,7 +44,7 @@ class A {
 }
 
 function main($a) {
-  return A::genFoo($a)->join();
+  return HH\Asio\join(A::genFoo($a));
 }
 
 var_dump(main(42));

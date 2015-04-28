@@ -31,14 +31,16 @@ Break at genBar() on line 11 of %s/flow_gen_async.php
 
 next
 Finished in genFoo
+Break at HH\Asio\join() on line 38 of systemlib.phpasio
+next
 Break at foo() on line 24 of %s/flow_gen_async.php
   23 function foo($a) {
-  24*  $result = genFoo($a)->join();
+  24*  $result = HH\Asio\join(genFoo($a));
   25   var_dump($result);
 
 next
 Break at foo() on line 25 of %s/flow_gen_async.php
-  24   $result = genFoo($a)->join();
+  24   $result = HH\Asio\join(genFoo($a));
   25*  var_dump($result);
   26 }
 
@@ -99,14 +101,16 @@ Breakpoint 1 reached at genBar() on line 10 of %s/flow_gen_async.php
 out
 Finished in genBar
 Finished in genFoo
+Break at HH\Asio\join() on line 38 of systemlib.phpasio
+next
 Break at foo() on line 24 of %s/flow_gen_async.php
   23 function foo($a) {
-  24*  $result = genFoo($a)->join();
+  24*  $result = HH\Asio\join(genFoo($a));
   25   var_dump($result);
 
 next
 Break at foo() on line 25 of %s/flow_gen_async.php
-  24   $result = genFoo($a)->join();
+  24   $result = HH\Asio\join(genFoo($a));
   25*  var_dump($result);
   26 }
 
@@ -159,14 +163,16 @@ Break at genFoo() on line 20 of %s/flow_gen_async.php
   21 }
 
 next
+Break at HH\Asio\join() on line 38 of systemlib.phpasio
+next
 Break at foo() on line 24 of %s/flow_gen_async.php
   23 function foo($a) {
-  24*  $result = genFoo($a)->join();
+  24*  $result = HH\Asio\join(genFoo($a));
   25   var_dump($result);
 
 next
 Break at foo() on line 25 of %s/flow_gen_async.php
-  24   $result = genFoo($a)->join();
+  24   $result = HH\Asio\join(genFoo($a));
   25*  var_dump($result);
   26 }
 
@@ -197,14 +203,14 @@ Breakpoint 1 reached at genFoo() on line 15 of %s/flow_gen_async.php
 out
 Break at foo() on line 24 of %s/flow_gen_async.php
   23 function foo($a) {
-  24*  $result = genFoo($a)->join();
+  24*  $result = HH\Asio\join(genFoo($a));
   25   var_dump($result);
 
 next
 Finished in genBar
 Finished in genFoo
 Break at foo() on line 25 of %s/flow_gen_async.php
-  24   $result = genFoo($a)->join();
+  24   $result = HH\Asio\join(genFoo($a));
   25*  var_dump($result);
   26 }
 

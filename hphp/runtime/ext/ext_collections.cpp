@@ -660,6 +660,16 @@ BaseVector::BaseVector(Class* cls, HeaderKind kind, uint32_t cap /* = 0 */)
   , m_version(0)
 {}
 
+BaseVector::BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
+  : ExtCollectionObjectData(cls, kind)
+  , m_size(arr->size())
+  , m_capacity(arr->m_cap.decode())
+  , m_data(packedData(arr))
+  , m_version(0)
+{
+  assertx(arr == staticEmptyArray() || arr->isPacked());
+}
+
 /**
  * Delegate the responsibility for freeing the buffer to the immutable copy,
  * if it exists.
@@ -745,6 +755,10 @@ c_ImmVector* c_ImmVector::Clone(ObjectData* obj) {
 
 c_Vector::c_Vector(Class* cls, uint32_t cap /* = 0 */)
   : BaseVector(cls, HeaderKind::Vector, cap)
+{}
+
+c_Vector::c_Vector(Class* cls, ArrayData* arr)
+  : BaseVector(cls, HeaderKind::Vector, arr)
 {}
 
 void BaseVector::t___construct(const Variant& iterable /* = null_variant */) {
@@ -1441,6 +1455,10 @@ c_ImmVector::c_ImmVector(Class* cls, uint32_t cap /* = 0 */)
   : BaseVector(cls, HeaderKind::ImmVector, cap)
 {}
 
+c_ImmVector::c_ImmVector(Class* cls, ArrayData* arr)
+  : BaseVector(cls, HeaderKind::ImmVector, arr)
+{}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -1489,6 +1507,13 @@ HashCollection::HashCollection(Class* cls, HeaderKind kind,
   , m_data(mixedData(cap == 0 ? staticEmptyMixedArray()
                               : static_cast<MixedArray*>(
                                 MixedArray::MakeReserveMixed(cap))))
+{}
+
+HashCollection::HashCollection(Class* cls, HeaderKind kind, ArrayData* arr)
+  : ExtCollectionObjectData(cls, kind)
+  , m_size(arr->m_size)
+  , m_version(0)
+  , m_data(mixedData(MixedArray::asMixed(arr)))
 {}
 
 Array HashCollection::t_toarray() {
@@ -1951,10 +1976,18 @@ c_Map::c_Map(Class* cls, uint32_t cap /* = 0 */)
   : BaseMap(cls, HeaderKind::Map, cap)
 {}
 
+c_Map::c_Map(Class* cls, ArrayData* arr)
+  : BaseMap(cls, HeaderKind::Map, arr)
+{}
+
 // Protected (Internal)
 
 BaseMap::BaseMap(Class* cls, HeaderKind kind, uint32_t cap /* = 0*/)
   : HashCollection(cls, kind, cap)
+{}
+
+BaseMap::BaseMap(Class* cls, HeaderKind kind, ArrayData* arr)
+  : HashCollection(cls, kind, arr)
 {}
 
 BaseMap::~BaseMap() {
@@ -3565,6 +3598,10 @@ c_ImmMap::c_ImmMap(Class* cb, uint32_t cap /* = 0 */)
   : BaseMap(cb, HeaderKind::ImmMap, cap)
 {}
 
+c_ImmMap::c_ImmMap(Class* cb, ArrayData* arr)
+  : BaseMap(cb, HeaderKind::ImmMap, arr)
+{}
+
 c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
   return BaseMap::Clone<c_ImmMap>(obj);
 }
@@ -4469,6 +4506,10 @@ BaseSet::BaseSet(Class* cls, HeaderKind kind, uint32_t cap /* = 0 */)
   : HashCollection(cls, kind, cap)
 {}
 
+BaseSet::BaseSet(Class* cls, HeaderKind kind, ArrayData* arr)
+  : HashCollection(cls, kind, arr)
+{}
+
 BaseSet::~BaseSet() {
   decRefArr(arrayData());
 }
@@ -4523,6 +4564,10 @@ void BaseSet::throwBadValueType() {
 
 c_Set::c_Set(Class* cls, uint32_t cap /* = 0 */)
   : BaseSet(cls, HeaderKind::Set, cap)
+{}
+
+c_Set::c_Set(Class* cls, ArrayData* arr)
+  : BaseSet(cls, HeaderKind::Set, arr)
 {}
 
 void BaseSet::t___construct(const Variant& iterable /* = null_variant */) {
@@ -4794,6 +4839,10 @@ Object c_ImmSet::ti_fromarrays(int _argc, const Array& _argv) {
 
 c_ImmSet::c_ImmSet(Class* cls, uint32_t cap /* = 0 */)
   : BaseSet(cls, HeaderKind::ImmSet, cap)
+{}
+
+c_ImmSet::c_ImmSet(Class* cls, ArrayData* arr)
+  : BaseSet(cls, HeaderKind::ImmSet, arr)
 {}
 
 void c_ImmSet::Unserialize(ObjectData* obj, VariableUnserializer* uns,
@@ -5992,6 +6041,28 @@ ObjectData* newCollectionHelper(CollectionType type, uint32_t size) {
       return newobj<c_ImmMap>(c_ImmMap::classof(), size);
     case CollectionType::ImmSet:
       return newobj<c_ImmSet>(c_ImmSet::classof(), size);
+  }
+  not_reached();
+}
+
+ObjectData* newCollectionFromArrayHelper(CollectionType type, ArrayData* arr) {
+  assert(isValidCollection(type));
+  assert(arr->getCount());
+  switch (type) {
+    case CollectionType::Vector:
+      return newobj<c_Vector>(c_Vector::classof(), arr);
+    case CollectionType::ImmVector:
+      return newobj<c_ImmVector>(c_ImmVector::classof(), arr);
+    case CollectionType::Map:
+      return newobj<c_Map>(c_Map::classof(), arr);
+    case CollectionType::ImmMap:
+      return newobj<c_ImmMap>(c_ImmMap::classof(), arr);
+    case CollectionType::Set:
+      return newobj<c_Set>(c_Set::classof(), arr);
+    case CollectionType::ImmSet:
+      return newobj<c_ImmSet>(c_ImmSet::classof(), arr);
+    case CollectionType::Pair:
+      not_reached();
   }
   not_reached();
 }

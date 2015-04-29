@@ -878,6 +878,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvArrToBool:
   case ConvArrToDbl:
   case ConvArrToInt:
+  case NewColFromArray:
   case ConvBoolToStr:
   case CountArray:
   case CountArrayFast:

@@ -129,9 +129,9 @@ flip: array(3) {
   string(1) "c"
 }
 --------------------
-input: object(HH\Vector)#1 (4) {
+input: object(HH\Vector)#2 (4) {
   [0]=>
-  object(stdClass)#2 (0) {
+  object(stdClass)#1 (0) {
   }
   [1]=>
   int(10)

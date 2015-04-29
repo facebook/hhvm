@@ -3689,6 +3689,17 @@ OPTBLD_INLINE void iopNewCol(IOP_ARGS) {
   vmStack().pushObject(obj);
 }
 
+OPTBLD_INLINE void iopColFromArray(IOP_ARGS) {
+  pc++;
+  auto const cType = static_cast<CollectionType>(decode_iva(pc));
+  auto const c1 = vmStack().topC();
+  // This constructor reassociates the ArrayData with the collection, so no
+  // inc/decref is needed.
+  auto obj = newCollectionFromArrayHelper(cType, c1->m_data.parr);
+  vmStack().discard();
+  vmStack().pushObject(obj);
+}
+
 OPTBLD_INLINE void iopColAddNewElemC(IOP_ARGS) {
   pc++;
   Cell* c1 = vmStack().topC();

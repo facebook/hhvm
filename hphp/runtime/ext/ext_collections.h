@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/system/systemlib.h"
 
-
 #include <limits>
 
 #define DECLARE_COLLECTION_MAGIC_METHODS()           \
@@ -293,6 +292,7 @@ class BaseVector : public ExtCollectionObjectData {
  protected:
 
   explicit BaseVector(Class* cls, HeaderKind, uint32_t cap = 0);
+  explicit BaseVector(Class* cls, HeaderKind, ArrayData* arr);
   /*virtual*/ ~BaseVector();
 
   Cell* data() const { return m_data; }
@@ -484,6 +484,7 @@ class c_Vector : public BaseVector {
 
  public:
   explicit c_Vector(Class* cls = c_Vector::classof(), uint32_t cap = 0);
+  explicit c_Vector(Class* cls, ArrayData* arr);
 
   static c_Vector* Clone(ObjectData* obj);
 
@@ -624,6 +625,7 @@ class c_ImmVector : public BaseVector {
 
  public:
   explicit c_ImmVector(Class* cls = c_ImmVector::classof(), uint32_t cap = 0);
+  explicit c_ImmVector(Class* cls, ArrayData* arr);
 
   static c_ImmVector* Clone(ObjectData* obj);
 
@@ -659,6 +661,7 @@ ALWAYS_INLINE MixedArray* staticEmptyMixedArray() {
 class HashCollection : public ExtCollectionObjectData {
  public:
   explicit HashCollection(Class* cls, HeaderKind, uint32_t cap = 0);
+  explicit HashCollection(Class* cls, HeaderKind, ArrayData* arr);
 
   typedef MixedArray::Elm Elm;
 
@@ -1320,6 +1323,7 @@ class BaseMap : public HashCollection {
 
  protected: // BaseMap is an abstract class
   explicit BaseMap(Class* cls, HeaderKind, uint32_t cap = 0);
+  explicit BaseMap(Class* cls, HeaderKind, ArrayData* arr);
   ~BaseMap();
 
  public:
@@ -1481,6 +1485,7 @@ class c_Map : public BaseMap {
 
  public:
   explicit c_Map(Class* cls = c_Map::classof(), uint32_t cap = 0);
+  explicit c_Map(Class* cls, ArrayData* arr);
 
   static c_Map* Clone(ObjectData* obj);
 
@@ -1531,6 +1536,7 @@ class c_ImmMap : public BaseMap {
 
  public:
   explicit c_ImmMap(Class* cls = c_ImmMap::classof(), uint32_t cap = 0);
+  explicit c_ImmMap(Class* cls, ArrayData* arr);
 
   static c_ImmMap* Clone(ObjectData* obj);
 
@@ -1777,6 +1783,7 @@ class BaseSet : public HashCollection {
  protected:
   // BaseSet is an abstract class.
   explicit BaseSet(Class* cls, HeaderKind, uint32_t cap = 0);
+  explicit BaseSet(Class* cls, HeaderKind, ArrayData* arr);
   /* virtual */ ~BaseSet();
 
  private:
@@ -1810,6 +1817,7 @@ class c_Set : public BaseSet {
   // PHP-land methods.
 
   explicit c_Set(Class* cls = c_Set::classof(), uint32_t cap = 0);
+  explicit c_Set(Class* cls, ArrayData* arr);
 
   Object t_add(const Variant& val);
   Object t_addall(const Variant& val);
@@ -1887,6 +1895,7 @@ class c_ImmSet : public BaseSet {
 
  public:
   explicit c_ImmSet(Class* cls = c_ImmSet::classof(), uint32_t cap = 0);
+  explicit c_ImmSet(Class* cls, ArrayData* arr);
 
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
@@ -2120,10 +2129,27 @@ ObjectData* collectionDeepCopySet(c_Set* mp);
 ObjectData* collectionDeepCopyImmSet(c_ImmSet* st);
 ObjectData* collectionDeepCopyPair(c_Pair* pair);
 
+// newCollectionHelper and newCollectionFromArrayHelper do not incref, and they
+// are used in the interpreter.
 ObjectData* newCollectionHelper(CollectionType type, uint32_t size);
+ObjectData* newCollectionFromArrayHelper(CollectionType type, ArrayData* arr);
+
 ObjectData* newPairHelper();
+
 template<typename T> ObjectData* newColHelper(uint32_t size) {
-  auto* obj = newobj<T>(T::classof(), size);
+  auto obj = newobj<T>(T::classof(), size);
+  obj->incRefCount();
+  return obj;
+}
+
+template<typename T> ObjectData* newVectorFromArrayHelper(ArrayData* arr) {
+  auto obj = newobj<T>(T::classof(), arr);
+  obj->incRefCount();
+  return obj;
+}
+
+template<typename T> ObjectData* newHashColFromArrayHelper(ArrayData* arr) {
+  auto obj = newobj<T>(T::classof(), arr);
   obj->incRefCount();
   return obj;
 }

@@ -906,6 +906,16 @@ struct NewColData : IRExtraData {
   uint32_t size;
 };
 
+struct NewColFromArrayData : IRExtraData {
+  explicit NewColFromArrayData(CollectionType type) : type(type) {}
+
+  std::string show() const {
+    return collectionTypeToString(type)->toCppString();
+  }
+
+  CollectionType type;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -1031,6 +1041,7 @@ X(DbgTrashFrame,                IRSPOffsetData);
 X(DbgTraceCall,                 IRSPOffsetData);
 X(LdPropAddr,                   PropOffset);
 X(NewCol,                       NewColData);
+X(NewColFromArray,              NewColFromArrayData);
 
 #undef X
 

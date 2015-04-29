@@ -3396,57 +3396,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       return true;
     }
     if (op == T_ARRAY) {
-      int num_elems;
-      std::vector<std::string> keys;
-
-      if (u->isScalar()) {
-        TypedValue tv;
-        tvWriteUninit(&tv);
-        initScalar(tv, u);
-        if (m_staticArrays.empty()) {
-          e.Array(tv.m_data.parr);
-        }
-
-      } else if (isPackedInit(u->getExpression(), &num_elems)) {
-        // evaluate array values onto stack
-        auto el = static_pointer_cast<ExpressionList>(u->getExpression());
-        for (int i = 0; i < num_elems; i++) {
-          auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
-          visit(ap->getValue());
-          emitConvertToCell(e);
-        }
-        e.NewPackedArray(num_elems);
-
-      } else if (isStructInit(u->getExpression(), keys)) {
-        auto el = static_pointer_cast<ExpressionList>(u->getExpression());
-        for (int i = 0, n = keys.size(); i < n; i++) {
-          auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
-          visit(ap->getValue());
-          emitConvertToCell(e);
-        }
-        e.NewStructArray(keys);
-
-      } else {
-        assert(m_staticArrays.empty());
-        auto capacityHint = MixedArray::SmallSize;
-
-        ExpressionPtr ex = u->getExpression();
-        if (ex->getKindOf() == Construct::KindOfExpressionList) {
-          auto el = static_pointer_cast<ExpressionList>(ex);
-
-          int capacity = el->getCount();
-          if (capacity > 0) {
-            capacityHint = capacity;
-          }
-        }
-
-        if (isPackedInit(ex, &num_elems, false /* ignore size */)) {
-          e.NewArray(capacityHint);
-        } else {
-          e.NewMixedArray(capacityHint);
-        }
-        visit(ex);
-      }
+      auto el = static_pointer_cast<ExpressionList>(u->getExpression());
+      emitArrayInit(e, el);
       return true;
     } else if (op == T_ISSET) {
       ExpressionListPtr list =
@@ -3698,57 +3649,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     }
 
     if (op == T_COLLECTION) {
-      ScalarExpressionPtr cls =
-        static_pointer_cast<ScalarExpression>(b->getExp1());
-      int nElms = 0;
-      ExpressionListPtr el;
-      if (b->getExp2()) {
-        el = static_pointer_cast<ExpressionList>(b->getExp2());
-        nElms = el->getCount();
-      }
-      const std::string* clsName = nullptr;
-      cls->getString(clsName);
-      auto ct = stringToCollectionType(*clsName);
-      if (!ct.hasValue()) {
-        throw IncludeTimeFatalException(b,
-          "Cannot use collection initialization for non-collection class");
-      } else if (ct == CollectionType::Pair && nElms != 2) {
-        throw IncludeTimeFatalException(b,
-            "Pair objects must have exactly 2 elements");
-      }
-      bool kvPairs = (ct == CollectionType::Map ||
-                      ct == CollectionType::ImmMap);
-      e.NewCol(int(ct.value()), nElms);
-      if (kvPairs) {
-        for (int i = 0; i < nElms; i++) {
-          ArrayPairExpressionPtr ap(
-            static_pointer_cast<ArrayPairExpression>((*el)[i]));
-          ExpressionPtr key = ap->getName();
-          if (!key) {
-            throw IncludeTimeFatalException(ap,
-              "Keys must be specified for Map initialization");
-          }
-          visit(key);
-          emitConvertToCell(e);
-          visit(ap->getValue());
-          emitConvertToCell(e);
-          e.ColAddElemC();
-        }
-      } else {
-        for (int i = 0; i < nElms; i++) {
-          ArrayPairExpressionPtr ap(
-            static_pointer_cast<ArrayPairExpression>((*el)[i]));
-          ExpressionPtr key = ap->getName();
-          if ((bool)key) {
-            throw IncludeTimeFatalException(ap,
-              "Keys may not be specified for Vector, Set, or Pair "
-              "initialization");
-          }
-          visit(ap->getValue());
-          emitConvertToCell(e);
-          e.ColAddNewElemC();
-        }
-      }
+      emitCollectionInit(e, b);
       return true;
     }
 
@@ -4559,7 +4460,14 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         m_staticArrays.back().set(tvAsCVarRef(&tvKey),
                                   tvAsVariant(&tvVal));
       } else {
-        m_staticArrays.back().append(tvAsCVarRef(&tvVal));
+        // Set/ImmSet, val is the key
+        if (m_staticColType.back() == CollectionType::Set ||
+            m_staticColType.back() == CollectionType::ImmSet) {
+          m_staticArrays.back().set(tvAsVariant(&tvVal),
+                                    tvAsVariant(&tvVal));
+        } else {
+          m_staticArrays.back().append(tvAsCVarRef(&tvVal));
+        }
       }
     } else {
       // Assume new array is on top of stack
@@ -8583,9 +8491,21 @@ void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe) {
   }
 }
 
-void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
+void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
+                                folly::Optional<CollectionType> ct) {
   assert(val->isScalar());
   tvVal.m_type = KindOfUninit;
+  // static array initilization
+  auto initArray = [&](ExpressionPtr el) {
+    m_staticArrays.push_back(Array::attach(MixedArray::MakeReserve(0)));
+    m_staticColType.push_back(ct);
+    visit(el);
+    tvVal = make_tv<KindOfArray>(
+      ArrayData::GetScalarArray(m_staticArrays.back().get())
+    );
+    m_staticArrays.pop_back();
+    m_staticColType.pop_back();
+  };
   switch (val->getKindOf()) {
     case Expression::KindOfConstantExpression: {
       ConstantExpressionPtr ce(static_pointer_cast<ConstantExpression>(val));
@@ -8622,15 +8542,15 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
       assert(false);
       break;
     }
+    case Expression::KindOfExpressionList: {
+      // Array, possibly for collection initialization.
+      initArray(val);
+      break;
+    }
     case Expression::KindOfUnaryOpExpression: {
       UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(val));
       if (u->getOp() == T_ARRAY) {
-        m_staticArrays.push_back(Array::attach(MixedArray::MakeReserve(0)));
-        visit(u->getExpression());
-        tvVal = make_tv<KindOfArray>(
-          ArrayData::GetScalarArray(m_staticArrays.back().get())
-        );
-        m_staticArrays.pop_back();
+        initArray(u->getExpression());
         break;
       }
       // Fall through
@@ -8645,6 +8565,253 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val) {
       not_reached();
     }
   }
+}
+
+void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
+                                   folly::Optional<CollectionType> ct) {
+  assert(m_staticArrays.empty());
+
+  if (el == nullptr) {
+    e.Array(staticEmptyArray());
+    return;
+  }
+
+  if (el->isScalar()) {
+    TypedValue tv;
+    tvWriteUninit(&tv);
+    initScalar(tv, el, ct);
+    e.Array(tv.m_data.parr);
+    return;
+  }
+
+  bool allowPacked = !ct ||
+    ct == CollectionType::Vector ||
+    ct == CollectionType::ImmVector;
+
+  int nElms;
+  if (allowPacked && isPackedInit(el, &nElms)) {
+    for (int i = 0; i < nElms; ++i) {
+      auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
+      visit(ap->getValue());
+      emitConvertToCell(e);
+    }
+    e.NewPackedArray(nElms);
+    return;
+  }
+
+  // If `RuntimeOption::EvalDisableStructArray`, MakeStructArray actually makes
+  // a mixed array, which can be used to initialize Map/Set.
+  bool allowStruct = !ct ||
+    (RuntimeOption::EvalDisableStructArray && !allowPacked);
+  std::vector<std::string> keys;
+  if (allowStruct && isStructInit(el, keys)) {
+    for (int i = 0, n = keys.size(); i < n; i++) {
+      auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
+      visit(ap->getValue());
+      emitConvertToCell(e);
+    }
+    e.NewStructArray(keys);
+    return;
+  }
+
+  auto capacityHint = MixedArray::SmallSize;
+  int capacity = el->getCount();
+  if (capacity > 0) capacityHint = capacity;
+  if (allowPacked && isPackedInit(el, &nElms, false /* ignore size */)) {
+    e.NewArray(capacityHint);
+  } else {
+    e.NewMixedArray(capacityHint);
+  }
+  visit(el);
+}
+
+void EmitterVisitor::emitPairInit(Emitter& e, ExpressionListPtr el) {
+  if (el->getCount() != 2) {
+    throw IncludeTimeFatalException(el,
+      "Pair objects must have exactly 2 elements");
+  }
+  e.NewCol(static_cast<int>(CollectionType::Pair), 2);
+  for (int i = 0; i < 2; i++) {
+    ArrayPairExpressionPtr ap(
+      static_pointer_cast<ArrayPairExpression>((*el)[i]));
+    if (ap->getName() != nullptr) {
+      throw IncludeTimeFatalException(ap,
+        "Keys may not be specified for Pair initialization");
+    }
+    visit(ap->getValue());
+    emitConvertToCell(e);
+    e.ColAddNewElemC();
+  }
+}
+
+void EmitterVisitor::emitVectorInit(Emitter&e, CollectionType ct,
+                                    ExpressionListPtr el) {
+  // Do not allow specification of keys even if the resulting array is
+  // packed. It doesn't make sense to specify keys for Vectors.
+  for (int i = 0; i < el->getCount(); i++) {
+    ArrayPairExpressionPtr ap(
+      static_pointer_cast<ArrayPairExpression>((*el)[i]));
+    if (ap->getName() != nullptr) {
+      throw IncludeTimeFatalException(ap,
+        "Keys may not be specified for Vector initialization");
+    }
+  }
+  emitArrayInit(e, el, ct);
+  e.ColFromArray(static_cast<int>(ct));
+  return;
+}
+
+void EmitterVisitor::emitSetInit(Emitter&e, CollectionType ct,
+                                 ExpressionListPtr el) {
+  /*
+   * Use an array to initialize the Set only if all the following conditional
+   * are met:
+   * 1. non-empty initializer;
+   * 2. no integer-like string values (keys are the same as values for Set);
+   * 3. !arr->isVectorData() to guarantee that we have a MixedArray.
+   *
+   * Effectively, we use array for Set initialization only when it is a static
+   * array for now.
+   */
+  auto const nElms = el->getCount();
+  auto useArray = !!nElms;
+  auto hasVectorData = true;
+  for (int i = 0; i < nElms; i++) {
+    ArrayPairExpressionPtr ap(
+      static_pointer_cast<ArrayPairExpression>((*el)[i]));
+    auto key = ap->getName();
+    if ((bool)key) {
+      throw IncludeTimeFatalException(ap,
+        "Keys may not be specified for Set initialization");
+    }
+    if (!useArray) continue;
+    auto val = ap->getValue();
+    Variant v;
+    if (val->getScalarValue(v)) {
+      if (v.isString()) {
+        hasVectorData = false;
+        int64_t intVal;
+        if (v.getStringData()->isStrictlyInteger(intVal)) {
+          useArray = false;
+        }
+      } else {
+        if (v.asInt64Val() != i) hasVectorData = false;
+      }
+    } else {
+      useArray = false;
+    }
+  }
+  if (hasVectorData) useArray = false;
+
+  if (useArray) {
+    emitArrayInit(e, el, ct);
+    e.ColFromArray(static_cast<int>(ct));
+  } else {
+    e.NewCol(static_cast<int>(ct), nElms);
+    for (int i = 0; i < nElms; i++) {
+      ArrayPairExpressionPtr ap(
+        static_pointer_cast<ArrayPairExpression>((*el)[i]));
+      visit(ap->getValue());
+      emitConvertToCell(e);
+      e.ColAddNewElemC();
+    }
+  }
+}
+
+void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
+                                 ExpressionListPtr el) {
+  /*
+   * Use an array to initialize the Map only when all the following conditional
+   * are met:
+   * 1. non-empty initializer;
+   * 2. no integer-like string keys;
+   * 3. !arr->isVectorData() to guarantee that we have a MixedArray.
+   */
+  auto nElms = el->getCount();
+  auto useArray = !!nElms;
+  auto hasVectorData = true;
+  for (int i = 0; i < nElms; i++) {
+    ArrayPairExpressionPtr ap(
+      static_pointer_cast<ArrayPairExpression>((*el)[i]));
+    auto key = ap->getName();
+    if (key == nullptr) {
+      throw IncludeTimeFatalException(ap,
+        "Keys must be specified for Map initialization");
+    }
+    if (!useArray) continue;
+    Variant vkey;
+    if (key->getScalarValue(vkey)) {
+      if (vkey.isString()) {
+        hasVectorData = false;
+        int64_t intKey;
+        if (vkey.getStringData()->isStrictlyInteger(intKey)) {
+          useArray = false;
+        }
+      } else {
+        if (vkey.asInt64Val() != i) hasVectorData = false;
+      }
+    } else {
+      useArray = false;
+    }
+  }
+  if (hasVectorData) useArray = false;
+
+  if (useArray) {
+    emitArrayInit(e, el, ct);
+    e.ColFromArray(static_cast<int>(ct));
+  } else {
+    e.NewCol(static_cast<int>(ct), nElms);
+    for (int i = 0; i < nElms; i++) {
+      ArrayPairExpressionPtr ap(
+        static_pointer_cast<ArrayPairExpression>((*el)[i]));
+      visit(ap->getName());
+      emitConvertToCell(e);
+      visit(ap->getValue());
+      emitConvertToCell(e);
+      e.ColAddElemC();
+    }
+  }
+}
+
+void EmitterVisitor::emitCollectionInit(Emitter& e, BinaryOpExpressionPtr b) {
+  ScalarExpressionPtr cls =
+    static_pointer_cast<ScalarExpression>(b->getExp1());
+  const std::string* clsName = nullptr;
+  cls->getString(clsName);
+  auto ct = stringToCollectionType(*clsName);
+  if (!ct) {
+    throw IncludeTimeFatalException(b,
+      "Cannot use collection initialization for non-collection class");
+  }
+
+  ExpressionListPtr el = nullptr;
+  if (b->getExp2()) {
+    el = static_pointer_cast<ExpressionList>(b->getExp2());
+  } else {
+    if (ct == CollectionType::Pair) {
+      throw IncludeTimeFatalException(b, "Initializer needed for Pair object");
+    }
+    e.NewCol(static_cast<int>(*ct), 0);
+    return;
+  }
+
+  if (ct == CollectionType::Pair) {
+    return emitPairInit(e, el);
+  }
+
+  if (ct == CollectionType::Vector || ct == CollectionType::ImmVector) {
+    return emitVectorInit(e, *ct, el);
+  }
+
+  if (ct == CollectionType::Map || ct == CollectionType::ImmMap) {
+    return emitMapInit(e, *ct, el);
+  }
+
+  if (ct == CollectionType::Set || ct == CollectionType::ImmSet) {
+    return emitSetInit(e, *ct, el);
+  }
+
+  not_reached();
 }
 
 bool EmitterVisitor::requiresDeepInit(ExpressionPtr initExpr) const {

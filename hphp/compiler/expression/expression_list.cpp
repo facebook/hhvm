@@ -169,7 +169,8 @@ bool ExpressionList::containsDynamicConstant(AnalysisResultPtr ar) const {
 }
 
 bool ExpressionList::isScalarArrayPairs() const {
-  if (m_elems_kind != ElemsKind::ArrayPairs) {
+  if (m_elems_kind != ElemsKind::ArrayPairs &&
+      m_elems_kind != ElemsKind::Collection) {
     return false;
   }
   for (unsigned int i = 0; i < m_exps.size(); i++) {

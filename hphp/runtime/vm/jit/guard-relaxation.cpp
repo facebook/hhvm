@@ -53,6 +53,7 @@ bool shouldHHIRRelaxGuards() {
 #define DArrPacked     return false; // fixed type
 #define DArrElem       assertx(inst->is(LdStructArrayElem, ArrayGet));    \
                          return typeMightRelax(inst->src(0));
+#define DCol           return false; // fixed in bytecode
 #define DThis          return false; // fixed type from ctx class
 #define DCtx           return false;
 #define DMulti         return true;  // DefLabel; value could be anything
@@ -90,6 +91,7 @@ bool typeMightRelax(const SSATmp* tmp) {
 #undef DAllocObj
 #undef DArrPacked
 #undef DArrElem
+#undef DCol
 #undef DThis
 #undef DCtx
 #undef DMulti

@@ -76,6 +76,7 @@ bool canDCE(IRInstruction* inst) {
   case ConvDblToStr:
   case ConvIntToStr:
   case ConvClsToCctx:
+  case NewColFromArray:
   case Gt:
   case Gte:
   case Lt:

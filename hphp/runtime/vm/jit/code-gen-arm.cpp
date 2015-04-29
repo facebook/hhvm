@@ -233,6 +233,7 @@ DELEGATE_OPCODE(NeqInt)
 
 DELEGATE_OPCODE(ConvBoolToInt)
 DELEGATE_OPCODE(NewCol)
+DELEGATE_OPCODE(NewColFromArray)
 
 /////////////////////////////////////////////////////////////////////
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,

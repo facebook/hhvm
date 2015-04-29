@@ -4486,7 +4486,7 @@ void CodeGenerator::cgNewCol(IRInstruction* inst) {
     args.imm(inst->extra<NewCol>()->size);
   }
   auto const target = [&]() -> CppCall {
-    switch(inst->extra<NewCol>()->type) {
+    switch (inst->extra<NewCol>()->type) {
       case CollectionType::Vector:
         return CppCall::direct(newColHelper<c_Vector>);
       case CollectionType::Map:
@@ -4505,6 +4505,34 @@ void CodeGenerator::cgNewCol(IRInstruction* inst) {
     not_reached();
   }();
   cgCallHelper(v, target, dest, SyncOptions::kSyncPoint, args);
+}
+
+void CodeGenerator::cgNewColFromArray(IRInstruction* inst) {
+  auto const target = [&]() -> CppCall {
+    switch (inst->extra<NewColFromArray>()->type) {
+      case CollectionType::Vector:
+        return CppCall::direct(newVectorFromArrayHelper<c_Vector>);
+      case CollectionType::ImmVector:
+        return CppCall::direct(newVectorFromArrayHelper<c_ImmVector>);
+      case CollectionType::Map:
+        return CppCall::direct(newHashColFromArrayHelper<c_Map>);
+      case CollectionType::ImmMap:
+        return CppCall::direct(newHashColFromArrayHelper<c_ImmMap>);
+      case CollectionType::Set:
+        return CppCall::direct(newHashColFromArrayHelper<c_Set>);
+      case CollectionType::ImmSet:
+        return CppCall::direct(newHashColFromArrayHelper<c_ImmSet>);
+      case CollectionType::Pair:
+        not_reached();
+    }
+    not_reached();
+  }();
+
+  cgCallHelper(vmain(),
+               target,
+               callDest(inst),
+               SyncOptions::kSyncPoint,
+               argGroup(inst).ssa(0));
 }
 
 void CodeGenerator::cgCheckInit(IRInstruction* inst) {

@@ -293,6 +293,13 @@ void in(ISS& env, const bc::NewCol& op) {
   push(env, objExact(env.index.builtin_class(name)));
 }
 
+void in(ISS& env, const bc::ColFromArray& op) {
+  popC(env);
+  auto const type = static_cast<CollectionType>(op.arg1);
+  auto const name = collectionTypeToString(type);
+  push(env, objExact(env.index.builtin_class(name)));
+}
+
 void in(ISS& env, const bc::ColAddElemC&) {
   popC(env); popC(env);
   auto const coll = popC(env);

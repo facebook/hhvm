@@ -24,14 +24,18 @@
 #include "hphp/compiler/statement/trait_prec_statement.h"
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
+#include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/expression/object_property_expression.h"
 #include "hphp/parser/parser.h"
 
+#include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/hash.h"
+
+#include <folly/Optional.h>
 
 #include <deque>
 #include <utility>
@@ -654,6 +658,7 @@ private:
   std::deque<FaultRegion*> m_faultRegions;
   std::deque<FPIRegion*> m_fpiRegions;
   std::vector<Array> m_staticArrays;
+  std::vector<folly::Optional<CollectionType>> m_staticColType;
   std::set<std::string,stdltistr> m_hoistables;
   LocationPtr m_tempLoc;
   std::unordered_set<std::string> m_staticEmitted;
@@ -717,7 +722,13 @@ public:
   void emitStringSwitch(Emitter& e, SwitchStatementPtr s,
                         std::vector<Label>& caseLabels, Label& done,
                         const SwitchState& state);
-
+  void emitArrayInit(Emitter& e, ExpressionListPtr el,
+                     folly::Optional<CollectionType> ct = folly::none);
+  void emitPairInit(Emitter&e, ExpressionListPtr el);
+  void emitVectorInit(Emitter&e, CollectionType ct, ExpressionListPtr el);
+  void emitMapInit(Emitter&e, CollectionType ct, ExpressionListPtr el);
+  void emitSetInit(Emitter&e, CollectionType ct, ExpressionListPtr el);
+  void emitCollectionInit(Emitter& e, BinaryOpExpressionPtr exp);
   void markElem(Emitter& e);
   void markNewElem(Emitter& e);
   void markProp(Emitter& e, PropAccessType propAccessType);
@@ -874,8 +885,8 @@ public:
   void copyOverFPIRegions(FuncEmitter* fe);
   void saveMaxStackCells(FuncEmitter* fe);
   void finishFunc(Emitter& e, FuncEmitter* fe);
-
-  void initScalar(TypedValue& tvVal, ExpressionPtr val);
+  void initScalar(TypedValue& tvVal, ExpressionPtr val,
+                  folly::Optional<CollectionType> ct = folly::none);
   bool requiresDeepInit(ExpressionPtr initExpr) const;
 
   void emitClassTraitPrecRule(PreClassEmitter* pce, TraitPrecStatementPtr rule);

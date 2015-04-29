@@ -1141,11 +1141,20 @@ To string conversions:
   off the stack given by S0, at `offset'. This instruction assumes it can take
   the values from the stack without increfing them.
 
-| NewCol<type,size>, D(Obj), NA, PRc
+| NewCol<type,size>, DCol, NA, PRc
 
   Create a new collection of `type' with space for `size' elements reserved.
 
-| Clone, D(Obj), S(Obj), PRc|Er
+| NewColFromArray<type>, DCol, S(Arr), PRc|CRc
+
+  Create a collection of `type` from an array. `type` cannot be Pair. The array
+  will be used to back the new collection without duplication or conversion.
+  Thus it should not contain references. In addition, the array must be in
+  packed mode when `type` is Vector or ImmVector, and must be in mixed mode
+  otherwise. Ownership of the array is transferred from $1 to the collection,
+  without manipulating the refcount.
+
+| Clone, DofS(0), S(Obj), PRc|Er
 
   Allocate an object by cloning S0.
 

@@ -1117,6 +1117,18 @@ NewCol <coll type> <num elems>    []  ->  [C:Obj]
   sufficient to hold the number of elements specified by %2, and pushes the
   collection onto the stack.
 
+ColFromArray <coll type>    [C:Arr]  ->  [C:Obj]
+
+  Create a collection of type %1 from array $1, and pushes the collection onto
+  the stack. %1 cannot be Pair. The array will be used to implement the
+  collection without conversion or duplication, thus it should not to contain
+  references. $1 must be in packed mode if %1 is Vector or ImmVector, and must
+  be in mixed mode otherwise.
+
+  Note that integer-like string keys are converted to integers in array, but
+  not in collections; thus not all collections can be created using this
+  instruction.
+
 ColAddElemC    [C C C]  ->  [C:Obj]
 
   Collection add key/value pair. If $3 is a collection object, this instruction

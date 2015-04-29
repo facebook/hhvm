@@ -319,6 +319,21 @@ Type setElemReturn(const IRInstruction* inst) {
   return TNullptr;
 }
 
+Type newColReturn(const IRInstruction* inst) {
+  assertx(inst->is(NewCol, NewColFromArray));
+  auto getColClassType = [&](CollectionType ct) -> Type {
+    auto name = collectionTypeToString(ct);
+    auto cls = Unit::lookupClassOrUniqueClass(name);
+    if (cls == nullptr) return TObj;
+    return Type::ExactObj(cls);
+  };
+
+  if (inst->is(NewCol)) {
+    return getColClassType(inst->extra<NewCol>()->type);
+  }
+  return getColClassType(inst->extra<NewColFromArray>()->type);
+}
+
 Type builtinReturn(const IRInstruction* inst) {
   assertx(inst->op() == CallBuiltin);
 
@@ -350,6 +365,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DAllocObj       return allocObjReturn(inst);
 #define DArrElem        return arrElemReturn(inst);
 #define DArrPacked      return Type::Array(ArrayData::kPackedKind);
+#define DCol            return newColReturn(inst);
 #define DThis           return thisReturn(inst);
 #define DCtx            return ctxReturn(inst);
 #define DMulti          return TBottom;
@@ -380,6 +396,7 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DAllocObj
 #undef DArrElem
 #undef DArrPacked
+#undef DCol
 #undef DThis
 #undef DCtx
 #undef DMulti

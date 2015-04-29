@@ -155,7 +155,7 @@ ArrayData* MixedArray::MakePackedUninitialized(uint32_t size) {
 }
 
 MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
-                                 const TypedValue* values) {
+                                   const TypedValue* values) {
   assert(size > 0);
 
   auto const cmret = computeCapAndMask(size);

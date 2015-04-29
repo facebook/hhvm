@@ -316,6 +316,14 @@ void emitNewCol(IRGS& env, int type, int size) {
   push(env, gen(env, NewCol, extra));
 }
 
+void emitColFromArray(IRGS& env, int type) {
+  auto const arr = popC(env);
+  push(env, gen(env,
+                NewColFromArray,
+                NewColFromArrayData(static_cast<CollectionType>(type)),
+                arr));
+}
+
 void emitColAddElemC(IRGS& env) {
   if (!topC(env, BCSPOffset{2})->isA(TObj)) {
     return interpOne(env, TObj, 3);

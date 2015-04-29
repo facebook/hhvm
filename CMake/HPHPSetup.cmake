@@ -34,7 +34,9 @@ if (APPLE)
   set(ENABLE_FASTCGI 1)
   set(HHVM_ANCHOR_SYMS
     -Wl,-u,_register_fastcgi_server
-    -Wl,-segaddr,__text,0
+    -Wl,-pagezero_size,0x00001000
+    # Set the .text.keep section to be executable.
+    -Wl,-segprot,.text,rx,rx
     -Wl,-all_load ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
 elseif (IS_AARCH64)
   set(HHVM_ANCHOR_SYMS

@@ -64,7 +64,7 @@ function mysql_async_status($link_identifier);
 class AsyncMysqlClient {
   public function __construct() { }
   static public function setPoolsConnectionLimit(int $limit) { }
-  static public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1) { }
+  static public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1): Awaitable<AsyncMysqlConnection> { }
   static public function adoptConnection($connection) { }
 }
 class AsyncMysqlConnectionPool {
@@ -196,11 +196,21 @@ namespace HH {
 
     public function format_upcase_t(string $s): string; // table name
     public function format_upcase_c(string $s): string; // column name
+
+    // %L[sdfC] - lists
+    public function format_upcase_l(): SQLListFormatter;
   }
 
   interface SQLScalarFormatter {
     public function format_f(?float $s): string;
     public function format_d(?int $int): string;
     public function format_s(?string $string): string;
+  }
+
+  interface SQLListFormatter {
+    public function format_upcase_c(ConstVector<string> $cols): string; // %LC
+    public function format_s(ConstVector<string> $strs): string; // %Ls
+    public function format_d(ConstVector<int> $ints): string; // %Ld
+    public function format_f(ConstVector<float> $floats): string; // %Lf
   }
 }

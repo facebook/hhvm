@@ -729,8 +729,8 @@ void MemoryManager::checkHeap() {
       case HeaderKind::ImmSet:
       case HeaderKind::Resource:
       case HeaderKind::Ref:
-      case HeaderKind::Resumable:
-      case HeaderKind::Native:
+      case HeaderKind::ResumableFrame:
+      case HeaderKind::NativeData:
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
       case HeaderKind::BigObj:

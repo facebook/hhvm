@@ -87,7 +87,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
     MM().objMallocLogged(size)
   );
   node->obj_offset = nativeDataSize;
-  node->kind = HeaderKind::Native;
+  node->kind = HeaderKind::NativeData;
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
              ObjectData(cls);
   obj->setAttribute(static_cast<ObjectData::Attribute>(ndi->odattrs));

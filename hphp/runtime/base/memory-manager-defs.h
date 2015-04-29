@@ -116,10 +116,10 @@ inline size_t Header::size() const {
       return big_.nbytes;
     case HeaderKind::Free:
       return free_.size;
-    case HeaderKind::Resumable:
+    case HeaderKind::ResumableFrame:
       // [ResumableNode][locals][Resumable][ObjectData<ResumableObj>]
       return resumable()->size();
-    case HeaderKind::Native:
+    case HeaderKind::NativeData:
       // [NativeNode][NativeData][ObjectData][props] is one allocation.
       return native_.obj_offset + Native::obj(&native_)->heapSize();
     case HeaderKind::Hole:
@@ -252,10 +252,10 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
       case HeaderKind::ImmSet:
         ptrs.push_back(&i->obj_);
         break;
-      case HeaderKind::Resumable:
+      case HeaderKind::ResumableFrame:
         ptrs.push_back(i->resumableObj());
         break;
-      case HeaderKind::Native:
+      case HeaderKind::NativeData:
         ptrs.push_back(Native::obj(&i->native_));
         break;
       case HeaderKind::BigObj: {

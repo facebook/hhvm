@@ -138,7 +138,7 @@ void Marker::operator()(const ObjectData* p) {
     auto frame = reinterpret_cast<const TypedValue*>(r) -
                  r->actRec()->func()->numSlotsInFrame();
     auto node = reinterpret_cast<const ResumableNode*>(frame) - 1;
-    assert(node->kind == HK::Resumable);
+    assert(node->kind == HK::ResumableFrame);
     if (mark(node)) {
       enqueue(p);
     }
@@ -259,14 +259,14 @@ void Marker::operator()(const void* start, size_t len) {
       case HK::ImmVector:
       case HK::ImmMap:
       case HK::ImmSet:
-      case HK::Resumable:
+      case HK::ResumableFrame:
       case HK::BigObj: // hmm.. what lives inside this?
         it->second.cmark = true;
         if (mark(p)) {
           enqueue(p);
         }
         break;
-      case HK::Native:
+      case HK::NativeData:
         it->second.cmark = true;
         if (mark(p)) {
           enqueue(Native::obj(&h->native_));
@@ -335,8 +335,8 @@ void Marker::init() {
         // count==0 can be witnessed, see above
         total_ += h->size();
         break;
-      case HK::Resumable:
-      case HK::Native:
+      case HK::ResumableFrame:
+      case HK::NativeData:
       case HK::SmallMalloc:
       case HK::BigMalloc:
       case HK::BigObj: // hmm.. what lives inside this?
@@ -389,8 +389,8 @@ void Marker::sweep() {
       case HK::Ref:
         // ordinary counted objects
         break;
-      case HK::Resumable:
-      case HK::Native:
+      case HK::ResumableFrame:
+      case HK::NativeData:
         // not counted but marked when attached object is marked
         break;
       case HK::BigObj:

@@ -26,8 +26,8 @@ enum class HeaderKind : uint8_t {
   String, Resource, Ref,
   Object, ResumableObj, AwaitAllWH,
   Vector, Map, Set, Pair, ImmVector, ImmMap, ImmSet,
-  Resumable, // ResumableNode followed by Frame, Resumable, ObjectData
-  Native, // a NativeData header preceding an HNI ObjectData
+  ResumableFrame, // ResumableNode followed by Frame, Resumable, ObjectData
+  NativeData, // a NativeData header preceding an HNI ObjectData
   SmallMalloc, // small smart_malloc'd block
   BigMalloc, // big smart_malloc'd block
   BigObj, // big size-tracked object (valid header follows BigNode)

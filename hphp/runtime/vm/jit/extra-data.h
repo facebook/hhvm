@@ -1039,6 +1039,7 @@ X(ContEnter,                    ContEnterData);
 X(LdARFuncPtr,                  StackOffset);
 X(EndCatch,                     IRSPOffsetData);
 X(AdjustSP,                     IRSPOffsetData);
+X(EagerSyncVMRegs,              IRSPOffsetData);
 X(DbgTrashStk,                  IRSPOffsetData);
 X(DbgTrashFrame,                IRSPOffsetData);
 X(DbgTraceCall,                 IRSPOffsetData);

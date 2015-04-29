@@ -562,9 +562,8 @@ private:
      * which is trying to detect failure to do this properly.
      */
     spillStack(env);
-    gen(env, AdjustSP,
-      IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) }, sp(env));
-    gen(env, EagerSyncVMRegs, fp(env), sp(env));
+    auto const spOff = IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) };
+    gen(env, EagerSyncVMRegs, spOff, fp(env), sp(env));
     updateMarker(env);  // Mark the EndCatch safe, since we're eager syncing.
   }
 

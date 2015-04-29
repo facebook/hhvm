@@ -2368,9 +2368,12 @@ void CodeGenerator::cgStLoc(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
+  auto const spOff = inst->extra<EagerSyncVMRegs>()->offset.offset;
   auto& v = vmain();
+  auto const sync_sp = v.makeReg();
+  v << lea{srcLoc(inst, 1).reg()[cellsToBytes(spOff)], sync_sp};
   emitEagerSyncPoint(v, reinterpret_cast<const Op*>(inst->marker().sk().pc()),
-                     rVmTl, srcLoc(inst, 0).reg(), srcLoc(inst, 1).reg());
+                     rVmTl, srcLoc(inst, 0).reg(), sync_sp);
 }
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {

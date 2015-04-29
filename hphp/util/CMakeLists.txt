@@ -45,6 +45,10 @@ if (ENABLE_COTIRE)
   cotire(hphp_util)
 endif()
 
+if (NOT LINUX)
+  add_definitions(-DNO_HARDWARE_COUNTERS)
+endif()
+
 #if (LIBNUMA_LIBRARIES)
 #  target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})
 #endif()

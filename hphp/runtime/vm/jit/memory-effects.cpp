@@ -233,10 +233,22 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // that could read or write anything as far as we know (including frame
   // locals).
   case ReqBindJmp:
-    return ExitEffects { AUnknown, stack_below(inst.src(0), -1) };
+    return ExitEffects {
+      AUnknown,
+      stack_below(inst.src(0), inst.extra<ReqBindJmp>()->irSPOff.offset - 1)
+    };
   case JmpSwitchDest:
+    return ExitEffects {
+      AUnknown,
+      stack_below(inst.src(1),
+                  inst.extra<JmpSwitchDest>()->irSPOff.offset - 1)
+    };
   case JmpSSwitchDest:
-    return ExitEffects { AUnknown, stack_below(inst.src(1), -1) };
+    return ExitEffects {
+      AUnknown,
+      stack_below(inst.src(1),
+                  inst.extra<JmpSSwitchDest>()->offset.offset - 1)
+    };
   case ReqRetranslate:
   case ReqRetranslateOpt:
     return UnknownEffects {};
@@ -810,7 +822,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case MulIntO:
   case NeqDbl:
   case NeqInt:
-  case AdjustSP:
   case SubDbl:
   case SubInt:
   case SubIntO:

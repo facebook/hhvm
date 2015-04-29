@@ -56,15 +56,6 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
   case RetAdjustStk:
     return StkPtrInfo { inst->src(0), FPRelOffset{2} };
 
-  case AdjustSP:
-    {
-      auto const prev = canonicalize_stkptr(inst->src(0));
-      return StkPtrInfo {
-        prev.fp,
-        prev.offset + inst->extra<AdjustSP>()->offset.offset
-      };
-    }
-
   default:
     always_assert_flog(false, "unexpected StkPtr: {}\n", sp->toString());
   }

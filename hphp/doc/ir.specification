@@ -1428,13 +1428,6 @@ To string conversions:
   This instruction is used at the beginning of tracelets to represent the state
   of the stack on entry and does not emit code.
 
-| AdjustSP<offset>, D(StkPtr), S(StkPtr), NF
-
-  Define a new StkPtr by adding `offset' cells to S0.  Note that because of
-  HHIR's not-yet-removed use of "reserved registers" for StkPtrs, AdjustSP
-  instructions are not "pure", and cannot be DCE'd just based on whether their
-  destinations are used.
-
 | Count, D(Int), S(Cell), Er
 
   Computes the number of elements in S0. The count of an array is the number of

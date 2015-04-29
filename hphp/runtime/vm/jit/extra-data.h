@@ -122,7 +122,8 @@ struct JmpSwitchData : IRExtraData {
     sd->cases      = cases;
     sd->defaultSk  = defaultSk;
     sd->targets    = new (arena) SrcKey[cases];
-    sd->spOff      = spOff;
+    sd->invSPOff   = invSPOff;
+    sd->irSPOff    = irSPOff;
     std::copy(targets, targets + cases, const_cast<SrcKey*>(sd->targets));
     return sd;
   }
@@ -132,7 +133,8 @@ struct JmpSwitchData : IRExtraData {
   int32_t cases;       // number of cases
   SrcKey  defaultSk;   // srckey of default case
   SrcKey* targets;     // srckeys for all targets
-  FPInvOffset spOff;
+  FPInvOffset invSPOff;
+  IRSPOffset irSPOff;
 };
 
 struct LocalId : IRExtraData {
@@ -259,14 +261,17 @@ struct FPushCufData : IRExtraData {
  * Information for REQ_RETRANSLATE stubs.
  */
 struct ReqRetranslateData : IRExtraData {
-  explicit ReqRetranslateData(TransFlags trflags)
-    : trflags{trflags}
+  explicit ReqRetranslateData(IRSPOffset irSPOff,
+                              TransFlags trflags)
+    : irSPOff(irSPOff)
+    , trflags{trflags}
   {}
 
   std::string show() const {
-    return folly::to<std::string>(trflags.packed);
+    return folly::to<std::string>(irSPOff.offset, ',', trflags.packed);
   }
 
+  IRSPOffset irSPOff;
   TransFlags trflags;
 };
 
@@ -275,20 +280,23 @@ struct ReqRetranslateData : IRExtraData {
  */
 struct ReqBindJmpData : IRExtraData {
   explicit ReqBindJmpData(const SrcKey& dest,
-                          FPInvOffset spOff,
-                          TransFlags trflags = TransFlags{})
+                          FPInvOffset invSPOff,
+                          IRSPOffset irSPOff,
+                          TransFlags trflags)
     : dest(dest)
-    , spOff(spOff)
+    , invSPOff(invSPOff)
+    , irSPOff(irSPOff)
     , trflags(trflags)
   {}
 
   std::string show() const {
-    return folly::to<std::string>(dest.offset(), ',', spOff.offset, ',',
-      trflags.packed);
+    return folly::to<std::string>(dest.offset(), ',', invSPOff.offset, ',',
+      irSPOff.offset, ',', trflags.packed);
   }
 
   SrcKey dest;
-  FPInvOffset spOff;
+  FPInvOffset invSPOff;
+  IRSPOffset irSPOff;
   TransFlags trflags;
 };
 
@@ -390,14 +398,23 @@ struct TransIDData : IRExtraData {
 /*
  * Information needed to generate a REQ_RETRANSLATE_OPT service request.
  */
-struct ReqRetransOptData : IRExtraData {
-  explicit ReqRetransOptData(TransID transId, SrcKey sk)
-      : transId(transId), sk(sk) {}
+struct ReqRetranslateOptData : IRExtraData {
+  explicit ReqRetranslateOptData(TransID transId,
+                                 SrcKey sk,
+                                 IRSPOffset irSPOff)
+    : transId(transId)
+    , sk(sk)
+    , irSPOff(irSPOff)
+  {}
+
   std::string show() const {
-    return folly::to<std::string>(transId, ',', sk.offset());
+    return folly::to<std::string>(transId, ',', sk.offset(), ',',
+      irSPOff.offset);
   }
+
   TransID transId;
   SrcKey sk;
+  IRSPOffset irSPOff;
 };
 
 /*
@@ -983,7 +1000,7 @@ X(LdStkAddr,                    IRSPOffsetData);
 X(DefInlineFP,                  DefInlineFPData);
 X(ReqRetranslate,               ReqRetranslateData);
 X(ReqBindJmp,                   ReqBindJmpData);
-X(ReqRetranslateOpt,            ReqRetransOptData);
+X(ReqRetranslateOpt,            ReqRetranslateOptData);
 X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
 X(Call,                         CallData);
@@ -1038,8 +1055,8 @@ X(StContArState,                GeneratorState);
 X(ContEnter,                    ContEnterData);
 X(LdARFuncPtr,                  StackOffset);
 X(EndCatch,                     IRSPOffsetData);
-X(AdjustSP,                     IRSPOffsetData);
 X(EagerSyncVMRegs,              IRSPOffsetData);
+X(JmpSSwitchDest,               IRSPOffsetData);
 X(DbgTrashStk,                  IRSPOffsetData);
 X(DbgTrashFrame,                IRSPOffsetData);
 X(DbgTraceCall,                 IRSPOffsetData);

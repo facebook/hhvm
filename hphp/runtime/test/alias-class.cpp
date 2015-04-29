@@ -135,35 +135,22 @@ TEST(AliasClass, StackBasics) {
   auto const marker = BCMarker::Dummy();
   auto const FP = unit.gen(DefFP, marker)->dst();
   auto const SP = unit.gen(DefSP, marker, StackOffset { 5 }, FP)->dst();
-  auto const SP2 = unit.gen(AdjustSP, marker,
-    IRSPOffsetData { IRSPOffset{-2} }, SP)->dst();
 
   // Some basic canonicalization and maybe.
   {
     AliasClass const stk1 = AStack { SP, 0, 1 };
     AliasClass const stk2 = AStack { FP, -5, 1 };
-    AliasClass const stk3 = AStack { SP2, -5, 1 };
 
     EXPECT_TRUE(stk1 <= AStackAny);
     EXPECT_TRUE(stk2 <= AStackAny);
-    EXPECT_TRUE(stk3 <= AStackAny);
     EXPECT_TRUE(stk1 != AStackAny);
     EXPECT_TRUE(stk2 != AStackAny);
-    EXPECT_TRUE(stk3 != AStackAny);
 
     EXPECT_NE(stk1, stk2);
-    EXPECT_NE(stk2, stk3);
-    EXPECT_NE(stk3, stk1);
     EXPECT_TRUE(stk1.maybe(stk2));
-    EXPECT_TRUE(stk2.maybe(stk3));
-    EXPECT_TRUE(stk3.maybe(stk1));
     EXPECT_FALSE(stk1 <= stk2);
-    EXPECT_FALSE(stk2 <= stk3);
-    EXPECT_FALSE(stk3 <= stk1);
     EXPECT_EQ(canonicalize(stk2), stk2); // already canonical
     EXPECT_EQ(canonicalize(stk1), stk2);
-    EXPECT_NE(canonicalize(stk3), stk2);
-    EXPECT_NE(canonicalize(stk3), stk1);
   }
 
   // Stack ranges, with subtype and maybe.

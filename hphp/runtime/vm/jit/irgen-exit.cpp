@@ -36,29 +36,39 @@ bool branchesToItself(SrcKey sk) {
  * Helper to emit the appropriate service request to exit with a given target
  * bytecode offset.
  *
- * A ReqRetranslate is generated if we're still generating IR for the
- * first bytecode instruction in the region and the `target' offset
- * matches the current offset.  Note that this condition here always
- * implies that the exit corresponds to a guard failure (i.e., without
- * advancing state), because instructions that branch back to
- * themselves are handled separately in implMakeExit and never call
- * into this function.
+ * A ReqRetranslate is generated if we're still generating IR for the first
+ * bytecode instruction in the region and the `target' offset matches the
+ * current offset.  Note that this condition here always implies that the exit
+ * corresponds to a guard failure (i.e., without advancing state), because
+ * instructions that branch back to themselves are handled separately in
+ * implMakeExit and never call into this function.
  *
  * In all other cases, a ReqBindJmp is generated.
- *
  */
 void exitRequest(IRGS& env, TransFlags flags, SrcKey target) {
-  auto const curBcOff = bcOff(env);
-  auto const spOff = invSPOff(env);
-  if (env.firstBcInst && target.offset() == curBcOff) {
+  auto const curBCOff = bcOff(env);
+  auto const irSP = offsetFromIRSP(env, BCSPOffset{0});
+  auto const invSP = invSPOff(env);
+  if (env.firstBcInst && target.offset() == curBCOff) {
     // The case where the instruction may branch back to itself is
     // handled in implMakeExit.
     assertx(!branchesToItself(curSrcKey(env)));
-    gen(env, ReqRetranslate, ReqRetranslateData { flags }, sp(env), fp(env));
-  } else {
-    gen(env, ReqBindJmp, ReqBindJmpData { target, spOff, flags }, sp(env),
-      fp(env));
+    gen(
+      env,
+      ReqRetranslate,
+      ReqRetranslateData { irSP, flags },
+      sp(env),
+      fp(env)
+    );
+    return;
   }
+  gen(
+    env,
+    ReqBindJmp,
+    ReqBindJmpData { target, invSP, irSP, flags },
+    sp(env),
+    fp(env)
+  );
 }
 
 Block* implMakeExit(IRGS& env, TransFlags trflags, Offset targetBcOff) {
@@ -78,8 +88,6 @@ Block* implMakeExit(IRGS& env, TransFlags trflags, Offset targetBcOff) {
   auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, targetBcOff), exit);
   spillStack(env);
-  auto const offset = offsetFromIRSP(env, BCSPOffset{0});
-  gen(env, AdjustSP, IRSPOffsetData { offset }, sp(env));
   exitRequest(env, trflags, SrcKey{curSrcKey(env), targetBcOff});
   return exit;
 }
@@ -119,13 +127,12 @@ Block* makeExitOpt(IRGS& env, TransID transId) {
   auto const exit = env.unit.defBlock(Block::Hint::Unlikely);
   BlockPusher blockPusher(*env.irb, makeMarker(env, targetBcOff), exit);
   spillStack(env);
-  auto const offset = offsetFromIRSP(env, BCSPOffset{0});
-  gen(env, AdjustSP, IRSPOffsetData { offset }, sp(env));
-  gen(env,
-      ReqRetranslateOpt,
-      ReqRetransOptData{transId, SrcKey{curSrcKey(env), targetBcOff}},
-      sp(env),
-      fp(env));
+  auto const data = ReqRetranslateOptData {
+    transId,
+    SrcKey { curSrcKey(env), targetBcOff },
+    offsetFromIRSP(env, BCSPOffset{0})
+  };
+  gen(env, ReqRetranslateOpt, data, sp(env), fp(env));
   return exit;
 }
 

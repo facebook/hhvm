@@ -174,17 +174,16 @@ void emitSwitch(IRGS& env,
     targets[i] = SrcKey{curSrcKey(env), bcOff(env) + iv.vec32()[i]};
   }
 
-  JmpSwitchData data;
+  auto data = JmpSwitchData{};
   data.base        = base;
   data.bounded     = bounded;
   data.cases       = iv.size();
   data.defaultSk   = SrcKey { curSrcKey(env), defaultOff };
   data.targets     = &targets[0];
-  data.spOff       = invSPOff(env);
+  data.invSPOff    = invSPOff(env);
+  data.irSPOff     = offsetFromIRSP(env, BCSPOffset{0});
 
   spillStack(env);
-  gen(env, AdjustSP, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
-    sp(env));
   gen(env, JmpSwitchDest, data, index, sp(env), fp(env));
 }
 
@@ -228,9 +227,14 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
                         data,
                         testVal);
   gen(env, DecRef, testVal);
-  gen(env, AdjustSP, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
-    sp(env));
-  gen(env, JmpSSwitchDest, dest, sp(env), fp(env));
+  gen(
+    env,
+    JmpSSwitchDest,
+    IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    dest,
+    sp(env),
+    fp(env)
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

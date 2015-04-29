@@ -227,11 +227,13 @@ void debug_trashsp(Vout& v) {
   }
 }
 
-void maybe_syncsp(Vout& v, BCMarker marker, Vreg sp) {
+void maybe_syncsp(Vout& v, BCMarker marker, Vreg irSP, IRSPOffset off) {
   if (!marker.resumed()) {
     debug_trashsp(v);
     return;
   }
+  auto const sp = v.makeReg();
+  v << lea{irSP[cellsToBytes(off.offset)], sp};
   v << syncvmsp{sp};
 }
 
@@ -2190,32 +2192,32 @@ void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
-  auto const data     = inst->extra<JmpSwitchDest>();
+  auto const extra    = inst->extra<JmpSwitchDest>();
   auto const marker   = inst->marker();
   auto const index    = inst->src(0);
   auto const indexReg = srcLoc(inst, 0).reg();
-  auto const spOff    = data->spOff;
+  auto const invSPOff = extra->invSPOff;
   auto& v = vmain();
 
-  maybe_syncsp(v, marker, srcLoc(inst, 1).reg());
+  maybe_syncsp(v, marker, srcLoc(inst, 1).reg(), extra->irSPOff);
 
   if (!index->hasConstVal()) {
     auto idx = indexReg;
-    if (data->bounded) {
-      if (data->base) {
+    if (extra->bounded) {
+      if (extra->base) {
         idx = v.makeReg();
-        v << subq{v.cns(data->base), indexReg, idx, v.makeReg()};
+        v << subq{v.cns(extra->base), indexReg, idx, v.makeReg()};
       }
       auto const sf = v.makeReg();
-      v << cmpqi{data->cases - 2, idx, sf};
-      v << bindjcc{CC_AE, sf, data->defaultSk, spOff,
+      v << cmpqi{extra->cases - 2, idx, sf};
+      v << bindjcc{CC_AE, sf, extra->defaultSk, invSPOff,
         TransFlags{}, leave_trace_args(marker)};
     }
 
-    auto const table = mcg->allocData<TCA>(sizeof(TCA), data->cases);
+    auto const table = mcg->allocData<TCA>(sizeof(TCA), extra->cases);
     auto const t = v.makeReg();
-    for (int i = 0; i < data->cases; i++) {
-      v << bindaddr{&table[i], data->targets[i], spOff};
+    for (int i = 0; i < extra->cases; i++) {
+      v << bindaddr{&table[i], extra->targets[i], invSPOff};
     }
     v << leap{rip[(intptr_t)table], t};
     v << jmpm{t[idx*8], leave_trace_args(marker)};
@@ -2223,15 +2225,15 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
   }
 
   auto indexVal = index->intVal();
-  if (data->bounded) {
-    indexVal -= data->base;
-    if (indexVal >= data->cases - 2 || indexVal < 0) {
-      v << bindjmp{data->defaultSk, spOff, TransFlags{},
+  if (extra->bounded) {
+    indexVal -= extra->base;
+    if (indexVal >= extra->cases - 2 || indexVal < 0) {
+      v << bindjmp{extra->defaultSk, invSPOff, TransFlags{},
         leave_trace_args(marker)};
       return;
     }
   }
-  v << bindjmp{data->targets[indexVal], spOff, TransFlags{},
+  v << bindjmp{extra->targets[indexVal], invSPOff, TransFlags{},
     leave_trace_args(marker)};
 }
 
@@ -2326,13 +2328,6 @@ void CodeGenerator::cgInlineReturn(IRInstruction* inst) {
   vmain() << load{fpReg[AROFF(m_sfp)], rVmFp};
 }
 
-void CodeGenerator::cgAdjustSP(IRInstruction* inst) {
-  auto const rsrc = srcLoc(inst, 0).reg();
-  auto const rdst = dstLoc(inst, 0).reg();
-  auto const off  = inst->extra<AdjustSP>()->offset;
-  vmain() << lea{rsrc[cellsToBytes(off.offset)], rdst};
-}
-
 void CodeGenerator::cgFreeActRec(IRInstruction* inst) {
   auto ptr = srcLoc(inst, 0).reg();
   auto off = AROFF(m_sfp);
@@ -2377,11 +2372,12 @@ void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
-  auto const extra   = inst->extra<ReqBindJmp>();
-  maybe_syncsp(vmain(), inst->marker(), srcLoc(inst, 0).reg());
-  vmain() << bindjmp{
+  auto const extra = inst->extra<ReqBindJmp>();
+  auto& v = vmain();
+  maybe_syncsp(v, inst->marker(), srcLoc(inst, 0).reg(), extra->irSPOff);
+  v << bindjmp{
     extra->dest,
-    extra->spOff,
+    extra->invSPOff,
     extra->trflags,
     leave_trace_args(inst->marker())
   };
@@ -2390,7 +2386,10 @@ void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
 void CodeGenerator::cgReqRetranslateOpt(IRInstruction* inst) {
   auto const extra = inst->extra<ReqRetranslateOpt>();
   auto& v = vmain();
-  v << syncvmsp{srcLoc(inst, 0).reg()};
+  auto const sync_sp = v.makeReg();
+  v << lea{srcLoc(inst, 0).reg()[cellsToBytes(extra->irSPOff.offset)],
+           sync_sp};
+  v << syncvmsp{sync_sp};
   emitServiceReq(v, nullptr, REQ_RETRANSLATE_OPT, {
     {ServiceReqArgInfo::Immediate, {extra->sk.toAtomicInt()}},
     {ServiceReqArgInfo::Immediate, {static_cast<uint64_t>(extra->transId)}}
@@ -2401,7 +2400,7 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
   auto const destSK = m_state.unit.initSrcKey();
   auto const extra  = inst->extra<ReqRetranslate>();
   auto& v = vmain();
-  maybe_syncsp(v, inst->marker(), srcLoc(inst, 0).reg());
+  maybe_syncsp(v, inst->marker(), srcLoc(inst, 0).reg(), extra->irSPOff);
   v << fallback{destSK, extra->trflags, leave_trace_args(inst->marker())};
 }
 
@@ -4503,9 +4502,10 @@ void CodeGenerator::cgDefLabel(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgJmpSSwitchDest(IRInstruction* inst) {
-  auto& v = vmain();
+  auto const extra = inst->extra<JmpSSwitchDest>();
   auto const m = inst->marker();
-  maybe_syncsp(v, m, srcLoc(inst, 1).reg());
+  auto& v = vmain();
+  maybe_syncsp(v, m, srcLoc(inst, 1).reg(), extra->offset);
   v << jmpr{srcLoc(inst, 0).reg(), leave_trace_args(m)};
 }
 

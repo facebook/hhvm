@@ -1947,11 +1947,6 @@ SSATmp* simplifyIsWaitHandle(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyAdjustSP(State& env, const IRInstruction* inst) {
-  if (inst->extra<AdjustSP>()->offset == 0) return inst->src(0);
-  return nullptr;
-}
-
 SSATmp* simplifyOrdStr(State& env, const IRInstruction* inst) {
   const auto src = inst->src(0);
   if (src->hasConstVal(TStr)) {
@@ -2099,7 +2094,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(Same)
   X(NSame)
   X(ArrayGet)
-  X(AdjustSP)
   X(OrdStr)
   X(LdLoc)
   X(LdStk)

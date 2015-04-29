@@ -1002,29 +1002,12 @@ void CodeGenerator::cgStStk(IRInstruction* inst) {
   emitStore(vmain(), spReg, offset, inst->src(1), srcLoc(1));
 }
 
-void CodeGenerator::cgAdjustSP(IRInstruction* inst) {
-  auto const rsrc = srcLoc(0).reg();
-  auto const rdst = dstLoc(0).reg();
-  auto const off  = inst->extra<AdjustSP>()->offset;
-  vmain() << lea{rsrc[cellsToBytes(off.offset)], rdst};
-}
-
 void CodeGenerator::cgReqBindJmp(IRInstruction* inst) {
-  auto const extra   = inst->extra<ReqBindJmp>();
-  auto& v            = vmain();
-  v << copy{srcLoc(0).reg(), PhysReg(rVmSp)};
-  v << bindjmp{extra->dest,
-               extra->spOff,
-               extra->trflags,
-               RegSet()};
+  not_implemented();
 }
 
 void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
-  assertx(m_state.unit.bcOff() == inst->marker().bcOff());
-  auto const destSK = SrcKey(curFunc(), m_state.unit.bcOff(), resumed());
-  auto const extra = inst->extra<ReqRetranslate>();
-  auto& v = vmain();
-  v << fallback{destSK, extra->trflags, RegSet()};
+  not_implemented();
 }
 
 //////////////////////////////////////////////////////////////////////

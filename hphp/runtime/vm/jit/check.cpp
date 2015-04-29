@@ -181,7 +181,7 @@ bool checkCfg(const IRUnit& unit) {
     for (auto& inst : blk->instrs()) {
       for (auto src : inst.srcs()) {
         if (src->inst()->is(DefConst)) continue;
-        auto const dom = findDefiningBlock(src);
+        auto const dom = findDefiningBlock(src, idoms);
         auto const locally_defined =
           src->inst()->block() == inst.block() && defined_set.contains(src);
         auto const strictly_dominates =

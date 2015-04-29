@@ -2972,7 +2972,7 @@ bool can_sink(Env& env, const IRInstruction* inst, const Block* block) {
   assertx(inst->is(IncRef));
   if (!block->taken() || !block->next()) return false;
   if (inst->src(0)->inst()->is(DefConst)) return true;
-  auto const defBlock = findDefiningBlock(inst->src(0));
+  auto const defBlock = findDefiningBlock(inst->src(0), env.idoms);
   return dominates(defBlock, block->taken(), env.idoms) &&
          dominates(defBlock, block->next(), env.idoms);
 }
@@ -2994,7 +2994,8 @@ IRInstruction* find_sinkable_pred(const Env& env, const NPhi& phi) {
     phi.pred_list,
     phi.pred_list + phi.pred_list_sz,
     [&] (const Node* pred) {
-      auto const defBlock = findDefiningBlock(to_inc(pred)->inst->src(0));
+      auto const defBlock = findDefiningBlock(to_inc(pred)->inst->src(0),
+                                              env.idoms);
       return dominates(defBlock, block, env.idoms);
     }
   );

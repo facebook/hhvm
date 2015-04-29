@@ -51,10 +51,11 @@ SSATmp* canonical(SSATmp*);
  * Such a block may not exist if the CFG has critical edges, so this function
  * may return nullptr.
  *
- * Details: we have several instructions that conditionally define values on
- * their fallthrough edge---if this fallthrough edge is a critical edge, the
- * value is actually only defined on that edge, and there is no block with the
- * desired properties.
+ * Details: We have several instructions that conditionally define values on
+ * their fallthrough edge.  If that edge goes to a block with other
+ * predecessors, this function only returns that block if it also dominates
+ * the sources of its other predecessors.  Otherwise, the value is only
+ * really defined in that edge -- but in no block in the unit.
  *
  * A normal use for this function is when you have computed that an SSATmp has
  * the same value as another computation, but want to know if it is defined at
@@ -65,7 +66,7 @@ SSATmp* canonical(SSATmp*);
  *
  * Pre: !t->inst()->is(DefConst)
  */
-Block* findDefiningBlock(const SSATmp* t);
+Block* findDefiningBlock(const SSATmp* t, const IdomVector& idoms);
 
 /*
  * Returns true if the SSATmp `tmp' is safely usable in the block `where',

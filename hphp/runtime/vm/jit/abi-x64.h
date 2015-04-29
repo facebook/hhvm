@@ -125,7 +125,7 @@ const RegSet kCrossTraceRegsNoSP = rVmFp | rVmTl;
  * Registers that are live during a PHP function call, between the caller and
  * the callee.
  */
-const RegSet kCrossCallRegs = kCrossTraceRegs; // TODO(#6849123)
+const RegSet kCrossCallRegs = kCrossTraceRegsNoSP; // TODO(#6849123)
 
 /*
  * Registers that can safely be used for scratch purposes in-between
@@ -136,7 +136,7 @@ const RegSet kCrossCallRegs = kCrossTraceRegs; // TODO(#6849123)
  * modifying them.
  */
 const RegSet kScratchCrossTraceRegs = kXMMCallerSaved |
-  (kGPUnreserved - kCrossCallRegs);
+  (kGPUnreserved - kCrossTraceRegs);
 
 //////////////////////////////////////////////////////////////////////
 /*

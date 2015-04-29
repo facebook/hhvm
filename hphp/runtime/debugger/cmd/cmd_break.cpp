@@ -319,9 +319,7 @@ void CmdBreak::processStatusChange(DebuggerClient& client) {
 
   if (client.arg(2, "all")) {
     if (hasClearArg(client)) {
-      while (m_breakpoints->size() > 0) {
-        m_breakpoints->erase(m_breakpoints->end());
-      }
+      m_breakpoints->clear();
       updateServer(client);
       client.info("All breakpoints are cleared.");
       return;

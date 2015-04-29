@@ -715,7 +715,7 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, int mode,
       // entity loading path, which is locked down by default for security
       // reasons.
       stream = File::Open(file_dest, "rb");
-      if (!stream->isInvalid()) {
+      if (stream && !stream->isInvalid()) {
         // The XML context is also deleted in this function, so the ownership
         // of the File is kept locally in 'stream'.
         // The libxml_streams_IO_nop_close callback does nothing.

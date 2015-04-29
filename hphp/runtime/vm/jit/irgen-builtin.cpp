@@ -547,11 +547,6 @@ private:
                   nullptr,
                   m_kind == Kind::InliningCtor);
     }
-    for (auto i = uint32_t{0}; i < m_params.size(); ++i) {
-      // TODO(#4313939): it's not actually necessary to push these
-      // nulls.
-      push(env, cns(env, TInitNull));
-    }
     /*
      * We're potentially spilling to a different depth than the unwinder
      * would've expected, so we need an eager sync.  Even if we aren't inlining

@@ -15,6 +15,7 @@
 */
 #include "hphp/util/afdt-util.h"
 #include <afdt.h>
+#include <errno.h>
 #include <limits.h>
 
 namespace HPHP {

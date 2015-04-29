@@ -103,7 +103,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     if (!fp) return bt;
   } else {
     fp = vmfp();
-    auto const unit = fp->m_func->unit();
+    auto const unit = fp->func()->unit();
     assert(unit);
     pc = unit->offsetOf(vmpc());
   }
@@ -111,10 +111,10 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   // Handle the top frame.
   if (btArgs.m_withSelf) {
     // Builtins don't have a file and line number.
-    if (!fp->m_func->isBuiltin()) {
-      auto const unit = fp->m_func->unit();
+    if (!fp->func()->isBuiltin()) {
+      auto const unit = fp->func()->unit();
       assert(unit);
-      auto const filename = fp->m_func->filename();
+      auto const filename = fp->func()->filename();
 
       ArrayInit frame(btArgs.m_parserFrame ? 4 : 2, ArrayInit::Map{});
       frame.set(s_file, const_cast<StringData*>(filename));
@@ -135,11 +135,11 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
        fp = prevFp, pc = prevPc,
          prevFp = getPrevActRec(fp, &prevPc)) {
     // Do not capture frame for HPHP only functions.
-    if (fp->m_func->isNoInjection()) continue;
+    if (fp->func()->isNoInjection()) continue;
 
     ArrayInit frame(7, ArrayInit::Map{});
 
-    auto const curUnit = fp->m_func->unit();
+    auto const curUnit = fp->func()->unit();
     auto const curOp = *reinterpret_cast<const Op*>(curUnit->at(pc));
     auto const isReturning =
       curOp == Op::RetC || curOp == Op::RetV ||
@@ -147,11 +147,11 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       fp->localsDecRefd();
 
     // Builtins and generators don't have a file and line number
-    if (prevFp && !prevFp->m_func->isBuiltin()) {
-      auto const prevUnit = prevFp->m_func->unit();
+    if (prevFp && !prevFp->func()->isBuiltin()) {
+      auto const prevUnit = prevFp->func()->unit();
       auto prevFile = prevUnit->filepath();
-      if (prevFp->m_func->originalFilename()) {
-        prevFile = prevFp->m_func->originalFilename();
+      if (prevFp->func()->originalFilename()) {
+        prevFile = prevFp->func()->originalFilename();
       }
       assert(prevFile);
       frame.set(s_file, const_cast<StringData*>(prevFile));
@@ -173,14 +173,14 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         pcAdjust = 1;
       }
       frame.set(s_line,
-                prevFp->m_func->unit()->getLineNumber(prevPc - pcAdjust));
+                prevFp->func()->unit()->getLineNumber(prevPc - pcAdjust));
     }
 
     // Check for include.
-    String funcname = const_cast<StringData*>(fp->m_func->name());
-    if (fp->m_func->isClosureBody()) {
+    String funcname = const_cast<StringData*>(fp->func()->name());
+    if (fp->func()->isClosureBody()) {
       // Strip the file hash from the closure name.
-      String fullName = const_cast<StringData*>(fp->m_func->baseCls()->name());
+      String fullName = const_cast<StringData*>(fp->func()->baseCls()->name());
       funcname = fullName.substr(0, fullName.find(';'));
     }
 
@@ -196,7 +196,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     if (!funcname.same(s_include)) {
       // Closures have an m_this but they aren't in object context.
       auto ctx = arGetContextClass(fp);
-      if (ctx != nullptr && !fp->m_func->isClosureBody()) {
+      if (ctx != nullptr && !fp->func()->isClosureBody()) {
         frame.set(s_class, const_cast<StringData*>(ctx->name()));
         if (fp->hasThis() && !isReturning) {
           if (btArgs.m_withThis) {
@@ -209,7 +209,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       }
     }
 
-    bool const mayUseVV = fp->m_func->attrs() & AttrMayUseVV;
+    bool const mayUseVV = fp->func()->attrs() & AttrMayUseVV;
 
     auto const withNames = btArgs.m_withArgNames;
     auto const withValues = btArgs.m_withArgValues;
@@ -225,7 +225,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       frame.set(s_args, empty_array());
     } else {
       auto args = Array::Create();
-      auto const nparams = fp->m_func->numNonVariadicParams();
+      auto const nparams = fp->func()->numNonVariadicParams();
       auto const nargs = fp->numArgs();
       auto const nformals = std::min<int>(nparams, nargs);
 

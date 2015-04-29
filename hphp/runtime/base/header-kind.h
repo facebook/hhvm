@@ -35,9 +35,35 @@ enum class HeaderKind : uint8_t {
   Hole, // wasted space not in any freelist
   Debug // a DebugHeader
 };
-
-const size_t HeaderKindOffset = 11;
 const unsigned NumHeaderKinds = unsigned(HeaderKind::Debug) + 1;
+
+/*
+ * Common header for all heap-allocated objects. Layout is carefully
+ * designed to allow overlapping with the second word of a TypedValue,
+ * or to follow a C++ defined vptr.
+ */
+template<class T = uint16_t> struct HeaderWord {
+  union {
+    struct {
+      T aux;
+      uint8_t marks;
+      HeaderKind kind;
+    };
+    uint32_t w;
+  };
+  static uint32_t pack(HeaderKind kind) {
+    return static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind));
+  }
+  static uint32_t pack(T aux, HeaderKind kind) {
+    return pack(kind) | static_cast<uint16_t>(aux);
+    static_assert(sizeof(aux) == 2, "");
+  }
+  void init(T aux, HeaderKind kind) { w = pack(aux, kind); }
+  void init(HeaderKind kind) { w = pack(kind); }
+};
+
+constexpr auto HeaderOffset = sizeof(void*);
+constexpr auto HeaderKindOffset = HeaderOffset + offsetof(HeaderWord<>, kind);
 
 inline bool isObjectKind(HeaderKind k) {
   return uint8_t(k) >= uint8_t(HeaderKind::Object) &&

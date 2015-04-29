@@ -150,8 +150,14 @@ class WaitHandle(object):
         wh_ptype = T('HPHP::c_' + wh_name + 'WaitHandle').pointer()
         wh = (blockable.cast(T('char').pointer()) - offset).cast(wh_ptype)
 
-        if blockable != wh['m_blockable'].address:
-            return None
+        # AsyncFunctionWaitHandles have a slightly different layout.
+        try:
+            if blockable != wh['m_blockable'].address:
+                return None
+        except:
+            if blockable != wh['m_children'][0]['m_blockable'].address:
+                return None
+
 
         return WaitHandle(wh)
 

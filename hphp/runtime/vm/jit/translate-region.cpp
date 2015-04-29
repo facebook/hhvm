@@ -501,6 +501,22 @@ RegionDesc::BlockId singleSucc(const RegionDesc& region,
   return *succs.begin();
 }
 
+/*
+ * Returns whether or not block `bid' is in the retranslation chain
+ * for `region's entry block.
+ */
+bool inEntryRetransChain(RegionDesc::BlockId bid, const RegionDesc& region) {
+  auto block = region.entry();
+  if (block->start() != region.block(bid)->start()) return false;
+  while (true) {
+    if (block->id() == bid) return true;
+    auto nextRetrans = region.nextRetrans(block->id());
+    if (!nextRetrans) return false;
+    block = region.block(nextRetrans.value());
+  }
+  not_reached();
+}
+
 TranslateResult irGenRegion(IRGS& irgs,
                             const RegionDesc& region,
                             RegionBlacklist& toInterp,
@@ -549,6 +565,7 @@ TranslateResult irGenRegion(IRGS& irgs,
     TransID profTransId = getTransId(blockId);
     irgs.profTransID = profTransId;
     irgs.inlineLevel = block->inlineLevel();
+    irgs.firstBcInst = inEntryRetransChain(blockId, region);
     irgen::prepareForNextHHBC(irgs, nullptr, sk, false);
 
     // Prepare to start translating this region block.  This loads the

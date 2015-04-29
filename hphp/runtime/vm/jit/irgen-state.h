@@ -88,8 +88,11 @@ struct IRGS {
   const NormalizedInstruction* currentNormalizedInstruction{nullptr};
 
   /*
-   * True if we're on the first HHBC instruction that will be emitted
-   * for this region.
+   * True if we're on the first HHBC instruction that will be executed
+   * for this instruction.  This is the first bytecode instruction in
+   * either the region entry block or any other block in its
+   * retranslation chain (i.e. that can be reached due to guard
+   * failures before advancing VM state for any bytecode instruction).
    */
   bool firstBcInst{true};
 

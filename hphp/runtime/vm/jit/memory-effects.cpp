@@ -165,14 +165,29 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
     inst
   );
 
+  /*
+   * We want to union `killed_stack' into whatever else the instruction already
+   * said it must kill, but if we end up with an unrepresentable AliasClass we
+   * can't return a set that's too big (the `kills' set is unlike the other
+   * AliasClasses in GeneralEffects in that means it kills /everything/ in the
+   * set, since it's must-information).
+   *
+   * If we can't represent the union, just take the stack, in part because we
+   * have some debugging asserts about this right now---but also nothing
+   * actually uses may_reenter with a non-AEmpty kills at the time of this
+   * writing anyway.
+   */
   auto const killed_stack =
     stack_below(inst.marker().fp(), -inst.marker().spOff().offset - 1);
+  auto const kills_union = x.kills.precise_union(killed_stack);
+  auto const new_kills   = kills_union ? *kills_union : killed_stack;
+
   return GeneralEffects {
     x.loads | AHeapAny
             | (RuntimeOption::EnableArgsInBacktraces ? AFrameAny : AEmpty),
     x.stores | AHeapAny,
     x.moves,
-    x.kills | killed_stack
+    new_kills
   };
 }
 

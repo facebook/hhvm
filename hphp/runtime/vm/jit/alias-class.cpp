@@ -307,9 +307,38 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
   return AliasClass{newBits};
 }
 
-AliasClass AliasClass::operator|(AliasClass o) const {
+folly::Optional<AliasClass> AliasClass::precise_union(AliasClass o) const {
   if (o <= *this) return *this;
   if (*this <= o) return o;
+
+  auto const unioned = static_cast<rep>(m_bits | o.m_bits);
+
+  // For a precise union, we need to make sure the returned class is not any
+  // bigger than it should be.  This means we can't deal with situations where
+  // we have disjoint stags, and right now we also don't try to deal with
+  // situations that have the same stag in a combinable way.  (E.g. two
+  // adjacent AStack ranges.)
+  auto const stag1 = m_stag;
+  auto const stag2 = o.m_stag;
+  if (stag1 == STag::None && stag2 == STag::None) {
+    return AliasClass{unioned};
+  }
+  if (stag1 == STag::None && stag2 != STag::None) {
+    return o.precise_union(*this); // flip args
+  }
+  assertx(stag1 != STag::None);
+  if (stag2 != STag::None)       return folly::none;
+  if (o.m_bits & stagBit(stag1)) return folly::none;
+
+  // Keep the data and stag from this, but change its bits.
+  auto ret = *this;
+  ret.m_bits = unioned;
+  assertx(ret.m_stag == stag1);
+  return ret;
+}
+
+AliasClass AliasClass::operator|(AliasClass o) const {
+  if (auto const c = precise_union(o)) return *c;
 
   auto const unioned = static_cast<rep>(m_bits | o.m_bits);
 

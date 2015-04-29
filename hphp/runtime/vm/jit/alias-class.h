@@ -184,10 +184,25 @@ struct AliasClass {
   bool operator!=(AliasClass o) const { return !(*this == o); }
 
   /*
-   * Create an alias class that is at least as big as the true union of this
-   * alias class and another one.  Guaranteed to be commutative.
+   * Return an AliasClass that is the precise union of this class and another
+   * class, or folly::none if that precise union cannot be represented.
+   *
+   * Guaranteed to be commutative.
    */
-  AliasClass operator|(AliasClass) const;
+  folly::Optional<AliasClass> precise_union(AliasClass) const;
+
+  /*
+   * Create an alias class that is at least as big as the true union of this
+   * alias class and another one.
+   *
+   * If this.precise_union(o) is not folly::none, this function is guaranteed
+   * to return *this.precise_union(o).  Otherwise it may return an arbitrary
+   * AliasClass bigger than the (unrepresentable) true union---callers should
+   * not rely on specifics about how much bigger it is.
+   *
+   * Guaranteed to be commutative.
+   */
+  AliasClass operator|(AliasClass o) const;
 
   /*
    * Returns whether this alias class is a non-strict-subset of another one.

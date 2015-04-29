@@ -814,6 +814,7 @@ struct MemoryManager {
   template <typename T> RootId addRoot(const SmartPtr<T>& ptr);
   template <typename T> SmartPtr<T> lookupRoot(RootId tok) const;
   template <typename T> bool removeRoot(const SmartPtr<T>& ptr);
+  template <typename T> bool removeRoot(const T* ptr);
   template <typename T> SmartPtr<T> removeRoot(RootId token);
   template <typename F> void scanRootMaps(F& m) const;
 

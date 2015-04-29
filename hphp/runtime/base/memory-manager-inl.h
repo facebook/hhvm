@@ -497,6 +497,11 @@ bool MemoryManager::removeRoot(const SmartPtr<T>& ptr) {
   return (bool)removeRoot<T>(ptr->getId());
 }
 
+template <typename T>
+bool MemoryManager::removeRoot(const T* ptr) {
+  return (bool)removeRoot<T>(ptr->getId());
+}
+
 template <typename F>
 void MemoryManager::scanRootMaps(F& m) const {
   if (m_objectRoots) {

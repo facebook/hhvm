@@ -31,6 +31,7 @@ module Unify        = Typing_unify
 module TGen         = Typing_generic
 module SN           = Naming_special_names
 module TAccess      = Typing_taccess
+module Phase        = Typing_phase
 
 (*****************************************************************************)
 (* Debugging *)
@@ -202,7 +203,7 @@ let make_param_local_ty env param =
     ~phase:Phase.locl
     ~for_body:true
     ~default:Env.fresh_type
-    ~localize:TUtils.localize
+    ~localize:Phase.localize
     env param
 
 let rec fun_decl (tcopt:TypecheckerOptions.t) f =
@@ -852,7 +853,7 @@ and expr_ ~in_cond ~(valkind: [> `lvalue | `rvalue | `other ]) env (p, e) =
       | None ->
           env, (Reason.Rnone, Tany)
       | Some ty ->
-          TUtils.localize env ty
+          Phase.localize env ty
       )
   | Method_id (instance, meth) ->
     (* Method_id is used when creating a "method pointer" using the magic
@@ -897,7 +898,7 @@ and expr_ ~in_cond ~(valkind: [> `lvalue | `rvalue | `other ]) env (p, e) =
           Reason.Rwitness p, Tgeneric (n, cstr)
         end class_.tc_tparams in
         let obj_type = Reason.Rwitness p, Tapply (pos_cname, params) in
-        let env, local_obj_ty = TUtils.localize env obj_type in
+        let env, local_obj_ty = Phase.localize env obj_type in
         let env, fty =
           obj_get ~is_method:true ~nullsafe:None env local_obj_ty
                  (CI (pos, class_name)) meth_name (fun x -> x) in
@@ -954,7 +955,7 @@ and expr_ ~in_cond ~(valkind: [> `lvalue | `rvalue | `other ]) env (p, e) =
       | Some smethod ->
         let cid = CI c in
         let env, cid_ty = static_class_id (fst c) env cid in
-        let env, smethod_type = TUtils.localize env smethod.ce_type in
+        let env, smethod_type = Phase.localize env smethod.ce_type in
         let env, smethod_type =
           TAccess.fill_type_hole env cid cid_ty smethod_type in
         (match smethod_type with
@@ -1141,7 +1142,7 @@ and expr_ ~in_cond ~(valkind: [> `lvalue | `rvalue | `other ]) env (p, e) =
   | Efun (f, _idl) ->
       NastCheck.fun_ env f (Nast.assert_named_body f.f_body);
       let env, ft = fun_decl_in_env env f in
-      let env, ft = TUtils.localize_ft env ft in
+      let env, ft = Phase.localize_ft env ft in
       (* check for recursive function calls *)
       let anon = anon_make env.Env.lenv p f in
       let env, anon_id = Env.add_anonymous env anon in
@@ -1181,7 +1182,7 @@ and expr_ ~in_cond ~(valkind: [> `lvalue | `rvalue | `other ]) env (p, e) =
             let elt_option = SMap.get name attrdec in
             (match elt_option with
             | Some elt ->
-              let env, declty = TUtils.localize env elt.ce_type in
+              let env, declty = Phase.localize env elt.ce_type in
               let env = Type.sub_type valp Reason.URxhp env declty valty in
               env
             | None when SN.Members.is_special_xhp_attribute name -> env
@@ -1262,7 +1263,7 @@ and anon_check_param env param =
   | None -> env
   | Some hty ->
       let env, hty = Typing_hint.hint env hty in
-      let env, hty = TUtils.localize env hty in
+      let env, hty = Phase.localize env hty in
       let env, paramty = Env.get_local env (snd param.param_id) in
       let hint_pos = Reason.to_pos (fst hty) in
       let env = Type.sub_type hint_pos Reason.URhint env hty paramty in
@@ -1351,7 +1352,7 @@ and new_object ~check_not_abstract p env c el uel =
       | CIparent ->
         (match (fst class_.tc_construct) with
           | Some ce ->
-            let _, ce_type = TUtils.localize env ce.ce_type in
+            let _, ce_type = Phase.localize env ce.ce_type in
             ignore (check_abstract_parent_meth SN.Members.__construct p ce_type)
           | None -> ());
         env, obj_type
@@ -1658,7 +1659,7 @@ and yield_field_key env = function
 
 and check_parent_construct pos env el uel env_parent =
   let check_not_abstract = false in
-  let env, env_parent = TUtils.localize env env_parent in
+  let env, env_parent = Phase.localize env env_parent in
   let env, parent = new_object ~check_not_abstract pos env CIparent el uel in
   let env, _ = Type.unify pos (Reason.URnone) env env_parent parent in
   env, (Reason.Rwitness pos, Tprim Tvoid)
@@ -1948,7 +1949,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
             [param1; param2; param3], ret
           | _ -> fty.ft_params, fty.ft_ret in
         let fty = { fty with ft_params = params; ft_ret = ret } in
-        let env, fty = TUtils.localize_ft env fty in
+        let env, fty = Phase.localize_ft env fty in
         let env, fty = Inst.instantiate_ft env fty in
         let tfun = Reason.Rwitness fty.ft_pos, Tfun fty in
         call p env tfun el []
@@ -1977,7 +1978,7 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
              * defined on the parent class, but $this is still the child class.
              * We can deal with this by hijacking the continuation that
              * calculates the SN.Typehints.this type *)
-            let env, self = TUtils.localize env (Env.get_self env) in
+            let env, self = Phase.localize env (Env.get_self env) in
             let k_lhs _ = Reason.Rwitness fpos, TUtils.this_of self
             in
             let env, method_, _ =
@@ -2065,7 +2066,7 @@ and fun_type_of_id env x =
     match Env.get_fun env (snd x) with
     | None -> unbound_name env x
     | Some fty ->
-        let env, fty = TUtils.localize_ft env fty in
+        let env, fty = Phase.localize_ft env fty in
         let env, fty = Inst.instantiate_ft env fty in
         env, (Reason.Rwitness fty.ft_pos, Tfun fty)
   in
@@ -2372,7 +2373,7 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
                 env, (Reason.Rnone, Tany)
               | Some {ce_visibility = vis; ce_type = (r, Tfun ft); _} ->
                 check_visibility p env (Reason.to_pos r, vis) (Some cid);
-                let env, ft = TUtils.localize_ft env ft in
+                let env, ft = Phase.localize_ft env ft in
                 (* xxx: is there a need to subst in SN.Typehints.this *)
                 let subst = Inst.make_subst Phase.locl class_.tc_tparams paraml in
                 let env, ft_ret = Inst.instantiate subst env ft.ft_ret in
@@ -2385,7 +2386,7 @@ and class_get_ ~is_method ~is_const env cty (p, mid) cid =
               | _ -> assert false)
           | Some { ce_visibility = vis; ce_type = method_; _ } ->
               check_visibility p env (Reason.to_pos (fst method_), vis) (Some cid);
-              let env, method_ = TUtils.localize env method_ in
+              let env, method_ = Phase.localize env method_ in
               let subst = Inst.make_subst Phase.locl class_.tc_tparams paraml in
               let env, method_ = Inst.instantiate subst env method_ in
               env, method_)
@@ -2549,7 +2550,7 @@ and obj_get_ ~is_method ~nullsafe env ty1 cid (p, s as id)
                     let this_ty = k_lhs ety1 in
                     let subst = Inst.make_subst_with_this ~phase:Phase.locl
                       ~this:this_ty class_.tc_tparams paraml in
-                    let env, ft = TUtils.localize_ft env ft in
+                    let env, ft = Phase.localize_ft env ft in
                     let env, ft_ret = Inst.instantiate subst env ft.ft_ret in
 
                     (* we change the params of the underlying
@@ -2581,7 +2582,7 @@ and obj_get_ ~is_method ~nullsafe env ty1 cid (p, s as id)
                 let env, paraml = alpha_this ~new_name env paraml in
 
                 let subst = Inst.make_subst Phase.locl class_.tc_tparams paraml in
-                let env, member_ = TUtils.localize env member_ in
+                let env, member_ = Phase.localize env member_ in
                 let env, member_ = Inst.instantiate subst env member_ in
 
                 (* We must substitute out the this types separately
@@ -2697,7 +2698,7 @@ and static_class_id p env = function
                  * type of the most concrete class that the trait has
                  * "require extend"-ed *)
                 let r = Reason.Rwitness p in
-                let env, parent_ty = TUtils.localize env parent_ty in
+                let env, parent_ty = Phase.localize env parent_ty in
                 env, (r, TUtils.this_of parent_ty)
             )
           | _ ->
@@ -2706,7 +2707,7 @@ and static_class_id p env = function
             if not parent_defined
             then Errors.parent_undefined p;
             let r = Reason.Rwitness p in
-            let env, parent = TUtils.localize env parent in
+            let env, parent = Phase.localize env parent in
             (* parent is still technically the same object. *)
             env, (r, TUtils.this_of (r, snd parent))
           )
@@ -2717,15 +2718,15 @@ and static_class_id p env = function
         if not parent_defined
         then Errors.parent_undefined p;
         let r = Reason.Rwitness p in
-        let env, parent = TUtils.localize env parent in
+        let env, parent = Phase.localize env parent in
         (* parent is still technically the same object. *)
         env, (r, TUtils.this_of (r, snd parent))
     )
   | CIstatic ->
-    let env, self = TUtils.localize env (Env.get_self env) in
+    let env, self = Phase.localize env (Env.get_self env) in
     env, (Reason.Rwitness p, TUtils.this_of self)
   | CIself ->
-    let env, self = TUtils.localize env (Env.get_self env) in
+    let env, self = Phase.localize env (Env.get_self env) in
     env, (Reason.Rwitness p, snd self)
   | CI c ->
     let class_ = Env.get_class env (snd c) in
@@ -2768,7 +2769,7 @@ and call_construct p env class_ params el uel cid =
     | Some { ce_visibility = vis; ce_type = m; _ } ->
       check_visibility p env (Reason.to_pos (fst m), vis) None;
       let subst = Inst.make_subst Phase.locl class_.tc_tparams params in
-      let env, m = TUtils.localize env m in
+      let env, m = Phase.localize env m in
       let env, m = Inst.instantiate subst env m in
       let env, cid_ty = static_class_id p env cid in
       let env, m = TAccess.fill_type_hole env cid cid_ty m in
@@ -3644,7 +3645,7 @@ and class_var_def env is_static c cv =
 
 and method_def env m =
   let env = { env with Env.lenv = Env.empty_local } in
-  let env, self = TUtils.localize env (Env.get_self env) in
+  let env, self = Phase.localize env (Env.get_self env) in
   let env = Env.set_local env this self in
   let env, ret = (match m.m_ret with
     | None -> env, (Reason.Rwitness (fst m.m_name), Tany)

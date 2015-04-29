@@ -12,7 +12,7 @@ open Typing_defs
 
 (* Expands a type access to underlying type *)
 val expand_with_env:
-  Typing_defs.ety_env ->
+  Typing_phase.env ->
   Typing_env.env ->
   Typing_reason.t ->
   locl taccess_type ->

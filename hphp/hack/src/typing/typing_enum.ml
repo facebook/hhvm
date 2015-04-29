@@ -19,6 +19,7 @@ open Utils
 open Typing_defs
 
 module SN = Naming_special_names
+module Phase = Typing_phase
 
 (* Figures out if a class needs to be treated like an enum and if so returns
  * Some(base, type, constraint), where base is the underlying type of the
@@ -102,7 +103,7 @@ let enum_class_check env tc consts const_types =
     | Some (ty_exp, _, ty_constraint) ->
         let env, (r, ty_exp'), trail =
           Typing_tdef.force_expand_typedef ~phase:Phase.decl env ty_exp in
-        let env, ty_exp = Typing_utils.localize env ty_exp in
+        let env, ty_exp = Phase.localize env ty_exp in
         (match ty_exp' with
           (* We disallow first-class enums from being non-exact types, because
            * a switch on such an enum can lead to very unexpected results,
@@ -130,7 +131,7 @@ let enum_class_check env tc consts const_types =
          * actually a subtype of it. *)
         let env = (match ty_constraint with
           | Some ty ->
-             let env, ty = Typing_utils.localize env ty in
+             let env, ty = Phase.localize env ty in
             Typing_ops.sub_type tc.tc_pos Reason.URenum_cstr env ty ty_exp
           | None -> env) in
 

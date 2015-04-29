@@ -14,6 +14,7 @@ open Typing_defs
 module Env    = Typing_env
 module SN     = Naming_special_names
 module TUtils = Typing_utils
+module Phase = Typing_phase
 
 type env   = Env.env
 type 'a subst = ('a Phase.t * 'a ty) SMap.t
@@ -97,8 +98,8 @@ and instantiate_ft env ft =
   env, { ft with ft_arity = arity; ft_params = params; ft_ret = ret }
 
 and check_constraint env ck cstr_ty ty =
-  let env, ty = TUtils.localize_phase env ty in
-  let env, cstr_ty = TUtils.localize_phase env cstr_ty in
+  let env, ty = Phase.localize_phase env ty in
+  let env, cstr_ty = Phase.localize_phase env cstr_ty in
   let env, ety = Env.expand_type env ty in
   let env, ecstr_ty = Env.expand_type env cstr_ty in
   match snd ecstr_ty, snd ety with

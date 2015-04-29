@@ -18,10 +18,11 @@ module Env = Typing_env
 module Inst = Typing_instantiate
 module SN = Naming_special_names
 module TGen = Typing_generic
+module Phase = Typing_phase
 
 type env = {
   tenv : Env.env;
-  ety_env : ety_env;
+  ety_env : Phase.env;
   (* Keeps track of all the expansions that occur when expanding a Taccess.
    * This is necessary to check for potential cycles while expanding, as well
    * as providing detailed information in the Reason.t of the resulting type.
@@ -67,7 +68,7 @@ let rec expand_with_env ety_env env reason (root, ids) =
   expand_env.tenv, (expand_env.ety_env, ty)
 
 and expand env r t =
-  let env, (_, ty) = expand_with_env empty_ety_env env r t in
+  let env, (_, ty) = expand_with_env Phase.empty_env env r t in
   env, ty
 
 (* The root of a type access is a type. When expanding a type access this type
@@ -151,7 +152,7 @@ and expand_ env root_ty ids =
           let (tenv, ty), x =
             if x = SN.Typehints.type_hole
             then
-              TUtils.localize env.tenv (Env.get_self env.tenv), SN.Typehints.this
+              Phase.localize env.tenv (Env.get_self env.tenv), SN.Typehints.this
             else (env.tenv, ty), x in
           let env = { env with tenv = tenv } in
           expand_generic env x ty ids
@@ -263,7 +264,7 @@ and create_root_from_type_constant env class_pos class_name root_ty (pos, tconst
           Tgeneric (strip_ns class_name^"::"^tconst, cstr)
         ) in
   let tenv, (ety_env, tconst_ty) =
-    TUtils.localize_with_env ~ety_env:env.ety_env env.tenv tconst_ty in
+    Phase.localize_with_env ~ety_env:env.ety_env env.tenv tconst_ty in
   let tenv, tconst_ty = fill_type_hole_ tenv tconst_ty root_ty in
   { env with tenv = tenv }, tconst_ty, ety_env
 

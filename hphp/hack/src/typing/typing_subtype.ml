@@ -21,6 +21,7 @@ module TUEnv = Typing_unification_env
 module ShapeMap = Nast.ShapeMap
 module SN = Naming_special_names
 module TAccess = Typing_taccess
+module Phase = Typing_phase
 
 (* This function checks that the method ft_sub can be used to replace
  * (is a subtype of) ft_super *)
@@ -301,7 +302,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
                   | _, Some _ -> acc
                   | env, None ->
                     Errors.try_ begin fun () ->
-                      let env, elt_type = TUtils.localize env elt_type in
+                      let env, elt_type = Phase.localize env elt_type in
                       let _, elt_ty = elt_type in
                       env, Some (sub_type env ty_super (p_sub, elt_ty))
                     end (fun _ -> acc)
@@ -324,7 +325,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
                   then
                     Errors.expected_tparam
                       (Reason.to_pos p_sub) (List.length class_.tc_tparams);
-                  let env, up_obj = TUtils.localize env up_obj in
+                  let env, up_obj = Phase.localize env up_obj in
                   let subst = Inst.make_subst Phase.locl class_.tc_tparams tyl_sub in
                   let env, up_obj = Inst.instantiate subst env up_obj in
                   sub_type env ty_super up_obj
@@ -433,7 +434,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
         Errors.try_
           (fun () -> fst (Unify.unify env ty_super ty_sub))
           (fun _ ->
-           let env, base = TUtils.localize env base in
+           let env, base = Phase.localize env base in
            sub_type env ty_super base)
       | None -> assert false)
   (* If all else fails we fall back to the super/as constraint on a generics. *)

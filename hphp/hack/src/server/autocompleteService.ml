@@ -11,6 +11,8 @@
 open Utils
 open Typing_defs
 
+module Phase = Typing_phase
+
 (* Details about functions to be added in json output *)
 type func_param_result = {
     param_name     : string;
@@ -358,7 +360,7 @@ let get_results funs classes =
   in
   let results = List.map begin fun x ->
     let env, ty = match x.ty with
-      | DeclTy ty -> Typing_utils.localize env ty
+      | DeclTy ty -> Phase.localize env ty
       | LoclTy ty -> env, ty
     in
     let desc_string = match x.desc with

@@ -14,6 +14,7 @@ module Env = Typing_env
 module TDef = Typing_tdef
 module N = Nast
 module TAccess = Typing_taccess
+module Phase = Typing_phase
 
 (*****************************************************************************)
 (* Check if a comparison is trivially true or false *)

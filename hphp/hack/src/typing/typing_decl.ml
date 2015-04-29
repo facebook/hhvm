@@ -26,6 +26,7 @@ module Inst = Typing_instantiate
 module Attrs = Attributes
 
 module SN = Naming_special_names
+module Phase = Typing_phase
 
 (*****************************************************************************)
 (* Module used to track what classes are declared and which ones still need

@@ -23,6 +23,8 @@ open Typing_defs
 module Env = Typing_env
 module Inst = Typing_instantiate
 module TUtils = Typing_utils
+module Phase = Typing_phase
+
 type env = Env.env
 
 (*****************************************************************************)

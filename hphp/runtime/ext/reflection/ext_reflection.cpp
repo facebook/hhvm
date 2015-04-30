@@ -1092,35 +1092,6 @@ static bool HHVM_METHOD(ReflectionClass, hasMethod, const String& name) {
   return (get_method_func(cls, name) != nullptr);
 }
 
-static void addInterfaceMethods(const Class* iface, const SmartPtr<c_Set>& st,
-                                const SmartPtr<c_Set>& filteredSet, Attr mask) {
-  assert(iface && st && filteredSet);
-  assert(AttrInterface & iface->attrs());
-
-  size_t const numMethods = iface->preClass()->numMethods();
-  Func* const* methods = iface->preClass()->methods();
-  for (Slot i = 0; i < numMethods; ++i) {
-    const Func* m = methods[i];
-    if (m->isGenerated()) continue;
-    if (st->contains(HHVM_FN(strtolower)(m->nameStr()).get())) continue;
-
-    st->add(HHVM_FN(strtolower)(m->nameStr()).get());
-    if (m->attrs() & mask) {
-      filteredSet->add(HHVM_FN(strtolower)(m->nameStr()).get());
-    }
-  }
-
-  for (auto const& parentIface: iface->declInterfaces()) {
-    addInterfaceMethods(parentIface.get(), st, filteredSet, mask);
-  }
-  auto const& allIfaces = iface->allInterfaces();
-  if (allIfaces.size() > iface->declInterfaces().size()) {
-    for (int i = 0; i < allIfaces.size(); ++i) {
-      addInterfaceMethods(allIfaces[i].get(), st, filteredSet, mask);
-    }
-  }
-}
-
 // helper for getMethods: returns a Set
 static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
@@ -1128,22 +1099,22 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
 
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
+  StringISet visitedMethods;
   auto st = makeSmartPtr<c_Set>();
   st->reserve(cls->numMethods());
-  auto filteredSet = makeSmartPtr<c_Set>();
-  filteredSet->reserve(cls->numMethods());
 
   auto add = [&] (const Func* m) {
     if (m->isGenerated()) return;
-    if (st->contains(HHVM_FN(strtolower)(m->nameStr()).get())) return;
+    if (visitedMethods.count(m->nameStr())) return;
 
-    st->add(HHVM_FN(strtolower)(m->nameStr()).get());
+    visitedMethods.insert(m->nameStr());
     if (m->attrs() & mask) {
-      filteredSet->add(HHVM_FN(strtolower)(m->nameStr()).get());
+      st->add(HHVM_FN(strtolower)(m->nameStr()).get());
     }
   };
 
   std::function<void(const Class*)> collect;
+  std::function<void(const Class*)> collectInterface;
 
   collect = [&] (const Class* cls) {
     if (!cls) return;
@@ -1172,23 +1143,43 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
     }
   };
 
+  collectInterface = [&] (const Class* iface) {
+    if (!iface) return;
+
+    size_t const numMethods = iface->preClass()->numMethods();
+    Func* const* methods = iface->preClass()->methods();
+    for (Slot i = 0; i < numMethods; ++i) {
+      add(methods[i]);
+    }
+
+    for (auto const& parentIface: iface->declInterfaces()) {
+      collectInterface(parentIface.get());
+    }
+    auto const& allIfaces = iface->allInterfaces();
+    if (allIfaces.size() > iface->declInterfaces().size()) {
+      for (int i = 0; i < allIfaces.size(); ++i) {
+        collectInterface(allIfaces[i].get());
+      }
+    }
+  };
+
   collect(const_cast<Class*>(cls));
 
   // concrete classes should already have all of their methods present
   if (((AttrPublic | AttrAbstract | AttrStatic) & mask) &&
       cls->attrs() & (AttrInterface | AttrAbstract | AttrTrait)) {
     for (auto const& interface: cls->declInterfaces()) {
-      addInterfaceMethods(interface.get(), st, filteredSet, mask);
+      collectInterface(interface.get());
     }
     auto const& allIfaces = cls->allInterfaces();
     if (allIfaces.size() > cls->declInterfaces().size()) {
       for (int i = 0; i < allIfaces.size(); ++i) {
         auto const& interface = allIfaces[i];
-        addInterfaceMethods(interface.get(), st, filteredSet, mask);
+        collectInterface(interface.get());
       }
     }
   }
-  return Object(std::move(filteredSet));
+  return Object(std::move(st));
 }
 
 static bool HHVM_METHOD(ReflectionClass, hasConstant, const String& name) {

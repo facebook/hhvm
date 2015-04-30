@@ -1673,11 +1673,10 @@ void LLVMEmitter::handleOutgoingPhysRegs(
     // providing a value that differs from existing predecessors. Either way,
     // create a phi node at the beginning of succ.
     if ((inFp == nullptr && backedge_targets.test(succ)) ||
-               (inFp != nullptr && inFp != outFp)) {
+        (inFp != nullptr && inFp != outFp)) {
       FTRACE(2, "Creating phi node for {}\n", succ);
       auto const phi = llvm::PHINode::Create(m_int64, 2, "rVmFp");
       target->getInstList().insert(target->begin(), phi);
-      inFp = phi;
       phi->addIncoming(outFp, m_irb.GetInsertBlock());
       if (inFp != nullptr) {
         // Also add the old incoming value to the phi node. We know that the
@@ -1686,9 +1685,11 @@ void LLVMEmitter::handleOutgoingPhysRegs(
         for (auto it = llvm::pred_begin(target), end = llvm::pred_end(target);
              it != end; ++it) {
           if (*it == m_irb.GetInsertBlock()) continue;
-          phi->addIncoming(outFp, *it);
+          phi->addIncoming(inFp, *it);
         }
       }
+
+      inFp = phi;
       continue;
     }
 

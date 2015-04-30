@@ -478,7 +478,6 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
     not_magic_call.jccAuto(a, CC_NZ);
   }
   a.    loadq  (rVmFp[AROFF(m_invName)], rInvName);
-  a.    decq   (rInvName);
   a.    storeq (0, rVmFp[AROFF(m_varEnv)]);
   if (nPassed != 0) { // for zero args, we use the empty array
     static_assert(sizeof(Cell) == 16, "");
@@ -492,9 +491,10 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
       MkPacked{MixedArray::MakePacked}), argSet(2));
     callFixup = a.frontier();
   }
-  if (nPassed != 2) {
-    a.  storel (2, rVmFp[AROFF(m_numArgsAndFlags)]);
-  }
+
+  // We store 2 here even if nPassed == 2 already, because we're going to use
+  // it to clear the ActRec::MagicDispatch flags.
+  a.    storel (2, rVmFp[AROFF(m_numArgsAndFlags)]);
 
   // Magic calls expect two arguments---first the name of the called
   // function, and then a packed array of the arguments to the

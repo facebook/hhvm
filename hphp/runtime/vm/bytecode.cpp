@@ -1416,7 +1416,7 @@ ActRec* ExecutionContext::getFrameAtDepth(int frame) {
     fp = getPrevVMState(fp);
   }
   if (UNLIKELY(!fp || fp->localsDecRefd())) return nullptr;
-  assert(!fp->magicDispatch() || !fp->hasInvName());
+  assert(!fp->magicDispatch());
   return fp;
 }
 
@@ -1618,7 +1618,7 @@ static NEVER_INLINE void cleanupParamsAndActRec(Stack& stack,
 
 static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
                                                Stack& stack, int nregular) {
-  assert(ar != nullptr && ar->magicDispatch() && ar->hasInvName());
+  assert(ar != nullptr && ar->magicDispatch());
   assert(!cellIsNull(&args));
   assert(nregular >= 0);
   assert((stack.top() + nregular) == (void*) ar);

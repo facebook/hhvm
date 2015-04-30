@@ -41,7 +41,6 @@
 #include "hphp/runtime/debugger/cmd/cmd_variable.h"
 #include "hphp/runtime/debugger/cmd/cmd_where.h"
 #include "hphp/runtime/debugger/cmd/cmd_extended.h"
-#include "hphp/runtime/debugger/cmd/cmd_zend.h"
 #include "hphp/runtime/debugger/cmd/cmd_shell.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/debugger/cmd/cmd_example.h"

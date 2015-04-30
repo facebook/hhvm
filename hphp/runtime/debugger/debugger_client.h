@@ -352,8 +352,6 @@ public:
   void usageLogEvent(const std::string &eventName,
                      const std::string &data = "");
 
-  std::string getZendExecutable() const { return m_zendExe; }
-
   // Internal testing helpers. Only used by internal tests!!!
   bool internalTestingIsClientStopped() const { return m_stopped; }
 
@@ -505,9 +503,6 @@ private:
   DebuggerCommandPtr xend(DebuggerCommand *cmd, EventLoopKind loopKind);
   DebuggerCommandPtr eventLoop(EventLoopKind loopKind, int expectedCmd,
                                const char *caller);
-
-  // Zend executable for CmdZend, overridable via config.
-  std::string m_zendExe = "php";
 
   bool m_unknownCmd;
 };

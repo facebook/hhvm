@@ -1645,7 +1645,6 @@ do {                                         \
     case 'u': MATCH_CMD("up"       , CmdUp       );
     case 'v': MATCH_CMD("variable" , CmdVariable );
     case 'w': MATCH_CMD("where"    , CmdWhere    );
-    case 'z': MATCH_CMD("zend"     , CmdZend     );
 
     // these single lettter commands allow "x{cmd}" and "x {cmd}"
     case 'x': shiftCommand(); NEW_CMD_NAME("extended", CmdExtended);
@@ -2462,9 +2461,6 @@ void DebuggerClient::loadConfig() {
 
   Config::Bind(m_sourceRoot, ini, config, "SourceRoot");
   BIND(source_root, &m_sourceRoot);
-
-  Config::Bind(m_zendExe, ini, config, "ZendExecutable", "php");
-  BIND(zend_executable, &m_zendExe);
 
   Config::Bind(m_neverSaveConfig, ini, config, "NeverSaveConfig", false);
   BIND(never_save_config, &m_neverSaveConfig);

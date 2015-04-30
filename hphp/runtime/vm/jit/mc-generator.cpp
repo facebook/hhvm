@@ -1545,9 +1545,11 @@ MCGenerator::translateWork(const TranslArgs& args) {
     UndoMarker{code.data()},
   };
 
-  auto const useLLVM =
-    (RuntimeOption::EvalJitLLVM > 1 ||
-     (RuntimeOption::EvalJitLLVM && m_tx.mode() == TransKind::Optimize));
+  setUseLLVM(
+    RuntimeOption::EvalJitLLVM > 1 ||
+    (RuntimeOption::EvalJitLLVM && m_tx.mode() == TransKind::Optimize)
+  );
+  SCOPE_EXIT { setUseLLVM(false); };
 
   auto resetState = [&] {
     for (auto& u : undo) u.undo();
@@ -1599,8 +1601,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         initSpOffset,
         sk.resumed(),
         sk.func(),
-        region.get(),
-        useLLVM
+        region.get()
       };
 
       IRGS irgs { transContext };
@@ -1691,7 +1692,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
               realColdStart,   code.realCold().frontier()   - realColdStart,
               realFrozenStart, code.realFrozen().frontier() - realFrozenStart,
               region, m_fixups.m_bcMap,
-              useLLVM);
+              useLLVM());
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
@@ -1751,6 +1752,7 @@ MCGenerator::MCGenerator()
   : m_backEnd(newBackEnd())
   , m_numTrans(0)
   , m_catchTraceMap(128)
+  , m_useLLVM(false)
 {
   TRACE(1, "MCGenerator@%p startup\n", this);
   mcg = this;

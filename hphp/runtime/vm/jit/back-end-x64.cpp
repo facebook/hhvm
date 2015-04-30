@@ -486,7 +486,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
   CodeBlock mainCode;
   CodeBlock coldCode;
   bool do_relocate = false;
-  if (!unit.context().useLLVM &&
+  if (!mcg->useLLVM() &&
       RuntimeOption::EvalJitRelocationSize &&
       coldCodeIn.canEmit(RuntimeOption::EvalJitRelocationSize * 3)) {
     /*
@@ -573,7 +573,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
     printUnit(kInitialVasmLevel, "after initial vasm generation", vunit);
     assertx(check(vunit));
 
-    if (unit.context().useLLVM) {
+    if (mcg->useLLVM()) {
       auto& areas = vasm.areas();
       auto x64_unit = vunit;
       auto vasm_size = std::numeric_limits<size_t>::max();
@@ -617,6 +617,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
           e.what(), show(vunit)
         );
 
+        mcg->setUseLLVM(false);
         resetCode();
         if (!optimized) optimizeX64(x64_unit, vasm_abi);
         emitX64(x64_unit, areas, state.asmInfo);

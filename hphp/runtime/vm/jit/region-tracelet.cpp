@@ -114,8 +114,7 @@ RegionFormer::RegionFormer(const RegionContext& ctx,
                          ctx.spOffset,
                          ctx.resumed,
                          ctx.func,
-                         nullptr,
-                         false })
+                         nullptr })
   , m_arStates(1)
   , m_numJmps(0)
   , m_inl(inl)

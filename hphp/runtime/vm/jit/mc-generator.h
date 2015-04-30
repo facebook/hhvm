@@ -129,9 +129,9 @@ struct TransRelocInfo;
 
 /*
  *
- * MCGenerator handles the machine-level details of code generation
- * (e.g., tcache entry, code smashing, code cache management) and
- * delegates the bytecode-to-asm translation process to Translator.
+ * MCGenerator handles the machine-level details of code generation (e.g.,
+ * translation cache entry, code smashing, code cache management) and delegates
+ * the bytecode-to-asm translation process to translateRegion().
  *
  */
 struct MCGenerator : private boost::noncopyable {
@@ -183,6 +183,9 @@ public:
     if (tl_regState == VMRegState::CLEAN) return;
     syncWork();
   }
+
+  bool useLLVM() const { return m_useLLVM; }
+  void setUseLLVM(bool useLLVM) { m_useLLVM = useLLVM; }
 
   template<typename T, typename... Args>
   T* allocData(Args&&... args) {
@@ -385,6 +388,10 @@ private:
 
   // asize + acoldsize + afrozensize + gdatasize
   size_t             m_totalSize;
+
+  // Used to tell the codegen backend when it should attempt to use LLVM, and
+  // to tell clients of the codegen backend when LLVM codegen succeeded.
+  bool               m_useLLVM;
 };
 
 TCA fcallHelper(ActRec*, bool isClonedClosure);

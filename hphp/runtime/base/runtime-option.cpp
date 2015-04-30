@@ -831,10 +831,10 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     RPCLogs = AccessLogs;
     parseLogs(config, ini, "Log.RPC", RPCLogs);
 
-    Config::Bind(AdminLogFormat, ini, config, "Logger.AdminLog.Format",
+    Config::Bind(AdminLogFormat, ini, config, "Log.AdminLog.Format",
                  "%h %t %s %U");
-    Config::Bind(AdminLogFile, ini, config, "Logger.AdminLog.File");
-    Config::Bind(AdminLogSymLink, ini, config, "Logger.AdminLog.SymLink");
+    Config::Bind(AdminLogFile, ini, config, "Log.AdminLog.File");
+    Config::Bind(AdminLogSymLink, ini, config, "Log.AdminLog.SymLink");
   }
   {
     // Error Handling
@@ -1169,12 +1169,12 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
                  "Server.GzipCompressionLevel", 3);
     Config::Bind(GzipMaxCompressionLevel, ini, config,
                  "Server.GzipMaxCompressionLevel", 9);
-    Config::Bind(ForceCompressionURL, ini, config, "Server.ForceCompression",
-                 "URL");
-    Config::Bind(ForceCompressionCookie, ini, config, "Server.ForceCompression",
-                 "Cookie");
-    Config::Bind(ForceCompressionParam, ini, config, "Server.ForceCompression",
-                 "Param");
+    Config::Bind(ForceCompressionURL, ini, config,
+                 "Server.ForceCompression.URL");
+    Config::Bind(ForceCompressionCookie, ini, config,
+                 "Server.ForceCompression.Cookie");
+    Config::Bind(ForceCompressionParam, ini, config,
+                 "Server.ForceCompression.Param");
     Config::Bind(EnableKeepAlive, ini, config, "Server.EnableKeepAlive", true);
     Config::Bind(ExposeHPHP, ini, config, "Server.ExposeHPHP", true);
     Config::Bind(ExposeXFBServer, ini, config, "Server.ExposeXFBServer", false);

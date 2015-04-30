@@ -397,7 +397,8 @@ struct ObjectData {
     return offsetof(ObjectData, m_cls);
   }
   static constexpr ptrdiff_t attributeOff() {
-    return offsetof(ObjectData, o_attribute);
+    return offsetof(ObjectData, m_hdr) +
+           offsetof(HeaderWord<uint16_t>, aux);
   }
 
 private:
@@ -421,9 +422,7 @@ private:
   int o_id; // Numeric identifier of this object (used for var_dump())
   union {
     struct {
-      uint16_t o_attribute;
-      uint8_t m_pad; // reserved for MM
-      HeaderKind m_kind;
+      HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
       mutable RefCount m_count;
     };
     uint64_t m_attr_kind_count;
@@ -432,9 +431,7 @@ private:
   LowClassPtr m_cls;
   union {
     struct {
-      mutable uint16_t o_attribute;
-      uint8_t m_pad; // reserved for MM
-      HeaderKind m_kind;
+      HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
       mutable RefCount m_count;
     };
     uint64_t m_attr_kind_count;

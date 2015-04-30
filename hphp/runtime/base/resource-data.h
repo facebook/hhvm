@@ -66,8 +66,8 @@ class ResourceData {
   }
 
   size_t heapSize() const {
-    assert(m_size != 0);
-    return m_size;
+    assert(m_hdr.aux != 0);
+    return m_hdr.aux;
   }
 
   template<class F> void scan(F&) const;
@@ -106,9 +106,7 @@ class ResourceData {
  private:
   //============================================================================
   // ResourceData fields
-  uint16_t m_size;
-  UNUSED char m_pad;
-  UNUSED HeaderKind m_kind;
+  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores heap size
   mutable RefCount m_count;
 
  protected:
@@ -212,7 +210,7 @@ template<class T, class... Args> T* newres(Args&&... args) {
   auto const mem = MM().smartMallocSizeLogged(sizeof(T));
   try {
     auto r = new (mem) T(std::forward<Args>(args)...);
-    r->m_size = sizeof(T);
+    r->m_hdr.aux = sizeof(T);
     return r;
   } catch (...) {
     MM().smartFreeSizeLogged(mem, sizeof(T));

@@ -34,9 +34,9 @@ inline ObjectData::ObjectData(Class* cls)
 inline ObjectData::ObjectData(Class* cls, uint16_t flags,
                               HeaderKind kind)
   : m_cls(cls)
-  , m_attr_kind_count(flags | kind << 24)
+  , m_attr_kind_count(HeaderWord<uint16_t>::pack(flags, kind)) // count=0
 {
-  assert(o_attribute == flags && !m_count);
+  assert(m_hdr.aux == flags && !m_count);
   assert(isObjectKind(kind));
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
@@ -45,9 +45,9 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags,
 
 inline ObjectData::ObjectData(Class* cls, NoInit)
   : m_cls(cls)
-  , m_attr_kind_count(HeaderKind::Object << 24)
+  , m_attr_kind_count(HeaderWord<uint16_t>::pack(0, HeaderKind::Object))
 {
-  assert(!o_attribute && m_kind == HeaderKind::Object && !m_count);
+  assert(!m_hdr.aux && m_hdr.kind == HeaderKind::Object && !m_count);
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
 }
@@ -105,7 +105,7 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
 }
 
 inline void ObjectData::instanceInit(Class* cls) {
-  o_attribute |= cls->getODAttrs();
+  m_hdr.aux |= cls->getODAttrs();
 
   size_t nProps = cls->numDeclProperties();
   if (nProps > 0) {
@@ -152,8 +152,8 @@ inline bool ObjectData::isImmutableCollection() const {
 }
 
 inline CollectionType ObjectData::collectionType() const {
-  assert(isValidCollection(static_cast<CollectionType>(m_kind)));
-  return static_cast<CollectionType>(m_kind);
+  assert(isValidCollection(static_cast<CollectionType>(m_hdr.kind)));
+  return static_cast<CollectionType>(m_hdr.kind);
 }
 
 inline bool ObjectData::isIterator() const {
@@ -161,11 +161,11 @@ inline bool ObjectData::isIterator() const {
 }
 
 inline bool ObjectData::getAttribute(Attribute attr) const {
-  return o_attribute & attr;
+  return m_hdr.aux & attr;
 }
 
 inline void ObjectData::setAttribute(Attribute attr) {
-  o_attribute |= attr;
+  m_hdr.aux |= attr;
 }
 
 inline bool ObjectData::noDestruct() const {
@@ -177,7 +177,7 @@ inline void ObjectData::setNoDestruct() {
 }
 
 inline void ObjectData::clearNoDestruct() {
-  o_attribute &= ~NoDestructor;
+  m_hdr.aux &= ~NoDestructor;
 }
 
 inline int ObjectData::getId() const {

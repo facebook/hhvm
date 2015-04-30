@@ -3348,7 +3348,9 @@ and get_instance_var env = function
 
 and check_null_wtf env p ty =
   if not (Env.is_strict env) then env else
-    match ty with
+    let env, ty = TUtils.fold_unresolved env ty in
+    let env, ety = Env.expand_type env ty in
+    match ety with
       | _, Toption ty ->
         let env, ty = Env.expand_type env ty in
         (match ty with

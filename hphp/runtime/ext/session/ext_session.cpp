@@ -1828,7 +1828,7 @@ static Variant HHVM_METHOD(SessionHandler, hhread, const String& session_id) {
 static bool HHVM_METHOD(SessionHandler, hhwrite,
                         const String& session_id, const String& session_data) {
   return s_session->default_mod &&
-    s_session->default_mod->write(session_id.data(), session_data.data());
+    s_session->default_mod->write(session_id.data(), session_data);
 }
 
 static bool HHVM_METHOD(SessionHandler, hhdestroy, const String& session_id) {

@@ -141,8 +141,14 @@ void emitIncRef(Vout& v, Vreg base) {
   v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
   emitAssertFlagsNonNegative(v, sf);
 
-  // TODO don't hardcode this
-  v << orwim{1 , base[10], v.makeReg()};
+  // if the refcount is greater than 1, set the one-bit ref
+  auto const sf2 = v.makeReg();
+  v << cmplim{1, base[FAST_REFCOUNT_OFFSET], sf2};
+  ifThen(v, CC_NLE, sf2, [&](Vout& v) {
+    // TODO don't hardcode this
+    v << orwim{1, base[10], v.makeReg()};
+  });
+
   TRACE_SET_MOD(countable);
   TRACE(1, "emitIncRef\n");
 }
@@ -164,7 +170,8 @@ void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
     as.   loadq  (base[disp + TVOFF(m_data)], tmpReg);
     { // if !static
       IfCountNotStatic ins(as, tmpReg);
-      as. incl(tmpReg[FAST_REFCOUNT_OFFSET]);
+      //as. incl(tmpReg[FAST_REFCOUNT_OFFSET]);
+      emitIncRef(as, tmpReg);
     } // endif
   } // endif
 }

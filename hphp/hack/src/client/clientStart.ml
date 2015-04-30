@@ -72,13 +72,6 @@ let should_start env =
           ServerMsg.response_from_channel ic) in
       match response with
       | ServerMsg.PONG -> false
-      | ServerMsg.SERVER_OUT_OF_DATE ->
-          Printf.fprintf
-            stderr
-            "Replacing out of date server for %s\n%!"
-            (Path.string_of_path env.root);
-          ignore(Unix.sleep 1);
-          true
       | ServerMsg.SERVER_DYING
       | ServerMsg.NO_ERRORS
       | ServerMsg.ERRORS _
@@ -105,6 +98,12 @@ let should_start env =
             "Replacing unresponsive server for %s\n%!"
             (Path.string_of_path env.root);
           HackClientStop.kill_server env.root;
+          true
+      | Server_out_of_date ->
+          Printf.eprintf
+            "Replacing out of date server for %s\n%!"
+            (Path.string_of_path env.root);
+          ignore(Unix.sleep 1);
           true
   end else true
 

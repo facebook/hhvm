@@ -279,6 +279,11 @@ let rec main args retries =
   | Server_missing ->
       if retries > 1
       then begin
+        ClientStart.start_server { ClientStart.
+          root = args.root;
+          wait = false;
+          no_load = args.no_load;
+        };
         (* No sleep in this one -- if the server is missing, the startup code
          * will wait to continue until at least the server has started
          * initalizing to continue. *)
@@ -291,15 +296,17 @@ let rec main args retries =
         exit 6;
       end
   | Server_out_of_date ->
+      let name = "hh_server" in
       if args.autostart
       then begin
-        Unix.sleep(1);
+        Printf.eprintf "%s is outdated, going to launch a new one.\n%!" name;
         (* Don't decrement retries -- the server is definitely not running, so
          * the next time round will hit Server_missing above, *but* before that
          * will actually start the server -- we need to make sure that happens.
          *)
         main args retries
       end else
+        Printf.eprintf "%s is outdated, killing it.\n" name;
         exit 6
   | Server_directory_mismatch ->
       if retries > 1

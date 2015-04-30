@@ -675,6 +675,7 @@ void BinaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_XOR_EQUAL:           cg_printf(" ^= ");         break;
   case T_SL_EQUAL:            cg_printf(" <<= ");        break;
   case T_SR_EQUAL:            cg_printf(" >>= ");        break;
+  case T_POW_EQUAL:           cg_printf(" **= ");        break;
   case T_BOOLEAN_OR:          cg_printf(" || ");         break;
   case T_BOOLEAN_AND:         cg_printf(" && ");         break;
   case T_LOGICAL_OR:          cg_printf(" or ");         break;
@@ -691,6 +692,7 @@ void BinaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   case '%':                   cg_printf(" %% ");         break;
   case T_SL:                  cg_printf(" << ");         break;
   case T_SR:                  cg_printf(" >> ");         break;
+  case T_POW:                 cg_printf(" ** ");         break;
   case T_IS_IDENTICAL:        cg_printf(" === ");        break;
   case T_IS_NOT_IDENTICAL:    cg_printf(" !== ");        break;
   case T_IS_EQUAL:            cg_printf(" == ");         break;

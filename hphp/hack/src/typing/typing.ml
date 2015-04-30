@@ -1043,18 +1043,23 @@ and expr_ ~in_cond ~(valkind: [> `lvalue | `rvalue | `other ]) env (p, e) =
   | Eif (c, e1, e2) ->
       let env, tyc = raw_expr in_cond env c in
       Async.enforce_not_awaitable env (fst c) tyc;
-      let lenv = env.Env.lenv in
-      let env  = condition env true c in
+      let _, parent_locals as lenv = env.Env.lenv in
+      let env = condition env true c in
       let env, ty1 = match e1 with
       | None ->
           non_null env tyc
       | Some e1 ->
           expr env e1
       in
-      let env  = { env with Env.lenv = lenv } in
-      let env  = condition env false c in
+      let fake1, _locals1 = env.Env.lenv in
+      let env = { env with Env.lenv = lenv } in
+      let env = condition env false c in
       let env, ty2 = expr env e2 in
-      let env  = { env with Env.lenv = lenv } in
+      let fake2, _locals2 = env.Env.lenv in
+      let fake_members = LEnv.intersect_fake fake1 fake2 in
+      (* we restore the locals to their parent state so as not to leak the
+       * effects of the `condition` calls above *)
+      let env = { env with Env.lenv = fake_members, parent_locals } in
       (* This is a shortened form of what we do in Typing_lenv.intersect. The
        * latter takes local environments as arguments, but our types here
        * aren't assigned to local variables in an environment *)

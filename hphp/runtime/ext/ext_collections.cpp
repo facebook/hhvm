@@ -1761,7 +1761,11 @@ NEVER_INLINE void HashCollection::makeRoom() {
     if (UNLIKELY(cap() == MaxSize)) {
       throwTooLarge();
     }
-    grow(cap() ? cap()*2 : SmallSize, cap() ? tableMask()*2+1 : SmallMask);
+    if (cap()) {
+      grow(scale() * 2);
+    } else {
+      grow(SmallScale);
+    }
   } else {
     compact();
   }
@@ -1772,22 +1776,14 @@ NEVER_INLINE void HashCollection::makeRoom() {
 
 NEVER_INLINE void HashCollection::reserve(int64_t sz) {
   assert(m_size <= posLimit() && posLimit() <= cap());
-  auto cap = int64_t(this->cap());
+  auto cap = static_cast<int64_t>(this->cap());
   if (LIKELY(sz > cap)) {
     if (UNLIKELY(sz > int64_t(MaxReserveSize))) {
       throwReserveTooLarge();
     }
     // Fast path: The requested capacity is greater than the current capacity.
     // Grow to the smallest allowed capacity that is sufficient.
-    auto lgSize = MinLgTableSize;
-    uint32_t newCap = SmallSize;
-    while (newCap < sz) {
-      newCap <<= 1;
-      ++lgSize;
-    }
-    uint32_t newMask = (size_t(1U) << lgSize) - 1;
-    assert(lgSize <= MaxLgTableSize);
-    grow(newCap, newMask);
+    grow(computeScaleFromSize(sz));
     assert(canMutateBuffer());
     return;
   }
@@ -1815,10 +1811,9 @@ NEVER_INLINE void HashCollection::reserve(int64_t sz) {
   assert(!isDensityTooLow());
   assert(sz + int64_t(posLimit() - m_size) > cap);
   assert(cap < MaxSize && tableMask() != 0);
-  uint32_t newCap = cap * 2;
-  uint32_t newMask = tableMask() * 2 + 1;
-  assert(0 < sz && sz <= int64_t(newCap));
-  grow(newCap, newMask);
+  auto newScale = scale() * 2;
+  assert(sz > 0 && MixedArray::Capacity(newScale) >= sz);
+  grow(newScale);
   assert(canMutateBuffer());
 }
 
@@ -1836,19 +1831,17 @@ void HashCollection::resizeHelper(uint32_t newCap) {
   assert(canMutateBuffer());
 }
 
-void HashCollection::grow(uint32_t newCap, uint32_t newMask) {
+void HashCollection::grow(uint32_t newScale) {
+  auto newCap = MixedArray::Capacity(newScale);
   assert(m_size <= posLimit() && posLimit() <= cap() && cap() <= newCap);
   assert(SmallSize <= newCap && newCap <= MaxSize);
   assert(m_size <= newCap);
-  assert(newMask > 0 && ((newMask+1) & newMask) == 0);
-  assert(newMask == folly::nextPowTwo<uint64_t>(newCap) - 1);
-  assert(newCap == computeMaxElms(newMask));
-  auto* oldAd = arrayData();
+  auto oldAd = arrayData();
   dropImmCopy();
   if (m_size > 0 && !oldAd->hasMultipleRefs()) {
     // MixedArray::Grow can only handle non-empty cases where the
     // buffer's refcount is 1.
-    m_data = mixedData(MixedArray::Grow(oldAd, newCap, newMask));
+    m_data = mixedData(MixedArray::Grow(oldAd, newScale));
     arrayData()->incRefCount();
     decRefArr(oldAd);
   } else {

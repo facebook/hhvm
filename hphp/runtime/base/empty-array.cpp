@@ -159,9 +159,9 @@ void EmptyArray::InitMixed(MixedArray* a, RefCount count, uint32_t size,
   a->m_sizeAndPos = size; // pos=0
   a->m_kindAndCount = ArrayData::kMixedKind << 24 |
                       uint64_t(uint32_t(count)) << 32;
-  a->m_mask_used = MixedArray::SmallMask | uint64_t(size) << 32;
+  a->m_scale_used = MixedArray::SmallScale | uint64_t(size) << 32;
   a->m_nextKI = nextIntKey;
-  auto const data = reinterpret_cast<MixedArray::Elm*>(a + 1);
+  auto const data = a->data();
   auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
   auto const emptyVal = int64_t{MixedArray::Empty};
   reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
@@ -176,14 +176,12 @@ void EmptyArray::InitMixed(MixedArray* a, RefCount count, uint32_t size,
 NEVER_INLINE
 std::pair<ArrayData*,TypedValue*>
 EmptyArray::MakeMixed(StringData* key, TypedValue val) {
-  auto const mask = MixedArray::SmallMask;            // 3
-  auto const cap  = MixedArray::computeMaxElms(mask); // 3
-  auto const ad   = smartAllocArray(cap, mask);
+  auto const ad = smartAllocArray(MixedArray::SmallScale);
   InitMixed(ad, 0/*count*/, 1/*size*/, 0/*nextIntKey*/);
-
-  auto const data = reinterpret_cast<MixedArray::Elm*>(ad + 1);
+  auto const data = ad->data();
   auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
   auto const khash = key->hash();
+  auto const mask = MixedArray::SmallMask;
   hash[khash & mask] = 0;
   data[0].setStrKey(key, khash);
 
@@ -195,7 +193,7 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
   assert(ad->m_count == 0);
-  assert(ad->capacity() == cap);
+  assert(ad->m_scale == MixedArray::SmallScale);
   assert(ad->m_used == 1);
   assert(ad->checkInvariants());
   return { ad, &lval };
@@ -207,19 +205,16 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
  */
 std::pair<ArrayData*,TypedValue*>
 EmptyArray::MakeMixed(int64_t key, TypedValue val) {
-  auto const mask = MixedArray::SmallMask;            // 3
-  auto const cap  = MixedArray::computeMaxElms(mask); // 3
-  auto const ad   = smartAllocArray(cap, mask);
+  auto const ad = smartAllocArray(MixedArray::SmallScale);
   InitMixed(ad, 0/*count*/, 1/*size*/, (key >= 0) ? key + 1 : 0);
-
-  auto const data = reinterpret_cast<MixedArray::Elm*>(ad + 1);
-  auto const hash = reinterpret_cast<int32_t*>(data + cap);
-
-  assert(mask + 1 == 4);
+  auto const data = ad->data();
+  auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
+  assert(ad->hashSize() == MixedArray::SmallHashSize);
   auto const emptyVal = int64_t{MixedArray::Empty};
   reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
   reinterpret_cast<int64_t*>(hash)[1] = emptyVal;
 
+  auto const mask = MixedArray::SmallMask;
   hash[key & mask] = 0;
   data[0].setIntKey(key);
 
@@ -231,7 +226,7 @@ EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
   assert(ad->m_count == 0);
-  assert(ad->capacity() == cap);
+  assert(ad->m_scale == MixedArray::SmallScale);
   assert(ad->m_used == 1);
   assert(ad->checkInvariants());
   return { ad, &lval };

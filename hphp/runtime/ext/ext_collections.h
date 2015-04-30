@@ -641,7 +641,7 @@ class c_ImmVector : public BaseVector {
 //////////////////////////////////////////////////////////////////////
 
 using EmptyMixedArrayStorage = std::aligned_storage<
-  sizeof(MixedArray) + MixedArray::computeDataSize(MixedArray::SmallMask),
+  computeAllocBytes(MixedArray::SmallScale),
   alignof(MixedArray)
 >::type;
 extern EmptyMixedArrayStorage s_theEmptyMixedArray;
@@ -695,14 +695,9 @@ class HashCollection : public ExtCollectionObjectData {
  public:
   static const int32_t Empty           = MixedArray::Empty;
   static const int32_t Tombstone       = MixedArray::Tombstone;
-
   static const uint32_t LoadScale      = MixedArray::LoadScale;
-  static const uint32_t MinLgTableSize = MixedArray::MinLgTableSize;
-  static const uint32_t SmallMask      = MixedArray::SmallMask;
+  static const uint32_t SmallScale     = MixedArray::SmallScale;
   static const uint32_t SmallSize      = MixedArray::SmallSize;
-  static const uint32_t MaxLgTableSize = MixedArray::MaxLgTableSize;
-  static const uint64_t MaxHashSize    = MixedArray::MaxHashSize;
-  static const uint32_t MaxMask        = MixedArray::MaxMask;
   static const uint32_t MaxSize        = MixedArray::MaxSize;
   // HashCollections can only guarantee that it won't throw "cannot add
   // element" exceptions if m_size <= MaxSize / 2. Therefore, we only allow
@@ -758,11 +753,14 @@ class HashCollection : public ExtCollectionObjectData {
     --m_size;
     arrayData()->m_size = m_size;
   }
+  inline uint32_t scale() const {
+    return arrayData()->scale();
+  }
   inline uint32_t cap() const {
     return arrayData()->capacity();
   }
   inline uint32_t tableMask() const {
-    return arrayData()->m_mask;
+    return arrayData()->mask();
   }
   inline uint32_t posLimit() const {
     return arrayData()->m_used;
@@ -998,10 +996,10 @@ class HashCollection : public ExtCollectionObjectData {
     return b;
   }
 
-  // grow() will increase the capacity of this HashCollection; newCap must
-  // be greater than or equal to the current capacity and newCap/newMask must
+  // grow() will increase the capacity of this HashCollection; newScale must
+  // be greater than or equal to the current scale so that the new cap and mask
   // satisfy all the usual cap/mask invariants.
-  void grow(uint32_t newCap, uint32_t newMask);
+  void grow(uint32_t newScale);
 
   // resizeHelper() dups all of the elements (not copying tombstones) to a
   // new buffer of the specified capacity and decRefs the old buffer. This

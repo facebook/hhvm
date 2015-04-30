@@ -742,8 +742,8 @@ void Array::unserialize(VariableUnserializer *uns) {
   if (size == 0) {
     operator=(Create());
   } else {
-    auto const cmret = computeCapAndMask(size);
-    auto const allocsz = computeAllocBytes(cmret.first, cmret.second);
+    auto const scale = computeScaleFromSize(size);
+    auto const allocsz = computeAllocBytes(scale);
 
     // For large arrays, do a naive pre-check for OOM.
     if (UNLIKELY(allocsz > kMaxSmartSize && MM().preAllocOOM(allocsz))) {

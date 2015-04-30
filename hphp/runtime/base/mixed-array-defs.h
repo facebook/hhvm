@@ -42,9 +42,14 @@ MixedArray::Elm* mixedData(const MixedArray* arr) {
   );
 }
 
+ALWAYS_INLINE int32_t* mixedHash(MixedArray::Elm* data, uint32_t scale) {
+  return reinterpret_cast<int32_t*>(data + MixedArray::Capacity(scale));
+}
+
 template<class F> void MixedArray::scan(F& mark) const {
+  auto data = this->data();
   for (unsigned i = 0, n = m_used; i < n; i++) {
-    auto& e = mixedData(this)[i];
+    auto& e = data[i];
     if (MixedArray::isTombstone(e.data.m_type)) continue;
     if (e.hasStrKey()) mark(e.skey);
     mark(e.data);
@@ -55,7 +60,7 @@ ALWAYS_INLINE
 MixedArray* getArrayFromMixedData(const MixedArray::Elm* elms) {
   // Note: changes to this scheme will require changes in the JIT for
   // LdColArray.
-  auto* a = const_cast<MixedArray*>(
+  auto a = const_cast<MixedArray*>(
     reinterpret_cast<const MixedArray*>(elms) - 1
   );
   assert(mixedData(a) == elms);
@@ -127,7 +132,7 @@ MixedArray::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
 
 ALWAYS_INLINE
 int32_t* MixedArray::findForNewInsert(size_t h0) const {
-  return findForNewInsert(hashTab(), m_mask, h0);
+  return findForNewInsert(hashTab(), mask(), h0);
 }
 
 inline bool MixedArray::isTombstone(ssize_t pos) const {
@@ -203,7 +208,7 @@ inline const MixedArray* MixedArray::asMixed(const ArrayData* ad) {
 }
 
 inline size_t MixedArray::hashSize() const {
-  return m_mask + 1;
+  return HashSize(m_scale);
 }
 
 inline ArrayData* MixedArray::addVal(int64_t ki, Cell data) {
@@ -372,65 +377,30 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE
-uint32_t computeMaskFromNumElms(uint32_t n) {
+uint32_t computeScaleFromSize(uint32_t n) {
   assert(n <= 0x7fffffffU);
-  auto lgSize = MixedArray::MinLgTableSize;
-  auto maxElms = MixedArray::SmallSize;
-  assert(lgSize >= 2);
-
-  // Note: it's tempting to convert this loop into something involving
-  // x64 bsr and a shift.  Naive attempts currently actually add more
-  // branches, because we need to initially check whether `n' is less
-  // than SmallSize, and after finding the next power of two we need a
-  // branch to see if it was big enough for the desired load factor.
-  // This is probably still worth revisiting (e.g., MakeReserve could
-  // have a precondition that n is at least SmallSize).
-  while (maxElms < n) {
-    ++lgSize;
-    maxElms <<= 1;
-  }
-  assert(lgSize <= 32);
-
-  // return 2^lgSize - 1
-  return ((size_t(1U)) << lgSize) - 1;
-  static_assert(MixedArray::MinLgTableSize >= 2,
+  auto scale = MixedArray::SmallScale;
+  while (MixedArray::Capacity(scale) < n) scale *= 2;
+  return scale;
+  static_assert(MixedArray::SmallHashSize >= 4,
                 "lower limit for 0.75 load factor");
 }
 
 ALWAYS_INLINE
-std::pair<uint32_t,uint32_t> computeCapAndMask(uint32_t minimumMaxElms) {
-  auto const mask = computeMaskFromNumElms(minimumMaxElms);
-  auto const cap  = MixedArray::computeMaxElms(mask);
-  return std::make_pair(cap, mask);
-}
-
-ALWAYS_INLINE
-size_t computeAllocBytes(uint32_t cap, uint32_t mask) {
-  auto const tabSize    = mask + 1;
-  auto const tabBytes   = tabSize * sizeof(int32_t);
-  auto const dataBytes  = cap * sizeof(MixedArray::Elm);
-  return sizeof(MixedArray) + tabBytes + dataBytes;
-}
-
-ALWAYS_INLINE
-MixedArray* smartAllocArray(uint32_t cap, uint32_t mask) {
-  /*
-   * Note: we're currently still allocating the memory for the hash
-   * for a packed array even if we aren't going to use it yet.
-   */
-  auto const allocBytes = computeAllocBytes(cap, mask);
+MixedArray* smartAllocArray(uint32_t scale) {
+  auto const allocBytes = computeAllocBytes(scale);
   return static_cast<MixedArray*>(MM().objMallocLogged(allocBytes));
 }
 
 ALWAYS_INLINE
-MixedArray* mallocArray(uint32_t cap, uint32_t mask) {
-  auto const allocBytes = computeAllocBytes(cap, mask);
+MixedArray* mallocArray(uint32_t scale) {
+  auto const allocBytes = computeAllocBytes(scale);
   return static_cast<MixedArray*>(std::malloc(allocBytes));
 }
 
 ALWAYS_INLINE
 size_t MixedArray::heapSize() const {
-  return computeAllocBytes(capacity(), m_mask);
+  return computeAllocBytes(m_scale);
 }
 
 //////////////////////////////////////////////////////////////////////

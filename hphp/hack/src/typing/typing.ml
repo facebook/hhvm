@@ -2030,28 +2030,18 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
         | _ -> () in
       call p env fty el uel
   | Obj_get(e1, (_, Id m), nullflavor) ->
-    let is_method = call_type = Cnormal in
-    let env, ty1 = expr env e1 in
-    let nullsafe =
-      (match nullflavor with
-        | OG_nullthrows -> None
-        | OG_nullsafe -> Some p
-      ) in
-    let fn = (fun (env, fty, _) ->
-      let env, fty = Env.expand_type env fty in
-      let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
+      let is_method = call_type = Cnormal in
+      let env, ty1 = expr env e1 in
+      let nullsafe =
+        (match nullflavor with
+          | OG_nullthrows -> None
+          | OG_nullsafe -> Some p
+        ) in
+      let fn = (fun (env, fty, _) ->
+        let env, fty = Env.expand_type env fty in
+        let env, fty = Inst.instantiate_fun env fty el in (* ignore uel ; el for FormatString *)
         let env, method_ = call p env fty el uel in
         env, method_, None) in
-      let env =
-        if nullflavor == OG_nullsafe && not (type_could_be_null env ty1)
-        then begin
-          let env, (r, _) = Env.expand_type env ty1 in
-          Errors.nullsafe_not_needed p
-            (Reason.to_string
-             "This is what makes me believe it cannot be null"
-             r);
-          env
-        end else env in
       obj_get ~is_method ~nullsafe env ty1 (CIvar e1) m fn
   | Fun_id x
   | Id x ->
@@ -2457,6 +2447,15 @@ and member_not_found pos ~is_method class_ member_name r =
         error (`did_you_mean (def_pos, v))
 
 and obj_get ~is_method ~nullsafe env ty1 cid id k =
+  let env =
+    match nullsafe with
+    | Some p when not (type_could_be_null env ty1) ->
+        let env, (r, _) = Env.expand_type env ty1 in
+        Errors.nullsafe_not_needed p
+          (Reason.to_string
+           "This is what makes me believe it cannot be null" r);
+        env
+    | _ -> env in
   let env, method_, _ =
     obj_get_with_visibility ~is_method ~nullsafe env ty1 cid id k in
   env, method_

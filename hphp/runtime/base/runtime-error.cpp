@@ -33,6 +33,7 @@ namespace HPHP {
 
 void raise_error(const std::string &msg) {
   raise_message(ErrorMode::ERROR, false, msg);
+  always_assert(0);
 }
 
 void raise_error(const char *fmt, ...) {
@@ -55,6 +56,7 @@ void raise_error_without_first_frame(const std::string &msg) {
                          ExecutionContext::ErrorThrowMode::Always,
                          "\nFatal error: ",
                          true);
+  always_assert(0);
 }
 
 void raise_recoverable_error(const std::string &msg) {

@@ -206,15 +206,6 @@ inline size_t MixedArray::hashSize() const {
   return m_mask + 1;
 }
 
-inline size_t MixedArray::computeMaxElms(uint32_t tableMask) {
-  return size_t(tableMask) - size_t(tableMask) / LoadScale;
-}
-
-inline size_t MixedArray::computeDataSize(uint32_t tableMask) {
-  return (tableMask + 1) * sizeof(int32_t) +
-         computeMaxElms(tableMask) * sizeof(Elm);
-}
-
 inline ArrayData* MixedArray::addVal(int64_t ki, Cell data) {
   assert(!exists(ki));
   assert(!isPacked());

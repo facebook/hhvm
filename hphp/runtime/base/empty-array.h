@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/countable.h"
 
 namespace HPHP {
 
@@ -34,6 +35,7 @@ struct ArrayData;
 struct RefData;
 struct StringData;
 struct MArrayIter;
+struct MixedArray;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -127,6 +129,9 @@ struct EmptyArray {
   static ArrayData* Escalate(const ArrayData* ad) {
     return const_cast<ArrayData*>(ad);
   }
+
+  static void InitMixed(MixedArray*, RefCount count, uint32_t size,
+                        int64_t nextIntKey);
 
 private:
   static std::pair<ArrayData*,TypedValue*> MakePacked(TypedValue);

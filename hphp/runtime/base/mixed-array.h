@@ -38,7 +38,7 @@ struct MixedArray : private ArrayData {
   // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
   // So 2 gives 0.5 load factor, 4 gives 0.75 load factor, 8 gives
   // 0.875 load factor. Use powers of 2 to enable shift-divide.
-  static const uint32_t LoadScale = 4;
+  static constexpr uint32_t LoadScale = 4;
 
 public:
   /*
@@ -296,20 +296,20 @@ public:
   // 32-bit ints than it does for 64-bit ints. As such, we have deliberately
   // chosen to use ssize_t in some places where ideally we *should* have used
   // int32_t.
-  static const int32_t Empty      = -1;
-  static const int32_t Tombstone  = -2;
+  static constexpr int32_t Empty      = -1;
+  static constexpr int32_t Tombstone  = -2;
 
   // Use a minimum of an 4-element hash table.  Valid range: [2..32]
-  static const uint32_t MinLgTableSize = 2;
-  static const uint32_t SmallHashSize = 1 << MinLgTableSize;
-  static const uint32_t SmallMask = SmallHashSize - 1;
-  static const uint32_t SmallSize = SmallHashSize - SmallHashSize / LoadScale;
+  static constexpr uint32_t MinLgTableSize = 2;
+  static constexpr uint32_t SmallHashSize = 1 << MinLgTableSize;
+  static constexpr uint32_t SmallMask = SmallHashSize - 1;
+  static constexpr uint32_t SmallSize = SmallHashSize-SmallHashSize/LoadScale;
 
-  static const uint32_t MaxLgTableSize = 32;
-  static const uint64_t MaxHashSize = uint64_t(1) << 32;
-  static const uint32_t MaxMask = MaxHashSize - 1;
-  static const uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
-  static const uint32_t MaxMakeSize = 4 * SmallSize;
+  static constexpr uint32_t MaxLgTableSize = 32;
+  static constexpr uint64_t MaxHashSize = uint64_t(1) << 32;
+  static constexpr uint32_t MaxMask = MaxHashSize - 1;
+  static constexpr uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
+  static constexpr uint32_t MaxMakeSize = 4 * SmallSize;
 
   uint32_t iterLimit() const { return m_used; }
 
@@ -326,8 +326,8 @@ public:
 
   size_t hashSize() const;
   size_t heapSize() const;
-  static size_t computeMaxElms(uint32_t tableMask);
-  static size_t computeDataSize(uint32_t tableMask);
+  static constexpr size_t computeMaxElms(uint32_t mask);
+  static constexpr size_t computeDataSize(uint32_t mask);
   static size_t computeAllocBytesFromMaxElms(uint32_t maxElms);
 
 private:
@@ -563,6 +563,14 @@ private:
   };
   int64_t  m_nextKI;        // Next integer key to use for append.
 };
+
+inline constexpr size_t MixedArray::computeMaxElms(uint32_t mask) {
+  return size_t(mask) - size_t(mask) / LoadScale;
+}
+
+inline constexpr size_t MixedArray::computeDataSize(uint32_t mask) {
+  return (mask + 1) * sizeof(int32_t) + computeMaxElms(mask) * sizeof(Elm);
+}
 
 //////////////////////////////////////////////////////////////////////
 

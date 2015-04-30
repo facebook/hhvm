@@ -154,6 +154,20 @@ std::pair<ArrayData*,TypedValue*> EmptyArray::MakePacked(TypedValue tv) {
   return MakePackedInl(tv);
 }
 
+void EmptyArray::InitMixed(MixedArray* a, RefCount count, uint32_t size,
+                           int64_t nextIntKey) {
+  a->m_sizeAndPos = size; // pos=0
+  a->m_kindAndCount = ArrayData::kMixedKind << 24 |
+                      uint64_t(uint32_t(count)) << 32;
+  a->m_mask_used = MixedArray::SmallMask | uint64_t(size) << 32;
+  a->m_nextKI = nextIntKey;
+  auto const data = reinterpret_cast<MixedArray::Elm*>(a + 1);
+  auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
+  auto const emptyVal = int64_t{MixedArray::Empty};
+  reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
+  reinterpret_cast<int64_t*>(hash)[1] = emptyVal;
+}
+
 /*
  * Helper for creating a single-element mixed array with a string key.
  *
@@ -165,20 +179,10 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   auto const mask = MixedArray::SmallMask;            // 3
   auto const cap  = MixedArray::computeMaxElms(mask); // 3
   auto const ad   = smartAllocArray(cap, mask);
-
-  ad->m_sizeAndPos   = 1; // size=1, pos=0
-  ad->m_kindAndCount = MixedArray::kMixedKind << 24; // capcode=0, count=0
-  ad->m_mask_used    = mask | uint64_t{1} << 32; // used=1
-  ad->m_nextKI       = 0;
+  InitMixed(ad, 0/*count*/, 1/*size*/, 0/*nextIntKey*/);
 
   auto const data = reinterpret_cast<MixedArray::Elm*>(ad + 1);
-  auto const hash = reinterpret_cast<int32_t*>(data + cap);
-
-  assert(mask + 1 == 4);
-  auto const emptyVal = int64_t{MixedArray::Empty};
-  reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
-  reinterpret_cast<int64_t*>(hash)[1] = emptyVal;
-
+  auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
   auto const khash = key->hash();
   hash[khash & mask] = 0;
   data[0].setStrKey(key, khash);
@@ -206,11 +210,7 @@ EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   auto const mask = MixedArray::SmallMask;            // 3
   auto const cap  = MixedArray::computeMaxElms(mask); // 3
   auto const ad   = smartAllocArray(cap, mask);
-
-  ad->m_sizeAndPos    = 1; // size=1, pos=0
-  ad->m_kindAndCount  = MixedArray::kMixedKind << 24; // capcode=0, count=0
-  ad->m_mask_used     = mask | uint64_t{1} << 32; // used=1
-  ad->m_nextKI        = (key >= 0) ? key + 1 : 0;
+  InitMixed(ad, 0/*count*/, 1/*size*/, (key >= 0) ? key + 1 : 0);
 
   auto const data = reinterpret_cast<MixedArray::Elm*>(ad + 1);
   auto const hash = reinterpret_cast<int32_t*>(data + cap);

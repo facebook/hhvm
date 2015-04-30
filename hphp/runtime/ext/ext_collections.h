@@ -640,10 +640,11 @@ class c_ImmVector : public BaseVector {
 
 //////////////////////////////////////////////////////////////////////
 
-extern std::aligned_storage<
-  sizeof(MixedArray) + sizeof(int32_t),
+using EmptyMixedArrayStorage = std::aligned_storage<
+  sizeof(MixedArray) + MixedArray::computeDataSize(MixedArray::SmallMask),
   alignof(MixedArray)
->::type s_theEmptyMixedArray;
+>::type;
+extern EmptyMixedArrayStorage s_theEmptyMixedArray;
 
 /*
  * This returns a static empty MixedArray. This gets used internally
@@ -869,19 +870,11 @@ class HashCollection : public ExtCollectionObjectData {
  public:
   /**
    * canMutateBuffer() indicates whether it is currently safe to directly
-   * modify this HashCollection's buffer. canMutateBuffer() is vacuously
-   * true for buffers with zero capacity (i.e. the staticEmptyMixedArray()
-   * case) because you can't meaningfully mutate zero-capacity buffer
-   * without first doing a grow. This may seem weird, but its actually
-   * much smoother in practice than the alternative of returning false
-   * for such cases.
+   * modify this HashCollection's buffer.
    */
   bool canMutateBuffer() const {
-    auto* a = arrayData();
-    bool b = (a == staticEmptyMixedArray() || !a->hasMultipleRefs());
-    assert(IMPLIES(a != staticEmptyMixedArray() && b, m_immCopy.isNull()));
-    assert(IMPLIES(!b, a->hasMultipleRefs()));
-    return b;
+    assert(IMPLIES(!arrayData()->hasMultipleRefs(), m_immCopy.isNull()));
+    return !arrayData()->hasMultipleRefs();
   }
 
   static constexpr ptrdiff_t dataOffset() {

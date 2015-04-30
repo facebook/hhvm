@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/empty-array.h"
 #include "hphp/util/text-util.h"
 
 #include <folly/ScopeGuard.h>
@@ -1475,25 +1476,12 @@ c_ImmVector::c_ImmVector(Class* cls, ArrayData* arr)
  * doing any allocation.
  */
 
-std::aligned_storage<
-  sizeof(MixedArray) + sizeof(int32_t),
-  alignof(MixedArray)
->::type s_theEmptyMixedArray;
+EmptyMixedArrayStorage s_theEmptyMixedArray;
 
 struct HashCollection::EmptyMixedInitializer {
   EmptyMixedInitializer() {
-    void* vpEmpty = &s_theEmptyMixedArray;
-
-    auto const ad   = static_cast<MixedArray*>(vpEmpty);
-    ad->m_kind      = ArrayData::kEmptyKind;
-    ad->m_size      = 0;
-    ad->m_pos       = 0;
-    ad->m_count     = 0;
-    ad->m_mask_used = 0;
-    ad->m_nextKI    = 0;
-    ad->hashTab()[0] = Empty;
-
-    ad->setStatic();
+    auto a = reinterpret_cast<MixedArray*>(&s_theEmptyMixedArray);
+    EmptyArray::InitMixed(a, StaticValue, 0/*used*/, 0/*nextIntKey*/);
   }
 };
 
@@ -1557,11 +1545,7 @@ void HashCollection::mutateImpl() {
     return;
   }
   if (!m_size) {
-    arrayData()->decRefCount();
-    m_size = 0;
-    m_data = mixedData(staticEmptyMixedArray());
     setIntLikeStrKeys(false);
-    return;
   }
   auto* oldAd = arrayData();
   m_data = mixedData(
@@ -1788,46 +1772,52 @@ NEVER_INLINE void HashCollection::makeRoom() {
 
 NEVER_INLINE void HashCollection::reserve(int64_t sz) {
   assert(m_size <= posLimit() && posLimit() <= cap());
-  uint32_t newCap;
-  uint32_t newMask;
-  if (LIKELY(sz > int64_t(cap()))) {
+  auto cap = int64_t(this->cap());
+  if (LIKELY(sz > cap)) {
     if (UNLIKELY(sz > int64_t(MaxReserveSize))) {
       throwReserveTooLarge();
     }
     // Fast path: The requested capacity is greater than the current capacity.
     // Grow to the smallest allowed capacity that is sufficient.
     auto lgSize = MinLgTableSize;
-    for (newCap = SmallSize; newCap < sz; newCap <<= 1) ++lgSize;
-    newMask = (size_t(1U) << lgSize) - 1;
-    assert(lgSize <= MaxLgTableSize && newCap > cap());
-    // Fall through to the call to grow() below
-  } else if (LIKELY(!hasTombstones())) {
-    // Fast path: There are no tombstones and the requested capacity is less
-    // than or equal to the current capacity. Do nothing and return.
+    uint32_t newCap = SmallSize;
+    while (newCap < sz) {
+      newCap <<= 1;
+      ++lgSize;
+    }
+    uint32_t newMask = (size_t(1U) << lgSize) - 1;
+    assert(lgSize <= MaxLgTableSize);
+    grow(newCap, newMask);
+    assert(canMutateBuffer());
     return;
-  } else if (sz + int64_t(posLimit() - m_size) <= int64_t(cap()) ||
-             isDensityTooLow()) {
+  }
+  if (LIKELY(!hasTombstones())) {
+    // Fast path: There are no tombstones and the requested capacity is less
+    // than or equal to the current capacity.
+    mutate();
+    return;
+  }
+  if (sz + int64_t(posLimit() - m_size) <= cap || isDensityTooLow()) {
     // If we reach this case, then either (1) density is too low (this is
     // possible because of methods like retain()), in which case we compact
     // to make room and return, OR (2) density is not too low and either
     // sz < m_size or there's enough room to add sz-m_size elements, in
     // which case we do nothing and return.
     compactOrShrinkIfDensityTooLow();
-    assert(sz + int64_t(posLimit() - m_size) <= int64_t(cap()));
+    assert(sz + int64_t(posLimit() - m_size) <= cap);
+    assert(canMutateBuffer());
     return;
-  } else {
-    // If we reach this case, then density is not too low and sz > m_size and
-    // there is not enough room to add sz-m_size elements. While would could
-    // compact to make room, it's better for Hysteresis if we grow capacity
-    // by 2x instead.
-    assert(!isDensityTooLow());
-    assert(sz + int64_t(posLimit() - m_size) > int64_t(cap()));
-    assert(cap() < MaxSize && tableMask() != 0);
-    newCap = cap() * 2;
-    newMask = tableMask() * 2 + 1;
-    assert(0 < sz && sz <= int64_t(newCap));
-    // Fall through to the call to grow() below
   }
+  // If we reach this case, then density is not too low and sz > m_size and
+  // there is not enough room to add sz-m_size elements. While would could
+  // compact to make room, it's better for Hysteresis if we grow capacity
+  // by 2x instead.
+  assert(!isDensityTooLow());
+  assert(sz + int64_t(posLimit() - m_size) > cap);
+  assert(cap < MaxSize && tableMask() != 0);
+  uint32_t newCap = cap * 2;
+  uint32_t newMask = tableMask() * 2 + 1;
+  assert(0 < sz && sz <= int64_t(newCap));
   grow(newCap, newMask);
   assert(canMutateBuffer());
 }
@@ -2373,10 +2363,9 @@ BaseMap::php_filter(const Variant& callback, MakeArgs makeArgs) const {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* mp = newobj<TMap>();
-  Object obj = mp;
-  if (!m_size) return obj;
-
+  auto map = makeSmartPtr<TMap>();
+  if (!m_size) return Object(std::move(map));
+  map->mutate();
   int32_t version = m_version;
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
     auto* e = iter_elm(pos);
@@ -2388,13 +2377,13 @@ BaseMap::php_filter(const Variant& callback, MakeArgs makeArgs) const {
     if (!b) continue;
     e = iter_elm(pos);
     if (e->hasIntKey()) {
-      mp->setRaw(e->ikey, &e->data);
+      map->setRaw(e->ikey, &e->data);
     } else {
       assert(e->hasStrKey());
-      mp->setRaw(e->skey, &e->data);
+      map->setRaw(e->skey, &e->data);
     }
   }
-  return obj;
+  return Object(std::move(map));
 }
 
 Object c_ImmMap::t_filter(const Variant& callback) {
@@ -2889,22 +2878,21 @@ BaseMap::php_mapFromArray(const Variant& arr) {
       "Parameter arr must be an array"));
     throw e;
   }
-  auto* mp = newobj<TMap>();
-  Object ret = mp;
+  auto map = makeSmartPtr<TMap>();
   ArrayData* ad = arr.getArrayData();
-  auto pos_limit = ad->iter_end();
-  for (ssize_t pos = ad->iter_begin(); pos != pos_limit;
+  map->reserve(ad->size());
+  for (ssize_t pos = ad->iter_begin(), limit = ad->iter_end(); pos != limit;
        pos = ad->iter_advance(pos)) {
     Variant k = ad->getKey(pos);
     auto* tv = ad->getValueRef(pos).asCell();
     if (k.isInteger()) {
-      mp->setRaw(k.toInt64(), tv);
+      map->setRaw(k.toInt64(), tv);
     } else {
       assert(k.isString());
-      mp->setRaw(k.getStringData(), tv);
+      map->setRaw(k.getStringData(), tv);
     }
   }
-  return ret;
+  return Object(std::move(map));
 }
 
 Object c_Map::ti_fromarray(const Variant& arr) {
@@ -3635,6 +3623,7 @@ void BaseSet::addAll(const Variant& t) {
   if (!iter) { return; }
 
   mutateAndBump();
+  assert(canMutateBuffer());
   // In theory we could be deferring the version bump above for the
   // container case because all the elements of iter could already be
   // present in the set: there's no destructor invocations because Sets are
@@ -4117,11 +4106,10 @@ BaseSet::php_filter(const Variant& callback, MakeArgs makeArgs) const {
       "Parameter must be a valid callback"));
     throw e;
   }
-  auto* st = newobj<TSet>();
-  assert(st->canMutateBuffer());
-  Object obj = st;
-  if (!m_size) return obj;
-  // we don't st->reserve, because we don't know how selective callback will be
+  auto set = makeSmartPtr<TSet>();
+  if (!m_size) return Object(std::move(set));
+  // we don't reserve(), because we don't know how selective callback will be
+  set->mutate();
   int32_t version = m_version;
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
     auto* e = iter_elm(pos);
@@ -4133,13 +4121,13 @@ BaseSet::php_filter(const Variant& callback, MakeArgs makeArgs) const {
     if (!b) continue;
     e = iter_elm(pos);
     if (e->hasIntKey()) {
-      st->addRaw(e->data.m_data.num);
+      set->addRaw(e->data.m_data.num);
     } else {
       assert(e->hasStrKey());
-      st->addRaw(e->data.m_data.pstr);
+      set->addRaw(e->data.m_data.pstr);
     }
   }
-  return obj;
+  return Object(std::move(set));
 }
 
 template<class TSet>
@@ -4155,8 +4143,7 @@ BaseSet::php_zip(const Variant& iterable) {
     // the zip operation will always fail
     throwBadValueType();
   }
-  Object obj = newobj<TSet>();
-  return obj;
+  return Object(makeSmartPtr<TSet>());
 }
 
 template<class MakeArgs>
@@ -4252,15 +4239,14 @@ BaseSet::php_takeWhile(const Variant& fn) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* st = newobj<TSet>();
-  assert(st->canMutateBuffer());
-  Object obj = st;
-  if (!m_size) return obj;
-  uint32_t used = posLimit();
+  auto set = makeSmartPtr<TSet>();
+  if (!m_size) return Object(std::move(set));
+  set->mutate();
   int32_t version UNUSED;
   if (checkVersion) {
     version = m_version;
   }
+  uint32_t used = posLimit();
   for (uint32_t i = 0; i < used; ++i) {
     if (isTombstone(i)) continue;
     Elm* e = &data()[i];
@@ -4273,13 +4259,13 @@ BaseSet::php_takeWhile(const Variant& fn) {
     if (!b) continue;
     e = &data()[i];
     if (e->hasIntKey()) {
-      st->addRaw(e->data.m_data.num);
+      set->addRaw(e->data.m_data.num);
     } else {
       assert(e->hasStrKey());
-      st->addRaw(e->data.m_data.pstr);
+      set->addRaw(e->data.m_data.pstr);
     }
   }
-  return obj;
+  return Object(std::move(set));
 }
 
 template<class TSet>
@@ -4343,17 +4329,16 @@ BaseSet::php_skipWhile(const Variant& fn) {
                "Parameter must be a valid callback"));
     throw e;
   }
-  auto* st = newobj<TSet>();
-  assert(st->canMutateBuffer());
-  Object obj = st;
-  if (!m_size) return obj;
-  uint32_t used = posLimit();
-  // we don't st->reserve(), because we don't know how selective fn will be
-  uint32_t i = 0;
+  auto set = makeSmartPtr<TSet>();
+  if (!m_size) return Object(std::move(set));
+  // we don't reserve(), because we don't know how selective fn will be
+  set->mutate();
   int32_t version UNUSED;
   if (checkVersion) {
     version = m_version;
   }
+  uint32_t used = posLimit();
+  uint32_t i = 0;
   for (; i < used; ++i) {
     if (isTombstone(i)) continue;
     Elm& e = data()[i];
@@ -4369,13 +4354,13 @@ BaseSet::php_skipWhile(const Variant& fn) {
     if (isTombstone(i)) continue;
     Elm& e = data()[i];
     if (e.hasIntKey()) {
-      st->addRaw(e.data.m_data.num);
+      set->addRaw(e.data.m_data.num);
     } else {
       assert(e.hasStrKey());
-      st->addRaw(e.data.m_data.pstr);
+      set->addRaw(e.data.m_data.pstr);
     }
   }
-  return obj;
+  return Object(std::move(set));
 }
 
 template<class TSet>
@@ -4425,11 +4410,9 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromItems(const Variant& iterable) {
-  auto* st = newobj<TSet>();
-  Object ret = st;
-  assert(st->canMutateBuffer());
-  st->addAll(iterable);
-  return ret;
+  auto set = makeSmartPtr<TSet>();
+  set->addAll(iterable);
+  return Object(std::move(set));
 }
 
 template<class TSet>
@@ -4437,14 +4420,13 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromKeysOf(const Variant& container) {
-  if (container.isNull()) { return newobj<TSet>(); }
-
+  if (container.isNull()) {
+    return Object(makeSmartPtr<TSet>());
+  }
   const auto& cellContainer = container_as_cell(container);
-
-  auto* target = newobj<TSet>();
-  Object ret = target;
+  auto target = makeSmartPtr<TSet>();
   target->addAllKeysOf(cellContainer);
-  return ret;
+  return Object(std::move(target));
 }
 
 template<class TSet>
@@ -4457,19 +4439,17 @@ BaseSet::php_fromArray(const Variant& arr) {
       "Parameter arr must be an array"));
     throw e;
   }
-  auto* st = newobj<TSet>();
-  assert(st->canMutateBuffer());
-  Object ret = st;
+  auto set = makeSmartPtr<TSet>();
   ArrayData* ad = arr.getArrayData();
-  auto oldCap = st->cap();
-  st->reserve(ad->size()); // presume minimum collisions ...
+  auto oldCap = set->cap();
+  set->reserve(ad->size()); // presume minimum collisions ...
   ssize_t pos_limit = ad->iter_end();
   for (ssize_t pos = ad->iter_begin(); pos != pos_limit;
        pos = ad->iter_advance(pos)) {
-    st->addRaw(ad->getValueRef(pos));
+    set->addRaw(ad->getValueRef(pos));
   }
-  st->shrinkIfCapacityTooHigh(oldCap); // ... and shrink if we were wrong
-  return ret;
+  set->shrinkIfCapacityTooHigh(oldCap); // ... and shrink if we were wrong
+  return Object(std::move(set));
 }
 
 template<class TSet>
@@ -4477,10 +4457,8 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
-  auto* st = newobj<TSet>();
-  assert(st->canMutateBuffer());
-  auto oldCap = st->cap();
-  Object ret = st;
+  auto set = makeSmartPtr<TSet>();
+  auto oldCap = set->cap();
   for (ArrayIter iter(_argv); iter; ++iter) {
     Variant arr = iter.second();
     if (!arr.isArray()) {
@@ -4489,15 +4467,15 @@ BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
       throw e;
     }
     ArrayData* ad = arr.getArrayData();
-    st->reserve(st->size() + ad->size()); // presume minimum collisions ...
+    set->reserve(set->size() + ad->size()); // presume minimum collisions ...
     ssize_t pos_limit = ad->iter_end();
     for (ssize_t pos = ad->iter_begin(); pos != pos_limit;
          pos = ad->iter_advance(pos)) {
-      st->addRaw(ad->getValueRef(pos));
+      set->addRaw(ad->getValueRef(pos));
     }
   }
-  st->shrinkIfCapacityTooHigh(oldCap); // ... and shrink if we were wrong
-  return ret;
+  set->shrinkIfCapacityTooHigh(oldCap); // ... and shrink if we were wrong
+  return Object(std::move(set));
 }
 
 // Protected (Internal)

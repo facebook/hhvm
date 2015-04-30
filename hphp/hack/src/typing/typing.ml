@@ -1054,6 +1054,7 @@ and expr_ ~in_cond ~(valkind: [> `lvalue | `rvalue | `other ]) env (p, e) =
       let env  = { env with Env.lenv = lenv } in
       let env  = condition env false c in
       let env, ty2 = expr env e2 in
+      let env  = { env with Env.lenv = lenv } in
       (* This is a shortened form of what we do in Typing_lenv.intersect. The
        * latter takes local environments as arguments, but our types here
        * aren't assigned to local variables in an environment *)

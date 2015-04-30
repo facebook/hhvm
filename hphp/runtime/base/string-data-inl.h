@@ -121,7 +121,7 @@ inline char* StringData::mutableData() const {
 inline int StringData::size() const { return m_len; }
 inline bool StringData::empty() const { return size() == 0; }
 inline uint32_t StringData::capacity() const {
-  return m_cap.decode();
+  return m_hdr.aux.decode();
 }
 
 inline size_t StringData::heapSize() const {

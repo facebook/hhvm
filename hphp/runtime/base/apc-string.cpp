@@ -27,7 +27,8 @@ APCString::MakeSharedString(DataType type, StringData* data) {
   auto size = cap + 1 + sizeof(APCString);
 
   apcStr->m_str.m_data        = reinterpret_cast<char*>(apcStr + 1);
-  apcStr->m_str.m_capAndCount = cc.code | (HeaderKind::String << 24); // count=0
+  apcStr->m_str.m_capAndCount =
+    HeaderWord<CapCode>::pack(cc, HeaderKind::String); // count=0
   apcStr->m_str.m_len         = len; // don't store hash
 
   apcStr->m_str.m_data[len] = 0;

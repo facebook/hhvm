@@ -124,7 +124,8 @@ StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
   auto const data = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_capAndCount = (HeaderKind::String << 24) | cc.code; // count=0
+  sd->m_capAndCount = HeaderWord<CapCode>::pack(cc, HeaderKind::String);
+  // count=0
   sd->m_lenAndHash  = sl.len; // hash=0
 
   data[sl.len] = 0;
@@ -162,14 +163,15 @@ StringData* StringData::MakeEmpty() {
   auto const data = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_capAndCount = HeaderKind::String << 24; // cap=0 count=0
+  sd->m_capAndCount = HeaderWord<CapCode>::pack(HeaderKind::String);
+  // cap=0, count=0
   sd->m_lenAndHash  = 0; // len=0, hash=0
   data[0] = 0;
 
   assert(sd->m_len == 0);
   assert(sd->m_hash == 0);
   assert(sd->capacity() == 0);
-  assert(sd->m_kind == HeaderKind::String);
+  assert(sd->m_hdr.kind == HeaderKind::String);
   assert(sd->m_count == 0);
   sd->setStatic();
   assert(sd->isFlat());
@@ -228,7 +230,8 @@ StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data         = data;
-  sd->m_capAndCount  = (HeaderKind::String << 24) | cc.code; // count=0
+  sd->m_capAndCount  = HeaderWord<CapCode>::pack(cc, HeaderKind::String);
+  // count=0
   sd->m_lenAndHash   = sl.len; // hash=0
 
   data[sl.len] = 0;
@@ -261,7 +264,8 @@ StringData* StringData::Make(size_t reserveLen) {
 
   data[0] = 0;
   sd->m_data        = data;
-  sd->m_capAndCount = (HeaderKind::String << 24) | cc.code; // count=0
+  sd->m_capAndCount = HeaderWord<CapCode>::pack(cc, HeaderKind::String);
+  // count=0
   sd->m_lenAndHash  = 0; // len=hash=0
 
   assert(sd->m_count == 0);
@@ -290,7 +294,8 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2) {
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_capAndCount = (HeaderKind::String << 24) | cc.code; // count=0
+  sd->m_capAndCount = HeaderWord<CapCode>::pack(cc, HeaderKind::String);
+  // count=0
   sd->m_lenAndHash  = len; // hash=0
 
   memcpy(data, r1.ptr, r1.len);
@@ -316,7 +321,8 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_capAndCount = (HeaderKind::String << 24) | cc.code; // count=0
+  sd->m_capAndCount = HeaderWord<CapCode>::pack(cc, HeaderKind::String);
+  // count=0
   sd->m_lenAndHash  = len; // hash=0
 
   void* p;
@@ -340,7 +346,8 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_capAndCount = (HeaderKind::String << 24) | cc.code; // count=0
+  sd->m_capAndCount = HeaderWord<CapCode>::pack(cc, HeaderKind::String);
+  // count=0
   sd->m_lenAndHash  = len; // hash=0
 
   void* p;
@@ -387,7 +394,7 @@ StringData* StringData::MakeAPCSlowPath(const APCString* shared) {
   assert(sd->m_count == 0);
   assert(sd->m_cap_kind == data->m_cap_kind);
   assert(sd->m_hash == data->m_hash);
-  assert(sd->m_kind == HeaderKind::String);
+  assert(sd->m_hdr.kind == HeaderKind::String);
   assert(sd->isShared());
   assert(sd->checkSane());
   return sd;
@@ -419,7 +426,8 @@ StringData* StringData::Make(const APCString* shared) {
   assert(cc.code == cap - kCapOverhead);
 
   sd->m_data = pdst;
-  sd->m_capAndCount = (HeaderKind::String << 24) | cc.code; // count=0
+  sd->m_capAndCount = HeaderWord<CapCode>::pack(cc, HeaderKind::String);
+  // count=0
   sd->m_lenAndHash = len | int64_t{hash} << 32;
 
   pdst[len] = 0;
@@ -986,7 +994,7 @@ bool StringData::checkSane() const {
   static_assert(sizeof(StringData) == 24,
                 "StringData size changed---update assertion if you mean it");
   static_assert(size_t(MaxSize) <= size_t(INT_MAX), "Beware int wraparound");
-  static_assert(offsetof(StringData, m_kind) == HeaderKindOffset, "");
+  static_assert(offsetof(StringData, m_hdr) == HeaderOffset, "");
   static_assert(offsetof(StringData, m_count) == FAST_REFCOUNT_OFFSET,
                 "m_count at wrong offset");
 

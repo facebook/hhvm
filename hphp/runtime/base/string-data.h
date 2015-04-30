@@ -482,11 +482,7 @@ private:
   union {
     struct {
       union {
-        struct {
-          CapCode m_cap;
-          char m_pad;
-          HeaderKind m_kind;
-        };
+        HeaderWord<CapCode> m_hdr;
         uint32_t m_cap_kind;
       };
       mutable RefCount m_count;

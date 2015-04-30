@@ -86,6 +86,10 @@ struct CapCode {
   static bool encodable(size_t c) {
     return c <= Max && c == floor(c).decode();
   }
+
+  explicit operator uint16_t() const {
+    return code;
+  }
 };
 
 //////////////////////////////////////////////////////////////////////

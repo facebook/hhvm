@@ -1240,8 +1240,7 @@ void Vxls::renameOperands() {
 }
 
 // Insert spills and copies that connect sub-intervals that were split
-// between instructions. Do not assume SSA; insert a spill-store
-// after every def, ignoring the interval's full live range.
+// between instructions.
 void Vxls::resolveSplits() {
   ONTRACE(kRegAllocLevel, dumpIntervals());
   for (auto i1 : intervals) {
@@ -1262,15 +1261,14 @@ void Vxls::resolveSplits() {
         // odd position
         assertx(pos > range.start); // implicit label position per block
         if (pos + 1 == range.end) continue; // copy belongs on successor edge
-        if (i2->reg != i1->reg) {
-          copies[pos][i2->reg] = i1;
-        }
+        copies[pos][i2->reg] = i1;
       }
     }
   }
 }
 
-// Insert a spill after the def-position in ivl.
+// Insert a spill after the def-position in ivl. There's only one
+// such position, because of SSA.
 void Vxls::insertSpill(Interval* ivl) {
   auto DEBUG_ONLY checkPos = [&](unsigned pos) {
     assertx(pos % 2 == 1);

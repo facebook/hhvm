@@ -224,13 +224,14 @@ The format used is the same as that used by `walkstk'.
         super(AsyncStkCommand, self).__init__('asyncstk', gdb.COMMAND_STACK)
 
     def invoke(self, args, from_tty):
-        argv = parse_argv(args)
-
-        if len(argv) != 1:
+        try:
+            wh = gdb.parse_and_eval(args)
+        except gdb.error:
             print('Usage: asyncstk wait-handle')
+            return
 
         try:
-            stacktrace = asio_stacktrace(argv[0])
+            stacktrace = asio_stacktrace(wh)
         except TypeError:
             print('asyncstk: Argument must be a WaitHandle object or pointer.')
             return

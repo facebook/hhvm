@@ -140,9 +140,14 @@ enum NDIFlags {
   NO_SWEEP       = (1<<1),
 };
 
+// NativeData's should not extend sweepable, to sweep a native data define
+// a sweep() function and register the NativeData without the NO_SWEEP flag.
 template<class T>
-void registerNativeDataInfo(const StringData* name,
-                            int64_t flags = 0) {
+typename std::enable_if<
+  !std::is_base_of<Sweepable, T>::value,
+  void
+>::type registerNativeDataInfo(const StringData* name,
+                               int64_t flags = 0) {
   registerNativeDataInfo(name, sizeof(T),
                          &nativeDataInfoInit<T>,
                          (flags & NDIFlags::NO_COPY)

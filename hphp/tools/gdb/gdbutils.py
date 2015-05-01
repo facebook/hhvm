@@ -16,10 +16,14 @@ import types
 #------------------------------------------------------------------------------
 # Memoization.
 
+_all_caches = []
+
 def memoized(func):
     """Simple memoization decorator that ignores **kwargs."""
+    global _all_caches
 
     cache = {}
+    _all_caches.append(cache)
 
     @functools.wraps(func)
     def memoizer(*args):
@@ -29,6 +33,13 @@ def memoized(func):
             cache[args] = func(*args)
         return cache[args]
     return memoizer
+
+
+def invalidate_all_memoizers():
+    global _all_caches
+
+    for cache in _all_caches:
+        cache.clear()
 
 
 #------------------------------------------------------------------------------
@@ -179,19 +190,23 @@ def T(name):
     return gdb.lookup_type(name)
 
 @memoized
-def V(name):
-    try:
-        return gdb.lookup_symbol(name)[0].value()
-    except gdb.error:
-        return gdb.lookup_symbol(name)[0].value(gdb.selected_frame())
-
-@memoized
 def K(name):
     return gdb.lookup_global_symbol(name).value()
 
 @memoized
+def V(name):
+    return TL(name)
+
+@memoized
 def nullptr():
     return gdb.Value(0).cast(T('void').pointer())
+
+
+def TL(name):
+    try:
+        return gdb.lookup_symbol(name)[0].value()
+    except gdb.error:
+        return gdb.lookup_symbol(name)[0].value(gdb.selected_frame())
 
 
 #------------------------------------------------------------------------------

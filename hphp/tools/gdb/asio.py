@@ -168,7 +168,7 @@ class WaitHandle(object):
 def asio_context(ctx_idx=None):
     """Get the AsioContext in the current thread by index."""
 
-    contexts = V('HPHP::AsioSession::s_current')['m_p']['m_contexts']
+    contexts = TL('HPHP::AsioSession::s_current')['m_p']['m_contexts']
     top_idx = sizeof(contexts)
 
     if ctx_idx is None:
@@ -252,7 +252,7 @@ class InfoAsioCommand(gdb.Command):
         super(InfoAsioCommand, self).__init__('info asio', gdb.COMMAND_STATUS)
 
     def invoke(self, args, from_tty):
-        asio_session = V('HPHP::AsioSession::s_current')['m_p']
+        asio_session = TL('HPHP::AsioSession::s_current')['m_p']
 
         contexts = asio_session['m_contexts']
         num_contexts = sizeof(contexts)
@@ -272,7 +272,7 @@ class InfoAsioCommand(gdb.Command):
 
         # Get the current vmfp().
         header_ptype = T('HPHP::rds::Header').pointer()
-        vmfp = V('HPHP::rds::tl_base').cast(header_ptype)['vmRegs']['fp']
+        vmfp = TL('HPHP::rds::tl_base').cast(header_ptype)['vmRegs']['fp']
 
         wh_ptype = T('HPHP::c_WaitableWaitHandle').pointer()
 

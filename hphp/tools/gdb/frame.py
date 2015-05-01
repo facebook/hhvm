@@ -190,8 +190,8 @@ def create_resumable(idx, resumable):
 # Frame generators.
 
 def gen_php(fp):
-    limit = V('HPHP::s_stackLimit')
-    size = V('HPHP::s_stackSize')
+    limit = TL('HPHP::s_stackLimit')
+    size = TL('HPHP::s_stackSize')
 
     while True:
         if fp - limit < size:

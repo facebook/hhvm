@@ -1776,6 +1776,7 @@ function start_server_impl($options, $config, $port) {
     $config,
     '-m', 'server',
     "-vServer.Port=$port",
+    "-vServer.Type=proxygen",
     "-vAdminServer.Port=0",
     "-vServer.ThreadCount=$threads",
     '-vServer.ExitOnBindFail=1',

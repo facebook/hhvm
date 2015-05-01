@@ -191,6 +191,17 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   };
 }
 
+/*
+ * Modify a GeneralEffects for instructions that could call the user
+ * error handler for the current frame (ie something that can raise
+ * a warning/notice/error, or a builtin call), because the error
+ * handler gets a context array which contains all the locals.
+ */
+GeneralEffects may_raise(const IRInstruction& inst, GeneralEffects x) {
+  return may_reenter(
+    inst, GeneralEffects { x.loads | AFrameAny, x.stores, x.moves, x.kills });
+}
+
 //////////////////////////////////////////////////////////////////////
 
 GeneralEffects may_load_store(AliasClass loads, AliasClass stores) {
@@ -352,13 +363,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyParamCallable:
   case VerifyParamCls:
   case VerifyParamFail:
-    return may_reenter(inst, may_load_store(AUnknown, AHeapAny));
+    return may_raise(inst, may_load_store(AUnknown, AHeapAny));
   // However the following ones can't read locals from our frame on the way
-  // out.
+  // out, except as a side effect of raising a warning.
   case VerifyRetCallable:
   case VerifyRetCls:
   case VerifyRetFail:
-    return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
+    return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
 
   case CallArray:
     return CallEffects {
@@ -400,7 +411,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         return ret;
       }();
       auto const locs = extra->destroyLocals ? AFrameAny : AEmpty;
-      return may_reenter(inst, may_load_store(stk | AHeapAny | locs, locs));
+      return may_raise(inst, may_load_store(stk | AHeapAny | locs, locs));
     }
 
   // Resumable suspension takes everything from the frame and moves it into the
@@ -618,7 +629,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // Right now we generally can't limit any of these better than general
     // re-entry rules, since they can raise warnings and re-enter.
     assertx(inst.src(0)->type() <= TPtrToGen);
-    return may_reenter(inst, may_load_store(
+    return may_raise(inst, may_load_store(
       AHeapAny | all_pointees(inst),
       AHeapAny | all_pointees(inst)
     ));
@@ -642,7 +653,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetOpProp:
   case SetProp:
   case VGetProp:
-    return may_reenter(inst, may_load_store(
+    return may_raise(inst, may_load_store(
       AHeapAny | all_pointees(inst),
       AHeapAny | all_pointees(inst)
     ));
@@ -734,7 +745,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const stk = AStack {
         inst.src(0), inst.extra<CastStk>()->offset.offset, 1
       };
-      return may_reenter(inst, may_load_store(stk, stk));
+      return may_raise(inst, may_load_store(stk, stk));
     }
   case CoerceStk:
     {
@@ -742,7 +753,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         inst.src(0),
         inst.extra<CoerceStk>()->offset.offset, 1
       };
-      return may_reenter(inst, may_load_store(stk, stk));
+      return may_raise(inst, may_load_store(stk, stk));
     }
 
   case LdARFuncPtr:

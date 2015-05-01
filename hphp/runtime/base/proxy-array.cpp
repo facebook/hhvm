@@ -67,12 +67,11 @@ ArrayData* ProxyArray::innerArr(const ArrayData* ad) {
 ProxyArray* ProxyArray::Make(ArrayData* ad) {
   auto ret = static_cast<ProxyArray*>(MM().objMallocLogged(sizeof(ProxyArray)));
   ret->m_size            = -1;
-  ret->m_kind            = kProxyKind;
   ret->m_pos             = 0;
+  ret->m_hdr.init(HeaderKind::Proxy);
   ret->m_count           = 1;
   ret->m_destructor      = ZvalPtrDtor;
   ret->m_ref             = RefData::Make(make_tv<KindOfArray>(ad));
-
   return ret;
 }
 

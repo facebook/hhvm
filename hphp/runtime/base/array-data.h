@@ -65,10 +65,10 @@ protected:
    */
   explicit ArrayData(ArrayKind kind)
     : m_sizeAndPos(uint32_t(-1))
-    , m_kindAndCount(kind << 24) {
+    , m_kindAndCount(HeaderWord<CapCode>::pack(static_cast<HeaderKind>(kind))) {
     assert(m_size == -1);
     assert(m_pos == 0);
-    assert(m_kind == kind);
+    assert(m_hdr.kind == static_cast<HeaderKind>(kind));
     assert(m_count == 0);
   }
 
@@ -112,7 +112,15 @@ public:
    * return the array kind for fast typechecks
    */
   ArrayKind kind() const {
-    return m_kind;
+    return static_cast<ArrayKind>(m_hdr.kind);
+  }
+
+  /*
+   * Return the capacity stored in the header. Not to be confused
+   * with MixedArray::capacity
+   */
+  uint32_t cap() const {
+    return m_hdr.aux.decode();
   }
 
   /**
@@ -146,13 +154,13 @@ public:
    */
   bool noCopyOnWrite() const;
 
-  bool isPacked() const { return m_kind == kPackedKind; }
-  bool isStruct() const { return m_kind == kStructKind; }
-  bool isMixed() const { return m_kind == kMixedKind; }
-  bool isApcArray() const { return m_kind == kApcKind; }
-  bool isGlobalsArray() const { return m_kind == kGlobalsKind; }
-  bool isProxyArray() const { return m_kind == kProxyKind; }
-  bool isEmptyArray() const { return m_kind == kEmptyKind; }
+  bool isPacked() const { return kind() == kPackedKind; }
+  bool isStruct() const { return kind() == kStructKind; }
+  bool isMixed() const { return kind() == kMixedKind; }
+  bool isApcArray() const { return kind() == kApcKind; }
+  bool isGlobalsArray() const { return kind() == kGlobalsKind; }
+  bool isProxyArray() const { return kind() == kProxyKind; }
+  bool isEmptyArray() const { return kind() == kEmptyKind; }
 
   /*
    * Returns whether or not this array contains "vector-like" data.
@@ -377,14 +385,7 @@ public:
   static ArrayData* GetScalarArray(ArrayData *arr);
   static ArrayData* GetScalarArray(ArrayData *arr, const std::string& key);
 
-  static constexpr size_t offsetofKind() {
-    return offsetof(ArrayData, m_kind);
-  }
-
-  static constexpr size_t offsetofSize() {
-    return offsetof(ArrayData, m_size);
-  }
-  static constexpr size_t sizeofKind() { return sizeof(m_kind); }
+  static constexpr size_t offsetofSize() { return offsetof(ArrayData, m_size); }
   static constexpr size_t sizeofSize() { return sizeof(m_size); }
 
   static const char* kindToString(ArrayKind kind);
@@ -393,7 +394,7 @@ private:
   void serializeImpl(VariableSerializer *serializer) const;
   friend size_t getMemSize(const ArrayData*);
   static void compileTimeAssertions() {
-    static_assert(offsetof(ArrayData, m_kind) == HeaderKindOffset, "");
+    static_assert(offsetof(ArrayData, m_hdr) == HeaderOffset, "");
     static_assert(offsetof(ArrayData, m_count) == FAST_REFCOUNT_OFFSET, "");
   }
 
@@ -435,11 +436,7 @@ protected:
   union {
     struct {
       union {
-        struct {
-          CapCode m_cap;
-          uint8_t m_pad;
-          ArrayKind m_kind;
-        };
+        HeaderWord<CapCode> m_hdr;
         uint32_t m_cap_kind;
       };
       mutable RefCount m_count;
@@ -479,7 +476,7 @@ ALWAYS_INLINE ArrayData* staticEmptyArray() {
  * ArrayFunctions is a hand-built virtual dispatch table.  Each field represents
  * one virtual method with an array of function pointers, one per ArrayKind.
  * There is one global instance of this table.  Arranging it this way allows
- * dispatch to be done with a single indexed load, using m_kind as the index.
+ * dispatch to be done with a single indexed load, using kind as the index.
  */
 struct ArrayFunctions {
   // NK stands for number of array kinds; here just for shorthand.

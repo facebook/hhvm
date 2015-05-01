@@ -75,6 +75,12 @@ struct CapCode {
     return {static_cast<uint16_t>(e << B | m)};
   }
 
+  // return the exact value n (must be small)
+  static CapCode exact(uint32_t n) {
+    assert(n <= Threshold);
+    return CapCode{static_cast<uint16_t>(n)};
+  }
+
   // return the decoded value
   uint32_t decode() const {
     uint32_t m = code & M;

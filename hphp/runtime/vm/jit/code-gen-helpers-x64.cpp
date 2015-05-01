@@ -265,8 +265,9 @@ void emitCall(Vout& v, CppCall target, RegSet args) {
       "deltaFits on ArrayData vtable calls needs to be checked before "
       "emitting them"
     );
-    v << loadzbl{rdi[ArrayData::offsetofKind()], eax};
+    v << loadzbl{rdi[HeaderKindOffset], eax};
     v << callm{baseless(rax*8 + addr), args};
+    static_assert(sizeof(HeaderKind) == 1, "");
     return;
   }
   case CppCall::Kind::Destructor:

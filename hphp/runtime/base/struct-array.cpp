@@ -34,10 +34,11 @@ StructArray::StructArray(
   , m_shape(shape)
 {
   m_sizeAndPos = size | uint64_t{pos} << 32;
-  m_kindAndCount = kStructKind << 24 | uint64_t{count} << 32;
+  m_kindAndCount = HeaderWord<CapCode>::pack(HeaderKind::Struct) |
+                   uint64_t{count} << 32;
   assert(m_pos == pos);
   assert(m_size == size);
-  assert(m_kind == kStructKind);
+  assert(kind() == kStructKind);
   assert(m_count == count);
 }
 
@@ -96,7 +97,8 @@ ArrayData* StructArray::MakeUncounted(ArrayData* array) {
   // change once it's uncounted.
   auto size = structArray->size();
   StructArray* result = createUncounted(structArray->shape(), size);
-  result->m_kindAndCount = kStructKind << 24 | int64_t{UncountedValue} << 32;
+  result->m_kindAndCount = HeaderWord<CapCode>::pack(HeaderKind::Struct) |
+                           int64_t{UncountedValue} << 32;
   result->m_sizeAndPos = array->m_sizeAndPos;
   auto const srcData = structArray->data();
   auto const stop    = srcData + size;
@@ -593,11 +595,12 @@ MixedArray* StructArray::ToMixedHeader(size_t neededSize) {
   auto const ad      = smartAllocArray(scale);
 
   ad->m_sizeAndPos       = 0; // We'll set size and pos later.
-  ad->m_kindAndCount     = MixedArray::kMixedKind << 24; // count=0
+  ad->m_kindAndCount     = HeaderWord<CapCode>::pack(HeaderKind::Mixed);
+  // count=0
   ad->m_scale_used       = scale; // used=0
   ad->m_nextKI           = 0; // There were never any numeric indices.
 
-  assert(ad->m_kind == ArrayData::kMixedKind);
+  assert(ad->kind() == ArrayData::kMixedKind);
   assert(ad->m_size == 0);
   assert(ad->m_pos == 0);
   assert(ad->m_count == 0);

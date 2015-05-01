@@ -67,13 +67,13 @@ static void throwIntOOB(int64_t key, bool isVector = false)
   ATTRIBUTE_NORETURN;
 
 void throwIntOOB(int64_t key, bool isVector /* = false */) {
-  static const size_t reserveSize = 50;
-  String msg(reserveSize, ReserveString);
-  char* buf = msg.mutableData();
-  int sz = sprintf(buf, "Integer key %" PRId64 " is %s", key,
-                   isVector ? "out of bounds" : "not defined");
-  assert(sz <= reserveSize);
-  msg.setSize(sz);
+  String msg(50, ReserveString);
+  auto buf = msg.bufferSlice();
+  uint32_t sz = snprintf(buf.ptr, buf.len + 1,
+                         "Integer key %" PRId64 " is %s", key,
+                         isVector ? "out of bounds" : "not defined");
+  assert(sz <= buf.len);
+  msg.setSize(std::min(sz, buf.len));
   Object e(SystemLib::AllocOutOfBoundsExceptionObject(msg));
   throw e;
 }
@@ -622,7 +622,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
   auto* oldBuf = m_data;
   auto* oldAd = arrayData();
   m_data = packedData(MixedArray::MakeReserve(newCap));
-  m_capacity = arrayData()->m_cap.decode();
+  m_capacity = arrayData()->cap();
   arrayData()->m_size = m_size;
   if (LIKELY(!oldAd->hasMultipleRefs())) {
     std::memcpy(m_data, oldBuf, m_size * sizeof(TypedValue));
@@ -664,7 +664,7 @@ BaseVector::BaseVector(Class* cls, HeaderKind kind, uint32_t cap /* = 0 */)
 BaseVector::BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
   : ExtCollectionObjectData(cls, kind)
   , m_size(arr->size())
-  , m_capacity(arr->m_cap.decode())
+  , m_capacity(arr->cap())
   , m_data(packedData(arr))
   , m_version(0)
 {
@@ -1559,18 +1559,16 @@ void HashCollection::mutateImpl() {
 NEVER_INLINE
 void HashCollection::throwTooLarge() {
   assert(getClassName().size() == 6);
-  static const size_t reserveSize = 130;
-  String msg(reserveSize, ReserveString);
-  char* buf = msg.mutableData();
-  int sz = sprintf(
-    buf,
+  String msg(130, ReserveString);
+  auto buf = msg.bufferSlice();
+  uint32_t sz = snprintf(buf.ptr, buf.len + 1,
     "%s object has reached its maximum capacity of %u element "
     "slots and does not have room to add a new element",
     getClassName().data() + 3, // strip "HH\" prefix
     MaxSize
   );
-  assert(sz <= reserveSize);
-  msg.setSize(sz);
+  assert(sz <= buf.len);
+  msg.setSize(std::min(sz, buf.len));
   Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
   throw e;
 }
@@ -1578,17 +1576,15 @@ void HashCollection::throwTooLarge() {
 NEVER_INLINE
 void HashCollection::throwReserveTooLarge() {
   assert(getClassName().size() == 6);
-  static const size_t reserveSize = 80;
-  String msg(reserveSize, ReserveString);
-  char* buf = msg.mutableData();
-  int sz = sprintf(
-    buf,
+  String msg(80, ReserveString);
+  auto buf = msg.bufferSlice();
+  uint32_t sz = snprintf(buf.ptr, buf.len + 1,
     "%s does not support reserving room for more than %u elements",
     getClassName().data() + 3, // strip "HH\" prefix
     MaxReserveSize
   );
-  assert(sz <= reserveSize);
-  msg.setSize(sz);
+  assert(sz <= buf.len);
+  msg.setSize(std::min(sz, buf.len));
   Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
   throw e;
 }

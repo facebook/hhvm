@@ -1389,7 +1389,8 @@ void CodeGenerator::emitSpecializedTypeTest(Type type, DataLoc dataSrc, Vreg sf,
     auto arrSpec = type.arrSpec();
     auto reg = getDataPtrEnregistered(v, dataSrc);
 
-    v << cmpbim{*arrSpec.kind(), reg[ArrayData::offsetofKind()], sf};
+    static_assert(sizeof(HeaderKind) == 1, "");
+    v << cmpbim{*arrSpec.kind(), reg[HeaderKindOffset], sf};
     doJcc(CC_E, sf);
 
     if (arrSpec.kind() == ArrayData::kStructKind && arrSpec.shape()) {
@@ -3486,9 +3487,10 @@ void CodeGenerator::cgProfilePackedArray(IRInstruction* inst) {
   // If kPackedKind changes to a value that is not 0, change
   // this to a conditional add.
   static_assert(ArrayData::ArrayKind::kPackedKind == 0, "kPackedKind changed");
+  static_assert(sizeof(HeaderKind) == 1, "");
   auto tmp_kind = v.makeReg();
   auto const sf = v.makeReg();
-  v << loadzbl{baseReg[ArrayData::offsetofKind()], tmp_kind};
+  v << loadzbl{baseReg[HeaderKindOffset], tmp_kind};
   v << addlm{tmp_kind, rVmTl[handle + offsetof(NonPackedArrayProfile, count)],
              sf};
 }
@@ -3504,7 +3506,8 @@ void CodeGenerator::cgProfileStructArray(IRInstruction* inst) {
   auto done = v.makeBlock();
 
   auto const sf0 = v.makeReg();
-  v << cmpbim{ArrayData::kStructKind, baseReg[ArrayData::offsetofKind()], sf0};
+  static_assert(sizeof(HeaderKind) == 1, "");
+  v << cmpbim{ArrayData::kStructKind, baseReg[HeaderKindOffset], sf0};
   v << jcc{CC_E, sf0, {notStruct, isStruct}};
 
   auto const shape = v.makeReg();

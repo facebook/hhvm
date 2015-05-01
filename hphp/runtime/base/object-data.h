@@ -412,9 +412,9 @@ private:
   int64_t toInt64Impl() const noexcept;
   double toDoubleImpl() const noexcept;
 
-// offset:  0    4    8     10  11    12     16   20          32
-// 64bit:   cls       attr  u8  kind  count  id   [subclass]  [props...]
-// lowptr:  cls  id   attr  u8  kind  count  [subclass][props...]
+// offset:  0    4   8       12     16   20          32
+// 64bit:   cls      header  count  id   [subclass]  [props...]
+// lowptr:  cls  id  header  count  [subclass][props...]
 
 private:
 #ifdef USE_LOWPTR

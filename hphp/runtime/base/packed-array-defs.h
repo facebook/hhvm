@@ -52,8 +52,7 @@ ptrdiff_t PackedArray::entriesOffset() {
 
 ALWAYS_INLINE
 size_t PackedArray::heapSize(const ArrayData* ad) {
-  auto cap = ad->m_cap.decode();
-  return sizeof(ArrayData) + sizeof(TypedValue) * cap;
+  return sizeof(ArrayData) + sizeof(TypedValue) * ad->cap();
 }
 
 template<class Marker>

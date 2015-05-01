@@ -484,6 +484,8 @@ class c_Vector : public BaseVector {
 
  public:
   explicit c_Vector(Class* cls = c_Vector::classof(), uint32_t cap = 0);
+  explicit c_Vector(uint32_t cap, Class* cls = c_Vector::classof())
+    : c_Vector(cls, cap) { }
   explicit c_Vector(Class* cls, ArrayData* arr);
 
   static c_Vector* Clone(ObjectData* obj);
@@ -625,6 +627,8 @@ class c_ImmVector : public BaseVector {
 
  public:
   explicit c_ImmVector(Class* cls = c_ImmVector::classof(), uint32_t cap = 0);
+  explicit c_ImmVector(uint32_t cap, Class* cls = c_ImmVector::classof())
+    : c_ImmVector(cls, cap) { }
   explicit c_ImmVector(Class* cls, ArrayData* arr);
 
   static c_ImmVector* Clone(ObjectData* obj);
@@ -1476,6 +1480,8 @@ class c_Map : public BaseMap {
 
  public:
   explicit c_Map(Class* cls = c_Map::classof(), uint32_t cap = 0);
+  explicit c_Map(uint32_t cap, Class* cls = c_Map::classof())
+    : c_Map(cls, cap) { }
   explicit c_Map(Class* cls, ArrayData* arr);
 
   static c_Map* Clone(ObjectData* obj);
@@ -1527,6 +1533,8 @@ class c_ImmMap : public BaseMap {
 
  public:
   explicit c_ImmMap(Class* cls = c_ImmMap::classof(), uint32_t cap = 0);
+  explicit c_ImmMap(uint32_t cap, Class* cls = c_ImmMap::classof())
+    : c_ImmMap(cls, cap) { }
   explicit c_ImmMap(Class* cls, ArrayData* arr);
 
   static c_ImmMap* Clone(ObjectData* obj);
@@ -1808,6 +1816,8 @@ class c_Set : public BaseSet {
   // PHP-land methods.
 
   explicit c_Set(Class* cls = c_Set::classof(), uint32_t cap = 0);
+  explicit c_Set(uint32_t cap, Class* cls = c_Set::classof())
+    : c_Set(cls, cap) { }
   explicit c_Set(Class* cls, ArrayData* arr);
 
   Object t_add(const Variant& val);
@@ -1886,6 +1896,8 @@ class c_ImmSet : public BaseSet {
 
  public:
   explicit c_ImmSet(Class* cls = c_ImmSet::classof(), uint32_t cap = 0);
+  explicit c_ImmSet(uint32_t cap, Class* cls = c_ImmSet::classof())
+    : c_ImmSet(cls, cap) { }
   explicit c_ImmSet(Class* cls, ArrayData* arr);
 
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,

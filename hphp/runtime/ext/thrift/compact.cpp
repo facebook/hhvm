@@ -835,8 +835,7 @@ class CompactReader {
       String format = spec.rvalAt(PHPTransport::s_format,
         AccessFlags::None).toString();
       if (format.equal(PHPTransport::s_collection)) {
-        auto ret(makeSmartPtr<c_Map>());
-        if (size) ret->reserve(size);
+        auto ret(makeSmartPtr<c_Map>(size));
         for (uint32_t i = 0; i < size; i++) {
           Variant key = readField(keySpec, keyType);
           Variant value = readField(valueSpec, valueType);
@@ -852,7 +851,7 @@ class CompactReader {
           ainit.setKeyUnconverted(key, value);
         }
         readCollectionEnd();
-        return ainit.toArray();
+        return ainit.toVariant();
       }
     }
 
@@ -866,8 +865,7 @@ class CompactReader {
       String format = spec.rvalAt(PHPTransport::s_format,
         AccessFlags::None).toString();
       if (format.equal(PHPTransport::s_collection)) {
-        auto const pvec(makeSmartPtr<c_Vector>());
-        if (size) pvec->reserve(size);
+        auto const pvec(makeSmartPtr<c_Vector>(size));
         for (uint32_t i = 0; i < size; i++) {
           pvec->t_add(readField(valueSpec, valueType));
         }
@@ -879,7 +877,7 @@ class CompactReader {
           pai.append(readField(valueSpec, valueType));
         }
         readCollectionEnd();
-        return pai.toArray();
+        return pai.toVariant();
       }
     }
 
@@ -893,9 +891,7 @@ class CompactReader {
       String format = spec.rvalAt(PHPTransport::s_format,
         AccessFlags::None).toString();
       if (format.equal(PHPTransport::s_collection)) {
-        auto set_ret = makeSmartPtr<c_Set>();
-        if (size) set_ret->reserve(size);
-
+        auto set_ret = makeSmartPtr<c_Set>(size);
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(valueSpec, valueType);
           set_ret->t_add(value);
@@ -912,7 +908,7 @@ class CompactReader {
           ainit.setKeyUnconverted(value, true);
         }
         readCollectionEnd();
-        return ainit.toArray();
+        return ainit.toVariant();
       }
     }
 

@@ -193,7 +193,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       String format = fieldspec.rvalAt(PHPTransport::s_format,
                                        AccessFlags::None).toString();
       if (format.equal(PHPTransport::s_collection)) {
-        auto obj(makeSmartPtr<c_Map>());
+        auto obj(makeSmartPtr<c_Map>(size));
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(types[0], transport, keyspec);
           Variant value = binary_deserialize(types[1], transport, valspec);
@@ -220,7 +220,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
                                        AccessFlags::None).toString();
 
       if (format.equal(PHPTransport::s_collection)) {
-        auto const pvec(makeSmartPtr<c_Vector>());
+        auto const pvec(makeSmartPtr<c_Vector>(size));
         for (uint32_t s = 0; s < size; ++s) {
           pvec->t_add(binary_deserialize(type, transport, elemspec));
         }
@@ -230,7 +230,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         for (auto s = uint32_t{0}; s < size; ++s) {
           pai.append(binary_deserialize(type, transport, elemspec));
         }
-        return pai.toArray();
+        return pai.toVariant();
       }
     }
     case T_SET: { // array of key -> TRUE
@@ -245,7 +245,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       String format = fieldspec.rvalAt(PHPTransport::s_format,
                                        AccessFlags::None).toString();
       if (format.equal(PHPTransport::s_collection)) {
-        auto set_ret(makeSmartPtr<c_Set>());
+        auto set_ret(makeSmartPtr<c_Set>(size));
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(type, transport, elemspec);
 
@@ -267,13 +267,13 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
             init.setKeyUnconverted(key, true);
           }
         }
-        return init.toArray();
+        return init.toVariant();
       }
     }
   };
 
   char errbuf[128];
-  sprintf(errbuf, "Unknown thrift typeID %d", thrift_typeID);
+  snprintf(errbuf, sizeof(errbuf), "Unknown thrift typeID %d", thrift_typeID);
   throw_tprotocolexception(String(errbuf, CopyString), INVALID_DATA);
   return init_null();
 }
@@ -334,7 +334,7 @@ void skip_element(long thrift_typeID, PHPInputTransport& transport) {
   };
 
   char errbuf[128];
-  sprintf(errbuf, "Unknown thrift typeID %ld", thrift_typeID);
+  snprintf(errbuf, sizeof(errbuf), "Unknown thrift typeID %ld", thrift_typeID);
   throw_tprotocolexception(String(errbuf, CopyString), INVALID_DATA);
 }
 
@@ -496,7 +496,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
     } return;
   };
   char errbuf[128];
-  sprintf(errbuf, "Unknown thrift typeID %d", thrift_typeID);
+  snprintf(errbuf, sizeof(errbuf), "Unknown thrift typeID %d", thrift_typeID);
   throw_tprotocolexception(String(errbuf, CopyString), INVALID_DATA);
 }
 
@@ -579,7 +579,7 @@ Variant HHVM_FUNCTION(thrift_protocol_read_binary,
     int32_t version = sz & VERSION_MASK;
     if (version != VERSION_1) {
       char errbuf[128];
-      sprintf(errbuf, "Bad version identifier, sz=%d", sz);
+      snprintf(errbuf, sizeof(errbuf), "Bad version identifier, sz=%d", sz);
       throw_tprotocolexception(String(errbuf, CopyString), BAD_VERSION);
     }
     messageType = (sz & 0x000000ff);
@@ -589,7 +589,11 @@ Variant HHVM_FUNCTION(thrift_protocol_read_binary,
   } else {
     if (strict_read) {
       char errbuf[128];
-      sprintf(errbuf, "No version identifier... old protocol client in strict mode? sz=%d", sz);
+      snprintf(errbuf,
+               sizeof(errbuf),
+               "No version identifier... "
+               "old protocol client in strict mode? sz=%d",
+               sz);
       throw_tprotocolexception(String(errbuf, CopyString), BAD_VERSION);
     } else {
       // Handle pre-versioned input

@@ -5562,6 +5562,7 @@ static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt,
 void DOMXPath::sweep() {
   if (m_node) {
     xmlXPathFreeContext((xmlXPathContextPtr)m_node);
+    m_node = nullptr;
   }
 }
 
@@ -5997,8 +5998,7 @@ public:
     HHVM_ME(DOMXPath, registerNamespace);
     HHVM_ME(DOMXPath, registerPHPFunctions);
     HHVM_ME(DOMXPath, __debuginfo);
-    Native::registerNativeDataInfo<DOMXPath>(
-        s_DOMXPath.get(), Native::NDIFlags::NO_SWEEP);
+    Native::registerNativeDataInfo<DOMXPath>(s_DOMXPath.get());
     Native::registerNativePropHandler<DOMXPathPropHandler>(s_DOMXPath);
 
     HHVM_FE(dom_import_simplexml);

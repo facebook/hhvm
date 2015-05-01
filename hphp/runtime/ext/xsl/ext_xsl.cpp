@@ -68,7 +68,7 @@ const StaticString
   s_DOMText("DOMText"),
   s_DOMNode("DOMNode");
 
-struct XSLTProcessorData : Sweepable {
+struct XSLTProcessorData {
   XSLTProcessorData() : m_stylesheet(nullptr), m_doc(nullptr),
   m_secprefs(k_XSL_SECPREF_DEFAULT),
   m_registerPhpFunctions(0) {

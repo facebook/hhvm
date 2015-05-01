@@ -131,11 +131,9 @@ struct DOMNodeIterator {
 ///////////////////////////////////////////////////////////////////////////////
 // class DOMXPath
 
-struct DOMXPath : Sweepable {
+struct DOMXPath {
   ~DOMXPath() { sweep(); }
-
-  void sweep() override;
-
+  void sweep();
   xmlXPathContextPtr m_node {nullptr};
   Object m_doc;
   Array m_node_list;

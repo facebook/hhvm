@@ -27,8 +27,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 const StaticString s_XMLWriterData("XMLWriterData");
 
-class XMLWriterData : public Sweepable {
-public:
+struct XMLWriterData {
   XMLWriterData(): m_ptr(nullptr), m_output(nullptr) {}
 
   ~XMLWriterData() {
@@ -565,7 +564,6 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 class XMLWriterResource : public SweepableResourceData {
-private:
   DECLARE_RESOURCE_ALLOCATION(XMLWriterResource)
 
 public:
@@ -579,7 +577,9 @@ public:
   XMLWriterData m_writer;
 };
 
-void XMLWriterResource::sweep() {}
+void XMLWriterResource::sweep() {
+  m_writer.sweep();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // methods (object oriented style) and functions (procedural style)

@@ -75,7 +75,7 @@ struct Resumable {
     auto actRec = resumable->actRec();
 
     node->framesize = frameSize;
-    node->kind = HeaderKind::ResumableFrame;
+    node->hdr.kind = HeaderKind::ResumableFrame;
 
     if (!clone) {
       // Copy ActRec, locals and iterators

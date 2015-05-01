@@ -219,14 +219,14 @@ void MemoryManager::resetRuntimeOptions() {
     checkHeap();
     // check that every allocation in heap has been freed before reset
     for (auto h = begin(), lim = end(); h != lim; ++h) {
-      if (h->kind_ == HeaderKind::Debug) {
+      if (h->kind() == HeaderKind::Debug) {
         auto h2 = h; ++h2;
         if (h2 != lim) {
-          assert(h2->kind_ == HeaderKind::Free);
+          assert(h2->kind() == HeaderKind::Free);
         }
       } else {
-        assert(h->kind_ == HeaderKind::Free ||
-               h->kind_ == HeaderKind::Hole);
+        assert(h->kind() == HeaderKind::Free ||
+               h->kind() == HeaderKind::Hole);
       }
     }
   }
@@ -568,7 +568,7 @@ inline void* MemoryManager::smartMalloc(size_t nbytes) {
   if (LIKELY(nbytes_padded) <= kMaxSmartSize) {
     auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes_padded));
     ptr->padbytes = nbytes_padded;
-    ptr->kind = HeaderKind::SmallMalloc;
+    ptr->hdr.kind = HeaderKind::SmallMalloc;
     return ptr + 1;
   }
   return smartMallocBig(nbytes);
@@ -652,7 +652,7 @@ SizeTable s_index2size;
 void MemoryManager::initHole() {
   if ((char*)m_front < (char*)m_limit) {
     auto hdr = static_cast<FreeNode*>(m_front);
-    hdr->kind = HeaderKind::Hole;
+    hdr->hdr.kind = HeaderKind::Hole;
     hdr->size = (char*)m_limit - (char*)m_front;
   }
 }
@@ -662,7 +662,7 @@ void MemoryManager::initFree() {
   for (size_t i = 0; i < kNumSmartSizes; i++) {
     auto size = s_index2size.table[i];
     for (auto n = m_freelists[i].head; n; n = n->next) {
-      n->kind_size = HeaderKind::Free<<24 | size<<32;
+      n->kind_size = HeaderWord<>::pack(HeaderKind::Free) | size << 32;
     }
   }
 }
@@ -690,13 +690,13 @@ void MemoryManager::checkHeap() {
     hdrs.push_back(&*h);
     TRACE(2, "checkHeap: hdr %p\n", hdrs[hdrs.size()-1]);
     bytes += h->size();
-    counts[(int)h->kind_]++;
-    switch (h->kind_) {
+    counts[(int)h->kind()]++;
+    switch (h->kind()) {
       case HeaderKind::Debug: {
         // the next block's parsed size should agree with DebugHeader
         auto h2 = h; ++h2;
         if (h2 != lim) {
-          assert(h2->kind_ != HeaderKind::Debug);
+          assert(h2->kind() != HeaderKind::Debug);
           assert(h->debug_.returnedCap ==
                  MemoryManager::smartSizeClass(h2->size()));
         }
@@ -984,7 +984,7 @@ void* MemoryManager::debugPostAllocate(void* p,
                                        size_t returnedCap) {
   auto const header = static_cast<DebugHeader*>(p);
   header->allocatedMagic = DebugHeader::kAllocatedMagic;
-  header->kind = HeaderKind::Debug;
+  header->hdr.kind = HeaderKind::Debug;
   header->requestedSize = bytes;
   header->returnedCap = returnedCap;
   return (void*)(uintptr_t(header) + kDebugExtraSize);
@@ -1143,7 +1143,7 @@ MemBlock BigHeap::allocSlab(size_t size) {
 
 void BigHeap::enlist(BigNode* n, HeaderKind kind, size_t size) {
   n->nbytes = size;
-  n->kind = kind;
+  n->hdr.kind = kind;
   n->index = m_bigs.size();
   m_bigs.push_back(n);
 }

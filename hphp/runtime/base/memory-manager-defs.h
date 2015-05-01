@@ -33,14 +33,13 @@ namespace HPHP {
 struct Header {
   size_t size() const;
   HeaderKind kind() const {
-    assert(unsigned(kind_) <= NumHeaderKinds);
-    return kind_;
+    assert(unsigned(hdr_.kind) <= NumHeaderKinds);
+    return hdr_.kind;
   }
   union {
     struct {
       uint64_t q;
-      uint8_t b[3];
-      HeaderKind kind_;
+      HeaderWord<> hdr_;
       RefCount count_;
     };
     StringData str_;
@@ -218,16 +217,15 @@ struct BigHeap::iterator {
 template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
   for (auto i = begin(), lim = end(); i != lim;) {
     auto h = &*i; ++i;
-    if (h->kind_ == HeaderKind::BigObj) {
+    if (h->kind() == HeaderKind::BigObj) {
       // skip BigNode
       h = reinterpret_cast<Header*>((&h->big_)+1);
-      if (h->kind_ == HeaderKind::Debug) {
+      if (h->kind() == HeaderKind::Debug) {
         // skip DebugHeader
         h = reinterpret_cast<Header*>((&h->debug_)+1);
       }
     }
-    if (h->kind_ == HeaderKind::Debug ||
-        h->kind_ == HeaderKind::Hole) {
+    if (h->kind() == HeaderKind::Debug || h->kind() == HeaderKind::Hole) {
       // no valid pointer can point here.
       continue;
     }

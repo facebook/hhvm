@@ -212,8 +212,7 @@ struct DebugHeader {
   static constexpr size_t kFreedMagic =        0x5AB07A6ED4110CEEull;
 
   uintptr_t allocatedMagic;
-  uint8_t pad[3];
-  HeaderKind kind;
+  HeaderWord<> hdr;
   size_t requestedSize; // zero for size-untracked allocator
   size_t returnedCap;
 };
@@ -371,16 +370,14 @@ struct StringDataNode {
 // so they can be auto-freed in MemoryManager::reset()
 struct BigNode {
   size_t nbytes;
-  char pad[3];
-  HeaderKind kind;
+  HeaderWord<> hdr;
   uint32_t index;
 };
 
 // Header used for small smart_malloc allocations (but not *Size allocs)
 struct SmallNode {
   size_t padbytes;
-  char pad[3];
-  HeaderKind kind;
+  HeaderWord<> hdr;
 };
 
 // all FreeList entries are parsed by inspecting this header.
@@ -388,8 +385,7 @@ struct FreeNode {
   FreeNode* next;
   union {
     struct {
-      char pad[3];
-      HeaderKind kind;
+      HeaderWord<> hdr;
       uint32_t size;
     };
     uint64_t kind_size;
@@ -401,15 +397,13 @@ struct FreeNode {
 struct NativeNode {
   uint32_t sweep_index; // index in MM::m_natives
   uint32_t obj_offset; // byte offset from this to ObjectData*
-  char pad[3];
-  HeaderKind kind;
+  HeaderWord<> hdr;
 };
 
 // header for Resumable objects. See layout comment in resumable.h
 struct ResumableNode {
   size_t framesize;
-  char pad[3];
-  HeaderKind kind; // Resumable
+  HeaderWord<> hdr;
 };
 
 // POD type for tracking arbitrary memory ranges

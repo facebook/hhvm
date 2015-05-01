@@ -38,7 +38,7 @@
 namespace HPHP {
 
 template<class F> void scanHeader(const Header* h, F& mark) {
-  switch (h->kind_) {
+  switch (h->kind()) {
     case HeaderKind::Proxy:
       return h->proxy_.scan(mark);
     case HeaderKind::Empty:

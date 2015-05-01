@@ -129,7 +129,7 @@ void Marker::operator()(const ObjectData* p) {
     if (mark(h)) {
       enqueue(p);
     }
-  } else if (reinterpret_cast<const Header*>(p)->kind_ == HK::ResumableObj) {
+  } else if (reinterpret_cast<const Header*>(p)->kind() == HK::ResumableObj) {
     // Resumable object. we also need to scan the actrec, locals,
     // and iterators attached to it. It's wrapped by a ResumableNode header,
     // which is what we need to mark.
@@ -138,7 +138,7 @@ void Marker::operator()(const ObjectData* p) {
     auto frame = reinterpret_cast<const TypedValue*>(r) -
                  r->actRec()->func()->numSlotsInFrame();
     auto node = reinterpret_cast<const ResumableNode*>(frame) - 1;
-    assert(node->kind == HK::ResumableFrame);
+    assert(node->hdr.kind == HK::ResumableFrame);
     if (mark(node)) {
       enqueue(p);
     }
@@ -152,7 +152,7 @@ void Marker::operator()(const ObjectData* p) {
 
 // Utility to just extract the kind field from an arbitrary Header ptr.
 inline HeaderKind kind(const void* p) {
-  return static_cast<const Header*>(p)->kind_;
+  return static_cast<const Header*>(p)->kind();
 }
 
 void Marker::operator()(const ResourceData* p) {
@@ -239,7 +239,7 @@ void Marker::operator()(const void* start, size_t len) {
     // mark p if it's an interesting kind. since we have metadata for it,
     // it must have a valid header.
     auto h = reinterpret_cast<const Header*>(p);
-    switch (h->kind_) {
+    switch (h->kind()) {
       case HK::Apc:
       case HK::Globals:
       case HK::Proxy:
@@ -300,7 +300,7 @@ void Marker::init() {
   total_ = 0;
   MM().forEachHeader([&](Header* h) {
     meta_[h] = Meta{false, false};
-    switch (h->kind_) {
+    switch (h->kind()) {
       case HK::Apc:
       case HK::Globals:
       case HK::Proxy:
@@ -366,7 +366,7 @@ void Marker::sweep() {
     UNUSED auto& meta = meta_[h];
     if (meta.cmark) ambig_marked_ += h->size();
     if (meta.mark) marked_ += h->size();
-    switch (h->kind_) {
+    switch (h->kind()) {
       case HK::Packed:
       case HK::Struct:
       case HK::Mixed:

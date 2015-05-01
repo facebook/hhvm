@@ -300,7 +300,7 @@ public:
 private:
   void internalModify(timelib_time *t);
   void internalModifyRelative(timelib_rel_time *rel, bool have_relative,
-                              char bias);
+                              signed char bias);
   struct LastErrors final : RequestEventHandler {
     void requestInit() override {
       m_errors = nullptr;

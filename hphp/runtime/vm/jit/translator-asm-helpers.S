@@ -122,11 +122,15 @@ ETCH_NAME(handleSRHelper):
   ETCH_SIZE(handleSRHelper)
 
 ///////////////////////////////////////////////////////////////////////////////
-#elif defined(__AARCH64EL__)
+#elif defined(__aarch64__)
+  .globl handleSRHelper
+handleSRHelper:
   .globl enterTCHelper
 enterTCHelper:
   .globl enterTCServiceReq
 enterTCServiceReq:
+  .globl enterTCExit
+enterTCExit:
   brk 0
 
 #endif

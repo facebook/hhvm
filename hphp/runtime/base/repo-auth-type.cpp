@@ -29,7 +29,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-static_assert(sizeof(RepoAuthType) == sizeof(CompactTaggedPtr<void>), "");
+static_assert(sizeof(RepoAuthType) == sizeof(CompactTaggedPtr<void, RepoAuthType::Tag>), "");
 
 //////////////////////////////////////////////////////////////////////
 

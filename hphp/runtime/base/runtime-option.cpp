@@ -427,10 +427,14 @@ static inline bool loopsDefault() {
 }
 
 static inline bool evalJitDefault() {
+#ifdef __aarch64__
+  return false;
+#else
 #if defined(__APPLE__) || defined(__CYGWIN__)
   return false;
 #else
   return true;
+#endif
 #endif
 }
 

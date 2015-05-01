@@ -277,24 +277,25 @@ let rec main args retries =
         exit 4;
       end
   | Server_missing ->
+      ClientStart.start_server { ClientStart.
+        root = args.root;
+        wait = false;
+        no_load = args.no_load;
+      };
+      if args.autostart
+      then Printf.eprintf ("The server will be ready in a few seconds "^^
+        "(a couple of minutes if your files are cold)!\n")
+      else begin
+        Printf.eprintf ("Error: no hh_server running. Either start hh_server"^^
+          " yourself or run hh_client without --autostart-server false\n%!");
+        exit 6;
+      end;
       if retries > 1
-      then begin
-        ClientStart.start_server { ClientStart.
-          root = args.root;
-          wait = false;
-          no_load = args.no_load;
-        };
+      then
         (* No sleep in this one -- if the server is missing, the startup code
          * will wait to continue until at least the server has started
          * initalizing to continue. *)
         main args (retries-1)
-      end else begin
-        if args.autostart
-        then Printf.fprintf stderr "The server will be ready in a few seconds (a couple of minutes if your files are cold)!\n"
-        else Printf.fprintf stderr "Error: no hh_server running. Either start hh_server yourself or run hh_client without --autostart-server false\n%!";
-        flush stderr;
-        exit 6;
-      end
   | Server_out_of_date ->
       let name = "hh_server" in
       if args.autostart

@@ -217,8 +217,9 @@ SSATmp* IRInstruction::dst(unsigned i) const {
 namespace {
 
 Type unboxPtr(Type t) {
-  t = t - TPtrToBoxedCell;
-  return t.deref().ptr(add_ref(t.ptrKind()));
+  auto const pcell = t & TPtrToCell;
+  auto const pref = t & TPtrToBoxedInitCell;
+  return pref.deref().inner().ptr(Ptr::Ref) | pcell;
 }
 
 Type boxPtr(Type t) {

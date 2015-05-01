@@ -46,8 +46,8 @@ template<class T = uint16_t> struct HeaderWord {
   union {
     struct {
       T aux;
-      uint8_t marks;
       HeaderKind kind;
+      uint8_t marks;
     };
     uint32_t w;
   };

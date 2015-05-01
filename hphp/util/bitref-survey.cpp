@@ -27,17 +27,14 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(bitref);
-BitrefSurvey *g_survey;
 uint64_t arr_empty_count, str_empty_count;
 std::mutex m;
 folly::Histogram<uint32_t> str_rc_copy_histogram(8, 1, 2048);
 folly::Histogram<uint32_t> arr_rc_copy_histogram(8, 1, 2048);
 
-inline BitrefSurvey *survey() {
-  if (!g_survey) {
-    g_survey = new BitrefSurvey();
-  }
-  return g_survey;
+inline BitrefSurvey &survey() {
+  static BitrefSurvey survey;
+  return survey;
 }
 
 /*
@@ -45,19 +42,15 @@ inline BitrefSurvey *survey() {
  */
 void cow_check_occurred(RefCount refcount, bool bitref) {
   // default: type is array
-  survey()->cow_check_occurred(refcount, bitref, true);
+  survey().cow_check_occurred(refcount, bitref, true);
 }
 
 void cow_check_occurred(ArrayData* ad) {
-  survey()->cow_check_occurred(ad);
+  survey().cow_check_occurred(ad);
 }
 
 void cow_check_occurred(StringData* sd) {
-  survey()->cow_check_occurred(sd);
-}
-
-void survey_request_end() {
-  survey()->survey_request_end();
+  survey().cow_check_occurred(sd);
 }
 
 void BitrefSurvey::cow_check_occurred(RefCount refcount, bool bitref, bool isArray) {
@@ -118,8 +111,7 @@ void BitrefSurvey::cow_check_occurred(StringData* sd) {
   m.unlock();
 }
 
-void BitrefSurvey::survey_request_end() {
-  m.lock();
+BitrefSurvey::~BitrefSurvey() {
   uint64_t avoided = check_count - bitref_copy_count;
   double avoided_pc = ((double)avoided / (double)check_count) * 100;
   uint64_t arr_avoided = arr_check_count - arr_bitref_copy_count;
@@ -182,7 +174,6 @@ void BitrefSurvey::survey_request_end() {
   TRACE(1, "               2048+     %8lu\n", arr_rc_copy_histogram.getBucketByIndex(numBuckets - 1).count);
 
   TRACE(1, "\n");
-  m.unlock();
   /*
   check_count = 0;
   arr_check_count = 0;

@@ -33,7 +33,8 @@ public:
   void cow_check_occurred(RefCount refcount, bool bitref, bool isArray);
   void cow_check_occurred(ArrayData* ad);
   void cow_check_occurred(StringData* sd);
-  void survey_request_end();
+
+  ~BitrefSurvey();
 
 private:
   uint64_t check_count;
@@ -60,14 +61,7 @@ void cow_check_occurred(RefCount refcount, bool bitref);
 void cow_check_occurred(ArrayData* ad);
 void cow_check_occurred(StringData* sd);
 
-/*
- * Indicate that the request has ended and results should be printed
- */
-void survey_request_end();
-
-BitrefSurvey *survey();
-
-extern BitrefSurvey *g_survey;
+BitrefSurvey &survey();
 
 ///////////////////////////////////////////////////////////////////////////////
 

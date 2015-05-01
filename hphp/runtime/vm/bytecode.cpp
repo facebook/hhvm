@@ -108,8 +108,6 @@
 
 #include "hphp/runtime/vm/globals-array.h"
 
-#include "hphp/util/bitref-survey.h"
-
 namespace HPHP {
 
 // TODO: #1746957, #1756122
@@ -7858,7 +7856,6 @@ void ExecutionContext::requestExit() {
   EventHook::Disable();
   EnvConstants::requestExit();
   tl_miter_table.clear();
-  survey_request_end();
 
   if (m_globalVarEnv) {
     smart_delete(m_globalVarEnv);

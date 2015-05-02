@@ -208,9 +208,9 @@ namespace HH {
   }
 
   interface SQLListFormatter {
-    public function format_upcase_c(ConstVector<string> $cols): string; // %LC
-    public function format_s(ConstVector<string> $strs): string; // %Ls
-    public function format_d(ConstVector<int> $ints): string; // %Ld
-    public function format_f(ConstVector<float> $floats): string; // %Lf
+    public function format_upcase_c(\ConstVector<string> $cols): string; // %LC
+    public function format_s(\ConstVector<string> $strs): string; // %Ls
+    public function format_d(\ConstVector<int> $ints): string; // %Ld
+    public function format_f(\ConstVector<float> $floats): string; // %Lf
   }
 }

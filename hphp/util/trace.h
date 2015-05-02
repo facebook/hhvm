@@ -91,6 +91,7 @@ namespace Trace {
       TM(asmx64)        \
       TM(atomicvector)  \
       TM(bcinterp)      \
+      TM(bisector)      \
       TM(datablock)     \
       TM(debugger)      \
       TM(debuggerflow)  \

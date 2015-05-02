@@ -22,6 +22,7 @@
 #include <folly/Optional.h>
 #include <folly/ScopeGuard.h>
 
+#include "hphp/util/bisector.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/dataflow-worklist.h"
@@ -88,6 +89,9 @@ bool isDeadSet(Local& env, const ALocBits& bits) {
 }
 
 void removeDead(Local& env, IRInstruction& inst) {
+  BISECTOR(store_delete);
+  if (!store_delete.go()) return;
+
   FTRACE(4, "      dead (removed)\n");
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {

@@ -392,10 +392,6 @@ StringData* convCellToStrHelper(TypedValue tv) {
   not_reached();
 }
 
-void raisePropertyOnNonObject() {
-  raise_notice("Cannot access property on non-object");
-}
-
 void raiseUndefProp(ObjectData* base, const StringData* name) {
   base->raiseUndefProp(name);
 }

@@ -889,7 +889,9 @@ void emitPropSpecialized(MTS& env, const MInstrAttr mia, PropInfo propInfo) {
     [&] { // Taken: Base is Null. Raise warnings/errors and return InitNull.
       hint(env, Block::Hint::Unlikely);
       if (!nullsafe && doWarn) {
-        gen(env, WarnNonObjProp);
+        auto const msg = makeStaticString(
+            "Cannot access property on non-object");
+        gen(env, RaiseNotice, cns(env, msg));
       }
       if (doDefine) {
         /*

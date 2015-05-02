@@ -1025,7 +1025,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
   case BaseG:
   case Clone:
-  case WarnNonObjProp:
   case RaiseArrayIndexNotice:
   case RaiseArrayKeyNotice:
   case RaiseError:

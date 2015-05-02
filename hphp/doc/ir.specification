@@ -1498,10 +1498,6 @@ To string conversions:
 
   Raise a notice for an uninitialized local variable.
 
-| WarnNonObjProp, ND, NA, Er
-
-  Raise a warning for property access on a non-object base.
-
 | RaiseUndefProp, ND, S(Obj) CStr, Er
 
   Raise a notice for an undefined property named S1 on the class of S0.

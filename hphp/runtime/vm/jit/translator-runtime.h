@@ -114,7 +114,6 @@ int64_t coerceCellToDblHelper(TypedValue tv, int64_t argNum, const Func* func);
 int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func);
 int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func);
 
-void raisePropertyOnNonObject();
 void raiseUndefProp(ObjectData* base, const StringData* name);
 void raiseUndefVariable(StringData* nm);
 void VerifyParamTypeSlow(const Class* cls,

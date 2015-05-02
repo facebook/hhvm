@@ -325,7 +325,6 @@ bool canDCE(IRInstruction* inst) {
   case VerifyRetCls:
   case VerifyRetFail:
   case RaiseUninitLoc:
-  case WarnNonObjProp:
   case RaiseUndefProp:
   case RaiseError:
   case RaiseWarning:

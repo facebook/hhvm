@@ -16,6 +16,36 @@ namespace __SystemLib {
       'string.tolower',
       '__SystemLib\StringToLowerStreamFilter'
     );
+    \stream_filter_Register(
+      'convert.iconv.*',
+      '__SystemLib\ConvertIconvFilter'
+    );
+  }
+
+  class ConvertIconvFilter extends \php_user_filter {
+    private $fromEncoding;
+    private $toEncoding;
+
+    public function onCreate(): bool {
+      $filter = substr($this->filtername, 14); // strip out prefix "convert.iconv."
+      if(false === strpos($filter, '/')) {
+        return false;
+      }
+      $encodingPair = explode('/', $filter, 2);
+      $this->fromEncoding = strtolower($encodingPair[0]);
+      $this->toEncoding = strtolower($encodingPair[1]);
+      return true;
+    }
+
+    public function filter($in, $out, &$consumed, $closing): int {
+      while ($bucket = stream_bucket_make_writeable($in)) {
+        stream_bucket_append(
+          $out,
+          stream_bucket_new($this->stream, iconv($this->fromEncoding, $this->toEncoding, $bucket->data))
+        );
+      }
+      return \PSFS_PASS_ON;
+    }
   }
 
   class DeflateStreamFilter extends \php_user_filter {

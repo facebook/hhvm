@@ -44,7 +44,7 @@ const StaticString s_default_filters_register_func(
 class StreamUserFilters : public RequestEventHandler {
  public:
   virtual ~StreamUserFilters() {}
-  Array m_registeredFilters;
+  StreamFilterRepository m_registeredFilters;
 
   bool registerFilter(const String& name, const String& class_name) {
     if (m_registeredFilters.exists(name)) {
@@ -262,6 +262,32 @@ String BucketBrigade::createString() {
     buffer.append(bucket_obj.toString());
   }
   return buffer.detach();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// StreamFilterRepository
+
+bool StreamFilterRepository::exists(const String& needle) const {
+  if(Array::exists(needle.toKey())) {
+    return true;
+  }
+  // Could not find exact match, now try wildcard match
+  int lastDotPos = needle.rfind('.');
+  if(String::npos == lastDotPos) {
+    return false;
+  }
+  String wildcard = needle.substr(0, lastDotPos) + ".*";
+  return Array::exists(wildcard.toKey());
+}
+
+Variant StreamFilterRepository::rvalAt(const String& needle, ACCESSPARAMS_IMPL) const {
+  // first try to find exact match, afterwards try wildcard matches
+  int lastDotPos = needle.rfind('.');
+  if(String::npos == lastDotPos || Array::exists(needle.toKey())) {
+    return Array::rvalAtRef(needle, flags);
+  }
+  String wildcard = needle.substr(0, lastDotPos) + ".*";
+  return Array::rvalAtRef(wildcard, flags);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

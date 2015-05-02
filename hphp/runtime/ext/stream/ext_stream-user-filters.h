@@ -53,6 +53,15 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class StreamFilterRepository : public Array {
+public:
+  virtual ~StreamFilterRepository() {}
+  bool exists(const String& needle) const;
+  Variant rvalAt(const String& needle, ACCESSPARAMS_DECL) const;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 class StreamFilter : public ResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(StreamFilter);

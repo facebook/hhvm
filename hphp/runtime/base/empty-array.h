@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/sort-flags.h"
-#include "hphp/runtime/base/countable.h"
+#include "hphp/runtime/base/header-kind.h"
 
 namespace HPHP {
 

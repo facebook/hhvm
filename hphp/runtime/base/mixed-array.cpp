@@ -53,8 +53,7 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
   auto const ad    = smartAllocArray(scale);
 
   ad->m_sizeAndPos   = 0; // size=0, pos=0
-  ad->m_kindAndCount = HeaderWord<CapCode>::pack(HeaderKind::Mixed) |
-                       uint64_t{1} << 32; // count=1
+  ad->m_hdr.init(HeaderKind::Mixed, 1);
   ad->m_scale_used   = scale; // used=0
   ad->m_nextKI       = 0;
 
@@ -65,7 +64,7 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
   assert(ad->kind() == kMixedKind);
   assert(ad->m_size == 0);
   assert(ad->m_pos == 0);
-  assert(ad->m_count == 1);
+  assert(ad->getCount() == 1);
   assert(ad->m_used == 0);
   assert(ad->m_nextKI == 0);
   assert(ad->m_scale == scale);
@@ -95,9 +94,7 @@ ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = size; // pos=0
-    ad->m_kindAndCount =
-      HeaderWord<CapCode>::pack(CapCode::exact(cap), HeaderKind::Packed) |
-      uint64_t{1} << 32; // kind=packed, count=1
+    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
     assert(ad->m_size == size);
     assert(ad->kind() == kPackedKind);
     assert(ad->cap() == cap);
@@ -117,7 +114,7 @@ ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
   }
 
   assert(ad->m_pos == 0);
-  assert(ad->m_count == 1);
+  assert(ad->getCount() == 1);
   assert(PackedArray::checkInvariants(ad));
   return ad;
 }
@@ -125,7 +122,7 @@ ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
 NEVER_INLINE ArrayData*
 MixedArray::MakePackedHelper(uint32_t size, const TypedValue* values) {
   auto const ad = MakeReserveSlow(size); // size=pos=count=kind=0
-  ad->m_count = 1;
+  ad->setRefCount(1);
   assert(ad->kind() == kPackedKind);
   assert(ad->m_size == size);
   assert(ad->cap() >= size);
@@ -142,14 +139,12 @@ ArrayData* MixedArray::MakePackedUninitialized(uint32_t size) {
   );
   assert(cap == CapCode::ceil(cap).code);
   ad->m_sizeAndPos = size; // pos=0
-  ad->m_kindAndCount =
-    HeaderWord<CapCode>::pack(CapCode::exact(cap), HeaderKind::Packed) |
-    uint64_t{1} << 32; // kind=packed, count=1
+  ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
   assert(ad->m_size == size);
   assert(ad->m_pos == 0);
   assert(ad->kind() == kPackedKind);
   assert(ad->cap() == cap);
-  assert(ad->m_count == 1);
+  assert(ad->getCount() == 1);
   assert(PackedArray::checkInvariants(ad));
   return ad;
 }
@@ -162,8 +157,7 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
   auto const ad    = smartAllocArray(scale);
 
   ad->m_sizeAndPos       = size; // pos=0
-  ad->m_kindAndCount     = HeaderWord<CapCode>::pack(HeaderKind::Mixed) |
-                           uint64_t{1} << 32; // count=1
+  ad->m_hdr.init(HeaderKind::Mixed, 1);
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -188,9 +182,9 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
 
   assert(ad->m_size == size);
   assert(ad->m_pos == 0);
-  assert(ad->m_count == 1);
-  assert(ad->m_scale == scale);
   assert(ad->kind() == kMixedKind);
+  assert(ad->m_scale == scale);
+  assert(ad->getCount() == 1);
   assert(ad->m_used == size);
   assert(ad->m_nextKI == 0);
   assert(ad->checkInvariants());
@@ -226,7 +220,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     : mallocArray(scale);
 
   ad->m_sizeAndPos      = other.m_sizeAndPos;
-  ad->m_kindAndCount    = other.m_cap_kind; // copy cap_kind; count=0
+  ad->m_hdr.init(other.m_hdr, 0);
   ad->m_scale_used      = other.m_scale_used;
   ad->m_nextKI          = other.m_nextKI;
 
@@ -260,7 +254,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   assert(ad->kind() == other.kind());
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
-  assert(ad->m_count == 0);
+  assert(ad->getCount() == 0);
   assert(ad->m_scale == scale);
   assert(ad->checkInvariants());
   return ad;
@@ -400,9 +394,7 @@ ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = array->m_sizeAndPos;
-    ad->m_kindAndCount =
-      HeaderWord<CapCode>::pack(CapCode::exact(cap), HeaderKind::Packed) |
-      int64_t{UncountedValue} << 32; // kind=packed, count=uncounted
+    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, UncountedValue);
     assert(ad->kind() == ArrayData::kPackedKind);
     assert(ad->cap() == cap);
     assert(ad->m_size == size);
@@ -417,7 +409,6 @@ ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
            *targetData);
   }
   assert(ad->m_pos == array->m_pos);
-  assert(ad->m_count == UncountedValue);
   assert(ad->isUncounted());
   assert(PackedArray::checkInvariants(ad));
   return ad;
@@ -431,8 +422,7 @@ ArrayData* MixedArray::MakeUncountedPackedHelper(ArrayData* array) {
     std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   ad->m_sizeAndPos = array->m_sizeAndPos;
-  ad->m_kindAndCount = HeaderWord<CapCode>::pack(fpcap, HeaderKind::Packed) |
-                       int64_t{UncountedValue} << 32; // count=uncounted
+  ad->m_hdr.init(fpcap, HeaderKind::Packed, UncountedValue);
   assert(ad->kind() == ArrayData::kPackedKind);
   assert(ad->cap() == cap);
   assert(ad->m_size == array->m_size);
@@ -494,7 +484,7 @@ void MixedArray::ReleaseUncountedTypedValue(TypedValue& tv) {
 NEVER_INLINE
 void MixedArray::ReleaseUncounted(ArrayData* in) {
   auto const ad = asMixed(in);
-  assert(ad->m_count == UncountedValue);
+  assert(ad->isUncounted());
 
   if (!ad->isZombie()) {
     auto const data = ad->data();
@@ -526,7 +516,7 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
 
 void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
   assert(PackedArray::checkInvariants(ad));
-  assert(ad->m_count == UncountedValue);
+  assert(ad->isUncounted());
 
   auto const data = packedData(ad);
   auto const stop = data + ad->m_size;
@@ -1041,7 +1031,7 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   auto const oldUsed    = old->m_used;
 
   ad->m_sizeAndPos      = old->m_sizeAndPos;
-  ad->m_kindAndCount    = old->m_cap_kind; // cap_kind=old->cap_kind, count=0
+  ad->m_hdr.init(old->m_hdr, 0);
   ad->m_scale_used      = newScale | uint64_t{oldUsed} << 32;
   ad->m_nextKI          = old->m_nextKI;
   auto table            = reinterpret_cast<int32_t*>(ad->data() + 3*newScale);
@@ -1073,7 +1063,7 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   assert(old->isZombie());
   assert(ad->kind() == old->kind());
   assert(ad->m_size == old->m_size);
-  assert(ad->m_count == 0);
+  assert(ad->getCount() == 0);
   assert(ad->m_pos == old->m_pos);
   assert(ad->m_used == oldUsed);
   assert(ad->m_scale == newScale);
@@ -1570,7 +1560,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   auto const oldUsed = src->m_used;
 
   ad->m_sizeAndPos      = src->m_sizeAndPos;
-  ad->m_kindAndCount    = src->m_cap_kind | uint64_t{1} << 32; // count=1
+  ad->m_hdr.init(src->m_hdr, 1);
   ad->m_scale           = scale; // don't set m_used yet
   ad->m_nextKI          = src->m_nextKI;
 
@@ -1633,7 +1623,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
 
   assert(ad->kind() == src->kind());
   assert(ad->m_size == src->m_size);
-  assert(ad->m_count == 1);
+  assert(ad->getCount() == 1);
   assert(ad->m_used <= oldUsed);
   assert(ad->m_used == dstElm - data);
   assert(ad->m_scale == scale);

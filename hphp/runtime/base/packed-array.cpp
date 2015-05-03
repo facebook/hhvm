@@ -66,15 +66,14 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
   auto const ad      = smartAllocArray(scale);
 
   ad->m_sizeAndPos       = oldSize | int64_t{old->m_pos} << 32;
-  ad->m_kindAndCount = HeaderWord<CapCode>::pack(HeaderKind::Mixed);
-  // capcode=0, count=0
+  ad->m_hdr.init(HeaderKind::Mixed, 0);
   ad->m_scale_used       = scale | uint64_t{oldSize} << 32; // used=oldSize
   ad->m_nextKI           = oldSize;
 
   assert(ad->m_size == oldSize);
   assert(ad->m_pos == old->m_pos);
   assert(ad->kind() == ArrayData::kMixedKind);
-  assert(ad->m_count == 0);
+  assert(ad->getCount() == 0);
   assert(ad->m_used == oldSize);
   assert(ad->m_scale == scale);
   assert(ad->m_nextKI == oldSize);
@@ -167,7 +166,7 @@ MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
                                            size_t neededSize) {
   assert(neededSize >= old->m_size);
   auto const ad      = ToMixedHeader(old, neededSize);
-  ad->m_count = 1;
+  ad->setRefCount(1);
   auto const oldSize = old->m_size;
   auto const mask    = ad->mask();
   auto dstData       = ad->data();
@@ -211,9 +210,7 @@ ArrayData* PackedArray::Grow(ArrayData* old) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = old->m_sizeAndPos;
-    ad->m_kindAndCount = HeaderWord<CapCode>::pack(CapCode::exact(cap),
-                                                   old->m_hdr.kind);
-    // count=0
+    ad->m_hdr.init(CapCode::exact(cap), old->m_hdr.kind, 0);
     assert(ad->isPacked());
     assert(ad->m_size == old->m_size);
     assert(ad->cap() == cap);
@@ -242,7 +239,7 @@ ArrayData* PackedArray::Grow(ArrayData* old) {
   // our refcount to start at 1.
 
   assert(ad->m_pos == oldPos);
-  assert(ad->m_count == 0);
+  assert(ad->getCount() == 0);
   assert(checkInvariants(ad));
   return ad;
 }
@@ -255,7 +252,7 @@ ArrayData* PackedArray::GrowHelper(ArrayData* old) {
   assert(CapCode::ceil(oldCap*2).decode() > CapCode::Threshold);
   auto ad = MixedArray::MakeReserveSlow(oldCap*2); // pos=count=size=kind=0
   if (UNLIKELY(ad == nullptr)) return nullptr;
-  // ad->m_cap_kind is already set correctly in MakeReserveSlow
+  // ad->m_hdr is already set correctly in MakeReserveSlow
   ad->m_sizeAndPos = old->m_sizeAndPos;
   assert(ad->isPacked());
   assert(ad->m_size == old->m_size);
@@ -326,7 +323,7 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   );
   auto const size = adIn->m_size;
   ad->m_sizeAndPos = adIn->m_sizeAndPos; // copy size, pos=0
-  ad->m_kindAndCount = adIn->m_cap_kind; // copy cap & kind, count=0
+  ad->m_hdr.init(adIn->m_hdr, 0);
 
   auto const srcData = packedData(adIn);
   auto const stop    = srcData + size;
@@ -339,7 +336,7 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   assert(ad->cap() == cap);
   assert(ad->m_size == size);
   assert(ad->m_pos == adIn->m_pos);
-  assert(ad->m_count == 0);
+  assert(ad->getCount() == 0);
   assert(checkInvariants(ad));
   return ad;
 }
@@ -366,9 +363,7 @@ ArrayData* PackedArray::NonSmartCopy(const ArrayData* adIn) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = adIn->m_sizeAndPos;
-    ad->m_kindAndCount = HeaderWord<CapCode>::pack(CapCode::exact(cap),
-                                                   HeaderKind::Packed);
-    // count=0
+    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 0);
     assert(ad->isPacked());
     assert(ad->cap() == cap);
     assert(ad->m_size == adIn->m_size);
@@ -385,7 +380,7 @@ ArrayData* PackedArray::NonSmartCopy(const ArrayData* adIn) {
   }
 
   assert(ad->m_pos == adIn->m_pos);
-  assert(ad->m_count == 0);
+  assert(ad->getCount() == 0);
   assert(checkInvariants(ad));
   return ad;
 }
@@ -398,8 +393,7 @@ ArrayData* PackedArray::NonSmartCopyHelper(const ArrayData* adIn) {
     std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   ad->m_sizeAndPos = adIn->m_sizeAndPos;
-  ad->m_kindAndCount = HeaderWord<CapCode>::pack(fpcap, HeaderKind::Packed);
-  // count=0
+  ad->m_hdr.init(fpcap, HeaderKind::Packed, 0);
   assert(ad->isPacked());
   assert(ad->cap() == cap);
   assert(ad->m_size == adIn->m_size);
@@ -417,9 +411,7 @@ ArrayData* PackedArray::NonSmartConvert(const ArrayData* arr) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = arr->m_sizeAndPos;
-    ad->m_kindAndCount =
-      HeaderWord<CapCode>::pack(CapCode::exact(cap), HeaderKind::Packed);
-    // count=0
+    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 0);
     assert(ad->isPacked());
     assert(ad->cap() == cap);
     assert(ad->m_size == arr->m_size);
@@ -434,7 +426,7 @@ ArrayData* PackedArray::NonSmartConvert(const ArrayData* arr) {
   }
 
   assert(ad->m_pos == arr->m_pos);
-  assert(ad->m_count == 0);
+  assert(ad->getCount() == 0);
   assert(checkInvariants(ad));
   return ad;
 }
@@ -447,8 +439,7 @@ ArrayData* PackedArray::NonSmartConvertHelper(const ArrayData* arr) {
     std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   ad->m_sizeAndPos = arr->m_sizeAndPos;
-  ad->m_kindAndCount = HeaderWord<CapCode>::pack(fpcap, HeaderKind::Packed);
-  // count=0
+  ad->m_hdr.init(fpcap, HeaderKind::Packed, 0);
   assert(ad->isPacked());
   assert(ad->cap() == cap);
   assert(ad->m_size == arr->m_size);
@@ -465,18 +456,16 @@ ArrayData* MixedArray::MakeReserve(uint32_t capacity) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = 0; // size=0, pos=0
-    ad->m_kindAndCount =
-      HeaderWord<CapCode>::pack(CapCode::exact(cap), HeaderKind::Packed) |
-      uint64_t{1} << 32; // kind=packed, count=1
+    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
     assert(ad->isPacked());
     assert(ad->cap() == cap);
     assert(ad->m_size == 0);
   } else {
     ad = MakeReserveSlow(capacity); // size=pos=kind=count=0
-    ad->m_count = 1;
+    ad->setRefCount(1);
   }
 
-  assert(ad->m_count == 1);
+  assert(ad->getCount() == 1);
   assert(ad->m_pos == 0);
   assert(PackedArray::checkInvariants(ad));
   return ad;
@@ -489,8 +478,7 @@ ArrayData* MixedArray::MakeReserveSlow(uint32_t capacity) {
   auto const requestSize = sizeof(ArrayData) + sizeof(TypedValue) * cap;
   auto const ad = static_cast<ArrayData*>(MM().objMallocLogged(requestSize));
   ad->m_sizeAndPos = 0;
-  ad->m_kindAndCount = HeaderWord<CapCode>::pack(fpcap, HeaderKind::Packed);
-  // count=0
+  ad->m_hdr.init(fpcap, HeaderKind::Packed, 0);
   assert(ad->isPacked());
   assert(ad->cap() == cap);
   assert(ad->m_size == 0);

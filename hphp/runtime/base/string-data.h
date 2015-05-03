@@ -479,16 +479,7 @@ private:
   // We have the next fields blocked into qword-size unions so
   // StringData initialization can do fewer stores to initialize the
   // fields.  (gcc does not combine the stores itself.)
-  union {
-    struct {
-      union {
-        HeaderWord<CapCode> m_hdr;
-        uint32_t m_cap_kind;
-      };
-      mutable RefCount m_count;
-    };
-    uint64_t m_capAndCount;
-  };
+  HeaderWord<CapCode> m_hdr;
   union {
     struct {
       uint32_t m_len;

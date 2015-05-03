@@ -29,8 +29,8 @@ namespace HPHP {
 // resources have a separate id space
 __thread int ResourceData::os_max_resource_id;
 
-ResourceData::ResourceData() : m_count(0) {
-  m_hdr.init(0, HeaderKind::Resource);
+ResourceData::ResourceData() {
+  m_hdr.init(0, HeaderKind::Resource, 0);
   int& pmax = os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
   o_id = ++pmax;
@@ -94,7 +94,6 @@ void ResourceData::serialize(VariableSerializer* serializer) const {
 
 void ResourceData::compileTimeAssertions() {
   static_assert(offsetof(ResourceData, m_hdr) == HeaderOffset, "");
-  static_assert(offsetof(ResourceData, m_count) == FAST_REFCOUNT_OFFSET, "");
 }
 
 void ResourceData::vscan(IMarker& mark) const {

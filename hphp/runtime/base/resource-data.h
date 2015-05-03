@@ -107,7 +107,6 @@ class ResourceData {
   //============================================================================
   // ResourceData fields
   HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores heap size
-  mutable RefCount m_count;
 
  protected:
   // Numeric identifier of resource object (used by var_dump() and other

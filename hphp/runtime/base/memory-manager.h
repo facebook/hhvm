@@ -371,7 +371,7 @@ struct StringDataNode {
 struct BigNode {
   size_t nbytes;
   HeaderWord<> hdr;
-  uint32_t index;
+  uint32_t& index() { return hdr.hi32; }
 };
 
 // Header used for small smart_malloc allocations (but not *Size allocs)
@@ -383,13 +383,9 @@ struct SmallNode {
 // all FreeList entries are parsed by inspecting this header.
 struct FreeNode {
   FreeNode* next;
-  union {
-    struct {
-      HeaderWord<> hdr;
-      uint32_t size;
-    };
-    uint64_t kind_size;
-  };
+  HeaderWord<> hdr;
+  uint32_t& size() { return hdr.hi32; }
+  uint32_t size() const { return hdr.hi32; }
 };
 
 // header for HNI objects with NativeData payloads. see native-data.h

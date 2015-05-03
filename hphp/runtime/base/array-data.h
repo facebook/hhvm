@@ -64,12 +64,12 @@ protected:
    * it, change the MixedArray::Make functions as appropriate.
    */
   explicit ArrayData(ArrayKind kind)
-    : m_sizeAndPos(uint32_t(-1))
-    , m_kindAndCount(HeaderWord<CapCode>::pack(static_cast<HeaderKind>(kind))) {
+    : m_sizeAndPos(uint32_t(-1)) {
+    m_hdr.init(static_cast<HeaderKind>(kind), 0);
     assert(m_size == -1);
     assert(m_pos == 0);
     assert(m_hdr.kind == static_cast<HeaderKind>(kind));
-    assert(m_count == 0);
+    assert(getCount() == 0);
   }
 
   /*
@@ -83,7 +83,7 @@ protected:
 
 public:
   IMPLEMENT_COUNTABLE_METHODS
-  void setRefCount(RefCount n) { m_count = n; }
+  void setRefCount(RefCount n) { m_hdr.count = n; }
 
   /**
    * Create a new ArrayData with specified array element(s).
@@ -395,7 +395,6 @@ private:
   friend size_t getMemSize(const ArrayData*);
   static void compileTimeAssertions() {
     static_assert(offsetof(ArrayData, m_hdr) == HeaderOffset, "");
-    static_assert(offsetof(ArrayData, m_count) == FAST_REFCOUNT_OFFSET, "");
   }
 
 protected:
@@ -433,16 +432,7 @@ protected:
     };
     uint64_t m_sizeAndPos; // careful, m_pos is signed
   };
-  union {
-    struct {
-      union {
-        HeaderWord<CapCode> m_hdr;
-        uint32_t m_cap_kind;
-      };
-      mutable RefCount m_count;
-    };
-    uint64_t m_kindAndCount;
-  };
+  HeaderWord<CapCode> m_hdr;
 };
 
 static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");

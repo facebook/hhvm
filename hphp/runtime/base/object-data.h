@@ -420,22 +420,10 @@ private:
 #ifdef USE_LOWPTR
   LowClassPtr m_cls;
   int o_id; // Numeric identifier of this object (used for var_dump())
-  union {
-    struct {
-      HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
-      mutable RefCount m_count;
-    };
-    uint64_t m_attr_kind_count;
-  };
+  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
 #else
   LowClassPtr m_cls;
-  union {
-    struct {
-      HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
-      mutable RefCount m_count;
-    };
-    uint64_t m_attr_kind_count;
-  };
+  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
   int o_id; // Numeric identifier of this object (used for var_dump())
 #endif
 };

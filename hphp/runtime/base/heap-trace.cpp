@@ -304,12 +304,12 @@ void Marker::init() {
       case HK::Apc:
       case HK::Globals:
       case HK::Proxy:
-        assert(h->count_ > 0);
+        assert(h->hdr_.count > 0);
         total_ += h->size();
         break;
       case HK::Ref:
         // EZC non-ref refdatas sometimes have count==0
-        assert(h->count_ > 0 || !h->ref_.zIsRef());
+        assert(h->hdr_.count > 0 || !h->ref_.zIsRef());
         total_ += h->size();
         break;
       case HK::Resource:

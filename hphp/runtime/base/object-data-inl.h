@@ -31,12 +31,11 @@ inline ObjectData::ObjectData(Class* cls)
   : ObjectData(cls, 0, HeaderKind::Object)
 {}
 
-inline ObjectData::ObjectData(Class* cls, uint16_t flags,
-                              HeaderKind kind)
+inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
   : m_cls(cls)
-  , m_attr_kind_count(HeaderWord<uint16_t>::pack(flags, kind)) // count=0
 {
-  assert(m_hdr.aux == flags && !m_count);
+  m_hdr.init(flags, kind, 0);
+  assert(m_hdr.aux == flags && !getCount());
   assert(isObjectKind(kind));
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
@@ -45,9 +44,9 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags,
 
 inline ObjectData::ObjectData(Class* cls, NoInit)
   : m_cls(cls)
-  , m_attr_kind_count(HeaderWord<uint16_t>::pack(0, HeaderKind::Object))
 {
-  assert(!m_hdr.aux && m_hdr.kind == HeaderKind::Object && !m_count);
+  m_hdr.init(0, HeaderKind::Object, 0);
+  assert(!m_hdr.aux && m_hdr.kind == HeaderKind::Object && !getCount());
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
 }

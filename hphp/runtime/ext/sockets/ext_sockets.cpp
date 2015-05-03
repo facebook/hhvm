@@ -353,7 +353,7 @@ static SmartPtr<Socket> create_new_socket(
 }
 
 static int connect_with_timeout(int fd, struct sockaddr *sa_ptr,
-                                size_t sa_size, int timeout,
+                                size_t sa_size, double timeout,
                                 const HostURL &hosturl,
                                 std::string &errstr, int &errnum) {
   if (timeout <= 0) {
@@ -404,7 +404,7 @@ static int connect_with_timeout(int fd, struct sockaddr *sa_ptr,
   return retval;
 }
 
-static Variant new_socket_connect(const HostURL &hosturl, int timeout,
+static Variant new_socket_connect(const HostURL &hosturl, double timeout,
                                   Variant &errnum, Variant &errstr) {
   int domain = AF_UNSPEC;
   int type = SOCK_STREAM;

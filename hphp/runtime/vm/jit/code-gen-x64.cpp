@@ -238,7 +238,7 @@ void maybe_syncsp(Vout& v, BCMarker marker, Vreg irSP, IRSPOffset off) {
 }
 
 RegSet leave_trace_args(BCMarker marker) {
-  return marker.resumed() ? kCrossTraceRegs : kCrossTraceRegsNoSP;
+  return marker.resumed() ? kCrossTraceRegsResumed : kCrossTraceRegs;
 }
 
 } // unnamed namespace
@@ -2152,7 +2152,8 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
                v.makeVcallArgs({{prev_fp, sync_sp, ripReg}}), v.makeTuple({})};
   }
 
-  v << vretm{fp[AROFF(m_savedRip)], fp[AROFF(m_sfp)], rVmFp, kCrossTraceRegs};
+  v << vretm{fp[AROFF(m_savedRip)], fp[AROFF(m_sfp)], rVmFp,
+    kCrossTraceRegsReturn};
 }
 
 void CodeGenerator::cgAsyncRetCtrl(IRInstruction* inst) {
@@ -2170,7 +2171,7 @@ void CodeGenerator::cgAsyncRetCtrl(IRInstruction* inst) {
                v.makeVcallArgs({{fp, sync_sp, retAddr}}), v.makeTuple({})};
   }
 
-  v << vret{retAddr, kCrossTraceRegs};
+  v << vret{retAddr, kCrossTraceRegsReturn};
 }
 
 void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
@@ -2892,7 +2893,7 @@ void CodeGenerator::cgCallArray(IRInstruction* inst) {
   v << syncvmsp{syncSP};
 
   auto done = v.makeBlock();
-  v << vcallstub{target, kCrossTraceRegs, v.makeTuple({pc, after}),
+  v << vcallstub{target, kCrossTraceRegsFCallArray, v.makeTuple({pc, after}),
                  {done, m_state.labels[inst->taken()]}};
   m_state.catch_calls[inst->taken()] = CatchCall::PHP;
   v = done;
@@ -4717,7 +4718,7 @@ void CodeGenerator::cgInterpOneCF(IRInstruction* inst) {
                             // system happy and generates the same code.
   assertx(mcg->tx().uniqueStubs.interpOneCFHelpers.count(op));
   v << jmpi{mcg->tx().uniqueStubs.interpOneCFHelpers[op],
-            kCrossTraceRegs | rAsm};
+            kCrossTraceRegsInterpOneCF};
 }
 
 void CodeGenerator::cgContEnter(IRInstruction* inst) {
@@ -4739,7 +4740,8 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
   auto const sync_sp = v.makeReg();
   v << lea{curSpReg[cellsToBytes(spOff.offset)], sync_sp};
   v << syncvmsp{sync_sp};
-  v << contenter{curFpReg, addrReg, kCrossTraceRegs, {next, catchBlock}};
+  v << contenter{curFpReg, addrReg, kCrossTraceRegsResumed,
+                 {next, catchBlock}};
   m_state.catch_calls[inst->taken()] = CatchCall::PHP;
   v = next;
 }

@@ -116,16 +116,36 @@ const RegSet kXMMRegs = kXMMUnreserved | kXMMReserved;
  */
 
 /*
- * Registers that are live between all tracelets.
+ * Registers that are live between tracelets, in two flavors, depending whether
+ * we are between tracelets in a resumed function.
  */
-const RegSet kCrossTraceRegs     = rVmFp | rVmSp | rVmTl;
-const RegSet kCrossTraceRegsNoSP = rVmFp | rVmTl;
+const RegSet kCrossTraceRegs        = rVmFp | rVmTl;
+const RegSet kCrossTraceRegsResumed = kCrossTraceRegs | rVmSp;
+
+/*
+ * Registers live on entry to the fcallArrayHelper.
+ *
+ * TODO(#2288359): we don't want this to include rVmSp eventually.
+ */
+const RegSet kCrossTraceRegsFCallArray = kCrossTraceRegs | rVmSp;
+
+/*
+ * Registers live on entry to an interpOneCFHelper.
+ */
+const RegSet kCrossTraceRegsInterpOneCF = kCrossTraceRegs | rVmSp | rAsm;
+
+/*
+ * Registers that are live after a PHP function return.
+ *
+ * TODO(#2288359): we don't want this to include rVmSp eventually.
+ */
+const RegSet kCrossTraceRegsReturn = kCrossTraceRegs | rVmSp;
 
 /*
  * Registers that are live during a PHP function call, between the caller and
  * the callee.
  */
-const RegSet kCrossCallRegs = kCrossTraceRegsNoSP; // TODO(#6849123)
+const RegSet kCrossCallRegs = kCrossTraceRegs;
 
 /*
  * Registers that can safely be used for scratch purposes in-between
@@ -136,7 +156,7 @@ const RegSet kCrossCallRegs = kCrossTraceRegsNoSP; // TODO(#6849123)
  * modifying them.
  */
 const RegSet kScratchCrossTraceRegs = kXMMCallerSaved |
-  (kGPUnreserved - kCrossTraceRegs);
+  (kGPUnreserved - (kCrossTraceRegs | kCrossTraceRegsResumed));
 
 //////////////////////////////////////////////////////////////////////
 /*

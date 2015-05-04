@@ -2306,9 +2306,8 @@ void emitServiceReq(Vout& v, TCA stub_block,
       }
     }
   }
-  v << svcreq{req, x64::kCrossTraceRegs, v.makeTuple(args), stub_block};
+  auto const regs = x64::kCrossTraceRegs | x64::rVmSp;
+  v << svcreq{req, regs, v.makeTuple(args), stub_block};
 }
 
-} // HPHP::jit
-
-} // HPHP
+}}

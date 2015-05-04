@@ -49,11 +49,10 @@ class AutoloadHandler final : public RequestEventHandler {
     smart::unique_ptr<CufIter> m_cufIter; // used to invoke handlers
   };
 
-  class CompareBundles {
-public:
+  struct CompareBundles {
     explicit CompareBundles(CufIter* cufIter) : m_cufIter(cufIter) { }
     bool operator()(const HandlerBundle& hb);
-private:
+   private:
     CufIter* m_cufIter;
   };
 
@@ -67,8 +66,8 @@ public:
     m_loading.detach();
   }
 
-  virtual void requestInit();
-  virtual void requestShutdown();
+  void requestInit() override;
+  void requestShutdown() override;
 
   Array getHandlers();
   bool addHandler(const Variant& handler, bool prepend);

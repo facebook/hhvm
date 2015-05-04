@@ -14,29 +14,28 @@ ZEND_API zend_compiler_globals compiler_globals;
 
 namespace HPHP {
 
-class ZendExecutorGlobals : public RequestEventHandler {
-  public:
-    virtual void requestInit() {
-      // Clear out any exceptions that might be left over from previous
-      // requests.
+struct ZendExecutorGlobals final : RequestEventHandler {
+  void requestInit() override {
+    // Clear out any exceptions that might be left over from previous
+    // requests.
+    m_data.exception = nullptr;
+    m_data.prev_exception = nullptr;
+  }
+
+  void requestShutdown() override {
+    if (auto exn = m_data.exception) {
       m_data.exception = nullptr;
+      zval_ptr_dtor(&exn);
+    }
+    if (auto exn = m_data.prev_exception) {
       m_data.prev_exception = nullptr;
+      zval_ptr_dtor(&exn);
     }
+  }
 
-    virtual void requestShutdown() {
-      if (auto exn = m_data.exception) {
-        m_data.exception = nullptr;
-        zval_ptr_dtor(&exn);
-      }
-      if (auto exn = m_data.prev_exception) {
-        m_data.prev_exception = nullptr;
-        zval_ptr_dtor(&exn);
-      }
-    }
+  ~ZendExecutorGlobals() {}
 
-    virtual ~ZendExecutorGlobals() {}
-
-    _zend_executor_globals m_data;
+  _zend_executor_globals m_data;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(ZendExecutorGlobals, s_zend_executor_globals);

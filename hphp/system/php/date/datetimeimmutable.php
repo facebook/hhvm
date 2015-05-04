@@ -1,6 +1,6 @@
 <?php
 
-class DateTimeImmutable implements DateTimeInterface, JsonSerializable {
+class DateTimeImmutable implements DateTimeInterface {
   public function __construct(
     string $time = "now",
     DateTimeZone $timezone = null
@@ -105,10 +105,6 @@ class DateTimeImmutable implements DateTimeInterface, JsonSerializable {
 
   public function __clone() {
     $this->data = clone $this->data;
-  }
-
-  public function jsonSerialize() {
-    return $this->data;
   }
 
   private DateTime $data;

@@ -42,6 +42,8 @@ protected:
   const Func* lookupMethod(const StringData* name);
 
 protected:
+  template <typename F> friend void scan(const UserFSNode&, F&);
+
   const Func* m_Call;
   LowClassPtr m_cls;
   Object m_obj;

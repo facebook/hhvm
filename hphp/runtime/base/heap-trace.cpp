@@ -20,9 +20,9 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/trace.h"
+#include "hphp/runtime/all-scan.h"
 
 #include <vector>
-#include <boost/dynamic_bitset.hpp>
 #include <unordered_map>
 #include <folly/Range.h>
 

@@ -1,0 +1,142 @@
+Clang GC tool
+-------------
+A Clang plugin that generates scan methods for the heap tracer.
+
+Currently, the code generation process works by scanning a verbose fbmake
+build log in order to scrape command line arguments and source files to pass
+to clang. The generate-scan-functions.sh script is used to run the whole
+process, e.g. from the clang-gc-tool directory run
+
+generate-scan-functions.sh hphp
+
+For a complete list of options, run generate-scan-functions.sh -h
+
+The plugin is initialized with several lists of interesting classes. One list
+contains all the classes that require scanning (needsScanMethods).  Any class
+that inherits from one of these classes will also be marked as needing a scan
+function.
+
+Another list contains classes that have (or should have) predefined scan
+methods (hasScanMethods). The plugin will not generate scan methods for any
+of the classes in this set. Uninteresting classes will also get added to this
+set as the plugin runs in order to reduce the time needed to analyze remaining
+classes.
+
+The final list (badContainers) contains a list of container classes that are
+not suitable for containing smart allocated objects, e.g. std::vector. These
+classes are a problem because they use new (not smart_malloc) to allocate
+internal memory. A warning is generated any time a class in this set is used
+to store a scannable class.
+
+The plugin uses a Clang provided visitor to traverse over all the declarations
+in a C++ file. For each declaration that inherits from one of the scannable
+classes, it will check all fields and any additional parent classes to see
+if those require scan methods as well. In most cases a scan method will be
+generated for each one of these classes. Unions, empty classes or classes
+that contain no additional scannable fields/parent classes will not get scan
+methods. Scannable classes containing unions will need to be written by the
+user.
+
+In addition to checking for the non-smart allocated containers above, it checks
+for a number of other problematic situations:
+
+The presence of a union in a scannable class.
+Use of void* in a scannable class.
+Use of a raw pointer to a scannable class, i.e. ObjectData*, ResourceData*, etc.
+Raw arrays of scannable classes.
+
+The scan methods are stored in a directory structure under hphp/scan-methods
+that is parallel to the original directory hierarchy. Each X.cpp file should
+have its own corresponding X-scan.h file under scan-methods. There is a
+master include file in scan-methods/all-scan.h that includes all the other
+scan files. The heap tracer includes all-scan.h.
+
+There are still certainly bugs but all the generated scan files compile and
+seem more or less correct. The whitelists of classes (needsScanMethod,
+hasScanMethod, badContainers) will probably need to be updated. We could
+also add better/more warnings.
+
+For now, must run fbconfig with --with-project-version=clang:dev
+
+Plan
+----
+Build process
+   hook into fbconfig/fbmake, cmake
+   - hacky: run fbconfig --clang && fbmake --verbose in a clean sandbox
+            scrape build log for compiler flags and then run clang plugin
+   - proper: tbd, requires help from other people
+
+   need cmake support for open source
+
+   generate files scan files alongside in a parallel directory structure.
+     - e.g. for x/y/z/foo.h make scanners/x/y/z/scan-foo.h that includes foo.h.
+     - eventually put in generated files in _build.
+     - need to collect up master scan-*.h list at end for inclusion by tracer.
+     - problems with private (.cpp only) classes.
+     - problems generating duplicate scan files (since many files include same headers).
+     - add 'this is autogened' and pointer to README/regeneration comments
+       on scan methods.
+
+   how to flag rebuilds?
+   - won't compile if a field is removed.
+   - add static_asserts about sizes in scan methods.
+     this will inform people that they need to regenerate.
+
+Details
+  what classes need scan methods?
+    (Array|String|Object|Resource)Data, TypedValue, RequestEventHandler?
+    anything that transitively subclasses/contains one of the above.
+    some classes/types have builtin scan methods that we want to ignore, e.g.
+      - smart containers
+      - base types
+
+   problem types
+     unions, raw pointers to any scanable class.
+       - need some escape hatch for incorporating user defined scan functions.
+     templates?
+     opaque types, i.e. void*, struct pimplX; class foo { pimplX* pimpl; }
+
+   need error checking
+     classes that don't fall into one of the above categories.
+     classes containing problem types.
+     storing gc things in static members/data, thread locals, etc.
+
+Lint like checks
+  make sure objects aren't stack allocated
+  check for pointer/intptr tricks
+
+TODO
+----
+not fully defined class problem, e.g.
+
+A.h:
+class B;
+struct A { B* m; }; // A defined.
+
+A.cpp:
+#include "A.h"
+struct B { int x; }  // A and B defined
+
+C.cpp:
+#include "A.h"  // A defined but B not
+
+handle NativeData
+- adding all classes too permissive.  should only add ones that have a 
+  "need scan" field.
+
+templates
+- generate mark for all template parameter members (or just all members?)
+
+improve warnings messages (trail of bad classes).
+
+marking for members is overly permissive (only fundamental types are excluded).
+
+warn about over allocation trick, e.g. foo elems[1];
+  see c_AsyncFunctionWaitHandle { Node m_children[1]; }
+
+clean up doc and move to doc directory
+- fix pointers in generated code to point to new location.
+
+clean up lockfiles (where they are created and delete at exit).
+
+conservatively scan unions instead of assert?

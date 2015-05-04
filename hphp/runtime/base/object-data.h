@@ -482,14 +482,15 @@ template<class T, class... Args> T* newobj(Args&&... args) {
   }
 }
 
-#define DECLARE_CLASS_NO_SWEEP(originalName)                    \
-  public:                                                       \
-  CLASSNAME_IS(#originalName)                                   \
-  friend ObjectData* new_##originalName##_Instance(Class*);     \
-  friend void delete_##originalName(ObjectData*, const Class*); \
-  static inline HPHP::LowClassPtr& classof() {                  \
-    static HPHP::LowClassPtr result;                            \
-    return result;                                              \
+#define DECLARE_CLASS_NO_SWEEP(originalName)                           \
+  public:                                                              \
+  CLASSNAME_IS(#originalName)                                          \
+  template <typename F> friend void scan(const c_##originalName&, F&); \
+  friend ObjectData* new_##originalName##_Instance(Class*);            \
+  friend void delete_##originalName(ObjectData*, const Class*);        \
+  static inline HPHP::LowClassPtr& classof() {                         \
+    static HPHP::LowClassPtr result;                                   \
+    return result;                                                     \
   }
 
 #define IMPLEMENT_CLASS_NO_SWEEP(cls)

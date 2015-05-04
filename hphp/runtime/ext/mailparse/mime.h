@@ -82,6 +82,8 @@ private:
                          int charset_p, int prevcharset_p);
   };
 
+  template <typename F> friend void scan(const MimePart::MimeHeader&, F&);
+
 private:
   static void UpdatePositions(SmartPtr<MimePart> part, int newendpos,
                               int newbodyend, int deltanlines);

@@ -57,6 +57,7 @@ struct IntervalTimer final {
   void run();
 
 private:
+  template <typename F> friend void scan(const IntervalTimer&, F&);
   double m_interval;
   double m_initial;
   Variant m_callback;

@@ -217,12 +217,17 @@ template<class T, class... Args> T* newres(Args&&... args) {
   }
 }
 
-#define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                         \
-  public:                                                               \
-  ALWAYS_INLINE void operator delete(void* p) {                         \
-    static_assert(std::is_base_of<ResourceData,T>::value, "");          \
-    assert(static_cast<T*>(p)->heapSize() == sizeof(T));                \
-    MM().smartFreeSizeLogged(p, sizeof(T));                             \
+#define RESOURCE_FRIEND(T) \
+template <typename F> friend void scan(const T& this_, F& mark);
+#define SUPPRESS_RESOURCE_FRIEND(x) x
+
+#define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                 \
+  public:                                                       \
+  SUPPRESS_RESOURCE_FRIEND(RESOURCE_FRIEND(T))                  \
+  ALWAYS_INLINE void operator delete(void* p) {                 \
+    static_assert(std::is_base_of<ResourceData,T>::value, "");  \
+    assert(static_cast<T*>(p)->heapSize() == sizeof(T));        \
+    MM().smartFreeSizeLogged(p, sizeof(T));                     \
   }
 
 #define DECLARE_RESOURCE_ALLOCATION(T)                                  \

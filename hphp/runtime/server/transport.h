@@ -421,6 +421,8 @@ public:
   bool isSSL() const {return m_isSSL;}
 
 protected:
+  template <typename F> friend void scan(const Transport&, F&);
+
   /**
    * Parameter parsing in this class is done by making just one copy of the
    * entire query (either URL or post data), then insert termintaing NULLs

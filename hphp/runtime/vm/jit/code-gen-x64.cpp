@@ -4399,6 +4399,7 @@ void CodeGenerator::cgAKExistsObj(IRInstruction* inst) {
 
   if (keyTy <= TInitNull) {
     v << ldimmq{0, dstLoc(inst, 0).reg()};
+    m_state.catch_calls[inst->taken()] = CatchCall::CPP;
     return;
   }
 

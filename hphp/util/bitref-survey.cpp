@@ -126,54 +126,55 @@ BitrefSurvey::~BitrefSurvey() {
   double str_rc_copy_pc = ((double) str_rc_copy_count / (double) str_check_count) * 100;
   double str_bitref_copy_pc = ((double)str_bitref_copy_count / (double)str_check_count) * 100;
   
+  FILE *fp = fopen("/tmp/hphp.log", "w");
 
-  TRACE(1, "     || # checks |        # rc copies       | # 1bit copies   | # avoided copy  \n");
-  TRACE(1, "     ||          |       all       | static |(incl. rc copies)|                 \n");
-  TRACE(1, "--------------------------------------------------------------------------------\n");
+  fprintf(fp, "     || # checks |        # rc copies       | # 1bit copies   | # avoided copy  \n");
+  fprintf(fp, "     ||          |       all       | static |(incl. rc copies)|                 \n");
+  fprintf(fp, "--------------------------------------------------------------------------------\n");
 
-  TRACE(1, " all ||%10ld|%8ld (%5.2f%%)|%8ld|%8ld (%5.2f%%)|%8ld (%5.2f%%)\n", check_count,
+  fprintf(fp, " all ||%10ld|%8ld (%5.2f%%)|%8ld|%8ld (%5.2f%%)|%8ld (%5.2f%%)\n", check_count,
       rc_copy_count, rc_copy_pc, static_count, bitref_copy_count, bitref_copy_pc,
       avoided, avoided_pc);
 
-  TRACE(1, " arr ||%10ld|%8ld (%5.2f%%)|%8ld|%8ld (%5.2f%%)|%8ld (%5.2f%%)\n", arr_check_count,
+  fprintf(fp, " arr ||%10ld|%8ld (%5.2f%%)|%8ld|%8ld (%5.2f%%)|%8ld (%5.2f%%)\n", arr_check_count,
       arr_rc_copy_count, arr_rc_copy_pc, arr_static_count, arr_bitref_copy_count, 
       arr_bitref_copy_pc, arr_avoided, arr_avoided_pc);
 
-  TRACE(1, " str ||%10ld|%8ld (%5.2f%%)|%8ld|%8ld (%5.2f%%)|%8ld (%5.2f%%)\n", str_check_count,
+  fprintf(fp, " str ||%10ld|%8ld (%5.2f%%)|%8ld|%8ld (%5.2f%%)|%8ld (%5.2f%%)\n", str_check_count,
       str_rc_copy_count, str_rc_copy_pc, str_static_count, str_bitref_copy_count, 
       str_bitref_copy_pc, str_avoided, str_avoided_pc);
 
-  TRACE(1, "--------------------------------------------------------------------------------\n");
-  TRACE(1, "# []: %8ld (%5.2f%% of rc array copies, %5.2f%% of 1bit array copies)\n",
+  fprintf(fp, "--------------------------------------------------------------------------------\n");
+  fprintf(fp, "# []: %8ld (%5.2f%% of rc array copies, %5.2f%% of 1bit array copies)\n",
       arr_empty_count,
       ((double)arr_empty_count / (double)arr_rc_copy_count) * 100,
       ((double)arr_empty_count / (double)arr_bitref_copy_count) * 100);
-  TRACE(1, "# \"\": %8ld (%5.2f%% of rc string copies, %5.2f%% of 1bit string copies)\n",
+  fprintf(fp, "# \"\": %8ld (%5.2f%% of rc string copies, %5.2f%% of 1bit string copies)\n",
       str_empty_count,
       ((double)str_empty_count / (double)str_rc_copy_count) * 100,
       ((double)str_empty_count / (double)str_bitref_copy_count) * 100);
   
-  TRACE(1, "--------------------------------------------------------------------------------\n");
+  fprintf(fp, "--------------------------------------------------------------------------------\n");
   
   unsigned int numBuckets = str_rc_copy_histogram.getNumBuckets();
-  TRACE(1, "String length:    0-   0 %8lu\n", str_rc_copy_histogram.getBucketByIndex(0).count);
+  /*fprintf(fp, "String length:    0-   0 %8lu\n", str_rc_copy_histogram.getBucketByIndex(0).count);
   for (unsigned int n = 1; n < numBuckets - 1; n++) {
-    TRACE(1, "               %4u-%4u %8lu\n", str_rc_copy_histogram.getBucketMin(n),
+    fprintf(fp, "               %4u-%4u %8lu\n", str_rc_copy_histogram.getBucketMin(n),
         str_rc_copy_histogram.getBucketMax(n), str_rc_copy_histogram.getBucketByIndex(n).count);
   }
-  TRACE(1, "               2048+     %8lu\n", str_rc_copy_histogram.getBucketByIndex(numBuckets - 1).count);
+  fprintf(fp, "               2048+     %8lu\n", str_rc_copy_histogram.getBucketByIndex(numBuckets - 1).count);
   
-  TRACE(1, "--------------------------------------------------------------------------------\n");
+  fprintf(fp, "--------------------------------------------------------------------------------\n");
 
   numBuckets = arr_rc_copy_histogram.getNumBuckets();
-  TRACE(1, "Array length :    0-   0 %8lu\n", arr_rc_copy_histogram.getBucketByIndex(0).count);
+  fprintf(fp, "Array length :    0-   0 %8lu\n", arr_rc_copy_histogram.getBucketByIndex(0).count);
   for (unsigned int n = 1; n < numBuckets - 1; n++) {
-    TRACE(1, "               %4u-%4u %8lu\n", arr_rc_copy_histogram.getBucketMin(n),
+    fprintf(fp, "               %4u-%4u %8lu\n", arr_rc_copy_histogram.getBucketMin(n),
         arr_rc_copy_histogram.getBucketMax(n), arr_rc_copy_histogram.getBucketByIndex(n).count);
   }
-  TRACE(1, "               2048+     %8lu\n", arr_rc_copy_histogram.getBucketByIndex(numBuckets - 1).count);
+  fprintf(fp, "               2048+     %8lu\n", arr_rc_copy_histogram.getBucketByIndex(numBuckets - 1).count);
 
-  TRACE(1, "\n");
+  fprintf(fp, "\n");*/
   /*
   check_count = 0;
   arr_check_count = 0;
@@ -193,6 +194,8 @@ BitrefSurvey::~BitrefSurvey() {
 
   arr_empty_count = 0;
   */
+
+  fclose(fp);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/imarker.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/ext/extension-registry.h"
+#include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
 
@@ -123,6 +124,11 @@ template<class F> void ResourceData::scan(F& mark) const {
   vscan(bridge);
 }
 
+template<class F> void RequestEventHandler::scan(F& mark) const {
+  ExtMarker<F> bridge(mark);
+  vscan(bridge);
+}
+
 //   [<-stack[iters[locals[params[ActRec[stack[iters[locals[ActRec...
 //   ^m_top                      ^fp                       ^firstAR
 //
@@ -187,7 +193,7 @@ template<class F> void scanRoots(F& mark) {
   mark(sp, s_stackLimit + s_stackSize - uintptr_t(sp));
   // Extension thread locals
   ExtMarker<F> xm(mark);
-  ExtensionRegistry::scanExtensionRoots(xm);
+  ExtensionRegistry::scanExtensions(xm);
   // Root maps
   MM().scanRootMaps(mark);
 }

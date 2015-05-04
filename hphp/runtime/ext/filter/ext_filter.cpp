@@ -124,7 +124,7 @@ struct FilterRequestData final : RequestEventHandler {
     return empty_array();
   }
 
-  void scanRoots(IMarker& mark) {
+  void vscan(IMarker& mark) const override {
     mark(m_GET);
     mark(m_POST);
     mark(m_COOKIE);
@@ -221,11 +221,6 @@ public:
     s_filter_request_data->requestInit();
   }
 
-  void scanRoots(IMarker& m) override {
-    if (s_filter_request_data.getInited()) {
-      s_filter_request_data->scanRoots(m);
-    }
-  }
 } s_filter_extension;
 
 #undef REGISTER_CONSTANT

@@ -494,7 +494,7 @@ public:
     //mark(m_stdoutData);
     mark(m_stdoutBytesWritten);
     mark(m_rawPostData);
-    //mark(m_requestEventHandlers);TODO #6512343
+    mark(m_requestEventHandlers);
     mark(m_shutdowns);
     mark(m_userErrorHandlers);
     mark(m_userExceptionHandlers);

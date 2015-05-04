@@ -81,7 +81,7 @@ public:
   virtual void threadShutdown() {}
   virtual void requestInit() {}
   virtual void requestShutdown() {}
-  virtual void scanRoots(IMarker&) {} // TODO 6495061 pure virtual
+  virtual void vscan(IMarker&) const {} // TODO 6495061 pure virtual
 
   // override this to control extension_loaded() return value
   virtual bool moduleEnabled() const { return true; }

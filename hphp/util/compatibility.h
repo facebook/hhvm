@@ -34,6 +34,7 @@ extern __thread int64_t s_extra_request_microseconds;
 char *strndup(const char* str, size_t len);
 int dprintf(int fd, const char *format, ...) ATTRIBUTE_PRINTF(2,3);
 typedef int clockid_t;
+int pipe2(int pipefd[2], int flags);
 #endif
 
 int gettime(clockid_t which_clock, struct timespec *tp);

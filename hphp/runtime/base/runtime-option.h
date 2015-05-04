@@ -398,21 +398,18 @@ public:
   F(bool, SimulateARM,                 simulateARMDefault())            \
   F(uint32_t, JitLLVM,                 jitLLVMDefault())                \
   F(uint32_t, JitLLVMKeepSize,         0)                               \
-  F(uint32_t, JitLLVMOptLevel,         2)                               \
-  F(uint32_t, JitLLVMSizeLevel,        0)                               \
-  F(bool,     JitLLVMBBVectorize,      false)                           \
   F(bool,     JitLLVMBasicOpt,         true)                            \
   F(string,   JitLLVMCompare,          "")                              \
   F(bool,     JitLLVMCondTail,         true)                            \
   F(bool,     JitLLVMCounters,         false)                           \
   F(bool,     JitLLVMDiscard,          false)                           \
   F(bool,     JitLLVMFastISel,         false)                           \
-  F(bool,     JitLLVMLoadCombine,      false)                           \
   F(bool,     JitLLVMMinSize,          true)                            \
+  F(uint32_t, JitLLVMOptLevel,         2)                               \
   F(bool,     JitLLVMOptSize,          true)                            \
   F(bool,     JitLLVMPrintAfterAll,    false)                           \
   F(bool,     JitLLVMRetOpt,           true)                            \
-  F(bool,     JitLLVMSLPVectorize,     jitLLVMSLPVectorizeDefault())    \
+  F(uint32_t, JitLLVMSizeLevel,        0)                               \
   F(uint32_t, JitLLVMSplitHotCold,     1)                               \
   F(bool,     JitLLVMVolatileIncDec,   true)                            \
   F(string,   JitLLVMAttrs,            "")                              \

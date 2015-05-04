@@ -78,8 +78,8 @@ struct UniqueStubs {
    * Like resumeHelper, but interpret a basic block first to ensure we make
    * forward progress. interpHelper expects the correct value of vmpc to be in
    * the first argument register, and interpHelperSyncedPC expects vmpc to
-   * already be synced. Both stubs will sync rVmSp and rVmFp before
-   * interpreting.
+   * already be synced. Both stubs will sync the sp and fp registers to vmRegs
+   * before interpreting.
    */
   TCA interpHelper;
   TCA interpHelperSyncedPC;

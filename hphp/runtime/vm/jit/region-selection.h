@@ -248,7 +248,7 @@ typedef std::vector<RegionDesc::TypePred> PostConditions;
  * vals is a bitmask of the same length as mask, with a 1 representing a
  * parameter that will be passed by reference and a 0 for for value.
  *
- * arSpOffset is the offset from rVmSp to the ActRec.
+ * arSpOffset is the offset from the initialSpOffset to the ActRec.
  */
 struct RegionDesc::ReffinessPred {
   std::vector<bool> mask;

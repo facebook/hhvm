@@ -248,17 +248,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * The ReturnHook sets up the ActRec so the unwinder knows everything is
    * already released (i.e. it calls ar->setLocalsDecRefd()).
    *
-   * This means it can block upward exposed uses of locals via kills, even
-   * though it has a catch block as a successor that looks like it can use any
-   * locals (and in fact it can, if it weren't for this instruction).  It also
-   * can block uses of the stack below the depth at the ReturnHook.
+   * The eval stack is also dead at this point (the return value is passed to
+   * ReturnHook as src(1), and the ReturnHook may not access the stack).
    */
   case ReturnHook:
     // Note, this instruction can re-enter, but doesn't need the may_reenter()
     // treatmeant because of the special kill semantics for locals and stack.
     return may_load_store_kill(
       AHeapAny, AHeapAny,
-      stack_below(inst.src(0), 2) | AFrameAny
+      AStackAny | AFrameAny | AMIStateAny
     );
 
   // The suspend hooks can load anything (re-entering the VM), but can't write
@@ -272,6 +270,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * If we're returning from a function, it's ReturnEffects.  The RetCtrl
    * opcode also suspends resumables, which we model as having any possible
    * effects.
+   *
+   * Note that marking AFrameAny as dead isn't quite right, because that
+   * ought to mean that the preceding StRetVal is dead; but memory effects
+   * ignores StRetVal so the AFrameAny is fine.
    */
   case RetCtrl:
     if (inst.extra<RetCtrl>()->suspendingResumed) {
@@ -279,7 +281,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return UnknownEffects {};
     }
     return ReturnEffects {
-      stack_below(inst.src(0), inst.extra<RetCtrl>()->spOffset.offset - 1)
+      AStackAny | AFrameAny | AMIStateAny
     };
 
   case AsyncRetCtrl:

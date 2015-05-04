@@ -5,7 +5,6 @@ endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
 list(APPEND HEADER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/version.h")
 
 if(NOT LINUX)
-  add_definitions(-DNO_HARDWARE_COUNTERS)
   list(REMOVE_ITEM CXX_SOURCES
        ${CMAKE_CURRENT_SOURCE_DIR}/vm/debug/elfwriter.cpp)
 endif()

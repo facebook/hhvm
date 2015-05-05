@@ -133,7 +133,7 @@ struct StreamUserFilters final : RequestEventHandler {
   }
 
   void vscan(IMarker& mark) const override {
-    m_registeredFilters.getFiltersAsArray();
+    mark(m_registeredFilters.getFiltersAsArray());
   }
 
 private:

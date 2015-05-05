@@ -41,6 +41,55 @@ const StaticString s_bucket_class("__SystemLib\\StreamFilterBucket");
 const StaticString s_default_filters_register_func(
   "__SystemLib\\register_default_stream_filters");
 
+///////////////////////////////////////////////////////////////////////////////
+
+class StreamFilterRepository {
+public:
+  void add(const String& key, const Variant& v) {
+    m_filters.add(key, v);
+  }
+
+  void detach() {
+    m_filters.detach();
+  }
+
+  bool exists(const String& needle) const {
+    if (m_filters.exists(needle.toKey())) {
+      return true;
+    }
+    /* Could not find exact match, now try wildcard match */
+    int lastDotPos = needle.rfind('.');
+    if (String::npos == lastDotPos) {
+      return false;
+    }
+    String wildcard = needle.substr(0, lastDotPos) + ".*";
+    return m_filters.exists(wildcard.toKey());
+  }
+
+  Variant rvalAt(const String& needle) const {
+    /* First try to find exact match, afterwards try wildcard matches */
+    int lastDotPos = needle.rfind('.');
+    if (String::npos == lastDotPos || m_filters.exists(needle.toKey())) {
+      return m_filters.rvalAtRef(needle);
+    }
+    String wildcard = needle.substr(0, lastDotPos) + ".*";
+    return m_filters.rvalAtRef(wildcard);
+  }
+
+  const Array& getFiltersAsArray() const {
+    return m_filters;
+  }
+
+  bool isNull() const {
+    return m_filters.isNull();
+  }
+
+private:
+  Array m_filters;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 struct StreamUserFilters final : RequestEventHandler {
   virtual ~StreamUserFilters() {}
   StreamFilterRepository m_registeredFilters;
@@ -84,7 +133,7 @@ struct StreamUserFilters final : RequestEventHandler {
   }
 
   void vscan(IMarker& mark) const override {
-    mark(m_registeredFilters);
+    m_registeredFilters.getFiltersAsArray();
   }
 
 private:
@@ -269,32 +318,6 @@ String BucketBrigade::createString() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// StreamFilterRepository
-
-bool StreamFilterRepository::exists(const String& needle) const {
-  if(Array::exists(needle.toKey())) {
-    return true;
-  }
-  // Could not find exact match, now try wildcard match
-  int lastDotPos = needle.rfind('.');
-  if(String::npos == lastDotPos) {
-    return false;
-  }
-  String wildcard = needle.substr(0, lastDotPos) + ".*";
-  return Array::exists(wildcard.toKey());
-}
-
-Variant StreamFilterRepository::rvalAt(const String& needle, ACCESSPARAMS_IMPL) const {
-  // first try to find exact match, afterwards try wildcard matches
-  int lastDotPos = needle.rfind('.');
-  if(String::npos == lastDotPos || Array::exists(needle.toKey())) {
-    return Array::rvalAtRef(needle, flags);
-  }
-  String wildcard = needle.substr(0, lastDotPos) + ".*";
-  return Array::rvalAtRef(wildcard, flags);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 bool HHVM_FUNCTION(stream_filter_register,
                    const String& name,
@@ -307,7 +330,7 @@ Array HHVM_FUNCTION(stream_get_filters) {
   if (UNLIKELY(filters.isNull())) {
     return empty_array();
   }
-  return array_keys_helper(filters).toArray();
+  return array_keys_helper(filters.getFiltersAsArray()).toArray();
 }
 
 Variant HHVM_FUNCTION(stream_filter_append,

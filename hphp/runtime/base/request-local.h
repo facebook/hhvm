@@ -30,10 +30,9 @@ namespace HPHP {
  *
  * Example:
  *
- *   class MyRequestLocalClass : public RequestEventHandler {
- *   public:
- *     virtual void requestInit() {...}
- *     virtual void requestShutdown() {...}
+ *   struct MyRequestLocalClass final : RequestEventHandler {
+ *     void requestInit() override {...}
+ *     void requestShutdown() override {...}
  *   };
  *   IMPLEMENT_STATIC_REQUEST_LOCAL(MyRequestLocalClass, s_data);
  *

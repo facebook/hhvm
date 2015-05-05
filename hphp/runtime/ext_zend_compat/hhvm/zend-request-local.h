@@ -26,25 +26,18 @@ namespace HPHP {
 
 #define ZEND_REQUEST_LOCAL_VECTOR(T, N) static __thread HPHP::RequestLocal<HPHP::ZendRequestLocalVector<T> > N;
 template <class T>
-class ZendRequestLocalVector final : public RequestEventHandler {
-  private:
-    void clear() {
-      m_container.clear();
-      m_container.push_back(nullptr); // don't give out id 0
-    }
-  public:
-    typedef std::vector<T> container;
-    virtual void requestInit() {
-      clear();
-    }
-    virtual void requestShutdown() {
-      clear();
-    }
-    container& get() {
-      return m_container;
-    }
-  private:
-    container m_container;
+struct ZendRequestLocalVector final : RequestEventHandler {
+  using container = std::vector<T>;
+  void requestInit() override { clear(); }
+  void requestShutdown() override { clear(); }
+  container& get() { return m_container; }
+private:
+  void clear() {
+    m_container.clear();
+    m_container.push_back(nullptr); // don't give out id 0
+  }
+private:
+  container m_container;
 };
 
 #define ZEND_REQUEST_LOCAL_MAP(K, V, N) static __thread HPHP::RequestLocal<HPHP::ZendRequestLocalMap<K,V> > N;

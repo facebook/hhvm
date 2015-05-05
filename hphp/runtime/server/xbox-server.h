@@ -153,6 +153,8 @@ public:
   }
 
 private:
+  template <typename F> friend void scan(const XboxTransport&, F&);
+
   std::atomic<int> m_refCount;
 
   std::string m_message;

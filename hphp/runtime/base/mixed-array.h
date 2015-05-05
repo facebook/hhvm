@@ -346,6 +346,7 @@ private:
   friend class c_Set;
   friend class c_ImmSet;
   friend class c_AwaitAllWaitHandle;
+  template <typename F> friend void scan(const MixedArray& this_, F& mark);
   enum class ClonePacked {};
   enum class CloneMixed {};
 

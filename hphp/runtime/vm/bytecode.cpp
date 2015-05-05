@@ -1416,7 +1416,7 @@ ActRec* ExecutionContext::getFrameAtDepth(int frame) {
     fp = getPrevVMState(fp);
   }
   if (UNLIKELY(!fp || fp->localsDecRefd())) return nullptr;
-  assert(!fp->magicDispatch() || !fp->hasInvName());
+  assert(!fp->magicDispatch());
   return fp;
 }
 
@@ -1618,7 +1618,7 @@ static NEVER_INLINE void cleanupParamsAndActRec(Stack& stack,
 
 static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
                                                Stack& stack, int nregular) {
-  assert(ar != nullptr && ar->magicDispatch() && ar->hasInvName());
+  assert(ar != nullptr && ar->magicDispatch());
   assert(!cellIsNull(&args));
   assert(nregular >= 0);
   assert((stack.top() + nregular) == (void*) ar);
@@ -3737,24 +3737,18 @@ OPTBLD_INLINE void iopColAddNewElemC(IOP_ARGS) {
   pc++;
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
-  if (c2->m_type == KindOfObject && c2->m_data.pobj->isCollection()) {
-    collectionInitAppend(c2->m_data.pobj, c1);
-  } else {
-    raise_error("ColAddNewElemC: $2 must be a collection");
-  }
+  assert(c2->m_type == KindOfObject && c2->m_data.pobj->isCollection());
+  collectionInitAppend(c2->m_data.pobj, c1);
   vmStack().popC();
 }
 
-OPTBLD_INLINE void iopColAddElemC(IOP_ARGS) {
+OPTBLD_INLINE void iopMapAddElemC(IOP_ARGS) {
   pc++;
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
   Cell* c3 = vmStack().indC(2);
-  if (c3->m_type == KindOfObject && c3->m_data.pobj->isCollection()) {
-    collectionInitSet(c3->m_data.pobj, c2, c1);
-  } else {
-    raise_error("ColAddElemC: $3 must be a collection");
-  }
+  assert(c3->m_type == KindOfObject && c3->m_data.pobj->isCollection());
+  collectionInitSet(c3->m_data.pobj, c2, c1);
   vmStack().popC();
   vmStack().popC();
 }

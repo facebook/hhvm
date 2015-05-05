@@ -420,22 +420,10 @@ private:
 #ifdef USE_LOWPTR
   LowClassPtr m_cls;
   int o_id; // Numeric identifier of this object (used for var_dump())
-  union {
-    struct {
-      HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
-      mutable RefCount m_count;
-    };
-    uint64_t m_attr_kind_count;
-  };
+  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
 #else
   LowClassPtr m_cls;
-  union {
-    struct {
-      HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
-      mutable RefCount m_count;
-    };
-    uint64_t m_attr_kind_count;
-  };
+  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
   int o_id; // Numeric identifier of this object (used for var_dump())
 #endif
 };
@@ -494,14 +482,15 @@ template<class T, class... Args> T* newobj(Args&&... args) {
   }
 }
 
-#define DECLARE_CLASS_NO_SWEEP(originalName)                    \
-  public:                                                       \
-  CLASSNAME_IS(#originalName)                                   \
-  friend ObjectData* new_##originalName##_Instance(Class*);     \
-  friend void delete_##originalName(ObjectData*, const Class*); \
-  static inline HPHP::LowClassPtr& classof() {                  \
-    static HPHP::LowClassPtr result;                            \
-    return result;                                              \
+#define DECLARE_CLASS_NO_SWEEP(originalName)                           \
+  public:                                                              \
+  CLASSNAME_IS(#originalName)                                          \
+  template <typename F> friend void scan(const c_##originalName&, F&); \
+  friend ObjectData* new_##originalName##_Instance(Class*);            \
+  friend void delete_##originalName(ObjectData*, const Class*);        \
+  static inline HPHP::LowClassPtr& classof() {                         \
+    static HPHP::LowClassPtr result;                                   \
+    return result;                                                     \
   }
 
 #define IMPLEMENT_CLASS_NO_SWEEP(cls)

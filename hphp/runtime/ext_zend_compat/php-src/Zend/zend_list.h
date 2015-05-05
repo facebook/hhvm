@@ -32,6 +32,13 @@ BEGIN_EXTERN_C()
 
 #ifdef HHVM
 
+// Ugh.  This is necessary because template declarations are not allowed
+// in extern "C" code.  This #define will suppress the inclusion of a
+// friend declaration for the GC scan function in
+// DECLARE_RESOURCE_ALLOCATION_NO_SWEEP.
+#undef SUPPRESS_RESOURCE_FRIEND
+#define SUPPRESS_RESOURCE_FRIEND(x)
+
 namespace HPHP {
   struct ZendResourceData : ResourceData {
     ZendResourceData(void* ptr, int type) : ptr(ptr), type(type) {}
@@ -162,6 +169,9 @@ int zval_get_resource_id(const zval &z);
         le_id = zend_fetch_list_dtor_id(le_type_name); \
   }
 END_EXTERN_C()
+
+#undef SUPPRESS_RESOURCE_FRIEND
+#define SUPPRESS_RESOURCE_FRIEND(x) x
 
 #endif
 

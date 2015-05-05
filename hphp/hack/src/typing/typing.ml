@@ -1152,7 +1152,15 @@ and expr_ ~in_cond ~(valkind: [> `lvalue | `rvalue | `other ]) env (p, e) =
       (* check for recursive function calls *)
       let anon = anon_make env.Env.lenv p f in
       let env, anon_id = Env.add_anonymous env anon in
-      ignore (anon env ft.ft_params);
+      let env = Errors.try_with_error
+        (fun () ->
+          ignore (anon env ft.ft_params); env)
+        (fun () ->
+          (* If the anonymous function declaration has errors itself, silence
+             them in any subsequent usages. *)
+          let anon env fun_params =
+            Errors.ignore_ (fun () -> (anon env fun_params)) in
+          Env.set_anonymous env anon_id anon) in
       env, (Reason.Rwitness p, Tanon (ft.ft_arity, anon_id))
   | Xml (sid, attrl, el) ->
       let cid = CI sid in

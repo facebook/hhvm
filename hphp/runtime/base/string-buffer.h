@@ -201,6 +201,7 @@ struct StringBuffer {
   template<class F> void scan(F& mark) const {
     mark(m_str);
   }
+  template <typename F> friend void scan(const StringBuffer&, F&);
 
 private:
   void appendHelper(const char* s, int len);

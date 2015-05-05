@@ -1594,6 +1594,7 @@ static int execute_program_impl(int argc, char** argv) {
       ret = 0;
       while (true) {
         try {
+          assert(po.debugger_options.fileName == file);
           execute_command_line_begin(new_argc, new_argv,
                                      po.xhprofFlags, po.config);
           // Set the proxy for this thread to be the localProxy we just
@@ -1615,6 +1616,7 @@ static int execute_program_impl(int argc, char** argv) {
 
           if (!e.m_args->empty()) {
             file = e.m_args->at(0);
+            po.debugger_options.fileName = file;
             client_args = e.m_args;
             free(new_argv);
             prepare_args(new_argc, new_argv, *client_args, nullptr);

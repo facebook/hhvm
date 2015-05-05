@@ -96,6 +96,14 @@ struct CapCode {
   explicit operator uint16_t() const {
     return code;
   }
+
+  bool operator==(const CapCode& other) const {
+    return code == other.code;
+  }
+
+  bool operator!=(const CapCode& other) const {
+    return code != other.code;
+  }
 };
 
 //////////////////////////////////////////////////////////////////////

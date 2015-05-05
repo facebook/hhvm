@@ -78,7 +78,6 @@ void maybeEmitStackCheck(X64Assembler& a, const Func* func) {
 TCA emitFuncGuard(X64Assembler& a, const Func* func) {
   using namespace reg;
   assertx(kScratchCrossTraceRegs.contains(rax));
-  assertx(kScratchCrossTraceRegs.contains(rdx));
 
   auto const funcImm = Immed64(func);
   int nBytes, offset;
@@ -97,17 +96,16 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
 
   TCA aStart DEBUG_ONLY = a.frontier();
   if (!funcImm.fits(sz::dword)) {
-    a.  loadq  (rVmFp[AROFF(m_func)], rax);
     /*
       Although func doesnt fit in a signed 32-bit immediate, it may still
       fit in an unsigned one. Rather than deal with yet another case
       (which only happens when we disable jemalloc) just force it to
       be an 8-byte immediate, and patch it up afterwards.
     */
-    a.  movq   (0xdeadbeeffeedface, rdx);
+    a.  movq   (0xdeadbeeffeedface, rax);
     assertx(((uint64_t*)a.frontier())[-1] == 0xdeadbeeffeedface);
     ((uint64_t*)a.frontier())[-1] = uintptr_t(func);
-    a.  cmpq   (rax, rdx);
+    a.  cmpq   (rax, rVmFp[AROFF(m_func)]);
   } else {
     a.  cmpq   (funcImm.l(), rVmFp[AROFF(m_func)]);
   }
@@ -478,7 +476,6 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
     not_magic_call.jccAuto(a, CC_NZ);
   }
   a.    loadq  (rVmFp[AROFF(m_invName)], rInvName);
-  a.    decq   (rInvName);
   a.    storeq (0, rVmFp[AROFF(m_varEnv)]);
   if (nPassed != 0) { // for zero args, we use the empty array
     static_assert(sizeof(Cell) == 16, "");
@@ -492,9 +489,10 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
       MkPacked{MixedArray::MakePacked}), argSet(2));
     callFixup = a.frontier();
   }
-  if (nPassed != 2) {
-    a.  storel (2, rVmFp[AROFF(m_numArgsAndFlags)]);
-  }
+
+  // We store 2 here even if nPassed == 2 already, because we're going to use
+  // it to clear the ActRec::MagicDispatch flags.
+  a.    storel (2, rVmFp[AROFF(m_numArgsAndFlags)]);
 
   // Magic calls expect two arguments---first the name of the called
   // function, and then a packed array of the arguments to the

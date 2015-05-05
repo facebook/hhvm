@@ -40,7 +40,6 @@ struct Header {
     struct {
       uint64_t q;
       HeaderWord<> hdr_;
-      RefCount count_;
     };
     StringData str_;
     ArrayData arr_;
@@ -114,7 +113,7 @@ inline size_t Header::size() const {
     case HeaderKind::BigObj:    // [BigNode][Header...]
       return big_.nbytes;
     case HeaderKind::Free:
-      return free_.size;
+      return free_.size();
     case HeaderKind::ResumableFrame:
       // [ResumableNode][locals][Resumable][ObjectData<ResumableObj>]
       return resumable()->size();
@@ -122,7 +121,7 @@ inline size_t Header::size() const {
       // [NativeNode][NativeData][ObjectData][props] is one allocation.
       return native_.obj_offset + Native::obj(&native_)->heapSize();
     case HeaderKind::Hole:
-      return free_.size;
+      return free_.size();
     case HeaderKind::Debug:
       assert(debug_.allocatedMagic == DebugHeader::kAllocatedMagic);
       return sizeof(DebugHeader);

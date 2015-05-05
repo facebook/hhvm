@@ -20,9 +20,9 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/trace.h"
+#include "hphp/runtime/all-scan.h"
 
 #include <vector>
-#include <boost/dynamic_bitset.hpp>
 #include <unordered_map>
 #include <folly/Range.h>
 
@@ -32,10 +32,21 @@ using HK = HeaderKind;
 
 namespace {
 
-// metadata about an allocated object
-struct Meta {
-  bool mark;   // exactly marked
-  bool cmark;  // conservatively marked
+// information about heap objects, indexed by valid object starts.
+struct PtrMap {
+  void insert(const Header* p) {
+    meta_[p] = Meta{};
+  }
+  const Header* header(const void* p) const {
+    auto it = meta_.find(p);
+    return it != meta_.end() ? static_cast<const Header*>(p) : nullptr;
+  }
+  bool contains(const void* p) const {
+    return header(p) != nullptr;
+  }
+private:
+  struct Meta {};
+  std::unordered_map<const void*,Meta> meta_;
 };
 
 struct Marker {
@@ -54,6 +65,7 @@ struct Marker {
   void operator()(const TypedValueAux& v) { (*this)(*(const TypedValue*)&v); }
   void operator()(const NameValueTable*);
   void operator()(const VarEnv*);
+  void operator()(const RequestEventHandler*);
 
   // mark ambiguous pointers in the range [start,start+len)
   void operator()(const void* start, size_t len);
@@ -102,8 +114,7 @@ private:
   }
 
 private:
-  // information about heap objects, indexed by valid object starts.
-  std::unordered_map<const void*,Meta> meta_;
+  PtrMap ptrs_;
   std::vector<const Header*> work_;
   folly::Range<const char*> rds_; // full mmap'd rds section.
   size_t total_;        // bytes allocated in heap
@@ -113,10 +124,10 @@ private:
 
 // mark the object at p, return true if first time.
 bool Marker::mark(const void* p) {
-  assert(meta_.find(p) != meta_.end());
-  auto& meta = meta_[p];
-  auto first = !meta.mark;
-  meta.mark = true;
+  assert(ptrs_.contains(p));
+  auto h = static_cast<const Header*>(p);
+  auto first = !h->hdr_.mark;
+  h->hdr_.mark = true;
   return first;
 }
 
@@ -197,6 +208,10 @@ void Marker::operator()(const VarEnv* p) {
   if (p) p->scan(*this);
 }
 
+void Marker::operator()(const RequestEventHandler* p) {
+  p->scan(*this);
+}
+
 void Marker::operator()(const String& p)    { (*this)(p.get()); }
 void Marker::operator()(const Array& p)     { (*this)(p.get()); }
 void Marker::operator()(const ArrayNoDtor& p) { (*this)(p.arr()); }
@@ -234,11 +249,10 @@ void Marker::operator()(const void* start, size_t len) {
   auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
   for (; s < e; s++) {
     auto p = *s;
-    auto it = meta_.find(p);
-    if (it == meta_.end()) continue;
+    auto h = ptrs_.header(p);
+    if (!h) continue;
     // mark p if it's an interesting kind. since we have metadata for it,
     // it must have a valid header.
-    auto h = reinterpret_cast<const Header*>(p);
     switch (h->kind()) {
       case HK::Apc:
       case HK::Globals:
@@ -261,19 +275,19 @@ void Marker::operator()(const void* start, size_t len) {
       case HK::ImmSet:
       case HK::ResumableFrame:
       case HK::BigObj: // hmm.. what lives inside this?
-        it->second.cmark = true;
+        h->hdr_.cmark = true;
         if (mark(p)) {
           enqueue(p);
         }
         break;
       case HK::NativeData:
-        it->second.cmark = true;
+        h->hdr_.cmark = true;
         if (mark(p)) {
           enqueue(Native::obj(&h->native_));
         }
         break;
       case HK::String:
-        it->second.cmark = true;
+        h->hdr_.cmark = true;
         mark(p);
         break;
       case HK::SmallMalloc:
@@ -299,17 +313,18 @@ void Marker::init() {
                                    RuntimeOption::EvalJitTargetCacheSize);
   total_ = 0;
   MM().forEachHeader([&](Header* h) {
-    meta_[h] = Meta{false, false};
+    ptrs_.insert(h);
+    h->hdr_.mark = h->hdr_.cmark = false;
     switch (h->kind()) {
       case HK::Apc:
       case HK::Globals:
       case HK::Proxy:
-        assert(h->count_ > 0);
+        assert(h->hdr_.count > 0);
         total_ += h->size();
         break;
       case HK::Ref:
         // EZC non-ref refdatas sometimes have count==0
-        assert(h->count_ > 0 || !h->ref_.zIsRef());
+        assert(h->hdr_.count > 0 || !h->ref_.zIsRef());
         total_ += h->size();
         break;
       case HK::Resource:
@@ -363,9 +378,8 @@ void Marker::trace() {
 void Marker::sweep() {
   marked_ = ambig_marked_ = 0;
   MM().forEachHeader([&](Header* h) {
-    UNUSED auto& meta = meta_[h];
-    if (meta.cmark) ambig_marked_ += h->size();
-    if (meta.mark) marked_ += h->size();
+    if (h->hdr_.cmark) ambig_marked_ += h->size();
+    if (h->hdr_.mark) marked_ += h->size();
     switch (h->kind()) {
       case HK::Packed:
       case HK::Struct:
@@ -395,19 +409,19 @@ void Marker::sweep() {
         break;
       case HK::BigObj:
         // these are headers that should wrap a markable or countable thing.
-        assert(!meta.mark);
+        assert(!h->hdr_.mark);
         break;
       case HK::SmallMalloc:
       case HK::BigMalloc:
         // these are managed by smart_malloc and should not have been marked.
-        assert(!meta.mark);
+        assert(!h->hdr_.mark);
         break;
       case HK::Free:
       case HK::Hole:
       case HK::Debug:
         // free memory; mark implies dangling pointer bug. cmark is ok because
         // dangling ambiguous pointers are not bugs, e.g. on the stack.
-        assert(!meta.mark);
+        assert(!h->hdr_.mark);
         break;
     }
   });

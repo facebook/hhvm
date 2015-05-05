@@ -38,6 +38,11 @@ enum class HeaderKind : uint8_t {
 const unsigned NumHeaderKinds = unsigned(HeaderKind::Debug) + 1;
 
 /*
+ * RefCount type for m_count field in refcounted objects
+ */
+using RefCount = int32_t;
+
+/*
  * Common header for all heap-allocated objects. Layout is carefully
  * designed to allow overlapping with the second word of a TypedValue,
  * or to follow a C++ defined vptr.
@@ -45,25 +50,44 @@ const unsigned NumHeaderKinds = unsigned(HeaderKind::Debug) + 1;
 template<class T = uint16_t> struct HeaderWord {
   union {
     struct {
-      T aux;
-      HeaderKind kind;
-      uint8_t marks;
+      union {
+        struct {
+          T aux;
+          HeaderKind kind;
+          mutable uint8_t mark:1;
+          mutable uint8_t cmark:1;
+        };
+        uint32_t lo32;
+      };
+      union {
+        mutable RefCount count;
+        uint32_t hi32;
+      };
     };
-    uint32_t w;
+    uint64_t q;
   };
-  static uint32_t pack(HeaderKind kind) {
-    return static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind));
+
+  void init(HeaderKind kind, RefCount count) {
+    q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
+        uint64_t(count) << 32;
   }
-  static uint32_t pack(T aux, HeaderKind kind) {
-    return pack(kind) | static_cast<uint16_t>(aux);
-    static_assert(sizeof(aux) == 2, "");
+
+  void init(T aux, HeaderKind kind, RefCount count) {
+    q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
+        static_cast<uint16_t>(aux) |
+        uint64_t(count) << 32;
+    static_assert(sizeof(T) == 2, "header layout requres 2-byte aux");
   }
-  void init(T aux, HeaderKind kind) { w = pack(aux, kind); }
-  void init(HeaderKind kind) { w = pack(kind); }
+
+  void init(const HeaderWord<T>& h, RefCount count) {
+    q = h.lo32 | uint64_t(count) << 32;
+  }
 };
 
 constexpr auto HeaderOffset = sizeof(void*);
 constexpr auto HeaderKindOffset = HeaderOffset + offsetof(HeaderWord<>, kind);
+constexpr auto FAST_REFCOUNT_OFFSET = HeaderOffset +
+                                      offsetof(HeaderWord<>, count);
 
 inline bool isObjectKind(HeaderKind k) {
   return uint8_t(k) >= uint8_t(HeaderKind::Object) &&

@@ -39,13 +39,13 @@ class Variant;
  * RefDatas are also used by the PHP extension compatibility layer to
  * represent "zvals". Because zvals can be shared by multiple things
  * "by value", it was necessary to add fields to RefData to support
- * this. As a consequence, the m_count field is not the "real"
+ * this. As a consequence, the count field is not the "real"
  * refcount of a RefData - instead the real refcount can be computed
- * by calling getRealCount() (which simply adds the m_count and cow
- * fields together). When the m_count field is decremented to 0, the
+ * by calling getRealCount() (which simply adds the count and cow
+ * fields together). When the count field is decremented to 0, the
  * release() method gets called. This will either free the RefData
  * (if the "real" refcount has reached 0) or it will update the
- * m_count and cow fields appropriately.
+ * count and cow fields appropriately.
  *
  * For more info on the PHP extension compatibility layer, check out
  * the documentation at "doc/php.extension.compat.layer".
@@ -62,7 +62,7 @@ struct RefData {
   void initInRDS() {
     assert(isUninitializedInRDS());
     m_hdr.kind = HeaderKind::Ref;
-    m_count = 1;
+    m_hdr.count = 1;
     assert(!m_hdr.aux.cow && !m_hdr.aux.z); // because RDS is pre-zeroed
   }
 
@@ -91,7 +91,7 @@ struct RefData {
   void release() noexcept {
     assert(!hasMultipleRefs());
     if (UNLIKELY(m_hdr.aux.cow)) {
-      m_count = 1;
+      m_hdr.count = 1;
       m_hdr.aux.cow = m_hdr.aux.z = 0;
       return;
     }
@@ -127,13 +127,13 @@ struct RefData {
   }
 
   int32_t getRealCount() const {
-    assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_count >= 1));
-    return m_count + m_hdr.aux.cow;
+    assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
+    return m_hdr.count + m_hdr.aux.cow;
   }
 
   bool isReferenced() const {
-    assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_count >= 1));
-    return m_count >= 2 && !m_hdr.aux.cow;
+    assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
+    return m_hdr.count >= 2 && !m_hdr.aux.cow;
   }
 
   /**
@@ -145,20 +145,20 @@ struct RefData {
   RefData() {
     m_tv.m_type = KindOfNull;
     m_hdr.kind = HeaderKind::Ref;
-    m_count = 0;
+    m_hdr.count = 0;
     m_hdr.aux.cow = m_hdr.aux.z = 0;
     assert(!m_hdr.aux.cow && !m_hdr.aux.z);
   }
 
   bool zIsRef() const {
-    assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_count >= 1));
-    return !m_hdr.aux.cow && (m_count >= 2 || m_hdr.aux.z);
+    assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
+    return !m_hdr.aux.cow && (m_hdr.count >= 2 || m_hdr.aux.z);
   }
 
   void zSetIsRef() const {
     auto realCount = getRealCount();
     if (realCount >= 2) {
-      m_count = realCount;
+      m_hdr.count = realCount;
       m_hdr.aux.cow = m_hdr.aux.z = 0;
     } else {
       assert(!m_hdr.aux.cow);
@@ -170,7 +170,7 @@ struct RefData {
   void zUnsetIsRef() const {
     auto realCount = getRealCount();
     if (realCount >= 2) {
-      m_count = realCount - 1;
+      m_hdr.count = realCount - 1;
       m_hdr.aux.cow = 1;
       m_hdr.aux.z = 0;
     } else {
@@ -193,12 +193,12 @@ struct RefData {
 
   void zAddRef() {
     if (getRealCount() != 1) {
-      ++m_count;
+      ++m_hdr.count;
       return;
     }
     assert(!m_hdr.aux.cow);
     assert(m_hdr.aux.z < 2);
-    m_count = m_hdr.aux.z + 1;
+    m_hdr.count = m_hdr.aux.z + 1;
     m_hdr.aux.cow = !m_hdr.aux.z;
     m_hdr.aux.z = 0;
   }
@@ -206,10 +206,10 @@ struct RefData {
   void zDelRef() {
     if (getRealCount() != 2) {
       assert(getRealCount() != 0);
-      --m_count;
+      --m_hdr.count;
       return;
     }
-    m_count = 1;
+    m_hdr.count = 1;
     m_hdr.aux.z = !m_hdr.aux.cow;
     m_hdr.aux.cow = 0;
   }
@@ -222,13 +222,13 @@ struct RefData {
     bool isRef = zIsRef();
     m_hdr.aux.cow = !zeroOrOne && !isRef;
     m_hdr.aux.z = zeroOrOne && isRef;
-    m_count = val - m_hdr.aux.cow;
+    m_hdr.count = val - m_hdr.aux.cow;
     assert(zRefcount() == val);
     assert(zIsRef() == isRef);
   }
 
   void zInit() {
-    m_count = 1;
+    m_hdr.count = 1;
     m_hdr.aux.cow = m_hdr.aux.z = 0;
     m_tv.m_type = KindOfNull;
     m_tv.m_data.num = 0;
@@ -243,7 +243,7 @@ private:
   RefData(DataType t, int64_t datum) {
     // Initialize this value by laundering uninitNull -> Null.
     m_hdr.kind = HeaderKind::Ref;
-    m_count = 1;
+    m_hdr.count = 1;
     m_hdr.aux.cow = m_hdr.aux.z = 0;
     if (!IS_NULL_TYPE(t)) {
       m_tv.m_type = t;
@@ -255,7 +255,6 @@ private:
 
   static void compileTimeAsserts() {
     static_assert(offsetof(RefData, m_hdr) == HeaderOffset, "");
-    static_assert(offsetof(RefData, m_count) == FAST_REFCOUNT_OFFSET, "");
     static_assert(offsetof(HeaderWord<Flags>, aux) == offsetof(Flags, type),"");
   }
 
@@ -274,13 +273,12 @@ private:
     };
     explicit operator uint16_t() const { return bits; }
   };
-  // hdr and count overlap TypedValue.m_aux
+  // header overlaps TypedValue.m_type and m_aux
   union {
     TypedValue m_tv;
     struct {
       Value m_value;
       HeaderWord<Flags> m_hdr;
-      mutable RefCount m_count; // refcount field
     };
   };
 };

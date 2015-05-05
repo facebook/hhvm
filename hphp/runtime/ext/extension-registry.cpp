@@ -285,10 +285,10 @@ void requestShutdown() {
 
 bool modulesInitialised() { return s_initialized; }
 
-void scanExtensionRoots(IMarker& m) {
+void scanExtensions(IMarker& mark) {
   assert(s_sorted);
   for (auto& ext : s_ordered) {
-    ext->scanRoots(m);
+    ext->vscan(mark);
   }
 }
 

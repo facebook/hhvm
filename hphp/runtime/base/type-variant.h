@@ -1155,6 +1155,8 @@ public:
     return asVariant()->isNull();
   }
 private:
+  template <typename F> friend void scan(const VarNR&, F&);
+
   /* implicit */ VarNR(const char* v) = delete;
   /* implicit */ VarNR(const std::string & v) = delete;
 

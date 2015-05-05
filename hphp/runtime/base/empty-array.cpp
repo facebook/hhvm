@@ -44,8 +44,7 @@ struct EmptyArray::Initializer {
   Initializer() {
     auto const ad   = reinterpret_cast<ArrayData*>(&s_theEmptyArray);
     ad->m_sizeAndPos = 0;
-    ad->m_hdr.init(HeaderKind::Empty);
-    ad->m_count = StaticValue;
+    ad->m_hdr.init(HeaderKind::Empty, StaticValue);
   }
 };
 EmptyArray::Initializer EmptyArray::s_initializer;
@@ -131,9 +130,7 @@ std::pair<ArrayData*,TypedValue*> EmptyArray::MakePackedInl(TypedValue tv) {
   );
   assert(cap == CapCode::ceil(cap).code);
   ad->m_sizeAndPos = 1; // size=1, pos=0
-  ad->m_kindAndCount = HeaderWord<CapCode>::pack(CapCode::exact(cap),
-                                                 HeaderKind::Packed);
-  // count=0
+  ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 0);
 
   auto& lval = *reinterpret_cast<TypedValue*>(ad + 1);
   lval.m_data = tv.m_data;
@@ -142,7 +139,7 @@ std::pair<ArrayData*,TypedValue*> EmptyArray::MakePackedInl(TypedValue tv) {
   assert(ad->kind() == ArrayData::kPackedKind);
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
-  assert(ad->m_count == 0);
+  assert(ad->getCount() == 0);
   assert(PackedArray::checkInvariants(ad));
   return { ad, &lval };
 }
@@ -155,8 +152,7 @@ std::pair<ArrayData*,TypedValue*> EmptyArray::MakePacked(TypedValue tv) {
 void EmptyArray::InitMixed(MixedArray* a, RefCount count, uint32_t size,
                            int64_t nextIntKey) {
   a->m_sizeAndPos = size; // pos=0
-  a->m_kindAndCount = HeaderWord<CapCode>::pack(HeaderKind::Mixed) |
-                      uint64_t(count) << 32;
+  a->m_hdr.init(HeaderKind::Mixed, count);
   a->m_scale_used = MixedArray::SmallScale | uint64_t(size) << 32;
   a->m_nextKI = nextIntKey;
   auto const data = a->data();
@@ -189,9 +185,9 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
 
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
-  assert(ad->m_count == 0);
   assert(ad->m_scale == MixedArray::SmallScale);
   assert(ad->kind() == ArrayData::kMixedKind);
+  assert(ad->getCount() == 0);
   assert(ad->m_used == 1);
   assert(ad->checkInvariants());
   return { ad, &lval };
@@ -223,7 +219,7 @@ EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   assert(ad->kind() == ArrayData::kMixedKind);
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
-  assert(ad->m_count == 0);
+  assert(ad->getCount() == 0);
   assert(ad->m_scale == MixedArray::SmallScale);
   assert(ad->m_used == 1);
   assert(ad->checkInvariants());
@@ -356,7 +352,7 @@ ArrayData* EmptyArray::Prepend(ArrayData*, const Variant& vin, bool) {
 
 ArrayData* EmptyArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
   auto const arr = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
-  arr->m_count = 0;
+  arr->setRefCount(0);
   DEBUG_ONLY auto const tmp = arr->zSet(k, v);
   assert(tmp == arr);
   return arr;
@@ -364,7 +360,7 @@ ArrayData* EmptyArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
 
 ArrayData* EmptyArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
   auto const arr = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
-  arr->m_count = 0;
+  arr->setRefCount(0);
   DEBUG_ONLY auto const tmp = arr->zSet(k, v);
   assert(tmp == arr);
   return arr;
@@ -372,7 +368,7 @@ ArrayData* EmptyArray::ZSetStr(ArrayData* ad, StringData* k, RefData* v) {
 
 ArrayData* EmptyArray::ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr) {
   auto const arr = MixedArray::MakeReserveMixed(MixedArray::SmallSize);
-  arr->m_count = 0;
+  arr->setRefCount(0);
   DEBUG_ONLY auto const tmp = arr->zAppend(v, key_ptr);
   assert(tmp == arr);
   return arr;

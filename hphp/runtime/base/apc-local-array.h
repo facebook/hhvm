@@ -141,6 +141,7 @@ private:
   mutable TypedValue* m_localCache;
   unsigned m_sweep_index;
   friend struct MemoryManager; // access to m_sweep_index
+  template<typename F> friend void scan(const APCLocalArray& this_, F& mark);
 };
 
 //////////////////////////////////////////////////////////////////////

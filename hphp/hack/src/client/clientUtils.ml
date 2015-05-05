@@ -42,14 +42,15 @@ let connect root =
     try
       let sock_name = Socket.get_path root in
       let sockaddr = Unix.ADDR_UNIX sock_name in
-      let domain = Unix.domain_of_sockaddr sockaddr in
-      let sock = Unix.socket domain Unix.SOCK_STREAM 0 in
-      Unix.connect sock sockaddr;
-      let ic = Unix.in_channel_of_descr sock in
-      let oc = Unix.out_channel_of_descr sock in
-      Printf.fprintf oc "%s\n%!" Build_id.build_id_ohai;
-      let cstate : ServerUtils.connection_state = Marshal.from_channel ic in
-      ic, oc, cstate
+      let ic, oc = Unix.open_connection sockaddr in
+      try
+        Printf.fprintf oc "%s\n%!" Build_id.build_id_ohai;
+        let cstate : ServerUtils.connection_state = Marshal.from_channel ic in
+        ic, oc, cstate
+      with e ->
+        Unix.shutdown_connection ic;
+        close_in_noerr ic;
+        raise e
     with _ ->
       if not (Lock.check root "init")
       then raise ClientExceptions.Server_initializing
@@ -58,16 +59,16 @@ let connect root =
   let () = match cstate with
     | ServerUtils.Connection_ok -> ()
     | ServerUtils.Build_id_mismatch ->
-         (* The server is out of date and is going to exit. Subsequent calls
-          * to connect on the Unix Domain Socket might succeed, connecting to
-          * the server that is about to die, and eventually we will be hung
-          * up on while trying to read from our end.
-          *
-          * To avoid that fate, when we know the server is about to exit, we
-          * wait for the connection to be closed, signaling that the server
-          * has exited and the OS has cleaned up after it, then we try again.
-          *)
-         wait_on_server_restart ic;
-         close_in_noerr ic;
+        (* The server is out of date and is going to exit. Subsequent calls
+         * to connect on the Unix Domain Socket might succeed, connecting to
+         * the server that is about to die, and eventually we will be hung
+         * up on while trying to read from our end.
+         *
+         * To avoid that fate, when we know the server is about to exit, we
+         * wait for the connection to be closed, signaling that the server
+         * has exited and the OS has cleaned up after it, then we try again.
+         *)
+        wait_on_server_restart ic;
+        close_in_noerr ic;
         raise ClientExceptions.Server_out_of_date in
   ic, oc

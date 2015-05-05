@@ -12,9 +12,11 @@ main();
 
 function specialIntervals() {
   $d = new DateTime('2015-05-05');
-  echo 'Last day of the month of 2015-05-05 is ', $d->modify('last day of the month')->format('Y-m-d'), "\n";
+  echo 'Last day of the month of 2015-05-05 is ';
+  echo $d->modify('last day of the month')->format('Y-m-d'), "\n";
 
   $d = new DateTime('2015-05-05');
-  echo 'First day of the month of 2015-05-05 is ', $d->modify('first day of the month')->format('Y-m-d'), "\n";
+  echo 'First day of the month of 2015-05-05 is ';
+  echo $d->modify('first day of the month')->format('Y-m-d'), "\n";
 }
 specialIntervals();

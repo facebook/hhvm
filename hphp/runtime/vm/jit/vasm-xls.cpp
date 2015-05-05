@@ -169,6 +169,7 @@ struct Vxls {
   void allocate();
   void computePositions();
   void analyzeRsp();
+  void computeLiveness();
   void buildIntervals();
   void walkIntervals();
   void resolveSplits();
@@ -500,6 +501,7 @@ void Vxls::allocate() {
   assertx(check(unit));
   computePositions();
   analyzeRsp();
+  computeLiveness();
   buildIntervals();
   walkIntervals();
   resolveSplits();
@@ -613,6 +615,133 @@ void Vxls::analyzeRsp() {
   }
 }
 
+// Visitor for Defs and Uses used to compute liveness information.
+// These are used only for iterating the per-block livein sets to a
+// fixed point in computeLiveness, while UseVisitor and DefVisitor are
+// used in the final pass to build actual intervals.
+struct LiveDefVisitor {
+  LiveDefVisitor(LiveSet& live, Vxls& vxls)
+    : m_tuples(vxls.unit.tuples)
+    , m_live(live)
+  {}
+  template<class F>          void imm(const F&) {}
+  template<class R>          void across(R) {}
+  template<class R>          void use(R) {}
+  template<class S, class H> void useHint(S, H) {}
+  void def(Vreg r)      { m_live.reset(r); }
+  void def(RegSet rs)   { rs.forEach([&](Vreg r) { def(r); }); }
+  void def(Vtuple defs) { for (auto r : m_tuples[defs]) def(r); }
+  void defHint(Vtuple def_tuple, Vtuple hint_tuple) {
+    auto& defs = m_tuples[def_tuple];
+    for (int i = 0; i < defs.size(); i++) {
+      def(defs[i]);
+    }
+  }
+  void defHint(Vreg d, Vreg hint) { def(d); }
+
+ private:
+  jit::vector<VregList>& m_tuples;
+  LiveSet&               m_live;
+};
+
+// Visitor for Uses used to compute liveness information.
+struct LiveUseVisitor {
+  LiveUseVisitor(LiveSet& live, Vxls& vxls)
+    : m_tuples(vxls.unit.tuples)
+    , m_live(live)
+  {}
+  template<class F>          void imm(const F&) {}
+  template<class R>          void def(R) {}
+  template<class D, class H> void defHint(D, H){}
+  template<class R>          void across(R r) { use(r); }
+  void across(RegSet regs) { regs.forEach([&](Vreg r) { across(r); }); }
+  void use(Vreg r)         { m_live.set(r); }
+  void use(Vtuple uses)    { for (auto r : m_tuples[uses]) use(r); }
+  void use(VcallArgsId id) { always_assert(0 && "vcall unsupported in vxls"); }
+  void use(RegSet regs)    { regs.forEach([&](Vreg r) { use(r); }); }
+  void use(Vptr m) {
+    if (m.base.isValid()) use(m.base);
+    if (m.index.isValid()) use(m.index);
+  }
+  template<class S, class H> void useHint(S src, H hint) { use(src); }
+  void useHint(Vtuple src_tuple, Vtuple hint_tuple) {
+    auto& uses = m_tuples[src_tuple];
+    for (int i = 0, n = uses.size(); i < n; i++) {
+      use(uses[i]);
+    }
+  }
+
+ private:
+  jit::vector<VregList>& m_tuples;
+  LiveSet&               m_live;
+};
+
+// Compute livein set for each block.  An iterative data-flow analysis
+// to compute the livein sets for each block is necessary for two
+// reasons:
+//
+// 1. buildIntervals() uses the sets in a single backwards pass to
+//    build precise Intervals with live range holes, and
+//
+// 2. resolveEdges() uses the sets to discover which intervals require
+//    copies on control flow edges due to having been split.
+void Vxls::computeLiveness() {
+  livein.resize(unit.blocks.size());
+  auto const preds = computePreds(unit);
+  jit::vector<uint32_t> blockPO(unit.blocks.size());
+  auto revBlocks = blocks;
+  std::reverse(begin(revBlocks), end(revBlocks));
+
+  FTRACE(6, "computeLiveness: starting with {} blocks (unit blocks: {})\n",
+         revBlocks.size(), unit.blocks.size());
+
+  auto wl = dataflow_worklist<uint32_t>(revBlocks.size());
+
+  for (unsigned po = 0; po < revBlocks.size(); po++) {
+    wl.push(po);
+    blockPO[revBlocks[po]] = po;
+    FTRACE(6, "  - inserting block {} (po = {})\n", revBlocks[po], po);
+  }
+
+  while (!wl.empty()) {
+    auto b = revBlocks[wl.pop()];
+    auto& block = unit.blocks[b];
+
+    FTRACE(6, "  - popped block {} (po = {})\n", b, blockPO[b]);
+
+    // start with the union of the successor blocks
+    LiveSet live(unit.next_vr);
+    for (auto s : succs(block)) {
+      if (!livein[s].empty()) live |= livein[s];
+    }
+
+    // and now go through the instructions in the block in reverse order
+    for (auto i = block.code.end(); i != block.code.begin();) {
+      auto& inst = *--i;
+
+      RegSet implicit_uses, implicit_across, implicit_defs;
+      getEffects(m_abi, inst, implicit_uses, implicit_across, implicit_defs);
+
+      LiveDefVisitor dv(live, *this);
+      visitOperands(inst, dv);
+      dv.def(implicit_defs);
+
+      LiveUseVisitor uv(live, *this);
+      visitOperands(inst, uv);
+      uv.use(implicit_uses);
+      uv.across(implicit_across);
+    }
+
+    if (live != livein[b]) {
+      livein[b] = live;
+      for (auto p : preds[b]) {
+        wl.push(blockPO[p]);
+        FTRACE(6, "  - reinserting block {} (po = {})\n", p, blockPO[p]);
+      }
+    }
+  }
+}
+
 // Visits defs of an instruction, updates their liveness, adds live
 // ranges, and adds Uses with appropriate hints.
 struct DefVisitor {
@@ -629,13 +758,7 @@ struct DefVisitor {
   void def(Vtuple defs) {
     for (auto r : m_tuples[defs]) def(r);
   }
-  void defHint(Vtuple def_tuple, Vtuple hint_tuple) {
-    auto& defs = m_tuples[def_tuple];
-    auto& hints = m_tuples[hint_tuple];
-    for (int i = 0; i < defs.size(); i++) {
-      def(defs[i], VregKind::Any, hints[i]);
-    }
-  }
+  void defHint(Vtuple def_tuple, Vtuple hint_tuple) { def(def_tuple); }
   template<class D, class H> void defHint(D dst, H hint) {
     def(dst, dst.kind, hint, dst.bits == 128);
   }
@@ -695,13 +818,7 @@ struct UseVisitor {
   void use(VcallArgsId id) {
     always_assert(false && "vcall unsupported in vxls");
   }
-  void useHint(Vtuple src_tuple, Vtuple hint_tuple) {
-    auto& uses = m_tuples[src_tuple];
-    auto& hints = m_tuples[hint_tuple];
-    for (int i = 0, n = uses.size(); i < n; i++) {
-      useHint(uses[i], hints[i]);
-    }
-  }
+  void useHint(Vtuple src_tuple, Vtuple hint_tuple) { use(src_tuple); }
   void use(RegSet regs) {
     regs.forEach([&](Vreg r) { use(r); });
   }
@@ -740,10 +857,7 @@ private:
 // the code bottom-up once.
 void Vxls::buildIntervals() {
   ONTRACE(kRegAllocLevel, printCfg(unit, blocks));
-  livein.resize(unit.blocks.size());
   intervals.resize(unit.next_vr);
-  UNUSED auto loops = false;
-  auto const preds = computePreds(unit);
   for (auto blockIt = blocks.end(); blockIt != blocks.begin();) {
     auto b = *--blockIt;
     auto& block = unit.blocks[b];
@@ -751,17 +865,14 @@ void Vxls::buildIntervals() {
     // initial live set is the union of successor live sets.
     LiveSet live(unit.next_vr);
     for (auto s : succs(block)) {
-      if (!livein[s].empty()) {
-        live |= livein[s];
-      } else {
-        // livein[s].empty() implies we haven't processed s yet
-        loops = true;
-      }
+      always_assert(!livein[s].empty());
+      live |= livein[s];
     }
 
     // add a range covering the whole block to every live interval
     auto& block_range = block_ranges[b];
     forEach(live, [&](Vreg r) {
+      if (!intervals[r]) intervals[r] = jit::make<Interval>(r);
       intervals[r]->add(block_range);
     });
 
@@ -783,19 +894,8 @@ void Vxls::buildIntervals() {
       uv.across(implicit_across);
     }
 
-    // save live set so it can propagate to predecessors
-    livein[b] = live;
-
-    // add a loop-covering range to each interval live into a loop.
-    for (auto p : preds[b]) {
-      auto pred_end = block_ranges[p].end;
-      if (pred_end > block_range.start) {
-        forEach(live, [&](Vreg r) {
-          auto ivl = intervals[r];
-          ivl->add(LiveRange{block_range.start, pred_end});
-        });
-      }
-    }
+    // sanity check liveness computation
+    always_assert(live == livein[b]);
   }
 
   // finish processing live ranges for constants
@@ -815,7 +915,6 @@ void Vxls::buildIntervals() {
     std::reverse(ivl->ranges.begin(), ivl->ranges.end());
   }
   ONTRACE(kRegAllocLevel,
-    if (loops) HPHP::Trace::traceRelease("vasm-loops\n");
     print("after building intervals");
   );
 

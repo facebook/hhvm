@@ -72,7 +72,6 @@ void throwIntOOB(int64_t key, bool isVector /* = false */) {
   uint32_t sz = snprintf(buf.ptr, buf.len + 1,
                          "Integer key %" PRId64 " is %s", key,
                          isVector ? "out of bounds" : "not defined");
-  assert(sz <= buf.len);
   msg.setSize(std::min(sz, buf.len));
   Object e(SystemLib::AllocOutOfBoundsExceptionObject(msg));
   throw e;
@@ -1567,7 +1566,6 @@ void HashCollection::throwTooLarge() {
     getClassName().data() + 3, // strip "HH\" prefix
     MaxSize
   );
-  assert(sz <= buf.len);
   msg.setSize(std::min(sz, buf.len));
   Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
   throw e;
@@ -1583,7 +1581,6 @@ void HashCollection::throwReserveTooLarge() {
     getClassName().data() + 3, // strip "HH\" prefix
     MaxReserveSize
   );
-  assert(sz <= buf.len);
   msg.setSize(std::min(sz, buf.len));
   Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
   throw e;

@@ -104,12 +104,12 @@ ALWAYS_INLINE bool ObjectData::destructImpl() {
           }
         }
 
-        // Some decref paths call release() when --m_count == 0 and some call it
-        // when m_count == 1. This difference only matters for objects that
-        // resurrect themselves in their destructors, so make sure m_count is
+        // Some decref paths call release() when --count == 0 and some call it
+        // when count == 1. This difference only matters for objects that
+        // resurrect themselves in their destructors, so make sure count is
         // consistent here.
-        assert(m_count <= 1);
-        m_count = 0;
+        assert(!hasMultipleRefs());
+        m_hdr.count = 0;
       } else {
         assert(g_context->m_faults.empty());
       }
@@ -1002,7 +1002,7 @@ ObjectData* ObjectData::callCustomInstanceInit() {
   auto const init = m_cls->lookupMethod(s___init__.get());
   assert(init);
 
-  // We need to incRef/decRef here because we're still a new (m_count == 0)
+  // We need to incRef/decRef here because we're still a new (count == 0)
   // object and invokeMethod is going to expect us to have a reasonable
   // refcount.
   try {
@@ -2036,7 +2036,6 @@ const char* ObjectData::classname_cstr() const {
 
 void ObjectData::compileTimeAssertions() {
   static_assert(offsetof(ObjectData, m_hdr) == HeaderOffset, "");
-  static_assert(offsetof(ObjectData, m_count) == FAST_REFCOUNT_OFFSET, "");
 }
 
 } // HPHP

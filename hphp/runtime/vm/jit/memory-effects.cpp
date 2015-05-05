@@ -191,6 +191,17 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   };
 }
 
+/*
+ * Modify a GeneralEffects for instructions that could call the user
+ * error handler for the current frame (ie something that can raise
+ * a warning/notice/error, or a builtin call), because the error
+ * handler gets a context array which contains all the locals.
+ */
+GeneralEffects may_raise(const IRInstruction& inst, GeneralEffects x) {
+  return may_reenter(
+    inst, GeneralEffects { x.loads | AFrameAny, x.stores, x.moves, x.kills });
+}
+
 //////////////////////////////////////////////////////////////////////
 
 GeneralEffects may_load_store(AliasClass loads, AliasClass stores) {
@@ -237,17 +248,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * The ReturnHook sets up the ActRec so the unwinder knows everything is
    * already released (i.e. it calls ar->setLocalsDecRefd()).
    *
-   * This means it can block upward exposed uses of locals via kills, even
-   * though it has a catch block as a successor that looks like it can use any
-   * locals (and in fact it can, if it weren't for this instruction).  It also
-   * can block uses of the stack below the depth at the ReturnHook.
+   * The eval stack is also dead at this point (the return value is passed to
+   * ReturnHook as src(1), and the ReturnHook may not access the stack).
    */
   case ReturnHook:
     // Note, this instruction can re-enter, but doesn't need the may_reenter()
     // treatmeant because of the special kill semantics for locals and stack.
     return may_load_store_kill(
       AHeapAny, AHeapAny,
-      stack_below(inst.src(0), 2) | AFrameAny
+      AStackAny | AFrameAny | AMIStateAny
     );
 
   // The suspend hooks can load anything (re-entering the VM), but can't write
@@ -261,6 +270,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * If we're returning from a function, it's ReturnEffects.  The RetCtrl
    * opcode also suspends resumables, which we model as having any possible
    * effects.
+   *
+   * Note that marking AFrameAny as dead isn't quite right, because that
+   * ought to mean that the preceding StRetVal is dead; but memory effects
+   * ignores StRetVal so the AFrameAny is fine.
    */
   case RetCtrl:
     if (inst.extra<RetCtrl>()->suspendingResumed) {
@@ -268,7 +281,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return UnknownEffects {};
     }
     return ReturnEffects {
-      stack_below(inst.src(0), inst.extra<RetCtrl>()->spOffset.offset - 1)
+      AStackAny | AFrameAny | AMIStateAny
     };
 
   case AsyncRetCtrl:
@@ -352,13 +365,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyParamCallable:
   case VerifyParamCls:
   case VerifyParamFail:
-    return may_reenter(inst, may_load_store(AUnknown, AHeapAny));
+    return may_raise(inst, may_load_store(AUnknown, AHeapAny));
   // However the following ones can't read locals from our frame on the way
-  // out.
+  // out, except as a side effect of raising a warning.
   case VerifyRetCallable:
   case VerifyRetCls:
   case VerifyRetFail:
-    return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
+    return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
 
   case CallArray:
     return CallEffects {
@@ -400,7 +413,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         return ret;
       }();
       auto const locs = extra->destroyLocals ? AFrameAny : AEmpty;
-      return may_reenter(inst, may_load_store(stk | AHeapAny | locs, locs));
+      return may_raise(inst, may_load_store(stk | AHeapAny | locs, locs));
     }
 
   // Resumable suspension takes everything from the frame and moves it into the
@@ -618,7 +631,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // Right now we generally can't limit any of these better than general
     // re-entry rules, since they can raise warnings and re-enter.
     assertx(inst.src(0)->type() <= TPtrToGen);
-    return may_reenter(inst, may_load_store(
+    return may_raise(inst, may_load_store(
       AHeapAny | all_pointees(inst),
       AHeapAny | all_pointees(inst)
     ));
@@ -642,7 +655,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetOpProp:
   case SetProp:
   case VGetProp:
-    return may_reenter(inst, may_load_store(
+    return may_raise(inst, may_load_store(
       AHeapAny | all_pointees(inst),
       AHeapAny | all_pointees(inst)
     ));
@@ -734,7 +747,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const stk = AStack {
         inst.src(0), inst.extra<CastStk>()->offset.offset, 1
       };
-      return may_reenter(inst, may_load_store(stk, stk));
+      return may_raise(inst, may_load_store(stk, stk));
     }
   case CoerceStk:
     {
@@ -742,7 +755,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         inst.src(0),
         inst.extra<CoerceStk>()->offset.offset, 1
       };
-      return may_reenter(inst, may_load_store(stk, stk));
+      return may_raise(inst, may_load_store(stk, stk));
     }
 
   case LdARFuncPtr:
@@ -1025,7 +1038,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
   case BaseG:
   case Clone:
-  case WarnNonObjProp:
   case RaiseArrayIndexNotice:
   case RaiseArrayKeyNotice:
   case RaiseError:
@@ -1087,7 +1099,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdSSwitchDestSlow:
   case ConvObjToDbl:
   case ConvObjToInt:
-  case ColAddElemC:
+  case MapAddElemC:
   case ColAddNewElemC:
   case CoerceStrToInt:
   case CoerceStrToDbl:

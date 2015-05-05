@@ -33,9 +33,9 @@ namespace jit { namespace x64 {
 
 // The funcGuard gets skipped and patched by other code, so we have some
 // magic offsets.
-constexpr auto kFuncMovImm = 6; // Offset to the immediate for 8 byte Func*
+constexpr auto kFuncMovImm = 2; // Offset to the immediate for 8 byte Func*
 constexpr auto kFuncCmpImm = 4; // Offset to the immediate for 4 byte Func*
-constexpr auto kFuncGuardLen = 23;
+constexpr auto kFuncGuardLen = 20;
 constexpr auto kFuncGuardShortLen = 14;
 
 template<typename T>

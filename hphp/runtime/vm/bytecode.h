@@ -273,9 +273,9 @@ struct ActRec {
     MagicDispatch = InResumed|FromFPushCtor,
   };
 
-  static constexpr int kNumArgsBits = 29;
-  static constexpr int kNumArgsMask = (1 << kNumArgsBits) - 1;
-  static constexpr int kFlagsMask   = ~kNumArgsMask;
+  static constexpr int kNumArgsBits       = 29;
+  static constexpr int kNumArgsMask       = (1 << kNumArgsBits) - 1;
+  static constexpr int kFlagsMask         = ~kNumArgsMask;
   static constexpr int kExecutionModeMask = ~LocalsDecRefd;
 
   int32_t numArgs() const { return m_numArgsAndFlags & kNumArgsMask; }
@@ -323,9 +323,7 @@ struct ActRec {
   void setMagicDispatch(StringData* invName) {
     assert(flags() == Flags::None);
     m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), MagicDispatch);
-    m_invName = reinterpret_cast<StringData*>(
-      reinterpret_cast<intptr_t>(invName) | kInvNameBit
-    );
+    m_invName = invName;
   }
 
   StringData* clearMagicDispatch() {
@@ -333,7 +331,7 @@ struct ActRec {
     auto const invName = getInvName();
     m_numArgsAndFlags = encodeNumArgsAndFlags(
       numArgs(),
-      static_cast<Flags>(flags() & (~MagicDispatch & kFlagsMask))
+      static_cast<Flags>(flags() & ~MagicDispatch)
     );
     trashVarEnv();
     return invName;
@@ -378,24 +376,21 @@ struct ActRec {
   }
 
   /*
-   * To conserve space, we use unions for pairs of mutually exclusive
-   * fields (fields that are not used at the same time). We use unions
-   * for m_this/m_cls and m_varEnv/m_invName.
+   * To conserve space, we use unions for pairs of mutually exclusive fields
+   * (fields that are not used at the same time). We use unions for
+   * m_this/m_cls and m_varEnv/m_invName.
    *
-   * The least significant bit is used as a marker for each pair of fields
-   * so that we can distinguish at runtime which field is valid. We define
+   * The least significant bit is used as a marker for each pair of fields so
+   * that we can distinguish at runtime which field is valid. We define
    * accessors below to encapsulate this logic.
-   *
-   * Note that m_invName is only used when the ActRec is pre-live. Thus when
-   * an ActRec is live it is safe to directly access m_varEnv without using
-   * accessors.
    */
 
-  static constexpr int8_t kHasClassBit = 0x1;
-  static constexpr int8_t kClassMask   = ~kHasClassBit;
+  static constexpr uintptr_t kHasClassBit       = 0x1;
+  static constexpr uintptr_t kExtraArgsBit      = 0x1;
+  static constexpr uintptr_t kTrashedVarEnvSlot = 0xfeeefeee000f000f;
 
   bool hasThis() const {
-    return m_this && !(reinterpret_cast<intptr_t>(m_this) & kHasClassBit);
+    return m_this && !(reinterpret_cast<uintptr_t>(m_this) & kHasClassBit);
   }
 
   ObjectData* getThis() const {
@@ -408,27 +403,19 @@ struct ActRec {
   }
 
   bool hasClass() const {
-    return reinterpret_cast<intptr_t>(m_cls) & kHasClassBit;
+    return reinterpret_cast<uintptr_t>(m_cls) & kHasClassBit;
   }
 
   Class* getClass() const {
     assert(hasClass());
     return reinterpret_cast<Class*>(
-      reinterpret_cast<intptr_t>(m_cls) & kClassMask);
+      reinterpret_cast<uintptr_t>(m_cls) & ~kHasClassBit);
   }
 
   void setClass(Class* val) {
     m_cls = reinterpret_cast<Class*>(
-      reinterpret_cast<intptr_t>(val) | kHasClassBit);
+      reinterpret_cast<uintptr_t>(val) | kHasClassBit);
   }
-
-  // Note that reordering these is likely to require changes to the translator.
-  static constexpr int8_t kInvNameBit    = 0x1;
-  static constexpr int8_t kInvNameMask   = ~kInvNameBit;
-  static constexpr int8_t kExtraArgsBit  = 0x2;
-  static constexpr int8_t kExtraArgsMask = ~kExtraArgsBit;
-
-  static constexpr uintptr_t kTrashedVarEnvSlot = 0xfeeefeee000f000f;
 
   void trashVarEnv() {
     if (debug) setVarEnv(reinterpret_cast<VarEnv*>(kTrashedVarEnvSlot));
@@ -441,19 +428,13 @@ struct ActRec {
 
   bool hasVarEnv() const {
     assert(checkVarEnv());
-    return m_varEnv &&
-      !(reinterpret_cast<intptr_t>(m_varEnv) & (kInvNameBit | kExtraArgsBit));
-  }
-
-  bool hasInvName() const {
-    assert(magicDispatch());
-    assert(checkVarEnv());
-    return reinterpret_cast<intptr_t>(m_invName) & kInvNameBit;
+    assert(!magicDispatch());
+    return m_varEnv && !(reinterpret_cast<uintptr_t>(m_varEnv) & kExtraArgsBit);
   }
 
   bool hasExtraArgs() const {
     assert(checkVarEnv());
-    return reinterpret_cast<intptr_t>(m_extraArgs) & kExtraArgsBit;
+    return reinterpret_cast<uintptr_t>(m_extraArgs) & kExtraArgsBit;
   }
 
   VarEnv* getVarEnv() const {
@@ -462,15 +443,15 @@ struct ActRec {
   }
 
   StringData* getInvName() const {
-    assert(hasInvName());
-    return reinterpret_cast<StringData*>(
-      reinterpret_cast<intptr_t>(m_invName) & kInvNameMask);
+    assert(magicDispatch());
+    assert(checkVarEnv());
+    return m_invName;
   }
 
   ExtraArgs* getExtraArgs() const {
     if (!hasExtraArgs()) return nullptr;
     return reinterpret_cast<ExtraArgs*>(
-      reinterpret_cast<intptr_t>(m_extraArgs) & kExtraArgsMask);
+      reinterpret_cast<uintptr_t>(m_extraArgs) & ~kExtraArgsBit);
   }
 
   void setVarEnv(VarEnv* val) {
@@ -479,7 +460,7 @@ struct ActRec {
 
   void setExtraArgs(ExtraArgs* val) {
     m_extraArgs = reinterpret_cast<ExtraArgs*>(
-      reinterpret_cast<intptr_t>(val) | kExtraArgsBit);
+      reinterpret_cast<uintptr_t>(val) | kExtraArgsBit);
   }
 
   TypedValue* getExtraArg(unsigned ind) const {

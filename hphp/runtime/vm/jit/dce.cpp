@@ -325,7 +325,6 @@ bool canDCE(IRInstruction* inst) {
   case VerifyRetCls:
   case VerifyRetFail:
   case RaiseUninitLoc:
-  case WarnNonObjProp:
   case RaiseUndefProp:
   case RaiseError:
   case RaiseWarning:
@@ -457,7 +456,7 @@ bool canDCE(IRInstruction* inst) {
   case VectorDoCow:
   case VectorHasImmCopy:
   case ColAddNewElemC:
-  case ColAddElemC:
+  case MapAddElemC:
   case BeginCatch:
   case EndCatch:
   case UnwindCheckSideExit:

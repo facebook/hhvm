@@ -31,10 +31,6 @@ foreach (dir ${subdirs})
   endif()
 endforeach()
 
-if(NOT LINUX)
-       add_definitions(-DNO_HARDWARE_COUNTERS)
-endif()
-
 ADD_LIBRARY(hphp_runtime_ext STATIC
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES})
 if (ENABLE_ASYNC_MYSQL)

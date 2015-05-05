@@ -5,7 +5,6 @@ endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
 list(APPEND HEADER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/version.h")
 
 if(NOT LINUX)
-  add_definitions(-DNO_HARDWARE_COUNTERS)
   list(REMOVE_ITEM CXX_SOURCES
        ${CMAKE_CURRENT_SOURCE_DIR}/vm/debug/elfwriter.cpp)
 endif()
@@ -44,6 +43,11 @@ add_custom_command(
   COMMENT "Generating HHIR opcode table"
   VERBATIM)
 
+# Generate dummy all-scan.h header file
+add_custom_target(ALL_SCAN_HEADER ALL
+  COMMAND ${CMAKE_COMMAND} -E touch all-scan.h
+  VERBATIM)
+
 ADD_LIBRARY(hphp_runtime_static STATIC
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES}
             "ir-opcode-generated.h")
@@ -65,3 +69,9 @@ if(CYGWIN AND CMAKE_BUILD_TYPE MATCHES "Debug")
     ${CMAKE_CURRENT_SOURCE_DIR}/vm/jit/hhbc-translator.cpp
     PROPERTIES COMPILE_FLAGS -Og)
 endif()
+
+set(EZC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../runtime/ext_zend_compat/")
+include_directories("${EZC_DIR}/php-src")
+include_directories("${EZC_DIR}/php-src/main")
+include_directories("${EZC_DIR}/php-src/Zend")
+include_directories("${EZC_DIR}/php-src/TSRM")

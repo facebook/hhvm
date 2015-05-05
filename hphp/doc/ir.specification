@@ -1498,10 +1498,6 @@ To string conversions:
 
   Raise a notice for an uninitialized local variable.
 
-| WarnNonObjProp, ND, NA, Er
-
-  Raise a warning for property access on a non-object base.
-
 | RaiseUndefProp, ND, S(Obj) CStr, Er
 
   Raise a notice for an undefined property named S1 on the class of S0.
@@ -2310,9 +2306,9 @@ fields of that struct for holding intermediate values.
   Adds item S0 to the end of collection S0. Throws a fatal error if S0 is not a
   collection. Returns S0.
 
-| ColAddElemC, DofS(0), S(Obj) S(Cell) S(Cell), Er|CRc|P
+| MapAddElemC, DofS(0), S(Obj) S(Cell) S(Cell), Er|CRc|P
 
-  Adds item to collection. Inserts item S2 into collection S0 at key S1.
+  Adds item to a Map or ImmMap. Inserts item S2 into collection S0 at key S1.
   Throws a fatal error if S0 is not a collection. Returns S0.
 
 | ColIsEmpty, D(Bool), S(Obj), NF

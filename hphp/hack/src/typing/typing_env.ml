@@ -488,6 +488,11 @@ let add_anonymous env x =
   let genv = { genv with anons = IMap.add anon_id x genv.anons } in
   { env with genv = genv }, anon_id
 
+let set_anonymous env anon_id x =
+  let genv = env.genv in
+  let genv = { genv with anons = IMap.add anon_id x genv.anons } in
+  { env with genv = genv }
+
 let get_anonymous env x =
   IMap.get x env.genv.anons
 

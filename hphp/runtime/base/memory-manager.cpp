@@ -653,7 +653,7 @@ void MemoryManager::initHole() {
   if ((char*)m_front < (char*)m_limit) {
     auto hdr = static_cast<FreeNode*>(m_front);
     hdr->hdr.kind = HeaderKind::Hole;
-    hdr->size = (char*)m_limit - (char*)m_front;
+    hdr->size() = (char*)m_limit - (char*)m_front;
   }
 }
 
@@ -662,7 +662,7 @@ void MemoryManager::initFree() {
   for (size_t i = 0; i < kNumSmartSizes; i++) {
     auto size = s_index2size.table[i];
     for (auto n = m_freelists[i].head; n; n = n->next) {
-      n->kind_size = HeaderWord<>::pack(HeaderKind::Free) | size << 32;
+      n->hdr.init(HeaderKind::Free, size);
     }
   }
 }
@@ -1144,7 +1144,7 @@ MemBlock BigHeap::allocSlab(size_t size) {
 void BigHeap::enlist(BigNode* n, HeaderKind kind, size_t size) {
   n->nbytes = size;
   n->hdr.kind = kind;
-  n->index = m_bigs.size();
+  n->index() = m_bigs.size();
   m_bigs.push_back(n);
 }
 
@@ -1181,9 +1181,9 @@ bool BigHeap::contains(void* ptr) const {
 NEVER_INLINE
 void BigHeap::freeBig(void* ptr) {
   auto n = static_cast<BigNode*>(ptr) - 1;
-  auto i = n->index;
+  auto i = n->index();
   auto last = m_bigs.back();
-  last->index = i;
+  last->index() = i;
   m_bigs[i] = last;
   m_bigs.pop_back();
   free(n);
@@ -1197,7 +1197,7 @@ MemBlock BigHeap::resizeBig(void* ptr, size_t newsize) {
     safe_realloc(n, newsize + sizeof(BigNode))
   );
   if (newNode != n) {
-    m_bigs[newNode->index] = newNode;
+    m_bigs[newNode->index()] = newNode;
   }
   return {newNode + 1, newsize};
 }
@@ -1270,7 +1270,7 @@ void ContiguousHeap::reset() {
   }
   m_used = m_base;
   m_freeList.next = nullptr;
-  m_freeList.size = 0;
+  m_freeList.size() = 0;
   always_assert(m_base);
   m_slabs.clear();
   m_bigs.clear();
@@ -1279,7 +1279,7 @@ void ContiguousHeap::reset() {
 void ContiguousHeap::flush() {
   madvise(m_base, m_peak-m_base, MADV_DONTNEED);
   m_used = m_peak = m_base;
-  m_freeList.size = 0;
+  m_freeList.size() = 0;
   m_freeList.next = nullptr;
   m_slabs = std::vector<MemBlock>{};
   m_bigs = std::vector<BigNode*>{};
@@ -1318,10 +1318,10 @@ NEVER_INLINE
 void ContiguousHeap::freeBig(void* ptr) {
   // remove from big list
   auto n = static_cast<BigNode*>(ptr) - 1;
-  auto i = n->index;
+  auto i = n->index();
   auto last = m_bigs.back();
   auto size = n->nbytes;
-  last->index = i;
+  last->index() = i;
   m_bigs[i] = last;
   m_bigs.pop_back();
 
@@ -1329,19 +1329,19 @@ void ContiguousHeap::freeBig(void* ptr) {
   // freed nodes are stored in address ordered freelist
   auto free = &m_freeList;
   auto node = reinterpret_cast<FreeNode*>(n);
-  node->size = size;
+  node->size() = size;
   while (free->next != nullptr && free->next < node) {
     free = free->next;
   }
   // Coalesce Nodes if possible with adjacent free nodes
-  if ((uintptr_t)free + free->size + node->size == (uintptr_t)free->next) {
-    free->size += node->size + free->next->size;
+  if ((uintptr_t)free + free->size() + node->size() == (uintptr_t)free->next) {
+    free->size() += node->size() + free->next->size();
     free->next = free->next->next;
-  } else if ((uintptr_t)free + free->size == (uintptr_t)ptr) {
-    free->size += node->size;
-  } else if ((uintptr_t)node + node->size == (uintptr_t)free->next){
+  } else if ((uintptr_t)free + free->size() == (uintptr_t)ptr) {
+    free->size() += node->size();
+  } else if ((uintptr_t)node + node->size() == (uintptr_t)free->next){
     node->next = free->next->next;
-    node->size += free->next->size;
+    node->size() += free->next->size();
     free->next = node;
   } else {
     node->next = free->next;
@@ -1365,7 +1365,7 @@ MemBlock ContiguousHeap::resizeBig(void* ptr, size_t newsize) {
     newNode->nbytes = cap;
   }
   if (newNode != n) {
-    m_bigs[newNode->index] = newNode;
+    m_bigs[newNode->index()] = newNode;
     freeBig(n);
   }
   return {newNode + 1, n->nbytes - sizeof(BigNode)};
@@ -1384,19 +1384,19 @@ void* ContiguousHeap::heapAlloc(size_t nbytes, size_t &cap) {
   auto prev = &m_freeList;
   auto cur = m_freeList.next;
   while (cur != nullptr ) {
-    if (cur->size >= alignedSize &&
-        cur->size < alignedSize + kMaxSmartSize) {
+    if (cur->size() >= alignedSize &&
+        cur->size() < alignedSize + kMaxSmartSize) {
       // found freed heap node that fits allocation and doesn't need to split
       ptr = cur;
       prev->next = cur->next;
-      cap = cur->size;
+      cap = cur->size();
       return ptr;
     }
-    if (cur->size > alignedSize) {
+    if (cur->size() > alignedSize) {
       // split free heap node
       prev->next = reinterpret_cast<FreeNode*>(((char*)cur) + alignedSize);
       prev->next->next = cur->next;
-      prev->next->size = cur->size - alignedSize;
+      prev->next->size() = cur->size() - alignedSize;
       ptr = cur;
       cap = alignedSize;
       return ptr;
@@ -1437,7 +1437,7 @@ void ContiguousHeap::createRequestHeap() {
   m_peak = m_base;
   m_OOMMarker = m_end - (m_contiguousHeapSize/2);
   m_freeList.next = nullptr;
-  m_freeList.size = 0;
+  m_freeList.size() = 0;
 }
 
 ContiguousHeap::~ContiguousHeap(){

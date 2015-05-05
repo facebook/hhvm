@@ -27,8 +27,7 @@ APCString::MakeSharedString(DataType type, StringData* data) {
   auto size = cap + 1 + sizeof(APCString);
 
   apcStr->m_str.m_data        = reinterpret_cast<char*>(apcStr + 1);
-  apcStr->m_str.m_capAndCount =
-    HeaderWord<CapCode>::pack(cc, HeaderKind::String); // count=0
+  apcStr->m_str.m_hdr.init(cc, HeaderKind::String, 0);
   apcStr->m_str.m_len         = len; // don't store hash
 
   apcStr->m_str.m_data[len] = 0;
@@ -41,7 +40,7 @@ APCString::MakeSharedString(DataType type, StringData* data) {
 
   assert(apcStr->m_str.m_hash != 0);
   assert(apcStr->m_str.m_data[len] == 0);
-  assert(apcStr->m_str.m_count == 0);
+  assert(apcStr->m_str.getCount() == 0);
   assert(apcStr->m_str.isFlat());
   assert(apcStr->m_str.checkSane());
   return {apcStr->getHandle(), size};

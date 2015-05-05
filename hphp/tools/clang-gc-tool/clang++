@@ -1,0 +1,11 @@
+#!/bin/sh
+
+DIR="$( cd "$( dirname "$0" )" && pwd )"
+
+ROOT="$DIR/../../.."
+
+GLIBC="$ROOT/third-party2/glibc/2.17/gcc-4.8.1-glibc-2.17-fb/99df8fc/lib"
+
+LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-$GLIBC}:$GLIBC"
+
+"$ROOT/third-party2/clang/dev/gcc-4.8.1-glibc-2.17-fb/ab1fa93/bin/clang++" "$@"

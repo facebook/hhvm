@@ -49,6 +49,13 @@ function typecheck_impl(string $client_name): TypecheckResult {
   }
 
   $json = \json_decode($output, true);
+
+  if (!$json) {
+    // This is typically "could not find hhconfig", which of course uses the
+    // same exit code as "type error". See above about fixing this.
+    return new TypecheckResult(TypecheckStatus::OTHER_ERROR, $output);
+  }
+
   $passed = ($ret === 0) && \hphp_array_idx($json, 'passed', false);
 
   if ($passed) {
@@ -82,6 +89,8 @@ enum TypecheckStatus : int {
   TYPE_ERROR = 1;
   SERVER_BUSY = 2;
   COMMAND_NOT_FOUND = 3;
+
+  OTHER_ERROR = -1;
 }
 
 final class TypecheckResult implements \JsonSerializable {
@@ -112,6 +121,7 @@ final class TypecheckResult implements \JsonSerializable {
       break;
     case TypecheckStatus::SERVER_BUSY:
     case TypecheckStatus::COMMAND_NOT_FOUND:
+    case TypecheckStatus::OTHER_ERROR:
       \trigger_error($this->error, $client_error_level);
       break;
     }

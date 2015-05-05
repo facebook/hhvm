@@ -23,43 +23,42 @@
 
 namespace HPHP {
 
-class ZendExceptionStore final : public RequestEventHandler {
-  public:
-    static ZendExceptionStore& getInstance() {
-      return *tl_instance;
-    }
+struct ZendExceptionStore final : RequestEventHandler {
+  static ZendExceptionStore& getInstance() {
+    return *tl_instance;
+  }
 
-    template <class E> void set(E e) {
-      m_ptr = std::make_exception_ptr(e);
-    }
-    void setPointer(std::exception_ptr ptr) {
-      m_ptr = ptr;
-    }
-    void clear() {
-      m_ptr = nullptr;
-    }
-    virtual void requestInit() {
-    }
-    virtual void requestShutdown() {
+  template <class E> void set(E e) {
+    m_ptr = std::make_exception_ptr(e);
+  }
+  void setPointer(std::exception_ptr ptr) {
+    m_ptr = ptr;
+  }
+  void clear() {
+    m_ptr = nullptr;
+  }
+  void requestInit() override {
+  }
+  void requestShutdown() override {
+    clear();
+  }
+  std::exception_ptr get() {
+    return m_ptr;
+  }
+  bool empty() {
+    return !m_ptr;
+  }
+  void rethrow() {
+    if (m_ptr) {
+      std::exception_ptr p = get();
       clear();
+      std::rethrow_exception(p);
     }
-    std::exception_ptr get() {
-      return m_ptr;
-    }
-    bool empty() {
-      return !m_ptr;
-    }
-    void rethrow() {
-      if (m_ptr) {
-        std::exception_ptr p = get();
-        clear();
-        std::rethrow_exception(p);
-      }
-    }
+  }
 
-  private:
-    std::exception_ptr m_ptr;
-    DECLARE_STATIC_REQUEST_LOCAL(ZendExceptionStore, tl_instance);
+private:
+  std::exception_ptr m_ptr;
+  DECLARE_STATIC_REQUEST_LOCAL(ZendExceptionStore, tl_instance);
 };
 
 }

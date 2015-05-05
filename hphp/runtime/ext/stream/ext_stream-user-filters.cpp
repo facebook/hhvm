@@ -41,8 +41,7 @@ const StaticString s_bucket_class("__SystemLib\\StreamFilterBucket");
 const StaticString s_default_filters_register_func(
   "__SystemLib\\register_default_stream_filters");
 
-class StreamUserFilters : public RequestEventHandler {
- public:
+struct StreamUserFilters final : RequestEventHandler {
   virtual ~StreamUserFilters() {}
   Array m_registeredFilters;
 
@@ -76,13 +75,18 @@ class StreamUserFilters : public RequestEventHandler {
                                  /* append = */ true);
   }
 
-  virtual void requestInit() {
+  void requestInit() override {
     vm_call_user_func(s_default_filters_register_func, empty_array_ref);
   }
 
-  virtual void requestShutdown() {
+  void requestShutdown() override {
     m_registeredFilters.detach();
   }
+
+  void vscan(IMarker& mark) const override {
+    mark(m_registeredFilters);
+  }
+
 private:
   Variant appendOrPrependFilter(const Resource& stream,
                  const String& filtername,

@@ -149,7 +149,7 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
   gen(
     env,
     RetCtrl,
-    RetCtrlData { offsetFromIRSP(env, BCSPOffset{0}), false },
+    RetCtrlData { offsetFromIRSP(env, BCSPOffset{0}), true },
     sp(env),
     fp(env)
   );

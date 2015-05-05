@@ -33,6 +33,7 @@
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
+#include "hphp/runtime/ext/gd/libgd/gd.h"
 #include "hphp/runtime/ext/gd/libgd/gdfontt.h"  /* 1 Tiny font */
 #include "hphp/runtime/ext/gd/libgd/gdfonts.h"  /* 2 Small font */
 #include "hphp/runtime/ext/gd/libgd/gdfontmb.h" /* 3 Medium bold font */

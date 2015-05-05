@@ -151,7 +151,7 @@ bool IRInstruction::consumesReference(int srcNo) const {
       // Consumes the $this/Class field of the ActRec
       return srcNo == 2;
 
-    case ColAddElemC:
+    case MapAddElemC:
       // value at index 2
       return srcNo == 2;
 

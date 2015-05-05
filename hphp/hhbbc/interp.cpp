@@ -300,7 +300,7 @@ void in(ISS& env, const bc::ColFromArray& op) {
   push(env, objExact(env.index.builtin_class(name)));
 }
 
-void in(ISS& env, const bc::ColAddElemC&) {
+void in(ISS& env, const bc::MapAddElemC&) {
   popC(env); popC(env);
   auto const coll = popC(env);
   push(env, coll);

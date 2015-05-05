@@ -8768,7 +8768,7 @@ void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
       emitConvertToCell(e);
       visit(ap->getValue());
       emitConvertToCell(e);
-      e.ColAddElemC();
+      e.MapAddElemC();
     }
   }
 }

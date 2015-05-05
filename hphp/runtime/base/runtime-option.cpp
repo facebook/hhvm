@@ -372,7 +372,7 @@ HackStrictOption
   RuntimeOption::IconvIgnoreCorrect = HackStrictOption::OFF,
   RuntimeOption::MinMaxAllowDegenerate = HackStrictOption::OFF;
 bool RuntimeOption::LookForTypechecker = true;
-bool RuntimeOption::AutoTypecheck = false;
+bool RuntimeOption::AutoTypecheck = true;
 
 int RuntimeOption::GetScannerType() {
   int type = 0;
@@ -1074,14 +1074,20 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
                  "Hack.Lang.IconvIgnoreCorrect");
     Config::Bind(MinMaxAllowDegenerate, ini, config,
                  "Hack.Lang.MinMaxAllowDegenerate");
+#ifdef FACEBOOK
+    // Force off for Facebook unless you explicitly turn on; folks here both
+    // disproportionately know what they are doing, and are doing work on HHVM
+    // where this gets in the way.
+    const bool aggroHackChecksDefault = false;
+#else
     // Defaults to EnableHHSyntax since, if you have that on, you are
     // assumed to know what you're doing.
+    const bool aggroHackChecksDefault = !EnableHipHopSyntax;
+#endif
     Config::Bind(LookForTypechecker, ini, config,
-                 "Hack.Lang.LookForTypechecker", !EnableHipHopSyntax);
-    // Experimental and off for now; will eventually default to something like
-    // !EnableHipHopSyntax
+                 "Hack.Lang.LookForTypechecker", aggroHackChecksDefault);
     Config::Bind(AutoTypecheck, ini, config, "Hack.Lang.AutoTypecheck",
-                 false);
+                 aggroHackChecksDefault);
   }
   {
     // Server

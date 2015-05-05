@@ -88,7 +88,7 @@ inline SSATmp* IRInstruction::getPassthroughValue() const {
   assertx(isPassthrough());
   assertx(is(IncRef,
             CheckType, AssertType, AssertNonNull,
-            ColAddElemC, ColAddNewElemC,
+            MapAddElemC, ColAddNewElemC,
             CastCtxThis,
             Mov));
   return src(0);

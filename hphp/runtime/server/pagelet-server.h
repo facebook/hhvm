@@ -134,6 +134,8 @@ public:
   void setAsioEvent(PageletServerTaskEvent *event);
 
 private:
+  template <typename F> friend void scan(const PageletTransport&, F&);
+
   std::atomic<int> m_refCount;
   int m_timeoutSeconds;
 

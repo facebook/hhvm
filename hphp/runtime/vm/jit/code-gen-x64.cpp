@@ -369,7 +369,7 @@ CALL_OPCODE(AddElemIntKey)
 CALL_OPCODE(AddNewElem)
 CALL_OPCODE(ArrayAdd)
 CALL_OPCODE(Box)
-CALL_OPCODE(ColAddElemC)
+CALL_OPCODE(MapAddElemC)
 CALL_OPCODE(ColAddNewElemC)
 
 CALL_OPCODE(CoerceCellToBool);
@@ -440,7 +440,6 @@ CALL_OPCODE(VerifyParamFail)
 CALL_OPCODE(VerifyRetCallable)
 CALL_OPCODE(VerifyRetFail)
 CALL_OPCODE(RaiseUninitLoc)
-CALL_OPCODE(WarnNonObjProp)
 CALL_OPCODE(RaiseUndefProp)
 CALL_OPCODE(RaiseError)
 CALL_OPCODE(RaiseWarning)
@@ -2640,9 +2639,7 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
     v << cmplim{0, name[FAST_REFCOUNT_OFFSET], sf};
     static_assert(UncountedValue < 0 && StaticValue < 0, "");
     ifThen(v, CC_NS, sf, [&](Vout& v) { emitIncRef(v, name); });
-    auto name2 = v.makeReg();
-    v << orqi{ActRec::kInvNameBit, name, name2, v.makeReg()};
-    v << store{name2, spReg[spOffset + int(AROFF(m_invName))]};
+    v << store{name, spReg[spOffset + int(AROFF(m_invName))]};
     auto const encoded = ActRec::encodeNumArgsAndFlags(
       safe_cast<int32_t>(nArgs),
       ActRec::Flags::MagicDispatch
@@ -2695,11 +2692,8 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   }
 
   // actRec->m_invName
-  // ActRec::m_invName is encoded as a pointer with bit kInvNameBit
-  // set to distinguish it from m_varEnv and m_extrArgs
   if (magicName) {
-    auto const invName =
-      reinterpret_cast<uintptr_t>(magicName) | ActRec::kInvNameBit;
+    auto const invName = reinterpret_cast<uintptr_t>(magicName);
     emitImmStoreq(v, invName, spReg[spOffset] + int{AROFF(m_invName)});
   } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitImmStoreq(v, ActRec::kTrashedVarEnvSlot,
@@ -4405,6 +4399,7 @@ void CodeGenerator::cgAKExistsObj(IRInstruction* inst) {
 
   if (keyTy <= TInitNull) {
     v << ldimmq{0, dstLoc(inst, 0).reg()};
+    m_state.catch_calls[inst->taken()] = CatchCall::CPP;
     return;
   }
 
@@ -4650,7 +4645,9 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
       v << incwm{rVmTl[profile.handle() + offsetof_release], v.makeReg()};
     }
     auto const sf = v.makeReg();
-    v << testqim{ActRec::kExtraArgsBit, rFp[AROFF(m_varEnv)], sf};
+    v << testqim{safe_cast<int32_t>(ActRec::kExtraArgsBit),
+                 rFp[AROFF(m_varEnv)],
+                 sf};
     emitFwdJcc(v, CC_Z, sf, label);
     cgCallHelper(
       v,

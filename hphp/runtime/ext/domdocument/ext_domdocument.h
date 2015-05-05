@@ -74,6 +74,7 @@ struct DOMNode {
   void setNode(xmlNodePtr n) { setNode(libxml_register_node(n)); }
 
 private:
+  template <typename F> friend void scan(const HPHP::DOMNode&, F&);
   ObjectData* toObject() {
     return reinterpret_cast<ObjectData*>(this + 1);
   }

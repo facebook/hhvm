@@ -76,7 +76,7 @@ public:
     return m_filters.rvalAtRef(wildcard);
   }
 
-  const Array& getFiltersAsArray() const {
+  const Array& filtersAsArray() const {
     return m_filters;
   }
 
@@ -133,7 +133,7 @@ struct StreamUserFilters final : RequestEventHandler {
   }
 
   void vscan(IMarker& mark) const override {
-    mark(m_registeredFilters.getFiltersAsArray());
+    mark(m_registeredFilters.filtersAsArray());
   }
 
 private:
@@ -330,7 +330,7 @@ Array HHVM_FUNCTION(stream_get_filters) {
   if (UNLIKELY(filters.isNull())) {
     return empty_array();
   }
-  return array_keys_helper(filters.getFiltersAsArray()).toArray();
+  return array_keys_helper(filters.filtersAsArray()).toArray();
 }
 
 Variant HHVM_FUNCTION(stream_filter_append,

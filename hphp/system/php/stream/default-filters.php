@@ -27,7 +27,8 @@ namespace __SystemLib {
     private $toEncoding;
 
     public function onCreate(): bool {
-      $filter = substr($this->filtername, 14); // strip out prefix "convert.iconv."
+      /* strip out prefix "convert.iconv." */
+      $filter = substr($this->filtername, 14);
       if (false === strpos($filter, '/')) {
         return false;
       }

@@ -61,6 +61,7 @@ struct TransRec {
   TransID                id;
   TransKind              kind;
   bool                   isLLVM;
+  bool                   hasLoop;
 
   TransRec() {}
 
@@ -75,7 +76,8 @@ struct TransRec {
            RegionDescPtr               region = RegionDescPtr(),
            std::vector<TransBCMapping> _bcMapping =
              std::vector<TransBCMapping>(),
-           bool                        _isLLVM = false);
+           bool                        _isLLVM = false,
+           bool                        _hasLoop = false);
 
   std::string print(uint64_t profCount) const;
   Offset bcPast() const;

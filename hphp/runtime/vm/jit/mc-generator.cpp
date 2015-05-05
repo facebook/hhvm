@@ -1632,6 +1632,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
   PostConditions pconds;
   RegionDescPtr region;
+  bool hasLoop = false;
+
   if (!reachedTranslationLimit(sk, srcRec)) {
     // Attempt to create a region at this SrcKey
     if (m_tx.mode() == TransKind::Optimize) {
@@ -1647,7 +1649,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
       }
     } else {
       assertx(m_tx.mode() == TransKind::Profile ||
-             m_tx.mode() == TransKind::Live);
+              m_tx.mode() == TransKind::Live);
       RegionContext rContext { sk.func(), sk.offset(), liveSpOff(),
                                sk.resumed() };
       FTRACE(2, "populating live context for region\n");
@@ -1659,7 +1661,6 @@ MCGenerator::translateWork(const TranslArgs& args) {
     auto regionInterps = RegionBlacklist{};
     initSpOffset = region ? region->entry()->initialSpOffset()
                           : liveSpOff();
-
     while (region && result == TranslateResult::Retry) {
       auto const transContext = TransContext {
         RuntimeOption::EvalJitPGO
@@ -1682,6 +1683,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         assertCleanState();
         result = translateRegion(irgs, *region, regionInterps, args.flags,
                                  pconds);
+        hasLoop = RuntimeOption::EvalJitLoops && cfgHasLoop(irgs.unit);
         FTRACE(2, "translateRegion finished with result {}\n", show(result));
       } catch (const std::exception& e) {
         FTRACE(1, "translateRegion failed with '{}'\n", e.what());
@@ -1761,7 +1763,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
               realColdStart,   code.realCold().frontier()   - realColdStart,
               realFrozenStart, code.realFrozen().frontier() - realFrozenStart,
               region, m_fixups.m_bcMap,
-              useLLVM());
+              useLLVM(), hasLoop);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);

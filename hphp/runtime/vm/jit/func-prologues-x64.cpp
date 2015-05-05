@@ -78,7 +78,6 @@ void maybeEmitStackCheck(X64Assembler& a, const Func* func) {
 TCA emitFuncGuard(X64Assembler& a, const Func* func) {
   using namespace reg;
   assertx(kScratchCrossTraceRegs.contains(rax));
-  assertx(kScratchCrossTraceRegs.contains(rdx));
 
   auto const funcImm = Immed64(func);
   int nBytes, offset;
@@ -97,17 +96,16 @@ TCA emitFuncGuard(X64Assembler& a, const Func* func) {
 
   TCA aStart DEBUG_ONLY = a.frontier();
   if (!funcImm.fits(sz::dword)) {
-    a.  loadq  (rVmFp[AROFF(m_func)], rax);
     /*
       Although func doesnt fit in a signed 32-bit immediate, it may still
       fit in an unsigned one. Rather than deal with yet another case
       (which only happens when we disable jemalloc) just force it to
       be an 8-byte immediate, and patch it up afterwards.
     */
-    a.  movq   (0xdeadbeeffeedface, rdx);
+    a.  movq   (0xdeadbeeffeedface, rax);
     assertx(((uint64_t*)a.frontier())[-1] == 0xdeadbeeffeedface);
     ((uint64_t*)a.frontier())[-1] = uintptr_t(func);
-    a.  cmpq   (rax, rdx);
+    a.  cmpq   (rax, rVmFp[AROFF(m_func)]);
   } else {
     a.  cmpq   (funcImm.l(), rVmFp[AROFF(m_func)]);
   }

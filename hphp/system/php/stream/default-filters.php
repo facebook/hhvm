@@ -28,7 +28,7 @@ namespace __SystemLib {
 
     public function onCreate(): bool {
       $filter = substr($this->filtername, 14); // strip out prefix "convert.iconv."
-      if(false === strpos($filter, '/')) {
+      if (false === strpos($filter, '/')) {
         return false;
       }
       $encodingPair = explode('/', $filter, 2);
@@ -39,9 +39,14 @@ namespace __SystemLib {
 
     public function filter($in, $out, &$consumed, $closing): int {
       while ($bucket = stream_bucket_make_writeable($in)) {
+        $convertedData = iconv(
+          $this->fromEncoding,
+          $this->toEncoding,
+          $bucket->data
+        );
         stream_bucket_append(
           $out,
-          stream_bucket_new($this->stream, iconv($this->fromEncoding, $this->toEncoding, $bucket->data))
+          stream_bucket_new($this->stream, $convertedData)
         );
       }
       return \PSFS_PASS_ON;

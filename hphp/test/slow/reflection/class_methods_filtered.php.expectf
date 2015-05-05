@@ -1,0 +1,25 @@
+array(2) {
+  [0]=>
+  object(ReflectionMethod)#%d (2) {
+    ["name"]=>
+    string(1) "i"
+    ["class"]=>
+    string(1) "I"
+  }
+  [1]=>
+  object(ReflectionMethod)#%d (2) {
+    ["name"]=>
+    string(1) "s"
+    ["class"]=>
+    string(1) "I"
+  }
+}
+array(1) {
+  [0]=>
+  object(ReflectionMethod)#%d (2) {
+    ["name"]=>
+    string(1) "s"
+    ["class"]=>
+    string(1) "I"
+  }
+}

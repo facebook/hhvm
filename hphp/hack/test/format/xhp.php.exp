@@ -25,3 +25,36 @@ function h() {
   $a = 1;
   return <input data-foo={$a} />;
 }
+
+function i() {
+  return <a></a>;
+}
+
+function j() {
+  // it would be nice to squeeze this into one line, too
+  return
+    <a>
+    </a>;
+}
+
+function k() {
+  return
+    <a>
+      <a>
+        <a>
+          <a><a><a><a><a><a><a><a><a></a></a></a></a></a></a></a></a></a>
+        </a>
+      </a>
+    </a>;
+}
+
+function m() {
+  return
+    <b>
+      <a
+        href="aaaaaaaaaaaaaaaaaaaaaaaaaa"
+        asdf="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      />
+      <a href="a" />
+    </b>;
+}

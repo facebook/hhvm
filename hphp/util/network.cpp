@@ -60,9 +60,6 @@ bool safe_gethostbyname(const char *address, HostEnt &result) {
   }
 
   result.hostbuf = *hp;
-#ifdef __APPLE__
-  freehostent(hp);
-#endif
   return true;
 #else
   struct hostent *hp;

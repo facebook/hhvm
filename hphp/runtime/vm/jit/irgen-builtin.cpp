@@ -16,10 +16,10 @@
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/ext/ext_collections.h"
 
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-call.h"
@@ -1054,7 +1054,7 @@ void emitIdx(IRGS& env) {
       // We must require either constant non-int keys or known integer keys for
       // Map, because integer-like strings behave differently.
       auto const okMap = [&]() {
-        if (cls != c_Map::classof()) return false;
+        if (!collections::isType(cls, CollectionType::Map)) return false;
         if (keyType <= TInt) return true;
         if (!keyType.hasConstVal()) return false;
         int64_t dummy;
@@ -1063,7 +1063,7 @@ void emitIdx(IRGS& env) {
       }();
       // Similarly, Vector is only usable with int keys, so we can only do this
       // for Vector if it's an Int.
-      auto const okVector = cls == c_Vector::classof() &&
+      auto const okVector = collections::isType(cls, CollectionType::Vector) &&
                             keyType <= TInt;
 
       auto const optimizableCollection = okMap || okVector;

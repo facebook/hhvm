@@ -24,6 +24,7 @@
 #include "hphp/runtime/ext/asio/wait-handle.h"
 #include "hphp/runtime/ext/asio/static-wait-handle.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/proxy-array.h"
@@ -141,8 +142,8 @@ Object c_AwaitAllWaitHandle::ti_frommap(const Variant& dependencies) {
   if (LIKELY(dependencies.isObject())) {
     auto obj = dependencies.getObjectData();
     if (LIKELY(obj->isCollection() && isMapCollection(obj->collectionType()))) {
-      assert(obj->instanceof(c_Map::classof()) ||
-             obj->instanceof(c_ImmMap::classof()));
+      assertx(collections::isType(obj->getVMClass(), CollectionType::Map,
+                                                     CollectionType::ImmMap));
       return FromMap(static_cast<BaseMap*>(obj));
     }
   }
@@ -154,8 +155,8 @@ Object c_AwaitAllWaitHandle::ti_fromvector(const Variant& dependencies) {
     auto obj = dependencies.getObjectData();
     if (LIKELY(obj->isCollection() &&
                isVectorCollection(obj->collectionType()))) {
-      assert(obj->instanceof(c_Vector::classof()) ||
-             obj->instanceof(c_ImmVector::classof()));
+      assertx(collections::isType(obj->getVMClass(), CollectionType::Vector,
+                                                  CollectionType::ImmVector));
       return FromVector(static_cast<BaseVector*>(obj));
     }
   }

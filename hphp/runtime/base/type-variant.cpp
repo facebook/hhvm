@@ -19,6 +19,7 @@
 #include "hphp/parser/hphp.tab.hpp"
 
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/externals.h"
@@ -1076,7 +1077,8 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
           throw_null_pointer_exception();
         } else {
           obj = ObjectData::newInstance(cls);
-          if (UNLIKELY(cls == c_Pair::classof() && size != 2)) {
+          if (UNLIKELY(collections::isType(cls, CollectionType::Pair) &&
+                       (size != 2))) {
             throw Exception("Pair objects must have exactly 2 elements");
           }
         }
@@ -1166,7 +1168,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
           if (!obj->isCollection()) {
             throw Exception("%s is not a collection class", clsName.data());
           }
-          collectionUnserialize(obj.get(), uns, size, type);
+          collections::unserialize(obj.get(), uns, size, type);
         }
       }
       uns->expectChar('}');

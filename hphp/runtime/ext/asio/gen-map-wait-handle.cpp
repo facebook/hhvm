@@ -54,7 +54,7 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
       "Expected dependencies to be an instance of Map"));
     throw e;
   }
-  assert(obj->instanceof(c_Map::classof()));
+  assertx(obj->collectionType() == CollectionType::Map);
   auto deps = SmartPtr<c_Map>::attach(c_Map::Clone(obj));
   auto ctx_idx = std::numeric_limits<context_idx_t>::max();
   for (ssize_t iter_pos = deps->iter_begin();

@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -309,7 +310,7 @@ bool HHVM_FUNCTION(array_key_exists,
   } else if (searchCell->m_type == KindOfObject) {
     ObjectData* obj = searchCell->m_data.pobj;
     if (obj->isCollection()) {
-      return collectionContains(obj, key);
+      return collections::contains(obj, key);
     }
     return HHVM_FN(array_key_exists)(key, toArray(search));
   } else {
@@ -594,9 +595,8 @@ Variant HHVM_FUNCTION(array_pop,
                       VRefParam containerRef) {
   const auto* container = containerRef->asCell();
   if (UNLIKELY(!isMutableContainer(*container))) {
-    raise_warning(
-      "%s() expects parameter 1 to be an array or mutable collection",
-      __FUNCTION__+2 /* remove the "f_" prefix */);
+    raise_warning("array_pop() expects parameter 1 to be an "
+                  "array or mutable collection");
     return init_null();
   }
   if (!getContainerSize(containerRef)) {
@@ -606,19 +606,7 @@ Variant HHVM_FUNCTION(array_pop,
     return containerRef.wrapped().toArrRef().pop();
   }
   assert(container->m_type == KindOfObject);
-  auto* obj = container->m_data.pobj;
-  switch (obj->collectionType()) {
-    case CollectionType::Vector: return static_cast<c_Vector*>(obj)->t_pop();
-    case CollectionType::Map:    return static_cast<c_Map*>(obj)->pop();
-    case CollectionType::Set:    return static_cast<c_Set*>(obj)->pop();
-    case CollectionType::Pair:
-    case CollectionType::ImmVector:
-    case CollectionType::ImmMap:
-    case CollectionType::ImmSet:
-      break;
-  }
-  assert(false);
-  return init_null();
+  return collections::pop(container->m_data.pobj);
 }
 
 Variant HHVM_FUNCTION(array_product,
@@ -812,43 +800,19 @@ Variant HHVM_FUNCTION(array_reverse,
 Variant HHVM_FUNCTION(array_shift,
                       VRefParam array) {
   const auto* cell_array = array->asCell();
-  if (UNLIKELY(!isContainer(*cell_array))) {
-    raise_warning(
-      "%s() expects parameter 1 to be an array or mutable collection",
-      __FUNCTION__+2 /* remove the "f_" prefix */);
+  if (UNLIKELY(!isMutableContainer(*cell_array))) {
+    raise_warning("array_shift() expects parameter 1 to be an "
+                  "array or mutable collection");
+    return init_null();
+  }
+  if (!getContainerSize(array)) {
     return init_null();
   }
   if (cell_array->m_type == KindOfArray) {
     return array.wrapped().toArrRef().dequeue();
   }
-  assert(cell_array->m_type == KindOfObject);
-  auto* obj = cell_array->m_data.pobj;
-  switch (obj->collectionType()) {
-    case CollectionType::Vector: {
-      auto* vec = static_cast<c_Vector*>(obj);
-      if (!vec->size()) return init_null();
-      return vec->popFront();
-    }
-    case CollectionType::Map: {
-      auto* mp = static_cast<BaseMap*>(obj);
-      if (!mp->size()) return init_null();
-      return mp->popFront();
-    }
-    case CollectionType::Set: {
-      auto* st = static_cast<c_Set*>(obj);
-      if (!st->size()) return init_null();
-      return st->popFront();
-    }
-    case CollectionType::Pair:
-    case CollectionType::ImmVector:
-    case CollectionType::ImmMap:
-    case CollectionType::ImmSet:
-      break;
-  }
-  raise_warning(
-    "%s() expects parameter 1 to be an array or mutable collection",
-    __FUNCTION__+2 /* remove the "f_" prefix */);
-  return init_null();
+  assertx(cell_array->m_type == KindOfObject);
+  return collections::shift(cell_array->m_data.pobj);
 }
 
 Variant HHVM_FUNCTION(array_slice,

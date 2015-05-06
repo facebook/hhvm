@@ -31,6 +31,7 @@
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/json/JSON_parser.h"
 #include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
@@ -107,7 +108,7 @@ Variant json_type_array_to_variant(json_object *new_obj, const bool assoc,
     tmpvar = json_object_to_variant(json_object_array_get_idx(new_obj, i),
                                     assoc, stable_maps, collections);
     if (collections) {
-      collectionAppend(var.getObjectData(), tmpvar.asCell());
+      collections::append(var.getObjectData(), tmpvar.asCell());
     } else {
       var.asArrRef().append(tmpvar);
     }
@@ -147,7 +148,7 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
     } else {
       if (collections) {
         auto keyTV = make_tv<KindOfString>(key.get());
-        collectionSet(var.getObjectData(), &keyTV, tmpvar.asCell());
+        collections::set(var.getObjectData(), &keyTV, tmpvar.asCell());
       } else {
         forceToArray(var).set(key, tmpvar);
       }

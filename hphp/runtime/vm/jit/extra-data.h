@@ -920,7 +920,7 @@ struct NewColData : IRExtraData {
 
   std::string show() const {
     return folly::sformat("{}, {}",
-                          collectionTypeToString(type)->toCppString(),
+                          collections::typeToString(type)->toCppString(),
                           size);
   }
 
@@ -932,7 +932,7 @@ struct NewColFromArrayData : IRExtraData {
   explicit NewColFromArrayData(CollectionType type) : type(type) {}
 
   std::string show() const {
-    return collectionTypeToString(type)->toCppString();
+    return collections::typeToString(type)->toCppString();
   }
 
   CollectionType type;

@@ -18,8 +18,8 @@
 #include <sstream>
 
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/collections.h"
 
-#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -286,9 +286,9 @@ bool isSimpleBase(MTS& env) {
 bool isSingleMember(MTS& env) { return env.immVecM.size() == 1; }
 
 bool isOptimizableCollectionClass(const Class* klass) {
-  return klass == c_Vector::classof() ||
-         klass == c_Map::classof() ||
-         klass == c_Pair::classof();
+  return collections::isType(klass, CollectionType::Vector,
+                                    CollectionType::Map,
+                                    CollectionType::Pair);
 }
 
 // Inspect the instruction we're about to translate and determine if it can be
@@ -538,9 +538,9 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
       }
     } else if (baseType < TObj) {
       const Class* klass = baseType.clsSpec().cls();
-      auto const isVector = klass == c_Vector::classof();
-      auto const isPair   = klass == c_Pair::classof();
-      auto const isMap    = klass == c_Map::classof();
+      auto const isVector = collections::isType(klass, CollectionType::Vector);
+      auto const isPair   = collections::isType(klass, CollectionType::Pair);
+      auto const isMap    = collections::isType(klass, CollectionType::Map);
 
       if (isVector || isPair) {
         if (mcodeMaybeVectorKey(env.immVecM[0])) {

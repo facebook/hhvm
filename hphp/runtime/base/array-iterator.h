@@ -33,9 +33,6 @@ struct TypedValue;
 class BaseVector;
 class BaseMap;
 class BaseSet;
-class c_ImmVector;
-class c_ImmSet;
-class c_Pair;
 struct Iter;
 struct MixedArray;
 

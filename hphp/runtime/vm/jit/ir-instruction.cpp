@@ -323,7 +323,7 @@ Type setElemReturn(const IRInstruction* inst) {
 Type newColReturn(const IRInstruction* inst) {
   assertx(inst->is(NewCol, NewColFromArray));
   auto getColClassType = [&](CollectionType ct) -> Type {
-    auto name = collectionTypeToString(ct);
+    auto name = collections::typeToString(ct);
     auto cls = Unit::lookupClassOrUniqueClass(name);
     if (cls == nullptr) return TObj;
     return Type::ExactObj(cls);

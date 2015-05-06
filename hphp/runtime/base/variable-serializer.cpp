@@ -553,7 +553,7 @@ void VariableSerializer::write(const Object& v) {
     }
     preventOverflow(v, [&v, this]() {
       if (v->isCollection()) {
-        collectionSerialize(v.get(), this);
+        collections::serialize(v.get(), this);
       } else if (v->instanceof(SystemLib::s_ClosureClass)) {
         // We serialize closures as "{}" in JSON mode to be compatible
         // with PHP. And issue a warning in HipHop syntax.

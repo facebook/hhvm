@@ -35,6 +35,7 @@ SOFTWARE.
 #include <vector>
 
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -553,7 +554,7 @@ static void object_set(Variant &var,
   } else {
     if (collections) {
       auto keyTV = make_tv<KindOfString>(key.get());
-      collectionSet(var.getObjectData(), &keyTV, value.asCell());
+      collections::set(var.getObjectData(), &keyTV, value.asCell());
     } else {
       forceToArray(var).set(key, value);
     }
@@ -574,7 +575,7 @@ static void attach_zval(json_parser *json,
 
   if (up_mode == MODE_ARRAY) {
     if (collections) {
-      collectionAppend(root.getObjectData(), child.asCell());
+      collections::append(root.getObjectData(), child.asCell());
     } else {
       root.toArrRef().append(child);
     }
@@ -807,7 +808,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             json_create_zval(mval, *buf, type, options);
             auto& top = the_json->the_zstack[the_json->the_top];
             if (collections) {
-              collectionAppend(top.getObjectData(), mval.asCell());
+              collections::append(top.getObjectData(), mval.asCell());
             } else {
               top.toArrRef().append(mval);
             }
@@ -878,7 +879,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             if (type != -1) {
               auto& top = the_json->the_zstack[the_json->the_top];
               if (collections) {
-                collectionAppend(top.getObjectData(), mval.asCell());
+                collections::append(top.getObjectData(), mval.asCell());
               } else {
                 top.toArrRef().append(mval);
               }

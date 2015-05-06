@@ -20,6 +20,7 @@
 #include <folly/Likely.h>
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/struct-array.h"
@@ -144,21 +145,13 @@ void ArrayIter::ImmSetInit(ArrayIter* iter, ObjectData* obj) {
 }
 
 IterNextIndex ArrayIter::getNextHelperIdx(ObjectData* obj) {
-  Class* cls = obj->getVMClass();
-  if (cls == c_Vector::classof()) {
-    return IterNextIndex::Vector;
-  } else if (cls == c_Map::classof()) {
-    return IterNextIndex::Map;
-  } else if (cls == c_Set::classof()) {
-    return IterNextIndex::Set;
-  } else if (cls == c_ImmVector::classof()) {
-    return IterNextIndex::ImmVector;
-  } else if (cls == c_ImmMap::classof()) {
-    return IterNextIndex::ImmMap;
-  } else if (cls == c_ImmSet::classof()) {
-    return IterNextIndex::ImmSet;
-  } else if (cls == c_Pair::classof()) {
-    return IterNextIndex::Pair;
+  if (obj->isCollection()) {
+    switch (obj->collectionType()) {
+#define X(type) case CollectionType::type: return IterNextIndex::type;
+COLLECTIONS_ALL_TYPES(X)
+#undef X
+    }
+    not_reached();
   } else {
     return IterNextIndex::Object;
   }

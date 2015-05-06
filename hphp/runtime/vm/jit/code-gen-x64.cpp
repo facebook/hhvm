@@ -3599,18 +3599,22 @@ void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
   auto vecReg = srcLoc(inst, 0).reg();
   auto dstReg = dstLoc(inst, 0).reg();
-  assertx(vec->type() < TObj &&
-         vec->type().clsSpec().cls() == c_Vector::classof());
-  vmain() << loadzlq{vecReg[c_Vector::sizeOffset()], dstReg};
+  assertx(vec->type() < TObj);
+  assertx(collections::isType(vec->type().clsSpec().cls(),
+                              CollectionType::Vector));
+  vmain() << loadzlq{vecReg[collections::sizeOffset(CollectionType::Vector)],
+                     dstReg};
 }
 
 void CodeGenerator::cgLdVectorBase(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
   auto vecReg = srcLoc(inst, 0).reg();
   auto dstReg = dstLoc(inst, 0).reg();
-  assertx(vec->type() < TObj &&
-         vec->type().clsSpec().cls() == c_Vector::classof());
-  vmain() << load{vecReg[c_Vector::dataOffset()], dstReg};
+  assertx(vec->type() < TObj);
+  assertx(collections::isType(vec->type().clsSpec().cls(),
+                              CollectionType::Vector));
+  vmain() << load{vecReg[collections::dataOffset(CollectionType::Vector)],
+                  dstReg};
 }
 
 void CodeGenerator::cgLdColArray(IRInstruction* inst) {
@@ -3620,16 +3624,16 @@ void CodeGenerator::cgLdColArray(IRInstruction* inst) {
   auto const rdst = dstLoc(inst, 0).reg();
   auto& v = vmain();
 
-  if (cls == c_Vector::classof()) {
+  if (collections::isType(cls, CollectionType::Vector)) {
     auto const rdata = v.makeReg();
-    v << load{rsrc[c_Vector::dataOffset()], rdata};
+    v << load{rsrc[collections::dataOffset(CollectionType::Vector)], rdata};
     v << lea{rdata[-int32_t{sizeof(ArrayData)}], rdst};
     return;
   }
 
-  if (cls == c_Map::classof()) {
+  if (collections::isType(cls, CollectionType::Map)) {
     auto const rdata = v.makeReg();
-    v << load{rsrc[HashCollection::dataOffset()], rdata};
+    v << load{rsrc[collections::dataOffset(CollectionType::Map)], rdata};
     v << lea{rdata[-int32_t{sizeof(MixedArray)}], rdst};
     return;
   }
@@ -3643,13 +3647,15 @@ void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
   auto vecReg = srcLoc(inst, 0).reg();
   auto& v = vmain();
 
-  assertx(vec->type() < TObj &&
-         vec->type().clsSpec().cls() == c_Vector::classof());
+  assertx(vec->type() < TObj);
+  assertx(collections::isType(vec->type().clsSpec().cls(),
+                              CollectionType::Vector));
 
   // Vector::m_data field holds an address of an ArrayData plus
   // sizeof(ArrayData) bytes. We need to check this ArrayData's
   // m_count field to see if we need to call Vector::triggerCow().
-  auto rawPtrOffset = c_Vector::dataOffset() + kExpectedMPxOffset;
+  auto rawPtrOffset = collections::dataOffset(CollectionType::Vector) +
+                      kExpectedMPxOffset;
   auto countOffset = (int64_t)FAST_REFCOUNT_OFFSET - (int64_t)sizeof(ArrayData);
 
   auto ptr = v.makeReg();
@@ -3665,8 +3671,9 @@ void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
  */
 void CodeGenerator::cgVectorDoCow(IRInstruction* inst) {
   DEBUG_ONLY auto vec = inst->src(0);
-  assertx(vec->type() < TObj &&
-         vec->type().clsSpec().cls() == c_Vector::classof());
+  assertx(vec->type() < TObj);
+  assertx(collections::isType(vec->type().clsSpec().cls(),
+                              CollectionType::Vector));
   auto args = argGroup(inst);
   args.ssa(0); // vec
   cgCallHelper(vmain(), CppCall::direct(triggerCow),
@@ -3676,9 +3683,11 @@ void CodeGenerator::cgVectorDoCow(IRInstruction* inst) {
 void CodeGenerator::cgLdPairBase(IRInstruction* inst) {
   DEBUG_ONLY auto pair = inst->src(0);
   auto pairReg = srcLoc(inst, 0).reg();
-  assertx(pair->type() < TObj &&
-         pair->type().clsSpec().cls() == c_Pair::classof());
-  vmain() << lea{pairReg[c_Pair::dataOffset()], dstLoc(inst, 0).reg()};
+  assertx(pair->type() < TObj);
+  assertx(collections::isType(pair->type().clsSpec().cls(),
+                              CollectionType::Pair));
+  vmain() << lea{pairReg[collections::dataOffset(CollectionType::Pair)],
+                 dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgLdElem(IRInstruction* inst) {
@@ -4514,50 +4523,20 @@ void CodeGenerator::cgNewCol(IRInstruction* inst) {
   auto& v = vmain();
   auto const dest = callDest(inst);
   auto args = argGroup(inst);
-  if (inst->extra<NewCol>()->type != CollectionType::Pair) {
-    args.imm(inst->extra<NewCol>()->size);
-  }
+  args.imm(inst->extra<NewCol>()->size);
   auto const target = [&]() -> CppCall {
-    switch (inst->extra<NewCol>()->type) {
-      case CollectionType::Vector:
-        return CppCall::direct(newColHelper<c_Vector>);
-      case CollectionType::Map:
-        return CppCall::direct(newColHelper<c_Map>);
-      case CollectionType::Set:
-        return CppCall::direct(newColHelper<c_Set>);
-      case CollectionType::Pair:
-        return CppCall::direct(newPairHelper);
-      case CollectionType::ImmVector:
-        return CppCall::direct(newColHelper<c_ImmVector>);
-      case CollectionType::ImmMap:
-        return CppCall::direct(newColHelper<c_ImmMap>);
-      case CollectionType::ImmSet:
-        return CppCall::direct(newColHelper<c_ImmSet>);
-    }
-    not_reached();
+    auto collectionType = inst->extra<NewCol>()->type;
+    auto helper = collections::allocFunc(collectionType, true);
+    return CppCall::direct(helper);
   }();
   cgCallHelper(v, target, dest, SyncOptions::kSyncPoint, args);
 }
 
 void CodeGenerator::cgNewColFromArray(IRInstruction* inst) {
   auto const target = [&]() -> CppCall {
-    switch (inst->extra<NewColFromArray>()->type) {
-      case CollectionType::Vector:
-        return CppCall::direct(newVectorFromArrayHelper<c_Vector>);
-      case CollectionType::ImmVector:
-        return CppCall::direct(newVectorFromArrayHelper<c_ImmVector>);
-      case CollectionType::Map:
-        return CppCall::direct(newHashColFromArrayHelper<c_Map>);
-      case CollectionType::ImmMap:
-        return CppCall::direct(newHashColFromArrayHelper<c_ImmMap>);
-      case CollectionType::Set:
-        return CppCall::direct(newHashColFromArrayHelper<c_Set>);
-      case CollectionType::ImmSet:
-        return CppCall::direct(newHashColFromArrayHelper<c_ImmSet>);
-      case CollectionType::Pair:
-        not_reached();
-    }
-    not_reached();
+    auto collectionType = inst->extra<NewColFromArray>()->type;
+    auto helper = collections::allocFromArrayFunc(collectionType, true);
+    return CppCall::direct(helper);
   }();
 
   cgCallHelper(vmain(),

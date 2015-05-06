@@ -30,8 +30,9 @@ struct _Unwind_Exception;
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
-struct Func;
-struct c_Vector;
+class Func;
+class c_Pair;
+class c_Vector;
 struct MInstrState;
 
 namespace jit {

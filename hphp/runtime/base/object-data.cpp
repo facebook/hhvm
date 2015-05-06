@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/externals.h"
@@ -155,13 +156,7 @@ bool ObjectData::toBooleanImpl() const noexcept {
   // Note: if you add more cases here, hhbbc/class-util.cpp also needs
   // to be changed.
   if (isCollection()) {
-    if (m_cls == c_Vector::classof())    return c_Vector::ToBool(this);
-    if (m_cls == c_Map::classof())       return c_Map::ToBool(this);
-    if (m_cls == c_ImmMap::classof())    return c_ImmMap::ToBool(this);
-    if (m_cls == c_Set::classof())       return c_Set::ToBool(this);
-    if (m_cls == c_ImmVector::classof()) return c_ImmVector::ToBool(this);
-    if (m_cls == c_ImmSet::classof())    return c_ImmSet::ToBool(this);
-    always_assert(false);
+    return collections::toBool(this);
   }
 
   if (instanceof(c_SimpleXMLElement::classof())) {
@@ -407,17 +402,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
   // We can quickly tell if this object is a collection, which lets us avoid
   // checking for each class in turn if it's not one.
   if (isCollection()) {
-    if (m_cls == c_Vector::classof())    return c_Vector::ToArray(this);
-    if (m_cls == c_Map::classof())       return c_Map::ToArray(this);
-    if (m_cls == c_Set::classof())       return c_Set::ToArray(this);
-    if (m_cls == c_Pair::classof())      return c_Pair::ToArray(this);
-    if (m_cls == c_ImmVector::classof()) return c_ImmVector::ToArray(this);
-    if (m_cls == c_ImmMap::classof())    return c_ImmMap::ToArray(this);
-    if (m_cls == c_ImmSet::classof())    return c_ImmSet::ToArray(this);
-
-    // It's undefined what happens if you reach not_reached. We want to be sure
-    // to hard fail if we get here.
-    always_assert(false);
+    return collections::toArray(this);
   } else if (UNLIKELY(getAttribute(CallToImpl))) {
     // If we end up with other classes that need special behavior, turn the
     // assert into an if and add cases.
@@ -858,7 +843,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
     }
   } else {
     if (isCollection()) {
-      collectionSerialize(const_cast<ObjectData*>(this), serializer);
+      collections::serialize(const_cast<ObjectData*>(this), serializer);
     } else if (serializer->getType() == VariableSerializer::Type::VarExport &&
                instanceof(c_Closure::classof())) {
       serializer->write(getClassName());
@@ -910,23 +895,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
 ObjectData* ObjectData::clone() {
   if (getAttribute(HasClone) && getAttribute(IsCppBuiltin)) {
     if (isCollection()) {
-      if (m_cls == c_Vector::classof()) {
-        return c_Vector::Clone(this);
-      } else if (m_cls == c_Map::classof()) {
-        return c_Map::Clone(this);
-      } else if (m_cls == c_ImmMap::classof()) {
-        return c_ImmMap::Clone(this);
-      } else if (m_cls == c_Set::classof()) {
-        return c_Set::Clone(this);
-      } else if (m_cls == c_Pair::classof()) {
-        return c_Pair::Clone(this);
-      } else if (m_cls == c_ImmVector::classof()) {
-        return c_ImmVector::Clone(this);
-      } else if (m_cls == c_ImmSet::classof()) {
-        return c_ImmSet::Clone(this);
-      } else {
-        always_assert(false);
-      }
+      return collections::clone(this);
     } else if (instanceof(c_Closure::classof())) {
       return c_Closure::Clone(this);
     } else if (instanceof(c_Generator::classof())) {
@@ -978,7 +947,7 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
     // m_aux.u_deepInit is true for properties that need "deep" initialization
     if (src->deepInit()) {
       tvRefcountedIncRef(dst);
-      collectionDeepCopyTV(dst);
+      collections::deepCopy(dst);
     }
   }
 }

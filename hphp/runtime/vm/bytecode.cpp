@@ -3718,7 +3718,7 @@ OPTBLD_INLINE void iopNewCol(IOP_ARGS) {
   pc++;
   auto cType = static_cast<CollectionType>(decode_iva(pc));
   auto nElms = decode_iva(pc);
-  ObjectData* obj = newCollectionHelper(cType, nElms);
+  auto obj = collections::alloc(cType, nElms);
   vmStack().pushObject(obj);
 }
 
@@ -3728,7 +3728,7 @@ OPTBLD_INLINE void iopColFromArray(IOP_ARGS) {
   auto const c1 = vmStack().topC();
   // This constructor reassociates the ArrayData with the collection, so no
   // inc/decref is needed.
-  auto obj = newCollectionFromArrayHelper(cType, c1->m_data.parr);
+  auto obj = collections::alloc(cType, c1->m_data.parr);
   vmStack().discard();
   vmStack().pushObject(obj);
 }
@@ -3738,7 +3738,7 @@ OPTBLD_INLINE void iopColAddNewElemC(IOP_ARGS) {
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
   assert(c2->m_type == KindOfObject && c2->m_data.pobj->isCollection());
-  collectionInitAppend(c2->m_data.pobj, c1);
+  collections::initElem(c2->m_data.pobj, c1);
   vmStack().popC();
 }
 
@@ -3748,7 +3748,7 @@ OPTBLD_INLINE void iopMapAddElemC(IOP_ARGS) {
   Cell* c2 = vmStack().indC(1);
   Cell* c3 = vmStack().indC(2);
   assert(c3->m_type == KindOfObject && c3->m_data.pobj->isCollection());
-  collectionInitSet(c3->m_data.pobj, c2, c1);
+  collections::initMapElem(c3->m_data.pobj, c2, c1);
   vmStack().popC();
   vmStack().popC();
 }

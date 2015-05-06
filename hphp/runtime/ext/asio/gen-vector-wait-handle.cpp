@@ -55,7 +55,7 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
       "Expected dependencies to be an instance of Vector"));
     throw e;
   }
-  assert(obj->instanceof(c_Vector::classof()));
+  assertx(collections::isType(obj->getVMClass(), CollectionType::Vector));
   auto deps = SmartPtr<c_Vector>::attach(c_Vector::Clone(obj));
   auto ctx_idx = std::numeric_limits<context_idx_t>::max();
   for (int64_t iter_pos = 0; iter_pos < deps->size(); ++iter_pos) {

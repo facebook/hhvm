@@ -8778,7 +8778,7 @@ void EmitterVisitor::emitCollectionInit(Emitter& e, BinaryOpExpressionPtr b) {
     static_pointer_cast<ScalarExpression>(b->getExp1());
   const std::string* clsName = nullptr;
   cls->getString(clsName);
-  auto ct = stringToCollectionType(*clsName);
+  auto ct = collections::stringToType(*clsName);
   if (!ct) {
     throw IncludeTimeFatalException(b,
       "Cannot use collection initialization for non-collection class");

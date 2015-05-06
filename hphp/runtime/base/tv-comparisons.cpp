@@ -25,9 +25,9 @@
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
-
-extern bool collectionEquals(const ObjectData*, const ObjectData*);
-
+namespace collections {
+extern bool equals(const ObjectData*, const ObjectData*);
+}
 //////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -390,7 +390,7 @@ struct Eq {
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
     if (od1 == od2) return true;
     if (od1->isCollection()) {
-      return collectionEquals(od1, od2);
+      return collections::equals(od1, od2);
     }
     if (UNLIKELY(od1->instanceof(SystemLib::s_DateTimeInterfaceClass)
         && od2->instanceof(SystemLib::s_DateTimeInterfaceClass))) {

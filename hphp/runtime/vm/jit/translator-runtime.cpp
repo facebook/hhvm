@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/zend-functions.h"
@@ -505,7 +506,7 @@ bool ak_exist_string(ArrayData* arr, StringData* key) {
 
 bool ak_exist_string_obj(ObjectData* obj, StringData* key) {
   if (obj->isCollection()) {
-    return collectionContains(obj, key);
+    return collections::contains(obj, key);
   }
   auto arr = obj->toArray();
   return ak_exist_string_impl(arr.get(), key);
@@ -513,7 +514,7 @@ bool ak_exist_string_obj(ObjectData* obj, StringData* key) {
 
 bool ak_exist_int_obj(ObjectData* obj, int64_t key) {
   if (obj->isCollection()) {
-    return collectionContains(obj, key);
+    return collections::contains(obj, key);
   }
   auto arr = obj->toArray();
   return arr.get()->exists(key);
@@ -1035,7 +1036,7 @@ Cell lookupClassConstantTv(TypedValue* cache,
 //////////////////////////////////////////////////////////////////////
 
 ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {
-  collectionInitAppend(coll, &value);
+  collections::initElem(coll, &value);
   // consume the input value. the collection setter either threw or created a
   // reference to value, so we can use a cheaper decref.
   tvRefcountedDecRefNZ(value);
@@ -1044,7 +1045,7 @@ ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {
 
 ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
                               TypedValue value) {
-  collectionInitSet(coll, &key, &value);
+  collections::initMapElem(coll, &key, &value);
   // consume the input value. the collection setter either threw or created a
   // reference to value, so we can use a cheaper decref.
   tvRefcountedDecRefNZ(value);

@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/util/logger.h"
 
 #include <sys/types.h>
@@ -197,7 +198,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(types[0], transport, keyspec);
           Variant value = binary_deserialize(types[1], transport, valspec);
-          collectionSet(obj.get(), key.asCell(), value.asCell());
+          collections::set(obj.get(), key.asCell(), value.asCell());
         }
         return Variant(std::move(obj));
       } else {

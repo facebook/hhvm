@@ -18,11 +18,11 @@
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
-#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 #include "hphp/system/systemlib.h"
@@ -71,7 +71,7 @@ bool Object::equal(const Object& v2) const {
     return false;
   }
   if (m_obj->isCollection()) {
-    return collectionEquals(get(), v2.get());
+    return collections::equals(get(), v2.get());
   }
   if (UNLIKELY(m_obj->instanceof(SystemLib::s_DateTimeInterfaceClass))) {
     return DateTimeData::getTimestamp(*this) ==

@@ -45,7 +45,7 @@ bool has_magic_bool_conversion(res::Class cls) {
 
 bool is_collection(res::Class cls) {
   auto const name = cls.name();
-  return isCollectionTypeName(name);
+  return collections::isTypeName(name);
 }
 
 bool could_have_magic_bool_conversion(Type t) {

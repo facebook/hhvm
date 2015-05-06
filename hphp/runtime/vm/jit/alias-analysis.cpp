@@ -134,9 +134,16 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
   auto ret = ALocBits{};
 
   auto const it = stk_expand_map.find(acls);
-  if (it != end(stk_expand_map)) ret |= it->second;
+  if (it != end(stk_expand_map)) {
+    ret |= it->second;
+  } else if (AStackAny <= acls) {
+    ret |= all_stack;
+  }
 
-  if (AFrameAny <= acls) ret |= all_frame;
+  if (APropAny    <= acls) ret |= all_props;
+  if (AElemIAny   <= acls) ret |= all_elemIs;
+  if (AFrameAny   <= acls) ret |= all_frame;
+  if (AMIStateAny <= acls) ret |= all_mistate;
 
   return ret;
 }
@@ -307,6 +314,12 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
 
 std::string show(ALocBits bits) {
   std::ostringstream out;
+  if (bits.none()) {
+    return "0";
+  }
+  if (bits.all()) {
+    return "-1";
+  }
   out << bits;
   return out.str();
 }

@@ -761,8 +761,8 @@ must be empty.
 exactly one value and the flavor descriptor of the value must be cell.
 Likewise, before executing the RetV instruction, the evaluation stack must
 contain exactly one value and the flavor descriptor of the value must be the
-ref. Finally, before executing the Unwind instruction, the evaluation stack
-must be empty.
+ref. Finally, before executing the Unwind or NativeImpl instructions, the
+evaluation stack must be empty.
 
 6) The code for the primary function body and fault funclets must be laid out
 in order in one contiguous block, starting with the primary function body and

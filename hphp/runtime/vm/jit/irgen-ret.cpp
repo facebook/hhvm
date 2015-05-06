@@ -13,10 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/irgen-ret.h"
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
+#include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 
@@ -90,8 +91,8 @@ void freeLocalsAndThis(IRGS& env) {
 
 void normalReturn(IRGS& env, SSATmp* retval) {
   gen(env, StRetVal, fp(env), retval);
-  gen(env, RetAdjustStk, fp(env));
-  gen(env, RetCtrl, RetCtrlData { IRSPOffset{0}, false }, sp(env), fp(env));
+  auto const data = RetCtrlData { offsetToReturnSlot(env), false };
+  gen(env, RetCtrl, data, sp(env), fp(env));
 }
 
 void asyncFunctionReturn(IRGS& env, SSATmp* retval) {
@@ -181,6 +182,16 @@ void implRet(IRGS& env, Type type) {
 
 //////////////////////////////////////////////////////////////////////
 
+}
+
+IRSPOffset offsetToReturnSlot(IRGS& env) {
+  return offsetFromIRSP(
+    env,
+    BCSPOffset{
+      logicalStackDepth(env).offset +
+        AROFF(m_r) / int32_t{sizeof(Cell)}
+    }
+  );
 }
 
 void emitRetC(IRGS& env) {

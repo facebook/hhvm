@@ -126,10 +126,7 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   // locals.
   always_assert(src.locals.size() == dst.locals.size());
 
-  // We must always have the same spValue at a merge point.  We sometimes
-  // redefine spValue still (TODO #2288359), but only before we're about to do
-  // something that leaves the region, so it should not show up here (without a
-  // bug).
+  // We must always have the same spValue.
   always_assert(dst.spValue == src.spValue);
 
   // This is available iff it's available in both states
@@ -350,12 +347,6 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   case DefFP:
   case FreeActRec:
     cur().fpValue = inst->dst();
-    break;
-
-  case RetAdjustStk:
-    cur().spValue = inst->dst();
-    cur().spOffset = FPInvOffset{-2};
-    cur().memoryStack.clear();
     break;
 
   case RetCtrl:

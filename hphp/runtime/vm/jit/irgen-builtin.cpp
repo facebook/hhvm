@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/runtime/vm/jit/irgen-ret.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
@@ -964,9 +965,8 @@ void emitNativeImpl(IRGS& env) {
   if (isInlining(env)) return nativeImplInlined(env);
 
   gen(env, NativeImpl, fp(env), sp(env));
-  auto const stack = gen(env, RetAdjustStk, fp(env));
-  auto const frame = fp(env);
-  gen(env, RetCtrl, RetCtrlData(IRSPOffset{0}, false), stack, frame);
+  auto const data = RetCtrlData { offsetToReturnSlot(env), false };
+  gen(env, RetCtrl, data, sp(env), fp(env));
 }
 
 //////////////////////////////////////////////////////////////////////

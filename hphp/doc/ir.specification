@@ -1284,11 +1284,6 @@ To string conversions:
   Writes the value in S1 to the return value slot on the activation record
   pointed to by S0.
 
-| RetAdjustStk, D(StkPtr), S(FramePtr), NF
-
-  Loads the new VM stack pointer into the destination. S0 is a pointer to the
-  current activation record.
-
 | ReleaseVVOrExit, ND, S(FramePtr), B
 
   Loads the VarEnv slot off the ActRec pointed to by S0. If it is null, does

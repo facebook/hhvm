@@ -2116,12 +2116,6 @@ void CodeGenerator::cgStRetVal(IRInstruction* inst) {
   emitStore(rFp[AROFF(m_r)], val, srcLoc(inst, 1), Width::Full);
 }
 
-void CodeGenerator::cgRetAdjustStk(IRInstruction* inst) {
-  auto const rFp   = srcLoc(inst, 0).reg();
-  auto const dstSp = dstLoc(inst, 0).reg();
-  vmain() << lea{rFp[AROFF(m_r)], dstSp};
-}
-
 void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
   auto const fp = srcLoc(inst, 0).reg();
   vmain() << load{fp[AROFF(m_savedRip)], dstLoc(inst, 0).reg()};

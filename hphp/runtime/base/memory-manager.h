@@ -599,21 +599,6 @@ struct MemoryManager {
   void* objMalloc(size_t size);
   void objFree(void* vp, size_t size);
 
-  /*
-   * Versions of the above APIs that log the allocation/deallocation.
-   *
-   * These should be used for allocations that reflect PHP "objects" (Object,
-   * String, Array, RefData, extension objects, etc.) that make sense to log by
-   * capturing a PHP stacktrace to which to charge the allocation.
-   */
-  void* smartMallocSizeLogged(uint32_t size);
-  void smartFreeSizeLogged(void* p, uint32_t size);
-  void* objMallocLogged(size_t size);
-  void objFreeLogged(void* vp, size_t size);
-  template<bool callerSavesActualSize>
-  MemBlock smartMallocSizeBigLogged(size_t size);
-  void smartFreeSizeBigLogged(void* vp, size_t size);
-
   /////////////////////////////////////////////////////////////////////////////
   // Cleanup.
 

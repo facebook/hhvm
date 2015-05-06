@@ -58,7 +58,7 @@ std::pair<StringData*,CapCode> allocFlatForLen(size_t len) {
   if (LIKELY(len <= CapCode::Threshold - kCapOverhead)) {
     // fast path for most small strings
     auto need = MemoryManager::smartSizeClass(len + kCapOverhead);
-    auto sd = static_cast<StringData*>(MM().smartMallocSizeLogged(need));
+    auto sd = static_cast<StringData*>(MM().smartMallocSize(need));
     // size class rounding ensures need >= (len+kCapOverhead), but rounding up
     // might have caused our capacity value (need - kCapOverhead) to
     // cross CapCode::Threshold. Truncate it to an encodable value. This is
@@ -78,11 +78,11 @@ std::pair<StringData*,CapCode> allocFlatForLen(size_t len) {
     auto cc = CapCode::floor(cap - kCapOverhead);
     assert(cc.decode() >= len);
     auto const sd = static_cast<StringData*>(
-        MM().smartMallocSizeLogged(cc.decode() + kCapOverhead)
+        MM().smartMallocSize(cc.decode() + kCapOverhead)
     );
     return std::make_pair(sd, cc);
   }
-  auto const block = MM().smartMallocSizeBigLogged<true>(need);
+  auto const block = MM().smartMallocSizeBig<true>(need);
   auto cc = CapCode::floor(block.size - kCapOverhead);
   assert(cc.decode() >= len);
   return std::make_pair(static_cast<StringData*>(block.ptr), cc);
@@ -91,9 +91,9 @@ std::pair<StringData*,CapCode> allocFlatForLen(size_t len) {
 ALWAYS_INLINE
 void freeForSize(void* vp, uint32_t size) {
   if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSizeLogged(vp, size);
+    return MM().smartFreeSize(vp, size);
   }
-  return MM().smartFreeSizeBigLogged(vp, size);
+  return MM().smartFreeSizeBig(vp, size);
 }
 
 }

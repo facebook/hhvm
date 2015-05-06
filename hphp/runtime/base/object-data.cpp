@@ -1020,12 +1020,12 @@ ObjectData* ObjectData::callCustomInstanceInit() {
 
 // called from jit code
 ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
-  return new (MM().smartMallocSizeLogged(size)) ObjectData(cls, NoInit{});
+  return new (MM().smartMallocSize(size)) ObjectData(cls, NoInit{});
 }
 
 // called from jit code
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  return new (MM().smartMallocSizeBigLogged<false>(size).ptr)
+  return new (MM().smartMallocSizeBig<false>(size).ptr)
     ObjectData(cls, NoInit{});
 }
 
@@ -1070,9 +1070,9 @@ void ObjectData::DeleteObject(ObjectData* objectData) {
 
   auto const size = sizeForNProps(nProps);
   if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSizeLogged(objectData, size);
+    return MM().smartFreeSize(objectData, size);
   }
-  MM().smartFreeSizeBigLogged(objectData, size);
+  MM().smartFreeSizeBig(objectData, size);
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {

@@ -45,7 +45,7 @@ StructArray* StructArray::create(
   const TypedValue* values,
   size_t length
 ) {
-  auto ptr = MM().objMallocLogged(bytesForCapacity(shape->capacity()));
+  auto ptr = MM().objMalloc(bytesForCapacity(shape->capacity()));
   auto result = new (NotNull{}, ptr) StructArray(length, 0, 1, shape);
 
   auto data = result->data();
@@ -62,7 +62,7 @@ StructArray* StructArray::createReversedValues(
   const TypedValue* values,
   size_t length
 ) {
-  auto ptr = MM().objMallocLogged(bytesForCapacity(shape->capacity()));
+  auto ptr = MM().objMalloc(bytesForCapacity(shape->capacity()));
   auto result = new (NotNull{}, ptr) StructArray(length, 0, 1, shape);
 
   auto data = result->data();
@@ -75,7 +75,7 @@ StructArray* StructArray::createReversedValues(
 }
 
 StructArray* StructArray::createNoCopy(Shape* shape, size_t length) {
-  auto ptr = MM().objMallocLogged(bytesForCapacity(shape->capacity()));
+  auto ptr = MM().objMalloc(bytesForCapacity(shape->capacity()));
   return new (NotNull{}, ptr) StructArray(length, 0, 1, shape);
 }
 
@@ -125,7 +125,7 @@ void StructArray::Release(ArrayData* ad) {
   }
 
   auto const cap = array->capacity();
-  MM().objFreeLogged(array, sizeof(StructArray) + sizeof(TypedValue) * cap);
+  MM().objFree(array, sizeof(StructArray) + sizeof(TypedValue) * cap);
 }
 
 void StructArray::ReleaseUncounted(ArrayData* ad) {

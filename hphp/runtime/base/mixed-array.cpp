@@ -90,7 +90,7 @@ ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
     }
     assert(cap > 0);
     ad = static_cast<ArrayData*>(
-      MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
+      MM().objMalloc(sizeof(ArrayData) + sizeof(TypedValue) * cap)
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = size; // pos=0
@@ -135,7 +135,7 @@ ArrayData* MixedArray::MakePackedUninitialized(uint32_t size) {
   assert(size <= CapCode::Threshold);
   auto const cap = size;
   ad = static_cast<ArrayData*>(
-    MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
+    MM().objMalloc(sizeof(ArrayData) + sizeof(TypedValue) * cap)
   );
   assert(cap == CapCode::ceil(cap).code);
   ad->m_sizeAndPos = size; // pos=0
@@ -452,7 +452,7 @@ void MixedArray::Release(ArrayData* in) {
       free_strong_iterators(ad);
     }
   }
-  MM().objFreeLogged(ad, ad->heapSize());
+  MM().objFree(ad, ad->heapSize());
 }
 
 void MixedArray::ReleaseUncountedTypedValue(TypedValue& tv) {

@@ -79,7 +79,7 @@ struct RefData {
    * Create a RefData, allocated in the request local heap.
    */
   static RefData* Make(TypedValue tv) {
-    return new (MM().smartMallocSizeLogged(sizeof(RefData)))
+    return new (MM().smartMallocSize(sizeof(RefData)))
       RefData(tv.m_type, tv.m_data.num);
   }
 
@@ -96,11 +96,11 @@ struct RefData {
       return;
     }
     this->~RefData();
-    MM().smartFreeSizeLogged(this, sizeof(RefData));
+    MM().smartFreeSize(this, sizeof(RefData));
   }
 
   void releaseMem() const {
-    MM().smartFreeSizeLogged(const_cast<RefData*>(this), sizeof(RefData));
+    MM().smartFreeSize(const_cast<RefData*>(this), sizeof(RefData));
   }
 
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC

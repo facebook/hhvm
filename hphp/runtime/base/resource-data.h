@@ -206,13 +206,13 @@ ALWAYS_INLINE bool decRefRes(ResourceData* res) {
 template<class T, class... Args> T* newres(Args&&... args) {
   static_assert(sizeof(T) <= 0xffff && sizeof(T) < kMaxSmartSize, "");
   static_assert(std::is_convertible<T*,ResourceData*>::value, "");
-  auto const mem = MM().smartMallocSizeLogged(sizeof(T));
+  auto const mem = MM().smartMallocSize(sizeof(T));
   try {
     auto r = new (mem) T(std::forward<Args>(args)...);
     r->m_hdr.aux = sizeof(T);
     return r;
   } catch (...) {
-    MM().smartFreeSizeLogged(mem, sizeof(T));
+    MM().smartFreeSize(mem, sizeof(T));
     throw;
   }
 }
@@ -227,7 +227,7 @@ template <typename F> friend void scan(const T& this_, F& mark);
   ALWAYS_INLINE void operator delete(void* p) {                 \
     static_assert(std::is_base_of<ResourceData,T>::value, "");  \
     assert(static_cast<T*>(p)->heapSize() == sizeof(T));        \
-    MM().smartFreeSizeLogged(p, sizeof(T));                     \
+    MM().smartFreeSize(p, sizeof(T));                     \
   }
 
 #define DECLARE_RESOURCE_ALLOCATION(T)                                  \

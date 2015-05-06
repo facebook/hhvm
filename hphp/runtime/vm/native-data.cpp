@@ -84,7 +84,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   size_t size = ObjectData::sizeForNProps(nProps) + nativeDataSize;
 
   auto node = reinterpret_cast<NativeNode*>(
-    MM().objMallocLogged(size)
+    MM().objMalloc(size)
   );
   node->obj_offset = nativeDataSize;
   node->hdr.kind = HeaderKind::NativeData;
@@ -137,9 +137,9 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
 
   size_t size = ObjectData::sizeForNProps(nProps) + ndsize(ndi);
   if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSizeLogged(node, size);
+    return MM().smartFreeSize(node, size);
   }
-  MM().smartFreeSizeBigLogged(node, size);
+  MM().smartFreeSizeBig(node, size);
 }
 
 Variant nativeDataSleep(const ObjectData* obj) {

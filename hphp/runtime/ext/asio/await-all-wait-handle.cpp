@@ -33,7 +33,7 @@ namespace HPHP {
 
 c_AwaitAllWaitHandle* c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
   auto size = c_AwaitAllWaitHandle::heapSize(cnt);
-  auto mem = MM().objMallocLogged(size);
+  auto mem = MM().objMalloc(size);
   return new (mem) c_AwaitAllWaitHandle(cnt);
 }
 
@@ -41,7 +41,7 @@ void delete_AwaitAllWaitHandle(ObjectData* od, const Class*) {
   auto const waitHandle = static_cast<c_AwaitAllWaitHandle*>(od);
   auto bytes = waitHandle->heapSize();
   waitHandle->~c_AwaitAllWaitHandle();
-  MM().objFreeLogged(waitHandle, bytes);
+  MM().objFree(waitHandle, bytes);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

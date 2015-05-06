@@ -87,7 +87,7 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t size = sizeForNProps(nProps);
   auto& mm = MM();
-  auto const obj = new (mm.objMallocLogged(size)) ObjectData(cls);
+  auto const obj = new (mm.objMalloc(size)) ObjectData(cls);
   if (UNLIKELY(cls->callsCustomInstanceInit())) {
     /*
       This must happen after the constructor finishes,

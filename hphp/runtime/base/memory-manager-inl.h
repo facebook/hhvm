@@ -319,47 +319,6 @@ void MemoryManager::objFree(void* vp, size_t size) {
 
 //////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE
-void* MemoryManager::smartMallocSizeLogged(uint32_t size) {
-  auto const retptr = smartMallocSize(size);
-  if (memory_profiling) { logAllocation(retptr, size); }
-  return retptr;
-}
-
-ALWAYS_INLINE
-void MemoryManager::smartFreeSizeLogged(void* p, uint32_t size) {
-  if (memory_profiling) { logDeallocation(p); }
-  smartFreeSize(p, size);
-}
-
-template<bool callerSavesActualSize> ALWAYS_INLINE
-MemBlock MemoryManager::smartMallocSizeBigLogged(size_t size) {
-  auto const block = smartMallocSizeBig<callerSavesActualSize>(size);
-  if (memory_profiling) { logAllocation(block.ptr, size); }
-  return block;
-}
-
-ALWAYS_INLINE
-void MemoryManager::smartFreeSizeBigLogged(void* vp, size_t size) {
-  if (memory_profiling) { logDeallocation(vp); }
-  smartFreeSizeBig(vp, size);
-}
-
-ALWAYS_INLINE
-void* MemoryManager::objMallocLogged(size_t size) {
-  auto const retptr = objMalloc(size);
-  if (memory_profiling) { logAllocation(retptr, size); }
-  return retptr;
-}
-
-ALWAYS_INLINE
-void MemoryManager::objFreeLogged(void* vp, size_t size) {
-  if (memory_profiling) { logDeallocation(vp); }
-  objFree(vp, size);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 inline int64_t MemoryManager::getAllocated() const {
 #ifdef USE_JEMALLOC
   assert(m_allocated);

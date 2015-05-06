@@ -473,11 +473,11 @@ using ExtObjectData = ExtObjectDataFlags<ObjectData::IsCppBuiltin>;
 
 template<class T, class... Args> T* newobj(Args&&... args) {
   static_assert(std::is_convertible<T*,ObjectData*>::value, "");
-  auto const mem = MM().smartMallocSizeLogged(sizeof(T));
+  auto const mem = MM().smartMallocSize(sizeof(T));
   try {
     return new (mem) T(std::forward<Args>(args)...);
   } catch (...) {
-    MM().smartFreeSizeLogged(mem, sizeof(T));
+    MM().smartFreeSize(mem, sizeof(T));
     throw;
   }
 }

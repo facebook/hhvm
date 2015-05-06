@@ -389,7 +389,7 @@ uint32_t computeScaleFromSize(uint32_t n) {
 ALWAYS_INLINE
 MixedArray* smartAllocArray(uint32_t scale) {
   auto const allocBytes = computeAllocBytes(scale);
-  return static_cast<MixedArray*>(MM().objMallocLogged(allocBytes));
+  return static_cast<MixedArray*>(MM().objMalloc(allocBytes));
 }
 
 ALWAYS_INLINE

@@ -206,7 +206,7 @@ ArrayData* PackedArray::Grow(ArrayData* old) {
       cap = capUpdated;
     }
     ad = static_cast<ArrayData*>(
-      MM().objMallocLogged(sizeof(ArrayData) + cap * sizeof(TypedValue))
+      MM().objMalloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = old->m_sizeAndPos;
@@ -319,7 +319,7 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
 
   auto const cap = adIn->cap();
   auto const ad = static_cast<ArrayData*>(
-    MM().objMallocLogged(sizeof(ArrayData) + cap * sizeof(TypedValue))
+    MM().objMalloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   auto const size = adIn->m_size;
   ad->m_sizeAndPos = adIn->m_sizeAndPos; // copy size, pos=0
@@ -452,7 +452,7 @@ ArrayData* MixedArray::MakeReserve(uint32_t capacity) {
     auto const kSmallSize = MixedArray::SmallSize;
     auto const cap = std::max(capacity, kSmallSize);
     ad = static_cast<ArrayData*>(
-      MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
+      MM().objMalloc(sizeof(ArrayData) + sizeof(TypedValue) * cap)
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = 0; // size=0, pos=0
@@ -476,7 +476,7 @@ ArrayData* MixedArray::MakeReserveSlow(uint32_t capacity) {
   auto const fpcap = CapCode::ceil(capacity);
   auto const cap = fpcap.decode();
   auto const requestSize = sizeof(ArrayData) + sizeof(TypedValue) * cap;
-  auto const ad = static_cast<ArrayData*>(MM().objMallocLogged(requestSize));
+  auto const ad = static_cast<ArrayData*>(MM().objMalloc(requestSize));
   ad->m_sizeAndPos = 0;
   ad->m_hdr.init(fpcap, HeaderKind::Packed, 0);
   assert(ad->isPacked());
@@ -499,7 +499,7 @@ void PackedArray::Release(ArrayData* ad) {
   if (UNLIKELY(strong_iterators_exist())) {
     free_strong_iterators(ad);
   }
-  MM().objFreeLogged(ad, heapSize(ad));
+  MM().objFree(ad, heapSize(ad));
 }
 
 const TypedValue* PackedArray::NvGetInt(const ArrayData* ad, int64_t ki) {

@@ -126,7 +126,7 @@ ALWAYS_INLINE
 std::pair<ArrayData*,TypedValue*> EmptyArray::MakePackedInl(TypedValue tv) {
   auto const cap = kPackedSmallSize;
   auto const ad = static_cast<ArrayData*>(
-    MM().objMallocLogged(sizeof(ArrayData) + cap * sizeof(TypedValue))
+    MM().objMalloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
   assert(cap == CapCode::ceil(cap).code);
   ad->m_sizeAndPos = 1; // size=1, pos=0

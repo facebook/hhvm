@@ -24,6 +24,8 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 
+#include <folly/Optional.h>
+
 namespace HPHP { namespace jit {
 
 namespace {
@@ -31,76 +33,85 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 AliasClass pointee(const SSATmp* ptr) {
-  always_assert(ptr->type() <= TPtrToGen);
+  auto const type = ptr->type();
+  always_assert(type <= TPtrToGen);
+  auto const maybeRef = type.maybe(TPtrToRefGen);
+  auto const typeNR =
+    maybeRef ? type.deref().ptr(remove_ref(type.ptrKind())) : type;
 
-  /*
-   * First check various kinds of known locations.
-   */
+  auto const sinst = canonical(ptr)->inst();
 
-  if (ptr->type() <= TPtrToFrameGen) {
-    auto const sinst = canonical(ptr)->inst();
-    if (sinst->is(LdLocAddr)) {
-      return AFrame { sinst->src(0), sinst->extra<LdLocAddr>()->locId };
-    }
-    return AFrameAny;
-  }
-
-  if (ptr->type() <= TPtrToStkGen) {
-    auto const sinst = canonical(ptr)->inst();
-    if (sinst->is(LdStkAddr)) {
-      return AStack { sinst->src(0),
-        sinst->extra<LdStkAddr>()->offset.offset, 1 };
-    }
-    return AStackAny;
-  }
-
-  if (ptr->type() <= TPtrToPropGen) {
-    auto const sinst = canonical(ptr)->inst();
-    if (sinst->is(LdPropAddr)) {
-      return AProp {
-        sinst->src(0),
-        safe_cast<uint32_t>(sinst->extra<LdPropAddr>()->offsetBytes)
-      };
-    }
-    return APropAny;
-  }
-
-  if (ptr->type() <= TPtrToMISGen) {
-    auto const sinst = canonical(ptr)->inst();
-    if (sinst->is(LdMIStateAddr)) {
-      return AMIState { safe_cast<int32_t>(sinst->src(1)->intVal()) };
-    }
-    return AMIStateAny;
-  }
-
-  if (ptr->type() <= TPtrToArrGen) {
-    auto const sinst = canonical(ptr)->inst();
-    if (sinst->is(LdPackedArrayElemAddr)) {
-      if (sinst->src(1)->hasConstVal() && sinst->src(1)->intVal() >= 0) {
-        return AElemI { sinst->src(0), sinst->src(1)->intVal() };
+  auto specific = [&] () -> folly::Optional<AliasClass> {
+    /*
+     * First check various kinds of known locations.
+     */
+    if (typeNR <= TPtrToFrameGen) {
+      if (sinst->is(LdLocAddr)) {
+        return AliasClass {
+          AFrame { sinst->src(0), sinst->extra<LdLocAddr>()->locId }
+        };
       }
-      return AElemIAny;
+      return AFrameAny;
     }
-    return AElemAny;
-  }
+
+    if (typeNR <= TPtrToStkGen) {
+      if (sinst->is(LdStkAddr)) {
+        return AliasClass {
+          AStack { sinst->src(0),
+                   sinst->extra<LdStkAddr>()->offset.offset, 1 }
+        };
+      }
+      return AStackAny;
+    }
+
+    if (typeNR <= TPtrToPropGen) {
+      if (sinst->is(LdPropAddr)) {
+        return AliasClass {
+          AProp { sinst->src(0),
+                  safe_cast<uint32_t>(sinst->extra<LdPropAddr>()->offsetBytes) }
+        };
+      }
+      return APropAny;
+    }
+
+    if (typeNR <= TPtrToMISGen) {
+      if (sinst->is(LdMIStateAddr)) {
+        return AliasClass {
+          AMIState { safe_cast<int32_t>(sinst->src(1)->intVal()) }
+        };
+      }
+      return AMIStateAny;
+    }
+
+    if (typeNR <= TPtrToArrGen) {
+      if (sinst->is(LdPackedArrayElemAddr)) {
+        if (sinst->src(1)->hasConstVal() && sinst->src(1)->intVal() >= 0) {
+          return AliasClass {
+            AElemI { sinst->src(0), sinst->src(1)->intVal() }
+          };
+        }
+        return AElemIAny;
+      }
+      return AElemAny;
+    }
+
+    return folly::none;
+  }();
+
+  auto ret = maybeRef ? ARefAny : AEmpty;
+  if (specific) return *specific | ret;
 
   /*
    * None of the above worked, so try to make the smallest union we can based
    * on the pointer type.
-   *
-   * Note: we don't support refs in AliasClass yet, so any pointer that
-   * contains the R bits unions all heap locations.
    */
-  auto const pty = ptr->type();
-  auto ret = AliasClass{AEmpty};
-  if (pty.maybe(TPtrToStkGen))     ret = ret | AStackAny;
-  if (pty.maybe(TPtrToFrameGen))   ret = ret | AFrameAny;
-  if (pty.maybe(TPtrToPropGen))    ret = ret | APropAny;
-  if (pty.maybe(TPtrToArrGen))     ret = ret | AElemAny;
-  if (pty.maybe(TPtrToMISGen))     ret = ret | AMIStateAny;
-  if (pty.maybe(TPtrToRefGen))     ret = ret | AHeapAny;
-  if (pty.maybe(TPtrToClsInitGen)) ret = ret | AHeapAny;
-  if (pty.maybe(TPtrToClsCnsGen))  ret = ret | AHeapAny;
+  if (typeNR.maybe(TPtrToStkGen))     ret = ret | AStackAny;
+  if (typeNR.maybe(TPtrToFrameGen))   ret = ret | AFrameAny;
+  if (typeNR.maybe(TPtrToPropGen))    ret = ret | APropAny;
+  if (typeNR.maybe(TPtrToArrGen))     ret = ret | AElemAny;
+  if (typeNR.maybe(TPtrToMISGen))     ret = ret | AMIStateAny;
+  if (typeNR.maybe(TPtrToClsInitGen)) ret = ret | AHeapAny;
+  if (typeNR.maybe(TPtrToClsCnsGen))  ret = ret | AHeapAny;
   return ret;
 }
 
@@ -533,11 +544,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
 
   case BoxPtr:
-  case UnboxPtr:
     {
       auto const mem = pointee(inst.src(0));
       return may_load_store(mem, mem);
     }
+  case UnboxPtr:
+    return may_load_store(pointee(inst.src(0)), AEmpty);
 
   case IsNTypeMem:
   case IsTypeMem:
@@ -552,16 +564,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // Object/Ref loads/stores
 
   case CheckRefInner:
-    // We don't have AliasClass support for refs yet, so it's a load from an
-    // unknown heap location.
-    return may_load_store(AHeapAny, AEmpty);
+    return may_load_store(ARefAny, AEmpty);
   case LdRef:
-    return PureLoad { AHeapAny };
+    return PureLoad { ARefAny };
 
   case StRef:
-    // We don't have anything for ref locations at this point, but we know it
-    // is a heap location.
-    return PureStore { AHeapAny, inst.src(1) };
+    return PureStore { ARefAny, inst.src(1) };
 
   case InitObjProps:
     return may_load_store(AEmpty, APropAny);
@@ -604,10 +612,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case ArrayIdx:
-    return may_load_store(AHeapAny, AHeapAny);
-
+    return may_load_store(AElemAny | ARefAny, AEmpty);
   case AKExistsArr:
-    return may_load_store(AHeapAny, AHeapAny);
+    return may_load_store(AElemAny, AEmpty);
   case AKExistsObj:
     return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
 

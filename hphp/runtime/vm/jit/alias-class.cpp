@@ -95,6 +95,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BElemS:    break;
   case A::BStack:    break;
   case A::BMIState:  break;
+  case A::BRef:      break;
   }
 
   auto ret = std::string{};
@@ -116,6 +117,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BElemS:   ret += "Es"; break;
     case A::BStack:   ret += "St"; break;
     case A::BMIState: ret += "Mis"; break;
+    case A::BRef:     ret += "Ref"; break;
     }
   }
   return ret;
@@ -169,7 +171,7 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
     , m_stag(STag::What)                                    \
     , m_##what(x)                                           \
   {                                                         \
-    assertx(checkInvariants());                              \
+    assertx(checkInvariants());                             \
   }                                                         \
                                                             \
   folly::Optional<A##What> AliasClass::what() const {       \
@@ -341,15 +343,12 @@ AliasClass AliasClass::operator|(AliasClass o) const {
   auto const stag1 = m_stag;
   auto const stag2 = o.m_stag;
   if (stag1 == stag2) return unionData(unioned, *this, o);
-  if (stag1 != STag::None && stag2 != STag::None) {
-    return AliasClass{unioned};
-  }
-  if (stag2 != STag::None) return o | *this;
-  if (o.m_bits & stagBit(stag1)) {
-    return AliasClass{unioned};
-  }
 
   auto ret = AliasClass{unioned};
+  if (stag1 != STag::None && stag2 != STag::None) return ret;
+  if (stag2 != STag::None) return o | *this;
+  if (o.m_bits & stagBit(stag1)) return ret;
+
   switch (stag1) {
   case STag::None:
     break;
@@ -365,6 +364,7 @@ AliasClass AliasClass::operator|(AliasClass o) const {
 }
 
 bool AliasClass::subclassData(AliasClass o) const {
+  assertx(m_stag == o.m_stag);
   switch (m_stag) {
   case STag::None:
   case STag::Frame:
@@ -417,7 +417,7 @@ bool AliasClass::maybeData(AliasClass o) const {
   assertx(m_stag == o.m_stag);
   switch (m_stag) {
   case STag::None:
-    not_reached();  // handled above
+    not_reached();  // handled outside
   case STag::Frame:
     return m_frame.fp == o.m_frame.fp && m_frame.id == o.m_frame.id;
   case STag::Prop:
@@ -480,7 +480,6 @@ bool AliasClass::maybeData(AliasClass o) const {
 bool AliasClass::maybe(AliasClass o) const {
   auto const isect = static_cast<rep>(m_bits & o.m_bits);
   if (isect == 0) return false;
-  if (*this <= o || o <= *this) return true;
 
   /*
    * If we have the same stag, then the cases are either the stag is in the
@@ -535,7 +534,7 @@ AliasClass canonicalize(AliasClass a) {
   case T::ElemS:   a.m_elemS.arr = canonical(a.m_elemS.arr); return a;
   case T::Stack:   a.m_stack = canonicalize_stk(a.m_stack);  return a;
   }
-  always_assert(0);
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////

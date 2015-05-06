@@ -43,26 +43,25 @@ struct SSATmp;
  *                 Unknown                    ANonFrame := ~AFrameAny
  *                    |                       ANonStack := ~AStackAny
  *                    |
- *      +---------+---+---------------+----------------------+
- *      |         |                   |                      |
- *      |         |                   |                      |
- *      |         |                   |                      |
- *      |         |                   |                      |
- *      |         |                AHeapAny*                 |
- *      |         |                   |                      |
- *      |         |            +------+-------+              |
- *      |         |            |              |              |
- *   FrameAny  StackAny     ElemAny        PropAny       MIStateAny
- *      |         |          /    \           |              |
- *     ...       ...   ElemIAny  ElemSAny    ...            ...
+ *      +---------+---+---------------+-------------------------+
+ *      |         |                   |                         |
+ *      |         |                   |                         |
+ *      |         |                   |                         |
+ *      |         |                   |                         |
+ *      |         |                AHeapAny*                    |
+ *      |         |                   |                         |
+ *      |         |            +------+------+---------+        |
+ *      |         |            |             |         |        |
+ *   FrameAny  StackAny     ElemAny       PropAny   RefAny  MIStateAny
+ *      |         |          /    \          |         |        |
+ *     ...       ...   ElemIAny  ElemSAny   ...       ...      ...
  *                        |         |
  *                       ...       ...
  *
- *   (*) AHeapAny contains some things other than ElemAny and PropAny that
- *       don't have explicit nodes in the lattice yet.  (Like the values inside
- *       of php references, the lvalBlackhole, etc.)  It's hard for this to
- *       matter to client code for now because we don't expose an intersection
- *       or difference operation.
+ *   (*) AHeapAny contains some things other than ElemAny, PropAny and RefAny
+ *       that don't have explicit nodes in the lattice yet.  (Like the
+ *       lvalBlackhole, etc.)  It's hard for this to matter to client code for
+ *       now because we don't expose an intersection or difference operation.
  */
 struct AliasClass;
 
@@ -145,9 +144,10 @@ struct AliasClass {
     BElemS   = 1 << 3,
     BStack   = 1 << 4,
     BMIState = 1 << 5,
+    BRef     = 1 << 6,
 
     BElem    = BElemI | BElemS,
-    BHeap    = BElem | BProp,
+    BHeap    = BElem | BProp | BRef,
 
     BNonFrame = ~BFrame,
     BNonStack = ~BStack,
@@ -283,6 +283,7 @@ auto const AEmpty      = AliasClass{AliasClass::BEmpty};
 auto const AFrameAny   = AliasClass{AliasClass::BFrame};
 auto const APropAny    = AliasClass{AliasClass::BProp};
 auto const AHeapAny    = AliasClass{AliasClass::BHeap};
+auto const ARefAny     = AliasClass{AliasClass::BRef};
 auto const ANonFrame   = AliasClass{AliasClass::BNonFrame};
 auto const ANonStack   = AliasClass{AliasClass::BNonStack};
 auto const AStackAny   = AliasClass{AliasClass::BStack};

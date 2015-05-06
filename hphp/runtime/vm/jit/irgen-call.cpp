@@ -596,9 +596,25 @@ void emitFPushObjMethodD(IRGS& env,
                          const StringData* methodName,
                          ObjMethodOp subop) {
   auto const obj = popC(env);
-  if (!obj->isA(TObj)) PUNT(FPushObjMethodD-nonObj);
-  fpushObjMethodCommon(env, obj, methodName, numParams,
-    true /* shouldFatal */);
+
+  if (obj->type() <= TObj) {
+    fpushObjMethodCommon(env, obj, methodName, numParams,
+      true /* shouldFatal */);
+    return;
+  }
+
+  if (obj->type() <= TInitNull && subop == ObjMethodOp::NullSafe) {
+    fpushActRec(
+      env,
+      cns(env, SystemLib::s_nullFunc),
+      cns(env, TNullptr),
+      numParams,
+      nullptr,
+      false);
+    return;
+  }
+
+  PUNT(FPushObjMethodD-nonObj);
 }
 
 void emitFPushClsMethodD(IRGS& env,

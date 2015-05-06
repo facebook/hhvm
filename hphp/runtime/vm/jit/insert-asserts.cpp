@@ -28,14 +28,20 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-// Insert `inst' after `definer'. If `definer' ends its block, it must have a
-// fallthrough block, and `inst' will be inserted at the beginning of that
-// block.
+/*
+ * Insert `inst' after `definer'.
+ *
+ * If `definer' ends its block, it must have a fallthrough block, and `inst'
+ * will be inserted at the beginning of that block, as long as the block has no
+ * other predecessors.
+ */
 void insertAfter(IRInstruction* definer, IRInstruction* inst) {
   assertx(!definer->isTerminal());
   if (definer->isControlFlow()) {
     assertx(definer->next());
-    definer->next()->prepend(inst);
+    if (definer->next()->numPreds() == 1) {
+      definer->next()->prepend(inst);
+    }
     return;
   }
 
@@ -45,9 +51,8 @@ void insertAfter(IRInstruction* definer, IRInstruction* inst) {
 }
 
 /*
- * Insert a DbgAssertRefCount instruction after each place we produce a
- * refcounted value.  The value must be something we can safely dereference to
- * check the _count field.
+ * Insert a DbgAssertRefCount instruction after each place we define a
+ * maybe-refcounted SSATmp.
  */
 void insertRefCountAsserts(IRUnit& unit, IRInstruction& inst) {
   for (auto& dst : inst.dsts()) {
@@ -82,11 +87,6 @@ void visit(IRUnit& unit, Block* block) {
     ++it;
 
     switch (inst.op()) {
-    case StStk:
-      if (inst.src(1)->type() <= TGen) {
-        insertStkAssert(unit, &inst, inst.src(0), inst.extra<StStk>()->offset);
-      }
-      break;
     case Call:
       {
         auto const extra = inst.extra<Call>();

@@ -60,7 +60,7 @@ abstract class BuiltinEnum<T> {
 
   /**
    * Coerce all the values in a traversable. If the value is not an
-   * array of valid items, an UnexpectedValueExcpeption is thrown
+   * array of valid items, an UnexpectedValueException is thrown
    */
   final public static function assertAll(
     Traversable<mixed> $values,

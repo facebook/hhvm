@@ -42,22 +42,23 @@ abstract class BuiltinEnum<T> {
   final public static function coerce(mixed $value): ?T;
 
   /**
-   * Coerce to valid value or throw UnexpectedValueExcpeption
+   * Coerce to valid value or throw UnexpectedValueException
    * This is useful for typing deserialized enum values.
    */
   final public static function assert(mixed $value): T {
     $new_value = static::coerce($value);
     if (null === $new_value) {
-      $cls = get_called_class();
+      $cls = \get_called_class();
       throw new \UnexpectedValueException(
-        "{$value} is not a valid value for {$cls}");
+        "{$value} is not a valid value for {$cls}",
+      );
     }
     return $new_value;
   }
 
   /**
    * Coerce all the values in a traversable. If the value is not an
-   * array of valid items, an UnexpectedValueExcpeption is thrown
+   * array of valid items, an UnexpectedValueException is thrown
    */
   final public static function assertAll(
     Traversable<mixed> $values,

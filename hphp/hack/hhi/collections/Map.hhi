@@ -50,8 +50,8 @@
 
 final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   /**
-   * Create an empty Map (if no parameters are passed) or create
-   * a Map from an KeyedTraversable (if one parameter is passed).
+   * Creates a Map from the given KeyedTraversable, or an empty Map
+   * if "null" is passed.
    */
   public function __construct(?KeyedTraversable<Tk, Tv> $it);
 

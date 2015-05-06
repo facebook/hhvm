@@ -40,7 +40,10 @@
  */
 
 final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
-  public function __construct();
+  /**
+   * Pairs must be constructed with "Pair {$first, $second}".
+   */
+  private function __construct();
 
   /**
    * Returns an array containing the values from this Pair.

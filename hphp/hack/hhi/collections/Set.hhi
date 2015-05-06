@@ -46,8 +46,8 @@
 
 final class Set<Tv> implements MutableSet<Tv> {
   /**
-   * Create an empty Set (if no parameters are passed) or create
-   * a Set from an Traversable (if one parameter is passed).
+   * Creates a Set from the given Traversable, or an empty Set
+   * if "null" is passed.
    */
   public function __construct(?Traversable<Tv> $it);
 

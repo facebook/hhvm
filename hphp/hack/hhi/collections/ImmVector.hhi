@@ -39,8 +39,8 @@
 
 final class ImmVector<+Tv> implements ConstVector<Tv> {
   /**
-   * Create an empty ImmVector (if no parameters are passed) or create
-   * an ImmVector from an Traversable (if one parameter is passed).
+   * Creates an ImmVector from the given Traversable, or an empty ImmVector
+   * if "null" is passed.
    */
   public function __construct(?Traversable<Tv> $it);
 

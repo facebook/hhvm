@@ -17,10 +17,10 @@
 
 final class ImmSet<+Tv> implements ConstSet<Tv> {
   /**
-   * Create an empty ImmSet (if no parameters are passed) or create
-   * an ImmSet from an Traversable (if one parameter is passed).
+   * Creates an ImmSet from the given Traversable, or an empty ImmSet
+   * if "null" is passed.
    */
-  public function __construct(?Traversable<Tv> $it = null);
+  public function __construct(?Traversable<Tv> $it);
 
   /**
    * Returns true if the ImmSet is empty, false otherwise.

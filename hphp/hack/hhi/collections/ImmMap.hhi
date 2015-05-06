@@ -36,8 +36,8 @@
 
 final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
   /**
-   * Create an empty ImmMap (if no parameters are passed) or create
-   * an ImmMap from an KeyedTraversable (if one parameter is passed).
+   * Creates an ImmMap from the given KeyedTraversable, or an empty ImmMap
+   * if "null" is passed.
    */
   public function __construct(?KeyedTraversable<Tk, Tv> $it);
 

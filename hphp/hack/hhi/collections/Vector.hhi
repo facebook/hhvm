@@ -44,8 +44,8 @@
 
 final class Vector<Tv> implements MutableVector<Tv> {
   /**
-   * Create an empty Vector (if no parameters are passed) or create
-   * a Vector from an Traversable (if one parameter is passed).
+   * Creates a Vector from the given Traversable, or an empty Vector
+   * if "null" is passed.
    */
   public function __construct(?Traversable<Tv> $it);
 

@@ -637,43 +637,43 @@ struct Variant : private TypedValue {
   /**
    * Explicit type conversions
    */
-  bool   toBoolean() const {
+  bool toBoolean() const {
     if (IS_NULL_TYPE(m_type)) return false;
     if (m_type <= KindOfInt64) return m_data.num;
     return toBooleanHelper();
   }
-  char   toByte   () const { return (char)toInt64();}
-  short  toInt16  (int base = 10) const { return (short)toInt64(base);}
-  int    toInt32  (int base = 10) const { return (int)toInt64(base);}
-  int64_t  toInt64  () const {
+  char toByte() const { return (char)toInt64();}
+  short toInt16(int base = 10) const { return (short)toInt64(base);}
+  int toInt32(int base = 10) const { return (int)toInt64(base);}
+  int64_t toInt64() const {
     if (IS_NULL_TYPE(m_type)) return 0;
     if (m_type <= KindOfInt64) return m_data.num;
     return toInt64Helper(10);
   }
-  int64_t  toInt64  (int base) const {
+  int64_t toInt64(int base) const {
     if (IS_NULL_TYPE(m_type)) return 0;
     if (m_type <= KindOfInt64) return m_data.num;
     return toInt64Helper(base);
   }
-  double toDouble () const {
+  double toDouble() const {
     if (m_type == KindOfDouble) return m_data.dbl;
     return toDoubleHelper();
   }
-  String toString () const {
+  String toString() const {
     if (IS_STRING_TYPE(m_type)) {
       return m_data.pstr;
     }
     return toStringHelper();
   }
-  Array  toArray  () const {
+  Array toArray() const {
     if (m_type == KindOfArray) return Array(m_data.parr);
     return toArrayHelper();
   }
-  Object toObject () const {
+  Object toObject() const {
     if (m_type == KindOfObject) return m_data.pobj;
     return toObjectHelper();
   }
-  Resource toResource () const {
+  Resource toResource() const {
     if (m_type == KindOfResource) return m_data.pres;
     return toResourceHelper();
   }

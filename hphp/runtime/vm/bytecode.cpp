@@ -3845,11 +3845,11 @@ OPTBLD_INLINE void iopClsCnsD(IOP_ARGS) {
 
 OPTBLD_INLINE void iopConcat(IOP_ARGS) {
   pc++;
-  Cell* c1 = vmStack().topC();
-  Cell* c2 = vmStack().indC(1);
-
-  cellAsVariant(*c2) = concat(cellAsVariant(*c2).toString(),
-                              cellAsCVarRef(*c1).toString());
+  auto const c1 = vmStack().topC();
+  auto const c2 = vmStack().indC(1);
+  auto const s2 = cellAsVariant(*c2).toString();
+  auto const s1 = cellAsCVarRef(*c1).toString();
+  cellAsVariant(*c2) = concat(s2, s1);
   assert(check_refcount_nz(c2->m_data.pstr->getCount()));
   vmStack().popC();
 }
@@ -3858,26 +3858,30 @@ OPTBLD_INLINE void iopConcatN(IOP_ARGS) {
   pc++;
   auto n = decode_iva(pc);
 
-  Cell* c1 = vmStack().topC();
-  Cell* c2 = vmStack().indC(1);
+  auto const c1 = vmStack().topC();
+  auto const c2 = vmStack().indC(1);
 
   if (n == 2) {
-    cellAsVariant(*c2) = concat(cellAsVariant(*c2).toString(),
-                                cellAsCVarRef(*c1).toString());
+    auto const s2 = cellAsVariant(*c2).toString();
+    auto const s1 = cellAsCVarRef(*c1).toString();
+    cellAsVariant(*c2) = concat(s2, s1);
     assert(check_refcount_nz(c2->m_data.pstr->getCount()));
   } else if (n == 3) {
-    Cell* c3 = vmStack().indC(2);
-    cellAsVariant(*c3) = concat3(cellAsVariant(*c3).toString(),
-                                 cellAsCVarRef(*c2).toString(),
-                                 cellAsCVarRef(*c1).toString());
+    auto const c3 = vmStack().indC(2);
+    auto const s3 = cellAsVariant(*c3).toString();
+    auto const s2 = cellAsCVarRef(*c2).toString();
+    auto const s1 = cellAsCVarRef(*c1).toString();
+    cellAsVariant(*c3) = concat3(s3, s2, s1);
     assert(check_refcount_nz(c3->m_data.pstr->getCount()));
-  } else /* n == 4 */ {
-    Cell* c3 = vmStack().indC(2);
-    Cell* c4 = vmStack().indC(3);
-    cellAsVariant(*c4) = concat4(cellAsVariant(*c4).toString(),
-                                 cellAsCVarRef(*c3).toString(),
-                                 cellAsCVarRef(*c2).toString(),
-                                 cellAsCVarRef(*c1).toString());
+  } else {
+    assert(n == 4);
+    auto const c3 = vmStack().indC(2);
+    auto const c4 = vmStack().indC(3);
+    auto const s4 = cellAsVariant(*c4).toString();
+    auto const s3 = cellAsCVarRef(*c3).toString();
+    auto const s2 = cellAsCVarRef(*c2).toString();
+    auto const s1 = cellAsCVarRef(*c1).toString();
+    cellAsVariant(*c4) = concat4(s4, s3, s2, s1);
     assert(check_refcount_nz(c4->m_data.pstr->getCount()));
   }
 

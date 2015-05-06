@@ -2678,6 +2678,9 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
   Native::registerConstant<KindOfInt64>(makeStaticString("ARRAY_" #option),    \
                                        (value));
 
+#define REGISTER_CONST_VALUE(option, value)                                    \
+  Native::registerConstant<KindOfInt64>(makeStaticString(option), (value));
+
 class ArrayExtension final : public Extension {
 public:
   ArrayExtension() : Extension("array") {}
@@ -2706,6 +2709,19 @@ public:
 
     REGISTER_CONSTANT_VALUE(FILTER_USE_BOTH, 1);
     REGISTER_CONSTANT_VALUE(FILTER_USE_KEY,  2);
+
+    REGISTER_CONST_VALUE("CASE_LOWER", 0);
+    REGISTER_CONST_VALUE("CASE_UPPER", 1);
+    REGISTER_CONST_VALUE("COUNT_NORMAL", 0);
+    REGISTER_CONST_VALUE("COUNT_RECURSIVE", 1);
+    REGISTER_CONST_VALUE("SORT_ASC", SORT_ASC);
+    REGISTER_CONST_VALUE("SORT_DESC", SORT_DESC);
+    REGISTER_CONST_VALUE("SORT_FLAG_CASE", SORT_FLAG_CASE);
+    REGISTER_CONST_VALUE("SORT_LOCALE_STRING", SORT_LOCALE_STRING);
+    REGISTER_CONST_VALUE("SORT_NATURAL", SORT_NATURAL);
+    REGISTER_CONST_VALUE("SORT_NUMERIC", SORT_NUMERIC);
+    REGISTER_CONST_VALUE("SORT_REGULAR", SORT_REGULAR);
+    REGISTER_CONST_VALUE("SORT_STRING", SORT_STRING);
 
     HHVM_FE(array_change_key_case);
     HHVM_FE(array_chunk);

@@ -1255,6 +1255,27 @@ void StandardExtension::initOptions() {
   ASSERTCONST(QUIET_EVAL);
 #undef ASSERTCONST
 
+  Native::registerConstant<KindOfString>(
+    makeStaticString("PHP_SAPI"),
+    makeStaticString(RuntimeOption::ExecutionMode)
+  );
+
+#define REGINT(n, v) Native::registerConstant<KindOfInt64> \
+                       (makeStaticString("" #n), v)
+  REGINT(CLOCK_MONOTONIC, 1);
+  REGINT(CLOCK_PROCESS_CPUTIME_ID, 2);
+  REGINT(CLOCK_REALTIME, 0);
+  REGINT(CLOCK_THREAD_CPUTIME_ID, 3);
+  REGINT(CREDITS_ALL, 4294967295);
+  REGINT(CREDITS_DOCS, 16);
+  REGINT(CREDITS_FULLPAGE, 32);
+  REGINT(CREDITS_GENERAL, 2);
+  REGINT(CREDITS_GROUP, 1);
+  REGINT(CREDITS_MODULES, 8);
+  REGINT(CREDITS_QA, 64);
+  REGINT(CREDITS_SAPI, 4);
+#undef REGINT
+
   loadSystemlib("std_options");
 }
 

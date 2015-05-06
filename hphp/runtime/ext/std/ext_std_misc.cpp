@@ -52,6 +52,10 @@ const std::string s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
 const double k_INF = std::numeric_limits<double>::infinity();
 const double k_NAN = std::numeric_limits<double>::quiet_NaN();
 
+static int k_CONNECTION_NORMAL = 0;
+static int k_CONNECTION_ABORTED = 1;
+static int k_CONNECTION_TIMEOUT = 2;
+
 static String HHVM_FUNCTION(server_warmup_status) {
   // Fail if we jitted more than 25kb of code.
   size_t begin, end;
@@ -173,7 +177,25 @@ void StandardExtension::initMisc() {
     bindTokenConstants();
     Native::registerConstant<KindOfInt64>(s_T_PAAMAYIM_NEKUDOTAYIM.get(),
                                           get_user_token_id(T_DOUBLE_COLON));
+    Native::registerConstant<KindOfInt64>(
+      makeStaticString("CONNECTION_ABORTED"),
+      k_CONNECTION_ABORTED
+    );
+    Native::registerConstant<KindOfInt64>(
+      makeStaticString("CONNECTION_NORMAL"),
+      k_CONNECTION_NORMAL
+    );
+    Native::registerConstant<KindOfInt64>(
+      makeStaticString("CONNECTION_TIMEOUT"),
+      k_CONNECTION_TIMEOUT
+    );
 
+    Native::registerConstant<KindOfBoolean>(makeStaticString("true"), true);
+    Native::registerConstant<KindOfBoolean>(makeStaticString("TRUE"), true);
+    Native::registerConstant<KindOfBoolean>(makeStaticString("false"), false);
+    Native::registerConstant<KindOfBoolean>(makeStaticString("FALSE"), false);
+    Native::registerConstant<KindOfNull>(makeStaticString("null"));
+    Native::registerConstant<KindOfNull>(makeStaticString("NULL"));
     loadSystemlib("std_misc");
   }
 

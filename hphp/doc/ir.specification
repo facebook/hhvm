@@ -1555,11 +1555,6 @@ To string conversions:
 
   Concatenate S0 and S1.
 
-| ConcatCellCell, D(Str), S(Cell) S(Cell), Er|CRc|PRc
-
-  Concatenate S0 and S1 after converting them to strings in a way that obeys
-  php semantics. (Calling object __toString methods, etc.)
-
 | ConcatStr3, D(Str), S(Str) S(Str) S(Str), Er|CRc|PRc
 
   Concatenate S0, S1, and S2.

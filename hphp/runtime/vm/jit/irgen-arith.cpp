@@ -263,17 +263,58 @@ void implAdd(IRGS& env, Op op) {
   binaryArith(env, op);
 }
 
+template<class PreDecRef>
+void implConcat(IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef) {
+  auto const t1 = c1->type();
+  auto const t2 = c2->type();
+
+  /*
+   * We have some special translations for common combinations that avoid extra
+   * conversion calls.
+   */
+  auto const str = [&] () -> SSATmp* {
+    if (t2 <= TInt && t1 <= TStr) return gen(env, ConcatIntStr, c2, c1);
+    if (t2 <= TStr && t1 <= TInt) return gen(env, ConcatStrInt, c2, c1);
+    return nullptr;
+  }();
+
+  if (str) {
+    preDecRef(str);
+    // Note that the ConcatFoo opcode consumed the reference on its first
+    // argument, so we only need to decref the second one.
+    gen(env, DecRef, c1);
+    return;
+  }
+
+  /*
+   * Generic translation: convert both to strings, and then concatenate them.
+   *
+   * NB: the order we convert to strings is observable (because of __toString
+   * methods), and the order we run DecRefs of the input cells is also
+   * observable.
+   *
+   * We don't want to convert to strings if either was already a string.  Note
+   * that for the c2 string, failing to do this could change big-O program
+   * behavior if refcount opts were off, since we'd COW strings that we
+   * shouldn't (a ConvCellToStr of a Str will simplify into an IncRef).
+   */
+  auto const s2 = t2 <= TStr ? c2 : gen(env, ConvCellToStr, c2);
+  auto const s1 = t1 <= TStr ? c1 : gen(env, ConvCellToStr, c1);
+  auto const r  = gen(env, ConcatStrStr, s2, s1);  // consumes s2 reference
+  preDecRef(r);
+  gen(env, DecRef, s1);
+  if (s2 != c2) gen(env, DecRef, c2);
+  if (s1 != c1) gen(env, DecRef, c1);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
 
 void emitConcat(IRGS& env) {
-  auto const tr         = popC(env);
-  auto const tl         = popC(env);
-  // ConcatCellCell consumes only first ref, not second.
-  push(env, gen(env, ConcatCellCell, tl, tr));
-  // So we need to consume second ref ourselves.
-  gen(env, DecRef, tr);
+  auto const c1 = popC(env);
+  auto const c2 = popC(env);
+  implConcat(env, c1, c2, [&] (SSATmp* r) { push(env, r); });
 }
 
 void emitConcatN(IRGS& env, int32_t n) {
@@ -329,8 +370,8 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
   }();
   if (!subOpc) PUNT(SetOpL-Unsupported);
 
-  // Needs to modify locals after doing effectful operations like
-  // ConcatCellCell, so we can't guard on their types.
+  // Needs to modify locals after doing effectful operations like converting
+  // things to strings, so we can't guard on their types.
   if (curFunc(env)->isPseudoMain()) PUNT(SetOpL-PseudoMain);
 
   // Null guard block for globals because we always punt on pseudomains
@@ -357,7 +398,7 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
   }
 
   auto const ldrefExit = makeExit(env);
-  auto loc = ldLocInnerWarn(env, id, ldrefExit, ldPMExit, DataTypeGeneric);
+  auto loc = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeGeneric);
 
   if (*subOpc == Op::Concat) {
     /*
@@ -366,23 +407,19 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
      */
     auto const val    = popC(env);
     env.irb->constrainValue(loc, DataTypeSpecific);
-    auto const result = gen(env, ConcatCellCell, loc, val);
-
-    /*
-     * Null exit block for 'ldrefExit' because we won't actually need to reload
-     * the inner cell since we are doing a stLocNRC.  (Note that the inner cell
-     * may have changed type if we re-entered during ConcatCellCell.)
-     *
-     * We can't put a non-null block here either, because it may need to
-     * side-exit and we've already made observable progress executing this
-     * instruction.  If we ever change ConcatCellCell not to decref its sources
-     * we'll need to address this (or punt on a boxed source).
-     */
-    pushIncRef(env, stLocNRC(env, id, nullptr, ldPMExit, result));
-
-    // ConcatCellCell does not DecRef its second argument,
-    // so we need to do it here
-    gen(env, DecRef, val);
+    implConcat(env, val, loc, [&] (SSATmp* result) {
+      /*
+       * Null exit block for 'ldrefExit' because we won't actually need to
+       * reload the inner cell since we are doing a stLocNRC.  (Note that the
+       * inner cell may have changed type if we re-entered during Concat.)
+       *
+       * We can't put a non-null block here either, because it may need to
+       * side-exit and we've already made observable progress executing this
+       * instruction.  If we ever change ConcatStrFoo not to decref its sources
+       * we'll need to address this (or punt on a boxed source).
+       */
+      pushIncRef(env, stLocNRC(env, id, nullptr, ldPMExit, result));
+    });
     return;
   }
 

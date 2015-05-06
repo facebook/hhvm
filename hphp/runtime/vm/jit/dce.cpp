@@ -338,7 +338,6 @@ bool canDCE(IRInstruction* inst) {
   case ConcatIntStr:
   case ConcatStrInt:
   case ConcatStrStr:
-  case ConcatCellCell:
   case ConcatStr3:
   case ConcatStr4:
   case AddElemStrKey:

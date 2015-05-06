@@ -133,6 +133,7 @@ RegionDescPtr selectWholeCFG(TransID triggerId,
                              const TransCFG& cfg,
                              TransIDSet& selectedSet,
                              TransIDVec* selectedVec) {
+  FTRACE(1, "selectWholeCFG\n");
   return DFS(profData, cfg, selectedSet, selectedVec).formRegion(triggerId);
 }
 

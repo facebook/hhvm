@@ -1224,57 +1224,6 @@ SSATmp* simplifyIsScalarType(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyConcatCellCell(State& env, const IRInstruction* inst) {
-  auto const src1       = inst->src(0);
-  auto const src2       = inst->src(1);
-  auto const catchBlock = inst->taken();
-
-  if (src1->isA(TStr) && src2->isA(TStr)) { // StrStr
-    return gen(env, ConcatStrStr, catchBlock, src1, src2);
-  }
-  if (src1->isA(TInt) && src2->isA(TStr)) { // IntStr
-    return gen(env, ConcatIntStr, catchBlock, src1, src2);
-  }
-  if (src1->isA(TStr) && src2->isA(TInt)) { // StrInt
-    return gen(env, ConcatStrInt, catchBlock, src1, src2);
-  }
-
-  // XXX: t3770157. All the cases below need two different catch blocks but we
-  // only have access to one here.
-  return nullptr;
-
-  if (src1->isA(TInt)) { // IntCell
-    auto* asStr = gen(env, ConvCellToStr, catchBlock, src2);
-    auto* result = gen(env, ConcatIntStr, src1, asStr);
-    // ConcatIntStr doesn't consume its second input so we have to decref it
-    // here.
-    gen(env, DecRef, asStr);
-    return result;
-  }
-  if (src2->isA(TInt)) { // CellInt
-    auto const asStr = gen(env, ConvCellToStr, catchBlock, src1);
-    // concat promises to decref its first argument. we need to do it here
-    gen(env, DecRef, src1);
-    return gen(env, ConcatStrInt, asStr, src2);
-  }
-  if (src1->isA(TStr)) { // StrCell
-    auto* asStr = gen(env, ConvCellToStr, catchBlock, src2);
-    auto* result = gen(env, ConcatStrStr, src1, asStr);
-    // ConcatStrStr doesn't consume its second input so we have to decref it
-    // here.
-    gen(env, DecRef, asStr);
-    return result;
-  }
-  if (src2->isA(TStr)) { // CellStr
-    auto const asStr = gen(env, ConvCellToStr, catchBlock, src1);
-    // concat promises to decref its first argument. we need to do it here
-    gen(env, DecRef, src1);
-    return gen(env, ConcatStrStr, asStr, src2);
-  }
-
-  return nullptr;
-}
-
 SSATmp* simplifyConcatStrStr(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
@@ -2009,7 +1958,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CoerceCellToBool)
   X(CoerceCellToDbl)
   X(CoerceCellToInt)
-  X(ConcatCellCell)
   X(ConcatStrStr)
   X(ConvArrToBool)
   X(ConvArrToDbl)

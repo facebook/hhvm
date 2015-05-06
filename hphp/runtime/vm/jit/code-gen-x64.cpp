@@ -4642,11 +4642,6 @@ void CodeGenerator::cgBoxPtr(IRInstruction* inst) {
     });
 }
 
-void CodeGenerator::cgConcatCellCell(IRInstruction* inst) {
-  // Supported cases are all simplified into other instructions
-  CG_PUNT(inst->marker(), cgConcatCellCell);
-}
-
 void CodeGenerator::cgInterpOne(IRInstruction* inst) {
   auto const extra = inst->extra<InterpOne>();
   auto const pcOff = extra->bcOff;

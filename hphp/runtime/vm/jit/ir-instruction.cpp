@@ -121,7 +121,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
   switch (op()) {
     case ConcatStrStr:
     case ConcatStrInt:
-    case ConcatCellCell:
     case ConcatStr3:
     case ConcatStr4:
       // Call a helper that decrefs the first argument

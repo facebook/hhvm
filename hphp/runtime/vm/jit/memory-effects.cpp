@@ -1074,7 +1074,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseWarning:
   case ConvCellToStr:
   case ConvObjToStr:
-  case ConcatCellCell:
   case Count:      // re-enters on CountableClass
   case CIterFree:  // decrefs context object in iter
   case MIterFree:

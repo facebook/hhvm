@@ -232,7 +232,7 @@ def rawptr(val):
     elif t.code == gdb.TYPE_CODE_REF:
         return val.referenced_type().address
 
-    name = template_type(rawtype(val.type))
+    name = template_type(t)
 
     if name == 'std::unique_ptr':
         return val['_M_t']['_M_head_impl']

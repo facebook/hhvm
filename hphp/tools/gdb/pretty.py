@@ -233,7 +233,8 @@ class ArrayDataPrinter(object):
 
 
     def __init__(self, val):
-        self.kind = val['m_kind']
+        kind_ty = T('HPHP::ArrayData::ArrayKind')
+        self.kind = val['m_hdr']['m_kind'].cast(kind_ty)
 
         if self.kind == self._kind('Mixed'):
             self.val = val.cast(T('HPHP::MixedArray'))

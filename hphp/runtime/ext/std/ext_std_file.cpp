@@ -1431,7 +1431,11 @@ bool HHVM_FUNCTION(chgrp,
   }
 
   int gid = get_gid(group);
-  if (gid == -1) return false;
+  if (gid == -1) {
+    raise_warning("chgrp(): Unable to find gid for %s",
+                  group.toString().c_str());
+    return false;
+  }
   CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), (uid_t)-1, gid));
   return true;
 }
@@ -1456,7 +1460,11 @@ bool HHVM_FUNCTION(lchgrp,
   }
 
   int gid = get_gid(group);
-  if (gid == 0) return false;
+  if (gid == -1) {
+    raise_warning("lchgrp(): Unable to find gid for %s",
+                  group.toString().c_str());
+    return false;
+  }
   CHECK_SYSTEM(lchown(File::TranslatePath(filename).data(), (uid_t)-1, gid));
   return true;
 }

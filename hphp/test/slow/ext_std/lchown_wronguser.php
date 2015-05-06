@@ -7,3 +7,5 @@ touch($file);
 
 var_dump(lchown($link, 'ihopenomachinehasthisuserthatwouldbebad'));
 var_dump(chown($file, 'ihopenomachinehasthisuserthatwouldbebad'));
+var_dump(lchgrp($link, 'ihopenomachinehasthisgroupthatwouldbebad'));
+var_dump(chgrp($file, 'ihopenomachinehasthisgroupthatwouldbebad'));

@@ -728,11 +728,15 @@ Variant include_impl_invoke(const String& file, bool once,
       } catch(PhpFileDoesNotExistException &e) {}
     }
 
-    String rel_path(FileUtil::relativePath(RuntimeOption::SourceRoot,
+    try {
+      String rel_path(FileUtil::relativePath(RuntimeOption::SourceRoot,
                                            string(file.data())));
 
-    // Don't try/catch - We want the exception to be passed along
-    return invoke_file(rel_path, once, currentDir);
+      // Don't try/catch - We want the exception to be passed along
+      return invoke_file(rel_path, once, currentDir);
+    } catch(PhpFileDoesNotExistException &e) {
+      throw PhpFileDoesNotExistException(file.c_str());
+    }
   } else {
     // Don't try/catch - We want the exception to be passed along
     return invoke_file(file, once, currentDir);

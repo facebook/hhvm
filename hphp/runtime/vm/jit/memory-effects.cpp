@@ -246,7 +246,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ReqBindJmp:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(0), inst.extra<ReqBindJmp>()->irSPOff.offset - 1)
+      stack_below(inst.src(0), inst.extra<ReqBindJmp>()->irSPOff.offset - 1) |
+        AMIStateAny
     };
   case JmpSwitchDest:
     return ExitEffects {
@@ -258,7 +259,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return ExitEffects {
       AUnknown,
       stack_below(inst.src(1),
-                  inst.extra<JmpSSwitchDest>()->offset.offset - 1)
+                  inst.extra<JmpSSwitchDest>()->offset.offset - 1) | AMIStateAny
     };
   case ReqRetranslate:
   case ReqRetranslateOpt:
@@ -287,7 +288,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SuspendHookE:
   case SuspendHookR:
     // TODO: may-load here probably doesn't need to include AFrameAny normally.
-    return may_reenter(inst, may_load_store(AUnknown, AHeapAny));
+    return may_reenter(inst,
+                       may_load_store_kill(AUnknown, AHeapAny, AMIStateAny));
 
   /*
    * If we're returning from a function, it's ReturnEffects.  The RetCtrl
@@ -309,7 +311,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case AsyncRetCtrl:
     return ReturnEffects {
-      stack_below(inst.src(0), inst.extra<AsyncRetCtrl>()->offset.offset - 1)
+      stack_below(inst.src(0), inst.extra<AsyncRetCtrl>()->offset.offset - 1) |
+        AMIStateAny
     };
 
   case GenericRetDecRefs:
@@ -322,12 +325,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
      * storing an Uninit over each of the locals, but the stores of uninits
      * would be dead so we're not actually doing that.
      */
-    return may_reenter(inst, may_load_store(AUnknown, AUnknown));
+    return may_reenter(inst,
+                       may_load_store_kill(AUnknown, AUnknown, AMIStateAny));
 
   case EndCatch:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(1), inst.extra<EndCatch>()->offset.offset - 1)
+      stack_below(inst.src(1), inst.extra<EndCatch>()->offset.offset - 1) |
+        AMIStateAny
     };
 
   /*
@@ -365,7 +370,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
 
   case InlineReturn:
-    return ReturnEffects { stack_below(inst.src(0), 2) };
+    return ReturnEffects { stack_below(inst.src(0), 2) | AMIStateAny };
 
   case InterpOne:
   case InterpOneCF:
@@ -373,7 +378,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       // We could be more precise about which stack locations (or which locals)
       // an InterpOne may read (this information is in its extra data), but
       // this hasn't been implemented.
-      stack_below(inst.src(1), -inst.marker().spOff().offset - 1)
+      stack_below(inst.src(1), -inst.marker().spOff().offset - 1) | AMIStateAny
     };
 
   case NativeImpl:
@@ -399,20 +404,21 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CallArray:
     return CallEffects {
       inst.extra<CallArray>()->destroyLocals,
-      AEmpty,
+      AMIStateAny,
       // The AStackAny on this is more conservative than it could be; see Call
       // and CallBuiltin.
       AStackAny
     };
   case ContEnter:
-    return CallEffects { false, AEmpty, AStackAny };
+    return CallEffects { false, AMIStateAny, AStackAny };
 
   case Call:
     {
       auto const extra = inst.extra<Call>();
       return CallEffects {
         extra->destroyLocals,
-        stack_below(inst.src(0), extra->spOffset.offset - 1), // kill
+        // kill
+        stack_below(inst.src(0), extra->spOffset.offset - 1) | AMIStateAny,
         // We might side-exit inside the callee, and interpret a return.  So we
         // can read anything anywhere on the eval stack above the call's entry
         // depth here.
@@ -436,7 +442,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         return ret;
       }();
       auto const locs = extra->destroyLocals ? AFrameAny : AEmpty;
-      return may_raise(inst, may_load_store(stk | AHeapAny | locs, locs));
+      return may_raise(
+        inst, may_load_store_kill(stk | AHeapAny | locs, locs, AMIStateAny));
     }
 
   // Resumable suspension takes everything from the frame and moves it into the
@@ -458,7 +465,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return IterEffects {
       inst.src(1),
       inst.extra<IterData>()->valId,
-      stack_below(inst.src(1), -inst.marker().spOff().offset - 1)
+      stack_below(inst.src(1), -inst.marker().spOff().offset - 1) | AMIStateAny
     };
   case IterNext:
   case MIterNext:
@@ -466,7 +473,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return IterEffects {
       inst.src(0),
       inst.extra<IterData>()->valId,
-      stack_below(inst.src(0), -inst.marker().spOff().offset - 1)
+      stack_below(inst.src(0), -inst.marker().spOff().offset - 1) | AMIStateAny
     };
 
   case IterInitK:
@@ -476,7 +483,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       inst.src(1),
       inst.extra<IterData>()->keyId,
       inst.extra<IterData>()->valId,
-      stack_below(inst.src(1), -inst.marker().spOff().offset - 1)
+      stack_below(inst.src(1), -inst.marker().spOff().offset - 1) | AMIStateAny
     };
 
   case IterNextK:
@@ -486,7 +493,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       inst.src(0),
       inst.extra<IterData>()->keyId,
       inst.extra<IterData>()->valId,
-      stack_below(inst.src(0), -inst.marker().spOff().offset - 1)
+      stack_below(inst.src(0), -inst.marker().spOff().offset - 1) | AMIStateAny
     };
 
   //////////////////////////////////////////////////////////////////////

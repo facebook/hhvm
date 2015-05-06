@@ -66,4 +66,4 @@ let rec flatten_error = function
       List.map ~f:(compose Errors.to_string Errors.to_absolute) errors |>
       String.concat "\n" |>
       fun m -> [("Parse Error", m)]
-  | _ -> [("Unknown Error", "")]
+  | e -> [("Unknown Error", Printexc.to_string e)]

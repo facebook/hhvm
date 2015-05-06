@@ -1,2 +1,4 @@
-
-Fatal error: Invalid access to class C's property d in %s/test/slow/reflection/setAccessibleTwo.php on line 19
+Fatal error: %s
+Stack trace:
+#0 %ssetAccessibleTwo.php(14): ReflectionProperty->getValue()
+#1 {main}

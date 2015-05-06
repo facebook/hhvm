@@ -640,9 +640,10 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
  * The ReflectionMethod class reports information about a method.
  */
 class ReflectionMethod extends ReflectionFunctionAbstract {
-
-  public string $name; // should be readonly (PHP compatibility)
-  public string $class; // should be readonly (PHP compatibility)
+  // $name and $class are the userland properties, implemented with NPH
+  // as read only properties.
+  private ?string $__name;
+  private ?string $__class;
 
   private /*string*/ $originalClass;
   private /*bool*/ $forcedAccessible = false;
@@ -694,8 +695,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
         "Method $classname::$name() does not exist");
     }
 
-    $this->name = $this->getName();
-    $this->class = $this->getDeclaringClassname();
+    $this->__name = $this->getName();
+    $this->__class = $this->getDeclaringClassname();
   }
 
   /**
@@ -1244,6 +1245,9 @@ class ReflectionClass implements Reflector {
       if ($func->isStatic()) continue;
       $ret .= '    ' . str_replace("\n", "\n    ",
                                    rtrim((string)$func, "\n")) . "\n";
+      if ($numMemberFuncs-- != 1) {
+        $ret .= "\n";
+      }
     }
     $ret .= "  }\n";
 
@@ -1256,6 +1260,10 @@ class ReflectionClass implements Reflector {
     throw new BadMethodCallException(
       'Trying to clone an uncloneable object of class ReflectionClass'
     );
+  }
+
+  public function __debuginfo() {
+    return array('name' => $this->name);
   }
 
   /**
@@ -1278,7 +1286,7 @@ class ReflectionClass implements Reflector {
     if ($ret) {
       return $str;
     }
-    print $str;
+    echo $str, "\n";
   }
 
   <<__Native>>
@@ -1835,6 +1843,7 @@ class ReflectionClass implements Reflector {
     $ret->name  = $name;
     $ret->info  = $prop_info;
     $ret->class = $this->getName();
+    $ret->cls   = $this;
     return $ret;
   }
 
@@ -1852,7 +1861,8 @@ class ReflectionClass implements Reflector {
     $prop_info = $this->getOrderedPropertyInfos()->get($name);
     if (!$prop_info) {
       $class = $this->getName();
-      throw new ReflectionException("Property $class::$name does not exist");
+      throw new ReflectionException(
+        "Property $class::\${$name} does not exist");
     }
     return $this->makeReflectionProperty($name, $prop_info);
   }

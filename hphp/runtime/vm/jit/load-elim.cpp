@@ -357,7 +357,6 @@ Flags analyze_inst(Local& env,
     effects,
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { clear_everything(env); },
-    [&] (InterpOneEffects)  { clear_everything(env); },
     [&] (ReturnEffects l)   {},
     [&] (CallEffects l)     { // Note: shouldn't need to give up types for some
                               // locations (e.g. locals), but CallEffects needs

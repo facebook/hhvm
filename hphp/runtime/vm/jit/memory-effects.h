@@ -159,15 +159,6 @@ struct ReturnEffects  { AliasClass kills; };
 struct ExitEffects    { AliasClass live; AliasClass kills; };
 
 /*
- * InterpOne instructions carry a bunch of information about how they may
- * affect locals.  It's special enough that we just pass it through.
- *
- * We don't make use of it in consumers of this module yet, except that the
- * `kills' set can't have upward exposed uses.
- */
-struct InterpOneEffects { AliasClass kills; };
-
-/*
  * "Irrelevant" effects means it doesn't do anything we currently care about
  * for consumers of this module.  If you want to care about a new kind of
  * memory effect, you get to re-audit everything---have fun. :)
@@ -187,7 +178,6 @@ using MemEffects = boost::variant< GeneralEffects
                                  , CallEffects
                                  , ReturnEffects
                                  , ExitEffects
-                                 , InterpOneEffects
                                  , IrrelevantEffects
                                  , UnknownEffects
                                  >;
@@ -197,13 +187,6 @@ using MemEffects = boost::variant< GeneralEffects
 /*
  * Return information about the kinds of memory effects an instruction may
  * have.  See the above branches of MemEffects for more information.
- *
- * Important note: right now, some of the branches of MemEffects are relatively
- * specific (e.g. InterpOneEffects) because of instructions that have odd
- * shapes.  This may eventually go away, but for now this means it's very
- * important that users of this module be aware of potentially "suprising"
- * effects of some of those instructions when runtime flags like
- * EnableArgsInBacktraces are set.
  */
 MemEffects memory_effects(const IRInstruction&);
 

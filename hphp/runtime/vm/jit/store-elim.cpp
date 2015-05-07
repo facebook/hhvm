@@ -179,11 +179,6 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (GeneralEffects l)  { load(env, l.loads);
                               kill(env, l.kills); },
 
-    [&] (InterpOneEffects m) {
-      addAllGen(env);
-      kill(env, m.kills);
-    },
-
     [&] (ReturnEffects l) {
       if (inst.is(InlineReturn)) {
         // Returning from an inlined function.  This adds nothing to gen, but

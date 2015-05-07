@@ -211,7 +211,9 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
  */
 GeneralEffects may_raise(const IRInstruction& inst, GeneralEffects x) {
   return may_reenter(
-    inst, GeneralEffects { x.loads | AFrameAny, x.stores, x.moves, x.kills });
+    inst,
+    GeneralEffects { x.loads | AFrameAny, x.stores, x.moves, x.kills }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -255,6 +257,32 @@ GeneralEffects iter_effects(const IRInstruction& inst,
       kill_stk | AMIStateAny
     )
   );
+}
+
+/*
+ * Construct effects for InterpOne, using the information in its extra data.
+ *
+ * We always consider an InterpOne as potentially doing anything to the heap,
+ * potentially re-entering, potentially raising warnings in the current frame,
+ * potentially reading any locals, and potentially reading/writing any stack
+ * location that isn't below the bottom of the stack.
+ *
+ * The extra data for the InterpOne comes with some additional information
+ * about which local(s) it may modify, which is all we try to be more precise
+ * about right now.
+ */
+GeneralEffects interp_one_effects(const IRInstruction& inst) {
+  auto const extra  = inst.extra<InterpOne>();
+  auto const loads  = AHeapAny | AStackAny | AFrameAny;
+  AliasClass stores = AHeapAny | AStackAny;
+  if (extra->smashesAllLocals) {
+    stores = stores | AFrameAny;
+  } else {
+    for (auto i = uint32_t{0}; i < extra->nChangedLocals; ++i) {
+      stores = stores | AFrame { inst.src(1), extra->changedLocals[i].id };
+    }
+  }
+  return may_raise(inst, may_load_store_kill(loads, stores, AMIStateAny));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -398,11 +426,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return ReturnEffects { stack_below(inst.src(0), 2) | AMIStateAny };
 
   case InterpOne:
+    return interp_one_effects(inst);
   case InterpOneCF:
-    return InterpOneEffects {
-      // We could be more precise about which stack locations (or which locals)
-      // an InterpOne may read (this information is in its extra data), but
-      // this hasn't been implemented.
+    return ExitEffects {
+      AUnknown,
       stack_below(inst.src(1), -inst.marker().spOff().offset - 1) | AMIStateAny
     };
 
@@ -1250,7 +1277,6 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     [&] (ExitEffects x)      { check(x.live); check(x.kills); },
     [&] (IrrelevantEffects)  {},
     [&] (UnknownEffects)     {},
-    [&] (InterpOneEffects x) { check(x.kills); },
     [&] (CallEffects x)      { check(x.kills); check(x.stack); },
     [&] (ReturnEffects x)    { check(x.kills); }
   );
@@ -1304,9 +1330,6 @@ MemEffects canonicalize(MemEffects me) {
     [&] (ReturnEffects x) -> R {
       return ReturnEffects { canonicalize(x.kills) };
     },
-    [&] (InterpOneEffects x) -> R {
-      return InterpOneEffects { canonicalize(x.kills) };
-    },
     [&] (IrrelevantEffects x) -> R { return x; },
     [&] (UnknownEffects x)    -> R { return x; }
   );
@@ -1331,9 +1354,6 @@ std::string show(MemEffects effects) {
     },
     [&] (CallEffects x) {
       return sformat("call({} ; {})", show(x.kills), show(x.stack));
-    },
-    [&] (InterpOneEffects x) {
-      return sformat("interp({})", show(x.kills));
     },
     [&] (PureSpillFrame x) {
       return sformat("stFrame({} ; {})", show(x.stk), show(x.ctx));

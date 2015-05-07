@@ -341,7 +341,7 @@ std::string show(const AliasAnalysis& linfo) {
     "all stack",  show(linfo.all_stack)
   );
   for (auto& kv : linfo.stk_expand_map) {
-    folly::format(&ret, " stk_expand {: <17}       : {}\n",
+    folly::format(&ret, " ex {: <17}       : {}\n",
       show(kv.first),
       show(kv.second));
   }

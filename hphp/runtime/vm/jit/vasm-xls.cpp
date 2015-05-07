@@ -631,12 +631,7 @@ struct LiveDefVisitor {
   void def(Vreg r)      { m_live.reset(r); }
   void def(RegSet rs)   { rs.forEach([&](Vreg r) { def(r); }); }
   void def(Vtuple defs) { for (auto r : m_tuples[defs]) def(r); }
-  void defHint(Vtuple def_tuple, Vtuple hint_tuple) {
-    auto& defs = m_tuples[def_tuple];
-    for (int i = 0; i < defs.size(); i++) {
-      def(defs[i]);
-    }
-  }
+  void defHint(Vtuple def_tuple, Vtuple hint_tuple) { def(def_tuple); }
   void defHint(Vreg d, Vreg hint) { def(d); }
 
  private:
@@ -664,12 +659,7 @@ struct LiveUseVisitor {
     if (m.index.isValid()) use(m.index);
   }
   template<class S, class H> void useHint(S src, H hint) { use(src); }
-  void useHint(Vtuple src_tuple, Vtuple hint_tuple) {
-    auto& uses = m_tuples[src_tuple];
-    for (int i = 0, n = uses.size(); i < n; i++) {
-      use(uses[i]);
-    }
-  }
+  void useHint(Vtuple src_tuple, Vtuple hint_tuple) { use(src_tuple); }
 
  private:
   jit::vector<VregList>& m_tuples;
@@ -758,7 +748,13 @@ struct DefVisitor {
   void def(Vtuple defs) {
     for (auto r : m_tuples[defs]) def(r);
   }
-  void defHint(Vtuple def_tuple, Vtuple hint_tuple) { def(def_tuple); }
+  void defHint(Vtuple def_tuple, Vtuple hint_tuple) {
+    auto& defs = m_tuples[def_tuple];
+    auto& hints = m_tuples[hint_tuple];
+    for (int i = 0; i < defs.size(); i++) {
+      def(defs[i], VregKind::Any, hints[i]);
+    }
+  }
   template<class D, class H> void defHint(D dst, H hint) {
     def(dst, dst.kind, hint, dst.bits == 128);
   }
@@ -818,7 +814,13 @@ struct UseVisitor {
   void use(VcallArgsId id) {
     always_assert(false && "vcall unsupported in vxls");
   }
-  void useHint(Vtuple src_tuple, Vtuple hint_tuple) { use(src_tuple); }
+  void useHint(Vtuple src_tuple, Vtuple hint_tuple) {
+    auto& uses = m_tuples[src_tuple];
+    auto& hints = m_tuples[hint_tuple];
+    for (int i = 0, n = uses.size(); i < n; i++) {
+      useHint(uses[i], hints[i]);
+    }
+  }
   void use(RegSet regs) {
     regs.forEach([&](Vreg r) { use(r); });
   }

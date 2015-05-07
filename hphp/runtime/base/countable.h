@@ -105,6 +105,13 @@ inline bool check_refcount_ns_nz(int32_t count) {
     if (isRefCounted()) { ++m_hdr.count; }                              \
   }                                                                     \
                                                                         \
+  void setRefCount(RefCount count) {                                    \
+    assert(!MemoryManager::sweeping());                                 \
+    assert(check_refcount(m_hdr.count));                                \
+    m_hdr.count = count;                                                \
+    assert(check_refcount(m_hdr.count));                                \
+  }                                                                     \
+                                                                        \
   RefCount decRefCount() const {                                        \
     assert(!MemoryManager::sweeping());                                 \
     assert(check_refcount_nz(m_hdr.count));                             \
@@ -166,6 +173,13 @@ inline bool check_refcount_ns_nz(int32_t count) {
     assert(!MemoryManager::sweeping());                 \
     assert(check_refcount_ns_nz(m_hdr.count));          \
     return --m_hdr.count;                               \
+  }                                                     \
+                                                        \
+  void setRefCount(RefCount count) {                    \
+    assert(!MemoryManager::sweeping());                 \
+    assert(check_refcount_ns(m_hdr.count));             \
+    m_hdr.count = count;                                \
+    assert(check_refcount_ns(m_hdr.count));             \
   }                                                     \
                                                         \
   ALWAYS_INLINE bool decRefAndRelease() {               \

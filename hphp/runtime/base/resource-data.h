@@ -243,8 +243,9 @@ typename std::enable_if<
   std::is_convertible<T*, ResourceData*>::value,
   SmartPtr<T>
 >::type makeSmartPtr(Args&&... args) {
-  using NonNull = typename SmartPtr<T>::NonNull;
-  return SmartPtr<T>(newres<T>(std::forward<Args>(args)...), NonNull{});
+  using UnownedAndNonNull = typename SmartPtr<T>::UnownedAndNonNull;
+  return SmartPtr<T>(newres<T>(std::forward<Args>(args)...),
+                     UnownedAndNonNull{});
 }
 
 ///////////////////////////////////////////////////////////////////////////////

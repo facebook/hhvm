@@ -54,10 +54,16 @@ public:
   enum class NoIncRef {};
   explicit SmartPtr(T* px, NoIncRef) : m_px(px) {}
 
-  enum class NonNull { Tag };
+  enum class NonNull {};
   explicit SmartPtr(T* px, NonNull) : m_px(px) {
     assert(px);
     m_px->incRefCount();
+  }
+
+  enum class UnownedAndNonNull {};
+  SmartPtr(T* px, UnownedAndNonNull) : m_px(px) {
+    assert(m_px && m_px->getCount() == 0);
+    m_px->setRefCount(1);
   }
 
   // Move ctor

@@ -69,9 +69,6 @@ inline StringData* StringData::Make(const StringData* s1, const char* lit2) {
 
 //////////////////////////////////////////////////////////////////////
 
-inline void StringData::setRefCount(RefCount n) {
-  m_hdr.count = n;
-}
 inline bool StringData::isStatic() const {
   return m_hdr.count == StaticValue;
 }

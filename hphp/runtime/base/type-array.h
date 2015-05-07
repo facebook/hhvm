@@ -97,7 +97,7 @@ public:
    */
   enum class ArrayInitCtor { Tag };
   explicit Array(ArrayData* ad, ArrayInitCtor)
-    : m_arr(ad, NonNull::Tag)
+    : m_arr(ad, NonNull{})
   {}
 
   // Move ctor

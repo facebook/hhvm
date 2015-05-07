@@ -532,8 +532,7 @@ inline bool cellIsNull(const Cell* tv) {
 }
 
 inline bool tvIsString(const TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
-  return IS_STRING_TYPE(tv->m_type);
+  return (tv->m_type & KindOfStringBit) != 0;
 }
 
 inline void tvUnboxIfNeeded(TypedValue* tv) {

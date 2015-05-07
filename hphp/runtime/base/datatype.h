@@ -40,7 +40,7 @@ namespace HPHP {
  */
 enum DataType : int8_t {
   // Values below zero are not PHP values, but runtime-internal.
-  KindOfClass         = -13,   //  11110011
+  KindOfClass         = -13,
 
   // Any code that static_asserts about the value of KindOfNull may also depend
   // on there not being any values between KindOfUninit and KindOfNull.
@@ -223,9 +223,9 @@ inline std::string tname(DataType t) {
 #undef CS
 
     default: {
-      if (t == kInvalidDataType) {
-        return std::string("Invalid");
-      }
+       if (t == kInvalidDataType) {
+         return std::string("Invalid");
+       }
       char buf[128];
       sprintf(buf, "Unknown:%d", t);
       return std::string(buf);
@@ -336,7 +336,7 @@ constexpr bool IS_NULL_TYPE(DataType t) {
  * Whether a type is any kind of string.
  */
 constexpr bool IS_STRING_TYPE(DataType t) {
-  return t & KindOfStringBit;
+  return (t & ~0x18) == KindOfStringBit;
 }
 inline bool IS_STRING_TYPE(MaybeDataType t) {
   return t && IS_STRING_TYPE(*t);

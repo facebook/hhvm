@@ -41,17 +41,22 @@ struct SSATmp;
 //////////////////////////////////////////////////////////////////////
 
 struct EvalStack {
+  struct EvalStackEntry {
+    SSATmp* tmp;
+    Type predictedType;
+  };
+
   explicit EvalStack() {}
 
   void push(SSATmp* tmp) {
-    m_vector.push_back(tmp);
+    m_vector.push_back(EvalStackEntry { tmp, tmp->type() });
   }
 
   SSATmp* pop() {
     if (m_vector.size() == 0) {
       return nullptr;
     }
-    SSATmp* tmp = m_vector.back();
+    auto tmp = m_vector.back().tmp;
     m_vector.pop_back();
     return tmp;
   }
@@ -61,25 +66,32 @@ struct EvalStack {
       return nullptr;
     }
     uint32_t index = m_vector.size() - 1 - offset;
-    return m_vector[index];
+    const auto& entry = m_vector[index];
+    return entry.tmp;
+  }
+
+  void replace(uint32_t offset, SSATmp* tmp, Type predictedType) {
+    assertx(offset < m_vector.size());
+    uint32_t index = m_vector.size() - 1 - offset;
+    auto& entry = m_vector[index];
+    entry.tmp = tmp;
+    entry.predictedType = predictedType;
   }
 
   void replace(uint32_t offset, SSATmp* tmp) {
-    assertx(offset < m_vector.size());
-    uint32_t index = m_vector.size() - 1 - offset;
-    m_vector[index] = tmp;
+    replace(offset, tmp, tmp->type());
   }
 
   bool empty() const { return m_vector.empty(); }
   int  size()  const { return m_vector.size(); }
   void clear()       { m_vector.clear(); }
 
-  void swap(jit::vector<SSATmp*>& vector) {
+  void swap(jit::vector<EvalStackEntry>& vector) {
     m_vector.swap(vector);
   }
 
 private:
-  jit::vector<SSATmp*> m_vector;
+  jit::vector<EvalStackEntry> m_vector;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -884,8 +884,6 @@ void mrinfo_step_impl(Env& env,
     [&] (ExitEffects)      {},
     [&] (ReturnEffects)    {},
     [&] (InterpOneEffects) {},
-    [&] (IterEffects)      {},
-    [&] (IterEffects2)     {},
     [&] (GeneralEffects)   {},
     [&] (UnknownEffects)   { kill(ALocBits{}.set()); },
     [&] (PureStore x)      { do_store(x.dst, x.value); },
@@ -1309,8 +1307,6 @@ void remove_trivial_incdecs(Env& env) {
 
         // Everything else may.
         [&] (GeneralEffects)    { incs.clear(); },
-        [&] (IterEffects)       { incs.clear(); },
-        [&] (IterEffects2)      { incs.clear(); },
         [&] (CallEffects)       { incs.clear(); },
         [&] (ReturnEffects)     { incs.clear(); },
         [&] (ExitEffects)       { incs.clear(); },
@@ -1987,8 +1983,6 @@ void analyze_mem_effects(Env& env,
 
     [&] (InterpOneEffects)  { pessimize_all(env, state, add_node); },
     [&] (UnknownEffects)    { pessimize_all(env, state, add_node); },
-    [&] (IterEffects)       { pessimize_all(env, state, add_node); },
-    [&] (IterEffects2)      { pessimize_all(env, state, add_node); },
 
     [&] (CallEffects e) { handle_call(env, state, inst, e, add_node); },
     [&] (PureStore x)   { pure_store(env, state, x.dst, x.value, add_node); },

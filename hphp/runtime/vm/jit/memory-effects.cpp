@@ -166,6 +166,8 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
             ReleaseVVOrExit,
             CIterFree,
             MIterFree,
+            MIterNext,
+            MIterNextK,
             IterFree,
             ABCUnblock,
             GenericRetDecRefs);
@@ -229,6 +231,30 @@ GeneralEffects may_load_store_move(AliasClass loads,
                                    AliasClass move) {
   assertx(move <= loads);
   return GeneralEffects { loads, stores, move, AEmpty };
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Helper for iterator instructions.  They all affect some locals, but are
+ * otherwise the same.
+ *
+ * N.B. Currently the memory for frame iterator slots is not part of the
+ * AliasClass lattice, since we never really manipulate them from the TC yet,
+ * so we don't report the effect these instructions have on it.
+ */
+GeneralEffects iter_effects(const IRInstruction& inst,
+                            SSATmp* fp,
+                            AliasClass locals) {
+  auto const kill_stk = stack_below(fp, -inst.marker().spOff().offset - 1);
+  return may_reenter(
+    inst,
+    may_load_store_kill(
+      locals   | AHeapAny,
+      locals   | AHeapAny,
+      kill_stk | AMIStateAny
+    )
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -461,39 +487,37 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IterInit:
   case MIterInit:
   case WIterInit:
-    return IterEffects {
+    return iter_effects(
+      inst,
       inst.src(1),
-      inst.extra<IterData>()->valId,
-      stack_below(inst.src(1), -inst.marker().spOff().offset - 1) | AMIStateAny
-    };
+      AFrame { inst.src(1), inst.extra<IterData>()->valId }
+    );
   case IterNext:
   case MIterNext:
   case WIterNext:
-    return IterEffects {
+    return iter_effects(
+      inst,
       inst.src(0),
-      inst.extra<IterData>()->valId,
-      stack_below(inst.src(0), -inst.marker().spOff().offset - 1) | AMIStateAny
-    };
+      AFrame { inst.src(0), inst.extra<IterData>()->valId }
+    );
 
   case IterInitK:
   case MIterInitK:
   case WIterInitK:
-    return IterEffects2 {
-      inst.src(1),
-      inst.extra<IterData>()->keyId,
-      inst.extra<IterData>()->valId,
-      stack_below(inst.src(1), -inst.marker().spOff().offset - 1) | AMIStateAny
-    };
+    {
+      AliasClass key = AFrame { inst.src(1), inst.extra<IterData>()->keyId };
+      AliasClass val = AFrame { inst.src(1), inst.extra<IterData>()->valId };
+      return iter_effects(inst, inst.src(1), key | val);
+    }
 
   case IterNextK:
   case MIterNextK:
   case WIterNextK:
-    return IterEffects2 {
-      inst.src(0),
-      inst.extra<IterData>()->keyId,
-      inst.extra<IterData>()->valId,
-      stack_below(inst.src(0), -inst.marker().spOff().offset - 1) | AMIStateAny
-    };
+    {
+      AliasClass key = AFrame { inst.src(0), inst.extra<IterData>()->keyId };
+      AliasClass val = AFrame { inst.src(0), inst.extra<IterData>()->valId };
+      return iter_effects(inst, inst.src(0), key | val);
+    }
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that explicitly manipulate locals
@@ -1050,14 +1074,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
      */
     return may_reenter(inst, may_load_store(AStackAny, AStackAny));
 
-  case LookupClsMethod: { // autoload, and it writes part of the new actrec
-    AliasClass effects = AStack {
-      inst.src(2),
-      inst.extra<LookupClsMethod>()->offset.offset,
-      int32_t{kNumActRecCells}
-    };
-    return may_reenter(inst, may_load_store(effects, effects));
-  }
+  case LookupClsMethod:   // autoload, and it writes part of the new actrec
+    {
+      AliasClass effects = AStack {
+        inst.src(2),
+        inst.extra<LookupClsMethod>()->offset.offset,
+        int32_t{kNumActRecCells}
+      };
+      return may_reenter(inst, may_load_store(effects, effects));
+    }
 
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
@@ -1222,8 +1247,6 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
                                always_assert(x.value != nullptr); },
     [&] (PureSpillFrame x)   { check(x.stk); check(x.ctx);
                                always_assert(x.ctx <= x.stk); },
-    [&] (IterEffects x)      { check_fp(x.fp); check(x.kills); },
-    [&] (IterEffects2 x)     { check_fp(x.fp); check(x.kills); },
     [&] (ExitEffects x)      { check(x.live); check(x.kills); },
     [&] (IrrelevantEffects)  {},
     [&] (UnknownEffects)     {},
@@ -1281,12 +1304,6 @@ MemEffects canonicalize(MemEffects me) {
     [&] (ReturnEffects x) -> R {
       return ReturnEffects { canonicalize(x.kills) };
     },
-    [&] (IterEffects x) -> R {
-      return IterEffects { x.fp, x.id, canonicalize(x.kills) };
-    },
-    [&] (IterEffects2 x) -> R {
-      return IterEffects2 { x.fp, x.id1, x.id2, canonicalize(x.kills) };
-    },
     [&] (InterpOneEffects x) -> R {
       return InterpOneEffects { canonicalize(x.kills) };
     },
@@ -1324,8 +1341,6 @@ std::string show(MemEffects effects) {
     [&] (PureLoad x)        { return sformat("ld({})", show(x.src)); },
     [&] (PureStore x)       { return sformat("st({})", show(x.dst)); },
     [&] (ReturnEffects x)   { return sformat("return({})", show(x.kills)); },
-    [&] (IterEffects)       { return "IterEffects"; },
-    [&] (IterEffects2)      { return "IterEffects2"; },
     [&] (IrrelevantEffects) { return "IrrelevantEffects"; },
     [&] (UnknownEffects)    { return "UnknownEffects"; }
   );

@@ -363,8 +363,6 @@ Flags analyze_inst(Local& env,
                               // locations (e.g. locals), but CallEffects needs
                               // more information to do it correctly.
                               clear_everything(env); },
-    [&] (IterEffects)       { clear_everything(env); },
-    [&] (IterEffects2)      { clear_everything(env); },
     [&] (ExitEffects)       { clear_everything(env); },
 
     [&] (PureStore m)      { store(env, m.dst, m.value); },

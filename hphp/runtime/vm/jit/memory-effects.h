@@ -106,19 +106,6 @@ struct PureStore    { AliasClass dst; SSATmp* value; };
 struct PureSpillFrame { AliasClass stk; AliasClass ctx; };
 
 /*
- * Iterator instructions are special enough that they just have their own
- * top-level memory effect type.  In general, they can both read and write to
- * the relevant locals, and can re-enter the VM and read and write anything on
- * the heap.  The `kills' set is an AliasClass that is killed by virtue of the
- * potential VM re-entry (i.e. the eval stack below some depth).
- */
-struct IterEffects    { SSATmp* fp; uint32_t id; AliasClass kills; };
-struct IterEffects2   { SSATmp* fp;
-                        uint32_t id1;
-                        uint32_t id2;
-                        AliasClass kills; };
-
-/*
  * Calls are somewhat special enough that they get a top-level effect.
  *
  * The `destroys_locals' flag indicates whether the call can change locals in
@@ -197,8 +184,6 @@ using MemEffects = boost::variant< GeneralEffects
                                  , PureLoad
                                  , PureStore
                                  , PureSpillFrame
-                                 , IterEffects
-                                 , IterEffects2
                                  , CallEffects
                                  , ReturnEffects
                                  , ExitEffects
@@ -214,10 +199,11 @@ using MemEffects = boost::variant< GeneralEffects
  * have.  See the above branches of MemEffects for more information.
  *
  * Important note: right now, some of the branches of MemEffects are relatively
- * specific (e.g. IterEffects) because of instructions that have odd shapes.
- * This may eventually go away, but for now this means it's very important that
- * users of this module be aware of potentially "suprising" effects of some of
- * those instructions when runtime flags like EnableArgsInBacktraces are set.
+ * specific (e.g. InterpOneEffects) because of instructions that have odd
+ * shapes.  This may eventually go away, but for now this means it's very
+ * important that users of this module be aware of potentially "suprising"
+ * effects of some of those instructions when runtime flags like
+ * EnableArgsInBacktraces are set.
  */
 MemEffects memory_effects(const IRInstruction&);
 

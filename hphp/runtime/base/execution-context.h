@@ -32,6 +32,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/virtual-host.h"
@@ -169,13 +170,20 @@ public:
   void writeStdout(const char* s, int len);
   size_t getStdoutBytesWritten() const;
 
+  /**
+   * Write to the transport, or to stdout if there is no transport.
+   */
+  void writeTransport(const char* s, int len);
+
   using PFUNC_STDOUT = void (*)(const char* s, int len, void* data);
   void setStdout(PFUNC_STDOUT func, void* data);
 
   /**
    * Output buffering.
    */
-  void obStart(const Variant& handler = uninit_null(), int chunk_size = 0);
+  void obStart(const Variant& handler = uninit_null(),
+               int chunk_size = 0,
+               int flags = k_PHP_OUTPUT_HANDLER_STDFLAGS);
   String obCopyContents();
   String obDetachContents();
   int obGetContentLength();
@@ -185,6 +193,7 @@ public:
   bool obEnd();
   void obEndAll();
   int obGetLevel();
+  String obGetBufferName();
   Array obGetStatus(bool full);
   void obSetImplicitFlush(bool on);
   Array obGetHandlers();
@@ -271,16 +280,18 @@ public:
 
 private:
   struct OutputBuffer {
-    explicit OutputBuffer(Variant&& h, int chunk_sz)
-      : oss(8192), handler(std::move(h)), chunk_size(chunk_sz)
+    explicit OutputBuffer(Variant&& h, int chunk_sz, int flgs)
+      : oss(8192), handler(std::move(h)), chunk_size(chunk_sz), flags(flgs)
     {}
     StringBuffer oss;
     Variant handler;
     int chunk_size;
+    int flags;
     template<class F> void scan(F& mark) {
       mark(oss);
       mark(handler);
       mark(chunk_size);
+      mark(flags);
     }
   };
 

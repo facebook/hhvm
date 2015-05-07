@@ -1764,6 +1764,10 @@ void hphp_process_init() {
   pthread_attr_destroy(&attr);
 
   Process::InitProcessStatics();
+
+  // initialize the tzinfo cache.
+  timezone_init();
+
   init_thread_locals();
 
   struct sigaction action = {};
@@ -1783,9 +1787,6 @@ void hphp_process_init() {
 
   // reinitialize pcre table
   pcre_reinit();
-
-  // initialize the tzinfo cache.
-  timezone_init();
 
   // the liboniguruma docs say this isnt needed,
   // but the implementation of init is not

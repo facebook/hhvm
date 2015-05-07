@@ -53,7 +53,10 @@ function typecheck_impl(string $client_name): TypecheckResult {
   if (!$json) {
     // This is typically "could not find hhconfig", which of course uses the
     // same exit code as "type error". See above about fixing this.
-    return new TypecheckResult(TypecheckStatus::OTHER_ERROR, $output);
+    return new TypecheckResult(
+      TypecheckStatus::OTHER_ERROR,
+      implode(' ', $output_arr)
+    );
   }
 
   $passed = ($ret === 0) && \hphp_array_idx($json, 'passed', false);

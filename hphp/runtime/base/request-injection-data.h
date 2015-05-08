@@ -72,8 +72,16 @@ struct RequestInjectionData {
   };
 
   RequestInjectionData()
+#ifdef __APPLE__
+    // OS X doesn't have CLOCK_THREAD_CPUTIME_ID... but it also doesn't have an
+    // implementation of POSIX timers at all, so all of RequestTimer is ifdef'd
+    // out anyways. Just pass dummy values.
+     : m_timer(this, 0)
+     , m_cpuTimer(this, 0)
+#else
       : m_timer(this, CLOCK_REALTIME)
       , m_cpuTimer(this, CLOCK_THREAD_CPUTIME_ID)
+#endif
     {}
 
   ~RequestInjectionData() = default;

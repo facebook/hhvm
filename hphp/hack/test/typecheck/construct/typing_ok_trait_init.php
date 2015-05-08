@@ -9,18 +9,25 @@
  *
  */
 
-trait A {
-  protected int $x;
+trait T1 {
+  protected int $i;
 }
 
-trait C {
-  use A;
+trait T2 {
+  use T1;
+  protected int $j;
 }
 
-abstract class B {
-  use C;
-
-  public function __construct() {}
+class B {
+  use T2;
+  public function __construct() {
+    $this->i = 1;
+    $this->j = 2;
+  }
 }
 
-class D extends B {}
+class C extends B {
+  public function test(): void {
+    $this->i = 2;
+  }
+}

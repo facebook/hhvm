@@ -1,5 +1,0 @@
-File "typing_ok_trait_init.php", line 26, characters 7-7:
-The class member x is not always properly initialized
-Make sure you systematically set $this->x when the method __construct is called
-Alternatively, you can define the type as optional (?...)
- (NastCheck[3015])

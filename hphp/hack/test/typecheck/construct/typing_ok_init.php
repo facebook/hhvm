@@ -9,19 +9,18 @@
  *
  */
 
-abstract class A {
+abstract class A1 {
   protected int $i;
-  protected int $j;
-
-  public function __construct() {
-    $this->j = 0;
-  }
 }
 
-class B extends A {
+abstract class A2 extends A1 {
+  protected int $j;
+}
+
+class B extends A2 {
   public function __construct() {
-    parent::__construct();
     $this->i = 1;
+    $this->j = 2;
   }
 }
 

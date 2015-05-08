@@ -74,17 +74,17 @@ class AsyncMysqlConnectionPool {
 }
 class AsyncMysqlConnection {
   public function __construct() { }
-  public function query(string $query, int $timeout_micros = -1) { }
-  public function queryf(HH\FormatString<HH\SQLFormatter> $query, ...$args) { }
+  public function query(string $query, int $timeout_micros = -1): Awaitable<AsyncMysqlQueryResult>{ }
+  public function queryf(HH\FormatString<HH\SQLFormatter> $query, ...$args): :Awaitable<AsyncMysqlQueryResult>{ }
   public function multiQuery(Vector<string> $query, int $timeout_micros = -1) { }
   public function escapeString(string $data): string { }
-  public function close() { }
+  public function close(): void{ }
   public function releaseConnection() { }
   public function serverInfo() { }
   public function warningCount() { }
-  public function host() { }
-  public function port() { }
-  public function setReusable(bool $reusable) { }
+  public function host(): string{ }
+  public function port(): int{ }
+  public function setReusable(bool $reusable): void{ }
   public function isReusable(): bool { }
 }
 abstract class AsyncMysqlResult {
@@ -108,7 +108,7 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
   public function numRowsAffected(): int { }
   public function lastInsertId(): int { }
   public function numRows(): int { }
-  public function mapRows() { }
+  public function mapRows(): Vector<Map<string, string>>{ }
   public function vectorRows() { }
   public function mapRowsTyped(): Vector<Map<string, mixed>> { }
   public function vectorRowsTyped() { }

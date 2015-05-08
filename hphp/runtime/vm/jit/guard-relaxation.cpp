@@ -316,7 +316,7 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
  * required by tc.
  */
 Type relaxType(Type t, TypeConstraint tc) {
-  always_assert(t <= TGen && t != TBottom);
+  always_assert_flog(t <= TGen && t != TBottom, "t = {}", t);
   if (tc.category == DataTypeGeneric) return TGen;
   auto const relaxed =
     (t & TCell) <= TBottom ? TBottom

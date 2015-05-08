@@ -158,10 +158,15 @@ RegionDescPtr RegionFormer::go() {
                           *m_region, show(m_irgs.irb->unit()));
   };
 
+  const bool emitPredictions = RuntimeOption::EvalHHIRConstrictGuards;
+
   for (auto const& lt : m_ctx.liveTypes) {
     auto t = lt.type;
     if (t <= TCls) {
       irgen::assertTypeLocation(m_irgs, lt.location, t);
+      m_curBlock->addPredicted(m_sk, RegionDesc::TypePred{lt.location, t});
+    } else if (emitPredictions) {
+      irgen::predictTypeLocation(m_irgs, lt.location, t);
       m_curBlock->addPredicted(m_sk, RegionDesc::TypePred{lt.location, t});
     } else {
       irgen::checkTypeLocation(m_irgs, lt.location, t, m_ctx.bcOffset,
@@ -213,7 +218,7 @@ RegionDescPtr RegionFormer::go() {
     auto const inlineReturn = irgen::isInlining(m_irgs) &&
       (isRet(m_inst.op()) || m_inst.op() == OpNativeImpl);
     try {
-      translateInstr(m_irgs, m_inst);
+      translateInstr(m_irgs, m_inst, true/*checkOuterTypeOnly*/);
     } catch (const FailedIRGen& exn) {
       FTRACE(1, "ir generation for {} failed with {}\n",
              m_inst.toString(), exn.what());

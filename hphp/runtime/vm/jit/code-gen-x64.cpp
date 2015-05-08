@@ -365,6 +365,8 @@ NOOP_OPCODE(EndGuards)
 NOOP_OPCODE(HintLocInner)
 NOOP_OPCODE(HintStkInner)
 NOOP_OPCODE(AssertStk)
+NOOP_OPCODE(PredictLoc);
+NOOP_OPCODE(PredictStk);
 
 CALL_OPCODE(AddElemStrKey)
 CALL_OPCODE(AddElemIntKey)

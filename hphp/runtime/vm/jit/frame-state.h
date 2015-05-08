@@ -40,6 +40,9 @@ struct SSATmp;
 
 //////////////////////////////////////////////////////////////////////
 
+Type refinePredictedType(Type oldPrediction, Type newPrediction, Type proven);
+Type updatePredictedType(Type predictedType, Type provenType);
+
 struct EvalStack {
   struct EvalStackEntry {
     SSATmp* tmp;
@@ -70,6 +73,13 @@ struct EvalStack {
     return entry.tmp;
   }
 
+  Type topPredictedType(uint32_t offset) const {
+    assert(offset < m_vector.size());
+    uint32_t index = m_vector.size() - 1 - offset;
+    const auto& entry = m_vector[index];
+    return entry.predictedType;
+  }
+
   void replace(uint32_t offset, SSATmp* tmp, Type predictedType) {
     assertx(offset < m_vector.size());
     uint32_t index = m_vector.size() - 1 - offset;
@@ -79,7 +89,8 @@ struct EvalStack {
   }
 
   void replace(uint32_t offset, SSATmp* tmp) {
-    replace(offset, tmp, tmp->type());
+    auto predictedType = topPredictedType(offset);
+    replace(offset, tmp, updatePredictedType(predictedType, tmp->type()));
   }
 
   bool empty() const { return m_vector.empty(); }
@@ -419,7 +430,9 @@ private: // LocalStateHook overrides
   void dropLocalRefsInnerTypes() override;
   void killLocalsForCall(bool) override;
   void refineLocalType(uint32_t id, Type type, TypeSource typeSrc) override;
-  void predictLocalType(uint32_t id, Type type) override;
+  void setLocalPredictedType(uint32_t id, Type type) override;
+  void refineLocalPredictedType(uint32_t id, Type type);
+  void refineStackPredictedType(IRSPOffset, Type);
   void setLocalType(uint32_t id, Type type) override;
   void setBoxedLocalPrediction(uint32_t id, Type type) override;
   void updateLocalRefPredictions(SSATmp*, SSATmp*) override;

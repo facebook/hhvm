@@ -62,7 +62,7 @@ void local_effects(const FrameStateMgr& frameState,
       break;
 
     case StLocPseudoMain:
-      hook.predictLocalType(inst->extra<LocalId>()->locId,
+      hook.setLocalPredictedType(inst->extra<LocalId>()->locId,
                             inst->src(1)->type());
       break;
 
@@ -70,7 +70,7 @@ void local_effects(const FrameStateMgr& frameState,
     case CheckLoc: {
       auto id = inst->extra<LocalId>()->locId;
       if (inst->marker().func()->isPseudoMain()) {
-        hook.predictLocalType(id, inst->typeParam());
+        hook.setLocalPredictedType(id, inst->typeParam());
       } else {
         hook.refineLocalType(id,
                              inst->typeParam(),

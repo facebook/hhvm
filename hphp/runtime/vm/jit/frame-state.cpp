@@ -217,6 +217,25 @@ bool check_invariants(const FrameState& state) {
 
 }
 
+/*
+ * When we're computing an update for a new predicted type, we sometimes need
+ * to fall back to the proven type, e.g. if the new predicted type is Bottom or
+ * no longer satisfies the invariant that predictedType <= provenType.
+ */
+Type updatePredictedType(Type predictedType, Type provenType) {
+  if (predictedType == TBottom) return provenType;
+  if (predictedType <= provenType) return predictedType;
+  return provenType;
+}
+
+Type refinePredictedType(Type oldPrediction, Type newPrediction, Type proven) {
+  auto refinedPrediction = oldPrediction & newPrediction;
+  if (refinedPrediction == TBottom) {
+    refinedPrediction = newPrediction;
+  }
+  return updatePredictedType(refinedPrediction, proven);
+}
+
 FrameStateMgr::FrameStateMgr(BCMarker marker) {
   m_stack.push_back(FrameState{});
   cur().curFunc       = marker.func();
@@ -373,6 +392,16 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   case HintStkInner:
     setBoxedStkPrediction(inst->extra<HintStkInner>()->irSpOffset,
                           inst->typeParam());
+    break;
+
+  case PredictLoc:
+    refineLocalPredictedType(inst->extra<PredictLoc>()->locId,
+                             inst->typeParam());
+    break;
+
+  case PredictStk:
+    refineStackPredictedType(inst->extra<PredictStk>()->offset,
+                             inst->typeParam());
     break;
 
   case CastStk:
@@ -917,7 +946,7 @@ void FrameStateMgr::refineStackType(IRSPOffset offset,
   // than is known about the stack slot.
   if (newType != state.type) state.value = nullptr;
   state.type = newType;
-  state.predictedType = newType;
+  state.predictedType = updatePredictedType(state.predictedType, state.type);
   state.typeSrcs.clear();
   state.typeSrcs.insert(typeSrc);
 }
@@ -996,20 +1025,30 @@ void FrameStateMgr::refineLocalType(uint32_t id,
   // than is known about the local.
   if (newType != local.type) local.value = nullptr;
   local.type = newType;
-  local.predictedType = newType;
+  local.predictedType = updatePredictedType(local.predictedType, newType);
   local.typeSrcs.clear();
   local.typeSrcs.insert(typeSrc);
 }
 
-void FrameStateMgr::predictLocalType(uint32_t id, Type type) {
+void FrameStateMgr::setLocalPredictedType(uint32_t id, Type type) {
   always_assert(id < cur().locals.size());
   auto& local = cur().locals[id];
   ITRACE(2, "updating local {}'s type prediction: {} -> {}\n",
     id, local.predictedType, type & local.type);
-  local.predictedType = type & local.type;
-  if (!(local.predictedType <= local.type)) {
-    local.predictedType = local.type;
-  }
+  local.predictedType = updatePredictedType(type, local.type);
+}
+
+void FrameStateMgr::refineLocalPredictedType(uint32_t id, Type type) {
+  always_assert(id < cur().locals.size());
+  auto& local = cur().locals[id];
+  local.predictedType = refinePredictedType(
+    local.predictedType, type, local.type);
+}
+
+void FrameStateMgr::refineStackPredictedType(IRSPOffset offset, Type type) {
+  auto& state = stackState(offset);
+  state.predictedType = refinePredictedType(
+    state.predictedType, type, state.type);
 }
 
 void FrameStateMgr::setLocalType(uint32_t id, Type type) {
@@ -1066,7 +1105,8 @@ void FrameStateMgr::refineLocalValues(SSATmp* oldVal, SSATmp* newVal) {
              id, *local.value, *newVal);
       local.value = newVal;
       local.type = newVal->type();
-      local.predictedType = local.type;
+      local.predictedType = updatePredictedType(local.predictedType,
+                                                local.type);
       local.typeSrcs.clear();
       local.typeSrcs.insert(TypeSource::makeValue(newVal));
     }
@@ -1082,7 +1122,7 @@ void FrameStateMgr::refineStackValues(SSATmp* oldVal, SSATmp* newVal) {
       ITRACE(2, "refining on stack {} -> {}\n", *oldVal, *newVal);
       slot.value         = newVal;
       slot.type          = newVal->type();
-      slot.predictedType = newVal->type();
+      slot.predictedType = updatePredictedType(slot.predictedType, slot.type);
       slot.typeSrcs.clear();
       slot.typeSrcs.insert(TypeSource::makeValue(newVal));
     }

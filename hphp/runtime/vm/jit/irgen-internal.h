@@ -401,6 +401,11 @@ inline void spillStack(IRGS& env) {
         IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{idx}) },
         sp(env),
         toSpill.top(idx));
+    gen(env,
+        PredictStk,
+        toSpill.topPredictedType(idx),
+        IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{idx}) },
+        sp(env));
   }
   env.irb->syncEvalStack();
 }

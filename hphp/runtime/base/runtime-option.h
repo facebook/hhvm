@@ -521,6 +521,7 @@ public:
   F(uint32_t, HotFuncCount,            4100)                            \
   F(bool, HHIRValidateRefCount,        debug)                           \
   F(bool, HHIRRelaxGuards,             true)                            \
+  F(bool, HHIRConstrictGuards,         false)                           \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpHhas,                    false)                           \

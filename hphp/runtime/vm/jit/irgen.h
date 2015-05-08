@@ -84,9 +84,17 @@ SSATmp* cns(IRGS& env, Args&&... args) {
  */
 void assertTypeStack(IRGS&, BCSPOffset, Type);
 void checkTypeStack(IRGS&, BCSPOffset, Type, Offset dest, bool outerOnly);
+void checkTypeLocal(IRGS&, uint32_t locId, Type, Offset dest, bool outerOnly);
 void assertTypeLocation(IRGS&, const RegionDesc::Location&, Type);
 void checkTypeLocation(IRGS&, const RegionDesc::Location&, Type, Offset dest,
                        bool outerOnly);
+
+/*
+ * Type predictions.
+ */
+void predictTypeLocation(IRGS&, const RegionDesc::Location&, Type);
+void predictTypeStack(IRGS&, int32_t offset, Type);
+void predictTypeLocal(IRGS&, uint32_t locId, Type);
 
 /*
  * Special type of guards for param-passing reffiness. These checks are needed
@@ -222,7 +230,16 @@ Type publicTopType(const IRGS& env, BCSPOffset);
 /*
  * Returns a predicted Type for the given location, used for tracelet analysis.
  */
-Type predictedTypeFromLocation(IRGS&, const Location&);
+Type predictedTypeFromLocation(const IRGS&, const Location&);
+Type predictedTypeFromLocal(const IRGS&, uint32_t locId);
+Type predictedTypeFromStack(const IRGS&, BCSPOffset slot);
+
+/*
+ * Returns the proven Type for the given location.
+ */
+Type provenTypeFromLocation(const IRGS&, const Location&);
+Type provenTypeFromLocal(const IRGS&, uint32_t locId);
+Type provenTypeFromStack(const IRGS&, BCSPOffset slot);
 
 //////////////////////////////////////////////////////////////////////
 

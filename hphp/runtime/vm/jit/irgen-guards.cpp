@@ -53,7 +53,6 @@ void profiledGuard(IRGS& env,
   }
 }
 
-
 uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
   uint64_t retval = 0;
   assertx(i % 64 == 0);
@@ -155,6 +154,43 @@ void checkTypeStack(IRGS& env,
   // Just like CheckType, CheckStk only cares about its input type if the
   // simplifier does something with it.
   profiledGuard(env, type, ProfGuard::CheckStk, idx.offset, exit);
+}
+
+void predictTypeStack(IRGS& env, BCSPOffset offset, Type type) {
+  assert(type <= TGen);
+
+  auto stackOff = IRSPOffsetData { offsetFromIRSP(env, offset) };
+  if (offset.offset < env.irb->evalStack().size()) {
+    auto const tmp = top(env, TStkElem, offset, DataTypeGeneric);
+    assertx(tmp);
+    auto oldType = env.irb->evalStack().topPredictedType(offset.offset);
+    auto newType = refinePredictedType(oldType, type, tmp->type());
+    env.irb->evalStack().replace(offset.offset, tmp, newType);
+    return;
+  }
+
+  gen(env, PredictStk, type, stackOff, sp(env));
+}
+
+void predictTypeLocal(IRGS& env, uint32_t locId, Type type) {
+  assert(type <= TGen);
+  gen(env, PredictLoc, type, LocalId { locId }, fp(env));
+}
+
+void predictTypeLocation(
+  IRGS& env,
+  const RegionDesc::Location& loc,
+  Type type
+) {
+  using T = RegionDesc::Location::Tag;
+  switch (loc.tag()) {
+  case T::Stack:
+    predictTypeStack(env, offsetFromBCSP(env, loc.offsetFromFP()), type);
+    break;
+  case T::Local:
+    predictTypeLocal(env, loc.localId(), type);
+    break;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

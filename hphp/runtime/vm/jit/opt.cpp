@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/timer.h"

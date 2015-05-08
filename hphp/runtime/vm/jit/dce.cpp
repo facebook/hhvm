@@ -463,6 +463,8 @@ bool canDCE(IRInstruction* inst) {
   case DbgTrashStk:
   case DbgTrashFrame:
   case DbgTrashMem:
+  case PredictLoc:
+  case PredictStk:
     return false;
   }
   not_reached();

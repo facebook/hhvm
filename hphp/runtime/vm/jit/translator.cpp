@@ -51,7 +51,9 @@
 #include "hphp/runtime/vm/bc-pattern.h"
 
 #include "hphp/runtime/vm/jit/annotation.h"
+#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -74,6 +76,14 @@ Lease Translator::s_writeLease;
 
 int locPhysicalOffset(int32_t localIndex) {
   return -(localIndex + 1);
+}
+
+bool isClassSpecializedTypeReliable(Type input) {
+  assert(input.isSpecialized());
+  assert(input.clsSpec());
+  auto baseClass = input.clsSpec().cls();
+  return RuntimeOption::RepoAuthoritative &&
+      (baseClass->preClass()->attrs() & AttrUnique);
 }
 
 PropInfo getPropertyOffset(const IRGS& env,
@@ -1336,7 +1346,179 @@ static Type flavorToType(FlavorDesc f) {
   not_reached();
 }
 
-void translateInstr(IRGS& irgs, const NormalizedInstruction& ni) {
+void emitInputChecks(
+  IRGS& irgs,
+  const NormalizedInstruction& ni,
+  bool checkOuterTypeOnly
+) {
+  auto typeToCheckForInput = [&](int32_t opndIdx, Type predictedType) {
+    auto opc = ni.op();
+    auto tc = TypeConstraint(DataTypeSpecific);
+    switch (opc) {
+    case OpSetS:
+    case OpSetG:
+    case OpSetL: {
+      // stack value
+      if (opndIdx == 0) {
+        tc = DataTypeCountness;
+        break;
+      }
+      if (opc == OpSetL) {
+        // old local value is dec-refed
+        assert(opndIdx == 1);
+        tc = DataTypeCountness;
+        break;
+      }
+      tc = DataTypeSpecific;
+      break;
+    }
+
+    case OpUnsetL: {
+      tc = DataTypeCountness;
+      break;
+    }
+
+    case OpCGetL: {
+      tc = DataTypeCountnessInit;
+      break;
+    }
+
+    case OpPushL:
+    case OpContEnter:
+    case OpContRaise: {
+      tc = DataTypeGeneric;
+      break;
+    }
+
+    case OpRetC:
+    case OpRetV: {
+      tc = DataTypeCountness;
+      break;
+    }
+
+    case OpFCallArray: {
+      tc = DataTypeGeneric;
+      break;
+    }
+
+    case OpPopC:
+    case OpPopV:
+    case OpPopR: {
+      tc = DataTypeCountness;
+      break;
+    }
+
+    case OpYield:
+    case OpYieldK: {
+      // The stack input is teleported to the continuation's m_value field
+      tc = DataTypeGeneric;
+      break;
+    }
+
+    case OpAddElemC: {
+      // The stack input is teleported to the array
+      tc = opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
+      break;
+    }
+
+    case OpIdx:
+    case OpArrayIdx: {
+      // The default value (w/ opndIdx 0) is simply passed to a helper,
+      // which takes care of dec-refing it if needed
+      tc = opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
+      break;
+    }
+
+    case OpCGetM:
+    case OpIssetM:
+    case OpSetM: {
+      if (opndIdx == 0) {
+        if (predictedType.isSpecialized()) {
+          if (predictedType.clsSpec() &&
+              isClassSpecializedTypeReliable(predictedType)) {
+            tc = TypeConstraint(predictedType.clsSpec().cls());
+          } else if (predictedType.arrSpec() &&
+              predictedType.arrSpec().kind()) {
+            tc = TypeConstraint(DataTypeSpecialized).setWantArrayKind();
+          }
+          break;
+        }
+      }
+      break;
+    }
+
+    default: {
+      break;
+    }
+    }
+    return relaxType(predictedType, tc);
+  };
+
+  FTRACE(4, "\n{}: {}\n", ni.offset(), opcodeToName(ni.op()));
+  for (auto i = 0; i < ni.inputs.size(); ++i) {
+    FTRACE(4, "Input {}: ", i);
+    auto loc = ni.inputs[i]->location;
+    if (!loc.isLocal() && !loc.isStack()) {
+      FTRACE(4, "!isLocal && !isStack, skipping\n");
+      continue;
+    }
+    auto const predictedType = irgen::predictedTypeFromLocation(irgs, loc);
+    FTRACE(4, "predicted {}\n", predictedType);
+
+    if (!(predictedType <= TGen) && !(predictedType <= TCls)) {
+      FTRACE(4, "predictedType ({}) !<= TGen|TCls, skipping\n", predictedType);
+      continue;
+    }
+
+    assertx(predictedType != TBottom);
+
+    auto typeToCheck = predictedType <= TCls
+      ? predictedType
+      : typeToCheckForInput(i, predictedType);
+
+    // Make sure typeToCheck is checkable.
+    if (!(typeToCheck <= TCell || typeToCheck <= TBoxedInitCell)) {
+      FTRACE(4, "typeToCheck isn't checkable, skipping\n");
+      continue;
+    }
+
+    if (typeToCheck == TCountedStr) {
+      FTRACE(4, "typeToCheck is CountedStr, widening to Str\n");
+      typeToCheck = TStr;
+    } else if (typeToCheck <= TStaticArr) {
+      FTRACE(4, "typeToCheck is StaticArr, widening to Arr\n");
+      typeToCheck = TArr;
+    } else if (typeToCheck.clsSpec() &&
+        !(typeToCheck.clsSpec().cls()->attrs() & AttrNoOverride)) {
+      FTRACE(4, "class specialization could be overridden, widening to Obj\n");
+      typeToCheck = TObj;
+    } else if (typeToCheck.arrSpec() && typeToCheck.arrSpec().type()) {
+      FTRACE(4, "array specialization is RAT, widening to Arr\n");
+      typeToCheck = TArr;
+    }
+
+    if (loc.isLocal()) {
+      FTRACE(4, "Checking local {} for type {}\n", loc.offset, typeToCheck);
+      irgen::checkTypeLocal(irgs, loc.offset, typeToCheck, ni.source.offset(),
+        checkOuterTypeOnly);
+    } else {
+      FTRACE(4, "Checking stack offset {} for type {}\n",
+          loc.bcRelOffset.offset, typeToCheck);
+      irgen::checkTypeStack(irgs, loc.bcRelOffset, typeToCheck,
+        ni.source.offset(), checkOuterTypeOnly);
+    }
+  }
+  // Calling checkTypeStack with a Type t such that t <= BoxedCell causes us to
+  // spill the stack, so we need to sync the stack with an exception stack
+  // boundary here.
+  irgs.irb->exceptionStackBoundary();
+}
+
+void translateInstr(
+  IRGS& irgs,
+  const NormalizedInstruction& ni,
+  bool checkOuterTypeOnly
+) {
   irgen::prepareForNextHHBC(
     irgs,
     &ni,
@@ -1352,6 +1534,10 @@ void translateInstr(IRGS& irgs, const NormalizedInstruction& ni) {
       // is a little unsure of itself.
       irgen::assertTypeStack(irgs, BCSPOffset{i}, type);
     }
+  }
+
+  if (RuntimeOption::EvalHHIRConstrictGuards) {
+    emitInputChecks(irgs, ni, checkOuterTypeOnly);
   }
 
   FTRACE(1, "\n{:-^60}\n", folly::format("Translating {}: {} with stack:\n{}",

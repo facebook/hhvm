@@ -191,6 +191,8 @@ void emitPredictionGuards(IRGS& irgs,
 
   if (isEntry) irgen::ringbufferEntry(irgs, Trace::RBTypeTraceletGuards, sk);
 
+  const bool emitPredictions = RuntimeOption::EvalHHIRConstrictGuards;
+
   // Emit type guards.
   while (typePreds.hasNext(sk)) {
     auto const& pred = typePreds.next();
@@ -200,6 +202,8 @@ void emitPredictionGuards(IRGS& irgs,
       // Do not generate guards for class; instead assert the type.
       assertx(loc.tag() == RegionDesc::Location::Tag::Stack);
       irgen::assertTypeLocation(irgs, loc, type);
+    } else if (emitPredictions) {
+      irgen::predictTypeLocation(irgs, loc, type);
     } else {
       // Check inner type eagerly if it is the first block during profiling.
       // Otherwise only check for BoxedInitCell.
@@ -592,6 +596,8 @@ TranslateResult irGenRegion(IRGS& irgs,
     // `EndGuards` after the checks, and generate profiling code in profiling
     // translations.
     auto const isEntry = block == region.entry();
+    auto const checkOuterTypeOnly =
+      !isEntry || mcg->tx().mode() != TransKind::Profile;
     emitPredictionGuards(irgs, region, block, isEntry);
     irb.resetGuardFailBlock();
 
@@ -656,7 +662,7 @@ TranslateResult irGenRegion(IRGS& irgs,
 
       // Emit IR for the body of the instruction.
       try {
-        if (!skipTrans) translateInstr(irgs, inst);
+        if (!skipTrans) translateInstr(irgs, inst, checkOuterTypeOnly);
       } catch (const FailedIRGen& exn) {
         ProfSrcKey psk{profTransId, sk};
         always_assert_flog(!toInterp.count(psk),

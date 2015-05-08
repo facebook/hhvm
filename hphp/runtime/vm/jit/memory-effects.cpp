@@ -877,6 +877,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckCtxThis:
   case CastCtxThis:
   case LdRDSAddr:
+  case PredictLoc:
+  case PredictStk:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////

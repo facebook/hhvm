@@ -133,6 +133,7 @@ struct IRBuilder {
   Type stackType(IRSPOffset, TypeConstraint tc);
   Type predictedInnerType(uint32_t id);
   Type predictedLocalType(uint32_t id);
+  Type predictedStackType(IRSPOffset);
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
   SSATmp* stackValue(IRSPOffset offset, TypeConstraint tc);
   TypeSourceSet localTypeSources(uint32_t id) const {

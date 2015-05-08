@@ -1454,6 +1454,15 @@ To string conversions:
   Does nothing. It's sometimes useful for the simplifier to insert one of these
   in the instruction stream.
 
+| PredictLoc<T, localId>, ND, S(FramePtr), NF
+
+  Does nothing. Serves as an indicator that the predicted type of the given 
+  localId on the frame S0 is T.
+
+| PredictStk<T, offset>, ND, S(StkPtr), NF
+
+  Does nothing. Serves as an indicator that the predicted type of the cell on
+  the eval stack pointed to by S0 at offset is T.
 
 14. Runtime helpers
 

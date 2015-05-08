@@ -188,30 +188,26 @@ void endRegion(IRGS& env, SrcKey nextSk) {
   gen(env, ReqBindJmp, data, sp(env), fp(env));
 }
 
+Type predictedTypeFromLocal(const IRGS& env, uint32_t locId) {
+  return env.irb->predictedLocalType(locId);
+}
+
+Type predictedTypeFromStack(const IRGS& env, BCSPOffset offset) {
+  if (offset < env.irb->evalStack().size()) {
+    return env.irb->evalStack().topPredictedType(offset.offset);
+  }
+  return env.irb->predictedStackType(offsetFromIRSP(env, offset));
+}
+
 // All accesses to the stack and locals in this function use DataTypeGeneric so
 // this function should only be used for inspecting state; when the values are
 // actually used they must be constrained further.
-Type predictedTypeFromLocation(IRGS& env, const Location& loc) {
+Type predictedTypeFromLocation(const IRGS& env, const Location& loc) {
   switch (loc.space) {
-    case Location::Stack: {
-      auto i = loc.bcRelOffset;
-      assertx(i >= 0);
-      if (i < env.irb->evalStack().size()) {
-        return topType(env, i, DataTypeGeneric);
-      } else {
-        auto stackTy = env.irb->stackType(
-          offsetFromIRSP(env, i),
-          DataTypeGeneric
-        );
-        if (stackTy <= TBoxedCell) {
-          return env.irb->stackInnerTypePrediction(
-            offsetFromIRSP(env, i)).box();
-        }
-        return stackTy;
-      }
-    } break;
+    case Location::Stack:
+      return predictedTypeFromStack(env, loc.bcRelOffset);
     case Location::Local:
-      return env.irb->predictedLocalType(loc.offset);
+      return predictedTypeFromLocal(env, loc.offset);
     case Location::Litstr:
       return Type::cns(curUnit(env)->lookupLitstrId(loc.offset));
     case Location::Litint:
@@ -227,6 +223,43 @@ Type predictedTypeFromLocation(IRGS& env, const Location& loc) {
     case Location::Iter:
     case Location::Invalid:
       break;
+  }
+  not_reached();
+}
+
+Type provenTypeFromLocal(const IRGS& env, uint32_t locId) {
+  return env.irb->localType(locId, DataTypeGeneric);
+}
+
+Type provenTypeFromStack(const IRGS& env, BCSPOffset offset) {
+  if (offset < env.irb->evalStack().size()) {
+    return env.irb->evalStack().top(offset.offset)->type();
+  }
+  return env.irb->stackType(offsetFromIRSP(env, offset), DataTypeGeneric);
+}
+
+
+Type provenTypeFromLocation(const IRGS& env, const Location& loc) {
+  switch (loc.space) {
+  case Location::Stack:
+    return provenTypeFromStack(env, loc.bcRelOffset);
+  case Location::Local:
+    return provenTypeFromLocal(env, loc.offset);
+  case Location::Litstr:
+    return Type::cns(curUnit(env)->lookupLitstrId(loc.offset));
+  case Location::Litint:
+    return Type::cns(loc.offset);
+  case Location::This:
+    // Don't specialize $this for cloned closures which may have been re-bound
+    if (curFunc(env)->hasForeignThis()) return TObj;
+    if (auto const cls = curFunc(env)->cls()) {
+      return Type::SubObj(cls);
+    }
+    return TObj;
+
+  case Location::Iter:
+  case Location::Invalid:
+    break;
   }
   not_reached();
 }

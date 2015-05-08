@@ -853,6 +853,10 @@ Type IRBuilder::stackInnerTypePrediction(IRSPOffset offset) const {
   return ldRefReturn(ty.unbox());
 }
 
+Type IRBuilder::predictedStackType(IRSPOffset offset) {
+  return m_state.predictedStackType(offset);
+}
+
 Type IRBuilder::predictedLocalType(uint32_t id) {
   return m_state.predictedLocalType(id);
 }

@@ -90,10 +90,10 @@ void AsioContext::exit(context_idx_t ctx_idx) {
 
   exitContextVector(ctx_idx, m_runnableQueue);
 
-  for (auto it : m_priorityQueueDefault) {
+  for (auto& it : m_priorityQueueDefault) {
     exitContextQueue<true>(ctx_idx, it.second);
   }
-  for (auto it : m_priorityQueueNoPendingIO) {
+  for (auto& it : m_priorityQueueNoPendingIO) {
     exitContextQueue<true>(ctx_idx, it.second);
   }
 

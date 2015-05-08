@@ -11,6 +11,6 @@
 
 class X {
   public function f($x): void {
-    $this = $x;
+    list($_, $this, $y) = $x;
   }
 }

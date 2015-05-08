@@ -1,7 +1,2 @@
 File "this_forbid.php", line 14, characters 5-14:
-Invalid assignment (Typing[4110])
-File "this_forbid.php", line 14, characters 5-9:
-This is the type 'this'
-  that is compatible with an object of type X
-File "this_forbid.php", line 14, characters 13-14:
-It is incompatible with a string
+Cannot assign a value to $this (Typing[4134])

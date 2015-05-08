@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_xml.h"
+#include "hphp/util/async-func.h"
 
 #ifdef ERROR
 #undef ERROR
@@ -30,6 +31,7 @@
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 
+struct ThreadInfo;
 struct XDebugCommand;
 struct XDebugBreakpoint;
 
@@ -148,7 +150,6 @@ public:
   // Sends the passed xml message to the client
   void sendMessage(xdebug_xml_node& xml);
 
-private:
   // Adds the xdebug xmlns to the node
   void addXmlns(xdebug_xml_node& node);
 
@@ -206,14 +207,52 @@ private:
   // behavior.  Throws an ErrorCode on failure.
   void parseInput(folly::StringPiece in, String& cmd, Array& args);
 
+  /*
+   * Runs in a separate thread.
+   *
+   * Polls the XDebugServer's socket for commands when the debugged thread is
+   * busy running.  If a break command is parsed out, then the polling thread
+   * interrupts the running thread, and blocks.  If a different command is
+   * parsed out, then it is dropped.
+   */
+  void pollSocketLoop();
+
+public:
+  /*
+   * Simultaneously gets the result of 'm_break', and clears it.
+   */
+  XDebugCommand* getAndClearBreak() {
+    return m_break.exchange(nullptr);
+  }
+
+private:
+
   const XDebugCommand* m_lastCommand = nullptr;
   char* m_buffer = nullptr;
   size_t m_bufferSize = 0;
 
+  AsyncFunc<XDebugServer> m_pollingThread;
+
+  ThreadInfo* m_requestThread{nullptr};
+
+  /*
+   * Mutex that protects m_{pause,stop}PollingThread.
+   */
+  std::mutex m_pollingMtx;
+
+  /*
+   * The "break" command that is read out by the polling thread is stored here.
+   */
+  std::atomic<XDebugCommand*> m_break{nullptr};
+
+  /* Whether to pause or stop the polling thread. */
+  std::atomic<bool> m_pausePollingThread{false};
+  std::atomic<bool> m_stopPollingThread{false};
+
 ////////////////////////////////////////////////////////////////////////////////
 // Logging
 
-private:
+ public:
   // Logs the string defined by the passed format string to the logfile, if the
   // logfile exists.
   inline void log(const char* format, ...) {
@@ -234,6 +273,7 @@ private:
     }
   }
 
+private:
   FILE* m_logFile = nullptr;
 
 ////////////////////////////////////////////////////////////////////////////////

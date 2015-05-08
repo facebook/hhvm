@@ -29,6 +29,8 @@
 #include "hphp/util/network.h"
 
 #include <fcntl.h>
+#include <poll.h>
+#include <thread>
 #include <netinet/tcp.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -138,7 +140,11 @@ const StaticString
   s_HTTP_X_FORWARDED_FOR("HTTP_X_FORWARDED_FOR"),
   s_REMOTE_ADDR("REMOTE_ADDR");
 
-XDebugServer::XDebugServer(Mode mode) : m_mode(mode) {
+XDebugServer::XDebugServer(Mode mode)
+    : m_pollingThread(this, &XDebugServer::pollSocketLoop)
+    , m_requestThread(&TI())
+    , m_mode(mode)
+{
   // Attempt to open optional log file
   if (XDEBUG_GLOBAL(RemoteLog).size() > 0) {
     m_logFile = fopen(XDEBUG_GLOBAL(RemoteLog).c_str(), "a");
@@ -199,6 +205,8 @@ XDebugServer::XDebugServer(Mode mode) : m_mode(mode) {
         XDEBUG_GLOBAL(RemoteHandler).c_str());
     goto failure;
   }
+
+  m_pollingThread.start();
   return;
 
 // Failure cleanup. A goto is used to prevent duplication
@@ -210,6 +218,18 @@ failure:
 }
 
 XDebugServer::~XDebugServer() {
+  {
+    std::lock_guard<std::mutex> lock(m_pollingMtx);
+
+    // Set flags to tell polling thread to end.
+    m_pausePollingThread.store(false);
+    m_stopPollingThread.store(true);
+  }
+
+  // Wait until polling thread gets the memo and exits.
+  auto const result = m_pollingThread.waitForEnd();
+  always_assert(result);
+
   destroySocket();
   closeLog();
 }
@@ -294,6 +314,98 @@ void XDebugServer::destroySocket() {
   if (m_socket >= 0) {
     close(m_socket);
     m_socket = -1;
+  }
+}
+
+/*
+ * Poll a socket seeing if there is any input waiting to be received.
+ *
+ * Returns true iff there is data to be read.
+ */
+static bool poll_socket(int socket) {
+  pollfd pollfd;
+
+  pollfd.fd = socket;
+  pollfd.events = POLLIN;
+  pollfd.revents = 0;
+
+  // Has timeout set to zero because pollSocketLoop() already does a sleep(1).
+  auto const result = poll(&pollfd, 1, 0);
+
+  // poll() timed out, or errored.
+  if (result == 0 || result == -1) {
+    return false;
+  }
+
+  // Error or hangup.
+  if ((pollfd.revents & POLLERR) || (pollfd.revents & POLLHUP)) {
+    return false;
+  }
+
+  // Whether we have data to read.
+  return pollfd.revents & POLLIN;
+}
+
+void XDebugServer::pollSocketLoop() {
+  while (true) {
+    // Take some load off the CPU when polling thread is paused.
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    // XXX: This can take the lock even when we want to pause the thread.
+    std::lock_guard<std::mutex> lock(m_pollingMtx);
+
+    // We're paused if the request thread is handling commands right now.
+    if (m_pausePollingThread.load()) {
+      continue;
+    }
+
+    // We've been told to exit.
+    if (m_stopPollingThread.load()) {
+      log("Polling thread stopping\n");
+      break;
+    }
+
+    // At this point we know that the request thread is busy running, so we let
+    // it enter the jit.
+    m_requestThread->m_reqInjectionData.setDebuggerIntr(false);
+
+    // Check if there is any input waiting on us.
+    if (!poll_socket(m_socket)) {
+      continue;
+    }
+
+    // Actually get the input from the socket.
+    if (!readInput()) {
+      log("Polling thread had input but failed to read it\n");
+      continue;
+    }
+
+    try {
+      log("Polling thread received: %s\n", m_buffer);
+      auto cmd = parseCommand();
+      if (cmd->getCommandStr() != "break") {
+        delete cmd;
+        continue;
+      }
+
+      log("Received break command\n");
+
+      // We're going to set the 'break' flag on our XDebugServer, and pause
+      // ourselves.  The request thread will unpause us when it exits its
+      // command loop.
+      m_pausePollingThread.store(true);
+
+      auto const old = m_break.exchange(cmd);
+      always_assert(old == nullptr);
+
+      // Force request thread to run in the interpreter, and hit
+      // XDebugHookHandler::onOpcode().
+      m_requestThread->m_reqInjectionData.setDebuggerIntr(true);
+      m_requestThread->m_reqInjectionData.setFlag(DebuggerSignalFlag);
+    } catch (const ErrorCode& error) {
+      log("Polling thread got invalid command: %s\n", m_buffer);
+      // Can drop the error.
+    }
   }
 }
 
@@ -418,14 +530,13 @@ void XDebugServer::addXmlns(xdebug_xml_node& node) {
 }
 
 void XDebugServer::addCommand(xdebug_xml_node& node, const XDebugCommand& cmd) {
-  // Grab the last command string + its transaction id
-  String cmd_str = cmd.getCommandStr();
-  String trans_str = cmd.getTransactionId();
+  auto const& cmd_str = cmd.getCommandStr();
+  auto const& trans_str = cmd.getTransactionId();
 
-  // We can't assume the passed command will stick around before the node is
-  // sent
-  xdebug_xml_add_attribute_dup(&node, "command", cmd_str.data());
-  xdebug_xml_add_attribute_dup(&node, "transaction_id", trans_str.data());
+  // We don't assume the XDebugCommand will stick around before the node is
+  // sent.
+  xdebug_xml_add_attribute_dup(&node, "command", cmd_str.c_str());
+  xdebug_xml_add_attribute_dup(&node, "transaction_id", trans_str.c_str());
 }
 
 void XDebugServer::addStatus(xdebug_xml_node& node) {
@@ -593,6 +704,7 @@ bool XDebugServer::breakpoint(const Variant& filename,
                               const Variant& exception,
                               const Variant& message,
                               int line) {
+  log("Hit breakpoint at %s:%d", filename.toString().data(), line);
   setStatus(Status::BREAK, Reason::OK);
 
   // Initialize the response node
@@ -677,7 +789,21 @@ bool XDebugServer::breakpoint(const XDebugBreakpoint& bp,
 #define INPUT_BUFFER_EXPANSION 2.0
 
 bool XDebugServer::doCommandLoop() {
+  log("Entered command loop");
+
   bool should_continue = false;
+
+  // Pause the polling thread if it isn't already. (It might have paused itself
+  // if it read a "break" command)
+  m_pausePollingThread.store(true);
+
+  // Unpause the polling thread when we leave the command loop.
+  SCOPE_EXIT {
+    m_pausePollingThread.store(false);
+  };
+
+  std::lock_guard<std::mutex> lock(m_pollingMtx);
+
   do {
     // If we are detached, short circuit
     if (m_status == Status::DETACHED) {

@@ -53,8 +53,8 @@ struct XDebugCommand {
   // This will always be called after handleImpl.
   virtual bool shouldContinue() const { return false; }
 
-  String getCommandStr() const { return m_commandStr; }
-  String getTransactionId() const { return m_transactionId; }
+  const std::string& getCommandStr() const { return m_commandStr; }
+  const std::string& getTransactionId() const { return m_transactionId; }
 
   // Returns true if this command is valid in the given server status. Almost
   // all commands are valid except for when the server is stopping, so this
@@ -68,8 +68,12 @@ protected:
   XDebugServer& m_server;
 
 private:
-  String m_commandStr; // String used to create the command
-  String m_transactionId; // Transaction id for the command
+  /*
+   * These are std::string instead of String because XDebugCommand objects are
+   * shared across two threads: the request thread, and the polling thread.
+   */
+  std::string m_commandStr;    // String used to create the command
+  std::string m_transactionId; // Transaction id for the command
 };
 
 }

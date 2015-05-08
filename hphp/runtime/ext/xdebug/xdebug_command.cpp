@@ -50,6 +50,7 @@ namespace HPHP {
   COMMAND("step_over", StepOverCmd)                                            \
   COMMAND("stop", StopCmd)                                                     \
   COMMAND("detach", DetachCmd)                                                 \
+  COMMAND("break", BreakCmd)                                                   \
   COMMAND("breakpoint_set", BreakpointSetCmd)                                  \
   COMMAND("breakpoint_get", BreakpointGetCmd)                                  \
   COMMAND("breakpoint_list", BreakpointListCmd)                                \
@@ -536,6 +537,24 @@ struct DetachCmd : XDebugCommand {
 
   void handleImpl(xdebug_xml_node& xml) override {
     m_server.setStatus(Status::DETACHED, Reason::OK);
+    m_server.addStatus(xml);
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// break -i #
+// Pauses a running request "as soon as possible".  This is the synchronous
+// implementation of the command, the asynchronous part is managed by
+// XDebugServer::pollSocketLoop.
+
+struct BreakCmd : XDebugCommand {
+  explicit BreakCmd(XDebugServer& server, const String& cmd, const Array& args)
+    : XDebugCommand(server, cmd, args)
+  {}
+  ~BreakCmd() {}
+
+  void handleImpl(xdebug_xml_node& xml) override {
+    // If we got here, then we were already paused.
     m_server.addStatus(xml);
   }
 };
@@ -1584,12 +1603,12 @@ struct ProfilerNameGetCmd : XDebugCommand {
 XDebugCommand::XDebugCommand(XDebugServer& server,
                              const String& cmd,
                              const Array& args)
-  : m_server(server), m_commandStr(cmd) {
+  : m_server(server), m_commandStr(cmd.data(), cmd.size()) {
   // A transaction id must be provided
   if (args['i'].isNull()) {
     throw XDebugServer::ERROR_INVALID_ARGS;
   }
-  m_transactionId = args['i'].toString();
+  m_transactionId = args['i'].toString().toCppString();
 }
 
 bool XDebugCommand::handle(xdebug_xml_node& response) {

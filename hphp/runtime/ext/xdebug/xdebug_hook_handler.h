@@ -163,6 +163,8 @@ struct XDebugHookHandler : DebugHookHandler {
     }
   }
 
+  void onOpcode(PC pc) override;
+
   // Information possibly passed during a breakpoint
   union BreakInfo {
     // Function enter/exit breakpoint

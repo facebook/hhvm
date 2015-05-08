@@ -351,13 +351,14 @@ const StaticString
  */
 Profiler::Profiler(bool needCPUAffinity) : m_successful(true),
                                            m_stack(nullptr),
-                                           m_frame_free_list(nullptr) {
+                                           m_frame_free_list(nullptr),
+                                           m_has_affinity(needCPUAffinity) {
     if (!s_rand_initialized) {
       s_rand_initialized = true;
       srand(math_generate_seed());
     }
 
-    if (needCPUAffinity) {
+    if (m_has_affinity) {
       //
       // Bind to a random cpu so that we can use rdtsc instruction.
       //
@@ -376,7 +377,9 @@ Profiler::Profiler(bool needCPUAffinity) : m_successful(true),
 }
 
 Profiler::~Profiler() {
-    SET_AFFINITY(0, sizeof(cpu_set_t), &m_prev_mask);
+    if (m_has_affinity) {
+      SET_AFFINITY(0, sizeof(cpu_set_t), &m_prev_mask);
+    }
 
     endAllFrames();
     for (Frame *p = m_frame_free_list; p;) {

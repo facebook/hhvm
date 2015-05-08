@@ -190,7 +190,10 @@ public:
   cpu_set_t m_prev_mask;               // saved cpu affinity
   Frame    *m_frame_free_list;         // freelist of Frame
   uint8_t     m_func_hash_counters[256]; // counter table by hash code;
+private:
+  bool m_has_affinity;
 
+public:
   /*
    * A hash function to calculate a 8-bit hash code for a function name.
    * This is based on a small modification to 'zend_inline_hash_func' by summing

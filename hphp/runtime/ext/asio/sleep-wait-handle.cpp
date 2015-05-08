@@ -60,7 +60,7 @@ void c_SleepWaitHandle::initialize(int64_t usecs) {
 
   incRefCount();
 
-  session->getSleepEventQueue().push(this);
+  session->enqueueSleepEvent(this);
 
   if (isInContext()) {
     registerToContext();

@@ -39,10 +39,10 @@ namespace HPHP {
 namespace {
   template<bool decRef, class TWaitHandle>
   void exitContextQueue(context_idx_t ctx_idx,
-                        smart::queue<TWaitHandle*> &queue) {
+                        smart::deque<TWaitHandle*>& queue) {
     while (!queue.empty()) {
       auto wait_handle = queue.front();
-      queue.pop();
+      queue.pop_front();
       wait_handle->exitContext(ctx_idx);
       if (decRef) decRefObj(wait_handle);
     }
@@ -101,16 +101,15 @@ void AsioContext::exit(context_idx_t ctx_idx) {
   exitContextVector(ctx_idx, m_externalThreadEvents);
 }
 
-void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, uint32_t priority) {
+void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue,
+                           uint32_t priority) {
   assert(queue == QUEUE_DEFAULT || queue == QUEUE_NO_PENDING_IO);
 
-  reschedule_priority_queue_t& dst_queue =
-    (queue == QUEUE_DEFAULT)
-      ? m_priorityQueueDefault
-      : m_priorityQueueNoPendingIO;
+  auto& dst_queue = queue == QUEUE_DEFAULT ? m_priorityQueueDefault :
+                    m_priorityQueueNoPendingIO;
 
   // creates a new per-prio queue if necessary
-  dst_queue[priority].push(wait_handle);
+  dst_queue[priority].push_back(wait_handle);
   wait_handle->incRefCount();
 }
 
@@ -120,7 +119,6 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
 
   auto session = AsioSession::Get();
   auto ete_queue = session->getExternalThreadEventQueue();
-  auto& sleep_queue = session->getSleepEventQueue();
 
   if (!session->hasAbruptInterruptException()) {
     session->initAbruptInterruptException();
@@ -155,12 +153,7 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     // Wait for pending external thread events...
     if (!m_externalThreadEvents.empty()) {
       // ...but only until the next sleeper (from any context) finishes.
-      AsioSession::TimePoint waketime;
-      if (sleep_queue.empty()) {
-        waketime = AsioSession::getLatestWakeTime();
-      } else {
-        waketime = sleep_queue.top()->getWakeTime();
-      }
+      auto waketime = session->sleepWakeTime();
 
       // Wait if necessary.
       if (LIKELY(!ete_queue->hasReceived())) {
@@ -185,7 +178,7 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     // be ready (in any context).
     if (!m_sleepEvents.empty()) {
       onIOWaitEnter(session);
-      std::this_thread::sleep_until(sleep_queue.top()->getWakeTime());
+      std::this_thread::sleep_until(session->sleepWakeTime());
       onIOWaitExit(session);
 
       session->processSleepEvents();
@@ -223,7 +216,7 @@ bool AsioContext::runSingle(reschedule_priority_queue_t& queue) {
   auto top_queue_iter = queue.begin();
   auto& top_queue = top_queue_iter->second;
   auto reschedule_wait_handle = top_queue.front();
-  top_queue.pop();
+  top_queue.pop_front();
   reschedule_wait_handle->run();
   decRefObj(reschedule_wait_handle);
 

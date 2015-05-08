@@ -35,60 +35,62 @@ class c_ExternalThreadEventWaitHandle;
 
 typedef uint8_t context_idx_t;
 
-class AsioContext final {
-  public:
-    void* operator new(size_t size) { return smart_malloc(size); }
-    void operator delete(void* ptr) { smart_free(ptr); }
+struct AsioContext final {
+  void* operator new(size_t size) { return smart_malloc(size); }
+  void operator delete(void* ptr) { smart_free(ptr); }
 
-    explicit AsioContext(ActRec* savedFP) : m_savedFP(savedFP) {}
-    void exit(context_idx_t ctx_idx);
+  explicit AsioContext(ActRec* savedFP) : m_savedFP(savedFP) {}
+  void exit(context_idx_t ctx_idx);
 
-    ActRec* getSavedFP() const { return m_savedFP; }
+  ActRec* getSavedFP() const { return m_savedFP; }
 
-    void schedule(c_ResumableWaitHandle* wait_handle) {
-      m_runnableQueue.push_back(wait_handle);
-    }
-    void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue, uint32_t priority);
+  void schedule(c_ResumableWaitHandle* wait_handle) {
+    m_runnableQueue.push_back(wait_handle);
+  }
+  void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue,
+                uint32_t priority);
 
-    template <class TWaitHandle>
-    uint32_t registerTo(smart::vector<TWaitHandle*>& vec, TWaitHandle* wh);
+  template <class TWaitHandle>
+  uint32_t registerTo(smart::vector<TWaitHandle*>& vec, TWaitHandle* wh);
 
-    template <class TWaitHandle>
-    void unregisterFrom(smart::vector<TWaitHandle*>& vec, uint32_t idx);
+  template <class TWaitHandle>
+  void unregisterFrom(smart::vector<TWaitHandle*>& vec, uint32_t idx);
 
-    smart::vector<c_SleepWaitHandle*>& getSleepEvents() {
-      return m_sleepEvents;
-    };
-    smart::vector<c_ExternalThreadEventWaitHandle*>& getExternalThreadEvents() {
-      return m_externalThreadEvents;
-    };
+  smart::vector<c_SleepWaitHandle*>& getSleepEvents() {
+    return m_sleepEvents;
+  };
+  smart::vector<c_ExternalThreadEventWaitHandle*>& getExternalThreadEvents() {
+    return m_externalThreadEvents;
+  };
 
-    void runUntil(c_WaitableWaitHandle* wait_handle);
+  void runUntil(c_WaitableWaitHandle* wait_handle);
 
-    static const uint32_t QUEUE_DEFAULT       = 0;
-    static const uint32_t QUEUE_NO_PENDING_IO = 1;
+  static const uint32_t QUEUE_DEFAULT       = 0;
+  static const uint32_t QUEUE_NO_PENDING_IO = 1;
 
-  private:
-    typedef smart::map<uint32_t, smart::queue<c_RescheduleWaitHandle*>>
-      reschedule_priority_queue_t;
+private:
+  typedef smart::map<uint32_t, smart::deque<c_RescheduleWaitHandle*>>
+    reschedule_priority_queue_t;
 
-    bool runSingle(reschedule_priority_queue_t& queue);
+  bool runSingle(reschedule_priority_queue_t& queue);
 
-    // Frame pointer to the ActRec of the WaitHandle::join() call.
-    ActRec* m_savedFP;
+private:
+  // Frame pointer to the ActRec of the WaitHandle::join() call.
+  ActRec* m_savedFP;
 
-    // stack of ResumableWaitHandles ready for immediate execution
-    smart::vector<c_ResumableWaitHandle*> m_runnableQueue;
+  // stack of ResumableWaitHandles ready for immediate execution
+  smart::vector<c_ResumableWaitHandle*> m_runnableQueue;
 
-    // queue of RescheduleWaitHandles scheduled in default mode
-    reschedule_priority_queue_t m_priorityQueueDefault;
+  // queue of RescheduleWaitHandles scheduled in default mode
+  reschedule_priority_queue_t m_priorityQueueDefault;
 
-    // queue of RescheduleWaitHandles scheduled to be run once there is no pending I/O
-    reschedule_priority_queue_t m_priorityQueueNoPendingIO;
+  // queue of RescheduleWaitHandles scheduled to be run once there is no
+  // pending I/O
+  reschedule_priority_queue_t m_priorityQueueNoPendingIO;
 
-    // pending wait handles
-    smart::vector<c_SleepWaitHandle*> m_sleepEvents;
-    smart::vector<c_ExternalThreadEventWaitHandle*> m_externalThreadEvents;
+  // pending wait handles
+  smart::vector<c_SleepWaitHandle*> m_sleepEvents;
+  smart::vector<c_ExternalThreadEventWaitHandle*> m_externalThreadEvents;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

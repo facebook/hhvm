@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/asio/asio-session.h"
 
 #include <limits>
+#include <algorithm>
 
 #include <folly/String.h>
 
@@ -414,33 +415,42 @@ void AsioSession::onSleepSuccess(c_SleepWaitHandle* waitHandle) {
   );
 }
 
-bool AsioSession::sleep_wh_greater::operator() (const c_SleepWaitHandle* x,
-                                                const c_SleepWaitHandle* y) {
+inline
+bool sleep_compare(const c_SleepWaitHandle* x, const c_SleepWaitHandle* y) {
   return x->getWakeTime() > y->getWakeTime();
 }
 
+void AsioSession::enqueueSleepEvent(c_SleepWaitHandle* h) {
+  m_sleepEvents.push_back(h);
+  std::push_heap(m_sleepEvents.begin(), m_sleepEvents.end(), sleep_compare);
+}
+
 bool AsioSession::processSleepEvents() {
-  if (m_sleepEventQueue.empty()) {
+  if (m_sleepEvents.empty()) {
     return false;
   }
 
   bool woken = false;
   auto now = TimePoint::clock::now();
 
-  while (!m_sleepEventQueue.empty()) {
-    auto wh = m_sleepEventQueue.top();
-
+  while (!m_sleepEvents.empty()) {
+    auto wh = m_sleepEvents.front();
     if (wh->getWakeTime() > now) {
       break;
     }
     woken = true;
-
     wh->process();
     decRefObj(wh);
-    m_sleepEventQueue.pop();
+    std::pop_heap(m_sleepEvents.begin(), m_sleepEvents.end(), sleep_compare);
+    m_sleepEvents.pop_back();
   }
 
   return woken;
+}
+
+AsioSession::TimePoint AsioSession::sleepWakeTime() {
+  return m_sleepEvents.empty() ? getLatestWakeTime() :
+         m_sleepEvents.front()->getWakeTime();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -16,6 +16,10 @@
 */
 
 #include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/sort-helpers.h"
@@ -163,11 +167,9 @@ bool BaseVector::t_containskey(const Variant& key) {
 
 // KeyedIterable
 Object BaseVector::t_getiterator() {
-  auto* it = newobj<c_VectorIterator>();
-  it->m_obj = this;
-  it->m_pos = 0;
-  it->m_version = getVersion();
-  return it;
+  auto iter = collections::VectorIterator::newInstance();
+  Native::data<collections::VectorIterator>(iter)->setVector(this);
+  return iter;
 }
 
 ALWAYS_INLINE
@@ -1344,59 +1346,6 @@ Object BaseVector::t_toimmset() { return materializeImpl<c_ImmSet>(this); }
 Object c_Vector::t_immutable() { return getImmutableCopy(); }
 Object c_ImmVector::t_immutable() { return this; }
 
-c_VectorIterator::c_VectorIterator(
-  Class* cls /*= c_VectorIterator::classof()*/
-) : ExtObjectDataFlags<ObjectData::IsCppBuiltin |
-                       ObjectData::HasClone>(cls) {
-}
-
-c_VectorIterator::~c_VectorIterator() {
-}
-
-c_VectorIterator* c_VectorIterator::Clone(ObjectData* obj) {
-  auto thiz = static_cast<c_VectorIterator*>(obj);
-  auto target = static_cast<c_VectorIterator*>(obj->cloneImpl());
-  target->m_obj = thiz->m_obj;
-  target->m_pos = thiz->m_pos;
-  target->m_version = thiz->m_version;
-  return target;
-}
-
-void c_VectorIterator::t___construct() {
-}
-
-Variant c_VectorIterator::t_current() {
-  BaseVector* vec = m_obj.get();
-  if (UNLIKELY(m_version != vec->getVersion())) {
-    throw_collection_modified();
-  }
-  if (m_pos >= vec->m_size) {
-    throw_iterator_not_valid();
-  }
-  return tvAsCVarRef(&vec->m_data[m_pos]);
-}
-
-Variant c_VectorIterator::t_key() {
-  BaseVector* vec = m_obj.get();
-  if (m_pos >= vec->m_size) {
-    throw_iterator_not_valid();
-  }
-  return (int64_t)m_pos;
-}
-
-bool c_VectorIterator::t_valid() {
-  BaseVector* vec = m_obj.get();
-  return vec && (m_pos < vec->m_size);
-}
-
-void c_VectorIterator::t_next() {
-  m_pos++;
-}
-
-void c_VectorIterator::t_rewind() {
-  m_pos = 0;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // c_ImmVector
 
@@ -2218,11 +2167,9 @@ Object c_Map::t_differencebykey(const Variant& it) {
 }
 
 Object BaseMap::t_getiterator() {
-  auto* it = newobj<c_MapIterator>();
-  it->m_obj = this;
-  it->m_pos = iter_begin();
-  it->m_version = getVersion();
-  return it;
+  auto iter = collections::MapIterator::newInstance();
+  Native::data<collections::MapIterator>(iter)->setMap(this);
+  return iter;
 }
 
 ALWAYS_INLINE static std::array<TypedValue, 2>
@@ -3453,72 +3400,6 @@ Object c_ImmMap::t_immutable() { return this; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_MapIterator::c_MapIterator(
-  Class* cls /*= c_MapIterator::classof()*/
-) : ExtObjectDataFlags<ObjectData::IsCppBuiltin |
-                       ObjectData::HasClone>(cls) {
-}
-
-c_MapIterator::~c_MapIterator() {
-}
-
-c_MapIterator* c_MapIterator::Clone(ObjectData* obj) {
-  auto thiz = static_cast<c_MapIterator*>(obj);
-  auto target = static_cast<c_MapIterator*>(obj->cloneImpl());
-  target->m_obj = thiz->m_obj;
-  target->m_pos = thiz->m_pos;
-  target->m_version = thiz->m_version;
-  return target;
-}
-
-void c_MapIterator::t___construct() {
-}
-
-Variant c_MapIterator::t_current() {
-  auto const mp = m_obj.get();
-  if (UNLIKELY(m_version != mp->getVersion())) {
-    throw_collection_modified();
-  }
-  if (!mp->iter_valid(m_pos)) {
-    throw_iterator_not_valid();
-  }
-  return tvAsCVarRef(mp->iter_value(m_pos));
-}
-
-Variant c_MapIterator::t_key() {
-  auto const mp = m_obj.get();
-  if (UNLIKELY(m_version != mp->getVersion())) {
-    throw_collection_modified();
-  }
-  if (!mp->iter_valid(m_pos)) {
-    throw_iterator_not_valid();
-  }
-  return mp->iter_key(m_pos);
-}
-
-bool c_MapIterator::t_valid() {
-  auto const mp = m_obj.get();
-  return mp->iter_valid(m_pos);
-}
-
-void c_MapIterator::t_next() {
-  auto const mp = m_obj.get();
-  if (UNLIKELY(m_version != mp->getVersion())) {
-    throw_collection_modified();
-  }
-  m_pos = mp->iter_next(m_pos);
-}
-
-void c_MapIterator::t_rewind() {
-  auto const mp = m_obj.get();
-  if (UNLIKELY(m_version != mp->getVersion())) {
-    throw_collection_modified();
-  }
-  m_pos = mp->iter_begin();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 c_ImmMap::c_ImmMap(Class* cb, uint32_t cap /* = 0 */)
   : BaseMap(cb, HeaderKind::ImmMap, cap)
 {}
@@ -3963,11 +3844,9 @@ void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 }
 
 Object BaseSet::t_getiterator() {
-  auto* it = newobj<c_SetIterator>();
-  it->m_obj = this;
-  it->m_pos = iter_begin();
-  it->m_version = getVersion();
-  return it;
+  auto iter = collections::SetIterator::newInstance();
+  Native::data<collections::SetIterator>(iter)->setSet(this);
+  return iter;
 }
 
 template<typename TSet, class MakeArgs>
@@ -4753,65 +4632,6 @@ Object c_ImmSet::t_immutable() { return this; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_SetIterator::c_SetIterator(
-  Class* cls /*= c_SetIterator::classof()*/
-) : ExtObjectDataFlags<ObjectData::IsCppBuiltin |
-                       ObjectData::HasClone>(cls) {
-}
-
-c_SetIterator::~c_SetIterator() {
-}
-
-c_SetIterator* c_SetIterator::Clone(ObjectData* obj) {
-  auto thiz = static_cast<c_SetIterator*>(obj);
-  auto target = static_cast<c_SetIterator*>(obj->cloneImpl());
-  target->m_obj = thiz->m_obj;
-  target->m_pos = thiz->m_pos;
-  target->m_version = thiz->m_version;
-  return target;
-}
-
-void c_SetIterator::t___construct() {
-}
-
-Variant c_SetIterator::t_current() {
-  BaseSet* st = m_obj.get();
-  if (UNLIKELY(m_version != st->getVersion())) {
-    throw_collection_modified();
-  }
-  if (!st->iter_valid(m_pos)) {
-    throw_iterator_not_valid();
-  }
-  return tvAsCVarRef(st->iter_value(m_pos));
-}
-
-Variant c_SetIterator::t_key() {
-  return t_current();
-}
-
-bool c_SetIterator::t_valid() {
-  auto const st = m_obj.get();
-  return st->iter_valid(m_pos);
-}
-
-void c_SetIterator::t_next() {
-  BaseSet* st = m_obj.get();
-  if (UNLIKELY(m_version != st->getVersion())) {
-    throw_collection_modified();
-  }
-  m_pos = st->iter_next(m_pos);
-}
-
-void c_SetIterator::t_rewind() {
-  BaseSet* st = m_obj.get();
-  if (UNLIKELY(m_version != st->getVersion())) {
-    throw_collection_modified();
-  }
-  m_pos = st->iter_begin();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 c_Pair::c_Pair(Class* cb)
   : ExtObjectDataFlags(cb, HeaderKind::Pair)
   , m_size(2)
@@ -4963,10 +4783,9 @@ Array c_Pair::t_tovaluesarray() {
 
 Object c_Pair::t_getiterator() {
   assert(isFullyConstructed());
-  auto* it = newobj<c_PairIterator>();
-  it->m_obj = this;
-  it->m_pos = 0;
-  return it;
+  auto iter = collections::PairIterator::newInstance();
+  Native::data<collections::PairIterator>(iter)->setPair(this);
+  return iter;
 }
 
 Object c_Pair::t_map(const Variant& callback) {
@@ -5302,57 +5121,6 @@ Object c_Pair::t_toimmmap() { return materializeImpl<c_ImmMap>(this); }
 Object c_Pair::t_toset() { return materializeImpl<c_Set>(this); }
 Object c_Pair::t_toimmset() { return materializeImpl<c_ImmSet>(this); }
 Object c_Pair::t_immutable() { return this; }
-
-c_PairIterator::c_PairIterator(
-  Class* cls /*= c_PairIterator::classof()*/
-) : ExtObjectDataFlags<ObjectData::IsCppBuiltin |
-                       ObjectData::HasClone>(cls) {
-}
-
-c_PairIterator::~c_PairIterator() {
-}
-
-c_PairIterator* c_PairIterator::Clone(ObjectData* obj) {
-  auto thiz = static_cast<c_PairIterator*>(obj);
-  auto target = static_cast<c_PairIterator*>(obj->cloneImpl());
-  target->m_obj = thiz->m_obj;
-  target->m_pos = thiz->m_pos;
-  return target;
-}
-
-void c_PairIterator::t___construct() {
-}
-
-Variant c_PairIterator::t_current() {
-  c_Pair* pair = m_obj.get();
-  if (!pair->contains(m_pos)) {
-    throw_iterator_not_valid();
-  }
-  return tvAsCVarRef(&pair->getElms()[m_pos]);
-}
-
-Variant c_PairIterator::t_key() {
-  c_Pair* pair = m_obj.get();
-  if (!pair->contains(m_pos)) {
-    throw_iterator_not_valid();
-  }
-  return (int64_t)m_pos;
-}
-
-bool c_PairIterator::t_valid() {
-  static_assert(std::is_unsigned<typeof(m_pos)>::value,
-                "m_pos should be unsigned");
-  c_Pair* pair = m_obj.get();
-  return pair && (m_pos < 2);
-}
-
-void c_PairIterator::t_next() {
-  m_pos++;
-}
-
-void c_PairIterator::t_rewind() {
-  m_pos = 0;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 

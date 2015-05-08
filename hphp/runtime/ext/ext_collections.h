@@ -48,6 +48,10 @@ namespace HPHP {
 
 namespace collections{
 void deepCopy(TypedValue*);
+class PairIterator;
+class VectorIterator;
+class MapIterator;
+class SetIterator;
 }
 
 /*
@@ -477,7 +481,7 @@ class BaseVector : public ExtCollectionObjectData {
 
   // Friends
 
-  friend class c_VectorIterator;
+  friend class collections::VectorIterator;
   friend class BaseMap;
   friend class BaseSet;
   friend class c_Pair;
@@ -569,33 +573,6 @@ class c_Vector : public BaseVector {
   friend class BaseMap;
   friend class c_Pair;
   friend class ArrayIter;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class VectorIterator
-
-class c_VectorIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
-                                                   ObjectData::HasClone> {
- public:
-  DECLARE_CLASS_NO_SWEEP(VectorIterator)
-
- public:
-  explicit c_VectorIterator(Class* cls = c_VectorIterator::classof());
-  ~c_VectorIterator();
-  static c_VectorIterator* Clone(ObjectData* obj);
-  void t___construct();
-  Variant t_current();
-  Variant t_key();
-  bool t_valid();
-  void t_next();
-  void t_rewind();
-
- private:
-  SmartPtr<BaseVector> m_obj;
-  uint32_t m_pos;
-  int32_t m_version;
-
-  friend class BaseVector;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1348,7 +1325,7 @@ class BaseMap : public HashCollection {
  private:
   friend void collections::deepCopy(TypedValue*);
 
-  friend class c_MapIterator;
+  friend class collections::MapIterator;
   friend class c_Vector;
   friend class c_Map;
   friend class c_ImmMap;
@@ -1583,33 +1560,6 @@ class c_ImmMap : public BaseMap {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// class MapIterator
-
-class c_MapIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
-                                                ObjectData::HasClone> {
- public:
-  DECLARE_CLASS_NO_SWEEP(MapIterator)
-
- public:
-  explicit c_MapIterator(Class* cls = c_MapIterator::classof());
-  ~c_MapIterator();
-  static c_MapIterator* Clone(ObjectData* obj);
-  void t___construct();
-  Variant t_current();
-  Variant t_key();
-  bool t_valid();
-  void t_next();
-  void t_rewind();
-
- private:
-  SmartPtr<BaseMap> m_obj;
-  uint32_t m_pos;
-  int32_t m_version;
-
-  friend class BaseMap;
-};
-
-///////////////////////////////////////////////////////////////////////////////
 
 /**
  * BaseSet is a hash-table implementation of the Set ADT. It doesn't represent
@@ -1835,7 +1785,7 @@ class BaseSet : public HashCollection {
 
  private:
 
-  friend class c_SetIterator;
+  friend class collections::SetIterator;
   friend class c_Vector;
   friend class c_Set;
   friend class c_Map;
@@ -1947,33 +1897,6 @@ class c_ImmSet : public BaseSet {
                           int64_t sz, char type);
 
   static c_ImmSet* Clone(ObjectData* obj);
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class SetIterator
-
-class c_SetIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
-                                                ObjectData::HasClone> {
- public:
-  DECLARE_CLASS_NO_SWEEP(SetIterator)
-
- public:
-  explicit c_SetIterator(Class* cls = c_SetIterator::classof());
-  ~c_SetIterator();
-  static c_SetIterator* Clone(ObjectData* obj);
-  void t___construct();
-  Variant t_current();
-  Variant t_key();
-  bool t_valid();
-  void t_next();
-  void t_rewind();
-
- private:
-  SmartPtr<BaseSet> m_obj;
-  uint32_t m_pos;
-  int32_t m_version;
-
-  friend class BaseSet;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2121,7 +2044,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   int getVersion() const { return 0; }
 
   friend void collections::deepCopy(TypedValue*);
-  friend class c_PairIterator;
+  friend class collections::PairIterator;
   friend class c_Vector;
   friend class BaseVector;
   friend class BaseMap;
@@ -2132,32 +2055,6 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
     // at the same offset.
     static_assert(offsetof(c_Pair, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
   }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class PairIterator
-
-class c_PairIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
-                                                 ObjectData::HasClone> {
- public:
-  DECLARE_CLASS_NO_SWEEP(PairIterator)
-
- public:
-  explicit c_PairIterator(Class* cls = c_PairIterator::classof());
-  ~c_PairIterator();
-  static c_PairIterator* Clone(ObjectData* obj);
-  void t___construct();
-  Variant t_current();
-  Variant t_key();
-  bool t_valid();
-  void t_next();
-  void t_rewind();
-
- private:
-  SmartPtr<c_Pair> m_obj;
-  uint32_t m_pos;
-
-  friend class c_Pair;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

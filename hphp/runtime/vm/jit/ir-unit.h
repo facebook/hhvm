@@ -214,6 +214,7 @@ struct IRUnit {
    * Add an extra SSATmp to jmp.
    */
   void expandJmp(IRInstruction* jmp, SSATmp* value);
+
 private:
   // Contains Block, IRInstruction, and SSATmp objects.
   Arena m_arena;

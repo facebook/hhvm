@@ -257,7 +257,6 @@ bool RuntimeOption::EnableStaticContentMMap = true;
 bool RuntimeOption::Utf8izeReplace = true;
 
 std::string RuntimeOption::StartupDocument;
-std::string RuntimeOption::WarmupDocument;
 std::string RuntimeOption::RequestInitFunction;
 std::string RuntimeOption::RequestInitDocument;
 std::string RuntimeOption::AutoPrependFile;
@@ -1250,7 +1249,6 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
 
     Config::Bind(StartupDocument, ini, config, "Server.StartupDocument");
     normalizePath(StartupDocument);
-    Config::Bind(WarmupDocument, ini, config, "Server.WarmupDocument");
     Config::Bind(RequestInitFunction, ini, config,
                  "Server.RequestInitFunction");
     Config::Bind(RequestInitDocument, ini, config,

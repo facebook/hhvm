@@ -4,8 +4,8 @@
 .file	"hash-crc.S"
 
 ETCH_SECTION(hash_string_i_crc)
-.global	ETCH_NAME(hash_string_i_crc)
-.type	ETCH_NAME(hash_string_i_crc), @function
+.globl	ETCH_NAME(hash_string_i_crc)
+ETCH_TYPE(ETCH_NAME(hash_string_i_crc), @function)
 ETCH_ALIGN16
 ETCH_NAME(hash_string_i_crc):
 ETCH_LABEL(FB800):
@@ -41,8 +41,8 @@ ETCH_LABEL(FE800):
 
 
 ETCH_SECTION(hash_string_i_unaligned_crc)
-.global	ETCH_NAME(hash_string_i_unaligned_crc)
-.type	ETCH_NAME(hash_string_i_unaligned_crc), @function
+.globl	ETCH_NAME(hash_string_i_unaligned_crc)
+ETCH_TYPE(ETCH_NAME(hash_string_i_unaligned_crc), @function)
 ETCH_ALIGN16
 ETCH_NAME(hash_string_i_unaligned_crc):
 ETCH_LABEL(FB801):
@@ -84,8 +84,8 @@ ETCH_LABEL(FE801):
 
 
 ETCH_SECTION(hash_string_cs_crc)
-.global	ETCH_NAME(hash_string_cs_crc)
-.type	ETCH_NAME(hash_string_cs_crc), @function
+.globl	ETCH_NAME(hash_string_cs_crc)
+ETCH_TYPE(ETCH_NAME(hash_string_cs_crc), @function)
 ETCH_ALIGN16
 ETCH_NAME(hash_string_cs_crc):
 ETCH_LABEL(FB802):
@@ -119,8 +119,8 @@ ETCH_LABEL(FE802):
 
 
 ETCH_SECTION(hash_string_cs_unaligned_crc)
-.global	ETCH_NAME(hash_string_cs_unaligned_crc)
-.type	ETCH_NAME(hash_string_cs_unaligned_crc), @function
+.globl	ETCH_NAME(hash_string_cs_unaligned_crc)
+ETCH_TYPE(ETCH_NAME(hash_string_cs_unaligned_crc), @function)
 ETCH_ALIGN16
 ETCH_NAME(hash_string_cs_unaligned_crc):
 ETCH_LABEL(FB803):
@@ -160,8 +160,8 @@ ETCH_LABEL(FE803):
 
 /* The following is the asm version of HPHP::StringData::hashHelper */
 ETCH_SECTION(g_hashHelper_crc)
-.global	ETCH_NAME(g_hashHelper_crc)
-.type	ETCH_NAME(g_hashHelper_crc), @function
+.globl	ETCH_NAME(g_hashHelper_crc)
+ETCH_TYPE(ETCH_NAME(g_hashHelper_crc), @function)
 ETCH_ALIGN16
 ETCH_NAME(g_hashHelper_crc):
 ETCH_LABEL(FB804):

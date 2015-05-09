@@ -79,6 +79,12 @@ NATIVE_LIBRARIES=\
   $(ELF)\
   pthread
 
+TARGETS=_build/hh_client.native _build/hh_single_type_check.native \
+		_build/hh_format.native _build/h2tp.native _build/test_unparser.native
+
+# Find all source files (all files not in _build dir)
+ALL_SRC_FILES=$(call rwildcard,$(patsubst _build,,$(wildcard *)),*.*)
+
 ################################################################################
 #                                    Rules                                     #
 ################################################################################
@@ -94,12 +100,8 @@ FRAMEWORK_OPTS=$(foreach framework, $(FRAMEWORKS),-cclib -framework -cclib $(fra
 
 LINKER_FLAGS=$(NATIVE_OBJECT_FILES) $(NATIVE_LIB_OPTS) $(EXTRA_LIB_OPTS) \
 	     $(EXTRA_NATIVE_LIB_OPTS) $(FRAMEWORK_OPTS) $(SECTCREATE)
-TARGETS=_build/hh_client.native _build/hh_single_type_check.native \
-		_build/hh_format.native _build/h2tp.native _build/test_unparser.native
 # Function the recursively find files, eg: $(call rwildcard,dir/to/look/in/,*.c)
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
-# Find all source files (all files not in _build dir)
-ALL_SRC_FILES=$(call rwildcard,$(patsubst _build,,$(wildcard *)),*.*)
 
 all: build-hhi-archive build-hack copy-hack-files
 
@@ -108,19 +110,24 @@ clean:
 	find ../bin -mindepth 1 -not -path ../bin/README -delete
 	rm -f utils/get_build_id.gen.c
 
-build-hack: build-hack-native-deps build-hhi-archive $(TARGETS)
+build-hack: $(TARGETS) build-hhi-archive
 
+# All targets are built in one time, so no parallelization is necessary
+.NOTPARALLEL: $(TARGETS)
 # As there is no efficient way to calculate the dependencies of
 # the targets, we make them dependent on all files. In doing this
 # we ensure that no rebuild is necessary of nothing has changed
 $(TARGETS): $(ALL_SRC_FILES)
+	# build-hack-native-deps is a dependency of $(TARGETS) but as it is phony
+	# we place it here to avoid unnecessary rebuilds
+	$(MAKE) build-hack-native-deps
 	ocamlbuild -no-links $(INCLUDE_OPTS) $(LIB_OPTS) \
 		-lflags "$(LINKER_FLAGS)" \
 		hh_server.native hh_client.native hh_single_type_check.native \
 		hh_format.native h2tp.native test_unparser.native
-	# touching the targets is necessary because the ocaml build
+	# Touching the targets is necessary because the ocaml build
 	# doens't change the modification dates of the targets if
-	# new binaries are exactly the same as the old ones
+	# the new binaries are exactly the same as the old ones
 	touch $(TARGETS)
 
 build-hack-native-deps: build-hack-stubs

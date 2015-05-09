@@ -116,7 +116,8 @@ void SrcRec::chainFrom(IncomingBranch br) {
   m_incomingBranches.push_back(br);
   TRACE(1, "SrcRec(%p)::chainFrom %p -> %p (type %d); %zd incoming branches\n",
         this,
-        br.toSmash(), destAddr, br.type(), m_incomingBranches.size());
+        br.toSmash(), destAddr, static_cast<int>(br.type()),
+        m_incomingBranches.size());
   br.patch(destAddr);
 }
 

@@ -213,7 +213,7 @@ void analyze_physical(Env& env) {
   } while (!workQ.empty());
 }
 
-std::string show_fixed_point(Env& env) {
+DEBUG_ONLY std::string show_fixed_point(Env& env) {
   auto ret = std::string{};
 
   for (auto& b : env.rpoBlocks) {

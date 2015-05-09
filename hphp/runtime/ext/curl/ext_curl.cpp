@@ -192,7 +192,7 @@ public:
     m_read.callback = src->m_read.callback;
     m_write_header.callback = src->m_write_header.callback;
 
-    reset();
+    reseat();
 
     m_to_free = src->m_to_free;
     m_emptyPost = src->m_emptyPost;
@@ -250,30 +250,36 @@ public:
     return std::min(1000 * remaining, timeout);
   }
 
+  void reseat() {
+    // Note: this is the minimum set of things to point the CURL*
+    // to this CurlHandle
+    curl_easy_setopt(m_cp, CURLOPT_ERRORBUFFER,       m_error_str);
+    curl_easy_setopt(m_cp, CURLOPT_FILE,              (void*)this);
+    curl_easy_setopt(m_cp, CURLOPT_INFILE,            (void*)this);
+    curl_easy_setopt(m_cp, CURLOPT_WRITEHEADER,       (void*)this);
+    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_DATA,      (void*)this);
+  }
+
   void reset() {
     curl_easy_reset(m_cp);
 
     curl_easy_setopt(m_cp, CURLOPT_NOPROGRESS,        1);
     curl_easy_setopt(m_cp, CURLOPT_VERBOSE,           0);
-    curl_easy_setopt(m_cp, CURLOPT_ERRORBUFFER,       m_error_str);
     curl_easy_setopt(m_cp, CURLOPT_WRITEFUNCTION,     curl_write);
-    curl_easy_setopt(m_cp, CURLOPT_FILE,              (void*)this);
     curl_easy_setopt(m_cp, CURLOPT_READFUNCTION,      curl_read);
-    curl_easy_setopt(m_cp, CURLOPT_INFILE,            (void*)this);
     curl_easy_setopt(m_cp, CURLOPT_HEADERFUNCTION,    curl_write_header);
-    curl_easy_setopt(m_cp, CURLOPT_WRITEHEADER,       (void*)this);
     curl_easy_setopt(m_cp, CURLOPT_DNS_USE_GLOBAL_CACHE, 0); // for thread-safe
     curl_easy_setopt(m_cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
     curl_easy_setopt(m_cp, CURLOPT_MAXREDIRS, 20); // no infinite redirects
     curl_easy_setopt(m_cp, CURLOPT_NOSIGNAL, 1); // for multithreading mode
     curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_FUNCTION,
                      CurlResource::ssl_ctx_callback);
-    curl_easy_setopt(m_cp, CURLOPT_SSL_CTX_DATA, (void*)this);
 
     curl_easy_setopt(m_cp, CURLOPT_TIMEOUT,
                      minTimeout(RuntimeOption::HttpDefaultTimeout));
     curl_easy_setopt(m_cp, CURLOPT_CONNECTTIMEOUT,
                      minTimeout(RuntimeOption::HttpDefaultTimeout));
+    reseat();
   }
 
   Variant execute() {

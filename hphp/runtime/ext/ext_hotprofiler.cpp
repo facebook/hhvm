@@ -1359,7 +1359,7 @@ bool ProfilerFactory::start(ProfilerKind kind,
     }
     break;
   default:
-    throw_invalid_argument("level: %d", kind);
+    throw_invalid_argument("level: %d", static_cast<int>(kind));
     return false;
   }
   if (m_profiler && m_profiler->m_successful) {

@@ -1590,7 +1590,7 @@ void Translator::addTranslation(const TransRec& transRec) {
                           transRec.src.offset()).str().c_str(),
                         transRec.aLen,
                         transRec.acoldLen,
-                        transRec.kind);
+                        static_cast<int>(transRec.kind));
   }
 
   if (!isTransDBEnabled()) return;

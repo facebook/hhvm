@@ -1050,7 +1050,7 @@ void populate_mrinfo(Env& env) {
 //////////////////////////////////////////////////////////////////////
 
 using HPHP::jit::show;
-std::string show(const boost::dynamic_bitset<>& bs) {
+DEBUG_ONLY std::string show(const boost::dynamic_bitset<>& bs) {
   std::ostringstream out;
   out << bs;
   return out.str();
@@ -1411,7 +1411,7 @@ void find_alias_sets(Env& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool check_state(const RCState& state) {
+DEBUG_ONLY bool check_state(const RCState& state) {
   for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
     auto& set = state.asets[asetID];
 
@@ -2266,7 +2266,7 @@ RCAnalysis rc_analyze(Env& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show_analysis(Env& env, const RCAnalysis& analysis) {
+DEBUG_ONLY std::string show_analysis(Env& env, const RCAnalysis& analysis) {
   auto ret = std::string{};
 
   for (auto asetID = uint32_t{0}; asetID < env.asets.size(); ++asetID) {
@@ -2549,7 +2549,7 @@ std::string graphs_dot_string(const jit::vector<MustAliasSet>& asets,
   return ret;
 }
 
-std::string show_graphs(const jit::vector<MustAliasSet>& asets,
+DEBUG_ONLY std::string show_graphs(const jit::vector<MustAliasSet>& asets,
                         const jit::vector<Node*>& heads) {
   char fileBuf[] = "/tmp/hhvmXXXXXX";
   int fd = mkstemp(fileBuf);
@@ -2633,7 +2633,7 @@ bool check_graph(Node* graph) {
   return true;
 }
 
-bool check_graphs(const jit::vector<Node*>& graphs) {
+DEBUG_ONLY bool check_graphs(const jit::vector<Node*>& graphs) {
   for (auto& g : graphs) always_assert(check_graph(g));
   return true;
 }

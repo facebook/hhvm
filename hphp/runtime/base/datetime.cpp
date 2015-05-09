@@ -592,7 +592,7 @@ String DateTime::toString(DateFormat format) const {
   default:
     assert(false);
   }
-  throw_invalid_argument("format: %d", format);
+  throw_invalid_argument("format: %d", static_cast<int>(format));
   return String();
 }
 

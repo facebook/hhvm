@@ -18,6 +18,7 @@
 #if (!defined(__CYGWIN__) && !defined(__MINGW__) && !defined(__MSC_VER))
 #include <execinfo.h>
 #endif
+
 #include <bfd.h>
 #include <signal.h>
 #include <sys/types.h>

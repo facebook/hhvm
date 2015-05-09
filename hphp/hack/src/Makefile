@@ -96,8 +96,9 @@ LINKER_FLAGS=$(NATIVE_OBJECT_FILES) $(NATIVE_LIB_OPTS) $(EXTRA_LIB_OPTS) \
 	     $(EXTRA_NATIVE_LIB_OPTS) $(FRAMEWORK_OPTS) $(SECTCREATE)
 TARGETS=_build/hh_client.native _build/hh_single_type_check.native \
 		_build/hh_format.native _build/h2tp.native _build/test_unparser.native
+# Function the recursively find files, eg: $(call rwildcard,dir/to/look/in/,*.c)
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
-# Find all src files (all files not in _build dir)
+# Find all source files (all files not in _build dir)
 ALL_SRC_FILES=$(call rwildcard,$(patsubst _build,,$(wildcard *)),*.*)
 
 all: build-hhi-archive build-hack copy-hack-files
@@ -109,11 +110,17 @@ clean:
 
 build-hack: build-hack-native-deps build-hhi-archive $(TARGETS)
 
+# As there is no efficient way to calculate the dependencies of
+# the targets, we make them dependent on all files. In doing this
+# we ensure that no rebuild is necessary of nothing has changed
 $(TARGETS): $(ALL_SRC_FILES)
 	ocamlbuild -no-links $(INCLUDE_OPTS) $(LIB_OPTS) \
 		-lflags "$(LINKER_FLAGS)" \
 		hh_server.native hh_client.native hh_single_type_check.native \
 		hh_format.native h2tp.native test_unparser.native
+	# touching the targets is necessary because the ocaml build
+	# doens't change the modification dates of the targets if
+	# new binaries are exactly the same as the old ones
 	touch $(TARGETS)
 
 build-hack-native-deps: build-hack-stubs
@@ -122,8 +129,8 @@ build-hack-native-deps: build-hack-stubs
 	ocamlbuild -ocamlc "ocamlopt $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" $(NATIVE_OBJECT_FILES)
 
 build-hack-stubs:
-	if [ "const char* const BuildInfo_kRevision = \"$$(git rev-parse HEAD)\";" != "$$(cat utils/get_build_id.gen.c)" ]; then \
-	echo "const char* const BuildInfo_kRevision = \"$$(git rev-parse HEAD)\";" > utils/get_build_id.gen.c; fi
+	REV="const char* const BuildInfo_kRevision = \"$$(git rev-parse HEAD)\";"; \
+	if [ "$$REV" != "$$(cat utils/get_build_id.gen.c)" ]; then echo "$$REV" > utils/get_build_id.gen.c; fi
 
 build-hhi-archive:
 	mkdir -p ../bin

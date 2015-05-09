@@ -195,7 +195,7 @@ bool checkCfg(const IRUnit& unit) {
           src->inst()->toString()
         );
       }
-      for (auto& dst : inst.dsts()) defined_set.insert(&dst);
+      for (auto dst : inst.dsts()) defined_set.insert(dst);
     }
     defined_set.clear();
   }
@@ -206,13 +206,13 @@ bool checkCfg(const IRUnit& unit) {
   defined_set.clear();
   for (auto& blk : blocks) {
     for (auto& inst : blk->instrs()) {
-      for (auto& dst : inst.dsts()) {
+      for (auto dst : inst.dsts()) {
         always_assert_flog(
-          !defined_set.contains(&dst),
+          !defined_set.contains(dst),
           "SSATmp ({}) was defined multiple times",
-          dst.toString()
+          dst->toString()
         );
-        defined_set.insert(&dst);
+        defined_set.insert(dst);
       }
     }
   }
@@ -241,7 +241,7 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
     if (auto next  = block->next()) live |= livein[next];
     for (auto it = block->end(); it != block->begin();) {
       auto& inst = *--it;
-      for (auto& dst : inst.dsts()) {
+      for (auto dst : inst.dsts()) {
         live.erase(dst);
       }
       if (isCallOp(inst.op())) {

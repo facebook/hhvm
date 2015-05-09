@@ -48,7 +48,7 @@ IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
   , m_marker(inst->m_marker)
   , m_id(id)
   , m_srcs(m_numSrcs ? new (arena) SSATmp*[m_numSrcs] : nullptr)
-  , m_dst(nullptr)
+  , m_dest(nullptr)
   , m_block(nullptr)
   , m_extra(inst->m_extra ? cloneExtra(op(), inst->m_extra, arena)
                           : nullptr)
@@ -83,7 +83,7 @@ void IRInstruction::convertToNop() {
   m_srcs         = nop.m_srcs;
   m_numDsts      = nop.m_numDsts;
   m_hasTypeParam = nop.m_hasTypeParam;
-  m_dst          = nop.m_dst;
+  m_dest         = nop.m_dest;
   m_extra        = nullptr;
 }
 
@@ -208,7 +208,7 @@ SSATmp* IRInstruction::dst(unsigned i) const {
   if (i == 0 && m_numDsts == 0) return nullptr;
   assertx(i < m_numDsts);
   assertx(naryDst() || i == 0);
-  return hasDst() ? dst() : &m_dst[i];
+  return hasDst() ? dst() : m_dsts[i];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

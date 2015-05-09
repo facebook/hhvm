@@ -146,7 +146,10 @@ struct Block : boost::noncopyable {
   template<typename L> SSATmp* findSrc(unsigned i, L body);
 
   // execute body(P) for each predecessor block P of this block
-  template <typename L> void forEachPred(L body);
+  template <typename L> void forEachPred(L body) const;
+
+  // execute body(P) for each successor block P of this block
+  template <typename L> void forEachSucc(L body) const;
 
   // list-compatible interface; these delegate to m_instrs but also update
   // inst.m_block
@@ -274,12 +277,18 @@ SSATmp* Block::findSrc(unsigned i, L body) {
 }
 
 template <typename L> inline
-void Block::forEachPred(L body) {
+void Block::forEachPred(L body) const {
   for (auto i = m_preds.begin(), e = m_preds.end(); i != e;) {
     auto inst = i->inst();
     ++i;
     body(inst->block());
   }
+}
+
+template <typename L> inline
+void Block::forEachSucc(L body) const {
+  if (auto n = next()) body(n);
+  if (auto t = taken()) body(t);
 }
 
 inline Block::iterator Block::insert(iterator pos, IRInstruction* inst) {

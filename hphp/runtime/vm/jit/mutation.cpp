@@ -246,7 +246,7 @@ void reflowTypes(IRUnit& unit) {
         auto srcs = jmp.srcs();
         auto dsts = jmp.taken()->front().dsts();
         for (unsigned i = 0; i < n; ++i) {
-          if (srcs[i]->type() <= dsts[i].type()) continue;
+          if (srcs[i]->type() <= dsts[i]->type()) continue;
           again = true;
           break;
         }
@@ -286,6 +286,38 @@ void refineTmps(IRUnit& unit,
   RefineTmpsRec refiner{unit, &idoms, rpoBlocks};
   refiner.go(unit.entry());
   if (refiner.needsReflow) reflowTypes(unit);
+}
+
+SSATmp* insertPhi(IRUnit& unit, Block* blk,
+                  const jit::vector<SSATmp*>& inputs) {
+  assert(blk->numPreds() > 1);
+  auto label = &blk->front();
+  if (!label->is(DefLabel)) {
+    label = unit.defLabel(1, label->marker());
+    blk->insert(blk->begin(), label);
+  } else {
+    for (auto d = label->numDsts(); d--; ) {
+      auto result = label->dst(d);
+      uint32_t i = 0;
+      blk->forEachPred([&](Block* pred) {
+          if (result) {
+            auto& jmp = blk->back();
+            if (jmp.src(d) != inputs[i++]) {
+              result = nullptr;
+            }
+          }
+        });
+      if (result) return result;
+    }
+    unit.expandLabel(label, 1);
+  }
+
+  uint32_t i = 0;
+  blk->forEachPred([&](Block* pred) {
+      unit.expandJmp(&pred->back(), inputs[i++]);
+    });
+  retypeDests(label, &unit);
+  return label->dst(label->numDsts() - 1);
 }
 
 //////////////////////////////////////////////////////////////////////

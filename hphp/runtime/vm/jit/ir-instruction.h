@@ -224,8 +224,7 @@ struct IRInstruction {
    * Get the srcs/dsts as a folly::Range.
    */
   folly::Range<SSATmp**> srcs() const;
-  folly::Range<SSATmp*> dsts();
-  folly::Range<const SSATmp*> dsts() const;
+  folly::Range<SSATmp**> dsts();
 
   /*
    * Set the ith src.
@@ -237,7 +236,7 @@ struct IRInstruction {
    * instruction has NaryDst).
    */
   void setDst(SSATmp* newDst);
-  void setDsts(uint32_t numDsts, SSATmp* newDsts);
+  void setDsts(uint32_t numDsts, SSATmp** newDsts);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -350,7 +349,10 @@ private:
   BCMarker m_marker;
   const Id m_id;
   SSATmp** m_srcs;
-  SSATmp* m_dst;    // if HasDest or NaryDest
+  union {
+    SSATmp* m_dest; // if HasDest
+    SSATmp** m_dsts;// if NaryDest
+  };
   Block* m_block;   // what block owns this instruction
   Edge* m_edges;    // outgoing edges, if this is a block-end
   IRExtraData* m_extra;

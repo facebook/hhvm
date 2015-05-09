@@ -34,7 +34,7 @@ inline IRInstruction::IRInstruction(Opcode op,
   , m_marker(marker)
   , m_id(kTransient)
   , m_srcs(srcs)
-  , m_dst(nullptr)
+  , m_dest(nullptr)
   , m_block(nullptr)
   , m_edges(edges)
   , m_extra(nullptr)
@@ -161,19 +161,17 @@ inline SSATmp* IRInstruction::src(uint32_t i) const {
 
 inline SSATmp* IRInstruction::dst() const {
   assertx(!naryDst());
-  return m_dst;
+  return m_dest;
 }
 
 inline folly::Range<SSATmp**> IRInstruction::srcs() const {
   return folly::Range<SSATmp**>(m_srcs, m_numSrcs);
 }
 
-inline folly::Range<SSATmp*> IRInstruction::dsts() {
-  return folly::Range<SSATmp*>(m_dst, m_numDsts);
-}
-
-inline folly::Range<const SSATmp*> IRInstruction::dsts() const {
-  return folly::Range<const SSATmp*>(m_dst, m_numDsts);
+inline folly::Range<SSATmp**> IRInstruction::dsts() {
+  assertx(naryDst() || m_numDsts <= 1);
+  if (hasDst()) return folly::Range<SSATmp**>(&m_dest, m_numDsts);
+  return folly::Range<SSATmp**>(m_dsts, m_numDsts);
 }
 
 inline void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
@@ -183,14 +181,14 @@ inline void IRInstruction::setSrc(uint32_t i, SSATmp* newSrc) {
 
 inline void IRInstruction::setDst(SSATmp* newDst) {
   assertx(hasDst());
-  m_dst = newDst;
+  m_dest = newDst;
   m_numDsts = newDst ? 1 : 0;
 }
 
-inline void IRInstruction::setDsts(uint32_t numDsts, SSATmp* newDsts) {
+inline void IRInstruction::setDsts(uint32_t numDsts, SSATmp** newDsts) {
   assertx(naryDst());
   m_numDsts = numDsts;
-  m_dst = newDsts;
+  m_dsts = newDsts;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

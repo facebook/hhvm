@@ -55,10 +55,10 @@ void insertAfter(IRInstruction* definer, IRInstruction* inst) {
  * maybe-refcounted SSATmp.
  */
 void insertRefCountAsserts(IRUnit& unit, IRInstruction& inst) {
-  for (auto& dst : inst.dsts()) {
-    auto const t = dst.type();
+  for (auto dst : inst.dsts()) {
+    auto const t = dst->type();
     if (t <= TGen && t.maybe(TCounted)) {
-      insertAfter(&inst, unit.gen(DbgAssertRefCount, inst.marker(), &dst));
+      insertAfter(&inst, unit.gen(DbgAssertRefCount, inst.marker(), dst));
     }
   }
 }

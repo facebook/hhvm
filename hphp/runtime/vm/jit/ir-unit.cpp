@@ -38,13 +38,44 @@ IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
   IRInstruction inst(DefLabel, marker);
   auto const label = clone(&inst);
   if (numDst > 0) {
-    SSATmp* dsts = (SSATmp*) m_arena.alloc(numDst * sizeof(SSATmp));
+    auto dsts = static_cast<SSATmp*>(
+      m_arena.alloc(numDst * (sizeof(SSATmp) + sizeof(SSATmp*))));
+    auto dstsPtr = static_cast<SSATmp**>(static_cast<void*>(dsts + numDst));
     for (unsigned i = 0; i < numDst; ++i) {
-      new (&dsts[i]) SSATmp(m_nextTmpId++, label);
+      dstsPtr[i] = new (&dsts[i]) SSATmp(m_nextTmpId++, label);
     }
-    label->setDsts(numDst, dsts);
+    label->setDsts(numDst, dstsPtr);
   }
   return label;
+}
+
+void IRUnit::expandLabel(IRInstruction* label, unsigned extraDst) {
+  assertx(label->is(DefLabel));
+  assertx(extraDst > 0);
+  auto extra = static_cast<SSATmp*>(
+    m_arena.alloc(
+      extraDst * sizeof(SSATmp) +
+      (extraDst + label->numDsts()) * sizeof(SSATmp*)));
+  auto dstsPtr = static_cast<SSATmp**>(static_cast<void*>(extra + extraDst));
+  unsigned i = 0;
+  for (auto dst : label->dsts()) {
+    dstsPtr[i++] = dst;
+  }
+  for (unsigned j = 0; j < extraDst; j++) {
+    dstsPtr[i++] = new (&extra[j]) SSATmp(m_nextTmpId++, label);
+  }
+  label->setDsts(i, dstsPtr);
+}
+
+void IRUnit::expandJmp(IRInstruction* jmp, SSATmp* value) {
+  assertx(jmp->is(Jmp));
+  std::vector<SSATmp*> newSrcs(jmp->numSrcs() + 1);
+  size_t i = 0;
+  for (auto src : jmp->srcs()) {
+    newSrcs[i++] = src;
+  }
+  newSrcs[i++] = value;
+  replace(jmp, Jmp, jmp->taken(), std::make_pair(i, &newSrcs[0]));
 }
 
 Block* IRUnit::defBlock(Block::Hint hint) {

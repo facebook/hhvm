@@ -107,6 +107,14 @@ void insertNegativeAssertTypes(IRUnit&, const BlockList&);
  */
 void refineTmps(IRUnit&, const BlockList&, const IdomVector&);
 
+/*
+ * Insert a phi for inputs in blk. none of blk's input edges may be
+ * critical, blk->numPreds() must be equal to inputs.size(), and
+ * inputs.size() must be greater than 1.
+ * If there's already a suitable phi, it will be returned.
+ */
+SSATmp* insertPhi(IRUnit&, Block* blk, const jit::vector<SSATmp*>& inputs);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

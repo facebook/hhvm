@@ -322,8 +322,8 @@ bool supportsGVN(const IRInstruction* inst) {
 
 void initWithInstruction(IRInstruction* inst, ValueNumberTable& table) {
   // Each SSATmp starts out as the canonical name for itself.
-  for (auto& dst : inst->dsts()) {
-    table[&dst] = ValueNumberMetadata { &dst, &dst };
+  for (auto dst : inst->dsts()) {
+    table[dst] = ValueNumberMetadata { dst, dst };
   }
 
   for (auto src : inst->srcs()) {

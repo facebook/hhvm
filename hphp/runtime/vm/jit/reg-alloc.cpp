@@ -167,9 +167,9 @@ void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
         }
       }
       for (auto& d : inst.dsts()) {
-        tmps[&d] = &d;
+        tmps[d] = d;
         if (!try_wide || inst.isControlFlow() || !loadsCell(inst.op())) {
-          not_wide.set(d.id());
+          not_wide.set(d->id());
         }
       }
     }

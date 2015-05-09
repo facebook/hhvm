@@ -1372,8 +1372,8 @@ void find_alias_sets(Env& env) {
 
   for (auto& blk : env.rpoBlocks) {
     for (auto& inst : blk->instrs()) {
-      for (auto& src : inst.srcs()) add(src);
-      for (auto& dst : inst.dsts()) add(&dst);
+      for (auto src : inst.srcs()) add(src);
+      for (auto dst : inst.dsts()) add(dst);
     }
   }
 

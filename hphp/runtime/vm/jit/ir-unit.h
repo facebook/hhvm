@@ -205,6 +205,15 @@ struct IRUnit {
    */
   IRInstruction* defLabel(unsigned numDst, BCMarker marker);
 
+  /*
+   * Add some extra destinations to a defLabel.
+   */
+  void expandLabel(IRInstruction* label, unsigned extraDst);
+
+  /*
+   * Add an extra SSATmp to jmp.
+   */
+  void expandJmp(IRInstruction* jmp, SSATmp* value);
 private:
   // Contains Block, IRInstruction, and SSATmp objects.
   Arena m_arena;

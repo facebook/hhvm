@@ -14,9 +14,9 @@
 #define ETCH_LABEL(x)   .L##x
 #define ETCH_TYPE(x, y) /* Not used on Windows */
 #elif defined(__APPLE__)
-#define CFI(x)          /* not used on OSX */
-#define CFI2(x, y)      /* not used on OSX */
-#define CFI3C(x, y, z)  /* not used on OSX */
+#define CFI(x)          .cfi_##x
+#define CFI2(x, y)      .cfi_##x y
+#define CFI3C(x, y, z)  .cfi_##x y##, z
 #define ETCH_ALIGN16    .align 4 // on OSX this is 2^value
 #define ETCH_ALIGN8     .align 3
 #define ETCH_ALIGN4     .align 2

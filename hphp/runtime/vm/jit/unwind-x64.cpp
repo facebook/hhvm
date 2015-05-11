@@ -57,6 +57,8 @@ rds::Link<UnwindRDS> unwindRdsInfo(rds::kInvalidHandle);
 
 namespace {
 
+size_t fdeIdx;
+
 template<class T>
 void append_vec(std::vector<char>& v,
                 // Prevent template argument deduction:
@@ -71,7 +73,7 @@ void sync_regstate(_Unwind_Context* context) {
   assertx(tl_regState == VMRegState::DIRTY);
 
   uintptr_t frameRbp = _Unwind_GetGR(context, Debug::RBP);
-  uintptr_t frameRip = _Unwind_GetGR(context, Debug::RIP);
+  uintptr_t frameRip = _Unwind_GetIP(context);
   FTRACE(2, "syncing regstate for rbp: {:#x} rip: {:#x}\n", frameRbp, frameRip);
 
   /*
@@ -166,7 +168,7 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
 
 void deregister_unwind_region(std::vector<char>* p) {
   std::auto_ptr<std::vector<char> > del(p);
-  __deregister_frame(&(*p)[0]);
+  __deregister_frame(&(*p)[fdeIdx]);
 }
 
 }
@@ -179,12 +181,17 @@ tc_unwind_personality(int version,
                       _Unwind_Context* context) {
   using namespace abi;
   // Exceptions thrown by g++-generated code will have the class "GNUCC++"
-  // packed into a 64-bit int. For now we shouldn't be seeing exceptions from
-  // any other runtimes but this may change in the future.
+  // packed into a 64-bit int. libc++ has the class "CLNGC++". For now we
+  // shouldn't be seeing exceptions from any other runtimes but this may
+  // change in the future.
   DEBUG_ONLY constexpr uint64_t kMagicClass = 0x474e5543432b2b00;
   DEBUG_ONLY constexpr uint64_t kMagicDependentClass = 0x474e5543432b2b01;
+  DEBUG_ONLY constexpr uint64_t kLLVMMagicClass = 0x434C4E47432B2B00;
+  DEBUG_ONLY constexpr uint64_t kLLVMMagicDependentClass = 0x434C4E47432B2B01;
   assertx(exceptionClass == kMagicClass ||
-         exceptionClass == kMagicDependentClass);
+          exceptionClass == kMagicDependentClass ||
+          exceptionClass == kLLVMMagicClass ||
+          exceptionClass == kLLVMMagicDependentClass);
   assertx(version == 1);
 
   auto const& ti = typeInfoFromUnwindException(exceptionObj);
@@ -343,9 +350,8 @@ register_unwind_region(unsigned char* startAddr, size_t size) {
     /*
      * Null-terminated "augmentation string" (defines what the rest of
      * this thing is going to have.
-     *
-     * TODO: probably we should have a 'z' field to indicate length.
      */
+    append_vec<char>(buffer, 'z');
     append_vec<char>(buffer, 'P');
     append_vec<char>(buffer, '\0');
 
@@ -356,9 +362,18 @@ register_unwind_region(unsigned char* startAddr, size_t size) {
     // Return address column (in version 1, this is a single byte).
     append_vec<uint8_t>(buffer, Debug::RIP);
 
+    // Length of the augmentation data.
+    const size_t augIdx = buffer.size();
+    append_vec<uint8_t>(buffer, 9);
+
     // Pointer to the personality routine for the TC.
     append_vec<uint8_t>(buffer, DW_EH_PE_absptr);
     append_vec<uintptr_t>(buffer, uintptr_t(tc_unwind_personality));
+
+    // Fixup the augmentation data length field.  Note that it doesn't include
+    // the space for itself.
+    void* vp = &buffer[augIdx];
+    *static_cast<uint8_t*>(vp) = buffer.size() - augIdx - sizeof(uint8_t);
 
     /*
      * Define a program for the CIE.  This explains to the unwinder
@@ -391,10 +406,10 @@ register_unwind_region(unsigned char* startAddr, size_t size) {
 
     // Fixup the length field.  Note that it doesn't include the space
     // for itself.
-    void* vp = &buffer[0];
+    vp = &buffer[0];
     *static_cast<uint32_t*>(vp) = buffer.size() - sizeof(uint32_t);
   }
-  const size_t fdeIdx = buffer.size();
+  fdeIdx = buffer.size();
   {
     // Reserve space for FDE length.
     append_vec<uint32_t>(buffer, 0);
@@ -409,6 +424,10 @@ register_unwind_region(unsigned char* startAddr, size_t size) {
     append_vec<unsigned char*>(buffer, startAddr);
     append_vec<size_t>(buffer, size);
 
+    // Length of the augmentation data in this FDE. This field must present if
+    // 'z' is set in CIE.
+    append_vec<uint8_t>(buffer, 0);
+
     // Fixup the length field for this FDE.  Again length doesn't
     // include the length field itself.
     void* vp = &buffer[fdeIdx];
@@ -418,7 +437,7 @@ register_unwind_region(unsigned char* startAddr, size_t size) {
   // no more FDEs sharing this CIE.
   append_vec<uint32_t>(buffer, 0);
 
-  __register_frame(&buffer[0]);
+  __register_frame(&buffer[fdeIdx]);
 
   return std::shared_ptr<std::vector<char>>(
     bufferMem.release(),

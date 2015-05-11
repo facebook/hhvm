@@ -2548,6 +2548,10 @@ void ExecutionContext::recordLastError(const Exception &e, int errnum) {
   m_lastErrorNum = errnum;
   m_lastErrorPath = String::attach(getContainingFileName());
   m_lastErrorLine = getLine();
+  if (auto const ee = dynamic_cast<const ExtendedException *>(&e)) {
+    m_lastErrorPath = ee->getFileAndLine().first;
+    m_lastErrorLine = ee->getFileAndLine().second;
+  }
 }
 
 void ExecutionContext::clearLastError() {

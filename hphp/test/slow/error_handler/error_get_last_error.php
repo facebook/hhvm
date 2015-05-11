@@ -10,7 +10,7 @@ function handleError($errno, $errstr, $errfile, $errline) {
 }
 
 function shutdownFunc() {
-  var_dump(error_get_last() != NULL);
+  var_dump(error_get_last()['line']);
 }
 
 set_error_handler('handleError');

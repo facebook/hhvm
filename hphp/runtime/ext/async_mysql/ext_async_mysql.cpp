@@ -1239,8 +1239,10 @@ bool HHVM_METHOD(AsyncMysqlRowIterator, valid) {
 /*?? return as string? */
 String HHVM_METHOD(AsyncMysqlRowIterator, current) {
   auto* data = Native::data<AsyncMysqlRowIterator>(this_);
-  return HHVM_MN(AsyncMysqlRow, getFieldAsString)(data->m_row.get(),
-                                                  data->m_field_number);
+  return HHVM_MN(AsyncMysqlRow, getFieldAsString)(
+    data->m_row.get(),
+    (uint64_t)data->m_field_number
+  );
 }
 
 int64_t HHVM_METHOD(AsyncMysqlRowIterator, key) {

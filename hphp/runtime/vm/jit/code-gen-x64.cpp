@@ -4369,19 +4369,6 @@ void CodeGenerator::cgAKExistsArr(IRInstruction* inst) {
   auto const keyTy = inst->src(1)->type();
   auto& v = vmain();
 
-  if (keyTy <= TInitNull) {
-    cgCallHelper(
-      v,
-      arrayCallIfLowMem(inst, &g_array_funcs.existsStr),
-      callDest(inst),
-      SyncOptions::kNoSyncPoint,
-      argGroup(inst)
-        .ssa(0)
-        .immPtr(staticEmptyString())
-    );
-    return;
-  }
-
   auto const keyInfo = checkStrictlyInteger(keyTy);
   auto const target =
     keyInfo.checkForInt ? CppCall::direct(ak_exist_string) :
@@ -4407,12 +4394,6 @@ void CodeGenerator::cgAKExistsArr(IRInstruction* inst) {
 void CodeGenerator::cgAKExistsObj(IRInstruction* inst) {
   auto const keyTy = inst->src(1)->type();
   auto& v = vmain();
-
-  if (keyTy <= TInitNull) {
-    v << ldimmq{0, dstLoc(inst, 0).reg()};
-    m_state.catch_calls[inst->taken()] = CatchCall::CPP;
-    return;
-  }
 
   cgCallHelper(
     v,

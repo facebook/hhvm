@@ -1587,11 +1587,11 @@ To string conversions:
 
   Has the effects of the php + operator on the two source arrays.
 
-| AKExistsArr, D(Bool), S(Arr) S(InitNull,Int,Str), NF
+| AKExistsArr, D(Bool), S(Arr) S(Int,Str), NF
 
   Has the effects of array_key_exists(S0, S1).
 
-| AKExistsObj, D(Bool), S(Obj) S(InitNull,Int,Str), Er
+| AKExistsObj, D(Bool), S(Obj) S(Int,Str), Er
 
   Has the effects of array_key_exists(S0, S1) on an object S0. This either does
   collection accesses, or uses the ArrayAccess API.

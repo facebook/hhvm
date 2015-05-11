@@ -1082,15 +1082,21 @@ void emitIdx(IRGS& env) {
 
 void emitAKExists(IRGS& env) {
   auto const arr = popC(env);
-  auto const key = popC(env);
+  auto key = popC(env);
 
-  if (!arr->isA(TArr) && !arr->isA(TObj)) {
-    PUNT(AKExists_badArray);
+  if (!arr->isA(TArr) && !arr->isA(TObj)) PUNT(AKExists_badArray);
+
+  if (key->isA(TInitNull)) {
+    if (arr->isA(TObj)) {
+      push(env, cns(env, false));
+      gen(env, DecRef, arr);
+      return;
+    }
+
+    key = cns(env, staticEmptyString());
   }
-  if (!key->isA(TStr) && !key->isA(TInt) &&
-      !key->isA(TInitNull)) {
-    PUNT(AKExists_badKey);
-  }
+
+  if (!key->isA(TStr) && !key->isA(TInt)) PUNT(AKExists_badKey);
 
   auto const val =
     gen(env, arr->isA(TArr) ? AKExistsArr : AKExistsObj, arr, key);

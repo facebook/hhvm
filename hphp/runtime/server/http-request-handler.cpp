@@ -181,6 +181,7 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
   transport->disableCompression();
 
   transport->sendRaw((void*)data, len, 200, compressed);
+  transport->onSendEnd();
 }
 
 void HttpRequestHandler::logToAccessLog(Transport* transport) {
@@ -354,7 +355,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     if (cacheableDynamicContent) {
       // check against dynamic content cache
       assert(transport->getUrl());
-      string key = path + transport->getUrl();
+      string key = absPath + transport->getUrl();
       if (DynamicContentCache::TheCache.find(key, data, len, compressed)) {
         sendStaticContent(transport, data, len, 0, compressed, path, ext);
         ServerStats::LogPage(path, 200);

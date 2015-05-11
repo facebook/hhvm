@@ -482,7 +482,7 @@ static bool fill_bfd_cache(const char *filename, bfd_cache *p) {
 #ifdef BFD_DECOMPRESS
   abfd->flags |= BFD_DECOMPRESS;
 #endif
-  p->abfd = abfd;
+  p->abfd = nullptr;
   p->syms = nullptr;
   char **match;
   if (bfd_check_format(abfd, bfd_archive) ||
@@ -491,6 +491,7 @@ static bool fill_bfd_cache(const char *filename, bfd_cache *p) {
     bfd_close(abfd);
     return true;
   }
+  p->abfd = abfd;
   return false;
 }
 

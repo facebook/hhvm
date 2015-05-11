@@ -932,8 +932,6 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
   String header = HHVM_FN(rtrim)(str);
 
   // new line safety check
-  // NOTE: PHP actually allows "\n " and "\n\t" to fall through. Is that bad
-  // for security?
   if (header.find('\n') >= 0 || header.find('\r') >= 0) {
     raise_error("Header may not contain more than a single header, "
                 "new line detected");

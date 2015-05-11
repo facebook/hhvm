@@ -14,6 +14,15 @@ PROJECT(${PACKAGE_NAME} C CXX ASM)
 
 MARK_AS_ADVANCED(CLEAR CMAKE_INSTALL_PREFIX)
 IF(APPLE)
+  # CMake really likes finding libraries inside OS X frameworks. This can
+  # create super unexpected results, such as the LDAP framework, where the
+  # ldap.h header there just consists of "#include <ldap.h>" -- obviously
+  # assuming /usr/include appears on the include path before that framework
+  # (which wasn't really supposed to be on the include path at all). This
+  # leads to a hilarious recursive include and general fireworks. Instead,
+  # tell CMake to search frameworks *last*, if it doesn't find something in
+  # /usr (or MacPorts/Homebrew).
+  SET(CMAKE_FIND_FRAMEWORK "LAST")
   MARK_AS_ADVANCED(CMAKE_OSX_ARCHITECTURES
     CMAKE_OSX_DEPLOYMENT_TARGET
     CMAKE_OSX_SYSROOT)

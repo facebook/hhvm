@@ -393,18 +393,6 @@ static size_t genBlock(CodegenState& state, Vout& v, Vout& vc, Block* block) {
   return hhir_count;
 }
 
-auto const vasm_gp = x64::abi.gpUnreserved | RegSet(rAsm).add(r11);
-auto const vasm_simd = x64::kXMMRegs;
-UNUSED const Abi vasm_abi {
-  .gpUnreserved = vasm_gp,
-  .gpReserved = x64::abi.gp() - vasm_gp,
-  .simdUnreserved = vasm_simd,
-  .simdReserved = x64::abi.simd() - vasm_simd,
-  .calleeSaved = x64::kCalleeSaved,
-  .sf = x64::abi.sf,
-  .canSpill = true
-};
-
 /*
  * Print side-by-side code dumps comparing vasm output with LLVM.
  */
@@ -605,7 +593,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
       // vasm, just to see how big it is. The cost of this is trivial compared
       // to the LLVM code generation.
       if (RuntimeOption::EvalJitLLVMKeepSize) {
-        optimizeX64(x64_unit, vasm_abi);
+        optimizeX64(x64_unit, x64::abi);
         optimized = true;
         emitX64(x64_unit, areas, nullptr);
         vasm_size = areas[0].code.frontier() - areas[0].start;
@@ -632,7 +620,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
 
         mcg->setUseLLVM(false);
         resetCode();
-        if (!optimized) optimizeX64(x64_unit, vasm_abi);
+        if (!optimized) optimizeX64(x64_unit, x64::abi);
         emitX64(x64_unit, areas, state.asmInfo);
 
         if (auto compare = dynamic_cast<const CompareLLVMCodeGen*>(&e)) {
@@ -640,7 +628,7 @@ void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
         }
       }
     } else {
-      optimizeX64(vunit, vasm_abi);
+      optimizeX64(vunit, x64::abi);
       emitX64(vunit, vasm.areas(), state.asmInfo);
     }
   }

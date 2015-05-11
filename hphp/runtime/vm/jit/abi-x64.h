@@ -73,38 +73,37 @@ constexpr Reg64 rAsm         = reg::r10;
  */
 
 const RegSet kGPCallerSaved =
-  reg::rax | reg::rcx | reg::rdx | reg::rsi | reg::rdi | reg::r8 | reg::r9;
+  reg::rax | reg::rcx | reg::rdx | reg::rsi | reg::rdi |
+  reg::r8  | reg::r9  | reg::r10 | reg::r11;
 
 const RegSet kGPCalleeSaved =
   reg::rbx | reg::r13 | reg::r14 | reg::r15;
 
 const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
 
-const RegSet kGPReserved =
-  reg::rsp | rVmFp | rVmTl | reg::r11 | rAsm;
+const RegSet kGPReserved = reg::rsp | rVmFp | rVmTl;
 
 const RegSet kGPRegs = kGPUnreserved | kGPReserved;
 
 const RegSet kXMMCallerSaved =
-  reg::xmm0 | reg::xmm1 | reg::xmm2 | reg::xmm3 |
-  reg::xmm4 | // reg::xmm5 | reg::xmm6 | reg::xmm7 // for vasm
-  reg::xmm8 | reg::xmm9 | reg::xmm10 | reg::xmm11 |
-  reg::xmm12 | reg::xmm13 | reg::xmm14; // | reg::xmm15 // for vasm
+  reg::xmm0  | reg::xmm1  | reg::xmm2  | reg::xmm3 |
+  reg::xmm4  | reg::xmm5  | reg::xmm6  | reg::xmm7 |
+  reg::xmm8  | reg::xmm9  | reg::xmm10 | reg::xmm11 |
+  reg::xmm12 | reg::xmm13 | reg::xmm14 | reg::xmm15;
 
 const RegSet kXMMCalleeSaved;
 
 const RegSet kXMMUnreserved = kXMMCallerSaved | kXMMCalleeSaved;
 
-const RegSet kXMMReserved =
-  reg::xmm5 | reg::xmm6 | reg::xmm7 | reg::xmm15; // for vasm
+const RegSet kXMMReserved;
+
+const RegSet kXMMRegs = kXMMUnreserved | kXMMReserved;
 
 const RegSet kCallerSaved = kGPCallerSaved | kXMMCallerSaved;
 
 const RegSet kCalleeSaved = kGPCalleeSaved | kXMMCalleeSaved;
 
 const RegSet kSF = RegSet(RegSF{0});
-
-const RegSet kXMMRegs = kXMMUnreserved | kXMMReserved;
 
 //////////////////////////////////////////////////////////////////////
 /*

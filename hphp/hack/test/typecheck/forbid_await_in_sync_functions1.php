@@ -1,4 +1,4 @@
- <?hh // strict
+<?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -10,5 +10,5 @@
  */
 
 function bar(Awaitable<string> $x): void {
-  print(await $x);
+  print (await $x);
 }

@@ -12,7 +12,7 @@
 function test(): int {
   $x = null;
   do {
-    if(true) {
+    if (true) {
       continue;
     }
     $x = 0;

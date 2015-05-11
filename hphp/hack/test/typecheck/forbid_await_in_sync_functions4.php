@@ -1,4 +1,4 @@
- <?hh // strict
+<?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -9,6 +9,9 @@
  *
  */
 
-function char_select(Awaitable<int> $fireboy, Awaitable<string> $watergirl) : Awaitable<int> {
+function char_select(
+  Awaitable<int> $fireboy,
+  Awaitable<string> $watergirl,
+): Awaitable<int> {
   return await $fireboy;
 }

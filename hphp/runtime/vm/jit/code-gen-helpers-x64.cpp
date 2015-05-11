@@ -142,15 +142,15 @@ void emitIncRef(Vout& v, Vreg base) {
   emitAssertFlagsNonNegative(v, sf);
 
   // if the refcount is greater than 1, set the one-bit ref
-  auto const sf2 = v.makeReg();
-  v << cmplim{1, base[FAST_REFCOUNT_OFFSET], sf2};
-  ifThen(v, CC_NLE, sf2, [&](Vout& v) {
-    // TODO don't hardcode this
-    v << orwim{1, base[10], v.makeReg()};
-  });
+  if (BITREF_SURVEY) {
+    auto const sf2 = v.makeReg();
+    v << cmplim{1, base[FAST_REFCOUNT_OFFSET], sf2};
+    ifThen(v, CC_NLE, sf2, [&](Vout& v) {
+      // TODO don't hardcode this
+      v << orwim{1, base[10], v.makeReg()};
+    });
+  }
 
-  TRACE_SET_MOD(countable);
-  TRACE(1, "emitIncRef\n");
 }
 
 void emitIncRef(Asm& as, PhysReg base) {

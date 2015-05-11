@@ -581,7 +581,7 @@ typename ShuffleReturn<setRef>::return_type
 arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   static_assert(keyType != KeyType::Any,
                 "KeyType::Any is not supported in arraySetMImpl");
-  cow_check_occurred(a);
+  if (BITREF_SURVEY) cow_check_occurred(a);
   assertx(cellIsPlausible(value));
   const bool copy = a->hasMultipleRefs();
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)

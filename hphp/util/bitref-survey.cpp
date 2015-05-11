@@ -156,8 +156,8 @@ BitrefSurvey::~BitrefSurvey() {
   
   fprintf(fp, "--------------------------------------------------------------------------------\n");
   
-  unsigned int numBuckets = str_rc_copy_histogram.getNumBuckets();
-  /*fprintf(fp, "String length:    0-   0 %8lu\n", str_rc_copy_histogram.getBucketByIndex(0).count);
+  /*unsigned int numBuckets = str_rc_copy_histogram.getNumBuckets();
+  fprintf(fp, "String length:    0-   0 %8lu\n", str_rc_copy_histogram.getBucketByIndex(0).count);
   for (unsigned int n = 1; n < numBuckets - 1; n++) {
     fprintf(fp, "               %4u-%4u %8lu\n", str_rc_copy_histogram.getBucketMin(n),
         str_rc_copy_histogram.getBucketMax(n), str_rc_copy_histogram.getBucketByIndex(n).count);

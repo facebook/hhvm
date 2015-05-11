@@ -1243,7 +1243,7 @@ inline Variant &concat_assign(Variant &v1, const char* s2) = delete;
 inline Variant &concat_assign(Variant &v1, const String& s2) {
   if (v1.getType() == KindOfString) {
     auto& str = v1.asStrRef();
-    cow_check_occurred(str.get());
+    if (BITREF_SURVEY) cow_check_occurred(str.get());
     if (str.get()->hasExactlyOneRef()) {
       str += StringSlice{s2.data(), static_cast<uint32_t>(s2.size())};
       return v1;

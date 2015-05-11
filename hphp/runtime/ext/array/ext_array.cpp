@@ -1284,7 +1284,7 @@ static Variant iter_op_impl(VRefParam refParam, OpPtr op, NonArrayRet nonArray,
 
   auto ad = cell.m_data.parr;
   auto constexpr doCow = !std::is_same<DoCow, NoCow>::value;
-  cow_check_occurred(ad);
+  if (BITREF_SURVEY) cow_check_occurred(ad);
   if (doCow && ad->hasMultipleRefs() && !(ad->*pred)() &&
       !ad->noCopyOnWrite()) {
     ad = ad->copy();

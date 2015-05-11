@@ -1586,7 +1586,7 @@ void Translator::addTranslation(const TransRec& transRec) {
                         HPHP::Timer::GetCurrentTimeMicros() - m_createdTime,
                         folly::format("{}:{}:{}",
                           transRec.src.unit()->filepath()->data(),
-                          transRec.src.getFuncId(),
+                          transRec.src.funcID(),
                           transRec.src.offset()).str().c_str(),
                         transRec.aLen,
                         transRec.acoldLen,

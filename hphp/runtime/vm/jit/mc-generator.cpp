@@ -164,8 +164,8 @@ bool shouldPGOFunc(const Func& func) {
 
 bool MCGenerator::profileSrcKey(SrcKey sk) const {
   if (!shouldPGOFunc(*sk.func())) return false;
-  if (m_tx.profData()->optimized(sk.getFuncId())) return false;
-  if (m_tx.profData()->profiling(sk.getFuncId())) return true;
+  if (m_tx.profData()->optimized(sk.funcID())) return false;
+  if (m_tx.profData()->profiling(sk.funcID())) return true;
 
   // Don't start profiling new functions if the size of either main or
   // prof is already above Eval.JitAMaxUsage.
@@ -307,7 +307,7 @@ MCGenerator::getTranslation(const TranslArgs& args) {
   SKTRACE(2, sk,
           "getTranslation: curUnit %s funcId %x offset %d\n",
           sk.unit()->filepath()->data(),
-          sk.getFuncId(),
+          sk.funcID(),
           sk.offset());
   SKTRACE(2, sk, "   funcId: %x \n", sk.func()->getFuncId());
 
@@ -1783,7 +1783,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
   // otherwise there's some chance of hitting in the reader threads whose
   // metadata is not yet visible.
   TRACE(1, "newTranslation: %p  sk: (func %d, bcOff %d)\n",
-        start, sk.getFuncId(), sk.offset());
+        start, sk.funcID(), sk.offset());
   srcRec.newTranslation(start, inProgressTailBranches);
 
   TRACE(1, "mcg: %zd-byte tracelet\n", code.main().frontier() - start);
@@ -2098,7 +2098,7 @@ bool MCGenerator::addDbgGuards(const Unit* unit) {
       SrcKey const sk = SrcKey::fromAtomicInt(it->first);
       // We may have a SrcKey to a deleted function. NB: this may miss a
       // race with deleting a Func. See task #2826313.
-      if (!Func::isFuncIdValid(sk.getFuncId())) continue;
+      if (!Func::isFuncIdValid(sk.funcID())) continue;
       SrcRec* sr = it->second;
       if (sr->unitMd5() == unit->md5() &&
           !sr->hasDebuggerGuard() &&

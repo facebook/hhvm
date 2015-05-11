@@ -82,7 +82,7 @@ TransRec::print(uint64_t profCount) const {
     "  src.resumed = {}\n"
     "  src.bcStart = {}\n"
     "  src.blocks = {}\n",
-    id, md5, src.getFuncId(),
+    id, md5, src.funcID(),
     funcName.empty() ? "Pseudo-main" : funcName,
     (int32_t)src.resumed(),
     src.offset(),

@@ -169,7 +169,7 @@ void OfflineTransData::loadTCData(string dumpDir) {
     always_assert(tid == tRec.id);
     addTrans(tRec, profCount);
 
-    funcIds.insert(tRec.src.getFuncId());
+    funcIds.insert(tRec.src.funcID());
 
     if (tRec.aStart) {
       transAddrRanges.push_back(
@@ -230,7 +230,7 @@ uint64_t OfflineTransData::findFuncTrans(uint32_t selectedFuncId,
 
   for (uint32_t tid = 0; tid < nTranslations; tid++) {
     if (translations[tid].kind != TransKind::Anchor &&
-        translations[tid].src.getFuncId() == selectedFuncId) {
+        translations[tid].src.funcID() == selectedFuncId) {
 
       inodes->push_back(tid);
 
@@ -256,13 +256,13 @@ void OfflineTransData::addControlArcs(uint32_t selectedFuncId,
     std::vector<TCA> jmpTargets;
     transCode->getTransJmpTargets(getTransRec(transId), &jmpTargets);
 
-    auto const srcFuncId = getTransRec(transId)->src.getFuncId();
+    auto const srcFuncId = getTransRec(transId)->src.funcID();
 
     for (size_t i = 0; i < jmpTargets.size(); i++) {
       TransID targetId = getTransStartingAt(jmpTargets[i]);
       if (targetId != INVALID_ID &&
           // filter jumps to prologues of other funcs for now
-          getTransRec(targetId)->src.getFuncId() == srcFuncId &&
+          getTransRec(targetId)->src.funcID() == srcFuncId &&
           getTransRec(targetId)->kind != TransKind::Anchor) {
 
         addControlArc(transId, targetId);
@@ -286,7 +286,7 @@ void OfflineTransData::printTransRec(TransID transId,
     "  src.guards = {}\n",
     tRec->id,
     tRec->md5,
-    tRec->src.getFuncId(),
+    tRec->src.funcID(),
     tRec->funcName,
     tRec->src.resumed(),
     tRec->src.offset(),

@@ -122,10 +122,10 @@ uint32_t RegionDesc::instrSize() const {
 
 SrcKey RegionDesc::lastSrcKey() const {
   assertx(!empty());
-  FuncId startFuncId = start().getFuncId();
+  FuncId startFuncId = start().funcID();
   for (int i = m_blocks.size() - 1; i >= 0; i--) {
     SrcKey sk = m_blocks[i]->last();
-    if (sk.getFuncId() == startFuncId) {
+    if (sk.funcID() == startFuncId) {
       return sk;
     }
   }

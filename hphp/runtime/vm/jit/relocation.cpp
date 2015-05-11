@@ -402,7 +402,7 @@ String perfRelocMapInfo(
                                      blob.size());
   String id;
   if (sk.valid()) {
-    int fid = sk.getFuncId();
+    int fid = sk.funcID();
     if (&code.blockFor(start) == &code.prof()) {
       // use -ve ids for translations we don't want
       // to relocate (currently just profiling trs).
@@ -439,7 +439,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest) {
     if (!sk.valid()) return false;
     // But if the func has been removed from the AtomicHashMap,
     // we don't want to process it.
-    return !Func::isFuncIdValid(sk.getFuncId());
+    return !Func::isFuncIdValid(sk.funcID());
   };
 
   RelocationInfo rel;

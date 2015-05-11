@@ -89,7 +89,7 @@ bool match_bindjcc1st(const Vunit& unit, Vlabel t0, Vlabel t1) {
     const auto& bj1 = unit.blocks[t1].code.back().bindjmp_;
     return addr0 == addr1 &&
            bj0.target.resumed() == bj1.target.resumed() &&
-           bj0.target.getFuncId() == bj1.target.getFuncId() &&
+           bj0.target.funcID() == bj1.target.funcID() &&
            bj0.spOff == bj1.spOff;
   }
   return false;

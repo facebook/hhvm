@@ -172,7 +172,7 @@ Func* ProfTransRec::func() const {
 }
 
 FuncId ProfTransRec::funcId() const {
-  return m_sk.getFuncId();
+  return m_sk.funcID();
 }
 
 RegionDescPtr ProfTransRec::region() const {
@@ -380,7 +380,7 @@ TransID ProfData::addTransPrologue(TransKind kind, SrcKey sk,
   m_transRecs.emplace_back(new ProfTransRec(transId, kind, sk, nArgs));
   if (kind == TransKind::Proflogue) {
     // only Proflogue translations need an entry in the m_prologueDB
-    m_prologueDB.add(sk.getFuncId(), nArgs, transId);
+    m_prologueDB.add(sk.funcID(), nArgs, transId);
   }
   return transId;
 }

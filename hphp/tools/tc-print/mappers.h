@@ -108,7 +108,7 @@ public:
 
   folly::Optional<FuncId> operator()(const TransID& tid) {
     always_assert(tdata);
-    return tdata->getTransRec(tid)->src.getFuncId();
+    return tdata->getTransRec(tid)->src.funcID();
   }
 };
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,15 +17,18 @@
 #define incl_HPHP_SRCKEY_H_
 
 #include "hphp/runtime/base/types.h"
-
-#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/hhbc.h"
 
 #include <boost/operators.hpp>
-#include <tuple>
 
 namespace HPHP {
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+struct Func;
+struct Unit;
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * A SrcKey is a logical source instruction---it's enough to identify
@@ -34,150 +37,115 @@ namespace HPHP {
 struct SrcKey : private boost::totally_ordered<SrcKey> {
   static_assert(sizeof(FuncId) == sizeof(uint32_t), "");
   static_assert(sizeof(Offset) == sizeof(uint32_t), "");
-  typedef uint64_t AtomicInt;
+
+  using AtomicInt = uint64_t;
   struct Hasher;
 
-  SrcKey()
-    : m_funcId(InvalidFuncId)
-    , m_offset(0)
-    , m_resumed(false)
-  {}
+  /////////////////////////////////////////////////////////////////////////////
 
-  SrcKey(const Func* f, Offset off, bool resumed)
-    : m_funcId(f->getFuncId())
-    , m_offset((uint32_t)off)
-    , m_resumed(resumed)
-  {
-    assert(0 <= (int32_t)off);
-  }
+  /*
+   * Invalid SrcKey constructor.
+   */
+  SrcKey();
 
-  SrcKey(const Func* f, PC i, bool resumed)
-    : m_funcId(f->getFuncId())
-    , m_offset((uint32_t)f->unit()->offsetOf(i))
-    , m_resumed(resumed)
-  {
-    assert(0 <= (int32_t)f->unit()->offsetOf(i));
-  }
+  SrcKey(const Func* f, Offset off, bool resumed);
+  SrcKey(const Func* f, PC pc, bool resumed);
+  SrcKey(FuncId funcId, Offset off, bool resumed);
 
-  SrcKey(FuncId funcId, Offset off, bool resumed)
-    : m_funcId{funcId}
-    , m_offset{(uint32_t)off}
-    , m_resumed{resumed}
-  {
-    assert(0 <= (int32_t)off);
-  }
+  SrcKey(SrcKey other, Offset off);
 
-  SrcKey(SrcKey other, Offset off)
-    : m_funcId{other.getFuncId()}
-    , m_offset{(uint32_t)off}
-    , m_resumed{other.resumed()}
-  {
-    assert(0 <= (int32_t)off);
-  }
+  explicit SrcKey(AtomicInt in);
+  static SrcKey fromAtomicInt(AtomicInt in);
 
-  explicit SrcKey(AtomicInt in)
-    : m_atomicInt(in)
-  {}
+  /////////////////////////////////////////////////////////////////////////////
 
-  bool valid() const {
-    return m_funcId != InvalidFuncId;
-  }
+  /*
+   * Whether the SrcKey has a valid FuncId.
+   *
+   * Does not check for validity of any other fields.
+   */
+  bool valid() const;
 
-  // Packed representation of SrcKeys for use in contexts where we
-  // want atomicity.  (SrcDB.)
-  AtomicInt toAtomicInt() const {
-    return m_atomicInt;
-  }
-  static SrcKey fromAtomicInt(AtomicInt in) {
-    return SrcKey { in };
-  }
+  /*
+   * Packed representation of SrcKeys for use in contexts (e.g. the SrcDB)
+   * where we want atomicity.
+   */
+  AtomicInt toAtomicInt() const;
 
-  void setFuncId(FuncId id) {
-    assert(id != InvalidFuncId);
-    m_funcId = id;
-  }
+  /*
+   * Direct accessors.
+   */
+  FuncId funcID() const;
+  int offset() const;
+  bool resumed() const;
 
-  FuncId getFuncId() const {
-    assert(m_funcId != InvalidFuncId);
-    return m_funcId;
-  }
+  /*
+   * Derived accessors.
+   */
+  const Func* func() const;
+  const Unit* unit() const;
+  Op op() const;
+  PC pc() const;
 
-  const Func* func() const {
-    return Func::fromFuncId(m_funcId);
-  }
+  /////////////////////////////////////////////////////////////////////////////
 
-  const Unit* unit() const {
-    return func()->unit();
-  }
+  /*
+   * Set this SrcKey's offset.
+   *
+   * Does not perform any bounds or consistency checks.
+   */
+  void setOffset(Offset o);
 
-  Op op() const {
-    return unit()->getOpcode(offset());
-  }
-
-  PC pc() const {
-    return unit()->at(offset());
-  }
-
-  std::string showInst() const;
-
-  void setOffset(Offset o) {
-    assert(0 <= (int32_t)o);
-    m_offset = (uint32_t)o;
-  }
-
-  int offset() const {
-    return m_offset;
-  }
-
-  bool resumed() const {
-    return m_resumed;
-  }
-
-  OffsetSet succOffsets() const {
-    return instrSuccOffsets((Op*)pc(), unit());
-  }
+  /*
+   * Get all possible Offsets for the next bytecode.
+   */
+  OffsetSet succOffsets() const;
 
   /*
    * Advance the SrcKey to the next instruction.
    *
-   * If the SrcKey points to the last instruction in a function, this
-   * will advance past the end of the function, and potentially
-   * contain an invalid bytecode offset.
+   * If the SrcKey points to the last instruction in a function, this will
+   * advance past the end of the function, and potentially contain an invalid
+   * bytecode offset.
    */
-  void advance(const Unit* u = nullptr) {
-    m_offset += instrLen((Op*)(u ? u : unit())->at(offset()));
-  }
+  void advance(const Unit* u = nullptr);
 
   /*
-   * Return a SrcKey representing the next instruction, without
-   * mutating this SrcKey.
+   * Return a SrcKey representing the next instruction, without mutating this
+   * SrcKey.
    */
-  SrcKey advanced(const Unit* u = nullptr) const {
-    auto tmp = *this;
-    tmp.advance(u);
-    return tmp;
-  }
+  SrcKey advanced(const Unit* u = nullptr) const;
 
-  bool operator==(const SrcKey& r) const {
-    return m_atomicInt == r.m_atomicInt;
-  }
+  /////////////////////////////////////////////////////////////////////////////
 
-  bool operator<(const SrcKey& r) const {
-    return m_atomicInt < r.m_atomicInt;
-  }
+  /*
+   * Comparisons.
+   *
+   * SrcKeys are ordered by their AtomicInt values.
+   */
+  bool operator==(const SrcKey& r) const;
+  bool operator<(const SrcKey& r) const;
 
+  /*
+   * Stringification.
+   */
+  std::string showInst() const;
   std::string getSymbol() const;
+
+  /////////////////////////////////////////////////////////////////////////////
 
 private:
   union {
     AtomicInt m_atomicInt;
     struct {
-      FuncId m_funcId;
+      FuncId m_funcID;
       uint32_t m_offset:31;
       bool m_resumed:1;
     };
   };
 };
+
+///////////////////////////////////////////////////////////////////////////////
 
 struct SrcKey::Hasher {
   size_t operator()(SrcKey sk) const {
@@ -185,9 +153,9 @@ struct SrcKey::Hasher {
   }
 };
 
-typedef hphp_hash_set<SrcKey,SrcKey::Hasher> SrcKeySet;
+using SrcKeySet = hphp_hash_set<SrcKey,SrcKey::Hasher>;
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 std::string show(SrcKey sk);
 std::string showShort(SrcKey sk);
@@ -196,6 +164,10 @@ void sktrace(SrcKey sk, const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 #define SKTRACE(level, sk, ...) \
   ONTRACE(level, sktrace(sk, __VA_ARGS__))
 
+///////////////////////////////////////////////////////////////////////////////
+
 }
+
+#include "hphp/runtime/vm/srckey-inl.h"
 
 #endif

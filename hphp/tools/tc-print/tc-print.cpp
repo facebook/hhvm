@@ -282,7 +282,7 @@ int compTransSrc(int i, int j) {
 void sortSrc() {
   for (uint32_t tid = 0; tid < NTRANS; tid++) {
     if (selectedFuncId == INVALID_ID ||
-        (selectedFuncId == TREC(tid)->src.getFuncId())) {
+        (selectedFuncId == TREC(tid)->src.funcID())) {
       transSortSrc.push_back(tid);
     }
   }
@@ -509,13 +509,13 @@ void printCFGOutArcs(TransID transId) {
   TCA fallThru = transCode->getTransJmpTargets(
     g_transData->getTransRec(transId), &jmpTargets);
 
-  auto const srcFuncId = TREC(transId)->src.getFuncId();
+  auto const srcFuncId = TREC(transId)->src.funcID();
 
   for (size_t i = 0; i < jmpTargets.size(); i++) {
     TransID targetId = g_transData->getTransStartingAt(jmpTargets[i]);
     if (targetId != INVALID_ID &&
         // filter jumps to prologues of other funcs
-        TREC(targetId)->src.getFuncId() == srcFuncId &&
+        TREC(targetId)->src.funcID() == srcFuncId &&
         TREC(targetId)->kind != TransKind::Anchor) {
 
       bool retrans = (TREC(transId)->src.offset() ==
@@ -690,7 +690,7 @@ void printTopBytecodes(const OfflineTransData* tdata,
 
     printf("\n====================\n");
     printf("{\n");
-    printf("  FuncID  = %u\n", trec->src.getFuncId());
+    printf("  FuncID  = %u\n", trec->src.funcID());
     printf("  TransID = %u\n", tfrag.tid);
     tfragPerfEvents.printEventsHeader(tfrag);
     printf("}\n\n");

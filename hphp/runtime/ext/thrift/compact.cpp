@@ -974,7 +974,7 @@ class CompactReader {
       }
     }
 
-    Variant readString(void) {
+    String readString(void) {
       uint32_t size = readVarint();
 
       if (size && (size + 1)) {
@@ -986,7 +986,7 @@ class CompactReader {
         return s;
       } else {
         transport.skip(size);
-        return empty_string_variant();
+        return empty_string();
       }
     }
 
@@ -1012,18 +1012,18 @@ int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version,
 }
 
 void HHVM_FUNCTION(thrift_protocol_write_compact,
-                   const Variant& transportobj,
+                   const Object& transportobj,
                    const String& method_name,
                    int64_t msgtype,
-                   const Variant& request_struct,
+                   const Object& request_struct,
                    int seqid,
                    bool oneway) {
-  PHPOutputTransport transport(transportobj.toObject());
+  PHPOutputTransport transport(transportobj);
 
   CompactWriter writer(&transport);
   writer.setWriteVersion(s_compact_request_data->version);
   writer.writeHeader(method_name, (uint8_t)msgtype, (uint32_t)seqid);
-  writer.write(request_struct.toObject());
+  writer.write(request_struct);
 
   if (oneway) {
     transport.onewayFlush();
@@ -1033,16 +1033,16 @@ void HHVM_FUNCTION(thrift_protocol_write_compact,
 }
 
 Variant HHVM_FUNCTION(thrift_protocol_read_compact,
-                      const Variant& transportobj,
+                      const Object& transportobj,
                       const String& obj_typename) {
-  CompactReader reader(transportobj.toObject());
+  CompactReader reader(transportobj);
   return reader.read(obj_typename);
 }
 
-Variant HHVM_FUNCTION(thrift_protocol_read_compact_struct,
-                      const Variant& transportobj,
-                      const String& obj_typename) {
-  CompactReader reader(transportobj.toObject());
+Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
+                     const Object& transportobj,
+                     const String& obj_typename) {
+  CompactReader reader(transportobj);
   Object ret = create_object(obj_typename, Array());
   Variant spec = HHVM_FN(hphp_get_static_property)(obj_typename,
                                                    "_TSPEC", false);

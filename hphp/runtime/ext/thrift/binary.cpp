@@ -532,15 +532,15 @@ void binary_serialize_spec(const Object& zthis, PHPOutputTransport& transport,
 }
 
 void HHVM_FUNCTION(thrift_protocol_write_binary,
-                   const Variant& transportobj,
+                   const Object& transportobj,
                    const String& method_name,
                    int64_t msgtype,
-                   const Variant& request_struct,
+                   const Object& request_struct,
                    int seqid,
                    bool strict_write,
                    bool oneway) {
 
-  PHPOutputTransport transport(transportobj.toObject());
+  PHPOutputTransport transport(transportobj);
 
   if (strict_write) {
     int32_t version = VERSION_1 | msgtype;
@@ -553,7 +553,7 @@ void HHVM_FUNCTION(thrift_protocol_write_binary,
     transport.writeI32(seqid);
   }
 
-  const Object& obj_request_struct = request_struct.toObject();
+  const Object& obj_request_struct = request_struct;
   Variant spec = HHVM_FN(hphp_get_static_property)(
     obj_request_struct->getClassName(),
     s_TSPEC,
@@ -567,11 +567,11 @@ void HHVM_FUNCTION(thrift_protocol_write_binary,
   }
 }
 
-Variant HHVM_FUNCTION(thrift_protocol_read_binary,
-                      const Variant& transportobj,
-                      const String& obj_typename,
-                      bool strict_read) {
-  PHPInputTransport transport(transportobj.toObject());
+Object HHVM_FUNCTION(thrift_protocol_read_binary,
+                     const Object& transportobj,
+                     const String& obj_typename,
+                     bool strict_read) {
+  PHPInputTransport transport(transportobj);
   int8_t messageType = 0;
   int32_t sz = transport.readI32();
 
@@ -620,9 +620,9 @@ Variant HHVM_FUNCTION(thrift_protocol_read_binary,
 }
 
 Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
-                      const Variant& transportobj,
+                      const Object& transportobj,
                       const String& obj_typename) {
-  PHPInputTransport transport(transportobj.toObject());
+  PHPInputTransport transport(transportobj);
 
   Object ret_val = createObject(obj_typename);
   Variant spec = HHVM_FN(hphp_get_static_property)(obj_typename, s_TSPEC,

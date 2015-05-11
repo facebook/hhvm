@@ -44,24 +44,27 @@ DomChildren findDomChildren(const IRUnit& unit,
   return ret;
 }
 
-void retypeDst(IRInstruction* inst, int num) {
-  auto ssa = inst->dst(num);
+bool retypeDst(IRInstruction* inst, int num) {
+  auto const ssa = inst->dst(num);
+  auto const oldType = ssa->type();
 
   /*
    * The type of a tmp defined by DefLabel is the union of the types of the
    * tmps at each incoming Jmp.
    */
   if (inst->op() == DefLabel) {
-    Type type = TBottom;
+    auto type = TBottom;
     inst->block()->forEachSrc(num, [&] (IRInstruction*, SSATmp* tmp) {
       type = type | tmp->type();
     });
     ssa->setType(type);
-    return;
+    return type != oldType;
   }
 
-  auto newType = outputType(inst, num);
+  auto const newType = outputType(inst, num);
   ssa->setType(newType);
+
+  return newType != oldType;
 }
 
 struct RefineTmpsRec {
@@ -204,16 +207,17 @@ void moveToBlock(Block::iterator const first,
   }
 }
 
-void retypeDests(IRInstruction* inst, const IRUnit* unit) {
-  for (int i = 0; i < inst->numDsts(); ++i) {
-    auto const ssa = inst->dst(i);
-    auto const oldType = ssa->type();
-    retypeDst(inst, i);
-    if (ssa->type() != oldType) {
+bool retypeDests(IRInstruction* inst, const IRUnit* unit) {
+  auto changed = false;
+  for (auto i = uint32_t{0}; i < inst->numDsts(); ++i) {
+    DEBUG_ONLY auto const oldType = inst->dst(i)->type();
+    if (retypeDst(inst, i)) {
+      changed = true;
       ITRACE(5, "reflowTypes: retyped {} in {}\n", oldType.toString(),
              inst->toString());
     }
   }
+  return changed;
 }
 
 /*

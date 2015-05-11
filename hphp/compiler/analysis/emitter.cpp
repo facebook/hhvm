@@ -5767,7 +5767,7 @@ void EmitterVisitor::emitClsIfSPropBase(Emitter& e) {
   for (;;) {
     char marker = StackSym::GetMarker(m_evalStack.get(pos));
     if (marker != StackSym::E && marker != StackSym::W &&
-        marker != StackSym::P) {
+        marker != StackSym::P && marker != StackSym::Q) {
       break;
     }
     --pos;

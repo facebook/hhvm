@@ -7420,8 +7420,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
       !f->nativeFuncPtr() ||
       f->isMethod() ||
       (f->numParams() > Native::maxFCallBuiltinArgs()) ||
-      (numParams > f->numParams()) ||
-      f->hasVariadicCaptureParam() ||
+      ((numParams > f->numParams()) && !f->hasVariadicCaptureParam()) ||
       (f->userAttributes().count(
         LowStringPtr(s_attr_Deprecated.get())))) return nullptr;
 
@@ -7569,7 +7568,15 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
     e.FPushFunc(numParams);
   }
   if (fcallBuiltin) {
-    assert(numParams <= fcallBuiltin->numParams());
+    auto variadic = fcallBuiltin->hasVariadicCaptureParam();
+    assertx((numParams <= fcallBuiltin->numParams()) || variadic);
+
+    auto concreteParams = fcallBuiltin->numParams();
+    if (variadic) {
+      assertx(concreteParams > 0);
+      --concreteParams;
+    }
+
     int i = 0;
     for (; i < numParams; i++) {
       // for builtin calls, since we don't push the ActRec, we
@@ -7580,7 +7587,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
 
     if (fcallBuiltin->methInfo()) {
       // IDL style
-      for (; i < fcallBuiltin->numParams(); i++) {
+      for (; i < concreteParams; i++) {
         const ClassInfo::ParameterInfo* pi =
           fcallBuiltin->methInfo()->parameters[i];
         Variant v = unserialize_from_string(
@@ -7589,7 +7596,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       }
     } else {
       // HNI style
-      for (; i < fcallBuiltin->numParams(); i++) {
+      for (; i < concreteParams; i++) {
         auto &pi = fcallBuiltin->params()[i];
         assert(pi.hasDefaultValue());
         auto &def = pi.defaultValue;
@@ -7597,7 +7604,16 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
                               pi.builtinType, i);
       }
     }
-    e.FCallBuiltin(fcallBuiltin->numParams(), numParams, nLiteral);
+    if (variadic) {
+      if (numParams <= concreteParams) {
+        e.Array(staticEmptyArray());
+      } else {
+        e.NewPackedArray(numParams - concreteParams);
+      }
+    }
+    e.FCallBuiltin(fcallBuiltin->numParams(),
+                   std::min<int32_t>(numParams, fcallBuiltin->numParams()),
+                   nLiteral);
   } else {
     {
       FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);

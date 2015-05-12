@@ -44,7 +44,7 @@ ETCH_NAME(enterTCHelper):
    */
   test %r9, %r9
   jz ETCH_LABEL(enterTCHelper$callTC)
-  push $enterTCExit
+  push ETCH_NAME_REL(enterTCExit)
   push 0x8(%r9)
   mov %r9, %rbp
   jmp *%rdx
@@ -104,7 +104,7 @@ ETCH_NAME(handleSRHelper):
   CFI2(adjust_cfa_offset, 0x30)
 
   // call mcg->handleServiceRequest(%rsp)
-  mov mcg(%rip), %rdi
+  mov ETCH_NAME(mcg)(%rip), %rdi
   mov %rsp, %rsi
   call MCGenerator_handleServiceRequest
 

@@ -425,6 +425,12 @@ void VarEnv::exitFP(ActRec* fp) {
   m_nvTable.detach(fp);
 
   if (m_depth == 0) {
+    if (m_extraArgs) {
+      assert(!isGlobalScope());
+      const auto numExtra = fp->numArgs() - fp->m_func->numNonVariadicParams();
+      ExtraArgs::deallocate(m_extraArgs, numExtra);
+    }
+
     // don't free global VarEnv
     if (!isGlobalScope()) {
       smart_delete(this);

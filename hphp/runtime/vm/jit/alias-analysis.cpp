@@ -77,6 +77,22 @@ folly::Optional<uint32_t> add_class(AliasAnalysis& ret, AliasClass acls) {
   return meta.index;
 };
 
+template<class T>
+ALocBits may_alias_part(const AliasAnalysis& aa,
+                        AliasClass acls,
+                        folly::Optional<T> proj,
+                        AliasClass any,
+                        ALocBits pessimistic) {
+  if (proj) {
+    if (auto const meta = aa.find(*proj)) {
+      return ALocBits{meta->conflicts}.set(meta->index);
+    }
+    assertx(acls.maybe(any));
+    return pessimistic;
+  }
+  return acls.maybe(any) ? pessimistic : ALocBits{};
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -98,30 +114,23 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
 
   auto ret = ALocBits{};
 
-  // We may have some special may-alias sets for multi-slot stack ranges.  If
-  // one of these is present, we can use that for the stack portion.
-  // Otherwise, we need to merge all_stack, because we didn't track which stack
-  // locations it can alias earlier.
-  if (auto const stk = acls.stack()) {
-    if (stk->size > 1) {
+  // We may have some special may-alias sets for multi-slot stack ranges, so
+  // this works a little differently from the other projections.
+  {
+    auto const stk = acls.stack();
+    if (stk && stk->size > 1) {
       auto const it = stack_ranges.find(*stk);
       ret |= it != end(stack_ranges) ? it->second : all_stack;
     } else {
-      if (auto const slot = find(*stk)) {
-        ret.set(slot->index);
-      } else {
-        ret |= all_stack;
-      }
+      ret |= may_alias_part(*this, acls, stk, AStackAny, all_stack);
     }
-  } else if (acls.maybe(AStackAny)) {
-    ret |= all_stack;
   }
 
-  if (acls.maybe(APropAny))    ret |= all_props;
-  if (acls.maybe(AElemIAny))   ret |= all_elemIs;
-  if (acls.maybe(AFrameAny))   ret |= all_frame;
-  if (acls.maybe(AMIStateAny)) ret |= all_mistate;
-  if (acls.maybe(ARefAny))     ret |= all_refs;
+  ret |= may_alias_part(*this, acls, acls.frame(), AFrameAny, all_frame);
+  ret |= may_alias_part(*this, acls, acls.prop(), APropAny, all_props);
+  ret |= may_alias_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
+  ret |= may_alias_part(*this, acls, acls.mis(), AMIStateAny, all_mistate);
+  ret |= may_alias_part(*this, acls, acls.ref(), ARefAny, all_refs);
 
   return ret;
 }

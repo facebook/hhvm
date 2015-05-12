@@ -93,10 +93,11 @@ class Object;
 #define HHVM_FN(fn) f_ ## fn
 #define HHVM_FUNCTION(fn, ...) \
         HHVM_FN(fn)(__VA_ARGS__)
-#define HHVM_NAMED_FE(fn, fimpl) \
-        Native::registerBuiltinFunction(#fn, fimpl)
-#define HHVM_FE(fn) HHVM_NAMED_FE(fn, HHVM_FN(fn))
-#define HHVM_FALIAS(fn, falias) HHVM_NAMED_FE(fn, HHVM_FN(falias))
+#define HHVM_NAMED_FE_STR(fn, fimpl) \
+        Native::registerBuiltinFunction(fn, fimpl)
+#define HHVM_NAMED_FE(fn, fimpl) HHVM_NAMED_FE_STR(#fn, fimpl)
+#define HHVM_FE(fn) HHVM_NAMED_FE_STR(#fn, HHVM_FN(fn))
+#define HHVM_FALIAS(fn, falias) HHVM_NAMED_FE_STR(#fn, HHVM_FN(falias))
 
 /* Macros related to declaring/registering internal implementations
  * of <<__Native>> class instance methods.

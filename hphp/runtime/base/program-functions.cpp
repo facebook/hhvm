@@ -1200,6 +1200,32 @@ std::string get_right_option_name(const basic_parsed_options<char>& opts,
 }
 #endif
 
+//
+// Note that confusingly there are two different implementations
+// of zend_strtod.
+//
+// The one from
+//   hphp/runtime/ext_zend_compat/php-src/Zend/zend_strtod.h
+// does not wrap with HPHP namespace, and implements
+// functionality required by the zend extension compatibility layer.
+// Empirically, this zend_strtod.h file can't be included because
+// it includes <zend.h> which isn't on any search path when compiling this.
+//
+// The zend_startup_strtod from
+//   hphp/runtime/base/zend-strtod.h
+// uses the HPHP namespace, is used for other purposes,
+// and predates the EZC extensions.
+//
+// Before we can call zend_strtod from zend compatibility extensions,
+// we need to initialize it.  Since it doesn't seem
+// to work to include the .h file, just sleaze declare it here.
+//
+// See the related issue https://github.com/facebook/hhvm/issues/5244
+//
+extern "C" {
+  void zend_startup_strtod(void);
+}
+
 static int execute_program_impl(int argc, char** argv) {
   string usage = "Usage:\n\n   ";
   usage += argv[0];
@@ -1424,6 +1450,13 @@ static int execute_program_impl(int argc, char** argv) {
 
   // we need to initialize pcre cache table very early
   pcre_init();
+
+  //
+  // Initialize in the zend extension compatibility layer, as needed
+  // before any calls from legacy zend extensions to zend_strtod. See
+  // the extern "C" declaration of this function, above.
+  //
+  zend_startup_strtod();
 
   MemoryManager::TlsWrapper::getCheck();
   if (RuntimeOption::ServerExecutionMode()) {

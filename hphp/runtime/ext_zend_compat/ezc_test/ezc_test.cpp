@@ -651,6 +651,36 @@ PHP_FUNCTION(ezc_create_cloneable_in_array)
 }
 /* }}} */
 
+/* {{{ proto mixed ezc_atof_toa()
+ * Convert a string to a double and back to a string again */
+PHP_FUNCTION(ezc_atof_toa)
+{
+  char *value;
+  int valuelen;
+  double d;
+  const char *end_value;
+  const int ndigits = 10;
+  int decpt = -1;
+  int sign = -1;
+  char *result;
+  char *resulte;
+  char *composed_result;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+        &value, &valuelen) == FAILURE) {
+    RETURN_FALSE;
+  }
+
+  d = zend_strtod(value, &end_value);
+  (void)end_value;
+
+  result = zend_dtoa(d, 0, ndigits, &decpt, &sign, &resulte);
+  asprintf(&composed_result, "%d %d %s", decpt, sign, result);
+  zend_freedtoa(result);
+  RETVAL_STRING(composed_result, 1);
+}
+/* }}} */
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_ezc_fetch_global, 0)
 ZEND_END_ARG_INFO()
@@ -731,6 +761,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_ezc_set_error_reporting, 0)
   ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_ezc_atof_toa, 0)
+  ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ ezc_test_functions[]
@@ -754,6 +789,7 @@ const zend_function_entry ezc_test_functions[] = {
   PHP_FE(ezc_array_set, arginfo_ezc_array_set)
   PHP_FE(ezc_get_error_reporting, arginfo_ezc_get_error_reporting)
   PHP_FE(ezc_set_error_reporting, arginfo_ezc_set_error_reporting)
+  PHP_FE(ezc_atof_toa, arginfo_ezc_atof_toa)
   PHP_FE_END
 };
 /* }}} */

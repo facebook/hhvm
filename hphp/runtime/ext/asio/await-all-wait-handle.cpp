@@ -100,7 +100,7 @@ namespace {
 }
 
 void c_AwaitAllWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  AsioSession::Get()->setOnAwaitAllCreateCallback(callback);
+  AsioSession::Get()->setOnAwaitAllCreate(callback);
 }
 
 Object c_AwaitAllWaitHandle::ti_fromarray(const Array& dependencies) {
@@ -266,7 +266,7 @@ void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {
   setContextIdx(ctx_idx);
   assert(m_cur >= 0);
 
-  if (UNLIKELY(AsioSession::Get()->hasOnAwaitAllCreateCallback())) {
+  if (UNLIKELY(AsioSession::Get()->hasOnAwaitAllCreate())) {
     auto vector = makeSmartPtr<c_Vector>();
     for (int32_t idx = m_cur; idx >= 0; --idx) {
       TypedValue child = make_tv<KindOfObject>(m_children[idx]);

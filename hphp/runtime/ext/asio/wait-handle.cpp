@@ -34,15 +34,15 @@ void c_WaitHandle::t___construct() {
 }
 
 void c_WaitHandle::ti_setoniowaitentercallback(const Variant& callback) {
-  AsioSession::Get()->setOnIOWaitEnterCallback(callback);
+  AsioSession::Get()->setOnIOWaitEnter(callback);
 }
 
 void c_WaitHandle::ti_setoniowaitexitcallback(const Variant& callback) {
-  AsioSession::Get()->setOnIOWaitExitCallback(callback);
+  AsioSession::Get()->setOnIOWaitExit(callback);
 }
 
 void c_WaitHandle::ti_setonjoincallback(const Variant& callback) {
-  AsioSession::Get()->setOnJoinCallback(callback);
+  AsioSession::Get()->setOnJoin(callback);
 }
 
 Object c_WaitHandle::t_getwaithandle() {

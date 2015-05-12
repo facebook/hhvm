@@ -59,7 +59,7 @@ namespace {
   }
 
   inline void onIOWaitEnter(AsioSession* session) {
-    if (UNLIKELY(session->hasOnIOWaitEnterCallback())) {
+    if (UNLIKELY(session->hasOnIOWaitEnter())) {
       session->onIOWaitEnter();
     }
   }
@@ -79,7 +79,7 @@ namespace {
       }
     }
 
-    if (UNLIKELY(session->hasOnIOWaitExitCallback())) {
+    if (UNLIKELY(session->hasOnIOWaitExit())) {
       session->onIOWaitExit();
     }
   }

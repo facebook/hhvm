@@ -109,85 +109,55 @@ void AsioSession::initAbruptInterruptException() {
     "The request was abruptly interrupted.");
 }
 
-void AsioSession::setOnIOWaitEnterCallback(const Variant& callback) {
-  m_onIOWaitEnterCallback = checkCallback(
-    callback,
-    "WaitHandle::onIOWaitEnter"
-  );
+void AsioSession::setOnIOWaitEnter(const Variant& callback) {
+  m_onIOWaitEnter = checkCallback(callback, "WaitHandle::onIOWaitEnter");
 }
 
-void AsioSession::setOnIOWaitExitCallback(const Variant& callback) {
-  m_onIOWaitExitCallback = checkCallback(
-    callback,
-    "WaitHandle::onIOWaitExit"
-  );
+void AsioSession::setOnIOWaitExit(const Variant& callback) {
+  m_onIOWaitExit = checkCallback(callback, "WaitHandle::onIOWaitExit");
 }
 
-void AsioSession::setOnJoinCallback(const Variant& callback) {
-  m_onJoinCallback = checkCallback(callback, "WaitHandle::onJoin");
+void AsioSession::setOnJoin(const Variant& callback) {
+  m_onJoin = checkCallback(callback, "WaitHandle::onJoin");
 }
 
 void AsioSession::onIOWaitEnter() {
-  runCallback(
-    m_onIOWaitEnterCallback,
-    empty_array(),
-    "WaitHandle::onIOWaitEnter"
-  );
+  runCallback(m_onIOWaitEnter, empty_array(), "WaitHandle::onIOWaitEnter");
 }
 
 void AsioSession::onIOWaitExit() {
-  runCallback(
-    m_onIOWaitExitCallback,
-    empty_array(),
-    "WaitHandle::onIOWaitExit"
-  );
+  runCallback(m_onIOWaitExit, empty_array(), "WaitHandle::onIOWaitExit");
 }
 
 void AsioSession::onJoin(c_WaitHandle* waitHandle) {
-  runCallback(
-    m_onJoinCallback,
-    make_packed_array(waitHandle),
-    "WaitHandle::onJoin"
-  );
+  runCallback(m_onJoin, make_packed_array(waitHandle), "WaitHandle::onJoin");
 }
 
-void AsioSession::setOnResumableCreateCallback(const Variant& callback) {
-  m_onResumableCreateCallback = checkCallback(
-    callback,
-    "ResumableWaitHandle::onCreate"
-  );
+void AsioSession::setOnResumableCreate(const Variant& callback) {
+  m_onResumableCreate = checkCallback(callback,"ResumableWaitHandle::onCreate");
   updateEventHookState();
 }
 
-void AsioSession::setOnResumableAwaitCallback(const Variant& callback) {
-  m_onResumableAwaitCallback = checkCallback(
-    callback,
-    "ResumableWaitHandle::onAwait"
-  );
+void AsioSession::setOnResumableAwait(const Variant& callback) {
+  m_onResumableAwait = checkCallback(callback, "ResumableWaitHandle::onAwait");
   updateEventHookState();
 }
 
-void AsioSession::setOnResumableSuccessCallback(const Variant& callback) {
-  m_onResumableSuccessCallback = checkCallback(
-    callback,
-    "ResumableWaitHandle::onSuccess"
-  );
+void AsioSession::setOnResumableSuccess(const Variant& callback) {
+  m_onResumableSuccess = checkCallback(callback,
+                                       "ResumableWaitHandle::onSuccess");
   updateEventHookState();
 }
 
-void AsioSession::setOnResumableFailCallback(const Variant& callback) {
-  m_onResumableFailCallback = checkCallback(
-    callback,
-    "ResumableWaitHandle::onFail"
-  );
+void AsioSession::setOnResumableFail(const Variant& callback) {
+  m_onResumableFail = checkCallback(callback, "ResumableWaitHandle::onFail");
 }
 
 void AsioSession::onResumableCreate(
   c_ResumableWaitHandle* resumable,
   c_WaitableWaitHandle* child
 ) {
-  runCallback(
-    m_onResumableCreateCallback,
+  runCallback(m_onResumableCreate,
     make_packed_array(resumable, child),
     "ResumableWaitHandle::onCreate"
   );
@@ -198,7 +168,7 @@ void AsioSession::onResumableAwait(
   c_WaitableWaitHandle* child
 ) {
   runCallback(
-    m_onResumableAwaitCallback,
+    m_onResumableAwait,
     make_packed_array(resumable, child),
     "ResumableWaitHandle::onAwait"
   );
@@ -209,7 +179,7 @@ void AsioSession::onResumableSuccess(
   const Variant& result
 ) {
   runCallback(
-    m_onResumableSuccessCallback,
+    m_onResumableSuccess,
     make_packed_array(resumable, result),
     "ResumableWaitHandle::onSuccess"
   );
@@ -220,24 +190,24 @@ void AsioSession::onResumableFail(
   const Object& exception
 ) {
   runCallback(
-    m_onResumableFailCallback,
+    m_onResumableFail,
     make_packed_array(resumable, exception),
     "ResumableWaitHandle::onFail"
   );
 }
 
 void AsioSession::updateEventHookState() {
-  if (hasOnResumableCreateCallback() ||
-      hasOnResumableAwaitCallback() ||
-      hasOnResumableSuccessCallback()) {
+  if (hasOnResumableCreate() ||
+      hasOnResumableAwait() ||
+      hasOnResumableSuccess()) {
     EventHook::EnableAsync();
   } else {
     EventHook::DisableAsync();
   }
 }
 
-void AsioSession::setOnAwaitAllCreateCallback(const Variant& callback) {
-  m_onAwaitAllCreateCallback = checkCallback(
+void AsioSession::setOnAwaitAllCreate(const Variant& callback) {
+  m_onAwaitAllCreate = checkCallback(
     callback,
     "AwaitAllWaitHandle::onCreate"
   );
@@ -248,17 +218,14 @@ void AsioSession::onAwaitAllCreate(
   const Variant &dependencies
 ) {
   runCallback(
-    m_onAwaitAllCreateCallback,
+    m_onAwaitAllCreate,
     make_packed_array(waitHandle, dependencies),
     "AwaitAllWaitHandle::onCreate"
   );
 }
 
-void AsioSession::setOnGenArrayCreateCallback(const Variant& callback) {
-  m_onGenArrayCreateCallback = checkCallback(
-    callback,
-    "GenArrayWaitHandle::onCreate"
-  );
+void AsioSession::setOnGenArrayCreate(const Variant& callback) {
+  m_onGenArrayCreate = checkCallback(callback, "GenArrayWaitHandle::onCreate");
 }
 
 void AsioSession::onGenArrayCreate(
@@ -266,35 +233,28 @@ void AsioSession::onGenArrayCreate(
   const Variant& dependencies
 ) {
   runCallback(
-    m_onGenArrayCreateCallback,
+    m_onGenArrayCreate,
     make_packed_array(waitHandle, dependencies),
     "GenArrayWaitHandle::onCreate"
   );
 }
 
-void AsioSession::setOnGenMapCreateCallback(const Variant& callback) {
-  m_onGenMapCreateCallback = checkCallback(
-    callback,
-    "GenMapWaitHandle::onCreate"
-  );
+void AsioSession::setOnGenMapCreate(const Variant& callback) {
+  m_onGenMapCreate = checkCallback(callback, "GenMapWaitHandle::onCreate");
 }
 
 void AsioSession::onGenMapCreate(
   c_GenMapWaitHandle* waitHandle,
   const Variant& dependencies
 ) {
-  runCallback(
-    m_onGenMapCreateCallback,
+  runCallback(m_onGenMapCreate,
     make_packed_array(waitHandle, dependencies),
     "GenMapWaitHandle::onCreate"
   );
 }
 
-void AsioSession::setOnGenVectorCreateCallback(const Variant& callback) {
-  m_onGenVectorCreateCallback = checkCallback(
-    callback,
-    "GenVectorWaitHandle::onCreate"
-  );
+void AsioSession::setOnGenVectorCreate(const Variant& callback) {
+  m_onGenVectorCreate= checkCallback(callback, "GenVectorWaitHandle::onCreate");
 }
 
 void AsioSession::onGenVectorCreate(
@@ -302,17 +262,14 @@ void AsioSession::onGenVectorCreate(
   const Variant& dependencies
 ) {
   runCallback(
-    m_onGenVectorCreateCallback,
+    m_onGenVectorCreate,
     make_packed_array(waitHandle, dependencies),
     "GenVectorWaitHandle::onCreate"
   );
 }
 
-void AsioSession::setOnConditionCreateCallback(const Variant& callback) {
-  m_onConditionCreateCallback = checkCallback(
-    callback,
-    "ConditionWaitHandle::onCreate"
-  );
+void AsioSession::setOnConditionCreate(const Variant& callback) {
+  m_onConditionCreate = checkCallback(callback,"ConditionWaitHandle::onCreate");
 }
 
 void AsioSession::onConditionCreate(
@@ -320,34 +277,34 @@ void AsioSession::onConditionCreate(
   c_WaitableWaitHandle* child
 ) {
   runCallback(
-    m_onConditionCreateCallback,
+    m_onConditionCreate,
     make_packed_array(waitHandle, child),
     "ConditionWaitHandle::onCreate"
   );
 }
 
-void AsioSession::setOnExternalThreadEventCreateCallback(
+void AsioSession::setOnExternalThreadEventCreate(
   const Variant& callback
 ) {
-  m_onExternalThreadEventCreateCallback = checkCallback(
+  m_onExtThreadEventCreate = checkCallback(
     callback,
     "ExternalThreadEventWaitHandle::onCreate"
   );
 }
 
-void AsioSession::setOnExternalThreadEventSuccessCallback(
+void AsioSession::setOnExternalThreadEventSuccess(
   const Variant& callback
 ) {
-  m_onExternalThreadEventSuccessCallback = checkCallback(
+  m_onExtThreadEventSuccess = checkCallback(
     callback,
     "ExternalThreadEventWaitHandle::onSuccess"
   );
 }
 
-void AsioSession::setOnExternalThreadEventFailCallback(
+void AsioSession::setOnExternalThreadEventFail(
   const Variant& callback
 ) {
-  m_onExternalThreadEventFailCallback = checkCallback(
+  m_onExtThreadEventFail = checkCallback(
     callback,
     "ExternalThreadEventWaitHandle::onFail"
   );
@@ -357,7 +314,7 @@ void AsioSession::onExternalThreadEventCreate(
   c_ExternalThreadEventWaitHandle* waitHandle
 ) {
   runCallback(
-    m_onExternalThreadEventCreateCallback,
+    m_onExtThreadEventCreate,
     make_packed_array(waitHandle),
     "ExternalThreadEventWaitHandle::onCreate"
   );
@@ -368,7 +325,7 @@ void AsioSession::onExternalThreadEventSuccess(
   const Variant& result
 ) {
   runCallback(
-    m_onExternalThreadEventSuccessCallback,
+    m_onExtThreadEventSuccess,
     make_packed_array(waitHandle, result),
     "ExternalThreadEventWaitHandle::onSuccess"
   );
@@ -379,21 +336,21 @@ void AsioSession::onExternalThreadEventFail(
   const Object& exception
 ) {
   runCallback(
-    m_onExternalThreadEventFailCallback,
+    m_onExtThreadEventFail,
     make_packed_array(waitHandle, exception),
     "ExternalThreadEventWaitHandle::onFail"
   );
 }
 
-void AsioSession::setOnSleepCreateCallback(const Variant& callback) {
-  m_onSleepCreateCallback = checkCallback(
+void AsioSession::setOnSleepCreate(const Variant& callback) {
+  m_onSleepCreate = checkCallback(
     callback,
     "SleepWaitHandle::onCreate"
   );
 }
 
-void AsioSession::setOnSleepSuccessCallback(const Variant& callback) {
-  m_onSleepSuccessCallback = checkCallback(
+void AsioSession::setOnSleepSuccess(const Variant& callback) {
+  m_onSleepSuccess = checkCallback(
     callback,
     "SleepWaitHandle::onSuccess"
   );
@@ -401,7 +358,7 @@ void AsioSession::setOnSleepSuccessCallback(const Variant& callback) {
 
 void AsioSession::onSleepCreate(c_SleepWaitHandle* waitHandle) {
   runCallback(
-    m_onSleepCreateCallback,
+    m_onSleepCreate,
     make_packed_array(waitHandle),
     "SleepWaitHandle::onCreate"
   );
@@ -409,7 +366,7 @@ void AsioSession::onSleepCreate(c_SleepWaitHandle* waitHandle) {
 
 void AsioSession::onSleepSuccess(c_SleepWaitHandle* waitHandle) {
   runCallback(
-    m_onSleepSuccessCallback,
+    m_onSleepSuccess,
     make_packed_array(waitHandle),
     "SleepWaitHandle::onSuccess"
   );

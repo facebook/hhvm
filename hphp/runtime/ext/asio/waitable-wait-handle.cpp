@@ -65,7 +65,7 @@ void c_WaitableWaitHandle::join() {
   assert(!isFinished());
 
   AsioSession* session = AsioSession::Get();
-  if (UNLIKELY(session->hasOnJoinCallback())) {
+  if (UNLIKELY(session->hasOnJoin())) {
     session->onJoin(this);
   }
 

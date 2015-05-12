@@ -43,7 +43,7 @@ namespace {
 }
 
 void c_GenVectorWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  AsioSession::Get()->setOnGenVectorCreateCallback(callback);
+  AsioSession::Get()->setOnGenVectorCreate(callback);
 }
 
 Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
@@ -96,7 +96,7 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
       auto my_wh = makeSmartPtr<c_GenVectorWaitHandle>();
       my_wh->initialize(exception, deps.get(), iter_pos, ctx_idx, child_wh);
       AsioSession* session = AsioSession::Get();
-      if (UNLIKELY(session->hasOnGenVectorCreateCallback())) {
+      if (UNLIKELY(session->hasOnGenVectorCreate())) {
         session->onGenVectorCreate(my_wh.get(), dependencies);
       }
       return Object(std::move(my_wh));

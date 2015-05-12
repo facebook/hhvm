@@ -28,19 +28,19 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void c_ResumableWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  AsioSession::Get()->setOnResumableCreateCallback(callback);
+  AsioSession::Get()->setOnResumableCreate(callback);
 }
 
 void c_ResumableWaitHandle::ti_setonawaitcallback(const Variant& callback) {
-  AsioSession::Get()->setOnResumableAwaitCallback(callback);
+  AsioSession::Get()->setOnResumableAwait(callback);
 }
 
 void c_ResumableWaitHandle::ti_setonsuccesscallback(const Variant& callback) {
-  AsioSession::Get()->setOnResumableSuccessCallback(callback);
+  AsioSession::Get()->setOnResumableSuccess(callback);
 }
 
 void c_ResumableWaitHandle::ti_setonfailcallback(const Variant& callback) {
-  AsioSession::Get()->setOnResumableFailCallback(callback);
+  AsioSession::Get()->setOnResumableFail(callback);
 }
 
 c_ResumableWaitHandle* c_ResumableWaitHandle::getRunning(ActRec* fp) {

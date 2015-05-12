@@ -42,7 +42,7 @@ namespace {
 }
 
 void c_GenMapWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  AsioSession::Get()->setOnGenMapCreateCallback(callback);
+  AsioSession::Get()->setOnGenMapCreate(callback);
 }
 
 Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
@@ -101,7 +101,7 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
       my_wh->initialize(exception, deps.get(), iter_pos, ctx_idx, child_wh);
 
       AsioSession* session = AsioSession::Get();
-      if (UNLIKELY(session->hasOnGenMapCreateCallback())) {
+      if (UNLIKELY(session->hasOnGenMapCreate())) {
         session->onGenMapCreate(my_wh.get(), dependencies);
       }
 

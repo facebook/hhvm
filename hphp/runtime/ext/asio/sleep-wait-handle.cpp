@@ -31,11 +31,11 @@ namespace {
 }
 
 void c_SleepWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  AsioSession::Get()->setOnSleepCreateCallback(callback);
+  AsioSession::Get()->setOnSleepCreate(callback);
 }
 
 void c_SleepWaitHandle::ti_setonsuccesscallback(const Variant& callback) {
-  AsioSession::Get()->setOnSleepSuccessCallback(callback);
+  AsioSession::Get()->setOnSleepSuccess(callback);
 }
 
 Object c_SleepWaitHandle::ti_create(int64_t usecs) {
@@ -66,7 +66,7 @@ void c_SleepWaitHandle::initialize(int64_t usecs) {
     registerToContext();
   }
 
-  if (UNLIKELY(session->hasOnSleepCreateCallback())) {
+  if (UNLIKELY(session->hasOnSleepCreate())) {
     session->onSleepCreate(this);
   }
 }
@@ -84,7 +84,7 @@ void c_SleepWaitHandle::process() {
   parentChain.unblock();
 
   auto session = AsioSession::Get();
-  if (UNLIKELY(session->hasOnSleepSuccessCallback())) {
+  if (UNLIKELY(session->hasOnSleepSuccess())) {
     session->onSleepSuccess(this);
   }
 }

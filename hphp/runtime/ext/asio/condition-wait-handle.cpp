@@ -43,7 +43,7 @@ namespace {
 }
 
 void c_ConditionWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  AsioSession::Get()->setOnConditionCreateCallback(callback);
+  AsioSession::Get()->setOnConditionCreate(callback);
 }
 
 Object c_ConditionWaitHandle::ti_create(const Variant& child) {
@@ -115,7 +115,7 @@ void c_ConditionWaitHandle::initialize(c_WaitableWaitHandle* child) {
   incRefCount();
 
   auto const session = AsioSession::Get();
-  if (UNLIKELY(session->hasOnConditionCreateCallback())) {
+  if (UNLIKELY(session->hasOnConditionCreate())) {
     session->onConditionCreate(this, child);
   }
 }

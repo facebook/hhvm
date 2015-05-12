@@ -101,25 +101,25 @@ struct AsioSession final {
   void initAbruptInterruptException();
 
   // WaitHandle callbacks:
-  void setOnIOWaitEnterCallback(const Variant& callback);
-  void setOnIOWaitExitCallback(const Variant& callback);
-  void setOnJoinCallback(const Variant& callback);
-  bool hasOnIOWaitEnterCallback() { return !m_onIOWaitEnterCallback.isNull(); }
-  bool hasOnIOWaitExitCallback() { return !m_onIOWaitExitCallback.isNull(); }
-  bool hasOnJoinCallback() { return !m_onJoinCallback.isNull(); }
+  void setOnIOWaitEnter(const Variant& callback);
+  void setOnIOWaitExit(const Variant& callback);
+  void setOnJoin(const Variant& callback);
+  bool hasOnIOWaitEnter() { return !!m_onIOWaitEnter; }
+  bool hasOnIOWaitExit() { return !!m_onIOWaitExit; }
+  bool hasOnJoin() { return !!m_onJoin; }
   void onIOWaitEnter();
   void onIOWaitExit();
   void onJoin(c_WaitHandle* waitHandle);
 
   // ResumableWaitHandle callbacks:
-  void setOnResumableCreateCallback(const Variant& callback);
-  void setOnResumableAwaitCallback(const Variant& callback);
-  void setOnResumableSuccessCallback(const Variant& callback);
-  void setOnResumableFailCallback(const Variant& callback);
-  bool hasOnResumableCreateCallback() { return !!m_onResumableCreateCallback; }
-  bool hasOnResumableAwaitCallback() { return !!m_onResumableAwaitCallback; }
-  bool hasOnResumableSuccessCallback() { return !!m_onResumableSuccessCallback;}
-  bool hasOnResumableFailCallback() { return !!m_onResumableFailCallback; }
+  void setOnResumableCreate(const Variant& callback);
+  void setOnResumableAwait(const Variant& callback);
+  void setOnResumableSuccess(const Variant& callback);
+  void setOnResumableFail(const Variant& callback);
+  bool hasOnResumableCreate() { return !!m_onResumableCreate; }
+  bool hasOnResumableAwait() { return !!m_onResumableAwait; }
+  bool hasOnResumableSuccess() { return !!m_onResumableSuccess; }
+  bool hasOnResumableFail() { return !!m_onResumableFail; }
   void onResumableCreate(c_ResumableWaitHandle*, c_WaitableWaitHandle* child);
   void onResumableAwait(c_ResumableWaitHandle*, c_WaitableWaitHandle* child);
   void onResumableSuccess(c_ResumableWaitHandle* cont, const Variant& result);
@@ -127,43 +127,37 @@ struct AsioSession final {
   void updateEventHookState();
 
   // AwaitAllWaitHandle callbacks:
-  void setOnAwaitAllCreateCallback(const Variant& callback);
-  bool hasOnAwaitAllCreateCallback() { return !!m_onAwaitAllCreateCallback; }
+  void setOnAwaitAllCreate(const Variant& callback);
+  bool hasOnAwaitAllCreate() { return !!m_onAwaitAllCreate; }
   void onAwaitAllCreate(c_AwaitAllWaitHandle* wh, const Variant& dependencies);
 
   // GenArrayWaitHandle callbacks:
-  void setOnGenArrayCreateCallback(const Variant& callback);
-  bool hasOnGenArrayCreateCallback() { return !!m_onGenArrayCreateCallback; }
+  void setOnGenArrayCreate(const Variant& callback);
+  bool hasOnGenArrayCreate() { return !!m_onGenArrayCreate; }
   void onGenArrayCreate(c_GenArrayWaitHandle* wh, const Variant& dependencies);
 
   // GenMapWaitHandle callbacks:
-  void setOnGenMapCreateCallback(const Variant& callback);
-  bool hasOnGenMapCreateCallback() { return !!m_onGenMapCreateCallback; }
+  void setOnGenMapCreate(const Variant& callback);
+  bool hasOnGenMapCreate() { return !!m_onGenMapCreate; }
   void onGenMapCreate(c_GenMapWaitHandle* wh, const Variant& dependencies);
 
   // GenVectorWaitHandle callbacks:
-  void setOnGenVectorCreateCallback(const Variant& callback);
-  bool hasOnGenVectorCreateCallback() { return !!m_onGenVectorCreateCallback; }
+  void setOnGenVectorCreate(const Variant& callback);
+  bool hasOnGenVectorCreate() { return !!m_onGenVectorCreate; }
   void onGenVectorCreate(c_GenVectorWaitHandle* wh, const Variant& deps);
 
   // ConditionWaitHandle callbacks:
-  void setOnConditionCreateCallback(const Variant& callback);
-  bool hasOnConditionCreateCallback() { return !!m_onConditionCreateCallback; }
+  void setOnConditionCreate(const Variant& callback);
+  bool hasOnConditionCreate() { return !!m_onConditionCreate; }
   void onConditionCreate(c_ConditionWaitHandle* wh, c_WaitableWaitHandle*);
 
   // ExternalThreadEventWaitHandle callbacks:
-  void setOnExternalThreadEventCreateCallback(const Variant& callback);
-  void setOnExternalThreadEventSuccessCallback(const Variant& callback);
-  void setOnExternalThreadEventFailCallback(const Variant& callback);
-  bool hasOnExternalThreadEventCreateCallback() {
-    return !m_onExternalThreadEventCreateCallback.isNull();
-  }
-  bool hasOnExternalThreadEventSuccessCallback() {
-    return !m_onExternalThreadEventSuccessCallback.isNull();
-  }
-  bool hasOnExternalThreadEventFailCallback() {
-    return !m_onExternalThreadEventFailCallback.isNull();
-  }
+  void setOnExternalThreadEventCreate(const Variant& callback);
+  void setOnExternalThreadEventSuccess(const Variant& callback);
+  void setOnExternalThreadEventFail(const Variant& callback);
+  bool hasOnExternalThreadEventCreate() { return !!m_onExtThreadEventCreate; }
+  bool hasOnExternalThreadEventSuccess() { return !!m_onExtThreadEventSuccess; }
+  bool hasOnExternalThreadEventFail() { return !!m_onExtThreadEventFail; }
   void onExternalThreadEventCreate(c_ExternalThreadEventWaitHandle* waitHandle);
   void onExternalThreadEventSuccess(c_ExternalThreadEventWaitHandle* waitHandle,
                                     const Variant& result);
@@ -171,10 +165,10 @@ struct AsioSession final {
                                  const Object& exception);
 
   // SleepWaitHandle callbacks:
-  void setOnSleepCreateCallback(const Variant& callback);
-  void setOnSleepSuccessCallback(const Variant& callback);
-  bool hasOnSleepCreateCallback() { return !!m_onSleepCreateCallback; }
-  bool hasOnSleepSuccessCallback() { return !!m_onSleepSuccessCallback; }
+  void setOnSleepCreate(const Variant& callback);
+  void setOnSleepSuccess(const Variant& callback);
+  bool hasOnSleepCreate() { return !!m_onSleepCreate; }
+  bool hasOnSleepSuccess() { return !!m_onSleepSuccess; }
   void onSleepCreate(c_SleepWaitHandle* waitHandle);
   void onSleepSuccess(c_SleepWaitHandle* waitHandle);
 
@@ -188,23 +182,23 @@ private:
   AsioExternalThreadEventQueue m_externalThreadEventQueue;
 
   Object m_abruptInterruptException;
-  Object m_onIOWaitEnterCallback;
-  Object m_onIOWaitExitCallback;
-  Object m_onJoinCallback;
-  Object m_onResumableCreateCallback;
-  Object m_onResumableAwaitCallback;
-  Object m_onResumableSuccessCallback;
-  Object m_onResumableFailCallback;
-  Object m_onAwaitAllCreateCallback;
-  Object m_onGenArrayCreateCallback;
-  Object m_onGenMapCreateCallback;
-  Object m_onGenVectorCreateCallback;
-  Object m_onConditionCreateCallback;
-  Object m_onExternalThreadEventCreateCallback;
-  Object m_onExternalThreadEventSuccessCallback;
-  Object m_onExternalThreadEventFailCallback;
-  Object m_onSleepCreateCallback;
-  Object m_onSleepSuccessCallback;
+  Object m_onIOWaitEnter;
+  Object m_onIOWaitExit;
+  Object m_onJoin;
+  Object m_onResumableCreate;
+  Object m_onResumableAwait;
+  Object m_onResumableSuccess;
+  Object m_onResumableFail;
+  Object m_onAwaitAllCreate;
+  Object m_onGenArrayCreate;
+  Object m_onGenMapCreate;
+  Object m_onGenVectorCreate;
+  Object m_onConditionCreate;
+  Object m_onExtThreadEventCreate;
+  Object m_onExtThreadEventSuccess;
+  Object m_onExtThreadEventFail;
+  Object m_onSleepCreate;
+  Object m_onSleepSuccess;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -165,7 +165,7 @@ void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
   assert(exception->instanceof(SystemLib::s_ExceptionClass));
 
   AsioSession* session = AsioSession::Get();
-  if (UNLIKELY(session->hasOnResumableFailCallback())) {
+  if (UNLIKELY(session->hasOnResumableFail())) {
     try {
       session->onResumableFail(this, exception);
     } catch (...) {

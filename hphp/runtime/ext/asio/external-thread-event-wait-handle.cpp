@@ -34,19 +34,19 @@ namespace {
 void c_ExternalThreadEventWaitHandle::ti_setoncreatecallback(
   const Variant& callback
 ) {
-  AsioSession::Get()->setOnExternalThreadEventCreateCallback(callback);
+  AsioSession::Get()->setOnExternalThreadEventCreate(callback);
 }
 
 void c_ExternalThreadEventWaitHandle::ti_setonsuccesscallback(
   const Variant& callback
 ) {
-  AsioSession::Get()->setOnExternalThreadEventSuccessCallback(callback);
+  AsioSession::Get()->setOnExternalThreadEventSuccess(callback);
 }
 
 void c_ExternalThreadEventWaitHandle::ti_setonfailcallback(
   const Variant& callback
 ) {
-  AsioSession::Get()->setOnExternalThreadEventFailCallback(callback);
+  AsioSession::Get()->setOnExternalThreadEventFail(callback);
 }
 
 void c_ExternalThreadEventWaitHandle::sweep() {
@@ -90,7 +90,7 @@ void c_ExternalThreadEventWaitHandle::initialize(
     registerToContext();
   }
 
-  if (UNLIKELY(session->hasOnExternalThreadEventCreateCallback())) {
+  if (UNLIKELY(session->hasOnExternalThreadEventCreate())) {
     session->onExternalThreadEventCreate(this);
   }
 }
@@ -143,7 +143,7 @@ void c_ExternalThreadEventWaitHandle::process() {
     parentChain.unblock();
 
     auto session = AsioSession::Get();
-    if (UNLIKELY(session->hasOnExternalThreadEventFailCallback())) {
+    if (UNLIKELY(session->hasOnExternalThreadEventFail())) {
       session->onExternalThreadEventFail(this, exception);
     }
     return;
@@ -163,7 +163,7 @@ void c_ExternalThreadEventWaitHandle::process() {
   parentChain.unblock();
 
   auto session = AsioSession::Get();
-  if (UNLIKELY(session->hasOnExternalThreadEventSuccessCallback())) {
+  if (UNLIKELY(session->hasOnExternalThreadEventSuccess())) {
     session->onExternalThreadEventSuccess(this, tvAsCVarRef(&result));
   }
 }

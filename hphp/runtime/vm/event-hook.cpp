@@ -425,7 +425,7 @@ void EventHook::onFunctionSuspendR(ActRec* suspending, ObjectData* child) {
     assert(suspending->resumed());
     auto const afwh = frame_afwh(suspending);
     auto const session = AsioSession::Get();
-    if (session->hasOnResumableAwaitCallback()) {
+    if (session->hasOnResumableAwait()) {
       session->onResumableAwait(
         afwh,
         static_cast<c_WaitableWaitHandle*>(child)
@@ -453,7 +453,7 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
       assert(resumableAR->resumed());
       auto const afwh = frame_afwh(resumableAR);
       auto const session = AsioSession::Get();
-      if (session->hasOnResumableCreateCallback()) {
+      if (session->hasOnResumableCreate()) {
         session->onResumableCreate(afwh, afwh->getChild());
       }
     }
@@ -485,7 +485,7 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
         ar->func()->isAsyncFunction() && ar->resumed()) {
       auto session = AsioSession::Get();
       // Return @ resumed execution => AsyncFunctionWaitHandle succeeded.
-      if (session->hasOnResumableSuccessCallback()) {
+      if (session->hasOnResumableSuccess()) {
         auto afwh = frame_afwh(ar);
         session->onResumableSuccess(afwh, cellAsCVarRef(retval));
       }

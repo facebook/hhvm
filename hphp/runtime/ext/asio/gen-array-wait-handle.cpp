@@ -44,7 +44,7 @@ namespace {
 }
 
 void c_GenArrayWaitHandle::ti_setoncreatecallback(const Variant& callback) {
-  AsioSession::Get()->setOnGenArrayCreateCallback(callback);
+  AsioSession::Get()->setOnGenArrayCreate(callback);
 }
 
 NEVER_INLINE __attribute__((__noreturn__))
@@ -124,7 +124,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
     my_wh->initialize(exception, depCopy, current_pos, ctx_idx, child_wh);
 
     auto const session = AsioSession::Get();
-    if (UNLIKELY(session->hasOnGenArrayCreateCallback())) {
+    if (UNLIKELY(session->hasOnGenArrayCreate())) {
       session->onGenArrayCreate(my_wh.get(), inputDependencies);
     }
 

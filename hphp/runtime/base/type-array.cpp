@@ -509,7 +509,7 @@ Variant &Array::lvalAt() {
   Variant *ret = nullptr;
   auto arr = m_arr;
   if (BITREF_SURVEY) cow_check_occurred(arr.get());
-  ArrayData *escalated = arr->lvalNew(ret, arr->hasMultipleRefs());
+  ArrayData *escalated = arr->lvalNew(ret, arr->cowCheck());
   if (escalated != arr) m_arr = escalated;
   assert(ret);
   return *ret;
@@ -520,7 +520,7 @@ Variant &Array::lvalAtRef() {
   Variant *ret = nullptr;
   auto arr = m_arr;
   if (BITREF_SURVEY) cow_check_occurred(arr.get());
-  ArrayData *escalated = arr->lvalNewRef(ret, arr->hasMultipleRefs());
+  ArrayData *escalated = arr->lvalNewRef(ret, arr->cowCheck());
   if (escalated != arr) m_arr = escalated;
   assert(ret);
   return *ret;
@@ -547,7 +547,7 @@ void Array::setImpl(const T &key, const Variant& v) {
     m_arr = ArrayData::Create(key, v);
   } else {
     if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
-    ArrayData *escalated = m_arr->set(key, v, (m_arr->hasMultipleRefs()));
+    ArrayData *escalated = m_arr->set(key, v, (m_arr->cowCheck()));
     if (escalated != m_arr) m_arr = escalated;
   }
 }
@@ -560,7 +560,7 @@ void Array::setRefImpl(const T &key, Variant& v) {
   } else {
     escalate();
     if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
-    ArrayData *escalated = m_arr->setRef(key, v, (m_arr->hasMultipleRefs()));
+    ArrayData *escalated = m_arr->setRef(key, v, (m_arr->cowCheck()));
     if (escalated != m_arr) m_arr = escalated;
   }
 }
@@ -572,7 +572,7 @@ void Array::addImpl(const T &key, const Variant& v) {
     m_arr = ArrayData::Create(key, v);
   } else {
     if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
-    ArrayData *escalated = m_arr->add(key, v, (m_arr->hasMultipleRefs()));
+    ArrayData *escalated = m_arr->add(key, v, (m_arr->cowCheck()));
     if (escalated != m_arr) m_arr = escalated;
   }
 }
@@ -679,7 +679,7 @@ const Variant& Array::append(const Variant& v) {
     m_arr = ArrayData::Create(v);
   } else {
     if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
-    ArrayData *escalated = m_arr->append(v, (m_arr->hasMultipleRefs()));
+    ArrayData *escalated = m_arr->append(v, (m_arr->cowCheck()));
     if (escalated != m_arr) m_arr = escalated;
   }
   return v;
@@ -690,7 +690,7 @@ const Variant& Array::appendRef(Variant& v) {
     m_arr = ArrayData::CreateRef(v);
   } else {
     if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
-    ArrayData *escalated = m_arr->appendRef(v, (m_arr->hasMultipleRefs()));
+    ArrayData *escalated = m_arr->appendRef(v, (m_arr->cowCheck()));
     if (escalated != m_arr) m_arr = escalated;
   }
   return v;
@@ -699,7 +699,7 @@ const Variant& Array::appendRef(Variant& v) {
 const Variant& Array::appendWithRef(const Variant& v) {
   if (!m_arr) m_arr = ArrayData::Create();
   if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
-  ArrayData *escalated = m_arr->appendWithRef(v, (m_arr->hasMultipleRefs()));
+  ArrayData *escalated = m_arr->appendWithRef(v, (m_arr->cowCheck()));
   if (escalated != m_arr) m_arr = escalated;
   return v;
 }
@@ -728,7 +728,7 @@ void Array::prepend(const Variant& v) {
   if (!m_arr) operator=(Create());
   assert(m_arr);
   if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
-  ArrayData *newarr = m_arr->prepend(v, (m_arr->hasMultipleRefs()));
+  ArrayData *newarr = m_arr->prepend(v, (m_arr->cowCheck()));
   if (newarr != m_arr) m_arr = newarr;
 }
 

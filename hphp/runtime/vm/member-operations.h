@@ -774,7 +774,7 @@ inline StringData* SetElemString(TypedValue* base, key_type<keyType> key,
 
   // Create and save the result.
   if (BITREF_SURVEY) cow_check_occurred(base->m_data.pstr);
-  if (x >= 0 && x < baseLen && !base->m_data.pstr->hasMultipleRefs()) {
+  if (x >= 0 && x < baseLen && !base->m_data.pstr->cowCheck()) {
     // Modify base in place.  This is safe because the LHS owns the
     // only reference.
     auto const oldp = base->m_data.pstr;
@@ -924,7 +924,7 @@ inline void SetElemArray(TypedValue* base, key_type<keyType> key,
                          Cell* value) {
   ArrayData* a = base->m_data.parr;
   if (BITREF_SURVEY) cow_check_occurred(a);
-  bool copy = (a->hasMultipleRefs())
+  bool copy = (a->cowCheck())
     || (value->m_type == KindOfArray && value->m_data.parr == a);
 
   auto* newData = SetElemArrayPre<setResult>(a, key, value, copy);
@@ -1036,7 +1036,7 @@ inline void SetNewElemString(TypedValue* base, Cell* value) {
 inline void SetNewElemArray(TypedValue* base, Cell* value) {
   ArrayData* a = base->m_data.parr;
   if (BITREF_SURVEY) cow_check_occurred(a);
-  bool copy = (a->hasMultipleRefs())
+  bool copy = (a->cowCheck())
     || (value->m_type == KindOfArray && value->m_data.parr == a);
   ArrayData* a2 = a->append(cellAsCVarRef(*value), copy);
   if (a2 != a) {
@@ -1555,7 +1555,7 @@ template <KeyType keyType>
 inline void UnsetElemArray(TypedValue* base, key_type<keyType> key) {
   ArrayData* a = base->m_data.parr;
   if (BITREF_SURVEY) cow_check_occurred(a);
-  bool copy = a->hasMultipleRefs();
+  bool copy = a->cowCheck();
   ArrayData* a2 = UnsetElemArrayPre(a, key, copy);
 
   if (a2 != a) {

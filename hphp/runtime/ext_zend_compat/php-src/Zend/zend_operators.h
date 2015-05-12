@@ -474,7 +474,7 @@ public:
   void cowCheck() {
     ArrayData * ad = m_tv->m_data.parr;
     if (BITREF_SURVEY) cow_check_occurred(ad);
-    if (ad->isStatic() || ad->hasMultipleRefs()) {
+    if (ad->isStatic() || ad->cowCheck()) {
       forceAsProxyArray ();
     }
   }

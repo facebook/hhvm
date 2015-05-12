@@ -88,7 +88,7 @@ ArrayData* addElemIntKeyHelper(ArrayData* ad,
   // if appropriate
   if (BITREF_SURVEY) cow_check_occurred(ad);
   ArrayData* retval = ad->set(key, tvAsCVarRef(&value),
-                              ad->hasMultipleRefs());
+                              ad->cowCheck());
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
@@ -101,7 +101,7 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
                                   TypedValue value) {
   // this does not re-enter
   if (BITREF_SURVEY) cow_check_occurred(ad);
-  bool copy = ad->hasMultipleRefs();
+  bool copy = ad->cowCheck();
   // set will decRef any old value that may have been overwritten
   // if appropriate
   int64_t intkey;

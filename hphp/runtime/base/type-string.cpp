@@ -270,7 +270,7 @@ String &String::operator+=(const char* s) {
       m_str = StringData::Make(s, CopyString);
     } else {
       if (BITREF_SURVEY) cow_check_occurred(m_str.get());
-      if (m_str->hasExactlyOneRef()) {
+      if (!m_str->cowCheck()) {
         auto const tmp = m_str->append(StringSlice(s, strlen(s)));
         if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);
       } else {
@@ -287,7 +287,7 @@ String &String::operator+=(const String& str) {
       m_str = str.m_str;
     } else {
       if (BITREF_SURVEY) cow_check_occurred(m_str.get());
-      if (m_str->hasExactlyOneRef()) {
+      if (!m_str->cowCheck()) {
         auto tmp = m_str->append(str.slice());
         if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);
       } else {
@@ -303,7 +303,7 @@ String& String::operator+=(const StringSlice& slice) {
     return *this;
   }
   if (BITREF_SURVEY) cow_check_occurred(m_str.get());
-  if (m_str && m_str->hasExactlyOneRef()) {
+  if (m_str && !m_str->cowCheck()) {
     auto const tmp = m_str->append(slice);
     if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);
     return *this;

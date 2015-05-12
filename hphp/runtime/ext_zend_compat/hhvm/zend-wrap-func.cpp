@@ -34,7 +34,7 @@ void zBoxAndProxy(TypedValue* arg) {
   if (inner->m_type == KindOfArray && !inner->m_data.parr->isProxyArray()) {
     ArrayData * inner_arr = inner->m_data.parr;
     if (BITREF_SURVEY) cow_check_occurred(inner_arr);
-    if (inner_arr->isStatic() || inner_arr->hasMultipleRefs()) {
+    if (inner_arr->isStatic() || inner_arr->cowCheck()) {
       ArrayData * tmp = inner_arr->copy();
       tmp->incRefCount();
       inner_arr->decRefAndRelease();

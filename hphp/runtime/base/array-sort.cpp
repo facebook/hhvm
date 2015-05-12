@@ -124,7 +124,7 @@ ArrayData* MixedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   //   return a;
   // }
   if (BITREF_SURVEY) cow_check_occurred(a);
-  if (UNLIKELY(hasUserDefinedCmp(sf) || a->hasMultipleRefs())) {
+  if (UNLIKELY(hasUserDefinedCmp(sf) || a->cowCheck())) {
     auto ret = a->copyMixed();
     assert(ret->getCount() == 0);
     return ret;
@@ -142,7 +142,7 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   }
   if (isSortFamily(sf)) {               // sort/rsort/usort
     if (BITREF_SURVEY) cow_check_occurred(ad);
-    if (UNLIKELY(ad->hasMultipleRefs())) {
+    if (UNLIKELY(ad->cowCheck())) {
       auto ret = PackedArray::Copy(ad);
       assert(ret->getCount() == 0);
       return ret;

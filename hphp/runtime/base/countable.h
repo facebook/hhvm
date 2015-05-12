@@ -114,6 +114,14 @@ inline bool check_one_bit_ref(uint8_t pad) {
     return (uint32_t)m_count > 1;                                       \
   }                                                                     \
                                                                         \
+  bool maybeShared() const {                                            \
+    return m_pad == 1;                                                  \
+  }                                                                     \
+                                                                        \
+  bool cowCheck() const {                                               \
+    return maybeShared();                                               \
+  }                                                                     \
+                                                                        \
   bool hasExactlyOneRef() const {                                       \
     assert(check_refcount(m_count));                                    \
     if ((uint32_t)m_count > 1) assert(check_one_bit_ref(m_pad));        \
@@ -176,6 +184,14 @@ inline bool check_one_bit_ref(uint8_t pad) {
     assert(check_refcount_ns(m_count));                 \
     if (m_count > 1) assert(check_one_bit_ref(m_pad));  \
     return m_count > 1;                                 \
+  }                                                     \
+                                                        \
+  bool maybeShared() const {                            \
+    return m_pad == 1;                                  \
+  }                                                     \
+                                                        \
+  bool cowCheck() const {                               \
+    return maybeShared();                               \
   }                                                     \
                                                         \
   bool hasExactlyOneRef() const {                       \

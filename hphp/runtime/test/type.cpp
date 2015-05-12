@@ -418,6 +418,13 @@ TEST(Type, PtrKinds) {
             (TPtrToRPropCell|TNullptr).ptrKind());
   EXPECT_EQ(TPtrToPropCell,
             (TPtrToPropCell|TNullptr) - TNullptr);
+
+  auto const frameGenOrCell = frameGen | TCell;
+  auto const frameOrRefGenOrCell = frameGenOrCell | TGen.ptr(Ptr::Ref);
+  auto const stackOrRefArrOrInt = TArr.ptr(Ptr::RStk) | TInt;
+  EXPECT_EQ(frameGenOrCell & stackOrRefArrOrInt, TInt);
+  EXPECT_EQ(frameOrRefGenOrCell & stackOrRefArrOrInt,
+            TArr.ptr(Ptr::Ref) | TInt);
 }
 
 TEST(Type, PtrRefs) {

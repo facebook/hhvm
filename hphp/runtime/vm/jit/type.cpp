@@ -479,11 +479,13 @@ Type Type::operator&(Type rhs) const {
   if (lhs.m_hasConstVal) return lhs <= rhs ? lhs : TBottom;
   if (rhs.m_hasConstVal) return rhs <= lhs ? rhs : TBottom;
 
-  auto const bits = lhs.m_bits & rhs.m_bits;
   auto const opt_ptr = lhs.ptrKind() & rhs.ptrKind();
-  bool const is_ptr = bits & TPtrToGen.m_bits;
 
-  if (!opt_ptr) return TBottom;
+  auto bits = lhs.m_bits & rhs.m_bits;
+  // Exclude pointer part of the bits when result is not a pointer.
+  if (!opt_ptr) bits &= ~TPtrToGen.m_bits;
+
+  bool const is_ptr = bits & TPtrToGen.m_bits;
   auto const ptr = is_ptr ? *opt_ptr : Ptr::Unk;
 
   return Type(bits, ptr).specialize(lhs.spec() & rhs.spec());

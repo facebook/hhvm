@@ -230,8 +230,8 @@ template <typename F> friend void scan(const T& this_, F& mark);
     MM().smartFreeSize(p, sizeof(T));                     \
   }
 
-#define DECLARE_RESOURCE_ALLOCATION(T)                                  \
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                               \
+#define DECLARE_RESOURCE_ALLOCATION(T)                          \
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                       \
   void sweep() override;
 
 #define IMPLEMENT_RESOURCE_ALLOCATION(T) \

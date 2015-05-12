@@ -81,24 +81,31 @@ struct ScanGenerator : clang::RecursiveASTVisitor<ScanGenerator>,
   bool cloneDef(std::ostream& os,
                 std::ostream& friends,
                 const clang::CXXRecordDecl* def);
+  void declareClass(std::ostream& os,
+                    const clang::CXXRecordDecl* def,
+                    bool do_close = false) const;
   void declareClonedClass(std::ostream& os,
                           const clang::CXXRecordDecl* def,
-                          bool do_close = false);
+                          bool do_close = false) const;
   std::string maybeCloneName(std::string str) const;
 
   // Add scan method to class.
   void addScanMethod(std::ostream& os,
                      std::ostream& friends,
                      const clang::CXXRecordDecl* def);
+  void dumpScanMethodDecl(std::ostream& out,
+                          const clang::CXXRecordDecl* def,
+                          bool declareArgs = false) const;
   void dumpFieldMarks(std::ostream& out,
                       std::ostream& friends,
                       const clang::CXXRecordDecl* def,
                       bool isCloned);
 
   void emitProlog(std::ostream& os,
-                  std::stringstream& friends,
                   const DeclSet& decls) const;
   void emitEpilog(std::ostream& os) const;
+  void emitDeclProlog(std::ostream& os) const;
+  void emitDeclEpilog(std::ostream& os) const;
   void emitEpilogs();
   void writeFiles();
 

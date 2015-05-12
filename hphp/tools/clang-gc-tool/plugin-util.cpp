@@ -41,6 +41,9 @@ using clang::dyn_cast;
 using clang::dyn_cast_or_null;
 using clang::PrintingPolicy;
 using clang::RawComment;
+using clang::TTK_Class;
+using clang::TTK_Union;
+using clang::TTK_Struct;
 
 PluginUtil::PluginUtil(ASTContext& context)
 : m_context(context) { }
@@ -249,7 +252,7 @@ std::string PluginUtil::getName(QualType ty,
                                 bool suppress_tag,
                                 bool suppress_qualifiers) const {
   PrintingPolicy pp(m_context.getLangOpts());
-  pp.SuppressTagKeyword = true;
+  pp.SuppressTagKeyword = suppress_tag;
   pp.SuppressScope = no_namespaces;
   if (suppress_qualifiers) {
     return ty.getUnqualifiedType().getAsString(pp);
@@ -277,7 +280,7 @@ std::string PluginUtil::getName(const ClassTemplateDecl* decl,
   std::string name;
   llvm::raw_string_ostream ss(name);
   PrintingPolicy p(m_context.getLangOpts());
-  p.SuppressTagKeyword = true;
+  p.SuppressTagKeyword = suppress_tag;
   p.SuppressScope = no_namespaces;
   decl->getNameForDiagnostic(ss, p, true);
   return ss.str();
@@ -295,6 +298,22 @@ std::string PluginUtil::getName(const NamedDecl* decl,
   return decl->getDeclName().getAsString();
 }
 
+std::string PluginUtil::tagName(const CXXRecordDecl* decl) const {
+  switch (decl->getTagKind()) {
+    case TTK_Struct: return "struct";
+    case TTK_Class: return "class";
+    case TTK_Union: return "union";
+    default: assert(0); return "";
+  }
+  assert(0);
+  return "";
+}
+
+bool PluginUtil::isNestedDecl(const CXXRecordDecl* decl) const {
+  auto ctx = decl->getDeclContext();
+  return ctx && ctx->isRecord();
+}
+
 std::vector<const NamespaceDecl*>
 PluginUtil::getParentNamespaces(const CXXRecordDecl* def) {
   std::vector<const NamespaceDecl*> nsvec;
@@ -310,6 +329,22 @@ PluginUtil::getParentNamespaces(const CXXRecordDecl* def) {
   }
   std::reverse(nsvec.begin(), nsvec.end());
   return nsvec;
+}
+
+std::vector<const CXXRecordDecl*>
+PluginUtil::getOuterClasses(const CXXRecordDecl* def) {
+  std::vector<const CXXRecordDecl*> rvec;
+  auto p = def->getDeclContext();
+  while (p) {
+    if(auto rec = dyn_cast<CXXRecordDecl>(p)) {
+      if (!rec->isAnonymousStructOrUnion()) {
+        rvec.push_back(rec);
+      }
+    }
+    p = p->getParent();
+  }
+  std::reverse(rvec.begin(), rvec.end());
+  return rvec;
 }
 
 // Find comment (if any) immediately preceding decl.

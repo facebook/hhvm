@@ -170,8 +170,15 @@ struct PluginUtil {
                       bool no_namespaces = false,
                       bool suppress_tag = true) const;
 
+  std::string tagName(const clang::CXXRecordDecl* decl) const;
+
+  bool isNestedDecl(const clang::CXXRecordDecl* decl) const;
+
   static std::vector<const clang::NamespaceDecl*>
   getParentNamespaces(const clang::CXXRecordDecl* def);
+
+  static std::vector<const clang::CXXRecordDecl*>
+  getOuterClasses(const clang::CXXRecordDecl* def);
 
   // Find comment (if any) immediately preceding decl.
   const clang::RawComment* findComment(const clang::Decl* decl) const;

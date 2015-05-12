@@ -495,11 +495,9 @@ void ScanGenerator::dumpTemplateArgs(std::ostream& out,
 // Cloning methods.
 //
 
-void ScanGenerator::declareClonedClass(std::ostream& out,
-                                       const CXXRecordDecl* def,
-                                       bool do_close) {
-  out << "namespace Cloned {\n";
-
+void ScanGenerator::declareClass(std::ostream& out,
+                                 const CXXRecordDecl* def,
+                                 bool do_close) const {
   // parent namespaces
   auto namespaces = getParentNamespaces(def);
 
@@ -508,7 +506,13 @@ void ScanGenerator::declareClonedClass(std::ostream& out,
     out << "namespace " << getName(ns) << " {\n";
   }
 
-  out << "struct " << getName(def, true);
+  if (isTemplate(def)) {
+    dumpTemplateDecl(out, "template <", def);
+    out << " ";
+    out << tagName(def) << " " << getTemplateClassName(def, true);
+  } else {
+    out << tagName(def) << " " << getName(def, true);
+  }
 
   if (do_close) {
     out << ";\n";
@@ -516,8 +520,15 @@ void ScanGenerator::declareClonedClass(std::ostream& out,
       if (getName(namespaces[i]) == "HPHP") continue;
       out << "}\n";
     }
-    out << "}\n";
   }
+}
+
+void ScanGenerator::declareClonedClass(std::ostream& out,
+                                       const CXXRecordDecl* def,
+                                       bool do_close) const {
+  out << "namespace Cloned {\n";
+  declareClass(out, def, do_close);
+  if (do_close) out << "}\n";
 }
 
 std::string ScanGenerator::maybeCloneName(std::string str) const {
@@ -561,10 +572,6 @@ bool ScanGenerator::cloneDef(std::ostream& out,
   m_clonedNames.insert(getName(def));  // XXX templates?
 
   def = def->getDefinition();
-
-  friends << "namespace HPHP {\n";
-  declareClonedClass(friends, def, true);
-  friends << "}\n";
 
   std::stringstream os;
 
@@ -703,6 +710,39 @@ void ScanGenerator::dumpFieldMarks(std::ostream& out,
   }
 }
 
+void ScanGenerator::dumpScanMethodDecl(std::ostream& out,
+                                       const CXXRecordDecl* def,
+                                       bool declareArgs) const {
+  if (!declareArgs || !isNestedDecl(def)) {
+    bool isCloned = exists(m_privateDefs, def->getCanonicalDecl());
+
+    if (declareArgs) {
+      declareClass(out, def, true);
+      out << "\n";
+    }
+
+    if (isTemplate(def)) {
+      dumpTemplateDecl(out, "template <typename F, ", def);
+    } else {
+      out << "template <typename F>";
+    }
+
+    std::string className;
+    if (isNestedDecl(def) && isCloned) {
+      className = "Cloned::" + getName(def, true);
+    } else {
+      className = getName(def, false);
+    }
+
+    out << " void scan(const "
+        << className
+        << "& this" << (isCloned ? "__" : "_")
+        << ", F& mark)";
+
+    if (declareArgs) out << ";\n\n";
+  }
+}
+
 // Add scan method to class.
 void ScanGenerator::addScanMethod(std::ostream& res,
                                   std::ostream& friends,
@@ -723,23 +763,13 @@ void ScanGenerator::addScanMethod(std::ostream& res,
     isCloned = cloneDef(out, friends, def->getCanonicalDecl());
   }
 
+  dumpScanMethodDecl(friends, def, true);
+
+  dumpScanMethodDecl(out, def);
+  out << " {\n";
   if (isCloned) {
-    if (isTemplate(def)) {
-      dumpTemplateDecl(out, "template <typename F, ", def);
-    } else {
-      out << "template <typename F>";
-    }
-    out << " void scan(const Cloned::" << getName(def, true)
-        << "& this__, F& mark) {\n";
     out << "  const auto& this_ = static_cast<const Cloned::"
         << getName(def, true) << "&>(this__);\n";
-  } else {
-    if (isTemplate(def)) {
-      dumpTemplateDecl(out, "template <typename F, ", def);
-    } else {
-      out << "template <typename F>";
-    }
-    out << " void scan(const " << getName(def) << "& this_, F& mark) {\n";
   }
 
   // Note: this assumes the sizing rules of clang/gcc are the same and that
@@ -803,9 +833,7 @@ void ScanGenerator::emitScanMethods() {
   writeFiles();
 }
 
-void ScanGenerator::emitProlog(std::ostream& os,
-                               std::stringstream& friends,
-                               const DeclSet& decls) const {
+void ScanGenerator::emitProlog(std::ostream& os, const DeclSet& decls) const {
   os << "// This file is auto generated.  Do not hand edit.\n";
   os << "// See hphp/tools/clang-gc-tool/README for details.\n";
   os << "// override-include-guard\n";
@@ -827,11 +855,21 @@ void ScanGenerator::emitProlog(std::ostream& os,
   }
 
   os << "\n";
-  os << friends.str() << "\n";
   os << "namespace HPHP {\n\n";
 }
 
 void ScanGenerator::emitEpilog(std::ostream& os) const {
+  os << "\n}\n";
+}
+
+void ScanGenerator::emitDeclProlog(std::ostream& os) const {
+  os << "// This file is auto generated.  Do not hand edit.\n";
+  os << "// See hphp/tools/clang-gc-tool/README for details.\n";
+  os << "// override-include-guard\n\n";
+  os << "namespace HPHP {\n\n";
+}
+
+void ScanGenerator::emitDeclEpilog(std::ostream& os) const {
   os << "\n}\n";
 }
 
@@ -887,8 +925,7 @@ bool mkdirhier(const std::string& fullpath) {
   }
 
   char dir[PATH_MAX+1];
-  assert(path.length() < PATH_MAX);
-  strcpy(dir, path.c_str());
+  snprintf(dir, sizeof(dir), "%s", path.c_str());
 
   for (char* p = dir + 1; *p; p++) {
     if (*p == '/') {
@@ -914,7 +951,7 @@ bool mkdirhier(const std::string& fullpath) {
 }
 
 std::string ScanGenerator::getScanFilename(const std::string& file) const {
-  return m_outdir + "/" + stripExtension(file) + "-scan.h";
+  return m_outdir + "/" + stripExtension(file) + "-scan";
 }
 
 void ScanGenerator::writeFiles() {
@@ -950,19 +987,35 @@ void ScanGenerator::writeFiles() {
     if (!mkdirhier(outfile)) {
       error("can't create directory %s", getDirname(outfile));
     }
-    Lockfile lf(outfile);
+
+    const auto scanfile = outfile + ".h";
+    Lockfile lf(scanfile);
     // if we can't get a lock, the file has been written already.
     if (lf) {
-      std::ofstream fs(outfile, std::ofstream::out | std::ofstream::trunc);
+      std::ofstream fs(scanfile, std::ofstream::out | std::ofstream::trunc);
       if (!fs) {
         lf.unlock();
-        error("can't open %s", outfile);
+        error("can't open %s", scanfile);
       }
-      emitProlog(fs,
-                 cattedScanFriends[entry.first],
-                 cattedScanDecls[entry.first]);
+
+      emitProlog(fs, cattedScanDecls[entry.first]);
       fs << entry.second.str();
       emitEpilog(fs);
+    }
+
+    const auto declfile = outfile + "-decl.h";
+    Lockfile dlf(declfile);
+    if (dlf) {
+      std::ofstream dfs(declfile, std::ofstream::out | std::ofstream::trunc);
+      if(!dfs) {
+        dlf.unlock();
+        error("can't open %s", declfile);
+      }
+
+      emitDeclProlog(dfs);
+      auto str = cattedScanFriends[entry.first].str();
+      dfs << str;
+      emitDeclEpilog(dfs);
     }
   }
 }

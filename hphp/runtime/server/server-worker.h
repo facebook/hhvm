@@ -20,7 +20,6 @@
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/debugger/debugger.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/service-data.h"
 

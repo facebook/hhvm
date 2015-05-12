@@ -1171,10 +1171,6 @@ EmitterVisitor::registerGoto(StatementPtr s, Region* region, StringData* name,
   Region* r;
   for (r = region; true; r = r->m_parent.get()) {
     assert(r);
-    if (r->isFinally()) {
-      throw EmitterVisitor::IncludeTimeFatalException(s,
-              "Goto inside a finally block is not supported");
-    }
     if (r->m_gotoTargets.count(name)) {
       // We registered the control target before. Just return the existing one.
       t = r->m_gotoTargets[name].target;
@@ -1440,7 +1436,6 @@ void EmitterVisitor::emitReturn(Emitter& e, char sym, StatementPtr s) {
 void EmitterVisitor::emitGoto(Emitter& e, StringData* name, StatementPtr s) {
   Region* region = m_regions.back().get();
   registerGoto(s, region, name, true);
-  assert(!region->isFinally());
   assert(region->m_gotoTargets.count(name));
   IterVec iters;
   for (Region* r = region; true; r = r->m_parent.get()) {
@@ -1452,8 +1447,12 @@ void EmitterVisitor::emitGoto(Emitter& e, StringData* name, StatementPtr s) {
       emitJump(e, iters, t->m_label);
       return;
     }
+    if (r->isFinally()) {
+      throw EmitterVisitor::IncludeTimeFatalException(s,
+        "Goto to a label outside a finally block is not supported");
+    }
     if (r->isTryFinally()) {
-      // We came across a try region, need for run a finally block.
+      // We came across a try region, need to run a finally block.
       // Store appropriate value inside the state local.
       Id stateLocal = getStateLocal();
       emitVirtualLocal(stateLocal);
@@ -1688,6 +1687,11 @@ void EmitterVisitor::emitGotoTrampoline(Emitter& e,
     // therefore if we are in a loop, we need to free the iterator.
     if (region->isForeach()) {
       iters.push_back(IterPair(region->m_iterKind, region->m_iterId));
+    }
+    // Error, because the label is crossing a finally
+    if (region->isFinally()) {
+        throw EmitterVisitor::IncludeTimeFatalException(e.getNode(),
+          "jump out of a finally block is disallowed");
     }
     // We should never break out of a function, therefore there
     // should always be a parent

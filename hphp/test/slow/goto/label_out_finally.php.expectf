@@ -1,0 +1,2 @@
+
+Fatal error: Goto to a label outside a finally block is not supported in %s/label_out_finally.php on line 12

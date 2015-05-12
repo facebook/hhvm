@@ -1,0 +1,2 @@
+
+Fatal error: 'goto' into loop or switch statement is disallowed: (Line: 3, Char: 13) in %s/try_goto_in_finally2.php on line 1

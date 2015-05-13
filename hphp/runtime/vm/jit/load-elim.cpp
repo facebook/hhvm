@@ -382,6 +382,28 @@ Flags handle_general_effects(Local& env,
   return FNone{};
 }
 
+void handle_call_effects(Local& env, CallEffects effects) {
+  if (effects.destroys_locals) {
+    clear_everything(env);
+    return;
+  }
+
+  /*
+   * Keep types for stack and frame locations, and throw away the values.  We
+   * are just doing this to avoid extending lifetimes across php calls, which
+   * currently always leads to spilling.
+   */
+  auto const stk_and_frame = env.global.ainfo.all_stack |
+                             env.global.ainfo.all_frame;
+  env.state.avail &= stk_and_frame;
+  for (auto aloc = uint32_t{0};
+      aloc < env.global.ainfo.locations.size();
+      ++aloc) {
+    if (!env.state.avail[aloc]) continue;
+    env.state.tracked[aloc].knownValue = nullptr;
+  }
+}
+
 Flags handle_assert(Local& env, const IRInstruction& inst) {
   auto const acls = [&] () -> folly::Optional<AliasClass> {
     switch (inst.op()) {
@@ -436,19 +458,16 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     effects,
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { clear_everything(env); },
-    [&] (ReturnEffects l)   {},
-    [&] (CallEffects l)     { // Note: shouldn't need to give up types for some
-                              // locations (e.g. locals), but CallEffects needs
-                              // more information to do it correctly.
-                              clear_everything(env); },
     [&] (ExitEffects)       { clear_everything(env); },
+    [&] (ReturnEffects)     {},
 
-    [&] (PureStore m)      { store(env, m.dst, m.value); },
-    [&] (PureSpillFrame m) { store(env, m.stk, nullptr); },
+    [&] (PureStore m)       { store(env, m.dst, m.value); },
+    [&] (PureSpillFrame m)  { store(env, m.stk, nullptr); },
 
-    [&] (PureLoad m)       { flags = load(env, inst, m.src); },
+    [&] (PureLoad m)        { flags = load(env, inst, m.src); },
 
-    [&] (GeneralEffects m) { flags = handle_general_effects(env, inst, m); }
+    [&] (GeneralEffects m)  { flags = handle_general_effects(env, inst, m); },
+    [&] (CallEffects x)     { handle_call_effects(env, x); }
   );
 
   switch (inst.op()) {

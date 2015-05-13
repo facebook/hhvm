@@ -1157,30 +1157,6 @@ Variant HHVM_FUNCTION(version_compare,
   return init_null();
 }
 
-static bool HHVM_FUNCTION(gc_enabled) {
-  return false;
-}
-
-static void HHVM_FUNCTION(gc_enable) {
-  if (RuntimeOption::EnableHipHopSyntax) {
-    raise_warning("HipHop currently does not support circular reference "
-                  "collection");
-  }
-}
-
-static void HHVM_FUNCTION(gc_disable) {
-  // we could raise a warning here, but gc_disable can be considered
-  // "successful" in that there's (still) no official GC after it's
-  // called ; and previous callers of gc_enable have already been warned.
-}
-
-static int64_t HHVM_FUNCTION(gc_collect_cycles) {
-  if (RuntimeOption::EnableHipHopSyntax) {
-    raise_warning("HipHop currently does not support circular reference "
-                  "collection");
-  }
-  return 0;
-}
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::initOptions() {
@@ -1229,10 +1205,6 @@ void StandardExtension::initOptions() {
   HHVM_FE(sys_get_temp_dir);
   HHVM_FE(zend_version);
   HHVM_FE(version_compare);
-  HHVM_FE(gc_enabled);
-  HHVM_FE(gc_enable);
-  HHVM_FE(gc_disable);
-  HHVM_FE(gc_collect_cycles);
 
 #define INFO(v) Native::registerConstant<KindOfInt64> \
                   (makeStaticString("INFO_" #v), k_INFO_##v);

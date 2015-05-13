@@ -696,13 +696,10 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
-  auto& ti = TI();
-
-  if (debug) MM().traceHeap();
+  MM().collect();
   if (RuntimeOption::EvalDumpTC) {
     HPHP::jit::tc_dump();
   }
-
   if (xhprof) {
     Variant profileData = HHVM_FN(xhprof_disable)();
     if (!profileData.isNull()) {
@@ -713,6 +710,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   Eval::Debugger::InterruptPSPEnded(program);
   hphp_context_exit();
   hphp_session_exit();
+  auto& ti = TI();
   if (coverage && ti.m_reqInjectionData.getCoverage() &&
       !RuntimeOption::CodeCoverageOutputFile.empty()) {
     ti.m_coverage->Report(RuntimeOption::CodeCoverageOutputFile);

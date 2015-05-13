@@ -431,9 +431,8 @@ void Marker::sweep() {
 }
 }
 
-void MemoryManager::traceHeap() {
-  if (!RuntimeOption::EvalTraceHeap) return;
-  if (empty()) return;
+void MemoryManager::collect() {
+  if (!RuntimeOption::EvalEnableGC || empty()) return;
   Marker mkr;
   mkr.init();
   mkr.trace();

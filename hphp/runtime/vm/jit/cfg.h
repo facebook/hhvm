@@ -27,8 +27,8 @@ struct Block;
 
 //////////////////////////////////////////////////////////////////////
 
-/**
- * perform a depth-first postorder walk
+/*
+ * Perform a depth-first postorder walk.
  */
 template <class Visitor>
 void postorderWalk(const IRUnit&, Visitor visitor, Block* start = nullptr);
@@ -66,13 +66,6 @@ Block* splitEdge(IRUnit& unit, Block* from, Block* to);
 bool splitCriticalEdges(IRUnit&);
 
 /*
- * Inserts a loop pre-header before every loop header that doesn't have one.
- *
- * Returns: true iff the unit was changed.
- */
-bool insertLoopPreHeaders(IRUnit&);
-
-/*
  * Remove unreachable blocks from the given unit.
  *
  * Returns: true iff one or more blocks were deleted.
@@ -97,28 +90,16 @@ IdomVector findDominators(const IRUnit&,
 bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms);
 
 /*
- * Return true iff the CFG has a backedge.
+ * Return true iff the CFG has any loops, regardless of whether they are
+ * natural loops or not.
  */
 bool cfgHasLoop(const IRUnit&);
 
 /*
- * Finds all the back-edges in a unit.
+ * Return a set of the retreating edges in the unit.  These are edges that
+ * create (possibly-irreducible) loops in the CFG.
  */
-EdgeSet findBackEdges(const IRUnit&);
-
-/*
- * Finds all the loop headers in a unit.
- */
-BlockSet findLoopHeaders(const IRUnit&);
-
-/*
- * Inserts a pre-header before every loop header.
- *
- * If the loop header already has a pre-header, then it will not be modified.
- *
- * Returns true iff the CFG is changed.
- */
-bool insertLoopPreHeaders(IRUnit&);
+EdgeSet findRetreatingEdges(const IRUnit&);
 
 /*
  * Visit the instructions in this blocklist, in block order.

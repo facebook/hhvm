@@ -406,7 +406,7 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
 
   // Print the block CFG above the actual code.
 
-  auto const backedges = findBackEdges(unit);
+  auto const retreating_edges = findRetreatingEdges(unit);
   os << "digraph G {\n";
   for (auto block : blocks) {
     if (block->empty()) continue;
@@ -436,7 +436,7 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
       return
         target->isCatch() ? " [color=blue]" :
         target->isExit() ? " [color=cyan]" :
-        backedges.count(edge) ? " [color=red]" :
+        retreating_edges.count(edge) ? " [color=red]" :
         target->hint() == Block::Hint::Unlikely ? " [color=green]" : "";
     };
     auto show_edge = [&] (Edge* edge) {

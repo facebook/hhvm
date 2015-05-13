@@ -45,63 +45,24 @@ void splitCriticalEdge(IRUnit& unit, Edge* edge) {
   splitEdge(unit, from, to);
 }
 
-// Visits all back-edges in a CFG.
-template <class Visitor>
-struct BackEdgeVisitor {
-  BackEdgeVisitor(const IRUnit& unit, Visitor& visitor)
-    : m_path(unit.numBlocks())
-    , m_visited(unit.numBlocks())
-    , m_visitor(visitor)
-  {}
+/*
+ * Visit edges that have an unprocessed from() block if we walk the blocks in a
+ * RPO.  These are the edges that create loops.
+ */
+template<class F>
+void visit_retreating_edges(const IRUnit& unit, F f) {
+  auto const rpo = rpoSortCfg(unit);
+  auto seen = boost::dynamic_bitset<>(unit.numBlocks());
 
-  using BitSet = boost::dynamic_bitset<>;
-
-  void walk(Edge* e) {
-    if (e == nullptr) return;
-
-    auto const block = e->to();
-    auto const id = block->id();
-
-    // If we're revisiting a block in our current search, then we've
-    // found a backedge.
-    if (m_path.test(id)) {
-      // The entry block can't be a loop header.
-      assertx(!block->isEntry());
-
-      m_visitor(e);
+  for (auto& b : rpo) {
+    for (auto& pred : b->preds()) {
+      auto const fr = pred.from()->id();
+      if (!seen[fr]) {
+        if (!f(&pred)) return;
+      }
     }
-
-    // Otherwise if we're getting back to a block that's already been
-    // visited, but it hasn't been visited in this path, then we can
-    // prune this search.
-    if (m_visited.test(id)) return;
-
-    m_visited.set(id);
-    m_path.set(id);
-
-    // Normally blocks cannot be empty, but this is used in printing and we want
-    // to be able to print malformed blocks.
-    if (!block->empty()) {
-      walk(block->takenEdge());
-      walk(block->nextEdge());
-    }
-
-    m_path.set(id, false);
+    seen[b->id()] = true;
   }
-
-private:
-  BitSet m_path;
-  BitSet m_visited;
-  Visitor& m_visitor;
-};
-
-template <class Visitor>
-void backEdgeWalk(const IRUnit& unit, Visitor visitor) {
-  BackEdgeVisitor<Visitor> bev(unit, visitor);
-
-  auto const entry = unit.entry();
-  bev.walk(entry->takenEdge());
-  bev.walk(entry->nextEdge());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -274,68 +235,24 @@ bool dominates(const Block* b1, const Block* b2, const IdomVector& idoms) {
   return false;
 }
 
-bool insertLoopPreHeaders(IRUnit& unit) {
-  ITRACE(2, "making preheaders\n");
-  Trace::Indent _i;
-
-  bool changed = false;
-
-  auto const backEdges = findBackEdges(unit);
-
-  for (auto header : findLoopHeaders(unit)) {
-    // Compute the set of forward predecessors for the loop header.
-    EdgeSet fwdPreds;
-    for (auto& pred : header->preds()) {
-      if (backEdges.find(&pred) == backEdges.end()) fwdPreds.insert(&pred);
-    }
-
-    // Header can't be the entry block.
-    assertx(fwdPreds.size() != 0);
-
-    // Already have a pre-header, so do nothing.
-    if (fwdPreds.size() == 1) continue;
-
-    auto const preheader = unit.defBlock();
-    preheader->push_back(unit.gen(Jmp, header->front().marker(), header));
-
-    ITRACE(4, "making pre-header B{} for header B{}\n",
-           preheader->id(), header->id());
-
-    auto constexpr unlikely = Block::Hint::Unlikely;
-    if (header->hint() == unlikely) preheader->setHint(unlikely);
-
-    // Point all forward preds at pre-header.
-    for (auto const pred : fwdPreds) {
-      auto& branch = pred->from()->back();
-
-      assertx(branch.taken() == header || branch.next() == header);
-
-      if (branch.taken() == header) branch.setTaken(preheader);
-      if (branch.next() == header) branch.setNext(preheader);
-
-      changed = true;
-    }
-  }
-
-  return changed;
-}
-
-EdgeSet findBackEdges(const IRUnit& unit) {
-  EdgeSet edges;
-  backEdgeWalk(unit, [&] (Edge* e) { edges.insert(e); });
-  return edges;
-}
-
-BlockSet findLoopHeaders(const IRUnit& unit) {
-  BlockSet headers;
-  backEdgeWalk(unit, [&] (Edge* e) { headers.insert(e->to()); });
-  return headers;
+EdgeSet findRetreatingEdges(const IRUnit& unit) {
+  auto v = jit::vector<Edge*>{};
+  visit_retreating_edges(unit, [&] (Edge* edge) {
+    v.push_back(edge);
+    return true;
+  });
+  return EdgeSet(begin(v), end(v));
 }
 
 bool cfgHasLoop(const IRUnit& unit) {
-  bool hasLoop = false;
-  backEdgeWalk(unit, [&] (Edge*) { hasLoop = true; });
-  return hasLoop;
+  auto ret = false;
+  visit_retreating_edges(unit, [&] (Edge* edge) {
+    ret = true;
+    return false;
+  });
+  return ret;
 }
+
+//////////////////////////////////////////////////////////////////////
 
 }}

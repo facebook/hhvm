@@ -29,6 +29,10 @@ class PDODriver;
 class PDOResource;
 class PDOStatement;
 
+using sp_PDOConnection = std::shared_ptr<PDOConnection>;
+using sp_PDOStatement = SmartPtr<PDOStatement>;
+using sp_PDOResource = SmartPtr<PDOResource>;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define PDO_DRIVER_API  20080721
@@ -223,6 +227,7 @@ struct PDODriver {
                                        const String& username,
                                        const String& password,
                                        const Array& options);
+  SmartPtr<PDOResource> createResource(const sp_PDOConnection& conn);
 
   static const PDODriverMap& GetDrivers() { return s_drivers; }
 
@@ -233,11 +238,11 @@ private:
 
   // Methods a driver needs to implement.
   virtual SmartPtr<PDOResource> createResourceImpl() = 0;
+  virtual SmartPtr<PDOResource>
+    createResourceImpl(const sp_PDOConnection& conn) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-using sp_PDOStatement = SmartPtr<PDOStatement>;
 
 /*
  * A connection to a database.
@@ -406,8 +411,6 @@ public:
   PDOFetchType default_fetch_type{PDO_FETCH_USE_DEFAULT};
 };
 
-using sp_PDOConnection = std::shared_ptr<PDOConnection>;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -450,8 +453,6 @@ public:
    */
   PDOStatement* query_stmt{nullptr};
 };
-
-using sp_PDOResource = SmartPtr<PDOResource>;
 
 ///////////////////////////////////////////////////////////////////////////////
 

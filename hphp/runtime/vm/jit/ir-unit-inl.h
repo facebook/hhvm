@@ -194,6 +194,14 @@ void IRUnit::replace(IRInstruction* old, Opcode op, Args... args) {
   );
 }
 
+template<class... Args>
+SSATmp* IRUnit::newSSATmp(Args&&... args) {
+  m_ssaTmps.push_back(
+    new (m_arena) SSATmp(m_ssaTmps.size(), std::forward<Args>(args)...)
+  );
+  return m_ssaTmps.back();
+}
+
 inline IRInstruction* IRUnit::clone(const IRInstruction* old,
                                     SSATmp* dst /* = nullptr */) {
   auto inst = new (m_arena) IRInstruction(
@@ -203,7 +211,7 @@ inline IRInstruction* IRUnit::clone(const IRInstruction* old,
     dst->setInstruction(inst);
     inst->setDst(dst);
   } else if (inst->hasDst()) {
-    dst = new (m_arena) SSATmp(m_nextTmpId++, inst);
+    dst = newSSATmp(inst);
     inst->setDst(dst);
   }
 
@@ -234,7 +242,7 @@ inline SrcKey IRUnit::initSrcKey() const {
 }
 
 inline uint32_t IRUnit::numTmps() const {
-  return m_nextTmpId;
+  return m_ssaTmps.size();
 }
 
 inline uint32_t IRUnit::numBlocks() const {
@@ -255,6 +263,16 @@ inline uint32_t IRUnit::numIds(const Block*) const {
 
 inline uint32_t IRUnit::numIds(const IRInstruction*) const {
   return numInsts();
+}
+
+inline SSATmp* IRUnit::findSSATmp(uint32_t id) const {
+  assert(id < m_ssaTmps.size());
+  return m_ssaTmps[id];
+}
+
+inline SSATmp* IRUnit::mainFP() const {
+  assertx(!entry()->empty() && entry()->begin()->is(DefFP));
+  return entry()->begin()->dst();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -13,7 +13,7 @@
 #define ETCH_NAME(x)    x
 #define ETCH_LABEL(x)   .L##x
 #define ETCH_TYPE(x, y) /* Not used on Windows */
-#define ETCH_NAME_REL(x) $##x
+#define ETCH_NAME_REL(x) $ x
 #elif defined(__APPLE__)
 #define CFI(x)          .cfi_##x
 #define CFI2(x, y)      .cfi_##x y
@@ -39,7 +39,7 @@
 #define ETCH_NAME(x)    x
 #define ETCH_LABEL(x)   .L##x
 #define ETCH_TYPE(x, y) .type x, y
-#define ETCH_NAME_REL(x) $##x
+#define ETCH_NAME_REL(x) $ x
 #endif
 
 #endif // incl_ETCH_HELPERS_H

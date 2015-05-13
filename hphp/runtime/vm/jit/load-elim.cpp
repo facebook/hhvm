@@ -51,7 +51,7 @@ TRACE_SET_MOD(hhir_load);
 //////////////////////////////////////////////////////////////////////
 
 // Reverse post order block ids.
-using RpoId = uint32_t;
+using RpoID = uint32_t;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -103,7 +103,7 @@ struct State {
 };
 
 struct BlockInfo {
-  RpoId rpoId;
+  RpoID rpoID;
   State stateIn;
 
   /*
@@ -804,9 +804,9 @@ void analyze(Global& genv) {
    * Scheduled blocks for the fixed point computation.  We'll visit blocks with
    * lower reverse post order ids first.
    */
-  auto incompleteQ = dataflow_worklist<RpoId>(genv.rpoBlocks.size());
-  for (auto rpoId = uint32_t{0}; rpoId < genv.rpoBlocks.size(); ++rpoId) {
-    genv.blockInfo[genv.rpoBlocks[rpoId]].rpoId = rpoId;
+  auto incompleteQ = dataflow_worklist<RpoID>(genv.rpoBlocks.size());
+  for (auto rpoID = uint32_t{0}; rpoID < genv.rpoBlocks.size(); ++rpoID) {
+    genv.blockInfo[genv.rpoBlocks[rpoID]].rpoID = rpoID;
   }
   {
     auto& entryIn = genv.blockInfo[genv.unit.entry()].stateIn;
@@ -834,7 +834,7 @@ void analyze(Global& genv) {
       });
       if (oldState != targetInfo.stateIn) {
         FTRACE(7, "target state now:\n{}\n", show(targetInfo.stateIn));
-        incompleteQ.push(targetInfo.rpoId);
+        incompleteQ.push(targetInfo.rpoID);
       }
     };
 

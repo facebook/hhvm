@@ -834,15 +834,43 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return T_HH_ERROR;
 }
 
-<INITIAL,ST_IN_HTML,ST_AFTER_HASHBANG>"<%="|"<?=" {
-        if ((yytext[1]=='%' && _scanner->aspTags()) ||
-            (yytext[1]=='?' && _scanner->shortTags())) {
+<ST_IN_HTML>"<?=" {
+        if  (_scanner->shortTags()) {
+          yy_pop_state(yyscanner);
+          RETTOKEN(T_ECHO);
+        } else {
+          RETTOKEN(T_INLINE_HTML);
+        }
+}
+
+<INITIAL,ST_AFTER_HASHBANG>"<?=" {
+        if (_scanner->shortTags()) {
           if (YY_START == INITIAL) {
             BEGIN(ST_IN_SCRIPTING);
           } else {
             yy_pop_state(yyscanner);
           }
-          RETTOKEN(T_ECHO); //return T_OPEN_TAG_WITH_ECHO;
+          RETTOKEN(T_OPEN_TAG_WITH_ECHO);
+        } else {
+          if (YY_START == INITIAL) {
+            BEGIN(ST_IN_SCRIPTING);
+            yy_push_state(ST_IN_HTML, yyscanner);
+          } else {
+            BEGIN(ST_IN_HTML);
+          }
+          RETTOKEN(T_INLINE_HTML);
+        }
+}
+
+
+<INITIAL,ST_IN_HTML,ST_AFTER_HASHBANG>"<%=" {
+        if (_scanner->aspTags()) {
+          if (YY_START == INITIAL) {
+            BEGIN(ST_IN_SCRIPTING);
+          } else {
+            yy_pop_state(yyscanner);
+          }
+          RETTOKEN(T_ECHO);
         } else {
           if (YY_START == INITIAL) {
             BEGIN(ST_IN_SCRIPTING);

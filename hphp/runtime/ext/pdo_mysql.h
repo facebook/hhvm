@@ -41,6 +41,8 @@ enum {
 struct PDOMySql : PDODriver {
   PDOMySql();
   SmartPtr<PDOResource> createResourceImpl() override;
+  SmartPtr<PDOResource>
+    createResourceImpl(const sp_PDOConnection&) override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

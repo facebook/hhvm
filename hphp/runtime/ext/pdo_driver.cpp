@@ -67,6 +67,12 @@ SmartPtr<PDOResource> PDODriver::createResource(const String& datasource,
   return rsrc;
 }
 
+SmartPtr<PDOResource> PDODriver::createResource(const sp_PDOConnection& conn) {
+  auto const rsrc = createResourceImpl(conn);
+  rsrc->persistentRestore();
+  return rsrc;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // PDOConnection
 

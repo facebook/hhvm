@@ -644,5 +644,12 @@ SmartPtr<PDOResource> PDOSqlite::createResourceImpl() {
     std::make_shared<PDOSqliteConnection>());
 }
 
+SmartPtr<PDOResource> PDOSqlite::createResourceImpl(
+  const sp_PDOConnection& conn
+) {
+  return makeSmartPtr<PDOSqliteResource>(
+      std::dynamic_pointer_cast<PDOSqliteConnection>(conn));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

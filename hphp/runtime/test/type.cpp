@@ -101,7 +101,6 @@ TEST(Type, ToString) {
   EXPECT_EQ("Cell", TCell.toString());
   EXPECT_EQ("BoxedDbl", TBoxedDbl.toString());
 
-
   auto const sub = Type::SubObj(SystemLib::s_IteratorClass);
   auto const exact = Type::ExactObj(SystemLib::s_IteratorClass);
 
@@ -335,6 +334,7 @@ TEST(Type, Const) {
   EXPECT_TRUE(!five.maybe(True));
   EXPECT_EQ(TInt | TBool, five | True);
   EXPECT_EQ(TBottom, five & True);
+  EXPECT_EQ(Type::cns(false), TBool - True);
 
   auto array = make_packed_array(1, 2, 3, 4);
   auto arrData = ArrayData::GetScalarArray(array.get());
@@ -435,6 +435,8 @@ TEST(Type, PtrRefs) {
   EXPECT_FALSE(TPtrToRPropCell.maybe(TPtrToFrameBool));
 
   EXPECT_EQ(TPtrToPropCell, TPtrToPropGen - TPtrToBoxedCell);
+  EXPECT_EQ(TPtrToPropInt, TPtrToRPropInt - TPtrToRefCell);
+  EXPECT_EQ(TPtrToPropInt, TPtrToRPropInt - TPtrToRStkCell);
 
   EXPECT_EQ(
     Ptr::Ref,

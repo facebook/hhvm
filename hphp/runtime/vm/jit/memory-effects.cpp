@@ -36,15 +36,14 @@ AliasClass pointee(const SSATmp* ptr) {
   auto const type = ptr->type();
   always_assert(type <= TPtrToGen);
   auto const maybeRef = type.maybe(TPtrToRefGen);
-  auto const typeNR =
-    maybeRef ? type.deref().ptr(remove_ref(type.ptrKind())) : type;
+  auto const typeNR = type - TPtrToRefGen;
+
 
   auto const sinst = canonical(ptr)->inst();
 
   auto specific = [&] () -> folly::Optional<AliasClass> {
-    /*
-     * First check various kinds of known locations.
-     */
+    if (typeNR <= TBottom) return AEmpty;
+
     if (typeNR <= TPtrToFrameGen) {
       if (sinst->is(LdLocAddr)) {
         return AliasClass {

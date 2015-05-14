@@ -96,6 +96,14 @@ inline Lease& Translator::WriteLease() {
 ///////////////////////////////////////////////////////////////////////////////
 // TransContext.
 
+inline TransContext::TransContext(TransID id, SrcKey sk, FPInvOffset spOff)
+  : transID(id)
+  , initSpOffset(spOff)
+  , func(sk.valid() ? sk.func() : nullptr)
+  , initBcOffset(sk.offset())
+  , resumed(sk.resumed())
+{}
+
 inline SrcKey TransContext::srcKey() const {
   return SrcKey { func, initBcOffset, resumed };
 }

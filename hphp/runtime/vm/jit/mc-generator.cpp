@@ -1661,16 +1661,10 @@ MCGenerator::translateWork(const TranslArgs& args) {
     initSpOffset = region ? region->entry()->initialSpOffset()
                           : liveSpOff();
     while (region && result == TranslateResult::Retry) {
-      auto const transContext = TransContext {
-        RuntimeOption::EvalJitPGO
-          ? m_tx.profData()->curTransID()
-          : kInvalidTransID,
-        sk.offset(),
-        initSpOffset,
-        sk.resumed(),
-        sk.func(),
-        region.get()
-      };
+      auto const profTransID = RuntimeOption::EvalJitPGO
+        ? m_tx.profData()->curTransID()
+        : kInvalidTransID;
+      auto const transContext = TransContext(profTransID, sk, initSpOffset);
 
       IRGS irgs { transContext };
       FTRACE(1, "{}{:-^40}{}\n",

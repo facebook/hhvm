@@ -107,14 +107,9 @@ RegionFormer::RegionFormer(const RegionContext& ctx,
   , m_region(std::make_shared<RegionDesc>())
   , m_curBlock(m_region->addBlock(m_sk, 0, ctx.spOffset, 0))
   , m_blockFinished(false)
-  , m_irgs(// TODO(#5703534): this is using a different TransContext than actual
-          // translation will use.
-          TransContext { kInvalidTransID,
-                         ctx.bcOffset,
-                         ctx.spOffset,
-                         ctx.resumed,
-                         ctx.func,
-                         nullptr })
+  // TODO(#5703534): this is using a different TransContext than actual
+  // translation will use.
+  , m_irgs(TransContext{kInvalidTransID, m_sk, ctx.spOffset})
   , m_arStates(1)
   , m_numJmps(0)
   , m_inl(inl)

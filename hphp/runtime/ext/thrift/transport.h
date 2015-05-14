@@ -64,7 +64,7 @@
 # define ntohll(x) (x)
 #endif
 
-namespace HPHP {
+namespace HPHP { namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
 
 enum TType {
@@ -89,56 +89,35 @@ enum TType {
   T_FLOAT      = 19,
 };
 
+extern const StaticString
+  s_getTransport,
+  s_flush,
+  s_onewayFlush,
+  s_write,
+  s_putBack,
+  s_read,
+  s_class,
+  s_key,
+  s_val,
+  s_elem,
+  s_var,
+  s_type,
+  s_ktype,
+  s_vtype,
+  s_etype,
+  s_format,
+  s_collection,
+  s_TSPEC,
+  s_TProtocolException,
+  s_TApplicationException;
 
-class PHPTransport {
- public:
-  static StaticString s_getTransport;
-  static StaticString s_flush;
-  static StaticString s_onewayFlush;
-  static StaticString s_write;
-  static StaticString s_putBack;
-  static StaticString s_read;
-  static StaticString s_class;
-  static StaticString s_key;
-  static StaticString s_val;
-  static StaticString s_elem;
-  static StaticString s_var;
-  static StaticString s_type;
-  static StaticString s_ktype;
-  static StaticString s_vtype;
-  static StaticString s_etype;
-  static StaticString s_format;
-  static StaticString s_collection;
+const size_t SIZE = 8192;
 
-  PHPTransport() = delete;
-
- protected:
-  explicit PHPTransport(const Object& protocol, size_t sz = 8192)
-    : buffer(reinterpret_cast<char*>(malloc(sz)))
-    , buffer_ptr(buffer)
-    , buffer_used(0)
-    , buffer_size(sz)
-    , m_protocol(protocol)
-    , m_transport(protocol->o_invoke_few_args(s_getTransport, 0).toObject())
-  {}
-  ~PHPTransport() {
-    free(buffer);
-  }
-
-  char* buffer;
-  char* buffer_ptr;
-  size_t buffer_used;
-  size_t buffer_size;
-
-  Object m_protocol;
-  Object m_transport;
-};
-
-
-class PHPOutputTransport : public PHPTransport {
+struct PHPOutputTransport {
 public:
-  explicit PHPOutputTransport(const Object& protocol, size_t sz = 8192)
-    : PHPTransport(protocol, sz) {}
+  explicit PHPOutputTransport(const Object& protocol)
+    : m_transport(protocol->o_invoke_few_args(s_getTransport, 0).toObject())
+  {}
 
   ~PHPOutputTransport() {
     // Because this is a destructor, we might already be
@@ -156,10 +135,10 @@ public:
   }
 
   void write(const char* data, size_t len) {
-    if ((len + buffer_used) > buffer_size) {
+    if ((len + buffer_used) > SIZE) {
       writeBufferToTransport();
     }
-    if (len > buffer_size) {
+    if (len > SIZE) {
       directWrite(data, len);
     } else {
       memcpy(buffer_ptr, data, len);
@@ -215,7 +194,7 @@ public:
     directOnewayFlush();
   }
 
-protected:
+private:
   void directFlush() {
     m_transport->o_invoke_few_args(s_flush, 0);
   }
@@ -225,12 +204,18 @@ protected:
   void directWrite(const char* data, size_t len) {
     m_transport->o_invoke_few_args(s_write, 1, String(data, len, CopyString));
   }
+
+  char buffer[SIZE];
+  char* buffer_ptr{buffer};
+  size_t buffer_used{0};
+
+  Object m_transport;
 };
 
-class PHPInputTransport : public PHPTransport {
-public:
-  explicit PHPInputTransport(const Object& protocol, size_t sz = 8192)
-    : PHPTransport(protocol, sz) {}
+struct PHPInputTransport {
+  explicit PHPInputTransport(const Object& protocol)
+    : m_transport(protocol->o_invoke_few_args(s_getTransport, 0).toObject())
+  {}
 
   ~PHPInputTransport() {
     try {
@@ -309,19 +294,24 @@ public:
     return (int32_t)ntohl(c);
   }
 
-protected:
+private:
   void refill() {
     assert(buffer_used == 0);
     String ret =
-      m_transport->o_invoke_few_args(s_read, 1, (int64_t)buffer_size);
+      m_transport->o_invoke_few_args(s_read, 1, (int64_t)SIZE);
     buffer_used = ret.size();
     memcpy(buffer, ret.data(), buffer_used);
     buffer_ptr = buffer;
   }
 
+  char buffer[SIZE];
+  char* buffer_ptr{buffer};
+  size_t buffer_used{0};
+
+  Object m_transport;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}
+}}
 
 #endif

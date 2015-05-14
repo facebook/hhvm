@@ -20,6 +20,7 @@
 #include "hphp/util/disasm.h"
 #include "hphp/util/text-color.h"
 
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/check.h"
@@ -149,12 +150,11 @@ struct BackEnd final : jit::BackEnd {
     return x64::funcPrologueToGuard(prologue, func);
   }
 
-  SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& coldCode, Func* func,
-                          bool funcIsMagic, int nPassed, TCA& start,
-                          TCA& aStart) override {
-    return funcIsMagic
-          ? x64::emitMagicFuncPrologue(func, nPassed, start)
-          : x64::emitFuncPrologue(func, nPassed, start);
+  SrcKey emitFuncPrologue(TransID transID, Func* func, int argc,
+                          TCA& start) override {
+    return func->isMagic()
+      ? x64::emitMagicFuncPrologue(transID, func, argc, start)
+      : x64::emitFuncPrologue(transID, func, argc, start);
   }
 
   TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) override {

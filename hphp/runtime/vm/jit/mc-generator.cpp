@@ -599,19 +599,18 @@ MCGenerator::checkCachedPrologue(const Func* func, int paramIdx,
   return false;
 }
 
-TCA MCGenerator::emitFuncPrologue(Func* func, int nPassed) {
-  const bool   funcIsMagic = func->isMagic();
-  const int    numParams   = func->numNonVariadicParams();
-  const int    paramIndex  = nPassed <= numParams ? nPassed : numParams + 1;
-  const Offset entry       = func->getEntryForNumArgs(nPassed);
-  const SrcKey funcBody(func, entry, false);
+TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
+  const int nparams = func->numNonVariadicParams();
+  const int paramIndex = argc <= nparams ? argc : nparams + 1;
+
+  auto const funcBody = SrcKey { func, func->getEntryForNumArgs(argc), false };
 
   CodeCache::Selector cbSel(CodeCache::Selector::Args(code)
                             .profile(m_tx.mode() == TransKind::Proflogue)
                             .hot(RuntimeOption::EvalHotFuncCount &&
                                  (func->attrs() & AttrHot) && m_tx.useAHot()));
-
   assertx(m_fixups.empty());
+
   // If we're close to a cache line boundary, just burn some space to
   // try to keep the func and its body on fewer total lines.
   if (((uintptr_t)code.main().frontier() & backEnd().cacheLineMask()) >=
@@ -629,8 +628,13 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int nPassed) {
   TCA realColdStart   = mcg->code.realCold().frontier();
   TCA realFrozenStart = mcg->code.realFrozen().frontier();
 
-  auto const skFuncBody = backEnd().emitFuncPrologue(
-    code.main(), code.cold(), func, funcIsMagic, nPassed, start, aStart);
+  // Give the prologue a TransID if we have profiling data.
+  auto transID = m_tx.profData()
+    ? m_tx.profData()->addTransPrologue(m_tx.mode(), funcBody, paramIndex)
+    : kInvalidTransID;
+
+  backEnd().emitFuncPrologue(transID, func, argc, start);
+
   if (RuntimeOption::EvalPerfRelocate) {
     GrowableVector<IncomingBranch> incomingBranches;
     recordPerfRelocMap(aStart, code.main().frontier(),
@@ -642,14 +646,15 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int nPassed) {
   m_fixups.process(nullptr);
 
   assertx(backEnd().funcPrologueHasGuard(start, func));
-  TRACE(2, "funcPrologue mcg %p %s(%d) setting prologue %p\n",
-        this, func->fullName()->data(), nPassed, start);
   assertx(isValidCodeAddress(start));
+
+  TRACE(2, "funcPrologue mcg %p %s(%d) setting prologue %p\n",
+        this, func->fullName()->data(), argc, start);
   func->setPrologue(paramIndex, start);
 
   assertx(m_tx.mode() == TransKind::Prologue ||
           m_tx.mode() == TransKind::Proflogue);
-  TransRec tr(skFuncBody,
+  TransRec tr(funcBody,
               m_tx.mode(),
               aStart,          code.main().frontier()       - aStart,
               realColdStart,   code.realCold().frontier()   - realColdStart,
@@ -659,13 +664,7 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int nPassed) {
     reportTraceletToVtune(func->unit(), func, tr);
   }
 
-  if (m_tx.profData()) {
-    m_tx.profData()->addTransPrologue(m_tx.mode(), skFuncBody, paramIndex);
-  }
-
-  recordGdbTranslation(skFuncBody, func,
-                       code.main(), aStart,
-                       false, true);
+  recordGdbTranslation(funcBody, func, code.main(), aStart, false, true);
   recordBCInstr(OpFuncPrologue, aStart, code.main().frontier(), false);
 
   m_numTrans++;

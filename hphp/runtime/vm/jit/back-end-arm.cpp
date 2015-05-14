@@ -182,11 +182,9 @@ struct BackEnd final : jit::BackEnd {
     return arm::funcPrologueToGuard(prologue, func);
   }
 
-  SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& coldCode, Func* func,
-                          bool funcIsMagic, int nPassed, TCA& start,
-                          TCA& aStart) override {
-    return arm::emitFuncPrologue(mainCode, coldCode, func, funcIsMagic,
-                                 nPassed, start, aStart);
+  SrcKey emitFuncPrologue(TransID transID, Func* func, int argc,
+                          TCA& start) override {
+    return arm::emitFuncPrologue(transID, func, argc, start);
   }
 
   TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) override {

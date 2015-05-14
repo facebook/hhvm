@@ -187,6 +187,16 @@ int BinaryOpExpression::getLocalEffects() const {
     }
     break;
   }
+  case '.': {
+    // Conservatively assume that a concat with any non-scalar argument can
+    // invoke arbitrary side-effects. This is because it may involve invoking an
+    // object's __toString() method, which can have side-effects.
+    if (!m_exp1->isScalar() || !m_exp2->isScalar()) {
+      effect = UnknownEffect;
+      m_canThrow = true;
+    }
+    break;
+  }
   default:
     break;
   }

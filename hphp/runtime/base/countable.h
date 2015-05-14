@@ -119,7 +119,7 @@ inline bool check_one_bit_ref(uint8_t pad) {
   }                                                                     \
                                                                         \
   bool cowCheck() const {                                               \
-    return maybeShared();                                               \
+    return hasMultipleRefs();                                           \
   }                                                                     \
                                                                         \
   bool hasExactlyOneRef() const {                                       \
@@ -182,21 +182,11 @@ inline bool check_one_bit_ref(uint8_t pad) {
                                                         \
   bool hasMultipleRefs() const {                        \
     assert(check_refcount_ns(m_count));                 \
-    if (m_count > 1) assert(check_one_bit_ref(m_pad));  \
     return m_count > 1;                                 \
-  }                                                     \
-                                                        \
-  bool maybeShared() const {                            \
-    return m_pad == 1;                                  \
-  }                                                     \
-                                                        \
-  bool cowCheck() const {                               \
-    return maybeShared();                               \
   }                                                     \
                                                         \
   bool hasExactlyOneRef() const {                       \
     assert(check_refcount(m_count));                    \
-    if (m_count > 1) assert(check_one_bit_ref(m_pad));  \
     return m_count == 1;                                \
   }                                                     \
                                                         \
@@ -204,7 +194,6 @@ inline bool check_one_bit_ref(uint8_t pad) {
     assert(!MemoryManager::sweeping());                 \
     assert(check_refcount_ns(m_count));                 \
     ++m_count;                                          \
-    if (m_count > 1) m_pad = 1;                         \
   }                                                     \
                                                         \
   RefCount decRefCount() const {                        \

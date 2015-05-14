@@ -501,8 +501,7 @@ void XDebugServer::attach(Mode mode) {
       detach();
     }
   } catch (...) {
-    raise_warning("Could not start xdebug server. Check the remote debugging "
-                  "log for details");
+    // Fail silently, continue running the request.
   }
 }
 

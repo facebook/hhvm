@@ -1451,12 +1451,14 @@ static int execute_program_impl(int argc, char** argv) {
   // we need to initialize pcre cache table very early
   pcre_init();
 
+#ifdef ENABLE_ZEND_COMPAT
   //
   // Initialize in the zend extension compatibility layer, as needed
   // before any calls from legacy zend extensions to zend_strtod. See
   // the extern "C" declaration of this function, above.
   //
   zend_startup_strtod();
+#endif
 
   MemoryManager::TlsWrapper::getCheck();
   if (RuntimeOption::ServerExecutionMode()) {

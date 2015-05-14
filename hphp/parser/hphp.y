@@ -2990,9 +2990,19 @@ hh_type_alias_statement:
       '=' hh_type ';'                  { $2.setText(_p->nsClassDecl($2.text()));
                                          _p->onTypedef($$, $2, $4);
                                          _p->popTypeScope(); }
+  | non_empty_user_attributes
+    T_TYPE hh_name_with_typevar
+      '=' hh_type ';'                  { $3.setText(_p->nsClassDecl($3.text()));
+                                         _p->onTypedef($$, $3, $5);
+                                         _p->popTypeScope(); }
   | T_NEWTYPE hh_name_with_typevar
     hh_opt_constraint '=' hh_type ';'  { $2.setText(_p->nsClassDecl($2.text()));
                                          _p->onTypedef($$, $2, $5);
+                                         _p->popTypeScope(); }
+  | non_empty_user_attributes
+    T_NEWTYPE hh_name_with_typevar
+    hh_opt_constraint '=' hh_type ';'  { $3.setText(_p->nsClassDecl($3.text()));
+                                         _p->onTypedef($$, $3, $6);
                                          _p->popTypeScope(); }
 ;
 

@@ -48,6 +48,40 @@ void ifThen(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock) {
   v = done;
 }
 
+/*
+ * Generate a do-while loop.
+ *
+ * The `regs' list is the list of initial loop registers, which will be phi'd
+ * appropriately for the loop.
+ *
+ * `loopBlock' is the lambda responsible for generating the code.  It takes
+ * both the input phidef and output phijcc loop registers as arguments, and
+ * should return a single SF Vreg to be tested against `cc'.
+ */
+template <class Loop>
+void doWhile(Vout& v, ConditionCode cc,
+             const VregList& regs, Loop loopBlock) {
+  auto loop = v.makeBlock();
+  auto done = v.makeBlock();
+
+  auto const freshRegs = [&] {
+    auto copy = regs;
+    for (auto& reg : copy) reg = v.makeReg();
+    return copy;
+  };
+  auto in = freshRegs(), out = freshRegs();
+
+  v << phijmp{loop, v.makeTuple(regs)};
+
+  v = loop;
+  v << phidef{v.makeTuple(in)};
+  auto const sf = loopBlock(in, out);
+  v << phijcc{cc, sf, {done, loop}, v.makeTuple(out)};
+
+  v = done;
+  v << phidef{v.makeTuple(freshRegs())};
+}
+
 // Helper structs for jcc vs. jcc8.
 struct Jcc8 {
   static void branch(X64Assembler& a, ConditionCode cc, TCA dest) {

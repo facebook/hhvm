@@ -5440,43 +5440,36 @@ void CodeGenerator::cgInitPackedArrayLoop(IRInstruction* inst) {
   auto const spIn = srcLoc(inst, 1).reg();
 
   auto& v = vmain();
-  auto const loopBody   = v.makeBlock();
-  auto const done       = v.makeBlock();
   auto const firstEntry = PackedArray::entriesOffset();
 
   auto const sp = v.makeReg();
   v << lea{spIn[cellsToBytes(offset.offset)], sp};
 
-  // Initialize loop variables and jump to the first condition check.
-  Vreg i0 = v.makeReg(), i1 = v.makeReg(), i2 = v.makeReg(), i3 = v.makeReg();
-  Vreg j0 = v.makeReg(), j1 = v.makeReg(), j2 = v.makeReg(), j3 = v.makeReg();
-  auto const value = v.makeReg();
-  i0 = v.cns(0);
-  j0 = v.cns((count - 1) * 2);
-  v << phijmp{loopBody, v.makeTuple({i0, j0})};
+  auto const i = v.cns(0);
+  auto const j = v.cns((count - 1) * 2);
 
-  // We know that we have at least one element in the array so we don't have
-  // to do an initial bounds check.
+  // We know that we have at least one element in the array so we don't have to
+  // do an initial bounds check.
   assertx(count);
 
-  v = loopBody;
-  v << phidef{v.makeTuple({i1, j1})};
+  doWhile(v, CC_GE, {i, j},
+    [&] (const VregList& in, const VregList& out) {
+      auto const i1 = in[0],  j1 = in[1];
+      auto const i2 = out[0], j2 = out[1];
+      auto const sf = v.makeReg();
+      auto const value = v.makeReg();
 
-  // Load the value from the stack and store into the array. It's safe
-  // to copy all 16 bytes of the value because packed arrays don't use
-  // The TypedValueAux::m_aux field.
-  v << loadups{sp[j1 * 8], value};
-  v << storeups{value, arrReg[i1 * 8] + firstEntry};
-  // Increment the loop variable by 2 because we can only scale by at most 8.
-  v << lea{i1[2], i2};
-  auto subFlags = v.makeReg();
-  v << subqi{2, j1, j2, subFlags};
+      // Load the value from the stack and store into the array.  It's safe to
+      // copy all 16 bytes of the TV because packed arrays don't use m_aux.
+      v << loadups{sp[j1 * 8], value};
+      v << storeups{value, arrReg[i1 * 8] + firstEntry};
 
-  // Jump back to the body if we're still in bounds, fall through otherwise.
-  v << phijcc{CC_GE, subFlags, {done, loopBody}, v.makeTuple({i2, j2})};
-
-  v = done;
-  v << phidef{v.makeTuple({i3, j3})};
+      // Add 2 to the loop variable because we can only scale by at most 8.
+      v << lea{i1[2], i2};
+      v << subqi{2, j1, j2, sf};
+      return sf;
+    }
+  );
 }
 
 void CodeGenerator::cgLdStructArrayElem(IRInstruction* inst) {

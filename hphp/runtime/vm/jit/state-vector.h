@@ -48,13 +48,15 @@ struct StateVector {
   );
 
   StateVector(const IRUnit& unit, Info init)
-    : m_unit(unit)
+    : m_unit(&unit)
     , m_init(std::move(init))
     , m_info(unit.numIds(nullKey), m_init)
   {}
 
-  StateVector(const StateVector& other) = default;
-  StateVector(StateVector&& other) = default;
+  StateVector(const StateVector&) = default;
+  StateVector(StateVector&&) = default;
+  StateVector& operator=(const StateVector&) = delete;
+  StateVector& operator=(StateVector&&) = default;
 
   reference operator[](uint32_t id) {
     if (id >= m_info.size()) grow();
@@ -62,7 +64,7 @@ struct StateVector {
   }
 
   const_reference operator[](uint32_t id) const {
-    assertx(id < m_unit.numIds(nullKey));
+    assertx(id < m_unit->numIds(nullKey));
     return id < m_info.size() ? m_info[id] : m_init;
   }
 
@@ -81,12 +83,12 @@ struct StateVector {
 
 private:
   void grow() {
-    m_info.resize(m_unit.numIds(nullKey), m_init);
+    m_info.resize(m_unit->numIds(nullKey), m_init);
   }
 
 private:
   static constexpr Key* nullKey { nullptr };
-  const IRUnit& m_unit;
+  const IRUnit* m_unit;
   Info m_init;
   InfoVector m_info;
 };

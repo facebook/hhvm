@@ -62,8 +62,8 @@ void markCoveredArc(const TransCFG::Arc& arc,
                     TransCFG::ArcPtrSet& coveredArcs) {
   auto dstRetransSet = findRetransSet(dstRegion, arc.dst());
   for (auto outArc : cfg.outArcs(arc.src())) {
-    if (hasTransId(outArc->dst())) {
-      auto dstTid = getTransId(outArc->dst());
+    if (hasTransID(outArc->dst())) {
+      auto dstTid = getTransID(outArc->dst());
       if (dstRetransSet.count(dstTid)) {
         coveredArcs.insert(outArc);
       }
@@ -84,7 +84,7 @@ void markCovered(const TransCFG& cfg, const RegionDescPtr region,
   assertx(selectedVec.size() > 0);
   TransID newHead = selectedVec[0];
   assertx(!region->empty());
-  assertx(newHead == getTransId(region->entry()->id()));
+  assertx(newHead == getTransID(region->entry()->id()));
 
   // Mark all region's nodes as covered.
   coveredNodes.insert(selectedVec.begin(), selectedVec.end());
@@ -99,9 +99,9 @@ void markCovered(const TransCFG& cfg, const RegionDescPtr region,
 
   // Mark all CFG arcs within the region as covered.
   region->forEachArc([&](RegionDesc::BlockId src, RegionDesc::BlockId dst) {
-    if (!hasTransId(src) || !hasTransId(dst)) return;
-    TransID srcTid = getTransId(src);
-    TransID dstTid = getTransId(dst);
+    if (!hasTransID(src) || !hasTransID(dst)) return;
+    TransID srcTid = getTransID(src);
+    TransID dstTid = getTransID(dst);
     assertx(cfg.hasArc(srcTid, dstTid));
     bool foundArc = false;
     for (auto arc : cfg.outArcs(srcTid)) {

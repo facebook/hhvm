@@ -395,7 +395,7 @@ void RegionDesc::chainRetransBlocks() {
   auto profData = mcg->tx().profData();
 
   auto weight = [&](RegionDesc::BlockId bid) {
-    return hasTransId(bid) ? profData->absTransCounter(getTransId(bid)) : 0;
+    return hasTransID(bid) ? profData->absTransCounter(getTransID(bid)) : 0;
   };
 
   auto sortGeneral = [&](RegionDesc::BlockId bid1, RegionDesc::BlockId bid2) {
@@ -474,12 +474,12 @@ std::string RegionDesc::toString() const {
  */
 RegionDesc::BlockId RegionDesc::Block::s_nextId = -2;
 
-TransID getTransId(RegionDesc::BlockId blockId) {
-  assertx(TransID(blockId) != kInvalidTransID);
+TransID getTransID(RegionDesc::BlockId blockId) {
+  assertx(hasTransID(blockId));
   return TransID(blockId);
 }
 
-bool hasTransId(RegionDesc::BlockId blockId) {
+bool hasTransID(RegionDesc::BlockId blockId) {
   return blockId >= 0;
 }
 

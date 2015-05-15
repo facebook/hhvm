@@ -566,8 +566,7 @@ TranslateResult irGenRegion(IRGS& irgs,
     SCOPE_ASSERT_DETAIL("IRGS") { return show(irgs); };
 
     const Func* topFunc = nullptr;
-    TransID profTransId = getTransId(blockId);
-    irgs.profTransID = profTransId;
+    if (hasTransID(blockId)) irgs.profTransID = getTransID(blockId);
     irgs.inlineLevel = block->inlineLevel();
     irgs.firstBcInst = inEntryRetransChain(blockId, region);
     irgen::prepareForNextHHBC(irgs, nullptr, sk, false);
@@ -617,7 +616,7 @@ TranslateResult irGenRegion(IRGS& irgs,
       // Create and initialize the instruction.
       NormalizedInstruction inst(sk, block->unit());
       jit::vector<DynLocation> dynLocs;
-      bool toInterpInst = toInterp.count(ProfSrcKey{profTransId, sk});
+      bool toInterpInst = toInterp.count(ProfSrcKey{irgs.profTransID, sk});
       initNormalizedInstruction(inst, dynLocs, byRefs, irgs, region, blockId,
                                 topFunc, lastInstr, toInterpInst);
 
@@ -664,7 +663,7 @@ TranslateResult irGenRegion(IRGS& irgs,
       try {
         if (!skipTrans) translateInstr(irgs, inst, checkOuterTypeOnly);
       } catch (const FailedIRGen& exn) {
-        ProfSrcKey psk{profTransId, sk};
+        ProfSrcKey psk{irgs.profTransID, sk};
         always_assert_flog(!toInterp.count(psk),
                            "IR generation failed with {}\n",
                            exn.what());

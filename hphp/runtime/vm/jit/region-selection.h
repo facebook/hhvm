@@ -525,8 +525,8 @@ void regionizeFunc(const Func*  func,
  * Functions to map BlockIds to the TransIDs used when the block was
  * profiled.
  */
-bool    hasTransId(RegionDesc::BlockId blockId);
-TransID getTransId(RegionDesc::BlockId blockId);
+bool    hasTransID(RegionDesc::BlockId blockId);
+TransID getTransID(RegionDesc::BlockId blockId);
 
 /*
  * Checks if the given region is well-formed.

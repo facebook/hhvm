@@ -218,7 +218,7 @@ void find_inner_loops(LoopAnalysis& loops) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool check_invariants(const LoopAnalysis& loops) {
+bool DEBUG_ONLY check_invariants(const LoopAnalysis& loops) {
   always_assert(loops.back_edges.size() == loops.naturals.size());
 
   for (auto& nat : loops.naturals) {

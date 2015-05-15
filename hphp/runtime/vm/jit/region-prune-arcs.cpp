@@ -49,7 +49,7 @@ struct BlockInfo {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(const State& state) {
+std::string DEBUG_ONLY show(const State& state) {
   if (!state.initialized) return "<uninit>\n";
   auto ret = std::string{};
   for (auto locID = uint32_t{0}; locID < state.locals.size(); ++locID) {

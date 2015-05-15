@@ -102,16 +102,17 @@ namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 // Helpers
 
-// These are used a lot, prevent unnecessary verbosity
-using Status = XDebugServer::Status;
-using Reason = XDebugServer::Reason;
+// These are used a lot, prevent unnecessary verbosity.
+using Error  = XDebugError;
+using Status = XDebugStatus;
+using Reason = XDebugReason;
 
 // Compiles the given evaluation string and returns its unit. Throws
-// XDebugServer::ERROR_EVALUATING_CODE on failure.
+// XDebugError::EvaluatingCode on failure.
 static Unit* compile(const String& evalStr) {
   auto unit = compile_string(evalStr.data(), evalStr.size());
   if (unit == nullptr) {
-    throw XDebugServer::ERROR_EVALUATING_CODE;
+    throw Error::EvaluatingCode;
   }
   unit->setInterpretOnly();
   return unit;
@@ -141,7 +142,7 @@ static Variant do_eval(Unit* evalUnit, int depth) {
   // Restore the error reporting level and then either return or throw
   req_data.setErrorReportingLevel(old_level);
   if (failure) {
-    throw XDebugServer::ERROR_EVALUATING_CODE;
+    throw Error::EvaluatingCode;
   }
   return result;
 }
@@ -241,7 +242,7 @@ static Variant find_symbol(const String& name, int depth) {
   // If the result is unitialized, the property must be undefined
   auto result = do_eval(eval_unit, depth);
   if (!result.isInitialized()) {
-    throw XDebugServer::ERROR_PROPERTY_NON_EXISTENT;
+    throw Error::PropertyNonExistent;
   }
   return result;
 }
@@ -281,7 +282,7 @@ struct FeatureGetCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {
     // Feature name is required
     if (args['n'].isNull()) {
-      throw XDebugServer::ERROR_INVALID_ARGS;
+      throw Error::InvalidArgs;
     }
     m_feature = args['n'].toString().toCppString();
   }
@@ -337,13 +338,13 @@ struct FeatureSetCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {
     // Feature name is required
     if (args['n'].isNull()) {
-      throw XDebugServer::ERROR_INVALID_ARGS;
+      throw Error::InvalidArgs;
     }
     m_feature = args['n'].toString().toCppString();
 
     // Value is required
     if (args['v'].isNull()) {
-      throw XDebugServer::ERROR_INVALID_ARGS;
+      throw Error::InvalidArgs;
     }
     m_value = args['v'].toString().toCppString();
   }
@@ -367,10 +368,10 @@ struct FeatureSetCmd : XDebugCommand {
       // throw an error, either
     } else if (m_feature == "encoding") {
       if (m_value != "iso-8859-1") {
-        throw XDebugServer::ERROR_ENCODING_NOT_SUPPORTED;
+        throw Error::EncodingNotSupported;
       }
     } else {
-      throw XDebugServer::ERROR_INVALID_ARGS;
+      throw Error::InvalidArgs;
     }
 
     // Const cast is needed due to xdebug xml api.
@@ -398,25 +399,25 @@ struct RunCmd : XDebugCommand {
 
   bool isValidInStatus(Status status) const override {
     return
-      status == Status::STARTING ||
-      status == Status::STOPPING ||
-      status == Status::BREAK;
+      status == Status::Starting ||
+      status == Status::Stopping ||
+      status == Status::Break;
   }
 
   void handleImpl(xdebug_xml_node& xml) override {
     // Get the server status
-    Status status;
-    Reason reason;
+    XDebugStatus status;
+    XDebugReason reason;
     m_server.getStatus(status, reason);
 
     // Modify the status
     switch (status) {
-      case Status::STARTING:
-      case Status::BREAK:
-        m_server.setStatus(Status::RUNNING, Reason::OK);
+      case XDebugStatus::Starting:
+      case XDebugStatus::Break:
+        m_server.setStatus(Status::Running, Reason::Ok);
         break;
-      case Status::STOPPING:
-        m_server.setStatus(Status::DETACHED, Reason::OK);
+      case XDebugStatus::Stopping:
+        m_server.setStatus(Status::Detached, Reason::Ok);
         break;
       default:
         throw Exception("Command 'run' invalid in this server state.");
@@ -443,9 +444,9 @@ struct StepIntoCmd : XDebugCommand {
 
   bool isValidInStatus(Status status) const override {
     return
-      status == Status::STARTING ||
-      status == Status::STOPPING ||
-      status == Status::BREAK;
+      status == Status::Starting ||
+      status == Status::Stopping ||
+      status == Status::Break;
   }
 
   void handleImpl(xdebug_xml_node& xml) override {
@@ -469,9 +470,9 @@ struct StepOutCmd : XDebugCommand {
 
   bool isValidInStatus(Status status) const override {
     return
-      status == Status::STARTING ||
-      status == Status::STOPPING ||
-      status == Status::BREAK;
+      status == Status::Starting ||
+      status == Status::Stopping ||
+      status == Status::Break;
   }
 
   void handleImpl(xdebug_xml_node& xml) override {
@@ -494,9 +495,9 @@ struct StepOverCmd : XDebugCommand {
 
   bool isValidInStatus(Status status) const override {
     return
-      status == Status::STARTING ||
-      status == Status::STOPPING ||
-      status == Status::BREAK;
+      status == Status::Starting ||
+      status == Status::Stopping ||
+      status == Status::Break;
   }
 
   void handleImpl(xdebug_xml_node& xml) override {
@@ -516,7 +517,7 @@ struct StopCmd : XDebugCommand {
   bool isValidInStatus(Status status) const override { return true; }
 
   void handleImpl(xdebug_xml_node& xml) override {
-    m_server.setStatus(Status::STOPPED, Reason::OK);
+    m_server.setStatus(Status::Stopped, Reason::Ok);
 
     // We need to throw an exception, so this needs to be sent manually
     m_server.addStatus(xml);
@@ -536,7 +537,7 @@ struct DetachCmd : XDebugCommand {
   ~DetachCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    m_server.setStatus(Status::DETACHED, Reason::OK);
+    m_server.setStatus(Status::Detached, Reason::Ok);
     m_server.addStatus(xml);
   }
 };
@@ -582,15 +583,15 @@ static const StaticString
 struct BreakpointSetCmd : XDebugCommand {
   BreakpointSetCmd(XDebugServer& server, const String& cmd, const Array& args)
     : XDebugCommand(server, cmd, args) {
-    XDebugBreakpoint& bp = m_breakpoint;
+    auto& bp = m_breakpoint;
 
     // Type is required
     if (args['t'].isNull()) {
-      throw XDebugServer::ERROR_INVALID_ARGS;
+      throw Error::InvalidArgs;
     }
 
     // Type: line|call|return|exception|conditional
-    String typeName = args['t'].toString();
+    auto typeName = args['t'].toString();
     if (typeName == s_LINE || typeName == s_CONDITIONAL) {
       // Despite spec, line and conditional are the same in php5 xdebug
       bp.type = XDebugBreakpoint::Type::LINE;
@@ -601,28 +602,28 @@ struct BreakpointSetCmd : XDebugCommand {
     } else if (typeName == s_EXCEPTION) {
       bp.type = XDebugBreakpoint::Type::EXCEPTION;
     } else if (typeName == s_WATCH) {
-      throw XDebugServer::ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED;
+      throw Error::BreakpointTypeNotSupported;
     } else {
-      throw XDebugServer::ERROR_INVALID_ARGS;
+      throw Error::InvalidArgs;
     }
 
     // State: enabled|disabled
     if (!args['s'].isNull()) {
-      String state = args['s'].toString();
+      auto state = args['s'].toString();
       if (state == s_ENABLED) {
         bp.enabled = true;
       } else if (state == s_DISABLED) {
         bp.enabled = false;
       } else {
-        throw XDebugServer::ERROR_INVALID_ARGS;
+        throw Error::InvalidArgs;
       }
     }
 
     // Hit condition and value. php5 xdebug does not throw an error if only
     // one of the two are provided
     if (!args['h'].isNull() && !args['o'].isNull()) {
-      String condition = args['o'].toString();
-      String val = args['h'].toString();
+      auto condition = args['o'].toString();
+      auto val = args['h'].toString();
       if (condition == s_GREATER_OR_EQUAL) {
         bp.hitCondition = XDebugBreakpoint::HitCondition::GREATER_OR_EQUAL;
       } else if (condition == s_EQUAL) {
@@ -630,7 +631,7 @@ struct BreakpointSetCmd : XDebugCommand {
       } else if (condition == s_MOD) {
         bp.hitCondition = XDebugBreakpoint::HitCondition::MULTIPLE;
       } else {
-        throw XDebugServer::ERROR_INVALID_ARGS;
+        throw Error::InvalidArgs;
       }
       bp.hitValue = strtol(val.data(), nullptr, 10);
     }
@@ -638,7 +639,7 @@ struct BreakpointSetCmd : XDebugCommand {
     // Temporary: 0|1 -- xdebug actually just throws the passed in data into
     // strtol.
     if (!args['r'].isNull()) {
-      String temp = args['r'].toString();
+      auto temp = args['r'].toString();
       m_breakpoint.temporary = (bool) strtol(temp.data(), nullptr, 10);
     }
 
@@ -646,15 +647,15 @@ struct BreakpointSetCmd : XDebugCommand {
     if (bp.type == XDebugBreakpoint::Type::LINE) {
       // Grab the line #
       if (args['n'].isNull()) {
-        throw XDebugServer::ERROR_INVALID_ARGS;
+        throw Error::InvalidArgs;
       }
       bp.line = strtol(args['n'].toString().data(), nullptr, 10);
 
       // Grab the file, use the current if none provided
       if (args['f'].isNull()) {
-        StringData* filename = g_context->getContainingFileName();
+        auto filename = g_context->getContainingFileName();
         if (filename == staticEmptyString()) {
-          throw XDebugServer::ERROR_STACK_DEPTH_INVALID;
+          throw Error::StackDepthInvalid;
         }
         bp.fileName = String(filename);
       } else {
@@ -666,7 +667,7 @@ struct BreakpointSetCmd : XDebugCommand {
 
       // Create the condition unit if a condition string was supplied
       if (!args['-'].isNull()) {
-        String condition = StringUtil::Base64Decode(args['-'].toString());
+        auto condition = StringUtil::Base64Decode(args['-'].toString());
         bp.condition = condition;
         bp.conditionUnit = compile_expression(condition);
       }
@@ -676,7 +677,7 @@ struct BreakpointSetCmd : XDebugCommand {
     if (bp.type == XDebugBreakpoint::Type::CALL ||
         bp.type == XDebugBreakpoint::Type::RETURN) {
       if (args['m'].isNull()) {
-        throw XDebugServer::ERROR_INVALID_ARGS;
+        throw Error::InvalidArgs;
       }
       bp.funcName = args['m'].toString();
 
@@ -695,7 +696,7 @@ struct BreakpointSetCmd : XDebugCommand {
     // Exception type
     if (bp.type == XDebugBreakpoint::Type::EXCEPTION) {
       if (args['x'].isNull()) {
-        throw XDebugServer::ERROR_INVALID_ARGS;
+        throw Error::InvalidArgs;
       }
       bp.exceptionName = args['x'].toString();
       return;
@@ -706,7 +707,7 @@ struct BreakpointSetCmd : XDebugCommand {
 
   void handleImpl(xdebug_xml_node& xml) override {
     // Add the breakpoint, write out the id
-    int id = XDEBUG_ADD_BREAKPOINT(m_breakpoint);
+    auto const id = XDEBUG_ADD_BREAKPOINT(m_breakpoint);
     xdebug_xml_add_attribute(&xml, "id", id);
 
     // Add the breakpoint state
@@ -730,7 +731,7 @@ struct BreakpointGetCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {
     // Breakpoint id must be provided
     if (args['d'].isNull()) {
-      throw XDebugServer::ERROR_INVALID_ARGS;
+      throw Error::InvalidArgs;
     }
     m_id = strtol(args['d'].toString().data(), nullptr, 10);
   }
@@ -740,7 +741,7 @@ struct BreakpointGetCmd : XDebugCommand {
   void handleImpl(xdebug_xml_node& xml) override {
     const XDebugBreakpoint* bp = XDEBUG_GET_BREAKPOINT(m_id);
     if (bp == nullptr) {
-      throw XDebugServer::ERROR_NO_SUCH_BREAKPOINT;
+      throw Error::NoSuchBreakpoint;
     }
     xdebug_xml_add_child(&xml, breakpoint_xml_node(m_id, *bp));
   }
@@ -782,19 +783,17 @@ struct BreakpointUpdateCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {
     // Breakpoint id must be provided
     if (args['d'].isNull()) {
-      throw XDebugServer::ERROR_INVALID_ARGS;
+      throw Error::InvalidArgs;
     }
     m_id = strtol(args['d'].toString().data(), nullptr, 10);
 
     // Grab the new state if it was passed
     if (!args['s'].isNull()) {
-      String state = args['s'].toString();
-      if (state == s_ENABLED) {
-        m_enabled = true;
-      } else if (state == s_DISABLED) {
-        m_enabled = false;
+      auto state = args['s'].toString();
+      if (state == s_ENABLED || state == s_DISABLED) {
+        m_enabled = state == s_ENABLED;
       } else {
-        throw XDebugServer::ERROR_INVALID_ARGS;
+        throw Error::InvalidArgs;
       }
       m_hasEnabled = true;
     }
@@ -813,7 +812,7 @@ struct BreakpointUpdateCmd : XDebugCommand {
 
     // Grab the hit condition if it was passed
     if (!args['o'].isNull()) {
-      String condition = args['o'].toString();
+      auto condition = args['o'].toString();
       if (condition == s_GREATER_OR_EQUAL) {
         m_hitCondition = XDebugBreakpoint::HitCondition::GREATER_OR_EQUAL;
       } else if (condition == s_EQUAL) {
@@ -821,7 +820,7 @@ struct BreakpointUpdateCmd : XDebugCommand {
       } else if (condition == s_MOD) {
         m_hitCondition = XDebugBreakpoint::HitCondition::MULTIPLE;
       } else {
-        throw XDebugServer::ERROR_INVALID_ARGS;
+        throw Error::InvalidArgs;
       }
       m_hasHitCondition = true;
     }
@@ -831,28 +830,28 @@ struct BreakpointUpdateCmd : XDebugCommand {
 
   void handleImpl(xdebug_xml_node& xml) override {
     // Need to grab the breakpoint to send back the breakpoint info
-    const XDebugBreakpoint* bp = XDEBUG_GET_BREAKPOINT(m_id);
+    auto const bp = XDEBUG_GET_BREAKPOINT(m_id);
     if (bp == nullptr) {
-      throw XDebugServer::ERROR_NO_SUCH_BREAKPOINT;
+      throw Error::NoSuchBreakpoint;
     }
 
     // If any of the updates fails an error is thrown
     if (m_hasEnabled &&
         !s_xdebug_breakpoints->updateBreakpointState(m_id, m_enabled)) {
-      throw XDebugServer::ERROR_BREAKPOINT_INVALID;
+      throw Error::BreakpointInvalid;
     }
     if (m_hasHitCondition &&
         !s_xdebug_breakpoints->updateBreakpointHitCondition(m_id,
                                                             m_hitCondition)) {
-      throw XDebugServer::ERROR_BREAKPOINT_INVALID;
+      throw Error::BreakpointInvalid;
     }
     if (m_hasHitValue &&
         !s_xdebug_breakpoints->updateBreakpointHitValue(m_id, m_hitValue)) {
-      throw XDebugServer::ERROR_BREAKPOINT_INVALID;
+      throw Error::BreakpointInvalid;
     }
     if (m_hasLine &&
         !s_xdebug_breakpoints->updateBreakpointLine(m_id, m_line)) {
-      throw XDebugServer::ERROR_BREAKPOINT_INVALID;
+      throw Error::BreakpointInvalid;
     }
 
     // Add the breakpoint info. php5 xdebug does this, the spec does
@@ -888,7 +887,7 @@ struct BreakpointRemoveCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {
     // Breakpoint id must be provided
     if (args['d'].isNull()) {
-      throw XDebugServer::ERROR_INVALID_ARGS;
+      throw Error::InvalidArgs;
     }
     m_id = strtol(args['d'].toString().data(), nullptr, 10);
   }
@@ -896,13 +895,13 @@ struct BreakpointRemoveCmd : XDebugCommand {
   ~BreakpointRemoveCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    const XDebugBreakpoint* bp = XDEBUG_GET_BREAKPOINT(m_id);
+    auto const bp = XDEBUG_GET_BREAKPOINT(m_id);
     if (bp == nullptr) {
-      throw XDebugServer::ERROR_NO_SUCH_BREAKPOINT;
+      throw Error::NoSuchBreakpoint;
     }
 
     // spec doesn't specify this, but php5 xdebug sends back breakpoint info
-    xdebug_xml_node* node = breakpoint_xml_node(m_id, *bp);
+    auto node = breakpoint_xml_node(m_id, *bp);
     xdebug_xml_add_child(&xml, node);
 
     // The breakpoint is deleted, so this has to be last
@@ -923,7 +922,7 @@ struct StackDepthCmd : XDebugCommand {
   ~StackDepthCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    int depth = XDebugUtils::stackDepth();
+    auto const depth = XDebugUtils::stackDepth();
     xdebug_xml_add_attribute(&xml, "depth", depth);
   }
 };
@@ -942,7 +941,7 @@ struct StackGetCmd : XDebugCommand {
     if (!args['d'].isNull()) {
       m_clientDepth = strtol(args['d'].toString().data(), nullptr, 10);
       if (m_clientDepth < 0 || m_clientDepth > XDebugUtils::stackDepth()) {
-        throw XDebugServer::ERROR_STACK_DEPTH_INVALID;
+        throw Error::StackDepthInvalid;
       }
     }
   }
@@ -961,7 +960,7 @@ struct StackGetCmd : XDebugCommand {
          fp = g_context->getPrevVMState(fp, &offset), depth++) {
       // If a depth was provided, we're only interested in that depth
       if (m_clientDepth < 0 || depth == m_clientDepth) {
-        xdebug_xml_node* frame = getFrame(fp, offset, depth);
+        auto frame = getFrame(fp, offset, depth);
         xdebug_xml_add_child(&xml, frame);
       }
     }
@@ -976,13 +975,13 @@ private:
 
     // Compute the function name. php5 xdebug includes names for each type of
     // include, we don't have access to that
-    const char* func_name =
+    auto const func_name =
       func->isPseudoMain() ?
         (g_context->getPrevVMState(fp) == nullptr ? "{main}" : "include") :
         func->fullName()->data();
 
     // Create the frame node
-    xdebug_xml_node* node = xdebug_xml_node_init("stack");
+    auto node = xdebug_xml_node_init("stack");
     xdebug_xml_add_attribute(node, "where", func_name);
     xdebug_xml_add_attribute(node, "level", level);
     xdebug_xml_add_attribute(node, "type", "file");
@@ -991,7 +990,7 @@ private:
     // file/line, for all other frames this is the stored file/line #
     auto file =
       XDebugUtils::pathToUrl(String(const_cast<StringData*>(unit->filepath())));
-    int line = level == 0 ? g_context->getLine() : unit->getLineNumber(offset);
+    auto line = level == 0 ? g_context->getLine() : unit->getLineNumber(offset);
 
     // Add the call file/line. Duplication is necessary due to xml api
     xdebug_xml_add_attribute_dup(node, "filename", file.data());
@@ -1022,7 +1021,7 @@ struct ContextNamesCmd : XDebugCommand {
   bool isValidInStatus(Status status) const override { return true; }
 
   void handleImpl(xdebug_xml_node& xml) override {
-    xdebug_xml_node* child = xdebug_xml_node_init("context");
+    auto child = xdebug_xml_node_init("context");
     xdebug_xml_add_attribute(child, "name", "Locals");
     xdebug_xml_add_attribute(child, "id",
                              static_cast<int>(XDebugContext::LOCAL));
@@ -1054,7 +1053,7 @@ struct ContextGetCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {
     // Grab the context if it was passed
     if (!args['c'].isNull()) {
-      int context = args['c'].toInt32();
+      auto context = args['c'].toInt32();
       switch (context) {
         case static_cast<int>(XDebugContext::LOCAL):
         case static_cast<int>(XDebugContext::SUPERGLOBALS):
@@ -1062,7 +1061,7 @@ struct ContextGetCmd : XDebugCommand {
           m_context = static_cast<XDebugContext>(context);
           break;
         default:
-          throw XDebugServer::ERROR_INVALID_ARGS;
+          throw Error::InvalidArgs;
       }
     }
 
@@ -1095,7 +1094,7 @@ struct ContextGetCmd : XDebugCommand {
             continue;
           }
 
-          xdebug_xml_node* node =
+          auto node =
             xdebug_get_value_xml_node(iter.first().toString().data(),
                                       iter.second(), XDebugVarType::Normal,
                                       exporter);
@@ -1106,7 +1105,7 @@ struct ContextGetCmd : XDebugCommand {
       case XDebugContext::USER_CONSTANTS: {
         Array constants = lookupDefinedConstants(true)[s_USER].toArray();
         for (ArrayIter iter(constants); iter; ++iter) {
-          xdebug_xml_node* node =
+          auto node =
             xdebug_get_value_xml_node(iter.first().toString().data(),
                                       iter.second(), XDebugVarType::Normal,
                                       exporter);
@@ -1126,7 +1125,7 @@ struct ContextGetCmd : XDebugCommand {
             continue;
           }
 
-          xdebug_xml_node* node =
+          auto node =
             xdebug_get_value_xml_node(name.data(), iter.second(),
                                       XDebugVarType::Normal, exporter);
           xdebug_xml_add_child(&xml, node);
@@ -1175,7 +1174,7 @@ struct TypemapGetCmd : XDebugCommand {
 
     // Add the types. Casts are necessary due to xml api
     for (int i = 0; i < XDEBUG_TYPES_COUNT; i++) {
-      xdebug_xml_node* type = xdebug_xml_node_init("map");
+      auto type = xdebug_xml_node_init("map");
       xdebug_xml_add_attribute(type, "name", s_TYPEMAP[i][1]);
       xdebug_xml_add_attribute(type, "type", s_TYPEMAP[i][0]);
       if (s_TYPEMAP[i][2]) {
@@ -1204,7 +1203,7 @@ struct PropertyGetCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {
     // A name is required
     if (args['n'].isNull()) {
-      throw XDebugServer::ERROR_INVALID_ARGS;
+      throw Error::InvalidArgs;
     }
     m_name = args['n'].toString();
 
@@ -1218,7 +1217,7 @@ struct PropertyGetCmd : XDebugCommand {
           m_context = static_cast<XDebugContext>(context);
           break;
         default:
-          throw XDebugServer::ERROR_INVALID_ARGS;
+          throw Error::InvalidArgs;
       }
     }
 
@@ -1242,13 +1241,13 @@ struct PropertyGetCmd : XDebugCommand {
 
   void handleImpl(xdebug_xml_node& xml) override {
     // Get the correct stack frame
-    ActRec* fp = g_context->getStackFrame();
+    auto fp = g_context->getStackFrame();
     for (int depth = 0; fp != nullptr && depth < m_depth;
          depth++, fp = g_context->getPrevVMState(fp)) {}
 
     // If we don't have an actrec, the stack depth was invalid
     if (fp == nullptr) {
-      throw XDebugServer::ERROR_STACK_DEPTH_INVALID;
+      throw Error::StackDepthInvalid;
     }
 
     // Setup the variable exporter
@@ -1263,9 +1262,9 @@ struct PropertyGetCmd : XDebugCommand {
       case XDebugContext::LOCAL:
       case XDebugContext::SUPERGLOBALS: {
         Variant val = find_symbol(m_name, m_depth);
-        xdebug_xml_node* node = xdebug_get_value_xml_node(m_name.data(), val,
-                                                          XDebugVarType::Normal,
-                                                          exporter);
+        auto node = xdebug_get_value_xml_node(m_name.data(), val,
+                                              XDebugVarType::Normal,
+                                              exporter);
         xdebug_xml_add_child(&xml, node);
         break;
       }
@@ -1273,11 +1272,11 @@ struct PropertyGetCmd : XDebugCommand {
       // we ensure it's defined before grabbing it
       case XDebugContext::USER_CONSTANTS: {
         if (!f_defined(m_name)) {
-          throw XDebugServer::ERROR_PROPERTY_NON_EXISTENT;
+          throw Error::PropertyNonExistent;
         }
 
         // php5 xdebug adds "constant" facet, but this is not in the spec
-        xdebug_xml_node* node =
+        auto node =
           xdebug_get_value_xml_node(m_name.data(), f_constant(m_name),
                                     XDebugVarType::Constant, exporter);
         xdebug_xml_add_attribute(node, "facet", "constant");
@@ -1316,13 +1315,13 @@ struct PropertySetCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {
     // A name is required
     if (args['n'].isNull()) {
-      throw XDebugServer::ERROR_INVALID_ARGS;
+      throw Error::InvalidArgs;
     }
     m_symbol = args['n'].toString();
 
     // Data must be provided
     if (args['-'].isNull()) {
-      throw XDebugServer::ERROR_INVALID_ARGS;
+      throw Error::InvalidArgs;
     }
     m_newValue = StringUtil::Base64Decode(args['-'].toString());
 
@@ -1331,7 +1330,7 @@ struct PropertySetCmd : XDebugCommand {
     if (!args['d'].isNull()) {
       m_depth = strtol(args['d'].toString().data(), nullptr, 10);
       if (m_depth < 0 || m_depth > XDebugUtils::stackDepth()) {
-        throw XDebugServer::ERROR_STACK_DEPTH_INVALID;
+        throw Error::StackDepthInvalid;
       }
     }
   }
@@ -1345,7 +1344,7 @@ struct PropertySetCmd : XDebugCommand {
 
     // If a datatype was passed, add the appropriate type cast
     if (!m_type.isNull()) {
-      String type = m_type.toString();
+      auto type = m_type.toString();
       if (type == s_BOOL) {
         buf.printf("(bool) ");
       } else if (type == s_INT) {
@@ -1359,7 +1358,7 @@ struct PropertySetCmd : XDebugCommand {
 
     // Add the value and create the evaluation string
     buf.printf("(%s);", m_newValue.data());
-    String eval_str = buf.detach();
+    auto eval_str = buf.detach();
 
     // Perform the evaluation at the given depth. Though this is inconsistent
     // with errors in property_get and eval, php5 xdebug sends back success = 0
@@ -1389,9 +1388,9 @@ struct SourceCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {
     // Either grab the passed filename or get the current one
     if (args['f'].isNull()) {
-      StringData* filename_data = g_context->getContainingFileName();
+      auto filename_data = g_context->getContainingFileName();
       if (filename_data == staticEmptyString()) {
-        throw XDebugServer::ERROR_STACK_DEPTH_INVALID;
+        throw Error::StackDepthInvalid;
       }
       m_filename = String(filename_data);
     } else {
@@ -1417,9 +1416,9 @@ struct SourceCmd : XDebugCommand {
     // Grab the file as an array
     Variant file = HHVM_FN(file)(m_filename);
     if (!file.isArray()) {
-      throw XDebugServer::ERROR_CANT_OPEN_FILE;
+      throw Error::CantOpenFile;
     }
-    Array source = file.toArray();
+    auto source = file.toArray();
 
     // Compute the begin/end line
     if (m_beginLine < 0) {
@@ -1474,11 +1473,11 @@ struct StdoutCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {
     // "c" must be provided
     if (args['c'].isNull()) {
-      throw XDebugServer::ERROR_INVALID_ARGS;
+      throw Error::InvalidArgs;
     }
 
     // Only several types of modes are allowed
-    int mode = strtol(args['c'].toString().data(), nullptr, 10);
+    auto mode = strtol(args['c'].toString().data(), nullptr, 10);
     switch (mode) {
       case MODE_DISABLE:
       case MODE_COPY:
@@ -1486,7 +1485,7 @@ struct StdoutCmd : XDebugCommand {
         m_mode = static_cast<Mode>(mode);
         break;
       default:
-        throw XDebugServer::ERROR_INVALID_ARGS;
+        throw Error::InvalidArgs;
     }
   }
 
@@ -1544,9 +1543,9 @@ struct EvalCmd : XDebugCommand {
     : XDebugCommand(server, cmd, args) {
     // An evaluation string must be provided
     if (args['-'].isNull()) {
-      throw XDebugServer::ERROR_INVALID_ARGS;
+      throw Error::InvalidArgs;
     }
-    String encoded_expr = args['-'].toString();
+    auto encoded_expr = args['-'].toString();
     m_evalUnit = compile_expression(StringUtil::Base64Decode(encoded_expr));
 
     // A page can optionally be provided
@@ -1558,7 +1557,7 @@ struct EvalCmd : XDebugCommand {
   ~EvalCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    Variant result = do_eval(m_evalUnit, 0);
+    auto result = do_eval(m_evalUnit, 0);
 
     // Construct the exporter
     XDebugExporter exporter;
@@ -1568,9 +1567,9 @@ struct EvalCmd : XDebugCommand {
     exporter.page = m_page;
 
     // Create the xml node
-    xdebug_xml_node* node = xdebug_get_value_xml_node(nullptr, result,
-                                                      XDebugVarType::Normal,
-                                                      exporter);
+    auto node = xdebug_get_value_xml_node(nullptr, result,
+                                          XDebugVarType::Normal,
+                                          exporter);
     xdebug_xml_add_child(&xml, node);
   }
 
@@ -1591,7 +1590,7 @@ struct ProfilerNameGetCmd : XDebugCommand {
   void handleImpl(xdebug_xml_node& xml) override {
     Variant filename = HHVM_FN(xdebug_get_profiler_filename)();
     if (!filename.isString()) {
-      throw XDebugServer::ERROR_PROFILING_NOT_STARTED;
+      throw Error::ProfilingNotStarted;
     }
     xdebug_xml_add_text(&xml, xdstrdup(filename.toString().data()));
   }
@@ -1606,7 +1605,7 @@ XDebugCommand::XDebugCommand(XDebugServer& server,
   : m_server(server), m_commandStr(cmd.data(), cmd.size()) {
   // A transaction id must be provided
   if (args['i'].isNull()) {
-    throw XDebugServer::ERROR_INVALID_ARGS;
+    throw Error::InvalidArgs;
   }
   m_transactionId = args['i'].toString().toCppString();
 }
@@ -1621,7 +1620,7 @@ XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
                                          const String& cmdStr,
                                          const Array& args) {
   // Match will be set true once there is a match.
-  bool match = false;
+  auto match = false;
   auto cmd_cpp = cmdStr.toCppString();
 
   // Check each command
@@ -1636,15 +1635,16 @@ XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
 
   // php5 xdebug throws an unimplemented error when no valid match is found
   if (!match) {
-    throw XDebugServer::ERROR_UNIMPLEMENTED;
+    throw Error::Unimplemented;
   }
 
   // Ensure this command is valid in the given server status
-  Status status; Reason reason;
+  XDebugStatus status;
+  XDebugReason reason;
   server.getStatus(status, reason);
   if (!cmd->isValidInStatus(status)) {
     delete cmd;
-    throw XDebugServer::ERROR_COMMAND_UNAVAILABLE;
+    throw Error::CommandUnavailable;
   }
   return cmd;
 }

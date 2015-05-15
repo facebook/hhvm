@@ -219,7 +219,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/dump-const:      dump all constant value in constant map to\n"
         "                  /tmp/const_map_dump\n"
         "/random-apc:      dump the key and size of a random APC entry\n"
-        "                  optionally set count for number of entries returned"
+        "    count         number of entries to return\n"
 
         "/pcre-cache-size: get pcre cache map size\n"
         "/dump-pcre-cache: dump cached pcre's to /tmp/pcre_cache\n"

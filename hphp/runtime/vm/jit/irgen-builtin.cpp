@@ -759,6 +759,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
 void builtinCall(IRGS& env,
                  const Func* callee,
                  ParamPrep& params,
+                 int32_t numNonDefault,
                  const CatchMaker& catchMaker) {
   /*
    * Everything that needs to be on the stack gets spilled now.
@@ -813,6 +814,7 @@ void builtinCall(IRGS& env,
     CallBuiltinData {
       offsetFromIRSP(env, BCSPOffset{0}),
       callee,
+      numNonDefault,
       builtinFuncDestroysLocals(callee)
     },
     catchMaker.makeUnusualCatch(),
@@ -887,7 +889,7 @@ void nativeImplInlined(IRGS& env) {
     &params
   };
 
-  builtinCall(env, callee, params, catcher);
+  builtinCall(env, callee, params, numArgs, catcher);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -958,7 +960,7 @@ void emitFCallBuiltin(IRGS& env,
     &params
   };
 
-  builtinCall(env, callee, params, catcher);
+  builtinCall(env, callee, params, numNonDefault, catcher);
 }
 
 void emitNativeImpl(IRGS& env) {

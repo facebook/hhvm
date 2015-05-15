@@ -2934,6 +2934,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   auto const dstType        = dst.reg(1);
   auto const callee         = inst->extra<CallBuiltin>()->callee;
   auto const numArgs        = callee->numParams();
+  auto const numNonDefault  = inst->extra<CallBuiltin>()->numNonDefault;
   auto const returnType     = inst->typeParam();
   auto const funcReturnType = callee->returnType();
   auto& v = vmain();
@@ -2996,6 +2997,11 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
       ++srcNum;
     }
   }
+
+  if (callee->attrs() & AttrNumArgs) {
+    callArgs.imm((int64_t)numNonDefault);
+  }
+
   for (uint32_t i = 0; i < numArgs; ++i, ++srcNum) {
     auto const& pi = callee->params()[i];
     if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType)) {

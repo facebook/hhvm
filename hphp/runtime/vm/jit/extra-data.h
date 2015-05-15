@@ -476,9 +476,11 @@ struct CallArrayData : IRExtraData {
 struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPOffset spOffset,
                            const Func* callee,
+                           int32_t numNonDefault,
                            bool destroyLocals)
     : spOffset(spOffset)
     , callee{callee}
+    , numNonDefault{numNonDefault}
     , destroyLocals{destroyLocals}
   {}
 
@@ -492,6 +494,7 @@ struct CallBuiltinData : IRExtraData {
 
   IRSPOffset spOffset;   // offset from StkPtr to last passed arg
   const Func* callee;
+  int32_t numNonDefault;
   bool destroyLocals;
 };
 

@@ -184,7 +184,7 @@ function array_keys(mixed $input,
  *   together.
  *
  */
-<<__Native, __IsFoldable>>
+<<__Native("NumArgs"), __IsFoldable>>
 function array_merge_recursive(mixed $array1,
                                mixed $array2 = null,
                                ...$argv): mixed;
@@ -204,7 +204,7 @@ function array_merge_recursive(mixed $array1,
  * @return mixed - Returns the resulting array.
  *
  */
-<<__Native, __IsFoldable>>
+<<__Native("NumArgs"), __IsFoldable>>
 function array_merge(mixed $array1, mixed $array2 = null, ...$argv): mixed;
 
 /**

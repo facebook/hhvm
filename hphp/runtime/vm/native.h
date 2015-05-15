@@ -200,7 +200,8 @@ bool coerceFCallArgs(TypedValue* args,
  */
 template<bool usesDoubles, bool variadic>
 void callFunc(const Func* func, void* ctx,
-              TypedValue* args, TypedValue& ret);
+              TypedValue* args, int32_t numNonDefault,
+              TypedValue& ret);
 
 /**
  * Extract the name used to invoke the function from the ActRec where name

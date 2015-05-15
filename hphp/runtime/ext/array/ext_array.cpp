@@ -77,12 +77,6 @@ DEFINE_CONSTANT(UCOL_NUMERIC_COLLATION);
 
 #undef DEFINE_CONSTANT
 
-int countArguments() {
-  ActRec *ar = g_context->getStackFrame();
-  assert(ar);
-  return ar->numArgs();
-}
-
 Variant HHVM_FUNCTION(array_change_key_case,
                       const Variant& input,
                       int64_t case_ /* = 0 */) {
@@ -439,6 +433,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
 }
 
 Variant HHVM_FUNCTION(array_merge,
+                      int64_t numArgs,
                       const Variant& array1,
                       const Variant& array2 /* = null_variant */,
                       const Array& args /* = null array */) {
@@ -446,7 +441,7 @@ Variant HHVM_FUNCTION(array_merge,
   Array ret = Array::Create();
   php_array_merge(ret, arr_array1);
 
-  if (UNLIKELY(countArguments() < 2)) return ret;
+  if (UNLIKELY(numArgs < 2)) return ret;
 
   getCheckedArray(array2);
   php_array_merge(ret, arr_array2);
@@ -464,6 +459,7 @@ Variant HHVM_FUNCTION(array_merge,
 }
 
 Variant HHVM_FUNCTION(array_merge_recursive,
+                      int64_t numArgs,
                       const Variant& array1,
                       const Variant& array2 /* = null_variant */,
                       const Array& args /* = null array */) {
@@ -473,7 +469,7 @@ Variant HHVM_FUNCTION(array_merge_recursive,
   php_array_merge_recursive(seen, false, ret, arr_array1);
   assert(seen.empty());
 
-  if (UNLIKELY(countArguments() < 2)) return ret;
+  if (UNLIKELY(numArgs < 2)) return ret;
 
   getCheckedArray(array2);
   php_array_merge_recursive(seen, false, ret, arr_array2);

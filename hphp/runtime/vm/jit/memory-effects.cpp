@@ -38,11 +38,10 @@ AliasClass pointee(const SSATmp* ptr) {
   auto const maybeRef = type.maybe(TPtrToRefGen);
   auto const typeNR = type - TPtrToRefGen;
 
-
-  auto const sinst = canonical(ptr)->inst();
-
   auto specific = [&] () -> folly::Optional<AliasClass> {
     if (typeNR <= TBottom) return AEmpty;
+
+    auto const sinst = canonical(ptr)->inst();
 
     if (typeNR <= TPtrToFrameGen) {
       if (sinst->is(LdLocAddr)) {
@@ -621,12 +620,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // Object/Ref loads/stores
 
   case CheckRefInner:
-    return may_load_store(ARefAny, AEmpty);
+    return may_load_store(ARef { inst.src(0) }, AEmpty);
   case LdRef:
-    return PureLoad { ARefAny };
-
+    return PureLoad { ARef { inst.src(0) } };
   case StRef:
-    return PureStore { ARefAny, inst.src(1) };
+    return PureStore { ARef { inst.src(0) }, inst.src(1) };
 
   case InitObjProps:
     return may_load_store(AEmpty, APropAny);
@@ -1079,11 +1077,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // alias-class.h above AStack for more).
 
   case DecRef:
-    if (inst.src(0)->type().maybe(TArr | TObj)) {
-      // Could re-enter to run a destructor.
-      return may_reenter(inst, may_load_store(AEmpty, AEmpty));
+    {
+      auto const src = inst.src(0);
+      // It could decref the inner ref.
+      auto const maybeRef = src->isA(TBoxedCell) ? ARef { src } :
+                            src->type().maybe(TBoxedCell) ? ARefAny : AEmpty;
+      // Need to add maybeRef to the `store' set. See comments about
+      // `GeneralEffects' in memory-effects.h.
+      auto const effect = may_load_store(maybeRef, maybeRef);
+      if (inst.src(0)->type().maybe(TArr | TObj | TBoxedArr | TBoxedObj)) {
+        // Could re-enter to run a destructor.
+        return may_reenter(inst, effect);
+      }
+      return effect;
     }
-    return may_load_store(AEmpty, AEmpty);
 
   case LdArrFPushCuf:  // autoloads
   case LdArrFuncCtx:   // autoloads

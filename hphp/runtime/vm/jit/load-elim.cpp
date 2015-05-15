@@ -256,6 +256,7 @@ Flags handle_general_effects(Local& env,
   case CheckTypeMem:
   case CheckLoc:
   case CheckStk:
+  case CheckRefInner:
     if (auto const tloc = find_tracked(env, inst, m.loads)) {
       if (tloc->knownType <= inst.typeParam()) {
         return FJmpNext{};
@@ -431,6 +432,7 @@ void reduce_inst(Local& env, IRInstruction& inst, const FReducible& flags) {
   case CheckTypeMem:
   case CheckLoc:
   case CheckStk:
+  case CheckRefInner:
     reduce_to(CheckType, inst.typeParam());
     break;
 

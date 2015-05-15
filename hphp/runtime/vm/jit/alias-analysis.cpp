@@ -121,6 +121,7 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
   if (acls.maybe(AElemIAny))   ret |= all_elemIs;
   if (acls.maybe(AFrameAny))   ret |= all_frame;
   if (acls.maybe(AMIStateAny)) ret |= all_mistate;
+  if (acls.maybe(ARefAny))     ret |= all_refs;
 
   return ret;
 }
@@ -141,6 +142,7 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
   if (AElemIAny   <= acls) ret |= all_elemIs;
   if (AFrameAny   <= acls) ret |= all_frame;
   if (AMIStateAny <= acls) ret |= all_mistate;
+  if (ARefAny     <= acls) ret |= all_refs;
 
   return ret;
 }
@@ -177,6 +179,13 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
     if (auto const elemI = acls.is_elemI()) {
       if (auto const index = add_class(ret, acls)) {
         conflict_array_index[elemI->idx].set(*index);
+      }
+      return;
+    }
+
+    if (auto const ref = acls.is_ref()) {
+      if (auto const index = add_class(ret, acls)) {
+        ret.all_refs.set(*index);
       }
       return;
     }
@@ -274,6 +283,12 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
+    if (auto const ref = acls.is_ref()) {
+      meta.conflicts = ret.all_refs;
+      meta.conflicts.reset(meta.index);
+      return;
+    }
+
     always_assert_flog(0, "AliasAnalysis assigned an AliasClass an id "
       "but it didn't match a situation we undestood: {}\n", show(acls));
   };
@@ -334,9 +349,11 @@ std::string show(const AliasAnalysis& linfo) {
   folly::format(&ret, " {: <20}       : {}\n"
                       " {: <20}       : {}\n"
                       " {: <20}       : {}\n"
+                      " {: <20}       : {}\n"
                       " {: <20}       : {}\n",
     "all props",  show(linfo.all_props),
     "all elemIs", show(linfo.all_elemIs),
+    "all refs",   show(linfo.all_refs),
     "all frame",  show(linfo.all_frame),
     "all stack",  show(linfo.all_stack)
   );

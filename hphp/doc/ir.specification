@@ -184,10 +184,10 @@ Instruction set
 
 1. Checks and Asserts
 
-Note: Instructions that guard or check boxed types only check that the operand
-is boxed, and they ignore the type of the value inside the box (the inner
-type). The inner type is normally checked when the value within the box is
-about to be loaded, using a separate CheckRefInner instruction.
+Note: Instructions that check boxed types only check that the operand is boxed,
+and they ignore the type of the value inside the box (the inner type). The
+inner type is normally checked when the value within the box is about to be
+loaded, using a separate CheckRefInner instruction.
 
 | CheckType<T>, DRefineS(0), S(Gen), B|P
 
@@ -1451,7 +1451,7 @@ To string conversions:
 
 | PredictLoc<T, localId>, ND, S(FramePtr), NF
 
-  Does nothing. Serves as an indicator that the predicted type of the given 
+  Does nothing. Serves as an indicator that the predicted type of the given
   localId on the frame S0 is T.
 
 | PredictStk<T, offset>, ND, S(StkPtr), NF

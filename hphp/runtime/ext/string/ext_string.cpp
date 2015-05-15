@@ -668,7 +668,16 @@ Variant HHVM_FUNCTION(str_replace,
                       const Variant& subject,
                       VRefParam count /* = null */) {
   int nCount = 0;
-  Variant ret = str_replace(search, replace, subject, nCount, true);
+  Variant ret;
+  if (LIKELY(search.isString() && replace.isString() && subject.isString())) {
+    // Short-cut for the most common (and simplest) case
+    ret = string_replace(subject.asCStrRef(), search.asCStrRef(),
+                         replace.asCStrRef(), nCount, true);
+  } else {
+    // search, replace, and subject can all be arrays. str_replace() reduces all
+    // the valid combinations to multiple string_replace() calls.
+    ret = str_replace(search, replace, subject, nCount, true);
+  }
   count = nCount;
   return ret;
 }

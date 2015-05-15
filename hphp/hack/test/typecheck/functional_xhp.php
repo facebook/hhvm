@@ -9,21 +9,16 @@
  *
  */
 
-
-class Blah {
-}
+class Blah {}
 
 class :x:xx extends Blah {
-  attribute
-    Map<string, int> k;
+  attribute Map<string, int> k;
 }
 
-class :x:xy {
-}
+class :x:xy {}
 
-class A {
-}
+class A {}
 
 function test(): void {
-  $x = <x:xx k={Map{}}></x:xx>;
+  $x = <x:xx k={Map {}}></x:xx>;
 }

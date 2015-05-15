@@ -61,7 +61,7 @@ struct c_SimpleXMLElement : SimpleXMLElementBase {
   void sweep();
 
   explicit c_SimpleXMLElement(Class* cls = c_SimpleXMLElement::classof());
-  public: virtual ~c_SimpleXMLElement();
+  public: ~c_SimpleXMLElement();
   public: void t___construct(const String& data, int64_t options = 0,
                              bool data_is_url = false, const String& ns = "",
                              bool is_prefix = false);

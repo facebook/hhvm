@@ -19,7 +19,7 @@
 
 #include <vector>
 #include <string>
-#include <locale.h>
+#include <xlocale.h>
 #include "hphp/util/thread-local.h"
 
 namespace HPHP {
@@ -38,6 +38,7 @@ public:
   ~ThreadSafeLocaleHandler();
   void reset();
   const char* actuallySetLocale(int category, const char* locale);
+  struct lconv* localeconv();
 
 private:
   void generate_LC_ALL_String();

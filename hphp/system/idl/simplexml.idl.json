@@ -220,7 +220,6 @@
                 {
                     "name": "getIteratorForTraversable",
                     "flags": [
-                        "IsPrivate"
                     ],
                     "return": {
                         "type": "Variant"
@@ -777,7 +776,6 @@
                 {
                     "name": "getIteratorForTraversable",
                     "flags": [
-                        "IsPrivate"
                     ],
                     "return": {
                         "type": "Variant"

@@ -7,7 +7,7 @@ object(SimpleXMLElement)#1 (0) {
 Warning: Attempted to serialize unserializable builtin class SimpleXMLElement in %s/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(22) {
+array(23) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -19,38 +19,40 @@ array(22) {
   [4]=>
   string(11) "offsetUnset"
   [5]=>
-  string(5) "count"
+  string(25) "getIteratorForTraversable"
   [6]=>
-  string(5) "xpath"
+  string(5) "count"
   [7]=>
-  string(22) "registerXPathNamespace"
+  string(5) "xpath"
   [8]=>
-  string(5) "asXML"
+  string(22) "registerXPathNamespace"
   [9]=>
-  string(7) "saveXML"
+  string(5) "asXML"
   [10]=>
-  string(13) "getNamespaces"
+  string(7) "saveXML"
   [11]=>
-  string(16) "getDocNamespaces"
+  string(13) "getNamespaces"
   [12]=>
-  string(8) "children"
+  string(16) "getDocNamespaces"
   [13]=>
-  string(7) "getName"
+  string(8) "children"
   [14]=>
-  string(10) "attributes"
+  string(7) "getName"
   [15]=>
-  string(8) "addChild"
+  string(10) "attributes"
   [16]=>
-  string(12) "addAttribute"
+  string(8) "addChild"
   [17]=>
-  string(10) "__toString"
+  string(12) "addAttribute"
   [18]=>
-  string(5) "__get"
+  string(10) "__toString"
   [19]=>
-  string(5) "__set"
+  string(5) "__get"
   [20]=>
-  string(7) "__isset"
+  string(5) "__set"
   [21]=>
+  string(7) "__isset"
+  [22]=>
   string(7) "__unset"
 }
 ================
@@ -63,7 +65,7 @@ object(A_SimpleXMLElement)#2 (0) {
 Warning: Attempted to serialize unserializable builtin class A_SimpleXMLElement in %s/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(22) {
+array(23) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -75,40 +77,43 @@ array(22) {
   [4]=>
   string(11) "offsetUnset"
   [5]=>
-  string(5) "count"
+  string(25) "getIteratorForTraversable"
   [6]=>
-  string(5) "xpath"
+  string(5) "count"
   [7]=>
-  string(22) "registerXPathNamespace"
+  string(5) "xpath"
   [8]=>
-  string(5) "asXML"
+  string(22) "registerXPathNamespace"
   [9]=>
-  string(7) "saveXML"
+  string(5) "asXML"
   [10]=>
-  string(13) "getNamespaces"
+  string(7) "saveXML"
   [11]=>
-  string(16) "getDocNamespaces"
+  string(13) "getNamespaces"
   [12]=>
-  string(8) "children"
+  string(16) "getDocNamespaces"
   [13]=>
-  string(7) "getName"
+  string(8) "children"
   [14]=>
-  string(10) "attributes"
+  string(7) "getName"
   [15]=>
-  string(8) "addChild"
+  string(10) "attributes"
   [16]=>
-  string(12) "addAttribute"
+  string(8) "addChild"
   [17]=>
-  string(10) "__toString"
+  string(12) "addAttribute"
   [18]=>
-  string(5) "__get"
+  string(10) "__toString"
   [19]=>
-  string(5) "__set"
+  string(5) "__get"
   [20]=>
-  string(7) "__isset"
+  string(5) "__set"
   [21]=>
+  string(7) "__isset"
+  [22]=>
   string(7) "__unset"
 }
 Of basic XML structure the 1th nodes contents is: 
-Of basic XML structure the 1th nodes contents is: b
-Of basic XML structure the 1th nodes contents is: c1
+Of basic XML structure the 2th nodes contents is: b
+Of basic XML structure the 3th nodes contents is: c1
+Basic XML has 3 root children

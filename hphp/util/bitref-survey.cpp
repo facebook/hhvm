@@ -32,6 +32,8 @@ std::mutex m;
 folly::Histogram<uint32_t> str_rc_copy_histogram(8, 1, 2048);
 folly::Histogram<uint32_t> arr_rc_copy_histogram(8, 1, 2048);
 
+bool BITREF_SURVEY = true;
+
 inline BitrefSurvey &survey() {
   static BitrefSurvey survey;
   return survey;
@@ -126,7 +128,7 @@ BitrefSurvey::~BitrefSurvey() {
   double str_rc_copy_pc = ((double) str_rc_copy_count / (double) str_check_count) * 100;
   double str_bitref_copy_pc = ((double)str_bitref_copy_count / (double)str_check_count) * 100;
   
-  FILE *fp = fopen("/tmp/hphp.log", "w");
+  FILE *fp = fopen("/tmp/hphp_mrb.log", "w");
 
   fprintf(fp, "     || # checks |        # rc copies       | # 1bit copies   | # avoided copy  \n");
   fprintf(fp, "     ||          |       all       | static |(incl. rc copies)|                 \n");

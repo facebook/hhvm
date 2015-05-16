@@ -34,11 +34,14 @@ public:
   explicit PlainFile(FILE *stream = nullptr,
                      bool nonblocking = false,
                      const String& wrapper_type = null_string,
-                     const String& stream_type = null_string);
+                     const String& stream_type = null_string,
+                     const String& mode = ""
+                    );
   explicit PlainFile(int fd,
                      bool nonblocking = false,
                      const String& wrapper = null_string,
-                     const String& stream_type = null_string);
+                     const String& stream_type = null_string,
+                     const String& mode = "");
   virtual ~PlainFile();
 
   // overriding ResourceData

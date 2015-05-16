@@ -1772,7 +1772,7 @@ Variant HHVM_FUNCTION(tempnam,
 Variant HHVM_FUNCTION(tmpfile) {
   FILE *f = tmpfile();
   if (f) {
-    return Variant(makeSmartPtr<PlainFile>(f));
+    return Variant(makeSmartPtr<PlainFile>(f, false, null_string, null_string, "r+b"));
   }
   return false;
 }

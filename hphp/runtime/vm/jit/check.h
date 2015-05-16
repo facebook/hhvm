@@ -44,6 +44,11 @@ bool checkTmpsSpanningCalls(const IRUnit&);
  */
 bool checkOperandTypes(const IRInstruction*, const IRUnit* unit = nullptr);
 
+/*
+ * Check everything useful we can about a unit.
+ */
+bool checkEverything(const IRUnit&);
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

@@ -703,6 +703,7 @@ TranslateResult irGenRegion(IRGS& irgs,
     assertx(!byRefs.hasNext());
     assertx(!knownFuncs.hasNext());
   }
+  irgen::sealUnit(irgs);
   irGenTimer.stop();
   return TranslateResult::Success;
 }

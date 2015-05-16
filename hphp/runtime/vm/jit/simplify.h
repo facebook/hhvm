@@ -75,8 +75,11 @@ void simplify(IRUnit&, IRInstruction*);
 
 /*
  * Perform a simplification pass in the entire unit.
+ *
+ * After running this pass, the caller must run a manditoryDCE to restore IR
+ * invariants.
  */
-void simplify(IRUnit&);
+void simplifyPass(IRUnit&);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -114,7 +117,6 @@ void copyProp(IRInstruction*);
  */
 folly::Optional<bool>
 packedArrayBoundsStaticCheck(Type arrayType, int64_t key);
-
 
 /*
  * Get the type of `arr[idx]` for a packed array, considering constness,

@@ -36,6 +36,8 @@
 #include <string>
 #include <unordered_set>
 
+#include <boost/dynamic_bitset.hpp>
+
 namespace HPHP { namespace jit {
 
 namespace {
@@ -141,7 +143,7 @@ bool checkBlock(Block* b) {
 bool checkCfg(const IRUnit& unit) {
   auto const blocks = rpoSortCfg(unit);
   auto const rpoIDs = numberBlocks(unit, blocks);
-  auto edges        = jit::hash_set<const Edge*>{};
+  auto reachable    = boost::dynamic_bitset<>(unit.numBlocks());
 
   // Entry block can't have predecessors.
   always_assert(unit.entry()->numPreds() == 0);
@@ -150,22 +152,26 @@ bool checkCfg(const IRUnit& unit) {
   always_assert(!unit.entry()->empty() &&
                 unit.entry()->begin()->op() == DefFP);
 
-  // Check valid successor/predecessor edges.
+  // Check valid successor/predecessor edges, and identify reachable blocks.
   for (Block* b : blocks) {
+    reachable.set(b->id());
     auto checkEdge = [&] (const Edge* e) {
       always_assert(e->from() == b);
-      edges.insert(e);
       for (auto& p : e->to()->preds()) if (&p == e) return;
       always_assert(false); // did not find edge.
     };
     checkBlock(b);
-    if (auto *e = b->nextEdge())  checkEdge(e);
-    if (auto *e = b->takenEdge()) checkEdge(e);
+    if (auto e = b->nextEdge())  checkEdge(e);
+    if (auto e = b->takenEdge()) checkEdge(e);
   }
   for (Block* b : blocks) {
-    for (auto const &e : b->preds()) {
+    for (auto const& e : b->preds()) {
       always_assert(&e == e.inst()->takenEdge() || &e == e.inst()->nextEdge());
       always_assert(e.to() == b);
+
+      // Invariant #5
+      always_assert_flog(reachable.test(e.from()->id()),
+        "unreachable: B{}\n", e.from()->id());
     }
   }
 
@@ -498,5 +504,17 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
   return true;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+bool checkEverything(const IRUnit& unit) {
+  assertx(checkCfg(unit));
+  assertx(checkTmpsSpanningCalls(unit));
+  if (debug) {
+    forEachInst(rpoSortCfg(unit), [&](IRInstruction* inst) {
+      assertx(checkOperandTypes(inst, &unit));
+    });
+  }
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }}

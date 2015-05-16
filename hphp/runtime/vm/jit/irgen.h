@@ -183,6 +183,12 @@ void endRegion(IRGS&);
 void endRegion(IRGS&, SrcKey);
 void endBlock(IRGS&, Offset next, bool nextIsMerge);
 
+/*
+ * When we're done creating the IRUnit, this function must be called to ensure
+ * all the IR invariants hold.
+ */
+void sealUnit(IRGS&);
+
 //////////////////////////////////////////////////////////////////////
 
 /*

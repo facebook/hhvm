@@ -2226,7 +2226,7 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
 
 //////////////////////////////////////////////////////////////////////
 
-void simplify(IRUnit& unit) {
+void simplifyPass(IRUnit& unit) {
   boost::dynamic_bitset<> reachable(unit.numBlocks());
   reachable.set(unit.entry()->id());
 
@@ -2240,7 +2240,7 @@ void simplify(IRUnit& unit) {
     if (auto const b = block->back().next())  reachable.set(b->id());
     if (auto const b = block->back().taken()) reachable.set(b->id());
   }
-};
+}
 
 //////////////////////////////////////////////////////////////////////
 

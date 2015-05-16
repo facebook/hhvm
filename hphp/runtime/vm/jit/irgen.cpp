@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
+#include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/dce.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
@@ -186,6 +188,10 @@ void endRegion(IRGS& env, SrcKey nextSk) {
     TransFlags{}
   };
   gen(env, ReqBindJmp, data, sp(env), fp(env));
+}
+
+void sealUnit(IRGS& env) {
+  mandatoryDCE(env.unit);
 }
 
 Type predictedTypeFromLocal(const IRGS& env, uint32_t locId) {

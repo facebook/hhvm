@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,42 +13,30 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_HHIR_OPT_H_
-#define incl_HPHP_HHIR_OPT_H_
-
-#include "hphp/runtime/vm/jit/types.h"
+#ifndef incl_HPHP_DCE_H_
+#define incl_HPHP_DCE_H_
 
 namespace HPHP { namespace jit {
 
-//////////////////////////////////////////////////////////////////////
-
-struct IRBuilder;
 struct IRUnit;
-struct IRInstruction;
-struct FrameStateMgr;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * The main optimization passes.
+ * Perform very minimal DCE required to preserve the IR invariant that there
+ * are no unreachable blocks in the unit.  All other IR invariants must hold
+ * before running this function.
  */
-void optimizeRefcounts2(IRUnit&);
-void optimizePredictions(IRUnit&);
-void gvn(IRUnit&);
-void optimizeLoads(IRUnit&);
-void optimizeStores(IRUnit&);
-void cleanCfg(IRUnit&);
+void mandatoryDCE(IRUnit&);
 
 /*
- * For debugging, we can run this pass, which inserts various sanity checking
- * assertion instructions.
+ * Perform a full DCE pass, which implies the mandatoryDCE as well.
+ *
+ * All IR invariants must hold before running this pass, except the one
+ * restored by mandatoryDCE, which we allow passes to violate and rely on a
+ * fullDCE run to fix.
  */
-void insertAsserts(IRUnit&);
-
-/*
- * Run all the optimization passes.
- */
-void optimize(IRUnit& unit, IRBuilder& builder, TransKind kind);
+void fullDCE(IRUnit&);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -944,6 +944,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdRDSAddr:
   case PredictLoc:
   case PredictStk:
+  case ExitPlaceholder:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////

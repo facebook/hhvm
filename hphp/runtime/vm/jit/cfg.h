@@ -79,7 +79,7 @@ bool removeUnreachable(IRUnit& unit);
  * Pre: `blocks' is in a reverse postorder, and `ids' are the rpoIDs for that
  *      order.
  */
-typedef StateVector<Block,Block*> IdomVector;
+using IdomVector = StateVector<Block,Block*>;
 IdomVector findDominators(const IRUnit&,
                           const BlockList& blocks,
                           const BlockIDs& ids);

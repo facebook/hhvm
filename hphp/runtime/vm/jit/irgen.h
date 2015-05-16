@@ -76,6 +76,12 @@ SSATmp* cns(IRGS& env, Args&&... args) {
 }
 
 /*
+ * Insert an ExitPlaceholder instruction in the IRUnit at the current emit
+ * point.
+ */
+void makeExitPlaceholder(IRGS&);
+
+/*
  * Guards, checks and type assertions.  Guards and checks are the same thing,
  * except that guards must happen at the first bytecode offset in the region.
  *

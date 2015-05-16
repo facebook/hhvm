@@ -117,11 +117,13 @@ namespace Trace {
       TM(hhir_dce)      \
       TM(hhir_store)    \
       TM(hhir_alias)    \
+      TM(hhir_loop)     \
       TM(hhir_load)     \
       TM(hhir_refineTmps) \
       TM(hhir_gvn)      \
       TM(hhir_refcount) \
       TM(layout)        \
+      TM(hhir_licm)     \
       TM(llvm)          \
       TM(llvm_count)    \
       TM(inlining)      \

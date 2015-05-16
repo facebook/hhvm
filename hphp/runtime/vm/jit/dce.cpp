@@ -470,6 +470,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckStackOverflow:
   case InitExtraArgs:
   case CheckSurpriseFlagsEnter:
+  case ExitPlaceholder:
     return false;
   }
   not_reached();

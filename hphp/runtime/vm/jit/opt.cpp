@@ -48,6 +48,14 @@ void doPass(IRUnit& unit, PassFN fn, DCE dce) {
   }
 }
 
+void removeExitPlaceholders(IRUnit& unit) {
+  for (auto& block : rpoSortCfg(unit)) {
+    if (block->back().is(ExitPlaceholder)) {
+      unit.replace(&block->back(), Jmp, block->next());
+    }
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -111,6 +119,16 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
 
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRRefcountOpts) {
     doPass(unit, optimizeRefcounts2, DCE::Full);
+  }
+
+  if (RuntimeOption::EvalHHIRLICM) {
+    if (kind != TransKind::Profile && hasLoop) {
+      // The clean pass is just to stress lack of pre_headers for now, since
+      // LICM is a disabled prototype pass.
+      doPass(unit, cleanCfg, DCE::None);
+      doPass(unit, optimizeLoopInvariantCode, DCE::Minimal);
+    }
+    doPass(unit, removeExitPlaceholders, DCE::Full);
   }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {

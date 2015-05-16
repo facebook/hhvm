@@ -1445,6 +1445,13 @@ To string conversions:
   Does nothing. It's sometimes useful for the simplifier to insert one of these
   in the instruction stream.
 
+| ExitPlaceholder, ND, NA, B
+
+  Does nothing if executed. Semantically, this instruction carries a taken edge
+  to a block that was a pure side-exit during initial IR generation.  This
+  allows later passes to test conditions and create new exits from the region
+  at this point in the program.
+
 | PredictLoc<T, localId>, ND, S(FramePtr), NF
 
   Does nothing. Serves as an indicator that the predicted type of the given

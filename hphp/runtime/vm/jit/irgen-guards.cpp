@@ -226,6 +226,10 @@ void checkTypeLocation(IRGS& env,
   }
 }
 
+void makeExitPlaceholder(IRGS& env) {
+  gen(env, ExitPlaceholder, makeExit(env));
+}
+
 void checkRefs(IRGS& env,
                int64_t entryArDelta,
                const std::vector<bool>& mask,

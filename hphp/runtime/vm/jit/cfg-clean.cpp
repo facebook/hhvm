@@ -74,6 +74,8 @@ bool foldJmp(IRUnit& unit, Block* block) {
     auto jmp = next->begin();
     if (!jmp->is(Jmp) || jmp->numSrcs() != 0) return false;
     assertx(jmp->taken());
+    FTRACE(1, "Setting {} next to skip {}\n", term.toString(),
+      jmp->toString());
     term.setNext(jmp->taken());
     return true;
   }
@@ -81,6 +83,8 @@ bool foldJmp(IRUnit& unit, Block* block) {
     auto jmp = taken->begin();
     if (!jmp->is(Jmp) || jmp->numSrcs() != 0) return false;
     assertx(jmp->taken());
+    FTRACE(1, "Setting {} taken to skip {}\n", term.toString(),
+      jmp->toString());
     term.setTaken(jmp->taken());
     return true;
   }

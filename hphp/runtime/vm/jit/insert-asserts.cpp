@@ -34,20 +34,24 @@ namespace {
  * If `definer' ends its block, it must have a fallthrough block, and `inst'
  * will be inserted at the beginning of that block, as long as the block has no
  * other predecessors.
+ *
+ * Returns: true if it inserted the intruction.
  */
-void insertAfter(IRInstruction* definer, IRInstruction* inst) {
+bool insertAfter(IRInstruction* definer, IRInstruction* inst) {
   assertx(!definer->isTerminal());
   if (definer->isControlFlow()) {
     assertx(definer->next());
     if (definer->next()->numPreds() == 1) {
       definer->next()->prepend(inst);
+      return true;
     }
-    return;
+    return false;
   }
 
   auto const block = definer->block();
   auto const pos = block->iteratorTo(definer);
   block->insert(std::next(pos), inst);
+  return true;
 }
 
 /*
@@ -74,7 +78,7 @@ void insertStkAssert(IRUnit& unit,
     IRSPOffsetData { off },
     sp
   );
-  insertAfter(where, addr);
+  if (!insertAfter(where, addr)) return;
   auto const check = unit.gen(DbgAssertPtr, where->marker(), addr->dst());
   insertAfter(addr, check);
 }

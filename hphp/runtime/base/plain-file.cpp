@@ -31,10 +31,12 @@ const StaticString s_stdio("STDIO");
 // constructor and destructor
 
 PlainFile::PlainFile(FILE *stream, bool nonblocking,
-                     const String& wrapper_type, const String& stream_type)
+                     const String& wrapper_type, const String& stream_type,
+                     const String& mode)
   : File(nonblocking,
          wrapper_type.isNull() ? s_plainfile : wrapper_type,
-         stream_type.isNull() ? s_stdio : stream_type),
+         stream_type.isNull() ? s_stdio : stream_type,
+         mode),
     m_stream(stream), m_buffer(nullptr) {
   if (stream) {
     setFd(fileno(stream));
@@ -46,10 +48,12 @@ PlainFile::PlainFile(FILE *stream, bool nonblocking,
 }
 
 PlainFile::PlainFile(int fd, bool nonblocking,
-                     const String& wrapper_type, const String& stream_type)
+                     const String& wrapper_type, const String& stream_type,
+                     const String& mode)
   : File(nonblocking,
          wrapper_type.isNull() ? s_plainfile : wrapper_type,
-         stream_type.isNull() ? s_stdio : stream_type),
+         stream_type.isNull() ? s_stdio : stream_type,
+         mode),
     m_stream(nullptr), m_buffer(nullptr) {
   setFd(fd);
 }

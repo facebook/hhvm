@@ -49,9 +49,11 @@ namespace HPHP {
 
 const int FileData::CHUNK_SIZE = 8192;
 
-FileData::FileData(bool nonblocking)
+FileData::FileData(bool nonblocking, const std::string& mode /* = "" */)
 : m_nonblocking(nonblocking)
-{ }
+{
+  m_mode = mode;
+}
 
 bool FileData::closeImpl() {
   free(m_buffer);
@@ -171,8 +173,9 @@ File::File(
 
 File::File(bool nonblocking /* = true */,
            const String& wrapper_type /* = null_string */,
-           const String& stream_type /* = empty_string_ref */)
-: File(std::make_shared<FileData>(nonblocking), wrapper_type, stream_type)
+           const String& stream_type /* = empty_string_ref */,
+           const String& mode /* = "" */)
+: File(std::make_shared<FileData>(nonblocking, mode.toCppString()), wrapper_type, stream_type)
 { }
 
 File::~File() {

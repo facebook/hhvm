@@ -49,7 +49,7 @@ struct FileData {
   static const int CHUNK_SIZE;
 
   FileData() { }
-  explicit FileData(bool nonblocking);
+  explicit FileData(bool nonblocking, const std::string& mode = "");
   virtual bool closeImpl();
   virtual ~FileData();
 
@@ -110,7 +110,8 @@ struct File : SweepableResourceData {
 
   explicit File(bool nonblocking = true,
                 const String& wrapper_type = null_string,
-                const String& stream_type = empty_string_ref);
+                const String& stream_type = empty_string_ref,
+                const String& mode = "");
   virtual ~File();
 
   static StaticString& classnameof() {

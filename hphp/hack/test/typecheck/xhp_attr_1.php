@@ -2,7 +2,9 @@
 class :blah {}
 class GenericClass<T> {}
 class SomeClass {
-  public function bar(): float { return 3.14; }
+  public function bar(): float {
+    return 3.14;
+  }
 }
 class :foo {
   attribute

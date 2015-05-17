@@ -30,25 +30,6 @@ namespace HPHP { namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
-template <class T, class F>
-Vreg cond(Vout& v, ConditionCode cc, Vreg sf, Vreg dst, T t, F f) {
-  auto fblock = v.makeBlock();
-  auto tblock = v.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, sf, {fblock, tblock}};
-  v = tblock;
-  auto treg = t(v);
-  v << phijmp{done, v.makeTuple(VregList{treg})};
-  v = fblock;
-  auto freg = f(v);
-  v << phijmp{done, v.makeTuple(VregList{freg})};
-  v = done;
-  v << phidef{v.makeTuple(VregList{dst})};
-  return dst;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * Information about an array key (this represents however much we know about
  * whether the key is going to behave like an integer or a string).

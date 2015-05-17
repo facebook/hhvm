@@ -48,6 +48,7 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -119,80 +120,6 @@ const char* getContextName(const Class* ctx) {
   return ctx ? ctx->name()->data() : ":anonymous:";
 }
 
-/*
- * Generate an if-block that branches around some unlikely code, handling
- * the cases when a == astubs and a != astubs.  cc is the branch condition
- * to run the unlikely block.
- *
- * Passes the proper assembler to use to the unlikely function.
- */
-template <class Then>
-void unlikelyIfThen(Vout& vmain, Vout& vstub, ConditionCode cc, Vreg sf,
-                    Then then) {
-  auto unlikely = vstub.makeBlock();
-  auto done = vmain.makeBlock();
-  vmain << jcc{cc, sf, {done, unlikely}};
-  vstub = unlikely;
-  then(vstub);
-  if (!vstub.closed()) vstub << jmp{done};
-  vmain = done;
-}
-
-// Generate an if-then-else block
-template <class Then, class Else>
-void ifThenElse(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock,
-                Else elseBlock) {
-  auto thenLabel = v.makeBlock();
-  auto elseLabel = v.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, sf, {elseLabel, thenLabel}};
-  v = thenLabel;
-  thenBlock();
-  if (!v.closed()) v << jmp{done};
-  v = elseLabel;
-  elseBlock();
-  if (!v.closed()) v << jmp{done};
-  v = done;
-}
-
-/*
- * Same as ifThenElse except the first block is off in astubs
- */
-template <class Then, class Else>
-void unlikelyIfThenElse(Vout& vmain, Vout& vstub, ConditionCode cc, Vreg sf,
-                        Then unlikelyBlock, Else elseBlock) {
-  auto elseLabel = vmain.makeBlock();
-  auto unlikelyLabel = vstub.makeBlock();
-  auto done = vmain.makeBlock();
-  vmain << jcc{cc, sf, {elseLabel, unlikelyLabel}};
-  vmain = elseLabel;
-  elseBlock(vmain);
-  if (!vmain.closed()) vmain << jmp{done};
-  vstub = unlikelyLabel;
-  unlikelyBlock(vstub);
-  if (!vstub.closed()) vstub << jmp{done};
-  vmain = done;
-}
-
-// emit an if-then-else condition where the true case is unlikely.
-template <class T, class F>
-Vreg unlikelyCond(Vout& v, Vout& vc, ConditionCode cc, Vreg sf, Vreg d, T t,
-                  F f) {
-  auto fblock = v.makeBlock();
-  auto tblock = vc.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, sf, {fblock, tblock}};
-  vc = tblock;
-  auto treg = t(vc);
-  vc << phijmp{done, vc.makeTuple({treg})};
-  v = fblock;
-  auto freg = f(v);
-  v << phijmp{done, v.makeTuple({freg})};
-  v = done;
-  v << phidef{v.makeTuple({d})};
-  return d;
-}
-
 template<class Then>
 void ifRefCountedType(Vout& v, Type ty, Vloc loc, Then then) {
   if (!ty.maybe(TCounted)) return;
@@ -202,9 +129,7 @@ void ifRefCountedType(Vout& v, Type ty, Vloc loc, Then then) {
   }
   auto const sf = v.makeReg();
   emitCmpTVType(v, sf, KindOfRefCountThreshold, loc.reg(1));
-  ifThen(v, CC_NLE, sf, [&] (Vout& v) {
-    then(v);
-  });
+  ifThen(v, CC_NLE, sf, then);
 }
 
 template<class Then>
@@ -243,74 +168,6 @@ RegSet leave_trace_args(BCMarker marker) {
 
 } // unnamed namespace
 //////////////////////////////////////////////////////////////////////
-
-template <class Then>
-void CodeGenerator::unlikelyIfBlock(Vout& v, Vout& vcold, ConditionCode cc,
-                                    Vreg sf, Then then) {
-  auto unlikely = vcold.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, sf, {done, unlikely}};
-  vcold = unlikely;
-  then(vcold);
-  if (!vcold.closed()) vcold << jmp{done};
-  v = done;
-}
-
-template <class Block>
-void CodeGenerator::ifBlock(Vout& v, Vout& vcold, ConditionCode cc, Vreg sf,
-                            Block taken, bool unlikely) {
-  if (unlikely) return unlikelyIfBlock(v, vcold, cc, sf, taken);
-  auto takenLabel = v.makeBlock();
-  auto doneLabel = v.makeBlock();
-  v << jcc{cc, sf, {doneLabel, takenLabel}};
-  v = takenLabel;
-  taken(v);
-  if (!v.closed()) v << jmp{doneLabel};
-  v = doneLabel;
-}
-
-// Generate an if-then-else block
-template <class Then, class Else>
-void CodeGenerator::ifThenElse(Vout& v, ConditionCode cc, Vreg sf,
-                               Then thenBlock, Else elseBlock) {
-  auto thenLabel = v.makeBlock();
-  auto elseLabel = v.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, sf, {elseLabel, thenLabel}};
-  v = thenLabel;
-  thenBlock(v);
-  if (!v.closed()) v << jmp{done};
-  v = elseLabel;
-  elseBlock(v);
-  if (!v.closed()) v << jmp{done};
-  v = done;
-}
-
-template <class Then, class Else>
-void CodeGenerator::ifThenElse(Vout& v, Vout& vcold, ConditionCode cc, Vreg sf,
-                               Then thenBlock, Else elseBlock, bool unlikely) {
-  if (unlikely) {
-    return unlikelyIfThenElse(v, vcold, cc, sf, thenBlock, elseBlock);
-  }
-  ifThenElse(v, cc, sf, thenBlock, elseBlock);
-}
-
-template <class Then, class Else>
-void CodeGenerator::unlikelyIfThenElse(Vout& v, Vout& vcold, ConditionCode cc,
-                                       Vreg sf, Then unlikelyBlock,
-                                       Else elseBlock) {
-  auto elseLabel = v.makeBlock();
-  auto unlikelyLabel = vcold.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, sf, {elseLabel, unlikelyLabel}};
-  v = elseLabel;
-  elseBlock(v);
-  if (!v.closed()) v << jmp{done};
-  vcold = unlikelyLabel;
-  unlikelyBlock(vcold);
-  if (!vcold.closed()) vcold << jmp{done};
-  v = done;
-}
 
 Vloc CodeGenerator::srcLoc(const IRInstruction* inst, unsigned i) const {
   return m_state.locs[inst->src(i)];
@@ -491,6 +348,8 @@ CALL_OPCODE(GetMemoKey)
 
 #undef NOOP_OPCODE
 
+///////////////////////////////////////////////////////////////////////////////
+
 Vlabel CodeGenerator::label(Block* b) {
   return m_state.labels[b];
 }
@@ -544,6 +403,8 @@ Vreg CodeGenerator::emitCompare(Vout& v, IRInstruction* inst) {
   }
   return sf;
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 void CodeGenerator::cgDefSP(IRInstruction* inst) {
   auto const sp = dstLoc(inst, 0).reg();
@@ -936,7 +797,7 @@ void CodeGenerator::cgDivDbl(IRInstruction* inst) {
   // divide by zero check
   auto const sf = v.makeReg();
   v << ucomisd{v.cns(0), srcReg1, sf};
-  unlikelyIfBlock(v, vcold(), CC_NP, sf, [&] (Vout& v) {
+  unlikelyIfThen(v, vcold(), CC_NP, sf, [&] (Vout& v) {
     emitFwdJcc(v, CC_E, sf, exit);
   });
   v << divsd{srcReg1, srcReg0, dstReg};
@@ -2550,7 +2411,7 @@ void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst) {
 
   if (!ty.maybe(TStatic)) {
     auto const sf = emitDecRef(v, base);
-    ifBlock(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
+    ifThen(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
     return;
   }
 
@@ -3582,13 +3443,13 @@ void CodeGenerator::cgCheckBounds(IRInstruction* inst) {
   if (idx->hasConstVal()) {
     auto const sf = v.makeReg();
     v << cmpq{idxReg, sizeReg, sf};
-    unlikelyIfBlock(v, vcold(), CC_BE, sf, throwHelper);
+    unlikelyIfThen(v, vcold(), CC_BE, sf, throwHelper);
     return;
   }
 
   auto const sf = v.makeReg();
   v << cmpq{sizeReg, idxReg, sf};
-  unlikelyIfBlock(v, vcold(), CC_AE, sf, throwHelper);
+  unlikelyIfThen(v, vcold(), CC_AE, sf, throwHelper);
 }
 
 void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {
@@ -4596,7 +4457,7 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
       releaseUnlikely = false;
     }
   }
-  ifBlock(v, vcold(), CC_NZ, sf, [&] (Vout& v) {
+  ifThen(v, vcold(), CC_NZ, sf, [&] (Vout& v) {
     if (profile.profiling()) {
       auto offsetof_release = offsetof(ReleaseVVProfile, released);
       v << incwm{rVmTl[profile.handle() + offsetof_release], v.makeReg()};

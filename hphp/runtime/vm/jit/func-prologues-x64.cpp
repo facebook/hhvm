@@ -39,6 +39,15 @@ TRACE_SET_MOD(mcg);
 
 namespace {
 
+// Generate an if-then block into a.  thenBlock is executed if cc is true.
+template <class Then>
+void ifThen(jit::X64Assembler& a, ConditionCode cc, Then thenBlock) {
+  Label done;
+  a.jcc8(ccNegate(cc), done);
+  thenBlock(a);
+  asm_label(a, done);
+}
+
 void emitStackCheck(X64Assembler& a, int funcDepth, Offset pc) {
   using reg::rax;
   assertx(kScratchCrossTraceRegs.contains(rax));

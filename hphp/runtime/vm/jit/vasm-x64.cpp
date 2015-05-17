@@ -1133,10 +1133,8 @@ void optimizeX64(Vunit& unit, const Abi& abi) {
 
   removeTrivialNops(unit);
   fuseBranches(unit);
-  if (RuntimeOption::EvalHHIRDirectExit) {
-    optimizeJmps(unit);
-    optimizeExits(unit);
-  }
+  optimizeJmps(unit);
+  optimizeExits(unit);
 
   lowerForX64(unit, abi);
 

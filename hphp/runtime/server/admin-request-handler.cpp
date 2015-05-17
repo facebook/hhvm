@@ -284,7 +284,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
 
-    if (!RuntimeOption::AdminPasswords.empty()) {
+    bool needs_password = (cmd != "build-id") && (cmd != "compiler-id") &&
+                          (cmd != "instance-id");
+
+    if (needs_password && !RuntimeOption::AdminPasswords.empty()) {
       std::set<std::string>::const_iterator iter =
         RuntimeOption::AdminPasswords.find(transport->getParam("auth"));
       if (iter == RuntimeOption::AdminPasswords.end()) {
@@ -292,7 +295,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         break;
       }
     } else {
-      if (!RuntimeOption::AdminPassword.empty() &&
+      if (needs_password && !RuntimeOption::AdminPassword.empty() &&
           RuntimeOption::AdminPassword != transport->getParam("auth")) {
         transport->sendString("Unauthorized", 401);
         break;

@@ -461,10 +461,9 @@ public:
   bool isUnion() const;
 
   /*
-   * Does this require a register to hold a DataType or value at runtime?
+   * Does this require a register to hold a DataType at runtime?
    */
   bool needsReg() const;
-  bool needsValueReg() const;
 
   /*
    * Return true if this corresponds to a type that is passed by (value/

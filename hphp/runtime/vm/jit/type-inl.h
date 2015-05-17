@@ -251,10 +251,6 @@ inline bool Type::needsReg() const {
   return *this <= TStkElem && !isKnownDataType();
 }
 
-inline bool Type::needsValueReg() const {
-  return !subtypeOfAny(TNull, TNullptr);
-}
-
 inline bool Type::isSimpleType() const {
   return subtypeOfAny(TBool, TInt, TDbl, TNull);
 }

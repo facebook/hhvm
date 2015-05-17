@@ -75,9 +75,6 @@ private:
                     SyncOptions sync, const ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
 
-  enum class Width { Value, Full };
-  void emitStore(Vptr dst, SSATmp* src, Vloc src_loc, Width);
-  void emitStoreTypedValue(Vptr dst, SSATmp* src, Vloc src_loc);
   void emitTrashTV(Vreg, int32_t, char fillByte);
 
   void emitLoad(SSATmp* dst, Vloc dstLoc, Vptr base);
@@ -118,7 +115,6 @@ private:
                    int64_t (*obj_cmp_int)(ObjectData*, int64_t),
                    int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
 
-  Vreg emitCompare(Vout& v, IRInstruction* inst);
   Vreg emitTestZero(Vout& v, SSATmp* src, Vloc srcLoc);
   template<class Inst>
   bool emitIncDec(Vout& v, Vloc dst, SSATmp* src0, Vloc loc0,
@@ -183,9 +179,6 @@ private:
   void emitLdRaw(IRInstruction* inst, size_t extraOff);
   void emitStRaw(IRInstruction* inst, size_t offset, int size);
   void resumableStResumeImpl(IRInstruction*, ptrdiff_t, ptrdiff_t);
-
-  void emitStoreTypedValue(Vout& v, Vreg base, ptrdiff_t offset,
-    Vloc src, Type srcType);
 
   // This is for printing partially-generated traces when debugging
   void print() const;

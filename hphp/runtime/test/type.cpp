@@ -61,9 +61,6 @@ TEST(Type, Null) {
   EXPECT_TRUE(TNull.needsReg());
   EXPECT_FALSE(TUninit.needsReg());
   EXPECT_FALSE(TInitNull.needsReg());
-  EXPECT_FALSE(TNull.needsValueReg());
-  EXPECT_FALSE(TUninit.needsValueReg());
-  EXPECT_FALSE(TInitNull.needsValueReg());
 }
 
 TEST(Type, KnownDataType) {

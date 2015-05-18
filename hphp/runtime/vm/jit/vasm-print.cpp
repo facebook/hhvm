@@ -302,7 +302,7 @@ void printInstrs(std::ostream& out,
 void printCfg(std::ostream& out, const Vunit& unit,
               const jit::vector<Vlabel>& blocks) {
   out << "digraph G {\n";
-  for (auto b: blocks) {
+  for (auto b : blocks) {
     auto& block = unit.blocks[b];
     auto succlist = succs(block);
     if (succlist.empty()) continue;

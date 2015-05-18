@@ -60,7 +60,7 @@ struct Vgen {
   }
   void emit(jit::vector<Vlabel>&);
 
-private:
+ private:
   template<class Inst> void emit(const Inst& i) {
     always_assert_flog(false, "unimplemented instruction: {} in B{}\n",
                        vinst_names[Vinstr(i).op], size_t(current));

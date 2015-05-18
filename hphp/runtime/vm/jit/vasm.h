@@ -79,7 +79,7 @@ private:                                                  \
 DECLARE_VNUM(Vlabel, true, "B");
 
 /*
- * Vpoint is a handle to record or retreive a code address.
+ * Vpoint is a handle to record or retrieve a code address.
  */
 DECLARE_VNUM(Vpoint, false, "P");
 

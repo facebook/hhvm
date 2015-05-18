@@ -191,7 +191,7 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   auto const killed_stack =
     stack_below(inst.marker().fp(), -inst.marker().spOff().offset - 1);
   auto const kills_union = x.kills.precise_union(killed_stack);
-  auto const new_kills   = kills_union ? *kills_union : killed_stack;
+  auto const new_kills = kills_union ? *kills_union : killed_stack;
 
   return GeneralEffects {
     x.loads | AHeapAny
@@ -247,13 +247,12 @@ GeneralEffects may_load_store_move(AliasClass loads,
 GeneralEffects iter_effects(const IRInstruction& inst,
                             SSATmp* fp,
                             AliasClass locals) {
-  auto const kill_stk = stack_below(fp, -inst.marker().spOff().offset - 1);
   return may_reenter(
     inst,
     may_load_store_kill(
-      locals   | AHeapAny,
-      locals   | AHeapAny,
-      kill_stk | AMIStateAny
+      locals | AHeapAny,
+      locals | AHeapAny,
+      AMIStateAny
     )
   );
 }
@@ -332,7 +331,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // treatmeant because of the special kill semantics for locals and stack.
     return may_load_store_kill(
       AHeapAny, AHeapAny,
-      AStackAny | AFrameAny | AMIStateAny
+      *AStackAny.precise_union(AFrameAny)->precise_union(AMIStateAny)
     );
 
   // The suspend hooks can load anything (re-entering the VM), but can't write

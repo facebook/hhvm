@@ -1105,7 +1105,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
      * region exit following it it doesn't help us eliminate anything for now,
      * so we just pretend it can read/write anything on the stack.
      */
-    return may_reenter(inst, may_load_store(AStackAny, AStackAny));
+    return may_raise(inst, may_load_store(AStackAny, AStackAny));
 
   case LookupClsMethod:   // autoload, and it writes part of the new actrec
     {
@@ -1114,7 +1114,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         inst.extra<LookupClsMethod>()->offset.offset,
         int32_t{kNumActRecCells}
       };
-      return may_reenter(inst, may_load_store(effects, effects));
+      return may_raise(inst, may_load_store(effects, effects));
     }
 
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload
@@ -1194,7 +1194,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConcatStr3:
   case ConcatStr4:
   case ConvCellToDbl:
-    return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
+    return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
 
   // These two instructions don't touch memory we track, except that they may
   // re-enter to construct php Exception objects.  During this re-entry anything

@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/type-conversions.h"
 
 #include "hphp/util/functional.h"
+#include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/text-util.h"
 
@@ -98,11 +99,20 @@ using TimeZoneValidityCacheEntry = std::pair<const char*, bool>;
 
 TimeZoneValidityCache* s_tzvCache;
 
+// Mac's setlocale() is not thread safe, so a lock is needed when calling
+// timelib_timezone_id_is_valid().
+#ifdef __APPLE__
+Mutex *s_tzvMutex = nullptr;
+#endif
+
 void timezone_init() {
   // Allocate enough space to cache all possible timezones, if needed.
   constexpr size_t kMaxTimeZoneCache = 1000;
   s_tzCache = TimeZoneCache::create(kMaxTimeZoneCache).release();
   s_tzvCache = TimeZoneValidityCache::create(kMaxTimeZoneCache).release();
+#ifdef __APPLE__
+  s_tzvMutex = new Mutex();
+#endif
 }
 
 const timelib_tzdb *TimeZone::GetDatabase() {
@@ -183,6 +193,9 @@ bool TimeZone::SetCurrent(const String& zone) {
   if (it != s_tzvCache->end()) {
     valid = it->second;
   } else {
+#ifdef __APPLE__
+    Lock lock(*s_tzvMutex);
+#endif
     valid = IsValid(zone);
 
     auto key = strdup(name);

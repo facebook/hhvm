@@ -516,9 +516,11 @@ int64_t HHVM_FUNCTION(pcntl_wtermsig,
 
 #define EXEC_INPUT_BUF 4096
 
-class ShellExecContext {
+namespace {
+
+class ShellExecContext final {
 public:
-  ShellExecContext() : m_proc(NULL) {
+  ShellExecContext() {
     m_sig_handler = signal(SIGCHLD, SIG_DFL);
   }
 
@@ -531,13 +533,18 @@ public:
     }
   }
 
-  FILE *exec(const char *cmd) {
-    assert(m_proc == NULL);
+  FILE *exec(const String& cmd_string) {
+    assert(m_proc == nullptr);
+    const auto cmd = cmd_string.c_str();
     if (RuntimeOption::WhitelistExec && !check_cmd(cmd)) {
-      return NULL;
+      return nullptr;
+    }
+    if (strlen(cmd) != cmd_string.size()) {
+      raise_warning("NULL byte detected. Possible attack");
+      return nullptr;
     }
     m_proc = LightProcess::popen(cmd, "r", g_context->getCwd().data());
-    if (m_proc == NULL) {
+    if (m_proc == nullptr) {
       raise_warning("Unable to execute '%s'", cmd);
     }
     return m_proc;
@@ -545,19 +552,21 @@ public:
 
   int exit() {
     int status = LightProcess::pclose(m_proc);
-    m_proc = NULL;
+    m_proc = nullptr;
     return status;
   }
 
 private:
   void (*m_sig_handler)(int);
-  FILE *m_proc;
+  FILE *m_proc{nullptr};
 };
+
+}
 
 Variant HHVM_FUNCTION(shell_exec,
                       const String& cmd) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(cmd.c_str());
+  FILE *fp = ctx.exec(cmd);
   if (!fp) return init_null();
   StringBuffer sbuf;
   sbuf.read(fp);
@@ -574,7 +583,7 @@ String HHVM_FUNCTION(exec,
                      VRefParam output /* = null */,
                      VRefParam return_var /* = null */) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(command.c_str());
+  FILE *fp = ctx.exec(command);
   if (!fp) return empty_string();
   StringBuffer sbuf;
   sbuf.read(fp);
@@ -605,7 +614,7 @@ void HHVM_FUNCTION(passthru,
                    const String& command,
                    VRefParam return_var /* = null */) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(command.c_str());
+  FILE *fp = ctx.exec(command);
   if (!fp) return;
 
   char buffer[1024];
@@ -625,7 +634,7 @@ String HHVM_FUNCTION(system,
                      const String& command,
                      VRefParam return_var /* = null */) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(command.c_str());
+  FILE *fp = ctx.exec(command);
   if (!fp) return empty_string();
   StringBuffer sbuf;
   if (fp) {

@@ -105,3 +105,10 @@ VERIFY(proc_nice(0));
 VS(escapeshellarg("\""), "'\"'");
 
 VS(escapeshellcmd("perl \""), "perl \\\"");
+
+$nullbyte = "echo abc\n\0command";
+VS(passthru($nullbyte), null);
+VS(system($nullbyte), "");
+VS(exec($nullbyte, $nullbyteout), "");
+VS($nullbyteout, null);
+VS(shell_exec($nullbyte), null);

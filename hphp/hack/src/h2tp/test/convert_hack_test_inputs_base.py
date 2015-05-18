@@ -59,16 +59,18 @@ class ConvertHackTestInputsBase(unittest.TestCase):
                         for line in lines if line.strip() != '')]
 
     def delete_unsupported_inputs(self, directory):
-        all_files = self.files_with_parse_errors(directory)
-        all_files += [f for files in UNSUPPORTED_FILES_UNPARSER.values()
+        all_patterns = self.files_with_parse_errors(directory)
+        all_patterns += [f for files in UNSUPPORTED_FILES_UNPARSER.values()
                         for f in files]
-        all_files += [f for files in UNSUPPORTED_FILES_CONVERTER.values()
+        all_patterns += [f for files in UNSUPPORTED_FILES_CONVERTER.values()
                         for f in files]
-        all_files += [f for files in INTERNAL_ERRORS.values()
+        all_patterns += [f for files in INTERNAL_ERRORS.values()
                         for f in files]
-        all_files += OTHER_UNPARSEABLE_FILES
+        all_patterns += OTHER_UNPARSEABLE_FILES
+        all_files = [f for p in all_patterns
+                       for f in glob.iglob(os.path.join(directory, p))]
         for f in set(all_files):
-            os.remove(os.path.join(directory, f))
+            os.remove(f)
 
 UNSUPPORTED_FILES_UNPARSER = {
     "c_is_xhp": [
@@ -123,31 +125,7 @@ UNSUPPORTED_FILES_UNPARSER = {
         'xhp_parse.php',
     ],
     "TypeConst": [
-        'tconst/abstract_type_in_concrete_class.php',
-        'tconst/access_expand_error_1.php',
-        'tconst/bad_input_type.php',
-        'tconst/cannot_assign_tparam1.php',
-        'tconst/cannot_override_tconst.php',
-        'tconst/cannot_use_class_tparams.php',
-        'tconst/constructor_error.php',
-        'tconst/constructors.php',
-        'tconst/cyclic_type_const.php',
-        'tconst/func_pointer.php',
-        'tconst/good_tconst_decl.php',
-        'tconst/local_inference.php',
-        'tconst/method_contravariant.php',
-        'tconst/method_return.php',
-        'tconst/method_swap_error.php',
-        'tconst/nested_type_access.php',
-        'tconst/parent_test.php',
-        'tconst/tconst_with_static.php',
-        'tconst/unassigned_tconst.php',
-        'tconst/interface.php',
-        'tconst/interface2.php',
-        'tconst/unsupported_this1.php',
-        'tconst/unsupported_this2.php',
-        'tconst/unsupported_this3.php',
-        'tconst/unsupported_this4.php',
+        'tconst/*.php',
     ],
 }
 

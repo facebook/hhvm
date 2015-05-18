@@ -23,7 +23,7 @@
 #include <time.h>
 #include <vector>
 
-#include <folly/experimental/Singleton.h>
+#include <folly/Singleton.h>
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/extension.h"

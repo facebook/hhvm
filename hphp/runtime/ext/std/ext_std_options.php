@@ -43,7 +43,7 @@ function assert(mixed $assertion, ?string $message = null): mixed;
 /* Loads the PHP extension given by the parameter library.  Use
  * extension_loaded() to test whether a given extension is already available
  * or not. This works on both built-in extensions and dynamically loaded ones
- * (either through php.ini or dl()). Warning This function has been removed
+ * (either through php.ini or dl()). Warning: This function has been removed
  * from some SAPI's in PHP 5.3.
  */
 <<__Native>>
@@ -246,16 +246,16 @@ function memory_get_allocation(): int;
 <<__Native, __HipHopSpecific>>
 function hphp_memory_get_interval_peak_usage(bool $real_usage = false): int;
 
-/* Starts per-interval usage tracking to allow peak usage to be tracked more
- * granularly than a per-script basis.
+/* Starts per-interval usage tracking to allow peak usage to be tracked
+ * with more granularity than a per-script basis.
  *
  * Returns whether the state of interval tracking was changed.
  */
 <<__Native, __HipHopSpecific>>
 function hphp_memory_start_interval(): bool;
 
-/* Stops per-interval usage tracking to allow peak usage to be tracked more
- * granularly than a per-script basis.
+/* Stops per-interval usage tracking to allow peak usage to be tracked
+ * with more granularity than a per-script basis.
  *
  * Returns whether the state of interval tracking was changed.
  */
@@ -327,7 +327,7 @@ function phpinfo(int $what = 0): bool {
   \__SystemLib\phpinfo_tr('Debug', HHVM_DEBUG);
   \__SystemLib\phpinfo_tr('Compiler ID', HHVM_COMPILER_ID);
   \__SystemLib\phpinfo_tr('Repo Schema', HHVM_REPO_SCHEMA);
-  \__SystemLib\phpinfo_tr('PHP Veresion', phpversion());
+  \__SystemLib\phpinfo_tr('PHP Version', phpversion());
   \__SystemLib\phpinfo_tr('Zend Version', zend_version());
   \__SystemLib\phpinfo_tr('uname', php_uname());
   echo '</table>';
@@ -371,7 +371,7 @@ function phpversion(string $extension = ""): mixed;
 function putenv(string $setting): bool;
 
 /* Set the current active configuration setting of magic_quotes_runtime.
- * WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this
+ * Warning: This function has been DEPRECATED as of PHP 5.3.0. Relying on this
  * feature is highly discouraged.
  */
 function set_magic_quotes_runtime(mixed $new_setting): bool {

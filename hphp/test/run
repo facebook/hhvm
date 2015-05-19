@@ -713,13 +713,11 @@ class Status {
   }
 
   public static function skip($test, $reason, $time, $stime, $etime) {
-    if (self::getMode() !== self::MODE_FBMAKE) {
-      array_push(self::$results, array('name' => $test,
-                                       'status' => 'skipped',
-                                       'start_time' => $stime,
-                                       'end_time' => $etime,
-                                       'time' => $time));
-    }
+    array_push(self::$results, array('name' => $test,
+                                     'status' => 'skipped',
+                                     'start_time' => $stime,
+                                     'end_time' => $etime,
+                                     'time' => $time));
     self::send(self::MSG_TEST_SKIP, array($test, $reason, $time, $stime, $etime));
   }
 
@@ -1552,6 +1550,10 @@ function msg_loop($num_tests, $queue) {
               Status::sayColor(" - $reason");
             }
             Status::sayColor(sprintf(" (%.2fs)\n", $time));
+            break;
+
+          case Status::MODE_FBMAKE:
+            Status::sayFBMake($test, 'skipped', $stime, $etime);
             break;
         }
         break;

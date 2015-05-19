@@ -26,3 +26,6 @@ string(1) "X"
 NULL
 === <C::X>::isAbstract() ===
 bool(true)
+
+=== ReflectionTypeConstant(C, x) ===
+string(33) "Type Constant C::x does not exist"

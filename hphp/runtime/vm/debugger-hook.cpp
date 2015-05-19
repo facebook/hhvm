@@ -81,7 +81,7 @@ namespace {
 // debugger is attached.
 void blacklistRangesInJit(const Unit* unit, const OffsetRangeVec& offsets) {
   for (auto const& range : offsets) {
-    for (PC pc = unit->at(range.m_base); pc < unit->at(range.m_past);
+    for (PC pc = unit->at(range.base); pc < unit->at(range.past);
          pc += instrLen((Op*)pc)) {
       mcg->tx().addDbgBLPC(pc);
     }

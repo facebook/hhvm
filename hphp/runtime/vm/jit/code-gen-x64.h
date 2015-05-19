@@ -75,9 +75,6 @@ private:
                     SyncOptions sync, const ArgGroup& args);
   void cgInterpOneCommon(IRInstruction* inst);
 
-  enum class Width { Value, Full };
-  void emitStore(Vptr dst, SSATmp* src, Vloc src_loc, Width);
-  void emitStoreTypedValue(Vptr dst, SSATmp* src, Vloc src_loc);
   void emitTrashTV(Vreg, int32_t, char fillByte);
 
   void emitLoad(SSATmp* dst, Vloc dstLoc, Vptr base);
@@ -118,7 +115,6 @@ private:
                    int64_t (*obj_cmp_int)(ObjectData*, int64_t),
                    int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
 
-  Vreg emitCompare(Vout& v, IRInstruction* inst);
   Vreg emitTestZero(Vout& v, SSATmp* src, Vloc srcLoc);
   template<class Inst>
   bool emitIncDec(Vout& v, Vloc dst, SSATmp* src0, Vloc loc0,
@@ -183,45 +179,6 @@ private:
   void emitLdRaw(IRInstruction* inst, size_t extraOff);
   void emitStRaw(IRInstruction* inst, size_t offset, int size);
   void resumableStResumeImpl(IRInstruction*, ptrdiff_t, ptrdiff_t);
-
-  void emitStoreTypedValue(Vout& v, Vreg base, ptrdiff_t offset,
-    Vloc src, Type srcType);
-
-  /*
-   * Execute the code emitted by 'taken' only if the given condition code is
-   * true.
-   */
-  template <class Block>
-  void ifBlock(Vout& v, Vout& vcold, ConditionCode cc, Vreg sf, Block taken,
-             bool unlikely = false);
-
-  /*
-   * Generate an if-block that branches around some unlikely code, handling
-   * the cases when a == acold and a != acold.  cc is the branch condition
-   * to run the unlikely block.
-   *
-   * Passes the proper assembler to use to the unlikely function.
-   */
-  template <class Then>
-  void unlikelyIfBlock(Vout& v, Vout& vcold, ConditionCode cc, Vreg sf,
-                       Then then);
-
-  // Generate an if-then-else block
-  template <class Then, class Else>
-  void ifThenElse(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock,
-                  Else elseBlock);
-
-  // Generate an if-then-else block into m_as.
-  template <class Then, class Else>
-  void ifThenElse(Vout& v, Vout& vcold, ConditionCode cc, Vreg sf,
-                  Then thenBlock, Else elseBlock, bool unlikely = false);
-
-  /*
-   * Same as ifThenElse except the first block is off in acold
-   */
-  template <class Then, class Else>
-  void unlikelyIfThenElse(Vout& v, Vout& vcold, ConditionCode cc, Vreg sf,
-                          Then unlikelyBlock, Else elseBlock);
 
   // This is for printing partially-generated traces when debugging
   void print() const;

@@ -50,7 +50,8 @@ std::vector<AliasClass> specialized_classes(IRUnit& unit) {
   // Specialized test cases need some SSATmp*'s and similar things, so let's
   // make some instructions.
   auto const mainFP = unit.gen(DefFP, marker)->dst();
-  auto const SP = unit.gen(DefSP, marker, StackOffset { 10 }, mainFP)->dst();
+  auto const SP = unit.gen(
+    DefSP, marker, FPInvOffsetData { FPInvOffset { 10 } }, mainFP)->dst();
 
   return {
     // Frame locals.
@@ -134,7 +135,8 @@ TEST(AliasClass, StackBasics) {
   IRUnit unit{test_context};
   auto const marker = BCMarker::Dummy();
   auto const FP = unit.gen(DefFP, marker)->dst();
-  auto const SP = unit.gen(DefSP, marker, StackOffset { 5 }, FP)->dst();
+  auto const SP = unit.gen(
+    DefSP, marker, FPInvOffsetData { FPInvOffset { 5 } }, FP)->dst();
 
   // Some basic canonicalization and maybe.
   {
@@ -245,7 +247,8 @@ TEST(AliasClass, StackUnions) {
   IRUnit unit{test_context};
   auto const marker = BCMarker::Dummy();
   auto const FP = unit.gen(DefFP, marker)->dst();
-  auto const SP = unit.gen(DefSP, marker, StackOffset { 1 }, FP)->dst();
+  auto const SP = unit.gen(
+    DefSP, marker, FPInvOffsetData { FPInvOffset { 1 } }, FP)->dst();
 
   {
     AliasClass const stk1  = AStack { FP, -3, 1 };

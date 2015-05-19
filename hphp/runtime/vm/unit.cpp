@@ -402,8 +402,8 @@ bool Unit::getOffsetRange(Offset pc, OffsetRange& range) const {
   if (it != lineTable.end()) {
     assert(pc < it->pastOffset());
     Offset base = it == lineTable.begin() ? 0 : (it-1)->pastOffset();
-    range.m_base = base;
-    range.m_past = it->pastOffset();
+    range.base = base;
+    range.past = it->pastOffset();
     return true;
   }
   return false;

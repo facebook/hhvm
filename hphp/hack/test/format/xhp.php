@@ -20,7 +20,6 @@ function i() {
 }
 
 function j() {
-  // it would be nice to squeeze this into one line, too
   return
     <a>
     </a>;
@@ -32,4 +31,36 @@ function k() {
 
 function m() {
   return <b><a href="aaaaaaaaaaaaaaaaaaaaaaaaaa" asdf="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"/><a href="a"/></b>;
+}
+
+function n() {
+  return <a>1 1     1</a>;
+}
+
+function o() {
+  return <a>
+    1 1     1
+  </a>;
+}
+
+function p() {
+  return <aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa href="a" href2="a" href3="a" href4="a">1 1   1</aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa>;
+}
+
+function q() {
+  return <aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa href="a" href2="a" href3="a" href4="a">
+    1 1   1
+  </aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa>;
+}
+
+function r() {
+  return <a><!-- this is a very long comment lorem ipsum ipsum ipsum ipsum ipsum ipsum --></a>;
+}
+
+function s() {
+  return <a><!-- this is a short comment --></a>;
+}
+
+function t() {
+  return <a><a href="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">1</a><a href="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">1</a></a>;
 }

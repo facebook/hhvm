@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/ext_generator.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-ret.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
@@ -69,8 +70,8 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset, int numIters) {
   // copying local variables and iterators.
   auto const func = curFunc(env);
   auto const resumeSk = SrcKey(func, resumeOffset, true);
-  auto const data = LdBindAddrData { resumeSk, invSPOff(env) };
-  auto const resumeAddr = gen(env, LdBindAddr, data);
+  auto const bind_data = LdBindAddrData { resumeSk, invSPOff(env) };
+  auto const resumeAddr = gen(env, LdBindAddr, bind_data);
   auto const waitHandle =
     gen(env,
         CreateAFWH,
@@ -93,9 +94,8 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset, int numIters) {
 
   // store the return value and return control to the caller.
   gen(env, StRetVal, fp(env), waitHandle);
-  auto const stack = gen(env, RetAdjustStk, fp(env));
-  auto const frame = fp(env);
-  gen(env, RetCtrl, RetCtrlData(IRSPOffset{0}, false), stack, frame);
+  auto const ret_data = RetCtrlData { offsetToReturnSlot(env), false };
+  gen(env, RetCtrl, ret_data, sp(env), fp(env));
 }
 
 void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
@@ -220,8 +220,8 @@ void emitCreateCont(IRGS& env) {
   // variables and iterators.
   auto const func = curFunc(env);
   auto const resumeSk = SrcKey(func, resumeOffset, true);
-  auto const data = LdBindAddrData { resumeSk, invSPOff(env) + 1 };
-  auto const resumeAddr = gen(env, LdBindAddr, data);
+  auto const bind_data = LdBindAddrData { resumeSk, invSPOff(env) + 1 };
+  auto const resumeAddr = gen(env, LdBindAddr, bind_data);
   auto const cont =
     gen(env,
         CreateCont,
@@ -237,9 +237,8 @@ void emitCreateCont(IRGS& env) {
   // Grab caller info from ActRec, free ActRec, store the return value
   // and return control to the caller.
   gen(env, StRetVal, fp(env), cont);
-  auto const stack = gen(env, RetAdjustStk, fp(env));
-  auto const frame = fp(env);
-  gen(env, RetCtrl, RetCtrlData(IRSPOffset{0}, false), stack, frame);
+  auto const ret_data = RetCtrlData { offsetToReturnSlot(env), false };
+  gen(env, RetCtrl, ret_data, sp(env), fp(env));
 }
 
 void emitContEnter(IRGS& env) {

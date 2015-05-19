@@ -109,20 +109,23 @@ using BlockIdToIRBlockMap = hphp_hash_map<RegionDesc::BlockId, Block*>;
  * need access to this.
  */
 struct TransContext {
-  /* The SrcKey for this translation. */
-  SrcKey srcKey() const;
-
-  TransID transID;  // May be kInvalidTransID if not for a real translation.
-  Offset initBcOffset;
-  FPInvOffset initSpOffset;
-  bool resumed;
-  const Func* func;
+  TransContext(TransID id, SrcKey sk, FPInvOffset spOff);
 
   /*
-   * If available, the RegionDesc that we're compiling.  Might be
-   * nullptr---only used for debug output.
+   * The SrcKey for this translation.
    */
-  const RegionDesc* regionDesc;
+  SrcKey srcKey() const;
+
+  /*
+   * Data members.
+   *
+   * The contents of SrcKey are re-laid out to avoid func table lookups.
+   */
+  TransID transID;  // May be kInvalidTransID if not for a real translation.
+  FPInvOffset initSpOffset;
+  const Func* func;
+  Offset initBcOffset;
+  bool resumed;
 };
 
 /*

@@ -38,11 +38,9 @@ IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
   IRInstruction inst(DefLabel, marker);
   auto const label = clone(&inst);
   if (numDst > 0) {
-    auto dsts = static_cast<SSATmp*>(
-      m_arena.alloc(numDst * (sizeof(SSATmp) + sizeof(SSATmp*))));
-    auto dstsPtr = static_cast<SSATmp**>(static_cast<void*>(dsts + numDst));
+    auto const dstsPtr = new (m_arena) SSATmp*[numDst];
     for (unsigned i = 0; i < numDst; ++i) {
-      dstsPtr[i] = new (&dsts[i]) SSATmp(m_nextTmpId++, label);
+      dstsPtr[i] = newSSATmp(label);
     }
     label->setDsts(numDst, dstsPtr);
   }
@@ -52,17 +50,13 @@ IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
 void IRUnit::expandLabel(IRInstruction* label, unsigned extraDst) {
   assertx(label->is(DefLabel));
   assertx(extraDst > 0);
-  auto extra = static_cast<SSATmp*>(
-    m_arena.alloc(
-      extraDst * sizeof(SSATmp) +
-      (extraDst + label->numDsts()) * sizeof(SSATmp*)));
-  auto dstsPtr = static_cast<SSATmp**>(static_cast<void*>(extra + extraDst));
+  auto const dstsPtr = new (m_arena) SSATmp*[extraDst + label->numDsts()];
   unsigned i = 0;
   for (auto dst : label->dsts()) {
     dstsPtr[i++] = dst;
   }
   for (unsigned j = 0; j < extraDst; j++) {
-    dstsPtr[i++] = new (&extra[j]) SSATmp(m_nextTmpId++, label);
+    dstsPtr[i++] = newSSATmp(label);
   }
   label->setDsts(i, dstsPtr);
 }

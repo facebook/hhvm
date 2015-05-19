@@ -800,11 +800,10 @@ struct MemoryManager {
   template<class Fn> void forEachHeader(Fn);
 
   /*
-   * Run the experimental heap-tracer.
-   *
+   * Run the experimental collector.
    * Has no effect other than possibly asserting.
    */
-  void traceHeap();
+  void collect();
 
   /////////////////////////////////////////////////////////////////////////////
 

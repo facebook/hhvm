@@ -19,6 +19,7 @@
 #define incl_HPHP_XDEBUG_SERVER_H_
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
+#include "hphp/runtime/ext/xdebug/status.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_xml.h"
 #include "hphp/util/async-func.h"
 
@@ -91,42 +92,6 @@ public:
   // it.
   static void detach();
 
-/////////////////////////////////////////////////////////////////////////////
-// Error Codes
-
-public:
-  // See http://xdebug.org/docs-dbgp.php#error-codes
-  enum ErrorCode {
-    ERROR_OK = 0,
-    ERROR_PARSE = 1,
-    ERROR_DUP_ARG = 2,
-    ERROR_INVALID_ARGS = 3,
-    ERROR_UNIMPLEMENTED = 4,
-    ERROR_COMMAND_UNAVAILABLE = 5,
-
-    ERROR_CANT_OPEN_FILE = 100,
-    ERROR_STREAM_REDIRECT_FAILED = 101,
-
-    ERROR_BREAKPOINT_NOT_SET = 200,
-    ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED = 201,
-    ERROR_BREAKPOINT_INVALID = 202,
-    ERROR_BREAKPOINT_NO_CODE = 203,
-    ERROR_BREAKPOINT_INVALID_STATE = 204,
-    ERROR_NO_SUCH_BREAKPOINT = 205,
-    ERROR_EVALUATING_CODE = 206,
-    ERROR_INVALID_EXPRESSION = 207,
-
-    ERROR_PROPERTY_NON_EXISTENT = 300,
-    ERROR_STACK_DEPTH_INVALID = 301,
-    ERROR_CONTEXT_INVALID = 302,
-
-    ERROR_PROFILING_NOT_STARTED = 800,
-
-    ERROR_ENCODING_NOT_SUPPORTED = 900,
-    ERROR_INTERNAL = 998,
-    ERROR_UNKNOWN = 999
-  };
-
 ///////////////////////////////////////////////////////////////////////////////
 // Dbgp
 
@@ -154,7 +119,7 @@ public:
   void addXmlns(xdebug_xml_node& node);
 
   // Add the error with the passed error code to the given node
-  void addError(xdebug_xml_node& node, ErrorCode code);
+  void addError(xdebug_xml_node& node, XDebugError code);
 
 /////////////////////////////////////////////////////////////////////////////
 // Commands
@@ -188,7 +153,7 @@ private:
   bool readInput();
 
   // Parses the input from the buffer and returns an instance of the
-  // corresponding command. Throws an ErrorCode on failure.
+  // corresponding command. Throws an XDebugError on failure.
   XDebugCommand* parseCommand();
 
   // Valid states of the input parsing state machine
@@ -204,7 +169,7 @@ private:
 
   // Grab the command and an array of arguments from the given input string.
   // This was taken and translated from php5 xdebug in order match parsing
-  // behavior.  Throws an ErrorCode on failure.
+  // behavior.  Throws an XDebugError on failure.
   void parseInput(folly::StringPiece in, String& cmd, Array& args);
 
   /*
@@ -276,43 +241,23 @@ private:
 private:
   FILE* m_logFile = nullptr;
 
-////////////////////////////////////////////////////////////////////////////////
-// Server Status
-
 public:
-  enum class Status {
-    STARTING,
-    STOPPING,
-    STOPPED,
-    RUNNING,
-    BREAK,
-    DETACHED
-  };
-
-  // Reason for the current state
-  enum class Reason {
-    OK,
-    ERROR,
-    ABORTED,
-    EXCEPTION
-  };
-
   // Sets the status of the webserver
-  void setStatus(Status status, Reason reason) {
+  void setStatus(XDebugStatus status, XDebugReason reason) {
     m_status = status;
     m_reason = reason;
   }
 
   // Store the status and its reason in the passed arguments
-  void getStatus(Status& status, Reason& reason) {
+  void getStatus(XDebugStatus& status, XDebugReason& reason) {
     status = m_status;
     reason = m_reason;
   }
 
 private:
-  // Set on dbgp init
-  Status m_status = Status::DETACHED;
-  Reason m_reason = Reason::OK;
+  /* Set on dbgp init. */
+  XDebugStatus m_status{XDebugStatus::Detached};
+  XDebugReason m_reason{XDebugReason::Ok};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Misc Data Members
@@ -325,4 +270,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_XDEBUG_SERVER_H_
+#endif

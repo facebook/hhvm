@@ -138,22 +138,6 @@ jit::vector<Vlabel> sortBlocks(const Vunit& unit) {
   return s.blocks;
 }
 
-jit::vector<Vlabel> layoutBlocks(const Vunit& unit) {
-  auto blocks = sortBlocks(unit);
-  // Partition into main/cold/frozen areas without changing relative order, and
-  // the end{} block will be last.
-  auto coldIt = std::stable_partition(blocks.begin(), blocks.end(),
-    [&](Vlabel b) {
-      return unit.blocks[b].area == AreaIndex::Main &&
-             unit.blocks[b].code.back().op != Vinstr::fallthru;
-    });
-  std::stable_partition(coldIt, blocks.end(),
-    [&](Vlabel b) {
-      return unit.blocks[b].area == AreaIndex::Cold &&
-             unit.blocks[b].code.back().op != Vinstr::fallthru;
-    });
-  return blocks;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
+
 }}

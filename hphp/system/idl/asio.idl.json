@@ -855,7 +855,7 @@
                         },
                         {
                             "name": "priority",
-                            "type": "Int32",
+                            "type": "Int64",
                             "desc": "A non-negative number indicating scheduling priority (0 runs first)"
                         }
                     ]

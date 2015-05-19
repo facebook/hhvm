@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/dce.h"
 
 #include "hphp/util/trace.h"
 
@@ -31,34 +32,30 @@
 
 namespace HPHP { namespace jit {
 
+namespace {
+
 //////////////////////////////////////////////////////////////////////
 
+enum class DCE { None, Minimal, Full };
+
+template<class PassFN>
+void doPass(IRUnit& unit, PassFN fn, DCE dce) {
+  fn(unit);
+  switch (dce) {
+  case DCE::Minimal:  mandatoryDCE(unit); break;
+  case DCE::Full:     fullDCE(unit); // fallthrough
+  case DCE::None:     assertx(checkEverything(unit)); break;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
 void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
-  Timer _t(Timer::optimize);
+  Timer timer(Timer::optimize);
 
-  auto const finishPass = [&] (const char* msg) {
-    if (msg) {
-      printUnit(6, unit, folly::format("after {}", msg).str().c_str());
-    }
-    assertx(checkCfg(unit));
-    assertx(checkTmpsSpanningCalls(unit));
-    if (debug) {
-      forEachInst(rpoSortCfg(unit), [&](IRInstruction* inst) {
-        assertx(checkOperandTypes(inst, &unit));
-      });
-    }
-  };
-
-  auto const doPass = [&] (void (*fn)(IRUnit&), const char* msg = nullptr) {
-    fn(unit);
-    finishPass(msg);
-  };
-
-  auto const dce = [&] (const char* which) {
-    if (!RuntimeOption::EvalHHIRDeadCodeElim) return;
-    eliminateDeadCode(unit);
-    finishPass(folly::format("{} DCE", which).str().c_str());
-  };
+  assertx(checkEverything(unit));
 
   auto const hasLoop = RuntimeOption::EvalJitLoops && cfgHasLoop(unit);
 
@@ -75,48 +72,48 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
     RelaxGuardsFlags flags = (RelaxGuardsFlags)
       (RelaxReflow | (simple ? RelaxSimple : RelaxNormal));
     auto changed = relaxGuards(unit, *irBuilder.guards(), flags);
-    if (changed) finishPass("guard relaxation");
+    if (changed) {
+      printUnit(6, unit, "after guard relaxation");
+      mandatoryDCE(unit);  // relaxGuards can leave unreachable preds.
+    }
 
     if (RuntimeOption::EvalHHIRSimplification) {
-      doPass(simplify, "guard relaxation simplify");
-      doPass(cleanCfg);
+      doPass(unit, simplifyPass, DCE::Minimal);
+      doPass(unit, cleanCfg, DCE::None);
     }
   }
 
-  dce("initial");
+  fullDCE(unit);
+  printUnit(6, unit, "after initial DCE");
+  assertx(checkEverything(unit));
 
   if (RuntimeOption::EvalHHIRPredictionOpts) {
-    doPass(optimizePredictions, "prediction opts");
+    doPass(unit, optimizePredictions, DCE::None);
   }
 
   if (RuntimeOption::EvalHHIRSimplification) {
-    doPass(simplify, "simplify");
-    dce("simplify");
-    doPass(cleanCfg);
+    doPass(unit, simplifyPass, DCE::Full);
+    doPass(unit, cleanCfg, DCE::None);
   }
 
   if (RuntimeOption::EvalHHIRGlobalValueNumbering) {
-    doPass(gvn);
-    dce("gvn");
+    doPass(unit, gvn, DCE::Full);
   }
 
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
-    doPass(optimizeLoads);
-    dce("loadelim");
+    doPass(unit, optimizeLoads, DCE::Full);
   }
 
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
-    doPass(optimizeStores);
-    dce("storeelim");
+    doPass(unit, optimizeStores, DCE::Full);
   }
 
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRRefcountOpts) {
-    doPass(optimizeRefcounts2);
-    dce("refcount");
+    doPass(unit, optimizeRefcounts2, DCE::Full);
   }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    doPass(insertAsserts);
+    doPass(unit, insertAsserts, DCE::None);
   }
 }
 

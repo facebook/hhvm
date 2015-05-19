@@ -47,11 +47,8 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         effects,
         [&] (IrrelevantEffects)   {},
         [&] (UnknownEffects)      {},
-        [&] (InterpOneEffects x)  { visit(x.kills); },
         [&] (ReturnEffects x)     { visit(x.kills); },
         [&] (CallEffects x)       { visit(x.kills); visit(x.stack); },
-        [&] (IterEffects x)       { visit(x.kills); },
-        [&] (IterEffects2 x)      { visit(x.kills); },
         [&] (GeneralEffects x)    { visit(x.loads);
                                     visit(x.stores);
                                     visit(x.moves);
@@ -80,6 +77,22 @@ folly::Optional<uint32_t> add_class(AliasAnalysis& ret, AliasClass acls) {
   return meta.index;
 };
 
+template<class T>
+ALocBits may_alias_part(const AliasAnalysis& aa,
+                        AliasClass acls,
+                        folly::Optional<T> proj,
+                        AliasClass any,
+                        ALocBits pessimistic) {
+  if (proj) {
+    if (auto const meta = aa.find(*proj)) {
+      return ALocBits{meta->conflicts}.set(meta->index);
+    }
+    assertx(acls.maybe(any));
+    return pessimistic;
+  }
+  return acls.maybe(any) ? pessimistic : ALocBits{};
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -101,29 +114,23 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
 
   auto ret = ALocBits{};
 
-  // We may have some special may-alias sets for multi-slot stack ranges.  If
-  // one of these is present, we can use that for the stack portion.
-  // Otherwise, we need to merge all_stack, because we didn't track which stack
-  // locations it can alias earlier.
-  if (auto const stk = acls.stack()) {
-    if (stk->size > 1) {
+  // We may have some special may-alias sets for multi-slot stack ranges, so
+  // this works a little differently from the other projections.
+  {
+    auto const stk = acls.stack();
+    if (stk && stk->size > 1) {
       auto const it = stack_ranges.find(*stk);
       ret |= it != end(stack_ranges) ? it->second : all_stack;
     } else {
-      if (auto const slot = find(*stk)) {
-        ret.set(slot->index);
-      } else {
-        ret |= all_stack;
-      }
+      ret |= may_alias_part(*this, acls, stk, AStackAny, all_stack);
     }
-  } else if (acls.maybe(AStackAny)) {
-    ret |= all_stack;
   }
 
-  if (acls.maybe(APropAny))    ret |= all_props;
-  if (acls.maybe(AElemIAny))   ret |= all_elemIs;
-  if (acls.maybe(AFrameAny))   ret |= all_frame;
-  if (acls.maybe(AMIStateAny)) ret |= all_mistate;
+  ret |= may_alias_part(*this, acls, acls.frame(), AFrameAny, all_frame);
+  ret |= may_alias_part(*this, acls, acls.prop(), APropAny, all_props);
+  ret |= may_alias_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
+  ret |= may_alias_part(*this, acls, acls.mis(), AMIStateAny, all_mistate);
+  ret |= may_alias_part(*this, acls, acls.ref(), ARefAny, all_refs);
 
   return ret;
 }
@@ -144,6 +151,7 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
   if (AElemIAny   <= acls) ret |= all_elemIs;
   if (AFrameAny   <= acls) ret |= all_frame;
   if (AMIStateAny <= acls) ret |= all_mistate;
+  if (ARefAny     <= acls) ret |= all_refs;
 
   return ret;
 }
@@ -180,6 +188,13 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
     if (auto const elemI = acls.is_elemI()) {
       if (auto const index = add_class(ret, acls)) {
         conflict_array_index[elemI->idx].set(*index);
+      }
+      return;
+    }
+
+    if (auto const ref = acls.is_ref()) {
+      if (auto const index = add_class(ret, acls)) {
+        ret.all_refs.set(*index);
       }
       return;
     }
@@ -277,6 +292,12 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
+    if (auto const ref = acls.is_ref()) {
+      meta.conflicts = ret.all_refs;
+      meta.conflicts.reset(meta.index);
+      return;
+    }
+
     always_assert_flog(0, "AliasAnalysis assigned an AliasClass an id "
       "but it didn't match a situation we undestood: {}\n", show(acls));
   };
@@ -337,14 +358,16 @@ std::string show(const AliasAnalysis& linfo) {
   folly::format(&ret, " {: <20}       : {}\n"
                       " {: <20}       : {}\n"
                       " {: <20}       : {}\n"
+                      " {: <20}       : {}\n"
                       " {: <20}       : {}\n",
     "all props",  show(linfo.all_props),
     "all elemIs", show(linfo.all_elemIs),
+    "all refs",   show(linfo.all_refs),
     "all frame",  show(linfo.all_frame),
     "all stack",  show(linfo.all_stack)
   );
   for (auto& kv : linfo.stk_expand_map) {
-    folly::format(&ret, " stk_expand {: <17}       : {}\n",
+    folly::format(&ret, " ex {: <17}       : {}\n",
       show(kv.first),
       show(kv.second));
   }

@@ -40,11 +40,6 @@ void optimizeStores(IRUnit&);
 void cleanCfg(IRUnit&);
 
 /*
- * DCE runs in between various passes.
- */
-void eliminateDeadCode(IRUnit&);
-
-/*
  * For debugging, we can run this pass, which inserts various sanity checking
  * assertion instructions.
  */

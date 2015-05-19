@@ -1,0 +1,12 @@
+File "trait_priv_extends3.php", line 11, characters 7-7:
+This object is of type C (Typing[4110])
+File "trait_priv_extends3.php", line 12, characters 7-7:
+It is incompatible with this object of type T
+because some declarations are incompatible.
+Read the following to see why:
+File "trait_priv_extends3.php", line 14, characters 11-13:
+Typing error
+File "trait_priv_extends3.php", line 8, characters 12-13:
+This is an object of type C1
+File "trait_priv_extends3.php", line 14, characters 12-13:
+It is incompatible with an object of type C2

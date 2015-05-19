@@ -184,10 +184,10 @@ Instruction set
 
 1. Checks and Asserts
 
-Note: Instructions that guard or check boxed types only check that the operand
-is boxed, and they ignore the type of the value inside the box (the inner
-type). The inner type is normally checked when the value within the box is
-about to be loaded, using a separate CheckRefInner instruction.
+Note: Instructions that check boxed types only check that the operand is boxed,
+and they ignore the type of the value inside the box (the inner type). The
+inner type is normally checked when the value within the box is about to be
+loaded, using a separate CheckRefInner instruction.
 
 | CheckType<T>, DRefineS(0), S(Gen), B|P
 
@@ -1284,11 +1284,6 @@ To string conversions:
   Writes the value in S1 to the return value slot on the activation record
   pointed to by S0.
 
-| RetAdjustStk, D(StkPtr), S(FramePtr), NF
-
-  Loads the new VM stack pointer into the destination. S0 is a pointer to the
-  current activation record.
-
 | ReleaseVVOrExit, ND, S(FramePtr), B
 
   Loads the VarEnv slot off the ActRec pointed to by S0. If it is null, does
@@ -1456,7 +1451,7 @@ To string conversions:
 
 | PredictLoc<T, localId>, ND, S(FramePtr), NF
 
-  Does nothing. Serves as an indicator that the predicted type of the given 
+  Does nothing. Serves as an indicator that the predicted type of the given
   localId on the frame S0 is T.
 
 | PredictStk<T, offset>, ND, S(StkPtr), NF

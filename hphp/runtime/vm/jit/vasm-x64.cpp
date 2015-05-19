@@ -60,7 +60,7 @@ struct Vgen {
   }
   void emit(jit::vector<Vlabel>&);
 
-private:
+ private:
   template<class Inst> void emit(const Inst& i) {
     always_assert_flog(false, "unimplemented instruction: {} in B{}\n",
                        vinst_names[Vinstr(i).op], size_t(current));
@@ -1133,10 +1133,8 @@ void optimizeX64(Vunit& unit, const Abi& abi) {
 
   removeTrivialNops(unit);
   fuseBranches(unit);
-  if (RuntimeOption::EvalHHIRDirectExit) {
-    optimizeJmps(unit);
-    optimizeExits(unit);
-  }
+  optimizeJmps(unit);
+  optimizeExits(unit);
 
   lowerForX64(unit, abi);
 

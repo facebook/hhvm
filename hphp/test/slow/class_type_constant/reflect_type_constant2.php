@@ -26,7 +26,9 @@ echo "=== ReflectionClass::hasTypeConstant('TYPE') ===" . PHP_EOL;
 var_dump($rc->hasTypeConstant('TYPE'));
 
 echo PHP_EOL;
-$tc = new ReflectionTypeConstant(C::class, 'TypeI');
+
+// Test non-interned string
+$tc = new ReflectionTypeConstant(C::class, trim(' TypeI '));
 echo '=== <C::TypeI>::getDeclaringClass() ===' . PHP_EOL;
 var_dump($tc->getDeclaringClass()->getName());
 
@@ -52,3 +54,12 @@ var_dump($tc->getAssignedTypeText());
 
 echo '=== <C::X>::isAbstract() ===' . PHP_EOL;
 var_dump($tc->isAbstract());
+
+echo PHP_EOL;
+echo '=== ReflectionTypeConstant(C, x) ===' . PHP_EOL;
+// Type Constants are case sensitive
+try {
+  new ReflectionTypeConstant(C::class, 'x');
+} catch (ReflectionException $e) {
+  var_dump($e->getMessage());
+}

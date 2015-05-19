@@ -110,15 +110,15 @@ struct OffsetRange {
   OffsetRange() {}
 
   OffsetRange(Offset base, Offset past)
-    : m_base(base)
-    , m_past(past)
+    : base(base)
+    , past(past)
   {}
 
-  Offset m_base{0};
-  Offset m_past{0};
+  Offset base{0};
+  Offset past{0};
 };
 
-typedef std::vector<OffsetRange> OffsetRangeVec;
+using OffsetRangeVec = std::vector<OffsetRange>;
 
 /*
  * Generic entry for representing many-to-one mappings of Offset -> T.

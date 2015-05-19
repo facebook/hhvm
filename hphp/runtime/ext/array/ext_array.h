@@ -83,11 +83,16 @@ Variant array_keys_helper(const Variant& input,
                           const Variant& search_value = uninit_null(),
                           bool strict = false);
 TypedValue* HHVM_FN(array_keys)(ActRec* ar);
+Variant HHVM_FUNCTION(array_map, const Variant& callback,
+                                 const Variant& arr1,
+                                 const Array& _argv = null_array);
 Variant HHVM_FUNCTION(array_merge_recursive,
+                      int64_t numArgs,
                       const Variant& array1,
                       const Variant& array2 = null_variant,
                       const Array& args = null_array);
 Variant HHVM_FUNCTION(array_merge,
+                      int64_t numArgs,
                       const Variant& array1,
                       const Variant& array2 = null_variant,
                       const Array& args = null_array);

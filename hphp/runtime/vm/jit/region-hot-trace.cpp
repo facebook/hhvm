@@ -141,8 +141,8 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     // When Eval.JitLoops is set, insert back-edges in the region if
     // they exist in the TransCFG.
     if (RuntimeOption::EvalJitLoops) {
-      assertx(hasTransId(newFirstBlockId));
-      auto newTransId = getTransId(newFirstBlockId);
+      assertx(hasTransID(newFirstBlockId));
+      auto newTransId = getTransID(newFirstBlockId);
       // Don't add the arc if the last opcode in the source block ends
       // the region.
       if (!breaksRegion(*profData->transLastInstr(newTransId))) {
@@ -150,8 +150,8 @@ RegionDescPtr selectHotTrace(TransID triggerId,
         for (auto iOther = 0; iOther < blocks.size(); iOther++) {
           auto other = blocks[iOther];
           auto otherFirstBlockId = other.get()->id();
-          if (!hasTransId(otherFirstBlockId)) continue;
-          auto otherTransId = getTransId(otherFirstBlockId);
+          if (!hasTransID(otherFirstBlockId)) continue;
+          auto otherTransId = getTransID(otherFirstBlockId);
           if (cfg.hasArc(newTransId, otherTransId)) {
             region->addArc(newLastBlockId, otherFirstBlockId);
           }

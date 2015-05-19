@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/runtime/vm/jit/irgen-ret.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
@@ -361,6 +362,10 @@ bool optimizedFCallBuiltin(IRGS& env,
  * returns TBottom.
  */
 Type param_coerce_type(const Func* callee, uint32_t paramIdx) {
+  if (callee->hasVariadicCaptureParam() &&
+      paramIdx == (callee->numParams() - 1)) {
+    return Type(KindOfArray);
+  }
   auto const& pi = callee->params()[paramIdx];
   auto const& tc = pi.typeConstraint;
   if (tc.isNullable() && !callee->byRef(paramIdx)) {
@@ -642,21 +647,21 @@ SSATmp* coerce_value(IRGS& env,
   if (targetTy <= TInt) {
     return gen(env,
                CoerceCellToInt,
-               CoerceData(callee, paramIdx + 1),
+               FuncArgData(callee, paramIdx + 1),
                maker.makeParamCoerceCatch(),
                oldVal);
   }
   if (targetTy <= TDbl) {
     return gen(env,
                CoerceCellToDbl,
-               CoerceData(callee, paramIdx + 1),
+               FuncArgData(callee, paramIdx + 1),
                maker.makeParamCoerceCatch(),
                oldVal);
   }
   always_assert(targetTy <= TBool);
   return gen(env,
              CoerceCellToBool,
-             CoerceData(callee, paramIdx + 1),
+             FuncArgData(callee, paramIdx + 1),
              maker.makeParamCoerceCatch(),
              oldVal);
 }
@@ -758,6 +763,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
 void builtinCall(IRGS& env,
                  const Func* callee,
                  ParamPrep& params,
+                 int32_t numNonDefault,
                  const CatchMaker& catchMaker) {
   /*
    * Everything that needs to be on the stack gets spilled now.
@@ -812,6 +818,7 @@ void builtinCall(IRGS& env,
     CallBuiltinData {
       offsetFromIRSP(env, BCSPOffset{0}),
       callee,
+      numNonDefault,
       builtinFuncDestroysLocals(callee)
     },
     catchMaker.makeUnusualCatch(),
@@ -886,7 +893,7 @@ void nativeImplInlined(IRGS& env) {
     &params
   };
 
-  builtinCall(env, callee, params, catcher);
+  builtinCall(env, callee, params, numArgs, catcher);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -957,16 +964,15 @@ void emitFCallBuiltin(IRGS& env,
     &params
   };
 
-  builtinCall(env, callee, params, catcher);
+  builtinCall(env, callee, params, numNonDefault, catcher);
 }
 
 void emitNativeImpl(IRGS& env) {
   if (isInlining(env)) return nativeImplInlined(env);
 
   gen(env, NativeImpl, fp(env), sp(env));
-  auto const stack = gen(env, RetAdjustStk, fp(env));
-  auto const frame = fp(env);
-  gen(env, RetCtrl, RetCtrlData(IRSPOffset{0}, false), stack, frame);
+  auto const data = RetCtrlData { offsetToReturnSlot(env), false };
+  gen(env, RetCtrl, data, sp(env), fp(env));
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -3,9 +3,7 @@
 class X {
   const type T as arraykey = string;
 
-  final public function __construct(
-    private this::T $val,
-  ) {}
+  final public function __construct(private this::T $val) {}
 
   public function get(): this::T {
     return $this->val;
@@ -56,10 +54,7 @@ trait X_Trait {
   }
 }
 
-function test(
-  Y $y,
-  X $x,
-): (int, arraykey) {
+function test(Y $y, X $x): (int, arraykey) {
   return tuple($y->get(), $x->get());
 }
 

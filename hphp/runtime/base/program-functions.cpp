@@ -696,13 +696,10 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
-  auto& ti = TI();
-
-  if (debug) MM().traceHeap();
+  MM().collect();
   if (RuntimeOption::EvalDumpTC) {
     HPHP::jit::tc_dump();
   }
-
   if (xhprof) {
     Variant profileData = HHVM_FN(xhprof_disable)();
     if (!profileData.isNull()) {
@@ -713,6 +710,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   Eval::Debugger::InterruptPSPEnded(program);
   hphp_context_exit();
   hphp_session_exit();
+  auto& ti = TI();
   if (coverage && ti.m_reqInjectionData.getCoverage() &&
       !RuntimeOption::CodeCoverageOutputFile.empty()) {
     ti.m_coverage->Report(RuntimeOption::CodeCoverageOutputFile);
@@ -1451,12 +1449,14 @@ static int execute_program_impl(int argc, char** argv) {
   // we need to initialize pcre cache table very early
   pcre_init();
 
+#ifdef ENABLE_ZEND_COMPAT
   //
   // Initialize in the zend extension compatibility layer, as needed
   // before any calls from legacy zend extensions to zend_strtod. See
   // the extern "C" declaration of this function, above.
   //
   zend_startup_strtod();
+#endif
 
   MemoryManager::TlsWrapper::getCheck();
   if (RuntimeOption::ServerExecutionMode()) {

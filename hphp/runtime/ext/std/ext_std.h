@@ -16,6 +16,7 @@ class StandardExtension final : public Extension {
     initClassobj();
     initNetwork();
     initOptions();
+    initGc();
     initOutput();
     initString();
     initVariable();
@@ -37,6 +38,7 @@ class StandardExtension final : public Extension {
   void initClassobj();
   void initNetwork();
   void initOptions();
+  void initGc();
   void initOutput();
   void initString();
   void initVariable();

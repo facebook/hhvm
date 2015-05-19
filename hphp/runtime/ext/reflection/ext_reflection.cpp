@@ -1480,7 +1480,7 @@ static bool HHVM_METHOD(ReflectionTypeConstant, __init,
   const Class::Const* consts = cls->constants();
 
   for (size_t i = 0; i < numConsts; i++) {
-    if (consts[i].m_name == const_name.get() && consts[i].isType()) {
+    if (const_name.same(consts[i].m_name) && consts[i].isType()) {
       ReflectionConstHandle::Get(this_)->setConst(&consts[i]);
       return true;
     }

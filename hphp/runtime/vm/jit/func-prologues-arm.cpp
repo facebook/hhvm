@@ -64,16 +64,14 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   return start;
 }
 
-SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& coldCode,
-                        Func* func, bool funcIsMagic, int nPassed,
-                        TCA& start, TCA& aStart) {
-  vixl::MacroAssembler a { mainCode };
+SrcKey emitFuncPrologue(TransID transID, Func* func, int argc, TCA& start) {
+  vixl::MacroAssembler a { mcg->code.main() };
   vixl::Label veryStart;
   a.bind(&veryStart);
 
   a.    Brk   (0);
 
-  SrcKey skFuncBody = emitPrologueWork(func, nPassed);
+  SrcKey skFuncBody = emitPrologueWork(func, argc);
 
   return skFuncBody;
 }

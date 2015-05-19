@@ -39,6 +39,15 @@ TRACE_SET_MOD(mcg);
 
 namespace {
 
+// Generate an if-then block into a.  thenBlock is executed if cc is true.
+template <class Then>
+void ifThen(jit::X64Assembler& a, ConditionCode cc, Then thenBlock) {
+  Label done;
+  a.jcc8(ccNegate(cc), done);
+  thenBlock(a);
+  asm_label(a, done);
+}
+
 void emitStackCheck(X64Assembler& a, int funcDepth, Offset pc) {
   using reg::rax;
   assertx(kScratchCrossTraceRegs.contains(rax));
@@ -126,7 +135,7 @@ constexpr auto kLocalsToInitializeInline = 9;
 // unroll. Beyond this, a loop is generated.
 constexpr auto kMaxParamsInitUnroll = 5;
 
-SrcKey emitPrologueWork(Func* func, int nPassed) {
+SrcKey emitPrologueWork(TransID transID, Func* func, int nPassed) {
   using namespace reg;
 
   auto const numNonVariadicParams = func->numNonVariadicParams();
@@ -142,8 +151,7 @@ SrcKey emitPrologueWork(Func* func, int nPassed) {
 
   if (mcg->tx().mode() == TransKind::Proflogue) {
     assertx(shouldPGOFunc(*func));
-    auto const transId     = mcg->tx().profData()->curTransID();
-    auto const counterAddr = mcg->tx().profData()->transCounterAddr(transId);
+    auto const counterAddr = mcg->tx().profData()->transCounterAddr(transID);
     a.    movq   (counterAddr, rAsm);
     a.    decq   (rAsm[0]);
     mcg->tx().profData()->setProfiling(func->getFuncId());
@@ -400,7 +408,7 @@ TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) {
   return start;
 }
 
-SrcKey emitFuncPrologue(Func* func, int nPassed, TCA& start) {
+SrcKey emitFuncPrologue(TransID transID, Func* func, int nPassed, TCA& start) {
   assertx(!func->isMagic());
   Asm a { mcg->code.main() };
 
@@ -417,10 +425,11 @@ SrcKey emitFuncPrologue(Func* func, int nPassed, TCA& start) {
   if (RuntimeOption::EvalJitTransCounters) emitTransCounterInc(a);
   a.    pop    (rVmFp[AROFF(m_savedRip)]);
   maybeEmitStackCheck(a, func);
-  return emitPrologueWork(func, nPassed);
+  return emitPrologueWork(transID, func, nPassed);
 }
 
-SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
+SrcKey emitMagicFuncPrologue(TransID transID, Func* func, int nPassed,
+                             TCA& start) {
   assertx(func->isMagic());
   assertx(func->numParams() == 2);
   assertx(!func->hasVariadicCaptureParam());
@@ -447,7 +456,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
    */
   if (nPassed != 2) {
     asm_label(a, not_magic_call);
-    skFuncBody = emitPrologueWork(func, nPassed);
+    skFuncBody = emitPrologueWork(transID, func, nPassed);
     // There is a REQ_BIND_JMP at the end of emitPrologueWork.
   }
 
@@ -513,7 +522,7 @@ SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start) {
   // Every magic call prologue has a case for nPassed == 2, because
   // this is how it works when the call is actually magic.
   if (nPassed == 2) asm_label(a, not_magic_call);
-  auto const skFor2Args = emitPrologueWork(func, 2);
+  auto const skFor2Args = emitPrologueWork(transID, func, 2);
   if (nPassed == 2) skFuncBody = skFor2Args;
 
   if (RuntimeOption::HHProfServerEnabled && callFixup) {

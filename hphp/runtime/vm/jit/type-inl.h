@@ -120,7 +120,8 @@ inline Ptr add_ref(Ptr p) {
 }
 
 inline Ptr remove_ref(Ptr p) {
-  // If p is unknown, or Ptr::Ref, we'll get back unknown.
+  // If p is unknown or Ptr::Ref, we'll get back unknown. Note that this is not
+  // the same as subtracting Ptr::Ref from p.
   return static_cast<Ptr>(static_cast<uint32_t>(p) & ~kPtrRefBit);
 }
 
@@ -170,10 +171,7 @@ inline size_t Type::hash() const {
 // Comparison.
 
 inline bool Type::operator==(Type rhs) const {
-  return m_bits == rhs.m_bits &&
-         m_ptrKind == rhs.m_ptrKind &&
-         m_hasConstVal == rhs.m_hasConstVal &&
-         m_extra == rhs.m_extra;
+  return m_rawInt == rhs.m_rawInt && m_extra == rhs.m_extra;
 }
 
 inline bool Type::operator!=(Type rhs) const {
@@ -251,10 +249,6 @@ inline bool Type::isKnownDataType() const {
 
 inline bool Type::needsReg() const {
   return *this <= TStkElem && !isKnownDataType();
-}
-
-inline bool Type::needsValueReg() const {
-  return !subtypeOfAny(TNull, TNullptr);
 }
 
 inline bool Type::isSimpleType() const {
@@ -495,6 +489,8 @@ inline Type Type::unbox() const {
 
 inline Type Type::ptr(Ptr kind) const {
   assertx(*this <= TGen);
+  // Enforce a canonical representation for Bottom.
+  if (m_bits == kBottom) return TBottom;
   return Type(m_bits << kPtrShift,
               kind,
               isSpecialized() && !m_hasConstVal ? m_extra : 0);

@@ -11,8 +11,7 @@
 
 class :x implements XHPChild {}
 
-function f1(XHPChild $x): void {
-}
+function f1(XHPChild $x): void {}
 
 function f2(): void {
   f1("hello");

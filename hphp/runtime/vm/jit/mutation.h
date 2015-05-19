@@ -80,8 +80,10 @@ void reflowTypes(IRUnit&);
 
 /*
  * Recomputes the output type of each of inst's dests.
+ *
+ * Returns: true if any of the instruction's dest types were changed.
  */
-void retypeDests(IRInstruction*, const IRUnit*);
+bool retypeDests(IRInstruction*, const IRUnit*);
 
 /*
  * Small pass that inserts AssertTypes on the taken edges of CheckType blocks

@@ -12,15 +12,18 @@ open ClientEnv
 open ClientExceptions
 open Utils
 
+module Cmd = ServerCommand
+module Rpc = ServerRpc
+
 let connect args =
   let ic, oc = ClientUtils.connect args.root in
   if not args.output_json && Tty.spinner_used() then
     Tty.print_clear_line stderr;
   (ic, oc)
 
-let get_list_files (args:client_check_env): string list =
-  let ic, oc = connect args in
-  ServerMsg.cmd_to_channel oc ServerMsg.LIST_FILES;
+let get_list_files conn (args:client_check_env): string list =
+  let ic, oc = conn in
+  Cmd.(stream_request oc LIST_FILES);
   let res = ref [] in
   try
     while true do
@@ -37,14 +40,14 @@ let print_all ic =
   with End_of_file -> ()
 
 let expand_path file =
-  let path = Path.mk_path file in
+  let path = Path.make file in
   if Path.file_exists path
-  then Path.string_of_path path
+  then Path.to_string path
   else
     let file = Filename.concat (Sys.getcwd()) file in
-    let path = Path.mk_path file in
+    let path = Path.make file in
     if Path.file_exists path
-    then Path.string_of_path path
+    then Path.to_string path
     else begin
       Printf.printf "File not found\n";
       exit 2
@@ -59,168 +62,141 @@ let rec main args retries =
     Printf.fprintf stderr "Error: hh_client hit timeout, giving up!\n%!";
     exit 7
   end else try
+    let conn = connect args in
     match args.mode with
     | MODE_LIST_FILES ->
-      let infol = get_list_files args in
-      List.iter (Printf.printf "%s\n") infol
-    | MODE_LIST_MODES -> begin
-        let ic, oc = connect args in
-        ServerMsg.cmd_to_channel oc ServerMsg.LIST_MODES;
-        try
+        let infol = get_list_files conn args in
+        List.iter (Printf.printf "%s\n") infol
+    | MODE_LIST_MODES ->
+        let ic, oc = conn in
+        Cmd.(stream_request oc LIST_MODES);
+        begin try
           while true do print_endline (input_line ic) done;
-        with End_of_file -> ()
-      end
+        with End_of_file -> () end
     | MODE_COLORING file ->
-        let ic, oc = connect args in
         let file_input = match file with
           | "-" ->
             let content = ClientUtils.read_stdin_to_string () in
-            ServerMsg.FileContent content
+            ServerUtils.FileContent content
           | _ ->
             let file = expand_path file in
-            ServerMsg.FileName file
+            ServerUtils.FileName file
         in
-        let command = ServerMsg.PRINT_COVERAGE_LEVELS file_input in
-        ServerMsg.cmd_to_channel oc command;
-        let pos_level_l : ServerColorFile.result = Marshal.from_channel ic in
+        let pos_level_l = Cmd.rpc conn @@ Rpc.COVERAGE_LEVELS file_input in
         ClientColorFile.go file_input args.output_json pos_level_l;
         exit 0
     | MODE_COVERAGE file ->
-        let ic, oc = connect args in
-        let command = ServerMsg.CALC_COVERAGE (expand_path file) in
-        ServerMsg.cmd_to_channel oc command;
-        let counts_opt : ServerCoverageMetric.result =
-          Marshal.from_channel ic in
+        let counts_opt =
+          Cmd.rpc conn @@ Rpc.COVERAGE_COUNTS (expand_path file) in
         ClientCoverageMetric.go ~json:args.output_json counts_opt;
         exit 0
     | MODE_FIND_CLASS_REFS name ->
-        let ic, oc = connect args in
-        let command = ServerMsg.FIND_REFS (ServerMsg.Class name) in
-        ServerMsg.cmd_to_channel oc command;
-        let results : ServerFindRefs.result = Marshal.from_channel ic in
+        let results =
+          Cmd.rpc conn @@ Rpc.FIND_REFS (ServerFindRefs.Class name) in
         ClientFindRefs.go results args.output_json;
         exit 0
     | MODE_FIND_REFS name ->
-        let ic, oc = connect args in
         let pieces = Str.split (Str.regexp "::") name in
         let action =
           try
             match pieces with
             | class_name :: method_name :: _ ->
-                ServerMsg.Method (class_name, method_name)
-            | method_name :: _ -> ServerMsg.Function method_name
+                ServerFindRefs.Method (class_name, method_name)
+            | method_name :: _ -> ServerFindRefs.Function method_name
             | _ -> raise Exit
           with _ -> Printf.fprintf stderr "Invalid input\n"; exit 1 in
-        let command = ServerMsg.FIND_REFS action in
-        ServerMsg.cmd_to_channel oc command;
-        let results : ServerFindRefs.result = Marshal.from_channel ic in
+        let results = Cmd.rpc conn @@ Rpc.FIND_REFS action in
         ClientFindRefs.go results args.output_json;
         exit 0
     | MODE_DUMP_SYMBOL_INFO files ->
-        let ic, oc = connect args in
-        ClientSymbolInfo.go files ic oc expand_path
+        ClientSymbolInfo.go conn files expand_path
     | MODE_REFACTOR ->
-        ClientRefactor.go args;
+        ClientRefactor.go conn args;
         exit 0
     | MODE_IDENTIFY_FUNCTION arg ->
-      let tpos = Str.split (Str.regexp ":") arg in
-      let line, char =
-        try
-          match tpos with
-          | [line; char] ->
-              int_of_string line, int_of_string char
-          | _ -> raise Exit
-        with _ ->
-          Printf.fprintf stderr "Invalid position\n"; exit 1
-      in
-      let ic, oc = connect args in
-      let content = ClientUtils.read_stdin_to_string () in
-      let command = ServerMsg.IDENTIFY_FUNCTION (content, line, char) in
-      ServerMsg.cmd_to_channel oc command;
-      print_all ic
+        let tpos = Str.split (Str.regexp ":") arg in
+        let line, char =
+          try
+            match tpos with
+            | [line; char] ->
+                int_of_string line, int_of_string char
+            | _ -> raise Exit
+          with _ ->
+            Printf.eprintf "Invalid position\n"; exit 1
+        in
+        let content = ClientUtils.read_stdin_to_string () in
+        let result =
+          Cmd.rpc conn @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
+        print_endline result
     | MODE_TYPE_AT_POS arg ->
-      let tpos = Str.split (Str.regexp ":") arg in
-      let fn, line, char =
-        try
-          match tpos with
-          | [filename; line; char] ->
-              let fn = expand_path filename in
-              ServerMsg.FileName fn, int_of_string line, int_of_string char
-          | [line; char] ->
-              let content = ClientUtils.read_stdin_to_string () in
-              ServerMsg.FileContent content, int_of_string line, int_of_string char
-          | _ -> raise Exit
-        with _ ->
-          Printf.fprintf stderr "Invalid position\n"; exit 1
-      in
-      let ic, oc = connect args in
-      ServerMsg.cmd_to_channel oc (ServerMsg.INFER_TYPE (fn, line, char));
-      let ((pos, ty) : ServerInferType.result) = Marshal.from_channel ic in
-      ClientTypeAtPos.go pos ty args.output_json;
-      exit 0
+        let tpos = Str.split (Str.regexp ":") arg in
+        let fn, line, char =
+          try
+            match tpos with
+            | [filename; line; char] ->
+                let fn = expand_path filename in
+                ServerUtils.FileName fn, int_of_string line, int_of_string char
+            | [line; char] ->
+                let content = ClientUtils.read_stdin_to_string () in
+                ServerUtils.FileContent content,
+                int_of_string line,
+                int_of_string char
+            | _ -> raise Exit
+          with _ ->
+            Printf.fprintf stderr "Invalid position\n"; exit 1
+        in
+        let pos, ty = Cmd.rpc conn @@ Rpc.INFER_TYPE (fn, line, char) in
+        ClientTypeAtPos.go pos ty args.output_json;
+        exit 0
     | MODE_ARGUMENT_INFO arg ->
-      let tpos = Str.split (Str.regexp ":") arg in
-      let line, char =
-        try
-          match tpos with
-          | [line; char] ->
-              int_of_string line, int_of_string char
-          | _ -> raise Exit
-        with _ ->
-          Printf.fprintf stderr "Invalid position\n"; exit 1
-      in
-      let ic, oc = connect args in
-      let content = ClientUtils.read_stdin_to_string () in
-      ServerMsg.cmd_to_channel oc
-          (ServerMsg.ARGUMENT_INFO (content, line, char));
-      let results : ServerArgumentInfo.result = Marshal.from_channel ic in
-      ClientArgumentInfo.go results args.output_json;
-      exit 0
+        let tpos = Str.split (Str.regexp ":") arg in
+        let line, char =
+          try
+            match tpos with
+            | [line; char] ->
+                int_of_string line, int_of_string char
+            | _ -> raise Exit
+          with _ ->
+            Printf.fprintf stderr "Invalid position\n"; exit 1
+        in
+        let content = ClientUtils.read_stdin_to_string () in
+        let results =
+          Cmd.rpc conn @@ Rpc.ARGUMENT_INFO (content, line, char) in
+        ClientArgumentInfo.go results args.output_json;
+        exit 0
     | MODE_AUTO_COMPLETE ->
-      let ic, oc = connect args in
-      let content = ClientUtils.read_stdin_to_string () in
-      let command = ServerMsg.AUTOCOMPLETE content in
-      ServerMsg.cmd_to_channel oc command;
-      let results : AutocompleteService.result = Marshal.from_channel ic in
-      ClientAutocomplete.go results args.output_json;
-      exit 0
+        let content = ClientUtils.read_stdin_to_string () in
+        let results = Cmd.rpc conn @@ Rpc.AUTOCOMPLETE content in
+        ClientAutocomplete.go results args.output_json;
+        exit 0
     | MODE_OUTLINE ->
-      let content = ClientUtils.read_stdin_to_string () in
-      let ic, oc = connect args in
-      let command = ServerMsg.OUTLINE content in
-      ServerMsg.cmd_to_channel oc command;
-      let results : ServerFileOutline.result = Marshal.from_channel ic in
-      ClientOutline.go results args.output_json;
-      exit 0
+        let content = ClientUtils.read_stdin_to_string () in
+        let results = Cmd.rpc conn @@ Rpc.OUTLINE content in
+        ClientOutline.go results args.output_json;
+        exit 0
     | MODE_METHOD_JUMP_CHILDREN class_ ->
-      let ic, oc = connect args in
-      let command = ServerMsg.METHOD_JUMP (class_, true) in
-      ServerMsg.cmd_to_channel oc command;
-      let results : MethodJumps.result list = Marshal.from_channel ic in
-      ClientMethodJumps.go results true args.output_json;
-      exit 0
+        let results = Cmd.rpc conn @@ Rpc.METHOD_JUMP (class_, true) in
+        ClientMethodJumps.go results true args.output_json;
+        exit 0
     | MODE_METHOD_JUMP_ANCESTORS class_ ->
-      let ic, oc = connect args in
-      let command = ServerMsg.METHOD_JUMP (class_, false) in
-      ServerMsg.cmd_to_channel oc command;
-      let results : MethodJumps.result list = Marshal.from_channel ic in
-      ClientMethodJumps.go results false args.output_json;
-      exit 0
-    | MODE_STATUS -> ClientCheckStatus.check_status connect args
-    | MODE_VERSION ->
-      Printf.printf "%s\n" (Build_id.build_id_ohai);
+        let results = Cmd.rpc conn @@ Rpc.METHOD_JUMP (class_, false) in
+        ClientMethodJumps.go results false args.output_json;
+        exit 0
+    | MODE_STATUS ->
+        let error_list = Cmd.rpc conn Rpc.STATUS in
+        if args.output_json || args.from <> "" || error_list = []
+        then ServerError.print_errorl args.output_json error_list stdout
+        else List.iter ClientCheckStatus.print_error_color error_list;
+        exit (if error_list = [] then 0 else 2)
     | MODE_SHOW classname ->
-        let ic, oc = connect args in
-        ServerMsg.cmd_to_channel oc (ServerMsg.SHOW classname);
+        let ic, oc = conn in
+        Cmd.(stream_request oc (SHOW classname));
         print_all ic
     | MODE_SEARCH (query, type_) ->
-        let ic, oc = connect args in
-        ServerMsg.cmd_to_channel oc (ServerMsg.SEARCH (query, type_));
-        let results : ServerSearch.result = Marshal.from_channel ic in
+        let results = Cmd.rpc conn @@ Rpc.SEARCH (query, type_) in
         ClientSearch.go results args.output_json;
         exit 0
     | MODE_LINT fnl ->
-        let ic, oc = connect args in
         let fnl = List.fold_left begin fun acc fn ->
           match Sys_utils.realpath fn with
           | Some path -> path :: acc
@@ -228,14 +204,11 @@ let rec main args retries =
               prerr_endlinef "Could not find file '%s'" fn;
               acc
         end [] fnl in
-        ServerMsg.cmd_to_channel oc (ServerMsg.LINT fnl);
-        let results : ServerLint.result = Marshal.from_channel ic in
+        let results = Cmd.rpc conn @@ Rpc.LINT fnl in
         ClientLint.go results args.output_json;
         exit 0
     | MODE_LINT_ALL code ->
-        let ic, oc = connect args in
-        ServerMsg.cmd_to_channel oc (ServerMsg.LINT_ALL code);
-        let results : ServerLint.result = Marshal.from_channel ic in
+        let results = Cmd.rpc conn @@ Rpc.LINT_ALL code in
         ClientLint.go results args.output_json;
         exit 0
     | MODE_UNSPECIFIED -> assert false

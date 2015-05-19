@@ -29,12 +29,7 @@ namespace {
   StaticString s_reschedule("<reschedule>");
 }
 
-const int64_t q_RescheduleWaitHandle$$QUEUE_DEFAULT =
-  AsioContext::QUEUE_DEFAULT;
-const int64_t q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO =
-  AsioContext::QUEUE_NO_PENDING_IO;
-
-Object c_RescheduleWaitHandle::ti_create(int64_t queue, int priority) {
+Object c_RescheduleWaitHandle::ti_create(int64_t queue, int64_t priority) {
   if (UNLIKELY(
       queue != q_RescheduleWaitHandle$$QUEUE_DEFAULT &&
       queue != q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO)) {
@@ -50,11 +45,11 @@ Object c_RescheduleWaitHandle::ti_create(int64_t queue, int priority) {
   }
 
   auto wh = makeSmartPtr<c_RescheduleWaitHandle>();
-  wh->initialize(static_cast<uint32_t>(queue), static_cast<uint32_t>(priority));
+  wh->initialize(static_cast<uint32_t>(queue), priority);
   return Object(std::move(wh));
 }
 
-void c_RescheduleWaitHandle::initialize(uint32_t queue, uint32_t priority) {
+void c_RescheduleWaitHandle::initialize(uint32_t queue, int64_t priority) {
   setState(STATE_SCHEDULED);
   setContextIdx(AsioSession::Get()->getCurrentContextIdx());
   m_queue = queue;

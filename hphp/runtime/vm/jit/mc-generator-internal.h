@@ -28,26 +28,6 @@
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
-// Generate an if-then block into a.  thenBlock is executed if cc is true.
-template <class Then>
-void ifThen(jit::X64Assembler& a, ConditionCode cc, Then thenBlock) {
-  Label done;
-  a.jcc8(ccNegate(cc), done);
-  thenBlock(a);
-  asm_label(a, done);
-}
-
-template <class Then>
-void ifThen(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock) {
-  auto then = v.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, sf, {done, then}};
-  v = then;
-  thenBlock(v);
-  if (!v.closed()) v << jmp{done};
-  v = done;
-}
-
 // Helper structs for jcc vs. jcc8.
 struct Jcc8 {
   static void branch(X64Assembler& a, ConditionCode cc, TCA dest) {

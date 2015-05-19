@@ -105,8 +105,8 @@ void PCFilter::PtrMap::clear() {
 void PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets,
                          OpcodeFilter isOpcodeAllowed) {
   for (auto range = offsets.cbegin(); range != offsets.cend(); ++range) {
-    TRACE(3, "\toffsets [%d, %d)\n", range->m_base, range->m_past);
-    for (PC pc = unit->at(range->m_base); pc < unit->at(range->m_past);
+    TRACE(3, "\toffsets [%d, %d)\n", range->base, range->past);
+    for (PC pc = unit->at(range->base); pc < unit->at(range->past);
          pc += instrLen((Op*)pc)) {
       if (isOpcodeAllowed(*reinterpret_cast<const Op*>(pc))) {
         TRACE(3, "\t\tpc %p\n", pc);
@@ -124,8 +124,8 @@ void PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets,
 void PCFilter::removeRanges(const Unit* unit, const OffsetRangeVec& offsets,
                             OpcodeFilter isOpcodeAllowed) {
   for (auto range = offsets.cbegin(); range != offsets.cend(); ++range) {
-    TRACE(3, "\toffsets [%d, %d) (remove)\n", range->m_base, range->m_past);
-    for (PC pc = unit->at(range->m_base); pc < unit->at(range->m_past);
+    TRACE(3, "\toffsets [%d, %d) (remove)\n", range->base, range->past);
+    for (PC pc = unit->at(range->base); pc < unit->at(range->past);
          pc += instrLen((Op*) pc)) {
       if (isOpcodeAllowed(*reinterpret_cast<const Op*>(pc))) {
         TRACE(3, "\t\tpc %p (remove)\n", pc);

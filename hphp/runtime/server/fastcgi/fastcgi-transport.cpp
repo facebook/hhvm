@@ -267,11 +267,13 @@ void FastCGITransport::onHeadersComplete() {
 
   // RequestURI needs script_filename and path_translated to not include
   // the document root
-  if (m_scriptName.find(m_docRoot) == 0) {
-    m_scriptName.erase(0, m_docRoot.length());
-  } else {
-    // if the document root isn't in the url set document root to /
-    m_docRoot = "/";
+  if (!m_scriptName.empty()) {
+    if (m_scriptName.find(m_docRoot) == 0) {
+      m_scriptName.erase(0, m_docRoot.length());
+    } else {
+      // if the document root isn't in the url set document root to /
+      m_docRoot = "/";
+    }
   }
 
   // XXX: This was originally done before remapping scriptName but that seemed

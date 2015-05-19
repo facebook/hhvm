@@ -178,13 +178,16 @@ struct IRUnit {
   uint32_t numIds(const Block*) const;
   uint32_t numIds(const IRInstruction*) const;
 
-  // Return the main FramePtr for the unit.  This is the result of the DefFP
-  // instruction on the entry block.
-  SSATmp* mainFP() const {
-    assertx(!entry()->empty() && entry()->begin()->is(DefFP));
-    return entry()->begin()->dst();
-  }
+  /*
+   * Find an SSATmp* from an id.
+   */
+  SSATmp* findSSATmp(uint32_t id) const;
 
+  /*
+   * Return the main FramePtr for the unit.  This is the result of the DefFP
+   * instruction on the entry block.
+   */
+  SSATmp* mainFP() const;
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -214,6 +217,10 @@ struct IRUnit {
    * Add an extra SSATmp to jmp.
    */
   void expandJmp(IRInstruction* jmp, SSATmp* value);
+
+private:
+  template<class... Args> SSATmp* newSSATmp(Args&&...);
+
 private:
   // Contains Block, IRInstruction, and SSATmp objects.
   Arena m_arena;
@@ -226,11 +233,13 @@ private:
 
   // Counters for m_arena allocations.
   uint32_t m_nextBlockId{0};
-  uint32_t m_nextTmpId{0};
   uint32_t m_nextInstId{0};
 
   // Entry point.
   Block* m_entry;
+
+  // Map from SSATmp ids to SSATmp*.
+  jit::vector<SSATmp*> m_ssaTmps;
 };
 
 //////////////////////////////////////////////////////////////////////

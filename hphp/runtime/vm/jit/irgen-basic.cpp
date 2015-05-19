@@ -116,7 +116,6 @@ void emitCGetL2(IRGS& env, int32_t id) {
 void emitVGetL(IRGS& env, int32_t id) {
   auto value = ldLoc(env, id, makeExit(env), DataTypeCountnessInit);
   auto const t = value->type();
-  always_assert(t <= TCell || t <= TBoxedCell);
 
   if (t <= TCell) {
     if (value->isA(TUninit)) {
@@ -124,6 +123,17 @@ void emitVGetL(IRGS& env, int32_t id) {
     }
     value = gen(env, Box, value);
     stLocRaw(env, id, fp(env), value);
+  } else if (t.maybe(TCell)) {
+    value = cond(env,
+                 [&](Block* taken) {
+                   return gen(env, CheckType, TBoxedCell, taken, value);
+                 },
+                 [&](SSATmp* box) { // Next: value is Boxed
+                   return gen(env, AssertType, TBoxedCell, box);
+                 },
+                 [&] { // Taken: value is not Boxed
+                   return gen(env, Box, value);
+                 });
   }
   pushIncRef(env, value);
 }

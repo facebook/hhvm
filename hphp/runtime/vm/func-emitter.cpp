@@ -499,7 +499,8 @@ static const StaticString
   s_nofcallbuiltin("NoFCallBuiltin"),
   s_variadicbyref("VariadicByRef"),
   s_noinjection("NoInjection"),
-  s_zendcompat("ZendCompat");
+  s_zendcompat("ZendCompat"),
+  s_numargs("NumArgs");
 
 int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
   int ret = Native::AttrNone;
@@ -526,6 +527,8 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
         // ZendCompat implies ActRec, no FCallBuiltin
         attrs_ |= AttrMayUseVV | AttrNoFCallBuiltin;
         ret |= Native::AttrActRec;
+      } else if (userAttrStrVal.get()->isame(s_numargs.get())) {
+        attrs_ |= AttrNumArgs;
       }
     }
   }

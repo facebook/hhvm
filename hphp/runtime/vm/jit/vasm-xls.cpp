@@ -1182,8 +1182,15 @@ void Vxls::allocBlocked(Interval* current) {
 
 // Assign r to this interval.
 void Vxls::assignReg(Interval* ivl, PhysReg r) {
-  ivl->reg = r;
-  active.push_back(ivl);
+  if (!ivl->fixed() && ivl->uses.empty()) {
+    ivl->reg = InvalidReg;
+    if (!ivl->constant) {
+      assignSpill(ivl);
+    }
+  } else {
+    ivl->reg = r;
+    active.push_back(ivl);
+  }
 }
 
 // split ivl at pos and spill the second part.  If pos is too close

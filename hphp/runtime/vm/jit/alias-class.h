@@ -132,12 +132,18 @@ struct AStack { SSATmp* base; int32_t offset; int32_t size; };
  */
 struct AMIState { int32_t offset; };
 
+/*
+ * A RefData referenced by a BoxedCell.
+ */
+struct ARef { SSATmp* boxed; };
+
 //////////////////////////////////////////////////////////////////////
 
 struct AliasClass {
   enum rep : uint32_t {  // bits for various location classes
     BEmpty   = 0,
-
+    // The relative order of the values are used in operator| to decide
+    // which specialization is more useful.
     BFrame   = 1 << 0,
     BProp    = 1 << 1,
     BElemI   = 1 << 2,
@@ -176,6 +182,7 @@ struct AliasClass {
   /* implicit */ AliasClass(AElemS);
   /* implicit */ AliasClass(AStack);
   /* implicit */ AliasClass(AMIState);
+  /* implicit */ AliasClass(ARef);
 
   /*
    * Exact equality.
@@ -227,6 +234,7 @@ struct AliasClass {
   folly::Optional<AElemS>   elemS() const;
   folly::Optional<AStack>   stack() const;
   folly::Optional<AMIState> mis() const;
+  folly::Optional<ARef>     ref() const;
 
   /*
    * Conditionally access specific known information, but also checking that
@@ -242,6 +250,7 @@ struct AliasClass {
   folly::Optional<AElemS>   is_elemS() const;
   folly::Optional<AStack>   is_stack() const;
   folly::Optional<AMIState> is_mis() const;
+  folly::Optional<ARef>     is_ref() const;
 
 private:
   enum class STag {
@@ -252,6 +261,7 @@ private:
     ElemS,
     Stack,
     MIState,
+    Ref,
   };
 
 private:
@@ -274,6 +284,7 @@ private:
     AElemS   m_elemS;
     AStack   m_stack;
     AMIState m_mis;
+    ARef     m_ref;
   };
 };
 

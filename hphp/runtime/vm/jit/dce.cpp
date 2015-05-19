@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/check.h"
 
 namespace HPHP { namespace jit {
 namespace {
@@ -298,7 +299,6 @@ bool canDCE(IRInstruction* inst) {
   case RetCtrl:
   case AsyncRetCtrl:
   case StRetVal:
-  case RetAdjustStk:
   case ReleaseVVOrExit:
   case GenericRetDecRefs:
   case StMem:
@@ -764,11 +764,30 @@ void optimizeActRecs(const BlockList& blocks,
 
 } // anonymous namespace
 
-void eliminateDeadCode(IRUnit& unit) {
+void mandatoryDCE(IRUnit& unit) {
+  if (removeUnreachable(unit)) {
+    // Removing unreachable incoming edges can change types, so if we changed
+    // anything we have to reflow to maintain that IR invariant.
+    reflowTypes(unit);
+  }
+  assertx(checkEverything(unit));
+}
+
+void fullDCE(IRUnit& unit) {
+  if (!RuntimeOption::EvalHHIRDeadCodeElim) {
+    // This portion of DCE cannot be turned off, because it restores IR
+    // invariants, and callers of fullDCE are allowed to rely on it for that.
+    return mandatoryDCE(unit);
+  }
+
   Timer dceTimer(Timer::optimize_dce);
 
   // kill unreachable code and remove any traces that are now empty
   auto const blocks = prepareBlocks(unit);
+
+  // At this point, all IR invariants must hold, because we've restored the
+  // only one allowed to be violated before fullDCE in prepareBlocks.
+  assertx(checkEverything(unit));
 
   // mark the essential instructions and add them to the initial
   // work list; this will also mark reachable exit traces. All

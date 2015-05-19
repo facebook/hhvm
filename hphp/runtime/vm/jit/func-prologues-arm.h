@@ -73,9 +73,7 @@ inline void funcPrologueSmashGuard(jit::TCA prologue, const Func* func) {
 
 jit::TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs);
 
-SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& coldCode,
-                        Func* func, bool funcIsMagic, int nPassed,
-                        jit::TCA& start, jit::TCA& aStart);
+SrcKey emitFuncPrologue(TransID transID, Func* func, int argc, TCA& start);
 
 }}}
 

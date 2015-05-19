@@ -9,7 +9,6 @@
  *
  */
 
-
 class Bloo {
   public function mybloo(): void {
     $x = <div>$</div>;

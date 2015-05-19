@@ -436,7 +436,8 @@ public:
    * for types that are too hard for us to represent, or we could generate
    * incorrect code by assuming certain possible values are impossible.)
    *
-   * Note: operator| and operator& guarantee commutativity.
+   * Note: operator| and operator& guarantee commutativity; operator- guarantees
+   * (a - b) <= a.
    */
   Type operator|(Type other) const;
   Type& operator|=(Type other) { return *this = *this | other; }
@@ -460,10 +461,9 @@ public:
   bool isUnion() const;
 
   /*
-   * Does this require a register to hold a DataType or value at runtime?
+   * Does this require a register to hold a DataType at runtime?
    */
   bool needsReg() const;
-  bool needsValueReg() const;
 
   /*
    * Return true if this corresponds to a type that is passed by (value/
@@ -703,7 +703,7 @@ private:
   static bits_t bitsFromDataType(DataType outer, DataType inner);
 
   /*
-   * Return false if a specialized type has a mismatching tag, else true.
+   * Check invariants and return false if the type is malformed.
    */
   bool checkValid() const;
 

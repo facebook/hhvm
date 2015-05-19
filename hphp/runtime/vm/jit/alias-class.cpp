@@ -51,10 +51,10 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
   auto const inst = sp->inst();
   switch (inst->op()) {
   case DefSP:
-    return StkPtrInfo { inst->src(0),
-      FPRelOffset{-inst->extra<DefSP>()->offset} };
-  case RetAdjustStk:
-    return StkPtrInfo { inst->src(0), FPRelOffset{2} };
+    return StkPtrInfo {
+      inst->src(0),
+      FPRelOffset { -inst->extra<DefSP>()->offset.offset }
+    };
 
   default:
     always_assert_flog(false, "unexpected StkPtr: {}\n", sp->toString());
@@ -159,6 +159,8 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
                                      acls.m_stack.size);
   case STag::MIState:
     return folly::hash::hash_combine(hash, acls.m_mis.offset);
+  case STag::Ref:
+    return folly::hash::hash_combine(hash, acls.m_ref.boxed);
   }
   not_reached();
 }
@@ -190,6 +192,7 @@ X(ElemI, elemI)
 X(ElemS, elemS)
 X(Stack, stack)
 X(MIState, mis)
+X(Ref, ref)
 
 #undef X
 
@@ -202,6 +205,7 @@ AliasClass::rep AliasClass::stagBit(STag tag) {
   case STag::ElemS:   return BElemS;
   case STag::Stack:   return BStack;
   case STag::MIState: return BMIState;
+  case STag::Ref:     return BRef;
   }
   always_assert(0);
 }
@@ -222,6 +226,9 @@ bool AliasClass::checkInvariants() const {
     assertx(m_elemS.key->isStatic());
     break;
   case STag::MIState:
+    break;
+  case STag::Ref:
+    assertx(m_ref.boxed->isA(TBoxedCell));
     break;
   }
 
@@ -246,6 +253,7 @@ bool AliasClass::equivData(AliasClass o) const {
                              m_stack.offset == o.m_stack.offset &&
                              m_stack.size == o.m_stack.size;
   case STag::MIState: return m_mis.offset == o.m_mis.offset;
+  case STag::Ref:     return m_ref.boxed == o.m_ref.boxed;
   }
   not_reached();
 }
@@ -266,6 +274,7 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
   case STag::ElemI:
   case STag::ElemS:
   case STag::MIState:
+  case STag::Ref:
     assertx(!a.equivData(b));
     break;
 
@@ -335,31 +344,43 @@ AliasClass AliasClass::operator|(AliasClass o) const {
 
   auto const unioned = static_cast<rep>(m_bits | o.m_bits);
 
-  // Note: union operations are guaranteed to be commutative, so if there are
-  // two non-None stags, we have to consistently choose between them.  For now
-  // we throw both away in any case where they differ, and try to merge them
-  // with unionData if they are the same.  If only one had an stag, we can keep
-  // it only if the other didn't have that bit set.
-  auto const stag1 = m_stag;
-  auto const stag2 = o.m_stag;
+  // If they have the same stag, try to merge them with unionData.
+  auto stag1 = m_stag;
+  auto stag2 = o.m_stag;
   if (stag1 == stag2) return unionData(unioned, *this, o);
 
-  auto ret = AliasClass{unioned};
-  if (stag1 != STag::None && stag2 != STag::None) return ret;
-  if (stag2 != STag::None) return o | *this;
-  if (o.m_bits & stagBit(stag1)) return ret;
+  // If one of the alias classes have a non-None stag, we can only keep it if
+  // the other doesn't have the corresponding bit set.
+  if (stag1 != STag::None && (o.m_bits & stagBit(stag1))) stag1 = STag::None;
+  if (stag2 != STag::None && (m_bits & stagBit(stag2))) stag2 = STag::None;
 
-  switch (stag1) {
+  auto ret = AliasClass{unioned};
+  if (stag1 == stag2) return ret;       // both None.
+
+  // Note: union operations are guaranteed to be commutative, so if there are
+  // two non-None stags, we have to consistently choose between them. For now
+  // we keep the one with a smaller `rep' value, instead of discarding both.
+  const AliasClass* chosen = &o;
+  auto stag = stag2;
+  if (stag1 != STag::None) {
+    if (stag2 == STag::None || stagBit(stag1) < stagBit(stag2)) {
+      chosen = this;
+      stag = stag1;
+    }
+  }
+
+  switch (stag) {
   case STag::None:
     break;
-  case STag::Frame:   new (&ret.m_frame) AFrame(m_frame); break;
-  case STag::Prop:    new (&ret.m_prop) AProp(m_prop); break;
-  case STag::ElemI:   new (&ret.m_elemI) AElemI(m_elemI); break;
-  case STag::ElemS:   new (&ret.m_elemS) AElemS(m_elemS); break;
-  case STag::Stack:   new (&ret.m_stack) AStack(m_stack); break;
-  case STag::MIState: new (&ret.m_mis) AMIState(m_mis); break;
+  case STag::Frame:   new (&ret.m_frame) AFrame(chosen->m_frame); break;
+  case STag::Prop:    new (&ret.m_prop) AProp(chosen->m_prop); break;
+  case STag::ElemI:   new (&ret.m_elemI) AElemI(chosen->m_elemI); break;
+  case STag::ElemS:   new (&ret.m_elemS) AElemS(chosen->m_elemS); break;
+  case STag::Stack:   new (&ret.m_stack) AStack(chosen->m_stack); break;
+  case STag::MIState: new (&ret.m_mis) AMIState(chosen->m_mis); break;
+  case STag::Ref:     new (&ret.m_ref) ARef(chosen->m_ref); break;
   }
-  ret.m_stag = stag1;
+  ret.m_stag = stag;
   return ret;
 }
 
@@ -372,6 +393,7 @@ bool AliasClass::subclassData(AliasClass o) const {
   case STag::ElemI:
   case STag::ElemS:
   case STag::MIState:
+  case STag::Ref:
     return equivData(o);
   case STag::Stack:
     if (m_stack.base != o.m_stack.base) return false;
@@ -468,6 +490,12 @@ bool AliasClass::maybeData(AliasClass o) const {
 
   case STag::MIState:
     return m_mis.offset == o.m_mis.offset;
+
+  /*
+   * Two boxed cells can generally refer to the same RefData.
+   */
+  case STag::Ref:
+    return true;
   }
   not_reached();
 }
@@ -529,6 +557,7 @@ AliasClass canonicalize(AliasClass a) {
   case T::None:    return a;
   case T::Frame:   return a;
   case T::MIState: return a;
+  case T::Ref:     return a;
   case T::Prop:    a.m_prop.obj = canonical(a.m_prop.obj);   return a;
   case T::ElemI:   a.m_elemI.arr = canonical(a.m_elemI.arr); return a;
   case T::ElemS:   a.m_elemS.arr = canonical(a.m_elemS.arr); return a;
@@ -574,6 +603,9 @@ std::string show(AliasClass acls) {
     break;
   case A::STag::MIState:
     folly::format(&ret, "Mis {}", acls.m_mis.offset);
+    break;
+  case A::STag::Ref:
+    folly::format(&ret, "Ref {}", acls.m_ref.boxed->id());
     break;
   }
 

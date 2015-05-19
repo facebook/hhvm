@@ -106,19 +106,6 @@ struct PureStore    { AliasClass dst; SSATmp* value; };
 struct PureSpillFrame { AliasClass stk; AliasClass ctx; };
 
 /*
- * Iterator instructions are special enough that they just have their own
- * top-level memory effect type.  In general, they can both read and write to
- * the relevant locals, and can re-enter the VM and read and write anything on
- * the heap.  The `kills' set is an AliasClass that is killed by virtue of the
- * potential VM re-entry (i.e. the eval stack below some depth).
- */
-struct IterEffects    { SSATmp* fp; uint32_t id; AliasClass kills; };
-struct IterEffects2   { SSATmp* fp;
-                        uint32_t id1;
-                        uint32_t id2;
-                        AliasClass kills; };
-
-/*
  * Calls are somewhat special enough that they get a top-level effect.
  *
  * The `destroys_locals' flag indicates whether the call can change locals in
@@ -172,15 +159,6 @@ struct ReturnEffects  { AliasClass kills; };
 struct ExitEffects    { AliasClass live; AliasClass kills; };
 
 /*
- * InterpOne instructions carry a bunch of information about how they may
- * affect locals.  It's special enough that we just pass it through.
- *
- * We don't make use of it in consumers of this module yet, except that the
- * `kills' set can't have upward exposed uses.
- */
-struct InterpOneEffects { AliasClass kills; };
-
-/*
  * "Irrelevant" effects means it doesn't do anything we currently care about
  * for consumers of this module.  If you want to care about a new kind of
  * memory effect, you get to re-audit everything---have fun. :)
@@ -197,12 +175,9 @@ using MemEffects = boost::variant< GeneralEffects
                                  , PureLoad
                                  , PureStore
                                  , PureSpillFrame
-                                 , IterEffects
-                                 , IterEffects2
                                  , CallEffects
                                  , ReturnEffects
                                  , ExitEffects
-                                 , InterpOneEffects
                                  , IrrelevantEffects
                                  , UnknownEffects
                                  >;
@@ -212,12 +187,6 @@ using MemEffects = boost::variant< GeneralEffects
 /*
  * Return information about the kinds of memory effects an instruction may
  * have.  See the above branches of MemEffects for more information.
- *
- * Important note: right now, some of the branches of MemEffects are relatively
- * specific (e.g. IterEffects) because of instructions that have odd shapes.
- * This may eventually go away, but for now this means it's very important that
- * users of this module be aware of potentially "suprising" effects of some of
- * those instructions when runtime flags like EnableArgsInBacktraces are set.
  */
 MemEffects memory_effects(const IRInstruction&);
 

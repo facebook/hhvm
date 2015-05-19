@@ -26,15 +26,16 @@
 #include <stack>
 #include <utility>
 
-namespace HPHP {
+namespace HPHP { namespace thrift {
+/////////////////////////////////////////////////////////////////////////////
 
-static const uint8_t VERSION_MASK = 0x1f;
-static const uint8_t VERSION = 2;
-static const uint8_t VERSION_LOW = 1;
-static const uint8_t VERSION_DOUBLE_BE = 2;
-static const uint8_t PROTOCOL_ID = 0x82;
-static const uint8_t TYPE_MASK = 0xe0;
-static const uint8_t TYPE_SHIFT_AMOUNT = 5;
+const uint8_t VERSION_MASK = 0x1f;
+const uint8_t VERSION = 2;
+const uint8_t VERSION_LOW = 1;
+const uint8_t VERSION_DOUBLE_BE = 2;
+const uint8_t PROTOCOL_ID = 0x82;
+const uint8_t TYPE_MASK = 0xe0;
+const uint8_t TYPE_SHIFT_AMOUNT = 5;
 
 enum CState {
   STATE_CLEAR,
@@ -168,7 +169,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(CompactRequestData, s_compact_request_data);
 
 static void thrift_error(const String& what, TError why) ATTRIBUTE_NORETURN;
 static void thrift_error(const String& what, TError why) {
-  throw create_object("TProtocolException", make_packed_array(what, why));
+  throw create_object(s_TProtocolException, make_packed_array(what, why));
 }
 
 class CompactWriter {
@@ -218,7 +219,7 @@ class CompactWriter {
 
       // Get field specification
       const Array& spec = HHVM_FN(hphp_get_static_property)(obj->getClassName(),
-                                                       "_TSPEC", false)
+                                                       s_TSPEC, false)
         .toArray();
 
       // Write each member
@@ -233,9 +234,9 @@ class CompactWriter {
         Array fieldSpec = specIter.second().toArray();
 
         String fieldName = fieldSpec
-          .rvalAt(PHPTransport::s_var, AccessFlags::Error_Key).toString();
+          .rvalAt(s_var, AccessFlags::Error_Key).toString();
         TType fieldType = (TType)fieldSpec
-          .rvalAt(PHPTransport::s_type, AccessFlags::Error_Key).toByte();
+          .rvalAt(s_type, AccessFlags::Error_Key).toByte();
 
         Variant fieldVal = obj->o_get(fieldName, true, obj->getClassName());
 
@@ -384,13 +385,13 @@ class CompactWriter {
 
     void writeMap(Array arr, const Array& spec) {
       TType keyType = (TType)spec
-        .rvalAt(PHPTransport::s_ktype, AccessFlags::Error_Key).toByte();
+        .rvalAt(s_ktype, AccessFlags::Error_Key).toByte();
       TType valueType = (TType)spec
-        .rvalAt(PHPTransport::s_vtype, AccessFlags::Error_Key).toByte();
+        .rvalAt(s_vtype, AccessFlags::Error_Key).toByte();
 
-      Array keySpec = spec.rvalAt(PHPTransport::s_key, AccessFlags::Error_Key)
+      Array keySpec = spec.rvalAt(s_key, AccessFlags::Error_Key)
         .toArray();
-      Array valueSpec = spec.rvalAt(PHPTransport::s_val, AccessFlags::Error_Key)
+      Array valueSpec = spec.rvalAt(s_val, AccessFlags::Error_Key)
         .toArray();
 
       writeMapBegin(keyType, valueType, arr.size());
@@ -405,9 +406,9 @@ class CompactWriter {
 
     void writeList(Array arr, const Array& spec, CListType listType) {
       TType valueType = (TType)spec
-        .rvalAt(PHPTransport::s_etype, AccessFlags::Error_Key).toByte();
+        .rvalAt(s_etype, AccessFlags::Error_Key).toByte();
       Array valueSpec = spec
-        .rvalAt(PHPTransport::s_elem, AccessFlags::Error_Key).toArray();
+        .rvalAt(s_elem, AccessFlags::Error_Key).toArray();
 
       writeListBegin(valueType, arr.size());
 
@@ -525,13 +526,13 @@ class CompactReader {
       if (type == T_REPLY) {
         Object ret = create_object(resultClassName, Array());
         Variant spec = HHVM_FN(hphp_get_static_property)(resultClassName,
-                                                         "_TSPEC", false);
+                                                         s_TSPEC, false);
         readStruct(ret, spec.toArray());
         return ret;
       } else if (type == T_EXCEPTION) {
-        Object exn = create_object("TApplicationException", Array());
+        Object exn = create_object(s_TApplicationException, Array());
         Variant spec = HHVM_FN(hphp_get_static_property)(
-                                      "TApplicationException", "_TSPEC", false);
+                                      s_TApplicationException, s_TSPEC, false);
         readStruct(exn, spec.toArray());
         throw exn;
       } else {
@@ -557,8 +558,8 @@ class CompactReader {
         if (!fieldSpecVariant.isNull()) {
           Array fieldSpec = fieldSpecVariant.toArray();
 
-          String fieldName = fieldSpec.rvalAt(PHPTransport::s_var).toString();
-          auto expectedType = (TType)fieldSpec.rvalAt(PHPTransport::s_type)
+          String fieldName = fieldSpec.rvalAt(s_var).toString();
+          auto expectedType = (TType)fieldSpec.rvalAt(s_type)
             .toInt64();
 
           if (typesAreCompatible(fieldType, expectedType)) {
@@ -641,7 +642,7 @@ class CompactReader {
           return init_null();
 
         case T_STRUCT: {
-            Variant className = spec.rvalAt(PHPTransport::s_class);
+            Variant className = spec.rvalAt(s_class);
             if (className.isNull()) {
               thrift_error("no class type in spec", ERR_INVALID_DATA);
             }
@@ -653,10 +654,10 @@ class CompactReader {
             }
 
             Variant newStructSpec =
-              HHVM_FN(hphp_get_static_property)(classNameString, "_TSPEC",
+              HHVM_FN(hphp_get_static_property)(classNameString, s_TSPEC,
                                                 false);
 
-            if (!newStructSpec.is(KindOfArray)) {
+            if (!newStructSpec.isArray()) {
               thrift_error("invalid type of spec", ERR_INVALID_DATA);
             }
 
@@ -828,13 +829,13 @@ class CompactReader {
       uint32_t size;
       readMapBegin(keyType, valueType, size);
 
-      Array keySpec = spec.rvalAt(PHPTransport::s_key,
+      Array keySpec = spec.rvalAt(s_key,
         AccessFlags::Error).toArray();
-      Array valueSpec = spec.rvalAt(PHPTransport::s_val,
+      Array valueSpec = spec.rvalAt(s_val,
         AccessFlags::Error).toArray();
-      String format = spec.rvalAt(PHPTransport::s_format,
+      String format = spec.rvalAt(s_format,
         AccessFlags::None).toString();
-      if (format.equal(PHPTransport::s_collection)) {
+      if (format.equal(s_collection)) {
         auto ret(makeSmartPtr<c_Map>(size));
         for (uint32_t i = 0; i < size; i++) {
           Variant key = readField(keySpec, keyType);
@@ -860,11 +861,11 @@ class CompactReader {
       uint32_t size;
       readListBegin(valueType, size);
 
-      Array valueSpec = spec.rvalAt(PHPTransport::s_elem,
+      Array valueSpec = spec.rvalAt(s_elem,
                                     AccessFlags::Error_Key).toArray();
-      String format = spec.rvalAt(PHPTransport::s_format,
+      String format = spec.rvalAt(s_format,
         AccessFlags::None).toString();
-      if (format.equal(PHPTransport::s_collection)) {
+      if (format.equal(s_collection)) {
         auto const pvec(makeSmartPtr<c_Vector>(size));
         for (uint32_t i = 0; i < size; i++) {
           pvec->t_add(readField(valueSpec, valueType));
@@ -886,11 +887,11 @@ class CompactReader {
       uint32_t size;
       readListBegin(valueType, size);
 
-      Array valueSpec = spec.rvalAt(PHPTransport::s_elem,
+      Array valueSpec = spec.rvalAt(s_elem,
                                     AccessFlags::Error_Key).toArray();
-      String format = spec.rvalAt(PHPTransport::s_format,
+      String format = spec.rvalAt(s_format,
         AccessFlags::None).toString();
-      if (format.equal(PHPTransport::s_collection)) {
+      if (format.equal(s_collection)) {
         auto set_ret = makeSmartPtr<c_Set>(size);
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(valueSpec, valueType);
@@ -1045,9 +1046,9 @@ Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
   CompactReader reader(transportobj);
   Object ret = create_object(obj_typename, Array());
   Variant spec = HHVM_FN(hphp_get_static_property)(obj_typename,
-                                                   "_TSPEC", false);
+                                                   s_TSPEC, false);
   reader.readStruct(ret, spec.toArray());
   return ret;
 }
 
-}
+}}

@@ -94,6 +94,7 @@ Ptr ptr_union(Ptr a, Ptr b) {
   if (ptr_subtype(a, b)) return b;
   if (ptr_subtype(b, a)) return a;
 #define X(y) if (ptr_subtype(a, y) && ptr_subtype(b, y)) return y;
+  X(Ptr::Memb);
   X(Ptr::RFrame);
   X(Ptr::RStk);
   X(Ptr::RGbl);
@@ -121,6 +122,7 @@ folly::Optional<Ptr> ptr_isect(Ptr a, Ptr b) {
     return ptr_isect(b, a);
   }
   if (has_ref(a) && has_ref(b)) {
+    assertx(a != Ptr::Ref && b != Ptr::Ref); // otherwise ptr_subtype() is true.
     auto const nonref = ptr_isect(remove_ref(a), remove_ref(b));
     if (nonref) return ptr_union(Ptr::Ref, *nonref);
     return Ptr::Ref;
@@ -131,11 +133,43 @@ folly::Optional<Ptr> ptr_isect(Ptr a, Ptr b) {
   return folly::none;
 }
 
+// This guarantees that (a - b) <= a.
+folly::Optional<Ptr> ptr_diff(Ptr a, Ptr b) {
+  // has_ref() doesn't work for Ptr::Unk.
+  if (b == Ptr::Unk) return folly::none;
+  if (a == Ptr::Unk) return a;
+
+  // remove_ref() gives us Ptr::Unk for Ptr::Ref, so special case for Ptr::Ref
+  // before calling it.
+  if (a == Ptr::Ref) {
+    if (has_ref(b)) return folly::none;
+    return a;
+  }
+
+  auto const hasRef = has_ref(a) && !has_ref(b);
+  auto const noRefA = remove_ref(a);
+  if (b == Ptr::Ref) {
+    return noRefA;
+  }
+
+  auto const noRefB = remove_ref(b);
+  if (ptr_subtype(noRefA, noRefB)) {
+    if (hasRef) return Ptr::Ref;
+    return folly::none;
+  }
+
+  if (hasRef) return a;
+  return noRefA;
+}
+
 ALWAYS_INLINE Ptr operator|(Ptr a, Ptr b) {
   return ptr_union(a, b);
 }
 ALWAYS_INLINE folly::Optional<Ptr> operator&(Ptr a, Ptr b) {
   return ptr_isect(a, b);
+}
+ALWAYS_INLINE folly::Optional<Ptr> operator-(Ptr a, Ptr b) {
+  return ptr_diff(a, b);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -345,6 +379,7 @@ bool Type::checkValid() const {
     assertx((!(m_bits & kAnyObj) || !(m_bits & kAnyArr)) &&
            "Conflicting specialization");
   }
+  // Never create such a thing like PtrToFooBottom.
   if ((m_bits >> kPtrShift) == 0) { // !maybe(PtrToGen)
     assertx(m_ptrKind == 0);
   }
@@ -493,30 +528,57 @@ Type Type::operator&(Type rhs) const {
 
 Type Type::operator-(Type rhs) const {
   auto lhs = *this;
-
+  if (rhs == TBottom) return lhs;
   if (lhs <= rhs) return TBottom;
+  if (lhs.hasConstVal()) return lhs;    // not covered by rhs.
 
-  // If `rhs' has a constant, but `lhs' doesn't, just (conservatively) return
-  // `lhs', rather than trying to represent things like "everything except
-  // Int<24>".
-  if (rhs.m_hasConstVal) return lhs;
-
-  // If we have pointers to different kinds of things, be conservative unless
-  // `rhs' is an unknown pointer type, in which case we can just subtract the
-  // pointers but keep our kind.
-  if (lhs.ptrKind() != rhs.ptrKind() &&
-      rhs.ptrKind() != Ptr::Unk) {
+  // If `rhs' has a constant value, but `lhs' doesn't, just (conservatively)
+  // return `lhs', rather than trying to represent things like "everything
+  // except Int<24>". Boolean is a special case.
+  if (rhs.m_hasConstVal) {
+    if (rhs <= TBool && lhs <= TBool) {
+      auto const res = !rhs.boolVal();
+      if (lhs.hasConstVal() && lhs.boolVal() != res) return TBottom;
+      return cns(res);
+    }
     return lhs;
   }
 
-  auto bits = lhs.m_bits & ~rhs.m_bits;
-  auto const ptr = lhs.ptrKind();
+  // Calculate the pointer part of the result type.
+  auto const ptrPart = [&]() -> Type {
+    // If `lhs' is not a pointer, result won't be too.
+    if ((lhs.m_bits & TPtrToGen.m_bits) == 0) return TBottom;
+    auto const lhsPtr = lhs & TPtrToGen;
+    if ((rhs.m_bits & TPtrToGen.m_bits) == 0) return lhsPtr;
+    auto const rhsPtr = rhs & TPtrToGen;
 
+    // We have to be conservative in pointer differences.
+    // (Ptr1, Bit1) - (Ptr2, Bits2) =
+    //   (Ptr1, Bits1 - Bits2),    if (Ptr1 <= Ptr2)
+    //   (Ptr1 - Ptr2, Bits1),     if (Bits1 <= Bits2)
+    //   (Ptr1, Bits1),            otherwise (conservative)
+    if (ptr_subtype(lhsPtr.ptrKind(), rhsPtr.ptrKind())) {
+      return (lhsPtr.deref() - rhsPtr.deref()).ptr(lhsPtr.ptrKind());
+    }
+    if (lhsPtr.deref() <= rhsPtr.deref()) {
+      auto const ptrKind = lhsPtr.ptrKind() - rhsPtr.ptrKind();
+      assertx(!!ptrKind);               // otherwise covered above.
+      return lhsPtr.deref().ptr(*ptrKind);
+    }
+    // Need to be conservative otherwise.
+    return lhsPtr;
+  }();
+
+  auto bits = lhs.m_bits & ~rhs.m_bits;
   // Put back any bits for which `rhs' admitted a nontrivial specialization.
   // If these specializations would be subtracted out of lhs's specializations,
   // the finalization below will take care of re-eliminating it.
   if (rhs.arrSpec()) bits |= (lhs.m_bits & rhs.m_bits & kAnyArr);
   if (rhs.clsSpec()) bits |= (lhs.m_bits & rhs.m_bits & kAnyObj);
+
+  // Stop looking at pointers, as it is already taken care of in `lhsPtr'.
+  bits &= ~TPtrToGen.m_bits;
+  if (bits == kBottom) return ptrPart;
 
   // Perform the specialization finalization step twice:
   //
@@ -524,19 +586,11 @@ Type Type::operator-(Type rhs) const {
   //    bits, but only ones present in `rhs'.
   // 2. If any specialized bits of `lhs' remain, reintroduce the `lhs'
   //    specializations.
-  auto ty = Type(bits, ptr)
+  auto const ty = Type(bits, Ptr::Unk)
     .specialize(lhs.spec() - rhs.spec(), rhs.m_bits)
     .specialize(lhs.spec());
 
-  if (lhs.m_hasConstVal) {
-    // If `lhs' was a constant, we should not have somehow developed a
-    // specialization in this process (with the exception of array constants,
-    // which pretend to be ArrayKind specializations).
-    assertx(!ty.isSpecialized() || ty.arrSpec());
-    ty.m_hasConstVal = true;
-    ty.m_extra = lhs.m_extra;
-  }
-  return ty;
+  return ty | ptrPart;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

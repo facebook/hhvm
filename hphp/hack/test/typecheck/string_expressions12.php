@@ -11,10 +11,7 @@
 
 class Dude {
   private function blah(): :fbt {
-    return
-      <fbt project="blah">
-        Some Text
-      </fbt>;
+    return <fbt project="blah">Some Text</fbt>;
   }
 }
 

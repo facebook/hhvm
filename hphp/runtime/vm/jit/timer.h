@@ -42,6 +42,7 @@
   TIMER_NAME(translateRegion_irGeneration)      \
   TIMER_NAME(translateTracelet)                 \
   TIMER_NAME(translateTracelet_irGeneration)    \
+  TIMER_NAME(vasm_layout)                       \
   TIMER_NAME(vasm_xls)                          \
   TIMER_NAME(vasm_xls_spill)                    \
   TIMER_NAME(vasm_jumps)                        \

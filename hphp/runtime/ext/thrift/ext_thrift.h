@@ -22,7 +22,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 
-namespace HPHP {
+namespace HPHP { namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
 
 void HHVM_FUNCTION(thrift_protocol_write_binary,
@@ -63,6 +63,5 @@ Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      const String& obj_typename);
 
 ///////////////////////////////////////////////////////////////////////////////
-}
-
+}}
 #endif // incl_HPHP_EXT_THRIFT_H_

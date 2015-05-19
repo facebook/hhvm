@@ -15,7 +15,8 @@ Makefile
 /runtime/ir-opcode-generated.h
 /hphp-build-info.cpp
 /hphp-repo-schema.h
-/runtime/all-scan.h
+/scan-methods/all-scan.h
+/scan-methods/all-scan-decl.h
 
 # precompiled headers
 *_cotire.cmake

@@ -179,11 +179,6 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (GeneralEffects l)  { load(env, l.loads);
                               kill(env, l.kills); },
 
-    [&] (InterpOneEffects m) {
-      addAllGen(env);
-      kill(env, m.kills);
-    },
-
     [&] (ReturnEffects l) {
       if (inst.is(InlineReturn)) {
         // Returning from an inlined function.  This adds nothing to gen, but
@@ -220,24 +215,6 @@ void visit(Local& env, IRInstruction& inst) {
       load(env, AFrameAny);  // Not necessary for some builtin calls, but it
                              // depends which builtin...
       load(env, l.stack);
-      kill(env, l.kills);
-    },
-
-    [&] (IterEffects l) {
-      if (RuntimeOption::EnableArgsInBacktraces) {
-        load(env, AFrameAny);
-      }
-      load(env, AFrame { l.fp, l.id });
-      load(env, AHeapAny);
-      kill(env, l.kills);
-    },
-    [&] (IterEffects2 l) {
-      if (RuntimeOption::EnableArgsInBacktraces) {
-        load(env, AFrameAny);
-      }
-      load(env, AFrame { l.fp, l.id1 });
-      load(env, AFrame { l.fp, l.id2 });
-      load(env, AHeapAny);
       kill(env, l.kills);
     },
 

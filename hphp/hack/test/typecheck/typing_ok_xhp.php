@@ -9,13 +9,11 @@
  *
  */
 
-class A {
-}
+class A {}
 
-class :x:dumb {
-}
+class :x:dumb {}
 
 function foo(mixed $x): void {
   // Anything goes in XHP
-  $x = <x:dumb> {0} {'hello'} {$x} {new A()} </x:dumb>;
+  $x = <x:dumb>{0} {'hello'} {$x} {new A()}</x:dumb>;
 }

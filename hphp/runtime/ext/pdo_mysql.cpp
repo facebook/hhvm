@@ -1339,7 +1339,15 @@ bool PDOMySqlStatement::cursorCloser() {
 PDOMySql::PDOMySql() : PDODriver("mysql") {}
 
 SmartPtr<PDOResource> PDOMySql::createResourceImpl() {
-  return makeSmartPtr<PDOMySqlResource>(std::make_shared<PDOMySqlConnection>());
+  return makeSmartPtr<PDOMySqlResource>(
+      std::make_shared<PDOMySqlConnection>());
+}
+
+SmartPtr<PDOResource> PDOMySql::createResourceImpl(
+  const sp_PDOConnection& conn
+) {
+  return makeSmartPtr<PDOMySqlResource>(
+      std::dynamic_pointer_cast<PDOMySqlConnection>(conn));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

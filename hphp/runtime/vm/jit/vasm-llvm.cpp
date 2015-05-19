@@ -20,6 +20,7 @@
 #include "hphp/util/disasm.h"
 
 #include "hphp/runtime/base/arch.h"
+#include "hphp/runtime/base/thread-init-fini.h"
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
@@ -278,16 +279,12 @@ void reportLLVMError(void* data, const std::string& err, bool gen_crash_diag) {
   always_assert_flog(false, "LLVM fatal error: {}", err);
 }
 
-struct LLVMErrorInit {
-  LLVMErrorInit() {
-    llvm::install_fatal_error_handler(reportLLVMError);
-  }
+InitFiniNode llvmInit(
+  []() { llvm::install_fatal_error_handler(reportLLVMError); },
+  InitFiniNode::When::ProcessInit);
 
-  ~LLVMErrorInit() {
-    llvm::remove_fatal_error_handler();
-  }
-};
-static LLVMErrorInit s_llvmErrorInit;
+InitFiniNode llvmExit(llvm::remove_fatal_error_handler,
+                      InitFiniNode::When::ProcessExit);
 
 std::string showNewCode(const Vasm::AreaList& areas) DEBUG_ONLY;
 std::string showNewCode(const Vasm::AreaList& areas) {

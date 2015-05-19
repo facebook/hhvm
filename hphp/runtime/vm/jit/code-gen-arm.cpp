@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/back-end-arm.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
 #include "hphp/runtime/vm/jit/punt.h"
@@ -213,6 +214,7 @@ DELEGATE_OPCODE(CheckNonNull)
 DELEGATE_OPCODE(AssertNonNull)
 DELEGATE_OPCODE(AssertStk)
 DELEGATE_OPCODE(AssertType)
+DELEGATE_OPCODE(LdARFuncPtr)
 
 DELEGATE_OPCODE(CheckStk)
 DELEGATE_OPCODE(CheckType)
@@ -404,7 +406,6 @@ PUNT_OPCODE(NativeImpl)
 PUNT_OPCODE(RetCtrl)
 PUNT_OPCODE(AsyncRetCtrl)
 PUNT_OPCODE(StRetVal)
-PUNT_OPCODE(RetAdjustStk)
 PUNT_OPCODE(StMem)
 PUNT_OPCODE(StRef)
 PUNT_OPCODE(StElem)
@@ -518,18 +519,6 @@ PUNT_OPCODE(OrdStr)
 
 //////////////////////////////////////////////////////////////////////
 
-// copy of ifThen in mc-generator-internal.h
-template <class Then>
-void ifThen(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock) {
-  auto then = v.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, sf, {done, then}};
-  v = then;
-  thenBlock(v);
-  if (!v.closed()) v << jmp{done};
-  v = done;
-}
-
 template <class Then>
 void ifZero(Vout& v, unsigned bit, Vreg r, Then thenBlock) {
   auto then = v.makeBlock();
@@ -557,23 +546,6 @@ Vreg condZero(Vout& v, Vreg r, Vreg dst, T t, F f) {
   v = done;
   v << phidef{v.makeTuple(VregList{dst})};
   return dst;
-}
-
-// copy of ifThenElse from code-gen-x64.cpp
-template <class Then, class Else>
-void ifThenElse(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock,
-                Else elseBlock) {
-  auto thenLabel = v.makeBlock();
-  auto elseLabel = v.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, sf, {elseLabel, thenLabel}};
-  v = thenLabel;
-  thenBlock(v);
-  if (!v.closed()) v << jmp{done};
-  v = elseLabel;
-  elseBlock(v);
-  if (!v.closed()) v << jmp{done};
-  v = done;
 }
 
 Vloc CodeGenerator::srcLoc(unsigned i) const {
@@ -1234,13 +1206,6 @@ void CodeGenerator::cgLdFuncNumParams(IRInstruction* inst) {
   // auto tmp = v.makeReg();
   // v << loadl{src, tmp};
   // v << shrli{1, tmp, dst, v.makeReg()};
-}
-
-void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
-  auto dst     = dstLoc(0).reg();
-  auto base    = srcLoc(0).reg();
-  auto offset  = cellsToBytes(inst->extra<LdARFuncPtr>()->offset);
-  vmain() << load{base[offset + AROFF(m_func)], dst};
 }
 
 void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {

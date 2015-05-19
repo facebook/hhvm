@@ -6347,10 +6347,17 @@ OPTBLD_INLINE void iopFCallBuiltin(IOP_ARGS) {
     raise_error("Call to undefined function %s()",
                 vmfp()->m_func->unit()->lookupLitstrId(id)->data());
   }
+
   TypedValue* args = vmStack().indTV(numArgs-1);
   TypedValue ret;
   if (Native::coerceFCallArgs(args, numArgs, numNonDefault, func)) {
-    Native::callFunc<true, false>(func, nullptr, args, ret);
+    if (func->hasVariadicCaptureParam()) {
+      assertx(numArgs > 0);
+      assertx(args[1-numArgs].m_type == KindOfArray);
+      Native::callFunc<true, true>(func, nullptr, args, numNonDefault, ret);
+    } else {
+      Native::callFunc<true, false>(func, nullptr, args, numNonDefault, ret);
+    }
   } else {
     if (func->attrs() & AttrParamCoerceModeNull) {
       ret.m_type = KindOfNull;

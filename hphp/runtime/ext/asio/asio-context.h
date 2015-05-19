@@ -48,7 +48,7 @@ struct AsioContext final {
     m_runnableQueue.push_back(wait_handle);
   }
   void schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue,
-                uint32_t priority);
+                int64_t priority);
 
   template <class TWaitHandle>
   uint32_t registerTo(smart::vector<TWaitHandle*>& vec, TWaitHandle* wh);
@@ -65,11 +65,11 @@ struct AsioContext final {
 
   void runUntil(c_WaitableWaitHandle* wait_handle);
 
-  static const uint32_t QUEUE_DEFAULT       = 0;
-  static const uint32_t QUEUE_NO_PENDING_IO = 1;
+  static constexpr uint32_t QUEUE_DEFAULT       = 0;
+  static constexpr uint32_t QUEUE_NO_PENDING_IO = 1;
 
 private:
-  typedef smart::map<uint32_t, smart::deque<c_RescheduleWaitHandle*>>
+  typedef smart::map<int64_t, smart::deque<c_RescheduleWaitHandle*>>
     reschedule_priority_queue_t;
 
   bool runSingle(reschedule_priority_queue_t& queue);

@@ -150,7 +150,7 @@ int XDebugThreadBreakpoints::addBreakpoint(XDebugBreakpoint& bp) {
 
       // If the file/line combo is invalid, throw an error
       if (!phpAddBreakPointLine(unit, bp.line)) {
-        throw XDebugServer::ERROR_BREAKPOINT_INVALID;
+        throw XDebugError::BreakpointInvalid;
       }
       add_line_breakpoint(id, bp, unit);
       break;
@@ -174,7 +174,7 @@ int XDebugThreadBreakpoints::addBreakpoint(XDebugBreakpoint& bp) {
       if (func != nullptr) {
         add_func_breakpoint(id, bp, func);
       } else if (!bp.className.isNull() && cls != nullptr) {
-        throw XDebugServer::ERROR_BREAKPOINT_INVALID;
+        throw XDebugError::BreakpointInvalid;
       } else {
         UNMATCHED.insert(id);
       }

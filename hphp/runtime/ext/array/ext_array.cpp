@@ -36,6 +36,8 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/logger.h"
 
+#include <vector>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -76,12 +78,6 @@ DEFINE_CONSTANT(UCOL_HIRAGANA_QUATERNARY_MODE);
 DEFINE_CONSTANT(UCOL_NUMERIC_COLLATION);
 
 #undef DEFINE_CONSTANT
-
-int countArguments() {
-  ActRec *ar = g_context->getStackFrame();
-  assert(ar);
-  return ar->numArgs();
-}
 
 Variant HHVM_FUNCTION(array_change_key_case,
                       const Variant& input,
@@ -438,7 +434,99 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
   }
 }
 
+Variant HHVM_FUNCTION(array_map, const Variant& callback,
+                                 const Variant& arr1,
+                                 const Array& _argv /* = null_array */) {
+  CallCtx ctx;
+  ctx.func = nullptr;
+  if (!callback.isNull()) {
+    CallerFrame cf;
+    vm_decode_function(callback, cf(), false, ctx);
+  }
+  const auto& cell_arr1 = *arr1.asCell();
+  if (UNLIKELY(!isContainer(cell_arr1))) {
+    raise_warning("array_map(): Argument #2 should be an array or collection");
+    return init_null();
+  }
+  if (LIKELY(_argv.empty())) {
+    // Handle the common case where the caller passed two
+    // params (a callback and a container)
+    if (!ctx.func) {
+      if (cell_arr1.m_type == KindOfArray) {
+        return arr1;
+      } else {
+        return arr1.toArray();
+      }
+    }
+    ArrayInit ret(getContainerSize(cell_arr1), ArrayInit::Map{});
+    bool keyConverted = (cell_arr1.m_type == KindOfArray);
+    if (!keyConverted) {
+      auto col_type = cell_arr1.m_data.pobj->collectionType();
+      keyConverted = !collectionAllowsIntStringKeys(col_type);
+    }
+    for (ArrayIter iter(arr1); iter; ++iter) {
+      Variant result;
+      g_context->invokeFuncFew((TypedValue*)&result, ctx, 1,
+                               iter.secondRefPlus().asCell());
+      // if keyConverted is false, it's possible that ret will have fewer
+      // elements than cell_arr1; keys int(1) and string('1') may both be
+      // present
+      ret.add(iter.first(), result, keyConverted);
+    }
+    return ret.toVariant();
+  }
+
+  // Handle the uncommon case where the caller passed a callback
+  // and two or more containers
+  ArrayIter* iters =
+    (ArrayIter*)smart_malloc(sizeof(ArrayIter) * (_argv.size() + 1));
+  size_t numIters = 0;
+  SCOPE_EXIT {
+    while (numIters--) iters[numIters].~ArrayIter();
+    smart_free(iters);
+  };
+  size_t maxLen = getContainerSize(cell_arr1);
+  (void) new (&iters[numIters]) ArrayIter(cell_arr1);
+  ++numIters;
+  for (ArrayIter it(_argv); it; ++it, ++numIters) {
+    const auto& c = *it.secondRefPlus().asCell();
+    if (UNLIKELY(!isContainer(c))) {
+      raise_warning("array_map(): Argument #%d should be an array or "
+                    "collection", (int)(numIters + 2));
+      (void) new (&iters[numIters]) ArrayIter(it.secondRefPlus().toArray());
+    } else {
+      (void) new (&iters[numIters]) ArrayIter(c);
+      size_t len = getContainerSize(c);
+      if (len > maxLen) maxLen = len;
+    }
+  }
+  PackedArrayInit ret_ai(maxLen);
+  for (size_t k = 0; k < maxLen; k++) {
+    PackedArrayInit params_ai(numIters);
+    for (size_t i = 0; i < numIters; ++i) {
+      if (iters[i]) {
+        params_ai.append(iters[i].secondRefPlus());
+        ++iters[i];
+      } else {
+        params_ai.append(init_null_variant);
+      }
+    }
+    Array params = params_ai.toArray();
+    if (ctx.func) {
+      Variant result;
+      g_context->invokeFunc((TypedValue*)&result,
+                              ctx.func, params, ctx.this_,
+                              ctx.cls, nullptr, ctx.invName);
+      ret_ai.append(result);
+    } else {
+      ret_ai.append(params);
+    }
+  }
+  return ret_ai.toVariant();
+}
+
 Variant HHVM_FUNCTION(array_merge,
+                      int64_t numArgs,
                       const Variant& array1,
                       const Variant& array2 /* = null_variant */,
                       const Array& args /* = null array */) {
@@ -446,7 +534,7 @@ Variant HHVM_FUNCTION(array_merge,
   Array ret = Array::Create();
   php_array_merge(ret, arr_array1);
 
-  if (UNLIKELY(countArguments() < 2)) return ret;
+  if (UNLIKELY(numArgs < 2)) return ret;
 
   getCheckedArray(array2);
   php_array_merge(ret, arr_array2);
@@ -464,6 +552,7 @@ Variant HHVM_FUNCTION(array_merge,
 }
 
 Variant HHVM_FUNCTION(array_merge_recursive,
+                      int64_t numArgs,
                       const Variant& array1,
                       const Variant& array2 /* = null_variant */,
                       const Array& args /* = null array */) {
@@ -473,7 +562,7 @@ Variant HHVM_FUNCTION(array_merge_recursive,
   php_array_merge_recursive(seen, false, ret, arr_array1);
   assert(seen.empty());
 
-  if (UNLIKELY(countArguments() < 2)) return ret;
+  if (UNLIKELY(numArgs < 2)) return ret;
 
   getCheckedArray(array2);
   php_array_merge_recursive(seen, false, ret, arr_array2);
@@ -2682,6 +2771,7 @@ public:
     HHVM_FE(array_key_exists);
     HHVM_FE(key_exists);
     HHVM_FE(array_keys);
+    HHVM_FALIAS(__SystemLib\\array_map, array_map);
     HHVM_FE(array_merge_recursive);
     HHVM_FE(array_merge);
     HHVM_FE(array_replace_recursive);

@@ -3,17 +3,13 @@
 class X {
   const type T as arraykey = string;
 
-  final private function __construct(
-    private this::T $val,
-  ) {}
+  final private function __construct(private this::T $val) {}
 
   public function get(): this::T {
     return $this->val;
   }
 
-  final public static function create(
-    this::T $x
-  ): this {
+  final public static function create(this::T $x): this {
     return new static($x);
   }
 
@@ -32,11 +28,7 @@ class Y extends X {
 }
 
 function test(Y $y): (Y, X, Y) {
-  return tuple(
-    $y::create(0),
-    X::create(''),
-    Y::create(0),
-  );
+  return tuple($y::create(0), X::create(''), Y::create(0));
 }
 
 function error(X $x): void {

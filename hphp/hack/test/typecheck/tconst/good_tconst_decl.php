@@ -2,9 +2,7 @@
 abstract class A {
   abstract const type abs_class_by_class as arraykey;
 
-  final public function __construct (
-    private this::abs_class_by_class $id,
-  ) {}
+  final public function __construct(private this::abs_class_by_class $id) {}
 
   public function overriding(): Aint::vec {
     return Vector {};

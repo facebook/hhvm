@@ -17,8 +17,7 @@ abstract class B {
   const type X = A;
 }
 
-class D extends B {
-}
+class D extends B {}
 
 function test_foo(): C::Test::T {
   return Vector {};

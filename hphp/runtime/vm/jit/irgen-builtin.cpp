@@ -647,21 +647,21 @@ SSATmp* coerce_value(IRGS& env,
   if (targetTy <= TInt) {
     return gen(env,
                CoerceCellToInt,
-               CoerceData(callee, paramIdx + 1),
+               FuncArgData(callee, paramIdx + 1),
                maker.makeParamCoerceCatch(),
                oldVal);
   }
   if (targetTy <= TDbl) {
     return gen(env,
                CoerceCellToDbl,
-               CoerceData(callee, paramIdx + 1),
+               FuncArgData(callee, paramIdx + 1),
                maker.makeParamCoerceCatch(),
                oldVal);
   }
   always_assert(targetTy <= TBool);
   return gen(env,
              CoerceCellToBool,
-             CoerceData(callee, paramIdx + 1),
+             FuncArgData(callee, paramIdx + 1),
              maker.makeParamCoerceCatch(),
              oldVal);
 }

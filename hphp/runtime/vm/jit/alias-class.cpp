@@ -51,8 +51,10 @@ StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
   auto const inst = sp->inst();
   switch (inst->op()) {
   case DefSP:
-    return StkPtrInfo { inst->src(0),
-      FPRelOffset{-inst->extra<DefSP>()->offset} };
+    return StkPtrInfo {
+      inst->src(0),
+      FPRelOffset { -inst->extra<DefSP>()->offset.offset }
+    };
 
   default:
     always_assert_flog(false, "unexpected StkPtr: {}\n", sp->toString());

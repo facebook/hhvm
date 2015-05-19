@@ -419,7 +419,7 @@ void CodeGenerator::cgDefSP(IRInstruction* inst) {
   }
 
   auto const fp = srcLoc(inst, 0).reg();
-  v << lea{fp[-cellsToBytes(inst->extra<DefSP>()->offset)], sp};
+  v << lea{fp[-cellsToBytes(inst->extra<DefSP>()->offset.offset)], sp};
 }
 
 void CodeGenerator::cgCheckNullptr(IRInstruction* inst) {
@@ -3183,10 +3183,10 @@ void CodeGenerator::cgLdClsName(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
-  auto const offset = cellsToBytes(inst->extra<LdARFuncPtr>()->offset);
-  auto dstReg       = dstLoc(inst, 0).reg();
-  auto baseReg      = srcLoc(inst, 0).reg();
-  vmain() << load{baseReg[offset + AROFF(m_func)], dstReg};
+  auto const off = cellsToBytes(inst->extra<LdARFuncPtr>()->offset.offset);
+  auto dstReg = dstLoc(inst, 0).reg();
+  auto baseReg = srcLoc(inst, 0).reg();
+  vmain() << load{baseReg[off + AROFF(m_func)], dstReg};
 }
 
 void CodeGenerator::cgLdStaticLocCached(IRInstruction* inst) {

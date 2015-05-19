@@ -840,7 +840,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(
       AStack {
         inst.src(0),
-        inst.extra<LdARFuncPtr>()->offset + int32_t{kNumActRecCells} - 1,
+        inst.extra<LdARFuncPtr>()->offset.offset + int32_t{kNumActRecCells} - 1,
         int32_t{kNumActRecCells}
       },
       AEmpty

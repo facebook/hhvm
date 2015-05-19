@@ -41,8 +41,7 @@ IRGS::IRGS(TransContext context)
 {
   irgen::updateMarker(*this);
   auto const frame = irgen::gen(*this, DefFP);
-  irgen::gen(*this, DefSP,
-    StackOffset { safe_cast<int32_t>(context.initSpOffset.offset) }, frame);
+  irgen::gen(*this, DefSP, FPInvOffsetData { context.initSpOffset }, frame);
 }
 
 //////////////////////////////////////////////////////////////////////

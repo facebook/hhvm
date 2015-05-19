@@ -214,6 +214,7 @@ DELEGATE_OPCODE(CheckNonNull)
 DELEGATE_OPCODE(AssertNonNull)
 DELEGATE_OPCODE(AssertStk)
 DELEGATE_OPCODE(AssertType)
+DELEGATE_OPCODE(LdARFuncPtr)
 
 DELEGATE_OPCODE(CheckStk)
 DELEGATE_OPCODE(CheckType)
@@ -1205,13 +1206,6 @@ void CodeGenerator::cgLdFuncNumParams(IRInstruction* inst) {
   // auto tmp = v.makeReg();
   // v << loadl{src, tmp};
   // v << shrli{1, tmp, dst, v.makeReg()};
-}
-
-void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
-  auto dst     = dstLoc(0).reg();
-  auto base    = srcLoc(0).reg();
-  auto offset  = cellsToBytes(inst->extra<LdARFuncPtr>()->offset);
-  vmain() << load{base[offset + AROFF(m_func)], dst};
 }
 
 void CodeGenerator::cgLdFuncCached(IRInstruction* inst) {

@@ -233,7 +233,7 @@ void checkRefs(IRGS& env,
                Offset dest) {
   auto const actRecOff = entryArDelta + offsetFromIRSP(env, BCSPOffset{0});
   auto const funcPtr = gen(env, LdARFuncPtr,
-                           StackOffset { actRecOff.offset }, sp(env));
+                           IRSPOffsetData { actRecOff }, sp(env));
   SSATmp* nParams = nullptr;
 
   for (unsigned i = 0; i < mask.size(); i += 64) {

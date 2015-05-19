@@ -283,7 +283,8 @@ void regionizeFunc(const Func* func,
 
   std::sort(nodes.begin(), nodes.end(),
             [&](TransID tid1, TransID tid2) -> bool {
-              if (RuntimeOption::EvalJitPGORegionSelector == "wholecfg") {
+              if (RuntimeOption::EvalJitPGORegionSelector == "wholecfg" ||
+                  RuntimeOption::EvalJitPGORegionSelector == "hotcfg") {
                 auto bcOff1 = profData->transStartBcOff(tid1);
                 auto bcOff2 = profData->transStartBcOff(tid2);
                 if (bcOff1 != bcOff2) return bcOff1 < bcOff2;
@@ -314,9 +315,10 @@ void regionizeFunc(const Func* func,
       if (RuntimeOption::EvalJitPGORegionSelector == "hottrace") {
         region = selectHotTrace(newHead, profData, cfg,
                                 selectedSet, &selectedVec);
-      } else if (RuntimeOption::EvalJitPGORegionSelector == "wholecfg") {
-        region = selectWholeCFG(newHead, profData, cfg, selectedSet,
-                                &selectedVec);
+      } else if (RuntimeOption::EvalJitPGORegionSelector == "wholecfg" ||
+                 RuntimeOption::EvalJitPGORegionSelector == "hotcfg") {
+        region = selectHotCFG(newHead, profData, cfg, selectedSet,
+                              &selectedVec);
       } else {
         always_assert(0 && "Invalid value for EvalJitPGORegionSelector");
       }

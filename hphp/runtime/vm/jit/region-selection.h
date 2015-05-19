@@ -490,15 +490,15 @@ RegionDescPtr selectHotTrace(TransID triggerId,
                              TransIDVec* selectedVec = nullptr);
 
 /*
- * Create a region, beginning with triggerId, that includes as much of
- * the TransCFG as possible.  Excludes multiple translations of the
- * same SrcKey.
+ * Create a region, beginning with headId, that includes as much of
+ * the TransCFG as possible (in "wholecfg" mode), but that can be
+ * pruned to eliminate cold/unlikely code as well (in "hotcfg" mode).
  */
-RegionDescPtr selectWholeCFG(TransID triggerId,
-                             const ProfData* profData,
-                             const TransCFG& cfg,
-                             TransIDSet& selectedSet,
-                             TransIDVec* selectedVec = nullptr);
+RegionDescPtr selectHotCFG(TransID headId,
+                           const ProfData* profData,
+                           const TransCFG& cfg,
+                           TransIDSet& selectedSet,
+                           TransIDVec* selectedVec = nullptr);
 
 /*
  * Checks whether the type predictions at the beginning of block

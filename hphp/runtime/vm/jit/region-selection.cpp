@@ -73,6 +73,7 @@ RegionMode regionMode() {
 enum class PGORegionMode {
   Hottrace, // Select a long region, using profile counters to guide the trace
   Hotblock, // Select a single block
+  HotCFG,   // Select arbitrary CFG using profile counters to prune cold paths
   WholeCFG, // Select the entire CFG that has been profiled
 };
 
@@ -80,6 +81,7 @@ PGORegionMode pgoRegionMode() {
   auto& s = RuntimeOption::EvalJitPGORegionSelector;
   if (s == "hottrace") return PGORegionMode::Hottrace;
   if (s == "hotblock") return PGORegionMode::Hotblock;
+  if (s == "hotcfg")   return PGORegionMode::HotCFG;
   if (s == "wholecfg") return PGORegionMode::WholeCFG;
   FTRACE(1, "unknown pgo region mode {}: using hottrace\n", s);
   assertx(false);
@@ -724,7 +726,8 @@ RegionDescPtr selectHotRegion(TransID transId,
       break;
 
     case PGORegionMode::WholeCFG:
-      region = selectWholeCFG(transId, profData, cfg, selectedTIDs);
+    case PGORegionMode::HotCFG:
+      region = selectHotCFG(transId, profData, cfg, selectedTIDs);
       break;
   }
   assertx(region);

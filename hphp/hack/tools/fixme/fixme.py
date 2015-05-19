@@ -27,6 +27,9 @@ import json
 import re
 import sys
 
+class ParseException(Exception):
+    pass
+
 def build_fixmes(raw_json_obj):
     fixmes = defaultdict(lambda: defaultdict(set))
     for error in raw_json_obj['errors']:
@@ -42,6 +45,9 @@ def build_fixmes(raw_json_obj):
 
 WHITESPACE_PATTERN = re.compile(r"\s*")
 
+def is_parse_error(code):
+    return code >= 1000 and code < 2000
+
 def patch(path, patches, explanation):
     with open(path, 'r') as f:
         file_lines = f.readlines()
@@ -53,6 +59,8 @@ def patch(path, patches, explanation):
         whitespace = WHITESPACE_PATTERN.match(target_line).group()
 
         for code in codes:
+            if is_parse_error(code):
+                raise ParseException()
             fixme_line = \
                     "%s/* HH_FIXME[%d]: %s */\n" % \
                     (whitespace, code, explanation)
@@ -73,10 +81,16 @@ def main(args):
 
     raw_json_obj = json.loads(raw_data)
     fixmes = build_fixmes(raw_json_obj)
+    failures = 0
 
     for path, patches in fixmes.iteritems():
-        patch(path, patches, explanation)
-    print('Patched %d files with HH_FIXME' % len(fixmes))
+        try:
+            patch(path, patches, explanation)
+        except ParseException:
+            failures += 1
+            print('Not patching %s as it has parse errors' % path)
+
+    print('Patched %d files with HH_FIXME' % (len(fixmes) - failures))
 
     return 0
 

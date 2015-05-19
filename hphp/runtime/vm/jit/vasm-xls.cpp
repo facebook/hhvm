@@ -1116,6 +1116,26 @@ void Vxls::allocate(Interval* current) {
     assertx(min_split <= max_split);
     auto split_pos = nearestSplitBefore(max_split);
     if (split_pos > current->start()) {
+      if (prev_use && prev_use < split_pos) {
+        /*
+         * If there are uses in previous blocks, but no
+         * uses between the start of the block containing split_pos,
+         * and split_pos itself, we should split earlier; otherwise
+         * we'll need to insert moves/loads on the edge(s) into this
+         * block, which clearly can't be used since we're spilling
+         * before the first use.
+         * Might as well spill on a block boundary, as early as
+         * possible.
+         */
+        auto prev_range_ix = current->findRange(prev_use);
+        auto prev_range = &current->ranges[prev_range_ix];
+        if (prev_range->start <= prev_use && prev_range->end < split_pos) {
+          prev_range++;
+        }
+        if (prev_range->start > prev_use && prev_range->start < split_pos) {
+          split_pos = prev_range->start;
+        }
+      }
       auto second = current->split(split_pos, true);
       pending.push(second);
       return assignReg(current, r);

@@ -112,3 +112,5 @@ VS(system($nullbyte), "");
 VS(exec($nullbyte, $nullbyteout), "");
 VS($nullbyteout, null);
 VS(shell_exec($nullbyte), null);
+$process = proc_open($nullbyte, array(), $pipes);
+VS($process, false);

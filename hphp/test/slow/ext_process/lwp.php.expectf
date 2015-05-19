@@ -50,3 +50,6 @@ bool(true)
 
 Warning: NULL byte detected. Possible attack in %s/lwp.php on line 114
 bool(true)
+
+Warning: NULL byte detected. Possible attack in %s/lwp.php on line 115
+bool(true)

@@ -79,10 +79,14 @@ void emitAGetL(IRGS& env, int32_t id) {
 void emitCGetL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  // Mimic hhbc guard relaxation for now.
-  auto cat = curSrcKey(env).op() == OpFPassL ? DataTypeSpecific
-                                             : DataTypeCountnessInit;
-  pushIncRef(env, ldLocInnerWarn(env, id, ldrefExit, ldPMExit, cat));
+  auto const loc = ldLocInnerWarn(
+    env,
+    id,
+    ldrefExit,
+    ldPMExit,
+    DataTypeCountnessInit
+  );
+  pushIncRef(env, loc);
 }
 
 void emitCUGetL(IRGS& env, int32_t id) {

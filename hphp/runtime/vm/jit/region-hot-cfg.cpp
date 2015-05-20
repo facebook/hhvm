@@ -14,41 +14,42 @@
    +----------------------------------------------------------------------+
 */
 
-#include <stack>
+#include <memory>
+#include <algorithm>
 
-#include <folly/MapUtil.h>
+#include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/region-prune-arcs.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
-#include "hphp/util/trace.h"
+
+/*
+ * This module supports the implementation of two region selectors: hotcfg and
+ * wholecfg.  In hotcfg mode, it constructs a region that is a maximal CFG
+ * given the constraints for what is currently supported within a region and
+ * the JitPGOMinBlockCountPercent and JitPGOMinArcProbability runtime options
+ * (which can be used to prune cold/unlikely code).  In wholecfg mode, these
+ * two runtime options are ignored and nothing is pruned based on profile
+ * counters.
+ */
 
 namespace HPHP { namespace jit {
 
-/*
- * This module supports the implementation of two region selectors:
- * hotcfg and wholecfg.  In hotcfg mode, it constructs a region that
- * is a maximal CFG given the constraints for what is currently
- * supported within a region and the JitPGOMinBlockCountPercent and
- * JitPGOMinArcProbability runtime options (which can be used to prune
- * cold/unlikely code).  In wholecfg mode, these two runtime options
- * are ignored and nothing is pruned based on profile counters.
- */
-
 TRACE_SET_MOD(pgo);
-
-//////////////////////////////////////////////////////////////////////
 
 namespace {
 
+//////////////////////////////////////////////////////////////////////
+
 struct DFS {
   DFS(const ProfData* p, const TransCFG& c, TransIDSet& ts, TransIDVec* tv)
-      : m_profData(p)
-      , m_cfg(c)
-      , m_selectedSet(ts)
-      , m_selectedVec(tv)
-      , m_numBCInstrs(0)
-    {}
+    : m_profData(p)
+    , m_cfg(c)
+    , m_selectedSet(ts)
+    , m_selectedVec(tv)
+    , m_numBCInstrs(0)
+  {}
 
   RegionDescPtr formRegion(TransID head) {
     m_region = std::make_shared<RegionDesc>();
@@ -73,16 +74,10 @@ struct DFS {
     for (auto& arc : m_arcs) {
       m_region->addArc(arc.src, arc.dst);
     }
-    FTRACE(3, "selectHotCFG: before chainRetransBlocks:\n{}\n",
-           show(*m_region));
-    m_region->chainRetransBlocks();
-    FTRACE(3, "selectHotCFG: after chainRetransBlocks:\n{}\n",
-           show(*m_region));
     return m_region;
   }
 
- private:
-
+private:
   void visit(TransID tid) {
     auto tidRegion = m_profData->transRegion(tid);
     auto tidInstrs = tidRegion->instrSize();
@@ -159,7 +154,7 @@ struct DFS {
     m_visiting.erase(tid);
   }
 
- private:
+private:
   const ProfData*              m_profData;
   const TransCFG&              m_cfg;
   TransIDSet&                  m_selectedSet;
@@ -173,9 +168,9 @@ struct DFS {
   double                       m_minArcProb;
 };
 
-}
-
 //////////////////////////////////////////////////////////////////////
+
+}
 
 RegionDescPtr selectHotCFG(TransID head,
                            const ProfData* profData,
@@ -183,7 +178,18 @@ RegionDescPtr selectHotCFG(TransID head,
                            TransIDSet& selectedSet,
                            TransIDVec* selectedVec) {
   FTRACE(1, "selectHotCFG\n");
-  return DFS(profData, cfg, selectedSet, selectedVec).formRegion(head);
+  auto const region =
+    DFS(profData, cfg, selectedSet, selectedVec)
+      .formRegion(head);
+  FTRACE(3, "selectHotCFG: before region_prune_arcs:\n{}\n",
+         show(*region));
+  region_prune_arcs(*region);
+  FTRACE(3, "selectHotCFG: before chainRetransBlocks:\n{}\n",
+         show(*region));
+  region->chainRetransBlocks();
+  FTRACE(3, "selectHotCFG: after chainRetransBlocks:\n{}\n",
+         show(*region));
+  return region;
 }
 
 }}

@@ -202,6 +202,11 @@ void RegionDesc::addArc(BlockId srcId, BlockId dstId) {
   data(dstId).preds.insert(srcId);
 }
 
+void RegionDesc::removeArc(BlockId srcID, BlockId dstID) {
+  data(srcID).succs.erase(dstID);
+  data(dstID).preds.erase(srcID);
+}
+
 void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
   assertx( hasBlock(oldId));
   assertx(!hasBlock(newId));

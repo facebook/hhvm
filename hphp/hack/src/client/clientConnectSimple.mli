@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -8,9 +8,12 @@
  *
  *)
 
-exception Server_cant_connect
-exception Server_busy
-exception Server_out_of_date
-exception Server_missing
-exception Server_initializing
-exception Server_directory_mismatch
+type error =
+  | Server_missing
+  | Server_initializing
+  | Server_busy
+  | Build_id_mismatch
+
+val server_exists : Path.t -> bool
+
+val connect_once : Path.t -> (in_channel * out_channel, error) Result.t

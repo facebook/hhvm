@@ -604,20 +604,24 @@ void throw_bad_type_exception(const char *fmt, ...) {
   raise_warning("Invalid operand type was used: %s", msg.c_str());
 }
 
-void throw_expected_array_exception() {
-  const char* fn = "(unknown)";
-  ActRec *ar = g_context->getStackFrame();
-  if (ar) {
-    fn = ar->m_func->name()->data();
+void throw_expected_array_exception(const char* fn /*=nullptr*/) {
+  if (!fn) {
+    if (auto ar = g_context->getStackFrame()) {
+     fn = ar->m_func->name()->data();
+    } else {
+     fn = "(unknown)";
+    }
   }
   throw_bad_type_exception("%s expects array(s)", fn);
 }
 
-void throw_expected_array_or_collection_exception() {
-  const char* fn = "(unknown)";
-  ActRec *ar = g_context->getStackFrame();
-  if (ar) {
-    fn = ar->m_func->name()->data();
+void throw_expected_array_or_collection_exception(const char* fn /*=nullptr*/) {
+  if (!fn) {
+    if (auto ar = g_context->getStackFrame()) {
+      fn = ar->m_func->name()->data();
+    } else {
+      fn = "(unknown)";
+    }
   }
   throw_bad_type_exception("%s expects array(s) or collection(s)", fn);
 }

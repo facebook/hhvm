@@ -47,6 +47,7 @@ const StaticString
   s_floor("floor"),
   s_abs("abs"),
   s_ord("ord"),
+  s_one("1"),
   s_empty("");
 
 //////////////////////////////////////////////////////////////////////
@@ -168,12 +169,21 @@ SSATmp* opt_ini_get(IRGS& env, uint32_t numArgs) {
 
   Variant value;
   IniSetting::Get(settingName, value);
-  // ini_get() is now enhanced to return more than strings
-  // Only return a string, get out of here if we are something
-  // else like an array
+  // All scalar values are cast to a string before being returned.
   if (value.isString()) {
     return cns(env, makeStaticString(value.toString()));
   }
+  if (value.isInteger()) {
+    return cns(env, makeStaticString(folly::to<std::string>(value.toInt64())));
+  }
+  if (value.isBoolean()) {
+    return cns(
+      env,
+      value.toBoolean() ? s_one.get() : s_empty.get()
+    );
+  }
+  // ini_get() is now enhanced to return more than strings.
+  // Get out of here if we are something else like an array.
   return nullptr;
 }
 

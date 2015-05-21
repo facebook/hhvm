@@ -488,6 +488,7 @@ private:
  * sweep time we don't run these destructors.
  */
 struct ArrayNoDtor {
+  /* implicit */ ArrayNoDtor(ArrayData* table) { new (&m_arr) Array(table); }
   ArrayNoDtor() { new (&m_arr) Array(); }
   ArrayNoDtor(ArrayNoDtor&& o) noexcept {
     new (&m_arr) Array(std::move(o.m_arr));

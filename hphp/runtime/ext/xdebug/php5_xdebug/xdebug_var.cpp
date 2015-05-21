@@ -324,7 +324,8 @@ static Array get_object_props(ObjectData* obj) {
   // Grab the properties on the object. o_toIterArray does this for us.
   auto const cls = obj->getVMClass();
   auto const cls_name = cls->name();
-  auto props = obj->o_toIterArray(String(const_cast<StringData*>(cls_name)));
+  auto props = obj->o_toIterArray(String(const_cast<StringData*>(cls_name)),
+                                  ObjectData::EraseRefs);
 
   // Grab the static properties from the class.
   auto const staticProperties = cls->staticProperties();

@@ -212,12 +212,25 @@ struct ObjectData {
 
  private:
   template<bool forExit> bool destructImpl();
+  Variant* realPropImpl(const String& s, int flags, const String& context,
+                        bool copyDynArray);
  public:
 
-  Array o_toIterArray(const String& context, bool getRef = false);
+  enum IterMode { EraseRefs, CreateRefs, PreserveRefs };
+  /*
+   * Create an array of object properties suitable for iteration.
+   *
+   * EraseRefs    - array should contain unboxed properties
+   * CreateRefs   - array should contain boxed properties
+   * PreserveRefs - reffiness of properties should be preserved in returned
+   *                array
+   */
+  Array o_toIterArray(const String& context, IterMode mode);
 
   Variant* o_realProp(const String& s, int flags,
                       const String& context = null_string);
+  const Variant* o_realProp(const String& s, int flags,
+                            const String& context = null_string) const;
 
   Variant o_get(const String& s, bool error = true,
                 const String& context = null_string);
@@ -313,6 +326,9 @@ struct ObjectData {
 
   PropLookup<TypedValue*> getProp(const Class*, const StringData*);
   PropLookup<const TypedValue*> getProp(const Class*, const StringData*) const;
+
+  PropLookup<TypedValue*> getPropImpl(const Class*, const StringData*,
+                                      bool copyDynArray);
 
  private:
   template <bool warn, bool define>

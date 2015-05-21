@@ -60,18 +60,6 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
   }();
 
   if (!valType.isKnownDataType()) {
-    if (!isReturnType) {
-      // This is supposed to be impossible, but it does happen in a rare case
-      // with the legacy region selector. Until it's figured out, punt in
-      // release builds. t3412704
-      assert_log(
-        false,
-        [&] {
-          return folly::sformat("Bad type {} for local {}:\n\n{}\n",
-                                valType, id, show(env.irb->unit()));
-        }
-      );
-    }
     interpOne(env, 0);
     return;
   }

@@ -325,4 +325,11 @@ CacheManager::readDirectory(const std::string& name) const {
   return std::vector<std::string>(ret.begin(), ret.end());
 }
 
+void CacheManager::dump() const {
+  for (const auto& it : cache_map_ ) {
+    printf("- %s\n", it.first.c_str());
+    it.second->dump();
+  }
+}
+
 }  // namespace HPHP

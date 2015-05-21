@@ -265,4 +265,17 @@ bool CacheData::sufficientlyCompressed(uint64_t orig_size,
   return new_size < (orig_size * .75);
 }
 
+void CacheData::dump() const {
+  printf(
+    "  Name: %s\n"
+    "  Flags: 0x%08lx\n"
+    "  Size: %ld\n"
+    "  ID: %ld\n",
+    name_.c_str(),
+    flags_,
+    fileSize(),
+    id_
+  );
+}
+
 }  // namespace HPHP

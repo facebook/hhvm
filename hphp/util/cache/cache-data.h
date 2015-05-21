@@ -70,6 +70,8 @@ class CacheData : private boost::noncopyable {
   // Returns false if data is not compressed, or on any other error.
   bool getDecompressedData(std::string* data) const;
 
+  void dump() const;
+
  private:
   static const int kFlag_Compressed  = 0x00000001;
 

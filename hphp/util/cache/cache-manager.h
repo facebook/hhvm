@@ -117,6 +117,7 @@ class CacheManager : private boost::noncopyable {
 
   // Read the contents of a direcotry
   std::vector<std::string> readDirectory(const std::string& name) const;
+  void dump() const;
 
  private:
   using CacheMap = struct std::map<std::string, std::unique_ptr<CacheData>>;

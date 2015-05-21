@@ -413,7 +413,7 @@ static inline std::string pgoRegionSelectorDefault() {
 #ifdef HHVM_WHOLE_CFG
   return "wholecfg";
 #else
-  return "hottrace";
+  return "hotcfg";
 #endif
 }
 

@@ -174,13 +174,7 @@ void fpushObjMethodCommon(IRGS& env,
         g_context->lookupObjMethod(func, baseClass, methodName, curClass(env),
                                    false);
       if (res == LookupResult::MethodFoundWithThis ||
-          /*
-           * TODO(#4455926): We don't allow vtable-style dispatch of
-           * abstract static methods, but not for any real reason
-           * here.  It should be able to work, but needs further
-           * testing to be enabled.
-           */
-          (res == LookupResult::MethodFoundNoThis && !func->isAbstract())) {
+          res == LookupResult::MethodFoundNoThis) {
         /*
          * If we found the func in baseClass, then either:
          *  a) its private, and this is always going to be the

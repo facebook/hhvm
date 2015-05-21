@@ -259,46 +259,42 @@ bool constrainBase(MTS& env, TypeConstraint tc) {
   return env.irb.constrainValue(env.base.value, tc);
 }
 
-bool constrainCollectionOpBase(MTS& env) {
-  switch (env.simpleOp) {
+folly::Optional<TypeConstraint> simpleOpConstraint(SimpleOp op) {
+  switch (op) {
     case SimpleOp::None:
-      return false;
+      return folly::none;
 
     case SimpleOp::Array:
     case SimpleOp::ProfiledPackedArray:
     case SimpleOp::ProfiledStructArray:
     case SimpleOp::String:
-      env.irb.constrainValue(env.base.value, DataTypeSpecific);
-      return true;
+      return TypeConstraint(DataTypeSpecific);
 
     case SimpleOp::PackedArray:
-      constrainBase(
-        env,
-        TypeConstraint(DataTypeSpecialized).setWantArrayKind()
-      );
-      return true;
+      return TypeConstraint(DataTypeSpecialized).setWantArrayKind();
 
     case SimpleOp::StructArray:
-      constrainBase(env,
-        TypeConstraint(DataTypeSpecialized).setWantArrayShape()
-      );
-      return true;
+      return TypeConstraint(DataTypeSpecialized).setWantArrayShape();
 
     case SimpleOp::Vector:
+      return TypeConstraint(c_Vector::classof());
+
     case SimpleOp::Map:
+      return TypeConstraint(c_Map::classof());
+
     case SimpleOp::Pair:
-      always_assert(env.base.type < TObj &&
-                    env.base.type.clsSpec());
-      constrainBase(env, TypeConstraint(env.base.type.clsSpec().cls()));
-      return true;
+      return TypeConstraint(c_Pair::classof());
   }
 
-  not_reached();
-  return false;
+  always_assert(false);
 }
 
 void specializeBaseIfPossible(MTS& env, Type baseType) {
-  if (constrainCollectionOpBase(env)) return;
+  if (auto tc = simpleOpConstraint(env.simpleOp)) {
+    constrainBase(env, *tc);
+    return;
+  }
+
   if (baseType < TObj && baseType.clsSpec()) {
     constrainBase(env, TypeConstraint(baseType.clsSpec().cls()));
   }
@@ -418,7 +414,9 @@ bool isSimpleBase(const IRGS& env) {
   return loc == LL || loc == LC || loc == LR || loc == LH;
 }
 
-bool isSingleMember(MTS& env) { return env.immVecM.size() == 1; }
+bool isSingleMember(const IRGS& env) {
+  return env.currentNormalizedInstruction->immVecM.size() == 1;
+}
 
 bool isOptimizableCollectionClass(const Class* klass) {
   return collections::isType(klass, CollectionType::Vector,
@@ -570,34 +568,35 @@ SSATmp* getValue(MTS& env) {
 
 // Compute whether the current instruction a 1-element simple collection
 // (includes Array) operation.
-SimpleOp computeSimpleCollectionOp(MTS& env) {
+SimpleOp computeSimpleCollectionOp(
+  const IRGS& env,
+  Type(*getType)(const IRGS&, const Location&)
+) {
   // DataTypeGeneric is used in here to avoid constraining the base in case we
   // end up not caring about the type. Consumers of the return value must
   // constrain the base as appropriate.
   if (!isSimpleBase(env)) return SimpleOp::None;
 
-  auto const base = getInput(env, env.mii.valCount(),
-                             DataTypeGeneric); // XXX: gens unneeded instrs
-  if (base->type().maybe(TCell) &&
-      base->type().maybe(TBoxedCell)) {
+  auto const& ni = *env.currentNormalizedInstruction;
+  auto const op = ni.mInstrOp();
+  auto const& mii = getMInstrInfo(ni.mInstrOp());
+  auto baseType = getType(env, ni.inputs[mii.valCount()]);
+  if (baseType.maybe(TCell) && baseType.maybe(TBoxedCell)) {
     // We might be doing a Base NL or something similar.  Either way we can't
     // do a simple op if we have a mixed boxed/unboxed type.
     return SimpleOp::None;
   }
 
-  auto const baseType = [&] {
-    auto const& baseL = env.ni.inputs[env.iInd];
-    // Before we do any simpleCollectionOp on a local base, we will always emit
-    // the appropriate CheckRefInner guard to allow us to use a predicted inner
-    // type.  So when calculating the SimpleOp assume that type.
-    if (base->type().maybe(TBoxedCell) && baseL.isLocal()) {
-      return env.irb.predictedInnerType(baseL.offset);
-    }
-    return base->type();
-  }();
+  auto const& baseL = ni.inputs[mii.valCount()];
+  // Before we do any simpleCollectionOp on a local base, we will always emit
+  // the appropriate CheckRefInner guard to allow us to use a predicted inner
+  // type.  So when calculating the SimpleOp assume that type.
+  if (baseType.maybe(TBoxedCell) && baseL.isLocal()) {
+    baseType = env.irb->predictedInnerType(baseL.offset);
+  }
 
-  bool const readInst = (env.op == Op::CGetM || env.op == Op::IssetM);
-  if ((env.op == OpSetM || readInst) && isSimpleBase(env) &&
+  bool const readInst = (op == Op::CGetM || op == Op::IssetM);
+  if ((op == OpSetM || readInst) && isSimpleBase(env) &&
       isSingleMember(env)) {
     if (baseType <= TArr) {
       auto isPacked = false;
@@ -607,14 +606,14 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
         isStruct = arrSpec.kind() == ArrayData::kStructKind &&
                    arrSpec.shape() != nullptr;
       }
-      if (mcodeIsElem(env.immVecM[0])) {
-        SSATmp* key = getInput(env, env.mii.valCount() + 1, DataTypeGeneric);
-        if (key->isA(TInt) || key->isA(TStr)) {
+      if (mcodeIsElem(ni.immVecM[0])) {
+        auto const keyType = getType(env, ni.inputs[mii.valCount() + 1]);
+        if (keyType <=TInt || keyType <= TStr) {
           if (readInst) {
-            if (key->isA(TInt)) {
+            if (keyType <= TInt) {
               return isPacked ? SimpleOp::PackedArray
                               : SimpleOp::ProfiledPackedArray;
-            } else if (key->hasConstVal(TStaticStr)) {
+            } else if (keyType.hasConstVal(TStaticStr)) {
               if (!isStruct || !baseType.arrSpec().shape()) {
                 return SimpleOp::ProfiledStructArray;
               }
@@ -625,14 +624,12 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
         }
       }
     } else if (baseType <= TStr &&
-               mcodeMaybeArrayIntKey(env.immVecM[0])) {
-      auto const key = getInput(env, env.mii.valCount() + 1, DataTypeGeneric);
-      if (key->isA(TInt)) {
+               mcodeMaybeArrayIntKey(ni.immVecM[0])) {
+      auto const keyType = getType(env, ni.inputs[mii.valCount() + 1]);
+      if (keyType <= TInt) {
         // Don't bother with SetM on strings, because profile data
         // shows it basically never happens.
-        if (readInst) {
-          return SimpleOp::String;
-        }
+        if (readInst) return SimpleOp::String;
       }
     } else if (baseType < TObj) {
       const Class* klass = baseType.clsSpec().cls();
@@ -641,21 +638,19 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
       auto const isMap    = collections::isType(klass, CollectionType::Map);
 
       if (isVector || isPair) {
-        if (mcodeMaybeVectorKey(env.immVecM[0])) {
-          auto const key = getInput(env, env.mii.valCount() + 1,
-                                    DataTypeGeneric);
-          if (key->isA(TInt)) {
+        if (mcodeMaybeVectorKey(ni.immVecM[0])) {
+          auto const keyType = getType(env, ni.inputs[mii.valCount() + 1]);
+          if (keyType <= TInt) {
             // We don't specialize setting pair elements.
-            if (isPair && env.op == Op::SetM) return SimpleOp::None;
+            if (isPair && op == Op::SetM) return SimpleOp::None;
 
             return isVector ? SimpleOp::Vector : SimpleOp::Pair;
           }
         }
       } else if (isMap) {
-        if (mcodeIsElem(env.immVecM[0])) {
-          auto const key = getInput(env, env.mii.valCount() + 1,
-                                    DataTypeGeneric);
-          if (key->isA(TInt) || key->isA(TStr)) {
+        if (mcodeIsElem(ni.immVecM[0])) {
+          auto const keyType = getType(env, ni.inputs[mii.valCount() + 1]);
+          if (keyType <= TInt || keyType <= TStr) {
             return SimpleOp::Map;
           }
         }
@@ -1301,7 +1296,7 @@ void emitMPre(MTS& env) {
     emitMTrace(env);
   }
 
-  env.simpleOp = computeSimpleCollectionOp(env);
+  env.simpleOp = computeSimpleCollectionOp(env, provenTypeFromLocation);
   emitBaseOp(env);
   ++env.iInd;
 
@@ -2211,7 +2206,34 @@ void implMInstr(IRGS& irgs, Op effectiveOp) {
 
 //////////////////////////////////////////////////////////////////////
 
+bool isClassSpecializedTypeReliable(Type input) {
+  assert(input.isSpecialized());
+  assert(input.clsSpec());
+  auto baseClass = input.clsSpec().cls();
+  return RuntimeOption::RepoAuthoritative &&
+      (baseClass->preClass()->attrs() & AttrUnique);
 }
+
+}
+
+TypeConstraint mInstrBaseConstraint(const IRGS& env, Type predictedType) {
+  if (!isSimpleBase(env)) return DataTypeSpecific;
+
+  if (predictedType.isSpecialized()) {
+    if (predictedType.clsSpec() &&
+        isClassSpecializedTypeReliable(predictedType)) {
+      return TypeConstraint(predictedType.clsSpec().cls());
+    }
+
+    auto const simpleOp =
+      computeSimpleCollectionOp(env, predictedTypeFromLocation);
+    if (auto tc = simpleOpConstraint(simpleOp)) return *tc;
+  }
+
+  return DataTypeSpecific;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 void emitBindM(IRGS& env, int)                 { implMInstr(env, Op::BindM); }
 void emitCGetM(IRGS& env, int)                 { implMInstr(env, Op::CGetM); }

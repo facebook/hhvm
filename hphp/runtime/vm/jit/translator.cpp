@@ -1283,15 +1283,8 @@ Type flavorToType(FlavorDesc f) {
   not_reached();
 }
 
-bool isClassSpecializedTypeReliable(Type input) {
-  assert(input.isSpecialized());
-  assert(input.clsSpec());
-  auto baseClass = input.clsSpec().cls();
-  return RuntimeOption::RepoAuthoritative &&
-      (baseClass->preClass()->attrs() & AttrUnique);
-}
-
 Type typeToCheckForInput(
+  IRGS& irgs,
   const NormalizedInstruction& ni,
   int32_t opndIdx,
   Type predictedType
@@ -1373,27 +1366,13 @@ Type typeToCheckForInput(
       break;
     }
 
-    case OpCGetM:
-    case OpIssetM:
-    case OpSetM: {
-      if (opndIdx == 0) {
-        if (predictedType.isSpecialized()) {
-          if (predictedType.clsSpec() &&
-              isClassSpecializedTypeReliable(predictedType)) {
-            tc = TypeConstraint(predictedType.clsSpec().cls());
-          } else if (predictedType.arrSpec() &&
-                     predictedType.arrSpec().kind()) {
-            tc = TypeConstraint(DataTypeSpecialized).setWantArrayKind();
-          }
-          break;
-        }
-      }
-      break;
-    }
-
     default: {
       break;
     }
+  }
+
+  if (hasMVector(opc) && opndIdx == getMInstrInfo(ni.mInstrOp()).valCount()) {
+    tc = irgen::mInstrBaseConstraint(irgs, predictedType);
   }
 
   return relaxType(predictedType, tc);
@@ -1424,7 +1403,7 @@ void emitInputChecks(
 
     auto typeToCheck = predictedType <= TCls
       ? predictedType
-      : typeToCheckForInput(ni, i, predictedType);
+      : typeToCheckForInput(irgs, ni, i, predictedType);
 
     // Make sure typeToCheck is checkable.
     if (!(typeToCheck <= TCell || typeToCheck <= TBoxedInitCell)) {

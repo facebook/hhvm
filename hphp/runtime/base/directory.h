@@ -23,14 +23,14 @@
 #include "hphp/runtime/base/type-string.h"
 
 #include <dirent.h>
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class Variant;
 
-class Directory : public SweepableResourceData {
-public:
+struct Directory : SweepableResourceData {
   virtual void close() = 0;
   virtual Variant read() = 0;
   virtual void rewind() = 0;
@@ -49,32 +49,30 @@ public:
   }
 };
 
-class PlainDirectory : public Directory {
-public:
+struct PlainDirectory : Directory {
   DECLARE_RESOURCE_ALLOCATION(PlainDirectory);
 
   explicit PlainDirectory(const String& path);
   ~PlainDirectory();
 
-  virtual void close();
-  virtual Variant read();
-  virtual void rewind();
+  void close() override;
+  Variant read() override;
+  void rewind() override;
   bool isValid() const;
 
 private:
   DIR* m_dir;
 };
 
-class ArrayDirectory : public Directory {
-public:
+struct ArrayDirectory : Directory {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ArrayDirectory);
 
   explicit ArrayDirectory(const Array& a) : m_it(a) {}
 
-  virtual void close() {}
-  virtual Variant read();
-  virtual void rewind();
-  virtual bool isEof() const;
+  void close() override {}
+  Variant read() override;
+  void rewind() override;
+  bool isEof() const override;
 
   void sweep() override {
     // Leave m_it alone
@@ -86,6 +84,24 @@ public:
 
 private:
   ArrayIter m_it;
+};
+
+struct CachedDirectory : Directory {
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(CachedDirectory);
+
+  explicit CachedDirectory(const String& path);
+
+  void close() override {}
+  Variant read() override {
+    if (m_pos >= m_files.size()) return false;
+    return String(m_files[m_pos++]);
+  }
+  void rewind() override { m_pos = 0; }
+  bool isEof() const override { return m_pos >= m_files.size(); }
+
+private:
+  int m_pos {0};
+  std::vector<std::string> m_files;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

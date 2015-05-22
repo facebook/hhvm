@@ -82,7 +82,12 @@ FileStreamWrapper::open(const String& filename, const String& mode,
 }
 
 SmartPtr<Directory> FileStreamWrapper::opendir(const String& path) {
-  auto dir = makeSmartPtr<PlainDirectory>(File::TranslatePath(path));
+  auto tpath = File::TranslatePath(path);
+  if (File::IsVirtualDirectory(tpath)) {
+    return makeSmartPtr<CachedDirectory>(tpath);
+  }
+
+  auto dir = makeSmartPtr<PlainDirectory>(tpath);
   if (!dir->isValid()) {
     raise_warning("%s", dir->getLastError().c_str());
     return nullptr;

@@ -503,7 +503,7 @@ String HHVM_FUNCTION(implode,
                              "one of the arguments");
     return String();
   }
-  return StringUtil::Implode(items, delim);
+  return StringUtil::Implode(items, delim, false);
 }
 
 String HHVM_FUNCTION(join,

@@ -244,7 +244,6 @@ Type provenTypeFromStack(const IRGS& env, BCSPOffset offset) {
   return env.irb->stackType(offsetFromIRSP(env, offset), DataTypeGeneric);
 }
 
-
 Type provenTypeFromLocation(const IRGS& env, const Location& loc) {
   switch (loc.space) {
   case Location::Stack:

@@ -140,7 +140,7 @@ bool blockHasUnprocessedPred(
  * single predecessor is a merge point if it's the target of both the
  * fallthru and the taken paths.
  */
-static bool isMerge(const RegionDesc& region, RegionDesc::BlockId blockId) {
+bool isMerge(const RegionDesc& region, RegionDesc::BlockId blockId) {
   auto const& preds = region.preds(blockId);
   if (preds.size() == 0)               return false;
   if (preds.size() > 1)                return true;
@@ -161,12 +161,42 @@ static bool isMerge(const RegionDesc& region, RegionDesc::BlockId blockId) {
  * Returns whether any successor of `blockId' in the `region' is a
  * merge-point within the `region'.
  */
-static bool hasMergeSucc(const RegionDesc&   region,
-                         RegionDesc::BlockId blockId) {
+bool hasMergeSucc(const RegionDesc& region,
+                  RegionDesc::BlockId blockId) {
   for (auto succ : region.succs(blockId)) {
     if (isMerge(region, succ)) return true;
   }
   return false;
+}
+
+
+/*
+ * If this region's entry block is at the entry point for a function, we have
+ * some additional information we can assume about the types of non-parameter
+ * local variables.
+ *
+ * Note: we can't assume anything if there are DV initializers, because they
+ * can run arbitrary code before they get to the main entry point (and they do,
+ * in some hhas-based builtins), if they even go there (they aren't required
+ * to).
+ */
+void emitEntryAssertions(IRGS& irgs, const Func* func, SrcKey sk) {
+  if (sk.offset() != func->base()) return;
+  for (auto& pinfo : func->params()) {
+    if (pinfo.hasDefaultValue()) return;
+  }
+  if (func->isClosureBody()) {
+    // In a closure, non-parameter locals can have types other than Uninit
+    // after the prologue runs.  (Local 0 will be the closure itself, and other
+    // locals will have used vars unpacked into them.)  We rely on hhbbc to
+    // assert these types.
+    return;
+  }
+  auto const numLocs = func->numLocals();
+  for (auto loc = func->numParams(); loc < numLocs; ++loc) {
+    auto const location = RegionDesc::Location::Local { loc };
+    irgen::assertTypeLocation(irgs, location, TUninit);
+  }
 }
 
 /*
@@ -176,8 +206,8 @@ void emitPredictionGuards(IRGS& irgs,
                           const RegionDesc& region,
                           const RegionDesc::BlockPtr block,
                           bool isEntry) {
-  auto sk = block->start();
-  auto bcOff = sk.offset();
+  auto const sk = block->start();
+  auto const bcOff = sk.offset();
   auto typePreds = makeMapWalker(block->typePreds());
   auto refPreds  = makeMapWalker(block->reffinessPreds());
 
@@ -190,7 +220,10 @@ void emitPredictionGuards(IRGS& irgs,
     }
   }
 
-  if (isEntry) irgen::ringbufferEntry(irgs, Trace::RBTypeTraceletGuards, sk);
+  if (isEntry) {
+    irgen::ringbufferEntry(irgs, Trace::RBTypeTraceletGuards, sk);
+    emitEntryAssertions(irgs, block->func(), sk);
+  }
 
   const bool emitPredictions = RuntimeOption::EvalHHIRConstrictGuards;
 

@@ -1206,8 +1206,8 @@ const typename Container::value_type* findEH(const Container& ehtab, Offset o) {
   return eh;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #define incl_HPHP_VM_FUNC_INL_H_

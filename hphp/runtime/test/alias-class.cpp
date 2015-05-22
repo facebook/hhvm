@@ -75,6 +75,85 @@ std::vector<AliasClass> specialized_classes(IRUnit& unit) {
 
 //////////////////////////////////////////////////////////////////////
 
+TEST(AliasClass, AliasIdSet) {
+  constexpr auto Max = AliasIdSet::Max;
+  constexpr auto BitsetMax = AliasIdSet::BitsetMax;
+
+  EXPECT_TRUE(BitsetMax < 64);
+
+  AliasIdSet big = BitsetMax + 100;
+  EXPECT_EQ(big.size(), 1);
+  EXPECT_TRUE(big.isBigInteger());
+  EXPECT_FALSE(big.empty());
+
+  big.unset(BitsetMax);
+  EXPECT_EQ(big.size(), 1);
+  EXPECT_TRUE(big.isBigInteger());
+  EXPECT_FALSE(big.empty());
+
+  big.set(BitsetMax + 100);
+  EXPECT_EQ(big.size(), 1);
+  EXPECT_TRUE(big.isBigInteger());
+  EXPECT_FALSE(big.empty());
+  EXPECT_TRUE(big.hasSingleValue());
+
+  big.unset(BitsetMax + 100);
+  EXPECT_EQ(big.size(), 0);
+  EXPECT_TRUE(big.isBitset());
+  EXPECT_TRUE(big.empty());
+  EXPECT_FALSE(big.hasSingleValue());
+
+  AliasIdSet ids { 0u, 3u, IdRange { 6, 9 }, IdRange { 15, 12 }, BitsetMax };
+
+  EXPECT_EQ(ids.size(), 6);
+  EXPECT_TRUE(ids.isBitset());
+  EXPECT_FALSE(ids.empty());
+  EXPECT_FALSE(ids.isBigInteger());
+  EXPECT_FALSE(ids.hasUpperRange());
+
+  EXPECT_TRUE(ids.test(0));
+  EXPECT_TRUE(ids.test(3));
+  EXPECT_FALSE(ids.test(5));
+  EXPECT_TRUE(ids.test(6));
+  EXPECT_TRUE(ids.test(8));
+  EXPECT_FALSE(ids.test(9));
+  EXPECT_FALSE(ids.test(12));
+  EXPECT_FALSE(ids.test(14));
+  EXPECT_FALSE(ids.test(15));
+  EXPECT_TRUE(ids.test(BitsetMax));
+  EXPECT_FALSE(ids.test(BitsetMax + 1));
+  EXPECT_FALSE(ids.test(63));
+
+  EXPECT_TRUE(ids == (ids | AliasIdSet{}));
+  EXPECT_TRUE(ids == (ids | 6));
+  EXPECT_TRUE(ids == (ids | BitsetMax));
+  EXPECT_TRUE((1000 | ids).test(1000));
+
+  AliasIdSet unbounded = IdRange { 4 };
+
+  EXPECT_EQ(unbounded.size(), Max);
+  EXPECT_TRUE(unbounded.isBitset());
+  EXPECT_FALSE(unbounded.empty());
+  EXPECT_FALSE(unbounded.isBigInteger());
+  EXPECT_TRUE(unbounded.hasUpperRange());
+
+  EXPECT_TRUE(unbounded.test(4));
+  EXPECT_TRUE(unbounded.test(12));
+  EXPECT_TRUE(unbounded.test(61));
+  EXPECT_TRUE(unbounded.test(62));
+  EXPECT_TRUE(unbounded.test(BitsetMax));
+  EXPECT_TRUE(unbounded.test(BitsetMax + 1));
+  EXPECT_TRUE(unbounded.test(64));
+  EXPECT_TRUE(unbounded.test(100));
+
+  EXPECT_TRUE(ids.maybe(IdRange { 5, 7 }));
+  EXPECT_TRUE(ids.maybe(unbounded));
+
+  EXPECT_TRUE((ids | unbounded).hasUpperRange());
+}
+
+//////////////////////////////////////////////////////////////////////
+
 TEST(AliasClass, Basic) {
   IRUnit unit{test_context};
   auto const specialized = specialized_classes(unit);

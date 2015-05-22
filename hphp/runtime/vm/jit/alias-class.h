@@ -16,10 +16,12 @@
 #ifndef incl_HPHP_ALIAS_CLASS_H_
 #define incl_HPHP_ALIAS_CLASS_H_
 
-#include <string>
-#include <cstdint>
+#include "hphp/runtime/vm/jit/alias-id-set.h"
 
 #include <folly/Optional.h>
+
+#include <string>
+#include <cstdint>
 
 namespace HPHP { struct StringData; }
 namespace HPHP { namespace jit {
@@ -68,10 +70,9 @@ struct AliasClass;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Special data for locations known to be exactly a specific local on the frame
- * `fp'.
+ * Special data for locations known to be a set of locals on the frame `fp'.
  */
-struct AFrame { SSATmp* fp; uint32_t id; };
+struct AFrame { SSATmp* fp; AliasIdSet ids; };
 
 /*
  * A location inside of an object property, with base `obj' and byte offset
@@ -220,6 +221,11 @@ struct AliasClass {
    * intersection.
    */
   bool maybe(AliasClass) const;
+
+  /*
+   * Returns whether the alias class contains a single location.
+   */
+  bool isSingleLocation() const;
 
   /*
    * Conditionally access specific known information of various kinds.

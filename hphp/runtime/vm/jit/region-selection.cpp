@@ -70,15 +70,20 @@ RegionMode regionMode() {
   return RegionMode::None;
 }
 
-enum class PGORegionMode {
-  Hottrace, // Select a long region, using profile counters to guide the trace
-  Hotblock, // Select a single block
-  HotCFG,   // Select arbitrary CFG using profile counters to prune cold paths
-  WholeCFG, // Select the entire CFG that has been profiled
-};
+template<typename Container>
+void truncateMap(Container& c, SrcKey final) {
+  c.erase(c.upper_bound(final), c.end());
+}
+}
 
-PGORegionMode pgoRegionMode() {
+//////////////////////////////////////////////////////////////////////
+
+PGORegionMode pgoRegionMode(const Func& func) {
   auto& s = RuntimeOption::EvalJitPGORegionSelector;
+  if ((s == "wholecfg" || s == "hotcfg") &&
+      RuntimeOption::EvalJitPGOCFGHotFuncOnly && !(func.attrs() & AttrHot)) {
+    return PGORegionMode::Hottrace;
+  }
   if (s == "hottrace") return PGORegionMode::Hottrace;
   if (s == "hotblock") return PGORegionMode::Hotblock;
   if (s == "hotcfg")   return PGORegionMode::HotCFG;
@@ -86,12 +91,6 @@ PGORegionMode pgoRegionMode() {
   FTRACE(1, "unknown pgo region mode {}: using hottrace\n", s);
   assertx(false);
   return PGORegionMode::Hottrace;
-}
-
-template<typename Container>
-void truncateMap(Container& c, SrcKey final) {
-  c.erase(c.upper_bound(final), c.end());
-}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -710,13 +709,14 @@ RegionDescPtr selectHotRegion(TransID transId,
   assertx(RuntimeOption::EvalJitPGO);
 
   const ProfData* profData = mcg->tx().profData();
-  FuncId funcId = profData->transFuncId(transId);
+  auto const& func = *(profData->transFunc(transId));
+  FuncId funcId = func.getFuncId();
   TransCFG cfg(funcId, profData, mcg->tx().getSrcDB(),
                mcg->getJmpToTransIDMap());
   TransIDSet selectedTIDs;
   assertx(regionMode() != RegionMode::Method);
   RegionDescPtr region;
-  switch (pgoRegionMode()) {
+  switch (pgoRegionMode(func)) {
     case PGORegionMode::Hottrace:
       region = selectHotTrace(transId, profData, cfg, selectedTIDs);
       break;

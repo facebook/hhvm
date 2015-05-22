@@ -265,6 +265,9 @@ void regionizeFunc(const Func* func,
                    RegionVec& regions) {
   const Timer rf_timer(Timer::regionizeFunc);
   assertx(RuntimeOption::EvalJitPGO);
+
+  PGORegionMode regionMode = pgoRegionMode(*func);
+
   auto const funcId = func->getFuncId();
   auto const profData = mcg->tx().profData();
   TransCFG cfg(funcId, profData, mcg->tx().getSrcDB(),
@@ -283,8 +286,8 @@ void regionizeFunc(const Func* func,
 
   std::sort(nodes.begin(), nodes.end(),
             [&](TransID tid1, TransID tid2) -> bool {
-              if (RuntimeOption::EvalJitPGORegionSelector == "wholecfg" ||
-                  RuntimeOption::EvalJitPGORegionSelector == "hotcfg") {
+              if (regionMode == PGORegionMode::WholeCFG ||
+                  regionMode == PGORegionMode::HotCFG) {
                 auto bcOff1 = profData->transStartBcOff(tid1);
                 auto bcOff2 = profData->transStartBcOff(tid2);
                 if (bcOff1 != bcOff2) return bcOff1 < bcOff2;
@@ -312,15 +315,20 @@ void regionizeFunc(const Func* func,
       TransIDSet selectedSet;
       TransIDVec selectedVec;
       RegionDescPtr region;
-      if (RuntimeOption::EvalJitPGORegionSelector == "hottrace") {
-        region = selectHotTrace(newHead, profData, cfg,
-                                selectedSet, &selectedVec);
-      } else if (RuntimeOption::EvalJitPGORegionSelector == "wholecfg" ||
-                 RuntimeOption::EvalJitPGORegionSelector == "hotcfg") {
-        region = selectHotCFG(newHead, profData, cfg, selectedSet,
-                              &selectedVec);
-      } else {
-        always_assert(0 && "Invalid value for EvalJitPGORegionSelector");
+      switch (regionMode) {
+        case PGORegionMode::Hottrace:
+          region = selectHotTrace(newHead, profData, cfg,
+                                  selectedSet, &selectedVec);
+          break;
+
+        case PGORegionMode::WholeCFG:
+        case PGORegionMode::HotCFG:
+          region = selectHotCFG(newHead, profData, cfg, selectedSet,
+                                &selectedVec);
+          break;
+
+        case PGORegionMode::Hotblock:
+          always_assert(0 && "Invalid value for EvalJitPGORegionSelector");
       }
       FTRACE(6, "regionizeFunc: selected region to cover node {}\n{}\n",
              newHead, show(*region));

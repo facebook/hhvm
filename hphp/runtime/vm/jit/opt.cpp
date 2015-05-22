@@ -58,9 +58,10 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   assertx(checkEverything(unit));
 
   auto const hasLoop = RuntimeOption::EvalJitLoops && cfgHasLoop(unit);
-
+  auto const func = unit.entry()->front().marker().func();
+  auto const regionMode = pgoRegionMode(*func);
   auto const traceMode = kind != TransKind::Optimize ||
-                         RuntimeOption::EvalJitPGORegionSelector == "hottrace";
+                         regionMode == PGORegionMode::Hottrace;
 
   // TODO (#5792564): Guard relaxation doesn't work with loops.
   // TODO (#6599498): Guard relaxation is broken in wholecfg mode.

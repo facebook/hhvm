@@ -40,6 +40,15 @@ struct TransCFG;
 
 //////////////////////////////////////////////////////////////////////
 
+enum class PGORegionMode {
+  Hottrace, // Select a long region, using profile counters to guide the trace
+  Hotblock, // Select a single block
+  HotCFG,   // Select arbitrary CFG using profile counters to prune cold paths
+  WholeCFG, // Select the entire CFG that has been profiled
+};
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * RegionDesc is a description of a code region.  This includes the
  * list of blocks in the region, and also the list of control-flow
@@ -520,6 +529,13 @@ bool breaksRegion(Op opc);
 void regionizeFunc(const Func*  func,
                    MCGenerator* mcg,
                    RegionVec&   regions);
+
+/*
+ * Returns the PGO region selector to be used for the given `func'.
+ * This depends on the values of RuntimeOption::EvalJitPGORegionSelector
+ * and RuntimeOption::EvalJitPGOCFGHotFuncOnly and the given `func'.
+ */
+PGORegionMode pgoRegionMode(const Func& func);
 
 /*
  * Functions to map BlockIds to the TransIDs used when the block was

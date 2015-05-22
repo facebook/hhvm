@@ -127,11 +127,6 @@ struct AliasAnalysis {
   ALocBits expand(AliasClass acls) const;
 
   /*
-   * Sets of alias classes that are used by expand().
-   */
-  jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> stk_expand_map;
-
-  /*
    * Map from frame SSATmp ids to the location bits for all of the frame's
    * locals.
    */

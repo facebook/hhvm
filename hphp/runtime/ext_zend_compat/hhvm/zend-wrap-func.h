@@ -64,8 +64,11 @@ TypedValue* zend_wrap_func(ActRec* ar);
 #else
 
 namespace HPHP {
-  inline void zBoxAndProxy(TypedValue* arg) {}
-  inline void zBoxAndProxy(const TypedValue* arg) {}
+
+struct TypedValue;
+inline void zBoxAndProxy(TypedValue* arg) {}
+inline void zBoxAndProxy(const TypedValue* arg) {}
+
 }
 
 #include "hphp/runtime/vm/native.h"

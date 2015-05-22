@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/string-vsnprintf.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

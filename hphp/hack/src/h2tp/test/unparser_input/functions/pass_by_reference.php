@@ -14,7 +14,7 @@ $o = "otter";
 $g = new Giraffe();
 $g->changeMe($o);
 echo($o."\n");
-$anon = function (&$x) {
+$anon = function(&$x) {
   $x++;
 };
 $x = 20;

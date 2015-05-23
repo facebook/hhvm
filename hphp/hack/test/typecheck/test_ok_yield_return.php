@@ -11,7 +11,7 @@
 
 function foo() {
   yield result(0);
-  $x = function () {
+  $x = function() {
     return 0;
   };
 }

@@ -15,10 +15,10 @@ function bar($start, $end) {
   if (false) {
     yield false;
   }
-  $f = function ($i) {
+  $f = function($i) {
     yield $i;
   };
-  $g = function () {
+  $g = function() {
     yield true;
   };
   return;

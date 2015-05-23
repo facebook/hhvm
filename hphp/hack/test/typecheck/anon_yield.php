@@ -10,7 +10,7 @@
  */
 
 function test(): (function(): Awaitable<int>) {
-  $f = async function () {
+  $f = async function() {
     return 0;
   };
   return $f;

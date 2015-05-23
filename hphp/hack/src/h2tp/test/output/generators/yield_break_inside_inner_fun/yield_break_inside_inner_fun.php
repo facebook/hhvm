@@ -1,7 +1,7 @@
 <?php
 require_once ($GLOBALS['HACKLIB_ROOT']);
 function foo($start, $end, $magic) {
-  $fn = function () use ($start, $magic) {
+  $fn = function() use ($start, $magic) {
     $i = $start;
     while ($i !== ($magic - 1)) {
       yield $i;
@@ -9,7 +9,7 @@ function foo($start, $end, $magic) {
     }
     return;
   };
-  $gn = function () {
+  $gn = function() {
     if (false) {
       yield false;
     }

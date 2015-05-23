@@ -1,10 +1,10 @@
 <?php
 require_once ($GLOBALS['HACKLIB_ROOT']);
 function lam() {
-  $fn = function ($a) {
+  $fn = function($a) {
     return $a * 2;
   };
-  $gn = function ($a) {
+  $gn = function($a) {
     $b = $a * 20;
     return $b * 2;
   };

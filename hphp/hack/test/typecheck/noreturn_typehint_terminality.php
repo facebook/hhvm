@@ -10,16 +10,34 @@ class C {
   }
 }
 
-function foo(?int $x): int {
+function test_fun1(?int $x): int {
   if ($x === null) {
     my_invariant_violation("yup!");
   }
   return $x;
 }
 
-function bar(?string $x): string {
+function test_fun2(?int $x): int {
+  if ($x === null) {
+    my_invariant_violation("yup!");
+  } else {
+    $y = $x;
+  }
+  return $y;
+}
+
+function test_meth1(?int $x): int {
   if ($x === null) {
     C::invariant_violation("yup!");
   }
   return $x;
+}
+
+function test_meth2(?int $x): int {
+  if ($x === null) {
+    C::invariant_violation("yup!");
+  } else {
+    $y = $x;
+  }
+  return $y;
 }

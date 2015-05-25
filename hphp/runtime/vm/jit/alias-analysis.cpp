@@ -32,9 +32,9 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-// Locations that refer to ranges of the eval stack or multiple frame locals
-// are expanded into individual locations only if smaller than this threshold.
-constexpr int kMaxExpandedSize = 16;
+// Locations that refer to ranges of the eval stack are expanded into
+// individual stack slots only if smaller than this threshold.
+constexpr int kMaxExpandedStackRange = 16;
 
 template<class Visit>
 void visit_locations(const BlockList& blocks, Visit visit) {
@@ -63,7 +63,6 @@ void visit_locations(const BlockList& blocks, Visit visit) {
 }
 
 folly::Optional<uint32_t> add_class(AliasAnalysis& ret, AliasClass acls) {
-  assertx(acls.isSingleLocation());
   auto const ins = ret.locations.insert(std::make_pair(acls, ALocMeta{}));
   if (!ins.second) return ins.first->second.index;
   if (ret.locations.size() > kMaxTrackedALocs) {
@@ -151,31 +150,14 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
     ret |= all_stack;
   }
 
+  // Individual frame locals are canonicalized so that different `AFrame's
+  // cannot alias each other.
   if (auto const frame = acls.frame()) {
-    if (frame->ids.hasSingleValue()) {
-      if (auto const slot = find(*frame)) {
-        ret.set(slot->index);
-      }
-      // Otherwise the location is untracked.
-    } else {
-      auto const it = frame_ranges.find(*frame);
-      if (it != end(frame_ranges)) {
-        ret |= it->second;
-      } else {
-        if (frame->ids.hasUpperRange()) {
-          ret |= all_frame;
-        }
-        for (uint32_t id = 0; id <= AliasIdSet::BitsetMax; ++id) {
-          if (auto const slot = find(AFrame {frame->fp, id})) {
-            if (frame->ids.test(id)) {
-              ret.set(slot->index);
-            } else {
-              ret.reset(slot->index);
-            }
-          }
-        }
-      }
+    // For now it is a single local, but this will change soon.
+    if (auto const meta = find(*frame)) {
+      ret.set(meta->index);
     }
+    // Otherwise the slot is untracked.
   } else if (acls.maybe(AFrameAny)) {
     ret |= all_frame;
   }
@@ -194,10 +176,8 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
   auto ret = ALocBits{};
 
   if (auto const stack = acls.stack()) {
-    if (stack->size == 1) {
-      if (auto const info = find(*stack)) {
-        ret.set(info->index);
-      }
+    if (auto const info = find(*stack)) {
+      ret.set(info->index);
     } else {
       auto const it = stack_ranges.find(*stack);
       if (it != end(stack_ranges)) {
@@ -209,28 +189,6 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
     }
   } else if (AStackAny <= acls) {
     ret |= all_stack;
-  }
-
-  if (auto const frame = acls.frame()) {
-    if (frame->ids.hasSingleValue()) {
-      if (auto const meta = find(*frame)) {
-        ret.set(meta->index);
-      }
-    } else {
-      auto const it = frame_ranges.find(*frame);
-      if (it != end(frame_ranges)) {
-        ret |= it->second;
-      } else {
-        for (uint32_t id = 0; id <= AliasIdSet::BitsetMax; ++id) {
-          AliasClass const single_frame = AFrame { frame->fp, id };
-          if (auto const meta = find(single_frame)) {
-            ret.set(meta->index);
-          }
-        }
-      }
-    }
-  } else if (AFrameAny <= acls) {
-    ret |= all_frame;
   }
 
   ret |= expand_part(*this, acls, acls.frame(), AFrameAny, all_frame);
@@ -278,26 +236,8 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (acls.is_mis()) {
+    if (acls.is_frame() || acls.is_mis()) {
       add_class(ret, acls);
-      return;
-    }
-
-    if (auto const frame = acls.frame()) {
-      always_assert(!frame->ids.empty());
-      if (frame->ids.hasSingleValue()) {
-        add_class(ret, *frame);
-      } else {
-        ret.frame_ranges[AliasClass { *frame }];
-
-        if (frame->ids.size() <= kMaxExpandedSize) {
-          for (uint32_t id = 0; id < AliasIdSet::BitsetMax; ++id) {
-            if (frame->ids.test(id)) {
-              add_class(ret, AFrame { frame->fp, id });
-            }
-          }
-        }
-      }
       return;
     }
 
@@ -322,11 +262,14 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       if (stk->size > 1) {
         ret.stack_ranges[AliasClass { *stk }];
       }
-      if (stk->size > kMaxExpandedSize) return;
+      if (stk->size > kMaxExpandedStackRange) return;
 
       for (auto stkidx = int32_t{0}; stkidx < stk->size; ++stkidx) {
-        add_class(ret, AStack { stk->offset - stkidx, 1 });
+        AliasClass single = AStack { stk->offset - stkidx, 1 };
+        add_class(ret, single);
       }
+
+      return;
     }
   });
 
@@ -399,16 +342,6 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
           ent.second.set(kv.second.index);
         }
       }
-    } else if (kv.first.is_frame()) {
-      for (auto& ent : ret.frame_ranges) {
-        if (kv.first <= ent.first) {
-          FTRACE(2, "  ({}) {} <= {}\n",
-            kv.second.index,
-            show(kv.first),
-            show(ent.first));
-          ent.second.set(kv.second.index);
-        }
-      }
     }
   }
 
@@ -443,18 +376,13 @@ std::string show(const AliasAnalysis& linfo) {
                       " {: <20}       : {}\n"
                       " {: <20}       : {}\n"
                       " {: <20}       : {}\n"
+                      " {: <20}       : {}\n",
     "all props",  show(linfo.all_props),
     "all elemIs", show(linfo.all_elemIs),
     "all refs",   show(linfo.all_refs),
-    "all frame",  show(linfo.all_frame)
+    "all frame",  show(linfo.all_frame),
+    "all stack",  show(linfo.all_stack)
   );
-  for (auto& kv : linfo.frame_ranges) {
-    folly::format(&ret, " ex {: <17}       : {}\n",
-      show(kv.first),
-      show(kv.second));
-  }
-  folly::format(&ret, " {: <20}       : {}\n",
-     "all stack",  show(linfo.all_stack));
   for (auto& kv : linfo.stack_ranges) {
     folly::format(&ret, " ex {: <17}       : {}\n",
       show(kv.first),

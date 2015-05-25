@@ -65,10 +65,6 @@ struct AliasAnalysis {
    * memory location, primarily an assigned id.  There is also an inverse map
    * from id to the metadata structure.
    *
-   * Two different alias classes in this map should not alias each other.  If
-   * an alias class contains multiple locations (e.g., a range of stack slots,
-   * multiple frame locals), we need to use multiple bits in this map.
-   *
    * The keyed locations in this map take their canonical form.  You should use
    * canonicalize before doing lookups.
    */
@@ -76,18 +72,10 @@ struct AliasAnalysis {
   jit::vector<ALocMeta> locations_inv;
 
   /*
-   * If an AStack covers multiple locations, it will have an entry in this
-   * map. It is OK if not all locations covered by the AStack are tracked. We
-   * only store the tracked subset here.
+   * Some pure store or load instructions affect ranges of stack slots.  If
+   * we've assigned all of them ids, they'll have an entry in this map.
    */
   jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> stack_ranges;
-
-  /*
-   * Similar to `stack_ranges', if an AFrame covers multiple locations, it will
-   * have an entry in this map. It is OK if not all locations covered are
-   * tracked.
-   */
-  jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> frame_ranges;
 
   /*
    * Short-hand to find an alias class in the locations map, or get folly::none

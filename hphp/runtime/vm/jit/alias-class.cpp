@@ -129,7 +129,7 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
   case STag::Frame:
     return folly::hash::hash_combine(hash,
                                      acls.m_frame.fp,
-                                     acls.m_frame.ids.raw());
+                                     acls.m_frame.id);
   case STag::Prop:
     return folly::hash::hash_combine(hash,
                                      acls.m_prop.obj,
@@ -202,14 +202,11 @@ AliasClass::rep AliasClass::stagBit(STag tag) {
 bool AliasClass::checkInvariants() const {
   switch (m_stag) {
   case STag::None:    break;
+  case STag::Frame:   break;
   case STag::Prop:    break;
   case STag::ElemI:   break;
-  case STag::Frame:   break;
-    assertx(m_frame.fp->isA(TFramePtr));
-    assertx(!m_frame.ids.empty());
-    break;
   case STag::Stack:
-    assertx(m_stack.size > 0);          // use AEmpty if you want that
+    assertx(m_stack.size > 0);
     break;
   case STag::ElemS:
     assertx(m_elemS.key->isStatic());
@@ -231,7 +228,7 @@ bool AliasClass::equivData(AliasClass o) const {
   switch (m_stag) {
   case STag::None:    return true;
   case STag::Frame:   return m_frame.fp == o.m_frame.fp &&
-                             m_frame.ids == o.m_frame.ids;
+                             m_frame.id == o.m_frame.id;
   case STag::Prop:    return m_prop.obj == o.m_prop.obj &&
                              m_prop.offset == o.m_prop.offset;
   case STag::ElemI:   return m_elemI.arr == o.m_elemI.arr &&
@@ -257,6 +254,7 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
   switch (a.m_stag) {
   case STag::None:
     break;
+  case STag::Frame:
   case STag::Prop:
   case STag::ElemI:
   case STag::ElemS:
@@ -264,22 +262,6 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
   case STag::Ref:
     assertx(!a.equivData(b));
     break;
-  case STag::Frame:
-    {
-      auto ret = AliasClass{newBits};
-      auto const frmA = a.m_frame;
-      auto const frmB = b.m_frame;
-      if (frmA.fp != frmB.fp) return ret;
-
-      auto const newIds = frmA.ids | frmB.ids;
-      // Even when newIds.isAny(), we still know it won't alias locals in other
-      // frames, so keep the specialization tag.
-      ret.m_stag = STag::Frame;
-      ret.m_frame = AFrame { frmA.fp, newIds };
-      assertx(ret.checkInvariants());
-      assertx(a <= ret && b <= ret);
-      return ret;
-    }
 
   case STag::Stack:
     {
@@ -312,7 +294,7 @@ folly::Optional<AliasClass> AliasClass::precise_union(AliasClass o) const {
   // bigger than it should be.  This means we can't deal with situations where
   // we have disjoint stags, and right now we also don't try to deal with
   // situations that have the same stag in a combinable way.  (E.g. two
-  // adjacent AStack ranges, multiple AFrame locals.)
+  // adjacent AStack ranges.)
   auto const stag1 = m_stag;
   auto const stag2 = o.m_stag;
   if (stag1 == STag::None && stag2 == STag::None) {
@@ -381,14 +363,13 @@ bool AliasClass::subclassData(AliasClass o) const {
   assertx(m_stag == o.m_stag);
   switch (m_stag) {
   case STag::None:
+  case STag::Frame:
   case STag::Prop:
   case STag::ElemI:
   case STag::ElemS:
   case STag::MIState:
   case STag::Ref:
     return equivData(o);
-  case STag::Frame:
-    return m_frame.fp == o.m_frame.fp && m_frame.ids <= o.m_frame.ids;
   case STag::Stack:
     return m_stack.offset <= o.m_stack.offset &&
            lowest_offset(m_stack) >= lowest_offset(o.m_stack);
@@ -434,7 +415,7 @@ bool AliasClass::maybeData(AliasClass o) const {
   case STag::None:
     not_reached();  // handled outside
   case STag::Frame:
-    return m_frame.fp == o.m_frame.fp && m_frame.ids.maybe(o.m_frame.ids);
+    return m_frame.fp == o.m_frame.fp && m_frame.id == o.m_frame.id;
   case STag::Prop:
     /*
      * We can't tell if two objects could be the same from here in general, but
@@ -532,21 +513,6 @@ bool AliasClass::maybe(AliasClass o) const {
   return true;
 }
 
-bool AliasClass::isSingleLocation() const {
-  if (m_stag == STag::None) return false;
-  if (m_bits & (m_bits - 1)) return false;
-
-  // AFrame and AStack can contain multiple locations.
-  if (auto const frame = is_frame()) {
-    return frame->ids.hasSingleValue();
-  }
-  if (auto const stk = is_stack()) {
-    return stk->size == 1;
-  }
-  // All other specializations currently have exactly one location.
-  return true;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 AliasClass canonicalize(AliasClass a) {
@@ -578,8 +544,7 @@ std::string show(AliasClass acls) {
   case A::STag::None:
     break;
   case A::STag::Frame:
-    folly::format(&ret, "Fr t{}:{}", acls.m_frame.fp->id(),
-                  show(acls.m_frame.ids));
+    folly::format(&ret, "Fr t{}:{}", acls.m_frame.fp->id(), acls.m_frame.id);
     break;
   case A::STag::Prop:
     folly::format(&ret, "Pr t{}:{}", acls.m_prop.obj->id(), acls.m_prop.offset);

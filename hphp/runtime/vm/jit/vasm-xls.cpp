@@ -1930,6 +1930,7 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
         bool const sf_live = !sf_ivl->ranges.empty() && sf_ivl->covers(pos);
         switch (ivl->val.kind) {
           case Vconst::Quad:
+          case Vconst::Double:
             loads.emplace_back(ldimmq{ivl->val.val, dst, sf_live});
             break;
           case Vconst::Long:

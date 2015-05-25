@@ -46,10 +46,11 @@ set(OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
 set(CMAKE_REQUIRED_FLAGS "-std=c++11")
 CHECK_CXX_SOURCE_COMPILES("
 #include <atomic>
+#include <iostream>
 int main() {
     struct Test { int val; };
     std::atomic<Test> s;
-    s.is_lock_free();
+    std::cout << s.is_lock_free();
 }
 " NOT_REQUIRE_ATOMIC_LINKER_FLAG)
 

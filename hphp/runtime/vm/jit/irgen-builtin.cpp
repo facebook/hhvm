@@ -92,7 +92,7 @@ SSATmp* opt_is_a(IRGS& env, uint32_t numArgs) {
       return implInstanceOfD(
         env,
         topC(env, BCSPOffset{2}),
-        top(env, TStr, BCSPOffset{1})->strVal()
+        top(env, BCSPOffset{1})->strVal()
       );
     }
   }
@@ -154,7 +154,6 @@ SSATmp* opt_ini_get(IRGS& env, uint32_t numArgs) {
   // We can only optimize settings that are system wide since user level
   // settings can be overridden during the execution of a request.
   auto const settingName = top(env,
-                               TStr,
                                BCSPOffset{0})->strVal()->toCppString();
   IniSetting::Mode mode = IniSetting::PHP_INI_NONE;
   if (!IniSetting::GetMode(settingName, mode)) {
@@ -593,7 +592,7 @@ private:
   void decRefForUnwind() const {
     for (auto i = uint32_t{0}; i < m_params.size(); ++i) {
       if (m_params[i].throughStack) {
-        popDecRef(env, TGen);
+        popDecRef(env);
       } else {
         gen(env, DecRef, m_params[i].value);
       }
@@ -610,14 +609,13 @@ private:
     // extendStack will end up with values that are of type StkElem
     // TODO(#6156498).
     for (auto i = 0; i < stackIdx; ++i) {
-      top(env, TGen, BCSPOffset{i}, DataTypeGeneric);
+      top(env, BCSPOffset{i}, DataTypeGeneric);
     }
 
     for (auto i = m_params.size(); i-- > 0;) {
       if (m_params[i].throughStack) {
         --stackIdx;
-        auto const val = top(env, TGen, BCSPOffset{stackIdx},
-          DataTypeGeneric);
+        auto const val = top(env, BCSPOffset{stackIdx}, DataTypeGeneric);
         gen(env, DecRef, val);
       } else {
         gen(env, DecRef, m_params[i].value);
@@ -838,7 +836,7 @@ void builtinCall(IRGS& env,
   // Pop the stack params and push the return value.
   if (params.thiz) gen(env, DecRef, params.thiz);
   for (auto i = uint32_t{0}; i < params.numThroughStack; ++i) {
-    popDecRef(env, TGen);
+    popDecRef(env);
   }
   // We don't need to decref the non-state param values, because they are only
   // non-reference counted types.  (At this point we've gotten through all our
@@ -964,7 +962,7 @@ void emitFCallBuiltin(IRGS& env,
     nullptr,  // no $this; FCallBuiltin never happens for methods
     numArgs,
     numNonDefault,
-    [&] (uint32_t i) { return pop(env, TGen, DataTypeSpecific); }
+    [&] (uint32_t i) { return pop(env, DataTypeSpecific); }
   );
 
   auto const catcher = CatchMaker {

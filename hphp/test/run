@@ -1191,7 +1191,7 @@ function run_config_server($options, $test) {
 
 function run_config_cli($options, $test, $hhvm, $hhvm_env) {
   if (isset($options['log'])) {
-    $hhvm_env['TRACE'] = 'printir:2';
+    $hhvm_env['TRACE'] = 'printir:1';
     $hhvm_env['HPHP_TRACE_FILE'] = $test . '.log';
   }
 

@@ -53,7 +53,7 @@
  *  order (i.e. a positive offset indicates lower address).
  * IRSP: Offset in cells relative to the IR stack pointer in address order.
  * BCSP: Offset in cells relative to the top of the stack at the start of the
- *  current bytecode in reverse address order.
+ *  current bytecode in address order.
  *
  * Supposing we're translating a bytecode instruction where EE is "top of
  * stack" in HHBC semantics, then here are some examples:
@@ -129,6 +129,8 @@ struct BCSPOffset {
   }
 
   BCSPOffset operator-() const { return BCSPOffset{-offset}; }
+
+  BCSPOffset operator-(int32_t delta) { return BCSPOffset{offset - delta}; }
 };
 
 struct FPInvOffset {

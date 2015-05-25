@@ -396,7 +396,7 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
   }
 
   auto const defaultVal = safe ? popC(env) : nullptr;
-  popDecRef(env, TCell); // callable
+  popDecRef(env); // callable
   if (safe) {
     push(env, defaultVal);
     push(env, safeFlag);
@@ -738,7 +738,7 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
 void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
   auto const exitBlock = makeExitSlow(env);
 
-  auto classTmp = top(env, TCls);
+  auto classTmp = top(env);
   auto methodTmp = topC(env, BCSPOffset{1}, DataTypeGeneric);
   assertx(classTmp->isA(TCls));
   if (!classTmp->hasConstVal() || !methodTmp->hasConstVal(TStr)) {

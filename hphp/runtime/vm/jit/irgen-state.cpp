@@ -99,7 +99,7 @@ std::string show(const IRGS& irgs) {
   for (auto i = 0; i < irgs.irb->evalStack().size(); ++i) {
     while (checkFpi());
     auto const value = irgen::top(const_cast<IRGS&>(irgs),
-      TStkElem, BCSPOffset{i}, DataTypeGeneric);
+                                  BCSPOffset{i}, DataTypeGeneric);
     elem(value->inst()->toString());
   }
 

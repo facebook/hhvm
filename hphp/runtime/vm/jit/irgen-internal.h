@@ -250,6 +250,11 @@ inline void updateMarker(IRGS& env) {
 //////////////////////////////////////////////////////////////////////
 // Eval stack manipulation
 
+inline SSATmp* assertType(SSATmp* tmp, Type type) {
+  assert(!tmp || tmp->isA(type));
+  return tmp;
+}
+
 inline IRSPOffset offsetFromIRSP(const IRGS& env, BCSPOffset offsetFromInstr) {
   int32_t const virtDelta = env.irb->evalStack().size() -
     env.irb->stackDeficit();
@@ -272,47 +277,39 @@ inline BCSPOffset offsetFromBCSP(const IRGS& env, FPInvOffset offsetFromFP) {
   return toBCSPOffset(offsetFromFP, curSPTop);
 }
 
-inline SSATmp* pop(IRGS& env, Type type, TypeConstraint tc = DataTypeSpecific) {
-  auto const opnd = env.irb->evalStack().pop();
-  env.irb->constrainValue(opnd, tc);
-
-  if (opnd == nullptr) {
-    env.irb->constrainStack(offsetFromIRSP(env, BCSPOffset{0}), tc);
-    auto value = gen(
-      env,
-      LdStk,
-      type,
-      IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
-      sp(env)
-    );
-    env.irb->incStackDeficit();
-    FTRACE(2, "popping {}\n", *value->inst());
-    return value;
+inline SSATmp* pop(IRGS& env, TypeConstraint tc = DataTypeSpecific) {
+  if (auto const opnd = env.irb->evalStack().pop()) {
+    FTRACE(2, "popping {}\n", *opnd->inst());
+    env.irb->constrainValue(opnd, tc);
+    return opnd;
   }
 
-  FTRACE(2, "popping {}\n", *opnd->inst());
-  return opnd;
+  auto const offset = offsetFromIRSP(env, BCSPOffset{0});
+  auto const knownType = env.irb->stackType(offset, tc);
+  auto value = gen(env, LdStk, knownType, IRSPOffsetData{offset}, sp(env));
+  env.irb->incStackDeficit();
+  FTRACE(2, "popping {}\n", *value->inst());
+  return value;
 }
 
 inline SSATmp* popC(IRGS& env, TypeConstraint tc = DataTypeSpecific) {
-  return pop(env, TCell, tc);
+  return assertType(pop(env, tc), TCell);
 }
 
-inline SSATmp* popA(IRGS& env) { return pop(env, TCls); }
-inline SSATmp* popV(IRGS& env) { return pop(env, TBoxedInitCell); }
-inline SSATmp* popR(IRGS& env) { return pop(env, TGen); }
-inline SSATmp* popF(IRGS& env) { return pop(env, TGen); }
+inline SSATmp* popA(IRGS& env) { return assertType(pop(env), TCls); }
+inline SSATmp* popV(IRGS& env) { return assertType(pop(env), TBoxedInitCell); }
+inline SSATmp* popR(IRGS& env) { return assertType(pop(env), TGen); }
+inline SSATmp* popF(IRGS& env) { return assertType(pop(env), TGen); }
 
 inline void discard(IRGS& env, uint32_t n) {
   for (auto i = uint32_t{0}; i < n; ++i) {
-    pop(env, TStkElem, DataTypeGeneric); // don't care about the values
+    pop(env, DataTypeGeneric); // don't care about the values
   }
 }
 
 inline void popDecRef(IRGS& env,
-                      Type type,
                       TypeConstraint tc = DataTypeCountness) {
-  auto const val = pop(env, type, tc);
+  auto const val = pop(env, tc);
   gen(env, DecRef, val);
 }
 
@@ -330,54 +327,6 @@ inline SSATmp* pushIncRef(IRGS& env,
   return push(env, tmp);
 }
 
-inline void extendStack(IRGS& env, uint32_t index, Type type) {
-  // DataTypeGeneric is used in here because nobody's actually looking at the
-  // values, we're just inserting LdStks into the eval stack to be consumed
-  // elsewhere.
-  if (index == 0) {
-    push(env, pop(env, type, DataTypeGeneric));
-    return;
-  }
-
-  auto const tmp = pop(env, TStkElem, DataTypeGeneric);
-  extendStack(env, index - 1, type);
-  push(env, tmp);
-}
-
-inline SSATmp* top(IRGS& env,
-                   Type type,
-                   BCSPOffset index = BCSPOffset{0},
-                   TypeConstraint tc = DataTypeSpecific) {
-  auto tmp = env.irb->evalStack().top(index.offset);
-  if (!tmp) {
-    extendStack(env, index.offset, type);
-    tmp = env.irb->evalStack().top(index.offset);
-  }
-  assertx(tmp);
-  env.irb->constrainValue(tmp, tc);
-  return tmp;
-}
-
-inline SSATmp* topC(IRGS& env,
-                    BCSPOffset i = BCSPOffset{0},
-                    TypeConstraint tc = DataTypeSpecific) {
-  return top(env, TCell, i, tc);
-}
-
-inline SSATmp* topF(IRGS& env,
-                    BCSPOffset i = BCSPOffset{0},
-                    TypeConstraint tc = DataTypeSpecific) {
-  return top(env, TGen, i, tc);
-}
-
-inline SSATmp* topV(IRGS& env, BCSPOffset i = BCSPOffset{0}) {
-  return top(env, TBoxedInitCell, i);
-}
-
-inline SSATmp* topR(IRGS& env, BCSPOffset i = BCSPOffset{0}) {
-  return top(env, TGen, i);
-}
-
 inline Type topType(IRGS& env,
                     BCSPOffset idx,
                     TypeConstraint constraint = DataTypeSpecific) {
@@ -388,6 +337,49 @@ inline Type topType(IRGS& env,
     return tmp->type();
   }
   return env.irb->stackType(offsetFromIRSP(env, idx), constraint);
+}
+
+inline void extendStack(IRGS& env, BCSPOffset index) {
+  // DataTypeGeneric is used in here because nobody's actually looking at the
+  // values, we're just inserting LdStks into the eval stack to be consumed
+  // elsewhere.
+  auto const tmp = pop(env, DataTypeGeneric);
+  if (index.offset > 0) extendStack(env, index - 1);
+  push(env, tmp);
+}
+
+inline SSATmp* top(IRGS& env,
+                   BCSPOffset index = BCSPOffset{0},
+                   TypeConstraint tc = DataTypeSpecific) {
+  auto tmp = env.irb->evalStack().top(index.offset);
+  if (!tmp) tmp = env.irb->stackValue(offsetFromIRSP(env, index), tc);
+  if (!tmp) {
+    extendStack(env, index);
+    tmp = env.irb->evalStack().top(index.offset);
+  }
+  assertx(tmp);
+  env.irb->constrainValue(tmp, tc);
+  return tmp;
+}
+
+inline SSATmp* topC(IRGS& env,
+                    BCSPOffset i = BCSPOffset{0},
+                    TypeConstraint tc = DataTypeSpecific) {
+  return assertType(top(env, i, tc), TCell);
+}
+
+inline SSATmp* topF(IRGS& env,
+                    BCSPOffset i = BCSPOffset{0},
+                    TypeConstraint tc = DataTypeSpecific) {
+  return assertType(top(env, i, tc), TGen);
+}
+
+inline SSATmp* topV(IRGS& env, BCSPOffset i = BCSPOffset{0}) {
+  return assertType(top(env, i), TBoxedCell);
+}
+
+inline SSATmp* topR(IRGS& env, BCSPOffset i = BCSPOffset{0}) {
+  return assertType(top(env, i), TGen);
 }
 
 //////////////////////////////////////////////////////////////////////

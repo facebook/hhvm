@@ -34,7 +34,7 @@ void bindMem(IRGS& env, SSATmp* ptr, SSATmp* src) {
 
 void destroyName(IRGS& env, SSATmp* name) {
   assertx(name == topC(env));
-  popDecRef(env, name->type());
+  popDecRef(env);
 }
 
 //////////////////////////////////////////////////////////////////////

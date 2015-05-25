@@ -143,6 +143,7 @@ inline Variant ArrayData::getKey(ssize_t pos) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void ArrayData::release() noexcept {
+  assert(isArrayKind(m_hdr.kind));
   return g_array_funcs.release[kind()](this);
 }
 

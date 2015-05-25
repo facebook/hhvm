@@ -156,8 +156,8 @@ void endInlinedCommon(IRGS& env) {
   FTRACE(1, "]]] end inlining: {}\n", curFunc(env)->fullName()->data());
 }
 
-void retFromInlined(IRGS& env, Type type) {
-  auto const retVal = pop(env, type, DataTypeGeneric);
+void retFromInlined(IRGS& env) {
+  auto const retVal = pop(env, DataTypeGeneric);
   endInlinedCommon(env);
   push(env, retVal);
 }

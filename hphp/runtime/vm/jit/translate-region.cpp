@@ -256,7 +256,6 @@ void emitPredictionGuards(IRGS& irgs,
 
 void initNormalizedInstruction(
   NormalizedInstruction& inst,
-  jit::vector<DynLocation>& dynLocs,
   MapWalker<RegionDesc::Block::ParamByRefMap>& byRefs,
   IRGS& irgs,
   const RegionDesc& region,
@@ -279,20 +278,9 @@ void initNormalizedInstruction(
 
   auto const inputInfos = getInputs(inst);
 
-  // Populate the NormalizedInstruction's input vector, using types
-  // from IRBuilder.
-  dynLocs.reserve(inputInfos.size());
-  auto newDynLoc = [&] (const InputInfo& ii) {
-    dynLocs.emplace_back(ii.loc,
-                         irgen::predictedTypeFromLocation(irgs, ii.loc));
-    FTRACE(2, "predictedTypeFromLocation: {} -> {}\n",
-           ii.loc.pretty(), dynLocs.back().rtt);
-    return &dynLocs.back();
-  };
-
   FTRACE(2, "populating inputs for {}\n", inst.toString());
   for (auto const& ii : inputInfos) {
-    inst.inputs.push_back(newDynLoc(ii));
+    inst.inputs.push_back(ii.loc);
   }
 
   if (inputInfos.needsRefCheck) {
@@ -615,9 +603,8 @@ TranslateResult irGenRegion(IRGS& irgs,
 
       // Create and initialize the instruction.
       NormalizedInstruction inst(sk, block->unit());
-      jit::vector<DynLocation> dynLocs;
       bool toInterpInst = toInterp.count(ProfSrcKey{irgs.profTransID, sk});
-      initNormalizedInstruction(inst, dynLocs, byRefs, irgs, region, blockId,
+      initNormalizedInstruction(inst, byRefs, irgs, region, blockId,
                                 topFunc, lastInstr, toInterpInst);
 
       // If this block ends with an inlined FCall, we don't emit anything for

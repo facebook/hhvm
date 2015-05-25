@@ -100,7 +100,7 @@ void checkTypeLocal(IRGS& env, uint32_t locId, Type type, Offset dest,
 void assertTypeStack(IRGS& env, BCSPOffset idx, Type type) {
   if (idx.offset < env.irb->evalStack().size()) {
     // We're asserting a new type so we don't care about the previous type.
-    auto const tmp = top(env, TStkElem, idx, DataTypeGeneric);
+    auto const tmp = top(env, idx, DataTypeGeneric);
     assertx(tmp);
     env.irb->evalStack().replace(idx.offset, gen(env, AssertType, type, tmp));
   } else {
@@ -144,7 +144,7 @@ void checkTypeStack(IRGS& env,
            idx.offset, type.toString());
     // CheckType only cares about its input type if the simplifier does
     // something with it and that's handled if and when it happens.
-    auto const tmp = top(env, TStkElem, idx, DataTypeGeneric);
+    auto const tmp = top(env, idx, DataTypeGeneric);
     assertx(tmp);
     env.irb->evalStack().replace(idx.offset,
                                  gen(env, CheckType, type, exit, tmp));
@@ -161,7 +161,7 @@ void predictTypeStack(IRGS& env, BCSPOffset offset, Type type) {
 
   auto stackOff = IRSPOffsetData { offsetFromIRSP(env, offset) };
   if (offset.offset < env.irb->evalStack().size()) {
-    auto const tmp = top(env, TStkElem, offset, DataTypeGeneric);
+    auto const tmp = top(env, offset, DataTypeGeneric);
     assertx(tmp);
     auto oldType = env.irb->evalStack().topPredictedType(offset.offset);
     auto newType = refinePredictedType(oldType, type, tmp->type());

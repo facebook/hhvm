@@ -93,10 +93,26 @@ struct MTS {
   IRUnit& unit;
   MInstrInfo mii;
 
-  hphp_hash_map<unsigned,BCSPOffset> stackInputs;
-
+  /*
+   * Member index. The current position in immVecM, which contains the list of
+   * member lookup keys.
+   */
   unsigned mInd;
+
+  /*
+   * Input index. The current position in ni.inputs. This travels at a
+   * different rate than mInd because not all member codes correspond to a
+   * NormalizedInstruction input.
+   */
   unsigned iInd;
+
+  /*
+   * Cached information about which stages of the minstr need ratchet
+   * operations. Filled in by computeRatchets().
+   */
+  unsigned numLogicalRatchets;
+  bool needFirstRatchet;
+  bool needFinalRatchet;
 
   bool needMIS{true};
 
@@ -152,6 +168,84 @@ Block* makeMISCatch(MTS& env);
 
 // Make a special catch block that deals with InvalidSetMExceptions.
 Block* makeCatchSet(MTS& env);
+
+//////////////////////////////////////////////////////////////////////
+// Property information.
+
+struct PropInfo {
+  PropInfo()
+    : offset{-1}
+    , repoAuthType{}
+    , baseClass{nullptr}
+  {}
+
+  explicit PropInfo(int offset,
+                    RepoAuthType repoAuthType,
+                    const Class* baseClass)
+    : offset{offset}
+    , repoAuthType{repoAuthType}
+    , baseClass{baseClass}
+  {}
+
+  int offset;
+  RepoAuthType repoAuthType;
+  const Class* baseClass;
+};
+
+/*
+ * Try to find a property offset for the given key in baseClass. Will return -1
+ * if the mapping from baseClass's name to the Class* can change (which happens
+ * in sandbox mode when the ctx class is unrelated to baseClass).
+ */
+PropInfo getPropertyOffset(IRGS& env,
+                           const Class* ctx,
+                           const Class* baseClass,
+                           Location keyLoc) {
+  if (!baseClass) return PropInfo();
+
+  // This doesn't constrain the key type, but it's ok because we only use the
+  // type if it's a constant string (which can never come directly from a
+  // guard).
+  auto const keyType = provenTypeFromLocation(env, keyLoc);
+  if (!keyType.hasConstVal(TStr)) return PropInfo();
+  auto const name = keyType.strVal();
+
+  // If we are not in repo-authoriative mode, we need to check that baseClass
+  // cannot change in between requests.
+  if (!RuntimeOption::RepoAuthoritative ||
+      !(baseClass->preClass()->attrs() & AttrUnique)) {
+    if (!ctx) return PropInfo();
+    if (!ctx->classof(baseClass)) {
+      if (baseClass->classof(ctx)) {
+        // baseClass can change on us in between requests, but since
+        // ctx is an ancestor of baseClass we can make the weaker
+        // assumption that the object is an instance of ctx
+        baseClass = ctx;
+      } else {
+        // baseClass can change on us in between requests and it is
+        // not related to ctx, so bail out
+        return PropInfo();
+      }
+    }
+  }
+
+  // Lookup the index of the property based on ctx and baseClass
+  auto const lookup = baseClass->getDeclPropIndex(ctx, name);
+  auto const idx = lookup.prop;
+
+  // If we couldn't find a property that is accessible in the current context,
+  // bail out
+  if (idx == kInvalidSlot || !lookup.accessible) return PropInfo();
+
+  // If it's a declared property we're good to go: even if a subclass redefines
+  // an accessible property with the same name it's guaranteed to be at the same
+  // offset.
+  return PropInfo(
+    baseClass->declPropOffset(idx),
+    baseClass->declPropRepoAuthType(idx),
+    baseClass
+  );
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -240,11 +334,42 @@ SSATmp* ptrToUninit(IRGS& env) {
   return cns(env, Type::cns(&null_variant, TPtrToMembUninit));
 }
 
-bool mightCallMagicPropMethod(MInstrAttr mia, const Class* cls,
-                              PropInfo propInfo) {
+SSATmp* getInput(IRGS& env, unsigned i, TypeConstraint tc) {
+  auto const& l = env.currentNormalizedInstruction->inputs[i];
+
+  switch (l.space) {
+    case Location::Stack: {
+      auto const offset = l.bcRelOffset;
+      assertx(offset.offset >= 0);
+      return top(env, offset, tc);
+    }
+
+    case Location::Local:
+      // N.B. Exit block for LdLocPseudoMain is nullptr because we always
+      // InterpOne member instructions in pseudomains
+      return ldLoc(env, l.offset, nullptr, tc);
+
+    case Location::Litstr:
+      return cns(env, curUnit(env)->lookupLitstrId(l.offset));
+
+    case Location::Litint:
+      return cns(env, l.offset);
+
+    case Location::This:
+      // If we don't have a current class context, this instruction will be
+      // unreachable.
+      if (!curClass(env)) PUNT(Unreachable-LdThis);
+      return ldThis(env);
+
+    default: not_reached();
+  }
+}
+
+bool mightCallMagicPropMethod(MInstrAttr mia, PropInfo propInfo) {
   if (!typeFromRAT(propInfo.repoAuthType).maybe(TUninit)) {
     return false;
   }
+  auto const cls = propInfo.baseClass;
   if (!cls) return true;
   bool const no_override_magic =
     // NB: this function can't yet be used for unset or isset contexts.  Just
@@ -254,33 +379,43 @@ bool mightCallMagicPropMethod(MInstrAttr mia, const Class* cls,
   return !no_override_magic;
 }
 
-bool mInstrHasUnknownOffsets(MTS& env) {
-  auto const& mii = env.mii;
-  unsigned mi = 0;
-  unsigned ii = mii.valCount() + 1;
-  for (; mi < env.immVecM.size(); ++mi) {
-    auto const mc = env.immVecM[mi];
-    if (mcodeIsProp(mc)) {
-      const Class* cls = nullptr;
-      auto propInfo = getPropertyOffset(env, env.ni, curClass(env), cls, mii,
-        mi, ii);
-      if (propInfo.offset == -1 ||
-          mightCallMagicPropMethod(mii.getAttr(mc), cls, propInfo)) {
-        return true;
-      }
-      ++ii;
-    } else {
+bool mInstrHasUnknownOffsets(IRGS& env) {
+  auto const& ni = *env.currentNormalizedInstruction;
+  auto const& mii = getMInstrInfo(ni.mInstrOp());
+  unsigned ii = mii.valCount();
+
+  // It's ok to use DataTypeGeneric here because our only caller will constrain
+  // the base properly if we return true and it uses that information.
+  auto const base = getInput(env, ii, DataTypeGeneric);
+  auto baseType = base->type().unbox();
+  if (!(baseType < (TObj | TInitNull)) || !baseType.clsSpec()) return true;
+  ++ii;
+
+  for (unsigned mi = 0; mi < ni.immVecM.size(); ++mi, ++ii) {
+    auto const mc = ni.immVecM[mi];
+    if (!mcodeIsProp(mc)) return true;
+
+    auto propInfo = getPropertyOffset(env,
+                                      curClass(env),
+                                      baseType.clsSpec().cls(),
+                                      ni.inputs[ii]);
+    if (propInfo.offset == -1 ||
+        mightCallMagicPropMethod(mii.getAttr(mc), propInfo)) {
       return true;
     }
+    baseType = typeFromRAT(propInfo.repoAuthType);
   }
 
   return false;
 }
 
-// "Simple" bases are stack cells and locals.
-bool isSimpleBase(MTS& env) {
-  auto const loc = env.immVec.locationCode();
-  return loc == LL || loc == LC || loc == LR;
+// "Simple" bases are stack cells and locals, which imply that
+// env.ni.inputs[env.mii.valCount()] is the actual base value. Other base types
+// have things like Class references or global variable names in the first few
+// inputs.
+bool isSimpleBase(const IRGS& env) {
+  auto const loc = env.currentNormalizedInstruction->immVec.locationCode();
+  return loc == LL || loc == LC || loc == LR || loc == LH;
 }
 
 bool isSingleMember(MTS& env) { return env.immVecM.size() == 1; }
@@ -308,7 +443,6 @@ void checkMIState(MTS& env) {
   const bool isIssetM       = env.op == Op::IssetM;
   const bool isUnsetM       = env.op == Op::UnsetM;
   const bool isSingle       = env.immVecM.size() == 1;
-  const bool unknownOffsets = mInstrHasUnknownOffsets(env);
 
   if (baseType.maybe(TCell) &&
       baseType.maybe(TBoxedCell)) {
@@ -322,7 +456,7 @@ void checkMIState(MTS& env) {
   // CGetM or SetM with no unknown property offsets
   const bool simpleProp = [&]() {
     if (!isCGetM && !isSetM) return false;
-    if (unknownOffsets) return false;
+    if (mInstrHasUnknownOffsets(env)) return false;
     auto cls = baseType.clsSpec().cls();
     if (!cls) return false;
     return !constrainBase(env, TypeConstraint(cls).setWeak());
@@ -370,11 +504,9 @@ void checkMIState(MTS& env) {
   }
 }
 
-//////////////////////////////////////////////////////////////////////
-
 void emitMTrace(MTS& env) {
   auto rttStr = [&](int i) {
-    return Type(env.ni.inputs[i]->rtt).unbox().toString();
+    return predictedTypeFromLocation(env, env.ni.inputs[i]).unbox().toString();
   };
   std::ostringstream shape;
   int iInd = env.mii.valCount();
@@ -408,49 +540,12 @@ void emitMTrace(MTS& env) {
       cns(env, 1));
 }
 
-//////////////////////////////////////////////////////////////////////
-
-SSATmp* getInput(MTS& env, unsigned i, TypeConstraint tc) {
-  auto const& dl = *env.ni.inputs[i];
-  auto const& l = dl.location;
-
-  assertx(!!env.stackInputs.count(i) == (l.space == Location::Stack));
-  switch (l.space) {
-    case Location::Stack:
-      return top(env, TStkElem, env.stackInputs[i], tc);
-
-    case Location::Local:
-      // N.B. Exit block for LdLocPseudoMain is nullptr because we always
-      // InterpOne member instructions in pseudomains
-      return ldLoc(env, l.offset, nullptr, tc);
-
-    case Location::Litstr:
-      return cns(env, curUnit(env)->lookupLitstrId(l.offset));
-
-    case Location::Litint:
-      return cns(env, l.offset);
-
-    case Location::This:
-      // If we don't have a current class context, this instruction will be
-      // unreachable.
-      if (!curClass(env)) PUNT(Unreachable-LdThis);
-      return ldThis(env);
-
-    default: not_reached();
-  }
-}
-
 void setBase(MTS& env,
              SSATmp* tmp,
              folly::Optional<Type> baseType = folly::none) {
   env.base.value = tmp;
   env.base.type = baseType ? *baseType : env.base.value->type();
   always_assert(env.base.type <= env.base.value->type());
-}
-
-SSATmp* getBase(MTS& env, TypeConstraint tc) {
-  assertx(env.iInd == env.mii.valCount());
-  return getInput(env, env.iInd, tc);
 }
 
 SSATmp* getKey(MTS& env) {
@@ -479,7 +574,10 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
   // DataTypeGeneric is used in here to avoid constraining the base in case we
   // end up not caring about the type. Consumers of the return value must
   // constrain the base as appropriate.
-  auto const base = getBase(env, DataTypeGeneric); // XXX: gens unneeded instrs
+  if (!isSimpleBase(env)) return SimpleOp::None;
+
+  auto const base = getInput(env, env.mii.valCount(),
+                             DataTypeGeneric); // XXX: gens unneeded instrs
   if (base->type().maybe(TCell) &&
       base->type().maybe(TBoxedCell)) {
     // We might be doing a Base NL or something similar.  Either way we can't
@@ -488,12 +586,12 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
   }
 
   auto const baseType = [&] {
-    auto const& baseDL = *env.ni.inputs[env.iInd];
+    auto const& baseL = env.ni.inputs[env.iInd];
     // Before we do any simpleCollectionOp on a local base, we will always emit
     // the appropriate CheckRefInner guard to allow us to use a predicted inner
     // type.  So when calculating the SimpleOp assume that type.
-    if (base->type().maybe(TBoxedCell) && baseDL.location.isLocal()) {
-      return env.irb.predictedInnerType(baseDL.location.offset);
+    if (base->type().maybe(TBoxedCell) && baseL.isLocal()) {
+      return env.irb.predictedInnerType(baseL.offset);
     }
     return base->type();
   }();
@@ -545,7 +643,7 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
       if (isVector || isPair) {
         if (mcodeMaybeVectorKey(env.immVecM[0])) {
           auto const key = getInput(env, env.mii.valCount() + 1,
-            DataTypeGeneric);
+                                    DataTypeGeneric);
           if (key->isA(TInt)) {
             // We don't specialize setting pair elements.
             if (isPair && env.op == Op::SetM) return SimpleOp::None;
@@ -556,7 +654,7 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
       } else if (isMap) {
         if (mcodeIsElem(env.immVecM[0])) {
           auto const key = getInput(env, env.mii.valCount() + 1,
-            DataTypeGeneric);
+                                    DataTypeGeneric);
           if (key->isA(TInt) || key->isA(TStr)) {
             return SimpleOp::Map;
           }
@@ -573,10 +671,10 @@ SimpleOp computeSimpleCollectionOp(MTS& env) {
 
 void emitBaseLCR(MTS& env) {
   auto const& mia = env.mii.getAttr(env.immVec.locationCode());
-  auto const& baseDL = *env.ni.inputs[env.iInd];
+  auto const& baseL = env.ni.inputs[env.iInd];
   // We use DataTypeGeneric here because we might not care about the type. If
   // we do, it's constrained further.
-  auto base = getBase(env, DataTypeGeneric);
+  auto base = getInput(env, env.iInd, DataTypeGeneric);
   auto baseType = base->type();
 
   if (!(baseType <= TCell ||
@@ -584,25 +682,25 @@ void emitBaseLCR(MTS& env) {
     PUNT(MInstr-GenBase);
   }
 
-  if (baseDL.location.isLocal()) {
+  if (baseL.isLocal()) {
     // Check for Uninit and warn/promote to InitNull as appropriate
     if (baseType <= TUninit) {
       if (mia & MIA_warn) {
         gen(env,
             RaiseUninitLoc,
-            cns(env, curFunc(env)->localVarName(baseDL.location.offset)));
+            cns(env, curFunc(env)->localVarName(baseL.offset)));
       }
       if (mia & MIA_define) {
         // We care whether or not the local is Uninit, and
         // CountnessInit will tell us that.
-        env.irb.constrainLocal(baseDL.location.offset, DataTypeSpecific,
+        env.irb.constrainLocal(baseL.offset, DataTypeSpecific,
                               "emitBaseLCR: Uninit base local");
         base = cns(env, TInitNull);
         baseType = TInitNull;
         gen(
           env,
           StLoc,
-          LocalId(baseDL.location.offset),
+          LocalId(baseL.offset),
           fp(env),
           base
         );
@@ -619,8 +717,8 @@ void emitBaseLCR(MTS& env) {
    * side-exit here.
    */
   Block* failedRef = baseType <= TBoxedCell ? makeExit(env) : nullptr;
-  if (baseType <= TBoxedCell && baseDL.location.isLocal()) {
-    auto const predTy = env.irb.predictedInnerType(baseDL.location.offset);
+  if (baseType <= TBoxedCell && baseL.isLocal()) {
+    auto const predTy = env.irb.predictedInnerType(baseL.offset);
     gen(env, CheckRefInner, predTy, failedRef, base);
     base = gen(env, LdRef, predTy, base);
     baseType = base->type();
@@ -642,28 +740,27 @@ void emitBaseLCR(MTS& env) {
   // unboxing, since all the generic helpers understand boxed bases. They still
   // may rely on the CheckRefInner guard above, though; the various emit*
   // functions may do smarter things based on the guarded type.
-  if (baseDL.location.space == Location::Local) {
+  if (baseL.space == Location::Local) {
     setBase(
       env,
-      ldLocAddr(env, baseDL.location.offset),
+      ldLocAddr(env, baseL.offset),
       env.irb.localType(
-        baseDL.location.offset,
+        baseL.offset,
         DataTypeSpecific
       ).ptr(Ptr::Frame)
     );
   } else {
-    assertx(baseDL.location.space == Location::Stack);
+    assertx(baseL.space == Location::Stack);
     // Make sure the stack is clean before getting a pointer to one of its
     // elements.
     spillStack(env);
     env.irb.exceptionStackBoundary();
-    assertx(env.stackInputs.count(env.iInd));
     auto const stkType = env.irb.stackType(
-      offsetFromIRSP(env, env.stackInputs[env.iInd]),
+      offsetFromIRSP(env, baseL.bcRelOffset),
       DataTypeGeneric);
     setBase(
       env,
-      ldStkAddr(env, env.stackInputs[env.iInd]),
+      ldStkAddr(env, baseL.bcRelOffset),
       stkType.ptr(Ptr::Stk)
     );
   }
@@ -675,7 +772,9 @@ void emitBaseLCR(MTS& env) {
   constrainBase(env, DataTypeSpecific);
 }
 
-void emitBaseH(MTS& env) { setBase(env, getBase(env, DataTypeSpecific)); }
+void emitBaseH(MTS& env) {
+  setBase(env, getInput(env, env.iInd, DataTypeSpecific));
+}
 
 void emitBaseN(MTS& env) {
   // If this is ever implemented, the check at the beginning of
@@ -685,7 +784,7 @@ void emitBaseN(MTS& env) {
 
 void emitBaseG(MTS& env) {
   auto const& mia = env.mii.getAttr(env.immVec.locationCode());
-  auto const gblName = getBase(env, DataTypeSpecific);
+  auto const gblName = getInput(env, env.iInd, DataTypeSpecific);
   if (!gblName->isA(TStr)) PUNT(BaseG-non-string-name);
   setBase(
     env,
@@ -697,7 +796,7 @@ void emitBaseS(MTS& env) {
   const int kClassIdx = env.ni.inputs.size() - 1;
   auto const key = getKey(env);
   auto const clsRef = getInput(env, kClassIdx,
-    DataTypeGeneric /* will be a Cls */);
+                               DataTypeGeneric /* will be a Cls */);
 
   /*
    * Note, the base may be a pointer to a boxed type after this.  We don't
@@ -723,48 +822,25 @@ void emitBaseOp(MTS& env) {
 //////////////////////////////////////////////////////////////////////
 // Intermediate ops
 
-PropInfo getCurrentPropertyOffset(MTS& env, const Class*& knownCls) {
+PropInfo getCurrentPropertyOffset(MTS& env) {
+  // We allow the use of clases from nullable objects because
+  // emitPropSpecialized() explicitly checks for null (when needed) before
+  // doing the property access.
   auto const baseType = env.base.type.derefIfPtr();
-  if (!knownCls) {
-    if (baseType < (TObj|TInitNull) && baseType.clsSpec()) {
-      knownCls = baseType.clsSpec().cls();
-    }
-  }
-
-  /*
-   * TODO(#5616733): If we still don't have a knownCls, we can't do anything
-   * good.  It's possible we still have the known information statically, and
-   * it might be in env.ni.inputs, but right now we can't really trust that
-   * because it's not very clear what it means.  See task for more information.
-   */
-  if (!knownCls) return PropInfo{};
-
-  auto const info = getPropertyOffset(env, env.ni, curClass(env), knownCls,
-                                      env.mii, env.mInd, env.iInd);
-  if (info.offset == -1) return info;
+  if (!(baseType < (TObj | TInitNull) && baseType.clsSpec())) return PropInfo{};
 
   auto const baseCls = baseType.clsSpec().cls();
-
-  /*
-   * baseCls and knownCls may differ due to a number of factors but they must
-   * always be related to each other somehow if they are both non-null.
-   *
-   * TODO(#5616733): stop using ni.inputs here.  Just use the class we know
-   * from this translation, if there is one.
-   */
-  always_assert_flog(
-    baseCls->classof(knownCls) || knownCls->classof(baseCls),
-    "Class mismatch between baseType({}) and knownCls({})",
-    baseCls->name()->data(), knownCls->name()->data()
-  );
+  auto const info = getPropertyOffset(env, curClass(env), baseCls,
+                                      env.ni.inputs[env.iInd]);
+  if (info.offset == -1) return info;
 
   if (env.irb.constrainValue(env.base.value,
                              TypeConstraint(baseCls).setWeak())) {
     // We can't use this specialized class without making a guard more
     // expensive, so don't do it.
-    knownCls = nullptr;
     return PropInfo{};
   }
+
   return info;
 }
 
@@ -984,11 +1060,10 @@ void emitPropGeneric(MTS& env) {
 }
 
 void emitProp(MTS& env) {
-  const Class* knownCls = nullptr;
-  const auto propInfo   = getCurrentPropertyOffset(env, knownCls);
+  const auto propInfo   = getCurrentPropertyOffset(env);
   auto mia = env.mii.getAttr(env.immVecM[env.mInd]);
   if (propInfo.offset == -1 || (mia & MIA_unset) ||
-      mightCallMagicPropMethod(mia, knownCls, propInfo)) {
+      mightCallMagicPropMethod(mia, propInfo)) {
     emitPropGeneric(env);
   } else {
     emitPropSpecialized(env, mia, propInfo);
@@ -1085,8 +1160,11 @@ void emitIntermediateOp(MTS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool needFirstRatchet(const MTS& env) {
-  auto const firstTy = env.ni.inputs[env.mii.valCount()]->rtt.unbox();
+bool needFirstRatchet(MTS& env) {
+  if (!isSimpleBase(env)) return true;
+
+  auto const firstVal = getInput(env, env.mii.valCount(), DataTypeSpecific);
+  auto const firstTy = firstVal->type().unbox();
   if (firstTy <= TArr) {
     if (mcodeIsElem(env.immVecM[0])) return false;
     return true;
@@ -1095,31 +1173,29 @@ bool needFirstRatchet(const MTS& env) {
   // Using the specialized type here is safe because we only elide the first
   // ratchet if the first member instruction is a property access, in which
   // case we have constrained the specialized type of the base in emitBaseLCR
-  if (firstTy < TObj && firstTy.clsSpec()) {
-    auto const klass = firstTy.clsSpec().cls();
-    auto const no_overrides = AttrNoOverrideMagicGet|
-                              AttrNoOverrideMagicSet|
-                              AttrNoOverrideMagicIsset|
-                              AttrNoOverrideMagicUnset;
-    if ((klass->attrs() & no_overrides) != no_overrides) {
-      // Note: we could also add a check here on whether the first property RAT
-      // contains Uninit---if not we can still return false.  See
-      // mightCallMagicPropMethod.
-      return true;
-    }
+  if (!(firstTy < TObj && firstTy.clsSpec())) return true;
+  auto const firstCls = firstTy.clsSpec().cls();
 
-    if (klass->hasNativePropHandler()) {
-      const Class* cls = nullptr;
-      auto propInfo = getPropertyOffset(env, env.ni, curClass(env), cls,
-                                        env.mii, 0, env.mii.valCount() + 1);
-      // For native properties if the property is declared then we know don't
-      // call the native handler
-      if (propInfo.offset == -1) return true;
-    }
-    if (mcodeIsProp(env.immVecM[0])) return false;
+  auto const no_overrides = AttrNoOverrideMagicGet|
+    AttrNoOverrideMagicSet|
+    AttrNoOverrideMagicIsset|
+    AttrNoOverrideMagicUnset;
+  if ((firstCls->attrs() & no_overrides) != no_overrides) {
+    // Note: we could also add a check here on whether the first property RAT
+    // contains Uninit---if not we can still return false.  See
+    // mightCallMagicPropMethod.
     return true;
   }
-  return true;
+
+  if (firstCls->hasNativePropHandler()) {
+    auto propInfo = getPropertyOffset(env, curClass(env), firstCls,
+                                      env.ni.inputs[env.mii.valCount() + 1]);
+    // For native properties if the property is declared then we know don't
+    // call the native handler
+    if (propInfo.offset == -1) return true;
+  }
+
+  return !mcodeIsProp(env.immVecM[0]);
 }
 
 bool needFinalRatchet(const MTS& env) { return env.mii.finalGet(); }
@@ -1160,23 +1236,33 @@ bool needFinalRatchet(const MTS& env) { return env.mii.finalGet(); }
 //     logical ratchet
 //   SetElemL
 //     no ratchet
-unsigned nLogicalRatchets(const MTS& env) {
+unsigned nLogicalRatchets(MTS& env) {
   // If we've proven elsewhere that we don't need an MInstrState struct, we
   // know this translation won't need any ratchets
   if (!env.needMIS) return 0;
 
   unsigned ratchets = env.immVecM.size();
-  if (!needFirstRatchet(env)) --ratchets;
-  if (!needFinalRatchet(env)) --ratchets;
+  if (!env.needFirstRatchet) --ratchets;
+  if (!env.needFinalRatchet) --ratchets;
   return ratchets;
 }
 
-int ratchetInd(const MTS& env) {
-  return needFirstRatchet(env) ? int(env.mInd) : int(env.mInd) - 1;
+int ratchetInd(MTS& env) {
+  return env.needFirstRatchet ? int(env.mInd) : int(env.mInd) - 1;
+}
+
+/*
+ * Compute and store ratchet-related fields in env, because their values can
+ * depending on state that will change during translation of the minstr.
+ */
+void computeRatchets(MTS& env) {
+  env.needFirstRatchet = needFirstRatchet(env);
+  env.needFinalRatchet = needFinalRatchet(env);
+  env.numLogicalRatchets = nLogicalRatchets(env);
 }
 
 void emitRatchetRefs(MTS& env) {
-  if (ratchetInd(env) < 0 || ratchetInd(env) >= int(nLogicalRatchets(env))) {
+  if (ratchetInd(env) < 0 || ratchetInd(env) >= int(env.numLogicalRatchets)) {
     return;
   }
 
@@ -1215,19 +1301,16 @@ void emitMPre(MTS& env) {
     emitMTrace(env);
   }
 
-  // The base location is input 0 or 1, and the location code is stored
-  // separately from immVecM, so input indices (iInd) and member indices (mInd)
-  // commonly differ.  Additionally, W members have no corresponding inputs, so
-  // it is necessary to track the two indices separately.
   env.simpleOp = computeSimpleCollectionOp(env);
   emitBaseOp(env);
   ++env.iInd;
 
   checkMIState(env);
+  computeRatchets(env);
   if (env.needMIS) {
     env.misBase = gen(env, DefMIStateBase);
     auto const uninit = cns(env, TUninit);
-    if (nLogicalRatchets(env) > 0) {
+    if (env.numLogicalRatchets > 0) {
       gen(env, StMem, misLea(env, offsetof(MInstrState, tvRef)), uninit);
       gen(env, StMem, misLea(env, offsetof(MInstrState, tvRef2)), uninit);
     }
@@ -1253,40 +1336,6 @@ void emitMPre(MTS& env) {
     emitRatchetRefs(env);
   }
   env.irb.exceptionStackBoundary();
-}
-
-//////////////////////////////////////////////////////////////////////
-
-// Build a map from (stack) input index to stack index.
-void numberStackInputs(MTS& env) {
-  // Stack inputs are pushed in the order they appear in the vector from left
-  // to right, so earlier elements in the vector are at higher offsets in the
-  // stack. mii.valCount() tells us how many rvals the instruction takes on the
-  // stack; they're pushed after any vector elements and we want to ignore them
-  // here.
-  bool stackRhs = env.mii.valCount() &&
-    env.ni.inputs[0]->location.space == Location::Stack;
-  int stackIdx = (int)stackRhs + env.immVec.numStackValues() - 1;
-  for (unsigned i = env.mii.valCount(); i < env.ni.inputs.size(); ++i) {
-    const Location& l = env.ni.inputs[i]->location;
-    switch (l.space) {
-      case Location::Stack:
-        assertx(stackIdx >= 0);
-        env.stackInputs[i] = BCSPOffset{stackIdx--};
-        break;
-
-      default:
-        break;
-    }
-  }
-  assertx(stackIdx == (stackRhs ? 0 : -1));
-
-  if (stackRhs) {
-    // If this instruction does have an RHS, it will be input 0 at
-    // stack offset 0.
-    assertx(env.mii.valCount() == 1);
-    env.stackInputs[0] = BCSPOffset{0};
-  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1552,15 +1601,16 @@ void emitArraySet(MTS& env, SSATmp* key, SSATmp* value) {
   assertx(key->type() <= TCell);
   assertx(value->type() <= TCell);
 
-  auto const& base = *env.ni.inputs[env.mii.valCount()];
-  bool const setRef = base.rtt <= TBoxedCell;
+  auto const& baseLoc = env.ni.inputs[env.mii.valCount()];
+  auto const setRef =
+    getInput(env, env.mii.valCount(), DataTypeSpecific)->type() <= TBoxedCell;
 
   // No catch trace below because the helper can't throw. It may reenter to
   // call destructors so it has a sync point in nativecalls.cpp, but exceptions
   // are swallowed at destructor boundaries right now: #2182869.
   if (setRef) {
-    assertx(base.location.space == Location::Local ||
-           base.location.space == Location::Stack);
+    assertx(baseLoc.space == Location::Local ||
+           baseLoc.space == Location::Stack);
     auto const box = getInput(env, baseStkIdx, DataTypeSpecific);
     gen(env, ArraySetRef, env.base.value, key, value, box);
     // Unlike the non-ref case, we don't need to do anything to the stack
@@ -1578,12 +1628,12 @@ void emitArraySet(MTS& env, SSATmp* key, SSATmp* value) {
   );
 
   // Update the base's value with the new array
-  if (base.location.space == Location::Local) {
+  if (baseLoc.space == Location::Local) {
     // We know it's not boxed (setRef above handles that), and
     // newArr has already been incref'd in the helper.
-    gen(env, StLoc, LocalId(base.location.offset), fp(env), newArr);
-  } else if (base.location.space == Location::Stack) {
-    extendStack(env, baseStkIdx, TGen);
+    gen(env, StLoc, LocalId(baseLoc.offset), fp(env), newArr);
+  } else if (baseLoc.space == Location::Stack) {
+    extendStack(env, BCSPOffset{baseStkIdx});
     env.irb.evalStack().replace(baseStkIdx, newArr);
   } else {
     not_reached();
@@ -1626,11 +1676,10 @@ void emitVectorSet(MTS& env, SSATmp* key, SSATmp* value) {
 //////////////////////////////////////////////////////////////////////
 
 void emitCGetProp(MTS& env) {
-  const Class* knownCls = nullptr;
-  const auto propInfo   = getCurrentPropertyOffset(env, knownCls);
+  const auto propInfo   = getCurrentPropertyOffset(env);
 
   if (propInfo.offset != -1 &&
-      !mightCallMagicPropMethod(MIA_none, knownCls, propInfo)) {
+      !mightCallMagicPropMethod(MIA_none, propInfo)) {
     emitPropSpecialized(env, MIA_warn, propInfo);
 
     if (!RuntimeOption::RepoAuthoritative) {
@@ -1688,11 +1737,10 @@ void emitSetProp(MTS& env) {
   auto const value = getValue(env);
 
   /* If we know the class for the current base, emit a direct property set. */
-  const Class* knownCls = nullptr;
-  const auto propInfo   = getCurrentPropertyOffset(env, knownCls);
+  auto const propInfo = getCurrentPropertyOffset(env);
 
   if (propInfo.offset != -1 &&
-      !mightCallMagicPropMethod(MIA_define, knownCls, propInfo)) {
+      !mightCallMagicPropMethod(MIA_define, propInfo)) {
     emitPropSpecialized(env, MIA_define, propInfo);
 
     auto cellTy = env.base.type.deref();
@@ -1970,7 +2018,7 @@ void emitFinalMOp(MTS& env) {
 
   switch (env.immVecM[env.mInd]) {
   case MEC: case MEL: case MET: case MEI:
-    static MemFun elemOps[] = {
+    static constexpr MemFun elemOps[] = {
 #   define MII(instr, ...) &emit##instr##Elem,
     MINSTRS
 #   undef MII
@@ -1980,7 +2028,7 @@ void emitFinalMOp(MTS& env) {
 
   case MQT:
   case MPC: case MPL: case MPT:
-    static MemFun propOps[] = {
+    static constexpr MemFun propOps[] = {
 #   define MII(instr, ...) &emit##instr##Prop,
     MINSTRS
 #   undef MII
@@ -1990,7 +2038,7 @@ void emitFinalMOp(MTS& env) {
 
   case MW:
     assertx(env.mii.getAttr(MW) & MIA_final);
-    static MemFun newOps[] = {
+    static constexpr MemFun newOps[] = {
 #   define MII(instr, attrs, bS, iS, vC, fN) \
       &emit##fN,
     MINSTRS
@@ -2021,7 +2069,7 @@ void cleanTvRefs(MTS& env) {
     offsetof(MInstrState, tvRef),
     offsetof(MInstrState, tvRef2)
   };
-  for (unsigned i = 0; i < std::min(nLogicalRatchets(env), 2U); ++i) {
+  for (unsigned i = 0; i < std::min(env.numLogicalRatchets, 2U); ++i) {
     auto const addr = misLea(env, refOffs[env.failedSetBlock ? 1 - i : i]);
     auto const val  = gen(env, LdMem, TGen, addr);
     gen(env, DecRef, val);
@@ -2031,14 +2079,18 @@ void cleanTvRefs(MTS& env) {
 enum class DecRefStyle { FromCatch, FromMain };
 uint32_t decRefStackInputs(MTS& env, DecRefStyle why) {
   auto const startOff = BCSPOffset{
-    env.op == Op::SetM || env.op == Op::BindM ? 1 : 0};
-  auto const stackCnt = env.stackInputs.size();
+    env.op == Op::SetM || env.op == Op::BindM ? 1 : 0
+  };
+  auto const hasStackRHS =
+    env.mii.valCount() && env.ni.inputs[0].space == Location::Stack;
+  auto const stackCnt = env.immVec.numStackValues() + hasStackRHS;
   for (auto i = startOff; i < stackCnt; ++i) {
     auto const type = topType(env, i, DataTypeGeneric);
-    if (!(type <= TGen)) continue;
+    if (type <= TCls) continue;
+
     auto const tc = why == DecRefStyle::FromMain ? DataTypeSpecific
                                                  : DataTypeGeneric;
-    auto const input = top(env, TGen, i, tc);
+    auto const input = top(env, i, tc);
     gen(env, DecRef, input);
   }
   return stackCnt;
@@ -2108,7 +2160,7 @@ Block* makeCatchSet(MTS& env) {
   // For consistency with the interpreter, decref the rhs before we decref the
   // stack inputs, and decref the ratchet storage after the stack inputs.
   if (!isSetWithRef) {
-    auto const val = top(env, TCell, BCSPOffset{0}, DataTypeGeneric);
+    auto const val = top(env, BCSPOffset{0}, DataTypeGeneric);
     gen(env, DecRef, val);
   }
   auto const stackCnt = decRefStackInputs(env, DecRefStyle::FromCatch);
@@ -2150,7 +2202,6 @@ void implMInstr(IRGS& irgs, Op effectiveOp) {
   }
 
   auto env = MTS { irgs, effectiveOp };
-  numberStackInputs(env); // Assign stack slots to our stack inputs
   emitMPre(env);          // Emit the base and every intermediate op
   emitFinalMOp(env);      // Emit the final operation
   emitMPost(env);         // Cleanup: decref inputs and scratch values

@@ -110,17 +110,16 @@ typedef CondBlock <TVOFF(m_type),
 /*
  * locToRegDisp --
  *
- * Helper code for stack frames. The struct is a "template" in the
- * non-C++ sense: we don't build source-level stack frames in C++
- * for the most part, but its offsets tell us where to find fields
- * in assembly.
+ * Helper code for stack frames. The struct is a "template" in the non-C++
+ * sense: we don't build source-level stack frames in C++ for the most part,
+ * but its offsets tell us where to find fields in assembly.
  *
- * If we were physically pushing stack frames, we would push them
- * in reverse order to what you see here.
+ * If we were physically pushing stack frames, we would push them in reverse
+ * order to what you see here.
  */
-static inline void
-locToRegDisp(int32_t localIndex, PhysReg *outbase, int *outdisp) {
-  *outdisp = cellsToBytes(locPhysicalOffset(localIndex));
+inline void
+locToRegDisp(int32_t localIndex, PhysReg* outbase, int* outdisp) {
+  *outdisp = cellsToBytes(-(localIndex + 1));
   *outbase = x64::rVmFp;
 }
 

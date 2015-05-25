@@ -156,7 +156,7 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
   );
 }
 
-void implRet(IRGS& env, Type type) {
+void implRet(IRGS& env) {
   if (curFunc(env)->attrs() & AttrMayUseVV) {
     // Note: this has to be the first thing, because we cannot bail after
     //       we start decRefing locs because then there'll be no corresponding
@@ -166,7 +166,7 @@ void implRet(IRGS& env, Type type) {
 
   // Pop the return value. Since it will be teleported to its place in memory,
   // we don't care about the type.
-  auto const retval = pop(env, type, DataTypeGeneric);
+  auto const retval = pop(env, DataTypeGeneric);
   freeLocalsAndThis(env);
   retSurpriseCheck(env, fp(env), retval);
 
@@ -199,9 +199,9 @@ void emitRetC(IRGS& env) {
 
   if (isInlining(env)) {
     assertx(!resumed(env));
-    retFromInlined(env, TCell);
+    retFromInlined(env);
   } else {
-    implRet(env, TCell);
+    implRet(env);
   }
 }
 
@@ -209,9 +209,9 @@ void emitRetV(IRGS& env) {
   assertx(!resumed(env));
   assertx(!curFunc(env)->isResumable());
   if (isInlining(env)) {
-    retFromInlined(env, TBoxedInitCell);
+    retFromInlined(env);
   } else {
-    implRet(env, TBoxedInitCell);
+    implRet(env);
   }
 }
 

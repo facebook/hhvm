@@ -33,6 +33,8 @@ TRACE_SET_MOD(hhir);
 using Trace::Indent;
 
 bool shouldHHIRRelaxGuards() {
+  assert(!(RuntimeOption::EvalHHIRRelaxGuards &&
+           RuntimeOption::EvalHHIRConstrictGuards));
   return RuntimeOption::EvalHHIRRelaxGuards &&
     (RuntimeOption::EvalJitRegionSelector == "tracelet" ||
      RuntimeOption::EvalJitRegionSelector == "method" ||

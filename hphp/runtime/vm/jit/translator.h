@@ -542,32 +542,6 @@ const InstrInfo& getInstrInfo(Op op);
  */
 bool dontGuardAnyInputs(Op op);
 
-
-///////////////////////////////////////////////////////////////////////////////
-// Property information.
-
-struct PropInfo {
-  PropInfo()
-    : offset(-1)
-    , repoAuthType{}
-  {}
-
-  explicit PropInfo(int offset, RepoAuthType repoAuthType)
-    : offset(offset)
-    , repoAuthType{repoAuthType}
-  {}
-
-  int offset;
-  RepoAuthType repoAuthType;
-};
-
-PropInfo getPropertyOffset(const IRGS& env,
-                           const NormalizedInstruction& ni,
-                           const Class* ctx,
-                           const Class*& baseClass,
-                           const MInstrInfo& mii,
-                           unsigned mInd, unsigned iInd);
-
 ///////////////////////////////////////////////////////////////////////////////
 // Other instruction information.
 

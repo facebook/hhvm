@@ -426,6 +426,10 @@ static inline bool loopsDefault() {
 #endif
 }
 
+static inline bool hhirRelaxGuardsDefault() {
+  return !RuntimeOption::EvalHHIRConstrictGuards;
+}
+
 static inline bool evalJitDefault() {
 #if defined(__APPLE__) || defined(__CYGWIN__)
   return false;

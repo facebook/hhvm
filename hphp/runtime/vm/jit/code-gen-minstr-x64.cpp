@@ -313,13 +313,11 @@ void CodeGenerator::cgElemArray(IRInstruction* i)  { cgElemArrayImpl(i); }
 void CodeGenerator::cgElemArrayW(IRInstruction* i) { cgElemArrayImpl(i); }
 
 void CodeGenerator::cgArrayGet(IRInstruction* inst) {
-  auto const arrIsStatic = inst->src(0)->isA(TStaticArr);
   auto const key         = inst->src(1);
   auto const keyInfo     = checkStrictlyInteger(key->type());
   BUILD_OPTAB(ARRAYGET_HELPER_TABLE,
               keyInfo.type,
-              keyInfo.checkForInt,
-              arrIsStatic);
+              keyInfo.checkForInt);
 
   auto args = argGroup(inst).ssa(0);
   if (keyInfo.converted) {

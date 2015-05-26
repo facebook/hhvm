@@ -418,7 +418,7 @@ inline SSATmp* ldCtx(IRGS& env) {
 inline SSATmp* unbox(IRGS& env, SSATmp* val, Block* exit) {
   auto const type = val->type();
   // If we don't have an exit the LdRef can't be a guard.
-  auto const inner = exit ? (type & TBoxedCell).inner() : TCell;
+  auto const inner = exit ? (type & TBoxedCell).inner() : TInitCell;
 
   if (type <= TCell) {
     env.irb->constrainValue(val, DataTypeCountness);

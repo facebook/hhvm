@@ -1663,6 +1663,10 @@ SSATmp* simplifyCheckStaticLocInit(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyCheckRefInner(State& env, const IRInstruction* inst) {
+  // Ref inner cells are at worst InitCell, so don't bother checking for that.
+  if (TInitCell <= inst->typeParam()) {
+    return gen(env, Nop);
+  }
   return mergeBranchDests(env, inst);
 }
 

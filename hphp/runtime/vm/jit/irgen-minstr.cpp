@@ -1416,7 +1416,9 @@ SSATmp* emitStructArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
 }
 
 SSATmp* emitArrayGet(MTS& env, SSATmp* key) {
-  return gen(env, ArrayGet, env.base.value, key);
+  auto elem = unbox(env, gen(env, ArrayGet, env.base.value, key), nullptr);
+  gen(env, IncRef, elem);
+  return elem;
 }
 
 void emitProfiledPackedArrayGet(MTS& env, SSATmp* key) {

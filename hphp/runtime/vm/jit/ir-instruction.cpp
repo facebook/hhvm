@@ -251,7 +251,7 @@ Type arrElemReturn(const IRInstruction* inst) {
 
   auto resultType = inst->hasTypeParam() ? inst->typeParam() : TGen;
   if (inst->is(ArrayGet)) {
-    resultType &= TInitCell;
+    resultType &= TInit;
   }
 
   // Elements of a static array are uncounted
@@ -269,7 +269,7 @@ Type arrElemReturn(const IRInstruction* inst) {
     case T::Packed:
     {
       auto const idx = inst->src(1);
-      if (idx->hasConstVal() &&
+      if (idx->hasConstVal(TInt) &&
           idx->intVal() >= 0 &&
           idx->intVal() < arrTy->size()) {
         resultType &= typeFromRAT(arrTy->packedElem(idx->intVal()));

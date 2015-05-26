@@ -322,9 +322,16 @@ void print(std::ostream& os, const Block* block, AreaIndex area,
           disasmRange(os, instRange.begin(), instRange.end());
           os << '\n';
           if (currentArea == area) {
-            assert_no_log(instRange.end() >= blockRange.start());
-            assert_no_log(instRange.end() <= blockRange.end());
-            blockRange = TcaRange(instRange.end(), blockRange.end());
+            // FIXME: this used to be an assertion
+            auto things_are_ok =
+              instRange.end() >= blockRange.start() &&
+              instRange.end() <= blockRange.end();
+            if (things_are_ok) {
+              blockRange = TcaRange(instRange.end(), blockRange.end());
+            } else {
+              // Don't crash; do something broken instead.
+              os << "<note: print range is probably incorrect right now>\n";
+            }
           }
         }
       }

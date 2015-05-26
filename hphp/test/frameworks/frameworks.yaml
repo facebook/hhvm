@@ -52,8 +52,8 @@
   # Stable (2.x) doesn't use phpunit, so targetting the next major release
   cakephp3:
     url: https://github.com/cakephp/cakephp.git
-    branch: "3.0"
-    commit: 5b6afa31109bb5e08474205afdd9796683e6e6f6
+    branch: "3.0.5"
+    commit: d853d756efa39bad2f744c0110f8626e7b619590
     install_root: cakephp3
     test_root: cakephp3
   codeigniter:

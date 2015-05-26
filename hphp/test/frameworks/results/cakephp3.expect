@@ -23,7 +23,9 @@ Cake\Test\TestCase\Auth\ControllerAuthorizeTest::testAuthorizeSuccess
 Cake\Test\TestCase\Auth\ControllerAuthorizeTest::testControllerErrorOnMissingMethod
 .
 Cake\Test\TestCase\Auth\ControllerAuthorizeTest::testControllerTypeError
-.
+F
+Cake\Test\TestCase\Auth\ControllerAuthorizeTest::testControllerTypeErrorPhp7
+S
 Cake\Test\TestCase\Auth\DefaultPasswordHasherTest::testNeedsRehash
 .
 Cake\Test\TestCase\Auth\DigestAuthenticateTest::testAuthenticateChallenge
@@ -183,7 +185,7 @@ Cake\Test\TestCase\Cache\Engine\ApcEngineTest::testGroupsReadWrite
 Cake\Test\TestCase\Cache\Engine\ApcEngineTest::testIncrement
 .
 Cake\Test\TestCase\Cache\Engine\ApcEngineTest::testReadAndWriteCache
-.
+F
 Cake\Test\TestCase\Cache\Engine\ApcEngineTest::testReadWriteDurationZero
 .
 Cake\Test\TestCase\Cache\Engine\FileEngineTest::testClear
@@ -280,6 +282,8 @@ Cake\Test\TestCase\Cache\Engine\MemcachedEngineTest::testParseServerStringNonLat
 S
 Cake\Test\TestCase\Cache\Engine\MemcachedEngineTest::testParseServerStringUnix
 S
+Cake\Test\TestCase\Cache\Engine\MemcachedEngineTest::testParseServerStringWithU
+S
 Cake\Test\TestCase\Cache\Engine\MemcachedEngineTest::testPhpSerializerSetting
 S
 Cake\Test\TestCase\Cache\Engine\MemcachedEngineTest::testReadAndWriteCache
@@ -358,6 +362,10 @@ Cake\Test\TestCase\Cache\Engine\XcacheEngineTest::testReadAndWriteCache
 S
 Cake\Test\TestCase\Collection\CollectionTest::testAppend
 .
+Cake\Test\TestCase\Collection\CollectionTest::testAppendIterator
+.
+Cake\Test\TestCase\Collection\CollectionTest::testAppendNotCollectionInstance
+.
 Cake\Test\TestCase\Collection\CollectionTest::testArrayIsWrapped
 .
 Cake\Test\TestCase\Collection\CollectionTest::testBuffered
@@ -366,9 +374,13 @@ Cake\Test\TestCase\Collection\CollectionTest::testCombine
 .
 Cake\Test\TestCase\Collection\CollectionTest::testCompile
 .
+Cake\Test\TestCase\Collection\CollectionTest::testComplexSortBy
+.
 Cake\Test\TestCase\Collection\CollectionTest::testContains
 .
 Cake\Test\TestCase\Collection\CollectionTest::testCountBy
+.
+Cake\Test\TestCase\Collection\CollectionTest::testDebug
 .
 Cake\Test\TestCase\Collection\CollectionTest::testEeach
 .
@@ -395,6 +407,8 @@ Cake\Test\TestCase\Collection\CollectionTest::testIndexByDeep
 Cake\Test\TestCase\Collection\CollectionTest::testInsert
 .
 Cake\Test\TestCase\Collection\CollectionTest::testInvalidConstructorArgument
+.
+Cake\Test\TestCase\Collection\CollectionTest::testIsEmpty
 .
 Cake\Test\TestCase\Collection\CollectionTest::testIteratorIsWrapped
 .
@@ -446,6 +460,10 @@ Cake\Test\TestCase\Collection\CollectionTest::testSumOf
 .
 Cake\Test\TestCase\Collection\CollectionTest::testTake
 .
+Cake\Test\TestCase\Collection\CollectionTest::testThrough
+.
+Cake\Test\TestCase\Collection\CollectionTest::testThroughReturnArray
+.
 Cake\Test\TestCase\Collection\CollectionTest::testToArray
 .
 Cake\Test\TestCase\Collection\CollectionTest::testToJson
@@ -458,6 +476,8 @@ Cake\Test\TestCase\Collection\CollectionTest::testUnfoldEmptyLevels
 .
 Cake\Test\TestCase\Collection\CollectionTest::testUnfoldWithCallable
 .
+Cake\Test\TestCase\Collection\CollectionTest::testZip
+FATAL
 Cake\Test\TestCase\Collection\Iterator\BufferedIteratorTest::testBuffer
 .
 Cake\Test\TestCase\Collection\Iterator\BufferedIteratorTest::testCount
@@ -731,7 +751,7 @@ Cake\Test\TestCase\Console\ShellDispatcherTest::testShiftArgs
 Cake\Test\TestCase\Console\ShellTest::testConstruct
 .
 Cake\Test\TestCase\Console\ShellTest::testCreateFileNoPermissions
-F
+.
 Cake\Test\TestCase\Console\ShellTest::testCreateFileNoReply
 .
 Cake\Test\TestCase\Console\ShellTest::testCreateFileNonInteractive
@@ -739,6 +759,8 @@ Cake\Test\TestCase\Console\ShellTest::testCreateFileNonInteractive
 Cake\Test\TestCase\Console\ShellTest::testCreateFileOverwrite
 .
 Cake\Test\TestCase\Console\ShellTest::testCreateFileOverwriteNonInteractive
+.
+Cake\Test\TestCase\Console\ShellTest::testDispatchShell
 .
 Cake\Test\TestCase\Console\ShellTest::testErr
 .
@@ -837,7 +859,7 @@ Cake\Test\TestCase\Controller\ComponentRegistryTest::testSet
 Cake\Test\TestCase\Controller\ComponentRegistryTest::testUnload
 .
 Cake\Test\TestCase\Controller\ComponentTest::testDuplicateComponentInitialize
-FATAL
+.
 Cake\Test\TestCase\Controller\ComponentTest::testInnerComponentConstruction
 .
 Cake\Test\TestCase\Controller\ComponentTest::testInnerComponentsAreNotEnabled
@@ -845,6 +867,8 @@ Cake\Test\TestCase\Controller\ComponentTest::testInnerComponentsAreNotEnabled
 Cake\Test\TestCase\Controller\ComponentTest::testMultipleComponentInitialize
 .
 Cake\Test\TestCase\Controller\ComponentTest::testNestedComponentLoading
+.
+Cake\Test\TestCase\Controller\ComponentTest::testSomethingReferencingCookieComponent
 .
 Cake\Test\TestCase\Controller\Component\AuthComponentTest::testAdminRoute
 .
@@ -1004,6 +1028,14 @@ Cake\Test\TestCase\Controller\Component\CsrfComponentTest::testInvalidTokenInHea
 .
 Cake\Test\TestCase\Controller\Component\CsrfComponentTest::testInvalidTokenInHeader with data set #3
 .
+Cake\Test\TestCase\Controller\Component\CsrfComponentTest::testInvalidTokenMissingCookie with data set #0
+.
+Cake\Test\TestCase\Controller\Component\CsrfComponentTest::testInvalidTokenMissingCookie with data set #1
+.
+Cake\Test\TestCase\Controller\Component\CsrfComponentTest::testInvalidTokenMissingCookie with data set #2
+.
+Cake\Test\TestCase\Controller\Component\CsrfComponentTest::testInvalidTokenMissingCookie with data set #3
+.
 Cake\Test\TestCase\Controller\Component\CsrfComponentTest::testInvalidTokenRequestData with data set #0
 .
 Cake\Test\TestCase\Controller\Component\CsrfComponentTest::testInvalidTokenRequestData with data set #1
@@ -1011,6 +1043,8 @@ Cake\Test\TestCase\Controller\Component\CsrfComponentTest::testInvalidTokenReque
 Cake\Test\TestCase\Controller\Component\CsrfComponentTest::testInvalidTokenRequestData with data set #2
 .
 Cake\Test\TestCase\Controller\Component\CsrfComponentTest::testInvalidTokenRequestData with data set #3
+.
+Cake\Test\TestCase\Controller\Component\CsrfComponentTest::testInvalidTokenRequestDataMissing
 .
 Cake\Test\TestCase\Controller\Component\CsrfComponentTest::testSettingCookie
 .
@@ -1078,6 +1112,8 @@ Cake\Test\TestCase\Controller\Component\PaginatorComponentTest::testPaginateMaxL
 .
 Cake\Test\TestCase\Controller\Component\PaginatorComponentTest::testPaginateQuery
 .
+Cake\Test\TestCase\Controller\Component\PaginatorComponentTest::testPaginateQueryWithBindValue
+.
 Cake\Test\TestCase\Controller\Component\PaginatorComponentTest::testPaginateQueryWithLimit
 .
 Cake\Test\TestCase\Controller\Component\PaginatorComponentTest::testValidateSortInvalid
@@ -1101,6 +1137,8 @@ Cake\Test\TestCase\Controller\Component\RequestHandlerComponentTest::testAccepts
 Cake\Test\TestCase\Controller\Component\RequestHandlerComponentTest::testAddInputTypeException
 .
 Cake\Test\TestCase\Controller\Component\RequestHandlerComponentTest::testAjaxRedirectAsRequestAction
+.
+Cake\Test\TestCase\Controller\Component\RequestHandlerComponentTest::testAjaxRedirectAsRequestActionStatusCode
 .
 Cake\Test\TestCase\Controller\Component\RequestHandlerComponentTest::testAjaxRedirectAsRequestActionStillRenderingLayout
 .
@@ -1178,6 +1216,8 @@ Cake\Test\TestCase\Controller\Component\RequestHandlerComponentTest::testStartup
 .
 Cake\Test\TestCase\Controller\Component\RequestHandlerComponentTest::testStartupCustomTypeProcess
 .
+Cake\Test\TestCase\Controller\Component\RequestHandlerComponentTest::testStartupProcessData
+.
 Cake\Test\TestCase\Controller\Component\RequestHandlerComponentTest::testViewClassMap
 .
 Cake\Test\TestCase\Controller\Component\RequestHandlerComponentTest::testXmlViewLoaded
@@ -1217,6 +1257,8 @@ Cake\Test\TestCase\Controller\Component\SecurityComponentTest::testValidateHasMa
 Cake\Test\TestCase\Controller\Component\SecurityComponentTest::testValidateHasManyRecordsPass
 .
 Cake\Test\TestCase\Controller\Component\SecurityComponentTest::testValidateHiddenMultipleModel
+.
+Cake\Test\TestCase\Controller\Component\SecurityComponentTest::testValidateIntFieldName
 .
 Cake\Test\TestCase\Controller\Component\SecurityComponentTest::testValidateNestedNumericSets
 .
@@ -1425,7 +1467,9 @@ Cake\Test\TestCase\Core\ConfigureTest::testDumpNoAdapter
 Cake\Test\TestCase\Core\ConfigureTest::testDumpPartial
 .
 Cake\Test\TestCase\Core\ConfigureTest::testEngineExceptionOnIncorrectClass
-.
+F
+Cake\Test\TestCase\Core\ConfigureTest::testEngineExceptionOnIncorrectClassPhp7
+S
 Cake\Test\TestCase\Core\ConfigureTest::testEngineSetup
 .
 Cake\Test\TestCase\Core\ConfigureTest::testLoadDefaultConfig
@@ -1515,6 +1559,8 @@ Cake\Test\TestCase\Core\Configure\Engine\PhpConfigTest::testReadWithNonExistentF
 Cake\Test\TestCase\Core\InstanceConfigTraitTest::testConfigShallow
 .
 Cake\Test\TestCase\Core\InstanceConfigTraitTest::testDefaultsAreSet
+.
+Cake\Test\TestCase\Core\InstanceConfigTraitTest::testDeleteArray
 .
 Cake\Test\TestCase\Core\InstanceConfigTraitTest::testDeleteClobber
 .
@@ -1622,6 +1668,10 @@ Cake\Test\TestCase\Database\ConnectionTest::testExecuteWithMissingType
 .
 Cake\Test\TestCase\Database\ConnectionTest::testExecuteWithNoParams
 .
+Cake\Test\TestCase\Database\ConnectionTest::testInTransaction
+.
+Cake\Test\TestCase\Database\ConnectionTest::testInTransactionWithSavePoints
+.
 Cake\Test\TestCase\Database\ConnectionTest::testInsertWithMatchingTypes
 .
 Cake\Test\TestCase\Database\ConnectionTest::testInsertWithPositionalTypes
@@ -1685,7 +1735,7 @@ Cake\Test\TestCase\Database\ConnectionTest::testVirtualNestedTrasanction2
 Cake\Test\TestCase\Database\ConnectionTest::testVirtualNestedTrasanction3
 .
 Cake\Test\TestCase\Database\ConnectionTest::testWrongCredentials
-F
+.
 Cake\Test\TestCase\Database\Driver\MysqlTest::testConnectionConfigCustom
 S
 Cake\Test\TestCase\Database\Driver\MysqlTest::testConnectionConfigDefault
@@ -1757,7 +1807,7 @@ Cake\Test\TestCase\Database\FunctionsBuilderTest::testSum
 Cake\Test\TestCase\Database\Log\LoggedQueryTest::testStringConversion
 .
 Cake\Test\TestCase\Database\Log\LoggingStatementTest::testExecuteNoParams
-.
+F
 Cake\Test\TestCase\Database\Log\LoggingStatementTest::testExecuteWithBinding
 .
 Cake\Test\TestCase\Database\Log\LoggingStatementTest::testExecuteWithError
@@ -1769,6 +1819,10 @@ Cake\Test\TestCase\Database\Log\QueryLoggerTest::testLogFunction
 Cake\Test\TestCase\Database\Log\QueryLoggerTest::testStringInterpolation
 .
 Cake\Test\TestCase\Database\Log\QueryLoggerTest::testStringInterpolation2
+.
+Cake\Test\TestCase\Database\Log\QueryLoggerTest::testStringInterpolation3
+.
+Cake\Test\TestCase\Database\Log\QueryLoggerTest::testStringInterpolationNamed
 .
 Cake\Test\TestCase\Database\QueryTest::testAppendDelete
 .
@@ -2230,6 +2284,8 @@ Cake\Test\TestCase\Database\Schema\PostgresSchemaTest::testCreateTemporary
 .
 Cake\Test\TestCase\Database\Schema\PostgresSchemaTest::testDescribeTable
 S
+Cake\Test\TestCase\Database\Schema\PostgresSchemaTest::testDescribeTableCompositeKey
+S
 Cake\Test\TestCase\Database\Schema\PostgresSchemaTest::testDescribeTableConstraintsWithKeywords
 S
 Cake\Test\TestCase\Database\Schema\PostgresSchemaTest::testDescribeTableIndexes
@@ -2358,6 +2414,8 @@ Cake\Test\TestCase\Database\Schema\SqliteSchemaTest::testCreateTemporary
 .
 Cake\Test\TestCase\Database\Schema\SqliteSchemaTest::testDescribeTable
 .
+Cake\Test\TestCase\Database\Schema\SqliteSchemaTest::testDescribeTableCompositeKey
+.
 Cake\Test\TestCase\Database\Schema\SqliteSchemaTest::testDescribeTableIndexes
 .
 Cake\Test\TestCase\Database\Schema\SqliteSchemaTest::testDropSql
@@ -2468,6 +2526,8 @@ Cake\Test\TestCase\Database\Schema\SqlserverSchemaTest::testCreateSql
 S
 Cake\Test\TestCase\Database\Schema\SqlserverSchemaTest::testDescribeTable
 S
+Cake\Test\TestCase\Database\Schema\SqlserverSchemaTest::testDescribeTableCompositeKey
+S
 Cake\Test\TestCase\Database\Schema\SqlserverSchemaTest::testDescribeTableIndexes
 S
 Cake\Test\TestCase\Database\Schema\SqlserverSchemaTest::testDescribeWithSchemaName
@@ -2536,6 +2596,8 @@ Cake\Test\TestCase\Database\Statement\StatemetDecoratorTest::testLastInsertId
 .
 Cake\Test\TestCase\Database\Statement\StatemetDecoratorTest::testLastInsertIdWithReturning
 .
+Cake\Test\TestCase\Database\Statement\StatemetDecoratorTest::testNoDoubleExecution
+.
 Cake\Test\TestCase\Database\TypeTest::testBigintegerToPHP
 .
 Cake\Test\TestCase\Database\TypeTest::testBigintegerToStatement
@@ -2554,10 +2616,6 @@ Cake\Test\TestCase\Database\TypeTest::testBuildBasicTypes with data set #1
 .
 Cake\Test\TestCase\Database\TypeTest::testBuildBasicTypes with data set #2
 .
-Cake\Test\TestCase\Database\TypeTest::testBuildBasicTypes with data set #3
-.
-Cake\Test\TestCase\Database\TypeTest::testBuildBasicTypes with data set #4
-.
 Cake\Test\TestCase\Database\TypeTest::testBuildUnknownType
 .
 Cake\Test\TestCase\Database\TypeTest::testClear
@@ -2566,17 +2624,11 @@ Cake\Test\TestCase\Database\TypeTest::testDecimalToPHP
 .
 Cake\Test\TestCase\Database\TypeTest::testDecimalToStatement
 .
-Cake\Test\TestCase\Database\TypeTest::testFloatToPHP
-.
-Cake\Test\TestCase\Database\TypeTest::testFloatToStatement
-.
 Cake\Test\TestCase\Database\TypeTest::testInstanceRecycling
 .
-Cake\Test\TestCase\Database\TypeTest::testIntegerToPHP
-.
-Cake\Test\TestCase\Database\TypeTest::testIntegerToStatement
-.
 Cake\Test\TestCase\Database\TypeTest::testMapAndBuild
+.
+Cake\Test\TestCase\Database\TypeTest::testSet
 .
 Cake\Test\TestCase\Database\TypeTest::testStringToPHP
 .
@@ -2595,6 +2647,8 @@ Cake\Test\TestCase\Database\Type\BinaryTypeTest::testToDatabase
 Cake\Test\TestCase\Database\Type\BinaryTypeTest::testToPHP
 .
 Cake\Test\TestCase\Database\Type\BinaryTypeTest::testToPHPFailure
+.
+Cake\Test\TestCase\Database\Type\BinaryTypeTest::testToPHPSqlserver
 .
 Cake\Test\TestCase\Database\Type\BinaryTypeTest::testToStatement
 .
@@ -2696,8 +2750,6 @@ Cake\Test\TestCase\Database\Type\DateTypeTest::testToDatabase
 .
 Cake\Test\TestCase\Database\Type\DateTypeTest::testToPHP
 .
-Cake\Test\TestCase\Database\Type\DateTypeTest::testToPHPError
-.
 Cake\Test\TestCase\Database\Type\FloatTypeTest::testMarshal
 .
 Cake\Test\TestCase\Database\Type\FloatTypeTest::testMarshalWithLocaleParsing
@@ -2759,8 +2811,6 @@ F
 Cake\Test\TestCase\Database\Type\TimeTypeTest::testToDatabase
 .
 Cake\Test\TestCase\Database\Type\TimeTypeTest::testToPHP
-.
-Cake\Test\TestCase\Database\Type\TimeTypeTest::testToPHPError
 .
 Cake\Test\TestCase\Database\Type\UuidTypeTest::testNewId
 .
@@ -2922,29 +2972,13 @@ Cake\Test\TestCase\Error\ExceptionRendererTest::testExceptionResponseHeader
 .
 Cake\Test\TestCase\Error\ExceptionRendererTest::testMissingController
 .
-Cake\Test\TestCase\Error\ExceptionRendererTest::testMissingPluginRenderSafe
-.
-Cake\Test\TestCase\Error\ExceptionRendererTest::testMissingPluginRenderSafeWithPlugin
-.
 Cake\Test\TestCase\Error\ExceptionRendererTest::testMissingRenderSafe
-.
-Cake\Test\TestCase\Error\ExceptionRendererTest::testMissingSubdirRenderSafe
-.
-Cake\Test\TestCase\Error\ExceptionRendererTest::testPDOException
-.
-Cake\Test\TestCase\Error\ExceptionRendererTest::testRenderExceptionInBeforeRender
-.
-Cake\Test\TestCase\Error\ExceptionRendererTest::testRenderShutdownEvents
-.
-Cake\Test\TestCase\Error\ExceptionRendererTest::testRenderWithNoRequest
-.
+FATAL
 Cake\Test\TestCase\Error\ExceptionRendererTest::testSubclassConvertingFrameworkErrors
 .
 Cake\Test\TestCase\Error\ExceptionRendererTest::testSubclassMethodsNotBeingConvertedDebug0
 .
 Cake\Test\TestCase\Error\ExceptionRendererTest::testSubclassMethodsNotBeingConvertedToError
-.
-Cake\Test\TestCase\Error\ExceptionRendererTest::testSubclassTriggerShutdownEvents
 .
 Cake\Test\TestCase\Error\ExceptionRendererTest::testUnknownExceptionInProduction
 .
@@ -3078,6 +3112,8 @@ Cake\Test\TestCase\Filesystem\FolderTest::testCopyWithSkip
 .
 Cake\Test\TestCase\Filesystem\FolderTest::testCopyWithSkipFileSkipped
 .
+Cake\Test\TestCase\Filesystem\FolderTest::testCopyWithoutRecursive
+.
 Cake\Test\TestCase\Filesystem\FolderTest::testCorrectSlashFor
 .
 Cake\Test\TestCase\Filesystem\FolderTest::testCreateRelative
@@ -3114,6 +3150,8 @@ Cake\Test\TestCase\Filesystem\FolderTest::testMove
 .
 Cake\Test\TestCase\Filesystem\FolderTest::testMoveWithSkip
 .
+Cake\Test\TestCase\Filesystem\FolderTest::testMoveWithoutRecursive
+.
 Cake\Test\TestCase\Filesystem\FolderTest::testNormalizePath
 .
 Cake\Test\TestCase\Filesystem\FolderTest::testOperations
@@ -3121,14 +3159,16 @@ Cake\Test\TestCase\Filesystem\FolderTest::testOperations
 Cake\Test\TestCase\Filesystem\FolderTest::testRealPathForWebroot
 .
 Cake\Test\TestCase\Filesystem\FolderTest::testRecursiveCreateFailure
-F
+.
 Cake\Test\TestCase\Filesystem\FolderTest::testReset
-F
+.
 Cake\Test\TestCase\Filesystem\FolderTest::testSlashTerm
 .
 Cake\Test\TestCase\Filesystem\FolderTest::testWindowsPath
 .
 Cake\Test\TestCase\Filesystem\FolderTest::testZeroAsDirectory
+.
+Cake\Test\TestCase\Form\FormTest::testDebugInfo
 .
 Cake\Test\TestCase\Form\FormTest::testErrors
 .
@@ -3147,6 +3187,8 @@ Cake\Test\TestCase\Form\SchemaTest::testAddingFields
 Cake\Test\TestCase\Form\SchemaTest::testAddingFieldsWhitelist
 .
 Cake\Test\TestCase\Form\SchemaTest::testAddingMultipleFields
+.
+Cake\Test\TestCase\Form\SchemaTest::testDebugInfo
 .
 Cake\Test\TestCase\Form\SchemaTest::testFieldType
 .
@@ -3225,7 +3267,7 @@ Cake\Test\TestCase\I18n\NumberTest::testDefaultCurrency
 Cake\Test\TestCase\I18n\NumberTest::testFormat
 .
 Cake\Test\TestCase\I18n\NumberTest::testFormatDelta
-F
+.
 Cake\Test\TestCase\I18n\NumberTest::testParseFloat
 .
 Cake\Test\TestCase\I18n\NumberTest::testPrecisionLocalized
@@ -3422,6 +3464,8 @@ Cake\Test\TestCase\I18n\TimeTest::testDiffForHumans
 .
 Cake\Test\TestCase\I18n\TimeTest::testI18nFormat
 .
+Cake\Test\TestCase\I18n\TimeTest::testI18nFormatWithOffsetTimezone
+F
 Cake\Test\TestCase\I18n\TimeTest::testIsThisMonth
 .
 Cake\Test\TestCase\I18n\TimeTest::testIsThisWeek
@@ -3437,6 +3481,8 @@ Cake\Test\TestCase\I18n\TimeTest::testListTimezones
 Cake\Test\TestCase\I18n\TimeTest::testNice
 .
 Cake\Test\TestCase\I18n\TimeTest::testParseDate
+.
+Cake\Test\TestCase\I18n\TimeTest::testParseDateDifferentTimezone
 .
 Cake\Test\TestCase\I18n\TimeTest::testParseDateTime
 .
@@ -3487,6 +3533,8 @@ Cake\Test\TestCase\I18n\TimeTest::testTimeAgoInWordsEnd with data set #5
 Cake\Test\TestCase\I18n\TimeTest::testTimeAgoInWordsEnd with data set #6
 .
 Cake\Test\TestCase\I18n\TimeTest::testTimeAgoInWordsNegativeValues
+.
+Cake\Test\TestCase\I18n\TimeTest::testTimeAgoInWordsTimezone
 .
 Cake\Test\TestCase\I18n\TimeTest::testTimeAgoInWordsWithFormat
 .
@@ -3588,6 +3636,8 @@ Cake\Test\TestCase\Log\LogTest::testScopedLogging
 .
 Cake\Test\TestCase\Log\LogTest::testScopedLoggingExclusive
 .
+Cake\Test\TestCase\Log\LogTest::testScopedLoggingStrict
+.
 Cake\Test\TestCase\Log\LogTest::testSelectiveLoggingByLevel
 .
 Cake\Test\TestCase\Log\LogTest::testValidKeyName
@@ -3602,21 +3652,7 @@ Cake\Test\TestCase\Network\Email\EmailTest::testAddresses
 .
 Cake\Test\TestCase\Network\Email\EmailTest::testAttachments
 .
-Cake\Test\TestCase\Network\Email\EmailTest::testBodyEncoding
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testBodyEncodingIso2022Jp
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testBodyEncodingIso2022JpMs
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testCharset
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testCharsetsCompatible
-.
 Cake\Test\TestCase\Network\Email\EmailTest::testConfig
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testConfigArrayWithLayoutWithoutTemplate
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testConfigCharset
 .
 Cake\Test\TestCase\Network\Email\EmailTest::testConfigEmailPattern
 .
@@ -3630,23 +3666,13 @@ Cake\Test\TestCase\Network\Email\EmailTest::testConfigTransportInstance
 .
 Cake\Test\TestCase\Network\Email\EmailTest::testConfigTransportMultiple
 .
-Cake\Test\TestCase\Network\Email\EmailTest::testConstructWithConfigArray
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testConstructWithConfigString
-.
 Cake\Test\TestCase\Network\Email\EmailTest::testCustomEmailValidation
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testDeliver
 .
 Cake\Test\TestCase\Network\Email\EmailTest::testDomain
 .
 Cake\Test\TestCase\Network\Email\EmailTest::testDropTransport
 .
-Cake\Test\TestCase\Network\Email\EmailTest::testEmailFormat
-.
 Cake\Test\TestCase\Network\Email\EmailTest::testEmailPattern
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testEncode
 .
 Cake\Test\TestCase\Network\Email\EmailTest::testFormatAddress
 .
@@ -3655,10 +3681,6 @@ Cake\Test\TestCase\Network\Email\EmailTest::testFormatAddressJapanese
 Cake\Test\TestCase\Network\Email\EmailTest::testFrom
 .
 Cake\Test\TestCase\Network\Email\EmailTest::testFromWithColonsAndQuotes
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testHeaderCharset
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testHeaderEncoding
 .
 Cake\Test\TestCase\Network\Email\EmailTest::testHeaders
 .
@@ -3682,80 +3704,18 @@ Cake\Test\TestCase\Network\Email\EmailTest::testInvalidEmailAdd with data set #3
 .
 Cake\Test\TestCase\Network\Email\EmailTest::testInvalidEmailAdd with data set #4
 .
-Cake\Test\TestCase\Network\Email\EmailTest::testJsonSerialize
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testMessage
-.
 Cake\Test\TestCase\Network\Email\EmailTest::testMessageId
 .
 Cake\Test\TestCase\Network\Email\EmailTest::testMessageIdInvalid
 .
 Cake\Test\TestCase\Network\Email\EmailTest::testMessageIdWithDomain
 .
-Cake\Test\TestCase\Network\Email\EmailTest::testMockTransport
-.
 Cake\Test\TestCase\Network\Email\EmailTest::testProfile
 .
 Cake\Test\TestCase\Network\Email\EmailTest::testProfileInvalid
 .
-Cake\Test\TestCase\Network\Email\EmailTest::testRenderWithLayoutAndAttachment
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testReset
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testResetWithCharset
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendAttachment
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendMultipleMIME
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendNoTemplateWithAttachments
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendNoTemplateWithAttachmentsAsBoth
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendNoTemplateWithDataStringAttachment
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendRender
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendRenderBoth
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendRenderJapanese
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendRenderNoLayout
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendRenderPlugin
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendRenderThemed
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendRenderWithHTML
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendRenderWithHelpers
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendRenderWithImage
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendRenderWithVars
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendRenderWithVarsJapanese
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendWithContent
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendWithInlineAttachments
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendWithInlineAttachmentsHtmlOnly
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendWithLog
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendWithLogAndScope
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendWithNoContentDispositionAttachments
-.
 Cake\Test\TestCase\Network\Email\EmailTest::testSendWithNoContentDoesNotOverwriteViewVar
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendWithoutFrom
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendWithoutTo
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testSendWithoutTransport
-.
+FATAL
 Cake\Test\TestCase\Network\Email\EmailTest::testSender
 .
 Cake\Test\TestCase\Network\Email\EmailTest::testSubject
@@ -3780,21 +3740,7 @@ Cake\Test\TestCase\Network\Email\EmailTest::testUnsetEmailPattern
 .
 Cake\Test\TestCase\Network\Email\EmailTest::testUseConfigString
 .
-Cake\Test\TestCase\Network\Email\EmailTest::testViewRender
-.
 Cake\Test\TestCase\Network\Email\EmailTest::testViewVars
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testWrap
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testWrapForJapaneseEncoding
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testWrapIncludeLessThanSign
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testWrapLongLine
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testWrapWithTagsAcrossLines
-.
-Cake\Test\TestCase\Network\Email\EmailTest::testZeroOnlyLinesNotBeingEmptied
 .
 Cake\Test\TestCase\Network\Email\MailTransportTest::testSendData
 .
@@ -3908,6 +3854,8 @@ Cake\Test\TestCase\Network\Http\ClientTest::testExceptionOnUnknownType
 .
 Cake\Test\TestCase\Network\Http\ClientTest::testGetQuerystring
 .
+Cake\Test\TestCase\Network\Http\ClientTest::testGetQuerystringString
+.
 Cake\Test\TestCase\Network\Http\ClientTest::testGetSimpleWithHeadersAndCookies
 .
 Cake\Test\TestCase\Network\Http\ClientTest::testGetWithAuthenticationAndProxy
@@ -3927,6 +3875,12 @@ Cake\Test\TestCase\Network\Http\ClientTest::testMethodsSimple with data set #2
 Cake\Test\TestCase\Network\Http\ClientTest::testMethodsSimple with data set #3
 .
 Cake\Test\TestCase\Network\Http\ClientTest::testMethodsSimple with data set #4
+.
+Cake\Test\TestCase\Network\Http\ClientTest::testMethodsSimple with data set #5
+.
+Cake\Test\TestCase\Network\Http\ClientTest::testMethodsSimple with data set #6
+.
+Cake\Test\TestCase\Network\Http\ClientTest::testPostWithStringDataDefaultsToFormEncoding
 .
 Cake\Test\TestCase\Network\Http\ClientTest::testPostWithTypeKey with data set #0
 .
@@ -3973,6 +3927,8 @@ Cake\Test\TestCase\Network\Http\RequestTest::testMethod
 Cake\Test\TestCase\Network\Http\RequestTest::testMethodInvalid
 .
 Cake\Test\TestCase\Network\Http\RequestTest::testUrl
+.
+Cake\Test\TestCase\Network\Http\RequestTest::testVersion
 .
 Cake\Test\TestCase\Network\Http\ResponseTest::testAutoDecodeGzipBody
 .
@@ -4033,6 +3989,8 @@ Cake\Test\TestCase\Network\RequestTest::testBaseUrlWithNoModRewrite
 Cake\Test\TestCase\Network\RequestTest::testBaseUrlwithModRewriteAlias
 .
 Cake\Test\TestCase\Network\RequestTest::testConstructionQueryData
+.
+Cake\Test\TestCase\Network\RequestTest::testContentType
 .
 Cake\Test\TestCase\Network\RequestTest::testDataReading
 .
@@ -4416,6 +4374,8 @@ Cake\Test\TestCase\Network\Session\DatabaseSessionTest::testOpen
 .
 Cake\Test\TestCase\Network\Session\DatabaseSessionTest::testRead
 .
+Cake\Test\TestCase\Network\Session\DatabaseSessionTest::testSerializeEntity
+.
 Cake\Test\TestCase\Network\Session\DatabaseSessionTest::testWrite
 .
 Cake\Test\TestCase\Network\Session\DatabaseSessionTest::testWriteEmptySessionId
@@ -4437,7 +4397,7 @@ Cake\Test\TestCase\Network\SocketTest::testSocketConnection
 Cake\Test\TestCase\Network\SocketTest::testSocketHost
 .
 Cake\Test\TestCase\Network\SocketTest::testSocketReading
-.
+S
 Cake\Test\TestCase\Network\SocketTest::testSocketWriting
 .
 Cake\Test\TestCase\Network\SocketTest::testTimeOutConnection
@@ -4445,6 +4405,8 @@ F
 Cake\Test\TestCase\ORM\AssociationCollectionTest::testAddHasRemoveAndGet
 .
 Cake\Test\TestCase\ORM\AssociationCollectionTest::testAddHasRemoveGetWithPlugin
+.
+Cake\Test\TestCase\ORM\AssociationCollectionTest::testAssociationsCanBeIterated
 .
 Cake\Test\TestCase\ORM\AssociationCollectionTest::testCascadeDelete
 .
@@ -4514,6 +4476,8 @@ Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testCanBeJoined
 .
 Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testCascadeDelete
 .
+Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testCascadeDeleteDependent
+.
 Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testCascadeDeleteWithCallbacks
 .
 Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testJunction
@@ -4542,7 +4506,7 @@ Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testRequiresKeys
 .
 Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testSaveAssociatedEmptySetSuccess
 .
-Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testSaveAssociatedOnlyEntities
+Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testSaveAssociatedOnlyEntitiesAppend
 .
 Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testSaveAssociatedWithReplace
 .
@@ -4555,6 +4519,8 @@ Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testSaveStrategyInOptions
 Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testSaveStrategyInvalid
 .
 Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testSort
+.
+Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testStrategyFailure
 .
 Cake\Test\TestCase\ORM\Association\BelongsToManyTest::testTargetForeignKey
 .
@@ -4619,6 +4585,8 @@ Cake\Test\TestCase\ORM\Association\HasManyTest::testRequiresKeys
 Cake\Test\TestCase\ORM\Association\HasManyTest::testSaveAssociatedOnlyEntities
 .
 Cake\Test\TestCase\ORM\Association\HasManyTest::testSort
+.
+Cake\Test\TestCase\ORM\Association\HasManyTest::testStrategyFailure
 .
 Cake\Test\TestCase\ORM\Association\HasOneTest::testAttachTo
 .
@@ -4916,8 +4884,6 @@ Cake\Test\TestCase\ORM\CompositeKeyTest::testBelongsToEager with data set #0
 .
 Cake\Test\TestCase\ORM\CompositeKeyTest::testBelongsToEager with data set #1
 .
-Cake\Test\TestCase\ORM\CompositeKeyTest::testBelongsToEager with data set #2
-.
 Cake\Test\TestCase\ORM\CompositeKeyTest::testBelongsToManyEager with data set #0
 .
 Cake\Test\TestCase\ORM\CompositeKeyTest::testBelongsToManyEager with data set #1
@@ -4938,13 +4904,15 @@ Cake\Test\TestCase\ORM\CompositeKeyTest::testHasOneEager with data set #0
 .
 Cake\Test\TestCase\ORM\CompositeKeyTest::testHasOneEager with data set #1
 .
-Cake\Test\TestCase\ORM\CompositeKeyTest::testHasOneEager with data set #2
-.
 Cake\Test\TestCase\ORM\CompositeKeyTest::testOneGenerateBelongsToManyEntitiesFromIds
 .
+Cake\Test\TestCase\ORM\CompositeKeyTest::testSaveNewCompositeKeyIncrement
+S
 Cake\Test\TestCase\ORM\CompositeKeyTest::testSaveNewEntity
 .
 Cake\Test\TestCase\ORM\CompositeKeyTest::testSaveNewEntityMissingKey
+.
+Cake\Test\TestCase\ORM\CompositeKeyTest::testSaveNewErrorCompositeKeyNoIncrement
 .
 Cake\Test\TestCase\ORM\EagerLoaderTest::testContainClosure
 .
@@ -5002,15 +4970,25 @@ Cake\Test\TestCase\ORM\EntityTest::testExtract
 .
 Cake\Test\TestCase\ORM\EntityTest::testExtractDirty
 .
+Cake\Test\TestCase\ORM\EntityTest::testExtractOriginal
+.
 Cake\Test\TestCase\ORM\EntityTest::testGetArrayAccess
 .
+Cake\Test\TestCase\ORM\EntityTest::testGetCacheClearedBySet
+.
+Cake\Test\TestCase\ORM\EntityTest::testGetCacheClearedByUnset
+.
 Cake\Test\TestCase\ORM\EntityTest::testGetCustomGetters
+.
+Cake\Test\TestCase\ORM\EntityTest::testGetCustomGettersAfterSet
 .
 Cake\Test\TestCase\ORM\EntityTest::testGetNoGetters
 .
 Cake\Test\TestCase\ORM\EntityTest::testHas
 .
 Cake\Test\TestCase\ORM\EntityTest::testIndirectModification
+.
+Cake\Test\TestCase\ORM\EntityTest::testIsDirtyFromClone
 .
 Cake\Test\TestCase\ORM\EntityTest::testIsNew
 .
@@ -5076,17 +5054,33 @@ Cake\Test\TestCase\ORM\EntityTest::testUnsetMakesClean
 .
 Cake\Test\TestCase\ORM\EntityTest::testUnsetMultiple
 .
+Cake\Test\TestCase\ORM\MarshallerTest::testAssociationNoChanges
+.
 Cake\Test\TestCase\ORM\MarshallerTest::testAssociatoinsFieldList
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testBeforeMarshalEvent
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testBeforeMarshalEventOnAssociations
 .
+Cake\Test\TestCase\ORM\MarshallerTest::testBelongsToManyInvalidData
+.
+Cake\Test\TestCase\ORM\MarshallerTest::testBelongsToManyWithMixedData
+.
+Cake\Test\TestCase\ORM\MarshallerTest::testBelongsToManyWithMixedJoinData
+.
+Cake\Test\TestCase\ORM\MarshallerTest::testBelongsToManyWithMixedJoinDataOutOfOrder
+.
+Cake\Test\TestCase\ORM\MarshallerTest::testHasManyInvalidData
+.
+Cake\Test\TestCase\ORM\MarshallerTest::testHasManyWithIds
+.
 Cake\Test\TestCase\ORM\MarshallerTest::testJoinDataWhiteList
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testManyAssociations
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testManyFieldList
+.
+Cake\Test\TestCase\ORM\MarshallerTest::testManyInvalidData
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testManySimple
 .
@@ -5096,9 +5090,13 @@ Cake\Test\TestCase\ORM\MarshallerTest::testMergeBelongsToManyEntitiesFromIds
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testMergeBelongsToManyEntitiesFromIdsEmptyValue
 .
+Cake\Test\TestCase\ORM\MarshallerTest::testMergeBelongsToManyFromArrayWithConditions
+.
 Cake\Test\TestCase\ORM\MarshallerTest::testMergeBelongsToManyFromIdsWithConditions
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testMergeBelongsToManyJoinData
+.
+Cake\Test\TestCase\ORM\MarshallerTest::testMergeBelongsToManyJoinDataAssociatedWithIds
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testMergeBelongsToManyJoinDataNotAccessible
 .
@@ -5126,6 +5124,8 @@ Cake\Test\TestCase\ORM\MarshallerTest::testMergeManyExistQueryFails
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testMergeManyFieldList
 .
+Cake\Test\TestCase\ORM\MarshallerTest::testMergeManyInvalidData
+.
 Cake\Test\TestCase\ORM\MarshallerTest::testMergeManySimple
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testMergeManyWithAppend
@@ -5142,9 +5142,13 @@ Cake\Test\TestCase\ORM\MarshallerTest::testMergeWithFieldList
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testMergeWithSingleAssociation
 .
+Cake\Test\TestCase\ORM\MarshallerTest::testMergeWithSingleAssociationAndFieldLists
+.
 Cake\Test\TestCase\ORM\MarshallerTest::testMergeWithValidation
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testOneAccessibleFieldsOption
+.
+Cake\Test\TestCase\ORM\MarshallerTest::testOneAccessibleFieldsOptionForAssociations
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testOneAccessibleProperties
 .
@@ -5155,6 +5159,8 @@ Cake\Test\TestCase\ORM\MarshallerTest::testOneAssociationsSingle
 Cake\Test\TestCase\ORM\MarshallerTest::testOneBelongsToManyJoinData
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testOneBelongsToManyJoinDataAssociated
+.
+Cake\Test\TestCase\ORM\MarshallerTest::testOneBelongsToManyJoinDataAssociatedWithIds
 .
 Cake\Test\TestCase\ORM\MarshallerTest::testOneDeepAssociations
 .
@@ -5192,6 +5198,8 @@ Cake\Test\TestCase\ORM\QueryRegressionTest::testBelongsToManyDeepSave2
 .
 Cake\Test\TestCase\ORM\QueryRegressionTest::testContainNoEmptyAssociatedObjects
 .
+Cake\Test\TestCase\ORM\QueryRegressionTest::testContainWithNoFields
+.
 Cake\Test\TestCase\ORM\QueryRegressionTest::testCountWithContain
 .
 Cake\Test\TestCase\ORM\QueryRegressionTest::testCountWithUnionQuery
@@ -5222,6 +5230,8 @@ Cake\Test\TestCase\ORM\QueryRegressionTest::testFirstOnResultSet
 .
 Cake\Test\TestCase\ORM\QueryRegressionTest::testHasManyEagerLoadingUniqueKey
 .
+Cake\Test\TestCase\ORM\QueryRegressionTest::testMatchingWithNoFields
+.
 Cake\Test\TestCase\ORM\QueryRegressionTest::testNullableTimeColumn
 .
 Cake\Test\TestCase\ORM\QueryRegressionTest::testOrConditionsWithExpression
@@ -5241,6 +5251,8 @@ Cake\Test\TestCase\ORM\QueryRegressionTest::testSaveWithExpressionProperty
 Cake\Test\TestCase\ORM\QueryRegressionTest::testSelectNoFieldsOnPrimaryAlias
 .
 Cake\Test\TestCase\ORM\QueryRegressionTest::testSelectTimestampColumn
+.
+Cake\Test\TestCase\ORM\QueryRegressionTest::testSubqueryInSelectExpression
 .
 Cake\Test\TestCase\ORM\QueryTest::testApplyOptions
 .
@@ -5264,6 +5276,8 @@ Cake\Test\TestCase\ORM\QueryTest::testBelongsToManyEagerLoadingNoHydration with 
 .
 Cake\Test\TestCase\ORM\QueryTest::testCacheErrorOnNonSelect
 .
+Cake\Test\TestCase\ORM\QueryTest::testCacheIntegrationWithFormatResults
+.
 Cake\Test\TestCase\ORM\QueryTest::testCacheReadIntegration
 .
 Cake\Test\TestCase\ORM\QueryTest::testCacheWriteIntegration
@@ -5271,6 +5285,8 @@ Cake\Test\TestCase\ORM\QueryTest::testCacheWriteIntegration
 Cake\Test\TestCase\ORM\QueryTest::testCleanCopy
 .
 Cake\Test\TestCase\ORM\QueryTest::testCleanCopyBeforeFind
+.
+Cake\Test\TestCase\ORM\QueryTest::testCleanCopyRetainsBindings
 .
 Cake\Test\TestCase\ORM\QueryTest::testCollectionProxy with data set #0
 .
@@ -5322,7 +5338,7 @@ Cake\Test\TestCase\ORM\QueryTest::testContainResultFetchingOneLevel with data se
 .
 Cake\Test\TestCase\ORM\QueryTest::testContainResultFetchingOneLevel with data set #1
 .
-Cake\Test\TestCase\ORM\QueryTest::testContainResultFetchingOneLevel with data set #2
+Cake\Test\TestCase\ORM\QueryTest::testContainSelectedFields
 .
 Cake\Test\TestCase\ORM\QueryTest::testContainWithClosure
 .
@@ -5406,8 +5422,6 @@ Cake\Test\TestCase\ORM\QueryTest::testHydrateBelongsTo with data set #0
 .
 Cake\Test\TestCase\ORM\QueryTest::testHydrateBelongsTo with data set #1
 .
-Cake\Test\TestCase\ORM\QueryTest::testHydrateBelongsTo with data set #2
-.
 Cake\Test\TestCase\ORM\QueryTest::testHydrateBelongsToCustomEntity
 .
 Cake\Test\TestCase\ORM\QueryTest::testHydrateBelongsToMany
@@ -5418,8 +5432,6 @@ Cake\Test\TestCase\ORM\QueryTest::testHydrateDeep with data set #0
 .
 Cake\Test\TestCase\ORM\QueryTest::testHydrateDeep with data set #1
 .
-Cake\Test\TestCase\ORM\QueryTest::testHydrateDeep with data set #2
-.
 Cake\Test\TestCase\ORM\QueryTest::testHydrateHasMany
 .
 Cake\Test\TestCase\ORM\QueryTest::testHydrateHasManyCustomEntity
@@ -5427,6 +5439,8 @@ Cake\Test\TestCase\ORM\QueryTest::testHydrateHasManyCustomEntity
 Cake\Test\TestCase\ORM\QueryTest::testHydrateSimple
 .
 Cake\Test\TestCase\ORM\QueryTest::testInsert
+.
+Cake\Test\TestCase\ORM\QueryTest::testIsEmpty
 .
 Cake\Test\TestCase\ORM\QueryTest::testJsonSerialize
 .
@@ -5450,14 +5464,14 @@ Cake\Test\TestCase\ORM\QueryTest::testRepeatedAssociationAliases with data set #
 .
 Cake\Test\TestCase\ORM\QueryTest::testRepeatedAssociationAliases with data set #1
 .
-Cake\Test\TestCase\ORM\QueryTest::testRepeatedAssociationAliases with data set #2
-.
 Cake\Test\TestCase\ORM\QueryTest::testResultsAreWrappedInMapReduce
 .
 Cake\Test\TestCase\ORM\QueryTest::testSetResult
 .
 Cake\Test\TestCase\ORM\QueryTest::testUpdate
 .
+Cake\Test\TestCase\ORM\QueryTest::testUpdateWithTableExpression
+S
 Cake\Test\TestCase\ORM\ResultSetTest::testBelongsToEagerLoaderLeavesEmptyAssocation
 .
 Cake\Test\TestCase\ORM\ResultSetTest::testCount
@@ -5492,6 +5506,10 @@ Cake\Test\TestCase\ORM\RulesCheckerIntegrationTest::testAddingRuleWithName
 .
 Cake\Test\TestCase\ORM\RulesCheckerIntegrationTest::testAvoidExistsInOnAutomaticSaving
 .
+Cake\Test\TestCase\ORM\RulesCheckerIntegrationTest::testCustomErrorMessageFromRule
+.
+Cake\Test\TestCase\ORM\RulesCheckerIntegrationTest::testCustomErrorMessageFromRuleNoErrorField
+.
 Cake\Test\TestCase\ORM\RulesCheckerIntegrationTest::testCustomOptionsPassingDelete
 .
 Cake\Test\TestCase\ORM\RulesCheckerIntegrationTest::testCustomOptionsPassingSave
@@ -5503,6 +5521,8 @@ Cake\Test\TestCase\ORM\RulesCheckerIntegrationTest::testExistsInAliasPrefix
 Cake\Test\TestCase\ORM\RulesCheckerIntegrationTest::testExistsInDomainRule
 .
 Cake\Test\TestCase\ORM\RulesCheckerIntegrationTest::testExistsInDomainRuleWithObject
+.
+Cake\Test\TestCase\ORM\RulesCheckerIntegrationTest::testExistsInErrorWithArrayField
 .
 Cake\Test\TestCase\ORM\RulesCheckerIntegrationTest::testExistsInNullValue
 .
@@ -5594,9 +5614,21 @@ Cake\Test\TestCase\ORM\TableTest::testAddBehaviorDuplicate
 .
 Cake\Test\TestCase\ORM\TableTest::testAddBehaviorMissing
 .
+Cake\Test\TestCase\ORM\TableTest::testAfterDeleteCommitTriggeredOnlyForPrimaryTable
+.
 Cake\Test\TestCase\ORM\TableTest::testAfterSave
 .
+Cake\Test\TestCase\ORM\TableTest::testAfterSaveCommitForNonAtomic
+.
+Cake\Test\TestCase\ORM\TableTest::testAfterSaveCommitTriggeredOnlyForPrimaryTable
+.
+Cake\Test\TestCase\ORM\TableTest::testAfterSaveCommitWithNonAtomicAndTransactionRunning
+.
+Cake\Test\TestCase\ORM\TableTest::testAfterSaveCommitWithTransactionRunning
+.
 Cake\Test\TestCase\ORM\TableTest::testAfterSaveNotCalled
+.
+Cake\Test\TestCase\ORM\TableTest::testAliasField
 .
 Cake\Test\TestCase\ORM\TableTest::testAliasMethod
 .
@@ -5648,6 +5680,8 @@ Cake\Test\TestCase\ORM\TableTest::testDeleteAllAliasedConditions
 .
 Cake\Test\TestCase\ORM\TableTest::testDeleteAllFailure
 .
+Cake\Test\TestCase\ORM\TableTest::testDeleteAssociationsCascadingCallbacksOrder
+.
 Cake\Test\TestCase\ORM\TableTest::testDeleteBeforeDeleteAbort
 .
 Cake\Test\TestCase\ORM\TableTest::testDeleteBeforeDeleteReturnResult
@@ -5656,7 +5690,11 @@ Cake\Test\TestCase\ORM\TableTest::testDeleteBelongsToMany
 .
 Cake\Test\TestCase\ORM\TableTest::testDeleteCallbacks
 .
+Cake\Test\TestCase\ORM\TableTest::testDeleteCallbacksNonAtomic
+.
 Cake\Test\TestCase\ORM\TableTest::testDeleteDependent
+.
+Cake\Test\TestCase\ORM\TableTest::testDeleteDependentAliased
 .
 Cake\Test\TestCase\ORM\TableTest::testDeleteDependentHasMany
 .
@@ -5697,6 +5735,12 @@ Cake\Test\TestCase\ORM\TableTest::testFindCleanEntities
 Cake\Test\TestCase\ORM\TableTest::testFindListHydrated
 .
 Cake\Test\TestCase\ORM\TableTest::testFindListNoHydration
+.
+Cake\Test\TestCase\ORM\TableTest::testFindListSelectedFields
+.
+Cake\Test\TestCase\ORM\TableTest::testFindListWithAssociatedTable
+.
+Cake\Test\TestCase\ORM\TableTest::testFindListWithVirtualField
 .
 Cake\Test\TestCase\ORM\TableTest::testFindOrCreate
 .
@@ -5771,11 +5815,11 @@ Cake\Test\TestCase\ORM\TableTest::testPatchEntity
 Cake\Test\TestCase\ORM\TableTest::testPrimaryKey
 .
 Cake\Test\TestCase\ORM\TableTest::testReciprocalBelongsToLoading
-F
+.
 Cake\Test\TestCase\ORM\TableTest::testReciprocalBelongsToMany
-F
+.
 Cake\Test\TestCase\ORM\TableTest::testReciprocalHasManyLoading
-E
+.
 Cake\Test\TestCase\ORM\TableTest::testRemoveBehavior
 .
 Cake\Test\TestCase\ORM\TableTest::testReplacelinksBelongsToMany
@@ -5792,17 +5836,23 @@ Cake\Test\TestCase\ORM\TableTest::testSaveBelongsToManyDeleteAllLinks
 .
 Cake\Test\TestCase\ORM\TableTest::testSaveBelongsToManyDeleteSomeLinks
 .
+Cake\Test\TestCase\ORM\TableTest::testSaveBelongsToManyIgnoreNonEntityData
+.
 Cake\Test\TestCase\ORM\TableTest::testSaveBelongsToManyJoinData
 .
 Cake\Test\TestCase\ORM\TableTest::testSaveBelongsToManyJoinDataOnExistingRecord
 .
 Cake\Test\TestCase\ORM\TableTest::testSaveCleanEntity
 .
+Cake\Test\TestCase\ORM\TableTest::testSaveCorrectPrimaryKeyType
+.
 Cake\Test\TestCase\ORM\TableTest::testSaveDeepAssociationOptions
 .
 Cake\Test\TestCase\ORM\TableTest::testSaveEntityOnlySchemaFields
 .
 Cake\Test\TestCase\ORM\TableTest::testSaveHasMany
+.
+Cake\Test\TestCase\ORM\TableTest::testSaveHasManyWithIds
 .
 Cake\Test\TestCase\ORM\TableTest::testSaveHasOne
 .
@@ -5827,6 +5877,8 @@ Cake\Test\TestCase\ORM\TableTest::testSaveUpdateAuto
 Cake\Test\TestCase\ORM\TableTest::testSaveUpdatePrimaryKeyNotModified
 .
 Cake\Test\TestCase\ORM\TableTest::testSaveUpdateWithHint
+.
+Cake\Test\TestCase\ORM\TableTest::testSaveWithClonedEntity
 .
 Cake\Test\TestCase\ORM\TableTest::testSchema
 .
@@ -5877,8 +5929,10 @@ Cake\Test\TestCase\ORM\TableTest::testValidatorSetter
 Cake\Test\TestCase\ORM\TableUuidTest::testDelete
 .
 Cake\Test\TestCase\ORM\TableUuidTest::testEmptyUuid
-S
+.
 Cake\Test\TestCase\ORM\TableUuidTest::testSaveNew
+.
+Cake\Test\TestCase\ORM\TableUuidTest::testSaveNewSpecificId
 .
 Cake\Test\TestCase\ORM\TableUuidTest::testSaveUpdate
 .
@@ -6136,6 +6190,8 @@ Cake\Test\TestCase\Routing\Route\RouteTest::testMatchWithPassedArgs
 .
 Cake\Test\TestCase\Routing\Route\RouteTest::testMatchWithPatterns
 .
+Cake\Test\TestCase\Routing\Route\RouteTest::testMatchWithPersistOption
+.
 Cake\Test\TestCase\Routing\Route\RouteTest::testMethodCompatibility
 .
 Cake\Test\TestCase\Routing\Route\RouteTest::testParse
@@ -6240,6 +6296,8 @@ Cake\Test\TestCase\Routing\RouterTest::testPluginOptions
 .
 Cake\Test\TestCase\Routing\RouterTest::testPrefix
 .
+Cake\Test\TestCase\Routing\RouterTest::testPrefixOptions
+.
 Cake\Test\TestCase\Routing\RouterTest::testPrefixOverride
 .
 Cake\Test\TestCase\Routing\RouterTest::testPrefixRoutePersistence
@@ -6309,6 +6367,8 @@ Cake\Test\TestCase\Routing\RouterTest::testUrlGenerationWithRegexQualifiedParams
 Cake\Test\TestCase\Routing\RouterTest::testUrlGenerationWithUrlFilter
 .
 Cake\Test\TestCase\Routing\RouterTest::testUrlNormalization
+.
+Cake\Test\TestCase\Routing\RouterTest::testUrlParamPersistence
 .
 Cake\Test\TestCase\Routing\RouterTest::testUrlParsing
 .
@@ -6380,18 +6440,18 @@ Cake\Test\TestCase\Shell\OrmCacheShellTest::testClearNamedModel
 .
 Cake\Test\TestCase\Shell\OrmCacheShellTest::testClearNoArgs
 .
-Cake\Test\TestCase\Shell\PluginAssetsShellTest::testCopy
-F
-Cake\Test\TestCase\Shell\PluginAssetsShellTest::testForPluginWithoutWebroot
+Cake\Test\TestCase\Shell\Task\AssetsTaskTest::testCopy
 .
-Cake\Test\TestCase\Shell\PluginAssetsShellTest::testSymlink
+Cake\Test\TestCase\Shell\Task\AssetsTaskTest::testForPluginWithoutWebroot
 .
-Cake\Test\TestCase\Shell\PluginAssetsShellTest::testSymlinkWhenTargetAlreadyExits
+Cake\Test\TestCase\Shell\Task\AssetsTaskTest::testSymlink
 .
-Cake\Test\TestCase\Shell\PluginAssetsShellTest::testSymlinkWhenVendorDirectoryExits
-F
-Cake\Test\TestCase\Shell\PluginAssetsShellTest::testSymlinkingSpecifiedPlugin
-F
+Cake\Test\TestCase\Shell\Task\AssetsTaskTest::testSymlinkWhenTargetAlreadyExits
+.
+Cake\Test\TestCase\Shell\Task\AssetsTaskTest::testSymlinkWhenVendorDirectoryExits
+.
+Cake\Test\TestCase\Shell\Task\AssetsTaskTest::testSymlinkingSpecifiedPlugin
+.
 Cake\Test\TestCase\Shell\Task\ExtractTaskTest::testExecute
 .
 Cake\Test\TestCase\Shell\Task\ExtractTaskTest::testExtractCore
@@ -6406,6 +6466,18 @@ Cake\Test\TestCase\Shell\Task\ExtractTaskTest::testExtractPlugin
 .
 Cake\Test\TestCase\Shell\Task\ExtractTaskTest::testExtractWithExclude
 .
+Cake\Test\TestCase\Shell\Task\LoadTaskTest::testLoad
+.
+Cake\Test\TestCase\Shell\Task\LoadTaskTest::testLoadNoAutoload
+.
+Cake\Test\TestCase\Shell\Task\LoadTaskTest::testLoadWithBootstrap
+.
+Cake\Test\TestCase\Shell\Task\LoadTaskTest::testLoadWithRoutes
+.
+Cake\Test\TestCase\Shell\Task\UnloadTaskTest::testRegularExpressions
+.
+Cake\Test\TestCase\Shell\Task\UnloadTaskTest::testUnload
+.
 Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testArrayUrls
 .
 Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testAssertContentType
@@ -6418,11 +6490,15 @@ Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testAssertNoRedirectFail
 .
 Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testAssertRedirect
 .
+Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testAssertRedirectContains
+.
 Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testAssertResponseContains
 .
 Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testAssertResponseNotContains
 .
 Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testAssertResponseStatusCodes
+.
+Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testContentTypeInAction
 .
 Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testEventManagerReset1
 .
@@ -6440,7 +6516,13 @@ Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testRedirectPermanent
 .
 Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testRequestBuilding
 .
+Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testRequestBuildingQueryParameters
+.
 Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testRequestSetsProperties
+.
+Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testWithExpectedException
+.
+Cake\Test\TestCase\TestSuite\IntegrationTestCaseTest::testWithUnexpectedException
 .
 Cake\Test\TestCase\TestSuite\TestCaseTest::testAssertHtmlBasic
 .
@@ -6576,6 +6658,8 @@ Cake\Test\TestCase\Utility\HashTest::testExtractStringKey
 .
 Cake\Test\TestCase\Utility\HashTest::testExtractUnevenKeys
 .
+Cake\Test\TestCase\Utility\HashTest::testExtractWildcard
+.
 Cake\Test\TestCase\Utility\HashTest::testFilter
 .
 Cake\Test\TestCase\Utility\HashTest::testFlatten
@@ -6627,7 +6711,7 @@ Cake\Test\TestCase\Utility\HashTest::testRemoveMulti
 Cake\Test\TestCase\Utility\HashTest::testSort
 .
 Cake\Test\TestCase\Utility\HashTest::testSortNatural
-F
+.
 Cake\Test\TestCase\Utility\HashTest::testSortNaturalFallbackToRegular
 .
 Cake\Test\TestCase\Utility\HashTest::testSortNumeric
@@ -6651,6 +6735,8 @@ Cake\Test\TestCase\Utility\InflectorTest::testCustomTransliterationRule
 Cake\Test\TestCase\Utility\InflectorTest::testDasherized
 .
 Cake\Test\TestCase\Utility\InflectorTest::testHumanization
+.
+Cake\Test\TestCase\Utility\InflectorTest::testInflectingMultiWordIrregulars
 .
 Cake\Test\TestCase\Utility\InflectorTest::testInflectingPlurals
 .
@@ -6699,8 +6785,6 @@ Cake\Test\TestCase\Utility\SecurityTest::testEncryptDecryptFalseyData
 Cake\Test\TestCase\Utility\SecurityTest::testEncryptInvalidKey
 .
 Cake\Test\TestCase\Utility\SecurityTest::testEngineEquivalence
-.
-Cake\Test\TestCase\Utility\SecurityTest::testGenerateAuthkey
 .
 Cake\Test\TestCase\Utility\SecurityTest::testHash
 .
@@ -6910,10 +6994,6 @@ Cake\Test\TestCase\Validation\ValidationTest::testAlphaNumeric
 .
 Cake\Test\TestCase\Validation\ValidationTest::testAlphaNumericPassedAsArray
 .
-Cake\Test\TestCase\Validation\ValidationTest::testBlank
-.
-Cake\Test\TestCase\Validation\ValidationTest::testBlankAsArray
-.
 Cake\Test\TestCase\Validation\ValidationTest::testBoolean
 .
 Cake\Test\TestCase\Validation\ValidationTest::testCc
@@ -7076,11 +7156,17 @@ Cake\Test\TestCase\Validation\ValidationTest::testUploadedFileWithDifferentFileP
 .
 Cake\Test\TestCase\Validation\ValidationTest::testUrl
 .
-Cake\Test\TestCase\Validation\ValidationTest::testUserDefined
-.
 Cake\Test\TestCase\Validation\ValidationTest::testUuid
 .
 Cake\Test\TestCase\Validation\ValidatorTest::testAddMulitple
+.
+Cake\Test\TestCase\Validation\ValidatorTest::testAddNestedMany
+.
+Cake\Test\TestCase\Validation\ValidatorTest::testAddNestedManyProviders
+.
+Cake\Test\TestCase\Validation\ValidatorTest::testAddNestedSingle
+.
+Cake\Test\TestCase\Validation\ValidatorTest::testAddNestedSingleProviders
 .
 Cake\Test\TestCase\Validation\ValidatorTest::testAddingRulesToField
 .
@@ -7108,6 +7194,8 @@ Cake\Test\TestCase\Validation\ValidatorTest::testCustomErrorsWithEmptyNotAllowed
 .
 Cake\Test\TestCase\Validation\ValidatorTest::testCustomErrorsWithPresenceRequired
 .
+Cake\Test\TestCase\Validation\ValidatorTest::testDebugInfo
+.
 Cake\Test\TestCase\Validation\ValidatorTest::testErrorsFromCustomProvider
 .
 Cake\Test\TestCase\Validation\ValidatorTest::testErrorsFromDefaultProvider
@@ -7117,6 +7205,14 @@ Cake\Test\TestCase\Validation\ValidatorTest::testErrorsWithEmptyAllowed
 Cake\Test\TestCase\Validation\ValidatorTest::testErrorsWithEmptyNotAllowed
 .
 Cake\Test\TestCase\Validation\ValidatorTest::testErrorsWithLastRule
+.
+Cake\Test\TestCase\Validation\ValidatorTest::testErrorsWithNestedFields
+.
+Cake\Test\TestCase\Validation\ValidatorTest::testErrorsWithNestedManyInvalidType
+.
+Cake\Test\TestCase\Validation\ValidatorTest::testErrorsWithNestedManySomeInvalid
+.
+Cake\Test\TestCase\Validation\ValidatorTest::testErrorsWithNestedSingleInvalidType
 .
 Cake\Test\TestCase\Validation\ValidatorTest::testErrorsWithPresenceRequired
 .
@@ -7146,25 +7242,15 @@ Cake\Test\TestCase\Validation\ValidatorTest::testRequirePresence
 .
 Cake\Test\TestCase\Validation\ValidatorTest::testUsingClosureAsRule
 .
-Cake\Test\TestCase\View\CellTest::testCachedRenderArrayConfig
-.
-Cake\Test\TestCase\View\CellTest::testCachedRenderSimple
-.
 Cake\Test\TestCase\View\CellTest::testCellImplictRenderWithError
-.
-Cake\Test\TestCase\View\CellTest::testCellInheritsCustomViewClass
-.
-Cake\Test\TestCase\View\CellTest::testCellInheritsHelperConfig
 .
 Cake\Test\TestCase\View\CellTest::testCellManualRender
 .
 Cake\Test\TestCase\View\CellTest::testCellManualRenderError
 .
-Cake\Test\TestCase\View\CellTest::testCellMissingMethod
-.
-Cake\Test\TestCase\View\CellTest::testCellOptions
-.
 Cake\Test\TestCase\View\CellTest::testCellRender
+.
+Cake\Test\TestCase\View\CellTest::testCellRenderPluginTemplate
 .
 Cake\Test\TestCase\View\CellTest::testCellRenderThemed
 .
@@ -7175,11 +7261,7 @@ Cake\Test\TestCase\View\CellTest::testDefaultCellAction
 Cake\Test\TestCase\View\CellTest::testPluginCell
 .
 Cake\Test\TestCase\View\CellTest::testPluginCellAlternateTemplate
-.
-Cake\Test\TestCase\View\CellTest::testPluginCellAlternateTemplateRenderParam
-.
-Cake\Test\TestCase\View\CellTest::testUnexistingCell
-.
+FATAL
 Cake\Test\TestCase\View\Form\ArrayContextTest::testAttributes
 .
 Cake\Test\TestCase\View\Form\ArrayContextTest::testError
@@ -7394,6 +7476,8 @@ Cake\Test\TestCase\View\Helper\FlashHelperTest::testFlashThrowsException
 .
 Cake\Test\TestCase\View\Helper\FlashHelperTest::testFlashWithPluginElement
 .
+Cake\Test\TestCase\View\Helper\FlashHelperTest::testFlashWithPrefix
+.
 Cake\Test\TestCase\View\Helper\FlashHelperTest::testFlashWithTheme
 .
 Cake\Test\TestCase\View\Helper\FormHelperTest::testAddContextProvider
@@ -7463,6 +7547,8 @@ Cake\Test\TestCase\View\Helper\FormHelperTest::testCreateFile
 Cake\Test\TestCase\View\Helper\FormHelperTest::testCreateGet
 .
 Cake\Test\TestCase\View\Helper\FormHelperTest::testCreateIdPrefix
+.
+Cake\Test\TestCase\View\Helper\FormHelperTest::testCreateNoUrl
 .
 Cake\Test\TestCase\View\Helper\FormHelperTest::testCreatePassedArgs
 .
@@ -7541,6 +7627,10 @@ Cake\Test\TestCase\View\Helper\FormHelperTest::testForMagicInputNonExistingNorVa
 Cake\Test\TestCase\View\Helper\FormHelperTest::testFormDateTimeMulti
 .
 Cake\Test\TestCase\View\Helper\FormHelperTest::testFormEnd
+.
+Cake\Test\TestCase\View\Helper\FormHelperTest::testFormGroupTemplates
+.
+Cake\Test\TestCase\View\Helper\FormHelperTest::testFormInputSubmit
 .
 Cake\Test\TestCase\View\Helper\FormHelperTest::testFormInputs
 .
@@ -7666,6 +7756,8 @@ Cake\Test\TestCase\View\Helper\FormHelperTest::testNestedSelect
 .
 Cake\Test\TestCase\View\Helper\FormHelperTest::testNoCheckboxLocking
 .
+Cake\Test\TestCase\View\Helper\FormHelperTest::testOrderForRenderingWidgetAndFetchingSecureFields
+.
 Cake\Test\TestCase\View\Helper\FormHelperTest::testPassword
 .
 Cake\Test\TestCase\View\Helper\FormHelperTest::testPostButton
@@ -7682,6 +7774,8 @@ Cake\Test\TestCase\View\Helper\FormHelperTest::testPostLinkNestedData
 .
 Cake\Test\TestCase\View\Helper\FormHelperTest::testPostLinkSecurityHash
 .
+Cake\Test\TestCase\View\Helper\FormHelperTest::testPostLinkWithData
+.
 Cake\Test\TestCase\View\Helper\FormHelperTest::testRadio
 .
 Cake\Test\TestCase\View\Helper\FormHelperTest::testRadioHiddenInputDisabling
@@ -7689,6 +7783,8 @@ Cake\Test\TestCase\View\Helper\FormHelperTest::testRadioHiddenInputDisabling
 Cake\Test\TestCase\View\Helper\FormHelperTest::testRadioInputInsideLabel
 .
 Cake\Test\TestCase\View\Helper\FormHelperTest::testRadioNoLabel
+.
+Cake\Test\TestCase\View\Helper\FormHelperTest::testRenderingWidgetWithEmptyName
 .
 Cake\Test\TestCase\View\Helper\FormHelperTest::testRequiredAttribute
 .
@@ -7932,6 +8028,8 @@ Cake\Test\TestCase\View\Helper\PaginatorHelperTest::testNumbersTemplates
 .
 Cake\Test\TestCase\View\Helper\PaginatorHelperTest::testOptions
 .
+Cake\Test\TestCase\View\Helper\PaginatorHelperTest::testPagingLinksMissingModel
+.
 Cake\Test\TestCase\View\Helper\PaginatorHelperTest::testParam
 .
 Cake\Test\TestCase\View\Helper\PaginatorHelperTest::testParams
@@ -7993,10 +8091,6 @@ Cake\Test\TestCase\View\Helper\RssHelperTest::testItemCdata
 Cake\Test\TestCase\View\Helper\RssHelperTest::testItemEnclosureLength
 .
 Cake\Test\TestCase\View\Helper\RssHelperTest::testItems
-.
-Cake\Test\TestCase\View\Helper\SessionHelperTest::testCheck
-.
-Cake\Test\TestCase\View\Helper\SessionHelperTest::testRead
 .
 Cake\Test\TestCase\View\Helper\TextHelperTest::testAutoLink
 .
@@ -8202,63 +8296,9 @@ Cake\Test\TestCase\View\UrlHelperTest::testUrlConversion
 .
 Cake\Test\TestCase\View\UrlHelperTest::testWebrootPaths
 .
-Cake\Test\TestCase\View\ViewTest::testAfterLayout
-.
-Cake\Test\TestCase\View\ViewTest::testBeforeLayout
-.
-Cake\Test\TestCase\View\ViewTest::testBlockAppend with data set "decimal"
-.
-Cake\Test\TestCase\View\ViewTest::testBlockAppend with data set "object with __toString"
-.
-Cake\Test\TestCase\View\ViewTest::testBlockAppend with data set "string"
-.
-Cake\Test\TestCase\View\ViewTest::testBlockAppendCapture
-.
-Cake\Test\TestCase\View\ViewTest::testBlockAppendObjectWithoutToString
-.
-Cake\Test\TestCase\View\ViewTest::testBlockAppendUndefined
-.
-Cake\Test\TestCase\View\ViewTest::testBlockCapture
-.
-Cake\Test\TestCase\View\ViewTest::testBlockCaptureOverwrite
-.
-Cake\Test\TestCase\View\ViewTest::testBlockDefaultValue
-.
-Cake\Test\TestCase\View\ViewTest::testBlockExist
-.
-Cake\Test\TestCase\View\ViewTest::testBlockExtend
-.
-Cake\Test\TestCase\View\ViewTest::testBlockPrepend with data set "decimal"
-.
-Cake\Test\TestCase\View\ViewTest::testBlockPrepend with data set "object with __toString"
-.
-Cake\Test\TestCase\View\ViewTest::testBlockPrepend with data set "string"
-.
-Cake\Test\TestCase\View\ViewTest::testBlockPrependObjectWithoutToString
-.
-Cake\Test\TestCase\View\ViewTest::testBlockPrependUndefined
-.
-Cake\Test\TestCase\View\ViewTest::testBlockReset
-.
-Cake\Test\TestCase\View\ViewTest::testBlockSet
-.
-Cake\Test\TestCase\View\ViewTest::testBlockSetDecimal
-.
-Cake\Test\TestCase\View\ViewTest::testBlockSetNull
-.
-Cake\Test\TestCase\View\ViewTest::testBlockSetObjectWithToString
-.
-Cake\Test\TestCase\View\ViewTest::testBlockSetObjectWithoutToString
-.
-Cake\Test\TestCase\View\ViewTest::testBlocks
-.
 Cake\Test\TestCase\View\ViewTest::testCamelCasePluginGetTemplate
 .
 Cake\Test\TestCase\View\ViewTest::testElement
-.
-Cake\Test\TestCase\View\ViewTest::testElementCache
-.
-Cake\Test\TestCase\View\ViewTest::testElementCacheHelperNoCache
 .
 Cake\Test\TestCase\View\ViewTest::testElementCallbacks
 .
@@ -8269,21 +8309,7 @@ Cake\Test\TestCase\View\ViewTest::testElementInexistent
 Cake\Test\TestCase\View\ViewTest::testElementInexistent3
 .
 Cake\Test\TestCase\View\ViewTest::testElementParamsDontOverwriteHelpers
-.
-Cake\Test\TestCase\View\ViewTest::testExceptionOnOpenBlock
-.
-Cake\Test\TestCase\View\ViewTest::testExtendElement
-.
-Cake\Test\TestCase\View\ViewTest::testExtendLoop
-.
-Cake\Test\TestCase\View\ViewTest::testExtendMissingElement
-.
-Cake\Test\TestCase\View\ViewTest::testExtendNested
-.
-Cake\Test\TestCase\View\ViewTest::testExtendSelf
-.
-Cake\Test\TestCase\View\ViewTest::testExtendWithElementBeforeExtend
-.
+FATAL
 Cake\Test\TestCase\View\ViewTest::testGetLayoutFileName
 .
 Cake\Test\TestCase\View\ViewTest::testGetLayoutFileNameDirectoryTraversal
@@ -8296,31 +8322,11 @@ Cake\Test\TestCase\View\ViewTest::testGetTemplate
 .
 Cake\Test\TestCase\View\ViewTest::testGetViewFileNameDirectoryTraversal
 .
-Cake\Test\TestCase\View\ViewTest::testGetViewFileNameSubdirWithPluginAndViewPath
-.
 Cake\Test\TestCase\View\ViewTest::testGetViewFileNames
-.
-Cake\Test\TestCase\View\ViewTest::testHelperCallbackTriggering
-.
-Cake\Test\TestCase\View\ViewTest::testHelpers
-.
-Cake\Test\TestCase\View\ViewTest::testInitialize
-.
-Cake\Test\TestCase\View\ViewTest::testLazyLoadHelpers
-.
-Cake\Test\TestCase\View\ViewTest::testLoadHelper
-.
-Cake\Test\TestCase\View\ViewTest::testLoadHelperDuplicate
-.
-Cake\Test\TestCase\View\ViewTest::testLoadHelpers
-.
-Cake\Test\TestCase\View\ViewTest::testMemoryLeakInPaths
 .
 Cake\Test\TestCase\View\ViewTest::testMissingLayout
 .
 Cake\Test\TestCase\View\ViewTest::testMissingTemplate
-.
-Cake\Test\TestCase\View\ViewTest::testNestedBlocks
 .
 Cake\Test\TestCase\View\ViewTest::testPathPluginGeneration
 .
@@ -8330,23 +8336,9 @@ Cake\Test\TestCase\View\ViewTest::testPluginGetTemplate
 .
 Cake\Test\TestCase\View\ViewTest::testPluginThemedGetTemplate
 .
-Cake\Test\TestCase\View\ViewTest::testRender
-.
-Cake\Test\TestCase\View\ViewTest::testRenderLoadHelper
-.
-Cake\Test\TestCase\View\ViewTest::testRenderUsingViewProperty
-.
-Cake\Test\TestCase\View\ViewTest::testStartBlocksTwice
+Cake\Test\TestCase\View\ViewTest::testPrefixElement
 .
 Cake\Test\TestCase\View\ViewTest::testUUIDGeneration
-.
-Cake\Test\TestCase\View\ViewTest::testViewEvent
-.
-Cake\Test\TestCase\View\ViewTest::testViewFileName
-.
-Cake\Test\TestCase\View\ViewTest::testViewVarDefaultValue
-.
-Cake\Test\TestCase\View\ViewTest::testViewVarOverwritingLocalHelperVar
 .
 Cake\Test\TestCase\View\ViewTest::testViewVars
 .
@@ -8436,6 +8428,8 @@ Cake\Test\TestCase\View\Widget\DateTimeWidgetTest::testRenderMeridianWidget
 .
 Cake\Test\TestCase\View\Widget\DateTimeWidgetTest::testRenderMinuteWidget
 .
+Cake\Test\TestCase\View\Widget\DateTimeWidgetTest::testRenderMinuteWidgetEmptyZeroDefault
+.
 Cake\Test\TestCase\View\Widget\DateTimeWidgetTest::testRenderMinuteWidgetInterval
 .
 Cake\Test\TestCase\View\Widget\DateTimeWidgetTest::testRenderMinuteWidgetIntervalRounding
@@ -8445,6 +8439,8 @@ Cake\Test\TestCase\View\Widget\DateTimeWidgetTest::testRenderMonthWidget
 Cake\Test\TestCase\View\Widget\DateTimeWidgetTest::testRenderMonthWidgetWithCustomNames
 .
 Cake\Test\TestCase\View\Widget\DateTimeWidgetTest::testRenderMonthWidgetWithNames
+.
+Cake\Test\TestCase\View\Widget\DateTimeWidgetTest::testRenderMonthWidgetWithNamesNoLeadingZeros
 .
 Cake\Test\TestCase\View\Widget\DateTimeWidgetTest::testRenderSecondsWidget
 .
@@ -8524,6 +8520,10 @@ Cake\Test\TestCase\View\Widget\RadioWidgetTest::testRenderSimpleNotNested
 .
 Cake\Test\TestCase\View\Widget\SelectBoxWidgetTest::testRenderComplex
 .
+Cake\Test\TestCase\View\Widget\SelectBoxWidgetTest::testRenderComplexDisabled
+.
+Cake\Test\TestCase\View\Widget\SelectBoxWidgetTest::testRenderComplexSelected
+.
 Cake\Test\TestCase\View\Widget\SelectBoxWidgetTest::testRenderDisabled
 .
 Cake\Test\TestCase\View\Widget\SelectBoxWidgetTest::testRenderDisabledMultiple
@@ -8587,6 +8587,10 @@ Cake\Test\TestCase\View\Widget\WidgetRegistryTestCase::testGetResolveDependencyM
 Cake\Test\TestCase\View\Widget\WidgetRegistryTestCase::testGetViewInstance
 .
 Cake\Test\TestCase\View\XmlViewTest::testRenderSerializeNoHelpers
+.
+Cake\Test\TestCase\View\XmlViewTest::testRenderSerializeWithOptions
+.
+Cake\Test\TestCase\View\XmlViewTest::testRenderSerializeWithString
 .
 Cake\Test\TestCase\View\XmlViewTest::testRenderWithView
 .

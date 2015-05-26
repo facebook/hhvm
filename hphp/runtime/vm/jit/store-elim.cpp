@@ -584,11 +584,15 @@ void find_all_stores(Global& genv, Block* blk, uint32_t id,
   if (!seen.insert(blk).second) return;
   blk->forEachPred([&](Block* pred) {
       auto& pst = genv.trackedStoreMap[StoreKey { pred, StoreKey::Out, id }];
-      if (auto inst = pst.instruction()) {
+      IRInstruction* inst;
+      if ((inst = pst.instruction()) != nullptr ||
+          (inst = pst.processed()) != nullptr) {
         stores.push_back(inst);
         return;
       }
-      if (auto b = pst.block()) {
+      Block* b;
+      if ((b = pst.block()) != nullptr ||
+          (b = pst.pending()) != nullptr) {
         find_all_stores(genv, b, id, stores, seen);
         return;
       }
@@ -608,8 +612,11 @@ IRInstruction* resolve_cycle(Global& genv, Block* blk, uint32_t id) {
   // whether a phi is actually required for each
   // src (also, we need a candidate store to clone)
   find_all_stores(genv, blk, id, stores, seen);
-  always_assert(stores.size() > 1);
+  always_assert(stores.size() > 0);
   auto cand = stores[0];
+  if (stores.size() == 1) {
+    return cand;
+  }
   jit::vector<uint32_t> srcsToPhi;
   for (uint32_t i = 0; i < cand->numSrcs(); i++) {
     SSATmp* prev = nullptr;
@@ -645,14 +652,15 @@ IRInstruction* resolve_flat(Global& genv, Block* blk, uint32_t id,
                             TrackedStore& ts) {
   ts.setPending(blk);
 
-  jit::vector<const IRInstruction*> stores;
+  jit::vector<IRInstruction*> stores;
   blk->forEachPred([&](Block* pred) {
       stores.push_back(resolve_ts(genv, pred, StoreKey::Out, id));
     });
-  always_assert(stores.size() > 1);
+  always_assert(stores.size() > 0);
   if (auto rep = ts.instruction()) return rep;
 
   auto cand = stores[0];
+  if (stores.size() == 1) return cand;
   jit::vector<SSATmp*> newSrcs;
   jit::vector<uint32_t> srcsToPhi;
   for (uint32_t i = 0; i < cand->numSrcs(); i++) {

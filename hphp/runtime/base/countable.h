@@ -118,10 +118,6 @@ inline bool check_one_bit_ref(uint8_t pad) {
     return m_pad == 1;                                                  \
   }                                                                     \
                                                                         \
-  bool cowCheck() const {                                               \
-    return hasMultipleRefs();                                           \
-  }                                                                     \
-                                                                        \
   bool hasExactlyOneRef() const {                                       \
     assert(check_refcount(m_count));                                    \
     if ((uint32_t)m_count > 1) assert(check_one_bit_ref(m_pad));        \

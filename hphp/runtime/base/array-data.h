@@ -87,6 +87,9 @@ public:
     m_count = n;
     if (m_count > 1) m_pad = 1;
   }
+  bool cowCheck() const {
+    return maybeShared();
+  }
 
   /**
    * Create a new ArrayData with specified array element(s).

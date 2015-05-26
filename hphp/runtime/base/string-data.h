@@ -196,6 +196,9 @@ struct StringData {
   void setRefCount(RefCount n);
   bool isStatic() const;
   bool isUncounted() const;
+  bool cowCheck() const {
+    return maybeShared();
+  }
 
   /*
    * Append the supplied range to this string.  If there is not

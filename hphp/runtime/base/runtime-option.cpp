@@ -1733,9 +1733,8 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   //
   // For some call paths (perhaps server invocation?) there's no RID() yet.
   //
-  if (!ThreadInfo::s_threadInfo.isNull()) {
-    BindPHPPerDirectoryIniSettings(&RID());
-  }
+  BindPHPPerDirectoryIniSettings(
+    ThreadInfo::s_threadInfo.isNull() ? nullptr : &RID());
 
   ExtensionRegistry::moduleLoad(ini, config);
   extern void initialize_apc();

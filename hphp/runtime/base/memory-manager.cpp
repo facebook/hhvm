@@ -218,17 +218,9 @@ void MemoryManager::resetRuntimeOptions() {
     deleteRootMaps();
     checkHeap();
     // check that every allocation in heap has been freed before reset
-    for (auto h = begin(), lim = end(); h != lim; ++h) {
-      if (h->kind() == HeaderKind::Debug) {
-        auto h2 = h; ++h2;
-        if (h2 != lim) {
-          assert(h2->kind() == HeaderKind::Free);
-        }
-      } else {
-        assert(h->kind() == HeaderKind::Free ||
-               h->kind() == HeaderKind::Hole);
-      }
-    }
+    iterate([&](Header* h) {
+      assert(h->kind() == HeaderKind::Free);
+    });
   }
   MemoryManager::TlsWrapper::destroy();
   MemoryManager::TlsWrapper::getCheck();
@@ -502,6 +494,7 @@ void MemoryManager::resetAllocator() {
   // zero out freelists
   for (auto& i : m_freelists) i.head = nullptr;
   m_front = m_limit = 0;
+  m_needInitFree = false;
 
   resetStatsImpl(true);
   TRACE(1, "reset: apc-arrays %lu strings %u\n", napcs, nstrings);
@@ -659,22 +652,14 @@ void MemoryManager::initHole() {
 
 // initialize the FreeNode header on all freelist entries.
 void MemoryManager::initFree() {
+  initHole();
   for (size_t i = 0; i < kNumSmartSizes; i++) {
-    auto size = s_index2size.table[i];
+    auto size = std::min(s_index2size.table[i], kMaxSmartSize);
     for (auto n = m_freelists[i].head; n; n = n->next) {
       n->hdr.init(HeaderKind::Free, size);
     }
   }
-}
-
-BigHeap::iterator MemoryManager::begin() {
-  initHole();
-  initFree();
-  return m_heap.begin();
-}
-
-BigHeap::iterator MemoryManager::end() {
-  return m_heap.end();
+  m_needInitFree = false;
 }
 
 // test iterating objects in slabs
@@ -686,22 +671,12 @@ void MemoryManager::checkHeap() {
   std::unordered_set<StringData*> apc_strings;
   size_t counts[NumHeaderKinds];
   for (unsigned i=0; i < NumHeaderKinds; i++) counts[i] = 0;
-  for (auto h = begin(), lim = end(); h != lim; ++h) {
+  forEachHeader([&](Header* h) {
     hdrs.push_back(&*h);
     TRACE(2, "checkHeap: hdr %p\n", hdrs[hdrs.size()-1]);
     bytes += h->size();
     counts[(int)h->kind()]++;
     switch (h->kind()) {
-      case HeaderKind::Debug: {
-        // the next block's parsed size should agree with DebugHeader
-        auto h2 = h; ++h2;
-        if (h2 != lim) {
-          assert(h2->kind() != HeaderKind::Debug);
-          assert(h->debug_.returnedCap ==
-                 MemoryManager::smartSizeClass(h2->size()));
-        }
-        break;
-      }
       case HeaderKind::Free:
         free_blocks.insert(&h->free_);
         break;
@@ -733,11 +708,14 @@ void MemoryManager::checkHeap() {
       case HeaderKind::NativeData:
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
+        break;
+      case HeaderKind::Debug:
       case HeaderKind::BigObj:
       case HeaderKind::Hole:
+        assert(false && "forEachHeader skips these kinds");
         break;
     }
-  }
+  });
 
   // check the free lists
   for (size_t i = 0; i < kNumSmartSizes; i++) {
@@ -1199,15 +1177,6 @@ MemBlock BigHeap::resizeBig(void* ptr, size_t newsize) {
     m_bigs[newNode->index()] = newNode;
   }
   return {newNode + 1, newsize};
-}
-
-BigHeap::iterator BigHeap::begin() {
-  if (!m_slabs.empty()) return iterator{m_slabs.begin(), *this};
-  return iterator{m_bigs.begin(), *this};
-}
-
-BigHeap::iterator BigHeap::end() {
-  return iterator{m_bigs.end(), *this};
 }
 
 /////////////////////////////////////////////////////////////////////////

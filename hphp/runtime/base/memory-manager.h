@@ -414,7 +414,6 @@ struct MemBlock {
  * Allocator for slabs and big blocks.
  */
 struct BigHeap {
-  struct iterator;
   BigHeap() {}
   bool empty() const {
     return m_slabs.empty() && m_bigs.empty();
@@ -440,8 +439,7 @@ struct BigHeap {
   void flush();
 
   // allow whole-heap iteration
-  iterator begin();
-  iterator end();
+  template<class Fn> void iterate(Fn);
 
  protected:
   void enlist(BigNode*, HeaderKind kind, size_t size);
@@ -796,8 +794,9 @@ struct MemoryManager {
   /*
    * Heap iterator methods.
    */
-  template<class Fn> void forEachObject(Fn);
+  template<class Fn> void iterate(Fn);
   template<class Fn> void forEachHeader(Fn);
+  template<class Fn> void forEachObject(Fn);
 
   /*
    * Run the experimental collector.
@@ -886,8 +885,6 @@ private:
   void checkHeap();
   void initHole();
   void initFree();
-  BigHeap::iterator begin();
-  BigHeap::iterator end();
 
   void dropRootMaps();
   void deleteRootMaps();
@@ -962,6 +959,7 @@ private:
   bool m_statsIntervalActive;
   bool m_couldOOM{true};
   bool m_bypassSlabAlloc;
+  bool m_needInitFree{false}; // true after free(), false after initFree()
 
   ReqProfContext m_profctx;
   static std::atomic<ReqProfContext*> s_trigger;

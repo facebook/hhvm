@@ -288,6 +288,7 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
   FTRACE(3, "smartFreeSize({}, {}), freelist {}\n", ptr, bytes, i);
   debugPreFree(ptr, bytes, bytes);
   m_freelists[i].push(ptr, bytes);
+  assert(m_needInitFree = true); // intentional debug-only side-effect.
   m_stats.usage -= bytes;
 
   FTRACE(3, "smartFreeSize: {} ({} bytes)\n", ptr, bytes);

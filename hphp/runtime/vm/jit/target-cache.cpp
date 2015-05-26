@@ -450,10 +450,10 @@ void handlePrimeCacheInit(Entry* mce,
   if (!writer) return;
 
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
-    always_assert(mcg->backEnd().isSmashable(addr, kMovLen));
+    always_assert(mcg->backEnd().isSmashable(addr, x64::kMovLen));
     //XX these assume the immediate move was to r10
     //assertx(addr[0] == 0x49 && addr[1] == 0xba);
-    auto const ptr = reinterpret_cast<uintptr_t*>(addr + kMovImmOff);
+    auto const ptr = reinterpret_cast<uintptr_t*>(addr + x64::kMovImmOff);
     if (!(*ptr & 1)) {
       return false;
     }

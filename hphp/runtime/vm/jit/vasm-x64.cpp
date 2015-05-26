@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
+#include "hphp/runtime/vm/jit/func-prologues-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -80,6 +81,7 @@ struct Vgen {
   void emit(const ldimmb& i);
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
+  void emit(const ldimmqs& i);
   void emit(const fallback& i);
   void emit(const fallbackcc& i);
   void emit(const load& i);
@@ -122,6 +124,7 @@ struct Vgen {
   void emit(const cmpq& i) { a->cmpq(i.s0, i.s1); }
   void emit(const cmpqi& i) { a->cmpq(i.s0, i.s1); }
   void emit(const cmpqim& i) { a->cmpq(i.s0, i.s1); }
+  void emit(const cmpqims& i);
   void emit(const cmpqm& i) { a->cmpq(i.s0, i.s1); }
   void emit(cmpsd i) { noncommute(i); a->cmpsd(i.s0, i.d, i.pred); }
   void emit(const cqo& i) { a->cqo(); }
@@ -142,6 +145,7 @@ struct Vgen {
   void emit(const incqmlock& i) { a->lock(); a->incq(i.m); }
   void emit(const incwm& i) { a->incw(i.m); }
   void emit(const jcc& i);
+  void emit(const jcci& i);
   void emit(const jmp& i);
   void emit(const jmpr& i) { a->jmp(i.target); }
   void emit(const jmpm& i) { a->jmp(i.target); }
@@ -170,6 +174,7 @@ struct Vgen {
   void emit(orqi i) { binary(i); a->orq(i.s0, i.d); }
   void emit(const orqim& i) { a->orq(i.s0, i.m); }
   void emit(const pop& i) { a->pop(i.d); }
+  void emit(const popm& i) { a->pop(i.d); }
   void emit(psllq i) { binary(i); a->psllq(i.s0, i.d); }
   void emit(psrlq i) { binary(i); a->psrlq(i.s0, i.d); }
   void emit(const push& i) { a->push(i.s); }
@@ -280,6 +285,19 @@ template<class Inst> void Vgen::commute(Inst& i) {
     binary(i);
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void emitSimdImm(X64Assembler* a, int64_t val, Vreg d) {
+  if (val == 0) {
+    a->pxor(d, d); // does not modify flags
+  } else {
+    auto addr = mcg->allocLiteral(val);
+    a->movsd(rip[(intptr_t)addr], d);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const addqim& i) {
   if (i.m.seg == Vptr::FS) a->fs();
@@ -428,6 +446,11 @@ void Vgen::emit(const callstub& i) {
   emit(call{i.target, i.args});
 }
 
+void Vgen::emit(const cmpqims& i) {
+  backend.prepareForSmash(a->code(), kCmpLen);
+  a->cmpq(i.s0, i.s1);
+}
+
 void Vgen::emit(const fallback& i) {
   emit(fallbackcc{CC_None, InvalidReg, i.dest, i.trflags, i.args});
 }
@@ -438,15 +461,6 @@ void Vgen::emit(const fallbackcc& i) {
     destSR->emitFallbackJump(a->code(), i.cc);
   } else {
     destSR->emitFallbackJumpCustom(a->code(), frozen(), i.dest, i.trflags);
-  }
-}
-
-static void emitSimdImm(X64Assembler* a, int64_t val, Vreg d) {
-  if (val == 0) {
-    a->pxor(d, d); // does not modify flags
-  } else {
-    auto addr = mcg->allocLiteral(val);
-    a->movsd(rip[(intptr_t)addr], d);
   }
 }
 
@@ -498,6 +512,14 @@ void Vgen::emit(const ldimmq& i) {
   }
 }
 
+void Vgen::emit(const ldimmqs& i) {
+  backend.prepareForSmash(a->code(), kMovLen);
+  a->movq(0xdeadbeeffeedface, i.d);
+
+  auto immp = reinterpret_cast<uintptr_t*>(a->frontier()) - 1;
+  *immp = i.s.q();
+}
+
 void Vgen::emit(const load& i) {
   if (i.s.seg == Vptr::FS) a->fs();
   auto mref = i.s.mr();
@@ -524,14 +546,13 @@ void Vgen::emit(const mcprep& i) {
    * Class*, so we'll always miss the inline check before it's smashed, and
    * handlePrimeCacheMiss can tell it's not been smashed yet
    */
-  backend.prepareForSmash(a->code(), MethodCache::kMovLen);
-  auto movAddr = a->frontier();
-  auto movAddrUInt = reinterpret_cast<uintptr_t>(movAddr);
-  a->movq(0x8000000000000000u, i.d);
-  auto after = reinterpret_cast<uintptr_t*>(a->frontier());
-  after[-1] = (movAddrUInt << 1) | 1;
-  mcg->cgFixups().m_addressImmediates.insert(
-    reinterpret_cast<TCA>(~movAddrUInt));
+  emit(ldimmqs{0x8000000000000000u, i.d});
+
+  auto movAddr = reinterpret_cast<uintptr_t>(a->frontier()) - x64::kMovLen;
+  auto immAddr = reinterpret_cast<uintptr_t*>(movAddr + x64::kMovImmOff);
+
+  *immAddr = (movAddr << 1) | 1;
+  mcg->cgFixups().m_addressImmediates.insert(reinterpret_cast<TCA>(~movAddr));
 }
 
 void Vgen::emit(const storebi& i) {
@@ -776,6 +797,11 @@ void Vgen::emit(const jcc& i) {
     a->jcc(i.cc, a->frontier());
   }
   emit(jmp{i.targets[0]});
+}
+
+void Vgen::emit(const jcci& i) {
+  a->jcc(i.cc, i.taken);
+  emit(jmp{i.target});
 }
 
 void Vgen::emit(const jmp& i) {

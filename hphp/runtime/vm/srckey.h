@@ -38,8 +38,20 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   static_assert(sizeof(FuncId) == sizeof(uint32_t), "");
   static_assert(sizeof(Offset) == sizeof(uint32_t), "");
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Types.
+
   using AtomicInt = uint64_t;
+
   struct Hasher;
+
+  /*
+   * Used for SrcKeys corresponding to the prologue which precedes a function
+   * entry source location.
+   *
+   * Used disjointly from the `resumed' flag.
+   */
+  enum class PrologueTag {};
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -51,6 +63,9 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   SrcKey(const Func* f, Offset off, bool resumed);
   SrcKey(const Func* f, PC pc, bool resumed);
   SrcKey(FuncId funcId, Offset off, bool resumed);
+
+  SrcKey(const Func* f, Offset off, PrologueTag);
+  SrcKey(const Func* f, PC pc, PrologueTag);
 
   SrcKey(SrcKey other, Offset off);
 
@@ -77,6 +92,7 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
    */
   FuncId funcID() const;
   int offset() const;
+  bool prologue() const;
   bool resumed() const;
 
   /*
@@ -139,8 +155,9 @@ private:
     AtomicInt m_atomicInt;
     struct {
       FuncId m_funcID;
-      uint32_t m_offset:31;
-      bool m_resumed:1;
+      uint32_t m_offset : 30;
+      bool m_prologue : 1;
+      bool m_resumed : 1;
     };
   };
 };

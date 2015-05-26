@@ -305,6 +305,7 @@ bool canDCE(IRInstruction* inst) {
   case StElem:
   case StLoc:
   case StLocPseudoMain:
+  case StLocRange:
   case StRef:
   case EagerSyncVMRegs:
   case ReqBindJmp:
@@ -325,6 +326,7 @@ bool canDCE(IRInstruction* inst) {
   case VerifyRetFail:
   case RaiseUninitLoc:
   case RaiseUndefProp:
+  case RaiseMissingArg:
   case RaiseError:
   case RaiseWarning:
   case RaiseNotice:
@@ -464,6 +466,10 @@ bool canDCE(IRInstruction* inst) {
   case DbgTrashMem:
   case PredictLoc:
   case PredictStk:
+  case EnterFrame:
+  case CheckStackOverflow:
+  case InitExtraArgs:
+  case CheckSurpriseFlagsEnter:
     return false;
   }
   not_reached();

@@ -101,7 +101,7 @@ void emitRB(Vout& v, Trace::RingBufferType t, const char* msg);
 void emitTestSurpriseFlags(Asm& as, PhysReg rds);
 Vreg emitTestSurpriseFlags(Vout& v, Vreg rds);
 
-void emitCheckSurpriseFlagsEnter(Vout& main, Vout& cold, Vreg rds,
+void emitCheckSurpriseFlagsEnter(Vout& main, Vout& cold, Vreg fp, Vreg rds,
                                  Fixup fixup, Vlabel catchBlock);
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  PhysReg rds, Fixup fixup);

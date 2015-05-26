@@ -44,6 +44,7 @@ bool isBlockEnd(const Vinstr& inst) {
     case Vinstr::svcreq:
     // control flow
     case Vinstr::jcc:
+    case Vinstr::jcci:
     case Vinstr::jmp:
     case Vinstr::jmpr:
     case Vinstr::jmpm:

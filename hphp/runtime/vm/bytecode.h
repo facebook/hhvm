@@ -37,7 +37,13 @@
 #include <type_traits>
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+struct ActRec;
+struct Func;
 struct Resumable;
+
+///////////////////////////////////////////////////////////////////////////////
 
 #define EVAL_FILENAME_SUFFIX ") : eval()'d code"
 
@@ -73,8 +79,7 @@ void SETOP_BODY(TypedValue* lhs, SetOpOp op, Cell* rhs) {
   SETOP_BODY_CELL(tvToCell(lhs), op, rhs);
 }
 
-class Func;
-struct ActRec;
+///////////////////////////////////////////////////////////////////////////////
 
 struct ExtraArgs : private boost::noncopyable {
   /*
@@ -185,6 +190,36 @@ class VarEnv {
   // Access to wrapped ExtraArgs, if we have one.
   TypedValue* getExtraArg(unsigned argInd) const;
 };
+
+/*
+ * Action taken to handle any extra arguments passed for a function call.
+ */
+enum class ExtraArgsAction {
+  None,     // no extra arguments; zero out m_extraArgs
+  Discard,  // discard extra arguments
+  Variadic, // populate `...$args' parameter
+  MayUseVV, // create ExtraArgs
+  VarAndVV, // both of the above
+};
+
+inline ExtraArgsAction extra_args_action(const Func* func, uint32_t argc) {
+  using Action = ExtraArgsAction;
+
+  auto const nparams = func->numNonVariadicParams();
+  if (argc <= nparams) return Action::None;
+
+  if (LIKELY(func->discardExtraArgs())) {
+    return Action::Discard;
+  }
+  if (func->attrs() & AttrMayUseVV) {
+    return func->hasVariadicCaptureParam() ? Action::VarAndVV
+                                           : Action::MayUseVV;
+  }
+  assertx(func->hasVariadicCaptureParam());
+  return Action::Variadic;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * An "ActRec" is a call activation record. The ordering of the fields assumes
@@ -474,6 +509,8 @@ struct ActRec {
 static_assert(offsetof(ActRec, m_sfp) == 0,
               "m_sfp should be at offset 0 of ActRec");
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Returns true iff ar represents a frame on the VM eval stack or a Resumable
  * object on the PHP heap.
@@ -499,6 +536,8 @@ void debuggerPreventReturnToTC(ActRec* ar);
  * Call debuggerPreventReturnToTC() on all live VM frames in this thread.
  */
 void debuggerPreventReturnsToTC();
+
+///////////////////////////////////////////////////////////////////////////////
 
 inline int32_t arOffset(const ActRec* ar, const ActRec* other) {
   return (intptr_t(other) - intptr_t(ar)) / sizeof(TypedValue);
@@ -531,6 +570,8 @@ inline Class* arGetContextClassFromBuiltin(const ActRec* ar) {
   return arGetContextClassImpl<true>(ar);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 // Used by extension functions that take a PHP "callback", since they need to
 // figure out the callback context once and call it multiple times. (e.g.
 // array_map, array_filter, ...)
@@ -543,6 +584,8 @@ struct CallCtx {
 
 constexpr size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
 constexpr size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * We pad all stack overflow checks by a small amount to allow for three

@@ -1586,16 +1586,20 @@ O(unpcklpd)
       case Vinstr::psllq:
       case Vinstr::psrlq:
       case Vinstr::fallthru:
+      case Vinstr::popm:  // currently used in cgEnterFrame
         always_assert_flog(false,
                            "Banned opcode in B{}: {}",
                            size_t(label), show(m_unit, inst));
 
       // Not yet implemented opcodes:
+      case Vinstr::jcci:
       case Vinstr::contenter:
       case Vinstr::mccall:
       case Vinstr::mcprep:
       case Vinstr::cmpsd:
       case Vinstr::ucomisd:
+      case Vinstr::ldimmqs:
+      case Vinstr::cmpqims:
       // ARM opcodes:
       case Vinstr::asrv:
       case Vinstr::brk:

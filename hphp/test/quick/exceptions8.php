@@ -16,7 +16,7 @@ function f($a1, $a2) {
     var_dump($b8);
     var_dump($b9);
     var_dump($b10);
-  }  
+  }
 }
 function main() {
   try {

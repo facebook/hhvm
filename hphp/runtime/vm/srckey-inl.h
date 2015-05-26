@@ -21,23 +21,26 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline SrcKey::SrcKey()
-  : m_funcID(InvalidFuncId)
-  , m_offset(0)
-  , m_resumed(false)
+  : m_funcID{InvalidFuncId}
+  , m_offset{0}
+  , m_prologue{false}
+  , m_resumed{false}
 {}
 
 inline SrcKey::SrcKey(const Func* f, Offset off, bool resumed)
-  : m_funcID(f->getFuncId())
-  , m_offset((uint32_t)off)
-  , m_resumed(resumed)
+  : m_funcID{f->getFuncId()}
+  , m_offset{(uint32_t)off}
+  , m_prologue{false}
+  , m_resumed{resumed}
 {
   assert((uint32_t)off >> 31 == 0);
 }
 
 inline SrcKey::SrcKey(const Func* f, PC pc, bool resumed)
-  : m_funcID(f->getFuncId())
-  , m_offset((uint32_t)f->unit()->offsetOf(pc))
-  , m_resumed(resumed)
+  : m_funcID{f->getFuncId()}
+  , m_offset{(uint32_t)f->unit()->offsetOf(pc)}
+  , m_prologue{false}
+  , m_resumed{resumed}
 {
   assert((uint32_t)f->unit()->offsetOf(pc) >> 31 == 0);
 }
@@ -45,21 +48,41 @@ inline SrcKey::SrcKey(const Func* f, PC pc, bool resumed)
 inline SrcKey::SrcKey(FuncId funcId, Offset off, bool resumed)
   : m_funcID{funcId}
   , m_offset{(uint32_t)off}
+  , m_prologue{false}
   , m_resumed{resumed}
 {
   assert((uint32_t)off >> 31 == 0);
 }
 
+inline SrcKey::SrcKey(const Func* f, Offset off, PrologueTag)
+  : m_funcID{f->getFuncId()}
+  , m_offset{(uint32_t)off}
+  , m_prologue{true}
+  , m_resumed{false}
+{
+  assert((uint32_t)off >> 31 == 0);
+}
+
+inline SrcKey::SrcKey(const Func* f, PC pc, PrologueTag)
+  : m_funcID{f->getFuncId()}
+  , m_offset{(uint32_t)f->unit()->offsetOf(pc)}
+  , m_prologue{true}
+  , m_resumed{false}
+{
+  assert((uint32_t)f->unit()->offsetOf(pc) >> 31 == 0);
+}
+
 inline SrcKey::SrcKey(SrcKey other, Offset off)
   : m_funcID{other.funcID()}
   , m_offset{(uint32_t)off}
+  , m_prologue{other.prologue()}
   , m_resumed{other.resumed()}
 {
   assert((uint32_t)off >> 31 == 0);
 }
 
 inline SrcKey::SrcKey(AtomicInt in)
-  : m_atomicInt(in)
+  : m_atomicInt{in}
 {}
 
 inline SrcKey SrcKey::fromAtomicInt(AtomicInt in) {
@@ -83,6 +106,10 @@ inline FuncId SrcKey::funcID() const {
 
 inline int SrcKey::offset() const {
   return m_offset;
+}
+
+inline bool SrcKey::prologue() const {
+  return m_prologue;
 }
 
 inline bool SrcKey::resumed() const {

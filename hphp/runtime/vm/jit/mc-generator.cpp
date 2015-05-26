@@ -76,6 +76,7 @@
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/code-gen.h"
 #include "hphp/runtime/vm/jit/debug-guards.h"
+#include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
@@ -633,7 +634,7 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
     ? m_tx.profData()->addTransPrologue(m_tx.mode(), funcBody, paramIndex)
     : kInvalidTransID;
 
-  backEnd().emitFuncPrologue(transID, func, argc, start);
+  genFuncPrologue(transID, func, argc, start);
 
   if (RuntimeOption::EvalPerfRelocate) {
     GrowableVector<IncomingBranch> incomingBranches;

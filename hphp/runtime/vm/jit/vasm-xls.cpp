@@ -1689,7 +1689,9 @@ void processSpillExits(Vunit& unit, Vlabel label, SpillState state,
     state = instrInState(unit, inst, state, sp);
 
     if (state < NeedSpill ||
-        (inst.op != Vinstr::fallbackcc && inst.op != Vinstr::bindjcc)) {
+        (inst.op != Vinstr::fallbackcc &&
+         inst.op != Vinstr::bindjcc &&
+         inst.op != Vinstr::jcci)) {
       continue;
     }
 
@@ -1708,13 +1710,19 @@ void processSpillExits(Vunit& unit, Vlabel label, SpillState state,
       targetCode.emplace_back(fallback{fb_i.dest, fb_i.trflags, fb_i.args});
       cc = fb_i.cc;
       sf = fb_i.sf;
-    } else {
+    } else if (inst.op == Vinstr::bindjcc) {
       auto const& bj_i = inst.bindjcc_;
       targetCode.emplace_back(free);
       targetCode.emplace_back(bindjmp{bj_i.target, bj_i.spOff, bj_i.trflags,
                                       bj_i.args});
       cc = bj_i.cc;
       sf = bj_i.sf;
+    } else /* inst.op == Vinstr::jcci */ {
+      auto const& jcc_i = inst.jcci_;
+      targetCode.emplace_back(free);
+      targetCode.emplace_back(jmpi{jcc_i.taken});
+      cc = jcc_i.cc;
+      sf = jcc_i.sf;
     }
     targetCode.back().origin = inst.origin;
 

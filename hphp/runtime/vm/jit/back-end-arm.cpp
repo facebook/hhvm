@@ -433,7 +433,7 @@ struct BackEnd final : jit::BackEnd {
     }
   }
 
-  void genCodeImpl(IRUnit& unit, AsmInfo*) override;
+  void genCodeImpl(IRUnit& unit, CodeKind, AsmInfo*) override;
 
 private:
   void do_moveToAlign(CodeBlock& cb, MoveToAlignFlags alignment) override {
@@ -474,7 +474,7 @@ static size_t genBlock(CodegenState& state, Vout& v, Vout& vc, Block* block) {
   return hhir_count;
 }
 
-void BackEnd::genCodeImpl(IRUnit& unit, AsmInfo* asmInfo) {
+void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
   Timer _t(Timer::codeGen);
   CodeBlock& mainCodeIn   = mcg->code.main();
   CodeBlock& coldCodeIn   = mcg->code.cold();

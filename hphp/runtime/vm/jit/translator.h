@@ -125,6 +125,7 @@ struct TransContext {
   FPInvOffset initSpOffset;
   const Func* func;
   Offset initBcOffset;
+  bool prologue;
   bool resumed;
 };
 

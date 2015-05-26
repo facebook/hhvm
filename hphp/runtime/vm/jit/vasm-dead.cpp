@@ -59,6 +59,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::cmpq:
     case Vinstr::cmpqi:
     case Vinstr::cmpqim:
+    case Vinstr::cmpqims:
     case Vinstr::cmpqm:
     case Vinstr::cmpsd:
     case Vinstr::copy2:
@@ -145,6 +146,8 @@ bool effectful(Vinstr& inst) {
       return !inst.ldimml_.saveflags;
     case Vinstr::ldimmb:
       return !inst.ldimmb_.saveflags;
+    case Vinstr::ldimmqs:
+      return false;
 
     case Vinstr::addlm:
     case Vinstr::addqim:
@@ -179,6 +182,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::incqmlock:
     case Vinstr::incwm:
     case Vinstr::jcc:
+    case Vinstr::jcci:
     case Vinstr::jmp:
     case Vinstr::jmpm:
     case Vinstr::jmpr:
@@ -193,6 +197,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::phijcc:
     case Vinstr::phijmp:
     case Vinstr::pop:
+    case Vinstr::popm:
     case Vinstr::push:
     case Vinstr::ret:
     case Vinstr::store:

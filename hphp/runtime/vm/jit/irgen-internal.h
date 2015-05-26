@@ -236,7 +236,7 @@ inline BCMarker makeMarker(IRGS& env, Offset bcOff) {
          bcOff, stackOff.offset, curFunc(env)->fullName()->data());
 
   return BCMarker {
-    SrcKey { curFunc(env), bcOff, resumed(env) },
+    SrcKey(curSrcKey(env), bcOff),
     stackOff,
     env.profTransID,
     env.irb->fp()

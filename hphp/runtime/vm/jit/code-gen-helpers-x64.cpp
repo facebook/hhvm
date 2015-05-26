@@ -340,22 +340,22 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
   acold.  jmp   (a.frontier());
 }
 
-void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg rds, Fixup fixup,
-                                 Vlabel catchBlock) {
-  // warning: keep this in sync with the x64 version above.
+void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp, Vreg rds,
+                                 Fixup fixup, Vlabel catchBlock) {
   auto cold = vcold.makeBlock();
   auto done = v.makeBlock();
+
   auto const sf = emitTestSurpriseFlags(v, rds);
   v << jcc{CC_NZ, sf, {done, cold}};
-  v = done;
 
-  auto helper = (void(*)())mcg->tx().uniqueStubs.functionEnterHelper;
+  v = done;
   vcold = cold;
-  vcold << vinvoke{CppCall::direct(helper),
-                 v.makeVcallArgs({{rVmFp}}),
-                 v.makeTuple({}),
-                 {done, catchBlock},
-                 Fixup{fixup.pcOffset, fixup.spOffset}};
+
+  auto call = CppCall::direct(
+      reinterpret_cast<void(*)()>(mcg->tx().uniqueStubs.functionEnterHelper));
+  auto args = v.makeVcallArgs({{fp}});
+
+  vcold << vinvoke{call, args, v.makeTuple({}), {done, catchBlock}, fixup};
 }
 
 void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {

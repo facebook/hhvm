@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,32 +14,28 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/code-gen.h"
+#ifndef incl_HPHP_JIT_FUNC_PROLOGUE_H
+#define incl_HPHP_JIT_FUNC_PROLOGUE_H
 
-#include <iterator>
+#include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/jit/types.h"
 
-#include "hphp/runtime/vm/jit/block.h"
-#include "hphp/runtime/vm/jit/check.h"
-#include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/reg-alloc.h"
-#include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
+#include <cstdint>
 
-namespace HPHP { namespace jit {
+namespace HPHP {
 
-TRACE_SET_MOD(hhir);
+struct Func;
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-void genCode(IRUnit& unit, CodeKind kind /* = CodeKind::Trace */) {
-  if (dumpIREnabled()) {
-    AsmInfo ai(unit);
-    mcg->backEnd().genCodeImpl(unit, kind, &ai);
-  } else {
-    mcg->backEnd().genCodeImpl(unit, kind, nullptr);
-  }
-}
+namespace jit {
+
+///////////////////////////////////////////////////////////////////////////////
+
+void genFuncPrologue(TransID transID, Func* func, int argc, TCA& start);
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}
+
+#endif // incl_HPHP_JIT_FUNC_PROLOGUE_H

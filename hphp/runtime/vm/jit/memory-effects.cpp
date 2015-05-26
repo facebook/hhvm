@@ -506,6 +506,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConstructInstance:
     return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
 
+  case CheckStackOverflow:
+  case CheckSurpriseFlagsEnter:
+    return may_raise(inst, may_load_store(AEmpty, AEmpty));
+
+  case InitExtraArgs:
+    return UnknownEffects {};
+
   //////////////////////////////////////////////////////////////////////
   // Iterator instructions
 
@@ -552,6 +559,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AFrame { inst.src(0), inst.extra<StLoc>()->locId },
       inst.src(1)
     };
+
+  case StLocRange:
+    {
+      auto const extra = inst.extra<StLocRange>();
+      auto acls = AEmpty;
+
+      for (auto locId = extra->start; locId < extra->end; ++locId) {
+        acls = acls | AFrame { inst.src(0), locId };
+      }
+      return PureStore { acls, inst.src(1) };
+    }
 
   case LdLoc:
     return PureLoad { AFrame { inst.src(0), inst.extra<LocalId>()->locId } };
@@ -1068,6 +1086,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VectorHasImmCopy:
   case CheckPackedArrayBounds:
   case LdColArray:
+  case EnterFrame:
     return may_load_store(AEmpty, AEmpty);
 
   //////////////////////////////////////////////////////////////////////
@@ -1123,10 +1142,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Clone:
   case RaiseArrayIndexNotice:
   case RaiseArrayKeyNotice:
+  case RaiseUninitLoc:
+  case RaiseUndefProp:
+  case RaiseMissingArg:
   case RaiseError:
   case RaiseNotice:
-  case RaiseUndefProp:
-  case RaiseUninitLoc:
   case RaiseWarning:
   case ConvCellToStr:
   case ConvObjToStr:

@@ -26,6 +26,8 @@
 
 namespace HPHP { namespace jit {
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Core types.
  */
@@ -43,8 +45,12 @@ struct ctca_identity_hash {
   }
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 typedef hphp_hash_set<TransID> TransIDSet;
 typedef std::vector<TransID>   TransIDVec;
+
+///////////////////////////////////////////////////////////////////////////////
 
 /**
  * The different kinds of translations that the JIT generates:
@@ -105,8 +111,24 @@ struct TransFlags {
 
 static_assert(sizeof(TransFlags) <= sizeof(uint64_t), "Too many TransFlags!");
 
-// Enumeration representing the various areas that we emit code. kNumAreas must
-// be kept up to date.
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * The "kind" of code being generated.
+ *
+ * Different contexts of code generation constrain codegen differently; e.g.,
+ * cross-trace code has fewer available registers.
+ */
+enum class CodeKind {
+  Trace,
+  CrossTrace,
+};
+
+/*
+ * Enumeration representing the various areas that we emit code.
+ *
+ * kNumAreas must be kept up to date.
+ */
 enum class AreaIndex : unsigned { Main, Cold, Frozen };
 constexpr size_t kNumAreas = 3;
 
@@ -121,6 +143,8 @@ inline std::string areaAsString(AreaIndex area) {
   }
   always_assert(false);
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}
 

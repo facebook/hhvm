@@ -75,6 +75,7 @@ struct Vunit;
   O(ldimmb, I(s) I(saveflags), Un, D(d))\
   O(ldimml, I(s) I(saveflags), Un, D(d))\
   O(ldimmq, I(s) I(saveflags), Un, D(d))\
+  O(ldimmqs, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
   O(mccall, I(target), U(args), Dn)\
   O(mcprep, Inone, Un, D(d))\
@@ -137,6 +138,7 @@ struct Vunit;
   O(cmpq, Inone, U(s0) U(s1), D(sf))\
   O(cmpqi, I(s0), U(s1), D(sf))\
   O(cmpqim, I(s0), U(s1), D(sf))\
+  O(cmpqims, I(s0), U(s1), D(sf))\
   O(cmpqm, Inone, U(s0) U(s1), D(sf))\
   O(cmpsd, I(pred), UA(s0) U(s1), D(d))\
   O(cqo, Inone, Un, Dn)\
@@ -157,6 +159,7 @@ struct Vunit;
   O(incqm, Inone, U(m), D(sf))\
   O(incqmlock, Inone, U(m), D(sf))\
   O(jcc, I(cc), U(sf), Dn)\
+  O(jcci, I(cc), U(sf), Dn)\
   O(jmp, Inone, Un, Dn)\
   O(jmpr, Inone, U(target) U(args), Dn)\
   O(jmpm, Inone, U(target) U(args), Dn)\
@@ -188,6 +191,7 @@ struct Vunit;
   O(orqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
   O(orqim, I(s0), U(m), D(sf))\
   O(pop, Inone, Un, D(d))\
+  O(popm, Inone, U(d), Dn)\
   O(psllq, I(s0), UH(s1,d), DH(d,s1))\
   O(psrlq, I(s0), UH(s1,d), DH(d,s1))\
   O(push, Inone, U(s), Dn)\
@@ -401,6 +405,7 @@ struct fallthru {};
 struct ldimmb { Immed s; Vreg d; bool saveflags; };
 struct ldimml { Immed s; Vreg d; bool saveflags; };
 struct ldimmq { Immed64 s; Vreg d; bool saveflags; };
+struct ldimmqs { Immed64 s; Vreg d; };
 struct load { Vptr s; Vreg d; };
 struct mccall { CodeAddress target; RegSet args; };
 struct mcprep { Vreg64 d; };
@@ -503,6 +508,7 @@ struct mul { Vreg64 s0, s1, d; };
  *    i   immediate
  *    m   Vptr
  *    p   RIPRelativeRef
+ *    s   smashable
  */
 
 struct addli { Immed s0; Vreg32 s1, d; VregSF sf; };
@@ -548,6 +554,7 @@ struct cmplm { Vreg32 s0; Vptr s1; VregSF sf; };
 struct cmpq  { Vreg64 s0; Vreg64 s1; VregSF sf; };
 struct cmpqi { Immed  s0; Vreg64 s1; VregSF sf; };
 struct cmpqim { Immed s0; Vptr s1; VregSF sf; };
+struct cmpqims { Immed s0; Vptr s1; VregSF sf; };
 struct cmpqm { Vreg64 s0; Vptr s1; VregSF sf; };
 struct cmpsd { ComparisonPred pred; VregDbl s0, s1, d; };
 struct cqo {};
@@ -568,6 +575,7 @@ struct incqm { Vptr m; VregSF sf; };
 struct incqmlock { Vptr m; VregSF sf; };
 struct incwm { Vptr m; VregSF sf; };
 struct jcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; };
+struct jcci { ConditionCode cc; VregSF sf; Vlabel target; TCA taken; };
 struct jmp { Vlabel target; };
 struct jmpr { Vreg64 target; RegSet args; };
 struct jmpm { Vptr target; RegSet args; };
@@ -603,6 +611,7 @@ struct orq { Vreg64 s0, s1, d; VregSF sf; };
 struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 struct orqim { Immed s0; Vptr m; VregSF sf; };
 struct pop { Vreg64 d; };
+struct popm { Vptr d; };
 struct push { Vreg64 s; };
 struct ret { RegSet args; };
 struct roundsd { RoundDirection dir; VregDbl s, d; };

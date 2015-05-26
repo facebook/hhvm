@@ -406,13 +406,28 @@ function find_tests($files, array $options = null) {
   return $tests;
 }
 
-function list_tests() {
-  foreach (find_tests(array('all')) as $test) {
-    foreach (array('-m interp', '-m jit') as $mode) {
-      foreach (array('', '-r') as $repo) {
-        print implode(' ', array_filter(array($mode, $repo, $test)))."\n";
-      }
-    }
+function list_tests($files, $options) {
+  $mode = idx($options, 'mode', '');
+  switch ($mode) {
+    case '':
+    case 'jit':
+      $mode = '-m jit';
+      break;
+    case 'interp';
+      $mode = '-m interp';
+      break;
+    default:
+      throw new Exception("Unsupported mode for listing tests: ".$mode);
+  }
+
+  if (isset($options['repo'])) {
+    $repo = '-r';
+  } else {
+    $repo = '';
+  }
+
+  foreach (find_tests($files) as $test) {
+    print implode(' ', array_filter(array($mode, $repo, $test)))."\n";
   }
 }
 
@@ -1893,7 +1908,7 @@ function main($argv) {
     error(help());
   }
   if (isset($options['list-tests'])) {
-    error(list_tests());
+    error(list_tests($files, $options));
   }
 
   $tests = find_tests($files, $options);

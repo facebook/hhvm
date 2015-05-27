@@ -99,9 +99,7 @@ void visit(IRUnit& unit, Block* block) {
       }
       break;
     default:
-      if (!inst.isBlockEnd()) {
-        insertRefCountAsserts(unit, inst);
-      }
+      insertRefCountAsserts(unit, inst);
       break;
     }
   }

@@ -1046,9 +1046,9 @@ unsigned Vxls::nearestSplitBefore(unsigned pos) {
 }
 
 // Return the first usable hint from all the uses in this interval.
-// Skip uses that don't have any hint, or have an unsable hint.
+// Skip uses that don't have any hint, or have an unusable hint.
 PhysReg Vxls::findHint(Interval* current, const PosVec& free_until,
-                       RegSet allow) {
+                    RegSet allow) {
   if (!RuntimeOption::EvalHHIREnablePreColoring &&
       !RuntimeOption::EvalHHIREnableCoalescing) return InvalidReg;
 
@@ -1059,6 +1059,8 @@ PhysReg Vxls::findHint(Interval* current, const PosVec& free_until,
     }
     return InvalidReg;
   };
+
+  auto ret = InvalidReg;
   for (auto u : current->uses) {
     if (!u.hint.isValid()) continue;
     auto hint_ivl = intervals[u.hint];
@@ -1074,8 +1076,12 @@ PhysReg Vxls::findHint(Interval* current, const PosVec& free_until,
     if (free_until[hint] >= current->end()) {
       return hint;
     }
+    if (ret == InvalidReg ||
+        free_until[ret] < free_until[hint]) {
+      ret = hint;
+    }
   }
-  return InvalidReg;
+  return ret;
 }
 
 void Vxls::allocate(Interval* current) {
@@ -1097,7 +1103,7 @@ void Vxls::allocate(Interval* current) {
 
   // Try to get a hinted register
   auto hint = findHint(current, free_until, allow);
-  if (hint != InvalidReg) {
+  if (hint != InvalidReg && free_until[hint] >= current->end()) {
     return assignReg(current, hint);
   }
   auto r = find(free_until);
@@ -1135,6 +1141,9 @@ void Vxls::allocate(Interval* current) {
       }
       auto second = current->split(split_pos, true);
       pending.push(second);
+      if (hint != InvalidReg && free_until[hint] >= current->end()) {
+        r = hint;
+      }
       return assignReg(current, r);
     }
   }

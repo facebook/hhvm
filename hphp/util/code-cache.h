@@ -22,6 +22,16 @@
 
 namespace HPHP {
 
+#if defined(__APPLE__) || defined(__CYGWIN__)
+extern const void* __hot_start;
+extern const void* __hot_end;
+#else
+extern "C" {
+void __attribute__((__weak__)) __hot_start();
+void __attribute__((__weak__)) __hot_end();
+}
+#endif
+
 struct CodeCache {
   enum class Selection {
     Default,   // 'main'
@@ -89,7 +99,6 @@ struct CodeCache {
 
 private:
   CodeAddress m_base;
-  CodeAddress m_mainBase;
   size_t m_codeSize;
   size_t m_totalSize;
   Selection m_selection;

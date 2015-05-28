@@ -59,7 +59,7 @@ size_t s_counter;
 struct Use {
   VregKind kind;
   unsigned pos;
-  Vreg hint; // if valid, try to use same vreg as this
+  Vreg hint; // if valid, try to use same physical register as hint.
 };
 
 // A LiveRange is an closed-open range of positions where an interval is live.
@@ -72,9 +72,6 @@ struct LiveRange {
 public:
   unsigned start, end;
 };
-
-typedef jit::vector<LiveRange> RangeList;
-typedef jit::vector<Use> UseList;
 
 constexpr int kInvalidSpillSlot = -1;
 
@@ -119,8 +116,8 @@ struct Interval {
 public:
   Interval* const parent;
   Interval* next{nullptr};
-  RangeList ranges;
-  UseList uses;
+  jit::vector<LiveRange> ranges;
+  jit::vector<Use> uses;
   const Vreg vreg;
   unsigned def_pos;
   int slot{kInvalidSpillSlot};
@@ -130,16 +127,16 @@ public:
   Vconst val;
 };
 
-typedef boost::dynamic_bitset<> LiveSet;
-typedef std::pair<Vlabel,unsigned> EdgeKey;
+using LiveSet = boost::dynamic_bitset<>;
+using EdgeKey = std::pair<Vlabel,unsigned>;
+using CopyPlan = PhysReg::Map<Interval*>;
+using PosVec = PhysReg::Map<unsigned>;
+
 struct EdgeHasher {
   size_t operator()(EdgeKey k) const {
     return size_t(k.first) ^ k.second;
   }
 };
-
-typedef PhysReg::Map<Interval*> CopyPlan;
-typedef PhysReg::Map<unsigned> PosVec;
 
 // Extended Linear Scan register allocator over vasm virtual registers (Vregs).
 // This encapsulates the intermediate data structures used during the algorithm
@@ -1421,7 +1418,7 @@ void Vxls::lowerCopyargs() {
         auto& defs = unit.tuples[inst.copyargs_.d];
         for (unsigned i = 0, n = uses.size(); i < n; ++i) {
           auto i1 = intervals[uses[i]];
-          if (i1 && !i1->fixed()) i1 = i1->childAt(pos);
+          if (!i1->fixed()) i1 = i1->childAt(pos);
           auto i2 = intervals[defs[i]];
           if (i2->reg != i1->reg) {
             assertx(!copies[pos][i2->reg]);

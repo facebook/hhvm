@@ -1,0 +1,7 @@
+HHVM_EXTENSION_CHECK_DEPENDENCIES(MySQL MySQL)
+if (ENABLE_EXTENSION_MYSQL)
+  HHVM_SELECT_SOURCES(HRE_CURRENT_EXT_PATH)
+  message(STATUS "Building the MySQL extension")
+else()
+  message("Not building the MySQL extension")
+endif ()

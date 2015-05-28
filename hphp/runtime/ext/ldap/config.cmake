@@ -1,0 +1,7 @@
+HHVM_EXTENSION_CHECK_DEPENDENCIES(ldap Ldap)
+if (ENABLE_EXTENSION_LDAP)
+  HHVM_SELECT_SOURCES(HRE_CURRENT_EXT_PATH)
+  message(STATUS "Building the ldap extension")
+else()
+  message("Not building the ldap extension")
+endif ()

@@ -20,10 +20,12 @@ class ErrorException extends Exception {
    * @severity   mixed   The severity level of the exception.
    * @filename   mixed   The filename where the exception is thrown.
    * @lineno     mixed   The line number where the exception is thrown.
+   * @previous   mixed   The previous exception used for the exception
+   *                     chaining.
    */
   public function __construct($message = "", $code = 0, $severity = 0,
-                              $filename = null, $lineno = null) {
-    parent::__construct($message, $code);
+                              $filename = null, $lineno = null, Exception $previous = null) {
+    parent::__construct($message, $code, $previous);
     $this->severity = $severity;
     if ($filename !== null) {
       $this->file = $filename;

@@ -1839,6 +1839,25 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyCountArrayFast(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (inst->src(0)->hasConstVal(TArr)) return cns(env, src->arrVal()->size());
+  auto const arrSpec = src->type().arrSpec();
+  auto const at = arrSpec.type();
+  if (!at) return nullptr;
+  using A = RepoAuthType::Array;
+  switch (at->tag()) {
+  case A::Tag::Packed:
+    if (at->emptiness() == A::Empty::No) {
+      return cns(env, at->size());
+    }
+    break;
+  case A::Tag::PackedN:
+    break;
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   auto const ty = src->type();
@@ -1850,14 +1869,14 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
   if (!kind || mightRelax(env, src)) return nullptr;
 
   switch (*kind) {
-    case ArrayData::kPackedKind:
-    case ArrayData::kStructKind:
-    case ArrayData::kMixedKind:
-    case ArrayData::kEmptyKind:
-    case ArrayData::kApcKind:
-      return gen(env, CountArrayFast, src);
-    default:
-      return nullptr;
+  case ArrayData::kPackedKind:
+  case ArrayData::kStructKind:
+  case ArrayData::kMixedKind:
+  case ArrayData::kEmptyKind:
+  case ArrayData::kApcKind:
+    return gen(env, CountArrayFast, src);
+  default:
+    return nullptr;
   }
 }
 
@@ -2014,6 +2033,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConvStrToInt)
   X(Count)
   X(CountArray)
+  X(CountArrayFast)
   X(DecRef)
   X(DecRefNZ)
   X(DefLabel)

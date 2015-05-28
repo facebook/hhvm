@@ -1,336 +1,416 @@
-"Jobs" 21-May-2015
-- [hhvm] Fix recursive ldap.h include on OS X
-- [hhvm] Add cast in async mysql
-- A little bit of thrift cleanup
-- Fix some gcc-4.9 compatibility issues
-- Remove comment referencing multi-line header support.
-- Clean up AKExists(Arr|Obj) codegen
-- [hack] Recheck changed files before responding to client
-- [hack] Remove unused Typing_env stuff
-- Fix the format of hash-crc.S to build on Mac and Cygwin.
-- Add input validation to urimap2 step
-- [hack] Fix OSS build
-- [hack] Check types of declared methods/vars/consts in decl mode
-- [hack] Require `?` in nullable decl parameters
-- [hack] Disable test_load_script_lib
-- [hack][load script] Complain if user doesn't seem to have much free space
-- [hack][load script] Avoid spurious failures in dir creation
-- [hack] Log the time it takes to recheck
-- Remove Server.WarmupDocument option
-- [hack] Remove Program.filter_update
-- Async command support in xdebug
-- [hh][typechecker] Add error for assigning to $this
-- [hhvm] More globally remove the OS X `isset` macro
-- [hhvm] Implement pipe2 compatibility
-- Make regionizeFunc aware of region retranslation arcs
-- AsioContext::exit should not copy its queues.
-- [hhvm] More RequestTimer stubbing on OS X
-- Use iterable queues in asio
-- Use to scheduler to run the taint analyses
-- Step 2 of Collections Migration
-- Augment call graph with calls to default constructors
-- Add prediction-based bytecode-level typechecks
-- Track predicted types in the eval stack
-- [hack] More logname tweaks
-- [hhvm] Better error reporting in ext_hh_client
-- [hhvm] We actually require boost 1.51
-- Add UnownedAndNonNull tag for SmartPtr ctor that sets the refcount of a non null ptr to one.
-- socket timeout support float
-- [hh] Move handling of "this" type into Typing_phase.localize
-- Fix XLS Vreg hinting
-- Remove MEMORY_PROFILING and memory_profiling build flags.
-- [hack] hh_client stop / restart should not fail if processes don't exist
-- Add support for incremental analysis and outer fix points.
-- Remove linter for XControllers with async names
-- [hack][load script] Handle unicode characters in file names
-- [hhvm] Add missing include for runtime.h in emitter.cpp
-- Correctly clear the vector to fix crash in cmd_break.
-- Fix lchgrp gid check and add warning as with chown
-- Added stream filter wildcard support + added convert.iconv.* filter
-- Fixed 'last day of this month' issue with DateTime
-- fix right log tips while php file not exists
-- Add contains_safe to the sparse-id-containers
-- AMIStateAny needs killing in various places
-- Make AliasAnalysis::expand more accurate
-- Fix compact accelerated protocol PHP byte decoding
-- Do not free the result of gethostbyname() to fix crash on Mac.
-- Step 1 of Collections HNI conversion
-- Fix some issues in insertAssertions
-- Remove the *Logged() allocation apis since hhprof is dead.
-- [hack][load script] Increase lock expiry time
-- Fix get_called_class() call in BuiltinEnum::assert
-- [hhvm/gdb] Learn how to read
-- [hhvm/gdb] ArrayKind moved into HeaderWord
-- Update constructors in Collection hhi files
-- Add the Ref alias class
-- [hack][format] Handle one-argument lambdas correctly
-- Fix XLS liveness computation
-- Fix ReflectionClass::getMethods filter with abstract methods and interfaces
-- Include missing errno.h in afdt-util.cpp.
-- Some cleanup to abi-x64.h
-- [trivial] fix a few comments about rVmSp
-- Remove remaining AdjustSP cases
-- Add mode for identifying function callsites in source file
-- [hhvm] No need to tell xargs to split on newlines
-- [hack][format] Better handling of nested XHP
-- Change hphp/test/run to use proxygen server for server mode
-- Annotate which translation has loops in TC print
-- [hack][lint] Add gen_slog warning
-- Fix the hphpd "run" command with arguments
-- Nix extra mov in func prologue guard
-- [hack] Log the command-line arguments to hh_client
-- [hack] Ensure client shuts down old connection before retrying
-- [hhvm] Move around where hardware counters are turned off
-- More accurate ReturnEffects
-- heap-trace: Use mark byte in header instead of metadata.
-- Fix catch block assertion in codegen
-- Fix re-enter effects
-- Partition members of RequestInjectionData
-- Add a call map to the call tree type
-- Remove ActRec::{kInvNameBit,hasInvName} (use the MagicDispatch flags instead)
-- Add ATTRIBUTE_NORETURN to raise_error
-- Use clang to add GC scan methods to classes.
-- Change a handful of virtual methods to override.
-- scan RequestEventHandlers
-- Modify ColAdd{New,}ElemC spec/behavior to not require isCollection check
-- [hh] Reduce error spew when typechecking anonymous functions
-- Fix building gd extension with libvpx 1.4.0
-- [hhvm] Change defaults for Hack/HHVM integration flags
-- [hhvm] ext_hh_client should deal with non-JSON reponse from hh_client
-- [HNI] NatveData classes should not extend Sweepable
-- Move count into HeaderWord
-- Kill WarnNonObjProp instruction
-- Add a class to help debug optimizations
-- [hack] Fix builtins_async_mysql type signature
-- [hack] Log the *age* of the merge base, not the date
-- Clean up the bits in ai.ml that call schedule code
-- NativeData classes with sweep() methods shouldn't extend Sweepable
-- Add support for %L[sdfC] to AsyncMysqlClient::queryf()
-- Enable proxygen server by default in OSS HHVM builds
-- [hack] Record the version of Jane Street's Core
-- [hack] Add Result module from Core
-- [hack] Simplify ClientStart code
-- Swap the Kind & mark bytes in HeaderWord
-- [hhvm/gdb] Better handling of memoized values from inferior
-- [hhvm/gdb] Accept more expressions for single-argument commands
-- Remove redundant if before inserting copy
-- Create a scheduler to run analysis tasks
-- [hhvm] We require boost 1.50
-- Replace incorrect uses of AliasAnalysis::must_alias and rename that function
-- Fix incorrect use of AliasClass::operator| in may_reenter
-- Use HeaderWord in various utility headers
-- make unboxPtr() work on any pointer type
-- Use HeaderWord in ArrayData and subclasses
-- Put collection reserves back into thrift.
-- [easy] add POW tokens to BinaryOpExpression::outputPHP
-- [hhvm] Fix test-context.h test
-- [hack] Make load script lock blocking
-- [hack] Remove redundant "already running" check
-- [hack] Always start up server even for `--retries 0`
-- [hhvm] OS X doesn't have or need -lrt
-- [hack] Sketchy null check should fold unresolved types
-- [hack] Have redundant-nullsafe check apply to property accesses too
-- [hack] escape shell glob for find
-- [hack] Fix ternary expression fake member handling
-- Remove unnecessary stores of TInitNull in irgen-builtin unusualCatch
-- Remove an AdjustSP in front of EagerSyncVMRegs
-- Don't AdjustSP in prepareForHHBCMergePoint, remove the TRACE_PUNT about it
-- Change kCrossCallRegs to not include rVmSp
-- Put DFS struct in unnamed namespace in region-whole-cfg
-- Allow test/run --wholecfg to run wholecfg
-- Don't redefine stack pointers for inlined functions
-- Make some hidden FramePtr dependencies explicit in the IR
-- Rename FPAbsOffset to FPInvOffset
-- Clarify DefInlineFPData::spOffset
-- Remove one of DefInlineFP's StkPtrs
-- Use a lot of ->func() instead of ->m_func for ActRecs in backtrace.cpp
-- Change native.cpp's getInvokeName to return func->fullName()
-- Don't require storing null to ActRec::m_invName at non-magic callsites
-- Make all functions have AttrMayUseVV in non repo auth mode
-- Fix some places where frames without AttrMayUseVV could get VarEnvs
-- Fix an error message in get_defined_vars
-- Turn ActRec flags into an enum to make it a little easier to extend
-- Use ActRec::kNumArgsMask in funcPrologueRedispatch
-- Add a unit test for a weird case with __call methods and constructors
-- Remove rStashedAR
-- Remove handleSRResumeTC entry point in enterTCHelper
-- Don't redefine StkPtrs for HHIR call instructions
-- Use HeaderWord in StringData
-- [hack] Ternary expressions should not leak lenv changes
-- Use HeaderWord in ObjectData and ResourceData
-- Remove the 'zend' command from hphpd
-- Track MixedArray capacity, hashtable size, and mask using m_scale
-- Fix writing of null-characters in SessionHandler
-- Add -latomic if needed in linking hhvm
-- Fix tc-print's LLVM flag
-- Fix rbp phis in vasm-llvm
-- Add declarations for ResourceData comparison functions.
-- Refactor HashCollection to work with a normal empty mixed array.
-- Fix various runtime options
-- Move tc-print tool to open source
-- [hack][load script] Close fds when shelling out
-- [hack][lint] Allow $_ as a param name
-- [hh] typechecker: rename "cvar" to "prop"
-- [hh] typechecker: tweak dynamic yield typing
-- [hack] Factor out version checking logic
-- [hhvm/gdb] AsyncFunctionWaitHandle has an m_children now
-- [folly] Move Singleton out of folly/experimental into folly/
-- HeaderWord for RefData
-- Rename HeaderKind::Native->NativeData and Resumable->ResumableFrame
-- Use root map manager for LDAP extension.
-- Construct analysis schedule from call tree
-- Fix findDefiningBlock
-- Don't crash HHVM with null-byte-ridden DOMDocument paths
-- Initialize collections with arrays
-- [hh][typechecker] Move localize logic into its own files
-- Fix exit service request for retranslations of the region entry block
-- [hack] Allow destructing assignment of ConstVector
-- [hack] Fix disabled build tests
-- [hack] Remove last of the covariance hacks
-- [asio] Introduce HH\Asio\{join,result,has_finished}()
-- [hh] use ... unpacking instead of cufa in meth_caller
-- [PDO] Fix double-free of SmartPtr
-- [hh] Fix return type of ImmVector::fromKeysOf
-- [libxml] Don't crash on invalidated arguments
-- [hhvm][ini] Refactor Config::[Get|Bind] functions for ini migration
-- Move Statement::KindOf and Expression::KindOf into Construct
+"King" 4-Jun-2015
+ - [hack] Format: `function() {...}` instead of `function () {...}`
+ - [hack] Fix build with ocaml 4.01
+ - [hack] Daemonize the logging process
+ - [hh] typechecker: unify function terminality code for `noreturn`
+ - [hh] format: 'elseif' => 'else if'
+ - [hh] typechecker: remove Injectable deps
+ - [hhvm][oss][perf] Reduce checks in Implode
+ - [OSS Perf] Use FileCache for opendir() and readdir()
+ - Link with boost_context library.
+ - Rewrite store-elim as partial redundancy elimination
+ - [hhvm] Simple script for OSS repo mode
+ - add nullbyte detection to proc_open
+ - add nullbyte detection to shell_exec,exec,system,passthru
+ - optimize ini_get() for integer values too
+ - Add an option to enable hotcfg/wholecfg regions only for functions marked as hot
+ - [bootcamp][hh_client]strip current directory when printing errors to a tty
+ - [HHVM] [Lockdown] Fast Object <=> Array cast
+ - Do join/meet/widen/fixpoint for backwards analysis
+ - Add check and test case for interface attempting to implement
+ - Enable hotcfg region selector by default
+ - [hack] User attributes on typedefs
+ - Implement join meet widen etc for Forward_analysis_result
+ - Add a hotcfg region selector that prunes wholecfg-like regions based on profile weights
+ - Add support for errors, proof obligations, predicates and generic analysis summaries
+ - Move array_map() to HNI.
+ - [hh_format] Add support for Type Constants
+ - allow RescheduleWaitHandle to work for [0..PHP_INT_MAX] as priority
+ - Optimize str_replace(string, string, string)
+ - Make IR invariants hold after irgen; check an unchecked one; fix disabling DCE
+ - Fix an insert-asserts.cpp issue for critical edges
+ - Let load-elim track AFrame/AStack knownTypes across php calls
+ - Allow load-elim.cpp to insert phis when it can enable its optimizations
+ - Improve AliasAnalysis::may_alias
+ - Add a profile-guided code layout pass
+ - Support variadic builtins via FCallBuiltin
+ - Support "num args" extra parameter to HNI builtins
+ - [hhbbc] Fix generation of ConcatN opcode
+ - Add IR-gen support for VGetL of type Gen
+ - hphp admin, don't ask for password for some simple queries
+ - [hack] Reduce number of places where we call string_of_path
+ - [hack][format] Don't add trailing commas after variadic params
+ - [hack] Format: Handle XHP trait import syntax
+ - Fix various issues with gcc-4.9 build
+ - [hack] Format: Improve handling of XHP bodies
+ - [hhvm] Port thread-safe-locale
+ - Fix double free in stack trace handler.
+ - Fix fastcgi behavior with FixPathInfo=true and apache 2.4+mod_proxy_fastcgi
+ - Remove -fno-gcse option for clang.
+ - LibPng and LibJpeg are required to build the GD extension
+ - Create two separate tokens in translator-asm-helpers.S and remove ##.
+ - Add support for widening to Ai_analysis_result
+ - Introduce ARef class to load elimination
+ - [hh] typechecker: improve uninit property error messages
+ - [hh] typechecker: reconsider initialization rules for traits and abstract classes
+ - Don't warn when xdebug cannot connect to a remote client.
+ - [hhvm] Don't optimize out concat binops with potential side-effects
+ - Call zend_startup_strtod if zend compact is enabled.
+ - [hack][typechecker] Don't ignore I<A> when declaring "extends I<A>, I<B>"
+ - [hhvm] Support user attributes on typedefs
+ - Clean up func prologue APIs
+ - Fix token for <?=
+ - Fix SmartPtr-related PDO persistence bugs
+ - Update third-party - new Squangle
+ - Use GeneralEffects for InterpOne, ExitEffects for InterpOneCF
+ - Use GeneralEffects for iterator instructions
+ - Translate NullSafe FPushObjMethodD when the base is null
+ - Add a simple dbgp client for debugging HHVM
+ - Enable relocation and use ETCH_NAME in translator-asm-helpers on Mac.
+ - Make irgen Concat support more types
+ - Fix conversion order bugs in intepreter Concat operations
+ - [hhvm] Fix ExtraArg leak when an VarEnv used in the same ActRec
+ - Generate declarations for scan functions.
+ - Remove error when goto inside a finally jumps to a label inside it. Add error when goto in a try-finally has target crossing finally.
+ - Set pagezero size and .text.keep section executable on Mac.
+ - Cache time zone validity.
+ - Call zend_startup_strtod so ezc extensions can use zend_strtod.
+ - Provide a way for an analysis to control fixpoint detection
+ - Fix emitter bug with nullsafe property accesses on an sprop base
 
-"Irwin" 8-May-2015
-- [hhvm] Optimization on array_slice
-- [hhvm] Add Hack.Lang.AutoTypecheck
-- [hh][typechecker] Move Expansion of Typedefs into Localize
-- Add rvalue ref versions of cast functions
-- Rename refcount-opts2.cpp to refcount-opts.cpp
-- [xenon] Fix crash when unwinding
-- MemoryManager API organization
-- Fix memory-effects for LookupClsMethod
-- Fix vasm jump optimization in presence of loops
-- [libxml] DOMDoc/DOMAttr memory leak
-- [hack] Remove cat_opts
-- [hack] Remove h2tp's List_ext
-- Switch to using Core_list
-- [xenon] Integrate with stack frame metadata
-- [hack] Have AI use Core_list instead of List
-- [hack] Remove opt_fold_left
-- [hack] Use the features available in 4.01
-- Build call tree to use for scheduler
-- [hack] Fix the month in our logs
-- set_frame_metadata(): allocate local and disable dynamic calls
-- [hack] Remove 3 second delay on small project startup time
-- [hhvm][easy] Fully-qualify some names in ext_hh_client
-- [hhvm/gdb] Use "new style classes"
-- Update vasm-llvm for bindcall ABI changes
-- Use cmpl instead of testl for surprise flag checks
-- Remove StLocNT instruction
-- Remove docjson hphpc option
-- [parser] Use FunctionContext to store hasCallToGetArgs flag
-- [hhvm] OCaml must be at least 4.01
-- Shrink mixed-array by eliminating m_cap field.
-- [hack] One more fix for `super`
-- [hack] Remove variance hacks for Collections
-- [hack] Static polymorphism check should fold unresolved types
-- [hack] Stabilize TVar numbers displayed by hh_show()
-- [hack] Remove Imm{Map,Set}::fromArray from hhis
-- [hack] Deprecate Set::fromArray
-- [hack] Add generics to Set::fromArray
-- Make Proxygen server open source
-- [hh] typechecker: check that parent::__construct is called
-- Add support for setting some xdebug options from hdf.
-- Update timelib version used by HHVM
-- Fix implicit integer conversion in XDebugServer
-- [hh][typechecker] Introduce Type "Phases" By Utilizing GADTs
-- Simplify CFG by merging blocks
-- [hhvm/gdb] Look up line numbers for PHP functions
-- [hhvm/gdb] Implement `info asio' command
-- [hhvm/gdb] Add asyncstk command for printing PHP async stacks
-- [hack] Fix handling of `super` constraints
-- Remove weird echo statement in test/run
-- Support xdebug handling the Debugger.resume command in chrome debugger protocol
-- Temporary workaround for EH problem in LLVM backend.
-- Make getTyped return a SmartPtr.  Add deprecation message.
-- Use signed int64_t for index in the AElemI AliasClass
-- Don't differentiate between cloned closures and normal funcs using rStashedAR
-- Make func-prologue-related unique stubs not use rVmSp
-- Make the stack overflow helper not require rVmSp on the way in
-- Remove the rest of the rVmSp uses in function prologues
-- Don't use rVmSp in emitMagicFuncPrologue
-- Fix a bug in method-statement that allowed __call to take named variadic params
-- Don't use rVmSp for stack overflow checks
-- Remove TranslArgs::dryRun
-- Fix small leak of strings from UniqueStubs::add
-- Add a way to read offsets from DecodedInstruction
-- Make arm BackEnd subclass final
-- Move emitTraceCall out of all the BackEnds, use an IR instruction instead
-- Make a VpassTracer for vasm passes
-- Allow unpacks in functions with call-by-ref args
-- Thread hooks create expensive backtraces
-- Update with patched LLVM.
-- More scaffolding for building analysis schedules
-- [hhvm][easy] Targeting 3.8.0
-- Create phi nodes for vmfp when needed in vasm-llvm
-- Add some missing dependencies in common
-- Moar const correctness.
-- Use SmartPtr in libxml
-- Replace newobj with makeSmartPtr in asio.
-- Catch and handle DataBlockFull exception during prologue generation
-- Add another condition for simpleProp
-- [hack] Deprecate Map::fromArray
-- [hack] Add generics to Map::fromArray
-- Add scaffolding for running and unit testing schedules
-- [hh] typechecker: improve handling of invariant ... [2/2]
-- [hh] typechecker: detect abstract static calls
-- [hh] typechecker: improve handling of invariant ...
-- Clean up call graph code and hide implementation
-- buildURIMap2 actually generate PHP classes
-- [hack] More logging for saved state
-- [hh] Don't use unpack operator for MethCallerHelper if there are no args
-- redis responseDouble returns false on error, not null
-- Make call graph aware of class (static) virtual methods
-- remove IR:CustomInstanceInit
-- remove __init__ usage from SplPriorityQueue
-- [hack] Touch file when something changes
-- Simplify the DefLabel case in GVN
-- [hhvm] Cache result of \HH\Client\typecheck
-- Updated call graph with overridden virtual methods
-- Add LLVMAttrs runtime option
-- Move experimental/tupperware -> tupperware/experimental
-- [hack] Only include .hhi files in our hhi.tar.gz
-- simpleProp depends on clsSpec but doesn't constrain on it
-- Add id<->root mapping interface to memory manager.
-- Refactor StringData using 16-bit CapCode
-- [hhvm] Simple implementation of phpinfo()
-- Fix packed array detection in emitter
-- Add some basic test coverage for live relocation
-- [hack] Fix typo in lint URI
-- [hh] typechecker: error on catch of non-Exception.
-- [hack] Remove autogen of tokens hhi
-- move Variant::unserialize to variable-unserializer
-- Clean up cgCheckStaticBitAndDecRef
-- move Variant::serialize() to variable-serializer
-- Fix crash in FCallUnpack
-- Extend the pos to method object map to include static methods and top level functions
-- Convert PackedArray capacity to a 16-bit pseudo-floating-point format.
-- Fix bug with closures in static methods
-- fix_duplicate_fastcgi_header
-- Clean up some SIMD instructions in LLVM backend
-- Volatile loads for inc/dec.
-- Add an option to only keep LLVM code if it's smaller than vasm
-- [hh] typechecker:  deduce correct return types for '// decl' generators
-- get Nast.method_ object corresponding to call graph target positions
-- Use movups instead of movdqu in codegen
-- [hh] typechecker: move responsibility for detecting generators to the parser
-- added first rudimental tracing
-- [create_function] Stop JITing per-request functions
-- [hack] Add deprecated Vector::fromArray back to hhi
-- [hack] Commit token updates
-- json_of_t
-- Add an HHI file for Transliterator
-- GVN doesn't check supportsGVN when looking through DefLabels
-- [hh] typechecker: check for `void` values used in function param expressions
-- [hh] typechecker: remove 'allow_null_as_void' from typing env
-- Remove litstr typedef
-- Don't emit Switch bytecode for 1-case switches
-- Updated the test cases so to be included in classes
+"Jobs" 21-May-2015
+ - [hhvm] Fix recursive ldap.h include on OS X
+ - [hhvm] Add cast in async mysql
+ - A little bit of thrift cleanup
+ - Fix some gcc-4.9 compatibility issues
+ - Remove comment referencing multi-line header support.
+ - Clean up AKExists(Arr|Obj) codegen
+ - [hack] Recheck changed files before responding to client
+ - [hack] Remove unused Typing_env stuff
+ - Fix the format of hash-crc.S to build on Mac and Cygwin.
+ - Add input validation to urimap2 step
+ - [hack] Fix OSS build
+ - [hack] Check types of declared methods/vars/consts in decl mode
+ - [hack] Require `?` in nullable decl parameters
+ - [hack] Disable test_load_script_lib
+ - [hack][load script] Complain if user doesn't seem to have much free space
+ - [hack][load script] Avoid spurious failures in dir creation
+ - [hack] Log the time it takes to recheck
+ - Remove Server.WarmupDocument option
+ - [hack] Remove Program.filter_update
+ - Async command support in xdebug
+ - [hh][typechecker] Add error for assigning to $this
+ - [hhvm] More globally remove the OS X `isset` macro
+ - [hhvm] Implement pipe2 compatibility
+ - Make regionizeFunc aware of region retranslation arcs
+ - AsioContext::exit should not copy its queues.
+ - [hhvm] More RequestTimer stubbing on OS X
+ - Use iterable queues in asio
+ - Use to scheduler to run the taint analyses
+ - Step 2 of Collections Migration
+ - Augment call graph with calls to default constructors
+ - Add prediction-based bytecode-level typechecks
+ - Track predicted types in the eval stack
+ - [hack] More logname tweaks
+ - [hhvm] Better error reporting in ext_hh_client
+ - [hhvm] We actually require boost 1.51
+ - Add UnownedAndNonNull tag for SmartPtr ctor that sets the refcount of a non null ptr to one.
+ - socket timeout support float
+ - [hh] Move handling of "this" type into Typing_phase.localize
+ - Fix XLS Vreg hinting
+ - Remove MEMORY_PROFILING and memory_profiling build flags.
+ - [hack] hh_client stop / restart should not fail if processes don't exist
+ - Add support for incremental analysis and outer fix points.
+ - Remove linter for XControllers with async names
+ - [hack][load script] Handle unicode characters in file names
+ - [hhvm] Add missing include for runtime.h in emitter.cpp
+ - Correctly clear the vector to fix crash in cmd_break.
+ - Fix lchgrp gid check and add warning as with chown
+ - Added stream filter wildcard support + added convert.iconv.* filter
+ - Fixed 'last day of this month' issue with DateTime
+ - fix right log tips while php file not exists
+ - Add contains_safe to the sparse-id-containers
+ - AMIStateAny needs killing in various places
+ - Make AliasAnalysis::expand more accurate
+ - Fix compact accelerated protocol PHP byte decoding
+ - Do not free the result of gethostbyname() to fix crash on Mac.
+ - Step 1 of Collections HNI conversion
+ - Fix some issues in insertAssertions
+ - Remove the *Logged() allocation apis since hhprof is dead.
+ - [hack][load script] Increase lock expiry time
+ - Fix get_called_class() call in BuiltinEnum::assert
+ - [hhvm/gdb] Learn how to read
+ - [hhvm/gdb] ArrayKind moved into HeaderWord
+ - Update constructors in Collection hhi files
+ - Add the Ref alias class
+ - [hack][format] Handle one-argument lambdas correctly
+ - Fix XLS liveness computation
+ - Fix ReflectionClass::getMethods filter with abstract methods and interfaces
+ - Include missing errno.h in afdt-util.cpp.
+ - Some cleanup to abi-x64.h
+ - [trivial] fix a few comments about rVmSp
+ - Remove remaining AdjustSP cases
+ - Add mode for identifying function callsites in source file
+ - [hhvm] No need to tell xargs to split on newlines
+ - [hack][format] Better handling of nested XHP
+ - Change hphp/test/run to use proxygen server for server mode
+ - Annotate which translation has loops in TC print
+ - [hack][lint] Add gen_slog warning
+ - Fix the hphpd "run" command with arguments
+ - Nix extra mov in func prologue guard
+ - [hack] Log the command-line arguments to hh_client
+ - [hack] Ensure client shuts down old connection before retrying
+ - [hhvm] Move around where hardware counters are turned off
+ - More accurate ReturnEffects
+ - heap-trace: Use mark byte in header instead of metadata.
+ - Fix catch block assertion in codegen
+ - Fix re-enter effects
+ - Partition members of RequestInjectionData
+ - Add a call map to the call tree type
+ - Remove ActRec::{kInvNameBit,hasInvName} (use the MagicDispatch flags instead)
+ - Add ATTRIBUTE_NORETURN to raise_error
+ - Use clang to add GC scan methods to classes.
+ - Change a handful of virtual methods to override.
+ - scan RequestEventHandlers
+ - Modify ColAdd{New,}ElemC spec/behavior to not require isCollection check
+ - [hh] Reduce error spew when typechecking anonymous functions
+ - Fix building gd extension with libvpx 1.4.0
+ - [hhvm] Change defaults for Hack/HHVM integration flags
+ - [hhvm] ext_hh_client should deal with non-JSON reponse from hh_client
+ - [HNI] NatveData classes should not extend Sweepable
+ - Move count into HeaderWord
+ - Kill WarnNonObjProp instruction
+ - Add a class to help debug optimizations
+ - [hack] Fix builtins_async_mysql type signature
+ - [hack] Log the *age* of the merge base, not the date
+ - Clean up the bits in ai.ml that call schedule code
+ - NativeData classes with sweep() methods shouldn't extend Sweepable
+ - Add support for %L[sdfC] to AsyncMysqlClient::queryf()
+ - Enable proxygen server by default in OSS HHVM builds
+ - [hack] Record the version of Jane Street's Core
+ - [hack] Add Result module from Core
+ - [hack] Simplify ClientStart code
+ - Swap the Kind & mark bytes in HeaderWord
+ - [hhvm/gdb] Better handling of memoized values from inferior
+ - [hhvm/gdb] Accept more expressions for single-argument commands
+ - Remove redundant if before inserting copy
+ - Create a scheduler to run analysis tasks
+ - [hhvm] We require boost 1.50
+ - Replace incorrect uses of AliasAnalysis::must_alias and rename that function
+ - Fix incorrect use of AliasClass::operator| in may_reenter
+ - Use HeaderWord in various utility headers
+ - make unboxPtr() work on any pointer type
+ - Use HeaderWord in ArrayData and subclasses
+ - Put collection reserves back into thrift.
+ - [easy] add POW tokens to BinaryOpExpression::outputPHP
+ - [hhvm] Fix test-context.h test
+ - [hack] Make load script lock blocking
+ - [hack] Remove redundant "already running" check
+ - [hack] Always start up server even for `--retries 0`
+ - [hhvm] OS X doesn't have or need -lrt
+ - [hack] Sketchy null check should fold unresolved types
+ - [hack] Have redundant-nullsafe check apply to property accesses too
+ - [hack] escape shell glob for find
+ - [hack] Fix ternary expression fake member handling
+ - Remove unnecessary stores of TInitNull in irgen-builtin unusualCatch
+ - Remove an AdjustSP in front of EagerSyncVMRegs
+ - Don't AdjustSP in prepareForHHBCMergePoint, remove the TRACE_PUNT about it
+ - Change kCrossCallRegs to not include rVmSp
+ - Put DFS struct in unnamed namespace in region-whole-cfg
+ - Allow test/run --wholecfg to run wholecfg
+ - Don't redefine stack pointers for inlined functions
+ - Make some hidden FramePtr dependencies explicit in the IR
+ - Rename FPAbsOffset to FPInvOffset
+ - Clarify DefInlineFPData::spOffset
+ - Remove one of DefInlineFP's StkPtrs
+ - Use a lot of ->func() instead of ->m_func for ActRecs in backtrace.cpp
+ - Change native.cpp's getInvokeName to return func->fullName()
+ - Don't require storing null to ActRec::m_invName at non-magic callsites
+ - Make all functions have AttrMayUseVV in non repo auth mode
+ - Fix some places where frames without AttrMayUseVV could get VarEnvs
+ - Fix an error message in get_defined_vars
+ - Turn ActRec flags into an enum to make it a little easier to extend
+ - Use ActRec::kNumArgsMask in funcPrologueRedispatch
+ - Add a unit test for a weird case with __call methods and constructors
+ - Remove rStashedAR
+ - Remove handleSRResumeTC entry point in enterTCHelper
+ - Don't redefine StkPtrs for HHIR call instructions
+ - Use HeaderWord in StringData
+ - [hack] Ternary expressions should not leak lenv changes
+ - Use HeaderWord in ObjectData and ResourceData
+ - Remove the 'zend' command from hphpd
+ - Track MixedArray capacity, hashtable size, and mask using m_scale
+ - Fix writing of null-characters in SessionHandler
+ - Add -latomic if needed in linking hhvm
+ - Fix tc-print's LLVM flag
+ - Fix rbp phis in vasm-llvm
+ - Add declarations for ResourceData comparison functions.
+ - Refactor HashCollection to work with a normal empty mixed array.
+ - Fix various runtime options
+ - Move tc-print tool to open source
+ - [hack][load script] Close fds when shelling out
+ - [hack][lint] Allow $_ as a param name
+ - [hh] typechecker: rename "cvar" to "prop"
+ - [hh] typechecker: tweak dynamic yield typing
+ - [hack] Factor out version checking logic
+ - [hhvm/gdb] AsyncFunctionWaitHandle has an m_children now
+ - [folly] Move Singleton out of folly/experimental into folly/
+ - HeaderWord for RefData
+ - Rename HeaderKind::Native->NativeData and Resumable->ResumableFrame
+ - Use root map manager for LDAP extension.
+ - Construct analysis schedule from call tree
+ - Fix findDefiningBlock
+ - Don't crash HHVM with null-byte-ridden DOMDocument paths
+ - Initialize collections with arrays
+ - [hh][typechecker] Move localize logic into its own files
+ - Fix exit service request for retranslations of the region entry block
+ - [hack] Allow destructing assignment of ConstVector
+ - [hack] Fix disabled build tests
+ - [hack] Remove last of the covariance hacks
+ - [asio] Introduce HH\Asio\{join,result,has_finished}()
+ - [hh] use ... unpacking instead of cufa in meth_caller
+ - [PDO] Fix double-free of SmartPtr
+ - [hh] Fix return type of ImmVector::fromKeysOf
+ - [libxml] Don't crash on invalidated arguments
+ - [hhvm][ini] Refactor Config::[Get|Bind] functions for ini migration
+ - Move Statement::KindOf and Expression::KindOf into Construct
+
+ "Irwin" 8-May-2015
+ - [hhvm] Optimization on array_slice
+ - [hhvm] Add Hack.Lang.AutoTypecheck
+ - [hh][typechecker] Move Expansion of Typedefs into Localize
+ - Add rvalue ref versions of cast functions
+ - Rename refcount-opts2.cpp to refcount-opts.cpp
+ - [xenon] Fix crash when unwinding
+ - MemoryManager API organization
+ - Fix memory-effects for LookupClsMethod
+ - Fix vasm jump optimization in presence of loops
+ - [libxml] DOMDoc/DOMAttr memory leak
+ - [hack] Remove cat_opts
+ - [hack] Remove h2tp's List_ext
+ - Switch to using Core_list
+ - [xenon] Integrate with stack frame metadata
+ - [hack] Have AI use Core_list instead of List
+ - [hack] Remove opt_fold_left
+ - [hack] Use the features available in 4.01
+ - Build call tree to use for scheduler
+ - [hack] Fix the month in our logs
+ - set_frame_metadata(): allocate local and disable dynamic calls
+ - [hack] Remove 3 second delay on small project startup time
+ - [hhvm][easy] Fully-qualify some names in ext_hh_client
+ - [hhvm/gdb] Use "new style classes"
+ - Update vasm-llvm for bindcall ABI changes
+ - Use cmpl instead of testl for surprise flag checks
+ - Remove StLocNT instruction
+ - Remove docjson hphpc option
+ - [parser] Use FunctionContext to store hasCallToGetArgs flag
+ - [hhvm] OCaml must be at least 4.01
+ - Shrink mixed-array by eliminating m_cap field.
+ - [hack] One more fix for `super`
+ - [hack] Remove variance hacks for Collections
+ - [hack] Static polymorphism check should fold unresolved types
+ - [hack] Stabilize TVar numbers displayed by hh_show()
+ - [hack] Remove Imm{Map,Set}::fromArray from hhis
+ - [hack] Deprecate Set::fromArray
+ - [hack] Add generics to Set::fromArray
+ - Make Proxygen server open source
+ - [hh] typechecker: check that parent::__construct is called
+ - Add support for setting some xdebug options from hdf.
+ - Update timelib version used by HHVM
+ - Fix implicit integer conversion in XDebugServer
+ - [hh][typechecker] Introduce Type "Phases" By Utilizing GADTs
+ - Simplify CFG by merging blocks
+ - [hhvm/gdb] Look up line numbers for PHP functions
+ - [hhvm/gdb] Implement `info asio' command
+ - [hhvm/gdb] Add asyncstk command for printing PHP async stacks
+ - [hack] Fix handling of `super` constraints
+ - Remove weird echo statement in test/run
+ - Support xdebug handling the Debugger.resume command in chrome debugger protocol
+ - Temporary workaround for EH problem in LLVM backend.
+ - Make getTyped return a SmartPtr.  Add deprecation message.
+ - Use signed int64_t for index in the AElemI AliasClass
+ - Don't differentiate between cloned closures and normal funcs using rStashedAR
+ - Make func-prologue-related unique stubs not use rVmSp
+ - Make the stack overflow helper not require rVmSp on the way in
+ - Remove the rest of the rVmSp uses in function prologues
+ - Don't use rVmSp in emitMagicFuncPrologue
+ - Fix a bug in method-statement that allowed __call to take named variadic params
+ - Don't use rVmSp for stack overflow checks
+ - Remove TranslArgs::dryRun
+ - Fix small leak of strings from UniqueStubs::add
+ - Add a way to read offsets from DecodedInstruction
+ - Make arm BackEnd subclass final
+ - Move emitTraceCall out of all the BackEnds, use an IR instruction instead
+ - Make a VpassTracer for vasm passes
+ - Allow unpacks in functions with call-by-ref args
+ - Thread hooks create expensive backtraces
+ - Update with patched LLVM.
+ - More scaffolding for building analysis schedules
+ - [hhvm][easy] Targeting 3.8.0
+ - Create phi nodes for vmfp when needed in vasm-llvm
+ - Add some missing dependencies in common
+ - Moar const correctness.
+ - Use SmartPtr in libxml
+ - Replace newobj with makeSmartPtr in asio.
+ - Catch and handle DataBlockFull exception during prologue generation
+ - Add another condition for simpleProp
+ - [hack] Deprecate Map::fromArray
+ - [hack] Add generics to Map::fromArray
+ - Add scaffolding for running and unit testing schedules
+ - [hh] typechecker: improve handling of invariant ... [2/2]
+ - [hh] typechecker: detect abstract static calls
+ - [hh] typechecker: improve handling of invariant ...
+ - Clean up call graph code and hide implementation
+ - buildURIMap2 actually generate PHP classes
+ - [hack] More logging for saved state
+ - [hh] Don't use unpack operator for MethCallerHelper if there are no args
+ - redis responseDouble returns false on error, not null
+ - Make call graph aware of class (static) virtual methods
+ - remove IR:CustomInstanceInit
+ - remove __init__ usage from SplPriorityQueue
+ - [hack] Touch file when something changes
+ - Simplify the DefLabel case in GVN
+ - [hhvm] Cache result of \HH\Client\typecheck
+ - Updated call graph with overridden virtual methods
+ - Add LLVMAttrs runtime option
+ - Move experimental/tupperware -> tupperware/experimental
+ - [hack] Only include .hhi files in our hhi.tar.gz
+ - simpleProp depends on clsSpec but doesn't constrain on it
+ - Add id<->root mapping interface to memory manager.
+ - Refactor StringData using 16-bit CapCode
+ - [hhvm] Simple implementation of phpinfo()
+ - Fix packed array detection in emitter
+ - Add some basic test coverage for live relocation
+ - [hack] Fix typo in lint URI
+ - [hh] typechecker: error on catch of non-Exception.
+ - [hack] Remove autogen of tokens hhi
+ - move Variant::unserialize to variable-unserializer
+ - Clean up cgCheckStaticBitAndDecRef
+ - move Variant::serialize() to variable-serializer
+ - Fix crash in FCallUnpack
+ - Extend the pos to method object map to include static methods and top level functions
+ - Convert PackedArray capacity to a 16-bit pseudo-floating-point format.
+ - Fix bug with closures in static methods
+ - fix_duplicate_fastcgi_header
+ - Clean up some SIMD instructions in LLVM backend
+ - Volatile loads for inc/dec.
+ - Add an option to only keep LLVM code if it's smaller than vasm
+ - [hh] typechecker:  deduce correct return types for '// decl' generators
+ - get Nast.method_ object corresponding to call graph target positions
+ - Use movups instead of movdqu in codegen
+ - [hh] typechecker: move responsibility for detecting generators to the parser
+ - added first rudimental tracing
+ - [create_function] Stop JITing per-request functions
+ - [hack] Add deprecated Vector::fromArray back to hhi
+ - [hack] Commit token updates
+ - json_of_t
+ - Add an HHI file for Transliterator
+ - GVN doesn't check supportsGVN when looking through DefLabels
+ - [hh] typechecker: check for `void` values used in function param expressions
+ - [hh] typechecker: remove 'allow_null_as_void' from typing env
+ - Remove litstr typedef
+ - Don't emit Switch bytecode for 1-case switches
+ - Updated the test cases so to be included in classes
 
 "Harris" 23-Apr-2015
  - Fix preloadRepo

@@ -1365,13 +1365,14 @@ SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
       return cns(env, *value);
     }
 
-    auto const check = packedArrayBoundsStaticCheck(base->type(), idx);
-    if (check.hasValue()) {
-      if (check.value()) {
-        return doLdElem();
-      }
+    switch (packedArrayBoundsStaticCheck(base->type(), idx)) {
+    case PackedBounds::In:
+      return doLdElem();
+    case PackedBounds::Out:
       gen(env, RaiseArrayIndexNotice, key);
       return cns(env, TInitNull);
+    case PackedBounds::Unknown:
+      break;
     }
   }
 
@@ -1562,9 +1563,9 @@ void emitPackedArrayIsset(MTS& env) {
 
   if (key->hasConstVal()) {
     auto const idx = key->intVal();
-    auto const check = packedArrayBoundsStaticCheck(env.base.type, idx);
-    if (check.hasValue()) {
-      if (check.value()) {
+    switch (packedArrayBoundsStaticCheck(env.base.type, idx)) {
+    case PackedBounds::In:
+      {
         if (!type.maybe(TNull)) {
           env.result = cns(env, true);
           return;
@@ -1572,10 +1573,13 @@ void emitPackedArrayIsset(MTS& env) {
         auto const elemAddr = gen(env, LdPackedArrayElemAddr,
                                   type.ptr(Ptr::Arr), env.base.value, key);
         env.result = gen(env, IsNTypeMem, TNull, elemAddr);
-      } else {
-        env.result = cns(env, false);
       }
       return;
+    case PackedBounds::Out:
+      env.result = cns(env, false);
+      return;
+    case PackedBounds::Unknown:
+      break;
     }
   }
 

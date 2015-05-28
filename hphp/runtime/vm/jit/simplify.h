@@ -114,15 +114,11 @@ void copyProp(IRInstruction*);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Statically check whether a packed array access is within bounds.  We share
- * this logic with gen time so that cases that are visible immediately don't
- * require generating IR with control flow that we have to clean up later.
- *
- * Return no value if runtime checking is necessary, true if guaranteed within
- * bounds, false if always out of bounds.
+ * Statically check whether a packed array access is within bounds, based on
+ * the type of the array.
  */
-folly::Optional<bool>
-packedArrayBoundsStaticCheck(Type arrayType, int64_t key);
+enum class PackedBounds { In, Out, Unknown };
+PackedBounds packedArrayBoundsStaticCheck(Type, int64_t key);
 
 /*
  * Get the type of `arr[idx]` for a packed array, considering constness,

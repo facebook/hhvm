@@ -1777,11 +1777,11 @@ SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
   auto const idx   = inst->src(1);
   if (!idx->hasConstVal()) return mergeBranchDests(env, inst);
 
-  auto const idxVal = (uint64_t)idx->intVal();
-  auto const check = packedArrayBoundsStaticCheck(array->type(), idxVal);
-  if (check.hasValue()) {
-    if (check.value()) return gen(env, Nop);
-    return gen(env, Jmp, inst->taken());
+  auto const idxVal = idx->intVal();
+  switch (packedArrayBoundsStaticCheck(array->type(), idxVal)) {
+  case PackedBounds::In:       return gen(env, Nop);
+  case PackedBounds::Out:      return gen(env, Jmp, inst->taken());
+  case PackedBounds::Unknown:  break;
   }
 
   return mergeBranchDests(env, inst);
@@ -2312,29 +2312,31 @@ void copyProp(IRInstruction* inst) {
   }
 }
 
-folly::Optional<bool>
-packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
-  if (idxVal < 0 || idxVal > PackedArray::MaxSize) return false;
+PackedBounds packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
+  if (idxVal < 0 || idxVal > PackedArray::MaxSize) return PackedBounds::Out;
 
   if (arrayType.hasConstVal()) {
-    return idxVal < arrayType.arrVal()->size();
+    return idxVal < arrayType.arrVal()->size()
+      ? PackedBounds::In
+      : PackedBounds::Out;
   }
 
   auto const at = arrayType.arrSpec().type();
-  if (!at) return folly::none;
+  if (!at) return PackedBounds::Unknown;
 
   using A = RepoAuthType::Array;
   switch (at->tag()) {
   case A::Tag::Packed:
     if (idxVal < at->size() && at->emptiness() == A::Empty::No) {
-      return true;
+      return PackedBounds::In;
     }
+    // fallthrough
   case A::Tag::PackedN:
     if (idxVal == 0 && at->emptiness() == A::Empty::No) {
-      return true;
+      return PackedBounds::In;
     }
   }
-  return folly::none;
+  return PackedBounds::Unknown;
 }
 
 Type packedArrayElemType(SSATmp* arr, SSATmp* idx) {

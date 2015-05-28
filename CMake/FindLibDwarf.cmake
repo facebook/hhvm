@@ -9,7 +9,7 @@
 
 # Locate libelf library at first
 if (NOT LIBELF_FOUND)
-   find_package (LibElf REQUIRED)
+  find_package (LibElf)
 endif (NOT LIBELF_FOUND)
 
 if (LIBDWARF_LIBRARIES AND LIBDWARF_INCLUDE_DIRS)
@@ -48,6 +48,7 @@ include (FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set LIBDWARF_FOUND to TRUE
 # if all listed variables are TRUE
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibDwarf DEFAULT_MSG
+  LIBELF_FOUND
   LIBDWARF_LIBRARIES
   LIBDWARF_INCLUDE_DIRS)
 

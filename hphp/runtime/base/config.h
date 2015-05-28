@@ -244,8 +244,7 @@ struct Config {
                                           const Hdf&,
                                           const std::string&)> cb,
                       const IniSettingMap &ini, const Hdf& config,
-                      const std::string &name = "",
-                      const bool prepend_hhvm = true);
+                      const std::string &name, const bool prepend_hhvm = true);
 
   private:
 

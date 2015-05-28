@@ -169,10 +169,12 @@ static int64_t variant_init(uint32_t v) {
 
 #define CONFIG_BODY(T, METHOD) \
 T Config::Get##METHOD(const IniSetting::Map &ini, const Hdf& config, \
-                      const std::string &name, \
+                      const std::string &name /* = "" */, \
                       const T defValue /* = 0ish */, \
                       const bool prepend_hhvm /* = true */) { \
   auto ini_name = IniName(name, prepend_hhvm); \
+  /* If we don't pass a name, then we just use the raw config as-is. */ \
+  /* This could happen when we are at a known leaf of a config node. */ \
   Hdf hdf = name != "" ? config[name] : config; \
   auto* value = ini_iterate(ini, ini_name); \
   if (value && value->isString()) { \
@@ -196,7 +198,7 @@ T Config::Get##METHOD(const IniSetting::Map &ini, const Hdf& config, \
   return hdf.configGet##METHOD(defValue); \
 } \
 void Config::Bind(T& loc, const IniSetting::Map &ini, const Hdf& config, \
-                  const std::string& name, \
+                  const std::string& name /* = "" */, \
                   const T defValue /* = 0ish */, \
                   const bool prepend_hhvm /* = true */) { \
   loc = Get##METHOD(ini, config, name, defValue, prepend_hhvm); \
@@ -218,7 +220,7 @@ CONFIG_BODY(std::string, String)
 
 #define CONTAINER_CONFIG_BODY(T, METHOD) \
 T Config::Get##METHOD(const IniSetting::Map& ini, const Hdf& config, \
-                      const std::string& name, \
+                      const std::string& name /* = "" */, \
                       const T& defValue /* = T() */, \
                       const bool prepend_hhvm /* = true */) { \
   auto ini_name = IniName(name, prepend_hhvm); \
@@ -247,7 +249,7 @@ T Config::Get##METHOD(const IniSetting::Map& ini, const Hdf& config, \
   return defValue; \
 } \
 void Config::Bind(T& loc, const IniSetting::Map& ini, const Hdf& config, \
-                  const std::string& name, \
+                  const std::string& name /* = "" */, \
                   const T& defValue /* = T() */, \
                   const bool prepend_hhvm /* = true */) { \
   loc = Get##METHOD(ini, config, name, defValue, prepend_hhvm); \
@@ -264,7 +266,8 @@ CONTAINER_CONFIG_BODY(ConfigIMap, IMap)
 
 static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
                                             const Hdf& config,
-                                            const std::string& name) {
+                                            const std::string& name /* = "" */
+                                           ) {
   auto val = Config::GetString(ini, config, name);
   if (val.empty()) {
     if (Option::EnableHipHopSyntax || RuntimeOption::EnableHipHopSyntax) {
@@ -281,7 +284,7 @@ static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
 }
 
 void Config::Bind(HackStrictOption& loc, const IniSettingMap& ini,
-                  const Hdf& config, const std::string& name) {
+                  const Hdf& config, const std::string& name /* = "" */) {
   // Currently this doens't bind to ini_get since it is hard to thread through
   // an enum
   loc = GetHackStrictOption(ini, config, name);
@@ -294,19 +297,23 @@ void Config::Iterate(std::function<void (const IniSettingMap&,
                                          const Hdf&,
                                          const std::string&)> cb,
                      const IniSettingMap &ini, const Hdf& config,
-                     const std::string &name /* = "" */,
+                     const std::string &name,
                      const bool prepend_hhvm /* = true */) {
-  Hdf hdf = name != "" ? config[name] : config;
+  // We shouldn't be passing a leaf here. That's why name is not
+  // optional.
+  assert(!name.empty());
+  Hdf hdf = config[name];
   if (hdf.exists() && !hdf.isEmpty()) {
     for (Hdf c = hdf.firstChild(); c.exists(); c = c.next()) {
-      cb(ini, c, name);
+      cb(IniSetting::Map::object, c, "");
     }
   } else {
+    Hdf empty;
     auto ini_name = IniName(name, prepend_hhvm);
     auto* ini_value = ini_iterate(ini, ini_name);
     if (ini_value && ini_value->isObject()) {
       for (auto& pair : ini_value->items()) {
-        cb(pair.second, hdf, pair.first.data());
+        cb(pair.second, empty, pair.first.data());
       }
     }
   }

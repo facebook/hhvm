@@ -973,7 +973,7 @@ let unparse_internal program =
   ]
 
 let unparse :
-    FileInfo.file_type -> Relative_path.t -> program -> string =
+    FileInfo.file_type -> Path.t -> program -> string =
     fun filetype file program ->
   unparse_internal program |>
   to_string |>

@@ -64,7 +64,7 @@ struct ArraySpec {
   /*
    * Casts.
    *
-   * Bottom and Top cast to true; everything else casts to false.
+   * Bottom and Top cast to false; everything else casts to true.
    */
   explicit operator bool() const;
 
@@ -157,7 +157,7 @@ struct ClassSpec {
   /*
    * Casts.
    *
-   * Bottom and Top cast to true; everything else casts to false.
+   * Bottom and Top cast to false; everything else casts to true.
    */
   explicit operator bool() const;
 

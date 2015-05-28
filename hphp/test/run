@@ -406,13 +406,28 @@ function find_tests($files, array $options = null) {
   return $tests;
 }
 
-function list_tests() {
-  foreach (find_tests(array('all')) as $test) {
-    foreach (array('-m interp', '-m jit') as $mode) {
-      foreach (array('', '-r') as $repo) {
-        print implode(' ', array_filter(array($mode, $repo, $test)))."\n";
-      }
-    }
+function list_tests($files, $options) {
+  $mode = idx($options, 'mode', '');
+  switch ($mode) {
+    case '':
+    case 'jit':
+      $mode = '-m jit';
+      break;
+    case 'interp';
+      $mode = '-m interp';
+      break;
+    default:
+      throw new Exception("Unsupported mode for listing tests: ".$mode);
+  }
+
+  if (isset($options['repo'])) {
+    $repo = '-r';
+  } else {
+    $repo = '';
+  }
+
+  foreach (find_tests($files) as $test) {
+    print implode(' ', array_filter(array($mode, $repo, $test)))."\n";
   }
 }
 
@@ -713,11 +728,13 @@ class Status {
   }
 
   public static function skip($test, $reason, $time, $stime, $etime) {
-    array_push(self::$results, array('name' => $test,
-                                     'status' => 'skipped',
-                                     'start_time' => $stime,
-                                     'end_time' => $etime,
-                                     'time' => $time));
+    if (self::getMode() !== self::MODE_FBMAKE) {
+      array_push(self::$results, array('name' => $test,
+                                       'status' => 'skipped',
+                                       'start_time' => $stime,
+                                       'end_time' => $etime,
+                                       'time' => $time));
+    }
     self::send(self::MSG_TEST_SKIP, array($test, $reason, $time, $stime, $etime));
   }
 
@@ -1189,7 +1206,7 @@ function run_config_server($options, $test) {
 
 function run_config_cli($options, $test, $hhvm, $hhvm_env) {
   if (isset($options['log'])) {
-    $hhvm_env['TRACE'] = 'printir:2';
+    $hhvm_env['TRACE'] = 'printir:1';
     $hhvm_env['HPHP_TRACE_FILE'] = $test . '.log';
   }
 
@@ -1551,10 +1568,6 @@ function msg_loop($num_tests, $queue) {
             }
             Status::sayColor(sprintf(" (%.2fs)\n", $time));
             break;
-
-          case Status::MODE_FBMAKE:
-            Status::sayFBMake($test, 'skipped', $stime, $etime);
-            break;
         }
         break;
 
@@ -1895,7 +1908,7 @@ function main($argv) {
     error(help());
   }
   if (isset($options['list-tests'])) {
-    error(list_tests());
+    error(list_tests($files, $options));
   }
 
   $tests = find_tests($files, $options);

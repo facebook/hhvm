@@ -101,10 +101,15 @@ inline TransContext::TransContext(TransID id, SrcKey sk, FPInvOffset spOff)
   , initSpOffset(spOff)
   , func(sk.valid() ? sk.func() : nullptr)
   , initBcOffset(sk.offset())
+  , prologue(sk.prologue())
   , resumed(sk.resumed())
 {}
 
 inline SrcKey TransContext::srcKey() const {
+  if (prologue) {
+    assertx(!resumed);
+    return SrcKey { func, initBcOffset, SrcKey::PrologueTag{} };
+  }
   return SrcKey { func, initBcOffset, resumed };
 }
 

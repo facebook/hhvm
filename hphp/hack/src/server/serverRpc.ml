@@ -38,7 +38,7 @@ let handle : type a. genv -> env -> a t -> a =
         (* Logging can be pretty slow, so do it asynchronously and respond to
          * the client first *)
         ServerEnv.async begin fun () ->
-          EventLogger.check_response env.errorl;
+          HackEventLogger.check_response env.errorl;
         end;
         let el = ServerError.sort_errorl env.errorl in
         List.map ~f:Errors.to_absolute el
@@ -65,4 +65,4 @@ let handle : type a. genv -> env -> a t -> a =
     | COVERAGE_COUNTS path -> ServerCoverageMetric.go path genv env
     | LINT fnl -> ServerLint.go genv fnl
     | LINT_ALL code -> ServerLint.lint_all genv code
-    | KILL -> ServerEnv.async ServerUtils.die_nicely
+    | KILL -> ServerEnv.async (fun () -> ServerUtils.die_nicely genv)

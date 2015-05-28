@@ -8,13 +8,27 @@
  *
  *)
 
-
 open Utils
+
+type config = {
+  global_size: int;
+  heap_size : int;
+}
+
+let default_config =
+  let gig = 1024 * 1024 * 1024 in
+  {global_size = gig; heap_size = 20 * gig}
 
 (*****************************************************************************)
 (* Initializes the shared memory. Must be called before forking. *)
 (*****************************************************************************)
-external init: unit -> unit = "hh_shared_init"
+external hh_shared_init: global_size:int -> heap_size:int -> unit
+= "hh_shared_init"
+
+let init config =
+  hh_shared_init
+    ~global_size:config.global_size
+    ~heap_size:config.heap_size
 
 (*****************************************************************************)
 (* The shared memory garbage collector. It must be called every time we
@@ -46,6 +60,16 @@ external load: string -> unit = "hh_load"
 external heap_size: unit -> int = "hh_heap_size"
 
 (*****************************************************************************)
+(* The number of used slots in our hashtable *)
+(*****************************************************************************)
+external hash_used_slots : unit -> int = "hh_hash_used_slots"
+
+(*****************************************************************************)
+(* The total number of slots in our hashtable *)
+(*****************************************************************************)
+external hash_slots : unit -> int = "hh_hash_slots"
+
+(*****************************************************************************)
 (* The number of used slots in our dependency table *)
 (*****************************************************************************)
 external dep_used_slots : unit -> int = "hh_dep_used_slots"
@@ -55,14 +79,19 @@ external dep_used_slots : unit -> int = "hh_dep_used_slots"
 (*****************************************************************************)
 external dep_slots : unit -> int = "hh_dep_slots"
 
-type dep_stats_t = {
-  dep_used_slots : int;
-  dep_slots : int;
+type table_stats = {
+  used_slots : int;
+  slots : int;
 }
 
 let dep_stats () = {
-  dep_used_slots = dep_used_slots ();
-  dep_slots = dep_slots ();
+  used_slots = dep_used_slots ();
+  slots = dep_slots ();
+}
+
+let hash_stats () = {
+  used_slots = hash_used_slots ();
+  slots = hash_slots ();
 }
 
 let collect () =

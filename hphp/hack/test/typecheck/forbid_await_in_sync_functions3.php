@@ -10,7 +10,7 @@
  */
 
 function sjm() {
-  return function (Awaitable<mixed> $the_doctor) {
+  return function(Awaitable<mixed> $the_doctor) {
     await $the_doctor;
   };
 }

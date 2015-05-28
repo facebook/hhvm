@@ -49,28 +49,29 @@ namespace {
 /*
  * Create a map from RegionDesc::BlockId -> IR Block* for all region blocks.
  */
-void createBlockMap(IRGS& irgs,
-                    const RegionDesc& region,
-                    BlockIdToIRBlockMap& blockIdToIRBlock) {
+BlockIdToIRBlockMap createBlockMap(IRGS& irgs, const RegionDesc& region) {
+  auto ret = BlockIdToIRBlockMap{};
+
   auto& irb = *irgs.irb;
-  blockIdToIRBlock.clear();
   auto const& blocks = region.blocks();
   for (unsigned i = 0; i < blocks.size(); i++) {
-    auto rBlock = blocks[i];
-    auto id = rBlock->id();
+    auto const rBlock = blocks[i];
+    auto const id = rBlock->id();
     DEBUG_ONLY Offset bcOff = rBlock->start().offset();
     assertx(IMPLIES(i == 0, bcOff == irb.unit().bcOff()));
 
     // NB: This maps the region entry block to a new IR block, even though
     // we've already constructed an IR entry block. We'll make the IR entry
     // block jump to this block.
-    Block* iBlock = irb.unit().defBlock();
+    auto const iBlock = irb.unit().defBlock();
 
-    blockIdToIRBlock[id] = iBlock;
+    ret[id] = iBlock;
     FTRACE(1,
            "createBlockMaps: RegionBlock {} => IRBlock {} (BC offset = {})\n",
            id, iBlock->id(), bcOff);
   }
+
+  return ret;
 }
 
 /*
@@ -256,7 +257,6 @@ void emitPredictionGuards(IRGS& irgs,
 
 void initNormalizedInstruction(
   NormalizedInstruction& inst,
-  jit::vector<DynLocation>& dynLocs,
   MapWalker<RegionDesc::Block::ParamByRefMap>& byRefs,
   IRGS& irgs,
   const RegionDesc& region,
@@ -279,20 +279,9 @@ void initNormalizedInstruction(
 
   auto const inputInfos = getInputs(inst);
 
-  // Populate the NormalizedInstruction's input vector, using types
-  // from IRBuilder.
-  dynLocs.reserve(inputInfos.size());
-  auto newDynLoc = [&] (const InputInfo& ii) {
-    dynLocs.emplace_back(ii.loc,
-                         irgen::predictedTypeFromLocation(irgs, ii.loc));
-    FTRACE(2, "predictedTypeFromLocation: {} -> {}\n",
-           ii.loc.pretty(), dynLocs.back().rtt);
-    return &dynLocs.back();
-  };
-
   FTRACE(2, "populating inputs for {}\n", inst.toString());
   for (auto const& ii : inputInfos) {
-    inst.inputs.push_back(newDynLoc(ii));
+    inst.inputs.push_back(ii.loc);
   }
 
   if (inputInfos.needsRefCheck) {
@@ -534,8 +523,7 @@ TranslateResult irGenRegion(IRGS& irgs,
   auto& irb = *irgs.irb;
 
   // Create a map from region blocks to their corresponding initial IR blocks.
-  BlockIdToIRBlockMap blockIdToIRBlock;
-  createBlockMap(irgs, region, blockIdToIRBlock);
+  auto blockIdToIRBlock = createBlockMap(irgs, region);
 
   // Prepare to start translation of the first region block.
   auto const entry = irb.unit().entry();
@@ -543,9 +531,11 @@ TranslateResult irGenRegion(IRGS& irgs,
 
   // Make the IR entry block jump to the IR block we mapped the region entry
   // block to (they are not the same!).
-  auto const irBlock = blockIdToIRBlock[region.entry()->id()];
-  always_assert(irBlock != entry);
-  irgen::gen(irgs, Jmp, irBlock);
+  {
+    auto const irBlock = blockIdToIRBlock[region.entry()->id()];
+    always_assert(irBlock != entry);
+    irgen::gen(irgs, Jmp, irBlock);
+  }
 
   RegionDesc::BlockIdSet processedBlocks;
 
@@ -575,7 +565,7 @@ TranslateResult irGenRegion(IRGS& irgs,
     // FrameState for the IR block corresponding to the start of this
     // region block, and it also sets the map from BC offsets to IR
     // blocks for the successors of this block in the region.
-    Block* irBlock = blockIdToIRBlock[blockId];
+    auto const irBlock = blockIdToIRBlock[blockId];
     const bool hasUnprocPred = blockHasUnprocessedPred(region, blockId,
                                                        processedBlocks);
     // Note: a block can have an unprocessed predecessor even if the
@@ -615,9 +605,8 @@ TranslateResult irGenRegion(IRGS& irgs,
 
       // Create and initialize the instruction.
       NormalizedInstruction inst(sk, block->unit());
-      jit::vector<DynLocation> dynLocs;
       bool toInterpInst = toInterp.count(ProfSrcKey{irgs.profTransID, sk});
-      initNormalizedInstruction(inst, dynLocs, byRefs, irgs, region, blockId,
+      initNormalizedInstruction(inst, byRefs, irgs, region, blockId,
                                 topFunc, lastInstr, toInterpInst);
 
       // If this block ends with an inlined FCall, we don't emit anything for

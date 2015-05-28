@@ -13,11 +13,11 @@ function show<T>(T $x): void {}
 
 function test(): Vector<(function(int): int)> {
   $v = Vector {
-    function ($x) {
+    function($x) {
       return $x;
     },
   };
-  $v[] = function ($x) use ($v) {
+  $v[] = function($x) use ($v) {
     return $v[0]($x);
   };
   return $v;

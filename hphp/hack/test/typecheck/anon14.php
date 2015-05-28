@@ -13,11 +13,11 @@ function show<T>(T $x): void {}
 
 function test(): void {
   $v = Vector {
-    function ($x) {
+    function($x) {
       return $x;
     },
   };
-  $v[0] = function ($x) use ($v) {
+  $v[0] = function($x) use ($v) {
     return $v[0]($x);
   };
   $v[0](1);

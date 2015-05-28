@@ -19,6 +19,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <string>
 
 #include <boost/container/flat_map.hpp>
 
@@ -40,6 +41,15 @@ struct TransCFG;
 
 //////////////////////////////////////////////////////////////////////
 
+enum class PGORegionMode {
+  Hottrace, // Select a long region, using profile counters to guide the trace
+  Hotblock, // Select a single block
+  HotCFG,   // Select arbitrary CFG using profile counters to prune cold paths
+  WholeCFG, // Select the entire CFG that has been profiled
+};
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * RegionDesc is a description of a code region.  This includes the
  * list of blocks in the region, and also the list of control-flow
@@ -57,8 +67,8 @@ struct RegionDesc {
   struct Location;
   struct TypePred;
   struct ReffinessPred;
-  typedef std::shared_ptr<Block> BlockPtr;
-  typedef TransID BlockId;
+  using BlockPtr = std::shared_ptr<Block>;
+  using BlockId = TransID;
   // BlockId Encoding:
   //   - Non-negative numbers are blocks that correspond
   //     to the start of a TransProfile translation, and therefore can
@@ -66,9 +76,9 @@ struct RegionDesc {
   //   - Negative numbers are used for other blocks, which correspond
   //     to blocks created by inlining and which don't correspond to
   //     the beginning of a profiling translation.
-  typedef boost::container::flat_set<BlockId> BlockIdSet;
-  typedef std::vector<BlockId>  BlockIdVec;
-  typedef std::vector<BlockPtr> BlockVec;
+  using BlockIdSet = boost::container::flat_set<BlockId>;
+  using BlockIdVec = std::vector<BlockId>;
+  using BlockVec = std::vector<BlockPtr>;
 
   bool              empty() const;
   SrcKey            start() const;
@@ -79,6 +89,12 @@ struct RegionDesc {
   const BlockIdSet& preds(BlockId bid) const;
   const BlockIdSet& sideExitingBlocks() const;
   bool              isExit(BlockId bid) const;
+
+  /*
+   * Modify this RegionDesc so that its list of blocks is sorted in a reverse
+   * post order.
+   */
+  void sortBlocks();
 
   /*
    * Returns the last BC offset in the region that corresponds to the
@@ -98,6 +114,7 @@ struct RegionDesc {
   void              deleteBlock(BlockId bid);
   void              renumberBlock(BlockId oldId, BlockId newId);
   void              addArc(BlockId src, BlockId dst);
+  void              removeArc(BlockId src, BlockId dst);
   void              setSideExitingBlock(BlockId bid);
   bool              isSideExitingBlock(BlockId bid) const;
   folly::Optional<BlockId> nextRetrans(BlockId id) const;
@@ -111,7 +128,7 @@ struct RegionDesc {
   template<class Work>
   void              forEachArc(Work w) const;
 
- private:
+private:
   struct BlockData {
     BlockPtr                 block;
     BlockIdSet               preds;
@@ -125,7 +142,6 @@ struct RegionDesc {
   void       copyBlocksFrom(const RegionDesc& other,
                             BlockVec::iterator where);
   void       copyArcsFrom(const RegionDesc& other);
-  void       sortBlocks();
   void       postOrderSort(RegionDesc::BlockId     bid,
                            RegionDesc::BlockIdSet& visited,
                            RegionDesc::BlockIdVec& outVec);
@@ -137,10 +153,12 @@ struct RegionDesc {
   BlockIdSet                        m_sideExitingBlocks;
 };
 
-typedef std::shared_ptr<RegionDesc>                      RegionDescPtr;
-typedef std::vector<RegionDescPtr>                       RegionVec;
-typedef hphp_hash_set<RegionDescPtr,
-                      smart_pointer_hash<RegionDescPtr>> RegionSet;
+using RegionDescPtr = std::shared_ptr<RegionDesc>;
+using RegionVec = std::vector<RegionDescPtr>;
+using RegionSet = hphp_hash_set<
+  RegionDescPtr,
+  smart_pointer_hash<RegionDescPtr>
+>;
 
 /*
  * Specification of an HHBC-visible location that can have a type
@@ -238,7 +256,7 @@ inline bool operator==(const RegionDesc::TypePred& a,
   return a.location == b.location && a.type == b.type;
 }
 
-typedef std::vector<RegionDesc::TypePred> PostConditions;
+using PostConditions = std::vector<RegionDesc::TypePred>;
 
 /*
  * A prediction for the argument reffiness of the Func for a pre-live ActRec.
@@ -265,12 +283,11 @@ inline bool operator==(const RegionDesc::ReffinessPred& a,
  * A basic block in the region, with type predictions for conditions
  * at various execution points, including at entry to the block.
  */
-class RegionDesc::Block {
- public:
-  typedef boost::container::flat_multimap<SrcKey, TypePred> TypePredMap;
-  typedef boost::container::flat_map<SrcKey, bool> ParamByRefMap;
-  typedef boost::container::flat_multimap<SrcKey, ReffinessPred> RefPredMap;
-  typedef boost::container::flat_map<SrcKey, const Func*> KnownFuncMap;
+struct RegionDesc::Block {
+  using TypePredMap = boost::container::flat_multimap<SrcKey,TypePred>;
+  using ParamByRefMap = boost::container::flat_map<SrcKey,bool>;
+  using RefPredMap = boost::container::flat_multimap<SrcKey,ReffinessPred>;
+  using KnownFuncMap = boost::container::flat_map<SrcKey,const Func*>;
 
   explicit Block(const Func* func, bool resumed, Offset start, int length,
                  FPInvOffset initSpOff, uint16_t inlineLevel);
@@ -490,15 +507,15 @@ RegionDescPtr selectHotTrace(TransID triggerId,
                              TransIDVec* selectedVec = nullptr);
 
 /*
- * Create a region, beginning with triggerId, that includes as much of
- * the TransCFG as possible.  Excludes multiple translations of the
- * same SrcKey.
+ * Create a region, beginning with headId, that includes as much of
+ * the TransCFG as possible (in "wholecfg" mode), but that can be
+ * pruned to eliminate cold/unlikely code as well (in "hotcfg" mode).
  */
-RegionDescPtr selectWholeCFG(TransID triggerId,
-                             const ProfData* profData,
-                             const TransCFG& cfg,
-                             TransIDSet& selectedSet,
-                             TransIDVec* selectedVec = nullptr);
+RegionDescPtr selectHotCFG(TransID headId,
+                           const ProfData* profData,
+                           const TransCFG& cfg,
+                           TransIDSet& selectedSet,
+                           TransIDVec* selectedVec = nullptr);
 
 /*
  * Checks whether the type predictions at the beginning of block
@@ -520,6 +537,13 @@ bool breaksRegion(Op opc);
 void regionizeFunc(const Func*  func,
                    MCGenerator* mcg,
                    RegionVec&   regions);
+
+/*
+ * Returns the PGO region selector to be used for the given `func'.
+ * This depends on the values of RuntimeOption::EvalJitPGORegionSelector
+ * and RuntimeOption::EvalJitPGOCFGHotFuncOnly and the given `func'.
+ */
+PGORegionMode pgoRegionMode(const Func& func);
 
 /*
  * Functions to map BlockIds to the TransIDs used when the block was

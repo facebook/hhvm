@@ -1,0 +1,2 @@
+File "interface_implement.php", line 8, characters 41-40:
+Expected: extends; Got implements (Parsing[1002])

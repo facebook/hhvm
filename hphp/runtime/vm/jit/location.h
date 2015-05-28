@@ -162,43 +162,6 @@ public:
   };
 };
 
-// A DynLocation is a Location-in-execution: a location, along with
-// whatever is known about its runtime type.
-struct DynLocation {
-  Location    location;
-  Type rtt;
-
-  DynLocation(Location l, DataType t) : location(l), rtt(t) {}
-
-  DynLocation(Location l, Type t) : location(l), rtt(t) {}
-
-  DynLocation() : location(), rtt() {}
-
-  bool operator==(const DynLocation& r) const = delete;
-
-  // Hash function
-  size_t operator()(const DynLocation &dl) const {
-    uint64_t rtthash = rtt.hash();
-    uint64_t locHash = location(location);
-    return rtthash ^ locHash;
-  }
-
-  std::string pretty() const {
-    return folly::to<std::string>(
-      "DynLocation(", location.pretty(), ',', rtt.toString(), ')');
-  }
-
-  bool isStack() const {
-    return location.isStack();
-  }
-  bool isLocal() const {
-    return location.isLocal();
-  }
-  bool isLiteral() const {
-    return location.isLiteral();
-  }
-};
-
 } }
 
 #endif // incl_HPHP_JIT_LOCATION_H_

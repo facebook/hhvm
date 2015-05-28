@@ -305,7 +305,7 @@ SSATmp* insertPhi(IRUnit& unit, Block* blk,
       uint32_t i = 0;
       blk->forEachPred([&](Block* pred) {
           if (result) {
-            auto& jmp = blk->back();
+            auto& jmp = pred->back();
             if (jmp.src(d) != inputs[i++]) {
               result = nullptr;
             }

@@ -1072,9 +1072,38 @@ bool HHVM_FUNCTION(is_executable,
   */
 }
 
+static VFileType lookupVirtualFile(const String& filename) {
+  if (filename.empty() || !StaticContentCache::TheFileCache) {
+    return VFileType::NotFound;
+  }
+
+  String cwd;
+  std::string root;
+  bool isRelative = (filename.charAt(0) != '/');
+  if (isRelative) {
+    cwd = g_context->getCwd();
+    root = RuntimeOption::SourceRoot;
+    if (cwd.empty() || cwd[cwd.size() - 1] != '/') root.pop_back();
+  }
+
+  if (!isRelative || !root.compare(cwd.data())) {
+    return StaticContentCache::TheFileCache->getFileType(filename.data());
+  }
+
+  return VFileType::NotFound;
+}
+
 bool HHVM_FUNCTION(is_file,
                    const String& filename) {
   CHECK_PATH_FALSE(filename, 1);
+  if (filename.empty()) {
+    return false;
+  }
+  auto vtype = lookupVirtualFile(filename);
+  if (vtype != VFileType::NotFound) {
+    return vtype == VFileType::PlainFile;
+  }
+
   struct stat sb;
   CHECK_SYSTEM_SILENT(statSyscall(filename, &sb, true));
   return (sb.st_mode & S_IFMT) == S_IFREG;
@@ -1083,16 +1112,12 @@ bool HHVM_FUNCTION(is_file,
 bool HHVM_FUNCTION(is_dir,
                    const String& filename) {
   CHECK_PATH_FALSE(filename, 1);
-  String cwd;
   if (filename.empty()) {
     return false;
   }
-  bool isRelative = (filename.charAt(0) != '/');
-  if (isRelative) cwd = g_context->getCwd();
-  if (!isRelative || cwd == String(RuntimeOption::SourceRoot)) {
-    if (File::IsVirtualDirectory(filename)) {
-      return true;
-    }
+  auto vtype = lookupVirtualFile(filename);
+  if (vtype != VFileType::NotFound) {
+    return vtype == VFileType::Directory;
   }
 
   struct stat sb;
@@ -1120,6 +1145,11 @@ bool HHVM_FUNCTION(is_uploaded_file,
 bool HHVM_FUNCTION(file_exists,
                    const String& filename) {
   CHECK_PATH_FALSE(filename, 1);
+  auto vtype = lookupVirtualFile(filename);
+  if (vtype != VFileType::NotFound) {
+    return true;
+  }
+
   if (filename.empty() ||
       (accessSyscall(filename, F_OK, true)) < 0) {
     return false;

@@ -191,7 +191,7 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   auto const killed_stack =
     stack_below(inst.marker().fp(), -inst.marker().spOff().offset - 1);
   auto const kills_union = x.kills.precise_union(killed_stack);
-  auto const new_kills   = kills_union ? *kills_union : killed_stack;
+  auto const new_kills = kills_union ? *kills_union : killed_stack;
 
   return GeneralEffects {
     x.loads | AHeapAny
@@ -247,13 +247,12 @@ GeneralEffects may_load_store_move(AliasClass loads,
 GeneralEffects iter_effects(const IRInstruction& inst,
                             SSATmp* fp,
                             AliasClass locals) {
-  auto const kill_stk = stack_below(fp, -inst.marker().spOff().offset - 1);
   return may_reenter(
     inst,
     may_load_store_kill(
-      locals   | AHeapAny,
-      locals   | AHeapAny,
-      kill_stk | AMIStateAny
+      locals | AHeapAny,
+      locals | AHeapAny,
+      AMIStateAny
     )
   );
 }
@@ -332,7 +331,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // treatmeant because of the special kill semantics for locals and stack.
     return may_load_store_kill(
       AHeapAny, AHeapAny,
-      AStackAny | AFrameAny | AMIStateAny
+      *AStackAny.precise_union(AFrameAny)->precise_union(AMIStateAny)
     );
 
   // The suspend hooks can load anything (re-entering the VM), but can't write
@@ -507,6 +506,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConstructInstance:
     return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
 
+  case CheckStackOverflow:
+  case CheckSurpriseFlagsEnter:
+    return may_raise(inst, may_load_store(AEmpty, AEmpty));
+
+  case InitExtraArgs:
+    return UnknownEffects {};
+
   //////////////////////////////////////////////////////////////////////
   // Iterator instructions
 
@@ -553,6 +559,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AFrame { inst.src(0), inst.extra<StLoc>()->locId },
       inst.src(1)
     };
+
+  case StLocRange:
+    {
+      auto const extra = inst.extra<StLocRange>();
+      auto acls = AEmpty;
+
+      for (auto locId = extra->start; locId < extra->end; ++locId) {
+        acls = acls | AFrame { inst.src(0), locId };
+      }
+      return PureStore { acls, inst.src(1) };
+    }
 
   case LdLoc:
     return PureLoad { AFrame { inst.src(0), inst.extra<LocalId>()->locId } };
@@ -1069,6 +1086,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VectorHasImmCopy:
   case CheckPackedArrayBounds:
   case LdColArray:
+  case EnterFrame:
     return may_load_store(AEmpty, AEmpty);
 
   //////////////////////////////////////////////////////////////////////
@@ -1106,7 +1124,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
      * region exit following it it doesn't help us eliminate anything for now,
      * so we just pretend it can read/write anything on the stack.
      */
-    return may_reenter(inst, may_load_store(AStackAny, AStackAny));
+    return may_raise(inst, may_load_store(AStackAny, AStackAny));
 
   case LookupClsMethod:   // autoload, and it writes part of the new actrec
     {
@@ -1115,7 +1133,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         inst.extra<LookupClsMethod>()->offset.offset,
         int32_t{kNumActRecCells}
       };
-      return may_reenter(inst, may_load_store(effects, effects));
+      return may_raise(inst, may_load_store(effects, effects));
     }
 
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload
@@ -1124,10 +1142,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Clone:
   case RaiseArrayIndexNotice:
   case RaiseArrayKeyNotice:
+  case RaiseUninitLoc:
+  case RaiseUndefProp:
+  case RaiseMissingArg:
   case RaiseError:
   case RaiseNotice:
-  case RaiseUndefProp:
-  case RaiseUninitLoc:
   case RaiseWarning:
   case ConvCellToStr:
   case ConvObjToStr:
@@ -1195,7 +1214,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConcatStr3:
   case ConcatStr4:
   case ConvCellToDbl:
-    return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
+    return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
 
   // These two instructions don't touch memory we track, except that they may
   // re-enter to construct php Exception objects.  During this re-entry anything

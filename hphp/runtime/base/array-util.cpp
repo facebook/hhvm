@@ -455,7 +455,8 @@ static void create_miter_for_walk(folly::Optional<MArrayIter>& miter,
     throw FatalErrorException("An iterator cannot be used with "
                               "foreach by reference");
   }
-  Array properties = iterable->o_toIterArray(null_string, true);
+  Array properties = iterable->o_toIterArray(null_string,
+                                             ObjectData::CreateRefs);
   miter.emplace(properties.detach());
 }
 

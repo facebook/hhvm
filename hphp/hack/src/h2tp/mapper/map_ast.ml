@@ -102,6 +102,7 @@ let mk_mapper = fun m_in ->
                   t_tparams = v_t_tparams;
                   t_constraint = v_t_constraint;
                   t_kind = v_t_kind;
+                  t_user_attributes = v_t_user_attributes;
                   t_namespace = v_t_namespace;
                   t_mode = v_t_mode
                 } =
@@ -109,6 +110,7 @@ let mk_mapper = fun m_in ->
     let v_t_tparams = map_of_list map_tparam v_t_tparams in
     let v_t_constraint = map_tconstraint v_t_constraint in
     let v_t_kind = map_typedef_kind v_t_kind in
+    let v_t_user_attributes = map_smap map_user_attribute v_t_user_attributes in
     let v_t_namespace = map_namespace_env v_t_namespace in
     let v_t_mode = map_mode v_t_mode
     in
@@ -117,6 +119,7 @@ let mk_mapper = fun m_in ->
         t_tparams = v_t_tparams;
         t_constraint = v_t_constraint;
         t_kind = v_t_kind;
+        t_user_attributes = v_t_user_attributes;
         t_namespace = v_t_namespace;
         t_mode = v_t_mode;
       }

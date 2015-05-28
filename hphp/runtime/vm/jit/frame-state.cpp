@@ -487,6 +487,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
         if (effects.baseTypeChanged || effects.baseValChanged) {
           auto const ty = effects.baseType.derefIfPtr();
+          assert(cur().evalStack.empty());
           setStackType(
             offset,
             ty <= TBoxedCell ? TBoxedInitCell : ty

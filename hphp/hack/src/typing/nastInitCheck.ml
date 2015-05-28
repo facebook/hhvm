@@ -212,9 +212,9 @@ and class_ tenv c =
 and constructor env cstr =
   match cstr with
     | None -> SSet.empty
-    | Some cstr -> match cstr.m_body with
-        | NamedBody b -> toplevel env SSet.empty b.fnb_nast
-        | UnnamedBody _ -> (* FIXME FIXME *) SSet.empty
+    | Some cstr ->
+      let b = Nast.assert_named_body cstr.m_body in
+      toplevel env SSet.empty b.fnb_nast
 
 and assign _env acc x =
   SSet.add x acc
@@ -359,24 +359,10 @@ and expr_ env acc p e =
           | Done -> acc
           | Todo b ->
             method_ := Done;
-            (match b with
-              | NamedBody b -> toplevel env acc b.fnb_nast
-              | UnnamedBody _b -> (* FIXME *) acc
-            )
+            let fb = Nast.assert_named_body b in
+            toplevel env acc fb.fnb_nast
           )
       )
-  | Assert (AE_invariant_violation (e, el)) ->
-    let el =
-      match e with
-        | _, Id (_, fun_name) when is_whitelisted fun_name ->
-          List.filter begin function
-            | _, This -> false
-            | _ -> true
-          end el
-        | _ -> el
-    in
-    let acc = List.fold_left expr acc el in
-    expr acc e
   | Call (_, e, el, uel) ->
     let el = el @ uel in
     let el =

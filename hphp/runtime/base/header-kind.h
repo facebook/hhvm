@@ -90,8 +90,11 @@ constexpr auto FAST_REFCOUNT_OFFSET = HeaderOffset +
                                       offsetof(HeaderWord<>, count);
 
 inline bool isObjectKind(HeaderKind k) {
-  return uint8_t(k) >= uint8_t(HeaderKind::Object) &&
-         uint8_t(k) <= uint8_t(HeaderKind::ImmSet);
+  return k >= HeaderKind::Object && k <= HeaderKind::ImmSet;
+}
+
+inline bool isArrayKind(HeaderKind k) {
+  return k >= HeaderKind::Packed && k <= HeaderKind::Proxy;
 }
 
 enum class CollectionType : uint8_t { // Subset of possible HeaderKind values

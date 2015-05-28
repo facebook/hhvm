@@ -62,13 +62,13 @@ struct VcallArgs {
 /*
  * Vasm constant.
  *
- * Either a 1, 4, or 8 byte unsigned value, or the disp32 part of a
- * thread-local address of an immutable constant that varies by
+ * Either a 1, 4, or 8 byte unsigned value, 8 byte double, or the disp32 part
+ * of a thread-local address of an immutable constant that varies by
  * thread. Constants may also represent an undefined value, indicated by the
  * isUndef member.
  */
 struct Vconst {
-  enum Kind { Quad, Long, Byte, ThreadLocal };
+  enum Kind { Quad, Long, Byte, Double, ThreadLocal };
 
   Vconst() : kind(Quad), val(0) {}
   /* implicit */ Vconst(Kind k) : kind(k), isUndef(true), val(0) {}
@@ -76,6 +76,7 @@ struct Vconst {
   /* implicit */ Vconst(uint8_t b) : kind(Byte), val(b) {}
   /* implicit */ Vconst(uint32_t i) : kind(Long), val(i) {}
   /* implicit */ Vconst(uint64_t i) : kind(Quad), val(i) {}
+  /* implicit */ Vconst(double d) : kind(Double), doubleVal(d) {}
   /* implicit */ Vconst(Vptr tl) : kind(ThreadLocal), disp(tl.disp) {
     assertx(!tl.base.isValid() &&
            !tl.index.isValid() &&
@@ -101,6 +102,7 @@ struct Vconst {
   bool isUndef{false};
   union {
     uint64_t val;
+    double doubleVal;
     int64_t disp; // really, int32 offset from %fs
   };
 };

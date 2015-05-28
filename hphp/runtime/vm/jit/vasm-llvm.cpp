@@ -611,6 +611,14 @@ struct LLVMEmitter {
             defineValue(pair.second, cns(uint8_t(pair.first.val)));
           }
           break;
+        case Vconst::Double:
+          if (pair.first.isUndef) {
+            defineValue(pair.second,
+                        llvm::UndefValue::get(m_irb.getDoubleTy()));
+          } else {
+            defineValue(pair.second, cnsDbl(pair.first.doubleVal));
+          }
+          break;
         case Vconst::ThreadLocal:
           always_assert(false);
           break;
@@ -1183,6 +1191,9 @@ private:
 
       for (auto phiInd = 0; phiInd < m_defs.size(); ++phiInd) {
         llvm::Type* type = e.value(m_pendingPreds[0].uses[phiInd])->getType();
+        // doubles through phis are treated as i64. See comment in
+        // addIncoming().
+        if (type->isDoubleTy()) type = e.m_int64;
         llvm::PHINode* phi = e.m_irb.CreatePHI(type, 1);
         m_phis.push_back(phi);
 
@@ -1201,8 +1212,18 @@ private:
     };
 
     void addIncoming(LLVMEmitter& e, UseInfo& useInfo, unsigned phiInd) {
-      m_phis[phiInd]->addIncoming(e.value(useInfo.uses[phiInd]),
-                                  useInfo.fromLabel);
+      // Due to the lack of a proper type system in vasm, we're tolerant of
+      // doubles being passed around as i64, and we insert bitcast instructions
+      // as needed to get proper double values. Until we get stronger types in
+      // the incoming Vunit, we bitcast all double values to i64 when sending
+      // them through a phi node, to avoid having to look ahead and figure out
+      // where we might be joining an i64 with a double.
+      auto value = e.value(useInfo.uses[phiInd]);
+      if (value->getType()->isDoubleTy()) {
+        value = new llvm::BitCastInst(value, e.m_int64, "",
+                                      useInfo.fromLabel->getTerminator());
+      }
+      m_phis[phiInd]->addIncoming(value, useInfo.fromLabel);
       auto typeStr = llshow(e.value(useInfo.uses[phiInd])->getType());
       FTRACE(2,
              "phidef --> phiInd:{}, type:{}, incoming:{}, use:%{}, "
@@ -1565,16 +1586,20 @@ O(unpcklpd)
       case Vinstr::psllq:
       case Vinstr::psrlq:
       case Vinstr::fallthru:
+      case Vinstr::popm:  // currently used in cgEnterFrame
         always_assert_flog(false,
                            "Banned opcode in B{}: {}",
                            size_t(label), show(m_unit, inst));
 
       // Not yet implemented opcodes:
+      case Vinstr::jcci:
       case Vinstr::contenter:
       case Vinstr::mccall:
       case Vinstr::mcprep:
       case Vinstr::cmpsd:
       case Vinstr::ucomisd:
+      case Vinstr::ldimmqs:
+      case Vinstr::cmpqims:
       // ARM opcodes:
       case Vinstr::asrv:
       case Vinstr::brk:
@@ -2639,9 +2664,9 @@ void LLVMEmitter::emit(const orqim& inst) {
 }
 
 void LLVMEmitter::emit(const phijmp& inst) {
+  m_irb.CreateBr(block(inst.target));
   m_phiInfos[block(inst.target)].phij(*this, m_irb.GetInsertBlock(),
                                       m_unit.tuples[inst.uses]);
-  m_irb.CreateBr(block(inst.target));
 }
 
 void LLVMEmitter::emit(const phijcc& inst) {
@@ -2649,12 +2674,11 @@ void LLVMEmitter::emit(const phijcc& inst) {
   auto next  = block(inst.targets[0]);
   auto taken = block(inst.targets[1]);
   auto& uses = m_unit.tuples[inst.uses];
+  auto cond = emitCmpForCC(inst.sf, inst.cc);
+  m_irb.CreateCondBr(cond, taken, next);
 
   m_phiInfos[next].phij(*this, curBlock, uses);
   m_phiInfos[taken].phij(*this, curBlock, uses);
-
-  auto cond = emitCmpForCC(inst.sf, inst.cc);
-  m_irb.CreateCondBr(cond, taken, next);
 }
 
 void LLVMEmitter::emit(const phidef& inst) {

@@ -72,7 +72,7 @@ let try_dump_unparsed ast =
 let _ =
   try
     let (src, dest) = parse_options () in
-    SharedMem.init ();
+    SharedMem.(init default_config);
     let src = Relative_path.create Relative_path.Dummy src in
     let {Parser_hack.ast; _} = Parser_hack.parse_or_die src in
     if !debug then try_dump_unparsed ast;

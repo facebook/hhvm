@@ -503,7 +503,7 @@ String HHVM_FUNCTION(implode,
                              "one of the arguments");
     return String();
   }
-  return StringUtil::Implode(items, delim);
+  return StringUtil::Implode(items, delim, false);
 }
 
 String HHVM_FUNCTION(join,
@@ -1647,7 +1647,7 @@ String HHVM_FUNCTION(fb_htmlspecialchars,
                      const String& charset /* = "ISO-8859-1" */,
                      const Variant& extra /* = empty_array_ref */) {
   if (!extra.isNull() && !extra.isArray()) {
-    throw_expected_array_exception();
+    throw_expected_array_exception("fb_htmlspecialchars");
   }
   const Array& arr_extra = extra.isNull() ? empty_array_ref : extra.toArray();
   return StringUtil::HtmlEncodeExtra(str, StringUtil::toQuoteStyle(flags),

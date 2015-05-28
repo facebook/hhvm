@@ -77,15 +77,21 @@ void IntervalTimer::RunCallbacks(IntervalTimer::SampleType type) {
       // This timer has been removed from the pool by one of the callbacks.
       continue;
     }
-    if (timer->m_signaled.load(std::memory_order_relaxed)) {
-      timer->m_signaled.store(false, std::memory_order_relaxed);
-      try {
-        Array args = make_packed_array(sample_type_string(type));
-        vm_call_user_func(timer->m_callback, args);
-      } catch (Object& ex) {
-        raise_error("Uncaught exception escaping IntervalTimer: %s",
-                    ex.toString().data());
+    int count = 0;
+    {
+      std::lock_guard<std::mutex> lock(timer->m_signalMutex);
+      count = timer->m_count;
+      timer->m_count = 0;
+      if (count == 0) {
+        continue;
       }
+    }
+    try {
+      Array args = make_packed_array(sample_type_string(type), count);
+      vm_call_user_func(timer->m_callback, args);
+    } catch (Object& ex) {
+      raise_error("Uncaught exception escaping IntervalTimer: %s",
+                  ex.toString().data());
     }
   }
 }
@@ -132,8 +138,11 @@ void IntervalTimer::run() {
                                 std::chrono::duration<double>(waitTime),
                                 [this]{ return m_done; });
     if (status) break;
-    m_signaled.store(true, std::memory_order_relaxed);
-    m_data->setFlag(IntervalTimerFlag);
+    {
+      std::lock_guard<std::mutex> l(m_signalMutex);
+      m_data->setFlag(IntervalTimerFlag);
+      ++m_count;
+    }
     waitTime = m_interval;
   } while (waitTime != 0.0);
 }

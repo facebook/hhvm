@@ -74,71 +74,6 @@ namespace HPHP { namespace jit {
 
 Lease Translator::s_writeLease;
 
-int locPhysicalOffset(int32_t localIndex) {
-  return -(localIndex + 1);
-}
-
-bool isClassSpecializedTypeReliable(Type input) {
-  assert(input.isSpecialized());
-  assert(input.clsSpec());
-  auto baseClass = input.clsSpec().cls();
-  return RuntimeOption::RepoAuthoritative &&
-      (baseClass->preClass()->attrs() & AttrUnique);
-}
-
-PropInfo getPropertyOffset(const IRGS& env,
-                           const NormalizedInstruction& ni,
-                           const Class* ctx, const Class*& baseClass,
-                           const MInstrInfo& mii,
-                           unsigned mInd, unsigned iInd) {
-  if (mInd == 0) {
-    auto const baseIndex = mii.valCount();
-    auto const type = irgen::predictedTypeFromLocation(
-      const_cast<IRGS&>(env), ni.inputs[baseIndex]->location);
-    baseClass = type <= TObj ? type.clsSpec().cls() : nullptr;
-  }
-  if (!baseClass) return PropInfo();
-
-  // TODO: This use of rtt is not guaranteed to be correctly guarded on.
-  auto keyType = ni.inputs[iInd]->rtt;
-  if (!keyType.hasConstVal(TStr)) return PropInfo();
-  auto const name = keyType.strVal();
-
-  // If we are not in repo-authoriative mode, we need to check that
-  // baseClass cannot change in between requests
-  if (!RuntimeOption::RepoAuthoritative ||
-      !(baseClass->preClass()->attrs() & AttrUnique)) {
-    if (!ctx) return PropInfo();
-    if (!ctx->classof(baseClass)) {
-      if (baseClass->classof(ctx)) {
-        // baseClass can change on us in between requests, but since
-        // ctx is an ancestor of baseClass we can make the weaker
-        // assumption that the object is an instance of ctx
-        baseClass = ctx;
-      } else {
-        // baseClass can change on us in between requests and it is
-        // not related to ctx, so bail out
-        return PropInfo();
-      }
-    }
-  }
-  // Lookup the index of the property based on ctx and baseClass
-  auto const lookup = baseClass->getDeclPropIndex(ctx, name);
-  auto const idx = lookup.prop;
-
-  // If we couldn't find a property that is accessible in the current context,
-  // bail out
-  if (idx == kInvalidSlot || !lookup.accessible) return PropInfo();
-
-  // If it's a declared property we're good to go: even if a subclass redefines
-  // an accessible property with the same name it's guaranteed to be at the same
-  // offset.
-  return PropInfo(
-    baseClass->declPropOffset(idx),
-    baseClass->declPropRepoAuthType(idx)
-  );
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -1332,7 +1267,9 @@ static void translateDispatch(IRGS& irgs,
 
 //////////////////////////////////////////////////////////////////////
 
-static Type flavorToType(FlavorDesc f) {
+namespace {
+
+Type flavorToType(FlavorDesc f) {
   switch (f) {
     case NOV: not_reached();
 
@@ -1346,15 +1283,15 @@ static Type flavorToType(FlavorDesc f) {
   not_reached();
 }
 
-void emitInputChecks(
+Type typeToCheckForInput(
   IRGS& irgs,
   const NormalizedInstruction& ni,
-  bool checkOuterTypeOnly
+  int32_t opndIdx,
+  Type predictedType
 ) {
-  auto typeToCheckForInput = [&](int32_t opndIdx, Type predictedType) {
-    auto opc = ni.op();
-    auto tc = TypeConstraint(DataTypeSpecific);
-    switch (opc) {
+  auto opc = ni.op();
+  auto tc = TypeConstraint(DataTypeSpecific);
+  switch (opc) {
     case OpSetS:
     case OpSetG:
     case OpSetL: {
@@ -1429,35 +1366,27 @@ void emitInputChecks(
       break;
     }
 
-    case OpCGetM:
-    case OpIssetM:
-    case OpSetM: {
-      if (opndIdx == 0) {
-        if (predictedType.isSpecialized()) {
-          if (predictedType.clsSpec() &&
-              isClassSpecializedTypeReliable(predictedType)) {
-            tc = TypeConstraint(predictedType.clsSpec().cls());
-          } else if (predictedType.arrSpec() &&
-              predictedType.arrSpec().kind()) {
-            tc = TypeConstraint(DataTypeSpecialized).setWantArrayKind();
-          }
-          break;
-        }
-      }
-      break;
-    }
-
     default: {
       break;
     }
-    }
-    return relaxType(predictedType, tc);
-  };
+  }
 
+  if (hasMVector(opc) && opndIdx == getMInstrInfo(ni.mInstrOp()).valCount()) {
+    tc = irgen::mInstrBaseConstraint(irgs, predictedType);
+  }
+
+  return relaxType(predictedType, tc);
+}
+
+void emitInputChecks(
+  IRGS& irgs,
+  const NormalizedInstruction& ni,
+  bool checkOuterTypeOnly
+) {
   FTRACE(4, "\n{}: {}\n", ni.offset(), opcodeToName(ni.op()));
   for (auto i = 0; i < ni.inputs.size(); ++i) {
     FTRACE(4, "Input {}: ", i);
-    auto loc = ni.inputs[i]->location;
+    auto loc = ni.inputs[i];
     if (!loc.isLocal() && !loc.isStack()) {
       FTRACE(4, "!isLocal && !isStack, skipping\n");
       continue;
@@ -1474,7 +1403,7 @@ void emitInputChecks(
 
     auto typeToCheck = predictedType <= TCls
       ? predictedType
-      : typeToCheckForInput(i, predictedType);
+      : typeToCheckForInput(irgs, ni, i, predictedType);
 
     // Make sure typeToCheck is checkable.
     if (!(typeToCheck <= TCell || typeToCheck <= TBoxedInitCell)) {
@@ -1514,6 +1443,8 @@ void emitInputChecks(
   irgs.irb->exceptionStackBoundary();
 }
 
+}
+
 void translateInstr(
   IRGS& irgs,
   const NormalizedInstruction& ni,
@@ -1529,11 +1460,9 @@ void translateInstr(
   auto pc = reinterpret_cast<const Op*>(ni.pc());
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
     auto const type = flavorToType(instrInputFlavor(pc, i));
-    if (type != TGen) {
-      // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
-      // is a little unsure of itself.
-      irgen::assertTypeStack(irgs, BCSPOffset{i}, type);
-    }
+    // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
+    // is a little unsure of itself.
+    irgen::assertTypeStack(irgs, BCSPOffset{i}, type);
   }
 
   if (RuntimeOption::EvalHHIRConstrictGuards) {

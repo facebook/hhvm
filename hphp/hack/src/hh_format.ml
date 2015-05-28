@@ -115,7 +115,7 @@ let debug_directory dir =
   let path = Path.make dir in
   let next = compose
     (rev_rev_map (Relative_path.create Relative_path.Root))
-    (Find.make_next_files_php path) in
+    (Find.make_next_files FindUtils.is_php path) in
   let workers = Worker.make GlobalConfig.nbr_procs GlobalConfig.gc_control in
   MultiWorker.call
     (Some workers)
@@ -203,7 +203,7 @@ let directory modes dir =
   let path = Path.make dir in
   let next = compose
     (rev_rev_map (Relative_path.create Relative_path.Root))
-    (Find.make_next_files_php path) in
+    (Find.make_next_files FindUtils.is_php path) in
   let workers = Worker.make GlobalConfig.nbr_procs GlobalConfig.gc_control in
   let messages =
     MultiWorker.call
@@ -257,7 +257,7 @@ let format_stdin modes from to_ =
 (*****************************************************************************)
 
 let () =
-  SharedMem.init();
+  SharedMem.(init default_config);
   PidLog.log_oc := Some (open_out "/dev/null");
   let files, from, to_, in_place, debug, diff, modes, root = parse_args() in
   let root =

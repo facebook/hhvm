@@ -1,5 +1,5 @@
 (**
- * Copyright (c) 2014, Facebook, Inc.
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -8,9 +8,11 @@
  *
  *)
 
-exception Server_cant_connect
-exception Server_busy
-exception Server_out_of_date
-exception Server_missing
-exception Server_initializing
-exception Server_directory_mismatch
+open Utils
+
+type t
+
+val init : Path.t list -> t
+val pid : t -> int
+val request_changes : t -> SSet.t
+val get_changes : t -> SSet.t

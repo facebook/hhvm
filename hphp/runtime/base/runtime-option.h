@@ -420,6 +420,7 @@ public:
   F(uint64_t, JitAProfSize,            64 << 20)                        \
   F(uint64_t, JitAColdSize,            24 << 20)                        \
   F(uint64_t, JitAFrozenSize,          40 << 20)                        \
+  F(uint32_t, JitAutoTCShift,          1)                               \
   F(uint64_t, JitGlobalDataSize,       kJitGlobalDataDef)               \
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(bool, JitTimer,                    kJitTimerDefault)                \
@@ -496,6 +497,7 @@ public:
   F(bool, HHIRGlobalValueNumbering,    true)                            \
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRMemoryOpts,              true)                            \
+  F(bool, HHIRStorePRE,                true)                            \
   /* Register allocation flags */                                       \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
@@ -507,14 +509,17 @@ public:
   F(string,   JitPGORegionSelector,    pgoRegionSelectorDefault())      \
   F(uint64_t, JitPGOThreshold,         pgoThresholdDefault())           \
   F(bool,     JitPGOHotOnly,           false)                           \
+  F(bool,     JitPGOCFGHotFuncOnly,    false)                           \
   F(bool,     JitPGOUsePostConditions, true)                            \
   F(uint32_t, JitUnlikelyDecRefPercent,10)                              \
   F(uint32_t, JitPGOReleaseVVMinPercent, 10)                            \
   F(bool,     JitPGOArrayGetStress,    false)                           \
+  F(uint32_t, JitPGOMinBlockCountPercent, 10)                           \
+  F(double,   JitPGOMinArcProbability, 0.02)                            \
   F(bool,     JitLoops,                loopsDefault())                  \
   F(uint32_t, HotFuncCount,            4100)                            \
-  F(bool, HHIRRelaxGuards,             true)                            \
   F(bool, HHIRConstrictGuards,         false)                           \
+  F(bool, HHIRRelaxGuards,             hhirRelaxGuardsDefault())        \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
   F(bool, DumpHhas,                    false)                           \

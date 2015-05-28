@@ -8,7 +8,7 @@ foreach ($g as $k => $v) {
   echo("$k = $v\n");
 }
 function bar($start, $end) {
-  $f = function ($i) {
+  $f = function($i) {
     yield $i;
   };
   $g = () ==> { yield true;};

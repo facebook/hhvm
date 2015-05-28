@@ -114,8 +114,9 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
   return ret;
 }
 
-String StringUtil::Implode(const Variant& items, const String& delim) {
-  if (!isContainer(items)) {
+String StringUtil::Implode(const Variant& items, const String& delim,
+                           const bool checkIsContainer /* = true */) {
+  if (checkIsContainer && !isContainer(items)) {
     throw_param_is_not_container();
   }
   int size = getContainerSize(items);
@@ -137,17 +138,18 @@ String StringUtil::Implode(const Variant& items, const String& delim) {
   char *buffer = s.mutableData();
   const char *sdelim = delim.data();
   char *p = buffer;
-  for (int i = 0; i < size; i++) {
+  String &init_str = sitems[0];
+  int init_len = init_str.size();
+  memcpy(p, init_str.data(), init_len);
+  p += init_len;
+  sitems[0].~String();
+  for (int i = 1; i < size; i++) {
     String &item = sitems[i];
-    if (i && lenDelim) {
-      memcpy(p, sdelim, lenDelim);
-      p += lenDelim;
-    }
+    memcpy(p, sdelim, lenDelim);
+    p += lenDelim;
     int lenItem = item.size();
-    if (lenItem) {
-      memcpy(p, item.data(), lenItem);
-      p += lenItem;
-    }
+    memcpy(p, item.data(), lenItem);
+    p += lenItem;
     sitems[i].~String();
   }
   smart_free(sitems);

@@ -33,6 +33,8 @@ TRACE_SET_MOD(hhir);
 using Trace::Indent;
 
 bool shouldHHIRRelaxGuards() {
+  assert(!(RuntimeOption::EvalHHIRRelaxGuards &&
+           RuntimeOption::EvalHHIRConstrictGuards));
   return RuntimeOption::EvalHHIRRelaxGuards &&
     (RuntimeOption::EvalJitRegionSelector == "tracelet" ||
      RuntimeOption::EvalJitRegionSelector == "method" ||
@@ -319,8 +321,7 @@ Type relaxType(Type t, TypeConstraint tc) {
   always_assert_flog(t <= TGen && t != TBottom, "t = {}", t);
   if (tc.category == DataTypeGeneric) return TGen;
   auto const relaxed =
-    (t & TCell) <= TBottom ? TBottom
-                                     : relaxCell(t & TCell, tc);
+    (t & TCell) <= TBottom ? TBottom : relaxCell(t & TCell, tc);
   return t <= TCell ? relaxed : relaxed | TBoxedInitCell;
 }
 

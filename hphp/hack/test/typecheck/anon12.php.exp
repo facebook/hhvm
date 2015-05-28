@@ -1,4 +1,4 @@
-File "anon12.php", line 13, characters 26-27:
+File "anon12.php", line 13, characters 25-26:
 A previous parameter has a default value.
 Remove all the default values for the preceding parameters,
 or add a default value to this one. (Typing[4077])

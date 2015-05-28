@@ -5,23 +5,23 @@ class C {
     return $a + $b;
   }
   public function foo($x) {
-    $bar = function ($y) use ($x) {
+    $bar = function($y) use ($x) {
       return $this->stuff($x, $y);
     };
     return $bar(33);
   }
   public function bar($x) {
     $zeta = new_model($x);
-    return function ($y) use ($zeta) {
+    return function($y) use ($zeta) {
       return $this->stuff($y, $zeta);
     };
   }
 }
 function lam($b) {
-  $fn = function ($a) use ($b) {
+  $fn = function($a) use ($b) {
     return $a + $b;
   };
-  $gn = function ($a) use ($b) {
+  $gn = function($a) use ($b) {
     $c = $b * 20;
     return $a + $b;
   };

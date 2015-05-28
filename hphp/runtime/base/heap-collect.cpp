@@ -378,7 +378,7 @@ void Marker::trace() {
 // another pass through the heap now that everything is marked.
 void Marker::sweep() {
   marked_ = ambig_marked_ = 0;
-  MM().forEachHeader([&](Header* h) {
+  MM().iterate([&](Header* h) {
     if (h->hdr_.cmark) ambig_marked_ += h->size();
     if (h->hdr_.mark) marked_ += h->size();
     switch (h->kind()) {

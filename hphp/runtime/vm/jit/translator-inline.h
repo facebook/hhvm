@@ -19,18 +19,20 @@
 
 #include <boost/noncopyable.hpp>
 
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/base/execution-context.h"
 
 /*
  * Because of a circular dependence with ExecutionContext, these
  * translation-related helpers cannot live in translator.h.
  */
-namespace HPHP   {
+namespace HPHP {
 
-inline ActRec* liveFrame()    { return vmfp(); }
+///////////////////////////////////////////////////////////////////////////////
+
+inline ActRec* liveFrame() { return vmfp(); }
 inline const Func* liveFunc() { return liveFrame()->m_func; }
 inline const Unit* liveUnit() { return liveFunc()->unit(); }
 inline Class* liveClass() { return liveFunc()->cls(); }
@@ -44,7 +46,11 @@ inline jit::FPInvOffset liveSpOff() {
   return jit::FPInvOffset{safe_cast<int32_t>(fp - vmsp())};
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 namespace jit {
+
+///////////////////////////////////////////////////////////////////////////////
 
 inline int cellsToBytes(int nCells) {
   return safe_cast<int32_t>(nCells * ssize_t(sizeof(Cell)));
@@ -54,6 +60,8 @@ inline int localOffset(int locId) {
   return -cellsToBytes(locId + 1);
 }
 
-} } // HPHP::jit
+///////////////////////////////////////////////////////////////////////////////
+
+}}
 
 #endif

@@ -34,17 +34,13 @@
 #include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/shape.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/ext/asio/asio-blockable.h"
-#include "hphp/runtime/ext/asio/async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/wait-handle.h"
-#include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/base/shape.h"
+#include "hphp/runtime/vm/runtime.h"
+
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -61,19 +57,25 @@
 #include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
-#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/stack-offsets-defs.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
-#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/jit/vasm.h"
+
+#include "hphp/runtime/ext/asio/asio-blockable.h"
+#include "hphp/runtime/ext/asio/async-function-wait-handle.h"
+#include "hphp/runtime/ext/asio/wait-handle.h"
+#include "hphp/runtime/ext/ext_closure.h"
+#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/ext_generator.h"
 
 #define rVmSp DontUseRVmSpInThisFile
 
@@ -348,6 +350,7 @@ CALL_OPCODE(VerifyRetCallable)
 CALL_OPCODE(VerifyRetFail)
 CALL_OPCODE(RaiseUninitLoc)
 CALL_OPCODE(RaiseUndefProp)
+CALL_OPCODE(RaiseMissingArg)
 CALL_OPCODE(RaiseError)
 CALL_OPCODE(RaiseWarning)
 CALL_OPCODE(RaiseNotice)
@@ -2218,6 +2221,36 @@ void CodeGenerator::cgStLoc(IRInstruction* inst) {
   emitStoreTV(vmain(), ptr[off], srcLoc(inst, 1), inst->src(1));
 }
 
+void CodeGenerator::cgStLocRange(IRInstruction* inst) {
+  auto const range = inst->extra<StLocRange>();
+
+  if (range->start >= range->end) return;
+
+  auto const fp = srcLoc(inst, 0).reg();
+  auto const loc = srcLoc(inst, 1);
+  auto const val = inst->src(1);
+  auto& v = vmain();
+
+  auto ireg = v.makeReg();
+  auto nreg = v.makeReg();
+
+  v << lea{fp[localOffset(range->start)], ireg};
+  v << lea{fp[localOffset(range->end)], nreg};
+
+  doWhile(v, CC_NE, {ireg},
+    [&] (const VregList& in, const VregList& out) {
+      auto const i = in[0];
+      auto const res = out[0];
+      auto const sf = v.makeReg();
+
+      emitStoreTV(v, i[0], loc, val);
+      v << subqi{int32_t{sizeof(Cell)}, i, res, v.makeReg()};
+      v << cmpq{res, nreg, sf};
+      return sf;
+    }
+  );
+}
+
 void CodeGenerator::cgEagerSyncVMRegs(IRInstruction* inst) {
   auto const spOff = inst->extra<EagerSyncVMRegs>()->offset.offset;
   auto& v = vmain();
@@ -2786,7 +2819,7 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
       v << storeqi{0, sync_sp[cellsToBytes(argc) + AROFF(m_invName)]};
     }
     v << lea{sync_sp[cellsToBytes(argc)], rVmFp};
-    emitCheckSurpriseFlagsEnter(v, vc, rds, Fixup(0, argc), catchBlock);
+    emitCheckSurpriseFlagsEnter(v, vc, rFP, rds, Fixup(0, argc), catchBlock);
     BuiltinFunction builtinFuncPtr = callee->builtinFuncPtr();
     TRACE(2, "calling builtin preClass %p func %p\n", callee->preClass(),
           builtinFuncPtr);
@@ -5050,8 +5083,8 @@ void CodeGenerator::cgIncTransCounter(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgIncProfCounter(IRInstruction* inst) {
-  TransID  transId = inst->extra<TransIDData>()->transId;
-  auto counterAddr = mcg->tx().profData()->transCounterAddr(transId);
+  auto const transId = inst->extra<TransIDData>()->transId;
+  auto const counterAddr = mcg->tx().profData()->transCounterAddr(transId);
   auto& v = vmain();
   v << decqm{v.cns(counterAddr)[0], v.makeReg()};
 }
@@ -5288,6 +5321,88 @@ void CodeGenerator::cgLdStructArrayElem(IRInstruction* inst) {
   auto const actualOffset = StructArray::dataOffset() +
     sizeof(TypedValue) * offset;
   emitLoad(inst->dst(), dstLoc(inst, 0), array[actualOffset]);
+}
+
+void CodeGenerator::cgEnterFrame(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+  vmain() << popm{fp[AROFF(m_savedRip)]};
+}
+
+void CodeGenerator::cgCheckStackOverflow(IRInstruction* inst) {
+  auto const func = inst->marker().func();
+  auto const fp = srcLoc(inst, 0).reg();
+
+  auto& v = vmain();
+  auto const r = v.makeReg();
+  auto const sf = v.makeReg();
+
+  auto const stackMask = int32_t{
+    cellsToBytes(RuntimeOption::EvalVMStackElms) - 1
+  };
+  auto const depth = cellsToBytes(func->maxStackCells()) +
+                     kStackCheckPadding * sizeof(Cell) +
+                     Stack::sSurprisePageSize;
+
+  v << andqi{stackMask, fp, r, v.makeReg()};
+  v << subqi{safe_cast<int32_t>(depth), r, v.makeReg(), sf};
+
+  unlikelyIfThen(v, vcold(), CC_L, sf, [&] (Vout& v) {
+    cgCallHelper(v, CppCall::direct(handleStackOverflow), kVoidDest,
+                 SyncOptions::kSyncPoint, argGroup(inst).reg(fp));
+  });
+}
+
+void CodeGenerator::cgInitExtraArgs(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+  auto const extra = inst->extra<InitExtraArgs>();
+  auto const func = extra->func;
+  auto const argc = extra->argc;
+
+  using Action = ExtraArgsAction;
+
+  auto& v = vmain();
+  void (*handler)(ActRec*) = nullptr;
+
+  switch (extra_args_action(func, argc)) {
+    case Action::None:
+      if (func->attrs() & AttrMayUseVV) {
+        v << storeqi{0, fp[AROFF(m_invName)]};
+      }
+      return;
+
+    case Action::Discard:
+      handler = trimExtraArgs;
+      break;
+    case Action::Variadic:
+      handler = shuffleExtraArgsVariadic;
+      break;
+    case Action::MayUseVV:
+      handler = shuffleExtraArgsMayUseVV;
+      break;
+    case Action::VarAndVV:
+      handler = shuffleExtraArgsVariadicAndVV;
+      break;
+  }
+
+  v << vcall{
+    CppCall::direct(handler),
+    v.makeVcallArgs({{fp}}),
+    v.makeTuple({})
+  };
+}
+
+void CodeGenerator::cgCheckSurpriseFlagsEnter(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+  auto const extra = inst->extra<CheckSurpriseFlagsEnter>();
+  auto const func = extra->func;
+  auto const argc = extra->argc;
+
+  auto const off = func->getEntryForNumArgs(argc) - func->base();
+  auto const fixup = Fixup(off, func->numSlotsInFrame());
+
+  auto const catchBlock = m_state.labels[inst->taken()];
+  emitCheckSurpriseFlagsEnter(vmain(), vcold(), fp, rVmTl, fixup, catchBlock);
+  m_state.catch_calls[inst->taken()] = CatchCall::CPP;
 }
 
 void CodeGenerator::print() const {

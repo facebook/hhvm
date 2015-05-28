@@ -542,7 +542,7 @@ Variant HHVM_FUNCTION(array_merge,
   for (ArrayIter iter(args); iter; ++iter) {
     Variant v = iter.second();
     if (!v.isArray()) {
-      throw_expected_array_exception();
+      throw_expected_array_exception("array_merge");
       return init_null();
     }
     const Array& arr_v = v.asCArrRef();
@@ -571,7 +571,7 @@ Variant HHVM_FUNCTION(array_merge_recursive,
   for (ArrayIter iter(args); iter; ++iter) {
     Variant v = iter.second();
     if (!v.isArray()) {
-      throw_expected_array_exception();
+      throw_expected_array_exception("array_merge_recursive");
       return init_null();
     }
     const Array& arr_v = v.asCArrRef();
@@ -828,7 +828,7 @@ Variant HHVM_FUNCTION(array_push,
       }
     }
   }
-  throw_expected_array_or_collection_exception();
+  throw_expected_array_or_collection_exception("array_push");
   return init_null();
 }
 
@@ -1179,7 +1179,7 @@ bool HHVM_FUNCTION(array_walk_recursive,
                    const Variant& funcname,
                    const Variant& userdata /* = null_variant */) {
   if (!input.isArray()) {
-    throw_expected_array_exception();
+    throw_expected_array_exception("array_walk_recursive");
     return false;
   }
   CallCtx ctx;
@@ -1198,7 +1198,7 @@ bool HHVM_FUNCTION(array_walk,
                    const Variant& funcname,
                    const Variant& userdata /* = null_variant */) {
   if (!input.isArray()) {
-    throw_expected_array_exception();
+    throw_expected_array_exception("array_walk");
     return false;
   }
   CallCtx ctx;
@@ -1265,7 +1265,7 @@ static int php_count_recursive(const Array& array) {
 bool HHVM_FUNCTION(shuffle,
                    VRefParam array) {
   if (!array.isArray()) {
-    throw_expected_array_exception();
+    throw_expected_array_exception("shuffle");
     return false;
   }
   array = ArrayUtil::Shuffle(array);
@@ -2376,7 +2376,7 @@ php_sort(VRefParam container, int sort_flags,
     //  - Maps and Sets require associative sort
     //  - Immutable collections are not to be modified
   }
-  throw_expected_array_or_collection_exception();
+  throw_expected_array_or_collection_exception(ascending ? "sort" : "rsort");
   return false;
 }
 
@@ -2409,7 +2409,7 @@ php_asort(VRefParam container, int sort_flags,
       }
     }
   }
-  throw_expected_array_or_collection_exception();
+  throw_expected_array_or_collection_exception(ascending ? "asort" : "arsort");
   return false;
 }
 
@@ -2442,7 +2442,7 @@ php_ksort(VRefParam container, int sort_flags, bool ascending,
       }
     }
   }
-  throw_expected_array_or_collection_exception();
+  throw_expected_array_or_collection_exception(ascending ? "ksort" : "krsort");
   return false;
 }
 
@@ -2527,7 +2527,7 @@ bool HHVM_FUNCTION(usort,
     //  - Maps and Sets require associative sort
     //  - Immutable collections are not to be modified
   }
-  throw_expected_array_or_collection_exception();
+  throw_expected_array_or_collection_exception("usort");
   return false;
 }
 
@@ -2557,7 +2557,7 @@ bool HHVM_FUNCTION(uasort,
     //  - Vectors require a non-associative sort
     //  - Immutable collections are not to be modified
   }
-  throw_expected_array_or_collection_exception();
+  throw_expected_array_or_collection_exception("uasort");
   return false;
 }
 
@@ -2582,7 +2582,7 @@ bool HHVM_FUNCTION(uksort,
     //  - Vectors require a non-associative sort
     //  - Immutable collections are not to be modified
   }
-  throw_expected_array_or_collection_exception();
+  throw_expected_array_or_collection_exception("uksort");
   return false;
 }
 
@@ -2677,7 +2677,7 @@ static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
 TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
   TypedValue* tv = getArg(ar, 0);
   if (tv == nullptr || !tvAsVariant(tv).isArray()) {
-    throw_expected_array_exception();
+    throw_expected_array_exception("array_multisort");
     return arReturn(ar, false);
   }
 

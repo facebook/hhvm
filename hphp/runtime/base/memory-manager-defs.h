@@ -112,14 +112,13 @@ inline size_t Header::size() const {
     case HeaderKind::BigMalloc: // [BigNode][bytes...]
     case HeaderKind::BigObj:    // [BigNode][Header...]
       return big_.nbytes;
-    case HeaderKind::Free:
-      return free_.size();
     case HeaderKind::ResumableFrame:
       // [ResumableNode][locals][Resumable][ObjectData<ResumableObj>]
       return resumable()->size();
     case HeaderKind::NativeData:
       // [NativeNode][NativeData][ObjectData][props] is one allocation.
       return native_.obj_offset + Native::obj(&native_)->heapSize();
+    case HeaderKind::Free:
     case HeaderKind::Hole:
       return free_.size();
     case HeaderKind::Debug:
@@ -129,93 +128,56 @@ inline size_t Header::size() const {
   return 0;
 }
 
-// Iterator over all the slabs and bigs
-struct BigHeap::iterator {
-  struct Headiter {
-    explicit Headiter(void* p) : raw_((char*)p) {}
-    Headiter& operator=(void* p) {
-      raw_ = (char*)p;
-      return *this;
-    }
-    Headiter& operator++() {
-      assert(h_->size() > 0);
-      raw_ += MemoryManager::smartSizeClass(h_->size());
-      return *this;
-    }
-    Header& operator*() { return *h_; }
-    Header* operator->() { return h_; }
-    bool operator<(Headiter i) const { return raw_ < i.raw_; }
-    bool operator==(Headiter i) const { return raw_ == i.raw_; }
-  private:
-    union {
-      Header* h_;
-      char* raw_;
-    };
-  };
-  enum State { Slabs, Bigs };
-  using slab_iter = std::vector<MemBlock>::iterator;
-  using big_iter  = std::vector<BigNode*>::iterator;
-  explicit iterator(slab_iter slab, BigHeap& heap)
-    : m_state{Slabs}
-    , m_slab{slab}
-    , m_header{slab->ptr} // should never be at end.
-    , m_heap(heap)
-  {}
-  explicit iterator(big_iter big, BigHeap& heap)
-    : m_state{Bigs}
-    , m_big{big}
-    , m_header{big != heap.m_bigs.end() ? *big : nullptr}
-    , m_heap(heap)
-  {}
-  bool operator==(const iterator& it) const {
-    if (m_state != it.m_state) return false;
-    switch (m_state) {
-      case Slabs: return m_slab == it.m_slab && m_header == it.m_header;
-      case Bigs: return m_big == it.m_big;
-    };
-    not_reached();
+// Iterate over all the slabs and bigs
+template<class Fn> void BigHeap::iterate(Fn fn) {
+  auto in_slabs = !m_slabs.empty();
+  auto slab = begin(m_slabs);
+  auto big = begin(m_bigs);
+  Header *hdr, *slab_end;
+  if (in_slabs) {
+    hdr = (Header*)slab->ptr;
+    slab_end = (Header*)(static_cast<char*>(slab->ptr) + slab->size);
+  } else {
+    hdr = big != end(m_bigs) ? (Header*)*big : nullptr;
+    slab_end = nullptr;
   }
-  bool operator!=(const iterator& it) const {
-    return !(*this == it);
-  }
-  iterator& operator++() {
-    switch (m_state) {
-      case Slabs: {
-        auto end = Headiter{static_cast<char*>(m_slab->ptr) + m_slab->size};
-        if (++m_header < end) {
-          return *this;
+  while (in_slabs || big != end(m_bigs)) {
+    auto h = hdr;
+    if (in_slabs) {
+      // move to next header in slab. Hole and Free have exact sizes,
+      // so don't round them.
+      auto size = hdr->hdr_.kind == HeaderKind::Hole ||
+                  hdr->hdr_.kind == HeaderKind::Free ? hdr->free_.size() :
+                  MemoryManager::smartSizeClass(hdr->size());
+      hdr = (Header*)((char*)hdr + size);
+      if (hdr >= slab_end) {
+        assert(hdr == slab_end && "hdr > slab_end indicates corruption");
+        // move to next slab
+        if (++slab != m_slabs.end()) {
+          hdr = (Header*)slab->ptr;
+          slab_end = (Header*)(static_cast<char*>(slab->ptr) + slab->size);
+        } else {
+          // move to first big block
+          in_slabs = false;
+          if (big != end(m_bigs)) hdr = (Header*)*big;
         }
-        if (++m_slab != m_heap.m_slabs.end()) {
-          m_header = m_slab->ptr;
-          return *this;
-        }
-        m_state = Bigs;
-        m_big = m_heap.m_bigs.begin();
-        m_header = m_big != m_heap.m_bigs.end() ? *m_big : nullptr;
-        return *this;
       }
-      case Bigs:
-        ++m_big;
-        m_header = m_big != m_heap.m_bigs.end() ? *m_big : nullptr;
-        return *this;
+    } else {
+      // move to next big block
+      if (++big != end(m_bigs)) hdr = (Header*)*big;
     }
-    not_reached();
+    fn(h);
   }
-  Header& operator*() { return *m_header; }
-  Header* operator->() { return &*m_header; }
- private:
-  State m_state;
-  union {
-    slab_iter m_slab;
-    big_iter m_big;
-  };
-  Headiter m_header;
-  BigHeap& m_heap;
-};
+}
 
-template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
-  for (auto i = begin(), lim = end(); i != lim;) {
-    auto h = &*i; ++i;
+// Raw iterator loop over the headers of everything in the heap.
+// Skips DebugHeader because it's boring, and skips BigObj, because
+// it's just a detail of which sub-heap we used to allocate something
+// based on its size, and it can prefix almost any other header kind.
+// clients can call this directly to avoid unnecessary initFree()s.
+template<class Fn> void MemoryManager::iterate(Fn fn) {
+  assert(!m_needInitFree);
+  m_heap.iterate([&](Header* h) {
     if (h->kind() == HeaderKind::BigObj) {
       // skip BigNode
       h = reinterpret_cast<Header*>((&h->big_)+1);
@@ -226,17 +188,26 @@ template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
     }
     if (h->kind() == HeaderKind::Debug || h->kind() == HeaderKind::Hole) {
       // no valid pointer can point here.
-      continue;
+      return; // continue iterating
     }
     fn(h);
-  }
+    assert(!m_needInitFree); // otherwise the heap is unparsable.
+  });
 }
 
+// same as iterate(), but calls initFree first.
+template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
+  initFree();
+  iterate(fn);
+}
+
+// iterate just the ObjectDatas, including the kinds with prefixes.
+// (NativeData and ResumableFrame).
 template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   if (debug) checkHeap();
   std::vector<ObjectData*> ptrs;
-  for (auto i = begin(), lim = end(); i != lim; ++i) {
-    switch (i->kind()) {
+  forEachHeader([&](Header* h) {
+    switch (h->kind()) {
       case HeaderKind::Object:
       case HeaderKind::ResumableObj:
       case HeaderKind::AwaitAllWH:
@@ -247,25 +218,14 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
       case HeaderKind::ImmVector:
       case HeaderKind::ImmMap:
       case HeaderKind::ImmSet:
-        ptrs.push_back(&i->obj_);
+        ptrs.push_back(&h->obj_);
         break;
       case HeaderKind::ResumableFrame:
-        ptrs.push_back(i->resumableObj());
+        ptrs.push_back(h->resumableObj());
         break;
       case HeaderKind::NativeData:
-        ptrs.push_back(Native::obj(&i->native_));
+        ptrs.push_back(Native::obj(&h->native_));
         break;
-      case HeaderKind::BigObj: {
-        auto h = reinterpret_cast<Header*>(&i->big_ + 1);
-        if (h->kind() == HeaderKind::Debug) {
-          h = reinterpret_cast<Header*>(&h->debug_ + 1);
-        }
-        if (isObjectKind(h->kind())) {
-          ptrs.push_back(reinterpret_cast<ObjectData*>(h));
-          break;
-        }
-        continue;
-      }
       case HeaderKind::Packed:
       case HeaderKind::Struct:
       case HeaderKind::Mixed:
@@ -279,11 +239,14 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
       case HeaderKind::Free:
-      case HeaderKind::Hole:
+        break;
       case HeaderKind::Debug:
-        continue;
+      case HeaderKind::BigObj:
+      case HeaderKind::Hole:
+        assert(false && "forEachHeader skips these kinds");
+        break;
     }
-  }
+  });
   for (auto ptr : ptrs) {
     fn(ptr);
   }

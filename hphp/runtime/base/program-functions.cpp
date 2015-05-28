@@ -69,6 +69,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/constants.h"
+#include "hphp/util/code-cache.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/capability.h"
 #include "hphp/util/current-executable.h"
@@ -716,16 +717,6 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
     ti.m_coverage->Report(RuntimeOption::CodeCoverageOutputFile);
   }
 }
-
-#if defined(__APPLE__) || defined(__CYGWIN__)
-const void* __hot_start = nullptr;
-const void* __hot_end = nullptr;
-#else
-extern "C" {
-void __attribute__((__weak__)) __hot_start();
-void __attribute__((__weak__)) __hot_end();
-}
-#endif
 
 #if FACEBOOK && defined USE_SSECRC
 // Overwrite the functiosn

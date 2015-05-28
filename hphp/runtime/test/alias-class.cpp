@@ -148,11 +148,9 @@ TEST(AliasClass, StackBasics) {
     EXPECT_TRUE(stk1 != AStackAny);
     EXPECT_TRUE(stk2 != AStackAny);
 
-    EXPECT_NE(stk1, stk2);
+    EXPECT_EQ(stk1, stk2);
     EXPECT_TRUE(stk1.maybe(stk2));
-    EXPECT_FALSE(stk1 <= stk2);
-    EXPECT_EQ(canonicalize(stk2), stk2); // already canonical
-    EXPECT_EQ(canonicalize(stk1), stk2);
+    EXPECT_TRUE(stk1 <= stk2);
   }
 
   // Stack ranges, with subtype and maybe.
@@ -279,8 +277,8 @@ TEST(AliasClass, StackUnions) {
     AliasClass const stk1 = AStack { FP, -1, 1 };
     AliasClass const stk2 = AStack { SP, -2, 1 };
     AliasClass const true_union = AStack { FP, -1, 3 };
-    EXPECT_EQ(stk1 | stk2, AStackAny);
-    EXPECT_EQ(stk1 | canonicalize(stk2), true_union);
+    EXPECT_NE(stk1 | stk2, AStackAny);
+    EXPECT_EQ(stk1 | stk2, true_union);
   }
 
   {

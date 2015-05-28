@@ -329,18 +329,7 @@ bool RegionFormer::prepareInstruction() {
 
   auto const inputInfos = getInputs(m_inst);
 
-  // Read types for all the inputs and apply MetaData.
-  auto newDynLoc = [&](const InputInfo& ii) {
-    auto dl = m_inst.newDynLoc(
-      ii.loc,
-      irgen::predictedTypeFromLocation(m_irgs, ii.loc)
-    );
-    FTRACE(2, "predictedTypeFromLocation: {} -> {}\n",
-           ii.loc.pretty(), dl->rtt);
-    return dl;
-  };
-
-  for (auto const& ii : inputInfos) m_inst.inputs.push_back(newDynLoc(ii));
+  for (auto const& ii : inputInfos) m_inst.inputs.push_back(ii.loc);
 
   // This reads valueClass from the inputs so it used to need to
   // happen after readMetaData.  But now readMetaData is gone ...
@@ -587,37 +576,35 @@ void RegionFormer::truncateLiterals() {
 }
 
 /*
- * Check if the current type for the location in ii is specific enough for what
- * the current opcode wants. If not, return false.
+ * Check if the current predicted type for the location in ii is specific
+ * enough for what the current opcode wants. If not, return false.
  */
 bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
-  auto& rtt = m_inst.inputs[i]->rtt;
   if (ii.dontGuard) return true;
+  auto const type = irgen::predictedTypeFromLocation(m_irgs, ii.loc);
 
-  if (m_profiling && rtt <= TBoxedCell &&
+  if (m_profiling && type <= TBoxedCell &&
       (m_region->blocks().size() > 1 || !m_region->entry()->empty())) {
     // We don't want side exits when profiling, so only allow instructions that
     // consume refs at the beginning of the region.
     return false;
   }
 
-  if (!ii.dontBreak && !rtt.isKnownDataType()) {
+  if (!ii.dontBreak && !type.isKnownDataType()) {
     // Trying to consume a value without a precise enough type.
     FTRACE(1, "selectTracelet: {} tried to consume {}\n",
-           m_inst.toString(), m_inst.inputs[i]->pretty());
+           m_inst.toString(), m_inst.inputs[i].pretty());
     return false;
   }
 
-  if (!(rtt <= TBoxedCell) ||
-      m_inst.ignoreInnerType ||
-      ii.dontGuardInner) {
+  if (!(type <= TBoxedCell) || m_inst.ignoreInnerType || ii.dontGuardInner) {
     return true;
   }
 
-  if (!rtt.inner().isKnownDataType()) {
+  if (!type.inner().isKnownDataType()) {
     // Trying to consume a boxed value without a guess for the inner type.
     FTRACE(1, "selectTracelet: {} tried to consume ref {}\n",
-           m_inst.toString(), m_inst.inputs[i]->pretty());
+           m_inst.toString(), m_inst.inputs[i].pretty());
     return false;
   }
 

@@ -332,7 +332,6 @@ exceptions depending on how coercion is implemented.
 
 2. Arithmetic
 
-
 | AbsDbl, D(Dbl), S(Dbl), NF
 
 | AddInt, D(Int), S(Int) S(Int), NF
@@ -404,8 +403,8 @@ exceptions depending on how coercion is implemented.
 
   Compute S0 mod S1. If S1 is -1 or 0 the results are undefined.
 
-3. Type conversions
 
+3. Type conversions
 
 To array conversions:
 
@@ -632,7 +631,6 @@ To string conversions:
 
 5. Branches
 
-
 | JmpZero,                          ND, S(Int,Bool),                     B
 
 | JmpNZero,                         ND, S(Int,Bool),                     B
@@ -694,7 +692,6 @@ To string conversions:
 
 6. Reference manipulation
 
-
 | Box, D(BoxedInitCell), S(Cell), CRc|PRc
 
   Box S0 and put the resulting BoxedInitCell in D. If S0 is Uninit, then
@@ -715,7 +712,6 @@ To string conversions:
 
 
 7. Loads
-
 
 | LdStk<T,offset>, DParamMayRelax, S(StkPtr), NF
 
@@ -1063,7 +1059,6 @@ To string conversions:
 
 8. Allocation
 
-
 | AllocObj, DAllocObj, S(Cls), Er
 
   Allocates a new object of class S1.
@@ -1300,7 +1295,6 @@ To string conversions:
 
 10. Stores
 
-
 | StMem, ND, S(PtrToGen) S(Gen), CRc
 
   Store S2 into the location pointed to by S0.
@@ -1319,6 +1313,11 @@ To string conversions:
   Behaves just like StLoc, except the hard requirement that it is only emitted
   for pseudo-mains. We don't optimize StGbl the same way as StLoc, as we need
   intraprocedural analysis to know whether the store is truly dead.
+
+| StLocRange<localIds>, ND, S(FramePtr) S(Gen), CRc
+
+  Store S1 to the local variables corresponding to localIds, on the frame
+  pointed to by S0.
 
 | StRef, ND, S(BoxedCell) S(Cell), CRc
 
@@ -1348,7 +1347,6 @@ To string conversions:
 
 11. Trace exits
 
-
 | EagerSyncVMRegs, ND, S(FramePtr) S(StkPtr), NF
 
   Sync the given vmfp and vmsp to their in-memory locations.
@@ -1373,7 +1371,6 @@ To string conversions:
 
 
 12. Refcounting and copies
-
 
 | Mov, DofS(0), S(Top), P
 
@@ -1407,7 +1404,6 @@ To string conversions:
 
 
 13. Misc
-
 
 | DefFP, D(FramePtr), NA, NF
 
@@ -1461,7 +1457,6 @@ To string conversions:
 
 14. Runtime helpers
 
-
 | VerifyParamCls, ND, S(Cls) S(Cls|Nullptr) C(Int) C(Int), Er
 
   Verify parameter type for classes or traits. If S0 does not extend (if S1 is
@@ -1498,6 +1493,11 @@ To string conversions:
 | RaiseUndefProp, ND, S(Obj) CStr, Er
 
   Raise a notice for an undefined property named S1 on the class of S0.
+
+| RaiseMissingArg<func,argc>, ND, NA, Er
+
+  Raise a missing argument warning because only S1 arguments were passed to
+  function S0.
 
 | RaiseError, ND, S(Str), T|Er
 
@@ -1655,7 +1655,6 @@ To string conversions:
 
 
 15. Generators & Closures
-
 
 | StClosureCtx, ND, S(Obj) S(Ctx,Nullptr), CRc
 
@@ -1893,8 +1892,8 @@ To string conversions:
   Count dynamic execution of bytecodes, to compare coverage of different
   codegen backends.
 
-17. Iterators
 
+17. Iterators
 
 | IterInit<IterData>,   D(Bool), S(Arr,Obj) S(FramePtr), Er|CRc
 
@@ -1989,7 +1988,6 @@ To string conversions:
 
 
 18. Member instruction support
-
 
 | DefMIStateBase, D(PtrToMISGen), NA, NF
 
@@ -2129,7 +2127,7 @@ fields of that struct for holding intermediate values.
   Like ElemX, but used for intermediate element lookups that may modify the
   base as part of an unset operation.
 
-| ArrayGet, DArrElem, S(Arr) S(Int,Str), PRc|Er
+| ArrayGet, DArrElem, S(Arr) S(Int,Str), Er
 
   Get element with key S1 from base S0.
 
@@ -2310,6 +2308,7 @@ fields of that struct for holding intermediate values.
   Returns whether a collection instance is empty or not.  S0 must be known to
   be an instance of a collection class at compile time.
 
+
 19. Exception/unwinding support
 
 | BeginCatch, ND, NA, NF
@@ -2336,6 +2335,30 @@ fields of that struct for holding intermediate values.
 | LdUnwinderValue<T>, DParam, NA, PRc
 
   Loads the value contained by the current unwinder exception.
+
+
+20. Function prologues
+
+| EnterFrame, ND, S(FramePtr), NF
+
+  Stash the return address of the call in m_savedRip.
+
+| CheckStackOverflow, ND, S(FramePtr), Er
+
+  Check if the stack depth has exceeded its limit.  If it has, jump to the
+  stack overflow helper stub, which will throw.
+
+| InitExtraArgs<func,argc>, ND, S(FramePtr), NF
+
+  Set up the ExtraArgs struct on the live ActRec.  If extra args are present
+  and need to be discarded, they will be decref'd and may re-enter to run
+  destructors.
+
+| CheckSurpriseFlagsEnter<func,argc>, ND, S(FramePtr), Er
+
+  Test the implementation-specific surprise flags.  If they're nonzero, call
+  the function enter helper.
+
 
 /* Local Variables: */
 /* fill-column: 79 */

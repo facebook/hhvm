@@ -7,7 +7,7 @@ function f(
   $dddddddddd,
   ...$eee
 ) {
-  return function (
+  return function(
     $aaaaaaaaaa,
     $bbbbbbbbbbbbbbbbbbbb,
     $cccccccccc,

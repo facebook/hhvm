@@ -125,6 +125,7 @@ struct TransContext {
   FPInvOffset initSpOffset;
   const Func* func;
   Offset initBcOffset;
+  bool prologue;
   bool resumed;
 };
 
@@ -541,32 +542,6 @@ const InstrInfo& getInstrInfo(Op op);
  * This is used to avoid generating guards for interpreted instructions.
  */
 bool dontGuardAnyInputs(Op op);
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Property information.
-
-struct PropInfo {
-  PropInfo()
-    : offset(-1)
-    , repoAuthType{}
-  {}
-
-  explicit PropInfo(int offset, RepoAuthType repoAuthType)
-    : offset(offset)
-    , repoAuthType{repoAuthType}
-  {}
-
-  int offset;
-  RepoAuthType repoAuthType;
-};
-
-PropInfo getPropertyOffset(const IRGS& env,
-                           const NormalizedInstruction& ni,
-                           const Class* ctx,
-                           const Class*& baseClass,
-                           const MInstrInfo& mii,
-                           unsigned mInd, unsigned iInd);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Other instruction information.

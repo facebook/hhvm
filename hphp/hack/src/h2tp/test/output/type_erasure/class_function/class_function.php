@@ -9,7 +9,7 @@ class C {
 class D {
   public static function foo($x, $y) {
     return $x->map(
-      function ($i) use ($y) {
+      function($i) use ($y) {
         return $y[$i];
       }
     );

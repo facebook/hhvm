@@ -293,7 +293,7 @@ interpOutputLocals(IRGS& env,
       switch (inst.immVec.locationCode()) {
         case LL: {
           auto const& mii = getMInstrInfo(inst.mInstrOp());
-          auto const& base = inst.inputs[mii.valCount()]->location;
+          auto const& base = inst.inputs[mii.valCount()];
           assertx(base.space == Location::Local);
 
           // MInstrEffects expects to be used in the context of a normally

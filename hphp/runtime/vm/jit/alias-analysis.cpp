@@ -93,6 +93,23 @@ ALocBits may_alias_part(const AliasAnalysis& aa,
   return acls.maybe(any) ? pessimistic : ALocBits{};
 }
 
+template<class T>
+ALocBits expand_part(const AliasAnalysis& aa,
+                     AliasClass acls,
+                     folly::Optional<T> proj,
+                     AliasClass any,
+                     ALocBits all) {
+  auto ret = ALocBits{};
+  if (proj) {
+    if (auto const meta = aa.find(*proj)) {
+      return ret.set(meta->index);      // A single tracked location.
+    }
+    assertx(acls <= any);
+    return ret;
+  }
+  return any <= acls ? all : ret;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -114,19 +131,37 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
 
   auto ret = ALocBits{};
 
-  // We may have some special may-alias sets for multi-slot stack ranges, so
-  // this works a little differently from the other projections.
-  {
-    auto const stk = acls.stack();
-    if (stk && stk->size > 1) {
-      auto const it = stack_ranges.find(*stk);
-      ret |= it != end(stack_ranges) ? it->second : all_stack;
+  if (auto const stk = acls.stack()) {
+    if (stk->size == 1) {
+      if (auto const meta = find(*stk)) {
+        // Different stack slots never alias each other
+        assertx(meta->conflicts.none());
+        ret.set(meta->index);
+      }
+      // Otherwise the stack slot is untracked, no need to pessimize.
     } else {
-      ret |= may_alias_part(*this, acls, stk, AStackAny, all_stack);
+      auto const it = stack_ranges.find(*stk);
+      // Since individual stack slots are canonicalized, we could be less
+      // pessimistic even if the entry is not in `stack_ranges', but that
+      // would require iterating over `all_stack'.
+      ret |= it != end(stack_ranges) ? it->second : all_stack;
     }
+  } else if (acls.maybe(AStackAny)) {
+    ret |= all_stack;
   }
 
-  ret |= may_alias_part(*this, acls, acls.frame(), AFrameAny, all_frame);
+  // Individual frame locals are canonicalized so that different `AFrame's
+  // cannot alias each other.
+  if (auto const frame = acls.frame()) {
+    // For now it is a single local, but this will change soon.
+    if (auto const meta = find(*frame)) {
+      ret.set(meta->index);
+    }
+    // Otherwise the slot is untracked.
+  } else if (acls.maybe(AFrameAny)) {
+    ret |= all_frame;
+  }
+
   ret |= may_alias_part(*this, acls, acls.prop(), APropAny, all_props);
   ret |= may_alias_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
   ret |= may_alias_part(*this, acls, acls.mis(), AMIStateAny, all_mistate);
@@ -140,18 +175,27 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
 
   auto ret = ALocBits{};
 
-  auto const it = stk_expand_map.find(acls);
-  if (it != end(stk_expand_map)) {
-    ret |= it->second;
+  if (auto const stack = acls.stack()) {
+    if (auto const info = find(*stack)) {
+      ret.set(info->index);
+    } else {
+      auto const it = stack_ranges.find(*stack);
+      if (it != end(stack_ranges)) {
+        ret |= it->second;
+      }
+      // We could iterate over `all_stack' and check individually, but since we
+      // don't combine stack slots in `AliasClass::precise_union()', doing so
+      // would not really help us much for now.
+    }
   } else if (AStackAny <= acls) {
     ret |= all_stack;
   }
 
-  if (APropAny    <= acls) ret |= all_props;
-  if (AElemIAny   <= acls) ret |= all_elemIs;
-  if (AFrameAny   <= acls) ret |= all_frame;
-  if (AMIStateAny <= acls) ret |= all_mistate;
-  if (ARefAny     <= acls) ret |= all_refs;
+  ret |= expand_part(*this, acls, acls.frame(), AFrameAny, all_frame);
+  ret |= expand_part(*this, acls, acls.prop(), APropAny, all_props);
+  ret |= expand_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
+  ret |= expand_part(*this, acls, acls.mis(), AMIStateAny, all_mistate);
+  ret |= expand_part(*this, acls, acls.ref(), ARefAny, all_refs);
 
   return ret;
 }
@@ -169,13 +213,6 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
    */
   auto conflict_prop_offset = jit::hash_map<uint32_t,ALocBits>{};
   auto conflict_array_index = jit::hash_map<int64_t,ALocBits>{};
-
-  /*
-   * Stack offset conflict sets: any stack alias class based off a different
-   * StkPtr base is presumed to potentially alias.  See the comments above
-   * AStack in alias-class.h.
-   */
-  auto conflict_stkptrs = jit::hash_map<SSATmp*,ALocBits>{};
 
   visit_locations(blocks, [&] (AliasClass acls) {
     if (auto const prop = acls.is_prop()) {
@@ -215,7 +252,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
      * that, when they can re-enter and do things to the stack in some range
      * (below the re-entry depth, for example), but also affect some other type
      * of memory (CastStk, for example).  In particular this means we want that
-     * AliasClass to have an entry in the stk_expand_map, so we'll populate
+     * AliasClass to have an entry in the stack_ranges, so we'll populate
      * it later.  Currently most of these situations should probably bail at
      * kMaxExpandedStackRange, although there are some situations that won't
      * (e.g. instructions like CoerceStk, which will have an AHeapAny (from
@@ -223,25 +260,13 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
      */
     if (auto const stk = acls.stack()) {
       if (stk->size > 1) {
-        ret.stk_expand_map[AliasClass { *stk }];
+        ret.stack_ranges[AliasClass { *stk }];
       }
       if (stk->size > kMaxExpandedStackRange) return;
 
-      ALocBits conf_set;
-      bool complete = true;
       for (auto stkidx = int32_t{0}; stkidx < stk->size; ++stkidx) {
-        AliasClass single = AStack { stk->base, stk->offset - stkidx, 1 };
-        if (auto const index = add_class(ret, single)) {
-          conf_set.set(*index);
-          conflict_stkptrs[stk->base].set(*index);
-        } else {
-          complete = false;
-        }
-      }
-
-      if (stk->size > 1 && complete) {
-        FTRACE(2, "    range {}:  {}\n", show(acls), show(conf_set));
-        ret.stack_ranges[acls] = conf_set;
+        AliasClass single = AStack { stk->offset - stkidx, 1 };
+        add_class(ret, single);
       }
 
       return;
@@ -276,14 +301,6 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
 
     if (auto const stk = acls.is_stack()) {
       ret.all_stack.set(meta.index);
-      for (auto& kv : conflict_stkptrs) {
-        if (kv.first != stk->base) {
-          if (kv.first->type() <= TStkPtr ||
-              stk->base->type() <= TStkPtr) {
-            meta.conflicts |= kv.second;
-          }
-        }
-      }
       return;
     }
 
@@ -309,14 +326,14 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
 
     /*
      * Note: this is probably more complex than it needs to be, because we're
-     * iterating the stk_expand_map for each location.  Since kMaxTrackedALocs
-     * is bounded by a constant, it's kinda O(stk_expand_map), but not in a
+     * iterating the stack_ranges for each location.  Since kMaxTrackedALocs
+     * is bounded by a constant, it's kinda O(stack_ranges), but not in a
      * good way.  The number of locations is currently generally small, so this
      * is probably ok for now---but if we remove the limit we may need to
      * revisit this so it can't blow up.
      */
     if (kv.first.is_stack()) {
-      for (auto& ent : ret.stk_expand_map) {
+      for (auto& ent : ret.stack_ranges) {
         if (kv.first <= ent.first) {
           FTRACE(2, "  ({}) {} <= {}\n",
             kv.second.index,
@@ -366,7 +383,7 @@ std::string show(const AliasAnalysis& linfo) {
     "all frame",  show(linfo.all_frame),
     "all stack",  show(linfo.all_stack)
   );
-  for (auto& kv : linfo.stk_expand_map) {
+  for (auto& kv : linfo.stack_ranges) {
     folly::format(&ret, " ex {: <17}       : {}\n",
       show(kv.first),
       show(kv.second));

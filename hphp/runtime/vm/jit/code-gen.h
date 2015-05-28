@@ -87,7 +87,7 @@ struct CodegenState {
 // Generate machine code; converts to vasm, optionally converts to llvm,
 // further optimizes, emits code into main/cold/frozen sections, allocates rds
 // and global data, and adds fixup metadata.
-void genCode(IRUnit& unit);
+void genCode(IRUnit& unit, CodeKind kind = CodeKind::Trace);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

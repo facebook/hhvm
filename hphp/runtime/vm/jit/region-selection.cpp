@@ -70,26 +70,27 @@ RegionMode regionMode() {
   return RegionMode::None;
 }
 
-enum class PGORegionMode {
-  Hottrace, // Select a long region, using profile counters to guide the trace
-  Hotblock, // Select a single block
-  WholeCFG, // Select the entire CFG that has been profiled
-};
-
-PGORegionMode pgoRegionMode() {
-  auto& s = RuntimeOption::EvalJitPGORegionSelector;
-  if (s == "hottrace") return PGORegionMode::Hottrace;
-  if (s == "hotblock") return PGORegionMode::Hotblock;
-  if (s == "wholecfg") return PGORegionMode::WholeCFG;
-  FTRACE(1, "unknown pgo region mode {}: using hottrace\n", s);
-  assertx(false);
-  return PGORegionMode::Hottrace;
-}
-
 template<typename Container>
 void truncateMap(Container& c, SrcKey final) {
   c.erase(c.upper_bound(final), c.end());
 }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+PGORegionMode pgoRegionMode(const Func& func) {
+  auto& s = RuntimeOption::EvalJitPGORegionSelector;
+  if ((s == "wholecfg" || s == "hotcfg") &&
+      RuntimeOption::EvalJitPGOCFGHotFuncOnly && !(func.attrs() & AttrHot)) {
+    return PGORegionMode::Hottrace;
+  }
+  if (s == "hottrace") return PGORegionMode::Hottrace;
+  if (s == "hotblock") return PGORegionMode::Hotblock;
+  if (s == "hotcfg")   return PGORegionMode::HotCFG;
+  if (s == "wholecfg") return PGORegionMode::WholeCFG;
+  FTRACE(1, "unknown pgo region mode {}: using hottrace\n", s);
+  assertx(false);
+  return PGORegionMode::Hottrace;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -199,6 +200,11 @@ const RegionDesc::BlockIdSet& RegionDesc::sideExitingBlocks() const {
 void RegionDesc::addArc(BlockId srcId, BlockId dstId) {
   data(srcId).succs.insert(dstId);
   data(dstId).preds.insert(srcId);
+}
+
+void RegionDesc::removeArc(BlockId srcID, BlockId dstID) {
+  data(srcID).succs.erase(dstID);
+  data(dstID).preds.erase(srcID);
 }
 
 void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
@@ -708,13 +714,14 @@ RegionDescPtr selectHotRegion(TransID transId,
   assertx(RuntimeOption::EvalJitPGO);
 
   const ProfData* profData = mcg->tx().profData();
-  FuncId funcId = profData->transFuncId(transId);
+  auto const& func = *(profData->transFunc(transId));
+  FuncId funcId = func.getFuncId();
   TransCFG cfg(funcId, profData, mcg->tx().getSrcDB(),
                mcg->getJmpToTransIDMap());
   TransIDSet selectedTIDs;
   assertx(regionMode() != RegionMode::Method);
   RegionDescPtr region;
-  switch (pgoRegionMode()) {
+  switch (pgoRegionMode(func)) {
     case PGORegionMode::Hottrace:
       region = selectHotTrace(transId, profData, cfg, selectedTIDs);
       break;
@@ -724,7 +731,8 @@ RegionDescPtr selectHotRegion(TransID transId,
       break;
 
     case PGORegionMode::WholeCFG:
-      region = selectWholeCFG(transId, profData, cfg, selectedTIDs);
+    case PGORegionMode::HotCFG:
+      region = selectHotCFG(transId, profData, cfg, selectedTIDs);
       break;
   }
   assertx(region);

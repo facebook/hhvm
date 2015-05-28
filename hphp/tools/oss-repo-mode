@@ -1,0 +1,91 @@
+#!/bin/sh
+
+set -e
+
+INI="/etc/hhvm/server.ini"
+
+usage() {
+  echo "Usage: $0 enable root-dir"
+  echo "       $0 disable"
+  echo
+  echo "Enables HHVM's \"repo authoritative\" mode. In this mode, HHVM"
+  echo "uses a pre-built and pre-optimized version of your PHP or Hack"
+  echo "source code. These ahead-of-time optimizations mean that code run"
+  echo "in repo mode can be significantly faster. Keep in mind that after"
+  echo "this mode is enabled, source code is no longer consulted, so"
+  echo "changes there will not be reflected unless this command is re-run"
+  echo "to either rebuild the repo or disable repo authoritative mode."
+  echo
+  echo "This command changes HHVM configuration; you will probably need"
+  echo "to be root."
+  echo
+  echo
+  echo "$0 enable root-dir"
+  echo
+  echo "Enables repo authoritative mode. Finds PHP or Hack source code"
+  echo "under \"root-dir\" and computes an optimized repo where that code"
+  echo "(and only that code) is available. If repo mode is already"
+  echo "enabled, the repo will be recomputed and replaced."
+  echo
+  echo
+  echo "$0 disable"
+  echo
+  echo "Disables repo authoritative mode. HHVM will return to its default"
+  echo "configuration of reading and executing code directly from disk."
+  exit 1
+}
+
+set_hhbc() {
+  HHBC=`grep hhvm.repo.central.path "$INI" | sed 's/[^=]*=\s*\(.*\)/\1/'`
+  if [ "x$HHBC" = "x" ]; then
+    echo "hhvm.repo.central.path = /var/run/hhvm/hhvm.hhbc" >> "$INI"
+    HHBC="/var/run/hhvm/hhvm.hhbc"
+  fi
+}
+
+repo_enable() {
+  FILE_LIST=`mktemp`
+  find "$1" -type f > "$FILE_LIST"
+
+  OUT_DIR=`dirname "$HHBC"`
+  hhvm --hphp --target hhbc --output-dir "$OUT_DIR" --input-list "$FILE_LIST" -l3 -v AllVolatile=true
+
+  OUT_DIR_USER=`stat -c "%U" "$OUT_DIR"`
+  HHBC_USER=`stat -c "%U" "$HHBC"`
+  if [ "$OUT_DIR_USER" != "$HHBC_USER" ]; then
+    chown "$OUT_DIR_USER" "$HHBC"
+  fi
+
+  echo "hhvm.repo.authoritative = true" >> "$INI"
+}
+
+repo_disable() {
+  rm -f "$HHBC"
+  sed -i '/hhvm.repo.authoritative/d' "$INI"
+}
+
+case "$1" in
+  enable)
+    if [ "$#" -ne 2 ] || ! [ -d "$2" ]; then
+      echo "Invalid root-dir"
+      usage
+    fi
+    service hhvm stop
+    set_hhbc
+    repo_disable
+    repo_enable "$2"
+    service hhvm start
+    ;;
+  disable)
+    service hhvm stop
+    set_hhbc
+    repo_disable
+    service hhvm start
+    ;;
+  *)
+    usage
+    ;;
+esac
+
+echo
+echo "Success!"

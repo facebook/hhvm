@@ -413,7 +413,7 @@ static inline std::string pgoRegionSelectorDefault() {
 #ifdef HHVM_WHOLE_CFG
   return "wholecfg";
 #else
-  return "hottrace";
+  return "hotcfg";
 #endif
 }
 
@@ -421,8 +421,13 @@ static inline bool loopsDefault() {
 #ifdef HHVM_JIT_LOOPS_BY_DEFAULT
   return true;
 #else
-  return RuntimeOption::EvalJitPGORegionSelector == "wholecfg";
+  return (RuntimeOption::EvalJitPGORegionSelector == "wholecfg" ||
+          RuntimeOption::EvalJitPGORegionSelector == "hotcfg");
 #endif
+}
+
+static inline bool hhirRelaxGuardsDefault() {
+  return !RuntimeOption::EvalHHIRConstrictGuards;
 }
 
 static inline bool evalJitDefault() {

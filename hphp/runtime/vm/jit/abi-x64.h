@@ -204,13 +204,23 @@ constexpr int kNumServiceReqArgRegs =
 #define CONTOFF(nm) int(offsetof(c_Generator, nm))
 
 UNUSED const Abi abi {
-  kGPUnreserved,  // gpUnreserved
-  kGPReserved,    // gpReserved
-  kXMMUnreserved, // simdUnreserved
-  kXMMReserved,   // simdReserved
-  kCalleeSaved,   // calleeSaved
-  kSF,            // sf
-  true,           // canSpill
+  .gpUnreserved   = kGPUnreserved,
+  .gpReserved     = kGPReserved,
+  .simdUnreserved = kXMMUnreserved,
+  .simdReserved   = kXMMReserved,
+  .calleeSaved    = kCalleeSaved,
+  .sf             = kSF,
+  .canSpill       = true,
+};
+
+UNUSED const Abi cross_trace_abi {
+  .gpUnreserved   = abi.gp() & kScratchCrossTraceRegs,
+  .gpReserved     = abi.gp() - kScratchCrossTraceRegs,
+  .simdUnreserved = abi.simd() & kScratchCrossTraceRegs,
+  .simdReserved   = abi.simd() - kScratchCrossTraceRegs,
+  .calleeSaved    = abi.calleeSaved & kScratchCrossTraceRegs,
+  .sf             = abi.sf,
+  .canSpill       = false
 };
 
 //////////////////////////////////////////////////////////////////////

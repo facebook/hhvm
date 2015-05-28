@@ -189,6 +189,7 @@ let unparser _env =
                 t_tparams = v_t_tparams;
                 t_constraint = v_t_constraint;
                 t_kind = v_t_kind;
+                t_user_attributes = v_t_user_attributes;
                 t_namespace = v_t_namespace;
                 t_mode = v_t_mode
               } =
@@ -197,12 +198,15 @@ let unparser _env =
     u_todo "typedef"
       (fun () ->
         u_in_mode v_t_mode (fun () ->
-         let v_t_id = u_id v_t_id in
-         let v_t_tparams = u_of_list_spc u_tparam v_t_tparams in
-         let v_t_constraint = u_tconstraint v_t_constraint in
-         let v_t_kind = u_typedef_kind v_t_kind in
-           StrWords
-             [ v_t_id; v_t_tparams; v_t_constraint; v_t_kind]))
+          u_todo_conds [
+            (v_t_user_attributes <> [], "t_user_attributes",
+              (fun () -> u_of_smap u_user_attribute v_t_user_attributes)) ;
+          ] (fun () ->
+            let v_t_id = u_id v_t_id in
+            let v_t_tparams = u_of_list_spc u_tparam v_t_tparams in
+            let v_t_constraint = u_tconstraint v_t_constraint in
+            let v_t_kind = u_typedef_kind v_t_kind in
+              StrWords [v_t_id; v_t_tparams; v_t_constraint; v_t_kind])))
   and
     u_gconst {
                cst_mode = v_cst_mode;

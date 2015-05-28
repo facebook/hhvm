@@ -21,7 +21,7 @@ class MyVector<T> {
 function test(): void {
   $in = new MyVector();
   $in2 = MyVector::fmap(
-    function (int $x): string {
+    function(int $x): string {
       return 'x';
     },
     $in,

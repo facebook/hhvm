@@ -18,7 +18,7 @@ function f((function(B, ...): string) $g): string {
 
 function test(): void {
   f(
-    function (A $x, ...): string {
+    function(A $x, ...): string {
       return "...";
     },
   );

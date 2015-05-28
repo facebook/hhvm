@@ -1128,7 +1128,7 @@ public:
       xorl  (r32(dest), r32(dest));
       return;
     }
-    if (LIKELY(imm.q() > 0 && deltaFits(imm.q(), sz::dword))) {
+    if (LIKELY(imm.q() > 0 && imm.fits(sz::dword))) {
       // This will zero out the high-order bits.
       movl (imm.l(), r32(dest));
       return;

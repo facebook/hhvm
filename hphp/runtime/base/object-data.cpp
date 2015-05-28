@@ -215,7 +215,9 @@ Array& ObjectData::dynPropArray() const {
 }
 
 Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
-  if (getAttribute(HasDynPropArr)) return dynPropArray();
+  if (getAttribute(HasDynPropArr)) {
+    return dynPropArray();
+  }
 
   assert(!g_context->dynPropTable.count(this));
   auto& arr = g_context->dynPropTable[this].arr();
@@ -224,8 +226,9 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
   return arr;
 }
 
-Variant* ObjectData::o_realProp(const String& propName, int flags,
-                                const String& context /* = null_string */) {
+Variant* ObjectData::realPropImpl(const String& propName, int flags,
+                                  const String& context,
+                                  bool copyDynArray) {
   /*
    * Returns a pointer to a place for a property value. This should never
    * call the magic methods __get or __set. The flags argument describes the
@@ -237,7 +240,7 @@ Variant* ObjectData::o_realProp(const String& propName, int flags,
     ctx = Unit::lookupClass(context.get());
   }
 
-  auto const lookup = getProp(ctx, propName.get());
+  auto const lookup = getPropImpl(ctx, propName.get(), copyDynArray);
   auto const prop = lookup.prop;
 
   if (!prop) {
@@ -256,6 +259,17 @@ Variant* ObjectData::o_realProp(const String& propName, int flags,
   }
 }
 
+Variant* ObjectData::o_realProp(const String& propName, int flags,
+                                const String& context /* = null_string */) {
+  return realPropImpl(propName, flags, context, true);
+}
+
+const Variant* ObjectData::o_realProp(const String& propName, int flags,
+                                      const String& context) const {
+  return const_cast<ObjectData*>(this)->realPropImpl(propName, flags, context,
+                                                     false);
+}
+
 inline Variant ObjectData::o_getImpl(const String& propName,
                                      int flags,
                                      bool error /* = true */,
@@ -264,7 +278,7 @@ inline Variant ObjectData::o_getImpl(const String& propName,
     throw_invalid_property_name(propName);
   }
 
-  if (Variant* t = o_realProp(propName, flags, context)) {
+  if (const Variant* t = o_realProp(propName, flags, context)) {
     if (t->isInitialized())
       return *t;
   }
@@ -361,6 +375,11 @@ void ObjectData::o_setArray(const Array& properties) {
 }
 
 void ObjectData::o_getArray(Array& props, bool pubOnly /* = false */) const {
+  // Fast path for classes with no declared properties
+  if (!m_cls->numDeclProperties() && getAttribute(HasDynPropArr)) {
+    props = dynPropArray();
+    return;
+  }
   // The declared properties in the resultant array should be a permutation of
   // propVec. They appear in the following order: go most-to-least-derived in
   // the inheritance hierarchy, inserting properties in declaration order (with
@@ -437,20 +456,22 @@ namespace {
 size_t getPropertyIfAccessible(ObjectData* obj,
                                const Class* ctx,
                                const StringData* key,
-                               bool getRef,
+                               ObjectData::IterMode mode,
                                Array& properties,
                                size_t propLeft) {
-  auto const lookup = obj->getProp(ctx, key);
+  auto const lookup = obj->getPropImpl(ctx, key, false);
   auto const val = lookup.prop;
 
   if (lookup.accessible && val->m_type != KindOfUninit) {
     --propLeft;
-    if (getRef) {
+    if (mode == ObjectData::CreateRefs) {
       if (val->m_type != KindOfRef) tvBox(val);
 
       properties.setRef(StrNR(key), tvAsVariant(val), true /* isKey */);
-    } else {
+    } else if (mode == ObjectData::EraseRefs) {
       properties.set(StrNR(key), tvAsCVarRef(val), true /* isKey */);
+    } else {
+      properties.setWithRef(VarNR(key), tvAsCVarRef(val), true /* isKey */);
     }
   }
   return propLeft;
@@ -458,8 +479,12 @@ size_t getPropertyIfAccessible(ObjectData* obj,
 
 }
 
-Array ObjectData::o_toIterArray(const String& context,
-                                bool getRef /* = false */) {
+Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
+  if (mode == PreserveRefs && !m_cls->numDeclProperties()) {
+    if (getAttribute(HasDynPropArr)) return dynPropArray();
+    return Array::Create();
+  }
+
   Array* dynProps = nullptr;
   size_t accessibleProps = m_cls->declPropNumAccessible();
   size_t size = accessibleProps;
@@ -484,7 +509,7 @@ Array ObjectData::o_toIterArray(const String& context,
     for (size_t i = 0; i < numProps; ++i) {
       auto key = const_cast<StringData*>(props[i].name());
       accessibleProps = getPropertyIfAccessible(
-          this, ctx, key, getRef, retArray, accessibleProps);
+          this, ctx, key, mode, retArray, accessibleProps);
     }
     klass = klass->parent();
   }
@@ -496,7 +521,7 @@ Array ObjectData::o_toIterArray(const String& context,
       const auto* key = props[i].m_name.get();
       if (!retArray.get()->exists(key)) {
         accessibleProps = getPropertyIfAccessible(
-            this, ctx, key, getRef, retArray, accessibleProps);
+            this, ctx, key, mode, retArray, accessibleProps);
         if (accessibleProps == 0) break;
       }
     }
@@ -517,23 +542,37 @@ Array ObjectData::o_toIterArray(const String& context,
       // property with a non-string name.
       if (UNLIKELY(!IS_STRING_TYPE(key.m_type))) {
         assert(key.m_type == KindOfInt64);
-        if (getRef) {
+        switch (mode) {
+        case CreateRefs: {
           auto& lval = dynProps->lvalAt(key.m_data.num);
           retArray.setRef(key.m_data.num, lval);
-        } else {
+        }
+        case EraseRefs: {
           auto const val = dynProps->get()->nvGet(key.m_data.num);
           retArray.set(key.m_data.num, tvAsCVarRef(val));
+        }
+        case PreserveRefs: {
+          auto const val = dynProps->get()->nvGet(key.m_data.num);
+          retArray.setWithRef(key.m_data.num, tvAsCVarRef(val));
+        }
         }
         continue;
       }
 
       auto const strKey = key.m_data.pstr;
-      if (getRef) {
+      switch (mode) {
+      case CreateRefs: {
         auto& lval = dynProps->lvalAt(StrNR(strKey), AccessFlags::Key);
         retArray.setRef(StrNR(strKey), lval, true /* isKey */);
-      } else {
+      }
+      case EraseRefs: {
         auto const val = dynProps->get()->nvGet(strKey);
         retArray.set(StrNR(strKey), tvAsCVarRef(val), true /* isKey */);
+      }
+      case PreserveRefs: {
+        auto const val = dynProps->get()->nvGet(strKey);
+        retArray.setWithRef(VarNR(strKey), tvAsCVarRef(val), true /* isKey */);
+      }
       }
       decRefStr(strKey);
     }
@@ -863,8 +902,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
         }
       }
       if (serializer->getType() == VariableSerializer::Type::DebuggerDump) {
-        Variant* debugDispVal = const_cast<ObjectData*>(this)->  // XXX
-          o_realProp(s_PHP_DebugDisplay, 0);
+        const Variant* debugDispVal = o_realProp(s_PHP_DebugDisplay, 0);
         if (debugDispVal) {
           serializeVariant(*debugDispVal, serializer, false, false, true);
           return;
@@ -872,8 +910,7 @@ void ObjectData::serializeImpl(VariableSerializer* serializer) const {
       }
       if (serializer->getType() != VariableSerializer::Type::VarDump &&
           className.asString() == s_PHP_Incomplete_Class) {
-        Variant* cname = const_cast<ObjectData*>(this)-> // XXX
-          o_realProp(s_PHP_Incomplete_Class_Name, 0);
+        const Variant* cname = o_realProp(s_PHP_Incomplete_Class_Name, 0);
         if (cname && cname->isString()) {
           serializer->pushObjectInfo(cname->toCStrRef(), getId(), 'O');
           properties.remove(s_PHP_Incomplete_Class_Name, true);
@@ -1038,23 +1075,8 @@ void ObjectData::DeleteObject(ObjectData* objectData) {
 
 Object ObjectData::FromArray(ArrayData* properties) {
   ObjectData* retval = ObjectData::newInstance(SystemLib::s_stdclassClass);
-  auto& dynArr = retval->reserveProperties(properties->size());
-  auto pos_limit = properties->iter_end();
-  for (ssize_t pos = properties->iter_begin();
-       pos != pos_limit;
-       pos = properties->iter_advance(pos)) {
-    auto const value = properties->getValueRef(pos);
-    TypedValue key;
-    properties->nvGetKey(&key, pos);
-    if (key.m_type == KindOfInt64) {
-      dynArr.set(key.m_data.num, value);
-    } else {
-      assert(IS_STRING_TYPE(key.m_type));
-      StringData* strKey = key.m_data.pstr;
-      dynArr.set(StrNR(strKey), value, true /* isKey */);
-      decRefStr(strKey);
-    }
-  }
+  retval->setAttribute(HasDynPropArr);
+  g_context->dynPropTable.emplace(retval, properties);
   return retval;
 }
 
@@ -1069,9 +1091,10 @@ Slot ObjectData::declPropInd(TypedValue* prop) const {
   }
 }
 
-ObjectData::PropLookup<TypedValue*> ObjectData::getProp(
+ObjectData::PropLookup<TypedValue*> ObjectData::getPropImpl(
   const Class* ctx,
-  const StringData* key
+  const StringData* key,
+  bool copyDynArray
 ) {
   auto const lookup = m_cls->getDeclPropIndex(ctx, key);
   auto const propIdx = lookup.prop;
@@ -1094,14 +1117,15 @@ ObjectData::PropLookup<TypedValue*> ObjectData::getProp(
   // We could not find a visible declared property. We need to check for a
   // dynamic property with this name.
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
-    if (auto const prop = dynPropArray()->nvGet(key)) {
+    if (auto prop = dynPropArray()->nvGet(key)) {
+      // If we may write to the property we need to allow the array to escalate
+      if (copyDynArray) {
+        prop = dynPropArray().lvalAt(StrNR(key),
+                                     AccessFlags::Key).asTypedValue();
+      }
+
       // Returning a non-declared property, we know that it is accessible since
       // all dynamic properties are.
-
-      assert(!dynPropArray()->hasMultipleRefs());
-      assert(dynPropArray()->isMixed());
-      // We are using a MixedArray for storage, but not really treating it as a
-      // normal array, so this cast is safe in this situation.
       return PropLookup<TypedValue*> { const_cast<TypedValue*>(prop), true };
     }
   }
@@ -1109,11 +1133,19 @@ ObjectData::PropLookup<TypedValue*> ObjectData::getProp(
   return PropLookup<TypedValue*> { nullptr, false };
 }
 
+ObjectData::PropLookup<TypedValue*> ObjectData::getProp(
+  const Class* ctx,
+  const StringData* key
+) {
+  return getPropImpl(ctx, key, true);
+}
+
 ObjectData::PropLookup<const TypedValue*> ObjectData::getProp(
   const Class* ctx,
   const StringData* key
 ) const {
-  auto const lookup = const_cast<ObjectData*>(this)->getProp(ctx, key);
+  auto const lookup = const_cast<ObjectData*>(this)->
+    getPropImpl(ctx, key, false);
   return PropLookup<const TypedValue*> { lookup.prop, lookup.accessible };
 }
 
@@ -1414,7 +1446,7 @@ TypedValue* ObjectData::propWD(
 }
 
 bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
-  auto const lookup = getProp(ctx, key);
+  auto const lookup = getPropImpl(ctx, key, false);
   auto const prop = lookup.prop;
 
   if (prop && lookup.accessible && prop->m_type != KindOfUninit) {
@@ -1435,7 +1467,7 @@ bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
 }
 
 bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
-  auto const lookup = getProp(ctx, key);
+  auto const lookup = getPropImpl(ctx, key, false);
   auto const prop = lookup.prop;
 
   if (prop && lookup.accessible && prop->m_type != KindOfUninit) {
@@ -1924,41 +1956,8 @@ void ObjectData::cloneSet(ObjectData* clone) {
     tvDupFlattenVars(&propVec()[i], &clonePropVec[i]);
   }
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
-    auto& dynProps = dynPropArray();
-    auto& cloneProps = clone->reserveProperties(dynProps.size());
-
-    auto const props = dynProps.get();
-    ssize_t iter = props->iter_begin();
-    auto pos_limit = props->iter_end();
-    while (iter != pos_limit) {
-      assert(MixedArray::asMixed(props));
-
-      TypedValue key;
-      MixedArray::NvGetKey(props, &key, iter);
-
-      const TypedValue* val;
-      TypedValue* ret;
-      switch (key.m_type) {
-      case HPHP::KindOfString: {
-        StringData* str = key.m_data.pstr;
-        val = MixedArray::NvGetStr(props, str);
-        ret = cloneProps.lvalAt(String(str), AccessFlags::Key).asTypedValue();
-        decRefStr(str);
-        break;
-      }
-      case HPHP::KindOfInt64: {
-        int64_t num = key.m_data.num;
-        val = MixedArray::NvGetInt(props, num);
-        ret = cloneProps.lvalAt(num, AccessFlags::Key).asTypedValue();
-        break;
-      }
-      default:
-        always_assert(false);
-      }
-
-      tvDupFlattenVars(val, ret, cloneProps.get());
-      iter = MixedArray::IterAdvance(props, iter);
-    }
+    clone->setAttribute(HasDynPropArr);
+    g_context->dynPropTable.emplace(clone, dynPropArray().get());
   }
 }
 

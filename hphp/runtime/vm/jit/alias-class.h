@@ -48,7 +48,7 @@ struct SSATmp;
  *      |         |                   |                         |
  *      |         |                   |                         |
  *      |         |                   |                         |
- *      |         |                AHeapAny*                    |
+ *      |         |                HeapAny*                     |
  *      |         |                   |                         |
  *      |         |            +------+------+---------+        |
  *      |         |            |             |         |        |
@@ -92,28 +92,17 @@ struct AElemI { SSATmp* arr; int64_t idx; };
 struct AElemS { SSATmp* arr; const StringData* key; };
 
 /*
- * A range of the stack, starting at `offset' from a base pointer, and
- * extending `size' slots deeper into the stack (toward lower memory
- * addresses).  The base pointer may either be a StkPtr or a FramePtr (see
- * below).  The reason ranges extend downward is that it is common to need to
- * refer to the class of all stack locations below some depth (this can be done
- * by putting INT32_MAX in the size).
+ * A range of the stack, starting at `offset' from the outermost frame pointer,
+ * and extending `size' slots deeper into the stack (toward lower memory
+ * addresses).  The frame pointer is the same for all stack ranges in the IR
+ * unit, and thus is not stored here.  The reason ranges extend downward is
+ * that it is common to need to refer to the class of all stack locations below
+ * some depth (this can be done by putting INT32_MAX in the size).
  *
  * Some notes on how the evaluation stack is treated for alias analysis:
  *
- *   o Unlike AFrame locations, in general AStack locations with different
- *     bases may alias each other, even if the offsets are the same.  This is
- *     because we define new StkPtrs in the middle of a region for the same
- *     function, but there is only one FramePtr for a function.
- *
- *   o We represent canonicalized AStack locations as offsets off of the
- *     FramePtr, to address the above aliasing issue.  See canonicalize() in
- *     the .cpp.  AStack locations based on different FramePtrs are presumed
- *     never to alias, and also are naturally presumed never to alias AFrame
- *     locations.  Either of these things 'could' be done, but it is illegal to
- *     generate IR that accesses eval stack locations using offsets from a
- *     FramePtr, or accesses frame locals using offsets from a StkPtr.  (It
- *     would break things in generators, among other things.)
+ *   o Since AStack locations are always canonicalized, different AStack
+ *     locations must not alias if there is no overlap in the ranges.
  *
  *   o In situations with inlined calls, we may in fact have AFrame locations
  *     that refer to the same concrete memory locations (in the evaluation
@@ -125,7 +114,16 @@ struct AElemS { SSATmp* arr; const StringData* key; };
  *     treated as both an AElemI or AProp, but not at the same time based on
  *     HHBC-level semantics.)
  */
-struct AStack { SSATmp* base; int32_t offset; int32_t size; };
+struct AStack {
+  // We can create an AStack from either a stack pointer or a frame
+  // pointer. This constructor canonicalizes the offset to base on the
+  // outermost frame pointer.
+  explicit AStack(SSATmp* base, int32_t offset, int32_t size);
+  explicit AStack(int32_t o, int32_t s) : offset(o), size(s) {}
+
+  int32_t offset;
+  int32_t size;
+};
 
 /*
  * One of the MInstrState TypedValues, at a particular offset in bytes.

@@ -193,7 +193,8 @@ struct Vxls {
   void spillOthers(Interval* current, PhysReg r);
   void assignSpill(Interval* ivl);
   void insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
-                      const CopyPlan&, MemoryRef slots, unsigned pos);
+                      const CopyPlan&, MemoryRef slots, unsigned pos,
+                      const Interval* sf_ivl);
   void insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
                       const CopyPlan&, MemoryRef slots, unsigned pos);
   PhysReg findHint(Interval* current, const PosVec& free_until, RegSet allow);
@@ -1115,6 +1116,26 @@ void Vxls::allocate(Interval* current) {
     assertx(min_split <= max_split);
     auto split_pos = nearestSplitBefore(max_split);
     if (split_pos > current->start()) {
+      if (prev_use && prev_use < split_pos) {
+        /*
+         * If there are uses in previous blocks, but no
+         * uses between the start of the block containing split_pos,
+         * and split_pos itself, we should split earlier; otherwise
+         * we'll need to insert moves/loads on the edge(s) into this
+         * block, which clearly can't be used since we're spilling
+         * before the first use.
+         * Might as well spill on a block boundary, as early as
+         * possible.
+         */
+        auto prev_range_ix = current->findRange(prev_use);
+        auto prev_range = &current->ranges[prev_range_ix];
+        if (prev_range->start <= prev_use && prev_range->end < split_pos) {
+          prev_range++;
+        }
+        if (prev_range->start > prev_use && prev_range->start < split_pos) {
+          split_pos = prev_range->start;
+        }
+      }
       auto second = current->split(split_pos, true);
       pending.push(second);
       return assignReg(current, r);
@@ -1488,6 +1509,28 @@ void Vxls::resolveEdges() {
 // last phase: mutate the code by inserting copies. this destroyes
 // the position numbering, so we can't use interval positions after this.
 void Vxls::insertCopies() {
+  // union sf intervals.  this is used to determine whether we can safely
+  // optimize constant loads of 0 to an xor on x64.
+  auto sf_ivl = jit::make<Interval>(Vreg{});
+  for (auto ivl : intervals) {
+    if (!ivl) continue;
+
+    for (auto split = ivl; split != nullptr; split = split->next) {
+      if (split->reg == InvalidReg ||
+          !m_abi.sf.contains(split->reg)) continue;
+      for (auto const& range : split->ranges) {
+        sf_ivl->ranges.push_back(range);
+      }
+    }
+  }
+  std::sort(sf_ivl->ranges.begin(), sf_ivl->ranges.end(),
+    [] (LiveRange r1, LiveRange r2) {
+      // sf ranges should be disjoint
+      assertx(!r1.intersects(r2));
+      return r1.end <= r2.start;
+    }
+  );
+
   // insert copies inside blocks
   for (auto b : blocks) {
     auto pos = block_ranges[b].start;
@@ -1503,11 +1546,11 @@ void Vxls::insertCopies() {
       }
       auto c = copies.find(pos - 1);
       if (c != copies.end()) {
-        insertCopiesAt(code, j, c->second, slots, pos - 1);
+        insertCopiesAt(code, j, c->second, slots, pos - 1, sf_ivl);
       }
       c = copies.find(pos);
       if (c != copies.end()) {
-        insertCopiesAt(code, j, c->second, slots, pos);
+        insertCopiesAt(code, j, c->second, slots, pos, sf_ivl);
       }
     }
   }
@@ -1522,7 +1565,8 @@ void Vxls::insertCopies() {
       if (c != edge_copies.end()) {
         unsigned j = code.size() - 1;
         auto slots = m_sp[spill_offsets[succlist[0]]];
-        insertCopiesAt(code, j, c->second, slots, block_ranges[b].end - 1);
+        insertCopiesAt(code, j, c->second, slots,
+                       block_ranges[b].end - 1, sf_ivl);
       }
     } else {
       // copies will go at start of successor
@@ -1533,7 +1577,8 @@ void Vxls::insertCopies() {
           auto slots = m_sp[spill_offsets[s]];
           auto& code = unit.blocks[s].code;
           unsigned j = 0;
-          insertCopiesAt(code, j, c->second, slots, block_ranges[s].start);
+          insertCopiesAt(code, j, c->second, slots,
+                         block_ranges[s].start, sf_ivl);
         }
       }
     }
@@ -1664,7 +1709,9 @@ void processSpillExits(Vunit& unit, Vlabel label, SpillState state,
     state = instrInState(unit, inst, state, sp);
 
     if (state < NeedSpill ||
-        (inst.op != Vinstr::fallbackcc && inst.op != Vinstr::bindjcc)) {
+        (inst.op != Vinstr::fallbackcc &&
+         inst.op != Vinstr::bindjcc &&
+         inst.op != Vinstr::jcci)) {
       continue;
     }
 
@@ -1683,13 +1730,19 @@ void processSpillExits(Vunit& unit, Vlabel label, SpillState state,
       targetCode.emplace_back(fallback{fb_i.dest, fb_i.trflags, fb_i.args});
       cc = fb_i.cc;
       sf = fb_i.sf;
-    } else {
+    } else if (inst.op == Vinstr::bindjcc) {
       auto const& bj_i = inst.bindjcc_;
       targetCode.emplace_back(free);
       targetCode.emplace_back(bindjmp{bj_i.target, bj_i.spOff, bj_i.trflags,
                                       bj_i.args});
       cc = bj_i.cc;
       sf = bj_i.sf;
+    } else /* inst.op == Vinstr::jcci */ {
+      auto const& jcc_i = inst.jcci_;
+      targetCode.emplace_back(free);
+      targetCode.emplace_back(jmpi{jcc_i.taken});
+      cc = jcc_i.cc;
+      sf = jcc_i.sf;
     }
     targetCode.back().origin = inst.origin;
 
@@ -1892,7 +1945,7 @@ void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
 
 void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
                           const CopyPlan& copies, MemoryRef slots,
-                          unsigned pos) {
+                          unsigned pos, const Interval* sf_ivl) {
   MovePlan moves;
   jit::vector<Vinstr> loads;
   for (auto dst : copies) {
@@ -1902,15 +1955,17 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
       moves[dst] = ivl->reg;
     } else if (ivl->constant) {
       if (!ivl->val.isUndef) {
+        bool const sf_live = !sf_ivl->ranges.empty() && sf_ivl->covers(pos);
         switch (ivl->val.kind) {
           case Vconst::Quad:
-            loads.emplace_back(ldimmq{ivl->val.val, dst, true});
+          case Vconst::Double:
+            loads.emplace_back(ldimmq{ivl->val.val, dst, sf_live});
             break;
           case Vconst::Long:
-            loads.emplace_back(ldimml{int32_t(ivl->val.val), dst, true});
+            loads.emplace_back(ldimml{int32_t(ivl->val.val), dst, sf_live});
             break;
           case Vconst::Byte:
-            loads.emplace_back(ldimmb{uint8_t(ivl->val.val), dst, true});
+            loads.emplace_back(ldimmb{uint8_t(ivl->val.val), dst, sf_live});
             break;
           case Vconst::ThreadLocal:
             loads.emplace_back(

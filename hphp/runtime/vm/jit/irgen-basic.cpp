@@ -79,10 +79,14 @@ void emitAGetL(IRGS& env, int32_t id) {
 void emitCGetL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  // Mimic hhbc guard relaxation for now.
-  auto cat = curSrcKey(env).op() == OpFPassL ? DataTypeSpecific
-                                             : DataTypeCountnessInit;
-  pushIncRef(env, ldLocInnerWarn(env, id, ldrefExit, ldPMExit, cat));
+  auto const loc = ldLocInnerWarn(
+    env,
+    id,
+    ldrefExit,
+    ldPMExit,
+    DataTypeCountnessInit
+  );
+  pushIncRef(env, loc);
 }
 
 void emitCUGetL(IRGS& env, int32_t id) {
@@ -101,7 +105,7 @@ void emitPushL(IRGS& env, int32_t id) {
 void emitCGetL2(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const oldTop = pop(env, TStkElem);
+  auto const oldTop = pop(env);
   auto const val = ldLocInnerWarn(
     env,
     id,
@@ -344,11 +348,9 @@ void emitIncStat(IRGS& env, int32_t counter, int32_t value) {
 //////////////////////////////////////////////////////////////////////
 
 void emitPopA(IRGS& env) { popA(env); }
-void emitPopC(IRGS& env) { popDecRef(env, TCell, DataTypeGeneric); }
-void emitPopV(IRGS& env) { popDecRef(env,
-                                    TBoxedInitCell,
-                                    DataTypeGeneric); }
-void emitPopR(IRGS& env) { popDecRef(env, TGen, DataTypeGeneric); }
+void emitPopC(IRGS& env) { popDecRef(env, DataTypeGeneric); }
+void emitPopV(IRGS& env) { popDecRef(env, DataTypeGeneric); }
+void emitPopR(IRGS& env) { popDecRef(env, DataTypeGeneric); }
 
 void emitDir(IRGS& env)  { push(env, cns(env, curUnit(env)->dirpath())); }
 void emitFile(IRGS& env) { push(env, cns(env, curUnit(env)->filepath())); }

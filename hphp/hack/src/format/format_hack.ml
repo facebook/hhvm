@@ -2075,7 +2075,7 @@ and else_word ~is_toplevel env = wrap_word env begin function
         | _ -> back env);
       block ~is_toplevel env;
   | "elseif" ->
-      seq env [last_token; space; expr_paren; space];
+      seq env [out "else"; space; out "if"; space; expr_paren; space];
       block ~is_toplevel env;
   | _ -> assert false
 end
@@ -2126,12 +2126,22 @@ and foreach_as env =
 
 and for_loop env =
   seq env [space; expect "("];
-  seq env [list_comma_single expr; semi_colon];
-  seq env [space; expr_list; semi_colon];
-  seq env [space; expr_list];
-  seq env [expect ")"];
-  block env;
-  newline env
+  (* the expr_list at toplevel adds newlines before and after the list, which
+   * we don't want *)
+  let expr_list = list_comma ~trailing:false expr in
+  let for_exprs ~break = begin fun env ->
+    seq env [expr_list; semi_colon];
+    seq env [break; expr_list; semi_colon];
+    seq env [break; expr_list]
+  end in
+  Try.one_line env
+    (for_exprs ~break:space)
+    begin fun env ->
+      newline env;
+      right env (for_exprs ~break:newline);
+      newline env;
+    end;
+  seq env [expect ")"; block; newline]
 
 (*****************************************************************************)
 (* Switch statement *)
@@ -2560,7 +2570,7 @@ and expr_atomic_word env last_tok = function
       end
   | "function" when last_tok <> Tarrow && last_tok <> Tnsarrow ->
       last_token env;
-      space env;
+      if next_non_ws_token env <> Tlp then space env;
       fun_ env
   | "await" ->
       last_token env;

@@ -861,9 +861,9 @@ struct ImmVector {
   int32_t size() const { return m_length; }
 
   /*
-   * Returns the number of elements on the execution stack that this
-   * vector will need to access.  (Includes stack elements for both
-   * the base and members.)
+   * Returns the number of elements on the execution stack that this vector
+   * will need to access.  Includes stack elements for both the base and
+   * members, but not the RHS of any set operations.
    */
   int numStackValues() const { return m_numStack; }
 

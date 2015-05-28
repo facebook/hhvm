@@ -174,13 +174,7 @@ void fpushObjMethodCommon(IRGS& env,
         g_context->lookupObjMethod(func, baseClass, methodName, curClass(env),
                                    false);
       if (res == LookupResult::MethodFoundWithThis ||
-          /*
-           * TODO(#4455926): We don't allow vtable-style dispatch of
-           * abstract static methods, but not for any real reason
-           * here.  It should be able to work, but needs further
-           * testing to be enabled.
-           */
-          (res == LookupResult::MethodFoundNoThis && !func->isAbstract())) {
+          res == LookupResult::MethodFoundNoThis) {
         /*
          * If we found the func in baseClass, then either:
          *  a) its private, and this is always going to be the
@@ -396,7 +390,7 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
   }
 
   auto const defaultVal = safe ? popC(env) : nullptr;
-  popDecRef(env, TCell); // callable
+  popDecRef(env); // callable
   if (safe) {
     push(env, defaultVal);
     push(env, safeFlag);
@@ -738,7 +732,7 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
 void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
   auto const exitBlock = makeExitSlow(env);
 
-  auto classTmp = top(env, TCls);
+  auto classTmp = top(env);
   auto methodTmp = topC(env, BCSPOffset{1}, DataTypeGeneric);
   assertx(classTmp->isA(TCls));
   if (!classTmp->hasConstVal() || !methodTmp->hasConstVal(TStr)) {

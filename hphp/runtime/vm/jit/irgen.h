@@ -247,6 +247,13 @@ Type provenTypeFromLocation(const IRGS&, const Location&);
 Type provenTypeFromLocal(const IRGS&, uint32_t locId);
 Type provenTypeFromStack(const IRGS&, BCSPOffset slot);
 
+/*
+ * Assuming env is ready to translate a member instruction, analyze the type of
+ * the base value and return an appropriately-specialized TypeConstraint if a
+ * supported operation is detected.
+ */
+TypeConstraint mInstrBaseConstraint(const IRGS& env, Type predicted);
+
 //////////////////////////////////////////////////////////////////////
 
 /*

@@ -104,6 +104,7 @@ struct ImmFolder {
   }
   void fold(storeb& in, Vinstr& out) {
     int val;
+    if (out.origin && out.origin->marker().sk().prologue()) return;
     if (match_byte(in.s, val)) { out = storebi{val, in.m}; }
   }
   void fold(storel& in, Vinstr& out) {

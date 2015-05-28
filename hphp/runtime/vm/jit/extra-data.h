@@ -1005,6 +1005,37 @@ struct NewColFromArrayData : IRExtraData {
   CollectionType type;
 };
 
+struct LocalIdRange : IRExtraData {
+  explicit LocalIdRange(uint32_t start, uint32_t end)
+    : start(start)
+    , end(end)
+  {}
+
+  std::string show() const {
+    return folly::format("[{}, {})", start, end).str();
+  }
+
+  uint32_t start, end;
+};
+
+struct FuncEntryData : IRExtraData {
+  FuncEntryData(const Func* func, uint32_t argc)
+    : func(func)
+    , argc(argc)
+  {}
+
+  std::string show() const {
+    return folly::format(
+      "{}({} args)",
+      func->fullName()->data(),
+      argc
+    ).str();
+  }
+
+  const Func* func;
+  uint32_t argc;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -1026,6 +1057,7 @@ X(LdLoc,                        LocalId);
 X(LdLocPseudoMain,              LocalId);
 X(StLoc,                        LocalId);
 X(StLocPseudoMain,              LocalId);
+X(StLocRange,                   LocalIdRange);
 X(IterFree,                     IterId);
 X(MIterFree,                    IterId);
 X(CIterFree,                    IterId);
@@ -1093,6 +1125,7 @@ X(LdFuncCached,                 LdFuncCachedData);
 X(LdFuncCachedSafe,             LdFuncCachedData);
 X(LdFuncCachedU,                LdFuncCachedUData);
 X(LdObjMethod,                  LdObjMethodData);
+X(RaiseMissingArg,              FuncArgData);
 X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureFunc,                FuncData);
@@ -1132,6 +1165,8 @@ X(DbgTraceCall,                 IRSPOffsetData);
 X(LdPropAddr,                   PropOffset);
 X(NewCol,                       NewColData);
 X(NewColFromArray,              NewColFromArrayData);
+X(InitExtraArgs,                FuncEntryData);
+X(CheckSurpriseFlagsEnter,      FuncEntryData);
 
 #undef X
 

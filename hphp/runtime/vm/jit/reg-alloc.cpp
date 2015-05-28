@@ -190,6 +190,8 @@ void assignRegs(IRUnit& unit, Vunit& vunit, CodegenState& state,
         c = vunit.makeConst(0);
       } else if (type <= TBool) {
         c = vunit.makeConst(tmp->boolVal());
+      } else if (type <= TDbl) {
+        c = vunit.makeConst(tmp->dblVal());
       } else {
         c = vunit.makeConst(tmp->rawVal());
       }

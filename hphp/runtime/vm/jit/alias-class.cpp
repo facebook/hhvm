@@ -35,40 +35,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-struct StkPtrInfo {
-  SSATmp* fp;
-  FPRelOffset offset;
-};
-
-/*
- * For a StkPtr, determine the frame pointer it is part of, and the logical
- * offset (in cells) from that frame.  ("logical" because in a generator this
- * number is not the actual difference between the two pointers.)
- */
-StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
-  assertx(sp->type() <= TStkPtr);
-
-  auto const inst = sp->inst();
-  switch (inst->op()) {
-  case DefSP:
-    return StkPtrInfo {
-      inst->src(0),
-      FPRelOffset { -inst->extra<DefSP>()->offset.offset }
-    };
-
-  default:
-    always_assert_flog(false, "unexpected StkPtr: {}\n", sp->toString());
-  }
-}
-
-AStack canonicalize_stk(AStack stk) {
-  if (stk.base->type() <= TFramePtr) return stk;
-  auto const info = canonicalize_stkptr(stk.base);
-  return AStack { info.fp, stk.offset + info.offset.offset, stk.size };
-}
-
-//////////////////////////////////////////////////////////////////////
-
 // Helper for returning the lowest index of an AStack range, non inclusive.
 // I.e. a AStack class affects stack slots in [sp+offset,lowest_offset).
 int32_t lowest_offset(AStack stk) {
@@ -127,6 +93,30 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
 
 }
 
+AStack::AStack(SSATmp* base, int32_t o, int32_t s)
+  : offset(o), size(s)
+{
+  // Always canonicalize to the outermost frame pointer.
+  if (base->isA(TStkPtr)) {
+    auto const defSP = base->inst();
+    always_assert_flog(defSP->is(DefSP),
+                       "unexpected StkPtr: {}\n", base->toString());
+    offset -= defSP->extra<DefSP>()->offset.offset;
+    return;
+  }
+
+  assertx(base->isA(TFramePtr));
+  auto const defInlineFP = base->inst();
+  if (defInlineFP->is(DefInlineFP)) {
+    auto const sp = defInlineFP->src(0)->inst();
+    offset += defInlineFP->extra<DefInlineFP>()->spOffset.offset;
+    offset -= sp->extra<DefSP>()->offset.offset;
+    always_assert_flog(sp->src(0)->inst()->is(DefFP),
+                       "failed to canonicalize to outermost FramePtr: {}\n",
+                       sp->src(0)->toString());
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 size_t AliasClass::Hash::operator()(AliasClass acls) const {
@@ -154,7 +144,6 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
                                      acls.m_elemS.key->hash());
   case STag::Stack:
     return folly::hash::hash_combine(hash,
-                                     acls.m_stack.base,
                                      acls.m_stack.offset,
                                      acls.m_stack.size);
   case STag::MIState:
@@ -217,9 +206,6 @@ bool AliasClass::checkInvariants() const {
   case STag::Prop:    break;
   case STag::ElemI:   break;
   case STag::Stack:
-    assertx(m_stack.base->type() <= TStkPtr ||
-           m_stack.base->type() <= TFramePtr);
-    assertx(m_stack.size != 0);  // use AEmpty if you want that
     assertx(m_stack.size > 0);
     break;
   case STag::ElemS:
@@ -249,8 +235,7 @@ bool AliasClass::equivData(AliasClass o) const {
                              m_elemI.idx == o.m_elemI.idx;
   case STag::ElemS:   return m_elemS.arr == o.m_elemS.arr &&
                              m_elemS.key == o.m_elemS.key;
-  case STag::Stack:   return m_stack.base == o.m_stack.base &&
-                             m_stack.offset == o.m_stack.offset &&
+  case STag::Stack:   return m_stack.offset == o.m_stack.offset &&
                              m_stack.size == o.m_stack.size;
   case STag::MIState: return m_mis.offset == o.m_mis.offset;
   case STag::Ref:     return m_ref.boxed == o.m_ref.boxed;
@@ -283,20 +268,10 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
       auto const stkA = a.m_stack;
       auto const stkB = b.m_stack;
 
-      // If two AStack have different bases, we can't union them any better
-      // than AStackAny, since we don't know where they are relative to each
-      // other.  We know two AStacks with different FramePtr bases can't alias,
-      // but that doesn't help us represent a union of them.
-      if (stkA.base != stkB.base) return AliasClass{newBits};
-
       // Make a stack range big enough to contain both of them.
       auto const highest = std::max(stkA.offset, stkB.offset);
       auto const lowest = std::min(lowest_offset(stkA), lowest_offset(stkB));
-      auto const newStack = AStack {
-        stkA.base,
-        highest,
-        highest - lowest
-      };
+      auto const newStack = AStack { highest, highest - lowest };
       auto ret = AliasClass{newBits};
       new (&ret.m_stack) AStack(newStack);
       ret.m_stag = STag::Stack;
@@ -396,7 +371,6 @@ bool AliasClass::subclassData(AliasClass o) const {
   case STag::Ref:
     return equivData(o);
   case STag::Stack:
-    if (m_stack.base != o.m_stack.base) return false;
     return m_stack.offset <= o.m_stack.offset &&
            lowest_offset(m_stack) >= lowest_offset(o.m_stack);
   }
@@ -466,17 +440,7 @@ bool AliasClass::maybeData(AliasClass o) const {
     if (m_elemS.key != o.m_elemS.key) return false;
     return true;
 
-  /*
-   * Stack offsets that have different StkPtr bases are always presumed to
-   * possibly alias.  If both are FramePtrs but different, they can't alias.
-   * Stack offsets on the same base pointer may only alias if they have
-   * overlapping ranges.
-   */
   case STag::Stack:
-    if (m_stack.base != o.m_stack.base) {
-      return !(m_stack.base->type() <= TFramePtr &&
-               o.m_stack.base->type() <= TFramePtr);
-    }
     {
       // True if there's a non-empty intersection of the two stack slot
       // intervals.
@@ -556,12 +520,12 @@ AliasClass canonicalize(AliasClass a) {
   switch (a.m_stag) {
   case T::None:    return a;
   case T::Frame:   return a;
+  case T::Stack:   return a;
   case T::MIState: return a;
   case T::Ref:     return a;
   case T::Prop:    a.m_prop.obj = canonical(a.m_prop.obj);   return a;
   case T::ElemI:   a.m_elemI.arr = canonical(a.m_elemI.arr); return a;
   case T::ElemS:   a.m_elemS.arr = canonical(a.m_elemS.arr); return a;
-  case T::Stack:   a.m_stack = canonicalize_stk(a.m_stack);  return a;
   }
   not_reached();
 }
@@ -593,8 +557,7 @@ std::string show(AliasClass acls) {
       acls.m_elemS.key);
     break;
   case A::STag::Stack:
-    folly::format(&ret, "St t{}:{}{}",
-      acls.m_stack.base->id(),
+    folly::format(&ret, "St {}{}",
       acls.m_stack.offset,
       acls.m_stack.size == std::numeric_limits<int32_t>::max()
         ? "<"

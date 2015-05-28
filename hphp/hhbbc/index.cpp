@@ -1472,18 +1472,22 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
                                                  SString clsName) const {
   clsName = normalizeNS(clsName);
 
+  // We know it has to name a class only if there's no type alias with this
+  // name.
+  //
+  // TODO(#3519401): when we start unfolding type aliases, we could
+  // look at whether it is an alias for a specific class here.
+  // (Note this might need to split into a different API: type
+  // aliases aren't allowed everywhere we're doing resolve_class
+  // calls.)
+  if (m_data->typeAliases.count(clsName)) {
+    return folly::none;
+  }
+
   auto name_only = [&] () -> folly::Optional<res::Class> {
-    // We know it has to name a class only if there's no type alias with this
-    // name.  We also refuse to have name-only resolutions of enums, so that
+    // We also refuse to have name-only resolutions of enums, so that
     // all name only resolutions can be treated as objects.
-    //
-    // TODO(#3519401): when we start unfolding type aliases, we could
-    // look at whether it is an alias for a specific class here.
-    // (Note this might need to split into a different API: type
-    // aliases aren't allowed everywhere we're doing resolve_class
-    // calls.)
-    if (!m_data->typeAliases.count(clsName) &&
-        !m_data->enums.count(clsName)) {
+    if (!m_data->enums.count(clsName)) {
       return res::Class { this, clsName };
     }
     return folly::none;

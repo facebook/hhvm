@@ -1618,9 +1618,12 @@ SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
 
   if (!srcType.maybe(typeParam) || inst->next() == inst->taken()) {
-    // Convert the check into a Jmp.
+    /*
+     * Convert the check into a Jmp.  The dest of the CheckType (which would've
+     * been Bottom) is now never going to be defined, so we return a Bottom.
+     */
     gen(env, Jmp, inst->taken());
-    return inst->src(0);
+    return cns(env, TBottom);
   }
 
   auto const newType = srcType & typeParam;
@@ -2215,10 +2218,36 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
   auto const pos = ++block->iteratorTo(origInst);
 
   if (need_mov) {
-    unit.replace(origInst, Mov, res.dst);
-
-    // Force the existing dst type to match that of `res.dst'.
-    origInst->dst()->setType(res.dst->type());
+    /*
+     * In `killed_edge_defining' we have the case that an instruction defining
+     * a temp on an edge (like CheckType) determined it can never define that
+     * tmp.  In this situation we just Nop out the instruction and leave the
+     * old tmp dangling.  The reason this is ok is that one of the following
+     * two things are happening:
+     *
+     *    o The old next() block is becoming unreachable.  It's ok not to make
+     *      a new definition of this tmp, because the code running simplify is
+     *      going to have to track unreachable blocks and avoid looking at
+     *      them.  It will also have to remove unreachable blocks when it's
+     *      finished to maintain IR invariants (e.g. through DCE::Minimal),
+     *      which will mean the uses of the no-longer-defined tmp will go away.
+     *
+     *    o The old next() block is still reachable (e.g. if we're removing a
+     *      CheckType because it had next == taken).  But in this case, the
+     *      next() edge must have been a critical edge, and therefore nothing
+     *      could have any use of the old destination of the CheckType, or the
+     *      program would already not have been in SSA, because it was only
+     *      defined in blocks dominated by the next edge.
+     */
+    auto const killed_edge_defining = res.dst->type() <= TBottom &&
+      origInst->isBlockEnd();
+    if (killed_edge_defining) {
+      origInst->convertToNop();
+    } else {
+      unit.replace(origInst, Mov, res.dst);
+      // Force the existing dst type to match that of `res.dst'.
+      origInst->dst()->setType(res.dst->type());
+    }
   } else {
     if (out_size == 1) {
       assertx(origInst->dst() == last->dst());
@@ -2237,6 +2266,7 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
       last->convertToNop();
       return;
     }
+
     origInst->convertToNop();
   }
 
@@ -2252,18 +2282,16 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
 //////////////////////////////////////////////////////////////////////
 
 void simplifyPass(IRUnit& unit) {
-  boost::dynamic_bitset<> reachable(unit.numBlocks());
+  auto reachable = boost::dynamic_bitset<>(unit.numBlocks());
   reachable.set(unit.entry()->id());
 
-  auto const blocks = rpoSortCfg(unit);
-
-  for (auto block : blocks) {
+  for (auto block : rpoSortCfg(unit)) {
     if (!reachable.test(block->id())) continue;
 
     for (auto& inst : *block) simplify(unit, &inst);
 
-    if (auto const b = block->back().next())  reachable.set(b->id());
-    if (auto const b = block->back().taken()) reachable.set(b->id());
+    if (auto const b = block->next())  reachable.set(b->id());
+    if (auto const b = block->taken()) reachable.set(b->id());
   }
 }
 

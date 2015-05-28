@@ -70,6 +70,12 @@ SimplifyResult simplify(IRUnit&, const IRInstruction*, bool typesMightRelax);
  * This version of simplify() expects an instruction in the IRUnit's CFG as
  * input, and replaces it with the simplified instruction stream, preserving
  * the integrity of the containing Block's forward iterators.
+ *
+ * This may cause other blocks in the unit to become unreachable, and also note
+ * that it is not legal to run simplify() on instructions in blocks that were
+ * made unreachable by other calls to simplify().  This generally means you
+ * need to track which blocks are still reachable if you are making simplify()
+ * calls.
  */
 void simplify(IRUnit&, IRInstruction*);
 

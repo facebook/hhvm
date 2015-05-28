@@ -1124,7 +1124,7 @@ Variant f_simplexml_load_file(const String& filename,
   }
 
   auto stream = File::Open(filename, "rb");
-  if (stream->isInvalid()) return false;
+  if (!stream || stream->isInvalid()) return false;
 
   xmlDocPtr doc = nullptr;
 

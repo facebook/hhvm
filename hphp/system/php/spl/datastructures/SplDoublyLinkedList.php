@@ -143,6 +143,9 @@ class SplDoublyLinkedList
   public function pop() {
     $retval = $this->top();
     $this->tail = $this->tail->prev;
+    if ($this->tail !== null) {
+      $this->tail->next = null;
+    }
     --$this->count;
     return $retval;
   }
@@ -184,6 +187,9 @@ class SplDoublyLinkedList
   public function shift() {
     $retval = $this->bottom();
     $this->head = $this->head->next;
+    if ($this->head !== null) {
+      $this->head->prev = null;
+    }
     --$this->count;
     return $retval;
   }

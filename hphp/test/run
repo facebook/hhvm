@@ -200,11 +200,30 @@ function verify_hhbc() {
   return bin_root().'/verify.hhbc';
 }
 
-function read_file($file) {
-  return file_exists($file) ?
-         str_replace('__DIR__', dirname($file),
-           preg_replace('/\s+/', ' ', (file_get_contents($file))))
-         : "";
+function read_opts_file($file) {
+  if (!file_exists($file)) {
+    return "";
+  }
+
+  $fp = fopen($file, "r");
+
+  $contents = "";
+  while ($line = fgets($fp)) {
+    // Compress out white space
+    $line = preg_replace('/\s+/', ' ', $line);
+
+    // Discard simple line oriented ; and # comments to end of line
+    // Comments at end of line (after payload) are not allowed.
+    $line = preg_replace('/^ *;.*$/', ' ', $line);
+    $line = preg_replace('/^ *#.*$/', ' ', $line);
+
+    // Substitute in the directory name
+    $line = str_replace('__DIR__', dirname($file), $line);
+
+    $contents .= $line;
+  }
+  fclose($fp);
+  return $contents;
 }
 
 // http://stackoverflow.com/questions/2637945/
@@ -551,7 +570,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
     find_test_ext($test, 'ini'),
     $hdf,
     find_debug_config($test, 'hphpd.ini'),
-    read_file(find_test_ext($test, 'opts')),
+    read_opts_file(find_test_ext($test, 'opts')),
     '--file',
     escapeshellarg($test_run)
   );
@@ -596,7 +615,7 @@ function hphp_cmd($options, $test) {
     '--hphp',
     '--config',
     find_file($test, 'hphp_config.ini'),
-    read_file("$test.hphp_opts"),
+    read_opts_file("$test.hphp_opts"),
     "-thhbc -l0 -k1 -o \"$test.repo\" \"$test\"",
   ));
 }
@@ -607,7 +626,7 @@ function hhbbc_cmd($options, $test) {
     '--hhbbc',
     '--no-logging',
     '--parallel-num-threads=1',
-    read_file("$test.hhbbc_opts"),
+    read_opts_file("$test.hhbbc_opts"),
     "-o \"$test.repo/hhvm.hhbbc\" \"$test.repo/hhvm.hhbc\"",
   ));
 }

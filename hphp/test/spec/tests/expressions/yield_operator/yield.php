@@ -39,7 +39,6 @@ foreach (series('d', 'f') as $key => $val)
 echo "===========================\n";
 $a = series(5, 15);
 var_dump($a);   // PHP5 and HHVM: type Generator
-                // HHVM is also: type Continuation
 echo "This type " . (($a instanceof Generator)
                      ? "is"
                      : "is not")

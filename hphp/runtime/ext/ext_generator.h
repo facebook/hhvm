@@ -119,22 +119,9 @@ private:
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// class Continuation
-
-class c_Continuation : public BaseGenerator {
-public:
-  DECLARE_CLASS_NO_SWEEP(Continuation)
-
-  explicit c_Continuation(Class* cls = c_Continuation::classof())
-    : BaseGenerator(cls) {}
-  ~c_Continuation() {}
-  void t___construct() {}
-};
-
-///////////////////////////////////////////////////////////////////////////////
 // class Generator
 
-class c_Generator : public c_Continuation {
+class c_Generator : public BaseGenerator {
 public:
   DECLARE_CLASS_NO_SWEEP(Generator)
   ~c_Generator();

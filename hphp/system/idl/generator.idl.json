@@ -6,20 +6,7 @@
     ],
     "classes": [
         {
-            "name": "Continuation",
-            "flags": [
-                "IsAbstract",
-                "IsCppAbstract",
-                "NoDefaultSweep"
-            ],
-            "funcs": [
-            ],
-            "consts": [
-            ]
-        },
-        {
             "name": "Generator",
-            "parent": "Continuation",
             "flags": [
                 "IsFinal",
                 "NoDefaultSweep",

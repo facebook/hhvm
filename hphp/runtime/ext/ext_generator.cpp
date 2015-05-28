@@ -34,7 +34,7 @@ void delete_Generator(ObjectData* od, const Class*) {
 ///////////////////////////////////////////////////////////////////////////////
 
 c_Generator::c_Generator(Class* cb)
-  : c_Continuation(cb)
+  : BaseGenerator(cb)
   , m_index(-1LL)
   , m_key(make_tv<KindOfInt64>(-1LL))
   , m_value(make_tv<KindOfNull>())

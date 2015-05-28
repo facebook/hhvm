@@ -85,7 +85,16 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee) {
     return refuse("call is recursive");
   }
   if (callee->hasVariadicCaptureParam()) {
-    return refuse("callee has variadic capture");
+    if (callee->attrs() & AttrMayUseVV) {
+      return refuse("callee has variadic capture and MayUseVV");
+    }
+    // Refuse if the variadic parameter actually captures something.
+    auto pc = reinterpret_cast<const Op*>(callSK.pc());
+    auto const numArgs = getImm(pc, 0).u_IVA;
+    auto const numParams = callee->numParams();
+    if (numArgs >= numParams) {
+      return refuse("callee has variadic capture with non-empty value");
+    }
   }
   if (callee->numIterators() != 0) {
     return refuse("callee has iterators");
@@ -127,7 +136,8 @@ bool checkNumArgs(SrcKey callSK, const Func* callee) {
   // as the gap can be filled in by DV funclets.
   for (auto i = numArgs; i < numParams; ++i) {
     auto const& param = callee->params()[i];
-    if (!param.hasDefaultValue()) {
+    if (!param.hasDefaultValue() &&
+        (i < numParams - 1 || !callee->hasVariadicCaptureParam())) {
       return refuse("callee called with too few arguments");
     }
   }

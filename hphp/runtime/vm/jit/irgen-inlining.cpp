@@ -108,12 +108,18 @@ void beginInlining(IRGS& env,
   for (unsigned i = 0; i < numParams; ++i) {
     stLocRaw(env, i, calleeFP, params[i]);
   }
-  for (unsigned i = numParams; i < target->numLocals(); ++i) {
+  const bool hasVariadicArg = target->hasVariadicCaptureParam();
+  for (unsigned i = numParams; i < target->numLocals() - hasVariadicArg; ++i) {
     /*
      * Here we need to be generating hopefully-dead stores to initialize
      * non-parameter locals to KindOfUninit in case we have to leave the trace.
      */
     stLocRaw(env, i, calleeFP, cns(env, TUninit));
+  }
+  if (hasVariadicArg) {
+    auto argNum = target->numLocals() - 1;
+    always_assert(numParams <= argNum);
+    stLocRaw(env, argNum, calleeFP, cns(env, staticEmptyArray()));
   }
 
   env.fpiActiveStack.push(std::make_pair(env.fpiStack.top().returnSP,

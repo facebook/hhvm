@@ -104,7 +104,16 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
           ((td->nullable && valType <= TNull) ||
            annotCompat(valType.toDataType(), td->type,
              td->klass ? td->klass->name() : nullptr) == AnnotAction::Pass)) {
-        env.irb->constrainValue(val, TypeConstraint(DataTypeSpecific));
+        env.irb->constrainValue(val, DataTypeSpecific);
+        return;
+      }
+      auto cachedClass = tc.namedEntity()->getCachedClass();
+      if (cachedClass && classHasPersistentRDS(cachedClass) &&
+          cachedClass->enumBaseTy() &&
+          annotCompat(valType.toDataType(),
+                      dataTypeToAnnotType(*cachedClass->enumBaseTy()),
+                      nullptr) == AnnotAction::Pass) {
+        env.irb->constrainValue(val, DataTypeSpecific);
         return;
       }
     }
@@ -503,4 +512,3 @@ void emitAssertRATStk(IRGS& env, int32_t offset, RepoAuthType rat) {
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

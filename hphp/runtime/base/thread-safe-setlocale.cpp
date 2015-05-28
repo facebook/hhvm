@@ -192,7 +192,8 @@ struct lconv* ThreadSafeLocaleHandler::localeconv() {
   // TODO is the memcpy even necessary?
   struct lconv *ptr = g_thread_safe_localeconv_data.get();
   struct lconv *l = localeconv_l(m_locale);
-  return memcpy(ptr, l, sizeof(struct lconv));
+  memcpy(ptr, l, sizeof(struct lconv));
+  return ptr;
 }
 #else
 struct lconv* ThreadSafeLocaleHandler::localeconv() {

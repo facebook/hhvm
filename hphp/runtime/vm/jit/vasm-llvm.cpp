@@ -1580,6 +1580,7 @@ O(xorbi) \
 O(xorq) \
 O(xorqi) \
 O(landingpad) \
+O(leavetc) \
 O(vretm) \
 O(vret) \
 O(absdbl) \
@@ -2786,6 +2787,21 @@ void LLVMEmitter::emit(const vret& inst) {
   auto const retAddr = m_irb.CreateIntToPtr(value(inst.retAddr),
                                             ptrType(m_traceletFnTy));
   auto call = emitTraceletTailCall(retAddr, inst.args);
+  if (RuntimeOption::EvalJitLLVMRetOpt) {
+    call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TCR);
+    call->setTailCallKind(llvm::CallInst::TCK_Tail);
+  }
+}
+
+void LLVMEmitter::emit(const leavetc& inst) {
+  auto const exit = reinterpret_cast<intptr_t>(
+    mcg->tx().uniqueStubs.callToExit
+  );
+  auto const exit_ptr = m_irb.CreateIntToPtr(
+    cns(exit),
+    ptrType(m_traceletFnTy)
+  );
+  auto call = emitTraceletTailCall(exit_ptr, inst.args);
   if (RuntimeOption::EvalJitLLVMRetOpt) {
     call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TCR);
     call->setTailCallKind(llvm::CallInst::TCK_Tail);

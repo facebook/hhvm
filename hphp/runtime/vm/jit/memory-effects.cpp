@@ -973,7 +973,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckSurpriseFlags:
   case CheckType:
   case FreeActRec:
-  case LdRetAddr:
   case RegisterLiveObj:
   case StClosureFunc:
   case StContArResume:

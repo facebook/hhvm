@@ -221,6 +221,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::vinvoke:
     case Vinstr::vretm:
     case Vinstr::vret:
+    case Vinstr::leavetc:
       return true;
   }
   always_assert(false);

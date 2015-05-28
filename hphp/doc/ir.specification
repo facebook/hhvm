@@ -1258,10 +1258,6 @@ To string conversions:
     Object              {Obj|InitNull}    destination
     Variant             {Gen-UninitNull}  destination
 
-| LdRetAddr, D(RetAddr), S(FramePtr), NF
-
-  Load the saved return address from S0 into D.
-
 | RetCtrl<spOff,suspendingResumed>, ND, S(StkPtr) S(FramePtr), T
 
   Ensure that S0 + `spOff' (in cells) is stored in rVmSp, S1's saved frame
@@ -1269,10 +1265,10 @@ To string conversions:
   S1. `suspendingResumed' indicates when this instruction is suspending a
   resumable rather than performing a normal function return.
 
-| AsyncRetCtrl<spOff>, ND, S(StkPtr) S(FramePtr) S(RetAddr), T
+| AsyncRetCtrl<spOff>, ND, S(StkPtr) S(FramePtr), T
 
   Ensure that S0 + `spOff` (in cells) is stored in rVmSp, S1 is stored in
-  rVmFp, and return to the address in S2.
+  rVmFp.  Returns by leaving the TC to enterTCHelper.
 
 | StRetVal, ND, S(FramePtr) S(Gen), CRc
 

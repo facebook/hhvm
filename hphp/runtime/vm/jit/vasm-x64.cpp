@@ -94,6 +94,7 @@ struct Vgen {
   void emit(const landingpad& i) {}
   void emit(const vretm& i);
   void emit(const vret& i);
+  void emit(const leavetc&);
 
   // instructions
   void emit(andb i) { commuteSF(i); a->andb(i.s0, i.d); }
@@ -631,6 +632,8 @@ void Vgen::emit(const vret& i) {
   a->push(i.retAddr);
   a->ret();
 }
+
+void Vgen::emit(const leavetc& i) { a->ret(); }
 
 // overall emitter
 void Vgen::emit(jit::vector<Vlabel>& labels) {

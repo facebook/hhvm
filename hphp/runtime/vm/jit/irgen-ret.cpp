@@ -114,7 +114,6 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retval) {
   // Must load this before FreeActRec, which adjusts fp(env).
   auto const resumableObj = gen(env, LdResumableArObj, fp(env));
 
-  auto const retAddr = gen(env, LdRetAddr, fp(env));
   gen(env, FreeActRec, fp(env));
   gen(env, DecRef, resumableObj);
 
@@ -123,8 +122,7 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retval) {
     AsyncRetCtrl,
     IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
     sp(env),
-    fp(env),
-    retAddr
+    fp(env)
   );
 }
 

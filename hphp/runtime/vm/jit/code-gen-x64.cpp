@@ -1983,11 +1983,6 @@ void CodeGenerator::cgStRetVal(IRInstruction* inst) {
   emitStoreTV(vmain(), rFp[AROFF(m_r)], srcLoc(inst, 1), inst->src(1));
 }
 
-void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
-  auto const fp = srcLoc(inst, 0).reg();
-  vmain() << load{fp[AROFF(m_savedRip)], dstLoc(inst, 0).reg()};
-}
-
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
   if (rip == mcg->tx().uniqueStubs.callToExit) {
     return;
@@ -2022,19 +2017,11 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
 void CodeGenerator::cgAsyncRetCtrl(IRInstruction* inst) {
   auto& v = vmain();
   auto const sp = srcLoc(inst, 0).reg();
-  auto const fp = srcLoc(inst, 1).reg();
-  auto const retAddr = srcLoc(inst, 2).reg();
   auto const sync_sp = v.makeReg();
   v << lea{sp[cellsToBytes(inst->extra<AsyncRetCtrl>()->offset.offset)],
            sync_sp};
   v << syncvmsp{sync_sp};
-
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    v << vcall{CppCall::direct(traceRet),
-               v.makeVcallArgs({{fp, sync_sp, retAddr}}), v.makeTuple({})};
-  }
-
-  v << vret{retAddr, kCrossTraceRegsReturn};
+  v << leavetc{kCrossTraceRegsReturn};
 }
 
 void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {

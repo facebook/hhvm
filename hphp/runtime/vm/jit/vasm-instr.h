@@ -98,6 +98,7 @@ struct Vunit;
   O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
   O(vretm, Inone, U(retAddr) U(prevFp) U(args), D(d))\
   O(vret, Inone, U(retAddr) U(args), Dn)\
+  O(leavetc, Inone, U(args), Dn)\
   O(absdbl, Inone, U(s), D(d))\
   /* arm instructions */\
   O(asrv, Inone, U(sl) U(sr), D(d))\
@@ -467,6 +468,11 @@ struct vretm { Vptr retAddr; Vptr prevFp; Vreg d; RegSet args; };
  * Pushes retAddr and executes a ret instruction.
  */
 struct vret { Vreg retAddr; RegSet args; };
+
+/*
+ * Execute a ret instruction directly, returning to enterTCHelper.
+ */
+struct leavetc { RegSet args; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // ARM.

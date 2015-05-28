@@ -159,7 +159,6 @@ bool canDCE(IRInstruction* inst) {
   case NewCol:
   case FreeActRec:
   case DefInlineFP:
-  case LdRetAddr:
   case Mov:
   case CountArray:
   case CountArrayFast:

@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/pdo_mysql.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/util/network.h"
@@ -259,6 +260,7 @@ PDOMySqlConnection::~PDOMySqlConnection() {
 }
 
 const StaticString s_localhost("localhost");
+const std::string s_default_socket_option("pdo_mysql.default_socket");
 
 bool PDOMySqlConnection::create(const Array& options) {
   int i, ret = 0;
@@ -266,6 +268,9 @@ bool PDOMySqlConnection::create(const Array& options) {
   unsigned int port = 3306;
   char *dbname;
   char *charset = nullptr;
+  char *default_socket = nullptr;
+  std::string default_socket_string;
+
   struct pdo_data_src_parser vars[] = {
     { "charset",      nullptr,          0 },
     { "dbname",       "",               0 },
@@ -399,7 +404,14 @@ bool PDOMySqlConnection::create(const Array& options) {
   }
 
   if (host.empty() || host.same(s_localhost)) {
-    unix_socket = vars[4].optval;
+    if (IniSetting::Get(s_default_socket_option, default_socket_string)) {
+      default_socket = new char[default_socket_string.size() + 1];
+      memcpy(default_socket, default_socket_string.c_str(),
+                             default_socket_string.size() + 1);
+      unix_socket = default_socket;
+    } else {
+      unix_socket = vars[4].optval;
+    }
   }
 
   if (mysql_real_connect(m_server, host.c_str(),
@@ -425,6 +437,9 @@ cleanup:
     if (vars[i].freeme) {
       free(vars[i].optval);
     }
+  }
+  if (default_socket != nullptr) {
+    delete[] default_socket;
   }
 
   return ret;

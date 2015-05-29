@@ -424,7 +424,8 @@ static int find_boundary(multipart_buffer *self, char *boundary) {
 static int multipart_buffer_headers(multipart_buffer *self,
                                     header_list &header) {
   char *line;
-  std::pair<std::string, std::string> prev_entry;
+  std::string key;
+  std::string buf_value;
   std::pair<std::string, std::string> entry;
 
   /* didn't find boundary, abort */
@@ -437,8 +438,6 @@ static int multipart_buffer_headers(multipart_buffer *self,
   while( (line = get_line(self)) && strlen(line) > 0 )
   {
     /* add header to table */
-
-    char *key = line;
     char *value = nullptr;
 
     /* space in the beginning means same header */
@@ -447,19 +446,27 @@ static int multipart_buffer_headers(multipart_buffer *self,
     }
 
     if (value) {
-      *value = 0;
+      if (!buf_value.empty() && !key.empty() ) {
+        entry = std::make_pair(key, buf_value);
+        header.push_back(entry);
+        buf_value.erase();
+        key.erase();
+      }
+      *value = '\0';
       do { value++; } while(isspace(*value));
-      entry = std::make_pair(key, value);
-    } else if (!header.empty()) {
+      key.assign(line);
+      buf_value.append(value);
+    } else if (!buf_value.empty() ) {
       /* If no ':' on the line, add to previous line */
-      entry = std::make_pair(prev_entry.first, prev_entry.second + line);
-      header.pop_back();
+      buf_value.append(line);
     } else {
       continue;
     }
+  }
 
+  if (!buf_value.empty() && !key.empty()) {
+    entry = std::make_pair(key, buf_value);
     header.push_back(entry);
-    prev_entry = entry;
   }
 
   return 1;

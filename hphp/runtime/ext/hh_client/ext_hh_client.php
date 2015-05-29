@@ -25,9 +25,16 @@ function typecheck_impl(string $client_name): TypecheckResult {
     return new TypecheckResult(TypecheckStatus::COMMAND_NOT_FOUND, $error_text);
   }
 
+  // Use a largeish timeout in CLI mode, so we can wait for hh_server startup if
+  // we need to. CLI is both tolerant of occasionally larger latencies, and also
+  // we want to make sure that we don't *always* get an error that the server
+  // isn't ready on the first CLI script execution in a repo.
+  $timeout = \php_sapi_name() === 'cli' ? 5 : 0;
+
   $cmd = \sprintf(
-    '%s --timeout 0 --retries 0 --json %s 2>&1',
+    '%s --timeout %d --retries 0 --json %s 2>&1',
     \escapeshellarg($client_name),
+    $timeout,
     \escapeshellarg(\dirname($_SERVER['SCRIPT_FILENAME'])),
   );
 

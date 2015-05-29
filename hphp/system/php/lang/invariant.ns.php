@@ -2,7 +2,7 @@
 
 namespace __SystemLib {
 
-class InvariantCallback {
+abstract final class InvariantCallback {
   public static $cb = null;
 }
 
@@ -50,13 +50,11 @@ function invariant(mixed $test, ...$args): void {
  * function you registered with invariant_callback_register and then throws an
  * InvariantException
  */
-function invariant_violation(string $format_str, ...): void {
-  if (\__SystemLib\InvariantCallback::$cb) {
-    $args = func_get_args();
-    \call_user_func_array(\__SystemLib\InvariantCallback::$cb, $args);
+function invariant_violation(string $format_str, ...$args): void {
+  if ($cb = \__SystemLib\InvariantCallback::$cb) {
+    $cb($format_str, ...$args);
   }
 
-  $args = \array_slice(\func_get_args(), 1);
   $args = \array_map('\__SystemLib\invariant_violation_helper', $args);
   $message = \vsprintf($format_str, $args);
 

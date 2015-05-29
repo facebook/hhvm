@@ -299,6 +299,8 @@ static php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
   char *out_p, *out_buf, *tmp_buf;
   size_t bsz, result = 0;
   php_iconv_err_t retval = PHP_ICONV_ERR_SUCCESS;
+  int ignore_ilseq = boost::ends_with(out_charset, "//IGNORE") ||
+                     boost::ends_with(out_charset, "//IGNORE//TRANSLIT");
 
   *out = NULL;
   *out_len = 0;
@@ -323,6 +325,16 @@ static php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
     result = iconv(cd, (ICONV_CONST char **)&in_p, &in_left, (char **)&out_p, &out_left);
     out_size = bsz - out_left;
     if (result == (size_t)(-1)) {
+      if (ignore_ilseq && errno == EILSEQ) {
+        if (in_left <= 1) {
+          result = 0;
+        } else {
+          errno = 0;
+          in_p++;
+          in_left--;
+          continue;
+        }
+      }
       if (errno == E2BIG && in_left > 0) {
         // converted string is longer than out buffer
         bsz += in_len;

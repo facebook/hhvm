@@ -464,6 +464,11 @@ static inline uint32_t jitLLVMDefault() {
 #endif
 }
 
+static inline bool jitLLVMSLPVectorizeDefault() {
+  return RuntimeOption::EvalJitLLVMOptLevel > 1 &&
+         RuntimeOption::EvalJitLLVMSizeLevel < 2;
+}
+
 static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }

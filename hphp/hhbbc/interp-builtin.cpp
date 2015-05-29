@@ -60,6 +60,7 @@ X(implode)
 X(in_array)
 X(log)
 X(log10)
+X(max)
 X(mt_rand)
 X(mt_getrandmax)
 X(octdec)
@@ -282,6 +283,36 @@ bool builtin_mt_rand(ISS& env, const bc::FCallBuiltin& op) {
   return false;
 }
 
+/**
+ * The compiler specializes the two-arg version of min() and max()
+ * into an HNI provided helper. If both arguments are an integer
+ * or both arguments are a double, we know the exact type of the
+ * return value. If they're both numeric, the result is at least
+ * numeric.
+ */
+bool minmax2(ISS& env, const bc::FCallBuiltin& op) {
+  // this version takes exactly two arguments.
+  if (op.arg1 != 2) return false;
+
+  auto const t0 = topT(env, 0);
+  auto const t1 = topT(env, 1);
+  if (!t0.subtypeOf(TNum) || !t1.subtypeOf(TNum)) return false;
+  popC(env);
+  popC(env);
+  push(env, t0 == t1 ? t0 : TNum);
+  return true;
+}
+bool builtin_max2(ISS& env, const bc::FCallBuiltin& op) {
+  return minmax2(env, op);
+}
+bool builtin_min2(ISS& env, const bc::FCallBuiltin& op) {
+  return minmax2(env, op);
+}
+
+const StaticString
+  s_max2("__SystemLib\\max2"),
+  s_min2("__SystemLib\\min2");
+
 bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
 #define X(x) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
 
@@ -289,6 +320,8 @@ bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
   X(ceil)
   X(floor)
   X(get_class)
+  X(max2)
+  X(min2)
   X(mt_rand)
 
 #undef X

@@ -1327,19 +1327,36 @@ template<class DoCow = void, class NonArrayRet, class OpPtr>
 static Variant iter_op_impl(VRefParam refParam, OpPtr op, NonArrayRet nonArray,
                             bool(ArrayData::*pred)() const =
                               &ArrayData::isInvalid) {
-  auto& cell = *refParam.wrapped().asCell();
-  if (cell.m_type != KindOfArray) {
+  Cell& cell = *refParam.wrapped().asCell();
+  ArrayData* ad = NULL;
+
+  if (cell.m_type == KindOfArray) {
+    ad = cell.m_data.parr;
+  }
+
+  if (cell.m_type == KindOfObject) {
+    Object object = refParam.wrapped().toObject();
+    if (object->instanceof("ArrayObject")) {
+      ad = object->o_get("storage").asCell()->m_data.parr;
+    }
+  }
+
+  if (NULL == ad) {
     throw_bad_type_exception("expecting an array");
     return Variant(nonArray);
   }
-
-  auto ad = cell.m_data.parr;
+  
   auto constexpr doCow = !std::is_same<DoCow, NoCow>::value;
   if (doCow && ad->hasMultipleRefs() && !(ad->*pred)() &&
       !ad->noCopyOnWrite()) {
     ad = ad->copy();
-    cellSet(make_tv<KindOfArray>(ad), cell);
+    if (cell.m_type == KindOfArray) {
+      cellSet(make_tv<KindOfArray>(ad), cell);
+    } else {
+      refParam.wrapped().toObject()->o_set("storage", ad);
+    }
   }
+
   return (ad->*op)();
 }
 

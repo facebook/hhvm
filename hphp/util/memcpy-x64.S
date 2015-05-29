@@ -1,152 +1,210 @@
+/*
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+*/
+
 #include "hphp/util/etch-helpers.h"
 
 #if defined(__x86_64__) && !defined(__APPLE__)
-	.file	"memcpy-x64.S"
-        ETCH_SECTION(memcpy)
-	.globl	ETCH_NAME(memcpy)
-	.type	ETCH_NAME(memcpy), @function
+              .file "hphp/util/memcpy-x64.S"
+              ETCH_SECTION(memcpy)
+
+/*
+ * _memcpy_short is a local helper used when length < 8. It cannot be called
+ * from outside, because it expects a non-standard calling convention:
+ *
+ *    %rax:  destination buffer address.
+ *    %rsi:  source buffer address.
+ *    %edx:  length, in the range of [0, 7]
+ */
+              .type ETCH_NAME(_memcpy_short), @function
+ETCH_NAME(_memcpy_short):
+ETCH_LABEL(SHORT):
+              CFI(startproc)
+              //    if (length == 0) return;
+              test  %edx, %edx
+              jz    ETCH_LABEL(END)
+
+              //    We can safely read a byte here.
+              movzbl (%rsi), %ecx
+              //    if (length - 4 < 0) goto S4 ;
+              sub   $4, %edx
+              jb    ETCH_LABEL(S4)
+              mov   (%rsi), %ecx
+              mov   (%rsi, %rdx), %edi
+              mov   %ecx, (%rax)
+              mov   %edi, (%rax, %rdx)
+ETCH_LABEL(END):
+              rep
+              ret
+              nop
+ETCH_LABEL(S4):
+              //    At this point, length can be 1 or 2 or 3, and $cl contains
+              //    the first byte.
+              mov   %cl, (%rax)
+              //    if (length - 4 + 2 < 0) return;
+              add   $2, %edx
+              jnc   ETCH_LABEL(END)
+
+              //    length is 2 or 3 here. In either case, just move the last
+              //    bytes.
+              movzwl (%rsi, %rdx), %ecx
+              mov   %cx, (%rax, %rdx)
+              ret
+
+              CFI(endproc)
+              ETCH_SIZE(_memcpy_short)
+
+
+/*
+ * void* _memcpy8(void* dst, void* src, uint32_t length);
+ *
+ * This is the same as
+ *     memcpy(dst, src, (length + 7) / 8 * 8)
+ * except that it returns dst + length instead of dst. It always copy 8-byte
+ * groups, and could overrun the buffers. If both src and dst starts at
+ * addresses aligned to 8-byte boundary, it is generally safe.
+ *
+ * Note: we limit the length to a 32-bit integer, because we don't
+ * really copy very long things, and this helps reduce code size.
+ */
+              ETCH_ALIGN16
+              .globl ETCH_NAME(_memcpy8)
+              .type ETCH_NAME(_memcpy8), @function
+ETCH_NAME(_memcpy8):
+              CFI(startproc)
+              lea   (%rdi, %rdx), %rax
+              add   $7, %edx
+              mov   %edx, %ecx
+              and   $-8, %edx
+              jnz   ETCH_LABEL(L8)
+              ret
+
+              CFI(endproc)
+              ETCH_SIZE(_memcpy8)
+
+/*
+ * void* memcpy(void* dst, void* src, uint32_t length);
+ *
+ * Note: we limit the length to a 32-bit integer here to save code
+ * size. It works for hhvm.
+ */
+              ETCH_ALIGN16
+              .globl ETCH_NAME(memcpy)
+              .type ETCH_NAME(memcpy), @function
 ETCH_NAME(memcpy):
-ETCH_LABEL(FB524):
-	CFI(startproc)
+              CFI(startproc)
 
-	testb	$63, %dl
-	movq	%rdi, %rax
-	movq	%rdi, %rcx
-	je	ETCH_LABEL(2)
-	movq	%rdx, %rdi
-	andl	$7, %edi
-	jmp	*ETCH_LABEL(5)(,%rdi,8)
-	.section	.rodata
-	ETCH_ALIGN8
-	ETCH_ALIGN4
-ETCH_LABEL(5):
-	.quad	ETCH_LABEL(3)
-	.quad	ETCH_LABEL(4)
-	.quad	ETCH_LABEL(6)
-	.quad	ETCH_LABEL(7)
-	.quad	ETCH_LABEL(8)
-	.quad	ETCH_LABEL(9)
-	.quad	ETCH_LABEL(10)
-	.quad	ETCH_LABEL(11)
+              mov   %rdx, %rcx
+              cmp   $8, %edx
+              mov   %rdi, %rax
+              jb    ETCH_LABEL(SHORT)
 
-        ETCH_SECTION(memcpy)
-	ETCH_ALIGN8
-	ETCH_ALIGN4
-ETCH_LABEL(11):
-	movzbl	6(%rsi), %ecx
-	movb	%cl, 6(%rax)
-ETCH_LABEL(10):
-	movl	(%rsi), %ecx
-	movl	%ecx, (%rax)
-	movzwl	4(%rsi), %ecx
-	movw	%cx, 4(%rax)
+              mov   -8(%rsi, %rdx), %r8
+ETCH_LABEL(L8):
+              mov   (%rsi), %r9
+              and   $24, %ecx
+              //    This stores garbage if coming from _memcpy8, but it won't
+              //    cause corretness problem. The address is writable, and the
+              //    data there will be overwritten later. I don't want to move
+              //    this store before L8 because that will slow down the
+              //    loading of (%rsi).
+              mov   %r8, -8(%rdi, %rdx)
+              jz    ETCH_LABEL(L32)
 
-	subq	%rdi, %rdx
-	leaq	(%rax,%rdi), %rcx
-	addq	%rdi, %rsi
-	movl	%edx, %edi
-	andl	$63, %edi
-	movl	%edi, %r8d
-	shrl	$3, %r8d
-	jmp	*ETCH_LABEL(14)(,%r8,8)
-ETCH_LABEL(9):
-	movzbl	4(%rsi), %ecx
-	movb	%cl, 4(%rax)
-ETCH_LABEL(8):
-	movl	(%rsi), %ecx
-	movl	%ecx, (%rax)
+              mov   %r9, (%rdi)
+              mov   %ecx, %r8d
+              sub   $16, %ecx
+              jb    ETCH_LABEL(T32)
 
-	subq	%rdi, %rdx
-	leaq	(%rax,%rdi), %rcx
-	addq	%rdi, %rsi
-	movl	%edx, %edi
-	andl	$63, %edi
-	movl	%edi, %r8d
-	shrl	$3, %r8d
-	jmp	*ETCH_LABEL(14)(,%r8,8)
+              movdqu (%rsi, %rcx), %xmm1
+              movdqu %xmm1, (%rdi, %rcx)
 
-ETCH_LABEL(7):
-	movzbl	2(%rsi), %ecx
-	movb	%cl, 2(%rax)
-ETCH_LABEL(6):
-	movzbl	1(%rsi), %ecx
-	movb	%cl, 1(%rax)
-ETCH_LABEL(4):
-	movzbl	(%rsi), %ecx
-	movb	%cl, (%rax)
-ETCH_LABEL(3):
-	subq	%rdi, %rdx
-	leaq	(%rax,%rdi), %rcx
-	addq	%rdi, %rsi
-	movl	%edx, %edi
-	andl	$63, %edi
-	movl	%edi, %r8d
-	shrl	$3, %r8d
-	jmp	*ETCH_LABEL(14)(,%r8,8)
-	.section	.rodata
-	ETCH_ALIGN8
-	ETCH_ALIGN4
-ETCH_LABEL(14):
-	.quad	ETCH_LABEL(12)
-	.quad	ETCH_LABEL(13)
-	.quad	ETCH_LABEL(15)
-	.quad	ETCH_LABEL(16)
-	.quad	ETCH_LABEL(17)
-	.quad	ETCH_LABEL(18)
-	.quad	ETCH_LABEL(19)
-	.quad	ETCH_LABEL(20)
-        ETCH_SECTION(memcpy)
-ETCH_LABEL(20):
-	movq	48(%rsi), %r8
-	movq	%r8, 48(%rcx)
-ETCH_LABEL(19):
-	movq	40(%rsi), %r8
-	movq	%r8, 40(%rcx)
-ETCH_LABEL(18):
-	movq	32(%rsi), %r8
-	movq	%r8, 32(%rcx)
-ETCH_LABEL(17):
-	movq	24(%rsi), %r8
-	movq	%r8, 24(%rcx)
-ETCH_LABEL(16):
-	movq	16(%rsi), %r8
-	movq	%r8, 16(%rcx)
-ETCH_LABEL(15):
-	movq	8(%rsi), %r8
-	movq	%r8, 8(%rcx)
-ETCH_LABEL(13):
-	movq	(%rsi), %r8
-	movq	%r8, (%rcx)
-ETCH_LABEL(12):
-	subq	%rdi, %rdx
-	addq	%rdi, %rcx
-	addq	%rdi, %rsi
-ETCH_LABEL(2):
-	testq	%rdx, %rdx
-	jne	ETCH_LABEL(28)
-	jmp	ETCH_LABEL(26)
-	.p2align 4,,10
-	.p2align 3
-ETCH_LABEL(32):
-	movq	%r8, %rcx
-ETCH_LABEL(28):
-	movdqu	(%rsi), %xmm3
-	addq	$64, %rsi
-	leaq	64(%rcx), %r8
-	movdqu	-48(%rsi), %xmm2
-	movdqu	-32(%rsi), %xmm1
-	movdqu	-16(%rsi), %xmm0
-	subq	$64, %rdx
-	movdqu	%xmm3, (%rcx)
-	movdqu	%xmm2, 16(%rcx)
-	movdqu	%xmm1, 32(%rcx)
-	movdqu	%xmm0, 48(%rcx)
-	jne	ETCH_LABEL(32)
-ETCH_LABEL(26):
-	rep; ret
-	CFI(endproc)
-ETCH_LABEL(FE524):
-	ETCH_SIZE(memcpy)
-	.ident	"GCC: (GNU) 4.8.2"
-	.section	.note.GNU-stack,"",@progbits
+              // Test if there are 32-byte groups
+ETCH_LABEL(T32):
+              add   %r8, %rsi
+              and   $-32, %edx
+              jnz   ETCH_LABEL(R32_adjDI)
+ETCH_LABEL(END2):
+              rep
+              ret
+              nop
+
+ETCH_LABEL(R32_adjDI):
+              add   %r8, %rdi
+/*
+ * void* _bcopy32(void* dst, void* src, uint32_t length);
+ *
+ * This is the same as
+ *     assert(length >= 32);
+ *     memcpy(dst, src, length / 32 * 32);
+ * except that the return value cannot be used.
+ */
+              .globl ETCH_NAME(_bcopy32)
+              .type ETCH_NAME(_bcopy32), @function
+ETCH_NAME(_bcopy32):
+ETCH_LABEL(L32):
+              // Multiples of 32 bytes.
+              movdqu (%rsi), %xmm0
+              movdqu 16(%rsi), %xmm1
+
+              //    if ((edx & 32) == 0) goto R64Byte_32read
+              shr   $6, %edx
+              jnc   ETCH_LABEL(R64Byte_32read)
+
+              movdqu %xmm0, (%rdi)
+              movdqu %xmm1, 16(%rdi)
+              lea   32(%rsi), %rsi
+              jnz   ETCH_LABEL(R64_adjDI)
+              ret
+
+ETCH_LABEL(R64_adjDI):
+              add   $32, %rdi
+
+/*
+ * void _bcopy_in_64(void* dst, void* src, uint32_t lengthIn64Bytes);
+ *
+ * This is the same as
+ *     assert(lengthIn64Bytes > 0);
+ *     memcpy(dst, src, 64 * lengthIn64Bytes);
+ * except that the return value cannot be used.
+ *
+ * Note that the length being copied is 64 * %edx.
+ */
+              .globl ETCH_NAME(_bcopy_in_64)
+              .type ETCH_NAME(_bcopy_in_64), @function
+ETCH_NAME(_bcopy_in_64):
+ETCH_LABEL(R64Byte):
+              // Multiples of 64 bytes.
+              movdqu (%rsi), %xmm0
+              movdqu 16(%rsi), %xmm1
+ETCH_LABEL(R64Byte_32read):
+              movdqu 32(%rsi), %xmm2
+              movdqu 48(%rsi), %xmm3
+              add   $64, %rsi
+              movdqu %xmm0, (%rdi)
+              movdqu %xmm1, 16(%rdi)
+              movdqu %xmm2, 32(%rdi)
+              movdqu %xmm3, 48(%rdi)
+              add   $64, %rdi
+              dec   %edx
+              jnz   ETCH_LABEL(R64Byte)
+              ret
+
+              CFI(endproc)
+              ETCH_SIZE(memcpy)
+
+              .ident "GCC: (GNU) 4.8.2"
+              .section .note.GNU-stack,"",@progbits
 #endif

@@ -13,9 +13,9 @@ if (FOLLY_IFUNC)
 endif()
 
 if (LINUX OR FREEBSD)
-  set(CMAKE_REQUIRED_LIBRARIES rt pthread)
+  set(CMAKE_REQUIRED_LIBRARIES rt ${LIBPTHREAD_LIBRARIES})
 else()
-  set(CMAKE_REQUIRED_LIBRARIES pthread)
+  set(CMAKE_REQUIRED_LIBRARIES ${LIBPTHREAD_LIBRARIES})
 endif()
 
 include(CheckFunctionExists)

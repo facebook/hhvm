@@ -76,12 +76,6 @@ SSATmp* cns(IRGS& env, Args&&... args) {
 }
 
 /*
- * Insert an ExitPlaceholder instruction in the IRUnit at the current emit
- * point.
- */
-void makeExitPlaceholder(IRGS&);
-
-/*
  * Guards, checks and type assertions.  Guards and checks are the same thing,
  * except that guards must happen at the first bytecode offset in the region.
  *
@@ -116,6 +110,13 @@ void checkRefs(IRGS&, int64_t entryArDelta, const std::vector<bool>& mask,
  * emitted.
  */
 void prepareEntry(IRGS&);
+
+/*
+ * Creates a no-op IR instruction that branches to an exit. These placeholder
+ * instructions are later removed after any passes that want to use them for
+ * their exits.
+ */
+void makeExitPlaceholder(IRGS&);
 
 //////////////////////////////////////////////////////////////////////
 

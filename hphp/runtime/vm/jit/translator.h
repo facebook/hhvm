@@ -617,7 +617,8 @@ int locPhysicalOffset(int32_t localIndex);
 void translateInstr(
   IRGS&,
   const NormalizedInstruction&,
-  bool checkOuterTypeOnly
+  bool checkOuterTypeOnly,
+  bool needsExitPlaceholder
 );
 
 extern bool tc_dump();

@@ -128,8 +128,8 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
       doPass(unit, cleanCfg, DCE::None);
       doPass(unit, optimizeLoopInvariantCode, DCE::Minimal);
     }
-    doPass(unit, removeExitPlaceholders, DCE::Full);
   }
+  doPass(unit, removeExitPlaceholders, DCE::Full);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     doPass(unit, insertAsserts, DCE::None);

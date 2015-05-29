@@ -613,11 +613,6 @@ TranslateResult irGenRegion(IRGS& irgs,
     }
     setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
 
-    // Create extra exits at loop headers.
-    if (RuntimeOption::EvalHHIRLICM && hasUnprocPred) {
-      irgen::makeExitPlaceholder(irgs);
-    }
-
     // Emit the type and reffiness predictions for this region block. If this is
     // the first instruction in the region, we check inner type eagerly, insert
     // `EndGuards` after the checks, and generate profiling code in profiling
@@ -688,7 +683,7 @@ TranslateResult irGenRegion(IRGS& irgs,
 
       // Emit IR for the body of the instruction.
       try {
-        if (!skipTrans) translateInstr(irgs, inst, checkOuterTypeOnly);
+        if (!skipTrans) translateInstr(irgs, inst, checkOuterTypeOnly, i == 0);
       } catch (const FailedIRGen& exn) {
         ProfSrcKey psk{irgs.profTransID, sk};
         always_assert_flog(!toInterp.count(psk),

@@ -1448,7 +1448,8 @@ void emitInputChecks(
 void translateInstr(
   IRGS& irgs,
   const NormalizedInstruction& ni,
-  bool checkOuterTypeOnly
+  bool checkOuterTypeOnly,
+  bool needsExitPlaceholder
 ) {
   irgen::prepareForNextHHBC(
     irgs,
@@ -1482,11 +1483,15 @@ void translateInstr(
 
   if (isAlwaysNop(ni.op())) {
     // Do nothing
+    return;
   } else if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
     irgen::interpOne(irgs, ni);
-  } else {
-    translateDispatch(irgs, ni);
+    return;
   }
+
+  if (needsExitPlaceholder) irgen::makeExitPlaceholder(irgs);
+
+  translateDispatch(irgs, ni);
 }
 
 //////////////////////////////////////////////////////////////////////

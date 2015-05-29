@@ -170,6 +170,7 @@ RegionDescPtr RegionFormer::go() {
   }
   irgen::gen(m_irgs, EndGuards);
 
+  bool needsExitPlaceholder = true;
   while (true) {
     assertx(m_numBCInstrs <= RuntimeOption::EvalJitMaxRegionInstrs);
     if (m_numBCInstrs == RuntimeOption::EvalJitMaxRegionInstrs) {
@@ -213,7 +214,9 @@ RegionDescPtr RegionFormer::go() {
     auto const inlineReturn = irgen::isInlining(m_irgs) &&
       (isRet(m_inst.op()) || m_inst.op() == OpNativeImpl);
     try {
-      translateInstr(m_irgs, m_inst, true/*checkOuterTypeOnly*/);
+      translateInstr(m_irgs, m_inst,
+          true/*checkOuterTypeOnly*/,
+          needsExitPlaceholder);
     } catch (const FailedIRGen& exn) {
       FTRACE(1, "ir generation for {} failed with {}\n",
              m_inst.toString(), exn.what());
@@ -222,6 +225,7 @@ RegionDescPtr RegionFormer::go() {
       m_region.reset();
       break;
     }
+    needsExitPlaceholder = false;
 
     irgen::finishHHBC(m_irgs);
 

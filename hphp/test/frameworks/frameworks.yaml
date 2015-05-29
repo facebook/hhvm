@@ -245,8 +245,8 @@
       - joomla-framework/src/Joomla/Log/Tests/LogEntryTest.php
   joomlacms:
     url: https://github.com/joomla/joomla-cms.git
-    branch: "3.4.1"
-    commit: b855f8885dec93ad439136f00b07a7ebf49af52b
+    branch: "3.4.1-rc"
+    commit: 7689d922ca373989e7328f510e94aa2fc541e272
     install_root: joomla-cms
     test_root: joomla-cms
     test_find_mode: token

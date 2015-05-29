@@ -1,7 +1,7 @@
 <?hh // strict
 
 class X {
-  const type T as arraykey = string;
+  const type T as arraykey = arraykey;
 
   final public function __construct(private this::T $val) {}
 

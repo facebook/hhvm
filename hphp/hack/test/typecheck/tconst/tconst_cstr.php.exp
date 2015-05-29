@@ -1,0 +1,6 @@
+File "tconst_cstr.php", line 4, characters 14-14:
+Unable to satisfy constraint on this type constant (Typing[4110])
+File "tconst_cstr.php", line 4, characters 19-26:
+This is an array key (int/string)
+File "tconst_cstr.php", line 4, characters 30-34:
+It is incompatible with a mixed value

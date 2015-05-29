@@ -2,7 +2,7 @@
 
 <<__ConsistentConstruct>>
 class X {
-  const type T as arraykey = string;
+  const type T as arraykey = arraykey;
 
   private this::T $priv;
 

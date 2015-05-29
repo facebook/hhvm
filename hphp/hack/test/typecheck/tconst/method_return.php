@@ -1,7 +1,7 @@
 <?hh // strict
 
 class X {
-  const type T as arraykey = string;
+  const type T as arraykey = arraykey;
 
   final public function __construct(private this::T $val) {}
 
@@ -58,7 +58,7 @@ function test(Y $y, X $x): (int, arraykey) {
   return tuple($y->get(), $x->get());
 }
 
-function test2(Y $y, X $x): (int, arraykey, string, int) {
+function test2(Y $y, X $x): (int, arraykey, X::T, int) {
   return tuple(
     $y::static_get(),
     $x::static_get(),

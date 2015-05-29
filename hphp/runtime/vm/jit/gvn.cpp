@@ -312,9 +312,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdMIStateAddr:
   case LdPackedArrayElemAddr:
   case OrdStr:
-  case AKExistsArr:
   case DefLabel:
-  case ArrayGet:
     return true;
   default:
     return false;

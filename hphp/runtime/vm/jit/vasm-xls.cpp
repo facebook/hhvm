@@ -174,6 +174,7 @@ struct Vxls {
   void resolveEdges();
   void renameOperands();
   void insertCopies();
+  void peephole();
   void allocateSpillSpace();
 
   // utilities
@@ -507,18 +508,9 @@ void Vxls::allocate() {
   resolveEdges();
   renameOperands();
   insertCopies();
-  // Remove nop-copies before allocating spill space, since it might create new
+  // clean up before allocating spill space, since it might create new
   // blocks and modify the cfg.
-  for (auto b : blocks) {
-    auto& code = unit.blocks[b].code;
-    auto end = std::remove_if(code.begin(), code.end(), [&](Vinstr& inst) {
-      return is_trivial_nop(inst) ||
-             inst.op == Vinstr::copyargs || // we lowered it
-             inst.op == Vinstr::phidef; // we lowered it
-    });
-    code.erase(end, code.end());
-  }
-
+  peephole();
   allocateSpillSpace();
   printUnit(kVasmRegAllocLevel, "after vasm-xls", unit);
 }
@@ -1593,6 +1585,38 @@ void Vxls::insertCopies() {
     dumpIntervals();
     print("after inserting copies");
   );
+}
+
+// Run a quick peephole pass to clean up after ourselves.
+// Remove nop-copies before allocating spill space, since it might create new
+// instructions that we lowered, and trivial copies.
+void Vxls::peephole() {
+  auto match_xchg = [](Vinstr& i, Vreg& r0, Vreg& r1) {
+    if (i.op != Vinstr::copy2) return false;
+    r0 = i.copy2_.s0;
+    r1 = i.copy2_.s1;
+    return r0 == i.copy2_.d1 && r1 == i.copy2_.d0;
+  };
+  for (auto b : blocks) {
+    auto& code = unit.blocks[b].code;
+    for (int i=0, n = code.size(); i+1 < n; i++) {
+      Vreg r0, r1, r2, r3;
+      if (match_xchg(code[i], r0, r1) &&
+          match_xchg(code[i+1], r2, r3) &&
+          ((r0 == r2 && r1 == r3) || (r0 == r3 && r1 == r2))) {
+        // matched xchg+xchg that cancel each other
+        code[i] = nop{};
+        code[i+1] = nop{};
+        i++;
+      }
+    }
+    auto end = std::remove_if(code.begin(), code.end(), [&](Vinstr& inst) {
+      return is_trivial_nop(inst) ||
+             inst.op == Vinstr::copyargs || // we lowered it
+             inst.op == Vinstr::phidef; // we lowered it
+    });
+    code.erase(end, code.end());
+  }
 }
 
 /*

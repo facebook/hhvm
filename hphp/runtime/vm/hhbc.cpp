@@ -1134,6 +1134,12 @@ static const char* ObjMethodOp_names[] = {
 #undef OBJMETHOD_OP
 };
 
+static const char* SwitchKind_names[] = {
+#define KIND(x) #x,
+  SWITCH_KINDS
+#undef KIND
+};
+
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode) {
   static_assert(
@@ -1183,6 +1189,7 @@ X(BareThisOp)
 X(SilenceOp)
 X(OODeclExistsOp)
 X(ObjMethodOp)
+X(SwitchKind)
 
 #undef X
 

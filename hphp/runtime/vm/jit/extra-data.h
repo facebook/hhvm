@@ -363,7 +363,6 @@ struct LdSSwitchData : IRExtraData {
 struct JmpSwitchData : IRExtraData {
   JmpSwitchData* clone(Arena& arena) const {
     JmpSwitchData* sd = new (arena) JmpSwitchData;
-    sd->base       = base;
     sd->bounded    = bounded;
     sd->cases      = cases;
     sd->defaultSk  = defaultSk;
@@ -374,7 +373,6 @@ struct JmpSwitchData : IRExtraData {
     return sd;
   }
 
-  int64_t base;        // base of switch case
   bool    bounded;     // whether switch is bounded or not
   int32_t cases;       // number of cases
   SrcKey  defaultSk;   // srckey of default case

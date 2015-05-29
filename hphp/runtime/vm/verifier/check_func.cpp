@@ -633,7 +633,7 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
 #define OO_DECL_EXISTS_OP(x) if (op == static_cast<uint8_t>(OODeclExistsOp::x)) break;
         OO_DECL_EXISTS_OPS
 #undef OO_DECL_EXISTS_OP
-          error("invalid operation for OODeclExists: %d\n", op);
+        error("invalid operation for OODeclExists: %d\n", op);
         ok = false;
         break;
       case OpFPushObjMethodD:
@@ -641,7 +641,14 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
 #define OBJMETHOD_OP(x) if (op == static_cast<uint8_t>(ObjMethodOp::x)) break;
         OBJMETHOD_OPS
 #undef OBJMETHOD_OP
-          error("invalid operation for FPushObjMethod*: %d\n", op);
+        error("invalid operation for FPushObjMethod*: %d\n", op);
+        ok = false;
+        break;
+      case OpSwitch:
+#define KIND(x) if (op == static_cast<uint8_t>(SwitchKind::x)) break;
+        SWITCH_KINDS
+#undef KIND
+        error("invalid kind for Switch: %d\n", op);
         ok = false;
         break;
       }

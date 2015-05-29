@@ -1953,6 +1953,7 @@ void LLVMEmitter::emit(const bindaddr& inst) {
     TransFlags{}.packed
   );
   mcg->cgFixups().m_codePointers.insert(inst.dest);
+  mcg->setJmpTransID(TCA(inst.dest));
 }
 
 void LLVMEmitter::emit(const defvmsp& inst) {

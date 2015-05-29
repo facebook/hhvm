@@ -407,6 +407,7 @@ void Vgen::emit(const copy2& i) {
 
 void Vgen::emit(const bindaddr& i) {
   *i.dest = emitBindAddr(a->code(), frozen(), i.dest, i.sk, i.spOff);
+  mcg->setJmpTransID(TCA(i.dest));
 }
 
 void Vgen::emit(const bindcall& i) {

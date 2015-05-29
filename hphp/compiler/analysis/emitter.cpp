@@ -1584,7 +1584,7 @@ void EmitterVisitor::emitFinallyEpilogue(Emitter& e, Region* region) {
     // A switch is needed since there are more than two cases.
     emitVirtualLocal(stateLocal);
     e.CGetL(stateLocal);
-    e.Switch(cases, 0, 0);
+    e.Switch(cases, 0, SwitchKind::Unbounded);
   }
   for (auto& p : region->m_returnTargets) {
     if (p.second.used) emitReturnTrampoline(e, region, cases, p.first);
@@ -5906,7 +5906,7 @@ void EmitterVisitor::emitIntegerSwitch(Emitter& e, SwitchStatementPtr sw,
 
   visit(sw->getExp());
   emitConvertToCell(e);
-  e.Switch(labels, base, 1);
+  e.Switch(labels, base, SwitchKind::Bounded);
 }
 
 void EmitterVisitor::emitStringSwitch(Emitter& e, SwitchStatementPtr sw,

@@ -1929,6 +1929,26 @@ SSATmp* simplifyLdStk(State& env, const IRInstruction* inst) {
   return ldImpl(env, inst);
 }
 
+SSATmp* simplifyJmpSwitchDest(State& env, const IRInstruction* inst) {
+  auto const index = inst->src(0);
+  if (!index->hasConstVal(TInt)) return nullptr;
+
+  auto indexVal = index->intVal();
+  auto const sp = inst->src(1);
+  auto const fp = inst->src(2);
+  auto const& extra = *inst->extra<JmpSwitchDest>();
+  auto newExtra = [&](const SrcKey& sk) {
+    return ReqBindJmpData{sk, extra.invSPOff, extra.irSPOff, TransFlags{}};
+  };
+
+  if (extra.bounded) {
+    if (indexVal >= extra.cases - 2 || indexVal < 0) {
+      return gen(env, ReqBindJmp, newExtra(extra.defaultSk), sp, fp);
+    }
+  }
+  return gen(env, ReqBindJmp, newExtra(extra.targets[indexVal]), sp, fp);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
@@ -2049,6 +2069,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(OrdStr)
   X(LdLoc)
   X(LdStk)
+  X(JmpSwitchDest)
   default: break;
   }
 #undef X

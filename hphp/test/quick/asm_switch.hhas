@@ -28,7 +28,7 @@ loop:    CGetL $foo
                  label_1
                  label_2
                  label_3
-                 label_4> 0 0
+                 label_4> 0 Unbounded
 
 label_0: String "label_0\n"
          Jmp printer

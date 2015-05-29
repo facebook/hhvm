@@ -1466,11 +1466,12 @@ JmpNZ <rel offset>    [C]  ->  []
 
 Switch <offset vector> <base> <bounded>    [C]  ->  []
 
-  Switch over integer case values. If bounded == 0, the implementation will
-  assume that $1 is an integer in the range [0, length(vector)) and
-  unconditionally transfer control to the location specified by vector[$1].
-  Undefined behavior will result if $1 is not an integer inside this range. If
-  bounded != 0, the following rules take over:
+  Switch over integer case values. If bounded == SwitchKind::Unbounded, the
+  implementation will assume that $1 is an integer in the range [0,
+  length(vector)) and unconditionally transfer control to the location
+  specified by vector[$1].  Undefined behavior will result if $1 is not an
+  integer inside this range. If bounded == SwitchKind::Bounded, the following
+  rules take over:
 
   For a bounded Switch, the last two elements of the offset vector are special:
   they represent the first non-zero case and the default case, respectively.

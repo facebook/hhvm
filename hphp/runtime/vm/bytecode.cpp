@@ -253,6 +253,7 @@ inline const char* prettytype(ObjMethodOp) { return "ObjMethodOp"; }
 inline const char* prettytype(BareThisOp) { return "BareThisOp"; }
 inline const char* prettytype(InitPropOp) { return "InitPropOp"; }
 inline const char* prettytype(SilenceOp) { return "SilenceOp"; }
+inline const char* prettytype(SwitchKind) { return "SwitchKind"; }
 
 // load a T value from *pc without incrementing
 template<class T> T peek(PC pc) {
@@ -4294,10 +4295,10 @@ OPTBLD_INLINE void iopSwitch(IOP_ARGS) {
   Offset* jmptab = (Offset*)pc;
   pc += veclen * sizeof(*jmptab);
   auto base = decode<int64_t>(pc);
-  auto bounded = decode_iva(pc);
+  auto const kind = decode_oa<SwitchKind>(pc);
 
   TypedValue* val = vmStack().topTV();
-  if (!bounded) {
+  if (kind == SwitchKind::Unbounded) {
     assert(val->m_type == KindOfInt64);
     // Continuation switch: no bounds checking needed
     int64_t label = val->m_data.num;

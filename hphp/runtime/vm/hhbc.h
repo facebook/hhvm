@@ -495,6 +495,16 @@ enum class ObjMethodOp : uint8_t {
 #undef OBJMETHOD_OP
 };
 
+#define SWITCH_KINDS                            \
+  KIND(Unbounded)                               \
+  KIND(Bounded)
+
+enum class SwitchKind : uint8_t {
+#define KIND(x) x,
+  SWITCH_KINDS
+#undef KIND
+};
+
 constexpr int32_t kMaxConcatN = 4;
 
 //  name             immediates        inputs           outputs     flags
@@ -586,7 +596,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(JmpNS,           ONE(BA),          NOV,             NOV,        CF_TF) \
   O(JmpZ,            ONE(BA),          ONE(CV),         NOV,        CF) \
   O(JmpNZ,           ONE(BA),          ONE(CV),         NOV,        CF) \
-  O(Switch,          THREE(BLA,I64A,IVA),                               \
+  O(Switch,          THREE(BLA,I64A,OA(SwitchKind)),                    \
                                        ONE(CV),         NOV,        CF_TF) \
   O(SSwitch,         ONE(SLA),         ONE(CV),         NOV,        CF_TF) \
   O(RetC,            NA,               ONE(CV),         NOV,        CF_TF) \
@@ -983,6 +993,7 @@ const char* subopToName(BareThisOp);
 const char* subopToName(SilenceOp);
 const char* subopToName(OODeclExistsOp);
 const char* subopToName(ObjMethodOp);
+const char* subopToName(SwitchKind);
 
 /*
  * Try to parse a string into a subop name of a given type.

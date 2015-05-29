@@ -2058,47 +2058,27 @@ void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
 void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
   auto const extra    = inst->extra<JmpSwitchDest>();
   auto const marker   = inst->marker();
-  auto const index    = inst->src(0);
   auto const indexReg = srcLoc(inst, 0).reg();
   auto const invSPOff = extra->invSPOff;
   auto& v = vmain();
 
   maybe_syncsp(v, marker, srcLoc(inst, 1).reg(), extra->irSPOff);
 
-  if (!index->hasConstVal()) {
-    auto idx = indexReg;
-    if (extra->bounded) {
-      if (extra->base) {
-        idx = v.makeReg();
-        v << subq{v.cns(extra->base), indexReg, idx, v.makeReg()};
-      }
-      auto const sf = v.makeReg();
-      v << cmpqi{extra->cases - 2, idx, sf};
-      v << bindjcc{CC_AE, sf, extra->defaultSk, invSPOff,
-        TransFlags{}, leave_trace_args(marker)};
-    }
-
-    auto const table = mcg->allocData<TCA>(sizeof(TCA), extra->cases);
-    auto const t = v.makeReg();
-    for (int i = 0; i < extra->cases; i++) {
-      v << bindaddr{&table[i], extra->targets[i], invSPOff};
-    }
-    v << leap{rip[(intptr_t)table], t};
-    v << jmpm{t[idx*8], leave_trace_args(marker)};
-    return;
-  }
-
-  auto indexVal = index->intVal();
+  auto idx = indexReg;
   if (extra->bounded) {
-    indexVal -= extra->base;
-    if (indexVal >= extra->cases - 2 || indexVal < 0) {
-      v << bindjmp{extra->defaultSk, invSPOff, TransFlags{},
-        leave_trace_args(marker)};
-      return;
-    }
+    auto const sf = v.makeReg();
+    v << cmpqi{extra->cases - 2, idx, sf};
+    v << bindjcc{CC_AE, sf, extra->defaultSk, invSPOff,
+                 TransFlags{}, leave_trace_args(marker)};
   }
-  v << bindjmp{extra->targets[indexVal], invSPOff, TransFlags{},
-    leave_trace_args(marker)};
+
+  auto const table = mcg->allocData<TCA>(sizeof(TCA), extra->cases);
+  auto const t = v.makeReg();
+  for (int i = 0; i < extra->cases; i++) {
+    v << bindaddr{&table[i], extra->targets[i], invSPOff};
+  }
+  v << leap{rip[(intptr_t)table], t};
+  v << jmpm{t[idx*8], leave_trace_args(marker)};
 }
 
 void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {

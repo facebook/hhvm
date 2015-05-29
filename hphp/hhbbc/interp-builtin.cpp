@@ -60,6 +60,7 @@ X(implode)
 X(in_array)
 X(log)
 X(log10)
+X(mt_rand)
 X(mt_getrandmax)
 X(octdec)
 X(ord)
@@ -255,6 +256,32 @@ bool builtin_floor(ISS& env, const bc::FCallBuiltin& op) {
   return floatIfNumeric(env, op);
 }
 
+bool builtin_mt_rand(ISS& env, const bc::FCallBuiltin& op) {
+  // In PHP, the two arg version can return false on input failure, but we don't
+  // behave the same as PHP. we allow 1-arg calls and we allow the params to
+  // come in any order.
+  auto success = [&] {
+    popT(env);
+    popT(env);
+    push(env, TInt);
+    return true;
+  };
+
+  switch (op.arg1) {
+  case 0:
+    return success();
+  case 1:
+    return topT(env, 0).subtypeOf(TNum) ? success() : false;
+  case 2:
+    if (topT(env, 0).subtypeOf(TNum) &&
+        topT(env, 1).subtypeOf(TNum)) {
+      return success();
+    }
+    break;
+  }
+  return false;
+}
+
 bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
 #define X(x) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
 
@@ -262,6 +289,7 @@ bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
   X(ceil)
   X(floor)
   X(get_class)
+  X(mt_rand)
 
 #undef X
 

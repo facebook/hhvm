@@ -32,4 +32,3 @@ function testCanBeWrappedByIteratorIterator() {
   echo "Basic XML has " . iterator_count($i) . " root children\n";
 }
 testCanBeWrappedByIteratorIterator();
-

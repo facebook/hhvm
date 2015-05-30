@@ -40,7 +40,8 @@ class IteratorIterator implements OuterIterator {
      * function "getIteratorForTraversable" that returns the iterator
      * implementation for these classes.
      */
-    } else if ($iterator instanceof \Traversable && method_exists($iterator, 'getIteratorForTraversable')) {
+    } else if ($iterator instanceof \Traversable &&
+        method_exists($iterator, 'getIteratorForTraversable')) {
       $this->iterator = $iterator->getIteratorForTraversable();
     } else {
       throw new Exception(

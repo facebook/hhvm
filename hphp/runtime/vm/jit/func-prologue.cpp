@@ -98,7 +98,7 @@ void genFuncPrologue(TransID transID, Func* func, int argc, TCA& start) {
   genFuncGuard(func, cb);
   start = cb.frontier();
 
-  irgen::emitFuncPrologue(env, argc);
+  irgen::emitFuncPrologue(env, argc, transID);
   irgen::sealUnit(env);
   genCode(env.unit, CodeKind::CrossTrace);
 }

@@ -138,7 +138,7 @@ void warn_missing_args(IRGS& env, uint32_t argc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitFuncPrologue(IRGS& env, uint32_t argc) {
+void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   auto const func = env.context.func;
 
   // Emit debug code.
@@ -164,7 +164,7 @@ void emitFuncPrologue(IRGS& env, uint32_t argc) {
     assertx(shouldPGOFunc(*func));
     auto profData = mcg->tx().profData();
 
-    gen(env, IncProfCounter, TransIDData{profData->curTransID()});
+    gen(env, IncProfCounter, TransIDData{transID});
     profData->setProfiling(func->getFuncId());
   }
 

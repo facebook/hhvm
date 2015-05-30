@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/execution-context.h"
 
 #include "hphp/hhbbc/eval-cell.h"
+#include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/interp-internal.h"
 
@@ -262,11 +263,12 @@ void builtin(ISS& env, const bc::FCallBuiltin& op) {
   // Try to handle the builtin at the type level.
   if (handle_builtin(env, op)) return;
 
-  // Fall back to generic version.  (This can at least push some return type
-  // information from HNI, but it won't be great in general.)
+  auto const name = op.str3;
+  auto const func = env.index.resolve_func(env.ctx, name);
+  auto const rt = env.index.lookup_return_type(env.ctx, func);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
-  specialFunctionEffects(env, op.str3);
-  push(env, TInitGen);
+  specialFunctionEffects(env, name);
+  push(env, rt);
 }
 
 //////////////////////////////////////////////////////////////////////

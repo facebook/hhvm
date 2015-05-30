@@ -1263,6 +1263,10 @@ Variant HHVM_FUNCTION(curl_error, const Resource& ch) {
   return curl->getErrorString();
 }
 
+String HHVM_FUNCTION(curl_strerror, int code) {
+  return curl_easy_strerror((CURLcode)code);
+}
+
 Variant HHVM_FUNCTION(curl_close, const Resource& ch) {
   CHECK_RESOURCE(curl);
   curl->close();
@@ -2984,6 +2988,7 @@ class CurlExtension final : public Extension {
     HHVM_FE(fb_curl_multi_fdset);
     HHVM_FE(curl_multi_info_read);
     HHVM_FE(curl_multi_close);
+    HHVM_FE(curl_strerror);
 
     loadSystemlib();
   }

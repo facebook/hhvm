@@ -249,6 +249,7 @@ function curl_exec($ch);
 function curl_getinfo($ch, $opt = 0);
 function curl_errno($ch);
 function curl_error($ch);
+function curl_strerror($code);
 function curl_close($ch);
 function curl_multi_init();
 function curl_multi_add_handle($mh, $ch);

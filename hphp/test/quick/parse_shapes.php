@@ -15,6 +15,10 @@ type Point3 = shape(
   'z' => int,
 );
 
+type Optional = shape(
+  ?'optional_field' => ?int,
+);
+
 function foo(Point $x) : Point {
   $x['x'] = 42;
   return $x;

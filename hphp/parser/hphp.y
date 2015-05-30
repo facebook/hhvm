@@ -3079,6 +3079,10 @@ hh_shape_member_type:
     T_CONSTANT_ENCAPSED_STRING
       T_DOUBLE_ARROW
       hh_type                      { validate_shape_keyname($1, _p); }
+ |   '?'
+      T_CONSTANT_ENCAPSED_STRING
+      T_DOUBLE_ARROW
+      hh_type                      { validate_shape_keyname($2, _p); }
  |  class_namespace_string_typeargs
       T_DOUBLE_COLON
       ident

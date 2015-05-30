@@ -289,8 +289,6 @@ public:
   static std::string AutoPrependFile;
   static std::string AutoAppendFile;
 
-  static bool didInitAlwaysPopulateRawPostData;
-
   static bool SafeFileAccess;
   static std::vector<std::string> AllowedDirectories;
   static std::set<std::string> AllowedFiles;

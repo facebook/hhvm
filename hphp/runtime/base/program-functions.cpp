@@ -1914,11 +1914,11 @@ bool hphp_invoke_simple(const std::string& filename, bool warmupOnly) {
 static const std::string *getPrependFileName() {
   const std::string *filename;
   filename = &RID().m_autoPrependFileName;
-  if (filename && !filename->empty() && *filename != "none") {
+  if (!filename->empty() && *filename != "none") {
     return filename;
   }
   filename = &RuntimeOption::AutoPrependFile;
-  if (filename && !filename->empty() && *filename != "none") {
+  if (!filename->empty() && *filename != "none") {
     return filename;
   }
   return nullptr;
@@ -1927,11 +1927,11 @@ static const std::string *getPrependFileName() {
 static const std::string *getAppendFileName() {
   const std::string *filename;
   filename = &RID().m_autoAppendFileName;
-  if (filename && !filename->empty() && *filename != "none") {
+  if (!filename->empty() && *filename != "none") {
     return filename;
   }
   filename = &RuntimeOption::AutoAppendFile;
-  if (filename && !filename->empty() && *filename != "none") {
+  if (!filename->empty() && *filename != "none") {
     return filename;
   }
   return nullptr;

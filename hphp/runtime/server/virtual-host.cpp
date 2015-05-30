@@ -49,39 +49,83 @@ const VirtualHost *VirtualHost::GetCurrent() {
   return ret;
 }
 
-__thread int64_t VirtualHost::s_maxPostSize = -1;
-__thread int64_t VirtualHost::s_uploadMaxFileSize = -1;
+/*
+ * These per-thread variables follow the discipline used for
+ * VariableSerializer::serializationSizeLimit
+ * They are bound via per-directory initialization settings,
+ * with a chain of default values.
+ */
+__thread int64_t VirtualHost::s_maxPostSize = -1LL;
+__thread int64_t VirtualHost::s_uploadMaxFileSize = -1LL;
+
+
+template <typename T>
+static T genericGet(const T perRequest,
+                    const T perVHost,
+                    const T perProcess,
+                    const T defValue) {
+  if (perRequest != defValue) {
+    /*
+     * perRequest is per request thread and bound via per-dir php ini setting
+     */
+    return perRequest;
+  } else if (perVHost != defValue) {
+    /*
+     * perVHost is set by VirtualHost::init from HDF "overwrite.Server.Foo"
+     */
+    return perVHost;
+  } else {
+    /*
+     * perProcess set once per process during HDF handling
+     */
+    return perProcess;
+  }
+}
+
+template <typename T>
+static void genericSet(T &perRequest,
+                       const T perVHost,
+                       const T perProcess,
+                       const T defValue) {
+  if (perRequest == -defValue) {
+    perRequest = (perVHost != defValue) ? perVHost : perProcess;
+  }
+}
 
 int64_t VirtualHost::GetMaxPostSize() {
   const VirtualHost *vh = GetCurrent();
   assert(vh);
-  if (VirtualHost::s_maxPostSize != -1) {
-    return VirtualHost::s_maxPostSize;
-  } else if (vh->m_runtimeOption.maxPostSize != -1) {
-    return vh->m_runtimeOption.maxPostSize;
-  } else {
-    return RuntimeOption::MaxPostSize;
-  }
-}
-
-void VirtualHost::UpdateMaxPostSize() {
-  VirtualHost::s_maxPostSize = GetMaxPostSize();
+  return genericGet(VirtualHost::s_maxPostSize,
+                    vh->m_runtimeOption.maxPostSize,
+                    RuntimeOption::MaxPostSize,
+                    -1L);
 }
 
 int64_t VirtualHost::GetUploadMaxFileSize() {
   const VirtualHost *vh = GetCurrent();
   assert(vh);
-  if (VirtualHost::s_uploadMaxFileSize != -1) {
-    return VirtualHost::s_uploadMaxFileSize;
-  } else if (vh->m_runtimeOption.uploadMaxFileSize != -1) {
-    return vh->m_runtimeOption.uploadMaxFileSize;
-  } else {
-    return RuntimeOption::UploadMaxFileSize;
-  }
+  return genericGet(VirtualHost::s_uploadMaxFileSize,
+                    vh->m_runtimeOption.uploadMaxFileSize,
+                    RuntimeOption::UploadMaxFileSize,
+                    -1L);
+}
+
+void VirtualHost::UpdateMaxPostSize() {
+  const VirtualHost *vh = GetCurrent();
+  assert(vh);
+  genericGet(VirtualHost::s_maxPostSize,
+             vh->m_runtimeOption.maxPostSize,
+             RuntimeOption::MaxPostSize,
+             -1L);
 }
 
 void VirtualHost::UpdateUploadMaxFileSize() {
-  VirtualHost::s_uploadMaxFileSize = GetUploadMaxFileSize();
+  const VirtualHost *vh = GetCurrent();
+  assert(vh);
+  genericGet(VirtualHost::s_uploadMaxFileSize,
+             vh->m_runtimeOption.uploadMaxFileSize,
+             RuntimeOption::UploadMaxFileSize,
+             -1L);
 }
 
 void VirtualHost::UpdateSerializationSizeLimit() {

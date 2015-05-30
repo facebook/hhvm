@@ -281,13 +281,7 @@ int64_t RuntimeOption::MaxPostSize = 100;
 /*
  * The per-request version of this is in:
  *   Transport::s_alwaysPopulateRawPostData
- *
- * There's not enough encoding space in a bool to differentiate a
- * special "not yet initialized value". In the absence of a mechanism
- * to tag values with their assignment point, we'll just have a shadow
- * variable that tells us when we've initialized this.
  */
-bool RuntimeOption::didInitAlwaysPopulateRawPostData = false;
 bool RuntimeOption::AlwaysPopulateRawPostData = false;
 
 /*
@@ -1234,8 +1228,6 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(MaxPostSize, ini, config, "Server.MaxPostSize", 100);
     MaxPostSize <<= 20;
 
-    didInitAlwaysPopulateRawPostData =
-      config.exists("Server.AlwaysPopulateRawPostData");
     Config::Bind(AlwaysPopulateRawPostData, ini, config,
                  "Server.AlwaysPopulateRawPostData", false);
 
@@ -1732,7 +1724,9 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
 
   //
   // For some call paths (perhaps server invocation?) there's no RID() yet.
+  // We never expect a valid s_threadInfo here.
   //
+  assert(ThreadInfo::s_threadInfo.isNull());
   BindPHPPerDirectoryIniSettings(
     ThreadInfo::s_threadInfo.isNull() ? nullptr : &RID());
 

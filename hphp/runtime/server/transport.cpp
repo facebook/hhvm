@@ -1022,10 +1022,7 @@ bool Transport::getAlwaysPopulateRawPostData() {
   if (s_didInitAlwaysPopulateRawPostData) {
     return s_alwaysPopulateRawPostData;
   }
-  if (RuntimeOption::didInitAlwaysPopulateRawPostData) {
-    return RuntimeOption::AlwaysPopulateRawPostData;
-  }
-  return false; /* TODO: Perhaps */
+  return RuntimeOption::AlwaysPopulateRawPostData;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

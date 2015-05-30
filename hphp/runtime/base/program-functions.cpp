@@ -837,19 +837,24 @@ static void pagein_self(void) {
       auto endPtr = (char*)end;
       auto hotStart = (char*)__hot_start;
       auto hotEnd = (char*)__hot_end;
-      const size_t hugeBytes = 2L * 1024 * 1024;
+      const size_t hugePageBytes = 2L * 1024 * 1024;
 
       if (mlock(beginPtr, end - begin) == 0) {
-        if (RuntimeOption::EvalMapHotTextHuge &&
+        if (RuntimeOption::EvalMaxHotTextHugePages > 0 &&
             __hot_start &&
             __hot_end &&
             hugePagesSupported() &&
             beginPtr <= hotStart &&
             hotEnd <= endPtr) {
 
-          char* from = hotStart - ((intptr_t)hotStart & (hugeBytes - 1));
-          char* to = hotEnd + (hugeBytes - 1);
-          to -= (intptr_t)to & (hugeBytes - 1);
+          char* from = hotStart - ((intptr_t)hotStart & (hugePageBytes - 1));
+          char* to = hotEnd + (hugePageBytes - 1);
+          to -= (intptr_t)to & (hugePageBytes - 1);
+          const size_t maxHugeHotTextBytes =
+            RuntimeOption::EvalMaxHotTextHugePages * hugePageBytes;
+          if (to - from >  maxHugeHotTextBytes) {
+            to = from + maxHugeHotTextBytes;
+          }
           if (to < (void*)hugifyText) {
             hugifyText(from, to);
           }

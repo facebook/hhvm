@@ -334,6 +334,28 @@ IMPLEMENT_PTR_SET(ResourceData, pres, KindOfResource)
 
 #undef IMPLEMENT_PTR_SET
 
+#define IMPLEMENT_ATTACH(ptr, member, dtype)                            \
+  void Variant::attach(ptr* v) noexcept {                               \
+    Variant* self = (m_type == KindOfRef) ? m_data.pref->var() : this;  \
+    if (UNLIKELY(!v)) {                                                 \
+      self->setNull();                                                  \
+    } else {                                                            \
+      auto const d = self->m_data.num;                                  \
+      auto const t = self->m_type;                                      \
+      self->m_type = dtype;                                             \
+      self->m_data.member = v;                                          \
+      tvRefcountedDecRefHelper(t, d);                                   \
+    }                                                                   \
+  }
+
+IMPLEMENT_ATTACH(StringData, pstr,
+                 v->isStatic() ? KindOfStaticString : KindOfString)
+IMPLEMENT_ATTACH(ArrayData, parr, KindOfArray)
+IMPLEMENT_ATTACH(ObjectData, pobj, KindOfObject)
+IMPLEMENT_ATTACH(ResourceData, pres, KindOfResource)
+
+#undef IMPLEMENT_ATTACH
+
 int Variant::getRefCount() const noexcept {
   switch (m_type) {
     DT_UNCOUNTED_CASE:

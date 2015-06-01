@@ -560,13 +560,17 @@ struct Variant : private TypedValue {
   Variant &assign(const Variant& v) noexcept;
   Variant &assignRef(Variant& v) noexcept;
 
-  Variant &operator=(const StaticString &v) {
-    set(v);
-    return *this;
-  }
-
-  template<typename T> Variant &operator=(const T &v) {
-    set(v);
+  // Generic assignment operator. Forward argument (preserving rvalue-ness and
+  // lvalue-ness) to the appropriate set function, as long as its not a Variant.
+  template <typename T>
+  typename std::enable_if<
+    !std::is_same<Variant,
+                 typename std::remove_reference<
+                   typename std::remove_cv<T>::type
+                   >::type
+                 >::value, Variant&>::type
+  operator=(T&& v) {
+    set(std::forward<T>(v));
     return *this;
   }
 
@@ -905,16 +909,31 @@ struct Variant : private TypedValue {
   void set(const ObjectData  *v) = delete;
   void set(const ResourceData  *v) = delete;
 
-  void set(const String& v) { return set(v.get()); }
+  void set(const String& v) noexcept { return set(v.get()); }
   void set(const StaticString & v) noexcept;
-  void set(const Array& v) { return set(v.get()); }
-  void set(const Object& v) { return set(v.get()); }
-  void set(const Resource& v) { return set(v.get()); }
+  void set(const Array& v) noexcept { return set(v.get()); }
+  void set(const Object& v) noexcept { return set(v.get()); }
+  void set(const Resource& v) noexcept { return set(v.get()); }
+
+  void set(String&& v) noexcept { return attach(v.detach()); }
+  void set(Array&& v) noexcept { return attach(v.detach()); }
+  void set(Object&& v) noexcept { return attach(v.detach()); }
+  void set(Resource&& v) noexcept { return attach(v.detach()); }
 
   template<typename T>
-  void set(const SmartPtr<T> &v) {
+  void set(const SmartPtr<T> &v) noexcept {
     return set(v.get());
   }
+
+  template <typename T>
+  void set(SmartPtr<T>&& v) noexcept {
+    return attach(v.detach());
+  }
+
+  void attach(StringData* v) noexcept;
+  void attach(ArrayData* v) noexcept;
+  void attach(ObjectData* v) noexcept;
+  void attach(ResourceData* v) noexcept;
 
   static ALWAYS_INLINE
   void AssignValHelper(Variant *self, const Variant *other) {

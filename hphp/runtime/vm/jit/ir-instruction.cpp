@@ -230,7 +230,7 @@ Type boxPtr(Type t) {
 Type allocObjReturn(const IRInstruction* inst) {
   switch (inst->op()) {
     case ConstructInstance:
-      return Type::SubObj(inst->extra<ConstructInstance>()->cls);
+      return Type::ExactObj(inst->extra<ConstructInstance>()->cls);
 
     case NewInstanceRaw:
       return Type::ExactObj(inst->extra<NewInstanceRaw>()->cls);

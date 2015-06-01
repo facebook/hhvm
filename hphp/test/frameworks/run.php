@@ -174,6 +174,18 @@ function fork_buckets(Traversable $data, (function(array):int) $callback): int {
   return $thread_ret_val;
 }
 
+function list_tests(Vector $frameworks): void {
+  if ($frameworks->isEmpty()) {
+    error_and_exit("No frameworks available on which to list tests");
+  }
+
+  foreach($frameworks as $framework) {
+    foreach($framework->getTests() as $test) {
+      print $test.PHP_EOL;
+    }
+  }
+}
+
 function run_tests(Vector $frameworks): void {
   if ($frameworks->isEmpty()) {
     error_and_exit("No frameworks available on which to run tests");
@@ -218,7 +230,14 @@ function run_tests(Vector $frameworks): void {
     // vector; otherwise, we are just going to add the framework to run
     // serially and use its global phpunit test run command to run the entire
     // suite (just like a normal phpunit run outside this framework).
-    if ($framework->isParallel() && !Options::$as_phpunit) {
+    if (Options::$single_test_name !== null) {
+      foreach($framework->getTests() as $test) {
+        if ($test == Options::$single_test_name) {
+          $st = new Runner($framework, $test);
+          $all_tests->add($st);
+        }
+      }
+    } elseif ($framework->isParallel() && !Options::$as_phpunit) {
       foreach($framework->getTests() as $test) {
         $st = new Runner($framework, $test);
         $all_tests->add($st);
@@ -659,6 +678,9 @@ function oss_test_option_map(): OptionInfoMap {
     'cache-directory:'    => Pair {'',   'Directory to store source tarballs'},
     'local-source-only'   => Pair {'',   'Fail if git or composer calls are '.
                                          'needed'},
+    'list-tests'          => Pair {'',   'List tests that would be run'},
+    'run-single-test:'    => Pair {'',   'Run a single test by its name as '.
+                                         'returned by --list-tests'},
   };
 }
 
@@ -678,7 +700,9 @@ function main(array $argv): void {
   $frameworks = prepare($available_frameworks, $framework_class_overrides,
                         $passed_frameworks);
 
-  if (Options::$run_tests) {
+  if (Options::$list_tests) {
+    list_tests($frameworks);
+  } elseif (Options::$run_tests) {
     run_tests($frameworks);
   }
 }

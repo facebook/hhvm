@@ -29,6 +29,7 @@ class Options {
   public static bool $allexcept = false;
   public static bool $test_by_single_test = false;
   public static bool $run_tests = true;
+  public static bool $list_tests = false;
   public static string $results_root = __DIR__.'/results';
   public static string $script_errors_file = __DIR__.'/results/_script.errors';
   public static string $generated_ini_file = __DIR__.'/.generated.php.ini';
@@ -38,6 +39,7 @@ class Options {
   public static bool $as_phpunit = false;
   public static ?string $cache_directory = null;
   public static bool $local_source_only = false;
+  public static ?string $single_test_name = null;
 
   public static function parse(OptionMap $options, array $argv): Vector {
     $ini_settings = Map { };
@@ -74,6 +76,31 @@ class Options {
 
     if ($options->containsKey('install-only')) {
       self::$run_tests = false;
+      $framework_names->removeKey(0);
+    }
+
+    if ($options->containsKey('list-tests')) {
+      if ($options->containsKey('install-only')) {
+        error_and_exit('Can not use --list-tests and --install-only together');
+      }
+      self::$run_tests = false;
+      self::$list_tests = true;
+      $framework_names->removeKey(0);
+    }
+
+    if ($options->containsKey('run-single-test')) {
+      if ($options->containsKey('install-only')) {
+        error_and_exit(
+          'Can not use --run-single-test and --install-only together'
+        );
+      }
+      if ($options->containsKey('list-tests')) {
+        error_and_exit(
+          'Can not use --run-single-test and --list-tests together'
+        );
+      }
+      self::$single_test_name = ((string) $options['run-single-test']) ?: null;
+      $framework_names->removeKey(0);
       $framework_names->removeKey(0);
     }
 

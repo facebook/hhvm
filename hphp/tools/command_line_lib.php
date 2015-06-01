@@ -224,8 +224,13 @@ function display_help(string $message, OptionInfoMap $optmap): void {
   $first_cols = Map {};
   foreach ($optmap as $long => $info) {
     $has_arg = false;
+    $has_opt = false;
     $vis = $long;
-    if (substr($long, -1) == ':') {
+    if (substr($long, -2) == '::') {
+      $has_opt = true;
+      $vis = substr($long, 0, -2);
+    }
+    elseif (substr($long, -1) == ':') {
       $has_arg = true;
       $vis = substr($long, 0, -1);
     }
@@ -238,6 +243,9 @@ function display_help(string $message, OptionInfoMap $optmap): void {
         ;
     if ($has_arg) {
       $first_cols[$long] .= '=arg';
+    }
+    elseif ($has_opt) {
+      $first_cols[$long] .= '[=optarg]';
     }
   }
 

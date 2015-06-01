@@ -3,6 +3,9 @@ set(C_SOURCES)
 set(ASM_SOURCES)
 set(HEADER_SOURCES)
 
+# Create the target early so we can manage it easier.
+ADD_LIBRARY(hphp_runtime_ext STATIC "")
+
 # Pick up all files in the base ext/ folder unconditionally
 auto_sources(files "*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND CXX_SOURCES ${files})
@@ -31,8 +34,7 @@ foreach (dir ${subdirs})
   endif()
 endforeach()
 
-ADD_LIBRARY(hphp_runtime_ext STATIC
-            ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES})
+target_sources(hphp_runtime_ext PRIVATE ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES})
 if (ENABLE_ASYNC_MYSQL)
   add_dependencies(hphp_runtime_ext webscalesqlclient squangle)
 endif ()

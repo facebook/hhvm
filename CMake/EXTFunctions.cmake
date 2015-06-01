@@ -67,7 +67,7 @@ function (HHVM_EXTENSION_INTERNAL_CHECK_DEPENDENCY InputVar ExtName LibraryName 
       )
       
       if (TARGET_ENABLED)
-        target_include_directories(${TargetName}
+        target_include_directories(${TargetName} PRIVATE
           ${TP_DIR}/re2/src/
           ${TP_DIR}/squangle/src/
           ${TP_DIR}/webscalesqlclient/src/include/
@@ -87,13 +87,13 @@ function (HHVM_EXTENSION_INTERNAL_CHECK_DEPENDENCY InputVar ExtName LibraryName 
       
       if (TARGET_ENABLED)
         target_link_directories(${TargetName} ${MYSQL_LIB_DIR})
-        target_include_directories(${TargetName} ${MYSQL_INCLUDE_DIR})
+        target_include_directories(${TargetName} PRIVATE ${MYSQL_INCLUDE_DIR})
       endif()
     endif()
     
     MYSQL_SOCKET_SEARCH()
     if (MYSQL_UNIX_SOCK_ADDR)
-      target_compile_definitions(${TargetName} PHP_MYSQL_UNIX_SOCK_ADDR="${MYSQL_UNIX_SOCK_ADDR}")
+      target_compile_definitions(${TargetName} PUBLIC "PHP_MYSQL_UNIX_SOCK_ADDR=\"${MYSQL_UNIX_SOCK_ADDR}\"")
     elseif (NOT TARGET_ENABLED)
       HHVM_EXTENSION_INTERNAL_SET_EXTENSION_ENABLED(${InputVar} ${ExtName} OFF)
       return()
@@ -109,12 +109,6 @@ function (HHVM_EXTENSION_INTERNAL_CHECK_DEPENDENCY InputVar ExtName LibraryName 
   
   if (TARGET_ENABLED)
     find_package(${LibraryName} REQUIRED)
-    
-    # This should be stopping the build, but isn't for some reason...
-    # We'll stop it ourselves.
-    if (NOT "${${LibraryName}_FOUND}")
-      message(FATAL_ERROR "Could not find ${LibraryName} required for the ${ExtName} extension!")
-    endif()
   else()
     find_package(${LibraryName})
   endif()
@@ -140,7 +134,7 @@ function (HHVM_EXTENSION_INTERNAL_CHECK_DEPENDENCY InputVar ExtName LibraryName 
       set(CMAKE_REQUIRED_LIBRARIES)
       set(CMAKE_REQUIRED_INCLUDES)
       
-      target_include_directories(${TargetName} ${CURL_INCLUDE_DIR})
+      target_include_directories(${TargetName} PRIVATE ${CURL_INCLUDE_DIR})
       target_link_libraries(${TargetName} ${CURL_LIBRARIES})
     endif()
   elseif ("${LibraryName}" STREQUAL "EXPAT")
@@ -150,7 +144,7 @@ function (HHVM_EXTENSION_INTERNAL_CHECK_DEPENDENCY InputVar ExtName LibraryName 
     endif()
     
     if (TARGET_ENABLED)
-      target_include_directories(${TargetName} ${EXPAT_INCLUDE_DIRS})
+      target_include_directories(${TargetName} PRIVATE ${EXPAT_INCLUDE_DIRS})
       target_link_libraries(${TargetName} ${EXPAT_LIBRARY})
     endif()
   elseif ("${LibraryName}" STREQUAL "ICU")
@@ -172,7 +166,7 @@ function (HHVM_EXTENSION_INTERNAL_CHECK_DEPENDENCY InputVar ExtName LibraryName 
     endif ()
     
     if (TARGET_ENABLED)
-      target_include_directories(${TargetName} ${ICU_INCLUDE_DIRS})
+      target_include_directories(${TargetName} PRIVATE ${ICU_INCLUDE_DIRS})
       target_link_libraries(${TargetName} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
     endif()
   elseif ("${LibraryName}" STREQUAL "Ldap")
@@ -182,7 +176,7 @@ function (HHVM_EXTENSION_INTERNAL_CHECK_DEPENDENCY InputVar ExtName LibraryName 
     endif()
     
     if (TARGET_ENABLED)
-      target_include_directories(${TargetName} ${LDAP_INCLUDE_DIR})
+      target_include_directories(${TargetName} PRIVATE ${LDAP_INCLUDE_DIR})
       target_link_libraries(${TargetName} ${LDAP_LIBRARIES})
     endif()
   elseif ("${LibraryName}" STREQUAL "Libmemcached")
@@ -204,18 +198,18 @@ function (HHVM_EXTENSION_INTERNAL_CHECK_DEPENDENCY InputVar ExtName LibraryName 
     endif()
     
     if (TARGET_ENABLED)
-      target_include_directories(${TargetName} ${LIBMEMCACHED_INCLUDE_DIR})
+      target_include_directories(${TargetName} PRIVATE ${LIBMEMCACHED_INCLUDE_DIR})
       target_link_libraries(${TargetName} ${LIBMEMCACHED_LIBRARY})
     endif()
   elseif ("${LibraryName}" STREQUAL "LibXml2")
-    if (NOT LIBXML2_INCLUDE_DIR OR NOT LIBXML2_DEFINITIONS OR NOT LIBXML2_LIBRARIES)
+    if (NOT LIBXML2_INCLUDE_DIR OR NOT LIBXML2_LIBRARIES)
       HHVM_EXTENSION_INTERNAL_SET_EXTENSION_ENABLED(${InputVar} ${ExtName} OFF)
       return()
     endif()
     
     if (TARGET_ENABLED)
-      target_include_directories(${TargetName} ${LIBXML2_INCLUDE_DIR})
-      target_compile_definitions(${TargetName} ${LIBXML2_DEFINITIONS})
+      target_include_directories(${TargetName} PRIVATE ${LIBXML2_INCLUDE_DIR})
+      target_compile_definitions(${TargetName} PRIVATE ${LIBXML2_DEFINITIONS})
       target_link_libraries(${TargetName} ${LIBXML2_LIBRARIES})
     endif()
   elseif ("${LibraryName}" STREQUAL "LibXslt")
@@ -225,8 +219,8 @@ function (HHVM_EXTENSION_INTERNAL_CHECK_DEPENDENCY InputVar ExtName LibraryName 
     endif()
     
     if (TARGET_ENABLED)
-      target_include_directories(${TargetName} ${LIBXSLT_INCLUDE_DIR})
-      target_compile_definitions(${TargetName} ${LIBXSLT_DEFINITIONS})
+      target_include_directories(${TargetName} PRIVATE ${LIBXSLT_INCLUDE_DIR})
+      target_compile_definitions(${TargetName} PRIVATE ${LIBXSLT_DEFINITIONS})
       target_link_libraries(${TargetName} ${LIBXSLT_LIBRARIES} ${LIBXSLT_EXSLT_LIBRARIES})
     endif()
   elseif ("${LibraryName}" STREQUAL "Mcrypt")
@@ -236,7 +230,7 @@ function (HHVM_EXTENSION_INTERNAL_CHECK_DEPENDENCY InputVar ExtName LibraryName 
     endif()
     
     if (TARGET_ENABLED)
-      target_include_directories(${TargetName} ${Mcrypt_INCLUDE_DIR})
+      target_include_directories(${TargetName} PRIVATE ${Mcrypt_INCLUDE_DIR})
       target_link_libraries(${TargetName} ${Mcrypt_LIB})
     endif()
   else()

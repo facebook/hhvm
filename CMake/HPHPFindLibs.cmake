@@ -87,6 +87,11 @@ if (LibXed_INCLUDE_DIR AND LibXed_LIBRARY)
   add_definitions("-DHAVE_LIBXED")
 endif()
 
+# LibXML2 checks
+find_package(LibXml2 REQUIRED)
+include_directories(${LIBXML2_INCLUDE_DIR})
+add_definitions(${LIBXML2_DEFINITIONS})
+
 # libsqlite3
 find_package(LibSQLite)
 if (LIBSQLITE_INCLUDE_DIR)
@@ -420,6 +425,7 @@ macro(hphp_link target)
   target_link_libraries(${target} ${ZLIB_LIBRARIES})
   target_link_libraries(${target} ${BZIP2_LIBRARIES})
 
+  target_link_libraries(${target} ${LIBXML2_LIBRARIES})
   target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
 
   if (LIBUODBC_LIBRARIES)

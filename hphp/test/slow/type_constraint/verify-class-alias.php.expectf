@@ -1,0 +1,4 @@
+object(Foo)#1 (0) {
+}
+
+Catchable fatal error: Argument 1 passed to dostring() must be an instance of StringAlias, Foo given in %s/verify-class-alias.php on line 19

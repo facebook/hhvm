@@ -126,8 +126,16 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
   const StringData* clsName;
   const Class* knownConstraint = nullptr;
   if (tc.isObject()) {
-    clsName = tc.typeName();
-    knownConstraint = Unit::lookupClass(clsName);
+    auto const td = tc.namedEntity()->getCachedTypeAlias();
+    if (RuntimeOption::RepoAuthoritative && td &&
+        tc.namedEntity()->isPersistentTypeAlias() &&
+        td->klass) {
+      clsName = td->klass->name();
+      knownConstraint = td->klass;
+    } else {
+      clsName = tc.typeName();
+      knownConstraint = Unit::lookupClass(clsName);
+    }
   } else {
     if (tc.isSelf()) {
       tc.selfToClass(curFunc(env), &knownConstraint);

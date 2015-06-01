@@ -55,9 +55,24 @@ namespace {
 
 size_t s_counter;
 
+// Vreg discriminator.
+enum class Constraint { Any, Gpr, Simd, Sf };
+
+Constraint constraint(const Vreg&) { return Constraint::Any; }
+Constraint constraint(const Vreg64&) { return Constraint::Gpr; }
+Constraint constraint(const Vreg32&) { return Constraint::Gpr; }
+Constraint constraint(const Vreg16&) { return Constraint::Gpr; }
+Constraint constraint(const Vreg8&) { return Constraint::Gpr; }
+Constraint constraint(const VregDbl&) { return Constraint::Simd; }
+Constraint constraint(const Vreg128&) { return Constraint::Simd; }
+Constraint constraint(const VregSF&) { return Constraint::Sf; }
+
+bool is_wide(const Vreg128&) { return true; }
+template<class T> bool is_wide(const T&) { return false; }
+
 // A Use refers to the position where an interval is used or defined
 struct Use {
-  VregKind kind;
+  Constraint kind;
   unsigned pos;
   Vreg hint; // if valid, try to use same physical register as hint.
 };
@@ -742,20 +757,20 @@ struct DefVisitor {
     auto& defs = m_tuples[def_tuple];
     auto& hints = m_tuples[hint_tuple];
     for (int i = 0; i < defs.size(); i++) {
-      def(defs[i], VregKind::Any, hints[i]);
+      def(defs[i], Constraint::Any, hints[i]);
     }
   }
   template<class D, class H> void defHint(D dst, H hint) {
-    def(dst, dst.kind, hint, dst.bits == 128);
+    def(dst, constraint(dst), hint, is_wide(dst));
   }
   template<class R> void def(R r) {
-    def(r, r.kind, Vreg{}, r.bits == 128);
+    def(r, constraint(r), Vreg{}, is_wide(r));
   }
-  void def(Vreg r) { def(r, VregKind::Any); }
-  void defHint(Vreg d, Vreg hint) { def(d, VregKind::Any, hint); }
+  void def(Vreg r) { def(r, Constraint::Any); }
+  void defHint(Vreg d, Vreg hint) { def(d, Constraint::Any, hint); }
   void def(RegSet rs) { rs.forEach([&](Vreg r) { def(r); }); }
 private:
-  void def(Vreg r, VregKind kind, Vreg hint = Vreg{}, bool wide = false) {
+  void def(Vreg r, Constraint kind, Vreg hint = Vreg{}, bool wide = false) {
     auto ivl = m_intervals[r];
     if (m_live.test(r)) {
       m_live.reset(r);
@@ -818,11 +833,11 @@ struct UseVisitor {
     regs.forEach([&](Vreg r) { across(r); });
   }
 
-  template<class R> void use(R r) { use(r, r.kind, m_range.end); }
+  template<class R> void use(R r) { use(r, constraint(r), m_range.end); }
   template<class S, class H> void useHint(S src, H hint) {
-    use(src, src.kind, m_range.end, hint);
+    use(src, constraint(src), m_range.end, hint);
   }
-  void use(Vreg r, VregKind kind, unsigned end, Vreg hint = Vreg{}) {
+  void use(Vreg r, Constraint kind, unsigned end, Vreg hint = Vreg{}) {
     m_live.set(r);
     auto ivl = m_intervals[r];
     if (!ivl) ivl = m_intervals[r] = jit::make<Interval>(r);
@@ -837,7 +852,7 @@ struct UseVisitor {
   // which ensures it will be assigned a different register than the
   // destination. This isn't necessary if *both* operands of a binary
   // instruction are the same virtual register, but is still correct.
-  template<class R> void across(R r) { use(r, r.kind, m_range.end + 1); }
+  template<class R> void across(R r) { use(r, constraint(r), m_range.end + 1); }
 private:
   jit::vector<Interval*>& m_intervals;
   jit::vector<VregList>& m_tuples;
@@ -1015,10 +1030,10 @@ unsigned Vxls::constrain(Interval* ivl, RegSet& allow) {
   auto const any = m_abi.unreserved() - m_abi.sf; // Any but not flags.
   allow = m_abi.unreserved();
   for (auto& u : ivl->uses) {
-    auto need = u.kind == VregKind::Simd ? m_abi.simdUnreserved :
-                u.kind == VregKind::Gpr ? m_abi.gpUnreserved :
-                u.kind == VregKind::Sf ? m_abi.sf :
-                /* VregKind::Any */ any;
+    auto need = u.kind == Constraint::Simd ? m_abi.simdUnreserved :
+                u.kind == Constraint::Gpr ? m_abi.gpUnreserved :
+                u.kind == Constraint::Sf ? m_abi.sf :
+                /* Constraint::Any */ any;
     if ((allow & need).empty()) {
       // cannot satisfy constraints; must split before u.pos
       return u.pos - 1;
@@ -1330,23 +1345,23 @@ struct Renamer {
   }
   void use(RegSet r){}
 private:
-  void rename(Vreg8& r) { r = lookup(r, VregKind::Gpr); }
-  void rename(Vreg16& r) { r = lookup(r, VregKind::Gpr); }
-  void rename(Vreg32& r) { r = lookup(r, VregKind::Gpr); }
-  void rename(Vreg64& r) { r = lookup(r, VregKind::Gpr); }
-  void rename(VregDbl& r) { r = lookup(r, VregKind::Simd); }
-  void rename(Vreg128& r) { r = lookup(r, VregKind::Simd); }
-  void rename(VregSF& r) { r = lookup(r, VregKind::Sf); }
-  void rename(Vreg& r) { r = lookup(r, VregKind::Any); }
+  void rename(Vreg8& r) { r = lookup(r, Constraint::Gpr); }
+  void rename(Vreg16& r) { r = lookup(r, Constraint::Gpr); }
+  void rename(Vreg32& r) { r = lookup(r, Constraint::Gpr); }
+  void rename(Vreg64& r) { r = lookup(r, Constraint::Gpr); }
+  void rename(VregDbl& r) { r = lookup(r, Constraint::Simd); }
+  void rename(Vreg128& r) { r = lookup(r, Constraint::Simd); }
+  void rename(VregSF& r) { r = lookup(r, Constraint::Sf); }
+  void rename(Vreg& r) { r = lookup(r, Constraint::Any); }
   void rename(Vtuple t) { /* phijmp/phijcc+phidef handled by resolveEdges */ }
-  PhysReg lookup(Vreg vreg, VregKind kind) {
+  PhysReg lookup(Vreg vreg, Constraint kind) {
     auto ivl = xls.intervals[vreg];
     if (!ivl || vreg.isPhys()) return vreg;
     PhysReg reg = ivl->childAt(pos)->reg;
-    assertx((kind == VregKind::Gpr && reg.isGP()) ||
-           (kind == VregKind::Simd && reg.isSIMD()) ||
-           (kind == VregKind::Sf && reg.isSF()) ||
-           (kind == VregKind::Any && reg != InvalidReg));
+    assertx((kind == Constraint::Gpr && reg.isGP()) ||
+           (kind == Constraint::Simd && reg.isSIMD()) ||
+           (kind == Constraint::Sf && reg.isSF()) ||
+           (kind == Constraint::Any && reg != InvalidReg));
     return reg;
   }
 private:

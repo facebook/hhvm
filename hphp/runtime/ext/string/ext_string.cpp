@@ -36,8 +36,6 @@
 #include "hphp/util/lock.h"
 #include "hphp/zend/html-table.h"
 
-#include "hphp/util/bitref-survey.h"
-
 #include <folly/Unicode.h>
 #include <locale.h>
 

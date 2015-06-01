@@ -26,13 +26,10 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(bitref);
 uint64_t arr_empty_count, str_empty_count;
 std::mutex m;
 folly::Histogram<uint32_t> str_rc_copy_histogram(8, 1, 2048);
 folly::Histogram<uint32_t> arr_rc_copy_histogram(8, 1, 2048);
-
-bool BITREF_SURVEY = false;
 
 inline BitrefSurvey &survey() {
   static BitrefSurvey survey;

@@ -21,8 +21,6 @@
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/types.h"
 
-#include "hphp/util/bitref-survey.h"
-
 #include <algorithm>
 #include <vector>
 
@@ -425,7 +423,6 @@ public:
   template<typename T>
   void removeImpl(const T& key) {
     if (m_arr) {
-      if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
       ArrayData* escalated = m_arr->remove(key, (m_arr->cowCheck()));
       if (escalated != m_arr) m_arr = escalated;
     }
@@ -435,7 +432,6 @@ public:
   Variant& lvalAtImpl(const T& key, ACCESSPARAMS_DECL) {
     if (!m_arr) m_arr = ArrayData::Create();
     Variant* ret = nullptr;
-    if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
     ArrayData* escalated = m_arr->lval(key, ret, m_arr->cowCheck());
     if (escalated != m_arr) m_arr = escalated;
     assert(ret);

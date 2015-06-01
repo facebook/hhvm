@@ -27,8 +27,6 @@
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/type-string.h"
 
-#include "hphp/util/bitref-survey.h"
-
 #include <algorithm>
 #include <type_traits>
 
@@ -1243,7 +1241,6 @@ inline Variant &concat_assign(Variant &v1, const char* s2) = delete;
 inline Variant &concat_assign(Variant &v1, const String& s2) {
   if (v1.getType() == KindOfString) {
     auto& str = v1.asStrRef();
-    if (BITREF_SURVEY) cow_check_occurred(str.get());
     if (!str.get()->cowCheck()) {
       str += StringSlice{s2.data(), static_cast<uint32_t>(s2.size())};
       return v1;
@@ -1260,7 +1257,7 @@ inline Variant &concat_assign(Variant &v1, const String& s2) {
 
 // Defined here for include order reasons.
 inline RefData::~RefData() {
-  assert(kind() == HeaderKind::Ref);
+  assert(m_kind == HeaderKind::Ref);
   tvAsVariant(&m_tv).~Variant();
 }
 

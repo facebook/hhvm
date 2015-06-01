@@ -293,7 +293,7 @@ struct MixedArray::ValIter {
 
   explicit ValIter(ArrayData* arr)
     : m_arr(arr)
-    , m_kind(arr->kind())
+    , m_kind(arr->m_kind)
   {
     assert(isMixed(m_kind) || m_kind == kPackedKind || m_kind == kStructKind);
     if (isMixed(m_kind)) {
@@ -311,7 +311,7 @@ struct MixedArray::ValIter {
 
   explicit ValIter(ArrayData* arr, ssize_t start_pos)
     : m_arr(arr)
-    , m_kind(arr->kind())
+    , m_kind(arr->m_kind)
   {
     assert(isMixed(m_kind) || m_kind == kPackedKind || m_kind == kStructKind);
     if (isMixed(m_kind)) {

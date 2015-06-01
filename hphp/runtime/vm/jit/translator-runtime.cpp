@@ -34,8 +34,6 @@
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/unwind.h"
 
-#include "hphp/util/bitref-survey.h"
-
 namespace HPHP {
 
 TRACE_SET_MOD(runtime);
@@ -86,7 +84,6 @@ ArrayData* addElemIntKeyHelper(ArrayData* ad,
   // this does not re-enter
   // set will decRef any old value that may have been overwritten
   // if appropriate
-  if (BITREF_SURVEY) cow_check_occurred(ad);
   ArrayData* retval = ad->set(key, tvAsCVarRef(&value),
                               ad->cowCheck());
   // TODO Task #1970153: It would be great if there were set()
@@ -100,7 +97,6 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
                                   StringData* key,
                                   TypedValue value) {
   // this does not re-enter
-  if (BITREF_SURVEY) cow_check_occurred(ad);
   bool copy = ad->cowCheck();
   // set will decRef any old value that may have been overwritten
   // if appropriate

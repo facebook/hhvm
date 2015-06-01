@@ -21,8 +21,6 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
-#include "hphp/util/bitref-survey.h"
-
 // This header does fun things with macros; keep it last.
 #include "hphp/runtime/vm/jit/minstr-translator-internal.h"
 
@@ -581,7 +579,6 @@ typename ShuffleReturn<setRef>::return_type
 arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   static_assert(keyType != KeyType::Any,
                 "KeyType::Any is not supported in arraySetMImpl");
-  if (BITREF_SURVEY) cow_check_occurred(a);
   assertx(cellIsPlausible(value));
   const bool copy = a->cowCheck();
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)

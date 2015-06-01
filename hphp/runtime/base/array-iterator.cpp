@@ -35,8 +35,6 @@
 #include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include "hphp/util/bitref-survey.h"
-
 namespace HPHP {
 
 TRACE_SET_MOD(runtime);
@@ -851,7 +849,6 @@ ArrayData* MArrayIter::cowCheck() {
   if (hasRef()) {
     auto data = getData();
     if (!data) return nullptr;
-    if (BITREF_SURVEY) cow_check_occurred(data);
     if (data->cowCheck() && !data->noCopyOnWrite()) {
       data = data->copyWithStrongIterators();
       cellSet(make_tv<KindOfArray>(data), *getRef()->tv());
@@ -861,7 +858,6 @@ ArrayData* MArrayIter::cowCheck() {
 
   assert(hasAd());
   auto const data = getAd();
-  if (BITREF_SURVEY) cow_check_occurred(data);
   if (data->cowCheck() && !data->noCopyOnWrite()) {
     ArrayData* copied = data->copyWithStrongIterators();
     copied->incRefCount();

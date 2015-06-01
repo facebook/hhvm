@@ -405,10 +405,6 @@ private:
 
   const char* classname_cstr() const;
 
-  HeaderKind kind() const {
-    return m_kind;
-  }
-
   static void compileTimeAssertions();
 
   bool toBooleanImpl() const noexcept;

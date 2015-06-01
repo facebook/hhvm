@@ -28,8 +28,6 @@
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/util/overflow.h"
 
-#include "hphp/util/bitref-survey.h"
-
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -631,7 +629,6 @@ void cellBitNot(Cell& cell) {
       break;
 
     case KindOfString:
-      if (BITREF_SURVEY) cow_check_occurred(cell.m_data.pstr);
       if (cell.m_data.pstr->cowCheck()) {
     case KindOfStaticString:
         auto const newSd = StringData::Make(

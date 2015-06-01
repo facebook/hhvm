@@ -37,7 +37,6 @@
 #include "hphp/parser/hphp.tab.hpp"
 
 #include "hphp/util/exception.h"
-#include "hphp/util/bitref-survey.h"
 
 #include <unicode/coll.h> // icu
 #include <vector>
@@ -508,7 +507,6 @@ Variant &Array::lvalAt() {
   if (!m_arr) m_arr = ArrayData::Create();
   Variant *ret = nullptr;
   auto arr = m_arr;
-  if (BITREF_SURVEY) cow_check_occurred(arr.get());
   ArrayData *escalated = arr->lvalNew(ret, arr->cowCheck());
   if (escalated != arr) m_arr = escalated;
   assert(ret);
@@ -519,7 +517,6 @@ Variant &Array::lvalAtRef() {
   if (!m_arr) m_arr = ArrayData::Create();
   Variant *ret = nullptr;
   auto arr = m_arr;
-  if (BITREF_SURVEY) cow_check_occurred(arr.get());
   ArrayData *escalated = arr->lvalNewRef(ret, arr->cowCheck());
   if (escalated != arr) m_arr = escalated;
   assert(ret);
@@ -546,7 +543,6 @@ void Array::setImpl(const T &key, const Variant& v) {
   if (!m_arr) {
     m_arr = ArrayData::Create(key, v);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
     ArrayData *escalated = m_arr->set(key, v, (m_arr->cowCheck()));
     if (escalated != m_arr) m_arr = escalated;
   }
@@ -559,7 +555,6 @@ void Array::setRefImpl(const T &key, Variant& v) {
     m_arr = ArrayData::CreateRef(key, v);
   } else {
     escalate();
-    if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
     ArrayData *escalated = m_arr->setRef(key, v, (m_arr->cowCheck()));
     if (escalated != m_arr) m_arr = escalated;
   }
@@ -571,7 +566,6 @@ void Array::addImpl(const T &key, const Variant& v) {
   if (!m_arr) {
     m_arr = ArrayData::Create(key, v);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
     ArrayData *escalated = m_arr->add(key, v, (m_arr->cowCheck()));
     if (escalated != m_arr) m_arr = escalated;
   }
@@ -678,7 +672,6 @@ const Variant& Array::append(const Variant& v) {
   if (!m_arr) {
     m_arr = ArrayData::Create(v);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
     ArrayData *escalated = m_arr->append(v, (m_arr->cowCheck()));
     if (escalated != m_arr) m_arr = escalated;
   }
@@ -689,7 +682,6 @@ const Variant& Array::appendRef(Variant& v) {
   if (!m_arr) {
     m_arr = ArrayData::CreateRef(v);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
     ArrayData *escalated = m_arr->appendRef(v, (m_arr->cowCheck()));
     if (escalated != m_arr) m_arr = escalated;
   }
@@ -698,7 +690,6 @@ const Variant& Array::appendRef(Variant& v) {
 
 const Variant& Array::appendWithRef(const Variant& v) {
   if (!m_arr) m_arr = ArrayData::Create();
-  if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
   ArrayData *escalated = m_arr->appendWithRef(v, (m_arr->cowCheck()));
   if (escalated != m_arr) m_arr = escalated;
   return v;
@@ -727,7 +718,6 @@ Variant Array::dequeue() {
 void Array::prepend(const Variant& v) {
   if (!m_arr) operator=(Create());
   assert(m_arr);
-  if (BITREF_SURVEY) cow_check_occurred(m_arr.get());
   ArrayData *newarr = m_arr->prepend(v, (m_arr->cowCheck()));
   if (newarr != m_arr) m_arr = newarr;
 }

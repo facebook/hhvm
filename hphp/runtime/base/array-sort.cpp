@@ -24,8 +24,6 @@
 #include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-#include "hphp/util/bitref-survey.h"
-
 #include <folly/ScopeGuard.h>
 
 namespace HPHP {
@@ -123,7 +121,6 @@ ArrayData* MixedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   // if (a->m_size <= 1 && !isSortFamily(sf)) {
   //   return a;
   // }
-  if (BITREF_SURVEY) cow_check_occurred(a);
   if (UNLIKELY(hasUserDefinedCmp(sf) || a->cowCheck())) {
     auto ret = a->copyMixed();
     assert(ret->getCount() == 0);
@@ -141,7 +138,6 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
     return ad;                          // trivial for packed arrays.
   }
   if (isSortFamily(sf)) {               // sort/rsort/usort
-    if (BITREF_SURVEY) cow_check_occurred(ad);
     if (UNLIKELY(ad->cowCheck())) {
       auto ret = PackedArray::Copy(ad);
       assert(ret->getCount() == 0);

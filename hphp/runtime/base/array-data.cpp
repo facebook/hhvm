@@ -852,12 +852,12 @@ const Variant& ArrayData::getNotFound(const StringData* k) {
 }
 
 const Variant& ArrayData::getNotFound(int64_t k, bool error) const {
-  return error && kind() != kGlobalsKind ? getNotFound(k) :
+  return error && m_kind != kGlobalsKind ? getNotFound(k) :
          null_variant;
 }
 
 const Variant& ArrayData::getNotFound(const StringData* k, bool error) const {
-  return error && kind() != kGlobalsKind ? getNotFound(k) :
+  return error && m_kind != kGlobalsKind ? getNotFound(k) :
          null_variant;
 }
 

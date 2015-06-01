@@ -24,8 +24,6 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
 
-#include "hphp/util/bitref-survey.h"
-
 #include <algorithm>
 
 namespace HPHP {
@@ -269,7 +267,6 @@ String &String::operator+=(const char* s) {
     if (empty()) {
       m_str = StringData::Make(s, CopyString);
     } else {
-      if (BITREF_SURVEY) cow_check_occurred(m_str.get());
       if (!m_str->cowCheck()) {
         auto const tmp = m_str->append(StringSlice(s, strlen(s)));
         if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);
@@ -286,7 +283,6 @@ String &String::operator+=(const String& str) {
     if (empty()) {
       m_str = str.m_str;
     } else {
-      if (BITREF_SURVEY) cow_check_occurred(m_str.get());
       if (!m_str->cowCheck()) {
         auto tmp = m_str->append(str.slice());
         if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);
@@ -302,7 +298,6 @@ String& String::operator+=(const StringSlice& slice) {
   if (slice.size() == 0) {
     return *this;
   }
-  if (BITREF_SURVEY) cow_check_occurred(m_str.get());
   if (m_str && !m_str->cowCheck()) {
     auto const tmp = m_str->append(slice);
     if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);

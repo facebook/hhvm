@@ -40,8 +40,6 @@
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/base/proxy-array.h"
 
-#include "hphp/util/bitref-survey.h"
-
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wconstant-logical-operand"
@@ -473,7 +471,6 @@ public:
   explicit ZArrVal(TypedValue* tv) : m_tv(tv) {}
   void cowCheck() {
     ArrayData * ad = m_tv->m_data.parr;
-    if (BITREF_SURVEY) cow_check_occurred(ad);
     if (ad->isStatic() || ad->cowCheck()) {
       forceAsProxyArray ();
     }

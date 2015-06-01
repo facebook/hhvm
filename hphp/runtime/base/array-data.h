@@ -22,6 +22,8 @@
 
 #include <folly/Likely.h>
 
+#include "hphp/util/bitref-survey.h"
+
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/types.h"
@@ -88,6 +90,7 @@ public:
     if (m_count > 1) m_pad = 1;
   }
   bool cowCheck() const {
+    if (BITREF_SURVEY) cow_check_occurred(this);
     return maybeShared();
   }
 
@@ -152,13 +155,13 @@ public:
    */
   bool noCopyOnWrite() const;
 
-  bool isPacked() const { return kind() == kPackedKind; }
-  bool isStruct() const { return kind() == kStructKind; }
-  bool isMixed() const { return kind() == kMixedKind; }
-  bool isApcArray() const { return kind() == kApcKind; }
-  bool isGlobalsArray() const { return kind() == kGlobalsKind; }
-  bool isProxyArray() const { return kind() == kProxyKind; }
-  bool isEmptyArray() const { return kind() == kEmptyKind; }
+  bool isPacked() const { return m_kind == kPackedKind; }
+  bool isStruct() const { return m_kind == kStructKind; }
+  bool isMixed() const { return m_kind == kMixedKind; }
+  bool isApcArray() const { return m_kind == kApcKind; }
+  bool isGlobalsArray() const { return m_kind == kGlobalsKind; }
+  bool isProxyArray() const { return m_kind == kProxyKind; }
+  bool isEmptyArray() const { return m_kind == kEmptyKind; }
 
   /*
    * Returns whether or not this array contains "vector-like" data.

@@ -21,6 +21,7 @@
 #include "hphp/util/hash.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/word-mem.h"
+#include "hphp/util/bitref-survey.h"
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/types.h"
@@ -197,6 +198,7 @@ struct StringData {
   bool isStatic() const;
   bool isUncounted() const;
   bool cowCheck() const {
+    if (BITREF_SURVEY) cow_check_occurred(this);
     return maybeShared();
   }
 
@@ -476,9 +478,6 @@ private:
   void setStatic();
   void setUncounted();
 
-  HeaderKind kind() const {
-    return m_kind;
-  }
 private:
   char* m_data;
 

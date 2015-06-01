@@ -32,7 +32,6 @@
 #include "hphp/runtime/vm/member-operations.h"
 
 #include "hphp/util/alloc.h"
-#include "hphp/util/bitref-survey.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/trace.h"
@@ -80,7 +79,7 @@ ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
                                        uint32_t capacity) {
   capacity = (capacity ? capacity : other->size());
 
-  if (other->kind() == kPackedKind) {
+  if (other->m_kind == kPackedKind) {
     return MixedArray::MakeReserve(capacity);
   } else {
     return MixedArray::MakeReserveMixed(capacity);
@@ -1677,7 +1676,6 @@ ArrayData* MixedArray::ArrayPlusEqGeneric(ArrayData* ad,
 ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
   auto const neededSize = ad->size() + elems->size();
 
-  if (BITREF_SURVEY) cow_check_occurred(ad);
   auto ret =
     ad->cowCheck() ? CopyReserve(asMixed(ad), neededSize) :
     asMixed(ad);
@@ -1776,7 +1774,6 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
 
 ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
   auto a = asMixed(ad);
-  if (BITREF_SURVEY) cow_check_occurred(a);
   if (a->cowCheck()) a = a->copyMixed();
   auto elms = a->data();
   if (a->m_size) {
@@ -1800,7 +1797,6 @@ ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
 
 ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
   auto a = asMixed(adInput);
-  if (BITREF_SURVEY) cow_check_occurred(a);
   if (a->cowCheck()) a = a->copyMixed();
   auto elms = a->data();
   if (a->m_size) {
@@ -1826,7 +1822,6 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput,
                               const Variant& v,
                               bool copy) {
   auto a = asMixed(adInput);
-  if (BITREF_SURVEY) cow_check_occurred(a);
   if (a->cowCheck()) a = a->copyMixedAndResizeIfNeeded();
 
   auto elms = a->data();

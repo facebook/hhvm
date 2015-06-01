@@ -29,8 +29,6 @@
 #include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 
-#include "hphp/util/bitref-survey.h"
-
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -215,7 +213,7 @@ ArrayData* PackedArray::Grow(ArrayData* old) {
     );
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = old->m_sizeAndPos;
-    ad->m_kindAndCount = cap | uint64_t{old->kind()} << 24; // count=0
+    ad->m_kindAndCount = cap | uint64_t{old->m_kind} << 24; // count=0
     assert(ad->isPacked());
     assert(ad->m_size == old->m_size);
     assert(ad->m_cap.decode() == cap);
@@ -259,7 +257,7 @@ ArrayData* PackedArray::GrowHelper(ArrayData* old) {
   if (UNLIKELY(ad == nullptr)) return nullptr;
   // ad->m_cap_kind is already set correctly in MakeReserveSlow
   ad->m_sizeAndPos = old->m_sizeAndPos;
-  ad->m_kind = old->kind();
+  ad->m_kind = old->m_kind;
   assert(ad->isPacked());
   assert(ad->m_size == old->m_size);
   assert(ad->m_cap.decode() >= oldCap*2);
@@ -809,7 +807,6 @@ static void adjustMArrayIter(ArrayData* ad, ssize_t pos) {
 
 ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
   assert(checkInvariants(adIn));
-  if (BITREF_SURVEY) cow_check_occurred(adIn);
   auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
 
   if (UNLIKELY(ad->m_size == 0)) {
@@ -834,7 +831,6 @@ ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
 
 ArrayData* PackedArray::Dequeue(ArrayData* adIn, Variant& value) {
   assert(checkInvariants(adIn));
-  if (BITREF_SURVEY) cow_check_occurred(adIn);
   auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
   // To conform to PHP behavior, we invalidate all strong iterators when an
   // element is removed from the beginning of the array.
@@ -862,7 +858,6 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn,
                                 const Variant& v,
                                 bool copy) {
   assert(checkInvariants(adIn));
-  if (BITREF_SURVEY) cow_check_occurred(adIn);
   auto const ad = adIn->cowCheck() ? CopyAndResizeIfNeeded(adIn)
                                           : ResizeIfNeeded(adIn);
   // To conform to PHP behavior, we invalidate all strong iterators when an

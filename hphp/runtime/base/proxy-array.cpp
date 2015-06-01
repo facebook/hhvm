@@ -23,8 +23,6 @@
 #include "hphp/runtime/base/zend-custom-element.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 
-#include "hphp/util/bitref-survey.h"
-
 // FIXME: get this from the proper header.
 // We need to move proxy-array.cpp to ext_zend_compat/hhvm before
 // the Zend headers can be included.
@@ -128,7 +126,6 @@ ProxyArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret, bool copy) {
   if (copy) {
     return innerArr(ad)->lval(k, ret, true);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(innerArr(ad));
     auto r = innerArr(ad)->lval(k, ret, innerArr(ad)->cowCheck());
     reseatable(ad, r);
     return ad;
@@ -140,7 +137,6 @@ ProxyArray::LvalStr(ArrayData* ad, StringData* k, Variant*& ret, bool copy) {
   if (copy) {
     return innerArr(ad)->lval(k, ret, true);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(innerArr(ad));
     auto r = innerArr(ad)->lval(k, ret, innerArr(ad)->cowCheck());
     reseatable(ad, r);
     return ad;
@@ -152,7 +148,6 @@ ProxyArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
   if (copy) {
     return innerArr(ad)->lvalNew(ret, true);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(innerArr(ad));
     auto r = innerArr(ad)->lvalNew(ret, innerArr(ad)->cowCheck());
     reseatable(ad, r);
     return ad;
@@ -166,7 +161,6 @@ ArrayData* ProxyArray::SetInt(ArrayData* ad,
   if (copy) {
     return innerArr(ad)->set(k, tvAsCVarRef(&v), true);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(innerArr(ad));
     auto r = innerArr(ad)->set(k,
         tvAsCVarRef(&v), innerArr(ad)->cowCheck());
     reseatable(ad, r);
@@ -181,7 +175,6 @@ ArrayData* ProxyArray::SetStr(ArrayData* ad,
   if (copy) {
     return innerArr(ad)->set(k, tvAsCVarRef(&v), copy);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(innerArr(ad));
     auto r = innerArr(ad)->set(k,
         tvAsCVarRef(&v), innerArr(ad)->cowCheck());
     reseatable(ad, r);
@@ -196,7 +189,6 @@ ArrayData* ProxyArray::SetRefInt(ArrayData* ad,
   if (copy) {
     return innerArr(ad)->setRef(k, v, true);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(innerArr(ad));
     auto r = innerArr(ad)->setRef(k, v, innerArr(ad)->cowCheck());
     reseatable(ad, r);
     return ad;
@@ -210,7 +202,6 @@ ArrayData* ProxyArray::SetRefStr(ArrayData* ad,
   if (copy) {
     return innerArr(ad)->setRef(k, v, true);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(innerArr(ad));
     auto r = innerArr(ad)->setRef(k, v, innerArr(ad)->cowCheck());
     reseatable(ad, r);
     return ad;
@@ -222,7 +213,6 @@ ProxyArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
   if (copy) {
     return innerArr(ad)->remove(k, true);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(innerArr(ad));
     auto r = innerArr(ad)->remove(k, innerArr(ad)->cowCheck());
     reseatable(ad, r);
     return ad;
@@ -235,7 +225,6 @@ ProxyArray::RemoveStr(ArrayData* ad, const StringData* k,
   if (copy) {
     return innerArr(ad)->remove(k, true);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(innerArr(ad));
     auto r = innerArr(ad)->remove(k, innerArr(ad)->cowCheck());
     reseatable(ad, r);
     return ad;
@@ -252,7 +241,6 @@ ProxyArray::Append(ArrayData* ad, const Variant& v, bool copy) {
   if (copy) {
     return innerArr(ad)->append(v, true);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(innerArr(ad));
     auto r = innerArr(ad)->append(v, innerArr(ad)->cowCheck());
     reseatable(ad, r);
     return ad;
@@ -264,7 +252,6 @@ ProxyArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
   if (copy) {
     return innerArr(ad)->appendRef(v, true);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(innerArr(ad));
     auto r = innerArr(ad)->appendRef(v, innerArr(ad)->cowCheck());
     reseatable(ad, r);
     return ad;
@@ -276,7 +263,6 @@ ProxyArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
   if (copy) {
     return innerArr(ad)->appendWithRef(v, true);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(innerArr(ad));
     auto r = innerArr(ad)->appendWithRef(v, innerArr(ad)->cowCheck());
     reseatable(ad, r);
     return ad;
@@ -285,7 +271,6 @@ ProxyArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
 
 ArrayData*
 ProxyArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
-  if (BITREF_SURVEY) cow_check_occurred(ad);
   auto const ret = ad->cowCheck() ? Make(innerArr(ad))
                                          : asProxyArray(ad);
   auto r = innerArr(ret)->plusEq(elems);
@@ -316,7 +301,6 @@ ArrayData* ProxyArray::Prepend(ArrayData* ad, const Variant& v, bool copy) {
   if (copy) {
     return innerArr(ad)->prepend(v, true);
   } else {
-    if (BITREF_SURVEY) cow_check_occurred(innerArr(ad));
     auto r = innerArr(ad)->prepend(v, innerArr(ad)->cowCheck());
     reseatable(ad, r);
     return ad;

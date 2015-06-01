@@ -58,12 +58,12 @@ private:
  * Log when a copy-on-write check takes place. 
  */
 void cow_check_occurred(RefCount refcount, bool bitref);
-void cow_check_occurred(ArrayData* ad);
-void cow_check_occurred(StringData* sd);
+void cow_check_occurred(const ArrayData* ad);
+void cow_check_occurred(const StringData* sd);
 
 BitrefSurvey &survey();
 
-extern bool BITREF_SURVEY;
+const bool BITREF_SURVEY = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 

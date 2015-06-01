@@ -194,13 +194,20 @@ void HHVM_FUNCTION(debug_zval_dump, const Variant& variable) {
   vs.serialize(variable, false);
 }
 
+const StaticString
+  s_Null("N;"),
+  s_True("b:1;"),
+  s_False("b:0;"),
+  s_Res("i:0;"),
+  s_EmptyArray("a:0:{}");
+
 String HHVM_FUNCTION(serialize, const Variant& value) {
   switch (value.getType()) {
     case KindOfUninit:
     case KindOfNull:
-      return "N;";
+      return s_Null;
     case KindOfBoolean:
-      return value.getBoolean() ? "b:1;" : "b:0;";
+      return value.getBoolean() ? s_True : s_False;
     case KindOfInt64: {
       StringBuffer sb;
       sb.append("i:");
@@ -220,10 +227,10 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
       return sb.detach();
     }
     case KindOfResource:
-      return "i:0;";
+      return s_Res;
     case KindOfArray: {
       ArrayData *arr = value.getArrayData();
-      if (arr->empty()) return "a:0:{}";
+      if (arr->empty()) return s_EmptyArray;
       // fall-through
     }
     case KindOfDouble:

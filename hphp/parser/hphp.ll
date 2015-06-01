@@ -961,7 +961,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         RETSTEP(T_WHITESPACE);
 }
 
-<ST_IN_SCRIPTING,ST_XHP_IN_TAG>("#"|"//").*{NEWLINE}? {
+<ST_IN_SCRIPTING,ST_XHP_IN_TAG>("#"|"//")[^\r\n]*{NEWLINE}? {
         const char* asptag = nullptr;
         if (_scanner->aspTags()) {
                 asptag = static_cast<const char*>(

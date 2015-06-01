@@ -1261,9 +1261,10 @@ void bindElemC(TypedValue* base, TypedValue key, RefData* val,
   }
 }
 
-void setWithRefElemC(TypedValue* base, TypedValue key, TypedValue val,
+void setWithRefElemC(TypedValue* base, TypedValue keyTV, TypedValue val,
                      MInstrState* mis) {
-  base = HPHP::ElemD<false, false>(mis->tvScratch, mis->tvRef, base, key);
+  auto const keyC = tvToCell(&keyTV);
+  base = HPHP::ElemD<false, false>(mis->tvScratch, mis->tvRef, base, *keyC);
   if (base != &mis->tvScratch) {
     tvDup(val, *base);
   } else {

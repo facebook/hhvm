@@ -547,6 +547,10 @@ void setBase(MTS& env,
   always_assert(env.base.type <= env.base.value->type());
 }
 
+SSATmp* getUnconstrainedKey(MTS& env) {
+  return getInput(env, env.iInd, DataTypeGeneric);
+}
+
 SSATmp* getKey(MTS& env) {
   auto key = getInput(env, env.iInd, DataTypeSpecific);
   auto const keyType = key->type();
@@ -558,11 +562,17 @@ SSATmp* getKey(MTS& env) {
   return key;
 }
 
-SSATmp* getValue(MTS& env) {
+SSATmp* getUnconstrainedValue(MTS& env) {
   // If an instruction takes an rhs, it's always input 0.
   assertx(env.mii.valCount() == 1);
   const int kValIdx = 0;
-  return getInput(env, kValIdx, DataTypeSpecific);
+  return getInput(env, kValIdx, DataTypeGeneric);
+}
+
+SSATmp* getValue(MTS& env) {
+  auto const val = getUnconstrainedValue(env);
+  env.irb.constrainValue(val, DataTypeSpecific);
+  return val;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1981,8 +1991,8 @@ void emitSetElem(MTS& env) {
 }
 
 void emitSetWithRefElem(MTS& env) {
-  auto const key = getKey(env);
-  auto const val = getValue(env);
+  auto const key = getUnconstrainedKey(env);
+  auto const val = getUnconstrainedValue(env);
   gen(env, SetWithRefElem, env.base.value, key, val, misPtr(env));
   env.result = nullptr;
 }
@@ -2224,8 +2234,8 @@ void emitMPost(MTS& env) {
     push(env, env.result);
   } else {
     assertx(env.op == Op::UnsetM ||
-           env.op == Op::SetWithRefLM ||
-           env.op == Op::SetWithRefRM);
+            env.op == Op::SetWithRefLM ||
+            env.op == Op::SetWithRefRM);
   }
 
   cleanTvRefs(env);

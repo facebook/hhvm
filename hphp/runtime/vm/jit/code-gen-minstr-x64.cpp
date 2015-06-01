@@ -109,7 +109,6 @@ void CodeGenerator::cgCGetProp(IRInstruction* inst) {
       .immPtr(getClass(inst->marker()))
       .ssa(0)
       .memberKeyS(1)
-      .ssa(2)
   );
 }
 
@@ -119,23 +118,13 @@ void CodeGenerator::cgCGetPropQ(IRInstruction* inst) {
     argGroup(inst)
       .immPtr(getClass(inst->marker()))
       .ssa(0)
-      .ssa(1)
-      .ssa(2);
+      .ssa(1);
 
-  if (inst->src(0)->isA(TObj)) {
-    cgCallHelper(
-      vmain(),
-      CppCall::direct(cGetPropSOQ),
-      callDestTV(inst),
-      SyncOptions::kSyncPoint,
-      args
-    );
-    return;
-  }
-
+  auto const target = inst->src(0)->isA(TObj) ? CppCall::direct(cGetPropSOQ)
+                                              : CppCall::direct(cGetPropSQ);
   cgCallHelper(
     vmain(),
-    CppCall::direct(cGetPropSQ),
+    target,
     callDestTV(inst),
     SyncOptions::kSyncPoint,
     args
@@ -395,7 +384,6 @@ void CodeGenerator::cgCGetElem(IRInstruction* inst) {
     argGroup(inst)
       .ssa(0)
       .memberKeyIS(1)
-      .ssa(2)
   );
 }
 

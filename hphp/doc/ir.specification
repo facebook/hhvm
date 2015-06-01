@@ -2064,11 +2064,11 @@ fields of that struct for holding intermediate values.
   Like PropX, but used for intermediate element lookups that may modify the
   base.
 
-| CGetProp, D(Cell), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), PRc|Er
+| CGetProp, D(Cell), S(Obj,PtrToGen) S(Cell), PRc|Er
 
   Get property with key S1 from S0.
 
-| CGetPropQ, D(Cell), S(Obj,PtrToGen) S(StaticStr) S(PtrToMISGen), PRc|Er
+| CGetPropQ, D(Cell), S(Obj,PtrToGen) S(StaticStr), PRc|Er
 
   A nullsafe version of CGetProp, returns null if the base S0 is null.
 
@@ -2146,7 +2146,7 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from base S0.
 
-| CGetElem, D(Cell), S(PtrToGen) S(Cell) S(PtrToMISGen), PRc|Er
+| CGetElem, D(Cell), S(PtrToGen) S(Cell), PRc|Er
 
   Get element with key S1 from S0.
 

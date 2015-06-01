@@ -374,6 +374,8 @@ public:
 #if LIBCURL_VERSION_NUM >= 0x071301
     case CURLOPT_POSTREDIR:
 #endif
+    case CURLOPT_PROTOCOLS:
+    case CURLOPT_REDIR_PROTOCOLS:
     case CURLOPT_FTPLISTONLY:
     case CURLOPT_FTPAPPEND:
     case CURLOPT_NETRC:
@@ -1892,6 +1894,8 @@ const int64_t k_CURLOPT_POST = CURLOPT_POST;
 const int64_t k_CURLOPT_POSTFIELDS = CURLOPT_POSTFIELDS;
 const int64_t k_CURLOPT_POSTREDIR = CURLOPT_POSTREDIR;
 const int64_t k_CURLOPT_POSTQUOTE = CURLOPT_POSTQUOTE;
+const int64_t k_CURLOPT_PROTOCOLS = CURLOPT_PROTOCOLS;
+const int64_t k_CURLOPT_REDIR_PROTOCOLS = CURLOPT_REDIR_PROTOCOLS;
 const int64_t k_CURLOPT_PRIVATE = CURLOPT_PRIVATE;
 const int64_t k_CURLOPT_PROGRESSDATA = CURLOPT_PROGRESSDATA;
 const int64_t k_CURLOPT_PROGRESSFUNCTION = CURLOPT_PROGRESSFUNCTION;
@@ -1967,6 +1971,20 @@ const int64_t k_CURL_VERSION_IPV6 = CURL_VERSION_IPV6;
 const int64_t k_CURL_VERSION_KERBEROS4 = CURL_VERSION_KERBEROS4;
 const int64_t k_CURL_VERSION_LIBZ = CURL_VERSION_LIBZ;
 const int64_t k_CURL_VERSION_SSL = CURL_VERSION_SSL;
+
+const int64_t k_CURLPROTO_HTTP = CURLPROTO_HTTP;
+const int64_t k_CURLPROTO_HTTPS = CURLPROTO_HTTPS;
+const int64_t k_CURLPROTO_FTP = CURLPROTO_FTP;
+const int64_t k_CURLPROTO_FTPS = CURLPROTO_FTPS;
+const int64_t k_CURLPROTO_SCP = CURLPROTO_SCP;
+const int64_t k_CURLPROTO_SFTP = CURLPROTO_SFTP;
+const int64_t k_CURLPROTO_TELNET = CURLPROTO_TELNET;
+const int64_t k_CURLPROTO_LDAP = CURLPROTO_LDAP;
+const int64_t k_CURLPROTO_LDAPS = CURLPROTO_LDAPS;
+const int64_t k_CURLPROTO_DICT = CURLPROTO_DICT;
+const int64_t k_CURLPROTO_FILE = CURLPROTO_FILE;
+const int64_t k_CURLPROTO_TFTP = CURLPROTO_TFTP;
+const int64_t k_CURLPROTO_ALL = CURLPROTO_ALL;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -2158,6 +2176,8 @@ const StaticString s_CURLOPT_PORT("CURLOPT_PORT");
 const StaticString s_CURLOPT_POST("CURLOPT_POST");
 const StaticString s_CURLOPT_POSTFIELDS("CURLOPT_POSTFIELDS");
 const StaticString s_CURLOPT_POSTREDIR("CURLOPT_POSTREDIR");
+const StaticString s_CURLOPT_PROTOCOLS("CURLOPT_PROTOCOLS");
+const StaticString s_CURLOPT_REDIR_PROTOCOLS("CURLOPT_REDIR_PROTOCOLS");
 const StaticString s_CURLOPT_POSTQUOTE("CURLOPT_POSTQUOTE");
 const StaticString s_CURLOPT_PRIVATE("CURLOPT_PRIVATE");
 const StaticString s_CURLOPT_PROGRESSFUNCTION("CURLOPT_PROGRESSFUNCTION");
@@ -2228,6 +2248,20 @@ const StaticString s_CURL_VERSION_IPV6("CURL_VERSION_IPV6");
 const StaticString s_CURL_VERSION_KERBEROS4("CURL_VERSION_KERBEROS4");
 const StaticString s_CURL_VERSION_LIBZ("CURL_VERSION_LIBZ");
 const StaticString s_CURL_VERSION_SSL("CURL_VERSION_SSL");
+
+const StaticString s_CURLPROTO_HTTP("CURLPROTO_HTTP");
+const StaticString s_CURLPROTO_HTTPS("CURLPROTO_HTTPS");
+const StaticString s_CURLPROTO_FTP("CURLPROTO_FTP");
+const StaticString s_CURLPROTO_FTPS("CURLPROTO_FTPS");
+const StaticString s_CURLPROTO_SCP("CURLPROTO_SCP");
+const StaticString s_CURLPROTO_SFTP("CURLPROTO_SFTP");
+const StaticString s_CURLPROTO_TELNET("CURLPROTO_TELNET");
+const StaticString s_CURLPROTO_LDAP("CURLPROTO_LDAP");
+const StaticString s_CURLPROTO_LDAPS("CURLPROTO_LDAPS");
+const StaticString s_CURLPROTO_DICT("CURLPROTO_DICT");
+const StaticString s_CURLPROTO_FILE("CURLPROTO_FILE");
+const StaticString s_CURLPROTO_TFTP("CURLPROTO_TFTP");
+const StaticString s_CURLPROTO_ALL("CURLPROTO_ALL");
 
 class CurlExtension final : public Extension {
  public:
@@ -2760,6 +2794,12 @@ class CurlExtension final : public Extension {
       s_CURLOPT_POSTREDIR.get(), k_CURLOPT_POSTREDIR
     );
     Native::registerConstant<KindOfInt64>(
+      s_CURLOPT_PROTOCOLS.get(), k_CURLOPT_PROTOCOLS
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLOPT_REDIR_PROTOCOLS.get(), k_CURLOPT_REDIR_PROTOCOLS
+    );
+    Native::registerConstant<KindOfInt64>(
       s_CURLOPT_POSTQUOTE.get(), k_CURLOPT_POSTQUOTE
     );
     Native::registerConstant<KindOfInt64>(
@@ -2964,6 +3004,46 @@ class CurlExtension final : public Extension {
     );
     Native::registerConstant<KindOfInt64>(
       s_CURL_VERSION_SSL.get(), k_CURL_VERSION_SSL
+    );
+
+    Native::registerConstant<KindOfInt64>(
+      s_CURLPROTO_HTTP.get(), k_CURLPROTO_HTTP
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLPROTO_HTTPS.get(), k_CURLPROTO_HTTPS
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLPROTO_FTP.get(), k_CURLPROTO_FTP
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLPROTO_FTPS.get(), k_CURLPROTO_FTPS
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLPROTO_SCP.get(), k_CURLPROTO_SCP
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLPROTO_SFTP.get(), k_CURLPROTO_SFTP
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLPROTO_TELNET.get(), k_CURLPROTO_TELNET
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLPROTO_LDAP.get(), k_CURLPROTO_LDAP
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLPROTO_LDAPS.get(), k_CURLPROTO_LDAPS
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLPROTO_DICT.get(), k_CURLPROTO_DICT
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLPROTO_FILE.get(), k_CURLPROTO_FILE
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLPROTO_TFTP.get(), k_CURLPROTO_TFTP
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLPROTO_ALL.get(), k_CURLPROTO_ALL
     );
 
     HHVM_FE(curl_init);

@@ -34,6 +34,7 @@ struct FrameStateMgr;
  */
 void optimizeRefcounts2(IRUnit&);
 void optimizePredictions(IRUnit&);
+void hoistTypeChecks(IRUnit&);
 void gvn(IRUnit&);
 void optimizeLoads(IRUnit&);
 void optimizeStores(IRUnit&);

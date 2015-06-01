@@ -96,6 +96,10 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   printUnit(6, unit, "after initial DCE");
   assertx(checkEverything(unit));
 
+  if (RuntimeOption::EvalHHIRTypeCheckHoisting) {
+    doPass(unit, hoistTypeChecks, DCE::None);
+  }
+
   if (RuntimeOption::EvalHHIRPredictionOpts) {
     doPass(unit, optimizePredictions, DCE::None);
   }

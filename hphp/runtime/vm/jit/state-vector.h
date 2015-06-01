@@ -81,6 +81,8 @@ struct StateVector {
   const_iterator cbegin() const { return m_info.cbegin(); }
   const_iterator cend()   const { return m_info.cend(); }
 
+  const IRUnit& unit() const { return *m_unit; }
+
 private:
   void grow() {
     m_info.resize(m_unit->numIds(nullKey), m_init);

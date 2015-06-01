@@ -1481,10 +1481,8 @@ void translateInstr(
     irgen::gen(irgs, CountBytecode);
   }
 
-  if (isAlwaysNop(ni.op())) {
-    // Do nothing
-    return;
-  } else if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
+  if (isAlwaysNop(ni.op())) return;
+  if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
     irgen::interpOne(irgs, ni);
     return;
   }

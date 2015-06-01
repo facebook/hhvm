@@ -2,8 +2,16 @@
 
 class _SplPriorityQueueHeap extends SplMaxHeap {
 
+  private $priorityQueue;
+
   public function __construct(SplPriorityQueue $priority_queue) {
     $this->priorityQueue = $priority_queue;
+  }
+
+  public function copy(SplPriorityQueue $priority_queue) {
+    $clonedHeap = clone $this;
+    $clonedHeap->priorityQueue = $priority_queue;
+    return $clonedHeap;
   }
 
   public function compare($a, $b) {
@@ -243,7 +251,7 @@ class SplPriorityQueue implements \HH\Iterator, Countable {
   }
 
   public function __clone() {
-    $this->heap = $this->heap ? clone $this->heap : null;
+    $this->heap = $this->heap ? $this->heap->copy($this) : null;
   }
 
 }

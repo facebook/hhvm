@@ -1,0 +1,51 @@
+Get top with SplPriorityQueue::EXTR_DATA:
+dux
+Second in rank with SplPriorityQueue::EXTR_DATA:
+legati
+
+Get top with SplPriorityQueue::EXTR_PRIORITY:
+3
+Second in rank with SplPriorityQueue::EXTR_PRIORITY:
+2
+
+Get top with SplPriorityQueue::EXTR_BOTH:
+Array
+(
+    [data] => centurion
+    [priority] => 2
+)
+
+Second in rank with SplPriorityQueue::EXTR_BOTH:
+Array
+(
+    [data] => munifex
+    [priority] => 1
+)
+
+
+Get top with SplPriorityQueue::EXTR_DATA:
+dux
+Second in rank with SplPriorityQueue::EXTR_DATA:
+legati
+
+Get top with SplPriorityQueue::EXTR_PRIORITY:
+3
+Second in rank with SplPriorityQueue::EXTR_PRIORITY:
+2
+
+Get top with SplPriorityQueue::EXTR_BOTH:
+Array
+(
+    [data] => centurion
+    [priority] => 2
+)
+
+Second in rank with SplPriorityQueue::EXTR_BOTH:
+Array
+(
+    [data] => munifex
+    [priority] => 1
+)
+
+
+Top rank (even after killing the top in a clone) is: dux

@@ -14,13 +14,21 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
 
-#ifdef __APPLE__
+#ifdef _MSC_VER
+#include <io.h>
+#include <Windows.h>
+#elif defined(__APPLE__)
+#include <unistd.h>
 #include <mach-o/getsect.h>
 #else
+#include <unistd.h>
 #include <gelf.h>
 #include <libelf.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 #define NONE Val_int(0)
@@ -35,7 +43,52 @@ static value SOME(value v) {
   CAMLreturn(result);
 }
 
-#ifndef __APPLE__
+#ifdef _MSC_VER
+
+value get_embedded_hhi_data(value filename) {
+  CAMLparam1(filename);
+  CAMLlocal1(result);
+
+  int fd = _open(String_val(filename), O_RDONLY);
+  if (fd < 0) {
+    goto fail_early;
+  }
+
+  IMAGE_DOS_HEADER dosHeader;
+  if (_read(fd, &dosHeader, sizeof(dosHeader)) != sizeof(dosHeader))
+    goto fail_after_open;
+  if (dosHeader.e_magic != IMAGE_DOS_SIGNATURE)
+    goto fail_after_open;
+
+  _lseek(fd, dosHeader.e_lfanew, SEEK_SET);
+  IMAGE_NT_HEADERS ntHeader;
+  if (_read(fd, &ntHeader, sizeof(ntHeader)) != sizeof(ntHeader))
+    goto fail_after_open;
+
+  _lseek(fd, ntHeader.FileHeader.SizeOfOptionalHeader, SEEK_CUR);
+  for (WORD i = 0; i < ntHeader.FileHeader.NumberOfSections; i++) {
+    IMAGE_SECTION_HEADER sectionHeader;
+    if (_read(fd, &sectionHeader, sizeof(sectionHeader)) != sizeof(sectionHeader))
+      goto fail_after_open;
+
+    if (!memcmp(sectionHeader.Name, "hhi", 4)) {
+      _lseek(fd, sectionHeader.VirtualAddress, SEEK_SET);
+      result = caml_alloc_string(sectionHeader.Misc.VirtualSize);
+      if (_read(fd, String_val(result), sectionHeader.Misc.VirtualSize) != sectionHeader.Misc.VirtualSize) {
+        goto fail_after_open;
+      }
+      _close(fd);
+      CAMLreturn(SOME(result));
+    }
+  }
+
+fail_after_open:
+  _close(fd);
+fail_early:
+  CAMLreturn(NONE);
+}
+
+#elif !defined(__APPLE__)
 /**
  * Look for a magic "hhi" elf section and read it out, if it exists. Most of
  * this code adapted from hphp/util/embedded-data.cpp.
@@ -148,4 +201,8 @@ fail_early:
   CAMLreturn(NONE);
 }
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

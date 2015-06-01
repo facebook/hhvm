@@ -15,6 +15,10 @@
 
 #define Val_none Val_int(0)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static value
 Val_some( value v )
 {
@@ -28,16 +32,25 @@ Val_some( value v )
 CAMLprim value
 hh_realpath(value v) {
   char *input;
-  char output[PATH_MAX];
   char *result;
 
   CAMLparam1(v);
 
   input = String_val(v);
+#ifdef _MSC_VER
+  char output[_MAX_PATH];
+  result = _fullpath(output, input, _MAX_PATH);
+#else
+  char output[PATH_MAX];
   result = realpath(input, output);
+#endif
   if (result == NULL) {
     CAMLreturn(Val_none);
   } else {
     CAMLreturn(Val_some(caml_copy_string(output)));
   }
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -684,16 +684,16 @@ function oss_test_option_map(): OptionInfoMap {
   };
 }
 
-function main(array $argv): void {
+function main(array &$argv): void {
   $options = parse_options(oss_test_option_map());
   if ($options->containsKey('help')) {
     help();
     return;
   }
 
-  // Parse all the options passed to run.php and come out with a list of
-  // frameworks passed into test (or --all or --allexcept)
-  $passed_frameworks = Options::parse($options, $argv);
+  // Parse all the options passed to run.php
+  Options::parse($options);
+  $passed_frameworks = new Vector($argv);
   $available_frameworks = new Set(array_keys(Options::$framework_info));
   include_all_php(__DIR__."/framework_class_overrides");
   $framework_class_overrides = get_subclasses_of("Framework")->toSet();

@@ -134,7 +134,7 @@ Variant HHVM_FUNCTION(array_shift,
                       VRefParam array);
 Variant HHVM_FUNCTION(array_slice,
                       const Variant& array,
-                      int offset,
+                      int64_t offset,
                       const Variant& length = null_variant,
                       bool preserve_keys = false);
 Variant HHVM_FUNCTION(array_splice,

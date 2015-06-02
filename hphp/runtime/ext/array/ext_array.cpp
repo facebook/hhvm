@@ -906,7 +906,7 @@ Variant HHVM_FUNCTION(array_shift,
 
 Variant HHVM_FUNCTION(array_slice,
                       const Variant& input,
-                      int offset,
+                      int64_t offset,
                       const Variant& length /* = null_variant */,
                       bool preserve_keys /* = false */) {
   const auto& cell_input = *input.asCell();
@@ -918,17 +918,18 @@ Variant HHVM_FUNCTION(array_slice,
   }
   int64_t len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
 
-  int num_in = getContainerSize(cell_input);
+  const int64_t num_in = getContainerSize(cell_input);
   if (offset > num_in) {
     offset = num_in;
   } else if (offset < 0 && (offset = (num_in + offset)) < 0) {
     offset = 0;
   }
 
+  auto const maxLen = num_in - offset;
   if (len < 0) {
-    len = num_in - offset + len;
-  } else if (((unsigned)offset + (unsigned)len) > (unsigned)num_in) {
-    len = num_in - offset;
+    len = maxLen + len;
+  } else if (len > maxLen) {
+    len = maxLen;
   }
 
   if (len <= 0) {

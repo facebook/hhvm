@@ -250,10 +250,10 @@ enum FbCompactSerializeCode {
   FB_CS_MAX_CODE   = 16,
 };
 
-static_assert(FB_CS_MAX_CODE <= '0',
-  "FB_CS_MAX_CODE must be less than ASCII '0' or fb_compact_serialize() could "
-  "produce strings that when used as array keys could collide with integer "
-  "array keys. Assumption relevant to fb_compact_serialize_code() below");
+static_assert(FB_CS_MAX_CODE <= '$',
+  "FB_CS_MAX_CODE must be less than ASCII '$' or serialize_memoize_param() "
+  "could produce strings that when used as array keys could collide with  "
+  "keys it produces.");
 
 // 1 byte: 0<7 bits>
 const uint64_t kInt7Mask            = 0x7f;

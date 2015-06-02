@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
@@ -32,11 +33,15 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString
+  s_86metadata("86metadata"),
+  // The following are used in serialize_memoize_param(), and to not collide
+  // with optimizations there, must be empty or start with a characther >=
+  // FB_CS_MAX_CODE && < '0'
   s_empty(""),
-  s_emptyArr("array()"),
-  s_true("true"),
-  s_false("false"),
-  s_86metadata("86metadata");
+  s_emptyArr("$array()"),
+  s_emptyStr("$"),
+  s_true("$true"),
+  s_false("$false");
 
 ///////////////////////////////////////////////////////////////////////////////
 bool HHVM_FUNCTION(autoload_set_paths,
@@ -66,21 +71,28 @@ bool HHVM_FUNCTION(could_include, const String& file) {
 }
 
 Variant HHVM_FUNCTION(serialize_memoize_param, const Variant& param) {
+  // Memoize throws in the emitter if any function parameters are references, so
+  // we can just assert that the param is cell here
+  const auto& cell_param = *tvAssertCell(param.asTypedValue());
   auto type = param.getType();
+
   if (type == KindOfInt64) {
     return param;
-  }
-  if (type == KindOfUninit || type == KindOfNull) {
+  } else if (type == KindOfUninit || type == KindOfNull) {
     return s_empty;
-  }
-  if (type == KindOfBoolean) {
+  } else if (type == KindOfBoolean) {
     return param.asBooleanVal() ? s_true : s_false;
-  }
-  if (type == KindOfArray) {
-    Array arr = param.toArray();
-    if (arr.size() == 0) {
-      return s_emptyArr;
+  } else if (type == KindOfString) {
+    auto str = param.asCStrRef();
+    if (str.empty()) {
+      return s_emptyStr;
+    } else if (str.charAt(0) > '9') {
+      // If it doesn't start with a number, then we know it can never collide
+      // with an int or any of our constants, so it's fine as is
+      return param;
     }
+  } else if (isContainer(cell_param) && getContainerSize(cell_param) == 0) {
+    return s_emptyArr;
   }
 
   return fb_compact_serialize(param, FBCompactSerializeBehavior::MemoizeParam);

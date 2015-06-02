@@ -24,6 +24,7 @@
 #endif
 #include "hphp/util/trace.h"
 
+#include <iostream>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -56,9 +57,9 @@ namespace {
  * Dummy class to get some code to run before main().
  */
 class Init {
-  Module name2mod(const char *name) {
+  Module name2mod(folly::StringPiece name) {
     for (int i = 0; i < NumModules; i++) {
-      if (!strcasecmp(tokNames[i], name)) {
+      if (name == tokNames[i]) {
         return (Module)i;
       }
     }
@@ -78,19 +79,26 @@ class Init {
         fprintf(stderr, "could not create log file (%s); using stderr\n", file);
         out = stderr;
       }
-      char *e = strdup(env);
-      char *tok;
-      for (tok = strtok(e, ","); tok; tok = strtok(nullptr, ",")) {
-        char *ctok;
-        char *moduleName = tok;
-        if (( ctok = strchr(moduleName, ':'))) {
-          *ctok++ = 0;
+
+      std::string envStr(env);
+      std::vector<folly::StringPiece> pieces;
+      folly::split(",", envStr, pieces);
+      for (auto piece : pieces) {
+        folly::StringPiece moduleName;
+        int level;
+        try {
+          if (!folly::split(":", piece, moduleName, level)) {
+            moduleName = piece;
+            level = 1;
+          }
+        } catch (const std::exception& re) {
+          std::cerr <<
+            folly::format("Ignoring invalid TRACE component: {}\n", piece);
+          continue;
         }
-        int level = ctok ? atoi(ctok) : 1;
+
         int mod = name2mod(moduleName);
-        if (mod >= 0) {
-          levels[mod] = level;
-        }
+        if (mod >= 0) levels[mod] = level;
 
         static auto const groups = {
           Trace::minstr,
@@ -104,7 +112,6 @@ class Init {
           }
         }
       }
-      free(e);
     } else {
       // If TRACE env var is not set, nothing should be traced...
       // but if it does, use stderr.

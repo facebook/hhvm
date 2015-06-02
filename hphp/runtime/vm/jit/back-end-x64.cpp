@@ -682,13 +682,15 @@ void BackEnd::genCodeImpl(IRUnit& unit, CodeKind kind, AsmInfo* asmInfo) {
         (coldCode.frontier() - coldCode.base());
 
       mainDeltaTot += mainDelta;
-      HPHP::Trace::traceRelease("main delta after relocation: "
-                                "%" PRId64 " (%" PRId64 ")\n",
-                                mainDelta, mainDeltaTot);
       coldDeltaTot += coldDelta;
-      HPHP::Trace::traceRelease("cold delta after relocation: "
-                                "%" PRId64 " (%" PRId64 ")\n",
-                                coldDelta, coldDeltaTot);
+      if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, 1)) {
+        HPHP::Trace::traceRelease("main delta after relocation: "
+                                  "%" PRId64 " (%" PRId64 ")\n",
+                                  mainDelta, mainDeltaTot);
+        HPHP::Trace::traceRelease("cold delta after relocation: "
+                                  "%" PRId64 " (%" PRId64 ")\n",
+                                  coldDelta, coldDeltaTot);
+      }
     }
 #ifndef NDEBUG
     auto& ip = mcg->cgFixups().m_inProgressTailJumps;

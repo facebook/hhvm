@@ -530,6 +530,7 @@ public:
   F(bool, DumpHhas,                    false)                           \
   F(bool, DumpTC,                      false)                           \
   F(bool, DumpTCAnchors,               false)                           \
+  F(uint32_t, DumpIR,                  0)                               \
   F(bool, DumpAst,                     false)                           \
   F(bool, MapTCHuge,                   hugePagesSoundNice())            \
   F(bool, MapTgtCacheHuge,             false)                           \

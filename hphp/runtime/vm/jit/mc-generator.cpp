@@ -1608,6 +1608,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
     UndoMarker{code.frozen()},
     UndoMarker{code.data()},
   };
+  m_annotations.clear();
 
   setUseLLVM(
     RuntimeOption::EvalJitLLVM > 1 ||
@@ -1756,7 +1757,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
               start,           code.main().frontier()       - start,
               realColdStart,   code.realCold().frontier()   - realColdStart,
               realFrozenStart, code.realFrozen().frontier() - realFrozenStart,
-              region, m_fixups.m_bcMap,
+              region, m_fixups.m_bcMap, std::move(m_annotations),
               useLLVM(), hasLoop);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
@@ -1772,6 +1773,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
   }
   GrowableVector<IncomingBranch> inProgressTailBranches;
   m_fixups.process(&inProgressTailBranches);
+  m_annotations.clear();
 
   // SrcRec::newTranslation() makes this code reachable. Do this last;
   // otherwise there's some chance of hitting in the reader threads whose

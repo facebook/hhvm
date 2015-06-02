@@ -71,6 +71,7 @@ void OfflineTransData::loadTCData(string dumpDir) {
     FuncId    funcId;
     int32_t   resumed;
     uint64_t  profCount;
+    uint64_t  annotationsCount;
     size_t    numBCMappings = 0;
     size_t    numBlocks = 0;
     size_t    numGuards = 0;
@@ -130,6 +131,34 @@ void OfflineTransData::loadTCData(string dumpDir) {
     READ(" coldLen = %x", &tRec.acoldLen);
     READ(" frozenStart = %p", (void**)&tRec.afrozenStart);
     READ(" frozenLen = %x", &tRec.afrozenLen);
+    READ(" annotations = %" PRIu64 "", &annotationsCount);
+    for (size_t i = 0; i < annotationsCount; ++i) {
+      if (gzgets(file, buf, BUFLEN) == Z_NULL) {
+        snprintf(buf, BUFLEN,
+                 "Error reading annotation #%lu at translation %u\n",
+                 i, tRec.id);
+        error(buf);
+      }
+      char* title = strstr(buf, "[\"");
+      char* annotation = nullptr;
+      if (title) {
+        title += 2;
+        annotation = strstr(buf, "\"] = ");
+        if (annotation) {
+          *annotation = '\0';
+          annotation += 5;
+          if (auto eol = strchr(annotation, '\n')) {
+            *eol = '\0';
+          }
+        }
+      }
+      if (!title || !annotation) {
+        title = "<unknown>";
+        annotation = buf;
+      }
+      tRec.annotations.emplace_back(title, annotation);
+    }
+
     READ(" profCount = %" PRIu64 "", &profCount);
 
     READ(" bcMapping = %lu", &numBCMappings);
@@ -315,6 +344,69 @@ void OfflineTransData::printTransRec(TransID transId,
     tRec->acoldLen,
     tRec->afrozenStart,
     tRec->afrozenLen);
+
+  if (annotationsVerbosity > 0) {
+    for (auto& annotation : tRec->annotations) {
+      std::cout << folly::format(
+        "  annotation[\"{}\"]",
+        annotation.first);
+      // Either read annotation from file or print inline.
+      if (annotationsVerbosity > 1 &&
+          annotation.second.substr(0, 5) == "file:") {
+        std::cout << '\n';
+        string fileName = annotation.second.substr(5);
+        // The actual file should be located in dumpDir.
+        size_t pos = fileName.find_last_of('/');
+        if (pos != std::string::npos) {
+          fileName = fileName.substr(pos+1);
+        }
+        uint64_t offset = 0;
+        uint64_t length = std::numeric_limits<decltype(length)>::max();
+        pos = fileName.find_first_of(':');
+        if (pos != std::string::npos) {
+          auto filePos = fileName.substr(pos+1);
+          fileName.resize(pos);
+          if (sscanf(filePos.c_str(), "%ld:%ld", &offset, &length) != 2) {
+            std::cout << annotation.second << '\n';
+            continue;
+          }
+        }
+        fileName = folly::sformat("{}/{}", dumpDir, fileName);
+        FILE *file = fopen(fileName.c_str(), "r");
+        if (!file) {
+          std::cout << folly::format("<Error opening file {}>\n",
+                                     fileName);
+          continue;
+        }
+        if (fseeko(file, offset, SEEK_SET) != 0) {
+          std::cout << folly::format("<Error positioning file {} at {}>\n",
+                                     fileName, offset);
+          fclose(file);
+          continue;
+        }
+        // zlib can read uncompressed files too.
+        gzFile compressedFile = gzdopen(fileno(file), "r");
+        if (!compressedFile) {
+          std::cout << folly::format("<Error opening file {} with gzdopen>\n",
+                                     fileName);
+          fclose(file);
+          continue;
+        }
+        SCOPE_EXIT{ gzclose(compressedFile); };
+        std::cout << '\n';
+        char buf[BUFLEN];
+        uint64_t bytesRead = 0;
+        while (gzgets(compressedFile, buf, BUFLEN) != Z_NULL &&
+               bytesRead < length) {
+          std::cout << folly::format("    {}", buf);
+          bytesRead += std::strlen(buf) + 1;
+        }
+        std::cout << '\n';
+      } else {
+        std::cout << folly::format(" = {}\n", annotation.second);
+      }
+    }
+  }
 
   if (transCounters[transId]) {
     std::cout << folly::format(

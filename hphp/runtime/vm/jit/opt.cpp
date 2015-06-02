@@ -93,7 +93,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   }
 
   fullDCE(unit);
-  printUnit(6, unit, "after initial DCE");
+  printUnit(6, unit, " after initial DCE ");
   assertx(checkEverything(unit));
 
   if (RuntimeOption::EvalHHIRTypeCheckHoisting) {

@@ -50,7 +50,8 @@ struct TransAddrRange {
 
 class OfflineTransData {
 public:
-  explicit OfflineTransData(const std::string& dumpDir) {
+  explicit OfflineTransData(const std::string& dumpDir)
+    : dumpDir(dumpDir) {
     loadTCData(dumpDir);
   }
 
@@ -181,6 +182,10 @@ public:
     return false;
   }
 
+  void setAnnotationsVerbosity(uint32_t level) {
+    annotationsVerbosity = level;
+  }
+
 private:
   uint32_t                    nTranslations;
   std::vector<TransRec>       translations;
@@ -207,6 +212,10 @@ private:
   TCA                         frozenFrontier;
 
   std::unordered_set<FuncId> funcIds;
+
+  std::string                 dumpDir;
+
+  uint32_t                    annotationsVerbosity;
 
   void loadTCData(std::string dumpDir);
 

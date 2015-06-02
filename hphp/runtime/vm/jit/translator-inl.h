@@ -60,7 +60,9 @@ inline void Translator::setUseAHot(bool val) {
 // TransDB.
 
 inline bool Translator::isTransDBEnabled() {
-  return debug || RuntimeOption::EvalDumpTC;
+  return debug ||
+         RuntimeOption::EvalDumpTC ||
+         RuntimeOption::EvalDumpIR;
 }
 
 inline const TransRec* Translator::getTransRec(TCA tca) const {

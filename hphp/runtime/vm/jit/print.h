@@ -68,7 +68,8 @@ void print(const IRUnit& unit);
  * control most IR logging via the hhir trace module.
  */
 static inline bool dumpIREnabled(int level = 1) {
-  return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level);
+  return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level) ||
+         RuntimeOption::EvalDumpIR >= level;
 }
 
 constexpr int kCodeGenLevel = 1;

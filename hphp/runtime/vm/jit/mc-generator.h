@@ -157,6 +157,7 @@ public:
   CodeGenFixups& cgFixups() { return m_fixups; }
   FreeStubList& freeStubList() { return m_freeStubs; }
   LiteralMap& literals() { return m_literals; }
+  Annotations& annotations() { return m_annotations; }
   void recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff);
 
   DataBlock& globalData() { return code.data(); }
@@ -380,6 +381,7 @@ private:
   FreeStubList       m_freeStubs;
   CodeGenFixups      m_fixups;
   LiteralMap         m_literals;
+  Annotations        m_annotations;
 
   // asize + acoldsize + afrozensize + gdatasize
   size_t             m_totalSize;

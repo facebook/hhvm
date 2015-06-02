@@ -507,7 +507,12 @@ void printUnit(int level, const IRUnit& unit, const char* caption, AsmInfo* ai,
     str << banner(caption);
     print(str, unit, ai, guards);
     str << banner("");
-    HPHP::Trace::traceRelease("%s\n", str.str().c_str());
+    if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level)) {
+      HPHP::Trace::traceRelease("%s\n", str.str().c_str());
+    }
+    if (RuntimeOption::EvalDumpIR >= level) {
+      mcg->annotations().emplace_back(caption, std::move(str.str()));
+    }
   }
 }
 

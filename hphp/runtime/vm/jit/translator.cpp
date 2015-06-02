@@ -1528,7 +1528,8 @@ void Translator::addTranslation(const TransRec& transRec) {
   if (!isTransDBEnabled()) return;
   uint32_t id = getCurrentTransID();
   m_translations.emplace_back(transRec);
-  m_translations[id].id = id;
+  auto& newTransRec = m_translations[id];
+  newTransRec.id = id;
 
   if (transRec.aLen > 0) {
     m_transDB[transRec.aStart] = id;
@@ -1536,6 +1537,9 @@ void Translator::addTranslation(const TransRec& transRec) {
   if (transRec.acoldLen > 0) {
     m_transDB[transRec.acoldStart] = id;
   }
+
+  // Optimize storage of the created TransRec.
+  newTransRec.optimizeForMemory();
 }
 
 uint64_t Translator::getTransCounter(TransID transId) const {

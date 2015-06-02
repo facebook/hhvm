@@ -66,14 +66,14 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
   foreach ($optmap as $k => $v) {
     $m = null;
     if (preg_match('/^([^:]*)(\[\])/', $k, $m)) {
-      invariant($m !== null);
+      invariant($m !== null, "Regex must return match!");
       $k = $m[1];
       $all_longs[$k] = true;
       $long_supports_arg[$k] = true;
       $long_requires_arg[$k] = true;
       $long_set_arg[$k] = true;
     } else if (preg_match('/^([^:]*)(:(:(.*))?)?/', $k, $m)) {
-      invariant($m !== null);
+      invariant($m !== null, "Regex must return match!");
       $k = $m[1];
       $all_longs[$k] = true;
       $long_supports_arg[$k] = isset($m[2]);
@@ -154,9 +154,9 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
 
       if ($long_set_arg[$long]) {
         if (!$ret->containsKey($long)) {
-          $ret[$long] = new Set();
+          $ret[$long] = new Set(null);
         }
-        $ret[$long][] = $val;
+        $ret[$long]->add($val);
       } else {
         $ret[$long] = $val;
       }

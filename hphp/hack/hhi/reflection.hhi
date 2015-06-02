@@ -33,6 +33,7 @@ class ReflectionClass implements Reflector {
   public static function export(mixed $argument, bool $return = false): ?string;
   public function getConstant(string $name): mixed;
   public function getConstants(): array<string, mixed>;
+  public function getAbstractConstantNames(): array<string, string>;
   public function getConstructor(): ?ReflectionMethod;
   public function getDefaultProperties(): array<string, mixed>;
   /**

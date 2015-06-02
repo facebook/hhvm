@@ -849,6 +849,28 @@ TCA MCGenerator::regeneratePrologues(Func* func, SrcKey triggerSk) {
                    m_tx.profData()->transCounter(t2);
           });
 
+  // Next, we're going to regenerate each prologue along with its DV
+  // funclet.  We consider the option of either including the DV
+  // funclets in the same region as the function body or not.
+  // Including them in the same region enables some type information
+  // to flow and thus can eliminate some stores and type checks, but
+  // it can also increase the code size by duplicating the whole
+  // function body.  Therefore, we keep the DV inits separate if both
+  // (a) the function has multiple proflogues, and (b) the size of the
+  // function is above a certain threshold.
+  //
+  // The mechanism used to keep the function body separate from the DV
+  // init is to temporarily mark the SrcKey for the function body as
+  // already optimized.  (The region selectors break a region whenever
+  // they hit a SrcKey that has already been optimized.)
+  SrcKey funcBodySk(func, func->base(), false);
+  if (prologTransIDs.size() > 1 &&
+      func->past() - func->base() > RuntimeOption::EvalJitPGOMaxFuncSizeDupBody)
+  {
+    m_tx.profData()->setOptimized(funcBodySk);
+  }
+  SCOPE_EXIT{ m_tx.profData()->clearOptimized(funcBodySk); };
+
   for (TransID tid : prologTransIDs) {
     TCA start = regeneratePrologue(tid, triggerSk);
     if (triggerStart == nullptr && start != nullptr) {

@@ -316,6 +316,10 @@ void ProfData::setOptimized(SrcKey sk) {
   m_optimizedSKs.insert(sk);
 }
 
+void ProfData::clearOptimized(SrcKey sk) {
+  m_optimizedSKs.erase(sk);
+}
+
 void ProfData::setOptimized(FuncId funcId) {
   m_optimizedFuncs.insert(funcId);
 }

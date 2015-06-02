@@ -222,6 +222,7 @@ public:
   bool                    optimized(FuncId funcId) const;
   void                    setOptimized(SrcKey sk);
   void                    setOptimized(FuncId funcId);
+  void                    clearOptimized(SrcKey sk);
   bool                    profiling(FuncId funcId) const;
   void                    setProfiling(FuncId funcId);
 

@@ -521,6 +521,7 @@ public:
   F(bool,     JitPGOArrayGetStress,    false)                           \
   F(uint32_t, JitPGOMinBlockCountPercent, 10)                           \
   F(double,   JitPGOMinArcProbability, 0.02)                            \
+  F(uint32_t, JitPGOMaxFuncSizeDupBody, 80)                             \
   F(bool,     JitLoops,                loopsDefault())                  \
   F(uint32_t, HotFuncCount,            4100)                            \
   F(bool, HHIRConstrictGuards,         false)                           \

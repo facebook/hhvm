@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/cap-code.h"
+#include "hphp/util/md5.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -381,8 +382,24 @@ public:
 
   ArrayData *escalate() const;
 
+  using ScalarArrayKey = MD5;
+  struct ScalarHash {
+    size_t operator()(const ScalarArrayKey& key) const {
+      return key.hash();
+    }
+    size_t hash(const ScalarArrayKey& key) const {
+      return key.hash();
+    }
+    bool equal(const ScalarArrayKey& k1,
+               const ScalarArrayKey& k2) const {
+      return k1 == k2;
+    }
+  };
+
+  static ScalarArrayKey GetScalarArrayKey(ArrayData* arr);
+  static ScalarArrayKey GetScalarArrayKey(const char* str, size_t sz);
   static ArrayData* GetScalarArray(ArrayData *arr);
-  static ArrayData* GetScalarArray(ArrayData *arr, const std::string& key);
+  static ArrayData* GetScalarArray(ArrayData *arr, const ScalarArrayKey& key);
 
   static constexpr size_t offsetofSize() { return offsetof(ArrayData, m_size); }
   static constexpr size_t sizeofSize() { return sizeof(m_size); }

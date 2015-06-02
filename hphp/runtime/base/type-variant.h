@@ -1155,7 +1155,9 @@ public:
     m_data.pstr = const_cast<StringData*>(v);
   }
   explicit VarNR(ArrayData *v);
+  explicit VarNR(const ArrayData*) = delete;
   explicit VarNR(ObjectData *v);
+  explicit VarNR(const ObjectData*) = delete;
 
   VarNR(const VarNR &v) : TypedValueAux(v) {}
 

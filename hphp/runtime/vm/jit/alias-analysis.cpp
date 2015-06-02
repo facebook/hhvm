@@ -160,7 +160,7 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
   // We want to handle stacks partially specially, because they can be expanded
   // in some situations even if they don't have an ALocMeta.
   if (auto const stk = acls.stack()) {
-    auto const it = stk->size > 1 ? stk_expand_map.find(acls)
+    auto const it = stk->size > 1 ? stk_expand_map.find(*stk)
                                   : end(stk_expand_map);
     if (it != end(stk_expand_map)) {
       ret |= it->second;

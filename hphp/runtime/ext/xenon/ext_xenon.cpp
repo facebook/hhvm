@@ -17,13 +17,15 @@
 
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
-#include "hphp/runtime/ext/std/ext_std_function.h"
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/request-injection-data.h"
-#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include <signal.h>
@@ -85,6 +87,7 @@ const StaticString
   s_function("function"),
   s_file("file"),
   s_line("line"),
+  s_metadata("metadata"),
   s_time("time"),
   s_isWait("ioWaitSample"),
   s_phpStack("phpStack");
@@ -96,27 +99,35 @@ Array parsePhpStack(const Array& bt) {
   for (ArrayIter it(bt); it; ++it) {
     const auto& frame = it.second().toArray();
     if (frame.exists(s_function)) {
+      bool fileline = frame.exists(s_file) && frame.exists(s_line);
+      bool metadata = frame.exists(s_metadata);
+
+      ArrayInit element(
+        1 + (fileline ? 2 : 0) + (metadata ? 1 : 0),
+        ArrayInit::Map{}
+      );
+
       if (frame.exists(s_class)) {
         auto func = folly::to<std::string>(
           frame[s_class].toString().c_str(),
           "::",
           frame[s_function].toString().c_str()
         );
-        stack.append(make_map_array(
-          s_function, func,
-          s_file, frame[s_file],
-          s_line, frame[s_line]
-        ));
+        element.set(s_function, func);
       } else {
-        bool fileline = frame.exists(s_file) && frame.exists(s_line);
-        ArrayInit element(fileline ? 3 : 1, ArrayInit::Map{});
         element.set(s_function, frame[s_function].toString());
-        if (fileline) {
-          element.set(s_file, frame[s_file]);
-          element.set(s_line, frame[s_line]);
-        }
-        stack.append(element.toArray());
       }
+
+      if (fileline) {
+        element.set(s_file, frame[s_file]);
+        element.set(s_line, frame[s_line]);
+      }
+
+      if (metadata) {
+        element.set(s_metadata, frame[s_metadata]);
+      }
+
+      stack.append(element.toArray());
     }
   }
   return stack.toArray();
@@ -206,10 +217,9 @@ void Xenon::stop() {
 // If the sample is Enter, then do not record this function name because it
 // hasn't done anything.  The sample belongs to the previous function.
 void Xenon::log(SampleType t) const {
-  RequestInjectionData *rid = &ThreadInfo::s_threadInfo->m_reqInjectionData;
-  if (rid->checkXenonSignalFlag()) {
+  if (getSurpriseFlag(XenonSignalFlag)) {
     if (!RuntimeOption::XenonForceAlwaysOn) {
-      rid->clearXenonSignalFlag();
+      clearSurpriseFlag(XenonSignalFlag);
     }
     TRACE(1, "Xenon::log %s\n", (t == IOWaitSample) ? "IOWait" : "Normal");
     s_xenonData->log(t);
@@ -226,7 +236,8 @@ void Xenon::onTimer() {
 void Xenon::surpriseAll() {
   TRACE(1, "Xenon::surpriseAll\n");
   ThreadInfo::ExecutePerThread(
-    [](ThreadInfo *t) {t->m_reqInjectionData.setXenonSignalFlag();} );
+    [] (ThreadInfo* t) { t->m_reqInjectionData.setFlag(XenonSignalFlag); }
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -264,6 +275,7 @@ void XenonRequestLocalData::log(Xenon::SampleType t) {
   auto bt = createBacktrace(BacktraceArgs()
                              .skipTop(t == Xenon::EnterSample)
                              .withSelf()
+                             .withMetadata()
                              .ignoreArgs());
   m_stackSnapshots.append(make_map_array(
     s_time, now,
@@ -276,17 +288,17 @@ void XenonRequestLocalData::requestInit() {
   TRACE(1, "XenonRequestLocalData::requestInit\n");
   m_stackSnapshots = Array::Create();
   if (RuntimeOption::XenonForceAlwaysOn) {
-    ThreadInfo::s_threadInfo->m_reqInjectionData.setXenonSignalFlag();
+    setSurpriseFlag(XenonSignalFlag);
   } else {
-    // clear any Xenon flags that might still be on in this thread so
-    // that we do not have a bias towards the first function
-    ThreadInfo::s_threadInfo->m_reqInjectionData.clearXenonSignalFlag();
+    // Clear any Xenon flags that might still be on in this thread so that we do
+    // not have a bias towards the first function.
+    clearSurpriseFlag(XenonSignalFlag);
   }
 }
 
 void XenonRequestLocalData::requestShutdown() {
   TRACE(1, "XenonRequestLocalData::requestShutdown\n");
-  ThreadInfo::s_threadInfo->m_reqInjectionData.clearXenonSignalFlag();
+  clearSurpriseFlag(XenonSignalFlag);
   m_stackSnapshots.detach();
 }
 

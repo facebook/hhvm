@@ -42,7 +42,7 @@ struct ArraySpec {
   /*
    * Constructors.
    */
-  ArraySpec();
+  constexpr ArraySpec();
   explicit ArraySpec(ArrayData::ArrayKind kind);
   explicit ArraySpec(const RepoAuthType::Array* arrTy);
   ArraySpec(ArrayData::ArrayKind kind, const RepoAuthType::Array* arrTy);
@@ -64,7 +64,7 @@ struct ArraySpec {
   /*
    * Casts.
    *
-   * Bottom and Top cast to true; everything else casts to false.
+   * Bottom and Top cast to false; everything else casts to true.
    */
   explicit operator bool() const;
 
@@ -142,7 +142,7 @@ struct ClassSpec {
   /*
    * Constructors.
    */
-  ClassSpec();
+  constexpr ClassSpec();
   ClassSpec(const Class* cls, SubTag);
   ClassSpec(const Class* cls, ExactTag);
 
@@ -157,7 +157,7 @@ struct ClassSpec {
   /*
    * Casts.
    *
-   * Bottom and Top cast to true; everything else casts to false.
+   * Bottom and Top cast to false; everything else casts to true.
    */
   explicit operator bool() const;
 

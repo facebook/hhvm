@@ -21,14 +21,14 @@ module ShapeMap = Nast.ShapeMap
 module IsGeneric: sig
 
   (* Give back the name and position of a generic if found *)
-  val ty: ty -> string option
+  val ty: locl ty -> string option
 end = struct
 
   exception Found of string
 
   let rec ty (_, x) = ty_ x
   and ty_ = function
-    | Tgeneric ("this", ty) -> ty_opt ty
+    | Tgeneric ("this", Some (_, x)) -> ty x
     | Tgeneric (x, _) -> raise (Found x)
     | Tanon _ | Taccess _
     | Tany | Tmixed | Tprim _ -> ()
@@ -44,8 +44,8 @@ end = struct
           | _ -> ())
     | Tabstract (_, tyl, x) ->
         List.iter ty tyl; ty_opt x
-    | Tapply (_, tyl)
     | Ttuple tyl -> List.iter ty tyl
+    | Tclass (_, tyl)
     | Tunresolved tyl -> List.iter ty tyl
     | Tobject -> ()
     | Tshape fdm ->
@@ -59,10 +59,14 @@ end
 
 let rename env old_name new_name ty_to_rename =
   let rec ty env (r, t) = (match t with
-    | Tgeneric (x, ty) ->
+    | Tgeneric (x, cstr_opt) ->
         let name = if x = old_name then new_name else x in
-        let env, ty = ty_opt env ty in
-        env, (r, Tgeneric (name, ty))
+        let env, cstr_opt = match cstr_opt with
+          | Some (ck, t) ->
+              let env, t = ty env t in
+              env, Some (ck, t)
+          | None -> env, None in
+        env, (r, Tgeneric (name, cstr_opt))
     | Tanon _
     | Tany | Tmixed | Tprim _-> env, (r, t)
     | Tarray (ty1, ty2) ->
@@ -100,9 +104,9 @@ let rename env old_name new_name ty_to_rename =
         let env, l = tyl env l in
         let env, x = ty_opt env x in
         env, (r, Tabstract (id, l, x))
-    | Tapply (id, l) ->
-        let env, l = tyl env l in
-        env, (r, Tapply(id, l))
+    | Tclass (cls, l) ->
+       let env, l = tyl env l in
+       env, (r, Tclass(cls, l))
     | Taccess (x, ids) ->
         let env, x = ty env x in
         env, (r, Taccess(x, ids))

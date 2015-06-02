@@ -71,7 +71,7 @@ struct Header {
    * points, the runtime will check whether this word is non-zero, and
    * if so go to a slow path to handle unusual conditions (e.g. OOM).
    */
-  std::atomic<ssize_t> conditionFlags;
+  std::atomic<ssize_t> surpriseFlags;
 
   VMRegs vmRegs;
 };
@@ -83,7 +83,7 @@ inline Header* header() {
   return static_cast<Header*>(tl_base);
 }
 
-constexpr ptrdiff_t kConditionFlagsOff = offsetof(Header, conditionFlags);
+constexpr ptrdiff_t kSurpriseFlagsOff  = offsetof(Header, surpriseFlags);
 constexpr ptrdiff_t kVmRegsOff         = offsetof(Header, vmRegs);
 constexpr ptrdiff_t kVmspOff           = kVmRegsOff + offsetof(VMRegs, stack) +
                                            Stack::topOfStackOffset();

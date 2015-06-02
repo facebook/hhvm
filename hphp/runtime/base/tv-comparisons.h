@@ -50,6 +50,7 @@ bool cellEqual(Cell, double);
 bool cellEqual(Cell, const StringData*);
 bool cellEqual(Cell, const ArrayData*);
 bool cellEqual(Cell, const ObjectData*);
+bool cellEqual(Cell, const ResourceData*);
 
 /*
  * Returns whether two Cells have the same value, in the same of php's
@@ -77,6 +78,7 @@ bool cellLess(Cell, double);
 bool cellLess(Cell, const StringData*);
 bool cellLess(Cell, const ArrayData*);
 bool cellLess(Cell, const ObjectData*);
+bool cellLess(Cell, const ResourceData*);
 
 /*
  * Returns whether a Cell is greater than another Cell, in the sense
@@ -103,6 +105,7 @@ bool cellGreater(Cell, double);
 bool cellGreater(Cell, const StringData*);
 bool cellGreater(Cell, const ArrayData*);
 bool cellGreater(Cell, const ObjectData*);
+bool cellGreater(Cell, const ResourceData*);
 
 /*
  * Returns whether a Cell is greater than another Cell, in the sense

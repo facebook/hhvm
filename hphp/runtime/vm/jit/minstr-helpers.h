@@ -34,7 +34,7 @@ TypedValue* baseGImpl(TypedValue key) {
   StringData* name = prepareKey(key);
   SCOPE_EXIT { decRefStr(name); };
   VarEnv* varEnv = g_context->m_globalVarEnv;
-  assert(varEnv != nullptr);
+  assertx(varEnv != nullptr);
   base = varEnv->lookup(name);
   if (base == nullptr) {
     if (warn) {
@@ -101,20 +101,50 @@ inline TypedValue* nm(Class* ctx, TypedValue* base, TypedValue key,     \
 PROP_HELPER_TABLE(X)
 #undef X
 
+// NullSafe prop.
+inline TypedValue* propCQ(Class* ctx, TypedValue* base, StringData* key,
+                          MInstrState* mis) {
+  return nullSafeProp(mis->tvScratch, mis->tvRef, ctx, base, key);
+}
+
+// NullSafe prop with object base.
+inline TypedValue* propCOQ(Class* ctx, ObjectData* base, StringData* key,
+                           MInstrState* mis) {
+  return base->prop(&mis->tvScratch, &mis->tvRef, ctx, key);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
+                                 const TypedValue* result) {
+  if (LIKELY(result != &localTvRef)) {
+    result = tvToCell(result);
+    tvRefcountedIncRef(result);
+  } else {
+    // If a magic getter or array access method returned by reference, we have
+    // to incref the inner cell and drop our reference to the
+    // RefData. Otherwise we do nothing, since we already own a reference to
+    // result.
+    if (UNLIKELY(localTvRef.m_type == KindOfRef)) {
+      result = localTvRef.m_data.pref->tv();
+      tvRefcountedIncRef(result);
+      decRefRef(localTvRef.m_data.pref);
+    }
+  }
+
+  return *result;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 template <KeyType keyType, bool isObj>
-TypedValue cGetPropImpl(Class* ctx, TypedValue* base,
-                        key_type<keyType> key, MInstrState* mis) {
+TypedValue cGetPropImpl(Class* ctx, TypedValue* base, key_type<keyType> key) {
   TypedValue scratch;
-  TypedValue* result = Prop<true, false, false, isObj, keyType>(
-    scratch, mis->tvRef, ctx, base, key);
+  TypedValue localTvRef;
 
-  if (result->m_type == KindOfRef) {
-    result = result->m_data.pref->tv();
-  }
-  tvRefcountedIncRef(result);
-  return *result;
+  auto result = Prop<true, false, false, isObj, keyType>(
+    scratch, localTvRef, ctx, base, key);
+  return cGetRefShuffle(localTvRef, result);
 }
 
 #define CGETPROP_HELPER_TABLE(m)          \
@@ -124,13 +154,32 @@ TypedValue cGetPropImpl(Class* ctx, TypedValue* base,
   m(cGetPropS,    KeyType::Str, false)    \
   m(cGetPropSO,   KeyType::Str,  true)
 
-#define X(nm, kt, isObj)                                          \
-inline TypedValue nm(Class* ctx, TypedValue* base, key_type<kt> key, \
-                     MInstrState* mis) {                           \
-  return cGetPropImpl<kt, isObj>(ctx, base, key, mis);             \
+#define X(nm, kt, isObj)                                                \
+inline TypedValue nm(Class* ctx, TypedValue* base, key_type<kt> key) {  \
+  return cGetPropImpl<kt, isObj>(ctx, base, key);                       \
 }
 CGETPROP_HELPER_TABLE(X)
 #undef X
+
+//////////////////////////////////////////////////////////////////////
+
+// NullSafe prop.
+inline TypedValue cGetPropSQ(Class* ctx, TypedValue* base, StringData* key) {
+  TypedValue scratch;
+  TypedValue localTvRef;
+
+  auto const result = nullSafeProp(scratch, localTvRef, ctx, base, key);
+  return cGetRefShuffle(localTvRef, result);
+}
+
+// NullSafe prop with object base.
+inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key) {
+  TypedValue scratch;
+  TypedValue localTvRef;
+
+  auto const result = base->prop(&scratch, &localTvRef, ctx, key);
+  return cGetRefShuffle(localTvRef, result);
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -264,9 +313,9 @@ TypedValue incDecPropImpl(
   TypedValue key,
   IncDecOp op
 ) {
-  auto result = make_tv<KindOfUninit>();
+  TypedValue result;
   HPHP::IncDecProp<true, isObj>(ctx, op, base, key, result);
-  assert(result.m_type != KindOfRef);
+  assertx(result.m_type != KindOfRef);
   return result;
 }
 
@@ -397,7 +446,7 @@ const TypedValue* elemArrayNotFound(const StringData* k) {
 
 template<KeyType keyType, bool checkForInt, bool warn>
 inline const TypedValue* elemArrayImpl(TypedValue* a, key_type<keyType> key) {
-  assert(a->m_type == KindOfArray);
+  assertx(a->m_type == KindOfArray);
   auto const ad = a->m_data.parr;
   auto const ret = checkForInt ? checkedGet(ad, key) : ad->nvGet(key);
   return ret ? ret : elemArrayNotFound<warn>(key);
@@ -428,23 +477,19 @@ TypedValue arrayGetNotFound(const StringData* k);
 template<KeyType keyType, bool checkForInt>
 TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
   auto ret = checkForInt ? checkedGet(a, key) : a->nvGet(key);
-  if (ret) {
-    ret = tvToCell(ret);
-    tvRefcountedIncRef(ret);
-    return *ret;
-  }
+  if (ret) return *ret;
   return arrayGetNotFound(key);
 }
 
-#define ARRAYGET_HELPER_TABLE(m)               \
-  /* name        keyType     checkForInt   */  \
-  m(arrayGetS,   KeyType::Str,   false)        \
-  m(arrayGetSi,  KeyType::Str,    true)        \
-  m(arrayGetI,   KeyType::Int,   false)
+#define ARRAYGET_HELPER_TABLE(m)                           \
+  /* name        keyType     checkForInt */                \
+  m(arrayGetS,  KeyType::Str,   false)                     \
+  m(arrayGetSi, KeyType::Str,    true)                     \
+  m(arrayGetI,  KeyType::Int,   false)                     \
 
-#define X(nm, keyType, checkForInt)                  \
-inline TypedValue nm(ArrayData* a, key_type<keyType> key) {\
-  return arrayGetImpl<keyType, checkForInt>(a, key);\
+#define X(nm, keyType, checkForInt)                          \
+inline TypedValue nm(ArrayData* a, key_type<keyType> key) {  \
+  return arrayGetImpl<keyType, checkForInt>(a, key);         \
 }
 ARRAYGET_HELPER_TABLE(X)
 #undef X
@@ -452,13 +497,12 @@ ARRAYGET_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 template <KeyType keyType>
-TypedValue cGetElemImpl(TypedValue* base, key_type<keyType> key,
-                        MInstrState* mis) {
+TypedValue cGetElemImpl(TypedValue* base, key_type<keyType> key) {
   TypedValue scratch;
-  auto result = Elem<true, keyType>(scratch, mis->tvRef, base, key);
-  result = tvToCell(result);
-  tvRefcountedIncRef(result);
-  return *result;
+  TypedValue localTvRef;
+
+  auto result = Elem<true, keyType>(scratch, localTvRef, base, key);
+  return cGetRefShuffle(localTvRef, result);
 }
 
 #define CGETELEM_HELPER_TABLE(m)                \
@@ -468,8 +512,8 @@ TypedValue cGetElemImpl(TypedValue* base, key_type<keyType> key,
   m(cGetElemS,  KeyType::Str)
 
 #define X(nm, kt)                                                       \
-inline TypedValue nm(TypedValue* base, key_type<kt> key, MInstrState* mis) { \
-  return cGetElemImpl<kt>(base, key, mis);                              \
+inline TypedValue nm(TypedValue* base, key_type<kt> key) {              \
+  return cGetElemImpl<kt>(base, key);                                   \
 }
 CGETELEM_HELPER_TABLE(X)
 #undef X
@@ -540,7 +584,7 @@ typename ShuffleReturn<setRef>::return_type
 arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, RefData* ref) {
   static_assert(keyType != KeyType::Any,
                 "KeyType::Any is not supported in arraySetMImpl");
-  assert(cellIsPlausible(value));
+  assertx(cellIsPlausible(value));
   const bool copy = a->hasMultipleRefs();
   ArrayData* ret = checkForInt ? checkedSet(a, key, value, copy)
                                : uncheckedSet(a, key, value, copy);

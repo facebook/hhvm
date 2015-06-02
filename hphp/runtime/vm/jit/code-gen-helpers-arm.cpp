@@ -40,12 +40,6 @@ void emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
 
 //////////////////////////////////////////////////////////////////////
 
-void emitStoreRetIntoActRec(vixl::MacroAssembler& a) {
-  a.  Str  (rLinkReg, rStashedAR[AROFF(m_savedRip)]);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 TCA emitCall(vixl::MacroAssembler& a, CppCall call) {
   switch (call.kind()) {
   case CppCall::Kind::Direct:
@@ -136,19 +130,19 @@ void emitRegRegMove(vixl::MacroAssembler& a, const vixl::CPURegister& dst,
 
 void emitTestSurpriseFlags(vixl::MacroAssembler& a, PhysReg rds) {
   // Keep this in sync with vasm version below
-  static_assert(RequestInjectionData::LastFlag < (1LL << 32),
-                "Translator assumes RequestInjectionFlags fit in 32-bit int");
-  a.  Ldr   (rAsm.W(), vixl::Register(rds)[rds::kConditionFlagsOff]);
+  static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
+                "Codegen assumes a SurpriseFlag fits in a 32-bit int");
+  a.  Ldr   (rAsm.W(), vixl::Register(rds)[rds::kSurpriseFlagsOff]);
   a.  Tst   (rAsm.W(), rAsm.W());
 }
 
 Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
   // Keep this in sync with arm version above
-  static_assert(RequestInjectionData::LastFlag < (1LL << 32),
-                "Translator assumes RequestInjectionFlags fit in 32-bit int");
+  static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
+                "Codegen assumes a SurpriseFlag fits in a 32-bit int");
   auto flags = v.makeReg();
   auto sf = v.makeReg();
-  v << loadl{rds[rds::kConditionFlagsOff], flags};
+  v << loadl{rds[rds::kSurpriseFlagsOff], flags};
   v << testl{flags, flags, sf};
   return sf;
 }
@@ -185,25 +179,6 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vc, Vreg rds,
   vc << syncpoint{fixup};
   vc << jmp{done};
   v = done;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void emitEagerVMRegSave(vixl::MacroAssembler& a, vixl::Register rds,
-                        RegSaveFlags flags) {
-  a.    Str  (rVmSp, rds[rds::kVmspOff]);
-  if ((bool)(flags & RegSaveFlags::SaveFP)) {
-    a.  Str  (rVmFp, rds[rds::kVmfpOff]);
-  }
-
-  if ((bool)(flags & RegSaveFlags::SavePC)) {
-    // m_fp->m_func->m_unit->m_bc
-    a.  Ldr  (rAsm, rVmFp[AROFF(m_func)]);
-    a.  Ldr  (rAsm, rAsm[Func::unitOff()]);
-    a.  Ldr  (rAsm, rAsm[Unit::bcOff()]);
-    a.  Add  (rAsm, rAsm, vixl::Operand(argReg(0), vixl::UXTW));
-    a.  Str  (rAsm, rds[rds::kVmpcOff]);
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

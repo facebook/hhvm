@@ -13,19 +13,16 @@
 (* The main entry point *)
 (*****************************************************************************)
 type options = {
+  ai_mode          : bool;
   check_mode       : bool;
   json_mode        : bool;
-  root             : Path.path;
+  root             : Path.t;
   should_detach    : bool;
-  convert          : Path.path option;
-  load_save_opt    : env_store_action option;
-  gc_control       : Gc.control; (* configures only the workers *)
-  tc_options       : TypecheckerOptions.t;
+  convert          : Path.t option;
+  no_load          : bool;
+  save_filename    : string option;
+  waiting_client   : int option;
 }
-
-and env_store_action =
-  | Load of string
-  | Save of string
 
 val parse_options: unit -> options
 val default_options: root:string -> options
@@ -34,11 +31,12 @@ val default_options: root:string -> options
 (* Accessors *)
 (*****************************************************************************)
 
+val ai_mode             : options -> bool
 val check_mode          : options -> bool
 val json_mode           : options -> bool
-val root                : options -> Path.path
+val root                : options -> Path.t
 val should_detach       : options -> bool
-val convert             : options -> Path.path option
-val load_save_opt       : options -> env_store_action option
-val gc_control          : options -> Gc.control
-val typechecker_options : options -> TypecheckerOptions.t
+val convert             : options -> Path.t option
+val no_load             : options -> bool
+val save_filename       : options -> string option
+val waiting_client      : options -> int option

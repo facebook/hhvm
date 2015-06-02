@@ -1,12 +1,14 @@
-File "interface2.php", line 6, characters 11-11:
+File "interface2.php", line 10, characters 11-11:
 This object is of type I (Typing[4110])
-File "interface2.php", line 6, characters 25-26:
+File "interface2.php", line 10, characters 25-26:
 It is incompatible with this object of type I2
 because some declarations are incompatible.
 Read the following to see why:
-File "interface2.php", line 4, characters 41-48:
+File "interface2.php", line 4, characters 23-23:
+The constraint on this type constant is inconsistent with its parent
+File "interface2.php", line 7, characters 28-35:
 This is an array key (int/string)
-File "interface2.php", line 3, characters 41-45:
+File "interface2.php", line 4, characters 28-32:
 It is incompatible with a mixed value
-File "interface2.php", line 3, characters 36-36:
+File "interface2.php", line 4, characters 23-23:
 This declaration was inherited from an object of type I1. Redeclare this member in I with a compatible signature.

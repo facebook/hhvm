@@ -38,7 +38,11 @@ struct MixedArray : private ArrayData {
   // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
   // So 2 gives 0.5 load factor, 4 gives 0.75 load factor, 8 gives
   // 0.875 load factor. Use powers of 2 to enable shift-divide.
-  static const uint32_t LoadScale = 4;
+  static constexpr uint32_t LoadScale = 4;
+
+  constexpr static uint32_t HashSize(uint32_t scale) { return 4 * scale; }
+  constexpr static uint32_t Capacity(uint32_t scale) { return 3 * scale; }
+  constexpr static uint32_t Mask(uint32_t scale) { return 4 * scale - 1; }
 
 public:
   /*
@@ -296,20 +300,19 @@ public:
   // 32-bit ints than it does for 64-bit ints. As such, we have deliberately
   // chosen to use ssize_t in some places where ideally we *should* have used
   // int32_t.
-  static const int32_t Empty      = -1;
-  static const int32_t Tombstone  = -2;
+  static constexpr int32_t Empty      = -1;
+  static constexpr int32_t Tombstone  = -2;
 
   // Use a minimum of an 4-element hash table.  Valid range: [2..32]
-  static const uint32_t MinLgTableSize = 2;
-  static const uint32_t SmallHashSize = 1 << MinLgTableSize;
-  static const uint32_t SmallMask = SmallHashSize - 1;
-  static const uint32_t SmallSize = SmallHashSize - SmallHashSize / LoadScale;
+  static constexpr uint32_t SmallScale = 1;
+  static constexpr uint32_t SmallHashSize = SmallScale * 4;
+  static constexpr uint32_t SmallMask = SmallHashSize - 1; // 3
+  static constexpr uint32_t SmallSize = SmallScale * 3;
 
-  static const uint32_t MaxLgTableSize = 32;
-  static const uint64_t MaxHashSize = uint64_t(1) << 32;
-  static const uint32_t MaxMask = MaxHashSize - 1;
-  static const uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
-  static const uint32_t MaxMakeSize = 4 * SmallSize;
+  static constexpr uint64_t MaxHashSize = uint64_t(1) << 32;
+  static constexpr uint32_t MaxMask = MaxHashSize - 1;
+  static constexpr uint32_t MaxSize = MaxMask - MaxMask / LoadScale;
+  static constexpr uint32_t MaxMakeSize = 4 * SmallSize;
 
   uint32_t iterLimit() const { return m_used; }
 
@@ -326,8 +329,7 @@ public:
 
   size_t hashSize() const;
   size_t heapSize() const;
-  static size_t computeMaxElms(uint32_t tableMask);
-  static size_t computeDataSize(uint32_t tableMask);
+  static constexpr size_t computeMaxElms(uint32_t tableMask);
   static size_t computeAllocBytesFromMaxElms(uint32_t maxElms);
 
 private:
@@ -344,6 +346,7 @@ private:
   friend class c_Set;
   friend class c_ImmSet;
   friend class c_AwaitAllWaitHandle;
+  template <typename F> friend void scan(const MixedArray& this_, F& mark);
   enum class ClonePacked {};
   enum class CloneMixed {};
 
@@ -501,7 +504,7 @@ private:
    * elements by a factor of 2. grow() rebuilds the hash table, but it
    * does not compact the elements.
    */
-  static MixedArray* Grow(MixedArray* old, uint32_t newCap, uint32_t newMask);
+  static MixedArray* Grow(MixedArray* old, uint32_t newScale);
   static MixedArray* GrowPacked(MixedArray* old);
 
   /**
@@ -536,29 +539,43 @@ private:
   int32_t* hashTab() const {
     return const_cast<int32_t*>(
       reinterpret_cast<int32_t const*>(
-        data() + m_cap
+        data() + capacity()
       )
     );
   }
 
+  uint32_t capacity() const { return Capacity(m_scale); }
+  uint32_t mask() const { return Mask(m_scale); }
+  uint32_t scale() const { return m_scale; }
+
   bool isZombie() const { return m_used + 1 == 0; }
   void setZombie() { m_used = -uint32_t{1}; }
 
+public:
+  template<class F> void scan(F&) const; // in mixed-array-defs.h
+
 private:
   // Some of these are packed into qword-sized unions so we can
-  // combine stores during initialization.  (gcc won't do it on its
-  // own.)
+  // combine stores during initialization. (gcc won't do it on its own.)
   union {
     struct {
-      uint32_t m_cap;       // Number of Elms we can use before having to grow.
+      uint32_t m_scale;     // size-class equal to 1/4 table size
       uint32_t m_used;      // Number of used elements (values or tombstones)
     };
-    uint64_t m_capAndUsed;
+    uint64_t m_scale_used;
   };
-  uint32_t m_tableMask;     // Bitmask used when indexing into the hash table.
-  UNUSED uint32_t m_unused2;
   int64_t  m_nextKI;        // Next integer key to use for append.
 };
+
+inline constexpr size_t MixedArray::computeMaxElms(uint32_t mask) {
+  return size_t(mask) - size_t(mask) / LoadScale;
+}
+
+ALWAYS_INLINE constexpr size_t computeAllocBytes(uint32_t scale) {
+  return sizeof(MixedArray) +
+         MixedArray::HashSize(scale) * sizeof(int32_t) +
+         MixedArray::Capacity(scale) * sizeof(MixedArray::Elm);
+}
 
 //////////////////////////////////////////////////////////////////////
 

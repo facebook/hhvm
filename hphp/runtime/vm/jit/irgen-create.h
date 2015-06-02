@@ -18,7 +18,7 @@
 
 namespace HPHP { struct Class; }
 namespace HPHP { namespace jit {
-struct HTS;
+struct IRGS;
 struct Block;
 struct SSATmp;
 }}
@@ -27,8 +27,8 @@ namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
-void initSProps(HTS&, const Class*);
-SSATmp* allocObjFast(HTS&, const Class*);
+void initSProps(IRGS&, const Class*);
+SSATmp* allocObjFast(IRGS&, const Class*);
 
 //////////////////////////////////////////////////////////////////////
 

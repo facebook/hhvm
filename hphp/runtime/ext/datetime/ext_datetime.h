@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_DATETIME_H_
 #define incl_HPHP_EXT_DATETIME_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/timezone.h"
@@ -192,10 +192,10 @@ public:
 void HHVM_METHOD(DateInterval, __construct,
                  const String& interval_spec);
 Variant HHVM_METHOD(DateInterval, __get,
-                    Variant member);
+                    const Variant& member);
 Variant HHVM_METHOD(DateInterval, __set,
-                    Variant member,
-                    Variant value);
+                    const Variant& member,
+                    const Variant& value);
 Object HHVM_STATIC_METHOD(DateInterval, createFromDateString,
                           const String& time);
 String HHVM_METHOD(DateInterval, format,

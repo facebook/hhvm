@@ -52,8 +52,8 @@
   # Stable (2.x) doesn't use phpunit, so targetting the next major release
   cakephp3:
     url: https://github.com/cakephp/cakephp.git
-    branch: "3.0.0-alpha2"
-    commit: 9054d6414a1d767b4742728319447f625b2e31fb
+    branch: "3.0.5"
+    commit: d853d756efa39bad2f744c0110f8626e7b619590
     install_root: cakephp3
     test_root: cakephp3
   codeigniter:
@@ -98,7 +98,13 @@
       - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/XmlDriverTest.php
       - doctrine2/tests/Doctrine/Tests/ORM/Mapping/Symfony/YamlDriverTest.php
     flakey:
+      - doctrine2/tests/Doctrine/Tests/ORM/Functional/IdentityMapTest.php
       - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/YamlClassMetadataExporterTest.php
+      - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/XmlClassMetadataExporterTest.php
+      - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/PhpClassMetadataExporterTest.php
+      - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/AbstractClassMetadataExporterTest.php
+      - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/AnnotationClassMetadataExporterTest.php
+      - doctrine2/tests/Doctrine/Tests/ORM/Tools/Export/ClassMetadataExporterTest.php
   drupal:
     url: https://github.com/drupal/drupal.git
     branch: 8.0-alpha13
@@ -110,12 +116,6 @@
       - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFileStorageTest.php
       # Depends on previous
       - drupal/core/tests/Drupal/Tests/Component/PhpStorage/MTimeProtectedFastFileStorageTest.php
-  ezpublish-kernel:
-    url: https://github.com/ezsystems/ezpublish-kernel.git
-    branch: v2014.07.0
-    commit: b7f0a2fd5750bbc11ce5bd6eb6c92d3180834463
-    install_root: ezpublish-kernel
-    test_root: ezpublish-kernel
   facebookphpsdk:
     # v3.2.3 from facebook/facebook-php-sdk and
     # https://github.com/facebook/facebook-php-sdk/pull/184
@@ -245,7 +245,7 @@
       - joomla-framework/src/Joomla/Log/Tests/LogEntryTest.php
   joomlacms:
     url: https://github.com/joomla/joomla-cms.git
-    branch: "3.4-dev"
+    branch: "3.4.1-rc"
     commit: 7689d922ca373989e7328f510e94aa2fc541e272
     install_root: joomla-cms
     test_root: joomla-cms
@@ -386,8 +386,8 @@
     test_root: jshrink
   mockery:
     url: https://github.com/padraic/mockery.git
-    branch: "0.9.2"
-    commit: 95a4855380dc70176c51807c678fb3bd6198529a
+    branch: "0.9.3"
+    commit: 686f85fa5b3b079cc0157d7cd3e9adb97f0b41e1
     install_root: mockery
     test_root: mockery
   monolog:
@@ -579,6 +579,8 @@
     commit: 006a9573cee3d30a721f137facd5467f4e63bed8
     install_root: ratchet
     test_root: ratchet
+    flakey:
+      - ratchet/tests/unit/Server/IoServerTest.php
   reactphp:
     url: https://github.com/reactphp/react.git
     branch: v0.4.1
@@ -696,19 +698,6 @@
       - yii/tests/framework/caching/CFileCacheTest.php
       - yii/tests/framework/caching/CDbCacheTest.php
       - yii/tests/framework/caching/CDirectoryCacheDependencyTest.php
-  zf2:
-    url: https://github.com/zendframework/zf2.git
-    branch: release-2.3.2
-    commit: 0b74b66dc07ff88140287bdf67d230c1bd32ee0c
-    install_root: zf2
-    test_root: zf2/tests
-    test_find_mode: token
-    flakey:
-      - zf2/tests/ZendTest/Authentication/Adapter/Http/AuthTest.php
-    blacklist:
-      - zf2/tests/ZendTest/Code/Generator/ParameterGeneratorTest.php
-      - zf2/tests/ZendTest/Code/Generator/PropertyGeneratorTest.php
-      - zf2/tests/ZendTest/Code/Generator/ValueGeneratorTest.php
   html5php:
     url: https://github.com/Masterminds/html5-php.git
     branch: "2.0.0"

@@ -5,7 +5,6 @@ endforeach(dir ${RECURSIVE_SOURCE_SUBDIRS})
 list(APPEND HEADER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/version.h")
 
 if(NOT LINUX)
-  add_definitions(-DNO_HARDWARE_COUNTERS)
   list(REMOVE_ITEM CXX_SOURCES
        ${CMAKE_CURRENT_SOURCE_DIR}/vm/debug/elfwriter.cpp)
 endif()
@@ -18,10 +17,15 @@ if(NOT ENABLE_FASTCGI)
   endforeach(file ${CXX_SOURCES})
 endif()
 
+if(NOT ENABLE_PROXYGEN_SERVER)
+  foreach (file ${CXX_SOURCES})
+    if (${file} MATCHES "/proxygen/")
+      list(REMOVE_ITEM CXX_SOURCES ${file})
+    endif()
+  endforeach(file ${CXX_SOURCES})
+endif()
+
 if(NOT HAVE_CUSTOM_LIBEVENT)
-  # Not working with off-the-shelf libevent
-  list(REMOVE_ITEM CXX_SOURCES
-       "${CMAKE_CURRENT_SOURCE_DIR}/server/server-name-indication.cpp")
   foreach (file ${CXX_SOURCES})
     if(${file} MATCHES "/server/libevent-")
       list(REMOVE_ITEM CXX_SOURCES ${file})
@@ -60,3 +64,9 @@ if(CYGWIN AND CMAKE_BUILD_TYPE MATCHES "Debug")
     ${CMAKE_CURRENT_SOURCE_DIR}/vm/jit/hhbc-translator.cpp
     PROPERTIES COMPILE_FLAGS -Og)
 endif()
+
+set(EZC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../runtime/ext_zend_compat/")
+include_directories("${EZC_DIR}/php-src")
+include_directories("${EZC_DIR}/php-src/main")
+include_directories("${EZC_DIR}/php-src/Zend")
+include_directories("${EZC_DIR}/php-src/TSRM")

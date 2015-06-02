@@ -32,7 +32,7 @@
 #include "hphp/util/async-job.h"
 #include "hphp/util/timer.h"
 
-#include "hphp/runtime/ext/ext_fb.h"
+#include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -111,46 +111,56 @@ typedef ConcurrentTableSharedStore::KeyValuePair KeyValuePair;
 typedef ConcurrentTableSharedStore::DumpMode DumpMode;
 
 void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
-  Hdf apc = config["Server"]["APC"];
-
-  Config::Bind(Enable, ini, apc["EnableApc"], true);
-  Config::Bind(EnableConstLoad, ini, apc["EnableConstLoad"], false);
-  Config::Bind(ForceConstLoadToAPC, ini, apc["ForceConstLoadToAPC"], true);
-  Config::Bind(PrimeLibrary, ini, apc["PrimeLibrary"]);
-  Config::Bind(LoadThread, ini, apc["LoadThread"], 2);
-  Config::Get(ini, apc["CompletionKeys"], CompletionKeys);
-  std::string tblType = Config::GetString(ini, apc["TableType"], "concurrent");
+  Config::Bind(Enable, ini, config, "Server.APC.EnableApc", true);
+  Config::Bind(EnableConstLoad, ini, config, "Server.APC.EnableConstLoad",
+               false);
+  Config::Bind(ForceConstLoadToAPC, ini, config,
+               "Server.APC.ForceConstLoadToAPC", true);
+  Config::Bind(PrimeLibrary, ini, config, "Server.APC.PrimeLibrary");
+  Config::Bind(LoadThread, ini, config, "Server.APC.LoadThread", 2);
+  Config::Bind(CompletionKeys, ini, config, "Server.APC.CompletionKeys");
+  std::string tblType = Config::GetString(ini, config, "Server.APC.TableType",
+                                          "concurrent");
   if (strcasecmp(tblType.c_str(), "concurrent") == 0) {
     TableType = TableTypes::ConcurrentTable;
   } else {
     throw std::runtime_error("invalid apc table type");
   }
-  Config::Bind(EnableApcSerialize, ini, apc["EnableApcSerialize"], true);
-  Config::Bind(ExpireOnSets, ini, apc["ExpireOnSets"]);
-  Config::Bind(PurgeFrequency, ini, apc["PurgeFrequency"], 4096);
-  Config::Bind(PurgeRate, ini, apc["PurgeRate"], -1);
+  Config::Bind(EnableApcSerialize, ini, config, "Server.APC.EnableApcSerialize",
+               true);
+  Config::Bind(ExpireOnSets, ini, config, "Server.APC.ExpireOnSets");
+  Config::Bind(PurgeFrequency, ini, config, "Server.APC.PurgeFrequency", 4096);
+  Config::Bind(PurgeRate, ini, config, "Server.APC.PurgeRate", -1);
 
-  Config::Bind(AllowObj, ini, apc["AllowObject"]);
-  Config::Bind(TTLLimit, ini, apc["TTLLimit"], -1);
+  Config::Bind(AllowObj, ini, config, "Server.APC.AllowObject");
+  Config::Bind(TTLLimit, ini, config, "Server.APC.TTLLimit", -1);
 
-  Hdf fileStorage = apc["FileStorage"];
-  Config::Bind(UseFileStorage, ini, fileStorage["Enable"]);
-  FileStorageChunkSize = Config::GetInt64(ini, fileStorage["ChunkSize"],
+  // FileStorage
+  Config::Bind(UseFileStorage, ini, config, "Server.APC.FileStorage.Enable");
+  FileStorageChunkSize = Config::GetInt64(ini, config,
+                                          "Server.APC.FileStorage.ChunkSize",
                                           1LL << 29);
-  FileStorageMaxSize = Config::GetInt64(ini, fileStorage["MaxSize"], 1LL << 32);
-  Config::Bind(FileStoragePrefix, ini, fileStorage["Prefix"], "/tmp/apc_store");
-  Config::Bind(FileStorageFlagKey, ini, fileStorage["FlagKey"], "_madvise_out");
-  Config::Bind(FileStorageAdviseOutPeriod, ini, fileStorage["AdviseOutPeriod"],
-               1800);
-  Config::Bind(FileStorageKeepFileLinked, ini, fileStorage["KeepFileLinked"]);
-  Config::Bind(KeyMaturityThreshold, ini, apc["KeyMaturityThreshold"], 20);
-  Config::Bind(MaximumCapacity, ini, apc["MaximumCapacity"], 0);
-  Config::Bind(KeyFrequencyUpdatePeriod, ini, apc["KeyFrequencyUpdatePeriod"],
-               1000);
+  FileStorageMaxSize = Config::GetInt64(ini, config,
+                                        "Server.APC.FileStorage.MaxSize",
+                                        1LL << 32);
+  Config::Bind(FileStoragePrefix, ini, config, "Server.APC.FileStorage.Prefix",
+               "/tmp/apc_store");
+  Config::Bind(FileStorageFlagKey, ini, config,
+               "Server.APC.FileStorage.FlagKey", "_madvise_out");
+  Config::Bind(FileStorageAdviseOutPeriod, ini, config,
+               "Server.APC.FileStorage.AdviseOutPeriod", 1800);
+  Config::Bind(FileStorageKeepFileLinked, ini, config,
+               "Server.APC.FileStorage.KeepFileLinked");
 
-  Config::Get(ini, apc["NoTTLPrefix"], NoTTLPrefix);
+  Config::Bind(KeyMaturityThreshold, ini, config,
+               "Server.APC.KeyMaturityThreshold", 20);
+  Config::Bind(MaximumCapacity, ini, config, "Server.APC.MaximumCapacity", 0);
+  Config::Bind(KeyFrequencyUpdatePeriod, ini, config,
+               "Server.APC.KeyFrequencyUpdatePeriod", 1000);
 
-  Config::Bind(UseUncounted, ini, apc["MemModelTreadmill"],
+  Config::Bind(NoTTLPrefix, ini, config, "Server.APC.NoTTLPrefix");
+
+  Config::Bind(UseUncounted, ini, config, "Server.APC.MemModelTreadmill",
                RuntimeOption::ServerExecutionMode());
 
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enabled", &Enable);
@@ -737,9 +747,9 @@ void const_load_impl(struct cache_info *info,
         String key(*p, (int)(int64_t)*(p+1), CopyString);
         String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         Variant success;
-        Variant v = f_fb_unserialize(value, ref(success));
+        Variant v = HHVM_FN(fb_unserialize)(value, ref(success));
         if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_unserialize failed");
+          throw Exception("bad apc archive, fb_unserialize failed");
         }
         const_load_set(key, v);
       }
@@ -850,9 +860,9 @@ void apc_load_impl(struct cache_info *info,
         item.len = (int)(int64_t)*(p+1);
         String value(*(p+2), (int)(int64_t)*(p+3), CopyString);
         Variant success;
-        Variant v = f_fb_unserialize(value, ref(success));
+        Variant v = HHVM_FN(fb_unserialize)(value, ref(success));
         if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_unserialize failed");
+          throw Exception("bad apc archive, fb_unserialize failed");
         }
         s.constructPrime(v, item);
       }
@@ -990,9 +1000,9 @@ void const_load_impl_compressed
         p += thrift_lens[i + i + 2] + 1;
         String value(p, thrift_lens[i + i + 3], CopyString);
         Variant success;
-        Variant v = f_fb_unserialize(value, ref(success));
+        Variant v = HHVM_FN(fb_unserialize)(value, ref(success));
         if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_unserialize failed");
+          throw Exception("bad apc archive, fb_unserialize failed");
         }
         const_load_set(key, v);
         p += thrift_lens[i + i + 3] + 1;
@@ -1147,9 +1157,9 @@ void apc_load_impl_compressed
         p += thrift_lens[i + i + 2] + 1; // skip \0
         String value(p, thrift_lens[i + i + 3], CopyString);
         Variant success;
-        Variant v = f_fb_unserialize(value, ref(success));
+        Variant v = HHVM_FN(fb_unserialize)(value, ref(success));
         if (same(success, false)) {
-          throw Exception("bad apc archive, f_fb_unserialize failed");
+          throw Exception("bad apc archive, fb_unserialize failed");
         }
         s.constructPrime(v, item);
         p += thrift_lens[i + i + 3] + 1; // skip \0

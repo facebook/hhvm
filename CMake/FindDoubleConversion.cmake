@@ -6,8 +6,11 @@
 #
 
 find_path(DOUBLE_CONVERSION_INCLUDE_DIR
-    NAMES double-conversion.h
-    PATHS /usr/include/double-conversion)
+    NAMES
+      double-conversion.h
+    PATHS
+      /usr/include/double-conversion
+      /usr/local/include/double-conversion)
 find_library(DOUBLE_CONVERSION_LIBRARY NAMES double-conversion)
 
 include(FindPackageHandleStandardArgs)

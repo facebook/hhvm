@@ -1,7 +1,7 @@
-#ifndef incl_HPHP_ICU_ITERATOR_H
-#define incl_HPHP_ICU_ITERATOR_H
+#ifndef incl_HPHP_ICU_UCONVERTER_H
+#define incl_HPHP_ICU_UCONVERTER_H
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/icu/icu.h"
 
 #include <unicode/ucnv.h>

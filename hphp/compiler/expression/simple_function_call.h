@@ -84,7 +84,7 @@ public:
   void changeToBytecode() {
     m_changedToBytecode = true;
   }
-  virtual bool allowCellByRef() const override {
+  bool hasBeenChangedToBytecode() {
     return m_changedToBytecode;
   }
 
@@ -116,7 +116,6 @@ protected:
   FunType m_type;
   unsigned m_dynamicConstant : 1;
   unsigned m_builtinFunction : 1;
-  unsigned m_invokeFewArgsDecision : 1;
   unsigned m_dynamicInvoke : 1;
   unsigned m_transformed : 1;
   unsigned m_changedToBytecode : 1; // true if it morphed into a bytecode

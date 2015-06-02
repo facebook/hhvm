@@ -43,7 +43,7 @@ In genBar
 int(44)
 In gen2
 Breakpoint 4 reached at genBar() on line 24 of %s/async_stack.php
-  23   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+  23   await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
   24*  error_log('Finished in genBar');
   25   return $a + 2;
 
@@ -55,8 +55,9 @@ switching stack contexts (async->sync) resetting stack state
     at %s/async_stack.php:38
 #2  genFoo (43)
 #3  HH\WaitHandle::join ()
+#4  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:46
-#4  main (42)
+#5  main (42)
     at %s/async_stack.php:50
 wa
 Fetching async stacktrace...
@@ -69,7 +70,7 @@ switching stack contexts (sync->async) resetting stack state
 c
 Finished in genBar
 Breakpoint 4 reached at genBar() on line 24 of %s/async_stack.php
-  23   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+  23   await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
   24*  error_log('Finished in genBar');
   25   return $a + 2;
 
@@ -81,8 +82,9 @@ switching stack contexts (async->sync) resetting stack state
     at %s/async_stack.php:38
 #2  genFoo (43)
 #3  HH\WaitHandle::join ()
+#4  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:46
-#4  main (42)
+#5  main (42)
     at %s/async_stack.php:50
 wa
 Fetching async stacktrace...
@@ -95,8 +97,8 @@ switching stack contexts (sync->async) resetting stack state
 c
 Finished in genBar
 Breakpoint 3 reached at gen2() on line 15 of %s/async_stack.php
-  14   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
-  15*  $x = gen1($a)->join();
+  14   await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
+  15*  $x = HH\Asio\join(gen1($a));
   16   error_log('Finished in gen2');
 
 w
@@ -107,8 +109,9 @@ switching stack contexts (async->sync) resetting stack state
     at %s/async_stack.php:38
 #2  genFoo (43)
 #3  HH\WaitHandle::join ()
+#4  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:46
-#4  main (42)
+#5  main (42)
     at %s/async_stack.php:50
 wa
 Fetching async stacktrace...
@@ -123,7 +126,7 @@ In gen1
 Finished in gen1
 Breakpoint 1 reached at gen1() on line 8 of %s/async_stack.php
    7   error_log('Finished in gen1');
-   8*  await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+   8*  await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
    9   return $a + 1;
 
 w
@@ -136,8 +139,9 @@ switching stack contexts (async->sync) resetting stack state
     at %s/async_stack.php:38
 #3  genFoo (43)
 #4  HH\WaitHandle::join ()
+#5  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:46
-#5  main (42)
+#6  main (42)
     at %s/async_stack.php:50
 w a
 Fetching async stacktrace...
@@ -150,7 +154,7 @@ switching stack contexts (sync->async) resetting stack state
 c
 Breakpoint 1 reached at gen1() on line 8 of %s/async_stack.php
    7   error_log('Finished in gen1');
-   8*  await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+   8*  await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
    9   return $a + 1;
 
 w
@@ -159,13 +163,15 @@ switching stack contexts (async->sync) resetting stack state
     at %s/async_stack.php:8
 #1  gen1 (45)
 #2  HH\WaitHandle::join ()
+#3  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:15
-#3  gen2 (45)
+#4  gen2 (45)
     at %s/async_stack.php:38
-#4  genFoo (43)
-#5  HH\WaitHandle::join ()
+#5  genFoo (43)
+#6  HH\WaitHandle::join ()
+#7  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
     at %s/async_stack.php:46
-#6  main (42)
+#8  main (42)
     at %s/async_stack.php:50
 wa
 Fetching async stacktrace...
@@ -179,7 +185,7 @@ switching stack contexts (sync->async) resetting stack state
 #5  <<join>>
 c
 Breakpoint 2 reached at gen1() on line 9 of %s/async_stack.php
-   8   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+   8   await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
    9*  return $a + 1;
   10 }
 

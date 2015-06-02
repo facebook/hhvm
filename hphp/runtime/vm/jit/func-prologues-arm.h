@@ -33,17 +33,17 @@ struct Func;
 namespace jit { namespace arm {
 
 inline const Func** funcPrologueToGuardImmPtr(jit::TCA prologue) {
-  assert(arch() == Arch::ARM);
+  assertx(arch() == Arch::ARM);
   return reinterpret_cast<const Func**>(prologue) - 1;
 }
 
 inline bool funcPrologueHasGuard(jit::TCA prologue, const Func* func) {
-  assert(arch() == Arch::ARM);
+  assertx(arch() == Arch::ARM);
   return *funcPrologueToGuardImmPtr(prologue) == func;
 }
 
 inline TCA funcPrologueToGuard(TCA prologue, const Func* func) {
-  assert(arch() == Arch::ARM);
+  assertx(arch() == Arch::ARM);
   if (!prologue || prologue == mcg->tx().uniqueStubs.fcallHelperThunk) {
     return prologue;
   }
@@ -73,9 +73,7 @@ inline void funcPrologueSmashGuard(jit::TCA prologue, const Func* func) {
 
 jit::TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs);
 
-SrcKey emitFuncPrologue(CodeBlock& mainCode, CodeBlock& coldCode,
-                        Func* func, bool funcIsMagic, int nPassed,
-                        jit::TCA& start, jit::TCA& aStart);
+SrcKey emitFuncPrologue(TransID transID, Func* func, int argc, TCA& start);
 
 }}}
 

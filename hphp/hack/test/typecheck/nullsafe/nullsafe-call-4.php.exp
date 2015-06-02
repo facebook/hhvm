@@ -1,0 +1,4 @@
+File "nullsafe-call-4.php", line 19, characters 32-34:
+You are trying to access the member baz but this object can be null.  (Typing[4064])
+File "nullsafe-call-4.php", line 19, characters 10-29:
+This is what makes me believe it can be null (use of ?-> operator)

@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/service-requests-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
+#include "hphp/runtime/vm/jit/relocation.h"
 
 namespace HPHP { namespace jit {
 
@@ -51,11 +52,13 @@ void IncomingBranch::patch(TCA dest) {
   switch (type()) {
     case Tag::JMP: {
       mcg->backEnd().smashJmp(toSmash(), dest);
+      mcg->getDebugInfo()->recordRelocMap(toSmash(), dest, "Arc-2");
       break;
     }
 
     case Tag::JCC: {
       mcg->backEnd().smashJcc(toSmash(), dest);
+      mcg->getDebugInfo()->recordRelocMap(toSmash(), dest, "Arc-1");
       break;
     }
 
@@ -98,18 +101,23 @@ void SrcRec::setFuncInfo(const Func* f) {
  * translation (which just is a REQ_RETRANSLATE).
  */
 TCA SrcRec::getFallbackTranslation() const {
-  assert(m_anchorTranslation);
+  assertx(m_anchorTranslation);
   return m_anchorTranslation;
 }
 
+FPInvOffset SrcRec::nonResumedSPOff() const {
+  return serviceReqSPOff(getFallbackTranslation());
+}
+
 void SrcRec::chainFrom(IncomingBranch br) {
-  assert(br.type() == IncomingBranch::Tag::ADDR ||
+  assertx(br.type() == IncomingBranch::Tag::ADDR ||
          mcg->code.isValidCodeAddress(br.toSmash()));
   TCA destAddr = getTopTranslation();
   m_incomingBranches.push_back(br);
   TRACE(1, "SrcRec(%p)::chainFrom %p -> %p (type %d); %zd incoming branches\n",
         this,
-        br.toSmash(), destAddr, br.type(), m_incomingBranches.size());
+        br.toSmash(), destAddr, static_cast<int>(br.type()),
+        m_incomingBranches.size());
   br.patch(destAddr);
 }
 
@@ -135,12 +143,15 @@ void SrcRec::registerFallbackJump(TCA from, ConditionCode cc /* = -1 */) {
   mcg->cgFixups().m_inProgressTailJumps.push_back(incoming);
 }
 
-void SrcRec::emitFallbackJumpCustom(CodeBlock& cb, CodeBlock& frozen,
-                                    SrcKey sk, TransFlags trflags,
+void SrcRec::emitFallbackJumpCustom(CodeBlock& cb,
+                                    CodeBlock& frozen,
+                                    SrcKey sk,
+                                    TransFlags trflags,
                                     ConditionCode cc) {
   // Another platform dependency (the same one as above). TODO(2990497)
-  auto toSmash = x64::emitRetranslate(cb, frozen, cc, sk, trflags);
-
+  auto optSPOff = folly::Optional<FPInvOffset>{};
+  if (!sk.resumed()) optSPOff = nonResumedSPOff();
+  auto toSmash = x64::emitRetranslate(cb, frozen, cc, sk, optSPOff, trflags);
   registerFallbackJump(toSmash, cc);
 }
 
@@ -148,7 +159,7 @@ void SrcRec::newTranslation(TCA newStart,
                             GrowableVector<IncomingBranch>& tailBranches) {
   // When translation punts due to hitting limit, will generate one
   // more translation that will call the interpreter.
-  assert(m_translations.size() <= RuntimeOption::EvalJitMaxTranslations);
+  assertx(m_translations.size() <= RuntimeOption::EvalJitMaxTranslations);
 
   TRACE(1, "SrcRec(%p)::newTranslation @%p, ", this, newStart);
 
@@ -206,7 +217,7 @@ void SrcRec::relocate(RelocationInfo& rel) {
 }
 
 void SrcRec::addDebuggerGuard(TCA dbgGuard, TCA dbgBranchGuardSrc) {
-  assert(!m_dbgBranchGuardSrc);
+  assertx(!m_dbgBranchGuardSrc);
 
   TRACE(1, "SrcRec(%p)::addDebuggerGuard @%p, "
         "%zd incoming branches to rechain\n",
@@ -263,7 +274,7 @@ void SrcRec::replaceOldTranslations() {
    * If we ever change that we'll have to change this to patch to
    * some sort of rebind requests.
    */
-  assert(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
+  assertx(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
   patchIncomingBranches(m_anchorTranslation);
 }
 

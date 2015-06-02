@@ -33,8 +33,8 @@
 #include "hphp/util/process.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/hardware-counter.h"
 #include "hphp/util/timer.h"
-#include "hphp/runtime/base/hardware-counter.h"
 
 using std::endl;
 

@@ -54,13 +54,20 @@ constexpr size_t kJmpTargetAlign = 16;
 void moveToAlign(CodeBlock& cb, size_t alignment = kJmpTargetAlign);
 
 void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp);
-void emitEagerVMRegSave(Asm& as, PhysReg rds, RegSaveFlags flags);
-void emitEagerVMRegSave(Vout& as, Vreg rds, RegSaveFlags flags);
 void emitGetGContext(Asm& as, PhysReg dest);
 void emitGetGContext(Vout& as, Vreg dest);
 
 void emitTransCounterInc(Asm& a);
 void emitTransCounterInc(Vout&);
+
+/*
+ * Emit a decrement on the m_count field of `base', which must contain a
+ * reference counted heap object.  This helper also conditionally makes some
+ * sanity checks on the reference count of the object.
+ *
+ * Returns: the status flags register for the decrement instruction.
+ */
+Vreg emitDecRef(Vout& v, Vreg base);
 
 void emitIncRef(Asm& as, PhysReg base);
 void emitIncRef(Vout& v, Vreg base);
@@ -85,19 +92,17 @@ void emitCall(Vout& v, CppCall call, RegSet args);
 void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref);
 void emitImmStoreq(Asm& as, Immed64 imm, MemoryRef ref);
 
-void emitRB(Vout& v, Trace::RingBufferType t, const char* msgm);
-
-void emitTraceCall(CodeBlock& cb, Offset pcOff);
+void emitRB(Vout& v, Trace::RingBufferType t, const char* msg);
 
 /*
- * Tests the surprise flags for the current thread. Should be used
+ * Test the current thread's surprise flags for a nonzero value. Should be used
  * before a jnz to surprise handling code.
  */
 void emitTestSurpriseFlags(Asm& as, PhysReg rds);
 Vreg emitTestSurpriseFlags(Vout& v, Vreg rds);
 
-void emitCheckSurpriseFlagsEnter(Vout& main, Vout& cold, Vreg rds,
-                                 Fixup fixup);
+void emitCheckSurpriseFlagsEnter(Vout& main, Vout& cold, Vreg fp, Vreg rds,
+                                 Fixup fixup, Vlabel catchBlock);
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  PhysReg rds, Fixup fixup);
 

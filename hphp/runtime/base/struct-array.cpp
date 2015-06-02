@@ -34,11 +34,10 @@ StructArray::StructArray(
   , m_shape(shape)
 {
   m_sizeAndPos = size | uint64_t{pos} << 32;
-  m_kindAndCount = kStructKind << 24 | uint64_t{count} << 32;
+  m_hdr.init(HeaderKind::Struct, count);
   assert(m_pos == pos);
   assert(m_size == size);
-  assert(m_kind == kStructKind);
-  assert(m_count == count);
+  assert(kind() == kStructKind);
 }
 
 StructArray* StructArray::create(
@@ -46,7 +45,7 @@ StructArray* StructArray::create(
   const TypedValue* values,
   size_t length
 ) {
-  auto ptr = MM().objMallocLogged(bytesForCapacity(shape->capacity()));
+  auto ptr = MM().objMalloc(bytesForCapacity(shape->capacity()));
   auto result = new (NotNull{}, ptr) StructArray(length, 0, 1, shape);
 
   auto data = result->data();
@@ -63,7 +62,7 @@ StructArray* StructArray::createReversedValues(
   const TypedValue* values,
   size_t length
 ) {
-  auto ptr = MM().objMallocLogged(bytesForCapacity(shape->capacity()));
+  auto ptr = MM().objMalloc(bytesForCapacity(shape->capacity()));
   auto result = new (NotNull{}, ptr) StructArray(length, 0, 1, shape);
 
   auto data = result->data();
@@ -76,7 +75,7 @@ StructArray* StructArray::createReversedValues(
 }
 
 StructArray* StructArray::createNoCopy(Shape* shape, size_t length) {
-  auto ptr = MM().objMallocLogged(bytesForCapacity(shape->capacity()));
+  auto ptr = MM().objMalloc(bytesForCapacity(shape->capacity()));
   return new (NotNull{}, ptr) StructArray(length, 0, 1, shape);
 }
 
@@ -96,7 +95,7 @@ ArrayData* StructArray::MakeUncounted(ArrayData* array) {
   // change once it's uncounted.
   auto size = structArray->size();
   StructArray* result = createUncounted(structArray->shape(), size);
-  result->m_kindAndCount = kStructKind << 24 | int64_t{UncountedValue} << 32;
+  result->m_hdr.init(HeaderKind::Struct, UncountedValue);
   result->m_sizeAndPos = array->m_sizeAndPos;
   auto const srcData = structArray->data();
   auto const stop    = srcData + size;
@@ -107,7 +106,6 @@ ArrayData* StructArray::MakeUncounted(ArrayData* array) {
            *targetData);
   }
   assert(result->m_pos == structArray->m_pos);
-  assert(result->m_count == UncountedValue);
   assert(result->isUncounted());
   return result;
 }
@@ -127,11 +125,11 @@ void StructArray::Release(ArrayData* ad) {
   }
 
   auto const cap = array->capacity();
-  MM().objFreeLogged(array, sizeof(StructArray) + sizeof(TypedValue) * cap);
+  MM().objFree(array, sizeof(StructArray) + sizeof(TypedValue) * cap);
 }
 
 void StructArray::ReleaseUncounted(ArrayData* ad) {
-  assert(ad->m_count == UncountedValue);
+  assert(ad->isUncounted());
   auto structArray = asStructArray(ad);
 
   auto const data = structArray->data();
@@ -408,7 +406,7 @@ ArrayData* StructArray::Copy(const ArrayData* ad) {
 
   auto result = StructArray::createNoCopy(shape, shape->size());
   result->m_pos = old->m_pos;
-  result->m_count = 0;
+  result->setRefCount(0);
 
   assert(result->m_size == result->shape()->size());
   assert(result->size() == old->size());
@@ -573,7 +571,7 @@ StructArray* StructArray::Grow(StructArray* old, Shape* newShape) {
   auto result = StructArray::create(newShape, old->data(),
     old->shape()->size());
   result->m_size = newShape->size();
-  result->m_count = 0;
+  result->setRefCount(0);
 
   if (UNLIKELY(strong_iterators_exist())) {
     move_strong_iterators(result, old);
@@ -589,23 +587,20 @@ StructArray* StructArray::Grow(StructArray* old, Shape* newShape) {
 }
 
 MixedArray* StructArray::ToMixedHeader(size_t neededSize) {
-  auto const cmret   = computeCapAndMask(neededSize);
-  auto const cap     = cmret.first;
-  auto const mask    = cmret.second;
-  auto const ad      = smartAllocArray(cap, mask);
+  auto const scale   = computeScaleFromSize(neededSize);
+  auto const ad      = smartAllocArray(scale);
 
   ad->m_sizeAndPos       = 0; // We'll set size and pos later.
-  ad->m_kindAndCount     = MixedArray::kMixedKind << 24;
-  ad->m_capAndUsed       = cap; // Used will be set as we initialize the array.
-  ad->m_tableMask        = mask;
+  ad->m_hdr.init(HeaderKind::Mixed, 0);
+  ad->m_scale_used       = scale; // used=0
   ad->m_nextKI           = 0; // There were never any numeric indices.
 
-  assert(ad->m_kind == ArrayData::kMixedKind);
+  assert(ad->kind() == ArrayData::kMixedKind);
   assert(ad->m_size == 0);
   assert(ad->m_pos == 0);
-  assert(ad->m_count == 0);
+  assert(ad->getCount() == 0);
   assert(ad->m_used == 0);
-  assert(ad->m_cap == cap);
+  assert(ad->m_scale == scale);
   return ad;
 }
 
@@ -616,7 +611,7 @@ MixedArray* StructArray::ToMixed(StructArray* old) {
   auto shape         = old->shape();
 
   memset(ad->hashTab(), static_cast<uint8_t>(MixedArray::Empty),
-    sizeof(int32_t) * (ad->m_tableMask + 1));
+    sizeof(int32_t) * ad->hashSize());
 
   for (auto i = 0; i < oldSize; ++i) {
     auto key = const_cast<StringData*>(shape->keyForOffset(i));
@@ -643,7 +638,7 @@ MixedArray* StructArray::ToMixedCopy(const StructArray* old) {
   auto shape         = old->shape();
 
   memset(ad->hashTab(), static_cast<uint8_t>(MixedArray::Empty),
-    sizeof(int32_t) * (ad->m_tableMask + 1));
+    sizeof(int32_t) * ad->hashSize());
 
   for (auto i = 0; i < oldSize; ++i) {
     auto key = const_cast<StringData*>(shape->keyForOffset(i));
@@ -663,13 +658,13 @@ MixedArray* StructArray::ToMixedCopyReserve(
 ) {
   assert(neededSize >= old->size());
   auto const ad      = ToMixedHeader(neededSize);
-  ad->m_count        = 1;
+  ad->setRefCount(1);
   auto const oldSize = old->size();
   auto const srcData = old->data();
   auto shape         = old->shape();
 
   memset(ad->hashTab(), static_cast<uint8_t>(MixedArray::Empty),
-    sizeof(int32_t) * (ad->m_tableMask + 1));
+    sizeof(int32_t) * ad->hashSize());
 
   for (auto i = 0; i < oldSize; ++i) {
     auto key = const_cast<StringData*>(shape->keyForOffset(i));

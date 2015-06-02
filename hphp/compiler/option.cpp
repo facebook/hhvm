@@ -138,8 +138,8 @@ int Option::GetScannerType() {
 
 int Option::InvokeFewArgsCount = 6;
 int Option::InlineFunctionThreshold = -1;
-bool Option::EliminateDeadCode = true;
-bool Option::LocalCopyProp = true;
+bool Option::EliminateDeadCode = false;
+bool Option::LocalCopyProp = false;
 int Option::AutoInline = 0;
 bool Option::VariableCoalescing = false;
 bool Option::ArrayAccessIdempotent = false;
@@ -147,7 +147,6 @@ bool Option::DumpAst = false;
 bool Option::WholeProgram = true;
 bool Option::UseHHBBC = !getenv("HHVM_DISABLE_HHBBC2");
 bool Option::RecordErrors = true;
-std::string Option::DocJson;
 
 bool Option::AllDynamic = true;
 bool Option::AllVolatile = false;
@@ -160,49 +159,49 @@ bool Option::GenerateDocComments = true;
 // load from HDF file
 
 void Option::LoadRootHdf(const IniSetting::Map& ini, const Hdf &roots,
-                         map<string, string> &map) {
+                         const std::string& name, map<string, string> &map) {
   if (roots.exists()) {
-    for (Hdf hdf = roots.firstChild(); hdf.exists(); hdf = hdf.next()) {
-      map[Config::Get(ini, hdf["root"])] = Config::Get(ini, hdf["path"]);
+    for (Hdf hdf = roots[name].firstChild(); hdf.exists(); hdf = hdf.next()) {
+      map[Config::Get(ini, hdf, "root", "", false)] =
+        Config::Get(ini, hdf, "path", "", false);
     }
   }
 }
 
 void Option::LoadRootHdf(const IniSetting::Map& ini, const Hdf &roots,
-                         vector<string> &vec) {
+                         const std::string& name, vector<string> &vec) {
   if (roots.exists()) {
-    for (Hdf hdf = roots.firstChild(); hdf.exists(); hdf = hdf.next()) {
-      vec.push_back(Config::GetString(ini, hdf,""));
+    for (Hdf hdf = roots[name].firstChild(); hdf.exists(); hdf = hdf.next()) {
+      vec.push_back(Config::GetString(ini, hdf, "", "", false));
     }
   }
 }
 
 void Option::Load(const IniSetting::Map& ini, Hdf &config) {
-  LoadRootHdf(ini, config["IncludeRoots"], IncludeRoots);
-  LoadRootHdf(ini, config["AutoloadRoots"], AutoloadRoots);
+  LoadRootHdf(ini, config, "IncludeRoots", IncludeRoots);
+  LoadRootHdf(ini, config, "AutoloadRoots", AutoloadRoots);
 
-  Config::Get(ini, config["PackageFiles"], PackageFiles);
-  Config::Get(ini, config["IncludeSearchPaths"], IncludeSearchPaths);
-  Config::Get(ini, config["PackageDirectories"], PackageDirectories);
-  Config::Get(ini, config["PackageExcludeDirs"], PackageExcludeDirs);
-  Config::Get(ini, config["PackageExcludeFiles"], PackageExcludeFiles);
-  Config::Get(ini, config["PackageExcludePatterns"], PackageExcludePatterns);
-  Config::Get(ini, config["PackageExcludeStaticDirs"],
-              PackageExcludeStaticDirs);
-  Config::Get(ini, config["PackageExcludeStaticFiles"],
-              PackageExcludeStaticFiles);
-  Config::Get(ini, config["PackageExcludeStaticPatterns"],
-              PackageExcludeStaticPatterns);
-  Config::Bind(CachePHPFile, ini, config["CachePHPFile"]);
+  Config::Bind(PackageFiles, ini, config, "PackageFiles", PackageFiles);
+  Config::Bind(IncludeSearchPaths, ini, config, "IncludeSearchPaths");
+  Config::Bind(PackageDirectories, ini, config, "PackageDirectories");
+  Config::Bind(PackageExcludeDirs, ini, config, "PackageExcludeDirs");
+  Config::Bind(PackageExcludeFiles, ini, config, "PackageExcludeFiles");
+  Config::Bind(PackageExcludePatterns, ini, config, "PackageExcludePatterns");
+  Config::Bind(PackageExcludeStaticDirs, ini,
+               config, "PackageExcludeStaticDirs");
+  Config::Bind(PackageExcludeStaticFiles, ini,
+               config, "PackageExcludeStaticFiles");
+  Config::Bind(PackageExcludeStaticFiles, ini,
+               config, "PackageExcludeStaticPatterns");
+  Config::Bind(CachePHPFile, ini, config, "CachePHPFile");
 
-  Config::Get(ini, config["ParseOnDemandDirs"], ParseOnDemandDirs);
+  Config::Bind(ParseOnDemandDirs, ini, config, "ParseOnDemandDirs");
 
   {
-    Hdf cg = config["CodeGeneration"];
     string tmp;
 
 #define READ_CG_OPTION(name)                    \
-    tmp = Config::GetString(ini, cg[#name]);         \
+    tmp = Config::GetString(ini, config, "CodeGeneration."#name); \
     if (!tmp.empty()) {                         \
       name = OptionStrings.add(tmp.c_str());    \
     }
@@ -211,61 +210,63 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     READ_CG_OPTION(LambdaPrefix);
   }
 
-  Config::Get(ini, config["DynamicFunctionPrefix"], DynamicFunctionPrefixes);
-  Config::Get(ini, config["DynamicFunctionPostfix"], DynamicFunctionPostfixes);
-  Config::Get(ini, config["DynamicMethodPrefix"], DynamicMethodPrefixes);
-  Config::Get(ini, config["DynamicInvokeFunctions"], DynamicInvokeFunctions);
-  Config::Get(ini, config["VolatileClasses"], VolatileClasses);
+  Config::Bind(DynamicFunctionPrefixes, ini, config, "DynamicFunctionPrefix");
+  Config::Bind(DynamicFunctionPostfixes, ini, config, "DynamicFunctionPostfix");
+  Config::Bind(DynamicMethodPrefixes, ini, config, "DynamicMethodPrefix");
+  Config::Bind(DynamicInvokeFunctions, ini, config, "DynamicInvokeFunctions");
+  Config::Bind(VolatileClasses, ini, config, "VolatileClasses");
 
   // build map from function names to sections
   for (Hdf hdf = config["FunctionSections"].firstChild(); hdf.exists();
        hdf = hdf.next()) {
     for (Hdf hdfFunc = hdf.firstChild(); hdfFunc.exists();
          hdfFunc = hdfFunc.next()) {
-           FunctionSections[Config::GetString(ini, hdfFunc)] = hdf.getName();
+           FunctionSections[Config::GetString(ini, hdfFunc, "", "", false)]
+             = hdf.getName();
     }
   }
 
   {
-    Hdf repo = config["Repo"];
+    // Repo
     {
-      Hdf repoCentral = repo["Central"];
-      Config::Bind(RepoCentralPath, ini, repoCentral["Path"]);
+      // Repo Central
+      Config::Bind(RepoCentralPath, ini, config, "Repo.Central.Path");
     }
-    Config::Bind(RepoDebugInfo, ini, repo["DebugInfo"], false);
+    Config::Bind(RepoDebugInfo, ini, config, "Repo.DebugInfo", false);
   }
 
   {
-    Hdf autoloadMap = config["AutoloadMap"];
-    Config::Get(ini, autoloadMap["class"], AutoloadClassMap);
-    Config::Get(ini, autoloadMap["function"], AutoloadFuncMap);
-    Config::Get(ini, autoloadMap["constant"], AutoloadConstMap);
-    Config::Bind(AutoloadRoot, ini, autoloadMap["root"]);
+    // AutoloadMap
+    Config::Bind(AutoloadClassMap, ini, config, "AutoloadMap.class");
+    Config::Bind(AutoloadFuncMap, ini, config, "AutoloadMap.function");
+    Config::Bind(AutoloadConstMap, ini, config, "AutoloadMap.constant");
+    Config::Bind(AutoloadRoot, ini, config, "AutoloadMap.root");
   }
 
-  Config::Bind(HardTypeHints, ini, config["HardTypeHints"], true);
-  Config::Bind(HardReturnTypeHints, ini, config["HardReturnTypeHints"], false);
-  Config::Bind(HardConstProp, ini, config["HardConstProp"], true);
+  Config::Bind(HardTypeHints, ini, config, "HardTypeHints", true);
+  Config::Bind(HardReturnTypeHints, ini, config, "HardReturnTypeHints", false);
+  Config::Bind(HardConstProp, ini, config, "HardConstProp", true);
 
-  Config::Bind(EnableHipHopSyntax, ini, config["EnableHipHopSyntax"]);
-  Config::Bind(EnableZendCompat, ini, config["EnableZendCompat"]);
-  Config::Bind(JitEnableRenameFunction, ini, config["JitEnableRenameFunction"]);
+  Config::Bind(EnableHipHopSyntax, ini, config, "EnableHipHopSyntax");
+  Config::Bind(EnableZendCompat, ini, config, "EnableZendCompat");
+  Config::Bind(JitEnableRenameFunction, ini, config, "JitEnableRenameFunction");
   Config::Bind(EnableHipHopExperimentalSyntax, ini,
-               config["EnableHipHopExperimentalSyntax"]);
-  Config::Bind(EnableShortTags, ini, config["EnableShortTags"], true);
+               config, "EnableHipHopExperimentalSyntax");
+  Config::Bind(EnableShortTags, ini, config, "EnableShortTags", true);
 
   {
-    const Hdf& lang = config["Hack"]["Lang"];
-    Config::Bind(IntsOverflowToInts, ini, lang["IntsOverflowToInts"],
-                 EnableHipHopSyntax);
-    Config::Bind(StrictArrayFillKeys, ini, lang["StrictArrayFillKeys"]);
-    Config::Bind(DisallowDynamicVarEnvFuncs, ini,
-                 lang["DisallowDynamicVarEnvFuncs"]);
+    // Hack
+    Config::Bind(IntsOverflowToInts, ini, config,
+                 "Hack.Lang.IntsOverflowToInts", EnableHipHopSyntax);
+    Config::Bind(StrictArrayFillKeys, ini, config,
+                 "Hack.Lang.StrictArrayFillKeys");
+    Config::Bind(DisallowDynamicVarEnvFuncs, ini, config,
+                 "Hack.Lang.DisallowDynamicVarEnvFuncs");
   }
 
-  Config::Bind(EnableAspTags, ini, config["EnableAspTags"]);
+  Config::Bind(EnableAspTags, ini, config, "EnableAspTags");
 
-  Config::Bind(EnableXHP, ini, config["EnableXHP"], false);
+  Config::Bind(EnableXHP, ini, config, "EnableXHP", false);
 
   if (EnableHipHopSyntax) {
     // If EnableHipHopSyntax is true, it forces EnableXHP to true
@@ -273,28 +274,28 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     EnableXHP = true;
   }
 
-  Config::Bind(ParserThreadCount, ini, config["ParserThreadCount"], 0);
+  Config::Bind(ParserThreadCount, ini, config, "ParserThreadCount", 0);
   if (ParserThreadCount <= 0) {
     ParserThreadCount = Process::GetCPUCount();
   }
 
-  EnableEval = (EvalLevel) Config::GetByte(ini, config["EnableEval"], 0);
-  Config::Bind(AllDynamic, ini, config["AllDynamic"], true);
-  Config::Bind(AllVolatile, ini, config["AllVolatile"]);
+  EnableEval = (EvalLevel) Config::GetByte(ini, config, "EnableEval", 0);
+  Config::Bind(AllDynamic, ini, config, "AllDynamic", true);
+  Config::Bind(AllVolatile, ini, config, "AllVolatile");
 
-  Config::Bind(GenerateDocComments, ini, config["GenerateDocComments"], true);
-  Config::Bind(EliminateDeadCode, ini, config["EliminateDeadCode"], true);
-  Config::Bind(LocalCopyProp, ini, config["LocalCopyProp"], true);
-  Config::Bind(AutoInline, ini, config["AutoInline"], 0);
-  Config::Bind(VariableCoalescing, ini, config["VariableCoalescing"], false);
-  Config::Bind(ArrayAccessIdempotent, ini, config["ArrayAccessIdempotent"],
+  Config::Bind(GenerateDocComments, ini, config, "GenerateDocComments", true);
+  Config::Bind(EliminateDeadCode, ini, config, "EliminateDeadCode", false);
+  Config::Bind(LocalCopyProp, ini, config, "LocalCopyProp", false);
+  Config::Bind(AutoInline, ini, config, "AutoInline", 0);
+  Config::Bind(VariableCoalescing, ini, config, "VariableCoalescing", false);
+  Config::Bind(ArrayAccessIdempotent, ini, config, "ArrayAccessIdempotent",
                false);
-  Config::Bind(DumpAst, ini, config["DumpAst"], false);
-  Config::Bind(WholeProgram, ini, config["WholeProgram"], true);
-  Config::Bind(UseHHBBC, ini, config["UseHHBBC"], UseHHBBC);
+  Config::Bind(DumpAst, ini, config, "DumpAst", false);
+  Config::Bind(WholeProgram, ini, config, "WholeProgram", true);
+  Config::Bind(UseHHBBC, ini, config, "UseHHBBC", UseHHBBC);
 
   // Temporary, during file-cache migration.
-  Config::Bind(FileCache::UseNewCache, ini, config["UseNewCache"], false);
+  Config::Bind(FileCache::UseNewCache, ini, config, "UseNewCache", false);
 
   OnLoad();
 }

@@ -16,9 +16,10 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/util/lock.h"
 
 #ifdef USE_EDITLINE
 #include <editline/readline.h>

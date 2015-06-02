@@ -50,7 +50,8 @@ std::vector<AliasClass> specialized_classes(IRUnit& unit) {
   // Specialized test cases need some SSATmp*'s and similar things, so let's
   // make some instructions.
   auto const mainFP = unit.gen(DefFP, marker)->dst();
-  auto const SP = unit.gen(DefSP, marker, StackOffset { 10 }, mainFP)->dst();
+  auto const SP = unit.gen(
+    DefSP, marker, FPInvOffsetData { FPInvOffset { 10 } }, mainFP)->dst();
 
   return {
     // Frame locals.
@@ -134,36 +135,22 @@ TEST(AliasClass, StackBasics) {
   IRUnit unit{test_context};
   auto const marker = BCMarker::Dummy();
   auto const FP = unit.gen(DefFP, marker)->dst();
-  auto const SP = unit.gen(DefSP, marker, StackOffset { 5 }, FP)->dst();
-  auto const SP2 = unit.gen(AdjustSP, marker,
-    IRSPOffsetData { IRSPOffset{-2} }, SP)->dst();
+  auto const SP = unit.gen(
+    DefSP, marker, FPInvOffsetData { FPInvOffset { 5 } }, FP)->dst();
 
   // Some basic canonicalization and maybe.
   {
     AliasClass const stk1 = AStack { SP, 0, 1 };
     AliasClass const stk2 = AStack { FP, -5, 1 };
-    AliasClass const stk3 = AStack { SP2, -5, 1 };
 
     EXPECT_TRUE(stk1 <= AStackAny);
     EXPECT_TRUE(stk2 <= AStackAny);
-    EXPECT_TRUE(stk3 <= AStackAny);
     EXPECT_TRUE(stk1 != AStackAny);
     EXPECT_TRUE(stk2 != AStackAny);
-    EXPECT_TRUE(stk3 != AStackAny);
 
-    EXPECT_NE(stk1, stk2);
-    EXPECT_NE(stk2, stk3);
-    EXPECT_NE(stk3, stk1);
+    EXPECT_EQ(stk1, stk2);
     EXPECT_TRUE(stk1.maybe(stk2));
-    EXPECT_TRUE(stk2.maybe(stk3));
-    EXPECT_TRUE(stk3.maybe(stk1));
-    EXPECT_FALSE(stk1 <= stk2);
-    EXPECT_FALSE(stk2 <= stk3);
-    EXPECT_FALSE(stk3 <= stk1);
-    EXPECT_EQ(canonicalize(stk2), stk2); // already canonical
-    EXPECT_EQ(canonicalize(stk1), stk2);
-    EXPECT_NE(canonicalize(stk3), stk2);
-    EXPECT_NE(canonicalize(stk3), stk1);
+    EXPECT_TRUE(stk1 <= stk2);
   }
 
   // Stack ranges, with subtype and maybe.
@@ -238,13 +225,28 @@ TEST(AliasClass, SpecializedUnions) {
   EXPECT_TRUE(rel_stk_and_frame.maybe(stk_and_prop));
   EXPECT_TRUE(stk_and_prop.maybe(rel_stk_and_frame));
   EXPECT_FALSE(rel_stk_and_frame <= stk_and_prop);
+
+  AliasClass const some_mis = AMIState { 0x10 };
+  {
+    AliasClass const some_heap = AElemIAny;
+    auto const u1 = some_heap | some_mis;
+    auto const u2 = AFrameAny | u1;
+    EXPECT_TRUE((AHeapAny | some_heap) == AHeapAny);
+    EXPECT_TRUE(AHeapAny <= (AHeapAny | u1));
+    EXPECT_TRUE(AHeapAny <= (AHeapAny | u2));
+  }
+
+  auto const mis_stk = some_mis | stk;
+  auto const mis_stk_any = AStackAny | mis_stk;
+  EXPECT_TRUE(mis_stk_any == (AStackAny | AMIStateAny));
 }
 
 TEST(AliasClass, StackUnions) {
   IRUnit unit{test_context};
   auto const marker = BCMarker::Dummy();
   auto const FP = unit.gen(DefFP, marker)->dst();
-  auto const SP = unit.gen(DefSP, marker, StackOffset { 1 }, FP)->dst();
+  auto const SP = unit.gen(
+    DefSP, marker, FPInvOffsetData { FPInvOffset { 1 } }, FP)->dst();
 
   {
     AliasClass const stk1  = AStack { FP, -3, 1 };
@@ -275,8 +277,8 @@ TEST(AliasClass, StackUnions) {
     AliasClass const stk1 = AStack { FP, -1, 1 };
     AliasClass const stk2 = AStack { SP, -2, 1 };
     AliasClass const true_union = AStack { FP, -1, 3 };
-    EXPECT_EQ(stk1 | stk2, AStackAny);
-    EXPECT_EQ(stk1 | canonicalize(stk2), true_union);
+    EXPECT_NE(stk1 | stk2, AStackAny);
+    EXPECT_EQ(stk1 | stk2, true_union);
   }
 
   {

@@ -33,6 +33,8 @@ TRACE_SET_MOD(hhir);
 using Trace::Indent;
 
 bool shouldHHIRRelaxGuards() {
+  assert(!(RuntimeOption::EvalHHIRRelaxGuards &&
+           RuntimeOption::EvalHHIRConstrictGuards));
   return RuntimeOption::EvalHHIRRelaxGuards &&
     (RuntimeOption::EvalJitRegionSelector == "tracelet" ||
      RuntimeOption::EvalJitRegionSelector == "method" ||
@@ -51,8 +53,9 @@ bool shouldHHIRRelaxGuards() {
 #define DBoxPtr        return false;
 #define DAllocObj      return false; // fixed type from ExtraData
 #define DArrPacked     return false; // fixed type
-#define DArrElem       assert(inst->is(LdPackedArrayElem));     \
+#define DArrElem       assertx(inst->is(LdStructArrayElem, ArrayGet));    \
                          return typeMightRelax(inst->src(0));
+#define DCol           return false; // fixed in bytecode
 #define DThis          return false; // fixed type from ctx class
 #define DCtx           return false;
 #define DMulti         return true;  // DefLabel; value could be anything
@@ -64,7 +67,7 @@ bool shouldHHIRRelaxGuards() {
 bool typeMightRelax(const SSATmp* tmp) {
   if (tmp == nullptr) return true;
 
-  if (tmp->isA(Type::Cls) || tmp->type() == Type::Gen) return false;
+  if (tmp->isA(TCls) || tmp->type() == TGen) return false;
   if (canonical(tmp)->inst()->is(DefConst)) return false;
 
   auto inst = tmp->inst();
@@ -90,6 +93,7 @@ bool typeMightRelax(const SSATmp* tmp) {
 #undef DAllocObj
 #undef DArrPacked
 #undef DArrElem
+#undef DCol
 #undef DThis
 #undef DCtx
 #undef DMulti
@@ -110,7 +114,7 @@ void retypeLoad(IRInstruction* load, Type newType) {
   // instruction that is always going to fail but wasn't simplified
   // during IR generation.  In this case, this code is unreacheble and
   // will be eliminated later.
-  if (newType != load->typeParam() && newType != Type::Bottom) {
+  if (newType != load->typeParam() && newType != TBottom) {
     ITRACE(2, "retypeLoad changing type param of {} to {}\n",
            *load, newType);
     load->setTypeParam(newType);
@@ -137,10 +141,10 @@ void visitLoad(IRInstruction* inst, const FrameStateMgr& state) {
       auto newType = state.stackType(idx);
       // We know from hhbc invariants that stack slots are always either Cls or
       // Gen flavors---there's no need to relax beyond that.
-      if (newType == Type::StkElem) {
-        newType = inst->typeParam() <= Type::Gen ? Type::Gen :
-                  inst->typeParam() <= Type::Cls ? Type::Cls :
-                  Type::StkElem;
+      if (newType == TStkElem) {
+        newType = inst->typeParam() <= TGen ? TGen :
+                  inst->typeParam() <= TCls ? TCls :
+                  TStkElem;
       }
       retypeLoad(inst, newType);
       break;
@@ -151,25 +155,25 @@ void visitLoad(IRInstruction* inst, const FrameStateMgr& state) {
 }
 
 Type relaxCell(Type t, TypeConstraint tc) {
-  assert(t <= Type::Cell);
+  assertx(t <= TCell);
 
   switch (tc.category) {
     case DataTypeGeneric:
-      return Type::Gen;
+      return TGen;
 
     case DataTypeCountness:
-      return !t.maybe(Type::Counted) ? Type::Uncounted : t.unspecialize();
+      return !t.maybe(TCounted) ? TUncounted : t.unspecialize();
 
     case DataTypeCountnessInit:
-      if (t <= Type::Uninit) return Type::Uninit;
-      return (!t.maybe(Type::Counted) && !t.maybe(Type::Uninit))
-        ? Type::UncountedInit : t.unspecialize();
+      if (t <= TUninit) return TUninit;
+      return (!t.maybe(TCounted) && !t.maybe(TUninit))
+        ? TUncountedInit : t.unspecialize();
 
     case DataTypeSpecific:
       return t.unspecialize();
 
     case DataTypeSpecialized:
-      assert(tc.wantClass() ^ tc.wantArrayKind());
+      assertx(tc.wantClass() ^ tc.wantArrayKind());
 
       if (tc.wantClass()) {
         // We could try to relax t's specialized class to tc.desiredClass() if
@@ -180,8 +184,8 @@ Type relaxCell(Type t, TypeConstraint tc) {
         // RATArrays always come from static analysis and never guards, so we
         // don't need to eliminate it here. Just make sure t actually fits the
         // constraint.
-        assert(t < Type::Arr && t.arrSpec().kind());
-        assert(!tc.wantArrayShape() || t.arrSpec().shape());
+        assertx(t < TArr && t.arrSpec().kind());
+        assertx(!tc.wantArrayShape() || t.arrSpec().shape());
       }
 
       return t;
@@ -243,13 +247,12 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
 
   // Make a second pass to reflow types, with some special logic for loads.
   FrameStateMgr state{unit.entry()->front().marker()};
-  // TODO(#5678127): this code is wrong for HHIRBytecodeControlFlow
   state.setLegacyReoptimize();
 
   for (auto block : blocks) {
     ITRACE(2, "relaxGuards reflow entering B{}\n", block->id());
     Indent _i;
-    state.startBlock(block, block->front().marker());
+    state.startBlock(block);
 
     for (auto& inst : *block) {
       copyProp(&inst);
@@ -264,30 +267,6 @@ bool relaxGuards(IRUnit& unit, const GuardConstraints& constraints,
   return true;
 }
 
-/*
- * For every instruction in trace representing a tracelet guard, call func with
- * its location and type.
- */
-void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
-  using L = RegionDesc::Location;
-  for (auto const& inst : *unit.entry()) {
-    switch (inst.op()) {
-    case HintLocInner:
-    case GuardLoc:
-      func(L::Local{inst.extra<LocalId>()->locId}, inst.typeParam());
-      break;
-    case HintStkInner:
-    case GuardStk:
-      {
-        auto bcSpOffset = inst.extra<RelOffsetData>()->bcSpOffset;
-        auto offsetFromFp = inst.marker().spOff() - bcSpOffset;
-        func(L::Stack{offsetFromFp}, inst.typeParam());
-      }
-      break;
-    default: break;
-    }
-  }
-}
 
 bool typeFitsConstraint(Type t, TypeConstraint tc) {
   switch (tc.category) {
@@ -298,13 +277,13 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
       // Consumers using this constraint expect the type to be relaxed to
       // Uncounted or left alone, so something like Arr|Obj isn't specific
       // enough.
-      return !t.maybe(Type::Counted) ||
-             t.subtypeOfAny(Type::Str, Type::Arr, Type::Obj,
-                            Type::Res, Type::BoxedCell);
+      return !t.maybe(TCounted) ||
+             t.subtypeOfAny(TStr, TArr, TObj,
+                            TRes, TBoxedCell);
 
     case DataTypeCountnessInit:
       return typeFitsConstraint(t, DataTypeCountness) &&
-             (t <= Type::Uninit || !t.maybe(Type::Uninit));
+             (t <= TUninit || !t.maybe(TUninit));
 
     case DataTypeSpecific:
       return t.isKnownDataType();
@@ -315,13 +294,13 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
       // specialized, a strict subtype of Obj or Arr, and that it fits the
       // specific requirements of tc.
 
-      assert(tc.wantClass() ^ tc.wantArrayKind());
+      assertx(tc.wantClass() ^ tc.wantArrayKind());
 
-      if (t < Type::Obj && t.clsSpec()) {
+      if (t < TObj && t.clsSpec()) {
         return tc.wantClass() &&
                t.clsSpec().cls()->classof(tc.desiredClass());
       }
-      if (t < Type::Arr && t.arrSpec()) {
+      if (t < TArr && t.arrSpec()) {
         auto arrSpec = t.arrSpec();
         if (tc.wantArrayShape() && !arrSpec.shape()) return false;
         if (tc.wantArrayKind() && !arrSpec.kind()) return false;
@@ -339,12 +318,11 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
  * required by tc.
  */
 Type relaxType(Type t, TypeConstraint tc) {
-  always_assert(t <= Type::Gen && t != Type::Bottom);
-  if (tc.category == DataTypeGeneric) return Type::Gen;
+  always_assert_flog(t <= TGen && t != TBottom, "t = {}", t);
+  if (tc.category == DataTypeGeneric) return TGen;
   auto const relaxed =
-    (t & Type::Cell) <= Type::Bottom ? Type::Bottom
-                                     : relaxCell(t & Type::Cell, tc);
-  return t <= Type::Cell ? relaxed : relaxed | Type::BoxedInitCell;
+    (t & TCell) <= TBottom ? TBottom : relaxCell(t & TCell, tc);
+  return t <= TCell ? relaxed : relaxed | TBoxedInitCell;
 }
 
 static void incCategory(DataTypeCategory& c) {

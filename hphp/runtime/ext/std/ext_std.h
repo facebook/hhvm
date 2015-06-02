@@ -1,7 +1,7 @@
 #ifndef HPHP_EXT_STD_H
 #define HPHP_EXT_STD_H
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
@@ -16,6 +16,7 @@ class StandardExtension final : public Extension {
     initClassobj();
     initNetwork();
     initOptions();
+    initGc();
     initOutput();
     initString();
     initVariable();
@@ -37,6 +38,7 @@ class StandardExtension final : public Extension {
   void initClassobj();
   void initNetwork();
   void initOptions();
+  void initGc();
   void initOutput();
   void initString();
   void initVariable();

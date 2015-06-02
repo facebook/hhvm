@@ -1,0 +1,4 @@
+File "IUseDynamicYield_trait7.php", line 27, characters 7-9:
+This class must be declared abstract, or provide an implementation for the abstract method 'getOtherStuff' (Typing[4047])
+File "IUseDynamicYield_trait7.php", line 19, characters 28-40:
+Declaration is here

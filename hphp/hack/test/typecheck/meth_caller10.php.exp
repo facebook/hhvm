@@ -1,0 +1,6 @@
+File "meth_caller10.php", line 13, characters 10-11:
+Invalid return type (Typing[4110])
+File "meth_caller10.php", line 9, characters 20-22:
+This is an int
+File "meth_caller10.php", line 12, characters 15-24:
+It is incompatible with a string

@@ -156,12 +156,13 @@ module Naming                               = struct
   let void_cast                             = 2054 (* DONT MODIFY!!!! *)
   let object_cast                           = 2055 (* DONT MODIFY!!!! *)
   let unset_cast                            = 2056 (* DONT MODIFY!!!! *)
-  let nullsafe_property_access              = 2057 (* DONT MODIFY!!!! *)
+  (* DEPRECATED let nullsafe_property_access = 2057 *)
   let illegal_TRAIT                         = 2058 (* DONT MODIFY!!!! *)
   let shape_typehint                        = 2059 (* DONT MODIFY!!!! *)
   let dynamic_new_in_strict_mode            = 2060 (* DONT MODIFY!!!! *)
   let invalid_type_access_root              = 2061 (* DONT MODIFY!!!! *)
   let duplicate_user_attribute              = 2062 (* DONT MODIFY!!!! *)
+  let return_only_typehint                  = 2063 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -196,6 +197,7 @@ module NastCheck                            = struct
   let typeconst_depends_on_external_tparam  = 3027 (* DONT MODIFY!!!! *)
   let typeconst_assigned_tparam             = 3028 (* DONT MODIFY!!!! *)
   let abstract_with_typeconst               = 3029 (* DONT MODIFY!!!! *)
+  let constructor_required                  = 3030 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -265,14 +267,14 @@ module Typing                               = struct
   let null_container                        = 4063 (* DONT MODIFY!!!! *)
   let null_member                           = 4064 (* DONT MODIFY!!!! *)
   let nullable_parameter                    = 4065 (* DONT MODIFY!!!! *)
-  let nullable_void                         = 4066 (* DONT MODIFY!!!! *)
+  let option_return_only_typehint           = 4066 (* DONT MODIFY!!!! *)
   let object_string                         = 4067 (* DONT MODIFY!!!! *)
   let option_mixed                          = 4068 (* DONT MODIFY!!!! *)
   let overflow                              = 4069 (* DONT MODIFY!!!! *)
   let override_final                        = 4070 (* DONT MODIFY!!!! *)
   let override_per_trait                    = 4071 (* DONT MODIFY!!!! *)
   let pair_arity                            = 4072 (* DONT MODIFY!!!! *)
-  let parent_abstract_call                  = 4073 (* DONT MODIFY!!!! *)
+  let abstract_call                         = 4073 (* DONT MODIFY!!!! *)
   let parent_in_trait                       = 4074 (* DONT MODIFY!!!! *)
   let parent_outside_class                  = 4075 (* DONT MODIFY!!!! *)
   let parent_undefined                      = 4076 (* DONT MODIFY!!!! *)
@@ -311,7 +313,7 @@ module Typing                               = struct
   let unsatisfied_req                       = 4111 (* DONT MODIFY!!!! *)
   let visibility                            = 4112 (* DONT MODIFY!!!! *)
   let visibility_extends                    = 4113 (* DONT MODIFY!!!! *)
-  let void_parameter                        = 4114 (* DONT MODIFY!!!! *)
+  (* DEPRECATED void_parameter              = 4114 *)
   let wrong_extend_kind                     = 4115 (* DONT MODIFY!!!! *)
   let generic_unify                         = 4116 (* DONT MODIFY!!!! *)
   let nullsafe_not_needed                   = 4117 (* DONT MODIFY!!!! *)
@@ -329,7 +331,9 @@ module Typing                               = struct
   let abstract_const_usage                  = 4129 (* DONT MODIFY!!!! *)
   let cannot_declare_constant               = 4130 (* DONT MODIFY!!!! *)
   let cyclic_typeconst                      = 4131 (* DONT MODIFY!!!! *)
-
+  let nullsafe_property_write_context       = 4132 (* DONT MODIFY!!!! *)
+  let noreturn_usage                        = 4133 (* DONT MODIFY!!!! *)
+  let this_lvalue                           = 4134 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -568,9 +572,9 @@ let dynamic_method_call pos =
   add Naming.dynamic_method_call pos
     "Dynamic method call"
 
-let nullsafe_property_access pos =
-  add Naming.nullsafe_property_access pos
-  "The ?-> operator is not supported for property access"
+let nullsafe_property_write_context pos =
+  add Typing.nullsafe_property_write_context pos
+  "?-> syntax not supported here, this function effectively does a write"
 
 let illegal_fun pos =
   let msg = "The argument to fun() must be a single-quoted, constant "^
@@ -688,16 +692,26 @@ let no_construct_parent pos =
    ]
  )
 
-let not_initialized (p, c) =
-  if c = "parent::__construct" then no_construct_parent p else
-  add NastCheck.not_initialized p (
-  sl[
-  "The class member "; c;
-  " is not always properly initialized\n";
-  "Make sure you systematically set $this->"; c;
-  " when the method __construct is called\n";
-  "Alternatively, you can define the type as optional (?...)\n"
-])
+let constructor_required (pos, name) prop_names =
+  let name = Utils.strip_ns name in
+  let props_str = SSet.fold (fun x acc -> x^" "^acc) prop_names "" in
+  add NastCheck.constructor_required pos
+    ("Lacking __construct, class "^name^" does not initialize its private member(s): "^props_str)
+
+let not_initialized (pos, cname) prop_names =
+  let cname = Utils.strip_ns cname in
+  let props_str = SSet.fold (fun x acc -> x^" "^acc) prop_names "" in
+  let members, verb = if 1 == SSet.cardinal prop_names then "member", "is"
+    else "members", "are" in
+  let setters_str = SSet.fold (fun x acc -> "$this->"^x^" "^acc) prop_names "" in
+  add NastCheck.not_initialized pos (
+    sl[
+      "Class "; cname ; " does not initialize all of its members; ";
+      props_str; verb; " not always initialized.";
+      "\nMake sure you systematically set "; setters_str;
+      "when the method __construct is called.";
+      "\nAlternatively, you can define the "; members ;" as optional (?...)\n"
+    ])
 
 let call_before_init pos cv =
   add NastCheck.call_before_init pos (
@@ -956,13 +970,19 @@ let missing_field pos1 pos2 name =
     [pos1, "The field '"^name^"' is missing";
      pos2, "The field '"^name^"' is defined"]
 
-let explain_constraint pos name (error: error) =
+let explain_constraint p_inst pos name (error : error) =
+  let inst_msg = "Some type constraint(s) here are violated" in
   let code, msgl = error in
+  (* There may be multiple constraints instantiated at one spot; avoid
+   * duplicating the instantiation message *)
+  let msgl = match msgl with
+    | (p, x) :: rest when x = inst_msg && p = p_inst -> rest
+    | _ -> msgl in
   let name = Utils.strip_ns name in
-  add_list code (
-    msgl @
-      [pos, "Considering the constraint on '"^name^"'"]
-  )
+  add_list code begin
+    [p_inst, inst_msg;
+     pos, "'"^name^"' is a constrained type"] @ msgl
+  end
 
 let explain_type_constant reason_msgl (error: error) =
   let code, msgl = error in
@@ -992,8 +1012,14 @@ let strict_members_not_known p name =
     (name^" has a non-<?hh grandparent; this is not allowed in strict mode"
      ^" because that parent may define methods of unknowable name and type")
 
-let nullable_void p =
-  add Typing.nullable_void p "?void is a nonsensical typehint"
+let option_return_only_typehint p kind =
+  let (typehint, reason) = match kind with
+    | `void -> ("?void", "only return implicitly")
+    | `noreturn -> ("?noreturn", "never return")
+  in
+  add Typing.option_return_only_typehint p
+    (typehint^" is a nonsensical typehint; a function cannot both "^reason
+     ^" and return null.")
 
 let tuple_syntax p =
   add Typing.tuple_syntax p
@@ -1035,8 +1061,12 @@ let previous_default p =
      "Remove all the default values for the preceding parameters,\n"^
      "or add a default value to this one.")
 
-let void_parameter p =
-  add Typing.void_parameter p "Cannot have a void parameter"
+let return_only_typehint p kind =
+  let msg = match kind with
+    | `void -> "void"
+    | `noreturn -> "noreturn" in
+  add Naming.return_only_typehint p
+    ("The "^msg^" typehint can only be used to describe a function return type")
 
 let nullable_parameter pos =
   add Typing.nullable_parameter pos
@@ -1129,10 +1159,23 @@ let parent_outside_class pos =
   add Typing.parent_outside_class pos
     "'parent' is undefined outside of a class"
 
-let parent_abstract_call meth_name call_pos parent_pos =
-  add_list Typing.parent_abstract_call [
+let parent_abstract_call meth_name call_pos decl_pos =
+  add_list Typing.abstract_call [
     call_pos, ("Cannot call parent::"^meth_name^"(); it is abstract");
-    parent_pos, "Declaration is here"
+    decl_pos, "Declaration is here"
+  ]
+
+let self_abstract_call meth_name call_pos decl_pos =
+  add_list Typing.abstract_call [
+    call_pos, ("Cannot call self::"^meth_name^"(); it is abstract. Did you mean static::"^meth_name^"()?");
+    decl_pos, "Declaration is here"
+  ]
+
+let classname_abstract_call cname meth_name call_pos decl_pos =
+  let cname = Utils.strip_ns cname in
+  add_list Typing.abstract_call [
+    call_pos, ("Cannot call "^cname^"::"^meth_name^"(); it is abstract");
+    decl_pos, "Declaration is here"
   ]
 
 let isset_empty_unset_in_strict pos name =
@@ -1454,6 +1497,9 @@ let cyclic_typeconst pos sl =
   add Typing.cyclic_typeconst pos
     ("Cyclic type constant:\n  "^String.concat " -> " sl)
 
+let this_lvalue pos =
+  add Typing.this_lvalue pos "Cannot assign a value to $this"
+
 (*****************************************************************************)
 (* Typing decl errors *)
 (*****************************************************************************)
@@ -1520,9 +1566,13 @@ let trivial_strict_eq p b left right left_trail right_trail =
   add_list Typing.trivial_strict_eq
     ((p, msg) :: left @ left_trail @ right @ right_trail)
 
-let void_usage p reason =
-  let msg = "You are attempting to use the return value of a void function" in
-  add_list Typing.void_usage ((p, msg) :: reason)
+let void_usage p void_witness =
+  let msg = "You are using the return value of a void function" in
+  add_list Typing.void_usage ((p, msg) :: void_witness)
+
+let noreturn_usage p noreturn_witness =
+  let msg = "You are using the return value of a noreturn function" in
+  add_list Typing.noreturn_usage ((p, msg) :: noreturn_witness)
 
 let attribute_arity pos x n =
   let n = string_of_int n in
@@ -1557,6 +1607,12 @@ let ambiguous_inheritance pos class_ origin (error: error) =
   let class_ = strip_ns class_ in
   let message = "This declaration was inherited from an object of type "^origin^
     ". Redeclare this member in "^class_^" with a compatible signature." in
+  let code, msgl = error in
+  add_list code (msgl @ [pos, message])
+
+let explain_contravariance pos c_name error =
+  let message = "Considering that this type argument is contravariant "^
+                "with respect to " ^ strip_ns c_name in
   let code, msgl = error in
   add_list code (msgl @ [pos, message])
 

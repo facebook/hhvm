@@ -110,8 +110,6 @@ void XDebugProfiler::collectFrameData(FrameData& frameData,
              XDEBUG_GLOBAL(CollectReturn)) {
     // TODO(#3704) This relies on xdebug_var_dump
     throw_not_implemented("Tracing with collect_return enabled");
-  } else {
-    frameData.context_str = nullptr;
   }
 }
 

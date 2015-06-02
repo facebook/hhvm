@@ -1,0 +1,4 @@
+<?hh
+
+enum e: int {
+}

@@ -7,4 +7,4 @@ async function fibonacci($a) {
   return $b + $c;
 }
 
-var_dump(fibonacci(12)->join());
+var_dump(HH\Asio\join(fibonacci(12)));

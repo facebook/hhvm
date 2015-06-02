@@ -353,7 +353,7 @@ static SmartPtr<Socket> create_new_socket(
 }
 
 static int connect_with_timeout(int fd, struct sockaddr *sa_ptr,
-                                size_t sa_size, int timeout,
+                                size_t sa_size, double timeout,
                                 const HostURL &hosturl,
                                 std::string &errstr, int &errnum) {
   if (timeout <= 0) {
@@ -404,7 +404,7 @@ static int connect_with_timeout(int fd, struct sockaddr *sa_ptr,
   return retval;
 }
 
-static Variant new_socket_connect(const HostURL &hosturl, int timeout,
+static Variant new_socket_connect(const HostURL &hosturl, double timeout,
                                   Variant &errnum, Variant &errstr) {
   int domain = AF_UNSPEC;
   int type = SOCK_STREAM;
@@ -899,6 +899,7 @@ Variant HHVM_FUNCTION(socket_select,
         except = empty_array();
       }
       read = hasData;
+      free(fds);
       return hasData.size();
     }
   }
@@ -1618,6 +1619,11 @@ class SocketsExtension final : public Extension {
     Native::registerConstant<KindOfInt64>(s_SOL_UDP.get(), IPPROTO_UDP);
 
     SOCK_CONST(IPV6_UNICAST_HOPS);
+
+#define REGISTER_LONG_CONSTANT(name, val, flags) \
+  Native::registerConstant<KindOfInt64>(makeStaticString(name), val)
+#include "hphp/runtime/ext/sockets/unix_socket_constants.h"
+#undef REGISTER_LONG_CONSTANT
 
     HHVM_FE(socket_create);
     HHVM_FE(socket_create_listen);

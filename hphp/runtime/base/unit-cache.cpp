@@ -20,7 +20,6 @@
 #include <fcntl.h>
 #include <memory>
 #include <string>
-#include <ctime>
 #include <cstdlib>
 #include <thread>
 
@@ -123,24 +122,6 @@ CachedUnit lookupUnitRepoAuth(const StringData* path) {
 //////////////////////////////////////////////////////////////////////
 // Non-repo mode unit caching
 
-/*
- * When a unit is removed from the unit cache, we wait for a Treadmill round
- * before reclaiming it using this routine.
- *
- * If we have or are in the process of a collecting an hhprof dump then we need
- * to keep these units around even longer, as they might be needed for symbol
- * resolution when that dump is collected by pprof.  In this case, we just pass
- * ownership to the ProfileControler module.
- */
-void reclaimUnit(const Unit* unit) {
-  if (memory_profiling && RuntimeOption::HHProfServerEnabled &&
-      ProfileController::isTracking()) {
-    ProfileController::enqueueOrphanedUnit(unit);
-    return;
-  }
-  delete unit;
-}
-
 struct CachedUnitWithFree {
   CachedUnitWithFree() = delete;
   explicit CachedUnitWithFree(const CachedUnitWithFree&) = delete;
@@ -149,7 +130,7 @@ struct CachedUnitWithFree {
   explicit CachedUnitWithFree(const CachedUnit& src) : cu(src) {}
   ~CachedUnitWithFree() {
     if (auto oldUnit = cu.unit) {
-      Treadmill::enqueue([oldUnit] { reclaimUnit(oldUnit); });
+      Treadmill::enqueue([oldUnit] { delete oldUnit; });
     }
   }
   CachedUnit cu;

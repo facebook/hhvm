@@ -24,12 +24,23 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include <algorithm>
+#include <cstdint>
 
 TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
 
 namespace {
+
+jit::vector<uint32_t> count_predecessors(Vunit& unit) {
+  auto ret = jit::vector<uint32_t>(unit.blocks.size(), 0);
+  PostorderWalker{unit}.dfs([&] (Vlabel b) {
+    for (auto& s : succs(unit.blocks[b])) {
+      ++ret[s];
+    }
+  });
+  return ret;
+}
 
 /*
  * Return true if block b matches one of these patterns:
@@ -78,7 +89,8 @@ bool match_bindjcc1st(const Vunit& unit, Vlabel t0, Vlabel t1) {
     const auto& bj1 = unit.blocks[t1].code.back().bindjmp_;
     return addr0 == addr1 &&
            bj0.target.resumed() == bj1.target.resumed() &&
-           bj0.target.getFuncId() == bj1.target.getFuncId();
+           bj0.target.funcID() == bj1.target.funcID() &&
+           bj0.spOff == bj1.spOff;
   }
   return false;
 }
@@ -88,7 +100,7 @@ bool match_bindjcc1st(const Vunit& unit, Vlabel t0, Vlabel t1) {
 /*
  * optimizeExits does two conversions to eliminate common branch-to-exit flows.
  *
- * 1. If we see a jcc that leads to two "idential" blocks ending with
+ * 1. If we see a jcc that leads to two "identical" blocks ending with
  * bindjmp, then copy the identical part of the targets before the jcc,
  * and replace the jcc with a bindjcc1st instruction using the bytecode
  * destinations from the two original bindjmps. For the sake of this pass,
@@ -103,17 +115,21 @@ bool match_bindjcc1st(const Vunit& unit, Vlabel t0, Vlabel t1) {
  * and the original bindjmp's dest.
  */
 void optimizeExits(Vunit& unit) {
+  auto const pred_counts = count_predecessors(unit);
+
   PostorderWalker{unit}.dfs([&](Vlabel b) {
     auto& code = unit.blocks[b].code;
-    assert(!code.empty());
+    assertx(!code.empty());
     if (code.back().op != Vinstr::jcc) return;
 
-    auto ijcc = code.back().jcc_;
-    auto t0 = ijcc.targets[0], t1 = ijcc.targets[1];
+    auto const ijcc = code.back().jcc_;
+    auto const t0 = ijcc.targets[0];
+    auto const t1 = ijcc.targets[1];
     if (t0 == t1) {
       code.back() = jmp{t0};
       return;
     }
+    if (pred_counts[t0] != 1 || pred_counts[t1] != 1) return;
 
     // copy all but the last instruction in blocks[t] to just before
     // the last instruction in code.
@@ -129,7 +145,8 @@ void optimizeExits(Vunit& unit) {
       const auto& bj0 = unit.blocks[t0].code.back().bindjmp_;
       const auto& bj1 = unit.blocks[t1].code.back().bindjmp_;
       hoist_sync(t0);
-      code.back() = bindjcc1st{ijcc.cc, ijcc.sf, {bj0.target, bj1.target},
+      code.back() = bindjcc1st{ijcc.cc, ijcc.sf, {{bj0.target, bj1.target}},
+                               bj0.spOff,
                                bj0.args | bj1.args};
       return;
     }
@@ -138,7 +155,8 @@ void optimizeExits(Vunit& unit) {
       const auto& bj = unit.blocks[exit].code.back().bindjmp_;
       auto origin = code.back().origin;
       hoist_sync(exit);
-      code.back() = bindjcc{cc, ijcc.sf, bj.target, bj.trflags, bj.args};
+      code.back() = bindjcc{cc, ijcc.sf, bj.target, bj.spOff,
+                            bj.trflags, bj.args};
       code.emplace_back(jmp{next});
       code.back().origin = origin;
     };
@@ -162,10 +180,13 @@ void optimizeJmps(Vunit& unit) {
   };
   bool changed = false;
   bool ever_changed = false;
+  // The number of incoming edges from (reachable) predecessors for each block.
+  // It is maintained as an upper bound of the actual value during the
+  // transformation.
   jit::vector<int> npreds(unit.blocks.size(), 0);
   do {
     if (changed) {
-      fill(npreds.begin(), npreds.end(), 0);
+      std::fill(begin(npreds), end(npreds), 0);
     }
     changed = false;
     PostorderWalker{unit}.dfs([&](Vlabel b) {
@@ -173,17 +194,19 @@ void optimizeJmps(Vunit& unit) {
         npreds[s]++;
       }
     });
-    // give entry an extra predecessor to prevent cloning it
+    // give entry an extra predecessor to prevent cloning it.
     npreds[unit.entry]++;
+
     PostorderWalker{unit}.dfs([&](Vlabel b) {
       auto& block = unit.blocks[b];
       auto& code = block.code;
-      assert(!code.empty());
+      assertx(!code.empty());
       if (code.back().op == Vinstr::jcc) {
         auto ss = succs(block);
         if (ss[0] == ss[1]) {
           // both edges have same target, change to jmp
           code.back() = jmp{ss[0]};
+          --npreds[ss[0]];
           changed = true;
         } else {
           auto jcc_i = code.back().jcc_;
@@ -198,7 +221,9 @@ void optimizeJmps(Vunit& unit) {
             const auto jcc_origin = code.back().origin;
             code.pop_back();
             code.emplace_back(
-              fallbackcc{jcc_i.cc, jcc_i.sf, fb_i.dest, fb_i.trflags});
+              fallbackcc{jcc_i.cc, jcc_i.sf, fb_i.dest,
+                fb_i.trflags, fb_i.args}
+            );
             code.back().origin = jcc_origin;
             code.emplace_back(jmp{t0});
             code.back().origin = jcc_origin;
@@ -206,26 +231,30 @@ void optimizeJmps(Vunit& unit) {
           }
         }
       }
-      if (code.back().op == Vinstr::jmp) {
-        auto& s = code.back().jmp_.target;
+
+      for (auto& s : succs(block)) {
         if (isEmpty(s, Vinstr::jmp)) {
           // skip over s
+          --npreds[s];
           s = unit.blocks[s].code.back().jmp_.target;
+          ++npreds[s];
           changed = true;
-        } else if (npreds[s] == 1 || isEmpty(s, Vinstr::jcc)) {
+        }
+      }
+
+      if (code.back().op == Vinstr::jmp) {
+        auto s = code.back().jmp_.target;
+        if (npreds[s] == 1 || isEmpty(s, Vinstr::jcc)) {
           // overwrite jmp with copy of s
           auto& code2 = unit.blocks[s].code;
           code.pop_back();
           code.insert(code.end(), code2.begin(), code2.end());
-          changed = true;
-        }
-      } else {
-        for (auto& s : succs(block)) {
-          if (isEmpty(s, Vinstr::jmp)) {
-            // skip over s
-            s = unit.blocks[s].code.back().jmp_.target;
-            changed = true;
+          if (--npreds[s]) {
+            for (auto ss : succs(block)) {
+              ++npreds[ss];
+            }
           }
+          changed = true;
         }
       }
     });

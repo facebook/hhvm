@@ -4,3 +4,9 @@ bool(false)
 
 Warning: chown(): Unable to find uid for ihopenomachinehasthisuserthatwouldbebad in %s/lchown_wronguser.php on line 9
 bool(false)
+
+Warning: lchgrp(): Unable to find gid for ihopenomachinehasthisgroupthatwouldbebad in %s/lchown_wronguser.php on line 10
+bool(false)
+
+Warning: chgrp(): Unable to find gid for ihopenomachinehasthisgroupthatwouldbebad in %s/lchown_wronguser.php on line 11
+bool(false)

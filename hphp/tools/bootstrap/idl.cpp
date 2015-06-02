@@ -143,7 +143,6 @@ static const std::unordered_map<fbstring, FuncFlags> g_flagsMap =
   {"HasOptFunction",                 HasOptFunction},
   {"AllowIntercept",                 AllowIntercept},
   {"NoProfile",                      NoProfile},
-  {"ContextSensitive",               ContextSensitive},
   {"NoDefaultSweep",                 NoDefaultSweep},
   {"IsSystem",                       IsSystem},
   {"IsTrait",                        IsTrait},

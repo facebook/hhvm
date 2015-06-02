@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VM_PRECLASS_H_
 #define incl_HPHP_VM_PRECLASS_H_
 
+#include "hphp/runtime/base/atomic-shared-ptr.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -162,7 +163,8 @@ struct PreClass : AtomicCountable {
     const StringData* name()     const { return m_name; }
     const TypedValueAux& val()   const { return m_val; }
     const StringData* phpCode()  const { return m_phpCode; }
-    bool isAbstract()            const { return m_val.isAbstractConst(); }
+    bool isAbstract()      const { return m_val.constModifiers().m_isAbstract; }
+    bool isType()          const { return m_val.constModifiers().m_isType; }
 
     template<class SerDe> void serde(SerDe& sd);
 
@@ -464,7 +466,7 @@ private:
   ConstMap m_constants;
 };
 
-typedef AtomicSmartPtr<PreClass> PreClassPtr;
+typedef AtomicSharedPtr<PreClass> PreClassPtr;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -10,5 +10,5 @@ async function f3($a) {
   return await f2("f3, ".$a);
 }
 
-var_dump(f2(".")->join());
-var_dump(f3("!")->join());
+var_dump(HH\Asio\join(f2(".")));
+var_dump(HH\Asio\join(f3("!")));

@@ -124,6 +124,7 @@ struct FPIEnt {
  */
 struct Func {
   friend class FuncEmitter;
+  template <typename F> friend void scan(const Func&, F&);
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.
@@ -1101,7 +1102,7 @@ private:
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
   };
 
-  typedef AtomicSmartPtr<SharedData> SharedDataPtr;
+  typedef AtomicSharedPtr<SharedData> SharedDataPtr;
 
   /*
    * SharedData accessors for internal use.
@@ -1205,8 +1206,8 @@ const typename Container::value_type* findEH(const Container& ehtab, Offset o) {
   return eh;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #define incl_HPHP_VM_FUNC_INL_H_

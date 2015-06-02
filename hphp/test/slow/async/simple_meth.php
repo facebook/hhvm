@@ -11,5 +11,5 @@ class F {
 }
 
 $f = new F(42);
-var_dump($f->retA()->join());
-var_dump($f->awaitA()->join());
+var_dump(HH\Asio\join($f->retA()));
+var_dump(HH\Asio\join($f->awaitA()));

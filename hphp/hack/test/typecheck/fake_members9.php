@@ -17,7 +17,7 @@ class B implements I { }
 
 class Z {
   public static async function genNotFoo(): Awaitable<void> {
-    return null;
+    return;
   }
 }
 

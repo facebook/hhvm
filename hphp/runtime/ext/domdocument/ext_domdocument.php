@@ -199,7 +199,6 @@ class DOMNode {
  * DOMAttr represents an attribute in the DOMElement object.
  *
  */
-<<__NativeData("DOMAttr")>>
 class DOMAttr extends DOMNode {
 
   <<__Native>>
@@ -230,7 +229,6 @@ class DOMAttr extends DOMNode {
  *   class, but other nodes do inherit from it.
  *
  */
-<<__NativeData("DOMCharacterData")>>
 class DOMCharacterData extends DOMNode {
 
   /**
@@ -311,7 +309,6 @@ class DOMCharacterData extends DOMNode {
  * Represents comment nodes, characters delimited by <!-- and -->.
  *
  */
-<<__NativeData("DOMComment")>>
 class DOMComment extends DOMCharacterData {
 
   <<__Native>>
@@ -323,7 +320,6 @@ class DOMComment extends DOMCharacterData {
  *   content of a DOMElement or DOMAttr.
  *
  */
-<<__NativeData("DOMText")>>
 class DOMText extends DOMCharacterData {
 
   <<__Native>>
@@ -375,7 +371,6 @@ class DOMText extends DOMCharacterData {
   function __debuginfo(): array;
 }
 
-<<__NativeData("DOMCdataSection")>>
 class DOMCdataSection extends DOMText {
 
   <<__Native>>
@@ -387,7 +382,6 @@ class DOMCdataSection extends DOMText {
  *   document tree.
  *
  */
-<<__NativeData("DOMDocument")>>
 class DOMDocument extends DOMNode {
 
   <<__Native>>
@@ -826,7 +820,6 @@ class DOMDocument extends DOMNode {
   function __debuginfo(): array;
 }
 
-<<__NativeData("DOMDocumentFragment")>>
 class DOMDocumentFragment extends DOMNode {
 
   <<__Native>>
@@ -854,7 +847,6 @@ class DOMDocumentFragment extends DOMNode {
  *   DOMDocumentType object.
  *
  */
-<<__NativeData("DOMDocumentType")>>
 class DOMDocumentType extends DOMNode {
 
   /**
@@ -1125,7 +1117,6 @@ class DOMElement extends DOMNode {
  *   XML document.
  *
  */
-<<__NativeData("DOMEntity")>>
 class DOMEntity extends DOMNode {
 
   /**
@@ -1136,14 +1127,12 @@ class DOMEntity extends DOMNode {
   function __debuginfo(): array;
 }
 
-<<__NativeData("DOMEntityReference")>>
 class DOMEntityReference extends DOMNode {
 
   <<__Native>>
   function __construct(string $name): void;
 }
 
-<<__NativeData("DOMNotation")>>
 class DOMNotation extends DOMNode {
 
   /**
@@ -1154,7 +1143,6 @@ class DOMNotation extends DOMNode {
   function __debuginfo(): array;
 }
 
-<<__NativeData("DOMProcessingInstruction")>>
 class DOMProcessingInstruction extends DOMNode {
 
   <<__Native>>
@@ -1168,7 +1156,6 @@ class DOMProcessingInstruction extends DOMNode {
   function __debuginfo(): array;
 }
 
-<<__NativeData("DOMNameSpaceNode")>>
 class DOMNameSpaceNode extends DOMNode {
 }
 
@@ -1194,7 +1181,7 @@ class DOMNodeIterator implements Iterator {
   function valid(): mixed;
 }
 
-<<__NativeData("DOMNamedNodeMap")>>
+<<__NativeData("DOMIterable")>>
 class DOMNamedNodeMap implements IteratorAggregate {
 
   function __construct(): void {
@@ -1242,7 +1229,7 @@ class DOMNamedNodeMap implements IteratorAggregate {
   function getIterator(): mixed;
 }
 
-<<__NativeData("DOMNodeList")>>
+<<__NativeData("DOMIterable")>>
 class DOMNodeList implements IteratorAggregate {
 
   function __construct(): void {
@@ -1279,7 +1266,6 @@ class DOMNodeList implements IteratorAggregate {
  *   object model.
  *
  */
-<<__NativeData("DOMImplementation")>>
 class DOMImplementation {
 
   function __construct(): void {

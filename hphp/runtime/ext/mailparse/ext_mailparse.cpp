@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/temp-file.h"
 #include "hphp/runtime/ext/mailparse/mime.h"
 #include "hphp/runtime/ext/mailparse/rfc822.h"

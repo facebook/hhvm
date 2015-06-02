@@ -49,46 +49,47 @@ namespace {
 /*
  * Create a map from RegionDesc::BlockId -> IR Block* for all region blocks.
  */
-void createBlockMap(HTS& hts,
-                    const RegionDesc& region,
-                    BlockIdToIRBlockMap& blockIdToIRBlock) {
-  auto& irb = *hts.irb;
-  blockIdToIRBlock.clear();
+BlockIdToIRBlockMap createBlockMap(IRGS& irgs, const RegionDesc& region) {
+  auto ret = BlockIdToIRBlockMap{};
+
+  auto& irb = *irgs.irb;
   auto const& blocks = region.blocks();
   for (unsigned i = 0; i < blocks.size(); i++) {
-    auto rBlock = blocks[i];
-    auto id = rBlock->id();
+    auto const rBlock = blocks[i];
+    auto const id = rBlock->id();
     DEBUG_ONLY Offset bcOff = rBlock->start().offset();
-    assert(IMPLIES(i == 0, bcOff == irb.unit().bcOff()));
+    assertx(IMPLIES(i == 0, bcOff == irb.unit().bcOff()));
 
     // NB: This maps the region entry block to a new IR block, even though
     // we've already constructed an IR entry block. We'll make the IR entry
     // block jump to this block.
-    Block* iBlock = irb.unit().defBlock();
+    auto const iBlock = irb.unit().defBlock();
 
-    blockIdToIRBlock[id] = iBlock;
+    ret[id] = iBlock;
     FTRACE(1,
            "createBlockMaps: RegionBlock {} => IRBlock {} (BC offset = {})\n",
            id, iBlock->id(), bcOff);
   }
+
+  return ret;
 }
 
 /*
  * Set IRBuilder's Block associated to blockId's block according to
  * the mapping in blockIdToIRBlock.
  */
-void setIRBlock(HTS& hts,
+void setIRBlock(IRGS& irgs,
                 RegionDesc::BlockId blockId,
                 const RegionDesc& region,
                 const BlockIdToIRBlockMap& blockIdToIRBlock) {
-  auto& irb = *hts.irb;
+  auto& irb = *irgs.irb;
   auto rBlock = region.block(blockId);
   Offset bcOffset = rBlock->start().offset();
 
   auto iit = blockIdToIRBlock.find(blockId);
-  assert(iit != blockIdToIRBlock.end());
+  assertx(iit != blockIdToIRBlock.end());
 
-  assert(!irb.hasBlock(bcOffset));
+  assertx(!irb.hasBlock(bcOffset));
   FTRACE(3, "  setIRBlock: blockId {}, offset {} => IR Block {}\n",
          blockId, bcOffset, iit->second->id());
   irb.setBlock(bcOffset, iit->second);
@@ -98,26 +99,26 @@ void setIRBlock(HTS& hts,
  * Set IRBuilder's Blocks for srcBlockId's successors' offsets within
  * the region.  It also sets the guard-failure block, if any.
  */
-void setSuccIRBlocks(HTS& hts,
+void setSuccIRBlocks(IRGS& irgs,
                      const RegionDesc& region,
                      RegionDesc::BlockId srcBlockId,
                      const BlockIdToIRBlockMap& blockIdToIRBlock) {
   FTRACE(3, "setSuccIRBlocks: srcBlockId = {}\n", srcBlockId);
-  auto& irb = *hts.irb;
+  auto& irb = *irgs.irb;
   irb.resetOffsetMapping();
   for (auto dstBlockId : region.succs(srcBlockId)) {
-    setIRBlock(hts, dstBlockId, region, blockIdToIRBlock);
+    setIRBlock(irgs, dstBlockId, region, blockIdToIRBlock);
   }
   if (auto nextRetrans = region.nextRetrans(srcBlockId)) {
     auto it = blockIdToIRBlock.find(nextRetrans.value());
-    assert(it != blockIdToIRBlock.end());
+    assertx(it != blockIdToIRBlock.end());
     irb.setGuardFailBlock(it->second);
   } else {
     irb.resetGuardFailBlock();
   }
 }
 
-bool blockIsLoopHeader(
+bool blockHasUnprocessedPred(
   const RegionDesc&             region,
   RegionDesc::BlockId           blockId,
   const RegionDesc::BlockIdSet& processedBlocks)
@@ -139,7 +140,7 @@ bool blockIsLoopHeader(
  * single predecessor is a merge point if it's the target of both the
  * fallthru and the taken paths.
  */
-static bool isMerge(const RegionDesc& region, RegionDesc::BlockId blockId) {
+bool isMerge(const RegionDesc& region, RegionDesc::BlockId blockId) {
   auto const& preds = region.preds(blockId);
   if (preds.size() == 0)               return false;
   if (preds.size() > 1)                return true;
@@ -160,23 +161,53 @@ static bool isMerge(const RegionDesc& region, RegionDesc::BlockId blockId) {
  * Returns whether any successor of `blockId' in the `region' is a
  * merge-point within the `region'.
  */
-static bool hasMergeSucc(const RegionDesc&   region,
-                         RegionDesc::BlockId blockId) {
+bool hasMergeSucc(const RegionDesc& region,
+                  RegionDesc::BlockId blockId) {
   for (auto succ : region.succs(blockId)) {
     if (isMerge(region, succ)) return true;
   }
   return false;
 }
 
+
+/*
+ * If this region's entry block is at the entry point for a function, we have
+ * some additional information we can assume about the types of non-parameter
+ * local variables.
+ *
+ * Note: we can't assume anything if there are DV initializers, because they
+ * can run arbitrary code before they get to the main entry point (and they do,
+ * in some hhas-based builtins), if they even go there (they aren't required
+ * to).
+ */
+void emitEntryAssertions(IRGS& irgs, const Func* func, SrcKey sk) {
+  if (sk.offset() != func->base()) return;
+  for (auto& pinfo : func->params()) {
+    if (pinfo.hasDefaultValue()) return;
+  }
+  if (func->isClosureBody()) {
+    // In a closure, non-parameter locals can have types other than Uninit
+    // after the prologue runs.  (Local 0 will be the closure itself, and other
+    // locals will have used vars unpacked into them.)  We rely on hhbbc to
+    // assert these types.
+    return;
+  }
+  auto const numLocs = func->numLocals();
+  for (auto loc = func->numParams(); loc < numLocs; ++loc) {
+    auto const location = RegionDesc::Location::Local { loc };
+    irgen::assertTypeLocation(irgs, location, TUninit);
+  }
+}
+
 /*
  * Emit type and reffiness prediction guards.
  */
-void emitPredictionGuards(HTS& hts,
+void emitPredictionGuards(IRGS& irgs,
                           const RegionDesc& region,
                           const RegionDesc::BlockPtr block,
-                          bool useGuards) {
-  auto sk = block->start();
-  auto bcOff = sk.offset();
+                          bool isEntry) {
+  auto const sk = block->start();
+  auto const bcOff = sk.offset();
   auto typePreds = makeMapWalker(block->typePreds());
   auto refPreds  = makeMapWalker(block->reffinessPreds());
 
@@ -185,62 +216,66 @@ void emitPredictionGuards(HTS& hts,
   // prepareForHHBCMergePoint to spill the stack.
   if (auto retrans = region.nextRetrans(block->id())) {
     if (isMerge(region, retrans.value())) {
-      irgen::prepareForHHBCMergePoint(hts);
+      irgen::prepareForHHBCMergePoint(irgs);
     }
   }
 
-  if (useGuards) irgen::ringbuffer(hts, Trace::RBTypeTraceletGuards, sk);
+  if (isEntry) {
+    irgen::ringbufferEntry(irgs, Trace::RBTypeTraceletGuards, sk);
+    emitEntryAssertions(irgs, block->func(), sk);
+  }
+
+  const bool emitPredictions = RuntimeOption::EvalHHIRConstrictGuards;
 
   // Emit type guards.
   while (typePreds.hasNext(sk)) {
     auto const& pred = typePreds.next();
     auto type = pred.type;
     auto loc  = pred.location;
-    if (type <= Type::Cls) {
+    if (type <= TCls) {
       // Do not generate guards for class; instead assert the type.
-      assert(loc.tag() == RegionDesc::Location::Tag::Stack);
-      irgen::assertTypeLocation(hts, loc, type);
-    } else if (useGuards) {
-      bool checkOuterTypeOnly = mcg->tx().mode() != TransKind::Profile;
-      irgen::guardTypeLocation(hts, loc, type, checkOuterTypeOnly);
+      assertx(loc.tag() == RegionDesc::Location::Tag::Stack);
+      irgen::assertTypeLocation(irgs, loc, type);
+    } else if (emitPredictions) {
+      irgen::predictTypeLocation(irgs, loc, type);
     } else {
-      irgen::checkTypeLocation(hts, loc, type, bcOff);
+      // Check inner type eagerly if it is the first block during profiling.
+      // Otherwise only check for BoxedInitCell.
+      bool checkOuterTypeOnly =
+        !isEntry || mcg->tx().mode() != TransKind::Profile;
+      irgen::checkTypeLocation(irgs, loc, type, bcOff, checkOuterTypeOnly);
     }
   }
 
   // Emit reffiness guards.
   while (refPreds.hasNext(sk)) {
     auto const& pred = refPreds.next();
-    if (useGuards) {
-      irgen::guardRefs(hts, pred.arSpOffset, pred.mask, pred.vals);
-    } else {
-      irgen::checkRefs(hts, pred.arSpOffset, pred.mask, pred.vals, bcOff);
-    }
+    irgen::checkRefs(irgs, pred.arSpOffset, pred.mask, pred.vals, bcOff);
   }
 
   // Finish emitting guards, and emit profiling counters.
-  if (useGuards) {
-    irgen::gen(hts, EndGuards);
+  if (isEntry) {
+    irgen::gen(irgs, EndGuards);
     if (RuntimeOption::EvalJitTransCounters) {
-      irgen::incTransCounter(hts);
+      irgen::incTransCounter(irgs);
     }
 
     if (mcg->tx().mode() == TransKind::Profile) {
       if (block->func()->isEntry(bcOff)) {
-        irgen::checkCold(hts, mcg->tx().profData()->curTransID());
+        irgen::checkCold(irgs, mcg->tx().profData()->curTransID());
       } else {
-        irgen::incProfCounter(hts, mcg->tx().profData()->curTransID());
+        irgen::incProfCounter(irgs, mcg->tx().profData()->curTransID());
       }
     }
-    irgen::ringbuffer(hts, Trace::RBTypeTraceletBody, sk);
+    irgen::ringbufferEntry(irgs, Trace::RBTypeTraceletBody, sk);
   }
 
   // In the entry block, hhbc-translator gets a chance to emit some code
-  // immediately after the initial guards/checks on the first instruction.
+  // immediately after the initial checks on the first instruction.
   if (block == region.entry()) {
     switch (arch()) {
       case Arch::X64:
-        irgen::prepareEntry(hts);
+        irgen::prepareEntry(irgs);
         break;
       case Arch::ARM:
         // Don't do this for ARM, because it can lead to interpOne on the
@@ -249,15 +284,14 @@ void emitPredictionGuards(HTS& hts,
     }
   }
 
-  assert(!typePreds.hasNext());
-  assert(!refPreds.hasNext());
+  assertx(!typePreds.hasNext());
+  assertx(!refPreds.hasNext());
 }
 
 void initNormalizedInstruction(
   NormalizedInstruction& inst,
-  jit::vector<DynLocation>& dynLocs,
   MapWalker<RegionDesc::Block::ParamByRefMap>& byRefs,
-  HTS& hts,
+  IRGS& irgs,
   const RegionDesc& region,
   RegionDesc::BlockId blockId,
   const Func* topFunc,
@@ -278,20 +312,9 @@ void initNormalizedInstruction(
 
   auto const inputInfos = getInputs(inst);
 
-  // Populate the NormalizedInstruction's input vector, using types
-  // from IRBuilder.
-  dynLocs.reserve(inputInfos.size());
-  auto newDynLoc = [&] (const InputInfo& ii) {
-    dynLocs.emplace_back(ii.loc,
-                         irgen::predictedTypeFromLocation(hts, ii.loc));
-    FTRACE(2, "predictedTypeFromLocation: {} -> {}\n",
-           ii.loc.pretty(), dynLocs.back().rtt);
-    return &dynLocs.back();
-  };
-
   FTRACE(2, "populating inputs for {}\n", inst.toString());
   for (auto const& ii : inputInfos) {
-    inst.inputs.push_back(newDynLoc(ii));
+    inst.inputs.push_back(ii.loc);
   }
 
   if (inputInfos.needsRefCheck) {
@@ -338,7 +361,7 @@ bool shouldTrySingletonInline(const RegionDesc& region,
  * function with a singleton pattern, and if so, inline it.  Returns true if
  * this succeeds, else false.
  */
-bool tryTranslateSingletonInline(HTS& hts,
+bool tryTranslateSingletonInline(IRGS& irgs,
                                  const NormalizedInstruction& ninst,
                                  const Func* funcd) {
   using Atom = BCPattern::Atom;
@@ -347,7 +370,7 @@ bool tryTranslateSingletonInline(HTS& hts,
   if (!funcd) return false;
 
   // Make sure we have an acceptable FPush and non-null callee.
-  assert(ninst.op() == Op::FPushFuncD ||
+  assertx(ninst.op() == Op::FPushFuncD ||
          ninst.op() == Op::FPushClsMethodD);
 
   auto fcall = ninst.nextSk();
@@ -367,8 +390,8 @@ bool tryTranslateSingletonInline(HTS& hts,
     auto cgetl = (const Op*)pc;
     auto sli = (const Op*)captures[0];
 
-    assert(*cgetl == Op::CGetL);
-    assert(*sli == Op::StaticLocInit);
+    assertx(*cgetl == Op::CGetL);
+    assertx(*sli == Op::StaticLocInit);
 
     return (getImm(sli, 0).u_IVA == getImm(cgetl, 0).u_IVA);
   };
@@ -391,9 +414,9 @@ bool tryTranslateSingletonInline(HTS& hts,
 
   if (result.found()) {
     try {
-      irgen::prepareForNextHHBC(hts, nullptr, ninst.offset(), false);
+      irgen::prepareForNextHHBC(irgs, nullptr, ninst.source, false);
       irgen::inlSingletonSLoc(
-        hts,
+        irgs,
         funcd,
         (const Op*)result.getCapture(0)
       );
@@ -416,8 +439,8 @@ bool tryTranslateSingletonInline(HTS& hts,
     return Atom(Op::String).onlyif([=] (PC pc, const Captures& captures) {
       auto string1 = (const Op*)pc;
       auto string2 = (const Op*)captures[i];
-      assert(*string1 == Op::String);
-      assert(*string2 == Op::String);
+      assertx(*string1 == Op::String);
+      assertx(*string2 == Op::String);
 
       auto const unit = funcd->unit();
       auto sd1 = unit->lookupLitstrId(getImmPtr(string1, 0)->u_SA);
@@ -449,9 +472,9 @@ bool tryTranslateSingletonInline(HTS& hts,
 
   if (result.found()) {
     try {
-      irgen::prepareForNextHHBC(hts, nullptr, ninst.offset(), false);
+      irgen::prepareForNextHHBC(irgs, nullptr, ninst.source, false);
       irgen::inlSingletonSProp(
-        hts,
+        irgs,
         funcd,
         (const Op*)result.getCapture(1),
         (const Op*)result.getCapture(0)
@@ -470,7 +493,57 @@ bool tryTranslateSingletonInline(HTS& hts,
   return false;
 }
 
-TranslateResult irGenRegion(HTS& hts,
+/*
+ * Returns the id of the next region block in workQ whose
+ * corresponding IR block is currently reachable from the IR unit's
+ * entry, or folly::none if no such block exists.  Furthermore, any
+ * unreachable blocks appearing before the first reachable block are
+ * moved to the end of workQ.
+ */
+folly::Optional<RegionDesc::BlockId> nextReachableBlock(
+  jit::queue<RegionDesc::BlockId>& workQ,
+  const IRBuilder& irb,
+  const BlockIdToIRBlockMap& blockIdToIRBlock
+) {
+  auto const size = workQ.size();
+  for (size_t i = 0; i < size; i++) {
+    auto const regionBlockId = workQ.front();
+    workQ.pop();
+    auto it = blockIdToIRBlock.find(regionBlockId);
+    assertx(it != blockIdToIRBlock.end());
+    auto irBlock = it->second;
+    if (irb.canStartBlock(irBlock)) return regionBlockId;
+    // Put the block back at the end of workQ, since it may become
+    // reachable after processing some of the other blocks.
+    workQ.push(regionBlockId);
+  }
+  return folly::none;
+}
+
+RegionDesc::BlockId singleSucc(const RegionDesc& region,
+                               RegionDesc::BlockId bid) {
+  auto const& succs = region.succs(bid);
+  always_assert(succs.size() == 1);
+  return *succs.begin();
+}
+
+/*
+ * Returns whether or not block `bid' is in the retranslation chain
+ * for `region's entry block.
+ */
+bool inEntryRetransChain(RegionDesc::BlockId bid, const RegionDesc& region) {
+  auto block = region.entry();
+  if (block->start() != region.block(bid)->start()) return false;
+  while (true) {
+    if (block->id() == bid) return true;
+    auto nextRetrans = region.nextRetrans(block->id());
+    if (!nextRetrans) return false;
+    block = region.block(nextRetrans.value());
+  }
+  not_reached();
+}
+
+TranslateResult irGenRegion(IRGS& irgs,
                             const RegionDesc& region,
                             RegionBlacklist& toInterp,
                             TransFlags trflags) {
@@ -480,64 +553,74 @@ TranslateResult irGenRegion(HTS& hts,
   std::string errorMsg;
   always_assert_flog(check(region, errorMsg), "{}", errorMsg);
 
-  auto& irb = *hts.irb;
+  auto& irb = *irgs.irb;
 
   // Create a map from region blocks to their corresponding initial IR blocks.
-  BlockIdToIRBlockMap blockIdToIRBlock;
-  createBlockMap(hts, region, blockIdToIRBlock);
+  auto blockIdToIRBlock = createBlockMap(irgs, region);
 
   // Prepare to start translation of the first region block.
   auto const entry = irb.unit().entry();
-  irb.startBlock(entry, entry->front().marker(), false /* isLoopHeader */);
+  irb.startBlock(entry, false /* hasUnprocPred */);
 
   // Make the IR entry block jump to the IR block we mapped the region entry
   // block to (they are not the same!).
-  auto const irBlock = blockIdToIRBlock[region.entry()->id()];
-  always_assert(irBlock != entry);
-  irgen::gen(hts, Jmp, irBlock);
+  {
+    auto const irBlock = blockIdToIRBlock[region.entry()->id()];
+    always_assert(irBlock != entry);
+    irgen::gen(irgs, Jmp, irBlock);
+  }
 
   RegionDesc::BlockIdSet processedBlocks;
 
   Timer irGenTimer(Timer::translateRegion_irGeneration);
   auto& blocks = region.blocks();
 
-  for (auto b = 0; b < blocks.size(); b++) {
-    auto const& block  = blocks[b];
-    auto const blockId = block->id();
+  jit::queue<RegionDesc::BlockId> workQ;
+  for (auto& block : blocks) workQ.push(block->id());
+
+  while (auto optBlockId = nextReachableBlock(workQ, irb, blockIdToIRBlock)) {
+    auto const blockId = optBlockId.value();
+    auto const& block  = region.block(blockId);
     auto sk            = block->start();
     auto byRefs        = makeMapWalker(block->paramByRefs());
     auto knownFuncs    = makeMapWalker(block->knownFuncs());
     auto skipTrans     = false;
 
-    SCOPE_ASSERT_DETAIL("HTS") { return show(hts); };
+    SCOPE_ASSERT_DETAIL("IRGS") { return show(irgs); };
 
     const Func* topFunc = nullptr;
-    TransID profTransId = getTransId(blockId);
-    hts.profTransID = profTransId;
+    if (hasTransID(blockId)) irgs.profTransID = getTransID(blockId);
+    irgs.inlineLevel = block->inlineLevel();
+    irgs.firstBcInst = inEntryRetransChain(blockId, region);
+    irgen::prepareForNextHHBC(irgs, nullptr, sk, false);
 
     // Prepare to start translating this region block.  This loads the
     // FrameState for the IR block corresponding to the start of this
     // region block, and it also sets the map from BC offsets to IR
     // blocks for the successors of this block in the region.
-    Block* irBlock = blockIdToIRBlock[blockId];
-    bool isLoopHeader = blockIsLoopHeader(region, blockId, processedBlocks);
-    always_assert(IMPLIES(isLoopHeader, RuntimeOption::EvalJitLoops));
-    BCMarker marker(sk, block->initialSpOffset(), profTransId);
-    if (!irb.startBlock(irBlock, marker, isLoopHeader)) {
-      FTRACE(1, "translateRegion: block {} is unreachable, skipping\n",
-             blockId);
-      processedBlocks.insert(blockId);
-      continue;
+    auto const irBlock = blockIdToIRBlock[blockId];
+    const bool hasUnprocPred = blockHasUnprocessedPred(region, blockId,
+                                                       processedBlocks);
+    // Note: a block can have an unprocessed predecessor even if the
+    // region is acyclic, e.g. if the IR was able to prove a path was
+    // unfeasible due to incompatible types.
+    if (!irb.startBlock(irBlock, hasUnprocPred)) {
+      // This can't happen because we picked a reachable block from the workQ.
+      always_assert_flog(
+        0, "translateRegion: tried to startBlock on unreachable block {}\n",
+        blockId
+      );
     }
-    setSuccIRBlocks(hts, region, blockId, blockIdToIRBlock);
+    setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
 
-    // Emit the type and reffiness predictions for this region block.
-    // If this is the first instruction in the region, and the
-    // region's entry block is not a loop header, the guards will go
-    // to a retranslate request.  Otherwise, they'll go to a side
-    // exit.
-    auto const useGuards = block == region.entry() && !isLoopHeader;
-    emitPredictionGuards(hts, region, block, useGuards);
+    // Emit the type and reffiness predictions for this region block. If this is
+    // the first instruction in the region, we check inner type eagerly, insert
+    // `EndGuards` after the checks, and generate profiling code in profiling
+    // translations.
+    auto const isEntry = block == region.entry();
+    auto const checkOuterTypeOnly =
+      !isEntry || mcg->tx().mode() != TransKind::Profile;
+    emitPredictionGuards(irgs, region, block, isEntry);
     irb.resetGuardFailBlock();
 
     // Generate IR for each bytecode instruction in this block.
@@ -546,7 +629,7 @@ TranslateResult irGenRegion(HTS& hts,
 
       // Update bcOff here so any guards or assertions from metadata are
       // attributed to this instruction.
-      irgen::prepareForNextHHBC(hts, nullptr, sk.offset(), false);
+      irgen::prepareForNextHHBC(irgs, nullptr, sk, false);
 
       // Update the current funcd, if we have a new one.
       if (knownFuncs.hasNext(sk)) {
@@ -555,13 +638,12 @@ TranslateResult irGenRegion(HTS& hts,
 
       // Create and initialize the instruction.
       NormalizedInstruction inst(sk, block->unit());
-      jit::vector<DynLocation> dynLocs;
-      bool toInterpInst = toInterp.count(ProfSrcKey{profTransId, sk});
-      initNormalizedInstruction(inst, dynLocs, byRefs, hts, region, blockId,
+      bool toInterpInst = toInterp.count(ProfSrcKey{irgs.profTransID, sk});
+      initNormalizedInstruction(inst, byRefs, irgs, region, blockId,
                                 topFunc, lastInstr, toInterpInst);
 
       // If this block ends with an inlined FCall, we don't emit anything for
-      // the FCall and instead set up HhbcTranslator for inlining. Blocks from
+      // the FCall and instead set up irgen for inlining. Blocks from
       // the callee will be next in the region.
       if (lastInstr && block->inlinedCallee()) {
         always_assert(inst.op() == Op::FCall || inst.op() == Op::FCallD);
@@ -571,12 +653,13 @@ TranslateResult irGenRegion(HTS& hts,
                block->func()->fullName()->data(),
                callee->fullName()->data(),
                inst.imm[0].u_IVA,
-               show(hts));
+               show(irgs));
         auto returnSk = inst.nextSk();
         auto returnFuncOff = returnSk.offset() - block->func()->base();
-        irgen::beginInlining(hts, inst.imm[0].u_IVA, callee, returnFuncOff);
+        irgen::beginInlining(irgs, inst.imm[0].u_IVA, callee, returnFuncOff);
         // "Fallthrough" into the callee's first block
-        irgen::endBlock(hts, blocks[b + 1]->start().offset(), inst.nextIsMerge);
+        auto const calleeEntry = region.block(singleSucc(region, blockId));
+        irgen::endBlock(irgs, calleeEntry->start().offset(), inst.nextIsMerge);
         continue;
       }
 
@@ -589,7 +672,7 @@ TranslateResult irGenRegion(HTS& hts,
         // change topFunc in the next pass since hasNext() will return false.
         topFunc = knownFuncs.next();
 
-        if (tryTranslateSingletonInline(hts, inst, topFunc)) {
+        if (tryTranslateSingletonInline(irgs, inst, topFunc)) {
           // Skip the translation of this instruction (the FPush) -and- the
           // next instruction (the FCall) if singleton inlining succeeds.
           // We still want the fallthrough and prediction logic, though.
@@ -600,15 +683,17 @@ TranslateResult irGenRegion(HTS& hts,
 
       // Emit IR for the body of the instruction.
       try {
-        if (!skipTrans) translateInstr(hts, inst);
+        if (!skipTrans) translateInstr(irgs, inst, checkOuterTypeOnly, i == 0);
       } catch (const FailedIRGen& exn) {
-        ProfSrcKey psk{profTransId, sk};
+        ProfSrcKey psk{irgs.profTransID, sk};
         always_assert_flog(!toInterp.count(psk),
                            "IR generation failed with {}\n",
                            exn.what());
         toInterp.insert(psk);
         return TranslateResult::Retry;
       }
+
+      irgen::finishHHBC(irgs);
 
       skipTrans = false;
 
@@ -620,34 +705,37 @@ TranslateResult irGenRegion(HTS& hts,
       // to be translated.
       if (lastInstr) {
         if (region.isExit(blockId)) {
-          irgen::endRegion(hts);
+          irgen::endRegion(irgs);
         } else if (instrAllowsFallThru(inst.op())) {
           if (region.isSideExitingBlock(blockId)) {
-            irgen::prepareForSideExit(hts);
+            irgen::prepareForSideExit(irgs);
           }
-          irgen::endBlock(hts, inst.nextSk().offset(), inst.nextIsMerge);
+          irgen::endBlock(irgs, inst.nextSk().offset(), inst.nextIsMerge);
         } else if (isRet(inst.op()) || inst.op() == OpNativeImpl) {
           // "Fallthrough" from inlined return to the next block
-          irgen::endBlock(hts, blocks[b+1]->start().offset(), inst.nextIsMerge);
+          auto const callerBlock = region.block(singleSucc(region, blockId));
+          irgen::endBlock(irgs, callerBlock->start().offset(),
+                          inst.nextIsMerge);
         }
       }
     }
 
     processedBlocks.insert(blockId);
 
-    assert(!byRefs.hasNext());
-    assert(!knownFuncs.hasNext());
+    assertx(!byRefs.hasNext());
+    assertx(!knownFuncs.hasNext());
   }
-  irGenTimer.end();
+  irgen::sealUnit(irgs);
+  irGenTimer.stop();
   return TranslateResult::Success;
 }
 
-TranslateResult mcGenRegion(HTS& hts,
+TranslateResult mcGenRegion(IRGS& irgs,
                             const RegionDesc& region,
                             RegionBlacklist& toInterp) {
   auto const startSk = region.start();
   try {
-    mcg->traceCodeGen(hts);
+    mcg->traceCodeGen(irgs);
     if (mcg->tx().mode() == TransKind::Profile) {
       mcg->tx().profData()->setProfiling(startSk.func()->getFuncId());
     }
@@ -659,14 +747,14 @@ TranslateResult mcGenRegion(HTS& hts,
       [&] {
         std::ostringstream oss;
         oss << folly::format("code generation failed with {}\n", exn.what());
-        print(oss, hts.irb->unit());
+        print(oss, irgs.irb->unit());
         return oss.str();
       });
     toInterp.insert(psk);
     return TranslateResult::Retry;
   } catch (const DataBlockFull& dbFull) {
     if (dbFull.name == "hot") {
-      assert(mcg->tx().useAHot());
+      assertx(mcg->tx().useAHot());
       mcg->tx().setUseAHot(false);
       // We can't return Retry here because the code block selection
       // will still say hot.
@@ -683,15 +771,15 @@ TranslateResult mcGenRegion(HTS& hts,
 
 //////////////////////////////////////////////////////////////////////
 
-TranslateResult translateRegion(HTS& hts,
+TranslateResult translateRegion(IRGS& irgs,
                                 const RegionDesc& region,
                                 RegionBlacklist& toInterp,
                                 TransFlags trflags,
                                 PostConditions& pConds) {
   SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
-  SCOPE_ASSERT_DETAIL("IRUnit") { return hts.unit.toString(); };
+  SCOPE_ASSERT_DETAIL("IRUnit") { return show(irgs.unit); };
 
-  auto irGenResult = irGenRegion(hts, region, toInterp, trflags);
+  auto irGenResult = irGenRegion(irgs, region, toInterp, trflags);
   if (irGenResult != TranslateResult::Success) return irGenResult;
 
   // For profiling translations, grab the postconditions to be used
@@ -699,16 +787,16 @@ TranslateResult translateRegion(HTS& hts,
   pConds.clear();
   if (mcg->tx().mode() == TransKind::Profile &&
       RuntimeOption::EvalJitPGOUsePostConditions) {
-    auto& unit = hts.irb->unit();
+    auto& unit = irgs.irb->unit();
     auto  lastSrcKey = region.lastSrcKey();
     Block* mainExit = findMainExitBlock(unit, lastSrcKey);
     FTRACE(2, "translateRegion: mainExit: B{}\nUnit: {}\n",
-           mainExit->id(), unit);
-    assert(mainExit);
-    pConds = hts.irb->postConds(mainExit);
+           mainExit->id(), show(unit));
+    assertx(mainExit);
+    pConds = irgs.irb->postConds(mainExit);
   }
 
-  return mcGenRegion(hts, region, toInterp);
+  return mcGenRegion(irgs, region, toInterp);
 }
 
 } }

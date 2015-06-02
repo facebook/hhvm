@@ -33,27 +33,27 @@ namespace jit { namespace x64 {
 
 // The funcGuard gets skipped and patched by other code, so we have some
 // magic offsets.
-constexpr auto kFuncMovImm = 6; // Offset to the immediate for 8 byte Func*
+constexpr auto kFuncMovImm = 2; // Offset to the immediate for 8 byte Func*
 constexpr auto kFuncCmpImm = 4; // Offset to the immediate for 4 byte Func*
-constexpr auto kFuncGuardLen = 23;
+constexpr auto kFuncGuardLen = 20;
 constexpr auto kFuncGuardShortLen = 14;
 
 template<typename T>
 T* funcPrologueToGuardImm(jit::TCA prologue) {
-  assert(arch() == Arch::X64);
-  assert(sizeof(T) == 4 || sizeof(T) == 8);
+  assertx(arch() == Arch::X64);
+  assertx(sizeof(T) == 4 || sizeof(T) == 8);
   T* retval = (T*)(prologue - (sizeof(T) == 8 ?
                                kFuncGuardLen - kFuncMovImm :
                                kFuncGuardShortLen - kFuncCmpImm));
   // We padded these so the immediate would fit inside a cache line
-  assert(((uintptr_t(retval) ^ (uintptr_t(retval + 1) - 1)) &
+  assertx(((uintptr_t(retval) ^ (uintptr_t(retval + 1) - 1)) &
           ~kCacheLineMask) == 0);
 
   return retval;
 }
 
 inline bool funcPrologueHasGuard(jit::TCA prologue, const Func* func) {
-  assert(arch() == Arch::X64);
+  assertx(arch() == Arch::X64);
   intptr_t iptr = uintptr_t(func);
   if (deltaFits(iptr, sz::dword)) {
     return *funcPrologueToGuardImm<int32_t>(prologue) == iptr;
@@ -62,7 +62,7 @@ inline bool funcPrologueHasGuard(jit::TCA prologue, const Func* func) {
 }
 
 inline TCA funcPrologueToGuard(TCA prologue, const Func* func) {
-  assert(arch() == Arch::X64);
+  assertx(arch() == Arch::X64);
   if (!prologue || prologue == mcg->tx().uniqueStubs.fcallHelperThunk) {
     return prologue;
   }
@@ -84,8 +84,8 @@ inline void funcPrologueSmashGuard(jit::TCA prologue, const Func* func) {
 //////////////////////////////////////////////////////////////////////
 
 jit::TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs);
-SrcKey emitFuncPrologue(Func* func, int nPassed, TCA& start);
-SrcKey emitMagicFuncPrologue(Func* func, uint32_t nPassed, TCA& start);
+SrcKey emitFuncPrologue(TransID transID, Func* func, int argc, TCA& start);
+SrcKey emitMagicFuncPrologue(TransID transID, Func* func, int argc, TCA& start);
 
 }}}
 

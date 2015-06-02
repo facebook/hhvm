@@ -1,7 +1,7 @@
 <?php
 $a = "do";
 $b = "re";
-$fn = function (&$x) use (&$b) {
+$fn = function(&$x) use (&$b) {
   $x = "mi";
   $b = "fa";
 };
@@ -10,7 +10,7 @@ echo ("the param $a\n");
 echo ("the used $b\n");
 class C {
   public function mk_lm(&$y, $toWhat) {
-    return function () use (&$y, $toWhat) {
+    return function() use (&$y, $toWhat) {
       $y = $toWhat;
     };
   }

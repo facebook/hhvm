@@ -1,0 +1,12 @@
+File "subsume_tconst1.php", line 7, characters 11-11:
+This object is of type C (Typing[4110])
+File "subsume_tconst1.php", line 7, characters 21-21:
+It is incompatible with this object of type P
+because some declarations are incompatible.
+Read the following to see why:
+File "subsume_tconst1.php", line 8, characters 23-23:
+The constraint on this type constant is inconsistent with its parent
+File "subsume_tconst1.php", line 4, characters 28-35:
+This is an array key (int/string)
+File "subsume_tconst1.php", line 8, characters 23-23:
+It is incompatible with a value of generic type T because the type constant T has no constraints

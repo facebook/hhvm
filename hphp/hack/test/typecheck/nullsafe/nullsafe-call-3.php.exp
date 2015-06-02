@@ -1,0 +1,4 @@
+File "nullsafe-call-3.php", line 19, characters 25-27:
+You are trying to access the member bar but this object can be null.  (Typing[4064])
+File "nullsafe-call-3.php", line 19, characters 10-22:
+This is what makes me believe it can be null (use of ?-> operator)

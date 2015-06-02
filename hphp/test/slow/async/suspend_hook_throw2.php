@@ -30,7 +30,7 @@ $y = thing();
 
 function get($y) {
   try {
-    foo($y)->join();
+    HH\Asio\join(foo($y));
   } catch (exception $ex) {
     echo "caught in get\n";
   }

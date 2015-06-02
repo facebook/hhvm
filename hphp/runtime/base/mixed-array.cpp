@@ -48,30 +48,26 @@ TRACE_SET_MOD(runtime);
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayData* MixedArray::MakeReserveMixed(uint32_t capacity) {
-  auto const cmret = computeCapAndMask(capacity);
-  auto const cap   = cmret.first;
-  auto const mask  = cmret.second;
-  auto const ad    = smartAllocArray(cap, mask);
+ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
+  auto const scale = computeScaleFromSize(size);
+  auto const ad    = smartAllocArray(scale);
 
   ad->m_sizeAndPos   = 0; // size=0, pos=0
-  ad->m_kindAndCount = kMixedKind << 24 | uint64_t{1} << 32; // count=1
-  ad->m_capAndUsed   = cap;
-  ad->m_tableMask    = mask;
+  ad->m_hdr.init(HeaderKind::Mixed, 1);
+  ad->m_scale_used   = scale; // used=0
   ad->m_nextKI       = 0;
 
   auto const data = mixedData(ad);
-  auto const hash = reinterpret_cast<int32_t*>(data + cap);
-  wordfill(hash, Empty, mask + 1);
+  auto const hash = mixedHash(data, scale);
+  wordfill(hash, Empty, MixedArray::HashSize(scale));
 
-  assert(ad->m_kind == kMixedKind);
+  assert(ad->kind() == kMixedKind);
   assert(ad->m_size == 0);
   assert(ad->m_pos == 0);
-  assert(ad->m_count == 1);
-  assert(ad->m_cap == cap);
+  assert(ad->getCount() == 1);
   assert(ad->m_used == 0);
   assert(ad->m_nextKI == 0);
-  assert(ad->m_tableMask == mask);
+  assert(ad->m_scale == scale);
   assert(ad->checkInvariants());
   return ad;
 }
@@ -80,31 +76,28 @@ ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
                                        uint32_t capacity) {
   capacity = (capacity ? capacity : other->size());
 
-  if (other->m_kind == kPackedKind) {
-    return MixedArray::MakeReserve(capacity);
-  } else {
-    return MixedArray::MakeReserveMixed(capacity);
-  }
+  return other->kind() == kPackedKind ? MixedArray::MakeReserve(capacity) :
+         MixedArray::MakeReserveMixed(capacity);
 }
 
 ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
   assert(size > 0);
   ArrayData* ad;
-  if (LIKELY(size <= kPackedCapCodeThreshold)) {
+  if (LIKELY(size <= CapCode::Threshold)) {
     auto cap = size;
     if (auto const newCap = PackedArray::getMaxCapInPlaceFast(cap)) {
       cap = newCap;
     }
     assert(cap > 0);
     ad = static_cast<ArrayData*>(
-      MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
+      MM().objMalloc(sizeof(ArrayData) + sizeof(TypedValue) * cap)
     );
-    assert(cap == packedCodeToCap(cap));
+    assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = size; // pos=0
-    ad->m_kindAndCount = cap | uint64_t{1} << 32; // kind=0, count=1
-    assert(ad->m_kind == kPackedKind);
+    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
     assert(ad->m_size == size);
-    assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+    assert(ad->kind() == kPackedKind);
+    assert(ad->cap() == cap);
   } else {
     ad = MakePackedHelper(size, values);
   }
@@ -121,7 +114,7 @@ ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
   }
 
   assert(ad->m_pos == 0);
-  assert(ad->m_count == 1);
+  assert(ad->getCount() == 1);
   assert(PackedArray::checkInvariants(ad));
   return ad;
 }
@@ -129,51 +122,48 @@ ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
 NEVER_INLINE ArrayData*
 MixedArray::MakePackedHelper(uint32_t size, const TypedValue* values) {
   auto const ad = MakeReserveSlow(size); // size=pos=count=kind=0
-  ad->m_count = 1;
-  assert(ad->m_kind == kPackedKind);
+  ad->setRefCount(1);
+  assert(ad->kind() == kPackedKind);
   assert(ad->m_size == size);
-  assert(packedCodeToCap(ad->m_packedCapCode) >= size);
+  assert(ad->cap() >= size);
   return ad;
 }
 
 ArrayData* MixedArray::MakePackedUninitialized(uint32_t size) {
   assert(size > 0);
   ArrayData* ad;
-  assert(size <= kPackedCapCodeThreshold);
+  assert(size <= CapCode::Threshold);
   auto const cap = size;
   ad = static_cast<ArrayData*>(
-    MM().objMallocLogged(sizeof(ArrayData) + sizeof(TypedValue) * cap)
+    MM().objMalloc(sizeof(ArrayData) + sizeof(TypedValue) * cap)
   );
-  assert(cap == packedCodeToCap(cap));
+  assert(cap == CapCode::ceil(cap).code);
   ad->m_sizeAndPos = size; // pos=0
-  ad->m_kindAndCount = cap | uint64_t{1} << 32; // kind=0, count=1
-  assert(ad->m_kind == kPackedKind);
+  ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
   assert(ad->m_size == size);
-  assert(packedCodeToCap(ad->m_packedCapCode) == cap);
   assert(ad->m_pos == 0);
-  assert(ad->m_count == 1);
+  assert(ad->kind() == kPackedKind);
+  assert(ad->cap() == cap);
+  assert(ad->getCount() == 1);
   assert(PackedArray::checkInvariants(ad));
   return ad;
 }
 
 MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
-                                 const TypedValue* values) {
+                                   const TypedValue* values) {
   assert(size > 0);
 
-  auto const cmret = computeCapAndMask(size);
-  auto const cap   = cmret.first;
-  auto const mask  = cmret.second;
-  auto const ad    = smartAllocArray(cap, mask);
+  auto const scale = computeScaleFromSize(size);
+  auto const ad    = smartAllocArray(scale);
 
   ad->m_sizeAndPos       = size; // pos=0
-  ad->m_kindAndCount     = kMixedKind << 24 | uint64_t{1} << 32; // count=1
-  ad->m_capAndUsed       = uint64_t{size} << 32 | cap; // used=size
-  ad->m_tableMask        = mask;
+  ad->m_hdr.init(HeaderKind::Mixed, 1);
+  ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
   auto const data = mixedData(ad);
-  auto const hash = reinterpret_cast<int32_t*>(data + cap);
-  ad->initHash(hash, mask + 1);
+  auto const hash = mixedHash(data, scale);
+  ad->initHash(hash, MixedArray::HashSize(scale));
 
   // Append values by moving -- Caller assumes we update refcount.
   // Values are in reverse order since they come from the stack, which
@@ -190,11 +180,11 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
     *ei = i;
   }
 
-  assert(ad->m_kind == kMixedKind);
   assert(ad->m_size == size);
   assert(ad->m_pos == 0);
-  assert(ad->m_count == 1);
-  assert(ad->m_cap == cap);
+  assert(ad->kind() == kMixedKind);
+  assert(ad->m_scale == scale);
+  assert(ad->getCount() == 1);
   assert(ad->m_used == size);
   assert(ad->m_nextKI == 0);
   assert(ad->checkInvariants());
@@ -207,7 +197,7 @@ StructArray* MixedArray::MakeStructArray(
   Shape* shape
 ) {
   assert(size > 0);
-  assert(size <= kPackedCapCodeThreshold);
+  assert(size <= CapCode::Threshold);
   assert(shape);
 
   // Append values by moving -- Caller assumes we update refcount.
@@ -224,22 +214,19 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
                                   CopyKeyValue copyKeyValue) {
   assert(other.isMixed());
 
-  auto const cap  = other.m_cap;
-  auto const mask = other.m_tableMask;
+  auto const scale  = other.m_scale;
   auto const ad = mode == AllocMode::Smart
-    ? smartAllocArray(cap, mask)
-    : mallocArray(cap, mask);
+    ? smartAllocArray(scale)
+    : mallocArray(scale);
 
   ad->m_sizeAndPos      = other.m_sizeAndPos;
-  ad->m_kindAndCount    = other.m_packedCapCode; // copy kind; count=0
-  ad->m_capAndUsed      = uint64_t{other.m_used} << 32 | cap;
-  ad->m_tableMask       = mask;
+  ad->m_hdr.init(other.m_hdr, 0);
+  ad->m_scale_used      = other.m_scale_used;
   ad->m_nextKI          = other.m_nextKI;
 
-  auto const data      = mixedData(ad);
-  auto const hash      = reinterpret_cast<int32_t*>(data + cap);
-
-  copyHash(hash, other.hashTab(), mask + 1);
+  auto const data = mixedData(ad);
+  auto const hash = mixedHash(data, scale);
+  copyHash(hash, other.hashTab(), MixedArray::HashSize(scale));
 
   // Copy the elements and bump up refcounts as needed.
   auto const elms = other.data();
@@ -264,12 +251,11 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     ad->compact(false);
   }
 
-  assert(ad->m_kind == other.m_kind);
+  assert(ad->kind() == other.kind());
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
-  assert(ad->m_count == 0);
-  assert(ad->m_cap == cap);
-  assert(ad->m_tableMask == mask);
+  assert(ad->getCount() == 0);
+  assert(ad->m_scale == scale);
   assert(ad->checkInvariants());
   return ad;
 }
@@ -325,8 +311,8 @@ MixedArray* MixedArray::copyMixedAndResizeIfNeededSlow() const {
 //////////////////////////////////////////////////////////////////////
 
 size_t MixedArray::computeAllocBytesFromMaxElms(uint32_t maxElms) {
-  auto const cam = computeCapAndMask(maxElms);
-  return computeAllocBytes(cam.first, cam.second);
+  auto const scale = computeScaleFromSize(maxElms);
+  return computeAllocBytes(scale);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -399,18 +385,18 @@ ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
 
   ArrayData* ad;
   auto const size = array->m_size;
-  if (LIKELY(size <= kPackedCapCodeThreshold)) {
+  if (LIKELY(size <= CapCode::Threshold)) {
     // We don't need to copy the full capacity, since the array won't
     // change once it's uncounted.
     auto const cap = size;
     ad = static_cast<ArrayData*>(
       std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
     );
-    assert(cap == packedCodeToCap(cap));
+    assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = array->m_sizeAndPos;
-    ad->m_kindAndCount = cap | int64_t{UncountedValue} << 32; // kind=0
-    assert(ad->m_kind == ArrayData::kPackedKind);
-    assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, UncountedValue);
+    assert(ad->kind() == ArrayData::kPackedKind);
+    assert(ad->cap() == cap);
     assert(ad->m_size == size);
   } else {
     ad = MakeUncountedPackedHelper(array);
@@ -423,7 +409,6 @@ ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
            *targetData);
   }
   assert(ad->m_pos == array->m_pos);
-  assert(ad->m_count == UncountedValue);
   assert(ad->isUncounted());
   assert(PackedArray::checkInvariants(ad));
   return ad;
@@ -431,15 +416,15 @@ ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
 
 NEVER_INLINE
 ArrayData* MixedArray::MakeUncountedPackedHelper(ArrayData* array) {
-  auto const cap = roundUpPackedCap(array->m_size);
+  auto const fpcap = CapCode::ceil(array->m_size);
+  auto const cap = fpcap.decode();
   auto const ad = static_cast<ArrayData*>(
     std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
-  auto const capCode = packedCapToCode(cap);
   ad->m_sizeAndPos = array->m_sizeAndPos;
-  ad->m_kindAndCount = capCode | int64_t{UncountedValue} << 32;
-  assert(ad->m_kind == ArrayData::kPackedKind);
-  assert(packedCodeToCap(ad->m_packedCapCode) == cap);
+  ad->m_hdr.init(fpcap, HeaderKind::Packed, UncountedValue);
+  assert(ad->kind() == ArrayData::kPackedKind);
+  assert(ad->cap() == cap);
   assert(ad->m_size == array->m_size);
   assert(ad->m_pos == array->m_pos);
   return ad;
@@ -467,7 +452,7 @@ void MixedArray::Release(ArrayData* in) {
       free_strong_iterators(ad);
     }
   }
-  MM().objFreeLogged(ad, ad->heapSize());
+  MM().objFree(ad, ad->heapSize());
 }
 
 void MixedArray::ReleaseUncountedTypedValue(TypedValue& tv) {
@@ -499,7 +484,7 @@ void MixedArray::ReleaseUncountedTypedValue(TypedValue& tv) {
 NEVER_INLINE
 void MixedArray::ReleaseUncounted(ArrayData* in) {
   auto const ad = asMixed(in);
-  assert(ad->m_count == UncountedValue);
+  assert(ad->isUncounted());
 
   if (!ad->isZombie()) {
     auto const data = ad->data();
@@ -531,7 +516,7 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
 
 void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
   assert(PackedArray::checkInvariants(ad));
-  assert(ad->m_count == UncountedValue);
+  assert(ad->isUncounted());
 
   auto const data = packedData(ad);
   auto const stop = data + ad->m_size;
@@ -561,9 +546,9 @@ void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
  *
  * All arrays (zombie or not):
  *
- *   m_tableMask is 2^k - 1 (required for quadratic probe)
- *   m_tableMask == folly::nextPowTwo(m_cap) - 1;
- *   m_cap == computeMaxElms(m_tableMask);
+ *   m_scale is 2^k (1/4 of the hashtable size and 1/3 of capacity)
+ *   mask is 4*scale - 1 (even power of 2 required for quadratic probe)
+ *   mask == folly::nextPowTwo(capacity()) - 1;
  *
  * Zombie state:
  *
@@ -572,7 +557,7 @@ void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
  *
  * Non-zombie:
  *
- *   m_size <= m_used; m_used <= m_cap
+ *   m_size <= m_used; m_used <= capacity()
  *   last element cannot be a tombstone
  *   m_pos and all external iterators can't be on a tombstone
  *
@@ -593,21 +578,21 @@ bool MixedArray::checkInvariants() const {
   static_assert(sizeof(Elm) == 24, "");
   static_assert(sizeof(ArrayData) == 2 * sizeof(uint64_t), "");
   static_assert(
-    sizeof(MixedArray) == sizeof(ArrayData) + 3 * sizeof(uint64_t),
+    sizeof(MixedArray) == sizeof(ArrayData) + 2 * sizeof(uint64_t),
     "Performance is sensitive to sizeof(MixedArray)."
     " Make sure you changed it with good reason and then update this assert."
   );
 
   // All arrays:
-  assert(m_tableMask > 0 && ((m_tableMask+1) & m_tableMask) == 0);
-  assert(m_tableMask == folly::nextPowTwo<uint64_t>(m_cap) - 1);
-  assert(m_cap == computeMaxElms(m_tableMask));
+  assert(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
+  assert(MixedArray::HashSize(m_scale) ==
+         folly::nextPowTwo<uint64_t>(capacity()));
 
   if (isZombie()) return true;
 
   // Non-zombie:
   assert(m_size <= m_used);
-  assert(m_used <= m_cap);
+  assert(m_used <= capacity());
   if (m_pos != m_used) {
     assert(size_t(m_pos) < m_used);
     assert(!isTombstone(data()[m_pos].data.m_type));
@@ -637,7 +622,7 @@ ssize_t MixedArray::IterBegin(const ArrayData* ad) {
 
 ssize_t MixedArray::IterLast(const ArrayData* ad) {
   auto a = asMixed(ad);
-  auto* elms = a->data();
+  auto elms = a->data();
   ssize_t ei = a->m_used;
   while (ei > 0) {
     --ei;
@@ -694,7 +679,7 @@ bool MixedArray::IsVectorData(const ArrayData* ad) {
   auto a = asMixed(ad);
   if (a->m_size == 0) {
     // any 0-length array is "vector-like" for the sake of this
-    // function, even if m_kind != kVector.
+    // function, even if kind != kVector.
     return true;
   }
   auto const elms = a->data();
@@ -746,18 +731,18 @@ static bool hitIntKey(const MixedArray::Elm& e, int64_t ki) {
 
 template <class Hit> ALWAYS_INLINE
 ssize_t MixedArray::findImpl(size_t h0, Hit hit) const {
-  // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
+  // mask, probeIndex, and pos are explicitly 64-bit, because performance
   // regressed when they were 32-bit types via auto.  Test carefully.
-  size_t tableMask = m_tableMask;
-  auto* elms = data();
-  auto* hashtable = hashTab();
+  size_t mask = this->mask();
+  auto elms = data();
+  auto hashtable = hashTab();
   for (size_t probeIndex = h0, i = 1;; ++i) {
-    ssize_t pos = hashtable[probeIndex & tableMask];
+    ssize_t pos = hashtable[probeIndex & mask];
     if ((validPos(pos) && hit(elms[pos])) || pos == Empty) {
       return pos;
     }
     probeIndex += i;
-    assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
+    assert(i <= mask && probeIndex == h0 + (i + i*i) / 2);
   }
 }
 
@@ -784,13 +769,13 @@ int32_t* warnUnbalanced(size_t n, int32_t* ei) {
 
 template <class Hit> ALWAYS_INLINE
 int32_t* MixedArray::findForInsertImpl(size_t h0, Hit hit) const {
-  // tableMask, probeIndex, and pos are explicitly 64-bit, because performance
+  // mask, probeIndex, and pos are explicitly 64-bit, because performance
   // regressed when they were 32-bit types via auto.  Test carefully.
-  size_t tableMask = m_tableMask;
-  auto* elms = data();
-  auto* hashtable = hashTab();
+  size_t mask = this->mask();
+  auto elms = data();
+  auto hashtable = hashTab();
   for (size_t probeIndex = h0, i = 1;; ++i) {
-    auto ei = &hashtable[probeIndex & tableMask];
+    auto ei = &hashtable[probeIndex & mask];
     ssize_t pos = *ei;
     if (validPos(pos)) {
       if (hit(elms[pos])) {
@@ -800,7 +785,7 @@ int32_t* MixedArray::findForInsertImpl(size_t h0, Hit hit) const {
       return ei;
     }
     probeIndex += i;
-    assert(i <= tableMask && probeIndex == h0 + (i + i*i) / 2);
+    assert(i <= mask && probeIndex == h0 + (i + i*i) / 2);
   }
 }
 
@@ -848,11 +833,11 @@ MixedArray::InsertPos MixedArray::insert(StringData* k) {
 
 template <class Hit, class Remove> ALWAYS_INLINE
 ssize_t MixedArray::findForRemoveImpl(size_t h0, Hit hit, Remove remove) const {
-  size_t mask = m_tableMask;
-  auto* elms = data();
-  auto* hashtable = hashTab();
+  size_t mask = this->mask();
+  auto elms = data();
+  auto hashtable = hashTab();
   for (size_t i = 1, probe = h0;; ++i) {
-    auto* ei = &hashtable[probe & mask];
+    auto ei = &hashtable[probe & mask];
     ssize_t pos = *ei;
     if (validPos(pos)) {
       if (hit(elms[pos])) {
@@ -1007,14 +992,14 @@ ALWAYS_INLINE MixedArray* MixedArray::resizeIfNeeded() {
 }
 
 NEVER_INLINE MixedArray* MixedArray::resize() {
-  uint32_t maxElms = computeMaxElms(m_tableMask);
-  assert(m_used <= maxElms);
+  assert(m_used <= capacity());
+  uint32_t cap = capacity();
   // At a minimum, compaction is required.  If the load factor would be >0.5
   // even after compaction, grow instead, in order to avoid the possibility
   // of repeated compaction if the load factor were to hover at nearly 0.75.
-  if (m_size > maxElms / 2) {
-    assert(m_tableMask <= 0x7fffffffU);
-    return Grow(this, maxElms * 2, m_tableMask * 2 + 1);
+  if (m_size > cap / 2) {
+    assert(mask() <= 0x7fffffffU);
+    return Grow(this, m_scale * 2);
   }
   compact(false);
   return this;
@@ -1036,25 +1021,20 @@ MixedArray::InsertCheckUnbalanced(MixedArray* ad,
 }
 
 MixedArray*
-MixedArray::Grow(MixedArray* old, uint32_t newCap, uint32_t newMask) {
+MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   assert(!old->isPacked());
   assert(old->m_size > 0);
-  assert(newCap >= old->m_size);
-  assert(newMask > 0 && ((newMask+1) & newMask) == 0);
-  assert(newMask == folly::nextPowTwo<uint64_t>(newCap) - 1);
-  assert(newCap == computeMaxElms(newMask));
+  assert(MixedArray::Capacity(newScale) >= old->m_size);
+  assert(newScale >= 1 && (newScale & (newScale - 1)) == 0);
 
-  auto const mask       = newMask;
-  auto const cap        = newCap;
-  auto const ad         = smartAllocArray(cap, mask);
+  auto const ad         = smartAllocArray(newScale);
   auto const oldUsed    = old->m_used;
 
   ad->m_sizeAndPos      = old->m_sizeAndPos;
-  ad->m_kindAndCount    = old->m_packedCapCode; // kind=old->kind, count=0
-  ad->m_capAndUsed      = uint64_t{oldUsed} << 32 | cap;
-  ad->m_tableMask       = mask;
+  ad->m_hdr.init(old->m_hdr, 0);
+  ad->m_scale_used      = newScale | uint64_t{oldUsed} << 32;
   ad->m_nextKI          = old->m_nextKI;
-  auto table            = reinterpret_cast<int32_t*>(ad->data() + cap);
+  auto table            = reinterpret_cast<int32_t*>(ad->data() + 3*newScale);
 
   if (UNLIKELY(strong_iterators_exist())) {
     move_strong_iterators(ad, old);
@@ -1062,11 +1042,12 @@ MixedArray::Grow(MixedArray* old, uint32_t newCap, uint32_t newMask) {
 
   // Copy the old element array, and initialize the hashtable to all empty.
   copyElms(ad->data(), old->data(), oldUsed);
-  ad->initHash(table, mask + 1);
+  ad->initHash(table, MixedArray::HashSize(newScale));
 
   auto iter = ad->data();
   auto const stop = iter + oldUsed;
-  assert(mask == ad->m_tableMask);
+  assert(newScale == ad->m_scale);
+  auto mask = MixedArray::Mask(newScale);
   if (UNLIKELY(oldUsed >= 2000)) {
     InsertCheckUnbalanced(ad, table, mask, iter, stop);
   } else {
@@ -1080,12 +1061,12 @@ MixedArray::Grow(MixedArray* old, uint32_t newCap, uint32_t newMask) {
   old->setZombie();
 
   assert(old->isZombie());
-  assert(ad->m_kind == old->m_kind);
+  assert(ad->kind() == old->kind());
   assert(ad->m_size == old->m_size);
-  assert(ad->m_count == 0);
+  assert(ad->getCount() == 0);
   assert(ad->m_pos == old->m_pos);
   assert(ad->m_used == oldUsed);
-  assert(ad->m_tableMask == mask);
+  assert(ad->m_scale == newScale);
   assert(ad->checkInvariants());
   return ad;
 }
@@ -1162,7 +1143,7 @@ void MixedArray::compact(bool renumber /* = false */) {
 
   // Perform compaction
   auto elms = data();
-  auto mask = m_tableMask;
+  auto mask = this->mask();
   size_t tableSize = mask + 1;
   auto table = hashTab();
   initHash(table, tableSize);
@@ -1466,7 +1447,7 @@ void MixedArray::eraseNoCompact(ssize_t pos) {
   tv->m_type = kInvalidDataType;
   --m_size;
   // Mark the hash entry as "deleted".
-  assert(m_used <= m_cap);
+  assert(m_used <= capacity());
 
   // Finally, decref the old value
   tvRefcountedDecRefHelper(oldType, oldDatum);
@@ -1574,21 +1555,18 @@ NEVER_INLINE
 MixedArray* MixedArray::CopyReserve(const MixedArray* src,
                                     size_t expectedSize) {
   assert(!src->isPacked());
-  auto const cmret = computeCapAndMask(expectedSize);
-  auto const cap   = cmret.first;
-  auto const mask  = cmret.second;
-  auto const ad    = smartAllocArray(cap, mask);
+  auto const scale = computeScaleFromSize(expectedSize);
+  auto const ad    = smartAllocArray(scale);
   auto const oldUsed = src->m_used;
 
   ad->m_sizeAndPos      = src->m_sizeAndPos;
-  ad->m_kindAndCount    = src->m_packedCapCode | uint64_t{1} << 32; // count=1
-  ad->m_cap             = cap;
-  ad->m_tableMask       = mask;
+  ad->m_hdr.init(src->m_hdr, 1);
+  ad->m_scale           = scale; // don't set m_used yet
   ad->m_nextKI          = src->m_nextKI;
 
   auto const data  = ad->data();
-  auto const table = reinterpret_cast<int32_t*>(data + cap);
-  ad->initHash(table, mask + 1);
+  auto const table = mixedHash(data, scale);
+  ad->initHash(table, MixedArray::HashSize(scale));
 
   auto dstElm = data;
   auto srcElm = src->data();
@@ -1612,6 +1590,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   }
 
   // Copy the elements
+  auto mask = MixedArray::Mask(scale);
   for (; srcElm != srcStop; ++srcElm) {
     if (isTombstone(srcElm->data.m_type)) continue;
     tvDupFlattenVars(&srcElm->data, &dstElm->data, src);
@@ -1642,13 +1621,12 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   assert(i == dstElm - data);
   ad->m_used = i;
 
-  assert(ad->m_kind == src->m_kind);
+  assert(ad->kind() == src->kind());
   assert(ad->m_size == src->m_size);
-  assert(ad->m_count == 1);
-  assert(ad->m_cap == cap);
+  assert(ad->getCount() == 1);
   assert(ad->m_used <= oldUsed);
   assert(ad->m_used == dstElm - data);
-  assert(ad->m_tableMask == mask);
+  assert(ad->m_scale == scale);
   assert(ad->m_nextKI == src->m_nextKI);
   assert(ad->checkInvariants());
   return ad;

@@ -1,0 +1,6 @@
+File "catch_non_exception.php", line 7, characters 12-23:
+Invalid exception (Typing[4110])
+File "catch_non_exception.php", line 7, characters 12-23:
+This is an object of type Exception because it is used as an exception
+File "catch_non_exception.php", line 7, characters 12-23:
+It is incompatible with an object of type NonException

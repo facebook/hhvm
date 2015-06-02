@@ -21,9 +21,11 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/hardware-counter.h"
+#include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/system/constants.h"
+#include "hphp/util/hardware-counter.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
 
@@ -218,13 +220,22 @@ int64_t HHVM_FUNCTION(hphp_instruction_counter) {
 Variant HHVM_FUNCTION(hphp_get_hardware_counters) {
   Array ret;
 
-  HardwareCounter::GetPerfEvents(ret);
+  HardwareCounter::GetPerfEvents(
+    [](const std::string& key, int64_t value, void* data) {
+      Array& ret = *reinterpret_cast<Array*>(data);
+      ret.set(String(key), value);
+    },
+    &ret);
+
+  jit::mcg->getPerfCounters(ret);
   return ret;
 }
 
 bool HHVM_FUNCTION(hphp_set_hardware_events,
                     const Variant& events /* = null */) {
-  return HardwareCounter::SetPerfEvents(events.toString());
+  String ev = events.toString();
+  ev = url_decode(ev.data(), ev.size());
+  return HardwareCounter::SetPerfEvents(ev.slice());
 }
 
 void HHVM_FUNCTION(hphp_clear_hardware_events) {

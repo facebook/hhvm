@@ -34,11 +34,15 @@ rds::Link<uint64_t> g_bytecodesVasm{rds::kInvalidHandle};
 
 folly::Range<Vlabel*> succs(Vinstr& inst) {
   switch (inst.op) {
+    case Vinstr::bindcall:  return {inst.bindcall_.targets, 2};
+    case Vinstr::contenter: return {inst.contenter_.targets, 2};
     case Vinstr::jcc:       return {inst.jcc_.targets, 2};
+    case Vinstr::jcci:      return {&inst.jcci_.target, 1};
     case Vinstr::jmp:       return {&inst.jmp_.target, 1};
     case Vinstr::phijmp:    return {&inst.phijmp_.target, 1};
     case Vinstr::phijcc:    return {inst.phijcc_.targets, 2};
     case Vinstr::unwind:    return {inst.unwind_.targets, 2};
+    case Vinstr::vcallstub: return {inst.vcallstub_.targets, 2};
     case Vinstr::vinvoke:   return {inst.vinvoke_.targets, 2};
     case Vinstr::cbcc:      return {inst.cbcc_.targets, 2};
     case Vinstr::tbcc:      return {inst.tbcc_.targets, 2};
@@ -60,6 +64,21 @@ folly::Range<const Vlabel*> succs(const Vblock& block) {
   return succs(const_cast<Vblock&>(block)).castToConst();
 }
 
+boost::dynamic_bitset<> backedgeTargets(const Vunit& unit,
+                                        const jit::vector<Vlabel>& rpoBlocks) {
+  boost::dynamic_bitset<> ret(unit.blocks.size());
+  boost::dynamic_bitset<> seen(unit.blocks.size());
+
+  for (auto label : rpoBlocks) {
+    seen.set(label);
+    for (auto target : succs(unit.blocks[label])) {
+      if (seen.test(target)) ret.set(target);
+    }
+  }
+
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -79,9 +98,7 @@ struct BlockSorter {
   }
 
   void dfs(Vlabel b) {
-    assert(size_t(b) < unit.blocks.size() &&
-           !unit.blocks[b].code.empty());
-
+    assert_no_log(size_t(b) < unit.blocks.size());
     if (visited.test(b)) return;
     visited.set(b);
 
@@ -116,28 +133,12 @@ jit::vector<Vlabel> sortBlocks(const Vunit& unit) {
   std::stable_partition(s.blocks.begin(), s.blocks.end(), [&] (Vlabel b) {
     auto& block = unit.blocks[b];
     auto& code = block.code;
-    return code.back().op != Vinstr::fallthru;
+    return !code.empty() && code.back().op != Vinstr::fallthru;
   });
 
   return s.blocks;
 }
 
-jit::vector<Vlabel> layoutBlocks(const Vunit& unit) {
-  auto blocks = sortBlocks(unit);
-  // Partition into main/cold/frozen areas without changing relative order, and
-  // the end{} block will be last.
-  auto coldIt = std::stable_partition(blocks.begin(), blocks.end(),
-    [&](Vlabel b) {
-      return unit.blocks[b].area == AreaIndex::Main &&
-             unit.blocks[b].code.back().op != Vinstr::fallthru;
-    });
-  std::stable_partition(coldIt, blocks.end(),
-    [&](Vlabel b) {
-      return unit.blocks[b].area == AreaIndex::Cold &&
-             unit.blocks[b].code.back().op != Vinstr::fallthru;
-    });
-  return blocks;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
+
 }}

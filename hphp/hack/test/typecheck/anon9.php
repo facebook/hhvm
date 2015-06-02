@@ -10,7 +10,7 @@
  */
 
 function test(): (function(string): string) {
-  $f = function () {
+  $f = function() {
     return '';
   };
   return $f;

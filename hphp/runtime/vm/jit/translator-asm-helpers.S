@@ -8,10 +8,9 @@
  *   rdx / x2:  unsigned char* start
  *   rcx / x4:  ActRec* firstAR
  *   r8  / x5:  uint8_t* targetCacheBase
- *   r9  / x6:  ActRec* stashedAR
+ *   r9  / x6:  ActRec* calleeAR
  */
 
-#include "hphp/runtime/vm/jit/reserved-stack.h"
 #include "hphp/util/etch-helpers.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,19 +34,19 @@ ETCH_NAME(enterTCHelper):
   mov %r8,  %r12          // rVmTl
   mov %rsi, %rbp          // rVmFp
 
-  sub $RESERVED_STACK_TOTAL_SPACE, %rsp
-  CFI2(adjust_cfa_offset, RESERVED_STACK_TOTAL_SPACE)
+  sub $8, %rsp // align native stack
+  CFI2(adjust_cfa_offset, 8)
 
   /*
    * If we're entering the TC at a function prologue, make it look like we got
-   * there via a bindcall by pushing return addresses, setting rStashedAR, then
-   * jumping to the prologue.
+   * there via a bindcall by pushing return addresses, setting the callee frame
+   * pointer, then jumping to the prologue.
    */
   test %r9, %r9
   jz ETCH_LABEL(enterTCHelper$callTC)
-  push $enterTCExit
+  push ETCH_NAME_REL(enterTCExit)
   push 0x8(%r9)
-  mov %r9, %r15
+  mov %r9, %rbp
   jmp *%rdx
 
   /*
@@ -71,8 +70,8 @@ ETCH_NAME(enterTCExit):
    */
   mov %rbx, 0x10(%r12)
   mov %rbp, 0x20(%r12)
-  add $RESERVED_STACK_TOTAL_SPACE, %rsp
-  CFI2(adjust_cfa_offset, -RESERVED_STACK_TOTAL_SPACE)
+  add $8, %rsp
+  CFI2(adjust_cfa_offset, -8)
 
   // Epilogue
   pop %rbp
@@ -96,37 +95,25 @@ ETCH_NAME(handleSRHelper):
   mov %rbp, 0x20(%r12)
 
   // Push a ServiceReqInfo struct onto the stack and call handleServiceRequest.
-  push %rax // padding
   push %r8
   push %rcx
   push %rdx
   push %rsi
-  push %r15
   push %r10
   push %rdi
-  CFI2(adjust_cfa_offset, 0x40)
+  CFI2(adjust_cfa_offset, 0x30)
 
   // call mcg->handleServiceRequest(%rsp)
-  mov mcg(%rip), %rdi
+  mov ETCH_NAME(mcg)(%rip), %rdi
   mov %rsp, %rsi
   call MCGenerator_handleServiceRequest
 
-  // Load the service request we were processing from the ServiceReqInfo,
-  // then pop it off the stack.
-  mov (%rsp), %edi
-  add $0x40, %rsp
-  CFI2(adjust_cfa_offset, -0x40)
+  // Pop the ServiceReqInfo off the stack.
+  add $0x30, %rsp
+  CFI2(adjust_cfa_offset, -0x30)
 
-  // If we're coming back from a REQ_BIND_CALL, we have to push m_savedRip
-  // from rStashedAR for the func prologue we're about to jump to.
-  cmpl $0, %edi
-  jne ETCH_NAME(handleSRResumeTC)
-  push 0x8(%r15)
-
-  .globl ETCH_NAME(handleSRResumeTC)
-ETCH_NAME(handleSRResumeTC):
-  // rVmTl and rStashedAR were preserved by the callee but vmsp and vmfp
-  // might've changed if we interpreted anything. Reload them.
+  // rVmTl was preserved by the callee, but vmsp and vmfp might've changed if
+  // we interpreted anything. Reload them.
   mov 0x10(%r12), %rbx
   mov 0x20(%r12), %rbp
 

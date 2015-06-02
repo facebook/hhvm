@@ -43,14 +43,6 @@ void emitRegGetsRegPlusImm(vixl::MacroAssembler& as,
                            int64_t imm);
 
 /*
- * The callee's half of within-TC calls. The caller uses a native call
- * instruction to get to either the bind-call stub (which needs to know the
- * address to smash) or the eventual destination (which needs to put the return
- * address into the ActRec). This fulfills both needs.
- */
-void emitStoreRetIntoActRec(vixl::MacroAssembler& a);
-
-/*
  * All calls should go through here, because they need to be implemented
  * differently depending on whether we're simulating ARM or running native.
  * Returns the address at which to record a fixup, if you need to.
@@ -84,13 +76,6 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg rds,
  * Increments the current (at translation time) translation counter.
  */
 void emitTransCounterInc(vixl::MacroAssembler& a);
-
-/*
- * Immediately saves the VM sp, fp and pc (the latter two contingent on the
- * flags argument) to the ExecutionContext.
- */
-void emitEagerVMRegSave(vixl::MacroAssembler& a, vixl::Register rds,
-                        RegSaveFlags flags);
 
 /*
  * Emits an incref after checking only the static bit, not the type.

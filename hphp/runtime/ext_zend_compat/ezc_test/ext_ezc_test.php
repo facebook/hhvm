@@ -102,3 +102,9 @@ function ezc_get_error_reporting(): mixed;
 <<__Native("ZendCompat")>>
 function ezc_set_error_reporting(int $error_reporting): mixed;
 
+/* Convert a string to a double, then back to a string again.
+ * Only purpose is to test basic code paths
+ * in the ezc string to double and double to string routines.
+ */
+<<__Native("ZendCompat")>>
+function ezc_atof_toa(string $source): mixed;

@@ -19,11 +19,12 @@
 
 #include <functional>
 
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/unit.h"  // OffsetRangeVec
-#include "hphp/runtime/base/thread-info.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // This is a set of functions which are primarily called from the VM to notify
@@ -39,7 +40,7 @@ struct ObjectData;
 
 // Is this thread being debugged?
 inline bool isDebuggerAttached(ThreadInfo* ti = nullptr) {
-  ti = (ti != nullptr) ? ti : ThreadInfo::s_threadInfo.getNoCheck();
+  ti = (ti != nullptr) ? ti : &TI();
   return ti->m_reqInjectionData.getDebuggerAttached();
 }
 
@@ -54,15 +55,13 @@ inline bool isDebuggerAttached(ThreadInfo* ti = nullptr) {
 // This flag ensures two things: first, that we stay in the interpreter and
 // out of JIT code. Second, that phpDebuggerOpcodeHook will continue to allow
 // debugger interrupts for every opcode executed (modulo filters.)
-#define DEBUGGER_FORCE_INTR \
-  (ThreadInfo::s_threadInfo->m_reqInjectionData.getDebuggerForceIntr())
+#define DEBUGGER_FORCE_INTR (RID().getDebuggerForceIntr())
 
 ////////////////////////////////////////////////////////////////////////////////
 // Hook Handler
 // A handler for debugger events. Any extension can subclass this class and
 // attach it to the thread in order to receive debugging events.
-class DebugHookHandler {
-public:
+struct DebugHookHandler {
   DebugHookHandler() {}
   virtual ~DebugHookHandler() {}
 
@@ -73,7 +72,7 @@ public:
   // hook handler is already attached).
   template<class HandlerClass>
   static bool attach(ThreadInfo* ti = nullptr) {
-    ti = (ti != nullptr) ? ti : ThreadInfo::s_threadInfo.getNoCheck();
+    ti = (ti != nullptr) ? ti : &TI();
     if (isDebuggerAttached(ti)) {
       return false;
     }
@@ -95,7 +94,7 @@ public:
     // just disable the breakpoint until we leave the site because some opcode
     // in the site could recurse to the site. So a disable must be attached to
     // a stack depth. This will be disabled on call to detach().
-    ti->m_reqInjectionData.setDebuggerHookFlag();
+    ti->m_reqInjectionData.setFlag(DebuggerHookFlag);
 
     return true;
   }
@@ -151,7 +150,7 @@ public:
 
 // Returns the current hook handler
 inline DebugHookHandler* getHookHandler() {
-  return ThreadInfo::s_threadInfo.getNoCheck()->m_debugHookHandler;
+  return TI().m_debugHookHandler;
 }
 
 // Is this process being debugged? Since this is across all threads, this cannot

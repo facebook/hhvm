@@ -25,4 +25,4 @@ async function foo() {
   var_dump($a);
 }
 
-foo()->join();
+HH\Asio\join(foo());

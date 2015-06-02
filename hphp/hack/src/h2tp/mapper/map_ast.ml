@@ -102,6 +102,7 @@ let mk_mapper = fun m_in ->
                   t_tparams = v_t_tparams;
                   t_constraint = v_t_constraint;
                   t_kind = v_t_kind;
+                  t_user_attributes = v_t_user_attributes;
                   t_namespace = v_t_namespace;
                   t_mode = v_t_mode
                 } =
@@ -109,6 +110,7 @@ let mk_mapper = fun m_in ->
     let v_t_tparams = map_of_list map_tparam v_t_tparams in
     let v_t_constraint = map_tconstraint v_t_constraint in
     let v_t_kind = map_typedef_kind v_t_kind in
+    let v_t_user_attributes = map_smap map_user_attribute v_t_user_attributes in
     let v_t_namespace = map_namespace_env v_t_namespace in
     let v_t_mode = map_mode v_t_mode
     in
@@ -117,6 +119,7 @@ let mk_mapper = fun m_in ->
         t_tparams = v_t_tparams;
         t_constraint = v_t_constraint;
         t_kind = v_t_kind;
+        t_user_attributes = v_t_user_attributes;
         t_namespace = v_t_namespace;
         t_mode = v_t_mode;
       }
@@ -152,7 +155,7 @@ let mk_mapper = fun m_in ->
   and map_tparam (v1, v2, v3) =
     let v1 = map_variance v1
     and v2 = map_id v2
-    and v3 = map_hint_option v3
+    and v3 = map_of_option (fun (ck, h) -> ck, map_hint h) v3
     in (v1, v2, v3)
   and map_tconstraint v = map_hint_option v
   and map_typedef_kind =
@@ -435,7 +438,11 @@ let mk_mapper = fun m_in ->
           f_namespace = v_f_namespace;
         }
     in m_in.k_fun_ (k, all_mappers) fun_
-  and map_fun_kind = function | FAsync -> FAsync | FSync -> FSync
+  and map_fun_kind = function
+    | FAsync -> FAsync
+    | FAsyncGenerator -> FAsyncGenerator
+    | FSync -> FSync
+    | FGenerator -> FGenerator
   and map_hint (v1, v2) =
     let v1 = map_pos_t v1 and v2 = map_hint_ v2 in (v1, v2)
   and map_hint_ =

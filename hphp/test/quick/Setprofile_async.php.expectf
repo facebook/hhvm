@@ -36,6 +36,7 @@ In gen2
 ** enter HH\GenArrayWaitHandle::create
 ** exit HH\GenArrayWaitHandle::create
 ** exit genFoo
+** enter HH\Asio\join
 ** enter HH\WaitHandle::join
 ** enter Exception::__init__
 ** enter Exception::initTrace
@@ -80,10 +81,12 @@ Finished in gen1
 ** enter HH\RescheduleWaitHandle::create
 ** exit HH\RescheduleWaitHandle::create
 ** exit gen1
+** enter HH\Asio\join
 ** enter HH\WaitHandle::join
 ** enter gen1
 ** exit gen1
 ** exit HH\WaitHandle::join
+** exit HH\Asio\join
 ** enter error_log
 Finished in gen2
 ** exit error_log
@@ -100,6 +103,7 @@ Finished in genFoo
 ** exit error_log
 ** exit genFoo
 ** exit HH\WaitHandle::join
+** exit HH\Asio\join
 ** enter var_dump
 int(91)
 ** exit var_dump

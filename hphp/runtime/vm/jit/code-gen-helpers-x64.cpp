@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/back-end.h"
 #include "hphp/runtime/vm/jit/code-gen-x64.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -59,7 +60,7 @@ TRACE_SET_MOD(hhir);
 void moveToAlign(CodeBlock& cb,
                  const size_t align /* =kJmpTargetAlign */) {
   X64Assembler a { cb };
-  assert(folly::isPowTwo(align));
+  assertx(folly::isPowTwo(align));
   size_t leftInBlock = align - ((align - 1) & uintptr_t(cb.frontier()));
   if (leftInBlock == align) return;
   if (leftInBlock > 2) {
@@ -75,65 +76,6 @@ void emitEagerSyncPoint(Vout& v, const Op* pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
   v << store{vmfp, rds[rds::kVmfpOff]};
   v << store{vmsp, rds[rds::kVmspOff]};
   emitImmStoreq(v, intptr_t(pc), rds[rds::kVmpcOff]);
-}
-
-// emitEagerVMRegSave --
-//   Inline. Saves regs in-place in the TC. This is an unusual need;
-//   you probably want to lazily save these regs via recordCall and
-//   its ilk.
-void emitEagerVMRegSave(Asm& as, PhysReg rds, RegSaveFlags flags) {
-  bool saveFP = bool(flags & RegSaveFlags::SaveFP);
-  bool savePC = bool(flags & RegSaveFlags::SavePC);
-  assert((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
-         RegSaveFlags::None);
-
-  Reg64 pcReg = rdi;
-  assert(!kCrossCallRegs.contains(rdi));
-
-  as.   storeq (rVmSp, rds[rds::kVmspOff]);
-  if (savePC) {
-    // We're going to temporarily abuse rVmSp to hold the current unit.
-    Reg64 rBC = rVmSp;
-    as. push   (rBC);
-    // m_fp -> m_func -> m_unit -> m_bc + pcReg
-    as. loadq  (rVmFp[AROFF(m_func)], rBC);
-    as. loadq  (rBC[Func::unitOff()], rBC);
-    as. loadq  (rBC[Unit::bcOff()], rBC);
-    as. addq   (rBC, pcReg);
-    as. storeq (pcReg, rds[rds::kVmpcOff]);
-    as. pop    (rBC);
-  }
-  if (saveFP) {
-    as. storeq (rVmFp, rds[rds::kVmfpOff]);
-  }
-}
-
-// Save vmsp, and optionally vmfp and vmpc. If saving vmpc,
-// the bytecode offset is expected to be in rdi and is clobbered
-void emitEagerVMRegSave(Vout& v, Vreg rds, RegSaveFlags flags) {
-  bool saveFP = bool(flags & RegSaveFlags::SaveFP);
-  bool savePC = bool(flags & RegSaveFlags::SavePC);
-  assert((flags & ~(RegSaveFlags::SavePC | RegSaveFlags::SaveFP)) ==
-         RegSaveFlags::None);
-
-  assert(!kCrossCallRegs.contains(rdi));
-
-  v << store{rVmSp, rds[rds::kVmspOff]};
-  if (savePC) {
-    PhysReg pc{rdi};
-    auto func = v.makeReg();
-    auto unit = v.makeReg();
-    auto bc = v.makeReg();
-    // m_fp -> m_func -> m_unit -> m_bc + pcReg
-    v << load{rVmFp[AROFF(m_func)], func};
-    v << load{func[Func::unitOff()], unit};
-    v << load{unit[Unit::bcOff()], bc};
-    v << addq{bc, pc, pc, v.makeReg()};
-    v << store{pc, rds[rds::kVmpcOff]};
-  }
-  if (saveFP) {
-    v << store{rVmFp, rds[rds::kVmfpOff]};
-  }
 }
 
 void emitGetGContext(Vout& v, Vreg dest) {
@@ -184,6 +126,13 @@ void emitTransCounterInc(Asm& a) {
   emitTransCounterInc(Vauto(a.code()).main());
 }
 
+Vreg emitDecRef(Vout& v, Vreg base) {
+  auto const sf = v.makeReg();
+  v << declm{base[FAST_REFCOUNT_OFFSET], sf};
+  emitAssertFlagsNonNegative(v, sf);
+  return sf;
+}
+
 void emitIncRef(Vout& v, Vreg base) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitAssertRefCount(v, base);
@@ -191,10 +140,7 @@ void emitIncRef(Vout& v, Vreg base) {
   // emit incref
   auto const sf = v.makeReg();
   v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    // Assert that the ref count is greater than zero
-    emitAssertFlagsNonNegative(v, sf);
-  }
+  emitAssertFlagsNonNegative(v, sf);
 }
 
 void emitIncRef(Asm& as, PhysReg base) {
@@ -220,15 +166,16 @@ void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
 }
 
 void emitAssertFlagsNonNegative(Vout& v, Vreg sf) {
+  if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
   ifThen(v, CC_NGE, sf, [&](Vout& v) { v << ud2{}; });
 }
 
 void emitAssertRefCount(Vout& v, Vreg base) {
   auto const sf = v.makeReg();
-  v << cmplim{HPHP::StaticValue, base[FAST_REFCOUNT_OFFSET], sf};
+  v << cmplim{StaticValue, base[FAST_REFCOUNT_OFFSET], sf};
   ifThen(v, CC_NLE, sf, [&](Vout& v) {
     auto const sf = v.makeReg();
-    v << cmplim{HPHP::RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET], sf};
+    v << cmplim{RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET], sf};
     ifThen(v, CC_NBE, sf, [&](Vout& v) { v << ud2{}; });
   });
 }
@@ -237,8 +184,8 @@ void emitAssertRefCount(Vout& v, Vreg base) {
 // after execution, but might do so in strange ways. Do not count on
 // being able to smash dest to a different register in the future, e.g.
 void emitMovRegReg(Asm& as, PhysReg srcReg, PhysReg dstReg) {
-  assert(srcReg != InvalidReg);
-  assert(dstReg != InvalidReg);
+  assertx(srcReg != InvalidReg);
+  assertx(dstReg != InvalidReg);
 
   if (srcReg == dstReg) return;
 
@@ -319,8 +266,9 @@ void emitCall(Vout& v, CppCall target, RegSet args) {
       "deltaFits on ArrayData vtable calls needs to be checked before "
       "emitting them"
     );
-    v << loadzbl{rdi[ArrayData::offsetofKind()], eax};
+    v << loadzbl{rdi[HeaderKindOffset], eax};
     v << callm{baseless(rax*8 + addr), args};
+    static_assert(sizeof(HeaderKind) == 1, "");
     return;
   }
   case CppCall::Kind::Destructor:
@@ -339,8 +287,9 @@ void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref) {
   if (imm.fits(sz::dword)) {
     v << storeqi{imm.l(), ref};
   } else {
-    v << storeli{int32_t(imm.q()), ref};
-    v << storeli{int32_t(imm.q() >> 32), ref + 4};
+    // An alternative is two 32-bit immediate stores, but that's little-endian
+    // specific and generates larger code on x64 (24 bytes vs. 18 bytes).
+    v << store{v.cns(imm.q()), ref};
   }
 }
 
@@ -354,7 +303,7 @@ void emitImmStoreq(Asm& a, Immed64 imm, MemoryRef ref) {
 }
 
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
-  if (!Trace::moduleEnabledRelease(Trace::ringbuffer, 1)) {
+  if (!Trace::moduleEnabled(Trace::ringbuffer, 1)) {
     return;
   }
   v << vcall{CppCall::direct(Trace::ringbufferMsg),
@@ -362,36 +311,25 @@ void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
              v.makeTuple({})};
 }
 
-void emitTraceCall(CodeBlock& cb, Offset pcOff) {
-  Asm a { cb };
-  // call to a trace function
-  a.    lea    (rip[(int64_t)a.frontier()], rcx);
-  a.    movq   (rVmFp, rdi);
-  a.    movq   (rVmSp, rsi);
-  a.    movq   (pcOff, rdx);
-  // do the call; may use a trampoline
-  emitCall(a, reinterpret_cast<TCA>(traceCallback),
-           RegSet().add(rcx).add(rdi).add(rsi).add(rdx));
-}
-
 void emitTestSurpriseFlags(Asm& a, PhysReg rds) {
-  static_assert(RequestInjectionData::LastFlag < (1LL << 32),
-                "Translator assumes RequestInjectionFlags fit in 32-bit int");
-  a.testl(-1, rds[rds::kConditionFlagsOff]);
+  static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
+                "Codegen assumes a SurpriseFlag fits in a 32-bit int");
+  a.cmpl(0, rds[rds::kSurpriseFlagsOff]);
 }
 
 Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
-  static_assert(RequestInjectionData::LastFlag < (1LL << 32),
-                "Translator assumes RequestInjectionFlags fit in 32-bit int");
+  static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
+                "Codegen assumes a SurpriseFlag fits in a 32-bit int");
   auto const sf = v.makeReg();
-  v << testlim{-1, rds[rds::kConditionFlagsOff], sf};
+  v << cmplim{0, rds[rds::kSurpriseFlagsOff], sf};
   return sf;
 }
 
 void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
                                  PhysReg rds, Fixup fixup) {
   // warning: keep this in sync with the vasm version below.
-  Asm a{mainCode}, acold{coldCode};
+  Asm a { mainCode };
+  Asm acold { coldCode };
 
   emitTestSurpriseFlags(a, rds);
   a.  jnz(coldCode.frontier());
@@ -402,21 +340,22 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
   acold.  jmp   (a.frontier());
 }
 
-void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg rds, Fixup fixup) {
-  // warning: keep this in sync with the x64 version above.
+void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp, Vreg rds,
+                                 Fixup fixup, Vlabel catchBlock) {
   auto cold = vcold.makeBlock();
   auto done = v.makeBlock();
+
   auto const sf = emitTestSurpriseFlags(v, rds);
   v << jcc{CC_NZ, sf, {done, cold}};
 
-  auto helper = (void(*)())mcg->tx().uniqueStubs.functionEnterHelper;
-  vcold = cold;
-  vcold << vcall{CppCall::direct(helper),
-                 v.makeVcallArgs({{rVmFp}}),
-                 v.makeTuple({}),
-                 Fixup{fixup.pcOffset, fixup.spOffset}};
-  vcold << jmp{done};
   v = done;
+  vcold = cold;
+
+  auto call = CppCall::direct(
+      reinterpret_cast<void(*)()>(mcg->tx().uniqueStubs.functionEnterHelper));
+  auto args = v.makeVcallArgs({{fp}});
+
+  vcold << vinvoke{call, args, v.makeTuple({}), {done, catchBlock}, fixup};
 }
 
 void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {
@@ -479,7 +418,7 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
     return;
   }
   always_assert(src_arity >= 1);
-  if (src_arity == 2 && destType <= Type::Bool) {
+  if (src_arity == 2 && destType <= TBool) {
     v << movtqb{src.reg(0), dst.reg(0)};
   } else {
     v << copy{src.reg(0), dst.reg(0)};
@@ -499,7 +438,7 @@ void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0) {
 }
 
 Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
-  if (!src->isA(Type::Bool)) return reg;
+  if (!src->isA(TBool)) return reg;
   // zero-extend the bool from a byte to a quad
   auto extended = v.makeReg();
   v << movzbq{reg, extended};

@@ -25,8 +25,6 @@ module M = Map_ast
 module CE = Common_exns
 open Ast
 open Ast_ext
-open Utils
-
 
 let cast_known_collection p expr_ =
   call_inst_func p (p, expr_) "isEmpty" [] |> negate

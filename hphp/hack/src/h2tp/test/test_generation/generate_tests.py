@@ -177,26 +177,33 @@ def parse_args():
     return options
 
 def compute_additional_paths(options):
+    options.fbcode_dir = os.path.abspath(options.fbcode_dir)
     options.code_dir = os.path.join(
         options.fbcode_dir,
         options.code_dir
     )
     options.test_dir = os.path.join(options.code_dir, 'test')
-    options.gen_file_dir = "%s/test/" % options.install_dir
+    if options.binary.find("buck-out") < 0:
+        options.gen_file_dir = "%s/test" % options.install_dir
+    else:
+        options.gen_file_dir = "%s/" % options.install_dir
+
     options.gen_file_path = os.path.join(
         options.gen_file_dir,
         options.gen_file_name
     )
-    options.bin_dir = os.path.join(
-        options.fbcode_dir,
-        '_bin',
-        os.path.relpath(options.code_dir, options.fbcode_dir)
-    )
+    if options.binary.find("buck-out") < 0:
+        options.bin_dir = os.path.join(
+            options.fbcode_dir,
+            '_bin',
+            os.path.relpath(options.code_dir, options.fbcode_dir))
+    else:
+        options.bin_dir = os.path.dirname(options.binary)
+        options.binary = os.path.basename(options.binary)
 
 def mkdir_safe(dirname):
     if not(os.path.isdir(dirname)):
         os.mkdir(dirname)
-
 
 if __name__ == '__main__':
     options = parse_args()

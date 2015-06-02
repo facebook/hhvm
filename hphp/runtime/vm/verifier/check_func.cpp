@@ -305,7 +305,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
         ok = false;
       }
       if (!isTF(pc)) {
-        error("Last instruction in %s is not teriminal %d:%s\n",
+        error("Last instruction in %s is not terminal %d:%s\n",
                name, offset(pc), instrToString((Op*)pc, unit()).c_str());
         ok = false;
       } else {
@@ -334,6 +334,10 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
     } else {
       Offset target = instrJumpTarget((Op*)bc, offset(branch));
       ok &= checkOffset("branch target", target, name, base, past);
+      if (*(Op*)branch == Op::JmpNS && target == offset(branch)) {
+        error("JmpNS may not have zero offset in %s\n", name);
+        ok = false;
+      }
     }
   }
   return ok;
@@ -458,6 +462,24 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
             ok &= checkLocal(pc, vr.frontLocal());
           } else if (vr.frontString() != -1) {
             ok &= checkString(pc, vr.frontString());
+          }
+          if (member == MQT) {
+            switch (*instr) {
+              case Op::CGetM:
+              case Op::IssetM:
+              case Op::EmptyM:
+                break;
+              case Op::VGetM:
+              case Op::FPassM:
+                break;
+              default:
+                error(
+                  "Illegal QT member code at %d: %s\n",
+                  offset((PC)instr),
+                  instrToString(instr).c_str()
+                );
+                ok = false;
+            }
           }
         }
       }
@@ -611,7 +633,7 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
 #define OO_DECL_EXISTS_OP(x) if (op == static_cast<uint8_t>(OODeclExistsOp::x)) break;
         OO_DECL_EXISTS_OPS
 #undef OO_DECL_EXISTS_OP
-          error("invalid operation for OODeclExists: %d\n", op);
+        error("invalid operation for OODeclExists: %d\n", op);
         ok = false;
         break;
       case OpFPushObjMethodD:
@@ -619,7 +641,14 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
 #define OBJMETHOD_OP(x) if (op == static_cast<uint8_t>(ObjMethodOp::x)) break;
         OBJMETHOD_OPS
 #undef OBJMETHOD_OP
-          error("invalid operation for FPushObjMethod*: %d\n", op);
+        error("invalid operation for FPushObjMethod*: %d\n", op);
+        ok = false;
+        break;
+      case OpSwitch:
+#define KIND(x) if (op == static_cast<uint8_t>(SwitchKind::x)) break;
+        SWITCH_KINDS
+#undef KIND
+        error("invalid kind for Switch: %d\n", op);
         ok = false;
         break;
       }
@@ -632,9 +661,20 @@ bool FuncChecker::checkImmediates(const char* name, const Op* instr) {
   return ok;
 }
 
-static char stkflav(FlavorDesc f) {
-  static const char flavs[] = { 'N', 'C', 'V', 'A', 'R', 'F' };
-  return f > NOV && f <= FV ? flavs[f] : '?';
+static const char* stkflav(FlavorDesc f) {
+  switch (f) {
+  case NOV:  return "N";
+  case CV:   return "C";
+  case VV:   return "V";
+  case AV:   return "A";
+  case RV:   return "R";
+  case FV:   return "F";
+  case UV:   return "U";
+  case CUV:  return "C|U";
+  case CVV:  return "C|V";
+  case CVUV: return "C|V|U";
+  }
+  not_reached();
 }
 
 bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
@@ -642,8 +682,9 @@ bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
   for (int i = 0; i < len; ++i) {
     if (args[i] != (FlavorDesc)sig[i] &&
         !((FlavorDesc)sig[i] == CVV && (args[i] == CV || args[i] == VV)) &&
+        !((FlavorDesc)sig[i] == CUV && (args[i] == CV || args[i] == UV)) &&
         !((FlavorDesc)sig[i] == CVUV && (args[i] == CV || args[i] == VV ||
-                                         args[i] == UV))) {
+                                         args[i] == UV || args[i] == CUV))) {
       error("flavor mismatch at %d, got %s expected %s\n",
              offset(pc), stkToString(len, args).c_str(),
              sigToString(len, sig).c_str());
@@ -752,9 +793,9 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = CVUV;
     }
     return m_tmp_sig;
-  case Op::CreateCl:  // TWO(IVA,SA),  CVMANY,   ONE(CV)
+  case Op::CreateCl:  // TWO(IVA,SA),  CVUMANY,   ONE(CV)
     for (int i = 0, n = instrNumPops((Op*)pc); i < n; ++i) {
-      m_tmp_sig[i] = CVV;
+      m_tmp_sig[i] = CVUV;
     }
     return m_tmp_sig;
   case Op::NewPackedArray:  // ONE(IVA),     CMANY,   ONE(CV)
@@ -1120,7 +1161,7 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   State& state = m_info[t->id].state_in;
   if (!state.stk) {
     copyState(&state, &cur);
-    return false;
+    return true;
   }
   // Check stack.
   if (state.stklen != cur.stklen) {

@@ -16,7 +16,7 @@ from sizeof import sizeof
 #------------------------------------------------------------------------------
 # Legacy iteration.
 
-class _BaseIterator:
+class _BaseIterator(object):
     """Base iterator for Python 2 compatibility (in Python 3, next() is renamed
     to __next__()).  See http://legacy.python.org/dev/peps/pep-3114/.
     """
@@ -30,7 +30,7 @@ class _BaseIterator:
 #------------------------------------------------------------------------------
 # StringData.
 
-class StringDataPrinter:
+class StringDataPrinter(object):
     RECOGNIZE = '^HPHP::StringData$'
 
     def __init__(self, val):
@@ -46,7 +46,7 @@ class StringDataPrinter:
 #------------------------------------------------------------------------------
 # TypedValue.
 
-class TypedValuePrinter:
+class TypedValuePrinter(object):
     RECOGNIZE = '^HPHP::(TypedValue|Cell|Ref|Variant|VarNR)$'
 
     def __init__(self, val):
@@ -109,7 +109,7 @@ class TypedValuePrinter:
 #------------------------------------------------------------------------------
 # Pointers.
 
-class PtrPrinter:
+class PtrPrinter(object):
     def _string(self):
         inner = self._pointer().dereference()
         inner_type = rawtype(inner.type)
@@ -137,41 +137,30 @@ class SmartPtrPrinter(PtrPrinter):
     def _pointer(self):
         return self.val['m_px']
 
-class ArrayPrinter(PtrPrinter):
-    RECOGNIZE = '^HPHP::Array$'
-
-    def __init__(self, val):
-        self.val = val
-
-    def _pointer(self):
-        return self.val['m_arr']['m_px']
-
-class ObjectPrinter(PtrPrinter):
-    RECOGNIZE = '^HPHP::Object$'
-
-    def __init__(self, val):
-        self.val = val
-
-    def _pointer(self):
-        return self.val['m_obj']['m_px']
-
-class ResourcePrinter(PtrPrinter):
-    RECOGNIZE = '^HPHP::Resource$'
-
-    def __init__(self, val):
-        self.val = val
-
-    def _pointer(self):
-        return self.val['m_res']['m_px']
-
-class StringPrinter(PtrPrinter):
+class StringPrinter(SmartPtrPrinter):
     RECOGNIZE = '^HPHP::(Static)?String$'
 
     def __init__(self, val):
-        self.val = val
+        super(StringPrinter, self).__init__(val['m_str'])
 
-    def _pointer(self):
-        return self.val['m_str']['m_px']
+class ArrayPrinter(SmartPtrPrinter):
+    RECOGNIZE = '^HPHP::Array$'
+
+    def __init__(self, val):
+        super(ArrayPrinter, self).__init__(val['m_arr'])
+
+class ObjectPrinter(SmartPtrPrinter):
+    RECOGNIZE = '^HPHP::Object$'
+
+    def __init__(self, val):
+        super(ObjectPrinter, self).__init__(val['m_obj'])
+
+class ResourcePrinter(SmartPtrPrinter):
+    RECOGNIZE = '^HPHP::Resource$'
+
+    def __init__(self, val):
+        super(ResourcePrinter, self).__init__(val['m_res'])
+
 
 class LowPtrPrinter(PtrPrinter):
     RECOGNIZE = '^HPHP::(LowPtr<.*>|LowPtrImpl<.*>)$'
@@ -190,7 +179,7 @@ class LowPtrPrinter(PtrPrinter):
 #------------------------------------------------------------------------------
 # ArrayData.
 
-class ArrayDataPrinter:
+class ArrayDataPrinter(object):
     RECOGNIZE = '^HPHP::(ArrayData|MixedArray|ProxyArray)$'
 
     class _packed_iterator(_BaseIterator):
@@ -244,7 +233,8 @@ class ArrayDataPrinter:
 
 
     def __init__(self, val):
-        self.kind = val['m_kind']
+        kind_ty = T('HPHP::ArrayData::ArrayKind')
+        self.kind = val['m_hdr']['kind'].cast(kind_ty)
 
         if self.kind == self._kind('Mixed'):
             self.val = val.cast(T('HPHP::MixedArray'))
@@ -290,7 +280,7 @@ class ArrayDataPrinter:
 #------------------------------------------------------------------------------
 # ObjectData.
 
-class ObjectDataPrinter:
+class ObjectDataPrinter(object):
     RECOGNIZE = '^HPHP::(ObjectData)$'
 
     class _iterator(_BaseIterator):
@@ -338,7 +328,7 @@ class ObjectDataPrinter:
 #------------------------------------------------------------------------------
 # RefData.
 
-class RefDataPrinter:
+class RefDataPrinter(object):
     RECOGNIZE = '^HPHP::RefData$'
 
     def __init__(self, val):

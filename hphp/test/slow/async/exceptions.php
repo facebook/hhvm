@@ -16,34 +16,34 @@ function verify(&$a, &$e) {
 }
 
 function normalCatch() {
-  try { $a = aThrow(); $a->join(); }
+  try { $a = aThrow(); HH\Asio\join($a); }
   catch (Exception $e) { verify($a, $e); }
 
-  try { $a = aaThrow(); $a->join(); }
+  try { $a = aaThrow(); HH\Asio\join($a); }
   catch (Exception $e) { verify($a, $e); }
 
-  try { $a = bThrow(); $a->join(); }
+  try { $a = bThrow(); HH\Asio\join($a); }
   catch (Exception $e) { verify($a, $e); }
 
-  try { $a = bbThrow(); $a->join(); }
+  try { $a = bbThrow(); HH\Asio\join($a); }
   catch (Exception $e) { verify($a, $e); }
 }
 
 async function asyncCatch() {
-  try { $a = aThrow(); $a->join(); }
+  try { $a = aThrow(); HH\Asio\join($a); }
   catch (Exception $e) { verify($a, $e); }
 
-  try { $a = aaThrow(); $a->join(); }
+  try { $a = aaThrow(); HH\Asio\join($a); }
   catch (Exception $e) { verify($a, $e); }
 
-  try { $a = bThrow(); $a->join(); }
+  try { $a = bThrow(); HH\Asio\join($a); }
   catch (Exception $e) { verify($a, $e); }
 
-  try { $a = bbThrow(); $a->join(); }
+  try { $a = bbThrow(); HH\Asio\join($a); }
   catch (Exception $e) { verify($a, $e); }
 }
 
 normalCatch();
 echo "---\n";
-asyncCatch()->join();
+HH\Asio\join(asyncCatch());
 

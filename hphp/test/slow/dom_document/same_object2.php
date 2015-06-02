@@ -3,14 +3,18 @@
 function test() {
   $a = new DOMDocument;
   $a->loadXML('<a/>');
-  $hash1 = spl_object_hash($a->getElementsByTagName('a')->item(0));
-  $hash2 = spl_object_hash($a->firstChild);
+  $o1 = $a->getElementsByTagName('a')->item(0);
+  $o2 = $a->firstChild;
+  $hash1 = spl_object_hash($o1);
+  $hash2 = spl_object_hash($o2);
   var_dump($hash1 === $hash2);
-  return $hash1;
+  return $o1;
 }
 function main() {
-  $hash1 = test();
-  $hash2 = test();
+  $o1 = test();
+  $o2 = test();
+  $hash1 = spl_object_hash($o1);
+  $hash2 = spl_object_hash($o2);
   var_dump($hash1 !== $hash2);
 }
 main();

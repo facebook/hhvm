@@ -367,7 +367,7 @@ void Parser::onClassTypeConstant(Token &out, Token &var, Token &value) {
     onClassConstant(typeConst, nullptr, var, typeConstValue);
   }
 
-  onClassVariableStart(out, nullptr, typeConst, nullptr, isAbstract);
+  onClassVariableStart(out, nullptr, typeConst, nullptr, isAbstract, true);
 }
 
 void Parser::onVariable(Token &out, Token *exprs, Token &var, Token *value,
@@ -466,8 +466,13 @@ void Parser::onCallParam(Token &out, Token *params, Token &expr,
     out->exp = params->exp;
   }
   if (ref) {
+#ifdef FACEBOOK
+    // TODO t#6485898 - Remove uses of call time pass by reference
     expr->exp->setContext(Expression::RefParameter);
     expr->exp->setContext(Expression::RefValue);
+#else
+    PARSE_ERROR("Call-time pass-by-reference has been removed");
+#endif
   }
   if (unpack) {
     (dynamic_pointer_cast<ExpressionList>(out->exp))->setContainsUnpack();
@@ -495,13 +500,17 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
                       : funcName.substr(lastBackslash+1);
     bool hadBackslash = name->num() & 2;
 
+    if (stripped == "set_frame_metadata" && m_funcContexts.size() > 0) {
+      m_funcContexts.back().mayCallSetFrameMetadata = true;
+    }
+
     if (!cls && !hadBackslash) {
       if (stripped == "func_num_args" ||
           stripped == "func_get_args" ||
           stripped == "func_get_arg") {
         funcName = stripped;
-        if (m_hasCallToGetArgs.size() > 0) {
-          m_hasCallToGetArgs.back() = true;
+        if (m_funcContexts.size() > 0) {
+          m_funcContexts.back().hasCallToGetArgs = true;
         }
       }
       // Auto import a few functions from the HH namespace
@@ -554,12 +563,9 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
 ///////////////////////////////////////////////////////////////////////////////
 // object property and method calls
 
-void Parser::onObjectProperty(Token &out, Token &base, bool nullsafe,
-                              Token &prop) {
-  if (nullsafe) {
-    PARSE_ERROR("?-> is not supported for property access");
-  }
-  if (prop.num() == ObjPropXhpAttr) {
+void Parser::onObjectProperty(Token &out, Token &base,
+                              PropAccessType propAccessType, Token &prop) {
+    if (prop.num() == ObjPropXhpAttr) {
     // Handle "$obj->:xhp-attr" transform
     ExpressionListPtr paramsExp = NEW_EXP0(ExpressionList);
     ScalarExpressionPtr name =
@@ -569,7 +575,8 @@ void Parser::onObjectProperty(Token &out, Token &base, bool nullsafe,
     ScalarExpressionPtr getAttributeMethodName =
       NEW_EXP(ScalarExpression, T_STRING, std::string("getAttribute"));
     auto om = NEW_EXP(ObjectMethodExpression, base->exp,
-                      getAttributeMethodName, paramsExp, nullsafe);
+                      getAttributeMethodName, paramsExp,
+                      propAccessType == PropAccessType::NullSafe);
     om->setIsXhpGetAttr();
     out->exp = om;
     return;
@@ -577,7 +584,22 @@ void Parser::onObjectProperty(Token &out, Token &base, bool nullsafe,
   if (!prop->exp) {
     prop->exp = NEW_EXP(ScalarExpression, T_STRING, prop->text());
   }
-  out->exp = NEW_EXP(ObjectPropertyExpression, base->exp, prop->exp);
+
+  if (propAccessType == PropAccessType::NullSafe) {
+    // $this?->foo is disallowed.
+    checkThisContext(base.exp, ThisContextError::NullSafeBase);
+
+    if (prop->exp->getKindOf() != Expression::KindOfScalarExpression) {
+      PARSE_ERROR("?-> can only be used with scalar property names");
+    }
+  }
+
+  out->exp = NEW_EXP(
+    ObjectPropertyExpression,
+    base->exp,
+    prop->exp,
+    propAccessType
+  );
 }
 
 void Parser::onObjectMethodCall(Token &out, Token &base, bool nullsafe,
@@ -641,14 +663,14 @@ void Parser::encapRefDim(Token &out, Token &var, Token &offset) {
   out->exp = NEW_EXP(ArrayElementExpression, arr, dim);
 }
 
-void Parser::encapObjProp(Token &out, Token &var, bool nullsafe, Token &name) {
-  if (nullsafe) {
-    PARSE_ERROR("?-> is not supported for property access");
-  }
+void Parser::encapObjProp(Token &out, Token &var,
+                          PropAccessType propAccessType, Token &name) {
   ExpressionPtr obj = NEW_EXP(SimpleVariable, var->text());
 
   ExpressionPtr prop = NEW_EXP(ScalarExpression, T_STRING, name->text());
-  out->exp = NEW_EXP(ObjectPropertyExpression, obj, prop);
+  out->exp = NEW_EXP(
+    ObjectPropertyExpression, obj, prop, propAccessType
+  );
 }
 
 void Parser::encapArray(Token &out, Token &var, Token &expr) {
@@ -739,15 +761,25 @@ void Parser::onExprListElem(Token &out, Token *exprs, Token &expr) {
 }
 
 void Parser::checkAllowedInWriteContext(ExpressionPtr e) {
+  if (e == nullptr) {
+    return;
+  }
   if (dynamic_pointer_cast<FunctionCall>(e)) {
     if (e->is(Expression::KindOfObjectMethodExpression)) {
       ObjectMethodExpressionPtr om =
-        dynamic_pointer_cast<ObjectMethodExpression>(e);
+        static_pointer_cast<ObjectMethodExpression>(e);
       if (om->isXhpGetAttr()) {
         PARSE_ERROR("Using ->: syntax in write context is not supported");
       }
     }
     PARSE_ERROR("Can't use return value in write context");
+  } if (e->is(Expression::KindOfObjectPropertyExpression)) {
+    ObjectPropertyExpressionPtr op(
+      static_pointer_cast<ObjectPropertyExpression>(e)
+    );
+    if (op->isNullSafe()) {
+      PARSE_ERROR(Strings::NULLSAFE_PROP_WRITE_ERROR);
+    }
   }
 }
 
@@ -756,7 +788,7 @@ void Parser::onListAssignment(Token &out, Token &vars, Token *expr,
   ExpressionListPtr el(dynamic_pointer_cast<ExpressionList>(vars->exp));
   for (int i = 0; i < el->getCount(); i++) {
     checkAllowedInWriteContext((*el)[i]);
-    checkAssignThis((*el)[i]);
+    checkThisContext((*el)[i], ThisContextError::Assign);
   }
   out->exp = NEW_EXP(ListAssignment,
                      dynamic_pointer_cast<ExpressionList>(vars->exp),
@@ -781,42 +813,52 @@ void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
   onExprListElem(out, list, out);
 }
 
-void Parser::checkAssignThis(string var) {
-  if (var == "this") {
-    PARSE_ERROR("Cannot re-assign $this");
+void Parser::checkThisContext(string var, ThisContextError error) {
+  if (var != "this") {
+    return;
+  }
+
+  switch (error) {
+    case ThisContextError::Assign:
+      PARSE_ERROR(Strings::ASSIGN_THIS_ERROR);
+      break;
+    case ThisContextError::NullSafeBase:
+      PARSE_ERROR(Strings::NULLSAFE_THIS_BASE_ERROR);
+      break;
   }
 }
 
-void Parser::checkAssignThis(Token &var) {
+void Parser::checkThisContext(Token &var, ThisContextError error) {
   if (SimpleVariablePtr simp = dynamic_pointer_cast<SimpleVariable>(var.exp)) {
-    checkAssignThis(simp->getName());
+    checkThisContext(simp->getName(), error);
   }
 }
 
-void Parser::checkAssignThis(ExpressionPtr e) {
+void Parser::checkThisContext(ExpressionPtr e, ThisContextError error) {
   if (SimpleVariablePtr simp = dynamic_pointer_cast<SimpleVariable>(e)) {
-    checkAssignThis(simp->getName());
+    checkThisContext(simp->getName(), error);
   }
 }
 
-void Parser::checkAssignThis(ExpressionListPtr params) {
+void Parser::checkThisContext(ExpressionListPtr params,
+                              ThisContextError error) {
   for (int i = 0, count = params->getCount(); i < count; i++) {
     ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*params)[i]);
-    checkAssignThis(param->getName());
+    checkThisContext(param->getName(), error);
   }
 }
 
 void Parser::onAssign(Token &out, Token &var, Token &expr, bool ref,
                       bool rhsFirst /* = false */) {
   checkAllowedInWriteContext(var->exp);
-  checkAssignThis(var);
+  checkThisContext(var, ThisContextError::Assign);
   out->exp = NEW_EXP(AssignmentExpression, var->exp, expr->exp, ref, rhsFirst);
 }
 
 void Parser::onAssignNew(Token &out, Token &var, Token &name, Token &args) {
   checkAllowedInWriteContext(var->exp);
-  checkAssignThis(var);
+  checkThisContext(var, ThisContextError::Assign);
   ExpressionPtr exp =
     NEW_EXP(NewObjectExpression, name->exp,
             dynamic_pointer_cast<ExpressionList>(args->exp));
@@ -996,7 +1038,6 @@ void Parser::onFunctionStart(Token &name, bool doPushComment /* = true */) {
   newScope();
   m_funcContexts.push_back(FunctionContext());
   m_funcName = name.text();
-  m_hasCallToGetArgs.push_back(false);
   m_staticVars.push_back(StringToExpressionPtrVecMap());
 }
 
@@ -1094,7 +1135,7 @@ void Parser::prepareConstructorParameters(StatementListPtr stmts,
     ScalarExpressionPtr prop = NEW_EXP(ScalarExpression, T_STRING, name);
     SimpleVariablePtr self = NEW_EXP(SimpleVariable, "this");
     ObjectPropertyExpressionPtr objProp =
-        NEW_EXP(ObjectPropertyExpression, self, prop);
+        NEW_EXP(ObjectPropertyExpression, self, prop, PropAccessType::Normal);
     AssignmentExpressionPtr assign =
         NEW_EXP(AssignmentExpression, objProp, value, false);
     ExpStatementPtr stmt = NEW_STMT(ExpStatement, assign);
@@ -1149,7 +1190,7 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
 
   if (type == FunctionType::Method && old_params &&
      !modifiersExp->isStatic()) {
-    checkAssignThis(old_params);
+    checkThisContext(old_params, ThisContextError::Assign);
   }
 
   string funcName = getFunctionName(type, name);
@@ -1196,12 +1237,11 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
   // check and set generator/async flags
   FunctionContext funcContext = m_funcContexts.back();
   checkFunctionContext(funcName, funcContext, modifiersExp, ref->num());
+  mth->setHasCallToGetArgs(funcContext.hasCallToGetArgs);
+  mth->setMayCallSetFrameMetadata(funcContext.mayCallSetFrameMetadata);
   mth->getFunctionScope()->setGenerator(funcContext.isGenerator);
   mth->getFunctionScope()->setAsync(modifiersExp->isAsync());
   m_funcContexts.pop_back();
-
-  mth->setHasCallToGetArgs(m_hasCallToGetArgs.back());
-  m_hasCallToGetArgs.pop_back();
 
   LocationPtr loc = popFuncLocation();
   if (reloc) {
@@ -1550,7 +1590,8 @@ void Parser::onTraitAliasRuleModify(Token &out, Token &rule,
 }
 
 void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
-                                  Token *type, bool abstract /* = false */) {
+                                  Token *type, bool abstract /* = false */,
+                                  bool typeconst /* = false */) {
   if (modifiers) {
     ModifierExpressionPtr exp = modifiers->exp ?
       dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
@@ -1565,7 +1606,8 @@ void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
       ClassConstant,
       (type) ? type->typeAnnotationName() : "",
       dynamic_pointer_cast<ExpressionList>(decl->exp),
-      abstract);
+      abstract,
+      typeconst);
   }
 }
 
@@ -1939,8 +1981,11 @@ void Parser::onEcho(Token &out, Token &expr, bool html) {
 }
 
 void Parser::onUnset(Token &out, Token &expr) {
-  out->stmt = NEW_STMT(UnsetStatement,
-                       dynamic_pointer_cast<ExpressionList>(expr->exp));
+  ExpressionListPtr exps = dynamic_pointer_cast<ExpressionList>(expr->exp);
+  for (int i = 0, n = exps->getCount(); i < n; i++) {
+    checkAllowedInWriteContext((*exps)[i]);
+  }
+  out->stmt = NEW_STMT(UnsetStatement, exps);
   m_file->setAttribute(FileScope::ContainsUnset);
 }
 
@@ -1963,8 +2008,8 @@ void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
     }
     setIsAsync();
   }
-  checkAssignThis(name);
-  checkAssignThis(value);
+  checkThisContext(name, ThisContextError::Assign);
+  checkThisContext(value, ThisContextError::Assign);
   if (stmt->stmt && stmt->stmt->is(Statement::KindOfStatementList)) {
     stmt->stmt = NEW_STMT(BlockStatement,
                           dynamic_pointer_cast<StatementList>(stmt->stmt));
@@ -2381,10 +2426,9 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"Awaitable", "HH\\Awaitable"},
     (AliasEntry){"AsyncGenerator", "HH\\AsyncGenerator"},
     (AliasEntry){"WaitHandle", "HH\\WaitHandle"},
-    // Keep in sync with order in hphp/runtime/ext/asio/wait_handle.h
+    // Keep in sync with order in hphp/runtime/ext/asio/wait-handle.h
     (AliasEntry){"StaticWaitHandle", "HH\\StaticWaitHandle"},
     (AliasEntry){"WaitableWaitHandle", "HH\\WaitableWaitHandle"},
-    (AliasEntry){"BlockableWaitHandle", "HH\\BlockableWaitHandle"},
     (AliasEntry){"ResumableWaitHandle", "HH\\ResumableWaitHandle"},
     (AliasEntry){"AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle"},
     (AliasEntry){"AsyncGeneratorWaitHandle", "HH\\AsyncGeneratorWaitHandle"},

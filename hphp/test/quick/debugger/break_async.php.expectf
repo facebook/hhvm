@@ -8,7 +8,7 @@ But wont break until function main has been loaded.
 continue
 Breakpoint 2 reached at main() on line 43 of %s/break_async.php
   42 function main($a) {
-  43*  $result = genFoo($a)->join();
+  43*  $result = HH\Asio\join(genFoo($a));
   44   var_dump($result);
 
 break genFoo()

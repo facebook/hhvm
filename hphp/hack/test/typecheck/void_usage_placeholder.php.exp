@@ -1,0 +1,6 @@
+Tint
+Tvoid
+File "void_usage_placeholder.php", line 32, characters 3-24:
+You are using the return value of a void function (Typing[4119])
+File "void_usage_placeholder.php", line 32, characters 22-23:
+A void function doesn't return a value ($_ is a placeholder variable not meant to be used)

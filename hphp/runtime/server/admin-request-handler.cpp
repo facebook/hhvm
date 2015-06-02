@@ -28,10 +28,10 @@
 #include "hphp/runtime/base/thread-hooks.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/repo.h"
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-server.h"
@@ -219,13 +219,17 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/dump-const:      dump all constant value in constant map to\n"
         "                  /tmp/const_map_dump\n"
         "/random-apc:      dump the key and size of a random APC entry\n"
-        "                  optionally set count for number of entries returned"
+        "    count         number of entries to return\n"
 
         "/pcre-cache-size: get pcre cache map size\n"
         "/dump-pcre-cache: dump cached pcre's to /tmp/pcre_cache\n"
         "/dump-array-info: dump array tracer info to /tmp/array_tracer_dump\n"
 
         "/start-stacktrace-profiler: set enable_stacktrace_profiler to true\n"
+        "/relocate:        relocate translations\n"
+        "    random        optional, default false, relocate random subset\n"
+        "       all        optional, default false, relocate all translations\n"
+        "      time        optional, default 20 (seconds)\n"
 
 #ifdef GOOGLE_CPU_PROFILER
         "/prof-cpu-on:     turn on CPU profiler\n"
@@ -280,7 +284,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
 
-    if (!RuntimeOption::AdminPasswords.empty()) {
+    bool needs_password = (cmd != "build-id") && (cmd != "compiler-id") &&
+                          (cmd != "instance-id");
+
+    if (needs_password && !RuntimeOption::AdminPasswords.empty()) {
       std::set<std::string>::const_iterator iter =
         RuntimeOption::AdminPasswords.find(transport->getParam("auth"));
       if (iter == RuntimeOption::AdminPasswords.end()) {
@@ -288,7 +295,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         break;
       }
     } else {
-      if (!RuntimeOption::AdminPassword.empty() &&
+      if (needs_password && !RuntimeOption::AdminPassword.empty() &&
           RuntimeOption::AdminPassword != transport->getParam("auth")) {
         transport->sendString("Unauthorized", 401);
         break;
@@ -418,6 +425,22 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
     if (cmd == "start-stacktrace-profiler") {
       enable_stacktrace_profiler = true;
+      transport->sendString("OK\n");
+      break;
+    }
+
+    if (cmd == "relocate") {
+      auto randomParam = transport->getParam("random");
+      auto allParam = transport->getParam("all");
+      auto time = transport->getIntParam("time");
+      bool random = randomParam == "true" || randomParam == "1";
+      if (allParam == "true" || allParam == "1") {
+        jit::liveRelocate(-2);
+      } else if (random || time == 0) {
+        jit::liveRelocate(random);
+      } else {
+        jit::liveRelocate(time);
+      }
       transport->sendString("OK\n");
       break;
     }

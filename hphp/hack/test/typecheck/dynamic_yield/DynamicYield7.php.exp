@@ -1,0 +1,4 @@
+File "DynamicYield7.php", line 25, characters 10-30:
+The pseudo-method genInt is deprecated; instead of relying on DynamicYield::__call, call getInt directly (Typing[4128])
+File "DynamicYield7.php", line 19, characters 19-24:
+Definition is here

@@ -43,26 +43,25 @@ struct SSATmp;
  *                 Unknown                    ANonFrame := ~AFrameAny
  *                    |                       ANonStack := ~AStackAny
  *                    |
- *      +---------+---+---------------+----------------------+
- *      |         |                   |                      |
- *      |         |                   |                      |
- *      |         |                   |                      |
- *      |         |                   |                      |
- *      |         |                AHeapAny*                 |
- *      |         |                   |                      |
- *      |         |            +------+-------+              |
- *      |         |            |              |              |
- *   FrameAny  StackAny     ElemAny        PropAny       MIStateAny
- *      |         |          /    \           |              |
- *     ...       ...   ElemIAny  ElemSAny    ...            ...
+ *      +---------+---+---------------+-------------------------+
+ *      |         |                   |                         |
+ *      |         |                   |                         |
+ *      |         |                   |                         |
+ *      |         |                   |                         |
+ *      |         |                HeapAny*                     |
+ *      |         |                   |                         |
+ *      |         |            +------+------+---------+        |
+ *      |         |            |             |         |        |
+ *   FrameAny  StackAny     ElemAny       PropAny   RefAny  MIStateAny
+ *      |         |          /    \          |         |        |
+ *     ...       ...   ElemIAny  ElemSAny   ...       ...      ...
  *                        |         |
  *                       ...       ...
  *
- *   (*) AHeapAny contains some things other than ElemAny and PropAny that
- *       don't have explicit nodes in the lattice yet.  (Like the values inside
- *       of php references, the lvalBlackhole, etc.)  It's hard for this to
- *       matter to client code for now because we don't expose an intersection
- *       or difference operation.
+ *   (*) AHeapAny contains some things other than ElemAny, PropAny and RefAny
+ *       that don't have explicit nodes in the lattice yet.  (Like the
+ *       lvalBlackhole, etc.)  It's hard for this to matter to client code for
+ *       now because we don't expose an intersection or difference operation.
  */
 struct AliasClass;
 
@@ -84,7 +83,7 @@ struct AProp  { SSATmp* obj; uint32_t offset; };
  * A integer index inside of an array, with base `arr'.  The `arr' tmp is any
  * kind of array (not necessarily kPackedKind or whatnot).
  */
-struct AElemI { SSATmp* arr; uint64_t idx; };
+struct AElemI { SSATmp* arr; int64_t idx; };
 
 /*
  * A location inside of an array, with base `arr', with a string key.  The
@@ -93,28 +92,17 @@ struct AElemI { SSATmp* arr; uint64_t idx; };
 struct AElemS { SSATmp* arr; const StringData* key; };
 
 /*
- * A range of the stack, starting at `offset' from a base pointer, and
- * extending `size' slots deeper into the stack (toward lower memory
- * addresses).  The base pointer may either be a StkPtr or a FramePtr (see
- * below).  The reason ranges extend downward is that it is common to need to
- * refer to the class of all stack locations below some depth (this can be done
- * by putting INT32_MAX in the size).
+ * A range of the stack, starting at `offset' from the outermost frame pointer,
+ * and extending `size' slots deeper into the stack (toward lower memory
+ * addresses).  The frame pointer is the same for all stack ranges in the IR
+ * unit, and thus is not stored here.  The reason ranges extend downward is
+ * that it is common to need to refer to the class of all stack locations below
+ * some depth (this can be done by putting INT32_MAX in the size).
  *
  * Some notes on how the evaluation stack is treated for alias analysis:
  *
- *   o Unlike AFrame locations, in general AStack locations with different
- *     bases may alias each other, even if the offsets are the same.  This is
- *     because we define new StkPtrs in the middle of a region for the same
- *     function, but there is only one FramePtr for a function.
- *
- *   o We represent canonicalized AStack locations as offsets off of the
- *     FramePtr, to address the above aliasing issue.  See canonicalize() in
- *     the .cpp.  AStack locations based on different FramePtrs are presumed
- *     never to alias, and also are naturally presumed never to alias AFrame
- *     locations.  Either of these things 'could' be done, but it is illegal to
- *     generate IR that accesses eval stack locations using offsets from a
- *     FramePtr, or accesses frame locals using offsets from a StkPtr.  (It
- *     would break things in generators, among other things.)
+ *   o Since AStack locations are always canonicalized, different AStack
+ *     locations must not alias if there is no overlap in the ranges.
  *
  *   o In situations with inlined calls, we may in fact have AFrame locations
  *     that refer to the same concrete memory locations (in the evaluation
@@ -125,36 +113,45 @@ struct AElemS { SSATmp* arr; const StringData* key; };
  *     different from knowing that a physical portion of the heap may be
  *     treated as both an AElemI or AProp, but not at the same time based on
  *     HHBC-level semantics.)
- *
- *   o IR instructions that may re-enter can generally potentially write to the
- *     evaluation stack below some logical depth.  Right now that depth is
- *     available in the BCMarker for each instruction, but there is no way to
- *     find which frame or stack pointer it is relative to.  In memory_effects
- *     right now this means we generally must include AStackAny in the
- *     may-store set for any instruction that can re-enter.
  */
-struct AStack { SSATmp* base; int32_t offset; int32_t size; };
+struct AStack {
+  // We can create an AStack from either a stack pointer or a frame
+  // pointer. This constructor canonicalizes the offset to base on the
+  // outermost frame pointer.
+  explicit AStack(SSATmp* base, int32_t offset, int32_t size);
+  explicit AStack(int32_t o, int32_t s) : offset(o), size(s) {}
+
+  int32_t offset;
+  int32_t size;
+};
 
 /*
  * One of the MInstrState TypedValues, at a particular offset in bytes.
  */
 struct AMIState { int32_t offset; };
 
+/*
+ * A RefData referenced by a BoxedCell.
+ */
+struct ARef { SSATmp* boxed; };
+
 //////////////////////////////////////////////////////////////////////
 
 struct AliasClass {
   enum rep : uint32_t {  // bits for various location classes
     BEmpty   = 0,
-
+    // The relative order of the values are used in operator| to decide
+    // which specialization is more useful.
     BFrame   = 1 << 0,
     BProp    = 1 << 1,
     BElemI   = 1 << 2,
     BElemS   = 1 << 3,
     BStack   = 1 << 4,
     BMIState = 1 << 5,
+    BRef     = 1 << 6,
 
     BElem    = BElemI | BElemS,
-    BHeap    = BElem | BProp,
+    BHeap    = BElem | BProp | BRef,
 
     BNonFrame = ~BFrame,
     BNonStack = ~BStack,
@@ -183,6 +180,7 @@ struct AliasClass {
   /* implicit */ AliasClass(AElemS);
   /* implicit */ AliasClass(AStack);
   /* implicit */ AliasClass(AMIState);
+  /* implicit */ AliasClass(ARef);
 
   /*
    * Exact equality.
@@ -191,10 +189,25 @@ struct AliasClass {
   bool operator!=(AliasClass o) const { return !(*this == o); }
 
   /*
-   * Create an alias class that is at least as big as the true union of this
-   * alias class and another one.  Guaranteed to be commutative.
+   * Return an AliasClass that is the precise union of this class and another
+   * class, or folly::none if that precise union cannot be represented.
+   *
+   * Guaranteed to be commutative.
    */
-  AliasClass operator|(AliasClass) const;
+  folly::Optional<AliasClass> precise_union(AliasClass) const;
+
+  /*
+   * Create an alias class that is at least as big as the true union of this
+   * alias class and another one.
+   *
+   * If this.precise_union(o) is not folly::none, this function is guaranteed
+   * to return *this.precise_union(o).  Otherwise it may return an arbitrary
+   * AliasClass bigger than the (unrepresentable) true union---callers should
+   * not rely on specifics about how much bigger it is.
+   *
+   * Guaranteed to be commutative.
+   */
+  AliasClass operator|(AliasClass o) const;
 
   /*
    * Returns whether this alias class is a non-strict-subset of another one.
@@ -219,6 +232,7 @@ struct AliasClass {
   folly::Optional<AElemS>   elemS() const;
   folly::Optional<AStack>   stack() const;
   folly::Optional<AMIState> mis() const;
+  folly::Optional<ARef>     ref() const;
 
   /*
    * Conditionally access specific known information, but also checking that
@@ -234,6 +248,7 @@ struct AliasClass {
   folly::Optional<AElemS>   is_elemS() const;
   folly::Optional<AStack>   is_stack() const;
   folly::Optional<AMIState> is_mis() const;
+  folly::Optional<ARef>     is_ref() const;
 
 private:
   enum class STag {
@@ -244,6 +259,7 @@ private:
     ElemS,
     Stack,
     MIState,
+    Ref,
   };
 
 private:
@@ -266,6 +282,7 @@ private:
     AElemS   m_elemS;
     AStack   m_stack;
     AMIState m_mis;
+    ARef     m_ref;
   };
 };
 
@@ -275,6 +292,7 @@ auto const AEmpty      = AliasClass{AliasClass::BEmpty};
 auto const AFrameAny   = AliasClass{AliasClass::BFrame};
 auto const APropAny    = AliasClass{AliasClass::BProp};
 auto const AHeapAny    = AliasClass{AliasClass::BHeap};
+auto const ARefAny     = AliasClass{AliasClass::BRef};
 auto const ANonFrame   = AliasClass{AliasClass::BNonFrame};
 auto const ANonStack   = AliasClass{AliasClass::BNonStack};
 auto const AStackAny   = AliasClass{AliasClass::BStack};

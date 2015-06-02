@@ -6,9 +6,7 @@ interface IFoo {
 }
 
 class Foo implements IFoo {
-  public function __construct(
-    private this::T $x,
-  ) {}
+  public function __construct(private this::T $x) {}
 
   public function get(): this::T {
     return $this->x;

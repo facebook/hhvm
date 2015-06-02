@@ -28,26 +28,6 @@
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
-// Generate an if-then block into a.  thenBlock is executed if cc is true.
-template <class Then>
-void ifThen(jit::X64Assembler& a, ConditionCode cc, Then thenBlock) {
-  Label done;
-  a.jcc8(ccNegate(cc), done);
-  thenBlock(a);
-  asm_label(a, done);
-}
-
-template <class Then>
-void ifThen(Vout& v, ConditionCode cc, Vreg sf, Then thenBlock) {
-  auto then = v.makeBlock();
-  auto done = v.makeBlock();
-  v << jcc{cc, sf, {done, then}};
-  v = then;
-  thenBlock(v);
-  if (!v.closed()) v << jmp{done};
-  v = done;
-}
-
 // Helper structs for jcc vs. jcc8.
 struct Jcc8 {
   static void branch(X64Assembler& a, ConditionCode cc, TCA dest) {
@@ -130,17 +110,16 @@ typedef CondBlock <TVOFF(m_type),
 /*
  * locToRegDisp --
  *
- * Helper code for stack frames. The struct is a "template" in the
- * non-C++ sense: we don't build source-level stack frames in C++
- * for the most part, but its offsets tell us where to find fields
- * in assembly.
+ * Helper code for stack frames. The struct is a "template" in the non-C++
+ * sense: we don't build source-level stack frames in C++ for the most part,
+ * but its offsets tell us where to find fields in assembly.
  *
- * If we were physically pushing stack frames, we would push them
- * in reverse order to what you see here.
+ * If we were physically pushing stack frames, we would push them in reverse
+ * order to what you see here.
  */
-static inline void
-locToRegDisp(int32_t localIndex, PhysReg *outbase, int *outdisp) {
-  *outdisp = cellsToBytes(locPhysicalOffset(localIndex));
+inline void
+locToRegDisp(int32_t localIndex, PhysReg* outbase, int* outdisp) {
+  *outdisp = cellsToBytes(-(localIndex + 1));
   *outbase = x64::rVmFp;
 }
 
@@ -169,7 +148,7 @@ static inline void verifyTVOff(MemoryRef mr) {
   DEBUG_ONLY auto disp = mr.r.disp;
   // Make sure that we're operating on the m_type field of a
   // TypedValue*.
-  assert((disp & (sizeof(TypedValue) - 1)) == TVOFF(m_type));
+  assertx((disp & (sizeof(TypedValue) - 1)) == TVOFF(m_type));
 }
 
 template<typename SrcType, typename OpndType>
@@ -246,7 +225,7 @@ emitStoreTypedValue(X64Assembler& a, DataType type, PhysReg val,
     emitStoreTVType(a, type, dest[disp + TVOFF(m_type)]);
   }
   if (!IS_NULL_TYPE(type)) {
-    assert(val != InvalidReg);
+    assertx(val != InvalidReg);
     a.  storeq(val, dest[disp + TVOFF(m_data)]);
   }
 }
@@ -266,18 +245,12 @@ emitCopyTo(X64Assembler& a,
            Reg64 dest,
            int destOff,
            PhysReg scratch) {
-  assert(src != scratch);
+  assertx(src != scratch);
   // This is roughly how gcc compiles this.  Blow off m_aux.
   a.    loadq  (src[srcOff + TVOFF(m_data)], scratch);
   a.    storeq (scratch, dest[destOff + TVOFF(m_data)]);
   emitLoadTVType(a, src[srcOff + TVOFF(m_type)], r32(scratch));
   emitStoreTVType(a, r32(scratch), dest[destOff + TVOFF(m_type)]);
-}
-
-// Pops the return address pushed by fcall and stores it into the
-// actrec in rStashedAR.
-inline void emitPopRetIntoActRec(X64Assembler& a) {
-  a.    pop  (x64::rStashedAR[AROFF(m_savedRip)]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

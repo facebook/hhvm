@@ -1,0 +1,2 @@
+File "private_props_abs_without_construct1.php", line 5, characters 16-16:
+Lacking __construct, class A does not initialize its private member(s): c  (NastCheck[3030])

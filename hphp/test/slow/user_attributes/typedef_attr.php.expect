@@ -1,0 +1,5 @@
+int(42)
+int(5)
+E_RECOVERABLE_ERROR: Argument 1 passed to wat() must be an instance of FBID, string given
+string(4) "fail"
+Done

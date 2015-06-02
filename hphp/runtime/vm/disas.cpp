@@ -502,14 +502,23 @@ std::string func_flag_list(const FuncInfo& finfo) {
 }
 
 
+std::string opt_attrs(AttrContext ctx, Attr attrs) {
+  auto str = attrs_to_string(ctx, attrs);
+  if (!str.empty()) str = folly::format(" [{}]", str).str();
+  return str;
+}
+
 void print_func(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
 
   if (func->isPseudoMain()) {
     out.fmtln(".main {{");
   } else {
-    out.fmtln(".function {}({}){}{{", func->name()->data(),
-      func_param_list(finfo), func_flag_list(finfo));
+    out.fmtln(".function{} {}({}){}{{",
+      opt_attrs(AttrContext::Func, func->attrs()),
+      func->name()->data(),
+      func_param_list(finfo),
+      func_flag_list(finfo));
   }
   indented(out, [&] {
     print_func_directives(out, func);
@@ -517,12 +526,6 @@ void print_func(Output& out, const Func* func) {
   });
   out.fmtln("}}");
   out.nl();
-}
-
-std::string opt_attrs(AttrContext ctx, Attr attrs) {
-  auto str = attrs_to_string(ctx, attrs);
-  if (!str.empty()) str = folly::format(" [{}]", str).str();
-  return str;
 }
 
 std::string member_tv_initializer(Cell cell) {

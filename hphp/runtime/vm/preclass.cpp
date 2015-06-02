@@ -93,6 +93,7 @@ void PreClass::prettyPrint(std::ostream &out) const {
   } else if (m_hoistable == AlwaysHoistable) {
     out << " (always-hoistable)";
   }
+  if (m_attrs & AttrNoOverride){ out << " (nooverride)"; }
   if (m_attrs & AttrUnique)     out << " (unique)";
   if (m_attrs & AttrPersistent) out << " (persistent)";
   if (m_id != -1) {
@@ -169,6 +170,9 @@ PreClass::Const::Const(const StringData* name,
 
 void PreClass::Const::prettyPrint(std::ostream& out,
                                   const PreClass* preClass) const {
+  if (isType()) {
+    out << "Type ";
+  }
   if (isAbstract()) {
     out << "Constant (abstract) "
         << preClass->name()->data() << "::" << m_name->data()

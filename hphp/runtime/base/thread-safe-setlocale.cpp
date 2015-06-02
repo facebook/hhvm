@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#ifdef ENABLE_THREAD_SAFE_SETLOCALE
-
 #include "hphp/runtime/base/thread-safe-setlocale.h"
 #include <string.h>
 #include <langinfo.h>
@@ -51,6 +49,9 @@
 
 namespace HPHP {
 
+IMPLEMENT_THREAD_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handler);
+IMPLEMENT_THREAD_LOCAL(struct lconv, g_thread_safe_localeconv_data);
+
 static const locale_t s_null_locale = (locale_t) 0;
 
 ThreadSafeLocaleHandler::ThreadSafeLocaleHandler() {
@@ -64,12 +65,14 @@ ThreadSafeLocaleHandler::ThreadSafeLocaleHandler() {
       FILL_IN_CATEGORY_LOCALE_MAP(LC_MONETARY),
       FILL_IN_CATEGORY_LOCALE_MAP(LC_MESSAGES),
       FILL_IN_CATEGORY_LOCALE_MAP(LC_ALL),
+      #ifndef __APPLE__
       FILL_IN_CATEGORY_LOCALE_MAP(LC_PAPER),
       FILL_IN_CATEGORY_LOCALE_MAP(LC_NAME),
       FILL_IN_CATEGORY_LOCALE_MAP(LC_ADDRESS),
       FILL_IN_CATEGORY_LOCALE_MAP(LC_TELEPHONE),
       FILL_IN_CATEGORY_LOCALE_MAP(LC_MEASUREMENT),
-      FILL_IN_CATEGORY_LOCALE_MAP(LC_IDENTIFICATION)
+      FILL_IN_CATEGORY_LOCALE_MAP(LC_IDENTIFICATION),
+      #endif
     #undef FILL_IN_CATEGORY_LOCALE_MAP
   };
 
@@ -181,6 +184,61 @@ const char* ThreadSafeLocaleHandler::actuallySetLocale(
   return locale_cstr;
 }
 
+#ifdef __APPLE__
+struct lconv* ThreadSafeLocaleHandler::localeconv() {
+  // BSD/OS X has localeconv_l, which actually returns data held onto by the
+  // locale itself -- and since that's thread-local (since this object instance
+  // is) we can just use that.
+  // TODO is the memcpy even necessary?
+  struct lconv *ptr = g_thread_safe_localeconv_data.get();
+  struct lconv *l = localeconv_l(m_locale);
+  memcpy(ptr, l, sizeof(struct lconv));
+  return ptr;
+}
+#else
+struct lconv* ThreadSafeLocaleHandler::localeconv() {
+  // glibc does not have localeconv_l, and so we need to do some shenanigans.
+  struct lconv *ptr = g_thread_safe_localeconv_data.get();
+
+  ptr->decimal_point = nl_langinfo(DECIMAL_POINT);
+  ptr->thousands_sep = nl_langinfo(THOUSANDS_SEP);
+  ptr->grouping = nl_langinfo(GROUPING);
+  ptr->int_curr_symbol = nl_langinfo(INT_CURR_SYMBOL);
+  ptr->currency_symbol = nl_langinfo(CURRENCY_SYMBOL);
+  ptr->mon_decimal_point = nl_langinfo(MON_DECIMAL_POINT);
+  ptr->mon_thousands_sep = nl_langinfo(MON_THOUSANDS_SEP);
+  ptr->mon_grouping = nl_langinfo(MON_GROUPING);
+  ptr->positive_sign = nl_langinfo(POSITIVE_SIGN);
+  ptr->negative_sign = nl_langinfo(NEGATIVE_SIGN);
+  ptr->int_frac_digits = nl_langinfo(INT_FRAC_DIGITS)[0];
+  ptr->frac_digits = nl_langinfo(FRAC_DIGITS)[0];
+  ptr->p_cs_precedes = nl_langinfo(P_CS_PRECEDES)[0];
+  ptr->p_sep_by_space = nl_langinfo(P_SEP_BY_SPACE)[0];
+  ptr->n_cs_precedes = nl_langinfo(N_CS_PRECEDES)[0];
+  ptr->n_sep_by_space = nl_langinfo(N_SEP_BY_SPACE)[0];
+  ptr->p_sign_posn = nl_langinfo(P_SIGN_POSN)[0];
+  ptr->n_sign_posn = nl_langinfo(N_SIGN_POSN)[0];
+
+  #ifdef __USE_ISOC99
+  ptr->int_p_cs_precedes = nl_langinfo(INT_P_CS_PRECEDES)[0];
+  ptr->int_p_sep_by_space = nl_langinfo(INT_P_SEP_BY_SPACE)[0];
+  ptr->int_n_cs_precedes = nl_langinfo(INT_N_CS_PRECEDES)[0];
+  ptr->int_n_sep_by_space = nl_langinfo(INT_N_SEP_BY_SPACE)[0];
+  ptr->int_p_sign_posn = nl_langinfo(INT_P_SIGN_POSN)[0];
+  ptr->int_n_sign_posn = nl_langinfo(INT_N_SIGN_POSN)[0];
+  #else
+  ptr->__int_p_cs_precedes = nl_langinfo(INT_P_CS_PRECEDES)[0];
+  ptr->__int_p_sep_by_space = nl_langinfo(INT_P_SEP_BY_SPACE)[0];
+  ptr->__int_n_cs_precedes = nl_langinfo(INT_N_CS_PRECEDES)[0];
+  ptr->__int_n_sep_by_space = nl_langinfo(INT_N_SEP_BY_SPACE)[0];
+  ptr->__int_p_sign_posn = nl_langinfo(INT_P_SIGN_POSN)[0];
+  ptr->__int_n_sign_posn = nl_langinfo(INT_N_SIGN_POSN)[0];
+  #endif
+
+  return ptr;
+}
+#endif
+
 void ThreadSafeLocaleHandler::generate_LC_ALL_String() {
   bool same = true;
   for (auto &i : m_category_locale_map) {
@@ -213,10 +271,6 @@ void ThreadSafeLocaleHandler::generate_LC_ALL_String() {
   }
 }
 
-IMPLEMENT_THREAD_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handler);
-
-IMPLEMENT_THREAD_LOCAL(struct lconv, g_thread_safe_localeconv_data);
-
 }
 
 extern "C" char* setlocale(int category, const char* locale) {
@@ -226,44 +280,5 @@ extern "C" char* setlocale(int category, const char* locale) {
 }
 
 extern "C" struct lconv* localeconv() {
-  struct lconv *ptr = HPHP::g_thread_safe_localeconv_data.get();
-
-  ptr->decimal_point = nl_langinfo(DECIMAL_POINT);
-  ptr->thousands_sep = nl_langinfo(THOUSANDS_SEP);
-  ptr->grouping = nl_langinfo(GROUPING);
-  ptr->int_curr_symbol = nl_langinfo(INT_CURR_SYMBOL);
-  ptr->currency_symbol = nl_langinfo(CURRENCY_SYMBOL);
-  ptr->mon_decimal_point = nl_langinfo(MON_DECIMAL_POINT);
-  ptr->mon_thousands_sep = nl_langinfo(MON_THOUSANDS_SEP);
-  ptr->mon_grouping = nl_langinfo(MON_GROUPING);
-  ptr->positive_sign = nl_langinfo(POSITIVE_SIGN);
-  ptr->negative_sign = nl_langinfo(NEGATIVE_SIGN);
-  ptr->int_frac_digits = nl_langinfo(INT_FRAC_DIGITS)[0];
-  ptr->frac_digits = nl_langinfo(FRAC_DIGITS)[0];
-  ptr->p_cs_precedes = nl_langinfo(P_CS_PRECEDES)[0];
-  ptr->p_sep_by_space = nl_langinfo(P_SEP_BY_SPACE)[0];
-  ptr->n_cs_precedes = nl_langinfo(N_CS_PRECEDES)[0];
-  ptr->n_sep_by_space = nl_langinfo(N_SEP_BY_SPACE)[0];
-  ptr->p_sign_posn = nl_langinfo(P_SIGN_POSN)[0];
-  ptr->n_sign_posn = nl_langinfo(N_SIGN_POSN)[0];
-
-#ifdef __USE_ISOC99
-  ptr->int_p_cs_precedes = nl_langinfo(INT_P_CS_PRECEDES)[0];
-  ptr->int_p_sep_by_space = nl_langinfo(INT_P_SEP_BY_SPACE)[0];
-  ptr->int_n_cs_precedes = nl_langinfo(INT_N_CS_PRECEDES)[0];
-  ptr->int_n_sep_by_space = nl_langinfo(INT_N_SEP_BY_SPACE)[0];
-  ptr->int_p_sign_posn = nl_langinfo(INT_P_SIGN_POSN)[0];
-  ptr->int_n_sign_posn = nl_langinfo(INT_N_SIGN_POSN)[0];
-#else
-  ptr->__int_p_cs_precedes = nl_langinfo(INT_P_CS_PRECEDES)[0];
-  ptr->__int_p_sep_by_space = nl_langinfo(INT_P_SEP_BY_SPACE)[0];
-  ptr->__int_n_cs_precedes = nl_langinfo(INT_N_CS_PRECEDES)[0];
-  ptr->__int_n_sep_by_space = nl_langinfo(INT_N_SEP_BY_SPACE)[0];
-  ptr->__int_p_sign_posn = nl_langinfo(INT_P_SIGN_POSN)[0];
-  ptr->__int_n_sign_posn = nl_langinfo(INT_N_SIGN_POSN)[0];
-#endif
-
-  return ptr;
+  return HPHP::g_thread_safe_locale_handler->localeconv();
 }
-
-#endif // ENABLE_THREAD_SAFE_SETLOCALE

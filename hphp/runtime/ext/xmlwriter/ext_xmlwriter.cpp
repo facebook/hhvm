@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/vm/native-data.h"
 
@@ -27,8 +27,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 const StaticString s_XMLWriterData("XMLWriterData");
 
-class XMLWriterData : public Sweepable {
-public:
+struct XMLWriterData {
   XMLWriterData(): m_ptr(nullptr), m_output(nullptr) {}
 
   ~XMLWriterData() {
@@ -57,7 +56,7 @@ public:
 
   bool openURI(const String& uri) {
     m_uri = File::Open(uri, "wb");
-    if (m_uri.isNull()) {
+    if (!m_uri) {
       return false;
     }
 
@@ -541,14 +540,14 @@ public:
 public:
   xmlTextWriterPtr  m_ptr;
   xmlBufferPtr      m_output;
-  Resource          m_uri;
+  SmartPtr<File>    m_uri;
 
 private:
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
   static int write_file(void *context, const char *buffer, int len) {
-    return len > 0 ? ((XMLWriterData*)context)->m_uri.getTyped<File>()->
+    return len > 0 ? reinterpret_cast<XMLWriterData*>(context)->m_uri->
       writeImpl(buffer, len) : 0;
   }
 
@@ -565,7 +564,6 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 class XMLWriterResource : public SweepableResourceData {
-private:
   DECLARE_RESOURCE_ALLOCATION(XMLWriterResource)
 
 public:
@@ -579,7 +577,9 @@ public:
   XMLWriterData m_writer;
 };
 
-void XMLWriterResource::sweep() {}
+void XMLWriterResource::sweep() {
+  m_writer.sweep();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // methods (object oriented style) and functions (procedural style)
@@ -641,7 +641,7 @@ void XMLWriterResource::sweep() {}
   }                                                                            \
 
 #define CHECK_RESOURCE(writer)                                                 \
-  XMLWriterResource *writer = wr.getTyped<XMLWriterResource>(true, true);      \
+  auto writer = dyn_cast_or_null<XMLWriterResource>(wr);                       \
   if (writer == nullptr) {                                                     \
     raise_warning("supplied argument is not a valid xmlwriter "                \
                   "handle resource");                                          \
@@ -680,13 +680,13 @@ void XMLWriterResource::sweep() {}
 XMLWRITER_METHOD_NO_ARGS(bool, openMemory)
 
 static Variant HHVM_FUNCTION(xmlwriter_open_memory) {
-  auto data = newres<XMLWriterResource>();
+  auto data = makeSmartPtr<XMLWriterResource>();
 
   bool opened = data->m_writer.openMemory();
   if (!opened) {
     return false;
   }
-  return data;
+  return Variant(std::move(data));
 }
 
 XMLWRITER_METHOD(bool, openURI,
@@ -694,13 +694,13 @@ XMLWRITER_METHOD(bool, openURI,
 
 static Variant HHVM_FUNCTION(xmlwriter_open_uri,
                              const String& uri) {
-  auto data = newres<XMLWriterResource>();
+  auto data = makeSmartPtr<XMLWriterResource>();
 
   bool opened = data->m_writer.openURI(uri);
   if (!opened) {
     return false;
   }
-  return data;
+  return Variant(std::move(data));
 }
 
 XMLWRITER_METHOD(bool, setIndentString,

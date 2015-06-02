@@ -65,7 +65,10 @@ protected:
   // to the server so that it too can update it's list.
   // Returns false if the breakpoint is not well formed.
   bool addToBreakpointListAndUpdateServer(
-      DebuggerClient &client, BreakPointInfoPtr bpi, int index);
+    DebuggerClient& client,
+    BreakPointInfoPtr bpi,
+    int index
+  );
 
 private:
   // Either points to the breakpoint collection of a debugger client
@@ -82,34 +85,13 @@ private:
   // will update its breakpoint list with the one in this command.
   // The client will block until the server echoes
   // this command back to it. The echoed command is discarded.
-  void updateServer(DebuggerClient &client);
+  void updateServer(DebuggerClient&);
 
   // Carries out the "break list" command.
-  void processList(DebuggerClient &client);
+  void processList(DebuggerClient&);
 
   // Carries out commands that change the status of a breakpoint.
-  void processStatusChange(DebuggerClient &client);
-
-  // Returns true if the last command parsed by the client has
-  // an argument that changes the status of a breakpoint.
-  // I.e. clear, enable, disable or toggle.
-  bool hasStatusChangeArg(DebuggerClient &client);
-
-  // Returns true if the last command parsed by the client has
-  // the string "enable" in its first argument position.
-  bool hasEnableArg(DebuggerClient &client);
-
-  // Returns true if the last command parsed by the client has
-  // the string "disable" in its first argument position.
-  bool hasDisableArg(DebuggerClient &client);
-
-  // Returns true if the last command parsed by the client has
-  // the string "clear" in its first argument position.
-  bool hasClearArg(DebuggerClient &client);
-
-  // Returns true if the last command parsed by the client has
-  // the string "toggle" in its first argument position.
-  bool hasToggleArg(DebuggerClient &client);
+  void processStatusChange(DebuggerClient&);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stack-logger.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/server/http-server.h"
@@ -196,21 +197,30 @@ MemoryManager::MemoryManager()
   m_bypassSlabAlloc = RuntimeOption::DisableSmartAllocator;
 }
 
+void MemoryManager::dropRootMaps() {
+  m_objectRoots = nullptr;
+  m_resourceRoots = nullptr;
+}
+
+void MemoryManager::deleteRootMaps() {
+  if (m_objectRoots) {
+    smart_delete(m_objectRoots);
+    m_objectRoots = nullptr;
+  }
+  if (m_resourceRoots) {
+    smart_delete(m_resourceRoots);
+    m_resourceRoots = nullptr;
+  }
+}
+
 void MemoryManager::resetRuntimeOptions() {
   if (debug) {
+    deleteRootMaps();
     checkHeap();
     // check that every allocation in heap has been freed before reset
-    for (auto h = begin(), lim = end(); h != lim; ++h) {
-      if (h->kind_ == HeaderKind::Debug) {
-        auto h2 = h; ++h2;
-        if (h2 != lim) {
-          assert(h2->kind_ == HeaderKind::Free);
-        }
-      } else {
-        assert(h->kind_ == HeaderKind::Free ||
-               h->kind_ == HeaderKind::Hole);
-      }
-    }
+    iterate([&](Header* h) {
+      assert(h->kind() == HeaderKind::Free);
+    });
   }
   MemoryManager::TlsWrapper::destroy();
   MemoryManager::TlsWrapper::getCheck();
@@ -294,8 +304,7 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
 }
 
 void MemoryManager::refreshStatsHelperExceeded() {
-  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-  info->m_reqInjectionData.setMemExceededFlag();
+  setSurpriseFlag(MemExceededFlag);
   m_couldOOM = false;
   if (RuntimeOption::LogNativeStackOnOOM) {
     log_native_stack("Exceeded memory limit");
@@ -434,16 +443,39 @@ template void MemoryManager::refreshStatsImpl<false>(MemoryUsageStats& stats);
 void MemoryManager::sweep() {
   assert(!sweeping());
   if (debug) checkHeap();
+  collect();
   m_sweeping = true;
   SCOPE_EXIT { m_sweeping = false; };
-  DEBUG_ONLY auto sweepable = Sweepable::SweepAll();
-  DEBUG_ONLY auto native = m_natives.size();
-  Native::sweepNativeData(m_natives);
-  TRACE(1, "sweep: sweepable %u native %lu\n", sweepable, native);
+  DEBUG_ONLY size_t num_sweepables = 0, num_natives = 0;
+
+  // iterate until both sweep lists are empty. Entries can be added or
+  // removed from either list during sweeping.
+  do {
+    while (!m_sweepables.empty()) {
+      num_sweepables++;
+      auto obj = m_sweepables.next();
+      obj->unregister();
+      obj->sweep();
+    }
+    while (!m_natives.empty()) {
+      num_natives++;
+      assert(m_natives.back()->sweep_index == m_natives.size() - 1);
+      auto node = m_natives.back();
+      m_natives.pop_back();
+      auto obj = Native::obj(node);
+      auto ndi = obj->getVMClass()->getNativeDataInfo();
+      ndi->sweep(obj);
+      // trash the native data but leave the header and object parsable
+      assert(memset(node+1, kSmartFreeFill, node->obj_offset - sizeof(*node)));
+    }
+  } while (!m_sweepables.empty());
+
+  TRACE(1, "sweep: sweepable %lu native %lu\n", num_sweepables, num_natives);
   if (debug) checkHeap();
 }
 
 void MemoryManager::resetAllocator() {
+  assert(m_natives.empty() && m_sweepables.empty());
   // decref apc strings and arrays referenced by this request
   DEBUG_ONLY auto napcs = m_apc_arrays.size();
   while (!m_apc_arrays.empty()) {
@@ -453,12 +485,16 @@ void MemoryManager::resetAllocator() {
   }
   DEBUG_ONLY auto nstrings = StringData::sweepAll();
 
+  // cleanup root maps
+  dropRootMaps();
+
   // free the heap
   m_heap.reset();
 
   // zero out freelists
   for (auto& i : m_freelists) i.head = nullptr;
   m_front = m_limit = 0;
+  m_needInitFree = false;
 
   resetStatsImpl(true);
   TRACE(1, "reset: apc-arrays %lu strings %u\n", napcs, nstrings);
@@ -469,7 +505,6 @@ void MemoryManager::flush() {
   m_heap.flush();
   m_apc_arrays = std::vector<APCLocalArray*>();
   m_natives = std::vector<NativeNode*>();
-  Sweepable::FlushList();
 }
 
 /*
@@ -526,7 +561,7 @@ inline void* MemoryManager::smartMalloc(size_t nbytes) {
   if (LIKELY(nbytes_padded) <= kMaxSmartSize) {
     auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes_padded));
     ptr->padbytes = nbytes_padded;
-    ptr->kind = HeaderKind::SmallMalloc;
+    ptr->hdr.kind = HeaderKind::SmallMalloc;
     return ptr + 1;
   }
   return smartMallocBig(nbytes);
@@ -572,7 +607,9 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
 namespace {
 DEBUG_ONLY const char* header_names[] = {
   "Packed", "Struct", "Mixed", "Empty", "Apc", "Globals", "Proxy",
-  "String", "Object", "ResumableObj", "Resource", "Ref",
+  "String", "Resource", "Ref",
+  "Object", "ResumableObj", "AwaitAllWH",
+  "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
   "Resumable", "Native", "SmallMalloc", "BigMalloc", "BigObj",
   "Free", "Hole", "Debug"
 };
@@ -608,29 +645,21 @@ SizeTable s_index2size;
 void MemoryManager::initHole() {
   if ((char*)m_front < (char*)m_limit) {
     auto hdr = static_cast<FreeNode*>(m_front);
-    hdr->kind = HeaderKind::Hole;
-    hdr->size = (char*)m_limit - (char*)m_front;
+    hdr->hdr.kind = HeaderKind::Hole;
+    hdr->size() = (char*)m_limit - (char*)m_front;
   }
 }
 
 // initialize the FreeNode header on all freelist entries.
 void MemoryManager::initFree() {
+  initHole();
   for (size_t i = 0; i < kNumSmartSizes; i++) {
-    auto size = s_index2size.table[i];
+    auto size = std::min(s_index2size.table[i], kMaxSmartSize);
     for (auto n = m_freelists[i].head; n; n = n->next) {
-      n->kind_size = HeaderKind::Free<<24 | size<<32;
+      n->hdr.init(HeaderKind::Free, size);
     }
   }
-}
-
-BigHeap::iterator MemoryManager::begin() {
-  initHole();
-  initFree();
-  return m_heap.begin();
-}
-
-BigHeap::iterator MemoryManager::end() {
-  return m_heap.end();
+  m_needInitFree = false;
 }
 
 // test iterating objects in slabs
@@ -642,22 +671,12 @@ void MemoryManager::checkHeap() {
   std::unordered_set<StringData*> apc_strings;
   size_t counts[NumHeaderKinds];
   for (unsigned i=0; i < NumHeaderKinds; i++) counts[i] = 0;
-  for (auto h = begin(), lim = end(); h != lim; ++h) {
+  forEachHeader([&](Header* h) {
     hdrs.push_back(&*h);
     TRACE(2, "checkHeap: hdr %p\n", hdrs[hdrs.size()-1]);
     bytes += h->size();
-    counts[(int)h->kind_]++;
-    switch (h->kind_) {
-      case HeaderKind::Debug: {
-        // the next block's parsed size should agree with DebugHeader
-        auto h2 = h; ++h2;
-        if (h2 != lim) {
-          assert(h2->kind_ != HeaderKind::Debug);
-          assert(h->debug_.returnedCap ==
-                 MemoryManager::smartSizeClass(h2->size()));
-        }
-        break;
-      }
+    counts[(int)h->kind()]++;
+    switch (h->kind()) {
       case HeaderKind::Free:
         free_blocks.insert(&h->free_);
         break;
@@ -675,17 +694,28 @@ void MemoryManager::checkHeap() {
       case HeaderKind::Proxy:
       case HeaderKind::Object:
       case HeaderKind::ResumableObj:
+      case HeaderKind::AwaitAllWH:
+      case HeaderKind::Vector:
+      case HeaderKind::Map:
+      case HeaderKind::Set:
+      case HeaderKind::Pair:
+      case HeaderKind::ImmVector:
+      case HeaderKind::ImmMap:
+      case HeaderKind::ImmSet:
       case HeaderKind::Resource:
       case HeaderKind::Ref:
-      case HeaderKind::Resumable:
-      case HeaderKind::Native:
+      case HeaderKind::ResumableFrame:
+      case HeaderKind::NativeData:
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
+        break;
+      case HeaderKind::Debug:
       case HeaderKind::BigObj:
       case HeaderKind::Hole:
+        assert(false && "forEachHeader skips these kinds");
         break;
     }
-  }
+  });
 
   // check the free lists
   for (size_t i = 0; i < kNumSmartSizes; i++) {
@@ -913,6 +943,15 @@ void MemoryManager::removeApcArray(APCLocalArray* a) {
   last->m_sweep_index = index;
 }
 
+void MemoryManager::addSweepable(Sweepable* obj) {
+  obj->enlist(&m_sweepables);
+}
+
+// defined here because memory-manager.h includes sweepable.h
+Sweepable::Sweepable() {
+  MM().addSweepable(this);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 #ifdef DEBUG
@@ -922,7 +961,7 @@ void* MemoryManager::debugPostAllocate(void* p,
                                        size_t returnedCap) {
   auto const header = static_cast<DebugHeader*>(p);
   header->allocatedMagic = DebugHeader::kAllocatedMagic;
-  header->kind = HeaderKind::Debug;
+  header->hdr.kind = HeaderKind::Debug;
   header->requestedSize = bytes;
   header->returnedCap = returnedCap;
   return (void*)(uintptr_t(header) + kDebugExtraSize);
@@ -969,8 +1008,7 @@ void MemoryManager::logDeallocation(void* p) {
 }
 
 void MemoryManager::resetCouldOOM(bool state) {
-  ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-  info->m_reqInjectionData.clearMemExceededFlag();
+  clearSurpriseFlag(MemExceededFlag);
   m_couldOOM = state;
 }
 
@@ -1082,8 +1120,8 @@ MemBlock BigHeap::allocSlab(size_t size) {
 
 void BigHeap::enlist(BigNode* n, HeaderKind kind, size_t size) {
   n->nbytes = size;
-  n->kind = kind;
-  n->index = m_bigs.size();
+  n->hdr.kind = kind;
+  n->index() = m_bigs.size();
   m_bigs.push_back(n);
 }
 
@@ -1120,9 +1158,9 @@ bool BigHeap::contains(void* ptr) const {
 NEVER_INLINE
 void BigHeap::freeBig(void* ptr) {
   auto n = static_cast<BigNode*>(ptr) - 1;
-  auto i = n->index;
+  auto i = n->index();
   auto last = m_bigs.back();
-  last->index = i;
+  last->index() = i;
   m_bigs[i] = last;
   m_bigs.pop_back();
   free(n);
@@ -1136,18 +1174,9 @@ MemBlock BigHeap::resizeBig(void* ptr, size_t newsize) {
     safe_realloc(n, newsize + sizeof(BigNode))
   );
   if (newNode != n) {
-    m_bigs[newNode->index] = newNode;
+    m_bigs[newNode->index()] = newNode;
   }
   return {newNode + 1, newsize};
-}
-
-BigHeap::iterator BigHeap::begin() {
-  if (!m_slabs.empty()) return iterator{m_slabs.begin(), *this};
-  return iterator{m_bigs.begin(), *this};
-}
-
-BigHeap::iterator BigHeap::end() {
-  return iterator{m_bigs.end(), *this};
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -1209,7 +1238,7 @@ void ContiguousHeap::reset() {
   }
   m_used = m_base;
   m_freeList.next = nullptr;
-  m_freeList.size = 0;
+  m_freeList.size() = 0;
   always_assert(m_base);
   m_slabs.clear();
   m_bigs.clear();
@@ -1218,7 +1247,7 @@ void ContiguousHeap::reset() {
 void ContiguousHeap::flush() {
   madvise(m_base, m_peak-m_base, MADV_DONTNEED);
   m_used = m_peak = m_base;
-  m_freeList.size = 0;
+  m_freeList.size() = 0;
   m_freeList.next = nullptr;
   m_slabs = std::vector<MemBlock>{};
   m_bigs = std::vector<BigNode*>{};
@@ -1257,10 +1286,10 @@ NEVER_INLINE
 void ContiguousHeap::freeBig(void* ptr) {
   // remove from big list
   auto n = static_cast<BigNode*>(ptr) - 1;
-  auto i = n->index;
+  auto i = n->index();
   auto last = m_bigs.back();
   auto size = n->nbytes;
-  last->index = i;
+  last->index() = i;
   m_bigs[i] = last;
   m_bigs.pop_back();
 
@@ -1268,19 +1297,19 @@ void ContiguousHeap::freeBig(void* ptr) {
   // freed nodes are stored in address ordered freelist
   auto free = &m_freeList;
   auto node = reinterpret_cast<FreeNode*>(n);
-  node->size = size;
+  node->size() = size;
   while (free->next != nullptr && free->next < node) {
     free = free->next;
   }
   // Coalesce Nodes if possible with adjacent free nodes
-  if ((uintptr_t)free + free->size + node->size == (uintptr_t)free->next) {
-    free->size += node->size + free->next->size;
+  if ((uintptr_t)free + free->size() + node->size() == (uintptr_t)free->next) {
+    free->size() += node->size() + free->next->size();
     free->next = free->next->next;
-  } else if ((uintptr_t)free + free->size == (uintptr_t)ptr) {
-    free->size += node->size;
-  } else if ((uintptr_t)node + node->size == (uintptr_t)free->next){
+  } else if ((uintptr_t)free + free->size() == (uintptr_t)ptr) {
+    free->size() += node->size();
+  } else if ((uintptr_t)node + node->size() == (uintptr_t)free->next){
     node->next = free->next->next;
-    node->size += free->next->size;
+    node->size() += free->next->size();
     free->next = node;
   } else {
     node->next = free->next;
@@ -1304,7 +1333,7 @@ MemBlock ContiguousHeap::resizeBig(void* ptr, size_t newsize) {
     newNode->nbytes = cap;
   }
   if (newNode != n) {
-    m_bigs[newNode->index] = newNode;
+    m_bigs[newNode->index()] = newNode;
     freeBig(n);
   }
   return {newNode + 1, n->nbytes - sizeof(BigNode)};
@@ -1323,19 +1352,19 @@ void* ContiguousHeap::heapAlloc(size_t nbytes, size_t &cap) {
   auto prev = &m_freeList;
   auto cur = m_freeList.next;
   while (cur != nullptr ) {
-    if (cur->size >= alignedSize &&
-        cur->size < alignedSize + kMaxSmartSize) {
+    if (cur->size() >= alignedSize &&
+        cur->size() < alignedSize + kMaxSmartSize) {
       // found freed heap node that fits allocation and doesn't need to split
       ptr = cur;
       prev->next = cur->next;
-      cap = cur->size;
+      cap = cur->size();
       return ptr;
     }
-    if (cur->size > alignedSize) {
+    if (cur->size() > alignedSize) {
       // split free heap node
       prev->next = reinterpret_cast<FreeNode*>(((char*)cur) + alignedSize);
       prev->next->next = cur->next;
-      prev->next->size = cur->size - alignedSize;
+      prev->next->size() = cur->size() - alignedSize;
       ptr = cur;
       cap = alignedSize;
       return ptr;
@@ -1353,8 +1382,7 @@ void* ContiguousHeap::heapAlloc(size_t nbytes, size_t &cap) {
     // Throw exception when t4840214 is fixed
     // throw FatalErrorException("Request heap out of memory");
   } else if (UNLIKELY(m_used > m_OOMMarker)) {
-    ThreadInfo* info = ThreadInfo::s_threadInfo.getNoCheck();
-    info->m_reqInjectionData.setMemExceededFlag();
+    setSurpriseFlag(MemExceededFlag);
   }
   return ptr;
 }
@@ -1377,7 +1405,7 @@ void ContiguousHeap::createRequestHeap() {
   m_peak = m_base;
   m_OOMMarker = m_end - (m_contiguousHeapSize/2);
   m_freeList.next = nullptr;
-  m_freeList.size = 0;
+  m_freeList.size() = 0;
 }
 
 ContiguousHeap::~ContiguousHeap(){

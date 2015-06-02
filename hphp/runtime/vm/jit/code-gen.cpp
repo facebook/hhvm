@@ -33,12 +33,12 @@ TRACE_SET_MOD(hhir);
 
 //////////////////////////////////////////////////////////////////////
 
-void genCode(IRUnit& unit) {
+void genCode(IRUnit& unit, CodeKind kind /* = CodeKind::Trace */) {
   if (dumpIREnabled()) {
     AsmInfo ai(unit);
-    mcg->backEnd().genCodeImpl(unit, &ai);
+    mcg->backEnd().genCodeImpl(unit, kind, &ai);
   } else {
-    mcg->backEnd().genCodeImpl(unit, nullptr);
+    mcg->backEnd().genCodeImpl(unit, kind, nullptr);
   }
 }
 

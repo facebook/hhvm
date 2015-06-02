@@ -30,15 +30,13 @@ if (ENABLE_ZEND_COMPAT)
   list(APPEND HHVM_WHOLE_ARCHIVE_LIBRARIES hphp_ext_zend_compat)
 endif()
 
-if (ENABLE_THREAD_SAFE_SETLOCALE)
-  add_definitions("-DENABLE_THREAD_SAFE_SETLOCALE=1")
-endif()
-
 if (APPLE)
   set(ENABLE_FASTCGI 1)
   set(HHVM_ANCHOR_SYMS
     -Wl,-u,_register_fastcgi_server
-    -Wl,-segaddr,__text,0
+    -Wl,-pagezero_size,0x00001000
+    # Set the .text.keep section to be executable.
+    -Wl,-segprot,.text,rx,rx
     -Wl,-all_load ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
 elseif (IS_AARCH64)
   set(HHVM_ANCHOR_SYMS
@@ -70,6 +68,7 @@ set(HHVM_LINK_LIBRARIES
   hphp_zend
   hphp_util
   hphp_hhbbc
+  jit_sort
   vixl neo)
 
 if(ENABLE_FASTCGI)
@@ -216,7 +215,7 @@ if(ENABLE_FASTCGI)
   add_definitions(-DENABLE_FASTCGI=1)
 endif ()
 
-if(DISABLE_HARDWARE_COUNTERS)
+if(DISABLE_HARDWARE_COUNTERS OR NOT LINUX)
   add_definitions(-DNO_HARDWARE_COUNTERS=1)
 endif ()
 

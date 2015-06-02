@@ -10,5 +10,4 @@ class C2 {
 
 type Cycle = C1::T;
 
-function test(): Cycle {
-}
+function test(): Cycle {}

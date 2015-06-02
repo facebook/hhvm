@@ -22,9 +22,9 @@
 #include <vector>
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
-#include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
@@ -418,25 +418,9 @@ static int getClassSize(Class* cls) {
 }
 
 static bool supportsToArray(ObjectData* obj) {
-  Class* cls = obj->getVMClass();
-
   if (obj->isCollection()) {
-    if (cls == c_Vector::classof()) {
-      return true;
-    } else if (cls == c_Map::classof()) {
-      return true;
-    } else if (cls == c_Set::classof()) {
-      return true;
-    } else if (cls == c_Pair::classof()) {
-      return true;
-    } else if (cls == c_ImmVector::classof()) {
-      return true;
-    } else if (cls == c_ImmMap::classof()) {
-      return true;
-    } else if (cls == c_ImmSet::classof()) {
-      return true;
-    }
-    return false;
+    assertx(isValidCollection(obj->collectionType()));
+    return true;
   } else if (UNLIKELY(obj->getAttribute(ObjectData::CallToImpl))) {
     return obj->instanceof(c_SimpleXMLElement::classof());
   } else if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayObjectClass))) {
@@ -470,7 +454,7 @@ static std::pair<int, double> getObjSize(ObjectData* obj) {
   }
 
   bool adjust_val = true;
-  if (cls == c_Map::classof() || cls == c_ImmMap::classof()) {
+  if (collections::isType(cls, CollectionType::Map, CollectionType::ImmMap)) {
     adjust_val = false;
   }
 

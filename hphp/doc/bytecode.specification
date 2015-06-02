@@ -711,7 +711,7 @@ Here is a description of each flavor descriptor:
       time; this flavor descriptor is used for parameter values that are about
       to be passed into a function
   U - uninit; specifies that the value must be an uninitialized null at run
-      time; this is only used for FCallBuiltin
+      time; this is only used for FCallBuiltin, CreateCl, and CUGetL.
 
 
 Verifiability
@@ -761,8 +761,8 @@ must be empty.
 exactly one value and the flavor descriptor of the value must be cell.
 Likewise, before executing the RetV instruction, the evaluation stack must
 contain exactly one value and the flavor descriptor of the value must be the
-ref. Finally, before executing the Unwind instruction, the evaluation stack
-must be empty.
+ref. Finally, before executing the Unwind or NativeImpl instructions, the
+evaluation stack must be empty.
 
 6) The code for the primary function body and fault funclets must be laid out
 in order in one contiguous block, starting with the primary function body and
@@ -909,6 +909,10 @@ descriptors:
   PC       - consume a cell from the evaluation stack as a property
   PL:<id>  - consume a local given by an immediate id as a property
   PT:<id>  - consume a litstr given by an immediate id as a property
+  QT:<id>  - a nullsafe version of PT:<id>. The null-base doesn't issue
+             a warning, and no stdClass promotion in write context for the
+             base happens. Consume a litstr given by an immediate id
+             as a property
   W        - synthesize a new element (no corresponding local variable or
              evaluation stack slot)
 
@@ -988,7 +992,7 @@ BoxR    [R:<T>]  ->  [V:<T>]
   If $1 is a cell at run time, this instruction creates a new ref, sets the new
   ref to point at a copy of cell $1, and pushes the ref onto the stack.
 
-BoxRNop   [R:<T>]  ->  [C:<T>]
+BoxRNop   [R:<T>]  ->  [V:<T>]
 
   Box, no op. $1 must be statically known to be boxed.
 
@@ -1113,19 +1117,29 @@ NewCol <coll type> <num elems>    []  ->  [C:Obj]
   sufficient to hold the number of elements specified by %2, and pushes the
   collection onto the stack.
 
-ColAddElemC    [C C C]  ->  [C:Obj]
+ColFromArray <coll type>    [C:Arr]  ->  [C:Obj]
 
-  Collection add key/value pair. If $3 is a collection object, this instruction
-  executes $3[$2] = $1 and then pushes $3 onto the stack.
+  Create a collection of type %1 from array $1, and pushes the collection onto
+  the stack. %1 cannot be Pair. The array will be used to implement the
+  collection without conversion or duplication, thus it should not to contain
+  references. $1 must be in packed mode if %1 is Vector or ImmVector, and must
+  be in mixed mode otherwise.
 
-  If $3 is not a collection object, this instruction throws a fatal error.
+  Note that integer-like string keys are converted to integers in array, but
+  not in collections; thus not all collections can be created using this
+  instruction.
+
+MapAddElemC    [C C C]  ->  [C:Obj]
+
+  Collection add key/value pair. $3 must be an instance of HH\Map or
+  HH\ImmMap. This instruction executes $3[$2] = $1 and then pushes $3 onto the
+  stack.
 
 ColAddNewElemC    [C C]  ->  [C:Obj]
 
-  Collection add value. If $2 is a collection object, this instruction executes
-  $2[] = $1 and then pushes $2 onto the stack.
-
-  If $2 is not a collection object, this instruction throws a fatal error.
+  Collection add value. $2 must be an instance of HH\Pair, HH\Set, or
+  HH\Vector.  This instruction executes $2[] = $1 and then pushes $2 onto the
+  stack.
 
 Cns <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Resource]
 
@@ -1224,7 +1238,7 @@ SubO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
 
   Same behavior as Sub, except for when both inputs have type Int and the
   result would not fit in a 64-bit integer. Then this instruction will push
-  (double)$1 - (double)$2.
+  (double)$2 - (double)$1.
 
 MulO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
        [C:<T2> C:<T1>]  ->  [C:Int|Dbl] (where T1 != Dbl && T2 != Dbl)
@@ -1434,9 +1448,11 @@ Jmp <rel offset>    []  ->  []
 
 JmpNS <rel offset>   []  ->  []
 
-  Jump, with no surprise flag checks. This behaves identically to the Jmp
-  instruction, except that internal VM checks for things like OOM do not need
-  to be performed even if the offset is negative. NS means "no surprise".
+  Jump, with no surprise flag checks (NS means "no surprise"). This behaves
+  identically to the Jmp instruction, except that internal VM checks for things
+  like OOM and timeouts do not need to be performed even if the offset is
+  negative.  This instruction cannot have a zero offset (i.e. it cannot jump to
+  itself).
 
 JmpZ <rel offset>    [C]  ->  []
 
@@ -1450,11 +1466,12 @@ JmpNZ <rel offset>    [C]  ->  []
 
 Switch <offset vector> <base> <bounded>    [C]  ->  []
 
-  Switch over integer case values. If bounded == 0, the implementation will
-  assume that $1 is an integer in the range [0, length(vector)) and
-  unconditionally transfer control to the location specified by vector[$1].
-  Undefined behavior will result if $1 is not an integer inside this range. If
-  bounded != 0, the following rules take over:
+  Switch over integer case values. If bounded == SwitchKind::Unbounded, the
+  implementation will assume that $1 is an integer in the range [0,
+  length(vector)) and unconditionally transfer control to the location
+  specified by vector[$1].  Undefined behavior will result if $1 is not an
+  integer inside this range. If bounded == SwitchKind::Bounded, the following
+  rules take over:
 
   For a bounded Switch, the last two elements of the offset vector are special:
   they represent the first non-zero case and the default case, respectively.
@@ -1529,6 +1546,13 @@ CGetL3 <local variable id>    [<F2>:<T2> <F1>:<T1>]  ->  [C <F2>:<T1> <F1>:<T1>]
   Get local as cell. If the local variable given by %1 is defined, this
   instruction gets the value of the local variable, pushes it onto the stack as
   a cell, then pushes $2 onto the stack, and then pushes $1 onto the stack.
+
+CUGetL <local variable id>    []  ->  [C|U]
+
+  Get local as cell or uninit. If the local variable given by %1 is defined,
+  this instruction gets the value of the local variable and pushes it onto the
+  stack as a cell. If the local variable is not defined, this instruction pushes
+  uninit onto the stack.
 
   If the local variable given by %1 is not defined, this instruction raises a
   warning, pushes null onto the stack, then pushes $2 onto the stack, and then
@@ -1973,7 +1997,7 @@ FPushObjMethodD <num params> <litstr id>    [C]  ->  []
   method named y. If it does, this instruction pushes a new entry on the FPI
   stack, initializing it with the number of parameters being passed (given by
   %1) and a reference to the FPI structure for the method named y from object
-  %x.
+  x.
 
   If object x does not have an accessible method named y, this instruction
   checks if object x has a __call method. If a __call method is found, this
@@ -2002,11 +2026,10 @@ FPushClsMethodD <num params> <litstr id> <litstr id>    []  ->  []
   the AGetC instruction to convert the name given by %3 into a classref.
 
   If y is not a string, this instruction throws a fatal error. Next, this
-  instruction checks if class x has an accessible method named y. If class x
-  has a method named y. If it does, this instruction pushes a new entry on the
-  FPI stack, initializing it with the number of parameters being passed (given
-  by %1) and a reference to the FPI structure for the method named y from class
-  x.
+  instruction checks if class x has an accessible method named y. If it does,
+  this instruction pushes a new entry on the FPI stack, initializing it with
+  the number of parameters being passed (given by %1) and a reference to the
+  FPI structure for the method named y from class x.
 
   If class x does not have an accessible method named y, this instruction
   checks if the current function's $this is non-null, if the class of $this is
@@ -2746,8 +2769,8 @@ IssetElemL <local variable id>    [B]  ->  [C:Bool]
   If y is an object that does not implement the ArrayAccess interface, this
   operation throws a fatal error.
 
-  If y is a string, this operation computes x = (int)x and then it pushes (x >=
-  0 && x < strlen(y)) onto the stack.
+  If y is a string, this operation computes z = (int)x and then it pushes (z >=
+  0 && z < strlen(y)) onto the stack.
 
   If y is a not a string, array, or object, this operation pushes false onto
   the stack.
@@ -3683,7 +3706,8 @@ WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
   is initialized in %1:
 
     If the iterator specified by %1 is a non-mutable array iterator or an
-    extension class iterator, these instructions of the current value in %3.
+    extension class iterator, these instructions store a copy of the current
+    value in %3.
 
     If the iterator specified by %1 is a user class iterator for object $x,
     these instructions store the return value of $x->current() in %3.
@@ -3724,7 +3748,7 @@ MIterInitK <iterator id> <rel offset> <local id> <local id>    [V]  ->  []
 
   If $1 is an object that does not match any of the three cases above, these
   instructions create a mutable default class iterator, rewind it to point to
-  the first accessible property, and store the it in the iterator variable %1.
+  the first accessible property, and store it in the iterator variable %1.
   Then these instructions check if the iterator is at the end, and if it is
   these instructions free the iterator and transfer control to the location
   specified by %2.
@@ -3839,7 +3863,7 @@ IterBreak <iter-vec> <rel offset>   []  ->  []
   control to the location specified by %2. Surprise checks are performed before
   iterators are freed so that in the event of an exception iterators are not
   double freed. Note that as with normal jumps surprise checks will only be
-  performed if %2 is negative.
+  performed if %2 is non-positive.
 
 
 12. Include, eval, and define instructions
@@ -4052,7 +4076,7 @@ AKExists    [C C] -> [C:Bool]
   key. Throws a fatal error if $1 is not an array or object, and raises a
   warning if $2 is not a string, integer, or null.
 
-CreateCl <num args> <class name>  [C|V..C|V]  ->  [C]
+CreateCl <num args> <class name>  [C|V|U..C|V|U]  ->  [C]
 
   Creates an instance of <class name> and pushes it on the stack.
 

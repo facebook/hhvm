@@ -23,6 +23,7 @@
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -56,6 +57,8 @@ rds::Link<UnwindRDS> unwindRdsInfo(rds::kInvalidHandle);
 
 namespace {
 
+size_t fdeIdx;
+
 template<class T>
 void append_vec(std::vector<char>& v,
                 // Prevent template argument deduction:
@@ -67,10 +70,11 @@ void append_vec(std::vector<char>& v,
 }
 
 void sync_regstate(_Unwind_Context* context) {
-  assert(tl_regState == VMRegState::DIRTY);
+  assertx(tl_regState == VMRegState::DIRTY);
 
   uintptr_t frameRbp = _Unwind_GetGR(context, Debug::RBP);
-  uintptr_t frameRip = _Unwind_GetGR(context, Debug::RIP);
+  uintptr_t frameRip = _Unwind_GetIP(context);
+  FTRACE(2, "syncing regstate for rbp: {:#x} rip: {:#x}\n", frameRbp, frameRip);
 
   /*
    * fixupWork expects to be looking at the first frame that is out of
@@ -88,39 +92,27 @@ void sync_regstate(_Unwind_Context* context) {
   Stats::inc(Stats::TC_SyncUnwind);
   mcg->fixupMap().fixupWork(g_context.getNoCheck(), &fakeAr);
   tl_regState = VMRegState::CLEAN;
+  FTRACE(2, "synced vmfp: {} vmsp: {} vmpc: {}\n", vmfp(), vmsp(), vmpc());
 }
 
-bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
-                         bool do_side_exit, TypedValue unwinder_tv,
-                         uint64_t returnRip) {
-  auto const rip = (TCA)_Unwind_GetIP(ctx);
-  TCA catchTrace;
+/*
+ * Lookup a catch trace for the given TCA, returning nullptr if none was
+ * found. Will abort if a nullptr catch trace was registered, meaning this call
+ * isn't allowed to throw.
+ */
+TCA lookup_catch_trace(TCA rip, _Unwind_Exception* exn) {
   if (auto catchTraceOpt = mcg->getCatchTrace(rip)) {
-    catchTrace = *catchTraceOpt;
-  } else {
-    if (returnRip) {
-      // We tried to interpret a return out of a frame that was entered in the
-      // TC and there's no catch trace for the current rip. Use endCatchHelper
-      // as a catch trace, which will delete the exception and resume at
-      // returnRip.
-      catchTrace = mcg->tx().uniqueStubs.endCatchHelperResumeTC;
-    } else {
-      FTRACE(1, "No catch trace entry for ip {}; bailing\n", rip);
-      return false;
-    }
-  }
+    if (auto catchTrace = *catchTraceOpt) return catchTrace;
 
-  if (!catchTrace) {
-    // A few of our optimization passes must be aware of every path out of the
-    // trace, so throwing through jitted code without a catch block is very
-    // bad. This is indicated with a present but nullptr entry in the catch
-    // trace map.
+    // A few of our optimization passes must be aware of every path out of
+    // the trace, so throwing through jitted code without a catch block is
+    // very bad. This is indicated with a present but nullptr entry in the
+    // catch trace map.
     const size_t kCallSize = 5;
     const uint8_t kCallOpcode = 0xe8;
 
     auto callAddr = rip - kCallSize;
     TCA helperAddr = nullptr;
-    std::string helperName;
     if (*callAddr == kCallOpcode) {
       helperAddr = rip + *reinterpret_cast<int32_t*>(callAddr + 1);
     }
@@ -129,8 +121,19 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
                        "Translated call to {} threw '{}' without "
                        "catch block, return address: {}\n",
                        getNativeFunctionName(helperAddr),
-                       exceptionFromUnwindException(exn)->what(),
+                       typeInfoFromUnwindException(exn).name(),
                        rip);
+  }
+
+  return nullptr;
+}
+
+bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
+                         bool do_side_exit, TypedValue unwinder_tv) {
+  auto const rip = (TCA)_Unwind_GetIP(ctx);
+  auto catchTrace = lookup_catch_trace(rip, exn);
+  if (!catchTrace) {
+    FTRACE(1, "No catch trace entry for ip {}; bailing\n", rip);
     return false;
   }
 
@@ -141,7 +144,7 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   // If the catch trace isn't going to finish by calling _Unwind_Resume, we
   // consume the exception here. Otherwise, we leave a pointer to it in RDS so
   // endCatchHelper can pass it to _Unwind_Resume when it's done.
-  if (returnRip || do_side_exit) {
+  if (do_side_exit) {
     unwindRdsInfo->exn = nullptr;
     __cxxabiv1::__cxa_begin_catch(exn);
     __cxxabiv1::__cxa_end_catch();
@@ -156,7 +159,6 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
   // because it doesn't have to worry about saving its arguments somewhere
   // while executing the exit trace.
   unwindRdsInfo->doSideExit = do_side_exit;
-  unwindRdsInfo->returnRip = returnRip;
   if (do_side_exit) unwindRdsInfo->unwinderTv = unwinder_tv;
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
   tl_regState = VMRegState::DIRTY;
@@ -166,7 +168,7 @@ bool install_catch_trace(_Unwind_Context* ctx, _Unwind_Exception* exn,
 
 void deregister_unwind_region(std::vector<char>* p) {
   std::auto_ptr<std::vector<char> > del(p);
-  __deregister_frame(&(*p)[0]);
+  __deregister_frame(&(*p)[fdeIdx]);
 }
 
 }
@@ -179,25 +181,27 @@ tc_unwind_personality(int version,
                       _Unwind_Context* context) {
   using namespace abi;
   // Exceptions thrown by g++-generated code will have the class "GNUCC++"
-  // packed into a 64-bit int. For now we shouldn't be seeing exceptions from
-  // any other runtimes but this may change in the future.
+  // packed into a 64-bit int. libc++ has the class "CLNGC++". For now we
+  // shouldn't be seeing exceptions from any other runtimes but this may
+  // change in the future.
   DEBUG_ONLY constexpr uint64_t kMagicClass = 0x474e5543432b2b00;
   DEBUG_ONLY constexpr uint64_t kMagicDependentClass = 0x474e5543432b2b01;
-  assert(exceptionClass == kMagicClass ||
-         exceptionClass == kMagicDependentClass);
-  assert(version == 1);
+  DEBUG_ONLY constexpr uint64_t kLLVMMagicClass = 0x434C4E47432B2B00;
+  DEBUG_ONLY constexpr uint64_t kLLVMMagicDependentClass = 0x434C4E47432B2B01;
+  assertx(exceptionClass == kMagicClass ||
+          exceptionClass == kMagicDependentClass ||
+          exceptionClass == kLLVMMagicClass ||
+          exceptionClass == kLLVMMagicDependentClass);
+  assertx(version == 1);
 
   auto const& ti = typeInfoFromUnwindException(exceptionObj);
   auto const std_exception = exceptionFromUnwindException(exceptionObj);
   InvalidSetMException* ism = nullptr;
   TVCoercionException* tce = nullptr;
-  VMResumeTC* resume_tc = nullptr;
   if (ti == typeid(InvalidSetMException)) {
     ism = static_cast<InvalidSetMException*>(std_exception);
   } else if (ti == typeid(TVCoercionException)) {
     tce = static_cast<TVCoercionException*>(std_exception);
-  } else if (ti == typeid(VMResumeTC)) {
-    resume_tc = static_cast<VMResumeTC*>(std_exception);
   }
 
   if (Trace::moduleEnabled(TRACEMOD, 1)) {
@@ -206,7 +210,7 @@ tc_unwind_personality(int version,
     int status;
     auto* exnType = __cxa_demangle(ti.name(), nullptr, nullptr, &status);
     SCOPE_EXIT { free(exnType); };
-    assert(status == 0);
+    assertx(status == 0);
     FTRACE(1, "unwind {} exn {}: regState: {} ip: {} type: {}\n",
            unwindType, exceptionObj,
            tl_regState == VMRegState::DIRTY ? "dirty" : "clean",
@@ -229,12 +233,6 @@ tc_unwind_personality(int version,
       FTRACE(1, "TVCoercionException thrown, returning _URC_HANDLER_FOUND\n");
       return _URC_HANDLER_FOUND;
     }
-    if (resume_tc) {
-      FTRACE(1, "VMResumeTC thrown with address {:#x}, "
-             "returning _URC_HANDLER_FOUND\n",
-             resume_tc->where);
-      return _URC_HANDLER_FOUND;
-    }
   }
 
   /*
@@ -249,35 +247,84 @@ tc_unwind_personality(int version,
       sync_regstate(context);
     }
 
-    // When we're unwinding through a TC frame (as opposed to stopping at a
-    // handler frame), we need to make sure that if we later return from this
-    // VM frame in translated code, we don't resume after the bindcall that may
-    // be expecting things to still live in its spill space. If the return
-    // address is in functionEnterHelper or callToExit, rVmFp won't contain a
-    // real VM frame, so we skip those.
-    auto const fp  = reinterpret_cast<ActRec*>(_Unwind_GetGR(context,
-                                                             Debug::RBP));
-    if (!(actions & _UA_HANDLER_FRAME) && isVMFrame(fp)) {
-      auto const oldRip = fp->m_savedRip;
-      g_context->preventReturnToTC(fp);
-      if (fp->m_savedRip != oldRip) {
-        FTRACE(1, "Smashed m_savedRip of fp {} from {:#x} to {:#x}\n",
-               fp, oldRip, fp->m_savedRip);
-      }
-    }
-
-    if (install_catch_trace(context, exceptionObj, ism || tce, tv,
-                            resume_tc ? resume_tc->where : 0)) {
-      always_assert((ism || tce || resume_tc) ==
-                    bool(actions & _UA_HANDLER_FRAME));
+    if (install_catch_trace(context, exceptionObj, ism || tce, tv)) {
+      always_assert((ism || tce) == bool(actions & _UA_HANDLER_FRAME));
       return _URC_INSTALL_CONTEXT;
     }
+
+    always_assert(!(actions & _UA_HANDLER_FRAME));
+
+    auto ip = TCA(_Unwind_GetIP(context));
+    auto& stubs = mcg->tx().uniqueStubs;
+    if (ip == stubs.endCatchHelperPast) {
+      FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
+      return _URC_CONTINUE_UNWIND;
+    }
+    if (ip == stubs.functionEnterHelperReturn) {
+      FTRACE(1, "rip == functionEnterHelperReturn, continuing unwind\n");
+      return _URC_CONTINUE_UNWIND;
+    }
+
+    FTRACE(1, "unwinder hit normal TC frame, going to tc_unwind_resume\n");
+    unwindRdsInfo->exn = exceptionObj;
+    _Unwind_SetIP(context, uint64_t(stubs.endCatchHelper));
+    return _URC_INSTALL_CONTEXT;
   }
 
   always_assert(!(actions & _UA_HANDLER_FRAME));
 
   FTRACE(1, "returning _URC_CONTINUE_UNWIND\n");
   return _URC_CONTINUE_UNWIND;
+}
+
+TCUnwindInfo tc_unwind_resume(ActRec* fp) {
+  while (true) {
+    auto const newFp = fp->m_sfp;
+    ITRACE(1, "tc_unwind_resume processing fp: {} savedRip: {:#x} newFp: {}\n",
+           fp, fp->m_savedRip, newFp);
+    Trace::Indent indent;
+    always_assert_flog(isVMFrame(fp),
+                       "Unwinder got non-VM frame {} with saved rip {:#x}\n",
+                       fp, fp->m_savedRip);
+
+    // When we're unwinding through a TC frame (as opposed to stopping at a
+    // handler frame), we need to make sure that if we later return from this
+    // VM frame in translated code, we don't resume after the bindcall that may
+    // be expecting things to still live in its spill space. If the return
+    // address is in functionEnterHelper or callToExit, rVmFp won't contain a
+    // real VM frame, so we skip those.
+    auto savedRip = reinterpret_cast<TCA>(fp->m_savedRip);
+    if (savedRip == mcg->tx().uniqueStubs.callToExit) {
+      ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
+      return {nullptr, newFp};
+    }
+
+    auto catchTrace = lookup_catch_trace(savedRip, unwindRdsInfo->exn);
+    if (isDebuggerReturnHelper(savedRip)) {
+      // If this frame had its return address smashed by the debugger, the real
+      // catch trace is saved in a side table.
+      assertx(catchTrace == nullptr);
+      catchTrace = popDebuggerCatch(fp);
+    }
+    unwindPreventReturnToTC(fp);
+    if (fp->m_savedRip != reinterpret_cast<uint64_t>(savedRip)) {
+      ITRACE(1, "Smashed m_savedRip of fp {} from {} to {:#x}\n",
+             fp, savedRip, fp->m_savedRip);
+    }
+
+    fp = newFp;
+
+    // If there's a catch trace for this block, return it. Otherwise, keep
+    // going up the VM stack for this nesting level.
+    if (catchTrace) {
+      ITRACE(1, "tc_unwind_resume returning catch trace {} with fp: {}\n",
+             catchTrace, fp);
+      return {catchTrace, fp};
+    }
+
+    ITRACE(1, "No catch trace entry for {}; continuing\n",
+           mcg->tx().uniqueStubs.describe(savedRip));
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -303,9 +350,8 @@ register_unwind_region(unsigned char* startAddr, size_t size) {
     /*
      * Null-terminated "augmentation string" (defines what the rest of
      * this thing is going to have.
-     *
-     * TODO: probably we should have a 'z' field to indicate length.
      */
+    append_vec<char>(buffer, 'z');
     append_vec<char>(buffer, 'P');
     append_vec<char>(buffer, '\0');
 
@@ -316,9 +362,18 @@ register_unwind_region(unsigned char* startAddr, size_t size) {
     // Return address column (in version 1, this is a single byte).
     append_vec<uint8_t>(buffer, Debug::RIP);
 
+    // Length of the augmentation data.
+    const size_t augIdx = buffer.size();
+    append_vec<uint8_t>(buffer, 9);
+
     // Pointer to the personality routine for the TC.
     append_vec<uint8_t>(buffer, DW_EH_PE_absptr);
     append_vec<uintptr_t>(buffer, uintptr_t(tc_unwind_personality));
+
+    // Fixup the augmentation data length field.  Note that it doesn't include
+    // the space for itself.
+    void* vp = &buffer[augIdx];
+    *static_cast<uint8_t*>(vp) = buffer.size() - augIdx - sizeof(uint8_t);
 
     /*
      * Define a program for the CIE.  This explains to the unwinder
@@ -351,10 +406,10 @@ register_unwind_region(unsigned char* startAddr, size_t size) {
 
     // Fixup the length field.  Note that it doesn't include the space
     // for itself.
-    void* vp = &buffer[0];
+    vp = &buffer[0];
     *static_cast<uint32_t*>(vp) = buffer.size() - sizeof(uint32_t);
   }
-  const size_t fdeIdx = buffer.size();
+  fdeIdx = buffer.size();
   {
     // Reserve space for FDE length.
     append_vec<uint32_t>(buffer, 0);
@@ -369,6 +424,10 @@ register_unwind_region(unsigned char* startAddr, size_t size) {
     append_vec<unsigned char*>(buffer, startAddr);
     append_vec<size_t>(buffer, size);
 
+    // Length of the augmentation data in this FDE. This field must present if
+    // 'z' is set in CIE.
+    append_vec<uint8_t>(buffer, 0);
+
     // Fixup the length field for this FDE.  Again length doesn't
     // include the length field itself.
     void* vp = &buffer[fdeIdx];
@@ -378,9 +437,9 @@ register_unwind_region(unsigned char* startAddr, size_t size) {
   // no more FDEs sharing this CIE.
   append_vec<uint32_t>(buffer, 0);
 
-  __register_frame(&buffer[0]);
+  __register_frame(&buffer[fdeIdx]);
 
-  return std::shared_ptr<std::vector<char> >(
+  return std::shared_ptr<std::vector<char>>(
     bufferMem.release(),
     deregister_unwind_region
   );

@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/pipe.h"
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -814,12 +815,11 @@ static String resolve_parse_ini_filename(const String& filename) {
   }
 
   // Next, see if include path was set in the ini settings.
-  auto const includePaths = ThreadInfo::s_threadInfo.getNoCheck()->
-    m_reqInjectionData.getIncludePaths();
+  auto const& includePaths =
+    ThreadInfo::s_threadInfo->m_reqInjectionData.getIncludePaths();
 
-  unsigned int pathCount = includePaths.size();
-  for (int i = 0; i < (int)pathCount; i++) {
-    resolved = includePaths[i] + '/' + filename;
+  for (auto const& path : includePaths) {
+    resolved = path + '/' + filename;
     if (HHVM_FN(file_exists)(resolved)) {
       return resolved;
     }
@@ -1072,9 +1072,38 @@ bool HHVM_FUNCTION(is_executable,
   */
 }
 
+static VFileType lookupVirtualFile(const String& filename) {
+  if (filename.empty() || !StaticContentCache::TheFileCache) {
+    return VFileType::NotFound;
+  }
+
+  String cwd;
+  std::string root;
+  bool isRelative = (filename.charAt(0) != '/');
+  if (isRelative) {
+    cwd = g_context->getCwd();
+    root = RuntimeOption::SourceRoot;
+    if (cwd.empty() || cwd[cwd.size() - 1] != '/') root.pop_back();
+  }
+
+  if (!isRelative || !root.compare(cwd.data())) {
+    return StaticContentCache::TheFileCache->getFileType(filename.data());
+  }
+
+  return VFileType::NotFound;
+}
+
 bool HHVM_FUNCTION(is_file,
                    const String& filename) {
   CHECK_PATH_FALSE(filename, 1);
+  if (filename.empty()) {
+    return false;
+  }
+  auto vtype = lookupVirtualFile(filename);
+  if (vtype != VFileType::NotFound) {
+    return vtype == VFileType::PlainFile;
+  }
+
   struct stat sb;
   CHECK_SYSTEM_SILENT(statSyscall(filename, &sb, true));
   return (sb.st_mode & S_IFMT) == S_IFREG;
@@ -1083,16 +1112,12 @@ bool HHVM_FUNCTION(is_file,
 bool HHVM_FUNCTION(is_dir,
                    const String& filename) {
   CHECK_PATH_FALSE(filename, 1);
-  String cwd;
   if (filename.empty()) {
     return false;
   }
-  bool isRelative = (filename.charAt(0) != '/');
-  if (isRelative) cwd = g_context->getCwd();
-  if (!isRelative || cwd == String(RuntimeOption::SourceRoot)) {
-    if (File::IsVirtualDirectory(filename)) {
-      return true;
-    }
+  auto vtype = lookupVirtualFile(filename);
+  if (vtype != VFileType::NotFound) {
+    return vtype == VFileType::Directory;
   }
 
   struct stat sb;
@@ -1120,6 +1145,11 @@ bool HHVM_FUNCTION(is_uploaded_file,
 bool HHVM_FUNCTION(file_exists,
                    const String& filename) {
   CHECK_PATH_FALSE(filename, 1);
+  auto vtype = lookupVirtualFile(filename);
+  if (vtype != VFileType::NotFound) {
+    return true;
+  }
+
   if (filename.empty() ||
       (accessSyscall(filename, F_OK, true)) < 0) {
     return false;
@@ -1431,7 +1461,11 @@ bool HHVM_FUNCTION(chgrp,
   }
 
   int gid = get_gid(group);
-  if (gid == -1) return false;
+  if (gid == -1) {
+    raise_warning("chgrp(): Unable to find gid for %s",
+                  group.toString().c_str());
+    return false;
+  }
   CHECK_SYSTEM(chown(File::TranslatePath(filename).data(), (uid_t)-1, gid));
   return true;
 }
@@ -1456,7 +1490,11 @@ bool HHVM_FUNCTION(lchgrp,
   }
 
   int gid = get_gid(group);
-  if (gid == 0) return false;
+  if (gid == -1) {
+    raise_warning("lchgrp(): Unable to find gid for %s",
+                  group.toString().c_str());
+    return false;
+  }
   CHECK_SYSTEM(lchown(File::TranslatePath(filename).data(), (uid_t)-1, gid));
   return true;
 }
@@ -1677,19 +1715,23 @@ Variant HHVM_FUNCTION(glob,
                   nullptr,
                   &globbuf);
   if (nret == GLOB_NOMATCH) {
+    globfree(&globbuf);
     return empty_array();
   }
 
   if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
     if (ThreadInfo::s_threadInfo->m_reqInjectionData.hasSafeFileAccess()) {
       if (!HHVM_FN(is_dir)(work_pattern)) {
+        globfree(&globbuf);
         return false;
       }
     }
+    globfree(&globbuf);
     return empty_array();
   }
 
   if (nret) {
+    globfree(&globbuf);
     return false;
   }
 
@@ -1978,6 +2020,11 @@ void HHVM_FUNCTION(closedir,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString
+  s_STDIN("STDIN"),
+  s_STDOUT("STDOUT"),
+  s_STDERR("STDERR");
+
 void StandardExtension::initFile() {
 
   REGISTER_STRING_CONSTANT(DIRECTORY_SEPARATOR, s_DIRECTORY_SEPARATOR);
@@ -2011,6 +2058,10 @@ void StandardExtension::initFile() {
   REGISTER_CONSTANT(SEEK_SET, k_SEEK_SET);
   REGISTER_CONSTANT(SEEK_CUR, k_SEEK_CUR);
   REGISTER_CONSTANT(SEEK_END, k_SEEK_END);
+
+  Native::registerConstant(s_STDIN.get(),  BuiltinFiles::GetSTDIN);
+  Native::registerConstant(s_STDOUT.get(), BuiltinFiles::GetSTDOUT);
+  Native::registerConstant(s_STDERR.get(), BuiltinFiles::GetSTDERR);
 
   HHVM_FE(fopen);
   HHVM_FE(popen);

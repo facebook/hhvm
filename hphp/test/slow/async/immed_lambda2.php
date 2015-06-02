@@ -6,7 +6,7 @@ async function block() {
 
 async function awaitva(...$args) {
   await AwaitAllWaitHandle::fromArray($args);
-  return array_map($x ==> $x->join(), $args);
+  return array_map($x ==> HH\Asio\join($x), $args);
 }
 
 async function foo() {
@@ -29,4 +29,4 @@ async function foo() {
   return $res1 + $res2 * $res3;
 }
 
-var_dump(foo()->join());
+var_dump(HH\Asio\join(foo()));

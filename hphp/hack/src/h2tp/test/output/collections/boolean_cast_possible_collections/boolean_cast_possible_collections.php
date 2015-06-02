@@ -27,10 +27,11 @@ function test_all_expression_types() {
   test_cast("class_get", (bool) \hacklib_cast_as_boolean(Foo::$s_prop));
   test_cast("cast", (bool) \hacklib_cast_as_boolean((object) $v));
   test_cast("cast", (bool) ((array) \hacklib_cast_as_array($v)));
-  for ($v_in = new \HH\Vector(array(1)), $i = 1;
-  $i > 0,
-  \hacklib_cast_as_boolean($v_in)
-  ; $i++, $v_in->pop()) {
+  for (
+    $v_in = new \HH\Vector(array(1)), $i = 1;
+    $i > 0, \hacklib_cast_as_boolean($v_in);
+    $i++, $v_in->pop()
+  ) {
     echo ("in here at $i\n");
     if ($i > 5) {
       break;

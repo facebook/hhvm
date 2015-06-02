@@ -25,34 +25,32 @@
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef struct _xdebug_xml_attribute xdebug_xml_attribute;
-typedef struct _xdebug_xml_text_node xdebug_xml_text_node;
-typedef struct _xdebug_xml_node xdebug_xml_node;
+struct String;
 
-struct _xdebug_xml_attribute {
+struct xdebug_xml_attribute {
   char *name;
   char *value;
   int   name_len;
   int   value_len;
-  struct _xdebug_xml_attribute *next;
+  xdebug_xml_attribute *next;
   int   free_name;
   int   free_value;
 };
 
 /* todo: support multiple text nodes inside an element */
-struct _xdebug_xml_text_node {
+struct xdebug_xml_text_node {
   char *text;
   int   free_value;
   int   encode;
   int   text_len;
 };
 
-struct _xdebug_xml_node {
+struct xdebug_xml_node {
   char *tag;
-  struct _xdebug_xml_text_node *text;
-  struct _xdebug_xml_attribute *attribute;
-  struct _xdebug_xml_node      *child;
-  struct _xdebug_xml_node      *next;
+  xdebug_xml_text_node *text;
+  xdebug_xml_attribute *attribute;
+  xdebug_xml_node      *child;
+  xdebug_xml_node      *next;
   int   free_tag;
 };
 
@@ -132,6 +130,8 @@ inline void xdebug_xml_add_text_encodel(xdebug_xml_node* xml, char* tag,
                                         int length) {
   xdebug_xml_add_text_ex(xml, tag, length, 1, 1);
 }
+
+String xdebug_xmlize(const char*, size_t);
 
 ////////////////////////////////////////////////////////////////////////////////
 }

@@ -18,6 +18,7 @@
 #if (!defined(__CYGWIN__) && !defined(__MINGW__) && !defined(__MSC_VER))
 #include <execinfo.h>
 #endif
+
 #include <bfd.h>
 #include <signal.h>
 #include <sys/types.h>
@@ -482,7 +483,7 @@ static bool fill_bfd_cache(const char *filename, bfd_cache *p) {
 #ifdef BFD_DECOMPRESS
   abfd->flags |= BFD_DECOMPRESS;
 #endif
-  p->abfd = abfd;
+  p->abfd = nullptr;
   p->syms = nullptr;
   char **match;
   if (bfd_check_format(abfd, bfd_archive) ||
@@ -491,6 +492,7 @@ static bool fill_bfd_cache(const char *filename, bfd_cache *p) {
     bfd_close(abfd);
     return true;
   }
+  p->abfd = abfd;
   return false;
 }
 

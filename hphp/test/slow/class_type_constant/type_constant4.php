@@ -24,4 +24,4 @@ async function gen_not_enforced(Awaitable<C::T> $x): Awaitable<C::T> {
 C::not_enforced(null);
 not_enforced(null);
 
-gen_not_enforced(async { return null; })->join();
+HH\Asio\join(gen_not_enforced(async { return null; }));

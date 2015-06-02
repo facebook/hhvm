@@ -21,7 +21,7 @@ async function foo() {
 }
 
 try {
-  foo()->join();
+  HH\Asio\join(foo());
 } catch (Exception $e) {
   echo "caught {$e->getMessage()}\n";
 }

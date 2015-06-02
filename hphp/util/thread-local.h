@@ -136,19 +136,25 @@ struct ThreadLocalNode {
 };
 
 struct ThreadLocalManager {
+  template<class T>
+  static void PushTop(ThreadLocalNode<T>& node) {
+    auto key = GetManager().m_key;
+    auto tmp = pthread_getspecific(key);
+    ThreadLocalSetValue(key, &node);
+    node.m_next = tmp;
+  }
+
+ private:
   ThreadLocalManager() : m_key(0) {
     ThreadLocalCreateKey(&m_key, ThreadLocalManager::OnThreadExit);
   };
-  void * getTop() {
-    return pthread_getspecific(m_key);
-  }
-  void setTop(void * p) {
-    ThreadLocalSetValue(m_key, p);
-  }
   static void OnThreadExit(void *p);
   pthread_key_t m_key;
 
-  static ThreadLocalManager s_manager;
+  static ThreadLocalManager& GetManager() {
+    static ThreadLocalManager m;
+    return m;
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -203,8 +209,7 @@ template<typename T>
 void ThreadLocal<T>::create() {
   if (m_node.m_on_thread_exit_fn == nullptr) {
     m_node.m_on_thread_exit_fn = ThreadLocalOnThreadExit<T>;
-    m_node.m_next = ThreadLocalManager::s_manager.getTop();
-    ThreadLocalManager::s_manager.setTop((void*)(&m_node));
+    ThreadLocalManager::PushTop(m_node);
   }
   assert(m_node.m_p == nullptr);
   m_node.m_p = new T();
@@ -249,8 +254,7 @@ template<typename T>
 void ThreadLocalNoCheck<T>::create() {
   if (m_node.m_on_thread_exit_fn == nullptr) {
     m_node.m_on_thread_exit_fn = ThreadLocalOnThreadExit<T>;
-    m_node.m_next = ThreadLocalManager::s_manager.getTop();
-    ThreadLocalManager::s_manager.setTop((void*)(&m_node));
+    ThreadLocalManager::PushTop(m_node);
   }
   assert(m_node.m_p == nullptr);
   m_node.m_p = new T();
@@ -404,6 +408,46 @@ void ThreadLocalOnThreadExit(void *p) {
   delete (T*)p;
 }
 
+#ifdef __APPLE__
+// The __thread variables in class T will be freed when pthread calls
+// the destructor function on Mac. We can register a handler in
+// pthread_t->__cleanup_stack similar to pthread_cleanup_push(). The handler
+// will be called earlier so the __thread variables will still exist in the
+// handler when the thread exits.
+//
+// See the details at:
+// https://github.com/facebook/hhvm/issues/4444#issuecomment-92497582
+typedef struct __darwin_pthread_handler_rec darwin_pthread_handler;
+
+template<typename T>
+void ThreadLocalOnThreadCleanup(void *key) {
+  void *obj = pthread_getspecific((pthread_key_t)key);
+  if (obj) {
+    ThreadLocalOnThreadExit<T>(obj);
+  }
+}
+
+inline void ThreadLocalSetCleanupHandler(pthread_key_t cleanup_key,
+                                         pthread_key_t key,
+                                         void (*del)(void*)) {
+  // Prevent from adding the handler for multiple times.
+  darwin_pthread_handler *handler =
+      (darwin_pthread_handler*)pthread_getspecific(cleanup_key);
+  if (handler)
+    return;
+
+  pthread_t self = pthread_self();
+
+  handler = new darwin_pthread_handler();
+  handler->__routine = del;
+  handler->__arg = (void*)key;
+  handler->__next = self->__cleanup_stack;
+  self->__cleanup_stack = handler;
+
+  ThreadLocalSetValue(cleanup_key, handler);
+}
+#endif
+
 /**
  * This is the emulation version of ThreadLocal. In this case, the ThreadLocal
  * object is a true global, and the get() method returns a thread-dependent
@@ -416,7 +460,13 @@ public:
    * Constructor that has to be called from a thread-neutral place.
    */
   ThreadLocal() : m_key(0) {
+#ifdef __APPLE__
+    ThreadLocalCreateKey(&m_key, nullptr);
+    ThreadLocalCreateKey(&m_cleanup_key,
+                         ThreadLocalOnThreadExit<darwin_pthread_handler>);
+#else
     ThreadLocalCreateKey(&m_key, ThreadLocalOnThreadExit<T>);
+#endif
   }
 
   T *get() const {
@@ -424,6 +474,10 @@ public:
     if (obj == nullptr) {
       obj = new T();
       ThreadLocalSetValue(m_key, obj);
+#ifdef __APPLE__
+      ThreadLocalSetCleanupHandler(m_cleanup_key, m_key,
+                                   ThreadLocalOnThreadCleanup<T>);
+#endif
     }
     return obj;
   }
@@ -452,6 +506,10 @@ public:
 
 private:
   pthread_key_t m_key;
+
+#ifdef __APPLE__
+  pthread_key_t m_cleanup_key;
+#endif
 };
 
 template<typename T>
@@ -461,7 +519,13 @@ public:
    * Constructor that has to be called from a thread-neutral place.
    */
   ThreadLocalNoCheck() : m_key(0) {
+#ifdef __APPLE__
+    ThreadLocalCreateKey(&m_key, nullptr);
+    ThreadLocalCreateKey(&m_cleanup_key,
+                         ThreadLocalOnThreadExit<darwin_pthread_handler>);
+#else
     ThreadLocalCreateKey(&m_key, ThreadLocalOnThreadExit<T>);
+#endif
   }
 
   T *getCheck() const NEVER_INLINE;
@@ -493,6 +557,10 @@ public:
 public:
   void setNull() { ThreadLocalSetValue(m_key, nullptr); }
   pthread_key_t m_key;
+
+#ifdef __APPLE__
+  pthread_key_t m_cleanup_key;
+#endif
 };
 
 template<typename T>
@@ -501,6 +569,10 @@ T *ThreadLocalNoCheck<T>::getCheck() const {
   if (obj == nullptr) {
     obj = new T();
     ThreadLocalSetValue(m_key, obj);
+#ifdef __APPLE__
+    ThreadLocalSetCleanupHandler(m_cleanup_key, m_key,
+                                 ThreadLocalOnThreadCleanup<T>);
+#endif
   }
   return obj;
 }
@@ -513,6 +585,16 @@ void ThreadLocalSingletonOnThreadExit(void *obj) {
   T::OnThreadExit((T*)obj);
   free(obj);
 }
+
+#ifdef __APPLE__
+template<typename T>
+void ThreadLocalSingletonOnThreadCleanup(void *key) {
+  void *obj = pthread_getspecific((pthread_key_t)key);
+  if (obj) {
+    ThreadLocalSingletonOnThreadExit<T>(obj);
+  }
+}
+#endif
 
 // ThreadLocalSingleton has NoCheck property
 template<typename T>
@@ -549,10 +631,20 @@ private:
   static pthread_key_t s_key;
   static bool s_inited; // pthread_key_t has no portable valid sentinel
 
+#ifdef __APPLE__
+  static pthread_key_t s_cleanup_key;
+#endif
+
   static pthread_key_t getKey() {
     if (!s_inited) {
       s_inited = true;
+#ifdef __APPLE__
+      ThreadLocalCreateKey(&s_key, nullptr);
+      ThreadLocalCreateKey(&s_cleanup_key,
+                           ThreadLocalOnThreadExit<darwin_pthread_handler>);
+#else
       ThreadLocalCreateKey(&s_key, ThreadLocalSingletonOnThreadExit<T>);
+#endif
     }
     return s_key;
   }
@@ -566,6 +658,10 @@ T *ThreadLocalSingleton<T>::getCheck() {
     obj = (T*)malloc(sizeof(T));
     T::Create(obj);
     ThreadLocalSetValue(s_key, obj);
+#ifdef __APPLE__
+    ThreadLocalSetCleanupHandler(s_cleanup_key, s_key,
+                                 ThreadLocalSingletonOnThreadCleanup<T>);
+#endif
   }
   return obj;
 }
@@ -574,6 +670,11 @@ template<typename T>
 pthread_key_t ThreadLocalSingleton<T>::s_key;
 template<typename T>
 bool ThreadLocalSingleton<T>::s_inited = false;
+
+#ifdef __APPLE__
+template<typename T>
+pthread_key_t ThreadLocalSingleton<T>::s_cleanup_key;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // some classes don't need new/delete at all

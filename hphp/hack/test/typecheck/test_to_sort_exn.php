@@ -9,7 +9,7 @@
  *
  */
 
-class A {
+class A extends \Exception {
   public function f(): void {}
 }
 

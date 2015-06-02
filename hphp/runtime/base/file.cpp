@@ -141,6 +141,12 @@ bool File::IsVirtualDirectory(const String& filename) {
     StaticContentCache::TheFileCache->dirExists(filename.data(), false);
 }
 
+bool File::IsVirtualFile(const String& filename) {
+  return
+    StaticContentCache::TheFileCache &&
+    StaticContentCache::TheFileCache->fileExists(filename.data(), false);
+}
+
 SmartPtr<File> File::Open(const String& filename, const String& mode,
                           int options /* = 0 */,
                           const SmartPtr<StreamContext>& context /* = null */) {

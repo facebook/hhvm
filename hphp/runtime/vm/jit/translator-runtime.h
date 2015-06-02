@@ -30,17 +30,15 @@ struct _Unwind_Exception;
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
-struct Func;
-struct c_Vector;
+class Func;
+class c_Pair;
+class c_Vector;
 struct MInstrState;
 
 namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 struct TypeConstraint;
-
-constexpr size_t kReservedRSPSpillSpace = RESERVED_STACK_SPILL_SPACE;
-constexpr size_t kReservedRSPTotalSpace = RESERVED_STACK_TOTAL_SPACE;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -117,7 +115,6 @@ int64_t coerceCellToDblHelper(TypedValue tv, int64_t argNum, const Func* func);
 int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func);
 int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func);
 
-void raisePropertyOnNonObject();
 void raiseUndefProp(ObjectData* base, const StringData* name);
 void raiseUndefVariable(StringData* nm);
 void VerifyParamTypeSlow(const Class* cls,
@@ -181,7 +178,7 @@ void lookupClsMethodHelper(Class* cls,
                            ActRec* fp);
 
 void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff);
-void traceCallback(ActRec* fp, Cell* sp, Offset pcOff, void* rip);
+void traceCallback(ActRec* fp, Cell* sp, Offset pcOff);
 
 void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 void fpushCufHelperArray(ArrayData*, ActRec* preLiveAR, ActRec* fp);
@@ -198,7 +195,6 @@ TypedValue lookupClassConstantTv(TypedValue* cache,
                                  const StringData* cls,
                                  const StringData* cns);
 
-ObjectData* newColHelper(uint32_t type, uint32_t size);
 ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value);
 ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
                               TypedValue value);
@@ -224,6 +220,11 @@ void registerLiveObj(ObjectData* obj);
  * Set tl_regState to CLEAN and call _Unwind_Resume.
  */
 void unwindResumeHelper();
+
+/*
+ * Throw a VMSwitchMode exception.
+ */
+void throwSwitchMode() ATTRIBUTE_NORETURN;
 
 namespace MInstrHelpers {
 StringData* stringGetI(StringData*, uint64_t);

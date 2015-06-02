@@ -41,6 +41,7 @@ public:
   static void Close();
   static bool Available();
   static void Initialize(const std::string &prefix, int count,
+                         bool trackProcessTimes,
                          const std::vector<int> &inherited_fds);
   static void ChangeUser(const std::string &username);
 
@@ -81,7 +82,7 @@ private:
   bool initShadow(int afdt_listen,
                   const std::string& afdt_filename, int id,
                   const std::vector<int> &inherited_fds);
-  void runShadow();
+  static void runShadow(int afdt_fd);
   void closeShadow();
 
   /**
@@ -94,11 +95,10 @@ private:
   static FILE *HeavyPopenImpl(const char *cmd, const char *type,
                               const char *cwd);
 
-  static Mutex s_mutex;
   pid_t m_shadowProcess;
   Mutex m_procMutex;
   int m_afdt_fd;
-  std::map<int64_t, int64_t> m_popenMap;
+  std::map<FILE*, pid_t> m_popenMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

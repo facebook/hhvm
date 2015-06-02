@@ -75,7 +75,9 @@ function(CONTAINS_STRING FILE SEARCH RETURN_VALUE)
 endfunction(CONTAINS_STRING)
 
 macro(MYSQL_SOCKET_SEARCH)
-  foreach (i
+  execute_process(COMMAND mysql_config --socket OUTPUT_VARIABLE MYSQL_SOCK OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+  if (NOT MYSQL_SOCK)
+    foreach (i
       /var/run/mysqld/mysqld.sock
       /var/tmp/mysql.sock
       /var/run/mysql/mysql.sock
@@ -86,12 +88,12 @@ macro(MYSQL_SOCKET_SEARCH)
       /private/tmp/mysql.sock
       /tmp/mysql.sock
       )
-    if (EXISTS ${i})
-      set(MYSQL_SOCK ${i})
-      break()
-    endif()
-  endforeach()
-
+      if (EXISTS ${i})
+        set(MYSQL_SOCK ${i})
+        break()
+      endif()
+    endforeach()
+  endif()
   if (MYSQL_SOCK)
     set(MYSQL_UNIX_SOCK_ADDR ${MYSQL_SOCK} CACHE STRING "Path to MySQL Socket")
   endif()

@@ -10,7 +10,6 @@
 
 open Utils
 module Sys = Sys_ext
-module List = List_ext
 module CE = Common_exns
 module Parser_hack = Parser_hack_ext
 
@@ -73,9 +72,9 @@ let try_dump_unparsed ast =
 let _ =
   try
     let (src, dest) = parse_options () in
-    SharedMem.init ();
-    let src = Relative_path.create Relative_path.Dummy src in
-    let {Parser_hack.ast; _} = Parser_hack.parse_or_die src in
+    SharedMem.(init default_config);
+    let {Parser_hack.ast; _} =
+      Parser_hack.parse_or_die Relative_path.(create Dummy src) in
     if !debug then try_dump_unparsed ast;
     if !debug then dn (Debug.dump_ast (Ast.AProgram ast));
 
@@ -88,7 +87,7 @@ let _ =
               then Erase_types.map ast
               else ast in
 
-    let unparsed = Unparser.unparse !output_file_type src ast in
+    let unparsed = Unparser.unparse !output_file_type (Path.make src) ast in
 
     match dest with
     | Some f -> Sys.write_file unparsed f

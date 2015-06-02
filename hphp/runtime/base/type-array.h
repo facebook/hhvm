@@ -97,7 +97,7 @@ public:
    */
   enum class ArrayInitCtor { Tag };
   explicit Array(ArrayData* ad, ArrayInitCtor)
-    : m_arr(ad, NonNull::Tag)
+    : m_arr(ad, NonNull{})
   {}
 
   // Move ctor
@@ -488,12 +488,14 @@ private:
  * sweep time we don't run these destructors.
  */
 struct ArrayNoDtor {
+  /* implicit */ ArrayNoDtor(ArrayData* table) { new (&m_arr) Array(table); }
   ArrayNoDtor() { new (&m_arr) Array(); }
   ArrayNoDtor(ArrayNoDtor&& o) noexcept {
     new (&m_arr) Array(std::move(o.m_arr));
   }
   ~ArrayNoDtor() {}
   Array& arr() { return m_arr; }
+  const Array& arr() const { return m_arr; }
   void destroy() { m_arr.~Array(); }
 private:
   union { Array m_arr; };

@@ -15,7 +15,15 @@ _benchy_complete()
     done
   else
     # On the branch part.
-    BRANCHES=`git branch | awk -F ' +' '! /\(no branch\)/ {print $2}' | grep "^$CUR"`
+    if OUTPUT=$(git branch 2>&1); then
+      BRANCHES=`echo "$OUTPUT" | awk -F ' +' '! /\(no branch\)/ {print $2}' | grep "^$CUR"`
+    elif OUTPUT=$(hg bookmark 2>&1); then
+      BRANCHES=`echo "$OUTPUT" | rev | awk -F ' +' '{print $2}' | rev | grep "^$CUR"`
+    else
+      BRANCHES=""
+      ! true
+    fi
+
     if [ $? -eq 0 ]
     then
       for BRANCH in $BRANCHES

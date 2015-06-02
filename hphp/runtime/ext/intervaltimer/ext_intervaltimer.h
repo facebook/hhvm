@@ -17,12 +17,11 @@
 #ifndef incl_HPHP_EXT_INTERVALTIMER_H_
 #define incl_HPHP_EXT_INTERVALTIMER_H_
 
-#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/resource-data.h"
 
@@ -57,6 +56,7 @@ struct IntervalTimer final {
   void run();
 
 private:
+  template <typename F> friend void scan(const IntervalTimer&, F&);
   double m_interval;
   double m_initial;
   Variant m_callback;
@@ -65,7 +65,8 @@ private:
   std::condition_variable m_cv;
   std::mutex m_mutex;
   bool m_done{false};
-  std::atomic<bool> m_signaled{false};
+  std::mutex m_signalMutex;
+  int m_count{0};   // # of times hit since last surprise check
 };
 
 void HHVM_METHOD(IntervalTimer, __construct,

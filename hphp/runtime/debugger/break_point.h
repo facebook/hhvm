@@ -140,8 +140,7 @@ struct DFunctionInfo;
 using BreakPointInfoPtr = std::shared_ptr<BreakPointInfo>;
 using DebuggerProxyPtr = std::shared_ptr<DebuggerProxy>;
 
-class BreakPointInfo {
-public:
+struct BreakPointInfo {
   // The state of the break point
   enum State : int8_t {
     Always   = -1, // always break when reaching this break point
@@ -163,7 +162,6 @@ public:
                         const std::string &needle);
   static bool MatchFile(const std::string& file, const std::string& fullPath);
 
-public:
   BreakPointInfo() : m_index(0) {} // for thrift
   BreakPointInfo(bool regex, State state, const std::string &file, int line);
   BreakPointInfo(bool regex, State state, InterruptType interrupt,

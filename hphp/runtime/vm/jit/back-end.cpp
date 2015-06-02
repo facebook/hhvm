@@ -32,9 +32,6 @@ std::unique_ptr<BackEnd> newBackEnd() {
   not_reached();
 }
 
-BackEnd::BackEnd() {
-}
-
 BackEnd::~BackEnd() {
 }
 

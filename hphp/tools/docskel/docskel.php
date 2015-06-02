@@ -232,7 +232,7 @@ CPP;
 function outputExtensionCPP(string $dest, string $extname,
                             array $funcs, array $classes): void {
   $fp = fopen($dest, 'w');
-  fwrite($fp, "#include \"hphp/runtime/base/base-includes.h\"\n");
+  fwrite($fp, "#include \"hphp/runtime/ext/extension.h\"\n");
   fwrite($fp, "namespace HPHP {\n");
 
   foreach($classes as $class) {

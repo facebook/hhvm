@@ -18,14 +18,14 @@
 #ifndef incl_HPHP_EXT_COLLECTION_H_
 #define incl_HPHP_EXT_COLLECTION_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/system/systemlib.h"
-
 
 #include <limits>
 
@@ -45,6 +45,14 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+namespace collections{
+void deepCopy(TypedValue*);
+class PairIterator;
+class VectorIterator;
+class MapIterator;
+class SetIterator;
+}
 
 /*
  * All native collection class have their m_size field at the same
@@ -225,9 +233,18 @@ class BaseVector : public ExtCollectionObjectData {
   }
 
   template <bool throwOnMiss>
-  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
-  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
-  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
+    assertx(key->m_type != KindOfRef);
+    auto vec = static_cast<BaseVector*>(obj);
+    if (key->m_type == KindOfInt64) {
+      return throwOnMiss ? vec->at(key->m_data.num)
+                         : vec->get(key->m_data.num);
+    }
+    throwBadKeyType();
+    return nullptr;
+  }
+  static bool OffsetIsset(ObjectData* obj, const TypedValue* key);
+  static bool OffsetEmpty(ObjectData* obj, const TypedValue* key);
   static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
@@ -292,7 +309,8 @@ class BaseVector : public ExtCollectionObjectData {
 
  protected:
 
-  explicit BaseVector(Class* cls);
+  explicit BaseVector(Class* cls, HeaderKind, uint32_t cap = 0);
+  explicit BaseVector(Class* cls, HeaderKind, ArrayData* arr);
   /*virtual*/ ~BaseVector();
 
   Cell* data() const { return m_data; }
@@ -418,6 +436,9 @@ class BaseVector : public ExtCollectionObjectData {
     m_immCopy.reset();
   }
 
+  static void Unserialize(ObjectData* obj,
+                          VariableUnserializer* uns, int64_t sz, char type);
+
  protected:
   /**
    * Copy the buffer and reset the immutable copy.
@@ -426,8 +447,6 @@ class BaseVector : public ExtCollectionObjectData {
 
   static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
-  static void Unserialize(const char* vectorType, ObjectData* obj,
-                          VariableUnserializer* uns, int64_t sz, char type);
 
   // Fields
 
@@ -462,17 +481,18 @@ class BaseVector : public ExtCollectionObjectData {
 
   // Friends
 
-  friend class c_VectorIterator;
+  friend class collections::VectorIterator;
   friend class BaseMap;
   friend class BaseSet;
   friend class c_Pair;
   friend class c_AwaitAllWaitHandle;
 
-  template<class TVector>
-  friend ObjectData* collectionDeepCopyBaseVector(TVector* vec);
+  friend void collections::deepCopy(TypedValue*);
 
   friend void collectionReserve(ObjectData* obj, int64_t sz);
   friend void collectionInitAppend(ObjectData* obj, TypedValue* val);
+
+  template <typename F> friend void scan(const BaseVector& this_, F& mark);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -483,7 +503,10 @@ class c_Vector : public BaseVector {
   DECLARE_CLASS_NO_SWEEP(Vector)
 
  public:
-  explicit c_Vector(Class* cls = c_Vector::classof());
+  explicit c_Vector(Class* cls = c_Vector::classof(), uint32_t cap = 0);
+  explicit c_Vector(uint32_t cap, Class* cls = c_Vector::classof())
+    : c_Vector(cls, cap) { }
+  explicit c_Vector(Class* cls, ArrayData* arr);
 
   static c_Vector* Clone(ObjectData* obj);
 
@@ -533,11 +556,6 @@ class c_Vector : public BaseVector {
                         const TypedValue* val);
   static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
-  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
-                          int64_t sz, char type) {
-    BaseVector::Unserialize("Vector", obj, uns, sz, type);
-  }
-
  private:
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc);
@@ -549,39 +567,12 @@ class c_Vector : public BaseVector {
   int64_t checkRequestedCapacity(const Variant& sz);
 
   // Friends
-  friend void collectionAppend(ObjectData* obj, TypedValue* val);
+  friend void collections::append(ObjectData* obj, TypedValue* val);
   friend void triggerCow(c_Vector* vec);
 
   friend class BaseMap;
   friend class c_Pair;
   friend class ArrayIter;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class VectorIterator
-
-class c_VectorIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
-                                                   ObjectData::HasClone> {
- public:
-  DECLARE_CLASS_NO_SWEEP(VectorIterator)
-
- public:
-  explicit c_VectorIterator(Class* cls = c_VectorIterator::classof());
-  ~c_VectorIterator();
-  static c_VectorIterator* Clone(ObjectData* obj);
-  void t___construct();
-  Variant t_current();
-  Variant t_key();
-  bool t_valid();
-  void t_next();
-  void t_rewind();
-
- private:
-  SmartPtr<BaseVector> m_obj;
-  uint32_t m_pos;
-  int32_t m_version;
-
-  friend class BaseVector;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -623,14 +614,12 @@ class c_ImmVector : public BaseVector {
   static Object ti_fromkeysof(const Variant& container);
 
  public:
-  explicit c_ImmVector(Class* cls = c_ImmVector::classof());
+  explicit c_ImmVector(Class* cls = c_ImmVector::classof(), uint32_t cap = 0);
+  explicit c_ImmVector(uint32_t cap, Class* cls = c_ImmVector::classof())
+    : c_ImmVector(cls, cap) { }
+  explicit c_ImmVector(Class* cls, ArrayData* arr);
 
   static c_ImmVector* Clone(ObjectData* obj);
-
-  static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
-                          int64_t sz, char type) {
-    BaseVector::Unserialize("ImmVector", obj, uns, sz, type);
-  }
 
   friend class c_Vector;
   friend class c_Pair;
@@ -638,10 +627,11 @@ class c_ImmVector : public BaseVector {
 
 //////////////////////////////////////////////////////////////////////
 
-extern std::aligned_storage<
-  sizeof(MixedArray) + sizeof(int32_t),
+using EmptyMixedArrayStorage = std::aligned_storage<
+  computeAllocBytes(MixedArray::SmallScale),
   alignof(MixedArray)
->::type s_theEmptyMixedArray;
+>::type;
+extern EmptyMixedArrayStorage s_theEmptyMixedArray;
 
 /*
  * This returns a static empty MixedArray. This gets used internally
@@ -658,7 +648,8 @@ ALWAYS_INLINE MixedArray* staticEmptyMixedArray() {
 
 class HashCollection : public ExtCollectionObjectData {
  public:
-  explicit HashCollection(Class* cls);
+  explicit HashCollection(Class* cls, HeaderKind, uint32_t cap = 0);
+  explicit HashCollection(Class* cls, HeaderKind, ArrayData* arr);
 
   typedef MixedArray::Elm Elm;
 
@@ -671,6 +662,8 @@ class HashCollection : public ExtCollectionObjectData {
   // A pointer to an immutable collection that shares its buffer with
   // this collection.
   Object m_immCopy;
+
+  template <typename F> friend void scan(const HashCollection& this_, F& mark);
 
  protected:
   // Read the high bit of m_version to tell if this collection might contain
@@ -691,14 +684,9 @@ class HashCollection : public ExtCollectionObjectData {
  public:
   static const int32_t Empty           = MixedArray::Empty;
   static const int32_t Tombstone       = MixedArray::Tombstone;
-
   static const uint32_t LoadScale      = MixedArray::LoadScale;
-  static const uint32_t MinLgTableSize = MixedArray::MinLgTableSize;
-  static const uint32_t SmallMask      = MixedArray::SmallMask;
+  static const uint32_t SmallScale     = MixedArray::SmallScale;
   static const uint32_t SmallSize      = MixedArray::SmallSize;
-  static const uint32_t MaxLgTableSize = MixedArray::MaxLgTableSize;
-  static const uint64_t MaxHashSize    = MixedArray::MaxHashSize;
-  static const uint32_t MaxMask        = MixedArray::MaxMask;
   static const uint32_t MaxSize        = MixedArray::MaxSize;
   // HashCollections can only guarantee that it won't throw "cannot add
   // element" exceptions if m_size <= MaxSize / 2. Therefore, we only allow
@@ -754,11 +742,14 @@ class HashCollection : public ExtCollectionObjectData {
     --m_size;
     arrayData()->m_size = m_size;
   }
+  inline uint32_t scale() const {
+    return arrayData()->scale();
+  }
   inline uint32_t cap() const {
-    return arrayData()->m_cap;
+    return arrayData()->capacity();
   }
   inline uint32_t tableMask() const {
-    return arrayData()->m_tableMask;
+    return arrayData()->mask();
   }
   inline uint32_t posLimit() const {
     return arrayData()->m_used;
@@ -866,19 +857,11 @@ class HashCollection : public ExtCollectionObjectData {
  public:
   /**
    * canMutateBuffer() indicates whether it is currently safe to directly
-   * modify this HashCollection's buffer. canMutateBuffer() is vacuously
-   * true for buffers with zero capacity (i.e. the staticEmptyMixedArray()
-   * case) because you can't meaningfully mutate zero-capacity buffer
-   * without first doing a grow. This may seem weird, but its actually
-   * much smoother in practice than the alternative of returning false
-   * for such cases.
+   * modify this HashCollection's buffer.
    */
   bool canMutateBuffer() const {
-    auto* a = arrayData();
-    bool b = (a == staticEmptyMixedArray() || !a->hasMultipleRefs());
-    assert(IMPLIES(a != staticEmptyMixedArray() && b, m_immCopy.isNull()));
-    assert(IMPLIES(!b, a->hasMultipleRefs()));
-    return b;
+    assert(IMPLIES(!arrayData()->hasMultipleRefs(), m_immCopy.isNull()));
+    return !arrayData()->hasMultipleRefs();
   }
 
   static constexpr ptrdiff_t dataOffset() {
@@ -1002,10 +985,10 @@ class HashCollection : public ExtCollectionObjectData {
     return b;
   }
 
-  // grow() will increase the capacity of this HashCollection; newCap must
-  // be greater than or equal to the current capacity and newCap/newMask must
+  // grow() will increase the capacity of this HashCollection; newScale must
+  // be greater than or equal to the current scale so that the new cap and mask
   // satisfy all the usual cap/mask invariants.
-  void grow(uint32_t newCap, uint32_t newMask);
+  void grow(uint32_t newScale);
 
   // resizeHelper() dups all of the elements (not copying tombstones) to a
   // new buffer of the specified capacity and decRefs the old buffer. This
@@ -1248,11 +1231,24 @@ class BaseMap : public HashCollection {
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
   template <bool throwOnMiss>
-  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
+  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
+    assertx(key->m_type != KindOfRef);
+    auto mp = static_cast<BaseMap*>(obj);
+    if (key->m_type == KindOfInt64) {
+      return throwOnMiss ? mp->at(key->m_data.num)
+                         : mp->get(key->m_data.num);
+    }
+    if (IS_STRING_TYPE(key->m_type)) {
+      return throwOnMiss ? mp->at(key->m_data.pstr)
+                         : mp->get(key->m_data.pstr);
+    }
+    throwBadKeyType();
+    return nullptr;
+  }
   static void OffsetSet(ObjectData* obj, const TypedValue* key,
                         const TypedValue* val);
-  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
-  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  static bool OffsetIsset(ObjectData* obj, const TypedValue* key);
+  static bool OffsetEmpty(ObjectData* obj, const TypedValue* key);
   static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
@@ -1319,19 +1315,17 @@ class BaseMap : public HashCollection {
   }
 
  protected: // BaseMap is an abstract class
-  explicit BaseMap(Class* cls);
+  explicit BaseMap(Class* cls, HeaderKind, uint32_t cap = 0);
+  explicit BaseMap(Class* cls, HeaderKind, ArrayData* arr);
   ~BaseMap();
 
  public:
   static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
  private:
-  template<class TMap>
-  typename std::enable_if<
-   std::is_base_of<BaseMap, TMap>::value, ObjectData*>::type
-  friend collectionDeepCopyBaseMap(TMap* vec);
+  friend void collections::deepCopy(TypedValue*);
 
-  friend class c_MapIterator;
+  friend class collections::MapIterator;
   friend class c_Vector;
   friend class c_Map;
   friend class c_ImmMap;
@@ -1480,7 +1474,10 @@ class c_Map : public BaseMap {
   DECLARE_CLASS_NO_SWEEP(Map)
 
  public:
-  explicit c_Map(Class* cls = c_Map::classof());
+  explicit c_Map(Class* cls = c_Map::classof(), uint32_t cap = 0);
+  explicit c_Map(uint32_t cap, Class* cls = c_Map::classof())
+    : c_Map(cls, cap) { }
+  explicit c_Map(Class* cls, ArrayData* arr);
 
   static c_Map* Clone(ObjectData* obj);
 
@@ -1530,7 +1527,10 @@ class c_ImmMap : public BaseMap {
   DECLARE_CLASS_NO_SWEEP(ImmMap)
 
  public:
-  explicit c_ImmMap(Class* cls = c_ImmMap::classof());
+  explicit c_ImmMap(Class* cls = c_ImmMap::classof(), uint32_t cap = 0);
+  explicit c_ImmMap(uint32_t cap, Class* cls = c_ImmMap::classof())
+    : c_ImmMap(cls, cap) { }
+  explicit c_ImmMap(Class* cls, ArrayData* arr);
 
   static c_ImmMap* Clone(ObjectData* obj);
 
@@ -1557,33 +1557,6 @@ class c_ImmMap : public BaseMap {
 
   friend class BaseMap;
   friend class c_Map;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class MapIterator
-
-class c_MapIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
-                                                ObjectData::HasClone> {
- public:
-  DECLARE_CLASS_NO_SWEEP(MapIterator)
-
- public:
-  explicit c_MapIterator(Class* cls = c_MapIterator::classof());
-  ~c_MapIterator();
-  static c_MapIterator* Clone(ObjectData* obj);
-  void t___construct();
-  Variant t_current();
-  Variant t_key();
-  bool t_valid();
-  void t_next();
-  void t_rewind();
-
- private:
-  SmartPtr<BaseMap> m_obj;
-  uint32_t m_pos;
-  int32_t m_version;
-
-  friend class BaseMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1665,15 +1638,40 @@ class BaseSet : public HashCollection {
   static bool ToBool(const ObjectData* obj);
 
   template <bool throwOnMiss>
-  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
-  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
-  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
+    assertx(key->m_type != KindOfRef);
+    auto st = static_cast<BaseSet*>(obj);
+    ssize_t p;
+    if (key->m_type == KindOfInt64) {
+      p = st->find(key->m_data.num);
+    } else if (IS_STRING_TYPE(key->m_type)) {
+      p = st->find(key->m_data.pstr, key->m_data.pstr->hash());
+    } else {
+      BaseSet::throwBadValueType();
+    }
+    if (LIKELY(p != Empty)) {
+      return reinterpret_cast<TypedValue*>(
+        &HashCollection::fetchElm(st->data(), p)->data
+      );
+    }
+    if (!throwOnMiss) {
+      return nullptr;
+    }
+    if (key->m_type == KindOfInt64) {
+      BaseSet::throwOOB(key->m_data.num);
+    } else {
+      assert(IS_STRING_TYPE(key->m_type));
+      BaseSet::throwOOB(key->m_data.pstr);
+    }
+  }
+  static bool OffsetIsset(ObjectData* obj, const TypedValue* key);
+  static bool OffsetEmpty(ObjectData* obj, const TypedValue* key);
   static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
-  static void Unserialize(const char* setType, ObjectData* obj,
+  static void Unserialize(ObjectData* obj,
                           VariableUnserializer* uns, int64_t sz, char type);
 
  protected:
@@ -1776,7 +1774,8 @@ class BaseSet : public HashCollection {
 
  protected:
   // BaseSet is an abstract class.
-  explicit BaseSet(Class* cls);
+  explicit BaseSet(Class* cls, HeaderKind, uint32_t cap = 0);
+  explicit BaseSet(Class* cls, HeaderKind, ArrayData* arr);
   /* virtual */ ~BaseSet();
 
  private:
@@ -1786,7 +1785,7 @@ class BaseSet : public HashCollection {
 
  private:
 
-  friend class c_SetIterator;
+  friend class collections::SetIterator;
   friend class c_Vector;
   friend class c_Set;
   friend class c_Map;
@@ -1809,7 +1808,11 @@ class c_Set : public BaseSet {
  public:
   // PHP-land methods.
 
-  explicit c_Set(Class* cls = c_Set::classof());
+  explicit c_Set(Class* cls = c_Set::classof(), uint32_t cap = 0);
+  explicit c_Set(uint32_t cap, Class* cls = c_Set::classof())
+    : c_Set(cls, cap) { }
+  explicit c_Set(Class* cls, ArrayData* arr);
+
   Object t_add(const Variant& val);
   Object t_addall(const Variant& val);
   Object t_addallkeysof(const Variant& val);
@@ -1885,39 +1888,15 @@ class c_ImmSet : public BaseSet {
   String t___tostring();
 
  public:
-  explicit c_ImmSet(Class* cls = c_ImmSet::classof());
+  explicit c_ImmSet(Class* cls = c_ImmSet::classof(), uint32_t cap = 0);
+  explicit c_ImmSet(uint32_t cap, Class* cls = c_ImmSet::classof())
+    : c_ImmSet(cls, cap) { }
+  explicit c_ImmSet(Class* cls, ArrayData* arr);
 
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
 
   static c_ImmSet* Clone(ObjectData* obj);
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class SetIterator
-
-class c_SetIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
-                                                ObjectData::HasClone> {
- public:
-  DECLARE_CLASS_NO_SWEEP(SetIterator)
-
- public:
-  explicit c_SetIterator(Class* cls = c_SetIterator::classof());
-  ~c_SetIterator();
-  static c_SetIterator* Clone(ObjectData* obj);
-  void t___construct();
-  Variant t_current();
-  Variant t_key();
-  bool t_valid();
-  void t_next();
-  void t_rewind();
-
- private:
-  SmartPtr<BaseSet> m_obj;
-  uint32_t m_pos;
-  int32_t m_version;
-
-  friend class BaseSet;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1937,6 +1916,7 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
 
   explicit c_Pair(Class* cls = c_Pair::classof());
   explicit c_Pair(NoInit, Class* cls = c_Pair::classof());
+  void reserve(int64_t sz) { assertx(sz == 2); }
   ~c_Pair();
   void t___construct(int _argc, const Array& _argv = null_array);
   bool t_isempty();
@@ -2017,11 +1997,26 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
   Array toArrayImpl() const;
 
   static c_Pair* Clone(ObjectData* obj);
+  static bool ToBool(const ObjectData* obj) {
+    assertx(obj->getVMClass() == c_Pair::classof());
+    assertx(static_cast<const c_Pair*>(obj)->isFullyConstructed());
+    return true;
+  }
   static Array ToArray(const ObjectData* obj);
   template <bool throwOnMiss>
-  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key);
-  static bool OffsetIsset(ObjectData* obj, TypedValue* key);
-  static bool OffsetEmpty(ObjectData* obj, TypedValue* key);
+  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
+    assertx(key->m_type != KindOfRef);
+    auto pair = static_cast<c_Pair*>(obj);
+    assertx(pair->isFullyConstructed());
+    if (key->m_type == KindOfInt64) {
+      return throwOnMiss ? pair->at(key->m_data.num)
+                         : pair->get(key->m_data.num);
+    }
+    throwBadKeyType();
+    return nullptr;
+  }
+  static bool OffsetIsset(ObjectData* obj, const TypedValue* key);
+  static bool OffsetEmpty(ObjectData* obj, const TypedValue* key);
   static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
@@ -2048,8 +2043,8 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
 
   int getVersion() const { return 0; }
 
-  friend ObjectData* collectionDeepCopyPair(c_Pair* pair);
-  friend class c_PairIterator;
+  friend void collections::deepCopy(TypedValue*);
+  friend class collections::PairIterator;
   friend class c_Vector;
   friend class BaseVector;
   friend class BaseMap;
@@ -2061,69 +2056,6 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
     static_assert(offsetof(c_Pair, m_size) == FAST_COLLECTION_SIZE_OFFSET, "");
   }
 };
-
-///////////////////////////////////////////////////////////////////////////////
-// class PairIterator
-
-class c_PairIterator : public ExtObjectDataFlags<ObjectData::IsCppBuiltin |
-                                                 ObjectData::HasClone> {
- public:
-  DECLARE_CLASS_NO_SWEEP(PairIterator)
-
- public:
-  explicit c_PairIterator(Class* cls = c_PairIterator::classof());
-  ~c_PairIterator();
-  static c_PairIterator* Clone(ObjectData* obj);
-  void t___construct();
-  Variant t_current();
-  Variant t_key();
-  bool t_valid();
-  void t_next();
-  void t_rewind();
-
- private:
-  SmartPtr<c_Pair> m_obj;
-  uint32_t m_pos;
-
-  friend class c_Pair;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-TypedValue* collectionAt(ObjectData* obj, const TypedValue* key);
-TypedValue* collectionAtLval(ObjectData* obj, const TypedValue* key);
-TypedValue* collectionAtRw(ObjectData* obj, const TypedValue* key);
-TypedValue* collectionGet(ObjectData* obj, TypedValue* key);
-void collectionSet(ObjectData* obj, const TypedValue* key,
-                   const TypedValue* val);
-// used for collection literal syntax only
-void collectionInitSet(ObjectData* obj, TypedValue* key, TypedValue* val);
-bool collectionIsset(ObjectData* obj, TypedValue* key);
-bool collectionEmpty(ObjectData* obj, TypedValue* key);
-void collectionUnset(ObjectData* obj, const TypedValue* key);
-void collectionAppend(ObjectData* obj, TypedValue* val);
-// used for collection literal syntax only
-void collectionInitAppend(ObjectData* obj, TypedValue* val);
-bool collectionContains(ObjectData* obj, const Variant& offset);
-void collectionReserve(ObjectData* obj, int64_t sz);
-void collectionUnserialize(ObjectData* obj, VariableUnserializer* uns,
-                           int64_t sz, char type);
-bool collectionEquals(const ObjectData* obj1, const ObjectData* obj2);
-void collectionDeepCopyTV(TypedValue* tv);
-ArrayData* collectionDeepCopyArray(ArrayData* arr);
-ObjectData* collectionDeepCopyVector(c_Vector* vec);
-ObjectData* collectionDeepCopyImmVector(c_ImmVector* vec);
-ObjectData* collectionDeepCopyMap(c_Map* mp);
-ObjectData* collectionDeepCopyImmMap(c_ImmMap* mp);
-ObjectData* collectionDeepCopySet(c_Set* mp);
-ObjectData* collectionDeepCopyImmSet(c_ImmSet* st);
-ObjectData* collectionDeepCopyPair(c_Pair* pair);
-
-ObjectData* newCollectionHelper(uint32_t type, uint32_t size);
-
-///////////////////////////////////////////////////////////////////////////////
-
-void collectionSerialize(ObjectData* obj, VariableSerializer* serializer);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -505,11 +505,11 @@ f2:
 f2() threw an exception
 f3:
 Triggered E_WARNING with message "Argument 1 to f3() must be of type @array, stdClass given"
-object(stdClass)#5 (0) {
+object(stdClass)#4 (0) {
 }
 f4:
 Triggered E_WARNING with message "Argument 1 to f4() must be of type @?array, stdClass given"
-object(stdClass)#5 (0) {
+object(stdClass)#4 (0) {
 }
 f5:
 f5() threw an exception
@@ -517,9 +517,9 @@ f6:
 f6() threw an exception
 f7:
 Triggered E_WARNING with message "Argument 1 to f7() must be of type @array, stdClass given"
-object(stdClass)#5 (0) {
+object(stdClass)#4 (0) {
 }
 f8:
 Triggered E_WARNING with message "Argument 1 to f8() must be of type @?array, stdClass given"
-object(stdClass)#5 (0) {
+object(stdClass)#4 (0) {
 }

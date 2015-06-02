@@ -1092,30 +1092,6 @@ static bool HHVM_METHOD(ReflectionClass, hasMethod, const String& name) {
   return (get_method_func(cls, name) != nullptr);
 }
 
-static void addInterfaceMethods(const Class* iface, const SmartPtr<c_Set>& st) {
-  assert(iface && st);
-  assert(AttrInterface & iface->attrs());
-
-  size_t const numMethods = iface->preClass()->numMethods();
-  Func* const* methods = iface->preClass()->methods();
-  for (Slot i = 0; i < numMethods; ++i) {
-    const Func* m = methods[i];
-    if (m->isGenerated()) continue;
-
-    st->add(HHVM_FN(strtolower)(m->nameStr()).get());
-  }
-
-  for (auto const& parentIface: iface->declInterfaces()) {
-    addInterfaceMethods(parentIface.get(), st);
-  }
-  auto const& allIfaces = iface->allInterfaces();
-  if (allIfaces.size() > iface->declInterfaces().size()) {
-    for (int i = 0; i < allIfaces.size(); ++i) {
-      addInterfaceMethods(allIfaces[i].get(), st);
-    }
-  }
-}
-
 // helper for getMethods: returns a Set
 static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
@@ -1123,15 +1099,22 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
 
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
+  StringISet visitedMethods;
   auto st = makeSmartPtr<c_Set>();
   st->reserve(cls->numMethods());
 
   auto add = [&] (const Func* m) {
-    if (m->isGenerated() || !(m->attrs() & mask)) return;
-    st->add(HHVM_FN(strtolower)(m->nameStr()).get());
+    if (m->isGenerated()) return;
+    if (visitedMethods.count(m->nameStr())) return;
+
+    visitedMethods.insert(m->nameStr());
+    if (m->attrs() & mask) {
+      st->add(HHVM_FN(strtolower)(m->nameStr()).get());
+    }
   };
 
   std::function<void(const Class*)> collect;
+  std::function<void(const Class*)> collectInterface;
 
   collect = [&] (const Class* cls) {
     if (!cls) return;
@@ -1160,19 +1143,39 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
     }
   };
 
+  collectInterface = [&] (const Class* iface) {
+    if (!iface) return;
+
+    size_t const numMethods = iface->preClass()->numMethods();
+    Func* const* methods = iface->preClass()->methods();
+    for (Slot i = 0; i < numMethods; ++i) {
+      add(methods[i]);
+    }
+
+    for (auto const& parentIface: iface->declInterfaces()) {
+      collectInterface(parentIface.get());
+    }
+    auto const& allIfaces = iface->allInterfaces();
+    if (allIfaces.size() > iface->declInterfaces().size()) {
+      for (int i = 0; i < allIfaces.size(); ++i) {
+        collectInterface(allIfaces[i].get());
+      }
+    }
+  };
+
   collect(const_cast<Class*>(cls));
 
   // concrete classes should already have all of their methods present
-  if ((AttrPublic & mask) &&
+  if (((AttrPublic | AttrAbstract | AttrStatic) & mask) &&
       cls->attrs() & (AttrInterface | AttrAbstract | AttrTrait)) {
     for (auto const& interface: cls->declInterfaces()) {
-      addInterfaceMethods(interface.get(), st);
+      collectInterface(interface.get());
     }
     auto const& allIfaces = cls->allInterfaces();
     if (allIfaces.size() > cls->declInterfaces().size()) {
       for (int i = 0; i < allIfaces.size(); ++i) {
         auto const& interface = allIfaces[i];
-        addInterfaceMethods(interface.get(), st);
+        collectInterface(interface.get());
       }
     }
   }
@@ -1200,7 +1203,8 @@ void addClassConstantNames(const Class* cls,
 
   const Class::Const* consts = cls->constants();
   for (size_t i = 0; i < numConsts; i++) {
-    if (consts[i].m_class == cls && !consts[i].m_val.isAbstractConst()) {
+    if (consts[i].m_class == cls && !consts[i].isAbstract() &&
+        !consts[i].isType()) {
       st->add(const_cast<StringData*>(consts[i].m_name.get()));
     }
   }
@@ -1254,7 +1258,32 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
 
   const Class::Const* consts = cls->constants();
   for (size_t i = 0; i < numConsts; i++) {
-    if (consts[i].m_val.isAbstractConst()) {
+    if (consts[i].isAbstract() && !consts[i].isType()) {
+      st->add(const_cast<StringData*>(consts[i].m_name.get()));
+    }
+  }
+
+  assert(st->size() <= numConsts);
+  return st->t_toarray();
+}
+
+
+
+// helper for getTypeConstants/hasTypeConstant
+static Array HHVM_METHOD(ReflectionClass, getOrderedTypeConstants) {
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+
+  size_t numConsts = cls->numConstants();
+  if (!numConsts) {
+    return Array::Create();
+  }
+
+  auto st = makeSmartPtr<c_Set>();
+  st->reserve(numConsts);
+
+  const Class::Const* consts = cls->constants();
+  for (size_t i = 0; i < numConsts; i++) {
+    if (consts[i].isType()) {
       st->add(const_cast<StringData*>(consts[i].m_name.get()));
     }
   }
@@ -1314,7 +1343,12 @@ static Array HHVM_METHOD(ReflectionClass, getClassPropertyInfo) {
   Array arrPrivIdx = Array::Create();
 
   const Class::Prop* properties = cls->declProperties();
-  auto const& propInitVec = cls->declPropInit();
+  cls->initialize();
+
+  auto const& propInitVec = cls->getPropData()
+    ? *cls->getPropData()
+    : cls->declPropInit();
+
   const size_t nProps = cls->numDeclProperties();
 
   for (Slot i = 0; i < nProps; ++i) {
@@ -1406,7 +1440,7 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
     obj->o_set(s_name, result);
 }
 
-static Variant reflection_extension_name_get(ObjectData* this_) {
+static Variant reflection_extension_name_get(const Object& this_) {
   auto name = this_->o_realProp(s___name.get(), ObjectData::RealPropUnchecked,
                                 s_reflectionextension.get());
   return name->toString();
@@ -1427,6 +1461,65 @@ struct reflection_extension_PropHandler :
   static constexpr Native::PropAccessorMap& map =
     reflection_extension_accessorsMap;
 };
+
+/////////////////////////////////////////////////////////////////////////////
+// class ReflectionTypeConstant
+
+const StaticString s_ReflectionConstHandle("ReflectionConstHandle");
+
+// helper for __construct
+static bool HHVM_METHOD(ReflectionTypeConstant, __init,
+                        const Variant& cls_or_obj, const String& const_name) {
+  auto const cls = get_cls(cls_or_obj);
+  if (!cls || const_name.isNull()) {
+    // caller raises exception
+    return false;
+  }
+
+  size_t numConsts = cls->numConstants();
+  const Class::Const* consts = cls->constants();
+
+  for (size_t i = 0; i < numConsts; i++) {
+    if (const_name.same(consts[i].m_name) && consts[i].isType()) {
+      ReflectionConstHandle::Get(this_)->setConst(&consts[i]);
+      return true;
+    }
+  }
+
+  // caller raises exception
+  return false;
+}
+
+static String HHVM_METHOD(ReflectionTypeConstant, getName) {
+  auto const cst = ReflectionConstHandle::GetConstFor(this_);
+  auto ret = const_cast<StringData*>(cst->m_name.get());
+  return String(ret);
+}
+
+static bool HHVM_METHOD(ReflectionTypeConstant, isAbstract) {
+  auto const cst = ReflectionConstHandle::GetConstFor(this_);
+  return cst->isAbstract();
+}
+
+// helper for getAssignedTypeText
+static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
+  auto const cst = ReflectionConstHandle::GetConstFor(this_);
+
+  if (cst->m_val.m_type == KindOfStaticString ||
+      cst->m_val.m_type == KindOfString) {
+    return String(cst->m_val.m_data.pstr);
+  }
+
+  return String();
+}
+
+// private helper for getDeclaringClass
+static String HHVM_METHOD(ReflectionTypeConstant, getDeclaringClassname) {
+  auto const cst = ReflectionConstHandle::GetConstFor(this_);
+  auto cls = cst->m_class;
+  auto ret = const_cast<StringData*>(cls->name());
+  return String(ret);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1480,6 +1573,12 @@ class ReflectionExtension final : public Extension {
     HHVM_ME(ReflectionFunction, getClosureScopeClassname);
     HHVM_ME(ReflectionFunction, getClosureThisObject);
 
+    HHVM_ME(ReflectionTypeConstant, __init);
+    HHVM_ME(ReflectionTypeConstant, getName);
+    HHVM_ME(ReflectionTypeConstant, isAbstract);
+    HHVM_ME(ReflectionTypeConstant, getAssignedTypeHint);
+    HHVM_ME(ReflectionTypeConstant, getDeclaringClassname);
+
     HHVM_ME(ReflectionClass, __init);
     HHVM_ME(ReflectionClass, getName);
     HHVM_ME(ReflectionClass, getParentName);
@@ -1508,6 +1607,7 @@ class ReflectionExtension final : public Extension {
     HHVM_ME(ReflectionClass, getConstant);
     HHVM_ME(ReflectionClass, getOrderedConstants);
     HHVM_ME(ReflectionClass, getOrderedAbstractConstants);
+    HHVM_ME(ReflectionClass, getOrderedTypeConstants);
 
     HHVM_ME(ReflectionClass, getAttributes);
     HHVM_ME(ReflectionClass, getAttributesRecursive);
@@ -1520,9 +1620,11 @@ class ReflectionExtension final : public Extension {
       s_ReflectionFuncHandle.get());
     Native::registerNativeDataInfo<ReflectionClassHandle>(
       s_ReflectionClassHandle.get());
+    Native::registerNativeDataInfo<ReflectionConstHandle>(
+      s_ReflectionConstHandle.get());
 
     Native::registerNativePropHandler
-      <reflection_extension_PropHandler>(s_reflectionextension.get());
+      <reflection_extension_PropHandler>(s_reflectionextension);
 
     loadSystemlib();
     loadSystemlib("reflection-classes");

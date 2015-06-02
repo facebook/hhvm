@@ -49,16 +49,16 @@
  *                                      lower addresses
  *
  * FPRel: Offset in cells relative to the frame pointer in address order.
- * FPAbs: Offset in cells relative to the frame pointer in reverse address
+ * FPInv: Offset in cells relative to the frame pointer in reverse address
  *  order (i.e. a positive offset indicates lower address).
- * IrSp: Offset in cells relative to the IR stack pointer in address order.
- * BcSp: Offset in cells relative to the top of the stack at the start of the
- *  current bytecode in reverse address order.
+ * IRSP: Offset in cells relative to the IR stack pointer in address order.
+ * BCSP: Offset in cells relative to the top of the stack at the start of the
+ *  current bytecode in address order.
  *
  * Supposing we're translating a bytecode instruction where EE is "top of
  * stack" in HHBC semantics, then here are some examples:
  *
- *  slot       FpRel      FpAbs         IrSp      BcSp
+ *  slot       FPRel      FPInv         IRSP      BCSP
  *    EE         -5          5           -2         0
  *    DD         -4          4           -1         1
  *    CC         -3          3            0         2
@@ -129,63 +129,65 @@ struct BCSPOffset {
   }
 
   BCSPOffset operator-() const { return BCSPOffset{-offset}; }
+
+  BCSPOffset operator-(int32_t delta) { return BCSPOffset{offset - delta}; }
 };
 
-struct FPAbsOffset {
+struct FPInvOffset {
   int32_t offset;
 
-  static constexpr FPAbsOffset invalid() { return FPAbsOffset{INT_MIN}; }
+  static constexpr FPInvOffset invalid() { return FPInvOffset{INT_MIN}; }
 
-  bool operator==(FPAbsOffset o) const { return offset == o.offset; }
+  bool operator==(FPInvOffset o) const { return offset == o.offset; }
 
   bool isValid() const {
-    return offset == INT_MIN;
+    return offset != INT_MIN;
   }
 
-  FPAbsOffset operator+(int32_t delta) const {
-    return FPAbsOffset{offset + delta};
+  FPInvOffset operator+(int32_t delta) const {
+    return FPInvOffset{offset + delta};
   }
 
-  // Return an int32_t because the difference between two FPAbsOffsets is no
-  // longer an FPAbsOffset.
-  int32_t operator-(FPAbsOffset o) const { return offset - o.offset; }
-  FPAbsOffset operator-(BCSPOffset o) const {
-    return FPAbsOffset{offset - o.offset};
+  // Return an int32_t because the difference between two FPInvOffsets is no
+  // longer an FPInvOffset.
+  int32_t operator-(FPInvOffset o) const { return offset - o.offset; }
+  FPInvOffset operator-(BCSPOffset o) const {
+    return FPInvOffset{offset - o.offset};
   }
-  FPAbsOffset operator-(IRSPOffset o) {
-    return FPAbsOffset{offset - o.offset};
+  FPInvOffset operator-(IRSPOffset o) {
+    return FPInvOffset{offset - o.offset};
   }
-  FPAbsOffset operator-(int32_t delta) const {
-    return FPAbsOffset{offset - delta};
+  FPInvOffset operator-(int32_t delta) const {
+    return FPInvOffset{offset - delta};
   }
 
-  FPAbsOffset& operator++() {
+  FPInvOffset& operator++() {
     offset++;
     return *this;
   }
 
-  FPAbsOffset& operator--() {
+  FPInvOffset& operator--() {
     offset--;
     return *this;
   }
 
-  FPAbsOffset& operator+=(int32_t delta) {
+  FPInvOffset& operator+=(int32_t delta) {
     offset += delta;
     return *this;
   }
-  FPAbsOffset& operator-=(int32_t delta) {
+  FPInvOffset& operator-=(int32_t delta) {
     offset -= delta;
     return *this;
   }
 
-  bool operator>(FPAbsOffset o) const { return offset > o.offset; }
+  bool operator>(FPInvOffset o) const { return offset > o.offset; }
   bool operator>(int32_t otherOffset) const { return offset > otherOffset; }
   bool operator>=(int32_t otherOffset) const { return offset >= otherOffset; }
-  bool operator<(FPAbsOffset other) const { return offset < other.offset; }
+  bool operator<(FPInvOffset other) const { return offset < other.offset; }
   bool operator<(int32_t otherOffset) const { return offset < otherOffset; }
 };
 
-inline bool operator>=(size_t lhs, FPAbsOffset rhs) {
+inline bool operator>=(size_t lhs, FPInvOffset rhs) {
   return safe_cast<int32_t>(lhs) >= rhs.offset;
 }
 

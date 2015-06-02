@@ -12,3 +12,7 @@
 function foo(Vector<int> $vector): void {
   list($x, $y) = $vector;
 }
+
+function bar(ConstVector<int> $vector): void {
+  list($x, $y) = $vector;
+}

@@ -122,12 +122,9 @@ struct UnitEmitter {
 
   /*
    * Merge a scalar array into the Unit.
-   *
-   * When `key' is provided, it should be the serialization of `a'; when not
-   * provided, the array is serialized in the call.
    */
   Id mergeArray(const ArrayData* a);
-  Id mergeArray(const ArrayData* a, const std::string& key);
+  Id mergeArray(const ArrayData* a, const ArrayData::ScalarArrayKey& key);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -372,12 +369,9 @@ private:
   /*
    * Scalar array tables.
    */
-  struct ArrayVecElm {
-    std::string serialized;
-    const ArrayData* array;
-  };
-  hphp_hash_map<std::string, Id, string_hash> m_array2id;
-  std::vector<ArrayVecElm> m_arrays;
+  hphp_hash_map<ArrayData::ScalarArrayKey, Id,
+                ArrayData::ScalarHash> m_array2id;
+  std::vector<ArrayData*> m_arrays;
 
   /*
    * Type alias table.

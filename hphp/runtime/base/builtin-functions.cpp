@@ -604,20 +604,24 @@ void throw_bad_type_exception(const char *fmt, ...) {
   raise_warning("Invalid operand type was used: %s", msg.c_str());
 }
 
-void throw_expected_array_exception() {
-  const char* fn = "(unknown)";
-  ActRec *ar = g_context->getStackFrame();
-  if (ar) {
-    fn = ar->m_func->name()->data();
+void throw_expected_array_exception(const char* fn /*=nullptr*/) {
+  if (!fn) {
+    if (auto ar = g_context->getStackFrame()) {
+     fn = ar->m_func->name()->data();
+    } else {
+     fn = "(unknown)";
+    }
   }
   throw_bad_type_exception("%s expects array(s)", fn);
 }
 
-void throw_expected_array_or_collection_exception() {
-  const char* fn = "(unknown)";
-  ActRec *ar = g_context->getStackFrame();
-  if (ar) {
-    fn = ar->m_func->name()->data();
+void throw_expected_array_or_collection_exception(const char* fn /*=nullptr*/) {
+  if (!fn) {
+    if (auto ar = g_context->getStackFrame()) {
+      fn = ar->m_func->name()->data();
+    } else {
+      fn = "(unknown)";
+    }
   }
   throw_bad_type_exception("%s expects array(s) or collection(s)", fn);
 }
@@ -728,11 +732,15 @@ Variant include_impl_invoke(const String& file, bool once,
       } catch(PhpFileDoesNotExistException &e) {}
     }
 
-    String rel_path(FileUtil::relativePath(RuntimeOption::SourceRoot,
+    try {
+      String rel_path(FileUtil::relativePath(RuntimeOption::SourceRoot,
                                            string(file.data())));
 
-    // Don't try/catch - We want the exception to be passed along
-    return invoke_file(rel_path, once, currentDir);
+      // Don't try/catch - We want the exception to be passed along
+      return invoke_file(rel_path, once, currentDir);
+    } catch(PhpFileDoesNotExistException &e) {
+      throw PhpFileDoesNotExistException(file.c_str());
+    }
   } else {
     // Don't try/catch - We want the exception to be passed along
     return invoke_file(file, once, currentDir);
@@ -798,14 +806,13 @@ String resolve_include(const String& file, const char* currentDir,
     }
 
   } else {
-    auto includePaths = ThreadInfo::s_threadInfo.getNoCheck()->
+    auto const& includePaths = ThreadInfo::s_threadInfo.getNoCheck()->
       m_reqInjectionData.getIncludePaths();
-    unsigned int path_count = includePaths.size();
 
-    for (int i = 0; i < (int)path_count; i++) {
+    for (auto const& includePath : includePaths) {
       String path("");
-      String includePath(includePaths[i]);
-      bool is_stream_wrapper = (includePath.find("://") > 0);
+      auto const is_stream_wrapper =
+        includePath.find("://") != std::string::npos;
 
       if (!is_stream_wrapper && includePath[0] != '/') {
         path += (g_context->getCwd() + "/");

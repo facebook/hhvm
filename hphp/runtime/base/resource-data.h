@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/classname-is.h"
 #include "hphp/runtime/base/smart-ptr.h"
-
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/util/thread-local.h"
 
 namespace HPHP {
@@ -31,6 +31,7 @@ namespace HPHP {
 class Array;
 class String;
 class VariableSerializer;
+struct IMarker;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -63,10 +64,14 @@ class ResourceData {
     always_assert(false);
     ::operator delete(p);
   }
+
   size_t heapSize() const {
-    assert(m_size != 0);
-    return m_size;
+    assert(m_hdr.aux != 0);
+    return m_hdr.aux;
   }
+
+  template<class F> void scan(F&) const;
+  virtual void vscan(IMarker& mark) const;
 
   void release() noexcept {
     assert(!hasMultipleRefs());
@@ -74,6 +79,7 @@ class ResourceData {
   }
 
   int32_t o_getId() const { return o_id; }
+  int32_t getId() const { return o_id; }
   void o_setId(int id); // only for BuiltinFiles
 
   const String& o_getClassName() const;
@@ -100,10 +106,7 @@ class ResourceData {
  private:
   //============================================================================
   // ResourceData fields
-  uint16_t m_size;
-  UNUSED char m_pad;
-  UNUSED HeaderKind m_kind;
-  mutable RefCount m_count;
+  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores heap size
 
  protected:
   // Numeric identifier of resource object (used by var_dump() and other
@@ -203,27 +206,32 @@ ALWAYS_INLINE bool decRefRes(ResourceData* res) {
 template<class T, class... Args> T* newres(Args&&... args) {
   static_assert(sizeof(T) <= 0xffff && sizeof(T) < kMaxSmartSize, "");
   static_assert(std::is_convertible<T*,ResourceData*>::value, "");
-  auto const mem = MM().smartMallocSizeLogged(sizeof(T));
+  auto const mem = MM().smartMallocSize(sizeof(T));
   try {
     auto r = new (mem) T(std::forward<Args>(args)...);
-    r->m_size = sizeof(T);
+    r->m_hdr.aux = sizeof(T);
     return r;
   } catch (...) {
-    MM().smartFreeSizeLogged(mem, sizeof(T));
+    MM().smartFreeSize(mem, sizeof(T));
     throw;
   }
 }
 
-#define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                         \
-  public:                                                               \
-  ALWAYS_INLINE void operator delete(void* p) {                         \
-    static_assert(std::is_base_of<ResourceData,T>::value, "");          \
-    assert(static_cast<T*>(p)->heapSize() == sizeof(T));                \
-    MM().smartFreeSizeLogged(p, sizeof(T));                             \
+#define RESOURCE_FRIEND(T) \
+template <typename F> friend void scan(const T& this_, F& mark);
+#define SUPPRESS_RESOURCE_FRIEND(x) x
+
+#define DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                 \
+  public:                                                       \
+  SUPPRESS_RESOURCE_FRIEND(RESOURCE_FRIEND(T))                  \
+  ALWAYS_INLINE void operator delete(void* p) {                 \
+    static_assert(std::is_base_of<ResourceData,T>::value, "");  \
+    assert(static_cast<T*>(p)->heapSize() == sizeof(T));        \
+    MM().smartFreeSize(p, sizeof(T));                     \
   }
 
-#define DECLARE_RESOURCE_ALLOCATION(T)                                  \
-  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                               \
+#define DECLARE_RESOURCE_ALLOCATION(T)                          \
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                       \
   void sweep() override;
 
 #define IMPLEMENT_RESOURCE_ALLOCATION(T) \
@@ -235,7 +243,9 @@ typename std::enable_if<
   std::is_convertible<T*, ResourceData*>::value,
   SmartPtr<T>
 >::type makeSmartPtr(Args&&... args) {
-  return SmartPtr<T>(newres<T>(std::forward<Args>(args)...));
+  using UnownedAndNonNull = typename SmartPtr<T>::UnownedAndNonNull;
+  return SmartPtr<T>(newres<T>(std::forward<Args>(args)...),
+                     UnownedAndNonNull{});
 }
 
 ///////////////////////////////////////////////////////////////////////////////

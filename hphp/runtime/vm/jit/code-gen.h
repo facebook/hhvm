@@ -35,6 +35,12 @@ enum class SyncOptions {
   kSmashableAndSyncPoint,
 };
 
+enum class CatchCall {
+  Uninit,
+  PHP,
+  CPP,
+};
+
 // Stuff we need to preserve between blocks while generating code,
 // and address information produced during codegen.
 struct CodegenState {
@@ -43,6 +49,7 @@ struct CodegenState {
     , asmInfo(asmInfo)
     , frozen(frozen)
     , catch_offsets(unit, 0)
+    , catch_calls(unit, CatchCall::Uninit)
     , labels(unit, Vlabel())
     , locs(unit, Vloc{})
   {}
@@ -57,7 +64,13 @@ struct CodegenState {
 
   // Each catch block needs to know the number of bytes pushed at the
   // callsite so it can fix rsp before executing the catch block.
-  StateVector<Block, Offset> catch_offsets;
+  StateVector<Block,Offset> catch_offsets;
+
+  // Catch blocks that are targets of php calls (bindcall, contenter, callstub)
+  // are handled specially. This StateVector is used to propagate information
+  // from the cg* function that detects this situation to cgBeginCatch, which
+  // encodes the information in the landingpad{} instruction.
+  StateVector<Block,CatchCall> catch_calls;
 
   // Have we progressed past the guards? Used to suppress TransBCMappings until
   // we're translating code that can properly be attributed to specific
@@ -71,10 +84,10 @@ struct CodegenState {
   StateVector<SSATmp,Vloc> locs;
 };
 
-// Generate machine code; converts to vasm or llvm, further optimizes,
-// emits code into main/cold/frozen sections, allocates rds and global
-// data, and adds fixup metadata.
-void genCode(IRUnit&);
+// Generate machine code; converts to vasm, optionally converts to llvm,
+// further optimizes, emits code into main/cold/frozen sections, allocates rds
+// and global data, and adds fixup metadata.
+void genCode(IRUnit& unit, CodeKind kind = CodeKind::Trace);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

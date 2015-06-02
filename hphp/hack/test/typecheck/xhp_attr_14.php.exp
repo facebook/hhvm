@@ -1,0 +1,6 @@
+File "xhp_attr_14.php", line 7, characters 21-30:
+Could not find member :undefined in an object of type :foo (Typing[4053])
+File "xhp_attr_14.php", line 7, characters 14-18:
+This is why I think it is an object of type :foo
+File "xhp_attr_14.php", line 3, characters 7-10:
+Declaration of :foo is here

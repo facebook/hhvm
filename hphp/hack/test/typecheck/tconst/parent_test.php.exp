@@ -1,0 +1,16 @@
+File "parent_test.php", line 24, characters 35-36:
+Invalid argument (Typing[4110])
+File "parent_test.php", line 8, characters 39-45:
+This is the abstract type constant this::T
+  that is compatible with the abstract type constant X::T
+  that is compatible with an array key (int/string)
+File "parent_test.php", line 4, characters 14-14:
+  resulting from expanding a type constant as follows:
+    this::T -> X::T
+File "parent_test.php", line 22, characters 31-37:
+It is incompatible with an int
+File "parent_test.php", line 22, characters 26-29:
+  where '<static>' is a reference to this expression
+File "parent_test.php", line 14, characters 18-20:
+  resulting from expanding a type constant as follows:
+    <static>::T -> this::T -> Y::T

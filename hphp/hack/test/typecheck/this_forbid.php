@@ -10,7 +10,7 @@
  */
 
 class X {
-  public function f(): void {
-    $this = '';
+  public function f($x): void {
+    $this = $x;
   }
 }

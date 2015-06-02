@@ -23,6 +23,8 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/mutex.h"
+
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/tread-hash-map.h"
@@ -50,11 +52,11 @@ struct GrowableVector {
     return m_vec ? m_vec->m_size : 0;
   }
   T& operator[](const size_t idx) {
-    assert(idx < size());
+    assertx(idx < size());
     return m_vec->m_data[idx];
   }
   const T& operator[](const size_t idx) const {
-    assert(idx < size());
+    assertx(idx < size());
     return m_vec->m_data[idx];
   }
   void push_back(const T& datum) {
@@ -125,6 +127,8 @@ struct IncomingBranch {
     ADDR,
   };
 
+  using Opaque = CompactTaggedPtr<void>::Opaque;
+
   static IncomingBranch jmpFrom(TCA from) {
     return IncomingBranch(Tag::JMP, from);
   }
@@ -134,6 +138,11 @@ struct IncomingBranch {
   static IncomingBranch addr(TCA* from) {
     return IncomingBranch(Tag::ADDR, TCA(from));
   }
+
+  Opaque getOpaque() const {
+    return m_ptr.getOpaque();
+  }
+  explicit IncomingBranch(CompactTaggedPtr<void>::Opaque v) : m_ptr(v) {}
 
   Tag type()        const { return m_ptr.tag(); }
   TCA toSmash()     const { return TCA(m_ptr.ptr()); }
@@ -187,8 +196,11 @@ struct SrcRec {
   void chainFrom(IncomingBranch br);
   void emitFallbackJump(CodeBlock& cb, ConditionCode cc = CC_None);
   void registerFallbackJump(TCA from, ConditionCode cc = CC_None);
-  void emitFallbackJumpCustom(CodeBlock& cb, CodeBlock& frozen, SrcKey sk,
-                              TransFlags trflags, ConditionCode cc = CC_None);
+  void emitFallbackJumpCustom(CodeBlock& cb,
+                              CodeBlock& frozen,
+                              SrcKey sk,
+                              TransFlags trflags,
+                              ConditionCode cc = CC_None);
   TCA getFallbackTranslation() const;
   void newTranslation(TCA newStart,
                       GrowableVector<IncomingBranch>& inProgressTailBranches);
@@ -210,10 +222,19 @@ struct SrcRec {
    * SrcKey that will continue the tracelet chain.
    */
   void setAnchorTranslation(TCA anc) {
-    assert(!m_anchorTranslation);
-    assert(m_tailFallbackJumps.empty());
+    assertx(!m_anchorTranslation);
+    assertx(m_tailFallbackJumps.empty());
     m_anchorTranslation = anc;
   }
+
+  /*
+   * Returns the VM stack offset the translations in the SrcRec have, in
+   * situations where we need to and can know.
+   *
+   * Pre: this SrcRec is for a non-resumed SrcKey
+   * Pre: setAnchorTranslation has been called
+   */
+  FPInvOffset nonResumedSPOff() const;
 
   const GrowableVector<IncomingBranch>& incomingBranches() const {
     return m_incomingBranches;

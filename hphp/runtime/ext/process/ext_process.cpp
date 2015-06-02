@@ -38,6 +38,7 @@
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/thread-init-fini.h"
 #include "hphp/runtime/base/string-util.h"
@@ -347,9 +348,7 @@ static bool signalHandlersInited() {
 static void pcntl_signal_handler(int signo) {
   if (signo > 0 && signo < _NSIG && signalHandlersInited()) {
     s_signal_handlers->signaled[signo] = 1;
-    RequestInjectionData &data = ThreadInfo::s_threadInfo.getNoCheck()->
-                                   m_reqInjectionData;
-    data.setSignaledFlag();
+    setSurpriseFlag(SignaledFlag);
   }
 }
 
@@ -457,9 +456,8 @@ invalid_argument:
 int64_t HHVM_FUNCTION(pcntl_wait,
                       VRefParam status,
                       int options /* = 0 */) {
-  int child_id;
-  int nstatus = 0;
-  child_id = LightProcess::pcntl_waitpid(-1, &nstatus, options);
+  int nstatus = status;
+  auto const child_id = LightProcess::pcntl_waitpid(-1, &nstatus, options);
 /*  if (options) {
     child_id = wait3(&nstatus, options, NULL);
   } else {
@@ -474,7 +472,11 @@ int64_t HHVM_FUNCTION(pcntl_waitpid,
                       VRefParam status,
                       int options /* = 0 */) {
   int nstatus = status;
-  pid_t child_id = LightProcess::pcntl_waitpid((pid_t)pid, &nstatus, options);
+  auto const child_id = LightProcess::pcntl_waitpid(
+    (pid_t)pid,
+    &nstatus,
+    options
+  );
   status = nstatus;
   return child_id;
 }
@@ -514,9 +516,11 @@ int64_t HHVM_FUNCTION(pcntl_wtermsig,
 
 #define EXEC_INPUT_BUF 4096
 
-class ShellExecContext {
+namespace {
+
+class ShellExecContext final {
 public:
-  ShellExecContext() : m_proc(NULL) {
+  ShellExecContext() {
     m_sig_handler = signal(SIGCHLD, SIG_DFL);
   }
 
@@ -529,13 +533,18 @@ public:
     }
   }
 
-  FILE *exec(const char *cmd) {
-    assert(m_proc == NULL);
+  FILE *exec(const String& cmd_string) {
+    assert(m_proc == nullptr);
+    const auto cmd = cmd_string.c_str();
     if (RuntimeOption::WhitelistExec && !check_cmd(cmd)) {
-      return NULL;
+      return nullptr;
+    }
+    if (strlen(cmd) != cmd_string.size()) {
+      raise_warning("NULL byte detected. Possible attack");
+      return nullptr;
     }
     m_proc = LightProcess::popen(cmd, "r", g_context->getCwd().data());
-    if (m_proc == NULL) {
+    if (m_proc == nullptr) {
       raise_warning("Unable to execute '%s'", cmd);
     }
     return m_proc;
@@ -543,19 +552,21 @@ public:
 
   int exit() {
     int status = LightProcess::pclose(m_proc);
-    m_proc = NULL;
+    m_proc = nullptr;
     return status;
   }
 
 private:
   void (*m_sig_handler)(int);
-  FILE *m_proc;
+  FILE *m_proc{nullptr};
 };
+
+}
 
 Variant HHVM_FUNCTION(shell_exec,
                       const String& cmd) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(cmd.c_str());
+  FILE *fp = ctx.exec(cmd);
   if (!fp) return init_null();
   StringBuffer sbuf;
   sbuf.read(fp);
@@ -572,7 +583,7 @@ String HHVM_FUNCTION(exec,
                      VRefParam output /* = null */,
                      VRefParam return_var /* = null */) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(command.c_str());
+  FILE *fp = ctx.exec(command);
   if (!fp) return empty_string();
   StringBuffer sbuf;
   sbuf.read(fp);
@@ -603,7 +614,7 @@ void HHVM_FUNCTION(passthru,
                    const String& command,
                    VRefParam return_var /* = null */) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(command.c_str());
+  FILE *fp = ctx.exec(command);
   if (!fp) return;
 
   char buffer[1024];
@@ -623,7 +634,7 @@ String HHVM_FUNCTION(system,
                      const String& command,
                      VRefParam return_var /* = null */) {
   ShellExecContext ctx;
-  FILE *fp = ctx.exec(command.c_str());
+  FILE *fp = ctx.exec(command);
   if (!fp) return empty_string();
   StringBuffer sbuf;
   if (fp) {
@@ -861,7 +872,8 @@ static bool pre_proc_open(const Array& descriptorspec,
           raise_warning("Missing mode parameter for 'file'");
           break;
         }
-        if (!item.openFile(descarr[int64_t(1)].toString(), descarr[int64_t(2)].toString())) {
+        if (!item.openFile(descarr[int64_t(1)].toString(),
+                           descarr[int64_t(2)].toString())) {
           break;
         }
       } else {
@@ -878,13 +890,14 @@ static bool pre_proc_open(const Array& descriptorspec,
   return false;
 }
 
-static Variant post_proc_open(const String& cmd, Variant &pipes,
-                              const Variant& env, std::vector<DescriptorItem> &items,
+static Variant post_proc_open(const String& cmd, Variant& pipes,
+                              const Variant& env,
+                              std::vector<DescriptorItem> &items,
                               pid_t child) {
   if (child < 0) {
     /* failed to fork() */
-    for (int i = 0; i < (int)items.size(); i++) {
-      items[i].cleanup();
+    for (auto& item : items) {
+      item.cleanup();
     }
     raise_warning("fork failed - %s", folly::errnoStr(errno).c_str());
     return false;
@@ -900,11 +913,11 @@ static Variant post_proc_open(const String& cmd, Variant &pipes,
   // previously set to
   pipes = Variant(Array::Create());
 
-  for (int i = 0; i < (int)items.size(); i++) {
-    Resource f = items[i].dupParent();
+  for (auto& item : items) {
+    Resource f = item.dupParent();
     if (!f.isNull()) {
       proc->pipes.append(f);
-      pipes.toArrRef().set(items[i].index, f);
+      pipes.toArrRef().set(item.index, f);
     }
   }
   return Variant(std::move(proc));
@@ -918,6 +931,10 @@ Variant HHVM_FUNCTION(proc_open,
                       const Variant& env /* = null_variant */,
                       const Variant& other_options /* = null_variant */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(cmd.data())) {
+    return false;
+  }
+  if (cmd.size() != strlen(cmd.c_str())) {
+    raise_warning("NULL byte detected. Possible attack");
     return false;
   }
 
@@ -938,9 +955,8 @@ Variant HHVM_FUNCTION(proc_open,
     // for each name.
 
     // Env vars defined in the hdf file go in first
-    for (auto iter = RuntimeOption::EnvVariables.begin();
-        iter != RuntimeOption::EnvVariables.end(); ++iter) {
-      enva.set(String(iter->first), String(iter->second));
+    for (const auto& envvar : RuntimeOption::EnvVariables) {
+      enva.set(String(envvar.first), String(envvar.second));
     }
 
     // global environment overrides the hdf
@@ -968,11 +984,15 @@ Variant HHVM_FUNCTION(proc_open,
     // there is no need to do any locking, because the forking is delegated
     // to the light process
     if (!pre_proc_open(descriptorspec, items)) return false;
+    const int item_size = items.size();
     std::vector<int> created;
+    created.reserve(item_size);
     std::vector<int> intended;
-    for (int i = 0; i < (int)items.size(); i++) {
-      created.push_back(items[i].childend);
-      intended.push_back(items[i].index);
+    intended.reserve(item_size);
+    for (int i = 0; i < item_size; i++) {
+      const auto& item = items[i];
+      created.push_back(item.childend);
+      intended.push_back(item.index);
     }
 
     std::vector<std::string> envs;
@@ -1008,8 +1028,8 @@ Variant HHVM_FUNCTION(proc_open,
   /* close those descriptors that we just opened for the parent stuff,
    * dup new descriptors into required descriptors and close the original
    * cruft */
-  for (int i = 0; i < (int)items.size(); i++) {
-    items[i].dupChild();
+  for (auto& item : items) {
+    item.dupChild();
   }
   if (scwd.length() > 0 && chdir(scwd.c_str())) {
     // chdir failed, the working directory remains unchanged

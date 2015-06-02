@@ -29,7 +29,6 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
-#include "hphp/runtime/vm/jit/reserved-stack.h"
 
 namespace HPHP { namespace jit { namespace x64 {
 
@@ -74,38 +73,37 @@ constexpr Reg64 rAsm         = reg::r10;
  */
 
 const RegSet kGPCallerSaved =
-  reg::rax | reg::rcx | reg::rdx | reg::rsi | reg::rdi | reg::r8 | reg::r9;
+  reg::rax | reg::rcx | reg::rdx | reg::rsi | reg::rdi |
+  reg::r8  | reg::r9  | reg::r10 | reg::r11;
 
 const RegSet kGPCalleeSaved =
   reg::rbx | reg::r13 | reg::r14 | reg::r15;
 
 const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
 
-const RegSet kGPReserved =
-  reg::rsp | rVmFp | rVmTl | reg::r11 | rAsm;
+const RegSet kGPReserved = reg::rsp | rVmFp | rVmTl;
 
 const RegSet kGPRegs = kGPUnreserved | kGPReserved;
 
 const RegSet kXMMCallerSaved =
-  reg::xmm0 | reg::xmm1 | reg::xmm2 | reg::xmm3 |
-  reg::xmm4 | // reg::xmm5 | reg::xmm6 | reg::xmm7 // for vasm
-  reg::xmm8 | reg::xmm9 | reg::xmm10 | reg::xmm11 |
-  reg::xmm12 | reg::xmm13 | reg::xmm14; // | reg::xmm15 // for vasm
+  reg::xmm0  | reg::xmm1  | reg::xmm2  | reg::xmm3 |
+  reg::xmm4  | reg::xmm5  | reg::xmm6  | reg::xmm7 |
+  reg::xmm8  | reg::xmm9  | reg::xmm10 | reg::xmm11 |
+  reg::xmm12 | reg::xmm13 | reg::xmm14 | reg::xmm15;
 
 const RegSet kXMMCalleeSaved;
 
 const RegSet kXMMUnreserved = kXMMCallerSaved | kXMMCalleeSaved;
 
-const RegSet kXMMReserved =
-  reg::xmm5 | reg::xmm6 | reg::xmm7 | reg::xmm15; // for vasm
+const RegSet kXMMReserved;
+
+const RegSet kXMMRegs = kXMMUnreserved | kXMMReserved;
 
 const RegSet kCallerSaved = kGPCallerSaved | kXMMCallerSaved;
 
 const RegSet kCalleeSaved = kGPCalleeSaved | kXMMCalleeSaved;
 
 const RegSet kSF = RegSet(RegSF{0});
-
-const RegSet kXMMRegs = kXMMUnreserved | kXMMReserved;
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -117,24 +115,36 @@ const RegSet kXMMRegs = kXMMUnreserved | kXMMReserved;
  */
 
 /*
- * When preparing to call a function prologue, the callee's frame
- * pointer (the new ActRec) is placed into this register.  rVmFp still
- * points to the caller's ActRec when the prologue is entered.
+ * Registers that are live between tracelets, in two flavors, depending whether
+ * we are between tracelets in a resumed function.
  */
-constexpr PhysReg rStashedAR = reg::r15;
+const RegSet kCrossTraceRegs        = rVmFp | rVmTl;
+const RegSet kCrossTraceRegsResumed = kCrossTraceRegs | rVmSp;
 
 /*
- * Registers that are live between all tracelets.
+ * Registers live on entry to the fcallArrayHelper.
+ *
+ * TODO(#2288359): we don't want this to include rVmSp eventually.
  */
-const RegSet kCrossTraceRegs =
-  rVmFp | rVmSp | rVmTl;
+const RegSet kCrossTraceRegsFCallArray = kCrossTraceRegs | rVmSp;
+
+/*
+ * Registers live on entry to an interpOneCFHelper.
+ */
+const RegSet kCrossTraceRegsInterpOneCF = kCrossTraceRegs | rVmSp | rAsm;
+
+/*
+ * Registers that are live after a PHP function return.
+ *
+ * TODO(#2288359): we don't want this to include rVmSp eventually.
+ */
+const RegSet kCrossTraceRegsReturn = kCrossTraceRegs | rVmSp;
 
 /*
  * Registers that are live during a PHP function call, between the caller and
  * the callee.
  */
-const RegSet kCrossCallRegs =
-  kCrossTraceRegs | rStashedAR;
+const RegSet kCrossCallRegs = kCrossTraceRegs;
 
 /*
  * Registers that can safely be used for scratch purposes in-between
@@ -145,7 +155,7 @@ const RegSet kCrossCallRegs =
  * modifying them.
  */
 const RegSet kScratchCrossTraceRegs = kXMMCallerSaved |
-  (kGPUnreserved - kCrossCallRegs);
+  (kGPUnreserved - (kCrossTraceRegs | kCrossTraceRegsResumed));
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -194,12 +204,23 @@ constexpr int kNumServiceReqArgRegs =
 #define CONTOFF(nm) int(offsetof(c_Generator, nm))
 
 UNUSED const Abi abi {
-  kGPUnreserved,  // gpUnreserved
-  kGPReserved,    // gpReserved
-  kXMMUnreserved, // simdUnreserved
-  kXMMReserved,   // simdReserved
-  kCalleeSaved,   // calleeSaved
-  kSF             // sf
+  .gpUnreserved   = kGPUnreserved,
+  .gpReserved     = kGPReserved,
+  .simdUnreserved = kXMMUnreserved,
+  .simdReserved   = kXMMReserved,
+  .calleeSaved    = kCalleeSaved,
+  .sf             = kSF,
+  .canSpill       = true,
+};
+
+UNUSED const Abi cross_trace_abi {
+  .gpUnreserved   = abi.gp() & kScratchCrossTraceRegs,
+  .gpReserved     = abi.gp() - kScratchCrossTraceRegs,
+  .simdUnreserved = abi.simd() & kScratchCrossTraceRegs,
+  .simdReserved   = abi.simd() - kScratchCrossTraceRegs,
+  .calleeSaved    = abi.calleeSaved & kScratchCrossTraceRegs,
+  .sf             = abi.sf,
+  .canSpill       = false
 };
 
 //////////////////////////////////////////////////////////////////////

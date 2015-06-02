@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_ICU_ITERATOR_H
 #define incl_HPHP_ICU_ITERATOR_H
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/icu/icu.h"
 
 #include <unicode/strenum.h>
@@ -99,6 +99,7 @@ public:
   icu::StringEnumeration *enumeration() const { return m_enum; }
 
 private:
+  template <typename F> friend void HPHP::scan(const IntlIterator&, F&);
   icu::StringEnumeration *m_enum = nullptr;
   int64_t m_key = -1;
   Variant m_current{Variant::NullInit()};

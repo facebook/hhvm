@@ -35,6 +35,7 @@ type 'a t = {
 let (lint_list: Relative_path.t t list option ref) = ref None
 
 let get_code {code; _} = code
+let get_pos {pos; _} = pos
 
 let add code severity pos message =
   if !Errors.is_hh_fixme pos code then () else begin
@@ -67,7 +68,7 @@ let to_json {pos; code; severity; message} =
 module Codes = struct
   let lowercase_constant                    = 5001 (* DONT MODIFY!!!! *)
   let use_collection_literal                = 5002 (* DONT MODIFY!!!! *)
-  let single_quoted_string                  = 5003 (* DONT MODIFY!!!! *)
+  let static_string                         = 5003 (* DONT MODIFY!!!! *)
 
   (* Values 5501 - 5999 are reserved for FB-internal use *)
 
@@ -84,10 +85,15 @@ let use_collection_literal pos coll =
   add Codes.use_collection_literal Warning pos
     (spf "Use `%s {...}` instead of `new %s(...)`" coll coll)
 
-let single_quoted_string pos =
-  add Codes.single_quoted_string Warning pos
-    ("This should be a single-quoted string so that lint can analyze it "^
-    "statically")
+let static_string ?(no_consts=false) pos =
+  add Codes.static_string Warning pos begin
+    if no_consts
+    then
+      "This should be a string literal so that lint can analyze it."
+    else
+      "This should be a string literal or string constant so that lint can "^
+      "analyze it."
+  end
 
 let do_ f =
   let list_copy = !lint_list in

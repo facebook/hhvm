@@ -51,7 +51,9 @@
 #include "hphp/runtime/vm/bc-pattern.h"
 
 #include "hphp/runtime/vm/jit/annotation.h"
+#include "hphp/runtime/vm/jit/guard-relaxation.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -71,70 +73,6 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 Lease Translator::s_writeLease;
-
-int locPhysicalOffset(int32_t localIndex) {
-  return -(localIndex + 1);
-}
-
-PropInfo getPropertyOffset(const NormalizedInstruction& ni,
-                           const Class* ctx, const Class*& baseClass,
-                           const MInstrInfo& mii,
-                           unsigned mInd, unsigned iInd) {
-  if (mInd == 0) {
-    auto const baseIndex = mii.valCount();
-    baseClass = ni.inputs[baseIndex]->rtt < Type::Obj
-      ? ni.inputs[baseIndex]->rtt.clsSpec().cls()
-      : nullptr;
-  }
-  if (!baseClass) return PropInfo();
-
-  auto keyType = ni.inputs[iInd]->rtt;
-  if (!keyType.isConst(Type::Str)) return PropInfo();
-  auto const name = keyType.strVal();
-
-  // If we are not in repo-authoriative mode, we need to check that
-  // baseClass cannot change in between requests
-  if (!RuntimeOption::RepoAuthoritative ||
-      !(baseClass->preClass()->attrs() & AttrUnique)) {
-    if (!ctx) return PropInfo();
-    if (!ctx->classof(baseClass)) {
-      if (baseClass->classof(ctx)) {
-        // baseClass can change on us in between requests, but since
-        // ctx is an ancestor of baseClass we can make the weaker
-        // assumption that the object is an instance of ctx
-        baseClass = ctx;
-      } else {
-        // baseClass can change on us in between requests and it is
-        // not related to ctx, so bail out
-        return PropInfo();
-      }
-    }
-  }
-  // Lookup the index of the property based on ctx and baseClass
-  auto const lookup = baseClass->getDeclPropIndex(ctx, name);
-  auto const idx = lookup.prop;
-
-  // If we couldn't find a property that is accessible in the current context,
-  // bail out
-  if (idx == kInvalidSlot || !lookup.accessible) return PropInfo();
-
-  // If it's a declared property we're good to go: even if a subclass redefines
-  // an accessible property with the same name it's guaranteed to be at the same
-  // offset.
-  return PropInfo(
-    baseClass->declPropOffset(idx),
-    baseClass->declPropRepoAuthType(idx)
-  );
-}
-
-PropInfo getFinalPropertyOffset(const NormalizedInstruction& ni,
-                                Class* ctx, const MInstrInfo& mii) {
-  unsigned mInd = ni.immVecM.size() - 1;
-  unsigned iInd = mii.valCount() + 1 + mInd;
-
-  const Class* cls = nullptr;
-  return getPropertyOffset(ni, ctx, cls, mii, mInd, iInd);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -180,7 +118,7 @@ static const struct {
   { OpArray,       {None,             Stack1,       OutArrayImm,       1 }},
   { OpNewArray,    {None,             Stack1,       OutArray,          1 }},
   { OpNewMixedArray,  {None,          Stack1,       OutArray,          1 }},
-  { OpNewLikeArrayL,  {None,          Stack1,       OutArray,          1 }},
+  { OpNewLikeArrayL,  {Local,         Stack1,       OutArray,          1 }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpNewStructArray, {StackN,        Stack1,       OutArray,          0 }},
   { OpAddElemC,    {StackTop3,        Stack1,       OutArray,         -2 }},
@@ -188,7 +126,8 @@ static const struct {
   { OpAddNewElemC, {StackTop2,        Stack1,       OutArray,         -1 }},
   { OpAddNewElemV, {StackTop2,        Stack1,       OutArray,         -1 }},
   { OpNewCol,      {None,             Stack1,       OutObject,         1 }},
-  { OpColAddElemC, {StackTop3,        Stack1,       OutObject,        -2 }},
+  { OpColFromArray,   {Stack1,        Stack1,       OutObject,         0 }},
+  { OpMapAddElemC, {StackTop3,        Stack1,       OutObject,        -2 }},
   { OpColAddNewElemC, {StackTop2,     Stack1,       OutObject,        -1 }},
   { OpCns,         {None,             Stack1,       OutCns,            1 }},
   { OpCnsE,        {None,             Stack1,       OutCns,            1 }},
@@ -275,6 +214,9 @@ static const struct {
   { OpCGetL,       {Local,            Stack1,       OutCInputL,        1 }},
   { OpCGetL2,      {Stack1|Local,     StackIns1,    OutCInputL,        1 }},
   { OpCGetL3,      {StackTop2|Local,  StackIns2,    OutCInputL,        1 }},
+  // In OpCUGetL we rely on OutCInputL returning TCell (which covers Uninit
+  // values) instead of TInitCell.
+  { OpCUGetL,      {Local,            Stack1,       OutCInputL,        1 }},
   { OpPushL,       {Local,            Stack1|Local, OutCInputL,        1 }},
   { OpCGetN,       {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpCGetG,       {Stack1,           Stack1,       OutUnknown,        0 }},
@@ -508,12 +450,12 @@ static void initInstrInfo() {
 }
 
 const InstrInfo& getInstrInfo(Op op) {
-  assert(instrInfoInited);
+  assertx(instrInfoInited);
   return instrInfo[op];
 }
 
 static int numHiddenStackInputs(const NormalizedInstruction& ni) {
-  assert(ni.immVec.isValid());
+  assertx(ni.immVec.isValid());
   return ni.immVec.numStackValues();
 }
 
@@ -539,7 +481,7 @@ int64_t countOperands(uint64_t mask) {
       mask &= ~pair[0];
     }
   }
-  assert(mask == 0);
+  assertx(mask == 0);
   return count;
 }
 }
@@ -565,7 +507,7 @@ int64_t getStackPopped(PC pc) {
   int64_t count = 0;
 
   // All instructions with these properties are handled above
-  assert((mask & (StackN | BStackN)) == 0);
+  assertx((mask & (StackN | BStackN)) == 0);
 
   if (mask & MVector) {
     count += getImmVector((Op*)pc).numStackValues();
@@ -633,7 +575,7 @@ bool isAlwaysNop(Op op) {
 static void addMVectorInputs(NormalizedInstruction& ni,
                              int& currentStackOffset,
                              std::vector<InputInfo>& inputs) {
-  assert(ni.immVec.isValid());
+  assertx(ni.immVec.isValid());
   ni.immVecM.reserve(ni.immVec.size());
 
   int UNUSED stackCount = 0;
@@ -672,7 +614,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
     if (lcode == LH) {
       inputs.emplace_back(Location(Location::This));
     } else {
-      assert(lcode == LL || lcode == LGL || lcode == LNL);
+      assertx(lcode == LL || lcode == LGL || lcode == LNL);
       if (location.hasImm()) {
         push_local(location.imm);
       }
@@ -682,7 +624,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
     if (lcode == LSL) {
       // We'll get the trailing stack value after pushing all the
       // member vector elements.
-      assert(location.hasImm());
+      assertx(location.hasImm());
       push_local(location.imm);
     } else {
       push_stack();
@@ -713,7 +655,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
       } else if (memberCodeImmIsString(mcode)) {
         inputs.emplace_back(Location(Location::Litstr, imm));
       } else {
-        assert(memberCodeImmIsInt(mcode));
+        assertx(memberCodeImmIsInt(mcode));
         inputs.emplace_back(Location(Location::Litint, imm));
       }
     } else {
@@ -726,7 +668,7 @@ static void addMVectorInputs(NormalizedInstruction& ni,
     push_stack();
   }
 
-  assert(stackCount == ni.immVec.numStackValues());
+  assertx(stackCount == ni.immVec.numStackValues());
 
   SKTRACE(2, ni.source, "M-vector using %d hidden stack "
                         "inputs, %d locals\n", stackCount, localCount);
@@ -754,7 +696,7 @@ static void getInputsImpl(NormalizedInstruction* ni,
 #endif
   if (isAlwaysNop(ni->op())) return;
 
-  assert(inputs.empty());
+  assertx(inputs.empty());
   always_assert_flog(
     instrInfo.count(ni->op()),
     "Invalid opcode in getInputsImpl: {}\n",
@@ -967,6 +909,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::CGetL:
   case Op::CGetL2:
   case Op::CGetS:
+  case Op::CUGetL:
   case Op::CIterFree:
   case Op::CastArray:
   case Op::CastDouble:
@@ -979,8 +922,9 @@ bool dontGuardAnyInputs(Op op) {
   case Op::Cns:
   case Op::CnsE:
   case Op::CnsU:
-  case Op::ColAddElemC:
+  case Op::MapAddElemC:
   case Op::ColAddNewElemC:
+  case Op::ColFromArray:
   case Op::ConcatN:
   case Op::Concat:
   case Op::ContCheck:
@@ -1127,6 +1071,7 @@ const StaticString s_parse_str("parse_str");
 const StaticString s_parse_strNative("__SystemLib\\parse_str");
 const StaticString s_assert("assert");
 const StaticString s_assertNative("__SystemLib\\assert");
+const StaticString s_set_frame_metadata("HH\\set_frame_metadata");
 
 bool funcByNameDestroysLocals(const StringData* fname) {
   if (!fname) return false;
@@ -1135,11 +1080,12 @@ bool funcByNameDestroysLocals(const StringData* fname) {
          fname->isame(s_parse_str.get()) ||
          fname->isame(s_parse_strNative.get()) ||
          fname->isame(s_assert.get()) ||
-         fname->isame(s_assertNative.get());
+         fname->isame(s_assertNative.get()) ||
+         fname->isame(s_set_frame_metadata.get());
 }
 
 bool builtinFuncDestroysLocals(const Func* callee) {
-  assert(callee && callee->isCPPBuiltin());
+  assertx(callee && callee->isCPPBuiltin());
   auto const fname = callee->name();
   return funcByNameDestroysLocals(fname);
 }
@@ -1148,8 +1094,8 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
                         const Func* caller) {
   // We don't handle these two cases, because we don't compile functions
   // containing them:
-  assert(caller->lookupVarId(s_php_errormsg.get()) == -1);
-  assert(caller->lookupVarId(s_http_response_header.get()) == -1);
+  assertx(caller->lookupVarId(s_php_errormsg.get()) == -1);
+  assertx(caller->lookupVarId(s_http_response_header.get()) == -1);
 
   auto* unit = caller->unit();
   auto checkTaintId = [&](Id id) {
@@ -1161,7 +1107,7 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
   if (!isFCallStar(inst.op()))     return false;
 
   const FPIEnt *fpi = caller->findFPI(inst.source.offset());
-  assert(fpi);
+  assertx(fpi);
   Op* fpushPc = (Op*)unit->at(fpi->m_fpushOff);
   auto const op = *fpushPc;
 
@@ -1289,9 +1235,9 @@ const char* show(TranslateResult r) {
 #define FOUR(x0,x1,x2,x3) , IMM_##x0(0), IMM_##x1(1), IMM_##x2(2), IMM_##x3(3)
 #define NA                   /*  */
 
-static void translateDispatch(HTS& hts,
+static void translateDispatch(IRGS& irgs,
                               const NormalizedInstruction& ni) {
-#define O(nm, imms, ...) case Op::nm: irgen::emit##nm(hts imms); return;
+#define O(nm, imms, ...) case Op::nm: irgen::emit##nm(irgs imms); return;
   switch (ni.op()) { OPCODES }
 #undef O
 }
@@ -1321,59 +1267,229 @@ static void translateDispatch(HTS& hts,
 
 //////////////////////////////////////////////////////////////////////
 
-static Type flavorToType(FlavorDesc f) {
+namespace {
+
+Type flavorToType(FlavorDesc f) {
   switch (f) {
     case NOV: not_reached();
 
-    case CV: return Type::Cell;  // TODO(#3029148) this could be InitCell
-    case UV: return Type::Uninit;
-    case VV: return Type::BoxedInitCell;
-    case AV: return Type::Cls;
-    case RV: case FV: case CVV: case CVUV: return Type::Gen;
+    case CV: return TCell;  // TODO(#3029148) this could be InitCell
+    case CUV: return TCell;
+    case UV: return TUninit;
+    case VV: return TBoxedInitCell;
+    case AV: return TCls;
+    case RV: case FV: case CVV: case CVUV: return TGen;
   }
   not_reached();
 }
 
-void translateInstr(HTS& hts, const NormalizedInstruction& ni) {
+Type typeToCheckForInput(
+  IRGS& irgs,
+  const NormalizedInstruction& ni,
+  int32_t opndIdx,
+  Type predictedType
+) {
+  auto opc = ni.op();
+  auto tc = TypeConstraint(DataTypeSpecific);
+  switch (opc) {
+    case OpSetS:
+    case OpSetG:
+    case OpSetL: {
+      // stack value
+      if (opndIdx == 0) {
+        tc = DataTypeCountness;
+        break;
+      }
+      if (opc == OpSetL) {
+        // old local value is dec-refed
+        assert(opndIdx == 1);
+        tc = DataTypeCountness;
+        break;
+      }
+      tc = DataTypeSpecific;
+      break;
+    }
+
+    case OpUnsetL: {
+      tc = DataTypeCountness;
+      break;
+    }
+
+    case OpCGetL: {
+      tc = DataTypeCountnessInit;
+      break;
+    }
+
+    case OpPushL:
+    case OpContEnter:
+    case OpContRaise: {
+      tc = DataTypeGeneric;
+      break;
+    }
+
+    case OpRetC:
+    case OpRetV: {
+      tc = DataTypeCountness;
+      break;
+    }
+
+    case OpFCallArray: {
+      tc = DataTypeGeneric;
+      break;
+    }
+
+    case OpPopC:
+    case OpPopV:
+    case OpPopR: {
+      tc = DataTypeCountness;
+      break;
+    }
+
+    case OpYield:
+    case OpYieldK: {
+      // The stack input is teleported to the continuation's m_value field
+      tc = DataTypeGeneric;
+      break;
+    }
+
+    case OpAddElemC: {
+      // The stack input is teleported to the array
+      tc = opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
+      break;
+    }
+
+    case OpIdx:
+    case OpArrayIdx: {
+      // The default value (w/ opndIdx 0) is simply passed to a helper,
+      // which takes care of dec-refing it if needed
+      tc = opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
+      break;
+    }
+
+    default: {
+      break;
+    }
+  }
+
+  if (hasMVector(opc) && opndIdx == getMInstrInfo(ni.mInstrOp()).valCount()) {
+    tc = irgen::mInstrBaseConstraint(irgs, predictedType);
+  }
+
+  return relaxType(predictedType, tc);
+}
+
+void emitInputChecks(
+  IRGS& irgs,
+  const NormalizedInstruction& ni,
+  bool checkOuterTypeOnly
+) {
+  FTRACE(4, "\n{}: {}\n", ni.offset(), opcodeToName(ni.op()));
+  for (auto i = 0; i < ni.inputs.size(); ++i) {
+    FTRACE(4, "Input {}: ", i);
+    auto loc = ni.inputs[i];
+    if (!loc.isLocal() && !loc.isStack()) {
+      FTRACE(4, "!isLocal && !isStack, skipping\n");
+      continue;
+    }
+    auto const predictedType = irgen::predictedTypeFromLocation(irgs, loc);
+    FTRACE(4, "predicted {}\n", predictedType);
+
+    if (!(predictedType <= TGen) && !(predictedType <= TCls)) {
+      FTRACE(4, "predictedType ({}) !<= TGen|TCls, skipping\n", predictedType);
+      continue;
+    }
+
+    assertx(predictedType != TBottom);
+
+    auto typeToCheck = predictedType <= TCls
+      ? predictedType
+      : typeToCheckForInput(irgs, ni, i, predictedType);
+
+    // Make sure typeToCheck is checkable.
+    if (!(typeToCheck <= TCell || typeToCheck <= TBoxedInitCell)) {
+      FTRACE(4, "typeToCheck isn't checkable, skipping\n");
+      continue;
+    }
+
+    if (typeToCheck == TCountedStr) {
+      FTRACE(4, "typeToCheck is CountedStr, widening to Str\n");
+      typeToCheck = TStr;
+    } else if (typeToCheck <= TStaticArr) {
+      FTRACE(4, "typeToCheck is StaticArr, widening to Arr\n");
+      typeToCheck = TArr;
+    } else if (typeToCheck.clsSpec() &&
+        !(typeToCheck.clsSpec().cls()->attrs() & AttrNoOverride)) {
+      FTRACE(4, "class specialization could be overridden, widening to Obj\n");
+      typeToCheck = TObj;
+    } else if (typeToCheck.arrSpec() && typeToCheck.arrSpec().type()) {
+      FTRACE(4, "array specialization is RAT, widening to Arr\n");
+      typeToCheck = TArr;
+    }
+
+    if (loc.isLocal()) {
+      FTRACE(4, "Checking local {} for type {}\n", loc.offset, typeToCheck);
+      irgen::checkTypeLocal(irgs, loc.offset, typeToCheck, ni.source.offset(),
+        checkOuterTypeOnly);
+    } else {
+      FTRACE(4, "Checking stack offset {} for type {}\n",
+          loc.bcRelOffset.offset, typeToCheck);
+      irgen::checkTypeStack(irgs, loc.bcRelOffset, typeToCheck,
+        ni.source.offset(), checkOuterTypeOnly);
+    }
+  }
+  // Calling checkTypeStack with a Type t such that t <= BoxedCell causes us to
+  // spill the stack, so we need to sync the stack with an exception stack
+  // boundary here.
+  irgs.irb->exceptionStackBoundary();
+}
+
+}
+
+void translateInstr(
+  IRGS& irgs,
+  const NormalizedInstruction& ni,
+  bool checkOuterTypeOnly,
+  bool needsExitPlaceholder
+) {
   irgen::prepareForNextHHBC(
-    hts,
+    irgs,
     &ni,
-    ni.source.offset(),
-    ni.endsRegion && !irgen::isInlining(hts)
+    ni.source,
+    ni.endsRegion && !irgen::isInlining(irgs)
   );
 
   auto pc = reinterpret_cast<const Op*>(ni.pc());
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
     auto const type = flavorToType(instrInputFlavor(pc, i));
-    if (type != Type::Gen) {
-      // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
-      // is a little unsure of itself.
-      irgen::assertTypeStack(hts, BCSPOffset{i}, type);
-    }
+    // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
+    // is a little unsure of itself.
+    irgen::assertTypeStack(irgs, BCSPOffset{i}, type);
+  }
+
+  if (RuntimeOption::EvalHHIRConstrictGuards) {
+    emitInputChecks(irgs, ni, checkOuterTypeOnly);
   }
 
   FTRACE(1, "\n{:-^60}\n", folly::format("Translating {}: {} with stack:\n{}",
                                          ni.offset(), ni.toString(),
-                                         show(hts)));
+                                         show(irgs)));
 
-  irgen::ringbuffer(hts, Trace::RBTypeBytecodeStart, ni.source, 2);
-  irgen::emitIncStat(hts, Stats::Instr_TC, 1);
+  irgen::ringbufferEntry(irgs, Trace::RBTypeBytecodeStart, ni.source, 2);
+  irgen::emitIncStat(irgs, Stats::Instr_TC, 1);
   if (Trace::moduleEnabledRelease(Trace::llvm_count, 1) ||
       RuntimeOption::EvalJitLLVMCounters) {
-    irgen::gen(hts, CountBytecode);
+    irgen::gen(irgs, CountBytecode);
   }
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts >= 2) {
-    irgen::gen(hts, DbgAssertRetAddr);
+  if (isAlwaysNop(ni.op())) return;
+  if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
+    irgen::interpOne(irgs, ni);
+    return;
   }
 
-  if (isAlwaysNop(ni.op())) {
-    // Do nothing
-  } else if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
-    irgen::interpOne(hts, ni);
-  } else {
-    translateDispatch(hts, ni);
-  }
+  if (needsExitPlaceholder) irgen::makeExitPlaceholder(irgs);
+
+  translateDispatch(irgs, ni);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1390,7 +1506,7 @@ uint64_t* Translator::getTransCounterAddr() {
     bzero(chunk, size);
     m_transCounters.push_back(chunk);
   }
-  assert(id / transCountersPerChunk < m_transCounters.size());
+  assertx(id / transCountersPerChunk < m_transCounters.size());
   return &(m_transCounters[id / transCountersPerChunk]
            [id % transCountersPerChunk]);
 }
@@ -1402,17 +1518,18 @@ void Translator::addTranslation(const TransRec& transRec) {
                         HPHP::Timer::GetCurrentTimeMicros() - m_createdTime,
                         folly::format("{}:{}:{}",
                           transRec.src.unit()->filepath()->data(),
-                          transRec.src.getFuncId(),
+                          transRec.src.funcID(),
                           transRec.src.offset()).str().c_str(),
                         transRec.aLen,
                         transRec.acoldLen,
-                        transRec.kind);
+                        static_cast<int>(transRec.kind));
   }
 
   if (!isTransDBEnabled()) return;
   uint32_t id = getCurrentTransID();
   m_translations.emplace_back(transRec);
-  m_translations[id].id = id;
+  auto& newTransRec = m_translations[id];
+  newTransRec.id = id;
 
   if (transRec.aLen > 0) {
     m_transDB[transRec.aStart] = id;
@@ -1420,11 +1537,14 @@ void Translator::addTranslation(const TransRec& transRec) {
   if (transRec.acoldLen > 0) {
     m_transDB[transRec.acoldStart] = id;
   }
+
+  // Optimize storage of the created TransRec.
+  newTransRec.optimizeForMemory();
 }
 
 uint64_t Translator::getTransCounter(TransID transId) const {
   if (!isTransDBEnabled()) return -1ul;
-  assert(transId < m_translations.size());
+  assertx(transId < m_translations.size());
 
   uint64_t counter;
 
@@ -1458,7 +1578,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
   if (res == LookupResult::MethodNotFound) return nullptr;
 
-  assert(res == LookupResult::MethodFoundWithThis ||
+  assertx(res == LookupResult::MethodFoundWithThis ||
          res == LookupResult::MethodFoundNoThis ||
          (staticLookup ?
           res == LookupResult::MagicCallStaticFound :
@@ -1510,7 +1630,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
 void invalidatePath(const std::string& path) {
   TRACE(1, "invalidatePath: abspath %s\n", path.c_str());
-  assert(path.size() >= 1 && path[0] == '/');
+  assertx(path.size() >= 1 && path[0] == '/');
   Treadmill::enqueue([path] {
     /*
      * inotify saw this path change. Now poke the unit loader; it will

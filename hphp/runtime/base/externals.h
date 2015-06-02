@@ -26,6 +26,7 @@
  */
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/globals-array.h"
 
 namespace HPHP {

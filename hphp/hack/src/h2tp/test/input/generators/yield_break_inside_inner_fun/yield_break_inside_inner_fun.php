@@ -1,6 +1,6 @@
 <?hh
 function foo($start, $end, $magic) {
-  $fn = function () use($start, $magic) {
+  $fn = function() use($start, $magic) {
     $i = $start;
     while ($i !== $magic - 1) {
       yield $i;

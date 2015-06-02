@@ -18,6 +18,7 @@
 #define incl_HPHP_JIT_MUTATION_H_
 
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/cfg.h"
 
 namespace HPHP { namespace jit {
 
@@ -79,8 +80,42 @@ void reflowTypes(IRUnit&);
 
 /*
  * Recomputes the output type of each of inst's dests.
+ *
+ * Returns: true if any of the instruction's dest types were changed.
  */
-void retypeDests(IRInstruction* inst, const IRUnit* unit);
+bool retypeDests(IRInstruction*, const IRUnit*);
+
+/*
+ * Small pass that inserts AssertTypes on the taken edges of CheckType blocks
+ * that may add type information about failing checks.  This pass is probably
+ * worth running before refineTmps, because it may allow better types when
+ * checks fail.
+ *
+ * (Note: the supplied block list need not be RPO-sorted.)
+ */
+void insertNegativeAssertTypes(IRUnit&, const BlockList&);
+
+/*
+ * Pass that walks over the dominator tree and replaces uses of SSATmps that
+ * have more-refined versions available with uses of the more refined versions.
+ * This basically fixes patterns like this:
+ *
+ *    t1 = LdLoc<Cell>
+ *    t2 = CheckType<Obj> t1 -> ...
+ *    IncRef t1
+ *
+ * So that we can replace t1 with t2 in the parts of the code dominated by the
+ * definition of t2.
+ */
+void refineTmps(IRUnit&, const BlockList&, const IdomVector&);
+
+/*
+ * Insert a phi for inputs in blk. none of blk's input edges may be
+ * critical, blk->numPreds() must be equal to inputs.size(), and
+ * inputs.size() must be greater than 1.
+ * If there's already a suitable phi, it will be returned.
+ */
+SSATmp* insertPhi(IRUnit&, Block* blk, const jit::vector<SSATmp*>& inputs);
 
 //////////////////////////////////////////////////////////////////////
 

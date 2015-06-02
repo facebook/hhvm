@@ -52,3 +52,18 @@ class StrhashFunction(gdb.Function):
         return strinfo(val)['hash']
 
 StrhashFunction()
+
+
+#------------------------------------------------------------------------------
+# `hhcry' command.
+
+class HHCryCommand(gdb.Command):
+    """Perform a bunch of obscure actions for unspecified reasons."""
+
+    def __init__(self):
+        super(HHCryCommand, self).__init__('hhcry', gdb.COMMAND_SUPPORT)
+
+    def invoke(self, args, from_tty):
+        invalidate_all_memoizers()
+
+HHCryCommand()

@@ -46,72 +46,7 @@ namespace HPHP { namespace smart {
  *
  * Replace std:: with smart:: if you know the data is request-local.
  *
- * You can also use smart::Allocator as a model of folly's
- * SimpleAllocator where appropriate.
  */
-
-//////////////////////////////////////////////////////////////////////
-
-// STL-style allocator for the smart allocator.  (Unfortunately we
-// can't use allocator_traits yet.)
-
-template <class T>
-struct Allocator {
-  typedef T              value_type;
-  typedef T*             pointer;
-  typedef const T*       const_pointer;
-  typedef T&             reference;
-  typedef const T&       const_reference;
-  typedef std::size_t    size_type;
-  typedef std::ptrdiff_t difference_type;
-
-  template <class U>
-  struct rebind {
-    typedef Allocator<U> other;
-  };
-
-  pointer address(reference value) const {
-    return &value;
-  }
-  const_pointer address(const_reference value) const {
-    return &value;
-  }
-
-  Allocator() noexcept {}
-  Allocator(const Allocator&) noexcept {}
-  template<class U> Allocator(const Allocator<U>&) noexcept {}
-  ~Allocator() noexcept {}
-
-  size_type max_size() const {
-    return std::numeric_limits<std::size_t>::max() / sizeof(T);
-  }
-
-  pointer allocate(size_type num, const void* = 0) {
-    pointer ret = (pointer)smart_malloc(num * sizeof(T));
-    return ret;
-  }
-
-  template<class U, class... Args>
-  void construct(U* p, Args&&... args) {
-    ::new ((void*)p) U(std::forward<Args>(args)...);
-  }
-
-  void destroy(pointer p) {
-    p->~T();
-  }
-
-  void deallocate(pointer p, size_type num) {
-    smart_free(p);
-  }
-
-  template<class U> bool operator==(const Allocator<U>&) const {
-    return true;
-  }
-
-  template<class U> bool operator!=(const Allocator<U>&) const {
-    return false;
-  }
-};
 
 /*
  * Shorthand to create an std::unique_ptr to a smart-allocated object.
@@ -127,6 +62,14 @@ using unique_ptr = typename folly::AllocatorUniquePtr<T,Allocator<T>>::type;
 template<class T, class... Args>
 unique_ptr<T> make_unique(Args&&... args) {
   return folly::allocate_unique<T>(
+    Allocator<T>(),
+    std::forward<Args>(args)...
+  );
+}
+
+template<class T, class... Args>
+std::shared_ptr<T> make_shared(Args&&... args) {
+  return std::allocate_shared<T>(
     Allocator<T>(),
     std::forward<Args>(args)...
   );

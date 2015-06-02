@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_SOAP_H_
 #define incl_HPHP_EXT_SOAP_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/soap/soap.h"
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,7 +81,7 @@ public:
   int                         m_max_redirect;
   bool                        m_use11;
   String                      m_user_agent;
-  bool                        m_compression;
+  int                         m_compression;
   Variant                     m_default_headers;
   Array                       m_cookies;
   bool                        m_exceptions;

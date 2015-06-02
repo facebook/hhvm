@@ -20,7 +20,6 @@
 #include <functional>
 
 #include <folly/ScopeGuard.h>
-#include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -40,8 +39,8 @@ namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 struct ExnStackState {
-  FPAbsOffset spOffset;
-  FPAbsOffset syncedSpLevel;
+  FPInvOffset spOffset;
+  FPInvOffset syncedSpLevel;
   uint32_t stackDeficit;
   EvalStack evalStack;
   SSATmp* sp;
@@ -118,7 +117,7 @@ struct IRBuilder {
   IRUnit& unit() const { return m_unit; }
   BCMarker curMarker() const { return m_curMarker; }
   const Func* curFunc() const { return m_state.func(); }
-  FPAbsOffset spOffset() { return m_state.spOffset(); }
+  FPInvOffset spOffset() { return m_state.spOffset(); }
   SSATmp* sp() const { return m_state.sp(); }
   SSATmp* fp() const { return m_state.fp(); }
   uint32_t stackDeficit() const { return m_state.stackDeficit(); }
@@ -127,13 +126,14 @@ struct IRBuilder {
   void setStackDeficit(uint32_t d) { m_state.setStackDeficit(d); }
   void syncEvalStack() { m_state.syncEvalStack(); }
   EvalStack& evalStack() { return m_state.evalStack(); }
-  FPAbsOffset syncedSpLevel() const { return m_state.syncedSpLevel(); }
+  FPInvOffset syncedSpLevel() const { return m_state.syncedSpLevel(); }
   bool thisAvailable() const { return m_state.thisAvailable(); }
   void setThisAvailable() { m_state.setThisAvailable(); }
   Type localType(uint32_t id, TypeConstraint tc);
   Type stackType(IRSPOffset, TypeConstraint tc);
   Type predictedInnerType(uint32_t id);
   Type predictedLocalType(uint32_t id);
+  Type predictedStackType(IRSPOffset);
   SSATmp* localValue(uint32_t id, TypeConstraint tc);
   SSATmp* stackValue(IRSPOffset offset, TypeConstraint tc);
   TypeSourceSet localTypeSources(uint32_t id) const {
@@ -174,7 +174,15 @@ public:
    * Start the given block.  Returns whether or not it succeeded.  A failure
    * may occur in case the block turned out to be unreachable.
    */
-  bool startBlock(Block* block, const BCMarker& marker, bool isLoopHeader);
+  bool startBlock(Block* block, bool hasUnprocPred);
+
+  /*
+   * Returns whether or not `block' will succeed if passed to
+   * startBlock, which implies that we have state saved for `block',
+   * and therefore it's currently reachable from the unit's entry
+   * block.
+   */
+  bool canStartBlock(Block* block) const;
 
   /*
    * Create a new block corresponding to bytecode control flow.
@@ -242,20 +250,13 @@ public:
   void popBlock();
 
   /*
-   * Run another pass of IRBuilder-managed optimizations on this
-   * unit.
-   */
-  void reoptimize();
-
-  /*
    * Conditionally-append a new instruction to the current Block, depending on
    * what some optimizations have to say about it.
    */
   enum class CloneFlag { Yes, No };
   SSATmp* optimizeInst(IRInstruction* inst,
                        CloneFlag doClone,
-                       Block* srcBlock,
-                       const folly::Optional<IdomVector>&);
+                       Block* srcBlock);
 
 
 private:
@@ -273,7 +274,7 @@ private:
   SSATmp* gen(Opcode op, Args&&... args) {
     return makeInstruction(
       [this] (IRInstruction* inst) {
-        return optimizeInst(inst, CloneFlag::Yes, nullptr, folly::none);
+        return optimizeInst(inst, CloneFlag::Yes, nullptr);
       },
       op,
       m_curMarker,
@@ -296,7 +297,6 @@ private:
   SSATmp* preOptimizeAssertLoc(IRInstruction*);
   SSATmp* preOptimizeCheckCtxThis(IRInstruction*);
   SSATmp* preOptimizeLdCtx(IRInstruction*);
-  SSATmp* preOptimizeDecRefThis(IRInstruction*);
   SSATmp* preOptimizeLdLocPseudoMain(IRInstruction*);
   SSATmp* preOptimizeLdLoc(IRInstruction*);
   SSATmp* preOptimizeStLoc(IRInstruction*);
@@ -326,8 +326,8 @@ private:
   jit::vector<BlockState> m_savedBlocks;
   Block* m_curBlock;
   ExnStackState m_exnStack{
-    FPAbsOffset{0},
-    FPAbsOffset{0},
+    FPInvOffset{0},
+    FPInvOffset{0},
     0,
     EvalStack{},
     nullptr

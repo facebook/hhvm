@@ -15,12 +15,12 @@ open Typing_defs
 (*****************************************************************************)
 
 type env = Typing_env.env
-type subst
+type 'a subst
 
 (*****************************************************************************)
 (* Builds a substitution out of a list of type parameters and a list of types.
  *
- * Typical use-case: 
+ * Typical use-case:
  *   class Y<T> { ... }
  *   class X extends Y<int>
  *
@@ -30,8 +30,7 @@ type subst
  *)
 (*****************************************************************************)
 
-val make_subst: tparam list -> ty list -> subst
-val make_subst_with_this: this:ty -> tparam list -> ty list -> subst
+val make_subst: phase:'a Typing_phase.t -> tparam list -> 'a ty list -> 'a subst
 
 (*****************************************************************************)
 (* Primitive instantiating a type.
@@ -39,12 +38,10 @@ val make_subst_with_this: this:ty -> tparam list -> ty list -> subst
  *)
 (*****************************************************************************)
 
-val instantiate     : subst -> env -> ty -> env * ty
-val instantiate_ce  : subst -> env -> class_elt -> env * class_elt
+val instantiate     : 'a subst -> env -> 'a ty -> env * 'a ty
+val instantiate_ce  : decl subst -> env -> class_elt -> env * class_elt
 val instantiate_typeconst :
-  subst -> env -> typeconst_type -> env * typeconst_type
+  decl subst -> env -> typeconst_type -> env * typeconst_type
 
-val instantiate_ft  : env -> fun_type -> env * fun_type
-val instantiate_fun : env -> ty -> Nast.expr list -> env * ty
-
-val instantiate_this : env -> ty -> ty -> env * ty
+val instantiate_ft  : env -> locl fun_type -> env * locl fun_type
+val instantiate_fun : env -> locl ty -> Nast.expr list -> env * locl ty

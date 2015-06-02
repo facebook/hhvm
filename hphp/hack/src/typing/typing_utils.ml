@@ -12,6 +12,7 @@ open Utils
 open Typing_defs
 
 module N = Nast
+module SN = Naming_special_names
 module Reason = Typing_reason
 module Env = Typing_env
 module ShapeMap = Nast.ShapeMap
@@ -23,32 +24,33 @@ module ShapeMap = Nast.ShapeMap
 let not_implemented _ = failwith "Function not implemented"
 
 type expand_typedef =
-    Env.env -> Reason.t -> string -> ty list -> Env.env * ty
-
+    expand_env -> Env.env -> Reason.t -> string -> locl ty list -> Env.env * ety
 let (expand_typedef_ref : expand_typedef ref) = ref not_implemented
 let expand_typedef x = !expand_typedef_ref x
 
-type unify = Env.env -> ty -> ty -> Env.env * ty
+type unify = Env.env -> locl ty -> locl ty -> Env.env * locl ty
 let (unify_ref: unify ref) = ref not_implemented
 let unify x = !unify_ref x
 
-type sub_type = Env.env -> ty -> ty -> Env.env
+type sub_type = Env.env -> locl ty -> locl ty -> Env.env
 let (sub_type_ref: sub_type ref) = ref not_implemented
 let sub_type x = !sub_type_ref x
+
+(* Convenience function for creating `this` types *)
+let this_of ty = Tgeneric (SN.Typehints.this, Some (Ast.Constraint_as, ty))
 
 (*****************************************************************************)
 (* Returns true if a type is optional *)
 (*****************************************************************************)
 
-let rec is_option env ty =
+let rec is_option: type a. _ -> a ty -> _ =
+  fun env ty ->
   let _, ety = Env.expand_type env ty in
-  match ety with
-  | _, Toption _ -> true
-  | _, Tunresolved tyl ->
+  match snd ety with
+  | Toption _ -> true
+  | Tunresolved tyl ->
       List.exists (is_option env) tyl
-  | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Tvar _
-    | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
-    | Tobject | Tshape _ | Taccess (_, _)) -> false
+  | _ -> false
 
 (*****************************************************************************)
 (* Unification error *)
@@ -182,8 +184,9 @@ let is_array_as_tuple env ty =
       | _ -> false
       )
   | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Toption _
-    | Tvar _ | Tabstract (_, _, _) | Tapply (_, _) | Ttuple _ | Tanon (_, _)
+    | Tvar _ | Tabstract (_, _, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
     | Tfun _ | Tunresolved _ | Tobject | Tshape _ | Taccess (_, _)) -> false
+
 
 (*****************************************************************************)
 (* Adds a new field to all the shapes found in a given type.
@@ -231,7 +234,7 @@ let min_vis_opt vis_opt1 vis_opt2 =
 (*****************************************************************************)
 
 module HasTany : sig
-  val check: ty -> bool
+  val check: locl ty -> bool
 end = struct
   let visitor =
     object(this)
@@ -242,7 +245,7 @@ end = struct
         (match ty2_opt with
         | None -> true
         | Some ty -> this#on_type acc ty) ||
-        (opt_fold_left this#on_type acc ty1_opt)
+        (Option.fold ~f:this#on_type ~init:acc ty1_opt)
     end
   let check ty = visitor#on_type false ty
 end

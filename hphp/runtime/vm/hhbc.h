@@ -91,15 +91,30 @@ enum FlavorDesc {
   FV,   // Function parameter (cell or var)
   UV,   // Uninit
   CVV,  // Cell or Var argument
+  CUV,  // Cell, or Uninit argument
   CVUV, // Cell, Var, or Uninit argument
 };
 
 enum InstrFlags {
-  NF = 0x0, // No flags
-  TF = 0x1, // Next instruction is not reachable via fall through or the
-            //   callee returning control
-  CF = 0x2, // Control flow instruction (branch, call, return, throw, etc)
-  FF = 0x4, // Instruction uses current FPI
+  /* No flags. */
+  NF = 0x0,
+
+  /* Terminal: next instruction is not reachable via fall through or the callee
+   * returning control. This includes instructions like Throw and Unwind that
+   * always throw exceptions. */
+  TF = 0x1,
+
+  /* Control flow: If this instruction finishes executing (doesn't throw an
+   * exception), vmpc() is not guaranteed to point to the next instruction in
+   * the bytecode stream. This does not take VM reentry into account, as that
+   * operation is part of the instruction that performed the reentry, and does
+   * not affect what vmpc() is set to after the instruction completes. */
+  CF = 0x2,
+
+  /* Instruction uses current FPI. */
+  FF = 0x4,
+
+  /* Shorthand for common combinations. */
   CF_TF = (CF | TF),
   CF_FF = (CF | FF)
 };
@@ -171,6 +186,12 @@ const char* locationCodeString(LocationCode lc);
 // is more junk after the first two bytes.
 LocationCode parseLocationCode(const char* s);
 
+
+/**
+ * E - an element, $x['y']
+ * P - a property, $x->y
+ * Q - a NullSafe version of P, $x?->y
+ */
 enum MemberCode {
   // Element and property, consuming a cell from the stack.
   MEC,
@@ -183,6 +204,7 @@ enum MemberCode {
   // Element and property, using a string immediate
   MET,
   MPT,
+  MQT,
 
   // Element, using an int64 immediate
   MEI,
@@ -291,7 +313,8 @@ struct MInstrInfo {
 };
 
 inline bool memberCodeHasImm(MemberCode mc) {
-  return mc == MEL || mc == MPL || mc == MET || mc == MPT || mc == MEI;
+  return mc == MEL || mc == MPL || mc == MET ||
+    mc == MPT || mc == MEI || mc == MQT;
 }
 
 inline bool memberCodeImmIsLoc(MemberCode mc) {
@@ -299,7 +322,7 @@ inline bool memberCodeImmIsLoc(MemberCode mc) {
 }
 
 inline bool memberCodeImmIsString(MemberCode mc) {
-  return mc == MET || mc == MPT;
+  return mc == MET || mc == MPT || mc == MQT;
 }
 
 inline bool memberCodeImmIsInt(MemberCode mc) {
@@ -472,6 +495,16 @@ enum class ObjMethodOp : uint8_t {
 #undef OBJMETHOD_OP
 };
 
+#define SWITCH_KINDS                            \
+  KIND(Unbounded)                               \
+  KIND(Bounded)
+
+enum class SwitchKind : uint8_t {
+#define KIND(x) x,
+  SWITCH_KINDS
+#undef KIND
+};
+
 constexpr int32_t kMaxConcatN = 4;
 
 //  name             immediates        inputs           outputs     flags
@@ -509,7 +542,8 @@ constexpr int32_t kMaxConcatN = 4;
   O(AddNewElemC,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(AddNewElemV,     NA,               TWO(VV,CV),      ONE(CV),    NF) \
   O(NewCol,          TWO(IVA,IVA),     NOV,             ONE(CV),    NF) \
-  O(ColAddElemC,     NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
+  O(ColFromArray,    ONE(IVA),         ONE(CV),         ONE(CV),    NF) \
+  O(MapAddElemC,     NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(ColAddNewElemC,  NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Cns,             ONE(SA),          NOV,             ONE(CV),    NF) \
   O(CnsE,            ONE(SA),          NOV,             ONE(CV),    NF) \
@@ -557,19 +591,20 @@ constexpr int32_t kMaxConcatN = 4;
   O(Print,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Clone,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Exit,            NA,               ONE(CV),         ONE(CV),    NF) \
-  O(Fatal,           ONE(OA(FatalOp)), ONE(CV),         NOV,        CF_TF) \
+  O(Fatal,           ONE(OA(FatalOp)), ONE(CV),         NOV,        TF) \
   O(Jmp,             ONE(BA),          NOV,             NOV,        CF_TF) \
   O(JmpNS,           ONE(BA),          NOV,             NOV,        CF_TF) \
   O(JmpZ,            ONE(BA),          ONE(CV),         NOV,        CF) \
   O(JmpNZ,           ONE(BA),          ONE(CV),         NOV,        CF) \
-  O(Switch,          THREE(BLA,I64A,IVA),                               \
+  O(Switch,          THREE(BLA,I64A,OA(SwitchKind)),                    \
                                        ONE(CV),         NOV,        CF_TF) \
   O(SSwitch,         ONE(SLA),         ONE(CV),         NOV,        CF_TF) \
   O(RetC,            NA,               ONE(CV),         NOV,        CF_TF) \
   O(RetV,            NA,               ONE(VV),         NOV,        CF_TF) \
-  O(Unwind,          NA,               NOV,             NOV,        CF_TF) \
-  O(Throw,           NA,               ONE(CV),         NOV,        CF_TF) \
+  O(Unwind,          NA,               NOV,             NOV,        TF) \
+  O(Throw,           NA,               ONE(CV),         NOV,        TF) \
   O(CGetL,           ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(CUGetL,          ONE(LA),          NOV,             ONE(CUV),   NF) \
   O(CGetL2,          ONE(LA),          NOV,             INS_1(CV),  NF) \
   O(CGetL3,          ONE(LA),          NOV,             INS_2(CV),  NF) \
   O(PushL,           ONE(LA),          NOV,             ONE(CV),    NF) \
@@ -663,7 +698,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(FCallD,          THREE(IVA,SA,SA), FMANY,           ONE(RV),    CF_FF) \
   O(FCallUnpack,     ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
-  O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    CF) \
+  O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    NF) \
   O(CufSafeArray,    NA,               THREE(RV,CV,CV), ONE(CV),    NF) \
   O(CufSafeReturn,   NA,               THREE(RV,CV,CV), ONE(RV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
@@ -711,17 +746,17 @@ constexpr int32_t kMaxConcatN = 4;
   O(Parent,          NA,               NOV,             ONE(AV),    NF) \
   O(LateBoundCls,    NA,               NOV,             ONE(AV),    NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
-  O(CreateCl,        TWO(IVA,SA),      CVMANY,          ONE(CV),    NF) \
+  O(CreateCl,        TWO(IVA,SA),      CVUMANY,         ONE(CV),    NF) \
   O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \
   O(ContEnter,       NA,               ONE(CV),         ONE(CV),    CF) \
   O(ContRaise,       NA,               ONE(CV),         ONE(CV),    CF) \
-  O(Yield,           NA,               ONE(CV),         ONE(CV),    NF) \
-  O(YieldK,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(Yield,           NA,               ONE(CV),         ONE(CV),    CF) \
+  O(YieldK,          NA,               TWO(CV,CV),      ONE(CV),    CF) \
   O(ContCheck,       ONE(IVA),         NOV,             NOV,        NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
   O(ContKey,         NA,               NOV,             ONE(CV),    NF) \
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
-  O(Await,           ONE(IVA),         ONE(CV),         ONE(CV),    NF) \
+  O(Await,           ONE(IVA),         ONE(CV),         ONE(CV),    CF) \
   O(Strlen,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
   O(Idx,             NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
@@ -836,9 +871,9 @@ struct ImmVector {
   int32_t size() const { return m_length; }
 
   /*
-   * Returns the number of elements on the execution stack that this
-   * vector will need to access.  (Includes stack elements for both
-   * the base and members.)
+   * Returns the number of elements on the execution stack that this vector
+   * will need to access.  Includes stack elements for both the base and
+   * members, but not the RHS of any set operations.
    */
   int numStackValues() const { return m_numStack; }
 
@@ -958,6 +993,7 @@ const char* subopToName(BareThisOp);
 const char* subopToName(SilenceOp);
 const char* subopToName(OODeclExistsOp);
 const char* subopToName(ObjMethodOp);
+const char* subopToName(SwitchKind);
 
 /*
  * Try to parse a string into a subop name of a given type.
@@ -995,7 +1031,22 @@ struct StackTransInfo {
   int pos;       // only for InsertMid
 };
 
+/*
+ * Some CF instructions can be treated as non-CF instructions for most analysis
+ * purposes, such as bytecode verification and HHBBC. These instructions change
+ * vmpc() to point somewhere in a different function, but the runtime
+ * guarantees that if excution ever returns to the original frame, it will be
+ * at the location immediately following the instruction in question. This
+ * creates the illusion that the instruction fell through normally to the
+ * instruction after it, within the context of its execution frame.
+ *
+ * The canonical example of this behavior is the FCall instruction, so we use
+ * "non-call control flow" to describe the set of CF instruction that do not
+ * exhibit this behavior. This function returns true if `opcode' is a non-call
+ * control flow instruction.
+ */
 bool instrIsNonCallControlFlow(Op opcode);
+
 bool instrHasConditionalBranch(Op opcode);
 bool instrAllowsFallThru(Op opcode);
 bool instrReadsCurrentFpi(Op opcode);
@@ -1006,27 +1057,27 @@ constexpr InstrFlags instrFlagsData[] = {
 #undef O
 };
 
-constexpr inline InstrFlags instrFlags(Op opcode) {
+constexpr InstrFlags instrFlags(Op opcode) {
   return instrFlagsData[uint8_t(opcode)];
 }
 
-constexpr inline bool instrIsControlFlow(Op opcode) {
+constexpr bool instrIsControlFlow(Op opcode) {
   return (instrFlags(opcode) & CF) != 0;
 }
 
-constexpr inline bool isUnconditionalJmp(Op opcode) {
+constexpr bool isUnconditionalJmp(Op opcode) {
   return opcode == Op::Jmp || opcode == Op::JmpNS;
 }
 
-constexpr inline bool isConditionalJmp(Op opcode) {
+constexpr bool isConditionalJmp(Op opcode) {
   return opcode == Op::JmpZ || opcode == Op::JmpNZ;
 }
 
-constexpr inline bool isJmp(Op opcode) {
+constexpr bool isJmp(Op opcode) {
   return opcode >= Op::Jmp && opcode <= Op::JmpNZ;
 }
 
-inline bool isFPush(Op opcode) {
+constexpr bool isFPush(Op opcode) {
   return opcode >= OpFPushFunc && opcode <= OpFPushCufSafe;
 }
 
@@ -1061,66 +1112,16 @@ inline bool isFPassStar(Op opcode) {
   }
 }
 
-inline bool isLiteral(Op op) {
-  switch (op) {
-    case OpNull:
-    case OpNullUninit:
-    case OpTrue:
-    case OpFalse:
-    case OpInt:
-    case OpDouble:
-    case OpString:
-    case OpArray:
-      return true;
-
-    default:
-      return false;
-  }
+constexpr bool isRet(Op op) {
+  return op == OpRetC || op == OpRetV;
 }
 
-inline bool isThisSelfOrParent(Op op) {
-  switch (op) {
-    case OpThis:
-    case OpSelf:
-    case OpParent:
-      return true;
-
-    default:
-      return false;
-  }
+constexpr bool isSwitch(Op op) {
+  return op == OpSwitch || op == OpSSwitch;
 }
 
-inline bool isRet(Op op) {
-  switch (op) {
-    case OpRetC:
-    case OpRetV:
-      return true;
-
-    default:
-      return false;
-  }
-}
-
-inline bool isSwitch(Op op) {
-  switch (op) {
-    case OpSwitch:
-    case OpSSwitch:
-      return true;
-
-    default:
-      return false;
-  }
-}
-
-inline bool isTypeAssert(Op op) {
-  switch (op) {
-    case OpAssertRATL:
-    case OpAssertRATStk:
-      return true;
-
-    default:
-      return false;
-  }
+constexpr bool isTypeAssert(Op op) {
+  return op == OpAssertRATL || op == OpAssertRATStk;
 }
 
 template<typename Out, typename In>
@@ -1159,27 +1160,27 @@ FlavorDesc instrInputFlavor(const Op* op, uint32_t idx);
 StackTransInfo instrStackTransInfo(const Op* opcode);
 int instrSpToArDelta(const Op* opcode);
 
-inline bool mcodeIsLiteral(MemberCode mcode) {
-  return mcode == MET || mcode == MEI || mcode == MPT;
+constexpr bool mcodeIsLiteral(MemberCode mcode) {
+  return mcode == MET || mcode == MEI || mcode == MPT || mcode == MQT;
 }
 
-inline bool mcodeIsProp(MemberCode mcode) {
-  return mcode == MPC || mcode == MPL || mcode == MPT;
+constexpr bool mcodeIsProp(MemberCode mcode) {
+  return mcode == MPC || mcode == MPL || mcode == MPT || mcode == MQT;
 }
 
-inline bool mcodeIsElem(MemberCode mcode) {
+constexpr bool mcodeIsElem(MemberCode mcode) {
   return mcode == MEC || mcode == MEL || mcode == MET || mcode == MEI;
 }
 
-inline bool mcodeMaybeArrayStringKey(MemberCode mcode) {
+constexpr bool mcodeMaybeArrayStringKey(MemberCode mcode) {
   return mcode == MEC || mcode == MEL || mcode == MET;
 }
 
-inline bool mcodeMaybeArrayIntKey(MemberCode mcode) {
+constexpr bool mcodeMaybeArrayIntKey(MemberCode mcode) {
   return mcode == MEC || mcode == MEL || mcode == MEI;
 }
 
-inline bool mcodeMaybeVectorKey(MemberCode mcode) {
+constexpr bool mcodeMaybeVectorKey(MemberCode mcode) {
   return mcode == MEC || mcode == MEL || mcode == MEI;
 }
 

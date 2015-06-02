@@ -32,6 +32,7 @@
 #include "hphp/runtime/server/server.h"
 
 #include <memory>
+#include <sys/param.h>
 #include <vector>
 
 #include <folly/Conv.h>

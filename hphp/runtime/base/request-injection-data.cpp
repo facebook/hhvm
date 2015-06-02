@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/base/request-injection-data.h"
 
 #include <atomic>
@@ -39,9 +40,7 @@ const StaticString s_dot(".");
 
 //////////////////////////////////////////////////////////////////////
 
-RequestTimer::RequestTimer(
-  RequestInjectionData* data,
-  clockid_t clockType)
+RequestTimer::RequestTimer(RequestInjectionData* data, clockid_t clockType)
     : m_reqInjectionData(data)
     , m_clockType(clockType)
     , m_timeoutSeconds(0)  // no timeout by default
@@ -312,6 +311,20 @@ void RequestInjectionData::threadInit() {
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "track_errors", "0",
                    &m_trackErrors);
+  IniSetting::Bind(
+    IniSetting::CORE,
+    IniSetting::PHP_INI_ALL,
+    "html_errors",
+    IniSetting::SetAndGet<bool>(
+      [&] (const bool& on) {
+        m_htmlErrors = on;
+        return true;
+      },
+      [&] () { return m_htmlErrors; }
+    ),
+    &m_htmlErrors
+  );
+
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "log_errors",
                    IniSetting::SetAndGet<bool>(
@@ -378,16 +391,16 @@ std::string RequestInjectionData::getDefaultIncludePath() {
 
 void RequestInjectionData::onSessionInit() {
   rds::requestInit();
-  cflagsPtr = &rds::header()->conditionFlags;
+  m_sflagsPtr = &rds::header()->surpriseFlags;
   reset();
 }
 
 void RequestInjectionData::onTimeout(RequestTimer* timer) {
   if (timer == &m_timer) {
-    setTimedOutFlag();
+    setFlag(TimedOutFlag);
     m_timer.m_timerActive.store(false, std::memory_order_relaxed);
   } else if (timer == &m_cpuTimer) {
-    setCPUTimedOutFlag();
+    setFlag(CPUTimedOutFlag);
     m_cpuTimer.m_timerActive.store(false, std::memory_order_relaxed);
   } else {
     always_assert(false && "Unknown timer fired");
@@ -417,33 +430,31 @@ int RequestInjectionData::getRemainingCPUTime() const {
  * If seconds  > 0, set the timeout to seconds.
  */
 void RequestInjectionData::resetTimer(int seconds /* = 0 */) {
-  auto data = &ThreadInfo::s_threadInfo->m_reqInjectionData;
   if (seconds == 0) {
-    seconds = data->getTimeout();
+    seconds = getTimeout();
   } else if (seconds < 0) {
-    if (!data->getTimeout()) return;
+    if (!getTimeout()) return;
     seconds = -seconds;
-    if (seconds < data->getRemainingTime()) return;
+    if (seconds < getRemainingTime()) return;
   }
-  data->setTimeout(seconds);
-  data->clearTimedOutFlag();
+  setTimeout(seconds);
+  clearFlag(TimedOutFlag);
 }
 
 void RequestInjectionData::resetCPUTimer(int seconds /* = 0 */) {
-  auto data = &ThreadInfo::s_threadInfo->m_reqInjectionData;
   if (seconds == 0) {
-    seconds = data->getCPUTimeout();
+    seconds = getCPUTimeout();
   } else if (seconds < 0) {
-    if (!data->getCPUTimeout()) return;
+    if (!getCPUTimeout()) return;
     seconds = -seconds;
-    if (seconds < data->getRemainingCPUTime()) return;
+    if (seconds < getRemainingCPUTime()) return;
   }
-  data->setCPUTimeout(seconds);
-  data->clearCPUTimedOutFlag();
+  setCPUTimeout(seconds);
+  clearFlag(CPUTimedOutFlag);
 }
 
 void RequestInjectionData::reset() {
-  getConditionFlags()->store(0);
+  m_sflagsPtr->store(0);
   m_coverage = RuntimeOption::RecordCodeCoverage;
   m_debuggerAttached = false;
   m_debuggerIntr = false;
@@ -470,96 +481,16 @@ void RequestInjectionData::updateJit() {
     !getDebuggerForceIntr();
 }
 
-void RequestInjectionData::setMemExceededFlag() {
-  getConditionFlags()->fetch_or(RequestInjectionData::MemExceededFlag);
+void RequestInjectionData::clearFlag(SurpriseFlag flag) {
+  m_sflagsPtr->fetch_and(~flag);
 }
 
-void RequestInjectionData::clearMemExceededFlag() {
-  getConditionFlags()->fetch_and(~RequestInjectionData::MemExceededFlag);
+bool RequestInjectionData::getFlag(SurpriseFlag flag) const {
+  return m_sflagsPtr->load() & flag;
 }
 
-void RequestInjectionData::setTimedOutFlag() {
-  getConditionFlags()->fetch_or(RequestInjectionData::TimedOutFlag);
-}
-
-void RequestInjectionData::clearTimedOutFlag() {
-  getConditionFlags()->fetch_and(~RequestInjectionData::TimedOutFlag);
-}
-
-void RequestInjectionData::setCPUTimedOutFlag() {
-  getConditionFlags()->fetch_or(RequestInjectionData::CPUTimedOutFlag);
-}
-
-void RequestInjectionData::clearCPUTimedOutFlag() {
-  getConditionFlags()->fetch_and(~RequestInjectionData::CPUTimedOutFlag);
-}
-
-void RequestInjectionData::setSignaledFlag() {
-  getConditionFlags()->fetch_or(RequestInjectionData::SignaledFlag);
-}
-
-void RequestInjectionData::setAsyncEventHookFlag() {
-  getConditionFlags()->fetch_or(RequestInjectionData::AsyncEventHookFlag);
-}
-
-void RequestInjectionData::clearAsyncEventHookFlag() {
-  getConditionFlags()->fetch_and(~RequestInjectionData::AsyncEventHookFlag);
-}
-
-void RequestInjectionData::setDebuggerHookFlag() {
-  getConditionFlags()->fetch_or(RequestInjectionData::DebuggerHookFlag);
-}
-
-void RequestInjectionData::clearDebuggerHookFlag() {
-  getConditionFlags()->fetch_and(~RequestInjectionData::DebuggerHookFlag);
-}
-
-void RequestInjectionData::setEventHookFlag() {
-  getConditionFlags()->fetch_or(RequestInjectionData::EventHookFlag);
-}
-
-void RequestInjectionData::clearEventHookFlag() {
-  getConditionFlags()->fetch_and(~RequestInjectionData::EventHookFlag);
-}
-
-void RequestInjectionData::setPendingExceptionFlag() {
-  getConditionFlags()->fetch_or(RequestInjectionData::PendingExceptionFlag);
-}
-
-void RequestInjectionData::clearPendingExceptionFlag() {
-  getConditionFlags()->fetch_and(~RequestInjectionData::PendingExceptionFlag);
-}
-
-void RequestInjectionData::setInterceptFlag() {
-  getConditionFlags()->fetch_or(RequestInjectionData::InterceptFlag);
-}
-
-void RequestInjectionData::clearInterceptFlag() {
-  getConditionFlags()->fetch_and(~RequestInjectionData::InterceptFlag);
-}
-
-void RequestInjectionData::setXenonSignalFlag() {
-  getConditionFlags()->fetch_or(RequestInjectionData::XenonSignalFlag);
-}
-
-void RequestInjectionData::clearXenonSignalFlag() {
-  getConditionFlags()->fetch_and(~RequestInjectionData::XenonSignalFlag);
-}
-
-void RequestInjectionData::setDebuggerSignalFlag() {
-  getConditionFlags()->fetch_or(RequestInjectionData::DebuggerSignalFlag);
-}
-
-void RequestInjectionData::setIntervalTimerFlag() {
-  getConditionFlags()->fetch_or(RequestInjectionData::IntervalTimerFlag);
-}
-
-void RequestInjectionData::clearIntervalTimerFlag() {
-  getConditionFlags()->fetch_and(~RequestInjectionData::IntervalTimerFlag);
-}
-
-ssize_t RequestInjectionData::fetchAndClearFlags() {
-  return getConditionFlags()->fetch_and(RequestInjectionData::StickyFlags);
+void RequestInjectionData::setFlag(SurpriseFlag flag) {
+  m_sflagsPtr->fetch_or(flag);
 }
 
 }

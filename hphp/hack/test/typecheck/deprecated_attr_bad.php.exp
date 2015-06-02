@@ -1,0 +1,2 @@
+File "deprecated_attr_bad.php", line 3, characters 16-18:
+This attribute parameter should be static string literal (Typing[4127])

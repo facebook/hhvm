@@ -11,7 +11,7 @@ async function gen1($a) {
 
 async function gen2($a) {
   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
-  $x = gen1($a)->join();
+  $x = HH\Asio\join(gen1($a));
   return $x;
 }
 
@@ -37,7 +37,7 @@ function idx($arr, $idx, $def = null) {
 }
 
 function main($a) {
-  $result = genFoo($a)->join();
+  $result = HH\Asio\join(genFoo($a));
 }
 
 main(42);
@@ -45,8 +45,19 @@ main(42);
 // get the Xenon data then verify that there are no unknown functions
 // and that all of the functions in this file are in the stack
 $stacks = xenon_get_data();
-$functionList = array( "main", "", WaitHandle::class."::join", "strcasecmp", "genFoo",
-  "genBar", "gen1", "gen2", "array_shift", "include");
+$functionList = array(
+  'main',
+  '',
+  'HH\Asio\join',
+  WaitHandle::class.'::join',
+  'strcasecmp',
+  'genFoo',
+  'genBar',
+  'gen1',
+  'gen2',
+  'array_shift',
+  'include',
+);
 $requiredFunctions = array("main" => 1);
 
 $asyncList = array("gen1", "gen2", "genBar", "genFoo", "",

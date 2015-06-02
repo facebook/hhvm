@@ -43,16 +43,10 @@ SSATmp* canonical(SSATmp* value) {
 
 //////////////////////////////////////////////////////////////////////
 
-Block* findDefiningBlock(const SSATmp* t) {
-  assert(!t->inst()->is(DefConst));
+Block* findDefiningBlock(const SSATmp* t, const IdomVector& idoms) {
+  assertx(!t->inst()->is(DefConst));
   auto const srcInst = t->inst();
 
-  /*
-   * Instructions that define temporaries that also have edges define the
-   * temporary only if they do not take the taken edge.  Since the temporary is
-   * defined on the fallthrough edge, this means we only have a block that we
-   * can return if this edge is not the only edge leading to its target.
-   */
   if (srcInst->hasEdges()) {
     auto const next = srcInst->next();
     UNUSED auto const taken = srcInst->taken();
@@ -61,7 +55,13 @@ Block* findDefiningBlock(const SSATmp* t) {
       "hasEdges instruction defining a dst had no edges:\n  {}\n",
       srcInst->toString()
     );
-    return next->numPreds() == 1 ? next : nullptr;
+    for (const auto& arc : next->preds()) {
+      auto pred = arc.from();
+      if (pred != srcInst->block() && !dominates(next, pred, idoms)) {
+        return nullptr;
+      }
+    }
+    return next;
   }
 
   return srcInst->block();
@@ -73,7 +73,7 @@ bool is_tmp_usable(const IdomVector& idoms,
                    const SSATmp* tmp,
                    const Block* where) {
   if (tmp->inst()->is(DefConst)) return true;
-  auto const definingBlock = findDefiningBlock(tmp);
+  auto const definingBlock = findDefiningBlock(tmp, idoms);
   if (!definingBlock) return false;
   return dominates(definingBlock, where, idoms);
 }
@@ -87,7 +87,7 @@ SSATmp* least_common_ancestor(SSATmp* s1, SSATmp* s2) {
   IdSet<SSATmp> seen;
 
   auto const step = [] (SSATmp* v) {
-    assert(v != nullptr);
+    assertx(v != nullptr);
     return v->inst()->isPassthrough() ?
       v->inst()->getPassthroughValue() :
       nullptr;

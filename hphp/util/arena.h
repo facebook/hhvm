@@ -21,7 +21,6 @@
 #include <cstring>
 
 #include "hphp/util/pointer-list.h"
-#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
 
@@ -147,6 +146,8 @@ inline void ArenaImpl<kChunkBytes>::endFrame() {
   m_frame = *m_frame.prev;
   m_current = m_ptrs[m_frame.index];
 }
+
+void SetArenaSlabAllocBypass(bool f);
 
 //////////////////////////////////////////////////////////////////////
 

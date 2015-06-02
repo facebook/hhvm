@@ -52,6 +52,7 @@ $expected_exceptions = array(
   'T_NULLSAFE_OBJECT_OPERATOR' => true,
   'T_UNRESOLVED_OP' => true,
   'T_HASHBANG' => true,
+  'T_SUPER' => true,
 );
 
 foreach ($token_range as $potential_token) {

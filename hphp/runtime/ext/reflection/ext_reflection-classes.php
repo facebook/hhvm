@@ -463,7 +463,7 @@ class ReflectionParameter implements Reflector {
     $class = $this->getDeclaringClass();
     $function_name = $this->info['function'];
     $index = $this->info['index'];
-    self::collectAttributes(&$attrs, $class, $function_name, $index);
+    self::collectAttributes($attrs, $class, $function_name, $index);
     return $attrs;
   }
 
@@ -495,7 +495,7 @@ class ReflectionParameter implements Reflector {
     $parent = $class->getParentClass();
     if ($parent) {
       self::collectAttributes(
-        &$attrs,
+        $attrs,
         $parent,
         $function_name,
         $index);

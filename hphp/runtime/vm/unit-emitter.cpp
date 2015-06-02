@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 
@@ -128,7 +129,7 @@ const StringData* UnitEmitter::lookupLitstr(Id id) const {
 
 const ArrayData* UnitEmitter::lookupArray(Id id) const {
   assert(id < m_arrays.size());
-  return m_arrays[id].array;
+  return m_arrays[id];
 }
 
 Id UnitEmitter::mergeLitstr(const StringData* litstr) {
@@ -152,20 +153,19 @@ Id UnitEmitter::mergeUnitLitstr(const StringData* litstr) {
 }
 
 Id UnitEmitter::mergeArray(const ArrayData* a) {
-  Variant v(const_cast<ArrayData*>(a));
-  auto key = HHVM_FN(serialize)(v).toCppString();
+  auto key = ArrayData::GetScalarArrayKey(const_cast<ArrayData*>(a));
   return mergeArray(a, key);
 }
 
-Id UnitEmitter::mergeArray(const ArrayData* a, const std::string& key) {
+Id UnitEmitter::mergeArray(const ArrayData* a,
+                           const ArrayData::ScalarArrayKey& key) {
   auto const it = m_array2id.find(key);
   if (it != m_array2id.end()) {
     return it->second;
   }
-  a = ArrayData::GetScalarArray(const_cast<ArrayData*>(a), key);
+  auto sa = ArrayData::GetScalarArray(const_cast<ArrayData*>(a), key);
   Id id = m_arrays.size();
-  ArrayVecElm ave = {key, a};
-  m_arrays.push_back(ave);
+  m_arrays.push_back(sa);
   m_array2id[key] = id;
   return id;
 }
@@ -427,8 +427,9 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       urp.insertUnitLitstr[repoId].insert(txn, usn, i, m_litstrs[i]);
     }
     for (unsigned i = 0; i < m_arrays.size(); ++i) {
-      urp.insertUnitArray[repoId].insert(txn, usn, i,
-                                         m_arrays[i].serialized);
+      VariableSerializer vs(VariableSerializer::Type::Serialize);
+      urp.insertUnitArray[repoId].insert(
+        txn, usn, i, vs.serialize(VarNR(m_arrays[i]), true).toCppString());
     }
     for (auto& fe : m_fes) {
       fe->commit(txn);
@@ -521,7 +522,7 @@ std::unique_ptr<Unit> UnitEmitter::create() {
   u->m_arrays = [&]() -> std::vector<const ArrayData*> {
     auto ret = std::vector<const ArrayData*>{};
     for (unsigned i = 0; i < m_arrays.size(); ++i) {
-      ret.push_back(m_arrays[i].array);
+      ret.push_back(m_arrays[i]);
     }
     return ret;
   }();
@@ -661,14 +662,20 @@ std::unique_ptr<Unit> UnitEmitter::create() {
     kVerifyVerboseSystem || getenv("HHVM_VERIFY_VERBOSE");
 
   const bool isSystemLib = u->filepath()->empty() ||
-    boost::ends_with(u->filepath()->data(), "systemlib.php");
+    boost::contains(u->filepath()->data(), "systemlib");
   const bool doVerify =
     kVerify || boost::ends_with(u->filepath()->data(), "hhas");
   if (doVerify) {
-    Verifier::checkUnit(
-      u.get(),
-      isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose
-    );
+    auto const verbose = isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose;
+    auto const ok = Verifier::checkUnit(u.get(), verbose);
+
+    if (!ok && !verbose) {
+      std::cerr << folly::format(
+        "Verification failed for unit {}. Re-run with HHVM_VERIFY_VERBOSE{}=1 "
+        "to see more details.\n",
+        u->filepath()->data(), isSystemLib ? "_SYSTEM" : ""
+      );
+    }
   }
 
   return u;
@@ -680,7 +687,6 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
     (m_mergeOnly)
     (m_isHHFile)
     (m_typeAliases)
-    (m_preloadPriority)
     ;
 }
 
@@ -703,8 +709,8 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
     std::stringstream ssCreate;
     ssCreate << "CREATE TABLE " << m_repo.table(repoId, "Unit")
-             << "(unitSn INTEGER PRIMARY KEY, md5 BLOB, bc BLOB, data BLOB, "
-                "UNIQUE (md5));";
+             << "(unitSn INTEGER PRIMARY KEY, md5 BLOB, preload INTEGER, "
+                "bc BLOB, data BLOB, UNIQUE (md5));";
     txn.exec(ssCreate.str());
   }
   {
@@ -804,12 +810,17 @@ void UnitRepoProxy::InsertUnitStmt
 
   if (!prepared()) {
     std::stringstream ssInsert;
+    /*
+     * Do not put preload into data; its needed to choose the
+     * units in preloadRepo.
+     */
     ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "Unit")
-             << " VALUES(NULL, @md5, @bc, @data);";
+             << " VALUES(NULL, @md5, @preload, @bc, @data);";
     txn.prepare(*this, ssInsert.str());
   }
   RepoTxnQuery query(txn, *this);
   query.bindMd5("@md5", md5);
+  query.bindInt("@preload", ue.m_preloadPriority);
   query.bindBlob("@bc", (const void*)bc, bclen);
   const_cast<UnitEmitter&>(ue).serdeMetaData(dataBlob);
   query.bindBlob("@data", dataBlob, /* static */ true);
@@ -823,7 +834,7 @@ bool UnitRepoProxy::GetUnitStmt
     RepoTxn txn(m_repo);
     if (!prepared()) {
       std::stringstream ssSelect;
-      ssSelect << "SELECT unitSn,bc,data FROM "
+      ssSelect << "SELECT unitSn,preload,bc,data FROM "
                << m_repo.table(m_repoId, "Unit")
                << " WHERE md5 == @md5;";
       txn.prepare(*this, ssSelect.str());
@@ -835,11 +846,13 @@ bool UnitRepoProxy::GetUnitStmt
       return true;
     }
     int64_t unitSn;                     /**/ query.getInt64(0, unitSn);
-    const void* bc; size_t bclen;       /**/ query.getBlob(1, bc, bclen);
-    BlobDecoder dataBlob =              /**/ query.getBlob(2);
+    int preloadPriority;                /**/ query.getInt(1, preloadPriority);
+    const void* bc; size_t bclen;       /**/ query.getBlob(2, bc, bclen);
+    BlobDecoder dataBlob =              /**/ query.getBlob(3);
 
     ue.m_repoId = m_repoId;
     ue.m_sn = unitSn;
+    ue.m_preloadPriority = preloadPriority;
     ue.setBc(static_cast<const unsigned char*>(bc), bclen);
     ue.serdeMetaData(dataBlob);
 
@@ -924,7 +937,9 @@ void UnitRepoProxy::GetUnitArraysStmt
       Id arrayId;        /**/ query.getId(0, arrayId);
       std::string key;   /**/ query.getStdString(1, key);
       Variant v = unserialize_from_buffer(key.data(), key.size());
-      Id id UNUSED = ue.mergeArray(v.asArrRef().get(), key);
+      Id id UNUSED = ue.mergeArray(
+        v.asArrRef().get(),
+        ArrayData::GetScalarArrayKey(key.c_str(), key.size()));
       assert(id == arrayId);
     }
   } while (!query.done());

@@ -1852,7 +1852,7 @@ void parse_constant(AsmState& as) {
   TypedValue tvInit = parse_member_tv_initializer(as);
   as.pce->addConstant(makeStaticString(name),
                       staticEmptyString(), &tvInit,
-                      staticEmptyString());
+                      staticEmptyString(), false);
 }
 
 /*

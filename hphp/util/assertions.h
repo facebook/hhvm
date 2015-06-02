@@ -57,12 +57,8 @@
   }                                              \
 } while(0)
 
-template<typename T>
-T bad_value() {
-  not_reached();
-}
-
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -75,6 +71,12 @@ void assert_fail(const char* e,
                  unsigned int line,
                  const char* func,
                  const std::string& msg) __attribute__((__noreturn__));
+
+void assert_fail_no_log(const char* e,
+                        const char* file,
+                        unsigned int line,
+                        const char* func,
+                        const std::string& msg) __attribute__((__noreturn__));
 
 void assert_log_failure(const char* title, const std::string& msg);
 
@@ -91,40 +93,58 @@ void register_assert_fail_logger(AssertFailLogger);
  * Stack-allocated detailed assertion logger.
  */
 struct AssertDetailImpl {
-  explicit AssertDetailImpl(const char* name) : m_name(name) {
-    m_next = s_head;
-    s_head = this;
-  }
-  AssertDetailImpl(const AssertDetailImpl&) = delete;
-
-  virtual std::string run() = 0;
-
-  friend void assert_log_failure(const char* title, const std::string& msg);
-  friend void assert_log_detail(AssertDetailImpl*);
+  /*
+   * Prints the results of all registered detailers to stderr.  Returns true if
+   * we had any registered detailers.
+   */
+  static bool log();
 
 protected:
-  ~AssertDetailImpl() { s_head = m_next; }
+  explicit AssertDetailImpl(const char* name)
+    : m_name(name)
+    , m_next(s_head)
+  {
+#ifndef NDEBUG
+    if (m_name == nullptr) std::abort();
+#endif
+    s_head = this;
+  }
+  ~AssertDetailImpl() { if (m_name) s_head = m_next; }
 
   AssertDetailImpl(AssertDetailImpl&& other) noexcept {
-    assert(this == s_head);
+#ifndef NDEBUG
+    if (s_head != &other) std::abort();
+#endif
+    m_name = other.m_name;
     m_next = other.m_next;
+    s_head = this;
+    other.m_name = nullptr; // prevents ~other from messing it up
   }
 
+  AssertDetailImpl(const AssertDetailImpl&) = delete;
+  AssertDetailImpl& operator=(const AssertDetailImpl&) = delete;
+
 private:
+  static bool log_impl(const AssertDetailImpl*);
+  virtual std::string run() const = 0;
+
+private:
+  static __thread AssertDetailImpl* s_head;
+
   const char* m_name;
   AssertDetailImpl* m_next{nullptr};
-
-  static __thread AssertDetailImpl* s_head;
 };
 
 template<class F>
 struct AssertDetailT final : AssertDetailImpl {
-  AssertDetailT(const char* name_, F&& f)
-    : AssertDetailImpl(name_)
+  AssertDetailT(const char* name, F&& f)
+    : AssertDetailImpl(name)
     , m_f(std::move(f))
   {}
   AssertDetailT(AssertDetailT&&) = default;
-  std::string run() override { return m_f(); }
+
+private:
+  std::string run() const override { return m_f(); }
 
 private:
   F m_f;
@@ -192,7 +212,6 @@ struct FailedAssertion : std::exception {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 
 #define assert_impl(cond, fail) \
   ((cond) ? static_cast<void>(0) : ((fail), static_cast<void>(0)))
@@ -200,10 +219,15 @@ struct FailedAssertion : std::exception {
 #define assert_fail_impl(e, msg) \
   ::HPHP::assert_fail(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__, msg)
 
+#define assert_fail_impl_no_log(e, msg) \
+  ::HPHP::assert_fail_no_log(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__, msg)
+
 #define assert_throw_fail_impl(e) \
   throw ::HPHP::FailedAssertion(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__)
 
 #define always_assert(e)            assert_impl(e, assert_fail_impl(e, ""))
+#define always_assert_no_log(e)    assert_impl(e, \
+                                        assert_fail_impl_no_log(e, ""))
 #define always_assert_log(e, l)     assert_impl(e, assert_fail_impl(e, l()))
 #define always_assert_flog(e, ...)  assert_impl(e, assert_fail_impl(e,        \
                                         ::folly::format(__VA_ARGS__).str()))
@@ -216,12 +240,16 @@ struct FailedAssertion : std::exception {
 
 #ifndef NDEBUG
 #define assert(e) always_assert(e)
+#define assertx(e) always_assert(e)
+#define assert_no_log(e) always_assert_no_log(e)
 #define assert_log(e, l) always_assert_log(e, l)
 #define assert_flog(e, ...) always_assert_flog(e, __VA_ARGS__)
 #define assert_throw(e) always_assert_throw(e)
 #define assert_throw_log(e, l) always_assert_throw_log(e, l)
 #else
 #define assert(e) static_cast<void>(0)
+#define assertx(e) static_cast<void>(0)
+#define assert_no_log(e) static_cast<void>(0)
 #define assert_log(e, l) static_cast<void>(0)
 #define assert_flog(e, ...) static_cast<void>(0)
 #define assert_throw(e) static_cast<void>(0)
@@ -237,5 +265,7 @@ const bool do_assert =
   ;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+}
 
 #endif

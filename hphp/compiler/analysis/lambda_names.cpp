@@ -24,6 +24,7 @@
 #include "hphp/compiler/statement/method_statement.h"
 #include "hphp/compiler/statement/function_statement.h"
 #include "hphp/compiler/expression/closure_expression.h"
+#include "hphp/compiler/expression/function_call.h"
 
 namespace HPHP {
 
@@ -49,19 +50,20 @@ struct Walker {
   }
 
 private:
-  void visit_closure(ClosureExpressionPtr ce) {
+  bool visit_closure(ClosureExpressionPtr ce) {
     auto const cfunc = ce->getClosureFunction();
 
+    auto useImplicitThis = false;
     with_scope(
       cfunc->getScope()->getVariables(),
       [&] {
-        walk_ast(cfunc->getStmts());
+        useImplicitThis = walk_ast(cfunc->getStmts());
       }
     );
 
-    if (ce->type() != ClosureType::Short) return;
+    if (ce->type() != ClosureType::Short) return useImplicitThis;
     if (ce->captureState() == ClosureExpression::CaptureState::Known) {
-      return;
+      return useImplicitThis;
     }
 
     auto const paramNames = ce->collectParamNames();
@@ -84,30 +86,40 @@ private:
       }
     }
 
-    if (cfunc->getFunctionScope()->containsThis()) {
+    if (cfunc->getFunctionScope()->containsThis() || useImplicitThis) {
       toCapture.insert("this");
     }
 
     ce->setCaptureList(m_ar, toCapture);
+
+    return useImplicitThis;
   }
 
-  void walk_ast(ConstructPtr node) {
-    if (!node) return;
+  // Returns: whether or not $this is implicitly used in this part of the AST,
+  // e.g. via a call using parent::.
+  bool walk_ast(ConstructPtr node) {
+    if (!node) return false;
 
     if (dynamic_pointer_cast<MethodStatement>(node)) {
       // Don't descend into nested non-closure functions, or functions
       // in the pseudo-main.
-      return;
+      return false;
     }
 
     if (auto ce = dynamic_pointer_cast<ClosureExpression>(node)) {
-      visit_closure(ce);
-      return;
+      return visit_closure(ce);
+    }
+
+    auto ret = false;
+    if (auto fc = dynamic_pointer_cast<FunctionCall>(node)) {
+      if (fc->isParent()) ret = true;
     }
 
     for (int i = 0; i < node->getKidCount(); ++i) {
-      walk_ast(node->getNthKid(i));
+      if (walk_ast(node->getNthKid(i))) ret = true;
     }
+
+    return ret;
   }
 
   void walk_function(const FunctionScopePtr& fscope) {

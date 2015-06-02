@@ -914,14 +914,16 @@ void emit_class(EmitUnitState& state,
     if (!cconst.val.hasValue()) {
       pce->addAbstractConstant(
         cconst.name,
-        cconst.typeConstraint
+        cconst.typeConstraint,
+        cconst.isTypeconst
       );
     } else {
       pce->addConstant(
         cconst.name,
         cconst.typeConstraint,
         &cconst.val.value(),
-        cconst.phpCode
+        cconst.phpCode,
+        cconst.isTypeconst
       );
     }
   }

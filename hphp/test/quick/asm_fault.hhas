@@ -77,7 +77,7 @@ repeat:
                       (Two on_two)
                       (Three on_three) {
              CGetL $counter
-             Switch <make_one make_two make_three> 0 0
+             Switch <make_one make_two make_three> 0 Unbounded
 
 make_one:    FPushCtorD 0 "One"
              FCall 0

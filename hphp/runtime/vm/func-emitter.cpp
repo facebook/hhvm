@@ -18,7 +18,7 @@
 
 #include "hphp/parser/parser.h"
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/strings.h"
@@ -187,7 +187,11 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     }
     attrs = Attr(attrs & ~AttrPersistent);
   }
-  if (RuntimeOption::EvalJitEnableRenameFunction &&
+  if (!RuntimeOption::RepoAuthoritative) {
+    // In non-RepoAuthoritative mode, any function could get a VarEnv because
+    // of evalPHPDebugger.
+    attrs |= AttrMayUseVV;
+  } else if (RuntimeOption::EvalJitEnableRenameFunction &&
       !name->empty() &&
       !Func::isSpecial(name) &&
       !isClosureBody) {
@@ -495,7 +499,8 @@ static const StaticString
   s_nofcallbuiltin("NoFCallBuiltin"),
   s_variadicbyref("VariadicByRef"),
   s_noinjection("NoInjection"),
-  s_zendcompat("ZendCompat");
+  s_zendcompat("ZendCompat"),
+  s_numargs("NumArgs");
 
 int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
   int ret = Native::AttrNone;
@@ -522,6 +527,8 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
         // ZendCompat implies ActRec, no FCallBuiltin
         attrs_ |= AttrMayUseVV | AttrNoFCallBuiltin;
         ret |= Native::AttrActRec;
+      } else if (userAttrStrVal.get()->isame(s_numargs.get())) {
+        attrs_ |= AttrNumArgs;
       }
     }
   }

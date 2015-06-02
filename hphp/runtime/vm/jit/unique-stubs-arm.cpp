@@ -59,10 +59,7 @@ void emitResumeHelpers(UniqueStubs& us) {
   MacroAssembler a { mcg->code.main() };
 
   us.resumeHelperRet = a.frontier();
-  a.   Str   (vixl::x30, rStashedAR[AROFF(m_savedRip)]);
-  us.resumeHelper = a.frontier();
-  a.   Ldr   (rVmFp, rVmTl[rds::kVmfpOff]);
-  a.   Ldr   (rVmSp, rVmTl[rds::kVmspOff]);
+  a.   Brk   (0);
 
   not_implemented();
 
@@ -74,15 +71,9 @@ void emitStackOverflowHelper(UniqueStubs& us) {
   MacroAssembler a { mcg->code.cold() };
 
   us.stackOverflowHelper = a.frontier();
-  a.  Ldr  (rAsm, rVmFp[AROFF(m_func)]);
-  a.  Ldr  (rAsm2.W(), rStashedAR[AROFF(m_soff)]);
-  a.  Ldr  (rAsm, rAsm[Func::sharedOff()]);
-  a.  Ldr  (rAsm.W(), rAsm[Func::sharedBaseOff()]);
-  // The VM-reg-save helper will read the current BC offset out of argReg(0).
-  a.  Add  (argReg(0).W(), rAsm.W(), rAsm2.W());
+  a.   Brk   (0);
 
-  emitEagerVMRegSave(a, rVmTl, RegSaveFlags::SaveFP | RegSaveFlags::SavePC);
-  emitServiceReq(mcg->code.cold(), REQ_STACK_OVERFLOW);
+  not_implemented();
 
   us.add("stackOverflowHelper", us.stackOverflowHelper);
 }
@@ -98,46 +89,9 @@ void emitFreeLocalsHelpers(UniqueStubs& us) {
 
 void emitFuncPrologueRedispatch(UniqueStubs& us) {
   MacroAssembler a { mcg->code.main() };
-  vixl::Label actualDispatch;
-  vixl::Label numParamsCheck;
 
-  us.funcPrologueRedispatch = a.frontier();
-
-  // Using x0, x1 and x2 as scratch registers here. This is happening between
-  // compilation units -- trying to get into a func prologue, to be precise --
-  // so there are no live registers.
-
-  a.  Ldr  (x0, rStashedAR[AROFF(m_func)]);
-  a.  Ldr  (w1, rStashedAR[AROFF(m_numArgsAndFlags)]);
-  a.  And  (w1, w1, 0x1fffffff);
-  a.  Ldr  (w2, x0[Func::paramCountsOff()]);
-  // See Func::finishedEmittingParams and Func::numParams for rationale
-  a.  Lsr  (w2, w2, 0x1);
-
-  // If we passed more args than declared, jump to the numParamsCheck.
-  a.  Cmp  (w2, w1);
-  a.  B    (&numParamsCheck, lt);
-
-  a.  bind (&actualDispatch);
-  // Need to load x0[w1 * 8 + Func::prologueTableOff()]. On x64 there's an
-  // addressing mode for this. Here, there's only base+imm and base+reg. So we
-  // add the immediate to the base first, then use base+reg with scaling.
-  a.  Add  (x0, x0, Func::prologueTableOff());
-  // What this is saying: base is x0, index is w1 (with Unsigned eXTension to 64
-  // bits), scaled by 2^3.
-  a.  Ldr  (x0, MemOperand(x0, w1, UXTW, 3));
-  a.  Br   (x0);
   a.  Brk  (0);
-
-  a.  bind (&numParamsCheck);
-  a.  Cmp  (w1, kNumFixedPrologues);
-  a.  B    (&actualDispatch, lt);
-
-  // Too many parameters.
-  a.  Add  (x0, x0, Func::prologueTableOff() + sizeof(TCA));
-  a.  Ldr  (x0, MemOperand(x0, w2, UXTW, 3));
-  a.  Br   (x0);
-  a.  Brk  (0);
+  not_implemented();
 
   us.add("funcPrologueRedispatch", us.funcPrologueRedispatch);
 }
@@ -152,42 +106,14 @@ void emitFCallArrayHelper(UniqueStubs& us) {
 }
 
 void emitFCallHelperThunk(UniqueStubs& us) {
-  TCA (*helper)(ActRec*, void*) = &fcallHelper;
   MacroAssembler a { mcg->code.main() };
-
   us.fcallHelperThunk = a.frontier();
-  vixl::Label popAndXchg, jmpRet;
-
-  a.   Mov   (argReg(0), rStashedAR);
-  a.   Mov   (argReg(1), rVmSp);
-  a.   Cmp   (rVmFp, rStashedAR);
-  a.   B     (&popAndXchg, vixl::ne);
-  emitCall(a, CppCall::direct(helper));
-  a.   Br    (rReturnReg);
-
-  a.   bind  (&popAndXchg);
-  emitXorSwap(a, rStashedAR, rVmFp);
-  // Put return address into ActRec.
-  a.   Str   (rLinkReg, rVmFp[AROFF(m_savedRip)]);
-  emitCall(a, CppCall::direct(helper));
-  // Put return address back in the link register.
-  a.   Ldr   (rLinkReg, rVmFp[AROFF(m_savedRip)]);
-  emitXorSwap(a, rStashedAR, rVmFp);
-  a.   Cmp   (rReturnReg, 0);
-  a.   B     (&jmpRet, vixl::gt);
-  a.   Neg   (rReturnReg, rReturnReg);
-  a.   Ldr   (rVmFp, rVmTl[rds::kVmfpOff]);
-  a.   Ldr   (rVmSp, rVmTl[rds::kVmspOff]);
-
-  a.   bind  (&jmpRet);
-
-  a.   Br    (rReturnReg);
-
+  a.   Brk   (0);
   us.add("fcallHelperThunk", us.fcallHelperThunk);
 }
 
 void emitFuncBodyHelperThunk(UniqueStubs& us) {
-  TCA (*helper)(ActRec*, void*) = &funcBodyHelper;
+  TCA (*helper)(ActRec*) = &funcBodyHelper;
   MacroAssembler a { mcg->code.main() };
 
   us.funcBodyHelperThunk = a.frontier();
@@ -251,13 +177,7 @@ void emitBindCallStubs(UniqueStubs& uniqueStubs) {
     } else {
       uniqueStubs.immutableBindCallStub = cb.frontier();
     }
-    Vauto vasm(cb);
-    auto& vf = vasm.main();
-    // Pop the return address into the actrec in rStashedAR.
-    vf << store{PhysReg{rLinkReg}, PhysReg{rStashedAR}[AROFF(m_savedRip)]};
-    ServiceReqArgVec argv;
-    packServiceReqArgs(argv, (int64_t)i);
-    emitServiceReq(vf, nullptr, jit::REQ_BIND_CALL, argv);
+    not_implemented();
   }
   uniqueStubs.add("bindCallStub", uniqueStubs.bindCallStub);
   uniqueStubs.add("immutableBindCallStub", uniqueStubs.immutableBindCallStub);

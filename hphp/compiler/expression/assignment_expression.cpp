@@ -56,9 +56,6 @@ AssignmentExpression::AssignmentExpression
   if (ref) {
     m_variable->setContext(Expression::RefAssignmentLHS);
     m_value->setContext(Expression::RefValue);
-
-    // we have &new special case that's handled in this class
-    m_value->setContext(Expression::NoRefWrapper);
   }
 }
 

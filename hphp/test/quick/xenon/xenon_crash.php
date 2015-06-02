@@ -14,19 +14,19 @@ class A {
   }
 
   async function gen1($a) {
-    await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+    await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
     return $a + 1;
   }
 
   async function gen2($a) {
-    await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
-    $x = $this->gen1($a)->join();
+    await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
+    $x = HH\Asio\join($this->gen1($a));
     return $x;
   }
 
   async function genBar($a) {
     $x = new X;
-    await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+    await RescheduleWaitHandle::Create(0, $a); // simulate blocking I/O
     return $a + 2;
   }
 
@@ -44,7 +44,7 @@ class A {
 }
 
 function main($a) {
-  return A::genFoo($a)->join();
+  return HH\Asio\join(A::genFoo($a));
 }
 
 var_dump(main(42));

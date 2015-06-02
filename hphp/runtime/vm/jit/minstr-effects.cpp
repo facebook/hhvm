@@ -24,6 +24,8 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
+template<typename T> T bad_value() { not_reached(); }
+
 Opcode canonicalOp(Opcode op) {
   if (op == ElemUX || op == UnsetElem) {
     return UnsetElem;
@@ -38,47 +40,47 @@ Opcode canonicalOp(Opcode op) {
 
 void getBaseType(Opcode rawOp, bool predict,
                  Type& baseType, bool& baseValChanged) {
-  always_assert(baseType <= Type::Cell);
+  always_assert(baseType <= TCell);
   auto const op = canonicalOp(rawOp);
 
   // Deal with possible promotion to stdClass or array
   if ((op == SetElem || op == SetProp || op == SetWithRefElem) &&
-      baseType.maybe(Type::Null | Type::Bool | Type::Str)) {
-    auto newBase = op == SetProp ? Type::Obj : Type::Arr;
+      baseType.maybe(TNull | TBool | TStr)) {
+    auto newBase = op == SetProp ? TObj : TArr;
 
     if (predict) {
       /* If the output type will be used as a prediction and not as fact, we
        * can be optimistic here. Assume no promotion for string bases and
        * promotion in other cases. */
-      baseType = baseType <= Type::Str ? Type::Str : newBase;
-    } else if (baseType <= Type::Str && rawOp == SetElem) {
+      baseType = baseType <= TStr ? TStr : newBase;
+    } else if (baseType <= TStr && rawOp == SetElem) {
       /* If the base is known to be a string and the operation is exactly
        * SetElem, we're guaranteed that either the base will end as a
        * CountedStr or the instruction will throw an exception and side
        * exit. */
-      baseType = Type::CountedStr;
-    } else if (baseType <= Type::Str && rawOp == SetNewElem) {
+      baseType = TCountedStr;
+    } else if (baseType <= TStr && rawOp == SetNewElem) {
       /* If the string base is empty, it will be promoted to an
        * array. Otherwise the base will be left alone and we'll fatal. */
-      baseType = Type::Arr;
+      baseType = TArr;
     } else {
       /* Regardless of whether or not promotion happens, we know the base
        * cannot be Null after the operation. If the base was a subtype of Null
        * this will give newBase. */
-      baseType = (baseType - Type::Null) | newBase;
+      baseType = (baseType - TNull) | newBase;
     }
 
     baseValChanged = true;
   }
 
   if ((op == SetElem || op == UnsetElem || op == SetWithRefElem) &&
-      baseType.maybe(Type::Arr | Type::Str)) {
+      baseType.maybe(TArr | TStr)) {
     /* Modifying an array or string element, even when COW doesn't kick in,
      * produces a new SSATmp for the base. StaticArr/StaticStr may be promoted
      * to CountedArr/CountedStr. */
     baseValChanged = true;
-    if (baseType.maybe(Type::StaticArr)) baseType |= Type::CountedArr;
-    if (baseType.maybe(Type::StaticStr)) baseType |= Type::CountedStr;
+    if (baseType.maybe(TStaticArr)) baseType |= TCountedArr;
+    if (baseType.maybe(TStaticStr)) baseType |= TCountedStr;
   }
 }
 
@@ -120,8 +122,8 @@ void MInstrEffects::get(const IRInstruction* inst,
   MInstrEffects effects(inst->op(), baseType.ptr(Ptr::Frame));
   if (effects.baseTypeChanged || effects.baseValChanged) {
     auto const ty = effects.baseType.derefIfPtr();
-    if (ty <= Type::BoxedCell) {
-      hook.setLocalType(locId, Type::BoxedInitCell);
+    if (ty <= TBoxedCell) {
+      hook.setLocalType(locId, TBoxedInitCell);
       hook.setBoxedLocalPrediction(locId, ty);
     } else {
       hook.setLocalType(locId, ty);
@@ -133,14 +135,14 @@ void MInstrEffects::get(const IRInstruction* inst,
 MInstrEffects::MInstrEffects(const Opcode rawOp, const Type origBase) {
   // Note: MInstrEffects wants to manipulate pointer types in some situations
   // for historical reasons.  We'll eventually change that.
-  bool const is_ptr = origBase <= Type::PtrToGen;
+  bool const is_ptr = origBase <= TPtrToGen;
   auto const basePtr = is_ptr ? origBase.ptrKind() : Ptr::Unk;
   baseType = origBase.derefIfPtr();
 
   // Only certain types of bases are supported now but this list may expand in
   // the future.
   assert_not_implemented(
-      is_ptr || baseType.subtypeOfAny(Type::Obj, Type::Arr));
+      is_ptr || baseType.subtypeOfAny(TObj, TArr));
 
   baseTypeChanged = baseValChanged = false;
 
@@ -148,8 +150,8 @@ MInstrEffects::MInstrEffects(const Opcode rawOp, const Type origBase) {
   // since the minstr operations all operate on the inner cell of boxed bases.
   // We treat the new inner type as a prediction because it will be verified
   // the next time we load from the box.
-  auto inner = (baseType & Type::BoxedCell).inner();
-  auto outer = baseType & Type::Cell;
+  auto inner = (baseType & TBoxedCell).inner();
+  auto outer = baseType & TCell;
   getBaseType(rawOp, false, outer, baseValChanged);
   getBaseType(rawOp, true, inner, baseValChanged);
 
@@ -160,7 +162,7 @@ MInstrEffects::MInstrEffects(const Opcode rawOp, const Type origBase) {
 
   /* Boxed bases may have their inner value changed but the value of the box
    * will never change. */
-  baseValChanged = !(origBase <= Type::BoxedCell) &&
+  baseValChanged = !(origBase <= TBoxedCell) &&
                    (baseValChanged || baseTypeChanged);
 }
 

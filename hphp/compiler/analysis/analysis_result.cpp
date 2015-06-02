@@ -300,37 +300,6 @@ ClassScopePtr AnalysisResult::findExactClass(ConstructPtr cs,
   return ClassScopePtr();
 }
 
-bool AnalysisResult::checkClassPresent(ConstructPtr cs,
-                                       const std::string &name) const {
-  if (name == "self" || name == "parent") return true;
-  std::string lowerName = toLower(name);
-  if (ClassScopePtr currentCls = cs->getClassScope()) {
-    if (lowerName == currentCls->getName() ||
-        currentCls->derivesFrom(shared_from_this(), lowerName,
-                                true, false)) {
-      return true;
-    }
-  }
-  if (FileScopePtr currentFile = cs->getFileScope()) {
-    StatementList &stmts = *currentFile->getStmt();
-    for (int i = stmts.getCount(); i--; ) {
-      StatementPtr s = stmts[i];
-      if (s && s->is(Statement::KindOfClassStatement)) {
-        ClassScopePtr scope =
-          static_pointer_cast<ClassStatement>(s)->getClassScope();
-        if (lowerName == scope->getName()) {
-          return true;
-        }
-        if (scope->derivesFrom(shared_from_this(), lowerName,
-                               true, false)) {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
-}
-
 int AnalysisResult::getFunctionCount() const {
   int total = 0;
   for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
@@ -734,31 +703,6 @@ static void dumpVisitor(AnalysisResultPtr ar, StatementPtr s, void *data) {
 void AnalysisResult::dump() {
   visitFiles(dumpVisitor, 0);
   fflush(0);
-}
-
-void AnalysisResult::docJson(const string &filename) {
-  ofstream f(filename.c_str());
-  if (f.fail()) {
-    Logger::Error("Could not open file for writing doc JSON: %s",
-                  filename.c_str());
-    return;
-  }
-  JSON::DocTarget::OutputStream out(f, shared_from_this());
-  JSON::DocTarget::MapStream ms(out);
-
-  ms.add("userland", m_fileScopes);
-
-  ClassScopePtrVec systemClasses;
-  systemClasses.reserve(m_systemClasses.size());
-  for (StringToClassScopePtrMap::iterator it = m_systemClasses.begin();
-       it != m_systemClasses.end(); ++it) {
-    systemClasses.push_back(it->second);
-  }
-  // just generate system classes for now
-  ms.add("system", systemClasses);
-
-  ms.done();
-  f.close();
 }
 
 void AnalysisResult::visitFiles(void (*cb)(AnalysisResultPtr,
@@ -1255,7 +1199,7 @@ int DepthFirstVisitor<Pre, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
     do {
       scope->clearUpdated();
       if (Option::LocalCopyProp || Option::EliminateDeadCode) {
-        AliasManager am(-1);
+        AliasManager am;
         if (am.optimize(this->m_data.m_ar, m)) {
           scope->addUpdates(BlockScope::UseKindCaller);
         }
@@ -1266,8 +1210,7 @@ int DepthFirstVisitor<Pre, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
       updates = scope->getUpdated();
       all_updates |= updates;
     } while (updates);
-    if (all_updates & BlockScope::UseKindCaller &&
-        !m->getFunctionScope()->getInlineAsExpr()) {
+    if (all_updates & BlockScope::UseKindCaller) {
       all_updates &= ~BlockScope::UseKindCaller;
     }
     return all_updates;

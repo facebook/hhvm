@@ -107,9 +107,6 @@ struct StaticMethodFCache {
 
 namespace MethodCache {
 
-constexpr int kMovLen = 10;
-constexpr int kMovImmOff = 2;
-
 /*
  * Method cache entries cache the dispatch target for a function call.
  * The key is a Class*, but the low bits are reused for other

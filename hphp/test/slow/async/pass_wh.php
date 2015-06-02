@@ -13,7 +13,7 @@ async function await1() {
 }
 
 function retWh() { return await1(); }
-function retValue() { return retWh()->join(); }
+function retValue() { return HH\Asio\join(retWh()); }
 
 var_dump(retValue());
 

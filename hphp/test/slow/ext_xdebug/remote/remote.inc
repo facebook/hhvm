@@ -82,8 +82,10 @@ function read_msg($socket) {
     $buffer = null;
     $result = socket_recv($socket, $buffer, 1024, 0);
     if (!$result) {
-      trigger_error("Client socket error: " . socket_last_error(),
-                     E_USER_ERROR);
+      trigger_error(
+        "Client socket error: " . socket_strerror(socket_last_error($socket)),
+        E_USER_ERROR
+      );
     }
     $bytes += $result;
     $message .= $buffer;
@@ -116,7 +118,7 @@ function test($filename) {
     if (count($response) === 0 || $response[0] === "#") {
       continue;
     }
-  
+
     // We should always receive a single response, we may also receive
     // streams, which we do not want to respond to
     do {

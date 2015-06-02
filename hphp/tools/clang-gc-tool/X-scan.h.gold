@@ -1,0 +1,110 @@
+// This file is auto generated.  Do not hand edit.
+// See xxxREADMExxx for details.
+#include "hphp/tools/clang-gc-tool/friend.h"
+#include "X.h"
+
+namespace HPHP {
+
+template <typename F> void scan(const HPHP::ResourceData& this_, F& mark) {
+}
+
+namespace {
+struct foobar_scanme_friend {
+  typedef int foobar::*type;
+  friend type get(foobar_scanme_friend);
+};
+template struct friender<foobar_scanme_friend, &foobar::scanme>;
+}
+
+template <typename F> void scan(const foobar& this_, F& mark) {
+  HPHP::ResourceData::scan(this_, mark);
+  mark(FGET(foobar, this_, scanme));
+}
+
+template <typename F> void scan(const bad_class& this_, F& mark) {
+  mark(this_.ff);
+}
+
+template <typename F> void scan(const bad_class2& this_, F& mark) {
+  mark(this_.vec);
+}
+
+template <typename F> void scan(const not_bad_class& this_, F& mark) {
+  mark(this_.vec);
+}
+
+template <typename F> void scan(const bad_template_use& this_, F& mark) {
+  HPHP::ResourceData::scan(this_, mark);
+  mark(this_.vec);
+}
+
+namespace {
+struct X_v_friend {
+  typedef int X::*type;
+  friend type get(X_v_friend);
+};
+template struct friender<X_v_friend, &X::v>;
+struct X_s_friend {
+  typedef char * X::*type;
+  friend type get(X_s_friend);
+};
+template struct friender<X_s_friend, &X::s>;
+}
+
+template <typename F> void scan(const X& this_, F& mark) {
+  HPHP::ResourceData::scan(this_, mark);
+  mark(FGET(X, this_, v));
+  mark(FGET(X, this_, s));
+  mark(this_.x);
+}
+
+template <typename F> void scan(const Y::Z& this_, F& mark) {
+  X::scan(this_, mark);
+  mark(this_.y);
+  mark(this_.m);
+  mark(this_.u);
+}
+
+template <typename F> void scan(const voidstargc& this_, F& mark) {
+  mark(this_.rd);
+  mark(this_.p);
+}
+
+template <typename F> void scan(const opaqueRef& this_, F& mark) {
+  mark(this_.px);
+}
+
+template <typename F> void scan(const badcontainer& this_, F& mark) {
+  HPHP::ResourceData::scan(this_, mark);
+  mark(this_.vec);
+}
+
+namespace {
+// cloned type.
+namespace ns {
+struct privateParent {
+  int x;
+};
+}
+}
+template <typename F> void scan(const ns::privateParent& this_, F& mark) {
+  static_assert(sizeof(this_) == 4);
+  mark(this_.x);
+}
+
+namespace {
+// cloned type.
+namespace ns {
+struct privateX : public HPHP::ResourceData, public ns::privateParent {
+  char *x;
+};
+}
+}
+template <typename F> void scan(const ns::privateX& this_, F& mark) {
+  HPHP::ResourceData::scan(this_, mark);
+  ns::privateParent::scan(this_, mark);
+  mark(this_.x);
+}
+
+
+}

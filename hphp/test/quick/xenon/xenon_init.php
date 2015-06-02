@@ -11,7 +11,7 @@ async function fa3($a) {
 }
 
 function fn1($a) {
-  return 19 + fa3($a +3)->join();
+  return 19 + HH\Asio\join(fa3($a +3));
 }
 
 async function fa2($a) {
@@ -29,7 +29,7 @@ async function fa1($a) {
 }
 
 function fn0($a) {
-  return 2 * fa1(1 + $a)->join();
+  return 2 * HH\Asio\join(fa1(1 + $a));
 }
 
 function idx($arr, $idx, $def = null) {
@@ -42,7 +42,7 @@ async function fa0($a) {
 }
 
 function main($a) {
-  return fa0($a)->join();
+  return HH\Asio\join(fa0($a));
 }
 
 echo main(42) . "\n";
@@ -54,7 +54,9 @@ verifyTestRun(
   xenon_get_data(),
   array(
     "fn1", "fn0", "main", "", "fa0", "fa1", "fa2", "fa3",
-    WaitHandle::class."::join", "strcasecmp", "array_shift", "include",
+    'HH\Asio\join',
+    WaitHandle::class.'::join',
+    "strcasecmp", "array_shift", "include",
     "fa3", "fa2", "fa1", "fa0",
   ),
   array(

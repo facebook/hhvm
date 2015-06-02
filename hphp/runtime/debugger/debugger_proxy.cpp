@@ -150,8 +150,7 @@ std::string DebuggerProxy::getSandboxId() {
 void DebuggerProxy::getThreads(std::vector<DThreadInfoPtr> &threads) {
   TRACE(2, "DebuggerProxy::getThreads\n");
   Lock lock(this);
-  std::stack<void *> &interrupts =
-    ThreadInfo::s_threadInfo->m_reqInjectionData.interrupts;
+  auto& interrupts = RID().interrupts;
   assert(!interrupts.empty());
   if (!interrupts.empty()) {
     CmdInterrupt *tint = (CmdInterrupt*)interrupts.top();
@@ -248,10 +247,11 @@ void DebuggerProxy::notifyDummySandbox() {
 }
 
 void DebuggerProxy::setBreakPoints(
-    std::vector<BreakPointInfoPtr> &breakpoints) {
+  std::vector<BreakPointInfoPtr>& breakpoints
+) {
   TRACE(2, "DebuggerProxy::setBreakPoints\n");
-  // Hold the break mutex while we update the proxy's state. There's no need
-  // to hold it over the longer operation to set breakpoints in each file later.
+  // Hold the break mutex while we update the proxy's state. There's no need to
+  // hold it over the longer operation to set breakpoints in each file later.
   {
     WriteLock lock(m_breakMutex);
     // breakpoints holds a list of fresh new BreakPointInfo objects that

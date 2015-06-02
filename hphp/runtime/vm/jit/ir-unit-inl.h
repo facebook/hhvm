@@ -83,7 +83,7 @@ private:
   Ret go2(IRInstruction* inst, SSATmp* t1, SSAs... ts) {
     SSATmp* ssas[] = { t1, ts... };
     auto const nSrcs = 1 + sizeof...(ts);
-    for (unsigned i = 0; debug && i < nSrcs; ++i) assert(ssas[i]);
+    for (unsigned i = 0; debug && i < nSrcs; ++i) assertx(ssas[i]);
 
     inst->initializeSrcs(nSrcs, ssas);
     return stop(inst);
@@ -101,7 +101,7 @@ private:
    * Call the lambda on the initialized IRInstruction.
    */
   Ret stop(IRInstruction* inst) {
-    assert(checkOperandTypes(inst));
+    assertx(checkOperandTypes(inst));
     return func(inst);
   }
 
@@ -124,7 +124,7 @@ private:
    * Setter for exit label.
    */
   void setter(IRInstruction* inst, Block* target) {
-    assert(!target || inst->hasEdges());
+    assertx(!target || inst->hasEdges());
     inst->setTaken(target);
   }
 
@@ -194,6 +194,14 @@ void IRUnit::replace(IRInstruction* old, Opcode op, Args... args) {
   );
 }
 
+template<class... Args>
+SSATmp* IRUnit::newSSATmp(Args&&... args) {
+  m_ssaTmps.push_back(
+    new (m_arena) SSATmp(m_ssaTmps.size(), std::forward<Args>(args)...)
+  );
+  return m_ssaTmps.back();
+}
+
 inline IRInstruction* IRUnit::clone(const IRInstruction* old,
                                     SSATmp* dst /* = nullptr */) {
   auto inst = new (m_arena) IRInstruction(
@@ -203,7 +211,7 @@ inline IRInstruction* IRUnit::clone(const IRInstruction* old,
     dst->setInstruction(inst);
     inst->setDst(dst);
   } else if (inst->hasDst()) {
-    dst = new (m_arena) SSATmp(m_nextTmpId++, inst);
+    dst = newSSATmp(inst);
     inst->setDst(dst);
   }
 
@@ -234,7 +242,7 @@ inline SrcKey IRUnit::initSrcKey() const {
 }
 
 inline uint32_t IRUnit::numTmps() const {
-  return m_nextTmpId;
+  return m_ssaTmps.size();
 }
 
 inline uint32_t IRUnit::numBlocks() const {
@@ -257,15 +265,20 @@ inline uint32_t IRUnit::numIds(const IRInstruction*) const {
   return numInsts();
 }
 
+inline SSATmp* IRUnit::findSSATmp(uint32_t id) const {
+  assert(id < m_ssaTmps.size());
+  return m_ssaTmps[id];
+}
+
+inline SSATmp* IRUnit::mainFP() const {
+  assertx(!entry()->empty() && entry()->begin()->is(DefFP));
+  return entry()->begin()->dst();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T> SSATmp* IRUnit::cns(T val) {
   return cns(Type::cns(val));
-}
-
-inline const LabelRefs& IRUnit::labelRefs() const {
-  return m_labelRefs;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

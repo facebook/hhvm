@@ -17,10 +17,10 @@ function function_scope() {
   };
   $baz();
 
-  // But this will capture $z, however it will be undefined at closure
-  // allocation time, emitting an undefined variable warning at the
-  // allocation site (in non-repo mode).  It will also give an
-  // ahead-of-type error from hh about $z not being defined.
+  // But this will capture $z, however it will be uninit at closure
+  // allocation time (in non-repo mode). It will give a warning
+  // closure call time. It will also give an ahead-of-type error
+  // from hh about $z not being defined.
   $quux = () ==> { var_dump(isset($z)); };
   $z = "function scope is weird\n";
   echo "z in parent is now: $z\n";

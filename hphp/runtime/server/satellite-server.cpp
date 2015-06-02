@@ -35,28 +35,29 @@ int SatelliteServerInfo::DanglingServerPort = 0;
 
 SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini, Hdf hdf) {
   m_name = hdf.getName();
-  m_port = Config::GetUInt16(ini, hdf["Port"], 0);
-  m_threadCount = Config::GetInt32(ini, hdf["ThreadCount"], 5);
-  m_maxRequest = Config::GetInt32(ini, hdf["MaxRequest"], 500);
-  m_maxDuration = Config::GetInt32(ini, hdf["MaxDuration"], 120);
+  m_port = Config::GetUInt16(ini, hdf, "Port", 0, false);
+  m_threadCount = Config::GetInt32(ini, hdf, "ThreadCount", 5, false);
+  m_maxRequest = Config::GetInt32(ini, hdf, "MaxRequest", 500, false);
+  m_maxDuration = Config::GetInt32(ini, hdf, "MaxDuration", 120, false);
   m_timeoutSeconds = std::chrono::seconds(
-    Config::GetInt32(ini, hdf["TimeoutSeconds"],
-                      RuntimeOption::RequestTimeoutSeconds));
-  m_reqInitFunc = Config::GetString(ini, hdf["RequestInitFunction"], "");
-  m_reqInitDoc = Config::GetString(ini, hdf["RequestInitDocument"], "");
-  m_password = Config::GetString(ini, hdf["Password"], "");
-  Config::Get(ini, hdf["Passwords"], m_passwords);
-  m_alwaysReset = Config::GetBool(ini, hdf["AlwaysReset"], false);
+    Config::GetInt32(ini, hdf, "TimeoutSeconds",
+                      RuntimeOption::RequestTimeoutSeconds, false));
+  m_reqInitFunc = Config::GetString(ini, hdf, "RequestInitFunction", "", false);
+  m_reqInitDoc = Config::GetString(ini, hdf, "RequestInitDocument", "", false);
+  m_password = Config::GetString(ini, hdf, "Password", "", false);
+  m_passwords = Config::GetSet(ini, hdf, "Passwords", m_passwords, false);
+  m_alwaysReset = Config::GetBool(ini, hdf, "AlwaysReset", false, false);
+  m_functions = Config::GetSet(ini, hdf, "Functions", m_functions, false);
 
-  std::string type = Config::GetString(ini, hdf["Type"]);
+  std::string type = Config::GetString(ini, hdf, "Type", "", false);
   if (type == "InternalPageServer") {
     m_type = SatelliteServer::Type::KindOfInternalPageServer;
     std::vector<std::string> urls;
-    Config::Get(ini, hdf["URLs"], urls);
+    urls = Config::GetVector(ini, hdf, "URLs", urls, false);
     for (unsigned int i = 0; i < urls.size(); i++) {
       m_urls.insert(format_pattern(urls[i], true));
     }
-    if (Config::GetBool(ini, hdf["BlockMainServer"], true)) {
+    if (Config::GetBool(ini, hdf, "BlockMainServer", true, false)) {
       InternalURLs.insert(m_urls.begin(), m_urls.end());
     }
   } else if (type == "DanglingPageServer") {

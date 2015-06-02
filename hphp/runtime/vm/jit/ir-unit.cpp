@@ -34,20 +34,42 @@ IRUnit::IRUnit(TransContext context)
   , m_entry(defBlock())
 {}
 
-IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker,
-                                const jit::vector<uint32_t>& producedRefs) {
+IRInstruction* IRUnit::defLabel(unsigned numDst, BCMarker marker) {
   IRInstruction inst(DefLabel, marker);
-  IRInstruction* label = clone(&inst);
-  always_assert(producedRefs.size() == numDst);
-  m_labelRefs[label] = producedRefs;
+  auto const label = clone(&inst);
   if (numDst > 0) {
-    SSATmp* dsts = (SSATmp*) m_arena.alloc(numDst * sizeof(SSATmp));
+    auto const dstsPtr = new (m_arena) SSATmp*[numDst];
     for (unsigned i = 0; i < numDst; ++i) {
-      new (&dsts[i]) SSATmp(m_nextTmpId++, label);
+      dstsPtr[i] = newSSATmp(label);
     }
-    label->setDsts(numDst, dsts);
+    label->setDsts(numDst, dstsPtr);
   }
   return label;
+}
+
+void IRUnit::expandLabel(IRInstruction* label, unsigned extraDst) {
+  assertx(label->is(DefLabel));
+  assertx(extraDst > 0);
+  auto const dstsPtr = new (m_arena) SSATmp*[extraDst + label->numDsts()];
+  unsigned i = 0;
+  for (auto dst : label->dsts()) {
+    dstsPtr[i++] = dst;
+  }
+  for (unsigned j = 0; j < extraDst; j++) {
+    dstsPtr[i++] = newSSATmp(label);
+  }
+  label->setDsts(i, dstsPtr);
+}
+
+void IRUnit::expandJmp(IRInstruction* jmp, SSATmp* value) {
+  assertx(jmp->is(Jmp));
+  std::vector<SSATmp*> newSrcs(jmp->numSrcs() + 1);
+  size_t i = 0;
+  for (auto src : jmp->srcs()) {
+    newSrcs[i++] = src;
+  }
+  newSrcs[i++] = value;
+  replace(jmp, Jmp, jmp->taken(), std::make_pair(i, &newSrcs[0]));
 }
 
 Block* IRUnit::defBlock(Block::Hint hint) {
@@ -58,11 +80,12 @@ Block* IRUnit::defBlock(Block::Hint hint) {
 }
 
 SSATmp* IRUnit::cns(Type type) {
-  assert(type.isConst());
+  assertx(type.hasConstVal() ||
+         type.subtypeOfAny(TUninit, TInitNull, TNullptr));
   IRInstruction inst(DefConst, BCMarker{});
   inst.setTypeParam(type);
   if (SSATmp* tmp = m_constTable.lookup(&inst)) {
-    assert(tmp->type() == type);
+    assertx(tmp->type() == type);
     return tmp;
   }
   return m_constTable.insert(clone(&inst)->dst());
@@ -70,32 +93,72 @@ SSATmp* IRUnit::cns(Type type) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static bool isMainExit(const Block* block, SrcKey lastSk) {
-  if (!block->isExit()) return false;
+/*
+ * Returns true iff `block' ends the IR unit after finishing execution
+ * of the bytecode instruction at `sk'.
+ */
+static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
+  if (!block->isExitNoThrow()) return false;
 
-  auto& lastInst = block->back();
+  const auto& inst = block->back();
+  const auto  instSk = inst.marker().sk();
 
-  // This captures cases where we end the region with a terminal
-  // instruction, e.g. RetCtrl, RaiseError, InterpOneCF.
-  if (lastInst.isTerminal() && lastInst.marker().sk() == lastSk) return true;
+  switch (inst.op()) {
+    // These instructions end a unit after executing the bytecode
+    // instruction they correspond to.
+    case InterpOneCF:
+    case JmpSSwitchDest:
+    case JmpSwitchDest:
+    case RaiseError:
+      return instSk == sk;;
 
-  // Otherwise, the region must contain a ReqBindJmp to a bytecode
-  // offset than will follow the execution of lastSk.
-  if (lastInst.op() != ReqBindJmp) return false;
+    // The RetCtrl is generally ending a bytecode instruction, with the
+    // exception being in an Await bytecode instruction, where we consider the
+    // end of the bytecode instruction to be the non-suspending path.
+    case RetCtrl:
+    case AsyncRetCtrl:
+      return inst.marker().sk().op() != Op::Await;
 
-  auto succOffsets = lastSk.succOffsets();
+    // A ReqBindJmp ends a unit and it jumps to the next instruction
+    // to execute.
+    case ReqBindJmp: {
+      auto destOffset = inst.extra<ReqBindJmp>()->dest.offset();
+      return sk.succOffsets().count(destOffset);
+    }
 
-  FTRACE(6, "isMainExit: instrSuccOffsets({}): {}\n",
-         show(lastSk), folly::join(", ", succOffsets));
-
-  return succOffsets.count(lastInst.marker().bcOff());
+    default:
+      return false;
+  }
 }
 
 Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk) {
+  Block* mainExit = nullptr;
+
+  FTRACE(5, "findMainExitBlock: starting on unit:\n{}\n", show(unit));
+
   for (auto block : rpoSortCfg(unit)) {
-    if (isMainExit(block, lastSk)) return block;
+    if (endsUnitAtSrcKey(block, lastSk)) {
+      if (mainExit == nullptr) {
+        mainExit = block;
+        continue;
+      }
+
+      always_assert_flog(
+        mainExit->hint() == Block::Hint::Unlikely ||
+        block->hint() == Block::Hint::Unlikely,
+        "findMainExit: 2 likely exits found: B{} and B{}\nlastSk = {}",
+        mainExit->id(), block->id(), showShort(lastSk));
+
+      if (mainExit->hint() == Block::Hint::Unlikely) mainExit = block;
+    }
   }
-  return nullptr;
+
+  always_assert_flog(mainExit, "findMainExit: no exit found for lastSk = {}",
+                     showShort(lastSk));
+
+  FTRACE(5, "findMainExitBlock: mainExit = B{}\n", mainExit->id());
+
+  return mainExit;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

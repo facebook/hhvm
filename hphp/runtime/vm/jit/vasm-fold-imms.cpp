@@ -104,6 +104,7 @@ struct ImmFolder {
   }
   void fold(storeb& in, Vinstr& out) {
     int val;
+    if (out.origin && out.origin->marker().sk().prologue()) return;
     if (match_byte(in.s, val)) { out = storebi{val, in.m}; }
   }
   void fold(storel& in, Vinstr& out) {
@@ -276,7 +277,7 @@ struct ImmFolder {
 // then change the instruction and embed the immediate.
 template<typename Folder>
 void foldImms(Vunit& unit) {
-  assert(check(unit)); // especially, SSA
+  assertx(check(unit)); // especially, SSA
   // block order doesn't matter, but only visit reachable blocks.
   auto blocks = sortBlocks(unit);
 

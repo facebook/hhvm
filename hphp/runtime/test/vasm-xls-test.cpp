@@ -45,7 +45,8 @@ template<class T> uint64_t test_const(T val) {
   unit.entry = v;
   v << copy{v.cns(val), Vreg{xmm0}};
   v << ret{RegSet{xmm0}};
-  vasm.finishX64(test_abi, nullptr);
+  optimizeX64(vasm.unit(), test_abi);
+  emitX64(vasm.unit(), vasm.areas(), nullptr);
   union { double d; uint64_t c; } u;
   u.d = ((testfunc)code)();
   return u.c;

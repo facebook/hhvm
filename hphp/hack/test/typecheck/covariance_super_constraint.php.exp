@@ -1,0 +1,6 @@
+File "covariance_super_constraint.php", line 4, characters 32-32:
+Illegal usage of a contravariant type parameter (Typing[4121])
+File "covariance_super_constraint.php", line 3, characters 12-12:
+This is where the parameter was declared as contravariant (-)
+File "covariance_super_constraint.php", line 4, characters 32-32:
+`super` constraints are covariant

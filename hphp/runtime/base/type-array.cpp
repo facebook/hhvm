@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-util.h"
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -742,8 +742,8 @@ void Array::unserialize(VariableUnserializer *uns) {
   if (size == 0) {
     operator=(Create());
   } else {
-    auto const cmret = computeCapAndMask(size);
-    auto const allocsz = computeAllocBytes(cmret.first, cmret.second);
+    auto const scale = computeScaleFromSize(size);
+    auto const allocsz = computeAllocBytes(scale);
 
     // For large arrays, do a naive pre-check for OOM.
     if (UNLIKELY(allocsz > kMaxSmartSize && MM().preAllocOOM(allocsz))) {
@@ -755,7 +755,7 @@ void Array::unserialize(VariableUnserializer *uns) {
     operator=(ArrayInit(size, ArrayInit::Mixed{}).toArray());
     for (int64_t i = 0; i < size; i++) {
       Variant key;
-      key.unserialize(uns, Uns::Mode::Key);
+      unserializeVariant(key, uns, UnserializeMode::Key);
       if (!key.isString() && !key.isInteger()) {
         throw Exception("Invalid key");
       }
@@ -767,7 +767,7 @@ void Array::unserialize(VariableUnserializer *uns) {
       if (UNLIKELY(IS_REFCOUNTED_TYPE(value.getRawType()))) {
         uns->putInOverwrittenList(value);
       }
-      value.unserialize(uns);
+      unserializeVariant(value, uns);
 
       if (i < (size - 1)) {
         auto lastChar = uns->peekBack();

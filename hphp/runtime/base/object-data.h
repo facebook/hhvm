@@ -76,7 +76,7 @@ struct ObjectData {
     HasDynPropArr = 0x0800, // has a dynamic properties array
     IsCppBuiltin  = 0x1000, // has custom C++ subclass
     IsCollection  = 0x2000, // it's a collection (and the specific type is
-                            // stored in o_subclass_u8)
+                            // one of the CollectionType HeaderKind values
     HasPropEmpty  = 0x4000, // has custom propEmpty logic
     HasNativePropHandler    // class has native magic props handler
                   = 0x8000,
@@ -119,6 +119,7 @@ struct ObjectData {
   bool isUncounted() const;
 
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC
+  template<class F> void scan(F&) const;
 
   size_t heapSize() const;
 
@@ -169,15 +170,14 @@ struct ObjectData {
   // Whether the object implements Iterator.
   bool isIterator() const;
 
-  // Whether the object is a collection.
+  // Whether the object is a collection, [and [not] mutable].
   bool isCollection() const;
   bool isMutableCollection() const;
   bool isImmutableCollection() const;
-
-  Collection::Type getCollectionType() const;
+  CollectionType collectionType() const; // asserts(isCollection())
 
   bool getAttribute(Attribute) const;
-  void setAttribute(Attribute) const;
+  void setAttribute(Attribute);
 
   bool noDestruct() const;
   void setNoDestruct();
@@ -212,12 +212,25 @@ struct ObjectData {
 
  private:
   template<bool forExit> bool destructImpl();
+  Variant* realPropImpl(const String& s, int flags, const String& context,
+                        bool copyDynArray);
  public:
 
-  Array o_toIterArray(const String& context, bool getRef = false);
+  enum IterMode { EraseRefs, CreateRefs, PreserveRefs };
+  /*
+   * Create an array of object properties suitable for iteration.
+   *
+   * EraseRefs    - array should contain unboxed properties
+   * CreateRefs   - array should contain boxed properties
+   * PreserveRefs - reffiness of properties should be preserved in returned
+   *                array
+   */
+  Array o_toIterArray(const String& context, IterMode mode);
 
   Variant* o_realProp(const String& s, int flags,
                       const String& context = null_string);
+  const Variant* o_realProp(const String& s, int flags,
+                            const String& context = null_string) const;
 
   Variant o_get(const String& s, bool error = true,
                 const String& context = null_string);
@@ -280,9 +293,6 @@ struct ObjectData {
   TypedValue* propVec();
   const TypedValue* propVec() const;
 
-  uint8_t& subclass_u8();
-  uint8_t subclass_u8() const;
-
  public:
   ObjectData* callCustomInstanceInit();
 
@@ -316,6 +326,9 @@ struct ObjectData {
 
   PropLookup<TypedValue*> getProp(const Class*, const StringData*);
   PropLookup<const TypedValue*> getProp(const Class*, const StringData*) const;
+
+  PropLookup<TypedValue*> getPropImpl(const Class*, const StringData*,
+                                      bool copyDynArray);
 
  private:
   template <bool warn, bool define>
@@ -400,10 +413,8 @@ struct ObjectData {
     return offsetof(ObjectData, m_cls);
   }
   static constexpr ptrdiff_t attributeOff() {
-    return offsetof(ObjectData, o_attribute);
-  }
-  static constexpr ptrdiff_t whStateOffset() {
-    return offsetof(ObjectData, o_subclass_u8);
+    return offsetof(ObjectData, m_hdr) +
+           offsetof(HeaderWord<uint16_t>, aux);
   }
 
 private:
@@ -417,38 +428,23 @@ private:
   int64_t toInt64Impl() const noexcept;
   double toDoubleImpl() const noexcept;
 
-// offset:  0    4    8     10  11    12     16   20          32
-// 64bit:   cls       attr  u8  kind  count  id   [subclass]  [props...]
-// lowptr:  cls  id   attr  u8  kind  count  [subclass][props...]
+// offset:  0    4   8       12     16   20          32
+// 64bit:   cls      header  count  id   [subclass]  [props...]
+// lowptr:  cls  id  header  count  [subclass][props...]
 
 private:
 #ifdef USE_LOWPTR
   LowClassPtr m_cls;
   int o_id; // Numeric identifier of this object (used for var_dump())
-  union {
-    struct {
-      mutable uint16_t o_attribute;
-      uint8_t o_subclass_u8; // for subclasses
-      HeaderKind m_kind;
-      mutable RefCount m_count;
-    };
-    uint64_t m_attr_kind_count;
-  };
+  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
 #else
   LowClassPtr m_cls;
-  union {
-    struct {
-      mutable uint16_t o_attribute;
-      uint8_t o_subclass_u8; // for subclasses
-      HeaderKind m_kind;
-      mutable RefCount m_count;
-    };
-    uint64_t m_attr_kind_count;
-  };
+  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
   int o_id; // Numeric identifier of this object (used for var_dump())
 #endif
 };
 
+struct GlobalsArray;
 typedef GlobalsArray GlobalVariables;
 
 struct CountableHelper : private boost::noncopyable {
@@ -493,23 +489,24 @@ using ExtObjectData = ExtObjectDataFlags<ObjectData::IsCppBuiltin>;
 
 template<class T, class... Args> T* newobj(Args&&... args) {
   static_assert(std::is_convertible<T*,ObjectData*>::value, "");
-  auto const mem = MM().smartMallocSizeLogged(sizeof(T));
+  auto const mem = MM().smartMallocSize(sizeof(T));
   try {
     return new (mem) T(std::forward<Args>(args)...);
   } catch (...) {
-    MM().smartFreeSizeLogged(mem, sizeof(T));
+    MM().smartFreeSize(mem, sizeof(T));
     throw;
   }
 }
 
-#define DECLARE_CLASS_NO_SWEEP(originalName)                    \
-  public:                                                       \
-  CLASSNAME_IS(#originalName)                                   \
-  friend ObjectData* new_##originalName##_Instance(Class*);     \
-  friend void delete_##originalName(ObjectData*, const Class*); \
-  static inline HPHP::LowClassPtr& classof() {                  \
-    static HPHP::LowClassPtr result;                            \
-    return result;                                              \
+#define DECLARE_CLASS_NO_SWEEP(originalName)                           \
+  public:                                                              \
+  CLASSNAME_IS(#originalName)                                          \
+  template <typename F> friend void scan(const c_##originalName&, F&); \
+  friend ObjectData* new_##originalName##_Instance(Class*);            \
+  friend void delete_##originalName(ObjectData*, const Class*);        \
+  static inline HPHP::LowClassPtr& classof() {                         \
+    static HPHP::LowClassPtr result;                                   \
+    return result;                                                     \
   }
 
 #define IMPLEMENT_CLASS_NO_SWEEP(cls)
@@ -519,7 +516,9 @@ typename std::enable_if<
   std::is_convertible<T*, ObjectData*>::value,
   SmartPtr<T>
 >::type makeSmartPtr(Args&&... args) {
-  return SmartPtr<T>(newobj<T>(std::forward<Args>(args)...));
+  using UnownedAndNonNull = typename SmartPtr<T>::UnownedAndNonNull;
+  return SmartPtr<T>(newobj<T>(std::forward<Args>(args)...),
+                     UnownedAndNonNull{});
 }
 
 ///////////////////////////////////////////////////////////////////////////////

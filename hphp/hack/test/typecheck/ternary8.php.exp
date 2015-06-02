@@ -1,0 +1,6 @@
+File "ternary8.php", line 5, characters 10-11:
+Invalid return type (Typing[4110])
+File "ternary8.php", line 3, characters 22-24:
+This is an int
+File "ternary8.php", line 3, characters 12-15:
+It is incompatible with a nullable type

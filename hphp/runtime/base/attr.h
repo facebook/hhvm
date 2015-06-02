@@ -111,7 +111,8 @@ enum Attr {
   AttrVariadicByRef        = (1 << 15), //       |          |    X    //
                                         //       |          |         //
   // Indicates that a function may need to use a VarEnv or varargs (i.e.,
-  // extraArgs) at runtime.             //       |          |         //
+  // extraArgs) at runtime.  If the debugger is enabled, all functions
+  // must be treated as having this flag.
   AttrMayUseVV             = (1 << 16), //       |          |    X    //
                                         //       |          |         //
   // Indicates that the function or class can be loaded once and then persisted
@@ -121,6 +122,10 @@ enum Attr {
   // Indicates that this property cannot be initialized on an ObjectData by
   // simply memcpy-ing from the initializer vector.         |         //
   AttrDeepInit             = (1 << 18), //       |    X     |         //
+                                        //       |          |         //
+  // This HNI method takes an additional "func_num_args()" value at the
+  // beginning of its signature (after Class*/ObjectData* for methods)
+  AttrNumArgs              = (1 << 18), //       |          |    X    //
                                         //       |          |         //
   // Set on functions to mark them as hot during PGO profiling.       //
   AttrHot                  = (1 << 19), //       |          |    X    //

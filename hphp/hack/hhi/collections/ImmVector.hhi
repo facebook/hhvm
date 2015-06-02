@@ -37,10 +37,10 @@
  *   $fv = ImmVector {1, 2, 3};
  */
 
-final class ImmVector<Tv> implements ConstVector<Tv> {
+final class ImmVector<+Tv> implements ConstVector<Tv> {
   /**
-   * Create an empty ImmVector (if no parameters are passed) or create
-   * an ImmVector from an Traversable (if one parameter is passed).
+   * Creates an ImmVector from the given Traversable, or an empty ImmVector
+   * if "null" is passed.
    */
   public function __construct(?Traversable<Tv> $it);
 
@@ -71,7 +71,7 @@ final class ImmVector<Tv> implements ConstVector<Tv> {
    * Returns true if the specified key is present in the ImmVector, returns
    * false otherwise.
    */
-  public function containsKey(int $k): bool;
+  public function containsKey<Tu super int>(Tu $k): bool;
 
   /**
    * Returns an array containing the values from this ImmVector.
@@ -97,16 +97,16 @@ final class ImmVector<Tv> implements ConstVector<Tv> {
    * Returns the index of the first element that matches the search value.
    * If no element matches the search value, this function returns -1.
    */
-  public function linearSearch(Tv $search_value): int;
+  public function linearSearch<Tu super Tv>(Tu $search_value): int;
 
   public static function fromItems(?Traversable<Tv> $items): ImmVector<Tv>;
 
   /**
-   * Returns a Vector built from the keys of the specified container.
+   * Returns an ImmVector built from the keys of the specified container.
    */
-  public static function fromKeysOf<Tk,Tv2>(
-    ?KeyedContainer<Tk,Tv2> $container
-  ): Vector<Tk>;
+  public static function fromKeysOf<Tk>(
+    ?KeyedContainer<Tk, mixed> $container,
+  ): ImmVector<Tk>;
 
   public function __toString(): string;
 
@@ -120,18 +120,27 @@ final class ImmVector<Tv> implements ConstVector<Tv> {
   /**
    * Returns a Vector containing the elements of this ImmVector.
    */
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toVector(): Vector<Tv>;
 
   /**
    * Returns a Map containing the elements of this ImmVector.
    * The keys are 0... count() - 1.
    */
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toMap(): Map<int, Tv>;
   public function toImmMap(): ImmMap<int, Tv>;
 
   /**
    * Returns a Set containing the elements of this ImmVector.
    */
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toSet(): Set<Tv>;
   public function toImmSet(): ImmSet<Tv>;
 
@@ -152,7 +161,9 @@ final class ImmVector<Tv> implements ConstVector<Tv> {
   public function skip(int $n): ImmVector<Tv>;
   public function skipWhile((function(Tv): bool) $fn): ImmVector<Tv>;
   public function slice(int $start, int $len): ImmVector<Tv>;
-  public function concat(Traversable<Tv> $traversable): ImmVector<Tv>;
+  public function concat<Tu super Tv>(
+    Traversable<Tu> $traversable
+  ): ImmVector<Tv>;
   public function firstValue(): ?Tv;
   public function firstKey(): ?int;
   public function lastValue(): ?Tv;

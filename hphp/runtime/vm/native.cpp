@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
@@ -142,7 +143,8 @@ static void populateArgsNoDoubles(const Func* func,
 
 template<bool usesDoubles, bool variadic>
 void callFunc(const Func* func, void *ctx,
-              TypedValue *args, TypedValue& ret) {
+              TypedValue *args, int32_t numNonDefault,
+              TypedValue& ret) {
   assert(variadic == func->hasVariadicCaptureParam());
 
   int64_t GP_args[kMaxBuiltinArgs];
@@ -160,6 +162,10 @@ void callFunc(const Func* func, void *ctx,
 
   if (ctx) {
     GP_args[GP_count++] = (int64_t)ctx;
+  }
+
+  if (func->attrs() & AttrNumArgs) {
+    GP_args[GP_count++] = (int64_t)numNonDefault;
   }
 
   if (usesDoubles) {
@@ -320,17 +326,10 @@ static inline int32_t minNumArgs(ActRec* ar) {
 }
 
 const StringData* getInvokeName(ActRec* ar) {
-  if (ar->hasInvName()) {
+  if (ar->magicDispatch()) {
     return ar->getInvName();
   }
-  auto func = ar->m_func;
-  auto cls = func->cls();
-  if (!cls) {
-    return func->name();
-  }
-  String clsname(const_cast<StringData*>(cls->name()));
-  String funcname(const_cast<StringData*>(func->name()));
-  return makeStaticString(clsname + "::" + funcname);
+  return ar->func()->fullName();
 }
 
 template<bool variadic>
@@ -373,7 +372,7 @@ TypedValue* functionWrapper(ActRec* ar) {
   if (((numNonDefault == numArgs) ||
        (nativeWrapperCheckArgs<variadic>(ar))) &&
       (coerceFCallArgs(args, numArgs, numNonDefault, func))) {
-    callFunc<usesDoubles, variadic>(func, nullptr, args, rv);
+    callFunc<usesDoubles, variadic>(func, nullptr, args, numNonDefault, rv);
   } else if (func->attrs() & AttrParamCoerceModeFalse) {
     rv.m_type = KindOfBoolean;
     rv.m_data.num = 0;
@@ -416,7 +415,7 @@ TypedValue* methodWrapper(ActRec* ar) {
       ctx = ar->getClass();
     }
 
-    callFunc<usesDoubles, variadic>(func, ctx, args, rv);
+    callFunc<usesDoubles, variadic>(func, ctx, args, numNonDefault, rv);
   } else if (func->attrs() & AttrParamCoerceModeFalse) {
     rv.m_type = KindOfBoolean;
     rv.m_data.num = 0;
@@ -503,6 +502,8 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
 const char* kInvalidReturnTypeMessage = "Invalid return type detected";
 const char* kInvalidArgTypeMessage = "Invalid argument type detected";
 const char* kInvalidArgCountMessage = "Invalid argument count detected";
+const char* kInvalidNumArgsMessage =
+  "\"NumArgs\" builtins must take an int64_t as their first declared argument";
 const char* kNeedStaticContextMessage =
   "Static class functions must take a Class* as their first argument";
 const char* kNeedObjectContextMessage =
@@ -546,6 +547,10 @@ const char* checkTypeFunc(const NativeSig& sig,
     } else {
       if (ctxTy != T::This) return kNeedObjectContextMessage;
     }
+  }
+
+  if (func->attrs() & AttrNumArgs) {
+    if (*argIt++ != T::Int64) return kInvalidNumArgsMessage;
   }
 
   int index = 0;
@@ -624,6 +629,20 @@ std::string NativeSig::toString(const char* classname,
   str += ")";
 
   return str;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+bool registerConstant(const StringData* cnsName,
+                      NativeConstantCallback callback) {
+  if (!Unit::defSystemConstantCallback(cnsName, callback)) {
+    return false;
+  }
+  TypedValue tv;
+  tv.m_type = KindOfUninit;
+  tv.m_data.pref = reinterpret_cast<RefData*>(callback);
+  s_constant_map[cnsName] = tv;
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////

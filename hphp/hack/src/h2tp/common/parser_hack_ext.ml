@@ -8,8 +8,8 @@
  *
  *)
 
-open Utils
-module List = List_ext
+open Sys_utils
+module List = Core_list
 module Sys = Sys_ext
 module CE = Common_exns
 
@@ -19,5 +19,5 @@ let parse_or_die file =
   let content = cat (Relative_path.to_absolute file) in
   let errors, res = Errors.do_
     (fun () -> Parser_hack.program file ~elaborate_namespaces:false content) in
-  if (List.not_empty errors) then raise (CE.ParseErrors errors);
+  if not (List.is_empty errors) then raise (CE.ParseErrors errors);
   res

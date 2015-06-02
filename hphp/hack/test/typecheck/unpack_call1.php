@@ -2,6 +2,8 @@
 
 function f(int $foo, ...$args): void {}
 
+function g(string $foo, ...$args): void {}
+
 class C1 {
   public function __construct(
     private int $foo,
@@ -53,6 +55,12 @@ function test_basic(): void {
   f(...make_mixed_args());
   $make = fun('make_mixed_args');
   f(...$make());
+
+  g(
+    'this is a long string to satisfy hh_format. it allows us to test that ',
+    'trailing commas after unpacked calls will parse',
+    ...$args,
+  );
 }
 
 function test_limitations() {

@@ -129,19 +129,19 @@ struct CppCall {
    * mutually exclusive, depending on the kind.
    */
   void* address() const {
-    assert(kind() == Kind::Direct);
+    assertx(kind() == Kind::Direct);
     return m_u.fptr;
   }
   int vtableOffset() const {
-    assert(m_kind == Kind::Virtual);
+    assertx(m_kind == Kind::Virtual);
     return m_u.vtableOffset;
   }
   Vreg reg() const {
-    assert(m_kind == Kind::Destructor);
+    assertx(m_kind == Kind::Destructor);
     return m_u.reg;
   }
   void* arrayTable() const {
-    assert(kind() == Kind::ArrayVirt);
+    assertx(kind() == Kind::ArrayVirt);
     return m_u.fptr;
   }
 

@@ -8,5 +8,5 @@ class F {
   }
 }
 
-var_dump(F::ret1()->join());
-var_dump(F::await1()->join());
+var_dump(HH\Asio\join(F::ret1()));
+var_dump(HH\Asio\join(F::await1()));

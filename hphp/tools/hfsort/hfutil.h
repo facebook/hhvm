@@ -56,13 +56,14 @@ constexpr uint8_t tracing = 1;
 enum class Algorithm { Hfsort, PettisHansen, Invalid };
 
 void trace(const char* fmt, ...);
-#define TRACE(LEVEL, ...)                  \
+#define HFTRACE(LEVEL, ...)                  \
   if (tracing >= LEVEL) { trace(__VA_ARGS__); }
 
 typedef   int32_t FuncId;
 constexpr int32_t InvalidId = -1;
 
 extern struct CallGraph cg;
+struct Cluster;
 
 struct Arc {
   Arc(FuncId s, FuncId d, double w)
@@ -76,8 +77,9 @@ struct Arc {
 };
 
 struct Func {
-   Func(FuncId id, std::string name, uint64_t a, uint32_t s)
+  Func(FuncId id, std::string name, uint64_t a, uint32_t s, uint32_t g)
       : id(id)
+      , group(g)
       , addr(a)
       , size(s)
       , samples(0) {
@@ -94,6 +96,7 @@ struct Func {
   }
 
   FuncId         id;
+  uint32_t       group;
   uint64_t       addr;
   uint32_t       size;
   uint32_t       samples;
@@ -103,26 +106,35 @@ struct Func {
 };
 
 struct CallGraph {
-  void addFunc(Func f) {
+  ~CallGraph() { clear(); }
+  void clear();
+
+  bool addFunc(Func f) {
     if (f.valid()) {
       auto it = addr2FuncId.find(f.addr);
       if (it != addr2FuncId.end()) {
         Func& base = funcs[it->second];
         base.mangledNames.push_back(f.mangledNames[0]);
         if (f.size > base.size) base.size = f.size;
-        TRACE(2, "Func: adding '%s' to (%u)\n",
-              f.mangledNames[0].c_str(),
-              base.id);
+        HFTRACE(2, "Func: adding '%s' to (%u)\n",
+                f.mangledNames[0].c_str(),
+                base.id);
       } else {
         funcs.push_back(f);
         addr2FuncId[f.addr] = f.id;
-        TRACE(2, "Func: adding (%u): %016lx %s %u\n",
-              f.id,
-              (long)f.addr,
-              f.mangledNames[0].c_str(),
-              f.size);
+        HFTRACE(2, "Func: adding (%u): %016lx %s %u\n",
+                f.id,
+                (long)f.addr,
+                f.mangledNames[0].c_str(),
+                f.size);
+        return true;
       }
     }
+    return false;
+  }
+
+  void addCluster(Cluster* c) {
+    clusters.push_back(c);
   }
 
   Arc* findArc(FuncId f1, FuncId f2) const {
@@ -134,18 +146,19 @@ struct CallGraph {
     return nullptr;
   }
 
-  void incArcWeight(FuncId src, FuncId dst, double w = 1.0) {
+  Arc* incArcWeight(FuncId src, FuncId dst, double w = 1.0) {
     for (size_t i = 0; i < funcs[src].outArcs.size(); i++) {
       Arc* arc = funcs[src].outArcs[i];
       if (arc->dst == dst) {
         arc->weight += w;
-        return;
+        return arc;
       }
     }
     Arc* arc = new Arc(src, dst, w);
     funcs[src].outArcs.push_back(arc);
     funcs[dst].inArcs. push_back(arc);
     arcs.push_back(arc);
+    return arc;
   }
 
   FuncId addrToFuncId(uint64_t addr) const {
@@ -184,6 +197,8 @@ struct CallGraph {
   std::vector<Func> funcs;
   std::map<uint64_t,FuncId> addr2FuncId;
   std::vector<Arc*> arcs;
+ private:
+  std::vector<Cluster*> clusters;
 };
 
 struct Cluster {
@@ -193,8 +208,8 @@ struct Cluster {
     arcWeight = 0;
     samples = cg.funcs[fid].samples;
     frozen  = false;
-    TRACE(1, "new Cluster: %s: %s\n", toString().c_str(),
-          cg.funcs[fid].toString().c_str());
+    HFTRACE(1, "new Cluster: %s: %s\n", toString().c_str(),
+            cg.funcs[fid].toString().c_str());
   }
 
   void merge(const Cluster& other, const double aw = 0) {

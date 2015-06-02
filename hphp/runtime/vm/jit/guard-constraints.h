@@ -32,9 +32,9 @@ struct IRInstruction;
  */
 struct GuardConstraints {
   /*
-   * Maps guard instructions (GuardLoc, CheckLoc, GuardStk, etc...)  to
-   * TypeConstraints. The TypeConstraints for a guard start out fully generic
-   * and are tightened appropriately when a value's type is used.
+   * Maps guard instructions (CheckLoc, CheckStk, etc.) to TypeConstraints. The
+   * TypeConstraints for a guard start out fully generic and are tightened
+   * appropriately when a value's type is used.
    */
   jit::hash_map<const IRInstruction*, TypeConstraint> guards;
 

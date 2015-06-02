@@ -28,38 +28,26 @@ inline void ObjectData::resetMaxId() {
 }
 
 inline ObjectData::ObjectData(Class* cls)
-  : m_cls(cls)
-  , m_attr_kind_count(HeaderKind::Object << 24)
-{
-  assert(!o_attribute && m_kind == HeaderKind::Object && !m_count);
-  if (cls->needInitialization()) {
-    // Needs to happen before we assign this object an o_id.
-    cls->initialize();
-  }
-  o_id = ++os_max_id;
-  instanceInit(cls);
-}
+  : ObjectData(cls, 0, HeaderKind::Object)
+{}
 
-inline ObjectData::ObjectData(Class* cls, uint16_t flags,
-                              HeaderKind kind)
+inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
   : m_cls(cls)
-  , m_attr_kind_count(flags | kind << 24)
 {
-  assert(o_attribute == flags && !m_count);
-  assert(m_kind == HeaderKind::Object || m_kind == HeaderKind::ResumableObj);
-  if (cls->needInitialization()) {
-    // Needs to happen before we assign this object an o_id.
-    cls->initialize();
-  }
+  m_hdr.init(flags, kind, 0);
+  assert(m_hdr.aux == flags && !getCount());
+  assert(isObjectKind(kind));
+  assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
   instanceInit(cls);
 }
 
 inline ObjectData::ObjectData(Class* cls, NoInit)
   : m_cls(cls)
-  , m_attr_kind_count(HeaderKind::Object << 24)
 {
-  assert(!o_attribute && m_kind == HeaderKind::Object && !m_count);
+  m_hdr.init(0, HeaderKind::Object, 0);
+  assert(!m_hdr.aux && m_hdr.kind == HeaderKind::Object && !getCount());
+  assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
 }
 
@@ -85,6 +73,9 @@ inline size_t ObjectData::heapSize() const {
 
 // Call newInstance() to instantiate a PHP object
 inline ObjectData* ObjectData::newInstance(Class* cls) {
+  if (cls->needInitialization()) {
+    cls->initialize();
+  }
   if (auto const ctor = cls->instanceCtor()) {
     return ctor(cls);
   }
@@ -96,7 +87,7 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   size_t nProps = cls->numDeclProperties();
   size_t size = sizeForNProps(nProps);
   auto& mm = MM();
-  auto const obj = new (mm.objMallocLogged(size)) ObjectData(cls);
+  auto const obj = new (mm.objMalloc(size)) ObjectData(cls);
   if (UNLIKELY(cls->callsCustomInstanceInit())) {
     /*
       This must happen after the constructor finishes,
@@ -109,14 +100,11 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
     */
     obj->callCustomInstanceInit();
   }
-  if (UNLIKELY(cls->hasNativePropHandler())) {
-    obj->setAttribute(ObjectData::Attribute::HasNativePropHandler);
-  }
   return obj;
 }
 
 inline void ObjectData::instanceInit(Class* cls) {
-  o_attribute |= cls->getODAttrs();
+  m_hdr.aux |= cls->getODAttrs();
 
   size_t nProps = cls->numDeclProperties();
   if (nProps > 0) {
@@ -155,17 +143,16 @@ inline bool ObjectData::isCollection() const {
 }
 
 inline bool ObjectData::isMutableCollection() const {
-  return Collection::isMutableType(getCollectionType());
+  return isCollection() && HPHP::isMutableCollection(collectionType());
 }
 
 inline bool ObjectData::isImmutableCollection() const {
-  return Collection::isImmutableType(getCollectionType());
+  return isCollection() && HPHP::isImmutableCollection(collectionType());
 }
 
-inline Collection::Type ObjectData::getCollectionType() const {
-  return isCollection() ?
-    static_cast<Collection::Type>(o_subclass_u8) :
-    Collection::Type::InvalidType;
+inline CollectionType ObjectData::collectionType() const {
+  assert(isValidCollection(static_cast<CollectionType>(m_hdr.kind)));
+  return static_cast<CollectionType>(m_hdr.kind);
 }
 
 inline bool ObjectData::isIterator() const {
@@ -173,11 +160,11 @@ inline bool ObjectData::isIterator() const {
 }
 
 inline bool ObjectData::getAttribute(Attribute attr) const {
-  return o_attribute & attr;
+  return m_hdr.aux & attr;
 }
 
-inline void ObjectData::setAttribute(Attribute attr) const {
-  o_attribute |= attr;
+inline void ObjectData::setAttribute(Attribute attr) {
+  m_hdr.aux |= attr;
 }
 
 inline bool ObjectData::noDestruct() const {
@@ -189,7 +176,7 @@ inline void ObjectData::setNoDestruct() {
 }
 
 inline void ObjectData::clearNoDestruct() {
-  o_attribute &= ~NoDestructor;
+  m_hdr.aux &= ~NoDestructor;
 }
 
 inline int ObjectData::getId() const {
@@ -216,14 +203,6 @@ inline double ObjectData::toDouble() const {
     return toDoubleImpl();
   }
   return toInt64();
-}
-
-inline uint8_t& ObjectData::subclass_u8() {
-  return o_subclass_u8;
-}
-
-inline uint8_t ObjectData::subclass_u8() const {
-  return o_subclass_u8;
 }
 
 inline const Func* ObjectData::methodNamed(const StringData* sd) const {

@@ -43,7 +43,7 @@ struct LocalStateHook {
   virtual void killLocalsForCall(bool callDestroysLocals) = 0;
   virtual void dropLocalRefsInnerTypes() = 0;
   virtual void refineLocalType(uint32_t id, Type, TypeSource) = 0;
-  virtual void predictLocalType(uint32_t id, Type) = 0;
+  virtual void setLocalPredictedType(uint32_t id, Type) = 0;
   virtual void setLocalType(uint32_t id, Type) = 0;
   virtual void setBoxedLocalPrediction(uint32_t id, Type) = 0;
   virtual void updateLocalRefPredictions(SSATmp*, SSATmp*) = 0;

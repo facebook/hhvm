@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_GENERATOR_H_
 
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -50,7 +50,7 @@ public:
     return resumableOff() + Resumable::resumeOffsetOff();
   }
   static constexpr ptrdiff_t stateOff() {
-    return whStateOffset();
+    return offsetof(BaseGenerator, m_state);
   }
 
   explicit BaseGenerator(Class* cls)
@@ -67,11 +67,11 @@ public:
   }
 
   State getState() const {
-    return static_cast<State>(subclass_u8());
+    return m_state;
   }
 
   void setState(State state) {
-    subclass_u8() = static_cast<uint8_t>(state);
+    m_state = state;
   }
 
   void startedCheck() {
@@ -112,26 +112,16 @@ public:
 
     return base + 2;
   }
+
+private:
+  State m_state;
 };
 
-
-///////////////////////////////////////////////////////////////////////////////
-// class Continuation
-
-class c_Continuation : public BaseGenerator {
-public:
-  DECLARE_CLASS_NO_SWEEP(Continuation)
-
-  explicit c_Continuation(Class* cls = c_Continuation::classof())
-    : BaseGenerator(cls) {}
-  ~c_Continuation() {}
-  void t___construct() {}
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Generator
 
-class c_Generator : public c_Continuation {
+class c_Generator : public BaseGenerator {
 public:
   DECLARE_CLASS_NO_SWEEP(Generator)
   ~c_Generator();

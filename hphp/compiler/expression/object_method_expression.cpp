@@ -85,7 +85,7 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
 
-    markRefParams(func, m_name, canInvokeFewArgs());
+    markRefParams(func, m_name);
   }
 
   // This is OK because AnalyzeFinal is guaranteed to run for a CPP
@@ -95,7 +95,6 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
     // necessary because we set the expected type of m_object to
     // Type::Some during type inference.
     TypePtr at(m_object->getActualType());
-    TypePtr it(m_object->getImplementedType());
     if (!m_object->isThis() && at && at->is(Type::KindOfObject)) {
       m_object->setExpectedType(at);
     }
@@ -116,25 +115,6 @@ void ObjectMethodExpression::setNthKid(int n, ConstructPtr cp) {
 }
 
 ExpressionPtr ObjectMethodExpression::preOptimize(AnalysisResultConstPtr ar) {
-  if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
-    return ExpressionPtr();
-  }
-
-  if (m_classScope && m_funcScope &&
-      (!m_funcScope->isVirtual() ||
-       (Option::WholeProgram && !m_funcScope->hasOverride()))) {
-
-    if (Option::DynamicInvokeFunctions.size()) {
-      if (Option::DynamicInvokeFunctions.find(
-            m_classScope->getName() + "::" + m_funcScope->getName()) !=
-          Option::DynamicInvokeFunctions.end()) {
-        setNoInline();
-      }
-    }
-
-    return inliner(ar, m_object, "");
-  }
-
   return ExpressionPtr();
 }
 

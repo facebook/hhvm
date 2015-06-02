@@ -105,10 +105,13 @@ class PreClassEmitter {
       , m_typeConstraint(nullptr)
       , m_val(make_tv<KindOfUninit>())
       , m_phpCode(nullptr)
+      , m_typeconst(false)
     {}
     Const(const StringData* n, const StringData* typeConstraint,
-          const TypedValue* val, const StringData* phpCode)
-      : m_name(n), m_typeConstraint(typeConstraint), m_phpCode(phpCode) {
+          const TypedValue* val, const StringData* phpCode,
+          const bool typeconst)
+      : m_name(n), m_typeConstraint(typeConstraint), m_phpCode(phpCode),
+        m_typeconst(typeconst) {
       if (!val) {
         m_val.clear();
       } else {
@@ -123,11 +126,13 @@ class PreClassEmitter {
     const folly::Optional<TypedValue>& valOption() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
     bool isAbstract()       const { return !m_val.hasValue(); }
+    bool isTypeconst() const { return m_typeconst; }
 
     template<class SerDe> void serde(SerDe& sd) {
       sd(m_name)
         (m_val)
-        (m_phpCode);
+        (m_phpCode)
+        (m_typeconst);
     }
 
    private:
@@ -135,6 +140,7 @@ class PreClassEmitter {
     LowStringPtr m_typeConstraint;
     folly::Optional<TypedValue> m_val;
     LowStringPtr m_phpCode;
+    bool m_typeconst;
   };
 
   typedef IndexedStringMap<Prop, true, Slot> PropMap;
@@ -179,9 +185,11 @@ class PreClassEmitter {
                    RepoAuthType);
   const Prop& lookupProp(const StringData* propName) const;
   bool addConstant(const StringData* n, const StringData* typeConstraint,
-                   const TypedValue* val, const StringData* phpCode);
+                   const TypedValue* val, const StringData* phpCode,
+                   const bool typeConst);
   bool addAbstractConstant(const StringData* n,
-                           const StringData* typeConstraint);
+                           const StringData* typeConstraint,
+                           const bool typeConst);
   void addUsedTrait(const StringData* traitName);
   void addClassRequirement(const PreClass::ClassRequirement req) {
     m_requirements.push_back(req);

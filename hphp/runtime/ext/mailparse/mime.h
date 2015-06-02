@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_PHP_MAILPARSE_MIME_H_
 #define incl_HPHP_PHP_MAILPARSE_MIME_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/mailparse/rfc822.h"
 #include "hphp/runtime/base/string-buffer.h"
 
@@ -81,6 +81,8 @@ private:
     void rfc2231_to_mime(StringBuffer &value_buf, char* value,
                          int charset_p, int prevcharset_p);
   };
+
+  template <typename F> friend void scan(const MimePart::MimeHeader&, F&);
 
 private:
   static void UpdatePositions(SmartPtr<MimePart> part, int newendpos,

@@ -21,15 +21,19 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/std/ext_std_math.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
 
 // TODO(#3704) Remove when xdebug fully implemented
@@ -338,6 +342,12 @@ static void refresh_xdebug_profiler() {
   }
 }
 
+static bool is_output_tty() {
+  auto& tty = XDEBUG_GLOBAL(OutputIsTTY);
+  if (tty.hasValue()) return *tty;
+  return *(tty = isatty(STDOUT_FILENO));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // XDebug Implementation
 
@@ -425,6 +435,13 @@ static bool HHVM_FUNCTION(xdebug_code_coverage_started) {
 }
 
 // TODO(#3704) This requires var_dump
+/*
+ * Requirements:
+ *
+ *   - xdebug_get_zval_value_fancy
+ *   - xdebug_get_zval_value_ansi
+ *   - xdebug_get_zval_value
+ */
 static TypedValue* HHVM_FN(xdebug_debug_zval)(ActRec* ar)
   XDEBUG_NOTIMPLEMENTED
 
@@ -644,11 +661,45 @@ static double HHVM_FUNCTION(xdebug_time_index) {
   return micro * 1.0e-6;
 }
 
-// TODO(#3704) Almost everything left relies on this. Need to translate xdebug's
-//             var_dump code in xdebug_var.c into the appropriate code in
-//             xdebug_var.cpp
-static TypedValue* HHVM_FN(xdebug_var_dump)(ActRec* ar)
-  XDEBUG_NOTIMPLEMENTED
+static void do_var_dump(const Variant& v) {
+  auto const cli = XDEBUG_GLOBAL(CliColor);
+  XDebugExporter exporter;
+  exporter.max_depth = XDEBUG_GLOBAL(VarDisplayMaxDepth);
+  exporter.max_children = XDEBUG_GLOBAL(VarDisplayMaxChildren);
+  exporter.max_data = XDEBUG_GLOBAL(VarDisplayMaxData);
+  exporter.page = 0;
+
+  String str;
+
+  auto const html_errors =
+    ThreadInfo::s_threadInfo->m_reqInjectionData.hasHtmlErrors();
+  if (html_errors) {
+    str = xdebug_get_zval_value_fancy(v, exporter);
+  } else if ((cli == 1 && is_output_tty()) || cli == 2) {
+    str = xdebug_get_zval_value_ansi(v, exporter);
+  } else {
+    str = xdebug_get_zval_value_text(v, exporter);
+  }
+
+  g_context->write(str);
+}
+
+void HHVM_FUNCTION(
+  xdebug_var_dump,
+  const Variant& v,
+  const Array& _argv /* = null_array */
+) {
+  if (!XDEBUG_GLOBAL(OverloadVarDump) || !XDEBUG_GLOBAL(DefaultEnable)) {
+    HHVM_FN(var_dump)(v, _argv);
+    return;
+  }
+
+  do_var_dump(v);
+  auto const size = _argv.size();
+  for (int64_t i = 0; i < size; ++i) {
+    do_var_dump(_argv[i]);
+  }
+}
 
 static void HHVM_FUNCTION(_xdebug_check_trigger_vars) {
   if (XDebugExtension::Enable &&
@@ -760,17 +811,41 @@ static void loadEnvConfig(std::map<std::string, std::string>& envCfg) {
   }
 }
 
+// Stores our HDF-specified values (only integral values for now) across
+// requests.
+static std::map<const char*, int> config_values;
+
 void XDebugExtension::moduleLoad(const IniSetting::Map& ini, Hdf xdebug_hdf) {
-  auto ini_val = ini.get_ptr(XDEBUG_INI("enable"));
-  if (ini_val != nullptr) {
-    ini_on_update(*ini_val, Enable);
+  assert(config_values.empty());
+
+  auto debugger = xdebug_hdf["Eval"]["Debugger"];
+
+  // Get everything as bools.
+  #define XDEBUG_OPT(T, name, sym, val) { \
+    std::string key = "XDebug" #sym; \
+    config_values[#sym] = Config::GetBool(ini, xdebug_hdf, \
+                                       "Eval.Debugger." + key, val); \
   }
+  XDEBUG_HDF_CFG
+  #undef XDEBUG_OPT
+
+  // But patch up overload_var_dump since it's actually an int.
+  config_values["OverloadVarDump"] =
+    Config::GetInt32(ini, xdebug_hdf, "Eval.Debugger.XDebugOverloadVarDump", 1);
+
+  // XDebug is disabled by default.
+  Config::Bind(Enable, ini, xdebug_hdf, "Eval.Debugger.XDebugEnable", false);
 }
 
 void XDebugExtension::moduleInit() {
   if (!Enable) {
     return;
   }
+
+  // Stacktraces are always on when XDebug is enabled
+  Logger::SetTheLogger(new ExtendedLogger());
+  ExtendedLogger::EnabledByDefault = true;
+
   Native::registerConstant<KindOfInt64>(
     s_XDEBUG_CC_UNUSED.get(), k_XDEBUG_CC_UNUSED
   );
@@ -842,6 +917,18 @@ void XDebugExtension::requestInit() {
                      XDEBUG_INI(name), &XDEBUG_GLOBAL(sym)); \
   }
   XDEBUG_CFG
+  #undef XDEBUG_OPT
+
+  #define XDEBUG_OPT(T, name, sym, val) { \
+    /* HDF values take priority over INI. */ \
+    auto iter = config_values.find(#sym); \
+    XDEBUG_GLOBAL(sym) = iter != config_values.end() \
+      ? iter->second \
+      : xdebug_init_opt<T>(name, val, env_cfg); \
+    IniSetting::Bind(this, IniSetting::PHP_INI_ALL, XDEBUG_INI(name), \
+                     &XDEBUG_GLOBAL(sym)); \
+  }
+  XDEBUG_HDF_CFG
   #undef XDEBUG_OPT
 
   // xdebug.dump.*
@@ -927,6 +1014,7 @@ bool XDebugExtension::Enable = false;
   IMPLEMENT_THREAD_LOCAL(T, XDebugExtension::sym);
 XDEBUG_CFG
 XDEBUG_MAPPED_CFG
+XDEBUG_HDF_CFG
 XDEBUG_DUMP_CFG
 XDEBUG_PROF_CFG
 XDEBUG_CUSTOM_GLOBALS

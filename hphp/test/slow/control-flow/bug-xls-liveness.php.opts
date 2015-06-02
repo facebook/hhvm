@@ -1,0 +1,2 @@
+-vEval.JitPGORegionSelector=wholecfg
+-vEval.JitPGOThreshold=2

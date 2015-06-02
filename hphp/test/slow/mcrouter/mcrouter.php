@@ -43,7 +43,7 @@ $wh = Vector {
   set_get_del($mcr),
   set_inc_dec($mcr),
 };
-$results = HH\asio\v($wh)->join();
+$results = HH\Asio\join(HH\Asio\v($wh));
 foreach ($results as $result) {
   var_dump($result);
 }

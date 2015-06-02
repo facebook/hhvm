@@ -13,11 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/irgen-ret.h"
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 
-#include "hphp/runtime/vm/jit/irgen-ringbuffer.h"
+#include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 
@@ -29,9 +29,9 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void retSurpriseCheck(HTS& env, SSATmp* frame, SSATmp* retVal) {
-  ringbuffer(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
+const StaticString s_returnHook("SurpriseReturnHook");
 
+void retSurpriseCheck(IRGS& env, SSATmp* frame, SSATmp* retVal) {
   /*
    * This is a weird situation for throwing: we've partially torn down the
    * ActRec (decref'd all the frame's locals), and we've popped the return
@@ -49,22 +49,19 @@ void retSurpriseCheck(HTS& env, SSATmp* frame, SSATmp* retVal) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
+      ringbufferMsg(env, Trace::RBTypeMsg, s_returnHook.get());
       gen(env, ReturnHook, frame, retVal);
     }
   );
+  ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
 }
 
-void freeLocalsAndThis(HTS& env) {
+void freeLocalsAndThis(IRGS& env) {
   auto const localCount = curFunc(env)->numLocals();
 
   auto const shouldFreeInline = [&]() -> bool {
     // In a pseudomain, we have to do a non-inline DecRef, because we can't
-    // side-exit in the middle of the sequence of LdLocPseudoMains.  In LLVM,
-    // non-inline decrefs are not currently supported, so we have to punt.
-    if (mcg->useLLVM()) {
-      if (curFunc(env)->isPseudoMain()) PUNT(LLVMPsuedoMain-RetC);
-      return true;
-    }
+    // side-exit in the middle of the sequence of LdLocPseudoMains.
     if (curFunc(env)->isPseudoMain()) return false;
 
     auto const count = mcg->numTranslations(
@@ -73,7 +70,7 @@ void freeLocalsAndThis(HTS& env) {
     if (localCount > 0 && count > kTooPolyRet) return false;
     auto numRefCounted = int{0};
     for (auto i = uint32_t{0}; i < localCount; ++i) {
-      if (env.irb->localType(i, DataTypeGeneric).maybe(Type::Counted)) {
+      if (env.irb->localType(i, DataTypeGeneric).maybe(TCounted)) {
         ++numRefCounted;
       }
     }
@@ -89,19 +86,16 @@ void freeLocalsAndThis(HTS& env) {
     gen(env, GenericRetDecRefs, fp(env));
   }
 
-  if (curFunc(env)->mayHaveThis()) gen(env, DecRefThis, fp(env));
+  decRefThis(env);
 }
 
-void normalReturn(HTS& env, SSATmp* retval) {
+void normalReturn(IRGS& env, SSATmp* retval) {
   gen(env, StRetVal, fp(env), retval);
-  gen(env, RetAdjustStk, fp(env));
-  auto const retAddr = gen(env, LdRetAddr, fp(env));
-  gen(env, FreeActRec, fp(env));
-  gen(env, RetCtrl, RetCtrlData { IRSPOffset{0}, false },
-    sp(env), fp(env), retAddr);
+  auto const data = RetCtrlData { offsetToReturnSlot(env), false };
+  gen(env, RetCtrl, data, sp(env), fp(env));
 }
 
-void asyncFunctionReturn(HTS& env, SSATmp* retval) {
+void asyncFunctionReturn(IRGS& env, SSATmp* retval) {
   if (!resumed(env)) {
     // Return from an eagerly-executed async function: wrap the return value in
     // a StaticWaitHandle object and return that normally.
@@ -122,30 +116,26 @@ void asyncFunctionReturn(HTS& env, SSATmp* retval) {
 
   auto const retAddr = gen(env, LdRetAddr, fp(env));
   gen(env, FreeActRec, fp(env));
-
-  // Decref the AsyncFunctionWaitHandle.  The TakeRef informs refcount-opts
-  // that we're going to consume the reference.
-  gen(env, TakeRef, resumableObj);
   gen(env, DecRef, resumableObj);
 
   gen(
     env,
-    RetCtrl,
-    RetCtrlData { offsetFromIRSP(env, BCSPOffset{0}), false },
+    AsyncRetCtrl,
+    IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
     sp(env),
     fp(env),
     retAddr
   );
 }
 
-void generatorReturn(HTS& env, SSATmp* retval) {
+void generatorReturn(IRGS& env, SSATmp* retval) {
   // Clear generator's key and value.
-  auto const oldKey = gen(env, LdContArKey, Type::Cell, fp(env));
-  gen(env, StContArKey, fp(env), cns(env, Type::InitNull));
+  auto const oldKey = gen(env, LdContArKey, TCell, fp(env));
+  gen(env, StContArKey, fp(env), cns(env, TInitNull));
   gen(env, DecRef, oldKey);
 
-  auto const oldValue = gen(env, LdContArValue, Type::Cell, fp(env));
-  gen(env, StContArValue, fp(env), cns(env, Type::InitNull));
+  auto const oldValue = gen(env, LdContArValue, TCell, fp(env));
+  gen(env, StContArValue, fp(env), cns(env, TInitNull));
   gen(env, DecRef, oldValue);
 
   gen(env,
@@ -154,23 +144,19 @@ void generatorReturn(HTS& env, SSATmp* retval) {
       fp(env));
 
   // Push return value of next()/send()/raise().
-  push(env, cns(env, Type::InitNull));
+  push(env, cns(env, TInitNull));
 
   spillStack(env);
-  auto const retAddr = gen(env, LdRetAddr, fp(env));
-  gen(env, FreeActRec, fp(env));
-
   gen(
     env,
     RetCtrl,
-    RetCtrlData { offsetFromIRSP(env, BCSPOffset{0}), false },
+    RetCtrlData { offsetFromIRSP(env, BCSPOffset{0}), true },
     sp(env),
-    fp(env),
-    retAddr
+    fp(env)
   );
 }
 
-void implRet(HTS& env, Type type) {
+void implRet(IRGS& env) {
   if (curFunc(env)->attrs() & AttrMayUseVV) {
     // Note: this has to be the first thing, because we cannot bail after
     //       we start decRefing locs because then there'll be no corresponding
@@ -180,7 +166,7 @@ void implRet(HTS& env, Type type) {
 
   // Pop the return value. Since it will be teleported to its place in memory,
   // we don't care about the type.
-  auto const retval = pop(env, type, DataTypeGeneric);
+  auto const retval = pop(env, DataTypeGeneric);
   freeLocalsAndThis(env);
   retSurpriseCheck(env, fp(env), retval);
 
@@ -188,7 +174,7 @@ void implRet(HTS& env, Type type) {
     return asyncFunctionReturn(env, retval);
   }
   if (resumed(env)) {
-    assert(curFunc(env)->isNonAsyncGenerator());
+    assertx(curFunc(env)->isNonAsyncGenerator());
     return generatorReturn(env, retval);
   }
   return normalReturn(env, retval);
@@ -198,24 +184,34 @@ void implRet(HTS& env, Type type) {
 
 }
 
-void emitRetC(HTS& env) {
+IRSPOffset offsetToReturnSlot(IRGS& env) {
+  return offsetFromIRSP(
+    env,
+    BCSPOffset{
+      logicalStackDepth(env).offset +
+        AROFF(m_r) / int32_t{sizeof(Cell)}
+    }
+  );
+}
+
+void emitRetC(IRGS& env) {
   if (curFunc(env)->isAsyncGenerator()) PUNT(RetC-AsyncGenerator);
 
   if (isInlining(env)) {
-    assert(!resumed(env));
-    retFromInlined(env, Type::Cell);
+    assertx(!resumed(env));
+    retFromInlined(env);
   } else {
-    implRet(env, Type::Cell);
+    implRet(env);
   }
 }
 
-void emitRetV(HTS& env) {
-  assert(!resumed(env));
-  assert(!curFunc(env)->isResumable());
+void emitRetV(IRGS& env) {
+  assertx(!resumed(env));
+  assertx(!curFunc(env)->isResumable());
   if (isInlining(env)) {
-    retFromInlined(env, Type::BoxedInitCell);
+    retFromInlined(env);
   } else {
-    implRet(env, Type::BoxedInitCell);
+    implRet(env);
   }
 }
 

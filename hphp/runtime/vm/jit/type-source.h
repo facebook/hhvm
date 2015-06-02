@@ -40,7 +40,7 @@ struct TypeSource {
   };
 
   static TypeSource makeValue(SSATmp* value) {
-    assert(value);
+    assertx(value);
     TypeSource src;
     src.value = value;
     src.kind = Kind::Value;
@@ -48,7 +48,7 @@ struct TypeSource {
   }
 
   static TypeSource makeGuard(const IRInstruction* guard) {
-    assert(guard);
+    assertx(guard);
     TypeSource src;
     src.guard = guard;
     src.kind = Kind::Guard;

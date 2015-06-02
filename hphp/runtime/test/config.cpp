@@ -21,12 +21,14 @@
 namespace HPHP {
 
 TEST(Config, HdfToIni) {
-  EXPECT_EQ("hhvm.jit", hdfToIni("Eval.Jit"));
-  EXPECT_EQ("hhvm.jit_llvm", hdfToIni("Eval.JitLLVM"));
+  EXPECT_EQ("hhvm.jit", Config::IniName("Eval.Jit"));
+  EXPECT_EQ("hhvm.jit_llvm", Config::IniName("Eval.JitLLVM"));
 
-  EXPECT_EQ("hhvm.server.ssl_port", hdfToIni("Server.SSLPort"));
-  EXPECT_EQ("max_file_uploads", hdfToIni("Server.Upload.MaxFileUploads"));
-  EXPECT_EQ("hhvm.force_hh", hdfToIni("Eval.EnableHipHopSyntax"));
+  EXPECT_EQ("hhvm.server.ssl_port", Config::IniName("Server.SSLPort"));
+  EXPECT_EQ("max_file_uploads",
+            Config::IniName("Server.Upload.MaxFileUploads"));
+  EXPECT_EQ("hhvm.force_hh", Config::IniName("Eval.EnableHipHopSyntax"));
+  EXPECT_EQ("server.ssl_port", Config::IniName("Server.SSLPort", false));
 }
 
 }

@@ -20,19 +20,20 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/asm-x64.h"
 
 namespace HPHP { namespace jit {
 
+//////////////////////////////////////////////////////////////////////
+
 #define SERVICE_REQUESTS \
   /*
-   * BIND_* all are requests for the first time a call, jump, or
-   * whatever is needed.  This generally involves translating new code
-   * and then patching an address supplied as a service request
-   * argument.
+   * BIND_* all are requests for the first time a jump is needed.  This
+   * generally involves translating new code and then patching an address
+   * supplied as a service request argument.
    */ \
-  REQ(BIND_CALL)         \
   REQ(BIND_JMP)          \
   REQ(BIND_ADDR)         \
   REQ(BIND_JMPCC_FIRST)  \
@@ -54,15 +55,14 @@ namespace HPHP { namespace jit {
    * this ActRec will be set to a stub that raises POST_INTERP_RET,
    * since it doesn't have a TCA to return to.
    *
-   * This request is raised in the case that translated machine code
-   * executes the RetC for a frame that was pushed by the interpreter.
+   * REQ_POST_INTERP_RET is raised in the case that translated machine code
+   * executes the RetC for a frame that was pushed by the
+   * interpreter. REQ_POST_DEBUGGER_RET is a similar request that is used when
+   * translated code returns from a frame that had its saved return address
+   * smashed by the debugger.
    */ \
   REQ(POST_INTERP_RET) \
-  \
-  /*
-   * Raised when the execution stack overflowed.
-   */ \
-  REQ(STACK_OVERFLOW)
+  REQ(POST_DEBUGGER_RET)
 
 enum ServiceRequest {
 #define REQ(nm) REQ_##nm,
@@ -130,7 +130,7 @@ inline ServiceReqArgInfo RipRelative(TCA addr) {
   };
 }
 
-typedef jit::vector<ServiceReqArgInfo> ServiceReqArgVec;
+using ServiceReqArgVec = jit::vector<ServiceReqArgInfo>;
 
 union ServiceReqArg {
   TCA tca;
@@ -149,9 +149,12 @@ union ServiceReqArg {
 struct ServiceReqInfo {
   ServiceRequest req;
   TCA stub;
-  ActRec* stashedAR;
   ServiceReqArg args[4];
 };
+static_assert(sizeof(ServiceReqInfo) == 0x30,
+              "rsp adjustments in handleSRHelper");
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * Assembly stub called by translated code to pack argument registers into a
@@ -160,11 +163,28 @@ struct ServiceReqInfo {
  */
 extern "C" void handleSRHelper();
 
+//////////////////////////////////////////////////////////////////////
+
 /*
- * Assembly stub used by the unwinder to reload vmsp() and vmfp() into their
- * ABI registers then jump somewhere in the TC.
+ * Return the VM stack offset a service request was associated with.  This
+ * function is only legal to call with service requests that were created with
+ * an FPInvOffset.  (TODO: list of when we do that.)
  */
-extern "C" void handleSRResumeTC();
+FPInvOffset serviceReqSPOff(TCA);
+
+/*
+ * A REQ_BIND_JMP service request passes an address of a jump that can be
+ * patched.  This function lets you change this jump address for an existing
+ * REQ_BIND_JMP stub to `newJmpIp'.  The caller must indicate whether the stub
+ * was created with a target SrcKey that is a resumed function.
+ *
+ * Pre: the `stub' must be a REQ_BIND_JMP stub.
+ */
+void adjustBindJmpPatchableJmpAddress(TCA stub,
+                                      bool targetIsResumed,
+                                      TCA newJmpIp);
+
+//////////////////////////////////////////////////////////////////////
 
 }}
 

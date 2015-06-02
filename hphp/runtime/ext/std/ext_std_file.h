@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_FILE_H_
 #define incl_HPHP_EXT_FILE_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 
 // To get the values of the SEEK constants

@@ -18,7 +18,7 @@
 #ifndef PHP_SOAP_H
 #define PHP_SOAP_H
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include <map>
 #include <memory>
 #include <vector>
@@ -88,26 +88,25 @@ class SoapData final : public RequestEventHandler {
           sdlCache;
 
 public:
-  int64_t m_cache;
+  SoapData();
 
-private:
-  int64_t m_cache_ttl;
-  sdlCache m_mem_cache; // URL => sdl
-
-public:
   sdl *get_sdl(const char *uri, long cache_wsdl, HttpClient *http = NULL);
   encodeMap *register_typemap(encodeMapPtr typemap);
   void register_encoding(xmlCharEncodingHandlerPtr encoding);
 
-public:
-  SoapData();
+  void requestInit() override { reset(); }
+  void requestShutdown() override { reset(); }
 
+private:
+  sdlPtr get_sdl_impl(const char *uri, long cache_wsdl, HttpClient *http);
+  void reset();
+
+public:
   // globals that live across requests
   encodeMap m_defEnc;   // name => encode
   std::map<int, encodePtr> m_defEncIndex; // type => encode
   std::map<std::string, std::string> m_defEncNs; // namespaces => prefixes
 
-public:
   // request scope globals to avoid passing them between functions
   int m_soap_version;
   sdl *m_sdl;
@@ -126,17 +125,15 @@ public:
   int m_cur_uniq_ref;
   Array m_ref_map; // reference handling
 
-public:
-  virtual void requestInit() { reset();}
-  virtual void requestShutdown() { reset();}
+  int64_t m_cache;
 
 private:
+  int64_t m_cache_ttl;
+  sdlCache m_mem_cache; // URL => sdl
+
   hphp_hash_set<sdlPtr> m_sdls;
   hphp_hash_set<encodeMapPtr> m_typemaps;
   hphp_hash_set<xmlCharEncodingHandlerPtr> m_encodings;
-
-  sdlPtr get_sdl_impl(const char *uri, long cache_wsdl, HttpClient *http);
-  void reset();
 };
 
 #define USE_SOAP_GLOBAL  SoapData *__sg__ = s_soap_data.get();

@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_REFLECTION_H_
 #define incl_HPHP_EXT_REFLECTION_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
@@ -78,6 +78,7 @@ class ReflectionFuncHandle {
   }
 
  private:
+  template <typename F> friend void scan(const ReflectionFuncHandle&, F&);
   const Func* m_func{nullptr};
 };
 
@@ -123,7 +124,43 @@ class ReflectionClassHandle {
   void wakeup(const Variant& content, ObjectData* obj);
 
  private:
+  template <typename F> friend void scan(const ReflectionClassHandle&, F&);
   const Class* m_cls{nullptr};
+};
+
+/* A ReflectionConstHandle is a NativeData object wrapping a Const*
+ * for the purposes of ReflectionTypeConstant. */
+extern const StaticString s_ReflectionConstHandle;
+class ReflectionConstHandle {
+ public:
+  ReflectionConstHandle(): m_const(nullptr) {}
+  explicit ReflectionConstHandle(const Class::Const* cst): m_const(cst) {};
+  ReflectionConstHandle(const ReflectionConstHandle&) = delete;
+  ReflectionConstHandle& operator=(const ReflectionConstHandle& other) {
+    m_const = other.m_const;
+    return *this;
+  }
+  ~ReflectionConstHandle() {}
+
+  static ReflectionConstHandle* Get(ObjectData* obj) {
+    return Native::data<ReflectionConstHandle>(obj);
+  }
+
+  static const Class::Const* GetConstFor(ObjectData* obj) {
+    return Native::data<ReflectionConstHandle>(obj)->getConst();
+  }
+
+  const Class::Const* getConst() { return m_const; }
+
+  void setConst(const Class::Const* cst) {
+    assert(cst != nullptr);
+    assert(m_const == nullptr);
+    m_const = cst;
+  }
+
+ private:
+  template <typename F> friend void scan(const ReflectionConstHandle&, F&);
+  const Class::Const* m_const{nullptr};
 };
 
 namespace DebuggerReflection {

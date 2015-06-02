@@ -37,12 +37,12 @@ struct SSATmp;
 
 struct FPIInfo {
   SSATmp* returnSP;
-  FPAbsOffset returnSPOff; // return's logical sp offset; stkptr might differ
+  FPInvOffset returnSPOff; // return's logical sp offset; stkptr might differ
   IRInstruction* spillFrame;
 };
 
 /*
- * HHBC Translation State.
+ * IR-Generation State.
  *
  * This structure contains the main state bag for the HHIR frontend, which
  * translates HHBC into HHIR.  The parse-time state in HHIR is relatively
@@ -51,11 +51,11 @@ struct FPIInfo {
  * represent all operations on generic types some simple type analysis is
  * required to determine high-level compilation strategy.
  */
-struct HTS {
-  explicit HTS(TransContext);
+struct IRGS {
+  explicit IRGS(TransContext ctx);
 
   /*
-   * TODO: refactor this code eventually so HTS doesn't own its IRUnit (or its
+   * TODO: refactor this code eventually so IRGS doesn't own its IRUnit (or its
    * IRBuilder).  The IRUnit should be the result of running the code in the ht
    * module.
    */
@@ -68,6 +68,11 @@ struct HTS {
    * are in. We push and pop as we deal with inlined calls.
    */
   std::vector<SrcKey> bcStateStack;
+
+  /*
+   * The current inlining level.  0 means we're not inlining.
+   */
+  uint16_t inlineLevel{0};
 
   /*
    * The id of the profiling translation for the code we're currently
@@ -83,10 +88,19 @@ struct HTS {
   const NormalizedInstruction* currentNormalizedInstruction{nullptr};
 
   /*
-   * True if we're on the last HHBC opcode that will be emitted for this
-   * region.
+   * True if we're on the first HHBC instruction that will be executed
+   * for this instruction.  This is the first bytecode instruction in
+   * either the region entry block or any other block in its
+   * retranslation chain (i.e. that can be reached due to guard
+   * failures before advancing VM state for any bytecode instruction).
    */
-  bool lastBcOff{false};
+  bool firstBcInst{true};
+
+  /*
+   * True if we're on the last HHBC instruction that will be emitted
+   * for this region.
+   */
+  bool lastBcInst{false};
 
   /*
    * The FPI stack is used for inlining---when we start inlining at an FCall,
@@ -100,7 +114,7 @@ struct HTS {
    * offset pair to this stack to prevent it from being erroneously
    * popped during an FCall.
    */
-  std::stack<std::pair<SSATmp*,FPAbsOffset>> fpiActiveStack;
+  std::stack<std::pair<SSATmp*,FPInvOffset>> fpiActiveStack;
 
   /*
    * The function to use to create catch blocks when instructions that can
@@ -117,7 +131,7 @@ struct HTS {
 /*
  * Debug-printable string.
  */
-std::string show(const HTS&);
+std::string show(const IRGS&);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -1,7 +1,7 @@
 <?hh
 // Test prototype of builtin classes
 
-function outputPrototype($rf) {
+function outputPrototype(ReflectionMethod $rf) {
   try {
     $prototype = $rf->getPrototype();
     print $prototype->getDeclaringClass()->getName() .
@@ -12,25 +12,25 @@ function outputPrototype($rf) {
   }
 }
 
-class BlockableWaitHandleSubClass extends BlockableWaitHandle {
-  public function getWaitHandle() {
-  }
-  public function getContextIdx() {
-  }
+class SimpleXMLElementChild extends SimpleXMLElement {
 }
+
 
 function main() {
   $tests = array(
-    array(WaitHandle::class, "getWaitHandle"),
-    array("Generator", "next"),
-    array(BlockableWaitHandle::class, "getContextIdx"),
-    array("BlockableWaitHandleSubClass", "getWaitHandle"),
-    array("BlockableWaitHandleSubClass", "getContextIdx"),
+    tuple(WaitHandle::class, "getWaitHandle"),
+    tuple(WaitHandle::class, "join"),
+    tuple(WaitableWaitHandle::class, "getWaitHandle"),
+    tuple(WaitableWaitHandle::class, "join"),
+    tuple(Generator::class, "next"),
+    tuple(Generator::class, "getOrigFuncName"),
+    tuple(SimpleXMLElementChild::class, '__construct'),
+    tuple(SimpleXMLElement::class, 'offsetSet'),
+    tuple(SimpleXMLElementChild::class, 'offsetSet'),
   );
 
   foreach ($tests as $test) {
-    $rf = new ReflectionMethod($test[0], $test[1]);
-    outputPrototype($rf);
+    outputPrototype(new ReflectionMethod(...$test));
   }
 }
 

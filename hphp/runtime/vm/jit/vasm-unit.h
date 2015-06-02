@@ -62,39 +62,36 @@ struct VcallArgs {
 /*
  * Vasm constant.
  *
- * Either a 1, 4, or 8 byte unsigned value, or the disp32 part of a
- * thread-local address of an immutable constant that varies by thread.
+ * Either a 1, 4, or 8 byte unsigned value, 8 byte double, or the disp32 part
+ * of a thread-local address of an immutable constant that varies by
+ * thread. Constants may also represent an undefined value, indicated by the
+ * isUndef member.
  */
 struct Vconst {
-  enum Kind { Quad, Long, Byte, ThreadLocal };
+  enum Kind { Quad, Long, Byte, Double, ThreadLocal };
 
-  /*
-   * Constructors.
-   */
   Vconst() : kind(Quad), val(0) {}
+  /* implicit */ Vconst(Kind k) : kind(k), isUndef(true), val(0) {}
   /* implicit */ Vconst(bool b) : kind(Byte), val(b) {}
   /* implicit */ Vconst(uint8_t b) : kind(Byte), val(b) {}
   /* implicit */ Vconst(uint32_t i) : kind(Long), val(i) {}
   /* implicit */ Vconst(uint64_t i) : kind(Quad), val(i) {}
+  /* implicit */ Vconst(double d) : kind(Double), doubleVal(d) {}
   /* implicit */ Vconst(Vptr tl) : kind(ThreadLocal), disp(tl.disp) {
-    assert(!tl.base.isValid() &&
+    assertx(!tl.base.isValid() &&
            !tl.index.isValid() &&
            tl.seg == Vptr::FS);
   }
 
-  /*
-   * Comparison.
-   */
   bool operator==(Vconst other) const {
-    return kind == other.kind && val == other.val;
+    return kind == other.kind &&
+      ((isUndef && other.isUndef) || val == other.val);
   }
 
-  /*
-   * Hasher.
-   */
   struct Hash {
     size_t operator()(Vconst c) const {
-      return std::hash<uint64_t>()(c.val) ^ std::hash<int>()(c.kind);
+      return
+        std::hash<uint64_t>()(c.val) ^ std::hash<int>()(c.kind) ^ c.isUndef;
     }
   };
 
@@ -102,8 +99,10 @@ struct Vconst {
   // Data members.
 
   Kind kind;
+  bool isUndef{false};
   union {
     uint64_t val;
+    double doubleVal;
     int64_t disp; // really, int32 offset from %fs
   };
 };
@@ -153,6 +152,7 @@ struct Vunit {
   Vreg makeConst(int32_t v) { return makeConst(int64_t(v)); }
   Vreg makeConst(DataType t) { return makeConst(uint64_t(t)); }
   Vreg makeConst(Immed64 v) { return makeConst(uint64_t(v.q())); }
+  Vreg makeConst(Vconst::Kind k);
 
   template<class R, class... Args>
   Vreg makeConst(R (*fn)(Args...)) { return makeConst(CTCA(fn)); }

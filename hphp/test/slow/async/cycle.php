@@ -12,5 +12,5 @@ async function foo() {
   return "finished!";
 }
 
-var_dump(foo()->join());
+var_dump(HH\Asio\join(foo()));
 

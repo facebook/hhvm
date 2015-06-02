@@ -16,7 +16,7 @@
 #include "hphp/runtime/vm/repo.h"
 
 #include <folly/Format.h>
-#include <folly/experimental/Singleton.h>
+#include <folly/Singleton.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"

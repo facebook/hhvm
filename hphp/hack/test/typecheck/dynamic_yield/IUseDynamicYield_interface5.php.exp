@@ -1,0 +1,12 @@
+File "IUseDynamicYield_interface5.php", line 22, characters 7-9:
+This object is of type Foo (Typing[4054])
+File "IUseDynamicYield_interface5.php", line 22, characters 22-25:
+It is incompatible with this object of type IFoo
+because some declarations are incompatible.
+Read the following to see why:
+File "IUseDynamicYield_interface5.php", line 22, characters 7-9:
+This object doesn't implement the method getStuff
+File "IUseDynamicYield_interface5.php", line 22, characters 22-25:
+Which is required by this interface
+File "IUseDynamicYield_interface5.php", line 19, characters 19-26:
+As defined here

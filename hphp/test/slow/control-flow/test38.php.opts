@@ -1,0 +1,3 @@
+-vEval.JitPGORegionSelector=wholecfg
+-vEval.JitPGOThreshold=3
+-vEval.JitLoops=1

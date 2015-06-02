@@ -20,8 +20,6 @@ namespace HPHP {
 
 #ifdef USE_GCC_FAST_TLS
 
-ThreadLocalManager ThreadLocalManager::s_manager;
-
 void ThreadLocalManager::OnThreadExit(void * p) {
   while (p != nullptr) {
     ThreadLocalNode<void*> * pNode = (ThreadLocalNode<void*>*)p;

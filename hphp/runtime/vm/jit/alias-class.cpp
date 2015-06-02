@@ -35,87 +35,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-struct StkPtrInfo {
-  SSATmp* fp;
-  FPRelOffset offset;
-};
-
-/*
- * For a StkPtr, determine the frame pointer it is part of, and the logical
- * offset (in cells) from that frame.  ("logical" because in a generator this
- * number is not the actual difference between the two pointers.)
- */
-StkPtrInfo canonicalize_stkptr(SSATmp* sp) {
-  assert(sp->type() <= Type::StkPtr);
-
-  auto const inst = sp->inst();
-  switch (inst->op()) {
-  case DefSP:
-    return StkPtrInfo { inst->src(0),
-      FPRelOffset{-inst->extra<DefSP>()->offset} };
-  case ResetSP:
-    return StkPtrInfo { inst->src(0),
-      FPRelOffset{-inst->extra<ResetSP>()->offset} };
-  case ReDefSP:
-    return StkPtrInfo { inst->src(0),
-      FPRelOffset{-inst->extra<ReDefSP>()->offset} };
-  case RetAdjustStk:
-    return StkPtrInfo { inst->src(0), FPRelOffset{2} };
-
-  case AdjustSP:
-    {
-      auto const prev = canonicalize_stkptr(inst->src(0));
-      return StkPtrInfo {
-        prev.fp,
-        prev.offset + inst->extra<AdjustSP>()->offset.offset
-      };
-    }
-
-  case Call:
-    {
-      auto const prev = canonicalize_stkptr(inst->src(0));
-      auto const extra = inst->extra<Call>();
-      return StkPtrInfo {
-        prev.fp,
-        prev.offset + extra->spOffset.offset +
-          safe_cast<int32_t>(extra->numParams) +
-          int32_t{kNumActRecCells} - 1
-      };
-    }
-
-  case CallArray:
-    {
-      auto const prev = canonicalize_stkptr(inst->src(0));
-      auto const extra = inst->extra<CallArray>();
-      return StkPtrInfo {
-        prev.fp,
-        prev.offset + extra->spOffset.offset + int32_t{kNumActRecCells} + 1 - 1
-      };
-    }
-
-  case ContEnter:
-    {
-      auto const prev = canonicalize_stkptr(inst->src(0));
-      auto const extra = inst->extra<ContEnter>();
-      return StkPtrInfo {
-        prev.fp,
-        prev.offset + extra->spOffset.offset + 1 - 1
-      };
-    }
-
-  default:
-    always_assert_flog(false, "unexpected StkPtr: {}\n", sp->toString());
-  }
-}
-
-AStack canonicalize_stk(AStack stk) {
-  if (stk.base->type() <= Type::FramePtr) return stk;
-  auto const info = canonicalize_stkptr(stk.base);
-  return AStack { info.fp, stk.offset + info.offset.offset, stk.size };
-}
-
-//////////////////////////////////////////////////////////////////////
-
 // Helper for returning the lowest index of an AStack range, non inclusive.
 // I.e. a AStack class affects stack slots in [sp+offset,lowest_offset).
 int32_t lowest_offset(AStack stk) {
@@ -142,6 +61,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BElemS:    break;
   case A::BStack:    break;
   case A::BMIState:  break;
+  case A::BRef:      break;
   }
 
   auto ret = std::string{};
@@ -163,6 +83,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BElemS:   ret += "Es"; break;
     case A::BStack:   ret += "St"; break;
     case A::BMIState: ret += "Mis"; break;
+    case A::BRef:     ret += "Ref"; break;
     }
   }
   return ret;
@@ -170,6 +91,30 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
 
 //////////////////////////////////////////////////////////////////////
 
+}
+
+AStack::AStack(SSATmp* base, int32_t o, int32_t s)
+  : offset(o), size(s)
+{
+  // Always canonicalize to the outermost frame pointer.
+  if (base->isA(TStkPtr)) {
+    auto const defSP = base->inst();
+    always_assert_flog(defSP->is(DefSP),
+                       "unexpected StkPtr: {}\n", base->toString());
+    offset -= defSP->extra<DefSP>()->offset.offset;
+    return;
+  }
+
+  assertx(base->isA(TFramePtr));
+  auto const defInlineFP = base->inst();
+  if (defInlineFP->is(DefInlineFP)) {
+    auto const sp = defInlineFP->src(0)->inst();
+    offset += defInlineFP->extra<DefInlineFP>()->spOffset.offset;
+    offset -= sp->extra<DefSP>()->offset.offset;
+    always_assert_flog(sp->src(0)->inst()->is(DefFP),
+                       "failed to canonicalize to outermost FramePtr: {}\n",
+                       sp->src(0)->toString());
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -199,11 +144,12 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
                                      acls.m_elemS.key->hash());
   case STag::Stack:
     return folly::hash::hash_combine(hash,
-                                     acls.m_stack.base,
                                      acls.m_stack.offset,
                                      acls.m_stack.size);
   case STag::MIState:
     return folly::hash::hash_combine(hash, acls.m_mis.offset);
+  case STag::Ref:
+    return folly::hash::hash_combine(hash, acls.m_ref.boxed);
   }
   not_reached();
 }
@@ -216,7 +162,7 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
     , m_stag(STag::What)                                    \
     , m_##what(x)                                           \
   {                                                         \
-    assert(checkInvariants());                              \
+    assertx(checkInvariants());                             \
   }                                                         \
                                                             \
   folly::Optional<A##What> AliasClass::what() const {       \
@@ -235,6 +181,7 @@ X(ElemI, elemI)
 X(ElemS, elemS)
 X(Stack, stack)
 X(MIState, mis)
+X(Ref, ref)
 
 #undef X
 
@@ -247,6 +194,7 @@ AliasClass::rep AliasClass::stagBit(STag tag) {
   case STag::ElemS:   return BElemS;
   case STag::Stack:   return BStack;
   case STag::MIState: return BMIState;
+  case STag::Ref:     return BRef;
   }
   always_assert(0);
 }
@@ -258,25 +206,25 @@ bool AliasClass::checkInvariants() const {
   case STag::Prop:    break;
   case STag::ElemI:   break;
   case STag::Stack:
-    assert(m_stack.base->type() <= Type::StkPtr ||
-           m_stack.base->type() <= Type::FramePtr);
-    assert(m_stack.size != 0);  // use AEmpty if you want that
-    assert(m_stack.size > 0);
+    assertx(m_stack.size > 0);
     break;
   case STag::ElemS:
-    assert(m_elemS.key->isStatic());
+    assertx(m_elemS.key->isStatic());
     break;
   case STag::MIState:
     break;
+  case STag::Ref:
+    assertx(m_ref.boxed->isA(TBoxedCell));
+    break;
   }
 
-  assert(m_bits & stagBit(m_stag));
+  assertx(m_bits & stagBit(m_stag));
 
   return true;
 }
 
 bool AliasClass::equivData(AliasClass o) const {
-  assert(m_stag == o.m_stag);
+  assertx(m_stag == o.m_stag);
   switch (m_stag) {
   case STag::None:    return true;
   case STag::Frame:   return m_frame.fp == o.m_frame.fp &&
@@ -287,10 +235,10 @@ bool AliasClass::equivData(AliasClass o) const {
                              m_elemI.idx == o.m_elemI.idx;
   case STag::ElemS:   return m_elemS.arr == o.m_elemS.arr &&
                              m_elemS.key == o.m_elemS.key;
-  case STag::Stack:   return m_stack.base == o.m_stack.base &&
-                             m_stack.offset == o.m_stack.offset &&
+  case STag::Stack:   return m_stack.offset == o.m_stack.offset &&
                              m_stack.size == o.m_stack.size;
   case STag::MIState: return m_mis.offset == o.m_mis.offset;
+  case STag::Ref:     return m_ref.boxed == o.m_ref.boxed;
   }
   not_reached();
 }
@@ -302,7 +250,7 @@ bool AliasClass::operator==(AliasClass o) const {
 }
 
 AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
-  assert(a.m_stag == b.m_stag);
+  assertx(a.m_stag == b.m_stag);
   switch (a.m_stag) {
   case STag::None:
     break;
@@ -311,7 +259,8 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
   case STag::ElemI:
   case STag::ElemS:
   case STag::MIState:
-    assert(!a.equivData(b));
+  case STag::Ref:
+    assertx(!a.equivData(b));
     break;
 
   case STag::Stack:
@@ -319,25 +268,15 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
       auto const stkA = a.m_stack;
       auto const stkB = b.m_stack;
 
-      // If two AStack have different bases, we can't union them any better
-      // than AStackAny, since we don't know where they are relative to each
-      // other.  We know two AStacks with different FramePtr bases can't alias,
-      // but that doesn't help us represent a union of them.
-      if (stkA.base != stkB.base) return AliasClass{newBits};
-
       // Make a stack range big enough to contain both of them.
       auto const highest = std::max(stkA.offset, stkB.offset);
       auto const lowest = std::min(lowest_offset(stkA), lowest_offset(stkB));
-      auto const newStack = AStack {
-        stkA.base,
-        highest,
-        highest - lowest
-      };
+      auto const newStack = AStack { highest, highest - lowest };
       auto ret = AliasClass{newBits};
       new (&ret.m_stack) AStack(newStack);
       ret.m_stag = STag::Stack;
-      assert(ret.checkInvariants());
-      assert(a <= ret && b <= ret);
+      assertx(ret.checkInvariants());
+      assertx(a <= ret && b <= ret);
       return ret;
     }
   }
@@ -345,40 +284,83 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
   return AliasClass{newBits};
 }
 
-AliasClass AliasClass::operator|(AliasClass o) const {
+folly::Optional<AliasClass> AliasClass::precise_union(AliasClass o) const {
   if (o <= *this) return *this;
   if (*this <= o) return o;
 
   auto const unioned = static_cast<rep>(m_bits | o.m_bits);
 
-  // Note: union operations are guaranteed to be commutative, so if there are
-  // two non-None stags, we have to consistently choose between them.  For now
-  // we throw both away in any case where they differ, and try to merge them
-  // with unionData if they are the same.
+  // For a precise union, we need to make sure the returned class is not any
+  // bigger than it should be.  This means we can't deal with situations where
+  // we have disjoint stags, and right now we also don't try to deal with
+  // situations that have the same stag in a combinable way.  (E.g. two
+  // adjacent AStack ranges.)
   auto const stag1 = m_stag;
   auto const stag2 = o.m_stag;
-  if (stag1 == stag2) return unionData(unioned, *this, o);
-  if (stag1 != STag::None && stag2 != STag::None) {
+  if (stag1 == STag::None && stag2 == STag::None) {
     return AliasClass{unioned};
   }
-  if (stag2 != STag::None) return o | *this;
+  if (stag1 == STag::None && stag2 != STag::None) {
+    return o.precise_union(*this); // flip args
+  }
+  assertx(stag1 != STag::None);
+  if (stag2 != STag::None)       return folly::none;
+  if (o.m_bits & stagBit(stag1)) return folly::none;
+
+  // Keep the data and stag from this, but change its bits.
+  auto ret = *this;
+  ret.m_bits = unioned;
+  assertx(ret.m_stag == stag1);
+  return ret;
+}
+
+AliasClass AliasClass::operator|(AliasClass o) const {
+  if (auto const c = precise_union(o)) return *c;
+
+  auto const unioned = static_cast<rep>(m_bits | o.m_bits);
+
+  // If they have the same stag, try to merge them with unionData.
+  auto stag1 = m_stag;
+  auto stag2 = o.m_stag;
+  if (stag1 == stag2) return unionData(unioned, *this, o);
+
+  // If one of the alias classes have a non-None stag, we can only keep it if
+  // the other doesn't have the corresponding bit set.
+  if (stag1 != STag::None && (o.m_bits & stagBit(stag1))) stag1 = STag::None;
+  if (stag2 != STag::None && (m_bits & stagBit(stag2))) stag2 = STag::None;
 
   auto ret = AliasClass{unioned};
-  switch (stag1) {
+  if (stag1 == stag2) return ret;       // both None.
+
+  // Note: union operations are guaranteed to be commutative, so if there are
+  // two non-None stags, we have to consistently choose between them. For now
+  // we keep the one with a smaller `rep' value, instead of discarding both.
+  const AliasClass* chosen = &o;
+  auto stag = stag2;
+  if (stag1 != STag::None) {
+    if (stag2 == STag::None || stagBit(stag1) < stagBit(stag2)) {
+      chosen = this;
+      stag = stag1;
+    }
+  }
+
+  switch (stag) {
   case STag::None:
     break;
-  case STag::Frame:   new (&ret.m_frame) AFrame(m_frame); break;
-  case STag::Prop:    new (&ret.m_prop) AProp(m_prop); break;
-  case STag::ElemI:   new (&ret.m_elemI) AElemI(m_elemI); break;
-  case STag::ElemS:   new (&ret.m_elemS) AElemS(m_elemS); break;
-  case STag::Stack:   new (&ret.m_stack) AStack(m_stack); break;
-  case STag::MIState: new (&ret.m_mis) AMIState(m_mis); break;
+  case STag::Frame:   new (&ret.m_frame) AFrame(chosen->m_frame); break;
+  case STag::Prop:    new (&ret.m_prop) AProp(chosen->m_prop); break;
+  case STag::ElemI:   new (&ret.m_elemI) AElemI(chosen->m_elemI); break;
+  case STag::ElemS:   new (&ret.m_elemS) AElemS(chosen->m_elemS); break;
+  case STag::Stack:   new (&ret.m_stack) AStack(chosen->m_stack); break;
+  case STag::MIState: new (&ret.m_mis) AMIState(chosen->m_mis); break;
+  case STag::Ref:     new (&ret.m_ref) ARef(chosen->m_ref); break;
   }
-  ret.m_stag = stag1;
+  ret.m_stag = stag;
   return ret;
 }
 
 bool AliasClass::subclassData(AliasClass o) const {
+  assertx(m_stag == o.m_stag);
   switch (m_stag) {
   case STag::None:
   case STag::Frame:
@@ -386,9 +368,9 @@ bool AliasClass::subclassData(AliasClass o) const {
   case STag::ElemI:
   case STag::ElemS:
   case STag::MIState:
+  case STag::Ref:
     return equivData(o);
   case STag::Stack:
-    if (m_stack.base != o.m_stack.base) return false;
     return m_stack.offset <= o.m_stack.offset &&
            lowest_offset(m_stack) >= lowest_offset(o.m_stack);
   }
@@ -428,10 +410,10 @@ bool AliasClass::operator<=(AliasClass o) const {
 }
 
 bool AliasClass::maybeData(AliasClass o) const {
-  assert(m_stag == o.m_stag);
+  assertx(m_stag == o.m_stag);
   switch (m_stag) {
   case STag::None:
-    not_reached();  // handled above
+    not_reached();  // handled outside
   case STag::Frame:
     return m_frame.fp == o.m_frame.fp && m_frame.id == o.m_frame.id;
   case STag::Prop:
@@ -458,17 +440,7 @@ bool AliasClass::maybeData(AliasClass o) const {
     if (m_elemS.key != o.m_elemS.key) return false;
     return true;
 
-  /*
-   * Stack offsets that have different StkPtr bases are always presumed to
-   * possibly alias.  If both are FramePtrs but different, they can't alias.
-   * Stack offsets on the same base pointer may only alias if they have
-   * overlapping ranges.
-   */
   case STag::Stack:
-    if (m_stack.base != o.m_stack.base) {
-      return !(m_stack.base->type() <= Type::FramePtr &&
-               o.m_stack.base->type() <= Type::FramePtr);
-    }
     {
       // True if there's a non-empty intersection of the two stack slot
       // intervals.
@@ -482,6 +454,12 @@ bool AliasClass::maybeData(AliasClass o) const {
 
   case STag::MIState:
     return m_mis.offset == o.m_mis.offset;
+
+  /*
+   * Two boxed cells can generally refer to the same RefData.
+   */
+  case STag::Ref:
+    return true;
   }
   not_reached();
 }
@@ -494,7 +472,6 @@ bool AliasClass::maybeData(AliasClass o) const {
 bool AliasClass::maybe(AliasClass o) const {
   auto const isect = static_cast<rep>(m_bits & o.m_bits);
   if (isect == 0) return false;
-  if (*this <= o || o <= *this) return true;
 
   /*
    * If we have the same stag, then the cases are either the stag is in the
@@ -509,7 +486,7 @@ bool AliasClass::maybe(AliasClass o) const {
    */
   if (m_stag == o.m_stag) {
     auto const bit = stagBit(m_stag);
-    assert(isect != 0);
+    assertx(isect != 0);
     if ((bit & isect) == isect) return maybeData(o);
     return true;
   }
@@ -543,13 +520,14 @@ AliasClass canonicalize(AliasClass a) {
   switch (a.m_stag) {
   case T::None:    return a;
   case T::Frame:   return a;
+  case T::Stack:   return a;
   case T::MIState: return a;
+  case T::Ref:     return a;
   case T::Prop:    a.m_prop.obj = canonical(a.m_prop.obj);   return a;
   case T::ElemI:   a.m_elemI.arr = canonical(a.m_elemI.arr); return a;
   case T::ElemS:   a.m_elemS.arr = canonical(a.m_elemS.arr); return a;
-  case T::Stack:   a.m_stack = canonicalize_stk(a.m_stack);  return a;
   }
-  always_assert(0);
+  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -579,8 +557,7 @@ std::string show(AliasClass acls) {
       acls.m_elemS.key);
     break;
   case A::STag::Stack:
-    folly::format(&ret, "St t{}:{}{}",
-      acls.m_stack.base->id(),
+    folly::format(&ret, "St {}{}",
       acls.m_stack.offset,
       acls.m_stack.size == std::numeric_limits<int32_t>::max()
         ? "<"
@@ -589,6 +566,9 @@ std::string show(AliasClass acls) {
     break;
   case A::STag::MIState:
     folly::format(&ret, "Mis {}", acls.m_mis.offset);
+    break;
+  case A::STag::Ref:
+    folly::format(&ret, "Ref {}", acls.m_ref.boxed->id());
     break;
   }
 

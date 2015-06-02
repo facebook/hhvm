@@ -1,4 +1,4 @@
 File "void_usage.php", line 6, characters 10-18:
-You are attempting to use the return value of a void function (Typing[4119])
+You are using the return value of a void function (Typing[4119])
 File "void_usage.php", line 3, characters 15-18:
 This is void

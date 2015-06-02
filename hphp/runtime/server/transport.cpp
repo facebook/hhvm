@@ -33,13 +33,13 @@
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/ext/openssl/ext_openssl.h"
 #include "hphp/system/constants.h"
-#include "hphp/util/compression.h"
-#include "hphp/util/text-util.h"
-#include "hphp/util/service-data.h"
-#include "hphp/util/logger.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/compression.h"
+#include "hphp/util/hardware-counter.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/service-data.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/timer.h"
-#include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include <folly/String.h>
 
@@ -724,8 +724,10 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
 
   if (m_responseHeaders.find("Content-Type") == m_responseHeaders.end() &&
       m_responseCode != 304) {
-    std::string contentType = "text/html; charset="
-                              + IniSetting::Get("default_charset");
+    std::string contentType = "text/html";
+    if (IniSetting::Get("default_charset") != "") {
+      contentType += "; charset=" + IniSetting::Get("default_charset");
+    }
     addHeaderImpl("Content-Type", contentType.c_str());
   }
 

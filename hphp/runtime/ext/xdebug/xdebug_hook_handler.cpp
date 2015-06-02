@@ -18,8 +18,13 @@
 #include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
 
 #include "hphp/runtime/base/file.h"
+
+#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_xml.h"
+#include "hphp/runtime/ext/xdebug/xdebug_command.h"
+
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 
@@ -145,7 +150,7 @@ int XDebugThreadBreakpoints::addBreakpoint(XDebugBreakpoint& bp) {
 
       // If the file/line combo is invalid, throw an error
       if (!phpAddBreakPointLine(unit, bp.line)) {
-        throw XDebugServer::ERROR_BREAKPOINT_INVALID;
+        throw XDebugError::BreakpointInvalid;
       }
       add_line_breakpoint(id, bp, unit);
       break;
@@ -169,7 +174,7 @@ int XDebugThreadBreakpoints::addBreakpoint(XDebugBreakpoint& bp) {
       if (func != nullptr) {
         add_func_breakpoint(id, bp, func);
       } else if (!bp.className.isNull() && cls != nullptr) {
-        throw XDebugServer::ERROR_BREAKPOINT_INVALID;
+        throw XDebugError::BreakpointInvalid;
       } else {
         UNMATCHED.insert(id);
       }
@@ -437,6 +442,50 @@ void XDebugHookHandler::onBreak(const BreakInfo& bi) {
 
 // Exception::getMessage method name
 const StaticString s_GET_MESSAGE("getMessage");
+
+void XDebugHookHandler::onOpcode(PC pc) {
+  auto server = XDEBUG_GLOBAL(Server);
+
+  // Likely case is that there was no break command.
+  auto brk = server->getAndClearBreak();
+  if (LIKELY(brk == nullptr)) {
+    return;
+  }
+
+  server->log("Request thread received break command");
+
+  VMRegAnchor _;
+
+  auto const unit = vmfp()->func()->unit();
+  auto const line = unit->getLineNumber(unit->offsetOf(pc));
+  auto const filepath = const_cast<StringData*>(unit->filepath());
+  auto const transpath = File::TranslatePath(String(filepath));
+
+  // XDebugServer::breakpoint will send the response for the command before the
+  // break command, but we first need to send a response for the break command.
+  auto response = xdebug_xml_node_init("response");
+  server->addXmlns(*response);
+
+  auto const& cmd_str  = brk->getCommandStr();
+  auto const& trans_id = brk->getTransactionId();
+
+  // Manually add status and reason.  XDebugServer still thinks we're running
+  // because we haven't run XDebugServer::breakpoint yet.
+  xdebug_xml_add_attribute(response, "status", "break");
+  xdebug_xml_add_attribute(response, "reason", "ok");
+
+  // Ditto with command, XDebugServer is tracking the command before the break.
+  xdebug_xml_add_attribute_dup(response, "command", cmd_str.data());
+  xdebug_xml_add_attribute_dup(response, "transaction_id", trans_id.data());
+
+  delete brk;
+
+  server->sendMessage(*response);
+  xdebug_xml_node_dtor(response);
+
+  // Now we can go into a command loop.
+  server->breakpoint(transpath, init_null(), init_null(), line);
+}
 
 void XDebugHookHandler::onExceptionThrown(ObjectData* exception) {
   // Grab the exception name and message

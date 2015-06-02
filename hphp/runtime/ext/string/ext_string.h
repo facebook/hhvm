@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_STRING_H_
 
 #include "hphp/zend/zend-html.h"
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/bstring.h"
@@ -56,29 +56,29 @@ String HHVM_FUNCTION(str_shuffle,
 String HHVM_FUNCTION(strrev,
                      const String& str);
 String HHVM_FUNCTION(strtolower,
-                     String str);
+                     const String& str);
 String HHVM_FUNCTION(strtoupper,
-                     String str);
+                     const String& str);
 String HHVM_FUNCTION(ucfirst,
-                     String str);
+                     const String& str);
 String HHVM_FUNCTION(lcfirst,
-                     String str);
+                     const String& str);
 String HHVM_FUNCTION(ucwords,
-                     String str);
+                     const String& str);
 String HHVM_FUNCTION(strip_tags,
                      const String& str,
                      const Variant& allowable_tags = "");
 String HHVM_FUNCTION(trim,
-                     String str,
+                     const String& str,
                      const String& charlist = k_HPHP_TRIM_CHARLIST);
 String HHVM_FUNCTION(ltrim,
-                     String str,
+                     const String& str,
                      const String& charlist = k_HPHP_TRIM_CHARLIST);
 String HHVM_FUNCTION(rtrim,
-                     String str,
+                     const String& str,
                      const String& charlist = k_HPHP_TRIM_CHARLIST);
 String HHVM_FUNCTION(chop,
-                     String str,
+                     const String& str,
                      const String& charlist = k_HPHP_TRIM_CHARLIST);
 Variant HHVM_FUNCTION(explode,
                       const String& delimiter,

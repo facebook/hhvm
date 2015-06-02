@@ -707,7 +707,7 @@ inline static void appenddouble(StringBuffer *buffer,
     return;
   }
 
-#if defined(HAVE_LOCALE_H) && defined(ENABLE_THREAD_SAFE_SETLOCALE)
+#if defined(HAVE_LOCALE_H)
   struct lconv *lconv;
   lconv = localeconv();
 # define APPENDDOUBLE_LCONV_DECIMAL_POINT (*lconv->decimal_point)

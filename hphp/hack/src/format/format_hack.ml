@@ -75,7 +75,7 @@ type env = {
     buffer     : Buffer.t             ;
 
     (* The path of the current file *)
-    file       : Relative_path.t      ;
+    file       : Path.t               ;
 
     (* The state of the lexer *)
     lexbuf     : Lexing.lexbuf        ;
@@ -624,6 +624,8 @@ let out_next env =
   ignore (token env);
   last_token env
 
+let ignore_ f env = ignore (f env)
+
 (*****************************************************************************)
 (* Precedence of binary operators.
  * We need to maintain that information to break expressions with the lowest
@@ -678,6 +680,12 @@ let rec skip_spaces env =
   match token env with
   | Teof -> ()
   | Tspace -> skip_spaces env
+  | _ -> back env
+
+let rec skip_spaces_and_nl env =
+  match token env with
+  | Teof -> ()
+  | Tspace | Tnewline -> skip_spaces_and_nl env
   | _ -> back env
 
 let rec comment env =
@@ -844,11 +852,13 @@ let next_non_ws_token env =
 (* Helpers to look ahead. *)
 (*****************************************************************************)
 
-let try_word env word f = wrap env begin function
-  | Tword when !(env.last_str) = word ->
+let try_words env wordl f = wrap env begin function
+  | Tword when List.mem !(env.last_str) wordl ->
       f env
   | _ -> back env
 end
+
+let try_word env word f = try_words env [word] f
 
 let try_token env tok f = wrap env begin function
   | tok' when tok = tok' ->
@@ -904,7 +914,7 @@ let print_error tok_str env =
     else buffer
   in
   let error =
-    (Pos.string (Pos.to_absolute (Pos.make env.file env.lexbuf)))^"\n"^
+    (Pos.string (Pos.make (env.file :> string) env.lexbuf))^"\n"^
     (Printf.sprintf "Expected: %s, found: '%s'\n" tok_str !(env.last_str))^
     buffer^"\n"
   in
@@ -925,8 +935,8 @@ let expect_xhp tok_str env = wrap_xhp env begin fun _ ->
   then last_token env
   else begin
     if debug then begin
-      output_string stderr (Pos.string (Pos.to_absolute
-        (Pos.make env.file env.lexbuf)));
+      prerr_string
+        (Pos.string ((Pos.make (env.file :> string) env.lexbuf)));
       flush stderr
     end;
     raise Format_error
@@ -1029,7 +1039,9 @@ end
 (* List comma separated. *)
 (*****************************************************************************)
 
-let rec list_comma_loop n ~break element env =
+let rec list_comma_loop :
+'a. break:(env -> unit) -> ('a -> env -> 'a) -> 'a -> env -> 'a =
+fun ~break element acc env ->
   while has_consumed env begin fun env ->
     wrap env begin function
       | Topen_comment | Tline_comment -> generic_nsc env
@@ -1037,24 +1049,30 @@ let rec list_comma_loop n ~break element env =
     end
   end
   do () done;
-  if has_consumed { env with char_break = env.char_break - 1 } element
-  then list_comma_loop_remain (n+1) ~break element env
-  else n
+  let has_consumed, acc = consume_value {
+    env with char_break = env.char_break - 1
+  } (element acc) in
+  if has_consumed
+  then list_comma_loop_remain ~break element acc env
+  else acc
 
-and list_comma_loop_remain n ~break element env = wrap_eof env begin function
-  | Teof -> n
-  | Tcomma ->
-      let continue = wrap_would_consume env element in
-      if continue
-      then begin
-        seq env [last_token; comment_after_comma ~break; break];
-        list_comma_loop n ~break element env
-      end
-      else n
-  | _ ->
-      back env;
-      n
-end
+and list_comma_loop_remain :
+'a. break:(env -> unit) -> ('a -> env -> 'a) -> 'a -> env -> 'a =
+fun ~break element acc env ->
+  wrap_eof env begin function
+    | Teof -> acc
+    | Tcomma ->
+        let continue = wrap_would_consume env (element acc) in
+        if continue
+        then begin
+          seq env [last_token; comment_after_comma ~break; break];
+          list_comma_loop ~break element acc env
+        end
+        else acc
+    | _ ->
+        back env;
+        acc
+  end
 
 and comment_after_comma ~break env =
   match token env with
@@ -1100,14 +1118,20 @@ let rec list_comma_single_comment env =
 
 let list_comma_single element env =
   list_comma_single_comment env;
-  let _size = list_comma_loop 0 ~break:space element env in
+  let f () env = element env in
+  let () = list_comma_loop ~break:space f () env in
   ()
 
-let list_comma_multi ~trailing element env =
+let list_comma_multi_maybe_trail ~trailing element env =
+  let trailing = trailing && not env.no_trailing_commas in
   let break = newline in
-  let _size = list_comma_loop 0 ~break element env in
+  let trailing = list_comma_loop ~break element trailing env in
   if trailing && !(env.last) <> Newline
   then seq env [out ","; comment_after_comma ~break]
+
+let list_comma_multi ~trailing element env =
+  let f acc env = ignore (element env); acc in
+  list_comma_multi_maybe_trail ~trailing f env
 
 let list_comma_multi_nl ~trailing element env =
   newline env;
@@ -1115,13 +1139,11 @@ let list_comma_multi_nl ~trailing element env =
   newline env
 
 let list_comma ?(trailing=true) element env =
-  let trailing = if trailing then not env.no_trailing_commas else trailing in
   Try.one_line env
     (list_comma_single element)
     (list_comma_multi ~trailing element)
 
 let list_comma_nl ?(trailing=true) element env =
-  let trailing = if trailing then not env.no_trailing_commas else trailing in
   Try.one_line env
     (list_comma_single element)
     (list_comma_multi_nl ~trailing element)
@@ -1146,11 +1168,12 @@ type 'a return =
   | Success of 'a
 
 let rec entry ~keep_source_metadata ~no_trailing_commas ~modes
-    file from to_ content k =
+    (file : Path.t) from to_ content k =
   try
     let errorl, () = Errors.do_ begin fun () ->
+      let rp = Relative_path.(create Dummy (file :> string)) in
       let {Parser_hack.file_mode; _} =
-        Parser_hack.program file content in
+        Parser_hack.program rp content in
       if not (List.mem file_mode modes) then raise PHP;
     end in
     if errorl <> []
@@ -1203,7 +1226,15 @@ and name env =
 
 and name_loop env =
   match token env with
-  | Tpercent | Tcolon | Tminus | Tword | Tbslash ->
+  (* names can contain colons, but cannot end with them *)
+  | Tcolon when attempt env begin fun env ->
+      match token env with
+        | Tword -> true
+        | _ -> false
+    end ->
+      last_token env;
+      name_loop env
+  | Tpercent | Tminus | Tword | Tbslash ->
       last_token env;
       name_loop env
   | _ ->
@@ -1217,7 +1248,7 @@ and typedef env = wrap env begin function
   | Tword when !(env.last_str) = "shape" ->
       last_token env;
       expect "(" env;
-      right env (list_comma_multi_nl ~trailing:(not env.no_trailing_commas) shape_type_elt);
+      right env (list_comma_multi_nl ~trailing:true shape_type_elt);
       expect ")" env
   | _ ->
       back env;
@@ -1254,6 +1285,37 @@ and abs_const env =
   seq env [space ; name ; expect ";"]
 
 (*****************************************************************************)
+(* Type Constants *)
+(*****************************************************************************)
+
+and is_typeconst env =
+  attempt env begin fun env ->
+    wrap_non_ws env begin function
+      | Tword when !(env.last_str) = "type" ->
+         (match next_non_ws_token env with
+         | Teq | Tsc -> false
+         | _ -> true
+         )
+      | _ -> false
+    end
+  end
+
+and type_const env =
+  seq env [last_token; space; expect "type"; space; hint; as_constraint];
+  if next_non_ws_token env = Teq
+  then seq env [space; expect "="; space; typedef; semi_colon]
+  else semi_colon env
+
+and abs_type_const env =
+  seq env [last_token; space; expect "type"; space; hint];
+  if attempt env begin fun env ->
+    as_constraint env;
+    next_token env = Tsc
+  end
+  then seq env [as_constraint; semi_colon]
+  else semi_colon env
+
+(*****************************************************************************)
 (* Type hints. *)
 (*****************************************************************************)
 
@@ -1267,6 +1329,18 @@ and hint_function_param env = wrap env begin function
   | _ -> back env; hint env
 end
 
+and taccess_loop env = wrap env begin function
+  | Tcolcol when next_token env = Tword ->
+     last_token env;
+     wrap env begin function
+       | Tword ->
+          last_token env;
+          taccess_loop env
+       | _ -> back env
+     end
+  | _ -> back env
+end
+
 and hint env = wrap env begin function
   | Tplus | Tminus | Tqm | Tat | Tbslash ->
       last_token env;
@@ -1274,6 +1348,7 @@ and hint env = wrap env begin function
   | Tpercent | Tcolon ->
       last_token env;
       name_loop env;
+      taccess_loop env;
       hint_parameter env
   | Tword ->
       last_token env;
@@ -1283,7 +1358,8 @@ and hint env = wrap env begin function
           return_type env
       | _ ->
           name_loop env;
-          as_constraint env;
+          taccess_loop env;
+          typevar_constraint env;
           hint_parameter env
       )
   | Tlp ->
@@ -1293,6 +1369,14 @@ and hint env = wrap env begin function
   | _ ->
       back env
 end
+
+and typevar_constraint env =
+  try_words env ["as"; "super"] begin fun env ->
+    space env;
+    last_token env;
+    space env;
+    hint env
+  end;
 
 and as_constraint env =
   try_word env "as" begin fun env ->
@@ -1332,6 +1416,7 @@ and enum_ env =
 (*****************************************************************************)
 
 and fun_ env =
+  seq env [opt_tok Tamp; name; hint_parameter];
   Try.one_line env fun_signature_single fun_signature_multi;
   if next_token env = Tlcb
   then space env;
@@ -1342,12 +1427,13 @@ and fun_ env =
 (*****************************************************************************)
 
 and fun_signature_single env =
-  seq env [opt_tok Tamp; name; hint_parameter; expect "("];
-  right env (list_comma_single fun_param);
+  expect "(" env;
+  right env (list_comma_single (ignore_ fun_param));
   seq env [expect ")"; return_type; use]
 
 (*****************************************************************************)
-(* Multi line function signature (adds a trailing comma if missing).
+(* Multi line function signature (adds a trailing comma if missing, unless
+ * the last param is variadic).
  * function foo(
  *   $arg1,
  *   ...,
@@ -1359,11 +1445,19 @@ and fun_signature_single env =
 (*****************************************************************************)
 
 and fun_signature_multi env =
-  seq env [opt_tok Tamp; name; hint_parameter; expect "("; newline];
+  seq env [expect "("; newline];
   if next_token env = Trp
   then right env (fun env -> wrap env (fun _ -> back env))
-  else right env (list_comma_multi ~trailing:(not env.no_trailing_commas) fun_param);
+  else right env fun_params_multi;
   seq env [newline; expect ")"; return_type; use]
+
+and fun_params_multi env = list_comma_multi_maybe_trail
+  ~trailing:true
+  begin fun trailing env ->
+    let is_variadic = fun_param env in
+    trailing && not is_variadic
+  end
+  env
 
 and fun_param env =
   let curr_pos = !(env.abs_pos) in
@@ -1372,8 +1466,15 @@ and fun_param env =
     then space env
   in
   seq env [attribute; space_opt; modifier_list; space_opt; hint; space_opt];
+  opt_tok Tamp env;
+  let is_variadic = wrap_eof env begin function
+    | Tellipsis -> last_token env; true
+    | _ -> back env; false
+  end in
+  opt_tok Tlvar env;
   seq env [opt_tok Tamp; opt_tok Tellipsis; opt_tok Tlvar];
-  try_token env Teq (seq_fun [space; last_token; space; expr])
+  try_token env Teq (seq_fun [space; last_token; space; expr]);
+  is_variadic
 
 and return_type env =
   try_token env Tcolon (seq_fun [last_token; space; hint])
@@ -1500,7 +1601,9 @@ and class_element_word env = function
       back env;
       seq env [modifier_list; after_modifier; newline]
   | "const" ->
-      const env
+     if is_typeconst env
+     then type_const env
+     else const env
   | "require" ->
       seq env [last_token; space; class_extends; semi_colon]
   | "use" ->
@@ -1549,7 +1652,9 @@ end
 
 and after_modifier env = wrap env begin function
   | Tword when !(env.last_str) = "const" ->
-      abs_const env
+      if is_typeconst env
+      then abs_type_const env
+      else abs_const env
   | Tword when !(env.last_str) = "function" ->
       seq env [last_token; space; fun_]
   | _ ->
@@ -1630,8 +1735,11 @@ and xhp_attribute_format_elt env =
         expect "}" env
     | _ -> back env; hint env
   end;
-  if !(env.abs_pos) != curr_pos && next_token env <> Tsc
-  then space env;
+  if !(env.abs_pos) != curr_pos then begin
+    match next_token env with
+      | Tsc | Tcomma -> ()
+      | _ -> space env
+  end;
   name env;
   wrap env begin function
     | Teq -> seq env [space; last_token; space; expr]
@@ -1666,7 +1774,11 @@ and xhp_single env =
   xhp_attribute_list ~break:space env;
   wrap_xhp env begin function
     | Tslash -> seq env [space; last_token; expect_xhp ">"]
-    | _ -> raise One_line
+    | _ ->
+        back env;
+        seq env [expect_xhp ">"; skip_spaces_and_nl; xhp_body];
+        env.spaces := 0;
+        xhp_close_tag env;
   end
 
 and xhp_multi env =
@@ -1687,17 +1799,18 @@ and xhp_multi env =
         back env;
         expect_xhp ">" env;
         newline env;
+        skip_spaces_and_nl env;
         margin_set margin_pos env begin fun env ->
           xhp_body env;
         end;
         newline env;
-        expect_xhp "<" env;
-        expect_xhp "/" env;
-        name env;
-        expect_xhp ">" env;
+        xhp_close_tag env;
   end;
   if next_token env <> Tsc
   then newline env
+
+and xhp_close_tag env =
+  seq env [expect_xhp "<"; expect_xhp "/"; name; expect_xhp ">"]
 
 and xhp_attribute_list ~break env = wrap_xhp env begin function
   | Tword ->
@@ -1731,37 +1844,35 @@ and xhp_attribute_value env = wrap_xhp env begin function
       back env
   end
 
-and xhp_space_after_Trcb = function
-  | Trp | Trcb | Trb | Tsc | Tcolon | Tcomma
-  | Tpercent | Tlcb | Tdot | Tem | Tqm | Tunderscore -> false
-  | _ -> false
-
+(* It seems like whitespace is significant in XHP, but only insofar as it acts
+ * as a separator of non-whitespace characters. That is, consecutive whitespace
+ * will be rendered as a single space at runtime. Thus the handling of xhp_body
+ * has to be slightly different from the rest of the syntax, which does not
+ * treat whitespace as significant. In particular, we output consecutive
+ * whitespace here as a single space, unless we have just wrapped a line, in
+ * which case we output the necessary number of spaces required by the
+ * indentation level. *)
 and xhp_body env =
   let k = xhp_body in
-  let last = !(env.last_token) in
   match xhp_token env with
   | Teof -> ()
-  | Tnewline ->
-      newline env;
-      k env
-  | Tspace ->
+  | Tnewline | Tspace ->
+      if !(env.last) <> Newline then space env;
       k env
   | Topen_xhp_comment ->
       last_token env;
       xhp_comment env;
       k env
   | Tlt when is_xhp env ->
-      newline env;
-      last_token env;
-      xhp env;
+      Try.one_line env
+        (fun env -> last_token env; xhp_single env)
+        (fun env -> newline env; last_token env; xhp env);
       k env;
   | Tlt ->
       back env
   | Tlcb ->
       Try.one_line env
         begin fun env ->
-          if last = Tspace && !(env.last) <> Newline
-          then space env;
           last_token env;
           expr env;
           expect_xhp "}" env;
@@ -1774,19 +1885,10 @@ and xhp_body env =
         end;
       k env
   | x ->
-      let add_space =
-        if last = Trcb
-        then xhp_space_after_Trcb x
-        else true
-      in
       let pos = !(env.char_pos) in
       let text = xhp_text env (Buffer.create 256) x in
       if pos + String.length text >= env.char_size
-      then newline env
-      else if !(env.last) = Newline
-      then ()
-      else if add_space
-      then space env;
+      then newline env;
       out text { env with report_fit = false };
       env.last := Text;
       k env
@@ -1799,7 +1901,12 @@ and xhp_text env buf = function
       Buffer.add_string buf !(env.last_out);
       xhp_text env buf (xhp_token env)
 
-and xhp_comment env =
+and xhp_comment env = Try.one_line env xhp_comment_single xhp_comment_multi
+
+and xhp_comment_single env =
+  seq env [xhp_comment_body; expect_xhp "-->"]
+
+and xhp_comment_multi env =
   newline env;
   right env xhp_comment_body;
   newline env;
@@ -1809,6 +1916,7 @@ and xhp_comment_body env =
   match xhp_token env with
   | Teof -> ()
   | Tnewline | Tspace ->
+      if !(env.last) <> Newline then space env;
       xhp_comment_body env
   | Tclose_xhp_comment ->
       back env
@@ -1819,10 +1927,7 @@ and xhp_comment_body env =
       let pos = !(env.char_pos) in
       let text = xhp_text env (Buffer.create 256) x in
       if pos + String.length text >= env.char_size
-      then newline env
-      else if !(env.last) = Newline
-      then ()
-      else space env;
+      then newline env;
       out text env;
       env.last := Text;
       xhp_comment_body env
@@ -1971,7 +2076,7 @@ and else_word ~is_toplevel env = wrap_word env begin function
         | _ -> back env);
       block ~is_toplevel env;
   | "elseif" ->
-      seq env [last_token; space; expr_paren; space];
+      seq env [out "else"; space; out "if"; space; expr_paren; space];
       block ~is_toplevel env;
   | _ -> assert false
 end
@@ -2022,12 +2127,22 @@ and foreach_as env =
 
 and for_loop env =
   seq env [space; expect "("];
-  seq env [list_comma_single expr; semi_colon];
-  seq env [space; expr_list; semi_colon];
-  seq env [space; expr_list];
-  seq env [expect ")"];
-  block env;
-  newline env
+  (* the expr_list at toplevel adds newlines before and after the list, which
+   * we don't want *)
+  let expr_list = list_comma ~trailing:false expr in
+  let for_exprs ~break = begin fun env ->
+    seq env [expr_list; semi_colon];
+    seq env [break; expr_list; semi_colon];
+    seq env [break; expr_list]
+  end in
+  Try.one_line env
+    (for_exprs ~break:space)
+    begin fun env ->
+      newline env;
+      right env (for_exprs ~break:newline);
+      newline env;
+    end;
+  seq env [expect ")"; block; newline]
 
 (*****************************************************************************)
 (* Switch statement *)
@@ -2080,7 +2195,7 @@ and catch_list env = wrap_word env begin function
 end
 
 and catch_remain env =
-  seq env [space; expect "("; fun_param; expect ")"; block]
+  seq env [space; expect "("; (ignore_ fun_param); expect ")"; block]
 
 (*****************************************************************************)
 (* Expressions *)
@@ -2382,35 +2497,34 @@ and expr_atomic env =
      right env array_body;
      expect "]" env
  | Tlp ->
-     last_token env;
      let env = { env with break_on = 0 } in
      (* CAST *)
      if is_followed_by env name ")"
      then begin
-       out_next env;
-       expect ")" env;
-       space env;
-       expr env
+       seq env [last_token; out_next; expect ")"; space; expr]
      end
      else if next_token_str env = "new"
      then begin
-       expr env;
-       expect ")" env
+       seq env [last_token; expr; expect ")"]
+     end
+     (* Short lambda parameters *)
+     else if attempt env begin fun env ->
+       try
+         list_comma (ignore_ fun_param) env;
+         seq env [expect ")"; return_type];
+         wrap_eof env (fun tok -> tok = Tlambda)
+       with Format_error -> false
+     end then begin
+       back env;
+       Try.one_line env fun_signature_single fun_signature_multi;
      end
      (* Expression *)
-     else if is_followed_by env expr ")"
-     then begin
+     else begin
+       last_token env;
        margin_set (!(env.char_pos) -1) env begin fun env ->
          expr env
        end;
        expect ")" env;
-     end
-     (* Short lambda parameters *)
-     else begin
-       margin_set (!(env.char_pos) -1) env begin fun env ->
-         list_comma fun_param env
-       end;
-       seq env [expect ")"; return_type];
      end
   | Tlt when is_xhp env ->
       if attempt env begin fun env ->
@@ -2457,7 +2571,7 @@ and expr_atomic_word env last_tok = function
       end
   | "function" when last_tok <> Tarrow && last_tok <> Tnsarrow ->
       last_token env;
-      space env;
+      if next_non_ws_token env <> Tlp then space env;
       fun_ env
   | "await" ->
       last_token env;
@@ -2591,7 +2705,7 @@ and array_one_line env =
   list_comma_single array_element_single env
 
 and array_multi_line env =
-  list_comma_multi_nl ~trailing:(not env.no_trailing_commas) array_element_multi env
+  list_comma_multi_nl ~trailing:true array_element_multi env
 
 and array_element_single env =
   expr env;
@@ -2627,7 +2741,7 @@ let region modes file ~start ~end_ content =
 let program ?no_trailing_commas:(no_trailing_commas = false) modes file
     content =
   entry ~keep_source_metadata:false file 0 max_int content
-    ~no_trailing_commas:no_trailing_commas ~modes
+    ~no_trailing_commas ~modes
     (fun env -> Buffer.contents env.buffer)
 
 let program_with_source_metadata modes file content =

@@ -20,7 +20,7 @@
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_mm.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_str.h"
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/zend-string.h"
 
@@ -31,7 +31,7 @@ namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 
 // Xml encode the passed string
-String xdebug_xmlize(char *string, int len) {
+String xdebug_xmlize(const char* string, size_t len) {
   String str(string, CopyString);
   if (len) {
     str = string_replace(str, "&","&amp;");

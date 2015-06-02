@@ -57,33 +57,6 @@ NativeDataInfo* getNativeDataInfo(const StringData* name) {
   return &it->second;
 }
 
-// return the full native header size, which is also the distance from
-// the allocated pointer to the ObjectData*.
-inline size_t ndsize(const NativeDataInfo* ndi) {
-  return alignTypedValue(ndi->sz + sizeof(NativeNode));
-}
-
-inline NativeNode* getSweepNode(ObjectData *obj, const NativeDataInfo* ndi) {
-  return reinterpret_cast<NativeNode*>(
-    reinterpret_cast<char*>(obj) - ndsize(ndi)
-  );
-}
-
-void sweepNativeData(std::vector<NativeNode*>& natives) {
-  while (!natives.empty()) {
-    assert(natives.back()->sweep_index == natives.size() - 1);
-    auto node = natives.back();
-    natives.pop_back();
-    auto obj = Native::obj(node);
-    auto ndi = obj->getVMClass()->getNativeDataInfo();
-    assert(ndi->sweep);
-    assert(node->obj_offset == ndsize(ndi));
-    ndi->sweep(obj);
-    // trash the payload but leave the header and object parsable
-    assert(memset(node + 1, kSmartFreeFill, node->obj_offset - sizeof(*node)));
-  }
-}
-
 /* Classes with NativeData structs allocate extra memory prior
  * to the ObjectData.
  *
@@ -102,16 +75,19 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
                (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
     ObjectData::raiseAbstractClassError(cls);
   }
+  if (cls->needInitialization()) {
+    cls->initialize();
+  }
   auto ndi = cls->getNativeDataInfo();
   size_t nativeDataSize = ndsize(ndi);
   size_t nProps = cls->numDeclProperties();
   size_t size = ObjectData::sizeForNProps(nProps) + nativeDataSize;
 
   auto node = reinterpret_cast<NativeNode*>(
-    MM().objMallocLogged(size)
+    MM().objMalloc(size)
   );
   node->obj_offset = nativeDataSize;
-  node->kind = HeaderKind::Native;
+  node->hdr.kind = HeaderKind::NativeData;
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
              ObjectData(cls);
   obj->setAttribute(static_cast<ObjectData::Attribute>(ndi->odattrs));
@@ -123,9 +99,6 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   }
   if (UNLIKELY(cls->callsCustomInstanceInit())) {
     obj->callCustomInstanceInit();
-  }
-  if (UNLIKELY(cls->hasNativePropHandler())) {
-    obj->setAttribute(ObjectData::Attribute::HasNativePropHandler);
   }
   return obj;
 }
@@ -157,16 +130,16 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
   if (ndi->destroy) {
     ndi->destroy(obj);
   }
-  auto node = getSweepNode(obj, ndi);
+  auto node = getNativeNode(obj, ndi);
   if (ndi->sweep) {
     MM().removeNativeObject(node);
   }
 
   size_t size = ObjectData::sizeForNProps(nProps) + ndsize(ndi);
   if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSizeLogged(node, size);
+    return MM().smartFreeSize(node, size);
   }
-  MM().smartFreeSizeBigLogged(node, size);
+  MM().smartFreeSizeBig(node, size);
 }
 
 Variant nativeDataSleep(const ObjectData* obj) {

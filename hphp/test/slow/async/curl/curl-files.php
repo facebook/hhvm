@@ -6,7 +6,7 @@ $files = Map {
 };
 
 $handles = $files->mapWithKey(($file,$dummy) ==> HH\Asio\curl_exec($file));
-HH\Asio\m($handles)->join()->mapWithKey(
+HH\Asio\join(HH\Asio\m($handles))->mapWithKey(
   function ($filename, $contents) {
     $actual = file_get_contents($filename);
     echo "$filename\n";

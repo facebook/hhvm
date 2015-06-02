@@ -39,7 +39,7 @@ namespace HPHP { namespace jit {
  *
  *   o The tracelet region selector uses this code to generate a RegionDesc.
  *
- * To use this code, the client creates an HTS structure, and calls these
+ * To use this code, the client creates an IRGS structure, and calls these
  * irgen::foo methods on it.
  *
  * TODO: we should push translateRegion and selectTracelet into this module, so
@@ -56,9 +56,9 @@ namespace irgen {
  *
  * Uses the same argument list format as IRUnit::gen.
  */
-namespace detail { SSATmp* genInstruction(HTS& env, IRInstruction*); }
+namespace detail { SSATmp* genInstruction(IRGS& env, IRInstruction*); }
 template<class... Args>
-SSATmp* gen(HTS& env, Opcode op, Args&&... args) {
+SSATmp* gen(IRGS& env, Opcode op, Args&&... args) {
   return makeInstruction(
     [&] (IRInstruction* inst) { return detail::genInstruction(env, inst); },
     op,
@@ -71,7 +71,7 @@ SSATmp* gen(HTS& env, Opcode op, Args&&... args) {
  * Create constant-valued SSATmps inside the IRUnit we're creating.
  */
 template<class... Args>
-SSATmp* cns(HTS& env, Args&&... args) {
+SSATmp* cns(IRGS& env, Args&&... args) {
   return env.unit.cns(std::forward<Args>(args)...);
 }
 
@@ -82,30 +82,41 @@ SSATmp* cns(HTS& env, Args&&... args) {
  * TODO(#5706706): the stack versions should not be exported, except that
  * RegionDesc::Location::Stack needs some fixes first.
  */
-void assertTypeStack(HTS&, BCSPOffset, Type);
-void checkTypeStack(HTS&, BCSPOffset, Type, Offset dest);
-void assertTypeLocation(HTS&, const RegionDesc::Location&, Type);
-void checkTypeLocation(HTS&, const RegionDesc::Location&, Type, Offset dest);
-void guardTypeLocation(HTS&, const RegionDesc::Location& loc, Type,
-  bool outerOnly);
+void assertTypeStack(IRGS&, BCSPOffset, Type);
+void checkTypeStack(IRGS&, BCSPOffset, Type, Offset dest, bool outerOnly);
+void checkTypeLocal(IRGS&, uint32_t locId, Type, Offset dest, bool outerOnly);
+void assertTypeLocation(IRGS&, const RegionDesc::Location&, Type);
+void checkTypeLocation(IRGS&, const RegionDesc::Location&, Type, Offset dest,
+                       bool outerOnly);
 
 /*
- * Special type of guards for param-passing reffiness.  These guards/checks are
- * needed when an FPush* instruction is in a different region from its FCall,
- * and we don't know statically whether the callee will want arguments by
- * reference.
+ * Type predictions.
  */
-void guardRefs(HTS&, int64_t entryArDelta, const std::vector<bool>& mask,
-  const std::vector<bool>& vals);
-void checkRefs(HTS&, int64_t entryArDelta, const std::vector<bool>& mask,
-  const std::vector<bool>& vals, Offset);
+void predictTypeLocation(IRGS&, const RegionDesc::Location&, Type);
+void predictTypeStack(IRGS&, int32_t offset, Type);
+void predictTypeLocal(IRGS&, uint32_t locId, Type);
+
+/*
+ * Special type of guards for param-passing reffiness. These checks are needed
+ * when an FPush* instruction is in a different region from its FCall, and we
+ * don't know statically whether the callee will want arguments by reference.
+ */
+void checkRefs(IRGS&, int64_t entryArDelta, const std::vector<bool>& mask,
+               const std::vector<bool>& vals, Offset);
 
 /*
  * After all initial guards instructions have been emitted, the client of this
  * module calls the following function to allow some "region header" code to be
  * emitted.
  */
-void prepareEntry(HTS&);
+void prepareEntry(IRGS&);
+
+/*
+ * Creates a no-op IR instruction that branches to an exit. These placeholder
+ * instructions are later removed after any passes that want to use them for
+ * their exits.
+ */
+void makeExitPlaceholder(IRGS&);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -113,14 +124,17 @@ void prepareEntry(HTS&);
  * Support for translation counters of various types, including reoptimization
  * (CheckCold).
  */
-void incTransCounter(HTS&);
-void incProfCounter(HTS&, TransID);
-void checkCold(HTS&, TransID);
+void incTransCounter(IRGS&);
+void incProfCounter(IRGS&, TransID);
+void checkCold(IRGS&, TransID);
 
 /*
- * Generate a ringbuffer update for executing a particular SrcKey.
+ * If ringbuffer tracing is enabled, generate a ringbuffer entry associated
+ * with a SrcKey or string.
  */
-void ringbuffer(HTS&, Trace::RingBufferType t, SrcKey sk, int level = 1);
+void ringbufferEntry(IRGS&, Trace::RingBufferType, SrcKey, int level = 1);
+void ringbufferMsg(IRGS&, Trace::RingBufferType, const StringData*,
+                   int level = 1);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -129,29 +143,36 @@ void ringbuffer(HTS&, Trace::RingBufferType t, SrcKey sk, int level = 1);
  * and the whole region is retried, with a bit set to interp the instruction
  * that failed.
  */
-void interpOne(HTS&, const NormalizedInstruction&);
+void interpOne(IRGS&, const NormalizedInstruction&);
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * After each bytecode that is translated/processed, the driver of the ht
- * module calls this function to move to the next bytecode offset (`newOff') to
- * translate.
+ * Before translating/processing each bytecode instruction, the driver
+ * of the irgen module calls this function to move to the next
+ * bytecode instruction (`newSk') to translate.
  *
- * The flag `lastBcOff' should be set if this is the last bytecode in a region
- * that's being translated.
+ * The flag `lastBcInst' should be set if this is the last bytecode in
+ * a region that's being translated.
  */
-void prepareForNextHHBC(HTS&,
+void prepareForNextHHBC(IRGS&,
                         const NormalizedInstruction*,
-                        Offset newOff,
-                        bool lastBcOff);
+                        SrcKey newSk,
+                        bool lastBcInst);
+
+/*
+ * After translating each bytecode instruction, the driver of the
+ * irgen module calls this function to signal that it has finished
+ * processing the HHBC instruction.
+ */
+void finishHHBC(IRGS&);
 
 /*
  * This is called before emitting instructions that can jump to a
  * block corresponding to a control-flow merge point at the bytecode
  * level.
  */
-void prepareForHHBCMergePoint(HTS&);
+void prepareForHHBCMergePoint(IRGS&);
 
 /*
  * This is called by the region translator to force the stack to be
@@ -159,30 +180,36 @@ void prepareForHHBCMergePoint(HTS&);
  * optimization, which enables smashing a branch in the main code
  * region.
  */
-void prepareForSideExit(HTS&);
+void prepareForSideExit(IRGS&);
 
 /*
  * When done translating a region, or a block in a region, these calls are
  * made.
  */
-void endRegion(HTS&);
-void endRegion(HTS&, Offset);
-void endBlock(HTS&, Offset next, bool nextIsMerge);
+void endRegion(IRGS&);
+void endRegion(IRGS&, SrcKey);
+void endBlock(IRGS&, Offset next, bool nextIsMerge);
+
+/*
+ * When we're done creating the IRUnit, this function must be called to ensure
+ * all the IR invariants hold.
+ */
+void sealUnit(IRGS&);
 
 //////////////////////////////////////////////////////////////////////
 
 /*
  * Called when we're starting to inline something.
  */
-void beginInlining(HTS&,
+void beginInlining(IRGS&,
                    unsigned numParams,
                    const Func* target,
                    Offset returnBcOffset);
 
 /*
- * Returns whether the HTS is currently inlining or not.
+ * Returns whether the IRGS is currently inlining or not.
  */
-bool isInlining(const HTS&);
+bool isInlining(const IRGS&);
 
 /*
  * We do two special-case optimizations to partially inline 'singleton'
@@ -192,8 +219,8 @@ bool isInlining(const HTS&);
  * This is exposed publically because the region translator drives inlining
  * decisions.
  */
-void inlSingletonSProp(HTS&, const Func*, const Op* clsOp, const Op* propOp);
-void inlSingletonSLoc(HTS&, const Func*, const Op* op);
+void inlSingletonSProp(IRGS&, const Func*, const Op* clsOp, const Op* propOp);
+void inlSingletonSLoc(IRGS&, const Func*, const Op* op);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -205,18 +232,34 @@ void inlSingletonSLoc(HTS&, const Func*, const Op* op);
 /*
  * The logical stack depth (from an hhbc perspective) in the current situation.
  */
-FPAbsOffset logicalStackDepth(const HTS& env);
+FPInvOffset logicalStackDepth(const IRGS& env);
 
 /*
  * Access the type of the top of the stack, without making any change to the
- * HTS.  This means that the type returned is /not/ necessarily constrained.
+ * IRGS.  This means that the type returned is /not/ necessarily constrained.
  */
-Type publicTopType(const HTS& env, BCSPOffset);
+Type publicTopType(const IRGS& env, BCSPOffset);
 
 /*
  * Returns a predicted Type for the given location, used for tracelet analysis.
  */
-Type predictedTypeFromLocation(HTS&, const Location&);
+Type predictedTypeFromLocation(const IRGS&, const Location&);
+Type predictedTypeFromLocal(const IRGS&, uint32_t locId);
+Type predictedTypeFromStack(const IRGS&, BCSPOffset slot);
+
+/*
+ * Returns the proven Type for the given location.
+ */
+Type provenTypeFromLocation(const IRGS&, const Location&);
+Type provenTypeFromLocal(const IRGS&, uint32_t locId);
+Type provenTypeFromStack(const IRGS&, BCSPOffset slot);
+
+/*
+ * Assuming env is ready to translate a member instruction, analyze the type of
+ * the base value and return an appropriately-specialized TypeConstraint if a
+ * supported operation is detected.
+ */
+TypeConstraint mInstrBaseConstraint(const IRGS& env, Type predicted);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -248,7 +291,7 @@ Type predictedTypeFromLocation(HTS&, const Location&);
 #define THREE(x0, x1, x2)    , IMM_##x0, IMM_##x1, IMM_##x2
 #define FOUR(x0, x1, x2, x3) , IMM_##x0, IMM_##x1, IMM_##x2, IMM_##x3
 
-#define O(name, imms, ...) void emit##name(HTS& imms);
+#define O(name, imms, ...) void emit##name(IRGS& imms);
   OPCODES
 #undef O
 

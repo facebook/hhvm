@@ -84,6 +84,15 @@ struct Block : boost::noncopyable {
 
   // Returns whether this block starts with BeginCatch
   bool isCatch() const;
+
+  // Returns true if this block is an exit, assuming that the last
+  // instruction won't throw an exception.  In other words, the block
+  // doesn't have a next edge, and it either has no taken edge or its
+  // taken edge goes to a catch block.
+  bool isExitNoThrow() const {
+    return !empty() && back().isTerminal() && (!taken() || taken()->isCatch());
+  }
+
   // If its a catch block, the BeginCatch's marker
   BCMarker catchMarker() const;
 
@@ -137,7 +146,10 @@ struct Block : boost::noncopyable {
   template<typename L> SSATmp* findSrc(unsigned i, L body);
 
   // execute body(P) for each predecessor block P of this block
-  template <typename L> void forEachPred(L body);
+  template <typename L> void forEachPred(L body) const;
+
+  // execute body(P) for each successor block P of this block
+  template <typename L> void forEachSucc(L body) const;
 
   // list-compatible interface; these delegate to m_instrs but also update
   // inst.m_block
@@ -181,7 +193,7 @@ using BlockList = jit::vector<Block*>;
 using BlockSet = jit::flat_set<Block*>;
 
 inline Block::reference Block::front() {
-  assert(!m_instrs.empty());
+  assertx(!m_instrs.empty());
   return m_instrs.front();
 }
 inline Block::const_reference Block::front() const {
@@ -189,7 +201,7 @@ inline Block::const_reference Block::front() const {
 }
 
 inline Block::reference Block::back() {
-  assert(!m_instrs.empty());
+  assertx(!m_instrs.empty());
   return m_instrs.back();
 }
 inline Block::const_reference Block::back() const {
@@ -202,12 +214,12 @@ inline Block::iterator Block::erase(iterator pos) {
 }
 
 inline Block::iterator Block::erase(IRInstruction* inst) {
-  assert(inst->block() == this);
+  assertx(inst->block() == this);
   return erase(iteratorTo(inst));
 }
 
 inline Block::iterator Block::prepend(IRInstruction* inst) {
-  assert(inst->marker().valid());
+  assertx(inst->marker().valid());
   auto it = skipHeader();
   return insert(it, inst);
 }
@@ -225,13 +237,13 @@ inline Block::const_iterator Block::skipHeader() const {
 }
 
 inline Block::iterator Block::backIter() {
-  assert(!empty());
+  assertx(!empty());
   auto it = end();
   return --it;
 }
 
 inline Block::iterator Block::iteratorTo(IRInstruction* inst) {
-  assert(inst->block() == this);
+  assertx(inst->block() == this);
   return m_instrs.iterator_to(*inst);
 }
 
@@ -250,7 +262,7 @@ template<typename L> inline
 void Block::forEachSrc(unsigned i, L body) const {
   for (auto const& e : m_preds) {
     auto jmp = e.inst();
-    assert(jmp->op() == Jmp && jmp->taken() == this);
+    assertx(jmp->op() == Jmp && jmp->taken() == this);
     body(jmp, jmp->src(i));
   }
 }
@@ -265,7 +277,7 @@ SSATmp* Block::findSrc(unsigned i, L body) {
 }
 
 template <typename L> inline
-void Block::forEachPred(L body) {
+void Block::forEachPred(L body) const {
   for (auto i = m_preds.begin(), e = m_preds.end(); i != e;) {
     auto inst = i->inst();
     ++i;
@@ -273,15 +285,21 @@ void Block::forEachPred(L body) {
   }
 }
 
+template <typename L> inline
+void Block::forEachSucc(L body) const {
+  if (auto n = next()) body(n);
+  if (auto t = taken()) body(t);
+}
+
 inline Block::iterator Block::insert(iterator pos, IRInstruction* inst) {
-  assert(inst->marker().valid());
+  assertx(inst->marker().valid());
   inst->setBlock(this);
   return m_instrs.insert(pos, *inst);
 }
 
 inline
 void Block::splice(iterator pos, Block* from, iterator begin, iterator end) {
-  assert(from != this);
+  assertx(from != this);
   for (auto i = begin; i != end; ++i) i->setBlock(this);
   m_instrs.splice(pos, from->instrs(), begin, end);
 }
@@ -291,7 +309,7 @@ inline void Block::push_back(std::initializer_list<IRInstruction*> insts) {
 }
 
 inline void Block::push_back(IRInstruction* inst) {
-  assert(inst->marker().valid());
+  assertx(inst->marker().valid());
   inst->setBlock(this);
   return m_instrs.push_back(*inst);
 }
@@ -315,9 +333,9 @@ inline bool Block::isCatch() const {
 }
 
 inline BCMarker Block::catchMarker() const {
-  assert(isCatch());
+  assertx(isCatch());
   auto it = skipHeader();
-  assert(it != begin());
+  assertx(it != begin());
   return (--it)->marker();
 }
 

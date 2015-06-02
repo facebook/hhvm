@@ -8,7 +8,7 @@
  *
  *)
 
-module List = List_ext
+module List = Core_list
 open Utils
 
 (* Errors that caught before the main loop *)
@@ -61,9 +61,9 @@ let rec flatten_error = function
       let e = Errors.to_absolute (Errors.make_error 0 [(p, m)]) in
       [("Conversion Error", Errors.to_string e)]
   | CompoundError exns ->
-      compose (List.concatMap flatten_error) List.rev exns
+      compose (List.concat_map ~f:flatten_error) List.rev exns
   | ParseErrors errors ->
-      List.map (compose Errors.to_string Errors.to_absolute) errors |>
+      List.map ~f:(compose Errors.to_string Errors.to_absolute) errors |>
       String.concat "\n" |>
       fun m -> [("Parse Error", m)]
-  | _ -> [("Unknown Error", "")]
+  | e -> [("Unknown Error", Printexc.to_string e)]

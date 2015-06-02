@@ -81,7 +81,8 @@ class ConverterTestCase(unittest.TestCase):
         # hacky code to pass an additional option to the unparser
         # we use the test input extension as a cue for what option we
         # want to pass to the test_unparser
-        if self.binary_name() == 'test_unparser':
+        if self.binary_name().endswith('test_unparser') or \
+           self.binary_name().endswith('test_unparser.opt'):
             options.append("-output-type")
             output_type = "php" if file_extension == ".php" else "hack"
             options.append(output_type)

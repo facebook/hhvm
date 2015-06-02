@@ -31,6 +31,8 @@
 
 #include "hphp/util/lock.h"
 
+#include <glob.h>
+
 #define __STDC_LIMIT_MACROS
 #include <cstdint>
 #include <boost/range/join.hpp>
@@ -100,12 +102,17 @@ static Variant dynamic_to_variant(const folly::dynamic& v) {
       return v.data();
     case folly::dynamic::Type::ARRAY:
     case folly::dynamic::Type::OBJECT:
-      ArrayInit ret(v.size(), ArrayInit::Mixed{});
+      ArrayInit arr_init(v.size(), ArrayInit::Mixed{});
       for (auto& item : v.items()) {
-        ret.add(dynamic_to_variant(item.first),
+        arr_init.add(dynamic_to_variant(item.first),
                 dynamic_to_variant(item.second));
       }
-      return ret.toArray();
+      Array ret = arr_init.toArray();
+      // Sort the array since folly::dynamic has a tendency to iterate from
+      // back to front. This way a var_dump of the array, for example, looks
+      // ordered.
+      ret.sort(Array::SortNaturalAscending, true, false);
+      return ret;
   }
   not_reached();
 }
@@ -276,6 +283,23 @@ bool ini_on_update(const folly::dynamic& value, std::set<std::string>& p) {
   return true;
 }
 
+bool ini_on_update(const folly::dynamic& value,
+                   std::set<std::string, stdltistr>& p) {
+  INI_ASSERT_ARR(value);
+  for (auto& v : value.values()) {
+    p.insert(v.data());
+  }
+  return true;
+}
+
+bool ini_on_update(const folly::dynamic& value,
+                   boost::container::flat_set<std::string>& p) {
+  INI_ASSERT_ARR(value);
+  for (auto& v : value.values()) {
+    p.insert(v.data());
+  }
+  return true;
+}
 
 bool ini_on_update(const folly::dynamic& value, std::vector<std::string>& p) {
   INI_ASSERT_ARR(value);
@@ -287,6 +311,15 @@ bool ini_on_update(const folly::dynamic& value, std::vector<std::string>& p) {
 
 bool ini_on_update(const folly::dynamic& value,
                    std::map<std::string, std::string>& p) {
+  INI_ASSERT_ARR(value);
+  for (auto& pair : value.items()) {
+    p[pair.first.data()] = pair.second.data();
+  }
+  return true;
+}
+
+bool ini_on_update(const folly::dynamic& value,
+                   hphp_string_imap<std::string>& p) {
   INI_ASSERT_ARR(value);
   for (auto& pair : value.items()) {
     p[pair.first.data()] = pair.second.data();
@@ -350,6 +383,14 @@ folly::dynamic ini_get(std::map<std::string, std::string>& p) {
   return ret;
 }
 
+folly::dynamic ini_get(hphp_string_imap<std::string>& p) {
+  folly::dynamic ret = folly::dynamic::object;
+  for (auto& pair : p) {
+    ret.insert(pair.first, pair.second);
+  }
+  return ret;
+}
+
 folly::dynamic ini_get(Array& p) {
   folly::dynamic ret = folly::dynamic::object;
   for (ArrayIter iter(p); iter; ++iter) {
@@ -361,8 +402,27 @@ folly::dynamic ini_get(Array& p) {
 
 folly::dynamic ini_get(std::set<std::string>& p) {
   folly::dynamic ret = folly::dynamic::object;
+  auto idx = 0;
   for (auto& s : p) {
-    ret.push_back(s);
+    ret.insert(idx++, s);
+  }
+  return ret;
+}
+
+folly::dynamic ini_get(std::set<std::string, stdltistr>& p) {
+  folly::dynamic ret = folly::dynamic::object;
+  auto idx = 0;
+  for (auto& s : p) {
+    ret.insert(idx++, s);
+  }
+  return ret;
+}
+
+folly::dynamic ini_get(boost::container::flat_set<std::string>& p) {
+  folly::dynamic ret = folly::dynamic::object;
+  auto idx = 0;
+  for (auto& s : p) {
+    ret.insert(idx++, s);
   }
   return ret;
 }
@@ -374,6 +434,64 @@ folly::dynamic ini_get(std::vector<std::string>& p) {
     ret.insert(idx++, s);
   }
   return ret;
+}
+
+const folly::dynamic* ini_iterate(const folly::dynamic &ini,
+                                  const std::string &name) {
+  // This should never happen, but handle it anyway.
+  if (ini == nullptr) {
+    return nullptr;
+  }
+
+  // If for some reason we are passed a string (i.e., a leaf value),
+  // just return it back
+  if (ini.isString()) {
+    return &ini;
+  }
+
+  // If we just passed in a name that already has a value like:
+  //   hhvm.server.apc.ttl_limit
+  //   max_execution_time
+  // then we just return the value now.
+  // i.e., a value that didn't look like
+  //   hhvm.a.b[c][d], where name = hhvm.a.b.c.d
+  //   c[d] (where ini is already hhvm.a.b), where name = c.d
+  auto* value = ini.get_ptr(name);
+  if (value) {
+    return value;
+  }
+
+  // Otherwise, we split on the dots (if any) to see if we can get a real value
+  std::vector<std::string> dot_parts;
+  folly::split('.', name, dot_parts);
+
+  int dot_loc = 0;
+  int dot_parts_size = dot_parts.size();
+  std::string part = dot_parts[0];
+  // If this is null, then all the loops below will be skipped and
+  // we will return it as null.
+  value = ini.get_ptr(part);
+  // Loop through the dot parts, getting a pointer to each
+  // We may need to concatenate dots to be able to get a real value
+  // e.g., if someone passed in hhvm.a.b.c.d, which in ini was equal
+  // to hhvm.a.b[c][d], then we would start with hhvm and get null,
+  // then hhvm.a and get null, then hhvm.a.b and actually get an object
+  // to point to.
+  while (!value && dot_loc < dot_parts_size - 1) {
+    dot_loc++;
+    part = part + "." + dot_parts[dot_loc];
+    value = ini.get_ptr(part);
+  }
+  // Get to the last dot part and get its value, if it exists
+  for (int i = dot_loc + 1; i < dot_parts_size; i++) {
+    if (value) {
+      part = dot_parts[i];
+      value = value->get_ptr(part);
+    } else { // If we reach a bad point, just return null
+      return nullptr;
+    }
+  }
+  return value;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -954,6 +1072,30 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
     }
   }
   return r;
+}
+
+void add_default_config_files_globbed(
+  const char *default_config_file,
+  std::function<void (const char *filename)> cb
+) {
+  glob_t globbuf;
+  memset(&globbuf, 0, sizeof(glob_t));
+  int flags = 0;  // Use default glob semantics
+  int nret = glob(default_config_file, flags, nullptr, &globbuf);
+  if (nret == GLOB_NOMATCH ||
+      globbuf.gl_pathc == 0 ||
+      globbuf.gl_pathv == 0 ||
+      nret != 0) {
+    globfree(&globbuf);
+    return;
+  }
+
+  for (int n = 0; n < (int)globbuf.gl_pathc; n++) {
+    if (access(globbuf.gl_pathv[n], R_OK) != -1) {
+      cb(globbuf.gl_pathv[n]);
+    }
+  }
+  globfree(&globbuf);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

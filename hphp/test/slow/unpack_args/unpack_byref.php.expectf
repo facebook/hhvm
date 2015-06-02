@@ -1,0 +1,11 @@
+Warning: Parameter 1 to foo() expected to be a reference, value given in %s/slow/unpack_args/unpack_byref.php on line 5
+int(1)
+array(1) {
+  [0]=>
+  int(1)
+}
+int(1)
+array(1) {
+  [0]=>
+  &int(5)
+}

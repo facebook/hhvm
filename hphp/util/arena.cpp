@@ -21,6 +21,14 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+bool s_bypassSlabAlloc = false;
+}
+
+void SetArenaSlabAllocBypass(bool f) {
+  s_bypassSlabAlloc = f;
+}
+
 template<size_t kChunkBytes>
 ArenaImpl<kChunkBytes>::ArenaImpl() {
   static_assert(kChunkBytes <= 4294967295U,
@@ -34,7 +42,7 @@ ArenaImpl<kChunkBytes>::ArenaImpl() {
   memset(&m_frame, 0, sizeof m_frame);
   m_current = static_cast<char*>(malloc(kChunkBytes));
   m_ptrs.push_back(m_current);
-  m_bypassSlabAlloc = RuntimeOption::DisableSmartAllocator;
+  m_bypassSlabAlloc = s_bypassSlabAlloc;
 #ifdef DEBUG
   m_externalAllocSize = 0;
 #endif
@@ -89,7 +97,7 @@ void* ArenaImpl<kChunkBytes>::allocSlow(size_t nbytes) {
 template<size_t kChunkBytes>
 void ArenaImpl<kChunkBytes>::createSlab() {
   ++m_frame.index;
-  m_frame.offset = RuntimeOption::DisableSmartAllocator ? kChunkBytes : 0 ;
+  m_frame.offset = m_bypassSlabAlloc ? kChunkBytes : 0 ;
   if (m_frame.index < m_ptrs.size()) {
     m_current = m_ptrs[m_frame.index];
   } else {
@@ -107,4 +115,3 @@ template class ArenaImpl<32 * 1024>;
 //////////////////////////////////////////////////////////////////////
 
 }
-

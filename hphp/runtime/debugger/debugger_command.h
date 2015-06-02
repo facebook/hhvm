@@ -79,7 +79,6 @@ struct DebuggerCommand {
     KindOfWhere               = 23,
     KindOfWhereAsync          = 223,
     KindOfExtended            = 24,
-    KindOfZend                = 26,
     KindOfComplete            = 27,
 
     KindOfEval                = 1000,

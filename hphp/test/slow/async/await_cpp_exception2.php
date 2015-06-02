@@ -24,7 +24,7 @@ function foo() {
 
 register_postsend_function(function() {
   echo "postsend start\n";
-  foo()->join();
+  HH\Asio\join(foo());
   echo "postsend end\n";
 });
 
@@ -34,4 +34,4 @@ async function evil($local) {
   await $dep;
 }
 
-evil(new DoubleDecRef())->join();
+HH\Asio\join(evil(new DoubleDecRef()));

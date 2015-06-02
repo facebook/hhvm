@@ -21,6 +21,7 @@
 #include <limits>
 
 #include "hphp/util/low-ptr.h"
+#include "hphp/runtime/base/header-kind.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,114 +66,9 @@ class Func;
 class VariableSerializer;
 class VariableUnserializer;
 
-///////////////////////////////////////////////////////////////////////////////
-
 using LowClassPtr  = LowPtr<Class>;
 using LowFuncPtr   = LowPtr<Func>;
 using LowStringPtr = LowPtr<const StringData>;
-
-///////////////////////////////////////////////////////////////////////////////
-
-namespace Uns {
-enum class Mode {
-  Value = 0,
-  Key = 1,
-  ColValue = 2,
-  ColKey = 3,
-};
-}
-
-namespace Collection {
-
-enum Type : uint8_t { // Stored in ObjectData::o_subclassData.
-  // Values must be contiguous integers (for ArrayIter::initFuncTable).
-  InvalidType = 0,
-  VectorType = 1,
-  MapType = 2,
-  SetType = 3,
-  PairType = 4,
-  ImmVectorType = 5,
-  ImmMapType = 6,
-  ImmSetType = 7,
-};
-
-constexpr size_t MaxNumTypes = 8;
-
-inline Type stringToType(const char* str, size_t len) {
-  switch (len) {
-    case 6:
-      if (!strcasecmp(str, "hh\\set")) return SetType;
-      if (!strcasecmp(str, "hh\\map")) return MapType;
-      break;
-    case 7:
-      if (!strcasecmp(str, "hh\\pair")) return PairType;
-      break;
-    case 9:
-      if (!strcasecmp(str, "hh\\vector")) return VectorType;
-      if (!strcasecmp(str, "hh\\immmap")) return ImmMapType;
-      if (!strcasecmp(str, "hh\\immset")) return ImmSetType;
-      break;
-    case 12:
-      if (!strcasecmp(str, "hh\\immvector")) return ImmVectorType;
-      break;
-    default:
-      break;
-  }
-  return InvalidType;
-}
-inline Type stringToType(const std::string& s) {
-  return stringToType(s.c_str(), s.size());
-}
-inline bool isVectorType(Collection::Type ctype) {
-  return (ctype == Collection::VectorType ||
-          ctype == Collection::ImmVectorType);
-}
-inline bool isMapType(Collection::Type ctype) {
-  return (ctype == Collection::MapType ||
-          ctype == Collection::ImmMapType);
-}
-inline bool isSetType(Collection::Type ctype) {
-  return (ctype == Collection::SetType ||
-          ctype == Collection::ImmSetType);
-}
-inline bool isInvalidType(Collection::Type ctype) {
-  return (ctype == Collection::InvalidType ||
-          static_cast<size_t>(ctype) >= Collection::MaxNumTypes);
-}
-inline bool isMutableType(Collection::Type ctype) {
-  return (ctype == Collection::VectorType ||
-          ctype == Collection::MapType ||
-          ctype == Collection::SetType);
-}
-inline bool isImmutableType(Collection::Type ctype) {
-  return !isMutableType(ctype);
-}
-
-inline bool isTypeWithPossibleIntStringKeys(Collection::Type ctype) {
-  return Collection::isSetType(ctype) || Collection::isMapType(ctype);
-}
-
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Many functions may elect to take "litstr" separately from "String" class.
- * This code specialization helps speed a lot by not instantiating a String
- * object to box an otherwise literal value. This also means, though not
- * obviously thus dangerous not to know, whenever a function takes a parameter
- * with type of "litstr", one can only pass in a literal string that has
- * a "permanent" memory address to be stored. To make this really clear, I
- * invented "litstr" as a typedef-ed name for "const char *" that expects a
- * literal string only. Therefore, throughout this entire runtime library,
- *
- *   litstr == literal string
- *   const char * == any C-string pointer
- *
- * TODO(#2298051): The above comment regarding "any C-string pointer" isn't
- * really true anymore.
- */
-using litstr = const char*;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -188,7 +84,7 @@ inline const Variant& variant(const Variant& v) {
 }
 
 /**
- * ref() can be used to cause strong binding
+ * ref() can be used to cause strong binding.
  *
  *   a = ref(b); // strong binding: now both a and b point to the same data
  *   a = b;      // weak binding: a will copy or copy-on-write
@@ -201,15 +97,6 @@ inline RefResult ref(const Variant& v) {
 inline RefResult ref(Variant& v) {
   return *(RefResultValue*)&v;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-class GlobalsArray;
-class ObjectAllocatorBase;
-class Profiler;
-class CodeCoverage;
-
-using GlobalVariables = GlobalsArray;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -303,4 +190,4 @@ constexpr FuncId DummyFuncId = -2;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_TYPES_H_
+#endif

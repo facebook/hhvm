@@ -42,13 +42,13 @@ class NameOfCommand(gdb.Command):
         super(NameOfCommand, self).__init__('nameof', gdb.COMMAND_DATA)
 
     def invoke(self, args, from_tty):
-        argv = parse_argv(args)
-
-        if len(argv) != 1:
+        try:
+            obj = gdb.parse_and_eval(args)
+        except gdb.error:
             print('Usage: nameof <object>')
             return
 
-        name = nameof(argv[0])
+        name = nameof(obj)
 
         if name is not None:
             print('"' + name + '"')

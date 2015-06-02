@@ -1,0 +1,39 @@
+= basic:
+
+NULL
+
+= nested:
+
+sideEffect is called from 'nested'
+NULL
+
+= notNull:
+
+sideEffect is called from 'notNull'
+string(1) "z"
+string(1) "q"
+
+= nonLocalBase:
+
+NULL
+sideEffect is called from 'nonLocalBase'
+string(1) "z"
+
+= varNameBase:
+
+sideEffect is called from 'varNameBase'
+NULL
+
+= xhpAttr:
+
+NULL
+
+= issetProp:
+
+bool(false)
+NULL
+
+= emptyProp:
+
+bool(true)
+NULL

@@ -103,6 +103,12 @@ Hdf::~Hdf() {
   }
 }
 
+bool Hdf::isEmpty() const {
+  return this->getFullPath() == "" &&
+         this->getName() == "" &&
+         strcmp(this->toString(), "") == 0;
+}
+
 void Hdf::assign(const Hdf &hdf) {
   m_hdf = hdf.m_hdf;
   if (m_rawp) {

@@ -47,30 +47,30 @@ object(HH\ImmVector)#2 (1) {
 }
 object(HH\ImmVector)#3 (1) {
   [0]=>
-  object(HH\Vector)#2 (1) {
+  object(HH\Vector)#1 (1) {
     [0]=>
     int(2)
   }
 }
-object(HH\ImmVector)#3 (1) {
+object(HH\ImmVector)#4 (1) {
   [0]=>
   object(HH\Vector)#2 (1) {
     [0]=>
     int(3)
   }
 }
-object(HH\ImmVector)#3 (1) {
+object(HH\ImmVector)#5 (1) {
   [0]=>
-  object(HH\Vector)#2 (2) {
+  object(HH\Vector)#3 (2) {
     [0]=>
     int(1)
     [1]=>
     int(2)
   }
 }
-object(HH\ImmVector)#3 (1) {
+object(HH\ImmVector)#6 (1) {
   [0]=>
-  object(HH\Vector)#2 (1) {
+  object(HH\Vector)#4 (1) {
     [0]=>
     int(2)
   }

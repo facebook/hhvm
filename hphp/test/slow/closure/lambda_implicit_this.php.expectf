@@ -1,0 +1,38 @@
+direct:
+
+in C::bar: get_called_class(): D, get_class($this): D
+
+in parent function
+object(D)#1 (0) {
+}
+
+nestedCapture:
+
+in C::bar: get_called_class(): D, get_class($this): D
+
+in parent function
+object(D)#1 (0) {
+}
+
+nestedNoCapture:
+
+in C::bar: get_called_class(): D, get_class($this): D
+
+in parent function
+object(D)#1 (0) {
+}
+
+Notice: Undefined variable: this in %s/test/slow/closure/lambda_implicit_this.php on line 20
+in D::bar
+
+reflectionInfo:
+
+object(D)#1 (0) {
+}
+object(D)#1 (0) {
+}
+NULL
+
+outer:
+
+NULL

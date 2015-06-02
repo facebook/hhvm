@@ -53,4 +53,4 @@ async function baz($from, $to) {
   echo "end baz\n";
 }
 
-baz(42, 100)->join();
+HH\Asio\join(baz(42, 100));

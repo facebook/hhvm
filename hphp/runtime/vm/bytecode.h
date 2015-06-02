@@ -30,17 +30,20 @@
 #include "hphp/runtime/vm/name-value-table.h"
 #include "hphp/runtime/vm/unit.h"
 
+#include "hphp/runtime/vm/jit/types.h"
+
 #include "hphp/util/arena.h"
 
 #include <type_traits>
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+struct ActRec;
+struct Func;
 struct Resumable;
 
-/**
- * These macros allow us to easily change the arguments to iop*() opcode
- * implementations.
- */
+///////////////////////////////////////////////////////////////////////////////
 
 #define EVAL_FILENAME_SUFFIX ") : eval()'d code"
 
@@ -76,8 +79,7 @@ void SETOP_BODY(TypedValue* lhs, SetOpOp op, Cell* rhs) {
   SETOP_BODY_CELL(tvToCell(lhs), op, rhs);
 }
 
-class Func;
-struct ActRec;
+///////////////////////////////////////////////////////////////////////////////
 
 struct ExtraArgs : private boost::noncopyable {
   /*
@@ -145,7 +147,14 @@ class VarEnv {
   NameValueTable m_nvTable;
   ExtraArgs* m_extraArgs;
   uint16_t m_depth;
-  bool m_global;
+  const bool m_global;
+
+ public:
+  template<class F> void scan(F& mark) const {
+    mark(m_nvTable);
+    // TODO #6511877 scan ExtraArgs. requires calculating numExtra
+    //mark(m_extraArgs);
+  }
 
  public:
   explicit VarEnv();
@@ -157,7 +166,7 @@ class VarEnv {
   static VarEnv* createLocal(ActRec* fp);
 
   // Allocate a global VarEnv.  Initially not attached to any frame.
-  static VarEnv* createGlobal();
+  static void createGlobal();
 
   VarEnv* clone(ActRec* fp) const;
 
@@ -181,6 +190,36 @@ class VarEnv {
   // Access to wrapped ExtraArgs, if we have one.
   TypedValue* getExtraArg(unsigned argInd) const;
 };
+
+/*
+ * Action taken to handle any extra arguments passed for a function call.
+ */
+enum class ExtraArgsAction {
+  None,     // no extra arguments; zero out m_extraArgs
+  Discard,  // discard extra arguments
+  Variadic, // populate `...$args' parameter
+  MayUseVV, // create ExtraArgs
+  VarAndVV, // both of the above
+};
+
+inline ExtraArgsAction extra_args_action(const Func* func, uint32_t argc) {
+  using Action = ExtraArgsAction;
+
+  auto const nparams = func->numNonVariadicParams();
+  if (argc <= nparams) return Action::None;
+
+  if (LIKELY(func->discardExtraArgs())) {
+    return Action::Discard;
+  }
+  if (func->attrs() & AttrMayUseVV) {
+    return func->hasVariadicCaptureParam() ? Action::VarAndVV
+                                           : Action::MayUseVV;
+  }
+  assertx(func->hasVariadicCaptureParam());
+  return Action::Variadic;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * An "ActRec" is a call activation record. The ordering of the fields assumes
@@ -220,10 +259,8 @@ struct ActRec {
       uint32_t m_soff;         // Saved offset of caller from beginning of
                                //   caller's Func's bytecode.
 
-      // Bits 0-28 are the number of function args.
-      // Bit 29 is whether the locals were already decrefd (used by unwinder)
-      // Bit 30 is whether this ActRec is embedded in a Resumable object.
-      // Bit 31 is whether this ActRec came from FPushCtor*.
+      // Bits 0-28 are the number of function args.  Bits 29-31 are values from
+      // the Flags enum.
       uint32_t m_numArgsAndFlags;
     };
   };
@@ -233,7 +270,7 @@ struct ActRec {
     struct {
       union {
         ObjectData* m_this;    // This.
-        Class* m_cls;      // Late bound class.
+        Class* m_cls;          // Late bound class.
       };
       union {
         VarEnv* m_varEnv;       // Variable environment; only used when the
@@ -251,83 +288,88 @@ struct ActRec {
   ActRec* sfp() const;
 
   void setReturn(ActRec* fp, PC pc, void* retAddr);
+  void setJitReturn(void* addr);
   void setReturnVMExit();
 
   // skip this frame if it is for a builtin function
   bool skipFrame() const;
 
-  /**
-   * Accessors for the packed m_numArgsAndFlags field. We track
-   * whether ActRecs came from FPushCtor* so that during unwinding we
-   * can set the flag not to call destructors for objects whose
-   * constructors exit via an exception.
-   */
+  enum Flags : uint32_t {
+    None          = 0,
 
-  static constexpr int kNumArgsBits = 29;
-  static constexpr int kNumArgsMask = (1 << kNumArgsBits) - 1;
-  static constexpr int kFlagsMask   = ~kNumArgsMask;
+    // This bit can be independently set on ActRecs with any other flag state.
+    // It's used by the unwinder to know that an ActRec has been partially torn
+    // down (locals freed).
+    LocalsDecRefd = (1u << 29),
 
-  static constexpr int kLocalsDecRefdShift = kNumArgsBits;
-  static constexpr int kResumedShift       = kNumArgsBits + 1;
-  static constexpr int kFPushCtorShift     = kNumArgsBits + 2;
+    // Mutually exclusive execution mode states in these 2 bits.
+    InResumed     = (1u << 30),
+    FromFPushCtor = (1u << 31),
+    MagicDispatch = InResumed|FromFPushCtor,
+  };
 
-  static_assert(kFPushCtorShift <= 8 * sizeof(int32_t) - 1,
-                "Out of bits in ActRec");
+  static constexpr int kNumArgsBits       = 29;
+  static constexpr int kNumArgsMask       = (1 << kNumArgsBits) - 1;
+  static constexpr int kFlagsMask         = ~kNumArgsMask;
+  static constexpr int kExecutionModeMask = ~LocalsDecRefd;
 
-  static constexpr int kLocalsDecRefdMask = 1 << kLocalsDecRefdShift;
-  static constexpr int kResumedMask       = 1 << kResumedShift;
-  static constexpr int kFPushCtorMask     = 1 << kFPushCtorShift;
-
-  int32_t numArgs() const {
-    return m_numArgsAndFlags & kNumArgsMask;
+  int32_t numArgs() const { return m_numArgsAndFlags & kNumArgsMask; }
+  Flags flags() const {
+    return static_cast<Flags>(m_numArgsAndFlags & kFlagsMask);
   }
 
-  bool localsDecRefd() const {
-    return m_numArgsAndFlags & kLocalsDecRefdMask;
-  }
-
+  bool localsDecRefd() const { return flags() & LocalsDecRefd; }
   bool resumed() const {
-    return m_numArgsAndFlags & kResumedMask;
+    return (flags() & kExecutionModeMask) == InResumed;
   }
-
-  void setResumed() {
-    m_numArgsAndFlags |= kResumedMask;
-  }
-
   bool isFromFPushCtor() const {
-    return m_numArgsAndFlags & kFPushCtorMask;
+    return (flags() & kExecutionModeMask) == FromFPushCtor;
+  }
+  bool magicDispatch() const {
+    return (flags() & kExecutionModeMask) == MagicDispatch;
   }
 
-  static inline uint32_t
-  encodeNumArgs(uint32_t numArgs, bool localsDecRefd, bool resumed,
-                bool isFPushCtor) {
-    assert((numArgs & kFlagsMask) == 0);
-    return numArgs |
-      (localsDecRefd << kLocalsDecRefdShift) |
-      (resumed       << kResumedShift) |
-      (isFPushCtor   << kFPushCtorShift);
+  static uint32_t encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
+    assert((numArgs & ~kNumArgsMask) == 0);
+    assert((uint32_t{flags} & ~kFlagsMask) == 0);
+    return numArgs | flags;
   }
 
   void initNumArgs(uint32_t numArgs) {
-    m_numArgsAndFlags = encodeNumArgs(numArgs, false, false, false);
-  }
-
-  void initNumArgsFromResumable(uint32_t numArgs) {
-    m_numArgsAndFlags = encodeNumArgs(numArgs, false, true, false);
-  }
-
-  void initNumArgsFromFPushCtor(uint32_t numArgs) {
-    m_numArgsAndFlags = encodeNumArgs(numArgs, false, false, true);
+    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs, Flags::None);
   }
 
   void setNumArgs(uint32_t numArgs) {
-    m_numArgsAndFlags = encodeNumArgs(numArgs, localsDecRefd(), resumed(),
-                                      isFromFPushCtor());
+    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs, flags());
   }
 
   void setLocalsDecRefd() {
-    assert(!localsDecRefd());
-    m_numArgsAndFlags |= kLocalsDecRefdMask;
+    m_numArgsAndFlags = m_numArgsAndFlags | LocalsDecRefd;
+  }
+  void setResumed() {
+    assert(flags() == Flags::None);
+    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), InResumed);
+  }
+  void setFromFPushCtor() {
+    assert(flags() == Flags::None);
+    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), FromFPushCtor);
+  }
+
+  void setMagicDispatch(StringData* invName) {
+    assert(flags() == Flags::None);
+    m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), MagicDispatch);
+    m_invName = invName;
+  }
+
+  StringData* clearMagicDispatch() {
+    assert(magicDispatch());
+    auto const invName = getInvName();
+    m_numArgsAndFlags = encodeNumArgsAndFlags(
+      numArgs(),
+      static_cast<Flags>(flags() & ~MagicDispatch)
+    );
+    trashVarEnv();
+    return invName;
   }
 
   static void* encodeThis(ObjectData* obj, Class* cls) {
@@ -368,88 +410,94 @@ struct ActRec {
     return m_func;
   }
 
-  /**
-   * To conserve space, we use unions for pairs of mutually exclusive
-   * fields (fields that are not used at the same time). We use unions
-   * for m_this/m_cls and m_varEnv/m_invName.
+  /*
+   * To conserve space, we use unions for pairs of mutually exclusive fields
+   * (fields that are not used at the same time). We use unions for
+   * m_this/m_cls and m_varEnv/m_invName.
    *
-   * The least significant bit is used as a marker for each pair of fields
-   * so that we can distinguish at runtime which field is valid. We define
+   * The least significant bit is used as a marker for each pair of fields so
+   * that we can distinguish at runtime which field is valid. We define
    * accessors below to encapsulate this logic.
-   *
-   * Note that m_invName is only used when the ActRec is pre-live. Thus when
-   * an ActRec is live it is safe to directly access m_varEnv without using
-   * accessors.
    */
 
-  static constexpr int8_t kHasClassBit = 0x1;
-  static constexpr int8_t kClassMask   = ~kHasClassBit;
+  static constexpr uintptr_t kHasClassBit       = 0x1;
+  static constexpr uintptr_t kExtraArgsBit      = 0x1;
+  static constexpr uintptr_t kTrashedVarEnvSlot = 0xfeeefeee000f000f;
 
-  inline bool hasThis() const {
-    return m_this && !(reinterpret_cast<intptr_t>(m_this) & kHasClassBit);
+  bool hasThis() const {
+    return m_this && !(reinterpret_cast<uintptr_t>(m_this) & kHasClassBit);
   }
-  inline ObjectData* getThis() const {
+
+  ObjectData* getThis() const {
     assert(hasThis());
     return m_this;
   }
-  inline void setThis(ObjectData* val) {
+
+  void setThis(ObjectData* val) {
     m_this = val;
   }
-  inline bool hasClass() const {
-    return reinterpret_cast<intptr_t>(m_cls) & kHasClassBit;
+
+  bool hasClass() const {
+    return reinterpret_cast<uintptr_t>(m_cls) & kHasClassBit;
   }
-  inline Class* getClass() const {
+
+  Class* getClass() const {
     assert(hasClass());
     return reinterpret_cast<Class*>(
-      reinterpret_cast<intptr_t>(m_cls) & kClassMask);
+      reinterpret_cast<uintptr_t>(m_cls) & ~kHasClassBit);
   }
-  inline void setClass(Class* val) {
+
+  void setClass(Class* val) {
     m_cls = reinterpret_cast<Class*>(
-      reinterpret_cast<intptr_t>(val) | kHasClassBit);
+      reinterpret_cast<uintptr_t>(val) | kHasClassBit);
   }
 
-  // Note that reordering these is likely to require changes to the translator.
-  static constexpr int8_t kInvNameBit    = 0x1;
-  static constexpr int8_t kInvNameMask   = ~kInvNameBit;
-  static constexpr int8_t kExtraArgsBit  = 0x2;
-  static constexpr int8_t kExtraArgsMask = ~kExtraArgsBit;
+  void trashVarEnv() {
+    if (debug) setVarEnv(reinterpret_cast<VarEnv*>(kTrashedVarEnvSlot));
+  }
 
-  inline bool hasVarEnv() const {
-    return m_varEnv &&
-      !(reinterpret_cast<intptr_t>(m_varEnv) & (kInvNameBit | kExtraArgsBit));
+  bool checkVarEnv() const {
+    always_assert(m_varEnv != reinterpret_cast<VarEnv*>(kTrashedVarEnvSlot));
+    return true;
   }
-  inline bool hasInvName() const {
-    return reinterpret_cast<intptr_t>(m_invName) & kInvNameBit;
+
+  bool hasVarEnv() const {
+    assert(checkVarEnv());
+    assert(!magicDispatch());
+    return m_varEnv && !(reinterpret_cast<uintptr_t>(m_varEnv) & kExtraArgsBit);
   }
-  inline bool hasExtraArgs() const {
-    return reinterpret_cast<intptr_t>(m_extraArgs) & kExtraArgsBit;
+
+  bool hasExtraArgs() const {
+    assert(checkVarEnv());
+    return reinterpret_cast<uintptr_t>(m_extraArgs) & kExtraArgsBit;
   }
-  inline VarEnv* getVarEnv() const {
+
+  VarEnv* getVarEnv() const {
     assert(hasVarEnv());
     return m_varEnv;
   }
-  inline StringData* getInvName() const {
-    assert(hasInvName());
-    return reinterpret_cast<StringData*>(
-      reinterpret_cast<intptr_t>(m_invName) & kInvNameMask);
-  }
-  inline ExtraArgs* getExtraArgs() const {
-    return reinterpret_cast<ExtraArgs*>(
-      reinterpret_cast<intptr_t>(m_extraArgs) & kExtraArgsMask);
-  }
-  inline void setVarEnv(VarEnv* val) {
-    m_varEnv = val;
-  }
-  inline void setInvName(StringData* val) {
-    m_invName = reinterpret_cast<StringData*>(
-      reinterpret_cast<intptr_t>(val) | kInvNameBit);
-  }
-  inline void setExtraArgs(ExtraArgs* val) {
-    m_extraArgs = reinterpret_cast<ExtraArgs*>(
-      reinterpret_cast<intptr_t>(val) | kExtraArgsBit);
+
+  StringData* getInvName() const {
+    assert(magicDispatch());
+    assert(checkVarEnv());
+    return m_invName;
   }
 
-  // Accessors for extra arg queries.
+  ExtraArgs* getExtraArgs() const {
+    if (!hasExtraArgs()) return nullptr;
+    return reinterpret_cast<ExtraArgs*>(
+      reinterpret_cast<uintptr_t>(m_extraArgs) & ~kExtraArgsBit);
+  }
+
+  void setVarEnv(VarEnv* val) {
+    m_varEnv = val;
+  }
+
+  void setExtraArgs(ExtraArgs* val) {
+    m_extraArgs = reinterpret_cast<ExtraArgs*>(
+      reinterpret_cast<uintptr_t>(val) | kExtraArgsBit);
+  }
+
   TypedValue* getExtraArg(unsigned ind) const {
     assert(hasExtraArgs() || hasVarEnv());
     return hasExtraArgs() ? getExtraArgs()->getExtraArg(ind) :
@@ -461,11 +509,35 @@ struct ActRec {
 static_assert(offsetof(ActRec, m_sfp) == 0,
               "m_sfp should be at offset 0 of ActRec");
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Returns true iff ar represents a frame on the VM eval stack or a Resumable
  * object on the PHP heap.
  */
 bool isVMFrame(const ActRec* ar);
+
+/*
+ * Returns true iff the given address is one of the special debugger return
+ * helpers.
+ */
+bool isDebuggerReturnHelper(void* addr);
+
+/*
+ * If ar->m_savedRip points somewhere in the TC that is not a return helper,
+ * change it to point to an appropriate return helper. The two different
+ * versions are for the different needs of the C++ unwinder and debugger hooks,
+ * respectively.
+ */
+void unwindPreventReturnToTC(ActRec* ar);
+void debuggerPreventReturnToTC(ActRec* ar);
+
+/*
+ * Call debuggerPreventReturnToTC() on all live VM frames in this thread.
+ */
+void debuggerPreventReturnsToTC();
+
+///////////////////////////////////////////////////////////////////////////////
 
 inline int32_t arOffset(const ActRec* ar, const ActRec* other) {
   return (intptr_t(other) - intptr_t(ar)) / sizeof(TypedValue);
@@ -498,6 +570,8 @@ inline Class* arGetContextClassFromBuiltin(const ActRec* ar) {
   return arGetContextClassImpl<true>(ar);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 // Used by extension functions that take a PHP "callback", since they need to
 // figure out the callback context once and call it multiple times. (e.g.
 // array_map, array_filter, ...)
@@ -510,6 +584,8 @@ struct CallCtx {
 
 constexpr size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
 constexpr size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * We pad all stack overflow checks by a small amount to allow for three
@@ -541,6 +617,11 @@ struct Fault {
       m_raiseFrame(nullptr),
       m_raiseOffset(kInvalidOffset),
       m_handledCount(0) {}
+
+  template<class F> void scan(F& mark) const {
+    if (m_faultType == Type::UserException) mark(m_userException);
+    else mark(m_cppException);
+  }
 
   union {
     ObjectData* m_userException;
@@ -609,6 +690,7 @@ public:
     return offsetof(Stack, m_top);
   }
 
+  static TypedValue* anyFrameStackBase(const ActRec* fp);
   static TypedValue* frameStackBase(const ActRec* fp);
   static TypedValue* resumableStackBase(const ActRec* fp);
 
@@ -670,11 +752,9 @@ public:
     assert(m_top != m_base);
     ActRec* ar = (ActRec*)m_top;
     if (ar->hasThis()) decRefObj(ar->getThis());
-    if (ar->hasInvName()) decRefStr(ar->getInvName());
-
-    // This should only be used on a pre-live ActRec.
-    assert(!ar->hasVarEnv());
-    assert(!ar->hasExtraArgs());
+    if (ar->magicDispatch()) {
+      decRefStr(ar->getInvName());
+    }
     discardAR();
   }
 
@@ -998,9 +1078,7 @@ visitStackElems(const ActRec* const fp,
                 Offset const bcOffset,
                 ARFun arFun,
                 TVFun tvFun) {
-  const TypedValue* const base =
-    fp->resumed() ? Stack::resumableStackBase(fp)
-                  : Stack::frameStackBase(fp);
+  const TypedValue* const base = Stack::anyFrameStackBase(fp);
   MaybeConstTVPtr cursor = stackTop;
   assert(cursor <= base);
 
@@ -1040,13 +1118,14 @@ visitStackElems(const ActRec* const fp,
 void resetCoverageCounters();
 
 // The interpOne*() methods implement individual opcode handlers.
-using InterpOneFunc = void (*) (ActRec* ar, Cell* sp, Offset pcOff);
+using InterpOneFunc = jit::TCA (*) (ActRec*, TypedValue*, Offset);
 extern InterpOneFunc interpOneEntryPoints[];
 
 bool doFCallArrayTC(PC pc);
 bool doFCall(ActRec* ar, PC& pc);
-void dispatchBB();
+jit::TCA dispatchBB();
 void pushLocalsAndIterators(const Func* func, int nparams = 0);
+Array getDefinedVariables(const ActRec*);
 
 ///////////////////////////////////////////////////////////////////////////////
 

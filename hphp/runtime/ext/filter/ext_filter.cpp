@@ -124,6 +124,14 @@ struct FilterRequestData final : RequestEventHandler {
     return empty_array();
   }
 
+  void vscan(IMarker& mark) const override {
+    mark(m_GET);
+    mark(m_POST);
+    mark(m_COOKIE);
+    mark(m_SERVER);
+    mark(m_ENV);
+  }
+
 private:
   Array m_GET;
   Array m_POST;
@@ -212,6 +220,7 @@ public:
     // warm up the s_filter_request_data
     s_filter_request_data->requestInit();
   }
+
 } s_filter_extension;
 
 #undef REGISTER_CONSTANT

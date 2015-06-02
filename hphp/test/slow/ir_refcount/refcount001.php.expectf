@@ -1,0 +1,22 @@
+array(1) {
+  [0]=>
+  object(stdClass)#2 (0) {
+  }
+}
+array(1) {
+  [0]=>
+  object(stdClass)#3 (0) {
+  }
+}
+array(1) {
+  [0]=>
+  object(stdClass)#4 (0) {
+  }
+}
+array(1) {
+  [0]=>
+  object(stdClass)#5 (0) {
+  }
+}
+
+Catchable fatal error: Argument 1 passed to X::__construct() must be an instance of array, string given in %s/test/slow/ir_refcount/refcount001.php on line 7

@@ -46,14 +46,14 @@ $ret = apc_add("foo", false);
 if ($ret !== false) {
   echo "no7\n";
 }
-$ret = apc_fetch("foo", &$success);
+$ret = apc_fetch("foo", $success);
 if ($ret !== false) {
   echo "no8\n";
 }
 if ($success !== true) {
   echo "no9\n";
 }
-$ret = apc_fetch("bar", &$success);
+$ret = apc_fetch("bar", $success);
 if ($ret !== false) {
   echo "no10\n";
 }
@@ -62,19 +62,19 @@ if ($success !== false) {
 }
 
 $map1 = array("foo" => false);
-$ret = apc_fetch(array("foo"), &$success);
+$ret = apc_fetch(array("foo"), $success);
 if ($ret !== $map1) {
   echo "no12\n";
 }
-$ret = apc_fetch(array("bar"), &$success);
+$ret = apc_fetch(array("bar"), $success);
 if ($ret !== array()) {
   echo "no13\n";
 }
 if ($success !== false) echo "no14\n";
-$ret = apc_fetch(array("foo", "bar"), &$success);
+$ret = apc_fetch(array("foo", "bar"), $success);
 if ($ret !== $map1) echo "no15\n";
 if ($success !== true) echo "no16\n";
-$ret = apc_fetch(array("foo", "bar", "foo", "bar"), &$success);
+$ret = apc_fetch(array("foo", "bar", "foo", "bar"), $success);
 if ($ret !== $map1) echo "no17\n";
 if ($success !== true) echo "no18\n";
 

@@ -22,5 +22,5 @@ async function test() {
   var_dump($a);
 }
 
-test()->join();
+HH\Asio\join(test());
 

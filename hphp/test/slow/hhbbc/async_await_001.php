@@ -11,7 +11,7 @@ async function foo() {
 
 function main() {
   $go = foo();
-  $blah = $go->join();
+  $blah = HH\Asio\join($go);
   $blah->yo();
 }
 

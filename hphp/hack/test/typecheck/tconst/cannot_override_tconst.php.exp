@@ -4,6 +4,8 @@ File "cannot_override_tconst.php", line 7, characters 21-26:
 It is incompatible with this object of type Parent
 because some declarations are incompatible.
 Read the following to see why:
+File "cannot_override_tconst.php", line 8, characters 14-15:
+The assigned type of this type constant is inconsistent with its parent
 File "cannot_override_tconst.php", line 4, characters 19-26:
 This is an array key (int/string)
 File "cannot_override_tconst.php", line 8, characters 19-21:

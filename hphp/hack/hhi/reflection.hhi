@@ -34,6 +34,8 @@ class ReflectionClass implements Reflector {
   public function getConstant(string $name): mixed;
   public function getConstants(): array<string, mixed>;
   public function getAbstractConstantNames(): array<string, string>;
+  public function getTypeConstant(string $name): ReflectionTypeConstant;
+  public function getTypeConstants(): array<ReflectionTypeConstant>;
   public function getConstructor(): ?ReflectionMethod;
   public function getDefaultProperties(): array<string, mixed>;
   /**
@@ -76,6 +78,7 @@ class ReflectionClass implements Reflector {
   public function hasConstant(string $name): bool;
   public function hasMethod(string $name): bool;
   public function hasProperty(string $name): bool;
+  public function hasTypeConstant(string $name): bool;
   public function implementsInterface(string $interface): bool;
   public function inNamespace(): bool;
   public function isAbstract(): bool;
@@ -276,4 +279,16 @@ class ReflectionZendExtension implements Reflector {
   public function getAuthor();
   public function getURL();
   public function getCopyright();
+}
+
+class ReflectionTypeConstant implements Reflector {
+
+  final private function __clone();
+  public static function export($class, string $name, $return = null);
+  public function __construct($class, string $name);
+  public function __toString(): string;
+  public function getName(): string;
+  public function isAbstract(): bool;
+  public function getDeclaringClass(): ReflectionClass;
+  public function getAssignedTypeText(): ?string;
 }

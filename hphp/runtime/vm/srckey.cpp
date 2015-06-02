@@ -37,14 +37,14 @@ std::string show(SrcKey sk) {
                        filepath, unit->getLineNumber(sk.offset()),
                        func->isPseudoMain() ? "pseudoMain"
                                             : func->fullName()->data(),
-                       (uint32_t)sk.getFuncId(), sk.offset(),
+                       (uint32_t)sk.funcID(), sk.offset(),
                        sk.resumed() ? "r" : "").str();
 }
 
 std::string showShort(SrcKey sk) {
   if (!sk.valid()) return "<invalid SrcKey>";
   return folly::format("{}(id {:#x})@{}{}",
-                       sk.func()->fullName()->data(), sk.getFuncId(),
+                       sk.func()->fullName()->data(), sk.funcID(),
                        sk.offset(), sk.resumed() ? "r" : "").str();
 }
 

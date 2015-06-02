@@ -1,0 +1,664 @@
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+
+  Int 1
+  RetC
+}
+
+.function callee() {
+  Int 1
+  RetC
+}
+
+.function main() {
+  Int 0
+  SetL $x
+  PopC
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+  FPushFuncD 0 "callee"
+  FCall 0
+  AssertRATStk 0 Int
+  UnboxRNop
+  PopC
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+
+  ## pops
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  ## pops
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+  PopC
+
+  Int 1
+  RetC
+}

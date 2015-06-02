@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh // decl   /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -84,6 +84,10 @@ interface SprintfQuote {
   public function format_0x3d() : PlainSprintf;
 }
 
-function sprintf(\HH\FormatString<PlainSprintf> $f, ...) : string;
-function printf(\HH\FormatString<PlainSprintf> $f, ...) : void;
+function sprintf(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args): string;
+function printf(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args): void;
 
+// Results in an \HH\InvariantException whose message is the result of
+// calling sprintf with the arguments given this function
+// function invariant_violation(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args): noreturn;
+function invariant_violation(string $fmt, ...$fmt_args): noreturn;

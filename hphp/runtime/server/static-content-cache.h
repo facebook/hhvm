@@ -41,12 +41,6 @@ public:
    */
   bool find(const std::string &name, const char *&data, int &len,
             bool &compressed) const;
-
-private:
-  struct ResourceFile {
-    std::shared_ptr<CstrBuffer> file;
-    std::shared_ptr<CstrBuffer> compressed;
-  };
 };
 
 ///////////////////////////////////////////////////////////////////////////////

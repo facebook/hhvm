@@ -19,6 +19,6 @@ function ping($w) {
 $t = new IntervalTimer(0.1, 0.1, ($w) ==> { ping($w); });
 $t->start();
 $n = microtime(true);
-while (microtime(true) < $n + 0.5) { busy(); }
+while ($x < 5) { busy(); }
 $t->stop();
-var_dump($x > 2);
+var_dump($x >= 5);

@@ -20,7 +20,7 @@
 
 namespace HPHP { struct StringData; }
 namespace HPHP { namespace jit {
-struct HTS;
+struct IRGS;
 struct SSATmp;
 }}
 
@@ -28,11 +28,12 @@ namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
-void fpushActRec(HTS& env,
+void fpushActRec(IRGS& env,
                  SSATmp* func,
                  SSATmp* objOrClass,
                  int32_t numArgs,
-                 const StringData* invName);
+                 const StringData* invName,
+                 bool fromFPushCtor);
 
 //////////////////////////////////////////////////////////////////////
 

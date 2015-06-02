@@ -43,13 +43,12 @@
 
 module M = Map_ast
 module CE = Common_exns
-module List = List_ext
+module List = Core_list
 open Ast
 open Ast_ext
-open Utils
 
 let static_init = "hacklib_initialize_statics"
-let extract_class s = Str.split (Str.regexp_string "\\") s |> List.lst_unsafe
+let extract_class s = Str.split (Str.regexp_string "\\") s |> List.last_exn
 
 let split_param_and_initializer param = match param with
   | {param_expr = Some ((p, Collection _) as e) ; param_id; _} ->
@@ -67,9 +66,12 @@ let initialize ((p, name), e) =
 
 let process_default_params params =
   let (params, inits) =
-    List.map split_param_and_initializer params |> List.split in
+    List.map ~f:split_param_and_initializer params |> List.unzip in
   let inits =
-    List.fold_right (fun v b -> (initialize v)::b) (filter_some inits) [] in
+    List.fold_right
+      ~f:(fun v b -> (initialize v) :: b)
+      ~init:[]
+      (List.filter_opt inits) in
   (params, inits)
 
 let convert_function f =
@@ -88,7 +90,7 @@ let convert_method c_kind m =
       m_body;
       _ } ->
             let (m_params, inits) = process_default_params m_params in
-            let m_body = if List.mem Abstract m_kind || c_kind = Cinterface
+            let m_body = if List.mem m_kind Abstract || c_kind = Cinterface
                          then m_body
                          else (inits @ m_body) in
             {m with m_body; m_params; }
@@ -99,10 +101,10 @@ let extract_var_initializer var = match var with
   | _ -> (var, None)
 
 let extract_class_initializer = function
-  | ClassVars (kinds, hOpt, class_vars) when List.mem Static kinds ->
+  | ClassVars (kinds, hOpt, class_vars) when List.mem kinds Static ->
       let (class_vars, inits) =
-        List.map extract_var_initializer class_vars |> List.split in
-      let inits = filter_some inits in
+        List.map ~f:extract_var_initializer class_vars |> List.unzip in
+      let inits = List.filter_opt inits in
       (ClassVars (kinds, hOpt, class_vars), inits)
   | elt -> (elt, [])
 
@@ -113,7 +115,7 @@ let init_static ((p, name), e) =
   Expr (assign_self p name e)
 
 let get_uses c_body =
-  map_filter begin function
+  List.filter_map ~f:begin function
     | ClassUse (p, Happly ((_, name), _)) -> Some (p, extract_class name)
     | _ -> None
   end c_body
@@ -124,7 +126,7 @@ let is_ctor = function
 
 let call_used_traits elts =
   let uses = get_uses elts in
-  List.map chain_initializer uses
+  List.map ~f:chain_initializer uses
 
 let create_static_initialize {c_kind; c_name = (p, cname); c_body; _} vars =
   let uses = get_uses c_body in
@@ -135,18 +137,18 @@ let create_static_initialize {c_kind; c_name = (p, cname); c_body; _} vars =
     | Ctrait -> ((p, static_init ^ "_" ^ cname), [Protected; Static; Final])
     | _ -> ((p, static_init), [Public; Static;]) in
     let call_traits = call_used_traits c_body in
-    let init_vars = List.map init_static vars in
+    let init_vars = List.map ~f:init_static vars in
     let m_body = call_traits @ init_vars in
     let mth = Method {default_method with m_kind; m_name; m_body;} in
     Some mth
 
 let process_class_initializers ({c_body; c_kind; _} as class_) =
   let (elts, inits) =
-    List.map extract_class_initializer c_body |> List.split in
+    List.map ~f:extract_class_initializer c_body |> List.unzip in
   let inits = List.concat inits in
   let s_elts =
     create_static_initialize class_ inits in
-  let elts = elts @ (filter_some [s_elts]) in
+  let elts = elts @ (List.filter_opt [s_elts]) in
   (elts, Option.is_some s_elts && c_kind <> Ctrait)
 
 let convert_class_ ({c_name = (p, cname); c_kind; _} as class_) =
@@ -173,5 +175,5 @@ let map =
     M.k_method_ =
       (fun (k, _) c_kind method_ -> k (convert_method c_kind method_));
     M.k_program =
-      (fun (k, _) program -> k (List.concatMap convert_def program));
+      (fun (k, _) program -> k (List.concat_map ~f:convert_def program));
   }

@@ -30,18 +30,22 @@ struct FrameStateMgr;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * The main optimization passes, in the order they run.
+ * The main optimization passes.
  */
-void optimizeRefcounts(IRUnit&, FrameStateMgr&&);
+void optimizeRefcounts2(IRUnit&);
 void optimizePredictions(IRUnit&);
+void hoistTypeChecks(IRUnit&);
 void gvn(IRUnit&);
 void optimizeLoads(IRUnit&);
 void optimizeStores(IRUnit&);
+void optimizeLoopInvariantCode(IRUnit&);
+void cleanCfg(IRUnit&);
 
 /*
- * DCE runs in between various passes.
+ * For debugging, we can run this pass, which inserts various sanity checking
+ * assertion instructions.
  */
-void eliminateDeadCode(IRUnit&);
+void insertAsserts(IRUnit&);
 
 /*
  * Run all the optimization passes.

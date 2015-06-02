@@ -1,0 +1,49 @@
+array(5) {
+  [0]=>
+  array(3) {
+    [0]=>
+    int(311)
+    [1]=>
+    string(32) "#!/usr/bin/env php
+another line
+"
+    [2]=>
+    int(1)
+  }
+  [1]=>
+  array(3) {
+    [0]=>
+    int(368)
+    [1]=>
+    string(6) "<?php "
+    [2]=>
+    int(3)
+  }
+  [2]=>
+  array(3) {
+    [0]=>
+    int(309)
+    [1]=>
+    string(2) "$x"
+    [2]=>
+    int(3)
+  }
+  [3]=>
+  array(3) {
+    [0]=>
+    int(371)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(3)
+  }
+  [4]=>
+  array(3) {
+    [0]=>
+    int(370)
+    [1]=>
+    string(2) "?>"
+    [2]=>
+    int(3)
+  }
+}

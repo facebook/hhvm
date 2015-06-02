@@ -1,0 +1,9 @@
+__autoloading Y
+
+Warning: Uncaught exception 'Exception' with message 'x' in %s/pinit-throw.php:6
+Stack trace:
+#0 %s/pinit-throw.php(11): __autoload()
+#1 %s/pinit-throw.php(24): test()
+#2 {main} in %s/pinit-throw.php on line 11
+
+Fatal error: Couldn't find constant Y::FOO in %s/pinit-throw.php on line 11

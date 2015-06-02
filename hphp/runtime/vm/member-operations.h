@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/type-array.h"
@@ -280,9 +281,9 @@ inline const TypedValue* ElemObject(TypedValue& tvRef,
 
   if (LIKELY(base->m_data.pobj->isCollection())) {
     if (warn) {
-      return collectionAt(base->m_data.pobj, &scratch);
+      return collections::at(base->m_data.pobj, &scratch);
     } else {
-      auto* res = collectionGet(base->m_data.pobj, &scratch);
+      auto* res = collections::get(base->m_data.pobj, &scratch);
       if (!res) {
         res = &tvRef;
         tvWriteNull(res);
@@ -442,7 +443,7 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
       raise_error("Collection elements cannot be taken by reference");
       return nullptr;
     }
-    return collectionAtLval(obj, &scratchKey);
+    return collections::atLval(obj, &scratchKey);
   } else if (obj->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
     auto storage = obj->o_realProp(s_storage, 0,
                                    SystemLib::s_ArrayObjectClass->nameStr());
@@ -525,7 +526,7 @@ inline TypedValue* ElemUObject(TypedValue& tvRef, TypedValue* base,
                                key_type<keyType> key) {
   auto const& scratchKey = initScratchKey(key);
   if (LIKELY(base->m_data.pobj->isCollection())) {
-    return collectionAtLval(base->m_data.pobj, &scratchKey);
+    return collections::atLval(base->m_data.pobj, &scratchKey);
   }
   return objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(scratchKey));
 }
@@ -810,7 +811,7 @@ inline void SetElemObject(TypedValue* base, key_type<keyType> key,
                           Cell* value) {
   auto const& scratchKey = initScratchKey(key);
   if (LIKELY(base->m_data.pobj->isCollection())) {
-    collectionSet(base->m_data.pobj, &scratchKey, value);
+    collections::set(base->m_data.pobj, &scratchKey, value);
   } else {
     objOffsetSet(instanceFromTv(base), tvAsCVarRef(&scratchKey), value);
   }
@@ -1047,7 +1048,7 @@ inline void SetNewElemArray(TypedValue* base, Cell* value) {
  */
 inline void SetNewElemObject(TypedValue* base, Cell* value) {
   if (LIKELY(base->m_data.pobj->isCollection())) {
-    collectionAppend(base->m_data.pobj, (TypedValue*)value);
+    collections::append(base->m_data.pobj, (TypedValue*)value);
   } else {
     objOffsetAppend(instanceFromTv(base), (TypedValue*)value);
   }
@@ -1158,7 +1159,7 @@ inline TypedValue* SetOpElem(TypedValue& tvScratch, TypedValue& tvRef,
     case KindOfObject: {
       TypedValue* result;
       if (LIKELY(base->m_data.pobj->isCollection())) {
-        result = collectionAtRw(base->m_data.pobj, &key);
+        result = collections::atRw(base->m_data.pobj, &key);
         SETOP_BODY(result, op, rhs);
       } else {
         result = objOffsetGet(tvRef, instanceFromTv(base),
@@ -1417,7 +1418,7 @@ inline void IncDecElem(
     case KindOfObject: {
       TypedValue* result;
       if (LIKELY(base->m_data.pobj->isCollection())) {
-        result = collectionAtRw(base->m_data.pobj, &key);
+        result = collections::atRw(base->m_data.pobj, &key);
         assert(cellIsPlausible(*result));
       } else {
         result = objOffsetGet(tvRef, instanceFromTv(base), cellAsCVarRef(key));
@@ -1589,7 +1590,7 @@ void UnsetElemSlow(TypedValue* base, key_type<keyType> key) {
     case KindOfObject: {
       auto const& scratchKey = initScratchKey(key);
       if (LIKELY(base->m_data.pobj->isCollection())) {
-        collectionUnset(base->m_data.pobj, &scratchKey);
+        collections::unset(base->m_data.pobj, &scratchKey);
       } else {
         objOffsetUnset(instanceFromTv(base), tvAsCVarRef(&scratchKey));
       }
@@ -1625,12 +1626,12 @@ inline bool IssetEmptyElemObj(TypedValue& tvRef, ObjectData* instance,
 
   if (useEmpty) {
     if (LIKELY(instance->isCollection())) {
-      return collectionEmpty(instance, &scratchKey);
+      return collections::empty(instance, &scratchKey);
     }
     return objOffsetEmpty(tvRef, instance, cellAsCVarRef(scratchKey));
   } else {
     if (LIKELY(instance->isCollection())) {
-      return collectionIsset(instance, &scratchKey);
+      return collections::isset(instance, &scratchKey);
     }
     return objOffsetIsset(tvRef, instance, cellAsCVarRef(scratchKey));
   }
@@ -1824,6 +1825,34 @@ inline DataType propPre(TypedValue& tvScratch, TypedValue*& result,
       break;
   }
   unknownBaseType(base);
+}
+
+inline TypedValue* nullSafeProp(TypedValue& tvScratch, TypedValue& tvRef,
+                                Class* ctx, TypedValue* base,
+                                StringData* key) {
+  base = tvToCell(base);
+  switch (base->m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+      tvWriteNull(&tvScratch);
+      return &tvScratch;
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfResource:
+    case KindOfStaticString:
+    case KindOfString:
+    case KindOfArray:
+      tvWriteNull(&tvScratch);
+      raise_notice("Cannot access property on non-object");
+      return &tvScratch;
+    case KindOfObject:
+      return base->m_data.pobj->prop(&tvScratch, &tvRef, ctx, key);
+    case KindOfRef:
+    case KindOfClass:
+      always_assert(false);
+  }
+  not_reached();
 }
 
 /*

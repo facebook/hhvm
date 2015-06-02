@@ -9,10 +9,7 @@
  *
  */
 
-
-final class :ui:link {
-
-}
+final class :ui:link {}
 
 class Bloo {
   public function mybloo(): void {

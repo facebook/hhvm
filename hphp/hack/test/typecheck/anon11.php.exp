@@ -2,5 +2,5 @@ File "anon11.php", line 16, characters 10-13:
 Invalid return type (Typing[4110])
 File "anon11.php", line 12, characters 18-23:
 This is a string
-File "anon11.php", line 13, characters 23-23:
+File "anon11.php", line 13, characters 22-22:
 It is incompatible with an int

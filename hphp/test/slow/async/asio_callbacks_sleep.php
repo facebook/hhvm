@@ -9,5 +9,5 @@ SleepWaitHandle::setOnSuccessCallback(function($wait_handle) {
 });
 
 echo "going to sleep\n";
-SleepWaitHandle::create(1)->join();
+HH\Asio\join(SleepWaitHandle::create(1));
 echo "sleep finished\n";

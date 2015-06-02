@@ -126,11 +126,22 @@ private:
   Variant getKey(ssize_t pos) const;
   void sweep();
 
+public:
+  template<class F> void scan(F& mark) const {
+    //mark(m_arr);
+    if (m_localCache) {
+      for (unsigned i = 0, n = m_arr->capacity(); i < n; ++i) {
+        mark(m_localCache[i]);
+      }
+    }
+  }
+
 private:
   const APCArray* m_arr;
   mutable TypedValue* m_localCache;
   unsigned m_sweep_index;
   friend struct MemoryManager; // access to m_sweep_index
+  template<typename F> friend void scan(const APCLocalArray& this_, F& mark);
 };
 
 //////////////////////////////////////////////////////////////////////

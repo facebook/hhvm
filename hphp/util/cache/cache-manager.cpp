@@ -29,7 +29,6 @@
 #include <utility>
 #include <vector>
 
-#include <folly/Format.h>
 #include "hphp/util/cache/cache-data.h"
 #include "hphp/util/cache/cache-saver.h"
 #include "hphp/util/cache/magic-numbers.h"
@@ -39,19 +38,12 @@
 
 namespace HPHP {
 
-using folly::format;
-using std::move;
-using std::set;
-using std::string;
-using std::unique_ptr;
-using std::vector;
-
 CacheManager::CacheManager()
     : entry_counter_(0) {}
 
 CacheManager::~CacheManager() {}
 
-bool CacheManager::getFileContents(const string& name, const char** data,
+bool CacheManager::getFileContents(const std::string& name, const char** data,
                                    uint64_t* data_len,
                                    bool* compressed) const {
   const auto it = cache_map_.find(name);
@@ -64,7 +56,8 @@ bool CacheManager::getFileContents(const string& name, const char** data,
   return cd.getDataPointer(data, data_len, compressed);
 }
 
-bool CacheManager::getDecompressed(const string& name, string* data) const {
+bool CacheManager::getDecompressed(const std::string& name,
+                                   std::string* data) const {
   const auto it = cache_map_.find(name);
 
   if (it == cache_map_.end()) {
@@ -75,7 +68,7 @@ bool CacheManager::getDecompressed(const string& name, string* data) const {
   return cd.getDecompressedData(data);
 }
 
-bool CacheManager::isCompressed(const string& name) const {
+bool CacheManager::isCompressed(const std::string& name) const {
   const auto it = cache_map_.find(name);
 
   if (it == cache_map_.end()) {
@@ -86,44 +79,45 @@ bool CacheManager::isCompressed(const string& name) const {
   return cd.isCompressed();
 }
 
-bool CacheManager::addFileContents(const string& name, const string& path) {
+bool CacheManager::addFileContents(const std::string& name,
+                                   const std::string& path) {
   if (entryExists(name)) {
     return false;
   }
 
-  unique_ptr<CacheData> cd(new CacheData);
+  std::unique_ptr<CacheData> cd(new CacheData);
 
   if (!cd->loadFromFile(name, entry_counter_++, path)) {
     return false;
   }
 
-  cache_map_[name] = move(cd);
+  cache_map_[name] = std::move(cd);
 
   addDirectories(name);
 
   return true;
 }
 
-bool CacheManager::addEmptyEntry(const string& name) {
+bool CacheManager::addEmptyEntry(const std::string& name) {
   if (entryExists(name)) {
     return false;
   }
 
-  unique_ptr<CacheData> cd(new CacheData);
+  std::unique_ptr<CacheData> cd(new CacheData);
   cd->createEmpty(name, entry_counter_++);
 
-  cache_map_[name] = move(cd);
+  cache_map_[name] = std::move(cd);
 
   addDirectories(name);
 
   return true;
 }
 
-bool CacheManager::entryExists(const string& name) const {
+bool CacheManager::entryExists(const std::string& name) const {
   return cache_map_.find(name) != cache_map_.end();
 }
 
-bool CacheManager::fileExists(const string& name) const {
+bool CacheManager::fileExists(const std::string& name) const {
   const auto it = cache_map_.find(name);
 
   if (it == cache_map_.end()) {
@@ -133,7 +127,7 @@ bool CacheManager::fileExists(const string& name) const {
   return it->second->isRegularFile();
 }
 
-bool CacheManager::dirExists(const string& name) const {
+bool CacheManager::dirExists(const std::string& name) const {
   const auto it = cache_map_.find(name);
 
   if (it == cache_map_.end()) {
@@ -143,7 +137,7 @@ bool CacheManager::dirExists(const string& name) const {
   return it->second->isDirectory();
 }
 
-bool CacheManager::emptyEntryExists(const string& name) const {
+bool CacheManager::emptyEntryExists(const std::string& name) const {
   const auto it = cache_map_.find(name);
 
   if (it == cache_map_.end()) {
@@ -154,7 +148,7 @@ bool CacheManager::emptyEntryExists(const string& name) const {
 }
 
 
-bool CacheManager::getUncompressedFileSize(const string& name,
+bool CacheManager::getUncompressedFileSize(const std::string& name,
                                            uint64_t* size) const {
   const auto it = cache_map_.find(name);
 
@@ -173,7 +167,7 @@ bool CacheManager::getUncompressedFileSize(const string& name,
     return true;
   }
 
-  string data;
+  std::string data;
 
   if (!cd.getDecompressedData(&data)) {
     return false;
@@ -183,7 +177,7 @@ bool CacheManager::getUncompressedFileSize(const string& name,
   return true;
 }
 
-bool CacheManager::loadCache(const string& path) {
+bool CacheManager::loadCache(const std::string& path) {
   mmap_file_.reset(new MmapFile(path));
 
   if (!mmap_file_->init()) {
@@ -208,14 +202,14 @@ bool CacheManager::loadCache(const string& path) {
   }
 
   for (uint64_t i = 0; i < dirlen; ++i) {
-    unique_ptr<CacheData> cd(new CacheData);
+    std::unique_ptr<CacheData> cd(new CacheData);
 
-    string name;
+    std::string name;
     if (!cd->loadFromMmap(mmap_file_.get(), &name)) {
       return false;
     }
 
-    cache_map_[name] = move(cd);
+    cache_map_[name] = std::move(cd);
   }
 
   uint64_t dirterm;
@@ -231,7 +225,7 @@ bool CacheManager::loadCache(const string& path) {
   return true;
 }
 
-bool CacheManager::saveCache(const string& path) const {
+bool CacheManager::saveCache(const std::string& path) const {
   CacheSaver cs(path);
 
   if (!cs.init(kCacheFileMagic, cache_map_.size())) {
@@ -240,7 +234,7 @@ bool CacheManager::saveCache(const string& path) const {
   }
 
   for (const auto& it : cache_map_) {
-    const string& name = it.first;
+    const std::string& name = it.first;
     const CacheData* cd = it.second.get();
 
     if (!cd->save(&cs)) {
@@ -272,8 +266,8 @@ bool CacheManager::saveCache(const string& path) const {
   return true;
 }
 
-void CacheManager::getEntryNames(set<string>* names) const {
-  set<string> temp;
+void CacheManager::getEntryNames(std::set<std::string>* names) const {
+  std::set<std::string> temp;
 
   for (const auto& it : cache_map_) {
     temp.insert(it.first);
@@ -284,8 +278,8 @@ void CacheManager::getEntryNames(set<string>* names) const {
 
 // --- Private functions.
 
-void CacheManager::addDirectories(const string& path) {
-  vector<string> path_list;
+void CacheManager::addDirectories(const std::string& path) {
+  std::vector<std::string> path_list;
   path_list = TextUtil::MakePathList(path);
 
   if (path_list.empty()) {
@@ -293,9 +287,48 @@ void CacheManager::addDirectories(const string& path) {
   }
 
   for (const auto& it : path_list) {
-    unique_ptr<CacheData> cd(new CacheData);
+    std::unique_ptr<CacheData> cd(new CacheData);
     cd->createDirectory(it, entry_counter_++);
-    cache_map_[it] = move(cd);
+    cache_map_[it] = std::move(cd);
+  }
+}
+
+VFileType CacheManager::getFileType(const std::string& name) const {
+  auto file = cache_map_.find(name);
+
+  if (file == cache_map_.end()) return VFileType::NotFound;
+  if (file->second->isDirectory()) return VFileType::Directory;
+  return VFileType::PlainFile;
+}
+
+std::vector<std::string>
+CacheManager::readDirectory(const std::string& name) const {
+  auto start = cache_map_.find(name);
+  if (start == cache_map_.end() || !start->second->isDirectory()) {
+    return std::vector<std::string>{};
+  }
+
+  std::set<std::string> ret;
+  for (; start != cache_map_.end() && start->first.find(name) == 0; ++start) {
+    // Remove Prefix
+    folly::StringPiece sp = folly::StringPiece(start->first, name.size());
+
+    // Removing leading '/'
+    while (sp.size() && sp.front() == '/') sp.pop_front();
+
+    // Skip subpaths
+    if (!sp.size() || sp.find_first_of('/') != std::string::npos) continue;
+
+    ret.emplace(sp.str());
+  }
+
+  return std::vector<std::string>(ret.begin(), ret.end());
+}
+
+void CacheManager::dump() const {
+  for (const auto& it : cache_map_ ) {
+    printf("- %s\n", it.first.c_str());
+    it.second->dump();
   }
 }
 

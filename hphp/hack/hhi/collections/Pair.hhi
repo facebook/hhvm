@@ -39,8 +39,11 @@
  * exception will be thrown.
  */
 
-final class Pair<Tv1, Tv2> implements ConstVector<mixed> {
-  public function __construct();
+final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
+  /**
+   * Pairs must be constructed with "Pair {$first, $second}".
+   */
+  private function __construct();
 
   /**
    * Returns an array containing the values from this Pair.
@@ -79,12 +82,12 @@ final class Pair<Tv1, Tv2> implements ConstVector<mixed> {
   public function skip(int $n): ImmVector<mixed>;
   public function skipWhile((function(mixed): bool) $fn): ImmVector<mixed>;
   public function slice(int $start, int $len): ImmVector<mixed>;
-  public function concat(Traversable<mixed> $traversable): ImmVector<mixed>;
+  public function concat<Tu super mixed>(Traversable<Tu> $traversable): ImmVector<Tu>;
   public function firstValue(): Tv1;
   public function firstKey(): int;
   public function lastValue(): Tv2;
   public function lastKey(): int;
-  public function linearSearch(mixed $search_value): int;
+  public function linearSearch<Tu super mixed>(Tu $search_value): int;
 
   /**
    * Returns true if the Pair is empty, false otherwise.
@@ -118,7 +121,7 @@ final class Pair<Tv1, Tv2> implements ConstVector<mixed> {
    * Returns true if the specified key is present in the Pair, returns
    * false otherwise.
    */
-  public function containsKey(int $k): bool;
+  public function containsKey<Tu super int>(Tu $k): bool;
 
   /**
    * Returns an iterator that points to beginning of this Pair.

@@ -69,13 +69,12 @@ inline StringData* StringData::Make(const StringData* s1, const char* lit2) {
 
 //////////////////////////////////////////////////////////////////////
 
-inline void StringData::setRefCount(RefCount n) { m_count = n; }
 inline bool StringData::isStatic() const {
-  return m_count == StaticValue;
+  return m_hdr.count == StaticValue;
 }
 
 inline bool StringData::isUncounted() const {
-  return m_count == UncountedValue;
+  return m_hdr.count == UncountedValue;
 }
 
 inline StringSlice StringData::slice() const {
@@ -121,12 +120,11 @@ inline char* StringData::mutableData() const {
 inline int StringData::size() const { return m_len; }
 inline bool StringData::empty() const { return size() == 0; }
 inline uint32_t StringData::capacity() const {
-  assert(m_kind == HeaderKind::String);
-  return packedCodeToCap(m_capCode - (HeaderKind::String << 24));
+  return m_hdr.aux.decode();
 }
 
 inline size_t StringData::heapSize() const {
-  return isFlat() ? sizeof(StringData) + capacity() :
+  return isFlat() ? sizeof(StringData) + 1 + capacity() :
          sizeof(StringData) + sizeof(SharedPayload);
 }
 

@@ -19,8 +19,6 @@
 #include <folly/Likely.h> // defining LIKELY/UNLIKELY is part of this header
 #include <folly/CPortability.h> // defining FOLLY_DISABLE_ADDRESS_SANITIZER
 
-namespace HPHP {
-
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -91,6 +89,16 @@ namespace HPHP {
     __attribute__((__section__(".text,.text.keep")))
 #endif
 
+#if defined(__APPLE__)
+// OS X has a macro "isset" defined in this header. Force the include so we can
+// make sure the macro gets undef'd. (I think this also applies to BSD, but we
+// can cross that road when we come to it.)
+# include <sys/param.h>
+# ifdef isset
+#  undef isset
+# endif
+#endif
+
 //////////////////////////////////////////////////////////////////////
 
 #if defined(__x86_64__)
@@ -133,6 +141,12 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-}
+#ifndef PACKAGE
+// The value doesn't matter, but it must be defined before you include
+// bfd.h
+#define PACKAGE "hhvm"
+#endif
+
+//////////////////////////////////////////////////////////////////////
 
 #endif

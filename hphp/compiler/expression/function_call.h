@@ -55,11 +55,9 @@ public:
   }
   ExpressionPtr getNameExp() const { return m_nameExp; }
   const ExpressionListPtr& getParams() const { return m_params; }
-  void setNoInline() { m_noInline = true; }
   void deepCopy(FunctionCallPtr exp);
 
   FunctionScopeRawPtr getFuncScope() const { return m_funcScope; }
-  bool canInvokeFewArgs();
   void setArrayParams() { m_arrayParams = true; }
   bool isValid() const { return m_valid; }
   bool hadBackslash() const { return m_hadBackslash; }
@@ -72,8 +70,6 @@ protected:
   ExpressionPtr m_nameExp;
   std::string m_name;
   std::string m_origName;
-  int m_ciTemp;
-  int m_clsNameTemp;
   ExpressionListPtr m_params;
 
   // Pointers to the corresponding function scope and class scope for this
@@ -83,36 +79,19 @@ protected:
   ClassScopeRawPtr m_classScope;
 
   bool m_valid;
-  int m_extraArg;
   unsigned m_variableArgument : 1;
-  unsigned m_voidReturn : 1;  // no return type
-  unsigned m_voidUsed : 1; // void return is used
   unsigned m_redeclared : 1;
-  unsigned m_noStatic : 1;
-  unsigned m_noInline : 1;
-  unsigned m_invokeFewArgsDecision : 1;
   unsigned m_arrayParams : 1;
   bool m_hadBackslash;
 
-  // Extra arguments form an array, to which the scalar array optimization
-  // should also apply.
-  int m_argArrayId;
-  int m_argArrayHash;
-  int m_argArrayIndex;
-  void optimizeArgArray(AnalysisResultPtr ar);
-
   void checkUnpackParams();
-  void markRefParams(FunctionScopePtr func, const std::string &name,
-                     bool canInvokeFewArgs);
+  void markRefParams(FunctionScopePtr func, const std::string &name);
 
   /**
    * Each program needs to reset this object's members to revalidate
    * a function call.
    */
   void reset();
-
-  ExpressionPtr inliner(AnalysisResultConstPtr ar,
-                        ExpressionPtr obj, std::string localThis);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

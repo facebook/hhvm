@@ -236,7 +236,6 @@ void VariableSerializer::write(double v) {
   case Type::JSON:
     if (!std::isinf(v) && !std::isnan(v)) {
       char *buf;
-      if (v == 0.0) v = 0.0; // so to avoid "-0" output
       vspprintf(&buf, 0, "%.*k", precision, v);
       m_buf->append(buf);
       free(buf);
@@ -254,7 +253,6 @@ void VariableSerializer::write(double v) {
   case Type::DebuggerDump:
     {
       char *buf;
-      if (v == 0.0) v = 0.0; // so to avoid "-0" output
       bool isExport = m_type == Type::VarExport || m_type == Type::PHPOutput;
       vspprintf(&buf, 0, isExport ? "%.*H" : "%.*G", precision, v);
       m_buf->append(buf);
@@ -270,7 +268,6 @@ void VariableSerializer::write(double v) {
   case Type::DebugDump:
     {
       char *buf;
-      if (v == 0.0) v = 0.0; // so to avoid "-0" output
       vspprintf(&buf, 0, "float(%.*G)", precision, v);
       indent();
       m_buf->append(buf);
@@ -290,7 +287,6 @@ void VariableSerializer::write(double v) {
       m_buf->append("INF");
     } else {
       char *buf;
-      if (v == 0.0) v = 0.0; // so to avoid "-0" output
       vspprintf(&buf, 0, "%.*H", serde_precision, v);
       m_buf->append(buf);
       free(buf);
@@ -557,7 +553,7 @@ void VariableSerializer::write(const Object& v) {
     }
     preventOverflow(v, [&v, this]() {
       if (v->isCollection()) {
-        collectionSerialize(v.get(), this);
+        collections::serialize(v.get(), this);
       } else if (v->instanceof(SystemLib::s_ClosureClass)) {
         // We serialize closures as "{}" in JSON mode to be compatible
         // with PHP. And issue a warning in HipHop syntax.
@@ -597,7 +593,7 @@ void VariableSerializer::write(const Variant& v, bool isArrayKey /* = false */) 
     write(v.toObject());
     return;
   }
-  v.serialize(this, isArrayKey);
+  serializeVariant(v, this, isArrayKey);
 }
 
 void VariableSerializer::writeNull() {

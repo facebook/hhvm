@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
 
-namespace HPHP {
+namespace HPHP { namespace thrift {
 
 static class ThriftExtension final : public Extension {
 public:
@@ -35,4 +35,4 @@ public:
   }
 } s_thrift_extension;
 
-}
+}}

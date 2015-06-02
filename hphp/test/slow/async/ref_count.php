@@ -14,5 +14,5 @@ async function foo($uid) {
 
 $i = 0;
 while ($i++ < 15) {
-  foo(0)->join();
+  HH\Asio\join(foo(0));
 }

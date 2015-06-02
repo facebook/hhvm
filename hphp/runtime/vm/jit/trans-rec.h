@@ -33,6 +33,9 @@ struct TransBCMapping {
   TCA    afrozenStart;
 };
 
+using Annotation = std::pair<std::string, std::string>;
+using Annotations = std::vector<Annotation>;
+
 /*
  * A record with various information about a translation.
  */
@@ -48,6 +51,7 @@ struct TransRec {
   std::vector<Block>     blocks;
   std::vector<TransBCMapping>
                          bcMapping;
+  Annotations            annotations;
   std::string            funcName;
   SrcKey                 src;
   MD5                    md5;
@@ -61,6 +65,7 @@ struct TransRec {
   TransID                id;
   TransKind              kind;
   bool                   isLLVM;
+  bool                   hasLoop;
 
   TransRec() {}
 
@@ -75,10 +80,23 @@ struct TransRec {
            RegionDescPtr               region = RegionDescPtr(),
            std::vector<TransBCMapping> _bcMapping =
              std::vector<TransBCMapping>(),
-           bool                        _isLLVM = false);
+           Annotations&&               _annotations =
+             Annotations(),
+           bool                        _isLLVM = false,
+           bool                        _hasLoop = false);
 
   std::string print(uint64_t profCount) const;
   Offset bcPast() const;
+  void optimizeForMemory();
+
+private:
+  struct SavedAnnotation {
+    std::string   fileName;
+    uint64_t      offset;
+    uint32_t      length;
+  };
+  SavedAnnotation writeAnnotation(const Annotation& annotation,
+                                  bool compress = true);
 };
 
 } }

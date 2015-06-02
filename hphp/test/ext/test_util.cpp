@@ -137,7 +137,7 @@ bool TestUtil::TestHDF() {
       "node.* {\n"
       "  name = value\n"
       "}");
-    VS(Config::GetString(ini, doc["node"][0]["name"]), "value");
+    VS(Config::GetString(ini, doc, "node.0.name"), "value");
   }
 
   return Count(true);

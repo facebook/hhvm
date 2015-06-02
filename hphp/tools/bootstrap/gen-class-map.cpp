@@ -24,6 +24,7 @@
 #include <folly/FBVector.h>
 
 #include "hphp/tools/bootstrap/idl.h"
+#include <cassert>
 
 using folly::fbstring;
 using folly::fbvector;
@@ -189,7 +190,7 @@ static void outputConstants(const fbstring &invocation_trace,
 
 #define FUNC_FLAG_MASK (IsProtected|IsPrivate|IsPublic|\
                         IsAbstract|IsStatic|IsFinal|\
-                        AllowIntercept|NoProfile|ContextSensitive|\
+                        AllowIntercept|NoProfile|\
                         HipHopSpecific|VariableArguments|\
                         RefVariableArguments|\
                         NoFCallBuiltin|FunctionIsFoldable|\
@@ -256,26 +257,19 @@ static void writeFunction(std::ostream& out, const PhpFunc& func) {
 
 static void writeConstant(std::ostream& out, const PhpConst& cns) {
   auto name = cns.name();
+  if (cns.isSystem() &&
+      ((name == "STDIN") || (name == "STDOUT") ||
+       (name == "STDERR") || (name == "SID"))) {
+    assert(false); // Dynamic constants no longer supported in IDLs
+    return;
+  }
+
   out << "  \"" << escapeCpp(name) << "\", ";
   if (cns.hasValue()) {
     auto ser = cns.serialize();
     out << castLong(ser.size())
         << ", \"" << escapeCpp(ser) << "\",\n";
     return;
-  }
-
-  if (cns.isSystem()) {
-    // Special "magic" constants
-    if (name == "SID") {
-      out << "(const char *)((offsetof(EnvConstants, k_" << name << ") - "
-          << "offsetof(EnvConstants, stgv_Variant)) / sizeof(Variant)), "
-          << castLong(1) << ",\n";
-      return;
-    }
-    if ((name == "STDIN") || (name == "STDOUT") || (name == "STDERR")) {
-      out << "(const char *)&BuiltinFiles::Get" << name << ", NULL,\n";
-      return;
-    }
   }
 
   out << "(const char *)&" << cns.varname() << ", "
@@ -338,10 +332,10 @@ static void outputClassMap(const fbstring &invocation_trace,
 
   brandOutputFile(out, "gen-class-map.cpp", invocation_trace);
 
-  out << "#include \"hphp/runtime/base/base-includes.h\"\n"
-      << "#include \"hphp/runtime/base/externals.h\"\n"
+  out << "#include \"hphp/runtime/base/externals.h\"\n"
       << "#include \"hphp/runtime/base/plain-file.h\"\n"
       << "#include \"hphp/system/constants.h\"\n"
+      << "#include \"hphp/runtime/ext/extension.h\"\n"
       << "#include \"hphp/runtime/ext/ext.h\"\n"
       << "namespace HPHP {\n";
   declareConstants(out, consts, false);

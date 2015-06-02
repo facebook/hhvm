@@ -55,12 +55,17 @@ union Value {
 
 enum VarNrFlag { NR_FLAG = 1<<29 };
 
+struct ConstModifiers {
+  bool m_isAbstract;
+  bool m_isType;
+};
+
 union AuxUnion {
   int32_t u_hash;        // key type and hash for MixedArray and [Stable]Map
   VarNrFlag u_varNrFlag; // magic number for asserts in VarNR
   bool u_deepInit;       // used by Class::initPropsImpl for deep init
   int32_t u_rdsHandle;   // used by unit.cpp to squirrel away rds handles TODO type
-  bool u_isAbstractConst; // used by Class::Const
+  ConstModifiers u_constModifiers; // used by Class::Const
 };
 
 /*
@@ -115,8 +120,8 @@ struct TypedValueAux : TypedValue {
   const int32_t& rdsHandle() const { return m_aux.u_rdsHandle; }
   bool& deepInit() { return m_aux.u_deepInit; }
   const bool& deepInit() const { return m_aux.u_deepInit; }
-  bool& isAbstractConst() { return m_aux.u_isAbstractConst; }
-  const bool& isAbstractConst() const { return m_aux.u_isAbstractConst; }
+  ConstModifiers& constModifiers() { return m_aux.u_constModifiers; }
+  const ConstModifiers& constModifiers() const { return m_aux.u_constModifiers; }
   VarNrFlag& varNrFlag() { return m_aux.u_varNrFlag; }
   const VarNrFlag& varNrFlag() const { return m_aux.u_varNrFlag; }
 

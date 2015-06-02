@@ -161,6 +161,18 @@ private:
   void writePropertyKey(const String& prop);
 };
 
+/*
+ * Serialize a Variant recursively.
+ * The last param noQuotes indicates to serializer to not put the output in
+ * double quotes (used when printing the output of a __toDebugDisplay() of
+ * an object when it is a string.
+ */
+void serializeVariant(const Variant&,
+                      VariableSerializer *serializer,
+                      bool isArrayKey = false,
+                      bool skipNestCheck = false,
+                      bool noQuotes = false);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

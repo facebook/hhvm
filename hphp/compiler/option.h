@@ -266,14 +266,15 @@ public:
   static bool WholeProgram;
   static bool UseHHBBC;  // see hhbbc/README
   static bool RecordErrors;
-  static std::string DocJson; // filename to dump doc JSON to
 
 private:
   static StringBag OptionStrings;
 
   static void LoadRootHdf(const IniSettingMap& ini, const Hdf &roots,
+                          const std::string& name,
                           std::map<std::string, std::string> &map);
   static void LoadRootHdf(const IniSettingMap& ini, const Hdf &roots,
+                          const std::string& name,
                           std::vector<std::string> &vec);
   static void OnLoad();
 

@@ -215,7 +215,7 @@ void FastCGITransport::onHeader(std::unique_ptr<folly::IOBuf> key_chain,
   Cursor valCur(value_chain.get());
   auto value = valCur.readFixedString(value_chain->computeChainDataLength());
 
-  m_requestParams.emplace(key, value);
+  m_requestParams[key] = value;
 }
 
 void FastCGITransport::onHeadersComplete() {
@@ -267,11 +267,13 @@ void FastCGITransport::onHeadersComplete() {
 
   // RequestURI needs script_filename and path_translated to not include
   // the document root
-  if (m_scriptName.find(m_docRoot) == 0) {
-    m_scriptName.erase(0, m_docRoot.length());
-  } else {
-    // if the document root isn't in the url set document root to /
-    m_docRoot = "/";
+  if (!m_scriptName.empty()) {
+    if (m_scriptName.find(m_docRoot) == 0) {
+      m_scriptName.erase(0, m_docRoot.length());
+    } else {
+      // if the document root isn't in the url set document root to /
+      m_docRoot = "/";
+    }
   }
 
   // XXX: This was originally done before remapping scriptName but that seemed
@@ -298,7 +300,7 @@ void FastCGITransport::onHeadersComplete() {
   }
 
   // IIS sets this value but sets it to off when SSL is off.
-  if (m_requestParams.count("HTTPS") &&
+  if (m_requestParams.count("HTTPS") && !m_requestParams["HTTPS"].empty() &&
       strcasecmp(m_requestParams["HTTPS"].c_str(), "OFF")) {
     setSSL();
   }

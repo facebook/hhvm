@@ -5,14 +5,12 @@ class X {
 
   private this::T $priv;
 
-  public function __construct(
-    private this::T $val,
-  ) {
+  public function __construct(private this::T $val) {
     $this->priv = $val;
   }
 
- public static function test(this::T $t): void {
-   // Invalid because T can be overridden to accept only int,.
-   $static = new static('');
- }
+  public static function test(this::T $t): void {
+    // Invalid because T can be overridden to accept only int,.
+    $static = new static('');
+  }
 }

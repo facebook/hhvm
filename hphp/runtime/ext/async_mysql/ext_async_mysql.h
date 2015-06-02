@@ -24,9 +24,9 @@
 #include <squangle/mysql_client/AsyncConnectionPool.h>
 #include <squangle/mysql_client/Row.h>
 
-#include "hphp/runtime/ext/asio/asio_external_thread_event.h"
+#include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/ext_collections.h"
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 
 #include <folly/Format.h>
 
@@ -178,8 +178,12 @@ class FieldIndex {
   String getFieldString(size_t field_index) const;
 
  private:
-  std::vector<String> field_names_;
-  StringMap<size_t> field_name_map_;
+  smart::vector<String> field_names_;
+  smart::hash_map<
+    String,
+    size_t,
+    hphp_string_hash,
+    hphp_string_same> field_name_map_;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

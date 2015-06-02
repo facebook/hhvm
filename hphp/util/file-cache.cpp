@@ -156,13 +156,7 @@ int64_t FileCache::fileSize(const char *name, bool isRelative) const {
 }
 
 void FileCache::dump() const {
-  set<string> files;
-
-  cache_manager_->getEntryNames(&files);
-
-  for (auto& name: files) {
-    printf("%s\n", name.c_str());
-  }
+  cache_manager_->dump();
 }
 
 }  // namespace HPHP

@@ -7,7 +7,7 @@ class C {
 }
 
 class Test {
-  private static function f1((function (int): void) $x): void {}
+  private static function f1((function(int): void) $x): void {}
 
   public function f2(): void {
     $y = class_meth(C::class, 'foo');

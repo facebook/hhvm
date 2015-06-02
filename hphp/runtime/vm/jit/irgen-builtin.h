@@ -18,14 +18,14 @@
 
 namespace HPHP { namespace jit {
 struct SSATmp;
-struct HTS;
+struct IRGS;
 }}
 
 namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* optimizedCallIsObject(HTS&, SSATmp*);
+SSATmp* optimizedCallIsObject(IRGS&, SSATmp*);
 
 //////////////////////////////////////////////////////////////////////
 

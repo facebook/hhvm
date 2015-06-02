@@ -53,7 +53,7 @@ let parse_options () =
 let _ =
   let (src, dest, options) = parse_options () in
   try
-    SharedMem.init ();
+    SharedMem.(init default_config);
     Opts.set options;
     Engine.go (Sys.chop_dirsymbol src) (Sys.chop_dirsymbol dest);
     print_string "The Conversion was successful\n"

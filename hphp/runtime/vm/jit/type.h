@@ -52,7 +52,7 @@ namespace jit {
  * union of that location with "inside of a Ref".  These classify PtrTo* types
  * into some categories that cannot possibly alias, without any smarter
  * analysis needed to prove it.  There is also a union for the various
- * locations things can point after a fully generic member operation (see Mem
+ * locations things can point after a fully generic member operation (see Memb
  * below).
  *
  * The reason we have the category "Ref|Foo" for each of these Foos is that it
@@ -78,7 +78,7 @@ enum class Ptr : uint8_t {
   SProp   = 0x06,
   MIS     = 0x07,
   /*
-   * Mem is a number of possible locations that result from the more generic
+   * Memb is a number of possible locations that result from the more generic
    * types of member operations.
    *
    * This is a pointer to something living either an object property, an array
@@ -238,8 +238,8 @@ Ptr remove_ref(Ptr);
   IRTP(PtrToSPropInit,   SProp, kInit << kPtrShift)               \
   IRTP(PtrToMISGen,        MIS, kGen << kPtrShift)                \
   IRTP(PtrToMISInit,       MIS, kInit << kPtrShift)               \
-  IRTP(PtrToMemGen,       Memb, kGen << kPtrShift)                \
-  IRTP(PtrToMemInit,      Memb, kInit << kPtrShift)               \
+  IRTP(PtrToMembGen,      Memb, kGen << kPtrShift)                \
+  IRTP(PtrToMembInit,     Memb, kInit << kPtrShift)               \
   IRTP(PtrToClsInitGen,ClsInit, kGen << kPtrShift)                \
   IRTP(PtrToClsCnsGen,  ClsCns, kGen << kPtrShift)                \
                                                                   \
@@ -296,8 +296,8 @@ struct ConstCctx {
 
 /*
  * Type is used to represent the types of values in the jit.  Every Type
- * represents a set of types, with Type::Top being a superset of all Types and
- * Type::Bottom being a subset of all Types.  The elements forming these sets
+ * represents a set of types, with TTop being a superset of all Types and
+ * TBottom being a subset of all Types.  The elements forming these sets
  * of types come from the types of PHP-visible values (Str, Obj, Int, ...) and
  * runtime-internal types (Func, TCA, ...).
  *
@@ -311,16 +311,6 @@ struct ConstCctx {
  * A, Obj<A> | Obj<B> == Obj<B>, which can be represented as a Type.
  */
 struct Type {
-  /*
-   * Predefined constants for all primitive types and many common unions.
-   */
-#define IRT(name, ...) static const Type name;
-#define IRTP(name, ...) IRT(name)
-  IR_TYPES
-#undef IRT
-#undef IRTP
-
-
   /////////////////////////////////////////////////////////////////////////////
   // Type tags.
 
@@ -331,6 +321,7 @@ private:
   static constexpr size_t kPtrShift     = kBoxShift + kBoxShift;
   static constexpr size_t kPtrBoxShift  = kBoxShift + kPtrShift;
 
+public:
   enum TypedBits {
 #define IRT(name, bits)       k##name = (bits),
 #define IRTP(name, ptr, bits) k##name = (bits),
@@ -350,6 +341,11 @@ public:
   Type();
 
   /*
+   * Construct from a predefined set of bits & pointer kind.
+   */
+  constexpr Type(bits_t bits, Ptr kind);
+
+  /*
    * Assignment.
    */
   Type& operator=(Type b);
@@ -362,7 +358,8 @@ public:
   /*
    * Stringify the Type.
    *
-   * constValString: @requires: isConst()
+   * constValString: @requires: hasConstVal() ||
+   *                            subtypeOfAny(Uninit, InitNull, Nullptr)
    */
   std::string toString() const;
   std::string constValString() const;
@@ -439,7 +436,8 @@ public:
    * for types that are too hard for us to represent, or we could generate
    * incorrect code by assuming certain possible values are impossible.)
    *
-   * Note: operator| and operator& guarantee commutativity.
+   * Note: operator| and operator& guarantee commutativity; operator- guarantees
+   * (a - b) <= a.
    */
   Type operator|(Type other) const;
   Type& operator|=(Type other) { return *this = *this | other; }
@@ -457,16 +455,15 @@ public:
   /*
    * Is this a union type?
    *
-   * Note that this is the plain old set definition of union, so Type::Str,
-   * Type::Arr, and Type::Null will all return true.
+   * Note that this is the plain old set definition of union, so TStr,
+   * TArr, and TNull will all return true.
    */
   bool isUnion() const;
 
   /*
-   * Does this require a register to hold a DataType or value at runtime?
+   * Does this require a register to hold a DataType at runtime?
    */
   bool needsReg() const;
-  bool needsValueReg() const;
 
   /*
    * Return true if this corresponds to a type that is passed by (value/
@@ -494,7 +491,7 @@ public:
   static Type cns(T val);
 
   /*
-   * @returns: Type::Nullptr
+   * @returns: TNullptr
    */
   static Type cns(std::nullptr_t);
 
@@ -521,36 +518,39 @@ public:
   // Constant introspection.                                            [const]
 
   /*
-   * Does this Type represent a known value?
+   * Does this Type have a constant value? If true, we can call xxVal().
+   *
+   * Note: Bottom is a type with no value, and Uninit/InitNull/Nullptr are
+   * considered types with a single unique value, so this function returns false
+   * for those types. You may want to explicitly check for them as needed.
+   *
    */
-  bool isConst() const;
+  bool hasConstVal() const;
 
   /*
-   * Does this Type represent a known value subtyping `t'?
-   *
-   * @returns: isConst() && *this <= t
+   * @return hasConstVal() && *this <= t.
    */
-  bool isConst(Type t) const;
+  bool hasConstVal(Type t) const;
 
   /*
    * Does this Type represent the constant val `val'?
    *
-   * @returns: *this <= cns(val)
+   * @returns: hasConstVal(cns(val))
    */
   template<typename T>
-  bool isConst(T val) const;
+  bool hasConstVal(T val) const;
 
   /*
    * Return the const value for a const Type as a uint64_t.
    *
-   * @requires: isConst()
+   * @requires: hasConstVal()
    */
   uint64_t rawVal() const;
 
   /*
    * Return the const value for a const Type.
    *
-   * @requires: *this <= Type::T && m_hasConstVal
+   * @requires: hasConstVal(Type::T)
    */
   bool boolVal() const;
   int64_t intVal() const;
@@ -568,21 +568,21 @@ public:
   // Specialized type creation.                                  [const/static]
 
   /*
-   * Return a specialized Type::Arr.
+   * Return a specialized TArr.
    */
   static Type Array(ArrayData::ArrayKind kind);
   static Type Array(const RepoAuthType::Array* rat);
   static Type Array(const Shape* shape);
 
   /*
-   * Return a specialized Type::StaticArr.
+   * Return a specialized TStaticArr.
    */
   static Type StaticArray(ArrayData::ArrayKind kind);
   static Type StaticArray(const RepoAuthType::Array* rat);
   static Type StaticArray(const Shape* shape);
 
   /*
-   * Return a specialized Type::Obj.
+   * Return a specialized TObj.
    */
   static Type SubObj(const Class* cls);
   static Type ExactObj(const Class* cls);
@@ -693,7 +693,7 @@ private:
   /*
    * Internal constructors.
    */
-  Type(bits_t bits, Ptr kind, uintptr_t extra = 0);
+  Type(bits_t bits, Ptr kind, uintptr_t extra);
   Type(Type t, ArraySpec arraySpec);
   Type(Type t, ClassSpec classSpec);
 
@@ -703,7 +703,7 @@ private:
   static bits_t bitsFromDataType(DataType outer, DataType inner);
 
   /*
-   * Return false if a specialized type has a mismatching tag, else true.
+   * Check invariants and return false if the type is malformed.
    */
   bool checkValid() const;
 
@@ -782,11 +782,19 @@ Type boxType(Type);
 /*
  * Return the dest type for a LdRef with the given typeParam.
  *
- * @requires: typeParam <= Type::Cell
+ * @requires: typeParam <= TCell
  */
 Type ldRefReturn(Type typeParam);
 
+/*
+ * Returns the type that a value may have if it had type `srcType' and failed a
+ * CheckType with `typeParam'.  Not all typeParams for CheckTypes are precise,
+ * so the return value may even be `srcType' itself in some situations.
+ */
+Type negativeCheckType(Type typeParam, Type srcType);
+
 ///////////////////////////////////////////////////////////////////////////////
+
 }}
 
 #define incl_HPHP_JIT_TYPE_INL_H_

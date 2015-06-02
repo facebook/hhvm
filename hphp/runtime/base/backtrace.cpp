@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -35,25 +36,28 @@ const StaticString
   s_type("type"),
   s_include("include"),
   s_main("{main}"),
+  s_metadata("metadata"),
+  s_86metadata("86metadata"),
   s_arrow("->"),
   s_double_colon("::");
 
 static ActRec* getPrevActRec(const ActRec* fp, Offset* prevPc) {
   if (fp && fp->func() && fp->resumed() && fp->func()->isAsyncFunction()) {
     c_WaitableWaitHandle* currentWaitHandle = frame_afwh(fp);
+    if (currentWaitHandle->isFinished()) {
+      /*
+       * It's possible in very rare cases (it will return a truncated stack):
+       * 1) async function which WaitHandle is not referenced by anything
+       *      else finishes
+       * 2) its return value is an object with destructor
+       * 3) this destructor gets called as part of destruction of the
+       *      WaitHandleobject, which happens right before FP is adjusted
+      */
+      return nullptr;
+    }
+
     auto const contextIdx = currentWaitHandle->getContextIdx();
     while (currentWaitHandle != nullptr) {
-      if (currentWaitHandle->isFinished()) {
-        /*
-         * It's possible in very rare cases (it will return a truncated stack):
-         * 1) async function which WaitHandle is not referenced by anything
-         *      else finishes
-         * 2) its return value is an object with destructor
-         * 3) this destructor gets called as part of destruction of the
-         *      WaitHandleobject, which happens right before FP is adjusted
-        */
-        break;
-      }
       auto p = currentWaitHandle->getParentChain().firstInContext(contextIdx);
       if (p == nullptr) break;
 
@@ -85,7 +89,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
   VMRegAnchor _;
   // If there are no VM frames, we're done.
-  if (!vmfp()) return bt;
+  if (!rds::header() || !vmfp()) return bt;
 
   int depth = 0;
   ActRec* fp = nullptr;
@@ -99,7 +103,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     if (!fp) return bt;
   } else {
     fp = vmfp();
-    auto const unit = fp->m_func->unit();
+    auto const unit = fp->func()->unit();
     assert(unit);
     pc = unit->offsetOf(vmpc());
   }
@@ -107,10 +111,10 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   // Handle the top frame.
   if (btArgs.m_withSelf) {
     // Builtins don't have a file and line number.
-    if (!fp->m_func->isBuiltin()) {
-      auto const unit = fp->m_func->unit();
+    if (!fp->func()->isBuiltin()) {
+      auto const unit = fp->func()->unit();
       assert(unit);
-      auto const filename = fp->m_func->filename();
+      auto const filename = fp->func()->filename();
 
       ArrayInit frame(btArgs.m_parserFrame ? 4 : 2, ArrayInit::Map{});
       frame.set(s_file, const_cast<StringData*>(filename));
@@ -131,11 +135,11 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
        fp = prevFp, pc = prevPc,
          prevFp = getPrevActRec(fp, &prevPc)) {
     // Do not capture frame for HPHP only functions.
-    if (fp->m_func->isNoInjection()) continue;
+    if (fp->func()->isNoInjection()) continue;
 
     ArrayInit frame(7, ArrayInit::Map{});
 
-    auto const curUnit = fp->m_func->unit();
+    auto const curUnit = fp->func()->unit();
     auto const curOp = *reinterpret_cast<const Op*>(curUnit->at(pc));
     auto const isReturning =
       curOp == Op::RetC || curOp == Op::RetV ||
@@ -143,11 +147,11 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       fp->localsDecRefd();
 
     // Builtins and generators don't have a file and line number
-    if (prevFp && !prevFp->m_func->isBuiltin()) {
-      auto const prevUnit = prevFp->m_func->unit();
+    if (prevFp && !prevFp->func()->isBuiltin()) {
+      auto const prevUnit = prevFp->func()->unit();
       auto prevFile = prevUnit->filepath();
-      if (prevFp->m_func->originalFilename()) {
-        prevFile = prevFp->m_func->originalFilename();
+      if (prevFp->func()->originalFilename()) {
+        prevFile = prevFp->func()->originalFilename();
       }
       assert(prevFile);
       frame.set(s_file, const_cast<StringData*>(prevFile));
@@ -169,14 +173,14 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         pcAdjust = 1;
       }
       frame.set(s_line,
-                prevFp->m_func->unit()->getLineNumber(prevPc - pcAdjust));
+                prevFp->func()->unit()->getLineNumber(prevPc - pcAdjust));
     }
 
     // Check for include.
-    String funcname = const_cast<StringData*>(fp->m_func->name());
-    if (fp->m_func->isClosureBody()) {
+    String funcname = const_cast<StringData*>(fp->func()->name());
+    if (fp->func()->isClosureBody()) {
       // Strip the file hash from the closure name.
-      String fullName = const_cast<StringData*>(fp->m_func->baseCls()->name());
+      String fullName = const_cast<StringData*>(fp->func()->baseCls()->name());
       funcname = fullName.substr(0, fullName.find(';'));
     }
 
@@ -192,7 +196,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     if (!funcname.same(s_include)) {
       // Closures have an m_this but they aren't in object context.
       auto ctx = arGetContextClass(fp);
-      if (ctx != nullptr && !fp->m_func->isClosureBody()) {
+      if (ctx != nullptr && !fp->func()->isClosureBody()) {
         frame.set(s_class, const_cast<StringData*>(ctx->name()));
         if (fp->hasThis() && !isReturning) {
           if (btArgs.m_withThis) {
@@ -204,6 +208,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         }
       }
     }
+
+    bool const mayUseVV = fp->func()->attrs() & AttrMayUseVV;
 
     auto const withNames = btArgs.m_withArgNames;
     auto const withValues = btArgs.m_withArgValues;
@@ -219,11 +225,12 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       frame.set(s_args, empty_array());
     } else {
       auto args = Array::Create();
-      auto const nparams = fp->m_func->numNonVariadicParams();
+      auto const nparams = fp->func()->numNonVariadicParams();
       auto const nargs = fp->numArgs();
       auto const nformals = std::min<int>(nparams, nargs);
 
-      if (UNLIKELY(fp->hasVarEnv() && fp->getVarEnv()->getFP() != fp)) {
+      if (UNLIKELY(mayUseVV) &&
+          UNLIKELY(fp->hasVarEnv() && fp->getVarEnv()->getFP() != fp)) {
         // VarEnv is attached to eval or debugger frame, other than the current
         // frame. Access locals thru VarEnv.
         auto varEnv = fp->getVarEnv();
@@ -257,13 +264,30 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       }
 
       // Builtin extra args are not stored in varenv.
-      if (nargs > nparams && fp->hasExtraArgs()) {
+      if (UNLIKELY(mayUseVV) && nargs > nparams && fp->hasExtraArgs()) {
         for (int i = nparams; i < nargs; i++) {
           auto arg = fp->getExtraArg(i - nparams);
           args.append(tvAsVariant(arg));
         }
       }
       frame.set(s_args, args);
+    }
+
+    if (btArgs.m_withMetadata && !isReturning) {
+      if (UNLIKELY(mayUseVV) && UNLIKELY(fp->hasVarEnv())) {
+        auto tv = fp->getVarEnv()->lookup(s_86metadata.get());
+        if (tv != nullptr && tv->m_type != KindOfUninit) {
+          frame.set(s_metadata, tvAsVariant(tv));
+        }
+      } else {
+        auto local = fp->func()->lookupVarId(s_86metadata.get());
+        if (local != kInvalidId) {
+          auto tv = frame_local(fp, local);
+          if (tv->m_type != KindOfUninit) {
+            frame.set(s_metadata, tvAsVariant(tv));
+          }
+        }
+      }
     }
 
     bt.append(frame.toVariant());

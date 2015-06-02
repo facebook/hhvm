@@ -81,6 +81,9 @@ using vector = std::vector<T>;
 template<class T, class Container = std::deque<T>>
 using stack = std::stack<T,Container>;
 
+template<class T, class Container = std::deque<T>>
+using queue = std::queue<T,Container>;
+
 template<class T, class Compare = std::less<T>>
 using priority_queue = std::priority_queue<T,vector<T>,Compare>;
 
@@ -98,6 +101,9 @@ template<class T, class V = std::hash<T>, class W = std::equal_to<T>>
 struct hash_set: std::unordered_set<T,V,W> {
   hash_set() : std::unordered_set<T,V,W>(0) {}
 };
+
+template<class T, class C = std::less<T>>
+using set = std::set<T, C>;
 
 template<class T>
 using unique_ptr = std::unique_ptr<T>;

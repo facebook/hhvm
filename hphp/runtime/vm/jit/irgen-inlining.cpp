@@ -23,56 +23,39 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
-bool isInlining(const HTS& env) { return env.bcStateStack.size() > 1; }
+bool isInlining(const IRGS& env) {
+  return env.inlineLevel > 0;
+}
 
 /*
  * When doing gen-time inlining, we set up a series of IR instructions
  * that looks like this:
  *
  *   fp0  = DefFP
- *   sp0  = DefSP<offset>
+ *   sp   = DefSP<offset>
  *
  *   // ... normal stuff happens ...
- *   // sp_pre = some SpillStack, or maybe the DefSP
  *
  *   // FPI region:
- *     sp1   = SpillStack sp_pre, ...
- *     sp2   = SpillFrame sp1, ...
- *     // ... possibly more spillstacks due to argument expressions
- *     sp3   = SpillStack sp2, -argCount
- *     fp2   = DefInlineFP<func,retBC,retSP,off> sp2 sp1
- *     sp4   = ReDefSP<spOffset,spansCall> sp1 fp2
+ *     SpillFrame sp, ...
+ *     // ... probably some StStks due to argument expressions
+ *     fp2   = DefInlineFP<func,retBC,retSP,off> sp
  *
  *         // ... callee body ...
  *
- *           = InlineReturn fp2
+ *     InlineReturn fp2
  *
- * [ sp5  = ResetSP<spOffset> fp0 ]
- *
- * The rest of the code then depends on sp5, and not any of the StkPtr
- * tree going through the callee body.  The sp5 tmp has the same view
- * of the stack as sp1 did, which represents what the stack looks like
- * before the return address is pushed but after the activation record
- * is popped.
- *
- * In DCE we attempt to remove the SpillFrame, InlineReturn, and
- * DefInlineFP instructions if they aren't needed.
- *
- * ReDefSP takes sp1, the stack pointer from before the inlined frame.
- * This SSATmp may be used for determining stack types in the
- * simplifier, or stack values if the inlined body doesn't contain a
- * call---these instructions both take an extradata `spansCall' which
- * is true iff a Call occured anywhere between the the definition of
- * its first argument and itself.
+ * In DCE we attempt to remove the InlineReturn and DefInlineFP instructions if
+ * they aren't needed.
  */
-void beginInlining(HTS& env,
+void beginInlining(IRGS& env,
                    unsigned numParams,
                    const Func* target,
                    Offset returnBcOffset) {
-  assert(!env.fpiStack.empty() &&
+  assertx(!env.fpiStack.empty() &&
     "Inlining does not support calls with the FPush* in a different Tracelet");
-  assert(returnBcOffset >= 0 && "returnBcOffset before beginning of caller");
-  assert(curFunc(env)->base() + returnBcOffset < curFunc(env)->past() &&
+  assertx(returnBcOffset >= 0 && "returnBcOffset before beginning of caller");
+  assertx(curFunc(env)->base() + returnBcOffset < curFunc(env)->past() &&
          "returnBcOffset past end of caller");
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
@@ -88,6 +71,11 @@ void beginInlining(HTS& env,
   auto const calleeSP  = sp(env);
 
   always_assert_flog(
+    prevSP == calleeSP,
+    "FPI stack pointer and callee stack pointer didn't match in beginInlining"
+  );
+
+  always_assert_flog(
     env.fpiStack.top().spillFrame != nullptr,
     "Couldn't find SpillFrame for inlined call on sp {}."
     " Was the FPush instruction interpreted?",
@@ -99,10 +87,10 @@ void beginInlining(HTS& env,
   DefInlineFPData data;
   data.target        = target;
   data.retBCOff      = returnBcOffset;
-  data.fromFPushCtor = sframe->extra<ActRecInfo>()->isFromFPushCtor();
+  data.fromFPushCtor = sframe->extra<ActRecInfo>()->fromFPushCtor;
   data.ctx           = sframe->src(2);
   data.retSPOff      = prevSPOff;
-  data.spOffset      = offsetFromIRSP(env, BCSPOffset{0}).offset;
+  data.spOffset      = offsetFromIRSP(env, BCSPOffset{0});
 
   // Push state and update the marker before emitting any instructions so
   // they're all given markers in the callee.
@@ -112,20 +100,26 @@ void beginInlining(HTS& env,
     false
   };
   env.bcStateStack.emplace_back(key);
+  env.inlineLevel++;
   updateMarker(env);
 
-  auto const calleeFP = gen(env, DefInlineFP, data, calleeSP, prevSP, fp(env));
-  gen(env, ReDefSP, StackOffset{target->numLocals()}, fp(env));
+  auto const calleeFP = gen(env, DefInlineFP, data, calleeSP, fp(env));
 
   for (unsigned i = 0; i < numParams; ++i) {
     stLocRaw(env, i, calleeFP, params[i]);
   }
-  for (unsigned i = numParams; i < target->numLocals(); ++i) {
+  const bool hasVariadicArg = target->hasVariadicCaptureParam();
+  for (unsigned i = numParams; i < target->numLocals() - hasVariadicArg; ++i) {
     /*
      * Here we need to be generating hopefully-dead stores to initialize
      * non-parameter locals to KindOfUninit in case we have to leave the trace.
      */
-    stLocRaw(env, i, calleeFP, cns(env, Type::Uninit));
+    stLocRaw(env, i, calleeFP, cns(env, TUninit));
+  }
+  if (hasVariadicArg) {
+    auto argNum = target->numLocals() - 1;
+    always_assert(numParams <= argNum);
+    stLocRaw(env, argNum, calleeFP, cns(env, staticEmptyArray()));
   }
 
   env.fpiActiveStack.push(std::make_pair(env.fpiStack.top().returnSP,
@@ -133,31 +127,26 @@ void beginInlining(HTS& env,
   env.fpiStack.pop();
 }
 
-void endInlinedCommon(HTS& env) {
-  assert(!env.fpiActiveStack.empty());
-  assert(!curFunc(env)->isPseudoMain());
+void endInlinedCommon(IRGS& env) {
+  assertx(!env.fpiActiveStack.empty());
+  assertx(!curFunc(env)->isPseudoMain());
 
-  assert(!resumed(env));
+  assertx(!resumed(env));
 
   decRefLocalsInline(env);
-  if (curFunc(env)->mayHaveThis()) {
-    gen(env, DecRefThis, fp(env));
-  }
+  decRefThis(env);
 
-  /*
-   * Pop the ActRec and restore the stack and frame pointers.  It's
-   * important that this does endInlining before pushing the return
-   * value so stack offsets are properly tracked.
-   */
   gen(env, InlineReturn, fp(env));
 
   // Return to the caller function.  Careful between here and the
   // updateMarker() below, where the caller state isn't entirely set up.
+  env.inlineLevel--;
   env.bcStateStack.pop_back();
+  always_assert(env.bcStateStack.size() > 0);
+
   env.fpiActiveStack.pop();
 
   updateMarker(env);
-  gen(env, ResetSP, StackOffset{env.irb->spOffset().offset}, fp(env));
 
   /*
    * After the end of inlining, we are restoring to a previously defined stack
@@ -167,22 +156,22 @@ void endInlinedCommon(HTS& env) {
    * The push of the return value in the caller of this function is not yet
    * materialized.
    */
-  assert(env.irb->evalStack().empty());
+  assertx(env.irb->evalStack().empty());
   env.irb->clearStackDeficit();
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc(env)->fullName()->data());
 }
 
-void retFromInlined(HTS& env, Type type) {
-  auto const retVal = pop(env, type, DataTypeGeneric);
+void retFromInlined(IRGS& env) {
+  auto const retVal = pop(env, DataTypeGeneric);
   endInlinedCommon(env);
   push(env, retVal);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void inlSingletonSLoc(HTS& env, const Func* func, const Op* op) {
-  assert(*op == Op::StaticLocInit);
+void inlSingletonSLoc(IRGS& env, const Func* func, const Op* op) {
+  assertx(*op == Op::StaticLocInit);
 
   TransFlags trflags;
   trflags.noinlineSingleton = true;
@@ -195,20 +184,20 @@ void inlSingletonSLoc(HTS& env, const Func* func, const Op* op) {
   gen(env, CheckStaticLocInit, exit, box);
 
   // Side exit if the static local is null.
-  auto const value  = gen(env, LdRef, Type::InitCell, box);
-  auto const isnull = gen(env, IsType, Type::InitNull, value);
+  auto const value  = gen(env, LdRef, TInitCell, box);
+  auto const isnull = gen(env, IsType, TInitNull, value);
   gen(env, JmpNZero, exit, isnull);
 
   // Return the singleton.
   pushIncRef(env, value);
 }
 
-void inlSingletonSProp(HTS& env,
+void inlSingletonSProp(IRGS& env,
                        const Func* func,
                        const Op* clsOp,
                        const Op* propOp) {
-  assert(*clsOp == Op::String);
-  assert(*propOp == Op::String);
+  assertx(*clsOp == Op::String);
+  assertx(*propOp == Op::String);
 
   TransFlags trflags;
   trflags.noinlineSingleton = true;
@@ -238,7 +227,7 @@ void inlSingletonSProp(HTS& env,
   auto const value   = gen(env, LdMem, unboxed->type().deref(), unboxed);
 
   // Side exit if the static property is null.
-  auto isnull = gen(env, IsType, Type::Null, value);
+  auto isnull = gen(env, IsType, TNull, value);
   gen(env, JmpNZero, exitBlock, isnull);
 
   // Return the singleton.

@@ -46,8 +46,8 @@
 
 final class Set<Tv> implements MutableSet<Tv> {
   /**
-   * Create an empty Set (if no parameters are passed) or create
-   * a Set from an Traversable (if one parameter is passed).
+   * Creates a Set from the given Traversable, or an empty Set
+   * if "null" is passed.
    */
   public function __construct(?Traversable<Tv> $it);
 
@@ -94,7 +94,7 @@ final class Set<Tv> implements MutableSet<Tv> {
   public function skip(int $n): Set<Tv>;
   public function skipWhile((function(Tv): bool) $fn): Set<Tv>;
   public function slice(int $start, int $len): Set<Tv>;
-  public function concat(Traversable<Tv> $traversable): Vector<Tv>;
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Vector<Tu>;
   public function firstValue(): ?Tv;
   public function firstKey(): mixed;
   public function lastValue(): ?Tv;
@@ -118,7 +118,7 @@ final class Set<Tv> implements MutableSet<Tv> {
   /**
    * Returns true if the specified value is present in the Set, false otherwise.
    */
-  public function contains(Tv $v): bool;
+  public function contains<Tu super Tv>(Tu $v): bool;
 
   /**
    * Adds an element to this Set and returns itself. "$c->add($v)" is
@@ -156,7 +156,8 @@ final class Set<Tv> implements MutableSet<Tv> {
   /**
    * Returns a Set containing the values from the specified array.
    */
-  public static function fromArray(array $arr): Set<Tv>;
+  <<__Deprecated('Use `new Set()` instead.')>>
+  public static function fromArray<T>(array<T, Tv> $arr): Set<Tv>;
 
   public static function fromArrays(...): Set<Tv>;
 
@@ -174,7 +175,7 @@ final class Set<Tv> implements MutableSet<Tv> {
   public function items(): Iterable<Tv>;
 }
 
-class SetIterator<Tv> implements KeyedIterator<mixed, Tv> {
+class SetIterator<+Tv> implements KeyedIterator<mixed, Tv> {
   public function __construct();
   public function current(): Tv;
   public function key(): mixed;

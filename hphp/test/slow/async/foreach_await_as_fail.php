@@ -10,4 +10,4 @@ async function foo() {
   }
 }
 
-foo()->join();
+HH\Asio\join(foo());

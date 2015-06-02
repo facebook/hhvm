@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/base/cap-code.h"
 
 namespace HPHP {
 
@@ -192,7 +193,6 @@ struct StringData {
    * Reference-counting related.
    */
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
-  void setRefCount(RefCount n);
   bool isStatic() const;
   bool isUncounted() const;
 
@@ -468,9 +468,9 @@ private:
   void delist();
   void incrementHelper();
   bool checkSane() const;
-  void preCompute() const;
-  void setStatic() const;
-  void setUncounted() const;
+  void preCompute();
+  void setStatic();
+  void setUncounted();
 
 private:
   char* m_data;
@@ -478,16 +478,7 @@ private:
   // We have the next fields blocked into qword-size unions so
   // StringData initialization can do fewer stores to initialize the
   // fields.  (gcc does not combine the stores itself.)
-  union {
-    struct {
-      union {
-        struct { char m_pad[3]; HeaderKind m_kind; };
-        uint32_t m_capCode;
-      };
-      mutable RefCount m_count;
-    };
-    uint64_t m_capAndCount;
-  };
+  HeaderWord<CapCode> m_hdr;
   union {
     struct {
       uint32_t m_len;

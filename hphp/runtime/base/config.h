@@ -24,6 +24,13 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef folly::dynamic IniSettingMap;
+typedef std::vector<std::string> ConfigVector;
+typedef std::map<std::string, std::string> ConfigMap;
+typedef std::set<std::string> ConfigSet;
+// with comparer
+typedef std::set<std::string, stdltistr> ConfigSetC;
+typedef boost::container::flat_set<std::string> ConfigFlatSet;
+typedef hphp_string_imap<std::string> ConfigIMap;
 
 /**
  * Parts of the language can individually be made stricter, warning or
@@ -37,15 +44,18 @@ enum class HackStrictOption {
 };
 
 
-/*
- * Normalizes hdf string names to their ini counterparts
- *
- * We have special handling for a few hdf strings such as those containing
- * MySQL, Eval, IPv[4|6] and EnableHipHopSyntax
- */
-std::string hdfToIni(const std::string&);
-
 struct Config {
+  /*
+   * Normalizes hdf string names to their ini counterparts
+   *
+   * We have special handling for a few hdf strings such as those containing
+   * MySQL, Eval, IPv[4|6] and EnableHipHopSyntax
+   */
+  static std::string IniName(const Hdf& config,
+                             const bool prepend_hhvm = true);
+  static std::string IniName(const std::string& config,
+                             const bool prepend_hhvm = true);
+
   static void ParseConfigFile(const std::string &filename, IniSettingMap &ini,
                               Hdf &hdf);
 
@@ -61,132 +71,182 @@ struct Config {
   // Parse and process a .hdf string (e.g., -v)
   static void ParseHdfString(const std::string hdfStr, Hdf &hdf);
 
-  /** Prefer the Bind() over the GetFoo() as it makes ini_get() work too. */
-  static void Bind(bool& loc, const IniSettingMap &ini,
-                   const Hdf& config, const bool defValue = false);
-  static void Bind(const char*& loc, const IniSettingMap &ini,
-                   const Hdf& config, const char *defValue = nullptr);
-  static void Bind(std::string& loc, const IniSettingMap &ini,
-                   const Hdf& config, const std::string defValue = "");
-  static void Bind(char& loc, const IniSettingMap &ini,
-                   const Hdf& config, const char defValue = 0);
-  static void Bind(unsigned char& loc,const IniSettingMap &ini,
-                   const Hdf& config, const unsigned char defValue = 0);
-  static void Bind(int16_t& loc, const IniSettingMap &ini,
-                   const Hdf& config, const int16_t defValue = 0);
-  static void Bind(uint16_t& loc, const IniSettingMap &ini,
-                   const Hdf& config, const uint16_t defValue = 0);
-  static void Bind(int32_t& loc, const IniSettingMap &ini,
-                   const Hdf& config, const int32_t defValue = 0);
-  static void Bind(uint32_t& loc, const IniSettingMap &ini,
-                   const Hdf& config, const uint32_t defValue = 0);
-  static void Bind(int64_t& loc, const IniSettingMap &ini,
-                   const Hdf& config, const int64_t defValue = 0);
-  static void Bind(uint64_t& loc, const IniSettingMap &ini,
-                   const Hdf& config, const uint64_t defValue = 0);
-  static void Bind(double& loc, const IniSettingMap &ini,
-                   const Hdf& config, const double defValue = 0);
-  static void Bind(HackStrictOption& loc, const IniSettingMap &ini,
-                   const Hdf& config);
-  static void Bind(std::vector<std::string>& loc, const IniSettingMap& ini,
-                   const Hdf& config);
-  static void Bind(std::map<std::string, std::string>& loc,
-                   const IniSettingMap& ini, const Hdf& config);
-
   /**
-   * These Bind()s should be used for ini settings. Specifically, they should
-   * be used when the bound setting is needed before the main ini processing
-   * pass. Unlike IniSetting::Bind, these bindings will fetch the value in
-   * an ini setting if it is set otherwise it will use the defValue.
+   * Prefer the Bind() over the GetFoo() as it makes ini_get() work too.
+   * These Bind()s should be used for ini settings. Specifically, they
+   * should be used when the bound setting is needed before the main ini
+   * processing pass. Unlike IniSetting::Bind, these bindings will fetch the
+   * value in an ini setting if it is set otherwise it will use the defValue.
    */
   static void Bind(bool& loc, const IniSettingMap &ini,
-                   const std::string name, const bool defValue = false);
+                   const Hdf& config, const std::string& name = "",
+                   const bool defValue = false,
+                   const bool prepend_hhvm = true);
   static void Bind(const char*& loc, const IniSettingMap &ini,
-                   const std::string name, const char *defValue = nullptr);
+                   const Hdf& config, const std::string& name = "",
+                   const char *defValue = nullptr,
+                   const bool prepend_hhvm = true);
   static void Bind(std::string& loc, const IniSettingMap &ini,
-                   const std::string name, const std::string defValue = "");
+                   const Hdf& config, const std::string& name = "",
+                   const std::string defValue = "",
+                   const bool prepend_hhvm = true);
   static void Bind(char& loc, const IniSettingMap &ini,
-                   const std::string name, const char defValue = 0);
+                   const Hdf& config, const std::string& name = "",
+                   const char defValue = 0, const bool prepend_hhvm = true);
   static void Bind(unsigned char& loc,const IniSettingMap &ini,
-                   const std::string name, const unsigned char defValue = 0);
+                   const Hdf& config, const std::string& name = "",
+                   const unsigned char defValue = 0,
+                   const bool prepend_hhvm = true);
   static void Bind(int16_t& loc, const IniSettingMap &ini,
-                   const std::string name, const int16_t defValue = 0);
+                   const Hdf& config, const std::string& name = "",
+                   const int16_t defValue = 0,
+                   const bool prepend_hhvm = true);
   static void Bind(uint16_t& loc, const IniSettingMap &ini,
-                   const std::string name, const uint16_t defValue = 0);
+                   const Hdf& config, const std::string& name = "",
+                   const uint16_t defValue = 0,
+                   const bool prepend_hhvm = true);
   static void Bind(int32_t& loc, const IniSettingMap &ini,
-                   const std::string name, const int32_t defValue = 0);
+                   const Hdf& config, const std::string& name = "",
+                   const int32_t defValue = 0,
+                   const bool prepend_hhvm = true);
   static void Bind(uint32_t& loc, const IniSettingMap &ini,
-                   const std::string name, const uint32_t defValue = 0);
+                   const Hdf& config, const std::string& name = "",
+                   const uint32_t defValue = 0,
+                   const bool prepend_hhvm = true);
   static void Bind(int64_t& loc, const IniSettingMap &ini,
-                   const std::string name, const int64_t defValue = 0);
+                   const Hdf& config, const std::string& name = "",
+                   const int64_t defValue = 0,
+                   const bool prepend_hhvm = true);
   static void Bind(uint64_t& loc, const IniSettingMap &ini,
-                   const std::string name, const uint64_t defValue = 0);
+                   const Hdf& config, const std::string& name = "",
+                   const uint64_t defValue = 0,
+                   const bool prepend_hhvm = true);
   static void Bind(double& loc, const IniSettingMap &ini,
-                   const std::string name, const double defValue = 0);
-
-
-  static bool GetBool(const IniSettingMap &ini, const Hdf& config,
-                      const bool defValue = false);
-  static const char *Get(const IniSettingMap &ini, const Hdf& config,
-                         const char *defValue = nullptr);
-  static std::string GetString(const IniSettingMap &ini, const Hdf& config,
-                               const std::string defValue = "");
-  static char GetByte(const IniSettingMap &ini, const Hdf& config,
-                      const char defValue = 0);
-  static unsigned char GetUByte(const IniSettingMap &ini, const Hdf& config,
-                                const unsigned char defValue = 0);
-  static int16_t GetInt16(const IniSettingMap &ini, const Hdf& config,
-                          const int16_t defValue = 0);
-  static uint16_t GetUInt16(const IniSettingMap &ini, const Hdf& config,
-                            const uint16_t defValue = 0);
-  static int32_t GetInt32(const IniSettingMap &ini, const Hdf& config,
-                          const int32_t defValue = 0);
-  static uint32_t GetUInt32(const IniSettingMap &ini, const Hdf& config,
-                            const uint32_t defValue = 0);
-  static int64_t GetInt64(const IniSettingMap &ini, const Hdf& config,
-                          const int64_t defValue = 0);
-  static uint64_t GetUInt64(const IniSettingMap &ini, const Hdf& config,
-                            const uint64_t defValue = 0);
-  static double GetDouble(const IniSettingMap &ini, const Hdf& config,
-                          const double defValue = 0);
+                   const Hdf& config, const std::string& name = "",
+                   const double defValue = 0,
+                   const bool prepend_hhvm = true);
+  static void Bind(HackStrictOption& loc, const IniSettingMap &ini,
+                   const Hdf& config, const std::string& name = "");
+  static void Bind(ConfigVector& loc, const IniSettingMap& ini,
+                   const Hdf& config, const std::string& name = "",
+                   const ConfigVector& defValue = ConfigVector(),
+                   const bool prepend_hhvm = true);
+  static void Bind(ConfigMap& loc, const IniSettingMap& ini, const Hdf& config,
+                   const std::string& name = "",
+                   const ConfigMap& defValue = ConfigMap(),
+                   const bool prepend_hhvm = true);
+  static void Bind(ConfigSet& loc, const IniSettingMap& ini, const Hdf& config,
+                   const std::string& name = "",
+                   const ConfigSet& defValue = ConfigSet(),
+                   const bool prepend_hhvm = true);
+  static void Bind(ConfigSetC& loc, const IniSettingMap& ini, const Hdf& config,
+                   const std::string& name = "",
+                   const ConfigSetC& defValue = ConfigSetC(),
+                   const bool prepend_hhvm = true);
+  static void Bind(ConfigIMap& loc, const IniSettingMap& ini, const Hdf& config,
+                   const std::string& name = "",
+                   const ConfigIMap& defValue = ConfigIMap(),
+                   const bool prepend_hhvm = true);
+  static void Bind(ConfigFlatSet& loc, const IniSettingMap& ini,
+                   const Hdf& config, const std::string& name = "",
+                   const ConfigFlatSet& defValue = ConfigFlatSet(),
+                   const bool prepend_hhvm = true);
 
   /**
-   * Use this for iterating over options that are stored as objects in
-   * runtime options (e.g. FilesMatch). This function iterates over the
-   * settings passed as ini/hdf, calls back to, generally, the constructor of
-   * the object in question.
+   * Master Get Methods to get values associated with an ini or hdf setting.
+   * These methods just get the value. They do not bind to a variable for
+   * enabling ini_get()
+   */
+  static bool GetBool(const IniSettingMap &ini, const Hdf& config,
+                      const std::string& name = "",
+                      const bool defValue = false,
+                      const bool prepend_hhvm = true);
+  static const char *Get(const IniSettingMap &ini, const Hdf& config,
+                         const std::string& name = "",
+                         const char *defValue = nullptr,
+                         const bool prepend_hhvm = true);
+  static std::string GetString(const IniSettingMap &ini, const Hdf& config,
+                               const std::string& name = "",
+                               const std::string defValue = "",
+                               const bool prepend_hhvm = true);
+  static char GetByte(const IniSettingMap &ini, const Hdf& config,
+                      const std::string& name = "", const char defValue = 0,
+                      const bool prepend_hhvm = true);
+  static unsigned char GetUByte(const IniSettingMap &ini, const Hdf& config,
+                                const std::string& name = "",
+                                const unsigned char defValue = 0,
+                                const bool prepend_hhvm = true);
+  static int16_t GetInt16(const IniSettingMap &ini, const Hdf& config,
+                          const std::string& name = "",
+                          const int16_t defValue = 0,
+                          const bool prepend_hhvm = true);
+  static uint16_t GetUInt16(const IniSettingMap &ini, const Hdf& config,
+                            const std::string& name = "",
+                            const uint16_t defValue = 0,
+                            const bool prepend_hhvm = true);
+  static int32_t GetInt32(const IniSettingMap &ini, const Hdf& config,
+                          const std::string& name = "",
+                          const int32_t defValue = 0,
+                          const bool prepend_hhvm = true);
+  static uint32_t GetUInt32(const IniSettingMap &ini, const Hdf& config,
+                            const std::string& name = "",
+                            const uint32_t defValue = 0,
+                            const bool prepend_hhvm = true);
+  static int64_t GetInt64(const IniSettingMap &ini, const Hdf& config,
+                          const std::string& name = "",
+                          const int64_t defValue = 0,
+                          const bool prepend_hhvm = true);
+  static uint64_t GetUInt64(const IniSettingMap &ini, const Hdf& config,
+                            const std::string& name = "",
+                            const uint64_t defValue = 0,
+                            const bool prepend_hhvm = true);
+  static double GetDouble(const IniSettingMap &ini, const Hdf& config,
+                          const std::string& name = "",
+                          const double defValue = 0,
+                          const bool prepend_hhvm = true);
+  static ConfigVector GetVector(const IniSettingMap& ini, const Hdf& config,
+                                const std::string& name = "",
+                                const ConfigVector& defValue = ConfigVector(),
+                                const bool prepend_hhvm = true);
+  static ConfigMap GetMap(const IniSettingMap& ini, const Hdf& config,
+                          const std::string& name = "",
+                          const ConfigMap& defValue = ConfigMap(),
+                          const bool prepend_hhvm = true);
+  static ConfigSet GetSet(const IniSettingMap& ini, const Hdf& config,
+                          const std::string& name = "",
+                          const ConfigSet& defValue = ConfigSet(),
+                          const bool prepend_hhvm = true);
+  static ConfigSetC GetSetC(const IniSettingMap& ini, const Hdf& config,
+                            const std::string& name = "",
+                            const ConfigSetC& defValue = ConfigSetC(),
+                            const bool prepend_hhvm = true);
+  static ConfigIMap GetIMap(const IniSettingMap& ini, const Hdf& config,
+                            const std::string& name = "",
+                            const ConfigIMap& defValue = ConfigIMap(),
+                            const bool prepend_hhvm = true);
+  static ConfigFlatSet GetFlatSet(const IniSettingMap& ini, const Hdf& config,
+                                  const std::string& name = "",
+                                  const ConfigFlatSet& defValue
+                                    = ConfigFlatSet(),
+                                  const bool prepend_hhvm = true);
+
+  /**
+   * Use the Iterate method for iterating over options that are stored as
+   * objects in runtime options (e.g. FilesMatch). This function iterates over
+   * the settings passed as ini/hdf, calls back to, generally, the constructor
+   * of the object in question.
    *
    * Note: For now, we are not `ini_get()` enabling these type of options as
    * it is not trivial to come up with a non-hacky and workable way to store
    * the data correctly. Also, as usual, Hdf takes priority.
    */
-  static void Iterate(const IniSettingMap &ini, const Hdf &hdf,
-                      std::function<void (const IniSettingMap&,
-                                          const Hdf&)> cb);
-
-  template<class T>
-  static void Get(const IniSettingMap &ini, const Hdf& config, T &data) {
-    config.configGet(data);
-    if (!data.empty()) {
-      return;
-    }
-    auto key = IniName(config);
-    auto* value = ini.get_ptr(key);
-    if (!value) {
-      return;
-    }
-    if (value->isArray() || value->isObject()) {
-      for (auto &pair : value->items()) {
-        StringInsert(data, pair.first.asString().toStdString(),
-                           pair.second.asString().toStdString());
-      }
-    }
-  }
+  static void Iterate(std::function<void (const IniSettingMap&,
+                                          const Hdf&,
+                                          const std::string&)> cb,
+                      const IniSettingMap &ini, const Hdf& config,
+                      const std::string &name, const bool prepend_hhvm = true);
 
   private:
-
-  static std::string IniName(const Hdf& config);
-  static std::string IniName(const std::string& config);
 
   static void SetParsedIni(IniSettingMap &ini, const std::string confStr,
                            const std::string filename, bool extensions_only);

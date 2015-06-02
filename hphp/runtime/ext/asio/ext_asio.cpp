@@ -18,9 +18,9 @@
 #include "hphp/runtime/ext/asio/ext_asio.h"
 
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/asio/asio_context.h"
-#include "hphp/runtime/ext/asio/asio_session.h"
-#include "hphp/runtime/ext/asio/resumable_wait_handle.h"
+#include "hphp/runtime/ext/asio/asio-context.h"
+#include "hphp/runtime/ext/asio/asio-session.h"
+#include "hphp/runtime/ext/asio/resumable-wait-handle.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/system/systemlib.h"
 

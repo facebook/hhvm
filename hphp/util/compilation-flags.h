@@ -39,14 +39,6 @@ const bool debug =
 #endif
   ;
 
-const bool memory_profiling =
-#ifdef MEMORY_PROFILING
-  true
-#else
-  false
-#endif
-  ;
-
 const bool contiguous_heap =
 #if CONTIGUOUS_HEAP
   true

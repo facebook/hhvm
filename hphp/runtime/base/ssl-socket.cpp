@@ -348,13 +348,21 @@ SmartPtr<SSLSocket> SSLSocket::Create(
   return sock;
 }
 
+bool SSLSocket::waitForData() {
+  if (m_data->m_ssl_active && SSL_pending(m_data->m_handle)) {
+    return true;
+  }
+
+  return Socket::waitForData();
+}
+
 int64_t SSLSocket::readImpl(char *buffer, int64_t length) {
   int64_t nr_bytes = 0;
   if (m_data->m_ssl_active) {
     bool retry = true;
     do {
       if (m_data->m_is_blocked) {
-        Socket::waitForData();
+        waitForData();
         if (timedOut()) {
           break;
         }

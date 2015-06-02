@@ -13,4 +13,4 @@ async function foo($a) {
   return await $fn(47, 26);
 }
 
-var_dump(foo(42)->join());
+var_dump(HH\Asio\join(foo(42)));

@@ -95,6 +95,7 @@ public:
   const std::string &getPassword() const { return m_password;}
   const std::set<std::string> &getPasswords() const { return m_passwords;}
   bool alwaysReset() const { return m_alwaysReset;}
+  const std::set<std::string> &getFunctions() const { return m_functions; }
 
 protected:
   std::string m_name;
@@ -110,6 +111,7 @@ protected:
   std::string m_password;
   std::set<std::string> m_passwords;
   bool m_alwaysReset = false;
+  std::set<std::string> m_functions;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

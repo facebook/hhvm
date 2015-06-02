@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include <folly/Optional.h>
+
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include <libdwarf.h>
@@ -183,9 +185,12 @@ struct DwarfInfo {
                       const Op* instr, FunctionInfo* f);
   void transferFuncs(DwarfChunk* from, DwarfChunk* to);
   void compactChunks();
-  DwarfChunk* addTracelet(TCRange range, const char* name,
-                          const Func* func, const Op* instr,
-                          bool exit, bool inPrologue);
+  DwarfChunk* addTracelet(TCRange range,
+                          folly::Optional<std::string> name,
+                          const Func* func,
+                          const Op* instr,
+                          bool exit,
+                          bool inPrologue);
   void syncChunks();
 };
 

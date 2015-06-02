@@ -1,0 +1,9 @@
+File "fake_members12.php", line 16, characters 9-16:
+Invalid argument (Typing[4110])
+File "fake_members12.php", line 5, characters 14-16:
+This is an int
+File "fake_members12.php", line 8, characters 10-13:
+It is incompatible with a nullable type
+File "fake_members12.php", line 14, characters 10-14:
+All the local information about the member x has been invalidated during this call.
+This is a limitation of the type-checker, use a local if that's the problem.

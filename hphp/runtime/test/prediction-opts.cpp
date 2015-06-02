@@ -33,10 +33,10 @@ TEST(PredictionOpts, basic) {
   Block* taken = unit.defBlock();
   Block* end = unit.defBlock();
 
-  auto ptr = unit.gen(Conjure, marker, Type::PtrToGen);
-  auto ldm = unit.gen(LdMem, marker, Type::Gen, ptr->dst());
+  auto ptr = unit.gen(Conjure, marker, TPtrToGen);
+  auto ldm = unit.gen(LdMem, marker, TGen, ptr->dst());
   auto inc = unit.gen(IncRef, marker, ldm->dst());
-  auto ckt = unit.gen(CheckType, marker, Type::Int, taken, ldm->dst());
+  auto ckt = unit.gen(CheckType, marker, TInt, taken, ldm->dst());
   ckt->setNext(end);
   entry->push_back({ptr, ldm, inc, ckt});
 
@@ -49,7 +49,7 @@ TEST(PredictionOpts, basic) {
   // narrowed type on the fallthrough block.
   {
     ASSERT_EQ(2, entry->instrs().size());
-    EXPECT_MATCH(entry->back(), CheckTypeMem, Type::Int, taken);
+    EXPECT_MATCH(entry->back(), CheckTypeMem, TInt, taken);
     EXPECT_EQ(end, entry->back().next());
   }
 
@@ -58,7 +58,7 @@ TEST(PredictionOpts, basic) {
     auto takenIt = taken->begin();
     auto& ldmem = *takenIt;
     auto& incref = *(++takenIt);
-    EXPECT_MATCH(ldmem, LdMem, Type::Gen, ptr->dst());
+    EXPECT_MATCH(ldmem, LdMem, TGen, ptr->dst());
     EXPECT_MATCH(incref, IncRef, ldmem.dst());
   }
 
@@ -68,7 +68,7 @@ TEST(PredictionOpts, basic) {
     auto& ldmem = *endIt;
     auto& incref = *(++endIt);
     auto& mov = *(++endIt);
-    EXPECT_MATCH(ldmem, LdMem, Type::Int, ptr->dst());
+    EXPECT_MATCH(ldmem, LdMem, TInt, ptr->dst());
     EXPECT_MATCH(incref, IncRef, ldmem.dst());
     EXPECT_MATCH(mov, Mov, ldmem.dst());
     EXPECT_EQ(ckt->dst(), mov.dst());

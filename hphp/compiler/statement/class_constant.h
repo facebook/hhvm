@@ -28,7 +28,7 @@ DECLARE_BOOST_TYPES(ClassConstant);
 class ClassConstant : public Statement, public IParseHandler {
 public:
   ClassConstant(STATEMENT_CONSTRUCTOR_PARAMETERS, std::string typeConstraint,
-                ExpressionListPtr exp, bool abstract);
+                ExpressionListPtr exp, bool abstract, bool typeconst);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   StatementPtr preOptimize(AnalysisResultConstPtr ar);
@@ -40,10 +40,12 @@ public:
 
   ExpressionListPtr getConList() { return m_exp; }
   bool isAbstract() { return m_abstract; }
+  bool isTypeconst() { return m_typeconst; }
 private:
   std::string m_typeConstraint;
   ExpressionListPtr m_exp;
   bool m_abstract;
+  bool m_typeconst;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

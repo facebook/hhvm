@@ -34,10 +34,10 @@
  *   $fm = ImmMap {'a' => 1, 'b' => 2};
  */
 
-final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
+final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
   /**
-   * Create an empty ImmMap (if no parameters are passed) or create
-   * an ImmMap from an KeyedTraversable (if one parameter is passed).
+   * Creates an ImmMap from the given KeyedTraversable, or an empty ImmMap
+   * if "null" is passed.
    */
   public function __construct(?KeyedTraversable<Tk, Tv> $it);
 
@@ -56,10 +56,19 @@ final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    */
   public function toKeysArray(): array;
 
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toVector(): Vector<Tv>;
   public function toImmVector(): ImmVector<Tv>;
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toMap(): Map<Tk, Tv>;
   public function toImmMap(): ImmMap<Tk, Tv>;
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toSet(): Set<Tv>;
   public function toImmSet(): ImmSet<Tv>;
   public function immutable(): ImmMap<Tk, Tv>;
@@ -79,7 +88,7 @@ final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
   public function skip(int $n): ImmMap<Tk, Tv>;
   public function skipWhile((function(Tv): bool) $fn): ImmMap<Tk, Tv>;
   public function slice(int $start, int $len): ImmMap<Tk, Tv>;
-  public function concat(Traversable<Tv> $traversable): ImmVector<Tv>;
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): ImmVector<Tu>;
   public function firstValue(): ?Tv;
   public function firstKey(): ?Tk;
   public function lastValue(): ?Tv;
@@ -112,25 +121,20 @@ final class ImmMap<Tk, Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * Returns true if the specified key is present in the ImmMap, false
    * otherwise.
    */
-  public function contains(Tk $k): bool;
-  public function containsKey(Tk $k): bool;
+  public function contains<Tu super Tk>(Tu $k): bool;
+  public function containsKey<Tu super Tk>(Tu $k): bool;
 
   /**
    * Returns a new Map with the keys in this Map not in $traversable
    */
-  public function differenceByKey(KeyedTraversable<Tk, Tv> $traversable):
-    Map<Tk, Tv>;
+  public function differenceByKey<Tu super Tk, Tw>(
+    KeyedTraversable<Tu, Tw> $traversable
+  ) /*: Map<Tk, Tv> */;
 
   /**
    * Returns an iterator that points to the beginning of this ImmMap.
    */
   public function getIterator(): MapIterator<Tk, Tv>;
-
-  /**
-   * Returns an ImmMap containing the key/value pairs from the specified
-   * array.
-   */
-  public static function fromArray(array $arr): ImmMap<Tk, Tv>;
 
   public static function fromItems(?Traversable<Pair<Tk, Tv>> $items):
     ImmMap<Tk, Tv>;

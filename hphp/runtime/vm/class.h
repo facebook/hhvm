@@ -58,7 +58,7 @@ struct NativePropHandler;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using ClassPtr = AtomicSmartPtr<Class>;
+using ClassPtr = AtomicSharedPtr<Class>;
 
 /*
  * Class represents the full definition of a user class in a given request
@@ -145,6 +145,9 @@ struct Class : AtomicCountable {
     LowClassPtr m_class;
     LowStringPtr m_name;
     TypedValueAux m_val;
+
+    bool isAbstract()      const { return m_val.constModifiers().m_isAbstract; }
+    bool isType()          const { return m_val.constModifiers().m_isType; }
   };
 
   /*
@@ -531,6 +534,11 @@ public:
   void initSProps() const;
 
   /*
+   * Check if class has been initialized.
+   */
+  bool initialized() const;
+
+  /*
    * PropInitVec for this class's declared properties, with default values for
    * scalars only.
    *
@@ -644,6 +652,11 @@ public:
    * Whether this class has a constant named `clsCnsName'.
    */
   bool hasConstant(const StringData* clsCnsName) const;
+
+  /*
+   * Whether this class has a type constant named `typeCnsName'.
+   */
+  bool hasTypeConstant(const StringData* typeCnsName) const;
 
   /*
    * Look up the actual value of a class constant.  Perform dynamic
@@ -780,12 +793,14 @@ public:
   /*
    * Whether the class registered native handler of magic props.
    */
-  bool hasNativePropHandler();
+  bool hasNativePropHandler() const;
 
   /*
    * Returns actual native handler of magic props.
+   *
+   * @requires hasNativePropHandler()
    */
-  Native::NativePropHandler* getNativePropHandler();
+  const Native::NativePropHandler* getNativePropHandler() const;
 
   /*
    * Get the underlying enum base type if this is an enum.

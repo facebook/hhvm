@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/check.h"
 
 namespace HPHP { namespace jit {
 namespace {
@@ -76,6 +77,7 @@ bool canDCE(IRInstruction* inst) {
   case ConvDblToStr:
   case ConvIntToStr:
   case ConvClsToCctx:
+  case NewColFromArray:
   case Gt:
   case Gte:
   case Lt:
@@ -153,18 +155,17 @@ bool canDCE(IRInstruction* inst) {
   case NewArray:
   case NewMixedArray:
   case NewLikeArray:
+  case LdPackedArrayElemAddr:
   case NewCol:
   case FreeActRec:
   case DefInlineFP:
   case LdRetAddr:
   case Mov:
-  case TakeRef:
-  case ReDefSP:
   case CountArray:
   case CountArrayFast:
   case CountCollection:
   case Nop:
-  case AKExists:
+  case AKExistsArr:
   case LdBindAddr:
   case LdSwitchDblIndex:
   case LdSwitchStrIndex:
@@ -186,11 +187,11 @@ bool canDCE(IRInstruction* inst) {
   case LdUnwinderValue:
   case LdColArray:
   case OrdStr:
-    assert(!inst->isControlFlow());
+    assertx(!inst->isControlFlow());
     return true;
 
-  case AdjustSP:
-  case ResetSP:
+  case DbgTraceCall:
+  case AKExistsObj:
   case StStk:
   case SpillFrame:
   case CufIterSpillFrame:
@@ -198,11 +199,9 @@ bool canDCE(IRInstruction* inst) {
   case CheckNullptr:
   case AssertType:
   case CheckTypeMem:
-  case GuardLoc:
   case HintLocInner:
   case CheckLoc:
   case AssertLoc:
-  case GuardStk:
   case HintStkInner:
   case CheckStk:
   case AssertStk:
@@ -216,7 +215,6 @@ bool canDCE(IRInstruction* inst) {
   case CheckInit:
   case CheckInitMem:
   case CheckCold:
-  case GuardRefs:
   case CheckRefs:
   case EndGuards:
   case CheckNonNull:
@@ -253,7 +251,6 @@ bool canDCE(IRInstruction* inst) {
   case Jmp:
   case DefLabel:
   case Box:
-  case TakeStk:
   case LdLocPseudoMain:
   case LdVectorBase:
   case LdPairBase:
@@ -289,7 +286,6 @@ bool canDCE(IRInstruction* inst) {
   case InitSProps:
   case InitObjProps:
   case ConstructInstance:
-  case CustomInstanceInit:
   case AllocPackedArray:
   case InitPackedArray:
   case InitPackedArrayLoop:
@@ -301,15 +297,15 @@ bool canDCE(IRInstruction* inst) {
   case NativeImpl:
   case CallBuiltin:
   case RetCtrl:
+  case AsyncRetCtrl:
   case StRetVal:
-  case RetAdjustStk:
   case ReleaseVVOrExit:
   case GenericRetDecRefs:
   case StMem:
   case StElem:
   case StLoc:
-  case StLocNT:
   case StLocPseudoMain:
+  case StLocRange:
   case StRef:
   case EagerSyncVMRegs:
   case ReqBindJmp:
@@ -317,7 +313,6 @@ bool canDCE(IRInstruction* inst) {
   case ReqRetranslateOpt:
   case IncRef:
   case IncRefCtx:
-  case DecRefThis:
   case DecRef:
   case DecRefNZ:
   case DefFP:
@@ -330,8 +325,8 @@ bool canDCE(IRInstruction* inst) {
   case VerifyRetCls:
   case VerifyRetFail:
   case RaiseUninitLoc:
-  case WarnNonObjProp:
   case RaiseUndefProp:
+  case RaiseMissingArg:
   case RaiseError:
   case RaiseWarning:
   case RaiseNotice:
@@ -345,7 +340,6 @@ bool canDCE(IRInstruction* inst) {
   case ConcatIntStr:
   case ConcatStrInt:
   case ConcatStrStr:
-  case ConcatCellCell:
   case ConcatStr3:
   case ConcatStr4:
   case AddElemStrKey:
@@ -390,8 +384,8 @@ bool canDCE(IRInstruction* inst) {
   case DbgAssertRefCount:
   case DbgAssertPtr:
   case DbgAssertType:
-  case DbgAssertRetAddr:
-  case RBTrace:
+  case RBTraceEntry:
+  case RBTraceMsg:
   case ZeroErrorLevel:
   case RestoreErrorLevel:
   case IterInit:
@@ -412,8 +406,10 @@ bool canDCE(IRInstruction* inst) {
   case CIterFree:
   case BaseG:
   case PropX:
+  case PropQ:
   case PropDX:
   case CGetProp:
+  case CGetPropQ:
   case VGetProp:
   case BindProp:
   case SetProp:
@@ -454,17 +450,13 @@ bool canDCE(IRInstruction* inst) {
   case CheckBounds:
   case ProfilePackedArray:
   case ProfileStructArray:
-  case ProfileStr:
   case CheckPackedArrayBounds:
-  case CheckTypePackedArrayElem:
-  case IsPackedArrayElemNull:
-  case LdPackedArrayElem:
   case LdStructArrayElem:
   case LdVectorSize:
   case VectorDoCow:
   case VectorHasImmCopy:
   case ColAddNewElemC:
-  case ColAddElemC:
+  case MapAddElemC:
   case BeginCatch:
   case EndCatch:
   case UnwindCheckSideExit:
@@ -472,6 +464,13 @@ bool canDCE(IRInstruction* inst) {
   case DbgTrashStk:
   case DbgTrashFrame:
   case DbgTrashMem:
+  case PredictLoc:
+  case PredictStk:
+  case EnterFrame:
+  case CheckStackOverflow:
+  case InitExtraArgs:
+  case CheckSurpriseFlagsEnter:
+  case ExitPlaceholder:
     return false;
   }
   not_reached();
@@ -545,7 +544,7 @@ void removeDeadInstructions(IRUnit& unit, const DceState& state) {
       // For now, all control flow instructions are essential. If we ever
       // change this, we'll need to be careful about unlinking dead CF
       // instructions here.
-      assert(IMPLIES(inst.isControlFlow(), !state[inst].isDead()));
+      assertx(IMPLIES(inst.isControlFlow(), !state[inst].isDead()));
       return state[inst].isDead();
     });
   });
@@ -613,7 +612,7 @@ bool findWeakActRecUses(const BlockList& blocks,
   bool killedFrames = false;
 
   auto const incWeak = [&] (const IRInstruction* inst, const SSATmp* src) {
-    assert(src->isA(Type::FramePtr));
+    assertx(src->isA(TFramePtr));
     auto const frameInst = src->inst();
     if (frameInst->op() == DefInlineFP) {
       ITRACE(3, "weak use of {} from {}\n", *frameInst, *inst);
@@ -626,7 +625,6 @@ bool findWeakActRecUses(const BlockList& blocks,
 
     switch (inst->op()) {
     // We don't need to generate stores to a frame if it can be eliminated.
-    case StLocNT:
     case StLoc:
       incWeak(inst, inst->src(0));
       break;
@@ -634,7 +632,7 @@ bool findWeakActRecUses(const BlockList& blocks,
     case InlineReturn:
       {
         auto const frameInst = inst->src(0)->inst();
-        assert(frameInst->is(DefInlineFP));
+        assertx(frameInst->is(DefInlineFP));
         auto const frameUses = uses[frameInst->dst()];
         auto const weakUses  = state[frameInst].weakUseCount();
         /*
@@ -665,17 +663,19 @@ bool findWeakActRecUses(const BlockList& blocks,
 }
 
 /*
- * The first time through, we've counted up weak uses of the frame and
- * then finally marked it dead.  The instructions in between that were
- * weak uses may need modifications now that their frame is going
- * away.
+ * The first time through, we've counted up weak uses of the frame and then
+ * finally marked it dead.  The instructions in between that were weak uses may
+ * need modifications now that their frame is going away.
  *
- * Also, if we eliminated some frames, DecRef instructions (which can
- * re-enter the VM without requiring a materialized frame) need to
- * have stack depths in their markers adjusted so they can't stomp on
- * parts of the outer function.  We handle this conservatively by just
- * pushing all DecRef markers where the DecRef is from a function
- * other than the outer function down to a safe re-entry depth.
+ * Also, if we eliminated some frames, DecRef instructions (which can re-enter
+ * the VM without requiring a materialized frame) need to have stack depths in
+ * their markers adjusted so they can't stomp on parts of the outer function.
+ * We handle this conservatively by just pushing all DecRef markers where the
+ * DecRef is from a function other than the outer function down to a safe
+ * re-entry depth.
+ *
+ * Finally, any removed frame pointers in BCMarkers must be rewritten to point
+ * to the outer frame of that frame.
  */
 void performActRecFixups(const BlockList& blocks,
                          DceState& state,
@@ -696,13 +696,21 @@ void performActRecFixups(const BlockList& blocks,
     for (auto& inst : *block) {
       ITRACE(5, "{}\n", inst.toString());
 
+      if (auto const fp = inst.marker().fp()) {
+        if (state[fp->inst()].isDead()) {
+          always_assert(fp->inst()->is(DefInlineFP));
+          auto const prev = fp->inst()->src(1);
+          inst.marker() = inst.marker().adjustFP(prev);
+          assertx(!state[prev->inst()].isDead());
+        }
+      }
+
       switch (inst.op()) {
       case DefInlineFP:
         ITRACE(3, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
              inst, state[inst].weakUseCount(), uses[inst.dst()]);
         break;
 
-      case StLocNT:
       case StLoc:
         if (state[inst.src(0)->inst()].isDead()) {
           ITRACE(3, "marking {} as dead\n", inst);
@@ -719,7 +727,7 @@ void performActRecFixups(const BlockList& blocks,
       case DecRef:
         if (inst.marker().func() != outerFunc) {
           ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);
-          inst.marker().setSpOff(FPAbsOffset{safeDepth});
+          inst.marker() = inst.marker().adjustSP(FPInvOffset{safeDepth});
         }
         break;
 
@@ -763,13 +771,30 @@ void optimizeActRecs(const BlockList& blocks,
 
 } // anonymous namespace
 
-// Publicly exported functions:
+void mandatoryDCE(IRUnit& unit) {
+  if (removeUnreachable(unit)) {
+    // Removing unreachable incoming edges can change types, so if we changed
+    // anything we have to reflow to maintain that IR invariant.
+    reflowTypes(unit);
+  }
+  assertx(checkEverything(unit));
+}
 
-void eliminateDeadCode(IRUnit& unit) {
+void fullDCE(IRUnit& unit) {
+  if (!RuntimeOption::EvalHHIRDeadCodeElim) {
+    // This portion of DCE cannot be turned off, because it restores IR
+    // invariants, and callers of fullDCE are allowed to rely on it for that.
+    return mandatoryDCE(unit);
+  }
+
   Timer dceTimer(Timer::optimize_dce);
 
   // kill unreachable code and remove any traces that are now empty
   auto const blocks = prepareBlocks(unit);
+
+  // At this point, all IR invariants must hold, because we've restored the
+  // only one allowed to be violated before fullDCE in prepareBlocks.
+  assertx(checkEverything(unit));
 
   // mark the essential instructions and add them to the initial
   // work list; this will also mark reachable exit traces. All

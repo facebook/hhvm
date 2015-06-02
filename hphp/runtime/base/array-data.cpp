@@ -36,6 +36,7 @@
 #include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/zend/zend-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,18 +46,32 @@ static_assert(
   "Performance is sensitive to sizeof(ArrayData)."
   " Make sure you changed it with good reason and then update this assert.");
 
-typedef tbb::concurrent_hash_map<std::string, ArrayData*> ArrayDataMap;
+using ArrayDataMap = tbb::concurrent_hash_map<ArrayData::ScalarArrayKey,
+                                              ArrayData*,
+                                              ArrayData::ScalarHash>;
 static ArrayDataMap s_arrayDataMap;
+
+ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(const char* str,
+                                                       size_t sz) {
+  return MD5(string_md5(str, sz).c_str());
+}
+
+ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(ArrayData* arr) {
+  VariableSerializer vs(VariableSerializer::Type::Serialize);
+  auto s = vs.serialize(VarNR(arr), true);
+  return GetScalarArrayKey(s.data(), s.size());
+}
 
 ArrayData* ArrayData::GetScalarArray(ArrayData* arr) {
   if (arr->empty()) return staticEmptyArray();
-  auto key = f_serialize(arr).toCppString();
+  auto key = GetScalarArrayKey(arr);
   return GetScalarArray(arr, key);
 }
 
-ArrayData* ArrayData::GetScalarArray(ArrayData* arr, const std::string& key) {
+ArrayData* ArrayData::GetScalarArray(ArrayData* arr,
+                                     const ScalarArrayKey& key) {
   if (arr->empty()) return staticEmptyArray();
-  assert(key == f_serialize(arr).toCppString());
+  assert(key == GetScalarArrayKey(arr));
 
   ArrayDataMap::accessor acc;
   if (s_arrayDataMap.insert(acc, key)) {
@@ -852,12 +867,12 @@ const Variant& ArrayData::getNotFound(const StringData* k) {
 }
 
 const Variant& ArrayData::getNotFound(int64_t k, bool error) const {
-  return error && m_kind != kGlobalsKind ? getNotFound(k) :
+  return error && kind() != kGlobalsKind ? getNotFound(k) :
          null_variant;
 }
 
 const Variant& ArrayData::getNotFound(const StringData* k, bool error) const {
-  return error && m_kind != kGlobalsKind ? getNotFound(k) :
+  return error && kind() != kGlobalsKind ? getNotFound(k) :
          null_variant;
 }
 

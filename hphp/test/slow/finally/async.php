@@ -26,11 +26,11 @@ async function genBlocking($a) {
 
 function main() {
   echo "* eager async *\n";
-  $result = genEager(42)->join();
+  $result = HH\Asio\join(genEager(42));
   var_dump($result);
 
   echo "* blocking async *\n";
-  $result = genBlocking(42)->join();
+  $result = HH\Asio\join(genBlocking(42));
   var_dump($result);
 }
 main();

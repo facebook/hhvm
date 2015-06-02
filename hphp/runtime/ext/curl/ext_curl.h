@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_EXT_CURL_H_
 #define incl_HPHP_EXT_CURL_H_
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -278,6 +278,7 @@ Variant HHVM_FUNCTION(curl_exec, const Resource& ch);
 Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt = 0);
 Variant HHVM_FUNCTION(curl_errno, const Resource& ch);
 Variant HHVM_FUNCTION(curl_error, const Resource& ch);
+String HHVM_FUNCTION(curl_strerror, int code);
 Variant HHVM_FUNCTION(curl_close, const Resource& ch);
 void HHVM_FUNCTION(curl_reset, const Resource& ch);
 Resource HHVM_FUNCTION(curl_multi_init);

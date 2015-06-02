@@ -32,8 +32,21 @@ using namespace vixl;
 
 //////////////////////////////////////////////////////////////////////
 
-TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
-                       ServiceRequest req, const ServiceReqArgVec& argv) {
+size_t reusableStubSize() {
+  // There are 4 instructions after the argument-shuffling, and they're all
+  // single instructions (i.e. not macros). There are up to 4 instructions per
+  // argument (it may take up to 4 instructions to move a 64-bit immediate into
+  // a register).
+  return 4 * vixl::kInstructionSize +
+    (4 * maxArgReg()) * vixl::kInstructionSize;
+}
+
+TCA emitServiceReqWork(CodeBlock& cb,
+                       TCA start,
+                       SRFlags flags,
+                       folly::Optional<FPInvOffset> spOff,
+                       ServiceRequest req,
+                       const ServiceReqArgVec& argv) {
   MacroAssembler a { cb };
 
   const bool persist = flags & SRFlags::Persist;
@@ -43,12 +56,7 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
     maybeCc.emplace(cb, start);
   }
 
-  // There are 4 instructions after the argument-shuffling, and they're all
-  // single instructions (i.e. not macros). There are up to 4 instructions per
-  // argument (it may take up to 4 instructions to move a 64-bit immediate into
-  // a register).
-  constexpr auto kMaxStubSpace = 4 * vixl::kInstructionSize +
-    (4 * maxArgReg()) * vixl::kInstructionSize;
+  const auto kMaxStubSpace = reusableStubSize();
 
   for (auto i = 0; i < argv.size(); ++i) {
     auto reg = serviceReqArgReg(i);
@@ -76,7 +84,7 @@ TCA emitServiceReqWork(CodeBlock& cb, TCA start, SRFlags flags,
   a.     Brk   (0);
 
   if (!persist) {
-    assert(cb.frontier() - start <= kMaxStubSpace);
+    assertx(cb.frontier() - start <= kMaxStubSpace);
     while (cb.frontier() - start < kMaxStubSpace) {
       a. Nop   ();
     }
@@ -95,13 +103,15 @@ void emitBindJ(CodeBlock& cb, CodeBlock& frozen, ConditionCode cc,
 
   mcg->setJmpTransID(toSmash);
 
-  TCA sr = emitEphemeralServiceReq(frozen,
-                                   mcg->getFreeStub(frozen,
-                                                    &mcg->cgFixups()),
-                                   REQ_BIND_JMP,
-                                   toSmash,
-                                   dest.toAtomicInt(),
-                                   TransFlags{}.packed);
+  TCA sr = emitEphemeralServiceReq(
+    frozen,
+    mcg->getFreeStub(frozen, &mcg->cgFixups()),
+    folly::none,
+    REQ_BIND_JMP,
+    toSmash,
+    dest.toAtomicInt(),
+    TransFlags{}.packed
+  );
 
   MacroAssembler a { cb };
   if (cb.base() == frozen.base()) {

@@ -65,20 +65,18 @@ ArrayData* ProxyArray::innerArr(const ArrayData* ad) {
 }
 
 ProxyArray* ProxyArray::Make(ArrayData* ad) {
-  auto ret = static_cast<ProxyArray*>(MM().objMallocLogged(sizeof(ProxyArray)));
+  auto ret = static_cast<ProxyArray*>(MM().objMalloc(sizeof(ProxyArray)));
   ret->m_size            = -1;
-  ret->m_kind            = kProxyKind;
   ret->m_pos             = 0;
-  ret->m_count           = 1;
+  ret->m_hdr.init(HeaderKind::Proxy, 1);
   ret->m_destructor      = ZvalPtrDtor;
   ret->m_ref             = RefData::Make(make_tv<KindOfArray>(ad));
-
   return ret;
 }
 
 void ProxyArray::Release(ArrayData*ad) {
   decRefRef(asProxyArray(ad)->m_ref);
-  MM().objFreeLogged(ad, sizeof(ProxyArray));
+  MM().objFree(ad, sizeof(ProxyArray));
 }
 
 void ProxyArray::reseatable(const ArrayData* oldArr, ArrayData* newArr) {

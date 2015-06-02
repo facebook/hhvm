@@ -16,8 +16,9 @@
 #ifndef incl_HPHP_JIT_UNIQUE_STUBS_H_
 #define incl_HPHP_JIT_UNIQUE_STUBS_H_
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP { namespace jit {
 
@@ -38,17 +39,25 @@ struct UniqueStubs {
   TCA callToExit;
 
   /*
-   * Returning from a function when the ActRec was pushed by the
-   * interpreter.  The return IP on the ActRec will be set to one of
-   * these stubs, so if someone tries to execute a return instruction,
-   * we get a chance to set up state for a POST_INTERP_RET service
-   * request.
+   * Returning from a function when the ActRec was pushed by the interpreter.
+   * The return IP on the ActRec will be set to one of these stubs, so if
+   * someone tries to execute a return instruction, we get a chance to set up
+   * state for a POST_INTERP_RET service request.
    *
-   * Generators need a different stub because the ActRec for a
-   * generator is in the heap.
+   * Generators need a different stub because the ActRec for a generator is in
+   * the heap.
    */
   TCA retHelper;
   TCA genRetHelper;  // version for generators
+
+  /*
+   * Returning from a function when the ActRec was called from jitted code but
+   * had its m_savedRip smashed by the debugger. These stubs call a helper that
+   * looks up the original catch trace from the call, executes it, then executes
+   * a REQ_POST_DEBUGGER_RET.
+   */
+  TCA debuggerRetHelper;
+  TCA debuggerGenRetHelper;
 
   /*
    * Returning from a function where the ActRec was pushed by an
@@ -69,23 +78,34 @@ struct UniqueStubs {
    * Like resumeHelper, but interpret a basic block first to ensure we make
    * forward progress. interpHelper expects the correct value of vmpc to be in
    * the first argument register, and interpHelperSyncedPC expects vmpc to
-   * already be synced. Both stubs will sync rVmSp and rVmFp before
-   * interpreting.
+   * already be synced. Both stubs will sync the sp and fp registers to vmRegs
+   * before interpreting.
    */
   TCA interpHelper;
   TCA interpHelperSyncedPC;
+
+  /*
+   * For every bytecode with the CF flag, a stub will exist here to interpOne
+   * that bytecode, followed by a call to resumeHelper. The stubs expect rVmFp
+   * and rVmSp to be live, and rAsm must contain the offset to the bytecode to
+   * interpret.
+   */
+  std::unordered_map<Op, TCA> interpOneCFHelpers;
+
+  /*
+   * Throw a VMSwitchMode exception. Used in
+   * bytecode.cpp:switchModeForDebugger().
+   */
+  TCA throwSwitchMode;
 
   /*
    * Catch blocks jump to endCatchHelper when they've finished executing. If
    * the unwinder has set state indicating a return address to jump to, this
    * stub will load vmfp and vmsp and jump there. Otherwise, it calls
    * unwindResumeHelper.
-   *
-   * endCatchHelperResumeTC is a shortcut to the part of endCatchHelper that
-   * loads VM regs and jumps to the indicated return address.
    */
   TCA endCatchHelper;
-  TCA endCatchHelperResumeTC;
+  TCA endCatchHelperPast;
 
   /*
    * Helper stubs for doing generic decrefs on a function return.  The
@@ -148,6 +168,29 @@ struct UniqueStubs {
    */
   TCA add(const char* name, TCA start);
 
+  /*
+   * If the given address is within one of the registered stubs, return a
+   * string indicating which stub and how far in it is:
+   * "fcallArrayHelper+0xfa". Otherwise, return a string representation of the
+   * raw address: "0xabcdef".
+   */
+  std::string describe(TCA addr);
+
+ private:
+  struct StubRange {
+    std::string name;
+    TCA start, end;
+
+    bool operator<(const StubRange& other) const {
+      return start < other.start;
+    }
+
+    bool contains(TCA address) const {
+      return start <= address && address < end;
+    }
+  };
+
+  std::vector<StubRange> m_ranges;
 };
 
 //////////////////////////////////////////////////////////////////////

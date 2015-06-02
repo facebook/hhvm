@@ -84,10 +84,10 @@ RegionDescPtr selectMethod(const RegionContext& context) {
       auto const start  = unit->offsetOf(b->start);
       auto const length = numInstrs(b->start, b->end);
       SrcKey sk{context.func, start, context.resumed};
-      auto const rblock = ret->addBlock(sk, length, spOffset);
+      auto const rblock = ret->addBlock(sk, length, spOffset, 0);
       blockMap[b] = rblock->id();
       // flag SP offset as unknown for all but the first block
-      spOffset = FPAbsOffset::invalid();
+      spOffset = FPInvOffset::invalid();
     }
   }
 
@@ -156,7 +156,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
   /*
    * Fill the first block predictions with the live types.
    */
-  assert(!ret->empty());
+  assertx(!ret->empty());
   auto const startSK = ret->start();
   for (auto& lt : context.liveTypes) {
     typedef RegionDesc::Location::Tag LTag;
@@ -167,7 +167,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
     case LTag::Local:
       if (lt.location.localId() < context.func->numParams()) {
         // Only predict objectness, not the specific class type.
-        auto const type = lt.type < Type::Obj ? Type::Obj : lt.type;
+        auto const type = lt.type < TObj ? TObj : lt.type;
         ret->entry()->addPredicted(startSK, {lt.location, type});
       }
       break;

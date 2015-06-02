@@ -41,8 +41,7 @@ ArrayInit::ArrayInit(size_t n, Map, CheckAllocation)
     MM().forceOOM();
     check_request_surprise_unlikely();
   }
-  auto const cmret = computeCapAndMask(n);
-  auto const allocsz = computeAllocBytes(cmret.first, cmret.second);
+  auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
   if (UNLIKELY(allocsz > kMaxSmartSize && MM().preAllocOOM(allocsz))) {
     check_request_surprise_unlikely();
   }

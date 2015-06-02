@@ -150,7 +150,11 @@ struct StructArray : public ArrayData {
     return offsetof(StructArray, m_shape);
   }
 
+  template<class F> void scan(F&) const;
+
 private:
+  template <typename F> friend void scan(const StructArray&, F&);
+
   StructArray(uint32_t size, uint32_t pos, uint32_t count, Shape* shape);
 
   static MixedArray* ToMixedHeader(size_t);

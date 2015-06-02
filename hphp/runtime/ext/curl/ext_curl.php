@@ -46,6 +46,16 @@ function curl_errno(resource $ch): mixed;
 function curl_error(resource $ch): mixed;
 
 /**
+ * Returns a string description of a cURL error code
+ *
+ * @param int $errno - a curl error code, e.g. returned by curl_errno()
+ *
+ * @return string - Returns a string description of a cURL error code
+ */
+<<__Native>>
+function curl_strerror(int $errno): string;
+
+/**
  * Perform a cURL session
  *
  * @param resource $ch -

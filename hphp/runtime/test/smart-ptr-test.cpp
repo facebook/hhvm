@@ -58,6 +58,14 @@ TEST(SmartPtr, Refcounts) {
   }
 }
 
+TEST(SmartPtr, Assignment) {
+  auto ptr = makeSmartPtr<DummyResource>();
+  auto* tmp = ptr.get();
+  ptr = ptr;
+  EXPECT_TRUE(ptr->hasExactlyOneRef());
+  EXPECT_TRUE(ptr.get() == tmp);
+}
+
 TEST(SmartPtr, Operators) {
   {
     SmartPtr<DummyResource> p1;
@@ -165,6 +173,15 @@ TEST(SmartPtr, Casts) {
     EXPECT_EQ(dyn_cast_or_null<ResourceData>(empty), nullptr);
     EXPECT_EQ(dyn_cast_or_null<ResourceData>(emptyFile), nullptr);
   }
+}
+
+TEST(SmartPtr, MoveCasts) {
+  auto res = unsafe_cast_or_null<DummyResource>(makeSmartPtr<DummyResource>());
+  EXPECT_NE(res, nullptr);
+  auto res2 = dyn_cast<DummyResource>(makeSmartPtr<DummyResource>());
+  EXPECT_NE(res2, nullptr);
+  auto res3 = dyn_cast<DummyResource2>(makeSmartPtr<DummyResource>());
+  EXPECT_EQ(res3, nullptr);
 }
 
 }

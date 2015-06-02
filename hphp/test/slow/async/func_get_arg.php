@@ -18,5 +18,5 @@ async function arg() {
   }
 }
 
-num("a", "b", "c")->join();
-arg("e", "f")->join();
+HH\Asio\join(num("a", "b", "c"));
+HH\Asio\join(arg("e", "f"));

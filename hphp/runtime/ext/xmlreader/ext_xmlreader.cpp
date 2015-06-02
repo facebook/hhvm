@@ -112,6 +112,10 @@ XMLReader::~XMLReader() {
 
 void XMLReader::close() {
   SYNC_VM_REGS_SCOPED();
+  if (m_stream) {
+    m_stream->close();
+    m_stream = nullptr;
+  }
   if (m_ptr) {
     xmlFreeTextReader(m_ptr);
     m_ptr = nullptr;
@@ -149,16 +153,18 @@ bool HHVM_METHOD(XMLReader, open,
 
   if (!valid_file.empty()) {
     // Manually create the IO context to support custom stream wrappers.
-    auto stream = File::Open(valid_file, "rb");
-    if (!stream->isInvalid()) {
+    data->m_stream = File::Open(valid_file, "rb");
+    if (!data->m_stream->isInvalid()) {
+      // The XML context is owned by the native data attached to 'this_'.
+      // The File is also owned by the native data so it does not need
+      // to be cleaned up by an XML callback.  The libxml_streams_IO_nop_close
+      // callback does nothing.
       reader = xmlReaderForIO(libxml_streams_IO_read,
-                              libxml_streams_IO_close,
-                              stream.get(),
+                              libxml_streams_IO_nop_close,
+                              &data->m_stream,
                               valid_file.data(),
                               str_encoding.data(),
                               options);
-      // The xmlTextReaderPtr owns a reference to stream.
-      if (reader) stream.get()->incRefCount();
     }
   }
 
@@ -626,7 +632,7 @@ static XMLPropertyAccessorMap xmlreader_properties_map
 ((XMLPropertyAccessor*)xmlreader_properties);
 
 Variant HHVM_METHOD(XMLReader, __get,
-                    Variant name) {
+                    const Variant& name) {
   auto* data = Native::data<XMLReader>(this_);
   const xmlChar *retchar = nullptr;
   int retint = 0;
@@ -675,20 +681,18 @@ Variant HHVM_METHOD(XMLReader, __get,
 Variant HHVM_METHOD(XMLReader, expand,
                     const Variant& basenode /* = null */) {
   auto* data = Native::data<XMLReader>(this_);
-  Object doc;
+  SmartPtr<XMLDocumentData> doc;
   xmlDocPtr docp = nullptr;
   SYNC_VM_REGS_SCOPED();
 
   if (!basenode.isNull()) {
-    DOMNode *dombasenode = toDOMNode(basenode.toObject().get());
+    auto dombasenode = Native::data<DOMNode>(basenode.toObject().get());
     doc = dombasenode->doc();
-    docp = (xmlDocPtr) toDOMNode(doc.get())->m_node;
+    docp = doc->docp();
     if (docp == nullptr) {
       raise_warning("Invalid State Error");
       return false;
     }
-  } else {
-    doc = DOMDocument::newInstance();
   }
 
   if (data->m_ptr) {
@@ -702,7 +706,7 @@ Variant HHVM_METHOD(XMLReader, expand,
         raise_notice("Cannot expand this node type");
         return false;
       } else {
-        return php_dom_create_object(nodec, doc, false);
+        return php_dom_create_object(nodec, doc);
       }
     }
   }

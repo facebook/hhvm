@@ -115,7 +115,7 @@ class LdapLink : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(LdapLink)
 
-  LdapLink() : link(NULL) {}
+  LdapLink() {}
   ~LdapLink() { closeImpl(); }
 
   void close() {
@@ -124,26 +124,49 @@ public:
   }
 
 private:
-  void closeImpl() {
-    if (link) {
-      ldap_unbind_s(link);
-      link = NULL;
-      LDAPG(num_links)--;
-    }
-  }
+  void closeImpl();
 
 public:
   CLASSNAME_IS("ldap link");
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
-  LDAP *link;
+  LDAP *link{nullptr};
   Variant rebindproc;
 };
+
+namespace {
+
+SmartPtr<LdapLink> getLdapLinkFromToken(void* userData) {
+  auto token = reinterpret_cast<MemoryManager::RootId>(userData);
+  return MM().lookupRoot<LdapLink>(token);
+}
+
+void* getLdapLinkToken(const SmartPtr<LdapLink>& link) {
+  return reinterpret_cast<void*>(MM().addRoot(link));
+}
+
+// Note: a raw pointer is ok here since clearLdapLink is being
+// called from ~LdapLink which might be getting invoked from
+// sweep and we can't create any new SmartPtrs at the point.
+void clearLdapLink(const LdapLink* link) {
+  MM().removeRoot(link);
+}
+
+}
 
 void LdapLink::sweep() {
   closeImpl();
   rebindproc.releaseForSweep();
+}
+
+void LdapLink::closeImpl() {
+  if (link) {
+    ldap_unbind_s(link);
+    link = nullptr;
+    LDAPG(num_links)--;
+    clearLdapLink(this);
+  }
 }
 
 class LdapResult : public SweepableResourceData {
@@ -549,17 +572,17 @@ cleanup:
 
 static int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req,
                              ber_int_t msgid, void *params) {
-  LdapLink *ld = (LdapLink*)params;
+  auto ld = getLdapLinkFromToken(params);
 
   /* link exists and callback set? */
-  if (ld == NULL || ld->rebindproc.isNull()) {
+  if (!ld || ld->rebindproc.isNull()) {
     raise_warning("Link not found or no callback set");
     return LDAP_OTHER;
   }
 
   /* callback */
   Variant ret = vm_call_user_func
-    (ld->rebindproc, make_packed_array(Resource(ld), String(url, CopyString)));
+    (ld->rebindproc, make_packed_array(Variant(ld), String(url, CopyString)));
   return ret.toInt64();
 }
 
@@ -769,7 +792,9 @@ bool HHVM_FUNCTION(ldap_set_rebind_proc,
 
   /* register rebind procedure */
   if (ld->rebindproc.isNull()) {
-    ldap_set_rebind_proc(ld->link, _ldap_rebind_proc, (void *)link.get());
+    ldap_set_rebind_proc(ld->link,
+                         _ldap_rebind_proc,
+                         getLdapLinkToken(ld));
   } else {
     ld->rebindproc.unset();
   }
@@ -807,10 +832,8 @@ bool HHVM_FUNCTION(ldap_start_tls,
   return true;
 }
 
-bool HHVM_FUNCTION(ldap_unbind,
-                   const Resource& link) {
-  auto ld = cast<LdapLink>(link);
-  ld->close();
+bool HHVM_FUNCTION(ldap_unbind, const Resource& link) {
+  cast<LdapLink>(link)->close();
   return true;
 }
 

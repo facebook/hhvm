@@ -66,21 +66,8 @@ struct IRInstruction;
  * instruction executes (before any of its other effects), it becomes
  * semantically illegal for any part of the program to read from those
  * locations again (without writing to them first).  This is used for the
- * ReturnHook to prevent uses of the stack and frame, and eventually should
- * have a use for killing stack slots below the re-entry depth for potentially
- * re-entering instructions (but is not used this way at the time of this
- * writing).
- *
- * A final note about instructions that can re-enter the VM:
- *
- *   If an instruction can re-enter, it can generally both read and write to
- *   the eval stack below some depth.  However, it can only legally read those
- *   slots if it writes them first, so we only need to include them in the
- *   may-store set, not the may-load set.  This is sufficient to ensure those
- *   stack locations don't have upward-exposed uses through a potentially
- *   re-entering instruction, and also to ensure we don't consider those
- *   locations available for load elimination after the instruction.
- *
+ * ReturnHook to prevent uses of the stack and frame, and for killing stack
+ * slots below the re-entry depth for potentially re-entering instructions.
  */
 struct GeneralEffects   { AliasClass loads;
                           AliasClass stores;
@@ -100,40 +87,29 @@ struct PureLoad       { AliasClass src; };
  * any other work.  Instructions with these memory effects can be removed if we
  * know the value being stored does not change the value of the location, or if
  * we know the location can never be loaded from again.
- *
- * The NT variation means it is not storing a type tag.
  */
 struct PureStore    { AliasClass dst; SSATmp* value; };
-struct PureStoreNT  { AliasClass dst; SSATmp* value; };
 
 /*
  * Spilling pre-live ActRecs are somewhat unusual, but effectively still just
  * pure stores.  They store to a range of stack slots, and don't store a PHP
- * value, so they get their own branch of the union.  The `dst' class is the
- * entire stack range the instruction stores to, and the `ctx' class is a
- * subclass of `dst' that is the stack slot where it'll store the context for
- * the pre-live ActRec.
+ * value, so they get their own branch of the union.
+ *
+ * The `stk' class is the entire stack range the instruction stores to, and the
+ * `ctx' class is a subclass of `stk' that is the stack slot where it'll store
+ * the context for the pre-live ActRec.
+ *
+ * The `stk' range should be interpreted as an exact AliasClass, not an upper
+ * bound: it is guaranteed to be kNumActRecCells in size---no bigger than the
+ * actual range of stack slots a SpillFrame instruction affects.
  */
-struct PureSpillFrame { AliasClass dst; AliasClass ctx; };
-
-/*
- * Iterator instructions are special enough that they just have their own
- * top-level memory effect type.  In general, they can both read and write to
- * the relevant locals, and can re-enter the VM and read and write anything on
- * the heap.  The `kills' set is an AliasClass that is killed by virtue of the
- * potential VM re-entry (i.e. the eval stack below some depth).
- */
-struct IterEffects    { SSATmp* fp; uint32_t id; AliasClass kills; };
-struct IterEffects2   { SSATmp* fp;
-                        uint32_t id1;
-                        uint32_t id2;
-                        AliasClass kills; };
+struct PureSpillFrame { AliasClass stk; AliasClass ctx; };
 
 /*
  * Calls are somewhat special enough that they get a top-level effect.
  *
  * The `destroys_locals' flag indicates whether the call can change locals in
- * the calling frame (e.g. extract() or parse_str().)
+ * the calling frame (e.g. extract() or parse_str(), when called with FCall).
  *
  * The `kills' set are locations that cannot be read by this instruction unless
  * it writes to them first, and which it generally may write to.  (This is used
@@ -144,6 +120,9 @@ struct IterEffects2   { SSATmp* fp;
  * (e.g. debug_backtrace, or pointers to stack slots to a CallBuiltin).
  * Locations in any intersection between `stack' and `kills' may be assumed to
  * be killed.
+ *
+ * Note that calls that have been weakened to CallBuiltin use GeneralEffects,
+ * not CallEffects.
  */
 struct CallEffects    { bool destroys_locals;
                         AliasClass kills;
@@ -180,15 +159,6 @@ struct ReturnEffects  { AliasClass kills; };
 struct ExitEffects    { AliasClass live; AliasClass kills; };
 
 /*
- * InterpOne instructions carry a bunch of information about how they may
- * affect locals.  It's special enough that we just pass it through.
- *
- * We don't make use of it in consumers of this module yet, except that the
- * `kills' set can't have upward exposed uses.
- */
-struct InterpOneEffects { AliasClass kills; };
-
-/*
  * "Irrelevant" effects means it doesn't do anything we currently care about
  * for consumers of this module.  If you want to care about a new kind of
  * memory effect, you get to re-audit everything---have fun. :)
@@ -204,14 +174,10 @@ struct UnknownEffects {};
 using MemEffects = boost::variant< GeneralEffects
                                  , PureLoad
                                  , PureStore
-                                 , PureStoreNT
                                  , PureSpillFrame
-                                 , IterEffects
-                                 , IterEffects2
                                  , CallEffects
                                  , ReturnEffects
                                  , ExitEffects
-                                 , InterpOneEffects
                                  , IrrelevantEffects
                                  , UnknownEffects
                                  >;
@@ -221,12 +187,6 @@ using MemEffects = boost::variant< GeneralEffects
 /*
  * Return information about the kinds of memory effects an instruction may
  * have.  See the above branches of MemEffects for more information.
- *
- * Important note: right now, some of the branches of MemEffects are relatively
- * specific (e.g. IterEffects) because of instructions that have odd shapes.
- * This may eventually go away, but for now this means it's very important that
- * users of this module be aware of potentially "suprising" effects of some of
- * those instructions when runtime flags like EnableArgsInBacktraces are set.
  */
 MemEffects memory_effects(const IRInstruction&);
 
@@ -247,7 +207,7 @@ std::string show(MemEffects);
 /*
  * Get the frame from a DefInlineFP.
  *
- * Returns: an (uncanonicalized) AliasClass containing the stack slots
+ * Returns: an (uncanonicalized, precise) AliasClass containing the stack slots
  * corresponding to the ActRec that is being converted from a pre-live to a
  * live ActRec by this instruction.
  *

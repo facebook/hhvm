@@ -16,10 +16,14 @@ import types
 #------------------------------------------------------------------------------
 # Memoization.
 
+_all_caches = []
+
 def memoized(func):
     """Simple memoization decorator that ignores **kwargs."""
+    global _all_caches
 
     cache = {}
+    _all_caches.append(cache)
 
     @functools.wraps(func)
     def memoizer(*args):
@@ -29,6 +33,13 @@ def memoized(func):
             cache[args] = func(*args)
         return cache[args]
     return memoizer
+
+
+def invalidate_all_memoizers():
+    global _all_caches
+
+    for cache in _all_caches:
+        cache.clear()
 
 
 #------------------------------------------------------------------------------
@@ -42,6 +53,10 @@ def gdbprint(val, ty=None):
     if ty is None:
         ty = val.type
     gdb.execute('print (%s)%s' % (str(ty), str(val)))
+
+
+def plural_suffix(num, suffix='s'):
+    return '' if num == 1 else suffix
 
 
 #------------------------------------------------------------------------------
@@ -175,12 +190,23 @@ def T(name):
     return gdb.lookup_type(name)
 
 @memoized
-def V(name):
-    return gdb.lookup_symbol(name)[0].value()
-
-@memoized
 def K(name):
     return gdb.lookup_global_symbol(name).value()
+
+@memoized
+def V(name):
+    return TL(name)
+
+@memoized
+def nullptr():
+    return gdb.Value(0).cast(T('void').pointer())
+
+
+def TL(name):
+    try:
+        return gdb.lookup_symbol(name)[0].value()
+    except gdb.error:
+        return gdb.lookup_symbol(name)[0].value(gdb.selected_frame())
 
 
 #------------------------------------------------------------------------------
@@ -206,7 +232,7 @@ def rawptr(val):
     elif t.code == gdb.TYPE_CODE_REF:
         return val.referenced_type().address
 
-    name = template_type(rawtype(val.type))
+    name = template_type(t)
 
     if name == 'std::unique_ptr':
         return val['_M_t']['_M_head_impl']
@@ -214,7 +240,7 @@ def rawptr(val):
     if name == 'HPHP::default_ptr':
         return val['m_p']
 
-    if name == 'HPHP::SmartPtr' or name == 'HPHP::AtomicSmartPtr':
+    if name == 'HPHP::SmartPtr' or name == 'HPHP::AtomicSharedPtr':
         return val['m_px']
 
     if name == 'HPHP::LowPtr' or name == 'HPHP::LowPtrImpl':

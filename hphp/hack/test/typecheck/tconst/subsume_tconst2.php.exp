@@ -1,0 +1,12 @@
+File "subsume_tconst2.php", line 7, characters 7-7:
+This object is of type C (Typing[4110])
+File "subsume_tconst2.php", line 7, characters 20-20:
+It is incompatible with this object of type I
+because some declarations are incompatible.
+Read the following to see why:
+File "subsume_tconst2.php", line 4, characters 23-23:
+Unable to satisfy constraint on this type constant
+File "subsume_tconst2.php", line 4, characters 28-35:
+This is an array key (int/string)
+File "subsume_tconst2.php", line 8, characters 18-22:
+It is incompatible with a mixed value

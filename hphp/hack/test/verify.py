@@ -8,12 +8,14 @@ import argparse
 import os.path
 import subprocess
 import sys
+import difflib
 from concurrent.futures import ThreadPoolExecutor
 from glob import glob
 from itertools import compress
 from operator import not_
 
 verbose = False
+dump_on_failure = False
 
 def run_test_program(files, program, out_ext, get_flags):
     """
@@ -50,8 +52,31 @@ def check_results(fnames, out_ext, expect_ext):
         print("Failures:\n" + " ".join(failures))
         for f in failures:
             print("mv {0}{1} {0}{2}".format(f, out_ext, expect_ext))
+        if dump_on_failure:
+            for f in failures:
+                expected = get_file_content(f, expect_ext)
+                actual = get_file_content(f, out_ext)
+                diff = difflib.ndiff(
+                    expected.splitlines(1),
+                    actual.splitlines(1))
+                print("Details for the failed test %s:" % f)
+                print("\n>>>>>  Expected output  >>>>>>\n")
+                print(expected)
+                print("\n=====   Actual output   ======\n")
+                print(actual)
+                print("\n<<<<< End Actual output <<<<<<<")
+                print("\n>>>>>       Diff        >>>>>>>\n")
+                print(''.join(diff))
+                print("\n<<<<<     End Diff      <<<<<<<\n")
         print("Failed %d out of %d tests." % (len(failures), total))
     return success
+
+def get_file_content(fname, ext):
+    try:
+        with open(fname + ext, 'r') as f:
+            return f.read()
+    except FileNotFoundError:
+        return "< !!! Exception: file not found !!! >"
 
 def check_result(fname, out_ext, expect_ext):
     try:
@@ -113,6 +138,8 @@ if __name__ == '__main__':
     parser.add_argument('--disabled-extension', type=str,
             default='.no_typecheck')
     parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--diff', action='store_true',
+                       help='On test failure, show the content of the files and a diff')
     parser.add_argument('--flags', nargs=argparse.REMAINDER)
     parser.epilog = "Unless --flags is passed as an argument, "\
                     "%s looks for a file named HH_FLAGS in the same directory" \
@@ -122,6 +149,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     verbose = args.verbose
+    dump_on_failure = args.diff
 
     if not os.path.isfile(args.program):
         raise Exception('Could not find program at %s' % args.program)

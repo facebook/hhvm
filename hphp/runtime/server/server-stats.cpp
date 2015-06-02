@@ -37,10 +37,10 @@
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/hardware-counter.h"
 #include "hphp/util/process.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/text-util.h"
-#include "hphp/runtime/base/hardware-counter.h"
 #include "hphp/runtime/server/writer.h"
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
@@ -833,7 +833,7 @@ void ServerStats::startRequest(const char *url, const char *clientIP,
                                const char *vhost) {
   ++m_threadStatus.m_requestCount;
 
-  m_threadStatus.m_mm = ThreadInfo::s_threadInfo->m_mm;
+  m_threadStatus.m_mm = &MM();
   gettimeofday(&m_threadStatus.m_start, 0);
   memset(&m_threadStatus.m_done, 0, sizeof(m_threadStatus.m_done));
   m_threadStatus.m_mode = ThreadMode::Processing;

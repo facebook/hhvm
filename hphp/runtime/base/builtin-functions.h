@@ -22,21 +22,7 @@
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/util/functional.h"
-
-#if defined(__APPLE__) || defined(__USE_BSD)
-/**
- * We don't actually use param.h in this file,
- * but other files which use us do, and we want
- * to enforce clearing of the isset macro from
- * that header by handling the header now
- * and wiping it out.
- */
-# include <sys/param.h>
-#include <algorithm>
-# ifdef isset
-#  undef isset
-# endif
-#endif
+#include "hphp/util/portability.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -170,8 +156,8 @@ void handle_destructor_exception(const char* situation = "Destructor");
  * Don't use in new code.
  */
 void throw_bad_type_exception(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
-void throw_expected_array_exception();
-void throw_expected_array_or_collection_exception();
+void throw_expected_array_exception(const char* fn = nullptr);
+void throw_expected_array_or_collection_exception(const char* fn = nullptr);
 void throw_invalid_argument(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2)
    __attribute__((__cold__));
 

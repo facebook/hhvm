@@ -1,0 +1,11 @@
+toString: 0
+array(0) {
+}
+dtor: 0
+toString: 2
+array(1) {
+  [0]=>
+  string(5) "asdaa"
+}
+dtor: 2
+asdaa

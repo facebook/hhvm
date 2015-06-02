@@ -20,9 +20,25 @@ type visibility =
 
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
+
+   Types exists in two phases. Phase one is 'decl', meaning it is a type that
+   was declared in user code. Phase two is 'locl', meaning it is a type that is
+   inferred via local inference.
 *)
-type ty = Reason.t * ty_
-and ty_ =
+(* create private types to represent the different type phases *)
+type decl = private DeclPhase
+type locl = private LoclPhase
+
+type 'phase ty = Reason.t * 'phase ty_
+and _ ty_ =
+  (*========== Following Types Exist Only in the Declared Phase ==========*)
+  (* The late static bound type of a class *)
+  | Tthis : decl ty_
+
+  (* Either an object type or a type alias, ty list are the arguments *)
+  | Tapply : Nast.sid * decl ty list -> decl ty_
+
+  (*========== Following Types Exist in Both Phases ==========*)
   (* "Any" is the type of a variable with a missing annotation, and "mixed" is
    * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
    * Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -54,36 +70,49 @@ and ty_ =
    * Tarray (Some ty1, Some ty2) => "array<ty1, ty2>"
    * Tarray (None, Some ty)      => [invalid]
    *)
-  | Tarray        of ty option * ty option
+  | Tarray : 'phase ty option * 'phase ty option -> 'phase ty_
 
   (* The type of a generic inside a function using that generic, with an
-   * optional "as" constraint. For example:
+   * optional "as" or "super" constraint. For example:
    *
    * function f<T as int>(T $x) {
    *   // ...
    * }
    *
-   * The type of $x inside the body of f() is Tgeneric("T", Some(Tprim Tint))
+   * The type of $x inside f() is
+   * Tgeneric("T", Some(Constraint_as, Tprim Tint))
    *)
-  | Tgeneric      of string * ty option
+  | Tgeneric : string * (Ast.constraint_kind * 'phase ty) option -> 'phase ty_
 
   (* Nullable, called "option" in the ML parlance. *)
-  | Toption       of ty
+  | Toption : 'phase ty -> 'phase ty_
 
   (* All the primitive types: int, string, void, etc. *)
-  | Tprim         of Nast.tprim
+  | Tprim : Nast.tprim -> 'phase ty_
+
+  (* A wrapper around fun_type, which contains the full type information for a
+   * function, method, lambda, etc. Note that lambdas have an additional layer
+   * of indirection before you get to Tfun -- see Tanon below. *)
+  | Tfun : 'phase fun_type -> 'phase ty_
+
+
+  (* Tuple, with ordered list of the types of the elements of the tuple. *)
+  | Ttuple : 'phase ty list -> 'phase ty_
+
+  (* Name of class, name of type const, remaining names of type consts *)
+  | Taccess : 'phase taccess_type -> 'phase ty_
+
+  (* Shape and types of each of the arms. *)
+  | Tshape : 'phase ty Nast.ShapeMap.t -> 'phase ty_
+
+  (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
 
   (* A type variable (not to be confused with a type parameter). This is the
    * core of how type inference works. If you aren't familiar with it, a
    * suitable explanation couldn't possibly fit here; terms to google for
    * include "Hindley-Milner type inference", "unification", and "algorithm W".
    *)
-  | Tvar          of Ident.t
-
-  (* A wrapper around fun_type, which contains the full type information for a
-   * function, method, lambda, etc. Note that lambdas have an additional layer
-   * of indirection before you get to Tfun -- see Tanon below. *)
-  | Tfun          of fun_type
+  | Tvar : Ident.t -> locl ty_
 
   (* The type of an opaque type alias ("newtype"), outside of the file where it
    * was defined. They are "opaque", which means that they only unify with
@@ -98,21 +127,12 @@ and ty_ =
    *
    * Which means that my_type is abstract, but is subtype of int as well.
    *)
-  | Tabstract     of Nast.sid * ty list * ty option
-
-  (* Object type, ty list are the arguments *)
-  | Tapply        of Nast.sid * ty list
-
-  (* Tuple, with ordered list of the types of the elements of the tuple. *)
-  | Ttuple        of ty list
-
-  (* Name of class, name of type const, remaining names of type consts *)
-  | Taccess       of taccess_type
+  | Tabstract : Nast.sid * locl ty list * locl ty option -> locl ty_
 
   (* An anonymous function, including the fun arity, and the identifier to
    * type the body of the function. (The actual closure is stored in
    * Typing_env.env.genv.anons) *)
-  | Tanon         of fun_arity * Ident.t
+  | Tanon : locl fun_arity * Ident.t -> locl ty_
 
   (* This is a kinda-union-type we use in order to defer picking which common
    * ancestor for a type we should use until we hit a type annotation.
@@ -160,7 +180,7 @@ and ty_ =
    * a contravariant position, we must collapse it down to whatever is annotated
    * right then, in order to be sound.
    *)
-  | Tunresolved        of ty list
+  | Tunresolved : locl ty list -> locl ty_
 
   (* Tobject is an object type compatible with all objects. This type is also
    * compatible with some string operations (since a class might implement
@@ -171,39 +191,39 @@ and ty_ =
    * Tobject is currently used to type code like:
    *   ../test/typecheck/return_unknown_class.php
    *)
-  | Tobject
+  | Tobject : locl ty_
 
-  (* Shape and types of each of the arms. *)
-  | Tshape of ty Nast.ShapeMap.t
+  (* An instance of a class or interface, ty list are the arguments *)
+  | Tclass : Nast.sid * locl ty list -> locl ty_
 
-and taccess_type = ty * Nast.sid list
+and 'phase taccess_type = 'phase ty * Nast.sid list
 
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)
-and fun_type = {
+and 'phase fun_type = {
   ft_pos       : Pos.t;
-  ft_unsafe    : bool            ;
   ft_deprecated: string option   ;
   ft_abstract  : bool            ;
-  ft_arity     : fun_arity       ;
+  ft_arity     : 'phase fun_arity    ;
   ft_tparams   : tparam list     ;
-  ft_params    : fun_params      ;
-  ft_ret       : ty              ;
+  ft_params    : 'phase fun_params   ;
+  ft_ret       : 'phase ty           ;
 }
 
 (* Arity information for a fun_type; indicating the minimum number of
  * args expected by the function and the maximum number of args for
  * standard, non-variadic functions or the type of variadic argument taken *)
-and fun_arity =
+and 'phase fun_arity =
   | Fstandard of int * int (* min ; max *)
   (* PHP5.6-style ...$args finishes the func declaration *)
-  | Fvariadic of int * fun_param (* min ; variadic param type *)
+  | Fvariadic of int * 'phase fun_param (* min ; variadic param type *)
   (* HH-style ... anonymous variadic arg; body presumably uses func_get_args *)
   | Fellipsis of int       (* min *)
 
-and fun_param = (string option * ty)
 
-and fun_params = fun_param list
+and 'phase fun_param = (string option * 'phase ty)
+
+and 'phase fun_params = 'phase fun_param list
 
 and class_elt = {
   ce_final       : bool;
@@ -216,7 +236,7 @@ and class_elt = {
      synthesized elts. *)
   ce_synthesized : bool;
   ce_visibility  : visibility;
-  ce_type        : ty;
+  ce_type        : decl ty;
   (* identifies the class from which this elt originates *)
   ce_origin      : string;
 }
@@ -230,25 +250,25 @@ and class_type = {
   tc_final               : bool;
   (* When a class is abstract (or in a trait) the initialization of
    * a protected member can be delayed *)
-  tc_members_init        : SSet.t;
+  tc_deferred_init_members : SSet.t;
   tc_kind                : Ast.class_kind;
-  tc_name                : string    ;
+  tc_name                : string ;
   tc_pos                 : Pos.t ;
-  tc_tparams             : tparam list   ;
+  tc_tparams             : tparam list ;
   tc_consts              : class_elt SMap.t;
   tc_typeconsts          : typeconst_type SMap.t;
-  tc_cvars               : class_elt SMap.t;
-  tc_scvars              : class_elt SMap.t;
+  tc_props               : class_elt SMap.t;
+  tc_sprops              : class_elt SMap.t;
   tc_methods             : class_elt SMap.t;
   tc_smethods            : class_elt SMap.t;
   tc_construct           : class_elt option * bool;
   (* This includes all the classes, interfaces and traits this class is
    * using. *)
-  tc_ancestors           : ty SMap.t ;
+  tc_ancestors           : decl ty SMap.t ;
   (* Ancestors that have to be checked when the class becomes
    * concrete. *)
-  tc_ancestors_checked_when_concrete  : ty SMap.t;
-  tc_req_ancestors       : ty SMap.t;
+  tc_ancestors_checked_when_concrete  : decl ty SMap.t;
+  tc_req_ancestors       : decl ty SMap.t;
   tc_req_ancestors_extends : SSet.t; (* the extends of req_ancestors *)
   tc_extends             : SSet.t;
   tc_user_attributes     : Nast.user_attribute list;
@@ -257,17 +277,30 @@ and class_type = {
 
 and typeconst_type = {
   ttc_name        : Nast.sid;
-  ttc_constraint  : ty option;
-  ttc_type        : ty option;
+  ttc_constraint  : decl ty option;
+  ttc_type        : decl ty option;
   ttc_origin      : string;
 }
 
 and enum_type = {
-  te_base       : ty;
-  te_constraint : ty option;
+  te_base       : decl ty;
+  te_constraint : decl ty option;
 }
 
-and tparam = Ast.variance * Ast.id * ty option
+and tparam = Ast.variance * Ast.id * (Ast.constraint_kind * decl ty) option
+
+type phase_ty =
+  | DeclTy of decl ty
+  | LoclTy of locl ty
+
+(* Tracks information about how a type was expanded *)
+type expand_env = {
+  typedef_expansions : (Pos.t * string) list;
+  substs : locl ty SMap.t;
+  this_ty : locl ty;
+}
+
+type ety = expand_env * locl ty
 
 (* The identifier for this *)
 let this = Ident.make "$this"

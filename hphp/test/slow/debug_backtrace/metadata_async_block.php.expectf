@@ -1,0 +1,108 @@
+array(4) {
+  [0]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(10)
+    ["function"]=>
+    string(3) "bar"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      int(0)
+    }
+  }
+  [1]=>
+  array(2) {
+    ["function"]=>
+    string(3) "foo"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      int(0)
+    }
+  }
+  [2]=>
+  array(4) {
+    ["function"]=>
+    string(4) "join"
+    ["class"]=>
+    string(13) "HH\WaitHandle"
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [3]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(13)
+    ["function"]=>
+    string(12) "HH\Asio\join"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      object(HH\AsyncFunctionWaitHandle)#%d (0) {
+      }
+    }
+  }
+}
+array(4) {
+  [0]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(10)
+    ["function"]=>
+    string(3) "bar"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      int(65536)
+    }
+  }
+  [1]=>
+  array(3) {
+    ["function"]=>
+    string(3) "foo"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      int(65536)
+    }
+    ["metadata"]=>
+    string(8) "I am foo"
+  }
+  [2]=>
+  array(4) {
+    ["function"]=>
+    string(4) "join"
+    ["class"]=>
+    string(13) "HH\WaitHandle"
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [3]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(14)
+    ["function"]=>
+    string(12) "HH\Asio\join"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      object(HH\AsyncFunctionWaitHandle)#%d (0) {
+      }
+    }
+  }
+}

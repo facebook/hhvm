@@ -1,0 +1,6 @@
+logger 0 constructing
+about to call func
+logger 1 constructing
+
+Fatal error: Call to undefined method logger::foo() in %s/test/slow/object_method/fpush-leaks.php on line 21
+logger 0 destructing

@@ -14,10 +14,10 @@ function f(int $x): int {
 }
 
 function test(): void {
-  $f = function ($x) {
+  $f = function($x) {
     return $x;
   };
-  $f = function ($x) use ($f) {
+  $f = function($x) use ($f) {
     return call_user_func($f, $x);
   };
   call_user_func(fun(f), 0);

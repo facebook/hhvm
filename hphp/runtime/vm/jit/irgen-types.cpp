@@ -36,7 +36,7 @@ const StaticString s_WaitHandle("HH\\WaitHandle");
 
 //////////////////////////////////////////////////////////////////////
 
-void verifyTypeImpl(HTS& env, int32_t const id) {
+void verifyTypeImpl(IRGS& env, int32_t const id) {
   const bool isReturnType = (id == HPHP::TypeConstraint::ReturnId);
   if (isReturnType && !RuntimeOption::EvalCheckReturnTypeHints) return;
 
@@ -48,10 +48,10 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
   auto const ldPMExit = makePseudoMainExit(env);
   auto val = isReturnType ? topR(env)
                           : ldLoc(env, id, ldPMExit, DataTypeSpecific);
-  assert(val->type() <= Type::Cell || val->type() <= Type::BoxedCell);
+  assertx(val->type() <= TCell || val->type() <= TBoxedCell);
 
   auto const valType = [&]() -> Type {
-    if (val->type() <= Type::Cell) return val->type();
+    if (val->type() <= TCell) return val->type();
     if (isReturnType) PUNT(VerifyReturnTypeBoxed);
     auto const pred = env.irb->predictedInnerType(id);
     gen(env, CheckRefInner, pred, makeExit(env), val);
@@ -60,26 +60,14 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
   }();
 
   if (!valType.isKnownDataType()) {
-    if (!isReturnType) {
-      // This is supposed to be impossible, but it does happen in a rare case
-      // with the legacy region selector. Until it's figured out, punt in
-      // release builds. t3412704
-      assert_log(
-        false,
-        [&] {
-          return folly::format("Bad type {} for local {}:\n\n{}\n",
-                               valType, id, env.irb->unit().toString()).str();
-        }
-      );
-    }
     interpOne(env, 0);
     return;
   }
 
-  if (tc.isNullable() && valType <= Type::InitNull) return;
+  if (tc.isNullable() && valType <= TInitNull) return;
 
   if (!isReturnType && tc.isArray() && !tc.isSoft() && !func->mustBeRef(id) &&
-      valType <= Type::Obj) {
+      valType <= TObj) {
     PUNT(VerifyParamType-collectionToArray);
     return;
   }
@@ -105,18 +93,27 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
     case AnnotAction::ObjectCheck:
       break;
   }
-  assert(result == AnnotAction::ObjectCheck);
+  assertx(result == AnnotAction::ObjectCheck);
 
-  if (!(valType <= Type::Obj)) {
+  if (!(valType <= TObj)) {
     // For RepoAuthoritative mode, if tc is a type alias we can optimize
     // in some cases
     if (tc.isObject() && RuntimeOption::RepoAuthoritative) {
       auto const td = tc.namedEntity()->getCachedTypeAlias();
       if (tc.namedEntity()->isPersistentTypeAlias() && td &&
-          ((td->nullable && valType <= Type::Null) ||
+          ((td->nullable && valType <= TNull) ||
            annotCompat(valType.toDataType(), td->type,
              td->klass ? td->klass->name() : nullptr) == AnnotAction::Pass)) {
-        env.irb->constrainValue(val, TypeConstraint(DataTypeSpecific));
+        env.irb->constrainValue(val, DataTypeSpecific);
+        return;
+      }
+      auto cachedClass = tc.namedEntity()->getCachedClass();
+      if (cachedClass && classHasPersistentRDS(cachedClass) &&
+          cachedClass->enumBaseTy() &&
+          annotCompat(valType.toDataType(),
+                      dataTypeToAnnotType(*cachedClass->enumBaseTy()),
+                      nullptr) == AnnotAction::Pass) {
+        env.irb->constrainValue(val, DataTypeSpecific);
         return;
       }
     }
@@ -129,13 +126,21 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
   const StringData* clsName;
   const Class* knownConstraint = nullptr;
   if (tc.isObject()) {
-    clsName = tc.typeName();
-    knownConstraint = Unit::lookupClass(clsName);
+    auto const td = tc.namedEntity()->getCachedTypeAlias();
+    if (RuntimeOption::RepoAuthoritative && td &&
+        tc.namedEntity()->isPersistentTypeAlias() &&
+        td->klass) {
+      clsName = td->klass->name();
+      knownConstraint = td->klass;
+    } else {
+      clsName = tc.typeName();
+      knownConstraint = Unit::lookupClass(clsName);
+    }
   } else {
     if (tc.isSelf()) {
       tc.selfToClass(curFunc(env), &knownConstraint);
     } else {
-      assert(tc.isParent());
+      assertx(tc.isParent());
       tc.parentToClass(curFunc(env), &knownConstraint);
     }
     if (!knownConstraint) {
@@ -150,7 +155,7 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
     }
     clsName = knownConstraint->preClass()->name();
   }
-  assert(clsName);
+  assertx(clsName);
 
   // We can only burn in the Class* if it's unique or in the
   // inheritance hierarchy of our context. It's ok if the class isn't
@@ -161,7 +166,7 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
 
   // For "self" and "parent", knownConstraint should always be
   // non-null at this point
-  assert(IMPLIES(tc.isSelf() || tc.isParent(), knownConstraint != nullptr));
+  assertx(IMPLIES(tc.isSelf() || tc.isParent(), knownConstraint != nullptr));
 
   /*
    * If the local is a specialized object type and we don't have to constrain a
@@ -169,7 +174,7 @@ void verifyTypeImpl(HTS& env, int32_t const id) {
    * would pass. If we don't know, we still have to emit them because valType
    * might be a subtype of its specialized object type.
    */
-  if (valType < Type::Obj && valType.clsSpec()) {
+  if (valType < TObj && valType.clsSpec()) {
     auto const cls = valType.clsSpec().cls();
     if (!env.irb->constrainValue(val, TypeConstraint(cls).setWeak()) &&
         ((knownConstraint && cls->classof(knownConstraint)) ||
@@ -227,14 +232,14 @@ DataType typeOpToDataType(IsTypeOp op) {
   not_reached();
 }
 
-void implIsScalarL(HTS& env, int32_t id) {
+void implIsScalarL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const src = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
   push(env, gen(env, IsScalarType, src));
 }
 
-void implIsScalarC(HTS& env) {
+void implIsScalarC(IRGS& env) {
   auto const src = popC(env);
   push(env, gen(env, IsScalarType, src));
   gen(env, DecRef, src);
@@ -248,7 +253,7 @@ void implIsScalarC(HTS& env) {
  * doesn't always handle the additional type information very well.  It is
  * possibly a compile-time slowdown only, but we haven't investigated yet.)
  */
-folly::Optional<Type> ratToAssertType(HTS& env, RepoAuthType rat) {
+folly::Optional<Type> ratToAssertType(IRGS& env, RepoAuthType rat) {
   using T = RepoAuthType::Tag;
 
   switch (rat.tag()) {
@@ -278,14 +283,14 @@ folly::Optional<Type> ratToAssertType(HTS& env, RepoAuthType rat) {
       auto const cls = Unit::lookupClassOrUniqueClass(rat.clsName());
 
       if (!classIsUniqueOrCtxParent(env, cls)) {
-        ty |= Type::Obj; // Kill specialization.
+        ty |= TObj; // Kill specialization.
       }
       return ty;
     }
 
     // Type assertions can't currently handle Init-ness.
     case T::InitCell:
-      return Type::Cell;
+      return TCell;
     case T::InitGen:
       return folly::none;
 
@@ -315,7 +320,7 @@ folly::Optional<Type> ratToAssertType(HTS& env, RepoAuthType rat) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* implInstanceOfD(HTS& env, SSATmp* src, const StringData* className) {
+SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
   /*
    * InstanceOfD is always false if it's not an object.
    *
@@ -323,14 +328,14 @@ SSATmp* implInstanceOfD(HTS& env, SSATmp* src, const StringData* className) {
    * types, but if it's Gen/Cell we're going to PUNT because it's
    * natural to translate that case with control flow TODO(#2020251)
    */
-  if (Type::Obj < src->type()) {
+  if (TObj < src->type()) {
     PUNT(InstanceOfD_MaybeObj);
   }
-  if (!src->isA(Type::Obj)) {
-    bool res = ((src->isA(Type::Arr) && interface_supports_array(className))) ||
-      (src->isA(Type::Str) && interface_supports_string(className)) ||
-      (src->isA(Type::Int) && interface_supports_int(className)) ||
-      (src->isA(Type::Dbl) && interface_supports_double(className));
+  if (!src->isA(TObj)) {
+    bool res = ((src->isA(TArr) && interface_supports_array(className))) ||
+      (src->isA(TStr) && interface_supports_string(className)) ||
+      (src->isA(TInt) && interface_supports_int(className)) ||
+      (src->isA(TDbl) && interface_supports_double(className));
     return cns(env, res);
   }
 
@@ -377,17 +382,17 @@ SSATmp* implInstanceOfD(HTS& env, SSATmp* src, const StringData* className) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitInstanceOfD(HTS& env, const StringData* className) {
+void emitInstanceOfD(IRGS& env, const StringData* className) {
   auto const src = popC(env);
   push(env, implInstanceOfD(env, src, className));
   gen(env, DecRef, src);
 }
 
-void emitInstanceOf(HTS& env) {
+void emitInstanceOf(IRGS& env) {
   auto const t1 = popC(env);
   auto const t2 = popC(env); // t2 instanceof t1
 
-  if (t1->isA(Type::Obj) && t2->isA(Type::Obj)) {
+  if (t1->isA(TObj) && t2->isA(TObj)) {
     auto const c2 = gen(env, LdObjClass, t2);
     auto const c1 = gen(env, LdObjClass, t1);
     push(env, gen(env, InstanceOf, c2, c1));
@@ -396,9 +401,9 @@ void emitInstanceOf(HTS& env) {
     return;
   }
 
-  if (!t1->isA(Type::Str)) PUNT(InstanceOf-NotStr);
+  if (!t1->isA(TStr)) PUNT(InstanceOf-NotStr);
 
-  if (t2->isA(Type::Obj)) {
+  if (t2->isA(TObj)) {
     auto const rds = gen(env, LookupClsRDSHandle, t1);
     auto const c1  = gen(env, DerefClsRDSHandle, rds);
     auto const c2  = gen(env, LdObjClass, t2);
@@ -410,34 +415,34 @@ void emitInstanceOf(HTS& env) {
 
   push(
     env,
-    t2->isA(Type::Arr) ? gen(env, InterfaceSupportsArr, t1) :
-    t2->isA(Type::Int) ? gen(env, InterfaceSupportsInt, t1) :
-    t2->isA(Type::Str) ? gen(env, InterfaceSupportsStr, t1) :
-    t2->isA(Type::Dbl) ? gen(env, InterfaceSupportsDbl, t1) :
+    t2->isA(TArr) ? gen(env, InterfaceSupportsArr, t1) :
+    t2->isA(TInt) ? gen(env, InterfaceSupportsInt, t1) :
+    t2->isA(TStr) ? gen(env, InterfaceSupportsStr, t1) :
+    t2->isA(TDbl) ? gen(env, InterfaceSupportsDbl, t1) :
     cns(env, false)
   );
   gen(env, DecRef, t2);
   gen(env, DecRef, t1);
 }
 
-void emitVerifyRetTypeC(HTS& env) {
+void emitVerifyRetTypeC(IRGS& env) {
   verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId);
 }
 
-void emitVerifyRetTypeV(HTS& env) {
+void emitVerifyRetTypeV(IRGS& env) {
   verifyTypeImpl(env, HPHP::TypeConstraint::ReturnId);
 }
 
-void emitVerifyParamType(HTS& env, int32_t paramId) {
+void emitVerifyParamType(IRGS& env, int32_t paramId) {
   verifyTypeImpl(env, paramId);
 }
 
-void emitOODeclExists(HTS& env, OODeclExistsOp subop) {
+void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {
   auto const tAutoload = popC(env);
   auto const tCls = popC(env);
 
-  assert(tCls->isA(Type::Str)); // result of CastString
-  assert(tAutoload->isA(Type::Bool)); // result of CastBool
+  assertx(tCls->isA(TStr)); // result of CastString
+  assertx(tAutoload->isA(TBool)); // result of CastBool
 
   ClassKind kind;
   switch (subop) {
@@ -457,14 +462,14 @@ void emitOODeclExists(HTS& env, OODeclExistsOp subop) {
   gen(env, DecRef, tCls);
 }
 
-void emitIssetL(HTS& env, int32_t id) {
+void emitIssetL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const ld = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
-  push(env, gen(env, IsNType, Type::Null, ld));
+  push(env, gen(env, IsNType, TNull, ld));
 }
 
-void emitEmptyL(HTS& env, int32_t id) {
+void emitEmptyL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const ld = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
@@ -474,7 +479,7 @@ void emitEmptyL(HTS& env, int32_t id) {
   );
 }
 
-void emitIsTypeC(HTS& env, IsTypeOp subop) {
+void emitIsTypeC(IRGS& env, IsTypeOp subop) {
   if (subop == IsTypeOp::Scalar) return implIsScalarC(env);
   auto const t = typeOpToDataType(subop);
   auto const src = popC(env, DataTypeSpecific);
@@ -486,7 +491,7 @@ void emitIsTypeC(HTS& env, IsTypeOp subop) {
   gen(env, DecRef, src);
 }
 
-void emitIsTypeL(HTS& env, int32_t id, IsTypeOp subop) {
+void emitIsTypeL(IRGS& env, int32_t id, IsTypeOp subop) {
   if (subop == IsTypeOp::Scalar) return implIsScalarL(env, id);
   auto const t = typeOpToDataType(subop);
   auto const ldrefExit = makeExit(env);
@@ -500,13 +505,13 @@ void emitIsTypeL(HTS& env, int32_t id, IsTypeOp subop) {
   }
 }
 
-void emitAssertRATL(HTS& env, int32_t loc, RepoAuthType rat) {
+void emitAssertRATL(IRGS& env, int32_t loc, RepoAuthType rat) {
   if (auto const t = ratToAssertType(env, rat)) {
     assertTypeLocal(env, loc, *t);
   }
 }
 
-void emitAssertRATStk(HTS& env, int32_t offset, RepoAuthType rat) {
+void emitAssertRATStk(IRGS& env, int32_t offset, RepoAuthType rat) {
   if (auto const t = ratToAssertType(env, rat)) {
     assertTypeStack(env, BCSPOffset{offset}, *t);
   }
@@ -515,4 +520,3 @@ void emitAssertRATStk(HTS& env, int32_t offset, RepoAuthType rat) {
 //////////////////////////////////////////////////////////////////////
 
 }}}
-

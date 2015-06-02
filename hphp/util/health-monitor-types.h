@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_HOST_HEALTH_MONITOR_TYPES_H_
 #define incl_HPHP_HOST_HEALTH_MONITOR_TYPES_H_
 
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/hdf.h"
 
 namespace HPHP {
@@ -41,6 +42,9 @@ enum class HealthLevel {
 struct IHealthMonitorMetric {
   virtual ~IHealthMonitorMetric() { } // make compiler happy
   virtual HealthLevel evaluate() = 0;
+  virtual bool enabled() = 0;
+  virtual void setConfig(const IniSettingMap&, const Hdf&,
+                         const std::string& name) = 0;
 };
 
 /*

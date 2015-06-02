@@ -19,6 +19,7 @@
 
 #include <algorithm>
 
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/ext/ext_generator.h"
 
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -71,14 +72,262 @@ template<Opcode op> struct IRExtraDataType;
 
 struct IRExtraData {};
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Shared IRExtraData classes.
+ *
+ * These subtypes represent common parameters (e.g., statically known Func,
+ * local variable ID, stack offset, etc.) that are useful for a variety of HHIR
+ * instructions.
+ *
+ * These are kept separate from the one-off IRExtraDatas to make it easier to
+ * find existing common parameters.
+ */
+
+/*
+ * Class pointer.
+ *
+ * Required to be non-null.
+ */
+struct ClassData : IRExtraData {
+  explicit ClassData(const Class* cls)
+    : cls(cls)
+  {
+    assert(cls != nullptr);
+  }
+
+  std::string show() const {
+    return folly::to<std::string>(cls->name()->data());
+  }
+
+  const Class* cls;
+};
+
+/*
+ * Class with method name.
+ */
+struct ClsMethodData : IRExtraData {
+  ClsMethodData(const StringData* cls, const StringData* method,
+                const NamedEntity* ne = nullptr)
+    : clsName(cls)
+    , methodName(method)
+    , namedEntity(ne)
+  {}
+
+  std::string show() const {
+    return folly::format("{}::{}", *clsName, *methodName).str();
+  }
+
+  bool equals(const ClsMethodData& o) const {
+    // The strings are static so we can use pointer equality.
+    return clsName == o.clsName && methodName == o.methodName;
+  }
+  size_t hash() const {
+    return hash_int64_pair((uintptr_t)clsName, (uintptr_t)methodName);
+  }
+
+  const StringData* clsName;
+  const StringData* methodName;
+  const NamedEntity* namedEntity;
+};
+
+/*
+ * Func pointer.
+ */
+struct FuncData : IRExtraData {
+  explicit FuncData(const Func* func) : func(func) {}
+
+  std::string show() const {
+    return folly::to<std::string>(func->fullName()->data());
+  }
+
+  bool equals(FuncData o) const { return func == o.func; }
+  size_t hash() const { return std::hash<const Func*>()(func); }
+
+  const Func* func;
+};
+
+/*
+ * Func with argument index.
+ */
+struct FuncArgData : IRExtraData {
+  explicit FuncArgData(const Func* f, int64_t arg)
+    : func(f)
+    , argNum(arg)
+  {}
+
+  std::string show() const {
+    return folly::format("{},{}", func->name()->data(), argNum).str();
+  }
+
+  const Func* func;
+  int64_t argNum;
+};
+
+/*
+ * Local variable ID.
+ */
+struct LocalId : IRExtraData {
+  explicit LocalId(uint32_t id) : locId(id) {}
+
+  std::string show() const { return folly::to<std::string>(locId); }
+
+  bool equals(LocalId o) const { return locId == o.locId; }
+  size_t hash() const { return std::hash<uint32_t>()(locId); }
+
+  uint32_t locId;
+};
+
+/*
+ * Iterator ID.
+ */
+struct IterId : IRExtraData {
+  explicit IterId(uint32_t id)
+    : iterId(id)
+  {}
+
+  std::string show() const { return folly::to<std::string>(iterId); }
+
+  bool equals(IterId o) const { return iterId == o.iterId; }
+  size_t hash() const { return std::hash<uint32_t>()(iterId); }
+
+  uint32_t iterId;
+};
+
+/*
+ * Iter instruction data.
+ *
+ * `iterId' is the iterator ID; `keyId' and `valId' are the IDs of the iterator
+ * locals $key => $value.  For keyless iterators, we still use this class, with
+ * `keyId` set to -1u.
+ */
+struct IterData : IRExtraData {
+  explicit IterData(uint32_t iter, uint32_t key, uint32_t val)
+    : iterId(iter)
+    , keyId(key)
+    , valId(val)
+  {}
+
+  std::string show() const {
+    if (keyId == -1) return folly::format("{}::{}", iterId, valId).str();
+    return folly::format("{}::{}::{}", iterId, keyId, valId).str();
+  }
+
+  uint32_t iterId;
+  uint32_t keyId;
+  uint32_t valId;
+};
+
+struct RDSHandleData : IRExtraData {
+  explicit RDSHandleData(rds::Handle handle) : handle(handle) {}
+
+  std::string show() const { return folly::to<std::string>(handle); }
+
+  bool equals(RDSHandleData o) const { return handle == o.handle; }
+  size_t hash() const { return std::hash<uint32_t>()(handle); }
+
+  rds::Handle handle;
+};
+
+/*
+ * Translation ID.
+ *
+ * Used with profiling-related instructions.
+ */
+struct TransIDData : IRExtraData {
+  explicit TransIDData(TransID transId) : transId(transId) {}
+
+  std::string show() const { return folly::to<std::string>(transId); }
+
+  TransID transId;
+};
+
+/*
+ * Stack pointer offset.
+ */
+struct FPInvOffsetData : IRExtraData {
+  explicit FPInvOffsetData(FPInvOffset offset) : offset(offset) {}
+
+  std::string show() const {
+    return folly::to<std::string>("FPRelOff ", offset.offset);
+  }
+
+  bool equals(FPInvOffsetData o) const { return offset == o.offset; }
+  size_t hash() const { return std::hash<int32_t>()(offset.offset); }
+
+  FPInvOffset offset;
+};
+
+/*
+ * Stack offset.
+ */
+struct IRSPOffsetData : IRExtraData {
+  explicit IRSPOffsetData(IRSPOffset offset) : offset(offset) {}
+
+  std::string show() const {
+    return folly::to<std::string>("IRSPOff ", offset.offset);
+  }
+
+  bool equals(IRSPOffsetData o) const { return offset == o.offset; }
+  size_t hash() const { return std::hash<int32_t>()(offset.offset); }
+
+  IRSPOffset offset;
+};
+
+/*
+ * Special snowflake stack offset.
+ *
+ * This is sometimes used instead of IRSPOffsetData when we need to keep track
+ * of the BCSPOffset for post-code-gen use, at which point it would be
+ * difficult to derive (e.g., in visitGuards()).
+ */
+struct RelOffsetData : IRExtraData {
+  explicit RelOffsetData(BCSPOffset bcSpOffset, IRSPOffset irSpOffset)
+    : bcSpOffset(bcSpOffset)
+    , irSpOffset(irSpOffset)
+  {}
+
+  bool equals(RelOffsetData o) const {
+    return bcSpOffset == o.bcSpOffset && irSpOffset == o.irSpOffset;
+  }
+  size_t hash() const {
+    return hash_int64_pair(
+      std::hash<int32_t>()(bcSpOffset.offset),
+      std::hash<int32_t>()(irSpOffset.offset)
+    );
+  }
+
+  std::string show() const {
+    return folly::to<std::string>(
+      "BCSPOff ", bcSpOffset.offset, ", ",
+      "IRSPOff ", irSpOffset.offset
+    );
+  }
+
+  BCSPOffset bcSpOffset;
+  IRSPOffset irSpOffset;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * One-off IRExtraData classes.
+ *
+ * These are used for only one or two instructions and are in no particular
+ * order.  Add new IRExtraData types here.
+ */
+
 struct LdBindAddrData : IRExtraData {
-  explicit LdBindAddrData(SrcKey sk)
+  explicit LdBindAddrData(SrcKey sk, FPInvOffset spOff)
     : sk(sk)
+    , spOff(spOff)
   {}
 
   std::string show() const { return showShort(sk); }
 
   SrcKey sk;
+  FPInvOffset spOff;
 };
 
 struct LdSSwitchData : IRExtraData {
@@ -96,130 +345,40 @@ struct LdSSwitchData : IRExtraData {
     target->numCases   = numCases;
     target->defaultSk  = defaultSk;
     target->cases      = new (arena) Elm[numCases];
+    target->spOff      = spOff;
     std::copy(cases, cases + numCases, const_cast<Elm*>(target->cases));
     return target;
+  }
+
+  std::string show() const {
+    return folly::to<std::string>(spOff.offset);
   }
 
   int64_t     numCases;
   const Elm*  cases;
   SrcKey      defaultSk;
+  FPInvOffset spOff;
 };
 
 struct JmpSwitchData : IRExtraData {
   JmpSwitchData* clone(Arena& arena) const {
     JmpSwitchData* sd = new (arena) JmpSwitchData;
-    sd->base       = base;
     sd->bounded    = bounded;
     sd->cases      = cases;
     sd->defaultSk  = defaultSk;
     sd->targets    = new (arena) SrcKey[cases];
+    sd->invSPOff   = invSPOff;
+    sd->irSPOff    = irSPOff;
     std::copy(targets, targets + cases, const_cast<SrcKey*>(sd->targets));
     return sd;
   }
 
-  int64_t base;        // base of switch case
   bool    bounded;     // whether switch is bounded or not
   int32_t cases;       // number of cases
   SrcKey  defaultSk;   // srckey of default case
   SrcKey* targets;     // srckeys for all targets
-};
-
-struct LocalId : IRExtraData {
-  explicit LocalId(uint32_t id)
-    : locId(id)
-  {}
-
-  bool equals(LocalId o) const { return locId == o.locId; }
-  size_t hash() const { return std::hash<uint32_t>()(locId); }
-  std::string show() const { return folly::to<std::string>(locId); }
-
-  uint32_t locId;
-};
-
-struct IterId : IRExtraData {
-  explicit IterId(uint32_t id)
-    : iterId(id)
-  {}
-
-  bool equals(IterId o) const { return iterId == o.iterId; }
-  size_t hash() const { return std::hash<uint32_t>()(iterId); }
-  std::string show() const { return folly::to<std::string>(iterId); }
-
-  uint32_t iterId;
-};
-
-struct IterData : IRExtraData {
-  explicit IterData(uint32_t iter, uint32_t key, uint32_t val)
-    : iterId(iter), keyId(key), valId(val)
-  {}
-  std::string show() const {
-    if (keyId == -1) return folly::format("{}::{}", iterId, valId).str();
-
-    return folly::format("{}::{}::{}", iterId, keyId, valId).str();
-  }
-
-  uint32_t iterId;
-  uint32_t keyId;
-  uint32_t valId;
-};
-
-struct RDSHandleData : IRExtraData {
-  explicit RDSHandleData(rds::Handle handle)
-    : handle(handle)
-  {}
-
-  bool equals(RDSHandleData o) const { return handle == o.handle; }
-  size_t hash() const { return std::hash<uint32_t>()(handle); }
-  std::string show() const {
-    return folly::to<std::string>(handle);
-  }
-
-  rds::Handle handle;
-};
-
-struct ClassData : IRExtraData {
-  explicit ClassData(const Class* cls) : cls(cls) {}
-  std::string show() const {
-    return folly::to<std::string>(cls->name()->data());
-  }
-  const Class* cls;
-};
-
-struct FuncData : IRExtraData {
-  explicit FuncData(const Func* func) : func(func) {}
-
-  bool equals(FuncData o) const { return func == o.func; }
-  size_t hash() const { return std::hash<const Func*>()(func); }
-  std::string show() const {
-    return folly::to<std::string>(func->fullName()->data());
-  }
-
-  const Func* func;
-};
-
-struct ClsMethodData : IRExtraData {
-  ClsMethodData(const StringData* cls, const StringData* method,
-                const NamedEntity* ne = nullptr)
-    : clsName(cls)
-    , methodName(method)
-    , namedEntity(ne)
-  {}
-
-  std::string show() const {
-    return folly::format("{}::{}", *clsName, *methodName).str();
-  }
-
-  bool equals(const ClsMethodData& b) const {
-    // Strings are static so we can use pointer equality
-    return clsName == b.clsName && methodName == b.methodName;
-  }
-  size_t hash() const {
-    return hash_int64_pair((uintptr_t)clsName, (uintptr_t)methodName);
-  }
-
-  const StringData* clsName;
-  const StringData* methodName;
-  const NamedEntity* namedEntity;
+  FPInvOffset invSPOff;
+  IRSPOffset irSPOff;
 };
 
 struct FPushCufData : IRExtraData {
@@ -248,33 +407,43 @@ struct FPushCufData : IRExtraData {
  * Information for REQ_RETRANSLATE stubs.
  */
 struct ReqRetranslateData : IRExtraData {
-  TransFlags trflags;
-
-  explicit ReqRetranslateData(TransFlags trflags)
-    : trflags(trflags)
+  explicit ReqRetranslateData(IRSPOffset irSPOff,
+                              TransFlags trflags)
+    : irSPOff(irSPOff)
+    , trflags{trflags}
   {}
 
   std::string show() const {
-    return folly::to<std::string>(trflags.packed);
+    return folly::to<std::string>(irSPOff.offset, ',', trflags.packed);
   }
+
+  IRSPOffset irSPOff;
+  TransFlags trflags;
 };
 
 /*
  * Information for REQ_BIND_JMP stubs.
  */
 struct ReqBindJmpData : IRExtraData {
-  SrcKey dest;
-  TransFlags trflags;
-
   explicit ReqBindJmpData(const SrcKey& dest,
-                          TransFlags trflags = TransFlags{})
+                          FPInvOffset invSPOff,
+                          IRSPOffset irSPOff,
+                          TransFlags trflags)
     : dest(dest)
+    , invSPOff(invSPOff)
+    , irSPOff(irSPOff)
     , trflags(trflags)
   {}
 
   std::string show() const {
-    return folly::to<std::string>(dest.offset(), ',', trflags.packed);
+    return folly::to<std::string>(dest.offset(), ',', invSPOff.offset, ',',
+      irSPOff.offset, ',', trflags.packed);
   }
+
+  SrcKey dest;
+  FPInvOffset invSPOff;
+  IRSPOffset irSPOff;
+  TransFlags trflags;
 };
 
 /*
@@ -284,82 +453,14 @@ struct ActRecInfo : IRExtraData {
   IRSPOffset spOffset;
   const StringData* invName;  // may be nullptr
   int32_t numArgs;
-
-  bool isFromFPushCtor() const {
-    ActRec ar;
-    ar.m_numArgsAndFlags = numArgs;
-    return ar.isFromFPushCtor();
-  }
+  bool fromFPushCtor;
 
   std::string show() const {
-    ActRec ar;
-    ar.m_numArgsAndFlags = numArgs;
     return folly::to<std::string>(spOffset.offset, ',',
-                                  ar.numArgs(),
-                                  ar.isFromFPushCtor() ? ",ctor" : "",
-                                  ar.resumed() ? ",res" : "",
-                                  ar.localsDecRefd() ? ",ldrd" : "",
+                                  numArgs,
+                                  fromFPushCtor ? ",ctor" : "",
                                   invName ? " M" : "");
   }
-};
-
-struct StackOffset : IRExtraData {
-  explicit StackOffset(int32_t offset) : offset(offset) {}
-
-  std::string show() const { return folly::to<std::string>(offset); }
-
-  bool equals(StackOffset o) const { return offset == o.offset; }
-  size_t hash() const { return std::hash<int32_t>()(offset); }
-
-  int32_t offset;
-};
-
-/*
- * This particular ExtraData exists because we need both the BCSPOffset and
- * the IRSPOffset for a particular stack entry. The BCSPOffset is used in
- * visitGuards in guard-relaxation.cpp at which point it would be difficult to
- * derive the BCSPOffset from the IRSPOffset. The IRSPOffset is used during
- * code gen. Thus, we pass both using this struct.
- */
-struct RelOffsetData : IRExtraData {
-  explicit RelOffsetData(BCSPOffset bcSpOffset, IRSPOffset irSpOffset)
-    : bcSpOffset(bcSpOffset)
-    , irSpOffset(irSpOffset)
-  {
-  }
-
-  std::string show() const {
-    return folly::to<std::string>(
-      "BcSpOff ", bcSpOffset.offset, ", ",
-      "IrSpOff ", irSpOffset.offset
-    );
-  }
-
-  bool equals(RelOffsetData o) const {
-    return bcSpOffset == o.bcSpOffset && irSpOffset == o.irSpOffset;
-  }
-  size_t hash() const {
-    return hash_int64_pair(
-      std::hash<int32_t>()(bcSpOffset.offset),
-      std::hash<int32_t>()(irSpOffset.offset)
-    );
-  }
-
-  BCSPOffset bcSpOffset;
-  IRSPOffset irSpOffset;
-};
-
-struct IRSPOffsetData : IRExtraData {
-  explicit IRSPOffsetData(IRSPOffset offset) : offset(offset) {}
-
-  std::string show() const {
-    return folly::to<std::string>("IrSpOff ", offset.offset);
-  }
-
-  bool equals(IRSPOffsetData o) const { return offset == o.offset; }
-  size_t hash() const { return std::hash<int32_t>()(offset.offset); }
-
-  IRSPOffset offset;
 };
 
 struct PropOffset : IRExtraData {
@@ -372,36 +473,26 @@ struct PropOffset : IRExtraData {
   int32_t offsetBytes;
 };
 
-struct ProfileStrData : IRExtraData {
-  explicit ProfileStrData(const StringData* key)
-    : key(key)
-  {}
-
-  std::string show() const { return key->data(); }
-
-  const StringData* key;
-};
-
-/*
- * Translation IDs.
- */
-struct TransIDData : IRExtraData {
-  explicit TransIDData(TransID transId) : transId(transId) {}
-  std::string show() const { return folly::to<std::string>(transId); }
-  TransID transId;
-};
-
 /*
  * Information needed to generate a REQ_RETRANSLATE_OPT service request.
  */
-struct ReqRetransOptData : IRExtraData {
-  explicit ReqRetransOptData(TransID transId, SrcKey sk)
-      : transId(transId), sk(sk) {}
+struct ReqRetranslateOptData : IRExtraData {
+  explicit ReqRetranslateOptData(TransID transId,
+                                 SrcKey sk,
+                                 IRSPOffset irSPOff)
+    : transId(transId)
+    , sk(sk)
+    , irSPOff(irSPOff)
+  {}
+
   std::string show() const {
-    return folly::to<std::string>(transId, ',', sk.offset());
+    return folly::to<std::string>(transId, ',', sk.offset(), ',',
+      irSPOff.offset);
   }
+
   TransID transId;
   SrcKey sk;
+  IRSPOffset irSPOff;
 };
 
 /*
@@ -426,7 +517,7 @@ struct DefInlineFPData : IRExtraData {
       fromFPushCtor ? "ctor," : "",
       retBCOff, ',',
       retSPOff.offset, ',',
-      spOffset
+      spOffset.offset
     );
   }
 
@@ -434,8 +525,8 @@ struct DefInlineFPData : IRExtraData {
   bool fromFPushCtor;
   SSATmp* ctx;       // Ctx, Cls or Nullptr.
   Offset retBCOff;
-  FPAbsOffset retSPOff;
-  int32_t spOffset;  // offset from caller SP to callee SP
+  FPInvOffset retSPOff;
+  IRSPOffset spOffset;  // offset from caller SP to bottom of callee's ActRec
 };
 
 struct CallArrayData : IRExtraData {
@@ -463,9 +554,11 @@ struct CallArrayData : IRExtraData {
 struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPOffset spOffset,
                            const Func* callee,
+                           int32_t numNonDefault,
                            bool destroyLocals)
     : spOffset(spOffset)
     , callee{callee}
+    , numNonDefault{numNonDefault}
     , destroyLocals{destroyLocals}
   {}
 
@@ -479,6 +572,7 @@ struct CallBuiltinData : IRExtraData {
 
   IRSPOffset spOffset;   // offset from StkPtr to last passed arg
   const Func* callee;
+  int32_t numNonDefault;
   bool destroyLocals;
 };
 
@@ -650,7 +744,7 @@ struct CheckDefinedClsData : IRExtraData {
  */
 struct InterpOneData : IRExtraData {
   struct LocalType {
-    explicit LocalType(uint32_t id = 0, Type type = Type::Bottom)
+    explicit LocalType(uint32_t id = 0, Type type = TBottom)
       : id(id)
       , type(type)
     {}
@@ -709,7 +803,7 @@ struct InterpOneData : IRExtraData {
       cellsPopped,
       cellsPushed
     );
-    assert(!smashesAllLocals || !nChangedLocals);
+    assertx(!smashesAllLocals || !nChangedLocals);
     if (smashesAllLocals) ret += ", smashes all locals";
     if (nChangedLocals) {
       for (auto i = 0; i < nChangedLocals; ++i) {
@@ -741,44 +835,33 @@ struct CoerceStkData : IRExtraData {
   int32_t argNum;
 };
 
-struct CoerceData : IRExtraData {
-  explicit CoerceData(const Func* f, int64_t arg_num)
-    : callee(f), argNum(arg_num) {}
-
-  std::string show() const {
-    return folly::format(
-      "{},{}",
-      callee->name()->data(),
-      argNum
-    ).str();
-  }
-
-  const Func* callee;
-  int64_t argNum;
-};
-
-struct RBTraceData : IRExtraData {
-  RBTraceData(Trace::RingBufferType t, SrcKey sk)
+struct RBEntryData : IRExtraData {
+  RBEntryData(Trace::RingBufferType t, SrcKey sk)
     : type(t)
     , sk(sk)
-    , msg(nullptr)
   {}
 
-  RBTraceData(Trace::RingBufferType t, const StringData* msg)
-    : type(t)
-    , sk()
-    , msg(msg)
-  {
-    assert(msg->isStatic());
-  }
-
   std::string show() const {
-    auto const data = msg ? msg->data() : showShort(sk);
-    return folly::format("{}: {}", ringbufferName(type), data).str();
+    return folly::sformat("{}: {}", ringbufferName(type), showShort(sk));
   }
 
   Trace::RingBufferType type;
   SrcKey sk;
+};
+
+struct RBMsgData : IRExtraData {
+  RBMsgData(Trace::RingBufferType t, const StringData* msg)
+    : type(t)
+    , msg(msg)
+  {
+    assertx(msg->isStatic());
+  }
+
+  std::string show() const {
+    return folly::sformat("{}: {}", ringbufferName(type), msg->data());
+  }
+
+  Trace::RingBufferType type;
   const StringData* msg;
 };
 
@@ -894,6 +977,63 @@ struct ContEnterData : IRExtraData {
   Offset returnBCOffset;
 };
 
+struct NewColData : IRExtraData {
+  explicit NewColData(CollectionType type, uint32_t size)
+    : type(type)
+    , size(size)
+  {}
+
+  std::string show() const {
+    return folly::sformat("{}, {}",
+                          collections::typeToString(type)->toCppString(),
+                          size);
+  }
+
+  CollectionType type;
+  uint32_t size;
+};
+
+struct NewColFromArrayData : IRExtraData {
+  explicit NewColFromArrayData(CollectionType type) : type(type) {}
+
+  std::string show() const {
+    return collections::typeToString(type)->toCppString();
+  }
+
+  CollectionType type;
+};
+
+struct LocalIdRange : IRExtraData {
+  explicit LocalIdRange(uint32_t start, uint32_t end)
+    : start(start)
+    , end(end)
+  {}
+
+  std::string show() const {
+    return folly::format("[{}, {})", start, end).str();
+  }
+
+  uint32_t start, end;
+};
+
+struct FuncEntryData : IRExtraData {
+  FuncEntryData(const Func* func, uint32_t argc)
+    : func(func)
+    , argc(argc)
+  {}
+
+  std::string show() const {
+    return folly::format(
+      "{}({} args)",
+      func->fullName()->data(),
+      argc
+    ).str();
+  }
+
+  const Func* func;
+  uint32_t argc;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -906,7 +1046,7 @@ X(LdBindAddr,                   LdBindAddrData);
 X(JmpSwitchDest,                JmpSwitchData);
 X(LdSSwitchDestFast,            LdSSwitchData);
 X(LdSSwitchDestSlow,            LdSSwitchData);
-X(GuardLoc,                     LocalId);
+X(PredictLoc,                   LocalId);
 X(HintLocInner,                 LocalId);
 X(CheckLoc,                     LocalId);
 X(AssertLoc,                    LocalId);
@@ -915,7 +1055,7 @@ X(LdLoc,                        LocalId);
 X(LdLocPseudoMain,              LocalId);
 X(StLoc,                        LocalId);
 X(StLocPseudoMain,              LocalId);
-X(StLocNT,                      LocalId);
+X(StLocRange,                   LocalIdRange);
 X(IterFree,                     IterId);
 X(MIterFree,                    IterId);
 X(CIterFree,                    IterId);
@@ -941,33 +1081,32 @@ X(NewInstanceRaw,               ClassData);
 X(InitObjProps,                 ClassData);
 X(CufIterSpillFrame,            FPushCufData);
 X(SpillFrame,                   ActRecInfo);
-X(GuardStk,                     RelOffsetData);
+X(CheckStk,                     RelOffsetData);
 X(HintStkInner,                 RelOffsetData);
-X(CheckStk,                     IRSPOffsetData);
+X(PredictStk,                   IRSPOffsetData);
 X(CastStk,                      IRSPOffsetData);
 X(StStk,                        IRSPOffsetData);
 X(CoerceStk,                    CoerceStkData);
-X(CoerceCellToInt,              CoerceData);
-X(CoerceCellToDbl,              CoerceData);
-X(CoerceCellToBool,             CoerceData);
-X(CoerceStrToInt,               CoerceData);
-X(CoerceStrToDbl,               CoerceData);
+X(CoerceCellToInt,              FuncArgData);
+X(CoerceCellToDbl,              FuncArgData);
+X(CoerceCellToBool,             FuncArgData);
+X(CoerceStrToInt,               FuncArgData);
+X(CoerceStrToDbl,               FuncArgData);
 X(AssertStk,                    IRSPOffsetData);
-X(ReDefSP,                      StackOffset);
-X(DefSP,                        StackOffset);
-X(ResetSP,                      StackOffset);
+X(DefSP,                        FPInvOffsetData);
 X(LdStk,                        IRSPOffsetData);
 X(LdStkAddr,                    IRSPOffsetData);
 X(DefInlineFP,                  DefInlineFPData);
 X(ReqRetranslate,               ReqRetranslateData);
 X(ReqBindJmp,                   ReqBindJmpData);
-X(ReqRetranslateOpt,            ReqRetransOptData);
+X(ReqRetranslateOpt,            ReqRetranslateOptData);
 X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);
 X(CallArray,                    CallArrayData);
 X(RetCtrl,                      RetCtrlData);
+X(AsyncRetCtrl,                 IRSPOffsetData);
 X(LdArrFuncCtx,                 IRSPOffsetData);
 X(LdArrFPushCuf,                IRSPOffsetData);
 X(LdStrFPushCuf,                IRSPOffsetData);
@@ -984,11 +1123,13 @@ X(LdFuncCached,                 LdFuncCachedData);
 X(LdFuncCachedSafe,             LdFuncCachedData);
 X(LdFuncCachedU,                LdFuncCachedUData);
 X(LdObjMethod,                  LdObjMethodData);
+X(RaiseMissingArg,              FuncArgData);
 X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
-X(RBTrace,                      RBTraceData);
+X(RBTraceEntry,                 RBEntryData);
+X(RBTraceMsg,                   RBMsgData);
 X(OODeclExists,                 ClassKindData);
 X(NewStructArray,               NewStructData);
 X(AllocPackedArray,             PackedArrayData);
@@ -996,7 +1137,6 @@ X(InitPackedArrayLoop,          InitPackedArrayLoopData);
 X(InitPackedArray,              IndexData);
 X(ProfilePackedArray,           RDSHandleData);
 X(ProfileStructArray,           RDSHandleData);
-X(ProfileStr,                   ProfileStrData);
 X(LdRDSAddr,                    RDSHandleData);
 X(ClsNeq,                       ClsNeqData);
 X(BaseG,                        MInstrAttrData);
@@ -1013,39 +1153,45 @@ X(StAsyncArResume,              ResumeOffset);
 X(StContArResume,               ResumeOffset);
 X(StContArState,                GeneratorState);
 X(ContEnter,                    ContEnterData);
-X(LdARFuncPtr,                  StackOffset);
+X(LdARFuncPtr,                  IRSPOffsetData);
 X(EndCatch,                     IRSPOffsetData);
-X(AdjustSP,                     IRSPOffsetData);
+X(EagerSyncVMRegs,              IRSPOffsetData);
+X(JmpSSwitchDest,               IRSPOffsetData);
 X(DbgTrashStk,                  IRSPOffsetData);
 X(DbgTrashFrame,                IRSPOffsetData);
+X(DbgTraceCall,                 IRSPOffsetData);
 X(LdPropAddr,                   PropOffset);
+X(NewCol,                       NewColData);
+X(NewColFromArray,              NewColFromArrayData);
+X(InitExtraArgs,                FuncEntryData);
+X(CheckSurpriseFlagsEnter,      FuncEntryData);
 
 #undef X
 
 //////////////////////////////////////////////////////////////////////
 
 template<bool hasExtra, Opcode opc, class T> struct AssertExtraTypes {
-  static void doassert() {
-    assert(!"called extra on an opcode without extra data");
+  static void doassertx() {
+    assertx(!"called extra on an opcode without extra data");
   }
   static void doassert_same() {
-    assert(!"called extra on an opcode without extra data");
+    assertx(!"called extra on an opcode without extra data");
   }
 };
 
 template<Opcode opc, class T> struct AssertExtraTypes<true,opc,T> {
   typedef typename IRExtraDataType<opc>::type ExtraType;
 
-  static void doassert() {
+  static void doassertx() {
     if (!std::is_base_of<T,ExtraType>::value) {
-      assert(!"extra<T> was called with an extra data "
+      assertx(!"extra<T> was called with an extra data "
               "type that doesn't match the opcode type");
     }
   }
   static void doassert_same() {
     if (!std::is_same<T,ExtraType>::value) {
       fprintf(stderr, "opcode = %s\n", opcodeName(opc));   \
-      assert(!"extra<T> was called with an extra data type that "
+      assertx(!"extra<T> was called with an extra data type that "
              "doesn't exactly match the opcode type");
     }
   }
@@ -1058,7 +1204,7 @@ template<class T> void assert_opcode_extra(Opcode opc) {
   case opcode:                                  \
     AssertExtraTypes<                           \
       OpHasExtraData<opcode>::value,opcode,T    \
-    >::doassert();                              \
+    >::doassertx();                              \
     break;
   switch (opc) { IR_OPCODES default: not_reached(); }
 #undef O

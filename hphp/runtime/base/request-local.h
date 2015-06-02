@@ -30,10 +30,9 @@ namespace HPHP {
  *
  * Example:
  *
- *   class MyRequestLocalClass : public RequestEventHandler {
- *   public:
- *     virtual void requestInit() {...}
- *     virtual void requestShutdown() {...}
+ *   struct MyRequestLocalClass final : RequestEventHandler {
+ *     void requestInit() override {...}
+ *     void requestShutdown() override {...}
  *   };
  *   IMPLEMENT_STATIC_REQUEST_LOCAL(MyRequestLocalClass, s_data);
  *
@@ -103,8 +102,7 @@ template<typename T>
 void RequestLocal<T>::create() {
   if (m_node.m_on_thread_exit_fn == nullptr) {
     m_node.m_on_thread_exit_fn = RequestLocal<T>::OnThreadExit;
-    m_node.m_next = ThreadLocalManager::s_manager.getTop();
-    ThreadLocalManager::s_manager.setTop((void*)(&m_node));
+    ThreadLocalManager::PushTop(m_node);
   }
   assert(m_node.m_p == nullptr);
   m_node.m_p = new T();

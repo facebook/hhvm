@@ -7,10 +7,10 @@ async function blockme(int $n): Awaitable<int> {
 
 try {
   $handle = blockme(1);
-  var_dump($handle->join());
+  var_dump(HH\Asio\join($handle));
 
   $handle = blockme(2);
-  AwaitAllWaitHandle::fromArray(array($handle))->join();
+  HH\Asio\join(AwaitAllWaitHandle::fromArray(array($handle)));
   var_dump($handle->result());
 
   $handle = blockme(3);

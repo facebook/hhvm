@@ -110,15 +110,15 @@ struct OffsetRange {
   OffsetRange() {}
 
   OffsetRange(Offset base, Offset past)
-    : m_base(base)
-    , m_past(past)
+    : base(base)
+    , past(past)
   {}
 
-  Offset m_base{0};
-  Offset m_past{0};
+  Offset base{0};
+  Offset past{0};
 };
 
-typedef std::vector<OffsetRange> OffsetRangeVec;
+using OffsetRangeVec = std::vector<OffsetRange>;
 
 /*
  * Generic entry for representing many-to-one mappings of Offset -> T.
@@ -620,14 +620,15 @@ public:
   static bool defCns(const StringData* cnsName, const TypedValue* value,
                      bool persistent = false);
 
+  using SystemConstantCallback = const Variant& (*)();
   /*
    * Define a constant with name `cnsName' which stores an arbitrary data
    * pointer in its TypedValue (with datatype KindOfUnit).
    *
    * The canonical examples are STDIN, STDOUT, and STDERR.
    */
-  static void defDynamicSystemConstant(const StringData* cnsName,
-                                       const void* data);
+  static bool defSystemConstantCallback(const StringData* cnsName,
+                                        SystemConstantCallback callback);
 
 
   /////////////////////////////////////////////////////////////////////////////

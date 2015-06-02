@@ -342,6 +342,10 @@ bool couldBeInPublicStatic(ISS& env, const Base& b) {
 //////////////////////////////////////////////////////////////////////
 
 void handleInThisPropD(MIS& env) {
+  // NullSafe (Q) props do not promote an emptyish base to stdClass instance.
+  if (env.mvec.mcodes[env.mInd].mcode == MQT) {
+    return;
+  }
   if (!couldBeInThis(env, env.base)) return;
 
   if (auto const name = env.base.locName) {
@@ -359,6 +363,11 @@ void handleInThisPropD(MIS& env) {
 }
 
 void handleInSelfPropD(MIS& env) {
+  // NullSafe (Q) props do not promote an emptyish base to stdClass instance.
+  if (env.mvec.mcodes[env.mInd].mcode == MQT) {
+    return;
+  }
+
   if (!couldBeInSelf(env, env.base)) return;
 
   if (auto const name = env.base.locName) {
@@ -374,6 +383,11 @@ void handleInSelfPropD(MIS& env) {
 }
 
 void handleInPublicStaticPropD(MIS& env) {
+  // NullSafe (Q) props do not promote an emptyish base to stdClass instance.
+  if (env.mvec.mcodes[env.mInd].mcode == MQT) {
+    return;
+  }
+
   if (!couldBeInPublicStatic(env, env.base)) return;
 
   auto const indexer = env.collect.publicStatics;
@@ -578,6 +592,10 @@ void handleBaseElemU(MIS& env) {
 }
 
 void handleBasePropD(MIS& env) {
+  // NullSafe (Q) props do not promote an emptyish base to stdClass instance.
+  if (env.mvec.mcodes[env.mInd].mcode == MQT) {
+    return;
+  }
   auto& ty = env.base.type;
   if (ty.subtypeOf(TObj)) return;
   if (propMustPromoteToObj(ty)) {
@@ -636,7 +654,7 @@ Type mcodeKey(MIS& env) {
   case MPC:  return topC(env, --env.stackIdx);
   case MPL:  return locAsCell(env, melem.immLoc);
   case MPT:  return sval(melem.immStr);
-
+  case MQT:  return sval(melem.immStr);
   case MEC:  return topC(env, --env.stackIdx);
   case MET:  return sval(melem.immStr);
   case MEL:  return locAsCell(env, melem.immLoc);
@@ -767,8 +785,9 @@ Base miBase(MIS& env) {
 
 void miProp(MIS& env) {
   auto const name     = mcodeStringKey(env);
-  bool const isDefine = env.info.getAttr(env.mcode()) & MIA_define;
-  bool const isUnset  = env.info.getAttr(env.mcode()) & MIA_unset;
+  auto const isDefine = env.info.getAttr(env.mcode()) & MIA_define;
+  auto const isUnset  = env.info.getAttr(env.mcode()) & MIA_unset;
+  auto const isNullsafe = (env.mvec.mcodes[env.mInd].mcode == MQT);
 
   /*
    * MIA_unset Props doesn't promote "emptyish" things to stdClass,
@@ -831,19 +850,18 @@ void miProp(MIS& env) {
   }
 
   /*
-   * Otherwise, intermediate props with define can promote a null,
-   * false, or "" to stdClass.  Those cases, and others, if it's not
-   * MIA_define, will set the base to a null value in tvScratch.
-   * The base may also legitimately be an object and our next base
-   * is in an object property.
+   * Otherwise, intermediate props with define can promote a null, false, or ""
+   * to stdClass.  Those cases, and others, if it's not MIA_define, will set
+   * the base to a null value in tvScratch.  The base may also legitimately be
+   * an object and our next base is in an object property.
    *
-   * If we know for sure we're promoting to stdClass, we can put the
-   * locType pointing at that.  Otherwise we conservatively treat
-   * all these cases as "possibly" being inside of an object
-   * property with "PostProp" with locType TTop.
+   * If we know for sure we're promoting to stdClass, we can put the locType
+   * pointing at that.  Otherwise we conservatively treat all these cases as
+   * "possibly" being inside of an object property with "PostProp" with locType
+   * TTop.
    */
   auto const newBaseLocTy =
-    propMustPromoteToObj(env.base.type)
+    isDefine && !isNullsafe && propMustPromoteToObj(env.base.type)
       ? objExact(env.index.builtin_class(s_stdClass.get()))
       : TTop;
 

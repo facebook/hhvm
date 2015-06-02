@@ -749,7 +749,7 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
    * Duplicate class constants override parent class constants, but
    * for interfaces it's an error to have a duplicate constant, unless
    * it just happens from implementing the same interface more than
-   * once.
+   * once, or the constant is abstract.
    *
    * Note: hphpc doesn't actually check for this case, but since with
    * HardConstProp we're potentially doing propagation of these
@@ -760,7 +760,10 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
   for (auto& c : rparent->cls->constants) {
     auto& cptr = rleaf->clsConstants[c.name];
     if (isIface && cptr) {
-      if (cptr->cls != rparent->cls) return false;
+      if (cptr->val.hasValue() && c.val.hasValue() &&
+          cptr->cls != rparent->cls) {
+        return false;
+      }
     }
     cptr = &c;
   }
@@ -1469,18 +1472,22 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
                                                  SString clsName) const {
   clsName = normalizeNS(clsName);
 
+  // We know it has to name a class only if there's no type alias with this
+  // name.
+  //
+  // TODO(#3519401): when we start unfolding type aliases, we could
+  // look at whether it is an alias for a specific class here.
+  // (Note this might need to split into a different API: type
+  // aliases aren't allowed everywhere we're doing resolve_class
+  // calls.)
+  if (m_data->typeAliases.count(clsName)) {
+    return folly::none;
+  }
+
   auto name_only = [&] () -> folly::Optional<res::Class> {
-    // We know it has to name a class only if there's no type alias with this
-    // name.  We also refuse to have name-only resolutions of enums, so that
+    // We also refuse to have name-only resolutions of enums, so that
     // all name only resolutions can be treated as objects.
-    //
-    // TODO(#3519401): when we start unfolding type aliases, we could
-    // look at whether it is an alias for a specific class here.
-    // (Note this might need to split into a different API: type
-    // aliases aren't allowed everywhere we're doing resolve_class
-    // calls.)
-    if (!m_data->typeAliases.count(clsName) &&
-        !m_data->enums.count(clsName)) {
+    if (!m_data->enums.count(clsName)) {
       return res::Class { this, clsName };
     }
     return folly::none;
@@ -1904,8 +1911,8 @@ Type Index::lookup_class_constant(Context ctx,
 
   auto const it = cinfo->clsConstants.find(cnsName);
   if (it != end(cinfo->clsConstants)) {
-    if (!it->second->val.hasValue()) {
-      // This is an abstract class constant.
+    if (!it->second->val.hasValue() || it->second->isTypeconst) {
+      // This is an abstract class constant or typeconstant
       return TInitCell;
     }
     if (it->second->val.value().m_type == KindOfUninit) {
@@ -1976,7 +1983,7 @@ Index::lookup_closure_use_vars(borrowed_ptr<const php::Func> func) const {
   if (!numUseVars) return {};
   auto const it = m_data->closureUseVars.find(func->cls);
   if (it == end(m_data->closureUseVars)) {
-    return std::vector<Type>(numUseVars, TInitGen);
+    return std::vector<Type>(numUseVars, TGen);
   }
   return it->second;
 }

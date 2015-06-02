@@ -37,9 +37,14 @@ using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Construct::Construct(BlockScopePtr scope, LocationPtr loc)
-    : m_blockScope(scope), m_flagsVal(0), m_loc(loc),
-      m_containedEffects(0), m_effectsTag(0) {
+Construct::Construct(BlockScopePtr scope, LocationPtr loc, KindOf kindOf)
+  : m_blockScope(scope)
+  , m_flagsVal(0)
+  , m_kindOf(kindOf)
+  , m_loc(loc)
+  , m_containedEffects(0)
+  , m_effectsTag(0)
+{
 }
 
 void Construct::resetScope(BlockScopeRawPtr scope, bool resetOrigScope) {
@@ -162,23 +167,24 @@ void Construct::dumpNode(int spc) {
   std::string type_info = "";
   unsigned id = 0;
   ExpressionPtr idPtr = ExpressionPtr();
-  ExpressionPtr idCsePtr = ExpressionPtr();
   int ef = 0;
 
-  if (Statement *s = dynamic_cast<Statement*>(this)) {
-    Statement::KindOf stype = s->getKindOf();
-    name = Statement::Names[stype];
+  if (isStatement()) {
+    Statement *s = static_cast<Statement*>(this);
+    auto stype = s->getKindOf();
+    name = Statement::nameOfKind(stype);
     value = s->getName();
     type = (int)stype;
-  } else if (Expression *e = dynamic_cast<Expression*>(this)) {
+  } else {
+    assert(isExpression());
+    Expression *e = static_cast<Expression*>(this);
     id = e->getCanonID();
     idPtr = e->getCanonLVal();
-    idCsePtr = e->getCanonCsePtr();
 
     ef = e->getLocalEffects();
 
     Expression::KindOf etype = e->getKindOf();
-    name = Expression::Names[etype];
+    name = Expression::nameOfKind(etype);
     switch (etype) {
       case Expression::KindOfSimpleFunctionCall:
         value = static_cast<SimpleFunctionCall*>(e)->getName();
@@ -212,9 +218,6 @@ void Construct::dumpNode(int spc) {
     }
     if (c & Expression::DeepReference) {
       scontext += "|DeepReference";
-    }
-    if (c & Expression::NoRefWrapper) {
-      scontext += "|NoRefWrapper";
     }
     if (c & Expression::ObjectContext) {
       scontext += "|ObjectContext";
@@ -269,20 +272,8 @@ void Construct::dumpNode(int spc) {
       } else {
         type_info += ":";
       }
-      if (e->getImplementedType()) {
-        type_info += ";" + e->getImplementedType()->toString();
-      } else {
-        type_info += ";";
-      }
-      if (e->getAssertedType()) {
-        type_info += "!" + e->getAssertedType()->toString();
-      } else {
-        type_info += "!";
-      }
       type_info = "{" + type_info + "} ";
     }
-  } else {
-    not_reached();
   }
 
   int s = spc;
@@ -303,11 +294,6 @@ void Construct::dumpNode(int spc) {
     std::cout << "idp=0x" <<
       std::hex << std::setfill('0') << std::setw(10) <<
       (int64_t)idPtr.get() << " ";
-  }
-  if (idCsePtr) {
-    std::cout << "idcsep=0x" <<
-      std::hex << std::setfill('0') << std::setw(10) <<
-      (int64_t)idCsePtr.get() << " ";
   }
 
   if (value != "") {
@@ -361,17 +347,8 @@ void Construct::dumpNode(int spc) {
 
   string objstr;
   if (dynamic_cast<SimpleVariable*>(this) != nullptr) {
-    if (isNeededValid()) {
-      if (isNeeded()) {
-        objstr += "Object";
-      } else {
-        objstr += "NotObject";
-      }
-    } else {
-      objstr = "NoObjInfo";
-    }
+    objstr = " (NoObjInfo)";
   }
-  if (objstr != "") objstr = " (" + objstr + ")";
 
   string noremoved;
   if (isNoRemove()) {
@@ -381,8 +358,9 @@ void Construct::dumpNode(int spc) {
   std::cout << type_info << nkid << scontext << sef
     << localtered << refstr << objstr << noremoved;
   if (m_loc) {
-    std::cout << " " << m_loc->file << ":" <<
-      m_loc->line1 << "@" << m_loc->char1;
+    std::cout << " " << m_loc->file << ":"
+      << "[" << m_loc->line0 << "@" << m_loc->char0 << ", "
+      << m_loc->line1 << "@" << m_loc->char1 << "]";
   }
   std::cout << "\n";
 }

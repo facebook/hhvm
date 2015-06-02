@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/ext/apache/ext_apache.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -145,10 +145,9 @@ void ApacheExtension::moduleInit() {
 }
 
 void ApacheExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
-  Hdf apache = config["Apache"];
   Enable = RuntimeOption::ServerExecutionMode() ||
            Config::GetBool(ini,
-                           config["Apache"]["EnableInCLI"],
+                           config, "Apache.EnableInCLI",
                            RuntimeOption::EnableHipHopSyntax);
 }
 

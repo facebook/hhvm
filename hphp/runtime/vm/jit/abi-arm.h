@@ -41,7 +41,7 @@ inline vixl::FPRegister x2simd(PhysReg x64reg) {
 inline constexpr unsigned maxArgReg() { return 7; }
 
 inline vixl::Register argReg(unsigned index) {
-  assert(index <= maxArgReg());
+  assertx(index <= maxArgReg());
   return vixl::Register::XRegFromCode(index);
 }
 
@@ -63,7 +63,7 @@ inline vixl::Condition convertCC(jit::ConditionCode cc) {
     // ARM has no parity flag
     always_assert(false);
   }
-  assert(cc >= 0 && cc <= 0xF);
+  assertx(cc >= 0 && cc <= 0xF);
 
   using namespace vixl;
 
@@ -95,7 +95,6 @@ const vixl::Register rVmSp(vixl::x19);
 const vixl::Register rVmTl(vixl::x20);
 const vixl::Register rAsm(vixl::x9);
 const vixl::Register rAsm2(vixl::x10);
-const vixl::Register rStashedAR(vixl::x21);
 const vixl::Register rGContextReg(vixl::x24);
 const vixl::Register rLinkReg(vixl::x30);
 const vixl::Register rReturnReg(vixl::x0);
@@ -115,7 +114,6 @@ const RegSet kGPCallerSaved =
 const RegSet kGPCalleeSaved =
   // x19 = rVmSp
   // x20 = rVmTl
-  // x21 = rStashedAR
   vixl::x22 | vixl::x23 |
   // x24 = rGContextReg
   vixl::x25 | vixl::x26 | vixl::x27 | vixl::x28;
@@ -126,7 +124,7 @@ const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
 
 const RegSet kGPReserved =
   rAsm | rAsm2 | rHostCallReg | vixl::x17 |
-  rVmSp | rVmTl | rStashedAR | rGContextReg | rVmFp | rLinkReg |
+  rVmSp | rVmTl | rGContextReg | rVmFp | rLinkReg |
   // ARM machines really only have 32 GP regs. However, vixl has 33 separate
   // register codes, because it treats the zero register and stack pointer
   // (which are really both register 31) separately. Rather than lose this

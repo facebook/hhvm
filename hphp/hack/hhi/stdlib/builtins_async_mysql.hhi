@@ -64,7 +64,7 @@ function mysql_async_status($link_identifier);
 class AsyncMysqlClient {
   public function __construct() { }
   static public function setPoolsConnectionLimit(int $limit) { }
-  static public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1) { }
+  static public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1): Awaitable<AsyncMysqlConnection> { }
   static public function adoptConnection($connection) { }
 }
 class AsyncMysqlConnectionPool {
@@ -74,17 +74,17 @@ class AsyncMysqlConnectionPool {
 }
 class AsyncMysqlConnection {
   public function __construct() { }
-  public function query(string $query, int $timeout_micros = -1) { }
-  public function queryf(HH\FormatString<HH\SQLFormatter> $query, ...$args) { }
+  public function query(string $query, int $timeout_micros = -1): Awaitable<AsyncMysqlQueryResult>{ }
+  public function queryf(HH\FormatString<HH\SQLFormatter> $query, ...$args): Awaitable<AsyncMysqlQueryResult>{ }
   public function multiQuery(Vector<string> $query, int $timeout_micros = -1) { }
   public function escapeString(string $data): string { }
-  public function close() { }
+  public function close(): void{ }
   public function releaseConnection() { }
   public function serverInfo() { }
   public function warningCount() { }
-  public function host() { }
-  public function port() { }
-  public function setReusable(bool $reusable) { }
+  public function host(): string{ }
+  public function port(): int{ }
+  public function setReusable(bool $reusable): void{ }
   public function isReusable(): bool { }
 }
 abstract class AsyncMysqlResult {
@@ -108,7 +108,7 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
   public function numRowsAffected(): int { }
   public function lastInsertId(): int { }
   public function numRows(): int { }
-  public function mapRows() { }
+  public function mapRows(): Vector<Map<string, string>>{ }
   public function vectorRows() { }
   public function mapRowsTyped(): Vector<Map<string, mixed>> { }
   public function vectorRowsTyped() { }
@@ -196,11 +196,21 @@ namespace HH {
 
     public function format_upcase_t(string $s): string; // table name
     public function format_upcase_c(string $s): string; // column name
+
+    // %L[sdfC] - lists
+    public function format_upcase_l(): SQLListFormatter;
   }
 
   interface SQLScalarFormatter {
     public function format_f(?float $s): string;
     public function format_d(?int $int): string;
     public function format_s(?string $string): string;
+  }
+
+  interface SQLListFormatter {
+    public function format_upcase_c(\ConstVector<string> $cols): string; // %LC
+    public function format_s(\ConstVector<string> $strs): string; // %Ls
+    public function format_d(\ConstVector<int> $ints): string; // %Ld
+    public function format_f(\ConstVector<float> $floats): string; // %Lf
   }
 }

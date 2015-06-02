@@ -1,8 +1,8 @@
-.function array_filter($arr = no_args, $func = start("""null"""), $res = start) {
+.function array_filter($arr = no_args, $func = start("""null"""), $flag = start("""null"""), $res = start) {
           .numiters 2;
 
 # if we get here, a value was supplied for $res
-          String "array_filter() expects at most 2 parameters"
+          String "array_filter() expects at most 3 parameters"
           Jmp warning
 no_args:  String "array_filter() expects at least 1 parameter, 0 given"
           Jmp warning
@@ -14,36 +14,65 @@ not_array:
           Jmp warning
 bad_param2:
           String "array_filter() expects parameter 2 to be a valid callback"
-          Jmp warning
 warning:  Cns "E_WARNING"
           FCallBuiltin 2 2 "trigger_error"
           PopR
           Null
           RetC
 
-start:    IsTypeL $arr Arr
-          JmpZ not_array
+start:          IsTypeL $arr Arr
+                JmpZ not_array
 
-          IssetL $func
-          JmpZ no_func
+                IssetL $func
+                JmpZ no_func
 
-          CGetL $func
-          DecodeCufIter 0 bad_param2
+                CGetL $func
+                DecodeCufIter 0 bad_param2
 .try_fault kill_iter_0 {
-            NewLikeArrayL $arr 0
-            SetL $res
-            PopC
+                NewLikeArrayL $arr 0
+                SetL $res
+                PopC
 
-            CGetL $arr
-            WIterInitK 1 endloop_a $v $k
+                CGetL $arr
+                WIterInitK 1 endloop_a $v $k
   .try_fault kill_iter_1 1 {
-    loop_a:   FPushCufIter 1 0
-              FPassL 0 $v
-              FCall 1
-              UnboxR
-              JmpZ skip_a
-              SetWithRefLM <L:$res EL:$k> $v
-    skip_a:   WIterNextK 1 loop_a $v $k
+                IssetL $flag
+                JmpZ loop_val
+                Int 1           # ARRAY_FILTER_USE_BOTH
+                CGetL $flag
+                Same
+                JmpNZ loop_both
+                Int 2           # ARRAY_FILTER_USE_KEY
+                CGetL $flag
+                Same
+                JmpNZ loop_key
+
+    loop_val:   FPushCufIter 1 0
+                FPassL 0 $v
+                FCall 1
+                UnboxR
+                JmpZ next_val
+                SetWithRefLM <L:$res EL:$k> $v
+    next_val:   WIterNextK 1 loop_val $v $k
+                Jmp endloop_a
+
+    loop_both:  FPushCufIter 2 0
+                FPassL 0 $v
+                FPassL 1 $k
+                FCall 2
+                UnboxR
+                JmpZ next_both
+                SetWithRefLM <L:$res EL:$k> $v
+    next_both:  WIterNextK 1 loop_both $v $k
+                Jmp endloop_a
+
+    loop_key:   FPushCufIter 1 0
+                FPassL 0 $k
+                FCall 1
+                UnboxR
+                JmpZ next_key
+                SetWithRefLM <L:$res EL:$k> $v
+    next_key:   WIterNextK 1 loop_key $v $k
   }
 }
 endloop_a:CIterFree 0
@@ -63,28 +92,62 @@ skip_n:   WIterNextK 1 loop_n $v $k
 }
           Jmp endloop_n
 
-start_kt: IssetL $func
-          JmpZ no_func_kt
+start_kt:         IssetL $func
+                  JmpZ no_func_kt
 
-          CGetL $func
-          DecodeCufIter 0 bad_param2
+                  CGetL $func
+                  DecodeCufIter 0 bad_param2
 .try_fault kill_iter_0_kt {
-            NewLikeArrayL $arr 0
-            SetL $res
-            PopC
+                  NewLikeArrayL $arr 0
+                  SetL $res
+                  PopC
 
-            CGetL $arr
-            IterInitK 1 endloop_a_kt $v $k
+                  CGetL $arr
+                  IterInitK 1 endloop_a_kt $v $k
   .try_fault kill_iter_1_kt 1 {
-    loop_a_kt: FPushCufIter 1 0
-               FPassL 0 $v
-               FCall 1
-               UnboxR
-               JmpZ skip_a_kt
-               CGetL $v
-               SetM <L:$res EL:$k>
-               PopC
-    skip_a_kt: IterNextK 1 loop_a_kt $v $k
+                  IssetL $flag
+                  JmpZ loop_val_kt
+                  Int 1           # ARRAY_FILTER_USE_BOTH
+                  CGetL $flag
+                  Same
+                  JmpNZ loop_both_kt
+                  Int 2           # ARRAY_FILTER_USE_KEY
+                  CGetL $flag
+                  Same
+                  JmpNZ loop_key_kt
+
+    loop_val_kt:  FPushCufIter 1 0
+                  FPassL 0 $v
+                  FCall 1
+                  UnboxR
+                  JmpZ next_val_kt
+                  CGetL $v
+                  SetM <L:$res EL:$k>
+                  PopC
+    next_val_kt:  IterNextK 1 loop_val_kt $v $k
+                  Jmp endloop_a_kt
+
+    loop_both_kt: FPushCufIter 2 0
+                  FPassL 0 $v
+                  FPassL 1 $k
+                  FCall 2
+                  UnboxR
+                  JmpZ next_both_kt
+                  CGetL $v
+                  SetM <L:$res EL:$k>
+                  PopC
+    next_both_kt: IterNextK 1 loop_both_kt $v $k
+                  Jmp endloop_a_kt
+
+    loop_key_kt:  FPushCufIter 1 0
+                  FPassL 0 $k
+                  FCall 1
+                  UnboxR
+                  JmpZ next_key_kt
+                  CGetL $v
+                  SetM <L:$res EL:$k>
+                  PopC
+    next_key_kt:  IterNextK 1 loop_key_kt $v $k
   }
 }
 endloop_a_kt:CIterFree 0

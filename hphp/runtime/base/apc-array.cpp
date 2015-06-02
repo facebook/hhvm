@@ -32,91 +32,77 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-APCHandle* APCArray::MakeShared(ArrayData* arr,
-                                size_t& size,
-                                bool inner,
-                                bool unserializeObj) {
+APCHandle::Pair
+APCArray::MakeSharedArray(ArrayData* arr, bool inner, bool unserializeObj) {
   if (!inner) {
     // only need to call traverseData() on the toplevel array
     DataWalker walker(DataWalker::LookupFeature::HasObjectOrResource);
     DataWalker::DataFeature features = walker.traverseData(arr);
     if (features.isCircular() || features.hasCollection()) {
       String s = apc_serialize(arr);
-      APCHandle* handle = APCString::MakeShared(KindOfArray, s.get(), size);
-      handle->setSerializedArray();
-      return handle;
+      auto pair = APCString::MakeSharedString(KindOfArray, s.get());
+      pair.handle->setSerializedArray();
+      return pair;
     }
 
-    if (apcExtension::UseUncounted &&
-        !features.hasObjectOrResource() &&
+    if (apcExtension::UseUncounted && !features.hasObjectOrResource() &&
         !arr->empty()) {
-      size = getMemSize(arr) + sizeof(APCTypedValue);
-      return APCTypedValue::MakeSharedArray(arr);
+      return {APCTypedValue::MakeSharedArray(arr),
+              getMemSize(arr) + sizeof(APCTypedValue)};
     }
   }
 
-  if (arr->isVectorData()) {
-    return APCArray::MakePackedShared(arr, size, unserializeObj);
-  }
-
-  return APCArray::MakeShared(arr, size, unserializeObj);
+  return arr->isVectorData() ? MakePacked(arr, unserializeObj) :
+         MakeHash(arr, unserializeObj);
 }
 
-APCHandle* APCArray::MakeShared() {
+APCHandle::Pair APCArray::MakeSharedEmptyArray() {
   void* p = malloc(sizeof(APCArray));
   APCArray* arr = new (p) APCArray(static_cast<size_t>(0));
-  return arr->getHandle();
+  return {arr->getHandle(), sizeof(APCArray)};
 }
 
-APCHandle* APCArray::MakeShared(ArrayData* arr,
-                                size_t& size,
-                                bool unserializeObj) {
+APCHandle::Pair APCArray::MakeHash(ArrayData* arr, bool unserializeObj) {
   auto num = arr->size();
   auto cap = num > 2 ? folly::nextPowTwo(num) : 2;
 
-  size = sizeof(APCArray) + sizeof(int) * cap + sizeof(Bucket) * num;
-  void* p = malloc(size);
+  auto size = sizeof(APCArray) + sizeof(int) * cap + sizeof(Bucket) * num;
+  auto p = malloc(size);
   APCArray* ret = new (p) APCArray(static_cast<unsigned int>(cap));
 
   for (int i = 0; i < cap; i++) ret->hash()[i] = -1;
 
   try {
     for (ArrayIter it(arr); !it.end(); it.next()) {
-      size_t s = 0;
-      auto key = APCHandle::Create(it.first(), s, false, true,
+      auto key = APCHandle::Create(it.first(), false, true,
                                    unserializeObj);
-      size += s;
-      s = 0;
-      auto val = APCHandle::Create(it.secondRef(), s, false, true,
+      size += key.size;
+      auto val = APCHandle::Create(it.secondRef(), false, true,
                                    unserializeObj);
-      size += s;
-      ret->add(key, val);
+      size += val.size;
+      ret->add(key.handle, val.handle);
     }
   } catch (...) {
     delete ret;
     throw;
   }
 
-  return ret->getHandle();
+  return {ret->getHandle(), size};
 }
 
-APCHandle* APCArray::MakePackedShared(ArrayData* arr,
-                                      size_t& size,
-                                      bool unserializeObj) {
-  size_t num_elems = arr->size();
-  size = sizeof(APCArray) + sizeof(APCHandle*) * num_elems;
-  void* p = malloc(size);
+APCHandle::Pair APCArray::MakePacked(ArrayData* arr, bool unserializeObj) {
+  auto num_elems = arr->size();
+  auto size = sizeof(APCArray) + sizeof(APCHandle*) * num_elems;
+  auto p = malloc(size);
   auto ret = new (p) APCArray(static_cast<size_t>(num_elems));
 
   try {
     size_t i = 0;
     for (ArrayIter it(arr); !it.end(); it.next()) {
-      size_t s = 0;
-      APCHandle* val = APCHandle::Create(it.secondRef(),
-                                         s, false, true,
-                                         unserializeObj);
-      size += s;
-      ret->vals()[i++] = val;
+      auto val = APCHandle::Create(it.secondRef(), false, true,
+                                   unserializeObj);
+      size += val.size;
+      ret->vals()[i++] = val.handle;
     }
     assert(i == num_elems);
   } catch (...) {
@@ -124,7 +110,7 @@ APCHandle* APCArray::MakePackedShared(ArrayData* arr,
     throw;
   }
 
-  return ret->getHandle();
+  return {ret->getHandle(), size};
 }
 
 Variant APCArray::MakeArray(const APCHandle* handle) {

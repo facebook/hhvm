@@ -19,4 +19,4 @@ async function foo() {
   );
 }
 
-var_dump(foo()->join());
+var_dump(HH\Asio\join(foo()));

@@ -18,7 +18,6 @@
 #define incl_HPHP_SWEEPABLE_H_
 
 #include "hphp/util/portability.h"
-#include "hphp/runtime/base/memory-manager.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,27 +25,11 @@ namespace HPHP {
 /*
  * Objects that need to do special clean up at the end of the request
  * may register themselves for this by deriving from Sweepable.  After
- * every request, Sweepable::SweepAll is called so the objects may
- * clear out request-local allocations that are not smart-allocated.
+ * every request, MemoryManager::sweep() called each Sweepable::sweep()
+ * method, allowing objects to clear out request-local allocations that
+ * are not smart-allocated, do cleanup, etc.
  */
-class Sweepable {
-  /*
-   * Sweepable objects are not supposed to be copied or assigned
-   * naively.
-   */
-  Sweepable(const Sweepable&) = delete;
-  Sweepable& operator=(const Sweepable&) = delete;
-
-public:
-  struct Node {
-    Node *next, *prev;
-    void enlist(Node& head);
-    void delist();
-    void init();
-  };
-  static unsigned SweepAll();
-  static void InitList();
-  static void FlushList();
+struct Sweepable: private boost::noncopyable {
 
   /*
    * There is no default behavior. Make sure this function frees all
@@ -58,34 +41,58 @@ public:
    * Remove this object from the sweepable list, so it won't have
    * sweep() called at the next SweepAll.
    */
-  void unregister();
+  void unregister() {
+    delist();
+    init(); // in case destructor runs later.
+  }
+
+  /*
+   * List manipulation methods; mainly for use by MemoryManager.
+   */
+  bool empty() const {
+    assert((this == m_prev) == (this == m_next)); // both==this or both!=this
+    return this == m_next;
+  }
+  void init() { m_prev = m_next = this; }
+  Sweepable* next() const { return m_next; }
+
+  void delist() {
+    auto n = m_next, p = m_prev;
+    n->m_prev = p;
+    p->m_next = n;
+  }
+
+  void enlist(Sweepable* head) {
+    auto next = head->m_next;
+    m_next = next;
+    m_prev = head;
+    head->m_next = next->m_prev = this;
+  }
 
 protected:
   Sweepable();
-  ~Sweepable();
+  enum class Init {};
+  explicit Sweepable(Init) { init(); }
+  virtual ~Sweepable() { delist(); }
 
 private:
-  Node m_sweepNode;
+  Sweepable *m_next, *m_prev;
 };
 
-using Sweeper = void (*)(ObjectData*);
-void registerSweepableObj(ObjectData* obj, Sweeper);
-void unregisterSweepableObj(ObjectData* obj);
-
 /*
- * Nonvirtual sweepable mixin for use with ObjectData. State is managed
- * completely in a thread-local hashtable.
+ * SweepableMember is a Sweepable used as a member of an otherwise nonvirtual
+ * class. The member must be named m_sweepable. If T is a derived class, it
+ * should only have one m_sweepable member. Anything fancier than that voids
+ * your warranty.
  */
-template<class Base> struct SweepableObj: Base {
-protected:
-  template<class... Args>
-  explicit SweepableObj(Sweeper f, Args&&... args)
-    : Base(std::forward<Args>(args)...) {
-    registerSweepableObj(this, f);
-    static_assert(sizeof(*this) == sizeof(Base), "");
-  }
-  ~SweepableObj() { unregister(); }
-  void unregister() { unregisterSweepableObj(this); }
+template<class T>
+struct SweepableMember: Sweepable {
+  void sweep() {
+    auto obj = reinterpret_cast<T*>(
+      uintptr_t(this) - offsetof(T, m_sweepable)
+    );
+    obj->sweep();
+  };
 };
 
 ///////////////////////////////////////////////////////////////////////////////

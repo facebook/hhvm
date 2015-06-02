@@ -102,6 +102,7 @@ struct File : SweepableResourceData {
     int options = 0, const SmartPtr<StreamContext>& context = nullptr);
 
   static bool IsVirtualDirectory(const String& filename);
+  static bool IsVirtualFile(const String& filename);
   static bool IsPlainFilePath(const String& filename) {
     return filename.find("://") == String::npos;
   }
@@ -307,6 +308,7 @@ protected:
                 const String& stream_type = empty_string_ref);
 
 private:
+  template <typename F> friend void scan(const File& this_, F& mark);
   template<class ResourceList>
   String applyFilters(const String& buffer,
                       ResourceList& filters,

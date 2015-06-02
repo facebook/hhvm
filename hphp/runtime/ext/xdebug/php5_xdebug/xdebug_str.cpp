@@ -26,20 +26,7 @@
 #include <locale.h>
 
 void xdebug_str_add(xdebug_str *xs, char *str, int f) {
-  int l = strlen(str);
-  if (xs->l + l > xs->a - 1) {
-    xs->d = (char*) xdrealloc(xs->d, xs->a + l + XDEBUG_STR_PREALLOC);
-    xs->a = xs->a + l + XDEBUG_STR_PREALLOC;
-  }
-  if (!xs->l) {
-    xs->d[0] = '\0';
-  }
-  memcpy(xs->d + xs->l, str, l);
-  xs->d[xs->l + l] = '\0';
-  xs->l = xs->l + l;
-  if (f) {
-    xdfree(str);
-  }
+  xdebug_str_addl(xs, str, strlen(str), f);
 }
 
 void xdebug_str_addl(xdebug_str *xs, char *str, int le, int f) {

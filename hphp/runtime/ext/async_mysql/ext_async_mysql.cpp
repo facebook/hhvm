@@ -370,24 +370,60 @@ Object HHVM_METHOD(AsyncMysqlConnection, queryf,
   // Not directly calling argsv.toFollyDynamic() as that creates a folly
   // dynamic object, not list
   std::vector<am::QueryArgument> query_args;
+  query_args.reserve(args.length());
+
+  auto scalarPush = [](
+    std::vector<am::QueryArgument>& list, const Variant& arg
+  ) {
+    if (arg.isInteger()) {
+      list.push_back(arg.toInt64());
+    } else if (arg.isDouble()) {
+      list.push_back(arg.toDouble());
+    } else if (arg.isString()) {
+      list.push_back(static_cast<std::string>(arg.toString()));
+    } else if (arg.isNull()) {
+      list.push_back(am::QueryArgument());
+    } else {
+      return false;
+    }
+    return true;
+  };
+
   for (ArrayIter iter(args); iter; ++iter) {
     const Variant& arg = iter.second();
-    // not using switch (arg.getType()) because null and strings are special
-    if (arg.isInteger()) {
-      query_args.push_back(arg.toInt64());
-    } else if (arg.isDouble()) {
-      query_args.push_back(arg.toDouble());
-    } else if (arg.isString()) {
-      query_args.push_back(static_cast<std::string>(arg.toString()));
-    } else if (arg.isNull()) {
-      query_args.push_back(am::QueryArgument());
-    } else {
-      throw_invalid_argument(
-        "queryf parameters must be scalars - parameter %ld is a %s",
-        query_args.size(),
-        getDataTypeString(arg.getType()).c_str()
-      );
+    if (scalarPush(query_args, arg)) {
+      continue;
     }
+
+    if (arg.isObject()) {
+      const Object& obj = arg.asCObjRef();
+      if (obj->isCollection() && isVectorCollection(obj->collectionType())) {
+        std::vector<am::QueryArgument> out;
+        out.reserve(getCollectionSize(obj.get()));
+        for (ArrayIter listIter(arg); listIter; ++listIter) {
+          const Variant& item = listIter.second();
+          if (scalarPush(out, item)) {
+            continue;
+          }
+          throw_invalid_argument(
+            "queryf arguments must be scalars, or Vectors of scalars. "
+            "Parameter %ld is a Vector containing a %s at index %ld",
+            query_args.size(),
+            getDataTypeString(item.getType()).c_str(),
+            out.size()
+          );
+        }
+        query_args.push_back(out);
+        continue;
+      }
+    }
+
+    throw_invalid_argument(
+      "queryf parameters must be scalars, or Vectors of scalars. "
+      "Parameter %ld is a %s",
+      query_args.size(),
+      getDataTypeString(arg.getType()).c_str()
+    );
   }
 
   return data->query(
@@ -662,7 +698,6 @@ IMPLEMENT_GET_CLASS(AsyncMysqlQueryResult)
 void AsyncMysqlQueryResult::sweep() {
   m_op.reset();
   m_query_result.reset();
-  m_field_index.reset();
 }
 
 ObjectData* AsyncMysqlQueryResult::newInstance(
@@ -678,7 +713,7 @@ void AsyncMysqlQueryResult::create(std::shared_ptr<am::Operation> op,
   m_query_result =
       folly::make_unique<am::QueryResult>(std::move(query_result));
   m_field_index =
-      std::make_shared<FieldIndex>(m_query_result->getRowFields());
+      smart::make_shared<FieldIndex>(m_query_result->getRowFields());
 }
 
 am::Operation* AsyncMysqlQueryResult::op() {
@@ -916,7 +951,6 @@ ObjectData* AsyncMysqlRowBlock::newInstance(am::RowBlock* row_block,
 
 void AsyncMysqlRowBlock::sweep() {
   m_row_block.reset();
-  m_field_index.reset();
 }
 
 size_t AsyncMysqlRowBlock::getIndexFromVariant(const Variant& field) {
@@ -1205,8 +1239,10 @@ bool HHVM_METHOD(AsyncMysqlRowIterator, valid) {
 /*?? return as string? */
 String HHVM_METHOD(AsyncMysqlRowIterator, current) {
   auto* data = Native::data<AsyncMysqlRowIterator>(this_);
-  return HHVM_MN(AsyncMysqlRow, getFieldAsString)(data->m_row.get(),
-                                                  data->m_field_number);
+  return HHVM_MN(AsyncMysqlRow, getFieldAsString)(
+    data->m_row.get(),
+    (uint64_t)data->m_field_number
+  );
 }
 
 int64_t HHVM_METHOD(AsyncMysqlRowIterator, key) {

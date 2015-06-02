@@ -1081,20 +1081,21 @@ void mysqlExtension::debuggerInfo(InfoVec &info) {
 }
 
 void mysqlExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
-  Hdf mysql = config["MySQL"];
-  Config::Bind(ReadOnly, ini, mysql["ReadOnly"], false);
+  Config::Bind(ReadOnly, ini, config, "MySQL.ReadOnly", false);
 #ifdef FACEBOOK
-  Config::Bind(Localize, ini, mysql["Localize"], false);
+  Config::Bind(Localize, ini, config, "MySQL.Localize", false);
 #endif
-  Config::Bind(ConnectTimeout, ini, mysql["ConnectTimeout"], 1000);
-  Config::Bind(ReadTimeout, ini, mysql["ReadTimeout"], 60000);
-  Config::Bind(WaitTimeout, ini, mysql["WaitTimeout"], -1);
-  Config::Bind(SlowQueryThreshold, ini, mysql["SlowQueryThreshold"], 1000);
-  Config::Bind(KillOnTimeout, ini, mysql["KillOnTimeout"], false);
-  Config::Bind(MaxRetryOpenOnFail, ini, mysql["MaxRetryOpenOnFail"], 1);
-  Config::Bind(MaxRetryQueryOnFail, ini, mysql["MaxRetryQueryOnFail"], 1);
-  Config::Bind(Socket, ini, mysql["Socket"], "");
-  Config::Bind(TypedResults, ini, mysql["TypedResults"], true);
+  Config::Bind(ConnectTimeout, ini, config, "MySQL.ConnectTimeout", 1000);
+  Config::Bind(ReadTimeout, ini, config, "MySQL.ReadTimeout", 60000);
+  Config::Bind(WaitTimeout, ini, config, "MySQL.WaitTimeout", -1);
+  Config::Bind(SlowQueryThreshold, ini, config, "MySQL.SlowQueryThreshold",
+               1000);
+  Config::Bind(KillOnTimeout, ini, config, "MySQL.KillOnTimeout", false);
+  Config::Bind(MaxRetryOpenOnFail, ini, config, "MySQL.MaxRetryOpenOnFail", 1);
+  Config::Bind(MaxRetryQueryOnFail, ini, config, "MySQL.MaxRetryQueryOnFail",
+               1);
+  Config::Bind(Socket, ini, config, "MySQL.Socket", "");
+  Config::Bind(TypedResults, ini, config, "MySQL.TypedResults", true);
 }
 
 }

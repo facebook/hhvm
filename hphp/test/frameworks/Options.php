@@ -29,6 +29,7 @@ class Options {
   public static bool $allexcept = false;
   public static bool $test_by_single_test = false;
   public static bool $run_tests = true;
+  public static bool $list_tests = false;
   public static string $results_root = __DIR__.'/results';
   public static string $script_errors_file = __DIR__.'/results/_script.errors';
   public static string $generated_ini_file = __DIR__.'/.generated.php.ini';
@@ -38,8 +39,9 @@ class Options {
   public static bool $as_phpunit = false;
   public static ?string $cache_directory = null;
   public static bool $local_source_only = false;
+  public static ?Set $filter_tests = null;
 
-  public static function parse(OptionMap $options, array $argv): Vector {
+  public static function parse(OptionMap $options) {
     $ini_settings = Map { };
 
     self::$framework_info = Spyc::YAMLLoad(__DIR__."/frameworks.yaml");
@@ -48,33 +50,60 @@ class Options {
     // want to control what gets printed to something like STDOUT.
     delete_file(self::$script_errors_file);
 
-    // Don't use $argv[0] which just contains the program to run
-    $framework_names = new Vector(array_slice($argv, 1));
-
-    // HACK: Yes, this next bit of "removeKey" code is hacky, maybe even clowny.
-    // We can fix the command_line_lib.php to maybe make things a bit better.
-
-    // It is possible that the $framework_names vector has a combiniation
-    // of command line options (e.g., verbose and timeout) that should be
-    // removed before running the tests. Remeber all these option values are
-    // already set in $options. They are just artificats of $argv right now.
-    // Although, there is a failsafe when checking if the framework exists that
-    // would weed command line opts out too.
-
     // Can't run all the framework tests and "all but" at the same time
     if ($options->containsKey('all') && $options->containsKey('allexcept')) {
       error_and_exit("Cannot use --all and --allexcept together");
     } else if ($options->containsKey('all')) {
       self::$all = true;
-      $framework_names->removeKey(0);
     } else if ($options->containsKey('allexcept')) {
       self::$allexcept = true;
-      $framework_names->removeKey(0);
     }
 
     if ($options->containsKey('install-only')) {
       self::$run_tests = false;
-      $framework_names->removeKey(0);
+    }
+
+    if ($options->containsKey('list-tests')) {
+      if ($options->containsKey('install-only')) {
+        error_and_exit('Can not use --list-tests and --install-only together');
+      }
+      self::$run_tests = false;
+      self::$list_tests = true;
+    }
+
+    if ($options->containsKey('run-specified')) {
+      if ($options->containsKey('install-only')) {
+        error_and_exit(
+          'Can not use --run-specified and --install-only together'
+        );
+      }
+      if ($options->containsKey('list-tests')) {
+        error_and_exit(
+          'Can not use --run-specified and --list-tests together'
+        );
+      }
+      if ($options['run-specified']) {
+        $tests = (string) $options['run-specified'];
+        if ($tests[0] === '@') {
+          $filelist = substr($tests, 1);
+
+          if (!file_exists($filelist)) {
+            error_and_exit(
+              'The test file provided in --run-specified does not exist'
+            );
+          } else {
+            // Load from file
+            self::$filter_tests = new Set(
+              file(
+                $filelist,
+                FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES,
+              )
+            );
+          }
+        } else {
+          self::$filter_tests = new Set(explode(',', $tests));
+        }
+      }
     }
 
     if ($options->containsKey('flakey')) {
@@ -82,7 +111,6 @@ class Options {
         error_and_exit('Can not use --flakey and --record together');
       }
       self::$include_flakey = true;
-      $framework_names->removeKey(0);
     }
 
     if ($options->containsKey('csv')) {
@@ -95,16 +123,13 @@ class Options {
       self::$output_format = OutputFormat::CSV;
       // $tests[0] may not even be "summary", but it doesn't matter, we are
       // just trying to make the count right for $frameworks
-      $framework_names->removeKey(0);
     } else if ($options->containsKey('verbose')) {
       if ($options->containsKey('fbmake')) {
         error_and_exit("Cannot use --fbmake and --verbose together");
       }
       self::$output_format = OutputFormat::HUMAN_VERBOSE;
-      $framework_names->removeKey(0);
     } else if ($options->containsKey('fbmake')) {
       self::$output_format = OutputFormat::FBMAKE;
-      $framework_names->removeKey(0);
     }
 
     if ($options->containsKey('csvheader')) {
@@ -112,7 +137,6 @@ class Options {
         error_and_exit("Must have --csv to use --csvheader");
       }
       self::$csv_header = true;
-      $framework_names->removeKey(0);
     }
 
     if ($options->containsKey('as-phpunit')) {
@@ -123,17 +147,14 @@ class Options {
                        "by-single-test, or numthreads");
       }
       self::$as_phpunit = true;
-      $framework_names->removeKey(0);
     } else if ($options->contains('by-single-test')) {
       if ($options->containsKey('by-file')) {
         // Can't run framework tests both by file and single test
         error_and_exit("Cannot specify both by-file and by-single-test");
       }
       self::$test_by_single_test = true;
-      $framework_names->removeKey(0);
     } else if ($options->contains('by-file')) {
-      // Nothing to set here since this is the default, but remove the key
-      $framework_names->removeKey(0);
+      // Nothing to set here since this is the default
     }
 
     if ($options->containsKey('numthreads')) {
@@ -141,28 +162,19 @@ class Options {
       if (self::$num_threads < 1) {
         self::$num_threads = 1;
       }
-      // Remove numthreads option and its value from the $framework_names vector
-      $framework_names->removeKey(0);
-      $framework_names->removeKey(0);
     }
 
     if ($options->containsKey('timeout')) {
       self::$timeout = (int) $options['timeout'];
-      // Remove timeout option and its value from the $framework_names vector
-      $framework_names->removeKey(0);
-      $framework_names->removeKey(0);
     }
 
     if ($options->containsKey('with-php')) {
        self::$php_path = (string) $options['with-php'];
-      $framework_names->removeKey(0);
-      $framework_names->removeKey(0);
     }
 
     if ($options->containsKey('isolate')) {
       $ini_settings['hhvm.jit_enable_rename_function'] = true;
       $ini_settings['auto_prepend_file'] = __DIR__.'/Isolation.php';
-      $framework_names->removeKey(0);
     }
 
     if ($options->containsKey('redownload')) {
@@ -173,20 +185,16 @@ class Options {
         error_and_exit("Cannot use --redownload and --latest-record together");
       }
       self::$force_redownload = true;
-      $framework_names->removeKey(0);
     } else if ($options->containsKey('latest')) {
       self::$get_latest_framework_code = true;
-      $framework_names->removeKey(0);
     }
 
     if ($options->containsKey('record')) {
       self::$generate_new_expect_file = true;
-      $framework_names->removeKey(0);
     }
 
     if ($options->containsKey('cache-directory')) {
       self::$cache_directory = ((string) $options['cache-directory']) ?: null;
-      $framework_names->removeKey(0);
     } else if (is_dir(__DIR__.'/facebook/cache')) {
       // For test reliability, we always want this to be set
       self::$cache_directory = realpath(__DIR__.'/facebook/cache');
@@ -194,7 +202,6 @@ class Options {
 
     if ($options->containsKey('local-source-only')) {
       self::$local_source_only = true;
-      $framework_names->removeKey(0);
     }
 
     // Probably bad practice to have --latest --record --latest-record, but it
@@ -203,7 +210,6 @@ class Options {
     if ($options->containsKey('latest-record')) {
       self::$get_latest_framework_code = true;
       self::$generate_new_expect_file = true;
-      $framework_names->removeKey(0);
     }
 
     $ini_string = '';
@@ -221,11 +227,6 @@ class Options {
               "values. Please change Map in ProxyInformation.php to correct ".
               "values, if necessary.\n");
     }
-
-    // This will return just the name of the frameworks passed in, if any left
-    // (e.g. --all may have been passed, in which case the Vector will be
-    // empty)
-    return $framework_names;
   }
 
   // Will return a string (e.g. for test path) or

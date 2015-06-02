@@ -161,7 +161,6 @@ public:
   void analyzeProgramFinal();
   void dump();
 
-  void docJson(const std::string &filename);
   void visitFiles(void (*cb)(AnalysisResultPtr, StatementPtr, void*),
                   void *data);
 
@@ -240,7 +239,6 @@ public:
   ClassScopePtrVec findClasses(const std::string &className) const;
   bool classMemberExists(const std::string &name, FindClassBy by) const;
   ClassScopePtr findExactClass(ConstructPtr cs, const std::string &name) const;
-  bool checkClassPresent(ConstructPtr cs, const std::string &name) const;
   FunctionScopePtr findFunction(const std::string &funcName) const ;
   BlockScopeConstPtr findConstantDeclarer(const std::string &constName) const {
     return const_cast<AnalysisResult*>(this)->findConstantDeclarer(constName);

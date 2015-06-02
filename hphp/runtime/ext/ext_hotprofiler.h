@@ -18,7 +18,6 @@
 #ifndef incl_HPHP_EXT_HOTPROFILER_H_
 #define incl_HPHP_EXT_HOTPROFILER_H_
 
-#include "hphp/runtime/ext/ext_fb.h"
 #include "hphp/runtime/base/request-local.h"
 
 #ifdef __FreeBSD__
@@ -191,7 +190,10 @@ public:
   cpu_set_t m_prev_mask;               // saved cpu affinity
   Frame    *m_frame_free_list;         // freelist of Frame
   uint8_t     m_func_hash_counters[256]; // counter table by hash code;
+private:
+  bool m_has_affinity;
 
+public:
   /*
    * A hash function to calculate a 8-bit hash code for a function name.
    * This is based on a small modification to 'zend_inline_hash_func' by summing

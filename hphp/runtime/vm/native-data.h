@@ -17,6 +17,7 @@
 #define _incl_HPHP_RUNTIME_VM_NATIVE_DATA_H
 
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
 
 namespace HPHP { namespace Native {
@@ -139,9 +140,14 @@ enum NDIFlags {
   NO_SWEEP       = (1<<1),
 };
 
+// NativeData's should not extend sweepable, to sweep a native data define
+// a sweep() function and register the NativeData without the NO_SWEEP flag.
 template<class T>
-void registerNativeDataInfo(const StringData* name,
-                            int64_t flags = 0) {
+typename std::enable_if<
+  !std::is_base_of<Sweepable, T>::value,
+  void
+>::type registerNativeDataInfo(const StringData* name,
+                               int64_t flags = 0) {
   registerNativeDataInfo(name, sizeof(T),
                          &nativeDataInfoInit<T>,
                          (flags & NDIFlags::NO_COPY)
@@ -173,9 +179,27 @@ ObjectData* nativeDataInstanceCtor(Class* cls);
 void nativeDataInstanceCopy(ObjectData* dest, ObjectData *src);
 void nativeDataInstanceDtor(ObjectData* obj, const Class* cls);
 
-void sweepNativeData(std::vector<NativeNode*>&);
 Variant nativeDataSleep(const ObjectData* obj);
 void nativeDataWakeup(ObjectData* obj, const Variant& data);
+
+// return the full native header size, which is also the distance from
+// the allocated pointer to the ObjectData*.
+inline size_t ndsize(const NativeDataInfo* ndi) {
+  return alignTypedValue(ndi->sz + sizeof(NativeNode));
+}
+
+inline NativeNode* getNativeNode(ObjectData *obj, const NativeDataInfo* ndi) {
+  return reinterpret_cast<NativeNode*>(
+    reinterpret_cast<char*>(obj) - ndsize(ndi)
+  );
+}
+
+inline const NativeNode*
+getNativeNode(const ObjectData *obj, const NativeDataInfo* ndi) {
+  return reinterpret_cast<const NativeNode*>(
+    reinterpret_cast<const char*>(obj) - ndsize(ndi)
+  );
+}
 
 //////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Native

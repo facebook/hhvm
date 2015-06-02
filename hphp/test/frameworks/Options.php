@@ -39,7 +39,7 @@ class Options {
   public static bool $as_phpunit = false;
   public static ?string $cache_directory = null;
   public static bool $local_source_only = false;
-  public static ?string $single_test_name = null;
+  public static ?Set $filter_tests = null;
 
   public static function parse(OptionMap $options) {
     $ini_settings = Map { };
@@ -71,18 +71,39 @@ class Options {
       self::$list_tests = true;
     }
 
-    if ($options->containsKey('run-single-test')) {
+    if ($options->containsKey('run-specified')) {
       if ($options->containsKey('install-only')) {
         error_and_exit(
-          'Can not use --run-single-test and --install-only together'
+          'Can not use --run-specified and --install-only together'
         );
       }
       if ($options->containsKey('list-tests')) {
         error_and_exit(
-          'Can not use --run-single-test and --list-tests together'
+          'Can not use --run-specified and --list-tests together'
         );
       }
-      self::$single_test_name = ((string) $options['run-single-test']) ?: null;
+      if ($options['run-specified']) {
+        $tests = (string) $options['run-specified'];
+        if ($tests[0] === '@') {
+          $filelist = substr($tests, 1);
+
+          if (!file_exists($filelist)) {
+            error_and_exit(
+              'The test file provided in --run-specified does not exist'
+            );
+          } else {
+            // Load from file
+            self::$filter_tests = new Set(
+              file(
+                $filelist,
+                FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES,
+              )
+            );
+          }
+        } else {
+          self::$filter_tests = new Set(explode(',', $tests));
+        }
+      }
     }
 
     if ($options->containsKey('flakey')) {

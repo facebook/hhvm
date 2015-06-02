@@ -230,9 +230,10 @@ function run_tests(Vector $frameworks): void {
     // vector; otherwise, we are just going to add the framework to run
     // serially and use its global phpunit test run command to run the entire
     // suite (just like a normal phpunit run outside this framework).
-    if (Options::$single_test_name !== null) {
+    $filter_tests = Options::$filter_tests;
+    if ($filter_tests !== null) {
       foreach($framework->getTests() as $test) {
-        if ($test == Options::$single_test_name) {
+        if ($filter_tests->contains($test)) {
           $st = new Runner($framework, $test);
           $all_tests->add($st);
         }
@@ -679,8 +680,12 @@ function oss_test_option_map(): OptionInfoMap {
     'local-source-only'   => Pair {'',   'Fail if git or composer calls are '.
                                          'needed'},
     'list-tests'          => Pair {'',   'List tests that would be run'},
-    'run-single-test:'    => Pair {'',   'Run a single test by its name as '.
-                                         'returned by --list-tests'},
+    'run-specified:'      => Pair {'',   'Run only the specified tests by '.
+                                         'name, separated by a comma. Test '.
+                                         'names are returned by '.
+                                         '--list-tests. If the name is '.
+                                         'prepended with an @, load the '.
+                                         'test names from file instead.'},
   };
 }
 

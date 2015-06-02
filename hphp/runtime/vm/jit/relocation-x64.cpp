@@ -120,6 +120,8 @@ size_t relocateImpl(RelocationInfo& rel,
               if (d2.size() < kJmpLen) {
                 d2.widenBranch();
                 internalRefsNeedUpdating = true;
+                // widening a branch makes the dest instruction bigger
+                destBlock.setFrontier(dest + d2.size());
               }
             } else if (d2.shrinkBranch()) {
               internalRefsNeedUpdating = true;
@@ -183,7 +185,7 @@ size_t relocateImpl(RelocationInfo& rel,
       if (keepNopHigh && src >= keepNopHigh) {
         keepNopLow = keepNopHigh = nullptr;
       }
-    }
+    } // while (src != end)
 
     if (exitAddr) {
       *exitAddr = jmpDest;

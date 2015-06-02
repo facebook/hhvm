@@ -55,6 +55,15 @@ function parse_options(OptionInfoMap $optmap): OptionMap {
   return parse_options_UNSAFE($optmap);
 }
 
+function remove_argument(array<string> &$argv, $index) {
+  if ($index < 0 || $index >= count($argv)) {
+    return;
+  }
+
+  unset($argv[$index]);
+  $argv = array_values($argv);
+}
+
 function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): OptionMap {
   $short_to_long     = Map {};
   $long_to_default   = Map {};
@@ -96,34 +105,37 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
   $ret = Map {};
 
   array_shift($argv);
-  while (count($argv) > 0) {
-    $arg = $argv[0];
+  $pos_args_count = 0;
+  while (count($argv) - $pos_args_count > 0) {
+    $arg = $argv[$pos_args_count];
 
     if ($arg == "--") {
-      array_shift($argv);
+      remove_argument($argv, $pos_args_count);
       break;
     }
 
     // Helper to try to read an argument for an option.
     $read_argument = function($long) use (&$argv,
+                                           $pos_args_count,
                                            $long_supports_arg,
                                            $long_requires_arg,
                                            $long_to_default,
                                            $long_set_arg) {
       if (!$long_supports_arg[$long]) error("precondition");
       if ($long_requires_arg[$long] || $long_set_arg[$long]) {
-        array_shift($argv);
-        if (count($argv) == 0) {
+        remove_argument($argv, $pos_args_count);
+        if (count($argv) - $pos_args_count == 0) {
           error("option --$long requires an argument");
         }
       } else {
-        if (count($argv) < 1 || $argv[1][0] == '-') {
+        if (count($argv) - $pos_args_count == 0 ||
+            $argv[$pos_args_count + 1][0] == '-') {
           return $long_to_default[$long];
         }
-        array_shift($argv);
+        remove_argument($argv, $pos_args_count);
       }
 
-      return $argv[0];
+      return $argv[$pos_args_count];
     };
 
     // Returns whether a given option is recognized at all.
@@ -160,7 +172,7 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
       } else {
         $ret[$long] = $val;
       }
-      array_shift($argv);
+      remove_argument($argv, $pos_args_count);
       continue;
     }
 
@@ -189,7 +201,7 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
           }
           $ret[$short_to_long[$s]] = $long_to_default[$long];
         }
-        array_shift($argv);
+        remove_argument($argv, $pos_args_count);
         continue;
       }
 
@@ -206,12 +218,12 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
       }
 
       $ret[$long] = $val;
-      array_shift($argv);
+      remove_argument($argv, $pos_args_count);
       continue;
     }
 
     // Positional argument, presumably.
-    break;
+    $pos_args_count++;
   }
 
   return $ret;

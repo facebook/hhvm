@@ -97,7 +97,7 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   assertx(checkEverything(unit));
 
   if (RuntimeOption::EvalHHIRTypeCheckHoisting) {
-    doPass(unit, hoistTypeChecks, DCE::None);
+    doPass(unit, hoistTypeChecks, DCE::Minimal);
   }
   doPass(unit, removeExitPlaceholders, DCE::Minimal);
 

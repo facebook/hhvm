@@ -10,8 +10,8 @@
  */
  
 // flags for password_hash
-const int PASSWORD_DEFAULT = 1;
-const int PASSWORD_BCRYPT = 1;
+const int PASSWORD_DEFAULT = 0;
+const int PASSWORD_BCRYPT = 0;
 
-function password_hash(string $Password, int $Algo, array $Options = []):string;
-function password_verify(string $Password, string $Hash):bool;
+function password_hash(string $password, int $algo, array $options = []): ?string;
+function password_verify(string $password, string $hash): bool;

@@ -34,14 +34,21 @@ struct SSATmp;
  * maybe() to test for non-zero intersections).
  *
  * AUnknown is the top of the lattice (is the class of all possible memory
- * locations we care about).  We don't subdivide very much yet, so many things
- * should end up there.  AEmpty is the bottom.  The various special location
- * types AFoo all have an AFooAny, which is the superset of all AFoos.
+ * locations we care about).  AEmpty is the bottom.  AUnknownTV is a union of
+ * all the classes that contain TypedValue-style storage of PHP values.  The
+ * various special location types AFoo all have an AFooAny, which is the
+ * superset of all AFoos.
  *
  * Part of the lattice currently looks like this:
  *
- *                 Unknown                    ANonFrame := ~AFrameAny
- *                    |                       ANonStack := ~AStackAny
+ *                         Unknown
+ *                            |
+ *                            |
+ *                    +-------+-------+----------+
+ *                    |               |          |
+ *                 UnknownTV      IterPosAny  IterBaseAny
+ *                    |               |          |
+ *                    |              ...        ...
  *                    |
  *      +---------+---+---------------+-------------------------+
  *      |         |                   |                         |
@@ -72,6 +79,22 @@ struct AliasClass;
  * `fp'.
  */
 struct AFrame { SSATmp* fp; uint32_t id; };
+
+/*
+ * A specific php iterator's position value (m_pos).
+ */
+struct AIterPos  { SSATmp* fp; uint32_t id; };
+
+/*
+ * A specific php iterator's base and initialization state, for non-mutable
+ * iterators.
+ *
+ * Instances of this AliasClass cover both the memory storing the pointer to
+ * the object being iterated, and the initialization flags (itype and next
+ * helper)---the reason for this is that nothing may load/store the
+ * initialization state if it isn't also going to load/store the base pointer.
+ */
+struct AIterBase { SSATmp* fp; uint32_t id; };
 
 /*
  * A location inside of an object property, with base `obj' and byte offset
@@ -139,24 +162,25 @@ struct ARef { SSATmp* boxed; };
 
 struct AliasClass {
   enum rep : uint32_t {  // bits for various location classes
-    BEmpty   = 0,
+    BEmpty    = 0,
     // The relative order of the values are used in operator| to decide
     // which specialization is more useful.
-    BFrame   = 1 << 0,
-    BProp    = 1 << 1,
-    BElemI   = 1 << 2,
-    BElemS   = 1 << 3,
-    BStack   = 1 << 4,
-    BMIState = 1 << 5,
-    BRef     = 1 << 6,
+    BFrame    = 1 << 0,
+    BIterPos  = 1 << 1,
+    BIterBase = 1 << 2,
+    BProp     = 1 << 3,
+    BElemI    = 1 << 4,
+    BElemS    = 1 << 5,
+    BStack    = 1 << 6,
+    BMIState  = 1 << 7,
+    BRef      = 1 << 8,
 
-    BElem    = BElemI | BElemS,
-    BHeap    = BElem | BProp | BRef,
+    BElem     = BElemI | BElemS,
+    BHeap     = BElem | BProp | BRef,
 
-    BNonFrame = ~BFrame,
-    BNonStack = ~BStack,
+    BUnknownTV = ~(BIterPos | BIterBase),
 
-    BUnknown = static_cast<uint32_t>(-1),
+    BUnknown   = static_cast<uint32_t>(-1),
   };
 
   /*
@@ -175,6 +199,8 @@ struct AliasClass {
    * where it is.
    */
   /* implicit */ AliasClass(AFrame);
+  /* implicit */ AliasClass(AIterPos);
+  /* implicit */ AliasClass(AIterBase);
   /* implicit */ AliasClass(AProp);
   /* implicit */ AliasClass(AElemI);
   /* implicit */ AliasClass(AElemS);
@@ -226,13 +252,15 @@ struct AliasClass {
    *
    * Returns folly::none if this alias class has no specialization in that way.
    */
-  folly::Optional<AFrame>   frame() const;
-  folly::Optional<AProp>    prop() const;
-  folly::Optional<AElemI>   elemI() const;
-  folly::Optional<AElemS>   elemS() const;
-  folly::Optional<AStack>   stack() const;
-  folly::Optional<AMIState> mis() const;
-  folly::Optional<ARef>     ref() const;
+  folly::Optional<AFrame>    frame() const;
+  folly::Optional<AIterPos>  iterPos() const;
+  folly::Optional<AIterBase> iterBase() const;
+  folly::Optional<AProp>     prop() const;
+  folly::Optional<AElemI>    elemI() const;
+  folly::Optional<AElemS>    elemS() const;
+  folly::Optional<AStack>    stack() const;
+  folly::Optional<AMIState>  mis() const;
+  folly::Optional<ARef>      ref() const;
 
   /*
    * Conditionally access specific known information, but also checking that
@@ -242,25 +270,32 @@ struct AliasClass {
    *
    *   cls <= AFooAny ? cls.foo() : folly::none
    */
-  folly::Optional<AFrame>   is_frame() const;
-  folly::Optional<AProp>    is_prop() const;
-  folly::Optional<AElemI>   is_elemI() const;
-  folly::Optional<AElemS>   is_elemS() const;
-  folly::Optional<AStack>   is_stack() const;
-  folly::Optional<AMIState> is_mis() const;
-  folly::Optional<ARef>     is_ref() const;
+  folly::Optional<AFrame>    is_frame() const;
+  folly::Optional<AIterPos>  is_iterPos() const;
+  folly::Optional<AIterBase> is_iterBase() const;
+  folly::Optional<AProp>     is_prop() const;
+  folly::Optional<AElemI>    is_elemI() const;
+  folly::Optional<AElemS>    is_elemS() const;
+  folly::Optional<AStack>    is_stack() const;
+  folly::Optional<AMIState>  is_mis() const;
+  folly::Optional<ARef>      is_ref() const;
 
 private:
   enum class STag {
     None,
     Frame,
+    IterPos,
+    IterBase,
     Prop,
     ElemI,
     ElemS,
     Stack,
     MIState,
     Ref,
+
+    IterBoth,  // A union of base and pos for the same iter.
   };
+  struct UIterBoth { SSATmp* fp; uint32_t id; };
 
 private:
   friend std::string show(AliasClass);
@@ -268,39 +303,50 @@ private:
   bool checkInvariants() const;
   bool equivData(AliasClass) const;
   bool subclassData(AliasClass) const;
+  bool diffSTagSubclassData(rep relevant_bits, AliasClass) const;
   bool maybeData(AliasClass) const;
+  bool diffSTagMaybeData(rep relevant_bits, AliasClass) const;
+  folly::Optional<UIterBoth> asUIter() const;
+  bool refersToSameIterHelper(AliasClass) const;
+  static folly::Optional<AliasClass>
+    precise_diffSTag_unionData(rep newBits, AliasClass, AliasClass);
   static AliasClass unionData(rep newBits, AliasClass, AliasClass);
-  static rep stagBit(STag tag);
+  static rep stagBits(STag tag);
 
 private:
   rep m_bits;
   STag m_stag{STag::None};
   union {
-    AFrame   m_frame;
-    AProp    m_prop;
-    AElemI   m_elemI;
-    AElemS   m_elemS;
-    AStack   m_stack;
-    AMIState m_mis;
-    ARef     m_ref;
+    AFrame    m_frame;
+    AIterPos  m_iterPos;
+    AIterBase m_iterBase;
+    AProp     m_prop;
+    AElemI    m_elemI;
+    AElemS    m_elemS;
+    AStack    m_stack;
+    AMIState  m_mis;
+    ARef      m_ref;
+
+    UIterBoth m_iterBoth;
   };
 };
 
 //////////////////////////////////////////////////////////////////////
 
-auto const AEmpty      = AliasClass{AliasClass::BEmpty};
-auto const AFrameAny   = AliasClass{AliasClass::BFrame};
-auto const APropAny    = AliasClass{AliasClass::BProp};
-auto const AHeapAny    = AliasClass{AliasClass::BHeap};
-auto const ARefAny     = AliasClass{AliasClass::BRef};
-auto const ANonFrame   = AliasClass{AliasClass::BNonFrame};
-auto const ANonStack   = AliasClass{AliasClass::BNonStack};
-auto const AStackAny   = AliasClass{AliasClass::BStack};
-auto const AElemIAny   = AliasClass{AliasClass::BElemI};
-auto const AElemSAny   = AliasClass{AliasClass::BElemS};
-auto const AElemAny    = AliasClass{AliasClass::BElem};
-auto const AMIStateAny = AliasClass{AliasClass::BMIState};
-auto const AUnknown    = AliasClass{AliasClass::BUnknown};
+auto const AEmpty       = AliasClass{AliasClass::BEmpty};
+auto const AFrameAny    = AliasClass{AliasClass::BFrame};
+auto const AIterPosAny  = AliasClass{AliasClass::BIterPos};
+auto const AIterBaseAny = AliasClass{AliasClass::BIterBase};
+auto const APropAny     = AliasClass{AliasClass::BProp};
+auto const AHeapAny     = AliasClass{AliasClass::BHeap};
+auto const ARefAny      = AliasClass{AliasClass::BRef};
+auto const AStackAny    = AliasClass{AliasClass::BStack};
+auto const AElemIAny    = AliasClass{AliasClass::BElemI};
+auto const AElemSAny    = AliasClass{AliasClass::BElemS};
+auto const AElemAny     = AliasClass{AliasClass::BElem};
+auto const AMIStateAny  = AliasClass{AliasClass::BMIState};
+auto const AUnknownTV   = AliasClass{AliasClass::BUnknownTV};
+auto const AUnknown     = AliasClass{AliasClass::BUnknown};
 
 //////////////////////////////////////////////////////////////////////
 

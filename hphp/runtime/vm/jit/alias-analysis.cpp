@@ -147,7 +147,10 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
   ret |= may_alias_part(*this, acls, acls.prop(), APropAny, all_props);
   ret |= may_alias_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
   ret |= may_alias_part(*this, acls, acls.mis(), AMIStateAny, all_mistate);
-  ret |= may_alias_part(*this, acls, acls.ref(), ARefAny, all_refs);
+  ret |= may_alias_part(*this, acls, acls.ref(), ARefAny, all_ref);
+  ret |= may_alias_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
+  ret |= may_alias_part(*this, acls, acls.iterBase(), AIterBaseAny,
+                        all_iterBase);
 
   return ret;
 }
@@ -173,7 +176,9 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
   ret |= expand_part(*this, acls, acls.prop(), APropAny, all_props);
   ret |= expand_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
   ret |= expand_part(*this, acls, acls.mis(), AMIStateAny, all_mistate);
-  ret |= expand_part(*this, acls, acls.ref(), ARefAny, all_refs);
+  ret |= expand_part(*this, acls, acls.ref(), ARefAny, all_ref);
+  ret |= expand_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
+  ret |= expand_part(*this, acls, acls.iterBase(), AIterBaseAny, all_iterBase);
 
   return ret;
 }
@@ -209,12 +214,15 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
 
     if (auto const ref = acls.is_ref()) {
       if (auto const index = add_class(ret, acls)) {
-        ret.all_refs.set(*index);
+        ret.all_ref.set(*index);
       }
       return;
     }
 
-    if (acls.is_frame() || acls.is_mis()) {
+    if (acls.is_frame() ||
+        acls.is_mis() ||
+        acls.is_iterPos() ||
+        acls.is_iterBase()) {
       add_class(ret, acls);
       return;
     }
@@ -293,13 +301,23 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
+    if (auto const iterPos = acls.is_iterPos()) {
+      ret.all_iterPos.set(meta.index);
+      return;
+    }
+
+    if (auto const iterBase = acls.is_iterBase()) {
+      ret.all_iterBase.set(meta.index);
+      return;
+    }
+
     if (auto const mis = acls.is_mis()) {
       ret.all_mistate.set(meta.index);
       return;
     }
 
     if (auto const ref = acls.is_ref()) {
-      meta.conflicts = ret.all_refs;
+      meta.conflicts = ret.all_ref;
       meta.conflicts.reset(meta.index);
       return;
     }
@@ -351,9 +369,9 @@ std::string show(ALocBits bits) {
   return out.str();
 }
 
-std::string show(const AliasAnalysis& linfo) {
+std::string show(const AliasAnalysis& ainfo) {
   auto ret = std::string{};
-  for (auto& kv : linfo.locations) {
+  for (auto& kv : ainfo.locations) {
     auto conf = kv.second.conflicts;
     conf.set(kv.second.index);
     folly::format(&ret, " {: <20} = {: >3} : {}\n",
@@ -365,14 +383,18 @@ std::string show(const AliasAnalysis& linfo) {
                       " {: <20}       : {}\n"
                       " {: <20}       : {}\n"
                       " {: <20}       : {}\n"
+                      " {: <20}       : {}\n"
+                      " {: <20}       : {}\n"
                       " {: <20}       : {}\n",
-    "all props",  show(linfo.all_props),
-    "all elemIs", show(linfo.all_elemIs),
-    "all refs",   show(linfo.all_refs),
-    "all frame",  show(linfo.all_frame),
-    "all stack",  show(linfo.all_stack)
+    "all props",    show(ainfo.all_props),
+    "all elemIs",   show(ainfo.all_elemIs),
+    "all refs",     show(ainfo.all_ref),
+    "all frame",    show(ainfo.all_frame),
+    "all iterPos",  show(ainfo.all_iterPos),
+    "all iterBase", show(ainfo.all_iterBase),
+    "all stack",    show(ainfo.all_stack)
   );
-  for (auto& kv : linfo.stk_expand_map) {
+  for (auto& kv : ainfo.stk_expand_map) {
     folly::format(&ret, " ex {: <17}       : {}\n",
       show(kv.first),
       show(kv.second));

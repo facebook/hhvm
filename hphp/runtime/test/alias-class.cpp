@@ -35,8 +35,6 @@ std::vector<AliasClass> generic_classes() {
     AFrameAny,
     APropAny,
     AHeapAny,
-    ANonFrame,
-    ANonStack,
     AStackAny,
     AElemIAny,
     AElemSAny,
@@ -286,6 +284,88 @@ TEST(AliasClass, StackUnions) {
     AliasClass const deep_stk1 = AStack { FP, -10, imax };
     AliasClass const deep_stk2 = AStack { FP, -14, imax };
     EXPECT_EQ(deep_stk1 | deep_stk2, deep_stk1);
+  }
+}
+
+TEST(AliasClass, IterUnion) {
+  IRUnit unit{test_context};
+  auto const marker = BCMarker::Dummy();
+  auto const FP = unit.gen(DefFP, marker)->dst();
+
+  {
+    AliasClass const iterP0 = AIterPos { FP, 0 };
+    AliasClass const iterP1 = AIterPos { FP, 1 };
+    auto const u1 = iterP0 | iterP1;
+    EXPECT_EQ(u1, AIterPosAny);
+    EXPECT_TRUE(iterP0 <= AIterPosAny);
+    EXPECT_FALSE(iterP0 <= AIterBaseAny);
+  }
+
+  {
+    AliasClass const iterP0 = AIterPos { FP, 0 };
+    AliasClass const iterB0 = AIterBase { FP, 0 };
+    AliasClass const iterP1 = AIterPos { FP, 1 };
+    auto const u1 = iterP0 | iterB0;
+    EXPECT_TRUE(iterP0 <= u1);
+    EXPECT_TRUE(iterB0 <= u1);
+    EXPECT_FALSE(u1 <= AIterPosAny);
+    EXPECT_FALSE(u1 <= AIterBaseAny);
+    EXPECT_TRUE(u1 <= (AIterPosAny | AIterBaseAny));
+    EXPECT_FALSE(iterP1 <= u1);
+    EXPECT_FALSE(iterP1 <= iterP0);
+    EXPECT_FALSE(iterP1 <= iterB0);
+
+    EXPECT_TRUE(!!u1.iterPos());
+    EXPECT_TRUE(!!u1.iterBase());
+    EXPECT_TRUE(!u1.is_iterPos());
+    EXPECT_TRUE(!u1.is_iterBase());
+  }
+
+  {
+    AliasClass const local = AFrame { FP, 0 };
+    AliasClass const iter  = AIterPos { FP, 0 };
+    auto const u1 = local | iter;
+    EXPECT_TRUE(local <= u1);
+    EXPECT_TRUE(iter <= u1);
+    EXPECT_FALSE(!!u1.is_iterPos());
+    EXPECT_FALSE(!!u1.is_frame());
+    EXPECT_TRUE(!!u1.frame());  // locals are preferred in unions to iters
+    EXPECT_FALSE(!!u1.iterPos());
+  }
+
+  {
+    AliasClass const iterP0 = AIterPos { FP, 0 };
+    AliasClass const iterB0 = AIterBase { FP, 0 };
+    AliasClass const iterP1 = AIterPos { FP, 1 };
+    AliasClass const iterB1 = AIterBase { FP, 1 };
+
+    EXPECT_FALSE(iterP0.maybe(iterP1));
+    EXPECT_FALSE(iterB0.maybe(iterB1));
+
+    auto const u1 = iterP0 | iterB0;
+    auto const u2 = iterP1 | iterB1;
+    EXPECT_FALSE(u1 == u2);
+    EXPECT_FALSE(u1.maybe(u2));
+    EXPECT_FALSE(u1 <= u2);
+    EXPECT_FALSE(u2 <= u1);
+
+    EXPECT_TRUE(iterB1 <= u2);
+    EXPECT_TRUE(iterP1 <= u2);
+    EXPECT_FALSE(iterP0 <= u2);
+    EXPECT_FALSE(iterB0 <= u2);
+
+    auto const u3 = u1 | iterP1;
+    EXPECT_FALSE(!!u3.iterPos());
+    EXPECT_FALSE(!!u3.iterBase());
+    EXPECT_TRUE(iterP1 <= u3);
+    EXPECT_TRUE(iterP0 <= u3);
+    EXPECT_TRUE(iterB0 <= u3);
+    EXPECT_TRUE(u1 <= u3);
+    EXPECT_TRUE(u2.maybe(u3));
+
+    // u2 <= u3 isn't 'really' true, but operator| is conservative and makes u3
+    // too big for that right now.
+    EXPECT_TRUE(!u1.precise_union(iterP1));
   }
 }
 

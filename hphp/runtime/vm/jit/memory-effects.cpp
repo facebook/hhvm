@@ -247,11 +247,15 @@ GeneralEffects may_load_store_move(AliasClass loads,
 GeneralEffects iter_effects(const IRInstruction& inst,
                             SSATmp* fp,
                             AliasClass locals) {
+  auto const iterID = inst.extra<IterData>()->iterId;
+  AliasClass const iterPos = AIterPos { fp, iterID };
+  AliasClass const iterBase = AIterBase { fp, iterID };
+  auto const iterMem = iterPos | iterBase;
   return may_reenter(
     inst,
     may_load_store_kill(
-      locals | AHeapAny,
-      locals | AHeapAny,
+      locals | AHeapAny | iterMem,
+      locals | AHeapAny | iterMem,
       AMIStateAny
     )
   );

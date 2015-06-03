@@ -546,7 +546,8 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
   m_length = newLen;
   m_last = final.offset();
 
-  truncateMap(m_typePreds, final);
+  truncateMap(m_typePredictions, final);
+  truncateMap(m_typePreConditions, final);
   truncateMap(m_byRefs, final);
   truncateMap(m_refPreds, final);
   truncateMap(m_knownFuncs, final);
@@ -555,11 +556,18 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
   checkMetadata();
 }
 
-void RegionDesc::Block::addPredicted(SrcKey sk, TypePred pred) {
-  FTRACE(2, "Block::addPredicted({}, {})\n", showShort(sk), show(pred));
-  assertx(pred.type <= TStkElem);
+void RegionDesc::Block::addPredicted(SrcKey sk, TypedLocation locType) {
+  FTRACE(2, "Block::addPredicted({}, {})\n", showShort(sk), show(locType));
+  assertx(locType.type <= TStkElem);
   assertx(contains(sk));
-  m_typePreds.insert(std::make_pair(sk, pred));
+  m_typePredictions.insert(std::make_pair(sk, locType));
+}
+
+void RegionDesc::Block::addPreCondition(SrcKey sk, TypedLocation locType) {
+  FTRACE(2, "Block::addPreCondition({}, {})\n", showShort(sk), show(locType));
+  assertx(locType.type <= TStkElem);
+  assertx(contains(sk));
+  m_typePreConditions.insert(std::make_pair(sk, locType));
 }
 
 void RegionDesc::Block::setParamByRef(SrcKey sk, bool byRef) {
@@ -634,8 +642,8 @@ void RegionDesc::Block::checkInstruction(Op op) const {
 /*
  * Check invariants about the metadata for this Block.
  *
- * 1. Each SrcKey in m_typePreds, m_byRefs, m_refPreds, and m_knownFuncs is
- *    within the bounds of the block.
+ * 1. Each SrcKey in m_typePredictions, m_preConditions, m_byRefs, m_refPreds,
+ *    and m_knownFuncs is within the bounds of the block.
  *
  * 2. Each local id referred to in the type prediction list is valid.
  *
@@ -650,16 +658,22 @@ void RegionDesc::Block::checkMetadata() const {
       assertx(!"Region::Block contained out-of-range metadata");
     }
   };
-  for (auto& tpred : m_typePreds) {
-    rangeCheck("type prediction", tpred.first.offset());
-    auto& loc = tpred.second.location;
-    switch (loc.tag()) {
-    case Location::Tag::Local: assertx(loc.localId() < m_func->numLocals());
-                               break;
-    case Location::Tag::Stack: // Unchecked
-                               break;
+
+  auto checkTypedLocations = [&](const char* msg, const TypedLocMap& map) {
+    for (auto& typedLoc : map) {
+      rangeCheck("type prediction", typedLoc.first.offset());
+      auto& loc = typedLoc.second.location;
+      switch (loc.tag()) {
+      case Location::Tag::Local: assertx(loc.localId() < m_func->numLocals());
+                                 break;
+      case Location::Tag::Stack: // Unchecked
+                                 break;
+      }
     }
-  }
+  };
+
+  checkTypedLocations("type prediction", m_typePredictions);
+  checkTypedLocations("type precondition", m_typePreConditions);
 
   for (auto& byRef : m_byRefs) {
     rangeCheck("parameter reference flag", byRef.first.offset());
@@ -754,18 +768,18 @@ RegionDescPtr selectHotRegion(TransID transId,
 
 //////////////////////////////////////////////////////////////////////
 
-static bool postCondMismatch(const RegionDesc::TypePred& postCond,
-                             const RegionDesc::TypePred& preCond) {
+static bool postCondMismatch(const RegionDesc::TypedLocation& postCond,
+                             const RegionDesc::TypedLocation& preCond) {
   return postCond.location == preCond.location &&
          !preCond.type.maybe(postCond.type);
 }
 
 bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
                           const PostConditions& prevPostConds) {
-  const auto& preConds = block->typePreds();
+  const auto& preConds = block->typePreConditions();
   for (const auto& it : preConds) {
     for (const auto& post : prevPostConds) {
-      const RegionDesc::TypePred& preCond = it.second;
+      const RegionDesc::TypedLocation& preCond = it.second;
       if (postCondMismatch(post, preCond)) {
         FTRACE(6, "preCondsAreSatisfied: postcondition check failed!\n"
                "  postcondition was {}, precondition was {}\n",
@@ -1000,7 +1014,7 @@ std::string show(RegionDesc::Location l) {
   not_reached();
 }
 
-std::string show(RegionDesc::TypePred ta) {
+std::string show(RegionDesc::TypedLocation ta) {
   return folly::format(
     "{} :: {}",
     show(ta.location),
@@ -1064,7 +1078,8 @@ std::string show(const RegionDesc::Block& b) {
                   &ret
                  );
 
-  auto typePreds = makeMapWalker(b.typePreds());
+  auto predictions = makeMapWalker(b.typePredictions());
+  auto preconditions = makeMapWalker(b.typePreConditions());
   auto byRefs    = makeMapWalker(b.paramByRefs());
   auto refPreds  = makeMapWalker(b.reffinessPreds());
   auto knownFuncs= makeMapWalker(b.knownFuncs());
@@ -1073,8 +1088,12 @@ std::string show(const RegionDesc::Block& b) {
   const Func* topFunc = nullptr;
 
   for (int i = 0; i < b.length(); ++i) {
-    while (typePreds.hasNext(skIter)) {
-      folly::toAppend("  predict: ", show(typePreds.next()), "\n", &ret);
+    while (predictions.hasNext(skIter)) {
+      folly::toAppend("  predict: ", show(predictions.next()), "\n", &ret);
+    }
+    while (preconditions.hasNext(skIter)) {
+      folly::toAppend("  precondition: ", show(preconditions.next()), "\n",
+          &ret);
     }
     while (refPreds.hasNext(skIter)) {
       folly::toAppend("  predict reffiness: ", show(refPreds.next()), "\n",

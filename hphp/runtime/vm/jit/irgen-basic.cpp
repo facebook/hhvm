@@ -136,7 +136,10 @@ void emitVGetL(IRGS& env, int32_t id) {
                    return gen(env, AssertType, TBoxedCell, box);
                  },
                  [&] { // Taken: value is not Boxed
-                   return gen(env, Box, value);
+                   auto const tmpType = t - TBoxedCell;
+                   assertx(tmpType <= TCell);
+                   auto const tmp = gen(env, AssertType, tmpType, value);
+                   return gen(env, Box, tmp);
                  });
   }
   pushIncRef(env, value);

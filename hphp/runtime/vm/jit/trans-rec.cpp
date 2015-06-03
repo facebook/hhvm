@@ -65,7 +65,8 @@ TransRec::TransRec(SrcKey                      _src,
   }
 
   auto& firstBlock = *region->blocks().front();
-  auto guardRange = firstBlock.typePreds().equal_range(firstBlock.start());
+  auto guardRange = firstBlock.typePreConditions().equal_range(
+      firstBlock.start());
   for (; guardRange.first != guardRange.second; ++guardRange.first) {
     guards.emplace_back(show(guardRange.first->second));
   }

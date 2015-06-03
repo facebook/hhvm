@@ -13,5 +13,5 @@
 const int PASSWORD_DEFAULT = 1;
 const int PASSWORD_BCRYPT = 1;
 
-function password_hash(string $Password, int $Hash):string;
+function password_hash(string $Password, int $Algo, array $Options = []):string;
 function password_verify(string $Password, string $Hash):bool;

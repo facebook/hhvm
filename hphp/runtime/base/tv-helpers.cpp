@@ -375,7 +375,6 @@ void tvCastToStringInPlace(TypedValue* tv) {
     not_reached();
   } while (0);
 
-  s->incRefCount();
   tv->m_data.pstr = s;
   tv->m_type = KindOfString;
   return;
@@ -391,51 +390,44 @@ StringData* tvCastToString(const TypedValue* tv) {
     tv = tv->m_data.pref->tv();
   }
 
-  StringData* s;
+  switch (tv->m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+      return staticEmptyString();
 
-  do {
-    switch (tv->m_type) {
-      case KindOfUninit:
-      case KindOfNull:
-        return staticEmptyString();
+    case KindOfBoolean:
+      return tv->m_data.num ? s_1.get() : staticEmptyString();
 
-      case KindOfBoolean:
-        return tv->m_data.num ? s_1.get() : staticEmptyString();
+    case KindOfInt64:
+      return buildStringData(tv->m_data.num);
 
-      case KindOfInt64:
-        s = buildStringData(tv->m_data.num);
-        continue;
+    case KindOfDouble:
+      return buildStringData(tv->m_data.dbl);
 
-      case KindOfDouble:
-        s = buildStringData(tv->m_data.dbl);
-        continue;
+    case KindOfStaticString:
+      return tv->m_data.pstr;
 
-      case KindOfStaticString:
-        return tv->m_data.pstr;
-
-      case KindOfString:
-        s = tv->m_data.pstr;
-        continue;
-
-      case KindOfArray:
-        raise_notice("Array to string conversion");
-        return array_string.get();
-
-      case KindOfObject:
-        return tv->m_data.pobj->invokeToString().detach();
-
-      case KindOfResource:
-        return tv->m_data.pres->o_toString().detach();
-
-      case KindOfRef:
-      case KindOfClass:
-        break;
+    case KindOfString: {
+      auto s = tv->m_data.pstr;
+      s->incRefCount();
+      return s;
     }
-    not_reached();
-  } while (0);
 
-  s->incRefCount();
-  return s;
+    case KindOfArray:
+      raise_notice("Array to string conversion");
+      return array_string.get();
+
+    case KindOfObject:
+      return tv->m_data.pobj->invokeToString().detach();
+
+    case KindOfResource:
+      return tv->m_data.pres->o_toString().detach();
+
+    case KindOfRef:
+    case KindOfClass:
+      not_reached();
+  }
+  not_reached();
 }
 
 void tvCastToArrayInPlace(TypedValue* tv) {

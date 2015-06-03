@@ -84,7 +84,6 @@ const StaticString
 Variant::Variant(const char* v) {
   m_type = KindOfString;
   m_data.pstr = StringData::Make(v);
-  m_data.pstr->incRefCount();
 }
 
 Variant::Variant(const String& v) noexcept : Variant(v.get()) {
@@ -95,7 +94,6 @@ Variant::Variant(const std::string & v) {
   StringData *s = StringData::Make(v.c_str(), v.size(), CopyString);
   assert(s);
   m_data.pstr = s;
-  s->incRefCount();
 }
 
 Variant::Variant(const Array& v) noexcept : Variant(v.get()) {}
@@ -334,8 +332,8 @@ IMPLEMENT_PTR_SET(ResourceData, pres, KindOfResource)
 
 #undef IMPLEMENT_PTR_SET
 
-#define IMPLEMENT_ATTACH(ptr, member, dtype)                            \
-  void Variant::attach(ptr* v) noexcept {                               \
+#define IMPLEMENT_STEAL(ptr, member, dtype)                             \
+  void Variant::steal(ptr* v) noexcept {                                \
     Variant* self = (m_type == KindOfRef) ? m_data.pref->var() : this;  \
     if (UNLIKELY(!v)) {                                                 \
       self->setNull();                                                  \
@@ -348,13 +346,13 @@ IMPLEMENT_PTR_SET(ResourceData, pres, KindOfResource)
     }                                                                   \
   }
 
-IMPLEMENT_ATTACH(StringData, pstr,
-                 v->isStatic() ? KindOfStaticString : KindOfString)
-IMPLEMENT_ATTACH(ArrayData, parr, KindOfArray)
-IMPLEMENT_ATTACH(ObjectData, pobj, KindOfObject)
-IMPLEMENT_ATTACH(ResourceData, pres, KindOfResource)
+IMPLEMENT_STEAL(StringData, pstr,
+                v->isStatic() ? KindOfStaticString : KindOfString)
+IMPLEMENT_STEAL(ArrayData, parr, KindOfArray)
+IMPLEMENT_STEAL(ObjectData, pobj, KindOfObject)
+IMPLEMENT_STEAL(ResourceData, pres, KindOfResource)
 
-#undef IMPLEMENT_ATTACH
+#undef IMPLEMENT_STEAL
 
 int Variant::getRefCount() const noexcept {
   switch (m_type) {

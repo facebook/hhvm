@@ -228,7 +228,7 @@ StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data         = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 0);
+  sd->m_hdr.init(cc, HeaderKind::String, 1);
   sd->m_lenAndHash   = sl.len; // hash=0
 
   data[sl.len] = 0;
@@ -238,7 +238,7 @@ StringData* StringData::Make(StringSlice sl, CopyStringMode) {
 
   assert(ret == sd);
   assert(ret->m_len == sl.len);
-  assert(ret->getCount() == 0);
+  assert(ret->hasExactlyOneRef());
   assert(ret->m_hash == 0);
   assert(ret->isFlat());
   assert(ret->checkSane());
@@ -261,10 +261,10 @@ StringData* StringData::Make(size_t reserveLen) {
 
   data[0] = 0;
   sd->m_data        = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 0);
+  sd->m_hdr.init(cc, HeaderKind::String, 1);
   sd->m_lenAndHash  = 0; // len=hash=0
 
-  assert(sd->getCount() == 0);
+  assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
   assert(sd->checkSane());
   return sd;
@@ -290,14 +290,14 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2) {
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 0);
+  sd->m_hdr.init(cc, HeaderKind::String, 1);
   sd->m_lenAndHash  = len; // hash=0
 
   memcpy(data, r1.ptr, r1.len);
   memcpy(data + r1.len, r2.ptr, r2.len);
   data[len] = 0;
 
-  assert(sd->getCount() == 0);
+  assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
   assert(sd->checkSane());
   return sd;
@@ -316,7 +316,7 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 0);
+  sd->m_hdr.init(cc, HeaderKind::String, 1);
   sd->m_lenAndHash  = len; // hash=0
 
   void* p;
@@ -325,7 +325,7 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
       memcpy((char*)p + r2.len, r3.ptr, r3.len);
   data[len] = 0;
 
-  assert(sd->getCount() == 0);
+  assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
   assert(sd->checkSane());
   return sd;
@@ -340,7 +340,7 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
   auto const data     = reinterpret_cast<char*>(sd + 1);
 
   sd->m_data        = data;
-  sd->m_hdr.init(cc, HeaderKind::String, 0);
+  sd->m_hdr.init(cc, HeaderKind::String, 1);
   sd->m_lenAndHash  = len; // hash=0
 
   void* p;
@@ -350,7 +350,7 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2,
       memcpy((char*)p + r3.len, r4.ptr, r4.len);
   data[len] = 0;
 
-  assert(sd->getCount() == 0);
+  assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
   assert(sd->checkSane());
   return sd;
@@ -377,7 +377,7 @@ StringData* StringData::MakeAPCSlowPath(const APCString* shared) {
   );
   auto const data = shared->getStringData();
   sd->m_data = const_cast<char*>(data->m_data);
-  sd->m_hdr.init(data->m_hdr, 0);
+  sd->m_hdr.init(data->m_hdr, 1);
   sd->m_lenAndHash = data->m_lenAndHash;
   sd->sharedPayload()->shared = shared;
   sd->enlist();
@@ -386,7 +386,7 @@ StringData* StringData::MakeAPCSlowPath(const APCString* shared) {
   assert(sd->m_len == data->size());
   assert(sd->m_hdr.aux == data->m_hdr.aux);
   assert(sd->m_hdr.kind == HeaderKind::String);
-  assert(sd->getCount() == 0);
+  assert(sd->hasExactlyOneRef());
   assert(sd->m_hash == data->m_hash);
   assert(sd->isShared());
   assert(sd->checkSane());
@@ -419,7 +419,7 @@ StringData* StringData::Make(const APCString* shared) {
   assert(cc.code == cap - kCapOverhead);
 
   sd->m_data = pdst;
-  sd->m_hdr.init(cc, HeaderKind::String, 0);
+  sd->m_hdr.init(cc, HeaderKind::String, 1);
   sd->m_lenAndHash = len | int64_t{hash} << 32;
 
   pdst[len] = 0;
@@ -432,7 +432,7 @@ StringData* StringData::Make(const APCString* shared) {
 
   assert(ret == sd);
   assert(ret->m_len == len);
-  assert(ret->getCount() == 0);
+  assert(ret->hasExactlyOneRef());
   assert(ret->m_hash == hash);
   assert(ret->isFlat());
   assert(ret->checkSane());

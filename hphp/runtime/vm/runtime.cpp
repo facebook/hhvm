@@ -69,7 +69,6 @@ void print_boolean(bool val) {
 StringData* concat_ss(StringData* v1, StringData* v2) {
   if (v1->hasMultipleRefs()) {
     StringData* ret = StringData::Make(v1, v2);
-    ret->setRefCount(1);
     // Because v1->getCount() is greater than 1, we know we will never
     // have to release the string here
     v1->decRefCount();
@@ -80,7 +79,6 @@ StringData* concat_ss(StringData* v1, StringData* v2) {
   if (UNLIKELY(ret != v1)) {
     assert(v1->hasExactlyOneRef());
     v1->release();
-    ret->incRefCount();
   }
   return ret;
 }
@@ -93,9 +91,7 @@ StringData* concat_is(int64_t v1, StringData* v2) {
   // Convert the int to a string
   auto const s1 = conv_10(v1, intbuf + sizeof(intbuf));
   StringSlice s2 = v2->slice();
-  StringData* ret = StringData::Make(s1, s2);
-  ret->incRefCount();
-  return ret;
+  return StringData::Make(s1, s2);
 }
 
 /**
@@ -108,7 +104,6 @@ StringData* concat_si(StringData* v1, int64_t v2) {
   if (v1->hasMultipleRefs()) {
     auto const s1 = v1->slice();
     auto const ret = StringData::Make(s1, s2);
-    ret->setRefCount(1);
     // Because v1->getCount() is greater than 1, we know we will never
     // have to release the string here
     v1->decRefCount();
@@ -119,7 +114,6 @@ StringData* concat_si(StringData* v1, int64_t v2) {
   if (UNLIKELY(ret != v1)) {
     assert(v1->hasExactlyOneRef());
     v1->release();
-    ret->incRefCount();
   }
   return ret;
 }
@@ -127,8 +121,7 @@ StringData* concat_si(StringData* v1, int64_t v2) {
 StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
   if (v1->hasMultipleRefs()) {
     StringData* ret = StringData::Make(
-        v1->slice(), v2->slice(), v3->slice());
-    ret->setRefCount(1);
+      v1->slice(), v2->slice(), v3->slice());
     // Because v1->getCount() is greater than 1, we know we will never
     // have to release the string here
     v1->decRefCount();
@@ -140,7 +133,6 @@ StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
   if (UNLIKELY(ret != v1)) {
     assert(v1->hasExactlyOneRef());
     v1->release();
-    ret->incRefCount();
   }
   return ret;
 }
@@ -150,7 +142,6 @@ StringData* concat_s4(StringData* v1, StringData* v2,
   if (v1->hasMultipleRefs()) {
     StringData* ret = StringData::Make(
         v1->slice(), v2->slice(), v3->slice(), v4->slice());
-    ret->setRefCount(1);
     // Because v1->getCount() is greater than 1, we know we will never
     // have to release the string here
     v1->decRefCount();
@@ -162,7 +153,6 @@ StringData* concat_s4(StringData* v1, StringData* v2,
   if (UNLIKELY(ret != v1)) {
     assert(v1->hasExactlyOneRef());
     v1->release();
-    ret->incRefCount();
   }
   return ret;
 }

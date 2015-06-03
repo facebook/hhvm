@@ -205,7 +205,7 @@ static SmartPtr<File> libxml_streams_IO_open_wrapper(
   ITRACE(1, "libxml_open_wrapper({}, {}, {})\n", filename, mode, read_only);
   Trace::Indent _i;
 
-  String strFilename = StringData::Make(filename, CopyString);
+  auto strFilename = String::attach(StringData::Make(filename, CopyString));
   /* FIXME: PHP calls stat() here if the wrapper has a non-null stat handler,
    * in order to skip the open of a missing file, thus suppressing warnings.
    * Our stat handlers are virtual, so there's no easy way to tell if stat

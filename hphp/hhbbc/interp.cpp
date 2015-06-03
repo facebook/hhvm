@@ -359,8 +359,9 @@ void in(ISS& env, const bc::Concat& op) {
         v2->m_type == KindOfStaticString) {
       constprop(env);
       auto const cell = eval_cell([&] {
-        String s(StringData::Make(v2->m_data.pstr, v1->m_data.pstr->slice()));
-        return make_tv<KindOfString>(s.detach());
+        auto s = StringData::Make(
+          v2->m_data.pstr, v1->m_data.pstr->slice());
+        return make_tv<KindOfString>(s);
       });
       return push(env, cell ? *cell : TInitCell);
     }

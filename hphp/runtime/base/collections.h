@@ -185,7 +185,9 @@ COLLECTIONS_ALL_TYPES(X)
 }
 
 inline folly::Optional<CollectionType> stringToType(const std::string& s) {
-  return stringToType(StringData::Make(s.c_str()));
+  return stringToType(
+    SmartPtr<StringData>::attach(StringData::Make(s)).get()
+  );
 }
 
 inline bool isTypeName(const StringData* str) {

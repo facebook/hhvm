@@ -892,10 +892,10 @@ void XDebugServer::parseInput(folly::StringPiece in, String& cmd, Array& args) {
   auto ptr = strchr(const_cast<char*>(in.data()), ' ');
   if (ptr != nullptr) {
     size_t size = ptr - in.data();
-    cmd = String(StringData::Make(in.data(), size, CopyString));
+    cmd = String::attach(StringData::Make(in.data(), size, CopyString));
   } else if (in[0] != '\0') {
     // There are no spaces, the entire string is the command
-    cmd = String(in.data(), CopyString);
+    cmd = String::attach(StringData::Make(in.data(), CopyString));
     return;
   } else {
     throw Error::Parse;
@@ -947,7 +947,7 @@ void XDebugServer::parseInput(folly::StringPiece in, String& cmd, Array& args) {
           if (args[opt].isNull()) {
             size_t size = ptr - value;
             StringData* val_data = StringData::Make(value, size, CopyString);
-            args.set(opt, String(val_data));
+            args.set(opt, String::attach(val_data));
             state = ParseState::NORMAL;
           } else {
             throw Error::DupArg;
@@ -973,7 +973,7 @@ void XDebugServer::parseInput(folly::StringPiece in, String& cmd, Array& args) {
         if (args[opt].isNull()) {
           size_t size = ptr - value;
           StringData* val_data = StringData::Make(value, size, CopyString);
-          args.set(opt, HHVM_FN(stripcslashes)(String(val_data)));
+          args.set(opt, HHVM_FN(stripcslashes)(String::attach(val_data)));
           state = ParseState::SKIP_CHAR;
         } else {
           throw Error::DupArg;

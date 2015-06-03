@@ -53,7 +53,7 @@ Variant HHVM_FUNCTION(wordwrap, const String& str, int64_t linewidth /* = 75 */,
   if (brklen == 1 && !cut) {
     auto new_sd = StringData::Make(str.get(), CopyString);
     new_sd->invalidateHash();
-    Variant ret = new_sd;
+    auto ret = Variant::attach(new_sd);
     char* newtext = new_sd->mutableData();
     auto bc = brkstr[0];
     size_t current = 0, laststart = 0, lastspace = 0;
@@ -139,7 +139,7 @@ Variant HHVM_FUNCTION(wordwrap, const String& str, int64_t linewidth /* = 75 */,
     return s;
   }
   // reallocate into a smaller buffer so that we don't waste memory
-  return StringData::Make(s.get(), CopyString);
+  return Variant::attach(StringData::Make(s.get(), CopyString));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

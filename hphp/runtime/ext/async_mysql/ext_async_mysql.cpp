@@ -1031,7 +1031,10 @@ String HHVM_METHOD(AsyncMysqlRowBlock,
                    const Variant& field) {
   auto* data = Native::data<AsyncMysqlRowBlock>(this_);
   auto val = data->getFieldAs<StringPiece>(row, field);
-  return StringData::Make(val.data(), val.size(), CopyString);
+  // Cannot use the String constructor directly, as it has subtle different
+  // behavior in the case where ptr is null, and length is 0, and it breaks flib
+  // to change that.
+  return String::attach(StringData::Make(val.data(), val.size(), CopyString));
 }
 
 bool HHVM_METHOD(AsyncMysqlRowBlock, isNull,

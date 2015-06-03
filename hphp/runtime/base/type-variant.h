@@ -316,6 +316,22 @@ struct Variant : private TypedValue {
    */
   Variant& setWithRef(const Variant& v) noexcept;
 
+  static Variant attach(StringData* var) noexcept {
+    return Variant{var, Attach{}};
+  }
+  static Variant attach(ArrayData* var) noexcept {
+    return Variant{var, Attach{}};
+  }
+  static Variant attach(ObjectData* var) noexcept {
+    return Variant{var, Attach{}};
+  }
+  static Variant attach(ResourceData* var) noexcept {
+    return Variant{var, Attach{}};
+  }
+  static Variant attach(RefData* var) noexcept {
+    return Variant{var, Attach{}};
+  }
+
 ///////////////////////////////////////////////////////////////////////////////
 // int64
 
@@ -915,10 +931,10 @@ struct Variant : private TypedValue {
   void set(const Object& v) noexcept { return set(v.get()); }
   void set(const Resource& v) noexcept { return set(v.get()); }
 
-  void set(String&& v) noexcept { return attach(v.detach()); }
-  void set(Array&& v) noexcept { return attach(v.detach()); }
-  void set(Object&& v) noexcept { return attach(v.detach()); }
-  void set(Resource&& v) noexcept { return attach(v.detach()); }
+  void set(String&& v) noexcept { return steal(v.detach()); }
+  void set(Array&& v) noexcept { return steal(v.detach()); }
+  void set(Object&& v) noexcept { return steal(v.detach()); }
+  void set(Resource&& v) noexcept { return steal(v.detach()); }
 
   template<typename T>
   void set(const SmartPtr<T> &v) noexcept {
@@ -927,13 +943,13 @@ struct Variant : private TypedValue {
 
   template <typename T>
   void set(SmartPtr<T>&& v) noexcept {
-    return attach(v.detach());
+    return steal(v.detach());
   }
 
-  void attach(StringData* v) noexcept;
-  void attach(ArrayData* v) noexcept;
-  void attach(ObjectData* v) noexcept;
-  void attach(ResourceData* v) noexcept;
+  void steal(StringData* v) noexcept;
+  void steal(ArrayData* v) noexcept;
+  void steal(ObjectData* v) noexcept;
+  void steal(ResourceData* v) noexcept;
 
   static ALWAYS_INLINE
   void AssignValHelper(Variant *self, const Variant *other) {

@@ -48,7 +48,9 @@ RefData* lookupStaticFromClosure(ObjectData* closure,
                                  StringData* name,
                                  bool& inited) {
   assertx(closure->instanceof(c_Closure::classof()));
-  String str(StringData::Make(s_staticPrefix.slice(), name->slice()));
+  auto str = String::attach(
+    StringData::Make(s_staticPrefix.slice(), name->slice())
+  );
   auto const cls = closure->getVMClass();
   auto const slot = cls->lookupDeclProp(str.get());
   assertx(slot != kInvalidSlot);
@@ -239,15 +241,11 @@ ObjectData* convCellToObjHelper(TypedValue tv) {
 
 StringData* convDblToStrHelper(int64_t i) {
   double d = reinterpretIntAsDbl(i);
-  auto r = buildStringData(d);
-  r->incRefCount();
-  return r;
+  return buildStringData(d);
 }
 
 StringData* convIntToStrHelper(int64_t i) {
-  auto r = buildStringData(i);
-  r->incRefCount();
-  return r;
+  return buildStringData(i);
 }
 
 StringData* convObjToStrHelper(ObjectData* o) {

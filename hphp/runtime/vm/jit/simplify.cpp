@@ -1377,7 +1377,7 @@ SSATmp* simplifyConvBoolToStr(State& env, const IRInstruction* inst) {
 SSATmp* simplifyConvDblToStr(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
-    String dblStr(buildStringData(src->dblVal()));
+    auto dblStr = String::attach(buildStringData(src->dblVal()));
     return cns(env, makeStaticString(dblStr));
   }
   return nullptr;

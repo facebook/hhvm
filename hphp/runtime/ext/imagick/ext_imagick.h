@@ -75,10 +75,14 @@ class ImagickExtension final : public Extension {
     } \
     \
    private: \
-    static void initClass() { \
-      cls = Unit::lookupClass(StringData::Make(#CLS)); \
-    } \
-    \
+    static void initClass() {                                   \
+      cls = Unit::lookupClass(                                  \
+        SmartPtr<StringData>::attach(                           \
+          StringData::Make(#CLS)                                \
+        ).get()                                                 \
+      );                                                        \
+    }                                                           \
+                                                                \
     static HPHP::Class* cls; \
   };
 

@@ -37,6 +37,17 @@ const uint8_t PROTOCOL_ID = 0x82;
 const uint8_t TYPE_MASK = 0xe0;
 const uint8_t TYPE_SHIFT_AMOUNT = 5;
 
+enum TError {
+  ERR_UNKNOWN = 0,
+  ERR_INVALID_DATA = 1,
+  ERR_BAD_VERSION = 4
+};
+
+static void thrift_error(const String& what, TError why) ATTRIBUTE_NORETURN;
+static void thrift_error(const String& what, TError why) {
+  throw create_object(s_TProtocolException, make_packed_array(what, why));
+}
+
 enum CState {
   STATE_CLEAR,
   STATE_FIELD_WRITE,
@@ -105,8 +116,10 @@ static CType ttype_to_ctype(TType x) {
     case T_FLOAT:
       return C_FLOAT;
     default:
-      raise_error("unknown TType %d", static_cast<int>(x));
-      not_reached();
+      thrift_error(
+        folly::to<std::string>(
+          "Unknown Thrift data type ", static_cast<int>(x)),
+        ERR_INVALID_DATA);
   }
 }
 
@@ -140,16 +153,12 @@ static TType ctype_to_ttype(CType x) {
     case C_FLOAT:
       return T_FLOAT;
     default:
-      raise_error("unknown CType %d", static_cast<int>(x));
-      not_reached();
+      thrift_error(
+        folly::to<std::string>(
+          "Unknown Compact data type ", static_cast<int>(x)),
+        ERR_INVALID_DATA);
   }
 }
-
-enum TError {
-  ERR_UNKNOWN = 0,
-  ERR_INVALID_DATA = 1,
-  ERR_BAD_VERSION = 4
-};
 
 struct CompactRequestData final : RequestEventHandler {
   CompactRequestData() : version(VERSION) { }
@@ -166,11 +175,6 @@ struct CompactRequestData final : RequestEventHandler {
   uint8_t version;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(CompactRequestData, s_compact_request_data);
-
-static void thrift_error(const String& what, TError why) ATTRIBUTE_NORETURN;
-static void thrift_error(const String& what, TError why) {
-  throw create_object(s_TProtocolException, make_packed_array(what, why));
-}
 
 class CompactWriter {
   public:
@@ -379,7 +383,8 @@ class CompactWriter {
           break;
 
         default:
-          raise_error("unknown TType %d", static_cast<int>(type));
+          thrift_error("Unknown Thrift data type",
+            ERR_INVALID_DATA);
       }
     }
 
@@ -724,8 +729,8 @@ class CompactReader {
           return readSet(spec);
 
         default:
-          raise_error("unknown TType %d", static_cast<int>(type));
-          not_reached();
+          thrift_error("Unknown Thrift data type",
+            ERR_INVALID_DATA);
       }
     }
 
@@ -820,7 +825,8 @@ class CompactReader {
           break;
 
         default:
-          raise_error("unknown TType %d", static_cast<int>(type));
+          thrift_error("Unknown Thrift data type",
+            ERR_INVALID_DATA);
       }
     }
 

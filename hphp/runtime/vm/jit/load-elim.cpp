@@ -452,7 +452,10 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   }
 
   auto const effects = memory_effects(inst);
-  FTRACE(3, "    {: <30} -- {}\n", show(effects), inst.toString());
+  FTRACE(3, "    {}\n"
+            "      {}\n",
+            inst.toString(),
+            show(effects));
   auto flags = Flags{};
   match<void>(
     effects,

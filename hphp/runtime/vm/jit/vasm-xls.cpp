@@ -1509,7 +1509,7 @@ void Vxls::resolveEdges() {
 void Vxls::insertCopies() {
   // union sf intervals.  this is used to determine whether we can safely
   // optimize constant loads of 0 to an xor on x64.
-  auto sf_ivl = jit::make<Interval>(Vreg{});
+  auto sf_ivl = jit::make_unique<Interval>(Vreg{});
   for (auto ivl : intervals) {
     if (!ivl) continue;
 
@@ -1544,11 +1544,11 @@ void Vxls::insertCopies() {
       }
       auto c = copies.find(pos - 1);
       if (c != copies.end()) {
-        insertCopiesAt(code, j, c->second, slots, pos - 1, sf_ivl);
+        insertCopiesAt(code, j, c->second, slots, pos - 1, sf_ivl.get());
       }
       c = copies.find(pos);
       if (c != copies.end()) {
-        insertCopiesAt(code, j, c->second, slots, pos, sf_ivl);
+        insertCopiesAt(code, j, c->second, slots, pos, sf_ivl.get());
       }
     }
   }
@@ -1564,7 +1564,7 @@ void Vxls::insertCopies() {
         unsigned j = code.size() - 1;
         auto slots = m_sp[spill_offsets[succlist[0]]];
         insertCopiesAt(code, j, c->second, slots,
-                       block_ranges[b].end - 1, sf_ivl);
+                       block_ranges[b].end - 1, sf_ivl.get());
       }
     } else {
       // copies will go at start of successor
@@ -1576,7 +1576,7 @@ void Vxls::insertCopies() {
           auto& code = unit.blocks[s].code;
           unsigned j = 0;
           insertCopiesAt(code, j, c->second, slots,
-                         block_ranges[s].start, sf_ivl);
+                         block_ranges[s].start, sf_ivl.get());
         }
       }
     }

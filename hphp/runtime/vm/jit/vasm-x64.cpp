@@ -221,6 +221,7 @@ struct Vgen {
   void emit(unpcklpd i) { noncommute(i); a->unpcklpd(i.s0, i.d); }
   void emit(xorb i) { commuteSF(i); a->xorb(i.s0, i.d); }
   void emit(xorbi i) { binary(i); a->xorb(i.s0, i.d); }
+  void emit(xorl i) { commuteSF(i); a->xorl(i.s0, i.d); }
   void emit(xorq i) { commuteSF(i); a->xorq(i.s0, i.d); }
   void emit(xorqi i) { binary(i); a->xorq(i.s0, i.d); }
 
@@ -630,12 +631,8 @@ void Vgen::emit(const ldimmb& i) {
   // ldimmb is for Vconst::Byte, which is treated as unsigned uint8_t
   auto val = i.s.b();
   if (i.d.isGP()) {
-    Vreg8 d = i.d;
-    if (val == 0 && !i.saveflags) {
-      a->xorb(d, d);
-    } else {
-      a->movb(val, d);
-    }
+    Vreg8 d8 = i.d;
+    a->movb(val, d8);
   } else {
     emitSimdImm(a, uint8_t(val), i.d);
   }
@@ -645,12 +642,8 @@ void Vgen::emit(const ldimml& i) {
   // ldimml is for Vconst::Long, which is treated as unsigned uint32_t
   auto val = i.s.l();
   if (i.d.isGP()) {
-    Vreg32 d = i.d;
-    if (val == 0 && !i.saveflags) {
-      a->xorl(d, d);
-    } else {
-      a->movl(val, d);
-    }
+    Vreg32 d32 = i.d;
+    a->movl(val, d32);
   } else {
     emitSimdImm(a, uint32_t(val), i.d);
   }
@@ -660,12 +653,8 @@ void Vgen::emit(const ldimmq& i) {
   auto val = i.s.q();
   if (i.d.isGP()) {
     if (val == 0) {
-      Reg64 d = i.d;
-      if (i.saveflags) {
-        a->movl(0, r32(d));
-      } else {
-        a->xorl(r32(d), r32(d));
-      }
+      Vreg32 d32 = i.d;
+      a->movl(0, d32); // because emitImmReg tries the xor optimization
     } else {
       a->emitImmReg(i.s, i.d);
     }

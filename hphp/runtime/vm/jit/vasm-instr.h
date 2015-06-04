@@ -73,9 +73,9 @@ struct Vunit;
   O(copyargs, Inone, UH(s,d), DH(d,s))\
   O(debugtrap, Inone, Un, Dn)\
   O(fallthru, Inone, Un, Dn)\
-  O(ldimmb, I(s) I(saveflags), Un, D(d))\
-  O(ldimml, I(s) I(saveflags), Un, D(d))\
-  O(ldimmq, I(s) I(saveflags), Un, D(d))\
+  O(ldimmb, I(s), Un, D(d))\
+  O(ldimml, I(s), Un, D(d))\
+  O(ldimmq, I(s), Un, D(d))\
   O(ldimmqs, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
   O(mccall, I(target), U(args), Dn)\
@@ -238,6 +238,7 @@ struct Vunit;
   O(unpcklpd, Inone, UA(s0) U(s1), D(d))\
   O(xorb, Inone, U(s0) U(s1), D(d) D(sf))\
   O(xorbi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(xorl, Inone, U(s0) U(s1), D(d) D(sf))\
   O(xorq, Inone, U(s0) U(s1), D(d) D(sf))\
   O(xorqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   /* */
@@ -412,10 +413,14 @@ struct debugtrap {};
  */
 struct fallthru {};
 
-struct ldimmb { Immed s; Vreg d; bool saveflags; };
-struct ldimml { Immed s; Vreg d; bool saveflags; };
-struct ldimmq { Immed64 s; Vreg d; bool saveflags; };
-struct ldimmqs { Immed64 s; Vreg d; };
+/*
+ * load an immedate value without mutating status flags.
+ */
+struct ldimmb { Immed s; Vreg d; };
+struct ldimml { Immed s; Vreg d; };
+struct ldimmq { Immed64 s; Vreg d; };
+struct ldimmqs { Immed64 s; Vreg d; }; // smashable version of ldimmq
+
 struct load { Vptr s; Vreg d; };
 struct mccall { CodeAddress target; RegSet args; };
 struct mcprep { Vreg64 d; };
@@ -674,6 +679,7 @@ struct ud2 {};
 struct unpcklpd { VregDbl s0, s1; Vreg128 d; };
 struct xorb { Vreg8 s0, s1, d; VregSF sf; };
 struct xorbi { Immed s0; Vreg8 s1, d; VregSF sf; };
+struct xorl { Vreg32 s0, s1, d; VregSF sf; };
 struct xorq { Vreg64 s0, s1, d; VregSF sf; };
 struct xorqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 

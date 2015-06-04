@@ -2001,25 +2001,40 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
     if (ivl->reg != InvalidReg) {
       moves[dst] = ivl->reg;
     } else if (ivl->constant) {
-      if (!ivl->val.isUndef) {
-        bool const sf_live = !sf_ivl->ranges.empty() && sf_ivl->covers(pos);
-        switch (ivl->val.kind) {
-          case Vconst::Quad:
-          case Vconst::Double:
-            loads.emplace_back(ldimmq{ivl->val.val, dst, sf_live});
-            break;
-          case Vconst::Long:
-            loads.emplace_back(ldimml{int32_t(ivl->val.val), dst, sf_live});
-            break;
-          case Vconst::Byte:
-            loads.emplace_back(ldimmb{uint8_t(ivl->val.val), dst, sf_live});
-            break;
-          case Vconst::ThreadLocal:
-            loads.emplace_back(
-              load{Vptr{baseless(ivl->val.disp), Vptr::FS}, dst}
-            );
-            break;
-        }
+      if (ivl->val.isUndef) continue;
+      auto const use_xor = ivl->val.val == 0 && dst.isGP() &&
+                           (sf_ivl->ranges.empty() || !sf_ivl->covers(pos));
+      switch (ivl->val.kind) {
+        case Vconst::Quad:
+        case Vconst::Double:
+          if (use_xor) {
+            Vreg32 d32 = dst; // assume 32-bit ops zero upper bits
+            loads.emplace_back(xorl{d32, d32, d32, RegSF{0}});
+          } else {
+            loads.emplace_back(ldimmq{ivl->val.val, dst});
+          }
+          break;
+        case Vconst::Long:
+          if (use_xor) {
+            Vreg32 d32 = dst;
+            loads.emplace_back(xorl{d32, d32, d32, RegSF{0}});
+          } else {
+            loads.emplace_back(ldimml{int32_t(ivl->val.val), dst});
+          }
+          break;
+        case Vconst::Byte:
+          if (use_xor) {
+            Vreg8 d8 = dst;
+            loads.emplace_back(xorb{d8, d8, d8, RegSF{0}});
+          } else {
+            loads.emplace_back(ldimmb{uint8_t(ivl->val.val), dst});
+          }
+          break;
+        case Vconst::ThreadLocal:
+          loads.emplace_back(
+            load{Vptr{baseless(ivl->val.disp), Vptr::FS}, dst}
+          );
+          break;
       }
     } else {
       assertx(ivl->spilled());

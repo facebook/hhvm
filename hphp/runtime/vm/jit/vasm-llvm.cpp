@@ -1576,6 +1576,7 @@ O(testqim) \
 O(ud2) \
 O(xorb) \
 O(xorbi) \
+O(xorl) \
 O(xorq) \
 O(xorqi) \
 O(landingpad) \
@@ -3070,6 +3071,10 @@ void LLVMEmitter::emit(const xorb& inst) {
 
 void LLVMEmitter::emit(const xorbi& inst) {
   defineValue(inst.d, m_irb.CreateXor(value(inst.s1), inst.s0.b()));
+}
+
+void LLVMEmitter::emit(const xorl& inst) {
+  defineValue(inst.d, m_irb.CreateXor(value(inst.s1), value(inst.s0)));
 }
 
 void LLVMEmitter::emit(const xorq& inst) {

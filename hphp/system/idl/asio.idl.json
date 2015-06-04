@@ -200,19 +200,6 @@
                     },
                     "args": [
                     ]
-                },
-                {
-                    "name": "getExceptionIfFailed",
-                    "desc": "Get exception if this wait handle has failed, or null",
-                    "flags": [
-                        "IsFinal"
-                    ],
-                    "return": {
-                        "type": "Object",
-                        "desc": "An exception if this wait handle has failed, or null"
-                    },
-                    "args": [
-                    ]
                 }
             ],
             "consts": [

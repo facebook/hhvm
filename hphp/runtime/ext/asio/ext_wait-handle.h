@@ -101,7 +101,6 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle|
   bool t_isfailed();
   int64_t t_getid();
   String t_getname();
-  Object t_getexceptioniffailed();
 
  public:
   static constexpr ptrdiff_t stateOff() {

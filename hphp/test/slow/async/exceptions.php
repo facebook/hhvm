@@ -11,7 +11,9 @@ async function bThrow() { await block(); throw new Exception(__function__); }
 async function bbThrow() { await block(); await bThrow(); }
 
 function verify(&$a, &$e) {
-  assert($a->getExceptionIfFailed()->getMessage() == $e->getMessage());
+  try { $a->result(); }
+  catch (Exception $ae) {}
+  assert($ae->getMessage() == $e->getMessage());
   var_dump($e->getMessage());
 }
 

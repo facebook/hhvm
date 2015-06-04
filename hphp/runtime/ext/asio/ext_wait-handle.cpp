@@ -108,9 +108,5 @@ String c_WaitHandle::t_getname() {
   return static_cast<c_WaitableWaitHandle*>(this)->getName();
 }
 
-Object c_WaitHandle::t_getexceptioniffailed() {
-  return isFailed() ? getException() : nullptr;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

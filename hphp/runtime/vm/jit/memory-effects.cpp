@@ -297,20 +297,22 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ReqBindJmp:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(0), inst.extra<ReqBindJmp>()->irSPOff.offset - 1) |
-        AMIStateAny
+      *stack_below(inst.src(0), inst.extra<ReqBindJmp>()->irSPOff.offset - 1).
+        precise_union(AMIStateAny)
     };
   case JmpSwitchDest:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(1),
-                  inst.extra<JmpSwitchDest>()->irSPOff.offset - 1)
+      *stack_below(inst.src(1),
+                   inst.extra<JmpSwitchDest>()->irSPOff.offset - 1).
+        precise_union(AMIStateAny)
     };
   case JmpSSwitchDest:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(1),
-                  inst.extra<JmpSSwitchDest>()->offset.offset - 1) | AMIStateAny
+      *stack_below(inst.src(1),
+                   inst.extra<JmpSSwitchDest>()->offset.offset - 1).
+        precise_union(AMIStateAny)
     };
   case ReqRetranslate:
   case ReqRetranslateOpt:

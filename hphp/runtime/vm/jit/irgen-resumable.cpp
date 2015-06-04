@@ -182,8 +182,6 @@ void emitAwait(IRGS& env, int32_t numIters) {
   auto const kFailed    = c_WaitHandle::STATE_FAILED;
 
   auto const state = gen(env, LdWHState, child);
-  auto const failed = gen(env, EqInt, state, cns(env, kFailed));
-  gen(env, JmpNZero, exitSlow, failed);
 
   ifThenElse(
     env,
@@ -192,6 +190,8 @@ void emitAwait(IRGS& env, int32_t numIters) {
       gen(env, JmpNZero, taken, succeeded);
     },
     [&] { // Next: the wait handle is not finished, we need to suspend
+      auto const failed = gen(env, EqInt, state, cns(env, kFailed));
+      gen(env, JmpNZero, exitSlow, failed);
       if (resumed(env)) {
         implAwaitR(env, child, resumeOffset);
       } else {

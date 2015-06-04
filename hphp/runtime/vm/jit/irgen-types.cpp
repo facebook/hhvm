@@ -245,6 +245,10 @@ void implIsScalarC(IRGS& env) {
   gen(env, DecRef, src);
 }
 
+//////////////////////////////////////////////////////////////////////
+
+}
+
 /*
  * Note: this is currently separate from typeFromRAT for now, just because we
  * don't want to enable every single type for assertions yet.
@@ -312,10 +316,6 @@ folly::Optional<Type> ratToAssertType(IRGS& env, RepoAuthType rat) {
       return folly::none;
   }
   not_reached();
-}
-
-//////////////////////////////////////////////////////////////////////
-
 }
 
 //////////////////////////////////////////////////////////////////////

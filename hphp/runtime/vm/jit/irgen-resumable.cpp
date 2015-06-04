@@ -18,9 +18,11 @@
 #include "hphp/runtime/ext/asio/async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/async-generator.h"
 #include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-ret.h"
+#include "hphp/runtime/vm/jit/irgen-types.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
@@ -183,6 +185,28 @@ void emitAwait(IRGS& env, int32_t numIters) {
 
   auto const state = gen(env, LdWHState, child);
 
+  /*
+   * HHBBC may have proven something about the inner type of this wait handle.
+   *
+   * So, we may have an assertion on the type of the top of the stack after
+   * this instruction.  We know the next bytecode instruction is reachable from
+   * fallthrough on the Await, so if it is an AssertRATStk 0, anything coming
+   * out of the wait handle must be a subtype of that type, so this is a safe
+   * and conservative way to do this optimization (even if our successor
+   * bytecode offset is a jump target from things we aren't thinking about
+   * here).
+   */
+  auto const knownTy = [&] {
+    auto pc = curUnit(env)->at(resumeOffset);
+    if (*reinterpret_cast<const Op*>(pc) != Op::AssertRATStk) return TInitCell;
+    ++pc;
+    auto const stkLoc = decodeVariableSizeImm(&pc);
+    if (stkLoc != 0) return TInitCell;
+    auto const rat = decodeRAT(curUnit(env), pc);
+    auto const ty = ratToAssertType(env, rat);
+    return ty ? *ty : TInitCell;
+  }();
+
   ifThenElse(
     env,
     [&] (Block* taken) {
@@ -199,7 +223,7 @@ void emitAwait(IRGS& env, int32_t numIters) {
       }
     },
     [&] { // Taken: retrieve the result from the wait handle
-      auto const res = gen(env, LdWHResult, child);
+      auto const res = gen(env, LdWHResult, knownTy, child);
       gen(env, IncRef, res);
       gen(env, DecRef, child);
       push(env, res);

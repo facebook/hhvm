@@ -1822,7 +1822,7 @@ To string conversions:
   handle states in ext_asio.h. This instruction has undefined behavior if S0 is
   not a WaitHandle.
 
-| LdWHResult, D(Cell), S(Obj), NF
+| LdWHResult, DParam, S(Obj), NF
 
   Loads the result of the WaitHandle in S0. This instruction has undefined
   behavior if S0 is not a WaitHandle, or if S0 is not finished.

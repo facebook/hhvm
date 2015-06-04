@@ -582,20 +582,6 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
   return cloneAndAppendOriginal();
 }
 
-void IRBuilder::prepareForNextHHBC() {
-  assertx(
-    syncedSpLevel() + m_state.evalStack().size() - m_state.stackDeficit() ==
-      m_curMarker.spOff()
-  );
-  m_exnStack = ExnStackState {
-    m_state.spOffset(),
-    m_state.syncedSpLevel(),
-    m_state.stackDeficit(),
-    m_state.evalStack(),
-    m_state.sp()
-  };
-}
-
 void IRBuilder::exceptionStackBoundary() {
   /*
    * If this assert fires, we're trying to put things on the stack in a catch

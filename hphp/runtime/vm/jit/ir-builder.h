@@ -82,12 +82,6 @@ struct IRBuilder {
   void setCurMarker(BCMarker);
 
   /*
-   * Called before we start lowering each bytecode instruction.  Right now all
-   * this does is cause an implicit exceptionStackBoundary.  See below.
-   */
-  void prepareForNextHHBC();
-
-  /*
    * Exception handling and IRBuilder.
    *
    * Normally HHBC opcodes that throw don't have any effects before they throw.

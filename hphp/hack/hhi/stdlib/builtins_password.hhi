@@ -15,3 +15,5 @@ const int PASSWORD_BCRYPT = 0;
 
 function password_hash(string $password, int $algo, array $options = []): ?string;
 function password_verify(string $password, string $hash): bool;
+function password_get_info(string $hash): array;
+function password_needs_rehash(string $password, int $algo, array $options = []): bool;

@@ -21,16 +21,11 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/rds-header.h"
+#include "hphp/runtime/base/surprise-flags.h"
 
 #include <atomic>
 
 namespace HPHP {
-
-//////////////////////////////////////////////////////////////////////
-
-inline bool checkSurpriseFlags() {
-  return rds::header()->surpriseFlags.load(std::memory_order_acquire);
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -59,8 +54,6 @@ class EventHook {
   static void DisableDebug();
   static void EnableIntercept();
   static void DisableIntercept();
-  static ssize_t CheckSurprise();
-  static ssize_t GetSurpriseFlags();
 
   /**
    * Event hooks -- interpreter entry points.
@@ -119,7 +112,7 @@ private:
 
   static void onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags);
   static void onFunctionExit(const ActRec* ar, const TypedValue* retval,
-                             const Fault* fault, ssize_t flags);
+                             const Fault* fault, size_t flags);
 
   static bool RunInterceptHandler(ActRec* ar);
   static const char* GetFunctionNameForProfiler(const Func* func,

@@ -246,6 +246,7 @@ bool canDCE(IRInstruction* inst) {
   case JmpSwitchDest:
   case ProfileSwitchDest:
   case CheckSurpriseFlags:
+  case CheckSurpriseAndStack:
   case ReturnHook:
   case SuspendHookE:
   case SuspendHookR:

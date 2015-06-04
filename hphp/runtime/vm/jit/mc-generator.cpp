@@ -1391,6 +1391,70 @@ void handleStackOverflow(ActRec* calleeAR) {
   not_reached();
 }
 
+void handlePossibleStackOverflow(ActRec* calleeAR) {
+  assert_native_stack_aligned();
+  auto const func = calleeAR->func();
+  auto const limit = func->maxStackCells() + kStackCheckPadding;
+  void* const needed_top = reinterpret_cast<TypedValue*>(calleeAR) - limit;
+  void* const limit_addr =
+    static_cast<char*>(vmRegsUnsafe().stack.getStackLowAddress()) +
+    Stack::sSurprisePageSize;
+  if (needed_top >= limit_addr) {
+    // It was probably a surprise flag trip.  But we can't assert that it is
+    // because background threads are allowed to clear surprise bits
+    // concurrently, so it could be cleared again by now.
+    return;
+  }
+
+  /*
+   * Stack overflows in this situation are a slightly different case than
+   * handleStackOverflow:
+   *
+   * A function prologue already did all the work to prepare to enter the
+   * function, but then it found out it didn't have enough room on the stack.
+   * It may even have written uninits deeper than the stack base (but we limit
+   * it to sSurprisePageSize, so it's harmless).
+   *
+   * Most importantly, it might have pulled args /off/ the eval stack and
+   * shoved them into an ExtraArgs on the calleeAR, or into an array for a
+   * variadic capture param.  We need to get things into an appropriate state
+   * for handleStackOverflow to be able to synchronize things to throw from the
+   * PC of the caller's FCall.
+   *
+   * We don't actually need to make sure the stack is the right depth for the
+   * FCall: the unwinder will expect to see a pre-live ActRec (and we'll set it
+   * up so it will), but it doesn't care how many args (or what types of args)
+   * are below it on the stack.
+   *
+   * It is tempting to try to free the ExtraArgs structure here, but it's ok to
+   * not to:
+   *
+   *     o We're about to raise an uncatchable fatal, which will end the
+   *       request.  We leak ExtraArgs in other similar situations for this too
+   *       (e.g. if called via FCallArray and then a stack overflow happens).
+   *
+   *     o If we were going to free the ExtraArgs structure, we'd need to make
+   *       sure we can re-enter the VM right now, which means performing a
+   *       manual fixup first.  (We aren't in a situation where we can do a
+   *       normal VMRegAnchor fixup right now.)  But moreover we shouldn't be
+   *       running destructors if a fatal is happening anyway, so we don't want
+   *       that either.
+   *
+   * So, all that boils down to this: we ignore the extra args field (the
+   * unwinder will not consult the ExtraArgs field because it believes the
+   * ActRec is pre-live).  And set calleeAR->m_numArgs to indicate how many
+   * things are actually on the stack (so handleStackOverflow knows what to set
+   * the vmsp to)---we just set it to the function's numLocals, which might
+   * mean decreffing some uninits unnecessarily, but that's ok.
+   */
+
+  if (debug && func->attrs() & AttrMayUseVV && calleeAR->getExtraArgs()) {
+    calleeAR->trashVarEnv();
+  }
+  calleeAR->setNumArgs(calleeAR->m_func->numLocals());
+  handleStackOverflow(calleeAR);
+}
+
 /*
  * Support for the stub freelist.
  */

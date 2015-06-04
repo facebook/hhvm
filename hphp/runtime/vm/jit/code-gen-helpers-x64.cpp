@@ -311,50 +311,21 @@ void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
              v.makeTuple({})};
 }
 
-void emitTestSurpriseFlags(Asm& a, PhysReg rds) {
-  static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
-                "Codegen assumes a SurpriseFlag fits in a 32-bit int");
-  a.cmpl(0, rds[rds::kSurpriseFlagsOff]);
-}
-
-Vreg emitTestSurpriseFlags(Vout& v, Vreg rds) {
-  static_assert(LastSurpriseFlag <= std::numeric_limits<uint32_t>::max(),
-                "Codegen assumes a SurpriseFlag fits in a 32-bit int");
-  auto const sf = v.makeReg();
-  v << cmplim{0, rds[rds::kSurpriseFlagsOff], sf};
-  return sf;
-}
-
-void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
-                                 PhysReg rds, Fixup fixup) {
-  // warning: keep this in sync with the vasm version below.
-  Asm a { mainCode };
-  Asm acold { coldCode };
-
-  emitTestSurpriseFlags(a, rds);
-  a.  jnz(coldCode.frontier());
-
-  acold.  movq  (rVmFp, argNumToRegName[0]);
-  emitCall(acold, mcg->tx().uniqueStubs.functionEnterHelper, argSet(1));
-  mcg->recordSyncPoint(acold.frontier(), fixup);
-  acold.  jmp   (a.frontier());
-}
-
 void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp, Vreg rds,
                                  Fixup fixup, Vlabel catchBlock) {
   auto cold = vcold.makeBlock();
   auto done = v.makeBlock();
 
-  auto const sf = emitTestSurpriseFlags(v, rds);
-  v << jcc{CC_NZ, sf, {done, cold}};
+  auto const sf = v.makeReg();
+  v << cmpqm{fp, rds[rds::kSurpriseFlagsOff], sf};
+  v << jcc{CC_NBE, sf, {done, cold}};
 
   v = done;
   vcold = cold;
 
-  auto call = CppCall::direct(
-      reinterpret_cast<void(*)()>(mcg->tx().uniqueStubs.functionEnterHelper));
-  auto args = v.makeVcallArgs({{fp}});
-
+  auto const call = CppCall::direct(
+    reinterpret_cast<void(*)()>(mcg->tx().uniqueStubs.functionEnterHelper));
+  auto const args = v.makeVcallArgs({});
   vcold << vinvoke{call, args, v.makeTuple({}), {done, catchBlock}, fixup};
 }
 

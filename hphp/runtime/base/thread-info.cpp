@@ -168,7 +168,7 @@ static Exception* generate_memory_exceeded_exception() {
     "request has exceeded memory limit", exceptionStack);
 }
 
-ssize_t check_request_surprise() {
+size_t check_request_surprise() {
   auto& info = TI();
   auto& p = info.m_reqInjectionData;
 
@@ -217,13 +217,8 @@ ssize_t check_request_surprise() {
   return flags;
 }
 
-ssize_t check_request_surprise_unlikely() {
-  auto const flags = surpriseFlags().load();
-
-  if (UNLIKELY(flags)) {
-    check_request_surprise();
-  }
-  return flags;
+void check_request_surprise_unlikely() {
+  if (UNLIKELY(checkSurpriseFlags())) check_request_surprise();
 }
 
 //////////////////////////////////////////////////////////////////////

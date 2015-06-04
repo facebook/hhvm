@@ -165,6 +165,12 @@ struct UniqueStubs {
   TCA functionEnterHelperReturn;
 
   /*
+   * Unique stub that is called when a JIT'd prologue has detected /either/ a
+   * surprise condition or a stack overflow.
+   */
+  TCA functionSurprisedOrStackOverflow;
+
+  /*
    * BindCall stubs for immutable/non-immutable calls
    */
   TCA bindCallStub;

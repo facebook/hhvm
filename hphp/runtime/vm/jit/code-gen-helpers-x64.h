@@ -124,17 +124,8 @@ void emitImmStoreq(Asm& as, Immed64 imm, MemoryRef ref);
 
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg);
 
-/*
- * Test the current thread's surprise flags for a nonzero value. Should be used
- * before a jnz to surprise handling code.
- */
-void emitTestSurpriseFlags(Asm& as, PhysReg rds);
-Vreg emitTestSurpriseFlags(Vout& v, Vreg rds);
-
 void emitCheckSurpriseFlagsEnter(Vout& main, Vout& cold, Vreg fp, Vreg rds,
                                  Fixup fixup, Vlabel catchBlock);
-void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
-                                 PhysReg rds, Fixup fixup);
 
 #ifdef USE_GCC_FAST_TLS
 

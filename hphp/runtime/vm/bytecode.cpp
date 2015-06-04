@@ -574,12 +574,9 @@ TypedValue* ExtraArgs::getExtraArg(unsigned argInd) const {
 
 // Store actual stack elements array in a thread-local in order to amortize the
 // cost of allocation.
-class StackElms {
- public:
-  StackElms() : m_elms(nullptr) {}
-  ~StackElms() {
-    flush();
-  }
+namespace {
+struct StackElms {
+  ~StackElms() { flush(); }
   TypedValue* elms() {
     if (m_elms == nullptr) {
       // RuntimeOption::EvalVMStackElms-sized and -aligned.
@@ -601,10 +598,11 @@ class StackElms {
       m_elms = nullptr;
     }
   }
- private:
-  TypedValue* m_elms;
+private:
+  TypedValue* m_elms{nullptr};
 };
 IMPLEMENT_THREAD_LOCAL(StackElms, t_se);
+}
 
 const int Stack::sSurprisePageSize = sysconf(_SC_PAGESIZE);
 // We reserve the bottom page of each stack for use as the surprise
@@ -633,13 +631,21 @@ Stack::~Stack() {
   requestExit();
 }
 
-void
-Stack::requestInit() {
+void Stack::requestInit() {
   m_elms = t_se->elms();
   // Burn one element of the stack, to satisfy the constraint that
   // valid m_top values always have the same high-order (>
   // log(RuntimeOption::EvalVMStackElms)) bits.
   m_top = m_base = m_elms + RuntimeOption::EvalVMStackElms - 1;
+
+  rds::header()->stackLimitAndSurprise.store(
+    reinterpret_cast<uintptr_t>(
+      reinterpret_cast<char*>(m_elms) + sSurprisePageSize +
+        kStackCheckPadding * sizeof(Cell)
+    ),
+    std::memory_order_release
+  );
+  assert(!(rds::header()->stackLimitAndSurprise.load() & kSurpriseFlagMask));
 
   // Because of the surprise page at the bottom of the stack we lose an
   // additional 256 elements which must be taken into account when checking for
@@ -650,8 +656,7 @@ Stack::requestInit() {
   assert(wouldOverflow(maxelms));
 }
 
-void
-Stack::requestExit() {
+void Stack::requestExit() {
   m_elms = nullptr;
 }
 
@@ -4212,7 +4217,7 @@ OPTBLD_INLINE void iopFatal(IOP_ARGS) {
 
 OPTBLD_INLINE void jmpSurpriseCheck(Offset offset) {
   if (offset <= 0 && UNLIKELY(checkSurpriseFlags())) {
-    EventHook::CheckSurprise();
+    check_request_surprise();
   }
 }
 

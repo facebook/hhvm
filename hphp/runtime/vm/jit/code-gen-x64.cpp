@@ -4477,9 +4477,18 @@ void CodeGenerator::cgCheckInitMem(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgCheckSurpriseFlags(IRInstruction* inst) {
-  auto&v = vmain();
-  auto const sf = emitTestSurpriseFlags(v, rVmTl);
-  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
+  // This is not a correctness assertion, but we want to know if we get it
+  // wrong because it'll be a subtle perf bug:
+  if (inst->marker().resumed()) {
+    assertx(inst->src(0)->isA(TStkPtr));
+  } else {
+    assertx(inst->src(0)->isA(TFramePtr));
+  }
+  auto& v = vmain();
+  auto const fp_or_sp = srcLoc(inst, 0).reg();
+  auto const sf = v.makeReg();
+  v << cmpqm{fp_or_sp, rVmTl[rds::kSurpriseFlagsOff], sf};
+  v << jcc{CC_NBE, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 void CodeGenerator::cgCheckCold(IRInstruction* inst) {
@@ -5490,6 +5499,37 @@ void CodeGenerator::cgCheckSurpriseFlagsEnter(IRInstruction* inst) {
 
   auto const catchBlock = m_state.labels[inst->taken()];
   emitCheckSurpriseFlagsEnter(vmain(), vcold(), fp, rVmTl, fixup, catchBlock);
+  m_state.catch_calls[inst->taken()] = CatchCall::CPP;
+}
+
+void CodeGenerator::cgCheckSurpriseAndStack(IRInstruction* inst) {
+  auto const fp    = srcLoc(inst, 0).reg();
+  auto const extra = inst->extra<CheckSurpriseAndStack>();
+  auto const func  = extra->func;
+  auto const argc  = extra->argc;
+  auto const off   = func->getEntryForNumArgs(argc) - func->base();
+  auto const fixup = Fixup(off, func->numSlotsInFrame());
+
+  auto& v = vmain();
+  auto const sf = v.makeReg();
+  auto const needed_top = v.makeReg();
+  v << lea{fp[-cellsToBytes(func->maxStackCells())], needed_top};
+  v << cmpqm{needed_top, rVmTl[rds::kSurpriseFlagsOff], sf};
+  unlikelyIfThen(v, vcold(), CC_AE, sf, [&] (Vout& v) {
+    auto const stub = reinterpret_cast<void (*)()>(
+      mcg->tx().uniqueStubs.functionSurprisedOrStackOverflow
+    );
+    auto const done = v.makeBlock();
+    v << vinvoke{
+      CppCall::direct(stub),
+      v.makeVcallArgs({}),
+      v.makeTuple({}),
+      {done, m_state.labels[inst->taken()]},
+      fixup
+    };
+    v = done;
+  });
+
   m_state.catch_calls[inst->taken()] = CatchCall::CPP;
 }
 

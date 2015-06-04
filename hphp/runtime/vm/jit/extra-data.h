@@ -1169,6 +1169,7 @@ X(NewCol,                       NewColData);
 X(NewColFromArray,              NewColData);
 X(InitExtraArgs,                FuncEntryData);
 X(CheckSurpriseFlagsEnter,      FuncEntryData);
+X(CheckSurpriseAndStack,        FuncEntryData);
 
 #undef X
 

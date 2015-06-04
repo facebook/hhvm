@@ -84,14 +84,6 @@ void EventHook::DisableIntercept() {
   clearSurpriseFlag(InterceptFlag);
 }
 
-ssize_t EventHook::CheckSurprise() {
-  return check_request_surprise();
-}
-
-ssize_t EventHook::GetSurpriseFlags() {
-  return surpriseFlags().load();
-}
-
 struct ExecutingSetprofileCallbackGuard {
   ExecutingSetprofileCallbackGuard() {
     g_context->m_executingSetprofileCallback = true;
@@ -307,7 +299,7 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
 }
 
 void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
-                               const Fault* fault, ssize_t flags) {
+                               const Fault* fault, size_t flags) {
   // Xenon
   if (flags & XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::ExitSample);
@@ -363,7 +355,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
 }
 
 bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
-  ssize_t flags = CheckSurprise();
+  auto const flags = check_request_surprise();
   if (flags & InterceptFlag &&
       !RunInterceptHandler(const_cast<ActRec*>(ar))) {
     return false;
@@ -383,7 +375,7 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
 }
 
 void EventHook::onFunctionResumeAwait(const ActRec* ar) {
-  ssize_t flags = CheckSurprise();
+  auto const flags = check_request_surprise();
 
   // Xenon
   if (flags & XenonSignalFlag) {
@@ -398,7 +390,7 @@ void EventHook::onFunctionResumeAwait(const ActRec* ar) {
 }
 
 void EventHook::onFunctionResumeYield(const ActRec* ar) {
-  ssize_t flags = CheckSurprise();
+  auto const flags = check_request_surprise();
 
   // Xenon
   if (flags & XenonSignalFlag) {
@@ -415,7 +407,7 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
 // Child is the AFWH we're going to block on, nullptr iff this is a suspending
 // generator.
 void EventHook::onFunctionSuspendR(ActRec* suspending, ObjectData* child) {
-  ssize_t flags = CheckSurprise();
+  auto const flags = check_request_surprise();
   onFunctionExit(suspending, nullptr, nullptr, flags);
 
   if ((flags & AsyncEventHookFlag) &&
@@ -445,7 +437,7 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
   suspending->setVarEnv(nullptr);
 
   try {
-    ssize_t flags = CheckSurprise();
+    auto const flags = check_request_surprise();
     onFunctionExit(resumableAR, nullptr, nullptr, flags);
 
     if ((flags & AsyncEventHookFlag) &&
@@ -477,7 +469,7 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
   ar->setVarEnv(nullptr);
 
   try {
-    ssize_t flags = CheckSurprise();
+    auto const flags = check_request_surprise();
     onFunctionExit(ar, &retval, nullptr, flags);
 
     // Async profiler
@@ -506,8 +498,9 @@ void EventHook::onFunctionUnwind(ActRec* ar, const Fault& fault) {
   ar->setLocalsDecRefd();
   ar->setVarEnv(nullptr);
 
-  // TODO(#2329497) can't CheckSurprise() yet, unwinder unable to replace fault
-  auto const flags = GetSurpriseFlags();
+  // TODO(#2329497) can't check_request_surprise() yet, unwinder unable to
+  // replace fault
+  auto const flags = stackLimitAndSurprise().load() & kSurpriseFlagMask;
   onFunctionExit(ar, nullptr, &fault, flags);
 }
 

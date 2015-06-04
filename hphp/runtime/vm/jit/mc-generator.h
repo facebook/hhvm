@@ -451,6 +451,11 @@ extern __thread int64_t s_perfCounters[];
  */
 void handleStackOverflow(ActRec* calleeAR);
 
+/*
+ * Determine whether something is a stack overflow, and if so, handle it.
+ */
+void handlePossibleStackOverflow(ActRec* calleeAR);
+
 }}
 
 #endif

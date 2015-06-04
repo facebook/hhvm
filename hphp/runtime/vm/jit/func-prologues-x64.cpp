@@ -342,8 +342,15 @@ SrcKey emitPrologueWork(TransID transID, Func* func, int nPassed) {
   // Check surprise flags in the same place as the interpreter: after
   // setting up the callee's frame but before executing any of its
   // code
-  emitCheckSurpriseFlagsEnter(mcg->code.main(), mcg->code.cold(), rVmTl,
-                              fixup);
+  {
+    Asm acold { mcg->code.cold() };
+    a.    cmpq    (rVmFp, rVmTl[rds::kSurpriseFlagsOff]);
+    a.    jnbe    (acold.frontier());
+
+    emitCall(acold, mcg->tx().uniqueStubs.functionEnterHelper, argSet(0));
+    mcg->recordSyncPoint(acold.frontier(), fixup);
+    acold.    jmp   (a.frontier());
+  }
 
   if (func->isClosureBody() && func->cls()) {
     int entry = nPassed <= numNonVariadicParams

@@ -652,10 +652,12 @@ To string conversions:
 
   Profile a switch statement target.
 
-| CheckSurpriseFlags, ND, NA, B
+| CheckSurpriseFlags, ND, S(FramePtr,StkPtr), B
 
   Tests the implementation-specific surprise flags. If they're true, branches
-  to block B.
+  to block B. This is done by comparing an evaluation stack pointer to the RDS
+  stackLimitAndSurprise word. Note that in a resumed, the frame pointer is not
+  pointing into the eval stack, so S0 should be a StkPtr in that case.
 
 | ReturnHook, ND, S(FramePtr) S(Gen), Er
 
@@ -2381,6 +2383,9 @@ fields of that struct for holding intermediate values.
   Test the implementation-specific surprise flags.  If they're nonzero, call
   the function enter helper.
 
+| CheckSurpriseAndStack<func,args>, ND, S(FramePtr), Er
+
+  Test surprise flags and stack overflow at the same time.
 
 /* Local Variables: */
 /* fill-column: 79 */

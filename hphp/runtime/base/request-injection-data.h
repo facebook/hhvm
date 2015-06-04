@@ -224,7 +224,6 @@ struct RequestInjectionData {
    * surprise flags for the current thread, use rds::surpriseFlags() instead.
    */
   void clearFlag(SurpriseFlag);
-  bool getFlag(SurpriseFlag) const;
   void setFlag(SurpriseFlag);
 
 private:
@@ -266,7 +265,7 @@ private:
   bool m_safeFileAccess;
 
   /* Pointer to surprise flags stored in RDS. */
-  std::atomic<ssize_t>* m_sflagsPtr{nullptr};
+  std::atomic<size_t>* m_sflagsAndStkPtr{nullptr};
 
   /*
    * When the PC is currently over a line that has been registered for a line

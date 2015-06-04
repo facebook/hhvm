@@ -525,6 +525,7 @@ PUNT_OPCODE(CheckStackOverflow)
 PUNT_OPCODE(InitExtraArgs)
 PUNT_OPCODE(CheckSurpriseFlagsEnter)
 PUNT_OPCODE(ProfileSwitchDest)
+PUNT_OPCODE(CheckSurpriseAndStack)
 
 #undef PUNT_OPCODE
 

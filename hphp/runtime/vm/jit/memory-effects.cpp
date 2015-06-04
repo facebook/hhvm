@@ -510,6 +510,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case CheckStackOverflow:
   case CheckSurpriseFlagsEnter:
+  case CheckSurpriseAndStack:
     return may_raise(inst, may_load_store(AEmpty, AEmpty));
 
   case InitExtraArgs:

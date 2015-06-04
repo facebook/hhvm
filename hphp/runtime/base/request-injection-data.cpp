@@ -391,7 +391,7 @@ std::string RequestInjectionData::getDefaultIncludePath() {
 
 void RequestInjectionData::onSessionInit() {
   rds::requestInit();
-  m_sflagsPtr = &rds::header()->surpriseFlags;
+  m_sflagsAndStkPtr = &rds::header()->stackLimitAndSurprise;
   reset();
 }
 
@@ -454,7 +454,7 @@ void RequestInjectionData::resetCPUTimer(int seconds /* = 0 */) {
 }
 
 void RequestInjectionData::reset() {
-  m_sflagsPtr->store(0);
+  m_sflagsAndStkPtr->fetch_and(kSurpriseFlagStackMask);
   m_coverage = RuntimeOption::RecordCodeCoverage;
   m_debuggerAttached = false;
   m_debuggerIntr = false;
@@ -482,15 +482,13 @@ void RequestInjectionData::updateJit() {
 }
 
 void RequestInjectionData::clearFlag(SurpriseFlag flag) {
-  m_sflagsPtr->fetch_and(~flag);
-}
-
-bool RequestInjectionData::getFlag(SurpriseFlag flag) const {
-  return m_sflagsPtr->load() & flag;
+  assert(flag >= 1ull << 48);
+  m_sflagsAndStkPtr->fetch_and(~flag);
 }
 
 void RequestInjectionData::setFlag(SurpriseFlag flag) {
-  m_sflagsPtr->fetch_or(flag);
+  assert(flag >= 1ull << 48);
+  m_sflagsAndStkPtr->fetch_or(flag);
 }
 
 }

@@ -152,9 +152,43 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
 
   gen(env, EnterFrame, fp(env));
 
-  // Emit stack overflow check if necessary.
-  if (!(func->attrs() & AttrPhpLeafFn) ||
-      func->maxStackCells() >= kStackCheckLeafPadding) {
+  bool const isLeafFunction = func->attrs() & AttrPhpLeafFn;
+  auto const needsStackCheck =
+    !isLeafFunction || func->maxStackCells() >= kStackCheckLeafPadding;
+
+  /*
+   * Determine how many stack slots we're going to write that the caller hasn't
+   * already checked we have space for.
+   *
+   * We don't need to worry about any of the passed parameter locals, because
+   * the caller must have checked for that in its maxStackCells().  However,
+   * we'd like to delay our stack overflow check until after we've entered our
+   * frame, so we can combine it with the surprise flag check (which must run
+   * after we've created the callee).
+   *
+   * The only things we are going to do is write uninits to the non-passed
+   * params and to the non-parameter locals, and possibly shuffle some of the
+   * locals into an ExtraArgs structure.  The stack overflow code knows how to
+   * handle the possibility of an ExtraArgs structure on the ActRec, and the
+   * uninits are harmless as long as we know we aren't going to segfault while
+   * we write them.
+   *
+   * There's always sSurprisePageSize extra space at the bottom (lowest
+   * addresses) of the eval stack, so we just only do this optimization if
+   * we're sure we're going to write few enough uninits that we would be
+   * staying within that region if the locals are actually too deep.
+   */
+  auto const safeFromSEGV = Stack::sSurprisePageSize / sizeof(TypedValue);
+  auto const uncheckedUninit = argc < func->numLocals()
+    ? func->numLocals() - argc
+    : 0;
+  auto const canCombineChecks = uncheckedUninit < safeFromSEGV;
+
+  /*
+   * If we can't safely combine the stack overflow check with the surprise
+   * check, do it now.
+   */
+  if (needsStackCheck && !canCombineChecks) {
     env.irb->exceptionStackBoundary();
     gen(env, CheckStackOverflow, fp(env));
   }
@@ -176,7 +210,11 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   // Check surprise flags in the same place as the interpreter: after setting
   // up the callee's frame but before executing any of its code.
   env.irb->exceptionStackBoundary();
-  gen(env, CheckSurpriseFlagsEnter, FuncEntryData{func, argc}, fp(env));
+  if (needsStackCheck && canCombineChecks) {
+    gen(env, CheckSurpriseAndStack, FuncEntryData { func, argc }, fp(env));
+  } else {
+    gen(env, CheckSurpriseFlagsEnter, FuncEntryData { func, argc }, fp(env));
+  }
 
   // Emit the bindjmp for the function body.
   gen(

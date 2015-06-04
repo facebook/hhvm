@@ -599,6 +599,7 @@ void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
 
   PhysReg ar = argNumToRegName[0];
 
+  a.   movq    (rVmFp, ar);
   a.   push    (rVmFp);
   a.   movq    (rsp, rVmFp);
   a.   push    (ar[AROFF(m_savedRip)]);
@@ -624,6 +625,37 @@ asm_label(a, skip);
   a.   ud2     ();
 
   uniqueStubs.add("functionEnterHelper", uniqueStubs.functionEnterHelper);
+}
+
+void emitFunctionSurprisedOrStackOverflow(UniqueStubs& uniqueStubs) {
+  Asm a { mcg->code.cold() }; // TODO(#7345557): others in hot for some reason?
+
+  moveToAlign(mcg->code.main());
+  uniqueStubs.functionSurprisedOrStackOverflow = a.frontier();
+
+  /*
+   * We might be here because of a stack overflow, or because of a real
+   * surprise, or because of a spurious wake up where we raced with a
+   * background thread clearing surprise flags.
+   *
+   * We need to verify whether it is a stack overflow, because the handling of
+   * that is different.  However, if it was a spurious wake up it's fine to
+   * just pretend we had a real surprise---the surprise handler rechecks all
+   * the flags and clears them as necessary.  It will set the stack top trigger
+   * back if no flags are actually set.
+   */
+
+  // If handlePossibleStackOverflow returns, it was not a stack overflow, so we
+  // need to go through event hook processing.
+  a.    subq   (8, rsp);  // align native stack
+  a.    movq   (rVmFp, argNumToRegName[0]);
+  emitCall(a, CppCall::direct(handlePossibleStackOverflow), argSet(1));
+  a.    addq   (8, rsp);
+  a.    jmp    (uniqueStubs.functionEnterHelper);
+  a.    ud2    ();
+
+  uniqueStubs.add("functionSurprisedOrStackOverflow",
+                  uniqueStubs.functionSurprisedOrStackOverflow);
 }
 
 void emitBindCallStubs(UniqueStubs& uniqueStubs) {
@@ -669,6 +701,7 @@ UniqueStubs emitUniqueStubs() {
     emitFCallHelperThunk,
     emitFuncBodyHelperThunk,
     emitFunctionEnterHelper,
+    emitFunctionSurprisedOrStackOverflow,
     emitBindCallStubs,
   };
   for (auto& f : functions) f(us);

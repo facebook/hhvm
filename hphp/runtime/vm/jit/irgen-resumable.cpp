@@ -40,7 +40,7 @@ void suspendHookE(IRGS& env,
   ifThen(
     env,
     [&] (Block* taken) {
-      gen(env, CheckSurpriseFlags, taken);
+      gen(env, CheckSurpriseFlags, taken, fp(env));
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
@@ -54,7 +54,9 @@ void suspendHookR(IRGS& env, SSATmp* frame, SSATmp* objOrNullptr) {
   ifThen(
     env,
     [&] (Block* taken) {
-      gen(env, CheckSurpriseFlags, taken);
+      // Check using sp(env) in the -R version---remember that fp(env) does not
+      // point into the eval stack.
+      gen(env, CheckSurpriseFlags, taken, sp(env));
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
@@ -279,7 +281,7 @@ void emitContEnter(IRGS& env) {
 
   // Make sure function enter hook is called if needed.
   auto const exitSlow = makeExitSlow(env);
-  gen(env, CheckSurpriseFlags, exitSlow);
+  gen(env, CheckSurpriseFlags, exitSlow, fp(env));
 
   // Exit to interpreter if resume address is not known.
   resumeAddr = gen(env, CheckNonNull, exitSlow, resumeAddr);

@@ -184,8 +184,9 @@ struct Func {
    * Allocate memory for a function, including the extra preceding and
    * succeeding data.
    */
-  static void* allocFuncMem(const StringData* name, int numParams,
-                            bool needsNextClonedClosure, bool lowMem);
+  static void* allocFuncMem(int numParams,
+                            bool needsNextClonedClosure,
+                            bool lowMem);
 
   /*
    * Destruct and free a Func*.
@@ -206,9 +207,7 @@ struct Func {
    */
   Func* clone(Class* cls, const StringData* name = nullptr) const;
   Func* cloneAndModify(Class* cls, Attr attrs) const;
-  Func* cloneAndSetClass(Class* cls) const {
-    return cloneAndModify(cls, attrs());
-  }
+  Func* cloneAndSetClass(Class* cls) const;
 
   /*
    * Rename a function and reload it.
@@ -962,8 +961,6 @@ public:
    * Access to the global vector of funcs.  This maps FuncID's back to Func*'s.
    */
   static const AtomicVector<const Func*>& getFuncVec();
-
-  void setHot() { m_attrs = (Attr)(m_attrs | AttrHot); }
 
 
   /////////////////////////////////////////////////////////////////////////////

@@ -100,10 +100,9 @@ Func::~Func() {
 #endif
 }
 
-void* Func::allocFuncMem(
-  const StringData* name, int numParams,
-  bool needsNextClonedClosure,
-  bool lowMem) {
+void* Func::allocFuncMem(int numParams,
+                         bool needsNextClonedClosure,
+                         bool lowMem) {
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
   int numExtraPrologues =
     maxNumPrologues > kNumFixedPrologues ?
@@ -176,7 +175,6 @@ void Func::destroy(Func* func) {
 Func* Func::clone(Class* cls, const StringData* name) const {
   auto numParams = this->numParams();
   Func* f = new (allocFuncMem(
-                   m_name,
                    numParams,
                    isClosureBody(),
                    cls || !preClass())) Func(*this);

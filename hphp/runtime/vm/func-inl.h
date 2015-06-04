@@ -68,6 +68,10 @@ inline bool Func::ParamInfo::isVariadic() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Func.
 
+inline Func* Func::cloneAndSetClass(Class* cls) const {
+  return cloneAndModify(cls, attrs());
+}
+
 inline void Func::validate() const {
 #ifdef DEBUG
   assert(m_magic == kMagic);

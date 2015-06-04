@@ -228,7 +228,7 @@ Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
                            const StringData* name, Attr attrs, bool top,
                            const StringData* docComment, int numParams,
                            bool needsNextClonedClosure) {
-  Func* f = new (Func::allocFuncMem(name, numParams,
+  Func* f = new (Func::allocFuncMem(numParams,
                                     needsNextClonedClosure,
                                     !preClass))
     Func(unit, name, attrs);

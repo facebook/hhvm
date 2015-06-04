@@ -316,8 +316,6 @@ bool RuntimeOption::EnableStats = false;
 bool RuntimeOption::EnableAPCStats = false;
 bool RuntimeOption::EnableWebStats = false;
 bool RuntimeOption::EnableMemoryStats = false;
-bool RuntimeOption::EnableMemcacheStats = false;
-bool RuntimeOption::EnableMemcacheKeyStats = false;
 bool RuntimeOption::EnableSQLStats = false;
 bool RuntimeOption::EnableSQLTableStats = false;
 bool RuntimeOption::EnableNetworkIOStatus = false;
@@ -1501,8 +1499,6 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
     Config::Bind(EnableAPCStats, ini, config, "Stats.APC", false);
     Config::Bind(EnableWebStats, ini, config, "Stats.Web");
     Config::Bind(EnableMemoryStats, ini, config, "Stats.Memory");
-    Config::Bind(EnableMemcacheStats, ini, config, "Stats.Memcache");
-    Config::Bind(EnableMemcacheKeyStats, ini, config, "Stats.MemcacheKey");
     Config::Bind(EnableSQLStats, ini, config, "Stats.SQL");
     Config::Bind(EnableSQLTableStats, ini, config, "Stats.SQLTable");
     Config::Bind(EnableNetworkIOStatus, ini, config, "Stats.NetworkIO");

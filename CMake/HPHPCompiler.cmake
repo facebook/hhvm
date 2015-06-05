@@ -9,7 +9,11 @@ endif()
 
 # using Clang
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set(LLVM_OPT "")
+  # march=native is a rather ham-fisted approach to try to work around a clang
+  # ICE where it can't figure out what to do when we request to use a crc32
+  # intrinsic. This might affect portability of binaries, and should probably be
+  # revisited.
+  set(LLVM_OPT "-march=native")
   execute_process(
     COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} --version COMMAND head -1
     OUTPUT_VARIABLE _clang_version_info)

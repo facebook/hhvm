@@ -1925,9 +1925,6 @@ void MCGenerator::requestInit() {
 }
 
 void MCGenerator::requestExit() {
-  assertx(!std::uncaught_exception() &&
-         "Uncaught exception live at request shutdown. "
-         "Probably an unwind-x64.cpp bug.");
   always_assert(!Translator::WriteLease().amOwner());
   TRACE_MOD(txlease, 2, "%" PRIx64 " write lease stats: %15" PRId64
             " kept, %15" PRId64 " grabbed\n",

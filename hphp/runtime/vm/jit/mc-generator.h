@@ -158,7 +158,7 @@ public:
   FreeStubList& freeStubList() { return m_freeStubs; }
   LiteralMap& literals() { return m_literals; }
   Annotations& annotations() { return m_annotations; }
-  void recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff);
+  void recordSyncPoint(CodeAddress frontier, Fixup fix);
 
   DataBlock& globalData() { return code.data(); }
   Debug::DebugInfo* getDebugInfo() { return &m_debugInfo; }

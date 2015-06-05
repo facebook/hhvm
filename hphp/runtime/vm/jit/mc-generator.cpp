@@ -1529,9 +1529,8 @@ MCGenerator::reachedTranslationLimit(SrcKey sk,
 }
 
 void
-MCGenerator::recordSyncPoint(CodeAddress frontier, Offset pcOff, Offset spOff) {
-  m_fixups.m_pendingFixups.push_back(
-    PendingFixup(frontier, Fixup(pcOff, spOff)));
+MCGenerator::recordSyncPoint(CodeAddress frontier, Fixup fix) {
+  m_fixups.m_pendingFixups.push_back(PendingFixup(frontier, fix));
 }
 
 /*

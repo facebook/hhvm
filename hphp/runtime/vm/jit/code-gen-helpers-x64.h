@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/cpp-call.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -68,6 +69,35 @@ void emitTransCounterInc(Vout&);
  * Returns: the status flags register for the decrement instruction.
  */
 Vreg emitDecRef(Vout& v, Vreg base);
+
+/*
+ * Assuming rData is the data pointer for a refcounted (but possibly static)
+ * value, emit a static check and DecRef, executing the code emitted by
+ * `destroy' if the count would go to zero.
+ */
+template<class Destroy>
+void emitDecRefWork(Vout& v, Vout& vcold, Vreg rData,
+                    Destroy destroy, bool unlikelyDestroy) {
+  auto const sf = v.makeReg();
+  v << cmplim{1, rData[FAST_REFCOUNT_OFFSET], sf};
+  ifThenElse(
+    v, vcold, CC_E, sf,
+    destroy,
+    [&] (Vout& v) {
+      /*
+       * If it's not static, actually reduce the reference count.  This does
+       * another branch using the same status flags from the cmplim above.
+       */
+      ifThen(
+        v, CC_NL, sf,
+        [&] (Vout& v) {
+          emitDecRef(v, rData);
+        }
+      );
+    },
+    unlikelyDestroy
+  );
+}
 
 void emitIncRef(Asm& as, PhysReg base);
 void emitIncRef(Vout& v, Vreg base);

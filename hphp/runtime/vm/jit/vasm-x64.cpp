@@ -73,6 +73,7 @@ struct Vgen {
   void emit(const bindjcc& i);
   void emit(const bindjmp& i);
   void emit(const callstub& i);
+  void emit(const callfaststub& i);
   void emit(const contenter& i);
   void emit(const copy& i);
   void emit(const copy2& i);
@@ -593,6 +594,11 @@ void Vgen::emit(const callstub& i) {
   emit(call{i.target, i.args});
 }
 
+void Vgen::emit(const callfaststub& i) {
+  emit(call{i.target, i.args});
+  emit(syncpoint{i.fix});
+}
+
 void Vgen::emit(const cmpqims& i) {
   backend.prepareForSmash(a->code(), kCmpLen);
   a->cmpq(i.s0, i.s1);
@@ -728,8 +734,7 @@ void Vgen::emit(const store& i) {
 void Vgen::emit(const syncpoint& i) {
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a->frontier(),
          i.fix.pcOffset, i.fix.spOffset);
-  mcg->recordSyncPoint(a->frontier(), i.fix.pcOffset,
-                       i.fix.spOffset);
+  mcg->recordSyncPoint(a->frontier(), i.fix);
 }
 
 void Vgen::emit(const testwim& i) {

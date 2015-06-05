@@ -158,30 +158,48 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+struct IncRefProfile {
+  /* The number of times this IncRef made it at least as far as the static
+   * check (meaning it was given a refcounted DataType. */
+  uint16_t tryinc;
+
+  std::string toString() const {
+    return folly::sformat("tryinc: {:4}", tryinc);
+  }
+
+  static void reduce(IncRefProfile& a, const IncRefProfile& b) {
+    a.tryinc += b.tryinc;
+  }
+};
+
 /*
- * DecRefProfile is used to track which DecRef instructions are likely to go to
- * zero. During an optimized translation, the release path will be put in
- * acold if it rarely went to zero during profiling.
+ * DecRefProfile is used to track which types go through DecRef instructions,
+ * and which ones arelikely go to zero.
  */
 struct DecRefProfile {
-  uint16_t decrement;
+  /* The number of times this DecRef was executed. */
+  uint16_t hits;
+
+  /* The number of times this DecRef made it at least as far as the static
+   * check (meaning it was given a refcounted DataType. */
+  uint16_t trydec;
+
+  /* The number of times this DecRef went to zero and called destroy(). */
   uint16_t destroy;
 
-  int hitRate() const {
-    return decrement ? destroy * 100 / decrement : 0;
+  float destroyRate() const {
+    return hits ? float(destroy) / hits : 0.0;
   }
 
   std::string toString() const {
-    return folly::format("decl: {:3}, destroy: {:3} ({:3}%)",
-                         decrement, destroy, hitRate()).str();
+    return folly::sformat("hits: {:4} trydec: {:4}, destroy: {:4} ({:.2%}%)",
+                          hits, trydec, destroy, destroyRate());
   }
 
   static void reduce(DecRefProfile& a, const DecRefProfile& b) {
-    // This is slightly racy but missing a few either way isn't a
-    // disaster. It's already racy at profiling time because the two values
-    // aren't updated atomically.
-    a.decrement += b.decrement;
-    a.destroy   += b.destroy;
+    a.hits    += b.hits;
+    a.trydec  += b.trydec;
+    a.destroy += b.destroy;
   }
 };
 typedef folly::Optional<TargetProfile<DecRefProfile>> OptDecRefProfile;

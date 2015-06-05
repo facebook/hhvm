@@ -390,7 +390,7 @@ void Vgen::emit(fallback& i) {
 
 void Vgen::emit(hcsync& i) {
   assertx(points[i.call]);
-  mcg->recordSyncPoint(points[i.call], i.fix.pcOffset, i.fix.spOffset);
+  mcg->recordSyncPoint(points[i.call], i.fix);
 }
 
 void Vgen::emit(hcnocatch& i) {
@@ -477,8 +477,7 @@ void Vgen::emit(store& i) {
 void Vgen::emit(syncpoint& i) {
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a->frontier(),
          i.fix.pcOffset, i.fix.spOffset);
-  mcg->recordSyncPoint(a->frontier(), i.fix.pcOffset,
-                       i.fix.spOffset);
+  mcg->recordSyncPoint(a->frontier(), i.fix);
 }
 
 void Vgen::emit(jmp i) {

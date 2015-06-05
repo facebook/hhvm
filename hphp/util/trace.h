@@ -93,6 +93,7 @@ namespace Trace {
       TM(bcinterp)      \
       TM(bisector)      \
       TM(datablock)     \
+      TM(decreftype)    \
       TM(debugger)      \
       TM(debuggerflow)  \
       TM(debuginfo)     \

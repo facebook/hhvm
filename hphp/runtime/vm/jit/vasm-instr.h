@@ -67,6 +67,7 @@ struct Vunit;
   O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
   O(svcreq, I(req) I(stub_block), U(args) U(extraArgs), Dn)\
   /* vasm intrinsics */\
+  O(callfaststub, I(fix), U(args), Dn)\
   O(copy, Inone, UH(s,d), DH(d,s))\
   O(copy2, Inone, UH(s0,d0) UH(s1,d1), DH(d0,s0) DH(d1,s1))\
   O(copyargs, Inone, UH(s,d), DH(d,s))\
@@ -382,6 +383,14 @@ struct bindjmp {
 
 ///////////////////////////////////////////////////////////////////////////////
 // VASM intrinsics.
+
+/*
+ * Call a "fast" stub, which is a stub that preserves more registers than a
+ * normal call. It may still call C++ functions on a slow path (which is why
+ * there's a Fixup operand) but it will save any required registers before
+ * doing so.
+ */
+struct callfaststub { TCA target; Fixup fix; RegSet args; };
 
 /*
  * Copies of different arities. All copies happen in parallel, meaning operand

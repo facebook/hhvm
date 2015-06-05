@@ -253,6 +253,9 @@ void getEffects(const Abi& abi, const Vinstr& i,
       case Arch::X64: defs -= reg::rbp | x64::rVmTl; break;
       }
       break;
+    case Vinstr::callfaststub:
+      defs = abi.all() - abi.calleeSaved - x64::kGPCallerSaved;
+      break;
     case Vinstr::cqo:
       uses = RegSet(reg::rax);
       defs = reg::rax | reg::rdx;

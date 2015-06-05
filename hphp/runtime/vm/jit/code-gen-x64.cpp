@@ -128,7 +128,20 @@ const char* getContextName(const Class* ctx) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class Then>
-void ifRefCountedType(Vout& v, Type ty, Vloc loc, Then then) {
+void ifNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
+  if (!ty.maybe(TStatic)) {
+    then(v);
+    return;
+  }
+
+  auto const sf = v.makeReg();
+  v << cmplim{0, loc.reg()[FAST_REFCOUNT_OFFSET], sf};
+  static_assert(UncountedValue < 0 && StaticValue < 0, "");
+  ifThen(v, CC_GE, sf, then);
+}
+
+template<class Then>
+void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
   if (!ty.maybe(TCounted)) return;
   if (ty.isKnownDataType()) {
     if (IS_REFCOUNTED_TYPE(ty.toDataType())) then(v);
@@ -136,20 +149,13 @@ void ifRefCountedType(Vout& v, Type ty, Vloc loc, Then then) {
   }
   auto const sf = v.makeReg();
   emitCmpTVType(v, sf, KindOfRefCountThreshold, loc.reg(1));
-  ifThen(v, CC_NLE, sf, then);
+  unlikelyIfThen(v, vtaken, CC_NLE, sf, then);
 }
 
 template<class Then>
 void ifRefCountedNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
-  ifRefCountedType(v, ty, loc, [&] (Vout& v) {
-    if (!ty.maybe(TStatic)) {
-      then(v);
-      return;
-    }
-    auto const sf = v.makeReg();
-    v << cmplim{0, loc.reg()[FAST_REFCOUNT_OFFSET], sf};
-    static_assert(UncountedValue < 0 && StaticValue < 0, "");
-    ifThen(v, CC_GE, sf, then);
+  ifRefCountedType(v, v, ty, loc, [&] (Vout& v) {
+    ifNonStatic(v, ty, loc, then);
   });
 }
 
@@ -2262,13 +2268,44 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgIncRef(IRInstruction* inst) {
+  // This is redundant with a check in ifRefCountedNonStatic, but we check
+  // earlier to avoid emitting profiling code in this case.
   auto const ty = inst->src(0)->type();
-  ifRefCountedNonStatic(
-    vmain(), ty, srcLoc(inst, 0),
-    [&] (Vout& v) {
-      emitIncRef(v, srcLoc(inst, 0).reg());
+  if (!ty.maybe(TCounted)) return;
+
+  folly::Optional<rds::Handle> profHandle;
+  auto vtaken = &vmain();
+  // We profile generic IncRefs to see which ones are unlikely to see
+  // refcounted values.
+  if (RuntimeOption::EvalHHIROutlineGenericIncDecRef && !ty.isKnownDataType()) {
+    auto const profileKey =
+      makeStaticString(folly::to<std::string>("IncRefProfile-",
+                                              ty.toString()));
+    TargetProfile<IncRefProfile> profile{
+      m_state.unit.context(), inst->marker(), profileKey
+    };
+    if (profile.profiling()) {
+      profHandle = profile.handle();
+    } else if (profile.optimizing()) {
+      auto const data = profile.data(IncRefProfile::reduce);
+      if (data.tryinc == 0) {
+        FTRACE(3, "Emitting cold IncRef for {}, {}\n", data, *inst);
+        vtaken = &vcold();
+      }
     }
-  );
+  }
+
+  auto& v = vmain();
+  auto const loc = srcLoc(inst, 0);
+  ifRefCountedType(v, *vtaken, ty, loc, [&](Vout& v) {
+    if (profHandle) {
+      v << incwm{rVmTl[*profHandle + offsetof(IncRefProfile, tryinc)],
+                 v.makeReg()};
+    }
+    ifNonStatic(v, ty, loc, [&](Vout& v) {
+      emitIncRef(v, loc.reg());
+    });
+  });
 }
 
 void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
@@ -2318,11 +2355,12 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
  * Returns true iff the release path for this DecRef should be put in cold
  * code.
  */
-bool CodeGenerator::decRefDestroyIsUnlikely(const IRInstruction* inst,
-                                            OptDecRefProfile& profile,
-                                            Type type) {
+float CodeGenerator::decRefDestroyRate(const IRInstruction* inst,
+                                       OptDecRefProfile& profile,
+                                       Type type) {
   auto const kind = mcg->tx().mode();
-  if (kind != TransKind::Profile && kind != TransKind::Optimize) return true;
+  // Without profiling data, we assume destroy is unlikely.
+  if (kind != TransKind::Profile && kind != TransKind::Optimize) return 0.0;
 
   auto const profileKey =
     makeStaticString(folly::to<std::string>("DecRefProfile-",
@@ -2333,24 +2371,24 @@ bool CodeGenerator::decRefDestroyIsUnlikely(const IRInstruction* inst,
 
   auto& v = vmain();
   if (profile->profiling()) {
-    v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, decrement)],
+    v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, hits)],
                v.makeReg()};
   } else if (profile->optimizing()) {
     auto const data = profile->data(DecRefProfile::reduce);
-    if (data.hitRate() != 0 && data.hitRate() != 100) {
+    if (data.destroyRate() != 0.0 && data.destroyRate() != 1.0) {
       // These are the only interesting cases where we could be doing better.
       FTRACE(5, "DecRefProfile: {}: {} {}\n",
              data, inst->marker().show(), profileKey->data());
     }
-    if (data.hitRate() == 0) {
+    if (data.destroyRate() == 0.0) {
       emitIncStat(v, Stats::TC_DecRef_Profiled_0);
-    } else if (data.hitRate() == 100) {
+    } else if (data.destroyRate() == 1.0) {
       emitIncStat(v, Stats::TC_DecRef_Profiled_100);
     }
-    return data.hitRate() < RuntimeOption::EvalJitUnlikelyDecRefPercent;
+    return data.destroyRate();
   }
 
-  return true;
+  return 0.0;
 }
 
 /*
@@ -2378,16 +2416,15 @@ bool CodeGenerator::decRefDestroyIsUnlikely(const IRInstruction* inst,
  *  skip_dec:
  *    // ....
  */
-void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst) {
+void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
+                               const OptDecRefProfile& profile,
+                               bool unlikelyDestroy) {
   auto const ty   = inst->src(0)->type();
   auto const base = srcLoc(inst, 0).reg(0);
 
-  OptDecRefProfile profile;
-  auto const unlikelyDestroy = decRefDestroyIsUnlikely(inst, profile, ty);
-
   auto destroy = [&] (Vout& v) {
-    emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Destroy :
-                   Stats::TC_DecRef_Likely_Destroy);
+    emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Destroy
+                                   : Stats::TC_DecRef_Likely_Destroy);
     if (profile && profile->profiling()) {
       v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, destroy)],
                  v.makeReg()};
@@ -2408,46 +2445,84 @@ void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst) {
   emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl
                                  : Stats::TC_DecRef_Likely_Decl);
 
+  if (profile && profile->profiling()) {
+    v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, trydec)],
+               v.makeReg()};
+  }
+
   if (!ty.maybe(TStatic)) {
     auto const sf = emitDecRef(v, base);
     ifThen(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
     return;
   }
 
-  auto const cmp1_sf = v.makeReg();
-  v << cmplim{1, base[FAST_REFCOUNT_OFFSET], cmp1_sf};
-  ifThenElse(
-    v, vcold(), CC_E, cmp1_sf,
-    destroy,
-    [&] (Vout& v) {
-      /*
-       * If it's not static, actually reduce the reference count.  This
-       * does another branch using the same status flags from the cmplim
-       * above.
-       */
-      ifThen(
-        v, CC_NL, cmp1_sf,
-        [&] (Vout& v) {
-          emitDecRef(v, base);
-        }
-      );
-    },
-    unlikelyDestroy
+  emitDecRefWork(v, vcold(), base, destroy, unlikelyDestroy);
+}
+
+void CodeGenerator::emitDecRefTypeStat(Vout& v, const IRInstruction* inst) {
+  if (!Trace::moduleEnabled(Trace::decreftype)) return;
+
+  auto category = makeStaticString(inst->is(DecRef) ? "DecRef" : "DecRefNZ");
+  auto key = makeStaticString(inst->src(0)->type().unspecialize().toString());
+  cgCallHelper(
+    v,
+    CppCall::direct(Stats::incStatGrouped),
+    kVoidDest,
+    SyncOptions::kNoSyncPoint,
+    argGroup(inst)
+      .immPtr(category)
+      .immPtr(key)
+      .imm(1)
   );
 }
 
 void CodeGenerator::cgDecRef(IRInstruction *inst) {
+  // This is redundant with a check in ifRefCounted, but we check earlier to
+  // avoid emitting profiling code in this case.
   auto const ty = inst->src(0)->type();
+  if (!ty.maybe(TCounted)) return;
+
+  auto& v = vmain();
+  emitDecRefTypeStat(v, inst);
+  OptDecRefProfile profile;
+  auto const destroyRate = decRefDestroyRate(inst, profile, ty);
+  FTRACE(3, "destroyPercent {:.2%} for {}\n", destroyRate, *inst);
+
+  auto const rData = srcLoc(inst, 0).reg(0);
+  auto const rType = srcLoc(inst, 0).reg(1);
+  if (RuntimeOption::EvalHHIROutlineGenericIncDecRef &&
+      profile && profile->optimizing() && !ty.isKnownDataType() &&
+      !mcg->useLLVM()) {
+    auto const data = profile->data(DecRefProfile::reduce);
+    if (data.trydec == 0) {
+      // This DecRef never saw a refcounted type during profiling, so call the
+      // stub in cold, keeping only the type check in main.
+      FTRACE(3, "Emitting partially outlined DecRef for {}, {}\n", data, *inst);
+      auto const sf = v.makeReg();
+      emitCmpTVType(v, sf, KindOfRefCountThreshold, rType);
+      unlikelyIfThen(v, vcold(), CC_NLE, sf, [&](Vout& v) {
+        auto const stub = mcg->tx().uniqueStubs.genDecRefHelper;
+        v << copy2{rData, rType, argNumToRegName[0], argNumToRegName[1]};
+        v << callfaststub{stub, makeFixup(inst->marker()), argSet(2)};
+      });
+      return;
+    }
+  }
+
   ifRefCountedType(
-    vmain(), ty, srcLoc(inst, 0),
+    v, v, ty, srcLoc(inst, 0),
     [&] (Vout& v) {
-      decRefImpl(v, inst);
+      decRefImpl(
+        v, inst, profile,
+        destroyRate * 100 < RuntimeOption::EvalJitUnlikelyDecRefPercent
+      );
     }
   );
 }
 
 void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
   emitIncStat(vmain(), Stats::TC_DecRef_NZ);
+  emitDecRefTypeStat(vmain(), inst);
   auto const ty = inst->src(0)->type();
   ifRefCountedNonStatic(
     vmain(), ty, srcLoc(inst, 0),
@@ -5073,7 +5148,7 @@ void CodeGenerator::cgDbgTraceCall(IRInstruction* inst) {
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
   ifRefCountedType(
-    vmain(), inst->src(0)->type(), srcLoc(inst, 0),
+    vmain(), vmain(), inst->src(0)->type(), srcLoc(inst, 0),
     [&] (Vout& v) {
       emitAssertRefCount(v, srcLoc(inst, 0).reg());
     }

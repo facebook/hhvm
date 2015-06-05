@@ -121,7 +121,8 @@ int PhysRegSaverParity::rspAdjustment() const {
   return m_adjust;
 }
 
-int PhysRegSaverParity::rspTotalAdjustmentRegs() const {
+int PhysRegSaverParity::dwordsPushed() const {
+  assert((m_adjust % sizeof(int64_t)) == 0);
   return m_regs.size() + m_adjust / sizeof(int64_t);
 }
 

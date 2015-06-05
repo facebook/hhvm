@@ -51,10 +51,6 @@ bool FixupMap::getFrameRegs(const ActRec* ar,
   return true;
 }
 
-void FixupMap::recordIndirectFixup(CodeAddress frontier, int dwordsPushed) {
-  recordIndirectFixup(frontier, IndirectFixup((2 + dwordsPushed) * 8));
-}
-
 void FixupMap::fixupWork(ExecutionContext* ec, ActRec* rbp) const {
   assertx(RuntimeOption::EvalJit);
 

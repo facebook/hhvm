@@ -104,6 +104,7 @@ class Init {
           Trace::minstr,
           Trace::interpOne,
           Trace::dispatchBB,
+          Trace::decreftype,
         };
         for (auto g : groups) {
           if (mod == g) {

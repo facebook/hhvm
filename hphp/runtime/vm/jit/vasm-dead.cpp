@@ -159,6 +159,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::bindjmp:
     case Vinstr::brk:
     case Vinstr::call:
+    case Vinstr::callfaststub:
     case Vinstr::callm:
     case Vinstr::callr:
     case Vinstr::callstub:

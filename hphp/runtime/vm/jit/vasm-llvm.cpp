@@ -875,8 +875,7 @@ struct LLVMEmitter {
         if (di.isCall()) {
           auto afterCall = ip + di.size();
           FTRACE(2, "From afterCall for fixup = {}\n", afterCall);
-          mcg->recordSyncPoint(afterCall,
-                               fix.fixup.pcOffset, fix.fixup.spOffset);
+          mcg->recordSyncPoint(afterCall, fix.fixup);
         }
       }
     }
@@ -1619,6 +1618,7 @@ O(unpcklpd)
       case Vinstr::psrlq:
       case Vinstr::fallthru:
       case Vinstr::popm:  // currently used in cgEnterFrame
+      case Vinstr::callfaststub:
         always_assert_flog(false,
                            "Banned opcode in B{}: {}",
                            size_t(label), show(m_unit, inst));

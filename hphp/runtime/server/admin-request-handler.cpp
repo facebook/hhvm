@@ -187,7 +187,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
         "/stats-web:       turn on/off server page stats (CPU and gen time)\n"
         "/stats-mem:       turn on/off memory statistics\n"
-        "/stats-mcc:       turn on/off memcache statistics\n"
         "/stats-sql:       turn on/off SQL statistics\n"
         "/stats-mutex:     turn on/off mutex statistics\n"
         "    sampling      optional, default 1000\n"
@@ -216,8 +215,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/dump-apc-meta:   dump meta information for all objects in APC to\n"
         "                  /tmp/apc_dump_meta\n"
         "/advise-out-apc:  forcibly madvise out APC prime data\n"
-        "/dump-const:      dump all constant value in constant map to\n"
-        "                  /tmp/const_map_dump\n"
         "/random-apc:      dump the key and size of a random APC entry\n"
         "    count         number of entries to return\n"
 
@@ -855,9 +852,6 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
   if (cmd == "stats-mem") {
     toggle_switch(transport, RuntimeOption::EnableMemoryStats);
     return true;
-  }
-  if (cmd == "stats-mcc") {
-    return toggle_switch(transport, RuntimeOption::EnableMemcacheStats);
   }
   if (cmd == "stats-sql") {
     return toggle_switch(transport, RuntimeOption::EnableSQLStats);

@@ -32,7 +32,6 @@ This is a list of available URLs:
 /stats-mem:       turn on/off memory statistics
 /stats-apc:       turn on/off APC statistics
 /stats-apc-key:   turn on/off APC key statistics
-/stats-mcc:       turn on/off memcache statistics
 /stats-sql:       turn on/off SQL statistics
 /stats-mutex:     turn on/off mutex statistics
     sampling      optional, default 1000

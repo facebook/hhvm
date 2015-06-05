@@ -301,8 +301,6 @@ public:
   static bool EnableAPCStats;
   static bool EnableWebStats;
   static bool EnableMemoryStats;
-  static bool EnableMemcacheStats;
-  static bool EnableMemcacheKeyStats;
   static bool EnableSQLStats;
   static bool EnableSQLTableStats;
   static bool EnableNetworkIOStatus;

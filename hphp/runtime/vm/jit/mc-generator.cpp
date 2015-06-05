@@ -353,6 +353,11 @@ bool MCGenerator::shouldTranslateNoSizeLimit(const Func* func) const {
     return false;
   }
 
+  // Do not translate interpret-only functions.
+  if (func->unit()->isInterpretOnly()) {
+    return false;
+  }
+
   return true;
 }
 

@@ -225,13 +225,13 @@ void readMagicOrStatic(Entry* mce,
                        StringData* name,
                        Class* cls,
                        Class* ctx,
-                       uintptr_t mceKey,
-                       const Func* mceValue) {
+                       uintptr_t mceKey) {
   auto const storedClass = reinterpret_cast<Class*>(mceKey & ~0x3u);
   if (storedClass != cls) {
     return lookup<fatal>(mce, ar, name, cls, ctx);
   }
 
+  auto const mceValue = mce->m_value;
   ar->m_func = mceValue;
 
   auto const isMagic = mceKey & 0x1u;
@@ -308,11 +308,10 @@ void handleSlowPath(Entry* mce,
     }
     mce->m_value = mceValue; // below assumes this is already in local cache
   } else {
-    mceValue = mce->m_value;
     if (UNLIKELY(mceKey & 0x3)) {
-      return readMagicOrStatic<fatal>(mce, ar, name, cls, ctx, mceKey,
-                                      mceValue);
+      return readMagicOrStatic<fatal>(mce, ar, name, cls, ctx, mceKey);
     }
+    mceValue = mce->m_value;
   }
   assertx(!(mceValue->attrs() & AttrStatic));
 

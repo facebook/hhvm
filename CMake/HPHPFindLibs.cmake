@@ -74,6 +74,8 @@ if (ENABLE_ASYNC_MYSQL)
     ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/libyassl.a
     ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/taocrypt/libtaocrypt.a
   )
+
+  add_definitions("-DENABLE_ASYNC_MYSQL=1")
 else()
   find_package(MySQL REQUIRED)
   link_directories(${MYSQL_LIB_DIR})

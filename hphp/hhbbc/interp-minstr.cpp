@@ -68,6 +68,10 @@ bool propCouldPromoteToObj(Type ty) { return couldBeEmptyish(ty); }
 bool elemMustPromoteToArr(Type ty)  { return mustBeEmptyish(ty); }
 bool propMustPromoteToObj(Type ty)  { return mustBeEmptyish(ty); }
 
+bool keyCouldBeWeird(Type key) {
+  return key.couldBe(TObj) || key.couldBe(TArr);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -1070,21 +1074,32 @@ void miFinalSetOpProp(MIS& env, SetOpOp subop) {
   push(env, resultTy);
 }
 
-void miFinalIncDecProp(MIS& env) {
+void miFinalIncDecProp(MIS& env, IncDecOp subop) {
   auto const name = mcodeStringKey(env);
   miPop(env);
   handleInThisPropD(env);
   handleInSelfPropD(env);
   handleInPublicStaticPropD(env);
   handleBasePropD(env);
+
+  auto prePropTy  = TInitCell;
+  auto postPropTy = TInitCell;
+
   if (couldBeThisObj(env, env.base)) {
+    if (name && mustBeThisObj(env, env.base)) {
+      if (auto const propTy = thisPropAsCell(env, name)) {
+        prePropTy  = typeIncDec(subop, *propTy);
+        postPropTy = *propTy;
+      }
+    }
+
     if (name) {
-      mergeThisProp(env, name, TInitCell);
+      mergeThisProp(env, name, prePropTy);
     } else {
       loseNonRefThisPropTypes(env);
     }
   }
-  push(env, TInitCell);
+  push(env, isPre(subop) ? prePropTy : postPropTy);
 }
 
 void miFinalBindProp(MIS& env) {
@@ -1211,8 +1226,7 @@ void miFinalSetElem(MIS& env) {
    * We push the right hand side on the stack only if the base is an
    * array, object or emptyish.
    */
-  auto const isWeird = key.couldBe(TObj) ||
-                       key.couldBe(TArr) ||
+  auto const isWeird = keyCouldBeWeird(key) ||
                        (!env.base.type.subtypeOf(TArr) &&
                         !env.base.type.subtypeOf(TObj) &&
                         !mustBeEmptyish(env.base.type));
@@ -1238,27 +1252,35 @@ void miFinalSetElem(MIS& env) {
   push(env, isWeird ? TInitCell : t1);
 }
 
-void miFinalSetOpElem(MIS& env) {
-  auto const key = mcodeKey(env);
-  popC(env);
+void miFinalSetOpElem(MIS& env, SetOpOp subop) {
+  auto const key   = mcodeKey(env);
+  auto const rhsTy = popC(env);
   miPop(env);
   handleInThisElemD(env);
   handleInSelfElemD(env);
   handleInPublicStaticElemD(env);
   handleBaseElemD(env);
-  pessimisticFinalElemD(env, key, TInitCell);
-  push(env, TInitCell);
+  auto const lhsTy = env.base.type.subtypeOf(TArr) && !keyCouldBeWeird(key)
+    ? array_elem(env.base.type, key)
+    : TInitCell;
+  auto const resultTy = typeSetOp(subop, lhsTy, rhsTy);
+  pessimisticFinalElemD(env, key, resultTy);
+  push(env, resultTy);
 }
 
-void miFinalIncDecElem(MIS& env) {
+void miFinalIncDecElem(MIS& env, IncDecOp subop) {
   auto const key = mcodeKey(env);
   miPop(env);
   handleInThisElemD(env);
   handleInSelfElemD(env);
   handleInPublicStaticElemD(env);
   handleBaseElemD(env);
-  pessimisticFinalElemD(env, key, TInitCell);
-  push(env, TInitCell);
+  auto const postTy = env.base.type.subtypeOf(TArr) && !keyCouldBeWeird(key)
+    ? array_elem(env.base.type, key)
+    : TInitCell;
+  auto const preTy = typeIncDec(subop, postTy);
+  pessimisticFinalElemD(env, key, typeIncDec(subop, preTy));
+  push(env, isPre(subop) ? preTy : postTy);
 }
 
 void miFinalBindElem(MIS& env) {
@@ -1417,14 +1439,14 @@ void miFinal(MIS& env, const bc::SetM& op) {
 }
 
 void miFinal(MIS& env, const bc::SetOpM& op) {
-  if (mcodeIsElem(env.mcode())) return miFinalSetOpElem(env);
+  if (mcodeIsElem(env.mcode())) return miFinalSetOpElem(env, op.subop);
   if (mcodeIsProp(env.mcode())) return miFinalSetOpProp(env, op.subop);
   return miFinalSetOpNewElem(env);
 }
 
 void miFinal(MIS& env, const bc::IncDecM& op) {
-  if (mcodeIsElem(env.mcode())) return miFinalIncDecElem(env);
-  if (mcodeIsProp(env.mcode())) return miFinalIncDecProp(env);
+  if (mcodeIsElem(env.mcode())) return miFinalIncDecElem(env, op.subop);
+  if (mcodeIsProp(env.mcode())) return miFinalIncDecProp(env, op.subop);
   return miFinalIncDecNewElem(env);
 }
 

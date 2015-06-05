@@ -743,8 +743,9 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                                isMain ? "" : name).str(),
                  a.used());
     });
-    appendStat("targetcache", rds::usedBytes());
-    appendStat("rds", rds::usedBytes()); // TODO(#2966387): temp double logging
+    appendStat("rds", rds::usedBytes());
+    appendStat("rds-local", rds::usedLocalBytes());
+    appendStat("rds-persistent", rds::usedPersistentBytes());
     appendStat("units", numLoadedUnits());
     appendStat("funcs", Func::nextFuncId());
     out << "}" << endl;

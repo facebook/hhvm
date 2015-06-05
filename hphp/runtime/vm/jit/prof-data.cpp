@@ -347,7 +347,7 @@ TransID ProfData::addTransProfile(const RegionDescPtr&  region,
   DEBUG_ONLY size_t nBlocks = region->blocks().size();
   assertx(nBlocks == 1 || (nBlocks > 1 && region->entry()->inlinedCallee()));
   region->renumberBlock(region->entry()->id(), transId);
-
+  for (auto& b : region->blocks()) b->setProfTransID(transId);
   region->blocks().back()->setPostConditions(pconds);
   auto const startSk = region->start();
   m_transRecs.emplace_back(new ProfTransRec(transId,

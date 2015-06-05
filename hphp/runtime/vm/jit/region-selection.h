@@ -308,10 +308,10 @@ struct RegionDesc::Block {
   bool        contains(SrcKey sk) const;
   FPInvOffset initialSpOffset()   const { return m_initialSpOffset; }
   uint16_t    inlineLevel()       const { return m_inlineLevel; }
+  TransID     profTransID()       const { return m_profTransID; }
 
-  void setId(BlockId id) {
-    m_id = id;
-  }
+  void setID(BlockId id)                  { m_id = id; }
+  void setProfTransID(TransID ptid)       { m_profTransID = ptid; }
   void setInitialSpOffset(FPInvOffset sp) { m_initialSpOffset = sp; }
 
   /*
@@ -408,6 +408,7 @@ private:
   FPInvOffset     m_initialSpOffset;
   const Func*     m_inlinedCallee;
   uint16_t        m_inlineLevel; // 0 means the outer-most function
+  TransID         m_profTransID;
   TypedLocMap     m_typePredictions;
   TypedLocMap     m_typePreConditions;
   ParamByRefMap   m_byRefs;

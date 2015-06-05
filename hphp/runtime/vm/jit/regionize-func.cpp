@@ -99,9 +99,9 @@ void markCovered(const TransCFG& cfg, const RegionDescPtr region,
 
   // Mark all CFG arcs within the region as covered.
   region->forEachArc([&](RegionDesc::BlockId src, RegionDesc::BlockId dst) {
-    if (!hasTransID(src) || !hasTransID(dst)) return;
-    TransID srcTid = getTransID(src);
-    TransID dstTid = getTransID(dst);
+    if (!hasTransID(dst)) return;
+    TransID srcTid = region->block(src)->profTransID();
+    TransID dstTid = region->block(dst)->profTransID();
     assertx(cfg.hasArc(srcTid, dstTid));
     bool foundArc = false;
     for (auto arc : cfg.outArcs(srcTid)) {
@@ -248,8 +248,7 @@ bool allArcsCovered(const TransCFG::ArcPtrVec& arcs,
  * "covered".  A node is covered if any region contains it.  An arc T1->T2
  * is covered if either:
  *
- *   a) T1 and T2 are in the same region R and T2 immediately follows
- *      T1 in R.
+ *   a) T1 and T2 are in the same region R and R contains arc T1->T2.
  *   b) T2 is the head (first translation) of a region.
  *
  * Basic algorithm:

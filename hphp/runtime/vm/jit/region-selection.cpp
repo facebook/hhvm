@@ -211,7 +211,7 @@ void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
   assertx( hasBlock(oldId));
   assertx(!hasBlock(newId));
 
-  block(oldId)->setId(newId);
+  block(oldId)->setID(newId);
   m_data[newId] = m_data[oldId];
   m_data.erase(oldId);
 
@@ -504,6 +504,7 @@ RegionDesc::Block::Block(const Func* func,
   , m_initialSpOffset(initSpOff)
   , m_inlinedCallee(nullptr)
   , m_inlineLevel(inlineLevel)
+  , m_profTransID(kInvalidTransID)
 {
   assertx(length >= 0);
   if (length > 0) {
@@ -1074,6 +1075,7 @@ std::string show(const RegionDesc::Block& b) {
                   " length ", b.length(),
                   " initSpOff ", b.initialSpOffset().offset,
                   " inlineLevel ", b.inlineLevel(),
+                  " profTransID ", b.profTransID(),
                   '\n',
                   &ret
                  );

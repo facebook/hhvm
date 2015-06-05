@@ -90,7 +90,7 @@ void genFuncPrologue(TransID transID, Func* func, int argc, TCA& start) {
     SrcKey{func, func->getEntryForNumArgs(argc), SrcKey::PrologueTag{}},
     FPInvOffset{func->numSlotsInFrame()}
   );
-  IRGS env{context};
+  IRGS env{context, TransFlags{0}};
 
   auto& cb = mcg->code.main();
 

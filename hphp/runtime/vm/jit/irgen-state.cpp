@@ -33,8 +33,9 @@ BCMarker initial_marker(TransContext ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-IRGS::IRGS(TransContext context)
+IRGS::IRGS(TransContext context, TransFlags flags)
   : context(context)
+  , transFlags(flags)
   , unit(context)
   , irb(new IRBuilder(unit, initial_marker(context)))
   , bcStateStack { context.srcKey() }

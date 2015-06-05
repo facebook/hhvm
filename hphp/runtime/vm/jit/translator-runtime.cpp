@@ -27,6 +27,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/member-operations.h"
@@ -749,6 +750,10 @@ void lookupClsMethodHelper(Class* cls,
     *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(meth);
     throw;
   }
+}
+
+void profileObjClassHelper(ClassProfile* profile, ObjectData* obj) {
+  profile->reportClass(obj->getVMClass());
 }
 
 Cell lookupCnsUHelper(const TypedValue* tv,

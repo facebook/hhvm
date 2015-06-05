@@ -282,6 +282,7 @@ PUNT_OPCODE(ConvBoolToStr)
 
 PUNT_OPCODE(ProfilePackedArray)
 PUNT_OPCODE(ProfileStructArray)
+PUNT_OPCODE(ProfileObjClass)
 PUNT_OPCODE(CheckTypeMem)
 PUNT_OPCODE(CheckLoc)
 PUNT_OPCODE(CastStk)

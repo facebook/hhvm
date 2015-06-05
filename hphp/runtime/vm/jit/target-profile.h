@@ -162,6 +162,52 @@ private:
   rds::Link<T> const m_link;
 };
 
+struct ClassProfile {
+  static const size_t kClassProfileSampleSize = 4;
+
+  const Class* sampledClasses[kClassProfileSampleSize];
+
+  bool isMonomorphic() const {
+    return size() == 1;
+  }
+
+  const Class* getClass(size_t i) const {
+    if (i >= kClassProfileSampleSize) return nullptr;
+    return sampledClasses[i];
+  }
+
+  size_t size() const {
+    for (auto i = 0; i < kClassProfileSampleSize; ++i) {
+      auto const cls = sampledClasses[i];
+      if (!cls) return i;
+    }
+    return kClassProfileSampleSize;
+  }
+
+  void reportClass(const Class* cls) {
+    for (auto& myCls : sampledClasses) {
+      // If the current slot is empty, store the class here.
+      if (!myCls) {
+        myCls = cls;
+        break;
+      }
+
+      // If the current slot matches the requested class, give up.
+      if (cls == myCls) {
+        break;
+      }
+    }
+  }
+
+  static void reduce(ClassProfile& a, const ClassProfile& b) {
+    // Racy, but who cares?
+    for (auto const cls : b.sampledClasses) {
+      if (!cls) return;
+      a.reportClass(cls);
+    }
+  }
+};
+
 //////////////////////////////////////////////////////////////////////
 
 struct IncRefProfile {

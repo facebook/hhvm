@@ -52,7 +52,7 @@ struct FPIInfo {
  * required to determine high-level compilation strategy.
  */
 struct IRGS {
-  explicit IRGS(TransContext ctx);
+  explicit IRGS(TransContext ctx, TransFlags);
 
   /*
    * TODO: refactor this code eventually so IRGS doesn't own its IRUnit (or its
@@ -60,6 +60,7 @@ struct IRGS {
    * module.
    */
   TransContext context;
+  TransFlags transFlags;
   IRUnit unit;
   std::unique_ptr<IRBuilder> irb;
 

@@ -1690,7 +1690,7 @@ MCGenerator::translateWork(const TranslArgs& args) {
         : kInvalidTransID;
       auto const transContext = TransContext(profTransID, sk, initSpOffset);
 
-      IRGS irgs { transContext };
+      IRGS irgs { transContext, args.flags };
       FTRACE(1, "{}{:-^40}{}\n",
              color(ANSI_COLOR_BLACK, ANSI_BGCOLOR_GREEN),
              " HHIR during translation ",

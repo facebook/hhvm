@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 
@@ -145,21 +146,13 @@ void fpushObjMethodUnknown(IRGS& env,
       sp(env));
 }
 
-void fpushObjMethodCommon(IRGS& env,
-                          SSATmp* obj,
-                          const StringData* methodName,
-                          int32_t numParams,
-                          bool shouldFatal) {
+void fpushObjMethodWithBaseClass(IRGS& env,
+                                 SSATmp* obj,
+                                 const Class* baseClass,
+                                 const StringData* methodName,
+                                 int32_t numParams,
+                                 bool shouldFatal) {
   SSATmp* objOrCls = obj;
-  const Class* baseClass = nullptr;
-  if (auto cls = obj->type().clsSpec().cls()) {
-    if (!env.irb->constrainValue(obj, TypeConstraint(cls).setWeak())) {
-      // If we know the class without having to specialize a guard any further,
-      // use it.
-      baseClass = cls;
-    }
-  }
-
   bool magicCall = false;
   const Func* func = lookupImmutableMethod(baseClass,
                                            methodName,
@@ -240,6 +233,55 @@ void fpushObjMethodCommon(IRGS& env,
   }
 
   fpushObjMethodUnknown(env, obj, methodName, numParams, shouldFatal);
+}
+
+static const StringData* classProfileKey = makeStaticString(
+  "ClassProfile-FPushObjMethod"
+);
+
+void fpushObjMethod(IRGS& env,
+                    SSATmp* obj,
+                    const StringData* methodName,
+                    int32_t numParams,
+                    bool shouldFatal,
+                    Block* sideExit) {
+  if (auto cls = obj->type().clsSpec().cls()) {
+    if (!env.irb->constrainValue(obj, TypeConstraint(cls).setWeak())) {
+      // If we know the class without having to specialize a guard any further,
+      // use it.
+      fpushObjMethodWithBaseClass(env, obj, cls, methodName,
+                                  numParams, shouldFatal);
+      return;
+    }
+  }
+
+  TargetProfile<ClassProfile> profile(env.context, env.irb->curMarker(),
+                                      classProfileKey);
+  if (profile.profiling()) {
+    gen(env, ProfileObjClass, RDSHandleData { profile.handle() }, obj);
+  }
+
+  const bool shouldTryToOptimize = !env.transFlags.noProfiledFPush
+    || !env.firstBcInst;
+
+  if (profile.optimizing() && shouldTryToOptimize) {
+    ClassProfile data = profile.data(ClassProfile::reduce);
+
+    if (data.isMonomorphic()) {
+      auto baseClass = data.getClass(0);
+      if (baseClass->attrs() & AttrNoOverride) {
+        auto refinedObj = gen(env, CheckType, Type::ExactObj(baseClass),
+                              sideExit, obj);
+        env.irb->constrainValue(refinedObj, TypeConstraint(baseClass));
+        fpushObjMethodWithBaseClass(env, refinedObj, baseClass, methodName,
+                                    numParams, shouldFatal);
+        return;
+      }
+    }
+  }
+
+  fpushObjMethodWithBaseClass(env, obj, nullptr, methodName, numParams,
+                              shouldFatal);
 }
 
 void fpushFuncObj(IRGS& env, int32_t numParams) {
@@ -589,11 +631,15 @@ void emitFPushObjMethodD(IRGS& env,
                          int32_t numParams,
                          const StringData* methodName,
                          ObjMethodOp subop) {
+  TransFlags trFlags;
+  trFlags.noProfiledFPush = true;
+  auto sideExit = makeExit(env, trFlags);
+
   auto const obj = popC(env);
 
   if (obj->type() <= TObj) {
-    fpushObjMethodCommon(env, obj, methodName, numParams,
-      true /* shouldFatal */);
+    fpushObjMethod(env, obj, methodName, numParams,
+      true /* shouldFatal */, sideExit);
     return;
   }
 

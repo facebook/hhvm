@@ -948,6 +948,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case PredictStk:
   case ExitPlaceholder:
   case CheckRange:
+  case ProfileObjClass:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////

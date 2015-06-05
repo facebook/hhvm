@@ -5464,4 +5464,15 @@ void CodeGenerator::print() const {
   jit::print(std::cout, m_state.unit, m_state.asmInfo);
 }
 
+void CodeGenerator::cgProfileObjClass(IRInstruction* inst) {
+  auto const extra = inst->extra<RDSHandleData>();
+
+  auto& v = vmain();
+  auto const profile = v.makeReg();
+  v << lea{rVmTl[extra->handle], profile};
+  cgCallHelper(v, CppCall::direct(profileObjClassHelper),
+               kVoidDest, SyncOptions::kNoSyncPoint,
+               argGroup(inst).reg(profile).ssa(0));
+}
+
 }}}

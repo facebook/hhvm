@@ -109,7 +109,7 @@ RegionFormer::RegionFormer(const RegionContext& ctx,
   , m_blockFinished(false)
   // TODO(#5703534): this is using a different TransContext than actual
   // translation will use.
-  , m_irgs(TransContext{kInvalidTransID, m_sk, ctx.spOffset})
+  , m_irgs(TransContext{kInvalidTransID, m_sk, ctx.spOffset}, TransFlags{0})
   , m_arStates(1)
   , m_numJmps(0)
   , m_inl(inl)

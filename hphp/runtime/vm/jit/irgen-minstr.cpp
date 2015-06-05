@@ -463,9 +463,6 @@ void checkMIState(MTS& env) {
   // SetM with only one vector element, for props and elems
   const bool singleSet = isSingle && isSetM;
 
-  // A CGetM with no intermediate operations.
-  const bool singleCGet = isCGetM && isSingle;
-
   // Element access with one element in the vector
   const bool singleElem = isSingle && mcodeIsElem(env.immVecM[0]);
 
@@ -492,7 +489,7 @@ void checkMIState(MTS& env) {
     isSimpleBase(env) && mcodeMaybeArrayIntKey(env.immVecM[0]) &&
     baseType <= TStr;
 
-  if (simpleProp || singleSet || singleCGet ||
+  if (simpleProp || singleSet ||
       simpleArrayGet || simpleCollectionGet ||
       simpleArrayUnset || simpleCollectionIsset ||
       simpleArrayIsset || simpleStringOp) {
@@ -1706,7 +1703,13 @@ void emitCGetProp(MTS& env) {
   auto const nullsafe = (env.immVecM[env.mInd] == MQT);
   auto const key = getKey(env);
 
-  env.result = gen(env, nullsafe ? CGetPropQ : CGetProp, env.base.value, key);
+  env.result = gen(
+    env,
+    nullsafe ? CGetPropQ : CGetProp,
+    env.base.value,
+    key,
+    misPtr(env)
+  );
 }
 
 void emitVGetProp(MTS& env) {
@@ -1826,7 +1829,7 @@ void emitCGetElem(MTS& env) {
     env.result = gen(env, MapGet, env.base.value, key);
     break;
   case SimpleOp::None:
-    env.result = gen(env, CGetElem, env.base.value, key);
+    env.result = gen(env, CGetElem, env.base.value, key, misPtr(env));
     break;
   }
 }

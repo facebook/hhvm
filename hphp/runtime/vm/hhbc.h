@@ -858,6 +858,10 @@ struct ImmVector {
   const int32_t* vec32() const {
     return reinterpret_cast<const int32_t*>(m_start);
   }
+  folly::Range<const int32_t*> range32() const {
+    auto base = vec32();
+    return {base, base + size()};
+  }
   const StrVecItem* strvec() const {
     return reinterpret_cast<const StrVecItem*>(m_start);
   }

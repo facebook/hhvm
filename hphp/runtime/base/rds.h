@@ -261,14 +261,15 @@ private:
 /*
  * Return a bound link to memory from RDS, using the given Symbol.
  *
- * Mode indicates whether the memory should be placed in the
- * persistent region or not, and Align indicates the alignment
- * requirements.  Both arguments are ignored if there is already an
- * allocation for the Symbol---they only affect the first caller for
- * the given Symbol.
+ * Mode indicates whether the memory should be placed in the persistent region
+ * or not, Align indicates the alignment requirements, and extraSize allows for
+ * allocating additional space beyond sizeof(T), for variable-length
+ * structures.  All three arguments are ignored if there is already an
+ * allocation for the Symbol---they only affect the first caller for the given
+ * Symbol.
  */
 template<class T, size_t Align = alignof(T)>
-Link<T> bind(Symbol key, Mode mode = Mode::Normal);
+Link<T> bind(Symbol key, Mode mode = Mode::Normal, size_t extraSize = 0);
 
 /*
  * Try to bind to a symbol in RDS, returning an unbound link if the

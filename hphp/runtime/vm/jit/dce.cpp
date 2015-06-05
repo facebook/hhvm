@@ -186,6 +186,7 @@ bool canDCE(IRInstruction* inst) {
   case LdUnwinderValue:
   case LdColArray:
   case OrdStr:
+  case CheckRange:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -242,6 +243,7 @@ bool canDCE(IRInstruction* inst) {
   case JmpNZero:
   case JmpSSwitchDest:
   case JmpSwitchDest:
+  case ProfileSwitchDest:
   case CheckSurpriseFlags:
   case ReturnHook:
   case SuspendHookE:
@@ -446,7 +448,6 @@ bool canDCE(IRInstruction* inst) {
   case MapIsset:
   case IssetElem:
   case EmptyElem:
-  case CheckBounds:
   case ProfilePackedArray:
   case ProfileStructArray:
   case CheckPackedArrayBounds:
@@ -470,6 +471,7 @@ bool canDCE(IRInstruction* inst) {
   case InitExtraArgs:
   case CheckSurpriseFlagsEnter:
   case ExitPlaceholder:
+  case ThrowOutOfBounds:
     return false;
   }
   not_reached();

@@ -1959,16 +1959,33 @@ SSATmp* simplifyJmpSwitchDest(State& env, const IRInstruction* inst) {
   auto const sp = inst->src(1);
   auto const fp = inst->src(2);
   auto const& extra = *inst->extra<JmpSwitchDest>();
-  auto newExtra = [&](const SrcKey& sk) {
-    return ReqBindJmpData{sk, extra.invSPOff, extra.irSPOff, TransFlags{}};
-  };
 
-  if (extra.bounded) {
-    if (indexVal >= extra.cases - 2 || indexVal < 0) {
-      return gen(env, ReqBindJmp, newExtra(extra.defaultSk), sp, fp);
+  if (indexVal < 0 || indexVal >= extra.cases) {
+    // Instruction is unreachable.
+    return gen(env, Halt);
+  }
+
+  auto const newExtra = ReqBindJmpData{extra.targets[indexVal], extra.invSPOff,
+                                       extra.irSPOff, TransFlags{}};
+  return gen(env, ReqBindJmp, newExtra, sp, fp);
+}
+
+SSATmp* simplifyCheckRange(State& env, const IRInstruction* inst) {
+  auto val = inst->src(0);
+  auto limit = inst->src(1);
+
+  // CheckRange returns (0 <= val < limit).
+  if (val->hasConstVal(TInt)) {
+    if (val->intVal() < 0) return cns(env, false);
+
+    if (limit->hasConstVal(TInt)) {
+      return cns(env, val->intVal() < limit->intVal());
     }
   }
-  return gen(env, ReqBindJmp, newExtra(extra.targets[indexVal]), sp, fp);
+
+  if (limit->hasConstVal(TInt) && limit->intVal() <= 0) return cns(env, false);
+
+  return nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2093,6 +2110,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdLoc)
   X(LdStk)
   X(JmpSwitchDest)
+  X(CheckRange)
   default: break;
   }
 #undef X

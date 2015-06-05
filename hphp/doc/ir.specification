@@ -645,7 +645,12 @@ To string conversions:
 | JmpSwitchDest, ND, S(Int) S(StkPtr) S(FramePtr), T
 
   Jump to the target of a switch statement, leaving the region, using table
-  metadata <JmpSwitchData> and index S0.
+  metadata <JmpSwitchData> and index S0, which must be a valid index in the
+  jump table.
+
+| ProfileSwitchDest<handle,nCases>, ND, S(Int), NF
+
+  Profile a switch statement target.
 
 | CheckSurpriseFlags, ND, NA, B
 
@@ -668,8 +673,7 @@ To string conversions:
 
 | Halt, ND, NA, T
 
-  Halt execution. Used only in tests, as a terminal instruction that does not
-  require any inputs or any successors.
+  Halt execution. Used only in tests or unreachable code.
 
 | Jmp, ND, SVar(Top), B|T
 
@@ -2251,10 +2255,13 @@ fields of that struct for holding intermediate values.
   Returns true iff the element at key S1 in S0 is set and not equal (as defined
   by the hhbc Eq instruction) to false.
 
-| CheckBounds, ND, S(Int) S(Int), Er
+| CheckRange, D(Bool), S(Int) S(Int), NF
 
-  Checks that the index in S0 is between 0 (included) and the values in S1
-  (excluded). Throws if out of bounds.
+  Returns true iff S0 is in the range [0, S1).
+
+| ThrowOutOfBounds, ND, S(Int), Er|T
+
+  Throws and OutOfBoundsException with a message indicating S0.
 
 | ProfilePackedArray, ND, S(Arr), NF
 

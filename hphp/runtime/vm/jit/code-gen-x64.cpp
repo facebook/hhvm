@@ -382,6 +382,7 @@ CALL_OPCODE(SetNewElemArray)
 CALL_OPCODE(BindNewElem)
 CALL_OPCODE(VectorIsset)
 CALL_OPCODE(PairIsset)
+CALL_OPCODE(ThrowOutOfBounds)
 
 CALL_OPCODE(InstanceOfIface)
 CALL_OPCODE(InterfaceSupportsArr)
@@ -2048,6 +2049,29 @@ void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
   v << loadqp{rip[addr], dstReg};
 }
 
+void CodeGenerator::cgProfileSwitchDest(IRInstruction* inst) {
+  auto& v = vmain();
+  auto const idxReg = srcLoc(inst, 0).reg();
+  auto const sf = v.makeReg();
+  auto const& extra = *inst->extra<ProfileSwitchDest>();
+  auto const vmtl = Vreg{rVmTl};
+
+  auto caseReg = v.makeReg();
+  v << subq{v.cns(extra.base), idxReg, caseReg, v.makeReg()};
+  v << cmpqi{extra.cases - 2, caseReg, sf};
+  ifThenElse(
+    v, CC_AE, sf,
+    [&](Vout& v) {
+      // Last vector element is the default case
+      v << inclm{vmtl[extra.handle + (extra.cases - 1) * sizeof(int32_t)],
+                 v.makeReg()};
+    },
+    [&](Vout& v) {
+      v << inclm{vmtl[caseReg * 4 + extra.handle], v.makeReg()};
+    }
+  );
+}
+
 void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
   auto const extra    = inst->extra<JmpSwitchDest>();
   auto const marker   = inst->marker();
@@ -2057,21 +2081,13 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
 
   maybe_syncsp(v, marker, srcLoc(inst, 1).reg(), extra->irSPOff);
 
-  auto idx = indexReg;
-  if (extra->bounded) {
-    auto const sf = v.makeReg();
-    v << cmpqi{extra->cases - 2, idx, sf};
-    v << bindjcc{CC_AE, sf, extra->defaultSk, invSPOff,
-                 TransFlags{}, leave_trace_args(marker)};
-  }
-
   auto const table = mcg->allocData<TCA>(sizeof(TCA), extra->cases);
   auto const t = v.makeReg();
   for (int i = 0; i < extra->cases; i++) {
     v << bindaddr{&table[i], extra->targets[i], invSPOff};
   }
   v << leap{rip[(intptr_t)table], t};
-  v << jmpm{t[idx*8], leave_trace_args(marker)};
+  v << jmpm{t[indexReg * 8], leave_trace_args(marker)};
 }
 
 void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
@@ -3456,29 +3472,25 @@ void CodeGenerator::cgLdPackedArrayElemAddr(IRInstruction* inst) {
   v << lea{Vptr{rArr, scaledIdx, 8, 16}, dst};
 }
 
-void CodeGenerator::cgCheckBounds(IRInstruction* inst) {
-  auto idx = inst->src(0);
-  auto idxReg = srcLoc(inst, 0).reg();
-  auto sizeReg = srcLoc(inst, 1).reg();
-
-  auto throwHelper = [&](Vout& v) {
-    auto args = argGroup(inst);
-    args.ssa(0/*idx*/);
-    cgCallHelper(v, CppCall::direct(throwOOB),
-                 kVoidDest, SyncOptions::kSyncPoint, args);
-  };
+void CodeGenerator::cgCheckRange(IRInstruction* inst) {
+  auto val = inst->src(0);
+  auto valReg = srcLoc(inst, 0).reg();
+  auto limitReg  = srcLoc(inst, 1).reg();
 
   auto& v = vmain();
-  if (idx->hasConstVal()) {
-    auto const sf = v.makeReg();
-    v << cmpq{idxReg, sizeReg, sf};
-    unlikelyIfThen(v, vcold(), CC_BE, sf, throwHelper);
-    return;
+  ConditionCode cc;
+  auto const sf = v.makeReg();
+  if (val->hasConstVal()) {
+    // Try to put the constant in a position that can get imm-folded. A
+    // suffiently smart imm-folder could handle this for us.
+    v << cmpq{valReg, limitReg, sf};
+    cc = CC_A;
+  } else {
+    v << cmpq{limitReg, valReg, sf};
+    cc = CC_B;
   }
 
-  auto const sf = v.makeReg();
-  v << cmpq{sizeReg, idxReg, sf};
-  unlikelyIfThen(v, vcold(), CC_AE, sf, throwHelper);
+  v << setcc{cc, sf, dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {

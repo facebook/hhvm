@@ -257,6 +257,7 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
   TCA start = regeneratePrologues(func, sk);
 
   // Regionize func and translate all its regions.
+  m_tx.setMode(TransKind::Optimize);
   std::vector<RegionDescPtr> regions;
   regionizeFunc(func, this, regions);
 

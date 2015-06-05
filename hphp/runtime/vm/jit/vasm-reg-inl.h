@@ -69,6 +69,9 @@ inline Vptr Vreg::operator[](DispReg rd) const {
 inline Vptr Vreg::operator[](Vscaled si) const {
   return Vptr(*this, si.index, si.scale, 0);
 }
+inline Vptr Vreg::operator[](VscaledDisp vd) const {
+  return Vptr(*this, vd.vs.index, vd.vs.scale, vd.disp);
+}
 inline Vptr Vreg::operator[](Vreg index) const {
   return Vptr(*this, index, 1, 0);
 }
@@ -148,6 +151,13 @@ inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
 template<class Reg, VregKind Kind, int Bits>
 inline Vptr Vr<Reg,Kind,Bits>::operator+(intptr_t d) const {
   return Vptr(*this, safe_cast<int32_t>(d));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Vscaled/VscaledDisp
+
+inline VscaledDisp operator+(Vscaled vs, int32_t disp) {
+  return {vs, disp};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

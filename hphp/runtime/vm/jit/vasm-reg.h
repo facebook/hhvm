@@ -27,6 +27,7 @@ namespace HPHP { namespace jit {
 
 struct Vptr;
 struct Vscaled;
+struct VscaledDisp;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -97,6 +98,7 @@ struct Vreg {
   Vptr operator[](Vptr) const;
   Vptr operator[](DispReg) const;
   Vptr operator[](Vscaled) const;
+  Vptr operator[](VscaledDisp) const;
   Vptr operator[](Vreg) const;
 
   Vptr operator*() const;
@@ -197,6 +199,13 @@ struct Vscaled {
   Vreg64 index;
   int scale;
 };
+
+struct VscaledDisp {
+  Vscaled vs;
+  int32_t disp;
+};
+
+VscaledDisp operator+(Vscaled, int32_t);
 
 /*
  * Result of virtual register addressing: base + (index * scale) + disp.

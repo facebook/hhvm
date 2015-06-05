@@ -64,30 +64,52 @@ namespace HPHP { namespace jit {
  */
 template<class T>
 struct TargetProfile {
-  explicit TargetProfile(const TransContext& context,
-                         BCMarker marker,
-                         const StringData* name)
-    : m_link(createLink(context, marker, name))
+  TargetProfile(TransID profTransID,
+                Offset bcOff,
+                const StringData* name,
+                size_t extraSize = 0)
+    : m_link(createLink(profTransID, bcOff, name, extraSize))
+  {}
+
+  TargetProfile(const TransContext& context,
+                BCMarker marker,
+                const StringData* name,
+                size_t extraSize = 0)
+    : TargetProfile(profiling() ? context.transID : marker.profTransID(),
+                    marker.bcOff(),
+                    name,
+                    extraSize)
   {}
 
   /*
    * Access the data we collected during profiling.
    *
    * ReduceFn is used to fold the data from each local RDS slot.  It must have
-   * the signature void(T&, const T&), and should assume the second argument
-   * might be concurrently written to by other threads running in the
-   * translation cache.
+   * the signature void(T&, const T&, Args...), and should assume the second
+   * argument might be concurrently written to by other threads running in the
+   * translation cache. Any arguments passed to data() after reduce will be
+   * forwarded to the reduce function.
+   *
+   * Most callers probably want the second overload, for simplicity. The
+   * two-argument version is for variable-sized T, and the caller must ensure
+   * that out is zero-initialized before calling data().
    *
    * Pre: optimizing()
    */
-  template<class ReduceFn>
-  T data(ReduceFn reduce) const {
+  template<class ReduceFn, class... Args>
+  void data(T& out, ReduceFn reduce, Args&&... extraArgs) const {
     assertx(optimizing());
     auto const hand = handle();
-    auto accum = T{};
     for (auto& base : rds::allTLBases()) {
-      reduce(accum, rds::handleToRef<T>(base, hand));
+      reduce(out, rds::handleToRef<T>(base, hand),
+             std::forward<Args>(extraArgs)...);
     }
+  }
+
+  template<class ReduceFn, class... Args>
+  T data(ReduceFn reduce, Args&&... extraArgs) const {
+    auto accum = T{};
+    data(accum, reduce, std::forward<Args>(extraArgs)...);
     return accum;
   }
 
@@ -111,35 +133,19 @@ struct TargetProfile {
   rds::Handle handle() const { return m_link.handle(); }
 
 private:
-  rds::Link<T> link() {
-    if (!m_link) m_link = createLink();
-    return *m_link;
-  }
+  static rds::Link<T> createLink(TransID profTransID,
+                                 Offset bcOff,
+                                 const StringData* name,
+                                 size_t extraSize) {
+    auto const rdsKey = rds::Profile{profTransID, bcOff, name};
 
-  static rds::Link<T> createLink(const TransContext& context,
-                                 BCMarker marker,
-                                 const StringData* name) {
     switch (mcg->tx().mode()) {
     case TransKind::Profile:
-      return rds::bind<T>(
-        rds::Profile {
-          context.transID,
-          marker.bcOff(),
-          name
-        },
-        rds::Mode::Local
-      );
+      return rds::bind<T>(rdsKey, rds::Mode::Local, extraSize);
 
     case TransKind::Optimize:
-      if (isValidTransID(marker.profTransID())) {
-        return rds::attach<T>(
-          rds::Profile {
-            marker.profTransID(), // transID from profiling translation
-            marker.bcOff(),
-            name
-          }
-        );
-      }
+      if (isValidTransID(profTransID)) return rds::attach<T>(rdsKey);
+
       // fallthrough
     case TransKind::Anchor:
     case TransKind::Prologue:
@@ -279,6 +285,37 @@ struct ReleaseVVProfile {
     a.released += b.released;
   }
 };
+
+//////////////////////////////////////////////////////////////////////
+
+struct SwitchProfile {
+  SwitchProfile(const SwitchProfile&) = delete;
+  SwitchProfile& operator=(const SwitchProfile&) = delete;
+
+  uint32_t cases[0]; // dynamically sized
+
+  static void reduce(SwitchProfile& a, const SwitchProfile& b, int nCases) {
+    for (uint32_t i = 0; i < nCases; ++i) {
+      a.cases[i] += b.cases[i];
+    }
+  }
+};
+
+struct SwitchCaseCount {
+  int32_t caseIdx;
+  uint32_t count;
+
+  bool operator<(const SwitchCaseCount& b) const { return count > b.count; }
+};
+
+/*
+ * Collect the data for the given SwitchProfile, and return a vector of case
+ * indexes and hit count, sorted in descending order of hit count.
+ */
+std::vector<SwitchCaseCount> sortedSwitchProfile(
+  TargetProfile<SwitchProfile>& profile,
+  int32_t nCases
+);
 
 }}
 

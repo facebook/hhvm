@@ -796,7 +796,6 @@ bool breaksRegion(Op opc) {
   switch (opc) {
     case Op::MIterNext:
     case Op::MIterNextK:
-    case Op::Switch:
     case Op::SSwitch:
     case Op::CreateCont:
     case Op::Yield:

@@ -1511,13 +1511,27 @@ void emitStringGet(MTS& env, SSATmp* key) {
   env.result = gen(env, StringGet, env.base.value, key);
 }
 
+void checkBounds(MTS& env, SSATmp* idx, SSATmp* limit) {
+  ifThen(
+    env,
+    [&](Block* taken) {
+      auto ok = gen(env, CheckRange, idx, limit);
+      gen(env, JmpZero, taken, ok);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, ThrowOutOfBounds, idx);
+    }
+  );
+}
+
 void emitVectorGet(MTS& env, SSATmp* key) {
   assertx(key->isA(TInt));
   if (key->hasConstVal() && key->intVal() < 0) {
     PUNT(emitVectorGet);
   }
   auto const size = gen(env, LdVectorSize, env.base.value);
-  gen(env, CheckBounds, key, size);
+  checkBounds(env, key, size);
   auto const base = gen(env, LdVectorBase, env.base.value);
   static_assert(sizeof(TypedValue) == 16,
                 "TypedValue size expected to be 16 bytes");
@@ -1540,7 +1554,7 @@ void emitPairGet(MTS& env, SSATmp* key) {
     auto index = cns(env, key->intVal() << 4);
     env.result = gen(env, LdElem, base, index);
   } else {
-    gen(env, CheckBounds, key, cns(env, 2));
+    checkBounds(env, key, cns(env, 2));
     auto const base = gen(env, LdPairBase, env.base.value);
     auto idx = gen(env, Shl, key, cns(env, 4));
     env.result = gen(env, LdElem, base, idx);
@@ -1649,7 +1663,7 @@ void emitVectorSet(MTS& env, SSATmp* key, SSATmp* value) {
     PUNT(emitVectorSet); // will throw
   }
   auto const size = gen(env, LdVectorSize, env.base.value);
-  gen(env, CheckBounds, key, size);
+  checkBounds(env, key, size);
 
   ifThen(
     env,

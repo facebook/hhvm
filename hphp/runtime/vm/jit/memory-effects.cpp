@@ -947,6 +947,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case PredictLoc:
   case PredictStk:
   case ExitPlaceholder:
+  case CheckRange:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////
@@ -1058,6 +1059,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsMethodFCacheFunc:
   case ProfilePackedArray:
   case ProfileStructArray:
+  case ProfileSwitchDest:
   case LdFuncCachedSafe:
   case LdFuncNumParams:
   case LdGblAddr:
@@ -1210,12 +1212,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CoerceCellToDbl:
   case CoerceCellToInt:
   case CoerceCellToBool:
-  case CheckBounds:
   case ConvCellToInt:
   case ConvResToStr:
   case ConcatStr3:
   case ConcatStr4:
   case ConvCellToDbl:
+  case ThrowOutOfBounds:
     return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
 
   // These two instructions don't touch memory we track, except that they may

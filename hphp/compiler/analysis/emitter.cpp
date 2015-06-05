@@ -5866,9 +5866,9 @@ MaybeDataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
   if (t == KindOfInt64) {
     int64_t base = caseMap.begin()->first;
     int64_t nTargets = caseMap.rbegin()->first - base + 1;
-    // Fail if there aren't enough cases or they're too sparse.
-    if (caseMap.size() < kMinIntSwitchCases ||
-        (float)caseMap.size() / nTargets < 0.5) {
+    // Fail if the cases are too sparse. We emit Switch even for absurdly small
+    // cases to allow the jit to decide when to lower back to comparisons.
+    if ((float)caseMap.size() / nTargets < 0.5) {
       return folly::none;
     }
   } else if (t == KindOfString) {

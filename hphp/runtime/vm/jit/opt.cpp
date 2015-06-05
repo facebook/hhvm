@@ -139,6 +139,10 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     doPass(unit, insertAsserts, DCE::None);
   }
+
+  // Perform a final clean pass to collapse any critical edges that were
+  // split.
+  doPass(unit, cleanCfg, DCE::None);
 }
 
 //////////////////////////////////////////////////////////////////////

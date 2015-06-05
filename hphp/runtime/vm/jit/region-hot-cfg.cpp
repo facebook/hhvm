@@ -19,9 +19,11 @@
 
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
-#include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/region-prune-arcs.h"
+#include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 
 /*
@@ -39,6 +41,8 @@ namespace HPHP { namespace jit {
 TRACE_SET_MOD(pgo);
 
 namespace {
+
+const StaticString s_switchProfile("SwitchProfile");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -63,10 +67,11 @@ struct DFS {
       m_minBlockWeight = minBlkPerc * m_cfg.weight(head) / 100.0;
       m_minArcProb = RuntimeOption::EvalJitPGOMinArcProbability;
     }
-    FTRACE(3, "formRegion: starting at head = {} (weight = {})\n"
+    ITRACE(3, "formRegion: starting at head = {} (weight = {})\n"
            "   minBlockWeight = {:.2}\n"
            "   minArcProb = {:.2}\n",
            head, m_cfg.weight(head), m_minBlockWeight, m_minArcProb);
+    Trace::Indent indent;
     visit(head);
     if (m_selectedVec) {
       std::reverse(m_selectedVec->begin(), m_selectedVec->end());
@@ -78,6 +83,89 @@ struct DFS {
   }
 
 private:
+  static constexpr int kMaxNonDefaultCases = 4;
+  static constexpr int kMinSwitchPercent = 75;
+
+  /*
+   * Look up profiling data for the Switch at the end of tid and decide which
+   * outgoing arcs, if any, to include in the region. Arcs that survive this
+   * function may still be trimmed by the other checks in visit().
+   */
+  void trimSwitchArcs(TransID tid,
+                      const RegionDesc& profRegion,
+                      std::vector<TransCFG::Arc*>& arcs) {
+    ITRACE(5, "Analyzing Switch ending profTrans {}\n", tid);
+    Trace::Indent indent;
+
+    auto sk = profRegion.blocks().back()->last();
+    assert(sk.op() == OpSwitch);
+    TargetProfile<SwitchProfile> profile(tid, sk.offset(),
+                                         s_switchProfile.get());
+    assert(!profile.profiling());
+    if (!profile.optimizing()) {
+      // We don't have profile data for this Switch, most likely because it saw
+      // some weird input type during profiling.
+      arcs.clear();
+      return;
+    }
+
+    NormalizedInstruction ni{sk, sk.unit()};
+    std::vector<Offset> offsets;
+    for (auto off : ni.immVec.range32()) offsets.push_back(sk.offset() + off);
+    auto const data = sortedSwitchProfile(profile, offsets.size());
+    uint32_t totalHits = 0;
+    for (auto const& item : data) totalHits += item.count;
+    if (totalHits == 0) {
+      // This switch was never executed during profiling.
+      arcs.clear();
+      return;
+    }
+
+    // Allow arcs if the hottest kMaxNonDefaultCases account for at least
+    // kMinSwitchPercent % of total profiling hits.
+    uint32_t includedCases = 0;
+    uint32_t includedHits = 0;
+    std::unordered_set<SrcKey, SrcKey::Hasher> allowedSks;
+    for (auto const& item : data) {
+      // We always have bounds checks for the default, so it doesn't count
+      // against the case limit.
+      if (item.caseIdx == data.size() - 1) {
+        ITRACE(5, "Adding {} hits from default case @ {}\n",
+               item.count, offsets[item.caseIdx]);
+        includedHits += item.count;
+        allowedSks.insert(SrcKey{sk, offsets[item.caseIdx]});
+        continue;
+      }
+
+      if (includedCases == kMaxNonDefaultCases) {
+        if (includedHits * 100 / totalHits < kMinSwitchPercent) {
+          ITRACE(5, "Profile data not biased towards hot cases; bailing\n");
+          arcs.clear();
+          return;
+        }
+        break;
+      }
+
+      ITRACE(5, "Adding {} hits from case {} @ {}\n",
+             item.count, item.caseIdx, offsets[item.caseIdx]);
+      ++includedCases;
+      includedHits += item.count;
+      allowedSks.insert(SrcKey{sk, offsets[item.caseIdx]});
+    }
+
+    ITRACE(5, "Including {} cases, representing {} / {} samples\n",
+           includedCases, includedHits, totalHits);
+    auto firstDead = std::remove_if(
+      begin(arcs), end(arcs), [&](const TransCFG::Arc* arc) {
+        const bool ok = allowedSks.count(m_profData->transSrcKey(arc->dst()));
+        ITRACE(5, "Arc {} -> {} {}included\n",
+               arc->src(), arc->dst(), ok ? "" : "not ");
+        return !ok;
+      }
+    );
+    arcs.erase(firstDead, end(arcs));
+  }
+
   void visit(TransID tid) {
     auto tidRegion = m_profData->transRegion(tid);
     auto tidInstrs = tidRegion->instrSize();
@@ -90,7 +178,7 @@ private:
     // started.
     auto tidWeight = m_cfg.weight(tid);
     if (tidWeight < m_minBlockWeight) {
-      FTRACE(5, "  - visit: skipping {} due to low weight ({})\n",
+      ITRACE(5, "- visit: skipping {} due to low weight ({})\n",
              tid, tidWeight);
       return;
     }
@@ -98,19 +186,27 @@ private:
     if (!m_visited.insert(tid).second) return;
     m_visiting.insert(tid);
     m_numBCInstrs += tidInstrs;
-    FTRACE(5, "  - visit: adding {} ({})\n", tid, tidWeight);
+    ITRACE(5, "- visit: adding {} ({})\n", tid, tidWeight);
 
-    if (!breaksRegion(*(m_profData->transLastInstr(tid)))) {
-
+    auto const termOp = *(m_profData->transLastInstr(tid));
+    if (!breaksRegion(termOp)) {
       auto srcBlockId = tidRegion->blocks().back().get()->id();
 
-      for (auto const arc : m_cfg.outArcs(tid)) {
+      auto arcs = m_cfg.outArcs(tid);
+
+      // We have special profiling and logic to decide which arcs from a Switch
+      // are eligible for inclusion in the region.
+      if (termOp == OpSwitch) {
+        trimSwitchArcs(srcBlockId, *tidRegion, arcs);
+      }
+
+      for (auto const arc : arcs) {
         auto dst = arc->dst();
 
-        // Skip if the probability of taking this arc is below the
-        // specified threshold.
+        // Skip if the probability of taking this arc is below the specified
+        // threshold.
         if (arc->weight() < m_minArcProb * tidWeight) {
-          FTRACE(5, "  - visit: skipping arc {} -> {} due to low probability "
+          ITRACE(5, "- visit: skipping arc {} -> {} due to low probability "
                  "({:.2})\n", tid, dst, arc->weight() / (tidWeight + 0.001));
           continue;
         }
@@ -118,7 +214,7 @@ private:
         // If dst is in the visiting set then this arc forms a cycle. Don't
         // include it unless we've asked for loops.
         if (!RuntimeOption::EvalJitLoops && m_visiting.count(dst)) {
-          FTRACE(5, "  - visit: skipping arc {} -> {} because it would create "
+          ITRACE(5, "- visit: skipping arc {} -> {} because it would create "
                  "a loop\n", tid, dst);
           continue;
         }
@@ -126,19 +222,19 @@ private:
         // Skip dst if we already generated a region starting at that SrcKey.
         auto dstSK = m_profData->transSrcKey(dst);
         if (m_profData->optimized(dstSK)) {
-          FTRACE(5, "  - visit: skipping {} because SrcKey was already "
+          ITRACE(5, "- visit: skipping {} because SrcKey was already "
                  "optimize", showShort(dstSK));
           continue;
         }
-        auto dstBlockId = m_profData->transRegion(dst)->entry()->id();
+        always_assert(dst == m_profData->transRegion(dst)->entry()->id());
 
         visit(dst);
 
-        // Record the arc if dstBlockId was included in the region.
-        // (Note that it may not be included in the region due to
-        // the EvalJitMaxRegionInstrs limit.)
-        if (m_visited.count(dstBlockId)) {
-          m_arcs.push_back({srcBlockId, dstBlockId});
+        // Record the arc if dstBlockId was included in the region.  (Note that
+        // it may not be included in the region due to the
+        // EvalJitMaxRegionInstrs limit.)
+        if (m_visited.count(dst)) {
+          m_arcs.push_back({srcBlockId, dst});
         }
       }
     }
@@ -177,17 +273,17 @@ RegionDescPtr selectHotCFG(TransID head,
                            const TransCFG& cfg,
                            TransIDSet& selectedSet,
                            TransIDVec* selectedVec) {
-  FTRACE(1, "selectHotCFG\n");
+  ITRACE(1, "selectHotCFG\n");
   auto const region =
     DFS(profData, cfg, selectedSet, selectedVec)
       .formRegion(head);
-  FTRACE(3, "selectHotCFG: before region_prune_arcs:\n{}\n",
+  ITRACE(3, "selectHotCFG: before region_prune_arcs:\n{}\n",
          show(*region));
   region_prune_arcs(*region);
-  FTRACE(3, "selectHotCFG: before chainRetransBlocks:\n{}\n",
+  ITRACE(3, "selectHotCFG: before chainRetransBlocks:\n{}\n",
          show(*region));
   region->chainRetransBlocks();
-  FTRACE(3, "selectHotCFG: after chainRetransBlocks:\n{}\n",
+  ITRACE(3, "selectHotCFG: after chainRetransBlocks:\n{}\n",
          show(*region));
   return region;
 }

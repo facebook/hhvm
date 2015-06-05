@@ -344,17 +344,17 @@ bool MCGenerator::shouldTranslateNoSizeLimit(const Func* func) const {
     return false;
   }
 
+  // Do not translate functions from units marked as interpret-only.
+  if (func->unit()->isInterpretOnly()) {
+    return false;
+  }
+
   /*
    * We don't support JIT compiling functions that use some super-dynamic php
    * variables.
    */
   if (func->lookupVarId(s_php_errormsg.get()) != -1 ||
       func->lookupVarId(s_http_response_header.get()) != -1) {
-    return false;
-  }
-
-  // Do not translate interpret-only functions.
-  if (func->unit()->isInterpretOnly()) {
     return false;
   }
 

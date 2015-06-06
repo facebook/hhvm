@@ -32,11 +32,11 @@ public:
   virtual ~UserFile();
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
-  virtual int fd() const;
+  int fd() const override;
 
-  virtual bool open(const String& filename, const String& mode) {
+  bool open(const String& filename, const String& mode) override {
     return openImpl(filename, mode, 0);
   }
   bool openImpl(const String& filename, const String& mode, int options);

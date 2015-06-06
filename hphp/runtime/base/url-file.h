@@ -37,15 +37,15 @@ public:
                    int timeout = -1, bool ignoreErrors = false);
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   void setProxy(const String& proxy_host, int proxy_port,
                 const String& proxy_user, const String& proxy_pass);
-  virtual bool open(const String& filename, const String& mode);
-  virtual int64_t writeImpl(const char *buffer, int64_t length);
-  virtual bool seekable() { return false; }
-  virtual bool flush();
-  virtual Variant getWrapperMetaData() { return Variant(m_responseHeaders); }
+  bool open(const String& filename, const String& mode) override;
+  int64_t writeImpl(const char *buffer, int64_t length) override;
+  bool seekable() override { return false; }
+  bool flush() override;
+  Variant getWrapperMetaData() override { return Variant(m_responseHeaders); }
   String getLastError();
 
 private:

@@ -49,7 +49,7 @@ public:
 
   CLASSNAME_IS("mcrypt");
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   DECLARE_RESOURCE_ALLOCATION(MCrypt)
 

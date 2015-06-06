@@ -40,21 +40,21 @@ public:
 
   CLASSNAME_IS("MemFile");
   // overriding ResourceData
-  const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
-  virtual bool open(const String& filename, const String& mode);
-  virtual bool close();
-  virtual int64_t readImpl(char *buffer, int64_t length);
-  virtual int getc();
-  virtual int64_t writeImpl(const char *buffer, int64_t length);
-  virtual bool seekable() { return true;}
-  virtual bool seek(int64_t offset, int whence = SEEK_SET);
-  virtual int64_t tell();
-  virtual bool eof();
-  virtual bool rewind();
-  virtual bool flush();
+  bool open(const String& filename, const String& mode) override;
+  bool close() override;
+  int64_t readImpl(char *buffer, int64_t length) override;
+  int getc() override;
+  int64_t writeImpl(const char *buffer, int64_t length) override;
+  bool seekable() override { return true;}
+  bool seek(int64_t offset, int whence = SEEK_SET) override;
+  int64_t tell() override;
+  bool eof() override;
+  bool rewind() override;
+  bool flush() override;
 
-  virtual Array getMetaData();
+  Array getMetaData() override;
 
   void unzip();
 

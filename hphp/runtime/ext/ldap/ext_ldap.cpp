@@ -129,7 +129,7 @@ private:
 public:
   CLASSNAME_IS("ldap link");
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   LDAP *link{nullptr};
   Variant rebindproc;
@@ -185,7 +185,7 @@ public:
 
   CLASSNAME_IS("ldap result");
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof();}
+  const String& o_getClassNameHook() const override { return classnameof();}
 
   LDAPMessage *data;
 };
@@ -209,7 +209,7 @@ public:
 
   CLASSNAME_IS("ldap result entry");
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   LDAPMessage *data;
   BerElement *ber;

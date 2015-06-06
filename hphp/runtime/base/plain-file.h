@@ -42,24 +42,24 @@ public:
   virtual ~PlainFile();
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   // implementing File
-  virtual bool open(const String& filename, const String& mode);
-  virtual bool close();
-  virtual int64_t readImpl(char *buffer, int64_t length);
-  virtual int getc();
-  virtual String read();
-  virtual String read(int64_t length);
-  virtual int64_t writeImpl(const char *buffer, int64_t length);
-  virtual bool seekable() { return true;}
-  virtual bool seek(int64_t offset, int whence = SEEK_SET);
-  virtual int64_t tell();
-  virtual bool eof();
-  virtual bool rewind();
-  virtual bool flush();
-  virtual bool truncate(int64_t size);
-  virtual bool stat(struct stat *sb);
+  bool open(const String& filename, const String& mode) override;
+  bool close() override;
+  int64_t readImpl(char *buffer, int64_t length) override;
+  int getc() override;
+  String read() override;
+  String read(int64_t length) override;
+  int64_t writeImpl(const char *buffer, int64_t length) override;
+  bool seekable() override { return true;}
+  bool seek(int64_t offset, int whence = SEEK_SET) override;
+  int64_t tell() override;
+  bool eof() override;
+  bool rewind() override;
+  bool flush() override;
+  bool truncate(int64_t size) override;
+  bool stat(struct stat *sb) override;
 
   FILE *getStream() { return m_stream;}
 
@@ -79,8 +79,8 @@ struct BuiltinFile : PlainFile {
   explicit BuiltinFile(FILE *stream) : PlainFile(stream, true) {}
   explicit BuiltinFile(int fd) : PlainFile(fd, true) {}
   virtual ~BuiltinFile();
-  virtual bool close();
-  virtual void sweep() override;
+  bool close() override;
+  void sweep() override;
 };
 static_assert(sizeof(BuiltinFile) == sizeof(PlainFile),
               "BuiltinFile inherits PlainFile::heapSize()");

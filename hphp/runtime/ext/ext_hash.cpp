@@ -167,7 +167,7 @@ struct HashContext : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(HashContext)
 
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   HashEnginePtr ops;
   void *context;

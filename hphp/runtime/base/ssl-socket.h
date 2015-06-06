@@ -120,7 +120,7 @@ public:
 
   CLASSNAME_IS("OpenSSL X.509")
   // overriding ResourceData
-  const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   DECLARE_RESOURCE_ALLOCATION(Certificate)
 

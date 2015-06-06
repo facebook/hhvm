@@ -236,7 +236,7 @@ ODBCParam::ODBCParam(const SQLHSTMT hdl_stmt, const int i_col)
 class ODBCCursor : public SweepableResourceData {
 public:
   CLASSNAME_IS("odbc cursor")
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
   DECLARE_RESOURCE_ALLOCATION(ODBCCursor);
 
   // needs a connection
@@ -570,7 +570,7 @@ int64_t ODBCCursor::num_rows() const
 class ODBCLink : public SweepableResourceData {
 public:
   CLASSNAME_IS("odbc link")
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
   DECLARE_RESOURCE_ALLOCATION(ODBCLink);
 
   ODBCLink();

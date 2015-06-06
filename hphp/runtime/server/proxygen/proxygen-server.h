@@ -58,7 +58,7 @@ class HPHPSessionAcceptor : public proxygen::HTTPSessionAcceptor {
 
   proxygen::HTTPTransaction::Handler* newHandler(
     proxygen::HTTPTransaction& txn,
-    proxygen::HTTPMessage *msg) noexcept;
+    proxygen::HTTPMessage *msg) noexcept override;
 
   bool canAccept(const folly::SocketAddress&) override;
 
@@ -117,7 +117,7 @@ class ProxygenServer : public Server,
     return m_eventBaseManager.getEventBase();
   }
 
-  void messageAvailable(ResponseMessage&& message) {
+  void messageAvailable(ResponseMessage&& message) override {
     message.m_transport->messageAvailable(std::move(message));
   }
 
@@ -159,7 +159,7 @@ class ProxygenServer : public Server,
     DRAINING_WRITES
   };
 
-  void timeoutExpired() noexcept;
+  void timeoutExpired() noexcept override;
 
   bool drained() const {
     return (m_https ? m_drainCount > 1 : m_drainCount > 0);

@@ -234,7 +234,7 @@ public:
 
   CLASSNAME_IS("DateTime");
   // overriding ResourceData
-  const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   // informational
   bool local() const { return m_time->is_localtime;}

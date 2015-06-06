@@ -75,6 +75,9 @@
  /* Do tar(1) matching rules, which ignore a trailing slash? */
 #undef MATCH_TAR_PATTERN
 
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wunevaluated-expression"
+#endif
 
 /*
  ** Match text and p, return TRUE, FALSE, or ABORT.

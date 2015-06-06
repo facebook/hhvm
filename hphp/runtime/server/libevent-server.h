@@ -106,19 +106,19 @@ public:
   ~LibEventServer();
 
   // implementing Server
-  virtual void start();
-  virtual void waitForEnd();
-  virtual void stop();
-  virtual int getActiveWorker() {
+  void start() override;
+  void waitForEnd() override;
+  void stop() override;
+  int getActiveWorker() override {
     return m_dispatcher.getActiveWorker();
   }
-  virtual void addWorkers(int numWorkers) {
+  void addWorkers(int numWorkers) override {
     m_dispatcher.addWorkers(numWorkers);
   }
-  virtual int getQueuedJobs() {
+  int getQueuedJobs() override {
     return m_dispatcher.getQueuedJobs();
   }
-  int getLibEventConnectionCount();
+  int getLibEventConnectionCount() override;
 
   void addTakeoverListener(TakeoverListener* listener) override;
   void removeTakeoverListener(TakeoverListener* listener) override;
@@ -143,7 +143,7 @@ public:
    * To enable SSL of the current server, it will listen to an additional
    * port as specified in parameter.
    */
-  virtual bool enableSSL(int port);
+  bool enableSSL(int port) override;
 
   /**
    * TakeoverAgent::Callback

@@ -121,9 +121,9 @@ struct File : SweepableResourceData {
   static StaticString s_resource_name;
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const { return classnameof(); }
-  const String& o_getResourceName() const;
-  virtual bool isInvalid() const { return m_data->m_closed; }
+  const String& o_getClassNameHook() const override { return classnameof(); }
+  const String& o_getResourceName() const override;
+  bool isInvalid() const override { return m_data->m_closed; }
 
   virtual int fd() const { return m_data->m_fd;}
   bool valid() const { return m_data && m_data->m_fd >= 0; }

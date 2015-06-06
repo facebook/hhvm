@@ -33,11 +33,11 @@ public:
   virtual ~Pipe();
 
   // overriding ResourceData
-  const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   // implementing File
-  virtual bool open(const String& filename, const String& mode);
-  virtual bool close();
+  bool open(const String& filename, const String& mode) override;
+  bool close() override;
 
 private:
   bool closeImpl();

@@ -168,7 +168,7 @@ public:
 
   CLASSNAME_IS("OpenSSL key");
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   DECLARE_RESOURCE_ALLOCATION(Key)
 
@@ -324,7 +324,7 @@ public:
 
   CLASSNAME_IS("OpenSSL X.509 CSR");
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   DECLARE_RESOURCE_ALLOCATION(CSRequest)
 

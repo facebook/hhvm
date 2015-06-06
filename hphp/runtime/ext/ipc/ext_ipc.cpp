@@ -370,7 +370,7 @@ struct Semaphore : SweepableResourceData {
 
   CLASSNAME_IS("Semaphore");
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   bool op(bool acquire) {
     struct sembuf sop;

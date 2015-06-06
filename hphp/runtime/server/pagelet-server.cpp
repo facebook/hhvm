@@ -329,7 +329,7 @@ public:
 
   CLASSNAME_IS("PageletTask");
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
 private:
   PageletTransport *m_job;

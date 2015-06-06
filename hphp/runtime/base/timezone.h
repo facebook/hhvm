@@ -69,7 +69,7 @@ public:
     return result;
   }
   // overriding ResourceData
-  const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   /**
    * Whether this represents a valid timezone.

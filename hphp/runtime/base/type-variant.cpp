@@ -734,6 +734,29 @@ void Variant::setEvalScalar() {
   not_reached();
 }
 
+
+namespace {
+static void serializeRef(const TypedValue* tv,
+                         VariableSerializer* serializer,
+                         bool isArrayKey) {
+  assert(tv->m_type == KindOfRef);
+  // Ugly, but behavior is different for serialize
+  if (serializer->getType() == VariableSerializer::Type::Serialize ||
+      serializer->getType() == VariableSerializer::Type::APCSerialize ||
+      serializer->getType() == VariableSerializer::Type::DebuggerSerialize) {
+    if (serializer->incNestedLevel(tv->m_data.pref->var())) {
+      serializer->writeOverflow(tv->m_data.pref->var());
+    } else {
+      // Tell the inner variant to skip the nesting check for data inside
+      serializeVariant(*tv->m_data.pref->var(), serializer, isArrayKey, true);
+    }
+    serializer->decNestedLevel(tv->m_data.pref->var());
+  } else {
+    serializeVariant(*tv->m_data.pref->var(), serializer, isArrayKey);
+  }
+}
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 
@@ -742,23 +765,6 @@ void serializeVariant(const Variant& self, VariableSerializer *serializer,
                       bool skipNestCheck /* = false */,
                       bool noQuotes /* = false */) {
   auto tv = self.asTypedValue();
-  if (tv->m_type == KindOfRef) {
-    // Ugly, but behavior is different for serialize
-    if (serializer->getType() == VariableSerializer::Type::Serialize ||
-        serializer->getType() == VariableSerializer::Type::APCSerialize ||
-        serializer->getType() == VariableSerializer::Type::DebuggerSerialize) {
-      if (serializer->incNestedLevel(tv->m_data.pref->var())) {
-        serializer->writeOverflow(tv->m_data.pref->var());
-      } else {
-        // Tell the inner variant to skip the nesting check for data inside
-        serializeVariant(*tv->m_data.pref->var(), serializer, isArrayKey, true);
-      }
-      serializer->decNestedLevel(tv->m_data.pref->var());
-    } else {
-      serializeVariant(*tv->m_data.pref->var(), serializer, isArrayKey);
-    }
-    return;
-  }
 
   switch (tv->m_type) {
     case KindOfUninit:
@@ -802,6 +808,9 @@ void serializeVariant(const Variant& self, VariableSerializer *serializer,
       return;
 
     case KindOfRef:
+      serializeRef(tv, serializer, isArrayKey);
+      return;
+
     case KindOfClass:
       break;
   }

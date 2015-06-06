@@ -305,6 +305,26 @@ uint16_t reverse16(uint16_t us) {
     (((us >> 8) & 0xf) << 4) | ((us >> 12) & 0xf);
 }
 
+// Potentially need to escape all control characters (< 32) and also "\/<>&'@%
+static const bool jsonNoEscape[128] = {
+  false, false, false, false, false, false, false, false,
+  false, false, false, false, false, false, false, false,
+  false, false, false, false, false, false, false, false,
+  false, false, false, false, false, false, false, false,
+  true,  true,  false, true,  true,  false, false, false,
+  true,  true,  true,  true,  true,  true,  true,  false,
+  true,  true,  true,  true,  true,  true,  true,  true,
+  true,  true,  true,  true,  false, true,  false, true,
+  false, true,  true,  true,  true,  true,  true,  true,
+  true,  true,  true,  true,  true,  true,  true,  true,
+  true,  true,  true,  true,  true,  true,  true,  true,
+  true,  true,  true,  true,  false, true,  true,  true,
+  true,  true,  true,  true,  true,  true,  true,  true,
+  true,  true,  true,  true,  true,  true,  true,  true,
+  true,  true,  true,  true,  true,  true,  true,  true,
+  true,  true,  true,  true,  true,  true,  true,  true,
+};
+
 static void appendJsonEscape(StringBuffer& sb,
                              const char *s,
                              int len,
@@ -319,7 +339,21 @@ static void appendJsonEscape(StringBuffer& sb,
   auto const start = sb.size();
   sb.append('"');
 
-  UTF8To16Decoder decoder(s, len, options & k_JSON_FB_LOOSE);
+  // Do a fast path for ASCII characters that don't need escaping
+  int pos = 0;
+  do {
+    int c = s[pos];
+    if (UNLIKELY((unsigned char)c >= 128 || !jsonNoEscape[c])) {
+      goto utf8_decode;
+    }
+    sb.append((char)c);
+    pos++;
+  } while (pos < len);
+  sb.append('"');
+  return;
+
+utf8_decode:
+  UTF8To16Decoder decoder(s + pos, len - pos, options & k_JSON_FB_LOOSE);
   for (;;) {
     int c = options & k_JSON_UNESCAPED_UNICODE ? decoder.decodeAsUTF8()
                                                : decoder.decode();
@@ -588,7 +622,9 @@ void VariableSerializer::preventOverflow(const Object& v,
 
 void VariableSerializer::write(const Variant& v, bool isArrayKey /* = false */) {
   setReferenced(v.isReferenced());
-  setRefCount(v.getRefCount());
+  if (m_type == Type::DebugDump) {
+    setRefCount(v.getRefCount());
+  }
   if (!isArrayKey && v.isObject()) {
     write(v.toObject());
     return;
@@ -869,14 +905,10 @@ void VariableSerializer::writePropertyKey(const String& prop) {
 }
 
 /* key MUST be a non-reference string or int */
-void VariableSerializer::writeArrayKey(Variant key) {
-  auto const keyCell = key.asCell();
+void VariableSerializer::writeArrayKey(const Variant& key) {
+  auto const keyCell = tvAssertCell(key.asTypedValue());
   bool const skey = IS_STRING_TYPE(keyCell->m_type);
 
-  if (skey && m_type == Type::APCSerialize) {
-    write(StrNR(keyCell->m_data.pstr).asString());
-    return;
-  }
   ArrayInfo &info = m_arrayInfos.back();
 
   switch (m_type) {
@@ -919,6 +951,11 @@ void VariableSerializer::writeArrayKey(Variant key) {
     break;
 
   case Type::APCSerialize:
+    if (skey) {
+      write(StrNR(keyCell->m_data.pstr).asString());
+      return;
+    }
+
   case Type::Serialize:
   case Type::DebuggerSerialize:
     write(key);
@@ -928,7 +965,7 @@ void VariableSerializer::writeArrayKey(Variant key) {
     if (!info.first_element) {
       m_buf->append(',');
     }
-    if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
+    if (UNLIKELY(m_option & k_JSON_PRETTY_PRINT)) {
       if (!info.first_element) {
         m_buf->append("\n");
       }
@@ -951,7 +988,7 @@ void VariableSerializer::writeArrayKey(Variant key) {
         m_buf->append('"');
       }
       m_buf->append(':');
-      if (m_type == Type::JSON && m_option & k_JSON_PRETTY_PRINT) {
+      if (UNLIKELY(m_option & k_JSON_PRETTY_PRINT)) {
         m_buf->append(' ');
       }
     }
@@ -1005,25 +1042,32 @@ void VariableSerializer::writeCollectionKeylessPrefix() {
 }
 
 void VariableSerializer::writeArrayValue(const Variant& value) {
-  // Do not count referenced values after the first
-  if ((m_type == Type::Serialize || m_type == Type::APCSerialize ||
-       m_type == Type::DebuggerSerialize) &&
-      !(value.isReferenced() &&
-        m_arrayIds->find(value.getRefData()) != m_arrayIds->end())) {
-    m_valueCount++;
-  }
-
-  write(value);
   switch (m_type) {
+  case Type::Serialize:
+  case Type::APCSerialize:
+  case Type::DebuggerSerialize:
+  // Do not count referenced values after the first
+    if (!(value.isReferenced() &&
+          m_arrayIds->find(value.getRefData()) != m_arrayIds->end())) {
+      m_valueCount++;
+    }
+    write(value);
+    break;
+
   case Type::DebuggerDump:
   case Type::PrintR:
+    write(value);
     m_buf->append('\n');
     break;
+
   case Type::VarExport:
   case Type::PHPOutput:
+    write(value);
     m_buf->append(",\n");
     break;
+
   default:
+    write(value);
     break;
   }
 

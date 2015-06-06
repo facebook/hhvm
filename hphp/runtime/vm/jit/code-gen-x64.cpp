@@ -3074,12 +3074,9 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   auto srcNum = uint32_t{2};
   if (callee->isMethod()) {
     if (callee->isStatic()) {
-      // This isn't entirely accurate.  HNI functions expect the Class*
-      // of the class used for the call which may be callee->cls() or
-      // one of its children. Currently we don't support FCallBuiltin on
-      // these functions (disabled in inlining-decider.cpp); (t5360661)
       if (callee->isNative()) {
-        callArgs.imm(callee->cls());
+        callArgs.ssa(srcNum);
+        ++srcNum;
       }
     } else {
       // Note, we don't support objects with vtables here (if they may
@@ -3091,7 +3088,12 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
 
   if (callee->attrs() & AttrNumArgs) {
-    callArgs.imm((int64_t)numNonDefault);
+    if (numNonDefault >= 0) {
+      callArgs.imm((int64_t)numNonDefault);
+    } else {
+      callArgs.ssa(srcNum);
+      ++srcNum;
+    }
   }
 
   for (uint32_t i = 0; i < numArgs; ++i, ++srcNum) {
@@ -3279,6 +3281,15 @@ void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   auto dstReg = dstLoc(inst, 0).reg();
   auto baseReg = srcLoc(inst, 0).reg();
   vmain() << load{baseReg[off + AROFF(m_func)], dstReg};
+}
+
+void CodeGenerator::cgLdARNumParams(IRInstruction* inst) {
+  auto& v = vmain();
+  auto dstReg = dstLoc(inst, 0).reg();
+  auto baseReg = srcLoc(inst, 0).reg();
+  auto tmp = v.makeReg();
+  v << loadzlq{baseReg[AROFF(m_numArgsAndFlags)], tmp};
+  v << andqi{ActRec::kNumArgsMask, tmp, dstReg, v.makeReg()};
 }
 
 void CodeGenerator::cgLdStaticLocCached(IRInstruction* inst) {

@@ -63,6 +63,8 @@ void freeLocalsAndThis(IRGS& env) {
     // In a pseudomain, we have to do a non-inline DecRef, because we can't
     // side-exit in the middle of the sequence of LdLocPseudoMains.
     if (curFunc(env)->isPseudoMain()) return false;
+    // We don't want to specialize on arg types for builtins
+    if (curFunc(env)->builtinFuncPtr()) return false;
 
     auto const count = mcg->numTranslations(
       env.irb->unit().context().srcKey());

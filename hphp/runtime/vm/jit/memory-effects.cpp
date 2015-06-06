@@ -943,6 +943,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdStaticLocCached:
   case CheckCtxThis:
   case CastCtxThis:
+  case LdARNumParams:
   case LdRDSAddr:
   case PredictLoc:
   case PredictStk:

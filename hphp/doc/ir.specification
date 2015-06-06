@@ -1047,6 +1047,10 @@ To string conversions:
   Loads the m_func member of an ActRec. S0 is the base address, with `offset'
   cells to the ActRec.
 
+| LdARNumParams, D(Int), S(FramePtr), NF
+
+  Loads the number of params from an ActRec. S0 is the address of the ActRec
+
 | LdFuncNumParams, D(Int), S(Func), NF
 
   Returns the value of func->numParams().
@@ -1239,7 +1243,7 @@ To string conversions:
   Execute a call to the native builtin specified by the current function. S0
   and S1 should be the current vmfp and vmsp, respectively.
 
-| CallBuiltin<T>, DBuiltin, S(FramePtr) S(StkPtr) SVar(PtrToGen,Gen), Er|PRc
+| CallBuiltin<T>, DBuiltin, S(FramePtr) S(StkPtr) SVar(PtrToGen,Gen,Cls), Er|PRc
 
   Call builtin function with N arguments. S0 and S1 should be the current vmfp
   and vmsp, respectively.

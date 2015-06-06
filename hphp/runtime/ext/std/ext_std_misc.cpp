@@ -38,6 +38,7 @@
 #include "hphp/system/constants.h"
 #include "hphp/util/logger.h"
 #include <sys/param.h> // MAXPATHLEN is here
+#include "hphp/runtime/base/comparisons.h"
 
 namespace HPHP {
 
@@ -159,6 +160,7 @@ void StandardExtension::initMisc() {
     HHVM_FE(token_get_all);
     HHVM_FE(token_name);
     HHVM_FE(hphp_to_string);
+    HHVM_FALIAS(__SystemLib\\max2, SystemLib_max2);
     Native::registerConstant<KindOfDouble>(makeStaticString("INF"), k_INF);
     Native::registerConstant<KindOfDouble>(makeStaticString("NAN"), k_NAN);
     Native::registerConstant<KindOfInt64>(
@@ -821,6 +823,12 @@ String HHVM_FUNCTION(token_name, int64_t token) {
 
 String HHVM_FUNCTION(hphp_to_string, const Variant& v) {
   return v.toString();
+}
+
+// Adds an optimized FCallBuiltin for max with 2 operands to SystemLib
+Variant HHVM_FUNCTION(SystemLib_max2, const Variant& value1,
+                      const Variant& value2) {
+  return less(value1, value2) ? value2 : value1;
 }
 
 #undef YYTOKENTYPE

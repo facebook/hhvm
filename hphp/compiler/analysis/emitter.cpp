@@ -3955,6 +3955,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         e.Strlen();
         return true;
       }
+    } else if (call->isCallToFunction("max")) {
+      if (params && params->getCount() == 2) {
+        emitFuncCall(e, call, "__SystemLib\\max2", params);
+        return true;
+      }
     } else if (call->isCallToFunction("define")) {
       if (params && params->getCount() == 2) {
         ExpressionPtr p0 = (*params)[0];

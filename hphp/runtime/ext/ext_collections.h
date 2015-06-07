@@ -707,7 +707,11 @@ class HashCollection : public ExtCollectionObjectData {
  protected:
   inline Elm* data() { return m_data; }
   inline const Elm* data() const { return m_data; }
-  inline int32_t* hashTab() const { return (int32_t*)(m_data + cap()); }
+  inline int32_t* hashTab() const {
+    return reinterpret_cast<int32_t*>(
+      m_data + static_cast<size_t>(arrayData()->scale()) * 3
+    );
+  }
 
   MixedArray* arrayData() {
     auto* ret = getArrayFromMixedData(m_data);
@@ -790,21 +794,6 @@ class HashCollection : public ExtCollectionObjectData {
     }
   }
 
-  // We use this funny-looking helper to make g++ use lea and shl
-  // instructions instead of imul when indexing into m_data
-  inline static const HashCollection::Elm*
-  fetchElm(const Elm* data, int64_t pos) {
-    assert(sizeof(Elm) == 24);
-    assert(sizeof(int64_t) == 8);
-    int64_t index = 3 * pos;
-    int64_t* ptr = (int64_t*)data;
-    return (const Elm*)(&ptr[index]);
-  }
-  inline static HashCollection::Elm*
-  fetchElm(Elm* data, int64_t pos) {
-    return (Elm*)fetchElm((const Elm*)data, pos);
-  }
-
   void throwTooLarge() ATTRIBUTE_NORETURN;
   void throwReserveTooLarge() ATTRIBUTE_NORETURN;
   int32_t* warnUnbalanced(size_t n, int32_t* ei) const;
@@ -834,21 +823,21 @@ class HashCollection : public ExtCollectionObjectData {
   template <class Hit>
   ssize_t findImpl(size_t h0, Hit) const;
   ssize_t find(int64_t h) const;
-  ssize_t find(const StringData* s, strhash_t prehash) const;
+  ssize_t find(const StringData* s, strhash_t h) const;
 
   template <class Hit>
   int32_t* findForInsertImpl(size_t h0, Hit) const;
   int32_t* findForInsert(int64_t h) const;
-  int32_t* findForInsert(const StringData* s, strhash_t prehash) const;
+  int32_t* findForInsert(const StringData* s, strhash_t h) const;
 
   ssize_t findForRemove(int64_t h) {
     assert(canMutateBuffer());
     return arrayData()->findForRemove(h, false);
   }
 
-  ssize_t findForRemove(const StringData* s, strhash_t prehash) {
+  ssize_t findForRemove(const StringData* s, strhash_t h) {
     assert(canMutateBuffer());
-    return arrayData()->findForRemove(s, prehash);
+    return arrayData()->findForRemove(s, h);
   }
 
   int32_t* findForNewInsert(size_t h0) const;
@@ -908,10 +897,10 @@ class HashCollection : public ExtCollectionObjectData {
   }
 
   inline Elm* elmLimit() {
-    return fetchElm(data(), posLimit());
+    return data() + posLimit();
   }
   inline const Elm* elmLimit() const {
-    return fetchElm(data(), posLimit());
+    return data() + posLimit();
   }
 
   inline static Elm* nextElm(Elm* e, Elm* eLimit) {
@@ -934,7 +923,7 @@ class HashCollection : public ExtCollectionObjectData {
   }
 
   static bool isTombstone(ssize_t pos, const Elm* data) {
-    return isTombstoneType(fetchElm(data, pos)->data.m_type);
+    return isTombstoneType(data[pos].data.m_type);
   }
 
   bool isTombstone(ssize_t pos) const {
@@ -1037,7 +1026,7 @@ class HashCollection : public ExtCollectionObjectData {
     *ei = i;
     setPosLimit(i + 1);
     incSize();
-    return *fetchElm(data(), i);
+    return data()[i];
   }
 
   HashCollection::Elm& allocElmFront(int32_t* ei);
@@ -1062,7 +1051,7 @@ class HashCollection : public ExtCollectionObjectData {
 
   const Elm* iter_elm(ssize_t pos) const {
     assert(iter_valid(pos));
-    return fetchElm(data(), pos);
+    return &(data()[pos]);
   }
 
   ssize_t iter_begin() const {
@@ -1650,9 +1639,7 @@ class BaseSet : public HashCollection {
       BaseSet::throwBadValueType();
     }
     if (LIKELY(p != Empty)) {
-      return reinterpret_cast<TypedValue*>(
-        &HashCollection::fetchElm(st->data(), p)->data
-      );
+      return reinterpret_cast<TypedValue*>(&st->data()[p].data);
     }
     if (!throwOnMiss) {
       return nullptr;

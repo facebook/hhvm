@@ -43,7 +43,7 @@ MixedArray::Elm* mixedData(const MixedArray* arr) {
 }
 
 ALWAYS_INLINE int32_t* mixedHash(MixedArray::Elm* data, uint32_t scale) {
-  return reinterpret_cast<int32_t*>(data + MixedArray::Capacity(scale));
+  return reinterpret_cast<int32_t*>(data + static_cast<size_t>(scale) * 3);
 }
 
 template<class F> void MixedArray::scan(F& mark) const {
@@ -108,25 +108,27 @@ ALWAYS_INLINE int32_t*
 MixedArray::findForNewInsertCheckUnbalanced(int32_t* table, size_t mask,
                                             size_t h0) const {
   assert(!isPacked());
-  size_t balanceLimit = size_t(RuntimeOption::MaxArrayChain);
-  for (size_t i = 1, probe = h0;; ++i) {
+  uint32_t balanceLimit = RuntimeOption::MaxArrayChain;
+  for (uint32_t i = 1, probe = h0;; ++i) {
     auto ei = &table[probe & mask];
     if (!validPos(*ei)) {
       return LIKELY(i <= balanceLimit) ? ei : warnUnbalanced(i, ei);
     }
     probe += i;
-    assert(i <= mask && probe == h0 + ((i + i * i) / 2));
+    assertx(i <= mask);
+    assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
   }
 }
 
 ALWAYS_INLINE int32_t*
 MixedArray::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
   assert(!isPacked());
-  for (size_t i = 1, probe = h0;; ++i) {
+  for (uint32_t i = 1, probe = h0;; ++i) {
     auto ei = &table[probe & mask];
     if (!validPos(*ei)) return ei;
     probe += i;
-    assert(i <= mask && probe == h0 + ((i + i * i) / 2));
+    assertx(i <= mask);
+    assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
   }
 }
 
@@ -240,8 +242,8 @@ inline ArrayData* MixedArray::addValNoAsserts(StringData* key, Cell data) {
   auto& e = allocElm(ei);
   e.setStrKey(key, h);
   cellDup(data, e.data);
- // TODO(#3888164): should refactor to avoid making KindOfUninit checks.
- if (UNLIKELY(e.data.m_type == KindOfUninit)) {
+  // TODO(#3888164): should refactor to avoid making KindOfUninit checks.
+  if (UNLIKELY(e.data.m_type == KindOfUninit)) {
     e.data.m_type = KindOfNull;
   }
   return this;

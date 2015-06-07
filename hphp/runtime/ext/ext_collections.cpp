@@ -1590,16 +1590,20 @@ static bool hitIntKey(const HashCollection::Elm& e, int64_t ki) {
 template <class Hit>
 ALWAYS_INLINE
 ssize_t HashCollection::findImpl(size_t h0, Hit hit) const {
-  size_t mask = tableMask();
-  auto* elms = data();
-  auto* hashtable = hashTab();
-  for (size_t probeIndex = h0, i = 1;; ++i) {
-    ssize_t pos = hashtable[probeIndex & mask];
-    if ((validPos(pos) && hit(*fetchElm(elms, pos))) || pos == Empty) {
+  uint32_t mask = tableMask();
+  auto elms = data();
+  auto hashtable = hashTab();
+  for (uint32_t probeIndex = h0, i = 1;; ++i) {
+    auto pos = hashtable[probeIndex & mask];
+    if (validPos(pos)) {
+      if (hit(elms[pos])) return pos;
+    } else if (pos & 1) {
+      assert(pos == Empty);
       return pos;
     }
     probeIndex += i;
-    assert(i <= mask && probeIndex == h0 + (i + i*i) / 2);
+    assertx(i <= mask);
+    assertx(probeIndex == static_cast<uint32_t>(h0) + (i + i * i) / 2);
   }
 }
 
@@ -1610,9 +1614,8 @@ ssize_t HashCollection::find(int64_t ki) const {
 }
 
 ssize_t
-HashCollection::find(const StringData* s, strhash_t prehash) const {
-  auto h = prehash | STRHASH_MSB;
-  return findImpl(prehash, [s, h] (const Elm& e) {
+HashCollection::find(const StringData* s, strhash_t h) const {
+  return findImpl(h, [s, h] (const Elm& e) {
     return hitStringKey(e, s, h);
   });
 }
@@ -1620,27 +1623,22 @@ HashCollection::find(const StringData* s, strhash_t prehash) const {
 template <class Hit>
 ALWAYS_INLINE
 int32_t* HashCollection::findForInsertImpl(size_t h0, Hit hit) const {
-  // mask, probe, and pos are explicitly 64-bit, because performance
-  // regressed when they were 32-bit types via auto. Test carefully.
-  size_t mask = tableMask();
-  auto* elms = data();
-  auto* hashtable = hashTab();
-  int32_t* ret = nullptr;
-  for (size_t probe = h0, i = 1;; ++i) {
+  uint32_t mask = tableMask();
+  auto elms = data();
+  auto hashtable = hashTab();
+  for (uint32_t probe = h0, i = 1;; ++i) {
     auto ei = &hashtable[probe & mask];
     ssize_t pos = *ei;
     if (validPos(pos)) {
-      if (hit(*fetchElm(elms, pos))) {
+      if (hit(elms[pos])) {
         return ei;
       }
-    } else {
-      if (!ret) ret = ei;
-      if (pos == Empty) {
-        return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
-      }
+    } else if (pos & 1) {
+      return LIKELY(i <= 100) ? ei : warnUnbalanced(i, ei);
     }
     probe += i;
-    assert(i <= mask && probe == h0 + (i + i*i) / 2);
+    assertx(i <= mask);
+    assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
   }
 }
 
@@ -1650,10 +1648,8 @@ int32_t* HashCollection::findForInsert(int64_t ki) const {
   });
 }
 
-int32_t* HashCollection::findForInsert(
-  const StringData* s, strhash_t prehash) const {
-  auto h = prehash | STRHASH_MSB;
-  return findForInsertImpl(prehash, [s, h] (const Elm& e) {
+int32_t* HashCollection::findForInsert(const StringData* s, strhash_t h) const {
+  return findForInsertImpl(h, [s, h] (const Elm& e) {
     return hitStringKey(e, s, h);
   });
 }
@@ -1662,13 +1658,14 @@ int32_t* HashCollection::findForInsert(
 // key is not already present in the HashCollection.
 ALWAYS_INLINE int32_t* HashCollection::findForNewInsert(
   int32_t* table, size_t mask, size_t h0) const {
-  for (size_t i = 1, probe = h0;; ++i) {
+  for (uint32_t i = 1, probe = h0;; ++i) {
     auto ei = &table[probe & mask];
     if (!validPos(*ei)) {
       return ei;
     }
     probe += i;
-    assert(i <= mask && probe == h0 + (i + i*i) / 2);
+    assertx(i <= mask);
+    assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
   }
 }
 
@@ -1692,11 +1689,8 @@ NEVER_INLINE void HashCollection::makeRoom() {
     if (UNLIKELY(cap() == MaxSize)) {
       throwTooLarge();
     }
-    if (cap()) {
-      grow(scale() * 2);
-    } else {
-      grow(SmallScale);
-    }
+    assertx(scale() > 0);
+    grow(scale() * 2);
   } else {
     compact();
   }
@@ -2836,7 +2830,9 @@ TypedValue* BaseMap::at(int64_t key) const {
   if (UNLIKELY(p == Empty)) {
     throwOOB(key);
   }
-  return (TypedValue*)&fetchElm(data(), p)->data;
+  return const_cast<TypedValue*>(
+    static_cast<const TypedValue*>(&(data()[p].data))
+  );
 }
 
 TypedValue* BaseMap::at(StringData* key) const {
@@ -2844,7 +2840,9 @@ TypedValue* BaseMap::at(StringData* key) const {
   if (UNLIKELY(p == Empty)) {
     throwOOB(key);
   }
-  return (TypedValue*)&fetchElm(data(), p)->data;
+  return const_cast<TypedValue*>(
+    static_cast<const TypedValue*>(&(data()[p].data))
+  );
 }
 
 TypedValue* BaseMap::get(int64_t key) const {
@@ -2852,7 +2850,9 @@ TypedValue* BaseMap::get(int64_t key) const {
   if (p == Empty) {
     return nullptr;
   }
-  return (TypedValue*)&fetchElm(data(), p)->data;
+  return const_cast<TypedValue*>(
+    static_cast<const TypedValue*>(&(data()[p].data))
+  );
 }
 
 TypedValue* BaseMap::get(StringData* key) const {
@@ -2860,7 +2860,9 @@ TypedValue* BaseMap::get(StringData* key) const {
   if (p == Empty) {
     return nullptr;
   }
-  return (TypedValue*)&fetchElm(data(), p)->data;
+  return const_cast<TypedValue*>(
+    static_cast<const TypedValue*>(&(data()[p].data))
+  );
 }
 
 void BaseMap::add(const TypedValue* val) {
@@ -2933,10 +2935,10 @@ void BaseMap::setImpl(int64_t h, const TypedValue* val) {
   assert(val->m_type != KindOfRef);
   assert(canMutateBuffer());
 retry:
-  auto* p = findForInsert(h);
+  auto p = findForInsert(h);
   assert(p);
   if (validPos(*p)) {
-    auto& e = *fetchElm(data(), *p);
+    auto& e = data()[*p];
     TypedValue old = e.data;
     cellDup(*val, e.data);
     tvRefcountedDecRef(old);
@@ -2967,7 +2969,7 @@ retry:
   auto* p = findForInsert(key, h);
   assert(p);
   if (validPos(*p)) {
-    auto& e = *fetchElm(data(), *p);
+    auto& e = data()[*p];
     TypedValue old = e.data;
     cellDup(*val, e.data);
     tvRefcountedDecRef(old);

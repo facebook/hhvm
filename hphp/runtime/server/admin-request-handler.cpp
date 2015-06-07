@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/repo.h"
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-server.h"
@@ -51,6 +52,7 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <fstream>
 #include <string>
 #include <sstream>
 #include <iomanip>
@@ -210,6 +212,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
         "/const-ss:        get const_map_size\n"
         "/static-strings:  get number of static strings\n"
+        "/dump-static-strings: dump static strings to /tmp/static_strings\n"
         "/dump-apc:        dump all current value in APC to /tmp/apc_dump\n"
         "/dump-apc-info:   show basic APC stats\n"
         "/dump-apc-meta:   dump meta information for all objects in APC to\n"
@@ -390,6 +393,13 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "static-strings", 14) == 0 &&
         handleStaticStringsRequest(cmd, transport)) {
+      break;
+    }
+    if (strncmp(cmd.c_str(), "dump-static-strings", 19) == 0) {
+      auto filename = transport->getParam("file");
+      if (filename == "") filename = "/tmp/static_strings";
+      handleDumpStaticStrings(cmd, transport, filename);
+      transport->sendString("OK\n");
       break;
     }
     if (strncmp(cmd.c_str(), "vm-", 3) == 0 &&
@@ -982,6 +992,20 @@ bool AdminRequestHandler::handleStaticStringsRequest(const std::string& cmd,
   std::ostringstream result;
   result << makeStaticStringCount();
   transport->sendString(result.str());
+  return true;
+}
+
+bool AdminRequestHandler::handleDumpStaticStrings(const std::string& cmd,
+                                                  Transport* transporti,
+                                                  const std::string &filename) {
+  std::vector<StringData*> list = lookupDefinedStaticStrings();
+  std::ofstream out(filename.c_str());
+  SCOPE_EXIT { out.close(); };
+  for (auto item : list) {
+    out << "----\n";
+    out << item->size() << " bytes\n";
+    out << item->toCppString() << "\n";
+  }
   return true;
 }
 

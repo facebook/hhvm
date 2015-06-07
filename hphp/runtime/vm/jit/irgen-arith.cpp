@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/strings.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-incdec.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
@@ -158,32 +159,6 @@ void binaryArith(IRGS& env, Op op) {
     push(env, gen(env, opc, src1, src2));
   }
 }
-
-// Implementation function that only handles integer or double inc/dec.
-SSATmp* implIncDec(IRGS& env, bool pre, bool inc, bool over, SSATmp* src) {
-  assertx(src->type() <= TInt || src->type() <= TDbl);
-
-  Opcode op;
-
-  if (src->type() <= TDbl) {
-    op = inc ? AddDbl : SubDbl;
-  } else if (!over) {
-    op = inc ? AddInt : SubInt;
-  } else {
-    op = inc ? AddIntO : SubIntO;
-  }
-
-  auto const one = src->type() <= TInt ? cns(env, 1) : cns(env, 1.0);
-  auto const res =
-    op == AddIntO || op == SubIntO
-      ? gen(env, op, makeExitSlow(env), src, one)
-      : gen(env, op, src, one);
-
-  // No incref necessary on push since result is an int.
-  push(env, pre ? res : src);
-  return res;
-}
-
 
 /*
  * True if comparison may throw or reenter.
@@ -446,10 +421,6 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
 }
 
 void emitIncDecL(IRGS& env, int32_t id, IncDecOp subop) {
-  auto const pre = isPre(subop);
-  auto const inc = isInc(subop);
-  auto const over = isIncDecO(subop);
-
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const src = ldLocInnerWarn(
@@ -460,30 +431,13 @@ void emitIncDecL(IRGS& env, int32_t id, IncDecOp subop) {
     DataTypeSpecific
   );
 
-  if (src->type() <= TBool) {
-    push(env, src);
+  if (auto const result = incDec(env, subop, src)) {
+    pushIncRef(env, isPre(subop) ? result : src);
+    stLoc(env, id, ldrefExit, ldPMExit, result);
     return;
   }
 
-  if (src->type().subtypeOfAny(TArr, TObj)) {
-    pushIncRef(env, src);
-    return;
-  }
-
-  if (src->type() <= TNull) {
-    push(env, inc && pre ? cns(env, 1) : src);
-    if (inc) {
-      stLoc(env, id, ldrefExit, ldPMExit, cns(env, 1));
-    }
-    return;
-  }
-
-  if (!src->type().subtypeOfAny(TInt, TDbl)) {
-    PUNT(IncDecL);
-  }
-
-  auto const res = implIncDec(env, pre, inc, over, src);
-  stLoc(env, id, ldrefExit, ldPMExit, res);
+  PUNT(IncDecL);
 }
 
 void emitXor(IRGS& env) {

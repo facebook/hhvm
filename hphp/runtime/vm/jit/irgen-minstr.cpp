@@ -28,6 +28,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-incdec.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
@@ -1789,8 +1790,30 @@ void emitSetOpProp(MTS& env) {
 }
 
 void emitIncDecProp(MTS& env) {
-  IncDecOp op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
+  auto const op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
   auto const key = getKey(env);
+  auto const propInfo = getCurrentPropertyOffset(env);
+
+  if (RuntimeOption::RepoAuthoritative &&
+      propInfo.offset != -1 &&
+      !mightCallMagicPropMethod(MIA_none, propInfo) &&
+      !mightCallMagicPropMethod(MIA_define, propInfo)) {
+
+    // Special case for when the property is known to be an int.
+    if (env.base.type <= TObj &&
+        propInfo.repoAuthType.tag() == RepoAuthType::Tag::Int) {
+      DEBUG_ONLY auto const propIntTy = TInt.ptr(Ptr::Prop);
+      emitPropSpecialized(env, MIA_define, propInfo);
+      assertx(env.base.value->type() <= propIntTy);
+      auto const prop = gen(env, LdMem, TInt, env.base.value);
+      auto const result = incDec(env, op, prop);
+      assertx(result != nullptr);
+      gen(env, StMem, env.base.value, result);
+      env.result = isPre(op) ? result : prop;
+      return;
+    }
+  }
+
   env.result = gen(env, IncDecProp, IncDecData { op }, env.base.value, key);
 }
 

@@ -7467,6 +7467,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
       } else {
         // HNI style
         auto &pi = f->params()[i];
+        if (pi.isVariadic()) continue;
         if (!pi.hasDefaultValue()) {
           return nullptr;
         }
@@ -7530,8 +7531,12 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   } else if (!nameStr.empty()) {
     // foo()
     nLiteral = makeStaticString(nameStr);
-    if (!unpack) {
-      fcallBuiltin = canEmitBuiltinCall(nameStr, numParams);
+    fcallBuiltin = canEmitBuiltinCall(nameStr, numParams);
+    if (unpack &&
+        fcallBuiltin &&
+        (!fcallBuiltin->hasVariadicCaptureParam() ||
+         numParams != fcallBuiltin->numParams())) {
+      fcallBuiltin = nullptr;
     }
     if (fcallBuiltin && (fcallBuiltin->attrs() & AttrAllowOverride)) {
       if (!Option::WholeProgram ||
@@ -7573,7 +7578,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
     e.FPushFunc(numParams);
   }
   if (fcallBuiltin) {
-    auto variadic = fcallBuiltin->hasVariadicCaptureParam();
+    auto variadic = !unpack && fcallBuiltin->hasVariadicCaptureParam();
     assertx((numParams <= fcallBuiltin->numParams()) || variadic);
 
     auto concreteParams = fcallBuiltin->numParams();

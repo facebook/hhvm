@@ -841,7 +841,7 @@ void builtinCall(IRGS& env,
   auto const retType = [&]() -> Type {
     auto const retDT = callee->returnType();
     auto const ret = retDT ? Type(*retDT) : TCell;
-    if (callee->attrs() & ClassInfo::IsReference) {
+    if (callee->attrs() & AttrReference) {
       return ret.box() & TBoxedInitCell;
     }
     return ret;

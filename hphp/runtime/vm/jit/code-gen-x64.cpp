@@ -4403,10 +4403,9 @@ void CodeGenerator::cgNewCol(IRInstruction* inst) {
   auto& v = vmain();
   auto const dest = callDest(inst);
   auto args = argGroup(inst);
-  args.imm(inst->extra<NewCol>()->size);
   auto const target = [&]() -> CppCall {
     auto collectionType = inst->extra<NewCol>()->type;
-    auto helper = collections::allocFunc(collectionType, true);
+    auto helper = collections::allocEmptyFunc(collectionType);
     return CppCall::direct(helper);
   }();
   cgCallHelper(v, target, dest, SyncOptions::kSyncPoint, args);
@@ -4415,7 +4414,7 @@ void CodeGenerator::cgNewCol(IRInstruction* inst) {
 void CodeGenerator::cgNewColFromArray(IRInstruction* inst) {
   auto const target = [&]() -> CppCall {
     auto collectionType = inst->extra<NewColFromArray>()->type;
-    auto helper = collections::allocFromArrayFunc(collectionType, true);
+    auto helper = collections::allocFromArrayFunc(collectionType);
     return CppCall::direct(helper);
   }();
 

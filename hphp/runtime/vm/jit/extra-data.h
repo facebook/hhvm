@@ -994,23 +994,9 @@ struct ContEnterData : IRExtraData {
 };
 
 struct NewColData : IRExtraData {
-  explicit NewColData(CollectionType type, uint32_t size)
-    : type(type)
-    , size(size)
+  explicit NewColData(int itype)
+    : type(static_cast<CollectionType>(itype))
   {}
-
-  std::string show() const {
-    return folly::sformat("{}, {}",
-                          collections::typeToString(type)->toCppString(),
-                          size);
-  }
-
-  CollectionType type;
-  uint32_t size;
-};
-
-struct NewColFromArrayData : IRExtraData {
-  explicit NewColFromArrayData(CollectionType type) : type(type) {}
 
   std::string show() const {
     return collections::typeToString(type)->toCppString();
@@ -1180,7 +1166,7 @@ X(DbgTrashFrame,                IRSPOffsetData);
 X(DbgTraceCall,                 IRSPOffsetData);
 X(LdPropAddr,                   PropOffset);
 X(NewCol,                       NewColData);
-X(NewColFromArray,              NewColFromArrayData);
+X(NewColFromArray,              NewColData);
 X(InitExtraArgs,                FuncEntryData);
 X(CheckSurpriseFlagsEnter,      FuncEntryData);
 

@@ -1111,11 +1111,10 @@ AddNewElemV    [C V]  ->  [C:Arr]
 
   If $2 is not an array, this instruction throws a fatal error.
 
-NewCol <coll type> <num elems>    []  ->  [C:Obj]
+NewCol <coll type>    []  ->  [C:Obj]
 
-  New collection. Creates a new collection of type %1 with an initial capacity
-  sufficient to hold the number of elements specified by %2, and pushes the
-  collection onto the stack.
+  New collection. Creates a empty new collection of type %1, and pushes it
+  onto the stack.
 
 ColFromArray <coll type>    [C:Arr]  ->  [C:Obj]
 

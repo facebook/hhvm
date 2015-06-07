@@ -308,20 +308,13 @@ void emitAddNewElemC(IRGS& env) {
   push(env, gen(env, AddNewElem, arr, val));
 }
 
-void emitNewCol(IRGS& env, int type, int size) {
-  auto const extra = NewColData {
-    static_cast<CollectionType>(type),
-    static_cast<uint32_t>(size)
-  };
-  push(env, gen(env, NewCol, extra));
+void emitNewCol(IRGS& env, int type) {
+  push(env, gen(env, NewCol, NewColData{type}));
 }
 
 void emitColFromArray(IRGS& env, int type) {
   auto const arr = popC(env);
-  push(env, gen(env,
-                NewColFromArray,
-                NewColFromArrayData(static_cast<CollectionType>(type)),
-                arr));
+  push(env, gen(env, NewColFromArray, NewColData{type}, arr));
 }
 
 void emitMapAddElemC(IRGS& env) {

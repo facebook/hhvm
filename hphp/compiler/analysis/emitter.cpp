@@ -8656,7 +8656,7 @@ void EmitterVisitor::emitPairInit(Emitter& e, ExpressionListPtr el) {
     throw IncludeTimeFatalException(el,
       "Pair objects must have exactly 2 elements");
   }
-  e.NewCol(static_cast<int>(CollectionType::Pair), 2);
+  e.NewCol(static_cast<int>(CollectionType::Pair));
   for (int i = 0; i < 2; i++) {
     ArrayPairExpressionPtr ap(
       static_pointer_cast<ArrayPairExpression>((*el)[i]));
@@ -8733,7 +8733,13 @@ void EmitterVisitor::emitSetInit(Emitter&e, CollectionType ct,
     emitArrayInit(e, el, ct);
     e.ColFromArray(static_cast<int>(ct));
   } else {
-    e.NewCol(static_cast<int>(ct), nElms);
+    if (nElms == 0) {
+      // Will use the static empty mixed array to avoid allocation.
+      e.NewCol(static_cast<int>(ct));
+      return;
+    }
+    e.NewMixedArray(nElms);
+    e.ColFromArray(static_cast<int>(ct));
     for (int i = 0; i < nElms; i++) {
       ArrayPairExpressionPtr ap(
         static_pointer_cast<ArrayPairExpression>((*el)[i]));
@@ -8786,7 +8792,12 @@ void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
     emitArrayInit(e, el, ct);
     e.ColFromArray(static_cast<int>(ct));
   } else {
-    e.NewCol(static_cast<int>(ct), nElms);
+    if (nElms == 0) {
+      e.NewCol(static_cast<int>(ct));
+      return;
+    }
+    e.NewMixedArray(nElms);
+    e.ColFromArray(static_cast<int>(ct));
     for (int i = 0; i < nElms; i++) {
       ArrayPairExpressionPtr ap(
         static_pointer_cast<ArrayPairExpression>((*el)[i]));
@@ -8817,7 +8828,7 @@ void EmitterVisitor::emitCollectionInit(Emitter& e, BinaryOpExpressionPtr b) {
     if (ct == CollectionType::Pair) {
       throw IncludeTimeFatalException(b, "Initializer needed for Pair object");
     }
-    e.NewCol(static_cast<int>(*ct), 0);
+    e.NewCol(static_cast<int>(*ct));
     return;
   }
 

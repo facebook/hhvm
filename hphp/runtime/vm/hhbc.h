@@ -541,7 +541,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(AddElemV,        NA,               THREE(VV,CV,CV), ONE(CV),    NF) \
   O(AddNewElemC,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(AddNewElemV,     NA,               TWO(VV,CV),      ONE(CV),    NF) \
-  O(NewCol,          TWO(IVA,IVA),     NOV,             ONE(CV),    NF) \
+  O(NewCol,          ONE(IVA),         NOV,             ONE(CV),    NF) \
   O(ColFromArray,    ONE(IVA),         ONE(CV),         ONE(CV),    NF) \
   O(MapAddElemC,     NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(ColAddNewElemC,  NA,               TWO(CV,CV),      ONE(CV),    NF) \

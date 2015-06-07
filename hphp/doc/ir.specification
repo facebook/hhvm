@@ -1140,9 +1140,9 @@ To string conversions:
   off the stack given by S0, at `offset'. This instruction assumes it can take
   the values from the stack without increfing them.
 
-| NewCol<type,size>, DCol, NA, PRc
+| NewCol<type>, DCol, NA, PRc
 
-  Create a new collection of `type' with space for `size' elements reserved.
+  Create an empty new collection of `type'.
 
 | NewColFromArray<type>, DCol, S(Arr), PRc|CRc
 

@@ -10,4 +10,23 @@ class :foo {
     :foo qqqqq,
     :foo rrrrr,
     :foo sssss;
+
+  attribute
+    /* some comment -- preserve the newline after me! */
+    int foo,
+
+    /* some comment */
+    string bar;
+
+  attribute
+    enum {
+      'aaaaaaaaaa',
+      'bbbbbbbbbb',
+      'cccccccccc',
+      'dddddddddd',
+    } x = 'aaaaaaaaaa';
+
+  children (
+    :x:yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy | :a:bbbbbbbbbb
+  );
 }

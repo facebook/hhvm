@@ -567,18 +567,7 @@ void emitFPushCtorD(IRGS& env,
     !cls->callsCustomInstanceInit() &&
     !cls->hasNativePropHandler();
 
-  const Func* func = uniqueCls ? cls->getCtor() : nullptr;
-  if (func && !(func->attrs() & AttrPublic)) {
-    auto const ctx = curClass(env);
-    if (!ctx) {
-      func = nullptr;
-    } else if (ctx != cls) {
-      if ((func->attrs() & AttrPrivate) ||
-        !(ctx->classof(cls) || cls->classof(ctx))) {
-        func = nullptr;
-      }
-    }
-  }
+  auto const func = lookupImmutableCtor(cls, curClass(env));
 
   auto ssaCls = persistentCls
     ? cns(env, cls)

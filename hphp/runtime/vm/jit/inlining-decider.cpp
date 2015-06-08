@@ -99,8 +99,8 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee) {
   if (callee->numIterators() != 0) {
     return refuse("callee has iterators");
   }
-  if (callee->isMagic() || Func::isSpecial(callee->name())) {
-    return refuse("special or magic callee");
+  if (callee->isMagic()) {
+    return refuse("magic callee");
   }
   if (callee->isResumable()) {
     return refuse("callee is resumable");

@@ -4473,7 +4473,7 @@ void CodeGenerator::cgCheckCold(IRInstruction* inst) {
 
 static const StringData* s_ReleaseVV = makeStaticString("ReleaseVV");
 
-void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
+void CodeGenerator::cgReleaseVVAndSkip(IRInstruction* inst) {
   auto* const label = inst->taken();
   auto const rFp = srcLoc(inst, 0).reg();
   auto& v = vmain();
@@ -4491,7 +4491,7 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
   bool releaseUnlikely = true;
   if (profile.optimizing()) {
     auto const data = profile.data(ReleaseVVProfile::reduce);
-    FTRACE(3, "cgReleaseVVOrExit({}): percentReleased = {}\n",
+    FTRACE(3, "cgReleaseVVAndSkip({}): percentReleased = {}\n",
            inst->toString(), data.percentReleased());
     if (data.percentReleased() >= RuntimeOption::EvalJitPGOReleaseVVMinPercent)
     {
@@ -4507,14 +4507,27 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
     v << testqim{safe_cast<int32_t>(ActRec::kExtraArgsBit),
                  rFp[AROFF(m_varEnv)],
                  sf};
-    emitFwdJcc(v, CC_Z, sf, label);
-    cgCallHelper(
-      v,
-      CppCall::direct(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
-      kVoidDest,
-      SyncOptions::kSyncPoint,
-      argGroup(inst).reg(rFp)
-    );
+    ifThenElse(v, vcold(), CC_NZ, sf, [&] (Vout& v) {
+        cgCallHelper(
+          v,
+          CppCall::direct(static_cast<void (*)(ActRec*)>(
+                            ExtraArgs::deallocate)),
+          kVoidDest,
+          SyncOptions::kSyncPoint,
+          argGroup(inst).reg(rFp)
+        );
+      },
+      [&] (Vout& v) {
+        cgCallHelper(
+          v,
+          CppCall::direct(static_cast<void (*)(ActRec*)>(
+                            VarEnv::deallocate)),
+          kVoidDest,
+          SyncOptions::kSyncPoint,
+          argGroup(inst).reg(rFp)
+        );
+        v << jmp{m_state.labels[label]};
+      }, true /* else is unlikely */);
   },
   releaseUnlikely);
 }

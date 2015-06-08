@@ -155,20 +155,27 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
 }
 
 void implRet(IRGS& env) {
-  if (curFunc(env)->attrs() & AttrMayUseVV) {
-    // Note: this has to be the first thing, because we cannot bail after
-    //       we start decRefing locs because then there'll be no corresponding
-    //       bytecode boundaries until the end of RetC
-    gen(env, ReleaseVVOrExit, makeExitSlow(env), fp(env));
-  }
+  auto func = curFunc(env);
 
   // Pop the return value. Since it will be teleported to its place in memory,
   // we don't care about the type.
   auto const retval = pop(env, DataTypeGeneric);
-  freeLocalsAndThis(env);
+
+  if (func->attrs() & AttrMayUseVV) {
+    ifElse(
+      env,
+      [&] (Block* skip) {
+        gen(env, ReleaseVVAndSkip, skip, fp(env));
+      },
+      [&] { freeLocalsAndThis(env); }
+    );
+  } else {
+    freeLocalsAndThis(env);
+  }
+
   retSurpriseCheck(env, fp(env), retval);
 
-  if (curFunc(env)->isAsyncFunction()) {
+  if (func->isAsyncFunction()) {
     return asyncFunctionReturn(env, retval);
   }
   if (resumed(env)) {

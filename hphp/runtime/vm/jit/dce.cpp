@@ -300,7 +300,7 @@ bool canDCE(IRInstruction* inst) {
   case RetCtrl:
   case AsyncRetCtrl:
   case StRetVal:
-  case ReleaseVVOrExit:
+  case ReleaseVVAndSkip:
   case GenericRetDecRefs:
   case StMem:
   case StElem:

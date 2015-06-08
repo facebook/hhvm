@@ -383,6 +383,10 @@ VarEnv::~VarEnv() {
   }
 }
 
+void VarEnv::deallocate(ActRec* fp) {
+  fp->m_varEnv->exitFP(fp);
+}
+
 VarEnv* VarEnv::createLocal(ActRec* fp) {
   return smart_new<VarEnv>(fp, fp->getExtraArgs());
 }

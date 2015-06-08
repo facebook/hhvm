@@ -162,7 +162,7 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   auto const may_reenter_is_ok =
     (inst.taken() && inst.taken()->isCatch()) ||
     inst.is(DecRef,
-            ReleaseVVOrExit,
+            ReleaseVVAndSkip,
             CIterFree,
             MIterFree,
             MIterNext,
@@ -1166,7 +1166,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LtX:
   case NeqX:
   case DecodeCufIter:
-  case ReleaseVVOrExit:  // can decref fields in an ExtraArgs structure
   case ConvCellToArr:  // decrefs src, may read obj props
   case ConvCellToObj:  // decrefs src
   case ConvObjToArr:   // decrefs src
@@ -1220,6 +1219,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvCellToDbl:
   case ThrowOutOfBounds:
     return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
+
+  case ReleaseVVAndSkip:  // can decref ExtraArgs or VarEnv and Locals
+    return may_reenter(inst,
+                       may_load_store(AHeapAny|AFrameAny, AHeapAny|AFrameAny));
 
   // These two instructions don't touch memory we track, except that they may
   // re-enter to construct php Exception objects.  During this re-entry anything

@@ -1279,12 +1279,12 @@ To string conversions:
   Writes the value in S1 to the return value slot on the activation record
   pointed to by S0.
 
-| ReleaseVVOrExit, ND, S(FramePtr), B
+| ReleaseVVAndSkip, ND, S(FramePtr), B
 
   Loads the VarEnv slot off the ActRec pointed to by S0. If it is null, does
   nothing. If it is an ExtraArgs, deallocates the ExtraArgs structure.
-  Otherwise jumps to block B. This instruction may not occur in an inlined
-  call.
+  Otherwise it frees the VarEnv and jumps to block B. This instruction may not
+  occur in an inlined call.
 
 | GenericRetDecRefs, ND, S(FramePtr), NF
 

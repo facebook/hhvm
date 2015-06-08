@@ -167,7 +167,6 @@ void region_prune_arcs(RegionDesc& region) {
      */
     if (region.block(binfo.blockID)->inlineLevel() != 0) {
       assertx(region.block(binfo.blockID)->typePreConditions().empty());
-      assertx(region.block(binfo.blockID)->postConds().empty());
     }
 
     binfo.out = binfo.in;

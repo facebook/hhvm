@@ -517,9 +517,9 @@ asm_label(a, noCallee);
 
 void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
   TCA (*helper)(ActRec*, bool) = &fcallHelper;
-  Asm a { mcg->code.main() };
+  Asm a { mcg->code.cold() };
 
-  moveToAlign(mcg->code.main());
+  moveToAlign(mcg->code.cold());
   uniqueStubs.fcallHelperThunk = a.frontier();
 
   Label popAndXchg, skip;
@@ -573,9 +573,9 @@ asm_label(a, skip);
 
 void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
   TCA (*helper)(ActRec*) = &funcBodyHelper;
-  Asm a { mcg->code.main() };
+  Asm a { mcg->code.cold() };
 
-  moveToAlign(mcg->code.main());
+  moveToAlign(mcg->code.cold());
   uniqueStubs.funcBodyHelperThunk = a.frontier();
 
   // This helper is called via a direct jump from the TC (from
@@ -590,9 +590,9 @@ void emitFuncBodyHelperThunk(UniqueStubs& uniqueStubs) {
 
 void emitFunctionEnterHelper(UniqueStubs& uniqueStubs) {
   bool (*helper)(const ActRec*, int) = &EventHook::onFunctionCall;
-  Asm a { mcg->code.main() };
+  Asm a { mcg->code.cold() };
 
-  moveToAlign(mcg->code.main());
+  moveToAlign(mcg->code.cold());
   uniqueStubs.functionEnterHelper = a.frontier();
 
   Label skip;

@@ -59,13 +59,19 @@ void hoistFallbackccs(Vunit& unit) {
   for (auto i = code.size(); i--; ) {
     if (code[i].op == Vinstr::fallbackcc) {
       if (iLastFbcc == code.size()) iLastFbcc = i;
-      assert(i > 0 && (code[i - 1].op == Vinstr::cmpbim ||
-                       code[i - 1].op == Vinstr::testbim));
-      iFirstCmp = i - 1;
+      assertx(i > 0);
+      if (code[i - 1].op == Vinstr::cmpbim ||
+          code[i - 1].op == Vinstr::testbim ||
+          code[i - 1].op == Vinstr::cmpqim) {
+        iFirstCmp = i - 1;
+      }
     }
   }
   if (iLastFbcc == code.size()) return; // no fallbackccs
-  if (iFirstCmp == 0) return; // nothing before the fallbackccs
+  if (iFirstCmp == 0 || iFirstCmp == code.size()) {
+    // nothing before the fallbackccs
+    return;
+  }
 
   auto isStore = [&](Vinstr& instr) {
     return instr.op == Vinstr::store || instr.op == Vinstr::storeups;

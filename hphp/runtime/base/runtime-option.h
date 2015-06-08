@@ -502,6 +502,7 @@ public:
   F(bool, HHIRMemoryOpts,              true)                            \
   F(bool, HHIRStorePRE,                true)                            \
   F(bool, HHIROutlineGenericIncDecRef, true)                            \
+  F(bool, JitHoistFallbackccs,         true)                            \
   /* Register allocation flags */                                       \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \

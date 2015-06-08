@@ -523,6 +523,12 @@ void Vxls::allocate() {
   resolveEdges();
   renameOperands();
   insertCopies();
+  // insertCopies() can generate spills before fallbackccs in the
+  // entry block, which causes spill space to be allocated and
+  // deallocated immediately when the type-checks fail. So call
+  // hoistFallbackccs to move the fallbackccs above such stores to
+  // prevent this problem.
+  hoistFallbackccs(unit);
   // clean up before allocating spill space, since it might create new
   // blocks and modify the cfg.
   peephole();

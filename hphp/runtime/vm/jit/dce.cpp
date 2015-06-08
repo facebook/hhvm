@@ -474,6 +474,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckSurpriseFlagsEnter:
   case ExitPlaceholder:
   case ThrowOutOfBounds:
+  case MapIdx:
     return false;
   }
   not_reached();

@@ -366,6 +366,7 @@ CALL_OPCODE(RaiseArrayKeyNotice)
 CALL_OPCODE(IncStatGrouped)
 CALL_OPCODE(ClosureStaticLocInit)
 CALL_OPCODE(GenericIdx)
+CALL_OPCODE(MapIdx)
 CALL_OPCODE(LdClsPropAddrOrNull)
 CALL_OPCODE(LdClsPropAddrOrRaise)
 CALL_OPCODE(LdGblAddrDef)
@@ -3525,17 +3526,31 @@ void CodeGenerator::cgLdColArray(IRInstruction* inst) {
   auto const rdst = dstLoc(inst, 0).reg();
   auto& v = vmain();
 
-  if (collections::isType(cls, CollectionType::Vector)) {
+  auto const isVector    = collections::isType(cls, CollectionType::Vector);
+  auto const isImmVector = collections::isType(cls, CollectionType::ImmVector);
+  if (isVector || isImmVector) {
     auto const rdata = v.makeReg();
-    v << load{rsrc[collections::dataOffset(CollectionType::Vector)], rdata};
-    v << lea{rdata[-int32_t{sizeof(ArrayData)}], rdst};
+    auto const offset =
+      collections::dataOffset(isVector ? CollectionType::Vector
+                                       : CollectionType::ImmVector);
+    v << load{rsrc[offset], rdata};
+    v << addqi{-int32_t{sizeof(ArrayData)}, rdata, rdst, v.makeReg()};
     return;
   }
 
-  if (collections::isType(cls, CollectionType::Map)) {
+  auto const isMap    = collections::isType(cls, CollectionType::Map);
+  auto const isImmMap = collections::isType(cls, CollectionType::ImmMap);
+  auto const isSet    = collections::isType(cls, CollectionType::Set);
+  auto const isImmSet = collections::isType(cls, CollectionType::ImmSet);
+  if (isMap || isImmMap || isSet || isImmSet) {
     auto const rdata = v.makeReg();
-    v << load{rsrc[collections::dataOffset(CollectionType::Map)], rdata};
-    v << lea{rdata[-int32_t{sizeof(MixedArray)}], rdst};
+    auto const offset =
+      collections::dataOffset(isMap ? CollectionType::Map :
+                              isImmMap ? CollectionType::ImmMap :
+                              isSet ? CollectionType::Set :
+                              /*isImmSet ? */CollectionType::ImmSet);
+    v << load{rsrc[offset], rdata};
+    v << addqi{-int32_t{sizeof(MixedArray)}, rdata, rdst, v.makeReg()};
     return;
   }
 

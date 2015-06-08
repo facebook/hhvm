@@ -687,6 +687,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case ArrayIdx:
     return may_load_store(AElemAny | ARefAny, AEmpty);
+  case MapIdx:
+    return may_load_store(AHeapAny, AEmpty);
   case AKExistsArr:
     return may_load_store(AElemAny, AEmpty);
   case AKExistsObj:

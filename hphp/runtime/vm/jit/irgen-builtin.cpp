@@ -1203,6 +1203,17 @@ void implArrayIdx(IRGS& env, SSATmp* loaded_collection_array) {
   gen(env, DecRef, def);
 }
 
+void implMapIdx(IRGS& env) {
+  auto const def = popC(env);
+  auto const key = popC(env);
+  auto const map = popC(env);
+  auto const val = gen(env, MapIdx, map, key, def);
+  push(env, val);
+  gen(env, DecRef, map);
+  gen(env, DecRef, key);
+  gen(env, DecRef, def);
+}
+
 void implGenericIdx(IRGS& env) {
   auto const def = popC(env, DataTypeSpecific);
   auto const key = popC(env, DataTypeSpecific);
@@ -1233,38 +1244,56 @@ void emitIdx(IRGS& env) {
   auto const simple_key =
     keyType <= TInt || keyType <= TStr;
 
-  if (simple_key) {
-    if (baseType <= TArr) {
-      emitArrayIdx(env);
+  if (!simple_key) {
+    implGenericIdx(env);
+    return;
+  }
+
+  if (baseType <= TArr) {
+    emitArrayIdx(env);
+    return;
+  }
+
+  if (baseType < TObj && baseType.clsSpec()) {
+    auto const cls = baseType.clsSpec().cls();
+
+    // To use ArrayIdx, we require either constant non-int keys or known
+    // integer keys for Map, because integer-like strings behave differently.
+    auto const isMap      = collections::isType(cls, CollectionType::Map) ||
+                            collections::isType(cls, CollectionType::ImmMap);
+    auto const isMapOrSet = isMap ||
+                            collections::isType(cls, CollectionType::Set) ||
+                            collections::isType(cls, CollectionType::ImmSet);
+    auto const okMapOrSet = [&]() {
+      if (!isMapOrSet) return false;
+      if (keyType <= TInt) return true;
+      if (!keyType.hasConstVal()) return false;
+      int64_t dummy;
+      if (keyType.strVal()->isStrictlyInteger(dummy)) return false;
+      return true;
+    }();
+    // Similarly, Vector is only usable with int keys, so we can only do this
+    // for Vector if it's an Int.
+    auto const isVector = collections::isType(cls, CollectionType::Vector) ||
+                          collections::isType(cls, CollectionType::ImmVector);
+    auto const okVector = isVector && keyType <= TInt;
+
+    auto const optimizableCollection = okMapOrSet || okVector;
+    if (optimizableCollection) {
+      env.irb->constrainValue(base, TypeConstraint(cls));
+      env.irb->constrainValue(key, DataTypeSpecific);
+      auto const arr = gen(env, LdColArray, base);
+      implArrayIdx(env, arr);
       return;
     }
 
-    if (baseType < TObj && baseType.clsSpec()) {
-      auto const cls = baseType.clsSpec().cls();
-
-      // We must require either constant non-int keys or known integer keys for
-      // Map, because integer-like strings behave differently.
-      auto const okMap = [&]() {
-        if (!collections::isType(cls, CollectionType::Map)) return false;
-        if (keyType <= TInt) return true;
-        if (!keyType.hasConstVal()) return false;
-        int64_t dummy;
-        if (keyType.strVal()->isStrictlyInteger(dummy)) return false;
-        return true;
-      }();
-      // Similarly, Vector is only usable with int keys, so we can only do this
-      // for Vector if it's an Int.
-      auto const okVector = collections::isType(cls, CollectionType::Vector) &&
-                            keyType <= TInt;
-
-      auto const optimizableCollection = okMap || okVector;
-      if (optimizableCollection) {
-        env.irb->constrainValue(base, TypeConstraint(cls));
-        env.irb->constrainValue(key, DataTypeSpecific);
-        auto const arr = gen(env, LdColArray, base);
-        implArrayIdx(env, arr);
-        return;
-      }
+    // If it's a map with a non-static string key, we can do a map-specific
+    // optimization.
+    if (isMap && keyType <= TStr) {
+      env.irb->constrainValue(base, TypeConstraint(cls));
+      env.irb->constrainValue(key, DataTypeSpecific);
+      implMapIdx(env);
+      return;
     }
   }
 

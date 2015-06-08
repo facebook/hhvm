@@ -229,6 +229,8 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {GenericIdx,         genericIdx, DTV, SSync,
                           {{TV, 0}, {TV, 1}, {TV, 2}}},
+    {MapIdx,             mapIdx, DTV, SSync,
+                          {{SSA, 0}, {SSA, 1}, {TV, 2}}},
 
     /* Static prop helpers */
     {LdClsPropAddrOrNull,

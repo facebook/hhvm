@@ -519,6 +519,7 @@ bool ak_exist_int_obj(ObjectData* obj, int64_t key) {
   return arr.get()->exists(key);
 }
 
+namespace {
 ALWAYS_INLINE
 TypedValue getDefaultIfNullCell(const TypedValue* tv, TypedValue& def) {
   if (UNLIKELY(nullptr == tv)) {
@@ -531,6 +532,7 @@ TypedValue getDefaultIfNullCell(const TypedValue* tv, TypedValue& def) {
   auto const ret = tvToCell(tv);
   tvRefcountedIncRef(ret);
   return *ret;
+}
 }
 
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
@@ -565,6 +567,12 @@ TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {
   TypedValue ret;
   g_context->invokeFuncFew(&ret, func, nullptr, nullptr, 3, &args[0]);
   return ret;
+}
+
+TypedValue mapIdx(ObjectData* mapOD, StringData* key, TypedValue def) {
+  assert(collections::isType(mapOD->getVMClass(), CollectionType::Map) ||
+         collections::isType(mapOD->getVMClass(), CollectionType::ImmMap));
+  return getDefaultIfNullCell(static_cast<BaseMap*>(mapOD)->get(key), def);
 }
 
 int32_t arrayVsize(ArrayData* ad) {

@@ -1600,8 +1600,7 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
   if (!cls || RuntimeOption::EvalJitEnableRenameFunction) return nullptr;
   if (cls->attrs() & AttrInterface) return nullptr;
   bool privateOnly = false;
-  if (!RuntimeOption::RepoAuthoritative ||
-      !(cls->preClass()->attrs() & AttrUnique)) {
+  if (!(cls->attrs() & AttrUnique)) {
     if (!ctx || !ctx->classof(cls)) {
       return nullptr;
     }
@@ -1663,18 +1662,22 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 }
 
 const Func* lookupImmutableCtor(const Class* cls, const Class* ctx) {
-  if (!RuntimeOption::RepoAuthoritative ||
-      RuntimeOption::EvalJitEnableRenameFunction ||
-      !cls || !(cls->attrs() & AttrUnique)) {
-    return nullptr;
+  if (!cls || RuntimeOption::EvalJitEnableRenameFunction) return nullptr;
+  if (!(cls->attrs() & AttrUnique)) {
+    if (!ctx || !ctx->classof(cls)) {
+      return nullptr;
+    }
   }
 
   auto const func = cls->getCtor();
-  if (func && !(func->attrs() & AttrPublic) && cls != ctx) {
-    if (!ctx) return nullptr;
-    if ((func->attrs() & AttrPrivate) ||
-        !(ctx->classof(cls) || cls->classof(ctx))) {
-      return nullptr;
+  if (func && !(func->attrs() & AttrPublic)) {
+    auto fcls = func->cls();
+    if (fcls != ctx) {
+      if (!ctx) return nullptr;
+      if ((func->attrs() & AttrPrivate) ||
+          !(ctx->classof(fcls) || fcls->classof(ctx))) {
+        return nullptr;
+      }
     }
   }
 

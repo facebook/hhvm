@@ -242,6 +242,10 @@ void fpushObjMethodWithBaseClass(IRGS& env,
 
   if (func != nullptr) {
     /*
+     * lookupImmutableMethod will return Funcs from AttrUnique classes,
+     * but in this case, we have an object, so there's no need to check
+     * that the class exists.
+     *
      * static function: store base class into this slot instead of obj
      * and decref the obj that was pushed as the this pointer since
      * the obj won't be in the actrec and thus MethodCache::lookup won't
@@ -457,12 +461,12 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
   const Class* cls = nullptr;
   StringData* invName = nullptr;
   auto const callee = findCuf(op, callable, curClass(env), cls, invName,
-    forward);
+                              forward);
   if (!callee) return fpushCufUnknown(env, op, numArgs);
 
   SSATmp* ctx;
-  auto const safeFlag = cns(env, true); // This is always true until the slow exits
-                                        // below are implemented
+  auto const safeFlag = cns(env, true); // This is always true until the slow
+                                        // exits below are implemented
   auto func = cns(env, callee);
   if (cls) {
     auto const exitSlow = makeExitSlow(env);
@@ -702,6 +706,23 @@ void emitFPushObjMethodD(IRGS& env,
   PUNT(FPushObjMethodD-nonObj);
 }
 
+static void checkImmutableClsMethod(IRGS& env, Func const* func) {
+  if (!classHasPersistentRDS(func->cls())) {
+    // we're only guaranteed uniqueness of the class. If its
+    // not persistent, we must make sure its loaded.
+    auto clsName = cns(env, func->cls()->name());
+    ifThen(env,
+           [&] (Block* notLoaded) {
+             auto const clsOrNull = gen(env, LdClsCachedSafe, clsName);
+             gen(env, CheckNonNull, notLoaded, clsOrNull);
+           },
+           [&] {
+             hint(env, Block::Hint::Unlikely);
+             gen(env, LdClsCached, clsName);
+           });
+  }
+}
+
 void emitFPushClsMethodD(IRGS& env,
                          int32_t numParams,
                          const StringData* methodName,
@@ -714,6 +735,7 @@ void emitFPushClsMethodD(IRGS& env,
                                               magicCall,
                                               true /* staticLookup */,
                                               curClass(env))) {
+    checkImmutableClsMethod(env, func);
     auto const objOrCls = clsMethodCtx(env, func, baseClass);
     fpushActRec(env,
                 cns(env, func),
@@ -844,6 +866,7 @@ void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
 
   auto const curCtxTmp = ldCtx(env);
   if (vmfunc) {
+    checkImmutableClsMethod(env, vmfunc);
     auto const funcTmp = cns(env, vmfunc);
     auto const newCtxTmp = gen(env, GetCtxFwdCall, curCtxTmp, funcTmp);
     fpushActRec(env, funcTmp, newCtxTmp, numParams,

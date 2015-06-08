@@ -1082,7 +1082,7 @@ To string conversions:
 
   Load the length of the string in S0.
 
-| LdStaticLocCached<func,staticLocalName>, D(BoxedCell), NA, NF
+| LdStaticLocCached<func,staticLocalName>, D(BoxedInitCell), NA, NF
 
   Load the address of the static local RefData from the targetcache for
   function `func' with the static local variable named `staticLocalName'.
@@ -1553,7 +1553,7 @@ To string conversions:
 
   Raises a notice that S0 is an undefined key for an array.
 
-| ClosureStaticLocInit, D(BoxedCell), CStr S(FramePtr) S(Cell), NF
+| ClosureStaticLocInit, D(BoxedInitCell), CStr S(FramePtr) S(Cell), NF
 
   Get boxed value to initialize static local named S0 in frame S1, where S1
   must be either a closure or generatorFromClosure function. If the static
@@ -2113,7 +2113,7 @@ fields of that struct for holding intermediate values.
 
   A nullsafe version of CGetProp, returns null if the base S0 is null.
 
-| VGetProp, D(BoxedCell),
+| VGetProp, D(BoxedInitCell),
 |           S(Obj,PtrToGen) S(Cell) S(PtrToMISGen),
 |           MProp|PRc|Er
 
@@ -2191,7 +2191,7 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from S0.
 
-| VGetElem, D(BoxedCell), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|PRc|Er
+| VGetElem, D(BoxedInitCell), S(PtrToGen) S(Cell) S(PtrToMISGen), MElem|PRc|Er
 
   Get element with key S1 from base S0 as a reference.
 

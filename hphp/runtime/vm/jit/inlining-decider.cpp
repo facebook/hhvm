@@ -231,9 +231,29 @@ void InliningDecider::forbidInliningOf(const Func* callee) {
 
 bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee,
                                   const RegionDesc& region) const {
-  if (!RuntimeOption::RepoAuthoritative ||
-      !RuntimeOption::EvalHHIREnableGenTimeInlining) {
+  if (!callee || !RuntimeOption::EvalHHIREnableGenTimeInlining) {
     return false;
+  }
+
+  assert(!RuntimeOption::EvalJitEnableRenameFunction);
+  if (callee->cls()) {
+    if (!rds::isPersistentHandle(callee->cls()->classHandle())) {
+      // if the callee's class is not persistent, its still ok
+      // to use it if we're jitting into a method of a subclass
+      auto ctx = callSK.func()->cls();
+      if (!ctx || !ctx->classof(callee->cls())) {
+        return false;
+      }
+    }
+  } else {
+    if (!rds::isPersistentHandle(callee->funcHandle())) {
+      // if the callee isn't persistent, its still ok to
+      // use it if its defined at the top level in the same
+      // unit as the caller
+      if (callee->unit() != callSK.unit() || !callee->top()) {
+        return false;
+      }
+    }
   }
 
   // If inlining was disabled... don't inline.

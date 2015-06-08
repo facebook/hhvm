@@ -501,7 +501,7 @@ bool Func::isNameBindingImmutable(const Unit* fromUnit) const {
     return true;
   }
 
-  if (isUnique() && RuntimeOption::RepoAuthoritative) {
+  if (isUnique()) {
     return true;
   }
 

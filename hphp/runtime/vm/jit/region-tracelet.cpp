@@ -497,6 +497,10 @@ bool RegionFormer::tryInline(uint32_t& instrSize) {
   ctx.resumed = false;
   for (int i = 0; i < numArgs; ++i) {
     auto type = irgen::publicTopType(m_irgs, BCSPOffset{i});
+    if (!type.subtypeOfAny(TCell, TBoxedInitCell)) {
+      return refuse(folly::sformat("argument {}'s type was too strange ({})",
+                                   i, type.toString()));
+    }
     uint32_t paramIdx = numArgs - 1 - i;
     ctx.liveTypes.push_back({RegionDesc::Location::Local{paramIdx}, type});
   }

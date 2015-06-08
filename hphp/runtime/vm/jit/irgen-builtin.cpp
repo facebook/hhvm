@@ -49,6 +49,7 @@ const StaticString
   s_floor("floor"),
   s_abs("abs"),
   s_ord("ord"),
+  s_func_num_args("__SystemLib\\func_num_arg_"),
   s_one("1"),
   s_empty("");
 
@@ -129,17 +130,25 @@ SSATmp* opt_ord(IRGS& env, uint32_t numArgs) {
   if (arg->hasConstVal(TBool)) {
     // ord((string)true)===ord("1"), ord((string)false)===ord("")
     return cns(env, int64_t{arg_type.boolVal() ? '1' : 0});
-  } else if (arg_type <= TNull) {
+  }
+  if (arg_type <= TNull) {
     return cns(env, int64_t{0});
-  } else if (arg->hasConstVal(TInt)) {
+  }
+  if (arg->hasConstVal(TInt)) {
     const auto conv = folly::to<std::string>(arg_type.intVal());
     return cns(env, int64_t{conv[0]});
-  } else if (arg->hasConstVal(TDbl)) {
+  }
+  if (arg->hasConstVal(TDbl)) {
     const auto conv = folly::to<std::string>(arg_type.dblVal());
     return cns(env, int64_t{conv[0]});
   }
 
   return nullptr;
+}
+
+SSATmp* opt_func_num_args(IRGS& env, uint32_t numArgs) {
+  if (numArgs != 0 || curFunc(env)->isPseudoMain()) return nullptr;
+  return gen(env, LdARNumParams, fp(env));
 }
 
 SSATmp* opt_ini_get(IRGS& env, uint32_t numArgs) {
@@ -359,18 +368,19 @@ bool optimizedFCallBuiltin(IRGS& env,
 #define X(x) \
     if (func->name()->isame(s_##x.get())) return opt_##x(env, numArgs);
 
-    X(get_called_class);
-    X(get_class);
-    X(in_array);
-    X(ini_get);
-    X(count);
-    X(is_a);
-    X(sqrt);
-    X(max2);
-    X(ceil);
-    X(floor);
-    X(abs);
-    X(ord);
+    X(get_called_class)
+    X(get_class)
+    X(in_array)
+    X(ini_get)
+    X(count)
+    X(is_a)
+    X(sqrt)
+    X(max2)
+    X(ceil)
+    X(floor)
+    X(abs)
+    X(ord)
+    X(func_num_args)
 
 #undef X
 

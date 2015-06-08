@@ -582,7 +582,9 @@ struct CatchMaker {
     // instruction.
     hint(env, Block::Hint::Unlikely);
     decRefForSideExit();
-    if (m_params.thiz) gen(env, DecRef, m_params.thiz);
+    if (m_params.thiz && m_params.thiz->type() <= TObj) {
+      gen(env, DecRef, m_params.thiz);
+    }
 
     auto const val = gen(env, LdUnwinderValue, TCell);
     push(env, val);
@@ -883,7 +885,9 @@ void builtinCall(IRGS& env,
 
   if (!params.forNativeImpl) {
     // Pop the stack params
-    if (params.thiz) gen(env, DecRef, params.thiz);
+    if (params.thiz && params.thiz->type() <= TObj) {
+      gen(env, DecRef, params.thiz);
+    }
     for (auto i = uint32_t{0}; i < params.numThroughStack; ++i) {
       popDecRef(env);
     }
@@ -915,12 +919,14 @@ void nativeImplInlined(IRGS& env) {
   auto const wasInliningConstructor =
     fp(env)->inst()->extra<DefInlineFP>()->fromFPushCtor;
 
-  bool const instanceMethod = callee->isMethod() &&
-                                !(callee->attrs() & AttrStatic);
-
-
   auto const numArgs = callee->numParams();
-  auto const paramThis = instanceMethod ? ldThis(env) : nullptr;
+  auto const paramThis = [&] () -> SSATmp* {
+    if (!callee->isMethod()) return nullptr;
+    if (callee->isStatic() && !callee->isNative()) return nullptr;
+    auto ctx = gen(env, LdCtx, fp(env));
+    if (callee->isStatic()) return gen(env, LdClsCtx, ctx);
+    return gen(env, CastCtxThis, ctx);
+  }();
 
   auto params = prepare_params(
     env,
@@ -942,7 +948,7 @@ void nativeImplInlined(IRGS& env) {
 
   // For the same reason that we have to IncRef the locals above, we
   // need to grab one on the $this.
-  if (paramThis) gen(env, IncRef, paramThis);
+  if (paramThis && paramThis->type() <= TObj) gen(env, IncRef, paramThis);
 
   endInlinedCommon(env);
 

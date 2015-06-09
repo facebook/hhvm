@@ -67,6 +67,14 @@ inline Class::veclen_t Class::classVecLen() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Ancestry.
 
+inline bool Class::classofNonIFace(const Class* cls) const {
+  assert(!(cls->attrs() & AttrInterface));
+  if (m_classVecLen >= cls->m_classVecLen) {
+    return (m_classVec[cls->m_classVecLen-1] == cls);
+  }
+  return false;
+}
+
 inline bool Class::classof(const Class* cls) const {
   // If `cls' is an interface, we can simply check to see if cls is in
   // this->m_interfaces.  Otherwise, if `this' is not an interface, the
@@ -80,10 +88,7 @@ inline bool Class::classof(const Class* cls) const {
     return this == cls ||
       m_interfaces.lookupDefault(cls->m_preClass->name(), nullptr) == cls;
   }
-  if (m_classVecLen >= cls->m_classVecLen) {
-    return (m_classVec[cls->m_classVecLen-1] == cls);
-  }
-  return false;
+  return classofNonIFace(cls);
 }
 
 inline bool Class::ifaceofDirect(const StringData* name) const {

@@ -326,9 +326,12 @@ public:
   // Ancestry.                                                          [const]
 
   /*
-   * Determine if this represents a non-strict subtype of `cls'.
+   * Determine if this represents a non-strict subtype of `cls'.  The nonIFace
+   * variant is faster, but has the additional precondition that `cls' is not
+   * an interface.
    */
-  bool classof(const Class* cls) const;
+  bool classof(const Class*) const;
+  bool classofNonIFace(const Class*) const;
 
   /*
    * Whether this class implements an interface called `name'.

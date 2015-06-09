@@ -1735,14 +1735,14 @@ Variant c_SimpleXMLIterator::t_valid() {
 }
 
 bool c_SimpleXMLIterator::t_haschildren() {
-  if(!iter.data.isNull()) {
+  if(iter.data.isNull()) {
     return false;
   }
   return cast<c_SimpleXMLElement>(t_getchildren())->t_count() != 0;
 }
 
 Object c_SimpleXMLIterator::t_getchildren() {
-  if(!iter.data.isNull()) {
+  if(iter.data.isNull()) {
     return null_object;
   }
   return cast<c_SimpleXMLElement>(iter.data)->t_children();

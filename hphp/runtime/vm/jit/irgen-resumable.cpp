@@ -168,6 +168,24 @@ void yieldImpl(IRGS& env, Offset resumeOffset) {
 
 }
 
+void emitWHResult(IRGS& env) {
+  assertx(topC(env)->isA(TObj));
+  auto const exitSlow = makeExitSlow(env);
+  auto const child = popC(env);
+  // In most conditions, this will be optimized out by the simplifier.
+  // We already need to setup a side-exit for the !succeeded case.
+  gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, child));
+  static_assert(
+    c_WaitHandle::STATE_SUCCEEDED == 0,
+    "we test state for non-zero, success must be zero"
+  );
+  gen(env, JmpNZero, exitSlow, gen(env, LdWHState, child));
+  auto const res = gen(env, LdWHResult, TInitCell, child);
+  gen(env, IncRef, res);
+  gen(env, DecRef, child);
+  push(env, res);
+}
+
 void emitAwait(IRGS& env, int32_t numIters) {
   auto const resumeOffset = nextBcOff(env);
   assertx(curFunc(env)->isAsync());

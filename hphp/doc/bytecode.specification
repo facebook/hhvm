@@ -4227,6 +4227,13 @@ ContCurrent    []  ->  [C]
 15. Async functions
 -------------------
 
+WHResult [C:Obj] -> [C]
+
+  If $1 is not a subclass of WaitHandle, raises a fatal error. If $1 succeeded,
+  this instruction pushes the result value from the WaitHandle. If $1 failed,
+  this instruction throws the exception stored in the WaitHandle. If $1 is not
+  finished, throws an Exception.
+
 Await  <number of iterators>   [C]  ->  [C]
 
   This instruction may only appear in bodies of async functions. Awaits

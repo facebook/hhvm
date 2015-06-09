@@ -427,6 +427,7 @@ static const struct {
 
   /*** 15. Async functions instructions ***/
 
+  { OpWHResult,    {Stack1,           Stack1,       OutUnknown,        0 }},
   { OpAwait,       {Stack1,           Stack1,       OutUnknown,        0 }},
 };
 
@@ -1007,6 +1008,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::VerifyParamType:
   case Op::VerifyRetTypeC:
   case Op::VerifyRetTypeV:
+  case Op::WHResult:
   case Op::Xor:
     return false;
 

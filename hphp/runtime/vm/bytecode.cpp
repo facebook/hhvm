@@ -7361,6 +7361,25 @@ OPTBLD_INLINE TCA iopAwait(IOP_ARGS) {
   return jitReturnPost(jitReturn);
 }
 
+OPTBLD_INLINE void iopWHResult(IOP_ARGS) {
+  pc++;
+  // we should never emit this bytecode for non-waithandle
+  auto const wh = c_WaitHandle::fromCellAssert(vmStack().topC());
+  // the failure condition is likely since we punt to this opcode
+  // in the JIT when the state is failed.
+  if (wh->isFailed()) {
+    throw Object{wh->getException()};
+  }
+  if (wh->isSucceeded()) {
+    cellSet(wh->getResult(), *vmStack().topC());
+    return;
+  }
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Request for result on pending wait handle, "
+    "must await or join() before calling result()");
+  not_reached();
+}
+
 OPTBLD_INLINE void iopCheckProp(IOP_ARGS) {
   pc++;
   auto propName = decode_litstr(pc);

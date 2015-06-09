@@ -9151,9 +9151,20 @@ int32_t EmitterVisitor::emitNativeOpCodeImpl(MethodStatementPtr meth,
 }
 
 static int32_t emitGetWaitHandleMethod(UnitEmitter& ue, FuncEmitter* fe) {
-  Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
+  Attr attrs = (Attr)(AttrBuiltin | AttrPublic | AttrNoOverride | AttrUnique |
+                      AttrFinal);
   fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
   ue.emitOp(OpThis);
+  ue.emitOp(OpRetC);
+  return 1;  // we use one stack slot
+}
+
+static int32_t emitWaitHandleResultMethod(UnitEmitter& ue, FuncEmitter* fe) {
+  Attr attrs = (Attr)(AttrBuiltin | AttrPublic | AttrNoOverride | AttrUnique |
+                      AttrFinal);
+  fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
+  ue.emitOp(OpThis);
+  ue.emitOp(OpWHResult);
   ue.emitOp(OpRetC);
   return 1;  // we use one stack slot
 }
@@ -9263,6 +9274,7 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       static const StringData* waitHandleCls =
         makeStaticString("hh\\waithandle");
       static const StringData* gwhMeth = makeStaticString("getwaithandle");
+      static const StringData* resultMeth = makeStaticString("result");
       StringData* methName = makeStaticString(methodInfo->m_name);
       GeneratorMethod* cmeth;
 
@@ -9280,6 +9292,8 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
         stackPad = emitGeneratorMethod(*ue, fe, methCpy);
       } else if (e.name->isame(waitHandleCls) && methName->isame(gwhMeth)) {
         stackPad = emitGetWaitHandleMethod(*ue, fe);
+      } else if (e.name->isame(waitHandleCls) && methName->isame(resultMeth)) {
+        stackPad = emitWaitHandleResultMethod(*ue, fe);
       } else {
         if (e.name->isame(s_construct.get())) {
           hasCtor = true;

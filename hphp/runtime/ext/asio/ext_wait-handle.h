@@ -96,7 +96,6 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle|
   void t_import();
   Variant t_join();
   Variant t_result();
-  Variant result();
   bool t_isfinished();
   bool t_issucceeded();
   bool t_isfailed();

@@ -30,6 +30,8 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/util/arena.h"
+#include "hphp/runtime/ext/asio/async-function-wait-handle.h"
+#include "hphp/runtime/ext/asio/static-wait-handle.h"
 
 #include <folly/Range.h>
 
@@ -239,6 +241,12 @@ Type allocObjReturn(const IRInstruction* inst) {
       return inst->src(0)->hasConstVal()
         ? Type::ExactObj(inst->src(0)->clsVal())
         : TObj;
+
+    case CreateSSWH:
+      return Type::ExactObj(c_StaticWaitHandle::classof());
+
+    case CreateAFWH:
+      return Type::ExactObj(c_AsyncFunctionWaitHandle::classof());
 
     default:
       always_assert(false && "Invalid opcode returning AllocObj");

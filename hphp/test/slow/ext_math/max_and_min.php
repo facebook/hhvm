@@ -5,16 +5,15 @@ function min_max_single($arg) {
   var_dump(min($arg));
 }
 
-function min_max_multi(/* ... */) {
-  $args = func_get_args();
+function min_max_multi(...$args) {
 
-  $multi_max = call_user_func_array('max', $args);
-  $single_max = call_user_func('max', $args);
+  $multi_max = max(...$args);
+  $single_max = max($args);
   var_dump($multi_max);
   var_dump($multi_max === $single_max);
 
-  $multi_min = call_user_func_array('min', $args);
-  $single_min = call_user_func('min', $args);
+  $multi_min = min(...$args);
+  $single_min = min($args);
   var_dump($multi_min);
   var_dump($multi_min === $single_min);
 }
@@ -38,6 +37,8 @@ function multi_arg() {
   min_max_multi("hello", array(-1));
   min_max_multi(array(2, 4, 8), array(array(2, 5, 1)));
   min_max_multi("string", array(array(2, 5, 7), 42));
+  min_max_multi(1, 1.0);
+  min_max_multi(1.0, 1);
 }
 
 single_arg();

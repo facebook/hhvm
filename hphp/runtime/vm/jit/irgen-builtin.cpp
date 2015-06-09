@@ -45,6 +45,7 @@ const StaticString
   s_get_called_class("get_called_class"),
   s_sqrt("sqrt"),
   s_max2("__SystemLib\\max2"),
+  s_min2("__SystemLib\\min2"),
   s_ceil("ceil"),
   s_floor("floor"),
   s_abs("abs"),
@@ -293,25 +294,21 @@ SSATmp* opt_sqrt(IRGS& env, uint32_t numArgs) {
   return nullptr;
 }
 
-SSATmp* opt_max2(IRGS& env, uint32_t numArgs) {
-
-  // should never happen since max2 is only called for 2 operands
-  if (numArgs != 2) return nullptr;
-
+SSATmp* minmax(IRGS& env, const bool is_max) {
   auto const val1 = topC(env, BCSPOffset{0});
   auto const ty1 = val1->type();
   auto const val2 = topC(env, BCSPOffset{1});
   auto const ty2 = val2->type();
 
-  // this opt is only for max of 2 ints/doubles
+  // this optimization is only for 2 ints/doubles
   if (!(ty1 <= TInt || ty1 <= TDbl) ||
       !(ty2 <= TInt || ty2 <= TDbl)) return nullptr;
 
   return cond(
     env,
     [&] (Block* taken) {
-      auto const gte = gen(env, Gte, val1, val2);
-      gen(env, JmpZero, taken, gte);
+      auto const cmp = gen(env, is_max ? Gte : Lte, val1, val2);
+      gen(env, JmpZero, taken, cmp);
     },
     [&] {
       return val1;
@@ -320,6 +317,16 @@ SSATmp* opt_max2(IRGS& env, uint32_t numArgs) {
       return val2;
     }
   );
+}
+
+SSATmp* opt_max2(IRGS& env, uint32_t numArgs) {
+  // max2 is only called for 2 operands
+  return numArgs == 2 ? minmax(env, true) : nullptr;
+}
+
+SSATmp* opt_min2(IRGS& env, uint32_t numArgs) {
+  // min2 is only called for 2 operands
+  return numArgs == 2 ? minmax(env, false) : nullptr;
 }
 
 SSATmp* opt_ceil(IRGS& env, uint32_t numArgs) {
@@ -381,6 +388,8 @@ bool optimizedFCallBuiltin(IRGS& env,
     X(abs)
     X(ord)
     X(func_num_args)
+    X(max2)
+    X(min2)
 
 #undef X
 

@@ -71,3 +71,11 @@ array(2) {
 bool(true)
 string(6) "string"
 bool(true)
+int(1)
+bool(true)
+int(1)
+bool(true)
+float(1)
+bool(true)
+float(1)
+bool(true)

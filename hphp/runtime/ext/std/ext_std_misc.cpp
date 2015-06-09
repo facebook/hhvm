@@ -161,6 +161,7 @@ void StandardExtension::initMisc() {
     HHVM_FE(token_name);
     HHVM_FE(hphp_to_string);
     HHVM_FALIAS(__SystemLib\\max2, SystemLib_max2);
+    HHVM_FALIAS(__SystemLib\\min2, SystemLib_min2);
     Native::registerConstant<KindOfDouble>(makeStaticString("INF"), k_INF);
     Native::registerConstant<KindOfDouble>(makeStaticString("NAN"), k_NAN);
     Native::registerConstant<KindOfInt64>(
@@ -829,6 +830,12 @@ String HHVM_FUNCTION(hphp_to_string, const Variant& v) {
 Variant HHVM_FUNCTION(SystemLib_max2, const Variant& value1,
                       const Variant& value2) {
   return less(value1, value2) ? value2 : value1;
+}
+
+// Adds an optimized FCallBuiltin for min with 2 operands to SystemLib
+Variant HHVM_FUNCTION(SystemLib_min2, const Variant& value1,
+                      const Variant& value2) {
+  return more(value1, value2) ? value2 : value1;
 }
 
 #undef YYTOKENTYPE

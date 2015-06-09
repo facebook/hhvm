@@ -188,11 +188,8 @@ struct UnitEmitter {
    * This should only be called from fe->create(), and just constructs a new
    * Func* and records it as emitted from `fe'.
    */
-  Func* newFunc(const FuncEmitter* fe, Unit& unit, PreClass* preClass,
-                int line1, int line2, Offset base, Offset past,
-                const StringData* name, Attr attrs, bool top,
-                const StringData* docComment, int numParams,
-                bool needsNextClonedClosure);
+  Func* newFunc(const FuncEmitter* fe, Unit& unit, const StringData* name,
+                Attr attrs, int numParams, bool needsNextClonedClosure);
 
 
   /////////////////////////////////////////////////////////////////////////////

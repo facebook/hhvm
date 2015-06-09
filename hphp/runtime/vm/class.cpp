@@ -260,10 +260,14 @@ Class::~Class() {
     free(m_sPropCache);
   }
 
-  auto num = numMethods();
-  for (auto i = 0; i < num; i++) {
-    Func* meth = getMethod(i);
-    if (meth) Func::destroy(meth);
+  for (auto i = size_t{}, n = numMethods(); i < n; i++) {
+    if (auto meth = getMethod(i)) {
+      if (meth->isPreFunc()) {
+        meth->freeClone();
+      } else {
+        Func::destroy(meth);
+      }
+    }
   }
 
   if (m_extra) {

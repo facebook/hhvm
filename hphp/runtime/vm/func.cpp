@@ -78,6 +78,7 @@ Func::Func(Unit& unit, const StringData* name, Attr attrs)
   , m_unit(&unit)
   , m_attrs(attrs)
 {
+  m_isPreFunc = false;
   m_hasPrivateAncestor = false;
   m_shared = nullptr;
 }
@@ -100,9 +101,7 @@ Func::~Func() {
 #endif
 }
 
-void* Func::allocFuncMem(int numParams,
-                         bool needsNextClonedClosure,
-                         bool lowMem) {
+void* Func::allocFuncMem(int numParams, bool needsNextClonedClosure) {
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
   int numExtraPrologues =
     maxNumPrologues > kNumFixedPrologues ?
@@ -116,7 +115,7 @@ void* Func::allocFuncMem(int numParams,
 
   if (needsNextClonedClosure) s_totalClonedClosures++;
 
-  void* mem = lowMem ? low_malloc(funcSize) : malloc(funcSize);
+  void* mem = low_malloc(funcSize);
 
   /**
    * The Func object can have optional nextClonedClosure pointer to Func
@@ -148,7 +147,6 @@ void Func::destroy(Func* func) {
    * Funcs in PreClasses are just templates, and don't get used
    * until they are cloned so we don't put them in low memory.
    */
-  bool lowMem = !func->preClass() || func->m_cls;
   void* mem = func;
   if (func->isClosureBody()) {
     Func** startOfFunc = ((Func**) mem) - 1; // move back by a pointer
@@ -165,29 +163,29 @@ void Func::destroy(Func* func) {
     }
   }
   func->~Func();
-  if (lowMem) {
-    low_free(mem);
-  } else {
-    free(mem);
-  }
+  low_free(mem);
 }
 
 Func* Func::clone(Class* cls, const StringData* name) const {
   auto numParams = this->numParams();
-  Func* f = new (allocFuncMem(
-                   numParams,
-                   isClosureBody(),
-                   cls || !preClass())) Func(*this);
 
+  Func* f = (name || m_cloned.flag.test_and_set())
+    ? new (allocFuncMem(numParams, isClosureBody())) Func(*this)
+    : const_cast<Func*>(this);
+
+  f->m_cloned.flag.test_and_set();
   f->initPrologues(numParams);
   f->m_funcId = InvalidFuncId;
-  if (name) {
-    f->m_name = name;
-  }
-  if (cls != f->m_cls) {
-    f->m_cls = cls;
-  }
+  if (name) f->m_name = name;
+  f->m_cls = cls;
   f->setFullName(numParams);
+
+  if (f != this) {
+    f->m_cachedFunc = rds::Link<Func*>{rds::kInvalidHandle};
+    f->m_maybeIntercepted = -1;
+    f->m_isPreFunc = false;
+  }
+
   return f;
 }
 

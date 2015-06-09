@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_FUNC_H_
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/atomic-countable.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/datatype.h"
@@ -25,7 +26,6 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/user-attributes.h"
-#include "hphp/runtime/base/atomic-countable.h"
 
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -34,6 +34,7 @@
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/hash-map-typedefs.h"
 
+#include <atomic>
 #include <utility>
 #include <vector>
 
@@ -184,9 +185,7 @@ struct Func {
    * Allocate memory for a function, including the extra preceding and
    * succeeding data.
    */
-  static void* allocFuncMem(int numParams,
-                            bool needsNextClonedClosure,
-                            bool lowMem);
+  static void* allocFuncMem(int numParams, bool needsNextClonedClosure);
 
   /*
    * Destruct and free a Func*.
@@ -208,6 +207,13 @@ struct Func {
   Func* clone(Class* cls, const StringData* name = nullptr) const;
   Func* cloneAndModify(Class* cls, Attr attrs) const;
   Func* cloneAndSetClass(Class* cls) const;
+
+  /*
+   * Free up a PreFunc for re-use as a cloned Func.
+   *
+   * @requires: isPreFunc()
+   */
+  void freeClone() const;
 
   /*
    * Rename a function and reload it.
@@ -582,6 +588,14 @@ struct Func {
    * they were included in the context of an instance method definition.
    */
   bool mayHaveThis() const;
+
+  /*
+   * Is this Func owned by a PreClass?
+   *
+   * A PreFunc may be "adopted" by a Class when clone() is called, but only the
+   * owning PreClass is allowed to free it.
+   */
+  bool isPreFunc() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1131,6 +1145,18 @@ private:
 
 
   /////////////////////////////////////////////////////////////////////////////
+  // Internal types.
+
+  struct ClonedFlag {
+    ClonedFlag() {}
+    ClonedFlag(const ClonedFlag&) {}
+    ClonedFlag& operator=(const ClonedFlag&) = delete;
+
+    std::atomic_flag flag{ATOMIC_FLAG_INIT};
+  };
+
+
+  /////////////////////////////////////////////////////////////////////////////
   // Constants.
 
 private:
@@ -1142,6 +1168,7 @@ private:
 public:
   static std::atomic<bool>     s_treadmill;
   static std::atomic<uint32_t> s_totalClonedClosures;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -1172,6 +1199,8 @@ private:
   // Atomically-accessed intercept flag.  -1, 0, or 1.
   // TODO(#1114385) intercept should work via invalidation.
   mutable char m_maybeIntercepted;
+  mutable ClonedFlag m_cloned;
+  bool m_isPreFunc : 1;
   bool m_hasPrivateAncestor : 1;
   int m_maxStackCells{0};
   uint64_t m_refBitVal{0};

@@ -7426,9 +7426,13 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
       !f->nativeFuncPtr() ||
       f->isMethod() ||
       (f->numParams() > Native::maxFCallBuiltinArgs()) ||
-      ((numParams > f->numParams()) && !f->hasVariadicCaptureParam()) ||
       (f->userAttributes().count(
         LowStringPtr(s_attr_Deprecated.get())))) return nullptr;
+
+  auto variadic = f->hasVariadicCaptureParam();
+
+  // Only allowed to overrun the signature if we have somewhere to put it
+  if ((numParams > f->numParams()) && !variadic) return nullptr;
 
   if ((f->returnType() == KindOfDouble) &&
        !Native::allowFCallBuiltinDoubles()) return nullptr;
@@ -7449,7 +7453,13 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   }
 
   bool allowDoubleArgs = Native::allowFCallBuiltinDoubles();
-  for (int i = 0; i < f->numParams(); i++) {
+  auto concrete_params = f->numParams();
+  if (variadic) {
+    assertx(!f->methInfo());
+    assertx(concrete_params > 0);
+    --concrete_params;
+  }
+  for (int i = 0; i < concrete_params; i++) {
     if ((!allowDoubleArgs) &&
         (f->params()[i].builtinType == KindOfDouble)) {
       return nullptr;

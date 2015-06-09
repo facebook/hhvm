@@ -31,8 +31,8 @@ struct BitrefSurvey {
 
 public:
   void cow_check_occurred(RefCount refcount, bool bitref, bool isArray);
-  void cow_check_occurred(ArrayData* ad);
-  void cow_check_occurred(StringData* sd);
+  void cow_check_occurred(const ArrayData* ad);
+  void cow_check_occurred(const StringData* sd);
 
   ~BitrefSurvey();
 
@@ -63,7 +63,7 @@ void cow_check_occurred(const StringData* sd);
 
 BitrefSurvey &survey();
 
-const bool BITREF_SURVEY = false;
+const bool BITREF_SURVEY = true;
 
 ///////////////////////////////////////////////////////////////////////////////
 

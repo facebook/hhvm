@@ -88,8 +88,49 @@ bool MixedArray::isFull() const {
   return m_used == capacity();
 }
 
-inline void MixedArray::initHash(int32_t* hash, size_t tableSize) {
-  wordfill(hash, Empty, tableSize);
+ALWAYS_INLINE
+void MixedArray::InitSmall(MixedArray* a, RefCount count, uint32_t size,
+                           int64_t nextIntKey) {
+  // Intentionally initialize hash table before header.
+#ifdef __x86_64__
+  static_assert(MixedArray::Empty == -1, "");
+  static_assert(MixedArray::SmallSize == 3, "");
+  static_assert(sizeof(MixedArray) +
+                MixedArray::SmallSize * sizeof(MixedArray::Elm) == 104, "");
+  __asm__ __volatile__(
+    "pcmpeqd    %%xmm0, %%xmm0\n"          // xmm0 <- 11111....
+    "movdqu     %%xmm0, 104(%0)\n"
+      : : "r"(a)
+  );
+#else
+  auto const hash = a->hashTab();
+  auto const emptyVal = int64_t{MixedArray::Empty};
+  reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
+  reinterpret_cast<int64_t*>(hash)[1] = emptyVal;
+#endif
+  a->m_sizeAndPos = size; // pos=0
+  a->m_hdr.init(HeaderKind::Mixed, count);
+  a->m_scale_used = MixedArray::SmallScale | uint64_t(size) << 32;
+  a->m_nextKI = nextIntKey;
+}
+
+inline void MixedArray::initHash(int32_t* hash, uint32_t scale) {
+#if defined(__x86_64__)
+  static_assert(Empty == -1, "The following fills with all 1's.");
+  assertx(HashSize(scale) == scale * 4);
+
+  uint64_t offset = static_cast<uint32_t>(scale) * 16;
+  __asm__ __volatile__(
+    "pcmpeqd    %%xmm0, %%xmm0\n"          // xmm0 <- 11111....
+    ".l%=:\n"
+    "sub        $0x10, %0\n"
+    "movdqu     %%xmm0, (%1, %0)\n"
+    "ja         .l%=\n"
+      : "+r"(offset) : "r"(hash) : "%xmm0"
+  );
+#else
+  wordfill(hash, Empty, HashSize(scale));
+#endif
 }
 
 inline int32_t*

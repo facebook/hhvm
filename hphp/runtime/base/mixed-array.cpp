@@ -52,14 +52,16 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
   auto const scale = computeScaleFromSize(size);
   auto const ad    = smartAllocArray(scale);
 
+  // Intialize the hash table first, because the header is already in L1 cache,
+  // but the hash table may not be.  So let's issue the cache request ASAP.
+  auto const data = mixedData(ad);
+  auto const hash = mixedHash(data, scale);
+  ad->initHash(hash, scale);
+
   ad->m_sizeAndPos   = 0; // size=0, pos=0
   ad->m_hdr.init(HeaderKind::Mixed, 1);
   ad->m_scale_used   = scale; // used=0
   ad->m_nextKI       = 0;
-
-  auto const data = mixedData(ad);
-  auto const hash = mixedHash(data, scale);
-  wordfill(hash, Empty, MixedArray::HashSize(scale));
 
   assert(ad->kind() == kMixedKind);
   assert(ad->m_size == 0);
@@ -156,14 +158,15 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
   auto const scale = computeScaleFromSize(size);
   auto const ad    = smartAllocArray(scale);
 
+  auto const data = mixedData(ad);
+  auto const hash = mixedHash(data, scale);
+  ad->initHash(hash, scale);
+
   ad->m_sizeAndPos       = size; // pos=0
   ad->m_hdr.init(HeaderKind::Mixed, 1);
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
-  auto const data = mixedData(ad);
-  auto const hash = mixedHash(data, scale);
-  ad->initHash(hash, MixedArray::HashSize(scale));
 
   // Append values by moving -- Caller assumes we update refcount.
   // Values are in reverse order since they come from the stack, which
@@ -1022,13 +1025,14 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   assert(newScale >= 1 && (newScale & (newScale - 1)) == 0);
 
   auto const ad         = smartAllocArray(newScale);
+  auto table            = mixedHash(ad->data(), newScale);
+  ad->initHash(table, newScale);
   auto const oldUsed    = old->m_used;
 
   ad->m_sizeAndPos      = old->m_sizeAndPos;
   ad->m_hdr.init(old->m_hdr, 0);
   ad->m_scale_used      = newScale | uint64_t{oldUsed} << 32;
   ad->m_nextKI          = old->m_nextKI;
-  auto table            = reinterpret_cast<int32_t*>(ad->data() + 3*newScale);
 
   if (UNLIKELY(strong_iterators_exist())) {
     move_strong_iterators(ad, old);
@@ -1036,7 +1040,6 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
 
   // Copy the old element array, and initialize the hashtable to all empty.
   copyElms(ad->data(), old->data(), oldUsed);
-  ad->initHash(table, MixedArray::HashSize(newScale));
 
   auto iter = ad->data();
   auto const stop = iter + oldUsed;
@@ -1133,9 +1136,8 @@ void MixedArray::compact(bool renumber /* = false */) {
   // Perform compaction
   auto elms = data();
   auto mask = this->mask();
-  size_t tableSize = mask + 1;
   auto table = hashTab();
-  initHash(table, tableSize);
+  initHash(table, scale());
   for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
     while (elms[frPos].isTombstone()) {
       assert(frPos + 1 < m_used);
@@ -1185,7 +1187,7 @@ void MixedArray::compact(bool renumber /* = false */) {
       auto& k = siKeys[key];
       key++;
       iter->m_pos = k.hash >= 0 ? ssize_t(find(k.skey, k.hash))
-        : ssize_t(find(k.ikey));
+                                : ssize_t(find(k.ikey));
       assert(iter->m_pos >= 0 && iter->m_pos < m_size);
     }
   );
@@ -1555,7 +1557,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
 
   auto const data  = ad->data();
   auto const table = mixedHash(data, scale);
-  ad->initHash(table, MixedArray::HashSize(scale));
+  ad->initHash(table, scale);
 
   auto dstElm = data;
   auto srcElm = src->data();

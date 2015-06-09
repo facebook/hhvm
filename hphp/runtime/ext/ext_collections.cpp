@@ -1391,7 +1391,7 @@ EmptyMixedArrayStorage s_theEmptyMixedArray;
 struct HashCollection::EmptyMixedInitializer {
   EmptyMixedInitializer() {
     auto a = reinterpret_cast<MixedArray*>(&s_theEmptyMixedArray);
-    EmptyArray::InitMixed(a, StaticValue, 0/*used*/, 0/*nextIntKey*/);
+    MixedArray::InitSmall(a, StaticValue, 0/*used*/, 0/*nextIntKey*/);
   }
 };
 

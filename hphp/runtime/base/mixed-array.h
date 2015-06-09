@@ -124,6 +124,13 @@ public:
   }
 
   /*
+   * Initialize an empty small mixed array with given field. This should be
+   * inlined.
+   */
+  static void InitSmall(MixedArray* a, RefCount count, uint32_t size,
+                        int64_t nextIntKey);
+
+  /*
    * Allocate a new, empty, request-local array in packed mode, with
    * enough space reserved for `capacity' members.
    *
@@ -385,7 +392,7 @@ private:
   ~MixedArray() = delete;
 
 private:
-  static void initHash(int32_t* table, size_t tableSize);
+  static void initHash(int32_t* table, uint32_t scale);
   static int32_t* copyHash(int32_t* to, const int32_t* from, size_t tableSize);
   static Elm* copyElms(Elm* to, const Elm* from, size_t count);
 

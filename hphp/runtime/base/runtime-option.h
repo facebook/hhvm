@@ -552,6 +552,7 @@ public:
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
   F(bool, DisableStructArray, true)                                     \
+  F(bool, EnableCallBuiltin, true)                                      \
   /* */
 
 private:

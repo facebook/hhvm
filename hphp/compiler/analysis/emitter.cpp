@@ -7410,7 +7410,8 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
 
 Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
                                          int numParams) {
-  if (Option::JitEnableRenameFunction) {
+  if (Option::JitEnableRenameFunction ||
+      !RuntimeOption::EvalEnableCallBuiltin) {
     return nullptr;
   }
   if (Option::DynamicInvokeFunctions.size()) {

@@ -1,3 +1,3 @@
 Warning: Test warning in %s/test/slow/ext_xdebug/scream.php on line 6
-%w#0 foo(), called at [%s/hphp/test/slow/ext_xdebug/scream.php:9]
-%w#0 at [%s/hphp/test/slow/ext_xdebug/scream.php:6]\n%w#1 foo(), called at [%s/hphp/test/slow/ext_xdebug/scream.php:9]
+%w#0 trigger_error(), called at [%s/hphp/test/slow/ext_xdebug/scream.php:6]
+%w#1 foo(), called at [%s/hphp/test/slow/ext_xdebug/scream.php:9]

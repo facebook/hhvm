@@ -3,4 +3,3 @@
 3
 
 Fatal error: Maximum function nesting level of '4' reached, aborting! in %s/test/slow/ext_xdebug/max_nesting_level_0.php on line 4
-%w#0 at [%s/hphp/test/slow/ext_xdebug/max_nesting_level_0.php:4]\n%w#1 foo(), called at [%s/hphp/test/slow/ext_xdebug/max_nesting_level_0.php:5]\n%w#2 foo(), called at [%s/hphp/test/slow/ext_xdebug/max_nesting_level_0.php:5]\n%w#3 foo(), called at [%s/hphp/test/slow/ext_xdebug/max_nesting_level_0.php:11]

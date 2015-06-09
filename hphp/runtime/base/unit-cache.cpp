@@ -393,7 +393,8 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EnableXHP ? '1' : '0')
     + (RuntimeOption::EvalAllowHhas ? '1' : '0')
     + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
-    + (RuntimeOption::IntsOverflowToInts ? '1' : '0');
+    + (RuntimeOption::IntsOverflowToInts ? '1' : '0')
+    + (RuntimeOption::EvalEnableCallBuiltin ? '1' : '0');
   return string_md5(t.c_str(), t.size());
 }
 

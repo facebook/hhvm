@@ -3,6 +3,7 @@ string(%d) "/tmp/trace.%d.xt"
 string(%d) "TRACE START [%d-%d-%d %d:%d:%d]
 %w%f%w%d     -> xdebug_start_trace() %s/test/slow/ext_xdebug/tracing_4.php:2
 %w%f%w%d     -> include(%s/test/slow/ext_xdebug/tracing.inc) %s/test/slow/ext_xdebug/tracing_4.php:3
+%w%f%w%d       -> xdebug_get_tracefile_name() %s/test/slow/ext_xdebug/tracing.inc:3
 %w%f%w%d       -> var_dump() %s/test/slow/ext_xdebug/tracing.inc:3
 %w%f%w%d       -> include(%s/test/slow/ext_xdebug/tracing_helper.inc) %s/test/slow/ext_xdebug/tracing.inc:4
 %w%f%w%d         -> bee() %s/test/slow/ext_xdebug/tracing_helper.inc:7
@@ -22,6 +23,7 @@ TRACE END   [%d-%d-%d %d:%d:%d]
 TRACE START [%d-%d-%d %d:%d:%d]
 %w%f%w%d     -> xdebug_start_trace() %s/test/slow/ext_xdebug/tracing_4.php:5
 %w%f%w%d     -> include(%s/test/slow/ext_xdebug/tracing.inc) %s/test/slow/ext_xdebug/tracing_4.php:6
+%w%f%w%d       -> xdebug_get_tracefile_name() %s/test/slow/ext_xdebug/tracing.inc:3
 %w%f%w%d       -> var_dump() %s/test/slow/ext_xdebug/tracing.inc:3
 %w%f%w%d       -> include(%s/test/slow/ext_xdebug/tracing_helper.inc) %s/test/slow/ext_xdebug/tracing.inc:4
 %w%f%w%d         -> bee() %s/test/slow/ext_xdebug/tracing_helper.inc:7

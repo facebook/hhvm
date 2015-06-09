@@ -2,6 +2,7 @@ string(%d) "/tmp/trace.%d.xt"
 string(%d) "TRACE START [%d-%d-%d %d:%d:%d]
 %w%f%w%d%w        -> xdebug_start_trace() %s/test/slow/ext_xdebug/tracing_1.php:4
 %w%f%w%d%w%i    -> include(%s/test/slow/ext_xdebug/tracing.inc) %s/test/slow/ext_xdebug/tracing_1.php:8
+%w%f%w%d%w%i      -> xdebug_get_tracefile_name() %s/test/slow/ext_xdebug/tracing.inc:3
 %w%f%w%d%w%i      -> var_dump() %s/test/slow/ext_xdebug/tracing.inc:3
 %w%f%w%d%w%i      -> include(%s/test/slow/ext_xdebug/tracing_helper.inc) %s/test/slow/ext_xdebug/tracing.inc:4
 %w%f%w%d%w%i        -> bee() %s/test/slow/ext_xdebug/tracing_helper.inc:7

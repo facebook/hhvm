@@ -535,8 +535,20 @@ Variant HHVM_FUNCTION(xdebug_get_profiler_filename) {
   return false;
 }
 
+const StaticString s_xdebug_get_stack_depth("xdebug_get_stack_depth");
 static int64_t HHVM_FUNCTION(xdebug_get_stack_depth) {
-  return XDebugUtils::stackDepth();
+  int64_t depth = XDebugUtils::stackDepth();
+  if (auto ar = g_context->getStackFrame()) {
+    // If the call to xdebug_get_stack_depth was NOT
+    // done via CallBuiltin, then it will be included
+    // in the depth count, and we need to manually substract it
+    static auto get_stack_depth =
+      Unit::lookupFunc(s_xdebug_get_stack_depth.get());
+    if (ar->m_func == get_stack_depth) {
+      --depth;
+    }
+  }
+  return depth;
 }
 
 static Variant HHVM_FUNCTION(xdebug_get_tracefile_name) {

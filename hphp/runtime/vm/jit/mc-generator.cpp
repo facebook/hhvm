@@ -349,6 +349,11 @@ bool MCGenerator::shouldTranslateNoSizeLimit(const Func* func) const {
     return false;
   }
 
+  // Do not translate functions from units marked as interpret-only.
+  if (func->unit()->isInterpretOnly()) {
+    return false;
+  }
+
   /*
    * We don't support JIT compiling functions that use some super-dynamic php
    * variables.

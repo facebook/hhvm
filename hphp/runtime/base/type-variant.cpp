@@ -81,27 +81,6 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant::Variant(const char* v) {
-  m_type = KindOfString;
-  m_data.pstr = StringData::Make(v);
-}
-
-Variant::Variant(const String& v) noexcept : Variant(v.get()) {
-}
-
-Variant::Variant(const std::string & v) {
-  m_type = KindOfString;
-  StringData *s = StringData::Make(v.c_str(), v.size(), CopyString);
-  assert(s);
-  m_data.pstr = s;
-}
-
-Variant::Variant(const Array& v) noexcept : Variant(v.get()) {}
-
-Variant::Variant(const Object& v) noexcept : Variant(v.get()) {}
-
-Variant::Variant(const Resource& v) noexcept : Variant(v.get()) {}
-
 Variant::Variant(StringData *v) noexcept {
   if (v) {
     m_data.pstr = v;
@@ -116,102 +95,8 @@ Variant::Variant(StringData *v) noexcept {
   }
 }
 
-Variant::Variant(const StringData* v, StaticStrInit) noexcept {
-  if (v) {
-    assert(v->isStatic());
-    m_data.pstr = const_cast<StringData*>(v);
-    m_type = KindOfStaticString;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(ArrayData* v) noexcept {
-  if (v) {
-    m_type = KindOfArray;
-    m_data.parr = v;
-    v->incRefCount();
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(ObjectData* v) noexcept {
-  if (v) {
-    m_type = KindOfObject;
-    m_data.pobj = v;
-    v->incRefCount();
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(ResourceData* v) noexcept {
-  if (v) {
-    m_type = KindOfResource;
-    m_data.pres = v;
-    v->incRefCount();
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(RefData* r) noexcept {
-  if (r) {
-    m_type = KindOfRef;
-    m_data.pref = r;
-    r->incRefCount();
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(StringData* var, Attach) noexcept {
-  if (var) {
-    m_type = var->isStatic() ? KindOfStaticString : KindOfString;
-    m_data.pstr = var;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(ArrayData* var, Attach) noexcept {
-  if (var) {
-    m_type = KindOfArray;
-    m_data.parr = var;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(ObjectData* var, Attach) noexcept {
-  if (var) {
-    m_type = KindOfObject;
-    m_data.pobj = var;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(ResourceData* var, Attach) noexcept {
-  if (var) {
-    m_type = KindOfResource;
-    m_data.pres = var;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(RefData* var, Attach) noexcept {
-  if (var) {
-    m_type = KindOfRef;
-    m_data.pref = var;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
 // the version of the high frequency function that is not inlined
+NEVER_INLINE
 Variant::Variant(const Variant& v) noexcept {
   constructValHelper(v);
 }

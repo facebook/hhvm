@@ -93,13 +93,20 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(uint64_t  v) noexcept {
     m_type = KindOfInt64; m_data.num = v;
   }
-
   /* implicit */ Variant(double    v) noexcept {
     m_type = KindOfDouble; m_data.dbl = v;
   }
 
-  /* implicit */ Variant(const char* v);
-  /* implicit */ Variant(const std::string &v);
+  /* implicit */ Variant(const char* v) {
+    m_type = KindOfString;
+    m_data.pstr = StringData::Make(v);
+  }
+  /* implicit */ Variant(const std::string &v) {
+    m_type = KindOfString;
+    StringData *s = StringData::Make(v.c_str(), v.size(), CopyString);
+    assert(s);
+    m_data.pstr = s;
+  }
   /* implicit */ Variant(const StaticString &v) noexcept {
     m_type = KindOfStaticString;
     StringData *s = v.get();
@@ -107,15 +114,47 @@ struct Variant : private TypedValue {
     m_data.pstr = s;
   }
 
-  /* implicit */ Variant(const String& v) noexcept;
-  /* implicit */ Variant(const Array& v) noexcept;
-  /* implicit */ Variant(const Object& v) noexcept;
-  /* implicit */ Variant(const Resource& v) noexcept;
+  /* implicit */ Variant(const String& v) noexcept : Variant(v.get()) {}
+  /* implicit */ Variant(const Array& v) noexcept : Variant(v.get()) { }
+  /* implicit */ Variant(const Object& v) noexcept : Variant(v.get()) {}
+  /* implicit */ Variant(const Resource& v) noexcept : Variant(v.get()) {}
   /* implicit */ Variant(StringData* v) noexcept;
-  /* implicit */ Variant(ArrayData* v) noexcept;
-  /* implicit */ Variant(ObjectData* v) noexcept;
-  /* implicit */ Variant(ResourceData* v) noexcept;
-  /* implicit */ Variant(RefData* r) noexcept;
+  /* implicit */ Variant(ArrayData* v) noexcept {
+    if (v) {
+      m_type = KindOfArray;
+      m_data.parr = v;
+      v->incRefCount();
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+  /* implicit */ Variant(ObjectData* v) noexcept {
+    if (v) {
+      m_type = KindOfObject;
+      m_data.pobj = v;
+      v->incRefCount();
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+  /* implicit */ Variant(ResourceData* v) noexcept {
+    if (v) {
+      m_type = KindOfResource;
+      m_data.pres = v;
+      v->incRefCount();
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+  /* implicit */ Variant(RefData* r) noexcept {
+    if (r) {
+      m_type = KindOfRef;
+      m_data.pref = r;
+      r->incRefCount();
+    } else {
+      m_type = KindOfNull;
+    }
+  }
 
   template <typename T>
   explicit Variant(const SmartPtr<T>& ptr) : Variant(ptr.get()) { }
@@ -134,7 +173,15 @@ struct Variant : private TypedValue {
 
   // for static strings only
   enum class StaticStrInit {};
-  explicit Variant(const StringData *v, StaticStrInit) noexcept;
+  explicit Variant(const StringData *v, StaticStrInit) noexcept {
+    if (v) {
+      assert(v->isStatic());
+      m_data.pstr = const_cast<StringData*>(v);
+      m_type = KindOfStaticString;
+    } else {
+      m_type = KindOfNull;
+    }
+  }
 
   // These are prohibited, but declared just to prevent accidentally
   // calling the bool constructor just because we had a pointer to
@@ -894,11 +941,46 @@ struct Variant : private TypedValue {
    * given types except that they do not increment the reference count
    * of the passed value.  They are used for the SmartPtr move constructor.
    */
-  Variant(StringData* var, Attach) noexcept;
-  Variant(ArrayData* var, Attach) noexcept;
-  Variant(ObjectData* var, Attach) noexcept;
-  Variant(ResourceData* var, Attach) noexcept;
-  Variant(RefData* var, Attach) noexcept;
+  Variant(StringData* var, Attach) noexcept {
+    if (var) {
+      m_type = var->isStatic() ? KindOfStaticString : KindOfString;
+      m_data.pstr = var;
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+  Variant(ArrayData* var, Attach) noexcept {
+    if (var) {
+      m_type = KindOfArray;
+      m_data.parr = var;
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+  Variant(ObjectData* var, Attach) noexcept {
+    if (var) {
+      m_type = KindOfObject;
+      m_data.pobj = var;
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+  Variant(ResourceData* var, Attach) noexcept {
+    if (var) {
+      m_type = KindOfResource;
+      m_data.pres = var;
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+  Variant(RefData* var, Attach) noexcept {
+    if (var) {
+      m_type = KindOfRef;
+      m_data.pref = var;
+    } else {
+      m_type = KindOfNull;
+    }
+  }
 
   bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }
   bool isObjectConvertable() {

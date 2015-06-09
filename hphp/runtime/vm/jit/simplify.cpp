@@ -53,6 +53,10 @@ const StaticString s_count("count");
 const StaticString s_1("1");
 const StaticString s_empty("");
 const StaticString s_invoke("__invoke");
+const StaticString s_isFinished("isFinished");
+const StaticString s_isSucceeded("isSucceeded");
+const StaticString s_isFailed("isFailed");
+const StaticString s_WaitHandle("HH\\WaitHandle");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1908,6 +1912,32 @@ SSATmp* simplifyCallBuiltin(State& env, const IRInstruction* inst) {
     if (callee->name()->isame(s_count.get())) {
       FTRACE(3, "simplifying collection: {}\n", callee->name()->data());
       return gen(env, CountCollection, args[2]);
+    }
+  }
+
+  bool const arg2IsWaitHandle = !arg2IsCollection &&
+    args.size() == 3 &&
+    args[2]->isA(TObj) &&
+    args[2]->type().clsSpec() &&
+    args[2]->type().clsSpec().cls()->classof(c_WaitHandle::classof()) &&
+    !mightRelax(env, args[2]);
+
+  if (arg2IsWaitHandle) {
+    const auto genState = [&] (Opcode op, int64_t whstate) -> SSATmp* {
+      // these methods all spring from the base class
+      assert(callee->cls()->name()->isame(s_WaitHandle.get()));
+      const auto state = gen(env, LdWHState, args[2]);
+      return gen(env, op, state, cns(env, whstate));
+    };
+    const auto methName = callee->name();
+    if (methName->isame(s_isFinished.get())) {
+      return genState(LteInt, int64_t{c_WaitHandle::STATE_FAILED});
+    }
+    if (methName->isame(s_isSucceeded.get())) {
+      return genState(EqInt, int64_t{c_WaitHandle::STATE_SUCCEEDED});
+    }
+    if (methName->isame(s_isFailed.get())) {
+      return genState(EqInt, int64_t{c_WaitHandle::STATE_FAILED});
     }
   }
 

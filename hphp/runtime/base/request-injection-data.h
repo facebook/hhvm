@@ -218,6 +218,7 @@ struct RequestInjectionData {
   void reset();
 
   void onSessionInit();
+  void bindPHPPerDirectoryIniSettings();
 
   /*
    * Intended to be used by other threads other than the current thread.  To get

@@ -56,8 +56,6 @@ public:
     const std::vector<std::string>& iniClis = std::vector<std::string>(),
     const std::vector<std::string>& hdfClis = std::vector<std::string>());
 
-  static void BindPHPPerDirectoryIniSettings(RequestInjectionData *rid);
-
   static bool ServerExecutionMode() {
     return strcmp(ExecutionMode, "srv") == 0;
   }

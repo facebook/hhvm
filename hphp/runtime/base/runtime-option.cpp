@@ -1722,87 +1722,9 @@ void RuntimeOption::Load(IniSetting::Map& ini, Hdf& config,
   Config::Bind(RuntimeOption::DynamicExtensions, ini,
                config, "DynamicExtensions");
 
-  //
-  // For some call paths (perhaps server invocation?) there's no RID() yet.
-  // We never expect a valid s_threadInfo here.
-  //
-  assert(ThreadInfo::s_threadInfo.isNull());
-  BindPHPPerDirectoryIniSettings(
-    ThreadInfo::s_threadInfo.isNull() ? nullptr : &RID());
-
   ExtensionRegistry::moduleLoad(ini, config);
   extern void initialize_apc();
   initialize_apc();
-}
-
-void RuntimeOption::BindPHPPerDirectoryIniSettings(RequestInjectionData *rid) {
-  // File Uploads
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "upload_max_filesize",
-                   IniSetting::SetAndGet<std::string>(
-                     [](const std::string& value) {
-                       return ini_on_update(
-                         value, VirtualHost::s_uploadMaxFileSize);
-                     },
-                     []() {
-                       // Before 22May2015, this was printed as
-                       // Mebibytes with the 'M' suffix.
-                       // TODO: Use the same formatting for similar ideas.
-                       int64_t m =
-                         VirtualHost::GetUploadMaxFileSize() / (1 << 20);
-                       return std::to_string(m) + "M";
-                     }
-                   ));
-
-  // Data Handling
-
-  //
-  // Watch out: due to historical unfortunate typos in dark HHVM history,
-  // PHP calls this "post_max_size', but HHVM HDF uses "max_post_size".
-  //
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "post_max_size",
-                   IniSetting::SetAndGet<std::string>(
-                     [](const std::string& value) {
-                       return ini_on_update(
-                         value, VirtualHost::s_maxPostSize);
-                     },
-                     []() {
-                       // Before 22May2015, this was printed in bytes,
-                       // no suffix or scaling; the format differed from
-                       // upload_max_file_size.
-                       // TODO: Use the same formatting for similar ideas.
-                       int64_t m = 
-                         VirtualHost::GetMaxPostSize();
-                       return std::to_string(m);
-                     }
-                   ));
-
-  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                   "always_populate_raw_post_data",
-                   IniSetting::SetAndGet<std::string>(
-                     [](const std::string& value) {
-                       Transport::s_didInitAlwaysPopulateRawPostData
-                         = true;
-                       return ini_on_update(
-                         value, Transport::s_alwaysPopulateRawPostData);
-                     },
-                     []() {
-                       bool m = 
-                         Transport::getAlwaysPopulateRawPostData();
-                       return std::to_string(m);
-                     }
-                   ));
-
-  if (rid) {
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                     "auto_prepend_file",
-                     &rid->m_autoPrependFileName);
-
-    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_PERDIR,
-                     "auto_append_file",
-                     &rid->m_autoAppendFileName);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

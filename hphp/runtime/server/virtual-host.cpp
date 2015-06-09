@@ -113,7 +113,7 @@ int64_t VirtualHost::GetUploadMaxFileSize() {
 void VirtualHost::UpdateMaxPostSize() {
   const VirtualHost *vh = GetCurrent();
   assert(vh);
-  genericGet(VirtualHost::s_maxPostSize,
+  genericSet(VirtualHost::s_maxPostSize,
              vh->m_runtimeOption.maxPostSize,
              RuntimeOption::MaxPostSize,
              -1L);
@@ -122,7 +122,7 @@ void VirtualHost::UpdateMaxPostSize() {
 void VirtualHost::UpdateUploadMaxFileSize() {
   const VirtualHost *vh = GetCurrent();
   assert(vh);
-  genericGet(VirtualHost::s_uploadMaxFileSize,
+  genericSet(VirtualHost::s_uploadMaxFileSize,
              vh->m_runtimeOption.uploadMaxFileSize,
              RuntimeOption::UploadMaxFileSize,
              -1L);

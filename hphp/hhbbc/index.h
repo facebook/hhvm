@@ -514,12 +514,13 @@ struct Index {
 
   /*
    * Lookup the best known type for a public static property, with a given
-   * class type and name type.
+   * class and name.
    *
    * This function will always return TInitGen before refine_public_statics has
    * been called, or if the AnalyzePublicStatics option is off.
    */
   Type lookup_public_static(Type cls, Type name) const;
+  Type lookup_public_static(borrowed_ptr<const php::Class>, SString name) const;
 
   /*
    * Returns whether a public static property is known to be immutable.  This

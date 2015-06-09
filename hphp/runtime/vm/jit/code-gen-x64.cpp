@@ -2648,16 +2648,8 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   }
 
   // actRec->m_func
-  if (func->isA(TNullptr)) {
-    // No need to store the null---we're always about to run another
-    // instruction that will populate the Func.
-  } else if (func->hasConstVal()) {
-    const Func* f = func->funcVal();
-    emitImmStoreq(v, intptr_t(f), spReg[spOffset + int(AROFF(m_func))]);
-  } else {
-    int offset_m_func = spOffset + int(AROFF(m_func));
-    auto funcLoc = srcLoc(inst, 1);
-    v << store{funcLoc.reg(0), spReg[offset_m_func]};
+  if (!func->isA(TNullptr)) {
+    v << store{srcLoc(inst, 1).reg(0), spReg[spOffset + int(AROFF(m_func))]};
   }
 
   auto flags = ActRec::Flags::None;

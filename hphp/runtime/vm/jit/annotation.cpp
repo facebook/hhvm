@@ -30,6 +30,7 @@ TRACE_SET_MOD(trans);
 
 namespace {
 
+const StaticString s_empty("");
 const Func* lookupDirectFunc(SrcKey const sk,
                              const StringData* fname,
                              const StringData* clsName,

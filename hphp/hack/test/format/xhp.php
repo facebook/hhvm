@@ -64,3 +64,22 @@ function s() {
 function t() {
   return <a><a href="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">1</a><a href="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">1</a></a>;
 }
+
+function u($x, $y) {
+  return <grid>
+    <item>
+      {$x}
+      {$y}
+    </item>
+    <item>bar</item>
+  </grid>;
+}
+
+function v() {
+  return <a><aaaaaaaaaaa href="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa">1</aaaaaaaaaaa>!</a>;
+}
+
+function v() {
+  return
+    <aaaaaaaaaaaa href="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" name="watttttt"/>;
+}

@@ -166,6 +166,7 @@ class PreClassEmitter {
   int32_t numDeclMethods() const { return m_numDeclMethods; }
   void setNumDeclMethods(uint32_t n) { m_numDeclMethods = n; }
   const MethodVec& methods() const { return m_methods; }
+  FuncEmitter* findMethod(const StringData* name) { return m_methodMap[name]; }
   const PropMap::Builder& propMap() const { return m_propMap; }
   const ConstMap::Builder& constMap() const { return m_constMap; }
   const StringData* docComment() const { return m_docComment; }

@@ -9724,6 +9724,23 @@ Unit* hphp_build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
       staticAnalysisPce->name()->data()
     );
     uePce->setAttrs(staticAnalysisPce->attrs());
+
+    // Set all the method bits.
+    for (auto methID = uint32_t{0};
+         methID < staticAnalysisPce->methods().size();
+         ++methID) {
+      auto const& staticAnalysisMethod = staticAnalysisPce->methods()[methID];
+      auto const pceMethod = uePce->findMethod(staticAnalysisMethod->name);
+      always_assert_flog(
+        pceMethod != nullptr,
+        "Static analysis unit had a PreClass method that we don't have at "
+        "runtime ({}::{}); repo probably was built with a different hhvm "
+        "build.",
+        staticAnalysisPce->name()->data(),
+        staticAnalysisMethod->name->data()
+      );
+      pceMethod->attrs = staticAnalysisMethod->attrs;
+    }
   }
 
   return ue->create().release();

@@ -181,7 +181,8 @@
                     "name": "join",
                     "desc": "Wait until this wait handle is finished and return its result (operates in a new scheduler context)",
                     "flags": [
-                        "IsFinal"
+                        "IsFinal",
+                        "NoFCallBuiltin"
                     ],
                     "return": {
                         "type": "Variant",

@@ -201,142 +201,155 @@ struct Allocator {
  * 4 size classes for each doubling of size
  * (ignoring the alignment-constrained smallest size classes), which limits
  * internal fragmentation to 20%.
+ *
+ * SMART_SIZES: Complete table of SMART_SIZE(index, lg_grp, lg_delta, ndelta,
+ *              lg_delta_lookup, ncontig) tuples.
+ *   index: Size class index.
+ *   lg_grp: Lg group base size (no deltas added).
+ *   lg_delta: Lg delta to previous size class.
+ *   ndelta: Delta multiplier.  size == 1<<lg_grp + ndelta<<lg_delta
+ *   lg_delta_lookup: Same as lg_delta if a lookup table size class, 'no'
+ *                    otherwise.
+ *   ncontig: Number of contiguous regions to batch allocate in the slow path
+ *            due to the corresponding free list being empty.  Must be greater
+ *            than zero, and small enough that the contiguous regions fit within
+ *            one slab.
  */
 #define SMART_SIZES \
-/*         index, lg_grp, lg_delta, ndelta, lg_delta_lookup */ \
-  SMART_SIZE(  0,      4,        4,      0,  4) \
-  SMART_SIZE(  1,      4,        4,      1,  4) \
-  SMART_SIZE(  2,      4,        4,      2,  4) \
-  SMART_SIZE(  3,      4,        4,      3,  4) \
+/*         index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig */ \
+  SMART_SIZE(  0,      4,        4,      0,  4,              32) \
+  SMART_SIZE(  1,      4,        4,      1,  4,              32) \
+  SMART_SIZE(  2,      4,        4,      2,  4,              32) \
+  SMART_SIZE(  3,      4,        4,      3,  4,              32) \
   \
-  SMART_SIZE(  4,      6,        4,      1,  4) \
-  SMART_SIZE(  5,      6,        4,      2,  4) \
-  SMART_SIZE(  6,      6,        4,      3,  4) \
-  SMART_SIZE(  7,      6,        4,      4,  4) \
+  SMART_SIZE(  4,      6,        4,      1,  4,              24) \
+  SMART_SIZE(  5,      6,        4,      2,  4,              24) \
+  SMART_SIZE(  6,      6,        4,      3,  4,              24) \
+  SMART_SIZE(  7,      6,        4,      4,  4,              24) \
   \
-  SMART_SIZE(  8,      7,        5,      1,  5) \
-  SMART_SIZE(  9,      7,        5,      2,  5) \
-  SMART_SIZE( 10,      7,        5,      3,  5) \
-  SMART_SIZE( 11,      7,        5,      4,  5) \
+  SMART_SIZE(  8,      7,        5,      1,  5,              16) \
+  SMART_SIZE(  9,      7,        5,      2,  5,              16) \
+  SMART_SIZE( 10,      7,        5,      3,  5,              16) \
+  SMART_SIZE( 11,      7,        5,      4,  5,              16) \
   \
-  SMART_SIZE( 12,      8,        6,      1,  6) \
-  SMART_SIZE( 13,      8,        6,      2,  6) \
-  SMART_SIZE( 14,      8,        6,      3,  6) \
-  SMART_SIZE( 15,      8,        6,      4,  6) \
+  SMART_SIZE( 12,      8,        6,      1,  6,              12) \
+  SMART_SIZE( 13,      8,        6,      2,  6,              12) \
+  SMART_SIZE( 14,      8,        6,      3,  6,              12) \
+  SMART_SIZE( 15,      8,        6,      4,  6,              12) \
   \
-  SMART_SIZE( 16,      9,        7,      1,  7) \
-  SMART_SIZE( 17,      9,        7,      2,  7) \
-  SMART_SIZE( 18,      9,        7,      3,  7) \
-  SMART_SIZE( 19,      9,        7,      4,  7) \
+  SMART_SIZE( 16,      9,        7,      1,  7,               8) \
+  SMART_SIZE( 17,      9,        7,      2,  7,               8) \
+  SMART_SIZE( 18,      9,        7,      3,  7,               8) \
+  SMART_SIZE( 19,      9,        7,      4,  7,               8) \
   \
-  SMART_SIZE( 20,     10,        8,      1,  8) \
-  SMART_SIZE( 21,     10,        8,      2,  8) \
-  SMART_SIZE( 22,     10,        8,      3,  8) \
-  SMART_SIZE( 23,     10,        8,      4,  8) \
+  SMART_SIZE( 20,     10,        8,      1,  8,               6) \
+  SMART_SIZE( 21,     10,        8,      2,  8,               6) \
+  SMART_SIZE( 22,     10,        8,      3,  8,               6) \
+  SMART_SIZE( 23,     10,        8,      4,  8,               6) \
   \
-  SMART_SIZE( 24,     11,        9,      1,  9) \
-  SMART_SIZE( 25,     11,        9,      2,  9) \
-  SMART_SIZE( 26,     11,        9,      3,  9) \
-  SMART_SIZE( 27,     11,        9,      4,  9) \
+  SMART_SIZE( 24,     11,        9,      1,  9,               4) \
+  SMART_SIZE( 25,     11,        9,      2,  9,               4) \
+  SMART_SIZE( 26,     11,        9,      3,  9,               4) \
+  SMART_SIZE( 27,     11,        9,      4,  9,               4) \
   \
-  SMART_SIZE( 28,     12,       10,      1, no) \
-  SMART_SIZE( 29,     12,       10,      2, no) \
-  SMART_SIZE( 30,     12,       10,      3, no) \
-  SMART_SIZE( 31,     12,       10,      4, no) \
+  SMART_SIZE( 28,     12,       10,      1, no,               3) \
+  SMART_SIZE( 29,     12,       10,      2, no,               3) \
+  SMART_SIZE( 30,     12,       10,      3, no,               3) \
+  SMART_SIZE( 31,     12,       10,      4, no,               3) \
   \
-  SMART_SIZE( 32,     13,       11,      1, no) \
-  SMART_SIZE( 33,     13,       11,      2, no) \
-  SMART_SIZE( 34,     13,       11,      3, no) \
-  SMART_SIZE( 35,     13,       11,      4, no) \
+  SMART_SIZE( 32,     13,       11,      1, no,               2) \
+  SMART_SIZE( 33,     13,       11,      2, no,               2) \
+  SMART_SIZE( 34,     13,       11,      3, no,               2) \
+  SMART_SIZE( 35,     13,       11,      4, no,               2) \
   \
-  SMART_SIZE( 36,     14,       12,      1, no) \
-  SMART_SIZE( 37,     14,       12,      2, no) \
-  SMART_SIZE( 38,     14,       12,      3, no) \
-  SMART_SIZE( 39,     14,       12,      4, no) \
+  SMART_SIZE( 36,     14,       12,      1, no,               2) \
+  SMART_SIZE( 37,     14,       12,      2, no,               2) \
+  SMART_SIZE( 38,     14,       12,      3, no,               2) \
+  SMART_SIZE( 39,     14,       12,      4, no,               2) \
   \
-  SMART_SIZE( 40,     15,       13,      1, no) \
-  SMART_SIZE( 41,     15,       13,      2, no) \
-  SMART_SIZE( 42,     15,       13,      3, no) \
-  SMART_SIZE( 43,     15,       13,      4, no) \
+  SMART_SIZE( 40,     15,       13,      1, no,               2) \
+  SMART_SIZE( 41,     15,       13,      2, no,               2) \
+  SMART_SIZE( 42,     15,       13,      3, no,               2) \
+  SMART_SIZE( 43,     15,       13,      4, no,               2) \
   \
-  SMART_SIZE( 44,     16,       14,      1, no) \
-  SMART_SIZE( 45,     16,       14,      2, no) \
-  SMART_SIZE( 46,     16,       14,      3, no) \
-  SMART_SIZE( 47,     16,       14,      4, no) \
+  SMART_SIZE( 44,     16,       14,      1, no,               2) \
+  SMART_SIZE( 45,     16,       14,      2, no,               2) \
+  SMART_SIZE( 46,     16,       14,      3, no,               2) \
+  SMART_SIZE( 47,     16,       14,      4, no,               2) \
   \
-  SMART_SIZE( 48,     17,       15,      1, no) \
-  SMART_SIZE( 49,     17,       15,      2, no) \
-  SMART_SIZE( 50,     17,       15,      3, no) \
-  SMART_SIZE( 51,     17,       15,      4, no) \
+  SMART_SIZE( 48,     17,       15,      1, no,               2) \
+  SMART_SIZE( 49,     17,       15,      2, no,               2) \
+  SMART_SIZE( 50,     17,       15,      3, no,               2) \
+  SMART_SIZE( 51,     17,       15,      4, no,               2) \
   \
-  SMART_SIZE( 52,     18,       16,      1, no) \
-  SMART_SIZE( 53,     18,       16,      2, no) \
-  SMART_SIZE( 54,     18,       16,      3, no) \
-  SMART_SIZE( 55,     18,       16,      4, no) \
+  SMART_SIZE( 52,     18,       16,      1, no,               2) \
+  SMART_SIZE( 53,     18,       16,      2, no,               2) \
+  SMART_SIZE( 54,     18,       16,      3, no,               2) \
+  SMART_SIZE( 55,     18,       16,      4, no,               2) \
   \
-  SMART_SIZE( 56,     19,       17,      1, no) \
-  SMART_SIZE( 57,     19,       17,      2, no) \
-  SMART_SIZE( 58,     19,       17,      3, no) \
-  SMART_SIZE( 59,     19,       17,      4, no) \
+  SMART_SIZE( 56,     19,       17,      1, no,               2) \
+  SMART_SIZE( 57,     19,       17,      2, no,               2) \
+  SMART_SIZE( 58,     19,       17,      3, no,               2) \
+  SMART_SIZE( 59,     19,       17,      4, no,               1) \
   \
-  SMART_SIZE( 60,     20,       18,      1, no) \
-  SMART_SIZE( 61,     20,       18,      2, no) \
-  SMART_SIZE( 62,     20,       18,      3, no) \
-  SMART_SIZE( 63,     20,       18,      4, no) \
+  SMART_SIZE( 60,     20,       18,      1, no,               1) \
+  SMART_SIZE( 61,     20,       18,      2, no,               1) \
+  SMART_SIZE( 62,     20,       18,      3, no,               1) \
+  SMART_SIZE( 63,     20,       18,      4, no,               1) \
   \
-  SMART_SIZE( 64,     21,       19,      1, no) \
-  SMART_SIZE( 65,     21,       19,      2, no) \
-  SMART_SIZE( 66,     21,       19,      3, no) \
-  SMART_SIZE( 67,     21,       19,      4, no) \
+  SMART_SIZE( 64,     21,       19,      1, no,               1) \
+  SMART_SIZE( 65,     21,       19,      2, no,               1) \
+  SMART_SIZE( 66,     21,       19,      3, no,               1) \
+  SMART_SIZE( 67,     21,       19,      4, no,               1) \
   \
-  SMART_SIZE( 68,     22,       20,      1, no) \
-  SMART_SIZE( 69,     22,       20,      2, no) \
-  SMART_SIZE( 70,     22,       20,      3, no) \
-  SMART_SIZE( 71,     22,       20,      4, no) \
+  SMART_SIZE( 68,     22,       20,      1, no,               1) \
+  SMART_SIZE( 69,     22,       20,      2, no,               1) \
+  SMART_SIZE( 70,     22,       20,      3, no,               1) \
+  SMART_SIZE( 71,     22,       20,      4, no,               1) \
   \
-  SMART_SIZE( 72,     23,       21,      1, no) \
-  SMART_SIZE( 73,     23,       21,      2, no) \
-  SMART_SIZE( 74,     23,       21,      3, no) \
-  SMART_SIZE( 75,     23,       21,      4, no) \
+  SMART_SIZE( 72,     23,       21,      1, no,               1) \
+  SMART_SIZE( 73,     23,       21,      2, no,               1) \
+  SMART_SIZE( 74,     23,       21,      3, no,               1) \
+  SMART_SIZE( 75,     23,       21,      4, no,               1) \
   \
-  SMART_SIZE( 76,     24,       22,      1, no) \
-  SMART_SIZE( 77,     24,       22,      2, no) \
-  SMART_SIZE( 78,     24,       22,      3, no) \
-  SMART_SIZE( 79,     24,       22,      4, no) \
+  SMART_SIZE( 76,     24,       22,      1, no,               1) \
+  SMART_SIZE( 77,     24,       22,      2, no,               1) \
+  SMART_SIZE( 78,     24,       22,      3, no,               1) \
+  SMART_SIZE( 79,     24,       22,      4, no,               1) \
   \
-  SMART_SIZE( 80,     25,       23,      1, no) \
-  SMART_SIZE( 81,     25,       23,      2, no) \
-  SMART_SIZE( 82,     25,       23,      3, no) \
-  SMART_SIZE( 83,     25,       23,      4, no) \
+  SMART_SIZE( 80,     25,       23,      1, no,               1) \
+  SMART_SIZE( 81,     25,       23,      2, no,               1) \
+  SMART_SIZE( 82,     25,       23,      3, no,               1) \
+  SMART_SIZE( 83,     25,       23,      4, no,               1) \
   \
-  SMART_SIZE( 84,     26,       24,      1, no) \
-  SMART_SIZE( 85,     26,       24,      2, no) \
-  SMART_SIZE( 86,     26,       24,      3, no) \
-  SMART_SIZE( 87,     26,       24,      4, no) \
+  SMART_SIZE( 84,     26,       24,      1, no,               1) \
+  SMART_SIZE( 85,     26,       24,      2, no,               1) \
+  SMART_SIZE( 86,     26,       24,      3, no,               1) \
+  SMART_SIZE( 87,     26,       24,      4, no,               1) \
   \
-  SMART_SIZE( 88,     27,       25,      1, no) \
-  SMART_SIZE( 89,     27,       25,      2, no) \
-  SMART_SIZE( 90,     27,       25,      3, no) \
-  SMART_SIZE( 91,     27,       25,      4, no) \
+  SMART_SIZE( 88,     27,       25,      1, no,               1) \
+  SMART_SIZE( 89,     27,       25,      2, no,               1) \
+  SMART_SIZE( 90,     27,       25,      3, no,               1) \
+  SMART_SIZE( 91,     27,       25,      4, no,               1) \
   \
-  SMART_SIZE( 92,     28,       26,      1, no) \
-  SMART_SIZE( 93,     28,       26,      2, no) \
-  SMART_SIZE( 94,     28,       26,      3, no) \
-  SMART_SIZE( 95,     28,       26,      4, no) \
+  SMART_SIZE( 92,     28,       26,      1, no,               1) \
+  SMART_SIZE( 93,     28,       26,      2, no,               1) \
+  SMART_SIZE( 94,     28,       26,      3, no,               1) \
+  SMART_SIZE( 95,     28,       26,      4, no,               1) \
   \
-  SMART_SIZE( 96,     29,       27,      1, no) \
-  SMART_SIZE( 97,     29,       27,      2, no) \
-  SMART_SIZE( 98,     29,       27,      3, no) \
-  SMART_SIZE( 99,     29,       27,      4, no) \
+  SMART_SIZE( 96,     29,       27,      1, no,               1) \
+  SMART_SIZE( 97,     29,       27,      2, no,               1) \
+  SMART_SIZE( 98,     29,       27,      3, no,               1) \
+  SMART_SIZE( 99,     29,       27,      4, no,               1) \
   \
-  SMART_SIZE(100,     30,       28,      1, no) \
-  SMART_SIZE(101,     30,       28,      2, no) \
-  SMART_SIZE(102,     30,       28,      3, no) \
-  SMART_SIZE(103,     30,       28,      4, no) \
+  SMART_SIZE(100,     30,       28,      1, no,               1) \
+  SMART_SIZE(101,     30,       28,      2, no,               1) \
+  SMART_SIZE(102,     30,       28,      3, no,               1) \
+  SMART_SIZE(103,     30,       28,      4, no,               1) \
   \
-  SMART_SIZE(104,     31,       29,      1, no) \
-  SMART_SIZE(105,     31,       29,      2, no) \
-  SMART_SIZE(106,     31,       29,      3, no) \
+  SMART_SIZE(104,     31,       29,      1, no,               1) \
+  SMART_SIZE(105,     31,       29,      2, no,               1) \
+  SMART_SIZE(106,     31,       29,      3, no,               1) \
 
 __attribute__((__aligned__(64)))
 constexpr uint8_t kSmartSize2Index[] = {
@@ -347,7 +360,7 @@ constexpr uint8_t kSmartSize2Index[] = {
 #define S2I_8(i)  S2I_7(i) S2I_7(i)
 #define S2I_9(i)  S2I_8(i) S2I_8(i)
 #define S2I_no(i)
-#define SMART_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup) \
+#define SMART_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
   S2I_##lg_delta_lookup(index)
   SMART_SIZES
 #undef S2I_4
@@ -362,7 +375,7 @@ constexpr uint8_t kSmartSize2Index[] = {
 
 __attribute__((__aligned__(64)))
 constexpr uint32_t kSmartIndex2Size[] = {
-#define SMART_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup) \
+#define SMART_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
   ((uint32_t{1}<<lg_grp) + (uint32_t{ndelta}<<lg_delta)),
   SMART_SIZES
 #undef SMART_SIZE
@@ -911,6 +924,10 @@ private:
 private:
   void* slabAlloc(uint32_t bytes, unsigned index);
   void* newSlab(uint32_t nbytes);
+  void storeTail(void* tail, uint32_t tailBytes);
+  void splitTail(void* tail, uint32_t tailBytes, unsigned nSplit,
+                 uint32_t splitUsable, unsigned splitInd);
+  void* smartMallocSizeSlow(uint32_t bytes, unsigned index);
   void  updateBigStats();
   void* smartMallocBig(size_t nbytes);
   void* smartCallocBig(size_t nbytes);
@@ -922,6 +939,7 @@ private:
   static uint8_t smartSize2IndexCompute(uint32_t size);
   static uint8_t smartSize2IndexLookup(uint32_t size);
   static uint8_t smartSize2Index(uint32_t size);
+  static uint32_t smartIndex2Size(uint8_t index);
 
   static void threadStatsInit();
   static void threadStats(uint64_t*&, uint64_t*&, size_t*&, size_t&);
@@ -936,6 +954,7 @@ private:
   void logDeallocation(void*);
 
   void checkHeap();
+  void initHole(void* ptr, uint32_t size);
   void initHole();
   void initFree();
 

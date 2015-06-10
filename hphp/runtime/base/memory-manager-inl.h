@@ -214,6 +214,10 @@ inline uint8_t MemoryManager::smartSize2Index(uint32_t size) {
   return smartSize2IndexCompute(size);
 }
 
+inline uint32_t MemoryManager::smartIndex2Size(uint8_t index) {
+  return kSmartIndex2Size[index];
+}
+
 inline uint32_t MemoryManager::smartSizeClass(uint32_t reqBytes) {
   uint32_t x = bsr((reqBytes<<1)-1);
   int32_t lgReduced = x - kLgSizeClassesPerDoubling
@@ -235,10 +239,10 @@ inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
   // in the usage stats when we're going through smartMallocSize.
   m_stats.usage += bytes;
 
-  unsigned i = smartSize2Index(bytes);
-  void* p = m_freelists[i].maybePop();
+  unsigned index = smartSize2Index(bytes);
+  void *p = m_freelists[index].maybePop();
   if (UNLIKELY(p == nullptr)) {
-    p = slabAlloc(bytes, i);
+    p = smartMallocSizeSlow(bytes, index);
   }
   assert((reinterpret_cast<uintptr_t>(p) & kSmartSizeAlignMask) == 0);
   FTRACE(3, "smartMallocSize: {} -> {}\n", bytes, p);

@@ -618,11 +618,15 @@ static_assert(sizeof(header_names)/sizeof(*header_names) == NumHeaderKinds, "");
 }
 
 // initialize a Hole header in the unused memory between m_front and m_limit
+void MemoryManager::initHole(void* ptr, uint32_t size) {
+  auto hdr = static_cast<FreeNode*>(ptr);
+  hdr->hdr.kind = HeaderKind::Hole;
+  hdr->size() = size;
+}
+
 void MemoryManager::initHole() {
   if ((char*)m_front < (char*)m_limit) {
-    auto hdr = static_cast<FreeNode*>(m_front);
-    hdr->hdr.kind = HeaderKind::Hole;
-    hdr->size() = (char*)m_limit - (char*)m_front;
+    initHole(m_front, (char*)m_limit - (char*)m_front);
   }
 }
 
@@ -631,7 +635,7 @@ void MemoryManager::initFree() {
   initHole();
   for (auto i = 0; i < kNumSmartSizes; i++) {
     for (auto n = m_freelists[i].head; n; n = n->next) {
-      n->hdr.init(HeaderKind::Free, kSmartIndex2Size[i]);
+      n->hdr.init(HeaderKind::Free, smartIndex2Size(i));
     }
   }
   m_needInitFree = false;
@@ -733,7 +737,7 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
   if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
     refreshStats();
   }
-  initHole(); // enable parsing the leftover space in the old slab
+  storeTail(m_front, (char*)m_limit - (char*)m_front);
   if (debug && RuntimeOption::EvalCheckHeapOnAlloc) checkHeap();
   auto slab = m_heap.allocSlab(kSlabSize);
   assert((uintptr_t(slab.ptr) & kSmartSizeAlignMask) == 0);
@@ -751,8 +755,9 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
 /*
  * Allocate `bytes' from the current slab, aligned to kSmartSizeAlign.
  */
-void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
-  FTRACE(3, "slabAlloc({}, {})\n", bytes, index);
+inline void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
+  FTRACE(3, "slabAlloc({}, {}): m_front={}, m_limit={}\n", bytes, index,
+            m_front, m_limit);
   uint32_t nbytes = smartSizeClass(bytes);
 
   assert(nbytes <= kSlabSize);
@@ -793,7 +798,92 @@ void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
        p = (void*)(uintptr_t(p) - nbytes)) {
     m_freelists[index].push(p, nbytes);
   }
+  FTRACE(4, "slabAlloc({}, {}) --> ptr={}, m_front={}, m_limit={}\n", bytes,
+            index, ptr, m_front, m_limit);
   return ptr;
+}
+
+/*
+ * Store slab tail bytes (if any) in freelists.
+ */
+inline void MemoryManager::storeTail(void* tail, uint32_t tailBytes) {
+  void* rem = tail;
+  for (uint32_t remBytes = tailBytes; remBytes > 0;) {
+    uint32_t fragBytes = remBytes;
+    assert(fragBytes >= kSmartSizeAlign);
+    assert((fragBytes & kSmartSizeAlignMask) == 0);
+    unsigned fragInd = smartSize2Index(fragBytes + 1) - 1;
+    uint32_t fragUsable = smartIndex2Size(fragInd);
+    void* frag = (void*)(uintptr_t(rem) + remBytes - fragUsable);
+    FTRACE(4, "MemoryManager::storeTail({}, {}): rem={}, remBytes={}, "
+              "frag={}, fragBytes={}, fragUsable={}, fragInd={}\n", tail,
+              (void*)uintptr_t(tailBytes), rem, (void*)uintptr_t(remBytes),
+              frag, (void*)uintptr_t(fragBytes), (void*)uintptr_t(fragUsable),
+              fragInd);
+    m_freelists[fragInd].push(frag, fragUsable);
+    remBytes -= fragUsable;
+  }
+}
+
+/*
+ * Create nSplit contiguous regions and store them in the appropriate freelist.
+ */
+inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
+                                     unsigned nSplit, uint32_t splitUsable,
+                                     unsigned splitInd) {
+  assert(tailBytes >= kSmartSizeAlign);
+  assert((tailBytes & kSmartSizeAlignMask) == 0);
+  assert((splitUsable & kSmartSizeAlignMask) == 0);
+  assert(nSplit * splitUsable <= tailBytes);
+  for (uint32_t i = nSplit; i--;) {
+    void* split = (void*)(uintptr_t(tail) + i * splitUsable);
+    FTRACE(4, "MemoryManager::splitTail(tail={}, tailBytes={}, tailPast={}): "
+              "split={}, splitUsable={}, splitInd={}\n", tail,
+              (void*)uintptr_t(tailBytes), (void*)(uintptr_t(tail) + tailBytes),
+              split, splitUsable, splitInd);
+    m_freelists[splitInd].push(split, splitUsable);
+  }
+  void* rem = (void*)(uintptr_t(tail) + nSplit * splitUsable);
+  assert(tailBytes >= nSplit * splitUsable);
+  uint32_t remBytes = tailBytes - nSplit * splitUsable;
+  assert(uintptr_t(rem) + remBytes == uintptr_t(tail) + tailBytes);
+  storeTail(rem, remBytes);
+}
+
+void* MemoryManager::smartMallocSizeSlow(uint32_t bytes, unsigned index) {
+  size_t nbytes = smartIndex2Size(index);
+  static constexpr unsigned nContigTab[] = {
+#define SMART_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
+    ncontig,
+  SMART_SIZES
+#undef SMART_SIZE
+  };
+  unsigned nContig = nContigTab[index];
+  size_t contigMin = nContig * nbytes;
+  unsigned contigInd = smartSize2Index(contigMin);
+  for (unsigned i = contigInd; i < kNumSmartSizes; ++i) {
+    FTRACE(4, "MemoryManager::SmartMallocSizeSlow({}-->{}, {}): contigMin={}, "
+              "contigInd={}, try i={}\n", bytes, nbytes, index, contigMin,
+              contigInd, i);
+    void* p = m_freelists[i].maybePop();
+    if (p != nullptr) {
+      FTRACE(4, "MemoryManager::smartMallocSizeSlow({}-->{}, {}): "
+                "contigMin={}, contigInd={}, use i={}, size={}, p={}\n", bytes,
+                nbytes, index, contigMin, contigInd, i, smartIndex2Size(i),
+                p);
+      // Split tail into preallocations and store them back into freelists.
+      uint32_t availBytes = smartIndex2Size(i);
+      uint32_t tailBytes = availBytes - nbytes;
+      if (tailBytes > 0) {
+        void* tail = (void*)(uintptr_t(p) + nbytes);
+        splitTail(tail, tailBytes, nContig - 1, nbytes, index);
+      }
+      return p;
+    }
+  }
+
+  // No available free list items; carve new space from the current slab.
+  return slabAlloc(bytes, index);
 }
 
 inline void MemoryManager::updateBigStats() {

@@ -29,7 +29,9 @@
 #include <errno.h>
 #include <cxxabi.h>
 
+#ifdef HAVE_LIBBFD
 #include <bfd.h>
+#endif
 
 using namespace HPHP::jit;
 
@@ -81,6 +83,7 @@ DebugInfo::~DebugInfo() {
 }
 
 void DebugInfo::generatePidMapOverlay() {
+#ifdef HAVE_LIBBFD
   if (!m_perfMap || !pidMapOverlayStart) return;
 
   std::string self = current_executable_path();
@@ -154,6 +157,7 @@ void DebugInfo::generatePidMapOverlay() {
   }
   bfd_close(abfd);
   return;
+#endif // HAVE_LIBBFD
 }
 
 void DebugInfo::recordStub(TCRange range, const std::string& name) {

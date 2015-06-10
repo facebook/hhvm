@@ -19,7 +19,10 @@
 #include <execinfo.h>
 #endif
 
+#ifdef HAVE_LIBBFD
 #include <bfd.h>
+#endif
+
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -37,6 +40,8 @@
 #include "hphp/util/hash.h"
 
 namespace HPHP {
+
+#ifdef HAVE_LIBBFD
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -608,6 +613,75 @@ void StackTraceNoHeap::Demangle(int fd, const char *mangled) {
   return ;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
+
+#else // HAVE_LIBBFD
+
+// Basically everything in here requires libbfd. So, stub city it is.
+
+std::string StackTraceBase::Frame::toString() const {
+  return "";
+}
+
+bool StackTraceBase::Enabled = false;
+const char** StackTraceBase::FunctionBlacklist = {};
+unsigned int StackTraceBase::FunctionBlacklistCount = 0;
+
+StackTraceBase::StackTraceBase() {
+}
+
+std::string StackTrace::Frame::toString() const {
+  return "";
+}
+
+StackTrace::StackTrace(bool trace) {
+}
+
+std::shared_ptr<StackTrace::Frame> StackTrace::Translate(void *bt) {
+  return std::shared_ptr<StackTrace::Frame>(new Frame(bt));
+}
+
+void StackTrace::TranslateFromPerfMap(void* bt, Frame* f) {
+}
+
+std::string Demangle(const char *mangled) {
+  return "";
+}
+
+StackTrace::StackTrace(const StackTrace &bt) {
+}
+
+StackTrace::StackTrace(const std::string &hexEncoded) {
+}
+
+StackTrace::StackTrace(const char *hexEncoded) {
+}
+
+const std::string &StackTrace::toString(int skip, int limit) const {
+  return m_bt;
+}
+
+void StackTrace::get(std::vector<std::shared_ptr<Frame>> &frames) const {
+}
+
+std::string StackTrace::hexEncode(int minLevel, int maxLevel) const {
+  return "";
+}
+
+StackTraceNoHeap::StackTraceNoHeap(bool trace) {
+}
+
+void StackTraceNoHeap::log(const char *errorType, int fd, const char *buildId,
+    int debuggerCount) const {
+}
+
+void StackTraceNoHeap::AddExtraLogging(const char *name,
+    const std::string &value) {
+}
+
+void StackTraceNoHeap::ClearAllExtraLogging() {
+}
+
+#endif // HAVE_LIBBFD
+
 }

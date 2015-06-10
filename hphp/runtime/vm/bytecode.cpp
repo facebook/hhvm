@@ -242,6 +242,7 @@ const StaticString s_line("line");
 
 inline const char* prettytype(int) { return "int"; }
 inline const char* prettytype(long) { return "long"; }
+inline const char* prettytype(long long) { return "long long"; }
 inline const char* prettytype(double) { return "double"; }
 inline const char* prettytype(unsigned) { return "unsigned"; }
 inline const char* prettytype(OODeclExistsOp) { return "OpDeclExistsOp"; }

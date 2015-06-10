@@ -575,13 +575,13 @@ int64_t AsyncMysqlResult::elapsedMicros() {
 
 double AsyncMysqlResult::startTime() {
   am::Duration d = std::chrono::duration_cast<std::chrono::microseconds>(
-      op()->startTime() - std::chrono::system_clock::from_time_t(0));
+      op()->startTime().time_since_epoch());
   return d.count() / 1000.0 / 1000.0;
 }
 
 double AsyncMysqlResult::endTime() {
   am::Duration d = std::chrono::duration_cast<std::chrono::microseconds>(
-      op()->endTime() - std::chrono::system_clock::from_time_t(0));
+      op()->endTime().time_since_epoch());
   return d.count() / 1000.0 / 1000.0;
 }
 

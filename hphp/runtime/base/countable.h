@@ -106,7 +106,7 @@ inline bool check_refcount_ns_nz(int32_t count) {
   }                                                                     \
                                                                         \
   void setRefCount(RefCount count) {                                    \
-    assert(!MemoryManager::sweeping());                                 \
+    assert(count == StaticValue || !MemoryManager::sweeping());         \
     assert(check_refcount(m_hdr.count));                                \
     m_hdr.count = count;                                                \
     assert(check_refcount(m_hdr.count));                                \

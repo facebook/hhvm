@@ -30,13 +30,11 @@ TRACE_SET_MOD(trans);
 
 namespace {
 
-const StaticString s_empty("");
-
 const Func* lookupDirectFunc(SrcKey const sk,
                              const StringData* fname,
                              const StringData* clsName,
                              bool staticCall) {
-  if (clsName && !clsName->isame(s_empty.get())) {
+  if (clsName && !clsName->empty()) {
     auto const cls = Unit::lookupClassOrUniqueClass(clsName);
     bool magic = false;
     auto const ctx = sk.func()->cls();

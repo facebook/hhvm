@@ -167,13 +167,12 @@ inline strhash_t StringData::hash() const {
 
 inline bool StringData::same(const StringData* s) const {
   assert(s);
-  size_t len = m_len;
-  if (len != s->m_len) return false;
-  // The underlying buffer and its length are 32-bit aligned, ensured by
+  if (m_len != s->m_len) return false;
+  // The underlying buffer and its length are 8-byte aligned, ensured by
   // StringData layout, smart_malloc, or malloc. So compare words.
-  assert(uintptr_t(data()) % 4 == 0);
-  assert(uintptr_t(s->data()) % 4 == 0);
-  return wordsame(data(), s->data(), len);
+  assert(uintptr_t(data()) % 8 == 0);
+  assert(uintptr_t(s->data()) % 8 == 0);
+  return wordsame(data(), s->data(), m_len);
 }
 
 inline bool StringData::isame(const StringData* s) const {

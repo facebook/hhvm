@@ -29,30 +29,57 @@ namespace HPHP {
 #ifndef FOLLY_SANITIZE_ADDRESS
 
 /*
- * Word at a time comparison for two memory regions of length
- * `lenBytes' + 1 (for the null terminator).  Returns true if the
- * regions are the same.
+ * Word at a time comparison for two strings of length `lenBytes'.  Returns
+ * true if the regions are the same. This should be invoked only when we know
+ * the two strings have the same length. It will not check for the null
+ * terminator.
  *
- * Assumes it can load more words than the size to compare (this is
- * often possible in HPHP when you know you are dealing with smart
- * allocated memory).  The final word compare is adjusted to handle
- * the slack in lenBytes so only the bytes we care about are compared.
+ * Assumes it can load more words than the size to compare (this is often
+ * possible in HPHP when you know you are dealing with smart allocated memory).
+ * The final word compare is adjusted to handle the slack in lenBytes so only
+ * the bytes we care about are compared.
  */
 ALWAYS_INLINE
-bool wordsame(const void* mem1, const void* mem2, size_t lenBytes) {
+bool wordsame(const void* mem1, const void* mem2, uint32_t lenBytes) {
   using T = uint64_t;
   auto constexpr W = sizeof(T);
+
   assert(reinterpret_cast<const uintptr_t>(mem1) % W == 0);
-  auto p1 = reinterpret_cast<const T*>(mem1);
-  auto p2 = reinterpret_cast<const T*>(mem2);
-  for (auto end = p1 + lenBytes / W; p1 < end; p1++, p2++) {
-    if (*p1 != *p2) return false;
-  }
-  // let W = sizeof(*p1); p1 and p2 point to the last 0..W-1 bytes plus
-  // the 0 terminator, ie the last 1..W bytes. Load W bytes, shift off the
-  // bytes after the 0, then compare.
-  auto shift = 8 * (W - 1) - 8 * (lenBytes % W);
-  return (*p1 << shift) == (*p2 << shift);
+  // We would like to make sure `mem2' is also aligned.  But `strintern_eq' has
+  // always been using `wordsame()' on non-aligned pointers, and this doesn't
+  // seem to cause crashes in practice.
+  // assert(reinterpret_cast<const uintptr_t>(mem2) % W == 0);
+
+  // Inverse of lenBytes.  Do the negation here to avoid doing it later on the
+  // critical path.
+  int32_t const nBytes = -lenBytes;
+  // Check if `lenBytes' is 0, do the check right here to reuse the flags of
+  // the neg instruction.  This saves a test instruction.
+  if (UNLIKELY(nBytes == 0)) return true;
+  // Do the shift here to avoid doing it later on the critical path.  But we
+  // will have to switch to 64 bit here to support very long strings.
+  int64_t nBits = static_cast<int64_t>(nBytes) * 8u;
+
+  // Use the base+index addressing mode in x86, so that we only need to
+  // increment the base pointer in the loop.
+  auto p1 = reinterpret_cast<intptr_t>(mem1);
+  auto const diff = reinterpret_cast<intptr_t>(mem2) - p1;
+
+  T data;
+  do {
+    data = *(reinterpret_cast<const T*>(p1));
+    data ^= *(reinterpret_cast<const T*>(p1 + diff));
+    p1 += W;
+    nBits += W * 8;
+    if (nBits >= 0) {
+      // As a note for future consideration, we could consider precomputing a
+      // 64-bit mask, so that the fraction of the last qword can be checked
+      // faster.  But that would require an additional register for the
+      // mask.  So it depends on register pressure of the call site.
+      return !(data << nBits);
+    }
+  } while (data == 0);
+  return false;
 }
 
 #else // FOLLY_SANITIZE_ADDRESS
@@ -60,7 +87,7 @@ bool wordsame(const void* mem1, const void* mem2, size_t lenBytes) {
 ALWAYS_INLINE
 bool wordsame(const void* mem1, const void* mem2, size_t lenBytes) {
   assert(reinterpret_cast<const uintptr_t>(mem1) % 4 == 0);
-  return !memcmp(mem1, mem2, lenBytes+1);
+  return !memcmp(mem1, mem2, lenBytes);
 }
 
 #endif

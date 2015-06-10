@@ -34,6 +34,7 @@ namespace HH {
  *
  * The argument of fun() must always be a constant string.
  */
+<<__IsFoldable>>
 function fun(string $s) /* interpreted by the type checker as
                            (function(<hack figures this>): <and this>) */ {
   return $s;
@@ -73,6 +74,7 @@ function meth_caller(string $class, string $method) {
  *   $data = Vector { 1, 2, 3 };
  *   $data->filter(class_meth('C', 'isOdd'));
  */
+<<__IsFoldable>>
 function class_meth(string $class, string $method)
   /* : (function(<hack figures this>): <and this>) */ {
   return array($class, $method);

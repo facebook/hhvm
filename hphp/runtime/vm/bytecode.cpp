@@ -383,6 +383,10 @@ VarEnv::~VarEnv() {
   }
 }
 
+void VarEnv::deallocate(ActRec* fp) {
+  fp->m_varEnv->exitFP(fp);
+}
+
 VarEnv* VarEnv::createLocal(ActRec* fp) {
   return smart_new<VarEnv>(fp, fp->getExtraArgs());
 }
@@ -3728,9 +3732,9 @@ OPTBLD_INLINE void iopAddNewElemV(IOP_ARGS) {
 OPTBLD_INLINE void iopNewCol(IOP_ARGS) {
   pc++;
   auto cType = static_cast<CollectionType>(decode_iva(pc));
-  auto nElms = decode_iva(pc);
-  auto obj = collections::alloc(cType, nElms);
-  vmStack().pushObject(obj);
+  // Incref the collection object during construction.
+  auto obj = collections::alloc(cType);
+  vmStack().pushObjectNoRc(obj);
 }
 
 OPTBLD_INLINE void iopColFromArray(IOP_ARGS) {
@@ -3738,10 +3742,11 @@ OPTBLD_INLINE void iopColFromArray(IOP_ARGS) {
   auto const cType = static_cast<CollectionType>(decode_iva(pc));
   auto const c1 = vmStack().topC();
   // This constructor reassociates the ArrayData with the collection, so no
-  // inc/decref is needed.
+  // inc/decref is needed for the array. The collection object itself is
+  // increfed.
   auto obj = collections::alloc(cType, c1->m_data.parr);
   vmStack().discard();
-  vmStack().pushObject(obj);
+  vmStack().pushObjectNoRc(obj);
 }
 
 OPTBLD_INLINE void iopColAddNewElemC(IOP_ARGS) {

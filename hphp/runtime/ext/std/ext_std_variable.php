@@ -141,7 +141,7 @@ function var_export(mixed $expression,
  */
 /* Dumps a string representation of an internal zend value to output.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function var_dump(mixed $arg1, ...$argv): void;
 
 <<__Native>>

@@ -142,7 +142,7 @@ private:
 
   // Called by timer to terminate server when waiting for connections to drain
   // if connections are stalled
-  void timeoutExpired() noexcept;
+  void timeoutExpired() noexcept override;
 
   // Stops the server by waiting on thread-pool to become idle and then stopping
   // the dispatcher

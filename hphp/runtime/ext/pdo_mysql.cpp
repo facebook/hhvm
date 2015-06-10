@@ -108,15 +108,15 @@ struct PDOMySqlStatement : PDOStatement {
 
   bool create(const String& sql, const Array& options);
 
-  virtual bool support(SupportedMethod method);
-  virtual bool executer();
-  virtual bool fetcher(PDOFetchOrientation ori, long offset);
-  virtual bool describer(int colno);
-  virtual bool getColumn(int colno, Variant &value);
-  virtual bool paramHook(PDOBoundParam* param, PDOParamEvent event_type);
-  virtual bool getColumnMeta(int64_t colno, Array &return_value);
-  virtual bool nextRowset();
-  virtual bool cursorCloser();
+  bool support(SupportedMethod method) override;
+  bool executer() override;
+  bool fetcher(PDOFetchOrientation ori, long offset) override;
+  bool describer(int colno) override;
+  bool getColumn(int colno, Variant &value) override;
+  bool paramHook(PDOBoundParam* param, PDOParamEvent event_type) override;
+  bool getColumnMeta(int64_t colno, Array &return_value) override;
+  bool nextRowset() override;
+  bool cursorCloser() override;
 
   MYSQL_STMT *stmt() { return m_stmt;}
 

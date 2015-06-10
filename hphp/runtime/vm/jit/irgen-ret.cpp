@@ -63,6 +63,8 @@ void freeLocalsAndThis(IRGS& env) {
     // In a pseudomain, we have to do a non-inline DecRef, because we can't
     // side-exit in the middle of the sequence of LdLocPseudoMains.
     if (curFunc(env)->isPseudoMain()) return false;
+    // We don't want to specialize on arg types for builtins
+    if (curFunc(env)->builtinFuncPtr()) return false;
 
     auto const count = mcg->numTranslations(
       env.irb->unit().context().srcKey());
@@ -114,7 +116,6 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retval) {
   // Must load this before FreeActRec, which adjusts fp(env).
   auto const resumableObj = gen(env, LdResumableArObj, fp(env));
 
-  auto const retAddr = gen(env, LdRetAddr, fp(env));
   gen(env, FreeActRec, fp(env));
   gen(env, DecRef, resumableObj);
 
@@ -123,8 +124,7 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retval) {
     AsyncRetCtrl,
     IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
     sp(env),
-    fp(env),
-    retAddr
+    fp(env)
   );
 }
 
@@ -157,20 +157,27 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
 }
 
 void implRet(IRGS& env) {
-  if (curFunc(env)->attrs() & AttrMayUseVV) {
-    // Note: this has to be the first thing, because we cannot bail after
-    //       we start decRefing locs because then there'll be no corresponding
-    //       bytecode boundaries until the end of RetC
-    gen(env, ReleaseVVOrExit, makeExitSlow(env), fp(env));
-  }
+  auto func = curFunc(env);
 
   // Pop the return value. Since it will be teleported to its place in memory,
   // we don't care about the type.
   auto const retval = pop(env, DataTypeGeneric);
-  freeLocalsAndThis(env);
+
+  if (func->attrs() & AttrMayUseVV) {
+    ifElse(
+      env,
+      [&] (Block* skip) {
+        gen(env, ReleaseVVAndSkip, skip, fp(env));
+      },
+      [&] { freeLocalsAndThis(env); }
+    );
+  } else {
+    freeLocalsAndThis(env);
+  }
+
   retSurpriseCheck(env, fp(env), retval);
 
-  if (curFunc(env)->isAsyncFunction()) {
+  if (func->isAsyncFunction()) {
     return asyncFunctionReturn(env, retval);
   }
   if (resumed(env)) {

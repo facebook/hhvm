@@ -378,9 +378,11 @@ class MemcachedData {
         raise_warning("could not uncompress value");
         return false;
       }
-      decompPayload = StringData::Make(buffer.data(), bufferSize, CopyString);
+      decompPayload =
+        String::attach(StringData::Make(buffer.data(), bufferSize, CopyString));
     } else {
-      decompPayload = StringData::Make(payload, payloadLength, CopyString);
+      decompPayload =
+        String::attach(StringData::Make(payload, payloadLength, CopyString));
     }
 
     switch (flags & MEMC_VAL_TYPE_MASK) {

@@ -305,6 +305,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdObjClass:
   case LdClsName:
   case LdARFuncPtr:
+  case LdARNumParams:
   case Mov:
   case LdContActRec:
   case LdAFWHActRec:
@@ -312,9 +313,9 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdMIStateAddr:
   case LdPackedArrayElemAddr:
   case OrdStr:
-  case AKExistsArr:
   case DefLabel:
-  case ArrayGet:
+  case CheckRange:
+  case CountArrayFast:
     return true;
   default:
     return false;

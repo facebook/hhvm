@@ -645,7 +645,12 @@ To string conversions:
 | JmpSwitchDest, ND, S(Int) S(StkPtr) S(FramePtr), T
 
   Jump to the target of a switch statement, leaving the region, using table
-  metadata <JmpSwitchData> and index S0.
+  metadata <JmpSwitchData> and index S0, which must be a valid index in the
+  jump table.
+
+| ProfileSwitchDest<handle,nCases>, ND, S(Int), NF
+
+  Profile a switch statement target.
 
 | CheckSurpriseFlags, ND, NA, B
 
@@ -668,8 +673,7 @@ To string conversions:
 
 | Halt, ND, NA, T
 
-  Halt execution. Used only in tests, as a terminal instruction that does not
-  require any inputs or any successors.
+  Halt execution. Used only in tests or unreachable code.
 
 | Jmp, ND, SVar(Top), B|T
 
@@ -1043,6 +1047,10 @@ To string conversions:
   Loads the m_func member of an ActRec. S0 is the base address, with `offset'
   cells to the ActRec.
 
+| LdARNumParams, D(Int), S(FramePtr), NF
+
+  Loads the number of params from an ActRec. S0 is the address of the ActRec
+
 | LdFuncNumParams, D(Int), S(Func), NF
 
   Returns the value of func->numParams().
@@ -1136,9 +1144,9 @@ To string conversions:
   off the stack given by S0, at `offset'. This instruction assumes it can take
   the values from the stack without increfing them.
 
-| NewCol<type,size>, DCol, NA, PRc
+| NewCol<type>, DCol, NA, PRc
 
-  Create a new collection of `type' with space for `size' elements reserved.
+  Create an empty new collection of `type'.
 
 | NewColFromArray<type>, DCol, S(Arr), PRc|CRc
 
@@ -1235,7 +1243,7 @@ To string conversions:
   Execute a call to the native builtin specified by the current function. S0
   and S1 should be the current vmfp and vmsp, respectively.
 
-| CallBuiltin<T>, DBuiltin, S(FramePtr) S(StkPtr) SVar(PtrToGen,Gen), Er|PRc
+| CallBuiltin<T>, DBuiltin, S(FramePtr) S(StkPtr) SVar(PtrToGen,Gen,Cls), Er|PRc
 
   Call builtin function with N arguments. S0 and S1 should be the current vmfp
   and vmsp, respectively.
@@ -1258,10 +1266,6 @@ To string conversions:
     Object              {Obj|InitNull}    destination
     Variant             {Gen-UninitNull}  destination
 
-| LdRetAddr, D(RetAddr), S(FramePtr), NF
-
-  Load the saved return address from S0 into D.
-
 | RetCtrl<spOff,suspendingResumed>, ND, S(StkPtr) S(FramePtr), T
 
   Ensure that S0 + `spOff' (in cells) is stored in rVmSp, S1's saved frame
@@ -1269,22 +1273,22 @@ To string conversions:
   S1. `suspendingResumed' indicates when this instruction is suspending a
   resumable rather than performing a normal function return.
 
-| AsyncRetCtrl<spOff>, ND, S(StkPtr) S(FramePtr) S(RetAddr), T
+| AsyncRetCtrl<spOff>, ND, S(StkPtr) S(FramePtr), T
 
   Ensure that S0 + `spOff` (in cells) is stored in rVmSp, S1 is stored in
-  rVmFp, and return to the address in S2.
+  rVmFp.  Returns by leaving the TC to enterTCHelper.
 
 | StRetVal, ND, S(FramePtr) S(Gen), CRc
 
   Writes the value in S1 to the return value slot on the activation record
   pointed to by S0.
 
-| ReleaseVVOrExit, ND, S(FramePtr), B
+| ReleaseVVAndSkip, ND, S(FramePtr), B
 
   Loads the VarEnv slot off the ActRec pointed to by S0. If it is null, does
   nothing. If it is an ExtraArgs, deallocates the ExtraArgs structure.
-  Otherwise jumps to block B. This instruction may not occur in an inlined
-  call.
+  Otherwise it frees the VarEnv and jumps to block B. This instruction may not
+  occur in an inlined call.
 
 | GenericRetDecRefs, ND, S(FramePtr), NF
 
@@ -1822,7 +1826,7 @@ To string conversions:
   handle states in ext_asio.h. This instruction has undefined behavior if S0 is
   not a WaitHandle.
 
-| LdWHResult, D(Cell), S(Obj), NF
+| LdWHResult, DParam, S(Obj), NF
 
   Loads the result of the WaitHandle in S0. This instruction has undefined
   behavior if S0 is not a WaitHandle, or if S0 is not finished.
@@ -2064,11 +2068,11 @@ fields of that struct for holding intermediate values.
   Like PropX, but used for intermediate element lookups that may modify the
   base.
 
-| CGetProp, D(Cell), S(Obj,PtrToGen) S(Cell), PRc|Er
+| CGetProp, D(Cell), S(Obj,PtrToGen) S(Cell) S(PtrToMISGen), PRc|Er
 
   Get property with key S1 from S0.
 
-| CGetPropQ, D(Cell), S(Obj,PtrToGen) S(StaticStr), PRc|Er
+| CGetPropQ, D(Cell), S(Obj,PtrToGen) S(StaticStr) S(PtrToMISGen), PRc|Er
 
   A nullsafe version of CGetProp, returns null if the base S0 is null.
 
@@ -2146,7 +2150,7 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from base S0.
 
-| CGetElem, D(Cell), S(PtrToGen) S(Cell), PRc|Er
+| CGetElem, D(Cell), S(PtrToGen) S(Cell) S(PtrToMISGen), PRc|Er
 
   Get element with key S1 from S0.
 
@@ -2185,7 +2189,7 @@ fields of that struct for holding intermediate values.
   InvalidSetMException (see discussion above).
 
 | SetWithRefElem, ND,
-|                 S(PtrToGen) S(Cell) S(Gen) S(PtrToMISGen),
+|                 S(PtrToGen) S(Gen) S(Gen) S(PtrToMISGen),
 |                 MElem|Er
 
   Set element with key S1 in S0 to S2.
@@ -2255,10 +2259,13 @@ fields of that struct for holding intermediate values.
   Returns true iff the element at key S1 in S0 is set and not equal (as defined
   by the hhbc Eq instruction) to false.
 
-| CheckBounds, ND, S(Int) S(Int), Er
+| CheckRange, D(Bool), S(Int) S(Int), NF
 
-  Checks that the index in S0 is between 0 (included) and the values in S1
-  (excluded). Throws if out of bounds.
+  Returns true iff S0 is in the range [0, S1).
+
+| ThrowOutOfBounds, ND, S(Int), Er|T
+
+  Throws and OutOfBoundsException with a message indicating S0.
 
 | ProfilePackedArray, ND, S(Arr), NF
 
@@ -2268,6 +2275,8 @@ fields of that struct for holding intermediate values.
 
   Profile type of array S0 (i.e. whether it is a StructArray or some other kind
   and if it is a StructArray what Shapes it saw).
+
+| ProfileObjClass, ND, S(Obj), NF
 
 | LdStructArrayElem, DArrElem, AK(Struct) S(StaticStr), NF
 

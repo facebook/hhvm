@@ -676,7 +676,7 @@ public:
 
   CLASSNAME_IS("process");
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   int close() {
     // Although the PHP doc about proc_close() says that the pipes need to be

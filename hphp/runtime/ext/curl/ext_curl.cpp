@@ -138,7 +138,7 @@ private:
 public:
   CLASSNAME_IS("curl")
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   explicit CurlResource(const String& url)
   : m_emptyPost(true) {
@@ -202,7 +202,7 @@ public:
     close();
   }
 
-  virtual bool isInvalid() const {
+  bool isInvalid() const override {
     return !m_cp;
   }
 
@@ -1288,7 +1288,7 @@ public:
 
   CLASSNAME_IS("curl_multi")
   // overriding ResourceData
-  const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   CurlMultiResource() {
     m_multi = curl_multi_init();
@@ -1306,7 +1306,7 @@ public:
     }
   }
 
-  virtual bool isInvalid() const {
+  bool isInvalid() const override {
     return !m_multi;
   }
 

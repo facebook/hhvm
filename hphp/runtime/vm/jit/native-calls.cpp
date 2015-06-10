@@ -286,6 +286,7 @@ static CallMap s_callMap {
                  {{SSA, 0}, {TV, 1}, {TV, 2}, {SSA, 3}}},
     {SetWithRefNewElem, MInstrHelpers::setWithRefNewElem, DNone, SSync,
                  {{SSA, 0}, {TV, 1}, {SSA, 2}}},
+    {ThrowOutOfBounds, throwOOB, DNone, SSync, {{SSA, 0}}},
 
     /* instanceof checks */
     {InstanceOf, &Class::classof, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},

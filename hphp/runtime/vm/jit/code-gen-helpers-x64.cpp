@@ -336,7 +336,7 @@ void emitCheckSurpriseFlagsEnter(CodeBlock& mainCode, CodeBlock& coldCode,
 
   acold.  movq  (rVmFp, argNumToRegName[0]);
   emitCall(acold, mcg->tx().uniqueStubs.functionEnterHelper, argSet(1));
-  mcg->recordSyncPoint(acold.frontier(), fixup.pcOffset, fixup.spOffset);
+  mcg->recordSyncPoint(acold.frontier(), fixup);
   acold.  jmp   (a.frontier());
 }
 

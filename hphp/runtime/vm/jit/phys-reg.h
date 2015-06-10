@@ -413,7 +413,7 @@ struct PhysRegSaverParity {
   PhysRegSaverParity& operator=(PhysRegSaverParity&&) = default;
 
   int rspAdjustment() const;
-  int rspTotalAdjustmentRegs() const;
+  int dwordsPushed() const;
   void bytesPushed(int bytes);
 
 private:

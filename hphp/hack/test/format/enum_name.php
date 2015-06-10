@@ -1,4 +1,7 @@
 <?hh
 
-enum e: int {
+enum E: int {
+}
+
+enum F:int {
 }

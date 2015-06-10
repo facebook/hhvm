@@ -81,13 +81,16 @@ Array c_Closure::t___debuginfo() {
   if (m_func->numParams()) {
    Array params;
    for (int i = 0; i < m_func->numParams(); ++i) {
-      StrNR name(StringData::Make(s_varprefix.get(), m_func->localNames()[i]));
+      auto str = String::attach(
+        StringData::Make(s_varprefix.get(), m_func->localNames()[i])
+      );
+
       bool optional = m_func->params()[i].phpCode;
       if (auto mi = m_func->methInfo()) {
         optional = optional || mi->parameters[i]->valueText;
       }
 
-      params.set(name, optional ? s_optional : s_required);
+      params.set(str, optional ? s_optional : s_required);
     }
 
     ret.set(s_parameter, params);

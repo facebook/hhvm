@@ -3,19 +3,20 @@ string(%d) "<table class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>
 <tr><th>#</th><th>Time</th><th>Mem</th><th colspan='2'>Function</th><th>Location</th></tr>
 %r\x09%r<tr><td>0</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>xdebug_start_trace() </td><td>%s/test/slow/ext_xdebug/tracing_5.php:4</td></tr>
 %r\x09%r<tr><td>1</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;-&gt;</td><td>include(%s/test/slow/ext_xdebug/tracing.inc) </td><td>%s/test/slow/ext_xdebug/tracing_5.php:8</td></tr>
-%r\x09%r<tr><td>2</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>var_dump() </td><td>%s/test/slow/ext_xdebug/tracing.inc:3</td></tr>
-%r\x09%r<tr><td>3</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>include(%s/test/slow/ext_xdebug/tracing_helper.inc) </td><td>%s/test/slow/ext_xdebug/tracing.inc:4</td></tr>
-%r\x09%r<tr><td>4</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>bee() </td><td>%s/test/slow/ext_xdebug/tracing_helper.inc:7</td></tr>
-%r\x09%r<tr><td>5</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>Foo::86ctor() </td><td>%s/test/slow/ext_xdebug/tracing.inc:21</td></tr>
-%r\x09%r<tr><td>6</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>Foo::bar() </td><td>%s/test/slow/ext_xdebug/tracing.inc:21</td></tr>
-%r\x09%r<tr><td>7</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>Foo::bar() </td><td>%s/test/slow/ext_xdebug/tracing.inc:9</td></tr>
-%r\x09%r<tr><td>8</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>Foo::bar() </td><td>%s/test/slow/ext_xdebug/tracing.inc:9</td></tr>
-%r\x09%r<tr><td>9</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>Foo::bar() </td><td>%s/test/slow/ext_xdebug/tracing.inc:9</td></tr>
-%r\x09%r<tr><td>10</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>baz() </td><td>%s/test/slow/ext_xdebug/tracing.inc:8</td></tr>
-%r\x09%r<tr><td>11</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>boo() </td><td>%s/test/slow/ext_xdebug/tracing.inc:14</td></tr>
+%r\x09%r<tr><td>2</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>xdebug_get_tracefile_name() </td><td>%s/test/slow/ext_xdebug/tracing.inc:3</td></tr>
+%r\x09%r<tr><td>3</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>var_dump() </td><td>%s/test/slow/ext_xdebug/tracing.inc:3</td></tr>
+%r\x09%r<tr><td>4</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>include(%s/test/slow/ext_xdebug/tracing_helper.inc) </td><td>%s/test/slow/ext_xdebug/tracing.inc:4</td></tr>
+%r\x09%r<tr><td>5</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>bee() </td><td>%s/test/slow/ext_xdebug/tracing_helper.inc:7</td></tr>
+%r\x09%r<tr><td>6</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>Foo::86ctor() </td><td>%s/test/slow/ext_xdebug/tracing.inc:21</td></tr>
+%r\x09%r<tr><td>7</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>Foo::bar() </td><td>%s/test/slow/ext_xdebug/tracing.inc:21</td></tr>
+%r\x09%r<tr><td>8</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>Foo::bar() </td><td>%s/test/slow/ext_xdebug/tracing.inc:9</td></tr>
+%r\x09%r<tr><td>9</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>Foo::bar() </td><td>%s/test/slow/ext_xdebug/tracing.inc:9</td></tr>
+%r\x09%r<tr><td>10</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>Foo::bar() </td><td>%s/test/slow/ext_xdebug/tracing.inc:9</td></tr>
+%r\x09%r<tr><td>11</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>baz() </td><td>%s/test/slow/ext_xdebug/tracing.inc:8</td></tr>
 %r\x09%r<tr><td>12</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>boo() </td><td>%s/test/slow/ext_xdebug/tracing.inc:14</td></tr>
-%r\x09%r<tr><td>13</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>boo() </td><td>%s/test/slow/ext_xdebug/tracing.inc:15</td></tr>
-%r\x09%r<tr><td>14</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>boo() </td><td>%s/test/slow/ext_xdebug/tracing.inc:22</td></tr>
-%r\x09%r<tr><td>15</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>bee() </td><td>%s/test/slow/ext_xdebug/tracing.inc:23</td></tr>
-%r\x09%r<tr><td>16</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;-&gt;</td><td>xdebug_stop_trace() </td><td>%s/test/slow/ext_xdebug/tracing_5.php:9</td></tr>
+%r\x09%r<tr><td>13</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>boo() </td><td>%s/test/slow/ext_xdebug/tracing.inc:14</td></tr>
+%r\x09%r<tr><td>14</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>boo() </td><td>%s/test/slow/ext_xdebug/tracing.inc:15</td></tr>
+%r\x09%r<tr><td>15</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>boo() </td><td>%s/test/slow/ext_xdebug/tracing.inc:22</td></tr>
+%r\x09%r<tr><td>16</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>bee() </td><td>%s/test/slow/ext_xdebug/tracing.inc:23</td></tr>
+%r\x09%r<tr><td>17</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;-&gt;</td><td>xdebug_stop_trace() </td><td>%s/test/slow/ext_xdebug/tracing_5.php:9</td></tr>
 </table>"

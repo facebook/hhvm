@@ -42,7 +42,7 @@ struct Directory : SweepableResourceData {
 
   CLASSNAME_IS("Directory")
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   String getLastError() {
     return String(folly::errnoStr(errno).toStdString());

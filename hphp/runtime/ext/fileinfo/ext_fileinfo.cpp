@@ -29,7 +29,7 @@ class FileinfoResource : public SweepableResourceData {
 public:
   DECLARE_RESOURCE_ALLOCATION(FileinfoResource)
   CLASSNAME_IS("file_info")
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   explicit FileinfoResource(struct magic_set* magic) : m_magic(magic) {}
   virtual ~FileinfoResource() { close(); }

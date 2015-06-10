@@ -65,7 +65,7 @@ struct RegionDesc {
   struct Block;
   struct Arc;
   struct Location;
-  struct TypePred;
+  struct TypedLocation;
   struct ReffinessPred;
   using BlockPtr = std::shared_ptr<Block>;
   using BlockId = TransID;
@@ -238,25 +238,23 @@ struct RegionDesc::Arc {
 };
 
 /*
- * A type prediction for somewhere in the middle of or start of a
- * region.
+ * A type for somewhere in the middle of or start of a region.
  *
- * All types annotated in the RegionDesc are expected to be
- * predictions, i.e. things that need to be guarded on or checked and
- * then side-exited on.  Getting the ahead-of-time static types
- * attached is handled by a different module.
+ * All types annotated in the RegionDesc are things that need to be guarded on
+ * or checked and then side-exited on. Types from ahead-of-time static analysis
+ * are encoded in the bytecode stream.
  */
-struct RegionDesc::TypePred {
+struct RegionDesc::TypedLocation {
   Location location;
   Type type;
 };
 
-inline bool operator==(const RegionDesc::TypePred& a,
-                       const RegionDesc::TypePred& b) {
+inline bool operator==(const RegionDesc::TypedLocation& a,
+                       const RegionDesc::TypedLocation& b) {
   return a.location == b.location && a.type == b.type;
 }
 
-using PostConditions = std::vector<RegionDesc::TypePred>;
+using PostConditions = std::vector<RegionDesc::TypedLocation>;
 
 /*
  * A prediction for the argument reffiness of the Func for a pre-live ActRec.
@@ -284,7 +282,7 @@ inline bool operator==(const RegionDesc::ReffinessPred& a,
  * at various execution points, including at entry to the block.
  */
 struct RegionDesc::Block {
-  using TypePredMap = boost::container::flat_multimap<SrcKey,TypePred>;
+  using TypedLocMap = boost::container::flat_multimap<SrcKey, TypedLocation>;
   using ParamByRefMap = boost::container::flat_map<SrcKey,bool>;
   using RefPredMap = boost::container::flat_multimap<SrcKey,ReffinessPred>;
   using KnownFuncMap = boost::container::flat_map<SrcKey,const Func*>;
@@ -310,10 +308,10 @@ struct RegionDesc::Block {
   bool        contains(SrcKey sk) const;
   FPInvOffset initialSpOffset()   const { return m_initialSpOffset; }
   uint16_t    inlineLevel()       const { return m_inlineLevel; }
+  TransID     profTransID()       const { return m_profTransID; }
 
-  void setId(BlockId id) {
-    m_id = id;
-  }
+  void setID(BlockId id)                  { m_id = id; }
+  void setProfTransID(TransID ptid)       { m_profTransID = ptid; }
   void setInitialSpOffset(FPInvOffset sp) { m_initialSpOffset = sp; }
 
   /*
@@ -344,7 +342,17 @@ struct RegionDesc::Block {
    *
    * Pre: sk is in the region delimited by this block.
    */
-  void addPredicted(SrcKey sk, TypePred);
+  void addPredicted(SrcKey sk, TypedLocation);
+
+  /*
+   * Add a precondition type to this block. Preconditions have no effects on
+   * correctness, but entering a block with a known type that violates a
+   * precondition is likely to result in a side exit after little to no
+   * forward progress.
+   *
+   * Pre: sk is in the region delimited by this block.
+   */
+  void addPreCondition(SrcKey sk, TypedLocation);
 
   /*
    * Add information about parameter reffiness to this block.
@@ -374,11 +382,14 @@ struct RegionDesc::Block {
    * iterate over the information is using a MapWalker, since they're all
    * backed by a sorted map.
    */
-  const TypePredMap& typePreds()     const { return m_typePreds; }
+  const TypedLocMap& typePredictions() const { return m_typePredictions; }
+  const TypedLocMap& typePreConditions() const {
+    return m_typePreConditions;
+  }
   const ParamByRefMap& paramByRefs() const { return m_byRefs; }
   const RefPredMap& reffinessPreds() const { return m_refPreds; }
-  const KnownFuncMap& knownFuncs()   const { return m_knownFuncs; }
-  const PostConditions& postConds()  const { return m_postConds; }
+  const KnownFuncMap& knownFuncs() const { return m_knownFuncs; }
+  const PostConditions& postConds() const { return m_postConds; }
 
 private:
   void checkInstructions() const;
@@ -388,20 +399,22 @@ private:
 private:
   static BlockId s_nextId;
 
-  BlockId        m_id;
-  const Func*    m_func;
-  const bool     m_resumed;
-  const Offset   m_start;
-  Offset         m_last;
-  int            m_length;
-  FPInvOffset    m_initialSpOffset;
-  const Func*    m_inlinedCallee;
-  uint16_t       m_inlineLevel; // 0 means the outer-most function
-  TypePredMap    m_typePreds;
-  ParamByRefMap  m_byRefs;
-  RefPredMap     m_refPreds;
-  KnownFuncMap   m_knownFuncs;
-  PostConditions m_postConds;
+  BlockId         m_id;
+  const Func*     m_func;
+  const bool      m_resumed;
+  const Offset    m_start;
+  Offset          m_last;
+  int             m_length;
+  FPInvOffset     m_initialSpOffset;
+  const Func*     m_inlinedCallee;
+  uint16_t        m_inlineLevel; // 0 means the outer-most function
+  TransID         m_profTransID;
+  TypedLocMap     m_typePredictions;
+  TypedLocMap     m_typePreConditions;
+  ParamByRefMap   m_byRefs;
+  RefPredMap      m_refPreds;
+  KnownFuncMap    m_knownFuncs;
+  PostConditions  m_postConds;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -561,7 +574,7 @@ bool check(const RegionDesc& region, std::string& error);
  * Debug stringification for various things.
  */
 std::string show(RegionDesc::Location);
-std::string show(RegionDesc::TypePred);
+std::string show(RegionDesc::TypedLocation);
 std::string show(const PostConditions&);
 std::string show(const RegionDesc::ReffinessPred&);
 std::string show(RegionContext::LiveType);

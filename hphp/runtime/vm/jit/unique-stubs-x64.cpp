@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/back-end-x64.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-x64.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
@@ -311,7 +312,7 @@ asm_label(a, doRelease);
   a.    push    (rIter);
   a.    push    (rFinished);
   a.    call    (lookupDestructor(a, PhysReg(rType)));
-  mcg->fixupMap().recordIndirectFixup(a.frontier(), 3);
+  mcg->fixupMap().recordFixup(a.frontier(), makeIndirectFixup(3));
   a.    pop     (rFinished);
   a.    pop     (rIter);
   a.    ret     ();
@@ -353,6 +354,43 @@ asm_label(a, loopHead);
                 (a.frontier() - stubBegin <= 4 * kX64CacheLineSize));
 
   uniqueStubs.add("freeLocalsHelpers", stubBegin);
+}
+
+void emitDecRefHelper(UniqueStubs& us) {
+  auto& cold = mcg->code.cold();
+  const Vreg rData{argNumToRegName[0]};
+  const Vreg rType{argNumToRegName[1]};
+
+  auto doStub = [&](Type ty) {
+    assert(ty.maybe(TCounted));
+    auto const start = cold.frontier();
+    Vauto vasm{cold};
+    auto& v = vasm.main();
+
+    auto destroy = [&](Vout& v) {
+      auto toSave = kGPCallerSaved;
+      PhysRegSaverStub save{v, toSave};
+
+      assert(!ty.isKnownDataType() && ty.maybe(TCounted));
+      // We've saved all caller-saved registers so it's ok to use them as
+      // scratch, including rType. This duplicates work done in
+      // lookupDestructor() but we have to be careful to not use arbitrary
+      // Vregs for anything other than status flags in this stub.
+      v << movzbq{rType, rType};
+      v << shrli{kShiftDataTypeToDestrIndex, rType, rType, v.makeReg()};
+      auto const dtor_table =
+        safe_cast<int>(reinterpret_cast<intptr_t>(g_destructors));
+      v << callm{Vptr{Vreg{}, rType, 8, dtor_table}, argSet(1)};
+      v << syncpoint{makeIndirectFixup(save.dwordsPushed())};
+    };
+
+    emitDecRefWork(v, v, rData, destroy, false);
+
+    v << ret{};
+    return start;
+  };
+
+  us.genDecRefHelper = us.add("genDecRefHelper", doStub(TGen));
 }
 
 void emitFuncPrologueRedispatch(UniqueStubs& uniqueStubs) {
@@ -625,6 +663,7 @@ UniqueStubs emitUniqueStubs() {
     emitCatchHelper,
     emitStackOverflowHelper,
     emitFreeLocalsHelpers,
+    emitDecRefHelper,
     emitFuncPrologueRedispatch,
     emitFCallArrayHelper,
     emitFCallHelperThunk,

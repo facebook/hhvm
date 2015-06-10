@@ -101,6 +101,12 @@ rds::Handle lookupCnsHandle(const StringData* cnsName);
 rds::Handle makeCnsHandle(const StringData* cnsName, bool persistent);
 
 /*
+ * Return an array of all the static strings in the current
+ * execution context.
+ */
+std::vector<StringData*> lookupDefinedStaticStrings();
+
+/*
  * Return an array of all the defined constants in the current
  * execution context.
  */

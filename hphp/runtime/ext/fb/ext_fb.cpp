@@ -667,9 +667,8 @@ int fb_compact_unserialize_from_buffer(
       }
 
       CHECK_ENOUGH(len, p, n);
-      StringData* sd = StringData::Make(buf + p, len, CopyString);
+      out = Variant::attach(StringData::Make(buf + p, len, CopyString));
       p += len;
-      out = sd;
       break;
     }
 

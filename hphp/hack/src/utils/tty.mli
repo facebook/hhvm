@@ -28,6 +28,7 @@ type style =
  * codes.
  *)
 val print : (style * string) list -> unit
+val printf : style -> ('a, unit, string, unit) format4 -> 'a
 
 (* These two functions provide a four-state TTY-friendly spinner that
  * a client can output between sleeps if it happens to be waiting on
@@ -38,3 +39,10 @@ val spinner_used : unit -> bool
 (* Output a "clear current line" escape sequence to out_channel if it's
  * a TTY and a newline otherwise *)
 val print_clear_line : out_channel -> unit
+
+(* Read a single char and return immediately, without waiting for a newline. *)
+val read_char : unit -> char
+
+(* Prompt the user to pick one character out of a given list. If other
+ * characters are entered, the prompt repeats indefinitely. *)
+val read_choice : string -> char list -> char

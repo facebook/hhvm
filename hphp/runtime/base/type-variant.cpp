@@ -81,29 +81,6 @@ const StaticString
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant::Variant(const char* v) {
-  m_type = KindOfString;
-  m_data.pstr = StringData::Make(v);
-  m_data.pstr->incRefCount();
-}
-
-Variant::Variant(const String& v) noexcept : Variant(v.get()) {
-}
-
-Variant::Variant(const std::string & v) {
-  m_type = KindOfString;
-  StringData *s = StringData::Make(v.c_str(), v.size(), CopyString);
-  assert(s);
-  m_data.pstr = s;
-  s->incRefCount();
-}
-
-Variant::Variant(const Array& v) noexcept : Variant(v.get()) {}
-
-Variant::Variant(const Object& v) noexcept : Variant(v.get()) {}
-
-Variant::Variant(const Resource& v) noexcept : Variant(v.get()) {}
-
 Variant::Variant(StringData *v) noexcept {
   if (v) {
     m_data.pstr = v;
@@ -118,102 +95,8 @@ Variant::Variant(StringData *v) noexcept {
   }
 }
 
-Variant::Variant(const StringData* v, StaticStrInit) noexcept {
-  if (v) {
-    assert(v->isStatic());
-    m_data.pstr = const_cast<StringData*>(v);
-    m_type = KindOfStaticString;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(ArrayData* v) noexcept {
-  if (v) {
-    m_type = KindOfArray;
-    m_data.parr = v;
-    v->incRefCount();
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(ObjectData* v) noexcept {
-  if (v) {
-    m_type = KindOfObject;
-    m_data.pobj = v;
-    v->incRefCount();
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(ResourceData* v) noexcept {
-  if (v) {
-    m_type = KindOfResource;
-    m_data.pres = v;
-    v->incRefCount();
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(RefData* r) noexcept {
-  if (r) {
-    m_type = KindOfRef;
-    m_data.pref = r;
-    r->incRefCount();
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(StringData* var, Attach) noexcept {
-  if (var) {
-    m_type = var->isStatic() ? KindOfStaticString : KindOfString;
-    m_data.pstr = var;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(ArrayData* var, Attach) noexcept {
-  if (var) {
-    m_type = KindOfArray;
-    m_data.parr = var;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(ObjectData* var, Attach) noexcept {
-  if (var) {
-    m_type = KindOfObject;
-    m_data.pobj = var;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(ResourceData* var, Attach) noexcept {
-  if (var) {
-    m_type = KindOfResource;
-    m_data.pres = var;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
-Variant::Variant(RefData* var, Attach) noexcept {
-  if (var) {
-    m_type = KindOfRef;
-    m_data.pref = var;
-  } else {
-    m_type = KindOfNull;
-  }
-}
-
 // the version of the high frequency function that is not inlined
+NEVER_INLINE
 Variant::Variant(const Variant& v) noexcept {
   constructValHelper(v);
 }
@@ -334,8 +217,8 @@ IMPLEMENT_PTR_SET(ResourceData, pres, KindOfResource)
 
 #undef IMPLEMENT_PTR_SET
 
-#define IMPLEMENT_ATTACH(ptr, member, dtype)                            \
-  void Variant::attach(ptr* v) noexcept {                               \
+#define IMPLEMENT_STEAL(ptr, member, dtype)                             \
+  void Variant::steal(ptr* v) noexcept {                                \
     Variant* self = (m_type == KindOfRef) ? m_data.pref->var() : this;  \
     if (UNLIKELY(!v)) {                                                 \
       self->setNull();                                                  \
@@ -348,13 +231,13 @@ IMPLEMENT_PTR_SET(ResourceData, pres, KindOfResource)
     }                                                                   \
   }
 
-IMPLEMENT_ATTACH(StringData, pstr,
-                 v->isStatic() ? KindOfStaticString : KindOfString)
-IMPLEMENT_ATTACH(ArrayData, parr, KindOfArray)
-IMPLEMENT_ATTACH(ObjectData, pobj, KindOfObject)
-IMPLEMENT_ATTACH(ResourceData, pres, KindOfResource)
+IMPLEMENT_STEAL(StringData, pstr,
+                v->isStatic() ? KindOfStaticString : KindOfString)
+IMPLEMENT_STEAL(ArrayData, parr, KindOfArray)
+IMPLEMENT_STEAL(ObjectData, pobj, KindOfObject)
+IMPLEMENT_STEAL(ResourceData, pres, KindOfResource)
 
-#undef IMPLEMENT_ATTACH
+#undef IMPLEMENT_STEAL
 
 int Variant::getRefCount() const noexcept {
   switch (m_type) {
@@ -736,6 +619,29 @@ void Variant::setEvalScalar() {
   not_reached();
 }
 
+
+namespace {
+static void serializeRef(const TypedValue* tv,
+                         VariableSerializer* serializer,
+                         bool isArrayKey) {
+  assert(tv->m_type == KindOfRef);
+  // Ugly, but behavior is different for serialize
+  if (serializer->getType() == VariableSerializer::Type::Serialize ||
+      serializer->getType() == VariableSerializer::Type::APCSerialize ||
+      serializer->getType() == VariableSerializer::Type::DebuggerSerialize) {
+    if (serializer->incNestedLevel(tv->m_data.pref->var())) {
+      serializer->writeOverflow(tv->m_data.pref->var());
+    } else {
+      // Tell the inner variant to skip the nesting check for data inside
+      serializeVariant(*tv->m_data.pref->var(), serializer, isArrayKey, true);
+    }
+    serializer->decNestedLevel(tv->m_data.pref->var());
+  } else {
+    serializeVariant(*tv->m_data.pref->var(), serializer, isArrayKey);
+  }
+}
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 
@@ -744,23 +650,6 @@ void serializeVariant(const Variant& self, VariableSerializer *serializer,
                       bool skipNestCheck /* = false */,
                       bool noQuotes /* = false */) {
   auto tv = self.asTypedValue();
-  if (tv->m_type == KindOfRef) {
-    // Ugly, but behavior is different for serialize
-    if (serializer->getType() == VariableSerializer::Type::Serialize ||
-        serializer->getType() == VariableSerializer::Type::APCSerialize ||
-        serializer->getType() == VariableSerializer::Type::DebuggerSerialize) {
-      if (serializer->incNestedLevel(tv->m_data.pref->var())) {
-        serializer->writeOverflow(tv->m_data.pref->var());
-      } else {
-        // Tell the inner variant to skip the nesting check for data inside
-        serializeVariant(*tv->m_data.pref->var(), serializer, isArrayKey, true);
-      }
-      serializer->decNestedLevel(tv->m_data.pref->var());
-    } else {
-      serializeVariant(*tv->m_data.pref->var(), serializer, isArrayKey);
-    }
-    return;
-  }
 
   switch (tv->m_type) {
     case KindOfUninit:
@@ -804,6 +693,9 @@ void serializeVariant(const Variant& self, VariableSerializer *serializer,
       return;
 
     case KindOfRef:
+      serializeRef(tv, serializer, isArrayKey);
+      return;
+
     case KindOfClass:
       break;
   }

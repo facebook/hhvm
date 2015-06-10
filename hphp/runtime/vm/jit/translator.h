@@ -590,6 +590,15 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
                                   const Class* ctx);
 
 /*
+ * If possible find the constructor for cls that would be run from the context
+ * ctx if a new instance of cls were created there. If the class fails to be
+ * unique, or in non-repo-authoritative mode this function will always return
+ * nullptr. Additionally if the constructor is inaccessible from the given
+ * context this function will return nullptr.
+ */
+const Func* lookupImmutableCtor(const Class* cls, const Class* ctx);
+
+/*
  * Return true if type is passed in/out of C++ as String&/Array&/Object&.
  */
 inline bool isSmartPtrRef(MaybeDataType t) {

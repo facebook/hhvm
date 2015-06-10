@@ -778,7 +778,6 @@ inline StringData* SetElemString(TypedValue* base, key_type<keyType> key,
     auto const oldp = base->m_data.pstr;
     auto const newp = oldp->modifyChar(x, y[0]);
     if (UNLIKELY(newp != oldp)) {
-      newp->incRefCount();
       decRefStr(oldp);
       base->m_data.pstr = newp;
       base->m_type = KindOfString;
@@ -792,15 +791,12 @@ inline StringData* SetElemString(TypedValue* base, key_type<keyType> key,
     }
     s[x] = y[0];
     sd->setSize(slen);
-    sd->incRefCount();
     decRefStr(base->m_data.pstr);
     base->m_data.pstr = sd;
     base->m_type = KindOfString;
   }
 
-  StringData* sd = StringData::Make(y, strlen(y), CopyString);
-  sd->incRefCount();
-  return sd;
+  return StringData::Make(y, strlen(y), CopyString);
 }
 
 /**

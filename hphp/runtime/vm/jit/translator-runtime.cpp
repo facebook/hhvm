@@ -27,6 +27,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/jit/mc-generator-internal.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-x64.h"
 #include "hphp/runtime/vm/member-operations.h"
@@ -48,7 +49,9 @@ RefData* lookupStaticFromClosure(ObjectData* closure,
                                  StringData* name,
                                  bool& inited) {
   assertx(closure->instanceof(c_Closure::classof()));
-  String str(StringData::Make(s_staticPrefix.slice(), name->slice()));
+  auto str = String::attach(
+    StringData::Make(s_staticPrefix.slice(), name->slice())
+  );
   auto const cls = closure->getVMClass();
   auto const slot = cls->lookupDeclProp(str.get());
   assertx(slot != kInvalidSlot);
@@ -239,15 +242,11 @@ ObjectData* convCellToObjHelper(TypedValue tv) {
 
 StringData* convDblToStrHelper(int64_t i) {
   double d = reinterpretIntAsDbl(i);
-  auto r = buildStringData(d);
-  r->incRefCount();
-  return r;
+  return buildStringData(d);
 }
 
 StringData* convIntToStrHelper(int64_t i) {
-  auto r = buildStringData(i);
-  r->incRefCount();
-  return r;
+  return buildStringData(i);
 }
 
 StringData* convObjToStrHelper(ObjectData* o) {
@@ -751,6 +750,10 @@ void lookupClsMethodHelper(Class* cls,
     *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(meth);
     throw;
   }
+}
+
+void profileObjClassHelper(ClassProfile* profile, ObjectData* obj) {
+  profile->reportClass(obj->getVMClass());
 }
 
 Cell lookupCnsUHelper(const TypedValue* tv,
@@ -1258,9 +1261,10 @@ void bindElemC(TypedValue* base, TypedValue key, RefData* val,
   }
 }
 
-void setWithRefElemC(TypedValue* base, TypedValue key, TypedValue val,
+void setWithRefElemC(TypedValue* base, TypedValue keyTV, TypedValue val,
                      MInstrState* mis) {
-  base = HPHP::ElemD<false, false>(mis->tvScratch, mis->tvRef, base, key);
+  auto const keyC = tvToCell(&keyTV);
+  base = HPHP::ElemD<false, false>(mis->tvScratch, mis->tvRef, base, *keyC);
   if (base != &mis->tvScratch) {
     tvDup(val, *base);
   } else {

@@ -128,6 +128,12 @@ struct IndirectFixup {
   int32_t returnIpDisp;
 };
 
+inline Fixup makeIndirectFixup(int dwordsPushed) {
+  Fixup fix;
+  fix.spOffset = (2 + dwordsPushed) * 8;
+  return fix;
+}
+
 struct FixupMap {
   static constexpr unsigned kInitCapac = 128;
   TRACE_SET_MOD(fixup);
@@ -155,7 +161,6 @@ struct FixupMap {
   bool getFrameRegs(const ActRec* ar, const ActRec* prevAr,
                     VMRegs* outVMRegs) const;
 
-  void recordIndirectFixup(CodeAddress frontier, int dwordsPushed);
   void fixup(ExecutionContext* ec) const;
   void fixupWork(ExecutionContext* ec, ActRec* rbp) const;
   void fixupWorkSimulated(ExecutionContext* ec) const;
@@ -165,7 +170,6 @@ struct FixupMap {
 private:
   union FixupEntry {
     explicit FixupEntry(Fixup f) : fixup(f) {}
-    explicit FixupEntry(IndirectFixup f) : indirect(f) {}
 
     /* Depends on the magic field in an IndirectFixup being -1. */
     bool isIndirect() const {
@@ -183,12 +187,6 @@ private:
   };
 
 private:
-  void recordIndirectFixup(CTCA tca, const IndirectFixup& indirect) {
-    TRACE(2, "FixupMapImpl::recordIndirectFixup: tca %p -> ripOff %d\n",
-          tca, indirect.returnIpDisp);
-    m_fixups.insert(tca, FixupEntry(indirect));
-  }
-
   PC pc(const ActRec* ar, const Func* f, const Fixup& fixup) const {
     assertx(f);
     return f->getEntry() + fixup.pcOffset;

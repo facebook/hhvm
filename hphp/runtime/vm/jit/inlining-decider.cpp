@@ -99,8 +99,8 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee) {
   if (callee->numIterators() != 0) {
     return refuse("callee has iterators");
   }
-  if (callee->isMagic() || Func::isSpecial(callee->name())) {
-    return refuse("special or magic callee");
+  if (callee->isMagic()) {
+    return refuse("magic callee");
   }
   if (callee->isResumable()) {
     return refuse("callee is resumable");
@@ -278,8 +278,9 @@ bool isInlinableCPPBuiltin(const Func* f) {
 
   // The callee needs to be callable with FCallBuiltin, because NativeImpl
   // requires a frame.
-  if (f->attrs() & AttrNoFCallBuiltin ||
-      f->numParams() > Native::maxFCallBuiltinArgs() ||
+  if (!RuntimeOption::EvalEnableCallBuiltin ||
+      (f->attrs() & AttrNoFCallBuiltin) ||
+      (f->numParams() > Native::maxFCallBuiltinArgs()) ||
       !f->nativeFuncPtr()) {
     return false;
   }
@@ -303,12 +304,6 @@ bool isInlinableCPPBuiltin(const Func* f) {
 
   // For now, don't inline when we'd need to adjust ObjectData pointers.
   if (f->cls() && f->cls()->preClass()->builtinODOffset() != 0) {
-    return false;
-  }
-
-  // TODO: Static methods need to be passed their class, which we don't
-  // support yet. (t5360661)
-  if (f->isMethod() && (f->attrs() & AttrStatic)) {
     return false;
   }
 

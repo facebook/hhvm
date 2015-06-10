@@ -31,9 +31,9 @@ public:
   ~UserDirectory() {}
 
   bool open(const String& path);
-  virtual void close();
-  virtual Variant read();
-  virtual void rewind();
+  void close() override;
+  Variant read() override;
+  void rewind() override;
 
 private:
   const Func* m_DirOpen;

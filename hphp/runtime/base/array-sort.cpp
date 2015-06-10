@@ -96,7 +96,7 @@ done:
 void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
   assert(m_size > 0);
   auto const ht = hashTab();
-  initHash(ht, hashSize());
+  initHash(ht, m_scale);
   if (resetKeys) {
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data()[pos];

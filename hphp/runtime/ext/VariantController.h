@@ -146,7 +146,7 @@ struct VariantController {
     s.shrink(length);
   }
   static StringType stringFromData(const char* src, int n) {
-    return StringData::Make(src, n, CopyString);
+    return StringType::attach(StringData::Make(src, n, CopyString));
   }
   static size_t stringLen(const StringType& str) { return str.size(); }
   static const char* stringData(const StringType& str) {

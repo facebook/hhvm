@@ -128,7 +128,20 @@ const char* getContextName(const Class* ctx) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class Then>
-void ifRefCountedType(Vout& v, Type ty, Vloc loc, Then then) {
+void ifNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
+  if (!ty.maybe(TStatic)) {
+    then(v);
+    return;
+  }
+
+  auto const sf = v.makeReg();
+  v << cmplim{0, loc.reg()[FAST_REFCOUNT_OFFSET], sf};
+  static_assert(UncountedValue < 0 && StaticValue < 0, "");
+  ifThen(v, CC_GE, sf, then);
+}
+
+template<class Then>
+void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
   if (!ty.maybe(TCounted)) return;
   if (ty.isKnownDataType()) {
     if (IS_REFCOUNTED_TYPE(ty.toDataType())) then(v);
@@ -136,20 +149,13 @@ void ifRefCountedType(Vout& v, Type ty, Vloc loc, Then then) {
   }
   auto const sf = v.makeReg();
   emitCmpTVType(v, sf, KindOfRefCountThreshold, loc.reg(1));
-  ifThen(v, CC_NLE, sf, then);
+  unlikelyIfThen(v, vtaken, CC_NLE, sf, then);
 }
 
 template<class Then>
 void ifRefCountedNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
-  ifRefCountedType(v, ty, loc, [&] (Vout& v) {
-    if (!ty.maybe(TStatic)) {
-      then(v);
-      return;
-    }
-    auto const sf = v.makeReg();
-    v << cmplim{0, loc.reg()[FAST_REFCOUNT_OFFSET], sf};
-    static_assert(UncountedValue < 0 && StaticValue < 0, "");
-    ifThen(v, CC_GE, sf, then);
+  ifRefCountedType(v, v, ty, loc, [&] (Vout& v) {
+    ifNonStatic(v, ty, loc, then);
   });
 }
 
@@ -376,6 +382,7 @@ CALL_OPCODE(SetNewElemArray)
 CALL_OPCODE(BindNewElem)
 CALL_OPCODE(VectorIsset)
 CALL_OPCODE(PairIsset)
+CALL_OPCODE(ThrowOutOfBounds)
 
 CALL_OPCODE(InstanceOfIface)
 CALL_OPCODE(InterfaceSupportsArr)
@@ -1983,11 +1990,6 @@ void CodeGenerator::cgStRetVal(IRInstruction* inst) {
   emitStoreTV(vmain(), rFp[AROFF(m_r)], srcLoc(inst, 1), inst->src(1));
 }
 
-void CodeGenerator::cgLdRetAddr(IRInstruction* inst) {
-  auto const fp = srcLoc(inst, 0).reg();
-  vmain() << load{fp[AROFF(m_savedRip)], dstLoc(inst, 0).reg()};
-}
-
 void traceRet(ActRec* fp, Cell* sp, void* rip) {
   if (rip == mcg->tx().uniqueStubs.callToExit) {
     return;
@@ -2022,19 +2024,11 @@ void CodeGenerator::cgRetCtrl(IRInstruction* inst) {
 void CodeGenerator::cgAsyncRetCtrl(IRInstruction* inst) {
   auto& v = vmain();
   auto const sp = srcLoc(inst, 0).reg();
-  auto const fp = srcLoc(inst, 1).reg();
-  auto const retAddr = srcLoc(inst, 2).reg();
   auto const sync_sp = v.makeReg();
   v << lea{sp[cellsToBytes(inst->extra<AsyncRetCtrl>()->offset.offset)],
            sync_sp};
   v << syncvmsp{sync_sp};
-
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    v << vcall{CppCall::direct(traceRet),
-               v.makeVcallArgs({{fp, sync_sp, retAddr}}), v.makeTuple({})};
-  }
-
-  v << vret{retAddr, kCrossTraceRegsReturn};
+  v << leavetc{kCrossTraceRegsReturn};
 }
 
 void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
@@ -2055,6 +2049,29 @@ void CodeGenerator::cgLdBindAddr(IRInstruction* inst) {
   v << loadqp{rip[addr], dstReg};
 }
 
+void CodeGenerator::cgProfileSwitchDest(IRInstruction* inst) {
+  auto& v = vmain();
+  auto const idxReg = srcLoc(inst, 0).reg();
+  auto const sf = v.makeReg();
+  auto const& extra = *inst->extra<ProfileSwitchDest>();
+  auto const vmtl = Vreg{rVmTl};
+
+  auto caseReg = v.makeReg();
+  v << subq{v.cns(extra.base), idxReg, caseReg, v.makeReg()};
+  v << cmpqi{extra.cases - 2, caseReg, sf};
+  ifThenElse(
+    v, CC_AE, sf,
+    [&](Vout& v) {
+      // Last vector element is the default case
+      v << inclm{vmtl[extra.handle + (extra.cases - 1) * sizeof(int32_t)],
+                 v.makeReg()};
+    },
+    [&](Vout& v) {
+      v << inclm{vmtl[caseReg * 4 + extra.handle], v.makeReg()};
+    }
+  );
+}
+
 void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
   auto const extra    = inst->extra<JmpSwitchDest>();
   auto const marker   = inst->marker();
@@ -2064,21 +2081,13 @@ void CodeGenerator::cgJmpSwitchDest(IRInstruction* inst) {
 
   maybe_syncsp(v, marker, srcLoc(inst, 1).reg(), extra->irSPOff);
 
-  auto idx = indexReg;
-  if (extra->bounded) {
-    auto const sf = v.makeReg();
-    v << cmpqi{extra->cases - 2, idx, sf};
-    v << bindjcc{CC_AE, sf, extra->defaultSk, invSPOff,
-                 TransFlags{}, leave_trace_args(marker)};
-  }
-
   auto const table = mcg->allocData<TCA>(sizeof(TCA), extra->cases);
   auto const t = v.makeReg();
   for (int i = 0; i < extra->cases; i++) {
     v << bindaddr{&table[i], extra->targets[i], invSPOff};
   }
   v << leap{rip[(intptr_t)table], t};
-  v << jmpm{t[idx*8], leave_trace_args(marker)};
+  v << jmpm{t[indexReg * 8], leave_trace_args(marker)};
 }
 
 void CodeGenerator::cgLdSSwitchDestFast(IRInstruction* inst) {
@@ -2275,13 +2284,44 @@ void CodeGenerator::cgReqRetranslate(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgIncRef(IRInstruction* inst) {
+  // This is redundant with a check in ifRefCountedNonStatic, but we check
+  // earlier to avoid emitting profiling code in this case.
   auto const ty = inst->src(0)->type();
-  ifRefCountedNonStatic(
-    vmain(), ty, srcLoc(inst, 0),
-    [&] (Vout& v) {
-      emitIncRef(v, srcLoc(inst, 0).reg());
+  if (!ty.maybe(TCounted)) return;
+
+  folly::Optional<rds::Handle> profHandle;
+  auto vtaken = &vmain();
+  // We profile generic IncRefs to see which ones are unlikely to see
+  // refcounted values.
+  if (RuntimeOption::EvalHHIROutlineGenericIncDecRef && !ty.isKnownDataType()) {
+    auto const profileKey =
+      makeStaticString(folly::to<std::string>("IncRefProfile-",
+                                              ty.toString()));
+    TargetProfile<IncRefProfile> profile{
+      m_state.unit.context(), inst->marker(), profileKey
+    };
+    if (profile.profiling()) {
+      profHandle = profile.handle();
+    } else if (profile.optimizing()) {
+      auto const data = profile.data(IncRefProfile::reduce);
+      if (data.tryinc == 0) {
+        FTRACE(3, "Emitting cold IncRef for {}, {}\n", data, *inst);
+        vtaken = &vcold();
+      }
     }
-  );
+  }
+
+  auto& v = vmain();
+  auto const loc = srcLoc(inst, 0);
+  ifRefCountedType(v, *vtaken, ty, loc, [&](Vout& v) {
+    if (profHandle) {
+      v << incwm{rVmTl[*profHandle + offsetof(IncRefProfile, tryinc)],
+                 v.makeReg()};
+    }
+    ifNonStatic(v, ty, loc, [&](Vout& v) {
+      emitIncRef(v, loc.reg());
+    });
+  });
 }
 
 void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
@@ -2331,11 +2371,12 @@ void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
  * Returns true iff the release path for this DecRef should be put in cold
  * code.
  */
-bool CodeGenerator::decRefDestroyIsUnlikely(const IRInstruction* inst,
-                                            OptDecRefProfile& profile,
-                                            Type type) {
+float CodeGenerator::decRefDestroyRate(const IRInstruction* inst,
+                                       OptDecRefProfile& profile,
+                                       Type type) {
   auto const kind = mcg->tx().mode();
-  if (kind != TransKind::Profile && kind != TransKind::Optimize) return true;
+  // Without profiling data, we assume destroy is unlikely.
+  if (kind != TransKind::Profile && kind != TransKind::Optimize) return 0.0;
 
   auto const profileKey =
     makeStaticString(folly::to<std::string>("DecRefProfile-",
@@ -2346,24 +2387,24 @@ bool CodeGenerator::decRefDestroyIsUnlikely(const IRInstruction* inst,
 
   auto& v = vmain();
   if (profile->profiling()) {
-    v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, decrement)],
+    v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, hits)],
                v.makeReg()};
   } else if (profile->optimizing()) {
     auto const data = profile->data(DecRefProfile::reduce);
-    if (data.hitRate() != 0 && data.hitRate() != 100) {
+    if (data.destroyRate() != 0.0 && data.destroyRate() != 1.0) {
       // These are the only interesting cases where we could be doing better.
       FTRACE(5, "DecRefProfile: {}: {} {}\n",
              data, inst->marker().show(), profileKey->data());
     }
-    if (data.hitRate() == 0) {
+    if (data.destroyRate() == 0.0) {
       emitIncStat(v, Stats::TC_DecRef_Profiled_0);
-    } else if (data.hitRate() == 100) {
+    } else if (data.destroyRate() == 1.0) {
       emitIncStat(v, Stats::TC_DecRef_Profiled_100);
     }
-    return data.hitRate() < RuntimeOption::EvalJitUnlikelyDecRefPercent;
+    return data.destroyRate();
   }
 
-  return true;
+  return 0.0;
 }
 
 /*
@@ -2391,16 +2432,15 @@ bool CodeGenerator::decRefDestroyIsUnlikely(const IRInstruction* inst,
  *  skip_dec:
  *    // ....
  */
-void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst) {
+void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
+                               const OptDecRefProfile& profile,
+                               bool unlikelyDestroy) {
   auto const ty   = inst->src(0)->type();
   auto const base = srcLoc(inst, 0).reg(0);
 
-  OptDecRefProfile profile;
-  auto const unlikelyDestroy = decRefDestroyIsUnlikely(inst, profile, ty);
-
   auto destroy = [&] (Vout& v) {
-    emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Destroy :
-                   Stats::TC_DecRef_Likely_Destroy);
+    emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Destroy
+                                   : Stats::TC_DecRef_Likely_Destroy);
     if (profile && profile->profiling()) {
       v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, destroy)],
                  v.makeReg()};
@@ -2421,46 +2461,84 @@ void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst) {
   emitIncStat(v, unlikelyDestroy ? Stats::TC_DecRef_Normal_Decl
                                  : Stats::TC_DecRef_Likely_Decl);
 
+  if (profile && profile->profiling()) {
+    v << incwm{rVmTl[profile->handle() + offsetof(DecRefProfile, trydec)],
+               v.makeReg()};
+  }
+
   if (!ty.maybe(TStatic)) {
     auto const sf = emitDecRef(v, base);
     ifThen(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
     return;
   }
 
-  auto const cmp1_sf = v.makeReg();
-  v << cmplim{1, base[FAST_REFCOUNT_OFFSET], cmp1_sf};
-  ifThenElse(
-    v, vcold(), CC_E, cmp1_sf,
-    destroy,
-    [&] (Vout& v) {
-      /*
-       * If it's not static, actually reduce the reference count.  This
-       * does another branch using the same status flags from the cmplim
-       * above.
-       */
-      ifThen(
-        v, CC_NL, cmp1_sf,
-        [&] (Vout& v) {
-          emitDecRef(v, base);
-        }
-      );
-    },
-    unlikelyDestroy
+  emitDecRefWork(v, vcold(), base, destroy, unlikelyDestroy);
+}
+
+void CodeGenerator::emitDecRefTypeStat(Vout& v, const IRInstruction* inst) {
+  if (!Trace::moduleEnabled(Trace::decreftype)) return;
+
+  auto category = makeStaticString(inst->is(DecRef) ? "DecRef" : "DecRefNZ");
+  auto key = makeStaticString(inst->src(0)->type().unspecialize().toString());
+  cgCallHelper(
+    v,
+    CppCall::direct(Stats::incStatGrouped),
+    kVoidDest,
+    SyncOptions::kNoSyncPoint,
+    argGroup(inst)
+      .immPtr(category)
+      .immPtr(key)
+      .imm(1)
   );
 }
 
 void CodeGenerator::cgDecRef(IRInstruction *inst) {
+  // This is redundant with a check in ifRefCounted, but we check earlier to
+  // avoid emitting profiling code in this case.
   auto const ty = inst->src(0)->type();
+  if (!ty.maybe(TCounted)) return;
+
+  auto& v = vmain();
+  emitDecRefTypeStat(v, inst);
+  OptDecRefProfile profile;
+  auto const destroyRate = decRefDestroyRate(inst, profile, ty);
+  FTRACE(3, "destroyPercent {:.2%} for {}\n", destroyRate, *inst);
+
+  auto const rData = srcLoc(inst, 0).reg(0);
+  auto const rType = srcLoc(inst, 0).reg(1);
+  if (RuntimeOption::EvalHHIROutlineGenericIncDecRef &&
+      profile && profile->optimizing() && !ty.isKnownDataType() &&
+      !mcg->useLLVM()) {
+    auto const data = profile->data(DecRefProfile::reduce);
+    if (data.trydec == 0) {
+      // This DecRef never saw a refcounted type during profiling, so call the
+      // stub in cold, keeping only the type check in main.
+      FTRACE(3, "Emitting partially outlined DecRef for {}, {}\n", data, *inst);
+      auto const sf = v.makeReg();
+      emitCmpTVType(v, sf, KindOfRefCountThreshold, rType);
+      unlikelyIfThen(v, vcold(), CC_NLE, sf, [&](Vout& v) {
+        auto const stub = mcg->tx().uniqueStubs.genDecRefHelper;
+        v << copy2{rData, rType, argNumToRegName[0], argNumToRegName[1]};
+        v << callfaststub{stub, makeFixup(inst->marker()), argSet(2)};
+      });
+      return;
+    }
+  }
+
   ifRefCountedType(
-    vmain(), ty, srcLoc(inst, 0),
+    v, v, ty, srcLoc(inst, 0),
     [&] (Vout& v) {
-      decRefImpl(v, inst);
+      decRefImpl(
+        v, inst, profile,
+        destroyRate * 100 < RuntimeOption::EvalJitUnlikelyDecRefPercent
+      );
     }
   );
 }
 
 void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
   emitIncStat(vmain(), Stats::TC_DecRef_NZ);
+  emitDecRefTypeStat(vmain(), inst);
   auto const ty = inst->src(0)->type();
   ifRefCountedNonStatic(
     vmain(), ty, srcLoc(inst, 0),
@@ -2570,16 +2648,8 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   }
 
   // actRec->m_func
-  if (func->isA(TNullptr)) {
-    // No need to store the null---we're always about to run another
-    // instruction that will populate the Func.
-  } else if (func->hasConstVal()) {
-    const Func* f = func->funcVal();
-    emitImmStoreq(v, intptr_t(f), spReg[spOffset + int(AROFF(m_func))]);
-  } else {
-    int offset_m_func = spOffset + int(AROFF(m_func));
-    auto funcLoc = srcLoc(inst, 1);
-    v << store{funcLoc.reg(0), spReg[offset_m_func]};
+  if (!func->isA(TNullptr)) {
+    v << store{srcLoc(inst, 1).reg(0), spReg[spOffset + int(AROFF(m_func))]};
   }
 
   auto flags = ActRec::Flags::None;
@@ -2996,12 +3066,9 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   auto srcNum = uint32_t{2};
   if (callee->isMethod()) {
     if (callee->isStatic()) {
-      // This isn't entirely accurate.  HNI functions expect the Class*
-      // of the class used for the call which may be callee->cls() or
-      // one of its children. Currently we don't support FCallBuiltin on
-      // these functions (disabled in inlining-decider.cpp); (t5360661)
       if (callee->isNative()) {
-        callArgs.imm(callee->cls());
+        callArgs.ssa(srcNum);
+        ++srcNum;
       }
     } else {
       // Note, we don't support objects with vtables here (if they may
@@ -3013,7 +3080,12 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
 
   if (callee->attrs() & AttrNumArgs) {
-    callArgs.imm((int64_t)numNonDefault);
+    if (numNonDefault >= 0) {
+      callArgs.imm((int64_t)numNonDefault);
+    } else {
+      callArgs.ssa(srcNum);
+      ++srcNum;
+    }
   }
 
   for (uint32_t i = 0; i < numArgs; ++i, ++srcNum) {
@@ -3201,6 +3273,15 @@ void CodeGenerator::cgLdARFuncPtr(IRInstruction* inst) {
   auto dstReg = dstLoc(inst, 0).reg();
   auto baseReg = srcLoc(inst, 0).reg();
   vmain() << load{baseReg[off + AROFF(m_func)], dstReg};
+}
+
+void CodeGenerator::cgLdARNumParams(IRInstruction* inst) {
+  auto& v = vmain();
+  auto dstReg = dstLoc(inst, 0).reg();
+  auto baseReg = srcLoc(inst, 0).reg();
+  auto tmp = v.makeReg();
+  v << loadzlq{baseReg[AROFF(m_numArgsAndFlags)], tmp};
+  v << andqi{ActRec::kNumArgsMask, tmp, dstReg, v.makeReg()};
 }
 
 void CodeGenerator::cgLdStaticLocCached(IRInstruction* inst) {
@@ -3394,29 +3475,25 @@ void CodeGenerator::cgLdPackedArrayElemAddr(IRInstruction* inst) {
   v << lea{Vptr{rArr, scaledIdx, 8, 16}, dst};
 }
 
-void CodeGenerator::cgCheckBounds(IRInstruction* inst) {
-  auto idx = inst->src(0);
-  auto idxReg = srcLoc(inst, 0).reg();
-  auto sizeReg = srcLoc(inst, 1).reg();
-
-  auto throwHelper = [&](Vout& v) {
-    auto args = argGroup(inst);
-    args.ssa(0/*idx*/);
-    cgCallHelper(v, CppCall::direct(throwOOB),
-                 kVoidDest, SyncOptions::kSyncPoint, args);
-  };
+void CodeGenerator::cgCheckRange(IRInstruction* inst) {
+  auto val = inst->src(0);
+  auto valReg = srcLoc(inst, 0).reg();
+  auto limitReg  = srcLoc(inst, 1).reg();
 
   auto& v = vmain();
-  if (idx->hasConstVal()) {
-    auto const sf = v.makeReg();
-    v << cmpq{idxReg, sizeReg, sf};
-    unlikelyIfThen(v, vcold(), CC_BE, sf, throwHelper);
-    return;
+  ConditionCode cc;
+  auto const sf = v.makeReg();
+  if (val->hasConstVal()) {
+    // Try to put the constant in a position that can get imm-folded. A
+    // suffiently smart imm-folder could handle this for us.
+    v << cmpq{valReg, limitReg, sf};
+    cc = CC_A;
+  } else {
+    v << cmpq{limitReg, valReg, sf};
+    cc = CC_B;
   }
 
-  auto const sf = v.makeReg();
-  v << cmpq{sizeReg, idxReg, sf};
-  unlikelyIfThen(v, vcold(), CC_AE, sf, throwHelper);
+  v << setcc{cc, sf, dstLoc(inst, 0).reg()};
 }
 
 void CodeGenerator::cgLdVectorSize(IRInstruction* inst) {
@@ -4329,10 +4406,9 @@ void CodeGenerator::cgNewCol(IRInstruction* inst) {
   auto& v = vmain();
   auto const dest = callDest(inst);
   auto args = argGroup(inst);
-  args.imm(inst->extra<NewCol>()->size);
   auto const target = [&]() -> CppCall {
     auto collectionType = inst->extra<NewCol>()->type;
-    auto helper = collections::allocFunc(collectionType, true);
+    auto helper = collections::allocEmptyFunc(collectionType);
     return CppCall::direct(helper);
   }();
   cgCallHelper(v, target, dest, SyncOptions::kSyncPoint, args);
@@ -4341,7 +4417,7 @@ void CodeGenerator::cgNewCol(IRInstruction* inst) {
 void CodeGenerator::cgNewColFromArray(IRInstruction* inst) {
   auto const target = [&]() -> CppCall {
     auto collectionType = inst->extra<NewColFromArray>()->type;
-    auto helper = collections::allocFromArrayFunc(collectionType, true);
+    auto helper = collections::allocFromArrayFunc(collectionType);
     return CppCall::direct(helper);
   }();
 
@@ -4400,7 +4476,7 @@ void CodeGenerator::cgCheckCold(IRInstruction* inst) {
 
 static const StringData* s_ReleaseVV = makeStaticString("ReleaseVV");
 
-void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
+void CodeGenerator::cgReleaseVVAndSkip(IRInstruction* inst) {
   auto* const label = inst->taken();
   auto const rFp = srcLoc(inst, 0).reg();
   auto& v = vmain();
@@ -4418,7 +4494,7 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
   bool releaseUnlikely = true;
   if (profile.optimizing()) {
     auto const data = profile.data(ReleaseVVProfile::reduce);
-    FTRACE(3, "cgReleaseVVOrExit({}): percentReleased = {}\n",
+    FTRACE(3, "cgReleaseVVAndSkip({}): percentReleased = {}\n",
            inst->toString(), data.percentReleased());
     if (data.percentReleased() >= RuntimeOption::EvalJitPGOReleaseVVMinPercent)
     {
@@ -4434,14 +4510,27 @@ void CodeGenerator::cgReleaseVVOrExit(IRInstruction* inst) {
     v << testqim{safe_cast<int32_t>(ActRec::kExtraArgsBit),
                  rFp[AROFF(m_varEnv)],
                  sf};
-    emitFwdJcc(v, CC_Z, sf, label);
-    cgCallHelper(
-      v,
-      CppCall::direct(static_cast<void (*)(ActRec*)>(ExtraArgs::deallocate)),
-      kVoidDest,
-      SyncOptions::kSyncPoint,
-      argGroup(inst).reg(rFp)
-    );
+    ifThenElse(v, vcold(), CC_NZ, sf, [&] (Vout& v) {
+        cgCallHelper(
+          v,
+          CppCall::direct(static_cast<void (*)(ActRec*)>(
+                            ExtraArgs::deallocate)),
+          kVoidDest,
+          SyncOptions::kSyncPoint,
+          argGroup(inst).reg(rFp)
+        );
+      },
+      [&] (Vout& v) {
+        cgCallHelper(
+          v,
+          CppCall::direct(static_cast<void (*)(ActRec*)>(
+                            VarEnv::deallocate)),
+          kVoidDest,
+          SyncOptions::kSyncPoint,
+          argGroup(inst).reg(rFp)
+        );
+        v << jmp{m_state.labels[label]};
+      }, true /* else is unlikely */);
   },
   releaseUnlikely);
 }
@@ -5086,7 +5175,7 @@ void CodeGenerator::cgDbgTraceCall(IRInstruction* inst) {
 
 void CodeGenerator::cgDbgAssertRefCount(IRInstruction* inst) {
   ifRefCountedType(
-    vmain(), inst->src(0)->type(), srcLoc(inst, 0),
+    vmain(), vmain(), inst->src(0)->type(), srcLoc(inst, 0),
     [&] (Vout& v) {
       emitAssertRefCount(v, srcLoc(inst, 0).reg());
     }
@@ -5388,6 +5477,17 @@ void CodeGenerator::cgCheckSurpriseFlagsEnter(IRInstruction* inst) {
 
 void CodeGenerator::print() const {
   jit::print(std::cout, m_state.unit, m_state.asmInfo);
+}
+
+void CodeGenerator::cgProfileObjClass(IRInstruction* inst) {
+  auto const extra = inst->extra<RDSHandleData>();
+
+  auto& v = vmain();
+  auto const profile = v.makeReg();
+  v << lea{rVmTl[extra->handle], profile};
+  cgCallHelper(v, CppCall::direct(profileObjClassHelper),
+               kVoidDest, SyncOptions::kNoSyncPoint,
+               argGroup(inst).reg(profile).ssa(0));
 }
 
 }}}

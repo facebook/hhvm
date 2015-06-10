@@ -59,6 +59,10 @@ calls=1 0 0
 17 %d
 
 fl=php:internal
+fn=php::time
+840 %d
+
+fl=php:internal
 fn=php::var_dump
 145 %d
 
@@ -94,6 +98,10 @@ fl=php:internal
 fn=php::var_dump
 145 %d
 
+fl=php:internal
+fn=php::xdebug_get_profiler_filename
+140 %d
+
 fl=%s/test/slow/ext_xdebug/profiling_testee.inc
 fn={main}
 
@@ -121,6 +129,10 @@ cfn=Baz::bar
 calls=1 0 0
 24 %d
 cfl=php:internal
+cfn=php::time
+calls=1 0 0
+25 %d
+cfl=php:internal
 cfn=php::var_dump
 calls=1 0 0
 25 %d
@@ -132,5 +144,9 @@ cfl=php:internal
 cfn=php::var_dump
 calls=1 0 0
 26 %d
+cfl=php:internal
+cfn=php::xdebug_get_profiler_filename
+calls=1 0 0
+27 %d
 
 "

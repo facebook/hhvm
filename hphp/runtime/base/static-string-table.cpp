@@ -257,6 +257,19 @@ rds::Handle makeCnsHandle(const StringData* cnsName, bool persistent) {
   return it->second.handle();
 }
 
+std::vector<StringData*> lookupDefinedStaticStrings() {
+  assert(s_stringDataMap);
+  std::vector<StringData*> ret;
+
+  for (auto it = s_stringDataMap->begin();
+       it != s_stringDataMap->end(); ++it) {
+    ret.push_back(const_cast<StringData*>(to_sdata(it->first)));
+  }
+
+  return ret;
+}
+
+
 const StaticString s_user("user");
 const StaticString s_Core("Core");
 

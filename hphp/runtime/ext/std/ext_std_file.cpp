@@ -1786,8 +1786,7 @@ Variant HHVM_FUNCTION(tempnam,
     trailing_slash = "";
   }
   String templ = tmpdir + trailing_slash + pbase + "XXXXXX";
-  char buf[PATH_MAX + 1];
-  strcpy(buf, templ.data());
+  auto buf = templ.get()->mutableData();
   int fd = mkstemp(buf);
   if (fd < 0) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
@@ -1796,7 +1795,7 @@ Variant HHVM_FUNCTION(tempnam,
   }
 
   close(fd);
-  return String(buf, CopyString);
+  return templ.setSize(strlen(buf));
 }
 
 Variant HHVM_FUNCTION(tmpfile) {

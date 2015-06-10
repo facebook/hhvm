@@ -27,11 +27,9 @@ module Phase = Typing_phase
 
 (* This function checks that the method ft_sub can be used to replace
  * (is a subtype of) ft_super *)
-let rec subtype_funs_generic ~check_return env r_super ft_super r_sub
-    orig_ft_sub =
+let rec subtype_funs_generic ~check_return env r_super ft_super r_sub ft_sub =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
-  let env, ft_sub = Inst.instantiate_ft env orig_ft_sub in
   if (arity_min ft_sub.ft_arity) > (arity_min ft_super.ft_arity)
   then Errors.fun_too_many_args p_sub p_super;
   (match ft_sub.ft_arity, ft_super.ft_arity with
@@ -76,8 +74,22 @@ let rec subtype_funs_generic ~check_return env r_super ft_super r_sub
       );
   *)
   let env = if check_return then sub_type env ft_super.ft_ret ft_sub.ft_ret else env in
-  let env, _ = Unify.unify_funs env r_sub ft_sub r_sub orig_ft_sub in
   env
+
+(* Checking subtyping for methods is different than normal functions. Since
+ * methods are declarations we do not want to instantiate their function type
+ * parameters as unresolved, instead it should stay as a Tgeneric.
+ *)
+and subtype_method ~check_return env r_super ft_super r_sub ft_sub =
+  let ety_env = Phase.env_with_self env in
+  let env, ft_super_no_tvars =
+    Phase.localize_ft ~ety_env ~instantiate_tparams:false env ft_super in
+  let env, ft_sub_no_tvars =
+    Phase.localize_ft ~ety_env ~instantiate_tparams:false env ft_sub in
+  subtype_funs_generic
+    ~check_return env
+    r_super ft_super_no_tvars
+    r_sub ft_sub_no_tvars
 
 and subtype_tparams env c_name variancel super_tyl children_tyl =
   match variancel, super_tyl, children_tyl with
@@ -189,8 +201,23 @@ and typevars_subtype env (uenv_super, ety_super) (uenv_sub, ety_sub) =
  *      sub_type env int string => error
  *)
 and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
-  let env, ety_super = Env.expand_type env ty_super in
-  let env, ety_sub = Env.expand_type env ty_sub in
+  let env, seen_tvars_super, ety_super =
+    Env.expand_type_recorded env uenv_super.TUEnv.seen_tvars ty_super in
+  let env, seen_tvars_sub, ety_sub =
+    Env.expand_type_recorded env uenv_sub.TUEnv.seen_tvars ty_sub in
+  (* UGLY: We don't update uenv_super with seen_tvars_super just yet because
+   * sometimes we call sub_type_with_uenv recursively with the same ty_super
+   * (i.e. ty_sub has changed, but ty_super remains the same). If we pass
+   * through the updated uenv_super, we would not be able to expand ty_super
+   * a second time.
+   * The converse goes for seen_tvars_sub and ty_sub.
+   * TODO: Right now we only update seen_tvars when recursing into
+   * Tunresolveds, because we are encountering actual code that creates such
+   * recursive types. Should probably update seen_tvars regardless of which
+   * types we are recursing into, or prove that recursive types can't happen
+   * in those cases.
+   * TODO: Figure out a nicer (type-enforced?) way to associate the right
+   * uenv with the right type. *)
   match ety_super, ety_sub with
   | _, (r, Taccess taccess) ->
       let env, ty_sub = TAccess.expand env r taccess in
@@ -242,6 +269,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
        *)
       fst (Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
   | _, (_, Tunresolved tyl) when Env.grow_super env ->
+      let uenv_sub = {uenv_sub with TUEnv.seen_tvars = seen_tvars_sub} in
       List.fold_left begin fun env x ->
         sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, x)
       end env tyl
@@ -256,6 +284,7 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
   | (_, Tunresolved _), (_, Tany) when not (Env.grow_super env) ->
       fst (Unify.unify_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub))
   | (_, Tunresolved tyl), _ when not (Env.grow_super env) ->
+      let uenv_super = {uenv_super with TUEnv.seen_tvars = seen_tvars_super} in
       List.fold_left begin fun env x ->
         sub_type_with_uenv env (uenv_super, x) (uenv_sub, ty_sub)
       end env tyl
@@ -419,6 +448,21 @@ and sub_type_with_uenv env (uenv_super, ty_super) (uenv_sub, ty_sub) =
     wfold_left2 sub_type env tyl_super tyl_sub
   | (r_super, Tfun ft_super), (r_sub, Tfun ft_sub) ->
       subtype_funs_generic ~check_return:true env r_super ft_super r_sub ft_sub
+  | (r_super, Tfun ft), (r_sub, Tanon (anon_arity, id)) ->
+      (match Env.get_anonymous env id with
+      | None ->
+          Errors.anonymous_recursive_call (Reason.to_pos r_sub);
+          env
+      | Some anon ->
+          let p_super = Reason.to_pos r_super in
+          let p_sub = Reason.to_pos r_sub in
+          if not (Unify.unify_arities
+                    ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
+          then Errors.fun_arity_mismatch p_super p_sub;
+          let env, ret = anon env ft.ft_params in
+          let env = sub_type env ft.ft_ret ret in
+          env
+      )
   | (r_super, Tshape fdm_super), (r_sub, Tshape fdm_sub) ->
       ShapeMap.iter begin fun k _ ->
         if not (ShapeMap.mem k fdm_super)

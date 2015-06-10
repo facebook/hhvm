@@ -92,7 +92,7 @@ public:
   void writeRefCount(); // for DebugDump only
 
   void writeArrayHeader(int size, bool isVectorData);
-  void writeArrayKey(Variant key);
+  void writeArrayKey(const Variant& key);
   void writeArrayValue(const Variant& value);
   void writeCollectionKey(const Variant& key);
   void writeCollectionKeylessPrefix();

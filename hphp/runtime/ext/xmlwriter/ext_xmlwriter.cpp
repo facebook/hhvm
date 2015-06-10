@@ -569,7 +569,7 @@ class XMLWriterResource : public SweepableResourceData {
 public:
   CLASSNAME_IS("xmlwriter")
 
-  virtual const String& o_getClassNameHook() const {
+  const String& o_getClassNameHook() const override {
     return classnameof();
   }
 

@@ -1625,6 +1625,25 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
   return func;
 }
 
+const Func* lookupImmutableCtor(const Class* cls, const Class* ctx) {
+  if (!RuntimeOption::RepoAuthoritative ||
+      RuntimeOption::EvalJitEnableRenameFunction ||
+      !cls || !(cls->attrs() & AttrUnique)) {
+    return nullptr;
+  }
+
+  auto const func = cls->getCtor();
+  if (func && !(func->attrs() & AttrPublic) && cls != ctx) {
+    if (!ctx) return nullptr;
+    if ((func->attrs() & AttrPrivate) ||
+        !(ctx->classof(cls) || cls->classof(ctx))) {
+      return nullptr;
+    }
+  }
+
+  return func;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -117,6 +117,14 @@ struct UniqueStubs {
   TCA freeLocalsHelpers[kNumFreeLocalsHelpers];
 
   /*
+   * A cold, expensive stub to DecRef a value with an unknown (but known to be
+   * refcounted) DataType. It saves all GP registers around the destructor
+   * call. The value should be in the first two argument registers (data,
+   * type).
+   */
+  TCA genDecRefHelper;
+
+  /*
    * When we enter a func prologue based on a prediction of which
    * Func* we'll be calling, if the prediction was wrong we bail to
    * this stub to redispatch.

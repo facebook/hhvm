@@ -1,7 +1,0 @@
-Starting main
-logger 0 constructing
-logger 1 constructing
-logger 0 destructing
-logger 1 destructing
-Leaving main
-Done

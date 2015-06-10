@@ -45,6 +45,7 @@ StringBuffer::StringBuffer(int initialSize /* = SmallStringReserve */)
 
 StringBuffer::~StringBuffer() {
   if (m_str) {
+    assert(m_str->hasExactlyOneRef());
     assert((m_str->setSize(0), true)); // appease StringData::checkSane()
     m_str->release();
   }
@@ -60,15 +61,15 @@ const char *StringBuffer::data() const {
 
 String StringBuffer::detach() {
   if (m_buffer && m_len) {
-    assert(m_str && m_str->getCount() == 0);
+    assert(m_str && m_str->hasExactlyOneRef());
     m_buffer[m_len] = '\0'; // fixup
-    StringData* str = m_str;
-    str->setSize(m_len);
+    auto str = String::attach(m_str);
+    str.setSize(m_len);
     m_str = 0;
     m_buffer = 0;
     m_len = 0;
     m_cap = 0;
-    return String(str); // causes incref
+    return str;
   }
   return empty_string();
 }
@@ -109,7 +110,7 @@ void StringBuffer::clear() {
 
 void StringBuffer::release() {
   if (m_str) {
-    assert(m_str->getCount() == 0);
+    assert(m_str->hasExactlyOneRef());
     m_buffer[m_len] = 0; // appease StringData::checkSane()
     m_str->release();
   }
@@ -133,7 +134,7 @@ char* StringBuffer::appendCursor(int size) {
     m_str->setSize(m_len);
     auto const tmp = m_str->reserve(m_len + size);
     if (UNLIKELY(tmp != m_str)) {
-      assert(m_str->getCount() == 0);
+      assert(m_str->hasExactlyOneRef());
       m_str->release();
       m_str = tmp;
     }
@@ -313,7 +314,7 @@ void StringBuffer::growBy(int spaceRequired) {
   m_str->setSize(m_len);
   auto const tmp = m_str->reserve(new_size);
   if (UNLIKELY(tmp != m_str)) {
-    assert(m_str->getCount() == 0);
+    assert(m_str->hasExactlyOneRef());
     m_str->release();
     m_str = tmp;
   }

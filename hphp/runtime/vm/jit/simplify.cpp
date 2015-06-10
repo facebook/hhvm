@@ -1377,7 +1377,7 @@ SSATmp* simplifyConvBoolToStr(State& env, const IRInstruction* inst) {
 SSATmp* simplifyConvDblToStr(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
-    String dblStr(buildStringData(src->dblVal()));
+    auto dblStr = String::attach(buildStringData(src->dblVal()));
     return cns(env, makeStaticString(dblStr));
   }
   return nullptr;
@@ -1618,9 +1618,12 @@ SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
 
   if (!srcType.maybe(typeParam) || inst->next() == inst->taken()) {
-    // Convert the check into a Jmp.
+    /*
+     * Convert the check into a Jmp.  The dest of the CheckType (which would've
+     * been Bottom) is now never going to be defined, so we return a Bottom.
+     */
     gen(env, Jmp, inst->taken());
-    return inst->src(0);
+    return cns(env, TBottom);
   }
 
   auto const newType = srcType & typeParam;
@@ -1774,11 +1777,11 @@ SSATmp* simplifyCheckPackedArrayBounds(State& env, const IRInstruction* inst) {
   auto const idx   = inst->src(1);
   if (!idx->hasConstVal()) return mergeBranchDests(env, inst);
 
-  auto const idxVal = (uint64_t)idx->intVal();
-  auto const check = packedArrayBoundsStaticCheck(array->type(), idxVal);
-  if (check.hasValue()) {
-    if (check.value()) return gen(env, Nop);
-    return gen(env, Jmp, inst->taken());
+  auto const idxVal = idx->intVal();
+  switch (packedArrayBoundsStaticCheck(array->type(), idxVal)) {
+  case PackedBounds::In:       return gen(env, Nop);
+  case PackedBounds::Out:      return gen(env, Jmp, inst->taken());
+  case PackedBounds::Unknown:  break;
   }
 
   return mergeBranchDests(env, inst);
@@ -1836,6 +1839,25 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyCountArrayFast(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (inst->src(0)->hasConstVal(TArr)) return cns(env, src->arrVal()->size());
+  auto const arrSpec = src->type().arrSpec();
+  auto const at = arrSpec.type();
+  if (!at) return nullptr;
+  using A = RepoAuthType::Array;
+  switch (at->tag()) {
+  case A::Tag::Packed:
+    if (at->emptiness() == A::Empty::No) {
+      return cns(env, at->size());
+    }
+    break;
+  case A::Tag::PackedN:
+    break;
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   auto const ty = src->type();
@@ -1847,14 +1869,14 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
   if (!kind || mightRelax(env, src)) return nullptr;
 
   switch (*kind) {
-    case ArrayData::kPackedKind:
-    case ArrayData::kStructKind:
-    case ArrayData::kMixedKind:
-    case ArrayData::kEmptyKind:
-    case ArrayData::kApcKind:
-      return gen(env, CountArrayFast, src);
-    default:
-      return nullptr;
+  case ArrayData::kPackedKind:
+  case ArrayData::kStructKind:
+  case ArrayData::kMixedKind:
+  case ArrayData::kEmptyKind:
+  case ArrayData::kApcKind:
+    return gen(env, CountArrayFast, src);
+  default:
+    return nullptr;
   }
 }
 
@@ -1937,16 +1959,33 @@ SSATmp* simplifyJmpSwitchDest(State& env, const IRInstruction* inst) {
   auto const sp = inst->src(1);
   auto const fp = inst->src(2);
   auto const& extra = *inst->extra<JmpSwitchDest>();
-  auto newExtra = [&](const SrcKey& sk) {
-    return ReqBindJmpData{sk, extra.invSPOff, extra.irSPOff, TransFlags{}};
-  };
 
-  if (extra.bounded) {
-    if (indexVal >= extra.cases - 2 || indexVal < 0) {
-      return gen(env, ReqBindJmp, newExtra(extra.defaultSk), sp, fp);
+  if (indexVal < 0 || indexVal >= extra.cases) {
+    // Instruction is unreachable.
+    return gen(env, Halt);
+  }
+
+  auto const newExtra = ReqBindJmpData{extra.targets[indexVal], extra.invSPOff,
+                                       extra.irSPOff, TransFlags{}};
+  return gen(env, ReqBindJmp, newExtra, sp, fp);
+}
+
+SSATmp* simplifyCheckRange(State& env, const IRInstruction* inst) {
+  auto val = inst->src(0);
+  auto limit = inst->src(1);
+
+  // CheckRange returns (0 <= val < limit).
+  if (val->hasConstVal(TInt)) {
+    if (val->intVal() < 0) return cns(env, false);
+
+    if (limit->hasConstVal(TInt)) {
+      return cns(env, val->intVal() < limit->intVal());
     }
   }
-  return gen(env, ReqBindJmp, newExtra(extra.targets[indexVal]), sp, fp);
+
+  if (limit->hasConstVal(TInt) && limit->intVal() <= 0) return cns(env, false);
+
+  return nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2011,6 +2050,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConvStrToInt)
   X(Count)
   X(CountArray)
+  X(CountArrayFast)
   X(DecRef)
   X(DecRefNZ)
   X(DefLabel)
@@ -2070,6 +2110,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdLoc)
   X(LdStk)
   X(JmpSwitchDest)
+  X(CheckRange)
   default: break;
   }
 #undef X
@@ -2215,10 +2256,36 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
   auto const pos = ++block->iteratorTo(origInst);
 
   if (need_mov) {
-    unit.replace(origInst, Mov, res.dst);
-
-    // Force the existing dst type to match that of `res.dst'.
-    origInst->dst()->setType(res.dst->type());
+    /*
+     * In `killed_edge_defining' we have the case that an instruction defining
+     * a temp on an edge (like CheckType) determined it can never define that
+     * tmp.  In this situation we just Nop out the instruction and leave the
+     * old tmp dangling.  The reason this is ok is that one of the following
+     * two things are happening:
+     *
+     *    o The old next() block is becoming unreachable.  It's ok not to make
+     *      a new definition of this tmp, because the code running simplify is
+     *      going to have to track unreachable blocks and avoid looking at
+     *      them.  It will also have to remove unreachable blocks when it's
+     *      finished to maintain IR invariants (e.g. through DCE::Minimal),
+     *      which will mean the uses of the no-longer-defined tmp will go away.
+     *
+     *    o The old next() block is still reachable (e.g. if we're removing a
+     *      CheckType because it had next == taken).  But in this case, the
+     *      next() edge must have been a critical edge, and therefore nothing
+     *      could have any use of the old destination of the CheckType, or the
+     *      program would already not have been in SSA, because it was only
+     *      defined in blocks dominated by the next edge.
+     */
+    auto const killed_edge_defining = res.dst->type() <= TBottom &&
+      origInst->isBlockEnd();
+    if (killed_edge_defining) {
+      origInst->convertToNop();
+    } else {
+      unit.replace(origInst, Mov, res.dst);
+      // Force the existing dst type to match that of `res.dst'.
+      origInst->dst()->setType(res.dst->type());
+    }
   } else {
     if (out_size == 1) {
       assertx(origInst->dst() == last->dst());
@@ -2237,6 +2304,7 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
       last->convertToNop();
       return;
     }
+
     origInst->convertToNop();
   }
 
@@ -2252,18 +2320,16 @@ void simplify(IRUnit& unit, IRInstruction* origInst) {
 //////////////////////////////////////////////////////////////////////
 
 void simplifyPass(IRUnit& unit) {
-  boost::dynamic_bitset<> reachable(unit.numBlocks());
+  auto reachable = boost::dynamic_bitset<>(unit.numBlocks());
   reachable.set(unit.entry()->id());
 
-  auto const blocks = rpoSortCfg(unit);
-
-  for (auto block : blocks) {
+  for (auto block : rpoSortCfg(unit)) {
     if (!reachable.test(block->id())) continue;
 
     for (auto& inst : *block) simplify(unit, &inst);
 
-    if (auto const b = block->back().next())  reachable.set(b->id());
-    if (auto const b = block->back().taken()) reachable.set(b->id());
+    if (auto const b = block->next())  reachable.set(b->id());
+    if (auto const b = block->taken()) reachable.set(b->id());
   }
 }
 
@@ -2284,29 +2350,31 @@ void copyProp(IRInstruction* inst) {
   }
 }
 
-folly::Optional<bool>
-packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
-  if (idxVal < 0 || idxVal > PackedArray::MaxSize) return false;
+PackedBounds packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
+  if (idxVal < 0 || idxVal > PackedArray::MaxSize) return PackedBounds::Out;
 
   if (arrayType.hasConstVal()) {
-    return idxVal < arrayType.arrVal()->size();
+    return idxVal < arrayType.arrVal()->size()
+      ? PackedBounds::In
+      : PackedBounds::Out;
   }
 
   auto const at = arrayType.arrSpec().type();
-  if (!at) return folly::none;
+  if (!at) return PackedBounds::Unknown;
 
   using A = RepoAuthType::Array;
   switch (at->tag()) {
   case A::Tag::Packed:
     if (idxVal < at->size() && at->emptiness() == A::Empty::No) {
-      return true;
+      return PackedBounds::In;
     }
+    // fallthrough
   case A::Tag::PackedN:
     if (idxVal == 0 && at->emptiness() == A::Empty::No) {
-      return true;
+      return PackedBounds::In;
     }
   }
-  return folly::none;
+  return PackedBounds::Unknown;
 }
 
 Type packedArrayElemType(SSATmp* arr, SSATmp* idx) {

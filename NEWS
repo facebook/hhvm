@@ -1,3 +1,141 @@
+"Lukather" 18-Jun-2015
+- Check that the right operand of instanceof is not an enum
+- Allow inlining static builtin methods
+- Fix hhbbc not emitting RATs for public static properties.
+- Fix overflow in array_slice
+- Better error message for double quotes used in shape field names
+- infer return type of floor/ceil
+- Do not translate functions from units marked as interpret-only.
+- Eliminate ldimm saveflags operand
+- Allow folding the ideomatic hack callable wrappers
+- Optimize NativeImpl
+- Modify ReleaseVVOrExit to deal with VarEnvs
+- Allow inlined 86ctors
+- Fix folly build with Clang
+- Re-fix region-prune-arcs assertion
+- [mac] Fix crash compiling crc32 with Mac clang
+- [mac] Use -force_load, not -all_load
+- Don't constrain key or value for SetWithRefElem
+- Remove IRBuilder::prepareForNextHHBC---just use exceptionStackBoundary
+- Use HHBBC types to avoid generic IncRefs in Await translations
+- Don't check for failed waithandles until after it wasn't finished
+- Small tweaks to load-elim and store-elim tracing
+- Support gvn for CountArrayFast
+- Hoist fallbackccs above spills
+- Variadic fixes for FCallBuiltin
+- Proof of concept implementation of a "dump static strings to file" admin endpoint
+- Sink VregKind and Bits into xls
+- Specialize IncDecProp on integer object properties.
+- Make collection initialization/destruction fast
+- MixedArray data encoding microoptimization
+- Micro-optimize json_encode
+- Build HHVM with clang 3.6
+- Fix deploy-to-tier under hg
+- Optimized FCallBuiltin for max with 2 operands
+- Add TargetProfile for Classes
+- rds size logging tweaks
+- Get rid of last frame creation site in MethodCache::handleSlowPath
+- Lower hot Switch bytecodes into a series of comparisons
+- typecheck for shape field names that start with numbers/are empty
+- Remove typehint from Serializable::unserialize
+- Switch the fatal error when compiling with MSVC to a warning.
+- Better hhbbc types for SetOpElem, IncDecElem, and IncDecProp.
+- Avoid __cxa_guard_acquire() in classof()
+- Fix a bug in regionizeFunc causing some arcs to not be marked as covered
+- Outline generic Inc/DecRefs that didn't see refcounted values during profiling
+- use HNI return types in FCallBuiltin
+- Make hh_server init message not linewrap on 80-column terminals
+- Allow unset on array index expressions
+- Add some precise_unions in memory-effects.cpp
+- Move toplevel Vgen::emit() in vasm-x64.cpp
+- Add HHI for Password
+- Minor drive-by Func cleanup
+- Fix bug when we run check type hoisting
+- Get rid of local variable number in error message
+- Deconflate preconditions and predictions
+- Add HHVM README.md section on reporting security issues
+- Fix memory leak in vasm-xls
+- Revert D2067091 - "Don't ignore I<A> when declaring "extends I<A>, I<B>""
+- Leave the TC an x64 ret when returning control from a resumed async function
+- Remove exit placeholders before store/load elim and other passes
+- Fix a bug in expand() for stack AliasClasses unioned with non-stack slots
+- Add builtins to analysis
+- Simplify CountArrayFast based on RAT array types
+- Refactor packedArrayBoundsStaticCheck to return an enum
+- Fix a load-elim bug when simplify() folds a CheckType into a Jmp
+- Fix some problems with gvn on array instructions
+- Rewrite JSON printer to use buffers instead of strings
+- Make StringData::Make methods initialize the ref-count to one
+- Remove unnecessary strcpy call in f_tempnam
+- Selectively include DV inits and function bodies in the same region
+- Add annotations to TransRec and use them for printing IR.
+- Don't use strtok in trace.cpp
+- Fix framework test runner options handling.
+- Fix positional argument handling.
+- More 4.9 build fixes
+- Fix some hack errors.
+- Check method preconditions at call sites and output errors and warnings
+- [hhvm-lockdown] Improvements to serzialize_memoize_param
+- Use md5 as key for scalar arrays
+- Use static strings for special cases in serialize
+- simplexml_load_file: check for null return from File::Open()
+- Hoist CheckType
+- Treat type aliases of classes like the aliased class in VerifyParamType
+- Fix help string for optional arguments.
+- Add ability to list tests and run a specific test to hphp framework suite.
+- Fix some bugs with AliasAnalysis for stacks (bring back the stk_expand_map)
+- curl: add support for CURLOPT_PROTOCOLS and friends
+- Add curl_strerror
+- Fixed single-line comments for mac
+- Don't trigger a fatal error if MySQL wasn't required
+- Use `mysql_config --socket` instead of mucking with paths
+- Fixed SplPriorityQueue losing extract flags after clone
+- `ConstructInstance` returns an exact type
+- Fix test in OSS build
+- Add Variant move assignment operators for various types
+- Fix prologue counter used in irgen::emitFuncPrologue
+- Add a runtime option to control the number of huge pages used for the text section
+- HHVM parser support for new optional shape fields syntax
+- LibDwarf shouldn't forcefully require LibElf
+- Allow custom paths for pthread library when building Folly
+- Update linker-script
+- Peephole optimize away trivial copy2 sequences.
+- Add ExitPlaceholders
+- Increase hh_client auto-typecheck wait time
+- Better register hinting
+- memcpy rewriting
+- Switch-related cleanup
+- [HHBBC] Handle conflicting class/type-alias names in resolve_class()
+- Miscellaneous optimization options for LLVM backend.
+- Tune per arena lg_dirty_mult settings.
+- Update CakePHP3 to 3.0.5
+- Change test/run to discard line-comments in .opt files
+- Fixed a memory leak in SplDoublyLinkedList's pop and shift methods
+- Add $previous parameter to ErrorException::__construct
+- Fix compile error in thread-safe-setlocale.cpp in clang.
+- [hack] Allow anonymous functions to be subtypes of non-anonymous functions
+- [hack] Don't print ANSI color sequences if output is not a TTY
+- [hack] Format: Improve handling of XHP class members
+- [hack] Don't add trailing comma to multiline function type hint
+- [hack] Format: print colored diff output
+- [hack] Add --patch option to hh_format
+- [hack] Don't recurse infinitely on Tvar(x) -> Tunresolved[Tvar(x)]
+- [hack] Have format code use Core library
+- [hack] Fix up hh_json
+- [hack] Don't assert false on unknown signals
+- [hack] Avoid creating Tunresolved[Tunresolved[...]] in type unification
+- [hack] Move instantiation of function tparams to Typing_phase.localize
+- [hack] Update hackificator deploy script
+- [hack] Don't run dfind in hack build tests
+- [hack] Fail hard if initial heap size is too large
+- [hack] Mock out logging when running tests
+- [hack] Daemons should not print to the console
+- [hack] Makefile: Sort dependencies alphabetically
+- [hack] Fix crash with identifier named "namespace"
+- [hack] Simplify HackEventLogger
+- [hack] Add additional checks for implementing type constants
+- [hack] Fix load script path lookup
+
 "King" 4-Jun-2015
  - [hack] Format: `function() {...}` instead of `function () {...}`
  - [hack] Fix build with ocaml 4.01

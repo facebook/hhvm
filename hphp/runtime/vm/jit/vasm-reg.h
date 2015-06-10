@@ -27,6 +27,7 @@ namespace HPHP { namespace jit {
 
 struct Vptr;
 struct Vscaled;
+struct VscaledDisp;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +37,6 @@ struct Vscaled;
  * XMM, or virtual register.
  */
 struct Vreg {
-  static constexpr auto kind = VregKind::Any;
   static const unsigned kNumGP{PhysReg::kSIMDOffset}; // 33
   static const unsigned kNumXMM{30};
   static const unsigned kNumSF{1};
@@ -97,6 +97,7 @@ struct Vreg {
   Vptr operator[](Vptr) const;
   Vptr operator[](DispReg) const;
   Vptr operator[](Vscaled) const;
+  Vptr operator[](VscaledDisp) const;
   Vptr operator[](Vreg) const;
 
   Vptr operator*() const;
@@ -113,24 +114,17 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Instantiations of Vr wrap virtual register numbers in in a strongly typed
- * wrapper that conveys physical constraints, similar to Reg64, Reg32, RegXMM,
- * etc.
+ * Instantiations or distinct subclasses of Vr wrap virtual register numbers
+ * in in a strongly typed wrapper that conveys physical-register constraints,
+ * similar to Reg64, Reg32, RegXMM, etc.
  */
-template<class Reg, VregKind Kind, int Bits>
+template<class Reg>
 struct Vr {
-  static constexpr auto bits = Bits;
-  static constexpr auto kind = Kind;
-
-  static bool allowable(Vreg r);
-
   /*
    * Constructors.
    */
   explicit Vr(size_t rn) : rn(rn) {}
-  /* implicit */ Vr(Vreg r) : rn(size_t(r)) {
-    assertx(allowable(r) || !r.isValid());
-  }
+  /* implicit */ Vr(Vreg r);
   /* implicit */ Vr(Reg r) : Vr{Vreg(r)} {}
   /* implicit */ Vr(PhysReg pr) : Vr{Vreg(pr)} {}
 
@@ -160,8 +154,8 @@ struct Vr {
   /*
    * Comparisons.
    */
-  bool operator==(Vr<Reg,Kind,Bits> r) const { return rn == r.rn; }
-  bool operator!=(Vr<Reg,Kind,Bits> r) const { return rn != r.rn; }
+  bool operator==(Vr<Reg> r) const { return rn == r.rn; }
+  bool operator!=(Vr<Reg> r) const { return rn != r.rn; }
 
   /*
    * Addressing.
@@ -181,13 +175,25 @@ private:
   unsigned rn;
 };
 
-using Vreg64  = Vr<Reg64,VregKind::Gpr,64>;
-using Vreg32  = Vr<Reg32,VregKind::Gpr,32>;
-using Vreg16  = Vr<Reg16,VregKind::Gpr,16>;
-using Vreg8   = Vr<Reg8,VregKind::Gpr,8>;
-using VregDbl = Vr<RegXMM,VregKind::Simd,64>;
-using Vreg128 = Vr<RegXMM,VregKind::Simd,128>;
-using VregSF  = Vr<RegSF,VregKind::Sf,4>;
+using Vreg64  = Vr<Reg64>;
+using Vreg32  = Vr<Reg32>;
+using Vreg16  = Vr<Reg16>;
+using Vreg8   = Vr<Reg8>;
+using VregSF  = Vr<RegSF>;
+
+struct VregDbl : Vr<RegXMM> {
+  explicit VregDbl(size_t rn) : Vr<RegXMM>{rn} {}
+  template<class... Args> /* implicit */ VregDbl(Args&&... args)
+    : Vr<RegXMM>{std::forward<Args>(args)...} {}
+  static bool allowable(Vreg r) { return r.isVirt() || r.isSIMD(); }
+};
+
+struct Vreg128 : Vr<RegXMM> {
+  explicit Vreg128(size_t rn) : Vr<RegXMM>{rn} {}
+  template<class... Args> /* implicit */ Vreg128(Args&&... args)
+    : Vr<RegXMM>{std::forward<Args>(args)...}
+  {}
+};
 
 inline Reg64 r64(Vreg64 r) { return r; }
 
@@ -197,6 +203,13 @@ struct Vscaled {
   Vreg64 index;
   int scale;
 };
+
+struct VscaledDisp {
+  Vscaled vs;
+  int32_t disp;
+};
+
+VscaledDisp operator+(Vscaled, int32_t);
 
 /*
  * Result of virtual register addressing: base + (index * scale) + disp.

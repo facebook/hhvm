@@ -36,8 +36,13 @@ if (APPLE)
     -Wl,-u,_register_fastcgi_server
     -Wl,-pagezero_size,0x00001000
     # Set the .text.keep section to be executable.
-    -Wl,-segprot,.text,rx,rx
-    -Wl,-all_load ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
+    -Wl,-segprot,.text,rx,rx)
+  foreach(lib ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
+    # It's important to use -Xlinker and not -Wl here: ${lib} needs to be its
+    # own option on the command line, since target_link_libraries will expand it
+    # from its logical name here into the full .a path. (Eww.)
+    list(APPEND HHVM_ANCHOR_SYMS -Xlinker -force_load -Xlinker ${lib})
+  endforeach()
 elseif (IS_AARCH64)
   set(HHVM_ANCHOR_SYMS
     -Wl,--whole-archive ${HHVM_WHOLE_ARCHIVE_LIBRARIES} -Wl,--no-whole-archive)

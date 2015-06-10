@@ -130,9 +130,6 @@ struct EmptyArray {
     return const_cast<ArrayData*>(ad);
   }
 
-  static void InitMixed(MixedArray*, RefCount count, uint32_t size,
-                        int64_t nextIntKey);
-
 private:
   static std::pair<ArrayData*,TypedValue*> MakePacked(TypedValue);
   static std::pair<ArrayData*,TypedValue*> MakePackedInl(TypedValue);

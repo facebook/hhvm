@@ -875,8 +875,7 @@ struct LLVMEmitter {
         if (di.isCall()) {
           auto afterCall = ip + di.size();
           FTRACE(2, "From afterCall for fixup = {}\n", afterCall);
-          mcg->recordSyncPoint(afterCall,
-                               fix.fixup.pcOffset, fix.fixup.spOffset);
+          mcg->recordSyncPoint(afterCall, fix.fixup);
         }
       }
     }
@@ -1577,9 +1576,11 @@ O(testqim) \
 O(ud2) \
 O(xorb) \
 O(xorbi) \
+O(xorl) \
 O(xorq) \
 O(xorqi) \
 O(landingpad) \
+O(leavetc) \
 O(vretm) \
 O(vret) \
 O(absdbl) \
@@ -1618,6 +1619,7 @@ O(unpcklpd)
       case Vinstr::psrlq:
       case Vinstr::fallthru:
       case Vinstr::popm:  // currently used in cgEnterFrame
+      case Vinstr::callfaststub:
         always_assert_flog(false,
                            "Banned opcode in B{}: {}",
                            size_t(label), show(m_unit, inst));
@@ -2792,6 +2794,21 @@ void LLVMEmitter::emit(const vret& inst) {
   }
 }
 
+void LLVMEmitter::emit(const leavetc& inst) {
+  auto const exit = reinterpret_cast<intptr_t>(
+    mcg->tx().uniqueStubs.callToExit
+  );
+  auto const exit_ptr = m_irb.CreateIntToPtr(
+    cns(exit),
+    ptrType(m_traceletFnTy)
+  );
+  auto call = emitTraceletTailCall(exit_ptr, inst.args);
+  if (RuntimeOption::EvalJitLLVMRetOpt) {
+    call->setCallingConv(llvm::CallingConv::X86_64_HHVM_TCR);
+    call->setTailCallKind(llvm::CallInst::TCK_Tail);
+  }
+}
+
 void LLVMEmitter::emit(const absdbl& inst) {
   if (!m_fabs) {
     m_fabs = llvm::Intrinsic::getDeclaration(
@@ -3054,6 +3071,10 @@ void LLVMEmitter::emit(const xorb& inst) {
 
 void LLVMEmitter::emit(const xorbi& inst) {
   defineValue(inst.d, m_irb.CreateXor(value(inst.s1), inst.s0.b()));
+}
+
+void LLVMEmitter::emit(const xorl& inst) {
+  defineValue(inst.d, m_irb.CreateXor(value(inst.s1), value(inst.s0)));
 }
 
 void LLVMEmitter::emit(const xorq& inst) {

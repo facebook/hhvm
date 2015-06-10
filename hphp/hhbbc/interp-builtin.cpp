@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/execution-context.h"
 
 #include "hphp/hhbbc/eval-cell.h"
+#include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/interp-internal.h"
 
@@ -44,12 +45,14 @@ X(base64decode)
 X(base64_encode)
 X(base_convert)
 X(bindec)
+X(ceil)
 X(chr)
 X(count)
 X(decbin)
 X(dechex)
 X(decoct)
 X(explode)
+X(floor)
 X(getrandmax)
 X(gettype)
 X(hexdec)
@@ -76,8 +79,6 @@ X(urldecode)
 X(urlencode)
 X(utf8_encode)
 X(version_compare)
-X(floor)
-X(ceil)
 X(sqrt)
 X(abs)
 
@@ -136,12 +137,14 @@ folly::Optional<Type> const_fold(ISS& env, const bc::FCallBuiltin& op) {
   X(s_base64_encode)
   X(s_base_convert)
   X(s_bindec)
+  X(s_ceil)
   X(s_chr)
   X(s_count)
   X(s_decbin)
   X(s_dechex)
   X(s_decoct)
   X(s_explode)
+  X(s_floor)
   X(s_getrandmax)
   X(s_gettype)
   X(s_hexdec)
@@ -167,8 +170,6 @@ folly::Optional<Type> const_fold(ISS& env, const bc::FCallBuiltin& op) {
   X(s_urlencode)
   X(s_utf8_encode)
   X(s_version_compare)
-  X(s_floor)
-  X(s_ceil)
   X(s_sqrt)
   X(s_abs)
 
@@ -236,11 +237,31 @@ bool builtin_abs(ISS& env, const bc::FCallBuiltin& op) {
   return true;
 }
 
+/**
+ * if the input to these functions is known to be integer or double,
+ * the result will be a double. Otherwise, the result is conditional
+ * on a successful conversion and an accurate number of arguments.
+ */
+bool floatIfNumeric(ISS& env, const bc::FCallBuiltin& op) {
+  if (op.arg1 != 1) return false;
+  auto const ty = popC(env);
+  push(env, ty.subtypeOf(TNum) ? TDbl : TInitUnc);
+  return true;
+}
+bool builtin_ceil(ISS& env, const bc::FCallBuiltin& op) {
+  return floatIfNumeric(env, op);
+}
+bool builtin_floor(ISS& env, const bc::FCallBuiltin& op) {
+  return floatIfNumeric(env, op);
+}
+
 bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
 #define X(x) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
 
-  X(get_class)
   X(abs)
+  X(ceil)
+  X(floor)
+  X(get_class)
 
 #undef X
 
@@ -262,11 +283,12 @@ void builtin(ISS& env, const bc::FCallBuiltin& op) {
   // Try to handle the builtin at the type level.
   if (handle_builtin(env, op)) return;
 
-  // Fall back to generic version.  (This can at least push some return type
-  // information from HNI, but it won't be great in general.)
+  auto const name = op.str3;
+  auto const func = env.index.resolve_func(env.ctx, name);
+  auto const rt = env.index.lookup_return_type(env.ctx, func);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
-  specialFunctionEffects(env, op.str3);
-  push(env, TInitGen);
+  specialFunctionEffects(env, name);
+  push(env, rt);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -55,9 +55,24 @@ namespace {
 
 size_t s_counter;
 
+// Vreg discriminator.
+enum class Constraint { Any, Gpr, Simd, Sf };
+
+Constraint constraint(const Vreg&) { return Constraint::Any; }
+Constraint constraint(const Vreg64&) { return Constraint::Gpr; }
+Constraint constraint(const Vreg32&) { return Constraint::Gpr; }
+Constraint constraint(const Vreg16&) { return Constraint::Gpr; }
+Constraint constraint(const Vreg8&) { return Constraint::Gpr; }
+Constraint constraint(const VregDbl&) { return Constraint::Simd; }
+Constraint constraint(const Vreg128&) { return Constraint::Simd; }
+Constraint constraint(const VregSF&) { return Constraint::Sf; }
+
+bool is_wide(const Vreg128&) { return true; }
+template<class T> bool is_wide(const T&) { return false; }
+
 // A Use refers to the position where an interval is used or defined
 struct Use {
-  VregKind kind;
+  Constraint kind;
   unsigned pos;
   Vreg hint; // if valid, try to use same physical register as hint.
 };
@@ -508,6 +523,12 @@ void Vxls::allocate() {
   resolveEdges();
   renameOperands();
   insertCopies();
+  // insertCopies() can generate spills before fallbackccs in the
+  // entry block, which causes spill space to be allocated and
+  // deallocated immediately when the type-checks fail. So call
+  // hoistFallbackccs to move the fallbackccs above such stores to
+  // prevent this problem.
+  hoistFallbackccs(unit);
   // clean up before allocating spill space, since it might create new
   // blocks and modify the cfg.
   peephole();
@@ -742,20 +763,20 @@ struct DefVisitor {
     auto& defs = m_tuples[def_tuple];
     auto& hints = m_tuples[hint_tuple];
     for (int i = 0; i < defs.size(); i++) {
-      def(defs[i], VregKind::Any, hints[i]);
+      def(defs[i], Constraint::Any, hints[i]);
     }
   }
   template<class D, class H> void defHint(D dst, H hint) {
-    def(dst, dst.kind, hint, dst.bits == 128);
+    def(dst, constraint(dst), hint, is_wide(dst));
   }
   template<class R> void def(R r) {
-    def(r, r.kind, Vreg{}, r.bits == 128);
+    def(r, constraint(r), Vreg{}, is_wide(r));
   }
-  void def(Vreg r) { def(r, VregKind::Any); }
-  void defHint(Vreg d, Vreg hint) { def(d, VregKind::Any, hint); }
+  void def(Vreg r) { def(r, Constraint::Any); }
+  void defHint(Vreg d, Vreg hint) { def(d, Constraint::Any, hint); }
   void def(RegSet rs) { rs.forEach([&](Vreg r) { def(r); }); }
 private:
-  void def(Vreg r, VregKind kind, Vreg hint = Vreg{}, bool wide = false) {
+  void def(Vreg r, Constraint kind, Vreg hint = Vreg{}, bool wide = false) {
     auto ivl = m_intervals[r];
     if (m_live.test(r)) {
       m_live.reset(r);
@@ -818,11 +839,11 @@ struct UseVisitor {
     regs.forEach([&](Vreg r) { across(r); });
   }
 
-  template<class R> void use(R r) { use(r, r.kind, m_range.end); }
+  template<class R> void use(R r) { use(r, constraint(r), m_range.end); }
   template<class S, class H> void useHint(S src, H hint) {
-    use(src, src.kind, m_range.end, hint);
+    use(src, constraint(src), m_range.end, hint);
   }
-  void use(Vreg r, VregKind kind, unsigned end, Vreg hint = Vreg{}) {
+  void use(Vreg r, Constraint kind, unsigned end, Vreg hint = Vreg{}) {
     m_live.set(r);
     auto ivl = m_intervals[r];
     if (!ivl) ivl = m_intervals[r] = jit::make<Interval>(r);
@@ -837,7 +858,7 @@ struct UseVisitor {
   // which ensures it will be assigned a different register than the
   // destination. This isn't necessary if *both* operands of a binary
   // instruction are the same virtual register, but is still correct.
-  template<class R> void across(R r) { use(r, r.kind, m_range.end + 1); }
+  template<class R> void across(R r) { use(r, constraint(r), m_range.end + 1); }
 private:
   jit::vector<Interval*>& m_intervals;
   jit::vector<VregList>& m_tuples;
@@ -1015,10 +1036,10 @@ unsigned Vxls::constrain(Interval* ivl, RegSet& allow) {
   auto const any = m_abi.unreserved() - m_abi.sf; // Any but not flags.
   allow = m_abi.unreserved();
   for (auto& u : ivl->uses) {
-    auto need = u.kind == VregKind::Simd ? m_abi.simdUnreserved :
-                u.kind == VregKind::Gpr ? m_abi.gpUnreserved :
-                u.kind == VregKind::Sf ? m_abi.sf :
-                /* VregKind::Any */ any;
+    auto need = u.kind == Constraint::Simd ? m_abi.simdUnreserved :
+                u.kind == Constraint::Gpr ? m_abi.gpUnreserved :
+                u.kind == Constraint::Sf ? m_abi.sf :
+                /* Constraint::Any */ any;
     if ((allow & need).empty()) {
       // cannot satisfy constraints; must split before u.pos
       return u.pos - 1;
@@ -1330,23 +1351,23 @@ struct Renamer {
   }
   void use(RegSet r){}
 private:
-  void rename(Vreg8& r) { r = lookup(r, VregKind::Gpr); }
-  void rename(Vreg16& r) { r = lookup(r, VregKind::Gpr); }
-  void rename(Vreg32& r) { r = lookup(r, VregKind::Gpr); }
-  void rename(Vreg64& r) { r = lookup(r, VregKind::Gpr); }
-  void rename(VregDbl& r) { r = lookup(r, VregKind::Simd); }
-  void rename(Vreg128& r) { r = lookup(r, VregKind::Simd); }
-  void rename(VregSF& r) { r = lookup(r, VregKind::Sf); }
-  void rename(Vreg& r) { r = lookup(r, VregKind::Any); }
+  void rename(Vreg8& r) { r = lookup(r, Constraint::Gpr); }
+  void rename(Vreg16& r) { r = lookup(r, Constraint::Gpr); }
+  void rename(Vreg32& r) { r = lookup(r, Constraint::Gpr); }
+  void rename(Vreg64& r) { r = lookup(r, Constraint::Gpr); }
+  void rename(VregDbl& r) { r = lookup(r, Constraint::Simd); }
+  void rename(Vreg128& r) { r = lookup(r, Constraint::Simd); }
+  void rename(VregSF& r) { r = lookup(r, Constraint::Sf); }
+  void rename(Vreg& r) { r = lookup(r, Constraint::Any); }
   void rename(Vtuple t) { /* phijmp/phijcc+phidef handled by resolveEdges */ }
-  PhysReg lookup(Vreg vreg, VregKind kind) {
+  PhysReg lookup(Vreg vreg, Constraint kind) {
     auto ivl = xls.intervals[vreg];
     if (!ivl || vreg.isPhys()) return vreg;
     PhysReg reg = ivl->childAt(pos)->reg;
-    assertx((kind == VregKind::Gpr && reg.isGP()) ||
-           (kind == VregKind::Simd && reg.isSIMD()) ||
-           (kind == VregKind::Sf && reg.isSF()) ||
-           (kind == VregKind::Any && reg != InvalidReg));
+    assertx((kind == Constraint::Gpr && reg.isGP()) ||
+           (kind == Constraint::Simd && reg.isSIMD()) ||
+           (kind == Constraint::Sf && reg.isSF()) ||
+           (kind == Constraint::Any && reg != InvalidReg));
     return reg;
   }
 private:
@@ -1509,7 +1530,7 @@ void Vxls::resolveEdges() {
 void Vxls::insertCopies() {
   // union sf intervals.  this is used to determine whether we can safely
   // optimize constant loads of 0 to an xor on x64.
-  auto sf_ivl = jit::make<Interval>(Vreg{});
+  auto sf_ivl = jit::make_unique<Interval>(Vreg{});
   for (auto ivl : intervals) {
     if (!ivl) continue;
 
@@ -1544,11 +1565,11 @@ void Vxls::insertCopies() {
       }
       auto c = copies.find(pos - 1);
       if (c != copies.end()) {
-        insertCopiesAt(code, j, c->second, slots, pos - 1, sf_ivl);
+        insertCopiesAt(code, j, c->second, slots, pos - 1, sf_ivl.get());
       }
       c = copies.find(pos);
       if (c != copies.end()) {
-        insertCopiesAt(code, j, c->second, slots, pos, sf_ivl);
+        insertCopiesAt(code, j, c->second, slots, pos, sf_ivl.get());
       }
     }
   }
@@ -1564,7 +1585,7 @@ void Vxls::insertCopies() {
         unsigned j = code.size() - 1;
         auto slots = m_sp[spill_offsets[succlist[0]]];
         insertCopiesAt(code, j, c->second, slots,
-                       block_ranges[b].end - 1, sf_ivl);
+                       block_ranges[b].end - 1, sf_ivl.get());
       }
     } else {
       // copies will go at start of successor
@@ -1576,7 +1597,7 @@ void Vxls::insertCopies() {
           auto& code = unit.blocks[s].code;
           unsigned j = 0;
           insertCopiesAt(code, j, c->second, slots,
-                         block_ranges[s].start, sf_ivl);
+                         block_ranges[s].start, sf_ivl.get());
         }
       }
     }
@@ -1953,11 +1974,7 @@ void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
     assertx(slot >= 0 && src == ivl->reg);
     MemoryRef ptr{slots.r + slotOffset(slot)};
     if (!ivl->wide) {
-      always_assert_flog(
-        !src.isSF(),
-        "Tried to spill %flags in Vunit:\n\n{}",
-        show(unit)
-      );
+      always_assert_flog(!src.isSF(), "Tried to spill %flags");
       stores.emplace_back(store{src, ptr});
     } else {
       assertx(src.isSIMD());
@@ -1984,25 +2001,40 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
     if (ivl->reg != InvalidReg) {
       moves[dst] = ivl->reg;
     } else if (ivl->constant) {
-      if (!ivl->val.isUndef) {
-        bool const sf_live = !sf_ivl->ranges.empty() && sf_ivl->covers(pos);
-        switch (ivl->val.kind) {
-          case Vconst::Quad:
-          case Vconst::Double:
-            loads.emplace_back(ldimmq{ivl->val.val, dst, sf_live});
-            break;
-          case Vconst::Long:
-            loads.emplace_back(ldimml{int32_t(ivl->val.val), dst, sf_live});
-            break;
-          case Vconst::Byte:
-            loads.emplace_back(ldimmb{uint8_t(ivl->val.val), dst, sf_live});
-            break;
-          case Vconst::ThreadLocal:
-            loads.emplace_back(
-              load{Vptr{baseless(ivl->val.disp), Vptr::FS}, dst}
-            );
-            break;
-        }
+      if (ivl->val.isUndef) continue;
+      auto const use_xor = ivl->val.val == 0 && dst.isGP() &&
+                           (sf_ivl->ranges.empty() || !sf_ivl->covers(pos));
+      switch (ivl->val.kind) {
+        case Vconst::Quad:
+        case Vconst::Double:
+          if (use_xor) {
+            Vreg32 d32 = dst; // assume 32-bit ops zero upper bits
+            loads.emplace_back(xorl{d32, d32, d32, RegSF{0}});
+          } else {
+            loads.emplace_back(ldimmq{ivl->val.val, dst});
+          }
+          break;
+        case Vconst::Long:
+          if (use_xor) {
+            Vreg32 d32 = dst;
+            loads.emplace_back(xorl{d32, d32, d32, RegSF{0}});
+          } else {
+            loads.emplace_back(ldimml{int32_t(ivl->val.val), dst});
+          }
+          break;
+        case Vconst::Byte:
+          if (use_xor) {
+            Vreg8 d8 = dst;
+            loads.emplace_back(xorb{d8, d8, d8, RegSF{0}});
+          } else {
+            loads.emplace_back(ldimmb{uint8_t(ivl->val.val), dst});
+          }
+          break;
+        case Vconst::ThreadLocal:
+          loads.emplace_back(
+            load{Vptr{baseless(ivl->val.disp), Vptr::FS}, dst}
+          );
+          break;
       }
     } else {
       assertx(ivl->spilled());

@@ -504,12 +504,13 @@ template<class T, class... Args> T* newobj(Args&&... args) {
   template <typename F> friend void scan(const c_##originalName&, F&); \
   friend ObjectData* new_##originalName##_Instance(Class*);            \
   friend void delete_##originalName(ObjectData*, const Class*);        \
+  static HPHP::LowClassPtr s_classOf;                                  \
   static inline HPHP::LowClassPtr& classof() {                         \
-    static HPHP::LowClassPtr result;                                   \
-    return result;                                                     \
+    return s_classOf;                                                  \
   }
 
-#define IMPLEMENT_CLASS_NO_SWEEP(cls)
+#define IMPLEMENT_CLASS_NO_SWEEP(cls)                                  \
+  HPHP::LowClassPtr c_##cls::s_classOf;
 
 template<class T, class... Args>
 typename std::enable_if<

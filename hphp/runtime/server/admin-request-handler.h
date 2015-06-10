@@ -47,6 +47,8 @@ private:
   bool handleConstSizeRequest (const std::string &cmd, Transport *transport);
   bool handleStaticStringsRequest(const std::string &cmd,
                                   Transport *transport);
+  bool handleDumpStaticStrings(const std::string &cmd, Transport *transport,
+                               const std::string &filename);
   bool handleVMRequest      (const std::string &cmd, Transport *transport);
   void handleProxyRequest(const std::string& cmd, Transport *transport);
   bool handleRandomApcRequest (const std::string &cmd, Transport *transport);

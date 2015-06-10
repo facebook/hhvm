@@ -67,14 +67,15 @@ struct Vunit;
   O(fallbackcc, I(cc) I(dest), U(sf) U(args), Dn)\
   O(svcreq, I(req) I(stub_block), U(args) U(extraArgs), Dn)\
   /* vasm intrinsics */\
+  O(callfaststub, I(fix), U(args), Dn)\
   O(copy, Inone, UH(s,d), DH(d,s))\
   O(copy2, Inone, UH(s0,d0) UH(s1,d1), DH(d0,s0) DH(d1,s1))\
   O(copyargs, Inone, UH(s,d), DH(d,s))\
   O(debugtrap, Inone, Un, Dn)\
   O(fallthru, Inone, Un, Dn)\
-  O(ldimmb, I(s) I(saveflags), Un, D(d))\
-  O(ldimml, I(s) I(saveflags), Un, D(d))\
-  O(ldimmq, I(s) I(saveflags), Un, D(d))\
+  O(ldimmb, I(s), Un, D(d))\
+  O(ldimml, I(s), Un, D(d))\
+  O(ldimmq, I(s), Un, D(d))\
   O(ldimmqs, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
   O(mccall, I(target), U(args), Dn)\
@@ -98,6 +99,7 @@ struct Vunit;
   O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
   O(vretm, Inone, U(retAddr) U(prevFp) U(args), D(d))\
   O(vret, Inone, U(retAddr) U(args), Dn)\
+  O(leavetc, Inone, U(args), Dn)\
   O(absdbl, Inone, U(s), D(d))\
   /* arm instructions */\
   O(asrv, Inone, U(sl) U(sr), D(d))\
@@ -236,6 +238,7 @@ struct Vunit;
   O(unpcklpd, Inone, UA(s0) U(s1), D(d))\
   O(xorb, Inone, U(s0) U(s1), D(d) D(sf))\
   O(xorbi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(xorl, Inone, U(s0) U(s1), D(d) D(sf))\
   O(xorq, Inone, U(s0) U(s1), D(d) D(sf))\
   O(xorqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
   /* */
@@ -383,6 +386,14 @@ struct bindjmp {
 // VASM intrinsics.
 
 /*
+ * Call a "fast" stub, which is a stub that preserves more registers than a
+ * normal call. It may still call C++ functions on a slow path (which is why
+ * there's a Fixup operand) but it will save any required registers before
+ * doing so.
+ */
+struct callfaststub { TCA target; Fixup fix; RegSet args; };
+
+/*
  * Copies of different arities. All copies happen in parallel, meaning operand
  * order doesn't matter when a PhysReg appears as both a src and dst.
  */
@@ -402,10 +413,14 @@ struct debugtrap {};
  */
 struct fallthru {};
 
-struct ldimmb { Immed s; Vreg d; bool saveflags; };
-struct ldimml { Immed s; Vreg d; bool saveflags; };
-struct ldimmq { Immed64 s; Vreg d; bool saveflags; };
-struct ldimmqs { Immed64 s; Vreg d; };
+/*
+ * load an immedate value without mutating status flags.
+ */
+struct ldimmb { Immed s; Vreg d; };
+struct ldimml { Immed s; Vreg d; };
+struct ldimmq { Immed64 s; Vreg d; };
+struct ldimmqs { Immed64 s; Vreg d; }; // smashable version of ldimmq
+
 struct load { Vptr s; Vreg d; };
 struct mccall { CodeAddress target; RegSet args; };
 struct mcprep { Vreg64 d; };
@@ -467,6 +482,11 @@ struct vretm { Vptr retAddr; Vptr prevFp; Vreg d; RegSet args; };
  * Pushes retAddr and executes a ret instruction.
  */
 struct vret { Vreg retAddr; RegSet args; };
+
+/*
+ * Execute a ret instruction directly, returning to enterTCHelper.
+ */
+struct leavetc { RegSet args; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // ARM.
@@ -659,6 +679,7 @@ struct ud2 {};
 struct unpcklpd { VregDbl s0, s1; Vreg128 d; };
 struct xorb { Vreg8 s0, s1, d; VregSF sf; };
 struct xorbi { Immed s0; Vreg8 s1, d; VregSF sf; };
+struct xorl { Vreg32 s0, s1, d; VregSF sf; };
 struct xorq { Vreg64 s0, s1, d; VregSF sf; };
 struct xorqi { Immed s0; Vreg64 s1, d; VregSF sf; };
 

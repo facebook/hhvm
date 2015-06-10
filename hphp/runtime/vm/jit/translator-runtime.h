@@ -38,6 +38,7 @@ struct MInstrState;
 namespace jit {
 //////////////////////////////////////////////////////////////////////
 
+struct ClassProfile;
 struct TypeConstraint;
 
 //////////////////////////////////////////////////////////////////////
@@ -165,6 +166,8 @@ typedef FixedStringMap<TCA,true> SSwitchMap;
 TCA sswitchHelperFast(const StringData* val, const SSwitchMap* table, TCA* def);
 
 void tv_release_generic(TypedValue* tv);
+
+void profileObjClassHelper(ClassProfile*, ObjectData*);
 
 Cell lookupCnsHelper(const TypedValue* tv,
                      StringData* nm,

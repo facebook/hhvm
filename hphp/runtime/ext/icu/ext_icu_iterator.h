@@ -115,7 +115,7 @@ public:
   explicit BugStringCharEnumeration(UEnumeration* _uenum) : uenum(_uenum) {}
   ~BugStringCharEnumeration() { uenum_close(uenum); }
 
-  int32_t count(UErrorCode& status) const {
+  int32_t count(UErrorCode& status) const override {
     return uenum_count(uenum, &status);
   }
 
@@ -142,7 +142,7 @@ public:
     return str;
   }
 
-  void reset(UErrorCode& status) {
+  void reset(UErrorCode& status) override {
     uenum_reset(uenum, &status);
   }
 

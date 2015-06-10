@@ -4,9 +4,7 @@ File "generic_incompatible_implementation.php", line 6, characters 22-24:
 It is incompatible with this object of type Bar
 because some declarations are incompatible.
 Read the following to see why:
-File "generic_incompatible_implementation.php", line 7, characters 21-21:
-This is an object of type D
-File "generic_incompatible_implementation.php", line 11, characters 24-24:
-It was implicitly typed as an object of type D during this operation
 File "generic_incompatible_implementation.php", line 7, characters 26-26:
-It is incompatible with a value of generic type T
+This is a value of generic type T
+File "generic_incompatible_implementation.php", line 11, characters 26-26:
+It is incompatible with an object of type D

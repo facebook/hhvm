@@ -68,6 +68,15 @@ inline bool Func::ParamInfo::isVariadic() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Func.
 
+inline Func* Func::cloneAndSetClass(Class* cls) const {
+  return cloneAndModify(cls, attrs());
+}
+
+inline void Func::freeClone() const {
+  assert(isPreFunc());
+  m_cloned.flag.clear();
+}
+
 inline void Func::validate() const {
 #ifdef DEBUG
   assert(m_magic == kMagic);
@@ -330,6 +339,10 @@ inline bool Func::isAbstract() const {
 
 inline bool Func::mayHaveThis() const {
   return isPseudoMain() || (isMethod() && !isStatic());
+}
+
+inline bool Func::isPreFunc() const {
+  return m_isPreFunc;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

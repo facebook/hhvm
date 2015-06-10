@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/repo.h"
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/mysql/mysql_stats.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/http-server.h"
@@ -51,6 +52,7 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <fstream>
 #include <string>
 #include <sstream>
 #include <iomanip>
@@ -187,7 +189,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
         "/stats-web:       turn on/off server page stats (CPU and gen time)\n"
         "/stats-mem:       turn on/off memory statistics\n"
-        "/stats-mcc:       turn on/off memcache statistics\n"
         "/stats-sql:       turn on/off SQL statistics\n"
         "/stats-mutex:     turn on/off mutex statistics\n"
         "    sampling      optional, default 1000\n"
@@ -211,13 +212,12 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
         "/const-ss:        get const_map_size\n"
         "/static-strings:  get number of static strings\n"
+        "/dump-static-strings: dump static strings to /tmp/static_strings\n"
         "/dump-apc:        dump all current value in APC to /tmp/apc_dump\n"
         "/dump-apc-info:   show basic APC stats\n"
         "/dump-apc-meta:   dump meta information for all objects in APC to\n"
         "                  /tmp/apc_dump_meta\n"
         "/advise-out-apc:  forcibly madvise out APC prime data\n"
-        "/dump-const:      dump all constant value in constant map to\n"
-        "                  /tmp/const_map_dump\n"
         "/random-apc:      dump the key and size of a random APC entry\n"
         "    count         number of entries to return\n"
 
@@ -393,6 +393,13 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "static-strings", 14) == 0 &&
         handleStaticStringsRequest(cmd, transport)) {
+      break;
+    }
+    if (strncmp(cmd.c_str(), "dump-static-strings", 19) == 0) {
+      auto filename = transport->getParam("file");
+      if (filename == "") filename = "/tmp/static_strings";
+      handleDumpStaticStrings(cmd, transport, filename);
+      transport->sendString("OK\n");
       break;
     }
     if (strncmp(cmd.c_str(), "vm-", 3) == 0 &&
@@ -746,8 +753,9 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                                isMain ? "" : name).str(),
                  a.used());
     });
-    appendStat("targetcache", rds::usedBytes());
-    appendStat("rds", rds::usedBytes()); // TODO(#2966387): temp double logging
+    appendStat("rds", rds::usedBytes());
+    appendStat("rds-local", rds::usedLocalBytes());
+    appendStat("rds-persistent", rds::usedPersistentBytes());
     appendStat("units", numLoadedUnits());
     appendStat("funcs", Func::nextFuncId());
     out << "}" << endl;
@@ -855,9 +863,6 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
   if (cmd == "stats-mem") {
     toggle_switch(transport, RuntimeOption::EnableMemoryStats);
     return true;
-  }
-  if (cmd == "stats-mcc") {
-    return toggle_switch(transport, RuntimeOption::EnableMemcacheStats);
   }
   if (cmd == "stats-sql") {
     return toggle_switch(transport, RuntimeOption::EnableSQLStats);
@@ -987,6 +992,20 @@ bool AdminRequestHandler::handleStaticStringsRequest(const std::string& cmd,
   std::ostringstream result;
   result << makeStaticStringCount();
   transport->sendString(result.str());
+  return true;
+}
+
+bool AdminRequestHandler::handleDumpStaticStrings(const std::string& cmd,
+                                                  Transport* transporti,
+                                                  const std::string &filename) {
+  std::vector<StringData*> list = lookupDefinedStaticStrings();
+  std::ofstream out(filename.c_str());
+  SCOPE_EXIT { out.close(); };
+  for (auto item : list) {
+    out << "----\n";
+    out << item->size() << " bytes\n";
+    out << item->toCppString() << "\n";
+  }
   return true;
 }
 

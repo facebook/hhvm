@@ -307,14 +307,14 @@ public:
   /**
    * Override BlockScope::outputPHP() to generate return type.
    */
-  virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) override;
   /**
    * Serialize the iface, not everything.
    */
-  void serialize(JSON::CodeError::OutputStream &out) const;
-  void serialize(JSON::DocTarget::OutputStream &out) const;
+  void serialize(JSON::CodeError::OutputStream &out) const override;
+  void serialize(JSON::DocTarget::OutputStream &out) const override;
 
-  bool inPseudoMain() const {
+  bool inPseudoMain() const override {
     return m_pseudoMain;
   }
 

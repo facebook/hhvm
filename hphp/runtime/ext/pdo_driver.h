@@ -426,7 +426,7 @@ struct PDOResource : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(PDOResource)
 
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   const sp_PDOConnection& conn() const { return m_conn; }
 
@@ -485,7 +485,7 @@ public:
 
   CLASSNAME_IS("PDOBoundParam")
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
 public:
   int64_t paramno;           /* if -1, then it has a name, and we don't
@@ -538,7 +538,7 @@ public:
 
   CLASSNAME_IS("PDOStatement")
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   virtual bool support(SupportedMethod method);
 

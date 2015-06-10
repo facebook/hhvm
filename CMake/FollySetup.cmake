@@ -44,3 +44,7 @@ if(CYGWIN)
 # cygwin has c99 issues with cxx compiler and headers
   add_definitions("-D_GLIBCXX_USE_C99_DYNAMIC")
 endif()
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  add_definitions("-DFOLLY_USE_LIBCPP=1")
+endif()

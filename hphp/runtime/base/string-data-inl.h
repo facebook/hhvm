@@ -33,6 +33,10 @@ inline StringData* StringData::Make(const char* data) {
   return Make(data, CopyString);
 }
 
+inline StringData* StringData::Make(const std::string& data) {
+  return Make(data.data(), data.length(), CopyString);
+}
+
 inline StringData* StringData::Make(const char* data, CopyStringMode) {
   return Make(data, strlen(data), CopyString);
 }

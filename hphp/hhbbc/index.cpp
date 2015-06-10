@@ -1411,6 +1411,66 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
   return *prep;
 }
 
+PublicSPropEntry lookup_public_static_impl(
+  const IndexData& data,
+  borrowed_ptr<const ClassInfo> cinfo,
+  SString prop
+) {
+  auto const noInfo = PublicSPropEntry{TInitGen, TInitGen, true};
+
+  if (data.publicSPropState != PublicSPropState::Valid) {
+    return noInfo;
+  }
+
+  auto const knownClsPart = [&] () -> borrowed_ptr<const PublicSPropEntry> {
+    for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
+      auto const it = ci->publicStaticProps.find(prop);
+      if (it != end(ci->publicStaticProps)) {
+        return &it->second;
+      }
+    }
+    return nullptr;
+  }();
+  auto const unkPart = [&]() -> borrowed_ptr<const Type> {
+    auto unkIt = data.unknownClassSProps.find(prop);
+    if (unkIt != end(data.unknownClassSProps)) {
+      return &unkIt->second;
+    }
+    return nullptr;
+  }();
+
+  if (knownClsPart == nullptr) {
+    return noInfo;
+  }
+
+  always_assert_flog(
+    !knownClsPart->inferredType.subtypeOf(TBottom),
+    "A public static property had type TBottom; probably "
+    "was marked uninit but didn't show up in the class 86sinit."
+  );
+  if (unkPart != nullptr) {
+    return PublicSPropEntry {
+      union_of(knownClsPart->inferredType, *unkPart),
+      union_of(knownClsPart->initializerType, *unkPart),
+      true
+    };
+  }
+  return *knownClsPart;
+}
+
+PublicSPropEntry lookup_public_static_impl(
+  const IndexData& data,
+  borrowed_ptr<const php::Class> cls,
+  SString name
+) {
+  auto const classes = find_range(data.classInfo, cls->name);
+  if (begin(classes) == end(classes) ||
+      std::next(begin(classes)) != end(classes)) {
+    return PublicSPropEntry{TInitGen, TInitGen, true};
+  }
+  return lookup_public_static_impl(data, begin(classes)->second, name);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -2054,10 +2114,6 @@ Index::lookup_private_statics(borrowed_ptr<const php::Class> cls) const {
 }
 
 Type Index::lookup_public_static(Type cls, Type name) const {
-  if (m_data->publicSPropState != PublicSPropState::Valid) {
-    return TInitGen;
-  }
-
   auto const cinfo = [&] () -> borrowed_ptr<const ClassInfo> {
     if (!is_specialized_cls(cls)) {
       return nullptr;
@@ -2069,7 +2125,6 @@ Type Index::lookup_public_static(Type cls, Type name) const {
     }
     not_reached();
   }();
-  if (!cinfo) return TInitGen;
 
   auto const vname = tv(name);
   if (!vname || (vname && vname->m_type != KindOfStaticString)) {
@@ -2077,50 +2132,17 @@ Type Index::lookup_public_static(Type cls, Type name) const {
   }
   auto const sname = vname->m_data.pstr;
 
-  auto const knownClsPart = [&] {
-    for (auto ci = cinfo; ci != nullptr; ci = ci->parent) {
-      auto const it = ci->publicStaticProps.find(sname);
-      if (it != end(ci->publicStaticProps)) {
-        return it->second.inferredType;
-      }
-    }
-    return TInitGen;
-  }();
-  auto const unkPart = [&]() -> Type {
-    auto unkIt = m_data->unknownClassSProps.find(sname);
-    if (unkIt != end(m_data->unknownClassSProps)) {
-      return unkIt->second;
-    }
-    return TBottom;
-  }();
+  return lookup_public_static_impl(*m_data, cinfo, sname).inferredType;
+}
 
-  always_assert_flog(
-    !knownClsPart.subtypeOf(TBottom),
-    "A public static property had type TBottom; probably "
-    "was marked uninit but didn't show up in the class 86sinit."
-  );
-
-  return union_of(unkPart, knownClsPart);
+Type Index::lookup_public_static(borrowed_ptr<const php::Class> cls,
+                                 SString name) const {
+  return lookup_public_static_impl(*m_data, cls, name).inferredType;
 }
 
 bool Index::lookup_public_static_immutable(borrowed_ptr<const php::Class> cls,
                                            SString name) const {
-  if (m_data->publicSPropState != PublicSPropState::Valid) {
-    return false;
-  }
-  if (m_data->unknownClassSProps.count(name)) return false;
-  auto const classes = find_range(m_data->classInfo, cls->name);
-  if (begin(classes) == end(classes) ||
-      std::next(begin(classes)) != end(classes)) {
-    return false;
-  }
-  auto const cinfo = begin(classes)->second;
-  auto const it = cinfo->publicStaticProps.find(name);
-  if (it == end(cinfo->publicStaticProps)) {
-    // Presumably protected or private.
-    return false;
-  }
-  return !it->second.everModified;
+  return !lookup_public_static_impl(*m_data, cls, name).everModified;
 }
 
 //////////////////////////////////////////////////////////////////////

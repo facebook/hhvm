@@ -333,7 +333,7 @@ SrcKey emitPrologueWork(TransID transID, Func* func, int nPassed) {
         a.  emitImmReg((intptr_t)func, argNumToRegName[0]);
         a.  emitImmReg(nPassed, argNumToRegName[1]);
         emitCall(a, TCA(raiseMissingArgument), argSet(2));
-        mcg->recordSyncPoint(a.frontier(), fixup.pcOffset, fixup.spOffset);
+        mcg->recordSyncPoint(a.frontier(), fixup);
         break;
       }
     }
@@ -527,8 +527,8 @@ SrcKey emitMagicFuncPrologue(TransID transID, Func* func, int nPassed,
 
   if (RuntimeOption::HHProfServerEnabled && callFixup) {
     mcg->recordSyncPoint(callFixup,
-                         skFuncBody.offset() - func->base(),
-                         func->numSlotsInFrame());
+                         Fixup{skFuncBody.offset() - func->base(),
+                               func->numSlotsInFrame()});
   }
 
   return skFuncBody;

@@ -228,8 +228,8 @@ struct MySQLResource : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(MySQLResource);
 
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
-  virtual bool isInvalid() const { return m_mysql->get() == nullptr; }
+  const String& o_getClassNameHook() const override { return classnameof(); }
+  bool isInvalid() const override { return m_mysql->get() == nullptr; }
 
   std::shared_ptr<MySQL> mysql() const { return m_mysql; }
 
@@ -282,7 +282,7 @@ public:
 
   CLASSNAME_IS("mysql result")
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   void close() {
     sweep();
@@ -291,7 +291,7 @@ public:
     }
   }
 
-  virtual bool isInvalid() const {
+  bool isInvalid() const override {
     if (isLocalized()) {
       return !m_rows.hasValue();
     }
@@ -384,7 +384,7 @@ struct MySQLStmt : public SweepableResourceData {
   CLASSNAME_IS("mysql stmt")
 
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   Variant close();
 

@@ -101,7 +101,7 @@ SmartPtr<StringData> String::buildString(int n) {
     assert(sd->isStatic());
     return SmartPtr<StringData>::attach(const_cast<StringData*>(sd));
   }
-  return SmartPtr<StringData>(buildStringData(n), IsUnowned{});
+  return SmartPtr<StringData>::attach(buildStringData(n));
 }
 
 String::String(int n) : m_str(buildString(n)) { }
@@ -120,7 +120,7 @@ SmartPtr<StringData> String::buildString(int64_t n) {
     assert(sd->isStatic());
     return SmartPtr<StringData>::attach(const_cast<StringData*>(sd));
   }
-  return SmartPtr<StringData>(buildStringData(n), IsUnowned{});
+  return SmartPtr<StringData>::attach(buildStringData(n));
 }
 
 String::String(int64_t n) : m_str(buildString(n)) { }
@@ -144,7 +144,7 @@ std::string convDblToStrWithPhpFormat(double n) {
   return retVal;
 }
 
-String::String(double n) : m_str(buildStringData(n), IsUnowned{}) { }
+String::String(double n) : m_str(buildStringData(n), NoIncRef{}) { }
 
 String::String(Variant&& src) : String(src.toString()) { }
 
@@ -242,12 +242,14 @@ char String::charAt(int pos) const {
 // assignments
 
 String& String::operator=(const char* s) {
-  m_str = s ? StringData::Make(s, CopyString) : nullptr;
+  m_str = SmartPtr<StringData>::attach(
+    s ? StringData::Make(s, CopyString) : nullptr);
   return *this;
 }
 
 String& String::operator=(const std::string& s) {
-  m_str = StringData::Make(s.c_str(), s.size(), CopyString);
+  m_str = SmartPtr<StringData>::attach(
+    StringData::Make(s.c_str(), s.size(), CopyString));
   return *this;
 }
 
@@ -265,12 +267,15 @@ String& String::operator=(Variant&& var) {
 String &String::operator+=(const char* s) {
   if (s && *s) {
     if (empty()) {
-      m_str = StringData::Make(s, CopyString);
+      m_str = SmartPtr<StringData>::attach(StringData::Make(s, CopyString));
     } else if (m_str->hasExactlyOneRef()) {
       auto const tmp = m_str->append(StringSlice(s, strlen(s)));
-      if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);
+      if (UNLIKELY(tmp != m_str)) {
+        m_str = SmartPtr<StringData>::attach(tmp);
+      }
     } else {
-      m_str = StringData::Make(m_str.get(), s);
+      m_str =
+        SmartPtr<StringData>::attach(StringData::Make(m_str.get(), s));
     }
   }
   return *this;
@@ -282,9 +287,13 @@ String &String::operator+=(const String& str) {
       m_str = str.m_str;
     } else if (m_str->hasExactlyOneRef()) {
       auto tmp = m_str->append(str.slice());
-      if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);
+      if (UNLIKELY(tmp != m_str)) {
+        m_str = SmartPtr<StringData>::attach(tmp);
+      }
     } else {
-      m_str = StringData::Make(m_str.get(), str.slice());
+      m_str = SmartPtr<StringData>::attach(
+        StringData::Make(m_str.get(), str.slice())
+      );
     }
   }
   return *this;
@@ -296,14 +305,19 @@ String& String::operator+=(const StringSlice& slice) {
   }
   if (m_str && m_str->hasExactlyOneRef()) {
     auto const tmp = m_str->append(slice);
-    if (UNLIKELY(tmp != m_str)) m_str = std::move(tmp);
+    if (UNLIKELY(tmp != m_str)) {
+      m_str = SmartPtr<StringData>::attach(tmp);
+    }
     return *this;
   }
   if (empty()) {
-    m_str = StringData::Make(slice.begin(), slice.size(), CopyString);
+    m_str = SmartPtr<StringData>::attach(
+      StringData::Make(slice.begin(), slice.size(), CopyString));
     return *this;
   }
-  m_str = StringData::Make(m_str.get(), slice);
+  m_str = SmartPtr<StringData>::attach(
+    StringData::Make(m_str.get(), slice)
+  );
   return *this;
 }
 
@@ -319,7 +333,7 @@ String&& operator+(String&& lhs, const char* rhs) {
 String operator+(const String & lhs, const char* rhs) {
   if (lhs.empty()) return rhs;
   if (!rhs || !*rhs) return lhs;
-  return StringData::Make(lhs.slice(), rhs);
+  return String::attach(StringData::Make(lhs.slice(), rhs));
 }
 
 String&& operator+(String&& lhs, String&& rhs) {
@@ -331,13 +345,13 @@ String operator+(String&& lhs, const String & rhs) {
 }
 
 String operator+(const String & lhs, String&& rhs) {
-  return StringData::Make(lhs.slice(), rhs.slice());
+  return String::attach(StringData::Make(lhs.slice(), rhs.slice()));
 }
 
 String operator+(const String & lhs, const String & rhs) {
   if (lhs.empty()) return rhs;
   if (rhs.empty()) return lhs;
-  return StringData::Make(lhs.slice(), rhs.slice());
+  return String::attach(StringData::Make(lhs.slice(), rhs.slice()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -513,7 +527,7 @@ void String::unserialize(VariableUnserializer *uns,
   uns->expectChar(':');
   uns->expectChar(delimiter0);
 
-  SmartPtr<StringData> px(StringData::Make(int(size)), IsUnowned{});
+  auto px = SmartPtr<StringData>::attach(StringData::Make(int(size)));
   auto const buf = px->bufferSlice();
   assert(size <= buf.len);
   uns->read(buf.ptr, size);

@@ -58,7 +58,7 @@ class SetIterator;
  * All native collection class have their m_size field at the same
  * offset in the object.
  */
-constexpr ptrdiff_t FAST_COLLECTION_SIZE_OFFSET = use_lowptr ? 16 : 20;
+constexpr ptrdiff_t FAST_COLLECTION_SIZE_OFFSET = use_lowptr ? 16 : 24;
 inline size_t getCollectionSize(const ObjectData* od) {
   assert(od->isCollection());
   return *reinterpret_cast<const uint32_t*>(
@@ -90,7 +90,6 @@ void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
 // c_Vector and c_ImmVector. It doesn't map to any PHP-land class.
 
 class BaseVector : public ExtCollectionObjectData {
-
  public:
   void t___construct(const Variant& iterable = null_variant);
 
@@ -308,10 +307,24 @@ class BaseVector : public ExtCollectionObjectData {
   Variant popFront();
 
  protected:
+  // Make sure this one is inlined all the way
+  explicit BaseVector(Class* cls, HeaderKind kind)
+    : ExtCollectionObjectData(cls, kind)
+    , m_size(0)
+    , m_versionAndCap(0)
+    , m_data(packedData(staticEmptyArray()))
+  {}
+  explicit BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
+    : ExtCollectionObjectData(cls, kind)
+    , m_size(arr->size())
+    , m_versionAndCap(arr->cap())
+    , m_data(packedData(arr))
+  {
+    assertx(arr == staticEmptyArray() || arr->isPacked());
+  }
+  explicit BaseVector(Class* cls, HeaderKind, uint32_t cap);
 
-  explicit BaseVector(Class* cls, HeaderKind, uint32_t cap = 0);
-  explicit BaseVector(Class* cls, HeaderKind, ArrayData* arr);
-  /*virtual*/ ~BaseVector();
+  ~BaseVector();
 
   Cell* data() const { return m_data; }
   void grow();
@@ -447,11 +460,21 @@ class BaseVector : public ExtCollectionObjectData {
 
   static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
-
   // Fields
-
+#ifndef USE_LOWPTR
+  // Keep `m_size' aligned at the same offset for all collection classes.
+  UNUSED uint32_t dummy;
+#endif
   uint32_t m_size;
-  uint32_t m_capacity;
+
+  union {
+    struct {
+      uint32_t m_capacity;
+      int32_t m_version;
+    };
+    int64_t m_versionAndCap;
+  };
+
 
   // m_data is an interior pointer into an ArrayData as computed by the
   // packedData() helper function. The ArrayData's address can be computed
@@ -467,8 +490,6 @@ class BaseVector : public ExtCollectionObjectData {
   // buffer; instead we rely on the ArrayData's ref counting to deal
   // with freeing the buffer at the right time.
   Object m_immCopy;
-
-  int32_t m_version;
 
  private:
 
@@ -503,10 +524,14 @@ class c_Vector : public BaseVector {
   DECLARE_CLASS_NO_SWEEP(Vector)
 
  public:
-  explicit c_Vector(Class* cls = c_Vector::classof(), uint32_t cap = 0);
+  explicit c_Vector(Class* cls = c_Vector::classof())
+    : BaseVector(cls, HeaderKind::Vector) { }
+  explicit c_Vector(Class* cls, ArrayData* arr)
+    : BaseVector(cls, HeaderKind::Vector, arr) { }
+  explicit c_Vector(Class* cls, uint32_t cap)
+    : BaseVector(cls, HeaderKind::Vector, cap) { }
   explicit c_Vector(uint32_t cap, Class* cls = c_Vector::classof())
     : c_Vector(cls, cap) { }
-  explicit c_Vector(Class* cls, ArrayData* arr);
 
   static c_Vector* Clone(ObjectData* obj);
 
@@ -614,10 +639,14 @@ class c_ImmVector : public BaseVector {
   static Object ti_fromkeysof(const Variant& container);
 
  public:
-  explicit c_ImmVector(Class* cls = c_ImmVector::classof(), uint32_t cap = 0);
+  explicit c_ImmVector(Class* cls = c_ImmVector::classof())
+    : BaseVector(cls, HeaderKind::ImmVector) { }
+  explicit c_ImmVector(Class* cls, ArrayData* arr)
+    : BaseVector(cls, HeaderKind::ImmVector, arr) { }
+  explicit c_ImmVector(Class* cls, uint32_t cap)
+    : BaseVector(cls, HeaderKind::ImmVector, cap) { }
   explicit c_ImmVector(uint32_t cap, Class* cls = c_ImmVector::classof())
     : c_ImmVector(cls, cap) { }
-  explicit c_ImmVector(Class* cls, ArrayData* arr);
 
   static c_ImmVector* Clone(ObjectData* obj);
 
@@ -648,15 +677,29 @@ ALWAYS_INLINE MixedArray* staticEmptyMixedArray() {
 
 class HashCollection : public ExtCollectionObjectData {
  public:
-  explicit HashCollection(Class* cls, HeaderKind, uint32_t cap = 0);
-  explicit HashCollection(Class* cls, HeaderKind, ArrayData* arr);
+  explicit HashCollection(Class* cls, HeaderKind kind)
+    : ExtCollectionObjectData(cls, kind)
+    , m_versionAndSize(0)
+    , m_data(mixedData(staticEmptyMixedArray()))
+  {}
+  explicit HashCollection(Class* cls, HeaderKind kind, ArrayData* arr)
+    : ExtCollectionObjectData(cls, kind)
+    , m_versionAndSize(arr->m_size)
+    , m_data(mixedData(MixedArray::asMixed(arr)))
+  {}
+  explicit HashCollection(Class* cls, HeaderKind kind, uint32_t cap);
 
   typedef MixedArray::Elm Elm;
 
  protected:
-  uint32_t m_size;       // Number of values
-  int32_t m_version;     // Version number (high bit used to indicate if this
-                         //   collection might contain int-like string keys)
+  union {
+    struct {
+      uint32_t m_size;    // Number of values
+      int32_t m_version;  // Version number (high bit used to indicate if this
+    };                    //   collection might contain int-like string keys)
+    int64_t m_versionAndSize;
+  };
+
   Elm* m_data;           // Elm store.
 
   // A pointer to an immutable collection that shares its buffer with
@@ -707,7 +750,11 @@ class HashCollection : public ExtCollectionObjectData {
  protected:
   inline Elm* data() { return m_data; }
   inline const Elm* data() const { return m_data; }
-  inline int32_t* hashTab() const { return (int32_t*)(m_data + cap()); }
+  inline int32_t* hashTab() const {
+    return reinterpret_cast<int32_t*>(
+      m_data + static_cast<size_t>(arrayData()->scale()) * 3
+    );
+  }
 
   MixedArray* arrayData() {
     auto* ret = getArrayFromMixedData(m_data);
@@ -790,21 +837,6 @@ class HashCollection : public ExtCollectionObjectData {
     }
   }
 
-  // We use this funny-looking helper to make g++ use lea and shl
-  // instructions instead of imul when indexing into m_data
-  inline static const HashCollection::Elm*
-  fetchElm(const Elm* data, int64_t pos) {
-    assert(sizeof(Elm) == 24);
-    assert(sizeof(int64_t) == 8);
-    int64_t index = 3 * pos;
-    int64_t* ptr = (int64_t*)data;
-    return (const Elm*)(&ptr[index]);
-  }
-  inline static HashCollection::Elm*
-  fetchElm(Elm* data, int64_t pos) {
-    return (Elm*)fetchElm((const Elm*)data, pos);
-  }
-
   void throwTooLarge() ATTRIBUTE_NORETURN;
   void throwReserveTooLarge() ATTRIBUTE_NORETURN;
   int32_t* warnUnbalanced(size_t n, int32_t* ei) const;
@@ -834,21 +866,21 @@ class HashCollection : public ExtCollectionObjectData {
   template <class Hit>
   ssize_t findImpl(size_t h0, Hit) const;
   ssize_t find(int64_t h) const;
-  ssize_t find(const StringData* s, strhash_t prehash) const;
+  ssize_t find(const StringData* s, strhash_t h) const;
 
   template <class Hit>
   int32_t* findForInsertImpl(size_t h0, Hit) const;
   int32_t* findForInsert(int64_t h) const;
-  int32_t* findForInsert(const StringData* s, strhash_t prehash) const;
+  int32_t* findForInsert(const StringData* s, strhash_t h) const;
 
   ssize_t findForRemove(int64_t h) {
     assert(canMutateBuffer());
     return arrayData()->findForRemove(h, false);
   }
 
-  ssize_t findForRemove(const StringData* s, strhash_t prehash) {
+  ssize_t findForRemove(const StringData* s, strhash_t h) {
     assert(canMutateBuffer());
-    return arrayData()->findForRemove(s, prehash);
+    return arrayData()->findForRemove(s, h);
   }
 
   int32_t* findForNewInsert(size_t h0) const;
@@ -908,10 +940,10 @@ class HashCollection : public ExtCollectionObjectData {
   }
 
   inline Elm* elmLimit() {
-    return fetchElm(data(), posLimit());
+    return data() + posLimit();
   }
   inline const Elm* elmLimit() const {
-    return fetchElm(data(), posLimit());
+    return data() + posLimit();
   }
 
   inline static Elm* nextElm(Elm* e, Elm* eLimit) {
@@ -934,7 +966,7 @@ class HashCollection : public ExtCollectionObjectData {
   }
 
   static bool isTombstone(ssize_t pos, const Elm* data) {
-    return isTombstoneType(fetchElm(data, pos)->data.m_type);
+    return isTombstoneType(data[pos].data.m_type);
   }
 
   bool isTombstone(ssize_t pos) const {
@@ -1037,7 +1069,7 @@ class HashCollection : public ExtCollectionObjectData {
     *ei = i;
     setPosLimit(i + 1);
     incSize();
-    return *fetchElm(data(), i);
+    return data()[i];
   }
 
   HashCollection::Elm& allocElmFront(int32_t* ei);
@@ -1062,7 +1094,7 @@ class HashCollection : public ExtCollectionObjectData {
 
   const Elm* iter_elm(ssize_t pos) const {
     assert(iter_valid(pos));
-    return fetchElm(data(), pos);
+    return &(data()[pos]);
   }
 
   ssize_t iter_begin() const {
@@ -1314,9 +1346,11 @@ class BaseMap : public HashCollection {
     set(key.asCell(), data.asCell());
   }
 
- protected: // BaseMap is an abstract class
-  explicit BaseMap(Class* cls, HeaderKind, uint32_t cap = 0);
-  explicit BaseMap(Class* cls, HeaderKind, ArrayData* arr);
+ protected:
+  // BaseMap is an abstract class, with no additional member needing
+  // initialization.
+  using HashCollection::HashCollection;
+
   ~BaseMap();
 
  public:
@@ -1474,10 +1508,14 @@ class c_Map : public BaseMap {
   DECLARE_CLASS_NO_SWEEP(Map)
 
  public:
-  explicit c_Map(Class* cls = c_Map::classof(), uint32_t cap = 0);
+  explicit c_Map(Class* cls = c_Map::classof())
+    : BaseMap(cls, HeaderKind::Map) { }
+  explicit c_Map(Class* cls, ArrayData* arr)
+    : BaseMap(cls, HeaderKind::Map, arr) { }
+  explicit c_Map(Class* cls, uint32_t cap)
+    : BaseMap(cls, HeaderKind::Map, cap) { }
   explicit c_Map(uint32_t cap, Class* cls = c_Map::classof())
     : c_Map(cls, cap) { }
-  explicit c_Map(Class* cls, ArrayData* arr);
 
   static c_Map* Clone(ObjectData* obj);
 
@@ -1527,10 +1565,14 @@ class c_ImmMap : public BaseMap {
   DECLARE_CLASS_NO_SWEEP(ImmMap)
 
  public:
-  explicit c_ImmMap(Class* cls = c_ImmMap::classof(), uint32_t cap = 0);
+  explicit c_ImmMap(Class* cls = c_ImmMap::classof())
+    : BaseMap(cls, HeaderKind::ImmMap) { }
+  explicit c_ImmMap(Class* cls, ArrayData* arr)
+    : BaseMap(cls, HeaderKind::ImmMap, arr) { }
+  explicit c_ImmMap(Class* cls, uint32_t cap)
+    : BaseMap(cls, HeaderKind::ImmMap, cap) { }
   explicit c_ImmMap(uint32_t cap, Class* cls = c_ImmMap::classof())
     : c_ImmMap(cls, cap) { }
-  explicit c_ImmMap(Class* cls, ArrayData* arr);
 
   static c_ImmMap* Clone(ObjectData* obj);
 
@@ -1650,9 +1692,7 @@ class BaseSet : public HashCollection {
       BaseSet::throwBadValueType();
     }
     if (LIKELY(p != Empty)) {
-      return reinterpret_cast<TypedValue*>(
-        &HashCollection::fetchElm(st->data(), p)->data
-      );
+      return reinterpret_cast<TypedValue*>(&st->data()[p].data);
     }
     if (!throwOnMiss) {
       return nullptr;
@@ -1773,10 +1813,11 @@ class BaseSet : public HashCollection {
   static php_fromArrays(int _argc, const Array& _argv = null_array);
 
  protected:
-  // BaseSet is an abstract class.
-  explicit BaseSet(Class* cls, HeaderKind, uint32_t cap = 0);
-  explicit BaseSet(Class* cls, HeaderKind, ArrayData* arr);
-  /* virtual */ ~BaseSet();
+  // BaseSet is an abstract class with no additional member needing
+  // initialization.
+  using HashCollection::HashCollection;
+
+  ~BaseSet();
 
  private:
   // Helpers
@@ -1807,11 +1848,14 @@ class c_Set : public BaseSet {
 
  public:
   // PHP-land methods.
-
-  explicit c_Set(Class* cls = c_Set::classof(), uint32_t cap = 0);
+  explicit c_Set(Class* cls = c_Set::classof())
+    : BaseSet(cls, HeaderKind::Set) { }
+  explicit c_Set(Class* cls, ArrayData* arr)
+    : BaseSet(cls, HeaderKind::Set, arr) { }
+  explicit c_Set(Class* cls, uint32_t cap)
+    : BaseSet(cls, HeaderKind::Set, cap) { }
   explicit c_Set(uint32_t cap, Class* cls = c_Set::classof())
     : c_Set(cls, cap) { }
-  explicit c_Set(Class* cls, ArrayData* arr);
 
   Object t_add(const Variant& val);
   Object t_addall(const Variant& val);
@@ -1888,10 +1932,14 @@ class c_ImmSet : public BaseSet {
   String t___tostring();
 
  public:
-  explicit c_ImmSet(Class* cls = c_ImmSet::classof(), uint32_t cap = 0);
+  explicit c_ImmSet(Class* cls = c_ImmSet::classof())
+    : BaseSet(cls, HeaderKind::ImmSet) { }
+  explicit c_ImmSet(Class* cls, ArrayData* arr)
+    : BaseSet(cls, HeaderKind::ImmSet, arr) { }
+  explicit c_ImmSet(Class* cls, uint32_t cap)
+    : BaseSet(cls, HeaderKind::ImmSet, cap) { }
   explicit c_ImmSet(uint32_t cap, Class* cls = c_ImmSet::classof())
     : c_ImmSet(cls, cap) { }
-  explicit c_ImmSet(Class* cls, ArrayData* arr);
 
   static void Unserialize(ObjectData* obj, VariableUnserializer* uns,
                           int64_t sz, char type);
@@ -1914,8 +1962,18 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
  public:
   enum class NoInit {};
 
-  explicit c_Pair(Class* cls = c_Pair::classof());
-  explicit c_Pair(NoInit, Class* cls = c_Pair::classof());
+  explicit c_Pair(Class* cls = c_Pair::classof())
+    : ExtObjectDataFlags(cls, HeaderKind::Pair)
+    , m_size(2)
+  {
+    tvWriteNull(&elm0);
+    tvWriteNull(&elm1);
+  }
+  explicit c_Pair(NoInit, Class* cls = c_Pair::classof())
+    : ExtObjectDataFlags(cls, HeaderKind::Pair)
+    , m_size(0)
+  {}
+
   void reserve(int64_t sz) { assertx(sz == 2); }
   ~c_Pair();
   void t___construct(int _argc, const Array& _argv = null_array);
@@ -2032,9 +2090,13 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
  private:
   static void throwBadKeyType() ATTRIBUTE_NORETURN;
 
+#ifndef USE_LOWPTR
+  // Add 4 bytes here to keep m_size aligned the same way as in BaseVector and
+  // HashCollection.
+  UNUSED uint32_t dummy;
+#endif
   uint32_t m_size;
 
-  // TODO Can we add something here to make sure elm0 is 16-byte aligned?
   TypedValue elm0;
   TypedValue elm1;
 
@@ -2058,6 +2120,16 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+// Collection constructors do not throw exceptions, let's not try to catch
+// exceptions here.
+template<class T, class... Args> T* newCollectionObj(Args&&... args) {
+  static_assert(std::is_convertible<T*,BaseVector*>::value ||
+                std::is_convertible<T*,HashCollection*>::value ||
+                std::is_convertible<T*,c_Pair*>::value, "");
+  auto const mem = MM().smartMallocSize(sizeof(T));
+  return new (mem) T(std::forward<Args>(args)...);
+}
 
 }
 

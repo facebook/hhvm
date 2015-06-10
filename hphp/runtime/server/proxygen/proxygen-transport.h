@@ -117,79 +117,79 @@ public:
   /**
    * Request URI.
    */
-  virtual const char *getUrl();
-  virtual const char *getRemoteHost();
-  virtual uint16_t getRemotePort();
+  const char *getUrl() override;
+  const char *getRemoteHost() override;
+  uint16_t getRemotePort() override;
 
   /**
    * POST request's data.
    */
-  virtual const void *getPostData(int &size);
-  virtual bool hasMorePostData();
-  virtual const void *getMorePostData(int &size);
+  const void *getPostData(int &size) override;
+  bool hasMorePostData() override;
+  const void *getMorePostData(int &size) override;
 
   // TODO: is get getFiles required?
 
   /**
    * Is this a GET, POST or anything?
    */
-  virtual Method getMethod();
-  virtual const char *getExtendedMethod();
+  Method getMethod() override;
+  const char *getExtendedMethod() override;
 
   /**
    * What version of HTTP was the request?
    */
-  virtual std::string getHTTPVersion() const;
+  std::string getHTTPVersion() const override;
 
   /**
    * Get http request size.
    */
-  virtual int getRequestSize() const;
+  int getRequestSize() const override;
 
   /**
    * Get request header(s).
    */
-  virtual std::string getHeader(const char *name);
-  virtual void getHeaders(HeaderMap &headers);
+  std::string getHeader(const char *name) override;
+  void getHeaders(HeaderMap &headers) override;
 
   /**
    * Add/remove a response header.
    */
-  virtual void addHeaderImpl(const char *name, const char *value);
-  virtual void removeHeaderImpl(const char *name);
+  void addHeaderImpl(const char *name, const char *value) override;
+  void removeHeaderImpl(const char *name) override;
 
   /**
    * Add/remove a request header. Default is no-op, because not all transports
    * need to support incoming request header manipulations.
    */
-  virtual void addRequestHeaderImpl(const char *name, const char *value);
-  virtual void removeRequestHeaderImpl(const char *name);
+  void addRequestHeaderImpl(const char *name, const char *value) override;
+  void removeRequestHeaderImpl(const char *name) override;
 
   /**
    * Send back a response with specified code.
    * Caller deletes data, callee must copy
    */
-  virtual void sendImpl(const void *data, int size, int code,
-                        bool chunked, bool eom);
+  void sendImpl(const void *data, int size, int code,
+                bool chunked, bool eom) override;
 
   /**
    * Override to implement more send end logic.
    */
-  virtual void onSendEndImpl();
+  void onSendEndImpl() override;
 
-  virtual bool supportsServerPush();
+  bool supportsServerPush() override;
 
-  virtual int64_t pushResource(const char *host, const char *path,
-                               uint8_t priority, const Array &headers,
-                               const void *data, int size, bool eom);
+  int64_t pushResource(const char *host, const char *path,
+                       uint8_t priority, const Array &headers,
+                       const void *data, int size, bool eom) override;
 
-  virtual void pushResourceBody(int64_t id,
-                                const void *data, int size, bool eom);
+  void pushResourceBody(int64_t id,
+                        const void *data, int size, bool eom) override;
 
   /**
    * Need this implementation to break keep-alive connections.
    */
-  virtual bool isServerStopping();
+  bool isServerStopping() override;
 
   void finish(std::shared_ptr<ProxygenTransport> &&transport);
 
@@ -208,8 +208,7 @@ public:
   }
 
   // HTTPTransactionHandler interface
-  virtual void setTransaction(proxygen::HTTPTransaction* txn)
-    noexcept {
+  void setTransaction(proxygen::HTTPTransaction* txn) noexcept override {
     {
       Lock lock(this);
       m_clientTxn = txn;
@@ -222,7 +221,7 @@ public:
     m_localPort = localAddr.getPort();
   };
 
-  virtual void detachTransaction() noexcept {
+  void detachTransaction() noexcept override {
     VLOG(5) << "detachTransaction ProxygenTransport=" << (uint64_t) this;
     {
       Lock lock(this);
@@ -231,22 +230,21 @@ public:
     m_transactionReference.reset();
   }
 
-  virtual void onHeadersComplete(
-    std::unique_ptr<proxygen::HTTPMessage> msg) noexcept;
+  void onHeadersComplete(
+    std::unique_ptr<proxygen::HTTPMessage> msg) noexcept override;
 
-  virtual void onBody(std::unique_ptr<folly::IOBuf> chain) noexcept;
+  void onBody(std::unique_ptr<folly::IOBuf> chain) noexcept override;
 
-  virtual void onChunkHeader(size_t length) noexcept {};
+  void onChunkHeader(size_t length) noexcept override {};
 
-  virtual void onChunkComplete() noexcept {};
+  void onChunkComplete() noexcept override {};
 
-  virtual void onTrailers(
-    std::unique_ptr<proxygen::HTTPHeaders> trailers) noexcept {
+  void onTrailers(
+    std::unique_ptr<proxygen::HTTPHeaders> trailers) noexcept override {
     Logger::Error("HPHP ate the trailers");
   }
 
-  virtual void onUpgrade(
-      proxygen::UpgradeProtocol protocol) noexcept {
+  void onUpgrade(proxygen::UpgradeProtocol protocol) noexcept override {
     Logger::Error("HPHP received upgrade");
   }
 
@@ -257,19 +255,19 @@ public:
    * receiving this message. This Transaction is still valid, and work
    * may still occur on it until detachTransaction is called.
    */
-  virtual void onEOM() noexcept;
+  void onEOM() noexcept override;
 
   // error functions always use requestDoneLocking in case we are on
   // the POST path
-  virtual void onError(const proxygen::HTTPException& error) noexcept;
+  void onError(const proxygen::HTTPException& error) noexcept override;
 
-  virtual void onEgressPaused() noexcept {}
+  void onEgressPaused() noexcept override { }
 
-  virtual void onEgressResumed() noexcept {}
+  void onEgressResumed() noexcept override { }
 
   void messageAvailable(ResponseMessage&& message);
 
-  void timeoutExpired() noexcept;
+  void timeoutExpired() noexcept override;
 
   void removePushTxn(uint64_t id) {
     Lock lock(this);

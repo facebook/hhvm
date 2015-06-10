@@ -114,7 +114,7 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
 
 interface Serializable {
   public function serialize(): string;
-  public function unserialize(string $serialized): void;
+  public function unserialize($serialized): void;
 }
 
 interface Countable {

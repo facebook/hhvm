@@ -10,6 +10,16 @@ HHVM (aka the HipHop Virtual Machine) is an open-source virtual machine designed
 
 HHVM should be used together with a FastCGI-based webserver like [nginx](https://github.com/facebook/hhvm/wiki/FastCGI#making-it-work-with-nginx) or [apache](https://github.com/facebook/hhvm/wiki/FastCGI#making-it-work-with-apache).
 
+## Reporting and Fixing Security Issues
+
+Please do not open GitHub issues or pull requests - this makes the problem
+immediately visible to everyone, including malicious actors. Security issues in
+HHVM can be safely reported via HHVM's Whitehat Bug Bounty program:
+
+https://www.facebook.com/whitehat
+
+Facebook's security team will triage your report and determine whether or not
+is it eligible for a bounty under our program.
 
 ## FAQ
 

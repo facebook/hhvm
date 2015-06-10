@@ -202,13 +202,14 @@ void emitEntryAssertions(IRGS& irgs, const Func* func, SrcKey sk) {
 /*
  * Emit type and reffiness prediction guards.
  */
-void emitPredictionGuards(IRGS& irgs,
+void emitPredictionsAndPreConditions(IRGS& irgs,
                           const RegionDesc& region,
                           const RegionDesc::BlockPtr block,
                           bool isEntry) {
   auto const sk = block->start();
   auto const bcOff = sk.offset();
-  auto typePreds = makeMapWalker(block->typePreds());
+  auto typePredictions = makeMapWalker(block->typePredictions());
+  auto typePreConditions = makeMapWalker(block->typePreConditions());
   auto refPreds  = makeMapWalker(block->reffinessPreds());
 
   // If the block has a next retranslations in the chain that is a
@@ -225,33 +226,46 @@ void emitPredictionGuards(IRGS& irgs,
     emitEntryAssertions(irgs, block->func(), sk);
   }
 
-  const bool emitPredictions = RuntimeOption::EvalHHIRConstrictGuards;
+  auto emitTypePredictions = [&] {
+    if (!RuntimeOption::EvalHHIRConstrictGuards) return;
 
-  // Emit type guards.
-  while (typePreds.hasNext(sk)) {
-    auto const& pred = typePreds.next();
-    auto type = pred.type;
-    auto loc  = pred.location;
-    if (type <= TCls) {
-      // Do not generate guards for class; instead assert the type.
-      assertx(loc.tag() == RegionDesc::Location::Tag::Stack);
-      irgen::assertTypeLocation(irgs, loc, type);
-    } else if (emitPredictions) {
+    while (typePredictions.hasNext(sk)) {
+      auto const& pred = typePredictions.next();
+      auto type = pred.type;
+      auto loc  = pred.location;
       irgen::predictTypeLocation(irgs, loc, type);
-    } else {
-      // Check inner type eagerly if it is the first block during profiling.
-      // Otherwise only check for BoxedInitCell.
-      bool checkOuterTypeOnly =
-        !isEntry || mcg->tx().mode() != TransKind::Profile;
-      irgen::checkTypeLocation(irgs, loc, type, bcOff, checkOuterTypeOnly);
     }
-  }
+  };
 
-  // Emit reffiness guards.
-  while (refPreds.hasNext(sk)) {
-    auto const& pred = refPreds.next();
-    irgen::checkRefs(irgs, pred.arSpOffset, pred.mask, pred.vals, bcOff);
-  }
+  auto emitTypePreConditionChecks = [&] {
+    while (typePreConditions.hasNext(sk)) {
+      auto const& preCond = typePreConditions.next();
+      auto type = preCond.type;
+      auto loc  = preCond.location;
+      if (type <= TCls) {
+        // Do not generate guards for class; instead assert the type.
+        assertx(loc.tag() == RegionDesc::Location::Tag::Stack);
+        irgen::assertTypeLocation(irgs, loc, type);
+      } else {
+        // Check inner type eagerly if it is the first block during profiling.
+        // Otherwise only check for BoxedInitCell.
+        bool checkOuterTypeOnly =
+          !isEntry || mcg->tx().mode() != TransKind::Profile;
+        irgen::checkTypeLocation(irgs, loc, type, bcOff, checkOuterTypeOnly);
+      }
+    }
+  };
+
+  auto emitReffinessGuards = [&] {
+    while (refPreds.hasNext(sk)) {
+      auto const& pred = refPreds.next();
+      irgen::checkRefs(irgs, pred.arSpOffset, pred.mask, pred.vals, bcOff);
+    }
+  };
+
+  emitTypePredictions();
+  emitTypePreConditionChecks();
+  emitReffinessGuards();
 
   // Finish emitting guards, and emit profiling counters.
   if (isEntry) {
@@ -284,7 +298,7 @@ void emitPredictionGuards(IRGS& irgs,
     }
   }
 
-  assertx(!typePreds.hasNext());
+  assertx(!typePredictions.hasNext());
   assertx(!refPreds.hasNext());
 }
 
@@ -620,7 +634,7 @@ TranslateResult irGenRegion(IRGS& irgs,
     auto const isEntry = block == region.entry();
     auto const checkOuterTypeOnly =
       !isEntry || mcg->tx().mode() != TransKind::Profile;
-    emitPredictionGuards(irgs, region, block, isEntry);
+    emitPredictionsAndPreConditions(irgs, region, block, isEntry);
     irb.resetGuardFailBlock();
 
     // Generate IR for each bytecode instruction in this block.
@@ -689,6 +703,8 @@ TranslateResult irGenRegion(IRGS& irgs,
         always_assert_flog(!toInterp.count(psk),
                            "IR generation failed with {}\n",
                            exn.what());
+        FTRACE(1, "ir generation for {} failed with {}\n",
+          inst.toString(), exn.what());
         toInterp.insert(psk);
         return TranslateResult::Retry;
       }

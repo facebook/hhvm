@@ -882,7 +882,16 @@ void emit_class(EmitUnitState& state,
   auto const privateProps   = state.index.lookup_private_props(&cls);
   auto const privateStatics = state.index.lookup_private_statics(&cls);
   for (auto& prop : cls.properties) {
-    auto const repoTy = [&] (const PropState& ps) -> RepoAuthType {
+    auto const makeRat = [&] (const Type& ty) -> RepoAuthType {
+      if (ty.couldBe(TCls)) {
+        return RepoAuthType{};
+      }
+      auto const rat = make_repo_type(*state.index.array_table_builder(), ty);
+      merge_repo_auth_type(ue, rat);
+      return rat;
+    };
+
+    auto const privPropTy = [&] (const PropState& ps) -> Type {
       /*
        * Skip closures, because the types of their used vars can be
        * communicated via assert opcodes right now.  At the time of this
@@ -890,15 +899,20 @@ void emit_class(EmitUnitState& state,
        * properties, since closure properties are only used internally by the
        * runtime, not directly via opcodes like CGetM.
        */
-      if (is_closure(cls)) return RepoAuthType{};
+      if (is_closure(cls)) return Type{};
 
       auto it = ps.find(prop.name);
-      if (it == end(ps)) return RepoAuthType{};
-      auto const rat = make_repo_type(*state.index.array_table_builder(),
-                                      it->second);
-      merge_repo_auth_type(ue, rat);
-      return rat;
+      if (it == end(ps)) return Type{};
+      return it->second;
     };
+
+    Type propTy;
+    auto const attrs = prop.attrs;
+    if (attrs & AttrPrivate) {
+      propTy = privPropTy((attrs & AttrStatic) ? privateStatics : privateProps);
+    } else if ((attrs & AttrPublic) && (attrs & AttrStatic)) {
+      propTy = state.index.lookup_public_static(&cls, prop.name);
+    }
 
     pce->addProperty(
       prop.name,
@@ -906,7 +920,7 @@ void emit_class(EmitUnitState& state,
       prop.typeConstraint,
       prop.docComment,
       &prop.val,
-      (prop.attrs & AttrStatic) ? repoTy(privateStatics) : repoTy(privateProps)
+      makeRat(propTy)
     );
   }
 

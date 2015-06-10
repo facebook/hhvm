@@ -134,7 +134,7 @@ static void setHotFuncAttr() {
     while (queue.size()) {
       auto f = queue.top().first;
       queue.pop();
-      const_cast<Func*>(f)->setHot();
+      const_cast<Func*>(f)->setAttrs(f->attrs() | AttrHot);
     }
   }
 

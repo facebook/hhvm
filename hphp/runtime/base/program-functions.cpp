@@ -644,7 +644,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
     }
     String file = empty_string();
     if (argc > 0) {
-      file = StringData::Make(argv[0], CopyString);
+      file = String::attach(StringData::Make(argv[0], CopyString));
     }
     serverArr.set(s_REQUEST_START_TIME, now);
     serverArr.set(s_REQUEST_TIME, now);

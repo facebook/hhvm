@@ -76,8 +76,8 @@ void Link<T>::bind(Mode mode) {
 //////////////////////////////////////////////////////////////////////
 
 template<class T, size_t Align>
-Link<T> bind(Symbol key, Mode mode) {
-  return Link<T>(detail::bindImpl(key, mode, sizeof(T), Align));
+Link<T> bind(Symbol key, Mode mode, size_t extraSize) {
+  return Link<T>(detail::bindImpl(key, mode, sizeof(T) + extraSize, Align));
 }
 
 template<class T>

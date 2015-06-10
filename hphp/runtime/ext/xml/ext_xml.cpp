@@ -76,7 +76,7 @@ public:
   virtual ~XmlParser();
   void cleanupImpl();
   CLASSNAME_IS("xml");
-  virtual const String& o_getClassNameHook() const;
+  const String& o_getClassNameHook() const override;
 
   int case_folding{0};
   XML_Parser parser{nullptr};

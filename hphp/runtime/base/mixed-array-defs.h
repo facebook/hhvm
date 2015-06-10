@@ -43,7 +43,7 @@ MixedArray::Elm* mixedData(const MixedArray* arr) {
 }
 
 ALWAYS_INLINE int32_t* mixedHash(MixedArray::Elm* data, uint32_t scale) {
-  return reinterpret_cast<int32_t*>(data + MixedArray::Capacity(scale));
+  return reinterpret_cast<int32_t*>(data + static_cast<size_t>(scale) * 3);
 }
 
 template<class F> void MixedArray::scan(F& mark) const {
@@ -88,8 +88,49 @@ bool MixedArray::isFull() const {
   return m_used == capacity();
 }
 
-inline void MixedArray::initHash(int32_t* hash, size_t tableSize) {
-  wordfill(hash, Empty, tableSize);
+ALWAYS_INLINE
+void MixedArray::InitSmall(MixedArray* a, RefCount count, uint32_t size,
+                           int64_t nextIntKey) {
+  // Intentionally initialize hash table before header.
+#ifdef __x86_64__
+  static_assert(MixedArray::Empty == -1, "");
+  static_assert(MixedArray::SmallSize == 3, "");
+  static_assert(sizeof(MixedArray) +
+                MixedArray::SmallSize * sizeof(MixedArray::Elm) == 104, "");
+  __asm__ __volatile__(
+    "pcmpeqd    %%xmm0, %%xmm0\n"          // xmm0 <- 11111....
+    "movdqu     %%xmm0, 104(%0)\n"
+      : : "r"(a)
+  );
+#else
+  auto const hash = a->hashTab();
+  auto const emptyVal = int64_t{MixedArray::Empty};
+  reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
+  reinterpret_cast<int64_t*>(hash)[1] = emptyVal;
+#endif
+  a->m_sizeAndPos = size; // pos=0
+  a->m_hdr.init(HeaderKind::Mixed, count);
+  a->m_scale_used = MixedArray::SmallScale | uint64_t(size) << 32;
+  a->m_nextKI = nextIntKey;
+}
+
+inline void MixedArray::initHash(int32_t* hash, uint32_t scale) {
+#if defined(__x86_64__)
+  static_assert(Empty == -1, "The following fills with all 1's.");
+  assertx(HashSize(scale) == scale * 4);
+
+  uint64_t offset = static_cast<uint32_t>(scale) * 16;
+  __asm__ __volatile__(
+    "pcmpeqd    %%xmm0, %%xmm0\n"          // xmm0 <- 11111....
+    ".l%=:\n"
+    "sub        $0x10, %0\n"
+    "movdqu     %%xmm0, (%1, %0)\n"
+    "ja         .l%=\n"
+      : "+r"(offset) : "r"(hash) : "%xmm0"
+  );
+#else
+  wordfill(hash, Empty, HashSize(scale));
+#endif
 }
 
 inline int32_t*
@@ -108,25 +149,27 @@ ALWAYS_INLINE int32_t*
 MixedArray::findForNewInsertCheckUnbalanced(int32_t* table, size_t mask,
                                             size_t h0) const {
   assert(!isPacked());
-  size_t balanceLimit = size_t(RuntimeOption::MaxArrayChain);
-  for (size_t i = 1, probe = h0;; ++i) {
+  uint32_t balanceLimit = RuntimeOption::MaxArrayChain;
+  for (uint32_t i = 1, probe = h0;; ++i) {
     auto ei = &table[probe & mask];
     if (!validPos(*ei)) {
       return LIKELY(i <= balanceLimit) ? ei : warnUnbalanced(i, ei);
     }
     probe += i;
-    assert(i <= mask && probe == h0 + ((i + i * i) / 2));
+    assertx(i <= mask);
+    assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
   }
 }
 
 ALWAYS_INLINE int32_t*
 MixedArray::findForNewInsert(int32_t* table, size_t mask, size_t h0) const {
   assert(!isPacked());
-  for (size_t i = 1, probe = h0;; ++i) {
+  for (uint32_t i = 1, probe = h0;; ++i) {
     auto ei = &table[probe & mask];
     if (!validPos(*ei)) return ei;
     probe += i;
-    assert(i <= mask && probe == h0 + ((i + i * i) / 2));
+    assertx(i <= mask);
+    assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
   }
 }
 
@@ -240,8 +283,8 @@ inline ArrayData* MixedArray::addValNoAsserts(StringData* key, Cell data) {
   auto& e = allocElm(ei);
   e.setStrKey(key, h);
   cellDup(data, e.data);
- // TODO(#3888164): should refactor to avoid making KindOfUninit checks.
- if (UNLIKELY(e.data.m_type == KindOfUninit)) {
+  // TODO(#3888164): should refactor to avoid making KindOfUninit checks.
+  if (UNLIKELY(e.data.m_type == KindOfUninit)) {
     e.data.m_type = KindOfNull;
   }
   return this;

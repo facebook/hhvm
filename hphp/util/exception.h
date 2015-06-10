@@ -26,15 +26,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#define EXCEPTION_COMMON_IMPL(cls) \
-  virtual cls* clone() { \
-    return new cls(*this); \
-  } \
-  virtual void throwException() { \
-    Deleter deleter(this); \
-    throw *this; \
-  }
-
 struct Exception : std::exception {
   explicit Exception() = default;
   explicit Exception(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
@@ -57,7 +48,13 @@ struct Exception : std::exception {
     ~Deleter() { delete m_e; }
   };
 
-  EXCEPTION_COMMON_IMPL(Exception);
+  virtual Exception* clone() {
+    return new Exception(*this);
+  }
+  virtual void throwException() {
+    Deleter deleter(this);
+    throw *this;
+  }
 
   /**
    * Error message without stacktrace.
@@ -68,6 +65,15 @@ protected:
   mutable std::string m_msg;
   mutable std::string m_what;
 };
+
+#define EXCEPTION_COMMON_IMPL(cls)               \
+  cls* clone() override {                        \
+    return new cls(*this);                       \
+  }                                              \
+  void throwException() override {               \
+    Deleter deleter(this);                       \
+    throw *this;                                 \
+  }
 
 ///////////////////////////////////////////////////////////////////////////////
 

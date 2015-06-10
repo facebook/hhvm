@@ -56,6 +56,7 @@ bool absorbDstBlock(IRUnit& unit, Block* block) {
 
 bool foldJmp(IRUnit& unit, Block* block) {
   auto& term = block->back();
+
   if (term.is(Jmp)) {
     auto dstBlk = block->taken();
     if (dstBlk == block) return false;
@@ -70,24 +71,27 @@ bool foldJmp(IRUnit& unit, Block* block) {
     }
     return false;
   }
+
   if (auto next = term.next()) {
     auto jmp = next->begin();
-    if (!jmp->is(Jmp) || jmp->numSrcs() != 0) return false;
-    assertx(jmp->taken());
-    FTRACE(1, "Setting {} next to skip {}\n", term.toString(),
-      jmp->toString());
-    term.setNext(jmp->taken());
-    return true;
+    if (jmp->is(Jmp) && jmp->numSrcs() == 0) {
+      assertx(jmp->taken());
+      FTRACE(1, "Setting {} next to skip {}\n", term, *jmp);
+      term.setNext(jmp->taken());
+      return true;
+    }
   }
+
   if (auto taken = term.taken()) {
     auto jmp = taken->begin();
-    if (!jmp->is(Jmp) || jmp->numSrcs() != 0) return false;
-    assertx(jmp->taken());
-    FTRACE(1, "Setting {} taken to skip {}\n", term.toString(),
-      jmp->toString());
-    term.setTaken(jmp->taken());
-    return true;
+    if (jmp->is(Jmp) && jmp->numSrcs() == 0) {
+      assertx(jmp->taken());
+      FTRACE(1, "Setting {} taken to skip {}\n", term, *jmp);
+      term.setTaken(jmp->taken());
+      return true;
+    }
   }
+
   return false;
 }
 

@@ -306,7 +306,7 @@ void prepareForNextHHBC(IRGS& env,
   updateMarker(env);
   env.lastBcInst = lastBcInst;
   env.catchCreator = nullptr;
-  env.irb->prepareForNextHHBC();
+  env.irb->exceptionStackBoundary();
 }
 
 void finishHHBC(IRGS& env) {

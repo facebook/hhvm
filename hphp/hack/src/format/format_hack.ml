@@ -10,6 +10,7 @@
 (*****************************************************************************)
 (* Imported modules. *)
 (*****************************************************************************)
+open Core
 open Lexer_hack
 
 exception Format_error
@@ -853,7 +854,7 @@ let next_non_ws_token env =
 (*****************************************************************************)
 
 let try_words env wordl f = wrap env begin function
-  | Tword when List.mem !(env.last_str) wordl ->
+  | Tword when List.mem wordl !(env.last_str) ->
       f env
   | _ -> back env
 end
@@ -926,6 +927,14 @@ let expect tok_str env = wrap env begin fun _ ->
   then last_token env
   else begin
     if debug then print_error tok_str env;
+    raise Format_error
+  end
+end
+
+let expect_token tok env = wrap env begin fun x ->
+  if x = tok
+  then last_token env
+  else begin
     raise Format_error
   end
 end
@@ -1174,7 +1183,7 @@ let rec entry ~keep_source_metadata ~no_trailing_commas ~modes
       let rp = Relative_path.(create Dummy (file :> string)) in
       let {Parser_hack.file_mode; _} =
         Parser_hack.program rp content in
-      if not (List.mem file_mode modes) then raise PHP;
+      if not (List.mem modes file_mode) then raise PHP;
     end in
     if errorl <> []
     then Parsing_error errorl
@@ -1352,20 +1361,22 @@ and hint env = wrap env begin function
       hint_parameter env
   | Tword ->
       last_token env;
-      (match !(env.last_str) with
-      | "function" ->
+      name_loop env;
+      taccess_loop env;
+      typevar_constraint env;
+      hint_parameter env
+  | Tlp -> begin
+      last_token env;
+      (match token env with
+      | Tword when !(env.last_str) = "function" ->
+          last_token env;
           hint_function_params env;
           return_type env
       | _ ->
-          name_loop env;
-          taccess_loop env;
-          typevar_constraint env;
-          hint_parameter env
-      )
-  | Tlp ->
-      last_token env;
-      hint_list env;
+          back env;
+          hint_list env);
       expect ")" env
+    end
   | _ ->
       back env
 end
@@ -1402,7 +1413,7 @@ and hint_list ?(trailing=true) env =
 (*****************************************************************************)
 
 and enum_ env =
-  seq env [name; hint_parameter; space];
+  seq env [expect_token Tword; hint_parameter; space];
   try_token env Tcolon (seq_fun
     [last_token; space; hint; as_constraint; space]);
   (* stmt parses any list of statements, including things like $x = 1; which
@@ -1613,11 +1624,11 @@ and class_element_word env = function
       seq env [last_token; xhp_category; semi_colon]
   | "attribute" ->
       last_token env;
-      class_members_list xhp_attribute_format_elt env
+      xhp_class_attribute_list env
   | "children" ->
       last_token env;
       space env;
-      right env xhp_children;
+      xhp_children env;
       semi_colon env
   | _ ->
       back env
@@ -1696,7 +1707,7 @@ end
 and xhp_children env = wrap env begin function
   | Tlp ->
       last_token env;
-      list_comma_nl ~trailing:false xhp_children env;
+      right env (list_comma_nl ~trailing:false xhp_children);
       expect ")" env;
       xhp_children_post env;
       xhp_children_remain env
@@ -1715,23 +1726,42 @@ end
 
 and xhp_children_remain env = wrap env begin function
   | Tbar ->
-      last_token env;
-      xhp_children env;
-      xhp_children_remain env
+      seq env [space; last_token; space; xhp_children]
   | _ -> back env
 end
 
 and xhp_category env =
   space env; list_comma ~trailing:false name env
 
-and xhp_attribute_format_elt env =
+and xhp_class_attribute_list env =
+  Try.one_line env
+    (class_member_list_single xhp_class_attribute)
+    (fun env -> newline env; right env xhp_class_attribute_list_multi);
+  semi_colon env
+
+and xhp_class_attribute_list_multi env = preserve_nl env begin fun env ->
+  xhp_class_attribute env;
+  match token env with
+  | Tcomma ->
+      seq env [last_token; newline; add_block_tag];
+      xhp_class_attribute_list_multi env
+  | _ -> back env
+end
+
+and xhp_class_attribute env =
+  Try.one_line env
+    (xhp_class_attribute_impl ~enum_list_elts:(list_comma_single expr))
+    (xhp_class_attribute_impl ~enum_list_elts:
+      (fun env -> right env (list_comma_multi_nl ~trailing:true expr)))
+
+and xhp_class_attribute_impl ~enum_list_elts env =
   let curr_pos = !(env.abs_pos) in
   wrap env begin function
     | Tword when !(env.last_str) = "enum" ->
         last_token env;
         space env;
         expect "{" env;
-        expr_list env;
+        enum_list_elts env;
         expect "}" env
     | _ -> back env; hint env
   end;

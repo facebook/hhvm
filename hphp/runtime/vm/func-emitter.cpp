@@ -204,9 +204,9 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   if (!containsCalls) { attrs |= AttrPhpLeafFn; }
 
   assert(!m_pce == !preClass);
-  Func* f = m_ue.newFunc(this, unit, preClass, line1, line2, base,
-                         past, name, attrs, top, docComment,
-                         params.size(), isClosureBody);
+  auto f = m_ue.newFunc(this, unit, name, attrs, params.size(), isClosureBody);
+
+  f->m_isPreFunc = !!preClass;
 
   bool const needsExtendedSharedData =
     m_info ||

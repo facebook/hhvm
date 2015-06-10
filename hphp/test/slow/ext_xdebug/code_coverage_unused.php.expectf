@@ -1,2 +1,1 @@
 Fatal error: XDEBUG_CC_UNUSED and XDEBUG_CC_DEAD_CODE constants are not currently supported. in %s/test/slow/ext_xdebug/code_coverage_unused.php on line 2
-%w#0 xdebug_start_code_coverage(), called at [%shphp/test/slow/ext_xdebug/code_coverage_unused.php:2]

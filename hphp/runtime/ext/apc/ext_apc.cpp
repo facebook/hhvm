@@ -504,7 +504,8 @@ Variant HHVM_FUNCTION(apc_cache_info,
     PackedArrayInit ents(entries.size());
     for (auto& entry : entries) {
       ArrayInit ent(kEntryInfoSize, ArrayInit::Map{});
-      ent.add(s_entry_name, StringData::Make(entry.key.c_str()));
+      ent.add(s_entry_name,
+              Variant::attach(StringData::Make(entry.key.c_str())));
       ent.add(s_in_memory, entry.inMem);
       ent.add(s_ttl, entry.ttl);
       ent.add(s_mem_size, entry.size);

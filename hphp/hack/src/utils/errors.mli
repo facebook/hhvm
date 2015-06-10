@@ -122,7 +122,8 @@ val parent_outside_class : Pos.t -> unit
 val parent_abstract_call : string -> Pos.t -> Pos.t -> unit
 val self_abstract_call : string -> Pos.t -> Pos.t -> unit
 val classname_abstract_call : string -> string -> Pos.t -> Pos.t -> unit
-val isset_empty_unset_in_strict : Pos.t -> string -> unit
+val isset_empty_in_strict : Pos.t -> string -> unit
+val unset_nonidx_in_strict : Pos.t -> unit
 val array_get_arity : Pos.t -> string -> Pos.t -> unit
 val typing_error : Pos.t -> string -> unit
 val typing_error_l : error -> unit
@@ -238,6 +239,8 @@ val enum_switch_redundant_default : Pos.t -> Pos.t -> unit
 val enum_switch_not_const : Pos.t -> unit
 val enum_switch_wrong_class : Pos.t -> string -> string -> unit
 val invalid_shape_field_name : Pos.t -> unit
+val invalid_shape_field_name_empty : Pos.t -> unit
+val invalid_shape_field_name_number : Pos.t -> unit
 val invalid_shape_field_type : Pos.t -> Pos.t -> string -> Pos.t list -> unit
 val invalid_shape_field_literal : Pos.t -> Pos.t -> unit
 val invalid_shape_field_const : Pos.t -> Pos.t -> unit

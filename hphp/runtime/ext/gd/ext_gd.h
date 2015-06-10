@@ -44,8 +44,8 @@ public:
 
   CLASSNAME_IS("gd")
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
-  virtual bool isInvalid() const { return m_gdImage == nullptr; }
+  const String& o_getClassNameHook() const override { return classnameof(); }
+  bool isInvalid() const override { return m_gdImage == nullptr; }
 
   DECLARE_RESOURCE_ALLOCATION(Image)
 private:

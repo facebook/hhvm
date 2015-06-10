@@ -52,14 +52,16 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
   auto const scale = computeScaleFromSize(size);
   auto const ad    = smartAllocArray(scale);
 
+  // Intialize the hash table first, because the header is already in L1 cache,
+  // but the hash table may not be.  So let's issue the cache request ASAP.
+  auto const data = mixedData(ad);
+  auto const hash = mixedHash(data, scale);
+  ad->initHash(hash, scale);
+
   ad->m_sizeAndPos   = 0; // size=0, pos=0
   ad->m_hdr.init(HeaderKind::Mixed, 1);
   ad->m_scale_used   = scale; // used=0
   ad->m_nextKI       = 0;
-
-  auto const data = mixedData(ad);
-  auto const hash = mixedHash(data, scale);
-  wordfill(hash, Empty, MixedArray::HashSize(scale));
 
   assert(ad->kind() == kMixedKind);
   assert(ad->m_size == 0);
@@ -76,8 +78,8 @@ ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
                                        uint32_t capacity) {
   capacity = (capacity ? capacity : other->size());
 
-  return other->kind() == kPackedKind ? MixedArray::MakeReserve(capacity) :
-         MixedArray::MakeReserveMixed(capacity);
+  return other->kind() == kPackedKind ? MixedArray::MakeReserve(capacity)
+                                      : MixedArray::MakeReserveMixed(capacity);
 }
 
 ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
@@ -156,14 +158,15 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
   auto const scale = computeScaleFromSize(size);
   auto const ad    = smartAllocArray(scale);
 
+  auto const data = mixedData(ad);
+  auto const hash = mixedHash(data, scale);
+  ad->initHash(hash, scale);
+
   ad->m_sizeAndPos       = size; // pos=0
   ad->m_hdr.init(HeaderKind::Mixed, 1);
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
-  auto const data = mixedData(ad);
-  auto const hash = mixedHash(data, scale);
-  ad->initHash(hash, MixedArray::HashSize(scale));
 
   // Append values by moving -- Caller assumes we update refcount.
   // Values are in reverse order since they come from the stack, which
@@ -215,9 +218,8 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   assert(other.isMixed());
 
   auto const scale  = other.m_scale;
-  auto const ad = mode == AllocMode::Smart
-    ? smartAllocArray(scale)
-    : mallocArray(scale);
+  auto const ad = mode == AllocMode::Smart ? smartAllocArray(scale)
+                                           : mallocArray(scale);
 
   ad->m_sizeAndPos      = other.m_sizeAndPos;
   ad->m_hdr.init(other.m_hdr, 0);
@@ -233,7 +235,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   for (uint32_t i = 0, limit = ad->m_used; i < limit; ++i) {
     auto const& e = elms[i];
     auto& te = data[i];
-    if (!isTombstone(e.data.m_type)) {
+    if (LIKELY(!e.isTombstone())) {
       copyKeyValue(e, te, &other);
     } else {
       // Tombstone.
@@ -575,6 +577,8 @@ void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
  */
 bool MixedArray::checkInvariants() const {
   static_assert(ssize_t(Empty) == ssize_t(-1), "");
+  static_assert(Tombstone < 0, "");
+  static_assert((Tombstone & 1) == 0, "");
   static_assert(sizeof(Elm) == 24, "");
   static_assert(sizeof(ArrayData) == 2 * sizeof(uint64_t), "");
   static_assert(
@@ -606,9 +610,8 @@ bool MixedArray::checkInvariants() const {
 
 inline ssize_t MixedArray::prevElm(Elm* elms, ssize_t ei) const {
   assert(ei < ssize_t(m_used));
-  while (ei > 0) {
-    --ei;
-    if (!isTombstone(elms[ei].data.m_type)) {
+  while (--ei >= 0) {
+    if (!elms[ei].isTombstone()) {
       return ei;
     }
   }
@@ -624,9 +627,8 @@ ssize_t MixedArray::IterLast(const ArrayData* ad) {
   auto a = asMixed(ad);
   auto elms = a->data();
   ssize_t ei = a->m_used;
-  while (ei > 0) {
-    --ei;
-    if (!isTombstone(elms[ei].data.m_type)) {
+  while (--ei >= 0) {
+    if (!elms[ei].isTombstone()) {
       return ei;
     }
   }
@@ -642,7 +644,7 @@ ssize_t MixedArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
   auto a = asMixed(ad);
   ++pos;
   if (pos >= a->m_used) return a->m_used;
-  if (!isTombstone(a->data()[pos].data.m_type)) {
+  if (!a->data()[pos].isTombstone()) {
     return pos;
   }
   return a->iter_advance_helper(pos);
@@ -652,11 +654,12 @@ ssize_t MixedArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
 ssize_t MixedArray::iter_advance_helper(ssize_t next_pos) const {
   Elm* elms = data();
   for (auto limit = m_used; size_t(next_pos) < limit; ++next_pos) {
-    if (!isTombstone(elms[next_pos].data.m_type)) {
+    if (!elms[next_pos].isTombstone()) {
       return next_pos;
     }
   }
-  return m_used;
+  assert(next_pos == m_used);
+  return next_pos;
 }
 
 ssize_t MixedArray::IterRewind(const ArrayData* ad, ssize_t pos) {
@@ -671,7 +674,7 @@ const Variant& MixedArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   assert(a->checkInvariants());
   assert(pos != a->m_used);
   auto& e = a->data()[pos];
-  assert(!isTombstone(e.data.m_type));
+  assert(!e.isTombstone());
   return tvAsCVarRef(&e.data);
 }
 
@@ -700,8 +703,8 @@ bool MixedArray::IsVectorData(const ArrayData* ad) {
 //=============================================================================
 // Lookup.
 
-static bool hitStringKey(const MixedArray::Elm& e, const StringData* s,
-                         int32_t hash) {
+ALWAYS_INLINE bool hitStringKey(const MixedArray::Elm& e, const StringData* s,
+                                int32_t hash) {
   // hitStringKey() should only be called on an Elm that is referenced by a
   // hash table entry. MixedArray guarantees that when it adds a hash table
   // entry that it always sets it to refer to a valid element. Likewise when
@@ -717,7 +720,7 @@ static bool hitIntKey(const MixedArray::Elm& e, int64_t ki) {
   // entry that it always sets it to refer to a valid element. Likewise when
   // it removes an element it always removes the corresponding hash entry.
   // Therefore the assertion below must hold.
-  assert(!MixedArray::isTombstone(e.data.m_type));
+  assert(!e.isTombstone());
   return e.ikey == ki && e.hasIntKey();
 }
 
@@ -731,18 +734,20 @@ static bool hitIntKey(const MixedArray::Elm& e, int64_t ki) {
 
 template <class Hit> ALWAYS_INLINE
 ssize_t MixedArray::findImpl(size_t h0, Hit hit) const {
-  // mask, probeIndex, and pos are explicitly 64-bit, because performance
-  // regressed when they were 32-bit types via auto.  Test carefully.
-  size_t mask = this->mask();
+  uint32_t mask = this->mask();
   auto elms = data();
   auto hashtable = hashTab();
-  for (size_t probeIndex = h0, i = 1;; ++i) {
-    ssize_t pos = hashtable[probeIndex & mask];
-    if ((validPos(pos) && hit(elms[pos])) || pos == Empty) {
+  for (uint32_t probeIndex = h0, i = 1;; ++i) {
+    auto pos = hashtable[probeIndex & mask];
+    if (validPos(pos)) {
+      if (hit(elms[pos])) return pos;
+    } else if (pos & 1) {
+      assert(pos == Empty);
       return pos;
     }
     probeIndex += i;
-    assert(i <= mask && probeIndex == h0 + (i + i*i) / 2);
+    assertx(i <= mask);
+    assertx(probeIndex == static_cast<uint32_t>(h0) + (i + i * i) / 2);
   }
 }
 
@@ -752,9 +757,8 @@ ssize_t MixedArray::find(int64_t ki) const {
   });
 }
 
-ssize_t MixedArray::find(const StringData* s, strhash_t prehash) const {
-  auto h = prehash | STRHASH_MSB;
-  return findImpl(prehash, [s, h] (const Elm& e) {
+ssize_t MixedArray::find(const StringData* s, strhash_t h) const {
+  return findImpl(h, [s, h] (const Elm& e) {
     return hitStringKey(e, s, h);
   });
 }
@@ -769,23 +773,23 @@ int32_t* warnUnbalanced(size_t n, int32_t* ei) {
 
 template <class Hit> ALWAYS_INLINE
 int32_t* MixedArray::findForInsertImpl(size_t h0, Hit hit) const {
-  // mask, probeIndex, and pos are explicitly 64-bit, because performance
-  // regressed when they were 32-bit types via auto.  Test carefully.
   size_t mask = this->mask();
   auto elms = data();
   auto hashtable = hashTab();
-  for (size_t probeIndex = h0, i = 1;; ++i) {
+  for (uint32_t probeIndex = h0, i = 1;; ++i) {
     auto ei = &hashtable[probeIndex & mask];
-    ssize_t pos = *ei;
+    int32_t pos = *ei;
     if (validPos(pos)) {
       if (hit(elms[pos])) {
         return ei;
       }
-    } else if (pos == Empty) {
+    } else if (pos & 1) {
+      assert(pos == Empty);
       return ei;
     }
     probeIndex += i;
-    assert(i <= mask && probeIndex == h0 + (i + i*i) / 2);
+    assertx(i <= mask);
+    assertx(probeIndex == static_cast<uint32_t>(h0) + (i + i * i) / 2);
   }
 }
 
@@ -797,12 +801,10 @@ int32_t* MixedArray::findForInsert(int64_t ki) const {
   });
 }
 
-int32_t*
-MixedArray::findForInsert(const StringData* s, strhash_t prehash) const {
+int32_t* MixedArray::findForInsert(const StringData* s, strhash_t h) const {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
-  auto h = prehash | STRHASH_MSB;
-  return findForInsertImpl(prehash, [s, h] (const Elm& e) {
+  return findForInsertImpl(h, [s, h] (const Elm& e) {
     return hitStringKey(e, s, h);
   });
 }
@@ -836,24 +838,22 @@ ssize_t MixedArray::findForRemoveImpl(size_t h0, Hit hit, Remove remove) const {
   size_t mask = this->mask();
   auto elms = data();
   auto hashtable = hashTab();
-  for (size_t i = 1, probe = h0;; ++i) {
+  for (uint32_t probe = h0, i = 1;; ++i) {
     auto ei = &hashtable[probe & mask];
-    ssize_t pos = *ei;
+    auto pos = *ei;
     if (validPos(pos)) {
       if (hit(elms[pos])) {
         remove(elms[pos]);
         *ei = Tombstone;
         return pos;
       }
-    } else {
-      if (pos == Empty) {
-        // not found, terminate search
-        return pos;
-      }
+    } else if (pos & 1) {
+      assert(pos == Empty);
+      return pos;
     }
     probe += i;
-    assert(probe == (h0 + (i + i*i) / 2));
-    assert(i <= mask);
+    assertx(i <= mask);
+    assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
   }
 }
 
@@ -881,11 +881,10 @@ ssize_t MixedArray::findForRemove(int64_t ki, bool updateNext) {
 }
 
 ssize_t
-MixedArray::findForRemove(const StringData* s, strhash_t prehash) {
+MixedArray::findForRemove(const StringData* s, strhash_t h) {
   // all vector methods should work w/out touching the hashtable
   assert(!isPacked());
-  auto h = prehash | STRHASH_MSB;
-  return findForRemoveImpl(prehash,
+  return findForRemoveImpl(h,
       [&] (const Elm& e) {
         return hitStringKey(e, s, h);
       },
@@ -1013,10 +1012,8 @@ MixedArray::InsertCheckUnbalanced(MixedArray* ad,
                                   Elm* stop) {
   for (uint32_t i = 0; iter != stop; ++iter, ++i) {
     auto& e = *iter;
-    if (isTombstone(e.data.m_type)) continue;
-    *ad->findForNewInsertCheckUnbalanced(table, mask,
-                                         e.hasIntKey() ? e.ikey : e.hash())
-      = i;
+    if (e.isTombstone()) continue;
+    *ad->findForNewInsertCheckUnbalanced(table, mask, e.probe()) = i;
   }
 }
 
@@ -1028,13 +1025,14 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   assert(newScale >= 1 && (newScale & (newScale - 1)) == 0);
 
   auto const ad         = smartAllocArray(newScale);
+  auto table            = mixedHash(ad->data(), newScale);
+  ad->initHash(table, newScale);
   auto const oldUsed    = old->m_used;
 
   ad->m_sizeAndPos      = old->m_sizeAndPos;
   ad->m_hdr.init(old->m_hdr, 0);
   ad->m_scale_used      = newScale | uint64_t{oldUsed} << 32;
   ad->m_nextKI          = old->m_nextKI;
-  auto table            = reinterpret_cast<int32_t*>(ad->data() + 3*newScale);
 
   if (UNLIKELY(strong_iterators_exist())) {
     move_strong_iterators(ad, old);
@@ -1042,7 +1040,6 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
 
   // Copy the old element array, and initialize the hashtable to all empty.
   copyElms(ad->data(), old->data(), oldUsed);
-  ad->initHash(table, MixedArray::HashSize(newScale));
 
   auto iter = ad->data();
   auto const stop = iter + oldUsed;
@@ -1053,8 +1050,8 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   } else {
     for (uint32_t i = 0; iter != stop; ++iter, ++i) {
       auto& e = *iter;
-      if (isTombstone(e.data.m_type)) continue;
-      *ad->findForNewInsert(table, mask, e.hasIntKey() ? e.ikey : e.hash()) = i;
+      if (e.isTombstone()) continue;
+      *ad->findForNewInsert(table, mask, e.probe()) = i;
     }
   }
 
@@ -1075,22 +1072,21 @@ namespace {
 struct ElmKey {
   ElmKey() {}
   ElmKey(int32_t hash, StringData* key)
-    : hash(hash)
-    , skey(key)
+    : skey(key), hash(hash)
   {}
-  int32_t hash;
   union {
     StringData* skey;
     int64_t ikey;
   };
+  int32_t hash;
 };
 }
 
 void MixedArray::compact(bool renumber /* = false */) {
   assert(!isPacked());
-  ElmKey mPos;
 
-  bool updatePosAfterCompact;
+  bool updatePosAfterCompact = false;
+  ElmKey mPos;
   bool hasStrongIters;
   TinyVector<ElmKey,3> siKeys;
 
@@ -1103,7 +1099,7 @@ void MixedArray::compact(bool renumber /* = false */) {
       // the canonical invalid position.
       assert(size_t(m_pos) < m_used);
       auto& e = data()[m_pos];
-      mPos.hash = e.hasIntKey() ? 0 : e.hash();
+      mPos.hash = e.hash();
       mPos.skey = e.skey;
     } else {
       if (m_pos == m_used) {
@@ -1112,8 +1108,6 @@ void MixedArray::compact(bool renumber /* = false */) {
         // compaction
         m_pos = m_size;
       }
-      mPos.hash = 0;
-      mPos.skey = nullptr;
     }
     if (UNLIKELY((hasStrongIters = strong_iterators_exist()))) {
       for_each_strong_iterator([&] (const MIterTable::Ent& miEnt) {
@@ -1133,8 +1127,6 @@ void MixedArray::compact(bool renumber /* = false */) {
       free_strong_iterators(this);
     }
     m_pos = 0;
-    mPos.hash = 0;
-    mPos.skey = nullptr;
     updatePosAfterCompact = false;
     hasStrongIters = false;
     // Set m_nextKI to 0 for now to prepare for renumbering integer keys
@@ -1144,11 +1136,10 @@ void MixedArray::compact(bool renumber /* = false */) {
   // Perform compaction
   auto elms = data();
   auto mask = this->mask();
-  size_t tableSize = mask + 1;
   auto table = hashTab();
-  initHash(table, tableSize);
+  initHash(table, scale());
   for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
-    while (isTombstone(elms[frPos].data.m_type)) {
+    while (elms[frPos].isTombstone()) {
       assert(frPos + 1 < m_used);
       ++frPos;
     }
@@ -1156,18 +1147,17 @@ void MixedArray::compact(bool renumber /* = false */) {
     if (toPos != frPos) {
       toE = elms[frPos];
     }
-    if (UNLIKELY(renumber && !toE.hasStrKey())) {
-      toE.ikey = m_nextKI++;
+    if (UNLIKELY(renumber && toE.hasIntKey())) {
+      toE.setIntKey(m_nextKI++);
     }
-    auto ie = findForNewInsert(table, mask,
-                               toE.hasIntKey() ? toE.ikey : toE.hash());
-    *ie = toPos;
+    *findForNewInsert(table, mask, toE.probe()) = toPos;
   }
 
   if (updatePosAfterCompact) {
     // Update m_pos, now that compaction is complete
-    m_pos = mPos.hash ? ssize_t(find(mPos.skey, mPos.hash))
-                      : ssize_t(find(mPos.ikey));
+    m_pos = mPos.hash >= 0 ? ssize_t(find(mPos.skey, mPos.hash))
+                           : ssize_t(find(mPos.ikey));
+    assert(m_pos >= 0 && m_pos < m_size);
   }
 
   if (LIKELY(!hasStrongIters)) {
@@ -1196,8 +1186,9 @@ void MixedArray::compact(bool renumber /* = false */) {
       }
       auto& k = siKeys[key];
       key++;
-      iter->m_pos = k.hash ? ssize_t(find(k.skey, k.hash))
-                           : ssize_t(find(k.ikey));
+      iter->m_pos = k.hash >= 0 ? ssize_t(find(k.skey, k.hash))
+                                : ssize_t(find(k.ikey));
+      assert(iter->m_pos >= 0 && iter->m_pos < m_size);
     }
   );
   // Finally, update m_used and return
@@ -1549,7 +1540,7 @@ ArrayData* MixedArray::AppendWithRef(ArrayData* ad, const Variant& v,
 
 /*
  * Copy an array to a new array of mixed kind, with a particular
- * pre-reserved size.  The input array may be either packed or mixed.
+ * pre-reserved size.
  */
 NEVER_INLINE
 MixedArray* MixedArray::CopyReserve(const MixedArray* src,
@@ -1566,7 +1557,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
 
   auto const data  = ad->data();
   auto const table = mixedHash(data, scale);
-  ad->initHash(table, MixedArray::HashSize(scale));
+  ad->initHash(table, scale);
 
   auto dstElm = data;
   auto srcElm = src->data();
@@ -1578,25 +1569,21 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   // the key for element associated with src->m_pos so that we can
   // properly initialize ad->m_pos below.
   ElmKey mPos;
-  if (src->m_pos != src->m_used) {
+  bool updatePosAfterCopy = src->m_pos != 0 && src->m_pos < src->m_used;
+  if (updatePosAfterCopy) {
     assert(size_t(src->m_pos) < src->m_used);
     auto& e = srcElm[src->m_pos];
-    mPos.hash = e.hasIntKey() ? 0 : e.hash();
+    mPos.hash = e.probe();
     mPos.skey = e.skey;
-  } else {
-    // Silence compiler warnings.
-    mPos.hash = 0;
-    mPos.skey = nullptr;
   }
 
   // Copy the elements
   auto mask = MixedArray::Mask(scale);
   for (; srcElm != srcStop; ++srcElm) {
-    if (isTombstone(srcElm->data.m_type)) continue;
+    if (srcElm->isTombstone()) continue;
     tvDupFlattenVars(&srcElm->data, &dstElm->data, src);
-    auto const hasIntKey = srcElm->hasIntKey();
-    auto const hash = hasIntKey ? srcElm->ikey : srcElm->hash();
-    if (hasIntKey) {
+    auto const hash = srcElm->probe();
+    if (hash < 0) {
       dstElm->setIntKey(srcElm->ikey);
     } else {
       dstElm->setStrKey(srcElm->skey, hash);
@@ -1607,14 +1594,15 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   }
 
   // Now that we have finished copying the elements, update ad->m_pos
-  if (src->m_pos != src->m_used) {
-    ad->m_pos = mPos.hash
-      ? ssize_t(ad->find(mPos.skey, mPos.hash))
+  if (updatePosAfterCopy) {
+    ad->m_pos = mPos.hash >= 0 ? ssize_t(ad->find(mPos.skey, mPos.hash))
       : ssize_t(ad->find(mPos.ikey));
+    assert(ad->m_pos >=0 && ad->m_pos < ad->m_size);
   } else {
     // If src->m_pos is equal to src's canonical invalid position, then
     // set ad->m_pos to ad's canonical invalid position.
-    ad->m_pos = ad->m_size;
+    if (src->m_pos != 0)
+      ad->m_pos = ad->m_size;
   }
 
   // Set new used value (we've removed any tombstones).
@@ -1634,9 +1622,9 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
 
 NEVER_INLINE
 ArrayData* MixedArray::ArrayPlusEqGeneric(ArrayData* ad,
-                                         MixedArray* ret,
-                                         const ArrayData* elems,
-                                         size_t neededSize) {
+                                          MixedArray* ret,
+                                          const ArrayData* elems,
+                                          size_t neededSize) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
     const Variant& value = it.secondRef();
@@ -1676,7 +1664,7 @@ ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
   auto srcElem = rhs->data();
   auto const srcStop = rhs->data() + rhs->m_used;
   for (; srcElem != srcStop; ++srcElem) {
-    if (isTombstone(srcElem->data.m_type)) continue;
+    if (srcElem->isTombstone()) continue;
 
     if (UNLIKELY(ret->isFull())) {
       assert(ret == ad);
@@ -1769,8 +1757,8 @@ ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
     auto& e = elms[pos];
     assert(!isTombstone(e.data.m_type));
     value = tvAsCVarRef(&e.data);
-    auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash()) :
-                a->findForRemove(e.ikey, true);
+    auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash())
+                              : a->findForRemove(e.ikey, true);
     assert(pos2 == pos);
     a->erase(pos2);
   } else {
@@ -1792,8 +1780,8 @@ ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
     auto& e = elms[pos];
     assert(!isTombstone(e.data.m_type));
     value = tvAsCVarRef(&e.data);
-    auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash()) :
-                a->findForRemove(e.ikey, false);
+    auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash())
+                              : a->findForRemove(e.ikey, false);
     assert(pos2 == pos);
     a->erase(pos2);
   } else {

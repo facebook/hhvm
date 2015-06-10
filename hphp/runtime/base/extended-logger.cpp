@@ -72,10 +72,6 @@ void ExtendedLogger::log(LogLevelType level, const char *type,
                          int line /* = 0 */) {
   if (!IsEnabled()) return;
   Logger::log(level, type, e, file, line);
-
-  if (auto const ee = dynamic_cast<const ExtendedException*>(&e)) {
-    Log(level, ee->getBacktrace());
-  }
 }
 
 void ExtendedLogger::log(LogLevelType level, const std::string &msg,

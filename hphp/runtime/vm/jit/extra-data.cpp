@@ -140,11 +140,7 @@ typename std::enable_if<
 }
 
 template<class T>
-typename std::enable_if<
-  has_show<T,std::string () const>::value,
-  std::string
->::type showExtraImpl(T* t) { return t->show(); }
-std::string showExtraImpl(const IRExtraData*) { return "..."; }
+std::string showExtraImpl(const T* extra) { return extra->show(); }
 
 MAKE_DISPATCHER(HashDispatcher, size_t, hashExtraImpl);
 MAKE_DISPATCHER(EqualsDispatcher, bool, equalsExtraImpl);
@@ -174,8 +170,9 @@ IRExtraData* cloneExtra(Opcode opc, IRExtraData* data, Arena& a) {
 }
 
 std::string showExtra(Opcode opc, const IRExtraData* data) {
-  return dispatchExtra<std::string,ShowDispatcher>(opc,
-      const_cast<IRExtraData*>(data));
+  return dispatchExtra<std::string,ShowDispatcher>(
+    opc, const_cast<IRExtraData*>(data)
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

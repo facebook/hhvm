@@ -54,17 +54,29 @@ void RefDeps::addDep(int entryArDelta, unsigned argNum, bool isRef) {
 void
 ActRecState::pushFunc(const NormalizedInstruction& inst) {
   assertx(isFPush(inst.op()));
+
+  const Unit& unit = *inst.unit();
+  const Func* func = nullptr;
+
   if (inst.op() == OpFPushFuncD || inst.op() == OpFPushFuncU) {
-    const Unit& unit = *inst.unit();
     Id funcId = inst.imm[1].u_SA;
     auto const& nep = unit.lookupNamedEntityPairId(funcId);
-    auto const func = Unit::lookupFunc(nep.second);
-    if (func) func->validate();
-    if (func && func->isNameBindingImmutable(&unit)) {
-      pushFuncD(func);
-      return;
-    }
+    func = Unit::lookupFunc(nep.second);
+  } else if (inst.op() == OpFPushCtorD) {
+    Id clsId = inst.imm[1].u_SA;
+    auto const& nep = unit.lookupNamedEntityPairId(clsId);
+    auto const cls = Unit::lookupClass(nep.second);
+    auto const scopeFunc = knownFunc();
+    auto const ctx = scopeFunc ? scopeFunc->cls() : nullptr;
+    func = lookupImmutableCtor(cls, ctx);
   }
+
+  if (func) func->validate();
+  if (func && func->isNameBindingImmutable(&unit)) {
+    pushFuncD(func);
+    return;
+  }
+
   pushDynFunc();
 }
 

@@ -69,7 +69,7 @@ public:
     static const StaticString result("DateInterval");
     return result;
   }
-  const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   DateInterval();
   explicit DateInterval(const String& date_interval, bool date_string = false);

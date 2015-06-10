@@ -642,31 +642,22 @@ void BaseVector::reserve(int64_t sz) {
   }
 }
 
-BaseVector::BaseVector(Class* cls, HeaderKind kind, uint32_t cap /* = 0 */)
+BaseVector::BaseVector(Class* cls, HeaderKind kind, uint32_t cap)
   : ExtCollectionObjectData(cls, kind)
   , m_size(0)
-  , m_capacity(cap)
+  , m_versionAndCap(cap)
   , m_data(packedData(cap == 0 ? staticEmptyArray()
                                : MixedArray::MakeReserve(cap)))
-  , m_version(0)
 {}
-
-BaseVector::BaseVector(Class* cls, HeaderKind kind, ArrayData* arr)
-  : ExtCollectionObjectData(cls, kind)
-  , m_size(arr->size())
-  , m_capacity(arr->cap())
-  , m_data(packedData(arr))
-  , m_version(0)
-{
-  assertx(arr == staticEmptyArray() || arr->isPacked());
-}
 
 /**
  * Delegate the responsibility for freeing the buffer to the immutable copy,
  * if it exists.
  */
 BaseVector::~BaseVector() {
-  decRefArr(arrayData());
+  // Avoid indirect call, as we know it is a packed array.
+  auto const packed = arrayData();
+  if (packed->decReleaseCheck()) PackedArray::Release(packed);
 }
 
 NEVER_INLINE
@@ -743,14 +734,6 @@ c_ImmVector* c_ImmVector::Clone(ObjectData* obj) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_Vector::c_Vector(Class* cls, uint32_t cap /* = 0 */)
-  : BaseVector(cls, HeaderKind::Vector, cap)
-{}
-
-c_Vector::c_Vector(Class* cls, ArrayData* arr)
-  : BaseVector(cls, HeaderKind::Vector, arr)
-{}
 
 void BaseVector::t___construct(const Variant& iterable /* = null_variant */) {
   if (iterable.isNull()) return;
@@ -1387,16 +1370,6 @@ Object c_ImmVector::t_values() {
   return Object::attach(BaseVector::Clone<c_ImmVector>(this));
 }
 
-// Non PHP methods.
-
-c_ImmVector::c_ImmVector(Class* cls, uint32_t cap /* = 0 */)
-  : BaseVector(cls, HeaderKind::ImmVector, cap)
-{}
-
-c_ImmVector::c_ImmVector(Class* cls, ArrayData* arr)
-  : BaseVector(cls, HeaderKind::ImmVector, arr)
-{}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -1418,27 +1391,19 @@ EmptyMixedArrayStorage s_theEmptyMixedArray;
 struct HashCollection::EmptyMixedInitializer {
   EmptyMixedInitializer() {
     auto a = reinterpret_cast<MixedArray*>(&s_theEmptyMixedArray);
-    EmptyArray::InitMixed(a, StaticValue, 0/*used*/, 0/*nextIntKey*/);
+    MixedArray::InitSmall(a, StaticValue, 0/*used*/, 0/*nextIntKey*/);
   }
 };
 
 HashCollection::EmptyMixedInitializer
 HashCollection::s_empty_mixed_initializer;
 
-HashCollection::HashCollection(Class* cls, HeaderKind kind,
-                               uint32_t cap /* = 0 */)
+HashCollection::HashCollection(Class* cls, HeaderKind kind, uint32_t cap)
   : ExtCollectionObjectData(cls, kind)
-  , m_size(0), m_version(0)
+  , m_versionAndSize(0)
   , m_data(mixedData(cap == 0 ? staticEmptyMixedArray()
                               : static_cast<MixedArray*>(
                                 MixedArray::MakeReserveMixed(cap))))
-{}
-
-HashCollection::HashCollection(Class* cls, HeaderKind kind, ArrayData* arr)
-  : ExtCollectionObjectData(cls, kind)
-  , m_size(arr->m_size)
-  , m_version(0)
-  , m_data(mixedData(MixedArray::asMixed(arr)))
 {}
 
 Array HashCollection::t_toarray() {
@@ -1590,16 +1555,20 @@ static bool hitIntKey(const HashCollection::Elm& e, int64_t ki) {
 template <class Hit>
 ALWAYS_INLINE
 ssize_t HashCollection::findImpl(size_t h0, Hit hit) const {
-  size_t mask = tableMask();
-  auto* elms = data();
-  auto* hashtable = hashTab();
-  for (size_t probeIndex = h0, i = 1;; ++i) {
-    ssize_t pos = hashtable[probeIndex & mask];
-    if ((validPos(pos) && hit(*fetchElm(elms, pos))) || pos == Empty) {
+  uint32_t mask = tableMask();
+  auto elms = data();
+  auto hashtable = hashTab();
+  for (uint32_t probeIndex = h0, i = 1;; ++i) {
+    auto pos = hashtable[probeIndex & mask];
+    if (validPos(pos)) {
+      if (hit(elms[pos])) return pos;
+    } else if (pos & 1) {
+      assert(pos == Empty);
       return pos;
     }
     probeIndex += i;
-    assert(i <= mask && probeIndex == h0 + (i + i*i) / 2);
+    assertx(i <= mask);
+    assertx(probeIndex == static_cast<uint32_t>(h0) + (i + i * i) / 2);
   }
 }
 
@@ -1610,9 +1579,8 @@ ssize_t HashCollection::find(int64_t ki) const {
 }
 
 ssize_t
-HashCollection::find(const StringData* s, strhash_t prehash) const {
-  auto h = prehash | STRHASH_MSB;
-  return findImpl(prehash, [s, h] (const Elm& e) {
+HashCollection::find(const StringData* s, strhash_t h) const {
+  return findImpl(h, [s, h] (const Elm& e) {
     return hitStringKey(e, s, h);
   });
 }
@@ -1620,27 +1588,22 @@ HashCollection::find(const StringData* s, strhash_t prehash) const {
 template <class Hit>
 ALWAYS_INLINE
 int32_t* HashCollection::findForInsertImpl(size_t h0, Hit hit) const {
-  // mask, probe, and pos are explicitly 64-bit, because performance
-  // regressed when they were 32-bit types via auto. Test carefully.
-  size_t mask = tableMask();
-  auto* elms = data();
-  auto* hashtable = hashTab();
-  int32_t* ret = nullptr;
-  for (size_t probe = h0, i = 1;; ++i) {
+  uint32_t mask = tableMask();
+  auto elms = data();
+  auto hashtable = hashTab();
+  for (uint32_t probe = h0, i = 1;; ++i) {
     auto ei = &hashtable[probe & mask];
     ssize_t pos = *ei;
     if (validPos(pos)) {
-      if (hit(*fetchElm(elms, pos))) {
+      if (hit(elms[pos])) {
         return ei;
       }
-    } else {
-      if (!ret) ret = ei;
-      if (pos == Empty) {
-        return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
-      }
+    } else if (pos & 1) {
+      return LIKELY(i <= 100) ? ei : warnUnbalanced(i, ei);
     }
     probe += i;
-    assert(i <= mask && probe == h0 + (i + i*i) / 2);
+    assertx(i <= mask);
+    assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
   }
 }
 
@@ -1650,10 +1613,8 @@ int32_t* HashCollection::findForInsert(int64_t ki) const {
   });
 }
 
-int32_t* HashCollection::findForInsert(
-  const StringData* s, strhash_t prehash) const {
-  auto h = prehash | STRHASH_MSB;
-  return findForInsertImpl(prehash, [s, h] (const Elm& e) {
+int32_t* HashCollection::findForInsert(const StringData* s, strhash_t h) const {
+  return findForInsertImpl(h, [s, h] (const Elm& e) {
     return hitStringKey(e, s, h);
   });
 }
@@ -1662,13 +1623,14 @@ int32_t* HashCollection::findForInsert(
 // key is not already present in the HashCollection.
 ALWAYS_INLINE int32_t* HashCollection::findForNewInsert(
   int32_t* table, size_t mask, size_t h0) const {
-  for (size_t i = 1, probe = h0;; ++i) {
+  for (uint32_t i = 1, probe = h0;; ++i) {
     auto ei = &table[probe & mask];
     if (!validPos(*ei)) {
       return ei;
     }
     probe += i;
-    assert(i <= mask && probe == h0 + (i + i*i) / 2);
+    assertx(i <= mask);
+    assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
   }
 }
 
@@ -1692,11 +1654,8 @@ NEVER_INLINE void HashCollection::makeRoom() {
     if (UNLIKELY(cap() == MaxSize)) {
       throwTooLarge();
     }
-    if (cap()) {
-      grow(scale() * 2);
-    } else {
-      grow(SmallScale);
-    }
+    assertx(scale() > 0);
+    grow(scale() * 2);
   } else {
     compact();
   }
@@ -1886,26 +1845,12 @@ HashCollection::Elm& HashCollection::allocElmFront(int32_t* ei) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Map::c_Map(Class* cls, uint32_t cap /* = 0 */)
-  : BaseMap(cls, HeaderKind::Map, cap)
-{}
-
-c_Map::c_Map(Class* cls, ArrayData* arr)
-  : BaseMap(cls, HeaderKind::Map, arr)
-{}
-
 // Protected (Internal)
 
-BaseMap::BaseMap(Class* cls, HeaderKind kind, uint32_t cap /* = 0*/)
-  : HashCollection(cls, kind, cap)
-{}
-
-BaseMap::BaseMap(Class* cls, HeaderKind kind, ArrayData* arr)
-  : HashCollection(cls, kind, arr)
-{}
-
 BaseMap::~BaseMap() {
-  decRefArr(arrayData());
+  auto const mixed = MixedArray::asMixed(arrayData());
+  // Avoid indirect call, as we know it is a MixedArray
+  if (mixed->decReleaseCheck()) MixedArray::Release(mixed);
 }
 
 void BaseMap::t___construct(const Variant& iterable /* = null_variant */) {
@@ -2836,7 +2781,9 @@ TypedValue* BaseMap::at(int64_t key) const {
   if (UNLIKELY(p == Empty)) {
     throwOOB(key);
   }
-  return (TypedValue*)&fetchElm(data(), p)->data;
+  return const_cast<TypedValue*>(
+    static_cast<const TypedValue*>(&(data()[p].data))
+  );
 }
 
 TypedValue* BaseMap::at(StringData* key) const {
@@ -2844,7 +2791,9 @@ TypedValue* BaseMap::at(StringData* key) const {
   if (UNLIKELY(p == Empty)) {
     throwOOB(key);
   }
-  return (TypedValue*)&fetchElm(data(), p)->data;
+  return const_cast<TypedValue*>(
+    static_cast<const TypedValue*>(&(data()[p].data))
+  );
 }
 
 TypedValue* BaseMap::get(int64_t key) const {
@@ -2852,7 +2801,9 @@ TypedValue* BaseMap::get(int64_t key) const {
   if (p == Empty) {
     return nullptr;
   }
-  return (TypedValue*)&fetchElm(data(), p)->data;
+  return const_cast<TypedValue*>(
+    static_cast<const TypedValue*>(&(data()[p].data))
+  );
 }
 
 TypedValue* BaseMap::get(StringData* key) const {
@@ -2860,7 +2811,9 @@ TypedValue* BaseMap::get(StringData* key) const {
   if (p == Empty) {
     return nullptr;
   }
-  return (TypedValue*)&fetchElm(data(), p)->data;
+  return const_cast<TypedValue*>(
+    static_cast<const TypedValue*>(&(data()[p].data))
+  );
 }
 
 void BaseMap::add(const TypedValue* val) {
@@ -2933,10 +2886,10 @@ void BaseMap::setImpl(int64_t h, const TypedValue* val) {
   assert(val->m_type != KindOfRef);
   assert(canMutateBuffer());
 retry:
-  auto* p = findForInsert(h);
+  auto p = findForInsert(h);
   assert(p);
   if (validPos(*p)) {
-    auto& e = *fetchElm(data(), *p);
+    auto& e = data()[*p];
     TypedValue old = e.data;
     cellDup(*val, e.data);
     tvRefcountedDecRef(old);
@@ -2967,7 +2920,7 @@ retry:
   auto* p = findForInsert(key, h);
   assert(p);
   if (validPos(*p)) {
-    auto& e = *fetchElm(data(), *p);
+    auto& e = data()[*p];
     TypedValue old = e.data;
     cellDup(*val, e.data);
     tvRefcountedDecRef(old);
@@ -3399,14 +3352,6 @@ Object c_Map::t_immutable() { return getImmutableCopy(); }
 Object c_ImmMap::t_immutable() { return this; }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_ImmMap::c_ImmMap(Class* cb, uint32_t cap /* = 0 */)
-  : BaseMap(cb, HeaderKind::ImmMap, cap)
-{}
-
-c_ImmMap::c_ImmMap(Class* cb, ArrayData* arr)
-  : BaseMap(cb, HeaderKind::ImmMap, arr)
-{}
 
 c_ImmMap* c_ImmMap::Clone(ObjectData* obj) {
   return BaseMap::Clone<c_ImmMap>(obj);
@@ -4272,16 +4217,10 @@ BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
 
 // Protected (Internal)
 
-BaseSet::BaseSet(Class* cls, HeaderKind kind, uint32_t cap /* = 0 */)
-  : HashCollection(cls, kind, cap)
-{}
-
-BaseSet::BaseSet(Class* cls, HeaderKind kind, ArrayData* arr)
-  : HashCollection(cls, kind, arr)
-{}
-
 BaseSet::~BaseSet() {
-  decRefArr(arrayData());
+  auto const mixed = MixedArray::asMixed(arrayData());
+  // Avoid indirect call, as we know it is a MixedArray
+  if (mixed->decReleaseCheck()) MixedArray::Release(mixed);
 }
 
 NEVER_INLINE
@@ -4331,14 +4270,6 @@ void BaseSet::throwBadValueType() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Set
-
-c_Set::c_Set(Class* cls, uint32_t cap /* = 0 */)
-  : BaseSet(cls, HeaderKind::Set, cap)
-{}
-
-c_Set::c_Set(Class* cls, ArrayData* arr)
-  : BaseSet(cls, HeaderKind::Set, arr)
-{}
 
 void BaseSet::t___construct(const Variant& iterable /* = null_variant */) {
   addAll(iterable);
@@ -4601,14 +4532,6 @@ Object c_ImmSet::ti_fromarrays(int _argc, const Array& _argv) {
   return BaseSet::php_fromArrays<c_ImmSet>(_argc, _argv);
 }
 
-c_ImmSet::c_ImmSet(Class* cls, uint32_t cap /* = 0 */)
-  : BaseSet(cls, HeaderKind::ImmSet, cap)
-{}
-
-c_ImmSet::c_ImmSet(Class* cls, ArrayData* arr)
-  : BaseSet(cls, HeaderKind::ImmSet, arr)
-{}
-
 c_ImmSet* c_ImmSet::Clone(ObjectData* obj) {
   return BaseSet::Clone<c_ImmSet>(obj);
 }
@@ -4631,19 +4554,6 @@ Object c_Set::t_immutable() { return getImmutableCopy(); }
 Object c_ImmSet::t_immutable() { return this; }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-c_Pair::c_Pair(Class* cb)
-  : ExtObjectDataFlags(cb, HeaderKind::Pair)
-  , m_size(2)
-{
-  tvWriteNull(&elm0);
-  tvWriteNull(&elm1);
-}
-
-c_Pair::c_Pair(NoInit, Class* cb)
-  : ExtObjectDataFlags(cb, HeaderKind::Pair)
-  , m_size(0)
-{}
 
 c_Pair::~c_Pair() {
   if (LIKELY(m_size == 2)) {

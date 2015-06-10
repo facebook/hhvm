@@ -73,6 +73,7 @@ struct Vgen {
   void emit(const bindjcc& i);
   void emit(const bindjmp& i);
   void emit(const callstub& i);
+  void emit(const callfaststub& i);
   void emit(const contenter& i);
   void emit(const copy& i);
   void emit(const copy2& i);
@@ -94,6 +95,7 @@ struct Vgen {
   void emit(const landingpad& i) {}
   void emit(const vretm& i);
   void emit(const vret& i);
+  void emit(const leavetc&) { a->ret(); }
 
   // instructions
   void emit(andb i) { commuteSF(i); a->andb(i.s0, i.d); }
@@ -219,6 +221,7 @@ struct Vgen {
   void emit(unpcklpd i) { noncommute(i); a->unpcklpd(i.s0, i.d); }
   void emit(xorb i) { commuteSF(i); a->xorb(i.s0, i.d); }
   void emit(xorbi i) { binary(i); a->xorb(i.s0, i.d); }
+  void emit(xorl i) { commuteSF(i); a->xorl(i.s0, i.d); }
   void emit(xorq i) { commuteSF(i); a->xorq(i.s0, i.d); }
   void emit(xorqi i) { binary(i); a->xorq(i.s0, i.d); }
 
@@ -261,14 +264,21 @@ private:
   jit::hash_map<uint64_t,uint64_t*> constants;
 };
 
-// prepare a binary op that is not commutative.  s0 must be a different
-// register than s1 so we don't clobber it.
+/*
+ * Prepare a binary op that is not commutative.
+ *
+ * s0 must be a different register than s1 so we don't clobber it.
+ */
 template<class Inst> void Vgen::noncommute(Inst& i) {
   assertx(i.s1 == i.d || i.s0 != i.d); // do not clobber s0
   binary(i);
 }
 
-// prepare a binary op that is commutative. Swap operands if the dest is s0.
+/*
+ * Prepare a binary op that is commutative.
+ *
+ * Swap operands if the dest is s0.
+ */
 template<class Inst> void Vgen::commuteSF(Inst& i) {
   if (i.s1 != i.d && i.s0 == i.d) {
     i = Inst{i.s1, i.s0, i.d, i.sf};
@@ -277,7 +287,6 @@ template<class Inst> void Vgen::commuteSF(Inst& i) {
   }
 }
 
-// prepare a binary op that is commutative. Swap operands if the dest is s0.
 template<class Inst> void Vgen::commute(Inst& i) {
   if (i.s1 != i.d && i.s0 == i.d) {
     i = Inst{i.s1, i.s0, i.d};
@@ -288,12 +297,151 @@ template<class Inst> void Vgen::commute(Inst& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitSimdImm(X64Assembler* a, int64_t val, Vreg d) {
-  if (val == 0) {
-    a->pxor(d, d); // does not modify flags
-  } else {
-    auto addr = mcg->allocLiteral(val);
-    a->movsd(rip[(intptr_t)addr], d);
+/*
+ * Toplevel emitter.
+ */
+void Vgen::emit(jit::vector<Vlabel>& labels) {
+  // Some structures here track where we put things just for debug printing.
+  struct Snippet {
+    const IRInstruction* origin;
+    TcaRange range;
+  };
+  struct BlockInfo {
+    jit::vector<Snippet> snippets;
+  };
+
+  // This is under the printir tracemod because it mostly shows you IR and
+  // machine code, not vasm and machine code (not implemented).
+  bool shouldUpdateAsmInfo = !!m_asmInfo;
+
+  std::vector<TransBCMapping>* bcmap = nullptr;
+  if (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI) {
+    bcmap = &mcg->cgFixups().m_bcMap;
+  }
+
+  jit::vector<jit::vector<BlockInfo>> areaToBlockInfos;
+  if (shouldUpdateAsmInfo) {
+    areaToBlockInfos.resize(areas.size());
+    for (auto& r : areaToBlockInfos) {
+      r.resize(unit.blocks.size());
+    }
+  }
+
+  for (int i = 0, n = labels.size(); i < n; ++i) {
+    assertx(checkBlockEnd(unit, labels[i]));
+
+    auto b = labels[i];
+    auto& block = unit.blocks[b];
+    X64Assembler as { area(block.area).code };
+    a = &as;
+    auto blockStart = a->frontier();
+    addrs[b] = blockStart;
+
+    {
+      // Compute the next block we will emit into the current area.
+      auto cur_start = start(labels[i]);
+      auto j = i + 1;
+      while (j < labels.size() && cur_start != start(labels[j])) {
+        j++;
+      }
+      next = j < labels.size() ? labels[j] : Vlabel(unit.blocks.size());
+      current = b;
+    }
+
+    const IRInstruction* currentOrigin = nullptr;
+    auto blockInfo = shouldUpdateAsmInfo
+      ? &areaToBlockInfos[unsigned(block.area)][b]
+      : nullptr;
+    auto start_snippet = [&](const Vinstr& inst) {
+      if (!shouldUpdateAsmInfo) return;
+
+      blockInfo->snippets.push_back(
+        Snippet { inst.origin, TcaRange { a->code().frontier(), nullptr } }
+      );
+    };
+    auto finish_snippet = [&] {
+      if (!shouldUpdateAsmInfo) return;
+
+      if (!blockInfo->snippets.empty()) {
+        auto& snip = blockInfo->snippets.back();
+        snip.range = TcaRange { snip.range.start(), a->code().frontier() };
+      }
+    };
+
+    for (auto& inst : block.code) {
+      if (currentOrigin != inst.origin) {
+        finish_snippet();
+        start_snippet(inst);
+        currentOrigin = inst.origin;
+      }
+
+      if (bcmap && inst.origin) {
+        auto sk = inst.origin->marker().sk();
+        if (bcmap->empty() ||
+            bcmap->back().md5 != sk.unit()->md5() ||
+            bcmap->back().bcStart != sk.offset()) {
+          bcmap->push_back(TransBCMapping{sk.unit()->md5(), sk.offset(),
+                                          main().frontier(), cold().frontier(),
+                                          frozen().frontier()});
+        }
+      }
+
+      switch (inst.op) {
+#define O(name, imms, uses, defs) \
+        case Vinstr::name: emit(inst.name##_); break;
+        VASM_OPCODES
+#undef O
+      }
+    }
+
+    finish_snippet();
+  }
+
+  for (auto& p : jccs) {
+    assertx(addrs[p.target]);
+    X64Assembler::patchJcc(p.instr, addrs[p.target]);
+  }
+  for (auto& p : jmps) {
+    assertx(addrs[p.target]);
+    X64Assembler::patchJmp(p.instr, addrs[p.target]);
+  }
+  for (auto& p : calls) {
+    assertx(addrs[p.target]);
+    X64Assembler::patchCall(p.instr, addrs[p.target]);
+  }
+  for (auto& p : catches) {
+    mcg->registerCatchBlock(p.instr, addrs[p.target]);
+  }
+  for (auto& p : ldpoints) {
+    auto after_lea = p.instr + 7;
+    auto d = points[p.pos] - after_lea;
+    assertx(deltaFits(d, sz::dword));
+    ((int32_t*)after_lea)[-1] = d;
+  }
+
+  if (!shouldUpdateAsmInfo) {
+    return;
+  }
+
+  for (auto i = 0; i < areas.size(); ++i) {
+    auto& blockInfos = areaToBlockInfos[i];
+    for (auto const blockID : labels) {
+      auto const& blockInfo = blockInfos[static_cast<size_t>(blockID)];
+      if (blockInfo.snippets.empty()) continue;
+
+      const IRInstruction* currentOrigin = nullptr;
+      for (auto const& snip : blockInfo.snippets) {
+        if (currentOrigin != snip.origin && snip.origin) {
+          currentOrigin = snip.origin;
+        }
+
+        m_asmInfo->updateForInstruction(
+          currentOrigin,
+          static_cast<AreaIndex>(i),
+          snip.range.start(),
+          snip.range.end());
+      }
+    }
   }
 }
 
@@ -447,6 +595,11 @@ void Vgen::emit(const callstub& i) {
   emit(call{i.target, i.args});
 }
 
+void Vgen::emit(const callfaststub& i) {
+  emit(call{i.target, i.args});
+  emit(syncpoint{i.fix});
+}
+
 void Vgen::emit(const cmpqims& i) {
   backend.prepareForSmash(a->code(), kCmpLen);
   a->cmpq(i.s0, i.s1);
@@ -465,16 +618,21 @@ void Vgen::emit(const fallbackcc& i) {
   }
 }
 
+void emitSimdImm(X64Assembler* a, int64_t val, Vreg d) {
+  if (val == 0) {
+    a->pxor(d, d); // does not modify flags
+  } else {
+    auto addr = mcg->allocLiteral(val);
+    a->movsd(rip[(intptr_t)addr], d);
+  }
+}
+
 void Vgen::emit(const ldimmb& i) {
   // ldimmb is for Vconst::Byte, which is treated as unsigned uint8_t
   auto val = i.s.b();
   if (i.d.isGP()) {
-    Vreg8 d = i.d;
-    if (val == 0 && !i.saveflags) {
-      a->xorb(d, d);
-    } else {
-      a->movb(val, d);
-    }
+    Vreg8 d8 = i.d;
+    a->movb(val, d8);
   } else {
     emitSimdImm(a, uint8_t(val), i.d);
   }
@@ -484,12 +642,8 @@ void Vgen::emit(const ldimml& i) {
   // ldimml is for Vconst::Long, which is treated as unsigned uint32_t
   auto val = i.s.l();
   if (i.d.isGP()) {
-    Vreg32 d = i.d;
-    if (val == 0 && !i.saveflags) {
-      a->xorl(d, d);
-    } else {
-      a->movl(val, d);
-    }
+    Vreg32 d32 = i.d;
+    a->movl(val, d32);
   } else {
     emitSimdImm(a, uint32_t(val), i.d);
   }
@@ -499,12 +653,8 @@ void Vgen::emit(const ldimmq& i) {
   auto val = i.s.q();
   if (i.d.isGP()) {
     if (val == 0) {
-      Reg64 d = i.d;
-      if (i.saveflags) {
-        a->movl(0, r32(d));
-      } else {
-        a->xorl(r32(d), r32(d));
-      }
+      Vreg32 d32 = i.d;
+      a->movl(0, d32); // because emitImmReg tries the xor optimization
     } else {
       a->emitImmReg(i.s, i.d);
     }
@@ -573,8 +723,7 @@ void Vgen::emit(const store& i) {
 void Vgen::emit(const syncpoint& i) {
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a->frontier(),
          i.fix.pcOffset, i.fix.spOffset);
-  mcg->recordSyncPoint(a->frontier(), i.fix.pcOffset,
-                       i.fix.spOffset);
+  mcg->recordSyncPoint(a->frontier(), i.fix);
 }
 
 void Vgen::emit(const testwim& i) {
@@ -632,152 +781,6 @@ void Vgen::emit(const vret& i) {
   a->ret();
 }
 
-// overall emitter
-void Vgen::emit(jit::vector<Vlabel>& labels) {
-  // Some structures here track where we put things just for debug printing.
-  struct Snippet {
-    const IRInstruction* origin;
-    TcaRange range;
-  };
-  struct BlockInfo {
-    jit::vector<Snippet> snippets;
-  };
-
-  // This is under the printir tracemod because it mostly shows you IR and
-  // machine code, not vasm and machine code (not implemented).
-  bool shouldUpdateAsmInfo = !!m_asmInfo;
-
-  std::vector<TransBCMapping>* bcmap = nullptr;
-  if (mcg->tx().isTransDBEnabled() || RuntimeOption::EvalJitUseVtuneAPI) {
-    bcmap = &mcg->cgFixups().m_bcMap;
-  }
-
-  jit::vector<jit::vector<BlockInfo>> areaToBlockInfos;
-  if (shouldUpdateAsmInfo) {
-    areaToBlockInfos.resize(areas.size());
-    for (auto& r : areaToBlockInfos) {
-      r.resize(unit.blocks.size());
-    }
-  }
-
-  for (int i = 0, n = labels.size(); i < n; ++i) {
-    assertx(checkBlockEnd(unit, labels[i]));
-
-    auto b = labels[i];
-    auto& block = unit.blocks[b];
-    X64Assembler as { area(block.area).code };
-    a = &as;
-    auto blockStart = a->frontier();
-    addrs[b] = blockStart;
-
-    {
-      // Compute the next block we will emit into the current area.
-      auto cur_start = start(labels[i]);
-      auto j = i + 1;
-      while (j < labels.size() && cur_start != start(labels[j])) {
-        j++;
-      }
-      next = j < labels.size() ? labels[j] : Vlabel(unit.blocks.size());
-      current = b;
-    }
-
-    const IRInstruction* currentOrigin = nullptr;
-    auto blockInfo = shouldUpdateAsmInfo
-      ? &areaToBlockInfos[unsigned(block.area)][b]
-      : nullptr;
-    auto start_snippet = [&](const Vinstr& inst) {
-      if (!shouldUpdateAsmInfo) return;
-
-      blockInfo->snippets.push_back(
-        Snippet { inst.origin, TcaRange { a->code().frontier(), nullptr } }
-      );
-    };
-    auto finish_snippet = [&] {
-      if (!shouldUpdateAsmInfo) return;
-
-      if (!blockInfo->snippets.empty()) {
-        auto& snip = blockInfo->snippets.back();
-        snip.range = TcaRange { snip.range.start(), a->code().frontier() };
-      }
-    };
-
-    for (auto& inst : block.code) {
-      if (currentOrigin != inst.origin) {
-        finish_snippet();
-        start_snippet(inst);
-        currentOrigin = inst.origin;
-      }
-
-      if (bcmap && inst.origin) {
-        auto sk = inst.origin->marker().sk();
-        if (bcmap->empty() ||
-            bcmap->back().md5 != sk.unit()->md5() ||
-            bcmap->back().bcStart != sk.offset()) {
-          bcmap->push_back(TransBCMapping{sk.unit()->md5(), sk.offset(),
-                                          main().frontier(), cold().frontier(),
-                                          frozen().frontier()});
-        }
-      }
-
-      switch (inst.op) {
-#define O(name, imms, uses, defs) \
-        case Vinstr::name: emit(inst.name##_); break;
-        VASM_OPCODES
-#undef O
-      }
-    }
-
-    finish_snippet();
-  }
-
-  for (auto& p : jccs) {
-    assertx(addrs[p.target]);
-    X64Assembler::patchJcc(p.instr, addrs[p.target]);
-  }
-  for (auto& p : jmps) {
-    assertx(addrs[p.target]);
-    X64Assembler::patchJmp(p.instr, addrs[p.target]);
-  }
-  for (auto& p : calls) {
-    assertx(addrs[p.target]);
-    X64Assembler::patchCall(p.instr, addrs[p.target]);
-  }
-  for (auto& p : catches) {
-    mcg->registerCatchBlock(p.instr, addrs[p.target]);
-  }
-  for (auto& p : ldpoints) {
-    auto after_lea = p.instr + 7;
-    auto d = points[p.pos] - after_lea;
-    assertx(deltaFits(d, sz::dword));
-    ((int32_t*)after_lea)[-1] = d;
-  }
-
-  if (!shouldUpdateAsmInfo) {
-    return;
-  }
-
-  for (auto i = 0; i < areas.size(); ++i) {
-    auto& blockInfos = areaToBlockInfos[i];
-    for (auto const blockID : labels) {
-      auto const& blockInfo = blockInfos[static_cast<size_t>(blockID)];
-      if (blockInfo.snippets.empty()) continue;
-
-      const IRInstruction* currentOrigin = nullptr;
-      for (auto const& snip : blockInfo.snippets) {
-        if (currentOrigin != snip.origin && snip.origin) {
-          currentOrigin = snip.origin;
-        }
-
-        m_asmInfo->updateForInstruction(
-          currentOrigin,
-          static_cast<AreaIndex>(i),
-          snip.range.start(),
-          snip.range.end());
-      }
-    }
-  }
-}
-
 void Vgen::emit(const cvtsi2sd& i) {
   a->pxor(i.d, i.d);
   a->cvtsi2sd(i.s, i.d);
@@ -819,6 +822,8 @@ void Vgen::emit(const lea& i) {
     a->lea(i.s, i.d);
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Move all the elements of in into out, replacing count elements of out

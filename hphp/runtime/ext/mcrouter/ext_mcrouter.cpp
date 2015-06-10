@@ -166,7 +166,6 @@ class MCRouterResult : public AsioExternalThreadEvent {
       // Deferred string init, see below
       m_result.m_data.pstr = StringData::Make(
         m_stringResult.c_str(), m_stringResult.size(), CopyString);
-      m_result.m_data.pstr->setRefCount(1);
       m_stringResult.clear();
     }
     cellDup(m_result, c);

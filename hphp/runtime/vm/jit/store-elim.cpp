@@ -393,7 +393,7 @@ void removeDead(Local& env, IRInstruction& inst) {
 }
 
 void addLoadSet(Local& env, const ALocBits& bits) {
-  FTRACE(4, "     load:  {}\n", show(bits));
+  FTRACE(4, "           load: {}\n", show(bits));
   env.mayLoad |= bits;
   env.antLoc &= ~bits;
 }
@@ -404,7 +404,7 @@ void addAllLoad(Local& env) {
 }
 
 void mustStore(Local& env, int bit) {
-  FTRACE(4, " mustStore: {}\n", bit);
+  FTRACE(4, "      mustStore: {}\n", bit);
   if (!env.antLoc[bit] &&
       !env.mayLoad[bit]) {
     env.delLoc[bit] = 1;
@@ -413,7 +413,7 @@ void mustStore(Local& env, int bit) {
 }
 
 void mustStoreSet(Local& env, const ALocBits& bits) {
-  FTRACE(4, " mustStore: {}\n", show(bits));
+  FTRACE(4, "      mustStore: {}\n", show(bits));
   env.delLoc |= bits & ~(env.antLoc | env.mayLoad);
   env.antLoc |= bits;
 }
@@ -427,7 +427,7 @@ void load(Local& env, AliasClass acls) {
 void mayStore(Local& env, AliasClass acls) {
   auto const canon = canonicalize(acls);
   auto const mayStore = env.global.ainfo.may_alias(canon);
-  FTRACE(4, "  mayStore: {}\n", show(mayStore));
+  FTRACE(4, "       mayStore: {}\n", show(mayStore));
   env.mayStore |= mayStore;
 }
 
@@ -447,7 +447,10 @@ folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
 
 void visit(Local& env, IRInstruction& inst) {
   auto const effects = memory_effects(inst);
-  FTRACE(3, "    {: <30} -- {}\n", show(effects), inst.toString());
+  FTRACE(3, "    {}\n"
+            "      {}\n",
+            inst.toString(),
+            show(effects));
 
   match<void>(
     effects,
@@ -989,7 +992,7 @@ TrackedStore recompute_ts(Global& genv, uint32_t id, Block* succ) {
 void compute_available_stores(
   Global& genv, const jit::vector<BlockAnalysis>& blockAnalysis) {
 
-  FTRACE(4, "Iterating Available Stores\n");
+  FTRACE(4, "\nIterating Available Stores\n");
   compute_dataflow<Direction::Forward>(
     genv, blockAnalysis,
     [](Block* blk, BlockState& state) {
@@ -1093,7 +1096,7 @@ void compute_placement_possible(
 
   compute_available_stores(genv, blockAnalysis);
 
-  FTRACE(4, "Iterating Placement Possible\n");
+  FTRACE(4, "\nIterating Placement Possible\n");
   compute_dataflow<Direction::Forward>(
     genv, blockAnalysis,
     [](Block* blk, BlockState& state) {
@@ -1221,7 +1224,7 @@ void optimizeStores(IRUnit& unit) {
     return ret;
   }();
 
-  FTRACE(2, "Transfer functions:\n{}\n",
+  FTRACE(2, "\nTransfer functions:\n{}\n",
     [&]() -> std::string {
       auto ret = std::string{};
       for (auto poId = uint32_t{0}; poId < poBlockList.size(); ++poId) {

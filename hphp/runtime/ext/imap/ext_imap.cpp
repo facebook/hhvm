@@ -52,7 +52,7 @@ public:
 
   // overriding ResourceData
   CLASSNAME_IS("imap");
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
   void close();
 

@@ -452,7 +452,10 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   }
 
   auto const effects = memory_effects(inst);
-  FTRACE(3, "    {: <30} -- {}\n", show(effects), inst.toString());
+  FTRACE(3, "    {}\n"
+            "      {}\n",
+            inst.toString(),
+            show(effects));
   auto flags = Flags{};
   match<void>(
     effects,
@@ -728,6 +731,33 @@ void optimize_block(Local& env, Block* blk) {
   }
 }
 
+void optimize(Global& genv) {
+  /*
+   * Simplify() calls can make blocks unreachable as we walk, and visiting the
+   * unreachable blocks with simplify calls is not allowed.  They may have uses
+   * of SSATmps that no longer have defs, which can break how the simplifier
+   * chases up to definitions.
+   *
+   * We use a StateVector because we can add new blocks during optimize().
+   */
+  StateVector<Block,bool> reachable(genv.unit, false);
+  reachable[genv.unit.entry()] = true;
+  for (auto& blk : genv.rpoBlocks) {
+    FTRACE(1, "B{}:\n", blk->id());
+
+    if (!reachable[blk]) {
+      FTRACE(2, "   unreachable\n");
+      continue;
+    }
+
+    auto env = Local { genv, genv.blockInfo[blk].stateIn };
+    optimize_block(env, blk);
+
+    if (auto const x = blk->next()) reachable[x] = true;
+    if (auto const x = blk->taken()) reachable[x] = true;
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 bool operator==(const TrackedLoc& a, const TrackedLoc& b) {
@@ -935,11 +965,7 @@ void optimizeLoads(IRUnit& unit) {
   );
 
   FTRACE(1, "\nOptimize:\n");
-  for (auto& blk : genv.rpoBlocks) {
-    FTRACE(1, "B{}:\n", blk->id());
-    auto env = Local { genv, genv.blockInfo[blk].stateIn };
-    optimize_block(env, blk);
-  }
+  optimize(genv);
   FTRACE(2, "reflowing types\n");
   reflowTypes(genv.unit);
 }

@@ -1,2 +1,2 @@
 Notice: This should show up in %s/test/slow/ext_xdebug/force_error_reporting.php on line 5
-%w#0 at [%s/hphp/test/slow/ext_xdebug/force_error_reporting.php:5]
+%w#0 trigger_error(), called at [%s/hphp/test/slow/ext_xdebug/force_error_reporting.php:5]

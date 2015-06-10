@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -43,10 +44,12 @@ const StaticString
   s_get_class("get_class"),
   s_get_called_class("get_called_class"),
   s_sqrt("sqrt"),
+  s_max2("__SystemLib\\max2"),
   s_ceil("ceil"),
   s_floor("floor"),
   s_abs("abs"),
   s_ord("ord"),
+  s_func_num_args("__SystemLib\\func_num_arg_"),
   s_one("1"),
   s_empty("");
 
@@ -127,17 +130,25 @@ SSATmp* opt_ord(IRGS& env, uint32_t numArgs) {
   if (arg->hasConstVal(TBool)) {
     // ord((string)true)===ord("1"), ord((string)false)===ord("")
     return cns(env, int64_t{arg_type.boolVal() ? '1' : 0});
-  } else if (arg_type <= TNull) {
+  }
+  if (arg_type <= TNull) {
     return cns(env, int64_t{0});
-  } else if (arg->hasConstVal(TInt)) {
+  }
+  if (arg->hasConstVal(TInt)) {
     const auto conv = folly::to<std::string>(arg_type.intVal());
     return cns(env, int64_t{conv[0]});
-  } else if (arg->hasConstVal(TDbl)) {
+  }
+  if (arg->hasConstVal(TDbl)) {
     const auto conv = folly::to<std::string>(arg_type.dblVal());
     return cns(env, int64_t{conv[0]});
   }
 
   return nullptr;
+}
+
+SSATmp* opt_func_num_args(IRGS& env, uint32_t numArgs) {
+  if (numArgs != 0 || curFunc(env)->isPseudoMain()) return nullptr;
+  return gen(env, LdARNumParams, fp(env));
 }
 
 SSATmp* opt_ini_get(IRGS& env, uint32_t numArgs) {
@@ -282,6 +293,35 @@ SSATmp* opt_sqrt(IRGS& env, uint32_t numArgs) {
   return nullptr;
 }
 
+SSATmp* opt_max2(IRGS& env, uint32_t numArgs) {
+
+  // should never happen since max2 is only called for 2 operands
+  if (numArgs != 2) return nullptr;
+
+  auto const val1 = topC(env, BCSPOffset{0});
+  auto const ty1 = val1->type();
+  auto const val2 = topC(env, BCSPOffset{1});
+  auto const ty2 = val2->type();
+
+  // this opt is only for max of 2 ints/doubles
+  if (!(ty1 <= TInt || ty1 <= TDbl) ||
+      !(ty2 <= TInt || ty2 <= TDbl)) return nullptr;
+
+  return cond(
+    env,
+    [&] (Block* taken) {
+      auto const gte = gen(env, Gte, val1, val2);
+      gen(env, JmpZero, taken, gte);
+    },
+    [&] {
+      return val1;
+    },
+    [&] {
+      return val2;
+    }
+  );
+}
+
 SSATmp* opt_ceil(IRGS& env, uint32_t numArgs) {
   if (numArgs != 1) return nullptr;
   if (!folly::CpuId().sse41()) return nullptr;
@@ -328,17 +368,19 @@ bool optimizedFCallBuiltin(IRGS& env,
 #define X(x) \
     if (func->name()->isame(s_##x.get())) return opt_##x(env, numArgs);
 
-    X(get_called_class);
-    X(get_class);
-    X(in_array);
-    X(ini_get);
-    X(count);
-    X(is_a);
-    X(sqrt);
-    X(ceil);
-    X(floor);
-    X(abs);
-    X(ord);
+    X(get_called_class)
+    X(get_class)
+    X(in_array)
+    X(ini_get)
+    X(count)
+    X(is_a)
+    X(sqrt)
+    X(max2)
+    X(ceil)
+    X(floor)
+    X(abs)
+    X(ord)
+    X(func_num_args)
 
 #undef X
 
@@ -401,8 +443,10 @@ struct ParamPrep {
   size_t size() const { return info.size(); }
 
   SSATmp* thiz{nullptr};       // may be null if call is not a method
+  SSATmp* count{nullptr};      // if non-null, the count of arguments
   jit::vector<Info> info;
   uint32_t numThroughStack{0};
+  bool forNativeImpl{false};
 };
 
 /*
@@ -414,18 +458,24 @@ template<class LoadParam>
 ParamPrep prepare_params(IRGS& env,
                          const Func* callee,
                          SSATmp* thiz,
+                         SSATmp* numArgsExpr,
                          uint32_t numArgs,
                          uint32_t numNonDefault,
+                         bool forNativeImpl,
                          LoadParam loadParam) {
   auto ret = ParamPrep(numArgs);
   ret.thiz = thiz;
+  ret.count = numArgsExpr;
+  ret.forNativeImpl = forNativeImpl;
 
   // Fill in in reverse order, since they may come from popC's (depending on
   // what loadParam wants to do).
   for (auto offset = uint32_t{numArgs}; offset-- > 0;) {
-    ret[offset].value = loadParam(offset);
-
     auto const ty = param_coerce_type(callee, offset);
+    ret[offset].value = loadParam(offset, ty);
+    if (forNativeImpl) {
+      continue;
+    }
 
     // We do actually mean exact type equality here.  We're only capable of
     // passing the following primitives through registers; everything else goes
@@ -436,9 +486,9 @@ ParamPrep prepare_params(IRGS& env,
       continue;
     }
 
-    // If ty > TBottom, it had some kind of type hint.
     ++ret.numThroughStack;
     ret[offset].throughStack = true;
+    // If ty > TBottom, it had some kind of type hint.
     ret[offset].needsConversion = offset < numNonDefault && ty > TBottom;
   }
 
@@ -488,7 +538,7 @@ struct CatchMaker {
     , m_callee(callee)
     , m_params(*params)
   {
-    assertx(!m_params.thiz || inlining());
+    assertx(!m_params.thiz || m_params.forNativeImpl || inlining());
   }
 
   CatchMaker(const CatchMaker&) = delete;
@@ -542,7 +592,9 @@ struct CatchMaker {
     // instruction.
     hint(env, Block::Hint::Unlikely);
     decRefForSideExit();
-    if (m_params.thiz) gen(env, DecRef, m_params.thiz);
+    if (m_params.thiz && m_params.thiz->type() <= TObj) {
+      gen(env, DecRef, m_params.thiz);
+    }
 
     auto const val = gen(env, LdUnwinderValue, TCell);
     push(env, val);
@@ -590,11 +642,13 @@ private:
    */
 
   void decRefForUnwind() const {
+    if (m_params.forNativeImpl) return;
     for (auto i = uint32_t{0}; i < m_params.size(); ++i) {
-      if (m_params[i].throughStack) {
+      auto const &pi = m_params[i];
+      if (pi.throughStack) {
         popDecRef(env);
       } else {
-        gen(env, DecRef, m_params[i].value);
+        gen(env, DecRef, pi.value);
       }
     }
   }
@@ -720,12 +774,16 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
                                     const Func* callee,
                                     ParamPrep& params,
                                     const CatchMaker& maker) {
-  auto const cbNumArgs = 2 + params.size() + (params.thiz ? 1 : 0);
+  auto const cbNumArgs = 2 + params.size() +
+    (params.thiz ? 1 : 0) + (params.count ? 1 : 0);
   auto ret = jit::vector<SSATmp*>(cbNumArgs);
   auto argIdx = uint32_t{0};
   ret[argIdx++] = fp(env);
   ret[argIdx++] = sp(env);
   if (params.thiz) ret[argIdx++] = params.thiz;
+  if (params.count) ret[argIdx++] = params.count;
+
+  assertx(!params.count || callee->attrs() & AttrNumArgs);
 
   auto stackIdx = uint32_t{0};
   for (auto paramIdx = uint32_t{0}; paramIdx < params.size(); ++paramIdx) {
@@ -773,44 +831,46 @@ void builtinCall(IRGS& env,
                  ParamPrep& params,
                  int32_t numNonDefault,
                  const CatchMaker& catchMaker) {
-  /*
-   * Everything that needs to be on the stack gets spilled now.
-   *
-   * If we're not inlining, the reason we do this even when numThroughStack is
-   * zero is to make it so that in either case the stack depth when we enter
-   * our catch blocks is always the same as the numThroughStack value, in all
-   * situations.  If we didn't do this, then when we aren't inlining, and
-   * numThroughStack is zero, we'd have the stack depth be the total num params
-   * (the depth before the FCallBuiltin), which would add more cases to handle
-   * in the catch blocks.
-   */
-  if (params.numThroughStack != 0 || !catchMaker.inlining()) {
-    for (auto i = uint32_t{0}; i < params.size(); ++i) {
-      if (params[i].throughStack) {
-        push(env, params[i].value);
-      }
-    }
-    // We're going to do ldStkAddrs on these, so the stack must be
-    // materialized:
-    spillStack(env);
+  if (!params.forNativeImpl) {
     /*
-     * This marker update is to make sure rbx points to the bottom of our stack
-     * if we enter a catch trace.  It's also necessary because we might run
-     * destructors as part of parameter coersions, which we don't want to
-     * clobber our spilled stack.
+     * Everything that needs to be on the stack gets spilled now.
+     *
+     * If we're not inlining, the reason we do this even when numThroughStack is
+     * zero is to make it so that in either case the stack depth when we enter
+     * our catch blocks is always the same as the numThroughStack value, in all
+     * situations.  If we didn't do this, then when we aren't inlining, and
+     * numThroughStack is zero, we'd have the stack depth be the total num
+     * params (the depth before the FCallBuiltin), which would add more cases
+     * to handle in the catch blocks.
      */
-    updateMarker(env);
-  }
+    if (params.numThroughStack != 0 || !catchMaker.inlining()) {
+      for (auto i = uint32_t{0}; i < params.size(); ++i) {
+        if (params[i].throughStack) {
+          push(env, params[i].value);
+        }
+      }
+      // We're going to do ldStkAddrs on these, so the stack must be
+      // materialized:
+      spillStack(env);
+      /*
+       * This marker update is to make sure rbx points to the bottom of our
+       * stack if we enter a catch trace.  It's also necessary because we might
+       * run destructors as part of parameter coersions, which we don't want to
+       * clobber our spilled stack.
+       */
+      updateMarker(env);
+    }
 
-  // If we're not inlining, we've spilled the stack and are about to do things
-  // that can throw.  If we are inlining, we've done various DefInlineFP-type
-  // stuff and possibly also spilled the stack.
-  env.irb->exceptionStackBoundary();
+    // If we're not inlining, we've spilled the stack and are about to do things
+    // that can throw.  If we are inlining, we've done various DefInlineFP-type
+    // stuff and possibly also spilled the stack.
+    env.irb->exceptionStackBoundary();
+  }
 
   auto const retType = [&]() -> Type {
     auto const retDT = callee->returnType();
     auto const ret = retDT ? Type(*retDT) : TCell;
-    if (callee->attrs() & ClassInfo::IsReference) {
+    if (callee->attrs() & AttrReference) {
       return ret.box() & TBoxedInitCell;
     }
     return ret;
@@ -826,18 +886,23 @@ void builtinCall(IRGS& env,
     CallBuiltinData {
       offsetFromIRSP(env, BCSPOffset{0}),
       callee,
-      numNonDefault,
+      params.count ? -1 : numNonDefault,
       builtinFuncDestroysLocals(callee)
     },
     catchMaker.makeUnusualCatch(),
     std::make_pair(realized.size(), decayedPtr)
   );
 
-  // Pop the stack params and push the return value.
-  if (params.thiz) gen(env, DecRef, params.thiz);
-  for (auto i = uint32_t{0}; i < params.numThroughStack; ++i) {
-    popDecRef(env);
+  if (!params.forNativeImpl) {
+    // Pop the stack params
+    if (params.thiz && params.thiz->type() <= TObj) {
+      gen(env, DecRef, params.thiz);
+    }
+    for (auto i = uint32_t{0}; i < params.numThroughStack; ++i) {
+      popDecRef(env);
+    }
   }
+
   // We don't need to decref the non-state param values, because they are only
   // non-reference counted types.  (At this point we've gotten through all our
   // coersions, so even if they started refcounted we've already decref'd them
@@ -864,20 +929,24 @@ void nativeImplInlined(IRGS& env) {
   auto const wasInliningConstructor =
     fp(env)->inst()->extra<DefInlineFP>()->fromFPushCtor;
 
-  bool const instanceMethod = callee->isMethod() &&
-                                !(callee->attrs() & AttrStatic);
-
-
   auto const numArgs = callee->numParams();
-  auto const paramThis = instanceMethod ? ldThis(env) : nullptr;
+  auto const paramThis = [&] () -> SSATmp* {
+    if (!callee->isMethod()) return nullptr;
+    if (callee->isStatic() && !callee->isNative()) return nullptr;
+    auto ctx = gen(env, LdCtx, fp(env));
+    if (callee->isStatic()) return gen(env, LdClsCtx, ctx);
+    return gen(env, CastCtxThis, ctx);
+  }();
 
   auto params = prepare_params(
     env,
     callee,
     paramThis,
+    nullptr,
     numArgs,
     numArgs, // numNonDefault is equal to numArgs here.
-    [&] (uint32_t i) {
+    false,
+    [&] (uint32_t i, Type ty) {
       auto ret = ldLoc(env, i, nullptr, DataTypeSpecific);
       // These IncRefs must be 'inside' the callee: it may own the only
       // reference to the parameters.  Normally they will cancel with the
@@ -889,7 +958,7 @@ void nativeImplInlined(IRGS& env) {
 
   // For the same reason that we have to IncRef the locals above, we
   // need to grab one on the $this.
-  if (paramThis) gen(env, IncRef, paramThis);
+  if (paramThis && paramThis->type() <= TObj) gen(env, IncRef, paramThis);
 
   endInlinedCommon(env);
 
@@ -960,9 +1029,11 @@ void emitFCallBuiltin(IRGS& env,
     env,
     callee,
     nullptr,  // no $this; FCallBuiltin never happens for methods
+    nullptr,  // count is constant numNonDefault
     numArgs,
     numNonDefault,
-    [&] (uint32_t i) { return pop(env, DataTypeSpecific); }
+    false,
+    [&] (uint32_t i, Type ty) { return pop(env, DataTypeSpecific); }
   );
 
   auto const catcher = CatchMaker {
@@ -978,9 +1049,115 @@ void emitFCallBuiltin(IRGS& env,
 void emitNativeImpl(IRGS& env) {
   if (isInlining(env)) return nativeImplInlined(env);
 
-  gen(env, NativeImpl, fp(env), sp(env));
-  auto const data = RetCtrlData { offsetToReturnSlot(env), false };
-  gen(env, RetCtrl, data, sp(env), fp(env));
+  auto genericNativeImpl = [&]() {
+    gen(env, NativeImpl, fp(env), sp(env));
+    auto const data = RetCtrlData { offsetToReturnSlot(env), false };
+    gen(env, RetCtrl, data, sp(env), fp(env));
+  };
+
+  auto callee = curFunc(env);
+  if (!callee->nativeFuncPtr() || callee->builtinFuncPtr() == zend_wrap_func) {
+    genericNativeImpl();
+    return;
+  }
+
+  Block* fallback = nullptr;
+  auto thiz = callee->isMethod() && (!callee->isStatic() || callee->isNative())
+    ? gen(env, LdCtx, fp(env)) : nullptr;
+  auto const numParams = gen(env, LdARNumParams, fp(env));
+
+  ifThenElse(
+    env,
+    [&] (Block* t) {
+      fallback = t;
+      if (thiz) {
+        if (callee->isStatic()) {
+          thiz = gen(env, LdClsCtx, thiz);
+        } else {
+          gen(env, CheckCtxThis, fallback, thiz);
+          thiz = gen(env, CastCtxThis, thiz);
+        }
+      }
+
+      auto maxArgs = callee->numParams();
+      auto minArgs = callee->numNonVariadicParams();
+      while (minArgs) {
+        auto const& pi = callee->params()[minArgs - 1];
+        if (pi.funcletOff == InvalidAbsoluteOffset) {
+          break;
+        }
+        --minArgs;
+      }
+      if (callee->hasVariadicCaptureParam()) {
+        if (minArgs) {
+          auto const check = gen(env, LtInt, numParams, cns(env, minArgs));
+          gen(env, JmpNZero, fallback, check);
+        }
+      } else {
+        if (minArgs == maxArgs) {
+          auto const check = gen(env, EqInt, numParams, cns(env, minArgs));
+          gen(env, JmpZero, fallback, check);
+        } else {
+          if (minArgs) {
+            auto const checkMin = gen(env, LtInt,
+                                      numParams, cns(env, minArgs));
+            gen(env, JmpNZero, fallback, checkMin);
+          }
+          auto const checkMax = gen(env, GtInt, numParams, cns(env, maxArgs));
+          gen(env, JmpNZero, fallback, checkMax);
+        }
+      }
+    },
+    [&] () {
+      auto params = prepare_params(
+        env,
+        callee,
+        thiz,
+        callee->attrs() & AttrNumArgs ? numParams : nullptr,
+        callee->numParams(),
+        callee->numParams(),
+        true,
+        [&] (uint32_t i, Type targetType) {
+          auto const addr = gen(env, LdLocAddr,
+                                TPtrToFrameGen, LocalId(i), fp(env));
+          auto verifyType = [&] (Block* fail) {
+            gen(env, CheckTypeMem, targetType, fail, addr);
+          };
+          if (targetType.maybe(TInitNull)) {
+            targetType = targetType - TNull;
+            ifThen(env,
+                   verifyType,
+                   [&] {
+                     gen(env, CheckTypeMem, TInitNull,
+                         fallback, addr);
+                   });
+          } else if (targetType != TBottom) {
+            verifyType(fallback);
+            if (targetType == TBool ||
+                targetType == TInt ||
+                targetType == TDbl) {
+              return gen(env, LdMem,
+                         targetType == TBool ? TInt : targetType, addr);
+            }
+          }
+          return addr;
+        }
+      );
+      auto const catcher = CatchMaker {
+        env,
+        CatchMaker::Kind::NotInlining,
+        callee,
+        &params
+      };
+
+      builtinCall(env, callee, params, callee->numParams(), catcher);
+      emitRetC(env);
+    },
+    [&] () {
+      hint(env, Block::Hint::Unlikely);
+      genericNativeImpl();
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

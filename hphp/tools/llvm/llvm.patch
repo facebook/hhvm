@@ -2319,7 +2319,7 @@ index fdec333..ec9ee65 100644
    }
  
 diff --git lib/Target/X86/X86CallingConv.td lib/Target/X86/X86CallingConv.td
-index 899a960..796dce0 100644
+index 899a960..39d2907 100644
 --- lib/Target/X86/X86CallingConv.td
 +++ lib/Target/X86/X86CallingConv.td
 @@ -162,6 +162,15 @@ def RetCC_X86_64_WebKit_JS : CallingConv<[
@@ -2351,7 +2351,7 @@ index 899a960..796dce0 100644
    // Mingw64 and native Win64 use Win64 CC
    CCIfSubtarget<"isTargetWin64()", CCDelegateTo<RetCC_X86_Win64_C>>,
  
-@@ -278,6 +293,39 @@ def CC_X86_64_C : CallingConv<[
+@@ -278,6 +293,43 @@ def CC_X86_64_C : CallingConv<[
             CCAssignToStack<64, 64>>
  ]>;
  
@@ -2366,8 +2366,10 @@ index 899a960..796dce0 100644
 +
 +// Calling convention for PHP calls in HHVM.
 +def CC_X86_64_HHVM_PHP : CallingConv<[
-+  // Pass HHVM's rVmSp, rVmTl, rVmFp, and rStashedAR.
-+  CCIfType<[i64], CCAssignToReg<[RBX, R12, RBP, R15]>>
++  // Use all registers for args.
++  CCIfType<[i64], CCAssignToReg<[RBX, R12, RBP, R15,
++                                 RDI, RSI, RDX, RCX, R8, R9,
++                                 RAX, R10, R11, R13, R14]>>
 +]>;
 +
 +// Calling convention for HHVM's service requests on X86-64
@@ -2384,14 +2386,16 @@ index 899a960..796dce0 100644
 +
 +// Calling convention for HHVM's return from TC on X86-64
 +def CC_X86_64_HHVM_TCR : CallingConv<[
-+  // Pass HHVM's rVmSp, rVmTl, and rVmFp.
-+  CCIfType<[i64], CCAssignToReg<[RBX, R12, RBP]>>
++  // Pass as many registers as we like (sort of allreg_cc).
++  CCIfType<[i64], CCAssignToReg<[RBX, R12, RBP,
++                                 RAX, RCX, RDX, RDI, RSI,
++                                 R8, R9, R10, R11, R13, R14, R15]>>
 +]>;
 +
  // Calling convention used on Win64
  def CC_X86_Win64_C : CallingConv<[
    // FIXME: Handle byval stuff.
-@@ -592,6 +640,11 @@ def CC_X86_64 : CallingConv<[
+@@ -592,6 +644,11 @@ def CC_X86_64 : CallingConv<[
    CCIfCC<"CallingConv::AnyReg", CCDelegateTo<CC_X86_64_AnyReg>>,
    CCIfCC<"CallingConv::X86_64_Win64", CCDelegateTo<CC_X86_Win64_C>>,
    CCIfCC<"CallingConv::X86_64_SysV", CCDelegateTo<CC_X86_64_C>>,
@@ -2403,7 +2407,7 @@ index 899a960..796dce0 100644
  
    // Mingw64 and native Win64 use Win64 CC
    CCIfSubtarget<"isTargetWin64()", CCDelegateTo<CC_X86_Win64_C>>,
-@@ -662,3 +715,6 @@ def CSR_64_Intel_OCL_BI_AVX    : CalleeSavedRegs<(add CSR_64,
+@@ -662,3 +719,6 @@ def CSR_64_Intel_OCL_BI_AVX    : CalleeSavedRegs<(add CSR_64,
  def CSR_64_Intel_OCL_BI_AVX512 : CalleeSavedRegs<(add RBX, RDI, RSI, R14, R15,
                                                    (sequence "ZMM%u", 16, 31),
                                                    K4, K5, K6, K7)>;
@@ -2938,17 +2942,17 @@ index 0000000..6d3cbfd
 +
 diff --git test/CodeGen/X86/decmin.ll test/CodeGen/X86/decmin.ll
 new file mode 100644
-index 0000000..0347245
+index 0000000..6ebfa59
 --- /dev/null
 +++ test/CodeGen/X86/decmin.ll
 @@ -0,0 +1,28 @@
-+; RUN: opt -O2 -S < %s | llc -march=x86-64
++; RUN: opt -O2 -S < %s | llc -march=x86-64 | FileCheck %s
 +target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 +target triple = "x86_64-unknown-linux-gnu"
 +
 +; CHECK-LABEL:  foo:
-+; CHECK-NEXT:   mov
-+; CHECK-NEXT:   cmp
++; CHECK:        movabs
++; CHECK-NEXT:   dec
 +; CHECK-NEXT:   jle
 +define i32 @foo() minsize {
 +entry:
@@ -3000,10 +3004,10 @@ index 0000000..b0fb073
 +
 diff --git test/CodeGen/X86/hhvm-cc.ll test/CodeGen/X86/hhvm-cc.ll
 new file mode 100644
-index 0000000..eb80923
+index 0000000..f546243
 --- /dev/null
 +++ test/CodeGen/X86/hhvm-cc.ll
-@@ -0,0 +1,106 @@
+@@ -0,0 +1,172 @@
 +; RUN: llc -stack-alignment=8 < %s | FileCheck %s
 +
 +; 80 - HHVM_C
@@ -3049,19 +3053,53 @@ index 0000000..eb80923
 +  ret i64 %retval
 +}
 +
-+declare hhvm_php {i64, i64} @php_func(i64, i64, i64, i64)
++declare hhvm_php {i64, i64} @php_short(i64, i64, i64, i64)
 +
-+define hhvm_tc i64 @test_php(i64 %a, i64 %b, i64 %c) nounwind {
++; %r12 (2nd arg) should not be spilled.
++define hhvm_tc i64 @test_php_short(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
-+; CHECK-LABEL:  test_php:
++; CHECK-LABEL:  test_php_short:
 +; CHECK-NEXT:   {{^#.*}}
 +; CHECK-NEXT:   movl $42, %r15
-+; CHECK-NEXT:   callq php_func
-+; CHECK-NEXT:   movq %rbp, %rbx
++; CHECK-NEXT:   callq php_short
++; CHECK-NEXT:   leaq (%rbp,%r12), %rbx
 +; CHECK-NEXT:   retq
-+  %pair = call hhvm_php {i64, i64} @php_func(i64 %a, i64 %b, i64 %c, i64 42)
++  %pair = call hhvm_php {i64, i64} @php_short(i64 %a, i64 %b, i64 %c, i64 42)
 +  %fp = extractvalue {i64, i64} %pair, 1
-+  ret i64 %fp
++  %rv = add i64 %fp, %b
++  ret i64 %rv
++}
++
++declare hhvm_php {i64, i64} @php_all(i64, i64, i64, i64, i64, i64, i64,
++                                     i64, i64, i64, i64, i64, i64, i64, i64)
++
++; %r12 (2nd arg) should not be spilled.
++define hhvm_tc i64 @test_php_all(i64 %a, i64 %b, i64 %c) nounwind {
++entry:
++; CHECK-LABEL:  test_php_all:
++; CHECK-NEXT:   {{^#.*}}
++; CHECK-NOT:    sub
++; CHECK-DAG:    movl $1, %ebx
++; CHECK-DAG:    movl $3, %ebp
++; CHECK-DAG:    movl $4, %r15
++; CHECK-DAG:    movl $5, %edi
++; CHECK-DAG:    movl $6, %esi
++; CHECK-DAG:    movl $7, %edx
++; CHECK-DAG:    movl $8, %ecx
++; CHECK-DAG:    movl $9, %r8
++; CHECK-DAG:    movl $10, %r9
++; CHECK-DAG:    movl $11, %eax
++; CHECK-DAG:    movl $12, %r10
++; CHECK-DAG:    movl $13, %r11
++; CHECK-DAG:    movl $14, %r13
++; CHECK-DAG:    movl $15, %r14
++; CHECK-DAG:    callq php_all
++  %pair = call hhvm_php {i64, i64} @php_all(
++    i64 1, i64 %b, i64 3, i64 4, i64 5, i64 6, i64 7,
++    i64 8, i64 9, i64 10, i64 11, i64 12, i64 13, i64 14, i64 15)
++  %fp = extractvalue {i64, i64} %pair, 1
++  %rv = add i64 %fp, %b
++  ret i64 %rv
 +}
 +
 +declare hhvm_sr void @svcreq(i64, i64, i64, i64, i64, i64, i64, i64, i64, i64)
@@ -3078,7 +3116,8 @@ index 0000000..eb80923
 +; CHECK-NEXT:   movl $5, %r8
 +; CHECK-NEXT:   movl $6, %r9
 +; CHECK-NEXT:   jmp svcreq
-+  tail call hhvm_sr void @svcreq(i64 %a, i64 %b, i64 %c, i64 42, i64 1, i64 2, i64 3, i64 4, i64 5, i64 6)
++  tail call hhvm_sr void @svcreq(i64 %a, i64 %b, i64 %c, i64 42, i64 1, i64 2,
++                                 i64 3, i64 4, i64 5, i64 6)
 +  ret void
 +}
 +
@@ -3094,19 +3133,50 @@ index 0000000..eb80923
 +; CHECK-DAG:    movl $5, %r8
 +; CHECK-DAG:    movl $6, %r9
 +; CHECK-DAG:    callq helper
-+  call hhvm_c void @helper(i64 %c, i64 1, i64 2, i64 3, i64 4, i64 5, i64 6, i64 7, i64 8, i64 9)
++  call hhvm_c void @helper(i64 %c, i64 1, i64 2, i64 3, i64 4, i64 5, i64 6,
++                           i64 7, i64 8, i64 9)
 +  ret void
 +}
 +
-+declare hhvm_tcr void @ret_addr(i64, i64, i64)
++declare hhvm_tcr void @return_short(i64, i64, i64)
 +
-+define hhvm_tc void @test_return(i64 %a, i64 %b, i64 %c) nounwind {
++define hhvm_tc void @test_return_short(i64 %a, i64 %b, i64 %c) nounwind {
 +entry:
-+; CHECK-LABEL:  test_return:
++; CHECK-LABEL:  test_return_short:
 +; CHECK-NEXT:   {{^#.*}}
-+; CHECK-NEXT:   pushq
++; CHECK-NEXT:   pushq $return_short
 +; CHECK-NEXT:   retl
-+  tail call hhvm_tcr void @ret_addr(i64 %a, i64 %b, i64 %c)
++  tail call hhvm_tcr void @return_short(i64 %a, i64 %b, i64 %c)
++  ret void
++}
++
++declare hhvm_tcr void @return_all(i64, i64, i64, i64, i64, i64, i64, i64,
++                                  i64, i64, i64, i64, i64, i64, i64)
++
++define hhvm_tc void @test_return_all(i64 %a, i64 %b, i64 %c) nounwind {
++entry:
++; CHECK-LABEL:  test_return_all:
++; CHECK-NEXT:   {{^#.*}}
++; CHECK-DAG:    movl $1, %ebx
++; CHECK-DAG:    movl $2, %r12
++; CHECK-DAG:    movl $3, %ebp
++; CHECK-DAG:    movl $4, %eax
++; CHECK-DAG:    movl $5, %ecx
++; CHECK-DAG:    movl $6, %edx
++; CHECK-DAG:    movl $7, %edi
++; CHECK-DAG:    movl $8, %esi
++; CHECK-DAG:    movl $9, %r8
++; CHECK-DAG:    movl $10, %r9
++; CHECK-DAG:    movl $11, %r10
++; CHECK-DAG:    movl $12, %r11
++; CHECK-DAG:    movl $13, %r13
++; CHECK-DAG:    movl $14, %r14
++; CHECK-DAG:    movl $15, %r15
++; CHECK-DAG:    pushq $return_all
++; CHECK-DAG:    retl
++  tail call hhvm_tcr void @return_all(
++    i64 1, i64 2, i64 3, i64 4, i64 5, i64 6, i64 7,
++    i64 8, i64 9, i64 10, i64 11, i64 12, i64 13, i64 14, i64 15)
 +  ret void
 +}
 +

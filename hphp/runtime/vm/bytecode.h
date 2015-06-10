@@ -162,6 +162,10 @@ class VarEnv {
   explicit VarEnv(const VarEnv* varEnv, ActRec* fp);
   ~VarEnv();
 
+  // Free the VarEnv and locals for the given frame
+  // which must have a VarEnv
+  static void deallocate(ActRec* fp);
+
   // Allocates a local VarEnv and attaches it to the existing FP.
   static VarEnv* createLocal(ActRec* fp);
 

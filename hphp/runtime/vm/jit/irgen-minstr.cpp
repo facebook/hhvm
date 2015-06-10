@@ -28,6 +28,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-incdec.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
@@ -463,9 +464,6 @@ void checkMIState(MTS& env) {
   // SetM with only one vector element, for props and elems
   const bool singleSet = isSingle && isSetM;
 
-  // A CGetM with no intermediate operations.
-  const bool singleCGet = isCGetM && isSingle;
-
   // Element access with one element in the vector
   const bool singleElem = isSingle && mcodeIsElem(env.immVecM[0]);
 
@@ -492,7 +490,7 @@ void checkMIState(MTS& env) {
     isSimpleBase(env) && mcodeMaybeArrayIntKey(env.immVecM[0]) &&
     baseType <= TStr;
 
-  if (simpleProp || singleSet || singleCGet ||
+  if (simpleProp || singleSet ||
       simpleArrayGet || simpleCollectionGet ||
       simpleArrayUnset || simpleCollectionIsset ||
       simpleArrayIsset || simpleStringOp) {
@@ -549,6 +547,10 @@ void setBase(MTS& env,
   always_assert(env.base.type <= env.base.value->type());
 }
 
+SSATmp* getUnconstrainedKey(MTS& env) {
+  return getInput(env, env.iInd, DataTypeGeneric);
+}
+
 SSATmp* getKey(MTS& env) {
   auto key = getInput(env, env.iInd, DataTypeSpecific);
   auto const keyType = key->type();
@@ -560,11 +562,17 @@ SSATmp* getKey(MTS& env) {
   return key;
 }
 
-SSATmp* getValue(MTS& env) {
+SSATmp* getUnconstrainedValue(MTS& env) {
   // If an instruction takes an rhs, it's always input 0.
   assertx(env.mii.valCount() == 1);
   const int kValIdx = 0;
-  return getInput(env, kValIdx, DataTypeSpecific);
+  return getInput(env, kValIdx, DataTypeGeneric);
+}
+
+SSATmp* getValue(MTS& env) {
+  auto const val = getUnconstrainedValue(env);
+  env.irb.constrainValue(val, DataTypeSpecific);
+  return val;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1365,13 +1373,14 @@ SSATmp* emitPackedArrayGet(MTS& env, SSATmp* base, SSATmp* key) {
       return cns(env, *value);
     }
 
-    auto const check = packedArrayBoundsStaticCheck(base->type(), idx);
-    if (check.hasValue()) {
-      if (check.value()) {
-        return doLdElem();
-      }
+    switch (packedArrayBoundsStaticCheck(base->type(), idx)) {
+    case PackedBounds::In:
+      return doLdElem();
+    case PackedBounds::Out:
       gen(env, RaiseArrayIndexNotice, key);
       return cns(env, TInitNull);
+    case PackedBounds::Unknown:
+      break;
     }
   }
 
@@ -1513,13 +1522,27 @@ void emitStringGet(MTS& env, SSATmp* key) {
   env.result = gen(env, StringGet, env.base.value, key);
 }
 
+void checkBounds(MTS& env, SSATmp* idx, SSATmp* limit) {
+  ifThen(
+    env,
+    [&](Block* taken) {
+      auto ok = gen(env, CheckRange, idx, limit);
+      gen(env, JmpZero, taken, ok);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, ThrowOutOfBounds, idx);
+    }
+  );
+}
+
 void emitVectorGet(MTS& env, SSATmp* key) {
   assertx(key->isA(TInt));
   if (key->hasConstVal() && key->intVal() < 0) {
     PUNT(emitVectorGet);
   }
   auto const size = gen(env, LdVectorSize, env.base.value);
-  gen(env, CheckBounds, key, size);
+  checkBounds(env, key, size);
   auto const base = gen(env, LdVectorBase, env.base.value);
   static_assert(sizeof(TypedValue) == 16,
                 "TypedValue size expected to be 16 bytes");
@@ -1542,7 +1565,7 @@ void emitPairGet(MTS& env, SSATmp* key) {
     auto index = cns(env, key->intVal() << 4);
     env.result = gen(env, LdElem, base, index);
   } else {
-    gen(env, CheckBounds, key, cns(env, 2));
+    checkBounds(env, key, cns(env, 2));
     auto const base = gen(env, LdPairBase, env.base.value);
     auto idx = gen(env, Shl, key, cns(env, 4));
     env.result = gen(env, LdElem, base, idx);
@@ -1562,9 +1585,9 @@ void emitPackedArrayIsset(MTS& env) {
 
   if (key->hasConstVal()) {
     auto const idx = key->intVal();
-    auto const check = packedArrayBoundsStaticCheck(env.base.type, idx);
-    if (check.hasValue()) {
-      if (check.value()) {
+    switch (packedArrayBoundsStaticCheck(env.base.type, idx)) {
+    case PackedBounds::In:
+      {
         if (!type.maybe(TNull)) {
           env.result = cns(env, true);
           return;
@@ -1572,10 +1595,13 @@ void emitPackedArrayIsset(MTS& env) {
         auto const elemAddr = gen(env, LdPackedArrayElemAddr,
                                   type.ptr(Ptr::Arr), env.base.value, key);
         env.result = gen(env, IsNTypeMem, TNull, elemAddr);
-      } else {
-        env.result = cns(env, false);
       }
       return;
+    case PackedBounds::Out:
+      env.result = cns(env, false);
+      return;
+    case PackedBounds::Unknown:
+      break;
     }
   }
 
@@ -1648,7 +1674,7 @@ void emitVectorSet(MTS& env, SSATmp* key, SSATmp* value) {
     PUNT(emitVectorSet); // will throw
   }
   auto const size = gen(env, LdVectorSize, env.base.value);
-  gen(env, CheckBounds, key, size);
+  checkBounds(env, key, size);
 
   ifThen(
     env,
@@ -1702,7 +1728,13 @@ void emitCGetProp(MTS& env) {
   auto const nullsafe = (env.immVecM[env.mInd] == MQT);
   auto const key = getKey(env);
 
-  env.result = gen(env, nullsafe ? CGetPropQ : CGetProp, env.base.value, key);
+  env.result = gen(
+    env,
+    nullsafe ? CGetPropQ : CGetProp,
+    env.base.value,
+    key,
+    misPtr(env)
+  );
 }
 
 void emitVGetProp(MTS& env) {
@@ -1768,8 +1800,30 @@ void emitSetOpProp(MTS& env) {
 }
 
 void emitIncDecProp(MTS& env) {
-  IncDecOp op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
+  auto const op = static_cast<IncDecOp>(env.ni.imm[0].u_OA);
   auto const key = getKey(env);
+  auto const propInfo = getCurrentPropertyOffset(env);
+
+  if (RuntimeOption::RepoAuthoritative &&
+      propInfo.offset != -1 &&
+      !mightCallMagicPropMethod(MIA_none, propInfo) &&
+      !mightCallMagicPropMethod(MIA_define, propInfo)) {
+
+    // Special case for when the property is known to be an int.
+    if (env.base.type <= TObj &&
+        propInfo.repoAuthType.tag() == RepoAuthType::Tag::Int) {
+      DEBUG_ONLY auto const propIntTy = TInt.ptr(Ptr::Prop);
+      emitPropSpecialized(env, MIA_define, propInfo);
+      assertx(env.base.value->type() <= propIntTy);
+      auto const prop = gen(env, LdMem, TInt, env.base.value);
+      auto const result = incDec(env, op, prop);
+      assertx(result != nullptr);
+      gen(env, StMem, env.base.value, result);
+      env.result = isPre(op) ? result : prop;
+      return;
+    }
+  }
+
   env.result = gen(env, IncDecProp, IncDecData { op }, env.base.value, key);
 }
 
@@ -1822,7 +1876,7 @@ void emitCGetElem(MTS& env) {
     env.result = gen(env, MapGet, env.base.value, key);
     break;
   case SimpleOp::None:
-    env.result = gen(env, CGetElem, env.base.value, key);
+    env.result = gen(env, CGetElem, env.base.value, key, misPtr(env));
     break;
   }
 }
@@ -1937,8 +1991,8 @@ void emitSetElem(MTS& env) {
 }
 
 void emitSetWithRefElem(MTS& env) {
-  auto const key = getKey(env);
-  auto const val = getValue(env);
+  auto const key = getUnconstrainedKey(env);
+  auto const val = getUnconstrainedValue(env);
   gen(env, SetWithRefElem, env.base.value, key, val, misPtr(env));
   env.result = nullptr;
 }
@@ -2180,8 +2234,8 @@ void emitMPost(MTS& env) {
     push(env, env.result);
   } else {
     assertx(env.op == Op::UnsetM ||
-           env.op == Op::SetWithRefLM ||
-           env.op == Op::SetWithRefRM);
+            env.op == Op::SetWithRefLM ||
+            env.op == Op::SetWithRefRM);
   }
 
   cleanTvRefs(env);

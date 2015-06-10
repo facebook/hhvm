@@ -124,7 +124,7 @@ void warn_missing_args(IRGS& env, uint32_t argc) {
 
     for (auto i = argc; i < nparams; ++i) {
       if (paramInfo[i].funcletOff == InvalidAbsoluteOffset) {
-        env.irb->prepareForNextHHBC();
+        env.irb->exceptionStackBoundary();
         gen(env, RaiseMissingArg, FuncArgData { func, argc });
         break;
       }
@@ -155,7 +155,7 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   // Emit stack overflow check if necessary.
   if (!(func->attrs() & AttrPhpLeafFn) ||
       func->maxStackCells() >= kStackCheckLeafPadding) {
-    env.irb->prepareForNextHHBC();
+    env.irb->exceptionStackBoundary();
     gen(env, CheckStackOverflow, fp(env));
   }
 
@@ -175,18 +175,22 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
 
   // Check surprise flags in the same place as the interpreter: after setting
   // up the callee's frame but before executing any of its code.
-  env.irb->prepareForNextHHBC();
+  env.irb->exceptionStackBoundary();
   gen(env, CheckSurpriseFlagsEnter, FuncEntryData{func, argc}, fp(env));
 
   // Emit the bindjmp for the function body.
-  gen(env, ReqBindJmp,
-      ReqBindJmpData {
-        SrcKey { func, func->getEntryForNumArgs(argc), false },
-        FPInvOffset{func->numSlotsInFrame()},
-        offsetFromIRSP(env, BCSPOffset{0}),
-        TransFlags{}
-      },
-      sp(env), fp(env));
+  gen(
+    env,
+    ReqBindJmp,
+    ReqBindJmpData {
+      SrcKey { func, func->getEntryForNumArgs(argc), false },
+      FPInvOffset{func->numSlotsInFrame()},
+      offsetFromIRSP(env, BCSPOffset{0}),
+      TransFlags{}
+    },
+    sp(env),
+    fp(env)
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

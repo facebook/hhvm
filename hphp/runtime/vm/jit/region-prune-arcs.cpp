@@ -89,18 +89,20 @@ bool merge_into(State& dst, const State& src) {
 
 bool preconds_may_pass(const RegionDesc::Block& block,
                        const State& state) {
-  auto const preds = block.typePreds();
-  auto pred_it = preds.find(block.start());
-  for (; pred_it != end(preds) && pred_it->first == block.start(); ++pred_it) {
-    auto const tpred = pred_it->second;
+  auto const& preConds = block.typePreConditions();
+  auto preCond_it = preConds.find(block.start());
+  for (;
+      preCond_it != end(preConds) && preCond_it->first == block.start();
+      ++preCond_it) {
+    auto const preCond = preCond_it->second;
     using L = RegionDesc::Location::Tag;
-    switch (tpred.location.tag()) {
+    switch (preCond.location.tag()) {
     case L::Stack: break;
     case L::Local:
       {
-        auto const loc = tpred.location.localId();
+        auto const loc = preCond.location.localId();
         assertx(loc < state.locals.size());
-        if (!state.locals[loc].maybe(tpred.type)) return false;
+        if (!state.locals[loc].maybe(preCond.type)) return false;
       }
       break;
     }
@@ -164,7 +166,7 @@ void region_prune_arcs(RegionDesc& region) {
      * code handles that correctly.
      */
     if (region.block(binfo.blockID)->inlineLevel() != 0) {
-      assertx(region.block(binfo.blockID)->typePreds().empty());
+      assertx(region.block(binfo.blockID)->typePreConditions().empty());
     }
 
     binfo.out = binfo.in;

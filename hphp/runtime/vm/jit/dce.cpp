@@ -148,6 +148,7 @@ bool canDCE(IRInstruction* inst) {
   case LdClsName:
   case LdFuncCachedSafe:
   case LdARFuncPtr:
+  case LdARNumParams:
   case LdFuncNumParams:
   case LdStrLen:
   case LdStaticLocCached:
@@ -159,7 +160,6 @@ bool canDCE(IRInstruction* inst) {
   case NewCol:
   case FreeActRec:
   case DefInlineFP:
-  case LdRetAddr:
   case Mov:
   case CountArray:
   case CountArrayFast:
@@ -187,6 +187,7 @@ bool canDCE(IRInstruction* inst) {
   case LdUnwinderValue:
   case LdColArray:
   case OrdStr:
+  case CheckRange:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -243,6 +244,7 @@ bool canDCE(IRInstruction* inst) {
   case JmpNZero:
   case JmpSSwitchDest:
   case JmpSwitchDest:
+  case ProfileSwitchDest:
   case CheckSurpriseFlags:
   case ReturnHook:
   case SuspendHookE:
@@ -299,7 +301,7 @@ bool canDCE(IRInstruction* inst) {
   case RetCtrl:
   case AsyncRetCtrl:
   case StRetVal:
-  case ReleaseVVOrExit:
+  case ReleaseVVAndSkip:
   case GenericRetDecRefs:
   case StMem:
   case StElem:
@@ -447,9 +449,9 @@ bool canDCE(IRInstruction* inst) {
   case MapIsset:
   case IssetElem:
   case EmptyElem:
-  case CheckBounds:
   case ProfilePackedArray:
   case ProfileStructArray:
+  case ProfileObjClass:
   case CheckPackedArrayBounds:
   case LdStructArrayElem:
   case LdVectorSize:
@@ -471,6 +473,7 @@ bool canDCE(IRInstruction* inst) {
   case InitExtraArgs:
   case CheckSurpriseFlagsEnter:
   case ExitPlaceholder:
+  case ThrowOutOfBounds:
     return false;
   }
   not_reached();

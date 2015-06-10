@@ -69,6 +69,9 @@ inline Vptr Vreg::operator[](DispReg rd) const {
 inline Vptr Vreg::operator[](Vscaled si) const {
   return Vptr(*this, si.index, si.scale, 0);
 }
+inline Vptr Vreg::operator[](VscaledDisp vd) const {
+  return Vptr(*this, vd.vs.index, vd.vs.scale, vd.disp);
+}
 inline Vptr Vreg::operator[](Vreg index) const {
   return Vptr(*this, index, 1, 0);
 }
@@ -93,19 +96,21 @@ inline Vptr Vreg::operator+(intptr_t d) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Vr casting.
 
-template<class Reg, VregKind Kind, int Bits>
-inline bool Vr<Reg,Kind,Bits>::allowable(Vreg r) {
-  switch (Kind) {
-    case VregKind::Any: return true;
-    case VregKind::Gpr: return r.isVirt() || r.isGP();
-    case VregKind::Simd: return r.isVirt() || r.isSIMD();
-    case VregKind::Sf: return r.isVirt() || r.isSF();
-  }
-  not_reached();
-};
+inline bool allowable(Vreg64*, Vreg r) { return r.isVirt() || r.isGP(); }
+inline bool allowable(Vreg32*, Vreg r) { return r.isVirt() || r.isGP(); }
+inline bool allowable(Vreg16*, Vreg r) { return r.isVirt() || r.isGP(); }
+inline bool allowable(Vreg8*, Vreg r) { return r.isVirt() || r.isGP(); }
+inline bool allowable(VregSF*, Vreg r) { return r.isVirt() || r.isSF(); }
+inline bool allowable(Vr<RegXMM>*, Vreg r) { return r.isVirt() || r.isSIMD(); }
 
-template<class Reg, VregKind Kind, int Bits>
-inline Reg Vr<Reg,Kind,Bits>::asReg() const {
+template<class Reg>
+/* implicit */ Vr<Reg>::Vr(Vreg r)
+  : rn(size_t(r)) {
+  assertx(allowable(this, r) || !r.isValid());
+}
+
+template<class Reg>
+inline Reg Vr<Reg>::asReg() const {
   assertx(isPhys());
   return isGP()         ? Reg(rn) :
          isSIMD()       ? Reg(rn-Vreg::X0) :
@@ -115,39 +120,46 @@ inline Reg Vr<Reg,Kind,Bits>::asReg() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Vr addressing.
 
-template<class Reg, VregKind Kind, int Bits>
-Vptr Vr<Reg,Kind,Bits>::operator[](int disp) const {
+template<class Reg>
+Vptr Vr<Reg>::operator[](int disp) const {
   return Vptr(*this, disp);
 }
-template<class Reg, VregKind Kind, int Bits>
-Vptr Vr<Reg,Kind,Bits>::operator[](ScaledIndex si) const {
+template<class Reg>
+Vptr Vr<Reg>::operator[](ScaledIndex si) const {
   return Vptr(*this, si.index, si.scale, 0);
 }
-template<class Reg, VregKind Kind, int Bits>
-Vptr Vr<Reg,Kind,Bits>::operator[](ScaledIndexDisp sid) const {
+template<class Reg>
+Vptr Vr<Reg>::operator[](ScaledIndexDisp sid) const {
   return Vptr(*this, sid.si.index, sid.si.scale, sid.disp);
 }
-template<class Reg, VregKind Kind, int Bits>
-Vptr Vr<Reg,Kind,Bits>::operator[](Vptr p) const {
+template<class Reg>
+Vptr Vr<Reg>::operator[](Vptr p) const {
   return Vptr(*this, p.base, 1, p.disp);
 }
-template<class Reg, VregKind Kind, int Bits>
-Vptr Vr<Reg,Kind,Bits>::operator[](DispReg rd) const {
+template<class Reg>
+Vptr Vr<Reg>::operator[](DispReg rd) const {
   return Vptr(*this, rd.base, 1, rd.disp);
 }
 
-template<class Reg, VregKind Kind, int Bits>
-Vptr Vr<Reg,Kind,Bits>::operator*() const {
+template<class Reg>
+Vptr Vr<Reg>::operator*() const {
   return Vptr(*this, 0);
 }
 
-template<class Reg, VregKind Kind, int Bits>
-inline Vptr Vr<Reg,Kind,Bits>::operator+(size_t d) const {
+template<class Reg>
+inline Vptr Vr<Reg>::operator+(size_t d) const {
   return Vptr(*this, safe_cast<int32_t>(d));
 }
-template<class Reg, VregKind Kind, int Bits>
-inline Vptr Vr<Reg,Kind,Bits>::operator+(intptr_t d) const {
+template<class Reg>
+inline Vptr Vr<Reg>::operator+(intptr_t d) const {
   return Vptr(*this, safe_cast<int32_t>(d));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Vscaled/VscaledDisp
+
+inline VscaledDisp operator+(Vscaled vs, int32_t disp) {
+  return {vs, disp};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

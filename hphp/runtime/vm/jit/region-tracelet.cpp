@@ -109,7 +109,7 @@ RegionFormer::RegionFormer(const RegionContext& ctx,
   , m_blockFinished(false)
   // TODO(#5703534): this is using a different TransContext than actual
   // translation will use.
-  , m_irgs(TransContext{kInvalidTransID, m_sk, ctx.spOffset})
+  , m_irgs(TransContext{kInvalidTransID, m_sk, ctx.spOffset}, TransFlags{0})
   , m_arStates(1)
   , m_numJmps(0)
   , m_inl(inl)
@@ -159,10 +159,11 @@ RegionDescPtr RegionFormer::go() {
     auto t = lt.type;
     if (t <= TCls) {
       irgen::assertTypeLocation(m_irgs, lt.location, t);
-      m_curBlock->addPredicted(m_sk, RegionDesc::TypePred{lt.location, t});
+      m_curBlock->addPreCondition(m_sk,
+          RegionDesc::TypedLocation{lt.location, t});
     } else if (emitPredictions) {
       irgen::predictTypeLocation(m_irgs, lt.location, t);
-      m_curBlock->addPredicted(m_sk, RegionDesc::TypePred{lt.location, t});
+      m_curBlock->addPredicted(m_sk, RegionDesc::TypedLocation{lt.location, t});
     } else {
       irgen::checkTypeLocation(m_irgs, lt.location, t, m_ctx.bcOffset,
                                true /* outerOnly */);
@@ -617,17 +618,23 @@ bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
 
 
 typedef std::function<void(const RegionDesc::Location&, Type)> VisitGuardFn;
+
 /*
  * For every instruction in trace representing a tracelet guard, call func with
  * its location and type.
  */
 void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
   using L = RegionDesc::Location;
+  const bool stopAtEndGuards = !RuntimeOption::EvalHHIRConstrictGuards;
   auto blocks = rpoSortCfg(unit);
   for (auto* block : blocks) {
     for (auto const& inst : *block) {
       switch (inst.op()) {
         case EndGuards:
+          if (stopAtEndGuards) return;
+          break;
+        case ExitPlaceholder:
+          if (stopAtEndGuards) break;
           return;
         case HintLocInner:
         case CheckLoc:
@@ -695,9 +702,9 @@ void RegionFormer::recordDependencies() {
       // Guard was relaxed to Gen---don't record it.
       continue;
     }
-    auto const pred = RegionDesc::TypePred { kv.first, kv.second };
-    FTRACE(1, "selectTracelet adding guard {}\n", show(pred));
-    firstBlock.addPredicted(blockStart, pred);
+    auto const preCond = RegionDesc::TypedLocation { kv.first, kv.second };
+    FTRACE(1, "selectTracelet adding guard {}\n", show(preCond));
+    firstBlock.addPreCondition(blockStart, preCond);
   }
 
   if (changed) {

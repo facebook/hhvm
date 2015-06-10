@@ -303,7 +303,6 @@ StringData* stringBitOp(BitOp bop, SzOp sop, StringData* s1, StringData* s2) {
   }
   newStr->setSize(newLen);
 
-  newStr->setRefCount(1);
   return newStr;
 }
 
@@ -429,13 +428,12 @@ struct IncBase {
       auto const tmp = StringData::Make(sd, CopyString);
       auto const tmp2 = tmp->increment();
       if (tmp2 != tmp) {
-        assert(tmp->getCount() == 0);
+        assert(tmp->hasExactlyOneRef());
         tmp->release();
         return tmp2;
       }
       return tmp;
     }();
-    newSd->incRefCount();
     decRefStr(sd);
     cellCopy(make_tv<KindOfString>(newSd), cell);
   }
@@ -635,7 +633,6 @@ void cellBitNot(Cell& cell) {
           cell.m_data.pstr->slice(),
           CopyString
         );
-        newSd->incRefCount();
         cell.m_data.pstr->decRefCount(); // can't go to zero
         cell.m_data.pstr = newSd;
         cell.m_type = KindOfString;

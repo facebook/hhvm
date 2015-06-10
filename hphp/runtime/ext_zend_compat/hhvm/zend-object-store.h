@@ -40,7 +40,7 @@ struct ZendObjectStore final : RequestEventHandler {
 
   // Defer shutdown until after other requestShutdown hooks are done
   // freeing their objects.
-  virtual int priority() const {
+  int priority() const override {
     return 10;
   }
 

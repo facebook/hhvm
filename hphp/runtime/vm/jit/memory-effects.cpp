@@ -162,7 +162,7 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   auto const may_reenter_is_ok =
     (inst.taken() && inst.taken()->isCatch()) ||
     inst.is(DecRef,
-            ReleaseVVOrExit,
+            ReleaseVVAndSkip,
             CIterFree,
             MIterFree,
             MIterNext,
@@ -297,20 +297,22 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ReqBindJmp:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(0), inst.extra<ReqBindJmp>()->irSPOff.offset - 1) |
-        AMIStateAny
+      *stack_below(inst.src(0), inst.extra<ReqBindJmp>()->irSPOff.offset - 1).
+        precise_union(AMIStateAny)
     };
   case JmpSwitchDest:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(1),
-                  inst.extra<JmpSwitchDest>()->irSPOff.offset - 1)
+      *stack_below(inst.src(1),
+                   inst.extra<JmpSwitchDest>()->irSPOff.offset - 1).
+        precise_union(AMIStateAny)
     };
   case JmpSSwitchDest:
     return ExitEffects {
       AUnknown,
-      stack_below(inst.src(1),
-                  inst.extra<JmpSSwitchDest>()->offset.offset - 1) | AMIStateAny
+      *stack_below(inst.src(1),
+                   inst.extra<JmpSSwitchDest>()->offset.offset - 1).
+        precise_union(AMIStateAny)
     };
   case ReqRetranslate:
   case ReqRetranslateOpt:
@@ -941,10 +943,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdStaticLocCached:
   case CheckCtxThis:
   case CastCtxThis:
+  case LdARNumParams:
   case LdRDSAddr:
   case PredictLoc:
   case PredictStk:
   case ExitPlaceholder:
+  case CheckRange:
+  case ProfileObjClass:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////
@@ -973,7 +978,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckSurpriseFlags:
   case CheckType:
   case FreeActRec:
-  case LdRetAddr:
   case RegisterLiveObj:
   case StClosureFunc:
   case StContArResume:
@@ -1057,6 +1061,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsMethodFCacheFunc:
   case ProfilePackedArray:
   case ProfileStructArray:
+  case ProfileSwitchDest:
   case LdFuncCachedSafe:
   case LdFuncNumParams:
   case LdGblAddr:
@@ -1162,7 +1167,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LtX:
   case NeqX:
   case DecodeCufIter:
-  case ReleaseVVOrExit:  // can decref fields in an ExtraArgs structure
   case ConvCellToArr:  // decrefs src, may read obj props
   case ConvCellToObj:  // decrefs src
   case ConvObjToArr:   // decrefs src
@@ -1209,13 +1213,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CoerceCellToDbl:
   case CoerceCellToInt:
   case CoerceCellToBool:
-  case CheckBounds:
   case ConvCellToInt:
   case ConvResToStr:
   case ConcatStr3:
   case ConcatStr4:
   case ConvCellToDbl:
+  case ThrowOutOfBounds:
     return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
+
+  case ReleaseVVAndSkip:  // can decref ExtraArgs or VarEnv and Locals
+    return may_reenter(inst,
+                       may_load_store(AHeapAny|AFrameAny, AHeapAny|AFrameAny));
 
   // These two instructions don't touch memory we track, except that they may
   // re-enter to construct php Exception objects.  During this re-entry anything

@@ -146,8 +146,8 @@ void checkTypeStack(IRGS& env,
     // something with it and that's handled if and when it happens.
     auto const tmp = top(env, idx, DataTypeGeneric);
     assertx(tmp);
-    env.irb->evalStack().replace(idx.offset,
-                                 gen(env, CheckType, type, exit, tmp));
+    auto const ctype = gen(env, CheckType, type, exit, tmp);
+    env.irb->evalStack().replace(idx.offset, ctype);
     return;
   }
   FTRACE(1, "checkTypeStack({}): no tmp: {}\n", idx.offset, type.toString());

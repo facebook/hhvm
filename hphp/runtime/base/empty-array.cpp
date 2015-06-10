@@ -149,19 +149,6 @@ std::pair<ArrayData*,TypedValue*> EmptyArray::MakePacked(TypedValue tv) {
   return MakePackedInl(tv);
 }
 
-void EmptyArray::InitMixed(MixedArray* a, RefCount count, uint32_t size,
-                           int64_t nextIntKey) {
-  a->m_sizeAndPos = size; // pos=0
-  a->m_hdr.init(HeaderKind::Mixed, count);
-  a->m_scale_used = MixedArray::SmallScale | uint64_t(size) << 32;
-  a->m_nextKI = nextIntKey;
-  auto const data = a->data();
-  auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
-  auto const emptyVal = int64_t{MixedArray::Empty};
-  reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
-  reinterpret_cast<int64_t*>(hash)[1] = emptyVal;
-}
-
 /*
  * Helper for creating a single-element mixed array with a string key.
  *
@@ -171,7 +158,7 @@ NEVER_INLINE
 std::pair<ArrayData*,TypedValue*>
 EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   auto const ad = smartAllocArray(MixedArray::SmallScale);
-  InitMixed(ad, 0/*count*/, 1/*size*/, 0/*nextIntKey*/);
+  MixedArray::InitSmall(ad, 0/*count*/, 1/*size*/, 0/*nextIntKey*/);
   auto const data = ad->data();
   auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
   auto const khash = key->hash();
@@ -200,13 +187,9 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
 std::pair<ArrayData*,TypedValue*>
 EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   auto const ad = smartAllocArray(MixedArray::SmallScale);
-  InitMixed(ad, 0/*count*/, 1/*size*/, (key >= 0) ? key + 1 : 0);
+  MixedArray::InitSmall(ad, 0/*count*/, 1/*size*/, (key >= 0) ? key + 1 : 0);
   auto const data = ad->data();
   auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
-  assert(ad->hashSize() == MixedArray::SmallHashSize);
-  auto const emptyVal = int64_t{MixedArray::Empty};
-  reinterpret_cast<int64_t*>(hash)[0] = emptyVal;
-  reinterpret_cast<int64_t*>(hash)[1] = emptyVal;
 
   auto const mask = MixedArray::SmallMask;
   hash[key & mask] = 0;

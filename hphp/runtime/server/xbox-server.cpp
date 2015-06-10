@@ -348,7 +348,7 @@ public:
 
   CLASSNAME_IS("XboxTask");
   // overriding ResourceData
-  virtual const String& o_getClassNameHook() const { return classnameof(); }
+  const String& o_getClassNameHook() const override { return classnameof(); }
 
 private:
   XboxTransport *m_job;

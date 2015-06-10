@@ -16,16 +16,23 @@
 #ifndef incl_HPHP_JIT_IRGEN_TYPES_H_
 #define incl_HPHP_JIT_IRGEN_TYPES_H_
 
-namespace HPHP { struct StringData; }
+#include <folly/Optional.h>
+
+namespace HPHP {
+struct RepoAuthType;
+struct StringData;
+}
 namespace HPHP { namespace jit {
 struct SSATmp;
 struct IRGS;
+struct Type;
 }}
 
 namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
+folly::Optional<Type> ratToAssertType(IRGS& env, RepoAuthType rat);
 SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className);
 
 //////////////////////////////////////////////////////////////////////

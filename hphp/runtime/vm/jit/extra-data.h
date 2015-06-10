@@ -360,12 +360,26 @@ struct LdSSwitchData : IRExtraData {
   FPInvOffset spOff;
 };
 
+struct ProfileSwitchData : IRExtraData {
+  ProfileSwitchData(rds::Handle handle, int32_t cases, int64_t base)
+    : handle(handle)
+    , cases(cases)
+    , base(base)
+  {}
+
+  std::string show() const {
+    return folly::sformat("handle {}, {} cases, base {}", handle, cases, base);
+  }
+
+  rds::Handle handle;
+  int32_t cases;
+  int64_t base;
+};
+
 struct JmpSwitchData : IRExtraData {
   JmpSwitchData* clone(Arena& arena) const {
     JmpSwitchData* sd = new (arena) JmpSwitchData;
-    sd->bounded    = bounded;
     sd->cases      = cases;
-    sd->defaultSk  = defaultSk;
     sd->targets    = new (arena) SrcKey[cases];
     sd->invSPOff   = invSPOff;
     sd->irSPOff    = irSPOff;
@@ -373,9 +387,11 @@ struct JmpSwitchData : IRExtraData {
     return sd;
   }
 
-  bool    bounded;     // whether switch is bounded or not
+  std::string show() const {
+    return folly::sformat("{} cases", cases);
+  }
+
   int32_t cases;       // number of cases
-  SrcKey  defaultSk;   // srckey of default case
   SrcKey* targets;     // srckeys for all targets
   FPInvOffset invSPOff;
   IRSPOffset irSPOff;
@@ -978,23 +994,9 @@ struct ContEnterData : IRExtraData {
 };
 
 struct NewColData : IRExtraData {
-  explicit NewColData(CollectionType type, uint32_t size)
-    : type(type)
-    , size(size)
+  explicit NewColData(int itype)
+    : type(static_cast<CollectionType>(itype))
   {}
-
-  std::string show() const {
-    return folly::sformat("{}, {}",
-                          collections::typeToString(type)->toCppString(),
-                          size);
-  }
-
-  CollectionType type;
-  uint32_t size;
-};
-
-struct NewColFromArrayData : IRExtraData {
-  explicit NewColFromArrayData(CollectionType type) : type(type) {}
 
   std::string show() const {
     return collections::typeToString(type)->toCppString();
@@ -1043,6 +1045,7 @@ struct FuncEntryData : IRExtraData {
                 "IR extra data type must be trivially destructible")
 
 X(LdBindAddr,                   LdBindAddrData);
+X(ProfileSwitchDest,            ProfileSwitchData);
 X(JmpSwitchDest,                JmpSwitchData);
 X(LdSSwitchDestFast,            LdSSwitchData);
 X(LdSSwitchDestSlow,            LdSSwitchData);
@@ -1137,6 +1140,7 @@ X(InitPackedArrayLoop,          InitPackedArrayLoopData);
 X(InitPackedArray,              IndexData);
 X(ProfilePackedArray,           RDSHandleData);
 X(ProfileStructArray,           RDSHandleData);
+X(ProfileObjClass,              RDSHandleData);
 X(LdRDSAddr,                    RDSHandleData);
 X(ClsNeq,                       ClsNeqData);
 X(BaseG,                        MInstrAttrData);
@@ -1162,7 +1166,7 @@ X(DbgTrashFrame,                IRSPOffsetData);
 X(DbgTraceCall,                 IRSPOffsetData);
 X(LdPropAddr,                   PropOffset);
 X(NewCol,                       NewColData);
-X(NewColFromArray,              NewColFromArrayData);
+X(NewColFromArray,              NewColData);
 X(InitExtraArgs,                FuncEntryData);
 X(CheckSurpriseFlagsEnter,      FuncEntryData);
 

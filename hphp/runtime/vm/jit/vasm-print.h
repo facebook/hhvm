@@ -52,6 +52,7 @@ constexpr int kVasmCopyPropLevel = 4;
 constexpr int kVasmARMFoldLevel = 4;
 constexpr int kVasmJumpsLevel = 4;
 constexpr int kVasmExitsLevel = 4;
+constexpr int kVasmHoistFbccsLevel = 4;
 constexpr int kVasmDCELevel = 4;
 constexpr int kVasmLowerLevel = 4;
 constexpr int kVasmUnreachableLevel = 6;

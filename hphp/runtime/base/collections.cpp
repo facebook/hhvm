@@ -30,44 +30,44 @@ COLLECTIONS_ALL_TYPES(X)
 /////////////////////////////////////////////////////////////////////////////
 // Constructor/Initializer
 
-template<bool inc> ObjectData* allocPair(uint32_t ignored) {
-  auto ret = newobj<c_Pair>(c_Pair::NoInit{});
-  if (inc) ret->incRefCount();
+ObjectData* allocEmptyPair() {
+  auto ret = newCollectionObj<c_Pair>(c_Pair::NoInit{});
+  ret->incRefCount();
   return ret;
 }
 
+ObjectData* allocPair(uint32_t ignored) {
+  return allocEmptyPair();
+}
+
 #define X(type) \
-template<bool inc> ObjectData* alloc##type(uint32_t size) { \
-  auto ret = newobj<c_##type>(c_##type::classof(), size); \
-  if (inc) ret->incRefCount(); \
+ObjectData* allocEmpty##type() { \
+  auto ret = newCollectionObj<c_##type>(c_##type::classof()); \
+  ret->incRefCount(); \
   return ret; \
 } \
-template<bool inc> ObjectData* allocFromArray##type(ArrayData* arr) { \
-  auto ret = newobj<c_##type>(c_##type::classof(), arr); \
-  if (inc) ret->incRefCount(); \
+ObjectData* allocFromArray##type(ArrayData* arr) { \
+  auto ret = newCollectionObj<c_##type>(c_##type::classof(), arr); \
+  ret->incRefCount(); \
   return ret; \
 }
 COLLECTIONS_PAIRED_TYPES(X)
 #undef X
 
-newInstanceFunc allocFunc(CollectionType ctype, bool inc /*=false*/) {
+newFromArrayFunc allocFromArrayFunc(CollectionType ctype) {
   switch (ctype) {
-#define X(type) case CollectionType::type: \
-                  return inc ? alloc##type<true> : alloc##type<false>;
-COLLECTIONS_ALL_TYPES(X)
+#define X(type) case CollectionType::type: return allocFromArray##type;
+COLLECTIONS_PAIRED_TYPES(X)
 #undef X
+    case CollectionType::Pair: not_reached();
   }
   not_reached();
 }
 
-newFromArrayFunc allocFromArrayFunc(CollectionType ctype, bool inc /*=false*/) {
+newEmptyInstanceFunc allocEmptyFunc(CollectionType ctype) {
   switch (ctype) {
-#define X(type) case CollectionType::type: \
-                  return inc ? allocFromArray##type<true> \
-                             : allocFromArray##type<false>;
-COLLECTIONS_PAIRED_TYPES(X)
-    case CollectionType::Pair:
-      assertx(false);
+#define X(type) case CollectionType::type: return allocEmpty##type;
+COLLECTIONS_ALL_TYPES(X)
 #undef X
   }
   not_reached();

@@ -1,2 +1,2 @@
-File "no_unset_in_strict_mode.php", line 7, characters 3-14:
-unset cannot be used in a completely type safe way and so is banned in strict mode (Typing[4016])
+File "no_unset_in_strict_mode.php", line 5, characters 3-11:
+In strict mode, unset is banned except on array indexing (Typing[4135])

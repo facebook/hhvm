@@ -36,14 +36,14 @@ public:
   PDOSqliteStatement(sqlite3 *db, sqlite3_stmt* stmt);
   virtual ~PDOSqliteStatement();
 
-  virtual bool support(SupportedMethod method);
-  virtual bool executer();
-  virtual bool fetcher(PDOFetchOrientation ori, long offset);
-  virtual bool describer(int colno);
-  virtual bool getColumn(int colno, Variant &value);
-  virtual bool paramHook(PDOBoundParam* param, PDOParamEvent event_type);
-  virtual bool getColumnMeta(int64_t colno, Array &return_value);
-  virtual bool cursorCloser();
+  bool support(SupportedMethod method) override;
+  bool executer() override;
+  bool fetcher(PDOFetchOrientation ori, long offset) override;
+  bool describer(int colno) override;
+  bool getColumn(int colno, Variant &value) override;
+  bool paramHook(PDOBoundParam* param, PDOParamEvent event_type) override;
+  bool getColumnMeta(int64_t colno, Array &return_value) override;
+  bool cursorCloser() override;
 
 private:
   sqlite3 *m_db;

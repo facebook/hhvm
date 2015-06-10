@@ -1,0 +1,2 @@
+File "shape21.php", line 6, characters 23-22:
+Shape field names cannot be strings enclosed by double quotes. Use single quotes instead. (Parsing[1002])

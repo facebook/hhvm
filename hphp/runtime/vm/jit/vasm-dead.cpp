@@ -75,6 +75,10 @@ bool effectful(Vinstr& inst) {
     case Vinstr::imul:
     case Vinstr::incl:
     case Vinstr::incq:
+    case Vinstr::ldimmq:
+    case Vinstr::ldimml:
+    case Vinstr::ldimmb:
+    case Vinstr::ldimmqs:
     case Vinstr::lea:
     case Vinstr::leap:
     case Vinstr::load:
@@ -136,17 +140,9 @@ bool effectful(Vinstr& inst) {
     case Vinstr::unpcklpd:
     case Vinstr::xorb:
     case Vinstr::xorbi:
+    case Vinstr::xorl:
     case Vinstr::xorq:
     case Vinstr::xorqi:
-      return false;
-
-    case Vinstr::ldimmq:
-      return !inst.ldimmq_.saveflags;
-    case Vinstr::ldimml:
-      return !inst.ldimml_.saveflags;
-    case Vinstr::ldimmb:
-      return !inst.ldimmb_.saveflags;
-    case Vinstr::ldimmqs:
       return false;
 
     case Vinstr::addlm:
@@ -159,6 +155,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::bindjmp:
     case Vinstr::brk:
     case Vinstr::call:
+    case Vinstr::callfaststub:
     case Vinstr::callm:
     case Vinstr::callr:
     case Vinstr::callstub:
@@ -221,6 +218,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::vinvoke:
     case Vinstr::vretm:
     case Vinstr::vret:
+    case Vinstr::leavetc:
       return true;
   }
   always_assert(false);

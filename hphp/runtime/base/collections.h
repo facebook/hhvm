@@ -54,26 +54,25 @@ COLLECTIONS_ALL_TYPES(X)
 /////////////////////////////////////////////////////////////////////////////
 // Constructor/Initializer
 
-using newInstanceFunc = ObjectData* (*)(uint32_t size);
+using newEmptyInstanceFunc = ObjectData* (*)();
 using newFromArrayFunc = ObjectData* (*)(ArrayData* arr);
 
 /* Get a function capable of creating a collection class.
  * This is primarily used by the JIT to burn the initializer into the TC.
  */
-newInstanceFunc allocFunc(CollectionType ctype, bool inc = false);
-newFromArrayFunc allocFromArrayFunc(CollectionType ctype, bool inc = false);
+newEmptyInstanceFunc allocEmptyFunc(CollectionType ctype);
+newFromArrayFunc allocFromArrayFunc(CollectionType ctype);
 
-/* Create a new (empty) Collection of the appropriate type,
- * reserving {size} elements.
+/* Create a new empty collection, with refcount set to 1.
  */
-inline ObjectData* alloc(CollectionType ctype, uint32_t size) {
-  return allocFunc(ctype, false)(size);
+inline ObjectData* alloc(CollectionType ctype) {
+  return allocEmptyFunc(ctype)();
 }
 
-/* Create a collection from an array
+/* Create a collection from an array, with refcount set to 1.
  */
 inline ObjectData* alloc(CollectionType ctype, ArrayData* arr) {
-  return allocFromArrayFunc(ctype, false)(arr);
+  return allocFromArrayFunc(ctype)(arr);
 }
 
 /* Preallocate room for {sz} elements in the Collection */
@@ -185,7 +184,9 @@ COLLECTIONS_ALL_TYPES(X)
 }
 
 inline folly::Optional<CollectionType> stringToType(const std::string& s) {
-  return stringToType(StringData::Make(s.c_str()));
+  return stringToType(
+    SmartPtr<StringData>::attach(StringData::Make(s)).get()
+  );
 }
 
 inline bool isTypeName(const StringData* str) {

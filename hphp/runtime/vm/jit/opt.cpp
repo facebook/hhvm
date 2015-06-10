@@ -97,8 +97,9 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
   assertx(checkEverything(unit));
 
   if (RuntimeOption::EvalHHIRTypeCheckHoisting) {
-    doPass(unit, hoistTypeChecks, DCE::None);
+    doPass(unit, hoistTypeChecks, DCE::Minimal);
   }
+  doPass(unit, removeExitPlaceholders, DCE::Minimal);
 
   if (RuntimeOption::EvalHHIRPredictionOpts) {
     doPass(unit, optimizePredictions, DCE::None);
@@ -132,12 +133,16 @@ void optimize(IRUnit& unit, IRBuilder& irBuilder, TransKind kind) {
       doPass(unit, cleanCfg, DCE::None);
       doPass(unit, optimizeLoopInvariantCode, DCE::Minimal);
     }
+    doPass(unit, removeExitPlaceholders, DCE::Full);
   }
-  doPass(unit, removeExitPlaceholders, DCE::Full);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     doPass(unit, insertAsserts, DCE::None);
   }
+
+  // Perform a final clean pass to collapse any critical edges that were
+  // split.
+  doPass(unit, cleanCfg, DCE::None);
 }
 
 //////////////////////////////////////////////////////////////////////

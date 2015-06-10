@@ -301,8 +301,6 @@ public:
   static bool EnableAPCStats;
   static bool EnableWebStats;
   static bool EnableMemoryStats;
-  static bool EnableMemcacheStats;
-  static bool EnableMemcacheKeyStats;
   static bool EnableSQLStats;
   static bool EnableSQLTableStats;
   static bool EnableNetworkIOStatus;
@@ -503,6 +501,8 @@ public:
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRMemoryOpts,              true)                            \
   F(bool, HHIRStorePRE,                true)                            \
+  F(bool, HHIROutlineGenericIncDecRef, true)                            \
+  F(bool, JitHoistFallbackccs,         true)                            \
   /* Register allocation flags */                                       \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \
@@ -521,6 +521,7 @@ public:
   F(bool,     JitPGOArrayGetStress,    false)                           \
   F(uint32_t, JitPGOMinBlockCountPercent, 10)                           \
   F(double,   JitPGOMinArcProbability, 0.02)                            \
+  F(uint32_t, JitPGOMaxFuncSizeDupBody, 80)                             \
   F(bool,     JitLoops,                loopsDefault())                  \
   F(uint32_t, HotFuncCount,            4100)                            \
   F(bool, HHIRConstrictGuards,         false)                           \
@@ -551,6 +552,7 @@ public:
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
   F(bool, DisableStructArray, true)                                     \
+  F(bool, EnableCallBuiltin, true)                                      \
   /* */
 
 private:

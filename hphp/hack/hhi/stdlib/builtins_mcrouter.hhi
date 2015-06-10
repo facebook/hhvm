@@ -80,10 +80,6 @@ class MCRouter {
   const int mc_op_exec = 0;
   const int mc_op_gets = 0;
   const int mc_op_get_service_info = 0;
-  const int mc_op_get_count = 0;
-  const int mc_op_bump_count = 0;
-  const int mc_op_get_unique_count = 0;
-  const int mc_op_bump_unique_count = 0;
 
   // From mcrouter/lib/mc/msg.h enum mc_res_e:
   const int mc_res_unknown = 0;

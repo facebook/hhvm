@@ -95,11 +95,6 @@ DECLARE_VNUM(VcallArgsId, true, "V");
 
 #undef DECLARE_VNUM
 
-/*
- * Vreg discriminator.
- */
-enum class VregKind : uint8_t { Any, Gpr, Simd, Sf };
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -119,6 +114,7 @@ void allocateRegisters(Vunit&, const Abi&);
 void fuseBranches(Vunit&);
 void optimizeExits(Vunit&);
 void optimizeJmps(Vunit&);
+void hoistFallbackccs(Vunit&);
 void optimizeCopies(Vunit&, const Abi&);
 void removeDeadCode(Vunit&);
 void removeTrivialNops(Vunit&);

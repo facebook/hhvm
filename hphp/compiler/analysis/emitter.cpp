@@ -3955,6 +3955,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         e.Strlen();
         return true;
       }
+    } else if (call->isCallToFunction("max")) {
+      if (params && params->getCount() == 2) {
+        emitFuncCall(e, call, "__SystemLib\\max2", params);
+        return true;
+      }
     } else if (call->isCallToFunction("define")) {
       if (params && params->getCount() == 2) {
         ExpressionPtr p0 = (*params)[0];
@@ -5866,9 +5871,9 @@ MaybeDataType EmitterVisitor::analyzeSwitch(SwitchStatementPtr sw,
   if (t == KindOfInt64) {
     int64_t base = caseMap.begin()->first;
     int64_t nTargets = caseMap.rbegin()->first - base + 1;
-    // Fail if there aren't enough cases or they're too sparse.
-    if (caseMap.size() < kMinIntSwitchCases ||
-        (float)caseMap.size() / nTargets < 0.5) {
+    // Fail if the cases are too sparse. We emit Switch even for absurdly small
+    // cases to allow the jit to decide when to lower back to comparisons.
+    if ((float)caseMap.size() / nTargets < 0.5) {
       return folly::none;
     }
   } else if (t == KindOfString) {
@@ -7405,7 +7410,8 @@ bool EmitterVisitor::emitCallUserFunc(Emitter& e, SimpleFunctionCallPtr func) {
 
 Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
                                          int numParams) {
-  if (Option::JitEnableRenameFunction) {
+  if (Option::JitEnableRenameFunction ||
+      !RuntimeOption::EvalEnableCallBuiltin) {
     return nullptr;
   }
   if (Option::DynamicInvokeFunctions.size()) {
@@ -7420,9 +7426,13 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
       !f->nativeFuncPtr() ||
       f->isMethod() ||
       (f->numParams() > Native::maxFCallBuiltinArgs()) ||
-      ((numParams > f->numParams()) && !f->hasVariadicCaptureParam()) ||
       (f->userAttributes().count(
         LowStringPtr(s_attr_Deprecated.get())))) return nullptr;
+
+  auto variadic = f->hasVariadicCaptureParam();
+
+  // Only allowed to overrun the signature if we have somewhere to put it
+  if ((numParams > f->numParams()) && !variadic) return nullptr;
 
   if ((f->returnType() == KindOfDouble) &&
        !Native::allowFCallBuiltinDoubles()) return nullptr;
@@ -7443,7 +7453,13 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
   }
 
   bool allowDoubleArgs = Native::allowFCallBuiltinDoubles();
-  for (int i = 0; i < f->numParams(); i++) {
+  auto concrete_params = f->numParams();
+  if (variadic) {
+    assertx(!f->methInfo());
+    assertx(concrete_params > 0);
+    --concrete_params;
+  }
+  for (int i = 0; i < concrete_params; i++) {
     if ((!allowDoubleArgs) &&
         (f->params()[i].builtinType == KindOfDouble)) {
       return nullptr;
@@ -7462,6 +7478,7 @@ Func* EmitterVisitor::canEmitBuiltinCall(const std::string& name,
       } else {
         // HNI style
         auto &pi = f->params()[i];
+        if (pi.isVariadic()) continue;
         if (!pi.hasDefaultValue()) {
           return nullptr;
         }
@@ -7525,8 +7542,12 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   } else if (!nameStr.empty()) {
     // foo()
     nLiteral = makeStaticString(nameStr);
-    if (!unpack) {
-      fcallBuiltin = canEmitBuiltinCall(nameStr, numParams);
+    fcallBuiltin = canEmitBuiltinCall(nameStr, numParams);
+    if (unpack &&
+        fcallBuiltin &&
+        (!fcallBuiltin->hasVariadicCaptureParam() ||
+         numParams != fcallBuiltin->numParams())) {
+      fcallBuiltin = nullptr;
     }
     if (fcallBuiltin && (fcallBuiltin->attrs() & AttrAllowOverride)) {
       if (!Option::WholeProgram ||
@@ -7568,7 +7589,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
     e.FPushFunc(numParams);
   }
   if (fcallBuiltin) {
-    auto variadic = fcallBuiltin->hasVariadicCaptureParam();
+    auto variadic = !unpack && fcallBuiltin->hasVariadicCaptureParam();
     assertx((numParams <= fcallBuiltin->numParams()) || variadic);
 
     auto concreteParams = fcallBuiltin->numParams();
@@ -8651,7 +8672,7 @@ void EmitterVisitor::emitPairInit(Emitter& e, ExpressionListPtr el) {
     throw IncludeTimeFatalException(el,
       "Pair objects must have exactly 2 elements");
   }
-  e.NewCol(static_cast<int>(CollectionType::Pair), 2);
+  e.NewCol(static_cast<int>(CollectionType::Pair));
   for (int i = 0; i < 2; i++) {
     ArrayPairExpressionPtr ap(
       static_pointer_cast<ArrayPairExpression>((*el)[i]));
@@ -8728,7 +8749,13 @@ void EmitterVisitor::emitSetInit(Emitter&e, CollectionType ct,
     emitArrayInit(e, el, ct);
     e.ColFromArray(static_cast<int>(ct));
   } else {
-    e.NewCol(static_cast<int>(ct), nElms);
+    if (nElms == 0) {
+      // Will use the static empty mixed array to avoid allocation.
+      e.NewCol(static_cast<int>(ct));
+      return;
+    }
+    e.NewMixedArray(nElms);
+    e.ColFromArray(static_cast<int>(ct));
     for (int i = 0; i < nElms; i++) {
       ArrayPairExpressionPtr ap(
         static_pointer_cast<ArrayPairExpression>((*el)[i]));
@@ -8781,7 +8808,12 @@ void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
     emitArrayInit(e, el, ct);
     e.ColFromArray(static_cast<int>(ct));
   } else {
-    e.NewCol(static_cast<int>(ct), nElms);
+    if (nElms == 0) {
+      e.NewCol(static_cast<int>(ct));
+      return;
+    }
+    e.NewMixedArray(nElms);
+    e.ColFromArray(static_cast<int>(ct));
     for (int i = 0; i < nElms; i++) {
       ArrayPairExpressionPtr ap(
         static_pointer_cast<ArrayPairExpression>((*el)[i]));
@@ -8812,7 +8844,7 @@ void EmitterVisitor::emitCollectionInit(Emitter& e, BinaryOpExpressionPtr b) {
     if (ct == CollectionType::Pair) {
       throw IncludeTimeFatalException(b, "Initializer needed for Pair object");
     }
-    e.NewCol(static_cast<int>(*ct), 0);
+    e.NewCol(static_cast<int>(*ct));
     return;
   }
 

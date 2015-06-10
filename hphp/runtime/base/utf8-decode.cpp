@@ -41,10 +41,6 @@ static bool utf8_trail(unsigned char c) {
   return -1; \
 } while (0)
 
-UTF8To16Decoder::UTF8To16Decoder(const char *utf8, int length, bool loose)
-    : m_str(utf8), m_strlen(length), m_cursor(0), m_loose(loose),
-      m_low_surrogate(0) {}
-
 // Inspired by ext/standard/html.c:get_next_char()
 unsigned int UTF8To16Decoder::getNextChar() {
   int pos = m_cursor;

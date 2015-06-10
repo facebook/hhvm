@@ -185,6 +185,7 @@ double ObjectData::toDoubleImpl() const noexcept {
 // instance methods and properties
 
 const StaticString s_getIterator("getIterator");
+const StaticString s_getIteratorForTraversable("getIteratorForTraversable");
 
 Object ObjectData::iterableObject(bool& isIterable,
                                   bool mayImplementIterator /* = true */) {
@@ -203,6 +204,22 @@ Object ObjectData::iterableObject(bool& isIterable,
       return o;
     }
     obj = o;
+  }
+  /*
+   * Some classes like SimpleXMLElement implement Traversable
+   * but aren't Iterators or IteratorAggregates. So we call a magic
+   * function "getIteratorForTraversable" that returns the iterator
+   * implementation for these classes.
+   */
+  if (!isIterator() && obj->instanceof(SystemLib::s_TraversableClass)) {
+    auto iterator = obj->o_invoke_few_args(s_getIteratorForTraversable, 0);
+    if (iterator.isObject()) {
+      auto o = iterator.getObjectData();
+      if (o->isIterator()) {
+        isIterable = true;
+        return o;
+      }
+    }
   }
   isIterable = false;
   return obj;

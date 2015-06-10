@@ -33,6 +33,16 @@ class IteratorIterator implements OuterIterator {
     }
     if ($iterator instanceof \Iterator) {
       $this->iterator = $iterator;
+
+    /*
+     * Some classes like SimpleXMLElement implement Traversable
+     * but aren't Iterators or IteratorAggregates. So we call a magic
+     * function "getIteratorForTraversable" that returns the iterator
+     * implementation for these classes.
+     */
+    } else if ($iterator instanceof \Traversable &&
+        method_exists($iterator, 'getIteratorForTraversable')) {
+      $this->iterator = $iterator->getIteratorForTraversable();
     } else {
       throw new Exception(
         "Need to pass a Traversable that is convertable to an iterator");

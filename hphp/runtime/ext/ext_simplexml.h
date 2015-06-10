@@ -69,7 +69,7 @@ struct c_SimpleXMLElement : SimpleXMLElementBase {
   public: Variant t_offsetget(const Variant& index);
   public: void t_offsetset(const Variant& index, const Variant& newvalue);
   public: void t_offsetunset(const Variant& index);
-  public: Variant t_getiterator();
+  public: Variant t_getiteratorfortraversable();
   public: int64_t t_count();
   public: Variant t_xpath(const String& path);
   public: bool t_registerxpathnamespace(const String& prefix, const String& ns);
@@ -143,6 +143,26 @@ class c_SimpleXMLElementIterator : public ExtObjectData {
 
 public:
   SmartPtr<c_SimpleXMLElement> sxe;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class SimpleXMLElementIterator
+
+class c_SimpleXMLIterator : public c_SimpleXMLElement {
+ public:
+  DECLARE_CLASS_NO_SWEEP(SimpleXMLIterator)
+
+  c_SimpleXMLIterator(Class* cls = c_SimpleXMLIterator::classof())
+    : c_SimpleXMLElement(cls)
+  {}
+  ~c_SimpleXMLIterator() {}
+  Variant t_current();
+  Variant t_key();
+  Variant t_next();
+  Variant t_rewind();
+  Variant t_valid();
+  bool t_haschildren();
+  Object t_getchildren();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -615,30 +615,6 @@ DEBUG_ONLY const char* header_names[] = {
 };
 static_assert(sizeof(header_names)/sizeof(*header_names) == NumHeaderKinds, "");
 
-// Reverse lookup table from size class index back to block size.
-struct SizeTable {
-  size_t table[kNumSmartSizes];
-  SizeTable() {
-#define SMART_SIZE(i,d,s) table[i] = s;
-    SMART_SIZES
-#undef SMART_SIZE
-    assert(table[27] == 4096 && table[28] == 0);
-    // pick up where the macros left off
-    auto i = 28;
-    auto s = 4096;
-    auto d = s/4;
-    for (; i < kNumSmartSizes; d *= 2) {
-      // each power of two size has 4 linear spaced size classes
-      table[i++] = (s += d);
-      if (i < kNumSmartSizes) table[i++] = (s += d);
-      if (i < kNumSmartSizes) table[i++] = (s += d);
-      if (i < kNumSmartSizes) table[i++] = (s += d);
-    }
-  }
-  static_assert(LG_SMART_SIZES_PER_DOUBLING == 2, "");
-};
-SizeTable s_index2size;
-
 }
 
 // initialize a Hole header in the unused memory between m_front and m_limit
@@ -653,8 +629,8 @@ void MemoryManager::initHole() {
 // initialize the FreeNode header on all freelist entries.
 void MemoryManager::initFree() {
   initHole();
-  for (size_t i = 0; i < kNumSmartSizes; i++) {
-    auto size = std::min(s_index2size.table[i], kMaxSmartSize);
+  for (auto i = 0; i < kNumSmartSizes; i++) {
+    auto size = std::min(kSmartIndex2Size[i], kMaxSmartSize);
     for (auto n = m_freelists[i].head; n; n = n->next) {
       n->hdr.init(HeaderKind::Free, size);
     }
@@ -718,7 +694,7 @@ void MemoryManager::checkHeap() {
   });
 
   // check the free lists
-  for (size_t i = 0; i < kNumSmartSizes; i++) {
+  for (auto i = 0; i < kNumSmartSizes; i++) {
     for (auto n = m_freelists[i].head; n; n = n->next) {
       assert(free_blocks.find(n) != free_blocks.end());
       free_blocks.erase(n);
@@ -755,7 +731,7 @@ void MemoryManager::checkHeap() {
  * Get a new slab, then allocate nbytes from it and install it in our
  * slab list.  Return the newly allocated nbytes-sized block.
  */
-NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
+NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
   if (UNLIKELY(m_stats.usage > m_stats.maxBytes)) {
     refreshStats();
   }
@@ -779,7 +755,7 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
  */
 void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   FTRACE(3, "slabAlloc({}, {})\n", bytes, index);
-  size_t nbytes = debugAddExtra(smartSizeClass(bytes));
+  uint32_t nbytes = debugAddExtra(smartSizeClass(bytes));
 
   assert(nbytes <= kSlabSize);
   assert((nbytes & kSmartSizeAlignMask) == 0);

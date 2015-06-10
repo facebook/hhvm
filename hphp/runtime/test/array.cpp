@@ -30,22 +30,6 @@ TEST(ARRAY, Capacity) {
 
 #define MP(a, b) std::make_pair(a, b)
   // Update the numbers if we change CapCode::Threshold
-#if (LG_SMART_SIZES_PER_DOUBLING == 1)
-  std::pair<uint32_t, uint32_t> caps [] = {
-    MP(3, 0),
-    MP(4, 5),
-    MP(5, 0),
-    MP(6, 7),
-    MP(7, 0),
-    MP(8, 11),
-    MP(12, 15),
-    MP(127, 0),
-    MP(128, 191),
-    MP(0xFFFF, 0),
-    MP(0x10000, 0),
-    MP(0x10001, 0)
-  };
-#elif (LG_SMART_SIZES_PER_DOUBLING == 2)
   std::pair<uint32_t, uint32_t> caps [] = {
     MP(3, 0),
     MP(4, 0),
@@ -60,9 +44,6 @@ TEST(ARRAY, Capacity) {
     MP(0x10000, 0),
     MP(0x10001, 0)
   };
-#else
-#error Unknown LG_SMART_SIZES_PER_DOUBLING
-#endif
 #undef MP
 
   for (size_t i = 0; i != sizeof(caps) / sizeof(caps[0]); ++i) {

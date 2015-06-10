@@ -223,110 +223,199 @@ struct DebugHeader {
  * implementation detail documented here to shed light on the algorithms that
  * compute size classes.  Request sizes are rounded up to the nearest size in
  * the relevant SMART_SIZES table; e.g. 17 is rounded up to 32.  There are
- * 2^LG_SMART_SIZES_PER_DOUBLING size classes for each doubling of size
+ * 4 size classes for each doubling of size
  * (ignoring the alignment-constrained smallest size classes), which limits
- * internal fragmentation to 33% or 20%, for LG_SMART_SIZES_PER_DOUBLING
- * set to 1 or 2, respectively.
+ * internal fragmentation to 20%.
  */
 
-#define LG_SMART_SIZES_PER_DOUBLING 2
-
-#if (LG_SMART_SIZES_PER_DOUBLING == 1)
 #define SMART_SIZES \
-/*        index, delta, size */ \
-  SMART_SIZE( 0,    16,   16) \
-  SMART_SIZE( 1,    16,   32) \
-  SMART_SIZE( 2,    16,   48) \
-  SMART_SIZE( 3,    16,   64) \
-  SMART_SIZE( 4,    32,   96) \
-  SMART_SIZE( 5,    32,  128) \
-  SMART_SIZE( 6,    64,  192) \
-  SMART_SIZE( 7,    64,  256) \
-  SMART_SIZE( 8,   128,  384) \
-  SMART_SIZE( 9,   128,  512) \
-  SMART_SIZE(10,   256,  768) \
-  SMART_SIZE(11,   256, 1024) \
-  SMART_SIZE(12,   512, 1536) \
-  SMART_SIZE(13,   512, 2048) \
-  SMART_SIZE(14,  1024, 3072) \
-  SMART_SIZE(15,  1024, 4096) \
-
-#elif (LG_SMART_SIZES_PER_DOUBLING == 2)
-#define SMART_SIZES \
-/*        index, delta, size */ \
-  SMART_SIZE( 0,    16,   16) \
-  SMART_SIZE( 1,    16,   32) \
-  SMART_SIZE( 2,    16,   48) \
-  SMART_SIZE( 3,    16,   64) \
-  SMART_SIZE( 4,    16,   80) \
-  SMART_SIZE( 5,    16,   96) \
-  SMART_SIZE( 6,    16,  112) \
-  SMART_SIZE( 7,    16,  128) \
-  SMART_SIZE( 8,    32,  160) \
-  SMART_SIZE( 9,    32,  192) \
-  SMART_SIZE(10,    32,  224) \
-  SMART_SIZE(11,    32,  256) \
-  SMART_SIZE(12,    64,  320) \
-  SMART_SIZE(13,    64,  384) \
-  SMART_SIZE(14,    64,  448) \
-  SMART_SIZE(15,    64,  512) \
-  SMART_SIZE(16,   128,  640) \
-  SMART_SIZE(17,   128,  768) \
-  SMART_SIZE(18,   128,  896) \
-  SMART_SIZE(19,   128, 1024) \
-  SMART_SIZE(20,   256, 1280) \
-  SMART_SIZE(21,   256, 1536) \
-  SMART_SIZE(22,   256, 1792) \
-  SMART_SIZE(23,   256, 2048) \
-  SMART_SIZE(24,   512, 2560) \
-  SMART_SIZE(25,   512, 3072) \
-  SMART_SIZE(26,   512, 3584) \
-  SMART_SIZE(27,   512, 4096) \
-
-#else
-#  error Need SMART_SIZES definition for specified LG_SMART_SIZES_PER_DOUBLING
-#endif
+/*         index, lg_grp, lg_delta, ndelta, lg_delta_lookup */ \
+  SMART_SIZE(  0,      4,        4,      0,  4) \
+  SMART_SIZE(  1,      4,        4,      1,  4) \
+  SMART_SIZE(  2,      4,        4,      2,  4) \
+  SMART_SIZE(  3,      4,        4,      3,  4) \
+  \
+  SMART_SIZE(  4,      6,        4,      1,  4) \
+  SMART_SIZE(  5,      6,        4,      2,  4) \
+  SMART_SIZE(  6,      6,        4,      3,  4) \
+  SMART_SIZE(  7,      6,        4,      4,  4) \
+  \
+  SMART_SIZE(  8,      7,        5,      1,  5) \
+  SMART_SIZE(  9,      7,        5,      2,  5) \
+  SMART_SIZE( 10,      7,        5,      3,  5) \
+  SMART_SIZE( 11,      7,        5,      4,  5) \
+  \
+  SMART_SIZE( 12,      8,        6,      1,  6) \
+  SMART_SIZE( 13,      8,        6,      2,  6) \
+  SMART_SIZE( 14,      8,        6,      3,  6) \
+  SMART_SIZE( 15,      8,        6,      4,  6) \
+  \
+  SMART_SIZE( 16,      9,        7,      1,  7) \
+  SMART_SIZE( 17,      9,        7,      2,  7) \
+  SMART_SIZE( 18,      9,        7,      3,  7) \
+  SMART_SIZE( 19,      9,        7,      4,  7) \
+  \
+  SMART_SIZE( 20,     10,        8,      1,  8) \
+  SMART_SIZE( 21,     10,        8,      2,  8) \
+  SMART_SIZE( 22,     10,        8,      3,  8) \
+  SMART_SIZE( 23,     10,        8,      4,  8) \
+  \
+  SMART_SIZE( 24,     11,        9,      1,  9) \
+  SMART_SIZE( 25,     11,        9,      2,  9) \
+  SMART_SIZE( 26,     11,        9,      3,  9) \
+  SMART_SIZE( 27,     11,        9,      4,  9) \
+  \
+  SMART_SIZE( 28,     12,       10,      1, no) \
+  SMART_SIZE( 29,     12,       10,      2, no) \
+  SMART_SIZE( 30,     12,       10,      3, no) \
+  SMART_SIZE( 31,     12,       10,      4, no) \
+  \
+  SMART_SIZE( 32,     13,       11,      1, no) \
+  SMART_SIZE( 33,     13,       11,      2, no) \
+  SMART_SIZE( 34,     13,       11,      3, no) \
+  SMART_SIZE( 35,     13,       11,      4, no) \
+  \
+  SMART_SIZE( 36,     14,       12,      1, no) \
+  SMART_SIZE( 37,     14,       12,      2, no) \
+  SMART_SIZE( 38,     14,       12,      3, no) \
+  SMART_SIZE( 39,     14,       12,      4, no) \
+  \
+  SMART_SIZE( 40,     15,       13,      1, no) \
+  SMART_SIZE( 41,     15,       13,      2, no) \
+  SMART_SIZE( 42,     15,       13,      3, no) \
+  SMART_SIZE( 43,     15,       13,      4, no) \
+  \
+  SMART_SIZE( 44,     16,       14,      1, no) \
+  SMART_SIZE( 45,     16,       14,      2, no) \
+  SMART_SIZE( 46,     16,       14,      3, no) \
+  SMART_SIZE( 47,     16,       14,      4, no) \
+  \
+  SMART_SIZE( 48,     17,       15,      1, no) \
+  SMART_SIZE( 49,     17,       15,      2, no) \
+  SMART_SIZE( 50,     17,       15,      3, no) \
+  SMART_SIZE( 51,     17,       15,      4, no) \
+  \
+  SMART_SIZE( 52,     18,       16,      1, no) \
+  SMART_SIZE( 53,     18,       16,      2, no) \
+  SMART_SIZE( 54,     18,       16,      3, no) \
+  SMART_SIZE( 55,     18,       16,      4, no) \
+  \
+  SMART_SIZE( 56,     19,       17,      1, no) \
+  SMART_SIZE( 57,     19,       17,      2, no) \
+  SMART_SIZE( 58,     19,       17,      3, no) \
+  SMART_SIZE( 59,     19,       17,      4, no) \
+  \
+  SMART_SIZE( 60,     20,       18,      1, no) \
+  SMART_SIZE( 61,     20,       18,      2, no) \
+  SMART_SIZE( 62,     20,       18,      3, no) \
+  SMART_SIZE( 63,     20,       18,      4, no) \
+  \
+  SMART_SIZE( 64,     21,       19,      1, no) \
+  SMART_SIZE( 65,     21,       19,      2, no) \
+  SMART_SIZE( 66,     21,       19,      3, no) \
+  SMART_SIZE( 67,     21,       19,      4, no) \
+  \
+  SMART_SIZE( 68,     22,       20,      1, no) \
+  SMART_SIZE( 69,     22,       20,      2, no) \
+  SMART_SIZE( 70,     22,       20,      3, no) \
+  SMART_SIZE( 71,     22,       20,      4, no) \
+  \
+  SMART_SIZE( 72,     23,       21,      1, no) \
+  SMART_SIZE( 73,     23,       21,      2, no) \
+  SMART_SIZE( 74,     23,       21,      3, no) \
+  SMART_SIZE( 75,     23,       21,      4, no) \
+  \
+  SMART_SIZE( 76,     24,       22,      1, no) \
+  SMART_SIZE( 77,     24,       22,      2, no) \
+  SMART_SIZE( 78,     24,       22,      3, no) \
+  SMART_SIZE( 79,     24,       22,      4, no) \
+  \
+  SMART_SIZE( 80,     25,       23,      1, no) \
+  SMART_SIZE( 81,     25,       23,      2, no) \
+  SMART_SIZE( 82,     25,       23,      3, no) \
+  SMART_SIZE( 83,     25,       23,      4, no) \
+  \
+  SMART_SIZE( 84,     26,       24,      1, no) \
+  SMART_SIZE( 85,     26,       24,      2, no) \
+  SMART_SIZE( 86,     26,       24,      3, no) \
+  SMART_SIZE( 87,     26,       24,      4, no) \
+  \
+  SMART_SIZE( 88,     27,       25,      1, no) \
+  SMART_SIZE( 89,     27,       25,      2, no) \
+  SMART_SIZE( 90,     27,       25,      3, no) \
+  SMART_SIZE( 91,     27,       25,      4, no) \
+  \
+  SMART_SIZE( 92,     28,       26,      1, no) \
+  SMART_SIZE( 93,     28,       26,      2, no) \
+  SMART_SIZE( 94,     28,       26,      3, no) \
+  SMART_SIZE( 95,     28,       26,      4, no) \
+  \
+  SMART_SIZE( 96,     29,       27,      1, no) \
+  SMART_SIZE( 97,     29,       27,      2, no) \
+  SMART_SIZE( 98,     29,       27,      3, no) \
+  SMART_SIZE( 99,     29,       27,      4, no) \
+  \
+  SMART_SIZE(100,     30,       28,      1, no) \
+  SMART_SIZE(101,     30,       28,      2, no) \
+  SMART_SIZE(102,     30,       28,      3, no) \
+  SMART_SIZE(103,     30,       28,      4, no) \
+  \
+  SMART_SIZE(104,     31,       29,      1, no) \
+  SMART_SIZE(105,     31,       29,      2, no) \
+  SMART_SIZE(106,     31,       29,      3, no) \
 
 __attribute__((__aligned__(64)))
 constexpr uint8_t kSmartSize2Index[] = {
-#define S2I_16(i)  i,
-#define S2I_32(i)  S2I_16(i) S2I_16(i)
-#define S2I_64(i)  S2I_32(i) S2I_32(i)
-#define S2I_128(i) S2I_64(i) S2I_64(i)
-#define S2I_256(i) S2I_128(i) S2I_128(i)
-#define S2I_512(i) S2I_256(i) S2I_256(i)
-#define S2I_1024(i) S2I_512(i) S2I_512(i)
-#define SMART_SIZE(index, delta, size) S2I_##delta(index)
+#define S2I_4(i)  i,
+#define S2I_5(i)  S2I_4(i) S2I_4(i)
+#define S2I_6(i)  S2I_5(i) S2I_5(i)
+#define S2I_7(i)  S2I_6(i) S2I_6(i)
+#define S2I_8(i)  S2I_7(i) S2I_7(i)
+#define S2I_9(i)  S2I_8(i) S2I_8(i)
+#define S2I_no(i)
+#define SMART_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup) \
+  S2I_##lg_delta_lookup(index)
   SMART_SIZES
-#undef S2I_16
-#undef S2I_32
-#undef S2I_64
-#undef S2I_128
-#undef S2I_256
-#undef S2I_512
-#undef S2I_1024
+#undef S2I_4
+#undef S2I_5
+#undef S2I_6
+#undef S2I_7
+#undef S2I_8
+#undef S2I_9
+#undef S2I_no
+#undef SMART_SIZE
+};
+
+__attribute__((__aligned__(64)))
+constexpr uint32_t kSmartIndex2Size[] = {
+#define SMART_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup) \
+  ((uint32_t{1}<<lg_grp) + (uint32_t{ndelta}<<lg_delta)),
+  SMART_SIZES
 #undef SMART_SIZE
 };
 
 constexpr uint32_t kMaxSmartSizeLookup = 4096;
 
 constexpr unsigned kLgSlabSize = 21;
-constexpr size_t kSlabSize = size_t{1} << kLgSlabSize;
+constexpr uint32_t kSlabSize = uint32_t{1} << kLgSlabSize;
 constexpr unsigned kLgSmartSizeQuantum = 4;
-constexpr size_t kSmartSizeAlign = 1u << kLgSmartSizeQuantum;
-constexpr size_t kSmartSizeAlignMask = kSmartSizeAlign - 1;
+constexpr uint32_t kSmartSizeAlign = 1u << kLgSmartSizeQuantum;
+constexpr uint32_t kSmartSizeAlignMask = kSmartSizeAlign - 1;
 
-constexpr size_t kDebugExtraSize = debug ?
+constexpr uint32_t kDebugExtraSize = debug ?
                                    ((sizeof(DebugHeader) + kSmartSizeAlignMask)
                                     & ~kSmartSizeAlignMask) : 0;
 
-constexpr unsigned kLgSizeClassesPerDoubling = LG_SMART_SIZES_PER_DOUBLING;
+constexpr unsigned kLgSizeClassesPerDoubling = 2;
 constexpr unsigned kLgMaxSmartSize = kLgSlabSize;
 static_assert(kLgMaxSmartSize > kLgSmartSizeQuantum + 1,
               "Too few size classes");
-constexpr size_t kNumSmartSizes = (kLgMaxSmartSize - kLgSmartSizeQuantum
-                                  - (kLgSizeClassesPerDoubling - 1))
-                                  << kLgSizeClassesPerDoubling;
+constexpr unsigned kNumSmartSizes = (kLgMaxSmartSize - kLgSmartSizeQuantum
+                                     - (kLgSizeClassesPerDoubling - 1))
+                                    << kLgSizeClassesPerDoubling;
+static_assert(kNumSmartSizes <= sizeof(kSmartSize2Index),
+              "Extend SMART_SIZES table");
+
 /*
  * The maximum size where we use our custom allocator for request-local memory.
  *
@@ -334,11 +423,11 @@ constexpr size_t kNumSmartSizes = (kLgMaxSmartSize - kLgSmartSizeQuantum
  * and certain specialized allocator functions have preconditions about the
  * requested size being above or below this number to avoid checking at runtime.
  */
-constexpr size_t kMaxSmartSize = (size_t{1} << kLgMaxSmartSize)
+constexpr uint32_t kMaxSmartSize = (uint32_t{1} << kLgMaxSmartSize)
                                  - kDebugExtraSize;
 
 constexpr unsigned kSmartPreallocCountLimit = 8;
-constexpr size_t kSmartPreallocBytesLimit = size_t{1} << 9;
+constexpr uint32_t kSmartPreallocBytesLimit = uint32_t{1} << 9;
 
 /*
  * Constants for the various debug junk-filling of different types of
@@ -533,7 +622,7 @@ struct MemoryManager {
    * Return the smart size class for a given requested allocation size.
    *
    * The return value is greater than or equal to the parameter, and
-   * less than or equal to MaxSmallSize.
+   * less than or equal to kMaxSmartSize.
    *
    * Pre: requested <= kMaxSmartSize
    */
@@ -852,7 +941,7 @@ private:
 
 private:
   void* slabAlloc(uint32_t bytes, unsigned index);
-  void* newSlab(size_t nbytes);
+  void* newSlab(uint32_t nbytes);
   void  updateBigStats();
   void* smartMallocBig(size_t nbytes);
   void* smartCallocBig(size_t nbytes);

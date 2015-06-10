@@ -113,6 +113,9 @@ private:
                    int64_t (*obj_cmp_int)(ObjectData*, int64_t),
                    int64_t (*arr_cmp_arr)(ArrayData*, ArrayData*));
 
+  void cgCoerceHelper(IRInstruction* inst, Vreg base, int offset,
+                      Func const* callee, int argNum);
+  void cgCastHelper(IRInstruction* inst, Vreg base, int offset);
   Vreg emitTestZero(Vout& v, SSATmp* src, Vloc srcLoc);
   template<class Inst>
   bool emitIncDec(Vout& v, Vloc dst, SSATmp* src0, Vloc loc0,

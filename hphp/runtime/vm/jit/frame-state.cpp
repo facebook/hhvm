@@ -403,6 +403,16 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     setStackType(inst->extra<CoerceStk>()->offset, inst->typeParam());
     break;
 
+  case CastMem:
+  case CoerceMem: {
+    auto addr = inst->src(0);
+    if (!addr->inst()->is(LdLocAddr)) break;
+    auto locId = addr->inst()->extra<LdLocAddr>()->locId;
+    setLocalValue(locId, nullptr);
+    setLocalType(locId, inst->typeParam());
+    break;
+  }
+
   case EndCatch:
     /*
      * Hitting this means we've messed up with syncing the stack in a catch

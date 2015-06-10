@@ -115,8 +115,8 @@ template<> struct BranchImpl<SSATmp*> {
 /*
  * cond() generates if-then-else blocks within a trace.  The caller supplies
  * lambdas to create the branch, next-body, and taken-body.  The next and
- * taken lambdas must return one SSATmp* value; cond() returns the SSATmp for
- * the merged value.
+ * taken lambdas must return one SSATmp* value, or they must both return
+ * nullptr; cond() returns the SSATmp for the merged value, or nullptr.
  *
  * If branch returns void, next must take zero arguments. If branch returns
  * SSATmp*, next must take one SSATmp* argument. This allows branch to return
@@ -131,17 +131,29 @@ SSATmp* cond(IRGS& env, Branch branch, Next next, Taken taken) {
 
   using T = decltype(branch(taken_block));
   auto const v1 = BranchImpl<T>::go(branch, taken_block, next);
-  gen(env, Jmp, done_block, v1);
+  if (v1) {
+    gen(env, Jmp, done_block, v1);
+  } else {
+    gen(env, Jmp, done_block);
+  }
   env.irb->appendBlock(taken_block);
   auto const v2 = taken();
-  gen(env, Jmp, done_block, v2);
+  assertx(!v1 == !v2);
+  if (v2) {
+    gen(env, Jmp, done_block, v2);
+  } else {
+    gen(env, Jmp, done_block);
+  }
 
   env.irb->appendBlock(done_block);
-  auto const label = env.unit.defLabel(1, env.irb->curMarker());
-  done_block->push_back(label);
-  auto const result = label->dst(0);
-  result->setType(v1->type() | v2->type());
-  return result;
+  if (v1) {
+    auto const label = env.unit.defLabel(1, env.irb->curMarker());
+    done_block->push_back(label);
+    auto const result = label->dst(0);
+    result->setType(v1->type() | v2->type());
+    return result;
+  }
+  return nullptr;
 }
 
 /*

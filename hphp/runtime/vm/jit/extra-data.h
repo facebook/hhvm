@@ -868,15 +868,31 @@ struct CoerceStkData : IRExtraData {
     : offset(off), callee(f), argNum(arg_num) {}
 
   std::string show() const {
-    return folly::format(
+    return folly::sformat(
       "{},{},{}",
       offset.offset,
       callee->name()->data(),
       argNum
-    ).str();
+    );
   }
 
   IRSPOffset offset;
+  const Func* callee;
+  int32_t argNum;
+};
+
+struct CoerceMemData : IRExtraData {
+  explicit CoerceMemData(const Func* f, int64_t arg_num)
+    : callee(f), argNum(arg_num) {}
+
+  std::string show() const {
+    return folly::sformat(
+      "{},{}",
+      callee->name()->data(),
+      argNum
+    );
+  }
+
   const Func* callee;
   int32_t argNum;
 };
@@ -1121,6 +1137,7 @@ X(PredictStk,                   IRSPOffsetData);
 X(CastStk,                      IRSPOffsetData);
 X(StStk,                        IRSPOffsetData);
 X(CoerceStk,                    CoerceStkData);
+X(CoerceMem,                    CoerceMemData);
 X(CoerceCellToInt,              FuncArgData);
 X(CoerceCellToDbl,              FuncArgData);
 X(CoerceCellToBool,             FuncArgData);

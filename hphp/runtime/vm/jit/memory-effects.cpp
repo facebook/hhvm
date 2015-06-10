@@ -855,6 +855,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_raise(inst, may_load_store(stk, stk));
     }
 
+  case CastMem:
+  case CoerceMem:
+    {
+      auto aInst = inst.src(0)->inst();
+      if (aInst->is(LdLocAddr)) {
+        return may_raise(inst, may_load_store(AFrameAny, AFrameAny));
+      }
+      return may_raise(inst, may_load_store(AUnknown, AUnknown));
+    }
+
   case LdARFuncPtr:
     // This instruction is essentially a PureLoad, but we don't handle non-TV's
     // in PureLoad so we have to treat it as may_load_store.  We also treat it

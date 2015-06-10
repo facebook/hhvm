@@ -257,6 +257,10 @@ loaded, using a separate CheckRefInner instruction.
 
   Cast the stack element at `offset' (in cells) from S0 to type T.
 
+| CastMem<T>, ND, S(PtrToGen), Er
+
+  Cast the TypedValue at S0 to type T.
+
 The following instructions deal with parameter coercion (the standard type
 conversion for arguments to HNI functions). If parameter coercion fails these
 functions will throw a TVCoercion exception. They may throw other types of
@@ -267,6 +271,13 @@ exceptions depending on how coercion is implemented.
   Converts the stack slot at offset (in cells) to type T, with the semantics
   needed for calling a builtin function. May throw a TVCoercionException in the
   case of failed parameter coercion. The callee is f, and the position of the
+  argument being coerced is argNum.
+
+| CoerceMem<T,fn,argNum>, ND, S(PtrToGen), Er
+
+  Coerces the TypedValue at S0 to type T, with the semantics
+  needed for calling a builtin function. May throw a TVCoercionException in the
+  case of failed parameter coercion. The callee is fn, and the position of the
   argument being coerced is argNum.
 
 | CoerceCellToBool<fn,argNum>, D(Bool), S(Cell), Er

@@ -2914,12 +2914,19 @@ void CodeGenerator::cgCall(IRInstruction* inst) {
   v = next;
 }
 
-void CodeGenerator::cgCastStk(IRInstruction *inst) {
+void CodeGenerator::cgCastHelper(IRInstruction *inst,
+                                 Vreg base, int offset) {
   Type type       = inst->typeParam();
-  auto offset     = inst->extra<CastStk>()->offset;
-  auto spReg      = srcLoc(inst, 0).reg();
+  bool nullable = false;
+  if (!type.isKnownDataType()) {
+    assertx(TNull <= type);
+    type -= TNull;
+    assertx(type.isKnownDataType());
+    nullable = true;
+  }
+
   auto args = argGroup(inst);
-  args.addr(spReg, cellsToBytes(offset.offset));
+  args.addr(base, offset);
 
   TCA tvCastHelper;
   if (type <= TBool) {
@@ -2933,14 +2940,16 @@ void CodeGenerator::cgCastStk(IRInstruction *inst) {
   } else if (type <= TStr) {
     tvCastHelper = (TCA)tvCastToStringInPlace;
   } else if (type <= TObj) {
-    tvCastHelper = (TCA)tvCastToObjectInPlace;
-  } else if (type <= TNullableObj) {
-    tvCastHelper = (TCA)tvCastToNullableObjectInPlace;
+    tvCastHelper = nullable ?
+      (TCA)tvCastToNullableObjectInPlace :
+      (TCA)tvCastToObjectInPlace;
+    nullable = false;
   } else if (type <= TRes) {
     tvCastHelper = (TCA)tvCastToResourceInPlace;
   } else {
     not_reached();
   }
+  assert(!nullable);
   cgCallHelper(vmain(),
                CppCall::direct(reinterpret_cast<void (*)()>(tvCastHelper)),
                kVoidDest,
@@ -2948,41 +2957,33 @@ void CodeGenerator::cgCastStk(IRInstruction *inst) {
                args);
 }
 
-void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
-  Type type       = inst->typeParam();
-  auto extra      = inst->extra<CoerceStk>();
+void CodeGenerator::cgCastStk(IRInstruction *inst) {
+  auto offset     = inst->extra<CastStk>()->offset;
   auto spReg      = srcLoc(inst, 0).reg();
-  auto offset     = cellsToBytes(extra->offset.offset);
 
+  cgCastHelper(inst, spReg, cellsToBytes(offset.offset));
+}
+
+void CodeGenerator::cgCastMem(IRInstruction *inst) {
+  auto ptr      = srcLoc(inst, 0).reg();
+
+  cgCastHelper(inst, ptr, 0);
+}
+
+void CodeGenerator::cgCoerceHelper(IRInstruction* inst,
+                                   Vreg base, int offset,
+                                   Func const* callee, int argNum) {
   auto& v = vmain();
 
-  // Short-circuit call to tvCoerceParamTo*()
-  // if we're already of the appropriate type (common case)
-  auto const coerceTypeTest = [&](const Type& t) {
-    auto const sf = v.makeReg();
-    emitTypeTest(t,
-                 spReg[offset + TVOFF(m_type)],
-                 spReg[offset + TVOFF(m_data)], sf,
-                 [&](ConditionCode cc, Vreg sfTaken) {
-                   auto next = v.makeBlock();
-                   v << jcc{ccNegate(cc), sf, {label(inst->next()), next}};
-                   v = next;
-                 });
-  };
-  if (!type.isKnownDataType()) {
-    assertx(TNull <= type);
-    coerceTypeTest(TNull);
-    type -= TNull;
-    assertx(type.isKnownDataType());
-  }
-  coerceTypeTest(type);
+  Type type = inst->typeParam();
+  assertx(type.isKnownDataType());
 
   // If the type-specific test(s) failed,
   // fallback on actually calling the tvCoerceParamTo*() helper
   auto args = argGroup(inst);
-  args.addr(spReg, offset);
-  args.imm(extra->callee);
-  args.imm(extra->argNum);
+  args.addr(base, offset);
+  args.imm(callee);
+  args.imm(argNum);
 
   TCA tvCoerceHelper;
   if (type <= TBool) {
@@ -3009,6 +3010,21 @@ void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
     SyncOptions::kSyncPoint,
     args
   );
+}
+
+void CodeGenerator::cgCoerceStk(IRInstruction *inst) {
+  auto extra      = inst->extra<CoerceStk>();
+  auto spReg      = srcLoc(inst, 0).reg();
+  auto offset     = cellsToBytes(extra->offset.offset);
+
+  cgCoerceHelper(inst, spReg, offset, extra->callee, extra->argNum);
+}
+
+void CodeGenerator::cgCoerceMem(IRInstruction *inst) {
+  auto extra      = inst->extra<CoerceMem>();
+  auto ptr        = srcLoc(inst, 0).reg();
+
+  cgCoerceHelper(inst, ptr, 0, extra->callee, extra->argNum);
 }
 
 void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {

@@ -11,7 +11,11 @@ class :foo {
     int foo,
 
     /* some comment */
-    string bar;
+    string bar,
+
+    Stringish baz, // blah blah
+
+    Stringish qux; // blahhhh
 
   attribute
     enum {'aaaaaaaaaa', 'bbbbbbbbbb', 'cccccccccc', 'dddddddddd'} x = 'aaaaaaaaaa';

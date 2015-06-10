@@ -747,15 +747,6 @@ class HashCollection : public ExtCollectionObjectData {
     tvRefcountedIncRef(&toE.data);
   }
 
- protected:
-  inline Elm* data() { return m_data; }
-  inline const Elm* data() const { return m_data; }
-  inline int32_t* hashTab() const {
-    return reinterpret_cast<int32_t*>(
-      m_data + static_cast<size_t>(arrayData()->scale()) * 3
-    );
-  }
-
   MixedArray* arrayData() {
     auto* ret = getArrayFromMixedData(m_data);
     assert(ret == staticEmptyMixedArray() || ret->isMixed());
@@ -765,6 +756,15 @@ class HashCollection : public ExtCollectionObjectData {
     auto* ret = getArrayFromMixedData(m_data);
     assert(ret == staticEmptyMixedArray() || ret->isMixed());
     return ret;
+  }
+
+ protected:
+  inline Elm* data() { return m_data; }
+  inline const Elm* data() const { return m_data; }
+  inline int32_t* hashTab() const {
+    return reinterpret_cast<int32_t*>(
+      m_data + static_cast<size_t>(arrayData()->scale()) * 3
+    );
   }
 
   void setSize(uint32_t sz) {

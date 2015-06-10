@@ -38,14 +38,14 @@ APCArray::MakeSharedArray(ArrayData* arr, bool inner, bool unserializeObj) {
     // only need to call traverseData() on the toplevel array
     DataWalker walker(DataWalker::LookupFeature::HasObjectOrResource);
     DataWalker::DataFeature features = walker.traverseData(arr);
-    if (features.isCircular() || features.hasCollection()) {
+    if (features.isCircular) {
       String s = apc_serialize(arr);
       auto pair = APCString::MakeSharedString(KindOfArray, s.get());
       pair.handle->setSerializedArray();
       return pair;
     }
 
-    if (apcExtension::UseUncounted && !features.hasObjectOrResource() &&
+    if (apcExtension::UseUncounted && !features.hasObjectOrResource &&
         !arr->empty()) {
       return {APCTypedValue::MakeSharedArray(arr),
               getMemSize(arr) + sizeof(APCTypedValue)};

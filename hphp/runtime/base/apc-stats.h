@@ -225,12 +225,10 @@ struct APCStats {
   }
 
   void addPendingDelete(size_t size) {
-    assert(size > 0);
     m_pendingDeleteSize->addValue(size);
   }
 
   void removePendingDelete(size_t size) {
-    assert(size > 0);
     m_pendingDeleteSize->addValue(-size);
   }
 

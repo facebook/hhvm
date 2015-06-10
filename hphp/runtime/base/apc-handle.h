@@ -168,37 +168,42 @@ struct APCHandle {
   /*
    * For KindOfObject and KindOfArray, reprectively, these flags distinguish
    * between the APCObject and APCArray representations and serialized
-   * APCString representations.
+   * APCString representations.  And an APCCollection wraps an array that
+   * represents a php KindOfObject for a particular collection type.
    */
-  bool isSerializedObj() const { return m_flags & SerializedObj; }
-  bool isSerializedArray() const { return m_flags & SerializedArray; }
-  void setSerializedObj() { m_flags |= SerializedObj; }
-  void setSerializedArray() { m_flags |= SerializedArray; }
+  bool isSerializedObj() const { return m_flags & FSerializedObj; }
+  bool isSerializedArray() const { return m_flags & FSerializedArray; }
+  bool isAPCCollection() const { return m_flags & FAPCCollection; }
+  void setSerializedObj() { m_flags |= FSerializedObj; }
+  void setSerializedArray() { m_flags |= FSerializedArray; }
+  void setAPCCollection() { m_flags |= FAPCCollection; }
 
   /*
    * If true, this APCHandle is not using reference counting.
    */
-  bool isUncounted() const { return m_flags & Uncounted; }
-  void setUncounted() { m_flags |= Uncounted; }
+  bool isUncounted() const { return m_flags & FUncounted; }
+  void setUncounted() { m_flags |= FUncounted; }
 
   /*
    * If this APCHandle is using an APCArray representation, this flag
    * discriminates between two different storage schemes inside APCArray.
    */
-  bool isPacked() const { return m_flags & Packed; }
-  void setPacked() { m_flags |= Packed; }
+  bool isPacked() const { return m_flags & FPacked; }
+  void setPacked() { m_flags |= FPacked; }
 
 private:
-  constexpr static uint8_t SerializedArray = 1 << 0;
-  constexpr static uint8_t SerializedObj   = 1 << 1;
-  constexpr static uint8_t Packed          = 1 << 2;
-  constexpr static uint8_t Uncounted       = 1 << 3;
+  constexpr static uint8_t FSerializedArray = 1 << 0;
+  constexpr static uint8_t FSerializedObj   = 1 << 1;
+  constexpr static uint8_t FPacked          = 1 << 2;
+  constexpr static uint8_t FUncounted       = 1 << 3;
+  constexpr static uint8_t FAPCCollection   = 1 << 4;
 
 private:
   friend struct APCTypedValue;
   friend struct APCString;
   friend struct APCArray;
   friend struct APCObject;
+  friend struct APCCollection;
   explicit APCHandle(DataType type) : m_type(type) {}
   APCHandle(const APCHandle&) = delete;
   APCHandle& operator=(APCHandle const&) = delete;

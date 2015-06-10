@@ -63,13 +63,18 @@ using newFromArrayFunc = ObjectData* (*)(ArrayData* arr);
 newEmptyInstanceFunc allocEmptyFunc(CollectionType ctype);
 newFromArrayFunc allocFromArrayFunc(CollectionType ctype);
 
-/* Create a new empty collection, with refcount set to 1.
+/*
+ * Create a new empty collection, with refcount set to 1.
  */
 inline ObjectData* alloc(CollectionType ctype) {
   return allocEmptyFunc(ctype)();
 }
 
-/* Create a collection from an array, with refcount set to 1.
+/*
+ * Create a collection from an array, with refcount set to 1.
+ *
+ * Pre: The array must have a kind that's compatible with the collection type
+ * we're creating.
  */
 inline ObjectData* alloc(CollectionType ctype, ArrayData* arr) {
   return allocFromArrayFunc(ctype)(arr);
@@ -107,6 +112,15 @@ bool toBool(const ObjectData* obj);
 ObjectData* clone(ObjectData* obj);
 
 void deepCopy(TypedValue* tv);
+
+/*
+ * Return the inner-array for array-backed collections, and nullptr if it's a
+ * Pair.  The returned array pointer is not incref'd.
+ */
+ArrayData* asArray(ObjectData* obj);
+inline const ArrayData* asArray(const ObjectData* obj) {
+  return asArray(const_cast<ObjectData*>(obj));
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // Read/Write

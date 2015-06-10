@@ -2541,7 +2541,7 @@ void pushLocalsAndIterators(const Func* func, int nparams /*= 0*/) {
 }
 
 void ExecutionContext::enqueueAPCHandle(APCHandle* handle, size_t size) {
-  assert(handle->isUncounted() && size > 0);
+  assert(handle->isUncounted());
   assert(handle->type() == KindOfString ||
          handle->type() == KindOfArray);
   m_apcHandles.push_back(handle);

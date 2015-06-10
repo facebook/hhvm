@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-object.h"
+#include "hphp/runtime/base/apc-collection.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
@@ -62,7 +63,7 @@ StringCase:
       if (serialized) {
         // It is priming, and there might not be the right class definitions
         // for unserialization.
-        return APCObject::MakeSharedObj(apc_reserialize(s));
+        return APCObject::MakeSerializedObj(apc_reserialize(s));
       }
 
       auto const st = lookupStaticString(s);
@@ -85,8 +86,13 @@ StringCase:
                                        unserializeObj);
 
     case KindOfObject:
+      if (source.getObjectData()->isCollection()) {
+        return APCCollection::Make(source.getObjectData(),
+                                   inner,
+                                   unserializeObj);
+      }
       return unserializeObj ? APCObject::Construct(source.getObjectData()) :
-             APCObject::MakeSharedObj(apc_serialize(source));
+             APCObject::MakeSerializedObj(apc_serialize(source));
 
     case KindOfResource:
       // TODO Task #2661075: Here and elsewhere in the runtime, we convert
@@ -149,6 +155,10 @@ void APCHandle::deleteShared() {
       return;
 
     case KindOfObject:
+      if (isAPCCollection()) {
+        APCCollection::Delete(this);
+        return;
+      }
       APCObject::Delete(this);
       return;
 

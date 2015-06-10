@@ -249,6 +249,23 @@ COLLECTIONS_ALL_TYPES(X)
   not_reached();
 }
 
+ArrayData* asArray(ObjectData* obj) {
+  assertx(obj->isCollection());
+  switch (obj->collectionType()) {
+  case CollectionType::ImmVector:
+  case CollectionType::Vector:
+    return static_cast<BaseVector*>(obj)->arrayData();
+  case CollectionType::ImmMap:
+  case CollectionType::Map:
+  case CollectionType::ImmSet:
+  case CollectionType::Set:
+    return static_cast<HashCollection*>(obj)->arrayData()->asArrayData();
+  case CollectionType::Pair:
+    return nullptr;
+  }
+  not_reached();
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Deep Copy
 

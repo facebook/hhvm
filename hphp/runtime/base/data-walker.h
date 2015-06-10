@@ -35,7 +35,7 @@ struct ObjectData;
  * Used by APC to make proper decisions about the format of the data to save.
  */
 struct DataWalker {
-  /**
+  /*
    * Directive for the DataWalker. Define what to look for.
    */
   enum class LookupFeature {
@@ -45,57 +45,32 @@ struct DataWalker {
     HasObjectOrResource      = 0x4
   };
 
-  /**
+  /*
    * The set of features found by the DataWalker according to what specified
    * via LookupFeature.
    */
   struct DataFeature {
     DataFeature()
-      : m_circular(false)
-      , m_serializable(false)
-      , m_hasCollection(false)
-      , m_hasRefCountReference(false)
-      , m_hasObjectOrResource(false) {
+      : isCircular(false)
+      , hasSerializable(false)
+      , hasRefCountReference(false)
+      , hasObjectOrResource(false) {
     }
 
-    bool isCircular() const {
-      return m_circular;
-    }
-
-    bool hasCollection() const {
-      return m_hasCollection;
-    }
-
-    bool hasSerializableReference() {
-      return m_serializable;
-    }
-
-    bool hasRefCountReference() const {
-      return m_hasRefCountReference;
-    }
-
-    bool hasObjectOrResource() const {
-      return m_hasObjectOrResource;
-    }
-
-  private:
-    // whether the data graph contains internal references (it's circular)
-    unsigned m_circular : 1;
-    // whetehr the data graph contains serialiazble objects
-    unsigned m_serializable : 1;
-    // whether the data graph contains collections
-    unsigned m_hasCollection : 1;
+    // whether the data graph is not a tree in a user-visible way (either
+    // circular or DAG of types with reference semantics like objects).
+    unsigned isCircular : 1;
+    // whether the data graph contains serializable objects
+    unsigned hasSerializable : 1;
     // whether the data graph contains some ref counted reference
     // (*not* one of: bool, int, double and static string)
-    unsigned m_hasRefCountReference : 1;
+    unsigned hasRefCountReference : 1;
     // whether the data graph contains any object or resource
-    unsigned m_hasObjectOrResource : 1;
-
-    friend class DataWalker;
+    unsigned hasObjectOrResource : 1;
   };
 
 public:
-  /**
+  /*
    * Sets up a DataWalker to analyze an object or array.
    */
   explicit DataWalker(LookupFeature features)
@@ -129,7 +104,7 @@ private:
   bool markVisited(void* pvar,
                    DataFeature& features,
                    PointerSet& visited) const;
-  void objectFeature(ObjectData* pobj, DataFeature& features) const;
+  void objectFeature(ObjectData* pobj, DataFeature&, PointerSet&) const;
 
   bool canStopWalk(DataFeature& features) const;
 

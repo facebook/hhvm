@@ -145,7 +145,7 @@ RegionDescPtr selectHotTrace(TransID triggerId,
       auto newTransId = getTransID(newFirstBlockId);
       // Don't add the arc if the last opcode in the source block ends
       // the region.
-      if (!breaksRegion(*profData->transLastInstr(newTransId))) {
+      if (!breaksRegion(profData->transLastSrcKey(newTransId))) {
         auto& blocks = region->blocks();
         for (auto iOther = 0; iOther < blocks.size(); iOther++) {
           auto other = blocks[iOther];
@@ -165,10 +165,10 @@ RegionDescPtr selectHotTrace(TransID triggerId,
     selectedSet.insert(tid);
     if (selectedVec) selectedVec->push_back(tid);
 
-    Op lastOp = *(profData->transLastInstr(tid));
-    if (breaksRegion(lastOp)) {
+    const auto lastSk = profData->transLastSrcKey(tid);
+    if (breaksRegion(lastSk)) {
       FTRACE(2, "selectHotTrace: breaking region because of last instruction "
-             "in Translation {}: {}\n", tid, opcodeToName(lastOp));
+             "in Translation {}: {}\n", tid, opcodeToName(lastSk.op()));
       break;
     }
 

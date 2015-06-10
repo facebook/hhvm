@@ -541,7 +541,7 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
  * This function returns true for control-flow bytecode instructions that
  * are not supported in the middle of a region yet.
  */
-bool breaksRegion(Op opc);
+bool breaksRegion(SrcKey sk);
 
 /*
  * Creates regions covering all existing profile translations for

@@ -792,15 +792,14 @@ bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
   return true;
 }
 
-bool breaksRegion(Op opc) {
-  switch (opc) {
+bool breaksRegion(SrcKey sk) {
+  switch (sk.op()) {
     case Op::MIterNext:
     case Op::MIterNextK:
     case Op::SSwitch:
     case Op::CreateCont:
     case Op::Yield:
     case Op::YieldK:
-    case Op::Await:
     case Op::RetC:
     case Op::RetV:
     case Op::Exit:
@@ -814,6 +813,12 @@ bool breaksRegion(Op opc) {
     case Op::Eval:
     case Op::NativeImpl:
       return true;
+
+    case Op::Await:
+      // We break regions at resumed Await instructions, to avoid
+      // duplicating the translation of the resumed SrcKey after the
+      // Await.
+      return sk.resumed();
 
     default:
       return false;

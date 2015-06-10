@@ -188,8 +188,9 @@ private:
     m_numBCInstrs += tidInstrs;
     ITRACE(5, "- visit: adding {} ({})\n", tid, tidWeight);
 
-    auto const termOp = *(m_profData->transLastInstr(tid));
-    if (!breaksRegion(termOp)) {
+    auto const termSk = m_profData->transLastSrcKey(tid);
+    auto const termOp = termSk.op();
+    if (!breaksRegion(termSk)) {
       auto srcBlockId = tidRegion->blocks().back().get()->id();
 
       auto arcs = m_cfg.outArcs(tid);

@@ -17,7 +17,10 @@
 #ifndef incl_HPHP_ATOMIC_SHARED_PTR_H_
 #define incl_HPHP_ATOMIC_SHARED_PTR_H_
 
+#include "hphp/util/low-ptr.h"
+
 #include <cassert>
+#include <type_traits>
 
 namespace HPHP {
 
@@ -27,27 +30,29 @@ namespace HPHP {
 /**
  * Thread-safe ref-counting smart pointer.
  */
-template<typename T>
-struct AtomicSharedPtr {
-  explicit AtomicSharedPtr(T* px = nullptr) : m_px(px) {
+template<typename T, bool isLow>
+struct AtomicSharedPtrImpl {
+  explicit AtomicSharedPtrImpl(T* px = nullptr) : m_px(px) {
     if (m_px) m_px->incAtomicCount();
   }
 
   template<class Y>
-  explicit AtomicSharedPtr(Y* px) : m_px(px) {
+  explicit AtomicSharedPtrImpl(Y* px) : m_px(px) {
     if (m_px) m_px->incAtomicCount();
   }
 
-  AtomicSharedPtr(const AtomicSharedPtr<T>& src) : m_px(nullptr) {
+  AtomicSharedPtrImpl(const AtomicSharedPtrImpl& src)
+    : m_px(nullptr) {
     operator=(src.get());
   }
 
   template<class Y>
-  AtomicSharedPtr(const AtomicSharedPtr<Y>& src) : m_px(nullptr) {
+  AtomicSharedPtrImpl(const AtomicSharedPtrImpl<Y, isLow>& src)
+    : m_px(nullptr) {
     operator=(src.get());
   }
 
-  ~AtomicSharedPtr() {
+  ~AtomicSharedPtrImpl() {
     if (m_px && m_px->decAtomicCount() == 0) {
       m_px->atomicRelease();
     }
@@ -57,16 +62,16 @@ struct AtomicSharedPtr {
    * Assignments.
    */
 
-  AtomicSharedPtr& operator=(const AtomicSharedPtr<T>& src) {
+  AtomicSharedPtrImpl& operator=(const AtomicSharedPtrImpl& src) {
     return operator=(src.m_px);
   }
 
   template<class Y>
-  AtomicSharedPtr& operator=(const AtomicSharedPtr<Y>& src) {
+  AtomicSharedPtrImpl& operator=(const AtomicSharedPtrImpl<Y, isLow>& src) {
     return operator=(src.get());
   }
 
-  AtomicSharedPtr& operator=(T* px) {
+  AtomicSharedPtrImpl& operator=(T* px) {
     if (m_px != px) {
       if (m_px && m_px->decAtomicCount() == 0) {
         m_px->atomicRelease();
@@ -80,7 +85,7 @@ struct AtomicSharedPtr {
   }
 
   template<class Y>
-  AtomicSharedPtr& operator=(Y* px) {
+  AtomicSharedPtrImpl& operator=(Y* px) {
     T* npx = dynamic_cast<T*>(px);
     if (m_px != npx) {
       if (m_px && m_px->decAtomicCount() == 0) {
@@ -127,8 +132,14 @@ protected:
   }
 
 private:
-  T* m_px;
+  typename std::conditional<isLow, LowPtr<T>, T*>::type m_px;
 };
+
+template<typename T>
+using AtomicSharedPtr = AtomicSharedPtrImpl<T, false>;
+
+template<typename T>
+using AtomicSharedLowPtr = AtomicSharedPtrImpl<T, true>;
 
 }
 

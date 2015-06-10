@@ -129,10 +129,15 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
 ///////////////////////////////////////////////////////////////////////////////
 // Class.
 
-static_assert(sizeof(Class) == (use_lowptr ? 256 : 288),
-               "Change this only on purpose");
-
 namespace {
+
+template<size_t sz>
+struct assert_sizeof_class {
+  // If this static_assert fails, the compiler error will have the real value
+  // of sizeof(Class) in it since it's in this struct's type.
+  static_assert(sz == (use_lowptr ? 256 : 280), "Change this only on purpose");
+};
+template struct assert_sizeof_class<sizeof(Class)>;
 
 /*
  * Load used traits of PreClass `preClass', and append the trait Class*'s to

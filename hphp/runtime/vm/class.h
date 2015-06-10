@@ -58,7 +58,7 @@ struct NativePropHandler;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using ClassPtr = AtomicSharedPtr<Class>;
+using ClassPtr = AtomicSharedLowPtr<Class>;
 
 /*
  * Class represents the full definition of a user class in a given request
@@ -1133,7 +1133,7 @@ private:
    * Vector of Class pointers that encodes the inheritance hierarchy, including
    * this Class as the last element.
    */
-  LowClassPtr m_classVec[1]; // Dynamically sized; must come last.
+  LowClassPtr m_classVec[]; // Dynamically sized; must come last.
 };
 
 ///////////////////////////////////////////////////////////////////////////////

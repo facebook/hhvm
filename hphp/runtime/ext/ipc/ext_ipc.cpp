@@ -25,6 +25,7 @@
 #include <folly/String.h>
 
 #include <memory>
+#include <set>
 
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -32,27 +33,22 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 
-/* these are missing from cygwin ipc headers */
 #ifdef __CYGWIN__
-struct msgbuf {
-    long mtype;
-    char mtext[1];
-};
+/* These is missing from cygwin ipc headers. */
 #define MSG_EXCEPT 02000
 #endif
 
-#if defined(__APPLE__) || defined(__FreeBSD__)
-# include <sys/msgbuf.h>
-#include <set>
-# define MSGBUF_MTYPE(b) (b)->msg_magic
-# ifdef __APPLE__
-#  define MSGBUF_MTEXT(b) (b)->msg_bufc
-# else
-#  define MSGBUF_MTEXT(b) (b)->msg_ptr
-# endif
+#if defined(__APPLE__) || defined(__CYGWIN__)
+/* OS X defines msgbuf, but it is defined with extra fields and some weird
+ * types. It turns out that the actual msgsnd() and msgrcv() calls work fine
+ * with the same structure that other OSes use. This is weird, but this is also
+ * what PHP does, so *shrug*. */
+typedef struct {
+    long mtype;
+    char mtext[1];
+} hhvm_msgbuf;
 #else
-# define MSGBUF_MTYPE(b) (b)->mtype
-# define MSGBUF_MTEXT(b) (b)->mtext
+typedef msgbuf hhvm_msgbuf;
 #endif
 
 using HPHP::ScopedMem;
@@ -250,7 +246,7 @@ bool HHVM_FUNCTION(msg_send,
     return false;
   }
 
-  struct msgbuf *buffer = NULL;
+  hhvm_msgbuf *buffer = nullptr;
   String data;
   if (serialize) {
     data = HHVM_FN(serialize)(message);
@@ -258,10 +254,10 @@ bool HHVM_FUNCTION(msg_send,
     data = message.toString();
   }
   int len = data.length();
-  buffer = (struct msgbuf *)calloc(len + sizeof(struct msgbuf), 1);
+  buffer = (hhvm_msgbuf *)calloc(len + sizeof(hhvm_msgbuf), 1);
   ScopedMem deleter(buffer);
-  MSGBUF_MTYPE(buffer) = msgtype;
-  memcpy(MSGBUF_MTEXT(buffer), data.c_str(), len + 1);
+  buffer->mtype = msgtype;
+  memcpy(buffer->mtext, data.c_str(), len + 1);
 
   int result = msgsnd(q->id, buffer, len, blocking ? 0 : IPC_NOWAIT);
   if (result < 0) {
@@ -302,8 +298,7 @@ bool HHVM_FUNCTION(msg_receive,
     if (flags & k_MSG_IPC_NOWAIT) realflags |= IPC_NOWAIT;
   }
 
-  struct msgbuf *buffer =
-    (struct msgbuf *)calloc(maxsize + sizeof(struct msgbuf), 1);
+  hhvm_msgbuf *buffer = (hhvm_msgbuf *)calloc(maxsize + sizeof(hhvm_msgbuf), 1);
   ScopedMem deleter(buffer);
 
   int result = msgrcv(q->id, buffer, maxsize, desiredmsgtype, realflags);
@@ -312,9 +307,9 @@ bool HHVM_FUNCTION(msg_receive,
     return false;
   }
 
-  msgtype = (int)MSGBUF_MTYPE(buffer);
+  msgtype = (int)buffer->mtype;
   if (unserialize) {
-    const char *bufText = (const char *)MSGBUF_MTEXT(buffer);
+    const char *bufText = (const char *)buffer->mtext;
     uint bufLen = strlen(bufText);
     VariableUnserializer vu(bufText, bufLen,
                             VariableUnserializer::Type::Serialize);
@@ -327,7 +322,7 @@ bool HHVM_FUNCTION(msg_receive,
       return false;
     }
   } else {
-    message = String((const char *)MSGBUF_MTEXT(buffer));
+    message = String((const char *)buffer->mtext);
   }
 
   return true;

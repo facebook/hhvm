@@ -112,6 +112,19 @@ SSATmp* gen(State& env, Opcode op, Args&&... args) {
   return gen(env, op, env.insts.top()->marker(), std::forward<Args>(args)...);
 }
 
+bool arrayKindNeedsVsize(const ArrayData::ArrayKind kind) {
+  switch (kind) {
+    case ArrayData::kPackedKind:
+    case ArrayData::kStructKind:
+    case ArrayData::kMixedKind:
+    case ArrayData::kEmptyKind:
+    case ArrayData::kApcKind:
+      return false;
+    default:
+      return true;
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -1265,10 +1278,9 @@ SSATmp* simplifyConvStrToArr(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyConvArrToBool(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (src->hasConstVal()) {
-    // const_cast is safe. We're only making use of a cell helper.
-    auto arr = const_cast<ArrayData*>(src->arrVal());
-    return cns(env, cellToBool(make_tv<KindOfArray>(arr)));
+  auto const kind = src->type().arrSpec().kind();
+  if (src->isA(TStaticArr) || (kind && !arrayKindNeedsVsize(*kind))) {
+    return gen(env, ConvIntToBool, gen(env, CountArrayFast, src));
   }
   return nullptr;
 }
@@ -1866,18 +1878,10 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
 
   auto const kind = ty.arrSpec().kind();
 
-  if (!kind || mightRelax(env, src)) return nullptr;
-
-  switch (*kind) {
-  case ArrayData::kPackedKind:
-  case ArrayData::kStructKind:
-  case ArrayData::kMixedKind:
-  case ArrayData::kEmptyKind:
-  case ArrayData::kApcKind:
+  if (kind && !mightRelax(env, src) && !arrayKindNeedsVsize(*kind))
     return gen(env, CountArrayFast, src);
-  default:
+  else
     return nullptr;
-  }
 }
 
 SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {
@@ -2342,13 +2346,13 @@ void copyProp(IRInstruction* inst) {
 
     if (srcInst->is(Mov)) {
       inst->setSrc(i, srcInst->src(0));
-    }
+      }
 
     // We're assuming that all of our src instructions have already been
     // copyPropped.
     assertx(!inst->src(i)->inst()->is(Mov));
+    }
   }
-}
 
 PackedBounds packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
   if (idxVal < 0 || idxVal > PackedArray::MaxSize) return PackedBounds::Out;

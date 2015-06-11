@@ -2173,6 +2173,9 @@ void CodeGenerator::cgDefInlineFP(IRInstruction* inst) {
   v << store{callerFP, callerSP[offset + AROFF(m_sfp)]};
   emitImmStoreq(v, intptr_t(fakeRet), callerSP[offset + AROFF(m_savedRip)]);
   v << storeli{retBCOff, callerSP[offset + AROFF(m_soff)]};
+  if (extra->target->attrs() & AttrMayUseVV) {
+    v << storeqi{0, callerSP[offset + AROFF(m_invName)]};
+  }
   v << lea{callerSP[offset], dstLoc(inst, 0).reg()};
 }
 

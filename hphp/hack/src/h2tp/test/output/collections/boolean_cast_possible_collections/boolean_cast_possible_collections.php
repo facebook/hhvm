@@ -48,10 +48,7 @@ function test_all_expression_types() {
     (bool) (!\hacklib_id(new \HH\Vector(array()))->isEmpty())
   );
   test_cast("New", (bool) (new Foo()));
-  test_cast(
-    "New",
-    (bool) (!\hacklib_id(new \HH\Vector(array()))->isEmpty())
-  );
+  test_cast("New", (bool) (!\hacklib_id(new \HH\Vector(array()))->isEmpty()));
   test_cast("Eq", (bool) ($y = false));
   test_cast("Eq", (bool) \hacklib_cast_as_boolean($z = $f->i_func()));
   echo ($z."\n");

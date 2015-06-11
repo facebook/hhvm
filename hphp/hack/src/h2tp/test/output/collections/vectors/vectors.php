@@ -6,9 +6,7 @@ class Foo {
   }
 }
 function verify_vector($v) {
-  echo
-    (\hacklib_cast_as_boolean($v->isEmpty()) ? "empty\n" : "not empty\n")
-  ;
+  echo (\hacklib_cast_as_boolean($v->isEmpty()) ? "empty\n" : "not empty\n");
   echo ($v->count()."\n");
   echo ($v->at(1)."\n");
   echo ($v[1]."\n");

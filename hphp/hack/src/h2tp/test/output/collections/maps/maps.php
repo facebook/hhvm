@@ -6,9 +6,7 @@ class Foo {
   }
 }
 function verify_map($m) {
-  echo
-    (\hacklib_cast_as_boolean($m->isEmpty()) ? "empty\n" : "not empty\n")
-  ;
+  echo (\hacklib_cast_as_boolean($m->isEmpty()) ? "empty\n" : "not empty\n");
   echo ($m->count()."\n");
   echo ($m->at("25")."\n");
   echo ($m[\hacklib_id("25")]."\n");

@@ -6,9 +6,7 @@ class Foo {
   }
 }
 function verify_set($s) {
-  echo
-    (\hacklib_cast_as_boolean($s->isEmpty()) ? "empty\n" : "not empty\n")
-  ;
+  echo (\hacklib_cast_as_boolean($s->isEmpty()) ? "empty\n" : "not empty\n");
   echo ($s->count()."\n");
   echo
     (\hacklib_cast_as_boolean($s->contains("25"))

@@ -1,9 +1,7 @@
 <?php
 require_once ($GLOBALS['HACKLIB_ROOT']);
 function verify_pair($p) {
-  echo
-    (\hacklib_cast_as_boolean($p->isEmpty()) ? "empty\n" : "not empty\n")
-  ;
+  echo (\hacklib_cast_as_boolean($p->isEmpty()) ? "empty\n" : "not empty\n");
   echo ($p->count()."\n");
   echo ($p->at(1)."\n");
   echo ($p[1]."\n");

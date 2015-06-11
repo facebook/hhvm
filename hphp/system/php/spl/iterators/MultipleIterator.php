@@ -7,8 +7,7 @@
  */
 
 
-class MultipleIterator implements Iterator
-{
+class MultipleIterator implements Iterator {
     /** Inner Iterators */
     private $iterators;
 
@@ -30,21 +29,18 @@ class MultipleIterator implements Iterator
     /** Construct a new empty MultipleIterator
      * @param flags MIT_* flags
      */
-    public function __construct($flags = self::MIT_NEED_ALL|self::MIT_KEYS_NUMERIC)
-    {
+    public function __construct($flags = self::MIT_NEED_ALL|self::MIT_KEYS_NUMERIC)    {
         $this->iterators = new SplObjectStorage();
         $this->flags = $flags;
     }
 
     /** @return current flags MIT_* */
-    public function getFlags()
-    {
+    public function getFlags() {
         return $this->flags;
     }
 
     /** @param $flags new flags. */
-    public function setFlags($flags)
-    {
+    public function setFlags($flags) {
         $this->flags = $flags;
     }
 
@@ -54,8 +50,7 @@ class MultipleIterator implements Iterator
      * @throws IllegalValueException if a inf is none of NULL, integer or string
      * @throws IllegalValueException if a inf is already an associated info
      */
-    public function attachIterator(Iterator $iter, $inf = NULL)
-    {
+    public function attachIterator(Iterator $iter, $inf = NULL) {
 
         if (!is_null($inf)) {
             if (!is_int($inf) && !is_string($inf)){
@@ -72,28 +67,24 @@ class MultipleIterator implements Iterator
     }
 
     /** @param $iter attached Iterator that should be detached. */
-    public function detachIterator(Iterator $iter)
-    {
+    public function detachIterator(Iterator $iter) {
         $this->iterators->detach($iter);
     }
 
     /** @param $iter Iterator to check
      * @return whether $iter is attached or not
      */
-    public function containsIterator(Iterator $iter)
-    {
+    public function containsIterator(Iterator $iter) {
         return $this->iterator->contains($iter);
     }
 
     /** @return number of attached Iterator instances. */
-    public function countIterators()
-    {
+    public function countIterators() {
         return $this->iterators->count();
     }
 
     /** Rewind all attached Iterator instances. */
-    public function rewind()
-    {
+    public function rewind() {
         foreach($this->iterators as $iter) {
             $iter->rewind();
         }
@@ -106,8 +97,7 @@ class MultipleIterator implements Iterator
      * return true on the first valid sub iterator found. If no Iterator
      * is attached, we always return false.
      */
-    public function valid()
-    {
+    public function valid() {
         if (!sizeof($this->iterators)) {
             return false;
         }
@@ -137,8 +127,7 @@ class MultipleIterator implements Iterator
      *                               attached Iterator is not valid().
      * @throws IllegalValueException if a key is NULL and MIT_KEYS_ASSOC is set.
      */
-    public function current()
-    {
+    public function current() {
         if (!sizeof($this->iterators)) {
             return false;
         }
@@ -171,8 +160,7 @@ class MultipleIterator implements Iterator
      * @throws LogicException if mode MIT_NEED_ALL is set and at least one
      *         attached Iterator is not valid().
      */
-    public function key()
-    {
+    public function key() {
         if (!sizeof($this->iterators)) {
             return false;
         }

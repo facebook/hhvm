@@ -103,7 +103,7 @@ class MultipleIterator implements Iterator {
         }
         // The following code is an optimized version that executes as few
         // valid() calls as necessary and that only checks the flags once.
-        $expect = $this->flags & self::MIT_NEED_ALL ? true : false;
+        $expect = $this->flags & self::MIT_NEED_ALL;
         foreach($this->iterators as $iter) {
             if ($expect != $iter->valid()) {
                 return !$expect;

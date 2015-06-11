@@ -181,7 +181,7 @@ function list_tests(Vector $frameworks): void {
 
   foreach($frameworks as $framework) {
     foreach($framework->getTests() as $test) {
-      print $test.PHP_EOL;
+      print fbmake_test_name($framework, $test).PHP_EOL;
     }
   }
 }
@@ -233,7 +233,8 @@ function run_tests(Vector $frameworks): void {
     $filter_tests = Options::$filter_tests;
     if ($filter_tests !== null) {
       foreach($framework->getTests() as $test) {
-        if ($filter_tests->contains($test)) {
+        $testname = fbmake_test_name($framework, $test);
+        if ($filter_tests->contains($testname)) {
           $st = new Runner($framework, $test);
           $all_tests->add($st);
         }

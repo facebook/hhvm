@@ -9,7 +9,7 @@ File "parent_test.php", line 4, characters 14-14:
     this::T -> X::T
 File "parent_test.php", line 22, characters 31-37:
 It is incompatible with an int
-File "parent_test.php", line 22, characters 26-29:
+File "parent_test.php", line 22, characters 31-34:
   where '<static>' is a reference to this expression
 File "parent_test.php", line 14, characters 18-20:
   resulting from expanding a type constant as follows:

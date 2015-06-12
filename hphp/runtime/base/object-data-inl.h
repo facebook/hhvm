@@ -63,7 +63,7 @@ inline ObjectData::ObjectData(Class* cls,
                               uint16_t flags,
                               HeaderKind kind,
                               NoInit) noexcept
-: m_cls(cls)
+  : m_cls(cls)
 {
   m_hdr.init(flags, kind, 1);
   assert(m_hdr.aux == flags && hasExactlyOneRef());
@@ -152,12 +152,6 @@ inline void ObjectData::instanceInit(Class* cls) {
   }
 }
 
-inline void ObjectData::release() noexcept {
-  assert(!hasMultipleRefs());
-
-  if (LIKELY(destruct())) DeleteObject(this);
-}
-
 inline Class* ObjectData::getVMClass() const {
   return m_cls;
 }
@@ -190,6 +184,8 @@ inline bool ObjectData::isIterator() const {
 inline bool ObjectData::getAttribute(Attribute attr) const {
   return m_hdr.aux & attr;
 }
+
+inline uint16_t ObjectData::getAttributes() const { return m_hdr.aux; }
 
 inline void ObjectData::setAttribute(Attribute attr) {
   m_hdr.aux |= attr;

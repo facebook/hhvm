@@ -87,7 +87,7 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
     jit::mcg->tx().uniqueStubs.callToExit
   );
   actRec->m_soff = 0;
-  waitHandle->setNoDestruct();
+  assert(waitHandle->noDestruct());
   waitHandle->initialize(child);
   return waitHandle;
 }

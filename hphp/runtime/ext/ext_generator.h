@@ -154,7 +154,7 @@ public:
                                                               resumeOffset);
     auto const gen = new (obj) c_Generator();
     assert(gen->hasExactlyOneRef());
-    gen->setNoDestruct();
+    assert(gen->noDestruct());
     gen->setState(State::Created);
     return gen;
   }

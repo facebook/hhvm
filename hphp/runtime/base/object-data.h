@@ -148,13 +148,8 @@ struct ObjectData {
   static ObjectData* newInstanceRaw(Class*, uint32_t);
   static ObjectData* newInstanceRawBig(Class*, size_t);
 
- private:
-  void instanceInit(Class*);
-
- public:
-  static void DeleteObject(ObjectData*);
-
   void release() noexcept;
+  void releaseNoObjDestructCheck() noexcept;
 
   Class* getVMClass() const;
   StrNR getClassName() const;
@@ -186,6 +181,7 @@ struct ObjectData {
   CollectionType collectionType() const; // asserts(isCollection())
 
   bool getAttribute(Attribute) const;
+  uint16_t getAttributes() const;
   void setAttribute(Attribute);
 
   bool noDestruct() const;
@@ -204,15 +200,6 @@ struct ObjectData {
   Array toArray(bool pubOnly = false) const;
 
   /*
-   * Call this object's destructor, if it has one. The object's refcount must
-   * be be 0 or 1 on entry to this function.
-   *
-   * Returns true iff the object should be deleted (meaning it wasn't
-   * resurrected in the destructor).
-   */
-  bool destruct();
-
-  /*
    * Call this object's destructor, if it has one. No restrictions are placed
    * on the object's refcount, since this is used on objects still alive at
    * request shutdown.
@@ -220,7 +207,8 @@ struct ObjectData {
   void destructForExit();
 
  private:
-  template<bool forExit> bool destructImpl();
+  void instanceInit(Class*);
+  bool destructImpl();
   Variant* realPropImpl(const String& s, int flags, const String& context,
                         bool copyDynArray);
  public:

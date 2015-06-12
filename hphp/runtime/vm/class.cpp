@@ -1238,7 +1238,7 @@ Class::Class(PreClass* preClass, Class* parent,
   }
   setParent();
   setMethods();
-  setSpecial();
+  setSpecial();       // must run before setODAttributes
   setODAttributes();
   setInterfaces();
   setConstants();
@@ -1467,6 +1467,8 @@ void Class::setODAttributes() {
   if (lookupMethod(s_unset.get()     )) { m_ODAttrs |= ObjectData::UseUnset; }
   if (lookupMethod(s_call.get()      )) { m_ODAttrs |= ObjectData::HasCall;  }
   if (lookupMethod(s_clone.get()     )) { m_ODAttrs |= ObjectData::HasClone; }
+
+  if (m_dtor == nullptr) m_ODAttrs |= ObjectData::NoDestructor;
 
   if ((isBuiltin() && Native::getNativePropHandler(name())) ||
       (m_parent && m_parent->hasNativePropHandler())) {

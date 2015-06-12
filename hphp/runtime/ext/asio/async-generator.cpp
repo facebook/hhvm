@@ -71,7 +71,7 @@ c_AsyncGenerator* c_AsyncGenerator::Create(const ActRec* fp,
                                                                  resumeOffset);
   auto const gen = new (obj) c_AsyncGenerator();
   assert(gen->hasExactlyOneRef());
-  gen->setNoDestruct();
+  assert(gen->noDestruct());
   gen->setState(State::Created);
   gen->m_waitHandle = nullptr;
   return gen;

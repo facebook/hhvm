@@ -120,14 +120,20 @@ static_assert(TYPE_TO_DESTR_IDX(KindOfRef)    == 5,    "Ref destruct index");
 static_assert(kDestrTableSize == 6,
               "size of g_destructors[] must be kDestrTableSize");
 
-const RawDestructor g_destructors[] = {
+RawDestructor g_destructors[] = {
   nullptr,
   (RawDestructor)getMethodPtr(&StringData::release),
   (RawDestructor)getMethodPtr(&ArrayData::release),
-  (RawDestructor)getMethodPtr(&ObjectData::release),
+  (RawDestructor)getMethodPtr(&ObjectData::release), // may replace at runtime
   (RawDestructor)getMethodPtr(&ResourceData::release),
   (RawDestructor)getMethodPtr(&RefData::release),
 };
+
+void tweak_variant_dtors() {
+  if (RuntimeOption::EnableObjDestructCall) return;
+  g_destructors[TYPE_TO_DESTR_IDX(KindOfObject)] =
+    (RawDestructor)getMethodPtr(&ObjectData::releaseNoObjDestructCheck);
+}
 
 Variant::~Variant() noexcept {
   tvRefcountedDecRef(asTypedValue());

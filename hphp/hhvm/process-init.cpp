@@ -174,6 +174,9 @@ void ProcessInit() {
   RuntimeOption::EvalAllowHhas = ah;
   Option::WholeProgram = wp;
 
+  void tweak_variant_dtors();
+  tweak_variant_dtors();
+
   folly::SingletonVault::singleton()->registrationComplete();
 }
 

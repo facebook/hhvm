@@ -130,7 +130,11 @@ CppCall MCGenerator::getDtorCall(DataType type) {
     case KindOfArray:
       return CppCall::method(&ArrayData::release);
     case KindOfObject:
-      return CppCall::method(&ObjectData::release);
+      return CppCall::method(
+        RuntimeOption::EnableObjDestructCall
+          ? &ObjectData::release
+          : &ObjectData::releaseNoObjDestructCheck
+      );
     case KindOfResource:
       return CppCall::method(&ResourceData::release);
     case KindOfRef:

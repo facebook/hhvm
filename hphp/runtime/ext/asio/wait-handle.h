@@ -64,7 +64,8 @@ class c_ConditionWaitHandle;
 class c_RescheduleWaitHandle;
 class c_SleepWaitHandle;
 class c_ExternalThreadEventWaitHandle;
-class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
+class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle|
+                                               ObjectData::NoDestructor> {
  public:
   DECLARE_CLASS_NO_SWEEP(WaitHandle)
 

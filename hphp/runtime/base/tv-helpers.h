@@ -572,7 +572,7 @@ X(Resource)
 #undef X
 
 typedef void(*RawDestructor)(void*);
-extern const RawDestructor g_destructors[kDestrTableSize];
+extern RawDestructor g_destructors[kDestrTableSize];
 
 inline void tvCastInPlace(TypedValue *tv, DataType DType) {
 #define X(kind) \

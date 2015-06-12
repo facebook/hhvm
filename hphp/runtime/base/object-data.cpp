@@ -84,58 +84,124 @@ static_assert(sizeof(ObjectData) == (use_lowptr ? 16 : 24),
 
 //////////////////////////////////////////////////////////////////////
 
-template<bool forExit>
-ALWAYS_INLINE bool ObjectData::destructImpl() {
-  if (UNLIKELY(RuntimeOption::EnableObjDestructCall && m_cls->getDtor())) {
-    g_context->m_liveBCObjs.erase(this);
+ALWAYS_INLINE
+static void invoke_destructor(ObjectData* obj, const Func* dtor) {
+  try {
+    // Call the destructor method
+    g_context->invokeMethodV(obj, dtor);
+  } catch (...) {
+    // Swallow any exceptions that escape the __destruct method
+    handle_destructor_exception();
   }
-
-  if (!noDestruct()) {
-    setNoDestruct();
-    if (auto meth = m_cls->getDtor()) {
-      if (!forExit) {
-        // We don't run PHP destructors while we're unwinding for a C++
-        // exception.  We want to minimize the PHP code we run while propagating
-        // fatals, so we do this check here on a very common path, in the
-        // relatively slower case.
-        if (g_context->m_unwindingCppException) {
-          return true;
-        }
-
-        // Some decref paths call release() when --count == 0 and some call it
-        // when count == 1. This difference only matters for objects that
-        // resurrect themselves in their destructors, so make sure count is
-        // consistent here.
-        assert(!hasMultipleRefs());
-        m_hdr.count = 0;
-      } else {
-        assert(g_context->m_faults.empty());
-        assert(!g_context->m_unwindingCppException);
-      }
-
-      // We raise the refcount around the call to __destruct(). This is to
-      // prevent the refcount from going to zero when the destructor returns.
-      CountableHelper h(this);
-      try {
-        // Call the destructor method
-        g_context->invokeMethodV(this, meth);
-      } catch (...) {
-        // Swallow any exceptions that escape the __destruct method
-        handle_destructor_exception();
-      }
-
-      return getCount() == 1;
-    }
-  }
-  return true;
 }
 
-bool ObjectData::destruct() {
-  return destructImpl<false>();
+NEVER_INLINE bool ObjectData::destructImpl() {
+  setNoDestruct();
+  auto const dtor = m_cls->getDtor();
+  if (!dtor) return true;
+
+  // We don't run PHP destructors while we're unwinding for a C++
+  // exception.  We want to minimize the PHP code we run while propagating
+  // fatals, so we do this check here on a very common path, in the
+  // relatively slower case.
+  if (g_context->m_unwindingCppException) return true;
+
+  // Some decref paths call release() when --count == 0 and some call it
+  // when count == 1. This difference only matters for objects that
+  // resurrect themselves in their destructors, so make sure count is
+  // consistent here.
+  assert(!hasMultipleRefs());
+  m_hdr.count = 0;
+
+  // We raise the refcount around the call to __destruct(). This is to
+  // prevent the refcount from going to zero when the destructor returns.
+  CountableHelper h(this);
+  invoke_destructor(this, dtor);
+  return getCount() == 1;
 }
 
 void ObjectData::destructForExit() {
-  destructImpl<true>();
+  assert(RuntimeOption::EnableObjDestructCall);
+  auto const dtor = m_cls->getDtor();
+  if (dtor) {
+    g_context->m_liveBCObjs.erase(this);
+  }
+
+  if (noDestruct()) return;
+  setNoDestruct();
+
+  // We're exiting, so there should not be any live faults.
+  assert(g_context->m_faults.empty());
+  assert(!g_context->m_unwindingCppException);
+
+  CountableHelper h(this);
+  invoke_destructor(this, dtor);
+}
+
+NEVER_INLINE
+static void freeDynPropArray(ObjectData* inst) {
+  auto& table = g_context->dynPropTable;
+  auto it = table.find(inst);
+  assert(it != end(table));
+  it->second.destroy();
+  table.erase(it);
+}
+
+NEVER_INLINE
+void ObjectData::releaseNoObjDestructCheck() noexcept {
+  assert(!hasMultipleRefs());
+
+  auto const attrs = getAttributes();
+
+  if (UNLIKELY(!(attrs & Attribute::NoDestructor))) {
+    if (UNLIKELY(!destructImpl())) return;
+  }
+
+  auto const cls = getVMClass();
+
+  if (UNLIKELY(attrs & InstanceDtor))  return cls->instanceDtor()(this, cls);
+
+  assert(!cls->preClass()->builtinObjSize());
+  assert(!cls->preClass()->builtinODOffset());
+
+  // `this' is being torn down now---be careful about where/how you dereference
+  // this from here on.
+
+  auto const nProps = size_t{cls->numDeclProperties()};
+  auto prop = reinterpret_cast<TypedValue*>(this + 1);
+  auto const stop = prop + nProps;
+  for (; prop != stop; ++prop) {
+    tvRefcountedDecRef(prop);
+  }
+
+  // Deliberately reload `attrs' to check for dynamic properties.  This made
+  // gcc generate better code at the time it was done (saving a spill).
+  if (UNLIKELY(getAttributes() & HasDynPropArr)) freeDynPropArray(this);
+
+  auto& pmax = os_max_id;
+  if (o_id && o_id == pmax) --pmax;
+
+  auto const size =
+    reinterpret_cast<char*>(stop) - reinterpret_cast<char*>(this);
+  assert(size == sizeForNProps(nProps));
+  if (LIKELY(size <= kMaxSmartSize)) {
+    return MM().smartFreeSize(this, size);
+  }
+  MM().smartFreeSizeBig(this, size);
+}
+
+NEVER_INLINE
+static void tail_call_remove_live_bc_obj(ObjectData* obj) {
+  g_context->m_liveBCObjs.erase(obj);
+  return obj->releaseNoObjDestructCheck();
+}
+
+void ObjectData::release() noexcept {
+  assert(!hasMultipleRefs());
+  if (UNLIKELY(RuntimeOption::EnableObjDestructCall && m_cls->getDtor())) {
+    return tail_call_remove_live_bc_obj(this);
+  }
+  releaseNoObjDestructCheck();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1044,50 +1110,14 @@ ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
   return o;
 }
 
-NEVER_INLINE
-static void freeDynPropArray(ObjectData* inst) {
-  auto& table = g_context->dynPropTable;
-  auto it = table.find(inst);
-  assert(it != end(table));
-  it->second.destroy();
-  table.erase(it);
-}
-
+// Note: the normal object destruction path does not actually call this
+// destructor.  See ObjectData::release.
 ObjectData::~ObjectData() {
   int& pmax = os_max_id;
   if (o_id && o_id == pmax) {
     --pmax;
   }
   if (UNLIKELY(getAttribute(HasDynPropArr))) freeDynPropArray(this);
-}
-
-void ObjectData::DeleteObject(ObjectData* objectData) {
-  auto const cls = objectData->getVMClass();
-
-  if (UNLIKELY(objectData->getAttribute(InstanceDtor))) {
-    return cls->instanceDtor()(objectData, cls);
-  }
-
-  assert(!cls->preClass()->builtinObjSize());
-  assert(!cls->preClass()->builtinODOffset());
-
-  // ObjectData subobject is logically destructed now---don't access
-  // objectData->foo for anything.
-
-  auto const nProps = size_t{cls->numDeclProperties()};
-  auto prop = reinterpret_cast<TypedValue*>(objectData + 1);
-  auto const stop = prop + nProps;
-  for (; prop != stop; ++prop) {
-    tvRefcountedDecRef(prop);
-  }
-
-  objectData->~ObjectData();
-
-  auto const size = sizeForNProps(nProps);
-  if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSize(objectData, size);
-  }
-  MM().smartFreeSizeBig(objectData, size);
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {

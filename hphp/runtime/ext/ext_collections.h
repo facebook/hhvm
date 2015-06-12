@@ -81,6 +81,7 @@ using ExtCollectionObjectData = ExtObjectDataFlags<
   ObjectData::UseIsset |
   ObjectData::UseUnset |
   ObjectData::CallToImpl | // not used for the always-truthy c_Pair
+  ObjectData::NoDestructor |
   ObjectData::HasClone>;
 
 void throwOOB(int64_t key) ATTRIBUTE_NORETURN;
@@ -1952,7 +1953,8 @@ class c_Pair : public ExtObjectDataFlags<ObjectData::IsCollection|
                                          ObjectData::UseSet|
                                          ObjectData::UseIsset|
                                          ObjectData::UseUnset|
-                                         ObjectData::HasClone> {
+                                         ObjectData::HasClone|
+                                         ObjectData::NoDestructor> {
  public:
   DECLARE_CLASS_NO_SWEEP(Pair)
 

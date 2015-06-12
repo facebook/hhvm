@@ -186,9 +186,9 @@ frame_free_inl(ActRec* fp, TypedValue* rv) { // For frames with no locals
 }
 
 void ALWAYS_INLINE
-frame_free_locals_unwind(ActRec* fp, int numLocals, const Fault& fault) {
+frame_free_locals_unwind(ActRec* fp, int numLocals, ObjectData* phpException) {
   frame_free_locals_inl_no_hook<true>(fp, numLocals);
-  EventHook::FunctionUnwind(fp, fault);
+  EventHook::FunctionUnwind(fp, phpException);
 }
 
 void ALWAYS_INLINE

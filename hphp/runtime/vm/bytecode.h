@@ -611,11 +611,6 @@ constexpr int kInvalidRaiseLevel = -1;
 constexpr int kInvalidNesting = -1;
 
 struct Fault {
-  enum class Type : int16_t {
-    UserException,
-    CppException
-  };
-
   explicit Fault()
     : m_raiseNesting(kInvalidNesting),
       m_raiseFrame(nullptr),
@@ -623,15 +618,10 @@ struct Fault {
       m_handledCount(0) {}
 
   template<class F> void scan(F& mark) const {
-    if (m_faultType == Type::UserException) mark(m_userException);
-    else mark(m_cppException);
+    mark(m_userException);
   }
 
-  union {
-    ObjectData* m_userException;
-    Exception* m_cppException;
-  };
-  Type m_faultType;
+  ObjectData* m_userException;
 
   // The VM nesting at the moment where the exception was thrown.
   int m_raiseNesting;

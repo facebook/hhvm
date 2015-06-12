@@ -87,9 +87,9 @@ class EventHook {
     ringbufferExit(ar);
     if (UNLIKELY(checkSurpriseFlags())) { onFunctionReturn(ar, retval); }
   }
-  static inline void FunctionUnwind(ActRec* ar, const Fault& fault) {
+  static inline void FunctionUnwind(ActRec* ar, ObjectData* phpException) {
     ringbufferExit(ar);
-    if (UNLIKELY(checkSurpriseFlags())) { onFunctionUnwind(ar, fault); }
+    if (UNLIKELY(checkSurpriseFlags())) { onFunctionUnwind(ar, phpException); }
   }
 
   /**
@@ -108,11 +108,12 @@ private:
 
   static void onFunctionResumeAwait(const ActRec* ar);
   static void onFunctionResumeYield(const ActRec* ar);
-  static void onFunctionUnwind(ActRec* ar, const Fault& fault);
+  static void onFunctionUnwind(ActRec* ar, ObjectData* phpException);
 
   static void onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags);
   static void onFunctionExit(const ActRec* ar, const TypedValue* retval,
-                             const Fault* fault, size_t flags);
+                             bool unwind, ObjectData* phpException,
+                             size_t flags);
 
   static bool RunInterceptHandler(ActRec* ar);
   static const char* GetFunctionNameForProfiler(const Func* func,

@@ -602,6 +602,7 @@ public:
   TinyVector<VMState, 32> m_nestedVMs;
   int m_nesting;
   bool m_dbgNoBreak;
+  bool m_unwindingCppException;
 private:
   Array m_evaledArgs;
   String m_lastErrorPath;

@@ -299,7 +299,8 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
 }
 
 void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
-                               const Fault* fault, size_t flags) {
+                               bool unwind, ObjectData* phpException,
+                               size_t flags) {
   // Xenon
   if (flags & XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::ExitSample);
@@ -309,7 +310,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   // there's a pending exception or we're unwinding from a C++ exception.
   if (flags & IntervalTimerFlag
       && ThreadInfo::s_threadInfo->m_pendingException == nullptr
-      && (!fault || fault->m_faultType == Fault::Type::UserException)) {
+      && (!unwind || phpException)) {
     IntervalTimer::RunCallbacks(IntervalTimer::ExitSample);
   }
 
@@ -338,10 +339,10 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
       if (ThreadInfo::s_threadInfo->m_pendingException != nullptr) {
         // Avoid running PHP code when exception from destructor is pending.
         // TODO(#2329497) will not happen once CheckSurprise is used
-      } else if (!fault) {
+      } else if (!unwind) {
         runUserProfilerOnFunctionExit(ar, retval, nullptr);
-      } else if (fault->m_faultType == Fault::Type::UserException) {
-        runUserProfilerOnFunctionExit(ar, retval, fault->m_userException);
+      } else if (phpException) {
+        runUserProfilerOnFunctionExit(ar, retval, phpException);
       } else {
         // Avoid running PHP code when unwinding C++ exception.
       }
@@ -408,7 +409,7 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
 // generator.
 void EventHook::onFunctionSuspendR(ActRec* suspending, ObjectData* child) {
   auto const flags = check_request_surprise();
-  onFunctionExit(suspending, nullptr, nullptr, flags);
+  onFunctionExit(suspending, nullptr, false, nullptr, flags);
 
   if ((flags & AsyncEventHookFlag) &&
       suspending->func()->isAsyncFunction()) {
@@ -438,7 +439,7 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
 
   try {
     auto const flags = check_request_surprise();
-    onFunctionExit(resumableAR, nullptr, nullptr, flags);
+    onFunctionExit(resumableAR, nullptr, false, nullptr, flags);
 
     if ((flags & AsyncEventHookFlag) &&
         resumableAR->func()->isAsyncFunction()) {
@@ -470,7 +471,7 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
 
   try {
     auto const flags = check_request_surprise();
-    onFunctionExit(ar, &retval, nullptr, flags);
+    onFunctionExit(ar, &retval, false, nullptr, flags);
 
     // Async profiler
     if ((flags & AsyncEventHookFlag) &&
@@ -492,7 +493,7 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
   }
 }
 
-void EventHook::onFunctionUnwind(ActRec* ar, const Fault& fault) {
+void EventHook::onFunctionUnwind(ActRec* ar, ObjectData* phpException) {
   // The locals are already gone. Null out everything.
   ar->setThisOrClassAllowNull(nullptr);
   ar->setLocalsDecRefd();
@@ -501,7 +502,7 @@ void EventHook::onFunctionUnwind(ActRec* ar, const Fault& fault) {
   // TODO(#2329497) can't check_request_surprise() yet, unwinder unable to
   // replace fault
   auto const flags = stackLimitAndSurprise().load() & kSurpriseFlagMask;
-  onFunctionExit(ar, nullptr, &fault, flags);
+  onFunctionExit(ar, nullptr, true, phpException, flags);
 }
 
 } // namespace HPHP

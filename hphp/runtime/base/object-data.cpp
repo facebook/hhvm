@@ -97,12 +97,9 @@ ALWAYS_INLINE bool ObjectData::destructImpl() {
         // We don't run PHP destructors while we're unwinding for a C++
         // exception.  We want to minimize the PHP code we run while propagating
         // fatals, so we do this check here on a very common path, in the
-        // relativley slower case.
-        auto& faults = g_context->m_faults;
-        if (!faults.empty()) {
-          if (faults.back().m_faultType == Fault::Type::CppException) {
-            return true;
-          }
+        // relatively slower case.
+        if (g_context->m_unwindingCppException) {
+          return true;
         }
 
         // Some decref paths call release() when --count == 0 and some call it
@@ -113,6 +110,7 @@ ALWAYS_INLINE bool ObjectData::destructImpl() {
         m_hdr.count = 0;
       } else {
         assert(g_context->m_faults.empty());
+        assert(!g_context->m_unwindingCppException);
       }
 
       // We raise the refcount around the call to __destruct(). This is to

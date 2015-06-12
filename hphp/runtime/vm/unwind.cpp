@@ -62,15 +62,8 @@ enum class UnwindAction {
 
 #if (defined(DEBUG) || defined(USE_TRACE))
 std::string describeFault(const Fault& f) {
-  switch (f.m_faultType) {
-  case Fault::Type::UserException:
-    return folly::format("[user exception] {}",
-                         implicit_cast<void*>(f.m_userException)).str();
-  case Fault::Type::CppException:
-    return folly::format("[cpp exception] {}",
-                         implicit_cast<void*>(f.m_cppException)).str();
-  }
-  not_reached();
+  return folly::format("[user exception] {}",
+                       implicit_cast<void*>(f.m_userException)).str();
 }
 #endif
 
@@ -115,12 +108,6 @@ UnwindAction checkHandlers(const EHEnt* eh,
          func->fullName()->data(),
          func->unit()->filepath()->data());
 
-  // Always blindly propagate on fatal exception since those are
-  // unrecoverable anyway.
-  if (fault.m_faultType == Fault::Type::CppException) {
-    return UnwindAction::Propagate;
-  }
-
   for (int i = 0;; ++i) {
     // Skip the initial m_handledCount - 1 handlers that were
     // considered before.
@@ -138,8 +125,7 @@ UnwindAction checkHandlers(const EHEnt* eh,
         // Note: we skip catch clauses if we have a pending C++ exception
         // as part of our efforts to avoid running more PHP code in the
         // face of such exceptions.
-        if (fault.m_faultType == Fault::Type::UserException &&
-            ThreadInfo::s_threadInfo->m_pendingException == nullptr) {
+        if (ThreadInfo::s_threadInfo->m_pendingException == nullptr) {
           auto const obj = fault.m_userException;
           for (auto& idOff : eh->m_catches) {
             ITRACE(1, "checkHandlers: catch candidate {}\n", idOff.second);
@@ -168,7 +154,7 @@ UnwindAction checkHandlers(const EHEnt* eh,
 }
 
 UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
-                           const Fault& fault) {
+                           ObjectData* phpException) {
   auto const func = fp->func();
   auto const curOp = *reinterpret_cast<const Op*>(pc);
   auto const prevFp = fp->sfp();
@@ -221,7 +207,7 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
         // uninit/zero during unwind.  This is because a backtrace
         // from another destructing object during this unwind may try
         // to read them.
-        frame_free_locals_unwind(fp, func->numLocals(), fault);
+        frame_free_locals_unwind(fp, func->numLocals(), phpException);
       } catch (...) {}
     }
   };
@@ -230,12 +216,10 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
 
   if (LIKELY(!fp->resumed())) {
     decRefLocals();
-    if (UNLIKELY(func->isAsyncFunction()) &&
-        fault.m_faultType == Fault::Type::UserException) {
+    if (UNLIKELY(func->isAsyncFunction()) && phpException) {
       // If in an eagerly executed async function, wrap the user exception
       // into a failed StaticWaitHandle and return it to the caller.
-      auto const exception = fault.m_userException;
-      auto const waitHandle = c_StaticWaitHandle::CreateFailed(exception);
+      auto const waitHandle = c_StaticWaitHandle::CreateFailed(phpException);
       stack.ndiscard(func->numSlotsInFrame());
       stack.ret();
       assert(stack.topTV() == &fp->m_r);
@@ -248,10 +232,10 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     }
   } else if (func->isAsyncFunction()) {
     auto const waitHandle = frame_afwh(fp);
-    if (fault.m_faultType == Fault::Type::UserException) {
+    if (phpException) {
       // Handle exception thrown by async function.
       decRefLocals();
-      waitHandle->fail(fault.m_userException);
+      waitHandle->fail(phpException);
       action = UnwindAction::ResumeVM;
     } else if (waitHandle->isRunning()) {
       // Let the C++ exception propagate. If the current frame represents async
@@ -263,10 +247,10 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     }
   } else if (func->isAsyncGenerator()) {
     auto const gen = frame_async_generator(fp);
-    if (fault.m_faultType == Fault::Type::UserException) {
+    if (phpException) {
       // Handle exception thrown by async generator.
       decRefLocals();
-      auto eagerResult = gen->fail(fault.m_userException);
+      auto eagerResult = gen->fail(phpException);
       if (eagerResult) {
         stack.pushObjectNoRc(eagerResult);
       }
@@ -337,19 +321,8 @@ bool chainFaults(Fault& fault) {
     return false;
   }
   auto prev = faults.back();
-  if (fault.m_faultType == Fault::Type::CppException &&
-      fault.m_raiseNesting == prev.m_raiseNesting &&
+  if (fault.m_raiseNesting == prev.m_raiseNesting &&
       fault.m_raiseFrame == prev.m_raiseFrame) {
-    fault.m_raiseOffset = prev.m_raiseOffset;
-    fault.m_handledCount = prev.m_handledCount;
-    faults.pop_back();
-    faults.push_back(fault);
-    return true;
-  }
-  if (fault.m_faultType == Fault::Type::UserException &&
-             fault.m_raiseNesting == prev.m_raiseNesting &&
-             fault.m_raiseFrame == prev.m_raiseFrame) {
-    assert(prev.m_faultType == Fault::Type::UserException);
     fault.m_raiseOffset = prev.m_raiseOffset;
     fault.m_handledCount = prev.m_handledCount;
     chainFaultObjects(fault.m_userException, prev.m_userException);
@@ -386,7 +359,7 @@ bool chainFaults(Fault& fault) {
  * it's currently operating on, as the underlying faults vector may
  * reallocate due to nested exception handling.
  */
-void unwind() {
+void unwindPhp() {
   assert(!g_context->m_faults.empty());
   auto& fp = vmfp();
   auto& stack = vmStack();
@@ -470,7 +443,7 @@ void unwind() {
     // We found no more handlers in this frame, so the nested fault
     // count starts over for the caller frame.
     auto const lastFrameForNesting = !fp->sfp();
-    auto const action = tearDownFrame(fp, stack, pc, fault);
+    auto const action = tearDownFrame(fp, stack, pc, fault.m_userException);
     switch (action) {
       case UnwindAction::ResumeVM:
         g_context->m_faults.pop_back();
@@ -497,15 +470,66 @@ void unwind() {
 
   g_context->m_faults.pop_back();
 
-  switch (fault.m_faultType) {
-    case Fault::Type::UserException: {
-      Object obj = Object::attach(fault.m_userException);
-      throw obj;
+  Object obj = Object::attach(fault.m_userException);
+  throw obj;
+}
+
+/*
+ * Unwinding of C++ exceptions proceeds as follows:
+ *
+ *   - Discard all PHP exceptions pending for this frame.
+ *
+ *   - Discard all evaluation stack temporaries (including pre-live
+ *     activation records).
+ *
+ *   - Pop the frame for the current function.  If the current function
+ *     was the last frame in the current VM nesting level, re-throw
+ *     the C++ exception, otherwise go to the first step and repeat
+ *     this process in the caller's frame.
+ */
+void unwindCpp(Exception* exception) {
+  auto& fp = vmfp();
+  auto& stack = vmStack();
+  auto& pc = vmpc();
+
+  assert(!g_context->m_unwindingCppException);
+  g_context->m_unwindingCppException = true;
+  ITRACE(1, "entering unwinder for C++ exception: {}\n",
+         implicit_cast<void*>(exception));
+  SCOPE_EXIT {
+    assert(g_context->m_unwindingCppException);
+    g_context->m_unwindingCppException = false;
+    ITRACE(1, "leaving unwinder for C++ exception: {}\n",
+           implicit_cast<void*>(exception));
+  };
+
+  do {
+    auto const offset = fp->func()->unit()->offsetOf(pc);
+
+    ITRACE(1, "unwindCpp: func {}, raiseOffset {} fp {}\n",
+           fp->func()->name()->data(),
+           offset,
+           implicit_cast<void*>(fp));
+
+    // Discard all PHP exceptions pending for this frame
+    auto& faults = g_context->m_faults;
+    while (UNLIKELY(!faults.empty()) &&
+           faults.back().m_raiseFrame == fp &&
+           faults.back().m_raiseNesting == g_context->m_nestedVMs.size()) {
+      decRefObj(faults.back().m_userException);
+      faults.pop_back();
     }
-    case Fault::Type::CppException:
-      fault.m_cppException->throwException();
-      not_reached();
-  }
+
+    // Discard stack temporaries
+    discardStackTemps(fp, stack, offset);
+
+    // Discard the frame
+    DEBUG_ONLY auto const action = tearDownFrame(fp, stack, pc, nullptr);
+    assert(action == UnwindAction::Propagate);
+  } while (fp);
+
+  // Propagate the C++ exception to the outer VM nesting
+  exception->throwException();
 }
 
 const StaticString s_hphpd_break("hphpd_break");
@@ -547,17 +571,8 @@ void unwindBuiltinFrame() {
   stack.pushNull(); // return value
 }
 
-void pushFault(Exception* e) {
-  Fault f;
-  f.m_faultType = Fault::Type::CppException;
-  f.m_cppException = e;
-  g_context->m_faults.push_back(f);
-  ITRACE(1, "pushing new fault: {}\n", describeFault(f));
-}
-
 void pushFault(const Object& o) {
   Fault f;
-  f.m_faultType = Fault::Type::UserException;
   f.m_userException = o.get();
   f.m_userException->incRefCount();
   g_context->m_faults.push_back(f);
@@ -585,13 +600,15 @@ void exception_handler() {
    */
   catch (const VMPrepareUnwind&) {
     ITRACE(1, "unwind: restoring offset {}\n", vmpc());
-    return unwind();
+    unwindPhp();
+    return;
   }
 
   catch (const Object& o) {
     ITRACE(1, "unwind: Object of class {}\n", o->getVMClass()->name()->data());
     pushFault(o);
-    return unwind();
+    unwindPhp();
+    return;
   }
 
   catch (VMSwitchMode&) {
@@ -614,20 +631,20 @@ void exception_handler() {
 
   catch (Exception& e) {
     ITRACE(1, "unwind: Exception: {}\n", e.what());
-    pushFault(e.clone());;
-    return unwind();
+    unwindCpp(e.clone());
+    not_reached();
   }
 
   catch (std::exception& e) {
     ITRACE(1, "unwind: std::exception: {}\n", e.what());
-    pushFault(new Exception("unexpected %s: %s", typeid(e).name(), e.what()));
-    return unwind();
+    unwindCpp(new Exception("unexpected %s: %s", typeid(e).name(), e.what()));
+    not_reached();
   }
 
   catch (...) {
     ITRACE(1, "unwind: unknown\n");
-    pushFault(new Exception("unknown exception"));
-    return unwind();
+    unwindCpp(new Exception("unknown exception"));
+    not_reached();
   }
 
   not_reached();

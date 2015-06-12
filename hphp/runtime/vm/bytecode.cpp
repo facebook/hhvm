@@ -6955,7 +6955,7 @@ OPTBLD_INLINE void iopCatch(IOP_ARGS) {
   Fault fault = vm->m_faults.back();
   vm->m_faults.pop_back();
   assert(fault.m_raiseFrame == vmfp());
-  assert(fault.m_faultType == Fault::Type::UserException);
+  assert(fault.m_userException);
   vmStack().pushObjectNoRc(fault.m_userException);
 }
 

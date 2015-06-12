@@ -120,12 +120,11 @@ struct IRInstruction {
   bool isPassthrough() const;
 
   /*
-   * Whether the src/dst numbered `srcNo'/`dstNo' consumes a reference, kills a
-   * source, or produces a reference.
+   * Whether the src numbered srcNo consumes a reference, or the dest produces
+   * a reference.
    */
   bool consumesReference(int srcNo) const;
-  bool killsSource(int srcNo) const;
-  bool producesReference(int dstNo) const;
+  bool producesReference() const;
 
   /*
    * Get the src that is passed through.

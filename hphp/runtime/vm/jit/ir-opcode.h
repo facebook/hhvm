@@ -196,7 +196,6 @@ enum OpcodeFlag : uint64_t {
   NaryDest         = 1ULL <<  8, // has 0 or more destinations
   HasExtra         = 1ULL <<  9,
   Passthrough      = 1ULL << 10,
-  KillsSources     = 1ULL << 11,
 };
 
 bool hasEdges(Opcode opc);

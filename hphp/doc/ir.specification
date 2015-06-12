@@ -135,17 +135,10 @@ ConsumesRC
   The instruction consumes a reference to one or more of its sources, either by
   decreasing its refcount or storing the reference to memory.
 
-KillsSource
-
-  The instruction calls decref on one or more of its sources. Unless a source
-  is known to have a refcount > 1 before the instruction executes, it cannot
-  safely be used after the instruction has executed.
-
 ProducesRC
 
-  The instruction produces an incref'd value.
-
-  This flag is currently unused.
+  The instruction produces a value with an unconsumed reference that must be
+  consumed, either by DecRefing it or storing it somewhere in memory.
 
 MayRaiseError
 
@@ -425,11 +418,11 @@ To array conversions:
 
 | ConvIntToArr,                 D(Arr), S(Int),                          PRc
 
-| ConvObjToArr,                 D(Arr), S(Obj),                 Er|PRc|CRc|K
+| ConvObjToArr,                 D(Arr), S(Obj),                   Er|PRc|CRc
 
 | ConvStrToArr,                 D(Arr), S(Str),                      PRc|CRc
 
-| ConvCellToArr,                D(Arr), S(Cell),                Er|PRc|CRc|K
+| ConvCellToArr,                D(Arr), S(Cell),                  Er|PRc|CRc
 
 
 To bool conversions:
@@ -479,7 +472,7 @@ To int conversions:
 
 To object conversions:
 
-| ConvCellToObj, D(Obj), S(Cell), Er|CRc|PRc|K
+| ConvCellToObj, D(Obj), S(Cell), Er|CRc|PRc
 
 
 To string conversions:
@@ -1412,7 +1405,7 @@ To string conversions:
 
   If the Ctx in S0 is a $this pointer, IncRef it.
 
-| DecRef, ND, S(Gen), K|CRc
+| DecRef, ND, S(Gen), CRc
 
   Decrease the reference count of S0 by one, and call a destructor for types
   that require it if it goes to zero.
@@ -2200,12 +2193,12 @@ fields of that struct for holding intermediate values.
 
   Bind element with key S1 in base S0 to the reference S2.
 
-| ArraySet, D(Arr), S(Arr) S(Int,Str) S(Cell), PRc|CRc|K|Er
+| ArraySet, D(Arr), S(Arr) S(Int,Str) S(Cell), PRc|CRc|Er
 
   Set element with key S1 in S0 to S2. The dest will be a new Array that should
   replace S0.
 
-| ArraySetRef, ND, S(Arr) S(Int,Str) S(Cell) S(BoxedCell), CRc|K|Er
+| ArraySetRef, ND, S(Arr) S(Int,Str) S(Cell) S(BoxedCell), CRc|Er
 
   Like ArraySet, but for binding operations on the array. The parameter in S3
   must point to a RefData with an array type when this instruction is executed,

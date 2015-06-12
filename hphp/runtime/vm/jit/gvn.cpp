@@ -207,7 +207,8 @@ private:
 using NameTable = std::unordered_map<
   std::pair<IRInstruction*, DstIndex>, SSATmp*,
   CongruenceHasher,
-  CongruenceComparator>;
+  CongruenceComparator
+>;
 
 struct GVNState {
   ValueNumberTable* localTable{nullptr};
@@ -408,31 +409,21 @@ void runAnalysis(
     // apparently a no-no for unordered_map.
     ValueNumberTable localTable(unit, ValueNumberMetadata{});
     env.localTable = &localTable;
+    SCOPE_EXIT { env.localTable = nullptr; };
     {
       CongruenceHasher hash(*env.globalTable);
       CongruenceComparator pred(*env.globalTable);
       NameTable nameTable(0, hash, pred);
       env.nameTable = &nameTable;
+      SCOPE_EXIT { env.nameTable = nullptr; };
 
       changed = false;
       for (auto block : blocks) {
         changed = visitBlock(env, block) || changed;
       }
-
-      env.nameTable = nullptr;
     }
     applyLocalUpdates(localTable, *env.globalTable);
-    env.localTable = nullptr;
   }
-}
-
-bool canReplaceWith(
-  const IdomVector& idoms,
-  const SSATmp* dst,
-  const SSATmp* other
-) {
-  assertx(other->type() <= dst->type());
-  return is_tmp_usable(idoms, other, dst->inst()->block());
 }
 
 void tryReplaceInstruction(
@@ -444,22 +435,22 @@ void tryReplaceInstruction(
   for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
     auto s = inst->src(i);
     auto valueNumber = table[s].value;
+    auto valueInst = valueNumber->inst();
     if (valueNumber == s) continue;
     if (!valueNumber) continue;
-    if (!canReplaceWith(idoms, s, valueNumber)) continue;
+    if (!is_tmp_usable(idoms, valueNumber, inst->block())) continue;
     FTRACE(1,
       "instruction {}\n"
       "replacing src {} with dst of {}\n",
       *inst,
       i,
-      *valueNumber->inst()
+      *valueInst
     );
     inst->setSrc(i, valueNumber);
-    if (valueNumber->inst()->producesReference(0)) {
-      auto prevInst = valueNumber->inst();
-      auto block = prevInst->block();
-      auto iter = block->iteratorTo(prevInst);
-      block->insert(++iter, unit.gen(IncRef, prevInst->marker(), valueNumber));
+    if (valueInst->producesReference()) {
+      auto block = valueInst->block();
+      auto iter = block->iteratorTo(valueInst);
+      block->insert(++iter, unit.gen(IncRef, valueInst->marker(), valueNumber));
     }
   }
 }

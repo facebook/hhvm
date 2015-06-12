@@ -43,7 +43,6 @@ TRACE_SET_MOD(hhir);
 #define T      Terminal
 #define B      Branch
 #define P      Passthrough
-#define K      KillsSources
 #define MProp  MInstrProp
 #define MElem  MInstrElem
 
@@ -69,11 +68,22 @@ TRACE_SET_MOD(hhir);
 #define DSubtract(n,t) HasDest
 #define DCns           HasDest
 
+namespace {
+template<Opcode op, uint64_t flags>
+struct op_flags {
+  static constexpr uint64_t value =
+    (OpHasExtraData<op>::value ? HasExtra : 0) | flags;
+
+  static_assert(!(value & ProducesRC) ||
+                (value & (HasDest | NaryDest)) == HasDest,
+                "ProducesRC instructions must have exactly one dest");
+};
+}
+
 OpInfo g_opInfo[] = {
 #define O(name, dsts, srcs, flags)                    \
     { #name,                                          \
-       (OpHasExtraData<name>::value ? HasExtra : 0) | \
-       dsts | (flags)                                 \
+       op_flags<name, dsts | flags>::value            \
     },
   IR_OPCODES
 #undef O

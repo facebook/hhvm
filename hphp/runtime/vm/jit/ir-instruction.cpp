@@ -178,24 +178,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
   }
 }
 
-bool IRInstruction::killsSource(int idx) const {
-  if (!killsSources()) return false;
-  switch (m_op) {
-    case DecRef:
-    case ConvObjToArr:
-    case ConvCellToArr:
-    case ConvCellToObj:
-      assertx(idx == 0);
-      return true;
-    case ArraySet:
-    case ArraySetRef:
-      return idx == 1;
-    default:
-      not_reached();
-      break;
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void IRInstruction::setOpcode(Opcode newOpc) {

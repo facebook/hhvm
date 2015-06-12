@@ -60,10 +60,6 @@ inline bool IRInstruction::consumesReferences() const {
   return opcodeHasFlags(op(), ConsumesRC);
 }
 
-inline bool IRInstruction::killsSources() const {
-  return opcodeHasFlags(op(), KillsSources);
-}
-
 inline bool IRInstruction::mayRaiseError() const {
   return opcodeHasFlags(op(), MayRaiseError);
 }
@@ -80,7 +76,7 @@ inline bool IRInstruction::isPassthrough() const {
   return opcodeHasFlags(op(), Passthrough);
 }
 
-inline bool IRInstruction::producesReference(int dstNo) const {
+inline bool IRInstruction::producesReference() const {
   return opcodeHasFlags(op(), ProducesRC);
 }
 

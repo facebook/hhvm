@@ -2140,7 +2140,7 @@ void rc_analyze_inst(Env& env,
    * If the instruction produces a reference, we can assume the SSATmp it
    * defines corresponds to a new increment on the lower_bound.
    */
-  if (inst.producesReference(0)) {
+  if (inst.producesReference()) {
     for_aset(env, state, inst.dst(), [&] (ASetID asetID) {
       auto& aset = state.asets[asetID];
       ++aset.lower_bound;

@@ -1976,8 +1976,7 @@ void ExecutionContext::syncGdbState() {
 static void dispatch();
 static void enterVMAtCurPC();
 
-static void enterVMAtAsyncFunc(ActRec* enterFnAr, Resumable* resumable,
-                               ObjectData* exception) {
+static void prepareAsyncFuncEntry(ActRec* enterFnAr, Resumable* resumable) {
   assert(enterFnAr);
   assert(enterFnAr->func()->isAsync());
   assert(enterFnAr->resumed());
@@ -1987,20 +1986,6 @@ static void enterVMAtAsyncFunc(ActRec* enterFnAr, Resumable* resumable,
   vmpc() = vmfp()->func()->unit()->at(resumable->resumeOffset());
   assert(vmfp()->func()->contains(vmpc()));
   EventHook::FunctionResumeAwait(enterFnAr);
-
-  if (UNLIKELY(exception != nullptr)) {
-    assert(exception->instanceof(SystemLib::s_ExceptionClass));
-    Object e(exception);
-    throw e;
-  }
-
-  const bool useJit = RID().getJit();
-  if (LIKELY(useJit && resumable->resumeAddr())) {
-    Stats::inc(Stats::VMEnter);
-    mcg->enterTCAfterPrologue(resumable->resumeAddr());
-  } else {
-    enterVMAtCurPC();
-  }
 }
 
 static void enterVMAtFunc(ActRec* enterFnAr,
@@ -2065,21 +2050,16 @@ static void enterVMAtCurPC() {
 }
 
 /**
- * Enter VM and invoke a function or resume an async function. The 'ar'
- * argument points to an ActRec of the invoked/resumed function. When
- * an async function is resumed, a 'pc' pointing to the resume location
- * inside the async function must be provided. Optionally, the resumed
- * async function will throw an 'exception' upon entering VM if passed.
+ * Enter VM by calling action(), which invokes a function or resumes
+ * an async function. The 'ar' argument points to an ActRec of the
+ * invoked/resumed function.
  */
-static void enterVM(ActRec* ar, StackArgsState stk,
-                    Resumable* resumable,
-                    ObjectData* exception,
-                    VarEnv* varEnv) {
+template<class Action>
+static inline void enterVMCustomHandler(ActRec* ar, Action action) {
   assert(ar);
   assert(!ar->sfp());
   assert(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
   assert(ar->m_soff == 0);
-  assert(!resumable || (stk == StackArgsState::Untrimmed));
 
   auto ec = &*g_context;
   DEBUG_ONLY int faultDepth = ec->m_faults.size();
@@ -2088,20 +2068,16 @@ static void enterVM(ActRec* ar, StackArgsState stk,
   vmFirstAR() = ar;
   vmJitCalledFrame() = nullptr;
 
-  exception_handler([&] {
-    if (!resumable) {
-      enterVMAtFunc(ar, stk, varEnv);
-    } else {
-      assert(varEnv == nullptr);
-      enterVMAtAsyncFunc(ar, resumable, exception);
-    }
-  });
+  action();
 
   while (vmpc()) {
-    exception_handler([&] {
-      enterVMAtCurPC();
-    });
+    exception_handler(enterVMAtCurPC);
   }
+}
+
+template<class Action>
+static inline void enterVM(ActRec* ar, Action action) {
+  enterVMCustomHandler(ar, [&] { exception_handler(action); });
 }
 
 void ExecutionContext::invokeFunc(TypedValue* retptr,
@@ -2222,8 +2198,13 @@ void ExecutionContext::invokeFunc(TypedValue* retptr,
       popVMState();
     };
 
-    enterVM(ar, varEnv ? StackArgsState::Untrimmed : StackArgsState::Trimmed,
-            nullptr, nullptr, varEnv);
+    enterVM(ar, [&] {
+      enterVMAtFunc(
+        ar,
+        varEnv ? StackArgsState::Untrimmed : StackArgsState::Trimmed,
+        varEnv
+      );
+    });
 
     // retptr might point somewhere that is affected by (push|pop)VMState, so
     // don't write to it until after we pop the nested VM state.
@@ -2317,7 +2298,9 @@ void ExecutionContext::invokeFuncFew(TypedValue* retptr,
       popVMState();
     };
 
-    enterVM(ar, StackArgsState::Untrimmed, nullptr, nullptr, nullptr);
+    enterVM(ar, [&] {
+      enterVMAtFunc(ar, StackArgsState::Untrimmed, nullptr);
+    });
 
     // retptr might point somewhere that is affected by (push|pop)VMState, so
     // don't write to it until after we pop the nested VM state.
@@ -2348,7 +2331,17 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
   pushVMState(savedSP);
   SCOPE_EXIT { popVMState(); };
 
-  enterVM(fp, StackArgsState::Untrimmed, resumable, nullptr, nullptr);
+  enterVM(fp, [&] {
+    prepareAsyncFuncEntry(fp, resumable);
+
+    const bool useJit = RID().getJit();
+    if (LIKELY(useJit && resumable->resumeAddr())) {
+      Stats::inc(Stats::VMEnter);
+      mcg->enterTCAfterPrologue(resumable->resumeAddr());
+    } else {
+      enterVMAtCurPC();
+    }
+  });
 }
 
 void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
@@ -2369,7 +2362,11 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   pushVMState(vmStack().top());
   SCOPE_EXIT { popVMState(); };
 
-  enterVM(fp, StackArgsState::Untrimmed, resumable, exception, nullptr);
+  enterVMCustomHandler(fp, [&] {
+    prepareAsyncFuncEntry(fp, resumable);
+
+    unwindPhp(exception);
+  });
 }
 
 void ExecutionContext::invokeUnit(TypedValue* retval, const Unit* unit) {

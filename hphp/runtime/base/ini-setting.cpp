@@ -731,7 +731,7 @@ void IniSetting::Bind(
     );
   } else {
     is_thread_local = (mode == PHP_INI_USER || mode == PHP_INI_ALL);
-    assert(is_thread_local || !ExtensionRegistry::modulesInitialised() ||
+    assert(is_thread_local || !Extension::ModulesInitialised() ||
            s_pretendExtensionsHaveNotBeenLoaded);
   }
   //

@@ -23,24 +23,6 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Enumerates actions that should be taken by the enterVM loop after
- * unwinding an exception.
- */
-enum class UnwindAction {
-  /*
-   * The exception was not handled in this nesting of the VM---it
-   * needs to be rethrown.
-   */
-  Propagate,
-
-  /*
-   * The exception was either handled, or a catch or fault handler was
-   * identified and the VM state has been prepared for entry to it.
-   */
-  ResumeVM,
-};
-
-/*
  * The main entry point to the unwinder.
  *
  * When an exception propagates up to the top-level try/catch in
@@ -48,9 +30,11 @@ enum class UnwindAction {
  * appropriate.  This function must be called from within the catch
  * handler (it rethrows the exception to determine what to do).
  *
- * The returned UnwindAction instructs enterVM on how to proceed.
+ * If the exception was not handled in this nesting of the VM, it will
+ * be rethrown. Otherwise, a catch or fault handler was identified and
+ * the VM state has been prepared for entry to it.
  */
-UnwindAction exception_handler() noexcept;
+void exception_handler();
 
 //////////////////////////////////////////////////////////////////////
 

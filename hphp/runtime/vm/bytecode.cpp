@@ -2095,10 +2095,8 @@ static void enterVM(ActRec* ar, StackArgsState stk,
    *
    * This try/catch is where all this logic is centered.  The actual
    * unwinding happens under exception_handler in unwind.cpp, which
-   * returns a UnwindAction here to indicate what to do next.
-   *
-   * Either we'll enter the VM loop again at a user error/fault
-   * handler, or propagate the exception to a less-nested VM.
+   * either rethrows the exception, or let us enter the VM loop again
+   * at a user error/fault handler.
    */
   bool first = true;
 resume:
@@ -2121,39 +2119,9 @@ resume:
 
   } catch (...) {
     always_assert(tl_regState == VMRegState::CLEAN);
-    switch (exception_handler()) {
-      case UnwindAction::Propagate:
-        break;
-      case UnwindAction::ResumeVM:
-        if (vmpc()) { goto resume; }
-        return;
-    }
+    exception_handler();
+    if (vmpc()) { goto resume; }
   }
-
-  /*
-   * Here we have to propagate an exception out of this VM's nesting
-   * level.
-   */
-
-  assert(ec->m_faults.size() > 0);
-  Fault fault = ec->m_faults.back();
-  ec->m_faults.pop_back();
-
-  switch (fault.m_faultType) {
-  case Fault::Type::UserException:
-    {
-      Object obj = fault.m_userException;
-      fault.m_userException->decRefCount();
-      throw obj;
-    }
-  case Fault::Type::CppException:
-    // throwException() will take care of deleting heap-allocated
-    // exception object for us
-    fault.m_cppException->throwException();
-    not_reached();
-  }
-
-  not_reached();
 }
 
 void ExecutionContext::invokeFunc(TypedValue* retptr,

@@ -41,6 +41,25 @@ using boost::implicit_cast;
 namespace {
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Enumerates actions that should be taken by the enterVM loop after
+ * unwinding an exception.
+ */
+enum class UnwindAction {
+  /*
+   * The exception was not handled in this nesting of the VM---it
+   * needs to be rethrown.
+   */
+  Propagate,
+
+  /*
+   * The exception was either handled, or a catch or fault handler was
+   * identified and the VM state has been prepared for entry to it.
+   */
+  ResumeVM,
+};
+
 #if (defined(DEBUG) || defined(USE_TRACE))
 std::string describeFault(const Fault& f) {
   switch (f.m_faultType) {
@@ -359,15 +378,15 @@ bool chainFaults(Fault& fault) {
  *
  *   - Failing any of the above, pop the frame for the current
  *     function.  If the current function was the last frame in the
- *     current VM nesting level, return UnwindAction::Propagate,
- *     otherwise go to the first step and repeat this process in the
- *     caller's frame.
+ *     current VM nesting level, rethrow the exception, otherwise go
+ *     to the first step and repeat this process in the caller's
+ *     frame.
  *
  * Note: it's important that the unwinder makes a copy of the Fault
  * it's currently operating on, as the underlying faults vector may
  * reallocate due to nested exception handling.
  */
-UnwindAction unwind() {
+void unwind() {
   assert(!g_context->m_faults.empty());
   auto& fp = vmfp();
   auto& stack = vmStack();
@@ -436,7 +455,7 @@ UnwindAction unwind() {
           // ready to resume, we need to replace the fault to reflect
           // any state changes we've made (handledCount, etc).
           g_context->m_faults.back() = fault;
-          return UnwindAction::ResumeVM;
+          return;
         case UnwindAction::Propagate:
           break;
         }
@@ -455,7 +474,7 @@ UnwindAction unwind() {
     switch (action) {
       case UnwindAction::ResumeVM:
         g_context->m_faults.pop_back();
-        return action;
+        return;
       case UnwindAction::Propagate:
         break;
     }
@@ -476,7 +495,17 @@ UnwindAction unwind() {
     }
   }
 
-  return UnwindAction::Propagate;
+  g_context->m_faults.pop_back();
+
+  switch (fault.m_faultType) {
+    case Fault::Type::UserException: {
+      Object obj = Object::attach(fault.m_userException);
+      throw obj;
+    }
+    case Fault::Type::CppException:
+      fault.m_cppException->throwException();
+      not_reached();
+  }
 }
 
 const StaticString s_hphpd_break("hphpd_break");
@@ -539,7 +568,7 @@ void pushFault(const Object& o) {
 
 }
 
-UnwindAction exception_handler() noexcept {
+void exception_handler() {
   ITRACE(1, "unwind exception_handler\n");
   Trace::Indent _i;
 
@@ -567,20 +596,20 @@ UnwindAction exception_handler() noexcept {
 
   catch (VMSwitchMode&) {
     ITRACE(1, "unwind: VMSwitchMode\n");
-    return UnwindAction::ResumeVM;
+    return;
   }
 
   catch (VMSwitchModeBuiltin&) {
     ITRACE(1, "unwind: VMSwitchModeBuiltin from {}\n",
            vmfp()->m_func->fullName()->data());
     unwindBuiltinFrame();
-    return UnwindAction::ResumeVM;
+    return;
   }
 
   catch (VMReenterStackOverflow&) {
     ITRACE(1, "unwind: VMReenterStackOverflow\n");
-    pushFault(new FatalErrorException("Stack overflow"));
-    return UnwindAction::Propagate;
+    (new FatalErrorException("Stack overflow"))->throwException();
+    not_reached();
   }
 
   catch (Exception& e) {

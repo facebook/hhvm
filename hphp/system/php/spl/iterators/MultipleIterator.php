@@ -29,7 +29,7 @@ class MultipleIterator implements Iterator {
     /** Construct a new empty MultipleIterator
      * @param flags MIT_* flags
      */
-    public function __construct($flags = self::MIT_NEED_ALL|self::MIT_KEYS_NUMERIC)    {
+    public function __construct($flags = self::MIT_NEED_ALL|self::MIT_KEYS_NUMERIC)  {
         $this->iterators = new SplObjectStorage();
         $this->flags = $flags;
     }

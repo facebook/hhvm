@@ -2,7 +2,7 @@
 
 if [[ $# -lt 1 ]] ; then
     SLEEP_TIME=200
-else 
+else
     SLEEP_TIME=$1
 fi
 
@@ -20,7 +20,7 @@ if [[ -z $HHVM_PID ]] ; then
     exit 1
 fi
 
-perf record -ag -e instructions -o /tmp/perf.data -- sleep $SLEEP_TIME
+${PERF_PATH}perf record -ag -e instructions -o /tmp/perf.data -- sleep $SLEEP_TIME
 
 HHVM_ROOT=$(readlink -e /proc/$HHVM_PID/root)
 LOCAL_PID=$(cat $HHVM_ROOT/hphp/sockets/www.pid)
@@ -28,7 +28,7 @@ if [[ $LOCAL_PID != $HHVM_PID ]] ; then
     cp $HHVM_ROOT/tmp/perf-$LOCAL_PID.map $HHVM_ROOT/tmp/perf-$HHVM_PID.map
 fi
 
-perf script -i /tmp/perf.data -f comm,ip -chhvm | $GZIP -c > $TMPDIR/perf.pds.gz
+${PERF_PATH}perf script -i /tmp/perf.data -f comm,ip -chhvm | $GZIP -c > $TMPDIR/perf.pds.gz
 
 nm -S /proc/$HHVM_PID/exe > $TMPDIR/hhvm.nm
 

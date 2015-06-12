@@ -153,8 +153,14 @@ UnwindAction checkHandlers(const EHEnt* eh,
   return UnwindAction::Propagate;
 }
 
-UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
-                           ObjectData* phpException) {
+/**
+ * Discard the current frame, assuming that a PHP exception given in
+ * phpException argument, or C++ exception (phpException == nullptr)
+ * is being thrown. Returns an exception to propagate, or nulltpr
+ * if the VM execution should be resumed.
+ */
+ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
+                          ObjectData* phpException) {
   auto const func = fp->func();
   auto const curOp = *reinterpret_cast<const Op*>(pc);
   auto const prevFp = fp->sfp();
@@ -212,19 +218,17 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     }
   };
 
-  auto action = UnwindAction::Propagate;
-
   if (LIKELY(!fp->resumed())) {
     decRefLocals();
     if (UNLIKELY(func->isAsyncFunction()) && phpException) {
       // If in an eagerly executed async function, wrap the user exception
       // into a failed StaticWaitHandle and return it to the caller.
       auto const waitHandle = c_StaticWaitHandle::CreateFailed(phpException);
+      phpException = nullptr;
       stack.ndiscard(func->numSlotsInFrame());
       stack.ret();
       assert(stack.topTV() == &fp->m_r);
       cellCopy(make_tv<KindOfObject>(waitHandle), fp->m_r);
-      action = UnwindAction::ResumeVM;
     } else {
       // Free ActRec.
       stack.ndiscard(func->numSlotsInFrame());
@@ -236,7 +240,7 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       // Handle exception thrown by async function.
       decRefLocals();
       waitHandle->fail(phpException);
-      action = UnwindAction::ResumeVM;
+      phpException = nullptr;
     } else if (waitHandle->isRunning()) {
       // Let the C++ exception propagate. If the current frame represents async
       // function that is running, mark it as abruptly interrupted. Some opcodes
@@ -251,10 +255,10 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       // Handle exception thrown by async generator.
       decRefLocals();
       auto eagerResult = gen->fail(phpException);
+      phpException = nullptr;
       if (eagerResult) {
         stack.pushObjectNoRc(eagerResult);
       }
-      action = UnwindAction::ResumeVM;
     } else if (gen->isEagerlyExecuted() || gen->getWaitHandle()->isRunning()) {
       // Fail the async generator and let the C++ exception propagate.
       decRefLocals();
@@ -274,7 +278,7 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   if (UNLIKELY(!prevFp)) {
     pc = nullptr;
     fp = nullptr;
-    return action;
+    return phpException;
   }
 
   assert(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
@@ -282,7 +286,7 @@ UnwindAction tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   auto const prevOff = soff + prevFp->func()->base();
   pc = prevFp->func()->unit()->at(prevOff);
   fp = prevFp;
-  return action;
+  return phpException;
 }
 
 const StaticString s_previous("previous");
@@ -371,7 +375,7 @@ void unwindPhp() {
     ITRACE(1, "leaving unwinder for fault: {}\n", describeFault(fault));
   };
 
-  for (;;) {
+  do {
     bool discard = false;
     if (fault.m_raiseOffset == kInvalidOffset) {
       /*
@@ -442,14 +446,10 @@ void unwindPhp() {
 
     // We found no more handlers in this frame, so the nested fault
     // count starts over for the caller frame.
-    auto const lastFrameForNesting = !fp->sfp();
-    auto const action = tearDownFrame(fp, stack, pc, fault.m_userException);
-    switch (action) {
-      case UnwindAction::ResumeVM:
-        g_context->m_faults.pop_back();
-        return;
-      case UnwindAction::Propagate:
-        break;
+    fault.m_userException = tearDownFrame(fp, stack, pc, fault.m_userException);
+    if (fault.m_userException == nullptr) {
+      g_context->m_faults.pop_back();
+      return;
     }
 
     // Once we are done with EHs for the current frame we restore
@@ -461,13 +461,9 @@ void unwindPhp() {
     fault.m_raiseOffset = kInvalidOffset;
     fault.m_handledCount = 0;
     g_context->m_faults.back() = fault;
+  } while (fp);
 
-    if (lastFrameForNesting) {
-      ITRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");
-      break;
-    }
-  }
-
+  ITRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");
   g_context->m_faults.pop_back();
 
   Object obj = Object::attach(fault.m_userException);
@@ -524,8 +520,8 @@ void unwindCpp(Exception* exception) {
     discardStackTemps(fp, stack, offset);
 
     // Discard the frame
-    DEBUG_ONLY auto const action = tearDownFrame(fp, stack, pc, nullptr);
-    assert(action == UnwindAction::Propagate);
+    DEBUG_ONLY auto const phpException = tearDownFrame(fp, stack, pc, nullptr);
+    assert(phpException == nullptr);
   } while (fp);
 
   // Propagate the C++ exception to the outer VM nesting

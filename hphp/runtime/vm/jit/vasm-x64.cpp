@@ -1165,13 +1165,14 @@ void optimizeX64(Vunit& unit, const Abi& abi) {
   Timer timer(Timer::vasm_optimize);
 
   removeTrivialNops(unit);
+  optimizePhis(unit);
   fuseBranches(unit);
   optimizeJmps(unit);
   optimizeExits(unit);
 
   lowerForX64(unit, abi);
 
-  if (!unit.constants.empty()) {
+  if (!unit.constToReg.empty()) {
     foldImms<x64::ImmFolder>(unit);
   }
   {

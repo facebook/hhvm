@@ -912,7 +912,7 @@ void Vxls::buildIntervals() {
   }
 
   // finish processing live ranges for constants
-  for (auto& c : unit.constants) {
+  for (auto& c : unit.constToReg) {
     if (auto ivl = intervals[c.second]) {
       ivl->ranges.back().start = 0;
       ivl->constant = true;

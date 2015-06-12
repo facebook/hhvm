@@ -114,6 +114,7 @@ namespace Trace {
       TM(hhbc)          \
       TM(vasm)          \
       TM(vasm_copy)     \
+      TM(vasm_phi)      \
       TM(hhir)          \
       TM(hhirTracelets) \
       TM(hhir_cfg)      \

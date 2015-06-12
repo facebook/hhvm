@@ -35,23 +35,26 @@ struct Vunit;
  * own trace module.  The PassTracer bumps the trace level by 1, so that all
  * pass-internal traces starting at level 1 will actually show up at level 2:
  * this is so we have regularity that level 1 always just prints before and
- * after with no pass-internal traces.
+ * after with no pass-internal traces. If `changed' is provided to the
+ * constructor, the "after" unit trace will be skipped if !*changed.
  */
 template<class Unit>
 struct PassTracerImpl {
   explicit PassTracerImpl(const Unit* unit,
                           Trace::Module mod,
-                          const char* name)
+                          const char* name,
+                          const bool* changed = nullptr)
     : m_unit(*unit)
     , m_mod(mod)
     , m_name(name)
     , m_bumper{m_mod, 1}
+    , m_changed{changed}
   {
     traceUnit("before");
   }
 
   ~PassTracerImpl() {
-    traceUnit("after");
+    if (!m_changed || *m_changed) traceUnit("after");
   }
 
 private:
@@ -72,6 +75,7 @@ private:
   Trace::Module const m_mod;
   DEBUG_ONLY const char* const m_name;
   Trace::Bump m_bumper;
+  const bool* m_changed;
 };
 
 //////////////////////////////////////////////////////////////////////

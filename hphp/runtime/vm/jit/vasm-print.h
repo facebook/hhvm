@@ -29,11 +29,13 @@ namespace HPHP { namespace jit {
 
 struct Vinstr;
 struct Vunit;
+struct Vconst;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 std::string show(Vreg r);
 std::string show(Vptr p);
+std::string show(Vconst c);
 std::string show(const Vunit& unit);
 std::string show(const Vunit& unit, const Vinstr& inst);
 

@@ -675,7 +675,7 @@ void finishARM(Vunit& unit, Vasm::AreaList& areas,
                const Abi& abi, AsmInfo* asmInfo) {
   optimizeExits(unit);
   lower(unit);
-  if (!unit.constants.empty()) {
+  if (!unit.constToReg.empty()) {
     foldImms<arm::ImmFolder>(unit);
   }
   lowerForARM(unit);

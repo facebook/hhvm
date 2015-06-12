@@ -198,6 +198,11 @@ struct FormatVisitor {
 
   void print(Vreg r) {
     str << sep() << show(r);
+
+    auto it = unit.regToConst.find(r);
+    if (it != unit.regToConst.end()) {
+      str << '(' << show(it->second) << ')';
+    }
   }
 
   const char* sep() { return comma ? ", " : (comma = true, ""); }
@@ -243,6 +248,28 @@ std::string show(Vptr p) {
     if (p.scale != 1) folly::toAppend(" * ", p.scale, &str);
   }
   str += ']';
+  return str;
+}
+
+std::string show(Vconst c) {
+  auto str = folly::to<std::string>(c.val);
+  switch (c.kind) {
+    case Vconst::Quad:
+      str += 'q';
+      break;
+    case Vconst::Long:
+      str += 'l';
+      break;
+    case Vconst::Byte:
+      str += 'b';
+      break;
+    case Vconst::Double:
+      str += 'd';
+      break;
+    case Vconst::ThreadLocal:
+      str += "tl";
+      break;
+  }
   return str;
 }
 

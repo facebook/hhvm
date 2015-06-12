@@ -100,7 +100,7 @@ TEST(Vasm, FoldImms) {
   //
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "addqi 0, %64 => %65, %67\n"
     "copy %64 => %66\n"
     "movl %67 => %71\n"
@@ -109,7 +109,7 @@ TEST(Vasm, FoldImms) {
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "addqi 0, %64 => %65, %67\n"
     "copy %64 => %66\n"
     "movl %67 => %71\n"
@@ -118,7 +118,7 @@ TEST(Vasm, FoldImms) {
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "addqi 1, %64 => %65, %67\n"
     "incq %64 => %66, %68\n"
     "movl %67 => %71\n"
@@ -127,7 +127,7 @@ TEST(Vasm, FoldImms) {
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "addqi 1, %64 => %65, %67\n"
     "incq %64 => %66, %68\n"
     "movl %67 => %71\n"
@@ -140,7 +140,7 @@ TEST(Vasm, FoldImms) {
   //
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "subqi 0, %64 => %65, %67\n"
     "copy %64 => %66\n"
     "movl %67 => %71\n"
@@ -150,7 +150,7 @@ TEST(Vasm, FoldImms) {
 
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "neg %64 => %65, %67\n"
     "neg %64 => %66, %68\n"
     "movl %67 => %71\n"
@@ -160,7 +160,7 @@ TEST(Vasm, FoldImms) {
 
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "subqi 1, %64 => %65, %67\n"
     "decq %64 => %66, %68\n"
     "movl %67 => %71\n"
@@ -173,7 +173,7 @@ TEST(Vasm, FoldImms) {
   //
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "xorbi 0, %64 => %65, %67\n"
     "copy %64 => %66\n"
     "movl %67 => %71\n"
@@ -182,7 +182,7 @@ TEST(Vasm, FoldImms) {
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "xorbi 0, %64 => %65, %67\n"
     "copy %64 => %66\n"
     "movl %67 => %71\n"
@@ -191,7 +191,7 @@ TEST(Vasm, FoldImms) {
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "xorbi -1, %64 => %65, %67\n"
     "notb %64 => %66\n"
     "movl %67 => %71\n"
@@ -200,7 +200,7 @@ TEST(Vasm, FoldImms) {
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "xorbi -1, %64 => %65, %67\n"
     "notb %64 => %66\n"
     "movl %67 => %71\n"
@@ -213,7 +213,7 @@ TEST(Vasm, FoldImms) {
   //
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "xorqi 0, %64 => %65, %67\n"
     "copy %64 => %66\n"
     "movl %67 => %71\n"
@@ -222,7 +222,7 @@ TEST(Vasm, FoldImms) {
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "xorqi 0, %64 => %65, %67\n"
     "copy %64 => %66\n"
     "movl %67 => %71\n"
@@ -231,7 +231,7 @@ TEST(Vasm, FoldImms) {
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "xorqi -1, %64 => %65, %67\n"
     "not %64 => %66\n"
     "movl %67 => %71\n"
@@ -240,7 +240,7 @@ TEST(Vasm, FoldImms) {
   );
   EXPECT_EQ(
     "B0 main\n"
-    "movl %69 => %64\n"
+    "movl %69(42l) => %64\n"
     "xorqi -1, %64 => %65, %67\n"
     "not %64 => %66\n"
     "movl %67 => %71\n"

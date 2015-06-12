@@ -43,7 +43,7 @@ bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
   Bits global_defs(unit.next_vr);
   Bits consts(unit.next_vr);
 
-  for (auto& c : unit.constants) {
+  for (auto& c : unit.constToReg) {
     global_defs.set(c.second);
     consts.set(c.second);
   }
@@ -51,7 +51,7 @@ bool checkSSA(Vunit& unit, jit::vector<Vlabel>& blocks) {
     Bits local_defs;
     if (block_defs[b].empty()) {
       local_defs.resize(unit.next_vr);
-      for (auto& c : unit.constants) {
+      for (auto& c : unit.constToReg) {
         local_defs.set(c.second);
       }
     } else {

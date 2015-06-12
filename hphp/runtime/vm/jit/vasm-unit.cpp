@@ -58,9 +58,14 @@ VcallArgsId Vunit::makeVcallArgs(VcallArgs&& args) {
 // helper for making constants, where T maps to the correct overloaded
 // Vconst constructor.
 template<class T> Vreg make_const(Vunit& unit, T c) {
-  auto it = unit.constants.find(c);
-  if (it != unit.constants.end()) return it->second;
-  return unit.constants[c] = unit.makeReg();
+  auto const vconst = Vconst{c};
+  auto it = unit.constToReg.find(vconst);
+  if (it != unit.constToReg.end()) return it->second;
+
+  auto const reg = unit.makeReg();
+  unit.constToReg.emplace(vconst, reg);
+  unit.regToConst.emplace(reg, vconst);
+  return reg;
 }
 
 Vreg Vunit::makeConst(bool v)     { return make_const(*this, v); }

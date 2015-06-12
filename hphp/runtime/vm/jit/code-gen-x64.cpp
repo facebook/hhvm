@@ -974,7 +974,13 @@ void CodeGenerator::cgCmpHelper(IRInstruction* inst, ConditionCode cc,
   else if (type1 <= TBool && type2 <= TBool) {
     auto const sf = v.makeReg();
     if (src2->hasConstVal()) {
-      v << cmpbi{src2->boolVal(), src1Reg, sf};
+      // Emit testb when possible to enable more optimizations later on.
+      if (cc == CC_E || cc == CC_NE) {
+        if (src2->boolVal()) cc = ccNegate(cc);
+        v << testb{src1Reg, src1Reg, sf};
+      } else {
+        v << cmpbi{src2->boolVal(), src1Reg, sf};
+      }
     } else {
       v << cmpb{src2Reg, src1Reg, sf};
     }

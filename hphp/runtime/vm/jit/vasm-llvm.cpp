@@ -592,7 +592,7 @@ struct LLVMEmitter {
     m_int64Undef  = llvm::UndefValue::get(m_int64);
 
     // Register all unit's constants.
-    for (auto const& pair : unit.constants) {
+    for (auto const& pair : unit.constToReg) {
       switch (pair.first.kind) {
         case Vconst::Quad:
           if (pair.first.isUndef) {

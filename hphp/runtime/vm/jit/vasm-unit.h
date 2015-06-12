@@ -71,13 +71,13 @@ struct Vconst {
   enum Kind { Quad, Long, Byte, Double, ThreadLocal };
 
   Vconst() : kind(Quad), val(0) {}
-  /* implicit */ Vconst(Kind k) : kind(k), isUndef(true), val(0) {}
-  /* implicit */ Vconst(bool b) : kind(Byte), val(b) {}
-  /* implicit */ Vconst(uint8_t b) : kind(Byte), val(b) {}
-  /* implicit */ Vconst(uint32_t i) : kind(Long), val(i) {}
-  /* implicit */ Vconst(uint64_t i) : kind(Quad), val(i) {}
-  /* implicit */ Vconst(double d) : kind(Double), doubleVal(d) {}
-  /* implicit */ Vconst(Vptr tl) : kind(ThreadLocal), disp(tl.disp) {
+  explicit Vconst(Kind k) : kind(k), isUndef(true), val(0) {}
+  explicit Vconst(bool b) : kind(Byte), val(b) {}
+  explicit Vconst(uint8_t b) : kind(Byte), val(b) {}
+  explicit Vconst(uint32_t i) : kind(Long), val(i) {}
+  explicit Vconst(uint64_t i) : kind(Quad), val(i) {}
+  explicit Vconst(double d) : kind(Double), doubleVal(d) {}
+  explicit Vconst(Vptr tl) : kind(ThreadLocal), disp(tl.disp) {
     assertx(!tl.base.isValid() &&
            !tl.index.isValid() &&
            tl.seg == Vptr::FS);
@@ -176,7 +176,8 @@ struct Vunit {
   unsigned next_point{0};
   Vlabel entry;
   jit::vector<Vblock> blocks;
-  jit::hash_map<Vconst,Vreg,Vconst::Hash> constants;
+  jit::hash_map<Vconst,Vreg,Vconst::Hash> constToReg;
+  jit::hash_map<size_t,Vconst> regToConst;
   jit::vector<VregList> tuples;
   jit::vector<VcallArgs> vcallArgs;
 };

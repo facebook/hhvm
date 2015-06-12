@@ -15,23 +15,26 @@
 */
 #include "hphp/hhbbc/index.h"
 
-#include <unordered_map>
-#include <mutex>
-#include <map>
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
-#include <algorithm>
 #include <iterator>
+#include <map>
 #include <memory>
+#include <mutex>
+#include <unordered_map>
 #include <unordered_set>
-#include <vector>
 #include <utility>
+#include <vector>
+
+#include <boost/dynamic_bitset.hpp>
 
 #include <tbb/concurrent_hash_map.h>
 
 #include <folly/Format.h>
 #include <folly/Hash.h>
 #include <folly/Lazy.h>
+#include <folly/MapUtil.h>
 #include <folly/Memory.h>
 #include <folly/Optional.h>
 #include <folly/Range.h>
@@ -310,9 +313,9 @@ struct ClassInfo {
   borrowed_ptr<ClassInfo> parent = nullptr;
 
   /*
-   * A vector of the declared interfaces class info structures.  This
-   * is in declaration order mirroring the php::Class interfaceNames
-   * vector, and do not include inherited interfaces.
+   * A vector of the declared interfaces class info structures.  This is in
+   * declaration order mirroring the php::Class interfaceNames vector, and does
+   * not include inherited interfaces.
    */
   std::vector<borrowed_ptr<const ClassInfo>> declInterfaces;
 
@@ -601,6 +604,8 @@ std::string show(const Func& f) {
 
 //////////////////////////////////////////////////////////////////////
 
+using IfaceSlotMap = std::unordered_map<borrowed_ptr<const php::Class>, Slot>;
+
 struct IndexData {
   IndexData() = default;
   IndexData(const IndexData&) = delete;
@@ -669,6 +674,12 @@ struct IndexData {
    */
   PublicSPropState publicSPropState;
   PropState unknownClassSProps;
+
+  /*
+   * Map from interfaces to their assigned vtable slots, computed in
+   * compute_iface_vtables().
+   */
+  IfaceSlotMap ifaceSlotMap;
 
   std::unordered_map<
     borrowed_ptr<const php::Class>,
@@ -1073,6 +1084,218 @@ void define_func_families(IndexData& index) {
 
       define_func_family(index, borrow(cinfo), kv.first, func);
     }
+  }
+}
+
+/*
+ * ConflictGraph maintains lists of interfaces that conflict with each other
+ * due to being implemented by the same class.
+ */
+struct ConflictGraph {
+  void add(borrowed_ptr<const php::Class> i, borrowed_ptr<const php::Class> j) {
+    if (i == j) return;
+    auto& conflicts = map[i];
+    if (std::find(conflicts.begin(), conflicts.end(), j) != conflicts.end()) {
+      return;
+    }
+    conflicts.push_back(j);
+  }
+
+  std::unordered_map<borrowed_ptr<const php::Class>,
+                     std::vector<borrowed_ptr<const php::Class>>> map;
+};
+
+/*
+ * Trace information about interface conflict sets and the vtables computed
+ * from them.
+ */
+void trace_interfaces(const IndexData& index, const ConflictGraph& cg) {
+  // Compute what the vtable for each Class will look like, and build up a list
+  // of all interfaces.
+  struct Cls {
+    const ClassInfo* cinfo;
+    std::vector<const php::Class*> vtable;
+  };
+  std::vector<Cls> classes;
+  std::vector<const php::Class*> ifaces;
+  size_t total_slots = 0, empty_slots = 0;
+  for (auto& cinfo : index.allClassInfos) {
+    if (cinfo->cls->attrs & AttrInterface) {
+      ifaces.emplace_back(cinfo->cls);
+      continue;
+    }
+    if (cinfo->cls->attrs & (AttrTrait | AttrEnum | AttrAbstract)) continue;
+
+    classes.emplace_back(Cls{borrow(cinfo)});
+    auto& vtable = classes.back().vtable;
+    for (auto& pair : cinfo->implInterfaces) {
+      auto it = index.ifaceSlotMap.find(pair.second->cls);
+      assert(it != end(index.ifaceSlotMap));
+      auto const slot = it->second;
+      if (slot >= vtable.size()) vtable.resize(slot + 1);
+      vtable[slot] = pair.second->cls;
+    }
+
+    total_slots += vtable.size();
+    for (auto iface : vtable) if (iface == nullptr) ++empty_slots;
+  }
+
+  Slot max_slot = 0;
+  for (auto const& pair : index.ifaceSlotMap) {
+    max_slot = std::max(max_slot, pair.second);
+  }
+
+  // Sort the list of class vtables so the largest ones come first.
+  auto class_cmp = [&](const Cls& a, const Cls& b) {
+    return a.vtable.size() > b.vtable.size();
+  };
+  std::sort(begin(classes), end(classes), class_cmp);
+
+  // Sort the list of interfaces so the biggest conflict sets come first.
+  auto iface_cmp = [&](const php::Class* a, const php::Class* b) {
+    return cg.map.at(a).size() > cg.map.at(b).size();
+  };
+  std::sort(begin(ifaces), end(ifaces), iface_cmp);
+
+  std::string out;
+  folly::format(&out, "{} interfaces, {} classes\n",
+                ifaces.size(), classes.size());
+  folly::format(&out,
+                "{} vtable slots, {} empty vtable slots, max slot {}\n",
+                total_slots, empty_slots, max_slot);
+  folly::format(&out, "\n{:-^80}\n", " interface slots & conflict sets");
+  for (auto iface : ifaces) {
+    auto cgIt = cg.map.find(iface);
+    if (cgIt == end(cg.map)) break;
+    auto& conflicts = cgIt->second;
+
+    folly::format(&out, "{:>40} {:3} {:2} [", iface->name->data(),
+                  conflicts.size(),
+                  folly::get_default(index.ifaceSlotMap, iface));
+    auto sep = "";
+    for (auto conflict : conflicts) {
+      folly::format(&out, "{}{}", sep, conflict->name->data());
+      sep = ", ";
+    }
+    folly::format(&out, "]\n");
+  }
+
+  folly::format(&out, "\n{:-^80}\n", " class vtables ");
+  for (auto& item : classes) {
+    if (item.vtable.empty()) break;
+
+    folly::format(&out, "{:>30}: [", item.cinfo->cls->name->data());
+    auto sep = "";
+    for (auto iface : item.vtable) {
+      folly::format(&out, "{}{}", sep, iface ? iface->name->data() : "null");
+      sep = ", ";
+    }
+    folly::format(&out, "]\n");
+  }
+
+  Trace::traceRelease("%s", out.c_str());
+}
+
+/*
+ * Find the lowest Slot that doesn't conflict with anything in the conflict set
+ * for iface.
+ */
+Slot find_min_slot(borrowed_ptr<const php::Class> iface,
+                   const IfaceSlotMap& slots,
+                   const ConflictGraph& cg) {
+  auto const& conflicts = cg.map.at(iface);
+  if (conflicts.empty()) {
+    // No conflicts. This is the only interface implemented by the classes that
+    // implement it.
+    return 0;
+  }
+
+  boost::dynamic_bitset<> used;
+
+  for (auto& c : conflicts) {
+    auto const it = slots.find(c);
+    if (it == slots.end()) continue;
+    auto const slot = it->second;
+
+    if (used.size() <= slot) used.resize(slot + 1);
+    used.set(slot);
+  }
+  used.flip();
+  return used.any() ? used.find_first() : used.size();
+}
+
+/*
+ * Compute vtable slots for all interfaces. No two interfaces implemented by
+ * the same class will share the same vtable slot.
+ */
+void compute_iface_vtables(IndexData& index) {
+  trace_time tracer("compute interface vtables");
+
+  ConflictGraph cg;
+  std::vector<borrowed_ptr<const php::Class>> ifaces;
+  std::unordered_map<borrowed_ptr<const php::Class>, int> iface_uses;
+
+  // Build up the conflict sets.
+  for (auto& cinfo : index.allClassInfos) {
+    if (cinfo->cls->attrs & AttrInterface) {
+      ifaces.emplace_back(cinfo->cls);
+      // Make sure cg.map has an entry for every interface - this simplifies
+      // some code later on.
+      cg.map[cinfo->cls];
+      continue;
+    }
+
+    // Only worry about classes that can be instantiated. If an abstract class
+    // has any concrete subclasses, those classes will make sure the right
+    // entries are in the conflict sets.
+    if (cinfo->cls->attrs & (AttrTrait | AttrEnum | AttrAbstract)) continue;
+
+    for (auto& ipair : cinfo->implInterfaces) {
+      ++iface_uses[ipair.second->cls];
+      for (auto& jpair : cinfo->implInterfaces) {
+        cg.add(ipair.second->cls, jpair.second->cls);
+      }
+    }
+  }
+
+  // We assign slots greedily, so sort the interface list so the most
+  // frequently implemented ones come first.
+  auto iface_cmp = [&](const php::Class* a, const php::Class* b) {
+    return iface_uses[a] > iface_uses[b];
+  };
+  std::sort(begin(ifaces), end(ifaces), iface_cmp);
+
+  // Assign slots, keeping track of the largest assigned slot and the total
+  // number of uses for each slot.
+  Slot max_slot = 0;
+  std::unordered_map<Slot, int> slot_uses;
+  for (auto* iface : ifaces) {
+    auto const slot = find_min_slot(iface, index.ifaceSlotMap, cg);
+    index.ifaceSlotMap[iface] = slot;
+    max_slot = std::max(max_slot, slot);
+
+    // Interfaces implemented by the same class never share a slot, so normal
+    // addition is fine here.
+    slot_uses[slot] += iface_uses[iface];
+  }
+
+  // Finally, sort and reassign slots so the most frequently used slots come
+  // first. This slightly reduces the number of wasted vtable vector entries at
+  // runtime.
+  std::vector<Slot> slots;
+  slots.reserve(max_slot + 1);
+  for (Slot i = 0; i <= max_slot; ++i) slots.emplace_back(i);
+  auto slot_cmp = [&](Slot a, Slot b) { return slot_uses[a] > slot_uses[b]; };
+  std::sort(begin(slots), end(slots), slot_cmp);
+
+  std::vector<Slot> slots_permute(max_slot + 1, 0);
+  for (size_t i = 0; i <= max_slot; ++i) slots_permute[slots[i]] = i;
+  for (auto& pair : index.ifaceSlotMap) {
+    pair.second = slots_permute[pair.second];
+  }
+
+  if (Trace::moduleEnabledRelease(Trace::hhbbc_iface)) {
+    trace_interfaces(index, cg);
   }
 }
 
@@ -1503,6 +1726,7 @@ Index::Index(borrowed_ptr<php::Program> program)
   mark_no_override_functions(*m_data);
   define_func_families(*m_data);        // uses AttrNoOverride functions
   find_magic_methods(*m_data);          // uses the subclass lists
+  compute_iface_vtables(*m_data);
 
   check_invariants(*m_data);
 
@@ -2143,6 +2367,11 @@ Type Index::lookup_public_static(borrowed_ptr<const php::Class> cls,
 bool Index::lookup_public_static_immutable(borrowed_ptr<const php::Class> cls,
                                            SString name) const {
   return !lookup_public_static_impl(*m_data, cls, name).everModified;
+}
+
+Slot
+Index::lookup_iface_vtable_slot(borrowed_ptr<const php::Class> cls) const {
+  return folly::get_default(m_data->ifaceSlotMap, cls, kInvalidSlot);
 }
 
 //////////////////////////////////////////////////////////////////////

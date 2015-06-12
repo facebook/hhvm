@@ -1471,6 +1471,7 @@ O(cmovq) \
 O(cmpb) \
 O(cmpbi) \
 O(cmpbim) \
+O(cmpwim) \
 O(cmpl) \
 O(cmpli) \
 O(cmplim) \
@@ -2192,6 +2193,10 @@ void LLVMEmitter::emit(const cmpbim& inst) {
   defineFlagTmp(inst.sf, m_irb.CreateLoad(emitPtr(inst.s1, 8)));
 }
 
+void LLVMEmitter::emit(const cmpwim& inst) {
+  defineFlagTmp(inst.sf, m_irb.CreateLoad(emitPtr(inst.s1, 16)));
+}
+
 void LLVMEmitter::emit(const cmpl& inst) {
   // no-op.
 }
@@ -2433,6 +2438,9 @@ llvm::Value* LLVMEmitter::emitCmpForCC(Vreg sf, ConditionCode cc) {
   } else if (cmp.op == Vinstr::cmpbim) {
     lhs = flagTmp(sf);
     rhs = cns(cmp.cmpbim_.s0.b());
+  } else if (cmp.op == Vinstr::cmpwim) {
+    lhs = flagTmp(sf);
+    rhs = cns(cmp.cmpwim_.s0.w());
   } else if (cmp.op == Vinstr::cmpl) {
     lhs = value(cmp.cmpl_.s1);
     rhs = value(cmp.cmpl_.s0);

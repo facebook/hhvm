@@ -53,6 +53,8 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_Closure("Closure");
+const StaticString s_toString("__toString");
+const StaticString s_Stringish("Stringish");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -785,6 +787,26 @@ void parse_methods(ParseUnitState& puState,
   }
 }
 
+void add_stringish(borrowed_ptr<php::Class> cls) {
+  // The runtime adds Stringish to any class providing a __toString() function,
+  // so we mirror that here to make sure analysis of interfaces is correct.
+  if (cls->attrs & AttrInterface && cls->name->isame(s_Stringish.get())) {
+    return;
+  }
+
+  for (auto& iface : cls->interfaceNames) {
+    if (iface->isame(s_Stringish.get())) return;
+  }
+
+  for (auto& func : cls->methods) {
+    if (func->name->isame(s_toString.get())) {
+      FTRACE(2, "Adding Stringish to {}\n", cls->name->data());
+      cls->interfaceNames.push_back(s_Stringish.get());
+      return;
+    }
+  }
+}
+
 std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
                                         borrowed_ptr<php::Unit> unit,
                                         const PreClassEmitter& pce) {
@@ -813,6 +835,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->numDeclMethods    = pce.numDeclMethods();
 
   parse_methods(puState, borrow(ret), unit, pce);
+  add_stringish(borrow(ret));
 
   auto& propMap = pce.propMap();
   for (size_t idx = 0; idx < propMap.size(); ++idx) {

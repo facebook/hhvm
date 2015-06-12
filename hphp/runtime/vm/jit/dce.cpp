@@ -100,6 +100,7 @@ bool canDCE(IRInstruction* inst) {
   case NeqDbl:
   case InstanceOf:
   case InstanceOfIface:
+  case InstanceOfIfaceVtable:
   case ExtendsClass:
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
@@ -143,6 +144,7 @@ bool canDCE(IRInstruction* inst) {
   case LdClsMethodCacheFunc:
   case LdClsMethodCacheCls:
   case LdClsMethod:
+  case LdIfaceMethod:
   case LdPropAddr:
   case LdObjClass:
   case LdClsName:

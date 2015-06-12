@@ -384,6 +384,8 @@ PUNT_OPCODE(LookupClsMethodFCache)
 PUNT_OPCODE(GetCtxFwdCallDyn);
 PUNT_OPCODE(GetCtxFwdCall)
 PUNT_OPCODE(LdClsMethod)
+PUNT_OPCODE(LdIfaceMethod)
+PUNT_OPCODE(InstanceOfIfaceVtable)
 PUNT_OPCODE(LdPropAddr)
 PUNT_OPCODE(LdObjMethod)
 PUNT_OPCODE(LdObjInvoke)

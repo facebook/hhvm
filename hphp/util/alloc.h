@@ -144,7 +144,7 @@ inline void low_free(void* ptr) {
 #ifndef USE_JEMALLOC
   free(ptr);
 #else
-  dallocx(ptr, low_dallocx_flags());
+  if (ptr) dallocx(ptr, low_dallocx_flags());
 #endif
 }
 

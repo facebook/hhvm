@@ -953,6 +953,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ExitPlaceholder:
   case CheckRange:
   case ProfileObjClass:
+  case LdIfaceMethod:
+  case InstanceOfIfaceVtable:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////

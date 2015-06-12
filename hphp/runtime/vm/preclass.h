@@ -320,6 +320,12 @@ public:
   int32_t numDeclMethods() const { return m_numDeclMethods; }
 
   /*
+   * The interface vtable slot for this PreClass, or kInvalidSlot if it wasn't
+   * assigned one or isn't an interface.
+   */
+  Slot ifaceVtableSlot() const { return m_ifaceVtableSlot; }
+
+  /*
    * If this is an enum class, return the type of its enum values.
    */
   const TypeConstraint& enumBaseTy() const { return m_enumBaseTy; }
@@ -451,6 +457,7 @@ private:
   LowStringPtr m_parent;
   LowStringPtr m_docComment;
   int32_t m_numDeclMethods;
+  Slot m_ifaceVtableSlot{kInvalidSlot};
   TypeConstraint m_enumBaseTy;
   BuiltinCtorFunction m_instanceCtor{nullptr};
   BuiltinDtorFunction m_instanceDtor{nullptr};

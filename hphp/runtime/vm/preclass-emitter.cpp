@@ -235,6 +235,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   pc->m_traitAliasRules = m_traitAliasRules;
   pc->m_enumBaseTy = m_enumBaseTy;
   pc->m_numDeclMethods = m_numDeclMethods;
+  pc->m_ifaceVtableSlot = m_ifaceVtableSlot;
 
   // Set user attributes.
   [&] {
@@ -325,6 +326,7 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
     (m_parent)
     (m_docComment)
     (m_numDeclMethods)
+    (m_ifaceVtableSlot)
 
     (m_interfaces)
     (m_usedTraits)

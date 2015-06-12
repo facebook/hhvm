@@ -96,6 +96,11 @@ namespace Stats {
   /* ObjectData construction */ \
   STAT(ObjectData_new_dtor_yes) \
   STAT(ObjectData_new_dtor_no) \
+  STAT(ObjMethod_total) \
+  STAT(ObjMethod_known) \
+  STAT(ObjMethod_methodslot) \
+  STAT(ObjMethod_ifaceslot) \
+  STAT(ObjMethod_cached) \
 
 enum StatCounter {
 #define STAT(name) \

@@ -119,6 +119,7 @@ struct Vgen {
   void emit(const cmpb& i) { a->cmpb(i.s0, i.s1); }
   void emit(const cmpbi& i) { a->cmpb(i.s0, i.s1); }
   void emit(const cmpbim& i) { a->cmpb(i.s0, i.s1); }
+  void emit(const cmpwim& i) { a->cmpw(i.s0, i.s1); }
   void emit(const cmpl& i) { a->cmpl(i.s0, i.s1); }
   void emit(const cmpli& i) { a->cmpl(i.s0, i.s1); }
   void emit(const cmplim& i) { a->cmpl(i.s0, i.s1); }

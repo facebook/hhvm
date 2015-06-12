@@ -35,6 +35,8 @@
 #include <algorithm>
 #include <iostream>
 
+TRACE_SET_MOD(class_load);
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -135,7 +137,7 @@ template<size_t sz>
 struct assert_sizeof_class {
   // If this static_assert fails, the compiler error will have the real value
   // of sizeof(Class) in it since it's in this struct's type.
-  static_assert(sz == (use_lowptr ? 256 : 280), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 256 : 288), "Change this only on purpose");
 };
 template struct assert_sizeof_class<sizeof(Class)>;
 
@@ -190,8 +192,8 @@ unsigned loadUsedTraits(PreClass* preClass,
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
-  auto  funcVecLen = (parent != nullptr ? parent->m_methods.size() : 0)
-                      + preClass->numMethods();
+  auto funcVecLen = (parent != nullptr ? parent->m_methods.size() : 0)
+    + preClass->numMethods();
 
   std::vector<ClassPtr> usedTraits;
   auto numTraitMethodsEstimate = loadUsedTraits(preClass, usedTraits);
@@ -252,7 +254,7 @@ void Class::atomicRelease() {
   assert(!m_cachedClass.bound());
   assert(!getCount());
   this->~Class();
-  low_free(mallocPtrFromThis());
+  low_free(mallocPtr());
 }
 
 Class::~Class() {
@@ -281,6 +283,8 @@ Class::~Class() {
 
   // clean enum cache
   EnumCache::deleteValues(this);
+
+  low_free(m_vtableVec.get());
 }
 
 void Class::releaseRefs() {
@@ -389,9 +393,15 @@ Class::Avail Class::avail(Class*& parent,
 ///////////////////////////////////////////////////////////////////////////////
 // Pre- and post-allocations.
 
-LowFuncPtr* Class::mallocPtrFromThis() const {
+LowFuncPtr* Class::funcVec() const {
   return reinterpret_cast<LowFuncPtr*>(
-      reinterpret_cast<uintptr_t>(this) - m_funcVecLen * sizeof(LowFuncPtr));
+    reinterpret_cast<uintptr_t>(this) -
+    m_funcVecLen * sizeof(LowFuncPtr)
+  );
+}
+
+void* Class::mallocPtr() const {
+  return funcVec();
 }
 
 
@@ -1211,8 +1221,8 @@ Class::Class(PreClass* preClass, Class* parent,
              unsigned classVecLen, unsigned funcVecLen)
   : m_parent(parent)
   , m_preClass(PreClassPtr(preClass))
-  , m_classVecLen(classVecLen)
-  , m_funcVecLen(funcVecLen)
+  , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
+  , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))
 {
   if (usedTraits.size()) {
     allocExtraData();
@@ -1230,6 +1240,11 @@ Class::Class(PreClass* preClass, Class* parent,
   setRequirements();
   setNativeDataInfo();
   setEnumType();
+
+  // A class is allowed to implement two interfaces that share the same slot if
+  // we'll fatal trying to define that class, so this has to happen after all
+  // of those fatals could be thrown.
+  setInterfaceVtables();
 }
 
 void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
@@ -1302,7 +1317,7 @@ void Class::setMethods() {
     }
   }
 
-  assert(AttrPublic < AttrProtected && AttrProtected < AttrPrivate);
+  static_assert(AttrPublic < AttrProtected && AttrProtected < AttrPrivate, "");
   // Overlay/append this class's public/protected methods onto/to those of the
   // parent.
   for (size_t methI = 0; methI < m_preClass->numMethods(); ++methI) {
@@ -2265,6 +2280,65 @@ void Class::setInterfaces() {
   checkInterfaceMethods();
 }
 
+void Class::setInterfaceVtables() {
+  // We only need to set interface vtables for classes that can be instantiated
+  // and implement more than 0 interfaces.
+  if (!RuntimeOption::RepoAuthoritative ||
+      !isNormalClass(this) || isAbstract(this) || m_interfaces.empty()) return;
+
+  size_t totalMethods = 0;
+  Slot maxSlot = 0;
+  for (auto iface : m_interfaces.range()) {
+    auto const slot = iface->preClass()->ifaceVtableSlot();
+    if (slot == kInvalidSlot) continue;
+
+    maxSlot = std::max(maxSlot, slot);
+    totalMethods += iface->numMethods();
+  }
+
+  const size_t nVtables = maxSlot + 1;
+  auto const vtableVecSz = nVtables * sizeof(VtableVecSlot);
+  auto const memSz = vtableVecSz + totalMethods * sizeof(LowFuncPtr);
+  auto const mem = static_cast<char*>(low_malloc(memSz));
+  auto cursor = mem;
+
+  ITRACE(3, "Setting interface vtables for class {}. "
+         "{} interfaces, {} vtable slots, {} total methods\n",
+         name()->data(), m_interfaces.size(), nVtables, totalMethods);
+  Trace::Indent indent;
+
+  auto const vtableVec = reinterpret_cast<VtableVecSlot*>(cursor);
+  cursor += vtableVecSz;
+  m_vtableVecLen = always_safe_cast<decltype(m_vtableVecLen)>(nVtables);
+  m_vtableVec = vtableVec;
+  memset(vtableVec, 0, vtableVecSz);
+
+  for (auto iface : m_interfaces.range()) {
+    auto const slot = iface->preClass()->ifaceVtableSlot();
+    if (slot == kInvalidSlot) continue;
+    ITRACE(3, "{} @ slot {}\n", iface->name()->data(), slot);
+    Trace::Indent indent;
+    always_assert(slot < nVtables);
+
+    auto const nMethods = iface->numMethods();
+    auto const vtable = reinterpret_cast<LowFuncPtr*>(cursor);
+    cursor += nMethods * sizeof(LowFuncPtr);
+    always_assert(vtableVec[slot].vtable == nullptr);
+    vtableVec[slot].vtable = vtable;
+    vtableVec[slot].iface = iface;
+
+    for (size_t i = 0; i < nMethods; ++i) {
+      auto ifunc = iface->getMethod(i);
+      auto func = lookupMethod(ifunc->name());
+      ITRACE(3, "{}:{} @ slot {}\n", ifunc->name()->data(), func, i);
+      always_assert(func || Func::isSpecial(ifunc->name()));
+      vtable[i] = func;
+    }
+  }
+
+  always_assert(cursor == mem + memSz);
+}
+
 void Class::setRequirements() {
   RequirementMap::Builder reqBuilder;
 
@@ -2531,7 +2605,7 @@ void Class::setClassVec() {
 }
 
 void Class::setFuncVec(MethodMapBuilder& builder) {
-  auto funcVec = (LowFuncPtr*)mallocPtrFromThis();
+  auto funcVec = this->funcVec();
 
   memset(funcVec, 0, m_funcVecLen * sizeof(LowFuncPtr));
 

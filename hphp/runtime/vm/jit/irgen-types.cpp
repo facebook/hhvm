@@ -99,9 +99,14 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
     return gen(env, InstanceOfBitmask, objClass, ssaClassName);
   }
 
-  // If the class is an interface, we can just hit the class's interface map
-  // and call it a day.
+  // If the class is an interface, we can just hit the class's vtable or
+  // interface map and call it a day.
   if (isInterface(knownCls)) {
+    auto const slot = knownCls->preClass()->ifaceVtableSlot();
+    if (slot != kInvalidSlot && RuntimeOption::RepoAuthoritative) {
+      return gen(env, InstanceOfIfaceVtable, ClassData{knownCls}, objClass);
+    }
+
     return gen(env, InstanceOfIface, objClass, ssaClassName);
   }
 

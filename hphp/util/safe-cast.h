@@ -33,26 +33,28 @@ void safe_cast_failure(const std::string&, const char*, const char*)
 //////////////////////////////////////////////////////////////////////
 
 /*
- * DEBUG-only wrapper around boost::numeric_cast that converts any
+ * Optionally DEBUG-only wrappers around boost::numeric_cast that convert any
  * thrown exceptions to a failed assertion.
  */
-template <typename To, typename From>
-To safe_cast(From val) {
-  if (debug) {
-    try {
-      return boost::numeric_cast<To>(val);
-    } catch (std::bad_cast& bce) {
-      safe_cast_failure(
-        folly::to<std::string>(val),
-        // The function is always safe_cast, but will indicate which
-        // types were involved.
-        __PRETTY_FUNCTION__,
-        bce.what()
-      );
-    }
-  } else {
-    return static_cast<To>(val);
+
+template<typename To, typename From>
+To always_safe_cast(From val) {
+  try {
+    return boost::numeric_cast<To>(val);
+  } catch (std::bad_cast& bce) {
+    safe_cast_failure(
+      folly::to<std::string>(val),
+      // The function is always safe_cast, but will indicate which
+      // types were involved.
+      __PRETTY_FUNCTION__,
+      bce.what()
+    );
   }
+}
+
+template<typename To, typename From>
+To safe_cast(From val) {
+  return debug ? always_safe_cast<To>(val) : static_cast<To>(val);
 }
 
 //////////////////////////////////////////////////////////////////////

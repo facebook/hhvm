@@ -1485,8 +1485,8 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
     // least as long as the potential base (testClass) it might be a
     // subclass.
     auto const sf = v.makeReg();
-    v << cmplim{safe_cast<int32_t>(testClass->classVecLen()),
-                rObjClass[Class::classVecLenOff()], sf};
+    emitCmpVecLen(v, sf, rObjClass[Class::classVecLenOff()],
+                  static_cast<int32_t>(testClass->classVecLen()));
     return cond(v, CC_NB, sf, dst, [&](Vout& v) {
       // If it's a subclass, rTestClass must be at the appropriate index.
       auto const vecOffset = Class::classVecOff() +
@@ -3955,6 +3955,52 @@ void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
   auto methOff = int32_t(mSlotVal * sizeof(LowFuncPtr));
   auto& v = vmain();
   emitLdLowPtr(v, clsReg[methOff], dstReg, sizeof(LowFuncPtr));
+}
+
+void CodeGenerator::cgLdIfaceMethod(IRInstruction* inst) {
+  auto& extra = *inst->extra<LdIfaceMethod>();
+  auto& v = vmain();
+  auto const clsReg = srcLoc(inst, 0).reg();
+  auto const vtableVecReg = v.makeReg();
+  auto const vtableReg = v.makeReg();
+  auto const funcReg = dstLoc(inst, 0).reg();
+
+  emitLdLowPtr(v, clsReg[Class::vtableVecOff()],
+               vtableVecReg, sizeof(LowPtr<Class::VtableVecSlot>));
+  auto const vtableOff = extra.vtableIdx * sizeof(Class::VtableVecSlot) +
+             offsetof(Class::VtableVecSlot, vtable);
+  emitLdLowPtr(v, vtableVecReg[vtableOff], vtableReg, sizeof(LowVtablePtr));
+  emitLdLowPtr(v, vtableReg[extra.methodIdx * sizeof(LowFuncPtr)],
+               funcReg, sizeof(LowFuncPtr));
+}
+
+void CodeGenerator::cgInstanceOfIfaceVtable(IRInstruction* inst) {
+  auto iface = inst->extra<InstanceOfIfaceVtable>()->cls;
+  auto const slot = iface->preClass()->ifaceVtableSlot();
+  auto& v = vmain();
+  auto const clsReg = srcLoc(inst, 0).reg();
+
+  auto const sf = v.makeReg();
+  emitCmpVecLen(v, sf, clsReg[Class::vtableVecLenOff()],
+                static_cast<int32_t>(slot));
+  cond(
+    v, CC_A, sf, dstLoc(inst, 0).reg(),
+    [&](Vout& v) {
+      auto const vtableVecReg = v.makeReg();
+      emitLdLowPtr(v, clsReg[Class::vtableVecOff()],
+                   vtableVecReg, sizeof(LowPtr<Class::VtableVecSlot>));
+      auto const ifaceOff = slot * sizeof(Class::VtableVecSlot) +
+        offsetof(Class::VtableVecSlot, iface);
+      auto const sf = v.makeReg();
+      emitCmpClass(v, sf, iface, vtableVecReg[ifaceOff]);
+      auto dst = v.makeReg();
+      v << setcc{CC_E, sf, dst};
+      return dst;
+    },
+    [&](Vout& v) {
+      return v.cns(false);
+    }
+  );
 }
 
 void CodeGenerator::cgLookupClsMethodCache(IRInstruction* inst) {

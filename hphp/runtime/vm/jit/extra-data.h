@@ -101,6 +101,14 @@ struct ClassData : IRExtraData {
     return folly::to<std::string>(cls->name()->data());
   }
 
+  bool equals(const ClassData& o) const {
+    return cls == o.cls;
+  }
+
+  size_t hash() const {
+    return hash_int64(reinterpret_cast<intptr_t>(cls));
+  }
+
   const Class* cls;
 };
 
@@ -130,6 +138,28 @@ struct ClsMethodData : IRExtraData {
   const StringData* clsName;
   const StringData* methodName;
   const NamedEntity* namedEntity;
+};
+
+struct IfaceMethodData : IRExtraData {
+  IfaceMethodData(Slot vtableIdx, Slot methodIdx)
+    : vtableIdx(vtableIdx)
+    , methodIdx(methodIdx)
+  {}
+
+  std::string show() const {
+    return folly::sformat("{}, {}", vtableIdx, methodIdx);
+  }
+
+  bool equals(const IfaceMethodData& o) const {
+    return vtableIdx == o.vtableIdx && methodIdx == o.methodIdx;
+  }
+
+  size_t hash() const {
+    return hash_int64((int64_t)vtableIdx << 32 | methodIdx);
+  }
+
+  Slot vtableIdx;
+  Slot methodIdx;
 };
 
 /*
@@ -1082,6 +1112,7 @@ X(CheckInitSProps,              ClassData);
 X(InitSProps,                   ClassData);
 X(NewInstanceRaw,               ClassData);
 X(InitObjProps,                 ClassData);
+X(InstanceOfIfaceVtable,        ClassData);
 X(CufIterSpillFrame,            FPushCufData);
 X(SpillFrame,                   ActRecInfo);
 X(CheckStk,                     RelOffsetData);
@@ -1121,6 +1152,7 @@ X(LdClsMethodCacheCls,          ClsMethodData);
 X(LdClsMethodFCacheFunc,        ClsMethodData);
 X(LookupClsMethodFCache,        ClsMethodData);
 X(GetCtxFwdCallDyn,             ClsMethodData);
+X(LdIfaceMethod,                IfaceMethodData);
 X(LdStaticLocCached,            StaticLocName);
 X(LdFuncCached,                 LdFuncCachedData);
 X(LdFuncCachedSafe,             LdFuncCachedData);

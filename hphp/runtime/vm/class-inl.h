@@ -60,7 +60,7 @@ inline const LowClassPtr* Class::classVec() const {
   return m_classVec;
 }
 
-inline unsigned Class::classVecLen() const {
+inline Class::veclen_t Class::classVecLen() const {
   return m_classVecLen;
 }
 

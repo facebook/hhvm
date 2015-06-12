@@ -375,6 +375,17 @@ void emitCmpClass(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
   }
 }
 
+void emitCmpVecLen(Vout& v, Vreg sf, Vptr mem, Immed val) {
+  auto const size = sizeof(Class::veclen_t);
+  if (size == 2) {
+    v << cmpwim{val, mem, sf};
+  } else if (size == 4) {
+    v << cmplim{val, mem, sf};
+  } else {
+    not_implemented();
+  }
+}
+
 void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
   auto src_arity = src.numAllocated();
   auto dst_arity = dst.numAllocated();

@@ -870,6 +870,8 @@ void emit_class(EmitUnitState& state,
   for (auto& x : cls.traitAliasRules)    pce->addTraitAliasRule(x);
   pce->setNumDeclMethods(cls.numDeclMethods);
 
+  pce->setIfaceVtableSlot(state.index.lookup_iface_vtable_slot(&cls));
+
   for (auto& m : cls.methods) {
     FTRACE(2, "    method: {}\n", m->name->data());
     auto const fe = ue.newMethodEmitter(m->name, pce);

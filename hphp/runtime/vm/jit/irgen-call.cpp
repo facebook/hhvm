@@ -122,6 +122,7 @@ void fpushObjMethodUnknown(IRGS& env,
                            const StringData* methodName,
                            int32_t numParams,
                            bool shouldFatal) {
+  emitIncStat(env, Stats::ObjMethod_cached, 1);
   spillStack(env);
   fpushActRec(env,
               cns(env, TNullptr),  // Will be set by LdObjMethod
@@ -146,12 +147,44 @@ void fpushObjMethodUnknown(IRGS& env,
       sp(env));
 }
 
+/*
+ * Returns true iff a method named methodName appears in iface or any of its
+ * implemented (parent) interfaces. vtableSlot and func will be initialized to
+ * the appropriate vtable slot and interface Func when true is returned;
+ * otherwise their contents are undefined.
+ */
+bool findInterfaceVtableSlot(IRGS& env,
+                             const Class* iface,
+                             const StringData* methodName,
+                             Slot& vtableSlot,
+                             const Func*& func) {
+  vtableSlot = iface->preClass()->ifaceVtableSlot();
+
+  if (vtableSlot != kInvalidSlot) {
+    auto res = g_context->lookupObjMethod(func, iface, methodName,
+                                          curClass(env), false);
+    if (res == LookupResult::MethodFoundWithThis ||
+        res == LookupResult::MethodFoundNoThis) {
+      return true;
+    }
+  }
+
+  for (auto pface : iface->allInterfaces().range()) {
+    if (findInterfaceVtableSlot(env, pface, methodName, vtableSlot, func)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 void fpushObjMethodWithBaseClass(IRGS& env,
                                  SSATmp* obj,
                                  const Class* baseClass,
                                  const StringData* methodName,
                                  int32_t numParams,
-                                 bool shouldFatal) {
+                                 bool shouldFatal,
+                                 bool isMonomorphic) {
   SSATmp* objOrCls = obj;
   bool magicCall = false;
   const Func* func = lookupImmutableMethod(baseClass,
@@ -180,6 +213,7 @@ void fpushObjMethodWithBaseClass(IRGS& env,
          *     the Object and the method slot, which is the same as func's.
          */
         if (!(func->attrs() & AttrPrivate)) {
+          emitIncStat(env, Stats::ObjMethod_methodslot, 1);
           auto const clsTmp = gen(env, LdObjClass, obj);
           auto const funcTmp = gen(
             env,
@@ -218,6 +252,7 @@ void fpushObjMethodWithBaseClass(IRGS& env,
      * extract use vars).  It will decref it and put the class on the
      * actrec before entering the "real" cloned closure body.
      */
+    emitIncStat(env, Stats::ObjMethod_known, 1);
     if (func->attrs() & AttrStatic && !func->isClosureBody()) {
       assertx(baseClass);
       gen(env, DecRef, obj);
@@ -230,6 +265,25 @@ void fpushObjMethodWithBaseClass(IRGS& env,
                 magicCall ? methodName : nullptr,
                 false);
     return;
+  }
+
+  if (!isMonomorphic && classIsUniqueInterface(baseClass)) {
+    Slot vtableSlot;
+    const Func* ifaceFunc;
+    if (findInterfaceVtableSlot(env, baseClass, methodName,
+                                vtableSlot, ifaceFunc)) {
+      emitIncStat(env, Stats::ObjMethod_ifaceslot, 1);
+      auto cls = gen(env, LdObjClass, obj);
+      auto func = gen(env, LdIfaceMethod,
+                      IfaceMethodData{vtableSlot, ifaceFunc->methodSlot()},
+                      cls);
+      if (ifaceFunc->attrs() & AttrStatic) {
+        gen(env, DecRef, obj);
+        objOrCls = cls;
+      }
+      fpushActRec(env, func, objOrCls, numParams, nullptr, false);
+      return;
+    }
   }
 
   fpushObjMethodUnknown(env, obj, methodName, numParams, shouldFatal);
@@ -245,12 +299,14 @@ void fpushObjMethod(IRGS& env,
                     int32_t numParams,
                     bool shouldFatal,
                     Block* sideExit) {
+  emitIncStat(env, Stats::ObjMethod_total, 1);
+
   if (auto cls = obj->type().clsSpec().cls()) {
     if (!env.irb->constrainValue(obj, TypeConstraint(cls).setWeak())) {
       // If we know the class without having to specialize a guard any further,
       // use it.
       fpushObjMethodWithBaseClass(env, obj, cls, methodName,
-                                  numParams, shouldFatal);
+                                  numParams, shouldFatal, false);
       return;
     }
   }
@@ -264,24 +320,26 @@ void fpushObjMethod(IRGS& env,
   const bool shouldTryToOptimize = !env.transFlags.noProfiledFPush
     || !env.firstBcInst;
 
+  auto isMonomorphic = false;
   if (profile.optimizing() && shouldTryToOptimize) {
     ClassProfile data = profile.data(ClassProfile::reduce);
 
     if (data.isMonomorphic()) {
+      isMonomorphic = true;
       auto baseClass = data.getClass(0);
       if (baseClass->attrs() & AttrNoOverride) {
         auto refinedObj = gen(env, CheckType, Type::ExactObj(baseClass),
                               sideExit, obj);
         env.irb->constrainValue(refinedObj, TypeConstraint(baseClass));
         fpushObjMethodWithBaseClass(env, refinedObj, baseClass, methodName,
-                                    numParams, shouldFatal);
+                                    numParams, shouldFatal, true);
         return;
       }
     }
   }
 
   fpushObjMethodWithBaseClass(env, obj, nullptr, methodName, numParams,
-                              shouldFatal);
+                              shouldFatal, isMonomorphic);
 }
 
 void fpushFuncObj(IRGS& env, int32_t numParams) {

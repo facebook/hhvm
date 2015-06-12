@@ -88,7 +88,7 @@ struct IndexedStringMap {
 
   bool contains(const StringData* k) const { return m_map.find(k); }
   Index size() const { return m_map.extra(); }
-  bool empty() const { return size() != 0; }
+  bool empty() const { return size() == 0; }
 
   // Find the index for an entry by name.  Returns InvalidIndex if
   // there is no entry with this name.

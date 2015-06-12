@@ -39,6 +39,7 @@
 
 #include <list>
 #include <memory>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -192,6 +193,16 @@ struct Class : AtomicCountable {
   };
 
   /*
+   * A slot in a Class vtable vector, pointing to the vtable for an interface
+   * and the interface itself. Used for efficient interface method dispatch and
+   * instance checks.
+   */
+  struct VtableVecSlot {
+    LowVtablePtr vtable;
+    LowClassPtr iface;
+  };
+
+  /*
    * Container types.
    */
   using MethodMap         = FixedStringMap<Slot, false, Slot>;
@@ -201,6 +212,11 @@ struct Class : AtomicCountable {
                               const PreClass::ClassRequirement*, true, int>;
 
   using TraitAliasVec = std::vector<PreClass::TraitAliasRule::NamePair>;
+
+  // We store the length of vectors of methods, parent classes and
+  // interfaces. In lowptr builds, we limit all of these quantities to 2^16-1
+  // to save memory.
+  using veclen_t = std::conditional<use_lowptr, uint16_t, uint32_t>::type;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -283,10 +299,15 @@ public:
   // Pre- and post-allocations.                                         [const]
 
   /*
-   * The start of malloc'd memory for `this' (i.e., including the method
-   * table).
+   * Pointer to this Class's FuncVec, which is allocated before this.
    */
-  LowFuncPtr* mallocPtrFromThis() const;
+  LowFuncPtr* funcVec() const;
+
+  /*
+   * The start of malloc'd memory for `this' (i.e., including anything
+   * allocated before the object itself.).
+   */
+  void* mallocPtr() const;
 
   /*
    * Pointer to the array of Class pointers, allocated immediately after
@@ -298,7 +319,7 @@ public:
   /*
    * The size of the classVec.
    */
-  unsigned classVecLen() const;
+  veclen_t classVecLen() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -823,6 +844,8 @@ public:
   OFF(invoke)
   OFF(preClass)
   OFF(propDataCache)
+  OFF(vtableVecLen)
+  OFF(vtableVec)
 #undef OFF
 
 
@@ -1013,6 +1036,7 @@ private:
   void setProperties();
   void setInitializers();
   void setInterfaces();
+  void setInterfaceVtables();
   void setClassVec();
   void setFuncVec(MethodMapBuilder& builder);
   void setRequirements();
@@ -1103,8 +1127,10 @@ private:
   mutable rds::Link<TypedValue>* m_sPropCache{nullptr};
   mutable rds::Link<bool> m_sPropCacheInit{rds::kInvalidHandle};
 
-  unsigned m_classVecLen;
-  unsigned m_funcVecLen;
+  veclen_t m_classVecLen;
+  veclen_t m_funcVecLen;
+  veclen_t m_vtableVecLen{0};
+  LowPtr<VtableVecSlot> m_vtableVec{nullptr};
 
   // Each ObjectData is created with enough trailing space to directly store
   // the vector of declared properties. To look up a property by name and

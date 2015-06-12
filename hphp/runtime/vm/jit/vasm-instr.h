@@ -133,6 +133,7 @@ struct Vunit;
   O(cmpb, Inone, U(s0) U(s1), D(sf))\
   O(cmpbi, I(s0), U(s1), D(sf))\
   O(cmpbim, I(s0), U(s1), D(sf))\
+  O(cmpwim, I(s0), U(s1), D(sf))\
   O(cmpl, Inone, U(s0) U(s1), D(sf))\
   O(cmpli, I(s0), U(s1), D(sf))\
   O(cmplim, I(s0), U(s1), D(sf))\
@@ -567,6 +568,7 @@ struct cmovq { ConditionCode cc; VregSF sf; Vreg64 f, t, d; };
 struct cmpb  { Vreg8  s0; Vreg8  s1; VregSF sf; };
 struct cmpbi { Immed  s0; Vreg8  s1; VregSF sf; };
 struct cmpbim { Immed s0; Vptr s1; VregSF sf; };
+struct cmpwim { Immed s0; Vptr s1; VregSF sf; };
 struct cmpl  { Vreg32 s0; Vreg32 s1; VregSF sf; };
 struct cmpli { Immed  s0; Vreg32 s1; VregSF sf; };
 struct cmplim { Immed s0; Vptr s1; VregSF sf; };

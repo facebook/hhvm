@@ -531,6 +531,14 @@ struct Index {
                                       SString name) const;
 
   /*
+   * Returns the computed vtable slot for the given class, if it's an interface
+   * that was given a vtable slot. No two interfaces implemented by the same
+   * class will share the same vtable slot. May return kInvalidSlot, if the
+   * given class isn't an interface or if it wasn't assigned a slot.
+   */
+  Slot lookup_iface_vtable_slot(borrowed_ptr<const php::Class>) const;
+
+  /*
    * Refine the return type for a function, based on a round of
    * analysis.
    *

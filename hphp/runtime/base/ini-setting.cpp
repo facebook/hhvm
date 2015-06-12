@@ -838,7 +838,9 @@ void IniSetting::Bind(
    * Note that Mode value PHP_INI_SET_USER and PHP_INI_SET_EVERY are bit
    * sets; "SET" in this use means "bitset", and not "assignment".
    */
-  bool is_thread_local = (
+  bool is_thread_local;
+  if (RuntimeOption::EnableZendIniCompat) {
+    is_thread_local = (
     (mode == PHP_INI_USER) ||
     (mode == PHP_INI_PERDIR) ||
     (mode == PHP_INI_ALL) ||  /* See note above */
@@ -846,7 +848,11 @@ void IniSetting::Bind(
     (mode &  PHP_INI_PERDIR) ||
     (mode &  PHP_INI_ALL)
     );
-
+  } else {
+    is_thread_local = (mode == PHP_INI_USER || mode == PHP_INI_ALL);
+    assert(is_thread_local || !ExtensionRegistry::modulesInitialised() ||
+           s_pretendExtensionsHaveNotBeenLoaded);
+  }
   //
   // When the debugger is loading its configuration, there will be some
   // cases where Extension::ModulesInitialised(), but the name appears
@@ -856,7 +862,7 @@ void IniSetting::Bind(
   //
 
   bool use_user = is_thread_local;
-  if (!use_user) {
+  if (RuntimeOption::EnableZendIniCompat && !use_user) {
     //
     // If it is already in the user callbacks, continue to use it from
     // there. We don't expect it to be already there, but it has been

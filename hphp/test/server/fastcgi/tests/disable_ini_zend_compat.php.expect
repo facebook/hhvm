@@ -1,0 +1,12 @@
+---Enable Ini Zend Compat ON---
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+---Enable Ini Zend Compat OFF---
+string(9) "104857600"
+string(4) "100M"
+string(0) ""
+string(0) ""
+string(0) ""

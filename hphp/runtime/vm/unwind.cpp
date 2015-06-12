@@ -367,10 +367,13 @@ bool chainFaults(Fault& fault) {
  * it's currently operating on, as the underlying faults vector may
  * reallocate due to nested exception handling.
  */
-UnwindAction unwind(ActRec*& fp,
-                    Stack& stack,
-                    PC& pc,
-                    Fault fault) {
+UnwindAction unwind() {
+  assert(!g_context->m_faults.empty());
+  auto& fp = vmfp();
+  auto& stack = vmStack();
+  auto& pc = vmpc();
+  auto fault = g_context->m_faults.back();
+
   ITRACE(1, "entering unwinder for fault: {}\n", describeFault(fault));
   SCOPE_EXIT {
     ITRACE(1, "leaving unwinder for fault: {}\n", describeFault(fault));
@@ -532,16 +535,6 @@ void pushFault(const Object& o) {
   ITRACE(1, "pushing new fault: {}\n", describeFault(f));
 }
 
-UnwindAction enterUnwinder() {
-  auto fault = g_context->m_faults.back();
-  return unwind(
-    vmfp(),    // by ref
-    vmStack(), // by ref
-    vmpc(),    // by ref
-    fault
-  );
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -562,20 +555,14 @@ UnwindAction exception_handler() noexcept {
    * instead of pushing a new one.
    */
   catch (const VMPrepareUnwind&) {
-    Fault fault = g_context->m_faults.back();
     ITRACE(1, "unwind: restoring offset {}\n", vmpc());
-    return unwind(
-      vmfp(),
-      vmStack(),
-      vmpc(),
-      fault
-    );
+    return unwind();
   }
 
   catch (const Object& o) {
     ITRACE(1, "unwind: Object of class {}\n", o->getVMClass()->name()->data());
     pushFault(o);
-    return enterUnwinder();
+    return unwind();
   }
 
   catch (VMSwitchMode&) {
@@ -599,19 +586,19 @@ UnwindAction exception_handler() noexcept {
   catch (Exception& e) {
     ITRACE(1, "unwind: Exception: {}\n", e.what());
     pushFault(e.clone());;
-    return enterUnwinder();
+    return unwind();
   }
 
   catch (std::exception& e) {
     ITRACE(1, "unwind: std::exception: {}\n", e.what());
     pushFault(new Exception("unexpected %s: %s", typeid(e).name(), e.what()));
-    return enterUnwinder();
+    return unwind();
   }
 
   catch (...) {
     ITRACE(1, "unwind: unknown\n");
     pushFault(new Exception("unknown exception"));
-    return enterUnwinder();
+    return unwind();
   }
 
   not_reached();

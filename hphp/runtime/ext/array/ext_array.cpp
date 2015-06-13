@@ -1324,49 +1324,50 @@ namespace {
 
 enum class NoCow {};
 template<class DoCow = void, class NonArrayRet, class OpPtr>
-static Variant iter_op_impl(VRefParam refParam, OpPtr op, NonArrayRet nonArray,
+static Variant iter_op_impl(VRefParam refParam, OpPtr op, const String& objOp,
+                            NonArrayRet nonArray,
                             bool(ArrayData::*pred)() const =
                               &ArrayData::isInvalid) {
-  Cell& cell = *refParam.wrapped().asCell();
-  ArrayData* ad = NULL;
-
-  if (cell.m_type == KindOfArray) {
-    ad = cell.m_data.parr;
-  }
-
-  if (cell.m_type == KindOfObject) {
-    Object object = refParam.wrapped().toObject();
-    if (object->instanceof("ArrayObject")) {
-      ad = object->o_get("storage").asCell()->m_data.parr;
+  auto& cell = *refParam.wrapped().asCell();
+  if (cell.m_type != KindOfArray) {
+    if (cell.m_type == KindOfObject) {
+      auto obj = refParam.wrapped().toObject();
+      if (obj->instanceof(SystemLib::s_ArrayObjectClass)) {
+        return obj->o_invoke_few_args(objOp, 0);
+      }
     }
-  }
-
-  if (NULL == ad) {
     throw_bad_type_exception("expecting an array");
     return Variant(nonArray);
   }
-  
+
+  auto ad = cell.m_data.parr;
   auto constexpr doCow = !std::is_same<DoCow, NoCow>::value;
   if (doCow && ad->hasMultipleRefs() && !(ad->*pred)() &&
       !ad->noCopyOnWrite()) {
     ad = ad->copy();
-    if (cell.m_type == KindOfArray) {
-      cellSet(make_tv<KindOfArray>(ad), cell);
-    } else {
-      refParam.wrapped().toObject()->o_set("storage", ad);
-    }
+    cellSet(make_tv<KindOfArray>(ad), cell);
   }
-
   return (ad->*op)();
 }
 
 }
+
+const StaticString
+  s___each("__each"),
+  s___current("__current"),
+  s___key("__key"),
+  s___next("__next"),
+  s___prev("__prev"),
+  s___reset("__reset"),
+  s___end("__end");
+
 
 Variant HHVM_FUNCTION(each,
                       VRefParam refParam) {
   return iter_op_impl(
     refParam,
     &ArrayData::each,
+    s___each,
     Variant::NullInit()
   );
 }
@@ -1376,6 +1377,7 @@ Variant HHVM_FUNCTION(current,
   return iter_op_impl<NoCow>(
     refParam,
     &ArrayData::current,
+    s___current,
     false
   );
 }
@@ -1390,6 +1392,7 @@ Variant HHVM_FUNCTION(key,
   return iter_op_impl<NoCow>(
     refParam,
     &ArrayData::key,
+    s___key,
     false
   );
 }
@@ -1399,6 +1402,7 @@ Variant HHVM_FUNCTION(next,
   return iter_op_impl(
     refParam,
     &ArrayData::next,
+    s___next,
     false
   );
 }
@@ -1408,6 +1412,7 @@ Variant HHVM_FUNCTION(prev,
   return iter_op_impl(
     refParam,
     &ArrayData::prev,
+    s___prev,
     false
   );
 }
@@ -1417,6 +1422,7 @@ Variant HHVM_FUNCTION(reset,
   return iter_op_impl(
     refParam,
     &ArrayData::reset,
+    s___reset,
     false,
     &ArrayData::isHead
   );
@@ -1427,6 +1433,7 @@ Variant HHVM_FUNCTION(end,
   return iter_op_impl(
     refParam,
     &ArrayData::end,
+    s___end,
     false,
     &ArrayData::isTail
   );

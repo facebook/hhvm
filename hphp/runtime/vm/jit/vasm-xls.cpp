@@ -1131,6 +1131,31 @@ void Vxls::allocate(Interval* current) {
     free_until[r] = std::min(until, free_until[r]);
   }
 
+  if (current->ranges.size() > 1) {
+    auto blk_range = findBlockRange(current->start());
+    if (blk_range.end > current->ranges[0].end) {
+      // We're assigning a register to an interval with
+      // multiple ranges, but the vreg isn't live out
+      // of the first range. This means there's no
+      // connection between this range and any subsequent
+      // one, so we can safely break the interval
+      // after the first range without making things worse.
+      // On the other hand, it can make things better, by
+      // eg not assigning a constant to a register in an
+      // unlikely exit block, and then holding it in a callee save
+      // reg across lots of unrelated code until its used
+      // again in another unlikely exit block.
+      auto second = current->split(blk_range.end, false);
+      pending.push(second);
+    } else if (current->constant &&
+               current->uses.size() &&
+               current->uses[0].pos >= blk_range.end) {
+      // we probably don't want to load a constant into a register
+      // at the start of a block where its not used.
+      return spill(current);
+    }
+  }
+
   // Try to get a hinted register
   auto hint = findHint(current, free_until, allow);
   if (hint != InvalidReg && free_until[hint] >= current->end()) {

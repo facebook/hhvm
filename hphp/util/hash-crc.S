@@ -69,8 +69,11 @@ ETCH_LABEL(iutailloop):
         mov     (%rdi), %dl
         inc     %rdi
         ror     $8, %rdx
-        loop    ETCH_LABEL(iutailloop)
-        and     %r8, %rdx
+        dec     %ecx
+        jz      ETCH_LABEL(ifix_mis_br)     
+		jmp     ETCH_LABEL(iutailloop)
+ETCH_LABEL(ifix_mis_br):        
+		and     %r8, %rdx
         crc32q  %rdx, %rax
 
 ETCH_LABEL(iuend):
@@ -144,9 +147,12 @@ ETCH_LABEL(csutailloop):
         mov     (%rdi), %dl
         inc     %rdi
         ror     $8, %rdx
-        loop    ETCH_LABEL(csutailloop)
-        crc32q  %rdx, %rax
-
+        dec     %ecx
+		jz      ETCH_LABEL(csfix_mis_br)     
+		jmp     ETCH_LABEL(csutailloop)
+ETCH_LABEL(csfix_mis_br):  				
+		crc32q  %rdx, %rax
+		
 ETCH_LABEL(csuend):
         shr     %eax
         ret

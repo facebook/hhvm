@@ -1,0 +1,4 @@
+File "unset_shape_idx.php", line 9, characters 3-19:
+In strict mode, unset is banned except on array indexing (Typing[4135])
+File "unset_shape_idx.php", line 6, characters 12-12:
+This is a shape

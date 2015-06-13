@@ -1,0 +1,4 @@
+File "no_map_unset.php", line 11, characters 3-17:
+In strict mode, unset is banned except on array indexing (Typing[4135])
+File "no_map_unset.php", line 3, characters 21-23:
+This is an object of type Map

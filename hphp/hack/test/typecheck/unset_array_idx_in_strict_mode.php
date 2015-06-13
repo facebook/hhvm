@@ -5,3 +5,12 @@ function f(): void {
   $a = array('hi');
   unset($a[0]);
 }
+
+function g(bool $cond): void {
+  if ($cond) {
+    $arr = array('foo');
+  } else {
+    $arr = array(0);
+  }
+  unset($arr[0]);
+}

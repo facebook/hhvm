@@ -826,29 +826,6 @@ void Vgen::emit(const lea& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * Move all the elements of in into out, replacing count elements of out
- * starting at idx. in be will be cleared at the end.
- *
- * Example: vector_splice([1, 2, 3, 4, 5], 2, 1, [10, 11, 12]) will change out
- * to [1, 2, 10, 11, 12, 4, 5].
- */
-template<typename V>
-void vector_splice(V& out, size_t idx, size_t count, V& in) {
-  auto out_size = out.size();
-
-  // Start by making room in out for the new elements.
-  out.resize(out.size() + in.size() - count);
-
-  // Move everything after the to-be-overwritten elements to the new end.
-  std::move_backward(out.begin() + idx + count, out.begin() + out_size,
-                     out.end());
-
-  // Move the new elements in
-  std::move(in.begin(), in.end(), out.begin() + idx);
-  in.clear();
-}
-
 // Lower svcreq{} by making copies to abi registers explicit, saving
 // vm regs, and returning to the VM. svcreq{} is guaranteed to be
 // at the end of a block, so we can just keep appending to the same
@@ -1171,6 +1148,8 @@ void optimizeX64(Vunit& unit, const Abi& abi) {
   optimizeExits(unit);
 
   lowerForX64(unit, abi);
+
+  simplify(unit);
 
   if (!unit.constToReg.empty()) {
     foldImms<x64::ImmFolder>(unit);

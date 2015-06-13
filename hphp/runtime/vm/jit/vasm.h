@@ -120,6 +120,7 @@ void optimizePhis(Vunit&);
 void removeDeadCode(Vunit&);
 void removeTrivialNops(Vunit&);
 template<typename Folder> void foldImms(Vunit&);
+void simplify(Vunit&);
 
 ///////////////////////////////////////////////////////////////////////////////
 

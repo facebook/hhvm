@@ -3418,6 +3418,14 @@ static class PDOExtension final : public Extension {
 public:
   PDOExtension() : Extension("pdo", " 1.0.4dev") {}
 
+  std::string mysql_default_socket;
+
+  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
+    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
+                     "pdo_mysql.default_socket", nullptr,
+                     &mysql_default_socket);
+  }
+
   void moduleInit() override {
     HHVM_FE(pdo_drivers);
     HHVM_ME(PDO, __construct);

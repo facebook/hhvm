@@ -36,9 +36,8 @@ namespace {
 
   NEVER_INLINE __attribute__((__noreturn__))
   void failAlreadyFinished() {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Unable to notify ConditionWaitHandle that has already finished"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Unable to notify ConditionWaitHandle that has already finished");
   }
 }
 
@@ -50,15 +49,13 @@ Object c_ConditionWaitHandle::ti_create(const Variant& child) {
   // Child not a WaitHandle?
   auto const child_wh = c_WaitHandle::fromCell(child.asCell());
   if (UNLIKELY(!child_wh)) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected child to be an instance of WaitHandle"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Expected child to be an instance of WaitHandle");
   }
 
   // Child finished before notification?
   if (UNLIKELY(child_wh->isFinished())) {
-    Object e(getNotNotifiedException());
-    throw e;
+    throw Object{getNotNotifiedException()};
   }
 
   assert(child_wh->instanceof(c_WaitableWaitHandle::classof()));
@@ -87,9 +84,8 @@ void c_ConditionWaitHandle::t_fail(const Variant& exception) {
     cell->m_type != KindOfObject ||
     !cell->m_data.pobj->instanceof(SystemLib::s_ExceptionClass)
   )) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected exception to be an instance of Exception"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Expected exception to be an instance of Exception");
   }
 
   if (isFinished()) {

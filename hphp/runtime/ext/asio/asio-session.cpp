@@ -53,8 +53,7 @@ namespace {
         "Unable to set {}: callback not a closure",
         name
       ).str();
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg));
-      throw e;
+      SystemLib::throwInvalidArgumentExceptionObject(msg);
     }
     return callback.getObjectDataOrNull();
   }
@@ -84,9 +83,8 @@ AsioSession::AsioSession()
 
 void AsioSession::enterContext(ActRec* savedFP) {
   if (UNLIKELY(getCurrentContextIdx() >= MAX_CONTEXT_DEPTH)) {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      "Unable to enter asio context: too many contexts open"));
-    throw e;
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Unable to enter asio context: too many contexts open");
   }
 
   m_contexts.push_back(new AsioContext(savedFP));

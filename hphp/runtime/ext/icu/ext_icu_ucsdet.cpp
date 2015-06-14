@@ -60,8 +60,8 @@ Class* EncodingMatch::c_EncodingMatch = nullptr;
 #define FETCH_MATCH(dest, src) \
   auto dest = EncodingMatch::Get(src); \
   if (!dest) { \
-      throw Object(SystemLib::AllocExceptionObject( \
-                   "Call to invalid EncodingMatch Object")); \
+      SystemLib::throwExceptionObject( \
+        "Call to invalid EncodingMatch Object");        \
   }
 
 static bool HHVM_METHOD(EncodingMatch, isValid) {

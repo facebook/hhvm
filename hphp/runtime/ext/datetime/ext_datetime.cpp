@@ -364,7 +364,7 @@ void HHVM_METHOD(DateTimeZone, __construct,
     std::string msg = "DateTimeZone::__construct(): Unknown or bad timezone (";
     msg += timezone.data();
     msg += ")";
-    throw Object(SystemLib::AllocExceptionObject(msg));
+    SystemLib::throwExceptionObject(msg);
   }
 }
 
@@ -459,7 +459,7 @@ void HHVM_METHOD(DateInterval, __construct,
     std::string msg = "DateInterval::__construct: Invalid interval (";
     msg += interval_spec.data();
     msg += ")";
-    throw Object(SystemLib::AllocExceptionObject(msg));
+    SystemLib::throwExceptionObject(msg);
   }
 }
 
@@ -509,7 +509,7 @@ Variant HHVM_METHOD(DateInterval, __get,
   std::string msg = "Undefined property '";
   msg += member.toString().data();
   msg += ") on DateInterval object";
-  throw Object(SystemLib::AllocExceptionObject(msg));
+  SystemLib::throwExceptionObject(msg);
 }
 
 Variant HHVM_METHOD(DateInterval, __set,
@@ -554,7 +554,7 @@ Variant HHVM_METHOD(DateInterval, __set,
   std::string msg = "Undefined property '";
   msg += member.toString().data();
   msg += ") on DateInterval object";
-  throw Object(SystemLib::AllocExceptionObject(msg));
+  SystemLib::throwExceptionObject(msg);
 }
 
 Object HHVM_STATIC_METHOD(DateInterval, createFromDateString,

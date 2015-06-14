@@ -58,8 +58,8 @@ public:
   bool stat(struct stat* buf) override;
 
   Object await(uint16_t events, double timeout) override {
-    throw Object(SystemLib::AllocExceptionObject(
-      "Userstreams do not support awaiting"));
+    SystemLib::throwExceptionObject(
+      "Userstreams do not support awaiting");
   }
 
   Variant getWrapperMetaData() override { return Variant(m_obj); }

@@ -40,9 +40,8 @@ void c_SleepWaitHandle::ti_setonsuccesscallback(const Variant& callback) {
 
 Object c_SleepWaitHandle::ti_create(int64_t usecs) {
   if (UNLIKELY(usecs < 0)) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected usecs to be a non-negative integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+        "Expected usecs to be a non-negative integer");
   }
 
   auto wh = makeSmartPtr<c_SleepWaitHandle>();

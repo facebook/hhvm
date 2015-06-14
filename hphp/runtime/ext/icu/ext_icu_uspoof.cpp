@@ -9,8 +9,8 @@ const StaticString s_SpoofChecker("SpoofChecker");
 #define FETCH_SPOOF(dest, src) \
   auto dest = SpoofChecker::Get(src); \
   if (!dest) { \
-    throw Object(SystemLib::AllocExceptionObject( \
-      "Call to invalid SpoofChecker Object")); \
+    SystemLib::throwExceptionObject(           \
+      "Call to invalid SpoofChecker Object"); \
   }
 
 static bool HHVM_METHOD(SpoofChecker, isSuspicious, const String& text,

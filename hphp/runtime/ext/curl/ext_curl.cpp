@@ -1391,10 +1391,10 @@ void CurlMultiResource::sweep() {
     return;                                                              \
   }
 
-#define CHECK_MULTI_RESOURCE_THROW(curlm)                                \
-  auto curlm = dyn_cast_or_null<CurlMultiResource>(mh);                  \
-  if (!curlm || curlm->isInvalid()) {                                    \
-    throw Object(SystemLib::AllocExceptionObject(CURLM_ARG_WARNING));    \
+#define CHECK_MULTI_RESOURCE_THROW(curlm)                               \
+  auto curlm = dyn_cast_or_null<CurlMultiResource>(mh);                 \
+  if (!curlm || curlm->isInvalid()) {                                   \
+    SystemLib::throwExceptionObject(CURLM_ARG_WARNING);                 \
   }
 
 Resource HHVM_FUNCTION(curl_multi_init) {

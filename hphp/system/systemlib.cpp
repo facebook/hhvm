@@ -118,6 +118,46 @@ ObjectData* AllocLazyKeyedIterableViewObject(const Variant& iterable) {
 
 #undef CREATE_AND_CONSTRUCT
 
+void throwExceptionObject(const Variant& message) {
+  throw Object{AllocExceptionObject(message)};
+}
+
+void throwBadMethodCallExceptionObject(const Variant& message) {
+  throw Object{AllocBadMethodCallExceptionObject(message)};
+}
+
+void throwInvalidArgumentExceptionObject(const Variant& message) {
+  throw Object{AllocInvalidArgumentExceptionObject(message)};
+}
+
+void throwRuntimeExceptionObject(const Variant& message) {
+  throw Object{AllocRuntimeExceptionObject(message)};
+}
+
+void throwOutOfBoundsExceptionObject(const Variant& message) {
+  throw Object{AllocOutOfBoundsExceptionObject(message)};
+}
+
+void throwInvalidOperationExceptionObject(const Variant& message) {
+  throw Object{AllocInvalidOperationExceptionObject(message)};
+}
+
+void throwDOMExceptionObject(const Variant& message,
+                             const Variant& code) {
+  throw Object{AllocDOMExceptionObject(message, code)};
+}
+
+void throwSoapFaultObject(const Variant& code,
+                          const Variant& message,
+                          const Variant& actor /* = null_variant */,
+                          const Variant& detail /* = null_variant */,
+                          const Variant& name /* = null_variant */,
+                          const Variant& header /* = null_variant */) {
+  throw Object{AllocSoapFaultObject(code, message,
+                                    actor, detail,
+                                    name, header)};
+}
+
 #define ALLOC_OBJECT_STUB(name)                                           \
   ObjectData* Alloc##name##Object() {                                     \
     return ObjectData::newInstance(s_##name##Class);                      \

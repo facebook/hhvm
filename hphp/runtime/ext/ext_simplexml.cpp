@@ -1201,9 +1201,7 @@ void c_SimpleXMLElement::t___construct(const String& data,
     xmlReadFile(data.data(), nullptr, options) :
     xmlReadMemory(data.data(), data.size(), nullptr, nullptr, options);
   if (!docp) {
-    throw Object(
-        SystemLib::AllocExceptionObject("String could not be parsed as XML"));
-    return;
+    SystemLib::throwExceptionObject("String could not be parsed as XML");
   }
   iter.nsprefix = !ns.empty() ? xmlStrdup((xmlChar*)ns.data()) : nullptr;
   iter.isprefix = is_prefix;

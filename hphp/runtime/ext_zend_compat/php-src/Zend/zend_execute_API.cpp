@@ -260,4 +260,3 @@ ZEND_API zend_class_entry *zend_fetch_class_by_name(
   }
   return HPHP::zend_hphp_class_to_class_entry(cls);
 }
-

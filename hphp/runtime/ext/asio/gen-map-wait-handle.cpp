@@ -50,9 +50,8 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
   if (UNLIKELY(!dependencies.isObject() ||
       !(obj = dependencies.getObjectData())->isCollection() ||
       obj->collectionType() != CollectionType::Map)) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected dependencies to be an instance of Map"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Expected dependencies to be an instance of Map");
   }
   assertx(obj->collectionType() == CollectionType::Map);
   auto deps = SmartPtr<c_Map>::attach(c_Map::Clone(obj));
@@ -64,9 +63,8 @@ Object c_GenMapWaitHandle::ti_create(const Variant& dependencies) {
     auto* current = tvAssertCell(deps->iter_value(iter_pos));
     auto const child = c_WaitHandle::fromCell(current);
     if (UNLIKELY(!child)) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected dependencies to be a map of WaitHandle instances"));
-      throw e;
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Expected dependencies to be a map of WaitHandle instances");
     }
 
     if (!child->isFinished()) {

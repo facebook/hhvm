@@ -162,9 +162,8 @@ void objOffsetUnset(ObjectData* base, const Variant& offset) {
 // without a key to implicitly create a new element without supplying assigning
 // an initial value (ex "$vector[]['a'] = 73;").
 void throw_cannot_use_newelem_for_lval_read() {
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(
-    "Cannot use [] with collections for reading in an lvalue context"));
-  throw e;
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Cannot use [] with collections for reading in an lvalue context");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -58,9 +58,8 @@ static ALWAYS_INLINE
 const Cell container_as_cell(const Variant& container) {
   const auto& cellContainer = *container.asCell();
   if (UNLIKELY(!isContainer(cellContainer))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a container (array or collection)"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter must be a container (array or collection)");
   }
   return cellContainer;
 }
@@ -77,8 +76,7 @@ void throwIntOOB(int64_t key, bool isVector /* = false */) {
                          "Integer key %" PRId64 " is %s", key,
                          isVector ? "out of bounds" : "not defined");
   msg.setSize(std::min(sz, buf.len));
-  Object e(SystemLib::AllocOutOfBoundsExceptionObject(msg));
-  throw e;
+  SystemLib::throwOutOfBoundsExceptionObject(msg);
 }
 
 void throwOOB(int64_t key) {
@@ -101,8 +99,7 @@ void throwStrOOB(StringData* key) {
   msg += ss1;
   msg += ss2;
   msg += ss3;
-  Object e(SystemLib::AllocOutOfBoundsExceptionObject(msg));
-  throw e;
+  SystemLib::throwOutOfBoundsExceptionObject(msg);
 }
 
 ArrayIter getArrayIterHelper(const Variant& v, size_t& sz) {
@@ -124,9 +121,8 @@ ArrayIter getArrayIterHelper(const Variant& v, size_t& sz) {
       return ArrayIter(iterable.detach(), ArrayIter::noInc);
     }
   }
-  Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-    "Parameter must be an array or an instance of Traversable"));
-  throw e;
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Parameter must be an array or an instance of Traversable");
 }
 
 void triggerCow(c_Vector* vec) {
@@ -196,9 +192,8 @@ BaseVector::php_fromKeysOf(const Variant& container) {
 
   const auto& cellContainer = *container.asCell();
   if (UNLIKELY(!isContainer(cellContainer))) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a container (array or collection)"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter must be a container (array or collection)");
   }
 
   ArrayIter iter(cellContainer);
@@ -218,9 +213,8 @@ BaseVector::php_map(const Variant& callback, MakeArgs makeArgs) const {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback");
   }
 
   TVector* nv = newobj<TVector>();
@@ -249,9 +243,8 @@ BaseVector::php_filter(const Variant& callback, MakeArgs makeArgs) const {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback");
   }
   TVector* nv = newobj<TVector>();
   uint32_t sz = m_size;
@@ -276,9 +269,8 @@ typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_take(const Variant& n) {
   if (!n.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter n must be an integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
   auto* vec = newobj<TVector>();
@@ -304,9 +296,8 @@ BaseVector::php_takeWhile(const Variant& fn) {
   CallCtx ctx;
   vm_decode_function(fn, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback");
   }
   auto* vec = newobj<TVector>();
   assert(vec->m_size == 0);
@@ -334,9 +325,8 @@ typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_skip(const Variant& n) {
   if (!n.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter n must be an integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
   auto* vec = newobj<TVector>();
@@ -361,9 +351,8 @@ BaseVector::php_skipWhile(const Variant& fn) {
   CallCtx ctx;
   vm_decode_function(fn, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback");
   }
   auto* vec = newobj<TVector>();
   assert(vec->canMutateBuffer());
@@ -396,14 +385,12 @@ BaseVector::php_slice(const Variant& start, const Variant& len) {
   int64_t istart;
   int64_t ilen;
   if (!start.isInteger() || (istart = start.toInt64()) < 0) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter start must be a non-negative integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter start must be a non-negative integer");
   }
   if (!len.isInteger() || (ilen = len.toInt64()) < 0) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter len must be a non-negative integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter len must be a non-negative integer");
   }
   size_t skipAmt = std::min<size_t>(istart, m_size);
   size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
@@ -602,9 +589,8 @@ Variant BaseVector::popFront() {
     memmove(m_data, m_data+1, m_size * sizeof(TypedValue));
     return ret;
   } else {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      "Cannot pop empty Vector"));
-    throw e;
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Cannot pop empty Vector");
   }
 }
 
@@ -662,9 +648,8 @@ BaseVector::~BaseVector() {
 
 NEVER_INLINE
 void BaseVector::throwBadKeyType() {
-  Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-             "Only integer keys may be used with Vectors"));
-  throw e;
+  SystemLib::throwInvalidArgumentExceptionObject(
+             "Only integer keys may be used with Vectors");
 }
 
 void BaseVector::init(const Variant& t) {
@@ -806,23 +791,20 @@ Variant c_Vector::t_pop() {
     decSize();
     return Variant(tvAsCVarRef(&m_data[m_size]), Variant::CellCopy());
   } else {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      "Cannot pop empty Vector"));
-    throw e;
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Cannot pop empty Vector");
   }
 }
 
 int64_t c_Vector::checkRequestedCapacity(const Variant& sz) {
   if (!sz.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter sz must be a non-negative integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter sz must be a non-negative integer");
   }
   int64_t intSz = sz.toInt64();
   if (intSz < 0) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter sz must be a non-negative integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter sz must be a non-negative integer");
   }
   if (intSz > MaxCapacity()) {
     auto msg = folly::format(
@@ -830,8 +812,7 @@ int64_t c_Vector::checkRequestedCapacity(const Variant& sz) {
       MaxCapacity(),
       intSz
     ).str();
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(msg);
   }
   return intSz;
 }
@@ -942,19 +923,16 @@ void c_Vector::t_reverse() {
 void c_Vector::t_splice(const Variant& offset, const Variant& len /* = null */,
                         const Variant& replacement /* = null */) {
   if (!offset.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter offset must be an integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter offset must be an integer");
   }
   if (!len.isNull() && !len.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter len must be null or an integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter len must be null or an integer");
   }
   if (!replacement.isNull()) {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      "Vector::splice does not support replacement parameter"));
-    throw e;
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Vector::splice does not support replacement parameter");
   }
   int64_t sz = m_size;
   int64_t startPos = offset.toInt64();
@@ -1177,9 +1155,8 @@ Object c_ImmVector::ti_fromkeysof(const Variant& container) {
 
 Object c_Vector::ti_fromarray(const Variant& arr) {
   if (!arr.isArray()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter arr must be an array"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter arr must be an array");
   }
   auto* target = newobj<c_Vector>();
   Object ret = target;
@@ -1289,9 +1266,8 @@ void c_Vector::OffsetSet(ObjectData* obj, const TypedValue* key,
 }
 
 void c_Vector::OffsetUnset(ObjectData* obj, const TypedValue* key) {
-  Object e(SystemLib::AllocRuntimeExceptionObject(
-    "Cannot unset an element of a Vector"));
-  throw e;
+  SystemLib::throwRuntimeExceptionObject(
+    "Cannot unset an element of a Vector");
 }
 
 // This function will create a immutable copy of this Vector (if it doesn't
@@ -1470,8 +1446,7 @@ void HashCollection::throwTooLarge() {
     MaxSize
   );
   msg.setSize(std::min(sz, buf.len));
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
-  throw e;
+  SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
 NEVER_INLINE
@@ -1485,8 +1460,7 @@ void HashCollection::throwReserveTooLarge() {
     MaxReserveSize
   );
   msg.setSize(std::min(sz, buf.len));
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
-  throw e;
+  SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
 NEVER_INLINE
@@ -1919,15 +1893,13 @@ Object c_Map::t_addall(const Variant& iterable) {
 
 void HashCollection::t_reserve(const Variant& sz) {
   if (UNLIKELY(!sz.isInteger())) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter sz must be a non-negative integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+               "Parameter sz must be a non-negative integer");
   }
   int64_t intSz = sz.toInt64();
   if (UNLIKELY(intSz < 0)) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter sz must be a non-negative integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+               "Parameter sz must be a non-negative integer");
   }
   reserve(intSz); // checks for intSz > MaxReserveSize
 }
@@ -2069,9 +2041,8 @@ typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_differenceByKey(const Variant& it) {
   if (!it.isObject()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter it must be an instance of Iterable"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+               "Parameter it must be an instance of Iterable");
   }
   ObjectData* obj = it.getObjectData();
   TMap* target = BaseMap::Clone<TMap>(this);
@@ -2143,9 +2114,8 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback");
   }
   TMap* mp = newobj<TMap>();
   Object obj = mp;
@@ -2226,9 +2196,8 @@ BaseMap::php_filter(const Variant& callback, MakeArgs makeArgs) const {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback");
   }
   auto map = makeSmartPtr<TMap>();
   if (!m_size) return Object(std::move(map));
@@ -2274,9 +2243,8 @@ Object BaseMap::php_retain(const Variant& callback, MakeArgs makeArgs) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback");
   }
   auto size = m_size;
   if (!size) { return this; }
@@ -2366,9 +2334,8 @@ typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_take(const Variant& n) {
   if (!n.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter n must be an integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
   if (len >= int64_t(m_size)) {
@@ -2412,9 +2379,8 @@ BaseMap::php_takeWhile(const Variant& fn) {
   CallCtx ctx;
   vm_decode_function(fn, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback");
   }
   auto* mp = newobj<TMap>();
   Object obj = mp;
@@ -2449,9 +2415,8 @@ typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_skip(const Variant& n) {
   if (!n.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter n must be an integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
   if (len <= 0) {
@@ -2497,9 +2462,8 @@ BaseMap::php_skipWhile(const Variant& fn) {
   CallCtx ctx;
   vm_decode_function(fn, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback");
   }
   auto* mp = newobj<TMap>();
   Object obj = mp;
@@ -2540,14 +2504,12 @@ BaseMap::php_slice(const Variant& start, const Variant& len) {
   int64_t istart;
   int64_t ilen;
   if (!start.isInteger() || (istart = start.toInt64()) < 0) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter start must be a non-negative integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter start must be a non-negative integer");
   }
   if (!len.isInteger() || (ilen = len.toInt64()) < 0) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter len must be a non-negative integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter len must be a non-negative integer");
   }
   size_t skipAmt = std::min<size_t>(istart, m_size);
   size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
@@ -2717,9 +2679,8 @@ BaseMap::php_mapFromItems(const Variant& iterable) {
     TypedValue* tv = v.asCell();
     if (UNLIKELY(tv->m_type != KindOfObject ||
                  tv->m_data.pobj->getVMClass() != c_Pair::classof())) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-                 "Parameter must be an instance of Iterable<Pair>"));
-      throw e;
+      SystemLib::throwInvalidArgumentExceptionObject(
+                 "Parameter must be an instance of Iterable<Pair>");
     }
     auto pair = static_cast<c_Pair*>(tv->m_data.pobj);
     target->setRaw(&pair->elm0, &pair->elm1);
@@ -2741,9 +2702,8 @@ typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_mapFromArray(const Variant& arr) {
   if (!arr.isArray()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter arr must be an array"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter arr must be an array");
   }
   auto map = makeSmartPtr<TMap>();
   ArrayData* ad = arr.getArrayData();
@@ -2819,9 +2779,8 @@ TypedValue* BaseMap::get(StringData* key) const {
 void BaseMap::add(const TypedValue* val) {
   if (UNLIKELY(val->m_type != KindOfObject ||
                val->m_data.pobj->getVMClass() != c_Pair::classof())) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be an instance of Pair"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter must be an instance of Pair");
   }
   auto pair = static_cast<c_Pair*>(val->m_data.pobj);
   set(&pair->elm0, &pair->elm1);
@@ -2846,9 +2805,8 @@ Variant BaseMap::pop() {
     erase(ei);
     return ret;
   } else {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      "Cannot pop empty Map"));
-    throw e;
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Cannot pop empty Map");
   }
 }
 
@@ -2871,9 +2829,8 @@ Variant BaseMap::popFront() {
     erase(ei);
     return ret;
   } else {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      "Cannot pop empty Map"));
-    throw e;
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Cannot pop empty Map");
   }
 }
 
@@ -2956,9 +2913,8 @@ void BaseMap::set(StringData* key, const TypedValue* val) {
 }
 
 void BaseMap::throwBadKeyType() {
-  Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-    "Only integer keys and string keys may be used with Maps"));
-  throw e;
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Only integer keys and string keys may be used with Maps");
 }
 
 Array BaseMap::ToArray(const ObjectData* obj) {
@@ -3553,9 +3509,8 @@ Variant BaseSet::pop() {
     erase(ei);
     return ret;
   } else {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      "Cannot pop empty Set"));
-    throw e;
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Cannot pop empty Set");
   }
 }
 
@@ -3579,9 +3534,8 @@ Variant BaseSet::popFront() {
     erase(ei);
     return ret;
   } else {
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      "Cannot pop empty Set"));
-    throw e;
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Cannot pop empty Set");
   }
 }
 
@@ -3594,9 +3548,8 @@ void BaseSet::throwOOB(StringData* val) {
 }
 
 void BaseSet::throwNoMutableIndexAccess() {
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(
-    "[] operator cannot be used to modify elements of a Set"));
-  throw e;
+  SystemLib::throwInvalidOperationExceptionObject(
+    "[] operator cannot be used to modify elements of a Set");
 }
 
 Array BaseSet::ToArray(const ObjectData* obj) {
@@ -3802,9 +3755,8 @@ BaseSet::php_map(const Variant& callback, MakeArgs makeArgs) const {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback");
   }
   auto* st = newobj<TSet>();
   Object obj = st;
@@ -3839,9 +3791,8 @@ BaseSet::php_filter(const Variant& callback, MakeArgs makeArgs) const {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback");
   }
   auto set = makeSmartPtr<TSet>();
   if (!m_size) return Object(std::move(set));
@@ -3889,9 +3840,8 @@ Object BaseSet::php_retain(const Variant& callback, MakeArgs makeArgs) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback");
   }
   auto size = m_size;
   if (!size) { return this; }
@@ -3926,9 +3876,8 @@ typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_take(const Variant& n) {
   if (!n.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter n must be an integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
   if (len >= int64_t(m_size)) {
@@ -3972,9 +3921,8 @@ BaseSet::php_takeWhile(const Variant& fn) {
   CallCtx ctx;
   vm_decode_function(fn, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback");
   }
   auto set = makeSmartPtr<TSet>();
   if (!m_size) return Object(std::move(set));
@@ -4011,9 +3959,8 @@ typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_skip(const Variant& n) {
   if (!n.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter n must be an integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
   if (len <= 0) {
@@ -4062,9 +4009,8 @@ BaseSet::php_skipWhile(const Variant& fn) {
   CallCtx ctx;
   vm_decode_function(fn, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback");
   }
   auto set = makeSmartPtr<TSet>();
   if (!m_size) return Object(std::move(set));
@@ -4108,14 +4054,12 @@ BaseSet::php_slice(const Variant& start, const Variant& len) {
   int64_t istart;
   int64_t ilen;
   if (!start.isInteger() || (istart = start.toInt64()) < 0) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter start must be a non-negative integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter start must be a non-negative integer");
   }
   if (!len.isInteger() || (ilen = len.toInt64()) < 0) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter len must be a non-negative integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter len must be a non-negative integer");
   }
   size_t skipAmt = std::min<size_t>(istart, m_size);
   size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
@@ -4172,9 +4116,8 @@ typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromArray(const Variant& arr) {
   if (!arr.isArray()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter arr must be an array"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter arr must be an array");
   }
   auto set = makeSmartPtr<TSet>();
   ArrayData* ad = arr.getArrayData();
@@ -4199,9 +4142,8 @@ BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
   for (ArrayIter iter(_argv); iter; ++iter) {
     Variant arr = iter.second();
     if (!arr.isArray()) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Parameters must be arrays"));
-      throw e;
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Parameters must be arrays");
     }
     ArrayData* ad = arr.getArrayData();
     set->reserve(set->size() + ad->size()); // presume minimum collisions ...
@@ -4263,9 +4205,8 @@ void HashCollection::warnOnStrIntDup() const {
 }
 
 void BaseSet::throwBadValueType() {
-  Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-    "Only integer values and string values may be used with Sets"));
-  throw e;
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Only integer values and string values may be used with Sets");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4567,9 +4508,8 @@ c_Pair::~c_Pair() {
 }
 
 void c_Pair::t___construct(int _argc, const Array& _argv /* = null_array */) {
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(
-    "Pairs cannot be created using the new operator"));
-  throw e;
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Pairs cannot be created using the new operator");
 }
 
 Array c_Pair::toArrayImpl() const {
@@ -4703,9 +4643,8 @@ Object c_Pair::t_map(const Variant& callback) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback");
   }
   auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
@@ -4723,9 +4662,8 @@ Object c_Pair::t_mapwithkey(const Variant& callback) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback");
   }
   auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
@@ -4744,9 +4682,8 @@ Object c_Pair::t_filter(const Variant& callback) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback");
   }
   auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
@@ -4763,9 +4700,8 @@ Object c_Pair::t_filterwithkey(const Variant& callback) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter must be a valid callback");
   }
   auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
@@ -4804,9 +4740,8 @@ Object c_Pair::t_zip(const Variant& iterable) {
 
 Object c_Pair::t_take(const Variant& n) {
   if (!n.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter n must be an integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
   auto* vec = newobj<c_ImmVector>();
@@ -4828,9 +4763,8 @@ Object c_Pair::t_takewhile(const Variant& callback) {
   CallCtx ctx;
   vm_decode_function(callback, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback");
   }
   auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
@@ -4843,9 +4777,8 @@ Object c_Pair::t_takewhile(const Variant& callback) {
 
 Object c_Pair::t_skip(const Variant& n) {
   if (!n.isInteger()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter n must be an integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
   auto* vec = newobj<c_ImmVector>();
@@ -4866,9 +4799,8 @@ Object c_Pair::t_skipwhile(const Variant& fn) {
   CallCtx ctx;
   vm_decode_function(fn, nullptr, false, ctx);
   if (!ctx.func) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+               "Parameter must be a valid callback");
   }
   auto* vec = newobj<c_ImmVector>();
   Object obj = vec;
@@ -4886,14 +4818,12 @@ Object c_Pair::t_slice(const Variant& start, const Variant& len) {
   int64_t istart;
   int64_t ilen;
   if (!start.isInteger() || (istart = start.toInt64()) < 0) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter start must be a non-negative integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter start must be a non-negative integer");
   }
   if (!len.isInteger() || (ilen = len.toInt64()) < 0) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Parameter len must be a non-negative integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter len must be a non-negative integer");
   }
   size_t skipAmt = std::min<size_t>(istart, 2);
   size_t sz = std::min<size_t>(ilen, size_t(2) - skipAmt);
@@ -4947,9 +4877,8 @@ void c_Pair::throwOOB(int64_t key) {
 }
 
 void c_Pair::throwBadKeyType() {
-  Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-    "Only integer keys may be used with Pairs"));
-  throw e;
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Only integer keys may be used with Pairs");
 }
 
 Array c_Pair::ToArray(const ObjectData* obj) {

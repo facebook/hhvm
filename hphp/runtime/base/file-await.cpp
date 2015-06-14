@@ -85,13 +85,13 @@ Object File::await(uint16_t events, double timeout) {
     return c_StaticWaitHandle::CreateSucceeded(closedResult);
   }
   if (fd() < 0) {
-    throw Object(SystemLib::AllocExceptionObject(
-      "Unable to await on stream, invalid file descriptor"));
+    SystemLib::throwExceptionObject(
+      "Unable to await on stream, invalid file descriptor");
   }
   events = events & FileEventHandler::READ_WRITE;
   if (!events) {
-    throw Object(SystemLib::AllocExceptionObject(
-      "Must await for reading, writing, or both."));
+    SystemLib::throwExceptionObject(
+      "Must await for reading, writing, or both.");
   }
 
   auto ev = new FileAwait(fd(), events, timeout);

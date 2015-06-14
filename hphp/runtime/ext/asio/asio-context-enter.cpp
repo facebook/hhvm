@@ -51,10 +51,9 @@ namespace {
 
     bool discoverResumable(c_ResumableWaitHandle* node) {
       if (node->getState() == c_ResumableWaitHandle::STATE_RUNNING) {
-        Object e(SystemLib::AllocInvalidOperationExceptionObject(
+        SystemLib::throwInvalidOperationExceptionObject(
           "Detected cross-context dependency cycle. You are trying to depend "
-          "on something that is running you serially."));
-        throw e;
+          "on something that is running you serially.");
       }
 
       return node->getState() == c_ResumableWaitHandle::STATE_BLOCKED;

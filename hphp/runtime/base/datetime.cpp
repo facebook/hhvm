@@ -858,7 +858,7 @@ bool DateTime::fromString(const String& input, SmartPtr<TimeZone> tz,
       error->error_messages[0].character,
       error->error_messages[0].message
     ).str();
-    throw Object(SystemLib::AllocExceptionObject(msg));
+    SystemLib::throwExceptionObject(msg);
   }
 
   if (m_timestamp == -1) {

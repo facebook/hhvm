@@ -171,7 +171,7 @@ static void header_if_not_sent(const String& str);
 // client helpers
 
 static Object create_soap_fault(const String& code, const String& fault) {
-  return Object(SystemLib::AllocSoapFaultObject(code, fault));
+  return Object{SystemLib::AllocSoapFaultObject(code, fault)};
 }
 
 static Object create_soap_fault(Exception &e) {
@@ -2375,8 +2375,8 @@ void HHVM_METHOD(SoapServer, fault,
   SoapServerScope ss(this_);
   const String& str_actor = actor.isNull() ? null_string : actor.toString();
   const String& str_name = name.isNull() ? null_string : name.toString();
-  Object obj(SystemLib::AllocSoapFaultObject(code, fault, str_actor, detail,
-                                             str_name));
+  Object obj{SystemLib::AllocSoapFaultObject(code, fault, str_actor, detail,
+                                             str_name)};
   send_soap_server_fault(std::shared_ptr<sdlFunction>(), obj, nullptr);
 }
 
@@ -2799,7 +2799,7 @@ Variant HHVM_METHOD(SoapClient, __dorequest,
   auto* data = Native::data<SoapClient>(this_);
   if (location.empty()) {
     data->m_soap_fault =
-      Object(SystemLib::AllocSoapFaultObject("HTTP", "Unable to parse URL"));
+      Object{SystemLib::AllocSoapFaultObject("HTTP", "Unable to parse URL")};
     return init_null();
   }
 
@@ -2872,7 +2872,7 @@ Variant HHVM_METHOD(SoapClient, __dorequest,
       msg += ": " + http.getLastError();
     }
     data->m_soap_fault =
-      Object(SystemLib::AllocSoapFaultObject("HTTP", msg));
+      Object{SystemLib::AllocSoapFaultObject("HTTP", msg)};
     return init_null();
   }
 
@@ -2882,7 +2882,7 @@ Variant HHVM_METHOD(SoapClient, __dorequest,
     }
     if (data->m_exceptions) {
       data->m_soap_fault =
-        Object(SystemLib::AllocSoapFaultObject("HTTP", response));
+        Object{SystemLib::AllocSoapFaultObject("HTTP", response)};
       return init_null();
     }
   }

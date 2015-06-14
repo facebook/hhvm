@@ -5799,8 +5799,7 @@ static void throw_call_non_object(const char* methodName,
     methodName, typeName);
 
   if (RuntimeOption::ThrowExceptionOnBadMethodCall) {
-    Object e(SystemLib::AllocBadMethodCallExceptionObject(String(msg)));
-    throw e;
+    SystemLib::throwBadMethodCallExceptionObject(String(msg));
   }
   throw FatalErrorException(msg.c_str());
 }

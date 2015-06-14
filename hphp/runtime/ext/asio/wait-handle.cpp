@@ -71,9 +71,9 @@ Variant c_WaitHandle::t_join() {
 
 Variant c_WaitHandle::t_result() {
   if (!isFinished()) {
-    throw Object(SystemLib::AllocInvalidOperationExceptionObject(
+    SystemLib::throwInvalidOperationExceptionObject(
       "Request for result on pending wait handle, "
-      "must await or join() before calling result()"));
+      "must await or join() before calling result()");
   }
   return result();
 }
@@ -86,8 +86,7 @@ Variant c_WaitHandle::result() {
     return cellAsCVarRef(getResult());
   } else {
     // failed? throw exception
-    Object e(getException());
-    throw e;
+    throw Object{getException()};
   }
 }
 

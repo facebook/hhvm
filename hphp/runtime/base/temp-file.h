@@ -43,8 +43,8 @@ public:
   bool close() override;
 
   Object await(uint16_t events, double timeout) override {
-    throw Object(SystemLib::AllocExceptionObject(
-      "Temporary stream does not support awaiting"));
+    SystemLib::throwExceptionObject(
+      "Temporary stream does not support awaiting");
   }
 
 private:

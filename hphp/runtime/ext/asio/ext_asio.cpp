@@ -37,14 +37,12 @@ Object HHVM_FUNCTION(asio_get_running_in_context, int ctx_idx) {
   auto session = AsioSession::Get();
 
   if (ctx_idx <= 0) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected ctx_idx to be a positive integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Expected ctx_idx to be a positive integer");
   }
   if (ctx_idx > session->getCurrentContextIdx()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected ctx_idx to be less than or equal to the current context index"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Expected ctx_idx to be less than or equal to the current context index");
   }
 
   if (ctx_idx < session->getCurrentContextIdx()) {

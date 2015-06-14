@@ -406,9 +406,8 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
                                         FBCompactSerializeBehavior behavior) {
   if (depth > 256) {
     if (behavior == FBCompactSerializeBehavior::MemoizeParam) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Array depth exceeded"));
-      throw e;
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Array depth exceeded");
     }
 
     return 1;
@@ -471,8 +470,7 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
             "HH\\IMemoizeParam",
             obj->getClassName().data()).str();
 
-          Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg));
-          throw e;
+          SystemLib::throwInvalidArgumentExceptionObject(msg);
         }
 
         // Marker that shows that this was an obj so it doesn't collide with
@@ -499,8 +497,7 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
   if (behavior == FBCompactSerializeBehavior::MemoizeParam) {
     auto msg = folly::format(
       "Cannot Serialize unexpected type {}", tname(var.getType()).c_str());
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg.str()));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(msg.str());
   }
   return 1;
 }

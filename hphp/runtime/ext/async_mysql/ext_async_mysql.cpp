@@ -298,14 +298,14 @@ void AsyncMysqlConnection::setConnection(std::unique_ptr<am::Connection> conn) {
 void AsyncMysqlConnection::verifyValidConnection() {
   if (UNLIKELY(!m_conn || !m_conn->ok())) {
     if (m_closed) {
-      throw Object(SystemLib::AllocInvalidArgumentExceptionObject(
-          "attempt to invoke method on a closed connection"));
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "attempt to invoke method on a closed connection");
     } else if (m_conn && !m_conn->ok()) {
-      throw Object(SystemLib::AllocInvalidArgumentExceptionObject(
-          "attempt to invoke method on an invalid connection"));
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "attempt to invoke method on an invalid connection");
     } else {
-      throw Object(SystemLib::AllocInvalidArgumentExceptionObject(
-          "attempt to invoke method on a busy connection"));
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "attempt to invoke method on a busy connection");
     }
   }
 }
@@ -620,9 +620,8 @@ am::Operation* AsyncMysqlErrorResult::op() {
   if (m_op.get() == nullptr) {
     // m_op is null if this object is directly created. It is possible if
     // a derived class is defined that does not call this class' constructor.
-    Object e(SystemLib::AllocInvalidOperationExceptionObject(
-      "AsyncMysqlErrorResult object is not properly initialized."));
-    throw e;
+    SystemLib::throwInvalidOperationExceptionObject(
+      "AsyncMysqlErrorResult object is not properly initialized.");
   }
   return m_op.get();
 }
@@ -835,9 +834,8 @@ FieldIndex::FieldIndex(const am::RowFields* row_fields) {
 size_t FieldIndex::getFieldIndex(String field_name) const {
   auto it = field_name_map_.find(field_name);
   if (it == field_name_map_.end()) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Given field name doesn't exist"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Given field name doesn't exist");
   }
   return it->second;
 }
@@ -959,9 +957,8 @@ size_t AsyncMysqlRowBlock::getIndexFromVariant(const Variant& field) {
   } else if (field.isString()) {
     return m_field_index->getFieldIndex(field.toString());
   }
-  Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Only integer or string field names may be used with RowBlock"));
-  throw e;
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Only integer or string field names may be used with RowBlock");
 }
 
 // The String conversion allows `NULL` to ""
@@ -975,9 +972,8 @@ folly::StringPiece AsyncMysqlRowBlock::getFieldAs(int64_t row,
     return m_row_block->getField<folly::StringPiece>(row, index);
   }
   catch (std::range_error& excep) {
-    Object e(SystemLib::AllocBadMethodCallExceptionObject(
-        std::string("Error during conversion: ") + excep.what()));
-    throw e;
+    SystemLib::throwBadMethodCallExceptionObject(
+      std::string("Error during conversion: ") + excep.what());
   }
 }
 
@@ -986,17 +982,15 @@ FieldType AsyncMysqlRowBlock::getFieldAs(int64_t row, const Variant& field) {
   auto index = getIndexFromVariant(field);
 
   if (m_row_block->isNull(row, index)) {
-    Object e(SystemLib::AllocBadMethodCallExceptionObject(
-        "Field value needs to be non-null."));
-    throw e;
+    SystemLib::throwBadMethodCallExceptionObject(
+        "Field value needs to be non-null.");
   }
   try {
     return m_row_block->getField<FieldType>(row, index);
   }
   catch (std::range_error& excep) {
-    Object e(SystemLib::AllocBadMethodCallExceptionObject(
-        std::string("Error during conversion: ") + excep.what()));
-    throw e;
+    SystemLib::throwBadMethodCallExceptionObject(
+      std::string("Error during conversion: ") + excep.what());
   }
 }
 

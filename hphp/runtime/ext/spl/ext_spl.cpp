@@ -59,7 +59,7 @@ void throw_spl_exception(const char *fmt, ...) {
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
-  throw Object(SystemLib::AllocExceptionObject(Variant(msg)));
+  SystemLib::throwExceptionObject(Variant(msg));
 }
 
 static bool s_inited = false;

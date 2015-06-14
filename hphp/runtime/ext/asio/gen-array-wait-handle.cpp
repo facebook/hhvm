@@ -49,9 +49,8 @@ void c_GenArrayWaitHandle::ti_setoncreatecallback(const Variant& callback) {
 
 NEVER_INLINE __attribute__((__noreturn__))
 static void fail() {
-  Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-    "Expected dependencies to be an array of WaitHandle instances"));
-  throw e;
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Expected dependencies to be an array of WaitHandle instances");
 }
 
 Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {

@@ -55,8 +55,7 @@ void EnumCache::deleteValues(const Class* klass) {
 }
 
 void EnumCache::failLookup(const Variant& msg) {
-  Object e(SystemLib::AllocExceptionObject(msg));
-  throw e;
+  SystemLib::throwExceptionObject(msg);
 }
 
 EnumCache::~EnumCache() {

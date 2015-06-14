@@ -392,8 +392,7 @@ Resource XboxServer::TaskStart(const String& msg, const String& reqInitDoc /* = 
      "reached maximum capacity" :
      "Cannot create new Xbox task because the Xbox is not enabled");
 
-  Object e = SystemLib::AllocExceptionObject(errMsg);
-  throw_exception(e);
+  throw_exception(SystemLib::AllocExceptionObject(errMsg));
   return Resource();
 }
 

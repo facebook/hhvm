@@ -52,30 +52,26 @@ namespace {
 
   NEVER_INLINE __attribute__((__noreturn__))
   void failArray() {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected dependencies to be an array"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Expected dependencies to be an array");
   }
 
   NEVER_INLINE __attribute__((__noreturn__))
   void failMap() {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected dependencies to be a Map"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Expected dependencies to be a Map");
   }
 
   NEVER_INLINE __attribute__((__noreturn__))
   void failVector() {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected dependencies to be a Vector"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Expected dependencies to be a Vector");
   }
 
   NEVER_INLINE __attribute__((__noreturn__))
   void failWaitHandle() {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected dependencies to be a collection of WaitHandle instances"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Expected dependencies to be a collection of WaitHandle instances");
   }
 
   c_StaticWaitHandle* returnEmpty() {

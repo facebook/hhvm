@@ -18,6 +18,7 @@
 #define incl_HPHP_SYSTEMLIB_H_
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/util/portability.h"
 
 namespace HPHP {
 class ObjectData;
@@ -101,6 +102,26 @@ ObjectData* AllocLazyKVZipIterableObject(const Variant& mp);
 
 ObjectData* AllocLazyIterableViewObject(const Variant& iterable);
 ObjectData* AllocLazyKeyedIterableViewObject(const Variant& iterable);
+
+void throwExceptionObject(const Variant& message) ATTRIBUTE_NORETURN;
+void throwBadMethodCallExceptionObject(const Variant& message)
+  ATTRIBUTE_NORETURN;
+void throwInvalidArgumentExceptionObject(const Variant& message)
+  ATTRIBUTE_NORETURN;
+void throwRuntimeExceptionObject(const Variant& message) ATTRIBUTE_NORETURN;
+void throwOutOfBoundsExceptionObject(const Variant& message) ATTRIBUTE_NORETURN;
+void throwInvalidOperationExceptionObject(const Variant& message)
+  ATTRIBUTE_NORETURN;
+void throwDOMExceptionObject(const Variant& message,
+                             const Variant& code) ATTRIBUTE_NORETURN;
+void throwSoapFaultObject(const Variant& code,
+                          const Variant& message,
+                          const Variant& actor = null_variant,
+                          const Variant& detail = null_variant,
+                          const Variant& name = null_variant,
+                          const Variant& header = null_variant)
+  ATTRIBUTE_NORETURN;
+
 
 /**
  * Register a persistent unit to be re-merged (in non-repo mode)

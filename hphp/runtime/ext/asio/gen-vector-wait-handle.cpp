@@ -51,9 +51,8 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
   if (UNLIKELY(!dependencies.isObject() ||
       !(obj = dependencies.getObjectData())->isCollection() ||
       obj->collectionType() != CollectionType::Vector)) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-      "Expected dependencies to be an instance of Vector"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Expected dependencies to be an instance of Vector");
   }
   assertx(collections::isType(obj->getVMClass(), CollectionType::Vector));
   auto deps = SmartPtr<c_Vector>::attach(c_Vector::Clone(obj));
@@ -63,9 +62,8 @@ Object c_GenVectorWaitHandle::ti_create(const Variant& dependencies) {
 
     auto const child = c_WaitHandle::fromCell(current);
     if (UNLIKELY(!child)) {
-      Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected dependencies to be a vector of WaitHandle instances"));
-      throw e;
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Expected dependencies to be a vector of WaitHandle instances");
     }
 
     if (!child->isFinished()) {

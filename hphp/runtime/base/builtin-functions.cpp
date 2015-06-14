@@ -453,35 +453,30 @@ void throw_instance_method_fatal(const char *name) {
 }
 
 void throw_iterator_not_valid() {
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(
-    "Iterator is not valid"));
-  throw e;
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Iterator is not valid");
 }
 
 void throw_collection_modified() {
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(
-    "Collection was modified during iteration"));
-  throw e;
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Collection was modified during iteration");
 }
 
 void throw_collection_property_exception() {
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(
-    "Cannot access a property on a collection"));
-  throw e;
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Cannot access a property on a collection");
 }
 
 void throw_collection_compare_exception() {
   static const string msg(
     "Cannot use relational comparison operators (<, <=, >, >=) to compare "
     "a collection with an integer, double, string, array, or object");
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
-  throw e;
+  SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
 void throw_param_is_not_container() {
   static const string msg("Parameter must be an array or collection");
-  Object e(SystemLib::AllocInvalidArgumentExceptionObject(msg));
-  throw e;
+  SystemLib::throwInvalidArgumentExceptionObject(msg);
 }
 
 void throw_cannot_modify_immutable_object(const char* className) {
@@ -489,8 +484,7 @@ void throw_cannot_modify_immutable_object(const char* className) {
     "Cannot modify immutable object of type {}",
     className
   ).str();
-  Object e(SystemLib::AllocInvalidOperationExceptionObject(msg));
-  throw e;
+  SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
 void check_collection_compare(ObjectData* obj) {

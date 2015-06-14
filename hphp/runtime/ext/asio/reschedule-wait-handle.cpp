@@ -33,15 +33,13 @@ Object c_RescheduleWaitHandle::ti_create(int64_t queue, int64_t priority) {
   if (UNLIKELY(
       queue != q_RescheduleWaitHandle$$QUEUE_DEFAULT &&
       queue != q_RescheduleWaitHandle$$QUEUE_NO_PENDING_IO)) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected queue to be a value defined by one of the QUEUE_ constants"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Expected queue to be a value defined by one of the QUEUE_ constants");
   }
 
   if (UNLIKELY(priority < 0)) {
-    Object e(SystemLib::AllocInvalidArgumentExceptionObject(
-        "Expected priority to be a non-negative integer"));
-    throw e;
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Expected priority to be a non-negative integer");
   }
 
   auto wh = makeSmartPtr<c_RescheduleWaitHandle>();

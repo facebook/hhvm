@@ -51,15 +51,15 @@ class ServerTaskEvent final : public AsioExternalThreadEvent {
  protected:
   void unserialize(Cell& result) override final {
     if (UNLIKELY(!m_job)) {
-      throw Object(SystemLib::AllocInvalidOperationExceptionObject(
-        "The async operation was incorrectly initialized."));
+      SystemLib::throwInvalidOperationExceptionObject(
+        "The async operation was incorrectly initialized.");
     }
 
     Variant ret;
 
     int code = TServer::TaskResult(m_job, 0, ret);
     if (code != 200) {
-      throw Object(SystemLib::AllocExceptionObject(ret));
+      SystemLib::throwExceptionObject(ret);
     }
 
     cellDup(*ret.asCell(), result);

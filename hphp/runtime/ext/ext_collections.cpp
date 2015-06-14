@@ -1565,6 +1565,7 @@ int32_t* HashCollection::findForInsertImpl(size_t h0, Hit hit) const {
   uint32_t mask = tableMask();
   auto elms = data();
   auto hashtable = hashTab();
+  int32_t* ret = nullptr;
   for (uint32_t probe = h0, i = 1;; ++i) {
     auto ei = &hashtable[probe & mask];
     ssize_t pos = *ei;
@@ -1572,8 +1573,12 @@ int32_t* HashCollection::findForInsertImpl(size_t h0, Hit hit) const {
       if (hit(elms[pos])) {
         return ei;
       }
-    } else if (pos & 1) {
-      return LIKELY(i <= 100) ? ei : warnUnbalanced(i, ei);
+    } else {
+      if (!ret) ret = ei;
+      if (pos & 1) {
+        assert(pos == Empty);
+        return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
+      }
     }
     probe += i;
     assertx(i <= mask);

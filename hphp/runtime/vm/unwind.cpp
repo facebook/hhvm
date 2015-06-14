@@ -338,6 +338,14 @@ bool chainFaults(Fault& fault) {
   return false;
 }
 
+const StaticString s_hphpd_break("hphpd_break");
+const StaticString s_fb_enable_code_coverage("fb_enable_code_coverage");
+const StaticString s_xdebug_start_code_coverage("xdebug_start_code_coverage");
+
+//////////////////////////////////////////////////////////////////////
+
+}
+
 /*
  * Unwinding proceeds as follows:
  *
@@ -470,6 +478,15 @@ void unwindPhp() {
   throw obj;
 }
 
+void unwindPhp(ObjectData* phpException) {
+  Fault fault;
+  fault.m_userException = phpException;
+  fault.m_userException->incRefCount();
+  g_context->m_faults.push_back(fault);
+
+  unwindPhp();
+}
+
 /*
  * Unwinding of C++ exceptions proceeds as follows:
  *
@@ -528,13 +545,6 @@ void unwindCpp(Exception* exception) {
   exception->throwException();
 }
 
-const StaticString s_hphpd_break("hphpd_break");
-const StaticString s_fb_enable_code_coverage("fb_enable_code_coverage");
-const StaticString s_xdebug_start_code_coverage("xdebug_start_code_coverage");
-
-// Unwind the frame for a builtin.  Currently only used when switching
-// modes for hphpd_break, fb_enable_code_coverage, and
-// xdebug_start_code_coverage
 void unwindBuiltinFrame() {
   auto& stack = vmStack();
   auto& fp = vmfp();
@@ -565,85 +575,6 @@ void unwindBuiltinFrame() {
   stack.ndiscard(numSlots);
   stack.discardAR();
   stack.pushNull(); // return value
-}
-
-void pushFault(const Object& o) {
-  Fault f;
-  f.m_userException = o.get();
-  f.m_userException->incRefCount();
-  g_context->m_faults.push_back(f);
-  ITRACE(1, "pushing new fault: {}\n", describeFault(f));
-}
-
-//////////////////////////////////////////////////////////////////////
-
-}
-
-void exception_handler() {
-  ITRACE(1, "unwind exception_handler\n");
-  Trace::Indent _i;
-
-  checkVMRegState();
-
-  try { throw; }
-
-  /*
-   * Unwind (repropagating from a fault funclet) is slightly different
-   * from the throw cases, because we need to re-raise the exception
-   * as if it came from the same offset to handle nested fault
-   * handlers correctly, and we continue propagating the current Fault
-   * instead of pushing a new one.
-   */
-  catch (const VMPrepareUnwind&) {
-    ITRACE(1, "unwind: restoring offset {}\n", vmpc());
-    unwindPhp();
-    return;
-  }
-
-  catch (const Object& o) {
-    ITRACE(1, "unwind: Object of class {}\n", o->getVMClass()->name()->data());
-    pushFault(o);
-    unwindPhp();
-    return;
-  }
-
-  catch (VMSwitchMode&) {
-    ITRACE(1, "unwind: VMSwitchMode\n");
-    return;
-  }
-
-  catch (VMSwitchModeBuiltin&) {
-    ITRACE(1, "unwind: VMSwitchModeBuiltin from {}\n",
-           vmfp()->m_func->fullName()->data());
-    unwindBuiltinFrame();
-    return;
-  }
-
-  catch (VMReenterStackOverflow&) {
-    ITRACE(1, "unwind: VMReenterStackOverflow\n");
-    (new FatalErrorException("Stack overflow"))->throwException();
-    not_reached();
-  }
-
-  catch (Exception& e) {
-    ITRACE(1, "unwind: Exception: {}\n", e.what());
-    unwindCpp(e.clone());
-    not_reached();
-  }
-
-  catch (std::exception& e) {
-    ITRACE(1, "unwind: std::exception: {}\n", e.what());
-    unwindCpp(new Exception("unexpected %s: %s", typeid(e).name(), e.what()));
-    not_reached();
-  }
-
-  catch (...) {
-    ITRACE(1, "unwind: unknown\n");
-    unwindCpp(new Exception("unknown exception"));
-    not_reached();
-  }
-
-  not_reached();
 }
 
 //////////////////////////////////////////////////////////////////////

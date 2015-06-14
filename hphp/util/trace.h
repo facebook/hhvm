@@ -383,6 +383,7 @@ void dumpRingbuffer();
   DEBUG_ONLY static const HPHP::Trace::Module TRACEMOD = HPHP::Trace::name;
 
 #define ITRACE(...)     do { } while (0)
+#define ITRACE_MOD(...) do { } while (0)
 struct Indent {
   Indent() {
     always_assert(true && "If this struct is completely empty we get unused "

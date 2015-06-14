@@ -2088,39 +2088,19 @@ static void enterVM(ActRec* ar, StackArgsState stk,
   vmFirstAR() = ar;
   vmJitCalledFrame() = nullptr;
 
-  /*
-   * When an exception is propagating, each nesting of the VM is
-   * responsible for unwinding its portion of the execution stack, and
-   * finding user handlers if it is a catchable exception.
-   *
-   * This try/catch is where all this logic is centered.  The actual
-   * unwinding happens under exception_handler in unwind.cpp, which
-   * either rethrows the exception, or let us enter the VM loop again
-   * at a user error/fault handler.
-   */
-  bool first = true;
-resume:
-  try {
-    if (first) {
-      first = false;
-      if (!resumable) {
-        enterVMAtFunc(ar, stk, varEnv);
-      } else {
-        assert(varEnv == nullptr);
-        enterVMAtAsyncFunc(ar, resumable, exception);
-      }
+  exception_handler([&] {
+    if (!resumable) {
+      enterVMAtFunc(ar, stk, varEnv);
     } else {
-      enterVMAtCurPC();
+      assert(varEnv == nullptr);
+      enterVMAtAsyncFunc(ar, resumable, exception);
     }
+  });
 
-    // Everything succeeded with no exception---return to the previous
-    // VM nesting level.
-    return;
-
-  } catch (...) {
-    always_assert(tl_regState == VMRegState::CLEAN);
-    exception_handler();
-    if (vmpc()) { goto resume; }
+  while (vmpc()) {
+    exception_handler([&] {
+      enterVMAtCurPC();
+    });
   }
 }
 

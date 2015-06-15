@@ -513,6 +513,12 @@ Vxls::~Vxls() {
  *
  * If any sub-interval was spilled, a single store is generated after each
  * definition point.
+ *
+ * When analyzing instructions that use or define a virtual SF register
+ * (VregSF), eagerly rename it to the singleton PhysReg RegSF{0}, under the
+ * assumption that there can only be one live SF at each position. This
+ * reduces the number of intervals we need to process, facilitates inserting
+ * ldimm{0} (as xor), and is checked by checkSF().
  */
 
 void Vxls::allocate() {
@@ -650,6 +656,10 @@ struct LiveDefVisitor {
   void def(Vtuple defs) { for (auto r : m_tuples[defs]) def(r); }
   void defHint(Vtuple def_tuple, Vtuple hint_tuple) { def(def_tuple); }
   void defHint(Vreg d, Vreg hint) { def(d); }
+  void def(VregSF r) {
+    r = RegSF{0}; // eagerly rename all SFs
+    m_live.reset(r);
+  }
 
  private:
   jit::vector<VregList>& m_tuples;
@@ -664,8 +674,9 @@ struct LiveUseVisitor {
   {}
   template<class F>          void imm(const F&) {}
   template<class R>          void def(R) {}
-  template<class D, class H> void defHint(D, H){}
+  template<class D, class H> void defHint(D, H) {}
   template<class R>          void across(R r) { use(r); }
+  void across(VregSF) = delete;
   void across(RegSet regs) { regs.forEach([&](Vreg r) { across(r); }); }
   void use(Vreg r)         { m_live.set(r); }
   void use(Vtuple uses)    { for (auto r : m_tuples[uses]) use(r); }
@@ -674,6 +685,10 @@ struct LiveUseVisitor {
   void use(Vptr m) {
     if (m.base.isValid()) use(m.base);
     if (m.index.isValid()) use(m.index);
+  }
+  void use(VregSF r) {
+    r = RegSF{0}; // eagerly rename all SFs
+    m_live.set(r);
   }
   template<class S, class H> void useHint(S src, H hint) { use(src); }
   void useHint(Vtuple src_tuple, Vtuple hint_tuple) { use(src_tuple); }
@@ -781,6 +796,10 @@ struct DefVisitor {
   void def(Vreg r) { def(r, Constraint::Any); }
   void defHint(Vreg d, Vreg hint) { def(d, Constraint::Any, hint); }
   void def(RegSet rs) { rs.forEach([&](Vreg r) { def(r); }); }
+  void def(VregSF r) {
+    r = RegSF{0}; // eagerly rename all SFs
+    def(r, constraint(r));
+  }
 private:
   void def(Vreg r, Constraint kind, Vreg hint = Vreg{}, bool wide = false) {
     auto ivl = m_intervals[r];
@@ -849,6 +868,10 @@ struct UseVisitor {
   template<class R> void use(R r) { use(r, constraint(r), m_range.end); }
   template<class S, class H> void useHint(S src, H hint) {
     use(src, constraint(src), m_range.end, hint);
+  }
+  void use(VregSF r) {
+    r = RegSF{0}; // eagerly rename all SFs
+    use(r, constraint(r), m_range.end);
   }
   void use(Vreg r, Constraint kind, unsigned end, Vreg hint = Vreg{}) {
     m_live.set(r);
@@ -1398,7 +1421,7 @@ private:
   void rename(Vreg64& r) { r = lookup(r, Constraint::Gpr); }
   void rename(VregDbl& r) { r = lookup(r, Constraint::Simd); }
   void rename(Vreg128& r) { r = lookup(r, Constraint::Simd); }
-  void rename(VregSF& r) { r = lookup(r, Constraint::Sf); }
+  void rename(VregSF& r) { r = RegSF{0}; }
   void rename(Vreg& r) { r = lookup(r, Constraint::Any); }
   void rename(Vtuple t) { /* phijmp/phijcc+phidef handled by resolveEdges */ }
   PhysReg lookup(Vreg vreg, Constraint kind) {
@@ -1573,27 +1596,10 @@ void Vxls::resolveEdges() {
 // last phase: mutate the code by inserting copies. this destroyes
 // the position numbering, so we can't use interval positions after this.
 void Vxls::insertCopies() {
-  // union sf intervals.  this is used to determine whether we can safely
-  // optimize constant loads of 0 to an xor on x64.
-  auto sf_ivl = jit::make_unique<Interval>(Vreg{});
-  for (auto ivl : intervals) {
-    if (!ivl) continue;
-
-    for (auto split = ivl; split != nullptr; split = split->next) {
-      if (split->reg == InvalidReg ||
-          !m_abi.sf.contains(split->reg)) continue;
-      for (auto const& range : split->ranges) {
-        sf_ivl->ranges.push_back(range);
-      }
-    }
-  }
-  std::sort(sf_ivl->ranges.begin(), sf_ivl->ranges.end(),
-    [] (LiveRange r1, LiveRange r2) {
-      // sf ranges should be disjoint
-      assertx(!r1.intersects(r2));
-      return r1.end <= r2.start;
-    }
-  );
+  // sf_ivl is the physical SF register, computed from the union of VregSF
+  // registers by computeLiveness() and buildIntervals().
+  // Its safe to lower ldimm{0,r} to xor{r,r,r} when SF is not live.
+  auto sf_ivl = intervals[VregSF(RegSF{0})];
 
   // insert copies inside blocks
   for (auto b : blocks) {
@@ -1610,11 +1616,11 @@ void Vxls::insertCopies() {
       }
       auto c = copies.find(pos - 1);
       if (c != copies.end()) {
-        insertCopiesAt(code, j, c->second, slots, pos - 1, sf_ivl.get());
+        insertCopiesAt(code, j, c->second, slots, pos - 1, sf_ivl);
       }
       c = copies.find(pos);
       if (c != copies.end()) {
-        insertCopiesAt(code, j, c->second, slots, pos, sf_ivl.get());
+        insertCopiesAt(code, j, c->second, slots, pos, sf_ivl);
       }
     }
   }
@@ -1630,7 +1636,7 @@ void Vxls::insertCopies() {
         unsigned j = code.size() - 1;
         auto slots = m_sp[spill_offsets[succlist[0]]];
         insertCopiesAt(code, j, c->second, slots,
-                       block_ranges[b].end - 1, sf_ivl.get());
+                       block_ranges[b].end - 1, sf_ivl);
       }
     } else {
       // copies will go at start of successor
@@ -1642,7 +1648,7 @@ void Vxls::insertCopies() {
           auto& code = unit.blocks[s].code;
           unsigned j = 0;
           insertCopiesAt(code, j, c->second, slots,
-                         block_ranges[s].start, sf_ivl.get());
+                         block_ranges[s].start, sf_ivl);
         }
       }
     }
@@ -2037,6 +2043,9 @@ void Vxls::insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
 void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
                           const CopyPlan& copies, MemoryRef slots,
                           unsigned pos, const Interval* sf_ivl) {
+  auto sf_live = [&](unsigned pos) {
+    return sf_ivl && !sf_ivl->ranges.empty() && sf_ivl->covers(pos);
+  };
   MovePlan moves;
   jit::vector<Vinstr> loads;
   for (auto dst : copies) {
@@ -2046,8 +2055,7 @@ void Vxls::insertCopiesAt(jit::vector<Vinstr>& code, unsigned& j,
       moves[dst] = ivl->reg;
     } else if (ivl->constant) {
       if (ivl->val.isUndef) continue;
-      auto const use_xor = ivl->val.val == 0 && dst.isGP() &&
-                           (sf_ivl->ranges.empty() || !sf_ivl->covers(pos));
+      auto const use_xor = ivl->val.val == 0 && dst.isGP() && !sf_live(pos);
       switch (ivl->val.kind) {
         case Vconst::Quad:
         case Vconst::Double:

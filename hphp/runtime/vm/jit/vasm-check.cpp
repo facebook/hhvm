@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/dataflow-worklist.h"
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -162,6 +163,103 @@ bool checkCalls(Vunit& unit, jit::vector<Vlabel>& blocks) {
   return true;
 }
 
+struct FlagUseChecker {
+  VregSF& cur_sf;
+  explicit FlagUseChecker(VregSF& sf) : cur_sf(sf) {}
+  template<class T> void imm(const T&) {}
+  template<class T> void def(T) {}
+  template<class T, class H> void defHint(T, H) {}
+  template<class T> void across(T r) { use(r); }
+  template<class T> void use(T) {}
+  template<class T, class H> void useHint(T r, H) { use(r); }
+  void use(RegSet regs) {
+    regs.forEach([&](Vreg r) {
+      if (r.isSF()) use(VregSF(r));
+    });
+  }
+  void use(VregSF r) {
+    assertx(!cur_sf.isValid() || cur_sf == r);
+    assert(!r.isValid() || r.isSF() || r.isVirt());
+    cur_sf = r;
+  }
+};
+
+struct FlagDefChecker {
+  VregSF& cur_sf;
+  explicit FlagDefChecker(VregSF& sf) : cur_sf(sf) {}
+  template<class T> void imm(const T&) {}
+  template<class T> void def(T) {}
+  template<class T, class H> void defHint(T r, H) { def(r); }
+  template<class T> void across(T r) {}
+  template<class T> void use(T) {}
+  template<class T, class H> void useHint(T r, H) {}
+  void def(RegSet regs) {
+    regs.forEach([&](Vreg r) {
+      if (r.isSF()) def(VregSF(r));
+    });
+  }
+  void def(VregSF r) {
+    assertx(!cur_sf.isValid() || cur_sf == r);
+    cur_sf = InvalidReg;
+  }
+};
+
+const Abi sf_abi {
+  RegSet{}, RegSet{}, RegSet{}, RegSet{}, RegSet{},
+  RegSet{RegSF{0}}
+};
+
+// Check that no two status-flag register lifetimes overlap, by traversing
+// code bottom up, keeping track of the currently live (single) status-flag
+// register, or InvalidReg if there isn't one live, then iterating to a fixed
+// point.
+bool checkSF(Vunit& unit, jit::vector<Vlabel>& blocks) DEBUG_ONLY;
+bool checkSF(Vunit& unit, jit::vector<Vlabel>& blocks) {
+  auto const preds = computePreds(unit);
+  jit::vector<uint32_t> blockPO(unit.blocks.size());
+  auto revBlocks = blocks;
+  auto wl = dataflow_worklist<uint32_t>(revBlocks.size());
+  for (unsigned po = 0; po < revBlocks.size(); po++) {
+    wl.push(po);
+    blockPO[revBlocks[po]] = po;
+  }
+  jit::vector<VregSF> livein(unit.blocks.size(), VregSF{InvalidReg});
+  while (!wl.empty()) {
+    auto b = revBlocks[wl.pop()];
+    auto& block = unit.blocks[b];
+    VregSF cur_sf = InvalidReg;
+    for (auto s : succs(block)) {
+      if (!livein[s].isValid()) continue;
+      assertx(!cur_sf.isValid() || cur_sf == livein[s]);
+      assert(livein[s].isSF() || livein[s].isVirt());
+      cur_sf = livein[s];
+    }
+    for (auto i = block.code.end(); i != block.code.begin();) {
+      auto& inst = *--i;
+      RegSet implicit_uses, implicit_across, implicit_defs;
+      if (inst.op == Vinstr::vcall || inst.op == Vinstr::vinvoke ||
+          inst.op == Vinstr::vcallstub) {
+        // getEffects would assert since these haven't been lowered yet.
+        implicit_defs |= RegSF{0};
+      } else {
+        getEffects(sf_abi, inst, implicit_uses, implicit_across, implicit_defs);
+      }
+      FlagDefChecker d(cur_sf);
+      visitOperands(inst, d);
+      d.def(implicit_defs);
+      FlagUseChecker u(cur_sf);
+      visitOperands(inst, u);
+      u.use(implicit_uses);
+      u.across(implicit_across);
+    }
+    if (cur_sf != livein[b]) {
+      livein[b] = cur_sf;
+      for (auto p : preds[b]) wl.push(blockPO[p]);
+    }
+  }
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 
@@ -169,6 +267,7 @@ bool check(Vunit& unit) {
   auto blocks = sortBlocks(unit);
   assertx(checkSSA(unit, blocks));
   assertx(checkCalls(unit, blocks));
+  assertx(checkSF(unit, blocks));
   return true;
 }
 

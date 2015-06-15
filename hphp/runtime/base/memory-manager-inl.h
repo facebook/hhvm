@@ -161,32 +161,6 @@ inline void MemoryManager::FreeList::push(void* val, size_t size) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class SizeT> ALWAYS_INLINE
-SizeT MemoryManager::debugAddExtra(SizeT sz) {
-  if (!debug) return sz;
-  return sz + kDebugExtraSize;
-}
-
-template<class SizeT> ALWAYS_INLINE
-SizeT MemoryManager::debugRemoveExtra(SizeT sz) {
-  if (!debug) return sz;
-  return sz - kDebugExtraSize;
-}
-
-#ifndef DEBUG
-
-ALWAYS_INLINE void* MemoryManager::debugPostAllocate(void* p, size_t, size_t) {
-  return p;
-}
-
-ALWAYS_INLINE void* MemoryManager::debugPreFree(void* p, size_t, size_t) {
-  return p;
-}
-
-#endif
-
-//////////////////////////////////////////////////////////////////////
-
 inline uint32_t MemoryManager::estimateSmartCap(uint32_t requested) {
   return requested <= kMaxSmartSize ? smartSizeClass(requested)
                                     : requested;
@@ -233,7 +207,7 @@ inline uint8_t MemoryManager::smartSize2IndexLookup(uint32_t size) {
 
 inline uint8_t MemoryManager::smartSize2Index(uint32_t size) {
   assert(size > 0);
-  assert(size <= kMaxSmartSize + kDebugExtraSize);
+  assert(size <= kMaxSmartSize);
   if (LIKELY(size <= kMaxSmartSizeLookup)) {
     return smartSize2IndexLookup(size);
   }
@@ -249,16 +223,13 @@ inline uint32_t MemoryManager::smartSizeClass(uint32_t reqBytes) {
   uint32_t delta = 1u << lgDelta;
   uint32_t deltaMask = delta - 1;
   auto const ret = (reqBytes + deltaMask) & ~deltaMask;
-  assert(ret <= kMaxSmartSize + kDebugExtraSize);
-  if (kDebugExtraSize != 0) {
-    return std::min(ret, uint32_t(kMaxSmartSize));
-  }
+  assert(ret <= kMaxSmartSize);
   return ret;
 }
 
 inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
   assert(bytes > 0);
-  assert(bytes <= kMaxSmartSize + kDebugExtraSize);
+  assert(bytes <= kMaxSmartSize);
 
   // Note: unlike smart_malloc, we don't track internal fragmentation
   // in the usage stats when we're going through smartMallocSize.
@@ -268,17 +239,15 @@ inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
   void* p = m_freelists[i].maybePop();
   if (UNLIKELY(p == nullptr)) {
     p = slabAlloc(bytes, i);
-    p = ((char*)p + kDebugExtraSize);
   }
-  p = ((char*)p - kDebugExtraSize);
   assert((reinterpret_cast<uintptr_t>(p) & kSmartSizeAlignMask) == 0);
   FTRACE(3, "smartMallocSize: {} -> {}\n", bytes, p);
-  return debugPostAllocate(p, bytes, debug ? smartSizeClass(bytes) : bytes);
+  return p;
 }
 
 inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
   assert(bytes > 0);
-  assert(bytes <= kMaxSmartSize + kDebugExtraSize);
+  assert(bytes <= kMaxSmartSize);
   assert((reinterpret_cast<uintptr_t>(ptr) & kSmartSizeAlignMask) == 0);
 
   if (UNLIKELY(m_bypassSlabAlloc)) {
@@ -286,7 +255,6 @@ inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
   }
   unsigned i = smartSize2Index(bytes);
   FTRACE(3, "smartFreeSize({}, {}), freelist {}\n", ptr, bytes, i);
-  debugPreFree(ptr, bytes, bytes);
   m_freelists[i].push(ptr, bytes);
   assert(m_needInitFree = true); // intentional debug-only side-effect.
   m_stats.usage -= bytes;
@@ -301,7 +269,7 @@ void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
   // them on allocation, we also need to adjust for them negatively on free.
   m_stats.borrow(-bytes);
   FTRACE(3, "smartFreeSizeBig: {} ({} bytes)\n", vp, bytes);
-  m_heap.freeBig(debugPreFree(vp, bytes, 0));
+  m_heap.freeBig(vp);
 }
 
 //////////////////////////////////////////////////////////////////////

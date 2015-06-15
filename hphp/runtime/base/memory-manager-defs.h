@@ -56,7 +56,6 @@ struct Header {
     FreeNode free_;
     ResumableNode resumable_;
     NativeNode native_;
-    DebugHeader debug_;
     c_AwaitAllWaitHandle awaitall_;
   };
 
@@ -121,9 +120,6 @@ inline size_t Header::size() const {
     case HeaderKind::Free:
     case HeaderKind::Hole:
       return free_.size();
-    case HeaderKind::Debug:
-      assert(debug_.allocatedMagic == DebugHeader::kAllocatedMagic);
-      return sizeof(DebugHeader);
   }
   return 0;
 }
@@ -170,23 +166,17 @@ template<class Fn> void BigHeap::iterate(Fn fn) {
   }
 }
 
-// Raw iterator loop over the headers of everything in the heap.
-// Skips DebugHeader because it's boring, and skips BigObj, because
-// it's just a detail of which sub-heap we used to allocate something
-// based on its size, and it can prefix almost any other header kind.
-// clients can call this directly to avoid unnecessary initFree()s.
+// Raw iterator loop over the headers of everything in the heap.  Skips BigObj
+// because it's just a detail of which sub-heap we used to allocate something
+// based on its size, and it can prefix almost any other header kind.  Clients
+// can call this directly to avoid unnecessary initFree()s.
 template<class Fn> void MemoryManager::iterate(Fn fn) {
   assert(!m_needInitFree);
   m_heap.iterate([&](Header* h) {
     if (h->kind() == HeaderKind::BigObj) {
       // skip BigNode
       h = reinterpret_cast<Header*>((&h->big_)+1);
-      if (h->kind() == HeaderKind::Debug) {
-        // skip DebugHeader
-        h = reinterpret_cast<Header*>((&h->debug_)+1);
-      }
-    }
-    if (h->kind() == HeaderKind::Debug || h->kind() == HeaderKind::Hole) {
+    } else if (h->kind() == HeaderKind::Hole) {
       // no valid pointer can point here.
       return; // continue iterating
     }
@@ -240,7 +230,6 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
       case HeaderKind::BigMalloc:
       case HeaderKind::Free:
         break;
-      case HeaderKind::Debug:
       case HeaderKind::BigObj:
       case HeaderKind::Hole:
         assert(false && "forEachHeader skips these kinds");

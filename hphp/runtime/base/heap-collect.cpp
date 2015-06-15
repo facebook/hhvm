@@ -295,7 +295,6 @@ void Marker::operator()(const void* start, size_t len) {
       case HK::BigMalloc:
       case HK::Free:
       case HK::Hole:
-      case HK::Debug:
         break;
     }
     // for ObjectData embedded after NativeNode, ResumableNode, BigObj,
@@ -360,7 +359,6 @@ void Marker::init() {
         break;
       case HK::Free:
       case HK::Hole:
-      case HK::Debug:
         break;
     }
   });
@@ -419,7 +417,6 @@ void Marker::sweep() {
         break;
       case HK::Free:
       case HK::Hole:
-      case HK::Debug:
         // free memory; mark implies dangling pointer bug. cmark is ok because
         // dangling ambiguous pointers are not bugs, e.g. on the stack.
         assert(!h->hdr_.mark);

@@ -77,7 +77,6 @@ template<class F> void scanHeader(const Header* h, F& mark) {
     case HeaderKind::ResumableFrame:
     case HeaderKind::NativeData:
     case HeaderKind::Hole:
-    case HeaderKind::Debug:
       always_assert(false && "unexpected header in worklist");
       break;
   }

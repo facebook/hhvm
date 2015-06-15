@@ -193,31 +193,6 @@ struct Allocator {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Debug mode header.
- *
- * For size-untracked allocations, this sits in front of the user
- * payload for small allocations, and in front of the BigNode in
- * big allocations.  The allocatedMagic aliases the space for the
- * FreeList::Node pointers, but should catch double frees due to
- * kAllocatedMagic.
- *
- * For size-tracked allocations, this always sits in front of
- * whatever header we're using (SmallNode or BigNode).
- *
- * We set requestedSize to kFreedMagic when a block is not
- * allocated.
- */
-struct DebugHeader {
-  static constexpr uintptr_t kAllocatedMagic = 0xDB6000A110C0A7EDull;
-  static constexpr size_t kFreedMagic =        0x5AB07A6ED4110CEEull;
-
-  uintptr_t allocatedMagic;
-  HeaderWord<> hdr;
-  size_t requestedSize; // zero for size-untracked allocator
-  size_t returnedCap;
-};
-
-/*
  * Slabs are consumed via bump allocation.  The individual allocations are
  * quantized into a fixed set of size classes, the sizes of which are an
  * implementation detail documented here to shed light on the algorithms that
@@ -400,10 +375,6 @@ constexpr uint32_t kSlabSize = uint32_t{1} << kLgSlabSize;
 constexpr unsigned kLgSmartSizeQuantum = 4;
 constexpr uint32_t kSmartSizeAlign = 1u << kLgSmartSizeQuantum;
 constexpr uint32_t kSmartSizeAlignMask = kSmartSizeAlign - 1;
-
-constexpr uint32_t kDebugExtraSize = debug ?
-                                   ((sizeof(DebugHeader) + kSmartSizeAlignMask)
-                                    & ~kSmartSizeAlignMask) : 0;
 
 constexpr unsigned kLgSizeClassesPerDoubling = 2;
 
@@ -960,11 +931,6 @@ private:
   void refreshStatsHelperStop();
 
   void resetStatsImpl(bool isInternalCall);
-  bool checkPreFree(DebugHeader*, size_t, size_t) const;
-  template<class SizeT> static SizeT debugAddExtra(SizeT);
-  template<class SizeT> static SizeT debugRemoveExtra(SizeT);
-  void* debugPostAllocate(void*, size_t, size_t);
-  void* debugPreFree(void*, size_t, size_t);
 
   void logAllocation(void*, size_t);
   void logDeallocation(void*);

@@ -611,7 +611,7 @@ DEBUG_ONLY const char* header_names[] = {
   "Object", "ResumableObj", "AwaitAllWH",
   "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
   "Resumable", "Native", "SmallMalloc", "BigMalloc", "BigObj",
-  "Free", "Hole", "Debug"
+  "Free", "Hole"
 };
 static_assert(sizeof(header_names)/sizeof(*header_names) == NumHeaderKinds, "");
 
@@ -684,7 +684,6 @@ void MemoryManager::checkHeap() {
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
         break;
-      case HeaderKind::Debug:
       case HeaderKind::BigObj:
       case HeaderKind::Hole:
         assert(false && "forEachHeader skips these kinds");
@@ -754,7 +753,7 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
  */
 void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   FTRACE(3, "slabAlloc({}, {})\n", bytes, index);
-  uint32_t nbytes = debugAddExtra(smartSizeClass(bytes));
+  uint32_t nbytes = smartSizeClass(bytes);
 
   assert(nbytes <= kSlabSize);
   assert((nbytes & kSmartSizeAlignMask) == 0);
@@ -763,10 +762,7 @@ void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   if (UNLIKELY(m_bypassSlabAlloc)) {
     // Stats correction; smartMallocSizeBig() pulls stats from jemalloc.
     m_stats.usage -= bytes;
-    // smartMallocSizeBig already wraps its allocation in a debug header, but
-    // the caller will try to do it again, so we need to adjust this pointer
-    // before returning it.
-    return ((char*)smartMallocSizeBig<false>(nbytes).ptr) - kDebugExtraSize;
+    return smartMallocSizeBig<false>(nbytes).ptr;
   }
 
   void* ptr = m_front;
@@ -795,10 +791,7 @@ void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   }
   for (void* p = (void*)(uintptr_t(m_front) - nbytes); p != ptr;
        p = (void*)(uintptr_t(p) - nbytes)) {
-    auto usable = debugRemoveExtra(nbytes);
-    auto ptr = debugPostAllocate(p, usable, usable);
-    debugPreFree(ptr, usable, usable);
-    m_freelists[index].push(ptr, usable);
+    m_freelists[index].push(p, nbytes);
   }
   return ptr;
 }
@@ -828,8 +821,8 @@ MemBlock MemoryManager::smartMallocSizeBig<false>(size_t);
 
 template<bool callerSavesActualSize> NEVER_INLINE
 MemBlock MemoryManager::smartMallocSizeBig(size_t bytes) {
-  auto block = m_heap.allocBig(debugAddExtra(bytes), HeaderKind::BigObj);
-  auto szOut = debugRemoveExtra(block.size);
+  auto block = m_heap.allocBig(bytes, HeaderKind::BigObj);
+  auto szOut = block.size;
 #ifdef USE_JEMALLOC
   // NB: We don't report the SweepNode size in the stats.
   auto const delta = callerSavesActualSize ? szOut : bytes;
@@ -840,7 +833,7 @@ MemBlock MemoryManager::smartMallocSizeBig(size_t bytes) {
   m_stats.usage += bytes;
 #endif
   updateBigStats();
-  auto ptrOut = debugPostAllocate(block.ptr, bytes, szOut);
+  auto ptrOut = block.ptr;
   FTRACE(3, "smartMallocSizeBig: {} ({} requested, {} usable)\n",
          ptrOut, bytes, szOut);
   return {ptrOut, szOut};
@@ -928,51 +921,6 @@ Sweepable::Sweepable() {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-#ifdef DEBUG
-
-void* MemoryManager::debugPostAllocate(void* p,
-                                       size_t bytes,
-                                       size_t returnedCap) {
-  auto const header = static_cast<DebugHeader*>(p);
-  header->allocatedMagic = DebugHeader::kAllocatedMagic;
-  header->hdr.kind = HeaderKind::Debug;
-  header->requestedSize = bytes;
-  header->returnedCap = returnedCap;
-  return (void*)(uintptr_t(header) + kDebugExtraSize);
-}
-
-void* MemoryManager::debugPreFree(void* p,
-                                  size_t bytes,
-                                  size_t userSpecifiedBytes) {
-  auto const header = reinterpret_cast<DebugHeader*>(uintptr_t(p) -
-                                                     kDebugExtraSize);
-  assert(checkPreFree(header, bytes, userSpecifiedBytes));
-  header->requestedSize = DebugHeader::kFreedMagic;
-  memset(p, kSmartFreeFill, bytes);
-  return header;
-}
-
-#endif
-
-bool MemoryManager::checkPreFree(DebugHeader* p,
-                                 size_t bytes,
-                                 size_t userSpecifiedBytes) const {
-  assert(debug);
-  assert(p->allocatedMagic == DebugHeader::kAllocatedMagic);
-
-  if (userSpecifiedBytes != 0) {
-    // For size-specified frees, the size they report when freeing
-    // must be between the requested size and the actual capacity.
-    assert(userSpecifiedBytes >= p->requestedSize &&
-           userSpecifiedBytes <= p->returnedCap);
-  }
-  if (!m_bypassSlabAlloc && bytes != 0 && bytes <= kMaxSmartSize) {
-    assert(m_heap.contains(p));
-  }
-
-  return true;
-}
 
 void MemoryManager::logAllocation(void* p, size_t bytes) {
   MemoryProfile::logAllocation(p, bytes);

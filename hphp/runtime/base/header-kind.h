@@ -32,10 +32,9 @@ enum class HeaderKind : uint8_t {
   BigMalloc, // big smart_malloc'd block
   BigObj, // big size-tracked object (valid header follows BigNode)
   Free, // small block in a FreeList
-  Hole, // wasted space not in any freelist
-  Debug // a DebugHeader
+  Hole // wasted space not in any freelist
 };
-const unsigned NumHeaderKinds = unsigned(HeaderKind::Debug) + 1;
+const unsigned NumHeaderKinds = unsigned(HeaderKind::Hole) + 1;
 
 /*
  * RefCount type for m_count field in refcounted objects

@@ -40,14 +40,20 @@ ETCH_NAME(enterTCHelper):
   /*
    * If we're entering the TC at a function prologue, make it look like we got
    * there via a bindcall by pushing return addresses, setting the callee frame
-   * pointer, then jumping to the prologue.
+   * pointer, then jumping to the prologue. We leave the TC with a ret
+   * instruction, so if we enter it with a jmp, that will unbalance the RSB and
+   * cause tons of branch mispredictions in the frames above us. To avoid this,
+   * we get to the prologue by calling a stub that pops the return address
+   * pushed by the call and jumps to the prologue. This pushes a bogus address
+   * on the RSB but the ret to callToExit always mispredicts anyway, and this
+   * keeps the RSB balanced.
    */
   test %r9, %r9
   jz ETCH_LABEL(enterTCHelper$callTC)
   push ETCH_NAME_REL(enterTCExit)
   push 0x8(%r9)
   mov %r9, %rbp
-  jmp *%rdx
+  call ETCH_LABEL(enterTCHelper$prologue)
 
   /*
    * The translated code we are about to enter does not follow the
@@ -78,6 +84,11 @@ ETCH_NAME(enterTCExit):
   CFI2(restore, rbp)
   CFI2(adjust_cfa_offset, -8)
   ret
+
+ETCH_LABEL(enterTCHelper$prologue):
+  pop %rax
+  jmp *%rdx
+
   CFI(endproc)
   ETCH_SIZE(enterTCHelper)
 

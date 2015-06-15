@@ -59,7 +59,7 @@ struct CongruenceHasher {
     for (auto& pred : inst->block()->preds()) {
       auto fromBlock = pred.from();
       auto& jmp = fromBlock->back();
-      auto src = jmp.src(idx);
+      auto src = canonical(jmp.src(idx));
       assertx(m_globalTable[src].value);
       values.emplace(m_globalTable[src].value);
     }
@@ -92,7 +92,7 @@ struct CongruenceHasher {
   size_t hashSrcs(KeyType key, size_t result) const {
     auto inst = key.first;
     for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
-      auto src = inst->src(i);
+      auto src = canonical(inst->src(i));
       assertx(m_globalTable[src].value);
       result = folly::hash::hash_128_to_64(
         result,
@@ -146,7 +146,7 @@ struct CongruenceComparator {
       for (auto& pred : inst->block()->preds()) {
         auto fromBlock = pred.from();
         auto& jmp = fromBlock->back();
-        auto src = jmp.src(idx);
+        auto src = canonical(jmp.src(idx));
         assertx(m_globalTable[src].value);
         values.emplace(m_globalTable[src].value);
       }
@@ -161,8 +161,8 @@ struct CongruenceComparator {
     auto instB = keyB.first;
 
     for (uint32_t i = 0; i < instA->numSrcs(); ++i) {
-      auto srcA = instA->src(i);
-      auto srcB = instB->src(i);
+      auto srcA = canonical(instA->src(i));
+      auto srcB = canonical(instB->src(i));
       assertx(m_globalTable[srcA].value);
       assertx(m_globalTable[srcB].value);
       if (m_globalTable[srcA].value != m_globalTable[srcB].value) return false;

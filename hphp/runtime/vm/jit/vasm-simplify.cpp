@@ -32,31 +32,62 @@ namespace {
 
 struct Simplifier {
   Vunit& unit;
-  jit::vector<uint32_t> used;
-  jit::vector<uint64_t> vals;
-  boost::dynamic_bitset<> valid;
+  jit::vector<uint32_t> uses;
 
-  explicit Simplifier(Vunit& unit_in, jit::vector<uint32_t>&& used_in)
-  : unit(unit_in), used(std::move(used_in)) { }
+  explicit Simplifier(Vunit& unit_in, const jit::vector<Vlabel>& blocks)
+  : unit(unit_in), uses(unit.next_vr) {
+    // Use count for each register.  Used to keep peepholes from
+    // firing if results are used beyond the scope of the instructions
+    // being checked.
+    for (auto b : blocks) {
+      for (auto& inst : unit.blocks[b].code) {
+        visitUses(unit, inst, [&](Vreg r) { ++uses[r]; });
+      }
+    }
+  }
+
+  bool match_instr(const Vblock& block, size_t iIdx, Vinstr::Opcode op) const {
+    auto const& code = block.code;
+    return (iIdx < code.size() && code[iIdx].op == op);
+  }
+
+  // Compute register use counts for the given range of instructions.
+  // Check to expand uses vector in case a new register was introduced.
+  void compute_uses(const Vblock& block, size_t iIdx, size_t num) {
+    for(auto i = iIdx; i < iIdx + num; ++i) {
+      visitUses(unit,
+                block.code[iIdx],
+                [&](Vreg r) {
+                  if (r > uses.size()) { uses.resize((size_t)r+1); }
+                  ++uses[r];
+                });
+    }
+  }
+
+  // Undo any register uses from the given range of instructions.
+  void undo_uses(const Vblock& block, size_t iIdx, size_t num) {
+    for(auto i = iIdx; i < iIdx + num; ++i) {
+      visitUses(unit, block.code[iIdx], [&](Vreg r) { --uses[r]; });
+    }
+  }
 
   // If there is an adjacent setcc/xorbi pair where the xor is being used
   // to invert the result of the setcc, just invert the setcc condition and
   // omit the xor.
   bool match_setcc_xorbi(const Vblock& block,
-                         size_t iIdx,
+                         size_t& iIdx,
                          Vinstr& sinst,
                          Vreg& xdst) {
-    auto const& code = block.code;
-    if (code[iIdx].op == Vinstr::setcc) {
+    if (match_instr(block, iIdx, Vinstr::setcc)) {
+      auto const& code = block.code;
       auto const& inst = code[iIdx].setcc_;
       auto const dst = inst.d;
-      if (used[inst.d] == 1 && // Make sure setcc result is only used by xor.
-          iIdx + 1 < code.size() &&
-          code[iIdx + 1].op == Vinstr::xorbi) {
-        auto const& xor = code[iIdx+1].xorbi_;
-        if (xor.s0.b() == 1 && xor.s1 == dst && used[xor.sf] == 0) {
-          sinst = code[iIdx];  // setcc instruction being modified.
-          xdst = xor.d;        // destination for xor result.
+      // Make sure setcc result is only used by xor.
+      if (uses[inst.d] == 1 && match_instr(block, iIdx + 1, Vinstr::xorbi)) {
+        auto const& xor = code[iIdx + 1].xorbi_;
+        if (xor.s0.b() == 1 && xor.s1 == dst && uses[xor.sf] == 0) {
+          sinst = code[iIdx++];  // setcc instruction being modified.
+          xdst = xor.d;          // destination for xor result.
           return true;
         }
       }
@@ -72,12 +103,10 @@ struct Simplifier {
     if (match_setcc_xorbi(block, iIdx, inst, dst)) {
       // Rewrite setcc/xorbi pair as setcc with inverted condition.
       v << setcc{ccNegate(inst.setcc_.cc), inst.setcc_.sf, dst};
-      return iIdx + 1;
     }
-    return 0;
+    return iIdx;
   }
 };
-
 
 /*
  * The main work routine for the simplifier.  It runs a platform specific
@@ -103,7 +132,11 @@ size_t work(Simplifier& s, Vlabel b, size_t iIdx) {
 
   size_t mIdx = s.simplify(v, blocks[b], iIdx);
   if (!blocks[scratch].code.empty()) {
-    vector_splice(code, iIdx, mIdx - iIdx + 1, blocks[scratch].code);
+    const auto numNewInsts = blocks[scratch].code.size();
+    const auto numInsts = mIdx - iIdx + 1;
+    s.undo_uses(blocks[b], iIdx, numInsts);
+    vector_splice(code, iIdx, numInsts, blocks[scratch].code);
+    s.compute_uses(blocks[b], iIdx, numNewInsts);
     return work(s, b, iIdx);
   }
   return iIdx + 1;
@@ -119,24 +152,7 @@ void simplify(Vunit& unit) {
   // block order doesn't matter, but only visit reachable blocks.
   auto blocks = sortBlocks(unit);
 
-  // Use count for each register.  Used to keep peepholes from
-  // firing if results are used beyond the scope of the instructions
-  // being checked.
-  jit::vector<uint32_t> used(unit.next_vr);
-  for (auto b : blocks) {
-    for (auto& inst : unit.blocks[b].code) {
-      visitUses(unit, inst, [&](Vreg r) { ++used[r]; });
-    }
-  }
-
-  Simplifier simplifier(unit, std::move(used));
-  simplifier.vals.resize(unit.next_vr);
-  simplifier.valid.resize(unit.next_vr);
-  // figure out which Vregs are constants and stash their values.
-  for (auto& entry : unit.constToReg) {
-    simplifier.valid.set(entry.second);
-    simplifier.vals[entry.second] = entry.first.val;
-  }
+  Simplifier simplifier(unit, blocks);
 
   // now mutate instructions
   for (auto b : blocks) {

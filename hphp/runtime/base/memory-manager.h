@@ -227,7 +227,6 @@ struct DebugHeader {
  * (ignoring the alignment-constrained smallest size classes), which limits
  * internal fragmentation to 20%.
  */
-
 #define SMART_SIZES \
 /*         index, lg_grp, lg_delta, ndelta, lg_delta_lookup */ \
   SMART_SIZE(  0,      4,        4,      0,  4) \
@@ -407,14 +406,6 @@ constexpr uint32_t kDebugExtraSize = debug ?
                                     & ~kSmartSizeAlignMask) : 0;
 
 constexpr unsigned kLgSizeClassesPerDoubling = 2;
-constexpr unsigned kLgMaxSmartSize = kLgSlabSize;
-static_assert(kLgMaxSmartSize > kLgSmartSizeQuantum + 1,
-              "Too few size classes");
-constexpr unsigned kNumSmartSizes = (kLgMaxSmartSize - kLgSmartSizeQuantum
-                                     - (kLgSizeClassesPerDoubling - 1))
-                                    << kLgSizeClassesPerDoubling;
-static_assert(kNumSmartSizes <= sizeof(kSmartSize2Index),
-              "Extend SMART_SIZES table");
 
 /*
  * The maximum size where we use our custom allocator for request-local memory.
@@ -422,9 +413,16 @@ static_assert(kNumSmartSizes <= sizeof(kSmartSize2Index),
  * Allocations larger than this size go to the underlying malloc implementation,
  * and certain specialized allocator functions have preconditions about the
  * requested size being above or below this number to avoid checking at runtime.
+ *
+ * We want kMaxSmartSize to be the largest size-class less than kSlabSize.
  */
-constexpr uint32_t kMaxSmartSize = (uint32_t{1} << kLgMaxSmartSize)
-                                 - kDebugExtraSize;
+constexpr uint32_t kNumSmartSizes = 63;
+constexpr uint32_t kMaxSmartSize = kSmartIndex2Size[kNumSmartSizes-1];
+static_assert(kMaxSmartSize > kSmartSizeAlign * 2,
+              "Too few size classes");
+static_assert(kMaxSmartSize < kSlabSize, "fix kNumSmartSizes or kLgSlabSize");
+static_assert(kNumSmartSizes <= sizeof(kSmartSize2Index),
+              "Extend SMART_SIZES table");
 
 constexpr unsigned kSmartPreallocCountLimit = 8;
 constexpr uint32_t kSmartPreallocBytesLimit = uint32_t{1} << 9;

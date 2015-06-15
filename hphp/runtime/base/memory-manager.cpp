@@ -630,9 +630,8 @@ void MemoryManager::initHole() {
 void MemoryManager::initFree() {
   initHole();
   for (auto i = 0; i < kNumSmartSizes; i++) {
-    auto size = std::min(kSmartIndex2Size[i], kMaxSmartSize);
     for (auto n = m_freelists[i].head; n; n = n->next) {
-      n->hdr.init(HeaderKind::Free, size);
+      n->hdr.init(HeaderKind::Free, kSmartIndex2Size[i]);
     }
   }
   m_needInitFree = false;

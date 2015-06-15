@@ -22,10 +22,10 @@ struct VectorIterator {
   }
   ~VectorIterator() {}
 
-  static ObjectData* newInstance() {
+  static Object newInstance() {
     static Class* cls = Unit::lookupClass(s_VectorIterator.get());
     assertx(cls);
-    return ObjectData::newInstance(cls);
+    return Object{cls};
   }
 
   void setVector(BaseVector* vec) {

@@ -68,7 +68,7 @@ c_AsyncGenerator* c_AsyncGenerator::Create(const ActRec* fp,
   void* obj = Resumable::Create<false>(fp, numSlots, resumeAddr, resumeOffset,
                                        sizeof(c_AsyncGenerator));
   auto const gen = new (obj) c_AsyncGenerator();
-  gen->incRefCount();
+  assert(gen->hasExactlyOneRef());
   gen->setNoDestruct();
   gen->setState(State::Created);
   gen->m_waitHandle = nullptr;

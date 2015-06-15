@@ -507,7 +507,7 @@ void check_collection_cast_to_array() {
 }
 
 Object create_object_only(const String& s) {
-  return g_context->createObjectOnly(s.get());
+  return Object::attach(g_context->createObjectOnly(s.get()));
 }
 
 Object init_object(const String& s, const Array& params, ObjectData* o) {
@@ -515,7 +515,7 @@ Object init_object(const String& s, const Array& params, ObjectData* o) {
 }
 
 Object create_object(const String& s, const Array& params, bool init /* = true */) {
-  return g_context->createObject(s.get(), params, init);
+  return Object::attach(g_context->createObject(s.get(), params, init));
 }
 
 /*

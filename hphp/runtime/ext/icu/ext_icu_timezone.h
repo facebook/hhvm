@@ -43,9 +43,9 @@ class IntlTimeZone : public IntlError {
       c_IntlTimeZone = Unit::lookupClass(s_IntlTimeZone.get());
       assert(c_IntlTimeZone);
     }
-    auto obj = ObjectData::newInstance(c_IntlTimeZone);
+    Object obj{c_IntlTimeZone};
     if (tz) {
-      Native::data<IntlTimeZone>(obj)->setTimeZone(tz, owned);
+      Native::data<IntlTimeZone>(obj.get())->setTimeZone(tz, owned);
     }
     return obj;
   }

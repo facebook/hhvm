@@ -48,10 +48,9 @@ namespace HPHP {
 template<typename TCollection>
 ALWAYS_INLINE
 static Object materializeImpl(ObjectData* obj) {
-  auto* col = newobj<TCollection>();
-  Object o = col;
+  auto col = makeSmartPtr<TCollection>();
   col->init(VarNR(obj));
-  return o;
+  return Object{std::move(col)};
 }
 
 static ALWAYS_INLINE
@@ -164,7 +163,7 @@ bool BaseVector::t_containskey(const Variant& key) {
 // KeyedIterable
 Object BaseVector::t_getiterator() {
   auto iter = collections::VectorIterator::newInstance();
-  Native::data<collections::VectorIterator>(iter)->setVector(this);
+  Native::data<collections::VectorIterator>(iter.get())->setVector(this);
   return iter;
 }
 
@@ -188,7 +187,7 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_fromKeysOf(const Variant& container) {
-  if (container.isNull()) { return newobj<TVector>(); }
+  if (container.isNull()) { return Object{makeSmartPtr<TVector>()}; }
 
   const auto& cellContainer = *container.asCell();
   if (UNLIKELY(!isContainer(cellContainer))) {
@@ -197,12 +196,11 @@ BaseVector::php_fromKeysOf(const Variant& container) {
   }
 
   ArrayIter iter(cellContainer);
-  auto* target = newobj<TVector>();
+  auto target = makeSmartPtr<TVector>();
   target->reserve(getContainerSize(cellContainer));
   assert(target->canMutateBuffer());
-  Object ret = target;
   for (; iter; ++iter) { target->addRaw(iter.first()); }
-  return ret;
+  return Object{std::move(target)};
 }
 
 template<class TVector, class MakeArgs>
@@ -217,7 +215,7 @@ BaseVector::php_map(const Variant& callback, MakeArgs makeArgs) const {
       "Parameter must be a valid callback");
   }
 
-  TVector* nv = newobj<TVector>();
+  auto nv = makeSmartPtr<TVector>();
   uint32_t sz = m_size;
   nv->reserve(sz);
   assert(nv->canMutateBuffer());
@@ -232,7 +230,7 @@ BaseVector::php_map(const Variant& callback, MakeArgs makeArgs) const {
     }
     nv->incSize();
   }
-  return nv;
+  return Object{std::move(nv)};
 }
 
 template<class TVector, class MakeArgs>
@@ -246,7 +244,7 @@ BaseVector::php_filter(const Variant& callback, MakeArgs makeArgs) const {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  TVector* nv = newobj<TVector>();
+  auto nv = makeSmartPtr<TVector>();
   uint32_t sz = m_size;
   int32_t version = m_version;
   assert(nv->canMutateBuffer());
@@ -260,7 +258,7 @@ BaseVector::php_filter(const Variant& callback, MakeArgs makeArgs) const {
       nv->addRaw(&m_data[i]);
     }
   }
-  return nv;
+  return Object{std::move(nv)};
 }
 
 template<class TVector>
@@ -273,10 +271,9 @@ BaseVector::php_take(const Variant& n) {
       "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
-  auto* vec = newobj<TVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<TVector>();
   if (len <= 0) {
-    return obj;
+    return Object{std::move(vec)};
   }
   size_t sz = std::min(size_t(len), size_t(m_size));
   vec->reserve(sz);
@@ -285,7 +282,7 @@ BaseVector::php_take(const Variant& n) {
   for (size_t i = 0; i < sz; ++i) {
     cellDup(m_data[i], vec->m_data[i]);
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 template<class TVector, bool checkVersion>
@@ -299,9 +296,8 @@ BaseVector::php_takeWhile(const Variant& fn) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto* vec = newobj<TVector>();
+  auto vec = makeSmartPtr<TVector>();
   assert(vec->m_size == 0);
-  Object obj = vec;
   int32_t version UNUSED;
   if (checkVersion) {
     version = m_version;
@@ -316,7 +312,7 @@ BaseVector::php_takeWhile(const Variant& fn) {
     if (!b) break;
     vec->addRaw(&m_data[i]);
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 template<class TVector>
@@ -329,8 +325,7 @@ BaseVector::php_skip(const Variant& n) {
       "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
-  auto* vec = newobj<TVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<TVector>();
   if (len <= 0) len = 0;
   size_t skipAmt = std::min<size_t>(len, m_size);
   size_t sz = size_t(m_size) - skipAmt;
@@ -340,7 +335,7 @@ BaseVector::php_skip(const Variant& n) {
   for (size_t i = 0; i < sz; ++i) {
     cellDup(m_data[i + skipAmt], vec->m_data[i]);
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 template<class TVector, bool checkVersion>
@@ -354,9 +349,8 @@ BaseVector::php_skipWhile(const Variant& fn) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto* vec = newobj<TVector>();
+  auto vec = makeSmartPtr<TVector>();
   assert(vec->canMutateBuffer());
-  Object obj = vec;
   uint32_t i = 0;
   int32_t version UNUSED;
   if (checkVersion) {
@@ -374,7 +368,7 @@ BaseVector::php_skipWhile(const Variant& fn) {
   for (; i < m_size; ++i) {
     vec->addRaw(&m_data[i]);
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 template<class TVector>
@@ -394,8 +388,7 @@ BaseVector::php_slice(const Variant& start, const Variant& len) {
   }
   size_t skipAmt = std::min<size_t>(istart, m_size);
   size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
-  auto* vec = newobj<TVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<TVector>();
   vec->reserve(sz);
   assert(vec->canMutateBuffer());
   vec->setSize(sz);
@@ -405,7 +398,7 @@ BaseVector::php_slice(const Variant& start, const Variant& len) {
   for (; e != eLimit; ++e, ++ne) {
     cellDup(*e, *ne);
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
@@ -419,11 +412,10 @@ void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
     if (bvec->m_capacity <= bvec->m_size) {
       bvec->grow();
     }
-    auto* pair = newobj<c_Pair>(c_Pair::NoInit{});
-    pair->incRefCount();
+    auto pair = makeSmartPtr<c_Pair>(c_Pair::NoInit{});
     pair->initAdd(&m_data[i]);
     pair->initAdd(v);
-    bvec->m_data[i].m_data.pobj = pair;
+    bvec->m_data[i].m_data.pobj = pair.detach();
     bvec->m_data[i].m_type = KindOfObject;
     bvec->incSize();
   }
@@ -860,10 +852,9 @@ Object c_Vector::t_clear() {
 }
 
 Object c_Vector::t_keys() {
-  auto* vec = newobj<c_Vector>();
-  Object obj = vec;
-  BaseVector::keys(vec);
-  return obj;
+  auto vec = makeSmartPtr<c_Vector>();
+  BaseVector::keys(vec.get());
+  return Object{std::move(vec)};
 }
 
 Object c_Vector::t_values() {
@@ -1014,10 +1005,9 @@ Object c_Vector::t_filterwithkey(const Variant& callback) {
 }
 
 Object c_Vector::t_zip(const Variant& iterable) {
-  auto* vec = newobj<c_Vector>();
-  Object obj = vec;
-  BaseVector::zip(vec, iterable);
-  return obj;
+  auto vec = makeSmartPtr<c_Vector>();
+  BaseVector::zip(vec.get(), iterable);
+  return Object{std::move(vec)};
 }
 
 Object c_Vector::t_take(const Variant& n) {
@@ -1075,8 +1065,7 @@ typename std::enable_if<
 BaseVector::php_concat(const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  auto* vec = newobj<TVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<TVector>();
   uint32_t sz = m_size;
   vec->reserve((size_t)sz + itSize);
   assert(vec->canMutateBuffer());
@@ -1087,7 +1076,7 @@ BaseVector::php_concat(const Variant& iterable) {
   for (; iter; ++iter) {
     vec->addRaw(iter.second());
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Variant BaseVector::t_firstvalue() {
@@ -1130,11 +1119,10 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_fromItems(const Variant& iterable) {
-  auto* target = newobj<TVector>();
-  Object ret = target;
-  if (iterable.isNull()) return ret;
+  auto target = makeSmartPtr<TVector>();
+  if (iterable.isNull()) return Object{std::move(target)};
   target->init(iterable);
-  return ret;
+  return Object{std::move(target)};
 }
 
 Object c_Vector::ti_fromitems(const Variant& iterable) {
@@ -1158,8 +1146,7 @@ Object c_Vector::ti_fromarray(const Variant& arr) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter arr must be an array");
   }
-  auto* target = newobj<c_Vector>();
-  Object ret = target;
+  auto target = makeSmartPtr<c_Vector>();
   auto* ad = arr.getArrayData();
   uint32_t sz = ad->size();
   target->reserve(sz);
@@ -1171,7 +1158,7 @@ Object c_Vector::ti_fromarray(const Variant& arr) {
     assert(pos != ad->iter_end());
     cellDup(*(ad->getValueRef(pos).asCell()), data[i]);
   }
-  return ret;
+  return Object{std::move(target)};
 }
 
 void c_Vector::throwOOB(int64_t key) {
@@ -1274,13 +1261,13 @@ void c_Vector::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 // already exist) and then return it
 Object c_Vector::getImmutableCopy() {
   if (m_immCopy.isNull()) {
-    auto* vec = newobj<c_ImmVector>();
-    m_immCopy = vec;
-    arrayData()->incRefCount();
+    auto vec = makeSmartPtr<c_ImmVector>();
     vec->m_data = m_data;
     vec->m_size = m_size;
     vec->m_capacity = m_capacity;
     vec->m_version = m_version;
+    m_immCopy = std::move(vec);
+    arrayData()->incRefCount();
   }
   assert(!m_immCopy.isNull());
   assert(m_data == static_cast<c_ImmVector*>(m_immCopy.get())->m_data);
@@ -1327,17 +1314,15 @@ Object c_ImmVector::t_filterwithkey(const Variant& callback) {
 }
 
 Object c_ImmVector::t_zip(const Variant& iterable) {
-  auto* vec = newobj<c_ImmVector>();
-  Object obj = vec;
-  BaseVector::zip(vec, iterable);
-  return obj;
+  auto vec = makeSmartPtr<c_ImmVector>();
+  BaseVector::zip(vec.get(), iterable);
+  return Object{std::move(vec)};
 }
 
 Object c_ImmVector::t_keys() {
-  auto* vec = newobj<c_ImmVector>();
-  Object obj = vec;
-  BaseVector::keys(vec);
-  return obj;
+  auto vec = makeSmartPtr<c_ImmVector>();
+  BaseVector::keys(vec.get());
+  return Object{std::move(vec)};
 }
 
 // Others
@@ -2089,7 +2074,7 @@ Object c_Map::t_differencebykey(const Variant& it) {
 
 Object BaseMap::t_getiterator() {
   auto iter = collections::MapIterator::newInstance();
-  Native::data<collections::MapIterator>(iter)->setMap(this);
+  Native::data<collections::MapIterator>(iter.get())->setMap(this);
   return iter;
 }
 
@@ -2122,9 +2107,8 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  TMap* mp = newobj<TMap>();
-  Object obj = mp;
-  if (!m_size) return obj;
+  auto mp = makeSmartPtr<TMap>();
+  if (!m_size) return Object{std::move(mp)};
   assert(posLimit() != 0);
   assert(hashSize() > 0);
   assert(mp->arrayData() == staticEmptyMixedArray());
@@ -2166,7 +2150,7 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
       mp->incSize();
     }
   }
-  return obj;
+  return Object{std::move(mp)};
 }
 
 Object c_ImmMap::t_values() {
@@ -2296,10 +2280,9 @@ typename std::enable_if<
 BaseMap::php_zip(const Variant& iterable) const {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  auto* mp = newobj<TMap>();
-  Object obj = mp;
+  auto mp = makeSmartPtr<TMap>();
   if (!m_size) {
-    return obj;
+    return Object{std::move(mp)};
   }
   mp->reserve(std::min(sz, size_t(m_size)));
   uint32_t used = posLimit();
@@ -2307,12 +2290,11 @@ BaseMap::php_zip(const Variant& iterable) const {
     if (isTombstone(i)) continue;
     const Elm& e = data()[i];
     Variant v = iter.second();
-    auto* pair = newobj<c_Pair>(c_Pair::NoInit{});
-    Object pairObj = pair;
+    auto pair = makeSmartPtr<c_Pair>(c_Pair::NoInit{});
     pair->initAdd(&e.data);
     pair->initAdd(v);
     TypedValue tv;
-    tv.m_data.pobj = pair;
+    tv.m_data.pobj = pair.detach();
     tv.m_type = KindOfObject;
     if (e.hasIntKey()) {
       mp->setRaw(e.ikey, &tv);
@@ -2322,7 +2304,7 @@ BaseMap::php_zip(const Variant& iterable) const {
     }
     ++iter;
   }
-  return obj;
+  return Object{std::move(mp)};
 }
 
 Object c_ImmMap::t_zip(const Variant& iterable) {
@@ -2348,12 +2330,11 @@ BaseMap::php_take(const Variant& n) {
     // so we can just call Clone() and return early here.
     return Object::attach(TMap::Clone(this));
   }
-  auto* mp = newobj<TMap>();
-  Object obj = mp;
+  auto mp = makeSmartPtr<TMap>();
   if (len <= 0) {
     // We know the resulting Map will be empty, so we can return
     // early here.
-    return obj;
+    return Object{std::move(mp)};
   }
   size_t sz = size_t(len);
   mp->reserve(sz);
@@ -2373,7 +2354,7 @@ BaseMap::php_take(const Variant& n) {
       mp->updateIntLikeStrKeys(toE.skey);
     }
   }
-  return obj;
+  return Object{std::move(mp)};
 }
 
 template<class TMap, bool checkVersion>
@@ -2387,9 +2368,8 @@ BaseMap::php_takeWhile(const Variant& fn) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto* mp = newobj<TMap>();
-  Object obj = mp;
-  if (!m_size) return obj;
+  auto mp = makeSmartPtr<TMap>();
+  if (!m_size) return Object{std::move(mp)};
   int32_t version UNUSED;
   if (checkVersion) {
     version = m_version;
@@ -2411,7 +2391,7 @@ BaseMap::php_takeWhile(const Variant& fn) {
       mp->setRaw(e->skey, &e->data);
     }
   }
-  return obj;
+  return Object{std::move(mp)};
 }
 
 template<class TMap>
@@ -2429,12 +2409,11 @@ BaseMap::php_skip(const Variant& n) {
     // so we can just call Clone() and return early here.
     return Object::attach(TMap::Clone(this));
   }
-  auto* mp = newobj<TMap>();
-  Object obj = mp;
+  auto mp = makeSmartPtr<TMap>();
   if (len >= m_size) {
     // We know the resulting Map will be empty, so we can return
     // early here.
-    return obj;
+    return Object{std::move(mp)};
   }
   size_t sz = size_t(m_size) - size_t(len);
   assert(sz);
@@ -2456,7 +2435,7 @@ BaseMap::php_skip(const Variant& n) {
       mp->updateIntLikeStrKeys(toE.skey);
     }
   }
-  return obj;
+  return Object{std::move(mp)};
 }
 
 template<class TMap, bool checkVersion>
@@ -2470,9 +2449,8 @@ BaseMap::php_skipWhile(const Variant& fn) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto* mp = newobj<TMap>();
-  Object obj = mp;
-  if (!m_size) return obj;
+  auto mp = makeSmartPtr<TMap>();
+  if (!m_size) return Object{std::move(mp)};
   int32_t version;
   if (checkVersion) {
     version = m_version;
@@ -2498,7 +2476,7 @@ BaseMap::php_skipWhile(const Variant& fn) {
       mp->setRaw(e->skey, &e->data);
     }
   }
-  return obj;
+  return Object{std::move(mp)};
 }
 
 template<class TMap>
@@ -2518,8 +2496,7 @@ BaseMap::php_slice(const Variant& start, const Variant& len) {
   }
   size_t skipAmt = std::min<size_t>(istart, m_size);
   size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
-  auto* mp = newobj<TMap>();
-  Object obj = mp;
+  auto mp = makeSmartPtr<TMap>();
   mp->reserve(sz);
   mp->setSize(sz);
   mp->setPosLimit(sz);
@@ -2538,7 +2515,7 @@ BaseMap::php_slice(const Variant& start, const Variant& len) {
       mp->updateIntLikeStrKeys(toE.skey);
     }
   }
-  return obj;
+  return Object{std::move(mp)};
 }
 
 Object c_Map::t_take(const Variant& n) {
@@ -2596,8 +2573,7 @@ typename std::enable_if<
 BaseMap::php_concat(const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  auto* vec = newobj<TVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<TVector>();
   uint32_t sz = m_size;
   vec->reserve((size_t)sz + itSize);
   assert(vec->canMutateBuffer());
@@ -2613,7 +2589,7 @@ BaseMap::php_concat(const Variant& iterable) {
   for (; iter; ++iter) {
     vec->addRaw(iter.second());
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Variant BaseMap::t_firstvalue() {
@@ -2673,11 +2649,10 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_mapFromItems(const Variant& iterable) {
-  if (iterable.isNull()) return newobj<TMap>();
+  if (iterable.isNull()) return Object{makeSmartPtr<TMap>()};
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  auto* target = newobj<TMap>();
-  Object ret = target;
+  auto target = makeSmartPtr<TMap>();
   target->reserve(sz);
   for (; iter; ++iter) {
     Variant v = iter.second();
@@ -2690,7 +2665,7 @@ BaseMap::php_mapFromItems(const Variant& iterable) {
     auto pair = static_cast<c_Pair*>(tv->m_data.pobj);
     target->setRaw(&pair->elm0, &pair->elm1);
   }
-  return ret;
+  return Object{std::move(target)};
 }
 
 Object c_ImmMap::ti_fromitems(const Variant& iterable) {
@@ -3162,13 +3137,13 @@ void BaseMap::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 // already exist) and then return it
 Object c_Map::getImmutableCopy() {
   if (m_immCopy.isNull()) {
-    auto* mp = newobj<c_ImmMap>();
-    m_immCopy = mp;
-    arrayData()->incRefCount();
+    auto mp = makeSmartPtr<c_ImmMap>();
     mp->m_size = m_size;
     mp->m_version = m_version;
     mp->m_data = m_data;
     mp->setIntLikeStrKeys(intLikeStrKeys());
+    m_immCopy = std::move(mp);
+    arrayData()->incRefCount();
   }
   assert(!m_immCopy.isNull());
   assert(m_data == static_cast<c_ImmMap*>(m_immCopy.get())->m_data);
@@ -3572,13 +3547,13 @@ bool BaseSet::ToBool(const ObjectData* obj) {
 // already exist) and then return it
 Object c_Set::getImmutableCopy() {
   if (m_immCopy.isNull()) {
-    auto* st = newobj<c_ImmSet>();
-    m_immCopy = st;
-    arrayData()->incRefCount();
+    auto st = makeSmartPtr<c_ImmSet>();
     st->m_size = m_size;
     st->m_version = m_version;
     st->m_data = m_data;
     st->setIntLikeStrKeys(intLikeStrKeys());
+    m_immCopy = std::move(st);
+    arrayData()->incRefCount();
   }
   assert(!m_immCopy.isNull());
   assert(m_data == static_cast<c_ImmSet*>(m_immCopy.get())->m_data);
@@ -3748,7 +3723,7 @@ void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 
 Object BaseSet::t_getiterator() {
   auto iter = collections::SetIterator::newInstance();
-  Native::data<collections::SetIterator>(iter)->setSet(this);
+  Native::data<collections::SetIterator>(iter.get())->setSet(this);
   return iter;
 }
 
@@ -3763,9 +3738,8 @@ BaseSet::php_map(const Variant& callback, MakeArgs makeArgs) const {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto* st = newobj<TSet>();
-  Object obj = st;
-  if (!m_size) return obj;
+  auto st = makeSmartPtr<TSet>();
+  if (!m_size) return Object{std::move(st)};
   assert(posLimit() != 0);
   assert(hashSize() > 0);
   assert(st->arrayData() == staticEmptyMixedArray());
@@ -3785,7 +3759,7 @@ BaseSet::php_map(const Variant& callback, MakeArgs makeArgs) const {
   }
   // ... and shrink back if that was incorrect
   st->shrinkIfCapacityTooHigh(oldCap);
-  return obj;
+  return Object{std::move(st)};
 }
 
 template<typename TSet, class MakeArgs>
@@ -3890,12 +3864,11 @@ BaseSet::php_take(const Variant& n) {
     // so we can just call Clone() and return early here.
     return Object::attach(TSet::Clone(this));
   }
-  auto* st = newobj<TSet>();
-  Object obj = st;
+  auto st = makeSmartPtr<TSet>();
   if (len <= 0) {
     // We know the resulting Set will be empty, so we can return
     // early here.
-    return obj;
+    return Object{std::move(st)};
   }
   size_t sz = size_t(len);
   st->reserve(sz);
@@ -3915,7 +3888,7 @@ BaseSet::php_take(const Variant& n) {
       st->updateIntLikeStrKeys(toE.skey);
     }
   }
-  return obj;
+  return Object{std::move(st)};
 }
 
 template<class TSet, bool checkVersion>
@@ -3973,12 +3946,11 @@ BaseSet::php_skip(const Variant& n) {
     // so we can just call Clone() and return early here.
     return Object::attach(TSet::Clone(this));
   }
-  auto* st = newobj<TSet>();
-  Object obj = st;
+  auto st = makeSmartPtr<TSet>();
   if (len >= m_size) {
     // We know the resulting Set will be empty, so we can return
     // early here.
-    return obj;
+    return Object{std::move(st)};
   }
   size_t sz = size_t(m_size) - size_t(len);
   assert(sz);
@@ -4003,7 +3975,7 @@ BaseSet::php_skip(const Variant& n) {
       st->updateIntLikeStrKeys(toE.skey);
     }
   }
-  return obj;
+  return Object{std::move(st)};
 }
 
 template<class TSet, bool checkVersion>
@@ -4068,8 +4040,7 @@ BaseSet::php_slice(const Variant& start, const Variant& len) {
   }
   size_t skipAmt = std::min<size_t>(istart, m_size);
   size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
-  auto* st = newobj<TSet>();
-  Object obj = st;
+  auto st = makeSmartPtr<TSet>();
   st->reserve(sz);
   st->setSize(sz);
   st->setPosLimit(sz);
@@ -4088,7 +4059,7 @@ BaseSet::php_slice(const Variant& start, const Variant& len) {
       st->updateIntLikeStrKeys(toE.skey);
     }
   }
-  return obj;
+  return Object{std::move(st)};
 }
 
 template<class TSet>
@@ -4344,8 +4315,7 @@ typename std::enable_if<
 BaseSet::php_concat(const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  auto* vec = newobj<TVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<TVector>();
   uint32_t sz = m_size;
   vec->reserve((size_t)sz + itSize);
   assert(vec->canMutateBuffer());
@@ -4362,7 +4332,7 @@ BaseSet::php_concat(const Variant& iterable) {
   for (; iter; ++iter) {
     vec->addRaw(iter.second());
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Variant BaseSet::t_firstvalue() {
@@ -4552,8 +4522,7 @@ Object c_Pair::t_items() {
 
 Object c_Pair::t_keys() {
   assert(isFullyConstructed());
-  auto* vec = newobj<c_ImmVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<c_ImmVector>();
   vec->reserve(2);
   assert(vec->canMutateBuffer());
   vec->setSize(2);
@@ -4561,14 +4530,13 @@ Object c_Pair::t_keys() {
   vec->m_data[0].m_type = KindOfInt64;
   vec->m_data[1].m_data.num = 1;
   vec->m_data[1].m_type = KindOfInt64;
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Object c_Pair::t_values() {
-  auto* vec = newobj<c_ImmVector>();
-  Object o = vec;
+  auto vec = makeSmartPtr<c_ImmVector>();
   vec->init(VarNR(this));
-  return o;
+  return Object{std::move(vec)};
 }
 
 Object c_Pair::t_lazy() {
@@ -4639,7 +4607,7 @@ Array c_Pair::t_tovaluesarray() {
 Object c_Pair::t_getiterator() {
   assert(isFullyConstructed());
   auto iter = collections::PairIterator::newInstance();
-  Native::data<collections::PairIterator>(iter)->setPair(this);
+  Native::data<collections::PairIterator>(iter.get())->setPair(this);
   return iter;
 }
 
@@ -4651,15 +4619,14 @@ Object c_Pair::t_map(const Variant& callback) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto* vec = newobj<c_ImmVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<c_ImmVector>();
   vec->reserve(2);
   assert(vec->canMutateBuffer());
   for (uint64_t i = 0; i < 2; ++i) {
     g_context->invokeFuncFew(&vec->m_data[i], ctx, 1, &getElms()[i]);
     vec->incSize();
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Object c_Pair::t_mapwithkey(const Variant& callback) {
@@ -4670,8 +4637,7 @@ Object c_Pair::t_mapwithkey(const Variant& callback) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto* vec = newobj<c_ImmVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<c_ImmVector>();
   vec->reserve(2);
   assert(vec->canMutateBuffer());
   for (uint64_t i = 0; i < 2; ++i) {
@@ -4679,7 +4645,7 @@ Object c_Pair::t_mapwithkey(const Variant& callback) {
     g_context->invokeFuncFew(&vec->m_data[i], ctx, 2, args);
     vec->incSize();
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Object c_Pair::t_filter(const Variant& callback) {
@@ -4690,14 +4656,13 @@ Object c_Pair::t_filter(const Variant& callback) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto* vec = newobj<c_ImmVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<c_ImmVector>();
   for (uint64_t i = 0; i < 2; ++i) {
     if (invokeAndCastToBool(ctx, 1, &getElms()[i])) {
       vec->addRaw(&getElms()[i]);
     }
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Object c_Pair::t_filterwithkey(const Variant& callback) {
@@ -4708,23 +4673,21 @@ Object c_Pair::t_filterwithkey(const Variant& callback) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto* vec = newobj<c_ImmVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<c_ImmVector>();
   for (uint64_t i = 0; i < 2; ++i) {
     TypedValue args[2] = { make_tv<KindOfInt64>(i), getElms()[i] };
     if (invokeAndCastToBool(ctx, 2, args)) {
       vec->addRaw(&getElms()[i]);
     }
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Object c_Pair::t_zip(const Variant& iterable) {
   assert(isFullyConstructed());
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  auto* vec = newobj<c_ImmVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<c_ImmVector>();
   vec->reserve(std::min(sz, size_t(2)));
   assert(vec->canMutateBuffer());
   for (uint64_t i = 0; i < 2 && iter; ++i, ++iter) {
@@ -4732,15 +4695,14 @@ Object c_Pair::t_zip(const Variant& iterable) {
     if (vec->m_capacity <= vec->m_size) {
       vec->grow();
     }
-    auto* pair = newobj<c_Pair>(c_Pair::NoInit{});
-    pair->incRefCount();
+    auto pair = makeSmartPtr<c_Pair>(c_Pair::NoInit{});
     pair->initAdd(&getElms()[i]);
     pair->initAdd(v);
-    vec->m_data[i].m_data.pobj = pair;
+    vec->m_data[i].m_data.pobj = pair.detach();
     vec->m_data[i].m_type = KindOfObject;
     vec->incSize();
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Object c_Pair::t_take(const Variant& n) {
@@ -4749,10 +4711,9 @@ Object c_Pair::t_take(const Variant& n) {
       "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
-  auto* vec = newobj<c_ImmVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<c_ImmVector>();
   if (len <= 0) {
-    return obj;
+    return Object{std::move(vec)};
   }
   size_t sz = std::min(size_t(len), size_t(2));
   vec->reserve(sz);
@@ -4761,7 +4722,7 @@ Object c_Pair::t_take(const Variant& n) {
   for (size_t i = 0; i < sz; ++i) {
     cellDup(getElms()[i], vec->m_data[i]);
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Object c_Pair::t_takewhile(const Variant& callback) {
@@ -4771,13 +4732,12 @@ Object c_Pair::t_takewhile(const Variant& callback) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto* vec = newobj<c_ImmVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<c_ImmVector>();
   for (uint32_t i = 0; i < 2; ++i) {
     if (!invokeAndCastToBool(ctx, 1, &getElms()[i])) break;
     vec->addRaw(&getElms()[i]);
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Object c_Pair::t_skip(const Variant& n) {
@@ -4786,8 +4746,7 @@ Object c_Pair::t_skip(const Variant& n) {
       "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
-  auto* vec = newobj<c_ImmVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<c_ImmVector>();
   if (len <= 0) len = 0;
   size_t skipAmt = std::min<size_t>(len, 2);
   size_t sz = size_t(m_size) - skipAmt;
@@ -4797,7 +4756,7 @@ Object c_Pair::t_skip(const Variant& n) {
   for (size_t i = 0; i < sz; ++i) {
     cellDup(getElms()[i + skipAmt], vec->m_data[i]);
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Object c_Pair::t_skipwhile(const Variant& fn) {
@@ -4807,8 +4766,7 @@ Object c_Pair::t_skipwhile(const Variant& fn) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto* vec = newobj<c_ImmVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<c_ImmVector>();
   uint32_t i = 0;
   for (; i < 2; ++i) {
     if (!invokeAndCastToBool(ctx, 1, &getElms()[i])) break;
@@ -4816,7 +4774,7 @@ Object c_Pair::t_skipwhile(const Variant& fn) {
   for (; i < 2; ++i) {
     vec->addRaw(&getElms()[i]);
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Object c_Pair::t_slice(const Variant& start, const Variant& len) {
@@ -4832,22 +4790,20 @@ Object c_Pair::t_slice(const Variant& start, const Variant& len) {
   }
   size_t skipAmt = std::min<size_t>(istart, 2);
   size_t sz = std::min<size_t>(ilen, size_t(2) - skipAmt);
-  auto* vec = newobj<c_ImmVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<c_ImmVector>();
   vec->reserve(sz);
   assert(vec->canMutateBuffer());
   vec->setSize(sz);
   for (size_t i = 0; i < sz; ++i) {
     cellDup(getElms()[i + skipAmt], vec->m_data[i]);
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Object c_Pair::t_concat(const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  auto* vec = newobj<c_ImmVector>();
-  Object obj = vec;
+  auto vec = makeSmartPtr<c_ImmVector>();
   vec->reserve((size_t)2 + itSize);
   assert(vec->canMutateBuffer());
   vec->setSize(2);
@@ -4858,7 +4814,7 @@ Object c_Pair::t_concat(const Variant& iterable) {
   for (; iter; ++iter) {
     vec->addRaw(iter.second());
   }
-  return obj;
+  return Object{std::move(vec)};
 }
 
 Variant c_Pair::t_firstvalue() {

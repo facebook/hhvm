@@ -125,7 +125,6 @@ void emitCreateCl(IRGS& env, int32_t numParams, const StringData* clsName) {
   assertx(cls && (cls->attrs() & AttrUnique));
 
   auto const closure = allocObjFast(env, cls);
-  gen(env, IncRef, closure);
 
   auto const ctx = [&]{
     if (!curClass(env)) return cns(env, nullptr);

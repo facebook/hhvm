@@ -1015,31 +1015,33 @@ ObjectData* ObjectData::callCustomInstanceInit() {
   auto const init = m_cls->lookupMethod(s___init__.get());
   assert(init);
 
-  // We need to incRef/decRef here because we're still a new (count == 0)
-  // object and invokeMethod is going to expect us to have a reasonable
-  // refcount.
+  // No need to inc-ref here because we're a newly created object and our
+  // ref-count starts at 1.
   try {
-    incRefCount();
     DEBUG_ONLY auto const tv = g_context->invokeMethod(this, init);
     assert(!IS_REFCOUNTED_TYPE(tv.m_type));
-    decRefCount();
   } catch (...) {
     this->setNoDestruct();
     decRefObj(this);
     throw;
   }
+
   return this;
 }
 
 // called from jit code
 ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
-  return new (MM().smartMallocSize(size)) ObjectData(cls, NoInit{});
+  auto o = new (MM().smartMallocSize(size)) ObjectData(cls, NoInit{});
+  assert(o->hasExactlyOneRef());
+  return o;
 }
 
 // called from jit code
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  return new (MM().smartMallocSizeBig<false>(size).ptr)
+  auto o = new (MM().smartMallocSizeBig<false>(size).ptr)
     ObjectData(cls, NoInit{});
+  assert(o->hasExactlyOneRef());
+  return o;
 }
 
 NEVER_INLINE
@@ -1089,9 +1091,9 @@ void ObjectData::DeleteObject(ObjectData* objectData) {
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {
-  ObjectData* retval = ObjectData::newInstance(SystemLib::s_stdclassClass);
+  Object retval{SystemLib::s_stdclassClass};
   retval->setAttribute(HasDynPropArr);
-  g_context->dynPropTable.emplace(retval, properties);
+  g_context->dynPropTable.emplace(retval.get(), properties);
   return retval;
 }
 
@@ -1977,18 +1979,17 @@ void ObjectData::cloneSet(ObjectData* clone) {
 }
 
 ObjectData* ObjectData::cloneImpl() {
-  ObjectData* obj;
-  Object o = obj = ObjectData::newInstance(m_cls);
-  cloneSet(obj);
+  Object o{m_cls};
+  cloneSet(o.get());
   if (UNLIKELY(getAttribute(HasNativeData))) {
-    Native::nativeDataInstanceCopy(obj, this);
+    Native::nativeDataInstanceCopy(o.get(), this);
   }
 
   auto const hasCloneBit = getAttribute(HasClone);
 
   if (!hasCloneBit) return o.detach();
 
-  auto const method = obj->m_cls->lookupMethod(s_clone.get());
+  auto const method = o->m_cls->lookupMethod(s_clone.get());
 
   // PHP classes that inherit from cpp builtins that have special clone
   // functionality *may* also define a __clone method, but it's totally
@@ -1996,7 +1997,7 @@ ObjectData* ObjectData::cloneImpl() {
   if (!method && getAttribute(IsCppBuiltin)) return o.detach();
   assert(method);
 
-  g_context->invokeMethodV(obj, method);
+  g_context->invokeMethodV(o.get(), method);
 
   return o.detach();
 }

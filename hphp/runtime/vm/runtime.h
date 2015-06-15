@@ -223,10 +223,13 @@ Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
 Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
                                   ssize_t numBuiltinClasses);
 
+// Create a new class instance, and register it in the live object table if
+// necessary. The initial ref-count of the instance will be greater than zero.
 inline ObjectData*
 newInstance(Class* cls) {
   assert(cls);
   auto* inst = ObjectData::newInstance(cls);
+  assert(inst->getCount() > 0);
   Stats::inc(cls->getDtor() ? Stats::ObjectData_new_dtor_yes
                             : Stats::ObjectData_new_dtor_no);
 

@@ -1158,7 +1158,7 @@ Variant php_dom_create_object(xmlNodePtr obj,
 
   Object od = node->getCache()
     ? node->getCache()
-    : g_context->createObjectOnly(clsname.get());
+    : Object::attach(g_context->createObjectOnly(clsname.get()));
 
   auto* nodeobj = Native::data<DOMNode>(od.get());
 
@@ -1289,7 +1289,7 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
     }
 
     auto docData = Native::data<DOMNode>(domxpath->m_doc.get())->doc();
-    Object node_list = ObjectData::newInstance(getDOMNodeListClass());
+    Object node_list{getDOMNodeListClass()};
     auto list_data = Native::data<DOMIterable>(node_list.get());
     list_data->m_doc = docData;
     list_data->m_baseobjptr = retval;
@@ -1614,7 +1614,7 @@ void HHVM_METHOD(DOMDocument, __construct,
              const Variant& encoding /* = null_string */);
 
 Object newDOMDocument(bool construct /* = true */) {
-  Object doc = ObjectData::newInstance(getDOMDocumentClass());
+  Object doc{getDOMDocumentClass()};
   if (LIKELY(construct)) {
     HHVM_MN(DOMDocument, __construct)(doc.get(), null_string, null_string);
   }
@@ -1623,7 +1623,7 @@ Object newDOMDocument(bool construct /* = true */) {
 
 static Object newDOMNamedNodeMap(SmartPtr<XMLDocumentData> doc, Object base,
                           int node_type, xmlHashTable* ht = nullptr) {
-  Object nodemap = ObjectData::newInstance(getDOMNamedNodeMapClass());
+  Object nodemap{getDOMNamedNodeMapClass()};
   auto data = Native::data<DOMIterable>(nodemap.get());
   data->m_doc = doc;
   data->m_baseobj = base;
@@ -1636,7 +1636,7 @@ static Object newDOMNamedNodeMap(SmartPtr<XMLDocumentData> doc, Object base,
 static Object newDOMNodeList(SmartPtr<XMLDocumentData> doc, Object base,
                              int node_type, String local = String(),
                              String ns = String()) {
-  Object ret = ObjectData::newInstance(getDOMNodeListClass());
+  Object ret{getDOMNodeListClass()};
   auto data = Native::data<DOMIterable>(ret.get());
   data->m_doc = doc;
   data->m_baseobj = base;
@@ -3066,7 +3066,7 @@ Variant HHVM_METHOD(DOMText, splitText,
     xmlAddNextSibling(node, nnode);
     nnode->type = XML_TEXT_NODE;
   }
-  Object ret = ObjectData::newInstance(getDOMTextClass());
+  Object ret{getDOMTextClass()};
   auto text_data = Native::data<DOMNode>(ret.get());
   text_data->setNode(nnode);
   text_data->setDoc(std::move(data->doc()));
@@ -3121,7 +3121,7 @@ static Variant dom_document_doctype_read(const Object& obj) {
 }
 
 static Variant dom_document_implementation_read(const Object& obj) {
-  return ObjectData::newInstance(getDOMImplementationClass());
+  return Object{getDOMImplementationClass()};
 }
 
 static Variant dom_document_document_element_read(const Object& obj) {
@@ -5113,7 +5113,7 @@ Array HHVM_METHOD(DOMNamedNodeMap, __debuginfo) {
 
 Variant HHVM_METHOD(DOMNamedNodeMap, getIterator) {
   auto data = Native::data<DOMIterable>(this_);
-  Object ret = ObjectData::newInstance(getDOMNodeIteratorClass());
+  Object ret{getDOMNodeIteratorClass()};
   DOMNodeIterator* iter = Native::data<DOMNodeIterator>(ret.get());
   iter->set_iterator(this_, data);
   iter->setKeyIsNamed();
@@ -5230,7 +5230,7 @@ Variant HHVM_METHOD(DOMNodeList, item,
 
 Variant HHVM_METHOD(DOMNodeList, getIterator) {
   auto data = Native::data<DOMIterable>(this_);
-  Object ret = ObjectData::newInstance(getDOMNodeIteratorClass());
+  Object ret{getDOMNodeIteratorClass()};
   DOMNodeIterator* iter = Native::data<DOMNodeIterator>(ret.get());
   iter->set_iterator(this_, data);
   return ret;
@@ -5331,7 +5331,7 @@ Variant HHVM_METHOD(DOMImplementation, createDocument,
     xmlDocSetRootElement(docp, nodep);
     xmlFree(localname);
   }
-  Object ret = ObjectData::newInstance(getDOMDocumentClass());
+  Object ret{getDOMDocumentClass()};
   auto doc_data = Native::data<DOMNode>(ret.get());
   doc_data->setNode((xmlNodePtr)docp);
   if (doctype) {

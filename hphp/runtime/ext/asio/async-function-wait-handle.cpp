@@ -72,8 +72,8 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   void* obj = Resumable::Create<false>(fp, numSlots, resumeAddr, resumeOffset,
                                        sizeof(c_AsyncFunctionWaitHandle));
   auto const waitHandle = new (obj) c_AsyncFunctionWaitHandle();
+  assert(waitHandle->hasExactlyOneRef());
   waitHandle->actRec()->setReturnVMExit();
-  waitHandle->incRefCount();
   waitHandle->setNoDestruct();
   waitHandle->initialize(child);
   return waitHandle;

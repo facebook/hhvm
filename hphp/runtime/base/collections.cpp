@@ -31,25 +31,15 @@ COLLECTIONS_ALL_TYPES(X)
 // Constructor/Initializer
 
 ObjectData* allocEmptyPair() {
-  auto ret = newCollectionObj<c_Pair>(c_Pair::NoInit{});
-  ret->incRefCount();
-  return ret;
-}
-
-ObjectData* allocPair(uint32_t ignored) {
-  return allocEmptyPair();
+  return newCollectionObj<c_Pair>(c_Pair::NoInit{});
 }
 
 #define X(type) \
-ObjectData* allocEmpty##type() { \
-  auto ret = newCollectionObj<c_##type>(c_##type::classof()); \
-  ret->incRefCount(); \
-  return ret; \
-} \
-ObjectData* allocFromArray##type(ArrayData* arr) { \
-  auto ret = newCollectionObj<c_##type>(c_##type::classof(), arr); \
-  ret->incRefCount(); \
-  return ret; \
+ObjectData* allocEmpty##type() {                                        \
+  return newCollectionObj<c_##type>(c_##type::classof());               \
+}                                                                       \
+ObjectData* allocFromArray##type(ArrayData* arr) {                      \
+  return newCollectionObj<c_##type>(c_##type::classof(), arr);          \
 }
 COLLECTIONS_PAIRED_TYPES(X)
 #undef X

@@ -66,7 +66,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   void detectCycle(c_WaitableWaitHandle* child) const;
 
  private:
-  ObjectData* createCycleException(c_WaitableWaitHandle* child) const;
+  Object createCycleException(c_WaitableWaitHandle* child) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

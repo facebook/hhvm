@@ -1615,8 +1615,7 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
         "Is the system library not loaded yet?", class_type->name);
     return FAILURE;
   }
-  Z_OBJVAL_P(arg) = HPHP::ObjectData::newInstance(cls);
-  Z_OBJVAL_P(arg)->incRefCount();
+  Z_OBJVAL_P(arg) = HPHP::Object{cls}.detach();
   Z_TYPE_P(arg) = IS_OBJECT;
   return SUCCESS;
 }

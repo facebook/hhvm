@@ -374,11 +374,11 @@ Variant HHVM_METHOD(SQLite3, prepare,
   auto *data = Native::data<SQLite3>(this_);
   data->validate();
   if (!sql.empty()) {
-    ObjectData *ret = ObjectData::newInstance(SQLite3Stmt::getClass());
-    SQLite3Stmt *stmt = Native::data<SQLite3Stmt>(ret);
-    HHVM_MN(SQLite3Stmt, __construct)(ret, this_, sql);
+    Object ret{SQLite3Stmt::getClass()};
+    SQLite3Stmt *stmt = Native::data<SQLite3Stmt>(ret.get());
+    HHVM_MN(SQLite3Stmt, __construct)(ret.get(), this_, sql);
     if (stmt->m_raw_stmt) {
-      return Object(ret);
+      return ret;
     }
   }
   return false;
@@ -683,11 +683,11 @@ Variant HHVM_METHOD(SQLite3Stmt, execute) {
   case SQLITE_DONE: /* Valid but no results */
     {
       sqlite3_reset(data->m_raw_stmt);
-      ObjectData *ret = ObjectData::newInstance(SQLite3Result::getClass());
-      SQLite3Result *result = Native::data<SQLite3Result>(ret);
+      Object ret{SQLite3Result::getClass()};
+      SQLite3Result *result = Native::data<SQLite3Result>(ret.get());
       result->m_stmt_obj = Object(this_);
       result->m_stmt = data;
-      return Object(ret);
+      return ret;
     }
   case SQLITE_ERROR:
     sqlite3_reset(data->m_raw_stmt);

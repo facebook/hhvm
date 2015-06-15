@@ -221,7 +221,9 @@ private:
       ctor_args.append(Variant(stream));
       ctor_args.append(filter);
       ctor_args.append(params);
-      obj = g_context->createObject(class_name.get(), ctor_args.toArray());
+      obj = Object::attach(
+        g_context->createObject(class_name.get(), ctor_args.toArray())
+      );
       auto created = obj->o_invoke(s_onCreate, Array::Create());
       /* - true: documented value for success
        * - null: undocumented default successful value
@@ -289,7 +291,7 @@ BucketBrigade::BucketBrigade(const String& data) {
   ai.append(data);
   ai.append(data.length());
   auto bucket = g_context->createObject(s_bucket_class.get(), ai.toArray());
-  appendBucket(bucket);
+  appendBucket(Object::attach(bucket));
 }
 
 void BucketBrigade::appendBucket(const Object& bucket) {

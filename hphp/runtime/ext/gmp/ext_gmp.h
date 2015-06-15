@@ -175,7 +175,7 @@ public:
     if (UNLIKELY(cls == nullptr)) {
       initClass();
     }
-    return ObjectData::newInstance(cls);
+    return Object{cls};
   }
 
   static Object allocObject(const Variant& arg) {

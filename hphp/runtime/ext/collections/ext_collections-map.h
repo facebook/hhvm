@@ -22,10 +22,10 @@ struct MapIterator {
   }
   ~MapIterator() {}
 
-  static ObjectData* newInstance() {
+  static Object newInstance() {
     static Class* cls = Unit::lookupClass(s_MapIterator.get());
     assertx(cls);
-    return ObjectData::newInstance(cls);
+    return Object{cls};
   }
 
   void setMap(BaseMap* mp) {

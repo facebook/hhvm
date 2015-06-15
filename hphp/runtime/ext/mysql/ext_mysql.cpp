@@ -892,7 +892,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
   MySQLFieldInfo *info;
   if (!(info = res->fetchFieldInfo())) return false;
 
-  Object obj(SystemLib::AllocStdClassObject());
+  auto obj = SystemLib::AllocStdClassObject();
   obj->o_set("name",         info->name);
   obj->o_set("table",        info->table);
   obj->o_set("def",          info->def);

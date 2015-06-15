@@ -137,22 +137,34 @@ namespace {
     catch (HPHP::Object& e) {
       HPHP::TypedValue tv = HPHP::make_tv<HPHP::KindOfObject>(e.get());
       EG(exception) = HPHP::RefData::Make(tv);
+      tvIncRef(EG(exception)->tv());
     }
 
     catch (std::exception& e) {
       std::string message(typeid(e).name());
       message += ": ";
       message += e.what();
-      EG(exception) = HPHP::RefData::Make(HPHP::make_tv<HPHP::KindOfObject>(
-          HPHP::SystemLib::AllocExceptionObject(HPHP::Variant(message))));
+      EG(exception) =
+        HPHP::RefData::Make(
+          HPHP::make_tv<HPHP::KindOfObject>(
+            HPHP::SystemLib::AllocExceptionObject(
+              HPHP::Variant(message)
+            ).detach()
+          )
+        );
     }
 
     catch (...) {
       std::string message("unexpected C++ exception");
-      EG(exception) = HPHP::RefData::Make(HPHP::make_tv<HPHP::KindOfObject>(
-          HPHP::SystemLib::AllocExceptionObject(HPHP::Variant(message))));
+      EG(exception) =
+        HPHP::RefData::Make(
+          HPHP::make_tv<HPHP::KindOfObject>(
+            HPHP::SystemLib::AllocExceptionObject(
+              HPHP::Variant(message)
+            ).detach()
+          )
+        );
     }
-    tvIncRef(EG(exception)->tv());
   }
 }
 

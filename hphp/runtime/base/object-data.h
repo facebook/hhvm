@@ -125,16 +125,22 @@ struct ObjectData {
 
  public:
 
-  // Call newInstance() to instantiate a PHP object
+  // Call newInstance() to instantiate a PHP object. The initial ref-count will
+  // be greater than zero. Since this gives you a raw pointer, it is your
+  // responsibility to manage the ref-count yourself. Whenever possible, prefer
+  // using the Object class instead, which takes care of this for you.
   static ObjectData* newInstance(Class*);
 
   /*
-   * Given a Class that is assumed to be a concrete, regular (not a
-   * trait or interface), pure PHP class, and an allocation size,
-   * return a new, uninitialized object of that class.
+   * Given a Class that is assumed to be a concrete, regular (not a trait or
+   * interface), pure PHP class, and an allocation size, return a new,
+   * uninitialized object of that class. These are meant to be called from the
+   * JIT.
    *
    * newInstanceRaw should be called only when size <= kMaxSmartSize,
    * otherwise use newInstanceRawBig.
+   *
+   * The initial ref-count will be set to one.
    */
   static ObjectData* newInstanceRaw(Class*, uint32_t);
   static ObjectData* newInstanceRawBig(Class*, size_t);
@@ -487,17 +493,6 @@ protected:
 
 using ExtObjectData = ExtObjectDataFlags<ObjectData::IsCppBuiltin>;
 
-template<class T, class... Args> T* newobj(Args&&... args) {
-  static_assert(std::is_convertible<T*,ObjectData*>::value, "");
-  auto const mem = MM().smartMallocSize(sizeof(T));
-  try {
-    return new (mem) T(std::forward<Args>(args)...);
-  } catch (...) {
-    MM().smartFreeSize(mem, sizeof(T));
-    throw;
-  }
-}
-
 #define DECLARE_CLASS_NO_SWEEP(originalName)                           \
   public:                                                              \
   CLASSNAME_IS(#originalName)                                          \
@@ -517,9 +512,15 @@ typename std::enable_if<
   std::is_convertible<T*, ObjectData*>::value,
   SmartPtr<T>
 >::type makeSmartPtr(Args&&... args) {
-  using UnownedAndNonNull = typename SmartPtr<T>::UnownedAndNonNull;
-  return SmartPtr<T>(newobj<T>(std::forward<Args>(args)...),
-                     UnownedAndNonNull{});
+  auto const mem = MM().smartMallocSize(sizeof(T));
+  try {
+    auto t = new (mem) T(std::forward<Args>(args)...);
+    assert(t->hasExactlyOneRef());
+    return SmartPtr<T>::attach(t);
+  } catch (...) {
+    MM().smartFreeSize(mem, sizeof(T));
+    throw;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

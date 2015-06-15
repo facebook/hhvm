@@ -262,7 +262,7 @@ static xmlChar *xslt_string_to_xpathexpr(const char *str) {
 
 static Object newNode(const String name, xmlNodePtr obj) {
   auto const cls = Unit::lookupClass(name.get());
-  Object ret = ObjectData::newInstance(cls);
+  Object ret{cls};
   auto retData = Native::data<DOMNode>(ret.get());
   retData->setNode(obj);
   return ret;

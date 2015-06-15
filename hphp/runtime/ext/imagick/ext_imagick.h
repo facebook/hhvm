@@ -61,7 +61,7 @@ class ImagickExtension final : public Extension {
       if (cls == nullptr) { \
         initClass(); \
       } \
-      return ObjectData::newInstance(cls); \
+      return Object{cls};                       \
     } \
     \
     static Object allocObject(const Variant& arg) { \

@@ -139,9 +139,7 @@ Object HHVM_STATIC_METHOD(AsyncMysqlClient, adoptConnection,
                                                      conn->m_database,
                                                      conn->m_username,
                                                      conn->m_password);
-
-  ObjectData* ret = AsyncMysqlConnection::newInstance(std::move(adopted));
-  return Object(ret);
+  return AsyncMysqlConnection::newInstance(std::move(adopted));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -276,10 +274,10 @@ const StaticString AsyncMysqlConnection::s_className("AsyncMysqlConnection");
 
 IMPLEMENT_GET_CLASS(AsyncMysqlConnection)
 
-ObjectData* AsyncMysqlConnection::newInstance(
+Object AsyncMysqlConnection::newInstance(
     std::unique_ptr<am::Connection> conn) {
-  ObjectData* ret = ObjectData::newInstance(getClass());
-  Native::data<AsyncMysqlConnection>(ret)->setConnection(std::move(conn));
+  Object ret{getClass()};
+  Native::data<AsyncMysqlConnection>(ret.get())->setConnection(std::move(conn));
   return ret;
 }
 
@@ -601,10 +599,10 @@ const StaticString AsyncMysqlErrorResult::s_className("AsyncMysqlErrorResult");
 
 IMPLEMENT_GET_CLASS(AsyncMysqlErrorResult)
 
-ObjectData* AsyncMysqlErrorResult::newInstance(
+Object AsyncMysqlErrorResult::newInstance(
     std::shared_ptr<am::Operation> op) {
-  ObjectData* ret = ObjectData::newInstance(getClass());
-  Native::data<AsyncMysqlErrorResult>(ret)->create(op);
+  Object ret{getClass()};
+  Native::data<AsyncMysqlErrorResult>(ret.get())->create(op);
   return ret;
 }
 
@@ -652,10 +650,10 @@ const StaticString AsyncMysqlQueryErrorResult::s_className(
 
 IMPLEMENT_GET_CLASS(AsyncMysqlQueryErrorResult)
 
-ObjectData* AsyncMysqlQueryErrorResult::newInstance(
+Object AsyncMysqlQueryErrorResult::newInstance(
     std::shared_ptr<am::Operation> op, SmartPtr<c_Vector> results) {
-  ObjectData* ret = ObjectData::newInstance(getClass());
-  Native::data<AsyncMysqlQueryErrorResult>(ret)->create(op, results);
+  Object ret{getClass()};
+  Native::data<AsyncMysqlQueryErrorResult>(ret.get())->create(op, results);
   return ret;
 }
 
@@ -699,10 +697,11 @@ void AsyncMysqlQueryResult::sweep() {
   m_query_result.reset();
 }
 
-ObjectData* AsyncMysqlQueryResult::newInstance(
+Object AsyncMysqlQueryResult::newInstance(
     std::shared_ptr<am::Operation> op, am::QueryResult query_result) {
-  ObjectData* ret = ObjectData::newInstance(getClass());
-  Native::data<AsyncMysqlQueryResult>(ret)->create(op, std::move(query_result));
+  Object ret{getClass()};
+  Native::data<AsyncMysqlQueryResult>(ret.get())
+    ->create(op, std::move(query_result));
   return ret;
 }
 
@@ -762,11 +761,10 @@ Object HHVM_METHOD(AsyncMysqlQueryResult, rowBlocks) {
   ret->reserve(row_blocks.size());
 
   for (auto& row_block : row_blocks) {
-    ObjectData* row = AsyncMysqlRowBlock::newInstance(&row_block,
-                                                      data->m_field_index);
-    ret->t_add(Object(row));
+    ret->t_add(AsyncMysqlRowBlock::newInstance(&row_block,
+                                               data->m_field_index));
   }
-  return Object(std::move(ret));
+  return Object{std::move(ret)};
 }
 
 namespace {
@@ -848,37 +846,37 @@ String FieldIndex::getFieldString(size_t field_index) const {
 namespace {
 void throwAsyncMysqlException(const char* exception_type,
                               std::shared_ptr<am::Operation> op) {
-  ObjectData* error = AsyncMysqlErrorResult::newInstance(op);
+  auto error = AsyncMysqlErrorResult::newInstance(op);
 
   assert(op->result() == am::OperationResult::Failed ||
          op->result() == am::OperationResult::TimedOut ||
          op->result() == am::OperationResult::Cancelled);
 
   Array params;
-  params.append(error);
+  params.append(std::move(error));
   throw create_object(exception_type, params, true /* init */);
 }
 
 void throwAsyncMysqlQueryException(const char* exception_type,
                                    std::shared_ptr<am::Operation> op,
                                    SmartPtr<c_Vector> res) {
-  ObjectData* error = AsyncMysqlQueryErrorResult::newInstance(op, res);
+  auto error = AsyncMysqlQueryErrorResult::newInstance(op, res);
 
   assert(op->result() == am::OperationResult::Failed ||
          op->result() == am::OperationResult::TimedOut ||
          op->result() == am::OperationResult::Cancelled);
 
   Array params;
-  params.append(error);
+  params.append(std::move(error));
   throw create_object(exception_type, params, true /* init */);
 }
 }
 
 void AsyncMysqlConnectEvent::unserialize(Cell& result) {
   if (m_op->ok()) {
-    ObjectData* ret = AsyncMysqlConnection::newInstance(
+    auto ret = AsyncMysqlConnection::newInstance(
       m_op->releaseConnection());
-    cellDup(make_tv<KindOfObject>(ret), result);
+    cellCopy(make_tv<KindOfObject>(ret.detach()), result);
   } else {
     throwAsyncMysqlException("AsyncMysqlConnectException", m_op);
   }
@@ -893,9 +891,9 @@ void AsyncMysqlQueryEvent::unserialize(Cell& result) {
 
   if (m_query_op->ok()) {
     auto query_result = m_query_op->stealQueryResult();
-    ObjectData* ret = AsyncMysqlQueryResult::newInstance(m_query_op,
+    auto ret = AsyncMysqlQueryResult::newInstance(m_query_op,
       std::move(query_result));
-    cellDup(make_tv<KindOfObject>(ret), result);
+    cellCopy(make_tv<KindOfObject>(ret.detach()), result);
   } else {
     throwAsyncMysqlQueryException(
         "AsyncMysqlQueryException",
@@ -916,9 +914,9 @@ void AsyncMysqlMultiQueryEvent::unserialize(Cell& result) {
   std::vector<am::QueryResult> query_results = m_multi_op->stealQueryResults();
   results->reserve(query_results.size());
   for (int i = 0; i < query_results.size(); ++i) {
-    ObjectData* ret = AsyncMysqlQueryResult::newInstance(m_multi_op,
+    auto ret = AsyncMysqlQueryResult::newInstance(m_multi_op,
       std::move(query_results[i]));
-    results->t_add(ret);
+    results->t_add(std::move(ret));
   }
   query_results.clear();
 
@@ -938,10 +936,10 @@ const StaticString AsyncMysqlRowBlock::s_className("AsyncMysqlRowBlock");
 
 IMPLEMENT_GET_CLASS(AsyncMysqlRowBlock)
 
-ObjectData* AsyncMysqlRowBlock::newInstance(am::RowBlock* row_block,
+Object AsyncMysqlRowBlock::newInstance(am::RowBlock* row_block,
     std::shared_ptr<FieldIndex> indexer) {
-  ObjectData* ret = ObjectData::newInstance(AsyncMysqlRowBlock::getClass());
-  auto* data = Native::data<AsyncMysqlRowBlock>(ret);
+  Object ret{AsyncMysqlRowBlock::getClass()};
+  auto* data = Native::data<AsyncMysqlRowBlock>(ret.get());
   data->m_row_block.reset(new am::RowBlock(std::move(*row_block)));
   data->m_field_index = indexer;
   return ret;
@@ -1073,13 +1071,11 @@ int64_t HHVM_METHOD(AsyncMysqlRowBlock, count) {
 
 Object HHVM_METHOD(AsyncMysqlRowBlock, getRow,
                    int64_t row_no) {
-  ObjectData* row = AsyncMysqlRow::newInstance(this_, row_no);
-  return Object(row);
+  return AsyncMysqlRow::newInstance(this_, row_no);
 }
 
 Object HHVM_METHOD(AsyncMysqlRowBlock, getIterator) {
-  ObjectData* it = AsyncMysqlRowBlockIterator::newInstance(this_, 0);
-  return Object(it);
+  return AsyncMysqlRowBlockIterator::newInstance(this_, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1091,10 +1087,10 @@ const StaticString AsyncMysqlRowBlockIterator::s_className(
 
 IMPLEMENT_GET_CLASS(AsyncMysqlRowBlockIterator)
 
-ObjectData* AsyncMysqlRowBlockIterator::newInstance(Object row_block,
-                                                    size_t row_number) {
-  ObjectData* ret = ObjectData::newInstance(getClass());
-  auto* data = Native::data<AsyncMysqlRowBlockIterator>(ret);
+Object AsyncMysqlRowBlockIterator::newInstance(Object row_block,
+                                               size_t row_number) {
+  Object ret{getClass()};
+  auto* data = Native::data<AsyncMysqlRowBlockIterator>(ret.get());
   data->m_row_block = row_block;
   data->m_row_number = row_number;
   return ret;
@@ -1143,9 +1139,9 @@ const StaticString AsyncMysqlRow::s_className("AsyncMysqlRow");
 
 IMPLEMENT_GET_CLASS(AsyncMysqlRow)
 
-ObjectData* AsyncMysqlRow::newInstance(Object row_block, size_t row_number) {
-  ObjectData* ret = ObjectData::newInstance(getClass());
-  auto* data = Native::data<AsyncMysqlRow>(ret);
+Object AsyncMysqlRow::newInstance(Object row_block, size_t row_number) {
+  Object ret{getClass()};
+  auto* data = Native::data<AsyncMysqlRow>(ret.get());
   data->m_row_block = row_block;
   data->m_row_number = row_number;
   return ret;
@@ -1196,8 +1192,7 @@ int64_t HHVM_METHOD(AsyncMysqlRow, count) {
 }
 
 Object HHVM_METHOD(AsyncMysqlRow, getIterator) {
-  ObjectData* it = AsyncMysqlRowIterator::newInstance(this_, 0);
-  return Object(it);
+  return AsyncMysqlRowIterator::newInstance(this_, 0);
 }
 
 #undef ROW_BLOCK
@@ -1210,10 +1205,10 @@ const StaticString AsyncMysqlRowIterator::s_className("AsyncMysqlRowIterator");
 
 IMPLEMENT_GET_CLASS(AsyncMysqlRowIterator)
 
-ObjectData* AsyncMysqlRowIterator::newInstance(Object row,
-                                               size_t field_number) {
-  ObjectData* ret = ObjectData::newInstance(getClass());
-  auto* data = Native::data<AsyncMysqlRowIterator>(ret);
+Object AsyncMysqlRowIterator::newInstance(Object row,
+                                          size_t field_number) {
+  Object ret{getClass()};
+  auto* data = Native::data<AsyncMysqlRowIterator>(ret.get());
   data->m_row = row;
   data->m_field_number = field_number;
   return ret;

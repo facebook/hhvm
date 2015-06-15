@@ -607,7 +607,6 @@ void emitFPushCtor(IRGS& env, int32_t numParams) {
   auto const cls  = popA(env);
   auto const func = gen(env, LdClsCtor, cls);
   auto const obj  = gen(env, AllocObj, cls);
-  gen(env, IncRef, obj);
   pushIncRef(env, obj);
   fpushActRec(env, func, obj, numParams, nullptr, true /* fromFPushCtor */);
 }
@@ -641,7 +640,6 @@ void emitFPushCtorD(IRGS& env,
                             : gen(env, LdClsCtor, ssaCls);
   auto const obj = fastAlloc ? allocObjFast(env, cls)
                              : gen(env, AllocObj, ssaCls);
-  gen(env, IncRef, obj);
   pushIncRef(env, obj);
   fpushActRec(env, ssaFunc, obj, numParams, nullptr, true /* FromFPushCtor */);
 }

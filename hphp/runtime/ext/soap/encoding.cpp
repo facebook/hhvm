@@ -2680,19 +2680,19 @@ static Variant guess_zval_convert(encodeTypePtr type, xmlNodePtr data) {
   }
   ret = master_to_zval_int(enc, data);
   if (SOAP_GLOBAL(sdl) && type_name && enc->details.sdl_type) {
-    ObjectData* obj = ObjectData::newInstance(SoapVar::getClass());
-    SoapVar::setEncType(obj, enc->details.type);
-    SoapVar::setEncValue(obj, ret);
+    Object obj{SoapVar::getClass()};
+    SoapVar::setEncType(obj.get(), enc->details.type);
+    SoapVar::setEncValue(obj.get(), ret);
 
     string ns, cptype;
     parse_namespace(type_name, cptype, ns);
     xmlNsPtr nsptr = xmlSearchNs(data->doc, data, NS_STRING(ns));
 
-    SoapVar::setEncSType(obj, cptype);
+    SoapVar::setEncSType(obj.get(), cptype);
     if (nsptr) {
-      SoapVar::setEncNS(obj, String((char*)nsptr->href, CopyString));
+      SoapVar::setEncNS(obj.get(), String((char*)nsptr->href, CopyString));
     }
-    ret = Object(obj);
+    ret = std::move(obj);
   }
   return ret;
 }

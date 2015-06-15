@@ -358,7 +358,7 @@ const Object& SystemlibSessionModule::getObject() {
   if (!m_cls) {
     lookupClass();
   }
-  s_obj->setObject(ObjectData::newInstance(m_cls));
+  s_obj->setObject(Object{m_cls});
   const auto& obj = s_obj->getObject();
   g_context->invokeFuncFew(ret.asTypedValue(), m_ctor, obj.get());
   return obj;

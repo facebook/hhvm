@@ -449,7 +449,7 @@ Object Variant::toObjectHelper() const {
   switch (m_type) {
     case KindOfUninit:
     case KindOfNull:
-      return Object(SystemLib::AllocStdClassObject());
+      return SystemLib::AllocStdClassObject();
 
     case KindOfBoolean:
     case KindOfInt64:
@@ -457,7 +457,7 @@ Object Variant::toObjectHelper() const {
     case KindOfStaticString:
     case KindOfString:
     case KindOfResource: {
-      ObjectData *obj = SystemLib::AllocStdClassObject();
+      auto obj = SystemLib::AllocStdClassObject();
       obj->o_set(s_scalar, *this, false);
       return obj;
     }
@@ -990,15 +990,14 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
           assert(obj.isNull());
           throw_null_pointer_exception();
         } else {
-          obj = ObjectData::newInstance(cls);
+          obj = Object{cls};
           if (UNLIKELY(collections::isType(cls, CollectionType::Pair) &&
                        (size != 2))) {
             throw Exception("Pair objects must have exactly 2 elements");
           }
         }
       } else {
-        obj = ObjectData::newInstance(
-          SystemLib::s___PHP_Incomplete_ClassClass);
+        obj = Object{SystemLib::s___PHP_Incomplete_ClassClass};
         obj->o_set(s_PHP_Incomplete_Class_Name, clsName);
       }
       assert(!obj.isNull());
@@ -1111,8 +1110,8 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
 
       auto const obj = [&]() -> Object {
         if (auto const cls = Unit::loadClass(clsName.get())) {
-          return g_context->createObject(cls, init_null_variant,
-            false /* init */);
+          return Object::attach(g_context->createObject(cls, init_null_variant,
+                                                        false /* init */));
         }
         if (!uns->allowUnknownSerializableClass()) {
           raise_error("unknown class %s", clsName.data());

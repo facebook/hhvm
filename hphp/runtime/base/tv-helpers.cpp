@@ -488,7 +488,7 @@ void tvCastToObjectInPlace(TypedValue* tv) {
     switch (tv->m_type) {
       case KindOfUninit:
       case KindOfNull:
-        o = SystemLib::AllocStdClassObject();
+        o = SystemLib::AllocStdClassObject().detach();
         continue;
 
       case KindOfBoolean:
@@ -496,12 +496,12 @@ void tvCastToObjectInPlace(TypedValue* tv) {
       case KindOfDouble:
       case KindOfStaticString:
       case KindOfResource:
-        o = SystemLib::AllocStdClassObject();
+        o = SystemLib::AllocStdClassObject().detach();
         o->o_set(s_scalar, tvAsVariant(tv));
         continue;
 
       case KindOfString:
-        o = SystemLib::AllocStdClassObject();
+        o = SystemLib::AllocStdClassObject().detach();
         o->o_set(s_scalar, tvAsVariant(tv));
         tvDecRefStr(tv);
         continue;
@@ -523,7 +523,6 @@ void tvCastToObjectInPlace(TypedValue* tv) {
 
   tv->m_data.pobj = o;
   tv->m_type = KindOfObject;
-  tv->m_data.pobj->incRefCount();
 }
 
 void tvCastToNullableObjectInPlace(TypedValue* tv) {

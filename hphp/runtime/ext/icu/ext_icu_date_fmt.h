@@ -57,7 +57,7 @@ class IntlDateFormatter : public IntlError {
       c_IntlDateFormatter = Unit::lookupClass(s_IntlDateFormatter.get());
       assert(c_IntlDateFormatter);
     }
-    return ObjectData::newInstance(c_IntlDateFormatter);
+    return Object{c_IntlDateFormatter};
   }
   static IntlDateFormatter* Get(ObjectData* obj) {
     return GetData<IntlDateFormatter>(obj, s_IntlDateFormatter);

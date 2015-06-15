@@ -54,9 +54,9 @@ public:
       c_IntlIterator = Unit::lookupClass(s_IntlIterator.get());
       assert(c_IntlIterator);
     }
-    auto obj = ObjectData::newInstance(c_IntlIterator);
+    Object obj{c_IntlIterator};
     if (se) {
-      Native::data<IntlIterator>(obj)->setEnumeration(se);
+      Native::data<IntlIterator>(obj.get())->setEnumeration(se);
     }
     return obj;
   }

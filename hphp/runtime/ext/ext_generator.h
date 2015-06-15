@@ -76,8 +76,9 @@ public:
 
   void startedCheck() {
     if (getState() == State::Created) {
-      throw_exception(Object(
-        SystemLib::AllocExceptionObject("Need to call next() first")));
+      throw_exception(
+        SystemLib::AllocExceptionObject("Need to call next() first")
+      );
     }
   }
 
@@ -86,12 +87,14 @@ public:
       startedCheck();
     }
     if (getState() == State::Running) {
-      throw_exception(Object(
-        SystemLib::AllocExceptionObject("Generator is already running")));
+      throw_exception(
+        SystemLib::AllocExceptionObject("Generator is already running")
+      );
     }
     if (getState() == State::Done) {
-      throw_exception(Object(
-        SystemLib::AllocExceptionObject("Generator is already finished")));
+      throw_exception(
+        SystemLib::AllocExceptionObject("Generator is already finished")
+      );
     }
     assert(getState() == State::Created || getState() == State::Started);
     setState(State::Running);
@@ -148,7 +151,7 @@ public:
     void* obj = Resumable::Create<clone>(fp, numSlots, resumeAddr, resumeOffset,
                                          sizeof(c_Generator));
     auto const gen = new (obj) c_Generator();
-    gen->incRefCount();
+    assert(gen->hasExactlyOneRef());
     gen->setNoDestruct();
     gen->setState(State::Created);
     return gen;

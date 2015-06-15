@@ -44,7 +44,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
 class Reflection {
  public:
   static HPHP::Class* s_ReflectionExceptionClass;
-  static ObjectData* AllocReflectionExceptionObject(const Variant& message);
+  static Object AllocReflectionExceptionObject(const Variant& message);
 };
 
 

@@ -1919,7 +1919,7 @@ Variant HHVM_FUNCTION(dir,
   if (same(dir, false)) {
     return false;
   }
-  ObjectData* d = SystemLib::AllocDirectoryObject();
+  auto d = SystemLib::AllocDirectoryObject();
   *(d->o_realProp(s_path, 0)) = directory;
   *(d->o_realProp(s_handle, 0)) = dir;
   return d;

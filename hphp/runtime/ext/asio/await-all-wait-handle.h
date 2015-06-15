@@ -71,7 +71,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   static Object FromMixedArray(const MixedArray* dependencies);
   static Object FromMap(const BaseMap* dependencies);
   static Object FromVector(const BaseVector* dependencies);
-  static c_AwaitAllWaitHandle* Alloc(int32_t cnt);
+  static SmartPtr<c_AwaitAllWaitHandle> Alloc(int32_t cnt);
   void initialize(context_idx_t ctx_idx);
   template<bool checkCycle> void blockOnCurrent();
   void markAsFailed(const Object& exception);

@@ -89,9 +89,8 @@ class EncodingMatch : public IntlError {
       c_EncodingMatch = Unit::lookupClass(s_EncodingMatch.get());
       assert(c_EncodingMatch);
     }
-    auto ret = ObjectData::newInstance(c_EncodingMatch);
-    assert(ret);
-    Native::data<EncodingMatch>(ret)->m_match =
+    Object ret{c_EncodingMatch};
+    Native::data<EncodingMatch>(ret.get())->m_match =
       const_cast<UCharsetMatch*>(match);
     return ret;
   }

@@ -90,6 +90,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   node->hdr.kind = HeaderKind::NativeData;
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
              ObjectData(cls);
+  assert(obj->hasExactlyOneRef());
   obj->setAttribute(static_cast<ObjectData::Attribute>(ndi->odattrs));
   if (ndi->init) {
     ndi->init(obj);

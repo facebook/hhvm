@@ -29,7 +29,7 @@ namespace HPHP {
 namespace {
   StaticString s_condition("<condition>");
 
-  ObjectData* getNotNotifiedException() {
+  Object getNotNotifiedException() {
     return SystemLib::AllocInvalidArgumentExceptionObject(
       "ConditionWaitHandle not notified by its child");
   }
@@ -55,7 +55,7 @@ Object c_ConditionWaitHandle::ti_create(const Variant& child) {
 
   // Child finished before notification?
   if (UNLIKELY(child_wh->isFinished())) {
-    throw Object{getNotNotifiedException()};
+    throw getNotNotifiedException();
   }
 
   assert(child_wh->instanceof(c_WaitableWaitHandle::classof()));
@@ -128,7 +128,10 @@ void c_ConditionWaitHandle::onUnblocked() {
 
   auto parentChain = getParentChain();
   setState(STATE_FAILED);
-  tvWriteObject(getNotNotifiedException(), &m_resultOrException);
+  tvCopy(
+    make_tv<KindOfObject>(getNotNotifiedException().detach()),
+    m_resultOrException
+  );
   parentChain.unblock();
   decRefObj(this);
 }

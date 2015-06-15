@@ -1267,15 +1267,12 @@ ObjectData* ExecutionContext::createObject(StringData* clsName,
 ObjectData* ExecutionContext::createObject(const Class* class_,
                                            const Variant& params,
                                            bool init) {
-  Object o;
-  o = newInstance(const_cast<Class*>(class_));
+  auto o = Object::attach(newInstance(const_cast<Class*>(class_)));
   if (init) {
     initObject(class_, params, o.get());
   }
 
-  ObjectData* ret = o.detach();
-  ret->decRefCount();
-  return ret;
+  return o.detach();
 }
 
 ObjectData* ExecutionContext::createObjectOnly(StringData* clsName) {
@@ -1295,7 +1292,7 @@ ObjectData* ExecutionContext::initObject(const Class* class_,
   if (!(ctor->attrs() & AttrPublic)) {
     std::string msg = "Access to non-public constructor of class ";
     msg += class_->name()->data();
-    throw Object(Reflection::AllocReflectionExceptionObject(msg));
+    throw Reflection::AllocReflectionExceptionObject(msg);
   }
   // call constructor
   if (!isContainerOrNull(params)) {
@@ -5941,7 +5938,6 @@ OPTBLD_INLINE void iopFPushCtor(IOP_ARGS) {
   TRACE(2, "FPushCtor: just new'ed an instance of class %s: %p\n",
         cls->name()->data(), this_);
   this_->incRefCount();
-  this_->incRefCount();
   tv->m_type = KindOfObject;
   tv->m_data.pobj = this_;
   // Push new activation record.
@@ -5972,7 +5968,6 @@ OPTBLD_INLINE void iopFPushCtorD(IOP_ARGS) {
   ObjectData* this_ = newInstance(cls);
   TRACE(2, "FPushCtorD: new'ed an instance of class %s: %p\n",
         cls->name()->data(), this_);
-  this_->incRefCount();
   vmStack().pushObject(this_);
   // Push new activation record.
   ActRec* ar = vmStack().allocA();
@@ -7038,7 +7033,7 @@ OPTBLD_INLINE void iopCreateCl(IOP_ARGS) {
   auto const cl = static_cast<c_Closure*>(newInstance(cls));
   cl->init(numArgs, vmfp(), vmStack().top());
   vmStack().ndiscard(numArgs);
-  vmStack().pushObject(cl);
+  vmStack().pushObjectNoRc(cl);
 }
 
 const StaticString s_this("this");

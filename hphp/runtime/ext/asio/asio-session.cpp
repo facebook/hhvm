@@ -103,8 +103,10 @@ void AsioSession::exitContext() {
 
 void AsioSession::initAbruptInterruptException() {
   assert(!hasAbruptInterruptException());
-  m_abruptInterruptException = SystemLib::AllocInvalidOperationExceptionObject(
-    "The request was abruptly interrupted.");
+  m_abruptInterruptException =
+    SystemLib::AllocInvalidOperationExceptionObject(
+      "The request was abruptly interrupted."
+    );
 }
 
 void AsioSession::setOnIOWaitEnter(const Variant& callback) {

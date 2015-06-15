@@ -25,6 +25,22 @@
 namespace HPHP { namespace SystemLib {
 /////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+ALWAYS_INLINE
+Object createAndConstruct(Class* cls, const Variant& args) {
+  Object inst{cls};
+  TypedValue ret;
+  g_context->invokeFunc(&ret,
+                        cls->getCtor(),
+                        args,
+                        inst.get());
+  tvRefcountedDecRef(&ret);
+  return inst;
+}
+
+}
+
 bool s_inited = false;
 bool s_anyNonPersistentBuiltins = false;
 std::string s_source;
@@ -41,110 +57,109 @@ Func* s_nullFunc = nullptr;
 SYSTEMLIB_CLASSES(DEFINE_SYSTEMLIB_CLASS)
 #undef DEFINE_SYSTEMLIB_CLASS
 
-ObjectData* AllocStdClassObject() {
-  return ObjectData::newInstance(s_stdclassClass);
+Object AllocStdClassObject() {
+  return Object{s_stdclassClass};
 }
 
-ObjectData* AllocPinitSentinel() {
-  return ObjectData::newInstance(s_pinitSentinelClass);
+Object AllocPinitSentinel() {
+  return Object{s_pinitSentinelClass};
 }
 
-#define CREATE_AND_CONSTRUCT(clsname, params)                               \
-  ObjectData* inst =                                                        \
-    ObjectData::newInstance(s_##clsname##Class);                            \
-  TypedValue ret;                                                           \
-  {                                                                         \
-    /* Increment refcount across call to ctor, so the object doesn't */     \
-    /* get destroyed when ctor's frame is torn down */                      \
-    CountableHelper cnt(inst);                                              \
-    g_context->invokeFunc(&ret,                                             \
-                          s_##clsname##Class->getCtor(),                    \
-                          params,                                           \
-                          inst);                                            \
-  }                                                                         \
-  tvRefcountedDecRef(&ret);                                                 \
-  return inst;
-
-ObjectData* AllocExceptionObject(const Variant& message) {
-  CREATE_AND_CONSTRUCT(Exception, make_packed_array(message));
+Object AllocExceptionObject(const Variant& message) {
+  return createAndConstruct(s_ExceptionClass, make_packed_array(message));
 }
 
-ObjectData* AllocBadMethodCallExceptionObject(const Variant& message) {
-  CREATE_AND_CONSTRUCT(BadMethodCallException, make_packed_array(message));
+Object AllocBadMethodCallExceptionObject(const Variant& message) {
+  return createAndConstruct(s_BadMethodCallExceptionClass,
+                            make_packed_array(message));
 }
 
-ObjectData* AllocInvalidArgumentExceptionObject(const Variant& message) {
-  CREATE_AND_CONSTRUCT(InvalidArgumentException, make_packed_array(message));
+Object AllocInvalidArgumentExceptionObject(const Variant& message) {
+  return createAndConstruct(s_InvalidArgumentExceptionClass,
+                            make_packed_array(message));
 }
 
-ObjectData* AllocRuntimeExceptionObject(const Variant& message) {
-  CREATE_AND_CONSTRUCT(RuntimeException, make_packed_array(message));
+Object AllocRuntimeExceptionObject(const Variant& message) {
+  return createAndConstruct(s_RuntimeExceptionClass,
+                            make_packed_array(message));
 }
 
-ObjectData* AllocOutOfBoundsExceptionObject(const Variant& message) {
-  CREATE_AND_CONSTRUCT(OutOfBoundsException, make_packed_array(message));
+Object AllocOutOfBoundsExceptionObject(const Variant& message) {
+  return createAndConstruct(s_OutOfBoundsExceptionClass,
+                            make_packed_array(message));
 }
 
-ObjectData* AllocInvalidOperationExceptionObject(const Variant& message) {
-  CREATE_AND_CONSTRUCT(InvalidOperationException, make_packed_array(message));
+Object AllocInvalidOperationExceptionObject(const Variant& message) {
+  return createAndConstruct(s_InvalidOperationExceptionClass,
+                            make_packed_array(message));
 }
 
-ObjectData* AllocDOMExceptionObject(const Variant& message,
+Object AllocDOMExceptionObject(const Variant& message,
                                     const Variant& code) {
-  CREATE_AND_CONSTRUCT(DOMException, make_packed_array(message, code));
+  return createAndConstruct(s_DOMExceptionClass,
+                            make_packed_array(message, code));
 }
 
-ObjectData* AllocSoapFaultObject(const Variant& code,
+Object AllocSoapFaultObject(const Variant& code,
                                  const Variant& message,
                                  const Variant& actor /* = null_variant */,
                                  const Variant& detail /* = null_variant */,
                                  const Variant& name /* = null_variant */,
                                  const Variant& header /* = null_variant */) {
-  CREATE_AND_CONSTRUCT(SoapFault, make_packed_array(code, message, actor,
-                                                    detail, name, header));
+  return createAndConstruct(
+    s_SoapFaultClass,
+    make_packed_array(code,
+                      message,
+                      actor,
+                      detail,
+                      name,
+                      header
+                     )
+  );
 }
 
-ObjectData* AllocLazyKVZipIterableObject(const Variant& mp) {
-  CREATE_AND_CONSTRUCT(LazyKVZipIterable, make_packed_array(mp));
+Object AllocLazyKVZipIterableObject(const Variant& mp) {
+  return createAndConstruct(s_LazyKVZipIterableClass,
+                            make_packed_array(mp));
 }
 
-ObjectData* AllocLazyIterableViewObject(const Variant& iterable) {
-  CREATE_AND_CONSTRUCT(LazyIterableView, make_packed_array(iterable));
+Object AllocLazyIterableViewObject(const Variant& iterable) {
+  return createAndConstruct(s_LazyIterableViewClass,
+                            make_packed_array(iterable));
 }
 
-ObjectData* AllocLazyKeyedIterableViewObject(const Variant& iterable) {
-  CREATE_AND_CONSTRUCT(LazyKeyedIterableView, make_packed_array(iterable));
+Object AllocLazyKeyedIterableViewObject(const Variant& iterable) {
+  return createAndConstruct(s_LazyKeyedIterableViewClass,
+                            make_packed_array(iterable));
 }
-
-#undef CREATE_AND_CONSTRUCT
 
 void throwExceptionObject(const Variant& message) {
-  throw Object{AllocExceptionObject(message)};
+  throw AllocExceptionObject(message);
 }
 
 void throwBadMethodCallExceptionObject(const Variant& message) {
-  throw Object{AllocBadMethodCallExceptionObject(message)};
+  throw AllocBadMethodCallExceptionObject(message);
 }
 
 void throwInvalidArgumentExceptionObject(const Variant& message) {
-  throw Object{AllocInvalidArgumentExceptionObject(message)};
+  throw AllocInvalidArgumentExceptionObject(message);
 }
 
 void throwRuntimeExceptionObject(const Variant& message) {
-  throw Object{AllocRuntimeExceptionObject(message)};
+  throw AllocRuntimeExceptionObject(message);
 }
 
 void throwOutOfBoundsExceptionObject(const Variant& message) {
-  throw Object{AllocOutOfBoundsExceptionObject(message)};
+  throw AllocOutOfBoundsExceptionObject(message);
 }
 
 void throwInvalidOperationExceptionObject(const Variant& message) {
-  throw Object{AllocInvalidOperationExceptionObject(message)};
+  throw AllocInvalidOperationExceptionObject(message);
 }
 
 void throwDOMExceptionObject(const Variant& message,
                              const Variant& code) {
-  throw Object{AllocDOMExceptionObject(message, code)};
+  throw AllocDOMExceptionObject(message, code);
 }
 
 void throwSoapFaultObject(const Variant& code,
@@ -158,9 +173,9 @@ void throwSoapFaultObject(const Variant& code,
                                     name, header)};
 }
 
-#define ALLOC_OBJECT_STUB(name)                                           \
-  ObjectData* Alloc##name##Object() {                                     \
-    return ObjectData::newInstance(s_##name##Class);                      \
+#define ALLOC_OBJECT_STUB(name)                                         \
+  Object Alloc##name##Object() {                                        \
+    return Object{s_##name##Class};                                     \
   }
 
 ALLOC_OBJECT_STUB(Directory);

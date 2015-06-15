@@ -139,8 +139,8 @@ Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
   const Object& obj_timezone = timezone.isNull()
                              ? null_object
                              : timezone.toObject();
-  ObjectData* obj = ObjectData::newInstance(DateTimeData::getClass());
-  DateTimeData* data = Native::data<DateTimeData>(obj);
+  Object obj{DateTimeData::getClass()};
+  DateTimeData* data = Native::data<DateTimeData>(obj.get());
   const auto curr = (format.find("!") != String::npos) ? 0 : f_time() ;
   data->m_dt = makeSmartPtr<DateTime>(curr, false);
   if (!data->m_dt->fromString(time, DateTimeZoneData::unwrap(obj_timezone),
@@ -148,7 +148,7 @@ Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
     return false;
   }
 
-  return Object(obj);
+  return obj;
 }
 
 static const StaticString s_DateTimeInterface("DateTimeInterface");
@@ -281,11 +281,11 @@ Array HHVM_METHOD(DateTime, __sleep) {
 }
 
 void HHVM_METHOD(DateTime, __wakeup) {
-  ObjectData* dtz_obj = ObjectData::newInstance(DateTimeZoneData::getClass());
-  HHVM_MN(DateTimeZone, __construct)(dtz_obj,
+  Object dtz_obj{DateTimeZoneData::getClass()};
+  HHVM_MN(DateTimeZone, __construct)(dtz_obj.get(),
                                      this_->o_get(s_timezone).toString());
   HHVM_MN(DateTime, __construct)(this_, this_->o_get(s_date).toString(),
-                                 Object(dtz_obj));
+                                 std::move(dtz_obj));
 
   // cleanup
   Class* cls = this_->getVMClass();
@@ -324,10 +324,10 @@ int64_t DateTimeData::getTimestamp(const ObjectData* od) {
 }
 
 Object DateTimeData::wrap(SmartPtr<DateTime> dt) {
-  ObjectData* obj = ObjectData::newInstance(getClass());
-  DateTimeData* data = Native::data<DateTimeData>(obj);
+  Object obj{getClass()};
+  DateTimeData* data = Native::data<DateTimeData>(obj.get());
   data->m_dt = dt;
-  return Object(obj);
+  return obj;
 }
 
 SmartPtr<DateTime> DateTimeData::unwrap(const Object& datetime) {
@@ -429,10 +429,10 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
 // DateTimeZone helpers
 
 Object DateTimeZoneData::wrap(SmartPtr<TimeZone> tz) {
-  ObjectData* obj = ObjectData::newInstance(getClass());
-  DateTimeZoneData* data = Native::data<DateTimeZoneData>(obj);
+  Object obj{getClass()};
+  DateTimeZoneData* data = Native::data<DateTimeZoneData>(obj.get());
   data->m_tz = tz;
-  return Object(obj);
+  return obj;
 }
 
 SmartPtr<TimeZone> DateTimeZoneData::unwrap(const Object& timezone) {
@@ -572,10 +572,10 @@ String HHVM_METHOD(DateInterval, format,
 // DateInterval helpers
 
 Object DateIntervalData::wrap(SmartPtr<DateInterval> di) {
-  ObjectData* obj = ObjectData::newInstance(getClass());
-  DateIntervalData* data = Native::data<DateIntervalData>(obj);
+  Object obj{getClass()};
+  DateIntervalData* data = Native::data<DateIntervalData>(obj.get());
   data->m_di = di;
-  return Object(obj);
+  return obj;
 }
 
 SmartPtr<DateInterval> DateIntervalData::unwrap(const Object& obj) {
@@ -835,10 +835,9 @@ Variant HHVM_FUNCTION(date_create,
   const Object& obj_timezone = timezone.isNull()
                              ? null_object
                              : timezone.toObject();
-  ObjectData* obj = ObjectData::newInstance(DateTimeData::getClass());
-  Object ret(obj);
+  Object ret{DateTimeData::getClass()};
   // Don't set the time here because it will throw if it is bad
-  HHVM_MN(DateTime, __construct)(obj);
+  HHVM_MN(DateTime, __construct)(ret.get());
   if (str_time.empty()) {
     // zend does this, so so do we
     return ret;

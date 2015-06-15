@@ -172,8 +172,8 @@ Object APCObject::createObject() const {
       return obj;
     }
   }
-  obj = ObjectData::newInstance(const_cast<Class*>(klass));
-  obj.get()->clearNoDestruct();
+  obj = Object{const_cast<Class*>(klass)};
+  obj->clearNoDestruct();
 
   auto prop = props();
   auto const propEnd = prop + m_propCount;

@@ -32,10 +32,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-c_AwaitAllWaitHandle* c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
+SmartPtr<c_AwaitAllWaitHandle> c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
   auto size = c_AwaitAllWaitHandle::heapSize(cnt);
   auto mem = MM().objMalloc(size);
-  return new (mem) c_AwaitAllWaitHandle(cnt);
+  auto handle = new (mem) c_AwaitAllWaitHandle(cnt);
+  assert(handle->hasExactlyOneRef());
+  return SmartPtr<c_AwaitAllWaitHandle>::attach(handle);
 }
 
 void delete_AwaitAllWaitHandle(ObjectData* od, const Class*) {
@@ -171,7 +173,7 @@ Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
 
   if (!cnt) return returnEmpty();
 
-  SmartPtr<c_AwaitAllWaitHandle> result(Alloc(cnt));
+  auto result = Alloc(cnt);
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter < stop; ++iter) {
@@ -180,7 +182,7 @@ Object c_AwaitAllWaitHandle::FromPackedArray(const ArrayData* dependencies) {
 
   assert(next == &result->m_children[0]);
   result->initialize(ctx_idx);
-  return Object(std::move(result));
+  return Object{std::move(result)};
 }
 
 Object c_AwaitAllWaitHandle::FromMixedArray(const MixedArray* dependencies) {
@@ -196,7 +198,7 @@ Object c_AwaitAllWaitHandle::FromMixedArray(const MixedArray* dependencies) {
 
   if (!cnt) return returnEmpty();
 
-  SmartPtr<c_AwaitAllWaitHandle> result(Alloc(cnt));
+  auto result = Alloc(cnt);
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter < stop; ++iter) {
@@ -206,7 +208,7 @@ Object c_AwaitAllWaitHandle::FromMixedArray(const MixedArray* dependencies) {
 
   assert(next == &result->m_children[0]);
   result->initialize(ctx_idx);
-  return Object(std::move(result));
+  return Object{std::move(result)};
 }
 
 Object c_AwaitAllWaitHandle::FromMap(const BaseMap* dependencies) {
@@ -221,7 +223,7 @@ Object c_AwaitAllWaitHandle::FromMap(const BaseMap* dependencies) {
 
   if (!cnt) return returnEmpty();
 
-  SmartPtr<c_AwaitAllWaitHandle> result(Alloc(cnt));
+  auto result = Alloc(cnt);
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter != stop; iter = BaseMap::nextElm(iter, stop)) {
@@ -230,7 +232,7 @@ Object c_AwaitAllWaitHandle::FromMap(const BaseMap* dependencies) {
 
   assert(next == &result->m_children[0]);
   result->initialize(ctx_idx);
-  return Object(std::move(result));
+  return Object{std::move(result)};
 }
 
 Object c_AwaitAllWaitHandle::FromVector(const BaseVector* dependencies) {
@@ -245,7 +247,7 @@ Object c_AwaitAllWaitHandle::FromVector(const BaseVector* dependencies) {
 
   if (!cnt) return returnEmpty();
 
-  SmartPtr<c_AwaitAllWaitHandle> result(Alloc(cnt));
+  auto result = Alloc(cnt);
   auto next = &result->m_children[cnt];
 
   for (auto iter = start; iter < stop; ++iter) {
@@ -254,7 +256,7 @@ Object c_AwaitAllWaitHandle::FromVector(const BaseVector* dependencies) {
 
   assert(next == &result->m_children[0]);
   result->initialize(ctx_idx);
-  return Object(std::move(result));
+  return Object{std::move(result)};
 }
 
 void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {

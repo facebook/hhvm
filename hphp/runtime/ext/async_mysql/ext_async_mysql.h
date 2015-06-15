@@ -95,7 +95,7 @@ public:
   void setConnection(std::unique_ptr<am::Connection> conn);
   void verifyValidConnection();
   static Class* getClass();
-  static ObjectData* newInstance(std::unique_ptr<am::Connection> conn);
+  static Object newInstance(std::unique_ptr<am::Connection> conn);
   Object query(ObjectData* this_, am::Query query, int64_t timeout_micros = -1);
 
   std::unique_ptr<am::Connection> m_conn;
@@ -129,7 +129,7 @@ public:
   void sweep();
   virtual am::Operation* op();
   static Class* getClass();
-  static ObjectData* newInstance(std::shared_ptr<am::Operation> op);
+  static Object newInstance(std::shared_ptr<am::Operation> op);
 
   std::shared_ptr<am::Operation> m_op;
   static Class* s_class;
@@ -147,8 +147,8 @@ public:
   void sweep();
   void create(std::shared_ptr<am::Operation> op, SmartPtr<c_Vector> results);
   static Class* getClass();
-  static ObjectData* newInstance(std::shared_ptr<am::Operation> op,
-                                 SmartPtr<c_Vector> results);
+  static Object newInstance(std::shared_ptr<am::Operation> op,
+                            SmartPtr<c_Vector> results);
 
   SmartPtr<c_Vector> m_query_results;
   static Class* s_class;
@@ -198,8 +198,8 @@ public:
   Object buildRows(bool as_maps, bool typed_values);
   virtual am::Operation* op();
   static Class* getClass();
-  static ObjectData* newInstance(std::shared_ptr<am::Operation> op,
-                                 am::QueryResult query_result);
+  static Object newInstance(std::shared_ptr<am::Operation> op,
+                            am::QueryResult query_result);
 
   // Holding the operation just for operation elapsed time
   std::shared_ptr<am::Operation> m_op;
@@ -274,8 +274,8 @@ class AsyncMysqlRowBlock {
   template <typename FieldType>
   FieldType getFieldAs(int64_t row, const Variant& field);
   static Class* getClass();
-  static ObjectData* newInstance(am::RowBlock* row_block,
-                                 std::shared_ptr<FieldIndex> indexer);
+  static Object newInstance(am::RowBlock* row_block,
+                            std::shared_ptr<FieldIndex> indexer);
 
   std::unique_ptr<am::RowBlock> m_row_block;
   std::shared_ptr<FieldIndex> m_field_index;
@@ -291,7 +291,7 @@ class AsyncMysqlRowBlockIterator {
   AsyncMysqlRowBlockIterator& operator=(const AsyncMysqlRowBlockIterator&) =
       delete;
   static Class* getClass();
-  static ObjectData* newInstance(Object row_block, size_t row_number);
+  static Object newInstance(Object row_block, size_t row_number);
 
   Object m_row_block;
   size_t m_row_number;
@@ -306,7 +306,7 @@ class AsyncMysqlRow {
 public:
   AsyncMysqlRow& operator=(const AsyncMysqlRow&) = delete;
   static Class* getClass();
-  static ObjectData* newInstance(Object row_block, size_t row_number);
+  static Object newInstance(Object row_block, size_t row_number);
 
   Object m_row_block;
   size_t m_row_number;
@@ -321,7 +321,7 @@ class AsyncMysqlRowIterator {
 public:
   AsyncMysqlRowIterator& operator=(const AsyncMysqlRowIterator&) = delete;
   static Class* getClass();
-  static ObjectData* newInstance(Object row, size_t field_number);
+  static Object newInstance(Object row, size_t field_number);
 
   Object m_row;
   size_t m_field_number;

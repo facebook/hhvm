@@ -29,9 +29,9 @@ class IntlDatePatternGenerator : public IntlError {
         Unit::lookupClass(s_IntlDatePatternGenerator.get());
       assert(c_IntlDatePatternGenerator);
     }
-    auto ret = ObjectData::newInstance(c_IntlDatePatternGenerator);
+    Object ret{c_IntlDatePatternGenerator};
     if (generator) {
-      Native::data<IntlDatePatternGenerator>(ret)
+      Native::data<IntlDatePatternGenerator>(ret.get())
         ->setGenerator(std::move(generator));
     }
     return ret;

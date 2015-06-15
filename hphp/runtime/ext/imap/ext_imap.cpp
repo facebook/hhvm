@@ -231,12 +231,12 @@ static char* _php_imap_parse_address(ADDRESS *addresslist, Array &paddress) {
   ADDRESS *addresstmp = addresslist;
   char *fulladdress = _php_rfc822_write_address(addresstmp);
   do {
-    Object tmpvals(SystemLib::AllocStdClassObject());
+    auto tmpvals = SystemLib::AllocStdClassObject();
     OBJ_SET_ENTRY(tmpvals, addresstmp, "personal", personal);
     OBJ_SET_ENTRY(tmpvals, addresstmp, "adl",      adl);
     OBJ_SET_ENTRY(tmpvals, addresstmp, "mailbox",  mailbox);
     OBJ_SET_ENTRY(tmpvals, addresstmp, "host",     host);
-    paddress.append(tmpvals);
+    paddress.append(std::move(tmpvals));
   } while ((addresstmp = addresstmp->next));
   return fulladdress;
 }
@@ -253,7 +253,7 @@ static void set_address(Object &ret, const char *prop, ADDRESS *addr) {
 }
 
 static Object _php_make_header_object(ENVELOPE *en) {
-  Object ret(SystemLib::AllocStdClassObject());
+  auto ret = SystemLib::AllocStdClassObject();
 
   OBJ_SET_ENTRY(ret, en, "remail",      remail);
   OBJ_SET_ENTRY(ret, en, "date",        date);
@@ -333,11 +333,11 @@ static void _php_imap_add_body(Object &ret, BODY *body, bool do_multipart) {
 
     Array dparametres(Array::Create());
     do {
-      Object dparam(SystemLib::AllocStdClassObject());
+      auto dparam = SystemLib::AllocStdClassObject();
       dparam.o_set("attribute",
         String((const char*)dpar->attribute, CopyString));
       dparam.o_set("value", String((const char*)dpar->value, CopyString));
-      dparametres.append(dparam);
+      dparametres.append(std::move(dparam));
     } while ((dpar = dpar->next));
     ret.o_set("dparameters", dparametres);
   } else {
@@ -350,10 +350,10 @@ static void _php_imap_add_body(Object &ret, BODY *body, bool do_multipart) {
   if ((par = body->parameter)) {
     ret.o_set("ifparameters", 1);
     do {
-      Object param(SystemLib::AllocStdClassObject());
+      auto param = SystemLib::AllocStdClassObject();
       OBJ_SET_ENTRY(param, par, "attribute", attribute);
       OBJ_SET_ENTRY(param, par, "value", value);
-      parametres.append(param);
+      parametres.append(std::move(param));
     } while ((par = par->next));
     ret.o_set("parameters", parametres);
   } else {
@@ -366,9 +366,9 @@ static void _php_imap_add_body(Object &ret, BODY *body, bool do_multipart) {
       parametres.clear();
       PART *part;
       for (part = body->nested.part; part; part = part->next) {
-        Object param(SystemLib::AllocStdClassObject());
+        auto param = SystemLib::AllocStdClassObject();
         _php_imap_add_body(param, &part->body, do_multipart);
-        parametres.append(param);
+        parametres.append(std::move(param));
       }
       ret.o_set("parts", parametres);
     }
@@ -377,9 +377,9 @@ static void _php_imap_add_body(Object &ret, BODY *body, bool do_multipart) {
     if ((body->type == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
       body = body->nested.msg->body;
       parametres.clear();
-      Object param(SystemLib::AllocStdClassObject());
+      auto param = SystemLib::AllocStdClassObject();
       _php_imap_add_body(param, body, do_multipart);
-      parametres.append(param);
+      parametres.append(std::move(param));
       ret.o_set("parts", parametres);
     }
   }
@@ -789,7 +789,7 @@ static Variant HHVM_FUNCTION(imap_bodystruct, const Resource& imap_stream,
   if (!obj->checkMsgNumber(msg_number)) {
     return false;
   }
-  Object ret(SystemLib::AllocStdClassObject());
+  auto ret = SystemLib::AllocStdClassObject();
 
   BODY *body;
   body = mail_body(obj->m_stream, msg_number, (unsigned char *)section.data());
@@ -807,7 +807,7 @@ static Variant HHVM_FUNCTION(imap_check, const Resource& imap_stream) {
     return false;
   }
   if (obj->m_stream && obj->m_stream->mailbox) {
-    Object ret(SystemLib::AllocStdClassObject());
+    auto ret = SystemLib::AllocStdClassObject();
     char date[100];
     rfc822_date(date);
     ret.o_set("Date", String(date, CopyString));
@@ -917,7 +917,7 @@ static Variant HHVM_FUNCTION(imap_fetch_overview, const Resource& imap_stream,
       if (((elt = mail_elt(obj->m_stream, i))->sequence) &&
           (env = mail_fetch_structure(obj->m_stream, i, NIL, NIL))) {
 
-        Object myoverview(SystemLib::AllocStdClassObject());
+        auto myoverview = SystemLib::AllocStdClassObject();
         OBJ_SET_ENTRY(myoverview, env, "subject", subject);
 
         if (env->from) {
@@ -950,7 +950,7 @@ static Variant HHVM_FUNCTION(imap_fetch_overview, const Resource& imap_stream,
         myoverview.o_set("seen",     (int64_t)elt->seen);
         myoverview.o_set("draft",    (int64_t)elt->draft);
 
-        ret.append(myoverview);
+        ret.append(std::move(myoverview));
       }
     }
   }
@@ -1049,7 +1049,7 @@ static Variant HHVM_FUNCTION(imap_fetchstructure, const Resource& imap_stream,
     return false;
   }
 
-  Object ret(SystemLib::AllocStdClassObject());
+  auto ret = SystemLib::AllocStdClassObject();
   _php_imap_add_body(ret, body, true);
 
   return ret;
@@ -1256,7 +1256,7 @@ static bool HHVM_FUNCTION(imap_mail, const String& to, const String& subject,
 
 static Variant HHVM_FUNCTION(imap_mailboxmsginfo, const Resource& imap_stream) {
   auto obj = cast<ImapStream>(imap_stream);
-  Object ret(SystemLib::AllocStdClassObject());
+  auto ret = SystemLib::AllocStdClassObject();
 
   int64_t unreadmsg = 0, deletedmsg = 0, msize = 0;
 
@@ -1441,7 +1441,7 @@ static bool HHVM_FUNCTION(imap_setflag_full, const Resource& imap_stream,
 static Variant HHVM_FUNCTION(imap_status, const Resource& imap_stream,
                              const String& mailbox, int64_t options /* = 0 */) {
   auto obj = cast<ImapStream>(imap_stream);
-  Object ret(SystemLib::AllocStdClassObject());
+  auto ret = SystemLib::AllocStdClassObject();
 
   if (mail_status(obj->m_stream, (char *)mailbox.data(), options)) {
     ret.o_set("flags", (int64_t)IMAPG(status_flags));

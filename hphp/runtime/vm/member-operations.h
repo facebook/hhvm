@@ -1772,7 +1772,6 @@ inline DataType propPreStdclass(TypedValue& tvScratch,
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
   base->m_data.pobj = obj;
-  obj->incRefCount();
   result = base;
   // In PHP5, $undef->foo should warn, but $undef->foo['bar'] shouldn't.
   // This is crazy, so warn for both if EnableHipHopSyntax is on
@@ -1937,7 +1936,6 @@ inline void SetPropNull(Cell* val) {
 inline void SetPropStdclass(TypedValue* base, TypedValue key,
                             Cell* val) {
   auto const obj = newInstance(SystemLib::s_stdclassClass);
-  obj->incRefCount();
   StringData* keySD = prepareKey(key);
   SCOPE_EXIT { decRefStr(keySD); };
   obj->setProp(nullptr, keySD, (TypedValue*)val);
@@ -2011,7 +2009,6 @@ inline TypedValue* SetOpPropStdclass(TypedValue& tvRef, SetOpOp op,
                                      TypedValue* base, TypedValue key,
                                      Cell* rhs) {
   auto const obj = newInstance(SystemLib::s_stdclassClass);
-  obj->incRefCount();
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
   base->m_data.pobj = obj;
@@ -2094,7 +2091,6 @@ template <bool setResult>
 inline void IncDecPropStdclass(IncDecOp op, TypedValue* base,
                                TypedValue key, TypedValue& dest) {
   auto const obj = newInstance(SystemLib::s_stdclassClass);
-  obj->incRefCount();
   tvRefcountedDecRef(base);
   base->m_type = KindOfObject;
   base->m_data.pobj = obj;

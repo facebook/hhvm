@@ -242,7 +242,7 @@ static Variant HHVM_METHOD(mysqli, get_charset) {
   VALIDATE_CONN_CONNECTED(conn);
   mysql_get_character_set_info(conn->get(), &cs);
 
-  Object ret(SystemLib::AllocStdClassObject());
+  auto ret = SystemLib::AllocStdClassObject();
   ret.o_set(s_charset, String(cs.csname, CopyString));
   ret.o_set(s_collation, String(cs.name, CopyString));
   ret.o_set(s_dir, String(cs.dir, CopyString));
@@ -782,7 +782,7 @@ static Variant HHVM_METHOD(mysqli_result, fetch_field) {
     return false;
   }
 
-  Object obj(SystemLib::AllocStdClassObject());
+  auto obj = SystemLib::AllocStdClassObject();
   obj->o_set("name",       info->name);
   obj->o_set("orgname",    info->org_name);
   obj->o_set("table",      info->table);

@@ -34,8 +34,8 @@ inline ObjectData::ObjectData(Class* cls)
 inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
   : m_cls(cls)
 {
-  m_hdr.init(flags, kind, 0);
-  assert(m_hdr.aux == flags && !getCount());
+  m_hdr.init(flags, kind, 1);
+  assert(m_hdr.aux == flags && hasExactlyOneRef());
   assert(isObjectKind(kind));
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
@@ -53,8 +53,8 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
 inline ObjectData::ObjectData(Class* cls, NoInit)
   : m_cls(cls)
 {
-  m_hdr.init(0, HeaderKind::Object, 0);
-  assert(!m_hdr.aux && m_hdr.kind == HeaderKind::Object && !getCount());
+  m_hdr.init(0, HeaderKind::Object, 1);
+  assert(!m_hdr.aux && m_hdr.kind == HeaderKind::Object && hasExactlyOneRef());
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
 }
@@ -79,13 +79,14 @@ inline size_t ObjectData::heapSize() const {
   return m_cls->builtinODTailSize() + sizeForNProps(m_cls->numDeclProperties());
 }
 
-// Call newInstance() to instantiate a PHP object
 inline ObjectData* ObjectData::newInstance(Class* cls) {
   if (cls->needInitialization()) {
     cls->initialize();
   }
   if (auto const ctor = cls->instanceCtor()) {
-    return ctor(cls);
+    auto obj = ctor(cls);
+    assert(obj->getCount() > 0);
+    return obj;
   }
   Attr attrs = cls->attrs();
   if (UNLIKELY(attrs &
@@ -96,6 +97,7 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   size_t size = sizeForNProps(nProps);
   auto& mm = MM();
   auto const obj = new (mm.objMalloc(size)) ObjectData(cls);
+  assert(obj->hasExactlyOneRef());
   if (UNLIKELY(cls->callsCustomInstanceInit())) {
     /*
       This must happen after the constructor finishes,
@@ -108,6 +110,9 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
     */
     obj->callCustomInstanceInit();
   }
+
+  // callCustomInstanceInit may have inc-refd.
+  assert(obj->getCount() > 0);
   return obj;
 }
 

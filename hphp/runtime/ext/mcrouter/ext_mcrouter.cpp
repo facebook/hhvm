@@ -33,14 +33,13 @@ static Object mcr_getException(const std::string& message,
     assert(c_MCRouterException);
   }
 
-  auto objdata = ObjectData::newInstance(c_MCRouterException);
-  Object obj(objdata);
+  Object obj{c_MCRouterException};
   TypedValue ret;
   g_context->invokeFunc(
     &ret,
     c_MCRouterException->getCtor(),
     make_packed_array(message, (int64_t)op, (int64_t)reply, key),
-    objdata);
+    obj.get());
   tvRefcountedDecRef(&ret);
   return obj;
 }
@@ -63,14 +62,13 @@ static Object mcr_getOptionException(
     errorArray.append(e);
   }
 
-  auto objdata = ObjectData::newInstance(c_MCRouterOptionException);
-  Object obj(objdata);
+  Object obj{c_MCRouterOptionException};
   TypedValue ret;
   g_context->invokeFunc(
     &ret,
     c_MCRouterOptionException->getCtor(),
     make_packed_array(errorArray),
-    objdata);
+    obj.get());
   return obj;
 }
 

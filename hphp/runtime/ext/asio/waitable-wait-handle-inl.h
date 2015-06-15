@@ -67,8 +67,7 @@ inline AsioBlockableChain& c_WaitableWaitHandle::getParentChain() {
 inline void
 c_WaitableWaitHandle::detectCycle(c_WaitableWaitHandle* child) const {
   if (UNLIKELY(isDescendantOf(child))) {
-    Object e(createCycleException(child));
-    throw e;
+    throw createCycleException(child);
   }
 }
 

@@ -43,7 +43,7 @@ class IntlError {
     char buffer[1024];
     vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
-    return Object(SystemLib::AllocExceptionObject(buffer));
+    return SystemLib::AllocExceptionObject(buffer);
   }
 
   UErrorCode getErrorCode() const { return m_errorCode; }

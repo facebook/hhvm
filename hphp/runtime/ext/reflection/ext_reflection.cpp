@@ -364,12 +364,14 @@ Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj, const String& cls,
 }
 
 Object HHVM_FUNCTION(hphp_create_object, const String& name, const Variant& params) {
-  return g_context->createObject(name.get(), params);
+  return Object::attach(g_context->createObject(name.get(), params));
 }
 
 Object HHVM_FUNCTION(hphp_create_object_without_constructor,
                       const String& name) {
-  return g_context->createObject(name.get(), init_null_variant, false);
+  return Object::attach(
+    g_context->createObject(name.get(), init_null_variant, false)
+  );
 }
 
 Variant HHVM_FUNCTION(hphp_get_property, const Object& obj, const String& cls,
@@ -452,18 +454,13 @@ String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
   return cls->nameStr();
 }
 
-ObjectData* Reflection::AllocReflectionExceptionObject(const Variant& message) {
-  ObjectData* inst = ObjectData::newInstance(s_ReflectionExceptionClass);
+Object Reflection::AllocReflectionExceptionObject(const Variant& message) {
+  Object inst{s_ReflectionExceptionClass};
   TypedValue ret;
-  {
-    /* Increment refcount across call to ctor, so the object doesn't */
-    /* get destroyed when ctor's frame is torn down */
-    CountableHelper cnt(inst);
-    g_context->invokeFunc(&ret,
-                            s_ReflectionExceptionClass->getCtor(),
-                            make_packed_array(message),
-                            inst);
-  }
+  g_context->invokeFunc(&ret,
+                        s_ReflectionExceptionClass->getCtor(),
+                        make_packed_array(message),
+                        inst.get());
   tvRefcountedDecRef(&ret);
   return inst;
 }
@@ -639,10 +636,10 @@ static Array get_function_param_info(const Func* func) {
           if (resolveDefaultParameterConstant(defText, defTextLen, v)) {
             param.set(s_default, v);
           } else {
-            Object obj = SystemLib::AllocStdClassObject();
+            auto obj = SystemLib::AllocStdClassObject();
             obj->o_set(s_msg, String("Unknown unserializable default value: ")
                        + defText);
-            param.set(s_default, Variant(obj));
+            param.set(s_default, std::move(obj));
           }
         } else {
           param.set(s_default, unserialize_from_string(p->value));
@@ -1431,7 +1428,7 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
     String result = init(clsName);
     if (result.empty()) {
       auto msg = folly::format("Class {} does not exist", clsName.data()).str();
-      throw Object(Reflection::AllocReflectionExceptionObject(String(msg)));
+      throw Reflection::AllocReflectionExceptionObject(String(msg));
     }
 
     // It is possible that $name does not get serialized. If a class derives

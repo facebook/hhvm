@@ -129,7 +129,7 @@ c_WaitableWaitHandle::isDescendantOf(c_WaitableWaitHandle* wait_handle) const {
   return wait_handle == this;
 }
 
-ObjectData*
+Object
 c_WaitableWaitHandle::createCycleException(c_WaitableWaitHandle* child) const {
   assert(isDescendantOf(child));
 

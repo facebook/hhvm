@@ -64,7 +64,9 @@ ObjectData* new_{0:s}_Instance(HPHP::Class* cls) {{
   size_t nProps = cls->numDeclProperties();
   size_t builtinObjSize = sizeof(c_{0:s}) - sizeof(ObjectData);
   size_t size = ObjectData::sizeForNProps(nProps) + builtinObjSize;
-  return new (MM().objMalloc(size)) c_{0:s}(cls);
+  auto o = new (MM().objMalloc(size)) c_{0:s}(cls);
+  assert(o->hasExactlyOneRef());
+  return o;
 }})",
     className) << "\n\n";
 }

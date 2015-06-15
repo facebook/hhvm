@@ -539,7 +539,7 @@ static void libxml_error_handler(void* userData, xmlErrorPtr error) {
 }
 
 static Object create_libxmlerror(xmlError &error) {
-  Object ret = ObjectData::newInstance(s_LibXMLError_class);
+  Object ret{s_LibXMLError_class};
   ret->o_set(s_level,   error.level);
   ret->o_set(s_code,    error.code);
   ret->o_set(s_column,  error.int2);

@@ -1377,8 +1377,7 @@ class BaseMap : public HashCollection {
  protected:
   template<class TVector>
   Object php_values() {
-    auto* target = newobj<TVector>();
-    Object ret = target;
+    auto target = makeSmartPtr<TVector>();
     int64_t sz = m_size;
     target->reserve(sz);
     assert(target->canMutateBuffer());
@@ -1388,13 +1387,12 @@ class BaseMap : public HashCollection {
     for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit), ++out) {
       cellDup(e->data, *out);
     }
-    return ret;
+    return Object{std::move(target)};
   }
 
   template<class TVector>
   Object php_keys() {
-    auto* vec = newobj<TVector>();
-    Object obj = vec;
+    auto vec = makeSmartPtr<TVector>();
     vec->reserve(m_size);
     assert(vec->canMutateBuffer());
     auto* e = firstElm();
@@ -1409,7 +1407,7 @@ class BaseMap : public HashCollection {
         cellDup(make_tv<KindOfString>(e->skey), vec->m_data[j]);
       }
     }
-    return obj;
+    return Object{std::move(vec)};
   }
 
  public:
@@ -1717,11 +1715,10 @@ class BaseSet : public HashCollection {
  protected:
   // PHP-land methods exported by child classes.
   template<class TVector>
-  Object  php_values() {
-    TVector* vec;
-    Object o = vec = newobj<TVector>();
+  Object php_values() {
+    auto vec = makeSmartPtr<TVector>();
     vec->init(VarNR(this));
-    return o;
+    return Object{std::move(vec)};
   }
 
  public:
@@ -2128,7 +2125,9 @@ template<class T, class... Args> T* newCollectionObj(Args&&... args) {
                 std::is_convertible<T*,HashCollection*>::value ||
                 std::is_convertible<T*,c_Pair*>::value, "");
   auto const mem = MM().smartMallocSize(sizeof(T));
-  return new (mem) T(std::forward<Args>(args)...);
+  auto col = new (mem) T(std::forward<Args>(args)...);
+  assert(col->hasExactlyOneRef());
+  return col;
 }
 
 }

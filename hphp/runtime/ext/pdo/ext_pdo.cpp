@@ -476,7 +476,7 @@ const StaticString
 
 void throw_pdo_exception(const Variant& code, const Variant& info,
                          const char *fmt, ...) {
-  ObjectData *obj = SystemLib::AllocPDOExceptionObject();
+  auto obj = SystemLib::AllocPDOExceptionObject();
   obj->o_set(s_code, code, s_PDOException);
 
   va_list ap;
@@ -489,7 +489,7 @@ void throw_pdo_exception(const Variant& code, const Variant& info,
   if (!info.isNull()) {
     obj->o_set(s_errorInfo, info, s_PDOException);
   }
-  throw Object(obj);
+  throw obj;
 }
 
 void pdo_raise_impl_error(sp_PDOResource rsrc, PDOStatement* stmt,
@@ -600,7 +600,7 @@ static Object pdo_stmt_instantiate(sp_PDOResource dbh, const String& clsname,
   if (!cls) {
     return Object();
   }
-  return ObjectData::newInstance(cls);
+  return Object{cls};
 }
 
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,

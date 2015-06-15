@@ -1197,7 +1197,7 @@ Variant MySQLStmt::result_metadata() {
   args.append(Variant(makeSmartPtr<MySQLResult>(mysql_result)));
 
   auto cls = Unit::lookupClass(s_mysqli_result.get());
-  Object obj = ObjectData::newInstance(cls);
+  Object obj{cls};
 
   TypedValue ret;
   g_context->invokeFunc(&ret, cls->getCtor(), args, obj.get());

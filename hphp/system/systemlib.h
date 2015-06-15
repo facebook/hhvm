@@ -80,28 +80,28 @@ extern Class* s_ ## cls ## Class;
   SYSTEMLIB_CLASSES(DECLARE_SYSTEMLIB_CLASS)
 #undef DECLARE_SYSTEMLIB_CLASS
 
-ObjectData* AllocStdClassObject();
-ObjectData* AllocPinitSentinel();
-ObjectData* AllocExceptionObject(const Variant& message);
-ObjectData* AllocBadMethodCallExceptionObject(const Variant& message);
-ObjectData* AllocInvalidArgumentExceptionObject(const Variant& message);
-ObjectData* AllocRuntimeExceptionObject(const Variant& message);
-ObjectData* AllocOutOfBoundsExceptionObject(const Variant& message);
-ObjectData* AllocInvalidOperationExceptionObject(const Variant& message);
-ObjectData* AllocDOMExceptionObject(const Variant& message,
-                                    const Variant& code);
-ObjectData* AllocDirectoryObject();
-ObjectData* AllocPDOExceptionObject();
-ObjectData* AllocSoapFaultObject(const Variant& code,
-                                 const Variant& message,
-                                 const Variant& actor = null_variant,
-                                 const Variant& detail = null_variant,
-                                 const Variant& name = null_variant,
-                                 const Variant& header = null_variant);
-ObjectData* AllocLazyKVZipIterableObject(const Variant& mp);
+Object AllocStdClassObject();
+Object AllocPinitSentinel();
+Object AllocExceptionObject(const Variant& message);
+Object AllocBadMethodCallExceptionObject(const Variant& message);
+Object AllocInvalidArgumentExceptionObject(const Variant& message);
+Object AllocRuntimeExceptionObject(const Variant& message);
+Object AllocOutOfBoundsExceptionObject(const Variant& message);
+Object AllocInvalidOperationExceptionObject(const Variant& message);
+Object AllocDOMExceptionObject(const Variant& message,
+                               const Variant& code);
+Object AllocDirectoryObject();
+Object AllocPDOExceptionObject();
+Object AllocSoapFaultObject(const Variant& code,
+                            const Variant& message,
+                            const Variant& actor = null_variant,
+                            const Variant& detail = null_variant,
+                            const Variant& name = null_variant,
+                            const Variant& header = null_variant);
+Object AllocLazyKVZipIterableObject(const Variant& mp);
 
-ObjectData* AllocLazyIterableViewObject(const Variant& iterable);
-ObjectData* AllocLazyKeyedIterableViewObject(const Variant& iterable);
+Object AllocLazyIterableViewObject(const Variant& iterable);
+Object AllocLazyKeyedIterableViewObject(const Variant& iterable);
 
 void throwExceptionObject(const Variant& message) ATTRIBUTE_NORETURN;
 void throwBadMethodCallExceptionObject(const Variant& message)

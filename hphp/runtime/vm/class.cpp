@@ -133,14 +133,6 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
 
 namespace {
 
-template<size_t sz>
-struct assert_sizeof_class {
-  // If this static_assert fails, the compiler error will have the real value
-  // of sizeof(Class) in it since it's in this struct's type.
-  static_assert(sz == (use_lowptr ? 256 : 288), "Change this only on purpose");
-};
-template struct assert_sizeof_class<sizeof(Class)>;
-
 /*
  * Load used traits of PreClass `preClass', and append the trait Class*'s to
  * 'usedTraits'.  Return an estimate of the method count of all used traits.
@@ -188,6 +180,22 @@ unsigned loadUsedTraits(PreClass* preClass,
   return methodCount;
 }
 
+/*
+ * Class ends with a dynamically sized array, m_classVec. C++ doesn't allow
+ * declaring empty arrays like C does, so we give it size 1 and use
+ * m_classVec's offset as the true size of Class when allocating memory to
+ * construct one.
+ */
+constexpr size_t sizeof_Class = Class::classVecOff();
+
+template<size_t sz>
+struct assert_sizeof_class {
+  // If this static_assert fails, the compiler error will have the real value
+  // of sizeof_Class in it since it's in this struct's type.
+  static_assert(sz == (use_lowptr ? 252 : 288), "Change this only on purpose");
+};
+template struct assert_sizeof_class<sizeof_Class>;
+
 }
 
 Class* Class::newClass(PreClass* preClass, Class* parent) {
@@ -203,7 +211,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
     funcVecLen += numTraitMethodsEstimate;
   }
 
-  auto const size = offsetof(Class, m_classVec)
+  auto const size = sizeof_Class
                     + sizeof(m_classVec[0]) * classVecLen
                     + sizeof(LowFuncPtr) * funcVecLen;
   auto const mem = low_malloc(size);

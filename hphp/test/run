@@ -426,27 +426,31 @@ function find_tests($files, array $options = null) {
 }
 
 function list_tests($files, $options) {
+  $args = array();
   $mode = idx($options, 'mode', '');
   switch ($mode) {
     case '':
     case 'jit':
-      $mode = '-m jit';
+      $args[] = '-m jit';
       break;
     case 'interp';
-      $mode = '-m interp';
+      $args[] = '-m interp';
       break;
     default:
       throw new Exception("Unsupported mode for listing tests: ".$mode);
   }
 
   if (isset($options['repo'])) {
-    $repo = '-r';
-  } else {
-    $repo = '';
+    $args[] = '-r';
   }
 
-  foreach (find_tests($files) as $test) {
-    print implode(' ', array_filter(array($mode, $repo, $test)))."\n";
+  if (isset($options['relocate'])) {
+    $args[] = '--relocate';
+    $args[] = $options['relocate'];
+  }
+
+  foreach (find_tests($files, $options) as $test) {
+    print implode(' ', array_merge($args, array($test)))."\n";
   }
 }
 

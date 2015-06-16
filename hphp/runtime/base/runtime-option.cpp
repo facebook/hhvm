@@ -430,7 +430,7 @@ static inline bool hhirRelaxGuardsDefault() {
 }
 
 static inline bool evalJitDefault() {
-#if defined(__APPLE__) || defined(__CYGWIN__)
+#ifdef __CYGWIN__
   return false;
 #else
   return true;

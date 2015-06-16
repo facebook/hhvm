@@ -53,7 +53,7 @@ class IntlCalendar : public IntlError {
     }
     Object ret{c_IntlCalendar};
     if (cal) {
-      Native::data<IntlCalendar>(ret.get())->setCalendar(cal);
+      Native::data<IntlCalendar>(ret)->setCalendar(cal);
     }
     return ret;
   }

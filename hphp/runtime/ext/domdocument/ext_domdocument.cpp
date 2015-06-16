@@ -1160,7 +1160,7 @@ Variant php_dom_create_object(xmlNodePtr obj,
     ? node->getCache()
     : Object::attach(g_context->createObjectOnly(clsname.get()));
 
-  auto* nodeobj = Native::data<DOMNode>(od.get());
+  auto* nodeobj = Native::data<DOMNode>(od);
 
   if (!nodeobj->node()) {
     nodeobj->setNode(node);
@@ -1192,7 +1192,7 @@ static Variant create_node_object(xmlNodePtr obj) {
 
 static Variant create_node_object(xmlNodePtr obj, Object docObj) {
   if (docObj) {
-    auto doc = Native::data<DOMNode>(docObj.get());
+    auto doc = Native::data<DOMNode>(docObj);
     return create_node_object(obj, doc->doc());
   }
   return create_node_object(obj);
@@ -1217,7 +1217,7 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
   }
   xmlNodePtr nodep = nullptr;
   if (!context.isNull()) {
-    DOMNode *domnode = Native::data<DOMNode>(context.get());
+    DOMNode *domnode = Native::data<DOMNode>(context);
     nodep = domnode->nodep();
   }
   if (!nodep) {
@@ -1288,9 +1288,9 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
       }
     }
 
-    auto docData = Native::data<DOMNode>(domxpath->m_doc.get())->doc();
+    auto docData = Native::data<DOMNode>(domxpath->m_doc)->doc();
     Object node_list{getDOMNodeListClass()};
-    auto list_data = Native::data<DOMIterable>(node_list.get());
+    auto list_data = Native::data<DOMIterable>(node_list);
     list_data->m_doc = docData;
     list_data->m_baseobjptr = retval;
     list_data->m_nodetype = DOM_NODESET;
@@ -1624,7 +1624,7 @@ Object newDOMDocument(bool construct /* = true */) {
 static Object newDOMNamedNodeMap(SmartPtr<XMLDocumentData> doc, Object base,
                           int node_type, xmlHashTable* ht = nullptr) {
   Object nodemap{getDOMNamedNodeMapClass()};
-  auto data = Native::data<DOMIterable>(nodemap.get());
+  auto data = Native::data<DOMIterable>(nodemap);
   data->m_doc = doc;
   data->m_baseobj = base;
   data->m_nodetype = node_type;
@@ -1637,7 +1637,7 @@ static Object newDOMNodeList(SmartPtr<XMLDocumentData> doc, Object base,
                              int node_type, String local = String(),
                              String ns = String()) {
   Object ret{getDOMNodeListClass()};
-  auto data = Native::data<DOMIterable>(ret.get());
+  auto data = Native::data<DOMIterable>(ret);
   data->m_doc = doc;
   data->m_baseobj = base;
   data->m_nodetype = node_type;
@@ -1647,8 +1647,8 @@ static Object newDOMNodeList(SmartPtr<XMLDocumentData> doc, Object base,
   return ret;
 }
 
-#define CHECK_NODE(nodepVar)                                                   \
-  DOMNode *domnode = Native::data<DOMNode>(obj.get());                         \
+#define CHECK_NODE(nodepVar)                                            \
+  DOMNode *domnode = Native::data<DOMNode>(obj);                        \
   xmlNodePtr nodepVar = domnode->node() ? domnode->nodep() : nullptr;          \
   if (nodepVar == nullptr) {                                                   \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
@@ -1656,8 +1656,8 @@ static Object newDOMNodeList(SmartPtr<XMLDocumentData> doc, Object base,
   }                                                                            \
 /**/
 
-#define CHECK_WRITE_NODE(nodepVar)                                             \
-  DOMNode *domnode = Native::data<DOMNode>(obj.get());                         \
+#define CHECK_WRITE_NODE(nodepVar)                                      \
+  DOMNode *domnode = Native::data<DOMNode>(obj);                        \
   xmlNodePtr nodepVar = domnode->node() ? domnode->nodep() : nullptr;          \
   if (nodepVar == nullptr) {                                                   \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
@@ -2038,7 +2038,7 @@ Variant HHVM_METHOD(DOMNode, appendChild,
   if (!dom_node_children_valid(nodep)) {
     return false;
   }
-  auto* newdomnode = Native::data<DOMNode>(newnode.get());
+  auto* newdomnode = Native::data<DOMNode>(newnode);
   xmlNodePtr child = newdomnode->nodep();
   if (!child) {
     php_dom_throw_error(INVALID_STATE_ERR, 0);
@@ -2198,7 +2198,7 @@ Variant HHVM_METHOD(DOMNode, insertBefore,
   if (!dom_node_children_valid(parentp)) {
     return false;
   }
-  auto* domchildnode = Native::data<DOMNode>(newnode.get());
+  auto* domchildnode = Native::data<DOMNode>(newnode);
   xmlNodePtr child = domchildnode->nodep();
   if (!child) {
     php_dom_throw_error(INVALID_STATE_ERR, 0);
@@ -2225,7 +2225,7 @@ Variant HHVM_METHOD(DOMNode, insertBefore,
     return false;
   }
   if (!refnode.isNull()) {
-    auto* domrefnode = Native::data<DOMNode>(refnode.toObject().get());
+    auto* domrefnode = Native::data<DOMNode>(refnode.toObject());
     xmlNodePtr refp = domrefnode->nodep();
     if (!refp || refp->parent != parentp) {
       php_dom_throw_error(NOT_FOUND_ERR, stricterror);
@@ -2346,7 +2346,7 @@ bool HHVM_METHOD(DOMNode, isDefaultNamespace,
 bool HHVM_METHOD(DOMNode, isSameNode,
                  const Object& node) {
   auto* data = Native::data<DOMNode>(this_);
-  auto* other_data = Native::data<DOMNode>(node.get());
+  auto* other_data = Native::data<DOMNode>(node);
   return data->nodep() == other_data->nodep();
 }
 
@@ -2452,7 +2452,7 @@ Variant HHVM_METHOD(DOMNode, removeChild,
   if (!dom_node_children_valid(nodep)) {
     return false;
   }
-  auto* domnode2 = Native::data<DOMNode>(node.get());
+  auto* domnode2 = Native::data<DOMNode>(node);
   xmlNodePtr child = domnode2->nodep();
   if (!child) {
     php_dom_throw_error(INVALID_STATE_ERR, 0);
@@ -2493,13 +2493,13 @@ Variant HHVM_METHOD(DOMNode, replaceChild,
   if (!dom_node_children_valid(nodep)) {
     return false;
   }
-  auto* domnewchildnode = Native::data<DOMNode>(newchildobj.get());
+  auto* domnewchildnode = Native::data<DOMNode>(newchildobj);
   xmlNodePtr newchild = domnewchildnode->nodep();
   if (!newchild) {
     php_dom_throw_error(INVALID_STATE_ERR, 0);
     return false;
   }
-  auto* domoldchildnode = Native::data<DOMNode>(oldchildobj.get());
+  auto* domoldchildnode = Native::data<DOMNode>(oldchildobj);
   xmlNodePtr oldchild = domoldchildnode->nodep();
   if (!oldchild) {
     php_dom_throw_error(INVALID_STATE_ERR, 0);
@@ -2604,8 +2604,8 @@ Variant HHVM_METHOD(DOMNode, getNodePath) {
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#define CHECK_ATTR(attrp)                                                      \
-  auto domattr = Native::data<DOMNode>(obj.get());                             \
+#define CHECK_ATTR(attrp)                                               \
+  auto domattr = Native::data<DOMNode>(obj);                             \
   xmlAttrPtr attrp = (xmlAttrPtr)(domattr ? domattr->nodep() : nullptr);       \
   if (attrp == nullptr) {                                                      \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
@@ -2613,8 +2613,8 @@ Variant HHVM_METHOD(DOMNode, getNodePath) {
   }                                                                            \
 /**/
 
-#define CHECK_WRITE_ATTR(attrp)                                                \
-  auto domattr = Native::data<DOMNode>(obj.get());                             \
+#define CHECK_WRITE_ATTR(attrp)                                         \
+  auto domattr = Native::data<DOMNode>(obj);                            \
   xmlAttrPtr attrp = (xmlAttrPtr)(domattr ? domattr->nodep() : nullptr);       \
   if (attrp == nullptr) {                                                      \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                                 \
@@ -3067,7 +3067,7 @@ Variant HHVM_METHOD(DOMText, splitText,
     nnode->type = XML_TEXT_NODE;
   }
   Object ret{getDOMTextClass()};
-  auto text_data = Native::data<DOMNode>(ret.get());
+  auto text_data = Native::data<DOMNode>(ret);
   text_data->setNode(nnode);
   text_data->setDoc(std::move(data->doc()));
   return ret;
@@ -3089,8 +3089,8 @@ void HHVM_METHOD(DOMCdataSection, __construct,
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#define CHECK_DOC(docp)                                                        \
-  auto domdoc = Native::data<DOMNode>(obj.get());                              \
+#define CHECK_DOC(docp)                                                 \
+  auto domdoc = Native::data<DOMNode>(obj);                              \
   CHECK_THIS_DOC(docp, domdoc);                                                \
 
 #define CHECK_THIS_DOC(docp, domdoc)                                           \
@@ -3100,8 +3100,8 @@ void HHVM_METHOD(DOMCdataSection, __construct,
     return init_null();                                                        \
   }                                                                            \
 
-#define CHECK_WRITE_DOC(docp)                                                  \
-  auto domdoc = Native::data<DOMNode>(obj.get());                              \
+#define CHECK_WRITE_DOC(docp)                                           \
+  auto domdoc = Native::data<DOMNode>(obj);                             \
   CHECK_WRITE_THIS_DOC(docp, domdoc)                                           \
 
 #define CHECK_WRITE_THIS_DOC(docp, domdoc)                                     \
@@ -3194,14 +3194,14 @@ static void dom_document_version_write(const Object& obj,
   docp->version = xmlStrdup((const xmlChar *)svalue.data());
 }
 
-#define DOCPROP_READ_WRITE(member, name)                                       \
-  static Variant dom_document_ ##name## _read(const Object& obj) {             \
-    auto domdoc = Native::data<DOMNode>(obj.get());                            \
+#define DOCPROP_READ_WRITE(member, name)                                \
+  static Variant dom_document_ ##name## _read(const Object& obj) {      \
+    auto domdoc = Native::data<DOMNode>(obj);                           \
     return (bool)domdoc->doc()->m_ ## member;                                  \
   }                                                                            \
   static void dom_document_ ##name## _write(const Object& obj,                 \
                                             const Variant& value) {            \
-    auto domdoc = Native::data<DOMNode>(obj.get());                            \
+    auto domdoc = Native::data<DOMNode>(obj);                            \
     domdoc->doc()->m_ ## member = value.toBoolean();                           \
   }                                                                            \
 
@@ -3580,7 +3580,7 @@ Variant HHVM_METHOD(DOMDocument, importNode,
                     bool deep /* = false */) {
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
-  DOMNode *domnode = Native::data<DOMNode>(importednode.get());
+  DOMNode *domnode = Native::data<DOMNode>(importednode);
   xmlNodePtr nodep = domnode->nodep();
   xmlNodePtr retnodep;
   long recursive = deep ? 1 : 0;
@@ -3772,7 +3772,7 @@ Variant save_html_or_xml(DOMNode* obj,
   xmlChar *mem;
   int size;
   if (!node.isNull()) {
-    DOMNode* domnode = Native::data<DOMNode>(node.get());
+    DOMNode* domnode = Native::data<DOMNode>(node);
     xmlNodePtr node = domnode->nodep();
     if (!node) {
       php_dom_throw_error(INVALID_STATE_ERR, 0);
@@ -3921,7 +3921,7 @@ bool HHVM_METHOD(DOMDocumentFragment, appendXML,
 
 
 #define CHECK_DOCTYPE(dtdptr)                                                  \
-  auto domdoctype = Native::data<DOMNode>(obj.get());                          \
+  auto domdoctype = Native::data<DOMNode>(obj);                          \
   xmlDtdPtr dtdptr = (xmlDtdPtr)(domdoctype ? domdoctype->nodep()              \
                                             : nullptr);                        \
   if (dtdptr == nullptr) {                                                     \
@@ -4329,7 +4329,7 @@ Variant HHVM_METHOD(DOMElement, removeAttributeNode,
     php_dom_throw_error(INVALID_STATE_ERR, 0);
     return false;
   }
-  auto attr = Native::data<DOMNode>(oldattr.get());
+  auto attr = Native::data<DOMNode>(oldattr);
   xmlAttrPtr attrp = (xmlAttrPtr)attr->nodep();
   if (!attrp) {
     php_dom_throw_error(INVALID_STATE_ERR, 0);
@@ -4450,7 +4450,7 @@ Variant HHVM_METHOD(DOMElement, setAttributeNode,
     php_dom_throw_error(INVALID_STATE_ERR, 0);
     return false;
   }
-  auto domattr = Native::data<DOMNode>(newattr.get());
+  auto domattr = Native::data<DOMNode>(newattr);
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->nodep();
   if (!attrp) {
     php_dom_throw_error(INVALID_STATE_ERR, 0);
@@ -4495,7 +4495,7 @@ Variant HHVM_METHOD(DOMElement, setAttributeNodeNS,
     php_dom_throw_error(INVALID_STATE_ERR, 0);
     return false;
   }
-  auto domattr = Native::data<DOMNode>(newattr.get());
+  auto domattr = Native::data<DOMNode>(newattr);
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->nodep();
   if (!attrp) {
     php_dom_throw_error(INVALID_STATE_ERR, 0);
@@ -4673,7 +4673,7 @@ Variant HHVM_METHOD(DOMElement, setIDAttributeNode,
     php_dom_throw_error(INVALID_STATE_ERR, 0);
     return init_null();
   }
-  auto domattr = Native::data<DOMNode>(idattr.get());
+  auto domattr = Native::data<DOMNode>(idattr);
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->nodep();
   if (!attrp) {
     php_dom_throw_error(INVALID_STATE_ERR, 0);
@@ -4722,7 +4722,7 @@ Variant HHVM_METHOD(DOMElement, setIDAttributeNS,
 
 
 #define CHECK_ENTITY(nodep)                                                    \
-  auto domentity = Native::data<DOMNode>(obj.get());                           \
+  auto domentity = Native::data<DOMNode>(obj);                           \
   xmlEntity *nodep = (xmlEntity*)(domentity ? domentity->nodep()               \
                                             : nullptr);                        \
   if (nodep == nullptr) {                                                      \
@@ -4832,7 +4832,7 @@ void HHVM_METHOD(DOMEntityReference, __construct,
 
 
 #define CHECK_NOTATION(nodep)                                                  \
-  auto domnotation = Native::data<DOMNode>(obj.get());                         \
+  auto domnotation = Native::data<DOMNode>(obj);                         \
   xmlEntity *nodep = (xmlEntity*)(domnotation ? domnotation->nodep()           \
                                               : nullptr);                      \
   if (nodep == nullptr) {                                                      \
@@ -4953,7 +4953,7 @@ Array HHVM_METHOD(DOMProcessingInstruction, __debuginfo) {
 
 
 static Variant dom_namednodemap_length_read(const Object& obj) {
-  auto objmap = Native::data<DOMIterable>(obj.get());
+  auto objmap = Native::data<DOMIterable>(obj);
 
   int count = 0;
   if (objmap->m_nodetype == XML_NOTATION_NODE ||
@@ -5114,7 +5114,7 @@ Array HHVM_METHOD(DOMNamedNodeMap, __debuginfo) {
 Variant HHVM_METHOD(DOMNamedNodeMap, getIterator) {
   auto data = Native::data<DOMIterable>(this_);
   Object ret{getDOMNodeIteratorClass()};
-  DOMNodeIterator* iter = Native::data<DOMNodeIterator>(ret.get());
+  DOMNodeIterator* iter = Native::data<DOMNodeIterator>(ret);
   iter->set_iterator(this_, data);
   iter->setKeyIsNamed();
   return ret;
@@ -5124,7 +5124,7 @@ Variant HHVM_METHOD(DOMNamedNodeMap, getIterator) {
 
 
 static Variant dom_nodelist_length_read(const Object& obj) {
-  auto objmap = Native::data<DOMIterable>(obj.get());
+  auto objmap = Native::data<DOMIterable>(obj);
 
   int count = 0;
   if (objmap->m_ht) {
@@ -5231,7 +5231,7 @@ Variant HHVM_METHOD(DOMNodeList, item,
 Variant HHVM_METHOD(DOMNodeList, getIterator) {
   auto data = Native::data<DOMIterable>(this_);
   Object ret{getDOMNodeIteratorClass()};
-  DOMNodeIterator* iter = Native::data<DOMNodeIterator>(ret.get());
+  DOMNodeIterator* iter = Native::data<DOMNodeIterator>(ret);
   iter->set_iterator(this_, data);
   return ret;
 }
@@ -5259,7 +5259,7 @@ Variant HHVM_METHOD(DOMImplementation, createDocument,
                                ? null_object
                                : doctypeobj.toObject();
   if (!obj_doctypeobj.isNull()) {
-    auto *domdoctype = Native::data<DOMNode>(obj_doctypeobj.get());
+    auto *domdoctype = Native::data<DOMNode>(obj_doctypeobj);
     doctype = (xmlDtdPtr)domdoctype->nodep();
     if (!doctype) {
       php_dom_throw_error(INVALID_STATE_ERR, 0);
@@ -5332,7 +5332,7 @@ Variant HHVM_METHOD(DOMImplementation, createDocument,
     xmlFree(localname);
   }
   Object ret{getDOMDocumentClass()};
-  auto doc_data = Native::data<DOMNode>(ret.get());
+  auto doc_data = Native::data<DOMNode>(ret);
   doc_data->setNode((xmlNodePtr)docp);
   if (doctype) {
     libxml_register_node((xmlNodePtr)doctype)->setDoc(doc_data->doc());
@@ -5401,12 +5401,12 @@ bool HHVM_METHOD(DOMImplementation, hasFeature,
 
 static Variant dom_xpath_document_read(const Object& obj) {
   xmlDoc *docp = nullptr;
-  DOMXPath* xpath = Native::data<DOMXPath>(obj.get());
+  DOMXPath* xpath = Native::data<DOMXPath>(obj);
   xmlXPathContextPtr ctx = (xmlXPathContextPtr)xpath->m_node;
   if (ctx) {
     docp = (xmlDocPtr)ctx->doc;
   }
-  auto doc_data = Native::data<DOMNode>(xpath->m_doc.get());
+  auto doc_data = Native::data<DOMNode>(xpath->m_doc);
   // If document in the context is the same, return it.
   if ((xmlDocPtr)doc_data->nodep() == docp) {
     return xpath->m_doc;
@@ -5533,7 +5533,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
         intern->m_node_list = Array::Create();
       }
       intern->m_node_list.append(retval);
-      auto* node_data = Native::data<DOMNode>(retval.toObject().get());
+      auto* node_data = Native::data<DOMNode>(retval.toObject());
       xmlNode *nodep = node_data->nodep();
       if (nodep) valuePush(ctxt, xmlXPathNewNodeSet(nodep));
     } else if (retval.is(KindOfBoolean)) {
@@ -5569,7 +5569,7 @@ void HHVM_METHOD(DOMXPath, __construct,
                  const Variant& doc) {
   auto* data = Native::data<DOMXPath>(this_);
   data->m_doc = doc.toObject();
-  auto doc_data = Native::data<DOMNode>(data->m_doc.get());
+  auto doc_data = Native::data<DOMNode>(data->m_doc);
   xmlDocPtr docp = (xmlDocPtr)doc_data->nodep();
   xmlXPathContextPtr ctx = xmlXPathNewContext(docp);
   if (ctx == nullptr) {
@@ -5726,7 +5726,7 @@ Variant HHVM_METHOD(DOMNodeIterator, key) {
     return data->m_iter.first();
   }
   if (data->m_keyIsNamed) {
-    DOMNode* node_data = Native::data<DOMNode>(data->m_curobj.get());
+    DOMNode* node_data = Native::data<DOMNode>(data->m_curobj);
     xmlNodePtr curnode = node_data->nodep();
     if (!curnode) {
       php_dom_throw_error(INVALID_STATE_ERR, 0);
@@ -5747,7 +5747,7 @@ Variant HHVM_METHOD(DOMNodeIterator, next) {
   XMLNode curnode = nullptr;
   if (data->m_objmap->m_nodetype != XML_ENTITY_NODE &&
       data->m_objmap->m_nodetype != XML_NOTATION_NODE) {
-    DOMNode* node_data = Native::data<DOMNode>(data->m_curobj.get());
+    DOMNode* node_data = Native::data<DOMNode>(data->m_curobj);
     curnode = node_data->node();
     if (data->m_objmap->m_nodetype == XML_ATTRIBUTE_NODE ||
         data->m_objmap->m_nodetype == XML_ELEMENT_NODE) {

@@ -277,7 +277,7 @@ IMPLEMENT_GET_CLASS(AsyncMysqlConnection)
 Object AsyncMysqlConnection::newInstance(
     std::unique_ptr<am::Connection> conn) {
   Object ret{getClass()};
-  Native::data<AsyncMysqlConnection>(ret.get())->setConnection(std::move(conn));
+  Native::data<AsyncMysqlConnection>(ret)->setConnection(std::move(conn));
   return ret;
 }
 
@@ -602,7 +602,7 @@ IMPLEMENT_GET_CLASS(AsyncMysqlErrorResult)
 Object AsyncMysqlErrorResult::newInstance(
     std::shared_ptr<am::Operation> op) {
   Object ret{getClass()};
-  Native::data<AsyncMysqlErrorResult>(ret.get())->create(op);
+  Native::data<AsyncMysqlErrorResult>(ret)->create(op);
   return ret;
 }
 
@@ -653,7 +653,7 @@ IMPLEMENT_GET_CLASS(AsyncMysqlQueryErrorResult)
 Object AsyncMysqlQueryErrorResult::newInstance(
     std::shared_ptr<am::Operation> op, SmartPtr<c_Vector> results) {
   Object ret{getClass()};
-  Native::data<AsyncMysqlQueryErrorResult>(ret.get())->create(op, results);
+  Native::data<AsyncMysqlQueryErrorResult>(ret)->create(op, results);
   return ret;
 }
 
@@ -700,7 +700,7 @@ void AsyncMysqlQueryResult::sweep() {
 Object AsyncMysqlQueryResult::newInstance(
     std::shared_ptr<am::Operation> op, am::QueryResult query_result) {
   Object ret{getClass()};
-  Native::data<AsyncMysqlQueryResult>(ret.get())
+  Native::data<AsyncMysqlQueryResult>(ret)
     ->create(op, std::move(query_result));
   return ret;
 }
@@ -939,7 +939,7 @@ IMPLEMENT_GET_CLASS(AsyncMysqlRowBlock)
 Object AsyncMysqlRowBlock::newInstance(am::RowBlock* row_block,
     std::shared_ptr<FieldIndex> indexer) {
   Object ret{AsyncMysqlRowBlock::getClass()};
-  auto* data = Native::data<AsyncMysqlRowBlock>(ret.get());
+  auto* data = Native::data<AsyncMysqlRowBlock>(ret);
   data->m_row_block.reset(new am::RowBlock(std::move(*row_block)));
   data->m_field_index = indexer;
   return ret;
@@ -1090,7 +1090,7 @@ IMPLEMENT_GET_CLASS(AsyncMysqlRowBlockIterator)
 Object AsyncMysqlRowBlockIterator::newInstance(Object row_block,
                                                size_t row_number) {
   Object ret{getClass()};
-  auto* data = Native::data<AsyncMysqlRowBlockIterator>(ret.get());
+  auto* data = Native::data<AsyncMysqlRowBlockIterator>(ret);
   data->m_row_block = row_block;
   data->m_row_number = row_number;
   return ret;
@@ -1141,7 +1141,7 @@ IMPLEMENT_GET_CLASS(AsyncMysqlRow)
 
 Object AsyncMysqlRow::newInstance(Object row_block, size_t row_number) {
   Object ret{getClass()};
-  auto* data = Native::data<AsyncMysqlRow>(ret.get());
+  auto* data = Native::data<AsyncMysqlRow>(ret);
   data->m_row_block = row_block;
   data->m_row_number = row_number;
   return ret;
@@ -1208,7 +1208,7 @@ IMPLEMENT_GET_CLASS(AsyncMysqlRowIterator)
 Object AsyncMysqlRowIterator::newInstance(Object row,
                                           size_t field_number) {
   Object ret{getClass()};
-  auto* data = Native::data<AsyncMysqlRowIterator>(ret.get());
+  auto* data = Native::data<AsyncMysqlRowIterator>(ret);
   data->m_row = row;
   data->m_field_number = field_number;
   return ret;

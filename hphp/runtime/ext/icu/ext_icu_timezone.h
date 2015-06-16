@@ -45,7 +45,7 @@ class IntlTimeZone : public IntlError {
     }
     Object obj{c_IntlTimeZone};
     if (tz) {
-      Native::data<IntlTimeZone>(obj.get())->setTimeZone(tz, owned);
+      Native::data<IntlTimeZone>(obj)->setTimeZone(tz, owned);
     }
     return obj;
   }

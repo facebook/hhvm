@@ -44,7 +44,7 @@ class IntlBreakIterator : public IntlError {
     }
     Object obj{c_IntlBreakIterator};
     if (bi) {
-      Native::data<IntlBreakIterator>(obj.get())->setBreakIterator(bi);
+      Native::data<IntlBreakIterator>(obj)->setBreakIterator(bi);
     }
     return obj;
   }
@@ -57,7 +57,7 @@ class IntlBreakIterator : public IntlError {
     }
     Object obj{c_IntlCodePointBreakIterator};
     if (bi) {
-      Native::data<IntlBreakIterator>(obj.get())->setBreakIterator(bi);
+      Native::data<IntlBreakIterator>(obj)->setBreakIterator(bi);
     }
     return obj;
   }

@@ -36,7 +36,7 @@ public:
       assert(c_Transliterator);
     }
     Object obj{c_Transliterator};
-    auto data = Native::data<Transliterator>(obj.get());
+    auto data = Native::data<Transliterator>(obj);
     data->setTransliterator(trans);
     return obj;
   }

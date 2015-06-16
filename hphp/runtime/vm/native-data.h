@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/base/type-object.h"
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
@@ -56,6 +57,16 @@ T* data(ObjectData *obj) {
 template<class T>
 const T* data(const ObjectData *obj) {
   return reinterpret_cast<const T*>(obj) - 1;
+}
+
+template <class T>
+T* data(Object& obj) {
+  return data<T>(obj.get());
+}
+
+template <class T>
+T* data(const Object& obj) {
+  return data<T>(obj.get());
 }
 
 void registerNativeDataInfo(const StringData* name,

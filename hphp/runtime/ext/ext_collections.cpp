@@ -163,7 +163,7 @@ bool BaseVector::t_containskey(const Variant& key) {
 // KeyedIterable
 Object BaseVector::t_getiterator() {
   auto iter = collections::VectorIterator::newInstance();
-  Native::data<collections::VectorIterator>(iter.get())->setVector(this);
+  Native::data<collections::VectorIterator>(iter)->setVector(this);
   return iter;
 }
 
@@ -2074,7 +2074,7 @@ Object c_Map::t_differencebykey(const Variant& it) {
 
 Object BaseMap::t_getiterator() {
   auto iter = collections::MapIterator::newInstance();
-  Native::data<collections::MapIterator>(iter.get())->setMap(this);
+  Native::data<collections::MapIterator>(iter)->setMap(this);
   return iter;
 }
 
@@ -3723,7 +3723,7 @@ void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 
 Object BaseSet::t_getiterator() {
   auto iter = collections::SetIterator::newInstance();
-  Native::data<collections::SetIterator>(iter.get())->setSet(this);
+  Native::data<collections::SetIterator>(iter)->setSet(this);
   return iter;
 }
 
@@ -4607,7 +4607,7 @@ Array c_Pair::t_tovaluesarray() {
 Object c_Pair::t_getiterator() {
   assert(isFullyConstructed());
   auto iter = collections::PairIterator::newInstance();
-  Native::data<collections::PairIterator>(iter.get())->setPair(this);
+  Native::data<collections::PairIterator>(iter)->setPair(this);
   return iter;
 }
 

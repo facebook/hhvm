@@ -101,7 +101,7 @@ struct DOMIterable {
       throw_null_pointer_exception();
     }
 
-    return Native::data<DOMNode>(m_baseobj.get());
+    return Native::data<DOMNode>(m_baseobj);
   }
 
   SmartPtr<XMLDocumentData> m_doc {nullptr};

@@ -34,7 +34,13 @@ namespace {
       "ConditionWaitHandle not notified by its child");
   }
 
-  NEVER_INLINE __attribute__((__noreturn__))
+  NEVER_INLINE ATTRIBUTE_NORETURN
+  Object throwNotNotifiedException() {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "ConditionWaitHandle not notified by its child");
+  }
+
+  NEVER_INLINE ATTRIBUTE_NORETURN
   void failAlreadyFinished() {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Unable to notify ConditionWaitHandle that has already finished");
@@ -55,7 +61,7 @@ Object c_ConditionWaitHandle::ti_create(const Variant& child) {
 
   // Child finished before notification?
   if (UNLIKELY(child_wh->isFinished())) {
-    throw getNotNotifiedException();
+    throwNotNotifiedException();
   }
 
   assert(child_wh->instanceof(c_WaitableWaitHandle::classof()));

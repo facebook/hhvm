@@ -263,7 +263,7 @@ static xmlChar *xslt_string_to_xpathexpr(const char *str) {
 static Object newNode(const String name, xmlNodePtr obj) {
   auto const cls = Unit::lookupClass(name.get());
   Object ret{cls};
-  auto retData = Native::data<DOMNode>(ret.get());
+  auto retData = Native::data<DOMNode>(ret);
   retData->setNode(obj);
   return ret;
 }
@@ -464,7 +464,7 @@ static void HHVM_METHOD(XSLTProcessor, importStylesheet,
   xmlDocPtr doc = nullptr;
 
   if (stylesheet.instanceof(s_DOMDocument)) {
-    auto domdoc = Native::data<DOMNode>(stylesheet.get());
+    auto domdoc = Native::data<DOMNode>(stylesheet);
     // This doc will be freed by xsltFreeStylesheet.
     doc = xmlCopyDoc((xmlDocPtr)domdoc->nodep(), /*recursive*/ 1);
     if (doc == nullptr) {
@@ -613,13 +613,13 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToDoc,
   auto data = Native::data<XSLTProcessorData>(this_);
 
   if (doc.instanceof(s_DOMNode)) {
-    auto domnode = Native::data<DOMNode>(doc.get());
+    auto domnode = Native::data<DOMNode>(doc);
     data->m_doc =
       libxml_register_node(xmlCopyDoc((xmlDocPtr)domnode->nodep(),
                                       /*recursive*/ 1));
 
     auto ret = newDOMDocument(false /* construct */);
-    DOMNode* doc_data = Native::data<DOMNode>(ret.get());
+    DOMNode* doc_data = Native::data<DOMNode>(ret);
     doc_data->setNode((xmlNodePtr)data->apply_stylesheet());
 
     return ret;
@@ -634,7 +634,7 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToURI,
   auto data = Native::data<XSLTProcessorData>(this_);
 
   if (doc.instanceof(s_DOMDocument)) {
-    auto domdoc = Native::data<DOMNode>(doc.get());
+    auto domdoc = Native::data<DOMNode>(doc);
     data->m_doc =
       libxml_register_node(xmlCopyDoc ((xmlDocPtr)domdoc->nodep(),
                                        /*recursive*/ 1));
@@ -671,7 +671,7 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToXML,
   auto data = Native::data<XSLTProcessorData>(this_);
 
   if (doc.instanceof(s_DOMDocument)) {
-    auto domdoc = Native::data<DOMNode>(doc.get());
+    auto domdoc = Native::data<DOMNode>(doc);
     data->m_doc =
       libxml_register_node(xmlCopyDoc ((xmlDocPtr)domdoc->nodep(),
                                        /*recursive*/ 1));

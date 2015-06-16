@@ -56,7 +56,7 @@ public:
     }
     Object obj{c_IntlIterator};
     if (se) {
-      Native::data<IntlIterator>(obj.get())->setEnumeration(se);
+      Native::data<IntlIterator>(obj)->setEnumeration(se);
     }
     return obj;
   }

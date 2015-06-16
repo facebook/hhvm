@@ -1137,7 +1137,7 @@ static Variant HHVM_METHOD(PDO, prepare, const String& statement,
     PDO_HANDLE_DBH_ERR(data->m_dbh);
     return false;
   }
-  PDOStatementData *pdostmt = Native::data<PDOStatementData>(ret.get());
+  PDOStatementData *pdostmt = Native::data<PDOStatementData>(ret);
 
   if (data->m_dbh->conn()->preparer(statement, &pdostmt->m_stmt, options)) {
     auto stmt = pdostmt->m_stmt;
@@ -1499,7 +1499,7 @@ static Variant HHVM_METHOD(PDO, query, const String& sql,
        "failed to instantiate user supplied statement class");
     return init_null();
   }
-  PDOStatementData *pdostmt = Native::data<PDOStatementData>(ret.get());
+  PDOStatementData *pdostmt = Native::data<PDOStatementData>(ret);
 
   if (data->m_dbh->conn()->preparer(sql, &pdostmt->m_stmt, Array())) {
     auto stmt = pdostmt->m_stmt;

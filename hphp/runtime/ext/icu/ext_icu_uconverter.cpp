@@ -183,7 +183,7 @@ static bool setCallback(const Object& this_, UConverter *cnv) {
   ucnv_setToUCallBack(cnv, (UConverterToUCallback)ucnvToUCallback,
                            this_.get(), nullptr, nullptr, &error);
   if (U_FAILURE(error)) {
-    Native::data<IntlUConverter>(this_.get())->
+    Native::data<IntlUConverter>(this_)->
       failure(error, "ucnv_setToUCallback");
     return false;
   }
@@ -191,7 +191,7 @@ static bool setCallback(const Object& this_, UConverter *cnv) {
   ucnv_setFromUCallBack(cnv, (UConverterFromUCallback)ucnvFromUCallback,
                              this_.get(), nullptr, nullptr, &error);
   if (U_FAILURE(error)) {
-    Native::data<IntlUConverter>(this_.get())->
+    Native::data<IntlUConverter>(this_)->
       failure(error, "ucnv_setFromUCallback");
     return false;
   }

@@ -45,7 +45,7 @@ static String mpzToString(mpz_t gmpData, const int64_t base) {
 static Object mpzToGMPObject(mpz_t gmpData) {
   Object ret(GMP::allocObject());
 
-  auto data = Native::data<GMPData>(ret.get());
+  auto data = Native::data<GMPData>(ret);
   data->setGMPMpz(gmpData);
 
   return ret;
@@ -121,7 +121,7 @@ static bool variantToGMPData(const char* const fnCaller,
       return false;
     }
 
-    auto gmpObjectData = Native::data<GMPData>(gmpObject.get());
+    auto gmpObjectData = Native::data<GMPData>(gmpObject);
     if (!gmpObjectData) {
       raise_warning(cs_GMP_INVALID_OBJECT, fnCaller);
       return false;
@@ -255,7 +255,7 @@ static void HHVM_FUNCTION(gmp_clrbit,
     return;
   }
 
-  auto gmpData = Native::data<GMPData>(gmpObject.get());
+  auto gmpData = Native::data<GMPData>(gmpObject);
   if (!gmpData) {
     raise_warning(cs_GMP_INVALID_OBJECT, cs_GMP_FUNC_NAME_GMP_CLRBIT);
     return;
@@ -1147,7 +1147,7 @@ static void HHVM_FUNCTION(gmp_setbit,
     return;
   }
 
-  auto gmpData = Native::data<GMPData>(gmpObject.get());
+  auto gmpData = Native::data<GMPData>(gmpObject);
   if (!gmpData) {
     raise_warning(cs_GMP_INVALID_OBJECT, cs_GMP_FUNC_NAME_GMP_SETBIT);
     return;

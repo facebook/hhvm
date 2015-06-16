@@ -140,7 +140,7 @@ Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
                              ? null_object
                              : timezone.toObject();
   Object obj{DateTimeData::getClass()};
-  DateTimeData* data = Native::data<DateTimeData>(obj.get());
+  DateTimeData* data = Native::data<DateTimeData>(obj);
   const auto curr = (format.find("!") != String::npos) ? 0 : f_time() ;
   data->m_dt = makeSmartPtr<DateTime>(curr, false);
   if (!data->m_dt->fromString(time, DateTimeZoneData::unwrap(obj_timezone),
@@ -312,7 +312,7 @@ Array DateTimeData::getDebugInfo() const {
 
 int64_t DateTimeData::getTimestamp(const Object& obj) {
   if (LIKELY(obj.instanceof(getClass()))) {
-    return Native::data<DateTimeData>(obj.get())->getTimestamp();
+    return Native::data<DateTimeData>(obj)->getTimestamp();
   }
   assert(obj->instanceof(SystemLib::s_DateTimeInterfaceClass));
   Variant result = obj->o_invoke(s_getTimestamp, Array::Create());
@@ -325,14 +325,14 @@ int64_t DateTimeData::getTimestamp(const ObjectData* od) {
 
 Object DateTimeData::wrap(SmartPtr<DateTime> dt) {
   Object obj{getClass()};
-  DateTimeData* data = Native::data<DateTimeData>(obj.get());
+  DateTimeData* data = Native::data<DateTimeData>(obj);
   data->m_dt = dt;
   return obj;
 }
 
 SmartPtr<DateTime> DateTimeData::unwrap(const Object& datetime) {
   if (LIKELY(datetime.instanceof(getClass()))) {
-    DateTimeData* data = Native::data<DateTimeData>(datetime.get());
+    DateTimeData* data = Native::data<DateTimeData>(datetime);
     return data->m_dt;
   }
   if (datetime->instanceof(SystemLib::s_DateTimeImmutableClass)) {
@@ -430,14 +430,14 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
 
 Object DateTimeZoneData::wrap(SmartPtr<TimeZone> tz) {
   Object obj{getClass()};
-  DateTimeZoneData* data = Native::data<DateTimeZoneData>(obj.get());
+  DateTimeZoneData* data = Native::data<DateTimeZoneData>(obj);
   data->m_tz = tz;
   return obj;
 }
 
 SmartPtr<TimeZone> DateTimeZoneData::unwrap(const Object& timezone) {
   if (timezone.instanceof(getClass())) {
-    DateTimeZoneData* data = Native::data<DateTimeZoneData>(timezone.get());
+    DateTimeZoneData* data = Native::data<DateTimeZoneData>(timezone);
     return data->m_tz;
   }
   return SmartPtr<TimeZone>();
@@ -573,14 +573,14 @@ String HHVM_METHOD(DateInterval, format,
 
 Object DateIntervalData::wrap(SmartPtr<DateInterval> di) {
   Object obj{getClass()};
-  DateIntervalData* data = Native::data<DateIntervalData>(obj.get());
+  DateIntervalData* data = Native::data<DateIntervalData>(obj);
   data->m_di = di;
   return obj;
 }
 
 SmartPtr<DateInterval> DateIntervalData::unwrap(const Object& obj) {
   if (obj.instanceof(getClass())) {
-    DateIntervalData* data = Native::data<DateIntervalData>(obj.get());
+    DateIntervalData* data = Native::data<DateIntervalData>(obj);
     return data->m_di;
   }
 

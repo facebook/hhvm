@@ -90,7 +90,7 @@ class EncodingMatch : public IntlError {
       assert(c_EncodingMatch);
     }
     Object ret{c_EncodingMatch};
-    Native::data<EncodingMatch>(ret.get())->m_match =
+    Native::data<EncodingMatch>(ret)->m_match =
       const_cast<UCharsetMatch*>(match);
     return ret;
   }

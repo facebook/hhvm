@@ -686,7 +686,7 @@ Variant HHVM_METHOD(XMLReader, expand,
   SYNC_VM_REGS_SCOPED();
 
   if (!basenode.isNull()) {
-    auto dombasenode = Native::data<DOMNode>(basenode.toObject().get());
+    auto dombasenode = Native::data<DOMNode>(basenode.toObject());
     doc = dombasenode->doc();
     docp = doc->docp();
     if (docp == nullptr) {

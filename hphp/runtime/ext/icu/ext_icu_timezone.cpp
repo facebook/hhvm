@@ -54,7 +54,7 @@ icu::TimeZone* IntlTimeZone::ParseArg(const Variant& arg,
       return IntlTimeZone::Get(objarg.get())->timezone()->clone();
     }
     if (objarg.instanceof(DateTimeZoneData::getClass())) {
-      auto* dtz = Native::data<DateTimeZoneData>(objarg.get());
+      auto* dtz = Native::data<DateTimeZoneData>(objarg);
       tzstr = dtz->getName();
     } else {
       tzstr = arg.toString();

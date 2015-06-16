@@ -31,7 +31,7 @@ class IntlDatePatternGenerator : public IntlError {
     }
     Object ret{c_IntlDatePatternGenerator};
     if (generator) {
-      Native::data<IntlDatePatternGenerator>(ret.get())
+      Native::data<IntlDatePatternGenerator>(ret)
         ->setGenerator(std::move(generator));
     }
     return ret;

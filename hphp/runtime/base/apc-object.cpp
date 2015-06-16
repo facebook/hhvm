@@ -159,8 +159,6 @@ Variant APCObject::MakeObject(const APCHandle* handle) {
 }
 
 Object APCObject::createObject() const {
-  Object obj;
-
   const Class* klass;
   if (auto const c = m_cls.left()) {
     klass = c;
@@ -169,10 +167,10 @@ Object APCObject::createObject() const {
     if (!klass) {
       Logger::Error("APCObject::getObject(): Cannot find class %s",
                     m_cls.right()->data());
-      return obj;
+      return Object{};
     }
   }
-  obj = Object{const_cast<Class*>(klass)};
+  Object obj{const_cast<Class*>(klass)};
   obj->clearNoDestruct();
 
   auto prop = props();

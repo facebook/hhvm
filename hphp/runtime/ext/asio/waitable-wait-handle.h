@@ -66,7 +66,8 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   void detectCycle(c_WaitableWaitHandle* child) const;
 
  private:
-  Object createCycleException(c_WaitableWaitHandle* child) const;
+  void throwCycleException(c_WaitableWaitHandle* child) const
+    NEVER_INLINE ATTRIBUTE_NORETURN;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

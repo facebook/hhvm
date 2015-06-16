@@ -244,7 +244,7 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param, Variant value,
   if (!value.isNull() && value.isObject()) {
     Object obj_value = value.toObject();
     if (obj_value.instanceof(SoapParam::getClass())) {
-      SoapParam* p = Native::data<SoapParam>(obj_value.get());
+      SoapParam* p = Native::data<SoapParam>(obj_value);
       value = p->m_data;
       name = p->m_name.c_str();
     }
@@ -397,7 +397,7 @@ static xmlDocPtr serialize_function_call(SoapClient *client,
     for (ArrayIter iter(soap_headers); iter; ++iter) {
       Object obj_header = iter.second().toObject();
       assert(obj_header.instanceof(SoapHeader::getClass()));
-      SoapHeader *header = Native::data<SoapHeader>(obj_header.get());
+      SoapHeader *header = Native::data<SoapHeader>(obj_header);
 
       xmlNodePtr h;
       xmlNsPtr nsptr;
@@ -1263,7 +1263,7 @@ static xmlDocPtr serialize_response_call(
       head = xmlNewChild(envelope, ns, BAD_CAST("Header"), nullptr);
       if (hdr_ret.isObject() &&
           hdr_ret.toObject().instanceof(SoapHeader::getClass())) {
-        SoapHeader *ht = Native::data<SoapHeader>(hdr_ret.toObject().get());
+        const SoapHeader *ht = Native::data<SoapHeader>(hdr_ret.toObject());
 
         string key;
         if (!ht->m_namespace.empty()) {
@@ -1471,8 +1471,8 @@ static xmlDocPtr serialize_response_call(
 
           if (h->retval.isObject() &&
               h->retval.toObject().instanceof(SoapHeader::getClass())) {
-            SoapHeader *ht = Native::data<SoapHeader>(
-              h->retval.toObject().get());
+            const SoapHeader *ht = Native::data<SoapHeader>(
+              h->retval.toObject());
             string key;
             if (!ht->m_namespace.empty()) {
               key += ht->m_namespace.data();

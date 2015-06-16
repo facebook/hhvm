@@ -37,7 +37,7 @@ public:
       assert(c_ResourceBundle);
     }
     Object obj{c_ResourceBundle};
-    auto data = Native::data<ResourceBundle>(obj.get());
+    auto data = Native::data<ResourceBundle>(obj);
     data->setResource(bundle);
     return obj;
   }

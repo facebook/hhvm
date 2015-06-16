@@ -450,7 +450,10 @@ function list_tests($files, $options) {
   }
 
   foreach (find_tests($files, $options) as $test) {
-    print implode(' ', array_merge($args, array($test)))."\n";
+    print Status::jsonEncode(array(
+      'args' => implode(' ', $args),
+      'name' => $test,
+    ))."\n";
   }
 }
 

@@ -12,196 +12,172 @@ string(3) "foo"
 string(3) "foo"
 0 <
  --------> 
-int(84)
-string(4) "YJSZ"
-object(C)#3 (1) {
-  ["aliases"]=>
-  array(4) {
-    [0]=>
-    string(4) "EQOQ"
-    [1]=>
-    string(4) "QGWB"
-    [2]=>
-    string(4) "CYEN"
-    [3]=>
-    string(4) "GWHJ"
-  }
-}
+string(4) "KJSL"
+string(4) "SDGF"
+int(94)
 >
 1 <
  --------> 
-object(C)#5 (1) {
-  ["aliases"]=>
-  array(4) {
-    [0]=>
-    string(4) "ZVVQ"
-    [1]=>
-    string(4) "R[ZI"
-    [2]=>
-    string(4) "XPRU"
-    [3]=>
-    string(4) "UVHQ"
-  }
-}
-object(C)#6 (1) {
-  ["aliases"]=>
-  array(4) {
-    [0]=>
-    string(4) "EVXX"
-    [1]=>
-    string(4) "RLQQ"
-    [2]=>
-    string(4) "ROEP"
-    [3]=>
-    string(4) "ASNW"
-  }
-}
-object(C)#7 (1) {
-  ["aliases"]=>
-  array(4) {
-    [0]=>
-    string(4) "DNNB"
-    [1]=>
-    string(4) "VKRM"
-    [2]=>
-    string(4) "DLGK"
-    [3]=>
-    string(4) "ATPV"
-  }
-}
+string(4) "XULI"
+int(248)
+string(4) "KTJN"
 >
 2 <
  --------> 
-int(80)
-string(4) "MOU["
-int(22)
+int(24)
+object(C)#22 (1) {
+  ["aliases"]=>
+  array(4) {
+    [0]=>
+    string(4) "DATR"
+    [1]=>
+    string(4) "ATSW"
+    [2]=>
+    string(4) "VQGB"
+    [3]=>
+    string(4) "OTYQ"
+  }
+}
+array(4) {
+  [0]=>
+  string(4) "SWMJ"
+  [1]=>
+  string(4) "ZXRX"
+  [2]=>
+  string(4) "CQSY"
+  [3]=>
+  string(4) "BFNB"
+}
 >
 3 <
  --------> 
-int(248)
-object(C)#15 (1) {
+object(C)#44 (1) {
   ["aliases"]=>
   array(4) {
     [0]=>
-    string(4) "AFHQ"
+    string(4) "OGKF"
     [1]=>
-    string(4) "HUAT"
+    string(4) "JNPF"
     [2]=>
-    string(4) "JXHO"
+    string(4) "WVPI"
     [3]=>
-    string(4) "SZQR"
+    string(4) "ARHV"
   }
 }
-object(C)#16 (1) {
-  ["aliases"]=>
-  array(4) {
-    [0]=>
-    string(4) "A[JY"
-    [1]=>
-    string(4) "CHVH"
-    [2]=>
-    string(4) "FTKA"
-    [3]=>
-    string(4) "SYAX"
-  }
-}
+int(108)
+string(4) "MYAC"
 >
 4 <
  --------> 
-int(219)
-string(4) "Z[PT"
 int(29)
+int(20)
+object(C)#52 (1) {
+  ["aliases"]=>
+  array(4) {
+    [0]=>
+    string(4) "CQXW"
+    [1]=>
+    string(4) "IAZD"
+    [2]=>
+    string(4) "WUZL"
+    [3]=>
+    string(4) "GOEO"
+  }
+}
 >
 5 <
  --------> 
-int(65)
+int(115)
 array(4) {
   [0]=>
-  string(4) "DPVL"
+  string(4) "LGHM"
   [1]=>
-  string(4) "QMYI"
+  string(4) "XIAR"
   [2]=>
-  string(4) "AEUJ"
+  string(4) "PIVS"
   [3]=>
-  string(4) "TWWK"
+  string(4) "QHHI"
 }
-array(4) {
-  [0]=>
-  string(4) "DKZJ"
-  [1]=>
-  string(4) "NBYP"
-  [2]=>
-  string(4) "DBJD"
-  [3]=>
-  string(4) "ICGX"
-}
+string(4) "LYYE"
 >
 6 <
  --------> 
-string(4) "TAUO"
-string(4) "MCDZ"
-object(C)#20 (1) {
-  ["aliases"]=>
-  array(4) {
-    [0]=>
-    string(4) "SUOK"
-    [1]=>
-    string(4) "[OLT"
-    [2]=>
-    string(4) "PLAU"
-    [3]=>
-    string(4) "MRAV"
-  }
-}
+int(27)
+int(193)
+int(98)
 >
 7 <
  --------> 
-int(167)
-int(201)
-object(C)#27 (1) {
+string(4) "BDQB"
+object(C)#59 (1) {
   ["aliases"]=>
   array(4) {
     [0]=>
-    string(4) "CDW["
+    string(4) "QZZE"
     [1]=>
-    string(4) "IYGE"
+    string(4) "ZHYN"
     [2]=>
-    string(4) "ESWC"
+    string(4) "LCWO"
     [3]=>
-    string(4) "IIZG"
+    string(4) "ABKF"
   }
 }
+int(34)
 >
 8 <
  --------> 
-object(C)#30 (1) {
+object(C)#67 (1) {
   ["aliases"]=>
   array(4) {
     [0]=>
-    string(4) "UCPM"
+    string(4) "OVZY"
     [1]=>
-    string(4) "HDXK"
+    string(4) "ZRQJ"
     [2]=>
-    string(4) "OQMW"
+    string(4) "RMBD"
     [3]=>
-    string(4) "DRYO"
+    string(4) "TEAH"
   }
 }
-string(4) "ESBY"
-array(4) {
-  [0]=>
-  string(4) "WPQQ"
-  [1]=>
-  string(4) "ZMJK"
-  [2]=>
-  string(4) "UMKA"
-  [3]=>
-  string(4) "Q[EB"
+int(75)
+object(C)#68 (1) {
+  ["aliases"]=>
+  array(4) {
+    [0]=>
+    string(4) "IHJN"
+    [1]=>
+    string(4) "FX[B"
+    [2]=>
+    string(4) "UCJK"
+    [3]=>
+    string(4) "XXEU"
+  }
 }
 >
 9 <
  --------> 
-string(4) "PFXS"
-int(31)
-int(135)
+int(216)
+array(4) {
+  [0]=>
+  string(4) "YHUX"
+  [1]=>
+  string(4) "WUSF"
+  [2]=>
+  string(4) "OTMT"
+  [3]=>
+  string(4) "RUPX"
+}
+object(C)#70 (1) {
+  ["aliases"]=>
+  array(4) {
+    [0]=>
+    string(4) "QYHW"
+    [1]=>
+    string(4) "VWQU"
+    [2]=>
+    string(4) "MNAB"
+    [3]=>
+    string(4) "FBVJ"
+  }
+}
 >

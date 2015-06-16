@@ -98,11 +98,11 @@ function bar() {
 bar();
 
 // Exercise aliasing across re-entry.
-srand(0);
+mt_srand(0);
 function randphpwork($r) {
   $a = array();
   switch($r % 4) {
-  case 0: /* int */ return rand(0, 256);
+  case 0: /* int */ return mt_rand(0, 256);
   case 1: /* str */ return randstr();
   case 2: /* obj */ return new C($a = randarr());
   case 3: /* arr */ return randarr();
@@ -112,7 +112,7 @@ function randphpwork($r) {
 
 function randphp() {
   static $depth;
-  $r = rand(0, 4);
+  $r = mt_rand(0, 4);
   if ($depth > 2) $r = $r & 1; // scalars
   $depth++;
   $r = $r % 4;
@@ -122,7 +122,7 @@ function randphp() {
 }
 
 function randchar() {
-  return chr(ord('A') + (rand(0, 26)));
+  return chr(ord('A') + (mt_rand(0, 26)));
 }
 
 function randstr() {
@@ -161,7 +161,7 @@ function tmpobj(&$aliases) {
 
 function main3() {
   // Get some locals.
-  $a = rand(0, 10);
+  $a = mt_rand(0, 10);
   $b = randstr();
   $c = randarr();
   $str = randstr();

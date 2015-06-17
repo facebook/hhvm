@@ -6497,7 +6497,7 @@ OPTBLD_INLINE void iopWIterInit(IOP_ARGS) {
   Iter* it = frame_iter(vmfp(), itId);
   TypedValue* tv1 = frame_local(vmfp(), val);
   if (initIterator(pc, origPc, it, offset, c1)) {
-    tvAsVariant(tv1).setWithRef(it->arr().secondRef());
+    tvAsVariant(tv1).setWithRef(it->arr().secondRefPlus());
   }
 }
 
@@ -6513,7 +6513,7 @@ OPTBLD_INLINE void iopWIterInitK(IOP_ARGS) {
   TypedValue* tv1 = frame_local(vmfp(), val);
   TypedValue* tv2 = frame_local(vmfp(), key);
   if (initIterator(pc, origPc, it, offset, c1)) {
-    tvAsVariant(tv1).setWithRef(it->arr().secondRef());
+    tvAsVariant(tv1).setWithRef(it->arr().secondRefPlus());
     tvAsVariant(tv2) = it->arr().first();
   }
 }
@@ -6612,7 +6612,7 @@ OPTBLD_INLINE void iopWIterNext(IOP_ARGS) {
   TypedValue* tv1 = frame_local(vmfp(), val);
   if (it->next()) {
     pc = origPc + offset;
-    tvAsVariant(tv1).setWithRef(it->arr().secondRef());
+    tvAsVariant(tv1).setWithRef(it->arr().secondRefPlus());
   }
 }
 
@@ -6629,7 +6629,7 @@ OPTBLD_INLINE void iopWIterNextK(IOP_ARGS) {
   TypedValue* tv2 = frame_local(vmfp(), key);
   if (it->next()) {
     pc = origPc + offset;
-    tvAsVariant(tv1).setWithRef(it->arr().secondRef());
+    tvAsVariant(tv1).setWithRef(it->arr().secondRefPlus());
     tvAsVariant(tv2) = it->arr().first();
   }
 }

@@ -799,12 +799,12 @@ void StackDepth::setBase(AsmState& as, int stackDepth) {
   as.adjustStackHighwater(*baseValue + maxOffset);
 
   // Update the listeners
-  for (auto& kv : listeners) {
-    kv.first->setBase(as, *baseValue + kv.second);
-  }
-
+  auto l = std::move(listeners);
   // We won't need them anymore
   listeners.clear();
+  for (auto& kv : l) {
+    kv.first->setBase(as, *baseValue + kv.second);
+  }
 }
 
 void StackDepth::setCurrentAbsolute(AsmState& as, int stackDepth) {

@@ -261,13 +261,14 @@ void emitCall(Vout& v, CppCall target, RegSet args) {
     return;
   case CppCall::Kind::ArrayVirt: {
     auto const addr = reinterpret_cast<intptr_t>(target.arrayTable());
-    always_assert_flog(
-      deltaFits(addr, sz::dword),
-      "deltaFits on ArrayData vtable calls needs to be checked before "
-      "emitting them"
-    );
     v << loadzbl{rdi[HeaderKindOffset], eax};
-    v << callm{baseless(rax*8 + addr), args};
+    if (deltaFits(addr, sz::dword)) {
+      v << callm{baseless(rax*8 + addr), args};
+    } else {
+      auto const base = v.makeReg();
+      v << ldimmq{addr, base};
+      v << callm{Vptr{base, rax, 8, 0}, args};
+    }
     static_assert(sizeof(HeaderKind) == 1, "");
     return;
   }

@@ -578,18 +578,6 @@ CallDest CodeGenerator::callDestDbl(const IRInstruction* inst) const {
   return { DestType::Dbl, loc.reg(0) };
 }
 
-// We can't really compile using the compact call if the address of the array
-// vtable is in high memory (there is only an encoding for 32bit displacement).
-// This can happen, for example, if we have address space randomization
-// enabled.  For now just punt these cases.
-template<class Arg> CppCall
-CodeGenerator::arrayCallIfLowMem(const IRInstruction* inst, Arg vtable) const {
-  if (!deltaFits(reinterpret_cast<uintptr_t>(vtable), sz::dword)) {
-    CG_PUNT(inst->marker(), ArrayDataVtableHighMemory);
-  }
-  return CppCall::array(vtable);
-}
-
 /*
  * Prepare the given ArgDest for a call by shifting or zero-extending as
  * appropriate, then append its Vreg to the given VregList.
@@ -4343,9 +4331,8 @@ void CodeGenerator::cgAKExistsArr(IRInstruction* inst) {
   auto const keyInfo = checkStrictlyInteger(keyTy);
   auto const target =
     keyInfo.checkForInt ? CppCall::direct(ak_exist_string) :
-    keyInfo.type == KeyType::Int ?
-      arrayCallIfLowMem(inst, &g_array_funcs.existsInt) :
-    arrayCallIfLowMem(inst, &g_array_funcs.existsStr);
+    keyInfo.type == KeyType::Int ? CppCall::array(&g_array_funcs.existsInt)
+                                 : CppCall::array(&g_array_funcs.existsStr);
   auto args = argGroup(inst).ssa(0);
   if (keyInfo.converted) {
     args.imm(keyInfo.convertedInt);
@@ -5372,7 +5359,7 @@ void CodeGenerator::cgCountArray(IRInstruction* inst) {
   unlikelyCond(v, vcold(), CC_S, sf, dstReg,
     [&](Vout& v) {
       auto dst2 = v.makeReg();
-      cgCallHelper(v, CppCall::method(&ArrayData::vsize),
+      cgCallHelper(v, CppCall::array(&g_array_funcs.vsize),
                    callDest(dst2), SyncOptions::kNoSyncPoint,
                    argGroup(inst).ssa(0/*base*/));
       return dst2;

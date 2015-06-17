@@ -1,0 +1,5 @@
+[1]intersect(shape<fields fully known>(x => [2]intersect(Tint)), shape<fields fully known>(y => [3]intersect(Tstring)))
+[4]intersect(shape<fields fully known>(x => [5]intersect(Tstring, Tint)))
+[6]intersect(shape<fields partially known>(x => Tint), shape<fields partially known>(x => Tinty => option(Tstring)))
+[7]intersect(shape<fields fully known>(x => [8]intersect(Tint)), shape<fields partially known>(x => Tinty => option(Tstring)))
+No errors

@@ -1,0 +1,8 @@
+File "shape28.php", line 21, characters 10-11:
+Invalid return type (Typing[4138])
+File "shape28.php", line 18, characters 20-20:
+This is a shape type coming from a type annotation. Because of structural subtyping it might have some other fields besides those listed in its declaration.
+File "shape28.php", line 19, characters 8-12:
+It is incompatible with a shape created using "shape" constructor, which has all the fields known
+File "shape28.php", line 18, characters 20-20:
+Considering that this type argument is contravariant with respect to I

@@ -1,0 +1,6 @@
+File "shape24.php", line 19, characters 10-11:
+Invalid return type (Typing[4057])
+File "shape24.php", line 18, characters 15-15:
+The field 'z' is missing
+File "shape24.php", line 18, characters 22-22:
+The field 'z' is defined

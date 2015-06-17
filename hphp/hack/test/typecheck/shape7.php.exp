@@ -1,6 +1,6 @@
 File "shape7.php", line 20, characters 10-11:
-Invalid return type (Typing[4037])
+Invalid return type (Typing[4057])
 File "shape7.php", line 19, characters 3-17:
-The field 'undef' is defined
+The field 'field2' is missing
 File "shape7.php", line 17, characters 18-24:
-The field 'undef' is missing
+The field 'field2' is defined

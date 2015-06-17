@@ -78,7 +78,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset, int numIters) {
   auto const resumeAddr = gen(env, LdBindAddr, bind_data);
   auto const waitHandle =
     gen(env,
-        CreateAFWH,
+        func->attrs() & AttrMayUseVV ? CreateAFWH : CreateAFWHNoVV,
         fp(env),
         cns(env, func->numSlotsInFrame()),
         resumeAddr,

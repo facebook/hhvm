@@ -83,8 +83,8 @@ class c_WaitHandle : public ExtObjectDataFlags<ObjectData::IsWaitHandle> {
   };
 
   explicit c_WaitHandle(Class* cls = c_WaitHandle::classof(),
-                        HeaderKind kind = HeaderKind::Object)
-    : ExtObjectDataFlags(cls, kind) {}
+                        HeaderKind kind = HeaderKind::Object) noexcept
+    : ExtObjectDataFlags(cls, kind, NoInit{}) {}
   ~c_WaitHandle() {}
 
   void t___construct();

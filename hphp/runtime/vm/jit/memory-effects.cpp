@@ -501,6 +501,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // Resumable suspension takes everything from the frame and moves it into the
   // heap.
   case CreateAFWH:
+  case CreateAFWHNoVV:
   case CreateCont:
     return may_load_store_move(AFrameAny, AHeapAny, AFrameAny);
 

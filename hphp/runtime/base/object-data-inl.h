@@ -50,12 +50,27 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
   instanceInit(cls);
 }
 
-inline ObjectData::ObjectData(Class* cls, NoInit)
+inline ObjectData::ObjectData(Class* cls, NoInit) noexcept
   : m_cls(cls)
 {
   m_hdr.init(0, HeaderKind::Object, 1);
   assert(!m_hdr.aux && m_hdr.kind == HeaderKind::Object && hasExactlyOneRef());
   assert(!cls->needInitialization() || cls->initialized());
+  o_id = ++os_max_id;
+}
+
+inline ObjectData::ObjectData(Class* cls,
+                              uint16_t flags,
+                              HeaderKind kind,
+                              NoInit) noexcept
+: m_cls(cls)
+{
+  m_hdr.init(flags, kind, 1);
+  assert(m_hdr.aux == flags && hasExactlyOneRef());
+  assert(isObjectKind(kind));
+  assert(!cls->needInitialization() || cls->initialized());
+  assert(!(cls->getODAttrs() & ~static_cast<uint16_t>(flags)));
+  assert(cls->numDeclProperties() == 0);
   o_id = ++os_max_id;
 }
 

@@ -55,9 +55,11 @@ struct Resumable {
     return sizeof(Resumable);
   }
 
-  template<bool clone>
-  static void* Create(const ActRec* fp, size_t numSlots, jit::TCA resumeAddr,
-                      Offset resumeOffset, size_t objSize) {
+  template<bool clone, size_t objSize, bool mayUseVV = true>
+  static void* Create(const ActRec* fp,
+                      size_t numSlots,
+                      jit::TCA resumeAddr,
+                      Offset resumeOffset) {
     assert(fp);
     assert(fp->resumed() == clone);
     auto const func = fp->func();
@@ -79,27 +81,28 @@ struct Resumable {
 
     if (!clone) {
       // Copy ActRec, locals and iterators
-      auto src = (void *)((uintptr_t)fp - frameSize);
-      memcpy(frame, src, frameSize + sizeof(ActRec));
+      auto src = reinterpret_cast<char*>((uintptr_t)fp - frameSize);
+      wordcpy(frame, src, frameSize + sizeof(ActRec));
 
       // Set resumed flag.
       actRec->setResumed();
 
       // Suspend VarEnv if needed
-      if (UNLIKELY(func->attrs() & AttrMayUseVV) &&
+      assert(mayUseVV || !(func->attrs() & AttrMayUseVV));
+      if (mayUseVV &&
+          UNLIKELY(func->attrs() & AttrMayUseVV) &&
           UNLIKELY(fp->hasVarEnv())) {
         fp->getVarEnv()->suspend(fp, actRec);
       }
     } else {
       // If we are cloning a Resumable, only copy the ActRec. The
       // caller will take care of copying locals, setting the VarEnv, etc.
-      memcpy(actRec, fp, sizeof(ActRec));
+      wordcpy(actRec, fp, 1);
     }
 
     // Populate Resumable.
     resumable->m_resumeAddr = resumeAddr;
-    resumable->m_resumeOffset = resumeOffset;
-    resumable->m_size = totalSize;
+    resumable->m_offsetAndSize = (totalSize << 32 | resumeOffset);
 
     // Return pointer to the inline-allocated object.
     return resumable + 1;
@@ -143,10 +146,15 @@ private:
   jit::TCA m_resumeAddr;
 
   // Resume offset: bytecode offset from start of Unit's bytecode.
-  Offset m_resumeOffset;
+  union {
+    struct {
+      Offset m_resumeOffset;
 
-  // Size of the smart allocated memory that includes this resumable.
-  int32_t m_size;
+      // Size of the smart allocated memory that includes this resumable.
+      int32_t m_size;
+    };
+    uint64_t m_offsetAndSize;
+  };
 } __attribute__((__aligned__(16)));
 
 static_assert(Resumable::arOff() == 0,

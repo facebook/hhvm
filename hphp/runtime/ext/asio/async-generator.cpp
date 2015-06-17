@@ -65,8 +65,10 @@ c_AsyncGenerator* c_AsyncGenerator::Create(const ActRec* fp,
   assert(fp);
   assert(!fp->resumed());
   assert(fp->func()->isAsyncGenerator());
-  void* obj = Resumable::Create<false>(fp, numSlots, resumeAddr, resumeOffset,
-                                       sizeof(c_AsyncGenerator));
+  void* obj = Resumable::Create<false, sizeof(c_AsyncGenerator)>(fp,
+                                                                 numSlots,
+                                                                 resumeAddr,
+                                                                 resumeOffset);
   auto const gen = new (obj) c_AsyncGenerator();
   assert(gen->hasExactlyOneRef());
   gen->setNoDestruct();

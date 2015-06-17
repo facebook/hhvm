@@ -164,6 +164,7 @@ bool IRInstruction::consumesReference(int srcNo) const {
       return srcNo == 0;
 
     case CreateAFWH:
+    case CreateAFWHNoVV:
       return srcNo == 4;
 
     case InitPackedArray:
@@ -246,6 +247,7 @@ Type allocObjReturn(const IRInstruction* inst) {
       return Type::ExactObj(c_StaticWaitHandle::classof());
 
     case CreateAFWH:
+    case CreateAFWHNoVV:
       return Type::ExactObj(c_AsyncFunctionWaitHandle::classof());
 
     default:

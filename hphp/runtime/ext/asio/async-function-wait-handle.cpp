@@ -22,6 +22,7 @@
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
+#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -56,6 +57,7 @@ namespace {
   const StaticString s__closure_("{closure}");
 }
 
+template <bool mayUseVV>
 c_AsyncFunctionWaitHandle*
 c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                   size_t numSlots,
@@ -69,15 +71,40 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
   assert(!child->isFinished());
 
-  void* obj = Resumable::Create<false>(fp, numSlots, resumeAddr, resumeOffset,
-                                       sizeof(c_AsyncFunctionWaitHandle));
+  constexpr const size_t objSize = sizeof(c_AsyncFunctionWaitHandle);
+  void* obj = Resumable::Create<false, objSize, mayUseVV>(fp,
+                                                          numSlots,
+                                                          resumeAddr,
+                                                          resumeOffset);
   auto const waitHandle = new (obj) c_AsyncFunctionWaitHandle();
   assert(waitHandle->hasExactlyOneRef());
-  waitHandle->actRec()->setReturnVMExit();
+  auto actRec = waitHandle->actRec();
+  // Inlined version of ActRec::setReturnVMExit().  ActRec::setReturnVMExit
+  // can't be inlined as is without creating some circular header file
+  // dependencies.
+  actRec->m_sfp = nullptr;
+  actRec->m_savedRip = reinterpret_cast<uintptr_t>(
+    jit::mcg->tx().uniqueStubs.callToExit
+  );
+  actRec->m_soff = 0;
   waitHandle->setNoDestruct();
   waitHandle->initialize(child);
   return waitHandle;
 }
+
+template c_AsyncFunctionWaitHandle*
+c_AsyncFunctionWaitHandle::Create<true>(const ActRec* fp,
+                                        size_t numSlots,
+                                        jit::TCA resumeAddr,
+                                        Offset resumeOffset,
+                                        c_WaitableWaitHandle* child);
+
+template c_AsyncFunctionWaitHandle*
+c_AsyncFunctionWaitHandle::Create<false>(const ActRec* fp,
+                                        size_t numSlots,
+                                        jit::TCA resumeAddr,
+                                        Offset resumeOffset,
+                                        c_WaitableWaitHandle* child);
 
 void c_AsyncFunctionWaitHandle::PrepareChild(const ActRec* fp,
                                              c_WaitableWaitHandle* child) {

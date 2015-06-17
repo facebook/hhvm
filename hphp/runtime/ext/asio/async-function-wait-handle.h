@@ -59,7 +59,7 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
   };
 
   explicit c_AsyncFunctionWaitHandle(Class* cls =
-      c_AsyncFunctionWaitHandle::classof())
+      c_AsyncFunctionWaitHandle::classof()) noexcept
     : c_ResumableWaitHandle(cls, HeaderKind::ResumableObj) {}
   ~c_AsyncFunctionWaitHandle();
   void t___construct();
@@ -78,6 +78,7 @@ class c_AsyncFunctionWaitHandle final : public c_ResumableWaitHandle {
   static constexpr ptrdiff_t childrenOff() {
     return offsetof(c_AsyncFunctionWaitHandle, m_children);
   }
+  template <bool mayUseVV>
   static c_AsyncFunctionWaitHandle* Create(
     const ActRec* origFp,
     size_t numSlots,

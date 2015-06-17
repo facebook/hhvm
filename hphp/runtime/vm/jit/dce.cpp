@@ -364,6 +364,7 @@ bool canDCE(IRInstruction* inst) {
   case StClosureArg:
   case CreateCont:
   case CreateAFWH:
+  case CreateAFWHNoVV:
   case AFWHPrepareChild:
   case ContEnter:
   case ContPreNext:

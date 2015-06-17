@@ -148,8 +148,10 @@ public:
     assert(fp);
     assert(fp->resumed() == clone);
     assert(fp->func()->isNonAsyncGenerator());
-    void* obj = Resumable::Create<clone>(fp, numSlots, resumeAddr, resumeOffset,
-                                         sizeof(c_Generator));
+    void* obj = Resumable::Create<clone, sizeof(c_Generator)>(fp,
+                                                              numSlots,
+                                                              resumeAddr,
+                                                              resumeOffset);
     auto const gen = new (obj) c_Generator();
     assert(gen->hasExactlyOneRef());
     gen->setNoDestruct();

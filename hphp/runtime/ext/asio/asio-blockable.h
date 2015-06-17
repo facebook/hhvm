@@ -73,7 +73,7 @@ class AsioBlockableChain final {
       return offsetof(AsioBlockableChain, m_firstParent);
     }
 
-    void init() {
+    void init() noexcept {
       m_firstParent = nullptr;
     }
 

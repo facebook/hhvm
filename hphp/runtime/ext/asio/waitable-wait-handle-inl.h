@@ -22,7 +22,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb, HeaderKind kind)
+inline
+c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb, HeaderKind kind) noexcept
     : c_WaitHandle(cb, kind) {
   m_parentChain.init();
 }

@@ -39,7 +39,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   DECLARE_CLASS_NO_SWEEP(WaitableWaitHandle)
 
   explicit c_WaitableWaitHandle(Class* cls = c_WaitableWaitHandle::classof(),
-                                HeaderKind kind = HeaderKind::Object);
+                                HeaderKind kind = HeaderKind::Object) noexcept;
   ~c_WaitableWaitHandle();
 
   int t_getcontextidx();

@@ -7055,7 +7055,7 @@ OPTBLD_INLINE TCA iopCreateCont(IOP_ARGS) {
     ? static_cast<BaseGenerator*>(
         c_AsyncGenerator::Create(fp, numSlots, nullptr, resumeOffset))
     : static_cast<BaseGenerator*>(
-        c_Generator::Create<false>(fp, numSlots, nullptr, resumeOffset));
+      c_Generator::Create<false>(fp, numSlots, nullptr, resumeOffset));
 
   EventHook::FunctionSuspendE(fp, gen->actRec());
 
@@ -7222,8 +7222,9 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc, int32_t iters) {
   // Create the AsyncFunctionWaitHandle object. Create takes care of
   // copying local variables and itertors.
   auto waitHandle = static_cast<c_AsyncFunctionWaitHandle*>(
-    c_AsyncFunctionWaitHandle::Create(vmfp(), vmfp()->func()->numSlotsInFrame(),
-                                      nullptr, resumeOffset, child));
+    c_AsyncFunctionWaitHandle::Create<true>(vmfp(),
+                                            vmfp()->func()->numSlotsInFrame(),
+                                            nullptr, resumeOffset, child));
 
   // Call the FunctionSuspend hook. FunctionSuspend will decref the newly
   // allocated waitHandle if it throws.

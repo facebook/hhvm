@@ -107,10 +107,13 @@ struct ObjectData {
  protected:
   explicit ObjectData(Class*, uint16_t flags, HeaderKind = HeaderKind::Object);
 
- private:
   enum class NoInit {};
 
-  explicit ObjectData(Class*, NoInit);
+  explicit ObjectData(Class*, NoInit) noexcept;
+  explicit ObjectData(Class* cls,
+                      uint16_t flags,
+                      HeaderKind kind,
+                      NoInit) noexcept;
 
  public:
   void setStatic() const;
@@ -488,6 +491,14 @@ struct ExtObjectDataFlags : ObjectData {
   }
 
 protected:
+  explicit ExtObjectDataFlags(HPHP::Class* cb,
+                              HeaderKind kind,
+                              NoInit ni) noexcept
+  : ObjectData(cb, Flags | ObjectData::IsCppBuiltin, kind, ni)
+  {
+    assert(!getVMClass()->callsCustomInstanceInit());
+  }
+
   ~ExtObjectDataFlags() {}
 };
 

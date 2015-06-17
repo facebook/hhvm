@@ -327,7 +327,16 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
                            CopyString)
           ));
     }
-    for (unsigned int i = 0; i < m_tzi->timecnt; ++i) {
+    uint32_t timecnt;
+#ifdef FACEBOOK
+    // Internal builds embed tzdata into HHVM by keeping timelib updated
+    timecnt = m_tzi->bit32.timecnt;
+#else
+    // OSS builds read tzdata from the system location (eg /usr/share/zoneinfo)
+    // as this format must be stable, we're keeping timelib stable too
+    timecnt = m_tzi->timecnt;
+#endif
+    for (uint32_t i = 0; i < timecnt; ++i) {
       int timestamp = m_tzi->trans[i];
       if (timestamp > timestamp_begin && timestamp <= timestamp_end) {
         int index = m_tzi->trans_idx[i];

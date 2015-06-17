@@ -111,7 +111,7 @@ static char** readline_completion_cb(const char* text, int start, int end) {
 static bool HHVM_FUNCTION(
     readline_completion_function,
     const Variant& function) {
-  if (!HHVM_FN(is_callable)(function)) {
+  if (!is_callable(function)) {
     raise_warning(
         "readline_completion_function(): %s is not callable",
         function.toString().data());

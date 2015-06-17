@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/server/http-protocol.h"
@@ -54,82 +53,10 @@ bool HHVM_FUNCTION(function_exists, const String& function_name,
      function_exists(function_name));
 }
 
-const StaticString
-  s__invoke("__invoke"),
-  s_Closure__invoke("Closure::__invoke"),
-  s_colon2("::");
-
 bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */,
                    VRefParam name /* = null */) {
-  bool ret = true;
-  if (LIKELY(!syntax)) {
-    CallerFrame cf;
-    ObjectData* obj = nullptr;
-    HPHP::Class* cls = nullptr;
-    StringData* invName = nullptr;
-    const HPHP::Func* f = vm_decode_function(v, cf(), false, obj, cls,
-                                                 invName, false);
-    if (f == nullptr || f->isAbstract()) {
-      ret = false;
-    }
-    if (invName != nullptr) {
-      decRefStr(invName);
-    }
-    if (!name.isReferenced()) return ret;
-  }
-
-  auto const tv_func = v.asCell();
-  if (IS_STRING_TYPE(tv_func->m_type)) {
-    if (name.isReferenced()) name = tv_func->m_data.pstr;
-    return ret;
-  }
-
-  if (tv_func->m_type == KindOfArray) {
-    const Array& arr = Array(tv_func->m_data.parr);
-    const Variant& clsname = arr.rvalAtRef(int64_t(0));
-    const Variant& mthname = arr.rvalAtRef(int64_t(1));
-    if (arr.size() != 2 ||
-        &clsname == &null_variant ||
-        &mthname == &null_variant) {
-      name = array_string;
-      return false;
-    }
-
-    auto const tv_meth = mthname.asCell();
-    if (!IS_STRING_TYPE(tv_meth->m_type)) {
-      if (name.isReferenced()) name = v.toString();
-      return false;
-    }
-
-    auto const tv_cls = clsname.asCell();
-    if (tv_cls->m_type == KindOfObject) {
-      name = tv_cls->m_data.pobj->getClassName();
-    } else if (IS_STRING_TYPE(tv_cls->m_type)) {
-      name = tv_cls->m_data.pstr;
-    } else {
-      name = v.toString();
-      return false;
-    }
-
-    name = concat3(name, s_colon2, tv_meth->m_data.pstr);
-    return ret;
-  }
-
-  if (tv_func->m_type == KindOfObject) {
-    ObjectData *d = tv_func->m_data.pobj;
-    const Func* invoke = d->getVMClass()->lookupMethod(s__invoke.get());
-    if (name.isReferenced()) {
-      if (d->instanceof(c_Closure::classof())) {
-        // Hack to stop the mangled name from showing up
-        name = s_Closure__invoke;
-      } else {
-        name = d->getClassName().asString() + "::__invoke";
-      }
-    }
-    return invoke != nullptr;
-  }
-
-  return false;
+  return is_callable(v, syntax, name.isReferenced() ?
+                     name.wrapped().asTypedValue()->m_data.pref : nullptr);
 }
 
 Variant HHVM_FUNCTION(call_user_func, const Variant& function,

@@ -1834,7 +1834,7 @@ static bool do_fetch_common(sp_PDOStatement stmt, PDOFetchOrientation ori,
 }
 
 static bool do_fetch_func_prepare(sp_PDOStatement stmt) {
-  if (!HHVM_FN(is_callable)(stmt->fetch.func)) {
+  if (!is_callable(stmt->fetch.func)) {
     pdo_raise_impl_error(stmt->dbh, stmt, "HY000",
                          "user-supplied function must be a valid callback");
     return false;

@@ -25,6 +25,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "zend_constants.h"
 
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-class-entry.h"
@@ -1079,11 +1080,14 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint check_flags, char **callable_name, int *callable_name_len, zend_fcall_info_cache *fcc, char **error TSRMLS_DC) /* {{{ */
 {
   HPHP::Variant name;
+  HPHP::RefData* nameRef = nullptr;
   int callable_name_len_local;
   zend_fcall_info_cache fcc_local;
 
   if (callable_name) {
     *callable_name = NULL;
+    tvBox(name.asTypedValue());
+    nameRef = name.asTypedValue()->m_data.pref;
   }
   if (callable_name_len == NULL) {
     callable_name_len = &callable_name_len_local;
@@ -1098,10 +1102,10 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
   fcc->calling_scope = NULL;
   fcc->object_ptr = NULL;
 
-  bool b = HHVM_FN(is_callable)(
-      tvAsVariant(callable->tv()),
-      check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY,
-      HPHP::ref(name));
+  bool b = is_callable(
+    tvAsVariant(callable->tv()),
+    check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY,
+    nameRef);
   if (b) {
     if (callable_name) {
       HPHP::StringData *sd = name.getStringData();

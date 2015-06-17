@@ -437,7 +437,7 @@ void VerifyParamTypeSlow(const Class* cls,
 }
 
 void VerifyParamTypeCallable(TypedValue value, int param) {
-  if (UNLIKELY(!HHVM_FN(is_callable)(tvAsCVarRef(&value)))) {
+  if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
     VerifyParamTypeFail(param);
   }
 }
@@ -462,7 +462,7 @@ void VerifyRetTypeSlow(const Class* cls,
 }
 
 void VerifyRetTypeCallable(TypedValue value) {
-  if (UNLIKELY(!HHVM_FN(is_callable)(tvAsCVarRef(&value)))) {
+  if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
     VerifyRetTypeFail(value);
   }
 }

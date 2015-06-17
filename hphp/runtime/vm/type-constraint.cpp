@@ -253,7 +253,7 @@ bool TypeConstraint::checkTypeAliasNonObj(const TypedValue* tv) const {
       case AnnotAction::Pass: return true;
       case AnnotAction::Fail: return false;
       case AnnotAction::CallableCheck:
-        return HHVM_FN(is_callable)(tvAsCVarRef(tv));
+        return is_callable(tvAsCVarRef(tv));
       case AnnotAction::ObjectCheck: break;
     }
     assert(result == AnnotAction::ObjectCheck);
@@ -343,7 +343,7 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
           parentToClass(func, &c);
           break;
         case MetaType::Callable:
-          return HHVM_FN(is_callable)(tvAsCVarRef(tv));
+          return is_callable(tvAsCVarRef(tv));
         case MetaType::Precise:
         case MetaType::Number:
         case MetaType::ArrayKey:
@@ -368,7 +368,7 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
     case AnnotAction::Pass: return true;
     case AnnotAction::Fail: return false;
     case AnnotAction::CallableCheck:
-      return HHVM_FN(is_callable)(tvAsCVarRef(tv));
+      return is_callable(tvAsCVarRef(tv));
     case AnnotAction::ObjectCheck:
       assert(isObject());
       return checkTypeAliasNonObj(tv);

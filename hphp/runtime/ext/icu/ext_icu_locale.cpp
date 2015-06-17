@@ -160,7 +160,7 @@ static Variant get_icu_value(const String &locale, LocaleTag tag,
       if (pos == 0) {
         return init_null();
       } else if (pos > 0) {
-        locale_name = HHVM_FN(substr)(locale, 0, pos - 1);
+        locale_name = locale.substr(0, pos - 1);
       }
     }
   }
@@ -523,10 +523,10 @@ static Variant HHVM_STATIC_METHOD(Locale, getScript, const String& locale) {
 static String locale_suffix_strip(const String& locale) {
   for (int i = locale.size(); i >= 0; --i) {
     if (isIDSeparator(locale[i])) {
-      if ((i>=2) && isIDSeparator(locale[i-2])) {
-        return HHVM_FN(substr)(locale, 0, i - 2);
+      if ((i >= 2) && isIDSeparator(locale[i - 2])) {
+        return locale.substr(0, i - 2);
       } else {
-        return HHVM_FN(substr)(locale, 0, i);
+        return locale.substr(0, i);
       }
     }
   }
@@ -602,12 +602,12 @@ static Variant get_private_subtags(const String& locname) {
         /* loc_name ends with '-x-' */
         return init_null();
       }
-      return HHVM_FN(substr)(locale, pos);
+      return locale.substr(pos);
     }
     if ((pos + 1) >= locale.size()) {
       return init_null();
     }
-    locale = HHVM_FN(substr)(locale, pos + 1);
+    locale = locale.substr(pos + 1);
   }
   return init_null();
 }

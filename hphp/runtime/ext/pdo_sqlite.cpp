@@ -280,7 +280,7 @@ void php_sqlite3_callback_func(sqlite3_context* context, int argc,
 bool PDOSqliteConnection::createFunction(const String& name,
                                          const Variant& callback,
                                          int argcount) {
-  if (!HHVM_FN(is_callable)(callback)) {
+  if (!is_callable(callback)) {
     raise_warning("function '%s' is not callable", callback.toString().data());
     return false;
   }

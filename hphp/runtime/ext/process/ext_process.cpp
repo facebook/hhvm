@@ -394,7 +394,7 @@ bool HHVM_FUNCTION(pcntl_signal,
     return true;
   }
 
-  if (!HHVM_FN(is_callable)(handler)) {
+  if (!is_callable(handler)) {
     raise_warning("%s is not a callable function name error",
                     handler.toString().data());
     return false;

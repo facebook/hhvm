@@ -376,7 +376,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
   String handler((char*)obj->stringval, CopyString);
   xmlXPathFreeObject(obj);
 
-  if (!HHVM_FN(is_callable)(handler)) {
+  if (!is_callable(handler)) {
     raise_warning("Unable to call handler %s()", handler.data());
     // Push an empty string to get an xslt result.
     valuePush(ctxt, xmlXPathNewString((xmlChar*)""));

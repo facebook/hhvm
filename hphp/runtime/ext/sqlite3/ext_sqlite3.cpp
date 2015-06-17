@@ -448,7 +448,7 @@ bool HHVM_METHOD(SQLite3, createfunction,
   if (name.empty()) {
     return false;
   }
-  if (!f_is_callable(callback)) {
+  if (!is_callable(callback)) {
     raise_warning("Not a valid callback function %s",
                   callback.toString().data());
     return false;
@@ -476,12 +476,12 @@ bool HHVM_METHOD(SQLite3, createaggregate,
   if (name.empty()) {
     return false;
   }
-  if (!f_is_callable(step)) {
+  if (!is_callable(step)) {
     raise_warning("Not a valid callback function %s",
                   step.toString().data());
     return false;
   }
-  if (!f_is_callable(final)) {
+  if (!is_callable(final)) {
     raise_warning("Not a valid callback function %s",
                   final.toString().data());
     return false;

@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/builtin-functions.h"
 
 #include <pcre.h>
 
@@ -71,11 +72,13 @@ Variant HHVM_FUNCTION(preg_replace, const Variant& pattern, const Variant& repla
                            limit, count, false, false);
 }
 
-Variant HHVM_FUNCTION(preg_replace_callback, const Variant& pattern, const Variant& callback,
-                                             const Variant& subject,
-                                             int limit /* = -1 */,
-                                             VRefParam count /* = null */) {
-  if (!HHVM_FN(is_callable)(callback)) {
+Variant HHVM_FUNCTION(preg_replace_callback,
+                      const Variant& pattern,
+                      const Variant& callback,
+                      const Variant& subject,
+                      int limit /* = -1 */,
+                      VRefParam count /* = null */) {
+  if (!is_callable(callback)) {
     raise_warning("Not a valid callback function %s",
         callback.toString().data());
     return empty_string_variant();

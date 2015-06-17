@@ -1062,14 +1062,14 @@ Array f_fb_call_user_func_safe(int _argc, const Variant& function,
 Variant f_fb_call_user_func_safe_return(int _argc, const Variant& function,
                                         const Variant& def,
                                         const Array& _argv /* = null_array */) {
-  if (HHVM_FN(is_callable)(function)) {
+  if (is_callable(function)) {
     return vm_call_user_func(function, _argv);
   }
   return def;
 }
 
 Array f_fb_call_user_func_array_safe(const Variant& function, const Array& params) {
-  if (HHVM_FN(is_callable)(function)) {
+  if (is_callable(function)) {
     return make_packed_array(true, vm_call_user_func(function, params));
   }
   return make_packed_array(false, uninit_null());

@@ -5518,7 +5518,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
   String handler((char*)obj->stringval, CopyString);
   xmlXPathFreeObject(obj);
 
-  if (!HHVM_FN(is_callable)(handler)) {
+  if (!is_callable(handler)) {
     raise_warning("Unable to call handler %s()", handler.data());
   } else if (intern->m_registerPhpFunctions == 2 &&
              !intern->m_registered_phpfunctions.exists(handler)) {

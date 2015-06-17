@@ -778,7 +778,7 @@ Variant php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) {
 }
 
 Variant php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL) {
-  if (!HHVM_FN(is_callable)(option_array)) {
+  if (!is_callable(option_array)) {
     raise_warning("First argument is expected to be a valid callback");
     return init_null();
   }

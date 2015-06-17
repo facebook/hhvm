@@ -785,7 +785,7 @@ bool HHVM_FUNCTION(ldap_set_rebind_proc,
   }
 
   /* callable? */
-  if (!HHVM_FN(is_callable)(callback)) {
+  if (!is_callable(callback)) {
     raise_warning("Callback argument is not a valid callback");
     return false;
   }

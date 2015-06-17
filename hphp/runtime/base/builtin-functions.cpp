@@ -28,6 +28,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/process/ext_process.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/ext_collections.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/logger.h"
@@ -81,6 +82,83 @@ bool array_is_valid_callback(const Array& arr) {
     return false;
   }
   return true;
+}
+
+const StaticString
+  s__invoke("__invoke"),
+  s_Closure__invoke("Closure::__invoke"),
+  s_colon2("::");
+
+bool is_callable(const Variant& v) {
+  CallerFrame cf;
+  ObjectData* obj = nullptr;
+  HPHP::Class* cls = nullptr;
+  StringData* invName = nullptr;
+  const HPHP::Func* f = vm_decode_function(v, cf(), false, obj, cls,
+                                           invName, false);
+  if (invName != nullptr) {
+    decRefStr(invName);
+  }
+  return f != nullptr && !f->isAbstract();
+}
+
+bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
+  bool ret = true;
+  if (LIKELY(!syntax_only)) {
+    ret = is_callable(v);
+    if (LIKELY(!name)) return ret;
+  }
+
+  auto const tv_func = v.asCell();
+  if (IS_STRING_TYPE(tv_func->m_type)) {
+    if (name) *name->var() = v;
+    return ret;
+  }
+
+  if (tv_func->m_type == KindOfArray) {
+    const Array& arr = Array(tv_func->m_data.parr);
+    const Variant& clsname = arr.rvalAtRef(int64_t(0));
+    const Variant& mthname = arr.rvalAtRef(int64_t(1));
+    if (arr.size() != 2 ||
+        &clsname == &null_variant ||
+        !mthname.isString()) {
+      if (name) *name->var() = array_string;
+      return false;
+    }
+
+    auto const tv_meth = mthname.asCell();
+    auto const tv_cls = clsname.asCell();
+    StringData* clsString = nullptr;
+    if (tv_cls->m_type == KindOfObject) {
+      clsString = tv_cls->m_data.pobj->getClassName().get();
+    } else if (IS_STRING_TYPE(tv_cls->m_type)) {
+      clsString = tv_cls->m_data.pstr;
+    } else {
+      if (name) *name->var() = array_string;
+      return false;
+    }
+
+    if (name) {
+      *name->var() = concat3(clsString, s_colon2, tv_meth->m_data.pstr);
+    }
+    return ret;
+  }
+
+  if (tv_func->m_type == KindOfObject) {
+    ObjectData *d = tv_func->m_data.pobj;
+    const Func* invoke = d->getVMClass()->lookupMethod(s__invoke.get());
+    if (name) {
+      if (d->instanceof(c_Closure::classof())) {
+        // Hack to stop the mangled name from showing up
+        *name->var() = s_Closure__invoke;
+      } else {
+        *name->var() = d->getClassName().asString() + "::__invoke";
+      }
+    }
+    return invoke != nullptr;
+  }
+
+  return false;
 }
 
 const HPHP::Func*

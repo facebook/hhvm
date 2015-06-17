@@ -1046,7 +1046,7 @@ bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
 Variant HHVM_FUNCTION(header_register_callback, const Variant& callback) {
   Transport *transport = g_context->getTransport();
 
-  if (!HHVM_FN(is_callable)(callback)) {
+  if (!is_callable(callback)) {
     raise_warning("First argument is expected to be a valid callback");
     return init_null();
   }

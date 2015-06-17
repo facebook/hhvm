@@ -75,6 +75,15 @@ inline bool is_empty_string(const Variant& v) {
 ///////////////////////////////////////////////////////////////////////////////
 // misc functions
 
+/*
+ * Semantics of is_callable defined here:
+ * http://docs.hhvm.com/manual/en/function.is-callable.php
+ */
+bool is_callable(const Variant& v, bool syntax_only, RefData* name);
+/*
+ * Equivalent to is_callable(v, false, nullptr)
+ */
+bool is_callable(const Variant& v);
 bool array_is_valid_callback(const Array& arr);
 
 const HPHP::Func*

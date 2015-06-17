@@ -13,9 +13,7 @@ class A {}
 class B extends A {}
 class C extends A {}
 
-type myshape = shape(
-  'field' => A,
-);
+type myshape = shape('field' => A);
 
 function test(): myshape {
   if (true) {

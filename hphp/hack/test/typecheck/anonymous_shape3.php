@@ -4,6 +4,6 @@
  * Anonymous shape parameter type hint
  */
 
-function test(shape('x' => int) $s) : void {
+function test(shape('x' => int) $s): void {
   $s['y'];
 }

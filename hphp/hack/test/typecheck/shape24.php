@@ -4,9 +4,7 @@
  * Structural subtyping of declared shapes in presence of optional fields
  */
 
-type s = shape(
-  'x' => int,
-);
+type s = shape('x' => int);
 
 type t = shape(
   'x' => int,

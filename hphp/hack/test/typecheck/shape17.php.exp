@@ -1,6 +1,6 @@
-File "shape17.php", line 26, characters 10-11:
+File "shape17.php", line 24, characters 10-11:
 Invalid return type (Typing[4110])
-File "shape17.php", line 17, characters 14-14:
+File "shape17.php", line 16, characters 33-33:
 This is an object of type C
-File "shape17.php", line 22, characters 27-33:
+File "shape17.php", line 20, characters 27-33:
 It is incompatible with an object of type A

@@ -1,6 +1,6 @@
-File "shape8.php", line 21, characters 10-11:
+File "shape8.php", line 19, characters 10-11:
 Invalid return type (Typing[4057])
-File "shape8.php", line 20, characters 15-27:
+File "shape8.php", line 18, characters 15-27:
 The field 'field2' is missing
-File "shape8.php", line 20, characters 34-40:
+File "shape8.php", line 18, characters 34-40:
 The field 'field2' is defined

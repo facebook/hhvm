@@ -9,9 +9,7 @@
  *
  */
 
-type myshape = shape(
-  'my_optional_field' => ?int,
-);
+type myshape = shape('my_optional_field' => ?int);
 
 function test(): myshape {
   $x = shape('my_optional_field' => 0);

@@ -298,6 +298,13 @@ template<class Inst> void Vgen::commute(Inst& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool is_empty_catch(const Vblock& block) {
+  return block.code.size() == 2 &&
+         block.code[0].op == Vinstr::landingpad &&
+         block.code[1].op == Vinstr::jmpi &&
+         block.code[1].jmpi_.target == mcg->tx().uniqueStubs.endCatchHelper;
+}
+
 /*
  * Toplevel emitter.
  */
@@ -353,14 +360,15 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
     auto blockInfo = shouldUpdateAsmInfo
       ? &areaToBlockInfos[unsigned(block.area)][b]
       : nullptr;
-    auto start_snippet = [&](const Vinstr& inst) {
+
+    auto const start_snippet = [&] (const Vinstr& inst) {
       if (!shouldUpdateAsmInfo) return;
 
       blockInfo->snippets.push_back(
         Snippet { inst.origin, TcaRange { a->code().frontier(), nullptr } }
       );
     };
-    auto finish_snippet = [&] {
+    auto const finish_snippet = [&] {
       if (!shouldUpdateAsmInfo) return;
 
       if (!blockInfo->snippets.empty()) {
@@ -368,6 +376,10 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
         snip.range = TcaRange { snip.range.start(), a->code().frontier() };
       }
     };
+
+    // We'll replace exception edges to empty catch blocks with the catch
+    // helper unique stub.
+    if (is_empty_catch(block)) continue;
 
     for (auto& inst : block.code) {
       if (currentOrigin != inst.origin) {
@@ -411,7 +423,10 @@ void Vgen::emit(jit::vector<Vlabel>& labels) {
     X64Assembler::patchCall(p.instr, addrs[p.target]);
   }
   for (auto& p : catches) {
-    mcg->registerCatchBlock(p.instr, addrs[p.target]);
+    auto const catch_target = is_empty_catch(unit.blocks[p.target])
+      ? mcg->tx().uniqueStubs.endCatchHelper
+      : addrs[p.target];
+    mcg->registerCatchBlock(p.instr, catch_target);
   }
   for (auto& p : ldpoints) {
     auto after_lea = p.instr + 7;

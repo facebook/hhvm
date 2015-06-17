@@ -767,7 +767,7 @@ void emitFPushClsMethod(IRGS& env, int32_t numParams) {
     const Class* cls = nullptr;
     if (clsVal->hasConstVal()) {
       cls = clsVal->clsVal();
-    } else if (clsVal->inst()->op() == LdClsCctx) {
+    } else if (clsVal->inst()->is(LdClsCtx, LdClsCctx)) {
       /*
        * Optimize FPushClsMethod when the method is a known static
        * string and the input class is the context.  The common bytecode

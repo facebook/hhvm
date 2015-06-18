@@ -1,0 +1,2 @@
+File "static_var_no_generic.php", line 6, characters 12-20:
+This static variable cannot use the type parameter T. (Typing[4046])

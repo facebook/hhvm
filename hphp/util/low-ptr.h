@@ -18,63 +18,86 @@
 #define incl_HPHP_LOW_PTR_H_
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/portability.h"
 
 #include <folly/CPortability.h> // FOLLY_SANITIZE_ADDRESS
 
+#include <algorithm>
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
-#include <algorithm>
+#include <type_traits>
 #include <utility>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace detail {
+
+///////////////////////////////////////////////////////////////////////////////
+
 /**
  * Low memory pointer template.
  */
-template <typename T, typename S>
+template <class T, class S>
 struct LowPtrImpl {
-  /**
+  /*
    * Constructors.
    */
   LowPtrImpl() {}
 
-  /* implicit */ LowPtrImpl(T* px) : m_raw(toLow(px)) {}
+  /* implicit */ LowPtrImpl(T* px) : m_s{to_low(px)} {}
 
-  /* implicit */ LowPtrImpl(std::nullptr_t px) : m_raw(0) {}
+  /* implicit */ LowPtrImpl(std::nullptr_t px) : m_s{0} {}
 
-  LowPtrImpl(const LowPtrImpl<T, S>& r) : m_raw(r.raw()) {}
+  LowPtrImpl(const LowPtrImpl<T, S>& r) : m_s{S::get(r.m_s)} {}
 
-  LowPtrImpl(LowPtrImpl<T, S>&& r) : m_raw(r.raw()) {
-    r.m_raw = 0;
+  LowPtrImpl(LowPtrImpl<T, S>&& r) : m_s{S::get(r.m_s)} {
+    S::set(r.m_s, 0);
   }
 
-  /**
+  /*
    * Assignments.
    */
   LowPtrImpl& operator=(T* px) {
-    return operator=(toLow(px));
-  }
-
-  LowPtrImpl& operator=(std::nullptr_t px) {
-    return operator=((S)0);
-  }
-
-  LowPtrImpl& operator=(const LowPtrImpl<T, S>& r) {
-    return operator=(r.raw());
-  }
-
-  LowPtrImpl& operator=(LowPtrImpl<T, S>&& r) {
-    assert(this != &r);
-    m_raw = std::move(r.m_raw);
+    S::set(m_s, to_low(px));
     return *this;
   }
 
-  /**
+  LowPtrImpl& operator=(std::nullptr_t px) {
+    S::set(m_s, 0);
+    return *this;
+  }
+
+  LowPtrImpl& operator=(const LowPtrImpl<T, S>& r) {
+    S::set(m_s, S::get(r.m_s));
+    return *this;
+  }
+
+  template <typename Q = S>
+  typename std::enable_if<
+    std::is_move_assignable<typename Q::storage_type>::value,
+    LowPtrImpl&
+  >::type operator=(LowPtrImpl<T, S>&& r) {
+    m_s = std::move(r.m_s);
+    return *this;
+  }
+
+  template <typename Q = S>
+  typename std::enable_if<
+    !std::is_move_assignable<typename Q::storage_type>::value,
+    LowPtrImpl&
+  >::type operator=(LowPtrImpl<T, S>&& r) {
+    S::set(m_s, S::get(r.m_s));
+    S::set(r.m_s, 0);
+    return *this;
+  }
+
+  /*
    * Observers.
    */
   T* get() const {
-    return reinterpret_cast<T*>(m_raw);
+    return reinterpret_cast<T*>(S::get(m_s));
   }
 
   T& operator*() const {
@@ -93,44 +116,81 @@ struct LowPtrImpl {
     return get();
   }
 
-  /**
+  /*
    * Modifiers.
    */
   void reset() {
     operator=(nullptr);
   }
 
-  void swap(LowPtrImpl& r) {
-    std::swap(m_raw, r.m_raw);
+  template <typename Q = T>
+  typename std::enable_if<
+    std::is_move_assignable<typename Q::storage_type>::value,
+    void
+  >::type swap(LowPtrImpl& r) {
+    std::swap(m_s, r.m_s);
+  }
+
+  template <typename Q = T>
+  typename std::enable_if<
+    !std::is_move_assignable<typename Q::storage_type>::value,
+    void
+  >::type swap(LowPtrImpl& r) {
+    auto const tmp = S::get(m_s);
+    S::set(m_s, S::get(r.m_s));
+    S::set(r.m_s, tmp);
   }
 
 private:
-  /**
-   * Raw value manipulation.
+  /*
+   * Lowness.
    */
-  S raw() const {
-    return m_raw;
-  }
-
-  LowPtrImpl& operator=(S raw) {
-    m_raw = raw;
-    return *this;
-  }
-
-  static bool isLow(T* px) {
-    S ones = ~0;
+  static bool is_low(T* px) {
+    typename S::raw_type ones = ~0;
     auto ptr = reinterpret_cast<uintptr_t>(px);
     return (ptr & ones) == ptr;
   }
 
-  static S toLow(T* px) {
-    always_assert(isLow(px));
-    return (S)((uintptr_t)(px));
+  static typename S::raw_type to_low(T* px) {
+    always_assert(is_low(px));
+    return (typename S::raw_type)(reinterpret_cast<uintptr_t>(px));
   }
 
 protected:
-  S m_raw;
+  typename S::storage_type m_s;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+template <class S>
+struct RawStorage {
+  using raw_type = S;
+  using storage_type = S;
+
+  static ALWAYS_INLINE raw_type get(const storage_type& s) {
+    return s;
+  }
+  static ALWAYS_INLINE void set(storage_type& s, raw_type r) {
+    s = r;
+  }
+};
+
+template <class S>
+struct AtomicStorage {
+  using raw_type = S;
+  using storage_type = std::atomic<S>;
+
+  static ALWAYS_INLINE raw_type get(const storage_type& s) {
+    return s.load(std::memory_order_relaxed);
+  }
+  static ALWAYS_INLINE void set(storage_type& s, raw_type r) {
+    s.store(r, std::memory_order_relaxed);
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -142,13 +202,17 @@ protected:
 constexpr bool use_lowptr = true;
 
 template<class T>
-using LowPtr = LowPtrImpl<T, uint32_t>;
+using LowPtr       = detail::LowPtrImpl<T, detail::RawStorage<uint32_t>>;
+template<class T>
+using AtomicLowPtr = detail::LowPtrImpl<T, detail::AtomicStorage<uint32_t>>;
 
 #else
 constexpr bool use_lowptr = false;
 
 template<class T>
-using LowPtr = LowPtrImpl<T, uintptr_t>;
+using LowPtr       = detail::LowPtrImpl<T, detail::RawStorage<uintptr_t>>;
+template<class T>
+using AtomicLowPtr = detail::LowPtrImpl<T, detail::AtomicStorage<uintptr_t>>;
 
 #endif
 

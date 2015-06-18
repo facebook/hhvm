@@ -500,6 +500,44 @@ function stream_socket_client(string $remote_socket,
                               ?resource $context = null): mixed;
 
 /**
+ * Turns encryption on/off on an already connected socket. Once the crypto
+ * settings are established, cryptography can be turned on and off dynamically
+ * by passing TRUE or FALSE in the enable parameter.
+ *
+ * @param resource $stream - The stream reszource.
+ * @param bool $enable - Enable/disable cryptography on the stream.
+ * @param int crypto_type - Setup encryption on the stream. Valid methods are:
+ *   - STREAM_CRYPTO_SSLv2_CLIENT
+ *   - STREAM_CRYPTO_SSLv3_CLIENT
+ *   - STREAM_CRYPTO_SSLv23_CLIENT
+ *   - STREAM_CRYPTO_TLS_CLIENT
+ *  The following methods are valid, but not currently implemented in HHVM:
+ *   - STREAM_CRYPTO_SSLv2_SERVER
+ *   - STREAM_CRYPTO_SSLv3_SERVER
+ *   - STREAM_CRYPTO_SSLv23_SERVER
+ *   - STREAM_CRYPTO_TLS_SERVER
+ *
+ *   When enabling crypto in HHVM, this parameter is requried as the
+ *   session_stream parameter is not supported.
+ *
+ *   Under PHP, if omitted, the crypto_type context option on the stream's SSL
+ *   context will be used instead.
+ * @param resource $session_stream Seed the stream with settings from
+ *   session_stream. CURRENTLY UNSUPPORTED IN HHVM.
+ *
+ * @returns mixed - Returns TRUE on success, FALSE if negoation has failed, or
+ *   0 if there isn't enough data and you should try again (only for
+ *   non-blocking sockets).
+ */
+<<__Native>>
+function stream_socket_enable_crypto(
+  resource $socket,
+  bool $enable,
+  int $crypto_type = 0,
+  ?resource $session_stream = null,
+): bool;
+
+/**
  * Returns the local or remote name of a given socket connection.
  *
  * @param resource $handle - The socket to get the name of.

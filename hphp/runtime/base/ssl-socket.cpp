@@ -208,7 +208,7 @@ StaticString s_ssl("ssl");
 
 SSLSocket::SSLSocket(int sockfd, int type, const SmartPtr<StreamContext>& ctx,
                      const char *address /* = NULL */, int port /* = 0 */)
-: Socket(std::make_shared<SSLSocketData>(), sockfd, type, address, port),
+: Socket(std::make_shared<SSLSocketData>(port, type), sockfd, type, address, port),
   m_data(static_cast<SSLSocketData*>(getSocketData()))
 {
   if (!ctx) {
@@ -226,11 +226,36 @@ void SSLSocket::sweep() {
   m_data = nullptr;
 }
 
+bool SSLSocket::enableCrypto(CryptoMethod method) {
+  if (this->m_data->m_method != CryptoMethod::NoCrypto) {
+    raise_warning("SSL/TLS already set-up for this stream");
+    return false;
+  }
+  this->m_data->m_method = method;
+  return setupCrypto() && enableCrypto();
+}
+
+bool SSLSocket::disableCrypto() {
+  if (!this->m_data->m_ssl_active) {
+    return false;
+  }
+  this->m_data->m_method = CryptoMethod::NoCrypto;
+  SSL_shutdown(this->m_data->m_handle);
+  this->m_data->m_ssl_active = false;
+  return true;
+}
+
 bool SSLSocket::onConnect() {
+  if (this->m_data->m_method == CryptoMethod::NoCrypto) {
+    return true;
+  }
   return setupCrypto() && enableCrypto();
 }
 
 bool SSLSocket::onAccept() {
+  if (m_data->m_method == CryptoMethod::NoCrypto) {
+    return true;
+  }
   if (getFd() >= 0 && m_data->m_enable_on_connect) {
     switch (m_data->m_method) {
     case CryptoMethod::ClientSSLv23:
@@ -347,6 +372,8 @@ SmartPtr<SSLSocket> SSLSocket::Create(
     method = CryptoMethod::ClientSSLv3;
   } else if (scheme == "tls") {
     method = CryptoMethod::ClientTLS;
+  } else if (scheme == "tcp") {
+    method = CryptoMethod::NoCrypto;
   } else {
     return nullptr;
   }

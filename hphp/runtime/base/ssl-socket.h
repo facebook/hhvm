@@ -44,6 +44,9 @@ struct SSLSocket : Socket {
     ServerSSLv3,
     ServerSSLv23,
     ServerTLS,
+
+    // This is evil. May be changed by a call stream_socket_enable_crypto()
+    NoCrypto,
   };
 
   static int GetSSLExDataIndex();
@@ -60,6 +63,9 @@ struct SSLSocket : Socket {
   // will setup and enable crypto
   bool onConnect();
   bool onAccept();
+  // This is evil. Needed for stream_socket_enable_crypto() though :(
+  bool enableCrypto(CryptoMethod method);
+  bool disableCrypto();
 
   CLASSNAME_IS("SSLSocket")
   // overriding ResourceData
@@ -90,7 +96,8 @@ private:
 };
 
 struct SSLSocketData : SocketData {
-  SSLSocketData() { }
+  SSLSocketData() {}
+  SSLSocketData(int port, int type) : SocketData(port, type) {}
   virtual bool closeImpl();
   ~SSLSocketData();
 private:

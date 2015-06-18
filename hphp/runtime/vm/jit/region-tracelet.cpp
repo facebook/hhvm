@@ -159,11 +159,10 @@ RegionDescPtr RegionFormer::go() {
     auto t = lt.type;
     if (t <= TCls) {
       irgen::assertTypeLocation(m_irgs, lt.location, t);
-      m_curBlock->addPreCondition(m_sk,
-          RegionDesc::TypedLocation{lt.location, t});
+      m_curBlock->addPreCondition(m_sk, {lt.location, t});
     } else if (emitPredictions) {
       irgen::predictTypeLocation(m_irgs, lt.location, t);
-      m_curBlock->addPredicted(m_sk, RegionDesc::TypedLocation{lt.location, t});
+      m_curBlock->addPredicted(m_sk, {lt.location, t});
     } else {
       irgen::checkTypeLocation(m_irgs, lt.location, t, m_ctx.bcOffset,
                                true /* outerOnly */);
@@ -620,11 +619,12 @@ bool RegionFormer::consumeInput(int i, const InputInfo& ii) {
 }
 
 
-typedef std::function<void(const RegionDesc::Location&, Type)> VisitGuardFn;
+using VisitGuardFn =
+  std::function<void(const RegionDesc::Location&, Type, bool)>;
 
 /*
  * For every instruction in trace representing a tracelet guard, call func with
- * its location and type.
+ * its location and type, and whether or not it's an inner hint.
  */
 void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
   using L = RegionDesc::Location;
@@ -641,14 +641,17 @@ void visitGuards(IRUnit& unit, const VisitGuardFn& func) {
           return;
         case HintLocInner:
         case CheckLoc:
-          func(L::Local{inst.extra<LocalId>()->locId}, inst.typeParam());
+          func(L::Local{inst.extra<LocalId>()->locId},
+               inst.typeParam(),
+               inst.is(HintLocInner));
           break;
         case HintStkInner:
         case CheckStk:
         {
           auto bcSpOffset = inst.extra<RelOffsetData>()->bcSpOffset;
           auto offsetFromFp = inst.marker().spOff() - bcSpOffset;
-          func(L::Stack{offsetFromFp}, inst.typeParam());
+          func(L::Stack{offsetFromFp}, inst.typeParam(),
+               inst.is(HintStkInner));
           break;
         }
         default: break;
@@ -688,24 +691,35 @@ void RegionFormer::recordDependencies() {
 
   auto guardMap = std::map<RegionDesc::Location,Type>{};
   ITRACE(2, "Visiting guards\n");
-  visitGuards(unit, [&](const RegionDesc::Location& loc, Type type) {
+  auto hintMap = std::map<RegionDesc::Location,Type>{};
+  visitGuards(unit, [&](const RegionDesc::Location& loc, Type type, bool hint) {
     Trace::Indent indent;
     ITRACE(3, "{}: {}\n", show(loc), type);
     if (type <= TCls) return;
-    auto inret = guardMap.insert(std::make_pair(loc, type));
+    auto& whichMap = hint ? hintMap : guardMap;
+    auto inret = whichMap.insert(std::make_pair(loc, type));
     if (inret.second) return;
     auto& oldTy = inret.first->second;
-    if (oldTy == TGen) {
-      // This is the case that we see an inner type prediction for a GuardLoc
-      // that got relaxed to Gen.
-      return;
-    }
     oldTy &= type;
   });
 
   for (auto& kv : guardMap) {
+    auto const hint_it = hintMap.find(kv.first);
+    // If we have a hinted type that's better than the guarded type, we want to
+    // keep it around.  This can really only when a guard is relaxed away to
+    // Gen because we knew something was a BoxedCell statically, but we may
+    // need to keep information about what inner type we were predicting.
+    if (hint_it != end(hintMap) && hint_it->second < kv.second) {
+      auto const pred = RegionDesc::TypedLocation {
+        hint_it->first,
+        hint_it->second
+      };
+      FTRACE(1, "selectTracelet adding prediction {}\n", show(pred));
+      firstBlock.addPredicted(blockStart, pred);
+    }
     if (kv.second == TGen) {
-      // Guard was relaxed to Gen---don't record it.
+      // Guard was relaxed to Gen---don't record it.  But if there's a hint, we
+      // may have needed that (recorded already above).
       continue;
     }
     auto const preCond = RegionDesc::TypedLocation { kv.first, kv.second };
@@ -717,7 +731,6 @@ void RegionFormer::recordDependencies() {
     printUnit(3, unit, " after guard relaxation ", nullptr,
               m_irgs.irb->guards());
   }
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////

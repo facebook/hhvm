@@ -226,14 +226,12 @@ void emitPredictionsAndPreConditions(IRGS& irgs,
     emitEntryAssertions(irgs, block->func(), sk);
   }
 
-  // Emit type predictions, if needed.
-  if (RuntimeOption::EvalHHIRConstrictGuards) {
-    while (typePredictions.hasNext(sk)) {
-      auto const& pred = typePredictions.next();
-      auto type = pred.type;
-      auto loc  = pred.location;
-      irgen::predictTypeLocation(irgs, loc, type);
-    }
+  // Emit type predictions.
+  while (typePredictions.hasNext(sk)) {
+    auto const& pred = typePredictions.next();
+    auto type = pred.type;
+    auto loc  = pred.location;
+    irgen::predictTypeLocation(irgs, loc, type);
   }
 
   // Emit type guards/preconditions.

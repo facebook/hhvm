@@ -257,7 +257,11 @@ void emitCreateCont(IRGS& env) {
         cns(env, resumeOffset));
 
   // The suspend hook will decref the newly created generator if it throws.
-  auto const contAR = gen(env, LdContActRec, cont);
+  auto const contAR =
+    gen(env,
+        LdContActRec,
+        IsAsyncData(curFunc(env)->isAsync()),
+        cont);
   suspendHookE(env, fp(env), contAR, cont);
 
   // Grab caller info from ActRec, free ActRec, store the return value
@@ -271,13 +275,14 @@ void emitContEnter(IRGS& env) {
   auto const returnOffset = nextBcOff(env);
   assertx(curClass(env));
   assertx(curClass(env)->classof(c_AsyncGenerator::classof()) ||
-         curClass(env)->classof(c_Generator::classof()));
+          curClass(env)->classof(c_Generator::classof()));
   assertx(curFunc(env)->contains(returnOffset));
 
+  auto isAsync = curClass(env)->classof(c_AsyncGenerator::classof());
   // Load generator's FP and resume address.
   auto const genObj = ldThis(env);
-  auto const genFp  = gen(env, LdContActRec, genObj);
-  auto resumeAddr   = gen(env, LdContResumeAddr, genObj);
+  auto const genFp  = gen(env, LdContActRec, IsAsyncData(isAsync), genObj);
+  auto resumeAddr   = gen(env, LdContResumeAddr, IsAsyncData(isAsync), genObj);
 
   // Make sure function enter hook is called if needed.
   auto const exitSlow = makeExitSlow(env);
@@ -350,22 +355,26 @@ void emitYieldK(IRGS& env) {
 void emitContCheck(IRGS& env, int32_t checkStarted) {
   assertx(curClass(env));
   assertx(curClass(env)->classof(c_AsyncGenerator::classof()) ||
-         curClass(env)->classof(c_Generator::classof()));
+          curClass(env)->classof(c_Generator::classof()));
   auto const cont = ldThis(env);
-  gen(env, ContPreNext, makeExitSlow(env), cont,
-    cns(env, static_cast<bool>(checkStarted)));
+  gen(env, ContPreNext,
+    IsAsyncData(curClass(env)->classof(c_AsyncGenerator::classof())),
+    makeExitSlow(env), cont, cns(env, static_cast<bool>(checkStarted)));
 }
 
 void emitContValid(IRGS& env) {
   assertx(curClass(env));
+  assertx(curClass(env)->classof(c_AsyncGenerator::classof()) ||
+          curClass(env)->classof(c_Generator::classof()));
   auto const cont = ldThis(env);
-  push(env, gen(env, ContValid, cont));
+  push(env, gen(env, ContValid,
+    IsAsyncData(curClass(env)->classof(c_AsyncGenerator::classof())), cont));
 }
 
 void emitContKey(IRGS& env) {
   assertx(curClass(env));
   auto const cont = ldThis(env);
-  gen(env, ContStartedCheck, makeExitSlow(env), cont);
+  gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
   auto const offset = cns(env, offsetof(c_Generator, m_key));
   auto const value = gen(env, LdContField, TCell, cont, offset);
   pushIncRef(env, value);
@@ -374,7 +383,7 @@ void emitContKey(IRGS& env) {
 void emitContCurrent(IRGS& env) {
   assertx(curClass(env));
   auto const cont = ldThis(env);
-  gen(env, ContStartedCheck, makeExitSlow(env), cont);
+  gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
   auto const offset = cns(env, offsetof(c_Generator, m_value));
   auto const value = gen(env, LdContField, TCell, cont, offset);
   pushIncRef(env, value);

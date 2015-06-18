@@ -348,6 +348,19 @@ struct RelOffsetData : IRExtraData {
  * order.  Add new IRExtraData types here.
  */
 
+/*
+ * IsAsyncData
+ */
+struct IsAsyncData : IRExtraData {
+  explicit IsAsyncData(bool isAsync) : isAsync(isAsync) {}
+
+  std::string show() const { return folly::to<std::string>(isAsync); }
+  bool equals(IsAsyncData d) const { return isAsync == d.isAsync; }
+  size_t hash() const { return std::hash<int32_t>()(isAsync); }
+
+  bool isAsync;
+};
+
 struct LdBindAddrData : IRExtraData {
   explicit LdBindAddrData(SrcKey sk, FPInvOffset spOff)
     : sk(sk)
@@ -1219,6 +1232,12 @@ X(NewColFromArray,              NewColData);
 X(InitExtraArgs,                FuncEntryData);
 X(CheckSurpriseFlagsEnter,      FuncEntryData);
 X(CheckSurpriseAndStack,        FuncEntryData);
+X(ContPreNext,                  IsAsyncData);
+X(ContStartedCheck,             IsAsyncData);
+X(ContValid,                    IsAsyncData);
+X(LdContResumeAddr,             IsAsyncData);
+X(LdContActRec,                 IsAsyncData);
+
 
 #undef X
 

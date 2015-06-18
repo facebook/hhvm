@@ -253,7 +253,7 @@ void fpushObjMethodWithBaseClass(IRGS& env,
      * actrec before entering the "real" cloned closure body.
      */
     emitIncStat(env, Stats::ObjMethod_known, 1);
-    if (func->attrs() & AttrStatic && !func->isClosureBody()) {
+    if (func->isStatic() && !func->isClosureBody()) {
       assertx(baseClass);
       gen(env, DecRef, obj);
       objOrCls = cns(env, baseClass);

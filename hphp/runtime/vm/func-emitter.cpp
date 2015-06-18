@@ -204,7 +204,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   if (!containsCalls) { attrs |= AttrPhpLeafFn; }
 
   assert(!m_pce == !preClass);
-  auto f = m_ue.newFunc(this, unit, name, attrs, params.size(), isClosureBody);
+  auto f = m_ue.newFunc(this, unit, name, attrs, params.size());
 
   f->m_isPreFunc = !!preClass;
 

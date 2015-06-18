@@ -25,13 +25,14 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-string.h"
-
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
+
+#include "hphp/system/systemlib.h"
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/fixed-vector.h"
@@ -52,7 +53,6 @@ using jit::mcg;
 const StringData*     Func::s___call       = makeStaticString("__call");
 const StringData*     Func::s___callStatic = makeStaticString("__callStatic");
 std::atomic<bool>     Func::s_treadmill;
-std::atomic<uint32_t> Func::s_totalClonedClosures;
 
 /*
  * This size hint will create a ~6MB vector and is rarely hit in practice.
@@ -101,35 +101,13 @@ Func::~Func() {
 #endif
 }
 
-void* Func::allocFuncMem(int numParams, bool needsNextClonedClosure) {
+void* Func::allocFuncMem(int numParams) {
   int maxNumPrologues = Func::getMaxNumPrologues(numParams);
-  int numExtraPrologues =
-    maxNumPrologues > kNumFixedPrologues ?
-    maxNumPrologues - kNumFixedPrologues :
-    0;
-  int numExtraFuncPtrs = (int) needsNextClonedClosure;
-  size_t funcSize =
-    sizeof(Func) +
-    numExtraPrologues * sizeof(unsigned char*) +
-    numExtraFuncPtrs * sizeof(Func*);
+  int numExtraPrologues = std::max(maxNumPrologues - kNumFixedPrologues, 0);
 
-  if (needsNextClonedClosure) s_totalClonedClosures++;
+  size_t funcSize = sizeof(Func) + numExtraPrologues * sizeof(unsigned char*);
 
-  void* mem = low_malloc(funcSize);
-
-  /**
-   * The Func object can have optional nextClonedClosure pointer to Func
-   * in front of the actual object. The layout is as follows:
-   *
-   *               +--------------------------------+ low address
-   *               |  nextClonedClosure (optional)  |
-   *               |  in closures                   |
-   *               +--------------------------------+ Func* address
-   *               |  Func object                   |
-   *               +--------------------------------+ high address
-   */
-  memset(mem, 0, numExtraFuncPtrs * sizeof(Func*));
-  return ((Func**) mem) + numExtraFuncPtrs;
+  return low_malloc(funcSize);
 }
 
 void Func::destroy(Func* func) {
@@ -142,28 +120,8 @@ void Func::destroy(Func* func) {
       return;
     }
   }
-
-  /*
-   * Funcs in PreClasses are just templates, and don't get used
-   * until they are cloned so we don't put them in low memory.
-   */
-  void* mem = func;
-  if (func->isClosureBody()) {
-    Func** startOfFunc = ((Func**) mem) - 1; // move back by a pointer
-    mem = startOfFunc;
-    if (Func* f = *startOfFunc) {
-      /*
-       * cloned closures use the prolog array to hold
-       * the per-clone post-prolog entry points.
-       * They're not real prologs, and they shouldn't be
-       * smashed, so clear them out here.
-       */
-      f->initPrologues(f->numParams());
-      Func::destroy(f);
-    }
-  }
   func->~Func();
-  low_free(mem);
+  low_free(func);
 }
 
 Func* Func::clone(Class* cls, const StringData* name) const {
@@ -177,7 +135,7 @@ Func* Func::clone(Class* cls, const StringData* name) const {
     m_isPreFunc && !name && !m_cloned.flag.test_and_set();
 
   Func* f = !can_reuse
-    ? new (allocFuncMem(numParams, isClosureBody())) Func(*this)
+    ? new (allocFuncMem(numParams)) Func(*this)
     : const_cast<Func*>(this);
 
   f->m_cloned.flag.test_and_set();
@@ -196,30 +154,11 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   return f;
 }
 
-Func* Func::cloneAndModify(Class* cls, Attr attrs) const {
-  if (Func* ret = findCachedClone(cls, attrs)) {
-    return ret;
-  }
+void Func::rescope(Class* ctx, Attr attrs) {
+  m_cls = ctx;
+  if (attrs != AttrNone) m_attrs = attrs;
 
-  static Mutex s_clonedFuncListMutex;
-  Lock l(s_clonedFuncListMutex);
-  // Check again now that I'm the writer
-  if (Func* ret = findCachedClone(cls, attrs)) {
-    return ret;
-  }
-
-  Func* clonedFunc = clone(cls);
-  clonedFunc->setNewFuncId();
-  clonedFunc->setAttrs(attrs);
-
-  // Save it so we don't have to keep cloning it and retranslating
-  Func** nextFunc = &this->nextClonedClosure();
-  while (*nextFunc) {
-    nextFunc = &nextFunc[0]->nextClonedClosure();
-  }
-  *nextFunc = clonedFunc;
-
-  return clonedFunc;
+  setFullName(numParams());
 }
 
 void Func::rename(const StringData* name) {
@@ -287,18 +226,25 @@ void Func::setFullName(int numParams) {
       std::string(m_cls->name()->data()) + "::" + m_name->data());
   } else {
     m_fullName = m_name;
-    m_namedEntity = NamedEntity::get(m_name);
+
+    // A scoped closure may not have a `cls', but we still need to preserve its
+    // `methodSlot', which refers to its slot in its `baseCls' (which still
+    // points to a subclass of Closure).
+    if (!isMethod()) {
+      m_namedEntity = NamedEntity::get(m_name);
+    }
   }
   if (RuntimeOption::EvalPerfDataMap) {
-    int numPre = isClosureBody() ? 1 : 0;
-    char* from = (char*)this - numPre * sizeof(Func);
-
     int maxNumPrologues = Func::getMaxNumPrologues(numParams);
-    int numPrologues = maxNumPrologues > kNumFixedPrologues ?
-      maxNumPrologues : kNumFixedPrologues;
+    int numPrologues = maxNumPrologues > kNumFixedPrologues
+      ? maxNumPrologues
+      : kNumFixedPrologues;
+
+    char* from = (char*)this;
     char* to = (char*)(m_prologueTable + numPrologues);
+
     Debug::DebugInfo::recordDataMap(
-      from, to, folly::format("Func-{}-{}", numPre,
+      from, to, folly::format("Func-{}",
                               (isPseudoMain() ?
                                m_unit->filepath()->data() :
                                m_fullName->data())).str());
@@ -526,27 +472,6 @@ Id Func::lookupVarId(const StringData* name) const {
 
 int Func::numSlotsInFrame() const {
   return shared()->m_numLocals + shared()->m_numIterators * kNumIterCells;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Closures.
-
-bool Func::isClonedClosure() const {
-  if (!isClosureBody()) return false;
-  if (!cls()) return true;
-  return cls()->lookupMethod(name()) != this;
-}
-
-Func* Func::findCachedClone(Class* cls, Attr attrs) const {
-  Func* nextFunc = const_cast<Func*>(this);
-  while (nextFunc) {
-    if (nextFunc->cls() == cls) {
-      if (LIKELY(nextFunc->attrs() == attrs)) return nextFunc;
-    }
-    nextFunc = nextFunc->nextClonedClosure();
-  }
-  return nullptr;
 }
 
 

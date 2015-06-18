@@ -391,7 +391,7 @@ private:
   bool               m_useLLVM;
 };
 
-TCA fcallHelper(ActRec*, bool isClonedClosure);
+TCA fcallHelper(ActRec*);
 TCA funcBodyHelper(ActRec*);
 int64_t decodeCufIterHelper(Iter* it, TypedValue func);
 

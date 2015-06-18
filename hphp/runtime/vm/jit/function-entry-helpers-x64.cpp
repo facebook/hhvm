@@ -47,10 +47,7 @@ static void setupAfterPrologue(ActRec* fp, void* sp) {
   }
 }
 
-TCA fcallHelper(ActRec* ar, bool isClonedClosure) {
-  void* const sp = isClonedClosure
-    ? reinterpret_cast<Cell*>(ar) - ar->m_func->numSlotsInFrame()
-    : reinterpret_cast<Cell*>(ar) - ar->numArgs();
+TCA fcallHelper(ActRec* ar) {
   try {
     assertx(!ar->resumed());
     auto const tca = mcg->getFuncPrologue(
@@ -60,24 +57,14 @@ TCA fcallHelper(ActRec* ar, bool isClonedClosure) {
     );
     if (tca) return tca;
 
-    /*
-     * If the func is a cloned closure, then the original closure has already
-     * run the prologue, and the prologues array is just being used as entry
-     * points for the dv funclets. Don't run the prologue again.
-     */
-    if (!isClonedClosure) {
-      VMRegAnchor _(ar);
-      if (doFCall(ar, vmpc())) {
-        return mcg->tx().uniqueStubs.resumeHelperRet;
-      }
-      // We've been asked to skip the function body (fb_intercept). frame,
-      // stack and pc have already been fixed - flag that with a negative
-      // return address.
-      return reinterpret_cast<TCA>(-ar->m_savedRip);
+    VMRegAnchor _(ar);
+    if (doFCall(ar, vmpc())) {
+      return mcg->tx().uniqueStubs.resumeHelperRet;
     }
-    setupAfterPrologue(ar, sp);
-    assertx(ar == vmRegsUnsafe().fp);
-    return mcg->tx().uniqueStubs.resumeHelper;
+    // We've been asked to skip the function body (fb_intercept). frame,
+    // stack and pc have already been fixed - flag that with a negative
+    // return address.
+    return reinterpret_cast<TCA>(-ar->m_savedRip);
   } catch (...) {
     /*
       The return address is set to __fcallHelperThunk,

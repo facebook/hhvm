@@ -339,7 +339,7 @@ inline bool Class::callsCustomInstanceInit() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Other methods.
+// JIT data.
 
 inline rds::Handle Class::classHandle() const {
   return m_cachedClass.handle();
@@ -358,9 +358,26 @@ inline void Class::setCached() {
   *m_cachedClass = this;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Native data.
+
 inline const Native::NativeDataInfo* Class::getNativeDataInfo() const {
   return m_extra->m_nativeDataInfo;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Closure subclasses.
+
+inline bool Class::isScopedClosure() const {
+  return m_scoped;
+}
+
+inline const Class::ScopedClonesMap& Class::scopedClones() const {
+  return m_extra->m_scopedClones;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Other methods.
 
 inline MaybeDataType Class::enumBaseTy() const {
   return m_enumBaseTy;

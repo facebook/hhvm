@@ -1,0 +1,11 @@
+int(1)
+int(2)
+int(42)
+string(8) "__invoke"
+string(%d) "Closure$Foo\Bar\C::func;%d"
+string(3) "arg"
+string(8) "__invoke"
+string(%d) "Closure$Foo\Bar\C::func;%d"
+string(%d) "Closure$Foo\Bar\C::func;%d"
+int(2)
+string(3) "BAZ"

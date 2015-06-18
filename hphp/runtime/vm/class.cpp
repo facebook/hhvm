@@ -15,23 +15,28 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
 #include "hphp/runtime/vm/treadmill.h"
+
+#include "hphp/runtime/ext/string/ext_string.h"
+
 #include "hphp/system/systemlib.h"
-#include "hphp/util/debug.h"
-#include "hphp/util/logger.h"
 #include "hphp/parser/parser.h"
 
+#include "hphp/util/debug.h"
+#include "hphp/util/logger.h"
+
 #include <folly/Bits.h>
+
 #include <algorithm>
 #include <iostream>
 
@@ -192,9 +197,14 @@ template<size_t sz>
 struct assert_sizeof_class {
   // If this static_assert fails, the compiler error will have the real value
   // of sizeof_Class in it since it's in this struct's type.
-  static_assert(sz == (use_lowptr ? 252 : 288), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 252 : 296), "Change this only on purpose");
 };
 template struct assert_sizeof_class<sizeof_Class>;
+
+/*
+ * R/W lock for caching scopings of closures.
+ */
+ReadWriteMutex s_scope_cache_mutex;
 
 }
 
@@ -224,6 +234,82 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
     low_free(mem);
     throw;
   }
+}
+
+Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
+  assert(parent() == SystemLib::s_ClosureClass);
+  assert(m_invoke);
+
+  bool const is_dynamic = (attrs != AttrNone);
+
+  // Look up the generated template class for this particular subclass of
+  // Closure.  This class maintains the table of scoped clones of itself, and
+  // if we create a new scoped clone, we need to map it there.
+  auto template_cls = is_dynamic ? Unit::lookupClass(name()) : this;
+  auto const invoke = template_cls->m_invoke;
+
+  assert(IMPLIES(is_dynamic, m_scoped));
+  assert(IMPLIES(is_dynamic, template_cls->m_scoped));
+
+  auto const try_template = [&]() -> Class* {
+    bool const ctx_match = invoke->cls() == ctx;
+    bool const attrs_match = (attrs == AttrNone || attrs == invoke->attrs());
+
+    return ctx_match && attrs_match ? template_cls : nullptr;
+  };
+
+  // If the template class has already been scoped to `ctx', we're done.  This
+  // is the common case in repo mode.
+  if (auto cls = try_template()) return cls;
+
+  template_cls->allocExtraData();
+  auto& scopedClones = template_cls->m_extra.raw()->m_scopedClones;
+
+  auto const key = reinterpret_cast<uintptr_t>(ctx) | uintptr_t(attrs) << 32;
+
+  auto const try_cache = [&] {
+    auto it = scopedClones.find(key);
+    return it != scopedClones.end() ? it->second.get() : nullptr;
+  };
+
+  { // Return the cached clone if we have one.
+    ReadLock l(s_scope_cache_mutex);
+
+    // This assertion only holds under lock, since setting m_scoped and
+    // m_invoke->cls() are independent atomic operations.
+    assert(template_cls->m_scoped == (invoke->cls() != template_cls));
+
+    // If this succeeds, someone raced us to scoping the template.  We may have
+    // unnecessarily allocated an ExtraData, but whatever.
+    if (auto cls = try_template()) return cls;
+
+    if (auto cls = try_cache()) return cls;
+  }
+
+  // We use the French for closure because using the English crashes gcc in the
+  // implicit lambda capture below.  (This is fixed in gcc 4.8.5.)
+  auto fermeture = ClassPtr {
+    template_cls->m_scoped
+      ? newClass(m_preClass.get(), m_parent.get())
+      : template_cls
+  };
+
+  WriteLock l(s_scope_cache_mutex);
+
+  // Check the caches again.
+  if (auto cls = try_template()) return cls;
+  if (auto cls = try_cache()) return cls;
+
+  fermeture->m_invoke->rescope(ctx, attrs);
+  fermeture->m_scoped = true;
+
+  InstanceBits::ifInitElse(
+    [&] { fermeture->setInstanceBits();
+          if (this != fermeture.get()) scopedClones[key] = fermeture; },
+    [&] { if (this != fermeture.get()) scopedClones[key] = fermeture; }
+  );
+
+  return fermeture.get();
 }
 
 void Class::destroy() {

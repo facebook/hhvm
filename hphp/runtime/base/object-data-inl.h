@@ -156,6 +156,10 @@ inline Class* ObjectData::getVMClass() const {
   return m_cls;
 }
 
+inline void ObjectData::setVMClass(Class* cls) {
+  m_cls = cls;
+}
+
 inline bool ObjectData::instanceof(const Class* c) const {
   return m_cls->classof(c);
 }

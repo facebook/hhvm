@@ -1191,7 +1191,6 @@ X(LdObjMethod,                  LdObjMethodData);
 X(RaiseMissingArg,              FuncArgData);
 X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
-X(StClosureFunc,                FuncData);
 X(StClosureArg,                 PropByteOffset);
 X(RBTraceEntry,                 RBEntryData);
 X(RBTraceMsg,                   RBMsgData);

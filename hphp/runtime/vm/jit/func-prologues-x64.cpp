@@ -230,7 +230,7 @@ SrcKey emitPrologueWork(TransID transID, Func* func, int nPassed) {
   if (func->isClosureBody()) {
     // Closure object properties are the use vars followed by the
     // static locals (which are per-instance).
-    auto const numUseVars = func->cls()->numDeclProperties() -
+    auto const numUseVars = func->baseCls()->numDeclProperties() -
                             func->numStaticLocals();
 
     assertx(kScratchCrossTraceRegs.contains(rcx));
@@ -242,7 +242,7 @@ SrcKey emitPrologueWork(TransID transID, Func* func, int nPassed) {
     a.  loadq  (rClosure[c_Closure::ctxOffset()], rax);
     a.  storeq (rax, rVmFp[AROFF(m_this)]);
 
-    if (!(func->attrs() & AttrStatic)) {
+    if (!func->isStatic()) {
       a.shrq   (1, rax);
       ifThen(a, CC_NBE, [&] (Asm& a) {
         a.shlq (1, rax);
@@ -250,12 +250,8 @@ SrcKey emitPrologueWork(TransID transID, Func* func, int nPassed) {
       });
     }
 
-    // Put in the correct context
-    a.  loadq  (rClosure[c_Closure::funcOffset()], rax);
-    a.  storeq (rax, rVmFp[AROFF(m_func)]);
-
     // Copy in all the use vars
-    int baseUVOffset = sizeof(ObjectData) + func->cls()->builtinODTailSize();
+    int baseUVOffset = sizeof(ObjectData) + func->baseCls()->builtinODTailSize();
     for (int i = 0; i < numUseVars + 1; i++) {
       int fpOffset = -cellsToBytes(i + 1 + numLocals);
 
@@ -352,23 +348,15 @@ SrcKey emitPrologueWork(TransID transID, Func* func, int nPassed) {
     acold.    jmp   (a.frontier());
   }
 
-  if (func->isClosureBody() && func->cls()) {
-    int entry = nPassed <= numNonVariadicParams
-      ? nPassed : numNonVariadicParams + 1;
-    a.    loadq   (rVmFp[AROFF(m_func)], rax); // XXX: redundant load; we just
-                                               // stored this
-    a.    loadq   (rax[Func::prologueTableOff() + sizeof(TCA)*entry], rax);
-    a.    jmp     (rax);
-  } else {
-    emitBindJ(
-      mcg->code.main(),
-      mcg->code.frozen(),
-      CC_None,
-      funcBody,
-      FPInvOffset{func->numSlotsInFrame()},
-      TransFlags{}
-    );
-  }
+  emitBindJ(
+    mcg->code.main(),
+    mcg->code.frozen(),
+    CC_None,
+    funcBody,
+    FPInvOffset{func->numSlotsInFrame()},
+    TransFlags{}
+  );
+
   return funcBody;
 }
 

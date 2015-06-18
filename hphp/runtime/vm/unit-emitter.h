@@ -189,7 +189,7 @@ struct UnitEmitter {
    * Func* and records it as emitted from `fe'.
    */
   Func* newFunc(const FuncEmitter* fe, Unit& unit, const StringData* name,
-                Attr attrs, int numParams, bool needsNextClonedClosure);
+                Attr attrs, int numParams);
 
 
   /////////////////////////////////////////////////////////////////////////////

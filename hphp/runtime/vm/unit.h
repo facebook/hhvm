@@ -824,44 +824,31 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// TODO(#4717225): Rewrite these in iterators.h.
 
-struct ConstPreClassMethodRanger {
-  typedef Func* const* Iter;
-  typedef const Func* Value;
-  static Iter get(PreClassPtr pc) {
-    return pc->methods();
-  }
-};
-
-struct MutablePreClassMethodRanger {
-  typedef Func** Iter;
-  typedef Func* Value;
-  static Func** get(PreClassPtr pc) {
-    return pc->mutableMethods();
-  }
-};
-
-template<typename FuncRange,
-         typename GetMethods>
-struct AllFuncsImpl {
-  explicit AllFuncsImpl(const Unit* unit)
+struct AllFuncs {
+  explicit AllFuncs(const Unit* unit)
     : fr(unit->funcs())
     , mr(0, 0)
     , cr(unit->preclasses())
   {
     if (fr.empty()) skip();
   }
-  bool empty() const { return fr.empty() && mr.empty() && cr.empty(); }
-  typedef typename GetMethods::Value FuncPtr;
-  FuncPtr front() const {
+
+  bool empty() const {
+    return fr.empty() && mr.empty() && cr.empty();
+  }
+
+  const Func* front() const {
     assert(!empty());
     if (!fr.empty()) return fr.front();
     assert(!mr.empty());
     return mr.front();
   }
-  FuncPtr popFront() {
-    FuncPtr f = !fr.empty() ? fr.popFront() :
-      !mr.empty() ? mr.popFront() : 0;
+
+  const Func* popFront() {
+    auto f = !fr.empty() ? fr.popFront() :
+             !mr.empty() ? mr.popFront() : 0;
     assert(f);
     if (fr.empty() && mr.empty()) skip();
     return f;
@@ -871,9 +858,9 @@ private:
   void skip() {
     assert(fr.empty());
     while (!cr.empty() && mr.empty()) {
-      PreClassPtr c = cr.popFront();
-      mr = Unit::FuncRange(GetMethods::get(c),
-                           GetMethods::get(c) + c->numMethods());
+      auto c = cr.popFront();
+      mr = Unit::FuncRange(c->methods(),
+                           c->methods() + c->numMethods());
     }
   }
 
@@ -881,27 +868,6 @@ private:
   Unit::FuncRange mr;
   Unit::PreClassRange cr;
 };
-
-typedef AllFuncsImpl<Unit::FuncRange,ConstPreClassMethodRanger> AllFuncs;
-typedef AllFuncsImpl<Unit::MutableFuncRange,MutablePreClassMethodRanger>
-  MutableAllFuncs;
-
-/*
- * Range over all defined classes.
- */
-class AllClasses {
-  NamedEntity::Map::iterator m_next, m_end;
-  Class* m_current;
-  void next();
-  void skip();
-
-public:
-  AllClasses();
-  bool empty() const;
-  Class* front() const;
-  Class* popFront();
-};
-
 
 class AllCachedClasses {
   NamedEntity::Map::iterator m_next, m_end;

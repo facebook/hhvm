@@ -128,7 +128,7 @@ const Func* get_method_func(const Class* cls, const String& meth_name) {
       }
     }
   }
-  assert(func == nullptr || func->cls());
+  assert(func == nullptr || func->isMethod());
   return func;
 }
 
@@ -146,6 +146,9 @@ Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
     // exceptions here.
     return g_context->getEvaledArg(
       fpi.phpCode,
+      // We use cls() instead of implCls() because we want the namespace and
+      // class context for which the closure is scoped, not that of the Closure
+      // subclass (which, among other things, is always globally namespaced).
       func->cls() ? func->cls()->nameStr() : func->nameStr()
     );
   }
@@ -331,7 +334,7 @@ bool resolveDefaultParameterConstant(const char *value, int64_t valueLen,
 static bool isConstructor(const Func* func) {
   PreClass* pcls = func->preClass();
   if (!pcls || (pcls->attrs() & AttrInterface)) { return false; }
-  if (func->cls()) { return func == func->cls()->getCtor(); }
+  if (func->implCls()) { return func == func->implCls()->getCtor(); }
   if (0 == strcasecmp("__construct", func->name()->data())) { return true; }
   /* A same named function is not a constructor in a trait */
   if (pcls->attrs() & AttrTrait) return false;
@@ -611,8 +614,11 @@ static Array get_function_param_info(const Func* func) {
     param.set(s_type_hint, VarNR(typeHint));
     param.set(s_function, VarNR(func->name()));
     if (func->preClass()) {
-      param.set(s_class, VarNR(func->cls() ? func->cls()->name() :
-                               func->preClass()->name()));
+      param.set(
+        s_class,
+        VarNR(func->implCls() ? func->implCls()->name()
+                              : func->preClass()->name())
+      );
     }
     if (!nonExtendedConstraint || fpi.typeConstraint.isNullable()) {
       param.set(s_nullable, true_varNR);
@@ -728,7 +734,7 @@ static bool HHVM_METHOD(ReflectionMethod, __init,
     // caller raises exception
     return false;
   }
-  assert(func->cls());
+  assert(func->isMethod());
   ReflectionFuncHandle::Get(this_)->setFunc(func);
   return true;
 }
@@ -777,14 +783,14 @@ static int HHVM_METHOD(ReflectionMethod, getModifiers) {
 static String HHVM_METHOD(ReflectionMethod, getPrototypeClassname) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   const Class *prototypeCls = nullptr;
-  if (func->baseCls() != nullptr && func->baseCls() != func->cls()) {
+  if (func->baseCls() != nullptr && func->baseCls() != func->implCls()) {
     prototypeCls = func->baseCls();
     const Class *result = get_prototype_class_from_interfaces(
       prototypeCls, func);
     if (result) { prototypeCls = result; }
   } else if (func->isMethod()) {
     // lookup the prototype in the interfaces
-    prototypeCls = get_prototype_class_from_interfaces(func->cls(), func);
+    prototypeCls = get_prototype_class_from_interfaces(func->implCls(), func);
   }
   if (prototypeCls) {
     auto ret = const_cast<StringData*>(prototypeCls->name());
@@ -796,8 +802,7 @@ static String HHVM_METHOD(ReflectionMethod, getPrototypeClassname) {
 // private helper for getDeclaringClass
 static String HHVM_METHOD(ReflectionMethod, getDeclaringClassname) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-  auto cls = func->cls();
-  auto ret = const_cast<StringData*>(cls->name());
+  auto ret = const_cast<StringData*>(func->implCls()->name());
   return String(ret);
 }
 
@@ -823,8 +828,8 @@ static bool HHVM_METHOD(ReflectionFunction, __initClosure,
     // caller raises exception
     return false;
   }
-  assert(func->cls());
   assert(func->isClosureBody());
+  assert(func->implCls()->isScopedClosure());
   ReflectionFuncHandle::Get(this_)->setFunc(func);
   return true;
 }
@@ -1661,14 +1666,14 @@ static void set_debugger_return_type_constraint(Array &ret, const StringData* re
 static void set_debugger_reflection_method_prototype_info(Array& ret,
                                                           const Func *func) {
   const Class *prototypeCls = nullptr;
-  if (func->baseCls() != nullptr && func->baseCls() != func->cls()) {
+  if (func->baseCls() != nullptr && func->baseCls() != func->implCls()) {
     prototypeCls = func->baseCls();
     const Class *result = get_prototype_class_from_interfaces(
       prototypeCls, func);
     if (result) prototypeCls = result;
   } else if (func->isMethod()) {
     // lookup the prototype in the interfaces
-    prototypeCls = get_prototype_class_from_interfaces(func->cls(), func);
+    prototypeCls = get_prototype_class_from_interfaces(func->implCls(), func);
   }
   if (prototypeCls) {
     Array prototype = Array::Create();
@@ -1717,12 +1722,15 @@ static void set_debugger_reflection_method_info(Array& ret, const Func* func,
 
   // If Func* is from a PreClass, it doesn't know about base classes etc.
   // Swap it out for the full version if possible.
-  auto resolved_func = func->cls() ? func : cls->lookupMethod(func->name());
+  auto resolved_func = func->implCls()
+    ? func
+    : cls->lookupMethod(func->name());
+
   if (!resolved_func) {
     resolved_func = func;
   }
 
-  ret.set(s_class, VarNR(resolved_func->cls()->name()));
+  ret.set(s_class, VarNR(resolved_func->implCls()->name()));
   set_debugger_reflection_function_info(ret, resolved_func);
   set_debugger_source_info(ret, func->unit()->filepath()->data(),
                            func->line1(), func->line2());

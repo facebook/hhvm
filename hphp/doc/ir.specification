@@ -1694,11 +1694,6 @@ To string conversions:
   Nullptr when there is no context (i.e. the closure is being used in a
   non-method).
 
-| StClosureFunc<func>, ND, S(Obj), NF
-
-  Store the Func* clone that should be used for calling this closure into the
-  closure object S0.
-
 | StClosureArg<offsetBytes>, ND, S(Obj) S(Gen), CRc
 
   Store one of the closure environment arguments (i.e. from the closure's use

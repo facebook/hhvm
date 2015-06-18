@@ -516,32 +516,13 @@ asm_label(a, noCallee);
 //////////////////////////////////////////////////////////////////////
 
 void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
-  TCA (*helper)(ActRec*, bool) = &fcallHelper;
+  TCA (*helper)(ActRec*) = &fcallHelper;
   Asm a { mcg->code.cold() };
 
   moveToAlign(mcg->code.cold());
   uniqueStubs.fcallHelperThunk = a.frontier();
 
-  Label popAndXchg, skip;
-
-  // fcallHelper is used for prologues, and (in the case of cloned closures)
-  // for dispatch to the function body. In the first case, there's a call, in
-  // the second, there's a jmp.  We can differentiate by loading the func out
-  // of the actrec and asking it if it's a cloned closure.
-  a.    loadq  (rVmFp[AROFF(m_func)], argNumToRegName[0]);
-  emitCall(a, CppCall::method(&Func::isClonedClosure), argSet(1));
-  a.    movb   (al, rbyte(argNumToRegName[1]));  // live for helper calls below
-  a.    movq   (rVmFp, argNumToRegName[0]); // live for helper calls below
-  a.    testb  (al, al);
-  a.    jz8    (popAndXchg);
-
-  // Cloned closure case:
-  emitCall(a, CppCall::direct(helper), argSet(2));
-  if (debug) {
-    a.  movq   (0x2, rVmSp);  // "assert" nothing reads it
-  }
-  a.    jmp    (rax);
-  a.    ud2    ();
+  Label skip;
 
   // fcallHelper may call doFCall. doFCall changes the return ip
   // pointed to by r15 so that it points to MCGenerator::m_retHelper,
@@ -549,9 +530,9 @@ void emitFCallHelperThunk(UniqueStubs& uniqueStubs) {
   // to pop the return address into r15 + m_savedRip before calling
   // fcallHelper, and then push it back from r15 + m_savedRip after
   // fcallHelper returns in case it has changed it.
-asm_label(a, popAndXchg);
   a.    pop    (rVmFp[AROFF(m_savedRip)]);
-  emitCall(a, CppCall::direct(helper), argSet(2));
+  a.    movq   (rVmFp, argNumToRegName[0]); // live for helper calls below
+  emitCall(a, CppCall::direct(helper), argSet(1));
   if (debug) {
     a.  movq   (0x1, rVmSp);  // "assert" nothing reads it
   }

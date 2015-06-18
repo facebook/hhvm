@@ -152,6 +152,7 @@ struct ObjectData {
   void releaseNoObjDestructCheck() noexcept;
 
   Class* getVMClass() const;
+  void setVMClass(Class* cls);
   StrNR getClassName() const;
   int getId() const;
 

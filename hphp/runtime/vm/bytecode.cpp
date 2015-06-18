@@ -7029,7 +7029,9 @@ OPTBLD_INLINE void iopCreateCl(IOP_ARGS) {
   pc++;
   auto numArgs = decode_iva(pc);
   auto clsName = decode_litstr(pc);
-  auto const cls = Unit::loadClass(clsName);
+  auto const cls = Unit::loadClass(clsName)->rescope(
+    const_cast<Class*>(vmfp()->m_func->cls())
+  );
   auto const cl = static_cast<c_Closure*>(newInstance(cls));
   cl->init(numArgs, vmfp(), vmStack().top());
   vmStack().ndiscard(numArgs);

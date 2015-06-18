@@ -156,13 +156,6 @@ bool shouldPGOFunc(const Func& func) {
   // pseudo-mains (so regions will be just tracelets).
   if (func.isPseudoMain()) return false;
 
-  // Non-cloned closures simply contain prologues that redispacth to
-  // cloned closures.  They don't contain a translation for the
-  // function entry, which is what triggers an Optimize retranslation.
-  // So don't generate profiling translations for them -- there's not
-  // much to do with PGO anyway here, since they just have prologues.
-  if (func.isClosureBody() && !func.isClonedClosure()) return false;
-
   if (!RuntimeOption::EvalJitPGOHotOnly) return true;
   return func.attrs() & AttrHot;
 }
@@ -279,14 +272,6 @@ TCA MCGenerator::retranslateOpt(TransID transId, bool align) {
     auto regionStart = translate(translArgs);
     if (start == nullptr && regionSk == sk) {
       start = regionStart;
-    }
-    // Cloned closures' prologue tables point to the corresponding
-    // main/DV entry point.  So update the prologue table when
-    // retranslating their entries.
-    if (func->isClonedClosure() && func->isEntry(regionSk.offset()) &&
-        regionStart) {
-      int entryNumParams = func->getEntryNumParams(regionSk.offset());
-      func->setPrologue(entryNumParams, regionStart);
     }
   }
 
@@ -698,18 +683,6 @@ TCA MCGenerator::getFuncPrologue(Func* func, int nPassed, ActRec* ar,
   Offset entry = func->getEntryForNumArgs(nPassed);
   SrcKey funcBody(func, entry, false);
 
-  if (func->isClonedClosure()) {
-    assertx(ar);
-    interp_set_regs(ar, (Cell*)ar - func->numSlotsInFrame(), entry);
-    auto tca = getTranslation(TranslArgs{funcBody, false});
-    tl_regState = VMRegState::DIRTY;
-    if (tca) {
-      // racy, but ok...
-      func->setPrologue(paramIndex, tca);
-    }
-    return tca;
-  }
-
   LeaseHolder writer(Translator::WriteLease());
   if (!writer) return nullptr;
 
@@ -798,12 +771,10 @@ TCA MCGenerator::regeneratePrologue(TransID prologueTransId, SrcKey triggerSk) {
   }
   pcr->clearAllCallers();
 
-  // If this prologue has a DV funclet, then generate a translation
-  // for the DV funclet right after the prologue.  However, skip
-  // cloned closures because their prologues are actually the DV
-  // funclets already.
+  // If this prologue has a DV funclet, then generate a translation for the DV
+  // funclet right after the prologue.
   TCA triggerSkStart = nullptr;
-  if (nArgs < func->numNonVariadicParams() && !func->isClonedClosure()) {
+  if (nArgs < func->numNonVariadicParams()) {
     auto paramInfo = func->params()[nArgs];
     if (paramInfo.hasDefaultValue()) {
       m_tx.setMode(TransKind::Optimize);
@@ -2131,10 +2102,6 @@ std::vector<UsageInfo> MCGenerator::getUsageInfo() {
       rds::usedPersistentBytes(),
       RuntimeOption::EvalJitTargetCacheSize / 4,
       false});
-  tcUsageInfo.emplace_back(UsageInfo{
-      "cloned-closures",
-      Func::s_totalClonedClosures,
-      100000 /* dummy value -- there isn't really a capacity for this */});
   return tcUsageInfo;
 }
 

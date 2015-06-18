@@ -995,7 +995,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckType:
   case FreeActRec:
   case RegisterLiveObj:
-  case StClosureFunc:
   case StContArResume:
   case StContArState:
   case ZeroErrorLevel:

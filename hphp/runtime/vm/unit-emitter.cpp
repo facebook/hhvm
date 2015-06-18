@@ -224,9 +224,8 @@ void UnitEmitter::recordFunction(FuncEmitter* fe) {
 
 Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
                            const StringData* name, Attr attrs,
-                           int numParams, bool needsNextClonedClosure) {
-  Func* f = new (Func::allocFuncMem(numParams, needsNextClonedClosure))
-    Func(unit, name, attrs);
+                           int numParams) {
+  auto f = new (Func::allocFuncMem(numParams)) Func(unit, name, attrs);
   m_fMap[fe] = f;
   return f;
 }

@@ -2665,12 +2665,6 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
   v << storeli{encoded, spReg[spOffset + int(AROFF(m_numArgsAndFlags))]};
 }
 
-void CodeGenerator::cgStClosureFunc(IRInstruction* inst) {
-  auto const obj  = srcLoc(inst, 0).reg();
-  auto const func = inst->extra<StClosureFunc>()->func;
-  emitImmStoreq(vmain(), intptr_t(func), obj[c_Closure::funcOffset()]);
-}
-
 void CodeGenerator::cgStClosureArg(IRInstruction* inst) {
   auto const ptr = srcLoc(inst, 0).reg();
   auto const off = inst->extra<StClosureArg>()->offsetBytes;

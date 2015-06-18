@@ -16,10 +16,11 @@
 #ifndef incl_HPHP_RUNTIME_VM_INSTANCE_BITS_H_
 #define incl_HPHP_RUNTIME_VM_INSTANCE_BITS_H_
 
-#include <bitset>
 #include <atomic>
+#include <bitset>
 #include <cinttypes>
 
+#include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
 
 namespace HPHP { struct StringData; }
@@ -35,24 +36,41 @@ namespace HPHP { namespace InstanceBits {
 
 //////////////////////////////////////////////////////////////////////
 
-typedef std::bitset<128> BitSet;
+using BitSet = std::bitset<128>;
 
 /*
- * The initFlag tracks whether init() has finished yet.
+ * Synchronization primitives used to atomically execute code relative to
+ * whether the instance bits have been initialized.
  *
- * The lock is used to protect access to the instance bits on
- * individual classes to ensure that after the initFlag -> true
- * transition, all loaded classes will properly have instance bits
- * populated.
- *
- * See Unit::defClass for some details.
+ * These are only exposed in order to define ifInitElse() below, and probably
+ * should not be accessed directly from anywhere else.
  */
 extern ReadWriteMutex lock;
 extern std::atomic<bool> initFlag;
 
 /*
- * Called to record an instanceof check for `name', during the warmup
- * phase.
+ * Execute either `init' or `uninit' depending on whether the instance bits
+ * have been set up.  While executing either block, the init-ness is guaranteed
+ * not to change.
+ *
+ * This mechanism lets us synchronize Class creation with instance bits
+ * initialization to ensure that all Classes get correct instance bits set.
+ */
+template<class Init, class Uninit>
+void ifInitElse(Init init, Uninit uninit) {
+  if (initFlag.load(std::memory_order_acquire)) return init();
+
+  ReadLock l(lock);
+
+  if (initFlag.load(std::memory_order_acquire)) {
+    init();
+  } else {
+    uninit();
+  }
+}
+
+/*
+ * Called to record an instanceof check for `name', during the warmup phase.
  */
 void profile(const StringData* name);
 

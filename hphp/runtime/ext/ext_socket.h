@@ -80,7 +80,8 @@ Variant HHVM_FUNCTION(pfsockopen, const String& hostname, int port = -1,
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
-                      VRefParam errstr, double timeout, bool persistent);
+                      VRefParam errstr, double timeout, bool persistent,
+                      const Resource& ctx);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

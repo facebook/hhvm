@@ -477,7 +477,7 @@ Variant f_stream_socket_client(const String& remote_socket,
                                int flags /* = 0 */,
                                const Resource& context /* = null_object */) {
   HostURL hosturl(static_cast<const std::string>(remote_socket));
-  return sockopen_impl(hosturl, errnum, errstr, timeout, false);
+  return sockopen_impl(hosturl, errnum, errstr, timeout, false, context);
 }
 
 Variant f_stream_socket_get_name(const Resource& handle, bool want_peer) {

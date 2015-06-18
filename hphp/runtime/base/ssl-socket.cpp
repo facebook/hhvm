@@ -10,6 +10,7 @@
    | http://www.php.net/license/3_01.txt                                  |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
+k/
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
@@ -18,6 +19,7 @@
 #include "hphp/runtime/base/complex-types.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/ext/stream/ext_stream.h"
 #include "folly/String.h"
 #include <poll.h>
 #include <sys/time.h>
@@ -112,6 +114,10 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
                       cafile.data(), capath.data());
         return nullptr;
       }
+    } else if (m_client && !SSL_CTX_set_default_verify_paths(ctx)) {
+      raise_warning(
+        "Unable to set default verify locations and no CA settings specified");
+      return nullptr;
     }
 
     int64_t depth = m_context[s_verify_depth].toInt64();
@@ -185,12 +191,22 @@ SSLSocket::SSLSocket()
       m_state_set(false), m_is_blocked(true) {
 }
 
-SSLSocket::SSLSocket(int sockfd, int type, const char *address /* = NULL */,
-                     int port /* = 0 */)
+const StaticString s_ssl("ssl");
+
+SSLSocket::SSLSocket(int sockfd, int type, const Resource& ctx,
+                     const char *address /* = NULL */, int port /* = 0 */)
     : Socket(sockfd, type, address, port),
       m_handle(nullptr), m_ssl_active(false), m_method((CryptoMethod)-1),
       m_client(false), m_connect_timeout(0), m_enable_on_connect(false),
       m_state_set(false), m_is_blocked(true) {
+  if (!ctx.get()) {
+    return;
+  }
+
+  Resource mutableCtx(ctx);
+  this->setStreamContext(mutableCtx);
+  this->m_context = ctx.getTyped<StreamContext>()
+    ->getOptions()[s_ssl].toArray();
 }
 
 SSLSocket::~SSLSocket() {
@@ -309,7 +325,8 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SSLSocket *SSLSocket::Create(const HostURL &hosturl, double timeout) {
+SSLSocket *SSLSocket::Create(
+  const HostURL &hosturl, double timeout, const Resource& ctx) {
   CryptoMethod method;
   const std::string scheme = hosturl.getScheme();
 
@@ -327,7 +344,7 @@ SSLSocket *SSLSocket::Create(const HostURL &hosturl, double timeout) {
 
   int domain = hosturl.isIPv6() ? AF_INET6 : AF_INET;
   int type = SOCK_STREAM;
-  SSLSocket *sock = new SSLSocket(socket(domain, type, 0), domain,
+  SSLSocket *sock = new SSLSocket(socket(domain, type, 0), domain, ctx,
                                   hosturl.getHost().c_str(),
                                   hosturl.getPort());
   sock->m_method = method;
@@ -396,6 +413,10 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
   if (m_handle) {
     raise_warning("SSL/TLS already set-up for this stream");
     return false;
+  }
+
+  if (!m_context.exists(s_verify_peer)) {
+    m_context.add(s_verify_peer, true);
   }
 
   /* need to do slightly different things, based on client/server method,
@@ -521,6 +542,10 @@ bool SSLSocket::applyVerificationPolicy(X509 *peer) {
       return false;
     } else if (name_len != (int)strlen(buf)) {
       raise_warning("Peer certificate CN=`%.*s' is malformed", name_len, buf);
+      return false;
+    } else if (name_len == sizeof(buf)) {
+      raise_warning("Peer certificate CN=`%.*s' is too long to verify",
+                    name_len, buf);
       return false;
     }
 

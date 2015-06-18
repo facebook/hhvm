@@ -45,11 +45,13 @@ public:
   };
 
   static int GetSSLExDataIndex();
-  static SSLSocket *Create(const HostURL &hosturl, double timeout);
+  static SSLSocket *Create(const HostURL &hosturl, double timeout,
+                           const Resource& ctx);
 
 public:
   SSLSocket();
-  SSLSocket(int sockfd, int type, const char *address = nullptr, int port = 0);
+  SSLSocket(int sockfd, int type, const Resource& ctx,
+            const char *address = nullptr, int port = 0);
   virtual ~SSLSocket();
   void sweep() FOLLY_OVERRIDE;
 

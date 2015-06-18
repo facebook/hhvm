@@ -136,7 +136,7 @@ int HttpClient::request(const char* verb,
   curl_easy_setopt(cp, CURLOPT_DNS_USE_GLOBAL_CACHE, 0); // for thread-safe
   curl_easy_setopt(cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
   curl_easy_setopt(cp, CURLOPT_NOSIGNAL, 1); // for multithreading mode
-  curl_easy_setopt(cp, CURLOPT_SSL_VERIFYPEER,    0);
+  curl_easy_setopt(cp, CURLOPT_SSL_VERIFYPEER,    1);
   curl_easy_setopt(cp, CURLOPT_SSL_CTX_FUNCTION, curl_tls_workarounds_cb);
 
   /*
@@ -214,8 +214,9 @@ int HttpClient::request(const char* verb,
 
   if (m_stream_context_options[s_ssl].isArray()) {
     const Array ssl = m_stream_context_options[s_ssl].toArray();
-    if (ssl[s_verify_peer].toBoolean()) {
-      curl_easy_setopt(cp, CURLOPT_SSL_VERIFYPEER, 1);
+    if (ssl.exists(s_verify_peer)) {
+      curl_easy_setopt(cp, CURLOPT_SSL_VERIFYPEER,
+                       ssl[s_verify_peer].toBoolean());
     }
     if (ssl.exists(s_capath)) {
       curl_easy_setopt(cp, CURLOPT_CAPATH,

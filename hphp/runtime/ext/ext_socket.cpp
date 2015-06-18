@@ -1074,7 +1074,8 @@ void f_socket_clear_error(const Resource& socket /* = null_object */) {
 // fsock: treating sockets as "file"
 
 Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
-                      VRefParam errstr, double timeout, bool persistent) {
+                      VRefParam errstr, double timeout, bool persistent,
+                      const Resource& ctx) {
 
   std::string key;
   if (persistent) {
@@ -1102,7 +1103,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
       m_reqInjectionData.getSocketDefaultTimeout();
   }
   // test if protocol is SSL
-  SSLSocket *sslsock = SSLSocket::Create(hosturl, timeout);
+  SSLSocket *sslsock = SSLSocket::Create(hosturl, timeout, ctx);
   if (sslsock) {
     sock = sslsock;
     ret = sock;
@@ -1193,7 +1194,7 @@ Variant HHVM_FUNCTION(fsockopen, const String& hostname, int port /* = -1 */,
                       VRefParam errstr /* = null */,
                       double timeout /* = -1.0 */) {
   HostURL hosturl(static_cast<const std::string>(hostname), port);
-  return sockopen_impl(hosturl, errnum, errstr, timeout, false);
+  return sockopen_impl(hosturl, errnum, errstr, timeout, false, null_resource);
 }
 
 Variant HHVM_FUNCTION(pfsockopen, const String& hostname, int port /* = -1 */,
@@ -1201,7 +1202,7 @@ Variant HHVM_FUNCTION(pfsockopen, const String& hostname, int port /* = -1 */,
                                   VRefParam errstr /* = null */,
                                   double timeout /* = -1.0 */) {
   HostURL hosturl(static_cast<const std::string>(hostname), port);
-  return sockopen_impl(hosturl, errnum, errstr, timeout, true);
+  return sockopen_impl(hosturl, errnum, errstr, timeout, true, null_resource);
 }
 
 String ipaddr_convert(struct sockaddr *addr, int addrlen) {

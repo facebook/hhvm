@@ -105,6 +105,10 @@ File* HttpStreamWrapper::open(const String& filename, const String& mode,
   file = std::unique_ptr<UrlFile>(NEWOBJ(UrlFile)(method.data(), headers,
                                                   post_data, max_redirs,
                                                   timeout, ignore_errors));
+  if (context.isResource()) {
+    auto ctxres = context.toResource();
+    file->setStreamContext(ctxres);
+  }
   bool ret = file->open(filename, mode);
   if (!ret) {
     raise_warning("Failed to open %s (%s)", filename.data(),

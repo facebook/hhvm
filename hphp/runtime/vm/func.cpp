@@ -169,7 +169,14 @@ void Func::destroy(Func* func) {
 Func* Func::clone(Class* cls, const StringData* name) const {
   auto numParams = this->numParams();
 
-  Func* f = (name || m_cloned.flag.test_and_set())
+  // If this is a PreFunc (i.e., a Func on a PreClass) that is not already
+  // being used as a regular Func by a Class, and we aren't trying to change
+  // its name (since the name is part of the template for later clones), we can
+  // reuse this same Func as the clone.
+  bool const can_reuse =
+    m_isPreFunc && !name && !m_cloned.flag.test_and_set();
+
+  Func* f = !can_reuse
     ? new (allocFuncMem(numParams, isClosureBody())) Func(*this)
     : const_cast<Func*>(this);
 

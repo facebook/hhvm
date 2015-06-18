@@ -6762,9 +6762,10 @@ OPTBLD_INLINE void iopEval(IOP_ARGS) {
   auto vm = &*g_context;
   string_printf(
     evalFilename,
-    "%s(%d" EVAL_FILENAME_SUFFIX,
+    "%s(%d)(%s" EVAL_FILENAME_SUFFIX,
     vm->getContainingFileName()->data(),
-    vm->getLine()
+    vm->getLine(),
+    string_md5(code.data(), code.size()).c_str()
   );
   Unit* unit = vm->compileEvalString(prefixedCode.get(), evalFilename.c_str());
 

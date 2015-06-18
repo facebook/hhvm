@@ -216,7 +216,9 @@ class ArrayDataPrinter(object):
             elt = self.cur
 
             try:
-                if elt['data']['m_aux']['u_hash'] == 0:
+                if elt['data']['m_type'] == -1:
+                    key = '<deleted>'
+                elif elt['data']['m_aux']['u_hash'] < 0:
                     key = '%d' % elt['ikey']
                 else:
                     key = '"%s"' % string_data_val(elt['skey'].dereference())
@@ -256,7 +258,11 @@ class ArrayDataPrinter(object):
 
         kind = str(self.kind)[len('HPHP::ArrayData::'):]
 
-        return "ArrayData[%s]: %d element(s)" % (kind, self.val['m_size'])
+        return "ArrayData[%s]: %d element(s) refcount=%d" % (
+            kind,
+            self.val['m_size'],
+            self.val['m_hdr']['count']
+        )
 
     def children(self):
         data = self.val.address.cast(T('char').pointer()) + \
@@ -264,14 +270,11 @@ class ArrayDataPrinter(object):
 
         if self.kind == self._kind('Packed'):
             pelm = data.cast(T('HPHP::TypedValue').pointer())
-            iter_class = self._packed_iterator
-        elif self.kind == self._kind('Mixed'):
+            return self._packed_iterator(pelm, pelm + self.val['m_size'])
+        if self.kind == self._kind('Mixed'):
             pelm = data.cast(T('HPHP::MixedArray::Elm').pointer())
-            iter_class = self._mixed_iterator
-        else:
-            return self._packed_iterator(0, 0)
-
-        return iter_class(pelm, pelm + self.val['m_size'])
+            return self._mixed_iterator(pelm, pelm + self.val['m_used'])
+        return self._packed_iterator(0, 0)
 
     def _kind(self, kind):
         return K('HPHP::ArrayData::k' + kind + 'Kind')

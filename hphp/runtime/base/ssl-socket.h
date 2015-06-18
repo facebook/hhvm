@@ -48,10 +48,12 @@ struct SSLSocket : Socket {
 
   static int GetSSLExDataIndex();
   static SmartPtr<SSLSocket> Create(int fd, int domain, const HostURL &hosturl,
-                                    double timeout);
+                                    double timeout,
+                                    const SmartPtr<StreamContext>& ctx);
 
   SSLSocket();
-  SSLSocket(int sockfd, int type, const char *address = nullptr, int port = 0);
+  SSLSocket(int sockfd, int type, const SmartPtr<StreamContext>& ctx,
+            const char *address = nullptr, int port = 0);
   virtual ~SSLSocket();
   DECLARE_RESOURCE_ALLOCATION(SSLSocket);
 

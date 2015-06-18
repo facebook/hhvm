@@ -49,6 +49,8 @@ struct UniqueStubs {
    */
   TCA retHelper;
   TCA genRetHelper;  // version for generators
+  TCA asyncGenRetHelper;  // version for async generators
+
 
   /*
    * Returning from a function when the ActRec was called from jitted code but
@@ -58,6 +60,7 @@ struct UniqueStubs {
    */
   TCA debuggerRetHelper;
   TCA debuggerGenRetHelper;
+  TCA debuggerAsyncGenRetHelper;
 
   /*
    * Returning from a function where the ActRec was pushed by an

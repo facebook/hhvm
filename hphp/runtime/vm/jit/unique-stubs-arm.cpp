@@ -50,8 +50,12 @@ void emitReturnHelpers(UniqueStubs& us) {
   us.genRetHelper = a.frontier();
   a.   Brk   (0);
 
+  us.asyncGenRetHelper = a.frontier();
+  a.   Brk   (0);
+
   us.add("retHelper", us.retHelper);
   us.add("genRetHelper", us.genRetHelper);
+  us.add("asyncGenRetHelper", us.asyncGenRetHelper);
   us.add("retInlHelper", us.retInlHelper);
 }
 

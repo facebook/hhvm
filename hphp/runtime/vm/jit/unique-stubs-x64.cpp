@@ -59,6 +59,7 @@ TCA emitRetFromInterpretedFrame() {
   return ret;
 }
 
+template <bool async>
 TCA emitRetFromInterpretedGeneratorFrame() {
   Asm a { mcg->code.cold() };
   moveToAlign(mcg->code.cold());
@@ -93,6 +94,7 @@ TCA emitDebuggerRetFromInterpretedFrame() {
   return ret;
 }
 
+template <bool async>
 TCA emitDebuggerRetFromInterpretedGenFrame() {
   Asm a { mcg->code.cold() };
   moveToAlign(a.code());
@@ -152,12 +154,16 @@ void emitCallToExit(UniqueStubs& uniqueStubs) {
 void emitReturnHelpers(UniqueStubs& us) {
   us.retHelper    = us.add("retHelper", emitRetFromInterpretedFrame());
   us.genRetHelper = us.add("genRetHelper",
-                           emitRetFromInterpretedGeneratorFrame());
+                           emitRetFromInterpretedGeneratorFrame<false>());
+  us.asyncGenRetHelper = us.add("asyncGenRetHelper",
+                           emitRetFromInterpretedGeneratorFrame<true>());
   us.retInlHelper = us.add("retInlHelper", emitRetFromInterpretedFrame());
   us.debuggerRetHelper =
     us.add("debuggerRetHelper", emitDebuggerRetFromInterpretedFrame());
-  us.debuggerGenRetHelper =
-    us.add("debuggerGenRetHelper", emitDebuggerRetFromInterpretedGenFrame());
+  us.debuggerGenRetHelper = us.add("debuggerGenRetHelper",
+    emitDebuggerRetFromInterpretedGenFrame<false>());
+  us.debuggerAsyncGenRetHelper = us.add("debuggerAsyncGenRetHelper",
+    emitDebuggerRetFromInterpretedGenFrame<true>());
 }
 
 void emitResumeInterpHelpers(UniqueStubs& uniqueStubs) {

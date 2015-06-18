@@ -139,6 +139,7 @@ static bool isReturnHelper(void* address) {
   auto& u = mcg->tx().uniqueStubs;
   return tcAddr == u.retHelper ||
          tcAddr == u.genRetHelper ||
+         tcAddr == u.asyncGenRetHelper ||
          tcAddr == u.retInlHelper ||
          tcAddr == u.callToExit;
 }
@@ -147,7 +148,8 @@ bool isDebuggerReturnHelper(void* address) {
   auto tcAddr = reinterpret_cast<jit::TCA>(address);
   auto& u = mcg->tx().uniqueStubs;
   return tcAddr == u.debuggerRetHelper ||
-         tcAddr == u.debuggerGenRetHelper;
+         tcAddr == u.debuggerGenRetHelper ||
+         tcAddr == u.debuggerAsyncGenRetHelper;
 }
 
 ActRec* ActRec::sfp() const {
@@ -2828,7 +2830,14 @@ void unwindPreventReturnToTC(ActRec* ar) {
   if (isReturnHelper(savedRip)) return;
 
   auto& ustubs = mcg->tx().uniqueStubs;
-  ar->setJitReturn(ar->resumed() ? ustubs.genRetHelper : ustubs.retHelper);
+  if (ar->resumed()) {
+    // async functions use callToExit stub
+    assert(ar->func()->isGenerator());
+    ar->setJitReturn(ar->func()->isAsync()
+      ? ustubs.asyncGenRetHelper : ustubs.genRetHelper);
+  } else {
+    ar->setJitReturn(ustubs.retHelper);
+  }
 }
 
 void debuggerPreventReturnToTC(ActRec* ar) {
@@ -2845,8 +2854,14 @@ void debuggerPreventReturnToTC(ActRec* ar) {
   jit::pushDebuggerCatch(ar);
 
   auto& ustubs = mcg->tx().uniqueStubs;
-  ar->setJitReturn(ar->resumed() ? ustubs.debuggerGenRetHelper
-                                 : ustubs.debuggerRetHelper);
+  if (ar->resumed()) {
+    // async functions use callToExit stub
+    assert(ar->func()->isGenerator());
+    ar->setJitReturn(ar->func()->isAsync()
+      ? ustubs.debuggerAsyncGenRetHelper : ustubs.debuggerGenRetHelper);
+  } else {
+    ar->setJitReturn(ustubs.debuggerRetHelper);
+  }
 }
 
 // Walk the stack and find any return address to jitted code and bash it to the
@@ -7103,7 +7118,9 @@ OPTBLD_INLINE void contEnterImpl(PC& pc) {
   BaseGenerator* gen = this_base_generator(vmfp());
   assert(gen->getState() == BaseGenerator::State::Running);
   ActRec* genAR = gen->actRec();
-  genAR->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.genRetHelper);
+  genAR->setReturn(vmfp(), pc, genAR->func()->isAsync() ?
+    mcg->tx().uniqueStubs.asyncGenRetHelper :
+    mcg->tx().uniqueStubs.genRetHelper);
 
   vmfp() = genAR;
 

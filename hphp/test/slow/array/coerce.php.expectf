@@ -1,0 +1,5 @@
+Warning:%slookup() expects parameter 1 to be array, object given in %s
+bool(false)
+
+Warning:%slookup() expects parameter 1 to be array, resource given in %s
+bool(false)

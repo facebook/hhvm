@@ -243,7 +243,7 @@ class Locale {
    * @return string - The closest matching language tag or default
    *   value.
    */
-  <<__Native>>
+  <<__Native, __ParamCoerceModeFalse>>
   public static function lookup(array $langtag,
                                 string $locale,
                                 bool $canonicalize = false,

@@ -686,12 +686,13 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
       return true;
 
     case KindOfObject:
-      tvAsVariant(tv) = tv->m_data.pobj->toArray();
-      return true;
-
+      if (LIKELY(tv->m_data.pobj->isCollection())) {
+        tvAsVariant(tv) = tv->m_data.pobj->toArray();
+        return true;
+      }
+      return false;
     case KindOfResource:
-      tvAsVariant(tv) = tv->m_data.pres->o_toArray();
-      return true;
+      return false;
 
     case KindOfRef:
     case KindOfClass:

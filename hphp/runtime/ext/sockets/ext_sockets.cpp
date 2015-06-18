@@ -403,6 +403,7 @@ static int connect_with_timeout(int fd, struct sockaddr *sa_ptr,
 }
 
 static Variant new_socket_connect(const HostURL &hosturl, int timeout,
+                                  const SmartPtr<StreamContext>& streamctx,
                                   Variant &errnum, Variant &errstr) {
   int domain = AF_UNSPEC;
   int type = SOCK_STREAM;
@@ -472,7 +473,7 @@ static Variant new_socket_connect(const HostURL &hosturl, int timeout,
       fd = -1;
     }
 
-    sslsock = SSLSocket::Create(fd, domain, hosturl, timeout);
+    sslsock = SSLSocket::Create(fd, domain, hosturl, timeout, streamctx);
     if (sslsock) {
       sock = sslsock;
     } else {
@@ -1343,7 +1344,8 @@ thread_local std::unordered_map<
 }
 
 Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
-                      VRefParam errstr, double timeout, bool persistent) {
+                      VRefParam errstr, double timeout, bool persistent,
+                      const Variant& context) {
   errnum = 0;
   errstr = empty_string();
   std::string key;
@@ -1370,7 +1372,12 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
       m_reqInjectionData.getSocketDefaultTimeout();
   }
 
-  auto socket = new_socket_connect(hosturl, timeout, errnum, errstr);
+
+  SmartPtr<StreamContext> streamctx;
+  if (context.isResource()) {
+    streamctx = cast<StreamContext>(context.toResource());
+  }
+  auto socket = new_socket_connect(hosturl, timeout, streamctx, errnum, errstr);
   if (!socket.isResource()) {
     return false;
   }
@@ -1393,7 +1400,7 @@ Variant HHVM_FUNCTION(fsockopen,
                       VRefParam errstr /* = null */,
                       double timeout /* = -1.0 */) {
   HostURL hosturl(static_cast<const std::string>(hostname), port);
-  return sockopen_impl(hosturl, errnum, errstr, timeout, false);
+  return sockopen_impl(hosturl, errnum, errstr, timeout, false, null_variant);
 }
 
 Variant HHVM_FUNCTION(pfsockopen,
@@ -1403,7 +1410,7 @@ Variant HHVM_FUNCTION(pfsockopen,
                       VRefParam errstr /* = null */,
                       double timeout /* = -1.0 */) {
   HostURL hosturl(static_cast<const std::string>(hostname), port);
-  return sockopen_impl(hosturl, errnum, errstr, timeout, true);
+  return sockopen_impl(hosturl, errnum, errstr, timeout, true, null_variant);
 }
 
 String ipaddr_convert(struct sockaddr *addr, int addrlen) {

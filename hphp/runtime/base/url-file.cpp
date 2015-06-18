@@ -70,6 +70,10 @@ bool UrlFile::open(const String& input_url, const String& mode) {
     return false;
   }
   HttpClient http(m_timeout, m_maxRedirect);
+  auto ctx = this->getStreamContext();
+  if (ctx) {
+    http.setStreamContextOptions(ctx->getOptions());
+  }
   m_response.clear();
 
   HeaderMap *pHeaders = nullptr;

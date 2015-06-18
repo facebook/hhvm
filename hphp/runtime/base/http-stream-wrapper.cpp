@@ -105,6 +105,7 @@ HttpStreamWrapper::open(const String& filename,
   auto file = makeSmartPtr<UrlFile>(method.data(), headers,
                                     post_data, max_redirs,
                                     timeout, ignore_errors);
+  file->setStreamContext(context);
   bool ret = file->open(filename, mode);
   if (!ret) {
     raise_warning("Failed to open %s (%s)", filename.data(),

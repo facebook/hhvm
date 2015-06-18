@@ -685,7 +685,7 @@ Variant HHVM_FUNCTION(stream_socket_client,
                       int flags /* = 0 */,
                       const Variant& context /* = null_variant */) {
   HostURL hosturl(static_cast<const std::string>(remote_socket));
-  return sockopen_impl(hosturl, errnum, errstr, timeout, false);
+  return sockopen_impl(hosturl, errnum, errstr, timeout, false, context);
 }
 
 Variant HHVM_FUNCTION(stream_socket_get_name,

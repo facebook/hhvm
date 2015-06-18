@@ -158,7 +158,8 @@ Variant socket_server_impl(const HostURL &hosturl,
                            VRefParam errnum = uninit_null(),
                            VRefParam errstr = uninit_null());
 Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
-                      VRefParam errstr, double timeout, bool persistent);
+                      VRefParam errstr, double timeout, bool persistent,
+                      const Variant& context);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

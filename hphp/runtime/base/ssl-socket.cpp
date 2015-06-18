@@ -128,6 +128,10 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
                       cafile.data(), capath.data());
         return nullptr;
       }
+    } else if (m_data->m_client && !SSL_CTX_set_default_verify_paths(ctx)) {
+      raise_warning(
+        "Unable to set default verify locations and no CA settings specified");
+      return nullptr;
     }
 
     int64_t depth = m_context[s_verify_depth].toInt64();
@@ -200,11 +204,19 @@ SSLSocket::SSLSocket()
   m_data(static_cast<SSLSocketData*>(getSocketData()))
 {}
 
-SSLSocket::SSLSocket(int sockfd, int type, const char *address /* = NULL */,
-                     int port /* = 0 */)
+StaticString s_ssl("ssl");
+
+SSLSocket::SSLSocket(int sockfd, int type, const SmartPtr<StreamContext>& ctx,
+                     const char *address /* = NULL */, int port /* = 0 */)
 : Socket(std::make_shared<SSLSocketData>(), sockfd, type, address, port),
   m_data(static_cast<SSLSocketData*>(getSocketData()))
-{}
+{
+  if (!ctx) {
+    return;
+  }
+  this->setStreamContext(ctx);
+  this->m_context = ctx->getOptions()[s_ssl].toArray();
+}
 
 SSLSocket::~SSLSocket() { }
 
@@ -322,7 +334,8 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
 ///////////////////////////////////////////////////////////////////////////////
 
 SmartPtr<SSLSocket> SSLSocket::Create(
-  int fd, int domain, const HostURL &hosturl, double timeout) {
+  int fd, int domain, const HostURL &hosturl, double timeout,
+  const SmartPtr<StreamContext>& ctx) {
   CryptoMethod method;
   const std::string scheme = hosturl.getScheme();
 
@@ -339,7 +352,7 @@ SmartPtr<SSLSocket> SSLSocket::Create(
   }
 
   auto sock = makeSmartPtr<SSLSocket>(
-    fd, domain, hosturl.getHost().c_str(), hosturl.getPort());
+    fd, domain, ctx, hosturl.getHost().c_str(), hosturl.getPort());
 
   sock->m_data->m_method = method;
   sock->m_data->m_connect_timeout = timeout;
@@ -390,6 +403,10 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
   if (m_data->m_handle) {
     raise_warning("SSL/TLS already set-up for this stream");
     return false;
+  }
+
+  if (!m_context.exists(s_verify_peer)) {
+    m_context.add(s_verify_peer, true);
   }
 
   /* need to do slightly different things, based on client/server method,
@@ -515,6 +532,10 @@ bool SSLSocket::applyVerificationPolicy(X509 *peer) {
       return false;
     } else if (name_len != (int)strlen(buf)) {
       raise_warning("Peer certificate CN=`%.*s' is malformed", name_len, buf);
+      return false;
+    } else if (name_len == sizeof(buf)) {
+      raise_warning("Peer certificate CN=`%.*s' is too long to verify",
+                    name_len, buf);
       return false;
     }
 

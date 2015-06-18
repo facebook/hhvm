@@ -615,7 +615,7 @@ asm_label(a, skip);
 }
 
 void emitFunctionSurprisedOrStackOverflow(UniqueStubs& uniqueStubs) {
-  Asm a { mcg->code.cold() }; // TODO(#7345557): others in hot for some reason?
+  Asm a { mcg->code.cold() };
 
   moveToAlign(mcg->code.main());
   uniqueStubs.functionSurprisedOrStackOverflow = a.frontier();

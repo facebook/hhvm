@@ -582,17 +582,26 @@ function hhvm_cmd($options, $test, $test_run = null) {
     escapeshellarg($test_run)
   );
 
+  // Special support for tests that require a path to the current
+  // test directory for things like prepend_file and append_file
+  // testing
   if (file_exists($test.'.ini')) {
-    file_put_contents($test_ini = tempnam('/tmp', $test).'.ini',
-                      str_replace('{PWD}', dirname($test),
-                                  file_get_contents($test.'.ini')));
-    $cmd .= " -c $test_ini";
+    $contents = file_get_contents($test.'.ini');
+    if (strpos($contents, '{PWD}') !== false) {
+      $test_ini = tempnam('/tmp', $test).'.ini';
+      file_put_contents($test_ini,
+                        str_replace('{PWD}', dirname($test), $contents));
+      $cmd .= " -c $test_ini";
+    }
   }
   if ($hdf !== "") {
-    file_put_contents($test_hdf = tempnam('/tmp', $test).$hdf_suffix,
-                      str_replace('{PWD}', dirname($test),
-                                  file_get_contents($test.$hdf_suffix)));
-    $cmd .= " -c $test_hdf";
+    $contents = file_get_contents($test.$hdf_suffix);
+    if (strpos($contents, '{PWD}') !== false) {
+      $test_hdf = tempnam('/tmp', $test).$hdf_suffix;
+      file_put_contents($test_hdf,
+                        str_replace('{PWD}', dirname($test), $contents));
+      $cmd .= " -c $test_hdf";
+    }
   }
 
   if (isset($options['repo'])) {

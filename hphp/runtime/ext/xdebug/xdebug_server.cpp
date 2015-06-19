@@ -363,19 +363,21 @@ void XDebugServer::pollSocketLoop() {
     // it enter the jit.
     m_requestThread->m_reqInjectionData.setDebuggerIntr(false);
 
-    // Check if there is any input waiting on us.
-    if (!poll_socket(m_socket)) {
-      continue;
-    }
+    if (m_bufferAvail == 0) {
+      // Check if there is any input waiting on us.
+      if (!poll_socket(m_socket)) {
+        continue;
+      }
 
-    // Actually get the input from the socket.
-    if (!readInput()) {
-      log("Polling thread had input but failed to read it\n");
-      continue;
+      // Actually get the input from the socket.
+      if (!readInput()) {
+        log("Polling thread had input but failed to read it\n");
+        continue;
+      }
     }
 
     try {
-      log("Polling thread received: %s\n", m_buffer);
+      log("Polling thread received: %s\n", m_bufferCur);
       auto cmd = parseCommand();
       if (cmd->getCommandStr() != "break") {
         delete cmd;
@@ -397,7 +399,7 @@ void XDebugServer::pollSocketLoop() {
       m_requestThread->m_reqInjectionData.setDebuggerIntr(true);
       m_requestThread->m_reqInjectionData.setFlag(DebuggerSignalFlag);
     } catch (const XDebugError& error) {
-      log("Polling thread got invalid command: %s\n", m_buffer);
+      log("Polling thread got invalid command: %s\n", m_bufferCur);
       // Can drop the error.
     }
   }
@@ -803,8 +805,9 @@ bool XDebugServer::doCommandLoop() {
       return true;
     }
 
-    // Read from socket, store into m_buffer. On failure, return.
-    if (!readInput()) {
+    // If we have no input buffered, read from socket, store into m_buffer.
+    // On failure, return.
+    if (m_bufferAvail == 0 && !readInput()) {
       return false;
     }
 
@@ -838,6 +841,7 @@ bool XDebugServer::doCommandLoop() {
 }
 
 bool XDebugServer::readInput() {
+  assert(m_bufferAvail == 0);
   size_t bytes_read = 0;
   do {
     size_t bytes_left = m_bufferSize - bytes_read;
@@ -856,12 +860,16 @@ bool XDebugServer::readInput() {
     }
     bytes_read += res;
   } while (m_buffer[bytes_read - 1] != '\0');
+  m_bufferAvail = bytes_read;
+  m_bufferCur = m_buffer;
   return true;
 }
 
 XDebugCommand* XDebugServer::parseCommand() {
+  assert(m_bufferAvail > 0);
+
   // Log the passed in command
-  log("<- %s\n", m_buffer);
+  log("<- %s\n", m_bufferCur);
   logFlush();
 
   // Attempt to parse the input.  parseInput will initialize cmd_str and args.
@@ -871,11 +879,18 @@ XDebugCommand* XDebugServer::parseCommand() {
   // If we're being sent chrome debugger commands, then convert them to dbgp
   // first.
   std::string chrome_input;
-  folly::StringPiece input(m_buffer);
+  folly::StringPiece input(m_bufferCur);
   if (RuntimeOption::XDebugChrome) {
     chrome_input = chrome_to_dbgp(input);
     input = chrome_input;
   }
+
+  // Bump the current buffer pointer forward *before* calling parseInput, so we
+  // don't get stuck in an infinite loop if parseInput throws.
+  auto consumed = strlen(m_bufferCur) + 1;
+  assert(consumed <= m_bufferAvail);
+  m_bufferCur += consumed;
+  m_bufferAvail -= consumed;
 
   parseInput(input, cmd_str, args);
 

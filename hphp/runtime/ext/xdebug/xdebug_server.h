@@ -194,6 +194,8 @@ private:
 
   const XDebugCommand* m_lastCommand = nullptr;
   char* m_buffer = nullptr;
+  char* m_bufferCur = nullptr;
+  size_t m_bufferAvail = 0;
   size_t m_bufferSize = 0;
 
   AsyncFunc<XDebugServer> m_pollingThread;

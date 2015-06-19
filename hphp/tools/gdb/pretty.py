@@ -163,7 +163,7 @@ class ResourcePrinter(SmartPtrPrinter):
 
 
 class LowPtrPrinter(PtrPrinter):
-    RECOGNIZE = '^HPHP::(LowPtr<.*>|LowPtrImpl<.*>)$'
+    RECOGNIZE = '^HPHP::(LowPtr<.*>|detail::LowPtrImpl<.*>)$'
 
     def __init__(self, val):
         self.val = val
@@ -173,7 +173,7 @@ class LowPtrPrinter(PtrPrinter):
 
     def _pointer(self):
         inner = self.val.type.template_argument(0)
-        return self.val['m_raw'].cast(inner.pointer())
+        return self.val['m_s'].cast(inner.pointer())
 
 
 #------------------------------------------------------------------------------

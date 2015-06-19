@@ -245,7 +245,7 @@ def rawptr(val):
 
     if name == 'HPHP::LowPtr' or name == 'HPHP::LowPtrImpl':
         inner = t.template_argument(0)
-        return val['m_raw'].cast(inner.pointer())
+        return val['m_s'].cast(inner.pointer())
 
     if name == 'HPHP::CompactTaggedPtr':
         inner = t.template_argument(0)

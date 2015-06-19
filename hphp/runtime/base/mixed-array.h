@@ -235,6 +235,7 @@ private:
   using ArrayData::release;
 public:
   static Variant CreateVarForUncountedArray(const Variant& source);
+  static void ConvertTvToUncounted(TypedValue* source);
   static void ReleaseUncountedTypedValue(TypedValue& tv);
 
   static size_t Vsize(const ArrayData*);
@@ -380,10 +381,7 @@ private:
 private:
   enum class AllocMode : bool { Smart, NonSmart };
 
-  template<class CopyKeyValue>
-  static MixedArray* CopyMixed(const MixedArray& other,
-                               AllocMode,
-                               CopyKeyValue);
+  static MixedArray* CopyMixed(const MixedArray& other, AllocMode);
   static MixedArray* CopyReserve(const MixedArray* src, size_t expectedSize);
 
   MixedArray() = delete;
@@ -393,8 +391,14 @@ private:
 
 private:
   static void initHash(int32_t* table, uint32_t scale);
-  static int32_t* copyHash(int32_t* to, const int32_t* from, size_t tableSize);
-  static Elm* copyElms(Elm* to, const Elm* from, size_t count);
+  static void copyHash(int32_t* to, const int32_t* from, uint32_t scale);
+  // Copy elements as well as `m_nextKI' from one MixedArray to another.
+  // Warning: it could copy up to 24 bytes beyond the array and thus overwrite
+  // the hashtable, but it never reads/writes beyond the end of the hash
+  // table.  If you use this function, make sure you copy/write the correct
+  // data on the hash table afterwards.
+  static void copyElmsNextUnsafe(MixedArray* to, const MixedArray* from,
+                                 uint32_t nElems);
 
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
@@ -514,9 +518,9 @@ private:
    * when Grow()ing the array, that also checks for potentially
    * unbalanced entries because of hash collision.
    */
-  static void InsertCheckUnbalanced(MixedArray* ad, int32_t* table,
-                                    uint32_t mask,
-                                    Elm* iter, Elm* stop);
+  static MixedArray* InsertCheckUnbalanced(MixedArray* ad, int32_t* table,
+                                           uint32_t mask,
+                                           Elm* iter, Elm* stop);
   /*
    * grow() increases the hash table size and the number of slots for
    * elements by a factor of 2. grow() rebuilds the hash table, but it
@@ -556,7 +560,6 @@ private:
   int32_t* hashTab() const {
     return const_cast<int32_t*>(
       reinterpret_cast<int32_t const*>(
-        // Note: don't use `capacity()', this generates better code.
         data() + static_cast<size_t>(m_scale) * 3
       )
     );

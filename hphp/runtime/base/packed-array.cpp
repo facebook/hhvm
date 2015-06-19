@@ -58,7 +58,7 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
 
 ALWAYS_INLINE
 MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
-                                      size_t neededSize) {
+                                       size_t neededSize) {
   assert(PackedArray::checkInvariants(old));
 
   auto const oldSize = old->m_size;
@@ -108,13 +108,7 @@ MixedArray* PackedArray::ToMixed(ArrayData* old) {
   for (; i <= mask; ++i) {
     *dstHash++ = MixedArray::Empty;
   }
-
-  old->m_size = 0;
-  if (debug) {
-    // For debug builds, set m_pos to 0 as well to make the
-    // asserts in checkInvariants() happy.
-    old->m_pos = 0;
-  }
+  old->m_sizeAndPos = 0;
 
   assert(ad->checkInvariants());
   assert(!ad->isFull());
@@ -222,22 +216,14 @@ ArrayData* PackedArray::Grow(ArrayData* old) {
     move_strong_iterators(ad, old);
   }
 
-  // Steal the old array payload.  At the time of this writing, it was
-  // better not to reuse the memcpy return value here because gcc had
-  // `ad' in a callee saved register anyway.  The reg-to-reg move was
-  // smaller than subtracting sizeof(ArrayData) from rax to return.
   auto const oldSize = old->m_size;
-  old->m_size = 0;
-  if (debug) {
-    // For debug builds, set m_pos to 0 as well to make the
-    // asserts in checkInvariants() happy.
-    old->m_pos = 0;
-  }
-  std::memcpy(packedData(ad), packedData(old), oldSize * sizeof(TypedValue));
+  old->m_sizeAndPos = 0;                // zombie
+
+  memcpy16_inline(packedData(ad), packedData(old),
+                  oldSize * sizeof(TypedValue));
 
   // TODO(#2926276): it would be good to refactor callers to expect
   // our refcount to start at 1.
-
   assert(ad->m_pos == oldPos);
   assert(ad->getCount() == 0);
   assert(checkInvariants(ad));
@@ -312,6 +298,29 @@ ArrayData* PackedArray::ResizeIfNeeded(ArrayData* adIn) {
 }
 
 //////////////////////////////////////////////////////////////////////
+ALWAYS_INLINE
+void PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad) {
+  // Copy everything from `adIn' to `ad', including refcount, etc.
+  auto const size = adIn->m_size;
+  static_assert(sizeof(ArrayData) == 16 && sizeof(TypedValue) == 16, "");
+  memcpy16_inline(ad, adIn, (size + 1) * 16);
+  ad->setRefCount(0);
+
+  // Copy counted types correctly, especially RefData.
+  auto data = packedData(ad);
+  for (uint32_t i = 0; i < size; ++i) {
+    auto pTv = data + i;
+    if (UNLIKELY(pTv->m_type == KindOfRef)) {
+      auto ref = pTv->m_data.pref;
+      // See also tvDupFlatternVars()
+      if (!ref->isReferenced() && ref->tv()->m_data.parr != adIn) {
+        cellDup(*ref->tv(), *pTv);
+        continue;
+      }
+    }
+    tvRefcountedIncRef(pTv);
+  }
+}
 
 NEVER_INLINE
 ArrayData* PackedArray::Copy(const ArrayData* adIn) {
@@ -321,20 +330,12 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   auto const ad = static_cast<ArrayData*>(
     MM().objMalloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );
-  auto const size = adIn->m_size;
-  ad->m_sizeAndPos = adIn->m_sizeAndPos; // copy size, pos=0
-  ad->m_hdr.init(adIn->m_hdr, 0);
 
-  auto const srcData = packedData(adIn);
-  auto const stop    = srcData + size;
-  auto targetData    = reinterpret_cast<TypedValue*>(ad + 1);
-  for (auto ptr = srcData; ptr != stop; ++ptr, ++targetData) {
-    tvDupFlattenVars(ptr, targetData, adIn);
-  }
+  CopyPackedHelper(adIn, ad);
 
   assert(ad->isPacked());
-  assert(ad->cap() == cap);
-  assert(ad->m_size == size);
+  assert(ad->cap() == adIn->cap());
+  assert(ad->m_size == adIn->m_size);
   assert(ad->m_pos == adIn->m_pos);
   assert(ad->getCount() == 0);
   assert(checkInvariants(ad));
@@ -350,6 +351,7 @@ ArrayData* PackedArray::CopyWithStrongIterators(const ArrayData* ad) {
   return cpy;
 }
 
+NEVER_INLINE
 ArrayData* PackedArray::NonSmartCopy(const ArrayData* adIn) {
   assert(checkInvariants(adIn));
 
@@ -371,13 +373,7 @@ ArrayData* PackedArray::NonSmartCopy(const ArrayData* adIn) {
     ad = NonSmartCopyHelper(adIn);
   }
 
-  auto const srcData = packedData(adIn);
-  auto const size    = adIn->m_size;
-  auto const stop    = srcData + size;
-  auto targetData    = reinterpret_cast<TypedValue*>(ad + 1);
-  for (auto ptr = srcData; ptr != stop; ++ptr, ++targetData) {
-    tvDupFlattenVars(ptr, targetData, adIn);
-  }
+  CopyPackedHelper(adIn, ad);
 
   assert(ad->m_pos == adIn->m_pos);
   assert(ad->getCount() == 0);

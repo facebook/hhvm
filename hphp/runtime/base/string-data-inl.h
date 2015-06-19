@@ -16,8 +16,6 @@
 #ifndef incl_HPHP_RUNTIME_BASE_STRING_DATA_INL_H_
 #define incl_HPHP_RUNTIME_BASE_STRING_DATA_INL_H_
 
-#include "hphp/runtime/base/cap-code.h"
-
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -41,10 +39,6 @@ inline StringData* StringData::Make(const char* data, CopyStringMode) {
   return Make(data, strlen(data), CopyString);
 }
 
-inline StringData* StringData::Make(const StringData* s, CopyStringMode) {
-  return Make(s->slice(), CopyString);
-}
-
 //////////////////////////////////////////////////////////////////////
 // AttachString
 
@@ -57,11 +51,6 @@ inline StringData* StringData::Make(char* data, AttachStringMode) {
 
 //////////////////////////////////////////////////////////////////////
 // Concat creation
-
-inline StringData* StringData::Make(const StringData* s1,
-                                    const StringData* s2) {
-  return Make(s1->slice(), s2->slice());
-}
 
 inline StringData* StringData::Make(const StringData* s1, StringSlice s2) {
   return Make(s1->slice(), s2);
@@ -101,8 +90,7 @@ inline void StringData::setSize(int len) {
   assert(len >= 0 && len <= capacity() && !isImmutable());
   assert(!hasMultipleRefs());
   m_data[len] = 0;
-  m_len = len;
-  m_hash = 0;
+  m_lenAndHash = len;
   assert(checkSane());
 }
 
@@ -112,7 +100,7 @@ inline void StringData::checkStack() const {
 
 inline const char* StringData::data() const {
   // TODO: t1800106: re-enable this assert
-  //assert(m_data[size()] == 0); // all strings must be null-terminated
+  // assert(m_data[size()] == 0); // all strings must be null-terminated
   return m_data;
 }
 

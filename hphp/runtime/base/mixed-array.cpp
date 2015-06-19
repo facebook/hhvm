@@ -210,37 +210,40 @@ StructArray* MixedArray::MakeStructArray(
 }
 
 // for internal use by nonSmartCopy() and copyMixed()
-template<class CopyKeyValue>
 ALWAYS_INLINE
 MixedArray* MixedArray::CopyMixed(const MixedArray& other,
-                                  AllocMode mode,
-                                  CopyKeyValue copyKeyValue) {
-  assert(other.isMixed());
-
-  auto const scale  = other.m_scale;
+                                  AllocMode mode) {
+  auto const scale = other.m_scale;
   auto const ad = mode == AllocMode::Smart ? smartAllocArray(scale)
                                            : mallocArray(scale);
 
-  ad->m_sizeAndPos      = other.m_sizeAndPos;
-  ad->m_hdr.init(other.m_hdr, 0);
-  ad->m_scale_used      = other.m_scale_used;
-  ad->m_nextKI          = other.m_nextKI;
+  // Copy everything including tombstones.  We want to copy the elements and
+  // the hash separately, because the array may not be very full.
+  assertx(reinterpret_cast<uintptr_t>(ad) % 16 == 0);
+  assertx(reinterpret_cast<uintptr_t>(&other) % 16 == 0);
+  // Adding 24 bytes so that we can copy in 32-byte groups. This might
+  // overwrite the hash table, but won't overrun the allocated space as long as
+  // `malloc' returns multiple of 16 bytes.
+  bcopy32_inline(ad, &other,
+                 sizeof(MixedArray) + sizeof(Elm) * other.m_used + 24);
+  copyHash(ad->hashTab(), other.hashTab(), scale);
+  ad->setRefCount(0);
 
-  auto const data = mixedData(ad);
-  auto const hash = mixedHash(data, scale);
-  copyHash(hash, other.hashTab(), MixedArray::HashSize(scale));
-
-  // Copy the elements and bump up refcounts as needed.
-  auto const elms = other.data();
+  // Bump up refcounts as needed.
+  auto const elms = ad->data();
   for (uint32_t i = 0, limit = ad->m_used; i < limit; ++i) {
-    auto const& e = elms[i];
-    auto& te = data[i];
-    if (LIKELY(!e.isTombstone())) {
-      copyKeyValue(e, te, &other);
-    } else {
-      // Tombstone.
-      te.data.m_type = kInvalidDataType;
+    auto& e = elms[i];
+    if (UNLIKELY(e.isTombstone())) continue;
+    if (e.hasStrKey()) e.skey->incRefCount();
+    if (UNLIKELY(e.data.m_type == KindOfRef)) {
+      auto ref = e.data.m_data.pref;
+      // See also tvDupFlattenVars()
+      if (!ref->isReferenced() && ref->tv()->m_data.parr != &other) {
+        cellDup(*ref->tv(), *reinterpret_cast<Cell*>(&e.data));
+        continue;
+      }
     }
+    tvRefcountedIncRef(&e.data);
   }
 
   // We need to assert this up here before we possibly call compact (which
@@ -265,29 +268,12 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
 NEVER_INLINE ArrayData* MixedArray::NonSmartCopy(const ArrayData* in) {
   auto a = asMixed(in);
   assert(a->checkInvariants());
-  return CopyMixed(
-    *a,
-    AllocMode::NonSmart,
-    [&] (const Elm& from, Elm& to, const ArrayData* container) {
-      to.skey = from.skey;
-      to.data.hash() = from.data.hash();
-      if (to.hasStrKey()) to.skey->incRefCount();
-      tvDupFlattenVars(&from.data, &to.data, container);
-      assert(to.hash() == from.hash()); // ensure not clobbered.
-    }
-  );
+  return CopyMixed(*a, AllocMode::NonSmart);
 }
 
 NEVER_INLINE MixedArray* MixedArray::copyMixed() const {
   assert(checkInvariants());
-  return CopyMixed(*this, AllocMode::Smart,
-      [&](const Elm& from, Elm& to, const ArrayData* container) {
-        to.skey = from.skey;
-        to.data.hash() = from.data.hash();
-        if (to.hasStrKey()) to.skey->incRefCount();
-        tvDupFlattenVars(&from.data, &to.data, container);
-        assert(to.hash() == from.hash()); // ensure not clobbered.
-      });
+  return CopyMixed(*this, AllocMode::Smart);
 }
 
 ALWAYS_INLINE
@@ -358,38 +344,81 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
   not_reached();
 }
 
+// This function helps converting a TypedValue `source' to its uncounted form,
+// so that its lifetime can go beyond the current request.  It is used after
+// doing a raw copy of the array elements (without manipulating refcounts, as
+// an uncounted won't hold any reference to refcounted values.
+ALWAYS_INLINE
+void MixedArray::ConvertTvToUncounted(TypedValue* source) {
+  if (source->m_type == KindOfRef) { // unbox
+    auto const inner = source->m_data.pref->tv();
+    tvCopy(*inner, *source);
+  }
+  auto& type = source->m_type;
+  // `source' cannot be Ref here as we already did an unbox.  It won't be
+  // Object or Resource, as these should never appear in an uncounted array.
+  // Thus we only need to deal with strings/arrays.  Note that even if the
+  // string/array is already uncounted but not static, we still have to make a
+  // copy, as we have no idea about the lifetime of the other uncounted item
+  // here.
+  if (!tvIsStatic(source)) {
+    if (type == KindOfString) {
+      auto& str = source->m_data.pstr;
+      if (str->empty()) str = staticEmptyString();
+      else if (auto const st = lookupStaticString(str)) str = st;
+      else str = StringData::MakeUncounted(str->slice());
+    } else {
+      assertx(type == KindOfArray);
+      auto& ad = source->m_data.parr;
+      if (ad->empty()) ad = staticEmptyArray();
+      else if (ad->isPacked()) ad = MixedArray::MakeUncountedPacked(ad);
+      else if (ad->isStruct()) ad = StructArray::MakeUncounted(ad);
+      else ad = MixedArray::MakeUncounted(ad);
+    }
+  } else if (type == KindOfUninit) {
+    type = KindOfNull;
+  }
+}
+
 ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
   auto a = asMixed(array);
-  auto mixed = CopyMixed(
-    *a,
-    AllocMode::NonSmart,
-    [&] (const Elm& fr, Elm& to, const ArrayData* container) {
-      to.data.hash() = fr.data.hash();
-      if (to.hasStrKey()) {
-        auto const st = lookupStaticString(fr.skey);
-        to.skey = (st != nullptr) ? st
-                                  : StringData::MakeUncounted(fr.skey->slice());
-      } else {
-        to.skey = fr.skey;
-      }
-      tvCopy(
-        *CreateVarForUncountedArray(tvAsCVarRef(&fr.data)).asTypedValue(),
-        to.data);
-      assert(to.hash() == fr.hash()); // ensure not clobbered.
+  assertx(!a->empty());
+  auto const scale = a->scale();
+  auto const ad = mallocArray(scale);
+  auto const used = a->m_used;
+  // Do a raw copy first, without worrying about counted types or refcount
+  // manipulation.  To copy in 32-byte chunks, we add 24 bytes to the length.
+  // This might overwrite the hash table, but won't go beyond the space
+  // allocated for the MixedArray, assuming `malloc()' always allocates
+  // multiple of 16 bytes.
+  bcopy32_inline(ad, a, sizeof(MixedArray) + sizeof(Elm) * used + 24);
+  copyHash(ad->hashTab(), a->hashTab(), scale);
+
+  // Need to make sure keys and values are all uncounted.
+  auto dstElem = ad->data();
+  for (uint32_t i = 0; i < used; ++i) {
+    auto& te = dstElem[i];
+    auto const type = te.data.m_type;
+    if (UNLIKELY(isTombstone(type))) continue;
+    if (te.hasStrKey() && !te.skey->isStatic()) {
+      auto const st = lookupStaticString(te.skey);
+      te.skey = st != nullptr ? st
+                              : StringData::MakeUncounted(te.skey->slice());
     }
-  );
-  mixed->setUncounted();
-  return mixed;
+    ConvertTvToUncounted(&te.data);
+  }
+  ad->setUncounted();
+  return ad;
 }
 
 ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
   assert(PackedArray::checkInvariants(array));
-
+  assert(!array->empty());
   ArrayData* ad;
   auto const size = array->m_size;
   if (LIKELY(size <= CapCode::Threshold)) {
-    // We don't need to copy the full capacity, since the array won't
-    // change once it's uncounted.
+    // We don't need to copy the full capacity, since the array won't change
+    // once it's uncounted.
     auto const cap = size;
     ad = static_cast<ArrayData*>(
       std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
@@ -404,12 +433,14 @@ ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
     ad = MakeUncountedPackedHelper(array);
   }
   auto const srcData = packedData(array);
-  auto const stop    = srcData + size;
-  auto targetData    = reinterpret_cast<TypedValue*>(ad + 1);
-  for (auto ptr = srcData; ptr != stop; ++ptr, ++targetData) {
-    tvCopy(*CreateVarForUncountedArray(tvAsCVarRef(ptr)).asTypedValue(),
-           *targetData);
+  auto targetData = reinterpret_cast<TypedValue*>(ad + 1);
+  // Do a raw copy without worrying about refcounts, and convert the values to
+  // uncounted later.
+  memcpy16_inline(targetData, srcData, sizeof(TypedValue) * size);
+  for (uint32_t i = 0; i < size; ++i) {
+    ConvertTvToUncounted(targetData + i);
   }
+
   assert(ad->m_pos == array->m_pos);
   assert(ad->isUncounted());
   assert(PackedArray::checkInvariants(ad));
@@ -1004,7 +1035,7 @@ NEVER_INLINE MixedArray* MixedArray::resize() {
   return this;
 }
 
-void NEVER_INLINE
+MixedArray* NEVER_INLINE
 MixedArray::InsertCheckUnbalanced(MixedArray* ad,
                                   int32_t* table,
                                   uint32_t mask,
@@ -1015,6 +1046,7 @@ MixedArray::InsertCheckUnbalanced(MixedArray* ad,
     if (e.isTombstone()) continue;
     *ad->findForNewInsertCheckUnbalanced(table, mask, e.probe()) = i;
   }
+  return ad;
 }
 
 MixedArray*
@@ -1024,29 +1056,30 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   assert(MixedArray::Capacity(newScale) >= old->m_size);
   assert(newScale >= 1 && (newScale & (newScale - 1)) == 0);
 
-  auto const ad         = smartAllocArray(newScale);
-  auto table            = mixedHash(ad->data(), newScale);
-  ad->initHash(table, newScale);
-  auto const oldUsed    = old->m_used;
-
-  ad->m_sizeAndPos      = old->m_sizeAndPos;
+  auto ad            = smartAllocArray(newScale);
+  auto const oldUsed = old->m_used;
+  ad->m_sizeAndPos   = old->m_sizeAndPos;
   ad->m_hdr.init(old->m_hdr, 0);
-  ad->m_scale_used      = newScale | uint64_t{oldUsed} << 32;
-  ad->m_nextKI          = old->m_nextKI;
+  ad->m_scale_used   = newScale | uint64_t{oldUsed} << 32;
+
+  copyElmsNextUnsafe(ad, old, oldUsed);
+
+  auto table = mixedHash(ad->data(), newScale);
+  ad->initHash(table, newScale);
 
   if (UNLIKELY(strong_iterators_exist())) {
     move_strong_iterators(ad, old);
   }
 
-  // Copy the old element array, and initialize the hashtable to all empty.
-  copyElms(ad->data(), old->data(), oldUsed);
-
   auto iter = ad->data();
   auto const stop = iter + oldUsed;
   assert(newScale == ad->m_scale);
   auto mask = MixedArray::Mask(newScale);
+  old->setZombie();
+
   if (UNLIKELY(oldUsed >= 2000)) {
-    InsertCheckUnbalanced(ad, table, mask, iter, stop);
+    // This should be a tail call in opt build.
+    ad = InsertCheckUnbalanced(ad, table, mask, iter, stop);
   } else {
     for (uint32_t i = 0; iter != stop; ++iter, ++i) {
       auto& e = *iter;
@@ -1054,8 +1087,6 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
       *ad->findForNewInsert(table, mask, e.probe()) = i;
     }
   }
-
-  old->setZombie();
 
   assert(old->isZombie());
   assert(ad->kind() == old->kind());

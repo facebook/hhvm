@@ -21,7 +21,124 @@
 
 #include "hphp/util/assertions.h"
 
+extern "C" void* _memcpy8(void* dst, const void* src, size_t len);
+extern "C" void* _memcpy16(void* dst, const void* src, size_t len);
+extern "C" void _bcopy32(void* dst, const void* src, size_t len);
+extern "C" void _bcopy_in_64(void* dst, const void* src, size_t lenIn64);
+
 namespace HPHP {
+
+/*
+ * Specialized memcpy implementations that takes advantage of the known
+ * properties in length and alignment.
+ *
+ *  o memcpy8(dst, src, len) is equivalent to
+ *        static_cast<char*>(memcpy(dst, src, (len + 7) / 8 * 8)) + len;
+ *    it returns a char* pointing to dst[len] instead of dst, in order to
+ *    ease its use in string operations.
+ *
+ *    Note that it could overrun the buffer by up to 7 bytes, depending on len
+ *    and alignment of the buffers.  When both src and dst are aligned to 8
+ *    bytes, it is safe.  It can also be used in other situations given
+ *    sufficient readable space after the buffers.
+ *
+ *  o memcpy16(dst, src, len) is equivalent to
+ *        assert(len > 0 && len % 16 == 0);
+ *        memcpy(dst, src, len);
+ *
+ *  o bcopy32(dst, src, len) is equivalent to
+ *         assert(len >= 32);
+ *         memcpy(dst, src, len / 32 * 32);
+ *    except that it returns void.
+ *
+ *  o bcopy_in_64(dst, src, lenIn64) is equivalent to
+ *         assert(lenIn64 > 0);
+ *         memcpy(dst, src, 64 * lenIn64);
+ *    except that it returns void.
+ */
+
+inline char* memcpy8(void* dst, const void* src, uint32_t len) {
+#if defined(__x86_64__) && !defined(__APPLE__)
+  return reinterpret_cast<char*>(_memcpy8(dst, src, len));
+#else
+  memcpy(dst, src, len);
+  return reinterpret_cast<char*>(dst) + len;
+#endif
+}
+
+inline char* memcpy16(void* dst, const void* src, uint32_t len) {
+  assertx(len > 0 && len % 16 == 0);
+#if defined(__x86_64__) && !defined(__APPLE__)
+  return reinterpret_cast<char*>(_memcpy16(dst, src, len));
+#else
+  return reinterpret_cast<char*>(memcpy(dst, src, len));
+#endif
+}
+
+inline void bcopy32(void* dst, const void* src, uint32_t len) {
+  assertx(len >= 32);
+#if defined(__x86_64__) && !defined(__APPLE__)
+  _bcopy32(dst, src, len);
+#else
+  memcpy(dst, src, len / 32 * 32);
+#endif
+}
+
+inline void bcopy_in_64(void* dst, const void* src, uint32_t lenIn64) {
+  assertx(lenIn64 != 0);
+#if defined(__x86_64__) && !defined(__APPLE__)
+  _bcopy_in_64(dst, src, lenIn64);
+#else
+  memcpy(dst, src, lenIn64 * 64);
+#endif
+}
+
+// Inline assembly version to avoid a function call.
+inline void bcopy32_inline(void* dst, const void* src, uint32_t len) {
+  assertx(len >= 32);
+#if defined(__x86_64__)
+  __asm__ __volatile__("shr    $5, %0\n"
+                       ".LBCP32%=:\n"
+                       "movdqu (%1), %%xmm0\n"
+                       "movdqu 16(%1), %%xmm1\n"
+                       "add    $32, %1\n"
+                       "movdqu %%xmm0, (%2)\n"
+                       "movdqu %%xmm1, 16(%2)\n"
+                       "add    $32, %2\n"
+                       "dec    %0\n"
+                       "jg     .LBCP32%=\n"
+                       : "+r"(len), "+r"(src), "+r"(dst)
+                       :: "xmm0", "xmm1"
+                      );
+#else
+  bcopy32(dst, src, len);
+#endif
+}
+
+inline void memcpy16_inline(void* dst, const void* src, uint64_t len) {
+  assertx(len >=16 && len % 16 == 0);
+#if defined(__x86_64__)
+  __asm__ __volatile__("movdqu -16(%1, %0), %%xmm0\n"
+                       "movdqu %%xmm0, -16(%2, %0)\n"
+                       "shr    $5, %0\n"
+                       "jz     .LEND%=\n"
+                       ".LR32%=:\n"
+                       "movdqu (%1), %%xmm0\n"
+                       "movdqu 16(%1), %%xmm1\n"
+                       "add    $32, %1\n"
+                       "movdqu %%xmm0, (%2)\n"
+                       "movdqu %%xmm1, 16(%2)\n"
+                       "add    $32, %2\n"
+                       "dec    %0\n"
+                       "jg     .LR32%=\n"
+                       ".LEND%=:\n"
+                       : "+r"(len), "+r"(src), "+r"(dst)
+                       :: "xmm0", "xmm1"
+                      );
+#else
+  memcpy16(dst, src, len);
+#endif
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -111,7 +228,7 @@ T* wordcpy(T* to, const T* from, size_t numT) {
 }
 
 /*
- * like Memset, but operates on words at a time.
+ * Like Memset, but operates on words at a time.
  */
 template<class T>
 T* wordfill(T* ptr, T value, size_t numT) {

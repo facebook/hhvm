@@ -40,7 +40,9 @@ namespace HPHP {
 
 namespace {
 
-// how many bytes are not included in capacity()'s return value.
+/*
+ * how many bytes are not included in capacity()'s return value.
+ */
 auto const kCapOverhead = 1 + sizeof(StringData);
 
 NEVER_INLINE void throw_string_too_large(size_t len);
@@ -48,6 +50,7 @@ NEVER_INLINE void throw_string_too_large(size_t len) {
   raise_error("String length exceeded 2^31-2: %zu", len);
 }
 
+//////////////////////////////////////////////////////////////////////
 // Allocate memory for a string, return the pointer to uninitialized
 // memory, and the encoded CapCode value to use.
 ALWAYS_INLINE
@@ -111,6 +114,7 @@ std::aligned_storage<
 // Diffrence between static and uncounted is in the lifetime
 // of the string. Static are alive for the lifetime of the process.
 // Uncounted are not ref counted but will be deleted at some point.
+ALWAYS_INLINE
 StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
   if (UNLIKELY(sl.len > StringData::MaxSize)) {
     throw_string_too_large(sl.len);
@@ -221,6 +225,20 @@ unsigned StringData::sweepAll() {
 
 //////////////////////////////////////////////////////////////////////
 
+StringData* StringData::Make(const StringData* s, CopyStringMode) {
+  auto const allocRet = allocFlatForLen(s->m_len);
+  auto const sd       = allocRet.first;
+  auto const cc       = allocRet.second;
+  auto const data     = reinterpret_cast<char*>(sd + 1);
+  sd->m_data          = data;
+  sd->m_hdr.init(cc, HeaderKind::String, 1);
+  sd->m_lenAndHash    = s->m_lenAndHash;
+  *memcpy8(data, s->m_data, s->m_len) = 0;
+
+  assert(sd->same(s));
+  return sd;
+}
+
 StringData* StringData::Make(StringSlice sl, CopyStringMode) {
   auto const allocRet = allocFlatForLen(sl.len);
   auto const sd       = allocRet.first;
@@ -298,6 +316,28 @@ StringData* StringData::Make(StringSlice r1, StringSlice r2) {
   data[len] = 0;
 
   assert(sd->hasExactlyOneRef());
+  assert(sd->isFlat());
+  assert(sd->checkSane());
+  return sd;
+}
+
+StringData* StringData::Make(const StringData* s1, const StringData* s2) {
+  auto const len      = s1->m_len + s2->m_len;
+  // `memcpy8()` could overrun the buffer by at most 7 bytes, so we allocate 6
+  // more bytes here, which (together with the trailing 0) makes it safe.
+  auto const allocRet = allocFlatForLen(len + 6);
+  auto const sd       = allocRet.first;
+  auto const cc       = allocRet.second;
+  auto const data     = reinterpret_cast<char*>(sd + 1);
+
+  sd->m_data          = data;
+  sd->m_hdr.init(cc, HeaderKind::String, 1);
+  sd->m_lenAndHash    = len; // hash=0
+
+  auto next = memcpy8(data, s1->m_data, s1->m_len);
+  *memcpy8(next, s2->m_data, s2->m_len) = 0;
+
+  assert(sd->getCount() == 1);
   assert(sd->isFlat());
   assert(sd->checkSane());
   return sd;
@@ -422,8 +462,8 @@ StringData* StringData::Make(const APCString* shared) {
   sd->m_hdr.init(cc, HeaderKind::String, 1);
   sd->m_lenAndHash = len | int64_t{hash} << 32;
 
-  pdst[len] = 0;
-  auto const mcret = memcpy(pdst, psrc, len);
+  // pdst[len] = 0;
+  auto const mcret = memcpy(pdst, psrc, len + 1);
   auto const ret = reinterpret_cast<StringData*>(mcret) - 1;
   // Recalculating ret from mcret avoids a spill.
 
@@ -470,14 +510,11 @@ StringData* StringData::append(StringSlice range) {
   auto const len = range.len;
 
   if (len == 0) return this;
-  if (UNLIKELY(uint32_t(len) > MaxSize)) {
-    throw_string_too_large(len);
-  }
-  if (UNLIKELY(size_t(m_len) + size_t(len) > MaxSize)) {
-    throw_string_too_large(size_t(len) + size_t(m_len));
-  }
+  auto const newLen = size_t(m_len) + size_t(len);
 
-  auto const newLen = m_len + len;
+  if (UNLIKELY(newLen > MaxSize)) {
+    throw_string_too_large(newLen);
+  }
 
   /*
    * We may have an aliasing append.  We don't allow appending with an
@@ -486,16 +523,13 @@ StringData* StringData::append(StringSlice range) {
    */
   ALIASING_APPEND_ASSERT(s, len);
 
-  auto const target = UNLIKELY(isShared()) ? escalate(newLen)
-                                           : reserve(newLen);
+  // `memcpy8()' could overrun the buffer by at most 7 bytes. Adding 6 bytes
+  // here, together with the trailing byte, makes it safe.
+  uint32_t const requestLen = static_cast<uint32_t>(newLen) + 6;
+  auto const target = UNLIKELY(isShared()) ? escalate(requestLen)
+                                           : reserve(requestLen);
 
-  /*
-   * memcpy is safe even if it's a self append---the regions will be
-   * disjoint, since s can't point past the start of our source
-   * pointer, and len is smaller than the old length.
-   */
-  memcpy(target->mutableData() + m_len, s, len);
-
+  memcpy8(target->mutableData() + m_len, s, len);
   target->setSize(newLen);
   assert(target->checkSane());
 
@@ -551,9 +585,6 @@ StringData* StringData::append(StringSlice r1,
   auto const len = r1.len + r2.len + r3.len;
 
   if (len == 0) return this;
-  if (UNLIKELY(uint32_t(len) > MaxSize)) {
-    throw_string_too_large(len);
-  }
   if (UNLIKELY(size_t(m_len) + size_t(len) > MaxSize)) {
     throw_string_too_large(size_t(len) + size_t(m_len));
   }
@@ -597,20 +628,29 @@ StringData* StringData::reserve(size_t cap) {
   assert(isFlat());
 
   if (cap <= capacity()) return this;
-  cap = std::min(cap + cap/4, size_t(MaxSize) + 1);
 
-  auto const sd = Make(cap);
-  auto const src = slice();
-  auto const dst = sd->mutableData();
-  sd->setSize(src.len);
+  cap = std::min(cap + cap / 4, size_t(MaxSize) + 1);
 
-  auto const mcret = memcpy(dst, src.ptr, src.len);
-  auto const ret = static_cast<StringData*>(mcret) - 1;
-  // Recalculating ret from mcret avoids a spill.
+  auto const allocRet = allocFlatForLen(cap);
+  auto const sd       = allocRet.first;
+  auto const cc       = allocRet.second;
+  auto const data     = reinterpret_cast<char*>(sd + 1);
 
-  assert(ret == sd);
-  assert(ret->checkSane());
-  return ret;
+  sd->m_data          = data;
+  sd->m_hdr.init(cc, HeaderKind::String, 1);
+  // Smart allocated StringData are always aligned at 16 bytes, thus it is safe
+  // to copy in 16-byte groups. This copies m_lenAndHash (8 bytes), the
+  // characters (m_len bytes), add the trailing zero (1 byte).
+  memcpy16_inline(&sd->m_lenAndHash, &m_lenAndHash,
+                  (m_len + 8 + 1 + 15) & ~0xF);
+  assertx(reinterpret_cast<uintptr_t>(&m_lenAndHash) + 8 ==
+          reinterpret_cast<uintptr_t>(m_data));
+  assertx(reinterpret_cast<uintptr_t>(&m_lenAndHash) % 16 == 0);
+
+  assert(sd->hasExactlyOneRef());
+  assert(sd->isFlat());
+  assert(sd->checkSane());
+  return sd;
 }
 
 StringData* StringData::shrinkImpl(size_t len) {
@@ -619,17 +659,13 @@ StringData* StringData::shrinkImpl(size_t len) {
   assert(len <= capacity());
 
   auto const sd = Make(len);
+  sd->m_len = len;
   auto const src = slice();
   auto const dst = sd->mutableData();
-  sd->setSize(len);
+  *memcpy8(dst, src.ptr, len) = 0;
 
-  auto const mcret = memcpy(dst, src.ptr, len);
-  auto const ret = static_cast<StringData*>(mcret) - 1;
-  // Recalculating ret from mcret avoids a spill.
-
-  assert(ret == sd);
-  assert(ret->checkSane());
-  return ret;
+  assert(sd->checkSane());
+  return sd;
 }
 
 StringData* StringData::shrink(size_t len) {
@@ -645,18 +681,20 @@ StringData* StringData::shrink(size_t len) {
 StringData* StringData::escalate(size_t cap) {
   assert(isShared() && !isStatic() && cap >= m_len);
 
-  auto const sd = Make(cap);
-  auto const src = slice();
-  auto const dst = sd->mutableData();
-  sd->setSize(src.len);
+  auto const allocRet = allocFlatForLen(cap);
+  auto const sd       = allocRet.first;
+  auto const cc       = allocRet.second;
+  auto const data     = reinterpret_cast<char*>(sd + 1);
 
-  auto const mcret = memcpy(dst, src.ptr, src.len);
-  auto const ret = static_cast<StringData*>(mcret) - 1;
-  // Recalculating ret from mcret avoids a spill.
+  sd->m_data          = data;
+  sd->m_hdr.init(cc, HeaderKind::String, 1);
+  sd->m_lenAndHash    = m_lenAndHash;
+  *memcpy8(data, m_data, m_len) = 0;
 
-  assert(ret == sd);
-  assert(ret->checkSane());
-  return ret;
+  assert(sd->hasExactlyOneRef());
+  assert(sd->isFlat());
+  assert(sd->checkSane());
+  return sd;
 }
 
 void StringData::dump() const {

@@ -657,10 +657,9 @@ class c_ImmVector : public BaseVector {
 
 //////////////////////////////////////////////////////////////////////
 
+// Align to 16-byte boundaries.
 using EmptyMixedArrayStorage = std::aligned_storage<
-  computeAllocBytes(MixedArray::SmallScale),
-  alignof(MixedArray)
->::type;
+  computeAllocBytes(MixedArray::SmallScale), 16>::type;
 extern EmptyMixedArrayStorage s_theEmptyMixedArray;
 
 /*

@@ -942,9 +942,11 @@ struct PDORequestData final : RequestEventHandler {
   }
 
   void addPersistent(const SmartPtr<PDOResource>& pdo) {
+    pdo->conn()->is_persistent = true;
     m_persistent_connections.insert(pdo);
   }
   void removePersistent(const SmartPtr<PDOResource>& pdo) {
+    pdo->conn()->is_persistent = false;
     m_persistent_connections.erase(pdo);
   }
 

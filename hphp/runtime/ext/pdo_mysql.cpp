@@ -879,6 +879,9 @@ PDOMySqlStatement::~PDOMySqlStatement() {
 }
 
 void PDOMySqlStatement::sweep() {
+  // Release the connection
+  m_conn.reset();
+
   if (m_result) {
     /* free the resource */
     mysql_free_result(m_result);

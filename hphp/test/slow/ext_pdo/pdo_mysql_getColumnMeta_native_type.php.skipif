@@ -14,7 +14,7 @@ $environmentVars = [
 ];
 
 foreach ($environmentVars as $environmentVar) {
- if (false === getenv($envrionmentVar)) {
+ if (false === getenv($environmentVar)) {
     die ("Skip. Environment variable $environmentVar is not set.");
   }  
 }

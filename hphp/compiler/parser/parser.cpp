@@ -2422,6 +2422,7 @@ hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
     (AliasEntry){"ImmSet", "HH\\ImmSet"},
     (AliasEntry){"InvariantException", "HH\\InvariantException"},
     (AliasEntry){"IMemoizeParam", "HH\\IMemoizeParam"},
+    (AliasEntry){"Shapes", "HH\\Shapes"},
 
     (AliasEntry){"Awaitable", "HH\\Awaitable"},
     (AliasEntry){"AsyncGenerator", "HH\\AsyncGenerator"},

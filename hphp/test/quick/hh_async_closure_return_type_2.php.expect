@@ -8,7 +8,7 @@ Caught exception: Value returned from async closure must be of type int, float g
 Caught exception: Value returned from async closure must be of type int, gd given
 Caught exception: Value returned from async closure must be of type int, array given
 Caught exception: Value returned from async closure must be of type int, Closure given
-Caught exception: Value returned from async closure must be of type int, Shapes given
+Caught exception: Value returned from async closure must be of type int, Figure given
 Caught exception: Value returned from async closure must be of type int, Square given
 Caught exception: Value returned from async closure must be of type int, Fractal given
 Caught exception: Value returned from async closure must be of type int, xhp_div given
@@ -23,7 +23,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @int, flo
 Triggered E_WARNING: Value returned from async closure must be of type @int, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @int, array given
 Triggered E_WARNING: Value returned from async closure must be of type @int, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @int, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @int, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @int, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @int, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @int, xhp_div given
@@ -38,7 +38,7 @@ Caught exception: Value returned from async closure must be of type string, floa
 Caught exception: Value returned from async closure must be of type string, gd given
 Caught exception: Value returned from async closure must be of type string, array given
 Caught exception: Value returned from async closure must be of type string, Closure given
-Caught exception: Value returned from async closure must be of type string, Shapes given
+Caught exception: Value returned from async closure must be of type string, Figure given
 Caught exception: Value returned from async closure must be of type string, Square given
 Caught exception: Value returned from async closure must be of type string, Fractal given
 Caught exception: Value returned from async closure must be of type string, xhp_div given
@@ -52,7 +52,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @string, 
 Triggered E_WARNING: Value returned from async closure must be of type @string, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @string, array given
 Triggered E_WARNING: Value returned from async closure must be of type @string, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @string, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @string, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @string, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @string, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @string, xhp_div given
@@ -66,7 +66,7 @@ Caught exception: Value returned from async closure must be of type bool, float 
 Caught exception: Value returned from async closure must be of type bool, gd given
 Caught exception: Value returned from async closure must be of type bool, array given
 Caught exception: Value returned from async closure must be of type bool, Closure given
-Caught exception: Value returned from async closure must be of type bool, Shapes given
+Caught exception: Value returned from async closure must be of type bool, Figure given
 Caught exception: Value returned from async closure must be of type bool, Square given
 Caught exception: Value returned from async closure must be of type bool, Fractal given
 Caught exception: Value returned from async closure must be of type bool, xhp_div given
@@ -81,7 +81,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @bool, fl
 Triggered E_WARNING: Value returned from async closure must be of type @bool, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @bool, array given
 Triggered E_WARNING: Value returned from async closure must be of type @bool, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @bool, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @bool, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @bool, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @bool, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @bool, xhp_div given
@@ -96,7 +96,7 @@ Caught exception: Value returned from async closure must be of type float, bool 
 Caught exception: Value returned from async closure must be of type float, gd given
 Caught exception: Value returned from async closure must be of type float, array given
 Caught exception: Value returned from async closure must be of type float, Closure given
-Caught exception: Value returned from async closure must be of type float, Shapes given
+Caught exception: Value returned from async closure must be of type float, Figure given
 Caught exception: Value returned from async closure must be of type float, Square given
 Caught exception: Value returned from async closure must be of type float, Fractal given
 Caught exception: Value returned from async closure must be of type float, xhp_div given
@@ -111,7 +111,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @float, b
 Triggered E_WARNING: Value returned from async closure must be of type @float, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @float, array given
 Triggered E_WARNING: Value returned from async closure must be of type @float, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @float, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @float, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @float, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @float, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @float, xhp_div given
@@ -126,7 +126,7 @@ Caught exception: Value returned from async closure must be of type resource, bo
 Caught exception: Value returned from async closure must be of type resource, float given
 Caught exception: Value returned from async closure must be of type resource, array given
 Caught exception: Value returned from async closure must be of type resource, Closure given
-Caught exception: Value returned from async closure must be of type resource, Shapes given
+Caught exception: Value returned from async closure must be of type resource, Figure given
 Caught exception: Value returned from async closure must be of type resource, Square given
 Caught exception: Value returned from async closure must be of type resource, Fractal given
 Caught exception: Value returned from async closure must be of type resource, xhp_div given
@@ -141,7 +141,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @resource
 Triggered E_WARNING: Value returned from async closure must be of type @resource, float given
 Triggered E_WARNING: Value returned from async closure must be of type @resource, array given
 Triggered E_WARNING: Value returned from async closure must be of type @resource, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @resource, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @resource, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @resource, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @resource, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @resource, xhp_div given
@@ -156,7 +156,7 @@ Caught exception: Value returned from async closure must be of type array, bool 
 Caught exception: Value returned from async closure must be of type array, float given
 Caught exception: Value returned from async closure must be of type array, gd given
 Caught exception: Value returned from async closure must be of type array, Closure given
-Caught exception: Value returned from async closure must be of type array, Shapes given
+Caught exception: Value returned from async closure must be of type array, Figure given
 Caught exception: Value returned from async closure must be of type array, Square given
 Caught exception: Value returned from async closure must be of type array, Fractal given
 Caught exception: Value returned from async closure must be of type array, xhp_div given
@@ -170,7 +170,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @array, b
 Triggered E_WARNING: Value returned from async closure must be of type @array, float given
 Triggered E_WARNING: Value returned from async closure must be of type @array, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @array, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @array, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @array, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @array, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @array, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @array, xhp_div given
@@ -184,7 +184,7 @@ Caught exception: Value returned from async closure must be of type callable, bo
 Caught exception: Value returned from async closure must be of type callable, float given
 Caught exception: Value returned from async closure must be of type callable, gd given
 Caught exception: Value returned from async closure must be of type callable, array given
-Caught exception: Value returned from async closure must be of type callable, Shapes given
+Caught exception: Value returned from async closure must be of type callable, Figure given
 Caught exception: Value returned from async closure must be of type callable, Square given
 Caught exception: Value returned from async closure must be of type callable, Fractal given
 Caught exception: Value returned from async closure must be of type callable, xhp_div given
@@ -197,36 +197,36 @@ Triggered E_WARNING: Value returned from async closure must be of type @callable
 Triggered E_WARNING: Value returned from async closure must be of type @callable, float given
 Triggered E_WARNING: Value returned from async closure must be of type @callable, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @callable, array given
-Triggered E_WARNING: Value returned from async closure must be of type @callable, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @callable, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @callable, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @callable, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @callable, xhp_div given
 
 calling f9
-Caught exception: Value returned from async closure must be of type Shapes, null given
-Caught exception: Value returned from async closure must be of type Shapes, int given
-Caught exception: Value returned from async closure must be of type Shapes, string given
-Caught exception: Value returned from async closure must be of type Shapes, bool given
-Caught exception: Value returned from async closure must be of type Shapes, float given
-Caught exception: Value returned from async closure must be of type Shapes, gd given
-Caught exception: Value returned from async closure must be of type Shapes, array given
-Caught exception: Value returned from async closure must be of type Shapes, Closure given
-Caught exception: Value returned from async closure must be of type Shapes, xhp_div given
-Caught exception: Value returned from async closure must be of type Shapes, string given
-Caught exception: Value returned from async closure must be of type Shapes, array given
+Caught exception: Value returned from async closure must be of type Figure, null given
+Caught exception: Value returned from async closure must be of type Figure, int given
+Caught exception: Value returned from async closure must be of type Figure, string given
+Caught exception: Value returned from async closure must be of type Figure, bool given
+Caught exception: Value returned from async closure must be of type Figure, float given
+Caught exception: Value returned from async closure must be of type Figure, gd given
+Caught exception: Value returned from async closure must be of type Figure, array given
+Caught exception: Value returned from async closure must be of type Figure, Closure given
+Caught exception: Value returned from async closure must be of type Figure, xhp_div given
+Caught exception: Value returned from async closure must be of type Figure, string given
+Caught exception: Value returned from async closure must be of type Figure, array given
 
 calling f9_soft
-Triggered E_WARNING: Value returned from async closure must be of type @Shapes, null given
-Triggered E_WARNING: Value returned from async closure must be of type @Shapes, int given
-Triggered E_WARNING: Value returned from async closure must be of type @Shapes, string given
-Triggered E_WARNING: Value returned from async closure must be of type @Shapes, bool given
-Triggered E_WARNING: Value returned from async closure must be of type @Shapes, float given
-Triggered E_WARNING: Value returned from async closure must be of type @Shapes, gd given
-Triggered E_WARNING: Value returned from async closure must be of type @Shapes, array given
-Triggered E_WARNING: Value returned from async closure must be of type @Shapes, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @Shapes, xhp_div given
-Triggered E_WARNING: Value returned from async closure must be of type @Shapes, string given
-Triggered E_WARNING: Value returned from async closure must be of type @Shapes, array given
+Triggered E_WARNING: Value returned from async closure must be of type @Figure, null given
+Triggered E_WARNING: Value returned from async closure must be of type @Figure, int given
+Triggered E_WARNING: Value returned from async closure must be of type @Figure, string given
+Triggered E_WARNING: Value returned from async closure must be of type @Figure, bool given
+Triggered E_WARNING: Value returned from async closure must be of type @Figure, float given
+Triggered E_WARNING: Value returned from async closure must be of type @Figure, gd given
+Triggered E_WARNING: Value returned from async closure must be of type @Figure, array given
+Triggered E_WARNING: Value returned from async closure must be of type @Figure, Closure given
+Triggered E_WARNING: Value returned from async closure must be of type @Figure, xhp_div given
+Triggered E_WARNING: Value returned from async closure must be of type @Figure, string given
+Triggered E_WARNING: Value returned from async closure must be of type @Figure, array given
 
 calling f10
 Caught exception: Value returned from async closure must be of type Square, null given
@@ -237,7 +237,7 @@ Caught exception: Value returned from async closure must be of type Square, floa
 Caught exception: Value returned from async closure must be of type Square, gd given
 Caught exception: Value returned from async closure must be of type Square, array given
 Caught exception: Value returned from async closure must be of type Square, Closure given
-Caught exception: Value returned from async closure must be of type Square, Shapes given
+Caught exception: Value returned from async closure must be of type Square, Figure given
 Caught exception: Value returned from async closure must be of type Square, Fractal given
 Caught exception: Value returned from async closure must be of type Square, xhp_div given
 Caught exception: Value returned from async closure must be of type Square, string given
@@ -252,7 +252,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @Square, 
 Triggered E_WARNING: Value returned from async closure must be of type @Square, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @Square, array given
 Triggered E_WARNING: Value returned from async closure must be of type @Square, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @Square, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @Square, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @Square, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @Square, xhp_div given
 Triggered E_WARNING: Value returned from async closure must be of type @Square, string given
@@ -267,7 +267,7 @@ Caught exception: Value returned from async closure must be of type xhp_div, flo
 Caught exception: Value returned from async closure must be of type xhp_div, gd given
 Caught exception: Value returned from async closure must be of type xhp_div, array given
 Caught exception: Value returned from async closure must be of type xhp_div, Closure given
-Caught exception: Value returned from async closure must be of type xhp_div, Shapes given
+Caught exception: Value returned from async closure must be of type xhp_div, Figure given
 Caught exception: Value returned from async closure must be of type xhp_div, Square given
 Caught exception: Value returned from async closure must be of type xhp_div, Fractal given
 Caught exception: Value returned from async closure must be of type xhp_div, string given
@@ -282,7 +282,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @xhp_div,
 Triggered E_WARNING: Value returned from async closure must be of type @xhp_div, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @xhp_div, array given
 Triggered E_WARNING: Value returned from async closure must be of type @xhp_div, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @xhp_div, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @xhp_div, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @xhp_div, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @xhp_div, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @xhp_div, string given
@@ -297,7 +297,7 @@ Caught exception: Value returned from async closure must be of type Fractal, flo
 Caught exception: Value returned from async closure must be of type Fractal, gd given
 Caught exception: Value returned from async closure must be of type Fractal, array given
 Caught exception: Value returned from async closure must be of type Fractal, Closure given
-Caught exception: Value returned from async closure must be of type Fractal, Shapes given
+Caught exception: Value returned from async closure must be of type Fractal, Figure given
 Caught exception: Value returned from async closure must be of type Fractal, Square given
 Caught exception: Value returned from async closure must be of type Fractal, xhp_div given
 Caught exception: Value returned from async closure must be of type Fractal, string given
@@ -312,7 +312,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @Fractal,
 Triggered E_WARNING: Value returned from async closure must be of type @Fractal, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @Fractal, array given
 Triggered E_WARNING: Value returned from async closure must be of type @Fractal, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @Fractal, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @Fractal, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @Fractal, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @Fractal, xhp_div given
 Triggered E_WARNING: Value returned from async closure must be of type @Fractal, string given
@@ -327,7 +327,7 @@ Caught exception: Value returned from async closure must be of type Fractal, flo
 Caught exception: Value returned from async closure must be of type Fractal, gd given
 Caught exception: Value returned from async closure must be of type Fractal, array given
 Caught exception: Value returned from async closure must be of type Fractal, Closure given
-Caught exception: Value returned from async closure must be of type Fractal, Shapes given
+Caught exception: Value returned from async closure must be of type Fractal, Figure given
 Caught exception: Value returned from async closure must be of type Fractal, Square given
 Caught exception: Value returned from async closure must be of type Fractal, xhp_div given
 Caught exception: Value returned from async closure must be of type Fractal, string given
@@ -342,7 +342,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @Fractal,
 Triggered E_WARNING: Value returned from async closure must be of type @Fractal, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @Fractal, array given
 Triggered E_WARNING: Value returned from async closure must be of type @Fractal, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @Fractal, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @Fractal, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @Fractal, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @Fractal, xhp_div given
 Triggered E_WARNING: Value returned from async closure must be of type @Fractal, string given
@@ -356,7 +356,7 @@ Caught exception: Value returned from async closure must be of type my_t, float 
 Caught exception: Value returned from async closure must be of type my_t, gd given
 Caught exception: Value returned from async closure must be of type my_t, array given
 Caught exception: Value returned from async closure must be of type my_t, Closure given
-Caught exception: Value returned from async closure must be of type my_t, Shapes given
+Caught exception: Value returned from async closure must be of type my_t, Figure given
 Caught exception: Value returned from async closure must be of type my_t, Square given
 Caught exception: Value returned from async closure must be of type my_t, Fractal given
 Caught exception: Value returned from async closure must be of type my_t, xhp_div given
@@ -371,7 +371,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @my_t, fl
 Triggered E_WARNING: Value returned from async closure must be of type @my_t, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @my_t, array given
 Triggered E_WARNING: Value returned from async closure must be of type @my_t, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @my_t, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @my_t, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @my_t, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @my_t, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @my_t, xhp_div given
@@ -393,7 +393,7 @@ Caught exception: Value returned from async closure must be of type ?int, float 
 Caught exception: Value returned from async closure must be of type ?int, gd given
 Caught exception: Value returned from async closure must be of type ?int, array given
 Caught exception: Value returned from async closure must be of type ?int, Closure given
-Caught exception: Value returned from async closure must be of type ?int, Shapes given
+Caught exception: Value returned from async closure must be of type ?int, Figure given
 Caught exception: Value returned from async closure must be of type ?int, Square given
 Caught exception: Value returned from async closure must be of type ?int, Fractal given
 Caught exception: Value returned from async closure must be of type ?int, xhp_div given
@@ -407,7 +407,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @?int, fl
 Triggered E_WARNING: Value returned from async closure must be of type @?int, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @?int, array given
 Triggered E_WARNING: Value returned from async closure must be of type @?int, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @?int, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @?int, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @?int, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @?int, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @?int, xhp_div given
@@ -422,7 +422,7 @@ Caught exception: Value returned from async closure must be of type array, bool 
 Caught exception: Value returned from async closure must be of type array, float given
 Caught exception: Value returned from async closure must be of type array, gd given
 Caught exception: Value returned from async closure must be of type array, Closure given
-Caught exception: Value returned from async closure must be of type array, Shapes given
+Caught exception: Value returned from async closure must be of type array, Figure given
 Caught exception: Value returned from async closure must be of type array, Square given
 Caught exception: Value returned from async closure must be of type array, Fractal given
 Caught exception: Value returned from async closure must be of type array, xhp_div given
@@ -436,7 +436,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @array, b
 Triggered E_WARNING: Value returned from async closure must be of type @array, float given
 Triggered E_WARNING: Value returned from async closure must be of type @array, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @array, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @array, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @array, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @array, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @array, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @array, xhp_div given
@@ -454,7 +454,7 @@ Caught exception: Value returned from async closure must be of type callable, bo
 Caught exception: Value returned from async closure must be of type callable, float given
 Caught exception: Value returned from async closure must be of type callable, gd given
 Caught exception: Value returned from async closure must be of type callable, array given
-Caught exception: Value returned from async closure must be of type callable, Shapes given
+Caught exception: Value returned from async closure must be of type callable, Figure given
 Caught exception: Value returned from async closure must be of type callable, Square given
 Caught exception: Value returned from async closure must be of type callable, Fractal given
 Caught exception: Value returned from async closure must be of type callable, xhp_div given
@@ -467,7 +467,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @callable
 Triggered E_WARNING: Value returned from async closure must be of type @callable, float given
 Triggered E_WARNING: Value returned from async closure must be of type @callable, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @callable, array given
-Triggered E_WARNING: Value returned from async closure must be of type @callable, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @callable, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @callable, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @callable, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @callable, xhp_div given
@@ -487,7 +487,7 @@ Caught exception: Value returned from async closure must be of type B, float giv
 Caught exception: Value returned from async closure must be of type B, gd given
 Caught exception: Value returned from async closure must be of type B, array given
 Caught exception: Value returned from async closure must be of type B, Closure given
-Caught exception: Value returned from async closure must be of type B, Shapes given
+Caught exception: Value returned from async closure must be of type B, Figure given
 Caught exception: Value returned from async closure must be of type B, Square given
 Caught exception: Value returned from async closure must be of type B, Fractal given
 Caught exception: Value returned from async closure must be of type B, xhp_div given
@@ -502,7 +502,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @B, float
 Triggered E_WARNING: Value returned from async closure must be of type @B, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @B, array given
 Triggered E_WARNING: Value returned from async closure must be of type @B, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @B, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @B, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @B, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @B, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @B, xhp_div given
@@ -517,7 +517,7 @@ Caught exception: Value returned from async closure must be of type A, float giv
 Caught exception: Value returned from async closure must be of type A, gd given
 Caught exception: Value returned from async closure must be of type A, array given
 Caught exception: Value returned from async closure must be of type A, Closure given
-Caught exception: Value returned from async closure must be of type A, Shapes given
+Caught exception: Value returned from async closure must be of type A, Figure given
 Caught exception: Value returned from async closure must be of type A, Square given
 Caught exception: Value returned from async closure must be of type A, Fractal given
 Caught exception: Value returned from async closure must be of type A, xhp_div given
@@ -531,7 +531,7 @@ Triggered E_WARNING: Value returned from async closure must be of type @A, float
 Triggered E_WARNING: Value returned from async closure must be of type @A, gd given
 Triggered E_WARNING: Value returned from async closure must be of type @A, array given
 Triggered E_WARNING: Value returned from async closure must be of type @A, Closure given
-Triggered E_WARNING: Value returned from async closure must be of type @A, Shapes given
+Triggered E_WARNING: Value returned from async closure must be of type @A, Figure given
 Triggered E_WARNING: Value returned from async closure must be of type @A, Square given
 Triggered E_WARNING: Value returned from async closure must be of type @A, Fractal given
 Triggered E_WARNING: Value returned from async closure must be of type @A, xhp_div given

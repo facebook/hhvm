@@ -56,9 +56,9 @@ function f8() {
 function f8_soft() {
   return async function ($p): @Awaitable<callable> { return $p; };
 }
-function f9() { return async function ($p): Awaitable<Shapes> { return $p; }; }
+function f9() { return async function ($p): Awaitable<Figure> { return $p; }; }
 function f9_soft() {
-  return async function ($p): @Awaitable<Shapes> { return $p; };
+  return async function ($p): @Awaitable<Figure> { return $p; };
 }
 function f10() { return async function ($p): Awaitable<Square> { return $p; }; }
 function f10_soft() {
@@ -115,9 +115,9 @@ function f20_soft() {
   return async function ($p): @Awaitable<callable> { return $p; };
 }
 
-class Shapes {}
-class Square extends Shapes {}
-class Fractal<T> extends Shapes {}
+class Figure {}
+class Square extends Figure {}
+class Fractal<T> extends Figure {}
 class :div {}
 
 class A {}
@@ -177,7 +177,7 @@ function main() {
       call_wrapper($f(), imagecreate(10, 10));
       call_wrapper($f(), array());
       call_wrapper($f(), function($x){return $x*$x;});
-      call_wrapper($f(), new Shapes());
+      call_wrapper($f(), new Figure());
       call_wrapper($f(), new Square());
       call_wrapper($f(), new Fractal());
       call_wrapper($f(), <div/>);
@@ -219,7 +219,7 @@ function main() {
     call_wrapper($f(), imagecreate(10, 10));
     call_wrapper($f(), array());
     call_wrapper($f(), function($x){return $x*$x;});
-    call_wrapper($f(), new Shapes());
+    call_wrapper($f(), new Figure());
     call_wrapper($f(), new Square());
     call_wrapper($f(), new Fractal());
     call_wrapper($f(), <div/>);

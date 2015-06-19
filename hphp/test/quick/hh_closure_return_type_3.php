@@ -36,8 +36,8 @@ function f7() { return function ($p): array { return $p; }; }
 function f7_soft() { return function ($p): @array { return $p; }; }
 function f8() { return function ($p): callable { return $p; }; }
 function f8_soft() { return function ($p): @callable { return $p; }; }
-function f9() { return function ($p): Shapes { return $p; }; }
-function f9_soft() { return function ($p): @Shapes { return $p; }; }
+function f9() { return function ($p): Figure { return $p; }; }
+function f9_soft() { return function ($p): @Figure { return $p; }; }
 function f10() { return function ($p): Square { return $p; }; }
 function f10_soft() { return function ($p): @Square { return $p; }; }
 function f11() { return function ($p): :div { return $p; }; }
@@ -63,9 +63,9 @@ function f19_soft() {
 function f20() { return function ($p): callable { return $p; }; }
 function f20_soft() { return function ($p): @callable { return $p; }; }
 
-class Shapes {}
-class Square extends Shapes {}
-class Fractal<T> extends Shapes {}
+class Figure {}
+class Square extends Figure {}
+class Fractal<T> extends Figure {}
 class :div {}
 
 class A {}
@@ -113,7 +113,7 @@ function main() {
       call_wrapper($f(), imagecreate(10, 10));
       call_wrapper($f(), array());
       call_wrapper($f(), function($x){return $x*$x;});
-      call_wrapper($f(), new Shapes());
+      call_wrapper($f(), new Figure());
       call_wrapper($f(), new Square());
       call_wrapper($f(), new Fractal());
       call_wrapper($f(), <div/>);
@@ -155,7 +155,7 @@ function main() {
     call_wrapper($f(), imagecreate(10, 10));
     call_wrapper($f(), array());
     call_wrapper($f(), function($x){return $x*$x;});
-    call_wrapper($f(), new Shapes());
+    call_wrapper($f(), new Figure());
     call_wrapper($f(), new Square());
     call_wrapper($f(), new Fractal());
     call_wrapper($f(), <div/>);

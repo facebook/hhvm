@@ -55,8 +55,17 @@ if (WIN32)
   if (MSVC90)
     set(_TBB_COMPILER "vc9")
   endif(MSVC90)
+  if (MSVC10)
+    set(_TBB_COMPILER "vc10")
+  endif(MSVC10)
+  if (MSVC11)
+    set(_TBB_COMPILER "vc11")
+  endif(MSVC11)
+  if (MSVC12)
+    set(_TBB_COMPILER "vc12")
+  endif(MSVC12)
   if (NOT _TBB_COMPILER)
-    message("ERROR: TBB supports only VC 7.1, 8 and 9 compilers on Windows platforms.")
+    message("ERROR: TBB supports only VC 7.1, 8, 9, 10, 11, and 12 compilers on Windows platforms.")
   endif (NOT _TBB_COMPILER)
   set(_TBB_ARCHITECTURE ${TBB_ARCHITECTURE})
 endif (WIN32)
@@ -138,18 +147,6 @@ else (TBB_OBVIOUS_PLACE)
     mark_as_advanced(TBB_INSTALL_DIR)
   endif (NOT TBB_INSTALL_DIR)
 
-  #-- A macro to rewrite the paths of the library. This is necessary, because
-  #   find_library() always found the em64t/vc9 version of the TBB libs
-  macro(TBB_CORRECT_LIB_DIR var_name)
-    #    if (NOT "${_TBB_ARCHITECTURE}" STREQUAL "em64t")
-    string(REPLACE em64t "${_TBB_ARCHITECTURE}" ${var_name} ${${var_name}})
-    #    endif (NOT "${_TBB_ARCHITECTURE}" STREQUAL "em64t")
-    string(REPLACE ia32 "${_TBB_ARCHITECTURE}" ${var_name} ${${var_name}})
-    string(REPLACE vc7.1 "${_TBB_COMPILER}" ${var_name} ${${var_name}})
-    string(REPLACE vc8 "${_TBB_COMPILER}" ${var_name} ${${var_name}})
-    string(REPLACE vc9 "${_TBB_COMPILER}" ${var_name} ${${var_name}})
-  endmacro(TBB_CORRECT_LIB_DIR var_content)
-
 
   #-- Look for include directory and set ${TBB_INCLUDE_DIR}
   set (TBB_INC_SEARCH_DIR ${_TBB_INSTALL_DIR}/include)
@@ -165,11 +162,9 @@ else (TBB_OBVIOUS_PLACE)
   if (NOT $ENV{TBB_ARCH_PLATFORM} STREQUAL "")
     set (TBB_LIBRARY_DIR "${_TBB_INSTALL_DIR}/$ENV{TBB_ARCH_PLATFORM}/lib")
   else (NOT $ENV{TBB_ARCH_PLATFORM} STREQUAL "")
-    # HH: deprecated
-    message(STATUS "[Warning] FindTBB.cmake: The use of TBB_ARCHITECTURE and TBB_COMPILER is deprecated and may not be supported in future versions. Please set $ENV{TBB_ARCH_PLATFORM} (using tbbvars.[bat|csh|sh]).")
-    set (TBB_LIBRARY_DIR "${_TBB_INSTALL_DIR}/${_TBB_ARCHITECTURE}/${_TBB_COMPILER}/lib")
+    # Undeprecated to allow for Windows use. 
+    set (TBB_LIBRARY_DIR "${_TBB_INSTALL_DIR}/lib/${_TBB_ARCHITECTURE}/${_TBB_COMPILER}")
   endif (NOT $ENV{TBB_ARCH_PLATFORM} STREQUAL "")
-
 
   find_library(TBB_LIBRARY        ${_TBB_LIB_NAME}        ${TBB_LIBRARY_DIR} NO_DEFAULT_PATH)
   find_library(TBB_MALLOC_LIBRARY ${_TBB_LIB_MALLOC_NAME} ${TBB_LIBRARY_DIR} NO_DEFAULT_PATH)

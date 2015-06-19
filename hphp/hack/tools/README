@@ -7,10 +7,12 @@ unparsing PHP code. However, this makes them more annoying to build.
 
 To install:
 
-1) Install OPAM (http://opam.ocaml.org/doc/Quick_Install.html)
+1) Install OPAM (https://opam.ocaml.org/doc/Install.html)
    Don't forget to run "opam init"
    Don't forget to run "eval `opam config env`"
 2) Install pfff (opam install pfff)
+   Note: You may need to switch to an older version of ocaml
+   You can do this with `opam switch 4.01.0`
 3) For each tool you want:
    cd $TOOL
    make clean && make depend && make

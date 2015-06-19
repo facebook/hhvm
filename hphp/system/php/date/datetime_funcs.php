@@ -24,7 +24,13 @@ function date_create_immutable(
   string $time = 'now',
   DateTimeZone $timezone = NULL
 ) {
-  return new DateTimeImmutable($time, $timezone);
+  try {
+    return new DateTimeImmutable($time, $timezone);
+  } catch (Exception $ex) {
+    // DateTime and DateTimeImmutable both throw exceptions when they fail but
+    // date_create and date_create_immutable should both simply return false
+    return false;
+  }
 }
 
 function timezone_offset_get(

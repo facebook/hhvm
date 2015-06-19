@@ -92,7 +92,7 @@ struct TypeAliasReq {
   // For option types, like ?Foo.
   bool nullable{false};
   // Aliased Class; nullptr if type != Object.
-  LowClassPtr klass{nullptr};
+  LowPtr<Class> klass{nullptr};
   // Needed for error messages; nullptr if not defined.
   LowStringPtr name{nullptr};
 };

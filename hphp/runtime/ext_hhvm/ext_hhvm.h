@@ -46,7 +46,7 @@ struct HhbcExtClassInfo {
   ptrdiff_t m_objectDataOffset;
   long long m_methodCount;
   const HhbcExtMethodInfo* m_methods;
-  LowClassPtr* m_clsPtr;
+  LowPtr<Class>* m_clsPtr;
 };
 
 extern const long long hhbc_ext_funcs_count;

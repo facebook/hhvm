@@ -112,7 +112,7 @@ struct Class : AtomicCountable {
     LowStringPtr m_mangledName;
     LowStringPtr m_originalMangledName;
     // First parent class that declares this property.
-    LowClassPtr m_class;
+    LowPtr<Class> m_class;
     Attr m_attrs;
     LowStringPtr m_typeConstraint;
     // When built in RepoAuthoritative mode, this is a control-flow
@@ -132,7 +132,7 @@ struct Class : AtomicCountable {
     LowStringPtr m_typeConstraint;
     LowStringPtr m_docComment;
     // Most derived class that declared this property.
-    LowClassPtr m_class;
+    LowPtr<Class> m_class;
     int m_idx;
     // Used if (m_class == this).
     TypedValue m_val;
@@ -144,7 +144,7 @@ struct Class : AtomicCountable {
    */
   struct Const {
     // Most derived class that declared this constant.
-    LowClassPtr m_class;
+    LowPtr<Class> m_class;
     LowStringPtr m_name;
     TypedValueAux m_val;
 
@@ -199,8 +199,8 @@ struct Class : AtomicCountable {
    * instance checks.
    */
   struct VtableVecSlot {
-    LowVtablePtr vtable;
-    LowClassPtr iface;
+    LowPtr<LowPtr<Func>> vtable;
+    LowPtr<Class> iface;
   };
 
   /*
@@ -208,16 +208,19 @@ struct Class : AtomicCountable {
    */
   using MethodMap         = FixedStringMap<Slot, false, Slot>;
   using MethodMapBuilder  = FixedStringMapBuilder<Func*, Slot, false, Slot>;
-  using InterfaceMap      = IndexedStringMap<LowClassPtr, true, int>;
+  using InterfaceMap      = IndexedStringMap<LowPtr<Class>, true, int>;
   using RequirementMap    = IndexedStringMap<
                               const PreClass::ClassRequirement*, true, int>;
 
   using TraitAliasVec = std::vector<PreClass::TraitAliasRule::NamePair>;
   using ScopedClonesMap = hphp_hash_map<uintptr_t,ClassPtr>;
 
-  // We store the length of vectors of methods, parent classes and
-  // interfaces. In lowptr builds, we limit all of these quantities to 2^16-1
-  // to save memory.
+  /*
+   * We store the length of vectors of methods, parent classes and interfaces.
+   *
+   * In lowptr builds, we limit all of these quantities to 2^16-1 to save
+   * memory.
+   */
   using veclen_t = std::conditional<use_lowptr, uint16_t, uint32_t>::type;
 
 
@@ -339,7 +342,7 @@ public:
   /*
    * Pointer to this Class's FuncVec, which is allocated before this.
    */
-  LowFuncPtr* funcVec() const;
+  LowPtr<Func>* funcVec() const;
 
   /*
    * The start of malloc'd memory for `this' (i.e., including anything
@@ -352,7 +355,7 @@ public:
    * `this', which contain this class's inheritance hierarchy (including `this'
    * as the last element).
    */
-  const LowClassPtr* classVec() const;
+  const LowPtr<Class>* classVec() const;
 
   /*
    * The size of the classVec.
@@ -442,7 +445,7 @@ public:
    * Look up a class' cached __invoke function.  We only cache __invoke methods
    * if they are instance methods or if the class is a static closure.
    */
-  LowFuncPtr getCachedInvoke() const;
+  const Func* getCachedInvoke() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1169,7 +1172,7 @@ public:
   // hot, and must be the last member.
 
 public:
-  LowClassPtr m_nextClass{nullptr}; // used by NamedEntity
+  LowPtr<Class> m_nextClass{nullptr}; // used by NamedEntity
 
 private:
   default_ptr<ExtraData> m_extra;
@@ -1179,8 +1182,8 @@ private:
   uint32_t m_numDeclInterfaces{0};
   mutable rds::Link<Array> m_nonScalarConstantCache{rds::kInvalidHandle};
 
-  LowFuncPtr m_toString;
-  LowFuncPtr m_invoke; // __invoke, iff non-static (or closure)
+  LowPtr<Func> m_toString;
+  LowPtr<Func> m_invoke; // __invoke, iff non-static (or closure)
 
   ConstMap m_constants;
 
@@ -1206,8 +1209,8 @@ private:
    *    - A static property of this class is accessed.
    */
   FixedVector<const Func*> m_sinitVec;
-  LowFuncPtr m_ctor;
-  LowFuncPtr m_dtor;
+  LowPtr<Func> m_ctor;
+  LowPtr<Func> m_dtor;
   PropInitVec m_declPropInit;
   FixedVector<const Func*> m_pinitVec;
   SPropMap m_staticProperties;
@@ -1274,7 +1277,7 @@ private:
    * Vector of Class pointers that encodes the inheritance hierarchy, including
    * this Class as the last element.
    */
-  LowClassPtr m_classVec[1]; // Dynamically sized; must come last.
+  LowPtr<Class> m_classVec[1]; // Dynamically sized; must come last.
 };
 
 ///////////////////////////////////////////////////////////////////////////////

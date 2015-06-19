@@ -279,7 +279,7 @@ static StaticString s_write("write");
 static StaticString s_gc("gc");
 static StaticString s_destroy("destroy");
 
-LowClassPtr SystemlibSessionModule::s_SHIClass = nullptr;
+LowPtr<Class> SystemlibSessionModule::s_SHIClass = nullptr;
 
 /**
  * Relies on the fact that only one SessionModule will be active

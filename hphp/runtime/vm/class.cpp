@@ -223,10 +223,10 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
 
   auto const size = sizeof_Class
                     + sizeof(m_classVec[0]) * classVecLen
-                    + sizeof(LowFuncPtr) * funcVecLen;
+                    + sizeof(LowPtr<Func>) * funcVecLen;
   auto const mem = low_malloc(size);
   auto const classPtr = (void *)((uintptr_t)mem +
-                                 funcVecLen * sizeof(LowFuncPtr));
+                                 funcVecLen * sizeof(LowPtr<Func>));
   try {
     return new (classPtr) Class(preClass, parent, std::move(usedTraits),
                                 classVecLen, funcVecLen);
@@ -487,10 +487,10 @@ Class::Avail Class::avail(Class*& parent,
 ///////////////////////////////////////////////////////////////////////////////
 // Pre- and post-allocations.
 
-LowFuncPtr* Class::funcVec() const {
-  return reinterpret_cast<LowFuncPtr*>(
+LowPtr<Func>* Class::funcVec() const {
+  return reinterpret_cast<LowPtr<Func>*>(
     reinterpret_cast<uintptr_t>(this) -
-    m_funcVecLen * sizeof(LowFuncPtr)
+    m_funcVecLen * sizeof(LowPtr<Func>)
   );
 }
 
@@ -526,7 +526,7 @@ const Func* Class::getDeclaredCtor() const {
   return f->name() != s_86ctor.get() ? f : nullptr;
 }
 
-LowFuncPtr Class::getCachedInvoke() const {
+const Func* Class::getCachedInvoke() const {
   assert(IMPLIES(m_invoke, !m_invoke->isStatic() || m_invoke->isClosureBody()));
   return m_invoke;
 }
@@ -2338,7 +2338,7 @@ void Class::setInterfaces() {
     }
     declInterfaces.push_back(ClassPtr(cp));
     if (interfacesBuilder.find(cp->name()) == interfacesBuilder.end()) {
-      interfacesBuilder.add(cp->name(), LowClassPtr(cp));
+      interfacesBuilder.add(cp->name(), LowPtr<Class>(cp));
     }
     int size = cp->m_interfaces.size();
     for (int i = 0; i < size; i++) {
@@ -2367,7 +2367,7 @@ void Class::setInterfaces() {
       Class* stringish = Unit::lookupClass(s_Stringish.get());
       assert(stringish != nullptr);
       assert((stringish->attrs() & AttrInterface));
-      interfacesBuilder.add(stringish->name(), LowClassPtr(stringish));
+      interfacesBuilder.add(stringish->name(), LowPtr<Class>(stringish));
     }
   }
 
@@ -2394,7 +2394,7 @@ void Class::setInterfaceVtables() {
 
   const size_t nVtables = maxSlot + 1;
   auto const vtableVecSz = nVtables * sizeof(VtableVecSlot);
-  auto const memSz = vtableVecSz + totalMethods * sizeof(LowFuncPtr);
+  auto const memSz = vtableVecSz + totalMethods * sizeof(LowPtr<Func>);
   auto const mem = static_cast<char*>(low_malloc(memSz));
   auto cursor = mem;
 
@@ -2417,8 +2417,8 @@ void Class::setInterfaceVtables() {
     always_assert(slot < nVtables);
 
     auto const nMethods = iface->numMethods();
-    auto const vtable = reinterpret_cast<LowFuncPtr*>(cursor);
-    cursor += nMethods * sizeof(LowFuncPtr);
+    auto const vtable = reinterpret_cast<LowPtr<Func>*>(cursor);
+    cursor += nMethods * sizeof(LowPtr<Func>);
     always_assert(vtableVec[slot].vtable == nullptr);
     vtableVec[slot].vtable = vtable;
     vtableVec[slot].iface = iface;
@@ -2703,9 +2703,9 @@ void Class::setClassVec() {
 void Class::setFuncVec(MethodMapBuilder& builder) {
   auto funcVec = this->funcVec();
 
-  memset(funcVec, 0, m_funcVecLen * sizeof(LowFuncPtr));
+  memset(funcVec, 0, m_funcVecLen * sizeof(LowPtr<Func>));
 
-  funcVec = (LowFuncPtr*)this;
+  funcVec = (LowPtr<Func>*)this;
   assert(builder.size() <= m_funcVecLen);
 
   for (Slot i = 0; i < builder.size(); i++) {

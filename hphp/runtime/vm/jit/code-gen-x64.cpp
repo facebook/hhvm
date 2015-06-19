@@ -1485,7 +1485,7 @@ void CodeGenerator::cgExtendsClass(IRInstruction* inst) {
     return cond(v, CC_NB, sf, dst, [&](Vout& v) {
       // If it's a subclass, rTestClass must be at the appropriate index.
       auto const vecOffset = Class::classVecOff() +
-        sizeof(LowClassPtr) * (testClass->classVecLen() - 1);
+        sizeof(LowPtr<Class>) * (testClass->classVecLen() - 1);
       auto const b = v.makeReg();
       auto const sf = v.makeReg();
       emitCmpClass(v, sf, rTestClass, rObjClass[vecOffset]);
@@ -1975,7 +1975,7 @@ void CodeGenerator::cgLdObjInvoke(IRInstruction* inst) {
   auto const rsrc = srcLoc(inst, 0).reg();
   auto const rdst = dstLoc(inst, 0).reg();
   auto& v = vmain();
-  emitLdLowPtr(v, rsrc[Class::invokeOff()], rdst, sizeof(LowFuncPtr));
+  emitLdLowPtr(v, rsrc[Class::invokeOff()], rdst, sizeof(LowPtr<Func>));
   auto const sf = v.makeReg();
   v << testq{rdst, rdst, sf};
   v << jcc{CC_Z, sf, {label(inst->next()), label(inst->taken())}};
@@ -3957,9 +3957,9 @@ void CodeGenerator::cgLdClsMethod(IRInstruction* inst) {
   auto dstReg = dstLoc(inst, 0).reg();
   auto clsReg = srcLoc(inst, 0).reg();
   int32_t mSlotVal = inst->src(1)->rawVal();
-  auto methOff = int32_t(mSlotVal * sizeof(LowFuncPtr));
+  auto methOff = int32_t(mSlotVal * sizeof(LowPtr<Func>));
   auto& v = vmain();
-  emitLdLowPtr(v, clsReg[methOff], dstReg, sizeof(LowFuncPtr));
+  emitLdLowPtr(v, clsReg[methOff], dstReg, sizeof(LowPtr<Func>));
 }
 
 void CodeGenerator::cgLdIfaceMethod(IRInstruction* inst) {
@@ -3974,9 +3974,10 @@ void CodeGenerator::cgLdIfaceMethod(IRInstruction* inst) {
                vtableVecReg, sizeof(LowPtr<Class::VtableVecSlot>));
   auto const vtableOff = extra.vtableIdx * sizeof(Class::VtableVecSlot) +
              offsetof(Class::VtableVecSlot, vtable);
-  emitLdLowPtr(v, vtableVecReg[vtableOff], vtableReg, sizeof(LowVtablePtr));
-  emitLdLowPtr(v, vtableReg[extra.methodIdx * sizeof(LowFuncPtr)],
-               funcReg, sizeof(LowFuncPtr));
+  emitLdLowPtr(v, vtableVecReg[vtableOff], vtableReg,
+               sizeof(Class::VtableVecSlot::vtable));
+  emitLdLowPtr(v, vtableReg[extra.methodIdx * sizeof(LowPtr<Func>)],
+               funcReg, sizeof(LowPtr<Func>));
 }
 
 void CodeGenerator::cgInstanceOfIfaceVtable(IRInstruction* inst) {
@@ -4070,7 +4071,7 @@ void CodeGenerator::emitGetCtxFwdCallWithThis(Vreg srcCtx, Vreg dstCtx,
     // Load (this->m_cls | 0x1) into ctxReg.
     auto vmclass = v.makeReg();
     emitLdLowPtr(v, srcCtx[ObjectData::getVMClassOffset()],
-                 vmclass, sizeof(LowClassPtr));
+                 vmclass, sizeof(LowPtr<Class>));
     v << orqi{1, vmclass, dstCtx, v.makeReg()};
   } else {
     // Just incref $this.
@@ -4156,7 +4157,7 @@ Vreg CodeGenerator::emitGetCtxFwdCallWithThisDyn(Vreg destCtxReg, Vreg thisReg,
     auto vmclass = v.makeReg();
     auto dst1 = v.makeReg();
     emitLdLowPtr(v, thisReg[ObjectData::getVMClassOffset()],
-                 vmclass, sizeof(LowClassPtr));
+                 vmclass, sizeof(LowPtr<Class>));
     v << orqi{1, vmclass, dst1, v.makeReg()};
     return dst1;
   }, [&](Vout& v) {

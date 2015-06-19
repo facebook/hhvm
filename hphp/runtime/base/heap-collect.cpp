@@ -97,7 +97,7 @@ struct Marker {
   }
 
   // Explicitly ignored field types.
-  void operator()(const LowClassPtr&) {}
+  void operator()(const LowPtr<Class>&) {}
   void operator()(const Unit*) {}
   void operator()(int) {}
 

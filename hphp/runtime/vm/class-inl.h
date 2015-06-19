@@ -56,7 +56,7 @@ inline const TypedValueAux& Class::PropInitVec::operator[](size_t i) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Pre- and post-allocations.
 
-inline const LowClassPtr* Class::classVec() const {
+inline const LowPtr<Class>* Class::classVec() const {
   return m_classVec;
 }
 
@@ -177,12 +177,12 @@ inline size_t Class::numMethods() const {
 }
 
 inline Func* Class::getMethod(Slot idx) const {
-  auto funcVec = (LowFuncPtr*)this;
+  auto funcVec = (LowPtr<Func>*)this;
   return funcVec[-((int32_t)idx + 1)];
 }
 
 inline void Class::setMethod(Slot idx, Func* func) {
-  auto funcVec = (LowFuncPtr*)this;
+  auto funcVec = (LowPtr<Func>*)this;
   funcVec[-((int32_t)idx + 1)] = func;
 }
 

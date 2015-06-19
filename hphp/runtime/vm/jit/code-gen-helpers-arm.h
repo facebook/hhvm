@@ -106,7 +106,7 @@ inline void emitLdLowPtr(Vout& v, Vreg dest, Vptr mem, size_t size) {
 }
 
 inline void emitCmpClass(Vout& v, Vreg sf, Vreg reg, const Class* c) {
-  auto size = sizeof(LowClassPtr);
+  auto size = sizeof(LowPtr<Class>);
   if (size == 8) {
     v << cmpq{v.cns(c), reg, sf};
   } else if (size == 4) {

@@ -45,7 +45,7 @@ protected:
   template <typename F> friend void scan(const UserFSNode&, F&);
 
   const Func* m_Call;
-  LowClassPtr m_cls;
+  LowPtr<Class> m_cls;
   Object m_obj;
 };
 

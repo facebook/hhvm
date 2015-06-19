@@ -219,7 +219,7 @@ void emitLea(Asm& as, MemoryRef mr, PhysReg dst) {
 
 Vreg emitLdObjClass(Vout& v, Vreg objReg, Vreg dstReg) {
   emitLdLowPtr(v, objReg[ObjectData::getVMClassOffset()],
-               dstReg, sizeof(LowClassPtr));
+               dstReg, sizeof(LowPtr<Class>));
   return dstReg;
 }
 
@@ -341,7 +341,7 @@ void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {
 }
 
 void emitCmpClass(Vout& v, Vreg sf, const Class* c, Vptr mem) {
-  auto size = sizeof(LowClassPtr);
+  auto size = sizeof(LowPtr<Class>);
   if (size == 8) {
     v << cmpqm{v.cns(c), mem, sf};
   } else if (size == 4) {
@@ -353,7 +353,7 @@ void emitCmpClass(Vout& v, Vreg sf, const Class* c, Vptr mem) {
 }
 
 void emitCmpClass(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
-  auto size = sizeof(LowClassPtr);
+  auto size = sizeof(LowPtr<Class>);
   if (size == 8) {
     v << cmpqm{reg, mem, sf};
   } else if (size == 4) {
@@ -366,7 +366,7 @@ void emitCmpClass(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
 }
 
 void emitCmpClass(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
-  auto size = sizeof(LowClassPtr);
+  auto size = sizeof(LowPtr<Class>);
   if (size == 8) {
     v << cmpq{reg1, reg2, sf};
   } else if (size == 4) {

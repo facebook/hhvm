@@ -1219,7 +1219,7 @@ private:
   // The first Class in the inheritance hierarchy that declared this method.
   // Note that this may be an abstract class that did not provide an
   // implementation.
-  LowClassPtr m_baseCls{nullptr};
+  LowPtr<Class> m_baseCls{nullptr};
   // The Class that provided this method implementation.
   AtomicLowPtr<Class> m_cls{nullptr};
   union {

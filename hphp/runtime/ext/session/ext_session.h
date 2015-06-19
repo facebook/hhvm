@@ -112,8 +112,8 @@ public:
 
 private:
   const char *m_classname;
-  LowClassPtr m_cls;
-  static LowClassPtr s_SHIClass;
+  LowPtr<Class> m_cls;
+  static LowPtr<Class> s_SHIClass;
   DECLARE_STATIC_REQUEST_LOCAL(SystemlibSessionInstance, s_obj);
 
   const Func *m_ctor;

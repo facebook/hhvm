@@ -432,11 +432,11 @@ private:
 
 private:
 #ifdef USE_LOWPTR
-  LowClassPtr m_cls;
+  LowPtr<Class> m_cls;
   int o_id; // Numeric identifier of this object (used for var_dump())
   HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
 #else
-  LowClassPtr m_cls;
+  LowPtr<Class> m_cls;
   HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
   int o_id; // Numeric identifier of this object (used for var_dump())
 #endif
@@ -499,13 +499,13 @@ using ExtObjectData = ExtObjectDataFlags<ObjectData::IsCppBuiltin>;
   template <typename F> friend void scan(const c_##originalName&, F&); \
   friend ObjectData* new_##originalName##_Instance(Class*);            \
   friend void delete_##originalName(ObjectData*, const Class*);        \
-  static HPHP::LowClassPtr s_classOf;                                  \
-  static inline HPHP::LowClassPtr& classof() {                         \
+  static HPHP::LowPtr<Class> s_classOf;                                  \
+  static inline HPHP::LowPtr<Class>& classof() {                         \
     return s_classOf;                                                  \
   }
 
 #define IMPLEMENT_CLASS_NO_SWEEP(cls)                                  \
-  HPHP::LowClassPtr c_##cls::s_classOf;
+  HPHP::LowPtr<Class> c_##cls::s_classOf;
 
 template<class T, class... Args>
 typename std::enable_if<

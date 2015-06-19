@@ -49,7 +49,7 @@ struct UserStreamWrapper final : Stream::Wrapper {
 
 private:
   String m_name;
-  LowClassPtr m_cls;
+  LowPtr<Class> m_cls;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

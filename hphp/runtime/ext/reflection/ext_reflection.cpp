@@ -1523,6 +1523,106 @@ static String HHVM_METHOD(ReflectionTypeConstant, getDeclaringClassname) {
   return String(ret);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// class ReflectionProperty
+
+const StaticString s_ReflectionPropHandle("ReflectionPropHandle");
+const StaticString s_ReflectionSPropHandle("ReflectionSPropHandle");
+
+// helper for __construct:
+// returns -1 if class not defined;
+// returns -2 if class::property not found (then caller raises exception);
+// returns the info array for ReflectionProperty if successfully initialized.
+static Variant HHVM_METHOD(ReflectionProperty, __init,
+                           const Variant& cls_or_obj, const String& prop_name) {
+  auto const cls = get_cls(cls_or_obj);
+  if (!cls) {
+    // caller raises exception
+    return Variant(-1);
+  }
+  if (prop_name.isNull()) {
+    return Variant(-2);
+  }
+
+  cls->initialize();
+  auto const& propInitVec = cls->getPropData()
+    ? *cls->getPropData()
+    : cls->declPropInit();
+
+  const size_t nProps = cls->numDeclProperties();
+  const Class::Prop* properties = cls->declProperties();
+
+  // index for the candidate property
+  Slot cInd = -1;
+  const Class::Prop* cProp = nullptr;
+
+  for (Slot i = 0; i < nProps; i++) {
+    const Class::Prop& prop = properties[i];
+    if (prop_name.same(prop.m_name)) {
+      if (cls == prop.m_class.get()) {
+        // found match for the exact child class
+        cInd = i;
+        cProp = &prop;
+        break;
+      } else if (!(prop.m_attrs & AttrPrivate)) {
+        // only inherit non-private properties
+        cInd = i;
+        cProp = &prop;
+      }
+    }
+  }
+
+  if (cProp != nullptr) {
+    ReflectionPropHandle::Get(this_)->setProp(cProp);
+    Array info = Array::Create();
+    auto const& default_val = tvAsCVarRef(&propInitVec[cInd]);
+    set_instance_prop_info(info, cProp, default_val);
+    return Variant(info);
+  }
+
+  // for static property
+  const size_t nSProps = cls->numStaticProperties();
+  const Class::SProp* staticProperties = cls->staticProperties();
+  const Class::SProp* cSProp = nullptr;
+
+  for (Slot i = 0; i < nSProps; i++) {
+    const Class::SProp& sprop = staticProperties[i];
+    if (prop_name.same(sprop.m_name)) {
+      if (cls == sprop.m_class.get()) {
+        cSProp = &sprop;
+        break;
+      } else if (!(sprop.m_attrs & AttrPrivate)) {
+        cSProp = &sprop;
+      }
+    }
+  }
+  if (cSProp != nullptr) {
+    ReflectionSPropHandle::Get(this_)->setSProp(cSProp);
+    Array info = Array::Create();
+    set_static_prop_info(info, cSProp);
+    return Variant(info);
+  }
+
+  // check for dynamic properties
+  if (cls_or_obj.is(KindOfObject)) {
+    ObjectData* obj = cls_or_obj.toCObjRef().get();
+    assert(cls == obj->getVMClass());
+    if (obj->hasDynProps()) {
+      auto const dynPropArray = obj->dynPropArray().get();
+      for (ArrayIter it(dynPropArray); !it.end(); it.next()) {
+        if (prop_name.same(it.first().getStringData())) {
+          Array info = Array::Create();
+          set_dyn_prop_info(info, it.first(), cls->name());
+          return Variant(info);
+        }
+      }
+    }
+  }
+
+  // caller raises exception
+  return Variant(-2);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class ReflectionExtension final : public Extension {
@@ -1581,6 +1681,8 @@ class ReflectionExtension final : public Extension {
     HHVM_ME(ReflectionTypeConstant, getAssignedTypeHint);
     HHVM_ME(ReflectionTypeConstant, getDeclaringClassname);
 
+    HHVM_ME(ReflectionProperty, __init);
+
     HHVM_ME(ReflectionClass, __init);
     HHVM_ME(ReflectionClass, getName);
     HHVM_ME(ReflectionClass, getParentName);
@@ -1624,6 +1726,8 @@ class ReflectionExtension final : public Extension {
       s_ReflectionClassHandle.get());
     Native::registerNativeDataInfo<ReflectionConstHandle>(
       s_ReflectionConstHandle.get());
+    Native::registerNativeDataInfo<ReflectionPropHandle>(
+      s_ReflectionPropHandle.get());
 
     Native::registerNativePropHandler
       <reflection_extension_PropHandler>(s_reflectionextension);

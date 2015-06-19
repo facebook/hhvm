@@ -1827,17 +1827,6 @@ class ReflectionClass implements Reflector {
       : $props_map->toMap()->setAll($dynamic_props);
   }
 
-  private function makeReflectionProperty(
-    string $name,
-    array $prop_info,
-  ): ReflectionProperty {
-    $ret = hphp_create_object_without_constructor(ReflectionProperty::class);
-    $ret->name  = $name;
-    $ret->info  = $prop_info;
-    $ret->class = $this->getName();
-    return $ret;
-  }
-
   /**
    * ( excerpt from http://docs.hhvm.com/manual/en/reflectionclass.getproperty.php
    * )
@@ -1849,12 +1838,15 @@ class ReflectionClass implements Reflector {
    * @return     mixed   A ReflectionProperty.
    */
   public function getProperty($name) {
-    $prop_info = $this->getOrderedPropertyInfos()->get($name);
-    if (!$prop_info) {
-      $class = $this->getName();
+    $class = $this->name;
+    if (!$this->hasProperty($name)) {
       throw new ReflectionException("Property $class::$name does not exist");
     }
-    return $this->makeReflectionProperty($name, $prop_info);
+    if ($this->obj) {
+      return new ReflectionProperty($this->obj, $name);
+    } else {
+      return new ReflectionProperty($this->name, $name);
+    }
   }
 
   /**
@@ -1885,7 +1877,11 @@ class ReflectionClass implements Reflector {
   public function getProperties($filter = 0xFFFF): array<ReflectionProperty> {
     $ret = array();
     foreach ($this->getOrderedPropertyInfos() as $name => $prop_info) {
-      $p = $this->makeReflectionProperty($name, $prop_info);
+      if ($this->obj) {
+        $p = new ReflectionProperty($this->obj, $name);
+      } else {
+        $p = new ReflectionProperty($this->name, $name);
+      }
       if (($filter & ReflectionProperty::IS_PUBLIC)    && $p->isPublic()    ||
           ($filter & ReflectionProperty::IS_PROTECTED) && $p->isProtected() ||
           ($filter & ReflectionProperty::IS_PRIVATE)   && $p->isPrivate()   ||

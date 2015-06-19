@@ -1,0 +1,32 @@
+array(1) {
+  [0]=>
+  object(ReflectionProperty)#4 (4) {
+    ["info"]=>
+    array(9) {
+      ["name"]=>
+      string(3) "foo"
+      ["default"]=>
+      bool(true)
+      ["defaultValue"]=>
+      int(12)
+      ["access"]=>
+      string(6) "public"
+      ["accessible"]=>
+      bool(true)
+      ["modifiers"]=>
+      int(256)
+      ["class"]=>
+      string(1) "X"
+      ["doc"]=>
+      bool(false)
+      ["type"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(3) "foo"
+    ["class"]=>
+    string(1) "X"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+}

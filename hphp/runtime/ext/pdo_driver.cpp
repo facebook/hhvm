@@ -146,7 +146,6 @@ bool PDOConnection::checkLiveness() {
 // PDOResource
 
 void PDOResource::sweep() {
-  assert(!conn()->is_persistent);
   def_stmt_ctor_args.releaseForSweep();
   this->~PDOResource();
 }

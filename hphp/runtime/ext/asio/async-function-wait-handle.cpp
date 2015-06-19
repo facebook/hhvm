@@ -23,7 +23,7 @@
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/bytecode-defs.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -78,15 +78,7 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                                           resumeOffset);
   auto const waitHandle = new (obj) c_AsyncFunctionWaitHandle();
   assert(waitHandle->hasExactlyOneRef());
-  auto actRec = waitHandle->actRec();
-  // Inlined version of ActRec::setReturnVMExit().  ActRec::setReturnVMExit
-  // can't be inlined as is without creating some circular header file
-  // dependencies.
-  actRec->m_sfp = nullptr;
-  actRec->m_savedRip = reinterpret_cast<uintptr_t>(
-    jit::mcg->tx().uniqueStubs.callToExit
-  );
-  actRec->m_soff = 0;
+  waitHandle->actRec()->setReturnVMExit();
   assert(waitHandle->noDestruct());
   waitHandle->initialize(child);
   return waitHandle;

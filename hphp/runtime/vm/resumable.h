@@ -55,7 +55,9 @@ struct Resumable {
     return sizeof(Resumable);
   }
 
-  template<bool clone, size_t objSize, bool mayUseVV = true>
+  template<bool clone,
+           size_t objSize,
+           bool mayUseVV = true>
   static void* Create(const ActRec* fp,
                       size_t numSlots,
                       jit::TCA resumeAddr,
@@ -97,7 +99,12 @@ struct Resumable {
     } else {
       // If we are cloning a Resumable, only copy the ActRec. The
       // caller will take care of copying locals, setting the VarEnv, etc.
-      wordcpy(actRec, fp, 1);
+      // When called from AFWH::Create or Generator::Create we know we are
+      // going to overwrite m_sfp and m_savedRip, so don't copy them here.
+      auto src = reinterpret_cast<const char*>(fp);
+      auto aRec = reinterpret_cast<char*>(actRec);
+      const size_t offset = offsetof(ActRec, m_func);
+      wordcpy(aRec + offset, src + offset, sizeof(ActRec) - offset);
     }
 
     // Populate Resumable.

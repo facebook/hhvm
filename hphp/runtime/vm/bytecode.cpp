@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/bytecode-defs.h"
 
 #include <algorithm>
 #include <string>
@@ -134,7 +135,7 @@ TRACE_SET_MOD(bcinterp);
 
 // Identifies the set of return helpers that we may set m_savedRip to in an
 // ActRec.
-static bool isReturnHelper(void* address) {
+bool isReturnHelper(void* address) {
   auto tcAddr = reinterpret_cast<jit::TCA>(address);
   auto& u = mcg->tx().uniqueStubs;
   return tcAddr == u.retHelper ||
@@ -173,13 +174,6 @@ void ActRec::setJitReturn(void* addr) {
   FTRACE(1, "Replace m_savedRip in fp {}, {:#x} -> {}, func {}\n",
          this, m_savedRip, addr, m_func->fullName()->data());
   m_savedRip = reinterpret_cast<uintptr_t>(addr);
-}
-
-void ActRec::setReturnVMExit() {
-  assert(isReturnHelper(mcg->tx().uniqueStubs.callToExit));
-  m_sfp = nullptr;
-  m_savedRip = reinterpret_cast<uintptr_t>(mcg->tx().uniqueStubs.callToExit);
-  m_soff = 0;
 }
 
 bool

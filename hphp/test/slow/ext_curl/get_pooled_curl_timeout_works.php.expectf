@@ -1,1 +1,1 @@
-Fatal error: Timeout reached for waiting for a pooled curl connection! %s
+Fatal error: Timeout reached waiting for an available pooled curl connection! %s

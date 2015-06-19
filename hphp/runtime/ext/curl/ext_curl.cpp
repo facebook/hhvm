@@ -159,13 +159,15 @@ public:
   PooledCurlHandle* fetch() {
     Lock lock(m_mutex);
 
-    // wait until the user-specified timeout for a new handle to become available
+    // wait until the user-specified timeout for an available handle
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     ts.tv_sec += waitTimeout;
     while (m_handleStack.empty()) {
-      if ( ETIMEDOUT == pthread_cond_timedwait(&m_cond, &m_mutex.getRaw(), &ts) ) {
-        raise_error("Timeout reached for waiting for a pooled curl connection!");
+      if (ETIMEDOUT == pthread_cond_timedwait(&m_cond, &m_mutex.getRaw(), &ts))
+      {
+        raise_error("Timeout reached waiting for an "
+                    "available pooled curl connection!");
       }
     }
     
@@ -288,7 +290,11 @@ public:
     }
   }
 
-  explicit CurlResource(SmartPtr<CurlResource> src) {
+  explicit CurlResource(SmartPtr<CurlResource> src)
+  : m_useConnPool(false), m_pooledHandle(nullptr) {
+    // NOTE: we never pool copied curl handles, because all spots in
+    // the pool are pre-populated
+
     assert(src && src != this);
     assert(!src->m_exception);
 
@@ -1146,10 +1152,13 @@ Variant HHVM_FUNCTION(curl_init, const Variant& url /* = null_string */) {
   }
 }
 
-Variant HHVM_FUNCTION(curl_init_pooled, const Variant& url /* = null_string */) {
+Variant HHVM_FUNCTION(curl_init_pooled, const Variant& url /* = null_string */)
+{
   bool useConnPool = (CurlHandlePool::standardPoolSize > 0);
   if (!useConnPool) {
-    raise_warning("attempting to use connection pooling without a connection pool! adjust the curl.connectionPoolSize ini setting above 0");
+    raise_warning("Attempting to use connection pooling without "
+                  "a connection pool! You must adjust the "
+                  "curl.connectionPoolSize ini setting above 0");
   }
 
   if (url.isNull()) {
@@ -3225,7 +3234,8 @@ class CurlExtension final : public Extension {
 
     String value;
     if (IniSetting::Get("curl.connectionPoolSize", value)) {}
-    CurlResource::handlePool = new CurlHandlePool(CurlHandlePool::standardPoolSize);
+    CurlResource::handlePool =
+      new CurlHandlePool(CurlHandlePool::standardPoolSize);
 
     loadSystemlib();
   }

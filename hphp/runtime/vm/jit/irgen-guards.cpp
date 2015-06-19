@@ -116,9 +116,11 @@ void checkTypeStack(IRGS& env,
                     bool outerOnly) {
   assertx(type <= TCell || type <= TBoxedInitCell);
 
+  auto exit = env.irb->guardFailBlock();
+  if (exit == nullptr) exit = makeExit(env, dest);
+
   if (type <= TBoxedInitCell) {
     spillStack(env); // don't bother with the case that it's not spilled.
-    auto const exit = makeExit(env, dest);
     auto const soff = RelOffsetData { idx, offsetFromIRSP(env, idx) };
     profiledGuard(env, TBoxedInitCell, ProfGuard::CheckStk,
                   idx.offset, exit);
@@ -135,9 +137,6 @@ void checkTypeStack(IRGS& env,
     }
     return;
   }
-
-  auto exit = env.irb->guardFailBlock();
-  if (exit == nullptr) exit = makeExit(env, dest);
 
   if (idx.offset < env.irb->evalStack().size()) {
     FTRACE(1, "checkTypeStack({}): generating CheckType for {}\n",

@@ -70,7 +70,18 @@ function u($x, $y) {
     <item>
       {$x}
       {$y}
+
+      {$x}
+
+      {$y}
+
+
     </item>
+    <item>bar</item>
+
+    <item>bar</item>
+
+
     <item>bar</item>
   </grid>;
 }

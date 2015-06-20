@@ -119,10 +119,6 @@ Variant HHVM_FUNCTION(array_push,
 Variant HHVM_FUNCTION(array_rand,
                       const Variant& input,
                       int num_req = 1);
-Variant HHVM_FUNCTION(array_reduce,
-                      const Variant& input,
-                      const Variant& callback,
-                      const Variant& initial = null_variant);
 Variant HHVM_FUNCTION(array_reverse,
                       const Variant& array,
                       bool preserve_keys = false);

@@ -839,27 +839,6 @@ Variant HHVM_FUNCTION(array_rand,
   return ArrayUtil::RandomKeys(arr_input, num_req);
 }
 
-static Variant reduce_func(const Variant& result, const Variant& operand, const void *data) {
-  CallCtx* ctx = (CallCtx*)data;
-  Variant ret;
-  TypedValue args[2] = { *result.asCell(), *operand.asCell() };
-  g_context->invokeFuncFew(ret.asTypedValue(), *ctx, 2, args);
-  return ret;
-}
-Variant HHVM_FUNCTION(array_reduce,
-                      const Variant& input,
-                      const Variant& callback,
-                      const Variant& initial /* = null_variant */) {
-  getCheckedArray(input);
-  CallCtx ctx;
-  CallerFrame cf;
-  vm_decode_function(callback, cf(), false, ctx);
-  if (ctx.func == NULL) {
-    return init_null();
-  }
-  return ArrayUtil::Reduce(arr_input, reduce_func, &ctx, initial);
-}
-
 Variant HHVM_FUNCTION(array_reverse,
                       const Variant& input,
                       bool preserve_keys /* = false */) {
@@ -2782,7 +2761,6 @@ public:
     HHVM_FE(array_product);
     HHVM_FE(array_push);
     HHVM_FE(array_rand);
-    HHVM_FE(array_reduce);
     HHVM_FE(array_reverse);
     HHVM_FE(array_search);
     HHVM_FE(array_shift);

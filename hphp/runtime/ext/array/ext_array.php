@@ -349,11 +349,9 @@ function array_rand(mixed $input, int $num_req = 1): mixed;
  * @return mixed - Returns the resulting value. If the array is empty and
  *   initial is not passed, array_reduce() returns NULL.
  *
+ * Defined in array_reduce.hhas
  */
-<<__Native>>
-function array_reduce(mixed $input,
-                      mixed $callback,
-                      mixed $initial = null): mixed;
+
 
 /**
  * Takes an input array and returns a new array with the order of the elements

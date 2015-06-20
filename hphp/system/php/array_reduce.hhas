@@ -1,0 +1,66 @@
+.function array_reduce($input = no_args, $func = one_arg, $res = two_args, $extra = got_args) {
+          .numiters 2;
+
+# If we get here, a value was supplied for $extra
+          String "array_reduce() expects at most 3 parameters, "
+          Jmp warn_num
+
+no_args:
+one_arg:  String "array_reduce() expects at least 2 parameters, "
+          Jmp warn_num
+
+bad_func: String "array_reduce() expects parameter 2 to be a valid callback"
+          Jmp warning
+warn_num: FCallBuiltin 0 0 "__SystemLib\\func_num_arg_"
+          UnboxR
+          String " given."
+          ConcatN 3
+warning:  Cns "E_USER_WARNING"
+          FCallBuiltin 2 2 "trigger_error"
+          PopR
+          Null
+          RetC
+
+check_collection:
+          CGetL $input
+          InstanceOfD "HH\\KeyedTraversable"
+          JmpNZ check_func
+          String "array_reduce() expects parameter 1 to be an array or collection"
+          Jmp warning
+
+two_args: Null
+          SetL $res
+          PopC
+got_args: IsTypeL $input Arr
+          JmpZ check_collection
+check_func:
+          IssetL $func
+          JmpZ bad_func
+          CGetL $func
+          DecodeCufIter 0 bad_func
+.try_fault kill_iter_0 {
+            CGetL $input
+            IterInit 1 endloop $v
+
+  .try_fault kill_iter_1 1 {
+    loop_x:   FPushCufIter 2 0
+              FPassL 0 $res
+              FPassL 1 $v
+              FCall 2
+              UnboxR
+              SetL $res
+              PopC
+              IterNext 1 loop_x $v
+  }
+}
+endloop:  CIterFree 0
+          CGetL $res
+          RetC
+
+kill_iter_0:
+          CIterFree 0
+          Unwind
+kill_iter_1:
+          IterFree 1
+          Unwind
+}

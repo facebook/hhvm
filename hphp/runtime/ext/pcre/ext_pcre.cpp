@@ -40,26 +40,24 @@ Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Array& input,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(preg_match, const String& pattern, const String& subject,
-                                  VRefParam matches /* = null */,
-                                  int flags /* = 0 */, int offset /* = 0 */) {
-  if (matches.isReferenced()) {
-    return preg_match(pattern, subject, matches, flags, offset);
-  } else {
-    return preg_match(pattern, subject, flags, offset);
-  }
+Variant HHVM_FUNCTION(preg_match,
+                      const String& pattern, const String& subject,
+                      VRefParam matches /* = null */,
+                      int flags /* = 0 */, int offset /* = 0 */) {
+  return preg_match(pattern, subject,
+                    matches.isReferenced() ? &matches : nullptr,
+                    flags, offset);
 }
 
-Variant HHVM_FUNCTION(preg_match_all, const String& pattern,
-                                      const String& subject,
-                                      VRefParam matches /* = null */,
-                                      int flags /* = 0 */,
-                                      int offset /* = 0 */) {
-  if (matches.isReferenced()) {
-    return preg_match_all(pattern, subject, matches, flags, offset);
-  } else {
-    return preg_match_all(pattern, subject, flags, offset);
-  }
+Variant HHVM_FUNCTION(preg_match_all,
+                      const String& pattern,
+                      const String& subject,
+                      VRefParam matches /* = null */,
+                      int flags /* = 0 */,
+                      int offset /* = 0 */) {
+  return preg_match_all(pattern, subject,
+                        matches.isReferenced() ? &matches : nullptr,
+                        flags, offset);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

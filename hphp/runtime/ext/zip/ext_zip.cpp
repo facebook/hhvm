@@ -17,10 +17,11 @@
 #include <zip.h>
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
-#include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 
 namespace HPHP {
 
@@ -657,7 +658,7 @@ static bool addPattern(zip* zipStruct, const String& pattern, const Array& optio
     }
 
     if (!glob) {
-      auto var = HHVM_FN(preg_match)(pattern, source);
+      auto var = preg_match(pattern, source);
       if (var.isInteger()) {
         if (var.asInt64Val() == 0) {
           continue;

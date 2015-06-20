@@ -38,6 +38,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/extended-logger.h"
+#include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/socket.h"
@@ -1340,7 +1341,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
                                     bool async_mode) {
   SYNC_VM_REGS_SCOPED();
   if (mysqlExtension::ReadOnly &&
-      same(HHVM_FN(preg_match)("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/i", query),
+      same(preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/i", query),
            0)) {
     raise_notice("runtime/ext_mysql: write query not executed [%s]",
                     query.data());
@@ -1356,21 +1357,22 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
 
     // removing comments, which can be wrong actually if some string field's
     // value has /* or */ in it.
-    String q =
-          HHVM_FN(preg_replace)("/\\/\\*.*?\\*\\//", " ", query).toString();
+    Variant result;
+    String q = preg_replace(result, "/\\/\\*.*?\\*\\//", " ", query) ?
+      result.toString() : query;
 
     Variant matches;
-    HHVM_FN(preg_match)("/^(?:\\(|\\s)*(?:"
-                        "(insert).*?\\s+(?:into\\s+)?([^\\s\\(,]+)|"
-                        "(update|set|show)\\s+([^\\s\\(,]+)|"
-                        "(replace).*?\\s+into\\s+([^\\s\\(,]+)|"
-                        "(delete).*?\\s+from\\s+([^\\s\\(,]+)|"
-                        "(select).*?[\\s`]+from\\s+([^\\s\\(,]+)|"
-                        "(create|alter|drop).*?\\s+table\\s+([^\\s\\(,]+))/is",
-                        q, ref(matches));
-    int size = matches.toArray().size();
+    preg_match("/^(?:\\(|\\s)*(?:"
+               "(insert).*?\\s+(?:into\\s+)?([^\\s\\(,]+)|"
+               "(update|set|show)\\s+([^\\s\\(,]+)|"
+               "(replace).*?\\s+into\\s+([^\\s\\(,]+)|"
+               "(delete).*?\\s+from\\s+([^\\s\\(,]+)|"
+               "(select).*?[\\s`]+from\\s+([^\\s\\(,]+)|"
+               "(create|alter|drop).*?\\s+table\\s+([^\\s\\(,]+))/is",
+               q, &matches);
+    auto marray = matches.toArray();
+    int size = marray.size();
     if (size > 2) {
-      auto marray = matches.toArray();
       std::string verb = toLower(marray[size - 2].toString().toCppString());
       std::string table = toLower(marray[size - 1].toString().toCppString());
       if (!table.empty() && table[0] == '`') {
@@ -1380,10 +1382,11 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
       if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLTableStats) {
         MySqlStats::Record(verb, rconn->m_xaction_count, table);
         if (verb == "update") {
-          HHVM_FN(preg_match)("([^\\s,]+)\\s*=\\s*([^\\s,]+)[\\+\\-]",
-                              q, ref(matches));
-          size = matches.toArray().size();
-          if (size > 2 && same(matches.toArray()[1], matches.toArray()[2])) {
+          preg_match("([^\\s,]+)\\s*=\\s*([^\\s,]+)[\\+\\-]",
+                     q, &matches);
+          marray = matches.toArray();
+          size = marray.size();
+          if (size > 2 && same(marray[1], marray[2])) {
             MySqlStats::Record("incdec", rconn->m_xaction_count, table);
           }
         }
@@ -1393,11 +1396,11 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
         }
       }
     } else {
-      HHVM_FN(preg_match)("/^(?:(?:\\/\\*.*?\\*\\/)|\\(|\\s)*"
-                          "(begin|commit|rollback|select)/is",
-                          query, ref(matches));
-      size = matches.toArray().size();
+      preg_match("/^(?:(?:\\/\\*.*?\\*\\/)|\\(|\\s)*"
+                 "(begin|commit|rollback|select)/is",
+                 query, &matches);
       auto marray = matches.toArray();
+      size = marray.size();
       if (size == 2) {
         std::string verb = toLower(marray[1].toString().data());
         rconn->m_xaction_count = ((verb == "begin") ? 1 : 0);
@@ -1454,7 +1457,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
       if (errcode == 2058 /* CR_NET_READ_INTERRUPTED */ ||
           errcode == 2059 /* CR_NET_WRITE_INTERRUPTED */) {
         Variant ret =
-          HHVM_FN(preg_match)("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/is", query);
+          preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/is", query);
         if (!same(ret, false)) {
           MYSQL *new_conn = create_new_conn();
           IOStatusHelper io("mysql::kill", rconn->m_host.c_str(),

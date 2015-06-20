@@ -348,7 +348,7 @@ bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
     Variant matches;
     int count = preg_match(rule.pattern.c_str(),
                            normalized,
-                           matches).toInt64();
+                           &matches).toInt64();
     if (count > 0) {
       const char *s = rule.to.c_str();
       StringBuffer ret;
@@ -418,7 +418,7 @@ std::string VirtualHost::serverName(const std::string &host) const {
                                       CopyString),
                                String(host.c_str(), host.size(),
                                       CopyString),
-                               matches);
+                               &matches);
       if (ret.toInt64() > 0) {
         String prefix = matches.toArray()[1].toString();
         if (prefix.empty()) {

@@ -106,19 +106,11 @@ void pcre_dump_cache(const std::string& filename);
 Variant preg_grep(const String& pattern, const Array& input, int flags = 0);
 
 Variant preg_match(const String& pattern, const String& subject,
-                   Variant& matches,
+                   Variant* matches = nullptr,
                    int flags = 0, int offset = 0);
 
-Variant preg_match(const String& pattern,
-                   const String& subject,
-                   int flags = 0,
-                   int offset = 0);
-
 Variant preg_match_all(const String& pattern, const String& subject,
-                       Variant& matches,
-                       int flags = 0, int offset = 0);
-
-Variant preg_match_all(const String& pattern, const String& subject,
+                       Variant* matches = nullptr,
                        int flags = 0, int offset = 0);
 
 Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,

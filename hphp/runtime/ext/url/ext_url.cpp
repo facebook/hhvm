@@ -117,8 +117,8 @@ Array HHVM_FUNCTION(get_meta_tags, const String& filename,
   String f = HHVM_FN(file_get_contents)(filename);
 
   Variant matches;
-  HHVM_FN(preg_match_all)("/<meta\\s+name=\"(.*?)\"\\s+content=\"(.*?)\".*?>/s",
-                          f, ref(matches), PREG_SET_ORDER);
+  preg_match_all("/<meta\\s+name=\"(.*?)\"\\s+content=\"(.*?)\".*?>/s",
+                 f, &matches, PREG_SET_ORDER);
 
   Array ret = Array::Create();
   for (ArrayIter iter(matches.toArray()); iter; ++iter) {

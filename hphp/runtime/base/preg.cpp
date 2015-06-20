@@ -1114,23 +1114,15 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
 }
 
 Variant preg_match(const String& pattern, const String& subject,
-                   Variant &matches, int flags /* = 0 */,
+                   Variant* matches /* = nullptr */, int flags /* = 0 */,
                    int offset /* = 0 */) {
-  return preg_match_impl(pattern, subject, &matches, flags, offset, false);
-}
-Variant preg_match(const String& pattern, const String& subject,
-                   int flags /* = 0 */, int offset /* = 0 */) {
-  return preg_match_impl(pattern, subject, nullptr, flags, offset, false);
+  return preg_match_impl(pattern, subject, matches, flags, offset, false);
 }
 
 Variant preg_match_all(const String& pattern, const String& subject,
-                       Variant& matches,
+                       Variant* matches /* = nullptr */,
                        int flags /* = 0 */, int offset /* = 0 */) {
-  return preg_match_impl(pattern, subject, &matches, flags, offset, true);
-}
-Variant preg_match_all(const String& pattern, const String& subject,
-                       int flags /* = 0 */, int offset /* = 0 */) {
-  return preg_match_impl(pattern, subject, nullptr, flags, offset, true);
+  return preg_match_impl(pattern, subject, matches, flags, offset, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

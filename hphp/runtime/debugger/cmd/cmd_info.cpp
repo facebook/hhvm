@@ -365,8 +365,8 @@ void CmdInfo::PrintDocComments(StringBuffer &sb, const Array& info) {
     int space1 = 0; // best guess
     int space2 = 3; // best guess
     Variant matches1, matches2;
-    Variant ret1 = preg_match("#^( *)/\\*#s", doc, matches1);
-    Variant ret2 = preg_match("#\n( *)\\*#s", doc, matches2);
+    Variant ret1 = preg_match("#^( *)/\\*#s", doc, &matches1);
+    Variant ret2 = preg_match("#\n( *)\\*#s", doc, &matches2);
     if (!same(ret1, false) && !same(ret2, false) &&
         matches1.isArray() && matches2.isArray()) {
       // we have perfect doc comment blocks, so we can re-adjust spaces

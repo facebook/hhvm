@@ -344,7 +344,7 @@ check_fmt(struct magic_set *ms, struct magic *m)
     return 0;
   }
   HPHP::Variant matches;
-  auto ret = HPHP::preg_match("~%[-0-9.]*s~", m->desc, matches, 0, 0);
+  auto ret = HPHP::preg_match("~%[-0-9.]*s~", m->desc, &matches, 0, 0);
   return ret.toInt64Val();
 }
 
@@ -2025,7 +2025,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
     auto retval = preg_match_all(
       pattern,
       HPHP::String(ms->search.s, ms->search.s_len, HPHP::CopyString),
-      matches,
+      &matches,
       PREG_OFFSET_CAPTURE,
       0
     );

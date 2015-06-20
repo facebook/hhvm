@@ -55,7 +55,7 @@ SourceRootInfo::SourceRootInfo(Transport* transport)
   Variant matches;
   Variant r = preg_match(String(RuntimeOption::SandboxPattern.c_str(),
                                 RuntimeOption::SandboxPattern.size(),
-                                CopyString), host, matches);
+                                CopyString), host, &matches);
   if (!same(r, 1)) {
     m_sandboxCond = SandboxCondition::Off;
     return;

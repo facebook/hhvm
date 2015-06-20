@@ -499,7 +499,6 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
     } else {
       $this->storage = $input;
     }
-    reset($this->storage);
   }
 
   public function __debugInfo() {

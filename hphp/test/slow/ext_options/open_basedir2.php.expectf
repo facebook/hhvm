@@ -1,0 +1,13 @@
+string(0) ""
+string(45) "/home:/tmp:/invalid_root_dir_asdfasdf/dfg:dfg"
+string(12) "This is data"
+string(45) "/home:/tmp:/invalid_root_dir_asdfasdf/dfg:dfg"
+string(14) "/tmp/aasdfasdf"
+
+Warning: No such file or directory in %s
+bool(false)
+bool(false)
+
+Warning: No such file or directory %s
+bool(false)
+string(14) "/tmp/aasdfasdf"

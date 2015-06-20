@@ -291,6 +291,15 @@ private:
   int64_t m_errorReportingLevel;
   int64_t m_socketDefaultTimeout;
 
+  /*
+   * Keep track of the open_basedir_separator that may be used so we can
+   * have backwards compatibility with our current ;.
+   * This is a simple fix with the caveat that we don't mix the characters
+   * in an ini file or ini_set().
+   * Moving forward we should just use s_PATH_SEPARATOR and support only that
+   */
+  std::string m_open_basedir_separator;
+
  public:
   /* CmdInterrupts this thread is handling. */
   std::stack<void*> interrupts;

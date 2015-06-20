@@ -24,6 +24,8 @@
 #include <sys/time.h>
 #include <signal.h>
 
+#include <boost/filesystem.hpp>
+
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -31,6 +33,7 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 
 namespace HPHP {
 
@@ -258,7 +261,26 @@ void RequestInjectionData::threadInit() {
                    "open_basedir",
                    IniSetting::SetAndGet<std::string>(
                      [this](const std::string& value) {
-                       auto boom = HHVM_FN(explode)(";", value).toCArrRef();
+                       // Backwards compat with ;
+                       // but moving forward should use PATH_SEPARATOR
+                       Array boom;
+                       if (value.find(";") != std::string::npos) {
+                         boom = HHVM_FN(explode)(";", value).toCArrRef();
+                         m_open_basedir_separator = ";";
+                       } else {
+                         boom = HHVM_FN(explode)(s_PATH_SEPARATOR,
+                                                 value).toCArrRef();
+                         m_open_basedir_separator =
+                          s_PATH_SEPARATOR.toCppString();
+                       }
+
+                       // If the open_basedir ends with a separator, then
+                       // explode will give us an empty string at the end.
+                       // Get rid of it.
+                       int sz = value.size();
+                       if (value.find(m_open_basedir_separator) == (sz - 1)) {
+                         boom.pop();
+                       }
 
                        std::vector<std::string> directories;
                        directories.reserve(boom.size());
@@ -290,11 +312,11 @@ void RequestInjectionData::threadInit() {
                        std::string out;
                        for (auto& directory: getAllowedDirectories()) {
                          if (!directory.empty()) {
-                           out += directory + ";";
+                            out += directory + m_open_basedir_separator;
                          }
                        }
 
-                       // Remove the trailing ;
+                       // Remove the trailing separator
                        if (!out.empty()) {
                          out.erase(std::end(out) - 1, std::end(out));
                        }

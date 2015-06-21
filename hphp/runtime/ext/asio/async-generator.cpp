@@ -33,12 +33,13 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void delete_AsyncGenerator(ObjectData* od, const Class*) {
-  Resumable::Destroy(static_cast<c_AsyncGenerator*>(od));
+  auto gen = static_cast<c_AsyncGenerator*>(od);
+  Resumable::Destroy(gen->data()->resumable()->size(), gen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_AsyncGenerator::~c_AsyncGenerator() {
+AsyncGeneratorData::~AsyncGeneratorData() {
   if (LIKELY(getState() == State::Done)) {
     return;
   }
@@ -51,34 +52,26 @@ c_AsyncGenerator::~c_AsyncGenerator() {
   frame_free_locals_inl_no_hook<false>(ar, ar->m_func->numLocals());
 }
 
-void c_AsyncGenerator::t___construct() {}
-
-// Functions with native implementation.
-void c_AsyncGenerator::t_next() {always_assert(false);}
-void c_AsyncGenerator::t_send(const Variant& value) {always_assert(false);}
-void c_AsyncGenerator::t_raise(const Object& exception) {always_assert(false);}
-
-c_AsyncGenerator* c_AsyncGenerator::Create(const ActRec* fp,
-                                           size_t numSlots,
-                                           jit::TCA resumeAddr,
-                                           Offset resumeOffset) {
+ObjectData*
+AsyncGeneratorData::Create(const ActRec* fp, size_t numSlots,
+                           jit::TCA resumeAddr, Offset resumeOffset) {
   assert(fp);
   assert(!fp->resumed());
   assert(fp->func()->isAsyncGenerator());
-  void* obj = Resumable::Create<false, sizeof(c_AsyncGenerator)>(fp,
-                                                                 numSlots,
-                                                                 resumeAddr,
-                                                                 resumeOffset);
-  auto const gen = new (obj) c_AsyncGenerator();
+  void* genDataPtr = Resumable::Create<false,
+                       sizeof(AsyncGeneratorData) + sizeof(c_AsyncGenerator)>(
+                       fp, numSlots, resumeAddr, resumeOffset);
+  AsyncGeneratorData* genData = new (genDataPtr) AsyncGeneratorData();
+  auto const gen = new (genData + 1) c_AsyncGenerator();
   assert(gen->hasExactlyOneRef());
   assert(gen->noDestruct());
-  gen->setState(State::Created);
-  gen->m_waitHandle = nullptr;
-  return gen;
+  genData->setState(State::Created);
+  genData->m_waitHandle = nullptr;
+  return static_cast<ObjectData*>(gen);
 }
 
 c_AsyncGeneratorWaitHandle*
-c_AsyncGenerator::await(Offset resumeOffset, c_WaitableWaitHandle* child) {
+AsyncGeneratorData::await(Offset resumeOffset, c_WaitableWaitHandle* child) {
   assert(getState() == State::Running);
   resumable()->setResumeAddr(nullptr, resumeOffset);
 
@@ -94,7 +87,7 @@ c_AsyncGenerator::await(Offset resumeOffset, c_WaitableWaitHandle* child) {
 }
 
 c_StaticWaitHandle*
-c_AsyncGenerator::yield(Offset resumeOffset,
+AsyncGeneratorData::yield(Offset resumeOffset,
                         const Cell* key, const Cell value) {
   assert(getState() == State::Running);
   resumable()->setResumeAddr(nullptr, resumeOffset);
@@ -117,7 +110,7 @@ c_AsyncGenerator::yield(Offset resumeOffset,
 }
 
 c_StaticWaitHandle*
-c_AsyncGenerator::ret() {
+AsyncGeneratorData::ret() {
   assert(getState() == State::Running);
   setState(State::Done);
 
@@ -134,7 +127,7 @@ c_AsyncGenerator::ret() {
 }
 
 c_StaticWaitHandle*
-c_AsyncGenerator::fail(ObjectData* exception) {
+AsyncGeneratorData::fail(ObjectData* exception) {
   assert(getState() == State::Running);
   setState(State::Done);
 
@@ -148,7 +141,7 @@ c_AsyncGenerator::fail(ObjectData* exception) {
   }
 }
 
-void c_AsyncGenerator::failCpp() {
+void AsyncGeneratorData::failCpp() {
   assert(getState() == State::Running);
   setState(State::Done);
 
@@ -158,6 +151,13 @@ void c_AsyncGenerator::failCpp() {
     m_waitHandle = nullptr;
   }
 }
+
+void c_AsyncGenerator::t___construct() {}
+
+// Functions with native implementation.
+void c_AsyncGenerator::t_next() {always_assert(false);}
+void c_AsyncGenerator::t_send(const Variant& value) {always_assert(false);}
+void c_AsyncGenerator::t_raise(const Object& exception) {always_assert(false);}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

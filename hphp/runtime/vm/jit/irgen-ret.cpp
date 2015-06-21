@@ -141,7 +141,7 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
 
   gen(env,
       StContArState,
-      GeneratorState { BaseGenerator::State::Done },
+      GeneratorState { BaseGeneratorData::State::Done },
       fp(env));
 
   // Push return value of next()/send()/raise().

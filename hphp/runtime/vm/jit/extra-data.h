@@ -1030,12 +1030,12 @@ struct ResumeOffset : IRExtraData {
 };
 
 struct GeneratorState : IRExtraData {
-  explicit GeneratorState(BaseGenerator::State state) : state(state) {}
+  explicit GeneratorState(BaseGeneratorData::State state) : state(state) {}
   std::string show() const {
-    using U = std::underlying_type<BaseGenerator::State>::type;
+    using U = std::underlying_type<BaseGeneratorData::State>::type;
     return folly::to<std::string>(static_cast<U>(state));
   }
-  BaseGenerator::State state;
+  BaseGeneratorData::State state;
 };
 
 struct ContEnterData : IRExtraData {

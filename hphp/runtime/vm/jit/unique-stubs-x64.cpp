@@ -64,12 +64,14 @@ TCA emitRetFromInterpretedGeneratorFrame() {
   Asm a { mcg->code.cold() };
   moveToAlign(mcg->code.cold());
   auto const ret = a.frontier();
+  auto const arOff = BaseGeneratorData::arOff() -
+    (async ? AsyncGeneratorData::objectOff() : GeneratorData::objectOff());
 
   // We have to get the Generator object from the current AR's $this, then
   // find where its embedded AR is.
   PhysReg rContAR = serviceReqArgRegs[0];
   a.    loadq  (rVmFp[AROFF(m_this)], rContAR);
-  a.    lea    (rContAR[c_Generator::arOff()], rContAR);
+  a.    lea    (rContAR[arOff], rContAR);
   a.    movq   (rVmFp, serviceReqArgRegs[1]);
   emitServiceReq(mcg->code.cold(), SRFlags::None, folly::none,
     REQ_POST_INTERP_RET);
@@ -99,12 +101,14 @@ TCA emitDebuggerRetFromInterpretedGenFrame() {
   Asm a { mcg->code.cold() };
   moveToAlign(a.code());
   auto const ret = a.frontier();
+  auto const arOff = BaseGeneratorData::arOff() -
+    (async ? AsyncGeneratorData::objectOff() : GeneratorData::objectOff());
 
   // We have to get the Generator object from the current AR's $this, then
   // find where its embedded AR is.
   PhysReg rContAR = argNumToRegName[0];
   a.  loadq (rVmFp[AROFF(m_this)], rContAR);
-  a.  lea   (rContAR[c_Generator::arOff()], rContAR);
+  a.  lea   (rContAR[arOff], rContAR);
   a.  loadl (rContAR[AROFF(m_soff)], eax);
   a.  storel(eax, rVmTl[unwinderDebuggerReturnOffOff()]);
   a.  storeq(rVmSp, rVmTl[unwinderDebuggerReturnSPOff()]);

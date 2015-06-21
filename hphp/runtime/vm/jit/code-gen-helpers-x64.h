@@ -266,6 +266,10 @@ inline Vptr lookupDestructor(Vout& v, Vreg typeReg) {
   return Vptr{Vreg{}, shiftedType, 8, safe_cast<int>(table)};
 }
 
+inline ptrdiff_t genOffset(bool isAsync) {
+  return isAsync ? AsyncGeneratorData::objectOff() : GeneratorData::objectOff();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}}

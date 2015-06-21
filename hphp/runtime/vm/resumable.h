@@ -26,22 +26,42 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /**
- * Header of the resumable frame used by async functions and generators:
+ * Header of the resumable frame used by async functions:
  *
- * Header*     -> +-------------------------+ low address
- *                | ResumableNode           |
- *                +-------------------------+
- *                | Function locals and     |
- *                | iterators               |
- * Resumable*  -> +-------------------------+
- *                | ActRec in Resumable     |
- *                +-------------------------+
- *                | Rest of Resumable       |
- * ObjectData* -> +-------------------------+
- *                | Parent object           |
- *                +-------------------------+ high address
+ *         Header*     -> +-------------------------+ low address
+ *                        | ResumableNode           |
+ *                        +-------------------------+
+ *                        | Function locals and     |
+ *                        | iterators               |
+ *         Resumable*  -> +-------------------------+
+ *                        | ActRec in Resumable     |
+ *                        +-------------------------+
+ *                        | Rest of Resumable       |
+ *         ObjectData* -> +-------------------------+
+ *                        | Parent object           |
+ *                        +-------------------------+ high address
+ *
+ * Header of the resumable frame used by generators:
+ *
+ *         Header*     -> +-------------------------+ low address
+ *                        | ResumableNode           |
+ *                        +-------------------------+
+ *                        | Function locals and     |
+ *                        | iterators               |
+ *         Resumable*  -> +-------------------------+
+ *                        | ActRec in Resumable     |
+ *                        +-------------------------+
+ *                        | Rest of Resumable       |
+ *  BaseGeneratorData* -> +-------------------------+
+ *                        | Parent Generator Data   |
+ *         ObjectData* -> +-------------------------+
+ *                        | Parent object           |
+ *                        +-------------------------+ high address
  */
 struct Resumable {
+  static Resumable* FromObj(ObjectData* obj);
+  static const Resumable* FromObj(const ObjectData* obj);
+
   static constexpr ptrdiff_t arOff() {
     return offsetof(Resumable, m_actRec);
   }
@@ -51,7 +71,7 @@ struct Resumable {
   static constexpr ptrdiff_t resumeOffsetOff() {
     return offsetof(Resumable, m_resumeOffset);
   }
-  static constexpr ptrdiff_t objectOff() {
+  static constexpr ptrdiff_t dataOff() {
     return sizeof(Resumable);
   }
 
@@ -115,19 +135,10 @@ struct Resumable {
     return resumable + 1;
   }
 
-  template<class T> static void Destroy(T* obj) {
-    auto const size = obj->resumable()->m_size;
+  template<class T> static void Destroy(size_t size, T* obj) {
     auto const base = reinterpret_cast<char*>(obj + 1) - size;
     obj->~T();
     MM().objFree(base, size);
-  }
-
-  static Resumable* FromObj(ObjectData* obj) {
-    return reinterpret_cast<Resumable*>(obj) - 1;
-  }
-
-  static const Resumable* FromObj(const ObjectData* obj) {
-    return reinterpret_cast<const Resumable*>(obj) - 1;
   }
 
   ActRec* actRec() { return &m_actRec; }

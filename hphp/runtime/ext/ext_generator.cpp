@@ -28,20 +28,20 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void delete_Generator(ObjectData* od, const Class*) {
-  Resumable::Destroy(static_cast<c_Generator*>(od));
+  auto gen = static_cast<c_Generator*>(od);
+  Resumable::Destroy(gen->data()->resumable()->size(), gen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_Generator::c_Generator(Class* cb)
-  : BaseGenerator(cb)
-  , m_index(-1LL)
+GeneratorData::GeneratorData()
+  : m_index(-1LL)
   , m_key(make_tv<KindOfInt64>(-1LL))
   , m_value(make_tv<KindOfNull>())
 {
 }
 
-c_Generator::~c_Generator() {
+GeneratorData::~GeneratorData() {
   if (LIKELY(getState() == State::Done)) {
     return;
   }
@@ -56,45 +56,7 @@ c_Generator::~c_Generator() {
   frame_free_locals_inl_no_hook<false>(ar, ar->func()->numLocals());
 }
 
-void c_Generator::t___construct() {}
-
-// Functions with native implementation.
-void c_Generator::t_next() { always_assert(false); }
-void c_Generator::t_send(const Variant& v) { always_assert(false); }
-void c_Generator::t_raise(const Variant& v) { always_assert(false); }
-bool c_Generator::t_valid() { always_assert(false); }
-Variant c_Generator::t_current() { always_assert(false); }
-Variant c_Generator::t_key() { always_assert(false); }
-
-const StaticString s_next("next");
-void c_Generator::t_rewind() {
-  this->o_invoke_few_args(s_next, 0);
-}
-
-const StaticString s__closure_("{closure}");
-String c_Generator::t_getorigfuncname() {
-  const Func* origFunc = actRec()->func();
-  auto const origName = origFunc->isClosureBody() ? s__closure_.get()
-                                                  : origFunc->name();
-  assert(origName->isStatic());
-  return String(const_cast<StringData*>(origName));
-}
-
-String c_Generator::t_getcalledclass() {
-  String called_class;
-
-  if (actRec()->hasThis()) {
-    called_class = actRec()->getThis()->getVMClass()->name()->data();
-  } else if (actRec()->hasClass()) {
-    called_class = actRec()->getClass()->name()->data();
-  } else {
-    called_class = empty_string();
-  }
-
-  return called_class;
-}
-
-void c_Generator::copyVars(ActRec* srcFp) {
+void GeneratorData::copyVars(const ActRec* srcFp) {
   const auto dstFp = actRec();
   const auto func = dstFp->func();
   assert(srcFp->func() == dstFp->func());
@@ -118,24 +80,8 @@ void c_Generator::copyVars(ActRec* srcFp) {
   }
 }
 
-c_Generator *c_Generator::Clone(ObjectData* obj) {
-  auto thiz = static_cast<c_Generator*>(obj);
-  auto fp = thiz->actRec();
-
-  c_Generator* cont = Create<true>(fp, fp->func()->numSlotsInFrame(),
-                                   thiz->resumable()->resumeAddr(),
-                                   thiz->resumable()->resumeOffset());
-  cont->copyVars(fp);
-  cont->setState(thiz->getState());
-  cont->m_index  = thiz->m_index;
-  cellSet(thiz->m_key, cont->m_key);
-  cellSet(thiz->m_value, cont->m_value);
-
-  return cont;
-}
-
-void c_Generator::yield(Offset resumeOffset,
-                        const Cell* key, const Cell value) {
+void GeneratorData::yield(Offset resumeOffset,
+                          const Cell* key, const Cell value) {
   assert(getState() == State::Running);
   resumable()->setResumeAddr(nullptr, resumeOffset);
 
@@ -155,11 +101,68 @@ void c_Generator::yield(Offset resumeOffset,
   setState(State::Started);
 }
 
-void c_Generator::done() {
+void GeneratorData::done() {
   assert(getState() == State::Running);
   cellSetNull(m_key);
   cellSetNull(m_value);
   setState(State::Done);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void c_Generator::t___construct() {}
+
+// Functions with native implementation.
+void c_Generator::t_next() { always_assert(false); }
+void c_Generator::t_send(const Variant& v) { always_assert(false); }
+void c_Generator::t_raise(const Variant& v) { always_assert(false); }
+bool c_Generator::t_valid() { always_assert(false); }
+Variant c_Generator::t_current() { always_assert(false); }
+Variant c_Generator::t_key() { always_assert(false); }
+
+const StaticString s_next("next");
+void c_Generator::t_rewind() {
+  this->o_invoke_few_args(s_next, 0);
+}
+
+const StaticString s__closure_("{closure}");
+String c_Generator::t_getorigfuncname() {
+  const Func* origFunc = data()->actRec()->func();
+  auto const origName = origFunc->isClosureBody() ? s__closure_.get()
+                                                  : origFunc->name();
+  assert(origName->isStatic());
+  return String(const_cast<StringData*>(origName));
+}
+
+String c_Generator::t_getcalledclass() {
+  String called_class;
+
+  if (data()->actRec()->hasThis()) {
+    called_class = data()->actRec()->getThis()->getVMClass()->name()->data();
+  } else if (data()->actRec()->hasClass()) {
+    called_class = data()->actRec()->getClass()->name()->data();
+  } else {
+    called_class = empty_string();
+  }
+
+  return called_class;
+}
+
+GeneratorData *GeneratorData::Clone(ObjectData* obj) {
+  auto thiz = GeneratorData::fromObject(obj);
+  auto fp = thiz->actRec();
+
+  auto objClone = Create<true>(fp, fp->func()->numSlotsInFrame(),
+                               thiz->resumable()->resumeAddr(),
+                               thiz->resumable()->resumeOffset());
+  auto cont = GeneratorData::fromObject(objClone);
+  cont->copyVars(fp);
+  cont->setState(thiz->getState());
+  cont->m_index  = thiz->m_index;
+  cellSet(thiz->m_key, cont->m_key);
+  cellSet(thiz->m_value, cont->m_value);
+
+  return cont;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -33,7 +33,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void delete_AsyncFunctionWaitHandle(ObjectData* od, const Class*) {
-  Resumable::Destroy(static_cast<c_AsyncFunctionWaitHandle*>(od));
+  auto wh = static_cast<c_AsyncFunctionWaitHandle*>(od);
+  Resumable::Destroy(wh->resumable()->size(), wh);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

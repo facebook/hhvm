@@ -4696,29 +4696,31 @@ void CodeGenerator::cgContEnter(IRInstruction* inst) {
 void CodeGenerator::cgContPreNext(IRInstruction* inst) {
   auto contReg      = srcLoc(inst, 0).reg();
   auto checkStarted = inst->src(1)->boolVal();
-  auto stateOff     = BaseGenerator::stateOff();
-  auto& v = vmain();
-  auto const sf = v.makeReg();
+  auto isAsync      = inst->extra<IsAsyncData>()->isAsync;
+  auto stateOff     = BaseGeneratorData::stateOff() - genOffset(isAsync);
+  auto& v           = vmain();
+  auto const sf     = v.makeReg();
 
-  static_assert(uint8_t(BaseGenerator::State::Created) == 0, "used below");
-  static_assert(uint8_t(BaseGenerator::State::Started) == 1, "used below");
-  static_assert(uint8_t(BaseGenerator::State::Running) > 1, "");
-  static_assert(uint8_t(BaseGenerator::State::Done) > 1, "");
+  static_assert(uint8_t(BaseGeneratorData::State::Created) == 0, "used below");
+  static_assert(uint8_t(BaseGeneratorData::State::Started) == 1, "used below");
+  static_assert(uint8_t(BaseGeneratorData::State::Running) > 1, "");
+  static_assert(uint8_t(BaseGeneratorData::State::Done) > 1, "");
 
   // Take exit if state != 1 (checkStarted) or state > 1 (!checkStarted).
-  v << cmpbim{int8_t(BaseGenerator::State::Started), contReg[stateOff], sf};
+  v << cmpbim{int8_t(BaseGeneratorData::State::Started), contReg[stateOff], sf};
   emitFwdJcc(v, checkStarted ? CC_NE : CC_A, sf, inst->taken());
 
   // Set generator state as Running.
-  v << storebi{int8_t(BaseGenerator::State::Running), contReg[stateOff]};
+  v << storebi{int8_t(BaseGeneratorData::State::Running), contReg[stateOff]};
 }
 
 void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
   auto contReg  = srcLoc(inst, 0).reg();
-  auto stateOff = BaseGenerator::stateOff();
-  auto& v = vmain();
+  auto isAsync  = inst->extra<IsAsyncData>()->isAsync;
+  auto stateOff = BaseGeneratorData::stateOff() - genOffset(isAsync);
+  auto& v       = vmain();
 
-  static_assert(uint8_t(BaseGenerator::State::Created) == 0, "used below");
+  static_assert(uint8_t(BaseGeneratorData::State::Created) == 0, "used below");
 
   // Take exit if state == 0.
   auto const sf = v.makeReg();
@@ -4729,26 +4731,27 @@ void CodeGenerator::cgContStartedCheck(IRInstruction* inst) {
 void CodeGenerator::cgContValid(IRInstruction* inst) {
   auto contReg  = srcLoc(inst, 0).reg();
   auto dstReg   = dstLoc(inst, 0).reg();
-  auto stateOff = BaseGenerator::stateOff();
-  auto& v = vmain();
+  auto isAsync  = inst->extra<IsAsyncData>()->isAsync;
+  auto stateOff = BaseGeneratorData::stateOff() - genOffset(isAsync);
+  auto& v       = vmain();
 
   // Return 1 if generator state is not Done.
   auto const sf = v.makeReg();
-  v << cmpbim{int8_t(BaseGenerator::State::Done), contReg[stateOff], sf};
+  v << cmpbim{int8_t(BaseGeneratorData::State::Done), contReg[stateOff], sf};
   v << setcc{CC_NE, sf, dstReg};
 }
 
 void CodeGenerator::cgContArIncKey(IRInstruction* inst) {
   auto contArReg = srcLoc(inst, 0).reg();
   auto& v = vmain();
-  v << incqm{contArReg[CONTOFF(m_key) + TVOFF(m_data) - c_Generator::arOff()],
-             v.makeReg()};
+  v << incqm{contArReg[GENDATAOFF(m_key) + TVOFF(m_data)
+             - GeneratorData::arOff()], v.makeReg()};
 }
 
 void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
   auto contArReg = srcLoc(inst, 0).reg();
   auto newIdxReg = srcLoc(inst, 1).reg();
-  int64_t off = CONTOFF(m_index) - c_Generator::arOff();
+  int64_t off = GENDATAOFF(m_index) - GeneratorData::arOff();
   auto& v = vmain();
   auto mem_index = v.makeReg();
   auto res = v.makeReg();
@@ -4762,35 +4765,36 @@ void CodeGenerator::cgContArUpdateIdx(IRInstruction* inst) {
 void CodeGenerator::cgLdContActRec(IRInstruction* inst) {
   auto dest = dstLoc(inst, 0).reg();
   auto base = srcLoc(inst, 0).reg();
-  ptrdiff_t offset = BaseGenerator::arOff();
+  auto isAsync  = inst->extra<IsAsyncData>()->isAsync;
+  auto offset = BaseGeneratorData::arOff() - genOffset(isAsync);
   vmain() << lea{base[offset], dest};
 }
 
 void CodeGenerator::cgLdContArValue(IRInstruction* inst) {
   auto contArReg = srcLoc(inst, 0).reg();
-  const int64_t valueOff = CONTOFF(m_value);
-  int64_t off = valueOff - c_Generator::arOff();
+  const int64_t valueOff = GENDATAOFF(m_value);
+  int64_t off = valueOff - GeneratorData::arOff();
   emitLoad(inst->dst(), dstLoc(inst, 0), contArReg[off]);
 }
 
 void CodeGenerator::cgStContArValue(IRInstruction* inst) {
   auto contArReg = srcLoc(inst, 0).reg();
-  const int64_t valueOff = CONTOFF(m_value);
-  const int64_t off = valueOff - c_Generator::arOff();
+  const int64_t valueOff = GENDATAOFF(m_value);
+  const int64_t off = valueOff - GeneratorData::arOff();
   emitStoreTV(vmain(), contArReg[off], srcLoc(inst, 1), inst->src(1));
 }
 
 void CodeGenerator::cgLdContArKey(IRInstruction* inst) {
   auto contArReg = srcLoc(inst, 0).reg();
-  const int64_t keyOff = CONTOFF(m_key);
-  int64_t off = keyOff - c_Generator::arOff();
+  const int64_t keyOff = GENDATAOFF(m_key);
+  int64_t off = keyOff - GeneratorData::arOff();
   emitLoad(inst->dst(), dstLoc(inst, 0), contArReg[off]);
 }
 
 void CodeGenerator::cgStContArKey(IRInstruction* inst) {
   auto contArReg = srcLoc(inst, 0).reg();
-  const int64_t keyOff = CONTOFF(m_key);
-  const int64_t off = keyOff - c_Generator::arOff();
+  const int64_t keyOff = GENDATAOFF(m_key);
+  const int64_t off = keyOff - GeneratorData::arOff();
   emitStoreTV(vmain(), contArReg[off], srcLoc(inst, 1), inst->src(1));
 }
 
@@ -4832,21 +4836,23 @@ void CodeGenerator::cgStAsyncArResume(IRInstruction* inst) {
 void CodeGenerator::cgStContArResume(IRInstruction* inst) {
   resumableStResumeImpl(
     inst,
-    c_Generator::resumeAddrOff() - BaseGenerator::arOff(),
-    c_Generator::resumeOffsetOff() - BaseGenerator::arOff()
+    BaseGeneratorData::resumeAddrOff() - BaseGeneratorData::arOff(),
+    BaseGeneratorData::resumeOffsetOff() - BaseGeneratorData::arOff()
   );
 }
 
 void CodeGenerator::cgLdContResumeAddr(IRInstruction* inst) {
+  auto isAsync  = inst->extra<IsAsyncData>()->isAsync;
   vmain() << load{
-    srcLoc(inst, 0).reg()[c_Generator::resumeAddrOff()],
+    srcLoc(inst, 0).reg()[
+      BaseGeneratorData::resumeAddrOff() - genOffset(isAsync)],
     dstLoc(inst, 0).reg()
   };
 }
 
 void CodeGenerator::cgContArIncIdx(IRInstruction* inst) {
   auto& v = vmain();
-  auto const idxOff = CONTOFF(m_index) - BaseGenerator::arOff();
+  auto const idxOff = GENDATAOFF(m_index) - GeneratorData::arOff();
   auto const dst    = dstLoc(inst, 0).reg();
   auto const src    = srcLoc(inst, 0).reg()[idxOff];
   auto const tmp    = v.makeReg();
@@ -4856,7 +4862,7 @@ void CodeGenerator::cgContArIncIdx(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgStContArState(IRInstruction* inst) {
-  auto const off = c_Generator::stateOff() - BaseGenerator::arOff();
+  auto const off = BaseGeneratorData::stateOff() - BaseGeneratorData::arOff();
   vmain() << storebi{
     static_cast<int8_t>(inst->extra<StContArState>()->state),
     srcLoc(inst, 0).reg()[off]
@@ -4961,7 +4967,7 @@ void CodeGenerator::cgLdResumableArObj(IRInstruction* inst) {
   auto const dstReg = dstLoc(inst, 0).reg();
   auto const resumableArReg = srcLoc(inst, 0).reg();
   auto& v = vmain();
-  auto const objectOff = Resumable::objectOff() - Resumable::arOff();
+  auto const objectOff = Resumable::dataOff() - Resumable::arOff();
   v << lea{resumableArReg[objectOff], dstReg};
 }
 

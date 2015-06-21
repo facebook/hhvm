@@ -1017,7 +1017,7 @@ ObjectData* ObjectData::clone() {
     } else if (instanceof(c_Closure::classof())) {
       return c_Closure::Clone(this);
     } else if (instanceof(c_Generator::classof())) {
-      return c_Generator::Clone(this);
+      return GeneratorData::Clone(this)->toObject();
     } else if (instanceof(c_SimpleXMLElement::classof())) {
       return c_SimpleXMLElement::Clone(this);
     }

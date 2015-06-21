@@ -65,7 +65,10 @@ struct Header {
     );
   }
   ObjectData* resumableObj() const {
-    return reinterpret_cast<ObjectData*>(resumable() + 1);
+    auto const func = resumable()->actRec()->func();
+    return func->isGenerator()
+      ? reinterpret_cast<ObjectData*>((char*)this + resumable()->size()) - 1
+      : reinterpret_cast<ObjectData*>(resumable() + 1);
   }
 };
 
@@ -112,7 +115,10 @@ inline size_t Header::size() const {
     case HeaderKind::BigObj:    // [BigNode][Header...]
       return big_.nbytes;
     case HeaderKind::ResumableFrame:
-      // [ResumableNode][locals][Resumable][ObjectData<ResumableObj>]
+      // Generators -
+      // [ResumableNode][locals][Resumable][BaseGeneratorData][ObjectData]
+      // Async functions -
+      // [ResumableNode][locals][Resumable][ObjectData<WaitHandle>]
       return resumable()->size();
     case HeaderKind::NativeData:
       // [NativeNode][NativeData][ObjectData][props] is one allocation.

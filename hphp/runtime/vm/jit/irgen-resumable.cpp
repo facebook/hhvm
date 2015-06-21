@@ -160,7 +160,7 @@ void yieldImpl(IRGS& env, Offset resumeOffset) {
 
   // Set state from Running to Started.
   gen(env, StContArState,
-      GeneratorState { BaseGenerator::State::Started },
+      GeneratorState { BaseGeneratorData::State::Started },
       fp(env));
 }
 
@@ -375,7 +375,8 @@ void emitContKey(IRGS& env) {
   assertx(curClass(env));
   auto const cont = ldThis(env);
   gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
-  auto const offset = cns(env, offsetof(c_Generator, m_key));
+  auto const offset = cns(env,
+    offsetof(GeneratorData, m_key) - GeneratorData::objectOff());
   auto const value = gen(env, LdContField, TCell, cont, offset);
   pushIncRef(env, value);
 }
@@ -384,7 +385,8 @@ void emitContCurrent(IRGS& env) {
   assertx(curClass(env));
   auto const cont = ldThis(env);
   gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
-  auto const offset = cns(env, offsetof(c_Generator, m_value));
+  auto const offset = cns(env,
+    offsetof(GeneratorData, m_value) - GeneratorData::objectOff());
   auto const value = gen(env, LdContField, TCell, cont, offset);
   pushIncRef(env, value);
 }

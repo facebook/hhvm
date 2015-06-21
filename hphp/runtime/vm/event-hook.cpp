@@ -456,7 +456,9 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
         return frame_afwh(resumableAR);
       }
       assert(resumableAR->func()->isGenerator());
-      return frame_base_generator(resumableAR);
+      return !resumableAR->func()->isAsync()
+        ? frame_generator(resumableAR)->toObject()
+        : frame_async_generator(resumableAR)->toObject();
     }();
     decRefObj(resumableObj);
     throw;

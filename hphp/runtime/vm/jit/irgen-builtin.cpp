@@ -489,7 +489,7 @@ ParamPrep prepare_params(IRGS& env,
     auto const ty = param_coerce_type(callee, offset);
     auto &cur = ret[offset];
 
-    cur.value = loadParam(offset);
+    cur.value = loadParam(offset, ty);
     // If ty > TBottom, it had some kind of type hint.
     cur.needsConversion = offset < numNonDefault && ty > TBottom;
 
@@ -1088,7 +1088,7 @@ void nativeImplInlined(IRGS& env) {
     numArgs,
     numArgs, // numNonDefault is equal to numArgs here.
     nullptr,
-    [&] (uint32_t i) {
+    [&] (uint32_t i, const Type) {
       auto ret = ldLoc(env, i, nullptr, DataTypeSpecific);
       // These IncRefs must be 'inside' the callee: it may own the only
       // reference to the parameters.  Normally they will cancel with the
@@ -1175,7 +1175,11 @@ void emitFCallBuiltin(IRGS& env,
     numArgs,
     numNonDefault,
     nullptr,
-    [&] (uint32_t i) { return pop(env, DataTypeSpecific); }
+    [&] (uint32_t i, const Type ty) {
+      auto specificity =
+        ty == TBottom ? DataTypeGeneric : DataTypeSpecific;
+      return pop(env, specificity);
+    }
   );
 
   auto const catcher = CatchMaker {
@@ -1260,7 +1264,7 @@ void emitNativeImpl(IRGS& env) {
             callee->numParams(),
             callee->numParams(),
             fail,
-            [&] (uint32_t i) {
+            [&] (uint32_t i, const Type) {
               return gen(env, LdLocAddr, TPtrToFrameGen, LocalId(i), fp(env));
             }
           );

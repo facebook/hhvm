@@ -338,7 +338,8 @@ static const struct {
   { OpFCallUnpack, {FStack,           Stack1,       OutUnknown,        0 }},
   { OpFCallArray,  {FStack,           Stack1,       OutUnknown,
                                                    -(int)kNumActRecCells }},
-  { OpFCallBuiltin,{BStackN,          Stack1,       OutUnknown,        0 }},
+  { OpFCallBuiltin,{BStackN|DontGuardAny,
+                                      Stack1,       OutUnknown,        0 }},
   { OpCufSafeArray,{StackTop3|DontGuardAny,
                                       Stack1,       OutArray,         -2 }},
   { OpCufSafeReturn,{StackTop3|DontGuardAny,
@@ -1498,9 +1499,16 @@ void translateInstr(
     ni.endsRegion && !irgen::isInlining(irgs)
   );
 
+  const Func* builtinFunc = nullptr;
+  if (ni.op() == OpFCallBuiltin) {
+    auto str = ni.m_unit->lookupLitstrId(ni.imm[2].u_SA);
+    builtinFunc = Unit::lookupFunc(str);
+  }
   auto pc = reinterpret_cast<const Op*>(ni.pc());
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
-    auto const type = flavorToType(instrInputFlavor(pc, i));
+    auto const type =
+      !builtinFunc ? flavorToType(instrInputFlavor(pc, i)) :
+      builtinFunc->byRef(num - i - 1) ? TGen : TCell;
     // TODO(#5706706): want to use assertTypeLocation, but Location::Stack
     // is a little unsure of itself.
     irgen::assertTypeStack(irgs, BCSPOffset{i}, type);

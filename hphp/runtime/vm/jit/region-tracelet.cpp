@@ -221,7 +221,10 @@ RegionDescPtr RegionFormer::go() {
     } catch (const FailedIRGen& exn) {
       FTRACE(1, "ir generation for {} failed with {}\n",
              m_inst.toString(), exn.what());
-      always_assert(!m_interp.count(m_sk));
+      always_assert_flog(
+        !m_interp.count(m_sk),
+        "Double PUNT trying to translate {}\n", m_inst
+      );
       m_interp.insert(m_sk);
       m_region.reset();
       break;
@@ -684,7 +687,10 @@ void RegionFormer::recordDependencies() {
   }
 
   auto guardMap = std::map<RegionDesc::Location,Type>{};
+  ITRACE(2, "Visiting guards\n");
   visitGuards(unit, [&](const RegionDesc::Location& loc, Type type) {
+    Trace::Indent indent;
+    ITRACE(3, "{}: {}\n", show(loc), type);
     if (type <= TCls) return;
     auto inret = guardMap.insert(std::make_pair(loc, type));
     if (inret.second) return;
@@ -703,7 +709,7 @@ void RegionFormer::recordDependencies() {
       continue;
     }
     auto const preCond = RegionDesc::TypedLocation { kv.first, kv.second };
-    FTRACE(1, "selectTracelet adding guard {}\n", show(preCond));
+    ITRACE(1, "selectTracelet adding guard {}\n", show(preCond));
     firstBlock.addPreCondition(blockStart, preCond);
   }
 

@@ -243,7 +243,7 @@ void emitNewPackedArray(IRGS& env, int32_t numArgs) {
       InitPackedArray,
       IndexData { static_cast<uint32_t>(numArgs - i - 1) },
       array,
-      popC(env)
+      popC(env, DataTypeGeneric)
     );
   }
   push(env, array);

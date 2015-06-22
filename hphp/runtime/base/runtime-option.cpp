@@ -425,6 +425,14 @@ static inline bool loopsDefault() {
 #endif
 }
 
+static inline bool hhirConstrictGuardsDefault() {
+#ifdef HHVM_CONSTRICT_GUARDS_BY_DEFAULT
+  return true;
+#else
+  return false;
+#endif
+}
+
 static inline bool hhirRelaxGuardsDefault() {
   return !RuntimeOption::EvalHHIRConstrictGuards;
 }

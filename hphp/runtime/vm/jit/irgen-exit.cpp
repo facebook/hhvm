@@ -50,9 +50,6 @@ void exitRequest(IRGS& env, TransFlags flags, SrcKey target) {
   auto const irSP = offsetFromIRSP(env, BCSPOffset{0});
   auto const invSP = invSPOff(env);
   if (env.firstBcInst && target.offset() == curBCOff) {
-    // The case where the instruction may branch back to itself is
-    // handled in implMakeExit.
-    assertx(!branchesToItself(curSrcKey(env)));
     gen(
       env,
       ReqRetranslate,
@@ -71,17 +68,18 @@ void exitRequest(IRGS& env, TransFlags flags, SrcKey target) {
   );
 }
 
-Block* implMakeExit(IRGS& env, TransFlags trflags, Offset targetBcOff) {
+Block* implMakeExit(IRGS& env, TransFlags trflags, Offset targetBcOff,
+                    bool isGuard = false) {
   auto const curBcOff = bcOff(env);
   if (targetBcOff == -1) targetBcOff = curBcOff;
 
-  // If the targetBcOff is to the same instruction, and the
-  // instruction can also branch back to itself (e.g. IterNext w/
-  // offset=0), then we can't distinguish whether the exit is due to a
-  // guard failure (i.e., no state advanced) or an actual control-flow
-  // transfer (i.e., advancing state).  These are rare situations, and
-  // so we just punt to the interpreter.
-  if (targetBcOff == curBcOff && branchesToItself(curSrcKey(env))) {
+  // If the targetBcOff is to the same instruction, the instruction can also
+  // branch back to itself (e.g. IterNext w/ offset=0), and isGuard is false,
+  // then we can't distinguish whether the exit is due to a guard failure
+  // (i.e., no state advanced) or an actual control-flow transfer (i.e.,
+  // advancing state).  These are rare situations, and so we just punt to the
+  // interpreter.
+  if (!isGuard && targetBcOff == curBcOff && branchesToItself(curSrcKey(env))) {
     PUNT(MakeExitAtBranchToItself);
   }
 
@@ -102,6 +100,10 @@ Block* makeExit(IRGS& env, Offset targetBcOff /* = -1 */) {
 
 Block* makeExit(IRGS& env, TransFlags flags) {
   return implMakeExit(env, flags, -1);
+}
+
+Block* makeGuardExit(IRGS& env, TransFlags flags) {
+  return implMakeExit(env, flags, -1, true);
 }
 
 Block* makeExitSlow(IRGS& env) {

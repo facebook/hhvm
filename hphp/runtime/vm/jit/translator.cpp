@@ -1366,6 +1366,11 @@ Type typeToCheckForInput(
       break;
     }
 
+    case OpNewPackedArray: {
+      tc = DataTypeGeneric;
+      break;
+    }
+
     default: {
       break;
     }
@@ -1474,6 +1479,8 @@ void translateInstr(
                                          ni.offset(), ni.toString(),
                                          show(irgs)));
 
+  if (needsExitPlaceholder) irgen::makeExitPlaceholder(irgs);
+
   irgen::ringbufferEntry(irgs, Trace::RBTypeBytecodeStart, ni.source, 2);
   irgen::emitIncStat(irgs, Stats::Instr_TC, 1);
   if (Trace::moduleEnabledRelease(Trace::llvm_count, 1) ||
@@ -1486,8 +1493,6 @@ void translateInstr(
     irgen::interpOne(irgs, ni);
     return;
   }
-
-  if (needsExitPlaceholder) irgen::makeExitPlaceholder(irgs);
 
   translateDispatch(irgs, ni);
 }

@@ -226,7 +226,7 @@ void checkTypeLocation(IRGS& env,
 }
 
 void makeExitPlaceholder(IRGS& env) {
-  gen(env, ExitPlaceholder, makeExit(env));
+  gen(env, ExitPlaceholder, makeGuardExit(env, TransFlags{}));
 }
 
 void checkRefs(IRGS& env,

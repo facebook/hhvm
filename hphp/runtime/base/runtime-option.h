@@ -525,7 +525,7 @@ public:
   F(uint32_t, JitPGOMaxFuncSizeDupBody, 80)                             \
   F(bool,     JitLoops,                loopsDefault())                  \
   F(uint32_t, HotFuncCount,            4100)                            \
-  F(bool, HHIRConstrictGuards,         false)                           \
+  F(bool, HHIRConstrictGuards,         hhirConstrictGuardsDefault())    \
   F(bool, HHIRRelaxGuards,             hhirRelaxGuardsDefault())        \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \

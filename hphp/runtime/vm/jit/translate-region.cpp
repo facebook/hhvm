@@ -226,46 +226,39 @@ void emitPredictionsAndPreConditions(IRGS& irgs,
     emitEntryAssertions(irgs, block->func(), sk);
   }
 
-  auto emitTypePredictions = [&] {
-    if (!RuntimeOption::EvalHHIRConstrictGuards) return;
-
+  // Emit type predictions, if needed.
+  if (RuntimeOption::EvalHHIRConstrictGuards) {
     while (typePredictions.hasNext(sk)) {
       auto const& pred = typePredictions.next();
       auto type = pred.type;
       auto loc  = pred.location;
       irgen::predictTypeLocation(irgs, loc, type);
     }
-  };
+  }
 
-  auto emitTypePreConditionChecks = [&] {
-    while (typePreConditions.hasNext(sk)) {
-      auto const& preCond = typePreConditions.next();
-      auto type = preCond.type;
-      auto loc  = preCond.location;
-      if (type <= TCls) {
-        // Do not generate guards for class; instead assert the type.
-        assertx(loc.tag() == RegionDesc::Location::Tag::Stack);
-        irgen::assertTypeLocation(irgs, loc, type);
-      } else {
-        // Check inner type eagerly if it is the first block during profiling.
-        // Otherwise only check for BoxedInitCell.
-        bool checkOuterTypeOnly =
-          !isEntry || mcg->tx().mode() != TransKind::Profile;
-        irgen::checkTypeLocation(irgs, loc, type, bcOff, checkOuterTypeOnly);
-      }
+  // Emit type guards/preconditions.
+  while (typePreConditions.hasNext(sk)) {
+    auto const& preCond = typePreConditions.next();
+    auto type = preCond.type;
+    auto loc  = preCond.location;
+    if (type <= TCls) {
+      // Do not generate guards for class; instead assert the type.
+      assertx(loc.tag() == RegionDesc::Location::Tag::Stack);
+      irgen::assertTypeLocation(irgs, loc, type);
+    } else {
+      // Check inner type eagerly if it is the first block during profiling.
+      // Otherwise only check for BoxedInitCell.
+      bool checkOuterTypeOnly =
+        !isEntry || mcg->tx().mode() != TransKind::Profile;
+      irgen::checkTypeLocation(irgs, loc, type, bcOff, checkOuterTypeOnly);
     }
-  };
+  }
 
-  auto emitReffinessGuards = [&] {
-    while (refPreds.hasNext(sk)) {
-      auto const& pred = refPreds.next();
-      irgen::checkRefs(irgs, pred.arSpOffset, pred.mask, pred.vals, bcOff);
-    }
-  };
-
-  emitTypePredictions();
-  emitTypePreConditionChecks();
-  emitReffinessGuards();
+  // Emit reffiness predictions.
+  while (refPreds.hasNext(sk)) {
+    auto const& pred = refPreds.next();
+    irgen::checkRefs(irgs, pred.arSpOffset, pred.mask, pred.vals, bcOff);
+  }
 
   // Finish emitting guards, and emit profiling counters.
   if (isEntry) {

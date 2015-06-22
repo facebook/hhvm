@@ -51,6 +51,14 @@ Block* makeExit(IRGS&, Offset targetBcOff = -1);
 Block* makeExit(IRGS&, TransFlags trflags);
 
 /*
+ * Identical to makeExit(IRGS, TransTrags), but only to be used in situations
+ * where the exit is known to be from a guard failure. This will generate a
+ * ReqRetranslate for bytecode instructions that could branch to themselves,
+ * rather than punting.
+ */
+Block* makeGuardExit(IRGS&, TransFlags);
+
+/*
  * Has the effects of makeExit(env) if the current function is a psuedomain,
  * and otherwise returns nullptr.
  */

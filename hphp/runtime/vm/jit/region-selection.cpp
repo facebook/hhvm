@@ -559,6 +559,7 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
 
 void RegionDesc::Block::addPredicted(SrcKey sk, TypedLocation locType) {
   FTRACE(2, "Block::addPredicted({}, {})\n", showShort(sk), show(locType));
+  assertx(locType.type != TBottom);
   assertx(locType.type <= TStkElem);
   assertx(contains(sk));
   m_typePredictions.insert(std::make_pair(sk, locType));
@@ -566,6 +567,7 @@ void RegionDesc::Block::addPredicted(SrcKey sk, TypedLocation locType) {
 
 void RegionDesc::Block::addPreCondition(SrcKey sk, TypedLocation locType) {
   FTRACE(2, "Block::addPreCondition({}, {})\n", showShort(sk), show(locType));
+  assertx(locType.type != TBottom);
   assertx(locType.type <= TStkElem);
   assertx(contains(sk));
   m_typePreConditions.insert(std::make_pair(sk, locType));

@@ -11,7 +11,7 @@ ETCH_NAME(hash_string_i_crc):
 ETCH_LABEL(FB800):
         CFI(startproc)
         or      $-1, %eax
-        test    %esi, %esi
+        neg     %esi
         je      ETCH_LABEL(iend)
         mov     %esi, %ecx
         movabs  $0xdfdfdfdfdfdfdfdf, %r8
@@ -21,13 +21,12 @@ ETCH_LABEL(iloop):
         add     $8, %rdi
         crc32q  %rdx, %rax
 ETCH_LABEL(iheader):
-        mov     (%rdi), %rdx
-        and     %r8, %rdx
-        sub     $8, %ecx
-        jg     ETCH_LABEL(iloop)
+        mov     %r8, %rdx
+        and     (%rdi), %rdx
+        add     $8, %ecx
+        jnc     ETCH_LABEL(iloop)
 
         shl     $3, %ecx
-        neg     %ecx
         shl     %cl, %rdx
         crc32q  %rdx, %rax
 
@@ -91,7 +90,7 @@ ETCH_NAME(hash_string_cs_crc):
 ETCH_LABEL(FB802):
         CFI(startproc)
         or      $-1, %eax
-        test    %esi, %esi
+        neg     %esi
         je      ETCH_LABEL(csend)
         mov     %esi, %ecx
         jmp     ETCH_LABEL(csheader)
@@ -101,11 +100,10 @@ ETCH_LABEL(csloop):
         crc32q  %rdx, %rax
 ETCH_LABEL(csheader):
         mov     (%rdi), %rdx
-        sub     $8, %ecx
-        jg     ETCH_LABEL(csloop)
+        add     $8, %ecx
+        jnc     ETCH_LABEL(csloop)
 
         shl     $3, %ecx
-        neg     %ecx
         shl     %cl, %rdx
         crc32q  %rdx, %rax
 

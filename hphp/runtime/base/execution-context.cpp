@@ -747,7 +747,7 @@ void ExecutionContext::handleError(const std::string& msg,
           tvTo = tvTo->m_data.pref->tv();
         }
         tvDup(*tvFrom, *tvTo);
-      } else if (fp->hasVarEnv()) {
+      } else if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
         fp->getVarEnv()->set(s_php_errormsg.get(), tvFrom);
       }
     }

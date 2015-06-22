@@ -143,6 +143,11 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
     return Variant(true);
   }
 
+  if (!(curFP->func()->attrs() & AttrMayUseVV)) {
+    throw_not_supported("assert()",
+                        "assert called from non-varenv function");
+  }
+
   if (!curFP->hasVarEnv()) {
     curFP->setVarEnv(VarEnv::createLocal(curFP));
   }

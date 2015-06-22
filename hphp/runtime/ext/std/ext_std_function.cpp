@@ -108,7 +108,8 @@ static Variant func_get_arg_impl(int arg_num) {
   if (ar == nullptr) {
     return false;
   }
-  if (ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {
+  if ((ar->func()->attrs() & AttrMayUseVV) &&
+      ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {
     raise_warning(
       "func_get_arg():  Called from the global scope - no function context"
     );
@@ -188,7 +189,8 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
 #define FUNC_GET_ARGS_IMPL(offset) do {                                        \
   EagerCallerFrame cf;                                                         \
   ActRec* ar = cf.actRecForArgs();                                             \
-  if (ar && ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {             \
+  if (ar && (ar->func()->attrs() & AttrMayUseVV) &&                            \
+      ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {                   \
     raise_warning(                                                             \
       "func_get_args():  Called from the global scope - no function context"   \
     );                                                                         \
@@ -222,7 +224,8 @@ static int64_t func_num_args_impl() {
   if (ar == nullptr) {
     return -1;
   }
-  if (ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {
+  if ((ar->func()->attrs() & AttrMayUseVV) &&
+      ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope()) {
     raise_warning(
       "func_num_args():  Called from the global scope - no function context"
     );

@@ -2448,6 +2448,7 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   assert(vmfp());
   ar->setReturn(vmfp(), pc, mcg->tx().uniqueStubs.retHelper);
   pushLocalsAndIterators(func);
+  assert(vmfp()->func()->attrs() & AttrMayUseVV);
   if (!vmfp()->hasVarEnv()) {
     vmfp()->setVarEnv(VarEnv::createLocal(vmfp()));
   }

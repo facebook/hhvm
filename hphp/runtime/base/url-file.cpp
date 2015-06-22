@@ -135,7 +135,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
       tvTo = tvTo->m_data.pref->tv();
     }
     tvDup(*tvFrom, *tvTo);
-  } else if (fp->hasVarEnv()) {
+  } else if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
     fp->getVarEnv()->set(s_http_response_header.get(),
                          Variant(m_responseHeaders).asTypedValue());
   }

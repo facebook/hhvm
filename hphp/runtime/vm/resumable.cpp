@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/ext/ext_generator.h"
-#include "hphp/runtime/ext/asio/async-generator.h"
+#include "hphp/runtime/ext/asio/ext_async-generator.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -97,6 +97,6 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#include "hphp/runtime/ext/asio/async-generator-inl.h"
+#include "hphp/runtime/ext/asio/ext_async-generator-inl.h"
 
 #endif // incl_HPHP_EXT_ASIO_ASYNC_GENERATOR_H_

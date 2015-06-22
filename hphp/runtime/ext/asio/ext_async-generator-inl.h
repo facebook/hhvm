@@ -16,7 +16,7 @@
 */
 
 #ifndef incl_HPHP_EXT_ASIO_ASYNC_GENERATOR_H_
-#error "This should only be included by async-generator.h"
+#error "This should only be included by ext_async-generator.h"
 #endif
 
 namespace HPHP {

@@ -23,7 +23,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/asio/async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/async-generator.h"
+#include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/static-wait-handle.h"
 #include "hphp/runtime/vm/bytecode.h"

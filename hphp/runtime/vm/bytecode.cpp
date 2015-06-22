@@ -83,7 +83,7 @@
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/asio/async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/async-generator.h"
+#include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/static-wait-handle.h"
 #include "hphp/runtime/ext/asio/wait-handle.h"

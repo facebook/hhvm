@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/async-generator.h"
+#include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/condition-wait-handle.h"

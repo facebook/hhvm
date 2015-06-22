@@ -742,6 +742,9 @@ void Array::unserialize(VariableUnserializer *uns) {
   if (size == 0) {
     operator=(Create());
   } else {
+    if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
+      throw Exception("Array size out of bounds");
+    }
     auto const scale = computeScaleFromSize(size);
     auto const allocsz = computeAllocBytes(scale);
 

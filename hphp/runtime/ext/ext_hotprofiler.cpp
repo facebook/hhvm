@@ -484,7 +484,7 @@ void Profiler::endFrame(const TypedValue *retval,
 ///////////////////////////////////////////////////////////////////////////////
 // HierarchicalProfiler
 
-class HierarchicalProfiler : public Profiler {
+class HierarchicalProfiler final : public Profiler {
 private:
   class CountMap {
   public:
@@ -515,11 +515,11 @@ public:
   explicit HierarchicalProfiler(int flags) : Profiler(true), m_flags(flags) {
   }
 
-  virtual Frame *allocateFrame() override {
+  Frame *allocateFrame() override {
     return new HierarchicalProfilerFrame();
   }
 
-  virtual void beginFrameEx(const char *symbol) override {
+  void beginFrameEx(const char *symbol) override {
     HierarchicalProfilerFrame *frame =
       dynamic_cast<HierarchicalProfilerFrame *>(m_stack);
     frame->m_tsc_start = cpuCycles();
@@ -538,8 +538,7 @@ public:
     }
   }
 
-  virtual void endFrameEx(const TypedValue *retval,
-                          const char *given_symbol) override {
+  void endFrameEx(const TypedValue *retval, const char *given_symbol) override {
     char symbol[512];
     HierarchicalProfilerFrame *frame =
       dynamic_cast<HierarchicalProfilerFrame *>(m_stack);
@@ -564,11 +563,11 @@ public:
     }
   }
 
-  virtual void writeStats(Array &ret) override {
+  void writeStats(Array &ret) override {
     extractStats(ret, m_stats, m_flags, m_MHz);
   }
 
-  virtual bool shouldSkipBuiltins() const override {
+  bool shouldSkipBuiltins() const override {
     return m_flags & NoTrackBuiltins;
   }
 
@@ -1279,48 +1278,32 @@ class MemoProfiler : public Profiler {
     fprintf(stderr, "writeStats end\n");
   }
 
-  class MemberMemoInfo {
-   public:
-    MemberMemoInfo()
-        : m_count(0)
-      {}
-
+  struct MemberMemoInfo {
     String m_return_value;
     TypedValue m_ret_tv;
-    int m_count;
+    int m_count{0};
   };
-  typedef hphp_hash_map<std::string, MemberMemoInfo, string_hash>
-    MemberMemoMap;
+  using MemberMemoMap = hphp_hash_map<std::string, MemberMemoInfo, string_hash>;
 
-  class MemoInfo {
-   public:
-    MemoInfo()
-        : m_count(0)
-        , m_ignore(false)
-        , m_has_this(false)
-        , m_ret_tv_same(true)
-      {}
-
+  struct MemoInfo {
     MemberMemoMap m_member_memos; // Keyed by serialized args
     String m_return_value;
     TypedValue m_ret_tv;
-    int m_count;
-    bool m_ignore;
-    bool m_has_this;
-    bool m_ret_tv_same;
+    int m_count{0};
+    bool m_ignore{false};
+    bool m_has_this{false};
+    bool m_ret_tv_same{true};
   };
-  typedef hphp_hash_map<std::string, MemoInfo, string_hash> MemoMap;
-  MemoMap m_memos; // Keyed by function name
+  using MemoMap = hphp_hash_map<std::string, MemoInfo, string_hash>;
 
-  class Frame {
-   public:
-    explicit Frame(const char* symbol)
-        : m_symbol(symbol)
-      {}
-
+  struct Frame {
+    explicit Frame(const char* symbol) : m_symbol(symbol) {}
     const char* m_symbol;
     String m_args;
   };
+
+public:
+  MemoMap m_memos; // Keyed by function name
   vector<Frame> m_stack;
 };
 

@@ -30,106 +30,108 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-  typedef AsioBlockable::Kind Kind;
 
-  template<class T>
-  inline T* getContainingObject(const AsioBlockable* blockable) {
-    return reinterpret_cast<T*>(
-      const_cast<char*>(
-        reinterpret_cast<const char*>(blockable) -
-        T::blockableOff()));
+typedef AsioBlockable::Kind Kind;
+
+template<class T>
+inline T* getContainingObject(const AsioBlockable* blockable) {
+  return reinterpret_cast<T*>(
+    const_cast<char*>(
+      reinterpret_cast<const char*>(blockable) -
+      T::blockableOff()));
+}
+
+inline c_AsyncFunctionWaitHandle::Node* getAsyncFunctionWaitHandleNode(
+  const AsioBlockable* blockable
+) {
+  assert(blockable->getKind() == Kind::AsyncFunctionWaitHandleNode);
+  return getContainingObject<c_AsyncFunctionWaitHandle::Node>(blockable);
+}
+
+inline c_AsyncGeneratorWaitHandle* getAsyncGeneratorWaitHandle(
+  const AsioBlockable* blockable
+) {
+  assert(blockable->getKind() == Kind::AsyncGeneratorWaitHandle);
+  return getContainingObject<c_AsyncGeneratorWaitHandle>(blockable);
+}
+
+inline c_AwaitAllWaitHandle* getAwaitAllWaitHandle(
+  const AsioBlockable* blockable
+) {
+  assert(blockable->getKind() == Kind::AwaitAllWaitHandle);
+  return getContainingObject<c_AwaitAllWaitHandle>(blockable);
+}
+
+inline c_ConditionWaitHandle* getConditionWaitHandle(
+  const AsioBlockable* blockable
+) {
+  assert(blockable->getKind() == Kind::ConditionWaitHandle);
+  return getContainingObject<c_ConditionWaitHandle>(blockable);
+}
+
+inline c_GenArrayWaitHandle* getGenArrayWaitHandle(
+  const AsioBlockable* blockable
+) {
+  assert(blockable->getKind() == Kind::GenArrayWaitHandle);
+  return getContainingObject<c_GenArrayWaitHandle>(blockable);
+}
+
+inline c_GenMapWaitHandle* getGenMapWaitHandle(
+  const AsioBlockable* blockable
+) {
+  assert(blockable->getKind() == Kind::GenMapWaitHandle);
+  return getContainingObject<c_GenMapWaitHandle>(blockable);
+}
+
+inline c_GenVectorWaitHandle* getGenVectorWaitHandle(
+  const AsioBlockable* blockable
+) {
+  assert(blockable->getKind() == Kind::GenVectorWaitHandle);
+  return getContainingObject<c_GenVectorWaitHandle>(blockable);
+}
+
+inline void exitContextImpl(
+  c_WaitableWaitHandle* waitHandle,
+  context_idx_t ctx_idx
+) {
+  assert(AsioSession::Get()->getContext(ctx_idx));
+  assert(!waitHandle->isFinished());
+  assert(waitHandle->getContextIdx() <= ctx_idx);
+
+  // Not in a context being exited.
+  if (waitHandle->getContextIdx() != ctx_idx) {
+    return;
   }
 
-  inline c_AsyncFunctionWaitHandle::Node* getAsyncFunctionWaitHandleNode(
-    const AsioBlockable* blockable
-  ) {
-    assert(blockable->getKind() == Kind::AsyncFunctionWaitHandleNode);
-    return getContainingObject<c_AsyncFunctionWaitHandle::Node>(blockable);
-  }
+  // Move the wait handle to the parent context.
+  waitHandle->setContextIdx(ctx_idx - 1);
 
-  inline c_AsyncGeneratorWaitHandle* getAsyncGeneratorWaitHandle(
-    const AsioBlockable* blockable
-  ) {
-    assert(blockable->getKind() == Kind::AsyncGeneratorWaitHandle);
-    return getContainingObject<c_AsyncGeneratorWaitHandle>(blockable);
-  }
+  // Recursively move all the parents to the parent context.
+  waitHandle->getParentChain().exitContext(ctx_idx);
+}
 
-  inline c_AwaitAllWaitHandle* getAwaitAllWaitHandle(
-    const AsioBlockable* blockable
-  ) {
-    assert(blockable->getKind() == Kind::AwaitAllWaitHandle);
-    return getContainingObject<c_AwaitAllWaitHandle>(blockable);
-  }
-
-  inline c_ConditionWaitHandle* getConditionWaitHandle(
-    const AsioBlockable* blockable
-  ) {
-    assert(blockable->getKind() == Kind::ConditionWaitHandle);
-    return getContainingObject<c_ConditionWaitHandle>(blockable);
-  }
-
-  inline c_GenArrayWaitHandle* getGenArrayWaitHandle(
-    const AsioBlockable* blockable
-  ) {
-    assert(blockable->getKind() == Kind::GenArrayWaitHandle);
-    return getContainingObject<c_GenArrayWaitHandle>(blockable);
-  }
-
-  inline c_GenMapWaitHandle* getGenMapWaitHandle(
-    const AsioBlockable* blockable
-  ) {
-    assert(blockable->getKind() == Kind::GenMapWaitHandle);
-    return getContainingObject<c_GenMapWaitHandle>(blockable);
-  }
-
-  inline c_GenVectorWaitHandle* getGenVectorWaitHandle(
-    const AsioBlockable* blockable
-  ) {
-    assert(blockable->getKind() == Kind::GenVectorWaitHandle);
-    return getContainingObject<c_GenVectorWaitHandle>(blockable);
-  }
-
-  inline void exitContextImpl(
-    c_WaitableWaitHandle* waitHandle,
-    context_idx_t ctx_idx
-  ) {
-    assert(AsioSession::Get()->getContext(ctx_idx));
-    assert(!waitHandle->isFinished());
-    assert(waitHandle->getContextIdx() <= ctx_idx);
-
-    // Not in a context being exited.
-    if (waitHandle->getContextIdx() != ctx_idx) {
-      return;
-    }
-
-    // Move the wait handle to the parent context.
-    waitHandle->setContextIdx(ctx_idx - 1);
-
-    // Recursively move all the parents to the parent context.
-    waitHandle->getParentChain().exitContext(ctx_idx);
-  }
-
-  inline void exitContextImpl(
-    c_AsyncFunctionWaitHandle::Node* node,
-    context_idx_t ctx_idx
-  ) {
-    if (node->isFirstUnfinishedChild()) {
-      exitContextImpl(node->getWaitHandle(), ctx_idx);
-    }
-  }
-
-  inline void exitContextImpl(
-    c_ConditionWaitHandle* waitHandle,
-    context_idx_t ctx_idx
-  ) {
-    // ConditionWaitHandle may finish before its children do.
-    if (waitHandle->isFinished()) {
-      return;
-    }
-
-    exitContextImpl(static_cast<c_WaitableWaitHandle*>(waitHandle), ctx_idx);
+inline void exitContextImpl(
+  c_AsyncFunctionWaitHandle::Node* node,
+  context_idx_t ctx_idx
+) {
+  if (node->isFirstUnfinishedChild()) {
+    exitContextImpl(node->getWaitHandle(), ctx_idx);
   }
 }
+
+inline void exitContextImpl(
+  c_ConditionWaitHandle* waitHandle,
+  context_idx_t ctx_idx
+) {
+  // ConditionWaitHandle may finish before its children do.
+  if (waitHandle->isFinished()) {
+    return;
+  }
+
+  exitContextImpl(static_cast<c_WaitableWaitHandle*>(waitHandle), ctx_idx);
+}
+
+} // anon namespace
 
 c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
   switch (getKind()) {
@@ -152,11 +154,9 @@ c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
 }
 
 void AsioBlockableChain::unblock() {
-  auto cur = m_firstParent;
-  while (cur) {
-    auto const next = cur->getNextParent();
-
-    // May free cur.
+  for (AsioBlockable* cur = m_firstParent, *next; cur; cur = next) {
+    next = cur->getNextParent();
+    // the onUnblocked handler may free cur
     switch (cur->getKind()) {
       case Kind::AsyncFunctionWaitHandleNode:
         getAsyncFunctionWaitHandleNode(cur)->onUnblocked();
@@ -180,8 +180,6 @@ void AsioBlockableChain::unblock() {
         getGenVectorWaitHandle(cur)->onUnblocked();
         break;
     }
-
-    cur = next;
   }
 }
 

@@ -63,13 +63,13 @@ void *s_waitThread(void *arg) {
 // grab snapshots of the php and async stack when log is called
 // detach itself from its snapshots when the request is ending.
 namespace {
-struct XenonRequestLocalData : public RequestEventHandler  {
+struct XenonRequestLocalData final : RequestEventHandler  {
   XenonRequestLocalData();
   virtual ~XenonRequestLocalData();
   void log(Xenon::SampleType t);
   Array createResponse();
 
-  // virtual from RequestEventHandler
+  // implement RequestEventHandler
   void requestInit() override;
   void requestShutdown() override;
 

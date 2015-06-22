@@ -56,7 +56,7 @@ typedef unsigned long tsrm_uintptr_t;
 #elif defined(TSRM_ST)
 # include <st.h>
 #elif defined(BETHREADS)
-#include <kernel/OS.h> 
+#include <kernel/OS.h>
 #include <TLS.h>
 #endif
 
@@ -87,7 +87,7 @@ typedef struct {
   sem_id sem;
   int32 ben;
 } beos_ben;
-# define MUTEX_T beos_ben * 
+# define MUTEX_T beos_ben *
 #endif
 
 #ifdef HAVE_SIGNAL_H
@@ -128,25 +128,26 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 
 #include "hphp/util/thread-local.h"
 namespace HPHP {
-  typedef std::vector<void*> TSRMStorageVector;
-  extern DECLARE_THREAD_LOCAL(TSRMStorageVector, tsrm_thread_resources);
-  void * ts_init_resource(int id);
+typedef std::vector<void*> TSRMStorageVector;
+extern DECLARE_THREAD_LOCAL(TSRMStorageVector, tsrm_thread_resources);
+void * ts_init_resource(int id);
 
-  static inline void * ts_resource_from_vector(const TSRMStorageVector & vec, ts_rsrc_id id) {
-    void * ret;
-    assert(id != 0);
-    if (TSRM_UNEXPECTED(vec.size() <= TSRM_UNSHUFFLE_RSRC_ID(id))) {
+static inline
+void* ts_resource_from_vector(const TSRMStorageVector & vec, ts_rsrc_id id) {
+  void * ret;
+  assert(id != 0);
+  if (TSRM_UNEXPECTED(vec.size() <= TSRM_UNSHUFFLE_RSRC_ID(id))) {
+    return ts_init_resource(id);
+  } else {
+    ret = vec[TSRM_UNSHUFFLE_RSRC_ID(id)];
+    if (TSRM_UNEXPECTED(ret == nullptr)) {
       return ts_init_resource(id);
     } else {
-      ret = vec[TSRM_UNSHUFFLE_RSRC_ID(id)];
-      if (TSRM_UNEXPECTED(ret == nullptr)) {
-        return ts_init_resource(id);
-      } else {
-        return ret;
-      }
+      return ret;
     }
   }
 }
+} // namespace HPHP
 
 static inline void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id) {
   assert(th_id == NULL); // unimplemented

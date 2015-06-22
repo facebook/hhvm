@@ -41,14 +41,12 @@ namespace HPHP {
  * gc() should look for an clean up expired sessions
  * close() is called on session_destroy() (or request end)
  */
-class SessionModule {
-public:
+struct SessionModule {
   enum {
     md5,
     sha1,
   };
 
-public:
   explicit SessionModule(const char *name) : m_name(name) {
     RegisteredModules.push_back(this);
   }
@@ -64,7 +62,6 @@ public:
   virtual bool gc(int maxlifetime, int *nrdels) = 0;
   virtual String create_sid();
 
-public:
   static SessionModule *Find(const char *name) {
     for (unsigned int i = 0; i < RegisteredModules.size(); i++) {
       SessionModule *mod = RegisteredModules[i];
@@ -77,7 +74,6 @@ public:
 
 private:
   static std::vector<SessionModule*> RegisteredModules;
-
   const char *m_name;
 };
 
@@ -97,8 +93,7 @@ private:
   Object m_obj;
 };
 
-class SystemlibSessionModule : public SessionModule {
-public:
+struct SystemlibSessionModule : SessionModule {
   SystemlibSessionModule(const char *mod_name, const char *phpclass_name) :
            SessionModule(mod_name),
            m_classname(phpclass_name) { }
@@ -111,6 +106,11 @@ public:
   virtual bool gc(int maxlifetime, int *nrdels);
 
 private:
+  void lookupClass();
+  Func* lookupFunc(Class *cls, StringData *fname);
+  const Object& getObject();
+
+private:
   const char *m_classname;
   LowPtr<Class> m_cls;
   static LowPtr<Class> s_SHIClass;
@@ -120,10 +120,6 @@ private:
   const Func *m_open, *m_close;
   const Func *m_read, *m_write;
   const Func *m_destroy, *m_gc;
-
-  void lookupClass();
-  Func* lookupFunc(Class *cls, StringData *fname);
-  const Object& getObject();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

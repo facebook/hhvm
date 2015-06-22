@@ -132,8 +132,7 @@ enum Flag {
 /**
  * Maintain profiles of a running stack.
  */
-class Profiler {
-public:
+struct Profiler {
   explicit Profiler(bool needCPUAffinity);
   virtual ~Profiler();
 
@@ -180,20 +179,6 @@ public:
   static bool extractStats(phpret& ret, StatsMap& stats, int flags,
                            int64_t MHz);
 
-  bool m_successful;
-
-  int64_t    m_MHz; // cpu freq for either the local cpu or the saved trace
-  Frame    *m_stack;      // top of the profile stack
-
-  static bool s_rand_initialized;
-
-  cpu_set_t m_prev_mask;               // saved cpu affinity
-  Frame    *m_frame_free_list;         // freelist of Frame
-  uint8_t     m_func_hash_counters[256]; // counter table by hash code;
-private:
-  bool m_has_affinity;
-
-public:
   /*
    * A hash function to calculate a 8-bit hash code for a function name.
    * This is based on a small modification to 'zend_inline_hash_func' by summing
@@ -257,6 +242,20 @@ public:
     p->m_parent = m_frame_free_list; // we overload the m_parent field here
     m_frame_free_list = p;
   }
+
+public:
+  bool m_successful;
+
+  int64_t    m_MHz; // cpu freq for either the local cpu or the saved trace
+  Frame    *m_stack;      // top of the profile stack
+
+  static bool s_rand_initialized;
+
+  cpu_set_t m_prev_mask;               // saved cpu affinity
+  Frame    *m_frame_free_list;         // freelist of Frame
+  uint8_t     m_func_hash_counters[256]; // counter table by hash code;
+private:
+  bool m_has_affinity;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -273,7 +272,6 @@ enum class ProfilerKind {
 struct ProfilerFactory final : RequestEventHandler {
   static bool EnableNetworkProfiler;
 
-public:
   ProfilerFactory() : m_profiler(nullptr), m_external_profiler(nullptr) {
   }
 

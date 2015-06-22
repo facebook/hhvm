@@ -88,7 +88,8 @@ static void flag_maybe_intercepted(std::vector<char*> &flags) {
   }
 }
 
-bool register_intercept(const String& name, const Variant& callback, const Variant& data) {
+bool register_intercept(const String& name, const Variant& callback,
+                        const Variant& data) {
   StringIMap<Variant> &handlers = s_intercept_data->m_intercept_handlers;
   if (!callback.toBoolean()) {
     if (name.empty()) {

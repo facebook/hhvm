@@ -27,69 +27,67 @@ namespace HPHP {
 
 class c_WaitableWaitHandle;
 
-class AsioBlockable final {
-  public:
-    enum class Kind : uint8_t {
-      AsyncFunctionWaitHandleNode,
-      AsyncGeneratorWaitHandle,
-      AwaitAllWaitHandle,
-      ConditionWaitHandle,
+struct AsioBlockable final {
+  enum class Kind : uint8_t {
+    AsyncFunctionWaitHandleNode,
+    AsyncGeneratorWaitHandle,
+    AwaitAllWaitHandle,
+    ConditionWaitHandle,
 
-      // DEPRECATED
-      GenArrayWaitHandle,
-      GenMapWaitHandle,
-      GenVectorWaitHandle,
-    };
+    // DEPRECATED
+    GenArrayWaitHandle,
+    GenMapWaitHandle,
+    GenVectorWaitHandle,
+  };
 
-    static constexpr ptrdiff_t bitsOff() {
-      return offsetof(AsioBlockable, m_bits);
-    }
+  static constexpr ptrdiff_t bitsOff() {
+    return offsetof(AsioBlockable, m_bits);
+  }
 
-    AsioBlockable* getNextParent() const {
-      return reinterpret_cast<AsioBlockable*>(m_bits & ~7UL);
-    }
+  AsioBlockable* getNextParent() const {
+    return reinterpret_cast<AsioBlockable*>(m_bits & ~7UL);
+  }
 
-    Kind getKind() const {
-      return static_cast<Kind>(m_bits & 7);
-    }
+  Kind getKind() const {
+    return static_cast<Kind>(m_bits & 7);
+  }
 
-    c_WaitableWaitHandle* getWaitHandle() const;
+  c_WaitableWaitHandle* getWaitHandle() const;
 
-    void setNextParent(AsioBlockable* parent, Kind kind) {
-      assert(!(reinterpret_cast<intptr_t>(parent) & 7));
-      assert(!(static_cast<intptr_t>(kind) & ~7UL));
-      m_bits = reinterpret_cast<intptr_t>(parent) |
-               static_cast<intptr_t>(kind);
-    }
+  void setNextParent(AsioBlockable* parent, Kind kind) {
+    assert(!(reinterpret_cast<intptr_t>(parent) & 7));
+    assert(!(static_cast<intptr_t>(kind) & ~7UL));
+    m_bits = reinterpret_cast<intptr_t>(parent) |
+             static_cast<intptr_t>(kind);
+  }
 
-  private:
-    // Stores pointer to the next parent + kind in the lowest 3 bits.
-    uintptr_t m_bits;
+private:
+  // Stores pointer to the next parent + kind in the lowest 3 bits.
+  uintptr_t m_bits;
 };
 
-class AsioBlockableChain final {
-  public:
-    static constexpr ptrdiff_t firstParentOff() {
-      return offsetof(AsioBlockableChain, m_firstParent);
-    }
+struct AsioBlockableChain final {
+  static constexpr ptrdiff_t firstParentOff() {
+    return offsetof(AsioBlockableChain, m_firstParent);
+  }
 
-    void init() noexcept {
-      m_firstParent = nullptr;
-    }
+  void init() noexcept {
+    m_firstParent = nullptr;
+  }
 
-    void addParent(AsioBlockable& parent, AsioBlockable::Kind kind) {
-      parent.setNextParent(m_firstParent, kind);
-      m_firstParent = &parent;
-    }
+  void addParent(AsioBlockable& parent, AsioBlockable::Kind kind) {
+    parent.setNextParent(m_firstParent, kind);
+    m_firstParent = &parent;
+  }
 
-    static void Unblock(AsioBlockableChain chain) { chain.unblock(); }
-    void unblock();
-    void exitContext(context_idx_t ctx_idx);
-    Array toArray();
-    c_WaitableWaitHandle* firstInContext(context_idx_t ctx_idx);
+  static void Unblock(AsioBlockableChain chain) { chain.unblock(); }
+  void unblock();
+  void exitContext(context_idx_t ctx_idx);
+  Array toArray();
+  c_WaitableWaitHandle* firstInContext(context_idx_t ctx_idx);
 
-  private:
-    AsioBlockable* m_firstParent;
+private:
+  AsioBlockable* m_firstParent;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

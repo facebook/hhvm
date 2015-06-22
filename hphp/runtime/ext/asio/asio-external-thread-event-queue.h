@@ -32,27 +32,27 @@ class c_ExternalThreadEventWaitHandle;
  * This value is in principle a constexp, but the integer-to-pointer cast would
  * require a reinterpret cast, which is not allowed in a constexpr
  */
-#define K_CONSUMER_WAITING (static_cast<c_ExternalThreadEventWaitHandle*>((void*)1L))
+#define K_CONSUMER_WAITING \
+  (static_cast<c_ExternalThreadEventWaitHandle*>((void*)1L))
 
-class AsioExternalThreadEventQueue final {
-  public:
-    AsioExternalThreadEventQueue();
+struct AsioExternalThreadEventQueue final {
+  AsioExternalThreadEventQueue();
 
-    bool hasReceived() { return m_received; }
-    void processAllReceived();
-    bool abandonAllReceived(c_ExternalThreadEventWaitHandle* wait_handle);
+  bool hasReceived() { return m_received; }
+  void processAllReceived();
+  bool abandonAllReceived(c_ExternalThreadEventWaitHandle* wait_handle);
 
-    bool tryReceiveSome();
-    bool receiveSomeUntil(
-        std::chrono::time_point<std::chrono::steady_clock> waketime);
-    void receiveSome();
-    void send(c_ExternalThreadEventWaitHandle* wait_handle);
+  bool tryReceiveSome();
+  bool receiveSomeUntil(
+      std::chrono::time_point<std::chrono::steady_clock> waketime);
+  void receiveSome();
+  void send(c_ExternalThreadEventWaitHandle* wait_handle);
 
-  private:
-    c_ExternalThreadEventWaitHandle* m_received;
-    std::atomic<c_ExternalThreadEventWaitHandle*> m_queue;
-    std::mutex m_queueMutex;
-    std::condition_variable m_queueCondition;
+private:
+  c_ExternalThreadEventWaitHandle* m_received;
+  std::atomic<c_ExternalThreadEventWaitHandle*> m_queue;
+  std::mutex m_queueMutex;
+  std::condition_variable m_queueCondition;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

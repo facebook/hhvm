@@ -22,38 +22,37 @@
 
 namespace HPHP {
 
-class ZendObject {
-  public:
-    static void registerNativeData();
+struct ZendObject {
+  static void registerNativeData();
 
-    void setHandle(unsigned int handle) {
-      m_handle = handle;
-    }
+  void setHandle(unsigned int handle) {
+    m_handle = handle;
+  }
 
-    zend_object_handle getHandle() const {
-      return m_handle;
-    }
+  zend_object_handle getHandle() const {
+    return m_handle;
+  }
 
-    void setHandlers(const zend_object_handlers * handlers) {
-      m_handlers = handlers;
-    }
+  void setHandlers(const zend_object_handlers * handlers) {
+    m_handlers = handlers;
+  }
 
-    const zend_object_handlers * getHandlers() const {
-      return m_handlers;
-    }
+  const zend_object_handlers * getHandlers() const {
+    return m_handlers;
+  }
 
-  protected:
-    static void nativeDataCtor(ObjectData* obj);
-    static void nativeDataCopy(ObjectData* dest, ObjectData* src);
-    static void nativeDataDtor(ObjectData* obj);
+protected:
+  static void nativeDataCtor(ObjectData* obj);
+  static void nativeDataCopy(ObjectData* dest, ObjectData* src);
+  static void nativeDataDtor(ObjectData* obj);
 
-    void initZendObject(Class* cls);
-    void destroyZendObject();
+  void initZendObject(Class* cls);
+  void destroyZendObject();
 
-    zend_object_handle m_handle;
-    // Note: zend_object_handlers will be an opaque (incomplete) type for
-    // callers external to EZC
-    const zend_object_handlers * m_handlers;
+  zend_object_handle m_handle;
+  // Note: zend_object_handlers will be an opaque (incomplete) type for
+  // callers external to EZC
+  const zend_object_handlers * m_handlers;
 };
 
 }

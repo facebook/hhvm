@@ -43,8 +43,7 @@ const StaticString s_default_filters_register_func(
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class StreamFilterRepository {
-public:
+struct StreamFilterRepository {
   void add(const String& key, const Variant& v) {
     m_filters.add(key, v);
   }
@@ -92,7 +91,6 @@ private:
 
 struct StreamUserFilters final : RequestEventHandler {
   virtual ~StreamUserFilters() {}
-  StreamFilterRepository m_registeredFilters;
 
   bool registerFilter(const String& name, const String& class_name) {
     if (m_registeredFilters.exists(name)) {
@@ -250,6 +248,9 @@ private:
 
     return makeSmartPtr<StreamFilter>(obj, stream);
   }
+
+public:
+  StreamFilterRepository m_registeredFilters;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(StreamUserFilters, s_stream_user_filters);
 

@@ -604,7 +604,7 @@ void RegionDesc::Block::setKnownFunc(SrcKey sk, const Func* func) {
   m_knownFuncs.insert(std::make_pair(sk, func));
 }
 
-void RegionDesc::Block::setPostConditions(const PostConditions& conds) {
+void RegionDesc::Block::setPostConds(const PostConditions& conds) {
   m_postConds = conds;
 }
 
@@ -778,7 +778,7 @@ static bool postCondMismatch(const RegionDesc::TypedLocation& postCond,
 }
 
 bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
-                          const PostConditions& prevPostConds) {
+                          const TypedLocations& prevPostConds) {
   const auto& preConds = block->typePreConditions();
   for (const auto& it : preConds) {
     for (const auto& post : prevPostConds) {
@@ -1031,8 +1031,11 @@ std::string show(RegionDesc::TypedLocation ta) {
 
 std::string show(const PostConditions& pconds) {
   std::string ret;
-  for (const auto& postCond : pconds) {
-    folly::toAppend("  postcondition: ", show(postCond), "\n", &ret);
+  for (const auto& postCond : pconds.changed) {
+    folly::toAppend("  changed postcondition: ", show(postCond), "\n", &ret);
+  }
+  for (const auto& postCond : pconds.refined) {
+    folly::toAppend("  refined postcondition: ", show(postCond), "\n", &ret);
   }
   return ret;
 }

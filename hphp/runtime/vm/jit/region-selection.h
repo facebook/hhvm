@@ -254,7 +254,31 @@ inline bool operator==(const RegionDesc::TypedLocation& a,
   return a.location == b.location && a.type == b.type;
 }
 
-using PostConditions = std::vector<RegionDesc::TypedLocation>;
+/*
+ * PostConditions are known type information for locals and stack
+ * locations at the end of profiling translation.
+ *
+ * These are kept for blocks that end a profiling translation in order
+ * to enable better region selection.  This information is used to
+ * prevent profiling translations with incompatible types from being
+ * stitched together in a larger, optimizing translation.
+ *
+ * The PostConditions are kept in two distinct sets:
+ *
+ *   - the 'changed' set includes locations that may have been
+ *     modified by the corresponding translation;
+ *
+ *   - the 'refined' set includes locations that are not modified but
+ *     that some information is learned about them during the
+ *     corresponding translation, typically due to type checks or
+ *     asserts.
+ */
+using TypedLocations = std::vector<RegionDesc::TypedLocation>;
+
+struct PostConditions {
+  TypedLocations changed;
+  TypedLocations refined;
+};
 
 /*
  * A prediction for the argument reffiness of the Func for a pre-live ActRec.
@@ -372,9 +396,9 @@ struct RegionDesc::Block {
   void setKnownFunc(SrcKey, const Func*);
 
   /*
-   * Set the postconditions for this Block.
+   * Set the post-conditions for this Block.
    */
-  void setPostConditions(const PostConditions&);
+  void setPostConds(const PostConditions&);
 
   /*
    * The following getters return references to the metadata maps holding the
@@ -382,14 +406,12 @@ struct RegionDesc::Block {
    * iterate over the information is using a MapWalker, since they're all
    * backed by a sorted map.
    */
-  const TypedLocMap& typePredictions() const { return m_typePredictions; }
-  const TypedLocMap& typePreConditions() const {
-    return m_typePreConditions;
-  }
-  const ParamByRefMap& paramByRefs() const { return m_byRefs; }
-  const RefPredMap& reffinessPreds() const { return m_refPreds; }
-  const KnownFuncMap& knownFuncs() const { return m_knownFuncs; }
-  const PostConditions& postConds() const { return m_postConds; }
+  const TypedLocMap&    typePredictions()   const { return m_typePredictions;  }
+  const TypedLocMap&    typePreConditions() const { return m_typePreConditions;}
+  const ParamByRefMap&  paramByRefs()       const { return m_byRefs;           }
+  const RefPredMap&     reffinessPreds()    const { return m_refPreds;         }
+  const KnownFuncMap&   knownFuncs()        const { return m_knownFuncs;       }
+  const PostConditions& postConds()         const { return m_postConds;        }
 
 private:
   void checkInstructions() const;
@@ -535,7 +557,7 @@ RegionDescPtr selectHotCFG(TransID headId,
  * satisfy the post-conditions in prevPostConds.
  */
 bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,
-                          const PostConditions& prevPostConds);
+                          const TypedLocations& prevPostConds);
 
 /*
  * This function returns true for control-flow bytecode instructions that

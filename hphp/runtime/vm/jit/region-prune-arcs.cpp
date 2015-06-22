@@ -89,6 +89,12 @@ bool merge_into(State& dst, const State& src) {
 
 bool preconds_may_pass(const RegionDesc::Block& block,
                        const State& state) {
+  // Return false if the type of any local is bottom, which can only
+  // happen in unreachable paths.
+  for (auto& locType : state.locals) {
+    if (locType == TBottom) return false;
+  }
+
   auto const& preConds = block.typePreConditions();
   auto preCond_it = preConds.find(block.start());
   for (;
@@ -102,7 +108,11 @@ bool preconds_may_pass(const RegionDesc::Block& block,
       {
         auto const loc = preCond.location.localId();
         assertx(loc < state.locals.size());
-        if (!state.locals[loc].maybe(preCond.type)) return false;
+        if (!state.locals[loc].maybe(preCond.type)) {
+          FTRACE(6, "  x B{}'s precond {} fails (Local{} is {})\n",
+                 block.id(), show(preCond), loc, state.locals[loc]);
+          return false;
+        }
       }
       break;
     }
@@ -110,17 +120,35 @@ bool preconds_may_pass(const RegionDesc::Block& block,
   return true;
 }
 
-// PostConditions of a block are our local transfer functions.  Changed types
-// are overwritten in the state.
-void apply_transfer_function(State& dst, const PostConditions& pconds) {
-  for (auto& p : pconds) {
+// PostConditions of a block are our local transfer functions.
+// Changed types are overwritten, while refined types are intersected
+// with the current type.
+void apply_transfer_function(State& dst, const PostConditions& postConds) {
+  for (auto& p : postConds.refined) {
     using L = RegionDesc::Location::Tag;
     switch (p.location.tag()) {
-    case L::Stack: break;
-    case L::Local:
-      assert(p.location.localId() < dst.locals.size());
-      dst.locals[p.location.localId()] = p.type;
-      break;
+      case L::Stack:
+        break;
+      case L::Local: {
+        const auto locId = p.location.localId();
+        assert(locId < dst.locals.size());
+        dst.locals[locId] = dst.locals[locId] & p.type;
+        break;
+      }
+    }
+  }
+
+  for (auto& p : postConds.changed) {
+    using L = RegionDesc::Location::Tag;
+    switch (p.location.tag()) {
+      case L::Stack:
+        break;
+      case L::Local: {
+        const auto locId = p.location.localId();
+        assert(locId < dst.locals.size());
+        dst.locals[locId] = p.type;
+        break;
+      }
     }
   }
 }

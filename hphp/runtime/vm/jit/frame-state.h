@@ -145,6 +145,12 @@ struct SlotState {
    * it around in typeSrcs for guard relaxation.
    */
   TypeSourceSet typeSrcs;
+
+  /*
+   * Whether or not the local or stack element may have changed since
+   * the entry of the unit.  This is only used for post-conditions.
+   */
+  bool maybeChanged{false};
 };
 
 using LocalState = SlotState<false>;
@@ -344,11 +350,13 @@ struct FrameStateMgr final : private LocalStateHook {
   void syncEvalStack();
 
   Type localType(uint32_t id) const;
+  bool localMaybeChanged(uint32_t id) const;
   Type predictedLocalType(uint32_t id) const;
   SSATmp* localValue(uint32_t id) const;
   TypeSourceSet localTypeSources(uint32_t id) const;
 
   Type stackType(IRSPOffset) const;
+  bool stackMaybeChanged(IRSPOffset) const;
   Type predictedStackType(IRSPOffset) const;
   SSATmp* stackValue(IRSPOffset) const;
   TypeSourceSet stackTypeSources(IRSPOffset) const;

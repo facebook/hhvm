@@ -111,8 +111,11 @@ TransCFG::TransCFG(FuncId funcId,
     TransIDSet predIDs = findPredTrans(dstId, profData, srcDB, jmpToTransID);
     for (auto predId : predIDs) {
       if (hasNode(predId)) {
-        auto predPostConds =
-          profData->transRegion(predId)->blocks().back()->postConds();
+        const auto  predBlock = profData->transRegion(predId)->blocks().back();
+        const auto& postConds = predBlock->postConds();
+        auto predPostConds = postConds.changed;
+        predPostConds.insert(predPostConds.end(), postConds.refined.begin(),
+                             postConds.refined.end());
         SrcKey predSK = profData->transSrcKey(predId);
         if (preCondsAreSatisfied(dstBlock, predPostConds) &&
             predSK.resumed() == dstSK.resumed()) {

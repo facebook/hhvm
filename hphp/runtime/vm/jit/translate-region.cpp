@@ -796,7 +796,8 @@ TranslateResult translateRegion(IRGS& irgs,
 
   // For profiling translations, grab the postconditions to be used
   // for region selection whenever we decide to retranslate.
-  pConds.clear();
+  pConds.changed.clear();
+  pConds.refined.clear();
   if (mcg->tx().mode() == TransKind::Profile &&
       RuntimeOption::EvalJitPGOUsePostConditions) {
     auto& unit = irgs.irb->unit();

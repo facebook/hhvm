@@ -86,6 +86,11 @@ bool merge_into(SlotState<Stack>& dst, const SlotState<Stack>& src) {
     changed = true;
   }
 
+  if (!dst.maybeChanged && src.maybeChanged) {
+    dst.maybeChanged = true;
+    changed = true;
+  }
+
   return
     merge_util(dst.predictedType, dst.predictedType | src.predictedType) ||
     changed;
@@ -546,7 +551,8 @@ void FrameStateMgr::forEachLocalValue(
 void FrameStateMgr::collectPostConds(Block* block) {
   assertx(block->isExitNoThrow());
   PostConditions& pConds = m_exitPostConds[block];
-  pConds.clear();
+  pConds.changed.clear();
+  pConds.refined.clear();
 
   if (sp() != nullptr) {
     const auto& lastInst = block->back();
@@ -560,9 +566,12 @@ void FrameStateMgr::collectPostConds(Block* block) {
       const auto fpRel   = bcSpOff - bcSpRel;
       const auto irSpRel = toIRSPOffset(bcSpRel, bcSpOff, irSpOff);
       const auto type    = stackType(irSpRel);
-      if (type < TGen) {
-        FTRACE(1, "Stack({}, {}): {}\n", bcSpRel.offset, fpRel.offset, type);
-        pConds.push_back({RegionDesc::Location::Stack{fpRel}, type});
+      const bool changed = stackMaybeChanged(irSpRel);
+      if (changed || type < TGen) {
+        FTRACE(1, "Stack({}, {}): {} ({})\n", bcSpRel.offset, fpRel.offset,
+               type, changed ? "changed" : "refined");
+        auto& vec = changed ? pConds.changed : pConds.refined;
+        vec.push_back({RegionDesc::Location::Stack{fpRel}, type});
       }
     }
   }
@@ -570,9 +579,12 @@ void FrameStateMgr::collectPostConds(Block* block) {
   if (fp() != nullptr) {
     for (unsigned i = 0; i < func()->numLocals(); i++) {
       auto t = localType(i);
-      if (t != TGen) {
-        FTRACE(1, "Local {}: {}\n", i, t.toString());
-        pConds.push_back({ RegionDesc::Location::Local{i}, t });
+      const bool changed = localMaybeChanged(i);
+      if (changed || t < TGen) {
+        FTRACE(1, "Local {}: {} ({})\n", i, t.toString(),
+               changed ? "changed" : "refined");
+        auto& vec = changed ? pConds.changed : pConds.refined;
+        vec.push_back({ RegionDesc::Location::Local{i}, t });
       }
     }
   }
@@ -877,6 +889,11 @@ Type FrameStateMgr::localType(uint32_t id) const {
   return cur().locals[id].type;
 }
 
+bool FrameStateMgr::localMaybeChanged(uint32_t id) const {
+  always_assert(id < cur().locals.size());
+  return cur().locals[id].maybeChanged;
+}
+
 Type FrameStateMgr::predictedLocalType(uint32_t id) const {
   always_assert(id < cur().locals.size());
   auto const ty = cur().locals[id].predictedType;
@@ -886,6 +903,10 @@ Type FrameStateMgr::predictedLocalType(uint32_t id) const {
 
 Type FrameStateMgr::stackType(IRSPOffset offset) const {
   return stackState(offset).type;
+}
+
+bool FrameStateMgr::stackMaybeChanged(IRSPOffset offset) const {
+  return stackState(offset).maybeChanged;
 }
 
 Type FrameStateMgr::predictedStackType(IRSPOffset offset) const {
@@ -908,6 +929,7 @@ void FrameStateMgr::setStackValue(IRSPOffset offset, SSATmp* value) {
     value ? value->toString() : std::string("<>"));
   stk.value         = value;
   stk.type          = value ? value->type() : TStkElem;
+  stk.maybeChanged  = true;
   stk.predictedType = stk.type;
   stk.typeSrcs.clear();
   if (value) {
@@ -918,8 +940,9 @@ void FrameStateMgr::setStackValue(IRSPOffset offset, SSATmp* value) {
 void FrameStateMgr::setStackType(IRSPOffset offset, Type type) {
   auto& stk = stackState(offset);
   FTRACE(2, "stk[{}] :: {}\n", offset.offset, type.toString());
-  stk.value = nullptr;
-  stk.type = type;
+  stk.value         = nullptr;
+  stk.type          = type;
+  stk.maybeChanged  = true;
   stk.predictedType = type;
   stk.typeSrcs.clear();
 }
@@ -947,7 +970,7 @@ void FrameStateMgr::refineStackType(IRSPOffset offset,
   // Otherwise, we may end up using a value with a more general type
   // than is known about the stack slot.
   if (newType != state.type) state.value = nullptr;
-  state.type = newType;
+  state.type          = newType;
   state.predictedType = updatePredictedType(state.predictedType, state.type);
   state.typeSrcs.clear();
   state.typeSrcs.insert(typeSrc);
@@ -971,10 +994,10 @@ void FrameStateMgr::clearLocals() {
 
 void FrameStateMgr::setLocalValue(uint32_t id, SSATmp* value) {
   always_assert(id < cur().locals.size());
-  cur().locals[id].value = value;
-  auto const newType = value ? value->type() : TGen;
-  cur().locals[id].type = newType;
-
+  cur().locals[id].value        = value;
+  auto const newType            = value ? value->type() : TGen;
+  cur().locals[id].type         = newType;
+  cur().locals[id].maybeChanged = true;
   /*
    * Update the predicted type for boxed values in some special cases to
    * something smart.  The rest of the time, throw it away.
@@ -1026,7 +1049,7 @@ void FrameStateMgr::refineLocalType(uint32_t id,
   // Otherwise, we may end up using a value with a more general type
   // than is known about the local.
   if (newType != local.type) local.value = nullptr;
-  local.type = newType;
+  local.type          = newType;
   local.predictedType = updatePredictedType(local.predictedType, newType);
   local.typeSrcs.clear();
   local.typeSrcs.insert(typeSrc);
@@ -1055,8 +1078,9 @@ void FrameStateMgr::refineStackPredictedType(IRSPOffset offset, Type type) {
 
 void FrameStateMgr::setLocalType(uint32_t id, Type type) {
   always_assert(id < cur().locals.size());
-  cur().locals[id].value = nullptr;
-  cur().locals[id].type = type;
+  cur().locals[id].value         = nullptr;
+  cur().locals[id].type          = type;
+  cur().locals[id].maybeChanged  = true;
   cur().locals[id].predictedType = type;
   cur().locals[id].typeSrcs.clear();
 }
@@ -1105,8 +1129,8 @@ void FrameStateMgr::refineLocalValues(SSATmp* oldVal, SSATmp* newVal) {
       }
       ITRACE(2, "refining local {}'s value: {} -> {}\n",
              id, *local.value, *newVal);
-      local.value = newVal;
-      local.type = newVal->type();
+      local.value         = newVal;
+      local.type          = newVal->type();
       local.predictedType = updatePredictedType(local.predictedType,
                                                 local.type);
       local.typeSrcs.clear();
@@ -1155,6 +1179,7 @@ void FrameStateMgr::dropLocalRefsInnerTypes() {
       if (local.type <= TBoxedCell) {
         local.type          = TBoxedInitCell;
         local.predictedType = TBoxedInitCell;
+        local.maybeChanged  = true;
       }
     }
   }

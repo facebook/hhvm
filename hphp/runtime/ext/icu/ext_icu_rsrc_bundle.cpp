@@ -163,7 +163,8 @@ static Variant HHVM_METHOD(ResourceBundle, get,
 static Variant HHVM_STATIC_METHOD(ResourceBundle, getLocales,
                                                   const String& bundleName) {
   UErrorCode error = U_ZERO_ERROR;
-  auto le = ures_openAvailableLocales(bundleName.c_str(), &error);
+  const char *bundle = bundleName.length() ? bundleName.c_str() : nullptr;
+  auto le = ures_openAvailableLocales(bundle, &error);
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "Cannot fetch locales list");
     return false;

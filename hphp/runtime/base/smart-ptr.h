@@ -273,12 +273,12 @@ typename std::enable_if<
 }
 
 template <typename T, typename P>
-inline auto detach(P&& p) -> decltype(p.detach()) {
+inline auto detach(P&& p) -> decltype(P().detach()) {
   return p.detach();
 }
 
 template <typename T, typename P>
-inline auto deref(const P& p) -> decltype(p.get()) {
+inline auto deref(const P& p) -> decltype(P().get()) {
   return p.get();
 }
 

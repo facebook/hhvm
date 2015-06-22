@@ -40,10 +40,9 @@ public:
 
   static const Resource s_nullResource;
 
-  ResourceData* get() const { return m_res.get(); }
   void reset() { m_res.reset(); }
 
-  ResourceData* operator->() const { return get(); }
+  ResourceData* operator->() const { return m_res.get(); }
 
   /**
    * Constructors
@@ -108,31 +107,14 @@ public:
   [[deprecated("Please use one of the cast family of functions instead.")]]
   SmartPtr<T> getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
     static_assert(std::is_base_of<ResourceData, T>::value, "");
-
-    ResourceData *cur = get();
-    if (!cur) {
-      if (!nullOkay) {
-        throw_null_pointer_exception();
-      }
-      return nullptr;
+    if (nullOkay) {
+      return badTypeOkay ? dyn_cast_or_null<T>(m_res) : cast_or_null<T>(m_res);
     }
-    T *px = dynamic_cast<T*>(cur);
-    if (!px) {
-      if (!badTypeOkay) {
-        throw_invalid_object_type(classname_cstr());
-      }
-      return nullptr;
-    }
-
-    // Assert that casting does not adjust the 'this' pointer
-    assert((void*)px == (void*)cur);
-    return SmartPtr<T>(px);
+    return badTypeOkay ? dyn_cast<T>(m_res) : cast<T>(m_res);
   }
 
   template<typename T>
-  bool is() const {
-    return dynamic_cast<T*>(get()) != nullptr;
-  }
+  bool is() const { return isa<T>(m_res); }
 
   /**
    * Type conversions
@@ -149,25 +131,27 @@ public:
   /**
    * Comparisons
    */
-  bool same (const Resource& v2) const { return m_res == v2.get();}
-  bool equal(const Resource& v2) const { return m_res == v2.get();}
-  bool less (const Resource& v2) const { return toInt64() < v2.toInt64();}
-  bool more (const Resource& v2) const { return toInt64() > v2.toInt64();}
+  bool same (const Resource& v2) const { return m_res == v2.m_res; }
+  bool equal(const Resource& v2) const { return m_res == v2.m_res; }
+  bool less(const Resource& v2) const { return toInt64() < v2.toInt64(); }
+  bool more(const Resource& v2) const { return toInt64() > v2.toInt64(); }
 
-  // Transfer ownership of our reference to this resource.
-  ResourceData *detach() { return m_res.detach(); }
 private:
+  //
+  // The deref and detach functions are only for use by the heap tracer,
+  // cast functions and Variant.  They should not be used anywhere else.
+  //
   template <typename T>
   friend typename std::enable_if<
     std::is_base_of<ResourceData,T>::value,
     ResourceData*
-  >::type deref(const Resource& r) { return r.get(); }
+  >::type deref(const Resource& r) { return r.m_res.get(); }
 
   template <typename T>
   friend typename std::enable_if<
     std::is_base_of<ResourceData,T>::value,
     ResourceData*
-  >::type detach(Resource&& r) { return r.detach(); }
+  >::type detach(Resource&& r) { return r.m_res.detach(); }
 
   static void compileTimeAssertions();
 

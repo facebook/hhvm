@@ -80,8 +80,7 @@ bool same(const Variant& v1, const Resource& v2) {
   if (null1 && null2) return true;
   if (null1 || null2) return false;
   if (!v1.isResource()) return false;
-  auto const rd = v1.getResourceData();
-  return rd == v2.get();
+  return v1.toCResRef().same(v2);
 }
 
 //////////////////////////////////////////////////////////////////////

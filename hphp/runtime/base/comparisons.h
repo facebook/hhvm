@@ -69,8 +69,8 @@ inline bool equal(const Variant& v1, const Object& v2) {
   return cellEqual(*v1.asCell(), v2.get());
 }
 inline bool equal(const Variant& v1, const Resource& v2) {
-  if (!v2.get()) return cellEqual(*v1.asCell(), false);
-  return cellEqual(*v1.asCell(), v2.get());
+  if (!v2) return cellEqual(*v1.asCell(), false);
+  return cellEqual(*v1.asCell(), deref<ResourceData>(v2));
 }
 inline bool equal(const Variant& v1, const Variant& v2) {
   return tvEqual(*v1.asTypedValue(), *v2.asTypedValue());
@@ -105,8 +105,8 @@ inline bool less(const Variant& v1, const Object& v2) {
   return cellLess(*v1.asCell(), v2.get());
 }
 inline bool less(const Variant& v1, const Resource& v2) {
-  if (!v2.get()) return cellLess(*v1.asCell(), false);
-  return cellLess(*v1.asCell(), v2.get());
+  if (!v2) return cellLess(*v1.asCell(), false);
+  return cellLess(*v1.asCell(), deref<ResourceData>(v2));
 }
 inline bool less(const Variant& v1, const Variant& v2) {
   return tvLess(*v1.asTypedValue(), *v2.asTypedValue());
@@ -141,8 +141,8 @@ inline bool more(const Variant& v1, const Object& v2) {
   return cellGreater(*v1.asCell(), v2.get());
 }
 inline bool more(const Variant& v1, const Resource& v2) {
-  if (!v2.get()) return cellGreater(*v1.asCell(), false);
-  return cellGreater(*v1.asCell(), v2.get());
+  if (!v2) return cellGreater(*v1.asCell(), false);
+  return cellGreater(*v1.asCell(), deref<ResourceData>(v2));
 }
 inline bool more(const Variant& v1, const Variant& v2) {
   return tvGreater(*v1.asTypedValue(), *v2.asTypedValue());
@@ -458,7 +458,7 @@ inline bool equal(const StringData *v1, const Object& v2) {
   return equal(v1, v2.toString());
 }
 inline bool equal(const StringData *v1, const Resource& v2) {
-  if (v1 == nullptr || v2.get() == nullptr) {
+  if (!v1 || !v2) {
     return equal(toBoolean(v1), v2.toBoolean());
   }
   return false;
@@ -494,8 +494,8 @@ inline bool less(const StringData *v1, const Object& v2) {
   if (!v2->hasToString()) return true;
   return less(v1, v2.toString());
 }
-inline bool less(const StringData *v1, const Resource& v2) {
-  if (v1 == nullptr || v2.get() == nullptr) {
+inline bool less(const StringData *v1, const Resource& v2)  {
+  if (!v1 || !v2) {
     return less(toBoolean(v1), v2.toBoolean());
   }
   return true;
@@ -531,8 +531,8 @@ inline bool more(const StringData *v1, const Object& v2) {
   if (!v2->hasToString()) return false;
   return more(v1, v2.toString());
 }
-inline bool more(const StringData *v1, const Resource& v2) {
-  if (v1 == nullptr || v2.get() == nullptr) {
+inline bool more(const StringData *v1, const Resource& v2)  {
+  if (!v1 || !v2) {
     return more(toBoolean(v1), v2.toBoolean());
   }
   return false;

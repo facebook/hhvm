@@ -117,7 +117,8 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(const String& v) noexcept : Variant(v.get()) {}
   /* implicit */ Variant(const Array& v) noexcept : Variant(v.get()) { }
   /* implicit */ Variant(const Object& v) noexcept : Variant(v.get()) {}
-  /* implicit */ Variant(const Resource& v) noexcept : Variant(v.get()) {}
+  /* implicit */ Variant(const Resource& v) noexcept
+  : Variant(deref<ResourceData>(v)) {}
   /* implicit */ Variant(StringData* v) noexcept;
   /* implicit */ Variant(ArrayData* v) noexcept {
     if (v) {
@@ -132,15 +133,6 @@ struct Variant : private TypedValue {
     if (v) {
       m_type = KindOfObject;
       m_data.pobj = v;
-      v->incRefCount();
-    } else {
-      m_type = KindOfNull;
-    }
-  }
-  /* implicit */ Variant(ResourceData* v) noexcept {
-    if (v) {
-      m_type = KindOfResource;
-      m_data.pres = v;
       v->incRefCount();
     } else {
       m_type = KindOfNull;
@@ -285,11 +277,11 @@ struct Variant : private TypedValue {
 
   // Move ctor for resources
   /* implicit */ Variant(Resource&& v) noexcept {
-    ResourceData *pres = v.get();
+    ResourceData* pres = deref<ResourceData>(v);
     if (pres) {
       m_type = KindOfResource;
       m_data.pres = pres;
-      v.detach();
+      detach<ResourceData>(std::move(v));
     } else {
       m_type = KindOfNull;
     }
@@ -843,10 +835,6 @@ struct Variant : private TypedValue {
         m_data.pref->var()->m_data.pobj) :
       (m_type <= KindOfNull ? nullptr : m_data.pobj);
   }
-  ResourceData* getResourceData() const {
-    assert(is(KindOfResource));
-    return m_type == KindOfRef ? m_data.pref->var()->m_data.pres : m_data.pres;
-  }
   Variant *getRefData() const {
     assert(m_type == KindOfRef);
     return m_data.pref->var();
@@ -890,6 +878,11 @@ struct Variant : private TypedValue {
   Ref* asRef() { PromoteToRef(*this); return this; }
 
  private:
+  ResourceData* getResourceData() const {
+    assert(is(KindOfResource));
+    return m_type == KindOfRef ? m_data.pref->var()->m_data.pres : m_data.pres;
+  }
+
   ResourceData* detachResourceData() {
     assert(is(KindOfResource));
     if (LIKELY(m_type == KindOfResource)) {
@@ -935,6 +928,16 @@ struct Variant : private TypedValue {
     std::is_base_of<ObjectData,T>::value,
     ObjectData*
   >::type detach(Variant&& v) { return v.detachObjectData(); }
+
+  explicit Variant(ResourceData* v) noexcept {
+    if (v) {
+      m_type = KindOfResource;
+      m_data.pres = v;
+      v->incRefCount();
+    } else {
+      m_type = KindOfNull;
+    }
+  }
 
   /*
    * This set of constructors act like the normal constructors for the
@@ -1011,12 +1014,12 @@ struct Variant : private TypedValue {
   void set(const StaticString & v) noexcept;
   void set(const Array& v) noexcept { return set(v.get()); }
   void set(const Object& v) noexcept { return set(v.get()); }
-  void set(const Resource& v) noexcept { return set(v.get()); }
+  void set(const Resource& v) noexcept { set(deref<ResourceData>(v)); }
 
   void set(String&& v) noexcept { return steal(v.detach()); }
   void set(Array&& v) noexcept { return steal(v.detach()); }
   void set(Object&& v) noexcept { return steal(v.detach()); }
-  void set(Resource&& v) noexcept { return steal(v.detach()); }
+  void set(Resource&& v) noexcept { steal(detach<ResourceData>(std::move(v))); }
 
   template<typename T>
   void set(const SmartPtr<T> &v) noexcept {
@@ -1421,7 +1424,7 @@ typename std::enable_if<
   const char*
 >::type getClassNameCstr(const Variant& v) {
   if(v.isResource()) {
-    return getClassNameCstr(v.toCResRef().get());
+    return getClassNameCstr(deref<T>(v));
   }
   return tname(v.getType()).c_str();
 }
@@ -1430,7 +1433,7 @@ template <typename T>
 typename std::enable_if<std::is_base_of<ObjectData,T>::value,const char*>::type
 getClassNameCstr(const Variant& v) {
   if(v.isObject()) {
-    return getClassNameCstr(v.toCObjRef().get());
+    return getClassNameCstr(deref<T>(v));
   }
   return tname(v.getType()).c_str();
 }

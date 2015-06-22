@@ -480,7 +480,7 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
     // Done at this level
     exporter.level--;
   } else if (var.isResource()) {
-    ResourceData* res = var.toResource().get();
+    auto res = var.toResource();
     xdebug_xml_add_attribute(node, "type", "resource");
     const char* text = xdebug_sprintf("resource id='%ld' type='%s'",
                                       res->o_getId(),

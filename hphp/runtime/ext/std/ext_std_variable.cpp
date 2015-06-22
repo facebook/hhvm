@@ -44,7 +44,7 @@ const StaticString
   s_null("null");
 
 String HHVM_FUNCTION(gettype, const Variant& v) {
-  if (v.getType() == KindOfResource && v.getResourceData()->isInvalid()) {
+  if (v.getType() == KindOfResource && v.toCResRef().isInvalid()) {
     return s_unknown_type;
   }
   return getDataTypeString(v.getType());
@@ -122,7 +122,7 @@ bool HHVM_FUNCTION(is_object, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(is_resource, const Variant& v) {
-  return (v.getType() == KindOfResource && !v.getResourceData()->isInvalid());
+  return (v.getType() == KindOfResource && !v.toCResRef().isInvalid());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

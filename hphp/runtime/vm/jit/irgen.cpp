@@ -275,6 +275,12 @@ void endBlock(IRGS& env, Offset next, bool nextIsMerge) {
     // there's no reason to try to jump anywhere now.
     return;
   }
+  // Don't emit the jump if it would be unreachable.  This avoids
+  // unreachable blocks appearing to be reachable, which would cause
+  // translateRegion to process them.
+  if (auto const curBlock = env.irb->curBlock()) {
+    if (!curBlock->empty() && curBlock->back().isTerminal()) return;
+  }
   jmpImpl(env, next, nextIsMerge ? JmpFlagNextIsMerge : JmpFlagNone);
 }
 

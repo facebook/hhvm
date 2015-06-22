@@ -670,10 +670,13 @@ TranslateResult irGenRegion(IRGS& irgs,
                show(irgs));
         auto returnSk = inst.nextSk();
         auto returnFuncOff = returnSk.offset() - block->func()->base();
-        irgen::beginInlining(irgs, inst.imm[0].u_IVA, callee, returnFuncOff);
-        // "Fallthrough" into the callee's first block
-        auto const calleeEntry = region.block(singleSucc(region, blockId));
-        irgen::endBlock(irgs, calleeEntry->start().offset(), inst.nextIsMerge);
+        if (irgen::beginInlining(irgs, inst.imm[0].u_IVA, callee,
+                                 returnFuncOff)) {
+          // "Fallthrough" into the callee's first block
+          auto const calleeEntry = region.block(singleSucc(region, blockId));
+          irgen::endBlock(irgs, calleeEntry->start().offset(),
+                          inst.nextIsMerge);
+        }
         continue;
       }
 

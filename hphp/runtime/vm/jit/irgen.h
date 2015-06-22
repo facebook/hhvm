@@ -199,9 +199,10 @@ void sealUnit(IRGS&);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Called when we're starting to inline something.
+ * Called when we're starting to inline something.  Returns true iff
+ * it succeeds.
  */
-void beginInlining(IRGS&,
+bool beginInlining(IRGS&,
                    unsigned numParams,
                    const Func* target,
                    Offset returnBcOffset);

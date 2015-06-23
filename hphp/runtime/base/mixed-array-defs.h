@@ -47,6 +47,7 @@ ALWAYS_INLINE int32_t* mixedHash(MixedArray::Elm* data, uint32_t scale) {
 }
 
 template<class F> void MixedArray::scan(F& mark) const {
+  if (isZombie()) return;
   auto data = this->data();
   for (unsigned i = 0, n = m_used; i < n; i++) {
     auto& e = data[i];

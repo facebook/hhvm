@@ -90,7 +90,7 @@ private:
   bool equal(const class_iterator& o) const {
     return m_iter == o.m_iter &&
            m_cls == o.m_cls &&
-           m_clone == o.m_clone;
+           (m_cls == nullptr || m_clone == o.m_clone);
   }
 
   /////////////////////////////////////////////////////////////////////////////

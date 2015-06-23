@@ -1,0 +1,199 @@
+Lambda expression syntax for Hack
+=================================
+
+
+The proposed "lambda syntax" feature is alternate syntax for creating closure
+objects. The two main selling points of "lambda syntax" are:
+
+  (1) Lambda syntax is significantly more concise that traditional closure
+      syntax.
+
+  (2) When lambda syntax is used, the captured variables are determined
+      automatically based on what variables are explicitly referenced in
+      the source code of the containing function and any relevant lambda
+      expressions.
+
+
+Background
+==========
+
+
+PHP 5 supports a language feature known as "closures", which allow
+creating anonymous functions.  The existing feature is pretty
+reasonable, but has a couple drawbacks:
+
+   - The syntax is fairly verbose, and gets some defaults weird:
+
+      - Captured variables must always be explicitly listed, and the
+        "function" and "return" keywords take up a lot of space.
+
+      - $this is always captured by default, even if it's not used in
+        the closure.  The syntax "static function() { .. }" is
+        available to avoid capturing $this, but it's too verbose for
+        real world use.
+
+      - The closure body must always be a compound statement.
+
+   - PHP closures are also PHP objects, in a user-visible way, and as
+     a result it is not trivial to avoid the need to perform
+     allocations or do as-cheap-as-normal-function invocation for
+     simple (no-capture) closures in a general way.
+
+   - PHP closure objects provide some dangerous member functions (bind
+     and bindTo) that allow breaking encapsulation (accessing
+     arbitrary private members of any class).
+
+   - Changes to variables captured by value are thrown away---repeated
+     invocations of the closure will see the originally captured
+     values each time.
+
+The proposal here attempts to address the first group of syntactic
+issues, but does nothing about the other issues mentioned.  But a goal
+here is not to harm anything we might we want to do in the future
+about those other issues.
+
+See https://wiki.php.net/rfc/closures for more on the PHP feature.
+
+
+Overview in Examples
+====================
+
+Expression-like lambdas with a single argument:
+
+  $foo = $x ==> $x + 1;
+  $foo(12); // returns 13
+
+  $squared = array_map($x ==> $x*$x, array(1,2,3));
+  // $squared is array(1,4,9)
+
+Expression-like lambdas with no arguments or more than one argument require
+parentheses around the parameter list:
+
+  $foo = () ==> 73;
+  $foo(); // returns 73
+
+  $bar = ($x,$y) ==> $x + $y;
+  $bar(3,8); // returns 11
+
+A compound statement can be given as the body of lambda expression by using
+curly braces like so:
+
+  $dump_map = ($name, $x) ==> {
+    echo "Map $name has:\n";
+    foreach ($x as $k => $v) {
+      echo "  $k => $v\n";
+    }
+  };
+  $dump_map(
+    "My Map",
+    Map {'a' => 'b', 'c' => 'd'},
+  );
+
+Variables are captured automatically and transitively (including $this):
+
+  $y = 11;
+  $foo = () ==> {
+    return $x ==> $x + $y; // captures $y
+  };
+  $bar = $foo();
+  $bar(5); // returns 16
+
+Use parenthesis if you need to provide parameter or return type hints, or if
+you need to provide default values for parameters:
+
+  $captured = "test: ";
+  $bar = (string $k = "foo"): string ==> $captured . $k;
+
+Async lambdas could be defined by prepending async keyword:
+
+  $async_fn = async $x ==> {
+    $y = await $x->foo();
+    return $y->bar();
+  }
+  $awaitable = $async_fn($obj);
+  $bar = $awaitable->join();
+
+For additional examples see the various unit tests in the implementation.
+
+
+Syntax/Semantics Details
+========================
+
+
+Closures objects may be allocated with either the traditional closure syntax,
+or the new proposed lambda syntax. Closures objects retain their current
+semantics, and both syntaxes for creating closures will continue to be
+supported going forward.
+
+The proposed lambda syntax creates Closure objects that automatically capture
+any referenced variables from enclosing lexical function scopes, transitively
+(i.e. nested closures that use named variables from several levels out will
+cause each intermediate closure to capture that variable so it can pass it to
+the inner one).
+
+Variables are only captured when they are statically visible as names in the
+enclosing scope.  I.e., the capture list is computed statically, not based on
+dynamically defined names in the scope. The Hack typechecker could potentially
+refine these rules with ahead-of-time errors on some automatic captures that
+the runtime allows.
+
+A lambda expression's captured variables are captured with the same "by value"
+semantics that are used for variables in the "use" list of a traditional closure
+expression that aren't preceded by "&". ("&" before a variable in a traditional
+closure's "use" list makes the variable get captured "by reference".) PHP
+programmers who use closures rarely put "&" before a variable in the "use" list
+of a traditional closure expression; as such they are familiar enough with
+the model of capturing variables "by value" that they can be productive and
+write correct code under this model.
+
+Lambda expressions do not support capturing variables by reference. If the
+programmer wants to capture variables by reference they must use the traditional
+closure syntax.
+
+Lambda expressions do not support returning by reference at present, but support
+could be added in the future.
+
+
+hh_server-related
+=================
+
+
+Also proposed (and not part of the proof of concept on the runtime
+implementation) are some things for the hh_server side:
+
+  - It is a static error if a closure reads a captured variable that is in the
+    enclosing scope but that is undefined on any control flow path to the
+    closure allocation site. Hack is already giving this error for traditional
+    closure expressions, so this just extends it to lambda expressions.
+
+    For example:
+
+       function foo() {
+         $y = $x ==> $x + $blah; // hh error: Undefined variable $blah
+         $blah = 12;
+       }
+
+       function foo2() {
+         if (something()) {
+           $blah = 12;
+         }
+         $y = $x ==> $x + $blah; // hh error: $blah is not in scope
+       }
+
+    The runtime will also emit an undefined variable warning when the variable
+    is read in this case.
+
+    Notice though, that it's not an error in case of an assignment, since
+    lambdas capture variables by value, and the variable after assignment is
+    always defined in this case inside a closure:
+
+       function foo() {
+         $y = () ==> $blah = 2; // OK
+         $blah = 12;
+       }
+
+  - Disallow the new style lambda expressions at the top-level (i.e. in
+    pseudo-mains). All top-level statements are disallowed in strict mode
+    anyway, and since this is new we can disallow it in partial as well.
+
+

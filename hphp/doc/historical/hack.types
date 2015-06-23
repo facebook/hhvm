@@ -1,0 +1,202 @@
+********************
+* Type annotations *
+********************
+
+Introduction
+------------
+
+With the introduction of Hack, our runtime types have gradually become richer.
+
+These new type annotations can be enabled with EnableHipHopSyntax=1 or by
+using <?hh instead of <?php as the code prologue.
+
+Some type annotation are currently enforced, others trigger warnings and some
+are just ignored. Over time we will probably implement more consistent checks.
+
+
+Type annotations locations
+--------------------------
+
+Type annotations can be used in the following places:
+1. to annotate class properties
+2. to annotate method/function arguments
+3. to annotate method/function return
+
+Code example:
+  class A {
+    protected **PROPERTY TYPE** $x;
+
+    public function foo(**ARGUMENT TYPE** $a): **RETURN TYPE** {
+      ...
+    }
+  }
+
+
+List of possible annotations
+----------------------------
+
+  * primitive
+    e.g.: function foo(int $x) { ... }
+
+    list of primitives: int, string, bool, float, resource, array
+
+  * class
+    e.g.: function foo(A $a) { ... }
+
+    Can be any user defined class.
+
+    Note: Don't try to use object or StdClass to indicate that a function takes
+          any class. There is no way to express the root class, parent of all.
+
+  * xhp
+    e.g.: function foo(:div $d) { ... }
+      or: function foo(): :div { ... }
+
+  * class with generic
+    e.g.: function foo(Vector<int> $v) { ... }
+      or: function foo(Map<string, int> $m) { ... }
+      or: function foo(Vector<Vector<int>> $v) { ... }
+
+    Can be any user defined generic class.
+
+    In some cases, the typevar is still present:
+      class A<T> {
+        public function foo(T $x) { ... }
+      }
+
+    or:
+      function foo<T>(T $x) { ... }
+
+    or:
+      function foo<T>(Vector<T> $x) { ... }
+
+    Notes:
+    - it is valid to write function foo(Vector $v) { ... } and is roughly
+      equivalent to function foo<T>(Vector<T> $v) { ... }.
+    - array is a generic type, with either one or two type variables, all
+      three following examples are valid:
+      function foo(array $a) { ... }
+      function foo(array<A> $a) { ... }
+      function foo(array<int, A> $a) { ... }
+
+  * typedefs
+    e.g.: type one = ?int; function foo(one $x) { ... }
+      or: newtype one = ?int; function foo(one $x) { ... }
+
+  * void
+    e.g.: function foo(): void { ... }
+
+    void only makes sense as a return type. A void function actually returns
+    null, so it's an ambiguous type. In general, ?void or Vector<void>
+    usually won't make a lot of sense.
+
+  * mixed
+    e.g.: function foo(mixed $x) { ... }
+
+    Mixed is a wildcard type and matches everything.
+
+  * nullable
+    e.g.: function foo(?int $x) { ... }
+
+    The '?' can be combined with any other type: ?int, ?Vector<?float>, etc.
+
+  * tuple
+    e.g.: function foo((int, string) $x) { ... }
+
+    1-element tuples are disallowed (made things easier in the parser).
+
+    tuples piggyback on arrays. $x[0] is the first element, $x[1] the second,
+    etc.
+
+  * closure
+    e.g.: function foo((function(int, string): int) $f) { ... }
+      or: function foo((function(int)) $f) { ... }
+
+    Annotating closures is unfortunately verbose.
+
+    Note: In the php docs, closures are called anonymous functions.
+
+  * callable
+    e.g.: function foo(callable $f) { ... }
+
+    The callable type is similar to a closure, but is weaker: it does not convey
+    any signature information about the function. A callable is compatible with
+    arrays, strings and closures (as long as the array/strings 'point' to valid
+    functions/methods).
+
+  * this
+    e.g.:
+      class A {
+        public function foo(): this {
+          return $this;
+        }
+      }
+
+    The this type indicates the code always returns $this. Returning a different
+    instance of A is an error.
+
+    Note: The this type can only be used as a return type annotation. It cannot
+          be used as a parameter or a property annotation.
+
+
+Type enforcement
+----------------
+
+The runtime currently ignores annotations on properties and return types.
+
+For argument annotations, the current implementation is the following:
+  * primitive types are enforced.
+  * class types are enforced.
+  * :xhp types are enforced.
+  * generic types are partially enforced. Only the base class is checked.
+    E.g. Vector<int> is enforced as Vector.
+  * void types are not enforced.
+  * mixed types are enforced by being ignored.
+  * nullable types are partially enforced. A nullable type ?t only triggers
+    warnings (see soft types below).
+  * tuple types are enforced as arrays.
+  * closure types are not enforced.
+  * callable types are enforced.
+  * this types are not enforced.
+
+
+If an annotation is prepended with an @ sign, the annotation is called "soft".
+A soft annotation mismatch gets logged as a warning, but the runtime continues
+execution. This is designed mainly for debugging or migrating code purpose.
+
+e.g.: function foo(@int $x) { ... }
+
+The presence or absence of the @ modifier does not change how an annotation gets
+enforced.
+
+Note: The @ belongs to the annotation, not the type. I.e. Foo<@Bar> is illegal.
+
+
+Runtime data structures
+-----------------------
+
+1. The parser stores the type information in TypeAnnotation objects
+   (see compiler/type_annotation.h).
+
+2. emitter.cpp uses the TypeAnnotation to populate Func
+   (see compiler/analysis/emitter.cpp and runtime/vm/func.h).
+
+3. Func uses
+   - DataType (see runtime/base/datatype.h) for builtin types.
+   - TypeConstraint (see runtime/vm/type-constraint.h) for checking
+     the types, stored in m_typeConstraint.
+   - StringData, used for reflection, stored in m_userType.
+
+4. TypeConstraint contains three pieces of information:
+   - a Type (see runtime/vm/jit/type.h)
+   - a set of bits to tell if a type is nullable, soft, etc.
+   - a StringData which is truncated in the case of generics.
+
+   Note: in some cases, e.g. function foo((function(int)) $x), m_typeConstraint
+         is null since we don't check closures, but m_userType still contains
+         the reflection information.
+
+5. TODO:
+   - explain how type information flows into the jit.
+   - document compiler/analysis/type.h
+   - document hhbbc/representation.h

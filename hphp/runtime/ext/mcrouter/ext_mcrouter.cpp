@@ -4,6 +4,8 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 
+#include <memory>
+
 #include "mcrouter/config.h" // @nolint
 #include "mcrouter/options.h" // @nolint
 #include "mcrouter/McrouterClient.h" // @nolint
@@ -92,7 +94,13 @@ class MCRouter {
 
     mcr::McrouterInstance* router;
     if (pid.empty()) {
+      /* TODO(t7574316): clean up */
+#ifdef HPHP_OSS
       router = mcr::McrouterInstance::createTransient(opts);
+#else
+      m_transientRouter = mcr::McrouterInstance::create(opts.clone());
+      router = m_transientRouter.get();
+#endif  /* HPHP_OSS */
     } else {
       router = mcr::McrouterInstance::init(pid.toCppString(), opts);
     }
@@ -114,6 +122,7 @@ class MCRouter {
   Object issue(mcr::mcrouter_msg_t& msg);
 
  private:
+  std::shared_ptr<mcr::McrouterInstance> m_transientRouter;
   mcr::McrouterClient::Pointer m_client;
 
   void parseOptions(mc::McrouterOptions& opts, const Array& options) {

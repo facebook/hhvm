@@ -98,6 +98,7 @@ struct ObjectData {
   static void resetMaxId();
 
   explicit ObjectData(Class*);
+  explicit ObjectData(Class*, uint16_t flags, HeaderKind = HeaderKind::Object);
   ~ObjectData();
 
   // Disallow copy construction and assignemt
@@ -105,8 +106,6 @@ struct ObjectData {
   ObjectData& operator=(const ObjectData&) = delete;
 
  protected:
-  explicit ObjectData(Class*, uint16_t flags, HeaderKind = HeaderKind::Object);
-
   enum class NoInit {};
 
   explicit ObjectData(Class*, NoInit) noexcept;

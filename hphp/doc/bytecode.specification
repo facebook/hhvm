@@ -4233,6 +4233,9 @@ Await  <number of iterators>   [C]  ->  [C]
   a WaitHandle provided by $1, suspending the execution if the WaitHandle
   was not yet ready.
 
+  The $1 argument is allowed to be a legacy user space Awaitable, in which case
+  a ->getWaitHandle() method is called first to obtain a WaitHandle object.
+
   If $1 is not a subclass of WaitHandle, raises a fatal error. If $1 succeeded,
   this instruction pushes the result value from the WaitHandle. If $1 failed,
   this instruction throws the exception from the WaitHandle. Otherwise the

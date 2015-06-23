@@ -4665,16 +4665,6 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     registerYieldAwait(await);
     assert(m_evalStack.size() == 0);
 
-    // If we know statically that it's a subtype of WaitHandle, we
-    // don't need to make a call.
-    bool const isKnownWaitHandle = [&] {
-      auto const expr = await->getExpression();
-      auto const ar = expr->getScope()->getContainingProgram();
-      auto const type = expr->getActualType();
-      return type && Type::SubType(ar, type,
-                       Type::GetType(Type::KindOfObject, "HH\\WaitHandle"));
-    }();
-
     Label resume;
 
     // evaluate expression passed to await
@@ -4686,21 +4676,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     emitIsType(e, IsTypeOp::Null);
     e.JmpNZ(resume);
 
-    if (!isKnownWaitHandle) {
-      Label likely;
-      const static StringData* nWaitHandle =
-        makeStaticString("HH\\WaitHandle");
-
-      e.Dup();
-      e.InstanceOfD(nWaitHandle);
-      e.JmpNZ(likely);
-      emitConstMethodCallNoParams(e, "getWaitHandle");
-      likely.set(e);
-    }
     assert(m_evalStack.size() == 1);
 
-    // TODO(#3197024): if isKnownWaitHandle, we should put an
-    // AssertObjStk so the Await type check can be avoided.
     e.Await(m_pendingIters.size());
 
     resume.set(e);

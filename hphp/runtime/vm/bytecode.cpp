@@ -230,6 +230,7 @@ const StaticString s___call("__call");
 const StaticString s___callStatic("__callStatic");
 const StaticString s_file("file");
 const StaticString s_line("line");
+const StaticString s_getWaitHandle("getWaitHandle");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -7311,12 +7312,30 @@ OPTBLD_INLINE void asyncSuspendR(PC& pc) {
 OPTBLD_INLINE TCA iopAwait(IOP_ARGS) {
   pc++;
   auto iters = decode_iva(pc);
-
-  auto const wh = c_WaitHandle::fromCell(vmStack().topC());
+  auto const awaitable = vmStack().topC();
+  auto wh = c_WaitHandle::fromCell(awaitable);
   if (UNLIKELY(wh == nullptr)) {
-    raise_error("Await on a non-WaitHandle");
-    not_reached();
-  } else if (wh->isSucceeded()) {
+    if (LIKELY(awaitable->m_type == KindOfObject)) {
+      auto const obj = awaitable->m_data.pobj;
+      auto const cls = obj->getVMClass();
+      auto const func = cls->lookupMethod(s_getWaitHandle.get());
+      if (func && !(func->attrs() & AttrStatic)) {
+        TypedValue ret;
+        g_context->invokeFuncFew(&ret, func, obj, nullptr, 0, nullptr);
+        cellSet(*tvToCell(&ret), *vmStack().topC());
+        tvRefcountedDecRef(ret);
+        wh = c_WaitHandle::fromCell(vmStack().topC());
+      }
+    }
+
+    if (UNLIKELY(wh == nullptr)) {
+      Object e(SystemLib::AllocBadMethodCallExceptionObject(
+        "Await on a non-WaitHandle"));
+      throw e;
+    }
+  }
+
+  if (wh->isSucceeded()) {
     cellSet(wh->getResult(), *vmStack().topC());
     return nullptr;
   } else if (UNLIKELY(wh->isFailed())) {

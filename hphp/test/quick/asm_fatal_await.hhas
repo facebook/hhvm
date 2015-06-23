@@ -1,6 +1,9 @@
 .main {
   FPushFuncD 0 "main"
   FCall 0
+  UnboxR
+  FPushObjMethodD 0 "join" NullThrows
+  FCall 0
   PopR
   Null
   RetC

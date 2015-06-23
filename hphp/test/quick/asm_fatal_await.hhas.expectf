@@ -1,2 +1,4 @@
-
-Fatal error: Await on a non-WaitHandle in %s/test/quick/asm_fatal_await.hhas on line -1
+Fatal error: Uncaught exception 'BadMethodCallException' with message 'Await on a non-WaitHandle' in %s:-1
+Stack trace:
+#0 %s(-1): main()
+#1 {main}

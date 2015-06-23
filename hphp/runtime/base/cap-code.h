@@ -40,12 +40,13 @@ struct CapCode {
 
   uint16_t code;
 
-  // return the exponent value to use, in the range 1..21
-  static uint32_t calc_exp(uint32_t c) {
-    assert(c > Threshold);
+  // return the exponent value to use, in the range 0..21
+  static ALWAYS_INLINE uint32_t calc_exp(uint32_t c) {
+    assert(c > Threshold / 2);
 #ifdef __x86_64
     uint32_t i;
     __asm("bsr %1,%0\n" : "=r"(i) : "r"(c));
+    assert(i >= B - 1);
     return i - (B - 1);
 #else
     return (32 - B) - __builtin_clz(c);
@@ -53,7 +54,7 @@ struct CapCode {
   }
 
   // return the lowest encodable value >= n
-  static CapCode ceil(uint32_t n) {
+  static ALWAYS_INLINE CapCode ceil(uint32_t n) {
     assert(n <= Max);
     if (n <= Threshold) return {static_cast<uint16_t>(n)};
     auto e = calc_exp(n);
@@ -66,7 +67,7 @@ struct CapCode {
   }
 
   // return the highest encodable value <= n
-  static CapCode floor(uint32_t n) {
+  static ALWAYS_INLINE CapCode floor(uint32_t n) {
     assert(n <= Max);
     if (n <= Threshold) return {static_cast<uint16_t>(n)};
     auto e = calc_exp(n);
@@ -76,32 +77,62 @@ struct CapCode {
   }
 
   // return the exact value n (must be small)
-  static CapCode exact(uint32_t n) {
+  static ALWAYS_INLINE CapCode exact(uint32_t n) {
     assert(n <= Threshold);
     return CapCode{static_cast<uint16_t>(n)};
   }
 
   // return the decoded value
-  uint32_t decode() const {
+  ALWAYS_INLINE uint32_t decode() const {
     uint32_t m = code & M;
     uint32_t e = code >> B;
     return m << e;
   }
 
-  // true if c is encodable exactly, without rounding
-  static bool encodable(size_t c) {
-    return c <= Max && c == floor(c).decode();
+  // return ceil(n).decode()
+  static ALWAYS_INLINE uint32_t roundUp(uint32_t n) {
+    assert(n <= Max);
+    // Following the natural way of doing it, we would compute `mask' from `n',
+    // but instead, we compute from `m = n - 1' here as a little trick to save
+    // an instruction or two.  It still works because
+    // (1) when `n <= Threashold + 1', we just return `n';
+    // (2) when `bsr(m) == bsr(n)', `mask' will be the same for `m' and `n', so
+    //     it doesn't matter;
+    // (3) otherwise, we have `n == 1 << K', and  `m' is just `K' 1's in its
+    //     binary form (K > 10).  In this case `(m | mask) == m', and we
+    //     eventually return `n' as desired.  Note that the computed `e',
+    //     and thus `mask', are *wrong* here, but they don't matter to the
+    //     final result.
+    //
+    // Depending on situations at call sites, the `-1' on `n' and `+1' on the
+    // return value can often get absorbed into neighboring instructions, this
+    // hopefully saves us an instruction or two.
+    auto m = n - 1;
+    if (m <= Threshold) return m + 1;
+    auto e = calc_exp(m);
+    auto mask = (1 << e) - 1;
+    return (m | mask) + 1;
   }
 
-  explicit operator uint16_t() const {
+  // true if c is encodable exactly, without rounding
+  static ALWAYS_INLINE bool encodable(size_t c) {
+    if (c > Max) return false;
+    auto const n = static_cast<uint32_t>(c);
+    if (n <= Threshold + 1) return true;
+    auto e = calc_exp(n);
+    auto mask = (1 << e) - 1;
+    return !(n & mask);
+  }
+
+  ALWAYS_INLINE explicit operator uint16_t() const {
     return code;
   }
 
-  bool operator==(const CapCode& other) const {
+  ALWAYS_INLINE bool operator==(const CapCode& other) const {
     return code == other.code;
   }
 
-  bool operator!=(const CapCode& other) const {
+  ALWAYS_INLINE bool operator!=(const CapCode& other) const {
     return code != other.code;
   }
 };

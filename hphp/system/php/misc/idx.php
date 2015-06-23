@@ -3,7 +3,7 @@
 namespace HH {
 
 /**
- * Returns the value at an index of an array. Thisfunction simplifies the
+ * Returns the value at an index of an array. This function simplifies the
  * common pattern of checking for an index in an array and selecting a default
  * value if it does not exist. You should NOT use idx() as a general replacement
  * for accessing array indices.

@@ -1,5 +1,4 @@
 <?hh
-// Copyright 2004-2014 Facebook. All Rights Reserved.
 
 // Test classes
 class MyArray implements ArrayAccess {

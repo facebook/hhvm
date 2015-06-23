@@ -1,0 +1,84 @@
+== Vector ==
+Only integer keys may be used with Vectors
+Only integer keys may be used with Vectors
+Only integer keys may be used with Vectors
+string(1) "2"
+int(2)
+string(5) "world"
+Only integer keys may be used with Vectors
+Only integer keys may be used with Vectors
+Only integer keys may be used with Vectors
+Only integer keys may be used with Vectors
+int(13)
+== ImmVector ==
+Only integer keys may be used with Vectors
+Only integer keys may be used with Vectors
+Only integer keys may be used with Vectors
+string(1) "2"
+int(2)
+string(5) "world"
+Only integer keys may be used with Vectors
+Only integer keys may be used with Vectors
+Only integer keys may be used with Vectors
+Only integer keys may be used with Vectors
+int(13)
+== Map ==
+int(3)
+string(1) "2"
+int(5)
+int(6)
+int(2)
+int(8)
+string(5) "world"
+int(10)
+string(5) "empty"
+Only integer keys and string keys may be used with Maps
+int(13)
+== ImmMap ==
+int(3)
+string(1) "2"
+int(5)
+int(6)
+int(2)
+int(8)
+string(5) "world"
+int(10)
+string(5) "empty"
+Only integer keys and string keys may be used with Maps
+int(13)
+== Set ==
+int(3)
+string(1) "1"
+int(5)
+int(6)
+int(1)
+int(8)
+string(5) "hello"
+int(10)
+string(0) ""
+Only integer values and string values may be used with Sets
+int(13)
+== ImmSet ==
+int(3)
+string(1) "1"
+int(5)
+int(6)
+int(1)
+int(8)
+string(5) "hello"
+int(10)
+string(0) ""
+Only integer values and string values may be used with Sets
+int(13)
+== Pair ==
+Only integer keys may be used with Pairs
+Only integer keys may be used with Pairs
+Only integer keys may be used with Pairs
+string(1) "2"
+string(0) ""
+int(8)
+Only integer keys may be used with Pairs
+Only integer keys may be used with Pairs
+Only integer keys may be used with Pairs
+Only integer keys may be used with Pairs
+int(13)

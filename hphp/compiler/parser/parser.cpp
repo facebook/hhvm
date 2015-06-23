@@ -523,6 +523,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "invariant_callback_register" ||
            stripped == "invariant" ||
            stripped == "invariant_violation" ||
+           stripped == "idx" ||
            stripped == "asio_get_current_context_idx" ||
            stripped == "asio_get_running_in_context" ||
            stripped == "asio_get_running" ||

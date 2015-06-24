@@ -3,10 +3,6 @@
 
 .file	"hash-crc.S"
 
-.section .rodata 
-.align 8
-.ABS_VAL: .quad 0xdfdfdfdfdfdfdfdf
-
 ETCH_SECTION(hash_string_i_crc)
 .globl	ETCH_NAME(hash_string_i_crc)
 ETCH_TYPE(ETCH_NAME(hash_string_i_crc), @function)
@@ -18,14 +14,14 @@ ETCH_LABEL(FB800):
         neg     %esi
         je      ETCH_LABEL(iend)
         mov     %esi, %ecx
-        movq    .ABS_VAL(%rip),%r8
+        movabs  $0xdfdfdfdfdfdfdfdf, %r8
         jmp     ETCH_LABEL(iheader)
 
 ETCH_LABEL(iloop):
         add     $8, %rdi
         crc32q  %rdx, %rax
 ETCH_LABEL(iheader):
-        and     %r8, %rdx
+        mov     %r8, %rdx
         and     (%rdi), %rdx
         add     $8, %ecx
         jnc     ETCH_LABEL(iloop)
@@ -42,6 +38,7 @@ ETCH_LABEL(iend):
 ETCH_LABEL(FE800):
         ETCH_SIZE(hash_string_i_crc)
 
+
 ETCH_SECTION(hash_string_i_unaligned_crc)
 .globl	ETCH_NAME(hash_string_i_unaligned_crc)
 ETCH_TYPE(ETCH_NAME(hash_string_i_unaligned_crc), @function)
@@ -50,9 +47,8 @@ ETCH_NAME(hash_string_i_unaligned_crc):
 ETCH_LABEL(FB801):
         CFI(startproc)
         or      $-1, %eax
-        //movabs  $0xdfdfdfdfdfdfdfdf, %r8     //takes 10 bytes 
-        mov     .ABS_VAL(%rip), %r8            // takes 7 bytes 
         sub     $8, %esi
+        movabs  $0xdfdfdfdfdfdfdfdf, %r8
         js      ETCH_LABEL(iutail)
 
 ETCH_LABEL(iuloop):
@@ -66,14 +62,17 @@ ETCH_LABEL(iuloop):
 ETCH_LABEL(iutail):
         add     $8, %esi
         je      ETCH_LABEL(iuend)
+        mov     %esi, %ecx
         xor     %edx, %edx
 
 ETCH_LABEL(iutailloop):
         mov     (%rdi), %dl
         inc     %rdi
         ror     $8, %rdx
-        dec     %esi 
-        jne     ETCH_LABEL(iutailloop)
+        dec     %ecx
+        jz      ETCH_LABEL(ifix_mis_br)     
+        jmp     ETCH_LABEL(iutailloop)
+ETCH_LABEL(ifix_mis_br):        
         and     %r8, %rdx
         crc32q  %rdx, %rax
 
@@ -148,7 +147,10 @@ ETCH_LABEL(csutailloop):
         mov     (%rdi), %dl
         inc     %rdi
         ror     $8, %rdx
-        loop    ETCH_LABEL(csutailloop)
+        dec     %ecx
+        jz      ETCH_LABEL(csfix_mis_br)     
+        jmp     ETCH_LABEL(csutailloop)
+ETCH_LABEL(csfix_mis_br):
         crc32q  %rdx, %rax
 
 ETCH_LABEL(csuend):
@@ -174,7 +176,7 @@ ETCH_LABEL(FB804):
         mov     (%rdi), %rdx
 
 ETCH_LABEL(hloop):
-        movq    .ABS_VAL(%rip), %rsi 
+        movabs  $0xdfdfdfdfdfdfdfdf, %rsi
         and     (%rdx), %rsi
         sub     $8, %ecx
         jle     ETCH_LABEL(htail)

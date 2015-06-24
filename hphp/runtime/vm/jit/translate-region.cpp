@@ -693,7 +693,14 @@ TranslateResult irGenRegion(IRGS& irgs,
 
       // Emit IR for the body of the instruction.
       try {
-        if (!skipTrans) translateInstr(irgs, inst, checkOuterTypeOnly, i == 0);
+        if (!skipTrans) {
+          // Only emit ExitPlaceholders for the first bytecode in the block,
+          // and if we're not inlining. The inlining decision could be smarter
+          // but this is enough for now since we never emit guards in inlined
+          // functions (t7385908).
+          auto const emitExitPlaceholder = i == 0 && !irgen::isInlining(irgs);
+          translateInstr(irgs, inst, checkOuterTypeOnly, emitExitPlaceholder);
+        }
       } catch (const FailedIRGen& exn) {
         ProfSrcKey psk{irgs.profTransID, sk};
         always_assert_flog(!toInterp.count(psk),

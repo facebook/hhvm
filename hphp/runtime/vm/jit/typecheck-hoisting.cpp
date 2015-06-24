@@ -20,10 +20,10 @@
  *
  * The way it works is as follows:
  * - Iterate through CFG to identify variables with at least one typecheck. If
- *   There exist more than one typecheck of the same variable, they must be
- *   Compatible with each other (i.e. their intersection must not be Bottom).
+ *   there exist more than one typecheck of the same variable, they must be
+ *   compatible with each other (i.e. their intersection must not be Bottom).
  *   If the checks are incompatible we then give up on hoisting the checks for
- *   This particular variable.
+ *   this particular variable.
  * - Iterate over each typecheck that we decided would make sense to hoist.
  *   Combine checks that want to be hoisted to the same destination into hoist
  *   groups. This step allows us to hoist dependent chains of checks as if they
@@ -118,14 +118,13 @@ void UnionFind<T>::join(T* tmpA, T* tmpB) {
 struct TypeCheckData {
   bool canHoist;
   IRInstruction* checkType;
-  IRInstruction* hoistDest;
 };
 
 using CanonicalCheck = IRInstruction;
 using SSATmpTypeMap = std::unordered_map<SSATmp*, TypeCheckData>;
 using BottomUpHoistGroups = UnionFind<IRInstruction>;
 using TopDownHoistGroups = std::unordered_map<CanonicalCheck*,
-  std::vector<IRInstruction*>>;
+                                              std::vector<IRInstruction*>>;
 using HoistDestinations = std::unordered_map<CanonicalCheck*, IRInstruction*>;
 using HoistGroupTypes = std::unordered_map<CanonicalCheck*, Type>;
 using HoistGroupDestinations = std::unordered_map<CanonicalCheck*,
@@ -146,22 +145,28 @@ void findHoistableCheck(
 ) {
   switch (inst.op()) {
   case CheckType: {
-    if (isHoistableExit(inst.taken())) {
-      FTRACE(2, "CheckType %d's taken branch is not an exit or is a catch\n",
-        inst.id());
+    if (!isHoistableExit(inst.taken())) {
+      FTRACE(2, "CheckType {}'s taken branch is not an exit\n", inst.id());
       break;
     }
 
     auto src = inst.src(0);
     auto type = inst.typeParam();
+    if (src->isA(type)) {
+      // This CheckType should've been optimized away but wasn't, presumably
+      // because certain optimizations are off or haven't run yet. Ignore it.
+      break;
+    }
 
     // Try to put a new TypeCheckData into the map. If this is the first time
     // we've seen a check on this particular SSATmp, the insert will succeed.
     // Otherwise we'll get the previous TypeCheckData back so we can modify it.
     auto result = ssaTmpTypes.emplace(src, TypeCheckData { true, &inst });
     if (result.second) {
-      FTRACE(2, "Adding TypeCheckData for CheckType {}\n", inst.id());
+      FTRACE(2, "Adding TypeCheckData for {}\n", inst);
       break;
+    } else {
+      FTRACE(2, "TypeCheckData already exists for {}\n", inst);
     }
 
     auto& checkData = result.first->second;
@@ -176,8 +181,8 @@ void findHoistableCheck(
     // If we see two checks on the same SSATmp with non-intersecting types then
     // give up on hoisting this particular SSATmp.
     if (!checkData.checkType->typeParam().maybe(type)) {
-      FTRACE(2, "Found contradictory CheckType for SSATmp %d, disabling "
-        "hoisting...\n", src->id());
+      FTRACE(2, "Found contradictory CheckType for SSATmp {}, disabling "
+             "hoisting...\n", src->id());
       checkData = TypeCheckData { false, nullptr };
       break;
     }
@@ -185,10 +190,9 @@ void findHoistableCheck(
     // The type we're checking here is a subtype of a previously identified
     // check, so update the TypeCheckData with the stronger check since
     // hoisting it will allow us to eliminate the subsequent weaker check.
-    if (type <= checkData.checkType->typeParam()) {
-      FTRACE(2, "Updating TypeCheckData for SSATmp %d, %s -> %s\n",
-        src->id(), type.toString().c_str(),
-        checkData.checkType->typeParam().toString().c_str());
+    if (type < checkData.checkType->typeParam()) {
+      FTRACE(2, "Updating TypeCheckData for SSATmp {}, {} -> {}\n",
+             src->id(), type, checkData.checkType->typeParam());
       checkData = TypeCheckData { true, &inst };
     }
     break;
@@ -227,8 +231,8 @@ BottomUpHoistGroups computeHoistGroups(const SSATmpTypeMap& ssaTmpTypes) {
       hoistGroups.find(checkType);
       continue;
     }
-    FTRACE(2, "Joining hoist groups for instruction %d and CheckType %d\n",
-      defInst->id(), checkType->id());
+    FTRACE(2, "Joining hoist groups for instruction {} and CheckType {}\n",
+           defInst->id(), checkType->id());
     hoistGroups.join(defInst, checkType);
   }
   return hoistGroups;
@@ -342,6 +346,7 @@ HoistGroupDestinations findHoistGroupDestinations(
   for (auto& kv : hoistGroups) {
     auto canonicalCheck = kv.first;
     auto defInst = canonicalCheck->src(0)->inst();
+    FTRACE(2, "Looking for hoist dest of canonical `{}'\n", *canonicalCheck);
     assert(defInst->op() != CheckType);
     auto hoistDest = canHoistTo(defInst)
       ? findNextDominatingExit(idoms, defInst, canonicalCheck)
@@ -470,10 +475,10 @@ void hoistTypeChecks(IRUnit& unit) {
   // non-hoistable IRInstruction.
   auto const bottomUpHoistGroups = computeHoistGroups(ssaTmpTypes);
   auto const topDownHoistGroups = invertHoistGroups(ssaTmpTypes,
-    bottomUpHoistGroups);
+                                                    bottomUpHoistGroups);
   auto const groupTypes = computeHoistGroupTypes(topDownHoistGroups);
   auto const groupDests = findHoistGroupDestinations(dominators,
-    topDownHoistGroups);
+                                                     topDownHoistGroups);
 
   // Do the actual hoisting.
   performHoisting(unit, groupTypes, groupDests);

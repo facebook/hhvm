@@ -22,28 +22,28 @@
 #include <string>
 
 #define STATEMENT_CONSTRUCTOR_BASE_PARAMETERS                           \
-  BlockScopePtr scope, LabelScopePtr labelScope, LocationPtr loc, \
-  Construct::KindOf kindOf
+  BlockScopePtr scope, LabelScopePtr labelScope,                        \
+  const Location::Range& r, Construct::KindOf kindOf
 #define STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES                     \
-  scope, labelScope, loc, kindOf
+  scope, labelScope, r, kindOf
 #define STATEMENT_CONSTRUCTOR_PARAMETERS                                \
-  BlockScopePtr scope, LabelScopePtr labelScope, LocationPtr loc
+  BlockScopePtr scope, LabelScopePtr labelScope, const Location::Range& r
 #define STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(kindOf)                  \
-  scope, labelScope, loc, Statement::KindOf##kindOf
+  scope, labelScope, r, Statement::KindOf##kindOf
 #define DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS                        \
-  virtual void analyzeProgram(AnalysisResultPtr ar);                    \
-  virtual StatementPtr clone();                                         \
-  virtual void outputCodeModel(CodeGenerator &cg);                      \
-  virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
+  void analyzeProgram(AnalysisResultPtr ar) override;                   \
+  StatementPtr clone() override;                                        \
+  void outputCodeModel(CodeGenerator &cg) override;                     \
+  void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) override;
 #define DECLARE_STATEMENT_VIRTUAL_FUNCTIONS                             \
   DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;                             \
-  virtual ConstructPtr getNthKid(int n) const;                          \
-  virtual int getKidCount() const;                                      \
-  virtual void setNthKid(int n, ConstructPtr cp)
-#define NULL_STATEMENT()                                                \
+  ConstructPtr getNthKid(int n) const override;                         \
+  int getKidCount() const override;                                     \
+  void setNthKid(int n, ConstructPtr cp) override
+#define NULL_STATEMENT()                                    \
   BlockStatementPtr(new BlockStatement(getScope(),          \
                                        getLabelScope(),     \
-                                       getLocation(),       \
+                                       getRange(),          \
                                        StatementListPtr()))
 
 namespace HPHP {

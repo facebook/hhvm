@@ -138,7 +138,7 @@ void TryStatement::outputCodeModel(CodeGenerator &cg) {
     m_finallyStmt->outputCodeModel(cg);
   }
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

@@ -46,9 +46,11 @@ StatementPtr UseTraitStatement::clone() {
 // parser functions
 
 void UseTraitStatement::onParseRecur(AnalysisResultConstPtr ar,
+                                     FileScopeRawPtr fs,
                                      ClassScopePtr scope) {
   if (scope->isInterface()) {
-    parseTimeFatal(Compiler::InvalidTraitStatement,
+    parseTimeFatal(fs,
+                   Compiler::InvalidTraitStatement,
                    "Interfaces cannot use traits");
   }
   vector<string> usedTraits;
@@ -114,7 +116,7 @@ void UseTraitStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("block");
   cg.printAsBlock(m_stmt);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

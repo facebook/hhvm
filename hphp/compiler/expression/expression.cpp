@@ -64,7 +64,7 @@ Expression::ExprClass Expression::Classes[] = {
 #undef DEC_EXPR_CLASSES
 
 Expression::Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS)
-    : Construct(scope, loc, kindOf), m_context(RValue),
+    : Construct(scope, r, kindOf), m_context(RValue),
       m_originalScopeSet(false), m_unused(false), m_canon_id(0), m_error(0),
       m_canonPtr() {
 }
@@ -76,7 +76,7 @@ ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
       An assignment isRefable, but the rhs may not be. Need this to
       prevent "bad pass by reference" errors.
     */
-    ExpressionListPtr el(new ExpressionList(getScope(), getLocation(),
+    ExpressionListPtr el(new ExpressionList(getScope(), getRange(),
                                             ExpressionList::ListKindWrapped));
     el->addElement(rep);
     rep->clearContext(AssignmentRHS);
@@ -183,7 +183,7 @@ void Expression::insertElement(ExpressionPtr exp, int index /* = 0 */) {
 
 ExpressionPtr Expression::unneededHelper() {
   ExpressionListPtr elist = ExpressionListPtr
-    (new ExpressionList(getScope(), getLocation(),
+    (new ExpressionList(getScope(), getRange(),
                         ExpressionList::ListKindWrapped));
 
   bool change = false;
@@ -222,7 +222,7 @@ ExpressionPtr Expression::unneeded() {
   if (!getContainedEffects()) {
     getScope()->addUpdates(BlockScope::UseKindCaller);
     return ScalarExpressionPtr
-      (new ScalarExpression(getScope(), getLocation(),
+      (new ScalarExpression(getScope(), getRange(),
                             T_LNUMBER, string("0")));
   }
 
@@ -407,11 +407,9 @@ bool Expression::CheckNeeded(ExpressionPtr variable, ExpressionPtr value) {
 
 ExpressionPtr Expression::MakeConstant(AnalysisResultConstPtr ar,
                                        BlockScopePtr scope,
-                                       LocationPtr loc,
+                                       const Location::Range& r,
                                        const std::string &value) {
-  ConstantExpressionPtr exp(new ConstantExpression(
-                              scope, loc,
-                              value, false));
+  auto exp = std::make_shared<ConstantExpression>(scope, r, value, false);
   if (value == "true" || value == "false") {
   } else if (value == "null") {
   } else {
@@ -572,29 +570,26 @@ bool Expression::isCollection() const {
 
 ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstPtr ar,
                                                BlockScopePtr scope,
-                                               LocationPtr loc,
+                                               const Location::Range& r,
                                                const Variant& value) {
   if (value.isArray()) {
-    ExpressionListPtr el(new ExpressionList(scope, loc,
-                                            ExpressionList::ListKindParam));
+    auto el = std::make_shared<ExpressionList>(
+      scope, r, ExpressionList::ListKindParam);
 
     for (ArrayIter iter(value.toArray()); iter; ++iter) {
-      ExpressionPtr k(MakeScalarExpression(ar, scope, loc, iter.first()));
-      ExpressionPtr v(MakeScalarExpression(ar, scope, loc, iter.second()));
+      ExpressionPtr k(MakeScalarExpression(ar, scope, r, iter.first()));
+      ExpressionPtr v(MakeScalarExpression(ar, scope, r, iter.second()));
       if (!k || !v) return ExpressionPtr();
-      ArrayPairExpressionPtr ap(
-        new ArrayPairExpression(scope, loc, k, v, false));
+      auto ap = std::make_shared<ArrayPairExpression>(scope, r, k, v, false);
       el->addElement(ap);
     }
     if (!el->getCount()) el.reset();
-    return ExpressionPtr(
-      new UnaryOpExpression(scope, loc, el, T_ARRAY, true));
+    return std::make_shared<UnaryOpExpression>(scope, r, el, T_ARRAY, true);
   } else if (value.isNull()) {
-    return MakeConstant(ar, scope, loc, "null");
+    return MakeConstant(ar, scope, r, "null");
   } else if (value.isBoolean()) {
-    return MakeConstant(ar, scope, loc, value.toBoolean() ? "true" : "false");
+    return MakeConstant(ar, scope, r, value.toBoolean() ? "true" : "false");
   } else {
-    return ScalarExpressionPtr
-      (new ScalarExpression(scope, loc, value));
+    return std::make_shared<ScalarExpression>(scope, r, value);
   }
 }

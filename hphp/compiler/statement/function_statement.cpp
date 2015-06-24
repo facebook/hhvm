@@ -55,13 +55,14 @@ StatementPtr FunctionStatement::clone() {
 // parser functions
 
 void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+  checkParameters(scope);
   // Correctness checks are normally done before adding function to scope.
   if (m_params) {
     for (int i = 0; i < m_params->getCount(); i++) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
       if (param->hasTypeHint() && param->defaultValue()) {
-        param->compatibleDefault();
+        param->compatibleDefault(scope);
       }
     }
   }
@@ -80,14 +81,16 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
 
   if (m_name == "__autoload") {
     if (m_params && m_params->getCount() != 1) {
-      parseTimeFatal(Compiler::InvalidMagicMethod,
+      parseTimeFatal(scope,
+                     Compiler::InvalidMagicMethod,
                      "__autoload() must take exactly 1 argument");
     }
   }
 
   if (fs->isNative()) {
     if (getStmts()) {
-      parseTimeFatal(Compiler::InvalidAttribute,
+      parseTimeFatal(scope,
+                     Compiler::InvalidAttribute,
                      "Native functions must not have an implementation body");
     }
     if (m_params) {
@@ -97,19 +100,22 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
         // since they'll be Arrays as far as HNI is concerned.
         auto param = dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
         if (!param->hasUserType() && !param->isVariadic()) {
-          parseTimeFatal(Compiler::InvalidAttribute,
+          parseTimeFatal(scope,
+                         Compiler::InvalidAttribute,
                          "Native function calls must have type hints "
                          "on all args");
         }
       }
     }
     if (getReturnTypeConstraint().empty()) {
-      parseTimeFatal(Compiler::InvalidAttribute,
+      parseTimeFatal(scope,
+                     Compiler::InvalidAttribute,
                      "Native function %s() must have a return type hint",
                      getOriginalName().c_str());
     }
   } else if (!getStmts()) {
-    parseTimeFatal(Compiler::InvalidAttribute,
+    parseTimeFatal(scope,
+                   Compiler::InvalidAttribute,
                    "Global function %s() must contain a body",
                     getOriginalName().c_str());
   }

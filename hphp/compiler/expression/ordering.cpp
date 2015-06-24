@@ -90,7 +90,7 @@ void Ordering::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("order");
   cg.printValue(m_direction);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 
@@ -110,4 +110,3 @@ void Ordering::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     break;
   }
 }
-

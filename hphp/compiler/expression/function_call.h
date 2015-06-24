@@ -33,16 +33,16 @@ protected:
                const std::string &name, bool hadBackslash,
                ExpressionListPtr params, ExpressionPtr classExp);
 public:
-  void analyzeProgram(AnalysisResultPtr ar);
+  void analyzeProgram(AnalysisResultPtr ar) override;
 
-  virtual bool isRefable(bool checkError = false) const { return true;}
-  virtual bool isTemporary() const;
+  bool isRefable(bool checkError = false) const override { return true;}
+  bool isTemporary() const override;
 
-  virtual ConstructPtr getNthKid(int n) const;
-  virtual void setNthKid(int n, ConstructPtr cp);
-  virtual int getKidCount() const;
+  ConstructPtr getNthKid(int n) const override;
+  void setNthKid(int n, ConstructPtr cp) override;
+  int getKidCount() const override;
 
-  virtual ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
   const std::string &getName() const { return m_name; }
   const std::string &getOriginalName() const { return m_origName; }
@@ -62,7 +62,8 @@ public:
   bool isValid() const { return m_valid; }
   bool hadBackslash() const { return m_hadBackslash; }
   bool hasUnpack() const;
-
+  void onParse(AnalysisResultConstPtr ar, FileScopePtr fileScope) override;
+  bool checkUnpackParams();
 private:
   void checkParamTypeCodeErrors(AnalysisResultPtr);
 
@@ -84,7 +85,6 @@ protected:
   unsigned m_arrayParams : 1;
   bool m_hadBackslash;
 
-  void checkUnpackParams();
   void markRefParams(FunctionScopePtr func, const std::string &name);
 
   /**

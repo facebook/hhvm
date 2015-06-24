@@ -47,11 +47,13 @@ StatementPtr ClassConstant::clone() {
 // parser functions
 
 void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
+                                 FileScopeRawPtr fs,
                                  ClassScopePtr scope) {
   ConstantTablePtr constants = scope->getConstants();
 
   if (scope->isTrait()) {
-    parseTimeFatal(Compiler::InvalidTraitStatement,
+    parseTimeFatal(fs,
+                   Compiler::InvalidTraitStatement,
                    "Traits cannot have constants");
   }
 
@@ -61,10 +63,11 @@ void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
         dynamic_pointer_cast<ConstantExpression>((*m_exp)[i]);
       const std::string &name = exp->getName();
       if (constants->isPresent(name)) {
-        exp->parseTimeFatal(Compiler::DeclaredConstantTwice,
-                                   "Cannot redeclare %s::%s",
-                                   scope->getOriginalName().c_str(),
-                                   name.c_str());
+        exp->parseTimeFatal(fs,
+                            Compiler::DeclaredConstantTwice,
+                            "Cannot redeclare %s::%s",
+                            scope->getOriginalName().c_str(),
+                            name.c_str());
       }
 
       // HACK: break attempts to write global constants here;
@@ -83,7 +86,8 @@ void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
       const std::string &name =
         dynamic_pointer_cast<ConstantExpression>(var)->getName();
       if (constants->isPresent(name)) {
-        assignment->parseTimeFatal(Compiler::DeclaredConstantTwice,
+        assignment->parseTimeFatal(fs,
+                                   Compiler::DeclaredConstantTwice,
                                    "Cannot redeclare %s::%s",
                                    scope->getOriginalName().c_str(),
                                    name.c_str());
@@ -97,7 +101,7 @@ void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
           // the constant table so we skip it.
           continue;
         }
-        assignment->onParseRecur(ar, scope);
+        assignment->onParseRecur(ar, fs, scope);
       }
     }
   }
@@ -174,7 +178,7 @@ void ClassConstant::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("expressions");
   cg.printExpressionVector(m_exp);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

@@ -39,18 +39,18 @@ public:
                  TypeAnnotationPtr enumBaseTy);
 
   DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;
-  virtual bool hasDecl() const { return true; }
-  virtual bool hasImpl() const;
+  bool hasDecl() const override { return true; }
+  bool hasImpl() const override;
 
   void setPromotedParameterCount(int count) {
     m_promotedParameterCount = count;
   }
 
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
+  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
   bool ignored() const { return m_ignored;}
 
-  virtual std::string getName() const;
+  std::string getName() const override;
   StatementPtr addClone(StatementPtr origStmt);
 
   TypeAnnotationPtr getEnumBaseTy() { return m_enumBaseTy; }

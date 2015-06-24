@@ -61,7 +61,7 @@ void StaticStatement::analyzeProgram(AnalysisResultPtr ar) {
       if (exp->is(Expression::KindOfSimpleVariable)) {
         variable = dynamic_pointer_cast<SimpleVariable>(exp);
         exp = AssignmentExpressionPtr
-          (new AssignmentExpression(exp->getScope(), exp->getLocation(),
+          (new AssignmentExpression(exp->getScope(), exp->getRange(),
                                     variable,
                                     CONSTANT("null"),
                                     false));
@@ -130,7 +130,7 @@ void StaticStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("expressions");
   cg.printExpressionVector(m_exp);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

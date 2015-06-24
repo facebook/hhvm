@@ -153,7 +153,7 @@ void SwitchStatement::outputCodeModel(CodeGenerator &cg) {
     cg.printStatementVector(m_cases);
   }
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

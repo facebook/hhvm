@@ -30,17 +30,17 @@ public:
                      ExpressionPtr exp1, ExpressionPtr exp2, int op);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
-  virtual bool isTemporary() const;
-  virtual int getLocalEffects() const;
-  virtual bool isLiteralString() const;
-  virtual std::string getLiteralString() const;
-  virtual bool containsDynamicConstant(AnalysisResultPtr ar) const;
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  bool isTemporary() const override;
+  int getLocalEffects() const override;
+  bool isLiteralString() const override;
+  std::string getLiteralString() const override;
+  bool containsDynamicConstant(AnalysisResultPtr ar) const override;
 
-  virtual bool isRefable(bool checkError = false) const;
+  bool isRefable(bool checkError = false) const override;
   bool isShortCircuitOperator() const;
   bool isLogicalOrOperator() const;
-  ExpressionPtr getStoreVariable() const { return m_exp1;}
+  ExpressionPtr getStoreVariable() const override { return m_exp1;}
   ExpressionPtr getExp1() { return m_exp1;}
   ExpressionPtr getExp2() { return m_exp2;}
   int getOp() const { return m_op;}
@@ -48,8 +48,8 @@ public:
   ExpressionPtr foldConst(AnalysisResultConstPtr ar);
   ExpressionPtr foldRightAssoc(AnalysisResultConstPtr ar);
 
-  virtual ExpressionPtr unneededHelper();
-  virtual bool canonCompare(ExpressionPtr e) const;
+  ExpressionPtr unneededHelper() override;
+  bool canonCompare(ExpressionPtr e) const override;
 
   static int getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
                            bool &hasVoid);

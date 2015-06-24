@@ -154,9 +154,10 @@ static void parse_string_arg(ExpressionPtr exp, string &var, string &lit) {
 }
 
 string IncludeExpression::CheckInclude(ConstructPtr includeExp,
+                                       FileScopePtr scope,
                                        ExpressionPtr fileExp,
                                        bool &documentRoot) {
-  string container = includeExp->getLocation()->file;
+  string container = scope->getName();
   string var, lit;
   parse_string_arg(fileExp, var, lit);
   if (lit.empty()) return lit;
@@ -184,7 +185,7 @@ string IncludeExpression::CheckInclude(ConstructPtr includeExp,
 void IncludeExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   /* m_documentRoot is a bitfield */
   bool dr = m_documentRoot;
-  m_include = CheckInclude(shared_from_this(), m_exp, dr);
+  m_include = CheckInclude(shared_from_this(), scope, m_exp, dr);
   m_documentRoot = dr;
   if (!m_include.empty()) ar->parseOnDemand(m_include);
 }
@@ -242,7 +243,7 @@ ExpressionPtr IncludeExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
     if (m_include.empty()) {
       bool dr = m_documentRoot;
-      m_include = CheckInclude(shared_from_this(), m_exp, dr);
+      m_include = CheckInclude(shared_from_this(), getFileScope(), m_exp, dr);
       m_documentRoot = dr;
       m_depsSet = false;
     }

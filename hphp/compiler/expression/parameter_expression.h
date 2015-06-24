@@ -48,7 +48,7 @@ public:
   bool isOptional() const { return m_defaultValue != nullptr;}
   bool isVariadic() const { return m_variadic; }
   const std::string &getName() const { return m_name; }
-  int getLocalEffects() const { return NoEffect; }
+  int getLocalEffects() const override { return NoEffect; }
   void rename(const std::string &name) { m_name = name;}
   ExpressionPtr defaultValue() { return m_defaultValue; }
   ExpressionPtr userAttributeList() { return m_attributeList; }
@@ -65,8 +65,8 @@ public:
   const std::string getOriginalTypeHint() const;
   const std::string getUserTypeHint() const;
   const std::string getTypeHintDisplayName() const;
-  void parseHandler(ClassScopePtr cls);
-  void compatibleDefault();
+  void parseHandler(FileScopeRawPtr file, ClassScopePtr cls);
+  void compatibleDefault(FileScopeRawPtr file);
   void fixupSelfAndParentTypehints(ClassScopePtr cls);
   bool hhType() { return m_hhType; }
   TokenID getModifier() const { return m_modifier; }

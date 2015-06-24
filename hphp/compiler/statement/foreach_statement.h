@@ -37,9 +37,9 @@ public:
   ExpressionPtr getNameExp() const { return m_name; }
   ExpressionPtr getValueExp() const { return m_value; }
   StatementPtr getBody() const { return m_stmt; }
-  virtual bool hasDecl() const { return m_stmt && m_stmt->hasDecl(); }
-  virtual bool hasRetExp() const { return m_stmt && m_stmt->hasRetExp(); }
-  virtual int getRecursiveCount() const {
+  bool hasDecl() const override { return m_stmt && m_stmt->hasDecl(); }
+  bool hasRetExp() const override { return m_stmt && m_stmt->hasRetExp(); }
+  int getRecursiveCount() const override {
     return 1 + (m_stmt ? m_stmt->getRecursiveCount() : 0);
   }
 

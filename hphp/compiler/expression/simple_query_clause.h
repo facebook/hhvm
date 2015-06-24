@@ -51,7 +51,7 @@ public:
         identifier, collection)  {
   }
 
-  virtual ExpressionPtr clone() {
+  ExpressionPtr clone() override {
     FromClausePtr exp(new FromClause(*this));
     Expression::deepCopy(exp);
     exp->m_identifier = m_identifier;
@@ -72,7 +72,7 @@ public:
         identifier, expression)  {
   }
 
-  virtual ExpressionPtr clone() {
+  ExpressionPtr clone() override {
     LetClausePtr exp(new LetClause(*this));
     Expression::deepCopy(exp);
     exp->m_identifier = m_identifier;
@@ -93,7 +93,7 @@ public:
         "", condition)  {
   }
 
-  virtual ExpressionPtr clone() {
+  ExpressionPtr clone() override {
     WhereClausePtr exp(new WhereClause(*this));
     Expression::deepCopy(exp);
     exp->m_identifier = m_identifier;
@@ -114,7 +114,7 @@ public:
         "", expression)  {
   }
 
-  virtual ExpressionPtr clone() {
+  ExpressionPtr clone() override {
     SelectClausePtr exp(new SelectClause(*this));
     Expression::deepCopy(exp);
     exp->m_identifier = m_identifier;
@@ -135,7 +135,7 @@ public:
         identifier, query)  {
   }
 
-  virtual ExpressionPtr clone() {
+  ExpressionPtr clone() override {
     IntoClausePtr exp(new IntoClause(*this));
     Expression::deepCopy(exp);
     exp->m_identifier = m_identifier;

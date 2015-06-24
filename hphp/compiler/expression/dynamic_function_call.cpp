@@ -86,7 +86,7 @@ void DynamicFunctionCall::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("arguments");
   cg.printExpressionVector(m_params);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(m_nameExp->getLocation());
+  cg.printLocation(m_nameExp);
   cg.printObjectFooter();
 }
 

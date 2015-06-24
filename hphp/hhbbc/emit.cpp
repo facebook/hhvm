@@ -283,10 +283,9 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto emit_srcloc = [&] {
       if (!inst.srcLoc.isValid()) return;
-      Location loc;
-      loc.first(inst.srcLoc.start.line, inst.srcLoc.start.col);
-      loc.last(inst.srcLoc.past.line, inst.srcLoc.past.col);
-      ue.recordSourceLocation(&loc, startOffset);
+      Location::Range loc(inst.srcLoc.start.line, inst.srcLoc.start.col,
+                          inst.srcLoc.past.line, inst.srcLoc.past.col);
+      ue.recordSourceLocation(loc, startOffset);
     };
 
     auto pop = [&] (int32_t n) {

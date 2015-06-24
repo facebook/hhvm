@@ -32,9 +32,9 @@ public:
                          ExpressionListPtr params, bool nullsafe);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  virtual ConstructPtr getNthKid(int n) const;
-  virtual void setNthKid(int n, ConstructPtr cp);
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ConstructPtr getNthKid(int n) const override;
+  void setNthKid(int n, ConstructPtr cp) override;
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
   ExpressionPtr getObject() const { return m_object; }
   bool isNullSafe() const { return m_nullsafe; }

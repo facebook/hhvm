@@ -84,7 +84,7 @@ void DynamicVariable::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("operation");
   cg.printValue(PHP_DYNAMIC_VARIABLE_OP) ;
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

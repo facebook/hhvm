@@ -24,25 +24,26 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 
 #define EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS                          \
-  BlockScopePtr scope, LocationPtr loc, Expression::KindOf kindOf
+  BlockScopePtr scope, const Location::Range& r,                        \
+  Expression::KindOf kindOf
 #define EXPRESSION_CONSTRUCTOR_BASE_PARAMETER_VALUES                    \
-  scope, loc, kindOf
+  scope, r, kindOf
 #define EXPRESSION_CONSTRUCTOR_PARAMETERS                               \
-  BlockScopePtr scope, LocationPtr loc
+  BlockScopePtr scope, const Location::Range& r
 #define EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(kindOf)                 \
-  scope, loc, Expression::KindOf##kindOf
+  scope, r, Expression::KindOf##kindOf
 #define EXPRESSION_CONSTRUCTOR_DERIVED_PARAMETER_VALUES                 \
-  scope, loc
+  scope, r
 #define DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS                       \
-  virtual void analyzeProgram(AnalysisResultPtr ar);                    \
-  virtual ExpressionPtr clone();                                        \
-  virtual void outputCodeModel(CodeGenerator &cg);                      \
-  virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
+  void analyzeProgram(AnalysisResultPtr ar) override;                   \
+  ExpressionPtr clone() override;                                       \
+  void outputCodeModel(CodeGenerator &cg) override;                     \
+  void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) override;
 #define DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS                            \
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;                            \
-  virtual ConstructPtr getNthKid(int n) const;                          \
-  virtual int getKidCount() const;                                      \
-  virtual void setNthKid(int n, ConstructPtr cp)
+  ConstructPtr getNthKid(int n) const override;                         \
+  int getKidCount() const override;                                     \
+  void setNthKid(int n, ConstructPtr cp) override
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,7 +98,6 @@ public:
                                  // ObjectPropertyExpression::m_object
     RefAssignmentLHS = 0x100000, // LHS of a reference assignment
     ReturnContext = 0x200000,    // Return expression
-    UnpackParameter = 0x400000,  // e.g. f(...$x)
   };
 
   enum Order {
@@ -255,11 +255,11 @@ public:
 
   static ExpressionPtr MakeConstant(AnalysisResultConstPtr ar,
                                     BlockScopePtr scope,
-                                    LocationPtr loc,
+                                    const Location::Range& r,
                                     const std::string &value);
   static ExpressionPtr MakeScalarExpression(AnalysisResultConstPtr ar,
                                             BlockScopePtr scope,
-                                            LocationPtr loc,
+                                            const Location::Range& r,
                                             const Variant &value);
 
   static bool CheckNeededRHS(ExpressionPtr value);

@@ -35,10 +35,11 @@ public:
                 ExpressionListPtr declaration);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultConstPtr ar);
+  StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
 
   // implementing IParseHandler
-  virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope);
+  void onParseRecur(AnalysisResultConstPtr ar, FileScopeRawPtr fs,
+                    ClassScopePtr scope) override;
 
   std::string getTypeConstraint() const { return m_typeConstraint; }
   ExpressionListPtr getVarList() const { return m_declaration; }

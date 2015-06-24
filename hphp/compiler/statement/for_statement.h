@@ -36,12 +36,12 @@ public:
   ExpressionPtr getCondExp() const { return m_exp2; }
   ExpressionPtr getIncExp() const { return m_exp3; }
   StatementPtr getBody() const { return m_stmt; }
-  virtual bool hasDecl() const { return m_stmt && m_stmt->hasDecl(); }
-  virtual bool hasRetExp() const { return m_stmt && m_stmt->hasRetExp(); }
-  virtual int getRecursiveCount() const {
+  bool hasDecl() const override { return m_stmt && m_stmt->hasDecl(); }
+  bool hasRetExp() const override { return m_stmt && m_stmt->hasRetExp(); }
+  int getRecursiveCount() const override {
     return 1 + (m_stmt ? m_stmt->getRecursiveCount() : 0);
   }
-  virtual bool kidUnused(int i) const { return i == 0 || i == 3; }
+  bool kidUnused(int i) const override { return i == 0 || i == 3; }
 private:
   ExpressionPtr m_exp1;
   ExpressionPtr m_exp2;

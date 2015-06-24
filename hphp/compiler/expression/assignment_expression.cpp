@@ -71,6 +71,7 @@ ExpressionPtr AssignmentExpression::clone() {
 // parser functions
 
 void AssignmentExpression::onParseRecur(AnalysisResultConstPtr ar,
+                                        FileScopeRawPtr fs,
                                         ClassScopePtr scope) {
   // This is that much we can do during parse phase.
   TypePtr type;
@@ -91,7 +92,8 @@ void AssignmentExpression::onParseRecur(AnalysisResultConstPtr ar,
     // We are handling this one here, not in ClassConstant, purely because
     // we need "value" to store in constant table.
     if (type->is(Type::KindOfArray)) {
-      parseTimeFatal(Compiler::NoError,
+      parseTimeFatal(fs,
+                     Compiler::NoError,
                      "Arrays are not allowed in class constants");
     }
     ConstantExpressionPtr exp =
@@ -230,7 +232,7 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (val && val->isScalar()) {
     if (val != m_value) {
       ExpressionListPtr rep(new ExpressionList(
-                              getScope(), getLocation(),
+                              getScope(), getRange(),
                               ExpressionList::ListKindWrapped));
       rep->addElement(m_value);
       m_value = val->clone();
@@ -265,13 +267,13 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
             }
             ExpressionPtr rep(
               new AssignmentExpression(
-                getScope(), getLocation(),
+                getScope(), getRange(),
                 m_variable->replaceValue(Clone(ae->getVariable())),
                 makeScalarExpression(ar, v), false));
             if (!isUnused()) {
               ExpressionListPtr el(
                 new ExpressionList(
-                  getScope(), getLocation(),
+                  getScope(), getRange(),
                   ExpressionList::ListKindWrapped));
               el->addElement(rep);
               el->addElement(val);
@@ -299,7 +301,7 @@ void AssignmentExpression::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("operation");
   cg.printValue(PHP_ASSIGNMENT);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

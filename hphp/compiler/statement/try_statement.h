@@ -27,7 +27,7 @@ DECLARE_BOOST_TYPES(TryStatement);
 
 class TryStatement : public Statement {
 public:
-  
+
   TryStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                StatementPtr tryStmt, StatementListPtr catches);
 
@@ -37,9 +37,9 @@ public:
 
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  virtual bool hasDecl() const;
-  virtual bool hasRetExp() const;
-  virtual int getRecursiveCount() const;
+  bool hasDecl() const override;
+  bool hasRetExp() const override;
+  int getRecursiveCount() const override;
 
   StatementPtr getBody() const { return m_tryStmt; }
   StatementListPtr getCatches() const { return m_catches; }

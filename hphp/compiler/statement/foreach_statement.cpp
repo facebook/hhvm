@@ -133,7 +133,7 @@ void ForEachStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("block");
   cg.printAsBlock(m_stmt);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

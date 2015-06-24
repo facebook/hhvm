@@ -29,7 +29,7 @@ class GlobalStatement : public Statement {
 public:
   GlobalStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp);
 
-  StatementPtr preOptimize(AnalysisResultConstPtr ar);
+  StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 

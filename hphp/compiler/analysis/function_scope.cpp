@@ -74,7 +74,8 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
 
   for (unsigned i = 0; i < attrs.size(); ++i) {
     if (m_userAttributes.find(attrs[i]->getName()) != m_userAttributes.end()) {
-      attrs[i]->parseTimeFatal(Compiler::DeclaredAttributeTwice,
+      attrs[i]->parseTimeFatal(file,
+                               Compiler::DeclaredAttributeTwice,
                                "Redeclared attribute %s",
                                attrs[i]->getName().c_str());
     }
@@ -581,9 +582,8 @@ void FunctionScope::setParamName(int index, const std::string &name) {
 
 void FunctionScope::addModifier(int mod) {
   if (!m_modifiers) {
-    m_modifiers =
-      ModifierExpressionPtr(new ModifierExpression(
-                              shared_from_this(), LocationPtr()));
+    m_modifiers = std::make_shared<ModifierExpression>(shared_from_this(),
+                                                       Location::Range());
   }
   m_modifiers->add(mod);
 }
@@ -713,7 +713,7 @@ void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
   JSON::DocTarget::MapStream ms(out);
 
   ms.add("name", getDocName());
-  ms.add("line", getStmt() ? getStmt()->getLocation()->line0 : 0);
+  ms.add("line", getStmt() ? getStmt()->line0() : 0);
   ms.add("docs", m_docComment);
 
   int mods = 0;

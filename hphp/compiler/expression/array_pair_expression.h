@@ -31,18 +31,18 @@ public:
                       bool collection = false);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  virtual bool containsDynamicConstant(AnalysisResultPtr ar) const;
-  virtual bool isScalar() const;
+  bool containsDynamicConstant(AnalysisResultPtr ar) const override;
+  bool isScalar() const override;
 
   ExpressionPtr getName() { return m_name;}
   ExpressionPtr getValue() { return m_value;}
 
-  virtual int getLocalEffects() const { return NoEffect; }
+  int getLocalEffects() const override { return NoEffect; }
   bool isScalarArrayPair() const;
 
   bool isRef() const { return m_ref; }
 
-  bool canonCompare(ExpressionPtr e) const;
+  bool canonCompare(ExpressionPtr e) const override;
 private:
   ExpressionPtr m_name;
   ExpressionPtr m_value;

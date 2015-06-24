@@ -316,13 +316,13 @@ LineTable createLineTable(SrcLoc& srcLoc, Offset bclen) {
 
 }
 
-void UnitEmitter::recordSourceLocation(const Location* sLoc, Offset start) {
+void UnitEmitter::recordSourceLocation(const Location::Range& sLoc,
+                                       Offset start) {
   // Some byte codes, such as for the implicit "return 0" at the end of a
   // a source file do not have valid source locations. This check makes
   // sure we don't record a (dummy) source location in this case.
-  if (start > 0 && sLoc->line0 == 1 && sLoc->char0 == 1 &&
-    sLoc->line1 == 1 && sLoc->char1 == 1 && strlen(sLoc->file) == 0) return;
-  SourceLoc newLoc(*sLoc);
+  if (start > 0 && sLoc.line0 == -1) return;
+  SourceLoc newLoc(sLoc);
   if (!m_sourceLocTab.empty()) {
     if (m_sourceLocTab.back().second == newLoc) {
       // Combine into the interval already at the back of the vector.

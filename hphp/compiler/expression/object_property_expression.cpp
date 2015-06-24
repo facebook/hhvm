@@ -198,7 +198,7 @@ void ObjectPropertyExpression::outputCodeModel(CodeGenerator &cg) {
   }
   m_property->outputCodeModel(cg);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

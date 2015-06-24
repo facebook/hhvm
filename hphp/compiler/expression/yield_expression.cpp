@@ -94,7 +94,7 @@ void YieldExpression::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("value");
   m_valExp->outputCodeModel(cg);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

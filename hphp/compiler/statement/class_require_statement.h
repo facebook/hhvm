@@ -37,7 +37,8 @@ public:
   std::string getRequiredName() const { return m_required;}
 
   // implementing IParseHandler
-  virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope);
+  void onParseRecur(AnalysisResultConstPtr ar, FileScopeRawPtr fs,
+                    ClassScopePtr scope) override;
 
 private:
   bool m_extends;  // class/interface

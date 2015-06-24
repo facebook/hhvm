@@ -30,10 +30,10 @@ public:
   IfStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, StatementListPtr stmts);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultConstPtr ar);
-  virtual bool hasDecl() const;
-  virtual bool hasRetExp() const;
-  virtual int getRecursiveCount() const;
+  StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
+  bool hasDecl() const override;
+  bool hasRetExp() const override;
+  int getRecursiveCount() const override;
 
   StatementListPtr getIfBranches() const { return m_stmts; }
 private:

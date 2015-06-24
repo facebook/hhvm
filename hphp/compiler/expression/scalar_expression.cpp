@@ -144,11 +144,7 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
 
     switch (m_type) {
       case T_LINE:
-        if (getLocation()) {
-          m_translated = folly::to<string>(getLocation()->line1);
-        } else {
-          m_translated = "0";
-        }
+        m_translated = folly::to<string>(line1());
         break;
       case T_NS_C:
         m_translated = m_value;
@@ -387,7 +383,7 @@ void ScalarExpression::outputCodeModel(CodeGenerator &cg) {
         cg.printPropertyHeader("constantName");
         cg.printValue(constName);
         cg.printPropertyHeader("sourceLocation");
-        cg.printLocation(this->getLocation());
+        cg.printLocation(this);
         cg.printObjectFooter();
       }
       return;
@@ -430,7 +426,7 @@ void ScalarExpression::outputCodeModel(CodeGenerator &cg) {
       break;
   }
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 
@@ -571,7 +567,7 @@ bool ScalarExpression::getInt(int64_t& i) const {
     i = getIntValue();
     return true;
   } else if (m_type == T_LINE) {
-    i = getLocation() ? getLocation()->line1 : 0;
+    i = line1();
     return true;
   }
   return false;

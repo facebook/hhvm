@@ -258,7 +258,7 @@ struct UnitEmitter {
    * Adjacent regions associated with the same source line will be collapsed as
    * this is created.
    */
-  void recordSourceLocation(const Location* sLoc, Offset start);
+  void recordSourceLocation(const Location::Range& sLoc, Offset start);
 
 
   /////////////////////////////////////////////////////////////////////////////

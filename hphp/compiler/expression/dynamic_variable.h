@@ -29,8 +29,8 @@ public:
   DynamicVariable(EXPRESSION_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  virtual int getLocalEffects() const { return NoEffect; }
-  virtual bool isRefable(bool checkError = false) const { return true;}
+  int getLocalEffects() const override { return NoEffect; }
+  bool isRefable(bool checkError = false) const override { return true;}
 
   ExpressionPtr getSubExpression() const { return m_exp; }
 private:

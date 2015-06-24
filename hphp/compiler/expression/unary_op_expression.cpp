@@ -449,7 +449,7 @@ void UnaryOpExpression::outputCodeModel(CodeGenerator &cg) {
         cg.printExpressionVector(m_exp);
       }
       cg.printPropertyHeader("sourceLocation");
-      cg.printLocation(this->getLocation());
+      cg.printLocation(this);
       cg.printObjectFooter();
       return;
     }
@@ -476,7 +476,7 @@ void UnaryOpExpression::outputCodeModel(CodeGenerator &cg) {
       cg.printPropertyHeader("constantName");
       cg.printValue(varName);
       cg.printPropertyHeader("sourceLocation");
-      cg.printLocation(this->getLocation());
+      cg.printLocation(this);
       cg.printObjectFooter();
       return;
     }
@@ -521,7 +521,7 @@ void UnaryOpExpression::outputCodeModel(CodeGenerator &cg) {
   }
   cg.printValue(op);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

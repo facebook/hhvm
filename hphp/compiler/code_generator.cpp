@@ -494,7 +494,7 @@ void CodeGenerator::printTypeExpression(ExpressionPtr expression) {
   printPropertyHeader("name");
   expression->outputCodeModel(*this);
   printPropertyHeader("sourceLocation");
-  printLocation(expression->getLocation());
+  printLocation(expression);
   printObjectFooter();
 }
 
@@ -506,7 +506,7 @@ void CodeGenerator::printExpression(ExpressionPtr expression, bool isRef) {
     printPropertyHeader("operation");
     printValue(PHP_REFERENCE_OP);
     printPropertyHeader("sourceLocation");
-    printLocation(expression->getLocation());
+    printLocation(expression);
     printObjectFooter();
   } else {
     expression->outputCodeModel(*this);
@@ -554,7 +554,7 @@ void CodeGenerator::printAsBlock(StatementPtr s, bool isEnclosed) {
       printPropertyHeader("statements");
       printStatementVector(s);
       printPropertyHeader("sourceLocation");
-      printLocation(s->getLocation());
+      printLocation(s);
     }
     if (isEnclosed) {
       printPropertyHeader("isEnclosed");
@@ -585,16 +585,17 @@ void CodeGenerator::printStatementVector(StatementPtr s) {
   }
 }
 
-void CodeGenerator::printLocation(LocationPtr location) {
-  if (location == nullptr) return;
+void CodeGenerator::printLocation(const Construct* what) {
+  if (what == nullptr) return;
+  auto r = what->getRange();
   printObjectHeader("SourceLocation", 4);
   printPropertyHeader("startLine");
-  printValue(location->line0);
+  printValue(r.line0);
   printPropertyHeader("endLine");
-  printValue(location->line1);
+  printValue(r.line1);
   printPropertyHeader("startColumn");
-  printValue(location->char0);
+  printValue(r.char0);
   printPropertyHeader("endColumn");
-  printValue(location->char1);
+  printValue(r.char1);
   printObjectFooter();
 }

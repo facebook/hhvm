@@ -144,7 +144,7 @@ void QOpExpression::outputCodeModel(CodeGenerator &cg) {
   }
   m_expNo->outputCodeModel(cg);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

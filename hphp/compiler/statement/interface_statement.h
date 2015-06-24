@@ -41,16 +41,16 @@ public:
                      ExpressionListPtr attrList);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultConstPtr ar);
-  virtual bool hasDecl() const { return true; }
-  virtual bool hasImpl() const;
-  virtual int getRecursiveCount() const;
+  StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
+  bool hasDecl() const override { return true; }
+  bool hasImpl() const override;
+  int getRecursiveCount() const override;
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
+  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
 
-  int getLocalEffects() const;
+  int getLocalEffects() const override;
 
-  virtual std::string getName() const;
+  std::string getName() const override;
   const std::string &getOriginalName() const { return m_originalName;}
   ClassScopeRawPtr getClassScope() const {
     BlockScopeRawPtr b = getScope();
@@ -59,7 +59,8 @@ public:
   }
 
   StatementListPtr getStmts() { return m_stmt; }
-  void checkArgumentsToPromote(ExpressionListPtr params, int type);
+  void checkArgumentsToPromote(FileScopeRawPtr scope,
+                               ExpressionListPtr params, int type);
 protected:
   std::string m_originalName;
   std::string m_name;

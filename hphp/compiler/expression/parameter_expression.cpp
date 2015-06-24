@@ -107,13 +107,14 @@ const std::string ParameterExpression::getTypeHintDisplayName() const {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ParameterExpression::parseHandler(ClassScopePtr cls) {
+void ParameterExpression::parseHandler(FileScopeRawPtr file,
+                                       ClassScopePtr cls) {
   // Trait has not been 'inlined' into using class so context is not available
   if (!m_type.empty() && !cls->isTrait()) {
     fixupSelfAndParentTypehints(cls);
 
     if (m_defaultValue) {
-      compatibleDefault();
+      compatibleDefault(file);
     }
   }
 }
@@ -186,7 +187,7 @@ static bool useHackTypeHintErrorMessage(const char* hint) {
   }
 }
 
-void ParameterExpression::compatibleDefault() {
+void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
   bool compat = true;
   if (!m_defaultValue || !hasTypeHint()) return;
 
@@ -273,7 +274,8 @@ void ParameterExpression::compatibleDefault() {
 
     string name = getName();
     string tdefault = HPHP::tname(defaultType);
-    parseTimeFatal(Compiler::BadDefaultValueType, msg,
+    parseTimeFatal(file,
+                   Compiler::BadDefaultValueType, msg,
                    name.c_str(), tdefault.c_str(),
                    getTypeHintDisplayName().c_str());
   }
@@ -322,7 +324,7 @@ void ParameterExpression::outputCodeModel(CodeGenerator &cg) {
     m_defaultValue->outputCodeModel(cg);
   }
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

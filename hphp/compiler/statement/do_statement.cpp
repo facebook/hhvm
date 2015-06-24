@@ -88,7 +88,7 @@ void DoStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("condition");
   m_condition->outputCodeModel(cg);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

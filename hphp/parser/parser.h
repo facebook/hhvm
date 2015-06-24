@@ -120,17 +120,14 @@ public:
   const char *file() const { return m_fileName;}
   std::string getMessage(bool filename = false,
                          bool rawPosWhenNoError = false) const;
-  std::string getMessage(Location *loc, bool filename = false) const;
-  LocationPtr getLocation() const;
-  void getLocation(Location &loc) const {
-    loc = m_loc;
-    loc.file = file();
-  }
+  std::string getMessage(const Location::Range& loc,
+                         bool filename = false) const;
+  const Location::Range& getRange() const;
 
-  int line0() const { return m_loc.line0;}
-  int char0() const { return m_loc.char0;}
-  int line1() const { return m_loc.line1;}
-  int char1() const { return m_loc.char1;}
+  int line0() const { return m_loc.r.line0;}
+  int char0() const { return m_loc.r.char0;}
+  int line1() const { return m_loc.r.line1;}
+  int char1() const { return m_loc.r.char1;}
   int cursor() const { return m_loc.cursor;}
 
   // called by generated code
@@ -144,7 +141,7 @@ public:
   virtual void parseFatal(const Location* loc, const char* msg) {}
 
   void pushFuncLocation();
-  LocationPtr popFuncLocation();
+  Location::Range popFuncLocation();
   void pushClass(bool isXhpClass);
   bool peekClass();
   void popClass();
@@ -160,9 +157,9 @@ public:
   void pushLabelInfo();
   void pushLabelScope();
   void popLabelScope();
-  void addLabel(const std::string &label, LocationPtr loc,
+  void addLabel(const std::string &label, const Location::Range& loc,
                 ScannerToken *stmt);
-  void addGoto(const std::string &label, LocationPtr loc,
+  void addGoto(const std::string &label, const Location::Range& loc,
                ScannerToken *stmt);
   void popLabelInfo();
 
@@ -181,7 +178,7 @@ protected:
   const char *m_fileName;
 
   Location m_loc;
-  std::vector<std::shared_ptr<Location>> m_funcLocs;
+  std::vector<Location::Range> m_funcLocs;
   std::vector<bool> m_classes; // used to determine if we are currently
                                // inside a regular class or an XHP class
 
@@ -189,7 +186,7 @@ protected:
     int scopeId;
     TStatementPtr stmt;
     bool inTryCatchBlock;
-    LocationPtr loc;
+    Location::Range loc;
   };
   typedef std::map<std::string, LabelStmtInfo> LabelMap;
     // name => LabelStmtInfo
@@ -204,7 +201,7 @@ protected:
   struct GotoInfo {
     std::string label;
     LabelScopes scopes;
-    LocationPtr loc;
+    Location::Range loc;
     TStatementPtr stmt;
   };
 

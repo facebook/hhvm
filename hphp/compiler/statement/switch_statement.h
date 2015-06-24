@@ -36,19 +36,18 @@ public:
                   ExpressionPtr exp, StatementListPtr cases);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  virtual bool hasDecl() const;
-  virtual bool hasRetExp() const;
-  virtual int getRecursiveCount() const;
+  bool hasDecl() const override;
+  bool hasRetExp() const override;
+  int getRecursiveCount() const override;
 
   ExpressionPtr getExp() const { return m_exp; }
   StatementListPtr getCases() const { return m_cases; }
 private:
-  typedef std::pair<int, CaseStatementPtr> StatementPtrWithPos;
-  typedef std::vector<StatementPtrWithPos> StatementPtrWithPosVec;
-  typedef std::shared_ptr<StatementPtrWithPosVec> 
-    StatementPtrWithPosVecPtr;
-	typedef std::map<uint64_t, StatementPtrWithPosVecPtr> 
-    MapIntToStatementPtrWithPosVec; 
+  using StatementPtrWithPos = std::pair<int, CaseStatementPtr>;
+  using StatementPtrWithPosVec = std::vector<StatementPtrWithPos>;
+  using StatementPtrWithPosVecPtr = std::shared_ptr<StatementPtrWithPosVec>;
+  using MapIntToStatementPtrWithPosVec =
+    std::map<uint64_t, StatementPtrWithPosVecPtr>;
   ExpressionPtr m_exp;
   StatementListPtr m_cases;
 };

@@ -30,9 +30,9 @@ public:
                 ExpressionPtr condition, StatementPtr stmt);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  virtual bool hasDecl() const { return m_stmt && m_stmt->hasDecl(); }
-  virtual bool hasRetExp() const { return m_stmt && m_stmt->hasRetExp(); }
-  virtual int getRecursiveCount() const {
+  bool hasDecl() const override { return m_stmt && m_stmt->hasDecl(); }
+  bool hasRetExp() const override { return m_stmt && m_stmt->hasRetExp(); }
+  int getRecursiveCount() const override {
     return m_stmt ? m_stmt->getRecursiveCount() : 0;
   }
 

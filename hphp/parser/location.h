@@ -25,28 +25,43 @@ namespace HPHP {
 
 class Location {
 public:
-  Location() : Location(1, 1, 1, 1) {}
+  Location() = default;
   Location(int l0, int c0, int l1, int c1)
-    : file(""), line0(l0), char0(c0), line1(l1), char1(c1), cursor(0) {}
+      : r(l0, c0, l1, c1) {}
 
-  const char *file;
-  int line0;
-  int char0;
-  int line1;
-  int char1;
-  int cursor;
+  struct Range {
+    Range() = default;
+    Range(int l0, int c0, int l1, int c1)
+        : line0(l0), char0(c0), line1(l1), char1(c1) {}
+    int line0{1};
+    int char0{1};
+    int line1{1};
+    int char1{1};
+
+    int compare(const Range& other) const {
+      if (line0 < other.line0) return -1; if (line0 > other.line0) return 1;
+      if (char0 < other.char0) return -1; if (char0 > other.char0) return 1;
+      if (line1 < other.line1) return -1; if (line1 > other.line1) return 1;
+      if (char1 < other.char1) return -1; if (char1 > other.char1) return 1;
+      return 0;
+    }
+  };
+
+  const char *file{""};
+  Range r;
+  int cursor{0};
 
   void first(int line, char pos) {
-    line0 = line; char0 = pos;
+    r.line0 = line; r.char0 = pos;
   }
   void first(Location &loc) {
-    line0 = loc.line0; char0 = loc.char0;
+    r.line0 = loc.r.line0; r.char0 = loc.r.char0;
   }
   void last(int line, char pos) {
-    line1 = line; char1 = pos;
+    r.line1 = line; r.char1 = pos;
   }
   void last(Location &loc) {
-    line1 = loc.line1; char1 = loc.char1;
+    r.line1 = loc.r.line1; r.char1 = loc.r.char1;
   }
 
   /**
@@ -54,15 +69,11 @@ public:
    * not it makes sense, because we're comparing those integers first for
    * quicker sorting.
    */
-  int compare(Location *loc) {
-    if (line0 < loc->line0) return -1; if (line0 > loc->line0) return 1;
-    if (char0 < loc->char0) return -1; if (char0 > loc->char0) return 1;
-    if (line1 < loc->line1) return -1; if (line1 > loc->line1) return 1;
-    if (char1 < loc->char1) return -1; if (char1 > loc->char1) return 1;
+  int compare(const Location *loc) const {
+    if (auto d = r.compare(loc->r)) return d;
     return strcmp(file, loc->file);
   }
 };
-using LocationPtr = std::shared_ptr<Location>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

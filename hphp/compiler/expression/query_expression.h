@@ -47,7 +47,7 @@ public:
   QueryExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                   ExpressionListPtr clauses);
 
-  virtual ExpressionPtr clone() {
+  ExpressionPtr clone() override {
     QueryExpressionPtr exp(new QueryExpression(*this));
     Expression::deepCopy(exp);
     exp->m_expressions = Clone(m_expressions);
@@ -86,7 +86,7 @@ public:
     m_originalExpressions = m_expressions;
   }
 
-  virtual ExpressionPtr clone() {
+  ExpressionPtr clone() override {
     OrderbyClausePtr exp(new OrderbyClause(*this));
     Expression::deepCopy(exp);
     exp->m_expressions = Clone(m_expressions);

@@ -32,15 +32,15 @@ public:
                  const std::string &docComment = "");
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  virtual int getLocalEffects() const;
-  virtual bool isThis() const { return m_this;}
+  int getLocalEffects() const override;
+  bool isThis() const override { return m_this;}
   bool isSuperGlobal() const { return m_superGlobal || m_globals; }
-  virtual bool isRefable(bool checkError = false) const {
+  bool isRefable(bool checkError = false) const override {
     return checkError || !m_this;
   }
 
-  virtual bool canonCompare(ExpressionPtr e) const;
-  virtual void setContext(Context context);
+  bool canonCompare(ExpressionPtr e) const override;
+  void setContext(Context context) override;
 
   const std::string &getName() const { return m_name;}
   const std::string &getDocComment() const {

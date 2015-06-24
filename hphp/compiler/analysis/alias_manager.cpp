@@ -244,7 +244,7 @@ void AliasManager::clear() {
 
 void AliasManager::beginScope() {
   if (m_noAdd) return;
-  ExpressionPtr e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
+  ExpressionPtr e(new ScalarExpression(BlockScopePtr(), Location::Range(),
                                        T_STRING, string("begin")));
   m_accessList.add(e);
   m_stack.push_back(CondStackElem(m_accessList.size()));
@@ -285,7 +285,7 @@ void AliasManager::endScope() {
     BucketMapEntry &bm = m_accessList;
     bm.import(cs.m_exprs);
     ExpressionPtr
-      e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
+      e(new ScalarExpression(BlockScopePtr(), Location::Range(),
                              T_STRING, string("end")));
     bm.add(e);
     m_stack.pop_back();
@@ -1239,7 +1239,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
 
                 b->setReplacement(
                   ExpressionPtr(new BinaryOpExpression(
-                                  b->getScope(), b->getLocation(),
+                                  b->getScope(), b->getRange(),
                                   lhs, rhs, getOpForAssignmentOp(b->getOp()))));
                 m_replaced++;
               }
@@ -1255,15 +1255,12 @@ ExpressionPtr AliasManager::canonicalizeNode(
                 ExpressionPtr val = u->getExpression()->clone();
                 val->clearContext();
                 if (u->getFront()) {
-                  ExpressionPtr inc
-                    (new ScalarExpression(u->getScope(), u->getLocation(),
-                                          T_LNUMBER, string("1")));
+                  auto inc = std::make_shared<ScalarExpression>(
+                    u->getScope(), u->getRange(), T_LNUMBER, string("1"));
 
-                  val = ExpressionPtr(
-                    new BinaryOpExpression(u->getScope(), u->getLocation(),
-                                           val, inc,
-                                           u->getOp() == T_INC ? '+' : '-'));
-
+                  val = std::make_shared<BinaryOpExpression>(
+                    u->getScope(), u->getRange(), val, inc,
+                    u->getOp() == T_INC ? '+' : '-');
                 }
 
                 u->setReplacement(val);
@@ -1371,10 +1368,9 @@ ExpressionPtr AliasManager::canonicalizeNode(
                               a->recomputeEffects();
                               setChanged();
                             } else {
-                              ExpressionListPtr el(
-                                new ExpressionList(
-                                  a->getScope(), a->getLocation(),
-                                  ExpressionList::ListKindWrapped));
+                              auto el = std::make_shared<ExpressionList>(
+                                a->getScope(), a->getRange(),
+                                ExpressionList::ListKindWrapped);
                               a = spc(AssignmentExpression, a->clone());
                               el->addElement(a);
                               el->addElement(a->getValue());
@@ -1486,9 +1482,8 @@ ExpressionPtr AliasManager::canonicalizeNode(
             rep = e->makeConstant(m_arp, "null");
             Compiler::Error(Compiler::UseUndeclaredVariable, e);
             if (m_variables->getAttribute(VariableTable::ContainsCompact)) {
-              rep = ExpressionPtr(
-                new UnaryOpExpression(e->getScope(), e->getLocation(),
-                                      rep, T_UNSET_CAST, true));
+              rep = std::make_shared<UnaryOpExpression>(
+                e->getScope(), e->getRange(), rep, T_UNSET_CAST, true);
             }
             return e->replaceValue(canonicalizeRecurNonNull(rep));
           }
@@ -1576,10 +1571,9 @@ ExpressionPtr AliasManager::canonicalizeNode(
         lhs->clearContext();
         e->recomputeEffects();
         return bop->replaceValue(
-          canonicalizeNonNull(ExpressionPtr(
-                                new BinaryOpExpression(
-                                  bop->getScope(), bop->getLocation(),
-                                  lhs, rhs, rop))));
+          canonicalizeNonNull(std::make_shared<BinaryOpExpression>(
+                                bop->getScope(), bop->getRange(),
+                                lhs, rhs, rop)));
       }
       if (rop) {
         ExpressionPtr lhs = bop->getExp1();
@@ -1592,23 +1586,22 @@ ExpressionPtr AliasManager::canonicalizeNode(
               ExpressionPtr op0 = spc(AssignmentExpression,alt)->getValue();
               if (op0->isScalar()) {
                 ExpressionPtr op1 = bop->getExp2();
-                ExpressionPtr rhs(
-                  (new BinaryOpExpression(e->getScope(), e->getLocation(),
-                                          op0->clone(), op1->clone(), rop)));
+                ExpressionPtr rhs = std::make_shared<BinaryOpExpression>(
+                  e->getScope(), e->getRange(),
+                  op0->clone(), op1->clone(), rop);
 
                 lhs = lhs->clone();
                 lhs->clearContext(Expression::OprLValue);
                 return e->replaceValue(
                   canonicalizeRecurNonNull(
-                    ExpressionPtr(new AssignmentExpression(
-                                    e->getScope(), e->getLocation(),
-                                    lhs, rhs, false))));
+                    std::make_shared<AssignmentExpression>(
+                      e->getScope(), e->getRange(), lhs, rhs, false)));
               }
               alt = spc(AssignmentExpression,alt)->getVariable();
               break;
             }
             case Expression::KindOfBinaryOpExpression: {
-              BinaryOpExpressionPtr b2(spc(BinaryOpExpression, alt));
+              auto b2(spc(BinaryOpExpression, alt));
               if (!(flags & NoDeadStore) && b2->getOp() == bop->getOp()) {
                 switch (rop) {
                   case '-':
@@ -1642,11 +1635,11 @@ ExpressionPtr AliasManager::canonicalizeNode(
                   if (ok) {
                     b2->setContext(Expression::DeadStore);
                     ExpressionPtr r(new BinaryOpExpression(
-                                      bop->getScope(), bop->getLocation(),
+                                      bop->getScope(), bop->getRange(),
                                       op0->clone(), bop->getExp2(),
                                       rop));
                     ExpressionPtr b(new BinaryOpExpression(
-                                      bop->getScope(), bop->getLocation(),
+                                      bop->getScope(), bop->getRange(),
                                       lhs, r, bop->getOp()));
                     return e->replaceValue(canonicalizeRecurNonNull(b));
                   }
@@ -2020,7 +2013,7 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
         canonicalizeKid(exprs, kid, i);
         endInExpression(es);
         kid->computeLocalExprAltered();
-        ExpressionPtr e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
+        ExpressionPtr e(new ScalarExpression(BlockScopePtr(), Location::Range(),
                                              T_STRING, string("io")));
         add(m_accessList, e);
       }
@@ -2441,4 +2434,3 @@ void AliasManager::endInExpression(StatementPtr requestor) {
     }
   }
 }
-

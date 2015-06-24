@@ -41,25 +41,25 @@ public:
   void toLower();
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
-  virtual void setContext(Context context);
+  void setContext(Context context) override;
   void setListKind(ListKind kind) { m_kind = kind; }
   ListKind getListKind() const { return m_kind; }
-  virtual void addElement(ExpressionPtr exp);
-  virtual void insertElement(ExpressionPtr exp, int index = 0);
-  virtual bool isScalar() const;
-  virtual int getLocalEffects() const { return NoEffect; }
+  void addElement(ExpressionPtr exp) override;
+  void insertElement(ExpressionPtr exp, int index = 0) override;
+  bool isScalar() const override;
+  int getLocalEffects() const override { return NoEffect; }
   bool isNoObjectInvolved() const;
-  virtual bool containsDynamicConstant(AnalysisResultPtr ar) const;
+  bool containsDynamicConstant(AnalysisResultPtr ar) const override;
   void removeElement(int index);
   void clearElements();
-  virtual bool getScalarValue(Variant &value);
-  virtual bool isRefable(bool checkError = false) const;
-  virtual bool kidUnused(int i) const;
+  bool getScalarValue(Variant &value) override;
+  bool isRefable(bool checkError = false) const override;
+  bool kidUnused(int i) const override;
   ExpressionPtr listValue() const;
-  virtual bool isLiteralString() const;
-  virtual std::string getLiteralString() const;
+  bool isLiteralString() const override;
+  std::string getLiteralString() const override;
 
   bool isScalarArrayPairs() const;
 
@@ -77,7 +77,7 @@ public:
   void setContainsUnpack() { m_argUnpack = true; };
   bool containsUnpack() const { return m_argUnpack; }
 
-  virtual bool canonCompare(ExpressionPtr e) const;
+  bool canonCompare(ExpressionPtr e) const override;
 
   /**
    * Checks whether the expression list contains only literal strings and

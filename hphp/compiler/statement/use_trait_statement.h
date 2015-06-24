@@ -44,7 +44,8 @@ public:
   }
 
   // implementing IParseHandler
-  virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope);
+  void onParseRecur(AnalysisResultConstPtr ar, FileScopeRawPtr fs,
+                    ClassScopePtr scope) override;
 
 private:
   ExpressionListPtr m_exp;  // used traits

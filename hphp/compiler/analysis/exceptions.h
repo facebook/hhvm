@@ -28,7 +28,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct AnalysisTimeFatalException : Exception {
-  AnalysisTimeFatalException(const char* file,
+  AnalysisTimeFatalException(const std::string& file,
                              int line,
                              const char* msg, ...) ATTRIBUTE_PRINTF(4,5)
     : m_file(file)

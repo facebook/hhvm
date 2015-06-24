@@ -73,7 +73,7 @@ struct SourceLoc {
    * Constructors.
    */
   SourceLoc() {}
-  explicit SourceLoc(const Location& l);
+  explicit SourceLoc(const Location::Range& l);
 
   /*
    * Reset to, or check for, the invalid state.
@@ -84,7 +84,7 @@ struct SourceLoc {
   /*
    * Set to a parser Location.
    */
-  void setLoc(const Location* l);
+  void setLoc(const Location::Range* l);
 
   /*
    * Equality.

@@ -13,6 +13,11 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/logger.h"
 
+#define line0 r.line0
+#define char0 r.char0
+#define line1 r.line1
+#define char1 r.char1
+
 #ifdef yyerror
 #undef yyerror
 #endif
@@ -28,8 +33,8 @@
       (Current).first(YYRHSLOC (Rhs, 1));                               \
       (Current).last (YYRHSLOC (Rhs, N));                               \
     } else {                                                            \
-      (Current).line0 = (Current).line1 = YYRHSLOC (Rhs, 0).line1;      \
-      (Current).char0 = (Current).char1 = YYRHSLOC (Rhs, 0).char1;      \
+      (Current).line0 = (Current).line1 = YYRHSLOC (Rhs, 0).line1;\
+      (Current).char0 = (Current).char1 = YYRHSLOC (Rhs, 0).char1;\
     }                                                                   \
   while (0);                                                            \
   _p->setRuleLocation(&Current);
@@ -967,7 +972,7 @@ statement:
   | T_THROW expr ';'                   { _p->onThrow($$, $2);}
   | T_GOTO ident ';'                   { _p->onGoto($$, $2, true);
                                          _p->addGoto($2.text(),
-                                                     _p->getLocation(),
+                                                     _p->getRange(),
                                                      &$$);}
   | expr ';'                           { _p->onExpStatement($$, $1);}
   | yield_expr ';'                     { _p->onExpStatement($$, $1);}
@@ -981,7 +986,7 @@ statement:
   | T_RETURN query_expr ';'            { _p->onReturn($$, &$2); }
   | ident ':'                          { _p->onLabel($$, $1);
                                          _p->addLabel($1.text(),
-                                                      _p->getLocation(),
+                                                      _p->getRange(),
                                                       &$$);
                                          _p->onScopeLabel($$, $1);}
 ;

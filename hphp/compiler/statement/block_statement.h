@@ -32,11 +32,11 @@ public:
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
   StatementListPtr getStmts() const { return m_stmts; }
-  virtual bool hasDecl() const;
-  virtual bool hasImpl() const;
-  virtual bool hasBody() const;
-  virtual bool hasRetExp() const;
-  virtual int getRecursiveCount() const;
+  bool hasDecl() const override;
+  bool hasImpl() const override;
+  bool hasBody() const override;
+  bool hasRetExp() const override;
+  int getRecursiveCount() const override;
 private:
   StatementListPtr m_stmts;
 };

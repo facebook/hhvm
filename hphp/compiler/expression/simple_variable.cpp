@@ -213,7 +213,7 @@ void SimpleVariable::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("variableName");
   cg.printValue(m_name);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

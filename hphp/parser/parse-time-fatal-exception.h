@@ -8,7 +8,7 @@ namespace HPHP {
 
 class ParseTimeFatalException : public Exception {
 public:
-  ParseTimeFatalException(const char* file, int line,
+  ParseTimeFatalException(const std::string& file, int line,
                           const char* msg, ...) ATTRIBUTE_PRINTF(4,5)
   : m_file(file), m_line(line) {
     va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);

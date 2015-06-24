@@ -61,7 +61,7 @@ void TypedefStatement::outputCodeModel(CodeGenerator& cg) {
   cg.printPropertyHeader("typeAnnotation");
   annot->outputCodeModel(cg);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 
@@ -75,4 +75,3 @@ void TypedefStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
 //////////////////////////////////////////////////////////////////////
 
 }
-

@@ -30,16 +30,16 @@ public:
   StatementListPtr shallowClone();
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultConstPtr ar);
-  virtual bool hasDecl() const;
-  virtual bool hasImpl() const;
+  StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
+  bool hasDecl() const override;
+  bool hasImpl() const override;
   ExpressionPtr getEffectiveImpl(AnalysisResultConstPtr ar) const;
-  virtual bool hasBody() const;
-  virtual bool hasRetExp() const;
+  bool hasBody() const override;
+  bool hasRetExp() const override;
 
-  virtual void addElement(StatementPtr stmt);
-  virtual void insertElement(StatementPtr stmt, int index = 0);
-  virtual int getRecursiveCount() const {
+  void addElement(StatementPtr stmt) override;
+  void insertElement(StatementPtr stmt, int index = 0) override;
+  int getRecursiveCount() const override {
     int ct = 0;
     for (StatementPtrVec::const_iterator it = m_stmts.begin();
          it != m_stmts.end(); ++it) {

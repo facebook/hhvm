@@ -34,7 +34,7 @@ public:
                      ExpressionListPtr params, ExpressionPtr cls);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
   void deepCopy(SimpleFunctionCallPtr exp);
 
   bool isDefineWithoutImpl(AnalysisResultConstPtr ar);
@@ -52,18 +52,16 @@ public:
   // define(<literal-string>, <scalar>);
   bool isSimpleDefine(StringData **name, TypedValue *value) const;
 
-  virtual int getLocalEffects() const;
+  int getLocalEffects() const override;
 
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr fs);
-
-  virtual void beforeCheck(AnalysisResultPtr ar) {}
+  void onParse(AnalysisResultConstPtr ar, FileScopePtr fs) override;
 
   void addLateDependencies(AnalysisResultConstPtr ar);
   void setSafeCall(int flag) { m_safe = flag; }
   void setSafeDefault(ExpressionPtr def) { m_safeDef = def; }
-  virtual ConstructPtr getNthKid(int n) const;
-  virtual void setNthKid(int n, ConstructPtr cp);
+  ConstructPtr getNthKid(int n) const override;
+  void setNthKid(int n, ConstructPtr cp) override;
   static SimpleFunctionCallPtr GetFunctionCallForCallUserFunc(
     AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, int testOnly,
     int firstParam, bool &error);

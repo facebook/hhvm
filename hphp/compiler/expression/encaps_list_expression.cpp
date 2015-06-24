@@ -89,12 +89,12 @@ ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultConstPtr ar) {
     if (count > 1) {
       ExpressionPtr exp =
         BinaryOpExpressionPtr(new BinaryOpExpression(
-                                getScope(), getLocation(),
+                                getScope(), getRange(),
                                 (*m_exps)[0], (*m_exps)[1], '.'));
       for (int i = 2; i < count; i++) {
         exp =
           BinaryOpExpressionPtr(new BinaryOpExpression(
-                                  getScope(), getLocation(),
+                                  getScope(), getRange(),
                                   exp, (*m_exps)[i], '.'));
       }
       return exp;
@@ -119,7 +119,7 @@ void EncapsListExpression::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("expressions");
   cg.printExpressionVector(m_exps);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

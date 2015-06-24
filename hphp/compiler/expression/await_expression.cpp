@@ -83,7 +83,7 @@ void AwaitExpression::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("operation");
   cg.printValue(PHP_AWAIT_OP);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

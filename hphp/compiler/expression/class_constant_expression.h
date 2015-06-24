@@ -32,13 +32,13 @@ public:
                           const std::string &varName);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
-  virtual int getLocalEffects() const { return NoEffect; }
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  int getLocalEffects() const override { return NoEffect; }
 
-  virtual unsigned getCanonHash() const;
-  virtual bool canonCompare(ExpressionPtr e) const;
+  unsigned getCanonHash() const override;
+  bool canonCompare(ExpressionPtr e) const override;
 
-  virtual bool containsDynamicConstant(AnalysisResultPtr ar) const;
+  bool containsDynamicConstant(AnalysisResultPtr ar) const override;
 
   const std::string &getConName() const { return m_varName; }
 

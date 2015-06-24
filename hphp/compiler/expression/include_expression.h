@@ -27,6 +27,7 @@ DECLARE_BOOST_TYPES(IncludeExpression);
 class IncludeExpression : public UnaryOpExpression, public IParseHandler {
 public:
   static std::string CheckInclude(ConstructPtr includeExp,
+                                  FileScopePtr scope,
                                   ExpressionPtr fileExp,
                                   bool &documentRoot);
 
@@ -35,10 +36,10 @@ public:
                     ExpressionPtr exp, int op);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
+  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
 
   bool isReqLit() const;
   void setDocumentRoot() { m_documentRoot = true;}

@@ -65,7 +65,8 @@ using std::map;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ClassScope::ClassScope(KindOf kindOf, const std::string &name,
+ClassScope::ClassScope(FileScopeRawPtr fs,
+                       KindOf kindOf, const std::string &name,
                        const std::string &parent,
                        const vector<string> &bases,
                        const std::string &docComment, StatementPtr stmt,
@@ -84,7 +85,8 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
 
   for (unsigned i = 0; i < attrs.size(); ++i) {
     if (m_userAttributes.find(attrs[i]->getName()) != m_userAttributes.end()) {
-      attrs[i]->parseTimeFatal(Compiler::DeclaredAttributeTwice,
+      attrs[i]->parseTimeFatal(fs,
+                               Compiler::DeclaredAttributeTwice,
                                "Redeclared attribute %s",
                                attrs[i]->getName().c_str());
     }
@@ -119,7 +121,7 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     } else if (f->getName() == "__isset") setAttribute(HasUnknownPropTester);
     else if (f->getName() == "__unset")   setAttribute(HasPropUnsetter);
     else if (f->getName() == "__invoke")  setAttribute(HasInvokeMethod);
-    addFunction(ar, f);
+    addFunction(ar, FileScopeRawPtr(), f);
   }
   setAttribute(Extension);
   setAttribute(System);
@@ -1158,7 +1160,7 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
   JSON::DocTarget::MapStream ms(out);
 
   ms.add("name", getDocName());
-  ms.add("line", getStmt() ? getStmt()->getLocation()->line0 : 0);
+  ms.add("line", getStmt() ? getStmt()->line0() : 0);
   ms.add("docs", m_docComment);
 
   ms.add("parent");
@@ -1228,10 +1230,12 @@ void ClassScope::setRedeclaring(AnalysisResultConstPtr ar, int redecId) {
 }
 
 bool ClassScope::addFunction(AnalysisResultConstPtr ar,
+                             FileScopeRawPtr fileScope,
                              FunctionScopePtr funcScope) {
   FunctionScopePtr &func = m_functions[funcScope->getName()];
   if (func) {
-    func->getStmt()->parseTimeFatal(Compiler::DeclaredMethodTwice,
+    func->getStmt()->parseTimeFatal(fileScope,
+                                    Compiler::DeclaredMethodTwice,
                                     "Redeclared method %s::%s",
                                     getOriginalName().c_str(),
                                     func->getOriginalName().c_str());

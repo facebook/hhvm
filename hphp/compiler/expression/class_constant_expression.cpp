@@ -152,7 +152,7 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
 
     ExpressionPtr rep = Clone(value, getScope());
     rep->setComment(getText());
-    rep->setLocation(getLocation());
+    copyLocationTo(rep);
     return replaceValue(rep);
   }
   return ExpressionPtr();
@@ -179,7 +179,7 @@ void ClassConstantExpression::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("constantName");
   cg.printValue(m_varName);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

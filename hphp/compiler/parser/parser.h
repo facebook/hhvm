@@ -41,8 +41,6 @@
 #ifdef HPHP_PARSER_ERROR
 #undef HPHP_PARSER_ERROR
 #endif
-#define HPHP_PARSER_ERROR(fmt, p, args...)  \
-  throw HPHP::ParseTimeFatalException((p)->file(), (p)->line1(), fmt, ##args)
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,7 +49,6 @@ DECLARE_BOOST_TYPES(Expression);
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(LabelScope);
-DECLARE_BOOST_TYPES(Location);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(BlockScope);
 DECLARE_BOOST_TYPES(TypeAnnotation);
@@ -532,6 +529,17 @@ private:
   const hphp_string_imap<std::string>& getAutoAliasedClasses();
   hphp_string_imap<std::string> getAutoAliasedClassesHelper();
 };
+
+template<typename... Args>
+inline void HPHP_PARSER_ERROR(const char* fmt,
+                       Parser* p,
+                       Args&&... args) {
+  throw ParseTimeFatalException(p->file(), p->line1(), fmt, args...);
+}
+
+inline void HPHP_PARSER_ERROR(const char* msg, Parser* p) {
+  throw ParseTimeFatalException(p->file(), p->line1(), "%s", msg);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

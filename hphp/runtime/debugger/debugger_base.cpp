@@ -487,8 +487,8 @@ string check_char_highlight(int lineFocus0, int charFocus0,
   TRACE(7, "debugger_base:check_char_highlight\n");
   if (DebuggerClient::HighlightBgColor &&
       lineFocus0 && charFocus0 && lineFocus1 && charFocus1 &&
-      loc.line0 * 1000 + loc.char0 >= lineFocus0 * 1000 + charFocus0 &&
-      loc.line1 * 1000 + loc.char1 <= lineFocus1 * 1000 + charFocus1) {
+      loc.r.line0 * 1000 + loc.r.char0 >= lineFocus0 * 1000 + charFocus0 &&
+      loc.r.line1 * 1000 + loc.r.char1 <= lineFocus1 * 1000 + charFocus1) {
     return add_bgcolor(DebuggerClient::HighlightForeColor,
                        DebuggerClient::HighlightBgColor);
   }

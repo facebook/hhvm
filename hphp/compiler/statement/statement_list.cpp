@@ -257,22 +257,22 @@ bool StatementList::mergeConcatAssign() {
           binaryOpExp = dynamic_pointer_cast<BinaryOpExpression>(exp);
           exp2 = binaryOpExp->getExp2();
           exp1 = BinaryOpExpressionPtr
-            (new BinaryOpExpression(getScope(), getLocation(),
+            (new BinaryOpExpression(getScope(), getRange(),
                                     exp1, exp2, '.'));
         }
         if (isAssignment) {
           exp = AssignmentExpressionPtr
-            (new AssignmentExpression(exp->getScope(), exp->getLocation(),
+            (new AssignmentExpression(exp->getScope(), exp->getRange(),
                                       var, exp1,
                                       false));
         } else {
           exp = BinaryOpExpressionPtr
-            (new BinaryOpExpression(getScope(), getLocation(),
+            (new BinaryOpExpression(getScope(), getRange(),
                                     var, exp1, T_CONCAT_EQUAL));
         }
         expStmt = ExpStatementPtr
           (new ExpStatement(getScope(), getLabelScope(),
-                            getLocation(), exp));
+                            getRange(), exp));
 
         m_stmts[i - length] = expStmt;
         for (j = i - (length - 1); i > j; i--) removeElement(j);

@@ -70,22 +70,26 @@ static bool isEquivRedecl(const std::string &name,
 }
 
 void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
+                                 FileScopeRawPtr fs,
                                  ClassScopePtr scope) {
   ModifierExpressionPtr modifiers =
     scope->setModifiers(m_modifiers);
 
   if (m_modifiers->isAbstract()) {
-    m_modifiers->parseTimeFatal(Compiler::InvalidAttribute,
+    m_modifiers->parseTimeFatal(fs,
+                                Compiler::InvalidAttribute,
                                 "Properties cannot be declared abstract");
   }
 
   if (m_modifiers->isFinal()) {
-    m_modifiers->parseTimeFatal(Compiler::InvalidAttribute,
+    m_modifiers->parseTimeFatal(fs,
+                                Compiler::InvalidAttribute,
                                 "Properties cannot be declared final");
   }
 
   if (!m_modifiers->isStatic() && scope->isStaticUtil()) {
     m_modifiers->parseTimeFatal(
+      fs,
       Compiler::InvalidAttribute,
       "Class %s contains non-static property declaration and "
       "therefore cannot be declared 'abstract final'",
@@ -97,6 +101,7 @@ void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
        m_modifiers->isProtected() +
        m_modifiers->isPrivate()) > 1) {
     m_modifiers->parseTimeFatal(
+      fs,
       Compiler::InvalidAttribute,
       "%s: properties of %s",
       Strings::PICK_ACCESS_MODIFIER,
@@ -114,17 +119,19 @@ void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
       const std::string &name =
         dynamic_pointer_cast<SimpleVariable>(var)->getName();
       if (variables->isPresent(name)) {
-        exp->parseTimeFatal(Compiler::DeclaredVariableTwice,
+        exp->parseTimeFatal(fs,
+                            Compiler::DeclaredVariableTwice,
                             "Cannot redeclare %s::$%s",
                             scope->getOriginalName().c_str(), name.c_str());
       } else {
-        assignment->onParseRecur(ar, scope);
+        assignment->onParseRecur(ar, fs, scope);
       }
     } else {
       const std::string &name =
         dynamic_pointer_cast<SimpleVariable>(exp)->getName();
       if (variables->isPresent(name)) {
-        exp->parseTimeFatal(Compiler::DeclaredVariableTwice,
+        exp->parseTimeFatal(fs,
+                            Compiler::DeclaredVariableTwice,
                             "Cannot redeclare %s::$%s",
                             scope->getOriginalName().c_str(), name.c_str());
       } else {
@@ -275,7 +282,7 @@ void ClassVariable::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("expressions");
   cg.printExpressionVector(m_declaration);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

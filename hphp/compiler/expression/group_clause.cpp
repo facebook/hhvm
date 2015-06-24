@@ -87,7 +87,7 @@ void GroupClause::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("key");
   m_key->outputCodeModel(cg);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 
@@ -100,4 +100,3 @@ void GroupClause::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf(" by ");
   m_key->outputPHP(cg, ar);
 }
-

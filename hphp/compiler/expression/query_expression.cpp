@@ -46,7 +46,7 @@ QueryExpression::QueryExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                                  ExpressionPtr head, ExpressionPtr body)
   : QueryOrderby(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(QueryExpression)) {
   m_expressions = ExpressionListPtr(
-    new ExpressionList(getScope(), getLocation())
+    new ExpressionList(getScope(), getRange())
   );
   m_expressions->addElement(head);
 
@@ -69,7 +69,7 @@ QueryExpression::QueryExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
 // parser functions
 
 void QueryExpression::doRewrites(AnalysisResultPtr ar,
-  FileScopePtr fileScope) {
+                                 FileScopePtr fileScope) {
   // Clone the query expression for client rewriting later on.
   auto csqe = static_pointer_cast<QueryExpression>(this->clone());
 
@@ -99,7 +99,8 @@ void QueryExpression::doRewrites(AnalysisResultPtr ar,
   // the query provider as a string which it can unserialize and turn
   // into a query (unless already cached).
   std::ostringstream serialized;
-  CodeGenerator cg(&serialized, CodeGenerator::Output::CodeModel);
+  CodeGenerator cg(&serialized, CodeGenerator::Output::CodeModel,
+                   &fileScope->getName());
   cg.setAstClassPrefix("Code");
   qe->outputCodeModel(cg);
   std::string s(serialized.str().c_str(), serialized.str().length());
@@ -119,8 +120,8 @@ void QueryExpression::doRewrites(AnalysisResultPtr ar,
 // a result tuple constructed by the query provider. Then wrap this expression
 // in a lambda so that the query provider can invoke it as a call back every
 // time it produces a result tuple (row).
-ClosureExpressionPtr QueryExpression::clientSideRewrite(AnalysisResultPtr ar,
-  FileScopePtr fileScope) {
+ClosureExpressionPtr QueryExpression::clientSideRewrite(
+  AnalysisResultPtr ar, FileScopePtr fileScope) {
   // Rewrite the select expression into an expression that refers to
   // table columns (including computed columns) via properties of an
   // object produced by the query provider at runtime.
@@ -137,15 +138,14 @@ ClosureExpressionPtr QueryExpression::clientSideRewrite(AnalysisResultPtr ar,
   // produce the value specified by this select expression.
 
   // Create a return statement for the lambda body
-  auto location = this->getLocation();
   LabelScopePtr labelScope(new LabelScope());
   ReturnStatementPtr returnStatement(
-    new ReturnStatement(BlockScopePtr(), labelScope, location, selectExpr)
+    new ReturnStatement(BlockScopePtr(), labelScope, getRange(), selectExpr)
   );
 
   // Wrap up the return statement in a list for the lambda body
   StatementListPtr stmt(
-    new StatementList(BlockScopePtr(), labelScope, location)
+    new StatementList(BlockScopePtr(), labelScope, getRange())
   );
   stmt->addElement(returnStatement);
 
@@ -163,15 +163,15 @@ ClosureExpressionPtr QueryExpression::clientSideRewrite(AnalysisResultPtr ar,
   ExpressionPtr defaultValue;
   ExpressionPtr attributeList;
   ParameterExpressionPtr parameter (
-    new ParameterExpression(BlockScopePtr(), location, type, hhType,
+    new ParameterExpression(BlockScopePtr(), getRange(), type, hhType,
         paramName, byRefParam, modifier, defaultValue, attributeList)
   );
-  ExpressionListPtr params(new ExpressionList(BlockScopePtr(), location));
+  ExpressionListPtr params(new ExpressionList(BlockScopePtr(), getRange()));
   params->addElement(parameter);
 
   // Now create a function statement object
   ModifierExpressionPtr modifiers(
-    new ModifierExpression(BlockScopePtr(), location)
+    new ModifierExpression(BlockScopePtr(), getRange())
   );
   bool ref = false;
   static int counter = 0;
@@ -181,8 +181,9 @@ ClosureExpressionPtr QueryExpression::clientSideRewrite(AnalysisResultPtr ar,
   std::string docComment;
   ExpressionListPtr attrList;
   FunctionStatementPtr func(
-    new FunctionStatement(BlockScopePtr(), labelScope, location, modifiers, ref,
-        name, params, retTypeAnnotation, stmt, attr, docComment, attrList)
+    new FunctionStatement(BlockScopePtr(), labelScope, getRange(), modifiers,
+                          ref, name, params, retTypeAnnotation, stmt, attr,
+                          docComment, attrList)
   );
 
   // The function statement needs a scope
@@ -198,7 +199,7 @@ ClosureExpressionPtr QueryExpression::clientSideRewrite(AnalysisResultPtr ar,
   // pass to the query provider.
   ExpressionListPtr captures;
   ClosureExpressionPtr closure(
-    new ClosureExpression(BlockScopePtr(), location, ClosureType::Short,
+    new ClosureExpression(BlockScopePtr(), getRange(), ClosureType::Short,
         func, captures)
   );
   closure->getClosureFunction()->setContainingClosure(closure);
@@ -246,7 +247,7 @@ void QueryOrderby::outputCodeModel(CodeGenerator &cg) {
   }
   cg.printExpressionVector(m_originalExpressions);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 
@@ -265,4 +266,3 @@ void QueryOrderby::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
 }
-

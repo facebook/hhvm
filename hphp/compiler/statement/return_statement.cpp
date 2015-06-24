@@ -97,7 +97,7 @@ void ReturnStatement::outputCodeModel(CodeGenerator &cg) {
     m_exp->outputCodeModel(cg);
   }
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

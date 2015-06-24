@@ -100,7 +100,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   }
 
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
-  ClassScopePtr classScope(new ClassScope(kindOf, m_originalName,
+  ClassScopePtr classScope(new ClassScope(fs, kindOf, m_originalName,
                                           m_originalParent,
                                           bases, m_docComment,
                                           stmt, attrs));
@@ -163,25 +163,28 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
         }
       }
       IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>((*m_stmt)[i]);
-      ph->onParseRecur(ar, classScope);
+      ph->onParseRecur(ar, fs, classScope);
     }
     if (constructor && constructor->getModifiers()->isStatic()) {
-      constructor->parseTimeFatal(Compiler::InvalidAttribute,
+      constructor->parseTimeFatal(fs,
+                                  Compiler::InvalidAttribute,
                                   "Constructor %s::%s() cannot be static",
                                   classScope->getOriginalName().c_str(),
                                   constructor->getOriginalName().c_str());
     }
     if (destructor && destructor->getModifiers()->isStatic()) {
-      destructor->parseTimeFatal(Compiler::InvalidAttribute,
-                                  "Destructor %s::%s() cannot be static",
-                                  classScope->getOriginalName().c_str(),
-                                  destructor->getOriginalName().c_str());
+      destructor->parseTimeFatal(fs,
+                                 Compiler::InvalidAttribute,
+                                 "Destructor %s::%s() cannot be static",
+                                 classScope->getOriginalName().c_str(),
+                                 destructor->getOriginalName().c_str());
     }
     if (clone && clone->getModifiers()->isStatic()) {
-      clone->parseTimeFatal(Compiler::InvalidAttribute,
-                                  "Clone method %s::%s() cannot be static",
-                                  classScope->getOriginalName().c_str(),
-                                  clone->getOriginalName().c_str());
+      clone->parseTimeFatal(fs,
+                            Compiler::InvalidAttribute,
+                            "Clone method %s::%s() cannot be static",
+                            classScope->getOriginalName().c_str(),
+                            clone->getOriginalName().c_str());
     }
   }
 }
@@ -293,7 +296,7 @@ void ClassStatement::outputCodeModel(CodeGenerator &cg) {
   }
   cg.printAsEnclosedBlock(stmt);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   if (!m_docComment.empty()) {
     cg.printPropertyHeader("comments");
     cg.printValue(m_docComment);

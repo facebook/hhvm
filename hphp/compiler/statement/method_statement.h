@@ -47,16 +47,17 @@ public:
                   ExpressionListPtr attrList, bool method = true);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  virtual bool hasDecl() const { return true; }
-  virtual bool hasImpl() const { return false; }
-  virtual int getRecursiveCount() const;
+  bool hasDecl() const override { return true; }
+  bool hasImpl() const override { return false; }
+  int getRecursiveCount() const override;
   // implementing IParseHandler
-  virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope);
+  void onParseRecur(AnalysisResultConstPtr ar, FileScopeRawPtr fs,
+                    ClassScopePtr scope) override;
 
   void fixupSelfAndParentTypehints(ClassScopePtr scope);
 
   const std::string &getOriginalName() const { return m_originalName;}
-  std::string getName() const { return m_name;}
+  std::string getName() const override { return m_name;}
   void setName(const std::string name) { m_name = name; }
   void setOriginalName(const std::string name) { m_originalName = name; }
   std::string getFullName() const;
@@ -73,7 +74,7 @@ public:
   bool isRef(int index = -1) const;
   bool isSystem() const;
 
-  int getLocalEffects() const;
+  int getLocalEffects() const override;
 
   ModifierExpressionPtr getModifiers() {
     return m_modifiers;
@@ -125,9 +126,6 @@ public:
   void setMayCallSetFrameMetadata(bool f) { m_mayCallSetFrameMetadata = f; }
   bool mayCallSetFrameMetadata() const { return m_mayCallSetFrameMetadata; }
 
-private:
-  void checkParameters();
-
 protected:
   bool m_method;
   bool m_ref;
@@ -149,7 +147,8 @@ protected:
   ClosureExpressionRawPtr m_containingClosure;
   ExpressionListPtr m_attrList;
 
-  void setSpecialMethod(ClassScopePtr classScope);
+  void setSpecialMethod(FileScopeRawPtr fileScope, ClassScopePtr classScope);
+  void checkParameters(FileScopeRawPtr scope);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -26,8 +26,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // SourceLoc.
 
-inline SourceLoc::SourceLoc(const Location& l) {
-  setLoc(&l);
+inline SourceLoc::SourceLoc(const Location::Range& r) {
+  setLoc(&r);
 }
 
 inline void SourceLoc::reset() {
@@ -38,7 +38,7 @@ inline bool SourceLoc::valid() const {
   return line0 != 1 || char0 != 1 || line1 != 1 || char1 != 1;
 }
 
-inline void SourceLoc::setLoc(const Location* l) {
+inline void SourceLoc::setLoc(const Location::Range* l) {
   line0 = l->line0;
   char0 = l->char0;
   line1 = l->line1;

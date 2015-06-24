@@ -113,7 +113,8 @@ public:
   };
 
 public:
-  ClassScope(KindOf kindOf, const std::string &name,
+  ClassScope(FileScopeRawPtr fs,
+             KindOf kindOf, const std::string &name,
              const std::string &parent,
              const std::vector<std::string> &bases,
              const std::string &docComment, StatementPtr stmt,
@@ -359,6 +360,7 @@ public:
    * Override function container
    */
   bool addFunction(AnalysisResultConstPtr ar,
+                   FileScopeRawPtr fileScope,
                    FunctionScopePtr funcScope);
 
   void setNeedsCppCtor(bool needsCppCtor) { m_needsCppCtor = needsCppCtor; }

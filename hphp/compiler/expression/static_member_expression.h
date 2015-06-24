@@ -30,12 +30,12 @@ public:
                          ExpressionPtr classExp, ExpressionPtr exp);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
-  virtual int getLocalEffects() const { return NoEffect; }
-  virtual bool isRefable(bool checkError = false) const { return true;}
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  int getLocalEffects() const override { return NoEffect; }
+  bool isRefable(bool checkError = false) const override { return true;}
 
-  virtual unsigned getCanonHash() const;
-  virtual bool canonCompare(ExpressionPtr e) const;
+  unsigned getCanonHash() const override;
+  bool canonCompare(ExpressionPtr e) const override;
 
   ExpressionPtr getExp() { return m_exp; }
 

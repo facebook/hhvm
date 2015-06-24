@@ -38,7 +38,7 @@ const char* Statement::nameOfKind(Construct::KindOf kind) {
 }
 
 Statement::Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS)
-  : Construct(scope, loc, kindOf),
+  : Construct(scope, r, kindOf),
     m_labelScope(labelScope) {
   assert(m_labelScope != nullptr);
 }

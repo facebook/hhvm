@@ -36,7 +36,6 @@ namespace HPHP {
 class CodeGenerator;
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(ClassScope);
-DECLARE_BOOST_TYPES(Location);
 DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 

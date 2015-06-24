@@ -271,30 +271,25 @@ ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
 }
 
 static ExpressionPtr makeIsNull(AnalysisResultConstPtr ar,
-                                LocationPtr loc, ExpressionPtr exp,
+                                const Location::Range& r, ExpressionPtr exp,
                                 bool invert) {
   /* Replace "$x === null" with an is_null call; this requires slightly
    * less work at runtime. */
-  ExpressionListPtr expList =
-    ExpressionListPtr(new ExpressionList(exp->getScope(), loc));
+  auto expList = std::make_shared<ExpressionList>(exp->getScope(), r);
   expList->insertElement(exp);
 
-  SimpleFunctionCallPtr call
-    (new SimpleFunctionCall(exp->getScope(), loc,
-                            "is_null", false, expList, ExpressionPtr()));
+  auto call =
+    std::make_shared<SimpleFunctionCall>(
+      exp->getScope(), r, "is_null", false, expList, ExpressionPtr());
 
   call->setValid();
   call->setActualType(Type::Boolean);
   call->setupScopes(ar);
 
-  ExpressionPtr result(call);
-  if (invert) {
-    result = ExpressionPtr(new UnaryOpExpression(
-                             exp->getScope(), loc,
-                             result, '!', true));
-  }
+  if (!invert) return call;
 
-  return result;
+  return std::make_shared<UnaryOpExpression>(
+    exp->getScope(), r, call, '!', true);
 }
 
 // foldConst() is callable from the parse phase as well as the analysis phase.
@@ -316,7 +311,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
         case T_IS_IDENTICAL:
         case T_IS_NOT_IDENTICAL:
           if (v1.isNull()) {
-            return makeIsNull(ar, getLocation(), m_exp2,
+            return makeIsNull(ar, getRange(), m_exp2,
                               m_op == T_IS_NOT_IDENTICAL);
           }
           break;
@@ -329,7 +324,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
                                m_op == T_BOOLEAN_AND) ? m_exp2 : m_exp1;
           rep = ExpressionPtr(
               new UnaryOpExpression(
-                getScope(), getLocation(),
+                getScope(), getRange(),
                 rep, T_BOOL_CAST, true));
           rep->setActualType(Type::Boolean);
           return replaceValue(rep);
@@ -521,13 +516,13 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
         ExpressionPtr rep = useFirst ? m_exp1 : m_exp2;
         rep = ExpressionPtr(
           new UnaryOpExpression(
-            getScope(), getLocation(),
+            getScope(), getRange(),
             rep, T_BOOL_CAST, true));
         rep->setActualType(Type::Boolean);
         if (!useFirst) {
           ExpressionListPtr l(
             new ExpressionList(
-              getScope(), getLocation(),
+              getScope(), getRange(),
               ExpressionList::ListKindComma));
           l->addElement(m_exp1);
           l->addElement(rep);
@@ -550,7 +545,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
       case T_IS_IDENTICAL:
       case T_IS_NOT_IDENTICAL:
         if (v2.isNull()) {
-          return makeIsNull(ar, getLocation(), m_exp1,
+          return makeIsNull(ar, getRange(), m_exp1,
                             m_op == T_IS_NOT_IDENTICAL);
         }
         break;
@@ -603,7 +598,7 @@ void BinaryOpExpression::outputCodeModel(CodeGenerator &cg) {
     cg.printPropertyHeader("arguments");
     cg.printExpressionVector(static_pointer_cast<ExpressionList>(m_exp2));
     cg.printPropertyHeader("sourceLocation");
-    cg.printLocation(this->getLocation());
+    cg.printLocation(this);
     cg.printObjectFooter();
     return;
   }
@@ -663,7 +658,7 @@ void BinaryOpExpression::outputCodeModel(CodeGenerator &cg) {
 
   cg.printValue(op);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

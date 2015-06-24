@@ -32,24 +32,25 @@ public:
                        bool ref, bool rhsFirst = false);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
   // implementing IParseHandler
-  virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope);
+  void onParseRecur(AnalysisResultConstPtr ar, FileScopeRawPtr fs,
+                    ClassScopePtr scope) override;
 
-  virtual bool isRefable(bool checkError = false) const {
+  bool isRefable(bool checkError = false) const override {
     if (checkError) return true;
     return m_value->isRefable() &&
            (m_value->getContext() & Expression::RefValue);
   }
 
   ExpressionPtr getVariable() { return m_variable;}
-  ExpressionPtr getStoreVariable() const { return m_variable; }
+  ExpressionPtr getStoreVariable() const override { return m_variable; }
   ExpressionPtr getValue() { return m_value;}
   void setVariable(ExpressionPtr v) { m_variable = v; }
   void setValue(ExpressionPtr v) { m_value = v; }
   bool isRhsFirst() { return m_rhsFirst; }
-  int getLocalEffects() const;
+  int getLocalEffects() const override;
 
   // $GLOBALS[<literal-string>] = <scalar>;
   bool isSimpleGlobalAssign(StringData **name, TypedValue *tv) const;

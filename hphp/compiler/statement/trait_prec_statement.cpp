@@ -121,7 +121,7 @@ void TraitPrecStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("otherTraitNames");
   cg.printExpressionVector(m_otherTraitNames);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

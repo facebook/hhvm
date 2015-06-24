@@ -29,7 +29,7 @@ public:
   ThrowStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  virtual int getLocalEffects() const { return CanThrow;}
+  int getLocalEffects() const override { return CanThrow;}
 
 private:
   ExpressionPtr m_exp;

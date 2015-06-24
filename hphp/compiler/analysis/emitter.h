@@ -67,15 +67,19 @@ namespace Compiler {
 class Label;
 class EmitterVisitor;
 
+using OptLocation = folly::Optional<Location::Range>;
+
 class Emitter {
 public:
   Emitter(ConstructPtr node, UnitEmitter& ue, EmitterVisitor& ev)
-    : m_node(node), m_ue(ue), m_ev(ev) {}
+      : m_node(node), m_ue(ue), m_ev(ev) {}
   UnitEmitter& getUnitEmitter() { return m_ue; }
   ConstructPtr getNode() { return m_node; }
   EmitterVisitor& getEmitterVisitor() { return m_ev; }
-  void setTempLocation(LocationPtr loc) { m_tempLoc = loc; }
-  LocationPtr getTempLocation() { return m_tempLoc; }
+  void setTempLocation(const OptLocation& r) {
+    m_tempLoc = r;
+  }
+  const OptLocation& getTempLocation() { return m_tempLoc; }
   void incStat(int counter, int value) {
     if (RuntimeOption::EnableEmitterStats) {
       IncStat(counter, value);
@@ -146,7 +150,7 @@ private:
   ConstructPtr m_node;
   UnitEmitter& m_ue;
   EmitterVisitor& m_ev;
-  LocationPtr m_tempLoc;
+  OptLocation m_tempLoc;
 };
 
 struct SymbolicStack {
@@ -652,7 +656,7 @@ private:
   std::vector<Array> m_staticArrays;
   std::vector<folly::Optional<CollectionType>> m_staticColType;
   std::set<std::string,stdltistr> m_hoistables;
-  LocationPtr m_tempLoc;
+  OptLocation m_tempLoc;
   std::unordered_set<std::string> m_staticEmitted;
 
   // The stack of all Regions that this EmitterVisitor is currently inside
@@ -678,6 +682,8 @@ public:
     ErrorOnCell,
   };
   PassByRefKind getPassByRefKind(ExpressionPtr exp);
+  void emitCall(Emitter& e, FunctionCallPtr func,
+                ExpressionListPtr params, Offset fpiStart);
   void emitAGet(Emitter& e);
   void emitCGetL2(Emitter& e);
   void emitCGetL3(Emitter& e);

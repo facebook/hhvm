@@ -100,7 +100,7 @@ void BlockStatement::outputCodeModel(CodeGenerator &cg) {
   cg.printPropertyHeader("isEnclosed");
   cg.printBool(true);
   cg.printPropertyHeader("sourceLocation");
-  cg.printLocation(this->getLocation());
+  cg.printLocation(this);
   cg.printObjectFooter();
 }
 

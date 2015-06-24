@@ -45,9 +45,9 @@ public:
   };
   CaptureState captureState() const { return m_captureState; }
 
-  virtual ConstructPtr getNthKid(int n) const;
-  virtual void setNthKid(int n, ConstructPtr cp);
-  virtual int getKidCount() const;
+  ConstructPtr getNthKid(int n) const override;
+  void setNthKid(int n, ConstructPtr cp) override;
+  int getKidCount() const override;
 
   FunctionStatementPtr getClosureFunction() { return m_func; }
   ExpressionListPtr getClosureVariables() { return m_vars; }

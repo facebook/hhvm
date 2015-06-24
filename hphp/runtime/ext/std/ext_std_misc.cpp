@@ -703,20 +703,20 @@ static String token_get_all_fix_elseif(Array& res,
   res.append(make_packed_array(
     UserTokenId_T_ELSE,
     String(tokCStr, strlen("else"), CopyString),
-    loc.line0
+    loc.r.line0
   ));
 
   res.append(make_packed_array(
     UserTokenId_T_WHITESPACE,
     String(tokCStr + strlen("else"), tokText.size() - strlen("elseif"),
            CopyString),
-    loc.line0
+    loc.r.line0
   ));
 
   tokVal = UserTokenId_T_IF;
 
   // To account for newlines in the T_WHITESPACE
-  loc.line0 = loc.line1;
+  loc.r.line0 = loc.r.line1;
 
   return String(tokCEnd - strlen("if"), CopyString);
 }
@@ -754,7 +754,7 @@ loop_start: // For after seeing a T_INLINE_HTML, see below
           // Consecutive T_INLINE_HTML tokens should be merged together to
           // match Zend behaviour.
           value = String(tok.text());
-          int line = loc.line0;
+          int line = loc.r.line0;
           tokid = scanner.getNextToken(tok, loc);
           while (tokid == T_INLINE_HTML) {
             value += String(tok.text());
@@ -787,7 +787,7 @@ loop_start: // For after seeing a T_INLINE_HTML, see below
       Array p = make_packed_array(
         tokVal,
         value,
-        loc.line0
+        loc.r.line0
       );
       res.append(p);
     }

@@ -108,26 +108,23 @@ void makeFatalMeth(FileScope& file,
                    const std::string& msg,
                    int line,
                    Meth meth) {
-  LocationPtr loc(new Location());
-  LabelScopePtr labelScope(new LabelScope());
-  loc->file = file.getName().c_str();
-  loc->first(line, 0);
-  loc->last(line, 0);
+  auto labelScope = std::make_shared<LabelScope>();
+  auto r = Location::Range(line, 0, line, 0);
   BlockScopePtr scope;
-  ExpressionListPtr args(new ExpressionList(scope, loc));
-  args->addElement(Expression::MakeScalarExpression(ar, scope, loc, msg));
-  SimpleFunctionCallPtr e(
-    new SimpleFunctionCall(scope, loc, "throw_fatal", false, args,
-      ExpressionPtr()));
+  auto args = std::make_shared<ExpressionList>(scope, r);
+  args->addElement(Expression::MakeScalarExpression(ar, scope, r, msg));
+  auto e =
+    std::make_shared<SimpleFunctionCall>(scope, r, "throw_fatal", false, args,
+                                         ExpressionPtr());
   meth(e);
-  ExpStatementPtr exp(new ExpStatement(scope, labelScope, loc, e));
-  StatementListPtr stmts(new StatementList(scope, labelScope, loc));
+  auto exp = std::make_shared<ExpStatement>(scope, labelScope, r, e);
+  auto stmts = std::make_shared<StatementList>(scope, labelScope, r);
   stmts->addElement(exp);
 
   FunctionScopePtr fs = file.setTree(ar, stmts);
   fs->setOuterScope(file.shared_from_this());
   fs->getStmt()->resetScope(fs);
-  fs->getStmt()->setLocation(loc);
+  exp->copyLocationTo(fs->getStmt());
   file.setOuterScope(const_cast<AnalysisResult*>(ar.get())->shared_from_this());
 }
 
@@ -270,27 +267,29 @@ const string &FileScope::pseudoMainName() {
 
 FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
   StatementListPtr st = m_tree;
-  LabelScopePtr labelScope(new LabelScope());
-  FunctionStatementPtr f
-    (new FunctionStatement(BlockScopePtr(),
-                           labelScope,
-                           LocationPtr(),
-                           ModifierExpressionPtr(),
-                           false, pseudoMainName(),
-                           ExpressionListPtr(), TypeAnnotationPtr(),
-                           st, 0, "", ExpressionListPtr()));
+  auto labelScope = std::make_shared<LabelScope>();
+  auto f =
+    std::make_shared<FunctionStatement>(
+      BlockScopePtr(),
+      labelScope,
+      Location::Range(),
+      ModifierExpressionPtr(),
+      false, pseudoMainName(),
+      ExpressionListPtr(), TypeAnnotationPtr(),
+      st, 0, "", ExpressionListPtr());
   f->setFileLevel();
-  FunctionScopePtr pseudoMain(
-    new HPHP::FunctionScope(ar, true,
-                            pseudoMainName().c_str(),
-                            f, false, 0, 0,
-                            ModifierExpressionPtr(),
-                            m_attributes[0], "",
-                            shared_from_this(),
-                            vector<UserAttributePtr>(),
-                            true));
+  auto pseudoMain =
+    std::make_shared<HPHP::FunctionScope>(
+      ar, true,
+      pseudoMainName().c_str(),
+      f, false, 0, 0,
+      ModifierExpressionPtr(),
+      m_attributes[0], "",
+      shared_from_this(),
+      vector<UserAttributePtr>(),
+      true);
   f->setBlockScope(pseudoMain);
-  FunctionScopePtr &fs = m_functions[pseudoMainName()];
+  auto& fs = m_functions[pseudoMainName()];
   always_assert(!fs);
   fs = pseudoMain;
   m_pseudoMain = pseudoMain;

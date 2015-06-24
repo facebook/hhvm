@@ -34,21 +34,21 @@ public:
                      const std::string &docComment = "");
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
-  virtual bool isTemporary() const {
+  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  bool isTemporary() const override {
     return isNull() || isBoolean();
   }
-  virtual bool isScalar() const;
-  virtual bool isLiteralNull() const;
-  virtual int getLocalEffects() const { return NoEffect; }
-  virtual bool getScalarValue(Variant &value);
-  virtual bool containsDynamicConstant(AnalysisResultPtr ar) const {
+  bool isScalar() const override;
+  bool isLiteralNull() const override;
+  int getLocalEffects() const override { return NoEffect; }
+  bool getScalarValue(Variant &value) override;
+  bool containsDynamicConstant(AnalysisResultPtr ar) const override {
     return !m_valid || m_dynamic;
   }
 
-  virtual unsigned getCanonHash() const;
-  virtual bool canonCompare(ExpressionPtr e) const;
+  unsigned getCanonHash() const override;
+  bool canonCompare(ExpressionPtr e) const override;
 
   const std::string &getName() const { return m_name;}
   const std::string &getOriginalName() const { return m_origName;}
@@ -69,8 +69,8 @@ public:
   bool getBooleanValue() const;
   void pushConst(const std::string &name);
   void popConst();
-  void setComment(const std::string &comment) { m_comment = comment;}
-  std::string getComment() { return m_comment;}
+  void setComment(const std::string &comment) override { m_comment = comment; }
+  std::string getComment() override { return m_comment;}
   bool isValid() const { return m_valid; }
   bool isDynamic() const { return m_dynamic; }
   bool hadBackslash() const { return m_hadBackslash; }

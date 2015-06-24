@@ -206,8 +206,8 @@ void BuiltinSymbols::ImportExtProperties(AnalysisResultPtr ar,
   for (auto it = src.begin(); it != src.end(); ++it) {
     ClassInfo::PropertyInfo *pinfo = *it;
     int attrs = pinfo->attribute;
-    ModifierExpressionPtr modifiers(
-      new ModifierExpression(BlockScopePtr(), LocationPtr()));
+    auto modifiers =
+      std::make_shared<ModifierExpression>(BlockScopePtr(), Location::Range());
     if (attrs & ClassInfo::IsPrivate) {
       modifiers->add(T_PRIVATE);
     } else if (attrs & ClassInfo::IsProtected) {
@@ -225,10 +225,9 @@ void BuiltinSymbols::ImportExtProperties(AnalysisResultPtr ar,
 
 void BuiltinSymbols::ImportNativeConstants(AnalysisResultPtr ar,
                                            ConstantTablePtr dest) {
-  LocationPtr loc(new Location);
   for (auto cnsPair : Native::getConstants()) {
     ExpressionPtr e(Expression::MakeScalarExpression(
-                      ar, ar, loc, tvAsVariant(&cnsPair.second)));
+                      ar, ar, Location::Range(), tvAsVariant(&cnsPair.second)));
 
     dest->add(cnsPair.first->data(),
               Type::FromDataType(cnsPair.second.m_type, Type::Variant),
@@ -245,10 +244,10 @@ void BuiltinSymbols::ImportNativeConstants(AnalysisResultPtr ar,
 void BuiltinSymbols::ImportExtConstants(AnalysisResultPtr ar,
                                         ConstantTablePtr dest,
                                         ClassInfo *cls) {
-  LocationPtr loc(new Location);
   for (auto cinfo : cls->getConstantsVec()) {
     auto t = Type::FromDataType(cinfo->getValue().getType(), Type::Variant);
-    auto e = Expression::MakeScalarExpression(ar, ar, loc, cinfo->getValue());
+    auto e = Expression::MakeScalarExpression(ar, ar, Location::Range(),
+                                              cinfo->getValue());
     dest->add(cinfo->name.data(), t, e, ar, e);
   }
 }
@@ -308,7 +307,6 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
   ImportExtClasses(ar);
 
   Array constants = ClassInfo::GetSystemConstants();
-  LocationPtr loc(new Location);
   for (ArrayIter it = constants.begin(); it; ++it) {
     const Variant& key = it.first();
     if (!key.isString()) continue;
@@ -317,7 +315,8 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
     if (name == "true" || name == "false" || name == "null") continue;
     const Variant& value = it.secondRef();
     if (!value.isInitialized() || value.isObject()) continue;
-    ExpressionPtr e = Expression::MakeScalarExpression(ar, ar, loc, value);
+    ExpressionPtr e = Expression::MakeScalarExpression(
+      ar, ar, Location::Range(), value);
     TypePtr t = Type::FromDataType(value.getType(), Type::Variant);
     cns->add(key.toCStrRef().data(), t, e, ar, e);
   }
@@ -350,7 +349,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
             String(cls->getName()).get())) {
         for (auto cnsMap : *nativeConsts) {
           auto tv = cnsMap.second;
-          auto e = Expression::MakeScalarExpression(ar, ar, loc,
+          auto e = Expression::MakeScalarExpression(ar, ar, Location::Range(),
                                                     tvAsVariant(&tv));
           cls->getConstants()->add(cnsMap.first->data(),
                                    Type::FromDataType(tv.m_type, Type::Variant),

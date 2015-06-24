@@ -33,20 +33,20 @@ public:
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
 
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
-  virtual bool isRefable(bool checkError = false) const { return true;}
-  bool isTemporary() const;
+  bool isRefable(bool checkError = false) const override { return true;}
+  bool isTemporary() const override;
 
   ExpressionPtr getVariable() const { return m_variable;}
   ExpressionPtr getOffset() const { return m_offset;}
-  virtual void setContext(Context context);
-  virtual void clearContext(Context context);
+  void setContext(Context context) override;
+  void clearContext(Context context) override;
 
   bool isSuperGlobal() const { return m_global;}
   bool isDynamicGlobal() const { return m_dynamicGlobal;}
   const std::string &getGlobalName() const { return m_globalName;}
-  ExpressionPtr unneeded();
+  ExpressionPtr unneeded() override;
 
   /**
    * This is purely for resolving a nasty case of interpreting
@@ -55,7 +55,7 @@ public:
   bool appendClass(ExpressionPtr cls,
                    AnalysisResultConstPtr ar, FileScopePtr file);
 
-  virtual bool canonCompare(ExpressionPtr e) const;
+  bool canonCompare(ExpressionPtr e) const override;
 
 private:
   ExpressionPtr m_variable;

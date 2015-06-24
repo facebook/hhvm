@@ -385,8 +385,11 @@ bool AnalysisResult::declareConst(FileScopePtr fs, const string &name) {
 }
 
 static bool by_source(const BlockScopePtr &b1, const BlockScopePtr &b2) {
-  return b1->getStmt()->getLocation()->
-    compare(b2->getStmt()->getLocation().get()) < 0;
+  if (auto d = b1->getStmt()->getRange().compare(b2->getStmt()->getRange())) {
+    return d;
+  }
+  return b1->getContainingFile()->getName() <
+    b2->getContainingFile()->getName();
 }
 
 void AnalysisResult::canonicalizeSymbolOrder() {

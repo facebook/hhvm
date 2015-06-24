@@ -138,12 +138,12 @@ void SelectRewriter::rewriteSelect(SelectClausePtr sc) {
   // properties into a single tuple.
   auto selectExpr = sc->getExpression();
   ExpressionListPtr newList(
-    new ExpressionList(selectExpr->getScope(), selectExpr->getLocation())
+    new ExpressionList(selectExpr->getScope(), selectExpr->getRange())
   );
   m_selectedColumns = newList;
   this->collectSelectedColumns(sc);
   SimpleFunctionCallPtr callTuple(
-    new SimpleFunctionCall(selectExpr->getScope(), selectExpr->getLocation(),
+    new SimpleFunctionCall(selectExpr->getScope(), selectExpr->getRange(),
       "tuple", false, newList, nullptr)
   );
   sc->setExpression(callTuple);
@@ -158,15 +158,15 @@ ObjectPropertyExpressionPtr getResultColumn(
   ExpressionPtr expr, std::string columnName) {
   SimpleVariablePtr obj(
     new SimpleVariable(expr->getScope(),
-        expr->getLocation(), "__query_result_row__")
+        expr->getRange(), "__query_result_row__")
   );
   ScalarExpressionPtr propName(
     new ScalarExpression(expr->getScope(),
-    expr->getLocation(), columnName)
+    expr->getRange(), columnName)
   );
   ObjectPropertyExpressionPtr result(
     new ObjectPropertyExpression(expr->getScope(),
-        expr->getLocation(), obj, propName, PropAccessType::Normal)
+        expr->getRange(), obj, propName, PropAccessType::Normal)
   );
   return result;
 }

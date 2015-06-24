@@ -1728,6 +1728,8 @@ class ReflectionExtension final : public Extension {
       s_ReflectionConstHandle.get());
     Native::registerNativeDataInfo<ReflectionPropHandle>(
       s_ReflectionPropHandle.get());
+    Native::registerNativeDataInfo<ReflectionSPropHandle>(
+      s_ReflectionSPropHandle.get());
 
     Native::registerNativePropHandler
       <reflection_extension_PropHandler>(s_reflectionextension);

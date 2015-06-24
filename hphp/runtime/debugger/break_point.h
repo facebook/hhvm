@@ -104,6 +104,7 @@ struct InterruptSite {
 
   bool valid() const { return m_valid; }
   bool funcEntry() const { return m_funcEntry; }
+  bool isBuiltin() const { return m_builtin; }
 
 private:
   InterruptSite(ActRec* fp, Offset offset, const Variant& error);
@@ -129,6 +130,7 @@ private:
   Unit* m_unit;
   bool m_valid;
   bool m_funcEntry;
+  bool m_builtin;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -123,7 +123,7 @@ InterruptSite::InterruptSite(ActRec *fp, Offset offset, const Variant& error)
     m_file((StringData*)nullptr),
     m_line0(0), m_char0(0), m_line1(0), m_char1(0),
     m_offset(offset), m_unit(nullptr), m_valid(false),
-    m_funcEntry(false) {
+    m_funcEntry(false), m_builtin(false) {
   TRACE(2, "InterruptSite::InterruptSite(fp)\n");
   this->Initialize(fp);
 }
@@ -150,6 +150,7 @@ void InterruptSite::Initialize(ActRec *fp) {
   } else {
     m_class = "";
   }
+  m_builtin = fp->m_func->isBuiltin();
 #undef bail_on
   m_valid = true;
 }

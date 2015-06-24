@@ -138,6 +138,10 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
         TRACE(2, "CmdNext: exception handler, ignoring func with no source\n");
         return;
       }
+      if (fp->m_func->isBuiltin()) {
+        TRACE(2, "CmdNext: exception handler, ignoring builtin functions\n");
+        return;
+      }
       TRACE(2, "CmdNext: exception handler altering expected flow\n");
     } else {
       // We have internal breakpoints setup, but we haven't hit one yet. Keep

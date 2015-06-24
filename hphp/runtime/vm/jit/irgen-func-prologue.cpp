@@ -134,27 +134,20 @@ void warn_missing_args(IRGS& env, uint32_t argc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}
+/*
+ * How to perform our stack overflow check.
+ */
+enum class StackCheck {
+  None,   // not needed
+  Early,  // must occur before setting up locals
+  Combine // can be delayed and combined with surprise flags check
+};
 
-///////////////////////////////////////////////////////////////////////////////
-
-void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
-  auto const func = env.context.func;
-
-  // Emit debug code.
-  if (Trace::moduleEnabled(Trace::ringbuffer)) {
-    auto msg = RBMsgData { Trace::RBTypeFuncPrologue, func->fullName() };
-    gen(env, RBTraceMsg, msg);
+StackCheck stack_check_kind(const Func* func, uint32_t argc) {
+  if (func->attrs() & AttrPhpLeafFn &&
+      func->maxStackCells() < kStackCheckLeafPadding) {
+    return StackCheck::None;
   }
-  if (RuntimeOption::EvalJitTransCounters) {
-    gen(env, IncTransCounter);
-  }
-
-  gen(env, EnterFrame, fp(env));
-
-  bool const isLeafFunction = func->attrs() & AttrPhpLeafFn;
-  auto const needsStackCheck =
-    !isLeafFunction || func->maxStackCells() >= kStackCheckLeafPadding;
 
   /*
    * Determine how many stack slots we're going to write that the caller hasn't
@@ -179,19 +172,37 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
    * staying within that region if the locals are actually too deep.
    */
   auto const safeFromSEGV = Stack::sSurprisePageSize / sizeof(TypedValue);
-  auto const uncheckedUninit = argc < func->numLocals()
-    ? func->numLocals() - argc
-    : 0;
-  auto const canCombineChecks = uncheckedUninit < safeFromSEGV;
 
-  /*
-   * If we can't safely combine the stack overflow check with the surprise
-   * check, do it now.
-   */
-  if (needsStackCheck && !canCombineChecks) {
+  return func->numLocals() - argc < safeFromSEGV
+    ? StackCheck::Combine
+    : StackCheck::Early;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void emitPrologueEntry(IRGS& env, uint32_t argc) {
+  auto const func = env.context.func;
+
+  // Emit debug code.
+  if (Trace::moduleEnabled(Trace::ringbuffer) && !func->isMagic()) {
+    auto msg = RBMsgData { Trace::RBTypeFuncPrologue, func->fullName() };
+    gen(env, RBTraceMsg, msg);
+  }
+  if (RuntimeOption::EvalJitTransCounters) {
+    gen(env, IncTransCounter);
+  }
+
+  gen(env, EnterFrame, fp(env));
+
+  // Emit early stack overflow check if necessary.
+  if (stack_check_kind(func, argc) == StackCheck::Early) {
     env.irb->exceptionStackBoundary();
     gen(env, CheckStackOverflow, fp(env));
   }
+}
+
+void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
+  auto const func = env.context.func;
 
   // Increment profiling counter.
   if (mcg->tx().mode() == TransKind::Proflogue) {
@@ -210,7 +221,7 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   // Check surprise flags in the same place as the interpreter: after setting
   // up the callee's frame but before executing any of its code.
   env.irb->exceptionStackBoundary();
-  if (needsStackCheck && canCombineChecks) {
+  if (stack_check_kind(func, argc) == StackCheck::Combine) {
     gen(env, CheckSurpriseAndStack, FuncEntryData { func, argc }, fp(env));
   } else {
     gen(env, CheckSurpriseFlagsEnter, FuncEntryData { func, argc }, fp(env));
@@ -229,6 +240,17 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
     sp(env),
     fp(env)
   );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
+  emitPrologueEntry(env, argc);
+  emitPrologueBody(env, argc, transID);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

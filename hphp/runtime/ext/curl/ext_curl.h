@@ -269,7 +269,7 @@ extern const int64_t k_CURL_VERSION_LIBZ;
 extern const int64_t k_CURL_VERSION_SSL;
 
 Variant HHVM_FUNCTION(curl_init, const Variant& url = null_string);
-Variant HHVM_FUNCTION(curl_init_pooled, const Variant& url = null_string);
+Variant HHVM_FUNCTION(curl_init_pooled, const String& poolName, const Variant& url = null_string);
 Variant HHVM_FUNCTION(curl_copy_handle, const Resource& ch);
 Variant HHVM_FUNCTION(curl_version, int uversion = k_CURLVERSION_NOW);
 bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int option, const Variant& value);

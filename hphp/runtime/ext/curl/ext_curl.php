@@ -134,6 +134,9 @@ function curl_init(?string $url = null): mixed;
  * is garbage collected, the curl handle will be saved for reuse later.
  * Pooled curl handles persist between requests.
  *
+ * @param string $poolName - The name of the connection pool to use.
+ *  Named connection pools are initialized via the 'curl.namedPools' ini
+ *  setting, which is a comma separated list of named pools to create.
  * @param string $url - If provided, the CURLOPT_URL option will be set
  *   to its value. You can manually set this using the curl_setopt()
  *   function.    The file protocol is disabled by cURL if open_basedir is
@@ -142,7 +145,7 @@ function curl_init(?string $url = null): mixed;
  * @return resource - Returns a cURL handle on success, FALSE on errors.
  */
 <<__Native, __HipHopSpecific>>
-function curl_init_pooled(?string $url = null): mixed;
+function curl_init_pooled(string $poolName, ?string $url = null): mixed;
 
 /**
  * Add a normal cURL handle to a cURL multi handle

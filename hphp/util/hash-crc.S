@@ -3,6 +3,10 @@
 
 .file	"hash-crc.S"
 
+.section .rodata 
+.align 8
+.ABS_VAL: .quad 0xdfdfdfdfdfdfdfdf
+
 ETCH_SECTION(hash_string_i_crc)
 .globl	ETCH_NAME(hash_string_i_crc)
 ETCH_TYPE(ETCH_NAME(hash_string_i_crc), @function)
@@ -14,7 +18,7 @@ ETCH_LABEL(FB800):
         neg     %esi
         je      ETCH_LABEL(iend)
         mov     %esi, %ecx
-        movabs  $0xdfdfdfdfdfdfdfdf, %r8
+        movq    .ABS_VAL(%rip),%r8
         jmp     ETCH_LABEL(iheader)
 
 ETCH_LABEL(iloop):
@@ -38,7 +42,6 @@ ETCH_LABEL(iend):
 ETCH_LABEL(FE800):
         ETCH_SIZE(hash_string_i_crc)
 
-
 ETCH_SECTION(hash_string_i_unaligned_crc)
 .globl	ETCH_NAME(hash_string_i_unaligned_crc)
 ETCH_TYPE(ETCH_NAME(hash_string_i_unaligned_crc), @function)
@@ -47,8 +50,8 @@ ETCH_NAME(hash_string_i_unaligned_crc):
 ETCH_LABEL(FB801):
         CFI(startproc)
         or      $-1, %eax
+        mov     .ABS_VAL(%rip), %r8            
         sub     $8, %esi
-        movabs  $0xdfdfdfdfdfdfdfdf, %r8
         js      ETCH_LABEL(iutail)
 
 ETCH_LABEL(iuloop):
@@ -62,17 +65,14 @@ ETCH_LABEL(iuloop):
 ETCH_LABEL(iutail):
         add     $8, %esi
         je      ETCH_LABEL(iuend)
-        mov     %esi, %ecx
         xor     %edx, %edx
 
 ETCH_LABEL(iutailloop):
         mov     (%rdi), %dl
         inc     %rdi
         ror     $8, %rdx
-        dec     %ecx
-        jz      ETCH_LABEL(ifix_mis_br)     
-        jmp     ETCH_LABEL(iutailloop)
-ETCH_LABEL(ifix_mis_br):        
+        dec     %esi 
+        jne     ETCH_LABEL(iutailloop)
         and     %r8, %rdx
         crc32q  %rdx, %rax
 
@@ -147,10 +147,7 @@ ETCH_LABEL(csutailloop):
         mov     (%rdi), %dl
         inc     %rdi
         ror     $8, %rdx
-        dec     %ecx
-        jz      ETCH_LABEL(csfix_mis_br)     
-        jmp     ETCH_LABEL(csutailloop)
-ETCH_LABEL(csfix_mis_br):
+        loop    ETCH_LABEL(csutailloop)
         crc32q  %rdx, %rax
 
 ETCH_LABEL(csuend):
@@ -176,7 +173,7 @@ ETCH_LABEL(FB804):
         mov     (%rdi), %rdx
 
 ETCH_LABEL(hloop):
-        movabs  $0xdfdfdfdfdfdfdfdf, %rsi
+        movq    .ABS_VAL(%rip), %rsi 
         and     (%rdx), %rsi
         sub     $8, %ecx
         jle     ETCH_LABEL(htail)

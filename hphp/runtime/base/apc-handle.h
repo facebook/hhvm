@@ -25,19 +25,9 @@
 
 #include "hphp/runtime/base/type-variant.h"
 
-#if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
-# if defined(__LITTLE_ENDIAN__)
-#  undef WORDS_BIGENDIAN
-# else
-#  if defined(__BIG_ENDIAN__)
-#   define WORDS_BIGENDIAN
-#  endif
-# endif
-#endif
-
 namespace HPHP {
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
 /*
  * An APCHandle is the externally visible handle for in-memory APC values.  The
@@ -232,7 +222,8 @@ private:
   mutable std::atomic<uint32_t> m_count{1};
 };
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 }
 
 #endif

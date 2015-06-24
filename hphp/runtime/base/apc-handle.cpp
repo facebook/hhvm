@@ -29,8 +29,8 @@ namespace HPHP {
 
 APCHandle::Pair APCHandle::Create(const Variant& source,
                                   bool serialized,
-                                  bool inner /* = false */,
-                                  bool unserializeObj /* = false */) {
+                                  bool inner,
+                                  bool unserializeObj) {
   auto type = source.getType(); // this gets rid of the ref, if it was one
   switch (type) {
     case KindOfUninit:

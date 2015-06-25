@@ -1619,13 +1619,7 @@ Array c_SimpleXMLElement::ToArray(const ObjectData* obj) {
   return properties;
 }
 
-/*
- * SimpleXMLElement is a Traversable, but not an Iterator or an
- * IteratorAggregate. So this magic function returns the iterator
- * implementation for this class. This function is recognized
- * by "ObjectData::iterableObject"
- */
-Variant c_SimpleXMLElement::t_getiteratorfortraversable() {
+Variant c_SimpleXMLElement::t_getiterator() {
   Object obj = create_object(c_SimpleXMLElementIterator::classof()->nameStr(),
                              Array(), false);
   auto iter = cast<c_SimpleXMLElementIterator>(obj);
@@ -1697,53 +1691,6 @@ Variant c_SimpleXMLElementIterator::t_rewind() {
 
 Variant c_SimpleXMLElementIterator::t_valid() {
   return !sxe->iter.data.isNull();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// SimpleXMLIterator
-
-Variant c_SimpleXMLIterator::t_current() {
-  return iter.data;
-}
-
-Variant c_SimpleXMLIterator::t_key() {
-  Object curobj = iter.data;
-  xmlNodePtr curnode = curobj.isNull()
-    ? nullptr
-    : cast<c_SimpleXMLElement>(curobj)->nodep();
-  if (curnode) {
-    return String((char*)curnode->name);
-  } else {
-    return init_null();
-  }
-}
-
-Variant c_SimpleXMLIterator::t_next() {
-  php_sxe_move_forward_iterator(this);
-  return init_null();
-}
-
-Variant c_SimpleXMLIterator::t_rewind() {
-  php_sxe_reset_iterator(this, true);
-  return init_null();
-}
-
-Variant c_SimpleXMLIterator::t_valid() {
-  return !iter.data.isNull();
-}
-
-bool c_SimpleXMLIterator::t_haschildren() {
-  if(iter.data.isNull()) {
-    return false;
-  }
-  return cast<c_SimpleXMLElement>(t_getchildren())->t_count() != 0;
-}
-
-Object c_SimpleXMLIterator::t_getchildren() {
-  if(iter.data.isNull()) {
-    return null_object;
-  }
-  return cast<c_SimpleXMLElement>(iter.data)->t_children();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

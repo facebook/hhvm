@@ -28,46 +28,6 @@ using std::vector;
 class TestTextUtil : public testing::Test {
 };
 
-TEST_F(TestTextUtil, EndsWith) {
-  EXPECT_FALSE(TextUtil::EndsWith("", 'a'));
-  EXPECT_FALSE(TextUtil::EndsWith("b", 'a'));
-  EXPECT_FALSE(TextUtil::EndsWith("b", 'a'));
-  EXPECT_TRUE(TextUtil::EndsWith("ab", 'b'));
-  EXPECT_FALSE(TextUtil::EndsWith("abc", 'b'));
-  EXPECT_FALSE(TextUtil::EndsWith("bbbbbbbbbbbba", 'b'));
-}
-
-TEST_F(TestTextUtil, StripTrailing) {
-  EXPECT_EQ(TextUtil::StripTrailing("abcd", 'd'), "abc");
-  EXPECT_EQ(TextUtil::StripTrailing("dddd", 'd'), "");
-}
-
-TEST_F(TestTextUtil, BeginsWith) {
-  EXPECT_TRUE(TextUtil::BeginsWith("12345", "123"));
-  EXPECT_TRUE(TextUtil::BeginsWith("12345", "12"));
-  EXPECT_TRUE(TextUtil::BeginsWith("12345", "1"));
-  EXPECT_TRUE(TextUtil::BeginsWith("12345", ""));
-
-  EXPECT_TRUE(TextUtil::BeginsWith("1", "1"));
-  EXPECT_TRUE(TextUtil::BeginsWith("12", "1"));
-  EXPECT_TRUE(TextUtil::BeginsWith("123", "1"));
-
-  EXPECT_FALSE(TextUtil::BeginsWith("0123", "1"));
-
-  EXPECT_TRUE(TextUtil::BeginsWith("", ""));
-
-  EXPECT_FALSE(TextUtil::BeginsWith("", "abcd"));
-}
-
-TEST_F(TestTextUtil, StripCommonStart) {
-  EXPECT_EQ(TextUtil::StripCommonStart("abcde", "abc"), "de");
-  EXPECT_EQ(TextUtil::StripCommonStart("abcde", "xyz"), "abcde");
-  EXPECT_EQ(TextUtil::StripCommonStart("abcde", ""), "abcde");
-  EXPECT_EQ(TextUtil::StripCommonStart("", "123"), "");
-  EXPECT_EQ(TextUtil::StripCommonStart("", ""), "");
-  EXPECT_EQ(TextUtil::StripCommonStart("123", ""), "123");
-}
-
 TEST_F(TestTextUtil, GetPathList) {
   vector<string> out;
 

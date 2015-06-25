@@ -242,6 +242,12 @@ Variant HHVM_FUNCTION(stream_socket_client,
                       int flags = 0,
                       const Variant& context = null_variant);
 
+bool HHVM_FUNCTION(stream_socket_enable_crypto,
+                   const Resource& socket,
+                   bool enable,
+                   int cryptotype,
+                   const Variant& sessionstream);
+
 Variant HHVM_FUNCTION(stream_socket_get_name,
                       const Resource& handle,
                       bool want_peer);

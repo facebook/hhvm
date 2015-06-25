@@ -619,8 +619,11 @@ struct AsmState : private boost::noncopyable {
     if (reg.stackDepth->baseValue) {
       ent.m_fpOff += *reg.stackDepth->baseValue;
     } else {
-      // base value still unknown, this will need to be updated later
-      fpiToUpdate.push_back(std::make_pair(&ent, reg.stackDepth));
+      // Base value still unknown, this will need to be updated later.
+
+      // Store the FPIEnt's index in the FuncEmitter's entry table.
+      assert(&fe->fpitab[fe->fpitab.size()-1] == &ent);
+      fpiToUpdate.emplace_back(fe->fpitab.size() - 1, reg.stackDepth);
     }
 
     fpiRegs.pop_back();
@@ -684,7 +687,7 @@ struct AsmState : private boost::noncopyable {
         error("created a FPI from an unreachable instruction");
       }
 
-      kv.first->m_fpOff += *kv.second->baseValue;
+      fe->fpitab[kv.first].m_fpOff += *kv.second->baseValue;
     }
 
     // Stack depth should be 0 at the end of a function body
@@ -748,7 +751,7 @@ struct AsmState : private boost::noncopyable {
   int stackHighWater;
   int fdescDepth;
   int fdescHighWater;
-  std::vector<std::pair<FPIEnt*, StackDepth*> > fpiToUpdate;
+  std::vector<std::pair<size_t, StackDepth*>> fpiToUpdate;
 };
 
 

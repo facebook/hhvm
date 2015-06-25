@@ -126,6 +126,7 @@ HttpStreamWrapper::open(const String& filename,
   auto file = makeSmartPtr<UrlFile>(method.data(), headers,
                                     post_data, max_redirs,
                                     timeout, ignore_errors);
+  file->setStreamContext(context);
   file->setProxy(proxy_host, proxy_port, proxy_user, proxy_pass);
   bool ret = file->open(filename, mode);
   if (!ret) {

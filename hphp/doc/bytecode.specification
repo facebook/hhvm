@@ -1546,16 +1546,16 @@ CGetL3 <local variable id>    [<F2>:<T2> <F1>:<T1>]  ->  [C <F2>:<T1> <F1>:<T1>]
   instruction gets the value of the local variable, pushes it onto the stack as
   a cell, then pushes $2 onto the stack, and then pushes $1 onto the stack.
 
+  If the local variable given by %1 is not defined, this instruction raises a
+  warning, pushes null onto the stack, then pushes $2 onto the stack, and then
+  pushes $1 onto the stack.
+
 CUGetL <local variable id>    []  ->  [C|U]
 
   Get local as cell or uninit. If the local variable given by %1 is defined,
   this instruction gets the value of the local variable and pushes it onto the
   stack as a cell. If the local variable is not defined, this instruction pushes
   uninit onto the stack.
-
-  If the local variable given by %1 is not defined, this instruction raises a
-  warning, pushes null onto the stack, then pushes $2 onto the stack, and then
-  pushes $1 onto the stack.
 
 PushL <local variable id>    []  ->  [C]
 

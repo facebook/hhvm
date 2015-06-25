@@ -40,8 +40,6 @@ public:
    * Functions this container has.
    */
   int getFunctionCount() const { return m_functions.size(); }
-  void countReturnTypes(std::map<std::string, int> &counts,
-                        const StringToFunctionScopePtrVecMap *redec);
 
   const StringToFunctionScopePtrMap &getFunctions() const {
     return m_functions;

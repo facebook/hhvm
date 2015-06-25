@@ -246,31 +246,16 @@ public:
   }
   int getOptionalParamCount() const { return getMaxParamCount() - m_minParam;}
 
-  /**
-   * What is the inferred type of this function's return.
-   * Note that for generators and async functions, this is different
-   * from what caller actually gets when calling the function.
-   */
-  void setReturnType(AnalysisResultConstPtr ar, TypePtr type);
-  TypePtr getReturnType() const {
-    return m_returnType;
-  }
-
   void setOptFunction(FunctionOptPtr fn) { m_optFunction = fn; }
   FunctionOptPtr getOptFunction() const { return m_optFunction; }
 
   /**
-   * Whether this is a virtual function that needs to go through invoke().
-   * "Overriding" is only being used by magic methods, enforcing parameter
-   * and return types.
+   * Whether this is a virtual function that needs dynamic dispatch
    */
   void setVirtual() { m_virtual = true;}
   bool isVirtual() const { return m_virtual;}
   void setHasOverride() { m_hasOverride = true; }
   bool hasOverride() const { return m_hasOverride; }
-  void setOverriding(TypePtr returnType, TypePtr param1 = TypePtr(),
-                     TypePtr param2 = TypePtr());
-  bool isOverriding() const { return m_overriding;}
 
   /**
    * Whether same function name was declared twice or more.
@@ -316,13 +301,6 @@ public:
 
   bool inPseudoMain() const override {
     return m_pseudoMain;
-  }
-
-  void setMagicMethod() {
-    m_magicMethod = true;
-  }
-  bool isMagicMethod() const {
-    return m_magicMethod;
   }
 
   void setClosureVars(ExpressionListPtr closureVars) {
@@ -401,7 +379,6 @@ private:
   std::vector<std::string> m_paramNames;
   TypePtrVec m_paramTypes;
   std::vector<bool> m_refs;
-  TypePtr m_returnType;
   ModifierExpressionPtr m_modifiers;
   UserAttributeMap m_userAttributes;
 
@@ -412,11 +389,9 @@ private:
   unsigned m_hasOverride : 1;
   unsigned m_dynamic : 1;
   unsigned m_dynamicInvoke : 1;
-  unsigned m_overriding : 1; // overriding a virtual function
   unsigned m_volatile : 1; // for function_exists
   unsigned m_persistent : 1;
   unsigned m_pseudoMain : 1;
-  unsigned m_magicMethod : 1;
   unsigned m_system : 1;
   unsigned m_containsThis : 1; // contains a usage of $this?
   unsigned m_containsBareThis : 2; // $this outside object-context,

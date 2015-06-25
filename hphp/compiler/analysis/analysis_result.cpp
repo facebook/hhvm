@@ -318,13 +318,6 @@ int AnalysisResult::getClassCount() const {
   return total;
 }
 
-void AnalysisResult::countReturnTypes(std::map<std::string, int> &counts) {
-  for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
-       iter != m_files.end(); ++iter) {
-    iter->second->countReturnTypes(counts);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 

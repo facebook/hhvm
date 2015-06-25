@@ -61,9 +61,9 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
       m_minParam(minParam), m_numDeclParams(numDeclParam),
       m_attribute(attribute), m_modifiers(modifiers), m_hasVoid(false),
       m_method(method), m_refReturn(reference), m_virtual(false),
-      m_hasOverride(false), m_overriding(false),
+      m_hasOverride(false),
       m_volatile(false), m_persistent(false), m_pseudoMain(inPseudoMain),
-      m_magicMethod(false), m_system(false),
+      m_system(false),
       m_containsThis(false), m_containsBareThis(0),
       m_generator(false),
       m_async(false),
@@ -122,9 +122,9 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_userAttributes(orig->m_userAttributes), m_hasVoid(orig->m_hasVoid),
       m_method(orig->m_method), m_refReturn(orig->m_refReturn),
       m_virtual(orig->m_virtual), m_hasOverride(orig->m_hasOverride),
-      m_overriding(orig->m_overriding), m_volatile(orig->m_volatile),
+      m_volatile(orig->m_volatile),
       m_persistent(orig->m_persistent),
-      m_pseudoMain(orig->m_pseudoMain), m_magicMethod(orig->m_magicMethod),
+      m_pseudoMain(orig->m_pseudoMain),
       m_system(!user),
       m_containsThis(orig->m_containsThis),
       m_containsBareThis(orig->m_containsBareThis),
@@ -145,11 +145,6 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
   m_dynamicInvoke = false;
   if (m_pseudoMain) {
     m_variables->forceVariants(ar, VariableTable::AnyVars);
-    setReturnType(ar, Type::Variant);
-  }
-
-  if (m_refReturn) {
-    m_returnType = Type::Variant;
   }
 
   if (!strcasecmp(m_name.c_str(), "__autoload")) {
@@ -218,9 +213,9 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_minParam(0), m_numDeclParams(0), m_attribute(0),
       m_modifiers(ModifierExpressionPtr()), m_hasVoid(false),
       m_method(method), m_refReturn(reference), m_virtual(false),
-      m_hasOverride(false), m_overriding(false),
+      m_hasOverride(false),
       m_volatile(false), m_persistent(false), m_pseudoMain(false),
-      m_magicMethod(false), m_system(true),
+      m_system(true),
       m_containsThis(false), m_containsBareThis(0),
       m_generator(false),
       m_async(false),
@@ -238,7 +233,6 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
 }
 
 void FunctionScope::setDynamicInvoke() {
-  m_returnType = Type::Variant;
   m_dynamicInvoke = true;
 }
 
@@ -319,8 +313,7 @@ bool FunctionScope::allowsVariableArguments() const {
 }
 
 bool FunctionScope::usesVariableArgumentFunc() const {
-  bool res = (m_attribute & FileScope::VariableArgument) && !m_overriding;
-  return res;
+  return m_attribute & FileScope::VariableArgument;
 }
 
 bool FunctionScope::allowOverride() const {
@@ -328,8 +321,7 @@ bool FunctionScope::allowOverride() const {
 }
 
 bool FunctionScope::isReferenceVariableArgument() const {
-  bool res = (m_attribute & FileScope::ReferenceVariableArgument) &&
-             !m_overriding;
+  bool res = m_attribute & FileScope::ReferenceVariableArgument;
   // If this method returns true, then usesVariableArgumentFunc() must also
   // return true.
   assert(!res || usesVariableArgumentFunc());
@@ -588,44 +580,6 @@ void FunctionScope::addModifier(int mod) {
   m_modifiers->add(mod);
 }
 
-void FunctionScope::setReturnType(AnalysisResultConstPtr ar, TypePtr type) {
-  if (inTypeInference()) {
-    getInferTypesMutex().assertOwnedBySelf();
-  }
-  // no change can be made to virtual function's prototype
-  if (m_overriding || m_dynamicInvoke) return;
-
-  if (!type) {
-    m_hasVoid = true;
-    if (!m_returnType) return;
-  }
-
-  if (m_hasVoid) {
-    type = Type::Variant;
-  } else if (m_returnType) {
-    type = Type::Coerce(ar, m_returnType, type);
-  }
-  m_returnType = type;
-  assert(m_returnType);
-}
-
-void FunctionScope::setOverriding(TypePtr returnType,
-                                  TypePtr param1 /* = TypePtr() */,
-                                  TypePtr param2 /* = TypePtr() */) {
-  m_returnType = returnType;
-  m_overriding = true;
-
-  if (param1 && m_paramTypes.size() >= 1) m_paramTypes[0] = param1;
-  if (param2 && m_paramTypes.size() >= 2) m_paramTypes[1] = param2;
-
-  // TODO: remove this block and replace with stronger typing
-  // Right now, we have to avoid a situation where a parameter is assigned
-  // with different values, making them a Variant.
-  for (unsigned int i = 0; i < m_paramTypes.size(); i++) {
-    m_paramTypes[i] = Type::Variant;
-  }
-}
-
 std::vector<std::string> FunctionScope::getUserAttributeStringParams(
     const std::string& key) {
 
@@ -692,13 +646,6 @@ void FunctionScope::serialize(JSON::CodeError::OutputStream &out) const {
   if (isAbstract()) mod = ClassScope::Abstract;
   else if (isFinal()) mod = ClassScope::Final;
 
-  if (!m_returnType) {
-    ms.add("retTp", -1);
-  } else if (m_returnType->isSpecificObject()) {
-    ms.add("retTp", m_returnType->getName());
-  } else {
-    ms.add("retTp", m_returnType->getKindOf());
-  }
   ms.add("minArgs", m_minParam)
     .add("maxArgs", m_numDeclParams)
     .add("varArgs", allowsVariableArguments())
@@ -726,7 +673,6 @@ void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
   ms.add("modifiers", mods);
 
   ms.add("refreturn", isRefReturn());
-  ms.add("return",    getReturnType());
 
   vector<SymParamWrapper> paramSymbols;
   auto const limit = getDeclParamCount();

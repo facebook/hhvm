@@ -134,14 +134,6 @@ void ParameterExpression::fixupSelfAndParentTypehints(ClassScopePtr cls) {
 
 void ParameterExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_defaultValue) m_defaultValue->analyzeProgram(ar);
-
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    // Have to use non const ref params for magic methods
-    FunctionScopePtr fs = getFunctionScope();
-    if (fs->isMagicMethod() || fs->getName() == "offsetget") {
-      fs->getVariables()->addLvalParam(m_name);
-    }
-  }
 }
 
 ConstructPtr ParameterExpression::getNthKid(int n) const {

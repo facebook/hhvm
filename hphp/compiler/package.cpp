@@ -349,13 +349,6 @@ void Package::saveStatsToFile(const char *filename, int totalSeconds) const {
       ms.add("AvgLinePerFunc", getLineCount()/m_ar->getFunctionCount());
     }
 
-    std::map<std::string, int> counts;
-    SymbolTable::CountTypes(counts);
-    m_ar->countReturnTypes(counts);
-
-    ms.add("SymbolTypes");
-    o << counts;
-
     ms.add("VariableTableFunctions");
     JSON::CodeError::ListStream ls(o);
     for (const std::string &f: m_ar->m_variableTableFunctions) {

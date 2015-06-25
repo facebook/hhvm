@@ -147,7 +147,6 @@ public:
 
   int getFunctionCount() const;
   int getClassCount() const;
-  void countReturnTypes(std::map<std::string, int> &counts);
 
   void addEntryPoint(const std::string &name);
   void addEntryPoints(const std::vector<std::string> &names);

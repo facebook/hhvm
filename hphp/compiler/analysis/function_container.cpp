@@ -33,32 +33,6 @@ FunctionContainer::FunctionContainer() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// parser functions
-
-void FunctionContainer::countReturnTypes(
-  std::map<std::string, int> &counts,
-  const StringToFunctionScopePtrVecMap *redec) {
-  for (StringToFunctionScopePtrMap::const_iterator iter =
-         m_functions.begin(); iter != m_functions.end(); ++iter) {
-    FunctionScopePtr f = iter->second;
-    if (f->isLocalRedeclaring()) {
-      always_assert(redec);
-      for (FunctionScopePtr f: redec->find(iter->first)->second) {
-        TypePtr type = f->getReturnType();
-        if (type) {
-          type->count(counts);
-        }
-      }
-    } else {
-      TypePtr type = f->getReturnType();
-      if (type) {
-        type->count(counts);
-      }
-    }
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void FunctionContainer::getFunctionsFlattened(

@@ -231,15 +231,9 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
 
   if (funcScope->isNative()) {
     if ((m_name == "__construct") || (m_name == "__destruct")) {
-      funcScope->setReturnType(ar, Type::Null);
       assert(!m_retTypeAnnotation ||
              !m_retTypeAnnotation->dataType().hasValue() ||
              (m_retTypeAnnotation->dataType() == KindOfNull));
-    } else if (m_retTypeAnnotation) {
-      funcScope->setReturnType(
-        ar, Type::FromDataType(m_retTypeAnnotation->dataType(), Type::Variant));
-    } else {
-      funcScope->setReturnType(ar, Type::Variant);
     }
   }
 
@@ -536,64 +530,6 @@ void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     if (Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
       funcScope->setDynamic();
-    }
-    // TODO: this may have to expand to a concept of "virtual" functions...
-    if (m_method) {
-      if (m_name.length() > 2 && m_name.substr(0,2) == "__") {
-        bool magic = true;
-        int paramCount = 0;
-        if (m_name == "__destruct") {
-          funcScope->setOverriding(Type::Variant);
-        } else if (m_name == "__call") {
-          funcScope->setOverriding(Type::Variant, Type::String, Type::Array);
-          paramCount = 2;
-        } else if (m_name == "__set") {
-          funcScope->setOverriding(Type::Variant, Type::String, Type::Variant);
-          paramCount = 2;
-        } else if (m_name == "__get") {
-          funcScope->setOverriding(Type::Variant, Type::String);
-          paramCount = 1;
-        } else if (m_name == "__isset") {
-          funcScope->setOverriding(Type::Boolean, Type::String);
-          paramCount = 1;
-        } else if (m_name == "__unset") {
-          funcScope->setOverriding(Type::Variant, Type::String);
-          paramCount = 1;
-        } else if (m_name == "__sleep") {
-          funcScope->setOverriding(Type::Variant);
-        } else if (m_name == "__wakeup") {
-          funcScope->setOverriding(Type::Variant);
-        } else if (m_name == "__set_state") {
-          funcScope->setOverriding(Type::Variant, Type::Variant);
-          paramCount = 1;
-        } else if (m_name == "__tostring") {
-          // do nothing
-        } else if (m_name == "__clone") {
-          funcScope->setOverriding(Type::Variant);
-        } else {
-          paramCount = -1;
-          if (m_name != "__construct") {
-            magic = false;
-          }
-        }
-        if (paramCount >= 0 && paramCount != funcScope->getMaxParamCount()) {
-          Compiler::Error(Compiler::InvalidMagicMethod, shared_from_this());
-          magic = false;
-        }
-        if (magic) funcScope->setMagicMethod();
-      }
-      // ArrayAccess methods
-      else if (m_name.length() > 6 && m_name.substr(0, 6) == "offset") {
-        if (m_name == "offsetexists") {
-          funcScope->setOverriding(Type::Boolean, Type::Variant);
-        } else if (m_name == "offsetget") {
-          funcScope->setOverriding(Type::Variant, Type::Variant);
-        } else if (m_name == "offsetset") {
-          funcScope->setOverriding(Type::Variant, Type::Variant, Type::Variant);
-        } else if (m_name == "offsetunset") {
-          funcScope->setOverriding(Type::Variant, Type::Variant);
-        }
-      }
     }
   }
 }

@@ -129,11 +129,6 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
     f->setParamType(ar, idx, Type::FromDataType(pinfo->argType, Type::Any));
   }
 
-  if (method->returnType != KindOfNull) {
-    f->setReturnType(ar, Type::FromDataType(method->returnType,
-                                            Type::Variant));
-  }
-
   f->setClassInfoAttribute(attrs);
   f->setDocComment(method->docComment);
 

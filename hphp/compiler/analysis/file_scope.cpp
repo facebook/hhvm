@@ -192,16 +192,6 @@ int FileScope::getFunctionCount() const {
   return total;
 }
 
-void FileScope::countReturnTypes(std::map<std::string, int> &counts) {
-  FunctionContainer::countReturnTypes(counts, m_redeclaredFunctions);
-  for (StringToClassScopePtrVecMap::const_iterator iter = m_classes.begin();
-       iter != m_classes.end(); ++iter) {
-    for (ClassScopePtr cls: iter->second) {
-      cls->countReturnTypes(counts, 0);
-    }
-  }
-}
-
 void FileScope::pushAttribute() {
   m_attributes.push_back(0);
 }

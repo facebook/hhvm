@@ -88,7 +88,6 @@ public:
   void getScopesSet(BlockScopeRawPtrQueue &v);
 
   int getFunctionCount() const;
-  void countReturnTypes(std::map<std::string, int> &counts);
   int getClassCount() const { return m_classes.size();}
 
   void pushAttribute();

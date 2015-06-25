@@ -25,13 +25,6 @@
 
 namespace HPHP {
 
-class TextUtil {
- public:
-  // Split "/foo/bar/x" into "/foo", "/foo/bar".
-  // Also splits "foo/bar/x" into "foo", "foo/bar".
-  static std::vector<std::string> MakePathList(const std::string& path);
-};
-
 /**
  * Split a string into a list of tokens by character delimiter.
  */

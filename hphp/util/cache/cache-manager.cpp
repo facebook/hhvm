@@ -279,17 +279,19 @@ void CacheManager::getEntryNames(std::set<std::string>* names) const {
 // --- Private functions.
 
 void CacheManager::addDirectories(const std::string& path) {
-  std::vector<std::string> path_list;
-  path_list = TextUtil::MakePathList(path);
 
-  if (path_list.empty()) {
+  if (path.empty()) {
     return;
   }
 
-  for (const auto& it : path_list) {
-    std::unique_ptr<CacheData> cd(new CacheData);
-    cd->createDirectory(it, entry_counter_++);
-    cache_map_[it] = std::move(cd);
+  size_t start = 0;
+  for (size_t i = 1; i < path.length(); ++i) {
+    if (path[i] == '/') {
+      auto pathdir = path.substr(start, i);
+      std::unique_ptr<CacheData> cd(new CacheData);
+      cd->createDirectory(pathdir, entry_counter_++);
+      cache_map_[pathdir] = std::move(cd);
+    }
   }
 }
 

@@ -27,25 +27,6 @@ namespace HPHP {
 using std::string;
 using std::vector;
 
-// --- Static functions.
-
-vector<string> TextUtil::MakePathList(const string& path) {
-  vector<string> temp;
-
-  if (path.empty()) {
-    return temp;
-  }
-
-  size_t start = 0;
-  for (size_t i = 1; i < path.length(); ++i) {
-    if (path[i] == '/') {
-      temp.push_back(path.substr(start, i));
-    }
-  }
-
-  return temp;
-}
-
 void split(char delimiter, const char *s, vector<string> &out,
            bool ignoreEmpty /* = false */) {
   assert(s);

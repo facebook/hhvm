@@ -240,6 +240,12 @@ class SplDoublyLinkedList
       if ($this->current->next !== null) {
         $this->current->next->prev = $this->current->prev;
       }
+      if ($this->current === $this->tail) {
+        $this->tail = $this->current->prev;
+      }
+      if ($this->current === $this->head) {
+        $this->head = $this->current->next;
+      }
     }
 
     if ($this->mode & self::IT_MODE_LIFO) {

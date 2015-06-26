@@ -21,7 +21,8 @@
 #include "hphp/runtime/base/apc-typed-value.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////
 
 /*
  * APCString holds the data to create a PHP string from APC.
@@ -29,8 +30,11 @@ namespace HPHP {
  * via APCTypedValue.
  */
 struct APCString {
-  // Entry point to create an APCString
   static APCHandle::Pair MakeSharedString(DataType type, StringData* s);
+  static void Delete(APCString* s) {
+    s->~APCString();
+    std::free(s);
+  }
 
   // Return the PHP string from the APC one
   static Variant MakeString(const APCHandle* handle) {
@@ -74,23 +78,10 @@ struct APCString {
   }
 
 private:
-  APCString(const APCString&) = delete;
-  APCString& operator=(const APCString&) = delete;
-
   explicit APCString(DataType type) : m_handle(type) {}
   ~APCString() {}
-
-  void *operator new(size_t sz, int size) {
-    assert(sz == sizeof(APCString));
-    return malloc(sizeof(APCString) + size);
-  }
-  void operator delete(void* ptr) { free(ptr); }
-  // just to keep the compiler happy; used if the constructor throws
-  void operator delete(void* ptr, int size) { free(ptr); }
-
-  friend struct APCHandle;
-  friend struct APCArray;
-  friend struct APCObject;
+  APCString(const APCString&) = delete;
+  APCString& operator=(const APCString&) = delete;
 
 private:
   APCHandle m_handle;
@@ -100,7 +91,8 @@ private:
   };
 };
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 }
 
-#endif /* incl_HPHP_APC_TYPED_VALUE_H_ */
+#endif

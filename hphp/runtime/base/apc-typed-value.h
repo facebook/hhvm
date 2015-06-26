@@ -20,17 +20,13 @@
 #include "hphp/runtime/base/apc-handle.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-/*
- * APCTypedValue is the APC object that holds non refcounted data. That is,
- * primitive values and static strings.
- * APCTypedValue has the same layout as TypedValue so it can be returned in
- * some cases and be used directly without any other allocation (see
- * APCLocalArray::getValueRef()). See comment below for more details.
- */
-class APCTypedValue {
-public:
+//////////////////////////////////////////////////////////////////////
+
+struct APCTypedValue {
+  /*
+   * TODO(#7411437): This function should not be here.
+   */
   static APCHandle* MakeSharedArray(ArrayData* array);
 
   APCTypedValue(DataType type, int64_t data) : m_handle(type) {
@@ -97,65 +93,24 @@ public:
     return m_data.arr;
   }
 
-  const Variant& asCVarRef() const {
-    // Must be non-refcounted types
-    assert(m_handle.m_flags == 0);
-    assert(!isRefcountedType(m_handle.m_type));
-    return tvAsCVarRef(reinterpret_cast<const TypedValue*>(this));
-  }
-
   void deleteUncounted();
 
 private:
-  friend struct APCHandle;
-
   APCTypedValue(const APCTypedValue&) = delete;
   APCTypedValue& operator=(const APCTypedValue&) = delete;
 
 private:
-
-  /*
-   * Keep the object layout binary compatible with Variant for primitive types.
-   * For non-refcounted types m_flags is guaranteed to be 0, and other parts of
-   * runtime will not touch the count.
-   *
-   * Note that this is assuming a little-endian system: m_unused_space and
-   * m_flags have to overlay the higher-order bits of TypedValue::m_type.
-   */
-
-  union SharedData {
+  union {
     int64_t num;
     double dbl;
     StringData* str;
     ArrayData* arr;
-  };
-
-  SharedData m_data;
+  } m_data;
   APCHandle m_handle;
-
-  static void compileTimeAssertions() {
-    static_assert(
-      offsetof(APCTypedValue, m_handle) == sizeof(SharedData),
-      "m_handle must come after SharedData"
-    );
-    static_assert(
-        offsetof(APCTypedValue, m_data) == offsetof(TypedValue, m_data),
-        "Offset of m_data must be equal in APCHandle and TypedValue");
-    static_assert(
-        offsetof(APCTypedValue, m_handle) + offsetof(APCHandle, m_count) ==
-            TypedValueAux::auxOffset,
-        "Offset of m_count must equal offset of TV.m_aux");
-    static_assert(
-        offsetof(APCTypedValue, m_handle) + offsetof(APCHandle, m_type) ==
-            offsetof(TypedValue, m_type),
-        "Offset of m_type must be equal in APCHandle and TypedValue");
-    static_assert(
-        sizeof(APCTypedValue) == sizeof(TypedValue),
-        "Be careful with field layout");
-  }
 };
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 }
 
-#endif /* incl_HPHP_APC_TYPED_VALUE_H_ */
+#endif

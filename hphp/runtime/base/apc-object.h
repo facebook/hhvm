@@ -25,6 +25,8 @@
 
 namespace HPHP {
 
+//////////////////////////////////////////////////////////////////////
+
 struct ObjectData;
 
 //////////////////////////////////////////////////////////////////////
@@ -52,6 +54,8 @@ struct APCObject {
 
   /*
    * Make a serialized version of an object.
+   *
+   * TODO(#7411437): this function should not be in this class.
    */
   static APCHandle::Pair MakeSerializedObj(String data) {
     auto const pair = APCString::MakeSharedString(KindOfObject, data.get());
@@ -59,7 +63,6 @@ struct APCObject {
     return pair;
   }
 
-  // Delete the APC object holding the object data
   static void Delete(APCHandle* handle);
 
   static APCObject* fromHandle(APCHandle* handle) {
@@ -75,9 +78,6 @@ struct APCObject {
   APCHandle* getHandle() { return &m_handle; }
 
 private:
-  friend struct APCHandle;
-  friend size_t getMemSize(const APCObject*);
-
   struct Prop {
     StringData* name;
     APCHandle* val;
@@ -91,6 +91,7 @@ private:
   APCObject& operator=(const APCObject&) = delete;
 
 private:
+  friend size_t getMemSize(const APCObject*);
   Object createObject() const;
 
   Prop* props() { return reinterpret_cast<Prop*>(this + 1); }

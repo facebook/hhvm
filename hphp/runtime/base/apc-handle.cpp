@@ -147,7 +147,7 @@ void APCHandle::deleteShared() {
       return;
 
     case KindOfString:
-      delete APCString::fromHandle(this);
+      APCString::Delete(APCString::fromHandle(this));
       return;
 
     case KindOfArray:

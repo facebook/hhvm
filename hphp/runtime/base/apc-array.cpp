@@ -126,8 +126,13 @@ Variant APCArray::MakeArray(const APCHandle* handle) {
 }
 
 void APCArray::Delete(APCHandle* handle) {
-  handle->isSerializedArray() ? delete APCString::fromHandle(handle)
-                              : delete APCArray::fromHandle(handle);
+  if (handle->isSerializedArray()) {
+    APCString::Delete(APCString::fromHandle(handle));
+    return;
+  }
+  auto const arr = APCArray::fromHandle(handle);
+  arr->~APCArray();
+  std::free(arr);
 }
 
 APCArray::~APCArray() {

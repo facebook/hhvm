@@ -20,11 +20,12 @@ namespace HPHP {
 
 APCHandle::Pair
 APCString::MakeSharedString(DataType type, StringData* data) {
-  auto const len = static_cast<uint32_t>(data->size());
-  auto const cc = CapCode::ceil(len);
-  auto const cap = cc.decode();
-  auto apcStr = new (cap + 1) APCString(type);
-  auto size = cap + 1 + sizeof(APCString);
+  auto const len    = static_cast<uint32_t>(data->size());
+  auto const cc     = CapCode::ceil(len);
+  auto const cap    = cc.decode();
+  auto const size   = cap + 1 + sizeof(APCString);
+  auto const mem    = std::malloc(size);
+  auto apcStr       = new (mem) APCString(type);
 
   apcStr->m_str.m_data        = reinterpret_cast<char*>(apcStr + 1);
   apcStr->m_str.m_hdr.init(cc, HeaderKind::String, 0);

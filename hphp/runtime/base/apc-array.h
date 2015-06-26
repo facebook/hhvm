@@ -23,24 +23,18 @@
 #include "hphp/util/hash.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-class APCLocalArray;
+//////////////////////////////////////////////////////////////////////
 
-/**
- * APCArray is a php-style array that can take strings and
- * ints as keys. We also store the order in which the elements
- * are inserted. Once an element is added, it can not be
- * removed.
- */
+struct APCLocalArray;
+
+//////////////////////////////////////////////////////////////////////
+
 struct APCArray {
-  // Entry point to create an APCArray of any kind
   static APCHandle::Pair MakeSharedArray(ArrayData* data, bool inner,
                                          bool unserializeObj);
   static APCHandle::Pair MakeSharedEmptyArray();
-
   static Variant MakeArray(const APCHandle* handle);
-
   static void Delete(APCHandle* handle);
 
   static APCArray* fromHandle(APCHandle* handle) {
@@ -104,6 +98,15 @@ struct APCArray {
   bool isPacked() const { return m_handle.isPacked(); }
 
 private:
+  struct Bucket {
+    /** index of the next bucket, or -1 if the end of a chain */
+    int next;
+    /** the value of this bucket */
+    APCHandle *key;
+    APCHandle *val;
+  };
+
+private:
   explicit APCArray(size_t size) : m_handle(KindOfArray), m_size(size) {
     m_handle.setPacked();
   }
@@ -116,27 +119,15 @@ private:
   APCArray(const APCArray&) = delete;
   APCArray& operator=(const APCArray&) = delete;
 
-  void operator delete(void* ptr) { free(ptr); }
-
-  struct Bucket {
-    /** index of the next bucket, or -1 if the end of a chain */
-    int next;
-    /** the value of this bucket */
-    APCHandle *key;
-    APCHandle *val;
-  };
-
-  //
-  // Create API
-  //
+private:
   static APCHandle::Pair MakeHash(ArrayData* data, bool unserializeObj);
   static APCHandle::Pair MakePacked(ArrayData* data, bool unserializeObj);
 
+private:
+  friend size_t getMemSize(const APCArray*);
+
   void setPacked() { m_handle.setPacked(); }
 
-  //
-  // Array internal API
-  //
   void add(APCHandle* key, APCHandle* val);
   ssize_t indexOf(const StringData* key) const;
   ssize_t indexOf(int64_t key) const;
@@ -149,9 +140,6 @@ private:
   APCHandle** vals() const { return (APCHandle**)(this + 1); }
 
 private:
-  friend struct APCHandle;
-  friend size_t getMemSize(const APCArray*);
-
   APCHandle m_handle;
   union {
     // for map style arrays
@@ -164,7 +152,8 @@ private:
   };
 };
 
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
 }
 
-#endif /* incl_HPHP_APC_ARRAY_H_ */
+#endif

@@ -118,7 +118,7 @@ APCObject::~APCObject() {
 
 void APCObject::Delete(APCHandle* handle) {
   if (handle->isSerializedObj()) {
-    delete APCString::fromHandle(handle);
+    APCString::Delete(APCString::fromHandle(handle));
     return;
   }
 

@@ -80,6 +80,10 @@ struct APCHandle {
     size_t size;
   };
 
+  explicit APCHandle(DataType type) : m_type(type) {}
+  APCHandle(const APCHandle&) = delete;
+  APCHandle& operator=(APCHandle const&) = delete;
+
   /*
    * Create an instance of an APC object according to the type of source and
    * the various flags. This is the only entry point to create APC entities.
@@ -189,16 +193,6 @@ private:
   constexpr static uint8_t FPacked          = 1 << 2;
   constexpr static uint8_t FUncounted       = 1 << 3;
   constexpr static uint8_t FAPCCollection   = 1 << 4;
-
-private:
-  friend struct APCTypedValue;
-  friend struct APCString;
-  friend struct APCArray;
-  friend struct APCObject;
-  friend struct APCCollection;
-  explicit APCHandle(DataType type) : m_type(type) {}
-  APCHandle(const APCHandle&) = delete;
-  APCHandle& operator=(APCHandle const&) = delete;
 
 private:
   void realIncRef() const {

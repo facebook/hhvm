@@ -108,20 +108,20 @@ ETCH_NAME(memcpy):
               CFI(startproc)
 
               mov   %rdx, %rcx
-              cmp   $8, %edx
               mov   %rdi, %rax
+              cmp   $8, %edx
               jb    ETCH_LABEL(SHORT)
 
               mov   -8(%rsi, %rdx), %r8
 ETCH_LABEL(L8):
               mov   (%rsi), %r9
-              and   $24, %ecx
               //    This stores garbage if coming from _memcpy8, but it won't
               //    cause corretness problem. The address is writable, and the
               //    data there will be overwritten later. I don't want to move
               //    this store before L8 because that will slow down the
               //    loading of (%rsi).
               mov   %r8, -8(%rdi, %rdx)
+              and   $24, %ecx
               jz    ETCH_LABEL(L32)
 
               mov   %r9, (%rdi)

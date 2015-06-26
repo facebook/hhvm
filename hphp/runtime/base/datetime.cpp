@@ -284,6 +284,8 @@ void DateTime::fromTimeStamp(int64_t timestamp, bool utc /* = false */) {
 
   timelib_time *t = timelib_time_ctor();
   if (utc) {
+    t->zone_type = TIMELIB_ZONETYPE_OFFSET;
+    t->z = 0;
     timelib_unixtime2gmt(t, (timelib_sll)m_timestamp);
   } else {
     if (!m_tz.get()) {

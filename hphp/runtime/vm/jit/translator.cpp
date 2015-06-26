@@ -1315,8 +1315,15 @@ Type typeToCheckForInput(
       break;
     }
 
-    case OpCGetL: {
+    case OpCGetL:
+    case OpVGetL:
+    case OpFPassL: {
       tc = DataTypeCountnessInit;
+      break;
+    }
+
+    case OpCUGetL: {
+      tc = DataTypeCountness;
       break;
     }
 
@@ -1371,6 +1378,29 @@ Type typeToCheckForInput(
       break;
     }
 
+    case OpIterInit:
+    case OpIterInitK:
+    case OpMIterInit:
+    case OpMIterInitK:
+    case OpWIterInit:
+    case OpWIterInitK: {
+      // We care about the type of the stack input but not the locals.
+      tc = opndIdx == 0 ? DataTypeSpecific : DataTypeGeneric;
+      break;
+    }
+
+    case OpIterNext:
+    case OpIterNextK:
+    case OpMIterNext:
+    case OpMIterNextK:
+    case OpWIterNext:
+    case OpWIterNextK: {
+      // Don't care about local input types; all we do is pass their address to
+      // helpers.
+      tc = DataTypeGeneric;
+      break;
+    }
+
     default: {
       break;
     }
@@ -1389,6 +1419,8 @@ void emitInputChecks(
   bool checkOuterTypeOnly
 ) {
   FTRACE(4, "\n{}: {}\n", ni.offset(), opcodeToName(ni.op()));
+  if (isAlwaysNop(ni.op())) return;
+
   for (auto i = 0; i < ni.inputs.size(); ++i) {
     FTRACE(4, "Input {}: ", i);
     auto loc = ni.inputs[i];

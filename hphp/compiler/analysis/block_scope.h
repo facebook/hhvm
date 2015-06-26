@@ -158,23 +158,11 @@ public:
     MarkProcessed
   };
 
-  class ScopeCompare {
-  public:
-    bool operator()(const BlockScopeRawPtr &p1,
-                    const BlockScopeRawPtr &p2) const {
-      return cmp(p1,p2) < 0;
-    }
-    int cmp(const BlockScopeRawPtr &p1, const BlockScopeRawPtr &p2) const;
-  };
-  typedef std::set<BlockScopeRawPtr, ScopeCompare> BlockScopeSet;
-  friend class ScopeCompare;
-
   BlockScope(const std::string &name, const std::string &docComment,
              StatementPtr stmt, KindOf kind);
   virtual ~BlockScope() {}
   bool is(KindOf kind) const { return kind == m_kind;}
-  const std::string &getName() const { return m_name;}
-  void setName(const std::string name) { m_name = name;}
+  const std::string &getScopeName() const { return m_scopeName;}
   virtual bool isBuiltin() const { return false; }
   StatementPtr getStmt() const { return m_stmt;}
   VariableTableConstPtr getVariables() const { return m_variables;}
@@ -285,8 +273,7 @@ public:
   int selfUser() const { return m_selfUser; }
 
 protected:
-  std::string m_originalName;
-  std::string m_name;
+  std::string m_scopeName;
   int m_attributeClassInfo;
   std::string m_docComment;
   StatementPtr m_stmt;

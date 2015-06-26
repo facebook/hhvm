@@ -32,25 +32,21 @@ public:
   bool isParent() const { return m_parent; }
   bool isStatic() const { return m_static; }
   bool isRedeclared() const { return m_redeclared; }
-  bool isPresent() const { return m_present || m_forcePresent; }
-  bool forcedPresent() const { return m_forcePresent; }
+  bool isPresent() const { return m_present; }
   bool isUnknown() const { return m_unknown; }
-
-  void setPresent() { m_present = m_forcePresent = true; }
 
   void setRedeclared() { m_redeclared = true; }
 
   const std::string &getOriginalClassName() const { return m_origClassName; }
-  const std::string &getClassName() const { return m_className; }
 
   ExpressionPtr getClass() const { return m_class; }
 
   ClassScopePtr resolveClass();
-
+  bool isNamed(const std::string& clsName) const;
+  bool hasStaticClass() const { return !m_origClassName.empty(); }
 protected:
   ExpressionPtr m_class;
   std::string m_origClassName;
-  std::string m_className;
 
   void updateClassName();
   void outputCodeModel(CodeGenerator &cg);
@@ -61,7 +57,6 @@ private:
   unsigned m_static : 1;
   unsigned m_redeclared : 1;
   unsigned m_present : 1;
-  unsigned m_forcePresent : 1;
   unsigned m_unknown : 1;
 };
 

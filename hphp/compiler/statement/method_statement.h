@@ -44,7 +44,10 @@ public:
                   const std::string &name, ExpressionListPtr params,
                   TypeAnnotationPtr retTypeAnnotation, StatementListPtr stmt,
                   int attr, const std::string &docComment,
-                  ExpressionListPtr attrList, bool method = true);
+                  ExpressionListPtr attrList, bool method = true) :
+      MethodStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(MethodStatement),
+                      modifiers, ref, name, params, retTypeAnnotation, stmt,
+                      attr, docComment, attrList, method) {}
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   bool hasDecl() const override { return true; }
@@ -56,11 +59,11 @@ public:
 
   void fixupSelfAndParentTypehints(ClassScopePtr scope);
 
+  bool isNamed(const char* name) const;
+  bool isNamed(const std::string& name) const { return isNamed(name.c_str()); }
   const std::string &getOriginalName() const { return m_originalName;}
-  std::string getName() const override { return m_name;}
-  void setName(const std::string name) { m_name = name; }
+  std::string getName() const override { return m_originalName; }
   void setOriginalName(const std::string name) { m_originalName = name; }
-  std::string getFullName() const;
   std::string getOriginalFullName() const;
   std::string getOriginalFilename() const { return m_originalFilename; }
   ExpressionListPtr getParams() { return m_params;}
@@ -106,11 +109,6 @@ public:
     return m_containingClosure;
   }
 
-  void setClassName(const std::string &name) { m_className = name; }
-  void setOriginalClassName(const std::string &name) {
-    m_originalClassName = name;
-  }
-
   // for flattened traits
   void setOriginalFilename(const std::string &name) {
     assert(m_method);
@@ -135,10 +133,7 @@ protected:
   int m_cppLength;
   int m_autoPropCount;
   ModifierExpressionPtr m_modifiers;
-  std::string m_name;
   std::string m_originalName;
-  std::string m_className;
-  std::string m_originalClassName;
   std::string m_originalFilename;
   ExpressionListPtr m_params;
   TypeAnnotationPtr m_retTypeAnnotation;

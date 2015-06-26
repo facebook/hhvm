@@ -59,9 +59,9 @@ void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
       ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     FunctionScopePtr func;
-    if (!m_name.empty()) {
+    if (!m_origName.empty()) {
       if (ClassScopePtr cls = resolveClass()) {
-        m_name = m_className;
+        m_origName = m_origClassName;
         func = cls->findConstructor(ar, true);
         if (func) func->addNewObjCaller(getScope());
       }

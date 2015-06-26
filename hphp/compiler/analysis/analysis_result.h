@@ -192,8 +192,9 @@ public:
   void parseOnDemandByConstant(const std::string &name) const {
     parseOnDemandBy(name, Option::AutoloadConstMap);
   }
+  template <class Map>
   void parseOnDemandBy(const std::string &name,
-                       const std::map<std::string,std::string>& amap) const;
+                       const Map& amap) const;
   FileScopePtr findFileScope(const std::string &name) const;
   const StringToFileScopePtrMap &getAllFiles() { return m_files;}
   const std::vector<FileScopePtr> &getAllFilesVector() {

@@ -51,14 +51,14 @@ ExpressionPtr DynamicFunctionCall::clone() {
 void DynamicFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   FunctionCall::analyzeProgram(ar);
   if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
-    if (!m_className.empty()) {
+    if (hasStaticClass()) {
       resolveClass();
     }
     if (m_params) {
       m_params->markParams();
     }
 
-    if (!m_class && m_className.empty()) {
+    if (!m_class && !hasStaticClass()) {
       FunctionScopePtr fs = getFunctionScope();
       VariableTablePtr vt = fs->getVariables();
       vt->setAttribute(VariableTable::ContainsDynamicFunctionCall);
@@ -74,7 +74,7 @@ ExpressionPtr DynamicFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void DynamicFunctionCall::outputCodeModel(CodeGenerator &cg) {
-  if (m_class || !m_className.empty()) {
+  if (m_class || hasStaticClass()) {
     cg.printObjectHeader("ClassMethodCallExpression", 4);
     StaticClassName::outputCodeModel(cg);
     cg.printPropertyHeader("methodExpression");
@@ -93,7 +93,7 @@ void DynamicFunctionCall::outputCodeModel(CodeGenerator &cg) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 void DynamicFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (m_class || !m_className.empty()) {
+  if (m_class || hasStaticClass()) {
     StaticClassName::outputPHP(cg, ar);
     cg_printf("::");
     m_nameExp->outputPHP(cg, ar);

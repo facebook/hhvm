@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/base/bstring.h"
+#include "hphp/util/bstring.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/actrec-args.h"

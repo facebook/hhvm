@@ -197,7 +197,7 @@ void Construct::dumpNode(int spc) {
     name = Expression::nameOfKind(etype);
     switch (etype) {
       case Expression::KindOfSimpleFunctionCall:
-        value = static_cast<SimpleFunctionCall*>(e)->getName();
+        value = static_cast<SimpleFunctionCall*>(e)->getOriginalName();
         break;
       case Expression::KindOfSimpleVariable:
         value = static_cast<SimpleVariable*>(e)->getName();

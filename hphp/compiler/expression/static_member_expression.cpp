@@ -163,7 +163,7 @@ ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultConstPtr ar) {
 
 unsigned StaticMemberExpression::getCanonHash() const {
   int64_t val = Expression::getCanonHash() +
-    hash_string_i_unsafe(m_className.c_str(), m_className.size());
+    hash_string_i_unsafe(m_origClassName.c_str(), m_origClassName.size());
   return ~unsigned(val) ^ unsigned(val >> 32);
 }
 
@@ -171,7 +171,7 @@ bool StaticMemberExpression::canonCompare(ExpressionPtr e) const {
   if (!Expression::canonCompare(e)) return false;
   StaticMemberExpressionPtr s =
     static_pointer_cast<StaticMemberExpression>(e);
-  return m_className == s->m_className;
+  return StaticClassName::isNamed(s->m_origClassName);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

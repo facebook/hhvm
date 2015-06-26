@@ -37,8 +37,6 @@ public:
   explicit ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                           ListKind kind = ListKindParam);
   ~ExpressionList();
-  // change case to lower so to make it case insensitive
-  void toLower();
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
@@ -67,7 +65,6 @@ public:
   ExpressionPtr &operator[](int index);
 
   void getStrings(std::vector<std::string> &strings);
-  void getOriginalStrings(std::vector<std::string> &strings);
   void stripConcat();
 
   void markParam(int p);

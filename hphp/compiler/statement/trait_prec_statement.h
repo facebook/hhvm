@@ -39,7 +39,8 @@ public:
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   const std::string& getMethodName() const { return m_methodName->getString(); }
   const std::string& getTraitName()  const { return m_traitName->getString(); }
-  void getOtherTraitNames(std::unordered_set<std::string>& nameSet) const;
+  void getOtherTraitNames(
+    hphp_string_iset& nameSet) const;
 
 private:
   ScalarExpressionPtr m_traitName;        // selected trait name

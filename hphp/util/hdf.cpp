@@ -364,6 +364,14 @@ void Hdf::configGet(std::map<std::string, std::string> &values) const {
   }
 }
 
+void Hdf::configGet(std::map<std::string, std::string,
+                    stdltistr> &values) const {
+  values.clear();
+  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
+    values[hdf.getName()] = hdf.configGetString("");
+  }
+}
+
 void Hdf::configGet(hphp_string_imap<std::string> &values) const {
   values.clear();
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {

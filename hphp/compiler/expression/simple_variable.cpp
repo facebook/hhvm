@@ -155,7 +155,7 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
           if (variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
             ClassScopePtr cls = getClassScope();
             TypePtr t = !cls || cls->isRedeclaring() ?
-              Type::Variant : Type::CreateObjectType(cls->getName());
+              Type::Variant : Type::CreateObjectType(cls->getOriginalName());
             variables->add(m_sym, t, true, ar, shared_from_this(),
                            getScope()->getModifiers());
           }

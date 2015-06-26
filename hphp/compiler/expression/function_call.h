@@ -44,7 +44,7 @@ public:
 
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
-  const std::string &getName() const { return m_name; }
+  const std::string &getName() const = delete;//{ return m_name; }
   const std::string &getOriginalName() const { return m_origName; }
   const std::string getNonNSOriginalName() const {
     auto nsPos = m_origName.rfind('\\');
@@ -64,12 +64,16 @@ public:
   bool hasUnpack() const;
   void onParse(AnalysisResultConstPtr ar, FileScopePtr fileScope) override;
   bool checkUnpackParams();
+  bool isNamed(const char* name) const;
+  bool isNamed(const std::string& name) const {
+    return isNamed(name.c_str());
+  }
 private:
   void checkParamTypeCodeErrors(AnalysisResultPtr);
 
 protected:
   ExpressionPtr m_nameExp;
-  std::string m_name;
+//  std::string m_name;
   std::string m_origName;
   ExpressionListPtr m_params;
 

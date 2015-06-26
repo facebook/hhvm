@@ -257,6 +257,7 @@ void Config::Bind(T& loc, const IniSetting::Map& ini, const Hdf& config, \
 
 CONTAINER_CONFIG_BODY(ConfigVector, Vector)
 CONTAINER_CONFIG_BODY(ConfigMap, Map)
+CONTAINER_CONFIG_BODY(ConfigMapC, MapC)
 CONTAINER_CONFIG_BODY(ConfigSet, Set)
 CONTAINER_CONFIG_BODY(ConfigSetC, SetC)
 CONTAINER_CONFIG_BODY(ConfigFlatSet, FlatSet)

@@ -68,11 +68,11 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     FunctionScopePtr func = m_funcScope;
-    if (!func && m_object->isThis() && !m_name.empty()) {
+    if (!func && m_object->isThis() && !m_origName.empty()) {
       ClassScopePtr cls = getClassScope();
       if (cls) {
         m_classScope = cls;
-        func = cls->findFunction(ar, m_name, true, true);
+        func = cls->findFunction(ar, m_origName, true, true);
         if (func &&
             !cls->isInterface() &&
             !(func->isVirtual() &&
@@ -85,7 +85,7 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
 
-    markRefParams(func, m_name);
+    markRefParams(func, m_origName);
   }
 
   // This is OK because AnalyzeFinal is guaranteed to run for a CPP

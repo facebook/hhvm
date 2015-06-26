@@ -2290,7 +2290,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         if (p->isStatic()) {
           useLSB = true;
         } else if (ekind == Expression::KindOfDynamicFunctionCall) {
-          if ((p->getClassName().empty() && !p->getClass()) ||
+          if ((!p->hasStaticClass() && !p->getClass()) ||
               p->isParent() || p->isSelf()) {
             useLSB = true;
           }

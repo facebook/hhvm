@@ -26,8 +26,13 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class ClassScope;
+class FunctionScope;
 
 template<class type> struct hphp_string_hash_map<type, ClassScope> :
+      public hphp_hash_map<std::string, type, string_hashi,
+                           string_eqstri> {};
+
+template<class type> struct hphp_string_hash_map<type, FunctionScope> :
       public hphp_hash_map<std::string, type, string_hashi,
                            string_eqstri> {};
 

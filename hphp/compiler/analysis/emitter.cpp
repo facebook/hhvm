@@ -2629,7 +2629,7 @@ static StringData* getClassName(ExpressionPtr e) {
     }
   }
   if (cls && !cls->isTrait()) {
-    return makeStaticString(cls->getOriginalName());
+    return makeStaticString(cls->getScopeName());
   }
   return nullptr;
 }
@@ -2648,9 +2648,9 @@ void EmitterVisitor::fixReturnType(Emitter& e, FunctionCallPtr fn,
     ref = (builtinFunc->attrs() & AttrReference) != 0;
   } else if (fn->isValid() && fn->getFuncScope()) {
     ref = fn->getFuncScope()->isRefReturn();
-  } else if (!fn->getName().empty()) {
+  } else if (!fn->getOriginalName().empty()) {
     FunctionScope::FunctionInfoPtr fi =
-      FunctionScope::GetFunctionInfo(fn->getName());
+      FunctionScope::GetFunctionInfo(fn->getOriginalName());
     if (!fi || !fi->getMaybeRefReturn()) ref = false;
   }
 
@@ -3284,7 +3284,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         for (int i = 0; i < catch_count; i++) {
           CatchStatementPtr c(static_pointer_cast<CatchStatement>
                               ((*catches)[i]));
-          StringData* eName = makeStaticString(c->getClassName());
+          StringData* eName = makeStaticString(c->getOriginalClassName());
 
           // If there's already a catch of this class, skip;
           // the first one wins
@@ -3660,7 +3660,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           } else {
             if (cls) {
               if (isSelf) {
-                s = cls->getOriginalName();
+                s = cls->getScopeName();
               } else if (isParent) {
                 s = cls->getOriginalParent();
               }
@@ -4059,7 +4059,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
                call->getClassScope() &&
                !call->getClassScope()->isTrait()) {
       StringData* name =
-        makeStaticString(call->getClassScope()->getOriginalName());
+        makeStaticString(call->getClassScope()->getScopeName());
       e.String(name);
       return true;
     }
@@ -6453,13 +6453,14 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
     Option::GenerateDocComments ? meth->getDocComment().c_str() : ""
   );
   auto retType = meth->retTypeAnnotation();
-  assert(retType || (meth->getName() == "__construct") ||
-                    (meth->getName() == "__destruct"));
+  assert(retType ||
+         meth->isNamed("__construct") ||
+         meth->isNamed("__destruct"));
   fe->returnType = retType ? retType->dataType() : KindOfNull;
   fe->retUserType = makeStaticString(meth->getReturnTypeConstraint());
 
   FunctionScopePtr funcScope = meth->getFunctionScope();
-  const char *funcname  = funcScope->getName().c_str();
+  const char *funcname  = funcScope->getScopeName().c_str();
   const char *classname = pce ? pce->name()->data() : nullptr;
   auto const& info = Native::GetBuiltinFunction(funcname, classname,
                                                 modifiers->isStatic());
@@ -6738,7 +6739,7 @@ void EmitterVisitor::emitDeprecationWarning(Emitter& e,
     : deprArgs.front();
 
   { // preface the message with the name of the offending function
-    auto funcName = funcScope->getOriginalName();
+    auto funcName = funcScope->getScopeName();
     BlockScopeRawPtr b = funcScope->getOuterScope();
     if (b && b->is(BlockScope::ClassScope)) {
       ClassScopePtr clsScope = dynamic_pointer_cast<ClassScope>(b);
@@ -6749,7 +6750,7 @@ void EmitterVisitor::emitDeprecationWarning(Emitter& e,
         e.Concat();
       } else {
         e.String(makeStaticString(
-                   clsScope->getOriginalName() + "::" + funcName
+                   clsScope->getScopeName() + "::" + funcName
                    + ": " + deprMessage));
       }
     } else {
@@ -6850,14 +6851,14 @@ void EmitterVisitor::addMemoizeProp(MethodStatementPtr meth) {
     m_curFunc->hasMemoizeSharedProp = true;
     m_curFunc->memoizeSharedPropIndex = pce->getNextMemoizeCacheKey();
   } else {
-    propNameBase = funcScope->getName();
+    propNameBase = toLower(funcScope->getScopeName());
   }
 
   // The prop definition in traits conflicts with the definition in a class
   // so make a different prop for each trait
   std::string traitNamePart;
   if (classScope && classScope->isTrait()) {
-    traitNamePart = classScope->getName();
+    traitNamePart = toLower(classScope->getScopeName());
     // the backslash comes from namespaces. @jan thought that would cause
     // issues, so use $ instead
     for (char &c: traitNamePart) {
@@ -7496,7 +7497,7 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
   Func* fcallBuiltin = nullptr;
   StringData* nLiteral = nullptr;
   Offset fpiStart = 0;
-  if (node->getClass() || !node->getClassName().empty()) {
+  if (node->getClass() || node->hasStaticClass()) {
     bool isSelfOrParent = node->isSelf() || node->isParent();
     if (!node->isStatic() && !isSelfOrParent &&
         !node->getOriginalClassName().empty() && !nameStr.empty()) {
@@ -7638,7 +7639,7 @@ void EmitterVisitor::emitClassTraitPrecRule(PreClassEmitter* pce,
 
   PreClass::TraitPrecRule rule(traitName, methodName);
 
-  std::unordered_set<std::string> otherTraitNames;
+  hphp_string_iset otherTraitNames;
   stmt->getOtherTraitNames(otherTraitNames);
   for (auto const& name : otherTraitNames) {
     rule.addOtherTraitName(makeStaticString(name));

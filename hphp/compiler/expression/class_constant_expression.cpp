@@ -59,7 +59,7 @@ ExpressionPtr ClassConstantExpression::clone() {
 bool ClassConstantExpression::containsDynamicConstant(AnalysisResultPtr ar)
   const {
   if (m_class) return true;
-  ClassScopePtr cls = ar->findClass(m_className);
+  ClassScopePtr cls = ar->findClass(m_origClassName);
   return !cls || cls->isVolatile() ||
     !cls->getConstants()->isRecursivelyDeclared(ar, m_varName);
 }
@@ -161,14 +161,15 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
 unsigned ClassConstantExpression::getCanonHash() const {
   int64_t val =
     hash_string_i_unsafe(m_varName.c_str(), m_varName.size()) -
-    hash_string_i_unsafe(m_className.c_str(), m_className.size());
+    hash_string_i_unsafe(m_origClassName.c_str(), m_origClassName.size());
   return ~unsigned(val) ^ unsigned(val >> 32);
 }
 
 bool ClassConstantExpression::canonCompare(ExpressionPtr e) const {
   return Expression::canonCompare(e) &&
     m_varName == static_cast<ClassConstantExpression*>(e.get())->m_varName &&
-    m_className == static_cast<ClassConstantExpression*>(e.get())->m_className;
+    StaticClassName::isNamed(static_cast<ClassConstantExpression*>(
+                               e.get())->m_origClassName);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

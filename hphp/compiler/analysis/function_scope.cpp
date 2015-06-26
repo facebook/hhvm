@@ -50,14 +50,14 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
 FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
-                             const std::string &name, StatementPtr stmt,
+                             const std::string &originalName, StatementPtr stmt,
                              bool reference, int minParam, int numDeclParam,
                              ModifierExpressionPtr modifiers,
                              int attribute, const std::string &docComment,
                              FileScopePtr file,
                              const std::vector<UserAttributePtr> &attrs,
                              bool inPseudoMain /* = false */)
-    : BlockScope(name, docComment, stmt, BlockScope::FunctionScope),
+    : BlockScope(originalName, docComment, stmt, BlockScope::FunctionScope),
       m_minParam(minParam), m_numDeclParams(numDeclParam),
       m_attribute(attribute), m_modifiers(modifiers), m_hasVoid(false),
       m_method(method), m_refReturn(reference), m_virtual(false),
@@ -110,12 +110,11 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
 
 FunctionScope::FunctionScope(FunctionScopePtr orig,
                              AnalysisResultConstPtr ar,
-                             const string &name,
                              const string &originalName,
                              StatementPtr stmt,
                              ModifierExpressionPtr modifiers,
                              bool user)
-    : BlockScope(name, orig->m_docComment, stmt,
+    : BlockScope(originalName, orig->m_docComment, stmt,
                  BlockScope::FunctionScope),
       m_minParam(orig->m_minParam), m_numDeclParams(orig->m_numDeclParams),
       m_attribute(orig->m_attribute), m_modifiers(modifiers),
@@ -137,7 +136,6 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_inlineIndex(orig->m_inlineIndex), m_optFunction(orig->m_optFunction),
       m_nextID(0) {
   init(ar);
-  m_originalName = originalName;
   setParamCounts(ar, m_minParam, m_numDeclParams);
 }
 
@@ -147,7 +145,7 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
     m_variables->forceVariants(ar, VariableTable::AnyVars);
   }
 
-  if (!strcasecmp(m_name.c_str(), "__autoload")) {
+  if (isNamed("__autoload")) {
     setVolatile();
   }
 
@@ -180,9 +178,9 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
     m_volatile = true;
   }
 
-  m_dynamic = Option::IsDynamicFunction(m_method, m_name) ||
+  m_dynamic = Option::IsDynamicFunction(m_method, m_scopeName) ||
     Option::EnableEval == Option::FullEval || Option::AllDynamic;
-  if (!m_method && Option::DynamicInvokeFunctions.find(m_name) !=
+  if (!m_method && Option::DynamicInvokeFunctions.find(m_scopeName) !=
       Option::DynamicInvokeFunctions.end()) {
     setDynamicInvoke();
   }
@@ -223,10 +221,10 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
       m_redeclaring(-1), m_inlineIndex(0),
       m_optFunction(0) {
-  m_dynamic = Option::IsDynamicFunction(method, m_name) ||
+  m_dynamic = Option::IsDynamicFunction(method, name) ||
     Option::EnableEval == Option::FullEval || Option::AllDynamic;
   m_dynamicInvoke = false;
-  if (!method && Option::DynamicInvokeFunctions.find(m_name) !=
+  if (!method && Option::DynamicInvokeFunctions.find(name) !=
       Option::DynamicInvokeFunctions.end()) {
     setDynamicInvoke();
   }
@@ -344,7 +342,7 @@ bool FunctionScope::mayContainThis() {
 }
 
 bool FunctionScope::isClosure() const {
-  return ParserBase::IsClosureName(name());
+  return ParserBase::IsClosureName(getScopeName());
 }
 
 void FunctionScope::setVariableArgument(int reference) {
@@ -374,7 +372,7 @@ bool FunctionScope::isFoldable() const {
     return true;
   }
   // Systemlib (PHP&HNI) builtins
-  auto f = Unit::lookupFunc(String(getName()).get());
+  auto f = Unit::lookupFunc(String(getScopeName()).get());
   return f && f->isFoldable();
 }
 
@@ -445,14 +443,19 @@ bool FunctionScope::hasImpl() const {
   return false;
 }
 
+bool FunctionScope::isNamed(const char* n) const {
+  return !strcasecmp(getScopeName().c_str(), n);
+}
+
 bool FunctionScope::isConstructor(ClassScopePtr cls) const {
-  return m_stmt && cls
-    && (getName() == "__construct"
-     || (cls->classNameCtor() && getName() == cls->getName()));
+  return m_stmt && cls &&
+    (isNamed("__construct") ||
+     (cls->classNameCtor() && isNamed(cls->getScopeName())));
 }
 
 bool FunctionScope::isMagic() const {
-  return m_name.size() >= 2 && m_name[0] == '_' && m_name[1] == '_';
+  return m_scopeName.size() >= 2 &&
+    m_scopeName[0] == '_' && m_scopeName[1] == '_';
 }
 
 bool FunctionScope::needsLocalThis() const {
@@ -467,19 +470,7 @@ bool FunctionScope::needsLocalThis() const {
 static std::string s_empty;
 const string &FunctionScope::getOriginalName() const {
   if (m_pseudoMain) return s_empty;
-  if (m_stmt) {
-    MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
-    return stmt->getOriginalName();
-  }
-  return m_originalName;
-}
-
-string FunctionScope::getFullName() const {
-  if (m_stmt) {
-    MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
-    return stmt->getFullName();
-  }
-  return m_name;
+  return m_scopeName;
 }
 
 string FunctionScope::getOriginalFullName() const {
@@ -487,7 +478,7 @@ string FunctionScope::getOriginalFullName() const {
     MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
     return stmt->getOriginalFullName();
   }
-  return m_name;
+  return m_scopeName;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -526,7 +517,7 @@ TypePtr FunctionScope::setParamType(AnalysisResultConstPtr ar, int index,
     addUpdates(UseKindCallerParam);
     if (!isFirstPass()) {
       Logger::Verbose("Corrected type of parameter %d of %s: %s -> %s",
-                      index, m_name.c_str(),
+                      index, m_scopeName.c_str(),
                       paramType->toString().c_str(), type->toString().c_str());
     }
   }
@@ -613,7 +604,7 @@ std::vector<std::string> FunctionScope::getUserAttributeStringParams(
 }
 
 std::string FunctionScope::getDocName() const {
-  string name = getOriginalName();
+  string name = getScopeName();
   if (m_redeclaring < 0) {
     return name;
   }
@@ -745,7 +736,7 @@ void FunctionScope::RecordFunctionInfo(string fname, FunctionScopePtr func) {
     Lock lock(s_refParamInfoLock);
     FunctionInfoPtr &info = s_refParamInfo[fname];
     if (!info) {
-      info = FunctionInfoPtr(new FunctionInfo());
+      info = std::make_shared<FunctionInfo>();
     }
     if (func->isStatic()) {
       info->setMaybeStatic();
@@ -769,7 +760,7 @@ void FunctionScope::RecordFunctionInfo(string fname, FunctionScopePtr func) {
 
 FunctionScope::FunctionInfoPtr FunctionScope::GetFunctionInfo(string fname) {
   assert(Option::WholeProgram);
-  StringToFunctionInfoPtrMap::iterator it = s_refParamInfo.find(fname);
+  auto it = s_refParamInfo.find(fname);
   if (it == s_refParamInfo.end()) {
     return FunctionInfoPtr();
   }

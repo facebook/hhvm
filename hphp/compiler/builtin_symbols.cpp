@@ -171,7 +171,7 @@ FunctionScopePtr BuiltinSymbols::ImportFunctionScopePtr(AnalysisResultPtr ar,
     f->setAllowOverride();
   }
 
-  FunctionScope::RecordFunctionInfo(f->getName(), f);
+  FunctionScope::RecordFunctionInfo(f->getScopeName(), f);
   return f;
 }
 
@@ -262,8 +262,10 @@ ClassScopePtr BuiltinSymbols::ImportClassScopePtr(AnalysisResultPtr ar,
     stdIfaces.push_back(it->data());
   }
 
-  ClassScopePtr cl(new ClassScope(ar, cls->getName().data(), parent.data(),
-                                  stdIfaces, methods));
+  auto cl = std::make_shared<ClassScope>(
+    ar, cls->getName().toCppString(), parent.toCppString(),
+    stdIfaces, methods);
+
   for (uint i = 0; i < methods.size(); ++i) {
     methods[i]->setOuterScope(cl);
   }
@@ -341,7 +343,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
       assert(clsVec.second.size() == 1);
       auto cls = clsVec.second[0];
       if (auto nativeConsts = Native::getClassConstants(
-            String(cls->getName()).get())) {
+            String(cls->getScopeName()).get())) {
         for (auto cnsMap : *nativeConsts) {
           auto tv = cnsMap.second;
           auto e = Expression::MakeScalarExpression(ar, ar, Location::Range(),

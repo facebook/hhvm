@@ -167,8 +167,9 @@ void AnalysisResult::parseOnDemand(const std::string &name) const {
   }
 }
 
+template <class Map>
 void AnalysisResult::parseOnDemandBy(const string &name,
-                                     const map<string,string> &amap) const {
+                                     const Map &amap) const {
   if (m_package) {
     auto it = amap.find(name);
     if (it != amap.end()) {
@@ -176,6 +177,13 @@ void AnalysisResult::parseOnDemandBy(const string &name,
     }
   }
 }
+
+template void AnalysisResult::parseOnDemandBy(
+  const string &name, const std::map<std::string,std::string> &amap) const;
+
+template void AnalysisResult::parseOnDemandBy(
+  const string &name,
+  const std::map<std::string,std::string,stdltistr> &amap) const;
 
 void AnalysisResult::addNSFallbackFunc(ConstructPtr c, FileScopePtr fs) {
   m_nsFallbackFuncs.insert(std::make_pair(c, fs));
@@ -191,13 +199,11 @@ FileScopePtr AnalysisResult::findFileScope(const std::string &name) const {
 
 FunctionScopePtr AnalysisResult::findFunction(
   const std::string &funcName) const {
-  StringToFunctionScopePtrMap::const_iterator bit =
-    m_functions.find(funcName);
+  auto bit = m_functions.find(funcName);
   if (bit != m_functions.end() && !bit->second->allowOverride()) {
     return bit->second;
   }
-  StringToFunctionScopePtrMap::const_iterator iter =
-    m_functionDecs.find(funcName);
+  auto iter = m_functionDecs.find(funcName);
   if (iter != m_functionDecs.end()) {
     return iter->second;
   }
@@ -293,7 +299,7 @@ ClassScopePtr AnalysisResult::findExactClass(ConstructPtr cs,
   ClassScopePtr cls = findClass(name);
   if (!cls || !cls->isRedeclaring()) return cls;
   if (ClassScopePtr currentCls = cs->getClassScope()) {
-    if (cls->getName() == currentCls->getName()) {
+    if (cls->isNamed(currentCls->getScopeName())) {
       return currentCls;
     }
   }
@@ -324,9 +330,8 @@ int AnalysisResult::getClassCount() const {
 bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) const {
   assert(m_phase < AnalyzeAll);
 
-  string fname = funcScope->getName();
   // System functions override
-  auto it = m_functions.find(fname);
+  auto it = m_functions.find(funcScope->getScopeName());
   if (it != m_functions.end()) {
     if (!it->second->allowOverride()) {
       // we need someone to hold on to a reference to it
@@ -342,9 +347,8 @@ bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) const {
 bool AnalysisResult::declareClass(ClassScopePtr classScope) const {
   assert(m_phase < AnalyzeAll);
 
-  string cname = classScope->getName();
   // System classes override
-  if (m_systemClasses.find(cname) != m_systemClasses.end()) {
+  if (m_systemClasses.count(classScope->getScopeName())) {
     // we need someone to hold on to a reference to it
     // even though we're not going to do anything with it
     this->lock()->m_ignoredScopes.push_back(classScope);
@@ -480,13 +484,13 @@ bool AnalysisResult::isSystemConstant(const std::string &constName) const {
 // Program
 
 void AnalysisResult::addSystemFunction(FunctionScopeRawPtr fs) {
-  FunctionScopePtr& entry = m_functions[fs->getName()];
+  FunctionScopePtr& entry = m_functions[fs->getScopeName()];
   assert(!entry);
   entry = fs;
 }
 
 void AnalysisResult::addSystemClass(ClassScopeRawPtr cs) {
-  ClassScopePtr& entry = m_systemClasses[cs->getName()];
+  ClassScopePtr& entry = m_systemClasses[cs->getScopeName()];
   assert(!entry);
   entry = cs;
 }
@@ -653,7 +657,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
       FunctionScopePtr func = iterMethod->second;
       if (Option::WholeProgram && !func->hasImpl() && needAbstractMethodImpl) {
         FunctionScopePtr tmpFunc =
-          cls->findFunction(ar, func->getName(), true, true);
+          cls->findFunction(ar, func->getScopeName(), true, true);
         always_assert(!tmpFunc || !tmpFunc->hasImpl());
         Compiler::Error(Compiler::MissingAbstractMethodImpl,
                         func->getStmt(), cls->getStmt());
@@ -1033,7 +1037,6 @@ int DepthFirstVisitor<Pre, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
   StatementPtr stmt = scope->getStmt();
   if (MethodStatementPtr m =
       dynamic_pointer_cast<MethodStatement>(stmt)) {
-    WriteLock lock(m->getFunctionScope()->getInlineMutex());
     do {
       scope->clearUpdated();
       if (Option::LocalCopyProp || Option::EliminateDeadCode) {

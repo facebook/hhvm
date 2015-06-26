@@ -145,13 +145,13 @@ void FileScope::makeParseFatal(AnalysisResultConstPtr ar,
 bool FileScope::addFunction(AnalysisResultConstPtr ar,
                             FunctionScopePtr funcScope) {
   if (ar->declareFunction(funcScope)) {
-    FunctionScopePtr &fs = m_functions[funcScope->getName()];
+    FunctionScopePtr &fs = m_functions[funcScope->getScopeName()];
     if (fs) {
       if (!m_redeclaredFunctions) {
         m_redeclaredFunctions = new StringToFunctionScopePtrVecMap;
       }
       FunctionScopePtrVec &funcVec =
-        (*m_redeclaredFunctions)[funcScope->getName()];
+        (*m_redeclaredFunctions)[funcScope->getScopeName()];
       if (!funcVec.size()) {
         fs->setLocalRedeclaring();
         funcVec.push_back(fs);
@@ -168,7 +168,7 @@ bool FileScope::addFunction(AnalysisResultConstPtr ar,
 
 bool FileScope::addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope) {
   if (ar->declareClass(classScope)) {
-    m_classes[classScope->getName()].push_back(classScope);
+    m_classes[classScope->getScopeName()].push_back(classScope);
     return true;
   }
   return false;
@@ -271,7 +271,7 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
   auto pseudoMain =
     std::make_shared<HPHP::FunctionScope>(
       ar, true,
-      pseudoMainName().c_str(),
+      pseudoMainName(),
       f, false, 0, 0,
       ModifierExpressionPtr(),
       m_attributes[0], "",

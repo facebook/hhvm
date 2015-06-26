@@ -68,7 +68,7 @@ public:
    * User defined functions.
    */
   FunctionScope(AnalysisResultConstPtr ar, bool method,
-                const std::string &name, StatementPtr stmt,
+                const std::string &originalName, StatementPtr stmt,
                 bool reference, int minParam, int maxParam,
                 ModifierExpressionPtr modifiers, int attribute,
                 const std::string &docComment,
@@ -77,7 +77,7 @@ public:
                 bool inPseudoMain = false);
 
   FunctionScope(FunctionScopePtr orig, AnalysisResultConstPtr ar,
-                const std::string &name, const std::string &originalName,
+                const std::string &originalName,
                 StatementPtr stmt, ModifierExpressionPtr modifiers, bool user);
 
   /**
@@ -137,6 +137,11 @@ public:
 
   bool needsLocalThis() const;
 
+  bool isNamed(const char* n) const;
+  bool isNamed(const std::string& n) const {
+    return isNamed(n.c_str());
+  }
+
   /**
    * Either __construct or a class-name constructor.
    */
@@ -144,9 +149,9 @@ public:
 
   const std::string &getParamName(int index) const;
 
-  const std::string &name() const {
-    return getName();
-  }
+//  const std::string &name() const {
+//    return getName();
+//  }
 
   int getRedeclaringId() const {
     return m_redeclaring;
@@ -172,7 +177,7 @@ public:
    * Get/set original name of the function, without case being lowered.
    */
   const std::string &getOriginalName() const;
-  void setOriginalName(const std::string &name) { m_originalName = name; }
+  void setOriginalName(const std::string &name) { m_scopeName = name; }
 
   std::string getDocName() const;
   std::string getDocFullName() const;
@@ -180,7 +185,6 @@ public:
   /**
    * If class method, returns class::name, otherwise just name.
    */
-  std::string getFullName() const;
   std::string getOriginalFullName() const;
 
   /**
@@ -317,14 +321,6 @@ public:
   void addCaller(BlockScopePtr caller, bool careAboutReturn = true);
   void addNewObjCaller(BlockScopePtr caller);
 
-  ReadWriteMutex &getInlineMutex() { return m_inlineMutex; }
-
-  DECLARE_EXTENDED_BOOST_TYPES(FunctionInfo);
-
-  static void RecordFunctionInfo(std::string fname, FunctionScopePtr func);
-
-  static FunctionInfoPtr GetFunctionInfo(std::string fname);
-
   class FunctionInfo {
   public:
     explicit FunctionInfo(int rva = -1)
@@ -368,6 +364,11 @@ public:
     std::set<int> m_refParams; // set of ref arg positions
   };
 
+  using FunctionInfoPtr = std::shared_ptr<FunctionInfo>;
+  using StringToFunctionInfoPtrMap = hphp_string_imap<FunctionInfoPtr>;
+  static void RecordFunctionInfo(std::string fname, FunctionScopePtr func);
+  static FunctionInfoPtr GetFunctionInfo(std::string fname);
+
 private:
   void init(AnalysisResultConstPtr ar);
 
@@ -409,7 +410,6 @@ private:
   FunctionOptPtr m_optFunction;
   ExpressionListPtr m_closureVars;
   ExpressionListPtr m_closureValues;
-  ReadWriteMutex m_inlineMutex;
   unsigned m_nextID; // used when cloning generators for traits
   std::list<FunctionScopeRawPtr> m_clonedTraitOuterScope;
 };

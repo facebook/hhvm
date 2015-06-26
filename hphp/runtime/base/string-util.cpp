@@ -19,7 +19,7 @@
 #include <vector>
 #include "hphp/zend/zend-html.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/bstring.h"
+#include "hphp/util/bstring.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/runtime-error.h"

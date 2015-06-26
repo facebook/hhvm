@@ -41,10 +41,11 @@ InterfaceStatement::InterfaceStatement
  const std::string &docComment, StatementListPtr stmt,
  ExpressionListPtr attrList)
   : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES),
-    m_originalName(name), m_base(base),
-    m_docComment(docComment), m_stmt(stmt), m_attrList(attrList) {
-  m_name = toLower(name);
-  if (m_base) m_base->toLower();
+    m_originalName(name),
+    m_base(base),
+    m_docComment(docComment),
+    m_stmt(stmt),
+    m_attrList(attrList) {
 }
 
 InterfaceStatement::InterfaceStatement
@@ -52,11 +53,9 @@ InterfaceStatement::InterfaceStatement
  const std::string &name, ExpressionListPtr base,
  const std::string &docComment, StatementListPtr stmt,
  ExpressionListPtr attrList)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(InterfaceStatement)),
-    m_originalName(name), m_base(base),
-    m_docComment(docComment), m_stmt(stmt), m_attrList(attrList) {
-  m_name = toLower(name);
-  if (m_base) m_base->toLower();
+  : InterfaceStatement(
+    STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(InterfaceStatement),
+    name, base, docComment, stmt, attrList) {
 }
 
 StatementPtr InterfaceStatement::clone() {
@@ -79,10 +78,10 @@ int InterfaceStatement::getRecursiveCount() const {
 void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
                                  FileScopePtr scope) {
   vector<string> bases;
-  if (m_base) m_base->getOriginalStrings(bases);
+  if (m_base) m_base->getStrings(bases);
 
   for (auto &b : bases) {
-    ar->parseOnDemandByClass(toLower(b));
+    ar->parseOnDemandByClass(b);
   }
 
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
@@ -96,10 +95,11 @@ void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
     }
   }
 
-  ClassScopePtr classScope
-    (new ClassScope(scope,
-                    ClassScope::KindOf::Interface, m_name, "", bases,
-                    m_docComment, stmt, attrs));
+  auto classScope =
+    std::make_shared<ClassScope>(
+      scope, ClassScope::KindOf::Interface, m_originalName, "", bases,
+      m_docComment, stmt, attrs);
+
   setBlockScope(classScope);
   scope->addClass(ar, classScope);
 
@@ -122,7 +122,7 @@ void InterfaceStatement::checkArgumentsToPromote(
   for (int i = 0; i < m_stmt->getCount(); i++) {
     MethodStatementPtr meth =
       dynamic_pointer_cast<MethodStatement>((*m_stmt)[i]);
-    if (meth && meth->getName() == "__construct") {
+    if (meth && meth->isNamed("__construct")) {
       ExpressionListPtr params = meth->getParams();
       if (params) {
         for (int i = 0; i < params->getCount(); i++) {
@@ -155,7 +155,7 @@ int InterfaceStatement::getLocalEffects() const {
 }
 
 std::string InterfaceStatement::getName() const {
-  return string("Interface ") + getScope()->getName();
+  return string("Interface ") + m_originalName;
 }
 
 bool InterfaceStatement::checkVolatileBases(AnalysisResultConstPtr ar) {

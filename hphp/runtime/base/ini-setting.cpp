@@ -319,6 +319,15 @@ bool ini_on_update(const folly::dynamic& value,
 }
 
 bool ini_on_update(const folly::dynamic& value,
+                   std::map<std::string, std::string, stdltistr>& p) {
+  INI_ASSERT_ARR(value);
+  for (auto& pair : value.items()) {
+    p[pair.first.data()] = pair.second.data();
+  }
+  return true;
+}
+
+bool ini_on_update(const folly::dynamic& value,
                    hphp_string_imap<std::string>& p) {
   INI_ASSERT_ARR(value);
   for (auto& pair : value.items()) {
@@ -376,6 +385,14 @@ folly::dynamic ini_get(String& p) {
 }
 
 folly::dynamic ini_get(std::map<std::string, std::string>& p) {
+  folly::dynamic ret = folly::dynamic::object;
+  for (auto& pair : p) {
+    ret.insert(pair.first, pair.second);
+  }
+  return ret;
+}
+
+folly::dynamic ini_get(std::map<std::string, std::string, stdltistr>& p) {
   folly::dynamic ret = folly::dynamic::object;
   for (auto& pair : p) {
     ret.insert(pair.first, pair.second);

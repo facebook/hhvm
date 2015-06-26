@@ -62,7 +62,7 @@ TypePtr Type::CreateObjectType(const std::string &clsname) {
       interface_supports_double(clsname)) {
     return Type::Variant;
   }
-  return TypePtr(new Type(KindOfObject, clsname));
+  return TypePtr(new Type(KindOfObject, toLower(clsname)));
 }
 
 TypePtr Type::GetType(KindOf kindOf, const std::string &clsname /* = "" */) {
@@ -226,7 +226,7 @@ TypePtr Type::Coerce(AnalysisResultConstPtr ar, TypePtr type1, TypePtr type2) {
         ClassScope::FindCommonParent(ar, type1->m_name,
                                          type2->m_name);
       if (parent) {
-        return Type::CreateObjectType(parent->getName());
+        return Type::CreateObjectType(parent->getOriginalName());
       }
     }
     return Type::Object;
@@ -267,7 +267,7 @@ TypePtr Type::Union(AnalysisResultConstPtr ar, TypePtr type1, TypePtr type2) {
       ClassScopePtr res =
         ClassScope::FindCommonParent(ar, type1->m_name,
                                          type2->m_name);
-      if (res) resultName = res->getName();
+      if (res) resultName = res->getOriginalName();
     }
     return TypePtr(Type::CreateObjectType(resultName));
   }

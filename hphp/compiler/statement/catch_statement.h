@@ -44,7 +44,7 @@ public:
            + (m_finallyStmt ? m_finallyStmt->getRecursiveCount() : 0);
   }
   const std::string &getVariableName() const { return m_variable->getName(); }
-  const std::string &getClassName() const { return m_className; }
+  const std::string &getClassName(void*) const { return m_origClassName; }
   SimpleVariablePtr getVariable() const { return m_variable; }
   StatementPtr getStmt() const { return m_stmt; }
   StatementPtr getFinally() const { return m_finallyStmt; }

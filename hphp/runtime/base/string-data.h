@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/bstring.h"
+#include "hphp/util/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/cap-code.h"
 

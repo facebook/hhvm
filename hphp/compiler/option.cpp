@@ -74,8 +74,8 @@ vector<string> Option::DynamicClassPrefixes;
 vector<string> Option::DynamicClassPostfixes;
 set<string, stdltistr> Option::DynamicInvokeFunctions;
 set<string> Option::VolatileClasses;
-map<string,string> Option::AutoloadClassMap;
-map<string,string> Option::AutoloadFuncMap;
+map<string,string,stdltistr> Option::AutoloadClassMap;
+map<string,string,stdltistr> Option::AutoloadFuncMap;
 map<string,string> Option::AutoloadConstMap;
 string Option::AutoloadRoot;
 
@@ -322,22 +322,32 @@ bool Option::IsDynamicClass(const std::string &name) {
   return IsDynamic(name, DynamicClassPrefixes, DynamicClassPostfixes);
 }
 
+static bool prefix_iequal(const std::string& s, const std::string& prefix) {
+  if (prefix.size() > s.size()) return false;
+  return bstrcaseeq(s.c_str(), prefix.c_str(), prefix.size());
+}
+
+static bool postfix_iequal(const std::string& s, const std::string& postfix) {
+  if (postfix.size() > s.size()) return false;
+  return bstrcaseeq(s.c_str() + s.size() - postfix.size(), postfix.c_str(),
+                    postfix.size());
+}
+
 bool Option::IsDynamic(const std::string &name,
                        const std::vector<std::string> &prefixes,
                        const std::vector<std::string> &postfixes) {
-  if (name.substr(0, 4) == "dyn_") return true;
+  if (prefix_iequal(name, "dyn_")) return true;
 
   for (unsigned int i = 0; i < prefixes.size(); i++) {
     const string &prefix = prefixes[i];
-    if (name.substr(0, prefix.length()) == prefix) {
+    if (prefix_iequal(name, prefix)) {
       return true;
     }
   }
 
   for (unsigned int i = 0; i < postfixes.size(); i++) {
     const string &postfix = postfixes[i];
-    if (name.length() > postfix.length() &&
-        name.substr(name.length() - postfix.length()) == postfix) {
+    if (postfix_iequal(name, postfix)) {
       return true;
     }
   }

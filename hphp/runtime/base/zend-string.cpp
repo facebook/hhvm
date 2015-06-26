@@ -24,7 +24,7 @@
 #include <math.h>
 #include <monetary.h>
 
-#include "hphp/runtime/base/bstring.h"
+#include "hphp/util/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-error.h"

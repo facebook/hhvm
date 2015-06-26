@@ -104,7 +104,7 @@ protected:
     ClassAlias,
   };
 
-  static std::map<std::string,FunType> FunctionTypeMap;
+  static std::map<std::string,FunType,stdltistr> FunctionTypeMap;
   FunType m_type;
   unsigned m_dynamicConstant : 1;
   unsigned m_builtinFunction : 1;
@@ -119,7 +119,6 @@ protected:
 
   ExpressionPtr optimize(AnalysisResultConstPtr ar);
 private:
-  int checkObjCall(AnalysisResultPtr ar);
   FunctionScopePtr
   getFuncScopeFromParams(AnalysisResultPtr ar,
                          BlockScopeRawPtr scope,

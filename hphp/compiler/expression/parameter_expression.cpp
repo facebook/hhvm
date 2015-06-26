@@ -121,7 +121,7 @@ void ParameterExpression::parseHandler(FileScopeRawPtr file,
 
 void ParameterExpression::fixupSelfAndParentTypehints(ClassScopePtr cls) {
   if (m_type == "self") {
-    m_type = cls->getName();
+    m_type = toLower(cls->getOriginalName());
   } else if (m_type == "parent") {
     if (!cls->getOriginalParent().empty()) {
       m_type = toLower(cls->getOriginalParent());

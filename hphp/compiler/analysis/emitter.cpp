@@ -3916,9 +3916,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       }
     } else if (call->isCallToFunction("hh\\invariant")) {
       if (emitHHInvariant(e, call)) return true;
-    } else if (call->isCallToFunction("idx") &&
-               call->isOptimizable() &&
-               systemlibDefinesIdx &&
+    } else if (call->isCallToFunction("hh\\idx") &&
                !Option::JitEnableRenameFunction) {
       if (params && (params->getCount() == 2 || params->getCount() == 3)) {
         visit((*params)[0]);

@@ -547,14 +547,6 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
        (BlockScopePtr(), getLocation(),
         funcName, hadBackslash,
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
-    if (m_scanner.isHHSyntaxEnabled() && !(name->num() & 2)) {
-      // If the function name is without any backslashes or
-      // namespace qualification then we treat this as a candidate
-      // for optimization via bytecode promotion.
-      // "idx" is the only function in that class for now but it's
-      // cheaper to set the bit that to check for the function name
-      call->setOptimizable();
-    }
     out->exp = call;
 
     call->onParse(m_ar, m_file);

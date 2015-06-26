@@ -621,13 +621,6 @@ private:
 
 private:
   static constexpr size_t kMinStringSwitchCases = 8;
-  static constexpr bool systemlibDefinesIdx =
-#ifdef FACEBOOK
-    true
-#else
-    false
-#endif
-    ;
 
   UnitEmitter& m_ue;
   FuncEmitter* m_curFunc;

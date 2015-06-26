@@ -554,7 +554,7 @@ TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
   return arrayIdxI(a, key, def);
 }
 
-const StaticString s_idx("idx");
+const StaticString s_idx("hh\\idx");
 
 TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {
   static auto func = Unit::loadFunc(s_idx.get());

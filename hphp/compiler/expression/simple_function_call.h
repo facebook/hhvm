@@ -75,12 +75,6 @@ public:
   bool isCallToFunction(const char *name) const;
   void resolveNSFallbackFunc(AnalysisResultConstPtr ar, FileScopePtr fs);
 
-  void setOptimizable() {
-    m_optimizable = true;
-  }
-  bool isOptimizable() const {
-    return m_optimizable;
-  }
   void changeToBytecode() {
     m_changedToBytecode = true;
   }

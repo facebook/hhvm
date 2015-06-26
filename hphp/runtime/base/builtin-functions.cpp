@@ -48,6 +48,7 @@
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/backtrace.h"
 
+#include <boost/format.hpp>
 #include <limits>
 #include <algorithm>
 
@@ -605,6 +606,21 @@ void pause_forever() {
   for (;;) sleep(300);
 }
 
+bool is_constructor_name(const char* fn) {
+  auto len = strlen(fn);
+  const char construct[] = "__construct";
+  auto clen = sizeof(construct) - 1;
+
+  if (len >= clen && !strcasecmp(fn + len - clen, construct)) {
+    if (len == clen || (len > clen + 2 &&
+                        fn[len - clen - 1] == ':' &&
+                        fn[len - clen - 2] == ':')) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
                                    const char *expectDesc,
                                    int level /* = 0 */,
@@ -613,18 +629,22 @@ void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
     rv->m_data.num = 0LL;
     rv->m_type = KindOfNull;
   }
-  if (level == 2) {
-    if (expected == 1) {
-      raise_error(Strings::MISSING_ARGUMENT, fn, expectDesc, got);
-    } else {
-      raise_error(Strings::MISSING_ARGUMENTS, fn, expectDesc, expected, got);
-    }
+  std::string msg;
+  if (expected == 1) {
+    msg = (boost::format(Strings::MISSING_ARGUMENT) %
+           fn % expectDesc % got).str();
   } else {
-    if (expected == 1) {
-      raise_warning(Strings::MISSING_ARGUMENT, fn, expectDesc, got);
-    } else {
-      raise_warning(Strings::MISSING_ARGUMENTS, fn, expectDesc, expected, got);
+    msg = (boost::format(Strings::MISSING_ARGUMENTS) %
+           fn % expectDesc % expected % got).str();
+  }
+
+  if (level == 2) {
+    raise_error(msg);
+  } else {
+    if (is_constructor_name(fn)) {
+      SystemLib::throwExceptionObject(msg);
     }
+    raise_warning(msg);
   }
 }
 

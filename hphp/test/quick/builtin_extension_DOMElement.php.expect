@@ -1,7 +1,41 @@
 DOMElement
-
-Warning: DOMElement::__construct() expects at least 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
-object(DOMElement)#1 (0) {
+object(DOMElement)#1 (18) {
+  ["nodeName"]=>
+  string(3) "Foo"
+  ["nodeValue"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(1)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
+  ["firstChild"]=>
+  NULL
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
+  string(22) "(object value omitted)"
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  string(3) "Foo"
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["tagName"]=>
+  string(3) "Foo"
+  ["schemaTypeInfo"]=>
+  NULL
 }
 string(22) "O:10:"DOMElement":0:{}"
 object(DOMElement)#2 (0) {
@@ -84,10 +118,44 @@ array(37) {
 }
 ================
 A_DOMElement
-
-Warning: DOMElement::__construct() expects at least 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
-object(A_DOMElement)#3 (1) {
+object(A_DOMElement)#3 (19) {
   ["___x"]=>
+  NULL
+  ["nodeName"]=>
+  string(3) "Foo"
+  ["nodeValue"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(1)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
+  ["firstChild"]=>
+  NULL
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
+  string(22) "(object value omitted)"
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  string(3) "Foo"
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["tagName"]=>
+  string(3) "Foo"
+  ["schemaTypeInfo"]=>
   NULL
 }
 string(37) "O:12:"A_DOMElement":1:{s:4:"___x";N;}"

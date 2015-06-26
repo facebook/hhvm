@@ -114,6 +114,7 @@ Variant invoke_static_method(const String& s, const String& method,
 Variant o_invoke_failed(const char *cls, const char *meth,
                         bool fatal = true);
 
+bool is_constructor_name(const char* func);
 void throw_instance_method_fatal(const char *name);
 
 void throw_iterator_not_valid() ATTRIBUTE_NORETURN;

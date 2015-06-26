@@ -1,10 +1,16 @@
 SoapHeader
-
-Warning: SoapHeader::__construct() expects at least 2 parameters, 0 given in %s/builtin_extensions.inc on line 5
-object(SoapHeader)#1 (0) {
+object(SoapHeader)#1 (4) {
+  ["namespace"]=>
+  string(3) "Foo"
+  ["name"]=>
+  string(3) "Bar"
+  ["data"]=>
+  NULL
+  ["mustUnderstand"]=>
+  bool(false)
 }
 
-Warning: Attempted to serialize unserializable builtin class SoapHeader in %s/builtin_extensions.inc on line 8
+Warning: Attempted to serialize unserializable builtin class SoapHeader in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
 array(1) {
@@ -13,14 +19,20 @@ array(1) {
 }
 ================
 A_SoapHeader
-
-Warning: SoapHeader::__construct() expects at least 2 parameters, 0 given in %s/builtin_extensions.inc on line 23
-object(A_SoapHeader)#2 (1) {
+object(A_SoapHeader)#2 (5) {
   ["___x"]=>
   NULL
+  ["namespace"]=>
+  string(3) "Foo"
+  ["name"]=>
+  string(3) "Bar"
+  ["data"]=>
+  NULL
+  ["mustUnderstand"]=>
+  bool(false)
 }
 
-Warning: Attempted to serialize unserializable builtin class A_SoapHeader in %s/builtin_extensions.inc on line 26
+Warning: Attempted to serialize unserializable builtin class A_SoapHeader in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
 array(1) {

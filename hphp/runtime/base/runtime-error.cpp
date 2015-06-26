@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/repo.h"
@@ -253,14 +254,18 @@ void raise_param_type_warning(
     func_name = "func_num_args";
   }
   assert(param_num > 0);
-  auto expected_type_str = getDataTypeString(expected_type);
-  auto actual_type_str = getDataTypeString(actual_type);
-  raise_warning(
-    "%s() expects parameter %d to be %s, %s given",
+  auto msg = folly::sformat(
+    "{}() expects parameter {} to be {}, {} given",
     func_name,
     param_num,
-    expected_type_str.c_str(),
-    actual_type_str.c_str());
+    getDataTypeString(expected_type).data(),
+    getDataTypeString(actual_type).data());
+
+  if (is_constructor_name(func_name)) {
+    SystemLib::throwExceptionObject(msg);
+  }
+
+  raise_warning(msg);
 }
 
 void raise_message(ErrorMode mode,

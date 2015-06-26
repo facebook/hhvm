@@ -1,8 +1,8 @@
 <?php
 
-function test($cls) {
+function test($cls, ...$args) {
   echo $cls . "\n";
-  $a = new $cls;
+  $a = new $cls(...$args);
   var_dump($a);
   // serialize and unserialize
   $b = serialize($a);
@@ -20,7 +20,7 @@ function test($cls) {
 
   $cls = 'A_' . $cls;
   echo $cls . "\n";
-  $a = new $cls;
+  $a = new $cls(...$args);
   var_dump($a);
   // serialize and unserialize
   $b = serialize($a);

@@ -36,9 +36,10 @@ bool shouldHHIRRelaxGuards() {
   assert(!(RuntimeOption::EvalHHIRRelaxGuards &&
            RuntimeOption::EvalHHIRConstrictGuards));
   return RuntimeOption::EvalHHIRRelaxGuards &&
-    (RuntimeOption::EvalJitRegionSelector == "tracelet" ||
-     RuntimeOption::EvalJitRegionSelector == "method" ||
-     mcg->tx().mode() == TransKind::Optimize);
+    // TODO (#5792564): Guard relaxation doesn't work with loops.
+    // TODO (#6599498): Guard relaxation is broken in wholecfg mode.
+    (mcg->tx().mode() != TransKind::Optimize ||
+     RuntimeOption::EvalJitPGORegionSelector == "hottrace");
 }
 
 /* For each possible dest type, determine if its type might relax. */

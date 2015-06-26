@@ -48,7 +48,7 @@ NEVER_INLINE
 strhash_t hash_string_i_fallback(const char *arKey, uint32_t nKeyLength) {
 #ifdef USE_SSECRC
   if (IsSSEHashSupported()) {
-    return hash_string_i_unaligned_crc(arKey, nKeyLength);
+    return hash_string_i_unaligned_crc(arKey, nKeyLength, 0xdfdfdfdfdfdfdfdfULL);
   }
 #endif
   if (MurmurHash3::useHash128) {

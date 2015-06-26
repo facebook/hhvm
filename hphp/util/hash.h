@@ -374,9 +374,9 @@ class StringData;
 // The following functions are implemented in ASM directly for x86_64.
 extern "C" {
   HPHP::strhash_t hash_string_cs_crc(const char*, uint32_t);
-  HPHP::strhash_t hash_string_i_crc(const char*, uint32_t);
+  HPHP::strhash_t hash_string_i_crc(const char*, uint32_t, uint64_t);
   HPHP::strhash_t hash_string_cs_unaligned_crc(const char*, uint32_t);
-  HPHP::strhash_t hash_string_i_unaligned_crc(const char*, uint32_t);
+  HPHP::strhash_t hash_string_i_unaligned_crc(const char*, uint32_t, uint64_t);
   HPHP::strhash_t g_hashHelper_crc(const HPHP::StringData*);
 }
 #endif

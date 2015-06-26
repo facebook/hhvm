@@ -804,8 +804,21 @@ To string conversions:
 | LdCtx, DCtx, S(FramePtr), NF
 
   Loads into D the value of the m_this/m_cls field out of the frame pointer S0,
-  which must be a frame for the function in the LdCtx's Marker. The result
+  which must be a frame for the function in the LdCtx's marker. The result
   could be either an object representing the this pointer or a class context.
+
+| LdCctx, D(Cctx), S(FramePtr), NF
+
+  Loads into D the value of the m_cls field out of the frame pointer S0. The
+  compiler should generate this only if it can prove that the frame does not
+  contain a nullptr or $this pointer.
+
+| LdClosure<T>, DParam, S(FramePtr), NF
+
+  Loads into D the value of the m_this/m_cls field out of the frame pointer S0.
+  The compiler should generate this only if it can prove that the frame context
+  is a closure object of type T.  Unlike LdCtx and LdCctx, there are no special
+  rules about the relative positions of LdClosure and InitCtx instructions.
 
 | CheckCtxThis, ND, S(Ctx), B
 
@@ -816,12 +829,6 @@ To string conversions:
 
   Convert a Ctx known to contain a $this pointer to a specific object type,
   based on the marker func for this instruction.
-
-| LdCctx, D(Cctx), S(FramePtr), NF
-
-  Loads into D the value of the m_cls field out of the frame pointer S0. The
-  compiler should generate this only if it can prove that the frame does not
-  contain a nullptr or $this pointer.
 
 | LdClsCtx, D(Cls), S(Ctx), NF
 
@@ -1688,7 +1695,11 @@ To string conversions:
 
 15. Generators & Closures
 
-| StClosureCtx, ND, S(Obj) S(Ctx,Nullptr), CRc
+| LdClosureCtx, D(Ctx), S(Obj), NF
+
+  Load the context from the closure object S0 into D.
+
+| StClosureCtx, ND, S(Obj) S(Ctx), CRc
 
   Store the context represented by S1 into the closure object S0. S1 may be a
   Nullptr when there is no context (i.e. the closure is being used in a
@@ -2395,6 +2406,13 @@ fields of that struct for holding intermediate values.
   Set up the ExtraArgs struct on the live ActRec.  If extra args are present
   and need to be discarded, they will be decref'd and may re-enter to run
   destructors.
+
+| InitCtx, ND, S(FramePtr) S(Ctx), CRc
+
+  Store S1 to the m_this/m_cls field in the frame pointer S0.
+
+  If InitCtx appears in an IR unit, it must dominate all occurrences of LdCtx
+  and LdCctx.
 
 | CheckSurpriseFlagsEnter<func,argc>, ND, S(FramePtr), Er
 

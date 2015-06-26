@@ -46,7 +46,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool is_supported(Func* func, uint32_t argc) {
-  return !func->isMagic() && !func->isClosureBody();
+  return !func->isMagic();
 }
 
 void genFuncGuard(Func* func, CodeBlock& cb) {

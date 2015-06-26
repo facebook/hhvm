@@ -84,6 +84,63 @@ void init_params(IRGS& env, uint32_t argc) {
 }
 
 /*
+ * Set up the closure object and class context.
+ *
+ * We swap out the Closure object stored in m_this, and replace it with the
+ * closure's bound Ctx, which may be either an object or a class context.  We
+ * then teleport the object onto the stack as the first local after the params.
+ */
+SSATmp* juggle_closure_ctx(IRGS& env) {
+  auto const func = env.context.func;
+
+  assertx(func->isClosureBody());
+
+  auto const closure_type = Type::ExactObj(func->implCls());
+  auto const closure = gen(env, LdClosure, closure_type, fp(env));
+
+  auto const ctx = gen(env, LdClosureCtx, closure);
+  gen(env, InitCtx, fp(env), ctx);
+  // We can skip the incref for static closures, which have a Cctx.
+  if (!func->isStatic()) gen(env, IncRefCtx, ctx);
+
+  // Teleport the closure to the next local.  There's no need to incref since
+  // it came from m_this.
+  gen(env, StLoc, LocalId{func->numParams()}, fp(env), closure);
+  return closure;
+}
+
+/*
+ * Copy the closure's use variables from the closure object's properties onto
+ * the stack.
+ */
+void init_use_vars(IRGS& env, SSATmp* closure) {
+  auto const func = env.context.func;
+  auto const nparams = func->numParams();
+
+  assertx(func->isClosureBody());
+
+  // Closure object properties are the use vars followed by the static locals
+  // (which are per-instance).
+  auto const nuse = func->implCls()->numDeclProperties() -
+                    func->numStaticLocals();
+
+  int use_var_off = sizeof(ObjectData) + func->implCls()->builtinODTailSize();
+
+  for (auto i = 0; i < nuse; ++i, use_var_off += sizeof(Cell)) {
+    auto const addr = gen(
+      env,
+      LdPropAddr,
+      PropOffset { use_var_off },
+      TPtrToPropGen,
+      closure
+    );
+    auto const prop = gen(env, LdMem, TGen, addr);
+    gen(env, StLoc, LocalId{nparams + 1 + i}, fp(env), prop);
+    gen(env, IncRef, prop);
+  }
+}
+
+/*
  * Set locals to Uninit.
  */
 void init_locals(IRGS& env) {
@@ -97,16 +154,24 @@ void init_locals(IRGS& env) {
   constexpr auto kMaxLocalsInitUnroll = 9;
 
   auto const func = env.context.func;
-  auto const nparams = func->numParams();
   auto const nlocals = func->numLocals();
 
-  if (nparams < nlocals) {
-    if (nlocals - nparams <= kMaxLocalsInitUnroll) {
-      for (auto i = nparams; i < nlocals; ++i) {
+  auto num_inited = func->numParams();
+
+  if (func->isClosureBody()) {
+    auto const nuse = func->implCls()->numDeclProperties() -
+                      func->numStaticLocals();
+    num_inited += 1 + nuse;
+  }
+
+  // We set to Uninit all locals beyond any params and any closure use vars.
+  if (num_inited < nlocals) {
+    if (nlocals - num_inited <= kMaxLocalsInitUnroll) {
+      for (auto i = num_inited; i < nlocals; ++i) {
         gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
       }
     } else {
-      gen(env, StLocRange, LocalIdRange{nparams, (uint32_t)nlocals},
+      gen(env, StLocRange, LocalIdRange{num_inited, (uint32_t)nlocals},
           fp(env), cns(env, TUninit));
     }
   }
@@ -213,8 +278,13 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
     profData->setProfiling(func->getFuncId());
   }
 
-  // Initialize params and locals.
+  // Initialize params, locals, and---if we have a closure---the closure's
+  // bound class context and use vars.
   init_params(env, argc);
+  if (func->isClosureBody()) {
+    auto const closure = juggle_closure_ctx(env);
+    init_use_vars(env, closure);
+  }
   init_locals(env);
   warn_missing_args(env, argc);
 

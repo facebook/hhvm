@@ -127,8 +127,9 @@ bool canDCE(IRInstruction* inst) {
   case LdElem:
   case LdRef:
   case LdCtx:
-  case CastCtxThis:
   case LdCctx:
+  case LdClosure:
+  case CastCtxThis:
   case LdClsCtx:
   case LdClsCctx:
   case DefConst:
@@ -172,6 +173,7 @@ bool canDCE(IRInstruction* inst) {
   case LdSwitchDblIndex:
   case LdSwitchStrIndex:
   case LdSSwitchDestFast:
+  case LdClosureCtx:
   case CreateSSWH:
   case LdContActRec:
   case LdContArValue:
@@ -476,6 +478,7 @@ bool canDCE(IRInstruction* inst) {
   case EnterFrame:
   case CheckStackOverflow:
   case InitExtraArgs:
+  case InitCtx:
   case CheckSurpriseFlagsEnter:
   case ExitPlaceholder:
   case ThrowOutOfBounds:

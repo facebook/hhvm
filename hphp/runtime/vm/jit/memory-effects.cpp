@@ -983,8 +983,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AFWHBlockOn:
   case IncRef:
   case IncRefCtx:
-  case StClosureArg:
+  case LdClosureCtx:
   case StClosureCtx:
+  case StClosureArg:
   case StContArKey:
   case StContArValue:
   case StRetVal:
@@ -1060,8 +1061,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ExtendsClass:
   case LdUnwinderValue:
   case GetCtxFwdCall:
-  case LdCctx:
   case LdCtx:
+  case LdCctx:
+  case LdClosure:
   case LdClsName:
   case LdAFWHActRec:
   case LdClsCtx:
@@ -1097,6 +1099,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LookupClsRDSHandle:
   case GetCtxFwdCallDyn:
   case DbgTraceCall:
+  case InitCtx:
     return may_load_store(AEmpty, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:

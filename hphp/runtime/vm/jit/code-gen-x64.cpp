@@ -2324,14 +2324,28 @@ void CodeGenerator::cgIncRef(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgIncRefCtx(IRInstruction* inst) {
-  if (inst->src(0)->isA(TObj)) return cgIncRef(inst);
+  auto const ty = inst->src(0)->type();
+
+  if (ty <= TObj) return cgIncRef(inst);
+  if (ty <= TCctx || ty <= TNullptr) return;
 
   auto const src = srcLoc(inst, 0).reg();
   auto& v = vmain();
   auto const sf = v.makeReg();
 
-  v << testbi{0x1, src, sf};
-  ifThen(v, CC_Z, sf, [&](Vout& v) { emitIncRef(v, src); });
+  if (ty.maybe(TNullptr)) {
+    auto const shifted = v.makeReg();
+    v << shrqi{1, src, shifted, sf};
+
+    ifThen(v, CC_NBE, sf, [&] (Vout& v) {
+      auto const unshifted = v.makeReg();
+      v << shlqi{1, shifted, unshifted, v.makeReg()};
+      emitIncRef(v, unshifted);
+    });
+  } else {
+    v << testbi{0x1, src, sf};
+    ifThen(v, CC_Z, sf, [&] (Vout& v) { emitIncRef(v, src); });
+  }
 }
 
 void CodeGenerator::cgGenericRetDecRefs(IRInstruction* inst) {
@@ -2669,6 +2683,12 @@ void CodeGenerator::cgStClosureArg(IRInstruction* inst) {
   auto const ptr = srcLoc(inst, 0).reg();
   auto const off = inst->extra<StClosureArg>()->offsetBytes;
   emitStoreTV(vmain(), ptr[off], srcLoc(inst, 1), inst->src(1));
+}
+
+void CodeGenerator::cgLdClosureCtx(IRInstruction* inst) {
+  auto const obj = srcLoc(inst, 0).reg();
+  auto const ctx = dstLoc(inst, 0).reg();
+  vmain() << load{obj[c_Closure::ctxOffset()], ctx};
 }
 
 void CodeGenerator::cgStClosureCtx(IRInstruction* inst) {
@@ -3264,6 +3284,10 @@ void CodeGenerator::cgLdCtx(IRInstruction* inst) {
 }
 
 void CodeGenerator::cgLdCctx(IRInstruction* inst) {
+  return cgLdCtx(inst);
+}
+
+void CodeGenerator::cgLdClosure(IRInstruction* inst) {
   return cgLdCtx(inst);
 }
 
@@ -5543,6 +5567,12 @@ void CodeGenerator::cgInitExtraArgs(IRInstruction* inst) {
     v.makeVcallArgs({{fp}}),
     v.makeTuple({})
   };
+}
+
+void CodeGenerator::cgInitCtx(IRInstruction* inst) {
+  auto const ptr = srcLoc(inst, 0).reg();
+  auto const ctx = srcLoc(inst, 1).reg();
+  vmain() << store{ctx, ptr[AROFF(m_this)]};
 }
 
 void CodeGenerator::cgCheckSurpriseFlagsEnter(IRInstruction* inst) {

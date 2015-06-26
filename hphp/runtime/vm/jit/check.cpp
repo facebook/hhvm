@@ -40,6 +40,8 @@
 
 namespace HPHP { namespace jit {
 
+//////////////////////////////////////////////////////////////////////
+
 namespace {
 
 //////////////////////////////////////////////////////////////////////
@@ -124,9 +126,54 @@ bool checkBlock(Block* b) {
   return true;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Check some invariants around InitCtx:
+ * 1. At most one should exist in a given unit.
+ * 2. If present, InitCtx must dominate all occurrences of LdCtx and LdCctx.
+ */
+bool checkInitCtxInvariants(const IRUnit& unit) {
+  auto const blocks = rpoSortCfg(unit);
+
+  const Block* init_ctx_block = nullptr;
+
+  for (auto& blk : blocks) {
+    for (auto& inst : blk->instrs()) {
+      if (!inst.is(InitCtx)) continue;
+      if (init_ctx_block) return false;
+      init_ctx_block = blk;
+    }
+  }
+
+  if (!init_ctx_block) return true;
+
+  auto const rpoIDs = numberBlocks(unit, blocks);
+  auto const idoms = findDominators(unit, blocks, rpoIDs);
+
+  for (auto& blk : blocks) {
+    bool found_init_ctx = false;
+
+    for (auto& inst : blk->instrs()) {
+      if (inst.is(InitCtx)) {
+        found_init_ctx = true;
+        continue;
+      }
+      if (!inst.is(LdCtx, LdCctx)) continue;
+
+      if (init_ctx_block == blk && !found_init_ctx) return false;
+      if (!dominates(init_ctx_block, blk, idoms)) return false;
+    }
+  }
+
+  return true;
 }
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Build the CFG, then the dominator tree, then use it to validate SSA.
@@ -148,7 +195,7 @@ bool checkCfg(const IRUnit& unit) {
   // Entry block can't have predecessors.
   always_assert(unit.entry()->numPreds() == 0);
 
-  // Entry block starts with DefFP
+  // Entry block starts with DefFP.
   always_assert(!unit.entry()->empty() &&
                 unit.entry()->begin()->op() == DefFP);
 
@@ -507,6 +554,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 bool checkEverything(const IRUnit& unit) {
   assertx(checkCfg(unit));
   assertx(checkTmpsSpanningCalls(unit));
+  assertx(checkInitCtxInvariants(unit));
   if (debug) {
     forEachInst(rpoSortCfg(unit), [&](IRInstruction* inst) {
       assertx(checkOperandTypes(inst, &unit));

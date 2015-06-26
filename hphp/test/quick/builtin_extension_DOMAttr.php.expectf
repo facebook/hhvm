@@ -1,7 +1,49 @@
 DOMAttr
 
-Warning: DOMAttr::__construct() expects at least 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
-object(DOMAttr)#1 (0) {
+Warning: Not yet implemented
+object(DOMAttr)#1 (21) {
+  ["nodeName"]=>
+  string(5) "Hello"
+  ["nodeValue"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(2)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
+  ["firstChild"]=>
+  string(22) "(object value omitted)"
+  ["lastChild"]=>
+  string(22) "(object value omitted)"
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
+  NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  string(5) "Hello"
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["name"]=>
+  string(5) "Hello"
+  ["specified"]=>
+  bool(true)
+  ["value"]=>
+  string(0) ""
+  ["ownerElement"]=>
+  NULL
+  ["schemaTypeInfo"]=>
+  NULL
 }
 
 Warning: Attempted to serialize unserializable builtin class DOMAttr in %s/test/quick/builtin_extensions.inc on line 8
@@ -52,9 +94,51 @@ array(20) {
 ================
 A_DOMAttr
 
-Warning: DOMAttr::__construct() expects at least 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
-object(A_DOMAttr)#2 (1) {
+Warning: Not yet implemented
+object(A_DOMAttr)#2 (22) {
   ["___x"]=>
+  NULL
+  ["nodeName"]=>
+  string(5) "Hello"
+  ["nodeValue"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(2)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
+  string(22) "(object value omitted)"
+  ["firstChild"]=>
+  string(22) "(object value omitted)"
+  ["lastChild"]=>
+  string(22) "(object value omitted)"
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
+  NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  string(5) "Hello"
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["name"]=>
+  string(5) "Hello"
+  ["specified"]=>
+  bool(true)
+  ["value"]=>
+  string(0) ""
+  ["ownerElement"]=>
+  NULL
+  ["schemaTypeInfo"]=>
   NULL
 }
 

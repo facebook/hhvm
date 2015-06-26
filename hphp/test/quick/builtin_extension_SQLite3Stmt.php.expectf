@@ -1,10 +1,8 @@
 SQLite3Stmt
-
-Warning: SQLite3Stmt::__construct() expects exactly 2 parameters, 0 given in %s/builtin_extensions.inc on line 5
-object(SQLite3Stmt)#1 (0) {
+object(SQLite3Stmt)#2 (0) {
 }
 
-Warning: Attempted to serialize unserializable builtin class SQLite3Stmt in %s/builtin_extensions.inc on line 8
+Warning: Attempted to serialize unserializable builtin class SQLite3Stmt in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
 array(8) {
@@ -27,14 +25,12 @@ array(8) {
 }
 ================
 A_SQLite3Stmt
-
-Warning: SQLite3Stmt::__construct() expects exactly 2 parameters, 0 given in %s/builtin_extensions.inc on line 23
-object(A_SQLite3Stmt)#2 (1) {
+object(A_SQLite3Stmt)#3 (1) {
   ["___x"]=>
   NULL
 }
 
-Warning: Attempted to serialize unserializable builtin class A_SQLite3Stmt in %s/builtin_extensions.inc on line 26
+Warning: Attempted to serialize unserializable builtin class A_SQLite3Stmt in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
 array(8) {

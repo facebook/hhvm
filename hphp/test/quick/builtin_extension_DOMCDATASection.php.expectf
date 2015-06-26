@@ -1,7 +1,43 @@
 DOMCdataSection
-
-Warning: DOMCdataSection::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
-object(DOMCdataSection)#1 (0) {
+object(DOMCdataSection)#1 (19) {
+  ["nodeName"]=>
+  string(14) "#cdata-section"
+  ["nodeValue"]=>
+  string(3) "Foo"
+  ["nodeType"]=>
+  int(4)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
+  NULL
+  ["firstChild"]=>
+  NULL
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
+  NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(3) "Foo"
+  ["data"]=>
+  string(3) "Foo"
+  ["length"]=>
+  int(3)
+  ["wholeText"]=>
+  string(3) "Foo"
 }
 
 Warning: Attempted to serialize unserializable builtin class DOMCdataSection in %s/test/quick/builtin_extensions.inc on line 8
@@ -65,11 +101,47 @@ array(27) {
 }
 ================
 A_DOMCdataSection
-
-Warning: DOMCdataSection::__construct() expects exactly 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
-object(A_DOMCdataSection)#2 (1) {
+object(A_DOMCdataSection)#2 (20) {
   ["___x"]=>
   NULL
+  ["nodeName"]=>
+  string(14) "#cdata-section"
+  ["nodeValue"]=>
+  string(3) "Foo"
+  ["nodeType"]=>
+  int(4)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
+  NULL
+  ["firstChild"]=>
+  NULL
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
+  NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(3) "Foo"
+  ["data"]=>
+  string(3) "Foo"
+  ["length"]=>
+  int(3)
+  ["wholeText"]=>
+  string(3) "Foo"
 }
 
 Warning: Attempted to serialize unserializable builtin class A_DOMCdataSection in %s/test/quick/builtin_extensions.inc on line 26

@@ -1,7 +1,41 @@
 DOMProcessingInstruction
-
-Warning: DOMProcessingInstruction::__construct() expects at least 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 5
-object(DOMProcessingInstruction)#1 (0) {
+object(DOMProcessingInstruction)#1 (18) {
+  ["nodeName"]=>
+  string(3) "Foo"
+  ["nodeValue"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(7)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
+  NULL
+  ["firstChild"]=>
+  NULL
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
+  NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["target"]=>
+  string(3) "Foo"
+  ["data"]=>
+  string(0) ""
 }
 
 Warning: Attempted to serialize unserializable builtin class DOMProcessingInstruction in %s/test/quick/builtin_extensions.inc on line 8
@@ -49,11 +83,45 @@ array(19) {
 }
 ================
 A_DOMProcessingInstruction
-
-Warning: DOMProcessingInstruction::__construct() expects at least 1 parameter, 0 given in %s/test/quick/builtin_extensions.inc on line 23
-object(A_DOMProcessingInstruction)#2 (1) {
+object(A_DOMProcessingInstruction)#2 (19) {
   ["___x"]=>
   NULL
+  ["nodeName"]=>
+  string(3) "Foo"
+  ["nodeValue"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(7)
+  ["parentNode"]=>
+  NULL
+  ["childNodes"]=>
+  NULL
+  ["firstChild"]=>
+  NULL
+  ["lastChild"]=>
+  NULL
+  ["previousSibling"]=>
+  NULL
+  ["nextSibling"]=>
+  NULL
+  ["attributes"]=>
+  NULL
+  ["ownerDocument"]=>
+  NULL
+  ["namespaceURI"]=>
+  NULL
+  ["prefix"]=>
+  string(0) ""
+  ["localName"]=>
+  NULL
+  ["baseURI"]=>
+  NULL
+  ["textContent"]=>
+  string(0) ""
+  ["target"]=>
+  string(3) "Foo"
+  ["data"]=>
+  string(0) ""
 }
 
 Warning: Attempted to serialize unserializable builtin class A_DOMProcessingInstruction in %s/test/quick/builtin_extensions.inc on line 26

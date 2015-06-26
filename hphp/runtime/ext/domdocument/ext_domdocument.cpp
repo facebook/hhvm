@@ -5569,6 +5569,11 @@ void HHVM_METHOD(DOMXPath, __construct,
                  const Variant& doc) {
   auto* data = Native::data<DOMXPath>(this_);
   data->m_doc = doc.toObject();
+  if (!data->m_doc->instanceof(getDOMNodeClass())) {
+    SystemLib::throwExceptionObject(String("DOMXPath::__construct expects "
+                                           "parameter 1 to be DOMNode"));
+    return;
+  }
   auto doc_data = Native::data<DOMNode>(data->m_doc);
   xmlDocPtr docp = (xmlDocPtr)doc_data->nodep();
   xmlXPathContextPtr ctx = xmlXPathNewContext(docp);

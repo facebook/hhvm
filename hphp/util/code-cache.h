@@ -85,6 +85,9 @@ struct CodeCache {
     return const_cast<CodeCache&>(*this).frozen();
   }
 
+  CodeBlock& realCold()   { return m_cold;   }
+  CodeBlock& realFrozen() { return m_frozen; }
+
   const CodeBlock& realCold()   const { return m_cold;   }
   const CodeBlock& realFrozen() const { return m_frozen; }
 
@@ -121,13 +124,13 @@ private:
    * of m_cold.
    *
    */
-  CodeBlock m_main;        // used for hot code of non-AttrHot functions
-  CodeBlock m_cold;        // used for cold or one time use code
-  CodeBlock m_hot;         // used for hot code of AttrHot functions
-  CodeBlock m_prof;        // used for hot code of profiling translations
-  CodeBlock m_frozen;      // used for code that is (almost) never used
-  DataBlock m_data;        // data to be used by translated code
-  bool      m_lock;        // don't allow access to main() or cold()
+  CodeBlock m_main;   // used for hot code of non-AttrHot functions
+  CodeBlock m_cold;   // used for cold or one time use code
+  CodeBlock m_hot;    // used for hot code of AttrHot functions
+  CodeBlock m_prof;   // used for hot code of profiling translations
+  CodeBlock m_frozen; // used for code that is (almost) never used
+  DataBlock m_data;   // data to be used by translated code
+  bool      m_lock;   // don't allow access to main() or cold()
 };
 
 struct CodeCache::Selector {

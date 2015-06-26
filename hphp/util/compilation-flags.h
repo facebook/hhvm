@@ -46,6 +46,15 @@ const bool contiguous_heap =
   false
 #endif
   ;
+
+const bool hhvm_reuse_tc =
+#ifdef HHVM_REUSE_TC
+  true
+#else
+  false
+#endif
+  ;
+
 //////////////////////////////////////////////////////////////////////
 
 }

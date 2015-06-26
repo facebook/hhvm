@@ -83,6 +83,7 @@
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/service-requests-inline.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
@@ -144,6 +145,87 @@ CppCall MCGenerator::getDtorCall(DataType type) {
       break;
   }
   not_reached();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+/*
+ * Convenience class for creating TransLocs and TransRecs for new translations.
+ *
+ * Records the beginning and end of a translation and stores the size of the
+ * cold and frozen regions in the first 4 bytes of their respective regions.
+ */
+struct TransLocMaker {
+  explicit TransLocMaker(CodeCache& c) : cache(c) {}
+
+  /*
+   * Record the start of a translation, and reserve space at the top of cold
+   * and frozen (if they aren't the same) to record sizes.
+   */
+  void markStart() {
+    loc.setMainStart(cache.main().frontier());
+    loc.setColdStart(cache.cold().frontier());
+    loc.setFrozenStart(cache.frozen().frontier());
+
+    cache.cold().dword(0);
+    if (&cache.cold() != &cache.frozen()) cache.frozen().dword(0);
+  }
+
+  /*
+   * Record the end of a translation, storing the size of cold and frozen,
+   * returns a TransLoc representing the translation.
+   */
+  TransLoc markEnd() {
+    uint32_t* coldSize   = (uint32_t*)loc.coldStart();
+    uint32_t* frozenSize = (uint32_t*)loc.frozenStart();
+    *coldSize   = cache  .cold().frontier() - loc.coldStart();
+    *frozenSize = cache.frozen().frontier() - loc.frozenStart();
+    loc.setMainSize(cache.main().frontier() - loc.mainStart());
+
+    return loc;
+  }
+
+  /*
+   * Create a TransRec for the translation, markEnd() should be called prior to
+   * calling rec().
+   */
+  TransRec rec(
+      SrcKey                      sk,
+      TransKind                   kind,
+      RegionDescPtr               region  = RegionDescPtr(),
+      std::vector<TransBCMapping> bcmap   = std::vector<TransBCMapping>(),
+      Annotations&&               annot   = Annotations(),
+      bool                        llvm    = false,
+      bool                        hasLoop = false) const {
+    auto& cold = cache.realCold();
+    auto& frozen = cache.realFrozen();
+    TCA coldStart = cold.frontier();
+    TCA frozenStart = frozen.frontier();
+    size_t coldSize = 0;
+    size_t frozenSize = 0;
+
+    if (&cache.cold() == &cold) {
+      coldStart = loc.coldCodeStart();
+      coldSize  = loc.coldCodeSize();
+    }
+    if (&cache.frozen() == &frozen) {
+      frozenStart = loc.frozenCodeStart();
+      frozenSize  = loc.frozenCodeSize();
+    }
+
+    return TransRec(sk, kind,
+                    loc.mainStart(), loc.mainSize(),
+                    coldStart, coldSize,
+                    frozenStart, frozenSize,
+                    std::move(region), std::move(bcmap),
+                    std::move(annot), llvm, hasLoop);
+  }
+
+private:
+  CodeCache& cache;
+  TransLoc loc;
+};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -440,12 +522,26 @@ MCGenerator::createTranslation(const TranslArgs& args) {
   TCA astart          = code.main().frontier();
   TCA realColdStart   = code.realCold().frontier();
   TCA realFrozenStart = code.realFrozen().frontier();
-  TCA req = emitServiceReq(code.cold(),
-                           SRFlags::None,
-                           srcRecSPOff,
-                           REQ_RETRANSLATE,
-                           sk.offset(),
-                           TransFlags().packed);
+  TCA req;
+  if (!RuntimeOption::EvalEnableReusableTC) {
+    req = emitServiceReq(code.cold(),
+                         SRFlags::None,
+                         srcRecSPOff,
+                         REQ_RETRANSLATE,
+                         sk.offset(),
+                         TransFlags().packed);
+  } else {
+    auto const stubsize = mcg->backEnd().reusableStubSize();
+    auto newStart = code.cold().allocInner(stubsize) ?: code.cold().frontier();
+    // Ensure that the anchor translation is a known size so that it can be
+    // reclaimed when the function is freed
+    req = emitEphemeralServiceReq(code.cold(),
+                                  (TCA)newStart,
+                                  srcRecSPOff,
+                                  REQ_RETRANSLATE,
+                                  sk.offset(),
+                                  TransFlags().packed);
+  }
   SKTRACE(1, sk, "inserting anchor translation for (%p,%d) at %p\n",
           sk.unit(), sk.offset(), req);
   SrcRec* sr = m_tx.getSrcRec(sk);
@@ -607,6 +703,7 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
                                  (func->attrs() & AttrHot) && m_tx.useAHot()));
   assertx(m_fixups.empty());
 
+  TCA mainOrig = code.main().frontier();
   // If we're close to a cache line boundary, just burn some space to
   // try to keep the func and its body on fewer total lines.
   if (((uintptr_t)code.main().frontier() & backEnd().cacheLineMask()) >=
@@ -616,13 +713,13 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
   m_fixups.m_alignFixups.emplace(
     code.main().frontier(), std::make_pair(backEnd().cacheLineSize() / 2, 0));
 
+  TransLocMaker maker(code);
+  maker.markStart();
+
   // Careful: this isn't necessarily the real entry point. For funcIsMagic
   // prologues, this is just a possible prologue.
-  TCA aStart    = code.main().frontier();
-  TCA start     = aStart;
-  TCA coldStart = code.cold().frontier();
-  TCA realColdStart   = mcg->code.realCold().frontier();
-  TCA realFrozenStart = mcg->code.realFrozen().frontier();
+  TCA aStart = code.main().frontier();
+  TCA start  = aStart;
 
   // Give the prologue a TransID if we have profiling data.
   auto transID = m_tx.profData()
@@ -631,10 +728,40 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
 
   genFuncPrologue(transID, func, argc, start);
 
+  auto loc = maker.markEnd();
+  if (RuntimeOption::EvalEnableReusableTC) {
+    TCA UNUSED ms = loc.mainStart(), me = loc.mainEnd(),
+               cs = loc.coldStart(), ce = loc.coldEnd(),
+               fs = loc.frozenStart(), fe = loc.frozenEnd(),
+               oldStart = start;
+    bool did_relocate = relocateNewTranslation(loc, code, &start);
+
+    if (did_relocate) {
+      FTRACE_MOD(reusetc, 1,
+                 "Relocated prologue for func {} (id = {}) "
+                 "from M[{}, {}], C[{}, {}], F[{}, {}] to M[{}, {}] "
+                 "C[{}, {}] F[{}, {}] orig start @ {} new start @ {}\n",
+                 func->fullName()->data(), func->getFuncId(),
+                 ms, me, cs, ce, fs, fe, loc.mainStart(), loc.mainEnd(),
+                 loc.coldStart(), loc.coldEnd(), loc.frozenStart(),
+                 loc.frozenEnd(), oldStart, start);
+    } else {
+      FTRACE_MOD(reusetc, 1,
+                 "Created prologue for func {} (id = {}) at "
+                 "M[{}, {}], C[{}, {}], F[{}, {}] start @ {}\n",
+                 func->fullName()->data(), func->getFuncId(),
+                 ms, me, cs, ce, fs, fe, oldStart);
+    }
+
+    recordFuncPrologue(func, loc);
+    if (loc.mainStart() != aStart) {
+      code.main().setFrontier(mainOrig); // we may have shifted to align
+    }
+  }
   if (RuntimeOption::EvalPerfRelocate) {
     GrowableVector<IncomingBranch> incomingBranches;
-    recordPerfRelocMap(aStart, code.main().frontier(),
-                       coldStart, code.cold().frontier(),
+    recordPerfRelocMap(loc.mainStart(), loc.mainEnd(),
+                       loc.coldCodeStart(), loc.coldEnd(),
                        funcBody, paramIndex,
                        incomingBranches,
                        m_fixups);
@@ -650,18 +777,16 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
 
   assertx(m_tx.mode() == TransKind::Prologue ||
           m_tx.mode() == TransKind::Proflogue);
-  TransRec tr(funcBody,
-              m_tx.mode(),
-              aStart,          code.main().frontier()       - aStart,
-              realColdStart,   code.realCold().frontier()   - realColdStart,
-              realFrozenStart, code.realFrozen().frontier() - realFrozenStart);
+
+  auto tr = maker.rec(funcBody, m_tx.mode());
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(func->unit(), func, tr);
   }
 
+
   recordGdbTranslation(funcBody, func, code.main(), aStart, false, true);
-  recordBCInstr(OpFuncPrologue, aStart, code.main().frontier(), false);
+  recordBCInstr(OpFuncPrologue, loc.mainStart(), loc.mainEnd(), false);
 
   m_numTrans++;
   assertx(m_numTrans <= RuntimeOption::EvalJitGlobalTranslationLimit);
@@ -1239,6 +1364,8 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
         assertx(backEnd().callTarget(toSmash));
         TRACE(2, "bindCall smash %p -> %p\n", toSmash, start);
         backEnd().smashCall(toSmash, start);
+
+        bool is_profiled = false;
         // For functions to be PGO'ed, if their current prologues are still
         // profiling ones (living in code.prof()), then save toSmash as a
         // caller to the prologue, so that it can later be smashed to call a
@@ -1253,6 +1380,17 @@ TCA MCGenerator::handleBindCall(TCA toSmash,
           } else {
             m_tx.profData()->addPrologueGuardCaller(
               func, calledPrologNumArgs, toSmash);
+          }
+          is_profiled = true;
+        }
+
+        // We need to be able to reclaim the function prologues once the unit
+        // associated with this function is treadmilled-- so record all of the
+        // callers that will need to be re-smashed
+        if (RuntimeOption::EvalEnableReusableTC) {
+          if (debug || !isImmutable) {
+            recordFuncCaller(func, toSmash, isImmutable,
+                             is_profiled, calledPrologNumArgs);
           }
         }
       }
@@ -1489,6 +1627,7 @@ TCA MCGenerator::getFreeStub(CodeBlock& frozen, CodeGenFixups* fixups,
     Stats::inc(Stats::Astub_New);
     TRACE(1, "alloc new stub %p\n", ret);
   }
+
   if (fixups) {
     fixups->m_reusedStubs.emplace_back(ret);
   }
@@ -1549,10 +1688,10 @@ MCGenerator::reachedTranslationLimit(SrcKey sk,
       SKTRACE(2, sk, "{\n");
       TCA topTrans = srcRec.getTopTranslation();
       for (size_t i = 0; i < tns.size(); ++i) {
-        const TransRec* rec = m_tx.getTransRec(tns[i]);
+        const TransRec* rec = m_tx.getTransRec(tns[i].mainStart());
         assertx(rec);
-        SKTRACE(2, sk, "%zd %p\n", i, tns[i]);
-        if (tns[i] == topTrans) {
+        SKTRACE(2, sk, "%zd %p\n", i, tns[i].mainStart());
+        if (tns[i].mainStart() == topTrans) {
           SKTRACE(2, sk, "%zd: *Top*\n", i);
         }
         if (rec->kind == TransKind::Anchor) {
@@ -1597,13 +1736,18 @@ CodeGenFixups::process_only(
   }
   ClearContainer(m_pendingFixups);
 
+  auto& ctm = mcg->catchTraceMap();
   for (auto const& pair : m_pendingCatchTraces) {
-    mcg->catchTraceMap().insert(pair.first, pair.second);
+    if (auto pos = ctm.find(pair.first)) {
+      *pos = pair.second;
+    } else {
+      ctm.insert(pair.first, pair.second);
+    }
   }
   ClearContainer(m_pendingCatchTraces);
 
   for (auto const& elm : m_pendingJmpTransIDs) {
-    mcg->getJmpToTransIDMap().insert(elm);
+    mcg->getJmpToTransIDMap()[elm.first] = elm.second;
   }
   ClearContainer(m_pendingJmpTransIDs);
 
@@ -1656,16 +1800,15 @@ MCGenerator::translateWork(const TranslArgs& args) {
   SKTRACE(1, sk, "translateWork\n");
   assertx(m_tx.getSrcDB().find(sk));
 
+  TCA mainOrig = code.main().frontier();
   if (args.align) {
     mcg->backEnd().moveToAlign(code.main(),
                                MoveToAlignFlags::kNonFallthroughAlign);
   }
 
+  TransLocMaker maker(code);
   TCA        start             = code.main().frontier();
-  TCA        coldStart         = code.cold().frontier();
-  TCA        realColdStart     = code.realCold().frontier();
   TCA DEBUG_ONLY frozenStart   = code.frozen().frontier();
-  TCA        realFrozenStart   = code.realFrozen().frontier();
   SrcRec&    srcRec            = *m_tx.getSrcRec(sk);
   TransKind  transKindToRecord = TransKind::Interp;
   UndoMarker undo[] = {
@@ -1742,6 +1885,8 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
       try {
         assertCleanState();
+        maker.markStart();
+
         result = translateRegion(irgs, *region, regionInterps, args.flags,
                                  pconds);
         hasLoop = RuntimeOption::EvalJitLoops && cfgHasLoop(irgs.unit);
@@ -1778,15 +1923,48 @@ MCGenerator::translateWork(const TranslArgs& args) {
 
   if (transKindToRecord == TransKind::Interp) {
     assertCleanState();
+    maker.markStart();
+
     FTRACE(1, "emitting dispatchBB interp request for failed "
       "translation (spOff = {})\n", initSpOffset.offset);
     backEnd().emitInterpReq(code.main(), sk, initSpOffset);
     // Fall through.
   }
 
+  auto loc = maker.markEnd();
+
   if (args.align) {
     m_fixups.m_alignFixups.emplace(
-      start, std::make_pair(backEnd().cacheLineSize() - 1, 0));
+      loc.mainStart(), std::make_pair(backEnd().cacheLineSize() - 1, 0));
+  }
+
+  if (RuntimeOption::EvalEnableReusableTC) {
+    TCA UNUSED ms = loc.mainStart(), me = loc.mainEnd(),
+               cs = loc.coldStart(), ce = loc.coldEnd(),
+               fs = loc.frozenStart(), fe = loc.frozenEnd(),
+               oldStart = start;
+    bool did_relocate = relocateNewTranslation(loc, code);
+
+    if (did_relocate) {
+      FTRACE_MOD(reusetc, 1,
+                 "Relocated translation for func {} (id = {})  @ sk({}) "
+                 "from M[{}, {}], C[{}, {}], F[{}, {}] to M[{}, {}] "
+                 "C[{}, {}] F[{}, {}]\n",
+                 sk.func()->fullName()->data(), sk.func()->getFuncId(),
+                 sk.offset(), ms, me, cs, ce, fs, fe, loc.mainStart(),
+                 loc.mainEnd(), loc.coldStart(), loc.coldEnd(),
+                 loc.frozenStart(), loc.frozenEnd());
+    } else {
+      FTRACE_MOD(reusetc, 1,
+                 "Created translation for func {} (id = {}) "
+                 " @ sk({}) at M[{}, {}], C[{}, {}], F[{}, {}]\n",
+                 sk.func()->fullName()->data(), sk.func()->getFuncId(),
+                 sk.offset(), ms, me, cs, ce, fs, fe);
+    }
+
+    if (loc.mainStart() != start) {
+      code.main().setFrontier(mainOrig); // we may have shifted to align
+    }
   }
 
   if (RuntimeOption::EvalProfileBC) {
@@ -1800,15 +1978,15 @@ MCGenerator::translateWork(const TranslArgs& args) {
                         prev.aStart, cur.aStart, false);
         }
       } else {
-        recordBCInstr(OpTraceletGuard, start, cur.aStart, false);
+        recordBCInstr(OpTraceletGuard, loc.mainStart(), cur.aStart, false);
       }
       prev = cur;
     }
   }
 
-  recordGdbTranslation(sk, sk.func(), code.main(), start,
+  recordGdbTranslation(sk, sk.func(), code.main(), loc.mainStart(),
                        false, false);
-  recordGdbTranslation(sk, sk.func(), code.cold(), coldStart,
+  recordGdbTranslation(sk, sk.func(), code.cold(), loc.coldStart(),
                        false, false);
   if (RuntimeOption::EvalJitPGO) {
     if (transKindToRecord == TransKind::Profile) {
@@ -1819,20 +1997,16 @@ MCGenerator::translateWork(const TranslArgs& args) {
     }
   }
 
-  TransRec tr(sk, transKindToRecord,
-              start,           code.main().frontier()       - start,
-              realColdStart,   code.realCold().frontier()   - realColdStart,
-              realFrozenStart, code.realFrozen().frontier() - realFrozenStart,
-              region, m_fixups.m_bcMap, std::move(m_annotations),
-              useLLVM(), hasLoop);
+  auto tr = maker.rec(sk, transKindToRecord, region, m_fixups.m_bcMap,
+                      std::move(m_annotations), useLLVM(), hasLoop);
   m_tx.addTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
   }
 
   if (RuntimeOption::EvalPerfRelocate) {
-    recordPerfRelocMap(start, code.main().frontier(),
-                       coldStart, code.cold().frontier(),
+    recordPerfRelocMap(loc.mainStart(), loc.mainEnd(),
+                       loc.coldCodeStart(), loc.coldEnd(),
                        sk, -1,
                        srcRec.tailFallbackJumps(),
                        m_fixups);
@@ -1845,15 +2019,15 @@ MCGenerator::translateWork(const TranslArgs& args) {
   // otherwise there's some chance of hitting in the reader threads whose
   // metadata is not yet visible.
   TRACE(1, "newTranslation: %p  sk: (func %d, bcOff %d)\n",
-        start, sk.funcID(), sk.offset());
-  srcRec.newTranslation(start, inProgressTailBranches);
+        loc.mainStart(), sk.funcID(), sk.offset());
+  srcRec.newTranslation(loc, inProgressTailBranches);
 
-  TRACE(1, "mcg: %zd-byte tracelet\n", code.main().frontier() - start);
+  TRACE(1, "mcg: %zd-byte tracelet\n", (ssize_t)loc.mainSize());
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
     Trace::traceRelease("%s", getUsageString().c_str());
   }
 
-  return start;
+  return loc.mainStart();
 }
 
 void MCGenerator::traceCodeGen(IRGS& irgs) {
@@ -1925,7 +2099,7 @@ void MCGenerator::registerCatchBlock(CTCA ip, TCA block) {
 
 folly::Optional<TCA> MCGenerator::getCatchTrace(CTCA ip) const {
   TCA* found = m_catchTraceMap.find(ip);
-  if (found) return *found;
+  if (found && *found != kInvalidCatchTrace) return *found;
   return folly::none;
 }
 
@@ -2317,6 +2491,11 @@ void MCGenerator::invalidateSrcKey(SrcKey sk) {
    * just created some garbage in the TC. We currently have no mechanism
    * to reclaim this.
    */
+  FTRACE_MOD(reusetc, 1, "Replacing translations from func {} (id = {}) "
+             "@ sk({}) in SrcRec addr={}\n",
+             sk.func()->fullName()->data(), sk.func()->getFuncId(), sk.offset(),
+             (void*)sr);
+  Trace::Indent _i;
   sr->replaceOldTranslations();
 }
 

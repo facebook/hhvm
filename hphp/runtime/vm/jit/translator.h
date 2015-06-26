@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
@@ -180,7 +181,6 @@ struct Translator {
    * If no SrcRec exists, insert one into the SrcDB.
    */
   SrcRec* getSrcRec(SrcKey sk);
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Configuration.

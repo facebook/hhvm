@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -87,13 +88,10 @@ Func::~Func() {
   if (m_fullName != nullptr && m_maybeIntercepted != -1) {
     unregister_intercept_flag(fullNameStr(), &m_maybeIntercepted);
   }
-  int maxNumPrologues = getMaxNumPrologues(numParams());
-  int numPrologues =
-    maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
-                                         : kNumFixedPrologues;
-  if (mcg != nullptr) {
-    mcg->smashPrologueGuards((jit::TCA*)m_prologueTable,
-                             numPrologues, this);
+  if (mcg != nullptr && !RuntimeOption::EvalEnableReusableTC) {
+    // If Reusable TC is enabled then the prologue may have already been smashed
+    // and the memory may now be in use by another function.
+    smashPrologues();
   }
 #ifdef DEBUG
   validate();
@@ -112,9 +110,15 @@ void* Func::allocFuncMem(int numParams) {
 
 void Func::destroy(Func* func) {
   if (func->m_funcId != InvalidFuncId) {
+    if (mcg && RuntimeOption::EvalEnableReusableTC) {
+      // Free TC-space associated with func
+      jit::reclaimFunction(func);
+    }
+
     DEBUG_ONLY auto oldVal = s_funcVec.exchange(func->m_funcId, nullptr);
     assert(oldVal == func);
     func->m_funcId = InvalidFuncId;
+
     if (s_treadmill.load(std::memory_order_acquire)) {
       Treadmill::enqueue([func](){ destroy(func); });
       return;
@@ -122,6 +126,15 @@ void Func::destroy(Func* func) {
   }
   func->~Func();
   low_free(func);
+}
+
+void Func::smashPrologues() {
+  int maxNumPrologues = getMaxNumPrologues(numParams());
+  int numPrologues =
+    maxNumPrologues > kNumFixedPrologues ? maxNumPrologues
+                                         : kNumFixedPrologues;
+  mcg->smashPrologueGuards((jit::TCA*)m_prologueTable,
+                           numPrologues, this);
 }
 
 Func* Func::clone(Class* cls, const StringData* name) const {

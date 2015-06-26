@@ -28,6 +28,8 @@
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct TransLoc;
+
 enum class SyncOptions {
   kNoSyncPoint,
   kSyncPoint,

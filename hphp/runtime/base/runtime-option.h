@@ -554,6 +554,8 @@ public:
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
   F(bool, DisableStructArray, true)                                     \
   F(bool, EnableCallBuiltin, true)                                      \
+  F(bool, EnableReusableTC,   reuseTCDefault())                         \
+  F(uint32_t, ReusableTCPadding, 128)                                   \
   /* */
 
 private:

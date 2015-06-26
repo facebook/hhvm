@@ -217,6 +217,33 @@ struct TransRelocInfoHelper {
   }
 };
 
+void relocateStubs(TransLoc& loc, TCA frozenStart, TCA frozenEnd,
+                   RelocationInfo& rel, CodeCache& cache,
+                   CodeGenFixups& fixups) {
+  auto const stubSize = mcg->backEnd().reusableStubSize();
+
+  for (auto addr : fixups.m_reusedStubs) {
+    if (!loc.contains(addr)) continue;
+    always_assert(frozenStart <= addr);
+
+    CodeBlock dest;
+    dest.init(cache.frozen().frontier(), stubSize, "New Stub");
+    x64::relocate(rel, dest, addr, addr + stubSize, fixups, nullptr);
+    cache.frozen().skip(stubSize);
+    if (addr != frozenStart) {
+      rel.recordRange(frozenStart, addr, frozenStart, addr);
+    }
+    frozenStart = addr + stubSize;
+  }
+  if (frozenStart != frozenEnd) {
+    rel.recordRange(frozenStart, frozenEnd, frozenStart, frozenEnd);
+  }
+
+  x64::adjustForRelocation(rel);
+  x64::adjustMetaDataForRelocation(rel, nullptr, fixups);
+  x64::adjustCodeForRelocation(rel, fixups);
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -603,6 +630,139 @@ void readRelocations(
       callback(std::move(tri), data);
     }
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+bool relocateNewTranslation(TransLoc& loc, CodeCache& cache,
+                            TCA* adjust /* = nullptr */) {
+  auto& mainCode = cache.main();
+  auto& coldCode = cache.cold();
+  auto& frozenCode = cache.frozen();
+
+  CodeBlock dest;
+  RelocationInfo rel;
+  size_t asm_count{0};
+
+  TCA mainStartRel, coldStartRel, frozenStartRel;
+
+  TCA mainStart   = loc.mainStart();
+  TCA coldStart   = loc.coldCodeStart();
+  TCA frozenStart = loc.frozenCodeStart();
+
+  size_t mainSize   = loc.mainSize();
+  size_t coldSize   = loc.coldSize();
+  size_t frozenSize = loc.frozenSize();
+  auto const pad = RuntimeOption::EvalReusableTCPadding;
+
+  TCA mainEndRel   = loc.mainEnd();
+  TCA coldEndRel   = loc.coldEnd();
+  TCA frozenEndRel = loc.frozenEnd();
+
+  if ((mainStartRel = (TCA)mainCode.allocInner(mainSize + pad))) {
+    mainSize += pad;
+
+    dest.init(mainStartRel, mainSize, "New Main");
+    asm_count += x64::relocate(rel, dest, mainStart, loc.mainEnd(),
+                               mcg->cgFixups(), nullptr);
+    mainEndRel = dest.frontier();
+
+    mainCode.setFrontier(loc.mainStart());
+  } else {
+    mainStartRel = loc.mainStart();
+    rel.recordRange(mainStart, loc.mainEnd(), mainStart, loc.mainEnd());
+  }
+
+  if ((frozenStartRel = (TCA)frozenCode.allocInner(frozenSize + pad))) {
+    frozenSize += pad;
+
+    dest.init(frozenStartRel + sizeof(uint32_t), frozenSize, "New Frozen");
+    asm_count += x64::relocate(rel, dest, frozenStart, loc.frozenEnd(),
+                               mcg->cgFixups(), nullptr);
+    frozenEndRel = dest.frontier();
+
+    frozenCode.setFrontier(loc.frozenStart());
+  } else {
+    frozenStartRel = loc.frozenStart();
+    rel.recordRange(frozenStart, loc.frozenEnd(), frozenStart, loc.frozenEnd());
+  }
+
+  if (&coldCode != &frozenCode) {
+    if ((coldStartRel = (TCA)coldCode.allocInner(coldSize + pad))) {
+      coldSize += pad;
+
+      dest.init(coldStartRel + sizeof(uint32_t), coldSize, "New Cold");
+      asm_count += x64::relocate(rel, dest, coldStart, loc.coldEnd(),
+                                 mcg->cgFixups(), nullptr);
+      coldEndRel = dest.frontier();
+
+      coldCode.setFrontier(loc.coldStart());
+    } else {
+      coldStartRel = loc.coldStart();
+      rel.recordRange(coldStart, loc.coldEnd(), coldStart, loc.coldEnd());
+    }
+  } else {
+    coldStartRel = frozenStartRel;
+    coldEndRel = frozenEndRel;
+    coldSize = frozenSize;
+  }
+
+  if (adjust) {
+    if (auto newaddr = rel.adjustedAddressAfter(*adjust)) {
+      *adjust = newaddr;
+    }
+  }
+
+  if (asm_count) {
+    x64::adjustForRelocation(rel);
+    x64::adjustMetaDataForRelocation(rel, nullptr, mcg->cgFixups());
+    x64::adjustCodeForRelocation(rel, mcg->cgFixups());
+  }
+
+  if (debug) {
+    auto clearRange = [](TCA start, TCA end) {
+      CodeBlock cb;
+      cb.init(start, end - start, "Dead code");
+      Asm a {cb};
+      while (cb.available() >= 2) a.ud2();
+      if (cb.available() > 0) a.int3();
+      always_assert(!cb.available());
+    };
+
+    if (mainStartRel != loc.mainStart()) {
+      clearRange(loc.mainStart(), loc.mainEnd());
+    }
+    if (coldStartRel != loc.coldStart()) {
+      clearRange(loc.coldStart(), loc.coldEnd());
+    }
+    if (frozenStartRel != loc.frozenStart()) {
+      clearRange(loc.frozenStart(), loc.frozenEnd());
+    }
+  }
+
+  uint32_t* coldSizePtr   = reinterpret_cast<uint32_t*>(coldStartRel);
+  uint32_t* frozenSizePtr = reinterpret_cast<uint32_t*>(frozenStartRel);
+
+  *coldSizePtr   = coldSize;
+  *frozenSizePtr = frozenSize;
+
+  loc.setMainStart(mainStartRel);
+  loc.setColdStart(coldStartRel);
+  loc.setFrozenStart(frozenStartRel);
+
+  loc.setMainSize(mainSize);
+
+  RelocationInfo relStubs;
+  auto record = [&](TCA s, TCA e) { relStubs.recordRange(s, e, s, e); };
+
+  record(mainStartRel, mainEndRel);
+  if (coldStartRel != frozenStartRel) {
+    record(coldStartRel + sizeof(uint32_t), coldEndRel);
+  }
+
+  relocateStubs(loc, frozenStartRel + sizeof(uint32_t), frozenEndRel, relStubs,
+                cache, mcg->cgFixups());
+  return asm_count != 0;
 }
 
 //////////////////////////////////////////////////////////////////////

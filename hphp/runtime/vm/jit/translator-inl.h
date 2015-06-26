@@ -34,7 +34,13 @@ inline SrcRec* Translator::getSrcRec(SrcKey sk) {
   // XXX: Add a insert-or-find primitive to THM.
   if (SrcRec* r = m_srcDB.find(sk)) return r;
   assertx(s_writeLease.amOwner());
-  return m_srcDB.insert(sk);
+
+  auto rec = m_srcDB.insert(sk);
+  if (RuntimeOption::EvalEnableReusableTC) {
+    recordFuncSrcRec(sk.func(), rec);
+  }
+
+  return rec;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

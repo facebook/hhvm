@@ -928,6 +928,11 @@ struct Func {
   void resetPrologue(int numParams);
   void resetPrologues();
 
+  /*
+   * Smash prologue guards to prevent function from being called.
+   */
+  void smashPrologues();
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Pretty printer.                                                    [const]

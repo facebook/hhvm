@@ -24,7 +24,11 @@
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP {
+
+struct CodeCache;
+
+namespace jit {
 
 struct AsmInfo;
 
@@ -105,6 +109,20 @@ void readRelocations(
   void* data);
 void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& hot);
 
+/*
+ * Relocate a new translation into a free region in the TC and update the
+ * TransLoc.
+ *
+ * Attempt to relocate the main, cold, and frozen portions of the translation
+ * loc into memory freed memory in the TC their respective code blocks. In
+ * addition, reusable stubs associated with this translation will be relocated
+ * to be outside of loc so that they can be managed separately.
+ *
+ * If set *adjust will be updated to its post relocation address.
+ */
+bool relocateNewTranslation(TransLoc& loc, CodeCache& cache,
+                            TCA* adjust = nullptr);
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -123,6 +141,7 @@ size_t relocate(RelocationInfo& rel,
                 TCA start, TCA end,
                 CodeGenFixups& fixups,
                 TCA* exitAddr);
+
 }
 
 //////////////////////////////////////////////////////////////////////

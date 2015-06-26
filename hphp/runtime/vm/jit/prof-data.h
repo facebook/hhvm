@@ -79,6 +79,8 @@ class PrologueCallersRec : private boost::noncopyable {
   void                      addMainCaller(TCA caller);
   void                      addGuardCaller(TCA caller);
   void                      clearAllCallers();
+  void                      removeMainCaller(TCA caller);
+  void                      removeGuardCaller(TCA caller);
 
  private:
   PrologueCallersVec m_mainCallers;

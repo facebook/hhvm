@@ -77,6 +77,14 @@ struct GrowableVector {
   }
   T* begin() const { return m_vec ? m_vec->m_data : (T*)this; }
   T* end() const { return m_vec ? &m_vec->m_data[m_vec->m_size] : (T*)this; }
+  void setEnd(T* newEnd) {
+    if (newEnd == begin()) {
+      free(m_vec);
+      m_vec = nullptr;
+      return;
+    }
+    m_vec->m_size = newEnd - m_vec->m_data;
+  }
 private:
   struct Impl {
     uint32_t m_size;
@@ -165,6 +173,58 @@ private:
 };
 
 /*
+ * TransLoc: the location of a translation in the TC
+ *
+ * All offsets are stored relative to the start of the TC, and the sizes of the
+ * cold and frozen regions are encoded in the first four bytes of their
+ * respective regions.
+ */
+struct TransLoc {
+  void setMainStart(TCA newStart);
+  void setColdStart(TCA newStart);
+  void setFrozenStart(TCA newFrozen);
+
+  void setMainSize(size_t size) {
+    assert(size < std::numeric_limits<uint32_t>::max());
+    m_mainLen = (uint32_t)size;
+  }
+
+  bool contains(TCA loc) {
+    return (mainStart() <= loc && loc < mainEnd()) ||
+      (coldStart() <= loc && loc < coldEnd()) ||
+      (frozenStart() <= loc && loc < frozenEnd());
+  }
+
+  TCA mainStart() const;
+  TCA coldStart() const;
+  TCA frozenStart() const;
+
+  TCA coldCodeStart()   const { return coldStart()   + sizeof(uint32_t); }
+  TCA frozenCodeStart() const { return frozenStart() + sizeof(uint32_t); }
+
+  uint32_t coldCodeSize()   const { return coldSize()   - sizeof(uint32_t); }
+  uint32_t frozenCodeSize() const { return frozenSize() - sizeof(uint32_t); }
+
+  TCA mainEnd()   const { return mainStart() + m_mainLen; }
+  TCA coldEnd()   const { return coldStart() + coldSize(); }
+  TCA frozenEnd() const { return frozenStart() + frozenSize(); }
+
+  uint32_t mainSize()   const { return m_mainLen; }
+  uint32_t coldSize()   const { return *(uint32_t*)coldStart(); }
+  uint32_t frozenSize() const { return *(uint32_t*)frozenStart(); }
+
+private:
+  uint32_t m_mainOff {std::numeric_limits<uint32_t>::max()};
+  uint32_t m_mainLen {0};
+
+  uint32_t m_coldOff   {std::numeric_limits<uint32_t>::max()};
+  uint32_t m_frozenOff {std::numeric_limits<uint32_t>::max()};
+};
+
+// Prevent unintentional growth of the SrcDB
+static_assert(sizeof(TransLoc) == 16, "Don't add fields to TransLoc");
+
+/*
  * SrcRec: record of translator output for a given source location.
  */
 struct SrcRec {
@@ -202,14 +262,14 @@ struct SrcRec {
                               TransFlags trflags,
                               ConditionCode cc = CC_None);
   TCA getFallbackTranslation() const;
-  void newTranslation(TCA newStart,
+  void newTranslation(TransLoc newStart,
                       GrowableVector<IncomingBranch>& inProgressTailBranches);
   void replaceOldTranslations();
   void addDebuggerGuard(TCA dbgGuard, TCA m_dbgBranchGuardSrc);
   bool hasDebuggerGuard() const { return m_dbgBranchGuardSrc != nullptr; }
   const MD5& unitMd5() const { return m_unitMd5; }
 
-  const GrowableVector<TCA>& translations() const {
+  const GrowableVector<TransLoc>& translations() const {
     return m_translations;
   }
 
@@ -241,6 +301,8 @@ struct SrcRec {
   }
 
   void relocate(RelocationInfo& rel);
+
+  void removeIncomingBranch(TCA toSmash);
 
   /*
    * There is an unlikely race in retranslate, where two threads
@@ -280,7 +342,7 @@ private:
   TCA m_anchorTranslation;
   GrowableVector<IncomingBranch> m_tailFallbackJumps;
 
-  GrowableVector<TCA> m_translations;
+  GrowableVector<TransLoc> m_translations;
   GrowableVector<IncomingBranch> m_incomingBranches;
   MD5 m_unitMd5;
   // The branch src for the debug guard, if this has one.

@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/thread-hooks.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/recycle-tc.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/repo.h"
 
@@ -758,6 +759,20 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("rds-persistent", rds::usedPersistentBytes());
     appendStat("units", numLoadedUnits());
     appendStat("funcs", Func::nextFuncId());
+
+    if (RuntimeOption::EvalEnableReusableTC) {
+      mCGenerator->code.forEachBlock([&](const char* name, const CodeBlock& a) {
+        appendStat(folly::format("tc-{}-allocs", name).str(), a.numAllocs());
+        appendStat(folly::format("tc-{}-frees", name).str(), a.numFrees());
+        appendStat(folly::format("tc-{}-free-size", name).str(), a.bytesFree());
+        appendStat(folly::format("tc-{}-free-blocks", name).str(),
+                   a.blocksFree());
+      });
+      appendStat("tc-recorded-funcs", jit::recordedFuncs());
+      appendStat("tc-smashed-calls", jit::smashedCalls());
+      appendStat("tc-smashed-branches", jit::smashedBranches());
+    }
+
     out << "}" << endl;
     transport->sendString(out.str());
     return true;

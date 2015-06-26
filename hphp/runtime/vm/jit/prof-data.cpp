@@ -65,6 +65,16 @@ const PrologueCallersVec& PrologueCallersRec::guardCallers() const {
   return m_guardCallers;
 }
 
+void PrologueCallersRec::removeMainCaller(TCA caller) {
+  auto pos = std::find(m_mainCallers.begin(), m_mainCallers.end(), caller);
+  if (pos != m_mainCallers.end()) m_mainCallers.erase(pos);
+}
+
+void PrologueCallersRec::removeGuardCaller(TCA caller) {
+  auto pos = std::find(m_guardCallers.begin(), m_guardCallers.end(), caller);
+  if (pos != m_mainCallers.end()) m_guardCallers.erase(pos);
+}
+
 void PrologueCallersRec::addMainCaller(TCA caller) {
   m_mainCallers.push_back(caller);
 }

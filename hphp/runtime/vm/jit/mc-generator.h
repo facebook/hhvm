@@ -60,6 +60,7 @@ constexpr int kTestImmRegLen = 5;  // only for rax -- special encoding
 // mutations don't "tear" on remote cpus.
 constexpr size_t kX64CacheLineSize = 64;
 constexpr size_t kX64CacheLineMask = kX64CacheLineSize - 1;
+const TCA kInvalidCatchTrace   = (TCA)(-1);
 
 //////////////////////////////////////////////////////////////////////
 

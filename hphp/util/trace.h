@@ -146,6 +146,7 @@ namespace Trace {
       TM(refcount)      \
       TM(regalloc)      \
       TM(region)        \
+      TM(reusetc)       \
       TM(ringbuffer)    \
       TM(runtime)       \
       TM(servicereq)    \

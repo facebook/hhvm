@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_DATA_BLOCK_H
 #define incl_HPHP_DATA_BLOCK_H
 
+#include <map>
+#include <set>
 #include <cstdint>
 #include <cstring>
 #include <sys/mman.h>
@@ -52,7 +54,16 @@ class DataBlockFull : public std::runtime_error {
 };
 
 /**
- * DataBlock is a simple bump-allocating wrapper around a chunk of memory.
+ * DataBlock is a simple bump-allocating wrapper around a chunk of memory, with
+ * basic tracking for unused memory and a simple interface to allocate it.
+ *
+ * Memory is allocated from the end of the block unless specifically allocated
+ * using allocInner.
+ *
+ * Unused memory can be freed using free(), if the memory is at the end of the
+ * block, the frontier will be moved back.
+ *
+ * Free memory is coalesced and allocation is done by best-fit.
  */
 struct DataBlock {
 
@@ -238,14 +249,35 @@ struct DataBlock {
     clear();
   }
 
+  // Append address range to free list
+  void free(void* addr, size_t len);
+
+  // Attempt to allocate a range from within the free list
+  void* allocInner(size_t len);
+
+  size_t numFrees()   const { return m_nfree; }
+  size_t numAllocs()  const { return m_nalloc; }
+  size_t bytesFree()  const { return m_bytesFree; }
+  size_t blocksFree() const { return m_freeRanges.size(); }
+
  protected:
   Address m_base;
   Address m_frontier;
   size_t  m_size;
   std::string m_name;
+
+  using Offset = uint32_t;
+  using Size = uint32_t;
+
+  size_t m_nfree{0};
+  size_t m_nalloc{0};
+
+  size_t m_bytesFree{0};
+  std::unordered_map<Offset, int64_t> m_freeRanges;
+  std::map<Size, std::unordered_set<Offset>> m_freeLists;
 };
 
-typedef DataBlock CodeBlock;
+using CodeBlock = DataBlock;
 
 //////////////////////////////////////////////////////////////////////
 

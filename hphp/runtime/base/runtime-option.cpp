@@ -476,6 +476,10 @@ static inline bool jitLLVMSLPVectorizeDefault() {
          RuntimeOption::EvalJitLLVMSizeLevel < 2;
 }
 
+static inline bool reuseTCDefault() {
+  return hhvm_reuse_tc && !RuntimeOption::RepoAuthoritative;
+}
+
 static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }

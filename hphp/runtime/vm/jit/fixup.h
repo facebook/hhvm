@@ -149,7 +149,12 @@ struct FixupMap {
   void recordFixup(CTCA tca, const Fixup& fixup) {
     TRACE(3, "FixupMapImpl::recordFixup: tca %p -> (pcOff %d, spOff %d)\n",
           tca, fixup.pcOffset, fixup.spOffset);
-    m_fixups.insert(tca, FixupEntry(fixup));
+
+    if (auto pos = m_fixups.find(tca)) {
+      *pos = FixupEntry(fixup);
+    } else {
+      m_fixups.insert(tca, FixupEntry(fixup));
+    }
   }
 
   const Fixup* findFixup(CTCA tca) const {

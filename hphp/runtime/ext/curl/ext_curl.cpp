@@ -3231,7 +3231,6 @@ class CurlExtension final : public Extension {
 
     IniSetting::Bind(ext, IniSetting::PHP_INI_SYSTEM, "curl.namedPools",
       "", &s_namedPools);
-    IniSetting::Get("curl.namedPools");
     if (s_namedPools.length() > 0) {
 
       // split on commas, search and bind ini settings for each pool
@@ -3254,10 +3253,6 @@ class CurlExtension final : public Extension {
             "100", &s_reuseLimit);
         IniSetting::Bind(ext, IniSetting::PHP_INI_SYSTEM, getTimeoutIni,
             "5000", &s_getTimeout);
-
-        IniSetting::Get(poolSizeIni);
-        IniSetting::Get(reuseLimitIni);
-        IniSetting::Get(getTimeoutIni);
 
         CurlHandlePool *hp =
           new CurlHandlePool(s_poolSize, s_getTimeout, s_reuseLimit);

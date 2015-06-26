@@ -121,10 +121,7 @@ TypedValue cGetPropImpl(Class* ctx, TypedValue* base,
   TypedValue scratch;
   TypedValue* result = Prop<true, false, false, isObj, keyType>(
     scratch, mis->tvRef, ctx, base, key);
-
-  if (result->m_type == KindOfRef) {
-    result = result->m_data.pref->tv();
-  }
+  result = tvToCell(result);
   tvRefcountedIncRef(result);
   return *result;
 }
@@ -150,7 +147,8 @@ CGETPROP_HELPER_TABLE(X)
 inline TypedValue cGetPropSQ(Class* ctx, TypedValue* base,
                              StringData* key, MInstrState* mis) {
   TypedValue scratch;
-  auto const result = nullSafeProp(scratch, mis->tvRef, ctx, base, key);
+  auto result = nullSafeProp(scratch, mis->tvRef, ctx, base, key);
+  result = tvToCell(result);
   tvRefcountedIncRef(result);
   return *result;
 }
@@ -159,7 +157,8 @@ inline TypedValue cGetPropSQ(Class* ctx, TypedValue* base,
 inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base,
                              StringData* key, MInstrState* mis) {
   TypedValue scratch;
-  auto const result = base->prop(&scratch, &mis->tvRef, ctx, key);
+  auto result = base->prop(&scratch, &mis->tvRef, ctx, key);
+  result = tvToCell(result);
   tvRefcountedIncRef(result);
   return *result;
 }

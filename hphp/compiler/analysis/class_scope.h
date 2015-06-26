@@ -246,23 +246,6 @@ public:
                        AnalysisResultConstPtr ar);
 
   /**
-   * Caller is assumed to hold a lock on this scope
-   */
-  TypePtr checkProperty(BlockScopeRawPtr context,
-                        Symbol *sym, TypePtr type,
-                        bool coerce, AnalysisResultConstPtr ar);
-
-  /**
-   * Caller is *NOT* assumed to hold any locks. Context is
-   */
-  TypePtr checkConst(BlockScopeRawPtr context,
-                     const std::string &name, TypePtr type,
-                     bool coerce, AnalysisResultConstPtr ar,
-                     ConstructPtr construct,
-                     const std::vector<std::string> &bases,
-                     BlockScope *&defScope);
-
-  /**
    * Collect parent class names.
    */
   void getInterfaces(AnalysisResultConstPtr ar,

@@ -70,15 +70,6 @@ public:
                 ExpressionPtr value);
 
   /**
-   * Called when a constant is used or being evaluated (r-value).
-   */
-  TypePtr check(BlockScopeRawPtr context,
-                const std::string &name, TypePtr type, bool coerce,
-                AnalysisResultConstPtr ar, ConstructPtr construct,
-                const std::vector<std::string> &bases,
-                BlockScope *&defScope);
-
-  /**
    * Generate all constant declarations for this symbol table.
    */
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);

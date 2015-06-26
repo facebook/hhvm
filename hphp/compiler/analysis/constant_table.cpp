@@ -155,63 +155,6 @@ void ConstantTable::cleanupForError(AnalysisResultConstPtr ar) {
   }
 }
 
-TypePtr ConstantTable::check(BlockScopeRawPtr context,
-                             const std::string &name, TypePtr type,
-                             bool coerce, AnalysisResultConstPtr ar,
-                             ConstructPtr construct,
-                             const std::vector<std::string> &bases,
-                             BlockScope *&defScope) {
-  assert(!m_blockScope.is(BlockScope::FunctionScope));
-  bool isClassScope = m_blockScope.is(BlockScope::ClassScope);
-  TypePtr actualType;
-  defScope = nullptr;
-  if (name == "true" || name == "false") {
-    actualType = Type::Boolean;
-  } else {
-    Symbol *sym = getSymbol(name);
-    if (!sym) {
-      if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
-        if (isClassScope) {
-          ClassScopeRawPtr parent = findBase(ar, name, bases);
-          if (parent) {
-            actualType = parent->getConstants()->check(
-              context, name, type, coerce, ar, construct, bases, defScope);
-            if (defScope) return actualType;
-          }
-        }
-        if (!isClassScope || !((ClassScope*)&m_blockScope)->isTrait()) {
-          if (strcasecmp("class", name.c_str())) {
-            Compiler::Error(Compiler::UseUndeclaredConstant, construct);
-          }
-        }
-        actualType = isClassScope || !Option::WholeProgram ?
-          Type::Variant : Type::String;
-      }
-    } else {
-      assert(sym->isPresent());
-      assert(sym->getType());
-      assert(sym->isConstant());
-      defScope = &m_blockScope;
-      if (isClassScope) {
-        // if the current scope is a function scope, grab the lock.
-        // otherwise if it's a class scope, then *try* to grab the lock.
-        if (context->is(BlockScope::FunctionScope)) {
-          GET_LOCK(BlockScopeRawPtr(&m_blockScope));
-          return setType(ar, sym, type, coerce);
-        } else {
-          TRY_LOCK(BlockScopeRawPtr(&m_blockScope));
-          return setType(ar, sym, type, coerce);
-        }
-      } else {
-        Lock lock(m_blockScope.getMutex());
-        return setType(ar, sym, type, coerce);
-      }
-    }
-  }
-
-  return actualType;
-}
-
 ClassScopePtr ConstantTable::findParent(AnalysisResultConstPtr ar,
                                         const std::string &name) const {
   for (ClassScopePtr parent = m_blockScope.getParentScope(ar);

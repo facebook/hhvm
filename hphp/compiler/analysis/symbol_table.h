@@ -56,10 +56,6 @@ public:
 
   void import(BlockScopeRawPtr scope, const Symbol &src_sym);
 
-  void beginLocal(BlockScopeRawPtr scope);
-  void endLocal  (BlockScopeRawPtr scope);
-  void resetLocal(BlockScopeRawPtr scope);
-
   void setName(const std::string &name) {
     m_name = name;
     m_hash = (unsigned int) hash_string_unsafe(m_name.c_str(), m_name.size());
@@ -292,10 +288,6 @@ public:
   SymbolTable(BlockScope &blockScope, bool isConst);
   SymbolTable();
   virtual ~SymbolTable();
-
-  void beginLocal();
-  void endLocal();
-  void resetLocal();
 
   /**
    * Import system symbols into this.

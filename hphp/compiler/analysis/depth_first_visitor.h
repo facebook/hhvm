@@ -183,18 +183,6 @@ public:
     }
     assert((int)buffer.size() == numSetMarks);
 
-#ifdef HPHP_DETAILED_TYPE_INF_ASSERT
-    // verify:
-    // (1) every scope in scopes is either MarkProcessingDeps OR
-    //     MarkProcessed
-    for (BlockScopeRawPtrQueue::const_iterator it = scopes.begin();
-         it != scopes.end(); ++it) {
-      int m = (*it)->getMark();
-      assert(m == BlockScope::MarkProcessingDeps ||
-             m == BlockScope::MarkProcessed);
-    }
-#endif /* HPHP_DETAILED_TYPE_INF_ASSERT */
-
     {
       Lock l1(BlockScope::s_depsMutex);
       Lock l2(BlockScope::s_jobStateMutex);

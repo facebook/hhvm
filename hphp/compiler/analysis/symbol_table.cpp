@@ -78,73 +78,6 @@ TypePtr Symbol::setType(AnalysisResultConstPtr ar, BlockScopeRawPtr scope,
   return type;
 }
 
-void Symbol::beginLocal(BlockScopeRawPtr scope) {
-  m_prevCoerced = m_coerced;
-  if (isClosureVar()) {
-    ExpressionListPtr useVars =
-      scope->getContainingFunction()->getClosureVars();
-    assert(useVars);
-    // linear scan for now, since most use var lists are
-    // fairly short
-    bool found = false;
-    for (int i = 0; i < useVars->getCount(); i++) {
-      ParameterExpressionPtr param =
-        dynamic_pointer_cast<ParameterExpression>((*useVars)[i]);
-      if (m_name == param->getName()) {
-        // bootstrap use var with parameter type
-        m_coerced = param->getType();
-        found = true;
-        break;
-      }
-    }
-    if (!found) assert(false);
-    assert(!isRefClosureVar() ||
-           (m_coerced && m_coerced->is(Type::KindOfVariant)));
-  } else {
-    m_coerced.reset();
-  }
-}
-
-void Symbol::resetLocal(BlockScopeRawPtr scope) {
-  if (!m_prevCoerced) return;
-  if (!m_coerced) {
-    // We either A) have not processed this symbol yet or B) we did not process
-    // it in lvalue context. Either way, restore the previous type information,
-    // since we can get away with it (we haven't broadcast any updates about
-    // this symbol's type)
-    m_coerced = m_prevCoerced;
-    m_prevCoerced.reset();
-    return;
-  }
-  // At this point, we've processed some type information about this symbol.
-  // Since we might have broadcast an update about this symbol (it could have
-  // been a parameter, constant, or global variable), we need to keep this type
-  // information around (even though it is potentially partially incomplete).
-  // Note that this is always the conservative thing to do (since we know this
-  // scope is going to be run again).
-  if (m_coerced->is(Type::KindOfSome) ||
-      m_coerced->is(Type::KindOfAny)) {
-    m_coerced = Type::Variant;
-  }
-  if (!Type::SameType(m_coerced, m_prevCoerced)) {
-    triggerUpdates(scope);
-  }
-  m_prevCoerced.reset();
-}
-
-void Symbol::endLocal(BlockScopeRawPtr scope) {
-  if (!m_prevCoerced) return;
-  if (!m_coerced ||
-      m_coerced->is(Type::KindOfSome) ||
-      m_coerced->is(Type::KindOfAny)) {
-    m_coerced = Type::Variant;
-  }
-  if (!Type::SameType(m_coerced, m_prevCoerced)) {
-    triggerUpdates(scope);
-  }
-  m_prevCoerced.reset();
-}
-
 void Symbol::triggerUpdates(BlockScopeRawPtr scope) const {
   int useKind = BlockScope::GetNonStaticRefUseKind(getHash());
   if (isConstant()) {
@@ -185,7 +118,6 @@ void Symbol::triggerUpdates(BlockScopeRawPtr scope) const {
        * into a define('FOO', 1) by earlier phases of the compiler
        */
       if (scope->is(BlockScope::FileScope)) {
-        declScope->announceUpdates(BlockScope::UseKindConstRef);
         return;
       }
     }
@@ -370,30 +302,6 @@ void SymbolTable::import(SymbolTablePtr src) {
     Symbol &dst_sym = m_symbolMap[src_sym.getName()];
     m_symbolVec.push_back(&dst_sym);
     dst_sym.import(getBlockScope(), src_sym);
-  }
-}
-
-void SymbolTable::beginLocal() {
-  BlockScopeRawPtr p(&m_blockScope);
-  for (unsigned int i = 0, s = m_symbolVec.size(); i < s; i++) {
-    Symbol *sym = m_symbolVec[i];
-    sym->beginLocal(p);
-  }
-}
-
-void SymbolTable::endLocal() {
-  BlockScopeRawPtr p(&m_blockScope);
-  for (unsigned int i = 0, s = m_symbolVec.size(); i < s; i++) {
-    Symbol *sym = m_symbolVec[i];
-    sym->endLocal(p);
-  }
-}
-
-void SymbolTable::resetLocal() {
-  BlockScopeRawPtr p(&m_blockScope);
-  for (unsigned int i = 0, s = m_symbolVec.size(); i < s; i++) {
-    Symbol *sym = m_symbolVec[i];
-    sym->resetLocal(p);
   }
 }
 

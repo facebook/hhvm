@@ -437,27 +437,6 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
   return sym;
 }
 
-TypePtr VariableTable::checkProperty(BlockScopeRawPtr context,
-                                     Symbol *sym, TypePtr type,
-                                     bool coerce, AnalysisResultConstPtr ar) {
-  always_assert(sym->isPresent());
-  if (sym->isOverride()) {
-    Symbol *base;
-    ClassScopePtr parent = findParent(ar, sym->getName(), base);
-    assert(parent);
-    assert(parent.get() != &m_blockScope);
-    assert(base && !base->isPrivate());
-    if (context->is(BlockScope::FunctionScope)) {
-      GET_LOCK(parent);
-      type = parent->getVariables()->setType(ar, base, type, coerce);
-    } else {
-      TRY_LOCK(parent);
-      type = parent->getVariables()->setType(ar, base, type, coerce);
-    }
-  }
-  return setType(ar, sym, type, coerce);
-}
-
 bool VariableTable::checkRedeclared(const string &name,
                                     Statement::KindOf kindOf)
 {

@@ -42,8 +42,7 @@ BlockScope::BlockScope(const std::string &name, const std::string &docComment,
     m_kind(kind), m_loopNestedLevel(0),
     m_pass(0), m_updated(0), m_runId(0), m_mark(MarkWaitingInQueue),
     m_effectsTag(1), m_numDepsToWaitFor(0),
-    m_forceRerun(false), m_inTypeInference(false),
-    m_inVisitScopes(false), m_needsReschedule(false),
+    m_forceRerun(false),
     m_rescheduleFlags(0), m_selfUser(0) {
   m_originalName = name;
   m_name = toLower(name);
@@ -169,45 +168,7 @@ void BlockScope::addUse(BlockScopeRawPtr user, int useKinds) {
 
 void BlockScope::addUpdates(int f) {
   assert(f > 0);
-  if (inTypeInference()) {
-    // we *must* have the mutex
-    getInferTypesMutex().assertOwnedBySelf();
-
-    m_updated |= f;
-
-    // If this scope is currently being processed by this thread, don't bother
-    // adding it to the updated map. otherwise, add it
-    if (AnalysisResult::s_currentScopeThreadLocal->get() != this) {
-      BlockScopeRawPtr self(this);
-      std::pair< BlockScopeRawPtrFlagsHashMap::iterator, bool > val =
-        AnalysisResult::s_changedScopesMapThreadLocal->insert(
-          BlockScopeRawPtrFlagsHashMap::value_type(self, f));
-      if (!val.second) {
-        // not new, or the updated bits together
-        val.first->second |= f;
-      }
-    }
-  } else {
-    m_updated |= f;
-  }
-}
-
-void BlockScope::announceUpdates(int f) {
-  assert(f > 0);
-  if (inTypeInference()) {
-    // If this scope is currently being processed by this thread, don't bother
-    // adding it to the updated map. otherwise, add it
-    if (AnalysisResult::s_currentScopeThreadLocal->get() != this) {
-      BlockScopeRawPtr self(this);
-      std::pair< BlockScopeRawPtrFlagsHashMap::iterator, bool > val =
-        AnalysisResult::s_changedScopesMapThreadLocal->insert(
-          BlockScopeRawPtrFlagsHashMap::value_type(self, f));
-      if (!val.second) {
-        // not new, or the updated bits together
-        val.first->second |= f;
-      }
-    }
-  }
+  m_updated |= f;
 }
 
 ModifierExpressionPtr

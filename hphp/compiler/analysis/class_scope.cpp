@@ -1031,23 +1031,6 @@ Symbol *ClassScope::findProperty(ClassScopePtr &cls,
   return getVariables()->findProperty(cls, name, ar);
 }
 
-TypePtr ClassScope::checkProperty(BlockScopeRawPtr context,
-                                  Symbol *sym, TypePtr type,
-                                  bool coerce, AnalysisResultConstPtr ar) {
-  return getVariables()->checkProperty(context, sym, type, coerce, ar);
-}
-
-TypePtr ClassScope::checkConst(BlockScopeRawPtr context,
-                               const std::string &name, TypePtr type,
-                               bool coerce, AnalysisResultConstPtr ar,
-                               ConstructPtr construct,
-                               const std::vector<std::string> &bases,
-                               BlockScope *&defScope) {
-  defScope = nullptr;
-  return getConstants()->check(context, name, type, coerce,
-                               ar, construct, m_bases, defScope);
-}
-
 void ClassScope::getInterfaces(AnalysisResultConstPtr ar,
                                std::vector<std::string> &names,
                                bool recursive /* = true */) const {

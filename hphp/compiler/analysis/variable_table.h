@@ -200,15 +200,6 @@ public:
                        AnalysisResultConstPtr ar);
 
   /**
-   * Caller is responsible for grabbing a lock on this class scope,
-   * This function will be responsible for grabbing (and releasing)
-   * a lock on the parent scope if necessary.
-   */
-  TypePtr checkProperty(BlockScopeRawPtr context,
-                        Symbol *sym, TypePtr type,
-                        bool coerce, AnalysisResultConstPtr ar);
-
-  /**
    * Walk up to find first parent that has the specified symbol.
    */
   ClassScopePtr findParent(AnalysisResultConstPtr ar,

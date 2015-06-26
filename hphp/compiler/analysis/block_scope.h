@@ -252,23 +252,7 @@ public:
 
   void clearUpdated() { m_updated = 0; }
   void addUpdates(int f);
-  void announceUpdates(int f);
   int getUpdated() const { return m_updated; }
-
-  void setInTypeInference(bool inTypeInference) {
-    m_inTypeInference = inTypeInference;
-  }
-  bool inTypeInference() const { return m_inTypeInference; }
-
-  void setInVisitScopes(bool inVisitScopes) {
-    m_inVisitScopes = inVisitScopes;
-  }
-  bool inVisitScopes() const { return m_inVisitScopes; }
-
-  void setNeedsReschedule(bool needsReschedule) {
-    m_needsReschedule = needsReschedule;
-  }
-  bool needsReschedule() const { return m_needsReschedule; }
 
   void setRescheduleFlags(int rescheduleFlags) {
     m_rescheduleFlags = rescheduleFlags;
@@ -279,7 +263,6 @@ public:
   int getEffectsTag() const { return m_effectsTag; }
 
   Mutex &getMutex() { return m_mutex; }
-  InferTypesMutex &getInferTypesMutex() { return m_inferTypesMutex; }
 
   void setNumDepsToWaitFor(int n) {
     assert(n >= 0);
@@ -294,27 +277,6 @@ public:
   int decNumDepsToWaitFor() {
     assert(m_numDepsToWaitFor > 0);
     return --m_numDepsToWaitFor;
-  }
-
-  inline void assertNumDepsSanity() const {
-#ifdef HPHP_DETAILED_TYPE_INF_ASSERT
-    int waiting = 0;
-    const BlockScopeRawPtrFlagsPtrVec &deps = getDeps();
-    for (BlockScopeRawPtrFlagsPtrVec::const_iterator it = deps.begin(),
-         end = deps.end(); it != end; ++it) {
-      const BlockScopeRawPtrFlagsPtrPair &p(*it);
-      int m = p.first->getMark();
-      if (m == MarkWaiting ||
-          m == MarkReady   ||
-          m == MarkProcessing) {
-        waiting++;
-      } else {
-        assert(m == MarkProcessed);
-      }
-    }
-    // >= b/c of cycles
-    assert(waiting >= getNumDepsToWaitFor());
-#endif /* HPHP_DETAILED_TYPE_INF_ASSERT */
   }
 
   void setForceRerun(bool v) { m_forceRerun = v; }
@@ -347,13 +309,8 @@ private:
   int m_effectsTag;
   int m_numDepsToWaitFor;
   Mutex m_mutex;
-  InferTypesMutex m_inferTypesMutex;
   bool m_forceRerun;      /* do we need to be re-run (allows deps to run during
                            * re-schedule) */
-  bool m_inTypeInference; /* are we in AnalysisResult::inferTypes() */
-  bool m_inVisitScopes;   /* are we in visitScope() */
-  bool m_needsReschedule; /* do we need to be re-scheduled (does not allow deps
-                           * to run during re-schedule)  */
   int  m_rescheduleFlags; /* who do we need to run after a re-schedule */
   int  m_selfUser;
 public:

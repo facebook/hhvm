@@ -1000,7 +1000,7 @@ ObjectData* ObjectData::clone() {
     } else if (instanceof(c_Closure::classof())) {
       return c_Closure::Clone(this);
     } else if (instanceof(c_Generator::classof())) {
-      return GeneratorData::Clone(this)->toObject();
+      return Generator::Clone(this)->toObject();
     } else if (instanceof(c_SimpleXMLElement::classof())) {
       return c_SimpleXMLElement::Clone(this);
     }

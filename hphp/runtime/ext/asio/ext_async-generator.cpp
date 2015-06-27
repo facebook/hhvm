@@ -39,7 +39,7 @@ void delete_AsyncGenerator(ObjectData* od, const Class*) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-AsyncGeneratorData::~AsyncGeneratorData() {
+AsyncGenerator::~AsyncGenerator() {
   if (LIKELY(getState() == State::Done)) {
     return;
   }
@@ -53,15 +53,15 @@ AsyncGeneratorData::~AsyncGeneratorData() {
 }
 
 ObjectData*
-AsyncGeneratorData::Create(const ActRec* fp, size_t numSlots,
-                           jit::TCA resumeAddr, Offset resumeOffset) {
+AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
+                       jit::TCA resumeAddr, Offset resumeOffset) {
   assert(fp);
   assert(!fp->resumed());
   assert(fp->func()->isAsyncGenerator());
   void* genDataPtr = Resumable::Create<false,
-                       sizeof(AsyncGeneratorData) + sizeof(c_AsyncGenerator)>(
+                       sizeof(AsyncGenerator) + sizeof(c_AsyncGenerator)>(
                        fp, numSlots, resumeAddr, resumeOffset);
-  AsyncGeneratorData* genData = new (genDataPtr) AsyncGeneratorData();
+  AsyncGenerator* genData = new (genDataPtr) AsyncGenerator();
   auto const gen = new (genData + 1) c_AsyncGenerator();
   assert(gen->hasExactlyOneRef());
   assert(gen->noDestruct());
@@ -71,7 +71,7 @@ AsyncGeneratorData::Create(const ActRec* fp, size_t numSlots,
 }
 
 c_AsyncGeneratorWaitHandle*
-AsyncGeneratorData::await(Offset resumeOffset, c_WaitableWaitHandle* child) {
+AsyncGenerator::await(Offset resumeOffset, c_WaitableWaitHandle* child) {
   assert(getState() == State::Running);
   resumable()->setResumeAddr(nullptr, resumeOffset);
 
@@ -87,8 +87,8 @@ AsyncGeneratorData::await(Offset resumeOffset, c_WaitableWaitHandle* child) {
 }
 
 c_StaticWaitHandle*
-AsyncGeneratorData::yield(Offset resumeOffset,
-                        const Cell* key, const Cell value) {
+AsyncGenerator::yield(Offset resumeOffset,
+                      const Cell* key, const Cell value) {
   assert(getState() == State::Running);
   resumable()->setResumeAddr(nullptr, resumeOffset);
   setState(State::Started);
@@ -110,7 +110,7 @@ AsyncGeneratorData::yield(Offset resumeOffset,
 }
 
 c_StaticWaitHandle*
-AsyncGeneratorData::ret() {
+AsyncGenerator::ret() {
   assert(getState() == State::Running);
   setState(State::Done);
 
@@ -127,7 +127,7 @@ AsyncGeneratorData::ret() {
 }
 
 c_StaticWaitHandle*
-AsyncGeneratorData::fail(ObjectData* exception) {
+AsyncGenerator::fail(ObjectData* exception) {
   assert(getState() == State::Running);
   setState(State::Done);
 
@@ -141,7 +141,7 @@ AsyncGeneratorData::fail(ObjectData* exception) {
   }
 }
 
-void AsyncGeneratorData::failCpp() {
+void AsyncGenerator::failCpp() {
   assert(getState() == State::Running);
   setState(State::Done);
 

@@ -52,7 +52,7 @@ namespace HPHP {
  *                        | ActRec in Resumable     |
  *                        +-------------------------+
  *                        | Rest of Resumable       |
- *  BaseGeneratorData* -> +-------------------------+
+ *  BaseGenerator* ->     +-------------------------+
  *                        | Parent Generator Data   |
  *         ObjectData* -> +-------------------------+
  *                        | Parent object           |

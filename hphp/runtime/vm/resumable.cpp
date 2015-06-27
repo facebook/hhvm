@@ -25,9 +25,9 @@ namespace HPHP {
 Resumable* Resumable::FromObj(ObjectData* obj) {
   auto const cls = obj->getVMClass();
   size_t objectOff = (cls == c_Generator::classof())
-    ? GeneratorData::objectOff()
+    ? Generator::objectOff()
     : (cls == c_AsyncGenerator::classof())
-    ?  AsyncGeneratorData::objectOff()
+    ?  AsyncGenerator::objectOff()
     :/*async function*/ 0;
   return reinterpret_cast<Resumable*>(
     reinterpret_cast<char*>(obj) - objectOff) - 1;
@@ -36,9 +36,9 @@ Resumable* Resumable::FromObj(ObjectData* obj) {
 const Resumable* Resumable::FromObj(const ObjectData* obj) {
   auto const cls = obj->getVMClass();
   size_t objectOff = (cls == c_Generator::classof())
-    ? GeneratorData::objectOff()
+    ? Generator::objectOff()
     : (cls == c_AsyncGenerator::classof())
-    ?  AsyncGeneratorData::objectOff()
+    ?  AsyncGenerator::objectOff()
     :/*async function*/ 0;
   return reinterpret_cast<const Resumable*>(
     reinterpret_cast<const char*>(obj) - objectOff) - 1;

@@ -7049,18 +7049,18 @@ OPTBLD_INLINE void iopCreateCl(IOP_ARGS) {
   vmStack().pushObjectNoRc(cl);
 }
 
-static inline BaseGeneratorData* this_base_generator(const ActRec* fp) {
+static inline BaseGenerator* this_base_generator(const ActRec* fp) {
   auto const obj = fp->getThis();
   assert(obj->getVMClass() == c_AsyncGenerator::classof() ||
          obj->getVMClass() == c_Generator::classof());
   return obj->getVMClass() == c_Generator::classof()
-    ? static_cast<BaseGeneratorData*>(GeneratorData::fromObject(obj))
-    : static_cast<BaseGeneratorData*>(AsyncGeneratorData::fromObject(obj));
+    ? static_cast<BaseGenerator*>(Generator::fromObject(obj))
+    : static_cast<BaseGenerator*>(AsyncGenerator::fromObject(obj));
 }
 
-static inline GeneratorData* this_generator(const ActRec* fp) {
+static inline Generator* this_generator(const ActRec* fp) {
   auto const obj = fp->getThis();
-  return GeneratorData::fromObject(obj);
+  return Generator::fromObject(obj);
 }
 
 const StaticString s_this("this");
@@ -7079,12 +7079,12 @@ OPTBLD_INLINE TCA iopCreateCont(IOP_ARGS) {
   // Create the {Async,}Generator object. Create takes care of copying local
   // variables and iterators.
   auto const obj = func->isAsync()
-    ? AsyncGeneratorData::Create(fp, numSlots, nullptr, resumeOffset)
-    : GeneratorData::Create<false>(fp, numSlots, nullptr, resumeOffset);
+    ? AsyncGenerator::Create(fp, numSlots, nullptr, resumeOffset)
+    : Generator::Create<false>(fp, numSlots, nullptr, resumeOffset);
 
   auto const genData = func->isAsync() ?
-    static_cast<BaseGeneratorData*>(AsyncGeneratorData::fromObject(obj)) :
-    static_cast<BaseGeneratorData*>(GeneratorData::fromObject(obj));
+    static_cast<BaseGenerator*>(AsyncGenerator::fromObject(obj)) :
+    static_cast<BaseGenerator*>(Generator::fromObject(obj));
 
   EventHook::FunctionSuspendE(fp, genData->actRec());
 
@@ -7115,7 +7115,7 @@ OPTBLD_INLINE void contEnterImpl(PC& pc) {
   // Do linkage of the generator's AR.
   assert(vmfp()->hasThis());
   auto const gen = this_base_generator(vmfp());
-  assert(gen->getState() == BaseGeneratorData::State::Running);
+  assert(gen->getState() == BaseGenerator::State::Running);
   ActRec* genAR = gen->actRec();
   genAR->setReturn(vmfp(), pc, genAR->func()->isAsync() ?
     mcg->tx().uniqueStubs.asyncGenRetHelper :
@@ -7205,19 +7205,19 @@ OPTBLD_INLINE void iopContCheck(IOP_ARGS) {
 OPTBLD_INLINE void iopContValid(IOP_ARGS) {
   pc++;
   vmStack().pushBool(
-    this_generator(vmfp())->getState() != BaseGeneratorData::State::Done);
+    this_generator(vmfp())->getState() != BaseGenerator::State::Done);
 }
 
 OPTBLD_INLINE void iopContKey(IOP_ARGS) {
   pc++;
-  GeneratorData* cont = this_generator(vmfp());
+  Generator* cont = this_generator(vmfp());
   cont->startedCheck();
   cellDup(cont->m_key, *vmStack().allocC());
 }
 
 OPTBLD_INLINE void iopContCurrent(IOP_ARGS) {
   pc++;
-  GeneratorData* cont = this_generator(vmfp());
+  Generator* cont = this_generator(vmfp());
   cont->startedCheck();
   cellDup(cont->m_value, *vmStack().allocC());
 }

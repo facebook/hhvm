@@ -30,17 +30,17 @@ class c_StaticWaitHandle;
 class c_WaitableWaitHandle;
 
 ///////////////////////////////////////////////////////////////////////////////
-// class AsyncGeneratorData
+// class AsyncGenerator
 
-class AsyncGeneratorData final : public BaseGeneratorData {
+class AsyncGenerator final : public BaseGenerator {
 public:
-  ~AsyncGeneratorData();
+  ~AsyncGenerator();
 
   static ObjectData* Create(const ActRec* fp, size_t numSlots,
                             jit::TCA resumeAddr, Offset resumeOffset);
-  static AsyncGeneratorData* fromObject(ObjectData *obj);
+  static AsyncGenerator* fromObject(ObjectData *obj);
   static constexpr ptrdiff_t objectOff() {
-    return sizeof(AsyncGeneratorData);
+    return sizeof(AsyncGenerator);
   }
 
   c_AsyncGeneratorWaitHandle* await(Offset resumeOffset,
@@ -72,15 +72,15 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncGenerator
 
-class c_AsyncGenerator final : public BaseGenerator {
+class c_AsyncGenerator final : public c_BaseGenerator {
 public:
   DECLARE_CLASS_NO_SWEEP(AsyncGenerator)
 
   explicit c_AsyncGenerator(Class* cls = c_AsyncGenerator::classof())
-    : BaseGenerator(cls)
+    : c_BaseGenerator(cls)
   {}
   ~c_AsyncGenerator() {
-    data()->~AsyncGeneratorData();
+    data()->~AsyncGenerator();
   }
   void t___construct();
   void t_next();
@@ -88,9 +88,9 @@ public:
   void t_raise(const Object& exception);
 
 public:
-  AsyncGeneratorData *data() {
-    return reinterpret_cast<AsyncGeneratorData*>(reinterpret_cast<char*>(
-      static_cast<BaseGenerator*>(this)) - AsyncGeneratorData::objectOff());
+  AsyncGenerator *data() {
+    return reinterpret_cast<AsyncGenerator*>(reinterpret_cast<char*>(
+      static_cast<c_BaseGenerator*>(this)) - AsyncGenerator::objectOff());
   }
 };
 

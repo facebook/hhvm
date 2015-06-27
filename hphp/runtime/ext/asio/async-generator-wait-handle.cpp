@@ -51,7 +51,7 @@ void c_AsyncGeneratorWaitHandle::t___construct() {
 }
 
 c_AsyncGeneratorWaitHandle*
-c_AsyncGeneratorWaitHandle::Create(AsyncGeneratorData* gen,
+c_AsyncGeneratorWaitHandle::Create(AsyncGenerator* gen,
                                    c_WaitableWaitHandle* child) {
   assert(child);
   assert(child->instanceof(c_WaitableWaitHandle::classof()));
@@ -62,7 +62,7 @@ c_AsyncGeneratorWaitHandle::Create(AsyncGeneratorData* gen,
   return waitHandle.detach();
 }
 
-void c_AsyncGeneratorWaitHandle::initialize(AsyncGeneratorData* gen,
+void c_AsyncGeneratorWaitHandle::initialize(AsyncGenerator* gen,
                                             c_WaitableWaitHandle* child) {
   setState(STATE_BLOCKED);
   setContextIdx(child->getContextIdx());

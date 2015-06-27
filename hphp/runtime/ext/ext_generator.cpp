@@ -34,14 +34,14 @@ void delete_Generator(ObjectData* od, const Class*) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-GeneratorData::GeneratorData()
+Generator::Generator()
   : m_index(-1LL)
   , m_key(make_tv<KindOfInt64>(-1LL))
   , m_value(make_tv<KindOfNull>())
 {
 }
 
-GeneratorData::~GeneratorData() {
+Generator::~Generator() {
   if (LIKELY(getState() == State::Done)) {
     return;
   }
@@ -56,7 +56,7 @@ GeneratorData::~GeneratorData() {
   frame_free_locals_inl_no_hook<false>(ar, ar->func()->numLocals());
 }
 
-void GeneratorData::copyVars(const ActRec* srcFp) {
+void Generator::copyVars(const ActRec* srcFp) {
   const auto dstFp = actRec();
   const auto func = dstFp->func();
   assert(srcFp->func() == dstFp->func());
@@ -80,8 +80,8 @@ void GeneratorData::copyVars(const ActRec* srcFp) {
   }
 }
 
-void GeneratorData::yield(Offset resumeOffset,
-                          const Cell* key, const Cell value) {
+void Generator::yield(Offset resumeOffset,
+                      const Cell* key, const Cell value) {
   assert(getState() == State::Running);
   resumable()->setResumeAddr(nullptr, resumeOffset);
 
@@ -101,7 +101,7 @@ void GeneratorData::yield(Offset resumeOffset,
   setState(State::Started);
 }
 
-void GeneratorData::done() {
+void Generator::done() {
   assert(getState() == State::Running);
   cellSetNull(m_key);
   cellSetNull(m_value);
@@ -148,14 +148,14 @@ String c_Generator::t_getcalledclass() {
   return called_class;
 }
 
-GeneratorData *GeneratorData::Clone(ObjectData* obj) {
-  auto thiz = GeneratorData::fromObject(obj);
+Generator *Generator::Clone(ObjectData* obj) {
+  auto thiz = Generator::fromObject(obj);
   auto fp = thiz->actRec();
 
   auto objClone = Create<true>(fp, fp->func()->numSlotsInFrame(),
                                thiz->resumable()->resumeAddr(),
                                thiz->resumable()->resumeOffset());
-  auto cont = GeneratorData::fromObject(objClone);
+  auto cont = Generator::fromObject(objClone);
   cont->copyVars(fp);
   cont->setState(thiz->getState());
   cont->m_index  = thiz->m_index;

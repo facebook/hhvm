@@ -116,7 +116,7 @@ inline size_t Header::size() const {
       return big_.nbytes;
     case HeaderKind::ResumableFrame:
       // Generators -
-      // [ResumableNode][locals][Resumable][BaseGeneratorData][ObjectData]
+      // [ResumableNode][locals][Resumable][BaseGenerator][ObjectData]
       // Async functions -
       // [ResumableNode][locals][Resumable][ObjectData<WaitHandle>]
       return resumable()->size();

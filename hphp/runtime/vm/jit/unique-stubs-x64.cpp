@@ -64,8 +64,8 @@ TCA emitRetFromInterpretedGeneratorFrame() {
   Asm a { mcg->code.cold() };
   moveToAlign(mcg->code.cold());
   auto const ret = a.frontier();
-  auto const arOff = BaseGeneratorData::arOff() -
-    (async ? AsyncGeneratorData::objectOff() : GeneratorData::objectOff());
+  auto const arOff = BaseGenerator::arOff() -
+    (async ? AsyncGenerator::objectOff() : Generator::objectOff());
 
   // We have to get the Generator object from the current AR's $this, then
   // find where its embedded AR is.
@@ -101,8 +101,8 @@ TCA emitDebuggerRetFromInterpretedGenFrame() {
   Asm a { mcg->code.cold() };
   moveToAlign(a.code());
   auto const ret = a.frontier();
-  auto const arOff = BaseGeneratorData::arOff() -
-    (async ? AsyncGeneratorData::objectOff() : GeneratorData::objectOff());
+  auto const arOff = BaseGenerator::arOff() -
+    (async ? AsyncGenerator::objectOff() : Generator::objectOff());
 
   // We have to get the Generator object from the current AR's $this, then
   // find where its embedded AR is.

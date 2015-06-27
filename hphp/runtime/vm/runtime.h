@@ -82,19 +82,19 @@ frame_afwh(const ActRec* fp) {
   return waitHandle;
 }
 
-inline GeneratorData*
+inline Generator*
 frame_generator(const ActRec* fp) {
   assert(fp->func()->isNonAsyncGenerator());
   auto resumable = frame_resumable(fp);
-  return (GeneratorData*)((char*)resumable - GeneratorData::resumableOff());
+  return (Generator*)((char*)resumable - Generator::resumableOff());
 }
 
-inline AsyncGeneratorData*
+inline AsyncGenerator*
 frame_async_generator(const ActRec* fp) {
   assert(fp->func()->isAsyncGenerator());
   auto resumable = frame_resumable(fp);
-  return (AsyncGeneratorData*)((char*)resumable -
-    AsyncGeneratorData::resumableOff());
+  return (AsyncGenerator*)((char*)resumable -
+    AsyncGenerator::resumableOff());
 }
 
 /*

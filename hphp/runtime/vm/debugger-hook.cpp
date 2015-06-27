@@ -458,7 +458,7 @@ void phpAddBreakPointRange(const Unit* unit, OffsetRangeVec& offsets) {
 void phpAddBreakPointFuncEntry(const Func* f) {
   // we are in a generator, skip CreateCont / RetC / PopC opcodes
   auto base = f->isGenerator()
-    ? BaseGeneratorData::userBase(f)
+    ? BaseGenerator::userBase(f)
     : f->base();
   auto pc = f->unit()->at(base);
 
@@ -523,7 +523,7 @@ void phpRemoveBreakPoint(const Unit* unit, Offset offset) {
 void phpRemoveBreakPointFuncEntry(const Func* f) {
   // See note in debugger-hook.h. This can only remove from the function entry
   // filter
-  auto base = f->isGenerator() ? BaseGeneratorData::userBase(f) : f->base();
+  auto base = f->isGenerator() ? BaseGenerator::userBase(f) : f->base();
   auto pc = f->unit()->at(base);
   RID().m_callBreakPointFilter.removePC(pc);
 }

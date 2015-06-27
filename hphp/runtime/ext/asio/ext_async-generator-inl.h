@@ -22,9 +22,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline AsyncGeneratorData* AsyncGeneratorData::fromObject(ObjectData *obj) {
+inline AsyncGenerator* AsyncGenerator::fromObject(ObjectData *obj) {
   assert (obj->getVMClass() == c_AsyncGenerator::classof());
-  return reinterpret_cast<AsyncGeneratorData*>(
+  return reinterpret_cast<AsyncGenerator*>(
     reinterpret_cast<char*>(obj) - objectOff());
 }
 

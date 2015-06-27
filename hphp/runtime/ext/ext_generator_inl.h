@@ -22,9 +22,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline GeneratorData* GeneratorData::fromObject(ObjectData *obj) {
+inline Generator* Generator::fromObject(ObjectData *obj) {
   assert(obj->getVMClass() == c_Generator::classof());
-  return reinterpret_cast<GeneratorData*>(
+  return reinterpret_cast<Generator*>(
     reinterpret_cast<char*>(obj) - objectOff());
 }
 

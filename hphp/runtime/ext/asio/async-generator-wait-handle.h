@@ -32,7 +32,7 @@ namespace HPHP {
  * An async generator wait handle represents one step of asynchronous execution
  * between two yield statements of an async generator.
  */
-class AsyncGeneratorData;
+class AsyncGenerator;
 
 class c_AsyncGeneratorWaitHandle final : public c_ResumableWaitHandle {
  public:
@@ -49,7 +49,7 @@ class c_AsyncGeneratorWaitHandle final : public c_ResumableWaitHandle {
   static constexpr ptrdiff_t blockableOff() {
     return offsetof(c_AsyncGeneratorWaitHandle, m_blockable);
   }
-  static c_AsyncGeneratorWaitHandle* Create(AsyncGeneratorData* gen,
+  static c_AsyncGeneratorWaitHandle* Create(AsyncGenerator* gen,
                                             c_WaitableWaitHandle* child);
   void resume();
   void onUnblocked();
@@ -64,10 +64,10 @@ class c_AsyncGeneratorWaitHandle final : public c_ResumableWaitHandle {
 
  private:
   void setState(uint8_t state) { setKindState(Kind::AsyncGenerator, state); }
-  void initialize(AsyncGeneratorData* gen, c_WaitableWaitHandle* child);
+  void initialize(AsyncGenerator* gen, c_WaitableWaitHandle* child);
   void prepareChild(c_WaitableWaitHandle* child);
 
-  AsyncGeneratorData* m_generator;
+  AsyncGenerator* m_generator;
 
   // valid if STATE_SCHEDULED || STATE_BLOCKED
   c_WaitableWaitHandle* m_child;

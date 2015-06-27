@@ -282,16 +282,18 @@ inline auto deref(const P& p) -> decltype(P().get()) {
   return p.get();
 }
 
-const char* getClassNameCstr(const ResourceData* r);
-const char* getClassNameCstr(const ObjectData* o);
-
-template <typename T, typename P>
-inline const char* getClassNameCstr(const P& v) {
-  return getClassNameCstr(deref<T>(v));
-}
-
 extern void throw_null_pointer_exception() ATTRIBUTE_NORETURN;
-extern void throw_invalid_object_type(const char* clsName) ATTRIBUTE_NORETURN;
+void throw_invalid_object_type(ResourceData* p) ATTRIBUTE_NORETURN;
+void throw_invalid_object_type(ObjectData* p) ATTRIBUTE_NORETURN;
+void throw_invalid_object_type(const Variant& p) ATTRIBUTE_NORETURN;
+void throw_invalid_object_type(const Resource& p) ATTRIBUTE_NORETURN;
+void throw_invalid_object_type(const Object& p) ATTRIBUTE_NORETURN;
+template <typename T>
+void throw_invalid_object_type(const SmartPtr<T>& p) ATTRIBUTE_NORETURN;
+template <typename T>
+void throw_invalid_object_type(const SmartPtr<T>& p) {
+  throw_invalid_object_type(p.get());
+}
 
 template <typename T>
 inline bool is_null(const T& p) {
@@ -354,9 +356,8 @@ inline SmartPtr<T> cast(P&& p) {
     if (isa_non_null<T>(p)) {
       return unsafe_cast_or_null<T>(std::forward<P>(p));
     }
-    throw_invalid_object_type(getClassNameCstr<T>(p));
   }
-  throw_null_pointer_exception();
+  throw_invalid_object_type(p);
 }
 
 // Perform a cast operation on p.  If p is not castable to
@@ -368,7 +369,7 @@ inline SmartPtr<T> cast_or_null(P&& p) {
     if (isa_non_null<T>(p)) {
       return unsafe_cast_or_null<T>(std::forward<P>(p));
     }
-    throw_invalid_object_type(getClassNameCstr<T>(p));
+    throw_invalid_object_type(p);
   }
   return nullptr;
 }

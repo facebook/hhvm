@@ -1418,26 +1418,6 @@ inline bool isa_non_null(const Variant& v) {
   return v.isa<T>();
 }
 
-template <typename T>
-typename std::enable_if<
-  std::is_base_of<ResourceData,T>::value,
-  const char*
->::type getClassNameCstr(const Variant& v) {
-  if(v.isResource()) {
-    return getClassNameCstr(deref<T>(v));
-  }
-  return tname(v.getType()).c_str();
-}
-
-template <typename T>
-typename std::enable_if<std::is_base_of<ObjectData,T>::value,const char*>::type
-getClassNameCstr(const Variant& v) {
-  if(v.isObject()) {
-    return getClassNameCstr(deref<T>(v));
-  }
-  return tname(v.getType()).c_str();
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }

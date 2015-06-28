@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_SWEEPABLE_H_
 #define incl_HPHP_SWEEPABLE_H_
 
+#include <boost/noncopyable.hpp>
+
 #include "hphp/util/portability.h"
 
 namespace HPHP {

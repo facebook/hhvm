@@ -17,8 +17,14 @@
 #ifndef incl_HPHP_HTTP_SERVER_SERVER_H_
 #define incl_HPHP_HTTP_SERVER_SERVER_H_
 
+#include <algorithm>
 #include <chrono>
+#include <functional>
+#include <list>
 #include <memory>
+#include <string>
+
+#include <boost/noncopyable.hpp>
 
 #include "hphp/runtime/server/takeover-agent.h"
 #include "hphp/runtime/server/transport.h"

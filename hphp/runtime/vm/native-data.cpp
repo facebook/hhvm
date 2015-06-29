@@ -79,7 +79,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
     cls->initialize();
   }
   auto ndi = cls->getNativeDataInfo();
-  size_t nativeDataSize = ndsize(ndi);
+  size_t nativeDataSize = ndsize(ndi->sz);
   size_t nProps = cls->numDeclProperties();
   size_t size = ObjectData::sizeForNProps(nProps) + nativeDataSize;
 
@@ -136,7 +136,7 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
     MM().removeNativeObject(node);
   }
 
-  size_t size = ObjectData::sizeForNProps(nProps) + ndsize(ndi);
+  size_t size = ObjectData::sizeForNProps(nProps) + ndsize(ndi->sz);
   if (LIKELY(size <= kMaxSmartSize)) {
     return MM().smartFreeSize(node, size);
   }

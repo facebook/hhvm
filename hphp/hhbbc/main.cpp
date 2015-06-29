@@ -208,6 +208,7 @@ std::vector<std::unique_ptr<UnitEmitter>> load_input() {
   trace_time timer("load units");
 
   open_repo(input_repo);
+  Repo::get().loadGlobalData();
   SCOPE_EXIT { Repo::shutdown(); };
 
   if (Repo::get().global().UsedHHBBC) {

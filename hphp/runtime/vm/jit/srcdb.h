@@ -16,13 +16,12 @@
 #ifndef incl_HPHP_SRCDB_H_
 #define incl_HPHP_SRCDB_H_
 
-#include <boost/noncopyable.hpp>
 #include <algorithm>
 #include <atomic>
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/growable-vector.h"
 #include "hphp/util/trace.h"
-#include "hphp/util/mutex.h"
 
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -30,90 +29,10 @@
 #include "hphp/runtime/vm/tread-hash-map.h"
 
 namespace HPHP { namespace jit {
+////////////////////////////////////////////////////////////////////////////////
 
 struct CodeGenFixups;
 struct RelocationInfo;
-
-template<typename T>
-struct GrowableVector {
-  GrowableVector() {}
-  GrowableVector(GrowableVector&& other) noexcept : m_vec(other.m_vec) {
-    other.m_vec = nullptr;
-  }
-  GrowableVector& operator=(GrowableVector&& other) {
-    m_vec = other.m_vec;
-    other.m_vec = nullptr;
-    return *this;
-  }
-  GrowableVector(const GrowableVector&) = delete;
-  GrowableVector& operator=(const GrowableVector&) = delete;
-
-  size_t size() const {
-    return m_vec ? m_vec->m_size : 0;
-  }
-  T& operator[](const size_t idx) {
-    assertx(idx < size());
-    return m_vec->m_data[idx];
-  }
-  const T& operator[](const size_t idx) const {
-    assertx(idx < size());
-    return m_vec->m_data[idx];
-  }
-  void push_back(const T& datum) {
-    if (!m_vec) {
-      m_vec = Impl::make();
-    }
-    m_vec = m_vec->push_back(datum);
-  }
-  void swap(GrowableVector<T>& other) {
-    std::swap(m_vec, other.m_vec);
-  }
-  void clear() {
-    free(m_vec);
-    m_vec = nullptr;
-  }
-  bool empty() const {
-    return !m_vec;
-  }
-  T* begin() const { return m_vec ? m_vec->m_data : (T*)this; }
-  T* end() const { return m_vec ? &m_vec->m_data[m_vec->m_size] : (T*)this; }
-  void setEnd(T* newEnd) {
-    if (newEnd == begin()) {
-      free(m_vec);
-      m_vec = nullptr;
-      return;
-    }
-    m_vec->m_size = newEnd - m_vec->m_data;
-  }
-private:
-  struct Impl {
-    uint32_t m_size;
-    T m_data[1]; // Actually variable length
-    Impl() : m_size(0) { }
-    static Impl* make() {
-      static_assert(std::is_trivially_destructible<T>::value,
-                    "GrowableVector can only hold trivially "
-                    "destructible types");
-      auto mem = malloc(sizeof(Impl));
-      return new (mem) Impl;
-    }
-    Impl* push_back(const T& datum) {
-      Impl* gv;
-      // m_data always has room for at least one element due to the m_data[1]
-      // declaration, so the realloc() code first has to kick in when a second
-      // element is about to be pushed.
-      if (folly::isPowTwo(m_size)) {
-        gv = (Impl*)realloc(this,
-                            offsetof(Impl, m_data) + 2 * m_size * sizeof(T));
-      } else {
-        gv = this;
-      }
-      gv->m_data[gv->m_size++] = datum;
-      return gv;
-    }
-  };
-  Impl* m_vec{nullptr};
-};
 
 /*
  * Incoming branches between different translations are tracked using
@@ -350,25 +269,32 @@ private:
   std::atomic<uint32_t> m_guard;
 };
 
-class SrcDB : boost::noncopyable {
-  // Although it seems tempting, in an experiment, trying to stash the
-  // top TCA in place in the hashtable did worse than dereferencing a
-  // SrcRec* to get it.  Maybe could be possible with a better hash
-  // function or lower max load factor.  (See D450383.)
-  typedef TreadHashMap<SrcKey::AtomicInt,SrcRec*,int64_hash> THM;
-  THM m_map;
-public:
-  explicit SrcDB()
-    : m_map(1024)
-  {}
+struct SrcDB {
+  /*
+   * Although it seems tempting, in an experiment, trying to stash the top TCA
+   * in place in the hashtable did worse than dereferencing a SrcRec* to get it.
+   * Maybe could be possible with a better hash function or lower max load
+   * factor.  (See D450383.)
+   */
+  using THM            = TreadHashMap<SrcKey::AtomicInt, SrcRec*, int64_hash>;
+  using iterator       = THM::iterator;
+  using const_iterator = THM::const_iterator;
 
-  typedef THM::iterator iterator;
-  typedef THM::const_iterator const_iterator;
+  //////////////////////////////////////////////////////////////////////////////
+
+  explicit SrcDB() {}
+
+  SrcDB(const SrcDB&) = delete;
+  SrcDB& operator=(const SrcDB&) = delete;
+
+  //////////////////////////////////////////////////////////////////////////////
 
   iterator begin()             { return m_map.begin(); }
   iterator end()               { return m_map.end(); }
   const_iterator begin() const { return m_map.begin(); }
   const_iterator end()   const { return m_map.end(); }
+
+  //////////////////////////////////////////////////////////////////////////////
 
   SrcRec* find(SrcKey sk) const {
     SrcRec* const* p = m_map.find(sk.toAtomicInt());
@@ -379,8 +305,11 @@ public:
     return *m_map.insert(sk.toAtomicInt(), new SrcRec);
   }
 
+private:
+  THM m_map{1024};
 };
 
-} }
+////////////////////////////////////////////////////////////////////////////////
+}}
 
 #endif

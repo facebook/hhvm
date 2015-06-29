@@ -220,14 +220,16 @@ class FuncFinisher {
   EmitterVisitor* m_ev;
   Emitter&        m_e;
   FuncEmitter*    m_fe;
+  int32_t         m_stackPad;
 
  public:
-  FuncFinisher(EmitterVisitor* ev, Emitter& e, FuncEmitter* fe)
-    : m_ev(ev), m_e(e), m_fe(fe)
+  FuncFinisher(EmitterVisitor* ev, Emitter& e, FuncEmitter* fe,
+               int32_t stackPad = 0)
+    : m_ev(ev), m_e(e), m_fe(fe), m_stackPad(stackPad)
   {}
 
   ~FuncFinisher() {
-    m_ev->finishFunc(m_e, m_fe);
+    m_ev->finishFunc(m_e, m_fe, m_stackPad);
   }
 };
 
@@ -6458,10 +6460,10 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
                                                 modifiers->isStatic());
   BuiltinFunction nif = info.ptr;
   BuiltinFunction bif;
+  int nativeAttrs = fe->parseNativeAttributes(attributes);
   if (!nif) {
     bif = Native::unimplementedWrapper;
   } else {
-    int nativeAttrs = fe->parseNativeAttributes(attributes);
     if (nativeAttrs & Native::AttrZendCompat) {
       bif = zend_wrap_func;
     } else {
@@ -6513,8 +6515,13 @@ void EmitterVisitor::bindNativeFunc(MethodStatementPtr meth,
 
   fe->setBuiltinFunc(bif, nif, attributes, base);
   fillFuncEmitterParams(fe, meth->getParams(), true);
-  e.NativeImpl();
-  FuncFinisher ff(this, e, fe);
+  int32_t stackPad = 0;
+  if (nativeAttrs & Native::AttrOpCodeImpl) {
+    stackPad = emitNativeOpCodeImpl(meth, funcname, classname, fe);
+  } else {
+    e.NativeImpl();
+  }
+  FuncFinisher ff(this, e, fe, stackPad);
   emitMethodDVInitializers(e, meth, topOfBody);
 }
 
@@ -8470,20 +8477,21 @@ void EmitterVisitor::copyOverFPIRegions(FuncEmitter* fe) {
   m_fpiRegions.clear();
 }
 
-void EmitterVisitor::saveMaxStackCells(FuncEmitter* fe) {
+void EmitterVisitor::saveMaxStackCells(FuncEmitter* fe, int32_t stackPad) {
   fe->maxStackCells = m_actualStackHighWater +
                       fe->numIterators() * kNumIterCells +
                       fe->numLocals() +
-                      m_fdescHighWater;
+                      m_fdescHighWater +
+                      stackPad;
   m_actualStackHighWater = 0;
   m_fdescHighWater = 0;
 }
 
 // Are you sure you mean to be calling this directly? Would FuncFinisher
 // be more appropriate?
-void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe) {
+void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe, int32_t stackPad) {
   emitFunclets(e);
-  saveMaxStackCells(fe);
+  saveMaxStackCells(fe, stackPad);
   copyOverCatchAndFaultRegions(fe);
   copyOverFPIRegions(fe);
   m_staticEmitted.clear();
@@ -9017,8 +9025,36 @@ enum GeneratorMethod {
   METH_CURRENT,
   METH_KEY,
 };
+
 typedef hphp_hash_map<const StringData*, GeneratorMethod,
                       string_data_hash, string_data_same> ContMethMap;
+typedef std::map<StaticString, GeneratorMethod> ContMethMapT;
+
+namespace {
+StaticString s_next("next");
+StaticString s_send("send");
+StaticString s_raise("raise");
+StaticString s_valid("valid");
+StaticString s_current("current");
+StaticString s_key("key");
+
+StaticString genCls("Generator");
+StaticString asyncGenCls("HH\\AsyncGenerator");
+
+ContMethMapT s_asyncGenMethods = {
+    {s_next, GeneratorMethod::METH_NEXT},
+    {s_send, GeneratorMethod::METH_SEND},
+    {s_raise, GeneratorMethod::METH_RAISE}
+  };
+ContMethMapT s_genMethods = {
+    {s_next, GeneratorMethod::METH_NEXT},
+    {s_send, GeneratorMethod::METH_SEND},
+    {s_raise, GeneratorMethod::METH_RAISE},
+    {s_valid, GeneratorMethod::METH_VALID},
+    {s_current, GeneratorMethod::METH_CURRENT},
+    {s_key, GeneratorMethod::METH_KEY}
+  };
+}
 
 static int32_t emitGeneratorMethod(UnitEmitter& ue,
                                    FuncEmitter* fe,
@@ -9085,6 +9121,27 @@ static int32_t emitGeneratorMethod(UnitEmitter& ue,
   }
 
   return 1;  // Above cases push at most one stack cell.
+}
+
+// Emit byte codes to implement methods. Return the maximum stack cell count.
+int32_t EmitterVisitor::emitNativeOpCodeImpl(MethodStatementPtr meth,
+                                             const char* funcName,
+                                             const char* className,
+                                             FuncEmitter* fe) {
+  GeneratorMethod* cmeth;
+  StaticString s_func(funcName);
+  StaticString s_class(className);
+
+  if (genCls.same(s_class) &&
+      (cmeth = folly::get_ptr(s_genMethods, s_func))) {
+    return emitGeneratorMethod(m_ue, fe, *cmeth);
+  } else if (asyncGenCls.same(s_class) &&
+      (cmeth = folly::get_ptr(s_asyncGenMethods, s_func))) {
+    return emitGeneratorMethod(m_ue, fe, *cmeth);
+  }
+
+  throw IncludeTimeFatalException(meth,
+    "OpCodeImpl attribute is not applicable to %s", funcName);
 }
 
 static int32_t emitGetWaitHandleMethod(UnitEmitter& ue, FuncEmitter* fe) {
@@ -9206,6 +9263,7 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
       FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
       pce->addMethod(fe);
       auto stackPad = int32_t{0};
+      // The following for generators is temporary until HNI conversion
       if (e.name->isame(asyncGenCls) &&
           (cmeth = folly::get_ptr(asyncGenMethods, methName))) {
         auto methCpy = *cmeth;

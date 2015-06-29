@@ -749,6 +749,10 @@ public:
                           FuncEmitter *fe,
                           bool &allowOverride);
   void bindNativeFunc(MethodStatementPtr meth, FuncEmitter *fe);
+  int32_t emitNativeOpCodeImpl(MethodStatementPtr meth,
+                               const char* funcName,
+                               const char* className,
+                               FuncEmitter* fe);
   void emitMethodMetadata(MethodStatementPtr meth,
                           ClosureUseVarVec* useVars,
                           bool top);
@@ -881,8 +885,8 @@ public:
   void newFPIRegion(Offset start, Offset end, Offset fpOff);
   void copyOverCatchAndFaultRegions(FuncEmitter* fe);
   void copyOverFPIRegions(FuncEmitter* fe);
-  void saveMaxStackCells(FuncEmitter* fe);
-  void finishFunc(Emitter& e, FuncEmitter* fe);
+  void saveMaxStackCells(FuncEmitter* fe, int32_t stackPad);
+  void finishFunc(Emitter& e, FuncEmitter* fe, int32_t stackPad);
   void initScalar(TypedValue& tvVal, ExpressionPtr val,
                   folly::Optional<CollectionType> ct = folly::none);
   bool requiresDeepInit(ExpressionPtr initExpr) const;

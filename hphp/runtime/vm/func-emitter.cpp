@@ -500,7 +500,8 @@ static const StaticString
   s_variadicbyref("VariadicByRef"),
   s_noinjection("NoInjection"),
   s_zendcompat("ZendCompat"),
-  s_numargs("NumArgs");
+  s_numargs("NumArgs"),
+  s_opcodeimpl("OpCodeImpl");
 
 int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
   int ret = Native::AttrNone;
@@ -529,6 +530,8 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
         ret |= Native::AttrActRec;
       } else if (userAttrStrVal.get()->isame(s_numargs.get())) {
         attrs_ |= AttrNumArgs;
+      } else if (userAttrStrVal.get()->isame(s_opcodeimpl.get())) {
+        ret |= Native::AttrOpCodeImpl;
       }
     }
   }

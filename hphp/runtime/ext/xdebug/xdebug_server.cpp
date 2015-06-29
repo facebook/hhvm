@@ -49,83 +49,6 @@ const StaticString
   s_GET("_GET"),
   s_COOKIE("_COOKIE");
 
-// Given an xdebug error code, returns its corresponding error string
-static const char* getXDebugErrorString(XDebugError error) {
-  switch (error) {
-    case Error::Ok:
-      return "no error";
-    case Error::Parse:
-      return "parse error in command";
-    case Error::DupArg:
-      return "duplicate arguments in command";
-    case Error::InvalidArgs:
-      return "invalid or missing options";
-    case Error::Unimplemented:
-      return "unimplemented command";
-    case Error::CommandUnavailable:
-      return "command is not available";
-    case Error::CantOpenFile:
-      return "can not open file";
-    case Error::StreamRedirectFailed:
-      return "stream redirect failed";
-    case Error::BreakpointNotSet:
-      return "breakpoint could not be set";
-    case Error::BreakpointTypeNotSupported:
-      return "breakpoint type is not supported";
-    case Error::BreakpointInvalid:
-      return "invalid breakpoint line";
-    case Error::BreakpointNoCode:
-      return "no code on breakpoint line";
-    case Error::BreakpointInvalidState:
-      return "invalid breakpoint state";
-    case Error::NoSuchBreakpoint:
-      return "no such breakpoint";
-    case Error::EvaluatingCode:
-      return "error evaluating code";
-    case Error::InvalidExpression:
-      return "invalid expression";
-    case Error::PropertyNonExistent:
-      return "can not get property";
-    case Error::StackDepthInvalid:
-      return "stack depth invalid";
-    case Error::ContextInvalid:
-      return "context invalid";
-    case Error::ProfilingNotStarted:
-      return "profiler not started";
-    case Error::EncodingNotSupported:
-      return "encoding not supported";
-    case Error::Internal:
-      return "an internal exception in the debugger";
-    case Error::Unknown:
-      return "unknown error";
-  }
-  not_reached();
-}
-
-// Returns the string corresponding to the given xdebug server status
-const char* getXDebugStatusString(XDebugStatus status) {
-  switch (status) {
-    case Status::Starting: return "starting";
-    case Status::Stopping: return "stopping";
-    case Status::Stopped:  return "stopped";
-    case Status::Running:  return "running";
-    case Status::Break:    return "break";
-    case Status::Detached: return "detached";
-  }
-  not_reached();
-}
-
-// Returns the string corresponding ot the xdebug server reason
-const char* getXDebugReasonString(XDebugReason reason) {
-  switch (reason) {
-    case Reason::Ok:        return "ok";
-    case Reason::Error:     return "error";
-    case Reason::Aborted:   return "aborted";
-    case Reason::Exception: return "exception";
-  }
-  not_reached();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 
@@ -398,7 +321,7 @@ void XDebugServer::pollSocketLoop() {
       // XDebugHookHandler::onOpcode().
       m_requestThread->m_reqInjectionData.setDebuggerIntr(true);
       m_requestThread->m_reqInjectionData.setFlag(DebuggerSignalFlag);
-    } catch (const XDebugError& error) {
+    } catch (const XDebugExn&) {
       log("Polling thread got invalid command: %s\n", m_bufferCur);
       // Can drop the error.
     }
@@ -535,8 +458,8 @@ void XDebugServer::addCommand(xdebug_xml_node& node, const XDebugCommand& cmd) {
 }
 
 void XDebugServer::addStatus(xdebug_xml_node& node) {
-  auto const status = getXDebugStatusString(m_status);
-  auto const reason = getXDebugReasonString(m_reason);
+  auto const status = xdebug_status_str(m_status);
+  auto const reason = xdebug_reason_str(m_reason);
   xdebug_xml_add_attribute(&node, "status", status);
   xdebug_xml_add_attribute(&node, "reason", reason);
 }
@@ -549,8 +472,7 @@ void XDebugServer::addError(xdebug_xml_node& node, XDebugError code) {
 
   // Add the error code's error message
   auto message = xdebug_xml_node_init("message");
-  xdebug_xml_add_text(message,
-                      const_cast<char*>(getXDebugErrorString(code)), 0);
+  xdebug_xml_add_text(message, const_cast<char*>(xdebug_error_str(code)), 0);
   xdebug_xml_add_child(error, message);
 }
 
@@ -828,8 +750,8 @@ bool XDebugServer::doCommandLoop() {
       if (cmd->shouldRespond()) {
         sendMessage(*response);
       }
-    } catch (const XDebugError& error) {
-      addError(*response, error);
+    } catch (const XDebugExn& exn) {
+      addError(*response, exn.error);
       sendMessage(*response);
     }
 
@@ -913,7 +835,7 @@ void XDebugServer::parseInput(folly::StringPiece in, String& cmd, Array& args) {
     cmd = String::attach(StringData::Make(in.data(), CopyString));
     return;
   } else {
-    throw Error::Parse;
+    throw_exn(Error::Parse);
   }
 
   // Loop starting after the space until the end of the string
@@ -927,7 +849,7 @@ void XDebugServer::parseInput(folly::StringPiece in, String& cmd, Array& args) {
       // A new option which is prefixed with "-" is expected
       case ParseState::NORMAL:
         if (*ptr != '-') {
-          throw Error::Parse;
+          throw_exn(Error::Parse);
         } else {
           state = ParseState::OPT_FOLLOWS;
         }
@@ -940,7 +862,7 @@ void XDebugServer::parseInput(folly::StringPiece in, String& cmd, Array& args) {
       // Expect a " " separator to follow
       case ParseState::SEP_FOLLOWS:
         if (*ptr != ' ') {
-          throw Error::Parse;
+          throw_exn(Error::Parse);
         } else {
           state = ParseState::VALUE_FOLLOWS_FIRST_CHAR;
           value = ptr + 1;
@@ -965,7 +887,7 @@ void XDebugServer::parseInput(folly::StringPiece in, String& cmd, Array& args) {
             args.set(opt, String::attach(val_data));
             state = ParseState::NORMAL;
           } else {
-            throw Error::DupArg;
+            throw_exn(Error::DupArg);
           }
         }
         break;
@@ -991,7 +913,7 @@ void XDebugServer::parseInput(folly::StringPiece in, String& cmd, Array& args) {
           args.set(opt, HHVM_FN(stripcslashes)(String::attach(val_data)));
           state = ParseState::SKIP_CHAR;
         } else {
-          throw Error::DupArg;
+          throw_exn(Error::DupArg);
         }
         break;
       // Do nothing

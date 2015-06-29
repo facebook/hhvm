@@ -36,8 +36,8 @@ namespace HPHP {
 #define EXCEPTION_MAP (s_xdebug_breakpoints->m_exceptionMap)
 #define UNMATCHED (s_xdebug_breakpoints->m_unmatched)
 
-typedef XDebugBreakpoint::Type BreakType;
-typedef XDebugHookHandler::BreakInfo BreakInfo;
+using BreakType = XDebugBreakpoint::Type;
+using BreakInfo = XDebugHookHandler::BreakInfo;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helpers
@@ -150,7 +150,7 @@ int XDebugThreadBreakpoints::addBreakpoint(XDebugBreakpoint& bp) {
 
       // If the file/line combo is invalid, throw an error
       if (!phpAddBreakPointLine(unit, bp.line)) {
-        throw XDebugError::BreakpointInvalid;
+        throw_exn(XDebugError::BreakpointInvalid);
       }
       add_line_breakpoint(id, bp, unit);
       break;
@@ -174,7 +174,7 @@ int XDebugThreadBreakpoints::addBreakpoint(XDebugBreakpoint& bp) {
       if (func != nullptr) {
         add_func_breakpoint(id, bp, func);
       } else if (!bp.className.isNull() && cls != nullptr) {
-        throw XDebugError::BreakpointInvalid;
+        throw_exn(XDebugError::BreakpointInvalid);
       } else {
         UNMATCHED.insert(id);
       }

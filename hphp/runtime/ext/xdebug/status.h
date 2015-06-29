@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,6 +17,8 @@
 
 #ifndef incl_HPHP_XDEBUG_STATUS_H_
 #define incl_HPHP_XDEBUG_STATUS_H_
+
+#include <exception>
 
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,6 +72,25 @@ enum class XDebugError {
   Internal = 998,
   Unknown = 999
 };
+
+/* An exception wrapper over XDebugError. */
+struct XDebugExn : std::exception {
+  explicit XDebugExn(XDebugError error) : error(error) {}
+
+  const char* what() const noexcept override;
+
+  XDebugError error;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+/* Stringify XDebug status codes. */
+const char* xdebug_status_str(XDebugStatus);
+const char* xdebug_reason_str(XDebugReason);
+const char* xdebug_error_str(XDebugError);
+
+/* Helper for throwing XDebug errors. */
+void throw_exn(XDebugError);
 
 ////////////////////////////////////////////////////////////////////////////////
 }

@@ -267,8 +267,12 @@ void emitCatchHelper(UniqueStubs& uniqueStubs) {
   a.    jmp  (rax);  // rdx is still live if we're going to code from llvm
 
 asm_label(a, resumeCppUnwind);
+  static_assert(sizeof(tl_regState) == 1,
+                "The following store must match the size of tl_regState");
+  a.    fs().storeb(static_cast<int32_t>(VMRegState::CLEAN),
+                    getTLSPtr(tl_regState).mr());
   a.    loadq(rVmTl[unwinderExnOff()], argNumToRegName[0]);
-  a.    call(TCA(unwindResumeHelper));
+  a.    call(TCA(_Unwind_Resume));
   uniqueStubs.endCatchHelperPast = a.frontier();
   a.    ud2();
 

@@ -105,7 +105,7 @@ struct UniqueStubs {
    * Catch blocks jump to endCatchHelper when they've finished executing. If
    * the unwinder has set state indicating a return address to jump to, this
    * stub will load vmfp and vmsp and jump there. Otherwise, it calls
-   * unwindResumeHelper.
+   * _Unwind_Resume.
    */
   TCA endCatchHelper;
   TCA endCatchHelperPast;

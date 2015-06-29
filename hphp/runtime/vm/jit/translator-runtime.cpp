@@ -1227,11 +1227,6 @@ void registerLiveObj(ObjectData* obj) {
   g_context->m_liveBCObjs.insert(obj);
 }
 
-void unwindResumeHelper() {
-  tl_regState = VMRegState::CLEAN;
-  _Unwind_Resume(unwindRdsInfo->exn);
-}
-
 void throwSwitchMode() {
   // This is only called right after dispatchBB, so the VM regs really are
   // clean.

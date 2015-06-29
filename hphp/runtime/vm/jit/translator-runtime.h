@@ -221,11 +221,6 @@ rds::Handle lookupClsRDSHandle(const StringData* name);
 void registerLiveObj(ObjectData* obj);
 
 /*
- * Set tl_regState to CLEAN and call _Unwind_Resume.
- */
-void unwindResumeHelper();
-
-/*
  * Throw a VMSwitchMode exception.
  */
 void throwSwitchMode() ATTRIBUTE_NORETURN;

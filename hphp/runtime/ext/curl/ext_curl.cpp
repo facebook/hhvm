@@ -147,7 +147,7 @@ public:
   static std::map<std::string, CurlHandlePool*> namedPools;
 
   explicit CurlHandlePool(int poolSize, int waitTimeout, int numConnReuses)
-  : m_poolSize(poolSize), m_waitTimeout(waitTimeout) {
+  : m_waitTimeout(waitTimeout) {
     for (int i = 0; i < poolSize; i++) {
       m_handleStack.push(new PooledCurlHandle(numConnReuses));
     }
@@ -196,7 +196,6 @@ private:
   std::stack<PooledCurlHandle*> m_handleStack;
   Mutex m_mutex;
   pthread_cond_t m_cond;
-  int m_poolSize;
   int m_waitTimeout;
 };
 

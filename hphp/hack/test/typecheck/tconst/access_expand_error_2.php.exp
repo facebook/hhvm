@@ -1,6 +1,4 @@
-File "access_expand_error_2.php", line 4, characters 10-17:
-Wrong type hint (Typing[4090])
 File "access_expand_error_2.php", line 4, characters 13-17:
-Could not find type constant ERROR in type C
+Could not find type constant ERROR in type C (Typing[4090])
 File "access_expand_error_2.php", line 3, characters 7-7:
 Declaration of C is here

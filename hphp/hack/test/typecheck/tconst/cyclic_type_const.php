@@ -7,7 +7,3 @@ class C1 {
 class C2 {
   const type T = C1::T;
 }
-
-type Cycle = C1::T;
-
-function test(): Cycle {}

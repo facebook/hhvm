@@ -1,6 +1,4 @@
-File "access_expand_error_1.php", line 5, characters 10-21:
-Wrong type hint (Typing[4062])
 File "access_expand_error_1.php", line 4, characters 19-21:
-You are trying to access the member ERROR but this is not an object, it is an int
+You are trying to access the member ERROR but this is not an object, it is an int (Typing[4062])
 File "access_expand_error_1.php", line 5, characters 17-21:
 Check this out

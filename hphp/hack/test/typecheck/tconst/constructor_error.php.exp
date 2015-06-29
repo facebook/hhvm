@@ -7,8 +7,8 @@ This is the expression dependent type <static>::T
   that is compatible with an array key (int/string)
 File "constructor_error.php", line 14, characters 15-28:
   where '<static>' is a reference to this expression
-File "constructor_error.php", line 4, characters 14-14:
+File "constructor_error.php", line 4, characters 19-26:
   resulting from expanding a type constant as follows:
-    <static>::T -> this::T -> X::T
+    X::T
 File "constructor_error.php", line 14, characters 26-27:
 It is incompatible with a string

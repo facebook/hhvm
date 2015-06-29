@@ -523,13 +523,11 @@ StringData* StringData::append(StringSlice range) {
    */
   ALIASING_APPEND_ASSERT(s, len);
 
-  // `memcpy8()' could overrun the buffer by at most 7 bytes. Adding 6 bytes
-  // here, together with the trailing byte, makes it safe.
-  uint32_t const requestLen = static_cast<uint32_t>(newLen) + 6;
+  auto const requestLen = static_cast<uint32_t>(newLen);
   auto const target = UNLIKELY(isShared()) ? escalate(requestLen)
                                            : reserve(requestLen);
 
-  memcpy8(target->mutableData() + m_len, s, len);
+  memcpy(target->mutableData() + m_len, s, len);
   target->setSize(newLen);
   assert(target->checkSane());
 

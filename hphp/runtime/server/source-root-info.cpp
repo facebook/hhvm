@@ -34,6 +34,8 @@ namespace HPHP {
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(std::string, SourceRootInfo::s_path);
 IMPLEMENT_THREAD_LOCAL_NO_CHECK(std::string, SourceRootInfo::s_phproot);
 
+const StaticString s_default("default");
+const StaticString s___builtin("__builtin");
 SourceRootInfo::SourceRootInfo(Transport* transport)
     : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxCondition::On :
                                                  SandboxCondition::Off) {
@@ -42,8 +44,8 @@ SourceRootInfo::SourceRootInfo(Transport* transport)
 
   auto documentRoot = transport->getDocumentRoot();
   if (!documentRoot.empty()) {
-    m_user = "__builtin";
-    m_sandbox = "default";
+    m_user = s___builtin;
+    m_sandbox = s_default;
     // The transport take precedence over the config file
     m_path = documentRoot;
     *s_path.getCheck() = documentRoot;
@@ -69,7 +71,7 @@ SourceRootInfo::SourceRootInfo(Transport* transport)
     m_user = pair.rvalAt(0).toString();
     bool defaultSb = pair.size() == 1;
     if (defaultSb) {
-      m_sandbox = "default";
+      m_sandbox = s_default;
     } else {
       m_sandbox = pair.rvalAt(1).toString();
     }
@@ -112,8 +114,6 @@ void SourceRootInfo::createFromCommonRoot(const String &sandboxName) {
                     accessLogPath.c_str());
   }
 }
-
-const StaticString s_default("default");
 
 void SourceRootInfo::createFromUserConfig() {
   String homePath = String(RuntimeOption::SandboxHome) + "/" + m_user + "/";

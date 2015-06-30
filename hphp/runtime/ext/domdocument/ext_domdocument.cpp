@@ -3855,6 +3855,7 @@ bool HHVM_METHOD(DOMDocument, validate) {
 
 Variant HHVM_METHOD(DOMDocument, xinclude,
                     int64_t options /* = 0 */) {
+  VMRegAnchor _;
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   int err = xmlXIncludeProcessFlags(docp, options);

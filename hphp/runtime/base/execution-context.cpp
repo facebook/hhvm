@@ -254,7 +254,7 @@ void ExecutionContext::obProtect(bool on) {
 
 void ExecutionContext::obStart(const Variant& handler /* = null */,
                                int chunk_size /* = 0 */,
-                               int flags /* = k_PHP_OUTPUT_HANDLER_STDFLAGS */) {
+                               OBFlags flags /* = OBFlags::Default */) {
   if (m_insideOBHandler) {
     raise_error("ob_start(): Cannot use output buffering "
                 "in output buffering display handlers");
@@ -303,7 +303,7 @@ void ExecutionContext::obClean(int handler_flag) {
   }
 }
 
-bool ExecutionContext::obFlush() {
+bool ExecutionContext::obFlush(bool force /*= false*/) {
   assert(m_protectedLevel >= 0);
 
   if (m_buffers.empty()) {
@@ -312,7 +312,10 @@ bool ExecutionContext::obFlush() {
 
   auto iter = m_buffers.end();
   OutputBuffer& last = *(--iter);
-  if (!(last.flags & k_PHP_OUTPUT_HANDLER_FLUSHABLE)) {
+  if (!force && !(last.flags & OBFlags::Flushable)) {
+    return false;
+  }
+  if (last.flags & OBFlags::OutputDisabled) {
     return false;
   }
 
@@ -366,7 +369,7 @@ bool ExecutionContext::obFlush() {
 
 void ExecutionContext::obFlushAll() {
   do {
-    obFlush();
+    obFlush(true);
   } while (obEnd());
 }
 
@@ -413,7 +416,19 @@ Array ExecutionContext::obGetStatus(bool full) {
       status.set(s_name, buffer.handler);
       status.set(s_type, 1);
     }
-    status.set(s_flags, buffer.flags);
+
+    int flags = 0;
+    if (buffer.flags & OBFlags::Cleanable) {
+      flags |= k_PHP_OUTPUT_HANDLER_CLEANABLE;
+    }
+    if (buffer.flags & OBFlags::Flushable) {
+      flags |= k_PHP_OUTPUT_HANDLER_FLUSHABLE;
+    } 
+    if (buffer.flags & OBFlags::Removable) {
+      flags |= k_PHP_OUTPUT_HANDLER_REMOVABLE;
+    }
+    status.set(s_flags, flags);
+
     status.set(s_level, level);
     status.set(s_chunk_size, buffer.chunk_size);
     status.set(s_buffer_used, static_cast<uint64_t>(buffer.oss.size()));
@@ -460,7 +475,7 @@ Array ExecutionContext::obGetHandlers() {
 void ExecutionContext::flush() {
   if (!m_buffers.empty() &&
       RuntimeOption::EnableEarlyFlush && m_protectedLevel &&
-      (m_buffers.front().flags & k_PHP_OUTPUT_HANDLER_FLUSHABLE)) {
+      !(m_buffers.front().flags & OBFlags::OutputDisabled)) {
     StringBuffer &oss = m_buffers.front().oss;
     if (!oss.empty()) {
       writeTransport(oss.data(), oss.size());

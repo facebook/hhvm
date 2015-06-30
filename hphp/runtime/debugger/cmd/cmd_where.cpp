@@ -20,9 +20,9 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/debugger/debugger_client.h"
-#include "hphp/runtime/ext/asio/async-function-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
-#include "hphp/runtime/ext/asio/waitable-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/ext/ext_generator.h"
 
 namespace HPHP { namespace Eval {

@@ -15,28 +15,22 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_H_
-#define incl_HPHP_EXT_ASIO_H_
-
-#include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_async-generator.h"
-#include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-array-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-map-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-vector-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
+#ifndef incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_
+#error "This should only be included by ext_await-all-wait-handle.h"
+#endif
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-Object HHVM_FUNCTION(asio_get_running);
-
+template<typename T>
+inline void c_AwaitAllWaitHandle::forEachChild(T fn) {
+  uint32_t const last = m_cur;
+  for (uint32_t idx = 0; idx <= last; ++idx) {
+    auto const child = m_children[idx];
+    if (child->isFinished()) continue;
+    fn(child);
+  }
 }
 
-#endif // incl_HPHP_EXT_ASIO_H_
+///////////////////////////////////////////////////////////////////////////////
+}

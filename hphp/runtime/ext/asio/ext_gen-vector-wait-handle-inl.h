@@ -15,28 +15,26 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_H_
-#define incl_HPHP_EXT_ASIO_H_
-
-#include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_async-generator.h"
-#include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-array-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-map-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-vector-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
+#ifndef incl_HPHP_EXT_ASIO_GEN_VECTOR_WAIT_HANDLE_H_
+#error "This should only be included by ext_gen-vector-wait-handle.h"
+#endif
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-Object HHVM_FUNCTION(asio_get_running);
-
+template<typename T>
+inline void c_GenVectorWaitHandle::forEachChild(T fn) {
+  int64_t const last = m_deps->size();
+  for (int64_t idx = m_iterPos; idx < last; ++idx) {
+    auto const current = tvAssertCell(m_deps->at(idx));
+    assert(current->m_type == KindOfObject);
+    assert(current->m_data.pobj->instanceof(c_WaitHandle::classof()));
+    auto const child = static_cast<c_WaitHandle*>(current->m_data.pobj);
+    if (child->isFinished()) continue;
+    assert(child->instanceof(c_WaitableWaitHandle::classof()));
+    fn(static_cast<c_WaitableWaitHandle*>(child));
+  }
 }
 
-#endif // incl_HPHP_EXT_ASIO_H_
+///////////////////////////////////////////////////////////////////////////////
+}

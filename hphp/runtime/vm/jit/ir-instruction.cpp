@@ -30,8 +30,8 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/util/arena.h"
-#include "hphp/runtime/ext/asio/async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/static-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 
 #include <folly/Range.h>
 

@@ -15,28 +15,33 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_H_
-#define incl_HPHP_EXT_ASIO_H_
+#ifndef incl_HPHP_EXT_ASIO_RESUMABLE_WAIT_HANDLE_DEFS_H_
+#define incl_HPHP_EXT_ASIO_RESUMABLE_WAIT_HANDLE_DEFS_H_
 
-#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-array-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-map-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-vector-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-Object HHVM_FUNCTION(asio_get_running);
-
+inline void c_ResumableWaitHandle::resume() {
+  switch (getKind()) {
+    case Kind::AsyncFunction:  return asAsyncFunction()->resume();
+    case Kind::AsyncGenerator: return asAsyncGenerator()->resume();
+    default:                   not_reached();
+  }
 }
 
-#endif // incl_HPHP_EXT_ASIO_H_
+inline void c_ResumableWaitHandle::exitContext(context_idx_t ctx_idx) {
+  switch (getKind()) {
+    case Kind::AsyncFunction:  return asAsyncFunction()->exitContext(ctx_idx);
+    case Kind::AsyncGenerator: return asAsyncGenerator()->exitContext(ctx_idx);
+    default:                   not_reached();
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}
+
+#endif // incl_HPHP_EXT_ASIO_RESUMABLE_WAIT_HANDLE_DEFS_H_

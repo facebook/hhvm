@@ -15,21 +15,45 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_CONTEXT_ENTER_H_
-#define incl_HPHP_EXT_ASIO_CONTEXT_ENTER_H_
+#ifndef incl_HPHP_EXT_ASIO_ASYNC_FUNCTION_WAIT_HANDLE_H_
+#error "This should only be included by ext_async-function-wait-handle.h"
+#endif
 
-#include "hphp/runtime/ext/asio/asio-context.h"
-#include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
-
-namespace HPHP { namespace asio {
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void enter_context(c_WaitableWaitHandle* root, context_idx_t ctx_idx);
-void enter_context_impl(c_WaitableWaitHandle* root, context_idx_t ctx_idx);
+inline void
+c_AsyncFunctionWaitHandle::Node::setChild(c_WaitableWaitHandle* child) {
+  assert(child);
+  assert(!child->isFinished());
+
+  m_child = child;
+  m_child->getParentChain()
+    .addParent(m_blockable, AsioBlockable::Kind::AsyncFunctionWaitHandleNode);
+}
+
+inline c_WaitableWaitHandle*
+c_AsyncFunctionWaitHandle::Node::getChild() const {
+  return m_child;
+}
+
+inline bool
+c_AsyncFunctionWaitHandle::Node::isFirstUnfinishedChild() const {
+  return true;
+}
+
+inline c_AsyncFunctionWaitHandle*
+c_AsyncFunctionWaitHandle::Node::getWaitHandle() const {
+  return reinterpret_cast<c_AsyncFunctionWaitHandle*>(
+    const_cast<char*>(
+      reinterpret_cast<const char*>(this) -
+      c_AsyncFunctionWaitHandle::childrenOff()));
+}
+
+inline void
+c_AsyncFunctionWaitHandle::Node::onUnblocked() {
+  getWaitHandle()->onUnblocked();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
-
-#include "hphp/runtime/ext/asio/asio-context-enter-inl.h"
-
-#endif // incl_HPHP_EXT_ASIO_CONTEXT_ENTER_H_
+}

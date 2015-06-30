@@ -15,21 +15,43 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_CONTEXT_ENTER_H_
-#define incl_HPHP_EXT_ASIO_CONTEXT_ENTER_H_
+#ifndef incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_
+#define incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_
 
-#include "hphp/runtime/ext/asio/asio-context.h"
-#include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/asio/ext_wait-handle.h"
 
-namespace HPHP { namespace asio {
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// class StaticWaitHandle
 
-void enter_context(c_WaitableWaitHandle* root, context_idx_t ctx_idx);
-void enter_context_impl(c_WaitableWaitHandle* root, context_idx_t ctx_idx);
+/**
+ * A static wait handle is a wait handle that is statically finished. The result
+ * of the operation is always available and waiting for the wait handle finishes
+ * immediately.
+ */
+class c_StaticWaitHandle final : public c_WaitHandle {
+ public:
+  DECLARE_CLASS_NO_SWEEP(StaticWaitHandle)
+
+  explicit c_StaticWaitHandle(Class* cls = c_StaticWaitHandle::classof())
+    : c_WaitHandle(cls) {}
+  ~c_StaticWaitHandle() {
+    assert(isFinished());
+    tvRefcountedDecRef(&m_resultOrException);
+  }
+
+  void t___construct();
+
+ public:
+  static c_StaticWaitHandle* CreateSucceeded(Cell result); // nothrow
+  static c_StaticWaitHandle* CreateFailed(ObjectData* exception);
+
+ private:
+  void setState(uint8_t state) { setKindState(Kind::Static, state); }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
-#include "hphp/runtime/ext/asio/asio-context-enter-inl.h"
-
-#endif // incl_HPHP_EXT_ASIO_CONTEXT_ENTER_H_
+#endif // incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_

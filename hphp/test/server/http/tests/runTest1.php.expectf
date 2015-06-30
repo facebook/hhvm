@@ -16,6 +16,12 @@ Requesting 'test_cookie.php?cookie_name=asdf&cookie_value=f%%0d%%0aoo&cookie_pat
 string(16) "string(4) "asdf""
 Requesting 'test_cookie.php?cookie_name=asdf&cookie_value=foo&cookie_path=B%%0d%%0aAR'
 NULL
+Requesting 'test_cookie.php?cookie_name=asdf&cookie_value=foo&cookie_domain=B%%0d%%0aAR'
+NULL
+Requesting 'test_cookie.php?cookie_name=asdf&cookie_value=foo=bar'
+string(16) "string(4) "asdf""
+Requesting 'test_cookie.php?cookie_name=asdf&cookie_value=foo&cookie_path=B=AR'
+string(16) "string(4) "asdf""
 Requesting 'test_header.php?test_string=foo'
 string(14) "string(2) "OK""
 Requesting 'test_header.php?test_string=f%%0d%%0aoo'

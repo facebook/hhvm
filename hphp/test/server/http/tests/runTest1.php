@@ -17,6 +17,12 @@ requestAll(array(
   "test_cookie.php?cookie_name=asdf&cookie_value=f%0d%0aoo&cookie_path=BAR",
   // This is expected to fatal due to embedded newline in the cookie path.
   "test_cookie.php?cookie_name=asdf&cookie_value=foo&cookie_path=B%0d%0aAR",
+  // This is expected to fatal due to embedded newline in the cookie domain.
+  "test_cookie.php?cookie_name=asdf&cookie_value=foo&cookie_domain=B%0d%0aAR",
+  // This is expected to pass.
+  "test_cookie.php?cookie_name=asdf&cookie_value=foo=bar",
+  // This is expected to pass.
+  "test_cookie.php?cookie_name=asdf&cookie_value=foo&cookie_path=B=AR",
   // This is expected to pass.
   "test_header.php?test_string=foo",
   // This is expected to fatal due to embedded newline in the header.

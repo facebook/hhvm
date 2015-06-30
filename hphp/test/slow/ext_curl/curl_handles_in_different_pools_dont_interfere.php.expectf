@@ -1,0 +1,4 @@
+string(7) "foo.com"
+string(7) "bar.com"
+
+Fatal error: Timeout reached waiting for an available pooled curl connection! %s

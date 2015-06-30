@@ -1,0 +1,157 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+  This script can help you isolate memory leaks in HHVM. It will request a heap
+  dump from HHVM at regular intervals and diff successive dumps to show you
+  which code paths are allocating memory.
+
+  requirements:
+    * HHVM debug symbols.
+    * a copy of libjemalloc compiled with `--enable-prof`.
+      (the script will check your libjemalloc for profiling capabilities
+      and alert you if they are missing.)
+    * Google Perf Tools (for diffing heaps).
+    * Ability to make HTTP or HTTPS requests to the HHVM admin server.
+
+  usage: hhvm-leak-isolator [--heap-dir HEAP_DIR] [--check-only]
+                            [--admin-server URL] [--interval MINS]
+
+  optional arguments:
+    -h, --help           show this help message and exit
+    --heap-dir HEAP_DIR  Dump heaps to this directory (default: $TMP).
+    --check-only         Check for heap profiling capabilities and exit.
+    --admin-server URL   HHVM admin server URL (default: http://localhost:9002)
+    --interval MINS      Time to sleep between heap dumps (default: 5).
+
+  Author: Ori Livneh
+
+"""
+from __future__ import print_function
+
+import argparse
+import ctypes
+import ctypes.util
+import distutils.spawn
+import os
+import subprocess
+import sys
+import tempfile
+import textwrap
+import time
+
+try:
+    from urllib import urlencode
+    from urllib2 import urlopen
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urlencode, urljoin
+    from urllib.request import urlopen
+
+
+temp_dir = tempfile.gettempdir()
+ap = argparse.ArgumentParser(
+    description=textwrap.dedent(__doc__.split('usage')[0]),
+    formatter_class=argparse.RawDescriptionHelpFormatter)
+ap.add_argument('--heap-dir', default=temp_dir, type=os.path.abspath,
+                help='Dump heaps to this directory (default: %s).' % temp_dir)
+ap.add_argument('--check-only', action='store_true', default=False,
+                help='Check for heap profiling capabilities and exit.')
+ap.add_argument('--admin-server', default='http://localhost:9002',
+                help='HHVM admin server URL (default: http://localhost:9002)',
+                metavar='URL')
+ap.add_argument('--interval', default=5, type=int, metavar='MINS',
+                help='Time to sleep between heap dumps (default: 5).')
+args = ap.parse_args()
+
+
+def get_jemalloc_can_profile():
+    """Check if libjemalloc was built with `--enable-prof` and thus
+    has heap profiling capabilities."""
+    jemalloc_so = ctypes.util.find_library('jemalloc')
+    if jemalloc_so is None:
+        raise EnvironmentError('Could not find libjemalloc!')
+    jemalloc = ctypes.CDLL(jemalloc_so, use_errno=True)
+
+    has_prof = ctypes.c_bool(False)
+    has_prof_len = ctypes.c_size_t(ctypes.sizeof(has_prof))
+    rv = jemalloc.mallctl(b'config.prof', ctypes.byref(has_prof),
+                          ctypes.byref(has_prof_len), None, None)
+    if rv != 0:
+        err = ctypes.get_errno()
+        raise OSError(err, os.strerror(err))
+
+    return bool(has_prof)
+
+
+def hhvm_admin_do(endpoint, **query_params):
+    url = urljoin(args.admin_server, endpoint)
+    if query_params:
+        url += '?' + urlencode(query_params)
+    req = urlopen(url)
+    return req.read().decode('utf-8')
+
+
+if get_jemalloc_can_profile():
+    print('OK: jemalloc built with `--enable-prof`.')
+else:
+    print('NOT OK: your copy of libjemalloc was not built with `--enable-prof`'
+          ' and thus has no heap profiling capabilities.', file=sys.stderr)
+    sys.exit(1)
+
+try:
+    stats = hhvm_admin_do('jemalloc-stats-print')
+except EnvironmentError:
+    print('NOT OK: Could not connect to an HHVM admin server at %s.\n'
+          ' Use `--admin-server` to specify an alternate URL.'
+          % args.admin_server, file=sys.stderr)
+    sys.exit(1)
+
+if 'opt.prof: true' in stats:
+    print('OK: jemalloc heap profiling is active (prof: true).')
+else:
+    print('NOT OK: jemalloc heap profiling is off.'
+          ' Run `sudo ln -sf prof:true /etc/malloc.conf` and restart HHVM.',
+          file=sys.stderr)
+    sys.exit(1)
+
+hhvm_path = distutils.spawn.find_executable('hhvm')
+pprof_path = (distutils.spawn.find_executable('google-pprof') or
+              distutils.spawn.find_executable('pprof'))
+if pprof_path:
+    print('OK: pprof is %s.' % pprof_path)
+else:
+    print('WARN: Could not find `pprof` or `google-pprof` in $PATH. '
+          'pprof is required for diffing heap dumps.\n'
+          'Install the `google-perftools` package or see '
+          'https://code.google.com/p/gperftools/.', file=sys.stderr)
+
+if args.check_only:
+    sys.exit(0)
+
+
+hhvm_admin_do('jemalloc-prof-activate')
+if 'ACTIVE' not in hhvm_admin_do('jemalloc-prof-status'):
+    print('NOT OK: failed to activate jemalloc profiling.', file=sys.stderr)
+    sys.exit(1)
+
+print('I will write heap files to %s every %d minute(s).' %
+      (os.path.join(args.heap_dir, 'hhvm-heap.*'), args.interval))
+
+heap_files = []
+while 1:
+    heap_file = os.path.join(args.heap_dir, 'hhvm-heap.%d' % time.time())
+    heap_files.append(heap_file)
+    hhvm_admin_do('jemalloc-prof-dump', file=heap_file)
+    print('Wrote %s.' % heap_file)
+    if pprof_path and len(heap_files) > 1:
+        base, heap = heap_files[-2:]
+        cmd = (pprof_path, hhvm_path, '--show_bytes', '--text',
+               '--base=%s' % base, heap)
+        out = subprocess.check_output(cmd, stderr=open(os.devnull, 'w'))
+        out = out.decode('utf-8', errors='ignore')
+        if out.strip():
+            print('-' * 80, '\n', out, '\n', '-' * 80)
+        else:
+            print('-- no diff --')
+    print('Sleeping for %d minute(s).' % args.interval)
+    time.sleep(args.interval * 60)

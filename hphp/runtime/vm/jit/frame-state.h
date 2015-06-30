@@ -353,12 +353,14 @@ struct FrameStateMgr final {
   Type predictedLocalType(uint32_t id) const;
   SSATmp* localValue(uint32_t id) const;
   TypeSourceSet localTypeSources(uint32_t id) const;
+  void refineLocalPredictedType(uint32_t id, Type type);
 
   Type stackType(IRSPOffset) const;
   bool stackMaybeChanged(IRSPOffset) const;
   Type predictedStackType(IRSPOffset) const;
   SSATmp* stackValue(IRSPOffset) const;
   TypeSourceSet stackTypeSources(IRSPOffset) const;
+  void refineStackPredictedType(IRSPOffset, Type);
 
   /*
    * Call a function with const access to the LocalState& for each local we're
@@ -438,8 +440,6 @@ private: // local tracking helpers
   void killLocalsForCall(bool);
   void refineLocalType(uint32_t id, Type type, TypeSource typeSrc);
   void setLocalPredictedType(uint32_t id, Type type);
-  void refineLocalPredictedType(uint32_t id, Type type);
-  void refineStackPredictedType(IRSPOffset, Type);
   void setLocalType(uint32_t id, Type type);
   void setBoxedLocalPrediction(uint32_t id, Type type);
   void updateLocalRefPredictions(SSATmp*, SSATmp*);

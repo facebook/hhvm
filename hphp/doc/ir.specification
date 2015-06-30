@@ -1497,16 +1497,6 @@ To string conversions:
   allows later passes to test conditions and create new exits from the region
   at this point in the program.
 
-| PredictLoc<T, localId>, ND, S(FramePtr), NF
-
-  Does nothing. Serves as an indicator that the predicted type of the given
-  localId on the frame S0 is T.
-
-| PredictStk<T, offset>, ND, S(StkPtr), NF
-
-  Does nothing. Serves as an indicator that the predicted type of the cell on
-  the eval stack pointed to by S0 at offset is T.
-
 14. Runtime helpers
 
 | VerifyParamCls, ND, S(Cls) S(Cls|Nullptr) C(Int) C(Int), Er

@@ -158,7 +158,7 @@ void checkTypeStack(IRGS& env,
 void predictTypeStack(IRGS& env, BCSPOffset offset, Type type) {
   assert(type <= TGen);
 
-  auto stackOff = IRSPOffsetData { offsetFromIRSP(env, offset) };
+  auto const irSPOff = offsetFromIRSP(env, offset);
   if (offset.offset < env.irb->evalStack().size()) {
     auto const tmp = top(env, offset, DataTypeGeneric);
     assertx(tmp);
@@ -168,12 +168,12 @@ void predictTypeStack(IRGS& env, BCSPOffset offset, Type type) {
     return;
   }
 
-  gen(env, PredictStk, type, stackOff, sp(env));
+  env.irb->fs().refineStackPredictedType(irSPOff, type);
 }
 
 void predictTypeLocal(IRGS& env, uint32_t locId, Type type) {
   assert(type <= TGen);
-  gen(env, PredictLoc, type, LocalId { locId }, fp(env));
+  env.irb->fs().refineLocalPredictedType(locId, type);
 }
 
 void predictTypeLocation(

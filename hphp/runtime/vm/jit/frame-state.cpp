@@ -403,11 +403,6 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
                           inst->typeParam());
     break;
 
-  case PredictStk:
-    refineStackPredictedType(inst->extra<PredictStk>()->offset,
-                             inst->typeParam());
-    break;
-
   case AssertLoc:
   case CheckLoc:
     {
@@ -420,11 +415,6 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
                         TypeSource::makeGuard(inst));
       }
     }
-    break;
-
-  case PredictLoc:
-    refineLocalPredictedType(inst->extra<PredictLoc>()->locId,
-                             inst->typeParam());
     break;
 
   case HintLocInner:

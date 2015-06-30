@@ -60,8 +60,6 @@ NOOP_OPCODE(EndGuards)
 NOOP_OPCODE(HintLocInner)
 NOOP_OPCODE(HintStkInner)
 NOOP_OPCODE(DbgTraceCall)
-NOOP_OPCODE(PredictLoc);
-NOOP_OPCODE(PredictStk);
 
 // When implemented this shouldn't be a nop, but there's no reason to make us
 // punt on everything until then.

@@ -963,8 +963,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CastCtxThis:
   case LdARNumParams:
   case LdRDSAddr:
-  case PredictLoc:
-  case PredictStk:
   case ExitPlaceholder:
   case CheckRange:
   case ProfileObjClass:

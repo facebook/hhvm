@@ -324,7 +324,7 @@
   (setq font-lock-maximum-decoration t)
   (setq case-fold-search t)
   
-  (setq-local compile-command (concat hack-client-binary "--from emacs"))
+  (setq-local compile-command (concat hack-client-binary " --from emacs"))
   
   (add-hook 'completion-at-point-functions 'hack-completion nil t) 
 

@@ -470,19 +470,26 @@ void MemoryManager::sweep() {
     }
   } while (!m_sweepables.empty());
 
-  TRACE(1, "sweep: sweepable %lu native %lu\n", num_sweepables, num_natives);
-  if (debug) checkHeap();
-}
-
-void MemoryManager::resetAllocator() {
-  assert(m_natives.empty() && m_sweepables.empty());
-  // decref apc strings and arrays referenced by this request
   DEBUG_ONLY auto napcs = m_apc_arrays.size();
+  FTRACE(1, "sweep: sweepable {} native {} apc array {}\n",
+         num_sweepables,
+         num_natives,
+         napcs);
+  if (debug) checkHeap();
+
+  // decref apc arrays referenced by this request.  This must happen here
+  // (instead of in resetAllocator), because the sweep routine may use
+  // g_context.
   while (!m_apc_arrays.empty()) {
     auto a = m_apc_arrays.back();
     m_apc_arrays.pop_back();
     a->sweep();
   }
+}
+
+void MemoryManager::resetAllocator() {
+  assert(m_natives.empty() && m_sweepables.empty());
+  // decref apc strings referenced by this request
   DEBUG_ONLY auto nstrings = StringData::sweepAll();
 
   // cleanup root maps
@@ -497,7 +504,7 @@ void MemoryManager::resetAllocator() {
   m_needInitFree = false;
 
   resetStatsImpl(true);
-  TRACE(1, "reset: apc-arrays %lu strings %u\n", napcs, nstrings);
+  FTRACE(1, "reset: strings {}\n", nstrings);
 }
 
 void MemoryManager::flush() {

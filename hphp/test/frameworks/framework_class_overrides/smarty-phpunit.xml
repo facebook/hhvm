@@ -1,0 +1,38 @@
+<phpunit bootstrap="Bootstrap.php"
+         colors="true"
+         backupGlobals="false"
+         backupStaticAttributes="false"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         beStrictAboutOutputDuringTests="true"
+         stopOnFailure="false">
+  <php>
+      <const name="individualFolders" value="true"/>
+      <const name="MemCacheEnable" value="false"/>
+      <const name="ApcCacheEnable" value="false"/>
+      <const name="MysqlCacheEnable" value="false"/>
+      <const name="PdoCacheEnable" value="false"/>
+      <const name="PdoGzipCacheEnable" value="false"/>
+      <const name="MysqlResourceEnable" value="false"/>
+      <const name="DB_DSN" value="mysql:dbname=test;host=localhost"/>
+      <const name="DB_USER" value="smarty"/>
+      <const name="DB_PASSWD" value=""/>
+  </php>
+  <testsuites>
+    <testsuite name="Smarty Test Suite">
+      <directory>UnitTests</directory>
+    </testsuite>
+    <blacklist>
+        <directory suffix=".php">./</directory>
+        <directory suffix=".php">cache</directory>
+        <directory suffix=".php">templates_c</directory>
+    </blacklist>
+    <whitelist processUncoveredFilesFromWhitelist="true">
+        <directory suffix=".php">../smarty/libs</directory>
+        <directory suffix=".php">../smarty/libs/plugins</directory>
+        <directory suffix=".php">../smarty/libs/sysplugins</directory>
+        <directory suffix=".php">../smarty/demo/plugins</directory>
+    </whitelist>
+  </testsuites>
+</phpunit>

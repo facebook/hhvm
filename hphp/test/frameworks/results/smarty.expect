@@ -1,0 +1,3196 @@
+AppendByRefBCTest::testInit
+.
+AppendByRefBCTest::testSmarty2AppendByRef
+.
+AppendByRefBCTest::testSmarty2AppendByRefUnassigned
+.
+AppendByRefTest::testAppendByRef
+.
+AppendByRefTest::testAppendByRefMerge
+.
+AppendByRefTest::testAppendByRefUnassigned
+.
+AppendTest::testAppend
+.
+AppendTest::testAppendArrayMerge
+.
+AppendTest::testAppendMerge
+.
+AppendTest::testAppendUnassigned
+.
+AppendTest::testArrayAppend
+.
+AppendTest::testArrayAppendArrayMerge
+.
+AppendTest::testInit
+.
+ArrayTest::testArrayMath1
+.
+ArrayTest::testArrayMath2
+.
+ArrayTest::testArrayMath3
+.
+ArrayTest::testArrayMath4
+.
+ArrayTest::testArrayMath5
+.
+ArrayTest::testArrayMath6
+.
+ArrayTest::testArrayVariableIndex1
+.
+ArrayTest::testArrayVariableIndex2
+.
+ArrayTest::testArrayVariableIndex3
+.
+ArrayTest::testArrayVariableIndex4
+.
+ArrayTest::testIndexedArrayDefinition
+.
+ArrayTest::testInit
+.
+ArrayTest::testNestedArray
+.
+ArrayTest::testSimpleArrayDefinition
+.
+ArrayTest::testSmarty2ArrayAccess
+.
+ArrayTest::testSmarty3ArrayAccess
+.
+AssignByRefBCTest::testInit
+.
+AssignByRefBCTest::testSmarty2AssignByRef
+.
+AssignByRefBCTest::testSmarty2AssignByRef2
+.
+AssignByRefTest::testSimpleAssignByRef
+.
+AssignGlobalTest::testAssignGlobalGetGlobal
+.
+AssignGlobalTest::testAssignGlobalGetGlobalArray
+.
+AssignGlobalTest::testAssignGlobalTag
+.
+AssignGlobalTest::testGlobalVarArrayTag
+.
+AssignGlobalTest::testInit
+.
+AssignTest::testArrayAssign
+.
+AssignTest::testInit
+.
+AssignTest::testSimpleAssign
+.
+AttributeTest::testIllegalOptionValue
+.
+AttributeTest::testInit
+.
+AttributeTest::testRequiredAttributeVar
+.
+AttributeTest::testTooManyShorthands
+.
+AttributeTest::testUnexpectedAttribute
+.
+AutoEscapeTest::testAutoEscape
+.
+CacheResourceCustomApcTest::testCache with data set #0
+S
+CacheResourceCustomApcTest::testCache with data set #1
+S
+CacheResourceCustomApcTest::testCache with data set #10
+S
+CacheResourceCustomApcTest::testCache with data set #11
+S
+CacheResourceCustomApcTest::testCache with data set #12
+S
+CacheResourceCustomApcTest::testCache with data set #13
+S
+CacheResourceCustomApcTest::testCache with data set #14
+S
+CacheResourceCustomApcTest::testCache with data set #15
+S
+CacheResourceCustomApcTest::testCache with data set #16
+S
+CacheResourceCustomApcTest::testCache with data set #17
+S
+CacheResourceCustomApcTest::testCache with data set #18
+S
+CacheResourceCustomApcTest::testCache with data set #19
+S
+CacheResourceCustomApcTest::testCache with data set #2
+S
+CacheResourceCustomApcTest::testCache with data set #20
+S
+CacheResourceCustomApcTest::testCache with data set #21
+S
+CacheResourceCustomApcTest::testCache with data set #22
+S
+CacheResourceCustomApcTest::testCache with data set #23
+S
+CacheResourceCustomApcTest::testCache with data set #24
+S
+CacheResourceCustomApcTest::testCache with data set #25
+S
+CacheResourceCustomApcTest::testCache with data set #26
+S
+CacheResourceCustomApcTest::testCache with data set #27
+S
+CacheResourceCustomApcTest::testCache with data set #28
+S
+CacheResourceCustomApcTest::testCache with data set #29
+S
+CacheResourceCustomApcTest::testCache with data set #3
+S
+CacheResourceCustomApcTest::testCache with data set #30
+S
+CacheResourceCustomApcTest::testCache with data set #31
+S
+CacheResourceCustomApcTest::testCache with data set #4
+S
+CacheResourceCustomApcTest::testCache with data set #5
+S
+CacheResourceCustomApcTest::testCache with data set #6
+S
+CacheResourceCustomApcTest::testCache with data set #7
+S
+CacheResourceCustomApcTest::testCache with data set #8
+S
+CacheResourceCustomApcTest::testCache with data set #9
+S
+CacheResourceCustomApcTest::testCachingDisabled1
+S
+CacheResourceCustomApcTest::testCachingDisabled2
+S
+CacheResourceCustomApcTest::testClearCacheAllCacheIdCompileId
+S
+CacheResourceCustomApcTest::testClearCacheCacheFile
+S
+CacheResourceCustomApcTest::testClearCacheCacheFileSub
+S
+CacheResourceCustomApcTest::testClearCacheCacheIdCompileId
+S
+CacheResourceCustomApcTest::testClearCacheCacheIdCompileId2
+S
+CacheResourceCustomApcTest::testClearCacheCacheIdCompileId2Sub
+S
+CacheResourceCustomApcTest::testClearCacheCacheIdCompileId3
+S
+CacheResourceCustomApcTest::testClearCacheCacheIdCompileId3Sub
+S
+CacheResourceCustomApcTest::testClearCacheCacheIdCompileId4
+S
+CacheResourceCustomApcTest::testClearCacheCacheIdCompileId4Sub
+S
+CacheResourceCustomApcTest::testClearCacheCacheIdCompileId5
+S
+CacheResourceCustomApcTest::testClearCacheCacheIdCompileId5Sub
+S
+CacheResourceCustomApcTest::testGetCachedFilepathCacheId
+S
+CacheResourceCustomApcTest::testGetCachedFilepathCacheIdCompileId
+S
+CacheResourceCustomApcTest::testGetCachedFilepathCompileId
+S
+CacheResourceCustomApcTest::testGetCachedFilepathSubDirs
+S
+CacheResourceCustomApcTest::testInit
+S
+CacheResourceCustomMemcacheTest::testCache with data set #0
+S
+CacheResourceCustomMemcacheTest::testCache with data set #1
+S
+CacheResourceCustomMemcacheTest::testCache with data set #10
+S
+CacheResourceCustomMemcacheTest::testCache with data set #11
+S
+CacheResourceCustomMemcacheTest::testCache with data set #12
+S
+CacheResourceCustomMemcacheTest::testCache with data set #13
+S
+CacheResourceCustomMemcacheTest::testCache with data set #14
+S
+CacheResourceCustomMemcacheTest::testCache with data set #15
+S
+CacheResourceCustomMemcacheTest::testCache with data set #16
+S
+CacheResourceCustomMemcacheTest::testCache with data set #17
+S
+CacheResourceCustomMemcacheTest::testCache with data set #18
+S
+CacheResourceCustomMemcacheTest::testCache with data set #19
+S
+CacheResourceCustomMemcacheTest::testCache with data set #2
+S
+CacheResourceCustomMemcacheTest::testCache with data set #20
+S
+CacheResourceCustomMemcacheTest::testCache with data set #21
+S
+CacheResourceCustomMemcacheTest::testCache with data set #22
+S
+CacheResourceCustomMemcacheTest::testCache with data set #23
+S
+CacheResourceCustomMemcacheTest::testCache with data set #24
+S
+CacheResourceCustomMemcacheTest::testCache with data set #25
+S
+CacheResourceCustomMemcacheTest::testCache with data set #26
+S
+CacheResourceCustomMemcacheTest::testCache with data set #27
+S
+CacheResourceCustomMemcacheTest::testCache with data set #28
+S
+CacheResourceCustomMemcacheTest::testCache with data set #29
+S
+CacheResourceCustomMemcacheTest::testCache with data set #3
+S
+CacheResourceCustomMemcacheTest::testCache with data set #30
+S
+CacheResourceCustomMemcacheTest::testCache with data set #31
+S
+CacheResourceCustomMemcacheTest::testCache with data set #4
+S
+CacheResourceCustomMemcacheTest::testCache with data set #5
+S
+CacheResourceCustomMemcacheTest::testCache with data set #6
+S
+CacheResourceCustomMemcacheTest::testCache with data set #7
+S
+CacheResourceCustomMemcacheTest::testCache with data set #8
+S
+CacheResourceCustomMemcacheTest::testCache with data set #9
+S
+CacheResourceCustomMemcacheTest::testCachingDisabled1
+S
+CacheResourceCustomMemcacheTest::testCachingDisabled2
+S
+CacheResourceCustomMemcacheTest::testClearCacheAllCacheIdCompileId
+S
+CacheResourceCustomMemcacheTest::testClearCacheCacheFile
+S
+CacheResourceCustomMemcacheTest::testClearCacheCacheFileSub
+S
+CacheResourceCustomMemcacheTest::testClearCacheCacheIdCompileId
+S
+CacheResourceCustomMemcacheTest::testClearCacheCacheIdCompileId2
+S
+CacheResourceCustomMemcacheTest::testClearCacheCacheIdCompileId2Sub
+S
+CacheResourceCustomMemcacheTest::testClearCacheCacheIdCompileId3
+S
+CacheResourceCustomMemcacheTest::testClearCacheCacheIdCompileId3Sub
+S
+CacheResourceCustomMemcacheTest::testClearCacheCacheIdCompileId4
+S
+CacheResourceCustomMemcacheTest::testClearCacheCacheIdCompileId4Sub
+S
+CacheResourceCustomMemcacheTest::testClearCacheCacheIdCompileId5
+S
+CacheResourceCustomMemcacheTest::testClearCacheCacheIdCompileId5Sub
+S
+CacheResourceCustomMemcacheTest::testGetCachedFilepathCacheId
+S
+CacheResourceCustomMemcacheTest::testGetCachedFilepathCacheIdCompileId
+S
+CacheResourceCustomMemcacheTest::testGetCachedFilepathCompileId
+S
+CacheResourceCustomMemcacheTest::testGetCachedFilepathSubDirs
+S
+CacheResourceCustomMemcacheTest::testInit
+S
+CacheResourceCustomMysqlTest::testCache with data set #0
+S
+CacheResourceCustomMysqlTest::testCache with data set #1
+S
+CacheResourceCustomMysqlTest::testCache with data set #10
+S
+CacheResourceCustomMysqlTest::testCache with data set #11
+S
+CacheResourceCustomMysqlTest::testCache with data set #12
+S
+CacheResourceCustomMysqlTest::testCache with data set #13
+S
+CacheResourceCustomMysqlTest::testCache with data set #14
+S
+CacheResourceCustomMysqlTest::testCache with data set #15
+S
+CacheResourceCustomMysqlTest::testCache with data set #16
+S
+CacheResourceCustomMysqlTest::testCache with data set #17
+S
+CacheResourceCustomMysqlTest::testCache with data set #18
+S
+CacheResourceCustomMysqlTest::testCache with data set #19
+S
+CacheResourceCustomMysqlTest::testCache with data set #2
+S
+CacheResourceCustomMysqlTest::testCache with data set #20
+S
+CacheResourceCustomMysqlTest::testCache with data set #21
+S
+CacheResourceCustomMysqlTest::testCache with data set #22
+S
+CacheResourceCustomMysqlTest::testCache with data set #23
+S
+CacheResourceCustomMysqlTest::testCache with data set #24
+S
+CacheResourceCustomMysqlTest::testCache with data set #25
+S
+CacheResourceCustomMysqlTest::testCache with data set #26
+S
+CacheResourceCustomMysqlTest::testCache with data set #27
+S
+CacheResourceCustomMysqlTest::testCache with data set #28
+S
+CacheResourceCustomMysqlTest::testCache with data set #29
+S
+CacheResourceCustomMysqlTest::testCache with data set #3
+S
+CacheResourceCustomMysqlTest::testCache with data set #30
+S
+CacheResourceCustomMysqlTest::testCache with data set #31
+S
+CacheResourceCustomMysqlTest::testCache with data set #4
+S
+CacheResourceCustomMysqlTest::testCache with data set #5
+S
+CacheResourceCustomMysqlTest::testCache with data set #6
+S
+CacheResourceCustomMysqlTest::testCache with data set #7
+S
+CacheResourceCustomMysqlTest::testCache with data set #8
+S
+CacheResourceCustomMysqlTest::testCache with data set #9
+S
+CacheResourceCustomMysqlTest::testCachingDisabled1
+S
+CacheResourceCustomMysqlTest::testCachingDisabled2
+S
+CacheResourceCustomMysqlTest::testClearCacheAllCacheIdCompileId
+S
+CacheResourceCustomMysqlTest::testClearCacheCacheFile
+S
+CacheResourceCustomMysqlTest::testClearCacheCacheFileSub
+S
+CacheResourceCustomMysqlTest::testClearCacheCacheIdCompileId
+S
+CacheResourceCustomMysqlTest::testClearCacheCacheIdCompileId2
+S
+CacheResourceCustomMysqlTest::testClearCacheCacheIdCompileId2Sub
+S
+CacheResourceCustomMysqlTest::testClearCacheCacheIdCompileId3
+S
+CacheResourceCustomMysqlTest::testClearCacheCacheIdCompileId3Sub
+S
+CacheResourceCustomMysqlTest::testClearCacheCacheIdCompileId4
+S
+CacheResourceCustomMysqlTest::testClearCacheCacheIdCompileId4Sub
+S
+CacheResourceCustomMysqlTest::testClearCacheCacheIdCompileId5
+S
+CacheResourceCustomMysqlTest::testClearCacheCacheIdCompileId5Sub
+S
+CacheResourceCustomMysqlTest::testGetCachedFilepathCacheId
+S
+CacheResourceCustomMysqlTest::testGetCachedFilepathCacheIdCompileId
+S
+CacheResourceCustomMysqlTest::testGetCachedFilepathCompileId
+S
+CacheResourceCustomMysqlTest::testGetCachedFilepathSubDirs
+S
+CacheResourceCustomMysqlTest::testInit
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #0
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #1
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #10
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #11
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #12
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #13
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #14
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #15
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #16
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #17
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #18
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #19
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #2
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #20
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #21
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #22
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #23
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #24
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #25
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #26
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #27
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #28
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #29
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #3
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #30
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #31
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #4
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #5
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #6
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #7
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #8
+S
+CacheResourceCustomPDOGzipTest::testCache with data set #9
+S
+CacheResourceCustomPDOGzipTest::testCachingDisabled1
+S
+CacheResourceCustomPDOGzipTest::testCachingDisabled2
+S
+CacheResourceCustomPDOGzipTest::testClearCacheAllCacheIdCompileId
+S
+CacheResourceCustomPDOGzipTest::testClearCacheCacheFile
+S
+CacheResourceCustomPDOGzipTest::testClearCacheCacheFileSub
+S
+CacheResourceCustomPDOGzipTest::testClearCacheCacheIdCompileId
+S
+CacheResourceCustomPDOGzipTest::testClearCacheCacheIdCompileId2
+S
+CacheResourceCustomPDOGzipTest::testClearCacheCacheIdCompileId2Sub
+S
+CacheResourceCustomPDOGzipTest::testClearCacheCacheIdCompileId3
+S
+CacheResourceCustomPDOGzipTest::testClearCacheCacheIdCompileId3Sub
+S
+CacheResourceCustomPDOGzipTest::testClearCacheCacheIdCompileId4
+S
+CacheResourceCustomPDOGzipTest::testClearCacheCacheIdCompileId4Sub
+S
+CacheResourceCustomPDOGzipTest::testClearCacheCacheIdCompileId5
+S
+CacheResourceCustomPDOGzipTest::testClearCacheCacheIdCompileId5Sub
+S
+CacheResourceCustomPDOGzipTest::testGetCachedFilepathCacheId
+S
+CacheResourceCustomPDOGzipTest::testGetCachedFilepathCacheIdCompileId
+S
+CacheResourceCustomPDOGzipTest::testGetCachedFilepathCompileId
+S
+CacheResourceCustomPDOGzipTest::testGetCachedFilepathSubDirs
+S
+CacheResourceCustomPDOGzipTest::testInit
+S
+CacheResourceCustomPDOTest::testCache with data set #0
+S
+CacheResourceCustomPDOTest::testCache with data set #1
+S
+CacheResourceCustomPDOTest::testCache with data set #10
+S
+CacheResourceCustomPDOTest::testCache with data set #11
+S
+CacheResourceCustomPDOTest::testCache with data set #12
+S
+CacheResourceCustomPDOTest::testCache with data set #13
+S
+CacheResourceCustomPDOTest::testCache with data set #14
+S
+CacheResourceCustomPDOTest::testCache with data set #15
+S
+CacheResourceCustomPDOTest::testCache with data set #16
+S
+CacheResourceCustomPDOTest::testCache with data set #17
+S
+CacheResourceCustomPDOTest::testCache with data set #18
+S
+CacheResourceCustomPDOTest::testCache with data set #19
+S
+CacheResourceCustomPDOTest::testCache with data set #2
+S
+CacheResourceCustomPDOTest::testCache with data set #20
+S
+CacheResourceCustomPDOTest::testCache with data set #21
+S
+CacheResourceCustomPDOTest::testCache with data set #22
+S
+CacheResourceCustomPDOTest::testCache with data set #23
+S
+CacheResourceCustomPDOTest::testCache with data set #24
+S
+CacheResourceCustomPDOTest::testCache with data set #25
+S
+CacheResourceCustomPDOTest::testCache with data set #26
+S
+CacheResourceCustomPDOTest::testCache with data set #27
+S
+CacheResourceCustomPDOTest::testCache with data set #28
+S
+CacheResourceCustomPDOTest::testCache with data set #29
+S
+CacheResourceCustomPDOTest::testCache with data set #3
+S
+CacheResourceCustomPDOTest::testCache with data set #30
+S
+CacheResourceCustomPDOTest::testCache with data set #31
+S
+CacheResourceCustomPDOTest::testCache with data set #4
+S
+CacheResourceCustomPDOTest::testCache with data set #5
+S
+CacheResourceCustomPDOTest::testCache with data set #6
+S
+CacheResourceCustomPDOTest::testCache with data set #7
+S
+CacheResourceCustomPDOTest::testCache with data set #8
+S
+CacheResourceCustomPDOTest::testCache with data set #9
+S
+CacheResourceCustomPDOTest::testCachingDisabled1
+S
+CacheResourceCustomPDOTest::testCachingDisabled2
+S
+CacheResourceCustomPDOTest::testClearCacheAllCacheIdCompileId
+S
+CacheResourceCustomPDOTest::testClearCacheCacheFile
+S
+CacheResourceCustomPDOTest::testClearCacheCacheFileSub
+S
+CacheResourceCustomPDOTest::testClearCacheCacheIdCompileId
+S
+CacheResourceCustomPDOTest::testClearCacheCacheIdCompileId2
+S
+CacheResourceCustomPDOTest::testClearCacheCacheIdCompileId2Sub
+S
+CacheResourceCustomPDOTest::testClearCacheCacheIdCompileId3
+S
+CacheResourceCustomPDOTest::testClearCacheCacheIdCompileId3Sub
+S
+CacheResourceCustomPDOTest::testClearCacheCacheIdCompileId4
+S
+CacheResourceCustomPDOTest::testClearCacheCacheIdCompileId4Sub
+S
+CacheResourceCustomPDOTest::testClearCacheCacheIdCompileId5
+S
+CacheResourceCustomPDOTest::testClearCacheCacheIdCompileId5Sub
+S
+CacheResourceCustomPDOTest::testGetCachedFilepathCacheId
+S
+CacheResourceCustomPDOTest::testGetCachedFilepathCacheIdCompileId
+S
+CacheResourceCustomPDOTest::testGetCachedFilepathCompileId
+S
+CacheResourceCustomPDOTest::testGetCachedFilepathSubDirs
+S
+CacheResourceCustomPDOTest::testInit
+S
+CacheResourceCustomRegisteredTest::testCache with data set #0
+S
+CacheResourceCustomRegisteredTest::testCache with data set #1
+S
+CacheResourceCustomRegisteredTest::testCache with data set #10
+S
+CacheResourceCustomRegisteredTest::testCache with data set #11
+S
+CacheResourceCustomRegisteredTest::testCache with data set #12
+S
+CacheResourceCustomRegisteredTest::testCache with data set #13
+S
+CacheResourceCustomRegisteredTest::testCache with data set #14
+S
+CacheResourceCustomRegisteredTest::testCache with data set #15
+S
+CacheResourceCustomRegisteredTest::testCache with data set #16
+S
+CacheResourceCustomRegisteredTest::testCache with data set #17
+S
+CacheResourceCustomRegisteredTest::testCache with data set #18
+S
+CacheResourceCustomRegisteredTest::testCache with data set #19
+S
+CacheResourceCustomRegisteredTest::testCache with data set #2
+S
+CacheResourceCustomRegisteredTest::testCache with data set #20
+S
+CacheResourceCustomRegisteredTest::testCache with data set #21
+S
+CacheResourceCustomRegisteredTest::testCache with data set #22
+S
+CacheResourceCustomRegisteredTest::testCache with data set #23
+S
+CacheResourceCustomRegisteredTest::testCache with data set #24
+S
+CacheResourceCustomRegisteredTest::testCache with data set #25
+S
+CacheResourceCustomRegisteredTest::testCache with data set #26
+S
+CacheResourceCustomRegisteredTest::testCache with data set #27
+S
+CacheResourceCustomRegisteredTest::testCache with data set #28
+S
+CacheResourceCustomRegisteredTest::testCache with data set #29
+S
+CacheResourceCustomRegisteredTest::testCache with data set #3
+S
+CacheResourceCustomRegisteredTest::testCache with data set #30
+S
+CacheResourceCustomRegisteredTest::testCache with data set #31
+S
+CacheResourceCustomRegisteredTest::testCache with data set #4
+S
+CacheResourceCustomRegisteredTest::testCache with data set #5
+S
+CacheResourceCustomRegisteredTest::testCache with data set #6
+S
+CacheResourceCustomRegisteredTest::testCache with data set #7
+S
+CacheResourceCustomRegisteredTest::testCache with data set #8
+S
+CacheResourceCustomRegisteredTest::testCache with data set #9
+S
+CacheResourceCustomRegisteredTest::testCachingDisabled1
+S
+CacheResourceCustomRegisteredTest::testCachingDisabled2
+S
+CacheResourceCustomRegisteredTest::testClearCacheAllCacheIdCompileId
+S
+CacheResourceCustomRegisteredTest::testClearCacheCacheFile
+S
+CacheResourceCustomRegisteredTest::testClearCacheCacheFileSub
+S
+CacheResourceCustomRegisteredTest::testClearCacheCacheIdCompileId
+S
+CacheResourceCustomRegisteredTest::testClearCacheCacheIdCompileId2
+S
+CacheResourceCustomRegisteredTest::testClearCacheCacheIdCompileId2Sub
+S
+CacheResourceCustomRegisteredTest::testClearCacheCacheIdCompileId3
+S
+CacheResourceCustomRegisteredTest::testClearCacheCacheIdCompileId3Sub
+S
+CacheResourceCustomRegisteredTest::testClearCacheCacheIdCompileId4
+S
+CacheResourceCustomRegisteredTest::testClearCacheCacheIdCompileId4Sub
+S
+CacheResourceCustomRegisteredTest::testClearCacheCacheIdCompileId5
+S
+CacheResourceCustomRegisteredTest::testClearCacheCacheIdCompileId5Sub
+S
+CacheResourceCustomRegisteredTest::testGetCachedFilepathCacheId
+S
+CacheResourceCustomRegisteredTest::testGetCachedFilepathCacheIdCompileId
+S
+CacheResourceCustomRegisteredTest::testGetCachedFilepathCompileId
+S
+CacheResourceCustomRegisteredTest::testGetCachedFilepathSubDirs
+S
+CacheResourceCustomRegisteredTest::testInit
+S
+CacheResourceFileTest::testCache with data set #0
+.
+CacheResourceFileTest::testCache with data set #1
+.
+CacheResourceFileTest::testCache with data set #10
+.
+CacheResourceFileTest::testCache with data set #11
+.
+CacheResourceFileTest::testCache with data set #12
+F
+CacheResourceFileTest::testCache with data set #13
+F
+CacheResourceFileTest::testCache with data set #14
+F
+CacheResourceFileTest::testCache with data set #15
+F
+CacheResourceFileTest::testCache with data set #16
+F
+CacheResourceFileTest::testCache with data set #17
+F
+CacheResourceFileTest::testCache with data set #18
+F
+CacheResourceFileTest::testCache with data set #19
+F
+CacheResourceFileTest::testCache with data set #2
+.
+CacheResourceFileTest::testCache with data set #20
+F
+CacheResourceFileTest::testCache with data set #21
+F
+CacheResourceFileTest::testCache with data set #22
+F
+CacheResourceFileTest::testCache with data set #23
+F
+CacheResourceFileTest::testCache with data set #24
+F
+CacheResourceFileTest::testCache with data set #25
+F
+CacheResourceFileTest::testCache with data set #26
+F
+CacheResourceFileTest::testCache with data set #27
+F
+CacheResourceFileTest::testCache with data set #28
+F
+CacheResourceFileTest::testCache with data set #29
+F
+CacheResourceFileTest::testCache with data set #3
+.
+CacheResourceFileTest::testCache with data set #30
+.
+CacheResourceFileTest::testCache with data set #31
+.
+CacheResourceFileTest::testCache with data set #4
+.
+CacheResourceFileTest::testCache with data set #5
+.
+CacheResourceFileTest::testCache with data set #6
+.
+CacheResourceFileTest::testCache with data set #7
+.
+CacheResourceFileTest::testCache with data set #8
+.
+CacheResourceFileTest::testCache with data set #9
+.
+CacheResourceFileTest::testCachingDisabled1
+.
+CacheResourceFileTest::testCachingDisabled2
+.
+CacheResourceFileTest::testClearCacheAll
+.
+CacheResourceFileTest::testClearCacheAllCacheIdCompileId
+.
+CacheResourceFileTest::testClearCacheAllExpired
+.
+CacheResourceFileTest::testClearCacheAllNotExpired
+.
+CacheResourceFileTest::testClearCacheCacheFile
+.
+CacheResourceFileTest::testClearCacheCacheFileSub
+.
+CacheResourceFileTest::testClearCacheCacheIdCompileId
+.
+CacheResourceFileTest::testClearCacheCacheIdCompileId2
+.
+CacheResourceFileTest::testClearCacheCacheIdCompileId2Sub
+.
+CacheResourceFileTest::testClearCacheCacheIdCompileId3
+.
+CacheResourceFileTest::testClearCacheCacheIdCompileId3Sub
+.
+CacheResourceFileTest::testClearCacheCacheIdCompileId4
+.
+CacheResourceFileTest::testClearCacheCacheIdCompileId4Sub
+.
+CacheResourceFileTest::testClearCacheCacheIdCompileId5
+.
+CacheResourceFileTest::testClearCacheCacheIdCompileId5Sub
+.
+CacheResourceFileTest::testGetCachedFilepathCacheId
+.
+CacheResourceFileTest::testGetCachedFilepathCacheIdCompileId
+.
+CacheResourceFileTest::testGetCachedFilepathCompileId
+.
+CacheResourceFileTest::testGetCachedFilepathSubDirs
+.
+CacheResourceFileTest::testInit
+.
+ClearAllAssignBCTest::testSmarty2ClearAllAssignInSmarty
+.
+ClearAllAssignTest::testAllVariablesAccessable
+.
+ClearAllAssignTest::testClearAllAssignInData
+.
+ClearAllAssignTest::testClearAllAssignInSmarty
+.
+ClearAllAssignTest::testClearAllAssignInTemplate
+.
+ClearAssignBCTest::testInit
+.
+ClearAssignBCTest::testSmarty2ArrayClearAssign
+.
+ClearAssignBCTest::testSmarty2ClearAssign
+.
+ClearAssignTest::testAllVariablesAccessable
+.
+ClearAssignTest::testArrayClearAssign
+.
+ClearAssignTest::testClearAssign
+.
+ClearCompiledTest::testClearAll
+.
+ClearCompiledTest::testClearAmbiguousTemplate
+.
+ClearCompiledTest::testClearCacheidExpired
+.
+ClearCompiledTest::testClearCompileid
+.
+ClearCompiledTest::testClearExpired
+.
+ClearCompiledTest::testClearOtherCompileid
+.
+ClearCompiledTest::testClearOtherTemplate
+.
+ClearCompiledTest::testClearTemplate
+.
+ClearCompiledTest::testClearTemplateCacheid
+.
+ClearCompiledTest::testClearTemplateCacheidExpired
+.
+ClearCompiledTest::testClearTemplateExpired
+.
+ClearCompiledTest::testInit
+.
+ClearCompiledTest::testSubsAmbiguousTemplate
+.
+ClearCompiledTest::testSubsClearAll
+.
+ClearCompiledTest::testSubsClearCacheidExpired
+.
+ClearCompiledTest::testSubsClearCompileid
+.
+ClearCompiledTest::testSubsClearExpired
+.
+ClearCompiledTest::testSubsClearOtherCompileid
+.
+ClearCompiledTest::testSubsClearOtherTemplate
+.
+ClearCompiledTest::testSubsClearTemplate
+.
+ClearCompiledTest::testSubsClearTemplateCacheid
+.
+ClearCompiledTest::testSubsClearTemplateCacheidExpired
+.
+ClearCompiledTest::testSubsClearTemplateExpired
+.
+CommentsTest::testInit
+.
+CommentsTest::testSimpleComment1
+.
+CommentsTest::testSimpleComment2
+.
+CommentsTest::testSimpleComment3
+.
+CommentsTest::testSimpleComment4
+.
+CommentsTest::testSimpleComment5
+.
+CommentsTest::testTextComment1
+.
+CommentsTest::testTextComment2
+.
+CommentsTest::testTextComment3
+.
+CommentsTest::testTextComment4
+.
+CommentsTest::testTextComment5
+.
+CompileAppendTest::testAppend1
+.
+CompileAppendTest::testAppend2
+.
+CompileAppendTest::testInit
+.
+CompileAssignTest::testAssignArrayAppend
+.
+CompileAssignTest::testAssignArrayAppend2
+.
+CompileAssignTest::testAssignArrayAppend3
+.
+CompileAssignTest::testAssignNestedArray
+.
+CompileAssignTest::testAssignNew1
+.
+CompileAssignTest::testAssignNew2
+.
+CompileAssignTest::testAssignNew3
+.
+CompileAssignTest::testAssignNew4
+.
+CompileAssignTest::testAssignNew5
+.
+CompileAssignTest::testAssignNew6
+.
+CompileAssignTest::testAssignNew7
+.
+CompileAssignTest::testAssignOld1
+.
+CompileAssignTest::testAssignOld2
+.
+CompileAssignTest::testAssignOld3
+.
+CompileAssignTest::testAssignOld4
+.
+CompileAssignTest::testAssignOld5
+.
+CompileAssignTest::testAssignOld6
+.
+CompileAssignTest::testAssignOld7
+.
+CompileAssignTest::testAssignOld8
+.
+CompileAssignTest::testAssignOld9
+.
+CompileAssignTest::testAssignShort1
+.
+CompileAssignTest::testAssignShort2
+.
+CompileAssignTest::testInit
+.
+CompileBlockExtendsTest::testBlockDefault_000_1
+.
+CompileBlockExtendsTest::testBlockDefault_000_2
+.
+CompileBlockExtendsTest::testCompileBlockChildAppendShortag_005
+.
+CompileBlockExtendsTest::testCompileBlockChildAppend_004
+.
+CompileBlockExtendsTest::testCompileBlockChildNestedHideAutoLiteralFalse_019
+.
+CompileBlockExtendsTest::testCompileBlockChildNestedHide_018
+.
+CompileBlockExtendsTest::testCompileBlockChildNestedInclude_011
+.
+CompileBlockExtendsTest::testCompileBlockChildNested_010
+.
+CompileBlockExtendsTest::testCompileBlockChildPlugin_008
+.
+CompileBlockExtendsTest::testCompileBlockChildPrepend_003
+.
+CompileBlockExtendsTest::testCompileBlockChildSmartyChild_006
+.
+CompileBlockExtendsTest::testCompileBlockChildSmartyParent_007
+.
+CompileBlockExtendsTest::testCompileBlockChild_002
+.
+CompileBlockExtendsTest::testCompileBlockGrandChildAppend_015
+.
+CompileBlockExtendsTest::testCompileBlockGrandChildMustCompile_021_1
+.
+CompileBlockExtendsTest::testCompileBlockGrandChildMustCompile_021_2
+F
+CompileBlockExtendsTest::testCompileBlockGrandChildMustCompile_021_3
+F
+CompileBlockExtendsTest::testCompileBlockGrandChildMustCompile_021_4
+F
+CompileBlockExtendsTest::testCompileBlockGrandChildNested_016
+.
+CompileBlockExtendsTest::testCompileBlockGrandChildNested_017
+.
+CompileBlockExtendsTest::testCompileBlockGrandChildPrepend_013
+.
+CompileBlockExtendsTest::testCompileBlockGrandChildSmartyChild_014
+.
+CompileBlockExtendsTest::testCompileBlockGrandChild_012
+.
+CompileBlockExtendsTest::testCompileBlockParentNested_009
+.
+CompileBlockExtendsTest::testCompileBlockParent_001
+.
+CompileBlockExtendsTest::testCompileBlockStartSubTemplates_020
+.
+CompileBlockExtendsTest::testDirt_022
+.
+CompileBlockExtendsTest::testInit
+.
+CompileBlockExtendsTest::testNotExistingChildBlock_024
+.
+CompileBlockExtendsTest::testSmartyBlockChildOutsideBlock_025
+.
+CompileBlockExtendsTest::testSmartyBlockParentInParent_027
+.
+CompileBlockExtendsTest::testSmartyBlockParentOutsideBlock_026
+.
+CompileBlockPluginTest::testBlockPluginAssign
+.
+CompileBlockPluginTest::testBlockPluginFromCompiledTemplateFile
+.
+CompileBlockPluginTest::testBlockPluginFromTemplateFile
+.
+CompileBlockPluginTest::testBlockPluginFromTemplateFileCache
+.
+CompileBlockPluginTest::testBlockPluginNoAssign
+.
+CompileBlockPluginTest::testBlockPluginRegisteredFunction
+.
+CompileBlockPluginTest::testBlockPluginRepeat
+.
+CompileBlockPluginTest::testBlockPluginRepeatModidier1
+.
+CompileBlockPluginTest::testBlockPluginRepeatModidier2
+.
+CompileBlockPluginTest::testInit
+.
+CompileCaptureTest::testCapture1
+.
+CompileCaptureTest::testCapture2
+.
+CompileCaptureTest::testCapture3
+.
+CompileCaptureTest::testCapture4
+.
+CompileCaptureTest::testCapture5
+.
+CompileCaptureTest::testCapture6
+.
+CompileCaptureTest::testCapture7
+.
+CompileCaptureTest::testCapture8
+.
+CompileCaptureTest::testCompileCaptureNocache1
+.
+CompileCaptureTest::testCompileCaptureNocache2
+.
+CompileCaptureTest::testInit
+.
+CompileCompilerPluginTest::testCompilerPlugin
+.
+CompileCompilerPluginTest::testInit
+.
+CompileConfigLoadTest::testConfigSyntaxError
+.
+CompileConfigLoadTest::testConfigVariableAllSectionsTemplate
+.
+CompileConfigLoadTest::testConfigVariableBooleanizeOff
+.
+CompileConfigLoadTest::testConfigVariableBooleanizeOn
+.
+CompileConfigLoadTest::testConfigVariableGlobal
+.
+CompileConfigLoadTest::testConfigVariableLocal
+.
+CompileConfigLoadTest::testConfigVariableOverwrite
+.
+CompileConfigLoadTest::testConfigVariableOverwrite2
+.
+CompileConfigLoadTest::testConfigVariableOverwriteFalse
+.
+CompileConfigLoadTest::testConfigVariableParent
+.
+CompileConfigLoadTest::testConfigVariableSection2Template
+.
+CompileConfigLoadTest::testConfigVariableSection2TemplateShorttags
+.
+CompileConfigLoadTest::testInit
+.
+CompileDelimiterTest::testInit
+.
+CompileDelimiterTest::testLeftDelimiter
+.
+CompileDelimiterTest::testRightDelimiter
+.
+CompileErrorTest::testInit
+.
+CompileErrorTest::testNoneExistingTemplateError
+.
+CompileErrorTest::testSyntaxError
+.
+CompileErrorTest::testUnclosedTagError
+.
+CompileErrorTest::testUnknownTagError
+.
+CompileEvalTest::testEval1
+.
+CompileEvalTest::testEval2
+.
+CompileEvalTest::testEval3
+.
+CompileEvalTest::testInit
+.
+CompileForTest::testFor1
+.
+CompileForTest::testFor10
+.
+CompileForTest::testFor11
+.
+CompileForTest::testFor12
+.
+CompileForTest::testFor13
+.
+CompileForTest::testFor14
+.
+CompileForTest::testFor2
+.
+CompileForTest::testFor3
+.
+CompileForTest::testFor4
+.
+CompileForTest::testFor5
+.
+CompileForTest::testFor6
+.
+CompileForTest::testFor7
+.
+CompileForTest::testFor8
+.
+CompileForTest::testFor9
+.
+CompileForTest::testForCache1
+.
+CompileForTest::testForCache2
+.
+CompileForTest::testForNocacheTag1
+.
+CompileForTest::testForNocacheTag2
+.
+CompileForTest::testForNocacheVar1
+.
+CompileForTest::testForNocacheVar2
+.
+CompileForTest::testInit
+.
+CompileForeachTest::testForeach
+.
+CompileForeachTest::testForeachBreak
+.
+CompileForeachTest::testForeachCache1
+.
+CompileForeachTest::testForeachCache2
+.
+CompileForeachTest::testForeachContinue
+.
+CompileForeachTest::testForeachElse
+.
+CompileForeachTest::testForeachFirstLast
+.
+CompileForeachTest::testForeachFirstLastProperty
+.
+CompileForeachTest::testForeachIndexIteration
+.
+CompileForeachTest::testForeachIndexIterationProperty
+.
+CompileForeachTest::testForeachKey
+.
+CompileForeachTest::testForeachKeyProperty
+.
+CompileForeachTest::testForeachNocacheTag1
+.
+CompileForeachTest::testForeachNocacheTag2
+.
+CompileForeachTest::testForeachNocacheVar1
+.
+CompileForeachTest::testForeachNocacheVar2
+.
+CompileForeachTest::testForeachNotElse
+.
+CompileForeachTest::testForeachShorttags
+.
+CompileForeachTest::testForeachShowFalse
+.
+CompileForeachTest::testForeachShowFalseProperty
+.
+CompileForeachTest::testForeachShowTrue
+.
+CompileForeachTest::testForeachShowTrueProperty
+.
+CompileForeachTest::testForeachTotal
+.
+CompileForeachTest::testForeachTotalProperty
+.
+CompileForeachTest::testInit
+.
+CompileForeachTest::testNewForeach
+.
+CompileForeachTest::testNewForeachElse
+.
+CompileForeachTest::testNewForeachKey
+.
+CompileForeachTest::testNewForeachKeyProperty
+.
+CompileForeachTest::testNewForeachNotElse
+.
+CompileFunctionPluginTest::testFunctionPluginFromCompiledTemplateFile
+.
+CompileFunctionPluginTest::testFunctionPluginFromTemplateFile
+.
+CompileFunctionPluginTest::testFunctionPluginFromTemplateFileNocache1
+F
+CompileFunctionPluginTest::testFunctionPluginRegisteredFunction
+.
+CompileFunctionPluginTest::testInit
+.
+CompileFunctionPluginTest::testMultiLineTags
+.
+CompileFunctionTest::testDefineFunctionInclude with data set #0
+.
+CompileFunctionTest::testDefineFunctionInclude with data set #1
+.
+CompileFunctionTest::testDefineFunctionInclude with data set #2
+.
+CompileFunctionTest::testDefineFunctionInclude with data set #3
+.
+CompileFunctionTest::testExternalDefinedFunctionCached1 with data set #0
+.
+CompileFunctionTest::testExternalDefinedFunctionCached1 with data set #1
+.
+CompileFunctionTest::testExternalDefinedFunctionCached1 with data set #2
+.
+CompileFunctionTest::testExternalDefinedFunctionCached1 with data set #3
+.
+CompileFunctionTest::testExternalDefinedFunctionCached12 with data set #0
+.
+CompileFunctionTest::testExternalDefinedFunctionCached12 with data set #1
+.
+CompileFunctionTest::testExternalDefinedFunctionCached12 with data set #2
+.
+CompileFunctionTest::testExternalDefinedFunctionCached12 with data set #3
+.
+CompileFunctionTest::testExternalDefinedFunctionNocachedCall1 with data set #0
+.
+CompileFunctionTest::testExternalDefinedFunctionNocachedCall1 with data set #1
+.
+CompileFunctionTest::testExternalDefinedFunctionNocachedCall1 with data set #2
+.
+CompileFunctionTest::testExternalDefinedFunctionNocachedCall1 with data set #3
+.
+CompileFunctionTest::testExternalDefinedFunctionNocachedCall2 with data set #0
+.
+CompileFunctionTest::testExternalDefinedFunctionNocachedCall2 with data set #1
+.
+CompileFunctionTest::testExternalDefinedFunctionNocachedCall2 with data set #2
+.
+CompileFunctionTest::testExternalDefinedFunctionNocachedCall2 with data set #3
+.
+CompileFunctionTest::testExternalDefinedFunctionNocachedCall3 with data set #0
+.
+CompileFunctionTest::testExternalDefinedFunctionNocachedCall3 with data set #1
+.
+CompileFunctionTest::testExternalDefinedFunctionNocachedCall3 with data set #2
+.
+CompileFunctionTest::testExternalDefinedFunctionNocachedCall3 with data set #3
+.
+CompileFunctionTest::testExternalDefinedFunctionRecursion
+.
+CompileFunctionTest::testExternalDefinedFunctionRecursion2
+.
+CompileFunctionTest::testInheritedFunction with data set #0
+.
+CompileFunctionTest::testInheritedFunction with data set #1
+.
+CompileFunctionTest::testInheritedFunction with data set #2
+.
+CompileFunctionTest::testInheritedFunction with data set #3
+.
+CompileFunctionTest::testInit
+.
+CompileFunctionTest::testRecursiveFunction with data set #0
+.
+CompileFunctionTest::testRecursiveFunction with data set #1
+.
+CompileFunctionTest::testSimpleFunctionCachedNocacheDefault_002_1 with data set #0
+.
+CompileFunctionTest::testSimpleFunctionCachedNocacheDefault_002_1 with data set #1
+.
+CompileFunctionTest::testSimpleFunctionCachedNocacheDefault_002_2
+.
+CompileFunctionTest::testSimpleFunctionCachedPluginNocache_003 with data set #0
+.
+CompileFunctionTest::testSimpleFunctionCachedPluginNocache_003 with data set #1
+.
+CompileFunctionTest::testSimpleFunctionCached_001 with data set #0
+.
+CompileFunctionTest::testSimpleFunctionCached_001 with data set #1
+.
+CompileFunctionTest::testSimpleFunctionCached_002 with data set #0
+.
+CompileFunctionTest::testSimpleFunctionCached_002 with data set #1
+.
+CompileFunctionTest::testSimpleFunctionPlugin_003 with data set #0
+.
+CompileFunctionTest::testSimpleFunctionPlugin_003 with data set #1
+.
+CompileFunctionTest::testSimpleFunctionTag2 with data set #0
+.
+CompileFunctionTest::testSimpleFunctionTag2 with data set #1
+.
+CompileFunctionTest::testSimpleFunction_001 with data set #0
+.
+CompileFunctionTest::testSimpleFunction_001 with data set #1
+.
+CompileIfTest::testElseif1
+.
+CompileIfTest::testIf1
+.
+CompileIfTest::testIf2
+.
+CompileIfTest::testIf3
+.
+CompileIfTest::testIf4
+.
+CompileIfTest::testIfAnd1
+.
+CompileIfTest::testIfAnd2
+.
+CompileIfTest::testIfAnd3
+.
+CompileIfTest::testIfAnd4
+.
+CompileIfTest::testIfAndOR4
+.
+CompileIfTest::testIfEQ1
+.
+CompileIfTest::testIfEQ2
+.
+CompileIfTest::testIfEQ3
+.
+CompileIfTest::testIfEQ4
+.
+CompileIfTest::testIfFalse
+.
+CompileIfTest::testIfFunc1
+.
+CompileIfTest::testIfFunc2
+.
+CompileIfTest::testIfFunc3
+.
+CompileIfTest::testIfFunc4
+.
+CompileIfTest::testIfGE1
+.
+CompileIfTest::testIfGE2
+.
+CompileIfTest::testIfGE3
+.
+CompileIfTest::testIfGE4
+.
+CompileIfTest::testIfGT1
+.
+CompileIfTest::testIfGT2
+.
+CompileIfTest::testIfGT3
+.
+CompileIfTest::testIfGT4
+.
+CompileIfTest::testIfIdent1
+.
+CompileIfTest::testIfIdent2
+.
+CompileIfTest::testIfIdentity1
+.
+CompileIfTest::testIfIdentity2
+.
+CompileIfTest::testIfIsDivBy
+.
+CompileIfTest::testIfIsEven
+.
+CompileIfTest::testIfIsEvenBy
+.
+CompileIfTest::testIfIsNotDivBy
+.
+CompileIfTest::testIfIsNotEven
+.
+CompileIfTest::testIfIsNotEvenBy
+.
+CompileIfTest::testIfIsNotOdd
+.
+CompileIfTest::testIfIsNotOddBy
+.
+CompileIfTest::testIfIsOdd
+.
+CompileIfTest::testIfIsOddBy
+.
+CompileIfTest::testIfLE1
+.
+CompileIfTest::testIfLE2
+.
+CompileIfTest::testIfLE3
+.
+CompileIfTest::testIfLE4
+.
+CompileIfTest::testIfLT1
+.
+CompileIfTest::testIfLT2
+.
+CompileIfTest::testIfLT3
+.
+CompileIfTest::testIfLT4
+.
+CompileIfTest::testIfNE1
+.
+CompileIfTest::testIfNE2
+.
+CompileIfTest::testIfNE3
+.
+CompileIfTest::testIfNE4
+.
+CompileIfTest::testIfNot1
+.
+CompileIfTest::testIfNot2
+.
+CompileIfTest::testIfNotIdentity1
+.
+CompileIfTest::testIfNotIdentity2
+.
+CompileIfTest::testIfOr1
+.
+CompileIfTest::testIfOr2
+.
+CompileIfTest::testIfOr3
+.
+CompileIfTest::testIfOr4
+.
+CompileIfTest::testIfStatement1
+.
+CompileIfTest::testIfStatement2
+.
+CompileIfTest::testIfTrue
+.
+CompileIfTest::testIfVariable1
+.
+CompileIfTest::testIfVariable2
+.
+CompileIfTest::testIfVariableInc1
+.
+CompileIfTest::testInit
+.
+CompileIncludePhpTest::testIncludePhpStringFileName
+.
+CompileIncludePhpTest::testIncludePhpVariableFileName
+.
+CompileIncludePhpTest::testIncludePhpVariableFileNameShortag
+.
+CompileIncludePhpTest::testInit
+.
+CompileIncludeTest::testIncludeAssign1 with data set #0
+.
+CompileIncludeTest::testIncludeAssign1 with data set #1
+.
+CompileIncludeTest::testIncludeAssign2 with data set #0
+.
+CompileIncludeTest::testIncludeAssign2 with data set #1
+.
+CompileIncludeTest::testIncludeLocalScope with data set #0
+.
+CompileIncludeTest::testIncludeLocalScope with data set #1
+.
+CompileIncludeTest::testIncludeParentScope with data set #0
+.
+CompileIncludeTest::testIncludeParentScope with data set #1
+.
+CompileIncludeTest::testIncludePassVars with data set #0
+.
+CompileIncludeTest::testIncludePassVars with data set #1
+.
+CompileIncludeTest::testIncludePassVars2 with data set #0
+.
+CompileIncludeTest::testIncludePassVars2 with data set #1
+.
+CompileIncludeTest::testIncludeRootScope with data set #0
+.
+CompileIncludeTest::testIncludeRootScope with data set #1
+.
+CompileIncludeTest::testIncludeRootScope2 with data set #0
+.
+CompileIncludeTest::testIncludeRootScope2 with data set #1
+.
+CompileIncludeTest::testIncludeStandardNocacheVar with data set #0
+.
+CompileIncludeTest::testIncludeStandardNocacheVar with data set #1
+.
+CompileIncludeTest::testIncludeStandard_001 with data set #0
+.
+CompileIncludeTest::testIncludeStandard_001 with data set #1
+.
+CompileIncludeTest::testInit
+.
+CompileIncludeTest::testRecursiveIncludes1 with data set #0
+.
+CompileIncludeTest::testRecursiveIncludes1 with data set #1
+.
+CompileIncludeTest::testRecursiveIncludes2 with data set #0
+.
+CompileIncludeTest::testRecursiveIncludes2 with data set #1
+.
+CompileIncludeTest::testSpacing_001 with data set #0
+.
+CompileIncludeTest::testSpacing_001 with data set #1
+.
+CompileIncludeTest::testSpacing_001 with data set #2
+.
+CompileIncludeTest::testSpacing_001 with data set #3
+.
+CompileIncludeTest::testSpacing_001 with data set #4
+.
+CompileIncludeTest::testSpacing_001 with data set #5
+.
+CompileIncludeTest::testSpacing_001V2 with data set #0
+.
+CompileIncludeTest::testSpacing_001V2 with data set #1
+.
+CompileIncludeTest::testSpacing_001V2 with data set #2
+.
+CompileIncludeTest::testSpacing_001V2 with data set #3
+.
+CompileIncludeTest::testSpacing_001V2 with data set #4
+.
+CompileIncludeTest::testSpacing_001V2 with data set #5
+.
+CompileIncludeTest::testSpacing_001V3 with data set #0
+.
+CompileIncludeTest::testSpacing_001V3 with data set #1
+.
+CompileIncludeTest::testSpacing_001V3 with data set #2
+.
+CompileIncludeTest::testSpacing_001V3 with data set #3
+.
+CompileIncludeTest::testSpacing_001V3 with data set #4
+.
+CompileIncludeTest::testSpacing_001V3 with data set #5
+.
+CompileInsertTest::testInit
+.
+CompileInsertTest::testInsertFunctionAssign
+.
+CompileInsertTest::testInsertFunctionAssignNoOutput
+.
+CompileInsertTest::testInsertFunctionDouble
+.
+CompileInsertTest::testInsertFunctionNoneExistingFunction
+.
+CompileInsertTest::testInsertFunctionNoneExistingScript
+.
+CompileInsertTest::testInsertFunctionSingle
+.
+CompileInsertTest::testInsertFunctionVariableName
+.
+CompileInsertTest::testInsertPlugin1
+.
+CompileInsertTest::testInsertPlugin2
+.
+CompileInsertTest::testInsertPluginAssign
+.
+CompileInsertTest::testInsertPluginCaching1_1
+.
+CompileInsertTest::testInsertPluginCaching1_2
+.
+CompileInsertTest::testInsertPluginCaching1_3
+.
+CompileInsertTest::testInsertPluginCaching1_4
+.
+CompileInsertTest::testInsertPluginCaching2_1
+.
+CompileInsertTest::testInsertPluginCaching2_2
+.
+CompileNocacheTest::testInit
+.
+CompileNocacheTest::testNocacheCachingNo
+.
+CompileNocacheTest::testNocacheCachingYes1
+.
+CompileNocacheTest::testNocacheCachingYes2
+.
+CompilePhpTest::testInit
+.
+CompilePhpTest::testPHP with data set #0
+.
+CompilePhpTest::testPHP with data set #1
+.
+CompilePhpTest::testPHP with data set #10
+.
+CompilePhpTest::testPHP with data set #11
+.
+CompilePhpTest::testPHP with data set #12
+.
+CompilePhpTest::testPHP with data set #13
+.
+CompilePhpTest::testPHP with data set #14
+.
+CompilePhpTest::testPHP with data set #15
+F
+CompilePhpTest::testPHP with data set #16
+.
+CompilePhpTest::testPHP with data set #17
+.
+CompilePhpTest::testPHP with data set #18
+.
+CompilePhpTest::testPHP with data set #19
+.
+CompilePhpTest::testPHP with data set #2
+.
+CompilePhpTest::testPHP with data set #20
+.
+CompilePhpTest::testPHP with data set #21
+.
+CompilePhpTest::testPHP with data set #22
+.
+CompilePhpTest::testPHP with data set #23
+.
+CompilePhpTest::testPHP with data set #24
+.
+CompilePhpTest::testPHP with data set #25
+.
+CompilePhpTest::testPHP with data set #26
+.
+CompilePhpTest::testPHP with data set #27
+.
+CompilePhpTest::testPHP with data set #3
+.
+CompilePhpTest::testPHP with data set #4
+.
+CompilePhpTest::testPHP with data set #5
+.
+CompilePhpTest::testPHP with data set #6
+.
+CompilePhpTest::testPHP with data set #7
+.
+CompilePhpTest::testPHP with data set #8
+.
+CompilePhpTest::testPHP with data set #9
+.
+CompilePhpTest::testPHP_ALLOW_error
+.
+CompilePhpTest::testPHP_Tag_IllegalOption
+.
+CompilePhpTest::testPHP_Tag_Nocache1
+.
+CompilePhpTest::testPHP_Tag_Nocache2
+.
+CompileRegisteredObjectFunctionTest::testInit
+.
+CompileRegisteredObjectFunctionTest::testRegisteredObjectBlockFunction
+.
+CompileRegisteredObjectFunctionTest::testRegisteredObjectBlockFunctionModifier1
+.
+CompileRegisteredObjectFunctionTest::testRegisteredObjectBlockFunctionModifier2
+.
+CompileRegisteredObjectFunctionTest::testRegisteredObjectFunction
+.
+CompileRegisteredObjectFunctionTest::testRegisteredObjectFunctionModifier
+.
+CompileSectionTest::testInit
+.
+CompileSectionTest::testSection1
+.
+CompileSectionTest::testSection2
+.
+CompileSectionTest::testSection3
+.
+CompileSectionTest::testSection4
+.
+CompileSectionTest::testSection6
+.
+CompileSectionTest::testSection7
+.
+CompileSetfilterTest::testInit
+.
+CompileSetfilterTest::testNestedSetfilter
+.
+CompileStripTest::testInit
+.
+CompileStripTest::testStrip
+.
+CompileWhileTest::testInit
+.
+CompileWhileTest::testWhileCondition
+.
+CompileWhileTest::testWhileStatement
+.
+CompilerPluginTest::testCompilerPlugin
+.
+CompilerPluginTest::testInit
+.
+ConfigVarTest::testConfigAbsolutePath
+.
+ConfigVarTest::testConfigClearConfigAll
+.
+ConfigVarTest::testConfigClearConfigAllData
+.
+ConfigVarTest::testConfigClearConfigAllTemplate
+.
+ConfigVarTest::testConfigClearSingleConfigVar
+.
+ConfigVarTest::testConfigClearSingleConfigVarData
+.
+ConfigVarTest::testConfigClearSingleConfigVarTemplate
+.
+ConfigVarTest::testConfigDifferentScope
+.
+ConfigVarTest::testConfigGetAllConfigVars
+.
+ConfigVarTest::testConfigGetAllConfigVarsData
+.
+ConfigVarTest::testConfigGetAllConfigVarsTemplate
+.
+ConfigVarTest::testConfigGetSingleConfigVar
+.
+ConfigVarTest::testConfigGetSingleConfigVarData
+.
+ConfigVarTest::testConfigGetSingleConfigVarTemplate
+.
+ConfigVarTest::testConfigLine
+.
+ConfigVarTest::testConfigNumber
+.
+ConfigVarTest::testConfigResourceDb4
+.
+ConfigVarTest::testConfigText
+.
+ConfigVarTest::testConfigTextData
+.
+ConfigVarTest::testConfigTextTemplate
+.
+ConfigVarTest::testConfigUndefinedNotice
+.
+ConfigVarTest::testConfigUndefinedSilent
+.
+ConfigVarTest::testConfigVariableGlobalSections
+.
+ConfigVarTest::testConfigVariableHidden
+.
+ConfigVarTest::testConfigVariableHiddenDisable
+.
+ConfigVarTest::testConfigVariableSection2
+.
+ConfigVarTest::testConfigVariableSectionFooBar
+.
+ConfigVarTest::testConfigVariableSectionSpecialChar
+.
+ConfigVarTest::testInit
+.
+ConstantsTest::testConstants
+.
+ConstantsTest::testConstants2
+.
+ConstantsTest::testConstants3
+.
+ConstantsTest::testConstants4
+.
+ConstantsTest::testConstants5
+.
+ConstantsTest::testConstants6
+.
+ConstantsTest::testConstants7
+.
+ConstantsTest::testConstantsUndefined
+.
+ConstantsTest::testConstantsUndefined2
+.
+ConstantsTest::testInit
+.
+CustomResourceAmbiguousTest::testCase1
+.
+CustomResourceAmbiguousTest::testCase2
+.
+CustomResourceAmbiguousTest::testCaseSwitching
+.
+CustomResourceAmbiguousTest::testInit
+.
+CustomResourceAmbiguousTest::testNone
+.
+DefaultConfigHandlerTest::testDefaultConfigHandlerReplacement
+.
+DefaultConfigHandlerTest::testDefaultConfigHandlerReplacementByConfigFile
+.
+DefaultConfigHandlerTest::testDefaultConfigHandlerReplacementReturningFalse
+.
+DefaultConfigHandlerTest::testRegisterUnknownDefaultConfigHandler
+.
+DefaultConfigHandlerTest::testUnknownConfigFile
+.
+DefaultPluginHandlerTest::testDefaultBlockScript
+.
+DefaultPluginHandlerTest::testDefaultCompilerFunctionScript
+.
+DefaultPluginHandlerTest::testDefaultFunctionLocal
+.
+DefaultPluginHandlerTest::testDefaultFunctionScript
+.
+DefaultPluginHandlerTest::testDefaultFunctionScriptNotCachable1
+.
+DefaultPluginHandlerTest::testDefaultFunctionScriptNotCachable2
+.
+DefaultPluginHandlerTest::testDefaultModifier
+.
+DefaultPluginHandlerTest::testDefaultModifierScript
+.
+DefaultPluginHandlerTest::testDefaultModifierStaticClassMethodCaching1
+.
+DefaultPluginHandlerTest::testDefaultModifierStaticClassMethodCaching2
+.
+DefaultPluginHandlerTest::testInit
+.
+DefaultTemplateHandlerTest::testDefaultTemplateHandlerReplacementByTemplateFile
+.
+DefaultTemplateHandlerTest::testDefaultTemplateHandlerReturningFalse
+.
+DefaultTemplateHandlerTest::testInit
+.
+DefaultTemplateHandlerTest::testRegisterNoneExistentHandlerFunction
+.
+DefaultTemplateHandlerTest::testUnknownTemplate
+.
+DelimiterTest::testDelimiter1
+.
+DelimiterTest::testDelimiter2
+.
+DelimiterTest::testDelimiter3
+.
+DelimiterTest::testDelimiter4
+.
+DelimiterTest::testDelimiter5
+.
+DelimiterTest::testInit
+.
+DoubleQuotedStringTest::testArrayVarsBacktickInDoubleQuotedString1
+.
+DoubleQuotedStringTest::testArrayVarsBacktickInDoubleQuotedString2
+.
+DoubleQuotedStringTest::testEmptyDoubleQuotedString
+.
+DoubleQuotedStringTest::testEscapedQuotesInDoubleQuotedString
+.
+DoubleQuotedStringTest::testExpressionBacktickInDoubleQuotedString
+.
+DoubleQuotedStringTest::testInit
+.
+DoubleQuotedStringTest::testSimpleDoubleQuotedString
+.
+DoubleQuotedStringTest::testSingleQuoteTagsInDoubleQuotedString
+.
+DoubleQuotedStringTest::testSingleQuotesInDoubleQuotedString
+.
+DoubleQuotedStringTest::testSmartyBlockTagInDoubleQuotedString1
+.
+DoubleQuotedStringTest::testSmartytagInDoubleQuotedString1
+.
+DoubleQuotedStringTest::testSmartytagInDoubleQuotedString2
+.
+DoubleQuotedStringTest::testTagsInDoubleQuotedString
+.
+DoubleQuotedStringTest::testVariableVarsBacktickInDoubleQuotedString
+.
+DoubleQuotedStringTest::testVarsBacktickInDoubleQuotedString1
+.
+DoubleQuotedStringTest::testVarsBacktickInDoubleQuotedString2
+.
+DoubleQuotedStringTest::testVarsDelimiterInDoubleQuotedString
+.
+DoubleQuotedStringTest::testVarsInDoubleQuotedString1
+.
+DoubleQuotedStringTest::testVarsInDoubleQuotedString2
+.
+EvalResourceTest::testBase64Template
+.
+EvalResourceTest::testEmptyTemplate
+.
+EvalResourceTest::testGetCompiledFilepath
+.
+EvalResourceTest::testGetCompiledTimestamp
+.
+EvalResourceTest::testGetRenderedTemplate
+.
+EvalResourceTest::testGetTemplateFilepath
+.
+EvalResourceTest::testGetTemplateSource
+.
+EvalResourceTest::testGetTemplateTimestamp
+.
+EvalResourceTest::testInit
+.
+EvalResourceTest::testIsCached
+.
+EvalResourceTest::testIsEvaluated
+.
+EvalResourceTest::testMustCompile
+.
+EvalResourceTest::testNoFiles
+.
+EvalResourceTest::testSmartyIsCached
+.
+EvalResourceTest::testTemplateEvalExists1
+.
+EvalResourceTest::testTemplateEvalExists2
+.
+EvalResourceTest::testUrlencodeTemplate
+.
+EvalResourceTest::testUsesCompiler
+.
+ExtendsResourceTest::testCompileBlockChildAppend_004
+.
+ExtendsResourceTest::testCompileBlockChildPrepend_003
+.
+ExtendsResourceTest::testCompileBlockChildPrepend_0032
+.
+ExtendsResourceTest::testCompileBlockGrandChildMustCompile_021_1
+.
+ExtendsResourceTest::testCompileBlockGrandChildMustCompile_021_2
+F
+ExtendsResourceTest::testCompileBlockGrandChildMustCompile_021_3
+F
+ExtendsResourceTest::testCompileBlockGrandChildMustCompile_021_4
+F
+ExtendsResourceTest::testInit
+.
+FileResourceTest::testCompileTemplateFile
+.
+FileResourceTest::testGetCachedFilepath
+.
+FileResourceTest::testGetCachedTimestamp
+.
+FileResourceTest::testGetCompiledFilepath
+.
+FileResourceTest::testGetCompiledTimestamp
+.
+FileResourceTest::testGetCompiledTimestampPrepare
+.
+FileResourceTest::testGetRenderedTemplate
+.
+FileResourceTest::testGetTemplateFilepath
+.
+FileResourceTest::testGetTemplateSource
+.
+FileResourceTest::testGetTemplateTimestamp
+.
+FileResourceTest::testInit
+.
+FileResourceTest::testIsEvaluated
+.
+FileResourceTest::testMustCompileAtForceCompile
+.
+FileResourceTest::testMustCompileExisting
+.
+FileResourceTest::testMustCompileTouchedSource
+.
+FileResourceTest::testMustCompileTouchedSourcePrepare
+.
+FileResourceTest::testRelativeFetch
+.
+FileResourceTest::testRelativeFetch2
+.
+FileResourceTest::testRelativeFetchCwd
+.
+FileResourceTest::testRelativeFetchCwd2
+.
+FileResourceTest::testRelativeInclude
+.
+FileResourceTest::testRelativeIncludeFail
+.
+FileResourceTest::testRelativeIncludeFailOtherDir
+.
+FileResourceTest::testRelativeIncludeSub
+.
+FileResourceTest::testRelativity
+.
+FileResourceTest::testRelativityCwd
+.
+FileResourceTest::testRelativityPrecedence
+.
+FileResourceTest::testRelativityRelRel
+.
+FileResourceTest::testRelativityRelRel1
+.
+FileResourceTest::testTemplateFileExists1
+.
+FileResourceTest::testTemplateFileExists2
+.
+FileResourceTest::testTemplateFileNotExists1
+.
+FileResourceTest::testTemplateFileNotExists2
+.
+FileResourceTest::testTemplateFileNotExists3
+.
+FileResourceTest::testUsesCompiler
+.
+FilterTest::testAutoloadOutputFilter
+.
+FilterTest::testAutoloadVariableFilter
+.
+FilterTest::testInit
+.
+FilterTest::testLoadedOutputFilter
+.
+FilterTest::testLoadedOutputFilterWrapper
+.
+FilterTest::testLoadedVariableFilter
+.
+FilterTest::testRegisteredOutputFilter
+.
+FilterTest::testRegisteredOutputFilterWrapper
+.
+FilterTest::testRegisteredPostFilter
+.
+FilterTest::testRegisteredPreFilter
+.
+FilterTest::testRegisteredPreFilterClass
+.
+FilterTest::testRegisteredPreFilterClosure
+.
+FilterTest::testRegisteredVariableFilter2
+.
+FunctionTest::testInit
+.
+FunctionTest::testUnknownFunction
+.
+GetTemplateVarsTest::testGetAllTemplateVarsScopeAll
+.
+GetTemplateVarsTest::testGetAllTemplateVarsScopeAllNoParents
+.
+GetTemplateVarsTest::testGetAllTemplateVarsScopeRoot
+.
+GetTemplateVarsTest::testGetSingleTemplateVarScopeAll
+.
+GetTemplateVarsTest::testGetSingleTemplateVarScopeRoot
+.
+GetTemplateVarsTest::testGetSingleTemplateVarsScopeAllNoParents
+.
+GetTemplateVarsTest::testInit
+.
+GetterSetterTest::testInit
+.
+GetterSetterTest::testSmartyGetter
+.
+GetterSetterTest::testSmartySetter
+.
+GetterSetterTest::testTemplateGetter
+.
+GetterSetterTest::testTemplateSetter
+.
+HttpModifiedSinceTest::testDisabled
+.
+HttpModifiedSinceTest::testEnabledCached
+.
+HttpModifiedSinceTest::testEnabledCached2
+.
+HttpModifiedSinceTest::testEnabledCached3
+.
+HttpModifiedSinceTest::testEnabledUncached
+.
+HttpModifiedSinceTest::testInit
+.
+IndexedFileResourceTest::testFetch
+.
+IndexedFileResourceTest::testFetchName
+.
+IndexedFileResourceTest::testFetchNumber
+.
+IndexedFileResourceTest::testFetchNumeric
+.
+IndexedFileResourceTest::testGetCachedFilepath
+.
+IndexedFileResourceTest::testGetCompiledFilepath
+.
+IndexedFileResourceTest::testGetTemplateFilepath
+.
+IndexedFileResourceTest::testGetTemplateFilepathName
+.
+IndexedFileResourceTest::testGetTemplateFilepathNumber
+.
+IndexedFileResourceTest::testGetTemplateFilepathNumeric
+.
+LiteralTest::testAutoLiteralDisabled
+.
+LiteralTest::testAutoLiteralLineBreak
+.
+LiteralTest::testAutoLiteralSpace
+.
+LiteralTest::testInit
+.
+LiteralTest::testLiteralTag
+.
+LoadFilterTest::testLoadFilter
+.
+LoadPluginTest::testLoadPluginErrorReturn
+.
+LoadPluginTest::testLoadPluginSmartyInternalDebug
+.
+LoadPluginTest::testLoadPluginSmartyPluginCounter
+.
+LoadPluginTest::testLoadPluginSmartyTemplateClass
+.
+MathTest::testFunction
+.
+MathTest::testFunctionFloat
+.
+MathTest::testFunctionFormat
+.
+MathTest::testFunctionSin
+.
+MathTest::testFunctionString
+.
+MathTest::testInit
+.
+MathTest::testSyntax
+.
+MathTest::testSyntaxFloat
+.
+MathTest::testSyntaxFormat
+.
+MathTest::testSyntaxSin
+.
+MathTest::testSyntaxString
+.
+ModifierTest::testDefaultModifier
+.
+ModifierTest::testInit
+.
+ModifierTest::testModifierAtPluginResult
+.
+ModifierTest::testModifierChaining
+.
+ModifierTest::testModifierInsideExpression
+.
+ModifierTest::testModifierInsideExpression2
+.
+ModifierTest::testModifierInsideIf
+.
+ModifierTest::testModifierRegisteredFunction
+.
+ModifierTest::testModifierRegisteredMethodCall
+.
+ModifierTest::testModifierRegisteredStaticClass
+.
+ModifierTest::testModifierUnqoutedString
+.
+ModifierTest::testPHPFunctionModifier
+.
+ModifierTest::testPHPFunctionModifier2
+.
+ModifierTest::testPluginModifier
+.
+ModifierTest::testPluginModifierVar
+.
+ModifierTest::testPluginModifierVar2
+.
+ModifierTest::testPluginModifierVar3
+.
+ModifierTest::testUnknownModifier
+.
+MuteExpectedErrorsTest::testInit
+.
+MuteExpectedErrorsTest::testMuted
+.
+MuteExpectedErrorsTest::testMutedCaching
+.
+MuteExpectedErrorsTest::testUnmuted
+.
+MuteExpectedErrorsTest::testUnmutedCaching
+.
+ObjectVariableTest::testInit
+.
+ObjectVariableTest::testObjectVariableOutput
+.
+ObjectVariableTest::testObjectVariableOutputDoubleQuotes
+.
+ObjectVariableTest::testObjectVariableOutputDoubleQuotesInclude
+.
+ObjectVariableTest::testObjectVariableOutputMethod
+.
+ObjectVariableTest::testObjectVariableOutputVariableMethod
+.
+ObjectVariableTest::testObjectVariableOutputVariableProperty
+.
+OutputFilterTrimWhitespaceTest::testWhitespace
+.
+PhpResourceTest::testCreateCacheFile
+.
+PhpResourceTest::testGetCachedFilepath
+.
+PhpResourceTest::testGetCachedFilepathName
+.
+PhpResourceTest::testGetCachedTimestamp
+.
+PhpResourceTest::testGetCompiledFilepath
+.
+PhpResourceTest::testGetCompiledTimestamp
+.
+PhpResourceTest::testGetRenderedTemplate
+.
+PhpResourceTest::testGetTemplateFilepath
+.
+PhpResourceTest::testGetTemplateFilepathName
+.
+PhpResourceTest::testGetTemplateTimestamp
+.
+PhpResourceTest::testInit
+.
+PhpResourceTest::testIsCached
+.
+PhpResourceTest::testIsCachedCachingDisabled
+.
+PhpResourceTest::testIsCachedTouchedSource
+.
+PhpResourceTest::testIsCachedTouchedSourcePrepare
+.
+PhpResourceTest::testIsEvaluated
+.
+PhpResourceTest::testMustCompile
+.
+PhpResourceTest::testSmartyIsCached
+F
+PhpResourceTest::testSmartyIsCachedCachingDisabled
+.
+PhpResourceTest::testSmartyIsCachedPrepare
+.
+PhpResourceTest::testUsesCompiler
+.
+PhpResourceTest::testWriteCachedContent
+.
+PluginBlockTextformatTest::testDefault
+.
+PluginBlockTextformatTest::testDefaultWithoutMbstring
+.
+PluginBlockTextformatTest::testIndent
+.
+PluginBlockTextformatTest::testIndentFirst
+.
+PluginBlockTextformatTest::testIndentFirstWithoutMbstring
+.
+PluginBlockTextformatTest::testIndentWithoutMbstring
+.
+PluginBlockTextformatTest::testIndentchar
+.
+PluginBlockTextformatTest::testIndentcharFirst
+.
+PluginBlockTextformatTest::testIndentcharFirstWithoutMbstring
+.
+PluginBlockTextformatTest::testIndentcharWithoutMbstring
+.
+PluginBlockTextformatTest::testStyleEmail
+.
+PluginBlockTextformatTest::testStyleEmailWithoutMbstring
+.
+PluginBlockTextformatTest::testWrapchar
+.
+PluginBlockTextformatTest::testWrapcharWithoutMbstring
+.
+PluginChainedLoadTest::testPluginChainedLoad
+.
+PluginFunctionFetchTest::testTodo
+.
+PluginFunctionHtmlCheckboxesTest::testAssociativeArray
+.
+PluginFunctionHtmlCheckboxesTest::testDisabled
+.
+PluginFunctionHtmlCheckboxesTest::testDisabledStrict1
+.
+PluginFunctionHtmlCheckboxesTest::testDisabledStrict2
+.
+PluginFunctionHtmlCheckboxesTest::testDisabledStrict3
+.
+PluginFunctionHtmlCheckboxesTest::testEmptyStringValue
+.
+PluginFunctionHtmlCheckboxesTest::testIterator
+.
+PluginFunctionHtmlCheckboxesTest::testNoLabels
+.
+PluginFunctionHtmlCheckboxesTest::testNullString
+.
+PluginFunctionHtmlCheckboxesTest::testNullValue
+.
+PluginFunctionHtmlCheckboxesTest::testObject
+.
+PluginFunctionHtmlCheckboxesTest::testObjectList
+.
+PluginFunctionHtmlCheckboxesTest::testObjectListNoString
+.
+PluginFunctionHtmlCheckboxesTest::testObjectNoString
+.
+PluginFunctionHtmlCheckboxesTest::testSeparateArrays
+.
+PluginFunctionHtmlCheckboxesTest::testWithId
+.
+PluginFunctionHtmlCheckboxesTest::testZeroStringValue
+.
+PluginFunctionHtmlCheckboxesTest::testZeroValue
+.
+PluginFunctionHtmlImageTest::testFoo
+.
+PluginFunctionHtmlOptionsTest::testAssociativeArray
+.
+PluginFunctionHtmlOptionsTest::testDisabled
+.
+PluginFunctionHtmlOptionsTest::testDisabledStrict
+.
+PluginFunctionHtmlOptionsTest::testEmptyStringValue
+.
+PluginFunctionHtmlOptionsTest::testEmptyStringValues
+.
+PluginFunctionHtmlOptionsTest::testIterator
+.
+PluginFunctionHtmlOptionsTest::testNullString
+.
+PluginFunctionHtmlOptionsTest::testNullValue
+.
+PluginFunctionHtmlOptionsTest::testObject
+.
+PluginFunctionHtmlOptionsTest::testObjectList
+.
+PluginFunctionHtmlOptionsTest::testObjectListNoString
+.
+PluginFunctionHtmlOptionsTest::testObjectNoString
+.
+PluginFunctionHtmlOptionsTest::testOptgroup
+.
+PluginFunctionHtmlOptionsTest::testSeparateArrays
+.
+PluginFunctionHtmlOptionsTest::testZeroStringValue
+.
+PluginFunctionHtmlOptionsTest::testZeroValue
+.
+PluginFunctionHtmlRadiosTest::testAssociativeArray
+.
+PluginFunctionHtmlRadiosTest::testDisabled
+.
+PluginFunctionHtmlRadiosTest::testDisabledStrict
+.
+PluginFunctionHtmlRadiosTest::testEmptyStringValue
+.
+PluginFunctionHtmlRadiosTest::testIterator
+.
+PluginFunctionHtmlRadiosTest::testNoLabels
+.
+PluginFunctionHtmlRadiosTest::testNullString
+.
+PluginFunctionHtmlRadiosTest::testNullValue
+.
+PluginFunctionHtmlRadiosTest::testObject
+.
+PluginFunctionHtmlRadiosTest::testObjectList
+.
+PluginFunctionHtmlRadiosTest::testObjectListNoString
+.
+PluginFunctionHtmlRadiosTest::testObjectNoString
+.
+PluginFunctionHtmlRadiosTest::testSeparateArrays
+.
+PluginFunctionHtmlRadiosTest::testWithId
+.
+PluginFunctionHtmlRadiosTest::testZeroStringValue
+.
+PluginFunctionHtmlRadiosTest::testZeroValue
+.
+PluginFunctionHtmlSelectDateTest::testDayFormat
+.
+PluginFunctionHtmlSelectDateTest::testDayFormatValue
+.
+PluginFunctionHtmlSelectDateTest::testDefault
+.
+PluginFunctionHtmlSelectDateTest::testDisplayDaysMonthYear
+.
+PluginFunctionHtmlSelectDateTest::testEmpty
+.
+PluginFunctionHtmlSelectDateTest::testEmptyUnset
+.
+PluginFunctionHtmlSelectDateTest::testEndYearAbsolute
+.
+PluginFunctionHtmlSelectDateTest::testEndYearRelative
+.
+PluginFunctionHtmlSelectDateTest::testEndYearRelativeNegative
+.
+PluginFunctionHtmlSelectDateTest::testExtra
+.
+PluginFunctionHtmlSelectDateTest::testFieldArray
+.
+PluginFunctionHtmlSelectDateTest::testFieldOrder
+.
+PluginFunctionHtmlSelectDateTest::testFieldSeparator
+.
+PluginFunctionHtmlSelectDateTest::testId
+.
+PluginFunctionHtmlSelectDateTest::testMonthFormat
+.
+PluginFunctionHtmlSelectDateTest::testMonthFormatValue
+.
+PluginFunctionHtmlSelectDateTest::testMonthNames
+.
+PluginFunctionHtmlSelectDateTest::testPrefix
+.
+PluginFunctionHtmlSelectDateTest::testStartYearAbsolute
+.
+PluginFunctionHtmlSelectDateTest::testStartYearRelative
+.
+PluginFunctionHtmlSelectDateTest::testStartYearRelativeNegative
+.
+PluginFunctionHtmlSelectDateTest::testTimeArray
+.
+PluginFunctionHtmlSelectDateTest::testYearText
+.
+PluginFunctionHtmlSelectDateTest::testYearsReversed
+.
+PluginFunctionHtmlSelectTimeTest::testDefault
+.
+PluginFunctionHtmlSelectTimeTest::testDisplay
+.
+PluginFunctionHtmlSelectTimeTest::testEmpty
+.
+PluginFunctionHtmlSelectTimeTest::testEmptyUnset
+.
+PluginFunctionHtmlSelectTimeTest::testExtra
+.
+PluginFunctionHtmlSelectTimeTest::testFieldArray
+.
+PluginFunctionHtmlSelectTimeTest::testFieldSeparator
+.
+PluginFunctionHtmlSelectTimeTest::testFormat1
+.
+PluginFunctionHtmlSelectTimeTest::testFormat2
+.
+PluginFunctionHtmlSelectTimeTest::testFormat3
+.
+PluginFunctionHtmlSelectTimeTest::testId
+.
+PluginFunctionHtmlSelectTimeTest::testMeridian1
+.
+PluginFunctionHtmlSelectTimeTest::testMeridian2
+.
+PluginFunctionHtmlSelectTimeTest::testMeridian3
+.
+PluginFunctionHtmlSelectTimeTest::testMeridian4
+.
+PluginFunctionHtmlSelectTimeTest::testMeridian5
+.
+PluginFunctionHtmlSelectTimeTest::testMeridian6
+.
+PluginFunctionHtmlSelectTimeTest::testMinuteInterval1
+.
+PluginFunctionHtmlSelectTimeTest::testMinuteInterval2
+.
+PluginFunctionHtmlSelectTimeTest::testMinuteInterval3
+.
+PluginFunctionHtmlSelectTimeTest::testMinuteInterval4
+.
+PluginFunctionHtmlSelectTimeTest::testPrefix
+.
+PluginFunctionHtmlSelectTimeTest::testSecondInterval1
+.
+PluginFunctionHtmlSelectTimeTest::testSecondInterval2
+.
+PluginFunctionHtmlSelectTimeTest::testSecondInterval3
+.
+PluginFunctionHtmlSelectTimeTest::testSecondInterval4
+.
+PluginFunctionHtmlSelectTimeTest::testTimeArray1
+.
+PluginFunctionHtmlSelectTimeTest::testTimeArray2
+.
+PluginFunctionHtmlSelectTimeTest::testTimeArrayMerdidian
+.
+PluginFunctionHtmlSelectTimeTest::testValueFormat1
+.
+PluginFunctionHtmlSelectTimeTest::testValueFormat2
+.
+PluginFunctionHtmlSelectTimeTest::testValueFormat3
+.
+PluginFunctionMailtoTest::testCc
+.
+PluginFunctionMailtoTest::testCcWithoutMbstring
+.
+PluginFunctionMailtoTest::testDefault
+.
+PluginFunctionMailtoTest::testDefaultWithoutMbstring
+.
+PluginFunctionMailtoTest::testEncodeHex
+.
+PluginFunctionMailtoTest::testEncodeHexWithoutMbstring
+.
+PluginFunctionMailtoTest::testEncodeJavascript
+.
+PluginFunctionMailtoTest::testEncodeJavascriptCharcode
+.
+PluginFunctionMailtoTest::testEncodeJavascriptCharcodeWithoutMbstring
+.
+PluginFunctionMailtoTest::testEncodeJavascriptWithoutMbstring
+.
+PluginFunctionMailtoTest::testExtra
+.
+PluginFunctionMailtoTest::testExtraWithoutMbstring
+.
+PluginFunctionMailtoTest::testSubject
+.
+PluginFunctionMailtoTest::testSubjectWithoutMbstring
+.
+PluginFunctionMailtoTest::testText
+.
+PluginFunctionMailtoTest::testTextWithoutMbstring
+.
+PluginFunctionMailtoTest::testUmlauts
+.
+PluginFunctionMailtoTest::testUmlautsWithoutMbstring
+.
+PluginModifierCapitalizeTest::testDefault
+.
+PluginModifierCapitalizeTest::testDefaultWithoutMbstring
+.
+PluginModifierCapitalizeTest::testDigits
+.
+PluginModifierCapitalizeTest::testDigitsWithoutMbstring
+.
+PluginModifierCapitalizeTest::testQuotes
+.
+PluginModifierCapitalizeTest::testQuotesBeginning
+.
+PluginModifierCapitalizeTest::testQuotesBeginningWithoutMbstring
+.
+PluginModifierCapitalizeTest::testQuotesDigits
+.
+PluginModifierCapitalizeTest::testQuotesDigitsWithoutMbstring
+.
+PluginModifierCapitalizeTest::testQuotesTrueCapitals
+.
+PluginModifierCapitalizeTest::testQuotesTrueCapitalsWithoutMbstring
+.
+PluginModifierCapitalizeTest::testQuotesWithoutMbstring
+.
+PluginModifierCapitalizeTest::testTrueCaptials
+.
+PluginModifierCapitalizeTest::testTrueCaptialsWithoutMbstring
+.
+PluginModifierCharsetTest::testFromLatin1
+.
+PluginModifierCharsetTest::testFromLatin1WithoutMbstring
+.
+PluginModifierCharsetTest::testFromUtf32le
+.
+PluginModifierCharsetTest::testFromUtf32leWithoutMbstring
+.
+PluginModifierCharsetTest::testToLatin1
+.
+PluginModifierCharsetTest::testToLatin1WithoutMbstring
+.
+PluginModifierCharsetTest::testToUtf32le
+.
+PluginModifierCharsetTest::testToUtf32leWithoutMbstring
+.
+PluginModifierCountCharactersTest::testDefault
+.
+PluginModifierCountCharactersTest::testDefaultWithoutMbstring
+.
+PluginModifierCountCharactersTest::testSpaces
+.
+PluginModifierCountCharactersTest::testSpacesWithoutMbstring
+.
+PluginModifierCountCharactersTest::testUmlauts
+.
+PluginModifierCountCharactersTest::testUmlautsSpaces
+.
+PluginModifierCountCharactersTest::testUmlautsSpacesWithoutMbstring
+.
+PluginModifierCountCharactersTest::testUmlautsWithoutMbstring
+.
+PluginModifierCountSentencesTest::testDefault
+.
+PluginModifierCountSentencesTest::testDefaultWithoutMbstring
+.
+PluginModifierCountSentencesTest::testUmlauts
+.
+PluginModifierCountWordsTest::testDashes
+.
+PluginModifierCountWordsTest::testDashesWithoutMbstring
+.
+PluginModifierCountWordsTest::testDefault
+.
+PluginModifierCountWordsTest::testDefaultWithoutMbstring
+.
+PluginModifierCountWordsTest::testUmlauts
+.
+PluginModifierCountWordsTest::testUmlautsWithoutMbstring
+.
+PluginModifierEscapeTest::testDecentity
+.
+PluginModifierEscapeTest::testDecentityWithoutMbstring
+.
+PluginModifierEscapeTest::testHex
+.
+PluginModifierEscapeTest::testHexWithoutMbstring
+.
+PluginModifierEscapeTest::testHexentity
+.
+PluginModifierEscapeTest::testHexentityWithoutMbstring
+.
+PluginModifierEscapeTest::testHtml
+.
+PluginModifierEscapeTest::testHtmlDouble
+.
+PluginModifierEscapeTest::testHtmlDoubleWithoutMbstring
+.
+PluginModifierEscapeTest::testHtmlWithoutMbstring
+.
+PluginModifierEscapeTest::testHtmlall
+.
+PluginModifierEscapeTest::testHtmlallDouble
+.
+PluginModifierEscapeTest::testHtmlallDoubleWithoutMbstring
+.
+PluginModifierEscapeTest::testHtmlallWithoutMbstring
+.
+PluginModifierEscapeTest::testJavascript
+.
+PluginModifierEscapeTest::testJavascriptWithoutMbstring
+.
+PluginModifierEscapeTest::testMail
+.
+PluginModifierEscapeTest::testMailWithoutMbstring
+.
+PluginModifierEscapeTest::testNonstd
+.
+PluginModifierEscapeTest::testNonstdWithoutMbstring
+.
+PluginModifierEscapeTest::testUrl
+.
+PluginModifierEscapeTest::testUrlWithoutMbstring
+.
+PluginModifierEscapeTest::testUrlpathinfo
+.
+PluginModifierEscapeTest::testUrlpathinfoWithoutMbstring
+.
+PluginModifierLowerTest::testDefault
+.
+PluginModifierLowerTest::testDefaultWithoutMbstring
+.
+PluginModifierLowerTest::testUmlauts
+.
+PluginModifierLowerTest::testUmlautsWithoutMbstring
+.
+PluginModifierRegexReplaceTest::testDefault
+.
+PluginModifierRegexReplaceTest::testDefaultWithoutMbstring
+.
+PluginModifierRegexReplaceTest::testUmlauts
+.
+PluginModifierSpacifyTest::testCharacter
+.
+PluginModifierSpacifyTest::testDefault
+.
+PluginModifierStripTest::testDefault
+.
+PluginModifierStripTest::testLinebreak
+.
+PluginModifierStripTest::testUnicodeSpaces
+.
+PluginModifierTruncateTest::testBreak
+.
+PluginModifierTruncateTest::testBreak2
+.
+PluginModifierTruncateTest::testBreak2WithoutMbstring
+.
+PluginModifierTruncateTest::testBreakWithoutMbstring
+.
+PluginModifierTruncateTest::testDefault
+.
+PluginModifierTruncateTest::testDefaultWithoutMbstring
+.
+PluginModifierTruncateTest::testEtc
+.
+PluginModifierTruncateTest::testEtc2
+.
+PluginModifierTruncateTest::testEtc2WithoutMbstring
+.
+PluginModifierTruncateTest::testEtcWithoutMbstring
+.
+PluginModifierTruncateTest::testLength
+.
+PluginModifierTruncateTest::testLengthWithoutMbstring
+.
+PluginModifierTruncateTest::testMiddle
+.
+PluginModifierTruncateTest::testMiddleWithoutMbstring
+.
+PluginModifierUnescapeTest::testHtml
+.
+PluginModifierUnescapeTest::testHtmlWithoutMbstring
+.
+PluginModifierUnescapeTest::testHtmlall
+.
+PluginModifierUnescapeTest::testHtmlallWithoutMbstring
+.
+PluginModifierUnescapeTest::testUrl
+.
+PluginModifierUpperTest::testDefault
+.
+PluginModifierUpperTest::testDefaultWithoutMbstring
+.
+PluginModifierUpperTest::testUmlauts
+.
+PluginModifierUpperTest::testUmlautsWithoutMbstring
+.
+PluginModifierWordwrapTest::testBreak
+.
+PluginModifierWordwrapTest::testBreakWithoutMbstring
+.
+PluginModifierWordwrapTest::testDefault
+.
+PluginModifierWordwrapTest::testDefaultUmlauts
+.
+PluginModifierWordwrapTest::testDefaultWithoutMbstring
+.
+PluginModifierWordwrapTest::testLength
+.
+PluginModifierWordwrapTest::testLengthWithoutMbstring
+.
+PluginModifierWordwrapTest::testLinebreaks
+.
+PluginModifierWordwrapTest::testLinebreaks2
+.
+PluginModifierWordwrapTest::testLinebreaks2WithoutMbstring
+.
+PluginModifierWordwrapTest::testLinebreaksWithoutMbstring
+.
+PluginModifierWordwrapTest::testLong
+.
+PluginModifierWordwrapTest::testLongCut
+.
+PluginModifierWordwrapTest::testLongCutUmlauts
+.
+PluginModifierWordwrapTest::testLongCutWithoutMbstring
+.
+PluginModifierWordwrapTest::testLongUmlauts
+.
+PluginModifierWordwrapTest::testLongWithoutMbstring
+.
+PrintNocacheTest::testInit
+.
+PrintNocacheTest::testPrintNocacheCachingNo1
+.
+PrintNocacheTest::testPrintNocacheCachingNo2
+.
+PrintNocacheTest::testPrintNocacheCachingYes1
+.
+PrintNocacheTest::testPrintNocacheCachingYes2
+.
+RegisterBlockTest::testInit
+.
+RegisterBlockTest::testRegisterBlockCaching1
+.
+RegisterBlockTest::testRegisterBlockCaching1Wrapper
+.
+RegisterBlockTest::testRegisterBlockCaching2
+.
+RegisterBlockTest::testRegisterBlockCaching2Wrapper
+.
+RegisterBlockTest::testRegisterBlockCaching3
+F
+RegisterBlockTest::testRegisterBlockCaching3Wrapper
+F
+RegisterBlockTest::testRegisterBlockCaching4
+F
+RegisterBlockTest::testRegisterBlockCaching4Wrapper
+F
+RegisterBlockTest::testRegisterBlockClass
+.
+RegisterBlockTest::testRegisterBlockClassWrapper
+.
+RegisterBlockTest::testRegisterBlockFunction
+.
+RegisterBlockTest::testRegisterBlockFunctionModifier1
+.
+RegisterBlockTest::testRegisterBlockFunctionModifier2
+.
+RegisterBlockTest::testRegisterBlockFunctionWrapper
+.
+RegisterBlockTest::testRegisterBlockObject
+.
+RegisterBlockTest::testRegisterBlockObjectWrapper
+.
+RegisterBlockTest::testUnregisterBlock
+.
+RegisterBlockTest::testUnregisterBlockNotRegistered
+.
+RegisterBlockTest::testUnregisterBlockWrapper
+.
+RegisterCompilerFunctionTest::testInit
+.
+RegisterCompilerFunctionTest::testRegisterCompilerFunction
+.
+RegisterCompilerFunctionTest::testRegisterCompilerFunctionBlock
+.
+RegisterCompilerFunctionTest::testRegisterCompilerFunctionClass
+.
+RegisterCompilerFunctionTest::testRegisterCompilerFunctionObject
+.
+RegisterCompilerFunctionTest::testUnregisterCompilerFunction
+.
+RegisterCompilerFunctionTest::testUnregisterCompilerFunctionNotRegistered
+.
+RegisterCompilerFunctionTest::testUnregisterCompilerFunctionOtherRegistered
+.
+RegisterFilterTest::testRegisterOutputfilterFunction
+.
+RegisterFilterTest::testRegisterOutputfiltermethod
+.
+RegisterFilterTest::testRegisterPostfilterFunction
+.
+RegisterFilterTest::testRegisterPostfiltermethod
+.
+RegisterFilterTest::testRegisterPrefilterFunction
+.
+RegisterFilterTest::testRegisterPrefilterObject
+.
+RegisterFilterTest::testRegisterPrefiltermethod
+.
+RegisterFilterTest::testUnegisterOutputfilterFunction
+.
+RegisterFilterTest::testUnegisterPostfilterFunction
+.
+RegisterFilterTest::testUnegisterPrefilterFunction
+.
+RegisterFilterTest::testUnregisterOutputfiltermethod
+.
+RegisterFilterTest::testUnregisterPostfiltermethod
+.
+RegisterFilterTest::testUnregisterPrefiltermethod
+.
+RegisterFunctionTest::testInit
+.
+RegisterFunctionTest::testRegisterFunction
+.
+RegisterFunctionTest::testRegisterFunctionCaching1
+.
+RegisterFunctionTest::testRegisterFunctionCaching2
+.
+RegisterFunctionTest::testRegisterFunctionCaching3
+F
+RegisterFunctionTest::testRegisterFunctionCaching4
+F
+RegisterFunctionTest::testRegisterFunctionClass
+.
+RegisterFunctionTest::testRegisterFunctionObject
+.
+RegisterFunctionTest::testRegisterFunctionWrapper
+.
+RegisterFunctionTest::testUnregisterFunction
+.
+RegisterFunctionTest::testUnregisterFunctionNotRegistered
+.
+RegisterFunctionTest::testUnregisterFunctionOtherRegistered
+.
+RegisterModifierTest::testInit
+.
+RegisterModifierTest::testRegisterModifier
+.
+RegisterModifierTest::testRegisterModifierClass
+.
+RegisterModifierTest::testRegisterModifierObject
+.
+RegisterModifierTest::testUnregisterModifier
+.
+RegisterModifierTest::testUnregisterModifierNotRegistered
+.
+RegisterModifierTest::testUnregisterModifierOtherRegistered
+.
+RegisteredResourceTest::testClearCompiledResourcePlugin
+.
+RegisteredResourceTest::testInit
+.
+RegisteredResourceTest::testResourceCompileIdChange
+.
+RegisteredResourceTest::testResourcePlugin
+.
+RegisteredResourceTest::testResourcePluginTimestamp
+.
+ResourceExtendsAllPluginTest::testInit
+.
+ResourceExtendsAllPluginTest::testResourcePluginExtendsall
+.
+ResourceExtendsAllPluginTest::testResourcePluginExtendsallOne
+.
+ResourcePluginTest::testInit
+S
+ResourcePluginTest::testResourcePlugin
+S
+ResourcePluginTest::testResourcePluginObject
+S
+ResourcePluginTest::testResourcePluginRecompiledCompiledFilepath
+S
+ResourcePluginTest::testResourcePluginRegisteredInstance
+S
+ResourcePluginTest::testResourcePluginTimestamp
+S
+SecurityTest::testAllowedModifier1
+.
+SecurityTest::testAllowedModifier2
+.
+SecurityTest::testAllowedTags1
+.
+SecurityTest::testChangedTrustedDirectory
+.
+SecurityTest::testDisabledModifier
+.
+SecurityTest::testDisabledTags
+.
+SecurityTest::testDisabledTrustedDirectory
+.
+SecurityTest::testDisabledTrustedModifier
+.
+SecurityTest::testDisabledTrustedPHPFunction
+.
+SecurityTest::testNotAllowedModifier
+.
+SecurityTest::testNotAllowedTags2
+.
+SecurityTest::testNotTrustedDirectory
+.
+SecurityTest::testNotTrustedModifier
+.
+SecurityTest::testNotTrustedPHPFunction
+.
+SecurityTest::testNotTrustedStaticClass
+.
+SecurityTest::testSecurityLoaded
+.
+SecurityTest::testSmartyPhpAllow
+.
+SecurityTest::testSmartyPhpAllowAsp
+S
+SecurityTest::testSmartyPhpQuote
+.
+SecurityTest::testSmartyPhpQuoteAsp
+S
+SecurityTest::testSmartyPhpRemove
+.
+SecurityTest::testSmartyPhpRemoveAsp
+S
+SecurityTest::testStandardDirectory
+.
+SecurityTest::testTrustedDirectory
+.
+SecurityTest::testTrustedModifier
+.
+SecurityTest::testTrustedPHPFunction
+.
+SecurityTest::testTrustedStaticClass
+.
+SecurityTest::testTrustedUri
+E
+SharedFunctionsTest::testEscapeSpecialChars
+.
+SingleQuotedStringTest::testDoubleQuotesInSingleQuotedString
+.
+SingleQuotedStringTest::testEmptySingleQuotedString
+.
+SingleQuotedStringTest::testEscapedSingleQuotesInSingleQuotedString
+.
+SingleQuotedStringTest::testInit
+.
+SingleQuotedStringTest::testSimpleSingleQuotedString
+.
+SingleQuotedStringTest::testTagsInSingleQuotedString
+.
+SingleQuotedStringTest::testVarsInSingleQuotedString
+.
+SmartyBcTest::testInit
+.
+SmartyBcTest::testSmartyPhpTag
+.
+SpacingTest::testInit
+.
+SpacingTest::testTagText1
+.
+SpacingTest::testTagText2
+.
+SpacingTest::testTagText3
+.
+SpacingTest::testTagText4
+.
+SpacingTest::testVariableSpacing1
+.
+SpacingTest::testVariableSpacing2
+.
+SpacingTest::testVariableSpacing3
+.
+SpacingTest::testVariableText1
+.
+SpacingTest::testVariableText2
+.
+SpacingTest::testVariableText3
+.
+SpacingTest::testVariableText4
+.
+SpacingTest::testVariableText5
+.
+StaticClassAccessTest::testInit
+.
+StaticClassAccessTest::testRegisteredStaticClassConstant
+.
+StaticClassAccessTest::testRegisteredStaticClassVariablemethod
+.
+StaticClassAccessTest::testRegisteredStaticClassVariablemethod2
+.
+StaticClassAccessTest::testRegisteredStaticClassmethod
+.
+StaticClassAccessTest::testStaticClassConstant
+.
+StaticClassAccessTest::testStaticClassVariable
+.
+StaticClassAccessTest::testStaticClassVariablemethod
+.
+StaticClassAccessTest::testStaticClassVariablemethod2
+.
+StaticClassAccessTest::testStaticClassmethod
+.
+StaticClassAccessTest::testStaticRegisteredClassVariable
+.
+StreamResourceTest::testGetCompiledFilepath
+.
+StreamResourceTest::testGetCompiledTimestamp
+.
+StreamResourceTest::testGetRenderedTemplate
+.
+StreamResourceTest::testGetTemplateFilepath
+.
+StreamResourceTest::testGetTemplateSource
+.
+StreamResourceTest::testGetTemplateTimestamp
+.
+StreamResourceTest::testInit
+.
+StreamResourceTest::testIsCached
+.
+StreamResourceTest::testIsEvaluated
+.
+StreamResourceTest::testMustCompile
+.
+StreamResourceTest::testNoFiles
+.
+StreamResourceTest::testSmartyIsCached
+.
+StreamResourceTest::testTemplateStramNotExists2
+.
+StreamResourceTest::testTemplateStramNotExists3
+.
+StreamResourceTest::testTemplateStreamExists1
+.
+StreamResourceTest::testTemplateStreamExists2
+.
+StreamResourceTest::testTemplateStreamNotExists1
+.
+StreamResourceTest::testUsesCompiler
+.
+StreamResourceTest::testWriteCachedContent
+.
+StreamVariableTest::testInit
+.
+StreamVariableTest::testStreamVariable1
+.
+StringResourceTest::testBase64Template
+.
+StringResourceTest::testEmptyTemplate
+.
+StringResourceTest::testGetCachedTimestamp
+.
+StringResourceTest::testGetCompiledFilepath
+.
+StringResourceTest::testGetCompiledTimestamp
+.
+StringResourceTest::testGetRenderedTemplate
+.
+StringResourceTest::testGetTemplateFilepath
+.
+StringResourceTest::testGetTemplateSource
+.
+StringResourceTest::testGetTemplateTimestamp
+.
+StringResourceTest::testInit
+.
+StringResourceTest::testIsCached
+.
+StringResourceTest::testIsEvaluated
+.
+StringResourceTest::testMustCompile
+.
+StringResourceTest::testSmartyIsCached
+.
+StringResourceTest::testTemplateStringExists1
+.
+StringResourceTest::testTemplateStringExists2
+.
+StringResourceTest::testUrlencodeTemplate
+.
+StringResourceTest::testUsesCompiler
+.
+StringResourceTest::testWriteCachedContent
+.
+TemplateExistsTest::testInit
+.
+TemplateExistsTest::testSmartyTemplateExists
+.
+TemplateExistsTest::testSmartyTemplateNotExists
+.
+VariableScopeTest::testAssigns
+.
+VariableScopeTest::testAssignsMerge
+.
+VariableScopeTest::testDataArray
+.
+VariableScopeTest::testDataArray2
+.
+VariableScopeTest::testInit
+.
+VariableScopeTest::testVariableScope12_0
+.
+VariableScopeTest::testVariableScope12_1
+.
+VariableScopeTest::testVariableScope13
+.
+VariableScopeTest::testVariableScope1_0
+.
+VariableScopeTest::testVariableScope1_1
+.
+VariableScopeTest::testVariableScope2
+.
+VariableScopeTest::testVariableScope22
+.
+VariableScopeTest::testVariableScope23
+.
+VariableScopeTest::testVariableScope3
+.
+VariableScopeTest::testVariableScope32
+.
+VariableScopeTest::testVariableScope4
+.
+VariableScopeTest::testVariableScope42
+.
+VariableScopeTest::testVariableScope5
+.
+VariableScopeTest::testVariableScope52
+.
+VariableScopeTest::testVariableScope6
+.
+VariableScopeTest::testVariableScope62
+.
+VariableVariableTest::testInit
+.
+VariableVariableTest::testVariableVariable1
+.
+VariableVariableTest::testVariableVariable2
+.
+VariableVariableTest::testVariableVariable3
+.
+VariableVariableTest::testVariableVariable4
+.
+XmlTest::testInit
+.
+XmlTest::testXml
+.
+XmlTest::testXmlCaching
+.
+XmlTest::testXmlCachingPhpAllow
+.
+XmlTest::testXmlCachingPhpQuote
+.
+XmlTest::testXmlPhpAllow
+.
+XmlTest::testXmlPhpQuote
+.
+XmlTest::testXmlVariable
+.
+XmlTest::testXmlVariableNocache1
+.
+XmlTest::testXmlVariableNocache2
+.

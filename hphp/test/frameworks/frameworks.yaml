@@ -609,6 +609,15 @@
     commit: 340e658aec0b51df58cab4605578acf4c90c479c
     install_root: slim
     test_root: slim
+  smarty:
+    url: https://github.com/smarty-php/smarty-dev
+    branch: master
+    commit: 03da4843d0fce83bcd192e02fc1ed55a19c4ec70
+    install_root: smarty
+    test_root: smarty/smarty-phpunit
+    # overridden explicitly in class_overrides
+    config_file: smarty/smarty-phpunit/phpunit.xml.dist
+    test_find_mode: token
   stash:
     url: https://github.com/tedious/Stash.git
     branch: master

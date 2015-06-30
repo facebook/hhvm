@@ -39,7 +39,6 @@ public:
     return checkError || !m_this;
   }
 
-  bool canonCompare(ExpressionPtr e) const override;
   void setContext(Context context) override;
 
   const std::string &getName() const { return m_name;}

@@ -36,7 +36,6 @@ public:
 
   explicit ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                           ListKind kind = ListKindParam);
-  ~ExpressionList();
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
@@ -73,8 +72,6 @@ public:
   void setCollectionElems();
   void setContainsUnpack() { m_argUnpack = true; };
   bool containsUnpack() const { return m_argUnpack; }
-
-  bool canonCompare(ExpressionPtr e) const override;
 
   /**
    * Checks whether the expression list contains only literal strings and

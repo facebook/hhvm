@@ -158,20 +158,6 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-unsigned ClassConstantExpression::getCanonHash() const {
-  int64_t val =
-    hash_string_i_unsafe(m_varName.c_str(), m_varName.size()) -
-    hash_string_i_unsafe(m_origClassName.c_str(), m_origClassName.size());
-  return ~unsigned(val) ^ unsigned(val >> 32);
-}
-
-bool ClassConstantExpression::canonCompare(ExpressionPtr e) const {
-  return Expression::canonCompare(e) &&
-    m_varName == static_cast<ClassConstantExpression*>(e.get())->m_varName &&
-    StaticClassName::isNamed(static_cast<ClassConstantExpression*>(
-                               e.get())->m_origClassName);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassConstantExpression::outputCodeModel(CodeGenerator &cg) {

@@ -41,8 +41,6 @@ public:
   bool isScalarArrayPair() const;
 
   bool isRef() const { return m_ref; }
-
-  bool canonCompare(ExpressionPtr e) const override;
 private:
   ExpressionPtr m_name;
   ExpressionPtr m_value;

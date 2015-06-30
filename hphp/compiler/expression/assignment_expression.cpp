@@ -207,12 +207,6 @@ ExpressionPtr AssignmentExpression::optimize(AnalysisResultConstPtr ar) {
 }
 
 ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
-  if (Option::EliminateDeadCode &&
-      ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
-    // otherwise used & needed flags may not be up to date yet
-    ExpressionPtr rep = optimize(ar);
-    if (rep) return rep;
-  }
   if (m_variable->getContainedEffects() & ~(CreateEffect|AccessorEffect)) {
     return ExpressionPtr();
   }
@@ -238,53 +232,6 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
       m_value = val->clone();
       rep->addElement(static_pointer_cast<Expression>(shared_from_this()));
       return replaceValue(rep);
-    }
-    if (!m_ref && m_variable->is(KindOfArrayElementExpression)) {
-      ArrayElementExpressionPtr ae(
-        static_pointer_cast<ArrayElementExpression>(m_variable));
-      ExpressionPtr avar(ae->getVariable());
-      ExpressionPtr aoff(ae->getOffset());
-      if (!aoff || aoff->isScalar()) {
-        avar = avar->getCanonLVal();
-        while (avar) {
-          if (avar->isScalar()) {
-            Variant v,o,r;
-            if (!avar->getScalarValue(v)) break;
-            if (!val->getScalarValue(r)) break;
-            try {
-              g_context->setThrowAllErrors(true);
-              if (aoff) {
-                if (!aoff->getScalarValue(o)) break;
-                if (!v.isArray()) break;
-                v.toArrRef().set(o, r);
-              } else {
-                if (!v.isArray()) break;
-                v.toArrRef().append(r);
-              }
-              g_context->setThrowAllErrors(false);
-            } catch (...) {
-              break;
-            }
-            ExpressionPtr rep(
-              new AssignmentExpression(
-                getScope(), getRange(),
-                m_variable->replaceValue(Clone(ae->getVariable())),
-                makeScalarExpression(ar, v), false));
-            if (!isUnused()) {
-              ExpressionListPtr el(
-                new ExpressionList(
-                  getScope(), getRange(),
-                  ExpressionList::ListKindWrapped));
-              el->addElement(rep);
-              el->addElement(val);
-              rep = el;
-            }
-            return replaceValue(rep);
-          }
-          avar = avar->getCanonPtr();
-        }
-        g_context->setThrowAllErrors(false);
-      }
     }
   }
   return ExpressionPtr();

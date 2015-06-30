@@ -248,20 +248,9 @@ public:
   static bool AllVolatile;
 
   /**
-   * Optimizations
-   */
-  static int InvokeFewArgsCount;
-  static int InlineFunctionThreshold;
-  static bool EliminateDeadCode;
-  static bool LocalCopyProp;
-  static int AutoInline;
-  static bool ArrayAccessIdempotent;
-
-  /**
    * Output options
    */
   static bool GenerateDocComments;
-  static bool VariableCoalescing;
   static bool DumpAst;
   static bool WholeProgram;
   static bool UseHHBBC;  // see hhbbc/README

@@ -101,16 +101,6 @@ bool ConstantExpression::getScalarValue(Variant &value) {
   return true;
 }
 
-unsigned ConstantExpression::getCanonHash() const {
-  strhash_t val = hash_string_i_unsafe(m_name.c_str(), m_name.size());
-  return static_cast<unsigned>(val);
-}
-
-bool ConstantExpression::canonCompare(ExpressionPtr e) const {
-  return Expression::canonCompare(e) &&
-    m_name == static_cast<ConstantExpression*>(e.get())->m_name;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 

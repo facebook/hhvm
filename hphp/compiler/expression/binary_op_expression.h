@@ -49,7 +49,6 @@ public:
   ExpressionPtr foldRightAssoc(AnalysisResultConstPtr ar);
 
   ExpressionPtr unneededHelper() override;
-  bool canonCompare(ExpressionPtr e) const override;
 
   static int getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
                            bool &hasVoid);

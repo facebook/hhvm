@@ -29,7 +29,6 @@
 #include <utility>
 #include <vector>
 
-#include "hphp/compiler/analysis/alias_manager.h"
 #include "hphp/compiler/analysis/exceptions.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
@@ -1039,15 +1038,8 @@ int DepthFirstVisitor<Pre, OptVisitor>::visitScope(BlockScopeRawPtr scope) {
       dynamic_pointer_cast<MethodStatement>(stmt)) {
     do {
       scope->clearUpdated();
-      if (Option::LocalCopyProp || Option::EliminateDeadCode) {
-        AliasManager am;
-        if (am.optimize(this->m_data.m_ar, m)) {
-          scope->addUpdates(BlockScope::UseKindCaller);
-        }
-      } else {
-        StatementPtr rep = this->visitStmtRecur(stmt);
-        always_assert(!rep);
-      }
+      StatementPtr rep = this->visitStmtRecur(stmt);
+      always_assert(!rep);
       updates = scope->getUpdated();
       all_updates |= updates;
     } while (updates);

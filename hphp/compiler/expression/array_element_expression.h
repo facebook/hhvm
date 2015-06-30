@@ -55,8 +55,6 @@ public:
   bool appendClass(ExpressionPtr cls,
                    AnalysisResultConstPtr ar, FileScopePtr file);
 
-  bool canonCompare(ExpressionPtr e) const override;
-
 private:
   ExpressionPtr m_variable;
   ExpressionPtr m_offset;

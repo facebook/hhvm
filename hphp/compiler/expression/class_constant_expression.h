@@ -35,9 +35,6 @@ public:
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
   int getLocalEffects() const override { return NoEffect; }
 
-  unsigned getCanonHash() const override;
-  bool canonCompare(ExpressionPtr e) const override;
-
   bool containsDynamicConstant(AnalysisResultPtr ar) const override;
 
   const std::string &getConName() const { return m_varName; }

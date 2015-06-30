@@ -174,24 +174,6 @@ public:
   ExpressionPtr getNthExpr(int n) const { return
       static_pointer_cast<Expression>(getNthKid(n)); }
 
-  /**
-   * For cse & canonicalization
-   */
-  virtual unsigned getCanonHash() const;
-  virtual bool canonCompare(ExpressionPtr e) const;
-  bool equals(ExpressionPtr other);
-  void setCanonID(unsigned id) { m_canon_id = id; }
-  unsigned getCanonID() const { return m_canon_id; }
-  void setCanonPtr(ExpressionPtr e) { m_canonPtr = e; }
-  ExpressionPtr getCanonPtr() const {
-    return m_context & (LValue|RefValue|UnsetContext|DeepReference) ?
-      ExpressionPtr() : m_canonPtr;
-  }
-  ExpressionPtr getCanonLVal() const {
-    return m_canonPtr;
-  }
-  ExpressionPtr getCanonTypeInfPtr() const;
-
   virtual bool isTemporary() const { return false; }
   virtual bool isScalar() const { return false; }
   bool isArray() const;
@@ -228,12 +210,6 @@ public:
   virtual ExpressionPtr preOptimize(AnalysisResultConstPtr ar) {
     return ExpressionPtr();
   }
-
-  /**
-   * Find other types that have been inferred for this expression,
-   * and combine them with inType to form a new, tighter type.
-   */
-  TypePtr propagateTypes(AnalysisResultConstPtr ar, TypePtr inType);
 
   /**
    * Check to make sure return type is convertible to specified type.
@@ -283,7 +259,6 @@ protected:
 private:
   bool m_originalScopeSet;
   bool m_unused;
-  unsigned m_canon_id;
   mutable int m_error;
 
 protected:
@@ -299,7 +274,6 @@ protected:
   static ExprClass Classes[];
 
   BlockScopeRawPtr m_originalScope;
-  ExpressionPtr m_canonPtr;
   ExpressionPtr m_replacement;
 };
 

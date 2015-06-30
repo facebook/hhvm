@@ -51,8 +51,6 @@ public:
   bool getScalarValue(Variant &value) override {
     value = getVariant(); return true;
   }
-  unsigned getCanonHash() const override;
-  bool canonCompare(ExpressionPtr e) const override;
   bool isQuoted() const { return m_quoted; }
 
   int getType() const { return m_type;}

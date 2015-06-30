@@ -129,18 +129,13 @@ ExpressionPtr Construct::makeScalarExpression(AnalysisResultConstPtr ar,
                                           getRange(), value);
 }
 
-std::string Construct::getText(bool useCache /* = false */,
-                               bool translate /* = false */,
-                               AnalysisResultPtr ar
+std::string Construct::getText(AnalysisResultPtr ar
                                /* = AnalysisResultPtr() */) {
-  std::string &text = m_text;
-  if (useCache && !text.empty()) return text;
   std::ostringstream o;
   CodeGenerator cg(&o, CodeGenerator::PickledPHP);
-  cg.translatePredefined(translate);
+  cg.translatePredefined(false);
   outputPHP(cg, ar);
-  text = o.str();
-  return text;
+  return o.str();
 }
 
 void Construct::serialize(JSON::CodeError::OutputStream &out) const {
@@ -175,8 +170,6 @@ void Construct::dumpNode(int spc) {
   std::string scontext = "";
   std::string value = "";
   std::string type_info = "";
-  unsigned id = 0;
-  ExpressionPtr idPtr = ExpressionPtr();
   int ef = 0;
 
   if (isStatement()) {
@@ -188,8 +181,6 @@ void Construct::dumpNode(int spc) {
   } else {
     assert(isExpression());
     Expression *e = static_cast<Expression*>(this);
-    id = e->getCanonID();
-    idPtr = e->getCanonLVal();
 
     ef = e->getLocalEffects();
 
@@ -297,14 +288,6 @@ void Construct::dumpNode(int spc) {
             << std::setw(10) << (int64_t)this << std::dec;
 
   std::cout << " " << name << "(" << type << ") ";
-  if (id) {
-    std::cout << "id=" << id << " ";
-  }
-  if (idPtr) {
-    std::cout << "idp=0x" <<
-      std::hex << std::setfill('0') << std::setw(10) <<
-      (int64_t)idPtr.get() << " ";
-  }
 
   if (value != "") {
     std::cout << "[" << value << "] ";

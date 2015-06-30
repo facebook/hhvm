@@ -375,10 +375,8 @@ public:
   /**
    * Get canonicalized PHP source code for this construct.
    */
-  std::string getText(bool useCache, bool translate = false,
-                      AnalysisResultPtr ar = AnalysisResultPtr());
+  std::string getText(AnalysisResultPtr ar = AnalysisResultPtr());
 
-  std::string getText() { return getText(false); }
   void recomputeEffects();
 
   /**
@@ -390,7 +388,6 @@ public:
   ExpressionPtr makeScalarExpression(AnalysisResultConstPtr ar,
                                      const Variant &value) const;
 private:
-  std::string m_text;
   BlockScopeRawPtr m_blockScope;
   union {
     unsigned m_flagsVal;

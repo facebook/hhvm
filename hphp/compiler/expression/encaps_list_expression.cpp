@@ -103,12 +103,6 @@ ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-bool EncapsListExpression::canonCompare(ExpressionPtr e) const {
-  if (!Expression::canonCompare(e)) return false;
-  EncapsListExpressionPtr el = static_pointer_cast<EncapsListExpression>(e);
-  return m_type == el->m_type;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void EncapsListExpression::outputCodeModel(CodeGenerator &cg) {

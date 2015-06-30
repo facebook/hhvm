@@ -672,7 +672,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
         if (vars->is(KindOfExpressionList)) {
           vars = static_pointer_cast<ExpressionList>(vars)->listValue();
         } else {
-          vars = vars->getCanonPtr();
+          vars.reset();
         }
       }
       if (vars) {

@@ -47,9 +47,6 @@ public:
     return !m_valid || m_dynamic;
   }
 
-  unsigned getCanonHash() const override;
-  bool canonCompare(ExpressionPtr e) const override;
-
   const std::string &getName() const { return m_name;}
   const std::string &getOriginalName() const { return m_origName;}
   const std::string getNonNSOriginalName() const {

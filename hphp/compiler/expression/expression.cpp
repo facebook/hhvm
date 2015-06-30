@@ -65,8 +65,7 @@ Expression::ExprClass Expression::Classes[] = {
 
 Expression::Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS)
     : Construct(scope, r, kindOf), m_context(RValue),
-      m_originalScopeSet(false), m_unused(false), m_canon_id(0), m_error(0),
-      m_canonPtr() {
+      m_originalScopeSet(false), m_unused(false), m_error(0) {
 }
 
 ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
@@ -135,9 +134,7 @@ void Expression::setArgNum(int n) {
 void Expression::deepCopy(ExpressionPtr exp) {
   exp->m_actualType = m_actualType;
   exp->m_expectedType = m_expectedType;
-  exp->m_canon_id = 0;
   exp->m_unused = false;
-  exp->m_canonPtr.reset();
   exp->m_replacement.reset();
   exp->clearVisited();
 };
@@ -259,22 +256,6 @@ TypePtr Expression::getType() {
   return Type::Any;
 }
 
-TypePtr Expression::propagateTypes(AnalysisResultConstPtr ar, TypePtr inType) {
-  ExpressionPtr e = getCanonTypeInfPtr();
-  TypePtr ret = inType;
-
-  while (e) {
-    TypePtr inferred = Type::Inferred(ar, ret, e->m_actualType);
-    if (!inferred) {
-      break;
-    }
-    ret = inferred;
-    e = e->getCanonTypeInfPtr();
-  }
-
-  return ret;
-}
-
 void Expression::analyzeProgram(AnalysisResultPtr ar) {
 }
 
@@ -310,7 +291,6 @@ TypePtr Expression::checkTypesImpl(AnalysisResultConstPtr ar,
                                    TypePtr expectedType,
                                    TypePtr actualType) {
   TypePtr ret;
-  actualType = propagateTypes(ar, actualType);
   assert(actualType);
   ret = Type::Intersection(ar, actualType, expectedType);
   setTypes(ar, actualType, ret);
@@ -416,118 +396,6 @@ ExpressionPtr Expression::MakeConstant(AnalysisResultConstPtr ar,
     assert(false);
   }
   return exp;
-}
-
-unsigned Expression::getCanonHash() const {
-  int64_t val = hash_int64(getKindOf());
-  for (int i = getKidCount(); i--; ) {
-    ExpressionPtr k = getNthExpr(i);
-    if (k) {
-      val = hash_int64(val ^ (((int64_t)k->getKindOf()<<32)+k->getCanonID()));
-    }
-  }
-
-  return (unsigned)val ^ (unsigned)(val >> 32);
-}
-
-bool Expression::canonCompare(ExpressionPtr e) const {
-  if (e->getKindOf() != getKindOf()) {
-    return false;
-  }
-
-  int kk = getKidCount();
-  if (kk != e->getKidCount()) {
-    return false;
-  }
-
-  for (int i = kk; i--; ) {
-    ExpressionPtr k1 = getNthExpr(i);
-    ExpressionPtr k2 = e->getNthExpr(i);
-
-    if (k1 != k2) {
-      if (!k1 || !k2) {
-        return false;
-      }
-      if (k1->getCanonID() != k2->getCanonID()) {
-        return false;
-      }
-    }
-  }
-
-  return true;
-}
-
-bool Expression::equals(ExpressionPtr other) {
-  if (!other) return false;
-
-  // So that we can leverage canonCompare()
-  setCanonID(0);
-  other->setCanonID(0);
-
-  if (other->getKindOf() != getKindOf()) {
-    return false;
-  }
-
-  int nKids = getKidCount();
-  if (nKids != other->getKidCount()) {
-    return false;
-  }
-
-  for (int i = 0; i < nKids; i++) {
-    ExpressionPtr thisKid = getNthExpr(i);
-    ExpressionPtr otherKid = other->getNthExpr(i);
-
-    if (!thisKid || !otherKid) {
-      if (thisKid == otherKid) continue;
-      return false;
-    }
-    if (!thisKid->equals(otherKid)) {
-      return false;
-    }
-  }
-
-  return canonCompare(other);
-}
-
-ExpressionPtr Expression::getCanonTypeInfPtr() const {
-  if (!m_canonPtr) return ExpressionPtr();
-  if (!(m_context & (LValue|RefValue|UnsetContext|DeepReference))) {
-    return m_canonPtr;
-  }
-  if (!hasAnyContext(AccessContext|ObjectContext) ||
-      !m_canonPtr->getActualType()) {
-    return ExpressionPtr();
-  }
-  switch (m_canonPtr->getActualType()->getKindOf()) {
-  case Type::KindOfArray:
-    {
-      if (!hasContext(AccessContext)) break;
-      if (!is(Expression::KindOfSimpleVariable)) break;
-      SimpleVariableConstPtr sv(
-        static_pointer_cast<const SimpleVariable>(shared_from_this()));
-      if (sv->couldBeAliased()) return ExpressionPtr();
-      if (hasContext(LValue) &&
-          !(m_context & (RefValue | UnsetContext | DeepReference))) {
-        return m_canonPtr;
-      }
-    }
-    break;
-  case Type::KindOfObject:
-    {
-      if (!hasContext(ObjectContext)) break;
-      if (!is(Expression::KindOfSimpleVariable)) break;
-      SimpleVariableConstPtr sv(
-        static_pointer_cast<const SimpleVariable>(shared_from_this()));
-      if (sv->couldBeAliased()) return ExpressionPtr();
-      if (hasContext(LValue) &&
-          !(m_context & (RefValue | UnsetContext | DeepReference))) {
-        return m_canonPtr;
-      }
-    }
-  default:
-    break;
-  }
-  return ExpressionPtr();
 }
 
 ExpressionPtr Expression::fetchReplacement() {

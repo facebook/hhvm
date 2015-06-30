@@ -240,11 +240,6 @@ void BinaryOpExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-bool BinaryOpExpression::canonCompare(ExpressionPtr e) const {
-  return Expression::canonCompare(e) &&
-    getOp() == static_cast<BinaryOpExpression*>(e.get())->getOp();
-}
-
 ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (!m_exp2->isScalar()) {
     if (!m_exp1->isScalar()) {

@@ -58,8 +58,6 @@ public:
   void shift(int from, int to);
 
 private:
-  bool mergeConcatAssign();
-
   StatementPtrVec m_stmts;
   bool m_included; // whether includes have been inlined
 };

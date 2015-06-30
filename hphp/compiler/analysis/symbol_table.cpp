@@ -175,7 +175,7 @@ std::string ExtractInitializer(AnalysisResultPtr ar, ExpressionPtr e) {
       ParameterExpressionPtr p(
         static_pointer_cast<ParameterExpression>(e));
       if (!p->defaultValue()) return "";
-      return p->defaultValue()->getText(false, false, ar);
+      return p->defaultValue()->getText(ar);
     }
   default:
     // TODO(stephentu): this doesn't allow us to tell the difference between
@@ -183,7 +183,7 @@ std::string ExtractInitializer(AnalysisResultPtr ar, ExpressionPtr e) {
     //   class X { public $x;        } versus
     //   class X { public $x = null; }
     // we'll just end up treating both cases like the latter
-    return e->getText(false, false, ar);
+    return e->getText(ar);
   }
   return "";
 }

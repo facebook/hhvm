@@ -57,7 +57,6 @@ public:
   TypePtr getCastType() const;
   bool getFront() const { return m_front; }
 
-  bool canonCompare(ExpressionPtr e) const override;
   ExpressionPtr unneededHelper() override;
   void setDefinedScope(BlockScopeRawPtr scope);
 protected:

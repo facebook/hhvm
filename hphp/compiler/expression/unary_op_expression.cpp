@@ -303,15 +303,6 @@ void UnaryOpExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-bool UnaryOpExpression::canonCompare(ExpressionPtr e) const {
-  if (!Expression::canonCompare(e)) return false;
-  UnaryOpExpressionPtr u =
-    static_pointer_cast<UnaryOpExpression>(e);
-
-  return m_op == u->m_op &&
-    m_front == u->m_front;
-}
-
 ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   Variant value;
   Variant result;

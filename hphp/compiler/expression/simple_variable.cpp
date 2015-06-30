@@ -196,11 +196,6 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-bool SimpleVariable::canonCompare(ExpressionPtr e) const {
-  return Expression::canonCompare(e) &&
-    getName() == static_cast<SimpleVariable*>(e.get())->getName();
-}
-
 bool SimpleVariable::checkUnused() const {
   return !m_superGlobal && !m_globals &&
     getScope()->getVariables()->checkUnused(m_sym);

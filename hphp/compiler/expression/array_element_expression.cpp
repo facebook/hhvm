@@ -229,10 +229,6 @@ void ArrayElementExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-bool ArrayElementExpression::canonCompare(ExpressionPtr e) const {
-  return m_offset && Expression::canonCompare(e);
-}
-
 ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (!(m_context & (RefValue|LValue|UnsetContext|OprLValue|
                      InvokeArgument|DeepReference|DeepOprLValue))) {

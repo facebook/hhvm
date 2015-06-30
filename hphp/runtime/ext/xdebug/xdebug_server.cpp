@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/ext/xdebug/xdebug_server.h"
 
-#include "hphp/runtime/ext/xdebug/chrome.h"
 #include "hphp/runtime/ext/xdebug/xdebug_command.h"
 #include "hphp/runtime/ext/xdebug/xdebug_hook_handler.h"
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
@@ -582,13 +581,6 @@ void XDebugServer::deinitDbgp() {
 }
 
 void XDebugServer::sendMessage(xdebug_xml_node& xml) {
-  if (RuntimeOption::XDebugChrome) {
-    auto const response = dbgp_to_chrome(&xml);
-    // Write the trailing NUL character.
-    write(m_socket, response.data(), response.size() + 1);
-    return;
-  }
-
   // Convert xml to an xdebug_str.
   xdebug_str xml_message = {0, 0, nullptr};
   xdebug_xml_return_node(&xml, &xml_message);
@@ -798,14 +790,7 @@ XDebugCommand* XDebugServer::parseCommand() {
   String cmd_str;
   Array args;
 
-  // If we're being sent chrome debugger commands, then convert them to dbgp
-  // first.
-  std::string chrome_input;
   folly::StringPiece input(m_bufferCur);
-  if (RuntimeOption::XDebugChrome) {
-    chrome_input = chrome_to_dbgp(input);
-    input = chrome_input;
-  }
 
   // Bump the current buffer pointer forward *before* calling parseInput, so we
   // don't get stuck in an infinite loop if parseInput throws.

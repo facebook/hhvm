@@ -613,8 +613,6 @@ public:
   static std::string DebuggerStartupDocument;
   static int DebuggerSignalTimeout;
 
-  static bool XDebugChrome;
-
   // Mail options
   static std::string SendmailPath;
   static std::string MailForceExtraParameters;

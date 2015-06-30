@@ -1,5 +1,0 @@
-(cmd) {"request":{"id":5,"method":"Debugger.resume"}}
-About to throw an exception
-Caught the exception!
-{"response":{"error":{},"id":"5"}}
-(cmd) {"request":{"id":6,"method":"Debugger.resume"}}

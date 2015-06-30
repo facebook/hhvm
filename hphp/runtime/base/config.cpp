@@ -80,8 +80,6 @@ std::string Config::IniName(const std::string& config,
 
   // Fix "XDebug" turning into "x_debug".
   boost::replace_first(out, "hhvm.debugger.x_debug_", "xdebug.");
-  // HHVM-specific option, leave it as such.
-  boost::replace_first(out, "xdebug.chrome", "hhvm.debugger.xdebug_chrome");
 
   return out;
 }

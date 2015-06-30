@@ -481,7 +481,6 @@ bool try_invariant_memory(LoopEnv& env,
 bool may_have_side_effects(const IRInstruction& inst) {
   switch (inst.op()) {
   case Jmp:
-  case DefLabel:
   case ExitPlaceholder:
     return false;
 

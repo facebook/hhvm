@@ -67,12 +67,12 @@ XDebugServer::XDebugServer(Mode mode)
     if (m_logFile == nullptr) {
       raise_warning("XDebug could not open the remote debug file '%s'.",
                     XDEBUG_GLOBAL(RemoteLog).c_str());
+    } else {
+      log("Log opened at");
+      XDebugUtils::fprintTimestamp(m_logFile);
+      log("\n");
+      logFlush();
     }
-
-    log("Log opened at");
-    XDebugUtils::fprintTimestamp(m_logFile);
-    log("\n");
-    logFlush();
   }
 
   // Grab the hostname and port to connect to

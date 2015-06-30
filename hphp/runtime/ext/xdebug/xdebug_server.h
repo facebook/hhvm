@@ -222,7 +222,7 @@ private:
  public:
   // Logs the string defined by the passed format string to the logfile, if the
   // logfile exists.
-  inline void log(const char* format, ...) {
+  void log(const char* format, ...) {
     if (m_logFile == nullptr) {
       return;
     }
@@ -234,7 +234,7 @@ private:
   }
 
   // Flushes the logfile if it exists
-  inline void logFlush() {
+  void logFlush() {
     if (m_logFile != nullptr) {
       fflush(m_logFile);
     }

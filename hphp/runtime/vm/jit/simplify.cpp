@@ -2409,13 +2409,13 @@ void copyProp(IRInstruction* inst) {
 
     if (srcInst->is(Mov)) {
       inst->setSrc(i, srcInst->src(0));
-      }
+    }
 
     // We're assuming that all of our src instructions have already been
     // copyPropped.
     assertx(!inst->src(i)->inst()->is(Mov));
-    }
   }
+}
 
 PackedBounds packedArrayBoundsStaticCheck(Type arrayType, int64_t idxVal) {
   if (idxVal < 0 || idxVal > PackedArray::MaxSize) return PackedBounds::Out;

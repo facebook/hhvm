@@ -52,8 +52,10 @@
 
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/guard-relaxation.h"
+#include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -61,11 +63,10 @@
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/timer.h"
+#include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/jit/inlining-decider.h"
-#include "hphp/runtime/vm/jit/translate-region.h"
-#include "hphp/runtime/vm/jit/irgen.h"
+
 
 TRACE_SET_MOD(trans);
 
@@ -1286,99 +1287,99 @@ Type flavorToType(FlavorDesc f) {
   not_reached();
 }
 
-Type typeToCheckForInput(
+TypeConstraint constraintForInput(
   IRGS& irgs,
   const NormalizedInstruction& ni,
   int32_t opndIdx,
   Type predictedType
 ) {
   auto opc = ni.op();
-  auto tc = TypeConstraint(DataTypeSpecific);
   switch (opc) {
     case OpSetS:
     case OpSetG:
     case OpSetL: {
       // stack value
       if (opndIdx == 0) {
-        tc = DataTypeCountness;
-        break;
+        return DataTypeCountness;
       }
       if (opc == OpSetL) {
         // old local value is dec-refed
         assert(opndIdx == 1);
-        tc = DataTypeCountness;
-        break;
+        return DataTypeCountness;
       }
-      tc = DataTypeSpecific;
-      break;
+      return DataTypeSpecific;
     }
 
     case OpUnsetL: {
-      tc = DataTypeCountness;
-      break;
+      return DataTypeCountness;
     }
 
     case OpCGetL:
     case OpVGetL:
     case OpFPassL: {
-      tc = DataTypeCountnessInit;
-      break;
+      return DataTypeCountnessInit;
+    }
+
+    case OpCGetL2: {
+      // Stack input isn't touched, Local input is CountnessInit.
+      return opndIdx == 0 ? DataTypeGeneric : DataTypeCountnessInit;
     }
 
     case OpCUGetL: {
-      tc = DataTypeCountness;
-      break;
+      return DataTypeCountness;
     }
 
     case OpPushL:
     case OpContEnter:
     case OpContRaise: {
-      tc = DataTypeGeneric;
-      break;
+      return DataTypeGeneric;
     }
 
     case OpRetC:
     case OpRetV: {
-      tc = DataTypeCountness;
-      break;
+      return DataTypeCountness;
     }
 
     case OpFCallArray: {
-      tc = DataTypeGeneric;
-      break;
+      return DataTypeGeneric;
     }
 
     case OpPopC:
     case OpPopV:
     case OpPopR: {
-      tc = DataTypeCountness;
-      break;
+      return DataTypeCountness;
     }
 
     case OpYield:
     case OpYieldK: {
       // The stack input is teleported to the continuation's m_value field
-      tc = DataTypeGeneric;
-      break;
+      return DataTypeGeneric;
     }
 
     case OpAddElemC: {
       // The stack input is teleported to the array
-      tc = opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
-      break;
+      return opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
     }
 
-    case OpIdx:
+    case OpIdx: {
+      // Default value is Generic, key is Specific, and base is more
+      // complicated.
+      if (opndIdx == 0) return DataTypeGeneric;
+      if (opndIdx == 1) return DataTypeSpecific;
+
+      auto baseType = irgen::predictedTypeFromLocation(irgs, ni.inputs[2]);
+      auto keyType = irgen::predictedTypeFromLocation(irgs, ni.inputs[1]);
+      return irgen::idxBaseConstraint(baseType, keyType);
+    }
+
     case OpArrayIdx: {
       // The default value (w/ opndIdx 0) is simply passed to a helper,
       // which takes care of dec-refing it if needed
-      tc = opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
-      break;
+      return opndIdx == 0 ? DataTypeGeneric : DataTypeSpecific;
     }
 
     case OpNewPackedArray: {
-      tc = DataTypeGeneric;
-      break;
+      return DataTypeGeneric;
     }
 
     case OpIterInit:
@@ -1388,8 +1389,7 @@ Type typeToCheckForInput(
     case OpWIterInit:
     case OpWIterInitK: {
       // We care about the type of the stack input but not the locals.
-      tc = opndIdx == 0 ? DataTypeSpecific : DataTypeGeneric;
-      break;
+      return opndIdx == 0 ? DataTypeSpecific : DataTypeGeneric;
     }
 
     case OpIterNext:
@@ -1400,8 +1400,7 @@ Type typeToCheckForInput(
     case OpWIterNextK: {
       // Don't care about local input types; all we do is pass their address to
       // helpers.
-      tc = DataTypeGeneric;
-      break;
+      return DataTypeGeneric;
     }
 
     default: {
@@ -1410,10 +1409,10 @@ Type typeToCheckForInput(
   }
 
   if (hasMVector(opc) && opndIdx == getMInstrInfo(ni.mInstrOp()).valCount()) {
-    tc = irgen::mInstrBaseConstraint(irgs, predictedType);
+    return irgen::mInstrBaseConstraint(irgs, predictedType);
   }
 
-  return relaxType(predictedType, tc);
+  return DataTypeSpecific;
 }
 
 void emitInputChecks(
@@ -1443,7 +1442,8 @@ void emitInputChecks(
 
     auto typeToCheck = predictedType <= TCls
       ? predictedType
-      : typeToCheckForInput(irgs, ni, i, predictedType);
+      : relaxType(predictedType,
+                  constraintForInput(irgs, ni, i, predictedType));
 
     // Make sure typeToCheck is checkable.
     if (!(typeToCheck <= TCell || typeToCheck <= TBoxedInitCell)) {

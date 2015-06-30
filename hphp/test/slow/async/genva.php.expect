@@ -1,0 +1,19 @@
+bool(false)
+NULL
+NULL
+array(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}
+g
+NULL
+array(3) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(37)
+  [2]=>
+  int(42)
+}

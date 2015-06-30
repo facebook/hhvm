@@ -2188,11 +2188,11 @@ bool EmitterVisitor::isJumpTarget(Offset target) {
   return (it != m_jumpTargetEvalStacks.end());
 }
 
-class IterFreeThunklet : public Thunklet {
+class IterFreeThunklet final : public Thunklet {
 public:
   IterFreeThunklet(Id iterId, bool itRef)
     : m_id(iterId), m_itRef(itRef) {}
-  virtual void emit(Emitter& e) {
+  void emit(Emitter& e) override {
     if (m_itRef) {
       e.MIterFree(m_id);
     } else {
@@ -2208,11 +2208,11 @@ private:
 /**
  * A thunklet for the fault region protecting a silenced (@) expression.
  */
-class RestoreErrorReportingThunklet : public Thunklet {
+class RestoreErrorReportingThunklet final : public Thunklet {
 public:
   explicit RestoreErrorReportingThunklet(Id loc)
     : m_oldLevelLoc(loc) {}
-  virtual void emit(Emitter& e) {
+  void emit(Emitter& e) override {
     e.getEmitterVisitor().emitRestoreErrorReporting(e, m_oldLevelLoc);
     e.Unwind();
   }
@@ -2220,11 +2220,11 @@ private:
   Id m_oldLevelLoc;
 };
 
-class UnsetUnnamedLocalThunklet : public Thunklet {
+class UnsetUnnamedLocalThunklet final : public Thunklet {
 public:
   explicit UnsetUnnamedLocalThunklet(Id loc)
     : m_loc(loc) {}
-  virtual void emit(Emitter& e) {
+  void emit(Emitter& e) override {
     e.getEmitterVisitor().emitVirtualLocal(m_loc);
     e.getEmitterVisitor().emitUnset(e);
     e.Unwind();
@@ -2233,12 +2233,28 @@ private:
   Id m_loc;
 };
 
-class FinallyThunklet : public Thunklet {
+class UnsetUnnamedLocalsThunklet final : public Thunklet {
+public:
+  explicit UnsetUnnamedLocalsThunklet(std::vector<Id>&& locs)
+    : m_locs(std::move(locs)) {}
+  void emit(Emitter& e) override {
+    auto& visitor = e.getEmitterVisitor();
+    for (auto loc : m_locs) {
+      visitor.emitVirtualLocal(loc);
+      visitor.emitUnset(e);
+    }
+    e.Unwind();
+  }
+private:
+  const std::vector<Id> m_locs;
+};
+
+class FinallyThunklet final : public Thunklet {
 public:
   explicit FinallyThunklet(FinallyStatementPtr finallyStatement,
                            int numLiveIters)
       : m_finallyStatement(finallyStatement), m_numLiveIters(numLiveIters) {}
-  virtual void emit(Emitter& e) {
+  void emit(Emitter& e) override {
     auto& visitor = e.getEmitterVisitor();
     auto region =
       visitor.createRegion(m_finallyStatement, Region::Kind::FaultFunclet);
@@ -4669,10 +4685,13 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     registerYieldAwait(await);
     assert(m_evalStack.size() == 0);
 
+    auto expression = await->getExpression();
+    if (emitInlineGenva(e, expression)) return true;
+
     Label resume;
 
     // evaluate expression passed to await
-    visit(await->getExpression());
+    visit(expression);
     emitConvertToCell(e);
 
     // if expr is null, just continue
@@ -4747,8 +4766,105 @@ void EmitterVisitor::emitConstMethodCallNoParams(Emitter& e,
   emitConvertToCell(e);
 }
 
-const StaticString s_hh_invariant_violation("hh\\invariant_violation");
-const StaticString s_invariant_violation("invariant_violation");
+namespace {
+const StaticString
+  s_hh_invariant_violation("hh\\invariant_violation"),
+  s_invariant_violation("invariant_violation"),
+  s_gennull("HH\\Asio\\null"),
+  s_fromArray("fromArray"),
+  s_AwaitAllWaitHandle("HH\\AwaitAllWaitHandle")
+  ;
+}
+
+bool EmitterVisitor::emitInlineGenva(
+  Emitter& e,
+  const ExpressionPtr expression
+) {
+  if (!m_ue.m_isHHFile || !Option::EnableHipHopSyntax ||
+      !expression->is(Expression::KindOfSimpleFunctionCall) ||
+      Option::JitEnableRenameFunction) {
+    return false;
+  }
+  const auto call = static_pointer_cast<SimpleFunctionCall>(expression);
+  assert(call);
+  if (!call->isCallToFunction("genva")) return false;
+  const auto params = call->getParams();
+  if (!params) {
+    e.Array(staticEmptyArray());
+    return true;
+  }
+  if (params->containsUnpack()) {
+    throw IncludeTimeFatalException(params, "do not use ...$args with genva()");
+  }
+  const auto num_params = params->getCount();
+  assertx(num_params > 0);
+
+  for (auto i = int{0}; i < num_params; i++) {
+    Label gwh;
+
+    visit((*params)[i]);
+    emitConvertToCell(e);
+
+    // ($_ !== null ? HH\Asio\null() : $_)->getWaitHandle()
+    e.Dup();
+    emitIsType(e, IsTypeOp::Null);
+    e.JmpZ(gwh);
+    emitPop(e);
+
+    Offset fpiStart = m_ue.bcPos();
+    e.FPushFuncD(0, s_gennull.get());
+    {
+      FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+    }
+    e.FCall(0);
+    e.UnboxR();
+    gwh.set(e);
+    emitConstMethodCallNoParams(e, "getWaitHandle");
+  }
+
+  std::vector<Id> waithandles(num_params);
+  for (auto i = int{num_params - 1}; i >= 0; --i) {
+    waithandles[i] = emitSetUnnamedL(e);
+  }
+  assertx(waithandles.size() == num_params);
+
+  // AwaitAllWaitHandle::fromArray() always returns a WaitHandle.
+  Offset fpiStart = m_ue.bcPos();
+  e.FPushClsMethodD(1, s_fromArray.get(), s_AwaitAllWaitHandle.get());
+  {
+    FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
+    // create a packed array of the waithandles
+    for (const auto wh : waithandles) {
+      emitVirtualLocal(wh);
+      emitCGet(e);
+    }
+    e.NewPackedArray(num_params);
+    emitFPass(e, 0, PassByRefKind::ErrorOnCell);
+  }
+  e.FCall(1);
+  e.UnboxR();
+
+  e.Await(m_pendingIters.size());
+  // result of AwaitAllWaitHandle does not matter
+  emitPop(e);
+
+  for (const auto wh : waithandles) {
+    emitVirtualLocal(wh);
+    emitPushL(e);
+    e.WHResult();
+  }
+  e.NewPackedArray(num_params);
+
+  for (auto wh : waithandles) {
+    m_curFunc->freeUnnamedLocal(wh);
+  }
+
+  newFaultRegionAndFunclet(
+    fpiStart, m_ue.bcPos(),
+    new UnsetUnnamedLocalsThunklet(std::move(waithandles)));
+
+  return true;
+}
 
 bool EmitterVisitor::emitHHInvariant(Emitter& e, SimpleFunctionCallPtr call) {
   if (!m_ue.m_isHHFile && !RuntimeOption::EnableHipHopSyntax) return false;

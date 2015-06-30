@@ -24,6 +24,9 @@ function asio_get_running(): ResumableWaitHandle;
 
 namespace HH\Asio {
 
+async function null<T>(): Awaitable<?T> { return null; }
+async function void(): Awaitable<void> {}
+
 /**
  * Wait for a given Awaitable to finish and return its result.
  *

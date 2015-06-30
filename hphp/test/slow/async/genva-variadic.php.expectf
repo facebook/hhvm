@@ -1,0 +1,2 @@
+
+Fatal error: do not use ...$args with genva() in %s/async/genva-variadic.php on line 5

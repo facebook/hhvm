@@ -128,7 +128,7 @@ array(2) {
     ["params"]=>
     array(1) {
       [0]=>
-      string(%d) "%s/test/slow/ext_xdebug/get_function_stack_noparams.php(18) : eval()'d code"
+      string(%d) "%s/test/slow/ext_xdebug/get_function_stack_noparams.php(18)(%s) : eval()'d code"
     }
   }
 }

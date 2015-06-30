@@ -1,4 +1,4 @@
 Before error, there should be an 'After error'
 
-Fatal error: syntax error, unexpected $end in %s(%d) : eval()'d code on line %d
+Fatal error: syntax error, unexpected $end in %s(%d)(%s) : eval()'d code on line %d
 After error

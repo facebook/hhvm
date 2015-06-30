@@ -3,10 +3,10 @@ boolean(1) & integer(42) = integer(0)
 boolean(1) & double(24.1987) = integer(0)
 boolean(1) & string(str) = integer(0)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 boolean(1) & array(Array) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 boolean(1) & object(c) = integer(1)
 boolean(1) & NULL() = integer(0)
 integer(42) & boolean(1) = integer(0)
@@ -14,10 +14,10 @@ integer(42) & integer(42) = integer(42)
 integer(42) & double(24.1987) = integer(8)
 integer(42) & string(str) = integer(0)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 integer(42) & array(Array) = integer(0)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 integer(42) & object(c) = integer(0)
 integer(42) & NULL() = integer(0)
 double(24.1987) & boolean(1) = integer(0)
@@ -25,10 +25,10 @@ double(24.1987) & integer(42) = integer(8)
 double(24.1987) & double(24.1987) = integer(24)
 double(24.1987) & string(str) = integer(0)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 double(24.1987) & array(Array) = integer(0)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 double(24.1987) & object(c) = integer(0)
 double(24.1987) & NULL() = integer(0)
 string(str) & boolean(1) = integer(0)
@@ -36,71 +36,71 @@ string(str) & integer(42) = integer(0)
 string(str) & double(24.1987) = integer(0)
 string(str) & string(str) = string(str)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 string(str) & array(Array) = integer(0)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 string(str) & object(c) = integer(0)
 string(str) & NULL() = integer(0)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) & boolean(1) = integer(1)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) & integer(42) = integer(0)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) & double(24.1987) = integer(0)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) & string(str) = integer(0)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) & array(Array) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) & object(c) = integer(1)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) & NULL() = integer(0)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) & boolean(1) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) & integer(42) = integer(0)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) & double(24.1987) = integer(0)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) & string(str) = integer(0)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 object(c) & array(Array) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) & object(c) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) & NULL() = integer(0)
 NULL() & boolean(1) = integer(0)
 NULL() & integer(42) = integer(0)
 NULL() & double(24.1987) = integer(0)
 NULL() & string(str) = integer(0)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 NULL() & array(Array) = integer(0)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 NULL() & object(c) = integer(0)
 NULL() & NULL() = integer(0)
 boolean(1) ^ boolean(1) = integer(0)
@@ -108,10 +108,10 @@ boolean(1) ^ integer(42) = integer(43)
 boolean(1) ^ double(24.1987) = integer(25)
 boolean(1) ^ string(str) = integer(1)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 boolean(1) ^ array(Array) = integer(0)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 boolean(1) ^ object(c) = integer(0)
 boolean(1) ^ NULL() = integer(1)
 integer(42) ^ boolean(1) = integer(43)
@@ -119,10 +119,10 @@ integer(42) ^ integer(42) = integer(0)
 integer(42) ^ double(24.1987) = integer(50)
 integer(42) ^ string(str) = integer(42)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 integer(42) ^ array(Array) = integer(43)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 integer(42) ^ object(c) = integer(43)
 integer(42) ^ NULL() = integer(42)
 double(24.1987) ^ boolean(1) = integer(25)
@@ -130,10 +130,10 @@ double(24.1987) ^ integer(42) = integer(50)
 double(24.1987) ^ double(24.1987) = integer(0)
 double(24.1987) ^ string(str) = integer(24)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 double(24.1987) ^ array(Array) = integer(25)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 double(24.1987) ^ object(c) = integer(25)
 double(24.1987) ^ NULL() = integer(24)
 string(str) ^ boolean(1) = integer(1)
@@ -141,71 +141,71 @@ string(str) ^ integer(42) = integer(42)
 string(str) ^ double(24.1987) = integer(24)
 string(str) ^ string(str) = string(%r\x00\x00\x00%r)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 string(str) ^ array(Array) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 string(str) ^ object(c) = integer(1)
 string(str) ^ NULL() = integer(0)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) ^ boolean(1) = integer(0)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) ^ integer(42) = integer(43)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) ^ double(24.1987) = integer(25)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) ^ string(str) = integer(1)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) ^ array(Array) = integer(0)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) ^ object(c) = integer(0)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) ^ NULL() = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) ^ boolean(1) = integer(0)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) ^ integer(42) = integer(43)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) ^ double(24.1987) = integer(25)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) ^ string(str) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 object(c) ^ array(Array) = integer(0)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) ^ object(c) = integer(0)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) ^ NULL() = integer(1)
 NULL() ^ boolean(1) = integer(1)
 NULL() ^ integer(42) = integer(42)
 NULL() ^ double(24.1987) = integer(24)
 NULL() ^ string(str) = integer(0)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 NULL() ^ array(Array) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 NULL() ^ object(c) = integer(1)
 NULL() ^ NULL() = integer(0)
 boolean(1) | boolean(1) = integer(1)
@@ -213,10 +213,10 @@ boolean(1) | integer(42) = integer(43)
 boolean(1) | double(24.1987) = integer(25)
 boolean(1) | string(str) = integer(1)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 boolean(1) | array(Array) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 boolean(1) | object(c) = integer(1)
 boolean(1) | NULL() = integer(1)
 integer(42) | boolean(1) = integer(43)
@@ -224,10 +224,10 @@ integer(42) | integer(42) = integer(42)
 integer(42) | double(24.1987) = integer(58)
 integer(42) | string(str) = integer(42)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 integer(42) | array(Array) = integer(43)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 integer(42) | object(c) = integer(43)
 integer(42) | NULL() = integer(42)
 double(24.1987) | boolean(1) = integer(25)
@@ -235,10 +235,10 @@ double(24.1987) | integer(42) = integer(58)
 double(24.1987) | double(24.1987) = integer(24)
 double(24.1987) | string(str) = integer(24)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 double(24.1987) | array(Array) = integer(25)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 double(24.1987) | object(c) = integer(25)
 double(24.1987) | NULL() = integer(24)
 string(str) | boolean(1) = integer(1)
@@ -246,71 +246,71 @@ string(str) | integer(42) = integer(42)
 string(str) | double(24.1987) = integer(24)
 string(str) | string(str) = string(str)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 string(str) | array(Array) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 string(str) | object(c) = integer(1)
 string(str) | NULL() = integer(0)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) | boolean(1) = integer(1)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) | integer(42) = integer(43)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) | double(24.1987) = integer(25)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) | string(str) = integer(1)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) | array(Array) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) | object(c) = integer(1)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 array(Array) | NULL() = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) | boolean(1) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) | integer(42) = integer(43)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) | double(24.1987) = integer(25)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) | string(str) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 object(c) | array(Array) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) | object(c) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 object(c) | NULL() = integer(1)
 NULL() | boolean(1) = integer(1)
 NULL() | integer(42) = integer(42)
 NULL() | double(24.1987) = integer(24)
 NULL() | string(str) = integer(0)
 
-Notice: Array to string conversion in %s(%d) : eval()'d code on line %d
+Notice: Array to string conversion in %s(%d)(%s) : eval()'d code on line %d
 NULL() | array(Array) = integer(1)
 
-Notice: Object of class c could not be converted to int in %s(%d) : eval()'d code on line %d
+Notice: Object of class c could not be converted to int in %s(%d)(%s) : eval()'d code on line %d
 NULL() | object(c) = integer(1)
 NULL() | NULL() = integer(0)
 int(0)

@@ -1,4 +1,4 @@
 Before error
 
-Fatal error: syntax error, unexpected $end, expecting ',' or ';' in %s(%d) : eval()'d code on line %d
+Fatal error: syntax error, unexpected $end, expecting ',' or ';' in %s(%d)(%s) : eval()'d code on line %d
 eval returns false

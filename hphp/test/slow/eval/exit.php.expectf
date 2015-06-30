@@ -1,3 +1,3 @@
 Before error
 
-Fatal error: Call to undefined function blah() in %s(%d) : eval()'d code on line %d
+Fatal error: Call to undefined function blah() in %s(%d)(%s) : eval()'d code on line %d

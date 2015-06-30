@@ -32,7 +32,6 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/virtual-host.h"
@@ -89,6 +88,27 @@ inline InclOpFlags operator|(const InclOpFlags& l, const InclOpFlags& r) {
 }
 
 inline bool operator&(const InclOpFlags& l, const InclOpFlags& r) {
+  return static_cast<int>(l) & static_cast<int>(r);
+}
+
+enum class OBFlags {
+  None = 0,
+  Cleanable = 1,
+  Flushable = 2,
+  Removable = 4,
+  OutputDisabled = 8,
+  Default = 1 | 2 | 4
+};
+
+inline OBFlags operator|(const OBFlags& l, const OBFlags& r) {
+  return static_cast<OBFlags>(static_cast<int>(l) | static_cast<int>(r));
+}
+
+inline OBFlags & operator|=(OBFlags& l, const OBFlags& r) {
+  return l = l | r;
+}
+
+inline bool operator&(const OBFlags& l, const OBFlags& r) {
   return static_cast<int>(l) & static_cast<int>(r);
 }
 
@@ -183,12 +203,12 @@ public:
    */
   void obStart(const Variant& handler = uninit_null(),
                int chunk_size = 0,
-               int flags = k_PHP_OUTPUT_HANDLER_STDFLAGS);
+               OBFlags flags = OBFlags::Default);
   String obCopyContents();
   String obDetachContents();
   int obGetContentLength();
   void obClean(int handler_flag);
-  bool obFlush();
+  bool obFlush(bool force = false);
   void obFlushAll();
   bool obEnd();
   void obEndAll();
@@ -280,18 +300,17 @@ public:
 
 private:
   struct OutputBuffer {
-    explicit OutputBuffer(Variant&& h, int chunk_sz, int flgs)
+    explicit OutputBuffer(Variant&& h, int chunk_sz, OBFlags flgs)
       : oss(8192), handler(std::move(h)), chunk_size(chunk_sz), flags(flgs)
     {}
     StringBuffer oss;
     Variant handler;
     int chunk_size;
-    int flags;
+    OBFlags flags;
     template<class F> void scan(F& mark) {
       mark(oss);
       mark(handler);
       mark(chunk_size);
-      mark(flags);
     }
   };
 

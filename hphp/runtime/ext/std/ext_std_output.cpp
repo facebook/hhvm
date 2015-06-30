@@ -58,7 +58,11 @@ bool HHVM_FUNCTION(ob_start, const Variant& callback /* = null */,
       return false;
     }
   }
-  g_context->obStart(callback, chunk_size, flags);
+  OBFlags f = OBFlags::None;
+  if (flags & k_PHP_OUTPUT_HANDLER_CLEANABLE) f |= OBFlags::Cleanable;
+  if (flags & k_PHP_OUTPUT_HANDLER_FLUSHABLE) f |= OBFlags::Flushable;
+  if (flags & k_PHP_OUTPUT_HANDLER_REMOVABLE) f |= OBFlags::Removable;
+  g_context->obStart(callback, chunk_size, f);
   return true;
 }
 void HHVM_FUNCTION(ob_clean) {
@@ -85,7 +89,7 @@ bool HHVM_FUNCTION(ob_end_clean) {
   return g_context->obEnd();
 }
 bool HHVM_FUNCTION(ob_end_flush) {
-  bool ret = g_context->obFlush();
+  bool ret = g_context->obFlush(true);
   g_context->obEnd();
   return ret;
 }

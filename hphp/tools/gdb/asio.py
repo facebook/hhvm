@@ -6,7 +6,7 @@ GDB commands for asio information and stacktraces.
 # @lint-avoid-pyflakes2
 
 import gdb
-from itertools import count, izip
+from itertools import count
 import re
 
 from gdbutils import *
@@ -277,7 +277,7 @@ class InfoAsioCommand(gdb.Command):
         wh_ptype = T('HPHP::c_WaitableWaitHandle').pointer()
 
         # Find the most recent join().
-        for i, fp in izip(count(), frame.gen_php(vmfp)):
+        for i, fp in zip(count(), frame.gen_php(vmfp)):
             if nameof(fp['m_func']) == 'HH\WaitHandle::join':
                 break
 

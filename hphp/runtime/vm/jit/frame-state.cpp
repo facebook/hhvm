@@ -282,7 +282,12 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     if (m_status != Status::Building || taken->empty()) changed |= save(taken);
   }
 
-  local_effects(*this, inst, *this);
+  auto killIterLocals = [&](const std::initializer_list<uint32_t>& ids) {
+    for (auto id : ids) {
+      setLocalValue(id, nullptr);
+    }
+  };
+
   assertx(checkInvariants());
 
   switch (inst->op()) {
@@ -292,6 +297,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   case Call:
     {
       auto const extra = inst->extra<Call>();
+      killLocalsForCall(extra->destroyLocals);
       for (auto& st : m_stack) st.frameMaySpanCall = true;
       // Remove tracked state for the slots for args and the actrec.
       for (auto i = uint32_t{0}; i < kNumActRecCells + extra->numParams; ++i) {
@@ -317,6 +323,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   case CallArray:
     {
       auto const extra = inst->extra<CallArray>();
+      killLocalsForCall(extra->destroyLocals);
       for (auto& st : m_stack) st.frameMaySpanCall = true;
       // Remove tracked state for the actrec and array arg.
       for (auto i = uint32_t{0}; i < kNumActRecCells + 1; ++i) {
@@ -334,9 +341,14 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     }
     break;
 
+  case CallBuiltin:
+    if (inst->extra<CallBuiltin>()->destroyLocals) clearLocals();
+    break;
+
   case ContEnter:
     {
       auto const extra = inst->extra<ContEnter>();
+      killLocalsForCall(false);
       for (auto& st : m_stack) st.frameMaySpanCall = true;
       clearStackForCall();
       setStackType(extra->spOffset, TGen);
@@ -371,6 +383,7 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   case CheckType:
   case AssertType:
     refineStackValues(inst->src(0), inst->dst());
+    refineLocalValues(inst->src(0), inst->dst());
     break;
 
   case CheckStk:
@@ -390,14 +403,46 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
                           inst->typeParam());
     break;
 
+  case PredictStk:
+    refineStackPredictedType(inst->extra<PredictStk>()->offset,
+                             inst->typeParam());
+    break;
+
+  case AssertLoc:
+  case CheckLoc:
+    {
+      auto id = inst->extra<LocalId>()->locId;
+      if (inst->marker().func()->isPseudoMain()) {
+        setLocalPredictedType(id, inst->typeParam());
+      } else {
+        refineLocalType(id,
+                        inst->typeParam(),
+                        TypeSource::makeGuard(inst));
+      }
+    }
+    break;
+
   case PredictLoc:
     refineLocalPredictedType(inst->extra<PredictLoc>()->locId,
                              inst->typeParam());
     break;
 
-  case PredictStk:
-    refineStackPredictedType(inst->extra<PredictStk>()->offset,
-                             inst->typeParam());
+  case HintLocInner:
+    setBoxedLocalPrediction(inst->extra<HintLocInner>()->locId,
+                            inst->typeParam());
+    break;
+
+  case StLoc:
+    setLocalValue(inst->extra<LocalId>()->locId, inst->src(1));
+    break;
+
+  case LdLoc:
+    setLocalValue(inst->extra<LdLoc>()->locId, inst->dst());
+    break;
+
+  case StLocPseudoMain:
+    setLocalPredictedType(inst->extra<LocalId>()->locId,
+                          inst->src(1)->type());
     break;
 
   case CastStk:
@@ -406,6 +451,10 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
 
   case CoerceStk:
     setStackType(inst->extra<CoerceStk>()->offset, inst->typeParam());
+    break;
+
+  case StRef:
+    updateLocalRefPredictions(inst->src(0), inst->src(1));
     break;
 
   case CastMem:
@@ -452,6 +501,22 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   case InterpOne:
   case InterpOneCF: {
     auto const& extra = *inst->extra<InterpOneData>();
+
+    assertx(!extra.smashesAllLocals || extra.nChangedLocals == 0);
+    if (extra.smashesAllLocals || inst->marker().func()->isPseudoMain()) {
+      clearLocals();
+    } else {
+      auto it = extra.changedLocals;
+      auto const end = it + extra.nChangedLocals;
+      for (; it != end; ++it) {
+        auto& loc = *it;
+        // If changing the inner type of a boxed local, also drop the
+        // information about inner types for any other boxed locals.
+        if (loc.type <= TBoxedCell) dropLocalRefsInnerTypes();
+        setLocalType(loc.id, loc.type);
+      }
+    }
+
     auto const spOffset = extra.spOffset;
 
     // Clear tracked information for slots pushed and popped.
@@ -488,13 +553,39 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     cur().thisAvailable = true;
     break;
 
+  case IterInitK:
+  case WIterInitK:
+    // kill the locals to which this instruction stores iter's key and value
+    killIterLocals({inst->extra<IterData>()->keyId,
+                    inst->extra<IterData>()->valId});
+    break;
+
+  case IterInit:
+  case WIterInit:
+    // kill the local to which this instruction stores iter's value
+    killIterLocals({inst->extra<IterData>()->valId});
+    break;
+
+  case IterNextK:
+  case WIterNextK:
+    // kill the locals to which this instruction stores iter's key and value
+    killIterLocals({inst->extra<IterData>()->keyId,
+                    inst->extra<IterData>()->valId});
+    break;
+
+  case IterNext:
+  case WIterNext:
+    // kill the local to which this instruction stores iter's value
+    killIterLocals({inst->extra<IterData>()->valId});
+    break;
+
   default:
     if (MInstrEffects::supported(inst)) {
       auto const base = inst->src(minstrBaseIdx(inst->op()));
-      // Right now we require that minstrs that affect stack locations take the
-      // stack address as an immediate source.  This isn't actually specified
-      // in the ir.spec but we intend to make it more general soon.  There is
-      // an analagous problem in local-effects.cpp for LdLocAddr.
+
+      // We require that minstrs that could affect stack/local locations take
+      // the stack address as an direct source. This restriction may be relaxed
+      // in the future (t7580150).
       if (base->inst()->is(LdStkAddr)) {
         auto const offset = base->inst()->extra<LdStkAddr>()->offset;
         auto const prevTy = stackType(offset);
@@ -507,6 +598,20 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
             offset,
             ty <= TBoxedCell ? TBoxedInitCell : ty
           );
+        }
+      } else if (base->inst()->is(LdLocAddr)) {
+        auto const locId = base->inst()->extra<LdLocAddr>()->locId;
+        auto const baseType = localType(locId);
+
+        MInstrEffects effects(inst->op(), baseType.ptr(Ptr::Frame));
+        if (effects.baseTypeChanged || effects.baseValChanged) {
+          auto const ty = effects.baseType.derefIfPtr();
+          if (ty <= TBoxedCell) {
+            setLocalType(locId, TBoxedInitCell);
+            setBoxedLocalPrediction(locId, ty);
+          } else {
+            setLocalType(locId, ty);
+          }
         }
       }
     }
@@ -1156,9 +1261,9 @@ void FrameStateMgr::refineStackValues(SSATmp* oldVal, SSATmp* newVal) {
 }
 
 /*
- * Called to clear out the tracked local values at a call site.  Calls kill all
- * registers, so we don't want to keep locals in registers across calls. We do
- * continue tracking the types in locals, however.
+ * Called to clear out the tracked local values at a call site.  Keeping a
+ * value live across a Call requires spilling, so we avoid it. We do continue
+ * tracking the types in locals, however.
  */
 void FrameStateMgr::killLocalsForCall(bool callDestroysLocals) {
   if (callDestroysLocals) clearLocals();

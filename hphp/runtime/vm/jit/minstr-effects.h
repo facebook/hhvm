@@ -22,7 +22,6 @@
 namespace HPHP { namespace jit {
 
 struct FrameStateMgr;
-struct LocalStateHook;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -35,13 +34,6 @@ struct MInstrEffects {
 
   static bool supported(Opcode op);
   static bool supported(const IRInstruction* inst);
-
-  /*
-   * MInstrEffects::get is used to allow multiple different consumers to deal
-   * with the side effects of vector instructions. It takes an instruction and
-   * a LocalStateHook, and a FrameStateMgr, which are defined in frame-state.h.
-   */
-  static void get(const IRInstruction*, const FrameStateMgr&, LocalStateHook&);
 
   Type baseType;
   bool baseTypeChanged;

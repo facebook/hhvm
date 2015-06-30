@@ -154,6 +154,21 @@ bool merge_into(FrameState& dst, const FrameState& src) {
     changed = true;
   }
 
+  for (auto const& srcPair : src.predictedTypes) {
+    auto dstIt = dst.predictedTypes.find(srcPair.first);
+    if (dstIt == dst.predictedTypes.end()) {
+      dst.predictedTypes.emplace(srcPair);
+      changed = true;
+      continue;
+    }
+
+    auto const newType = dstIt->second | srcPair.second;
+    if (newType != dstIt->second) {
+      dstIt->second = newType;
+      changed = true;
+    }
+  }
+
   return changed;
 }
 
@@ -228,20 +243,18 @@ bool check_invariants(const FrameState& state) {
 
 /*
  * When we're computing an update for a new predicted type, we sometimes need
- * to fall back to the proven type, e.g. if the new predicted type is Bottom or
- * no longer satisfies the invariant that predictedType <= provenType.
+ * to fall back to the proven type, e.g. if the new predicted type no longer
+ * satisfies the invariant that predictedType <= provenType. predictedType must
+ * not be Bottom.
  */
 Type updatePredictedType(Type predictedType, Type provenType) {
-  if (predictedType == TBottom) return provenType;
-  if (predictedType <= provenType) return predictedType;
-  return provenType;
+  assertx(predictedType != TBottom);
+  return predictedType < provenType ? predictedType : provenType;
 }
 
 Type refinePredictedType(Type oldPrediction, Type newPrediction, Type proven) {
   auto refinedPrediction = oldPrediction & newPrediction;
-  if (refinedPrediction == TBottom) {
-    refinedPrediction = newPrediction;
-  }
+  if (refinedPrediction == TBottom) refinedPrediction = newPrediction;
   return updatePredictedType(refinedPrediction, proven);
 }
 
@@ -383,6 +396,15 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     cur().spOffset = inst->extra<DefSP>()->offset;
     break;
 
+  case LdStk:
+    {
+      auto const offset = inst->extra<LdStk>()->offset;
+      auto& state = stackState(offset);
+      refinePredictedTmpType(inst->dst(), state.predictedType);
+      setStackValue(offset, inst->dst());
+    }
+    break;
+
   case StStk:
     setStackValue(inst->extra<StStk>()->offset, inst->src(1));
     break;
@@ -434,7 +456,11 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case LdLoc:
-    setLocalValue(inst->extra<LdLoc>()->locId, inst->dst());
+    {
+      auto const id = inst->extra<LdLoc>()->locId;
+      refinePredictedTmpType(inst->dst(), cur().locals[id].predictedType);
+      setLocalValue(id, inst->dst());
+    }
     break;
 
   case StLocPseudoMain:
@@ -616,6 +642,61 @@ bool FrameStateMgr::update(const IRInstruction* inst) {
   }
 
   return changed;
+}
+
+/*
+ * syncPrediction() is called after we update the predictedType and/or value
+ * for a SlotState. It looks up the predicted type for the value in
+ * cur().predictedTypes and ensures both locations have the most refined
+ * predicted type possible.
+ */
+template<bool Stack>
+void FrameStateMgr::syncPrediction(SlotState<Stack>& slot) {
+  if (!slot.value) return;
+  ITRACE(3, "Syncing prediction for {}\n", *slot.value);
+  auto const canonValue = canonical(slot.value);
+
+  auto& prediction = slot.predictedType;
+  auto& map = cur().predictedTypes;
+  auto it = map.find(canonValue);
+  if (it == map.end()) {
+    ITRACE(4, "No prediction in map; slot has {}\n", prediction);
+    if (prediction < slot.default_type) map.emplace(canonValue, prediction);
+    return;
+  }
+  if (prediction == slot.default_type) {
+    ITRACE(4, "No prediction in slot; map has {}\n", it->second);
+    prediction = it->second;
+    return;
+  }
+
+  auto const newPred = prediction & it->second;
+  ITRACE(3, "New prediction: {} & {} -> {}\n",
+         prediction, it->second, newPred);
+  if (newPred == TBottom) return;
+  if (newPred < prediction) prediction = newPred;
+  if (newPred < it->second) it->second = newPred;
+}
+
+void FrameStateMgr::refinePredictedTmpType(SSATmp* tmp, Type prediction) {
+  auto const canonTmp = canonical(tmp);
+  auto& map = cur().predictedTypes;
+  auto it = map.find(canonTmp);
+  if (it == map.end()) {
+    map.emplace(canonTmp, prediction);
+    ITRACE(3, "New prediction for {}: {}\n", *tmp->inst(), prediction);
+    return;
+  }
+
+  ITRACE(3, "Prediction for {} refined from {} to ", *tmp->inst(), it->second);
+  it->second = refinePredictedType(it->second, prediction, tmp->type());
+  FTRACE(3, "{}\n", it->second);
+}
+
+Type FrameStateMgr::predictedTmpType(SSATmp* tmp) const {
+  auto& map = cur().predictedTypes;
+  auto it = map.find(canonical(tmp));
+  return it == map.end() ? tmp->type() : it->second;
 }
 
 void FrameStateMgr::walkAllInlinedLocals(
@@ -999,7 +1080,6 @@ bool FrameStateMgr::localMaybeChanged(uint32_t id) const {
 Type FrameStateMgr::predictedLocalType(uint32_t id) const {
   always_assert(id < cur().locals.size());
   auto const ty = cur().locals[id].predictedType;
-  ITRACE(2, "Predicting {}: {}\n", id, ty);
   return ty;
 }
 
@@ -1033,6 +1113,8 @@ void FrameStateMgr::setStackValue(IRSPOffset offset, SSATmp* value) {
   stk.type          = value ? value->type() : TStkElem;
   stk.maybeChanged  = true;
   stk.predictedType = stk.type;
+  syncPrediction(stk);
+
   stk.typeSrcs.clear();
   if (value) {
     stk.typeSrcs.insert(TypeSource::makeValue(value));
@@ -1096,10 +1178,11 @@ void FrameStateMgr::clearLocals() {
 
 void FrameStateMgr::setLocalValue(uint32_t id, SSATmp* value) {
   always_assert(id < cur().locals.size());
-  cur().locals[id].value        = value;
-  auto const newType            = value ? value->type() : TGen;
-  cur().locals[id].type         = newType;
-  cur().locals[id].maybeChanged = true;
+  auto& loc = cur().locals[id];
+  loc.value          = value;
+  auto const newType = value ? value->type() : TGen;
+  loc.type           = newType;
+  loc.maybeChanged   = true;
   /*
    * Update the predicted type for boxed values in some special cases to
    * something smart.  The rest of the time, throw it away.
@@ -1120,7 +1203,7 @@ void FrameStateMgr::setLocalValue(uint32_t id, SSATmp* value) {
         break;
       }
     }
-    return cur().locals[id].type;  // just predict what we know
+    return loc.type;  // just predict what we know
   }();
 
   // We need to make sure not to violate the invariant that predictedType is
@@ -1132,11 +1215,12 @@ void FrameStateMgr::setLocalValue(uint32_t id, SSATmp* value) {
 
   FTRACE(3, "setLocalValue setting prediction {} based on {}, using = {}\n",
     id, newInnerPred, useTy);
-  cur().locals[id].predictedType = useTy;
+  loc.predictedType = useTy;
+  syncPrediction(loc);
 
-  cur().locals[id].typeSrcs.clear();
+  loc.typeSrcs.clear();
   if (value) {
-    cur().locals[id].typeSrcs.insert(TypeSource::makeValue(value));
+    loc.typeSrcs.insert(TypeSource::makeValue(value));
   }
 }
 
@@ -1170,12 +1254,14 @@ void FrameStateMgr::refineLocalPredictedType(uint32_t id, Type type) {
   auto& local = cur().locals[id];
   local.predictedType = refinePredictedType(
     local.predictedType, type, local.type);
+  syncPrediction(local);
 }
 
 void FrameStateMgr::refineStackPredictedType(IRSPOffset offset, Type type) {
   auto& state = stackState(offset);
   state.predictedType = refinePredictedType(
     state.predictedType, type, state.type);
+  syncPrediction(state);
 }
 
 void FrameStateMgr::setLocalType(uint32_t id, Type type) {

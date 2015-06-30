@@ -218,9 +218,14 @@ BottomUpHoistGroups computeHoistGroups(const SSATmpTypeMap& ssaTmpTypes) {
   // IRInstruction for a hoist group is the first check in that group. A hoist
   // group covers situations with a chain of dependent checks or of multiple
   // checks that consume the same SSATmp.
+  ITRACE(2, "Computing hoist groups\n");
+  Trace::Indent indent;
   BottomUpHoistGroups hoistGroups;
   for (auto const& kv : ssaTmpTypes) {
     auto const& checkData = kv.second;
+    ITRACE(2, "Inspecting can{}Hoist `{}'\n",
+           checkData.canHoist ? "" : "n't", *checkData.checkType);
+    Trace::Indent indent;
     if (!checkData.canHoist) continue;
 
     auto checkType = checkData.checkType;
@@ -228,10 +233,18 @@ BottomUpHoistGroups computeHoistGroups(const SSATmpTypeMap& ssaTmpTypes) {
     if (defInst->op() != CheckType) {
       // Join the CheckType to itself in case this is the first time we've
       // seen it (i.e. it's not in the hoist group forest yet).
+      ITRACE(2, "`{}' not CheckType, skipping\n", *defInst);
       hoistGroups.find(checkType);
       continue;
     }
-    FTRACE(2, "Joining hoist groups for instruction {} and CheckType {}\n",
+    if (!isHoistableExit(defInst->taken())) {
+      ITRACE(2, "Taken branch of `{}' not hoistable exit; skipping\n",
+             *defInst);
+      hoistGroups.find(checkType);
+      continue;
+    }
+
+    ITRACE(2, "Joining hoist groups for instruction {} and CheckType {}\n",
            defInst->id(), checkType->id());
     hoistGroups.join(defInst, checkType);
   }
@@ -260,14 +273,20 @@ HoistGroupTypes computeHoistGroupTypes(
   const TopDownHoistGroups& hoistGroups
 ) {
   // Create a map from canonical check to aggregated type for all hoist groups.
+  ITRACE(2, "Computing hoist group types\n");
+  Trace::Indent indent;
   HoistGroupTypes hoistGroupTypes;
   for (auto& kv : hoistGroups) {
     auto const& checksInGroup = kv.second;
     auto groupType = TTop;
+    ITRACE(3, "Hoist group `{}':\n", *kv.first);
+    Trace::Indent indent;
     for (auto const check : checksInGroup) {
       groupType &= check->typeParam();
+      ITRACE(3, "{}\n", *check);
     }
     assert(groupType != TBottom);
+    ITRACE(3, "Final type: {}\n", groupType);
     hoistGroupTypes.emplace(kv.first, groupType);
   }
   return hoistGroupTypes;
@@ -346,12 +365,12 @@ HoistGroupDestinations findHoistGroupDestinations(
   for (auto& kv : hoistGroups) {
     auto canonicalCheck = kv.first;
     auto defInst = canonicalCheck->src(0)->inst();
-    FTRACE(2, "Looking for hoist dest of canonical `{}'\n", *canonicalCheck);
-    assert(defInst->op() != CheckType);
     auto hoistDest = canHoistTo(defInst)
       ? findNextDominatingExit(idoms, defInst, canonicalCheck)
       : canonicalCheck;
     if (!hoistDest) hoistDest = canonicalCheck;
+    FTRACE(2, "Hoist dest of canonical `{}':\n  `{}'\n",
+           *canonicalCheck, *hoistDest);
     hoistDestinations.emplace(canonicalCheck, hoistDest);
   }
   return hoistDestinations;

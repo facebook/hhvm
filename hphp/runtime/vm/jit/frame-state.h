@@ -43,22 +43,15 @@ Type refinePredictedType(Type oldPrediction, Type newPrediction, Type proven);
 Type updatePredictedType(Type predictedType, Type provenType);
 
 struct EvalStack {
-  struct EvalStackEntry {
-    SSATmp* tmp;
-    Type predictedType;
-  };
-
-  explicit EvalStack() {}
-
   void push(SSATmp* tmp) {
-    m_vector.push_back(EvalStackEntry { tmp, tmp->type() });
+    m_vector.push_back(tmp);
   }
 
   SSATmp* pop() {
     if (m_vector.size() == 0) {
       return nullptr;
     }
-    auto tmp = m_vector.back().tmp;
+    auto tmp = m_vector.back();
     m_vector.pop_back();
     return tmp;
   }
@@ -68,40 +61,25 @@ struct EvalStack {
       return nullptr;
     }
     uint32_t index = m_vector.size() - 1 - offset;
-    const auto& entry = m_vector[index];
-    return entry.tmp;
-  }
-
-  Type topPredictedType(uint32_t offset) const {
-    assert(offset < m_vector.size());
-    uint32_t index = m_vector.size() - 1 - offset;
-    const auto& entry = m_vector[index];
-    return entry.predictedType;
-  }
-
-  void replace(uint32_t offset, SSATmp* tmp, Type predictedType) {
-    assertx(offset < m_vector.size());
-    uint32_t index = m_vector.size() - 1 - offset;
-    auto& entry = m_vector[index];
-    entry.tmp = tmp;
-    entry.predictedType = predictedType;
+    return m_vector[index];
   }
 
   void replace(uint32_t offset, SSATmp* tmp) {
-    auto predictedType = topPredictedType(offset);
-    replace(offset, tmp, updatePredictedType(predictedType, tmp->type()));
+    assertx(offset < m_vector.size());
+    uint32_t index = m_vector.size() - 1 - offset;
+    m_vector[index] = tmp;
   }
 
   bool empty() const { return m_vector.empty(); }
   int  size()  const { return m_vector.size(); }
   void clear()       { m_vector.clear(); }
 
-  void swap(jit::vector<EvalStackEntry>& vector) {
+  void swap(jit::vector<SSATmp*>& vector) {
     m_vector.swap(vector);
   }
 
 private:
-  jit::vector<EvalStackEntry> m_vector;
+  jit::vector<SSATmp*> m_vector;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -114,6 +92,8 @@ private:
  */
 template<bool Stack>
 struct SlotState {
+  static constexpr Type default_type = Stack ? TStkElem : TGen;
+
   /*
    * The current value of the or stack slot.
    */
@@ -127,7 +107,7 @@ struct SlotState {
    * incoming edges.  However, whenever we have a value, the type of
    * the SSATmp must match this `type' field.
    */
-  Type type{Stack ? TStkElem : TGen};
+  Type type{default_type};
 
   /*
    * Prediction for the type of a local or stack slot, if it's boxed or if
@@ -136,7 +116,7 @@ struct SlotState {
    * Invariants:
    *   always a subtype of `type'
    */
-  Type predictedType{Stack ? TStkElem : TGen};
+  Type predictedType{default_type};
 
   /*
    * The sources of the currently known type. They may be values. If the value
@@ -151,6 +131,8 @@ struct SlotState {
    */
   bool maybeChanged{false};
 };
+
+template<bool Stack> constexpr Type SlotState<Stack>::default_type;
 
 using LocalState = SlotState<false>;
 using StackState = SlotState<true>;
@@ -221,6 +203,13 @@ struct FrameState {
    * (if the state is initialized).
    */
   jit::vector<LocalState> locals;
+
+  /*
+   * Predicted types for values that lived in a local or stack slot at one
+   * point. Used to preserve predictions for values that move between different
+   * slots.
+   */
+  jit::hash_map<SSATmp*, Type> predictedTypes;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -348,6 +337,9 @@ struct FrameStateMgr final {
   FPInvOffset syncedSpLevel() const { return cur().syncedSpLevel; }
   void syncEvalStack();
 
+  void refinePredictedTmpType(SSATmp*, Type);
+  Type predictedTmpType(SSATmp*) const;
+
   Type localType(uint32_t id) const;
   bool localMaybeChanged(uint32_t id) const;
   Type predictedLocalType(uint32_t id) const;
@@ -432,6 +424,9 @@ private:
   const FrameState& cur() const {
     return const_cast<FrameStateMgr*>(this)->cur();
   }
+
+  template<bool Stack>
+  void syncPrediction(SlotState<Stack>&);
 
 private: // local tracking helpers
   void setLocalValue(uint32_t id, SSATmp* value);

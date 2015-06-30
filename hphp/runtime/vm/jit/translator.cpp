@@ -212,7 +212,8 @@ static const struct {
   /*** 5. Get instructions ***/
 
   { OpCGetL,       {Local,            Stack1,       OutCInputL,        1 }},
-  { OpCGetL2,      {Stack1|Local,     StackIns1,    OutCInputL,        1 }},
+  { OpCGetL2,      {Stack1|DontGuardStack1|
+                    Local,            StackIns1,    OutCInputL,        1 }},
   { OpCGetL3,      {StackTop2|Local,  StackIns2,    OutCInputL,        1 }},
   // In OpCUGetL we rely on OutCInputL returning TCell (which covers Uninit
   // values) instead of TInitCell.
@@ -1509,9 +1510,8 @@ void translateInstr(
     emitInputChecks(irgs, ni, checkOuterTypeOnly);
   }
 
-  FTRACE(1, "\n{:-^60}\n", folly::format("Translating {}: {} with stack:\n{}",
-                                         ni.offset(), ni.toString(),
-                                         show(irgs)));
+  FTRACE(1, "\nTranslating {}: {} with state:\n{}\n",
+         ni.offset(), ni, show(irgs));
 
   if (needsExitPlaceholder) irgen::makeExitPlaceholder(irgs);
 
@@ -1529,6 +1529,9 @@ void translateInstr(
   }
 
   translateDispatch(irgs, ni);
+
+  FTRACE(3, "\nTranslated {}: {} with state:\n{}\n",
+         ni.offset(), ni, show(irgs));
 }
 
 //////////////////////////////////////////////////////////////////////

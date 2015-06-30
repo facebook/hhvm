@@ -200,7 +200,8 @@ Type predictedTypeFromLocal(const IRGS& env, uint32_t locId) {
 
 Type predictedTypeFromStack(const IRGS& env, BCSPOffset offset) {
   if (offset < env.irb->evalStack().size()) {
-    return env.irb->evalStack().topPredictedType(offset.offset);
+    return env.irb->fs().predictedTmpType(
+      env.irb->evalStack().top(offset.offset));
   }
   return env.irb->predictedStackType(offsetFromIRSP(env, offset));
 }

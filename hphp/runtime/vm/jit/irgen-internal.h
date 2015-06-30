@@ -401,14 +401,11 @@ inline void spillStack(IRGS& env) {
   auto const toSpill = env.irb->evalStack();
   for (auto idx = toSpill.size(); idx-- > 0;) {
     auto const irSPOff = offsetFromIRSP(env, BCSPOffset{idx});
+    auto const tmp = toSpill.top(idx);
 
-    gen(env,
-        StStk,
-        IRSPOffsetData{irSPOff},
-        sp(env),
-        toSpill.top(idx));
-    env.irb->fs().refineStackPredictedType(irSPOff,
-                                           toSpill.topPredictedType(idx));
+    gen(env, StStk, IRSPOffsetData{irSPOff}, sp(env), tmp);
+    env.irb->fs().refineStackPredictedType(
+      irSPOff, env.irb->fs().predictedTmpType(tmp));
   }
   env.irb->syncEvalStack();
 }

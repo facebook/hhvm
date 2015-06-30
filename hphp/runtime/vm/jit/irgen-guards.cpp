@@ -156,15 +156,16 @@ void checkTypeStack(IRGS& env,
 }
 
 void predictTypeStack(IRGS& env, BCSPOffset offset, Type type) {
+  FTRACE(1, "predictTypeStack {}: {}\n", offset.offset, type);
   assert(type <= TGen);
 
   auto const irSPOff = offsetFromIRSP(env, offset);
   if (offset.offset < env.irb->evalStack().size()) {
     auto const tmp = top(env, offset, DataTypeGeneric);
     assertx(tmp);
-    auto oldType = env.irb->evalStack().topPredictedType(offset.offset);
-    auto newType = refinePredictedType(oldType, type, tmp->type());
-    env.irb->evalStack().replace(offset.offset, tmp, newType);
+    auto const oldType = env.irb->fs().predictedTmpType(tmp);
+    auto const newType = refinePredictedType(oldType, type, tmp->type());
+    env.irb->fs().refinePredictedTmpType(tmp, newType);
     return;
   }
 
@@ -172,6 +173,7 @@ void predictTypeStack(IRGS& env, BCSPOffset offset, Type type) {
 }
 
 void predictTypeLocal(IRGS& env, uint32_t locId, Type type) {
+  FTRACE(1, "predictTypeLocal: {}: {}\n", locId, type);
   assert(type <= TGen);
   env.irb->fs().refineLocalPredictedType(locId, type);
 }

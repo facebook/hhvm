@@ -332,8 +332,8 @@
       - klein/tests/Klein/Tests/KleinTest.php
   kohana:
     url: https://github.com/kohana/kohana.git
-    branch: v3.3.3.1
-    commit: ffc48d1d55da6aa4a0ced7f973f6043e547c9048
+    branch: v3.3.4
+    commit: 363c59ee298e1f5abe797e5efdf1c44431800a78
     install_root: kohana
     test_root: kohana
     test_find_mode: token

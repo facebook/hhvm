@@ -198,7 +198,7 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
           BlockScopePtr block = lock->findConstantDeclarer(varName);
           ConstantTablePtr constants = block->getConstants();
           if (constants != ar->getConstants()) {
-            constants->add(varName, Type::Some, value, ar, self);
+            constants->add(varName, value, ar, self);
           }
         }
       }
@@ -433,7 +433,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
                   constants = block->getConstants();
                   // set to be dynamic
                   if (m_type == FunType::Defined) {
-                    constants->setDynamic(ar, symbol, true);
+                    constants->setDynamic(ar, symbol);
                   }
                 }
               }
@@ -513,9 +513,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
 
-    if (m_type == FunType::Unserialize) {
-      ar->forceClassVariants(getOriginalClass(), false);
-    }
     if (m_params) {
       markRefParams(m_funcScope, m_origName);
     }

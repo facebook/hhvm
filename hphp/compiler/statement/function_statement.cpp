@@ -129,15 +129,6 @@ std::string FunctionStatement::getName() const {
 }
 
 void FunctionStatement::analyzeProgram(AnalysisResultPtr ar) {
-  FunctionScopeRawPtr fs = getFunctionScope();
-  // redeclared functions are automatically volatile
-  if (fs->isVolatile()) {
-    FunctionScopeRawPtr func =
-      getScope()->getOuterScope()->getContainingFunction();
-    if (func) {
-      func->getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
-    }
-  }
   MethodStatement::analyzeProgram(ar);
 }
 

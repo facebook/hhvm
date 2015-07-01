@@ -164,7 +164,6 @@ ExpressionPtr BinaryOpExpression::unneededHelper() {
 
   if (shortCircuit) {
     m_exp2 = m_exp2->unneeded();
-    m_exp2->setExpectedType(Type::Boolean);
   }
   return static_pointer_cast<Expression>(shared_from_this());
 }
@@ -278,7 +277,6 @@ static ExpressionPtr makeIsNull(AnalysisResultConstPtr ar,
       exp->getScope(), r, "is_null", false, expList, ExpressionPtr());
 
   call->setValid();
-  call->setActualType(Type::Boolean);
   call->setupScopes(ar);
 
   if (!invert) return call;
@@ -321,7 +319,6 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
               new UnaryOpExpression(
                 getScope(), getRange(),
                 rep, T_BOOL_CAST, true));
-          rep->setActualType(Type::Boolean);
           return replaceValue(rep);
         }
         case '+':
@@ -513,7 +510,6 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           new UnaryOpExpression(
             getScope(), getRange(),
             rep, T_BOOL_CAST, true));
-        rep->setActualType(Type::Boolean);
         if (!useFirst) {
           ExpressionListPtr l(
             new ExpressionList(
@@ -521,10 +517,8 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
               ExpressionList::ListKindComma));
           l->addElement(m_exp1);
           l->addElement(rep);
-          l->setActualType(Type::Boolean);
           rep = l;
         }
-        rep->setExpectedType(getExpectedType());
         return replaceValue(rep);
       }
       case T_LOGICAL_XOR:

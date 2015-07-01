@@ -63,9 +63,6 @@ StatementPtr CatchStatement::clone() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// parser functions
-
-///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
 void CatchStatement::analyzeProgram(AnalysisResultPtr ar) {
@@ -73,11 +70,7 @@ void CatchStatement::analyzeProgram(AnalysisResultPtr ar) {
   (void)resolveClass();
   if (m_stmt) m_stmt->analyzeProgram(ar);
   if (m_variable->isThis()) {
-    // catch (Exception $this) { ... }
-    // See note in alias_manager.cpp about why this forces a variable table
-    VariableTablePtr variables(getScope()->getVariables());
-    variables->forceVariants(ar, VariableTable::AnyVars);
-    variables->setAttribute(VariableTable::ContainsLDynamicVariable);
+    getFunctionScope()->setContainsBareThis(true, true);
   }
 }
 

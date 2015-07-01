@@ -126,11 +126,10 @@ public:
    * save the symbols for our iface.
    * This stuff only happens in the filechanged state.
    */
-  void addConstant(const std::string &name, TypePtr type, ExpressionPtr value,
+  void addConstant(const std::string &name, ExpressionPtr value,
                    AnalysisResultPtr ar, ConstructPtr con);
   void declareConstant(AnalysisResultPtr ar, const std::string &name);
   void getConstantNames(std::vector<std::string> &names);
-  TypePtr getConstantType(const std::string &name);
 
   void addClassAlias(const std::string& target, const std::string& alias) {
     m_classAliasMap.insert(

@@ -330,14 +330,9 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
           cls->collectMethods(ar, cur, false);
           inheritedMagicMethods(cls);
           funcs.insert(cur.begin(), cur.end());
-          cls->getVariables()->
-            forceVariants(ar, VariableTable::AnyNonPrivateVars);
         }
 
         m_derivesFromRedeclaring = Derivation::Redeclaring;
-        getVariables()->forceVariants(ar, VariableTable::AnyNonPrivateVars,
-                                      false);
-        getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
 
         setVolatile();
       } else {
@@ -346,7 +341,6 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
         inheritedMagicMethods(super);
         if (super->derivesFromRedeclaring() == Derivation::Redeclaring) {
           m_derivesFromRedeclaring = Derivation::Redeclaring;
-          getVariables()->forceVariants(ar, VariableTable::AnyNonPrivateVars);
           setVolatile();
         } else if (super->isVolatile()) {
           setVolatile();
@@ -357,8 +351,6 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
       if (base == m_parent) {
         ar->declareUnknownClass(m_parent);
         m_derivesFromRedeclaring = Derivation::Redeclaring;
-        getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
-        getVariables()->forceVariants(ar, VariableTable::AnyNonPrivateVars);
         setVolatile();
       } else {
         /*
@@ -1078,8 +1070,6 @@ void ClassScope::serialize(JSON::CodeError::OutputStream &out) const {
     propMap[name] = pm;
   }
   names.clear();
-  vector<string> cnames;
-  m_constants->getSymbols(cnames);
 
   // What's a mod again?
   ms.add("attributes", m_attribute)
@@ -1089,20 +1079,6 @@ void ClassScope::serialize(JSON::CodeError::OutputStream &out) const {
     .add("properties", propMap)
     .add("functions", m_functions);
 
-  ms.add("consts");
-
-  JSON::CodeError::MapStream cs(out);
-  for (const string& cname: cnames) {
-    TypePtr type = m_constants->getType(cname);
-    if (!type) {
-      cs.add(cname, -1);
-    } else if (type->isSpecificObject()) {
-      cs.add(cname, type->getName());
-    } else {
-      cs.add(cname, type->getKindOf());
-    }
-  }
-  cs.done();
   ms.done();
 }
 

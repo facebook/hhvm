@@ -82,56 +82,15 @@ void SimpleVariable::updateSymbol(SimpleVariablePtr src) {
   }
 }
 
-bool SimpleVariable::couldBeAliased() const {
-  if (m_globals || m_superGlobal) return true;
-  if (m_name == "http_response_header") return true;
-  if (m_name == "php_errormsg") return true;
-  always_assert(m_sym);
-  if (m_sym->isGlobal() || m_sym->isStatic()) return true;
-  if (getScope()->inPseudoMain() && !m_sym->isHidden()) return true;
-  if (isReferencedValid()) return isReferenced();
-  return m_sym->isReferenced();
-}
-
 bool SimpleVariable::isHidden() const {
   return m_sym && m_sym->isHidden();
 }
 
-void SimpleVariable::coalesce(SimpleVariablePtr other) {
-  always_assert(m_sym);
-  always_assert(other->m_sym);
-  if (!m_originalSym) m_originalSym = m_sym;
-  m_sym->clearUsed();
-  m_sym->clearNeeded();
-  m_sym = other->m_sym;
-  m_name = m_sym->getName();
-}
-
-/*
-  This simple variable is about to go out of scope.
-  Is it ok to kill the last assignment?
-  What if its a reference assignment (or an unset)?
-*/
-bool SimpleVariable::canKill(bool isref) const {
-  if (m_globals || m_superGlobal) return false;
-  always_assert(m_sym);
-  if (m_sym->isGlobal() || m_sym->isStatic()) {
-    return isref && !getScope()->inPseudoMain();
-  }
-
-  return
-    (isref && (m_sym->isHidden() || !getScope()->inPseudoMain())) ||
-    (isReferencedValid() ? !isReferenced() : !m_sym->isReferenced());
-}
-
 void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
   m_superGlobal = BuiltinSymbols::IsSuperGlobal(m_name);
-  m_superGlobalType = BuiltinSymbols::GetSuperGlobalType(m_name);
 
   VariableTablePtr variables = getScope()->getVariables();
-  if (m_superGlobal) {
-    variables->setAttribute(VariableTable::NeedGlobalPointer);
-  } else if (m_name == "GLOBALS") {
+  if (m_name == "GLOBALS") {
     m_globals = true;
   } else {
     m_sym = variables->addDeclaredSymbol(m_name, shared_from_this());
@@ -153,10 +112,7 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
             hasAnyContext(RefValue | RefAssignmentLHS) ||
             m_sym->isRefClosureVar() || unset);
           if (variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
-            ClassScopePtr cls = getClassScope();
-            TypePtr t = !cls || cls->isRedeclaring() ?
-              Type::Variant : Type::CreateObjectType(cls->getOriginalName());
-            variables->add(m_sym, t, true, ar, shared_from_this(),
+            variables->add(m_sym, true, ar, shared_from_this(),
                            getScope()->getModifiers());
           }
         }

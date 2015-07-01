@@ -85,13 +85,6 @@ ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
     static_pointer_cast<SimpleVariable>(rep)->setAlwaysStash();
   }
   rep->copyContext(m_context & ~(DeadStore|AccessContext));
-  if (TypePtr t1 = getType()) {
-    if (TypePtr t2 = rep->getType()) {
-      if (!Type::SameType(t1, t2)) {
-        rep->setExpectedType(t1);
-      }
-    }
-  }
 
   if (rep->getScope() != getScope()) {
     rep->resetScope(getScope());
@@ -132,8 +125,6 @@ void Expression::setArgNum(int n) {
 }
 
 void Expression::deepCopy(ExpressionPtr exp) {
-  exp->m_actualType = m_actualType;
-  exp->m_expectedType = m_expectedType;
   exp->m_unused = false;
   exp->m_replacement.reset();
   exp->clearVisited();
@@ -250,12 +241,6 @@ bool Expression::IsIdentifier(const string &value) {
   return true;
 }
 
-TypePtr Expression::getType() {
-  if (m_expectedType) return m_expectedType;
-  if (m_actualType) return m_actualType;
-  return Type::Any;
-}
-
 void Expression::analyzeProgram(AnalysisResultPtr ar) {
 }
 
@@ -280,45 +265,6 @@ ClassScopeRawPtr Expression::getOriginalClass() {
 FunctionScopeRawPtr Expression::getOriginalFunction() {
   BlockScopeRawPtr scope = getOriginalScope();
   return scope ? scope->getContainingFunction() : FunctionScopeRawPtr();
-}
-
-void Expression::resetTypes() {
-  m_actualType     .reset();
-  m_expectedType   .reset();
-}
-
-TypePtr Expression::checkTypesImpl(AnalysisResultConstPtr ar,
-                                   TypePtr expectedType,
-                                   TypePtr actualType) {
-  TypePtr ret;
-  assert(actualType);
-  ret = Type::Intersection(ar, actualType, expectedType);
-  setTypes(ar, actualType, ret);
-  assert(ret);
-  return ret;
-}
-
-void Expression::setTypes(AnalysisResultConstPtr ar, TypePtr actualType,
-                          TypePtr expectedType) {
-  assert(actualType);
-  assert(expectedType);
-
-  m_actualType = actualType;
-  if (!expectedType->is(Type::KindOfAny) &&
-      !expectedType->is(Type::KindOfSome)) {
-    // store the expected type if it is not Any nor Some,
-    // regardless of the actual type
-    m_expectedType = expectedType;
-  } else {
-    m_expectedType.reset();
-  }
-
-  // This is a special case where Type::KindOfObject means any object.
-  if (m_expectedType && m_expectedType->is(Type::KindOfObject) &&
-      !m_expectedType->isSpecificObject() &&
-      m_actualType->isSpecificObject()) {
-    m_expectedType.reset();
-  }
 }
 
 void Expression::setDynamicByIdentifier(AnalysisResultPtr ar,
@@ -356,12 +302,6 @@ bool Expression::CheckNeededRHS(ExpressionPtr value) {
   }
   if (value->isScalar()) {
     needed = false;
-  } else {
-    TypePtr type = value->getType();
-    if (type && (type->is(Type::KindOfSome) || type->is(Type::KindOfAny))) {
-      type = value->getActualType();
-    }
-    if (type && type->isNoObjectInvolved()) needed = false;
   }
   return needed;
 }

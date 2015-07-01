@@ -20,7 +20,6 @@
 #include "hphp/util/deprecated/declare-boost-types.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/compiler/construct.h"
-#include "hphp/compiler/analysis/type.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 
 #define EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS                          \
@@ -211,24 +210,6 @@ public:
     return ExpressionPtr();
   }
 
-  /**
-   * Check to make sure return type is convertible to specified type.
-   * If not, raise a CodeError.
-   */
-  TypePtr checkTypesImpl(AnalysisResultConstPtr ar, TypePtr expectedType,
-                         TypePtr actualType);
-
-  TypePtr getActualType()      { return m_actualType;      }
-  TypePtr getExpectedType()    { return m_expectedType;    }
-
-  void setActualType(TypePtr actualType) {
-    m_actualType = actualType;
-  }
-  void setExpectedType(TypePtr expectedType) {
-    m_expectedType = expectedType;
-  }
-  TypePtr getType();
-
   static ExpressionPtr MakeConstant(AnalysisResultConstPtr ar,
                                     BlockScopePtr scope,
                                     const Location::Range& r,
@@ -262,14 +243,8 @@ private:
   mutable int m_error;
 
 protected:
-  TypePtr m_actualType;
-  TypePtr m_expectedType; // null if the same as m_actualType
-
-  void setTypes(AnalysisResultConstPtr ar, TypePtr actualType,
-                TypePtr expectedType);
   void setDynamicByIdentifier(AnalysisResultPtr ar,
                               const std::string &value);
-  void resetTypes();
  private:
   static ExprClass Classes[];
 

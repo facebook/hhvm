@@ -47,19 +47,15 @@ public:
   }
   Symbol *getSymbol() const { return m_sym; }
 
-  bool couldBeAliased() const;
-  bool canKill(bool unset) const;
   bool isHidden() const;
   bool checkUnused() const;
   bool getAlwaysStash() const { return m_alwaysStash; }
   void setAlwaysStash() { m_alwaysStash = true; }
   void updateSymbol(SimpleVariablePtr src);
-  void coalesce(SimpleVariablePtr other);
 private:
   std::string m_name;
   std::string m_docComment;
 
-  TypePtr m_superGlobalType;
   Symbol *m_sym;
   Symbol *m_originalSym;
 

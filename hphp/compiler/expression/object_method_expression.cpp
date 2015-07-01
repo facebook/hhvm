@@ -87,18 +87,6 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
 
     markRefParams(func, m_origName);
   }
-
-  // This is OK because AnalyzeFinal is guaranteed to run for a CPP
-  // target, regardless of opts (and we only need the following
-  // for CPP targets)
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    // necessary because we set the expected type of m_object to
-    // Type::Some during type inference.
-    TypePtr at(m_object->getActualType());
-    if (!m_object->isThis() && at && at->is(Type::KindOfObject)) {
-      m_object->setExpectedType(at);
-    }
-  }
 }
 
 ConstructPtr ObjectMethodExpression::getNthKid(int n) const {

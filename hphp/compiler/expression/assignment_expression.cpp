@@ -73,35 +73,30 @@ ExpressionPtr AssignmentExpression::clone() {
 void AssignmentExpression::onParseRecur(AnalysisResultConstPtr ar,
                                         FileScopeRawPtr fs,
                                         ClassScopePtr scope) {
-  // This is that much we can do during parse phase.
-  TypePtr type;
-  if (m_value->is(Expression::KindOfScalarExpression)) {
-    type = static_pointer_cast<ScalarExpression>(m_value)->inferenceImpl(
-      ar, Type::Some, false);
-  } else if (m_value->is(Expression::KindOfUnaryOpExpression)) {
+  auto isArray = false;
+  if (m_value->is(Expression::KindOfUnaryOpExpression)) {
     UnaryOpExpressionPtr uexp =
       dynamic_pointer_cast<UnaryOpExpression>(m_value);
     if (uexp->getOp() == T_ARRAY) {
-      type = Type::Array;
+      isArray = true;
     }
   }
-  if (!type) type = Type::Some;
 
   if (m_variable->is(Expression::KindOfConstantExpression)) {
     // ...as in ClassConstant statement
     // We are handling this one here, not in ClassConstant, purely because
     // we need "value" to store in constant table.
-    if (type->is(Type::KindOfArray)) {
+    if (isArray) {
       parseTimeFatal(fs,
                      Compiler::NoError,
                      "Arrays are not allowed in class constants");
     }
     ConstantExpressionPtr exp =
       dynamic_pointer_cast<ConstantExpression>(m_variable);
-    scope->getConstants()->add(exp->getName(), type, m_value, ar, m_variable);
+    scope->getConstants()->add(exp->getName(), m_value, ar, m_variable);
   } else if (m_variable->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(m_variable);
-    scope->getVariables()->add(var->getName(), type, true, ar,
+    scope->getVariables()->add(var->getName(), true, ar,
                                shared_from_this(), scope->getModifiers());
     var->clearContext(Declaration); // to avoid wrong CodeError
   } else {
@@ -132,7 +127,7 @@ void AssignmentExpression::analyzeProgram(AnalysisResultPtr ar) {
       ConstantExpressionPtr exp =
         dynamic_pointer_cast<ConstantExpression>(m_variable);
       if (!m_value->isScalar()) {
-        getScope()->getConstants()->setDynamic(ar, exp->getName(), false);
+        getScope()->getConstants()->setDynamic(ar, exp->getName());
       }
     } else {
       CheckNeeded(m_variable, m_value);

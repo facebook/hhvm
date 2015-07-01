@@ -179,10 +179,6 @@ void InterfaceStatement::checkVolatile(AnalysisResultConstPtr ar) {
        classScope->setVolatile();
      }
   }
-  if (classScope->isVolatile()) {
-    classScope->getOuterScope()->getVariables()->
-       setAttribute(VariableTable::NeedGlobalPointer);
-  }
 }
 
 void InterfaceStatement::analyzeProgram(AnalysisResultPtr ar) {

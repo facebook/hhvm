@@ -182,18 +182,6 @@ void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
                           shared_from_this());
         }
       }
-    } else {
-      TypePtr at(m_variable->getActualType());
-      TypePtr et(m_variable->getExpectedType());
-      if (et &&
-          (et->is(Type::KindOfSequence) ||
-           et->is(Type::KindOfAutoSequence)) &&
-          at && at->isExactType()) {
-        // since Sequence maps to Variant in the runtime,
-        // using Sequence for the expected type will
-        // never allow the necessary casts to be generated.
-        m_variable->setExpectedType(at);
-      }
     }
   }
 }

@@ -63,11 +63,6 @@ public:
   const std::string &getName() const { return m_name; }
   unsigned int getHash() const { return m_hash; }
 
-  TypePtr getType() const { return m_coerced; }
-  TypePtr getFinalType() const;
-  TypePtr setType(AnalysisResultConstPtr ar, BlockScopeRawPtr scope,
-                  TypePtr type, bool coerced);
-
   bool isPresent() const { return m_flags.m_declaration_set; }
   bool checkDefined();
   bool declarationSet() const { return m_flags.m_declaration_set; }
@@ -234,16 +229,9 @@ private:
 
   ConstructPtr        m_declaration;
   ConstructPtr        m_value;
-  TypePtr             m_coerced;
-  TypePtr             m_prevCoerced;
 
   int                 m_parameter;
   ConstructPtr        m_initVal;
-
-  void triggerUpdates(BlockScopeRawPtr scope) const;
-
-  static TypePtr CoerceTo(AnalysisResultConstPtr ar,
-                          TypePtr &curType, TypePtr type);
 };
 
 class SymParamWrapper : public JSON::DocTarget::ISerializable {
@@ -279,7 +267,6 @@ public:
   static Mutex AllSymbolTablesMutex;
   static SymbolTablePtrList AllSymbolTables; // for stats purpose
   static void Purge();
-  static void CountTypes(std::map<std::string, int> &counts);
   BlockScope *getScopePtr() const { return &m_blockScope; }
   BlockScopeRawPtr getBlockScope() const {
     return BlockScopeRawPtr(&m_blockScope);
@@ -323,12 +310,6 @@ public:
   virtual void serialize(JSON::CodeError::OutputStream &out) const;
 
   /**
-   * Find a symbol's inferred type.
-   */
-  TypePtr getType(const std::string &name) const;
-  TypePtr getFinalType(const std::string &name) const;
-
-  /**
    * Find declaration construct.
    */
   bool isExplicitlyDeclared(const std::string &name) const;
@@ -346,12 +327,6 @@ public:
   void getSymbols(std::vector<Symbol*> &syms, bool filterHidden = false) const;
   void getSymbols(std::vector<std::string> &syms) const;
   const std::vector<Symbol*> &getSymbols() const { return m_symbolVec; }
-  void getCoerced(StringToTypePtrMap &coerced) const;
-
-  virtual TypePtr setType(AnalysisResultConstPtr ar, const std::string &name,
-                          TypePtr type, bool coerced);
-  virtual TypePtr setType(AnalysisResultConstPtr ar, Symbol *sym,
-                          TypePtr type, bool coerced);
   Symbol *getSymbol(const std::string &name);
   const Symbol *getSymbol(const std::string &name) const;
 
@@ -368,8 +343,6 @@ protected:
 
   std::vector<Symbol*>  m_symbolVec; // in declaration order
   StringToSymbolMap     m_symbolMap;
-
-  void countTypes(std::map<std::string, int> &counts);
 private:
   const Symbol* getSymbolImpl(const std::string &name) const;
   bool m_const;

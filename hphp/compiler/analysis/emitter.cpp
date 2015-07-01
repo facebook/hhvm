@@ -2623,10 +2623,6 @@ static StringData* getClassName(ExpressionPtr e) {
   ClassScopeRawPtr cls;
   if (e->isThis()) {
     cls = e->getOriginalClass();
-  } else if (TypePtr t = e->getActualType()) {
-    if (t->isSpecificObject()) {
-      cls = t->getClass(e->getScope()->getContainingProgram(), e->getScope());
-    }
   }
   if (cls && !cls->isTrait()) {
     return makeStaticString(cls->getScopeName());

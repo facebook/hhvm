@@ -152,19 +152,6 @@ bool UnaryOpExpression::isCast() const {
   return false;
 }
 
-TypePtr UnaryOpExpression::getCastType() const {
-  switch (m_op) {
-  case T_INT_CAST:    return Type::Int64;
-  case T_DOUBLE_CAST: return Type::Double;
-  case T_STRING_CAST: return Type::String;
-  case T_ARRAY_CAST:  return Type::Array;
-  case T_OBJECT_CAST: return Type::Object;
-  case T_BOOL_CAST:   return Type::Boolean;
-  default: break;
-  }
-  return TypePtr();
-}
-
 bool UnaryOpExpression::isRefable(bool checkError /*= false */) const {
   if (m_op == T_INC || m_op == T_DEC) {
     return m_exp->isRefable(checkError);

@@ -32,9 +32,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-TypePtr ClosureExpression::s_ClosureType =
-  Type::CreateObjectType("closure"); // needs lower case
-
 ClosureExpression::ClosureExpression(
     EXPRESSION_CONSTRUCTOR_PARAMETERS,
     ClosureType type,

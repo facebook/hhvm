@@ -85,7 +85,6 @@ AnalysisResult::AnalysisResult()
   : BlockScope("Root", "", StatementPtr(), BlockScope::ProgramScope),
     m_arrayLitstrKeyMaxSize(0), m_arrayIntegerKeyMaxSize(0),
     m_package(nullptr), m_parseOnDemand(false), m_phase(ParseAllFiles) {
-  m_classForcedVariants[0] = m_classForcedVariants[1] = false;
 }
 
 AnalysisResult::~AnalysisResult() {
@@ -354,14 +353,6 @@ bool AnalysisResult::declareClass(ClassScopePtr classScope) const {
     return false;
   }
 
-  int mask =
-    (m_classForcedVariants[0] ? VariableTable::NonPrivateNonStaticVars : 0) |
-    (m_classForcedVariants[1] ? VariableTable::NonPrivateStaticVars : 0);
-
-  if (mask) {
-    AnalysisResultConstPtr ar = shared_from_this();
-    classScope->getVariables()->forceVariants(ar, mask);
-  }
   return true;
 }
 
@@ -587,7 +578,6 @@ static bool by_filename(const FileScopePtr &f1, const FileScopePtr &f2) {
 void AnalysisResult::analyzeProgram(bool system /* = false */) {
   AnalysisResultPtr ar = shared_from_this();
 
-  getVariables()->forceVariants(ar, VariableTable::AnyVars);
   getVariables()->setAttribute(VariableTable::ContainsLDynamicVariable);
   getVariables()->setAttribute(VariableTable::ContainsExtract);
   getVariables()->setAttribute(VariableTable::ForceGlobal);
@@ -1108,32 +1098,6 @@ string AnalysisResult::prepareFile(const char *root, const string &fileName,
     }
   }
   return fullPath;
-}
-
-void
-AnalysisResult::forceClassVariants(
-    ClassScopePtr curScope,
-    bool doStatic) {
-  if (curScope) {
-    curScope->getVariables()->forceVariants(
-      shared_from_this(), VariableTable::GetVarClassMask(true, doStatic),
-      false);
-  }
-
-  if (m_classForcedVariants[doStatic]) {
-    return;
-  }
-
-  AnalysisResultPtr ar = shared_from_this();
-  for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
-       iter != m_classDecs.end(); ++iter) {
-    for (ClassScopePtr cls: iter->second) {
-      cls->getVariables()->forceVariants(
-        ar, VariableTable::GetVarClassMask(false, doStatic), false);
-    }
-  }
-
-  m_classForcedVariants[doStatic] = true;
 }
 
 bool AnalysisResult::outputAllPHP(CodeGenerator::Output output) {

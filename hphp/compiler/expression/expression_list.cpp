@@ -122,9 +122,7 @@ bool ExpressionList::isScalar() const {
 
 bool ExpressionList::isNoObjectInvolved() const {
   for (unsigned int i = 0; i < m_exps.size(); i++) {
-    TypePtr t = m_exps[i]->getActualType();
-    if (t == nullptr || !t->isNoObjectInvolved())
-      return false;
+    if (!m_exps[i]->isScalar()) return false;
   }
   return true;
 }

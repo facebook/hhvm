@@ -141,9 +141,6 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
 
 void FunctionScope::init(AnalysisResultConstPtr ar) {
   m_dynamicInvoke = false;
-  if (m_pseudoMain) {
-    m_variables->forceVariants(ar, VariableTable::AnyVars);
-  }
 
   if (isNamed("__autoload")) {
     setVolatile();
@@ -246,7 +243,6 @@ void FunctionScope::setParamCounts(AnalysisResultConstPtr ar, int minParam,
   assert(IMPLIES(hasVariadicParam(), m_numDeclParams > 0));
   if (m_numDeclParams > 0) {
     m_paramNames.resize(m_numDeclParams);
-    m_paramTypes.resize(m_numDeclParams);
     m_refs.resize(m_numDeclParams);
 
     if (m_stmt) {
@@ -506,35 +502,6 @@ bool FunctionScope::mayUseVV() const {
       variables->getAttribute(VariableTable::ContainsDynamicFunctionCall)));
 }
 
-TypePtr FunctionScope::setParamType(AnalysisResultConstPtr ar, int index,
-                                    TypePtr type) {
-  assert(index >= 0 && index < (int)m_paramTypes.size());
-  TypePtr paramType = m_paramTypes[index];
-
-  if (!paramType) paramType = Type::Some;
-  type = Type::Coerce(ar, paramType, type);
-  if (type && !Type::SameType(paramType, type)) {
-    addUpdates(UseKindCallerParam);
-    if (!isFirstPass()) {
-      Logger::Verbose("Corrected type of parameter %d of %s: %s -> %s",
-                      index, m_scopeName.c_str(),
-                      paramType->toString().c_str(), type->toString().c_str());
-    }
-  }
-  m_paramTypes[index] = type;
-  return type;
-}
-
-TypePtr FunctionScope::getParamType(int index) {
-  assert(index >= 0 && index < (int)m_paramTypes.size());
-  TypePtr paramType = m_paramTypes[index];
-  if (!paramType) {
-    paramType = Type::Some;
-    m_paramTypes[index] = paramType;
-  }
-  return paramType;
-}
-
 bool FunctionScope::isRefParam(int index) const {
   assert(index >= 0 && index < (int)m_refs.size());
   return m_refs[index];
@@ -754,7 +721,7 @@ void FunctionScope::RecordFunctionInfo(string fname, FunctionScopePtr func) {
   auto limit = func->getDeclParamCount();
   for (int i = 0; i < limit; i++) {
     variables->addParam(func->getParamName(i),
-                        TypePtr(), AnalysisResultPtr(), ConstructPtr());
+                        AnalysisResultPtr(), ConstructPtr());
   }
 }
 

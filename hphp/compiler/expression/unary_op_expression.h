@@ -54,7 +54,6 @@ public:
   int getOp() const { return m_op;}
   bool isLogicalNot() const { return m_op == '!'; }
   bool isCast() const;
-  TypePtr getCastType() const;
   bool getFront() const { return m_front; }
 
   ExpressionPtr unneededHelper() override;

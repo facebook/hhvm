@@ -16,7 +16,6 @@
 
 #include "hphp/compiler/analysis/symbol_table.h"
 #include <map>
-#include "hphp/compiler/analysis/type.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
@@ -38,99 +37,6 @@ using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Symbol
-TypePtr Symbol::getFinalType() const {
-  if (m_coerced &&
-      !m_coerced->is(Type::KindOfSome) &&
-      !m_coerced->is(Type::KindOfAny) &&
-      !m_coerced->is(Type::KindOfVoid)) {
-    return m_coerced;
-  }
-  return Type::Variant;
-}
-
-TypePtr Symbol::CoerceTo(AnalysisResultConstPtr ar,
-                         TypePtr &curType, TypePtr type) {
-  if (!curType) {
-    curType = type;
-  } else {
-    curType = Type::Coerce(ar, curType, type);
-  }
-
-  return curType;
-}
-
-TypePtr Symbol::setType(AnalysisResultConstPtr ar, BlockScopeRawPtr scope,
-                        TypePtr type, bool coerced) {
-  if (!type) return type;
-
-  TypePtr oldType = m_coerced;
-  if (!oldType) oldType = Type::Some;
-  if (!coerced) return oldType;
-
-  type = CoerceTo(ar, m_coerced, type);
-  assert(!isRefClosureVar() || (type && type->is(Type::KindOfVariant)));
-
-  if (ar->getPhase() >= AnalysisResult::AnalyzeAll &&
-      !Type::SameType(oldType, type)) {
-    triggerUpdates(scope);
-  }
-
-  return type;
-}
-
-void Symbol::triggerUpdates(BlockScopeRawPtr scope) const {
-  int useKind = BlockScope::GetNonStaticRefUseKind(getHash());
-  if (isConstant()) {
-    useKind = BlockScope::UseKindConstRef;
-    if (m_declaration) {
-      BlockScopeRawPtr declScope(m_declaration->getScope());
-
-      /**
-       * Constants can only belong to a file or class scope
-       */
-      assert(scope->is(BlockScope::FileScope) ||
-             scope->is(BlockScope::ClassScope));
-
-      /**
-       * Constants can only be declared in a function or
-       * class scope
-       */
-      assert(declScope->is(BlockScope::FunctionScope) ||
-             declScope->is(BlockScope::ClassScope));
-
-      /**
-       * For class scopes, the declaration scope *must*
-       * match the scope the symbol lives in
-       */
-      assert(!scope->is(BlockScope::ClassScope) ||
-             scope == declScope);
-
-      /**
-       * For file scopes, the declaration scope *must*
-       * live in a function scope
-       */
-      assert(!scope->is(BlockScope::FileScope) ||
-             declScope->is(BlockScope::FunctionScope));
-
-      /**
-       * This is really only for file scopes (constants created with
-       * define('FOO', ...)). const FOO = 1 outside of a class is re-written
-       * into a define('FOO', 1) by earlier phases of the compiler
-       */
-      if (scope->is(BlockScope::FileScope)) {
-        return;
-      }
-    }
-  } else if (isStatic()) {
-    useKind = BlockScope::UseKindStaticRef;
-  } else if (isParameter()) {
-    useKind = BlockScope::UseKindCallerParam;
-  }
-  if (isPassClosureVar()) {
-    useKind |= BlockScope::UseKindClosure;
-  }
-  scope->addUpdates(useKind);
-}
 
 void Symbol::import(BlockScopeRawPtr scope, const Symbol &src_sym) {
   setName(src_sym.getName());
@@ -151,7 +57,6 @@ void Symbol::import(BlockScopeRawPtr scope, const Symbol &src_sym) {
   if (src_sym.isConstant()) {
     setConstant();
   }
-  m_coerced = src_sym.m_coerced;
 }
 
 bool Symbol::checkDefined() {
@@ -193,7 +98,6 @@ void Symbol::serializeParam(JSON::DocTarget::OutputStream &out) const {
 
   JSON::DocTarget::MapStream ms(out);
   ms.add("name",       m_name);
-  ms.add("type",       getFinalType());
   ms.add("referenced", isReferenced());
 
   ms.add("initializer");
@@ -245,8 +149,6 @@ void Symbol::serializeClassVar(JSON::DocTarget::OutputStream &out) const {
   if (isStatic())    mods |= ClassInfo::IsStatic;
   ms.add("modifiers", mods);
 
-  ms.add("type", getFinalType());
-
   ms.add("initializer");
   if (m_initVal) {
     ExpressionPtr initExp(
@@ -272,13 +174,6 @@ void Symbol::serializeClassVar(JSON::DocTarget::OutputStream &out) const {
 
 Mutex SymbolTable::AllSymbolTablesMutex;
 SymbolTablePtrList SymbolTable::AllSymbolTables;
-
-void SymbolTable::CountTypes(std::map<std::string, int> &counts) {
-  for (SymbolTablePtrList::iterator it = AllSymbolTables.begin(),
-         end = AllSymbolTables.end(); it != end; ++it) {
-    (*it)->countTypes(counts);
-  }
-}
 
 void SymbolTable::Purge() {
   Lock lock(AllSymbolTablesMutex);
@@ -379,20 +274,6 @@ Symbol *SymbolTable::genSymbol(const std::string &name, bool konst,
   return sym;
 }
 
-TypePtr SymbolTable::getType(const std::string &name) const {
-  if (const Symbol *sym = getSymbol(name)) {
-    return sym->getType();
-  }
-  return TypePtr();
-}
-
-TypePtr SymbolTable::getFinalType(const std::string &name) const {
-  if (const Symbol *sym = getSymbol(name)) {
-    return sym->getFinalType();
-  }
-  return Type::Variant;
-}
-
 bool SymbolTable::isExplicitlyDeclared(const std::string &name) const {
   if (const Symbol *sym = getSymbol(name)) {
     return sym->valueSet();
@@ -412,20 +293,6 @@ ConstructPtr SymbolTable::getValue(const std::string &name) const {
     return sym->getValue();
   }
   return ConstructPtr();
-}
-
-TypePtr SymbolTable::setType(AnalysisResultConstPtr ar, const std::string &name,
-                             TypePtr type, bool coerced) {
-  return setType(ar, genSymbol(name, m_const), type, coerced);
-}
-
-TypePtr SymbolTable::setType(AnalysisResultConstPtr ar, Symbol *sym,
-                             TypePtr type, bool coerced) {
-  if (!sym->declarationSet()) {
-    m_symbolVec.push_back(sym);
-    sym->setDeclaration(ConstructPtr());
-  }
-  return sym->setType(ar, BlockScopeRawPtr(&m_blockScope), type, coerced);
 }
 
 static bool canonicalizeSymbolComp(const Symbol *s1, const Symbol *s2) {
@@ -451,30 +318,13 @@ void SymbolTable::getSymbols(vector<string> &syms) const {
   }
 }
 
-void SymbolTable::getCoerced(StringToTypePtrMap &coerced) const {
-  for (Symbol *sym: m_symbolVec) {
-    coerced[sym->getName()] = sym->getType();
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void SymbolTable::serialize(JSON::CodeError::OutputStream &out) const {
   vector<string> symbols;
-  StringToTypePtrMap coerced;
   getSymbols(symbols);
-  getCoerced(coerced);
 
-  out << symbols << coerced;
-}
-
-void SymbolTable::countTypes(std::map<std::string, int> &counts) {
-  for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
-    const Symbol *sym = m_symbolVec[i];
-    if (!isInherited(sym->getName())) {
-      sym->getFinalType()->count(counts);
-    }
-  }
+  out << symbols;
 }
 
 string SymbolTable::getEscapedText(Variant v, int &len) {

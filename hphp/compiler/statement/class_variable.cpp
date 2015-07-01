@@ -142,7 +142,7 @@ void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
                             "Cannot redeclare %s::$%s",
                             scope->getOriginalName().c_str(), name.c_str());
       } else {
-        variables->add(name, Type::Null, false, ar, exp, m_modifiers);
+        variables->add(name, false, ar, exp, m_modifiers);
       }
     }
   }
@@ -216,7 +216,7 @@ void ClassVariable::addTraitPropsToScope(AnalysisResultPtr ar,
       m_declaration->removeElement(i--);
     } else {
       if (prevScope != scope) { // Property is new or override, so add it
-        variables->add(name, Type::Variant, false, ar, exp, m_modifiers);
+        variables->add(name, false, ar, exp, m_modifiers);
         variables->getSymbol(name)->setValue(exp);
         variables->setClassInitVal(name, value);
         variables->markOverride(ar, name);

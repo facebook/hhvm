@@ -46,8 +46,6 @@ public:
   std::string getOriginalLiteralString() const;
   std::string getLiteralStringImpl(bool original) const;
   bool needsTranslation() const;
-  TypePtr inferenceImpl(AnalysisResultConstPtr ar, TypePtr type,
-                        bool coerce);
   bool getScalarValue(Variant &value) override {
     value = getVariant(); return true;
   }

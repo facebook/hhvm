@@ -66,9 +66,6 @@ public:
                       const std::set<std::string>&);
 
 private:
-  static TypePtr s_ClosureType;
-
-private:
   void initializeFromUseList(ExpressionListPtr vars);
   void initializeValuesFromVars();
   void analyzeVars(AnalysisResultPtr);

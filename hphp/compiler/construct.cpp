@@ -265,16 +265,6 @@ void Construct::dumpNode(int spc) {
     }
 
     type = (int)etype;
-
-    if (e->getActualType()) {
-      type_info = e->getActualType()->toString();
-      if (e->getExpectedType()) {
-        type_info += ":" + e->getExpectedType()->toString();
-      } else {
-        type_info += ":";
-      }
-      type_info = "{" + type_info + "} ";
-    }
   }
 
   int s = spc;
@@ -348,7 +338,7 @@ void Construct::dumpNode(int spc) {
     noremoved = " (NoRemove)";
   }
 
-  std::cout << type_info << nkid << scontext << sef
+  std::cout << nkid << scontext << sef
     << localtered << refstr << objstr << noremoved;
   if (auto scope = getFileScope()) {
     std::cout << " " << scope->getName() << ":"

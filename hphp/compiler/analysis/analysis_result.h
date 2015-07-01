@@ -167,14 +167,6 @@ public:
   void preOptimize();
 
   /**
-   * Force all class variables to be variants, since l-val or reference
-   * of dynamic properties are used.
-   */
-  void forceClassVariants(
-      ClassScopePtr curScope,
-      bool doStatic);
-
-  /**
    * Code generation functions.
    */
   bool outputAllPHP(CodeGenerator::Output output);
@@ -303,8 +295,6 @@ private:
 
   // Names of type aliases.
   std::set<std::string> m_typeAliasNames;
-
-  bool m_classForcedVariants[2];
 
   StatementPtrVec m_stmts;
   StatementPtr m_stmt;

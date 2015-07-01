@@ -226,11 +226,11 @@ void FileScope::declareConstant(AnalysisResultPtr ar, const string &name) {
   ar->declareConst(shared_from_this(), name);
 }
 
-void FileScope::addConstant(const string &name, TypePtr type,
+void FileScope::addConstant(const string &name,
                             ExpressionPtr value,
                             AnalysisResultPtr ar, ConstructPtr con) {
   BlockScopePtr f = ar->findConstantDeclarer(name);
-  f->getConstants()->add(name, type, value, ar, con);
+  f->getConstants()->add(name, value, ar, con);
 }
 
 void FileScope::analyzeProgram(AnalysisResultPtr ar) {

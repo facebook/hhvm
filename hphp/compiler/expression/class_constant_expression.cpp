@@ -73,12 +73,6 @@ void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
         getValueRecur(ar, m_varName, cls);
       cls->addUse(getScope(), BlockScope::UseKindConstRef);
       m_depsSet = true;
-      if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-        if (!isPresent()) {
-          getScope()->getVariables()->
-            setAttribute(VariableTable::NeedGlobalPointer);
-        }
-      }
     }
   }
 }

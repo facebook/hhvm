@@ -21,7 +21,6 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/code_error.h"
-#include "hphp/compiler/analysis/type.h"
 #include "hphp/compiler/code_generator.h"
 #include "hphp/compiler/expression/modifier_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -226,36 +225,24 @@ bool VariableTable::setClassInitVal(string varName, ConstructPtr value) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypePtr VariableTable::addParam(const string &name, TypePtr type,
-                                AnalysisResultConstPtr ar,
-                                ConstructPtr construct) {
+void VariableTable::addParam(const string &name,
+                             AnalysisResultConstPtr ar,
+                             ConstructPtr construct) {
   Symbol *sym = addDeclaredSymbol(name, construct);
   if (!sym->isParameter()) {
     sym->setParameterIndex(m_nextParam++);
   }
-  return type ?
-    add(sym, type, false, ar, construct, ModifierExpressionPtr()) : type;
+  add(sym, false, ar, construct, ModifierExpressionPtr());
 }
 
-TypePtr VariableTable::addParamLike(const string &name, TypePtr type,
-                                    AnalysisResultPtr ar,
-                                    ConstructPtr construct, bool firstPass) {
-  TypePtr ret = type;
+void VariableTable::addParamLike(const string &name,
+                                 AnalysisResultPtr ar,
+                                 ConstructPtr construct, bool firstPass) {
   if (firstPass) {
-    ret = add(name, ret, false, ar,
-              construct, ModifierExpressionPtr());
+    add(name, false, ar, construct, ModifierExpressionPtr());
   } else {
-    ret = checkVariable(name, ret, true, ar, construct);
-    if (ret->is(Type::KindOfSome)) {
-      // This is probably too conservative. The problem is that
-      // a function never called will have parameter types of Any.
-      // Functions that it calls won't be able to accept variant unless
-      // it is forced here.
-      forceVariant(ar, name, VariableTable::AnyVars);
-      ret = Type::Variant;
-    }
+    checkVariable(name, ar, construct);
   }
-  return ret;
 }
 
 void VariableTable::addStaticVariable(Symbol *sym,
@@ -312,42 +299,31 @@ bool VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
   return ret;
 }
 
-TypePtr VariableTable::add(const string &name, TypePtr type,
-                           bool implicit, AnalysisResultConstPtr ar,
-                           ConstructPtr construct,
-                           ModifierExpressionPtr modifiers) {
-  return add(addSymbol(name), type, implicit, ar,
-             construct, modifiers);
+void VariableTable::add(const string &name,
+                        bool implicit, AnalysisResultConstPtr ar,
+                        ConstructPtr construct,
+                        ModifierExpressionPtr modifiers) {
+  add(addSymbol(name), implicit, ar, construct, modifiers);
 }
 
-TypePtr VariableTable::add(Symbol *sym, TypePtr type,
-                           bool implicit, AnalysisResultConstPtr ar,
-                           ConstructPtr construct,
-                           ModifierExpressionPtr modifiers) {
+void VariableTable::add(Symbol *sym,
+                        bool implicit, AnalysisResultConstPtr ar,
+                        ConstructPtr construct,
+                        ModifierExpressionPtr modifiers) {
   if (getAttribute(InsideStaticStatement)) {
     addStaticVariable(sym, ar);
-    if (ClassScope::NeedStaticArray(getClassScope(), getFunctionScope())) {
-      forceVariant(ar, sym->getName(), AnyVars);
-    }
   } else if (getAttribute(InsideGlobalStatement)) {
     sym->setGlobal();
     m_hasGlobal = true;
     AnalysisResult::Locker lock(ar);
     if (!isGlobalTable(ar)) {
-      lock->getVariables()->add(sym->getName(), type, implicit,
+      lock->getVariables()->add(sym->getName(), implicit,
                                 ar, construct, modifiers);
-    }
-    assert(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
-    TypePtr varType = ar->getVariables()->getFinalType(sym->getName());
-    if (varType) {
-      type = varType;
-    } else {
-      lock->getVariables()->setType(ar, sym->getName(), type, true);
     }
   } else if (!sym->isHidden() && isPseudoMainTable()) {
     // A variable used in a pseudomain
     // only need to do this once... should mark the sym.
-    ar->lock()->getVariables()->add(sym->getName(), type, implicit, ar,
+    ar->lock()->getVariables()->add(sym->getName(), implicit, ar,
                                     construct, modifiers);
   }
 
@@ -366,7 +342,6 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
     }
   }
 
-  type = setType(ar, sym, type, true);
   if (sym->isParameter()) {
     auto p = dynamic_pointer_cast<ParameterExpression>(construct);
     if (p) {
@@ -381,34 +356,27 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
       sym->setValue(construct);
     }
   }
-  return type;
 }
 
-TypePtr VariableTable::checkVariable(const string &name, TypePtr type,
-                                     bool coerce, AnalysisResultConstPtr ar,
-                                     ConstructPtr construct) {
-  return checkVariable(addSymbol(name), type,
-                       coerce, ar, construct);
+void VariableTable::checkVariable(const string &name,
+                                  AnalysisResultConstPtr ar,
+                                  ConstructPtr construct) {
+  checkVariable(addSymbol(name), ar, construct);
 }
 
-TypePtr VariableTable::checkVariable(Symbol *sym, TypePtr type,
-                                     bool coerce, AnalysisResultConstPtr ar,
-                                     ConstructPtr construct) {
+void VariableTable::checkVariable(Symbol *sym,
+                                  AnalysisResultConstPtr ar,
+                                  ConstructPtr construct) {
 
   // Variable used in pseudomain
   if (!sym->isHidden() && isPseudoMainTable()) {
     // only need to do this once... should mark the sym.
-    ar->lock()->getVariables()->checkVariable(sym->getName(), type,
-                                              coerce, ar, construct);
+    ar->lock()->getVariables()->checkVariable(sym->getName(), ar, construct);
   }
 
   if (!sym->declarationSet()) {
-    type = setType(ar, sym, type, coerce);
     sym->setDeclaration(construct);
-    return type;
   }
-
-  return setType(ar, sym, type, coerce);
 }
 
 Symbol *VariableTable::findProperty(ClassScopePtr &cls,
@@ -505,93 +473,6 @@ void VariableTable::clearUsed() {
     } else {
       sym.second.setReferenced();
     }
-  }
-}
-
-void VariableTable::forceVariants(AnalysisResultConstPtr ar, int varClass,
-                                  bool recur /* = true */) {
-  int mask = varClass & ~m_forcedVariants;
-  if (mask) {
-    if (!m_hasPrivate) mask &= ~AnyPrivateVars;
-    if (!m_hasStatic) mask &= ~AnyStaticVars;
-
-    if (mask) {
-      for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
-        Symbol *sym = m_symbolVec[i];
-        if (!sym->isHidden() && sym->declarationSet() &&
-            mask & GetVarClassMaskForSym(sym)) {
-          setType(ar, sym, Type::Variant, true);
-          sym->setIndirectAltered();
-        }
-      }
-    }
-    m_forcedVariants |= varClass;
-
-    if (recur) {
-      ClassScopePtr parent = m_blockScope.getParentScope(ar);
-      if (parent && !parent->isRedeclaring()) {
-        parent->getVariables()->forceVariants(ar, varClass & ~AnyPrivateVars);
-      }
-    }
-  }
-}
-
-void VariableTable::forceVariant(AnalysisResultConstPtr ar,
-                                 const string &name, int varClass) {
-  int mask = varClass & ~m_forcedVariants;
-  if (!mask) return;
-  if (!m_hasPrivate) mask &= ~AnyPrivateVars;
-  if (!m_hasStatic) mask &= ~AnyStaticVars;
-  if (!mask) return;
-  if (Symbol *sym = getSymbol(name)) {
-    if (!sym->isHidden() && sym->declarationSet() &&
-        mask & GetVarClassMaskForSym(sym)) {
-      setType(ar, sym, Type::Variant, true);
-      sym->setIndirectAltered();
-    }
-  }
-}
-
-TypePtr VariableTable::setType(AnalysisResultConstPtr ar,
-                               const std::string &name,
-                               TypePtr type, bool coerce) {
-  return setType(ar, addSymbol(name), type, coerce);
-}
-
-TypePtr VariableTable::setType(AnalysisResultConstPtr ar, Symbol *sym,
-                               TypePtr type, bool coerce) {
-  bool force_coerce = coerce;
-  int mask = GetVarClassMaskForSym(sym);
-  if (m_forcedVariants & mask && !sym->isHidden()) {
-    type = Type::Variant;
-    force_coerce = true;
-  }
-  TypePtr ret = SymbolTable::setType(ar, sym, type, force_coerce);
-  if (!ret) return ret;
-
-  if (sym->isGlobal() && !isGlobalTable(ar)) {
-    ar->lock()->getVariables()->setType(ar, sym->getName(), type, coerce);
-  }
-
-  if (coerce) {
-    if (sym->isParameter()) {
-      FunctionScope *func = dynamic_cast<FunctionScope *>(&m_blockScope);
-      assert(func);
-      TypePtr paramType = func->setParamType(ar,
-                                             sym->getParameterIndex(), type);
-      if (!Type::SameType(paramType, type)) {
-        return setType(ar, sym, paramType, true); // recursively
-      }
-    }
-  }
-  return ret;
-}
-
-void VariableTable::dumpStats(std::map<string, int> &typeCounts) {
-  for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
-    Symbol *sym = m_symbolVec[i];
-    if (sym->isGlobal()) continue;
-    typeCounts[sym->getFinalType()->toString()]++;
   }
 }
 

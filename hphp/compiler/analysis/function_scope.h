@@ -283,9 +283,6 @@ public:
    * extraArgs) at run time */
   bool mayUseVV() const;
 
-  TypePtr setParamType(AnalysisResultConstPtr ar, int index, TypePtr type);
-  TypePtr getParamType(int index);
-
   typedef hphp_hash_map<std::string, ExpressionPtr, string_hashi,
     string_eqstri> UserAttributeMap;
 
@@ -378,7 +375,6 @@ private:
   int m_numDeclParams;
   int m_attribute;
   std::vector<std::string> m_paramNames;
-  TypePtrVec m_paramTypes;
   std::vector<bool> m_refs;
   ModifierExpressionPtr m_modifiers;
   UserAttributeMap m_userAttributes;

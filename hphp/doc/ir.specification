@@ -569,6 +569,24 @@ To string conversions:
   Perform comparisons of doubles. Comparisons that are unordered according to
   IEEE 754 (such as when at least one operand is NaN) result in false.
 
+| GtStr,                       D(Bool), S(Str) S(Str),                    NF
+
+| GteStr,                      D(Bool), S(Str) S(Str),                    NF
+
+| LtStr,                       D(Bool), S(Str) S(Str),                    NF
+
+| LteStr,                      D(Bool), S(Str) S(Str),                    NF
+
+| EqStr,                       D(Bool), S(Str) S(Str),                    NF
+
+| NeqStr,                      D(Bool), S(Str) S(Str),                    NF
+
+| SameStr,                     D(Bool), S(Str) S(Str),                    NF
+
+| NSameStr,                    D(Bool), S(Str) S(Str),                    NF
+
+  Performs comparison of strings using PHP semantics.
+
 | InstanceOf, D(Bool), S(Cls) S(Cls|Nullptr), NF
 
   Sets D based on whether S0 is a descendant of the class, interface, or trait

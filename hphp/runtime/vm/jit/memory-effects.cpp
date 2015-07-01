@@ -1045,6 +1045,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Lt:
   case Lte:
   case Neq:
+  case GtStr:
+  case GteStr:
+  case LtStr:
+  case LteStr:
+  case EqStr:
+  case NeqStr:
+  case SameStr:
+  case NSameStr:
   case IncTransCounter:
   case LdBindAddr:
   case LdAsyncArParentChain:

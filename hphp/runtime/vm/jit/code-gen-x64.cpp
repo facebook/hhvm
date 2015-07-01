@@ -328,6 +328,15 @@ CALL_OPCODE(ConcatIntStr);
 CALL_OPCODE(ConcatStr3);
 CALL_OPCODE(ConcatStr4);
 
+CALL_OPCODE(GtStr);
+CALL_OPCODE(GteStr);
+CALL_OPCODE(LtStr);
+CALL_OPCODE(LteStr);
+CALL_OPCODE(EqStr);
+CALL_OPCODE(NeqStr);
+CALL_OPCODE(SameStr);
+CALL_OPCODE(NSameStr);
+
 CALL_OPCODE(CreateCont)
 CALL_OPCODE(CreateAFWH)
 CALL_OPCODE(CreateAFWHNoVV)
@@ -949,12 +958,10 @@ void CodeGenerator::cgCmpHelper(IRInstruction* inst, ConditionCode cc,
   auto dstReg  = dstLoc(inst, 0).reg();
   auto& v = vmain();
 
-  /////////////////////////////////////////////////////////////////////////////
-  // case 1: null/string cmp string
-  // simplifyCmp has converted the null to ""
+  // case 1: string cmp string
+  // We should only get these if the simplifer didn't run.
   if (type1 <= TStr && type2 <= TStr) {
-    cgCallHelper(v, CppCall::direct(str_cmp_str), callDest(inst),
-      SyncOptions::kSyncPoint, argGroup(inst).ssa(0).ssa(1));
+    CG_PUNT(inst->marker(), cgOpCmpHelper_strstr);
   }
 
   /////////////////////////////////////////////////////////////////////////////

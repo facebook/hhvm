@@ -1,1252 +1,1460 @@
-  same lt  lte eq  ne  nw2 gte gt
+same    nsame   lt      lte     eq      neq     gte     gt
 
 null cmp null:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 null cmp false:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 null cmp true:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp int 0:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 null cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp int -1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp float 0:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 null cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp float -1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp -INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp "":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 null cmp "0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp "99":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp "-1":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp "0.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp "99.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp "-1.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
+null cmp "foo":
+F       T       T       T       F       T       F       F       
+null cmp "BAZ":
+F       T       T       T       F       T       F       F       
 null cmp array():
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 null cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 null cmp resource:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp null:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 false cmp false:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 false cmp true:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp int 0:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 false cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp int -1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp float 0:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 false cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp float -1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp -INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp "":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 false cmp "0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 false cmp "99":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp "-1":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp "0.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp "99.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp "-1.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
+false cmp "foo":
+F       T       T       T       F       T       F       F       
+false cmp "BAZ":
+F       T       T       T       F       T       F       F       
 false cmp array():
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 false cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 false cmp resource:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 true cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 true cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 true cmp true:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 true cmp int 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 true cmp int 99:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp int -1:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp float 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 true cmp double 99:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp float 99:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp float -1:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp INF:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp -INF:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 true cmp "0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 true cmp "99":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp "-1":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp "0.0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp "99.0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp "-1.0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
+true cmp "foo":
+F       T       F       T       T       F       T       F       
+true cmp "BAZ":
+F       T       F       T       T       F       T       F       
 true cmp array():
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 true cmp array(99):
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp object c1:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp object c2:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp object d:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 true cmp resource:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int 0 cmp null:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int 0 cmp false:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int 0 cmp true:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 0 cmp int 0:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 int 0 cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 0 cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 0 cmp float 0:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int 0 cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 0 cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 0 cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 0 cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 0 cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 0 cmp "":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int 0 cmp "0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int 0 cmp "99":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 0 cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 0 cmp "0.0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int 0 cmp "99.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 0 cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+int 0 cmp "foo":
+F       T       F       T       T       F       T       F       
+int 0 cmp "BAZ":
+F       T       F       T       T       F       T       F       
 int 0 cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 0 cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 0 cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 0 cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 0 cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 0 cmp resource:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 99 cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 99 cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 99 cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int 99 cmp int 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 99 cmp int 99:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 int 99 cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 99 cmp float 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 99 cmp double 99:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int 99 cmp float 99:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int 99 cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 99 cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 99 cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 99 cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 99 cmp "0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 99 cmp "99":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int 99 cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 99 cmp "0.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 99 cmp "99.0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int 99 cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+int 99 cmp "foo":
+F       T       F       F       F       T       T       T       
+int 99 cmp "BAZ":
+F       T       F       F       F       T       T       T       
 int 99 cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 99 cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int 99 cmp object c1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 99 cmp object c2:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 99 cmp object d:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int 99 cmp resource:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int -1 cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int -1 cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int -1 cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int -1 cmp int 0:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp int -1:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 int -1 cmp float 0:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp float -1:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int -1 cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 int -1 cmp "":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp "0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp "99":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp "-1":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 int -1 cmp "0.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp "99.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp "-1.0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
+int -1 cmp "foo":
+F       T       T       T       F       T       F       F       
+int -1 cmp "BAZ":
+F       T       T       T       F       T       F       F       
 int -1 cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 int -1 cmp resource:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 0 cmp null:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 float 0 cmp false:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 float 0 cmp true:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 0 cmp int 0:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 float 0 cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 0 cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 0 cmp float 0:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 float 0 cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 0 cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 0 cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 0 cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 0 cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 0 cmp "":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 float 0 cmp "0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 float 0 cmp "99":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 0 cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 0 cmp "0.0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 float 0 cmp "99.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 0 cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+float 0 cmp "foo":
+F       T       F       T       T       F       T       F       
+float 0 cmp "BAZ":
+F       T       F       T       T       F       T       F       
 float 0 cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 0 cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 0 cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 0 cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 0 cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 0 cmp resource:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 double 99 cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 double 99 cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 double 99 cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 double 99 cmp int 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 double 99 cmp int 99:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 double 99 cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 double 99 cmp float 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 double 99 cmp double 99:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 double 99 cmp float 99:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 double 99 cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 double 99 cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 double 99 cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 double 99 cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 double 99 cmp "0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 double 99 cmp "99":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 double 99 cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 double 99 cmp "0.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 double 99 cmp "99.0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 double 99 cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+double 99 cmp "foo":
+F       T       F       F       F       T       T       T       
+double 99 cmp "BAZ":
+F       T       F       F       F       T       T       T       
 double 99 cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 double 99 cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 double 99 cmp object c1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 double 99 cmp object c2:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 double 99 cmp object d:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 double 99 cmp resource:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 float 99 cmp int 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp int 99:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 float 99 cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp float 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp double 99:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 float 99 cmp float 99:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 float 99 cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 99 cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp "0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp "99":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 float 99 cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp "0.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp "99.0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 float 99 cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+float 99 cmp "foo":
+F       T       F       F       F       T       T       T       
+float 99 cmp "BAZ":
+F       T       F       F       F       T       T       T       
 float 99 cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 99 cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float 99 cmp object c1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp object c2:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp object d:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float 99 cmp resource:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float -1 cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float -1 cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float -1 cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 float -1 cmp int 0:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp int -1:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 float -1 cmp float 0:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp float -1:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 float -1 cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 float -1 cmp "":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp "0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp "99":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp "-1":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 float -1 cmp "0.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp "99.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp "-1.0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
+float -1 cmp "foo":
+F       T       T       T       F       T       F       F       
+float -1 cmp "BAZ":
+F       T       T       T       F       T       F       F       
 float -1 cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 float -1 cmp resource:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 INF cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 INF cmp int 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp int 99:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp float 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp double 99:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp float 99:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp INF:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 INF cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp "0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp "99":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp "0.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp "99.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+INF cmp "foo":
+F       T       F       F       F       T       T       T       
+INF cmp "BAZ":
+F       T       F       F       F       T       T       T       
 INF cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 INF cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 INF cmp object c1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp object c2:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp object d:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 INF cmp resource:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 -INF cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 -INF cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 -INF cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 -INF cmp int 0:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp int -1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp float 0:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp float -1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp -INF:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 -INF cmp "":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp "0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp "99":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp "-1":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp "0.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp "99.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp "-1.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
+-INF cmp "foo":
+F       T       T       T       F       T       F       F       
+-INF cmp "BAZ":
+F       T       T       T       F       T       F       F       
 -INF cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 -INF cmp resource:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp null:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "" cmp false:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "" cmp true:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp int 0:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "" cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "" cmp float 0:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "" cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "" cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "" cmp "":
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 "" cmp "0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp "99":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp "-1":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp "0.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp "99.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp "-1.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
+"" cmp "foo":
+F       T       T       T       F       T       F       F       
+"" cmp "BAZ":
+F       T       T       T       F       T       F       F       
 "" cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "" cmp resource:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0" cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "0" cmp false:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "0" cmp true:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0" cmp int 0:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "0" cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0" cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "0" cmp float 0:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "0" cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0" cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0" cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "0" cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0" cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "0" cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "0" cmp "0":
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 "0" cmp "99":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0" cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "0" cmp "0.0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "0" cmp "99.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0" cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+"0" cmp "foo":
+F       T       T       T       F       T       F       F       
+"0" cmp "BAZ":
+F       T       T       T       F       T       F       F       
 "0" cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0" cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0" cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0" cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0" cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0" cmp resource:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "99" cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99" cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99" cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "99" cmp int 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99" cmp int 99:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "99" cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99" cmp float 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99" cmp double 99:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "99" cmp float 99:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "99" cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99" cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "99" cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99" cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99" cmp "0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99" cmp "99":
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 "99" cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99" cmp "0.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99" cmp "99.0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "99" cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+"99" cmp "foo":
+F       T       T       T       F       T       F       F       
+"99" cmp "BAZ":
+F       T       T       T       F       T       F       F       
 "99" cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "99" cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "99" cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "99" cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "99" cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "99" cmp resource:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "-1" cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "-1" cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "-1" cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "-1" cmp int 0:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp int -1:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "-1" cmp float 0:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp float -1:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "-1" cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "-1" cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "-1" cmp "0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp "99":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp "-1":
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 "-1" cmp "0.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp "99.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp "-1.0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
+"-1" cmp "foo":
+F       T       T       T       F       T       F       F       
+"-1" cmp "BAZ":
+F       T       T       T       F       T       F       F       
 "-1" cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1" cmp resource:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0.0" cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "0.0" cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "0.0" cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "0.0" cmp int 0:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "0.0" cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0.0" cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "0.0" cmp float 0:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "0.0" cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0.0" cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0.0" cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "0.0" cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0.0" cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "0.0" cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "0.0" cmp "0":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "0.0" cmp "99":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0.0" cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "0.0" cmp "0.0":
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 "0.0" cmp "99.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0.0" cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+"0.0" cmp "foo":
+F       T       T       T       F       T       F       F       
+"0.0" cmp "BAZ":
+F       T       T       T       F       T       F       F       
 "0.0" cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0.0" cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0.0" cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0.0" cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0.0" cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "0.0" cmp resource:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "99.0" cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99.0" cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99.0" cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "99.0" cmp int 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99.0" cmp int 99:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "99.0" cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99.0" cmp float 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99.0" cmp double 99:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "99.0" cmp float 99:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "99.0" cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99.0" cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "99.0" cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99.0" cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99.0" cmp "0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99.0" cmp "99":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "99.0" cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99.0" cmp "0.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "99.0" cmp "99.0":
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 "99.0" cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+"99.0" cmp "foo":
+F       T       T       T       F       T       F       F       
+"99.0" cmp "BAZ":
+F       T       T       T       F       T       F       F       
 "99.0" cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "99.0" cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "99.0" cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "99.0" cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "99.0" cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "99.0" cmp resource:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "-1.0" cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "-1.0" cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "-1.0" cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "-1.0" cmp int 0:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp int -1:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "-1.0" cmp float 0:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp float -1:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "-1.0" cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "-1.0" cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 "-1.0" cmp "0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp "99":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp "-1":
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 "-1.0" cmp "0.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp "99.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp "-1.0":
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
+"-1.0" cmp "foo":
+F       T       T       T       F       T       F       F       
+"-1.0" cmp "BAZ":
+F       T       T       T       F       T       F       F       
 "-1.0" cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 "-1.0" cmp resource:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
+"foo" cmp null:
+F       T       F       F       F       T       T       T       
+"foo" cmp false:
+F       T       F       F       F       T       T       T       
+"foo" cmp true:
+F       T       F       T       T       F       T       F       
+"foo" cmp int 0:
+F       T       F       T       T       F       T       F       
+"foo" cmp int 99:
+F       T       T       T       F       T       F       F       
+"foo" cmp int -1:
+F       T       F       F       F       T       T       T       
+"foo" cmp float 0:
+F       T       F       T       T       F       T       F       
+"foo" cmp double 99:
+F       T       T       T       F       T       F       F       
+"foo" cmp float 99:
+F       T       T       T       F       T       F       F       
+"foo" cmp float -1:
+F       T       F       F       F       T       T       T       
+"foo" cmp INF:
+F       T       T       T       F       T       F       F       
+"foo" cmp -INF:
+F       T       F       F       F       T       T       T       
+"foo" cmp "":
+F       T       F       F       F       T       T       T       
+"foo" cmp "0":
+F       T       F       F       F       T       T       T       
+"foo" cmp "99":
+F       T       F       F       F       T       T       T       
+"foo" cmp "-1":
+F       T       F       F       F       T       T       T       
+"foo" cmp "0.0":
+F       T       F       F       F       T       T       T       
+"foo" cmp "99.0":
+F       T       F       F       F       T       T       T       
+"foo" cmp "-1.0":
+F       T       F       F       F       T       T       T       
+"foo" cmp "foo":
+T       F       F       T       T       F       T       F       
+"foo" cmp "BAZ":
+F       T       F       F       F       T       T       T       
+"foo" cmp array():
+F       T       T       T       F       T       F       F       
+"foo" cmp array(99):
+F       T       T       T       F       T       F       F       
+"foo" cmp object c1:
+F       T       T       T       F       T       F       F       
+"foo" cmp object c2:
+F       T       T       T       F       T       F       F       
+"foo" cmp object d:
+F       T       T       T       F       T       F       F       
+"foo" cmp resource:
+F       T       T       T       F       T       F       F       
+"BAZ" cmp null:
+F       T       F       F       F       T       T       T       
+"BAZ" cmp false:
+F       T       F       F       F       T       T       T       
+"BAZ" cmp true:
+F       T       F       T       T       F       T       F       
+"BAZ" cmp int 0:
+F       T       F       T       T       F       T       F       
+"BAZ" cmp int 99:
+F       T       T       T       F       T       F       F       
+"BAZ" cmp int -1:
+F       T       F       F       F       T       T       T       
+"BAZ" cmp float 0:
+F       T       F       T       T       F       T       F       
+"BAZ" cmp double 99:
+F       T       T       T       F       T       F       F       
+"BAZ" cmp float 99:
+F       T       T       T       F       T       F       F       
+"BAZ" cmp float -1:
+F       T       F       F       F       T       T       T       
+"BAZ" cmp INF:
+F       T       T       T       F       T       F       F       
+"BAZ" cmp -INF:
+F       T       F       F       F       T       T       T       
+"BAZ" cmp "":
+F       T       F       F       F       T       T       T       
+"BAZ" cmp "0":
+F       T       F       F       F       T       T       T       
+"BAZ" cmp "99":
+F       T       F       F       F       T       T       T       
+"BAZ" cmp "-1":
+F       T       F       F       F       T       T       T       
+"BAZ" cmp "0.0":
+F       T       F       F       F       T       T       T       
+"BAZ" cmp "99.0":
+F       T       F       F       F       T       T       T       
+"BAZ" cmp "-1.0":
+F       T       F       F       F       T       T       T       
+"BAZ" cmp "foo":
+F       T       T       T       F       T       F       F       
+"BAZ" cmp "BAZ":
+T       F       F       T       T       F       T       F       
+"BAZ" cmp array():
+F       T       T       T       F       T       F       F       
+"BAZ" cmp array(99):
+F       T       T       T       F       T       F       F       
+"BAZ" cmp object c1:
+F       T       T       T       F       T       F       F       
+"BAZ" cmp object c2:
+F       T       T       T       F       T       F       F       
+"BAZ" cmp object d:
+F       T       T       T       F       T       F       F       
+"BAZ" cmp resource:
+F       T       T       T       F       T       F       F       
 array() cmp null:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 array() cmp false:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 array() cmp true:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 array() cmp int 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp int 99:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp float 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp double 99:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp float 99:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp "0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp "99":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp "0.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp "99.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array() cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+array() cmp "foo":
+F       T       F       F       F       T       T       T       
+array() cmp "BAZ":
+F       T       F       F       F       T       T       T       
 array() cmp array():
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 array() cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 array() cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 array() cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 array() cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 array() cmp resource:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 array(99) cmp int 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp int 99:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp float 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp double 99:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp float 99:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp "0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp "99":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp "0.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp "99.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+array(99) cmp "foo":
+F       T       F       F       F       T       T       T       
+array(99) cmp "BAZ":
+F       T       F       F       F       T       T       T       
 array(99) cmp array():
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 array(99) cmp array(99):
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 array(99) cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 array(99) cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 array(99) cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 array(99) cmp resource:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 object c1 cmp int 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 object c1 cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp float 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 object c1 cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 object c1 cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 object c1 cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp "0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp "99":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp "0.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp "99.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+object c1 cmp "foo":
+F       T       F       F       F       T       T       T       
+object c1 cmp "BAZ":
+F       T       F       F       F       T       T       T       
 object c1 cmp array():
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp array(99):
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c1 cmp object c1:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 object c1 cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 object c1 cmp object d:
-  F    F   F   F   F   F   
+F       T       F       F       F       T       F       F       
 object c1 cmp resource:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 object c2 cmp int 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 object c2 cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp float 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 object c2 cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 object c2 cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 object c2 cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp "0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp "99":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp "0.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp "99.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+object c2 cmp "foo":
+F       T       F       F       F       T       T       T       
+object c2 cmp "BAZ":
+F       T       F       F       F       T       T       T       
 object c2 cmp array():
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp array(99):
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp object c1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object c2 cmp object c2:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 object c2 cmp object d:
-  F    F   F   F   F   F   
+F       T       F       F       F       T       F       F       
 object c2 cmp resource:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 object d cmp int 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 object d cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp float 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 object d cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 object d cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 object d cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp "0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp "99":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp "0.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp "99.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+object d cmp "foo":
+F       T       F       F       F       T       T       T       
+object d cmp "BAZ":
+F       T       F       F       F       T       T       T       
 object d cmp array():
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp array(99):
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 object d cmp object c1:
-  F    F   F   F   F   F   
+F       T       F       F       F       T       F       F       
 object d cmp object c2:
-  F    F   F   F   F   F   
+F       T       F       F       F       T       F       F       
 object d cmp object d:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       
 object d cmp resource:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 resource cmp null:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 resource cmp false:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 resource cmp true:
-  F    F   T   T   T   F   
+F       T       F       T       T       F       T       F       
 resource cmp int 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 resource cmp int 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 resource cmp int -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 resource cmp float 0:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 resource cmp double 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 resource cmp float 99:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 resource cmp float -1:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 resource cmp INF:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 resource cmp -INF:
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 resource cmp "":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 resource cmp "0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 resource cmp "99":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 resource cmp "-1":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 resource cmp "0.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
 resource cmp "99.0":
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 resource cmp "-1.0":
-  F    F   F   F   T   T   
+F       T       F       F       F       T       T       T       
+resource cmp "foo":
+F       T       F       F       F       T       T       T       
+resource cmp "BAZ":
+F       T       F       F       F       T       T       T       
 resource cmp array():
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 resource cmp array(99):
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 resource cmp object c1:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 resource cmp object c2:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 resource cmp object d:
-  F    T   T   F   F   F   
+F       T       T       T       F       T       F       F       
 resource cmp resource:
-  T    F   T   T   T   F   
+T       F       F       T       T       F       T       F       

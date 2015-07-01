@@ -167,6 +167,16 @@ bool isDblQueryOp(Opcode opc);
 Opcode queryToDblQueryOp(Opcode opc);
 
 /*
+ * Return true if opc is a str comparison operator
+ */
+bool isStrQueryOp(Opcode opc);
+
+/*
+ * Return the str-query opcode for the given non-str-query opcode
+ */
+Opcode queryToStrQueryOp(Opcode opc);
+
+/*
  * Return the opcode that corresponds to negation of opc.
  */
 Opcode negateQueryOp(Opcode opc);

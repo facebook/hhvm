@@ -18,6 +18,7 @@
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/rds.h"
@@ -55,6 +56,8 @@ auto constexpr SSA      = ArgType::SSA;
 auto constexpr TV       = ArgType::TV;
 
 using IFaceSupportFn = bool (*)(const StringData*);
+
+using StrCmpFn = bool (*)(const StringData*, const StringData*);
 
 }
 
@@ -231,6 +234,24 @@ static CallMap s_callMap {
                           {{TV, 0}, {TV, 1}, {TV, 2}}},
     {MapIdx,             mapIdx, DTV, SSync,
                           {{SSA, 0}, {SSA, 1}, {TV, 2}}},
+
+    /* Type specialized comparison operators */
+    {GtStr,              static_cast<StrCmpFn>(more), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {GteStr,             static_cast<StrCmpFn>(moreEqual), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {LtStr,              static_cast<StrCmpFn>(less), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {LteStr,             static_cast<StrCmpFn>(lessEqual), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {EqStr,              static_cast<StrCmpFn>(equal), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {NeqStr,             static_cast<StrCmpFn>(nequal), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {SameStr,            static_cast<StrCmpFn>(same), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
+    {NSameStr,           static_cast<StrCmpFn>(nsame), DSSA, SSync,
+                          {{SSA, 0}, {SSA, 1}}},
 
     /* Static prop helpers */
     {LdClsPropAddrOrNull,

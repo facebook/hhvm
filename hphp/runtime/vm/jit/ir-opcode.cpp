@@ -190,6 +190,14 @@ bool isQueryOp(Opcode opc) {
   case LteDbl:
   case EqDbl:
   case NeqDbl:
+  case GtStr:
+  case GteStr:
+  case LtStr:
+  case LteStr:
+  case EqStr:
+  case NeqStr:
+  case SameStr:
+  case NSameStr:
   case Same:
   case NSame:
   case InstanceOfBitmask:
@@ -230,6 +238,22 @@ bool isDblQueryOp(Opcode opc) {
   }
 }
 
+bool isStrQueryOp(Opcode opc) {
+  switch (opc) {
+  case GtStr:
+  case GteStr:
+  case LtStr:
+  case LteStr:
+  case EqStr:
+  case NeqStr:
+  case SameStr:
+  case NSameStr:
+    return true;
+ default:
+   return false;
+  }
+}
+
 Opcode negateQueryOp(Opcode opc) {
   assertx(isQueryOp(opc));
   switch (opc) {
@@ -247,6 +271,14 @@ Opcode negateQueryOp(Opcode opc) {
   case NeqInt:              return EqInt;
   case EqDbl:               return NeqDbl;
   case NeqDbl:              return EqDbl;
+  case GtStr:               return LteStr;
+  case GteStr:              return LtStr;
+  case LtStr:               return GteStr;
+  case LteStr:              return GtStr;
+  case EqStr:               return NeqStr;
+  case NeqStr:              return EqStr;
+  case SameStr:             return NSameStr;
+  case NSameStr:            return SameStr;
   case Same:                return NSame;
   case NSame:               return Same;
   case InstanceOfBitmask:   return NInstanceOfBitmask;
@@ -285,6 +317,15 @@ Opcode commuteQueryOp(Opcode opc) {
   case LteDbl:return GteDbl;
   case EqDbl: return EqDbl;
   case NeqDbl:return NeqDbl;
+  case GtStr: return LtStr;
+  case GteStr:return LteStr;
+  case LtStr: return GtStr;
+  case LteStr:return GteStr;
+  case EqStr:
+  case NeqStr:
+  case SameStr:
+  case NSameStr:
+    return opc;
   case Same:  return Same;
   case NSame: return NSame;
   default:      always_assert(0);
@@ -326,6 +367,21 @@ Opcode queryToDblQueryOp(Opcode opc) {
   case EqInt: return EqDbl;
   case NeqInt:return NeqDbl;
   default: always_assert(0);
+  }
+}
+
+Opcode queryToStrQueryOp(Opcode opc) {
+  assertx(isQueryOp(opc));
+  switch (opc) {
+    case Gt: return GtStr;
+    case Gte: return GteStr;
+    case Lt: return LtStr;
+    case Lte: return LteStr;
+    case Eq: return EqStr;
+    case Neq: return NeqStr;
+    case Same: return SameStr;
+    case NSame: return NSameStr;
+    default: always_assert(0);
   }
 }
 

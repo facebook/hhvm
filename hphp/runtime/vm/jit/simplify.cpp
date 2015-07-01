@@ -885,18 +885,26 @@ template<class T, class U>
 static typename std::common_type<T,U>::type cmpOp(Opcode opName, T a, U b) {
   switch (opName) {
   case GtInt:
+  case GtStr:
   case Gt:   return a > b;
   case GteInt:
+  case GteStr:
   case Gte:  return a >= b;
   case LtInt:
+  case LtStr:
   case Lt:   return a < b;
   case LteInt:
+  case LteStr:
   case Lte:  return a <= b;
   case Same:
+  case SameStr:
   case EqInt:
+  case EqStr:
   case Eq:   return a == b;
   case NSame:
+  case NSameStr:
   case NeqInt:
+  case NeqStr:
   case Neq:  return a != b;
   default:
     not_reached();
@@ -931,25 +939,30 @@ SSATmp* cmpImpl(State& env,
   }
 
   // OpSame and OpNSame have some special rules
-  if (opName == Same || opName == NSame) {
+  if (opName == Same || opName == NSame ||
+      opName == SameStr || opName == NSameStr) {
     // OpSame and OpNSame do not perform type juggling
     if (type1.toDataType() != type2.toDataType() &&
         !(type1 <= TStr && type2 <= TStr)) {
-      return cns(env, opName == NSame);
+      return cns(env, bool(cmpOp(opName, 0, 1)));
     }
     // Here src1 and src2 are same type, treating Str and StaticStr as the
     // same.
 
-    // Constant fold if they are both constant strings.
     if (type1 <= TStr && type2 <= TStr) {
+      // Constant fold if they are both constant strings.
       if (src1->hasConstVal() && src2->hasConstVal()) {
         auto const str1 = src1->strVal();
         auto const str2 = src2->strVal();
         bool same = str1->same(str2);
         return cns(env, bool(cmpOp(opName, same, 1)));
+      } else if (!isStrQueryOp(opName)) {
+        // Otherwise, lower to str comparison if possible.
+        return newInst(queryToStrQueryOp(opName), src1, src2);
       }
       return nullptr;
     }
+    assertx(opName != SameStr && opName != NSameStr);
 
     // If type is a primitive type - simplify to Eq/Neq.  Str was already
     // removed above.
@@ -1033,6 +1046,11 @@ SSATmp* cmpImpl(State& env,
     return newInst(queryToDblQueryOp(opName),
                    gen(env, ConvCellToDbl, src1),
                    gen(env, ConvCellToDbl, src2));
+  }
+
+  // Lower to str-comparison if possible.
+  if (!isStrQueryOp(opName) && type1 <= TStr && type2 <= TStr) {
+    return newInst(queryToStrQueryOp(opName), src1, src2);
   }
 
   // ---------------------------------------------------------------------
@@ -1164,6 +1182,14 @@ X(EqInt)
 X(NeqInt)
 X(Same)
 X(NSame)
+X(GtStr)
+X(GteStr)
+X(LtStr)
+X(LteStr)
+X(EqStr)
+X(NeqStr)
+X(SameStr)
+X(NSameStr)
 
 #undef X
 
@@ -2139,6 +2165,14 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(NeqInt)
   X(Same)
   X(NSame)
+  X(GtStr)
+  X(GteStr)
+  X(LtStr)
+  X(LteStr)
+  X(EqStr)
+  X(NeqStr)
+  X(SameStr)
+  X(NSameStr)
   X(ArrayGet)
   X(OrdStr)
   X(LdLoc)

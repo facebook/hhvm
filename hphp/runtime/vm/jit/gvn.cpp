@@ -271,6 +271,14 @@ bool supportsGVN(const IRInstruction* inst) {
   case LteDbl:
   case EqDbl:
   case NeqDbl:
+  case GtStr:
+  case GteStr:
+  case LtStr:
+  case LteStr:
+  case EqStr:
+  case NeqStr:
+  case SameStr:
+  case NSameStr:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:

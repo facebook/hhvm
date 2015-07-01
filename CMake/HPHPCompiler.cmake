@@ -46,15 +46,17 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   if(GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8)
     # FIXME: GCC 4.8+ regressions http://git.io/4r7VCQ
     set(GNUCC_OPT "${GNUCC_OPT} -ftrack-macro-expansion=0 -fno-builtin-memcmp")
-    # Fix problem with GCC 4.9, https://kb.isc.org/article/AA-01167
-    if(GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
-      set(GNUCC_OPT "${GNUCC_OPT} -fno-delete-null-pointer-checks")
-      if(GCC_VERSION VERSION_GREATER 5.1 OR GCC_VERSION VERSION_EQUAL 5.1)
-        set(GNUCC_OPT "${GNUCC_OPT} -D_GLIBCXX_USE_CXX11_ABI=0 -Wno-error=narrowing -Wno-bool-compare -DFOLLY_HAVE_MALLOC_H")
-      endif()
-    endif()
   else()
      message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.8 or greater.")
+  endif()
+
+  # Fix problem with GCC 4.9, https://kb.isc.org/article/AA-01167
+  if(GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
+    set(GNUCC_OPT "${GNUCC_OPT} -fno-delete-null-pointer-checks")
+  endif()
+
+  if(GCC_VERSION VERSION_GREATER 5.1 OR GCC_VERSION VERSION_EQUAL 5.1)
+    set(GNUCC_OPT "${GNUCC_OPT} -D_GLIBCXX_USE_CXX11_ABI=0 -Wno-bool-compare -DFOLLY_HAVE_MALLOC_H")
   endif()
 
   # Enabled GCC/LLVM stack-smashing protection

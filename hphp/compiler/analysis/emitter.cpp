@@ -8714,8 +8714,10 @@ void EmitterVisitor::emitSetInit(Emitter&e, CollectionType ct,
         if (v.getStringData()->isStrictlyInteger(intVal)) {
           useArray = false;
         }
-      } else {
+      } else if (v.isInteger()) {
         if (v.asInt64Val() != i) hasVectorData = false;
+      } else {
+        useArray = false;
       }
     } else {
       useArray = false;
@@ -8773,8 +8775,10 @@ void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
         if (vkey.getStringData()->isStrictlyInteger(intKey)) {
           useArray = false;
         }
-      } else {
+      } else if (vkey.isInteger()) {
         if (vkey.asInt64Val() != i) hasVectorData = false;
+      } else {
+        useArray = false;
       }
     } else {
       useArray = false;

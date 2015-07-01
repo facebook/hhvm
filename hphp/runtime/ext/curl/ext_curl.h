@@ -217,6 +217,7 @@ extern const int64_t k_CURLOPT_RANGE;
 extern const int64_t k_CURLOPT_READDATA;
 extern const int64_t k_CURLOPT_READFUNCTION;
 extern const int64_t k_CURLOPT_REFERER;
+extern const int64_t k_CURLOPT_RESOLVE;
 extern const int64_t k_CURLOPT_RESUME_FROM;
 extern const int64_t k_CURLOPT_RETURNTRANSFER;
 #ifdef FACEBOOK

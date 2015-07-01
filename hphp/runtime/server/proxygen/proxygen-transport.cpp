@@ -544,7 +544,7 @@ void ProxygenTransport::sendImpl(const void *data, int size, int code,
         m_response.getHeaders().add(HTTP_HEADER_CONTENT_LENGTH,
                                     folly::to<std::string>(size));
       }
-    } else if (!suppressBody) {
+    } else {
       // Explicitly add Transfer-Encoding: chunked here.  libproxygen will only
       // add it for keep-alive connections
       m_response.getHeaders().set(HTTP_HEADER_TRANSFER_ENCODING, "chunked");

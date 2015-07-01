@@ -938,6 +938,15 @@ TrackedStore combine_ts(Global& genv, uint32_t id,
 
   auto sf1 = findSpillFrame(genv, s1);
   auto sf2 = findSpillFrame(genv, s2);
+
+  // t7621182 Don't merge different spillframes for now,
+  // because code-gen doesn't handle phi'ing an Obj and a
+  // Cls.
+  if (sf1 || sf2) {
+    // we already know they aren't the same
+    return TrackedStore::BadVal();
+  }
+
   if (!sf1 != !sf2 || (sf1 && *sf1 != *sf2)) {
     // They need to both be spill frames affecting
     // the same addresses, or both not be spill frames.

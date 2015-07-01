@@ -2650,7 +2650,7 @@ void CodeGenerator::cgSpillFrame(IRInstruction* inst) {
     auto objOrClsPtrReg = srcLoc(inst, 2/*objOrCls*/).reg();
     v << store{objOrClsPtrReg, spReg[spOffset + int(AROFF(m_this))]};
   } else {
-    assertx(objOrCls->isA(TNullptr));
+    always_assert(objOrCls->isA(TNullptr));
     // no obj or class; this happens in FPushFunc
     int offset_m_this = spOffset + int(AROFF(m_this));
     v << storeqi{0, spReg[offset_m_this]};

@@ -9,7 +9,6 @@
  *
  */
 
-function _($msgid);
 function bind_textdomain_codeset($domain, $codeset);
 function bindtextdomain($domain_name, $dir);
 function dcgettext($domain_name, $msgid, $category);

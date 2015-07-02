@@ -74,47 +74,51 @@ struct Resumable {
   static constexpr ptrdiff_t dataOff() {
     return sizeof(Resumable);
   }
+  static constexpr size_t getFrameSize(size_t numSlots) {
+    return numSlots * sizeof(TypedValue);
+  }
+
+  // This function is temporary till we move AFWH to HNI
+  static Resumable* Create(size_t frameSize, size_t totalSize) {
+    // Allocate memory.
+    auto node = reinterpret_cast<ResumableNode*>(MM().objMalloc(totalSize));
+    auto frame = reinterpret_cast<char*>(node + 1);
+    auto resumable = reinterpret_cast<Resumable*>(frame + frameSize);
+
+    node->framesize = frameSize;
+    node->hdr.kind = HeaderKind::ResumableFrame;
+
+    return resumable;
+  }
 
   template<bool clone,
-           size_t objSize,
            bool mayUseVV = true>
-  static void* Create(const ActRec* fp,
-                      size_t numSlots,
-                      jit::TCA resumeAddr,
-                      Offset resumeOffset) {
+  void initialize(const ActRec* fp, jit::TCA resumeAddr,
+                  Offset resumeOffset, size_t frameSize, size_t totalSize) {
     assert(fp);
     assert(fp->resumed() == clone);
     auto const func = fp->func();
     assert(func);
     assert(func->isResumable());
     assert(func->contains(resumeOffset));
-
-    // Allocate memory.
-    size_t frameSize = numSlots * sizeof(TypedValue);
-    size_t totalSize = sizeof(ResumableNode) + frameSize +
-                       sizeof(Resumable) + objSize;
-    auto node = reinterpret_cast<ResumableNode*>(MM().objMalloc(totalSize));
-    auto frame = reinterpret_cast<char*>(node + 1);
-    auto resumable = reinterpret_cast<Resumable*>(frame + frameSize);
-    auto actRec = resumable->actRec();
-
-    node->framesize = frameSize;
-    node->hdr.kind = HeaderKind::ResumableFrame;
+    // Check memory alignment
+    assert((((uintptr_t) actRec()) & (sizeof(Cell) - 1)) == 0);
 
     if (!clone) {
       // Copy ActRec, locals and iterators
-      auto src = reinterpret_cast<char*>((uintptr_t)fp - frameSize);
-      wordcpy(frame, src, frameSize + sizeof(ActRec));
+      auto src = reinterpret_cast<const char*>(fp) - frameSize;
+      auto dst = reinterpret_cast<char*>(actRec()) - frameSize;
+      wordcpy(dst, src, frameSize + sizeof(ActRec));
 
       // Set resumed flag.
-      actRec->setResumed();
+      actRec()->setResumed();
 
       // Suspend VarEnv if needed
       assert(mayUseVV || !(func->attrs() & AttrMayUseVV));
       if (mayUseVV &&
           UNLIKELY(func->attrs() & AttrMayUseVV) &&
           UNLIKELY(fp->hasVarEnv())) {
-        fp->getVarEnv()->suspend(fp, actRec);
+        fp->getVarEnv()->suspend(fp, actRec());
       }
     } else {
       // If we are cloning a Resumable, only copy the ActRec. The
@@ -122,17 +126,14 @@ struct Resumable {
       // When called from AFWH::Create or Generator::Create we know we are
       // going to overwrite m_sfp and m_savedRip, so don't copy them here.
       auto src = reinterpret_cast<const char*>(fp);
-      auto aRec = reinterpret_cast<char*>(actRec);
+      auto dst = reinterpret_cast<char*>(actRec());
       const size_t offset = offsetof(ActRec, m_func);
-      wordcpy(aRec + offset, src + offset, sizeof(ActRec) - offset);
+      wordcpy(dst + offset, src + offset, sizeof(ActRec) - offset);
     }
 
     // Populate Resumable.
-    resumable->m_resumeAddr = resumeAddr;
-    resumable->m_offsetAndSize = (totalSize << 32 | resumeOffset);
-
-    // Return pointer to the inline-allocated object.
-    return resumable + 1;
+    m_resumeAddr = resumeAddr;
+    m_offsetAndSize = (totalSize << 32 | resumeOffset);
   }
 
   template<class T> static void Destroy(size_t size, T* obj) {

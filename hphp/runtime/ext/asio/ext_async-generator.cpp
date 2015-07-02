@@ -58,10 +58,17 @@ AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
   assert(fp);
   assert(!fp->resumed());
   assert(fp->func()->isAsyncGenerator());
-  void* genDataPtr = Resumable::Create<false,
-                       sizeof(AsyncGenerator) + sizeof(c_AsyncGenerator)>(
-                       fp, numSlots, resumeAddr, resumeOffset);
-  AsyncGenerator* genData = new (genDataPtr) AsyncGenerator();
+  const size_t frameSize = Resumable::getFrameSize(numSlots);
+  const size_t totalSize = sizeof(ResumableNode) + frameSize +
+                           sizeof(Resumable) +
+                           sizeof(AsyncGenerator) + sizeof(c_AsyncGenerator);
+  auto const resumable = Resumable::Create(frameSize, totalSize);
+  resumable->initialize<false>(fp,
+                               resumeAddr,
+                               resumeOffset,
+                               frameSize,
+                               totalSize);
+  auto const genData = new (resumable + 1) AsyncGenerator();
   auto const gen = new (genData + 1) c_AsyncGenerator();
   assert(gen->hasExactlyOneRef());
   assert(gen->noDestruct());

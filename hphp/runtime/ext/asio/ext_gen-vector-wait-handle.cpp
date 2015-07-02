@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/asio/ext_gen-vector-wait-handle.h"
 
 #include "hphp/runtime/base/smart-ptr.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-context.h"

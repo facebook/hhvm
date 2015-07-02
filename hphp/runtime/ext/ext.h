@@ -29,7 +29,7 @@
 #include "hphp/runtime/ext/array/ext_array_idl.h"
 #include "hphp/runtime/ext/async_mysql/ext_async_mysql.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"

@@ -105,7 +105,7 @@
 #include "hphp/runtime/base/container-functions.h"
 
 #include "hphp/system/systemlib.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 
 #include "hphp/runtime/vm/globals-array.h"
 

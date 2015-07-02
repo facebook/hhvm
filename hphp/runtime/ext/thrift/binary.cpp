@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/thrift/transport.h"
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/array-init.h"

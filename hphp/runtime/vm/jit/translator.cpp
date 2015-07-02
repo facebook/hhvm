@@ -41,7 +41,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/hhbc.h"

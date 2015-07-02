@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 
 namespace HPHP { namespace collections {
 /////////////////////////////////////////////////////////////////////////////

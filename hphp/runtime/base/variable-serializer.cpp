@@ -28,7 +28,7 @@
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/ext/json/JSON_parser.h"
 #include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

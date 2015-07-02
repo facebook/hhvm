@@ -43,7 +43,7 @@ SOFTWARE.
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/ext/json/ext_json.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/system/systemlib.h"
 
 #define MAX_LENGTH_OF_LONG 20

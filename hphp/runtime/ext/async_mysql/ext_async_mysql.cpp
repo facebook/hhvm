@@ -23,7 +23,7 @@
 #include <squangle/mysql_client/AsyncHelpers.h>
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
 #include "hphp/runtime/vm/native-data.h"

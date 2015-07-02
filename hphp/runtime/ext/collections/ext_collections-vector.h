@@ -2,7 +2,7 @@
 #define incl_HPHP_EXT_COLLECTIONS_VECTOR_H
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP { namespace collections {

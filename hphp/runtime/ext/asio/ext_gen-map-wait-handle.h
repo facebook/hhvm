@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_ASIO_GEN_MAP_WAIT_HANDLE_H_
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 

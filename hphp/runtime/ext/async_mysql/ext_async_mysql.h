@@ -25,7 +25,7 @@
 #include <squangle/mysql_client/Row.h>
 
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/extension.h"
 
 #include <folly/Format.h>

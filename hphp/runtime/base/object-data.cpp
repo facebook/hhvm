@@ -30,7 +30,7 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"

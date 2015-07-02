@@ -47,6 +47,6 @@ abstract final class Shapes {
    * local variables.
    */
   public static function removeKey(shape() $shape, arraykey $index): void {}
+
+  public static function toArray(shape() $shape): array<arraykey, mixed>;
 }
-
-

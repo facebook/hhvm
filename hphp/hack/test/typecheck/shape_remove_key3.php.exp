@@ -1,0 +1,6 @@
+File "shape_remove_key3.php", line 8, characters 10-11:
+Invalid return type (Typing[4110])
+File "shape_remove_key3.php", line 5, characters 18-23:
+This is a string
+File "shape_remove_key3.php", line 7, characters 3-28:
+It is incompatible with a shape

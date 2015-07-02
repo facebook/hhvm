@@ -7,11 +7,7 @@ HHVM_PUBLIC_HEADERS(hhbc ${files})
 
 
 # remove anything in a test folder
-foreach (file ${CXX_SOURCES})
-  if (${file} MATCHES "/test/")
-    list(REMOVE_ITEM CXX_SOURCES ${file})
-  endif()
-endforeach(file ${CXX_SOURCES})
+HHVM_REMOVE_MATCHES_FROM_LISTS(CXX_SOURCES MATCHES "/test/")
 
 add_library(hphp_hhbbc STATIC ${CXX_SOURCES})
 add_dependencies(hphp_hhbbc hphp_system)

@@ -6,17 +6,9 @@ set(ASM_SOURCES)
 auto_sources(asmfiles "*.S" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND ASM_SOURCES ${asmfiles})
 
-foreach (file ${files})
-  if (${file} MATCHES "/test/")
-    list(REMOVE_ITEM CXX_SOURCES ${file})
-  endif()
-
-  # Disable Channeled JSON until we're sure it's going to stick
-  # sgolemon(2014-02-19)
-  if (${file} MATCHES "channeled-json-")
-    list(REMOVE_ITEM CXX_SOURCES ${file})
-  endif()
-endforeach()
+# Disable Channeled JSON until we're sure it's going to stick
+# sgolemon(2014-02-19)
+HHVM_REMOVE_MATCHES_FROM_LISTS(CXX_SOURCES MATCHES "/test/" "channeled-json-")
 
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-repo-schema.h"

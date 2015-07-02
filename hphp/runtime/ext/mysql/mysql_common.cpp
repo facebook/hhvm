@@ -21,6 +21,7 @@
 #include <netinet/in.h>
 #include <poll.h>
 #include <algorithm>
+#include <cassert>
 #include <unordered_set>
 #include <vector>
 
@@ -28,7 +29,6 @@
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 
-#include "hphp/util/db-mysql.h"
 #include "hphp/util/network.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/timer.h"
@@ -62,6 +62,30 @@ public:
   }
 };
 static MySQLStaticInitializer s_mysql_initializer;
+
+///////////////////////////////////////////////////////////////////////////////
+
+int MySQLUtil::set_mysql_timeout(MYSQL *mysql, MySQLUtil::TimeoutType type, int ms) {
+   mysql_option opt = MYSQL_OPT_CONNECT_TIMEOUT;
+#ifdef MYSQL_MILLISECOND_TIMEOUT
+  switch (type) {
+   case MySQLUtil::ConnectTimeout: opt = MYSQL_OPT_CONNECT_TIMEOUT_MS; break;
+   case MySQLUtil::ReadTimeout: opt =  MYSQL_OPT_READ_TIMEOUT_MS; break;
+   case MySQLUtil::WriteTimeout: opt =  MYSQL_OPT_WRITE_TIMEOUT_MS; break;
+   default: assert(false); break;
+  }
+#else
+  switch (type) {
+    case MySQLUtil::ConnectTimeout: opt = MYSQL_OPT_CONNECT_TIMEOUT; break;
+    case MySQLUtil::ReadTimeout: opt =  MYSQL_OPT_READ_TIMEOUT; break;
+    case MySQLUtil::WriteTimeout: opt =  MYSQL_OPT_WRITE_TIMEOUT; break;
+    default: assert(false); break;
+  }
+  ms = (ms + 999) / 1000;
+#endif
+
+  return mysql_options(mysql, opt, (const char*)&ms);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

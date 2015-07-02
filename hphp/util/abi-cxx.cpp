@@ -25,7 +25,7 @@
 #include <unordered_map>
 
 #include <cxxabi.h>
-#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(__MSC_VER))
+#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
 # include <windows.h>
 # include <dbghelp.h>
 #else
@@ -59,7 +59,7 @@ std::string getNativeFunctionName(void* codeAddr) {
   }
   std::string functionName;
 
-#if defined(__CYGWIN__) || defined(__MINGW__) || defined(__MSC_VER)
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
   HANDLE process = GetCurrentProcess();
   SYMBOL_INFO *symbol;
   DWORD64 addr_disp = 0;

@@ -123,7 +123,9 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
     String capath = m_context[s_capath].toString();
 
     if (!cafile.empty() || !capath.empty()) {
-      if (!SSL_CTX_load_verify_locations(ctx, cafile.data(), capath.data())) {
+      const char* cafileptr = cafile.empty() ? nullptr : cafile.data();
+      const char* capathptr = capath.empty() ? nullptr : capath.data();
+      if (!SSL_CTX_load_verify_locations(ctx, cafileptr, capathptr)) {
         raise_warning("Unable to set verify locations `%s' `%s'",
                       cafile.data(), capath.data());
         return nullptr;

@@ -69,6 +69,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/system/constants.h"
+#include "hphp/util/code-cache.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/capability.h"
 #include "hphp/util/current-executable.h"
@@ -417,7 +418,7 @@ static void handle_exception_helper(bool& ret,
                                     bool& error,
                                     bool richErrorMsg) {
   // Clear oom/timeout while handling exception and restore them afterwards.
-  auto& flags = surpriseFlags();
+  auto& flags = stackLimitAndSurprise();
   auto const origFlags = flags.load() & ResourceFlags;
   flags.fetch_and(~ResourceFlags);
 
@@ -434,7 +435,7 @@ static void handle_exception_helper(bool& ret,
       ret = false;
     } else if (where != ContextOfException::Handler &&
         !context->getExitCallback().isNull() &&
-        HHVM_FN(is_callable)(context->getExitCallback())) {
+        is_callable(context->getExitCallback())) {
       Array stack = e.getBacktrace();
       Array argv = make_packed_array(ExitException::ExitCode.load(), stack);
       vm_call_user_func(context->getExitCallback(), argv);
@@ -642,7 +643,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
     }
     String file = empty_string();
     if (argc > 0) {
-      file = StringData::Make(argv[0], CopyString);
+      file = String::attach(StringData::Make(argv[0], CopyString));
     }
     serverArr.set(s_REQUEST_START_TIME, now);
     serverArr.set(s_REQUEST_TIME, now);
@@ -696,7 +697,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof,
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   MM().collect();
-  if (RuntimeOption::EvalDumpTC) {
+  if (RuntimeOption::EvalDumpTC || RuntimeOption::EvalDumpIR) {
     HPHP::jit::tc_dump();
   }
   if (xhprof) {
@@ -715,16 +716,6 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
     ti.m_coverage->Report(RuntimeOption::CodeCoverageOutputFile);
   }
 }
-
-#if defined(__APPLE__) || defined(__CYGWIN__)
-const void* __hot_start = nullptr;
-const void* __hot_end = nullptr;
-#else
-extern "C" {
-void __attribute__((__weak__)) __hot_start();
-void __attribute__((__weak__)) __hot_end();
-}
-#endif
 
 #if FACEBOOK && defined USE_SSECRC
 // Overwrite the functiosn
@@ -751,10 +742,10 @@ NEVER_INLINE void copyHashFuncs() {
              hash_func(hash_string_cs_crc), 48);
     copyFunc(hash_func(hash_string_cs),
              hash_func(hash_string_cs_unaligned_crc), 64);
-    copyFunc(reinterpret_cast<void*>(hash_string_i_unsafe),
-             reinterpret_cast<void*>(hash_string_i_crc), 64);
-    copyFunc(reinterpret_cast<void*>(hash_string_i),
-             reinterpret_cast<void*>(hash_string_i_unaligned_crc), 80);
+    copyFunc(hash_func(hash_string_i_unsafe),
+             hash_func(hash_string_i_crc), 64);
+    copyFunc(hash_func(hash_string_i),
+             hash_func(hash_string_i_unaligned_crc), 80);
   }
 #endif
 }
@@ -845,19 +836,24 @@ static void pagein_self(void) {
       auto endPtr = (char*)end;
       auto hotStart = (char*)__hot_start;
       auto hotEnd = (char*)__hot_end;
-      const size_t hugeBytes = 2L * 1024 * 1024;
+      const size_t hugePageBytes = 2L * 1024 * 1024;
 
       if (mlock(beginPtr, end - begin) == 0) {
-        if (RuntimeOption::EvalMapHotTextHuge &&
+        if (RuntimeOption::EvalMaxHotTextHugePages > 0 &&
             __hot_start &&
             __hot_end &&
             hugePagesSupported() &&
             beginPtr <= hotStart &&
             hotEnd <= endPtr) {
 
-          char* from = hotStart - ((intptr_t)hotStart & (hugeBytes - 1));
-          char* to = hotEnd + (hugeBytes - 1);
-          to -= (intptr_t)to & (hugeBytes - 1);
+          char* from = hotStart - ((intptr_t)hotStart & (hugePageBytes - 1));
+          char* to = hotEnd + (hugePageBytes - 1);
+          to -= (intptr_t)to & (hugePageBytes - 1);
+          const size_t maxHugeHotTextBytes =
+            RuntimeOption::EvalMaxHotTextHugePages * hugePageBytes;
+          if (to - from >  maxHugeHotTextBytes) {
+            to = from + maxHugeHotTextBytes;
+          }
           if (to < (void*)hugifyText) {
             hugifyText(from, to);
           }

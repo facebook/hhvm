@@ -65,17 +65,11 @@ void StaticClassName::updateClassName() {
   }
 }
 
-static BlockScopeRawPtr originalScope(StaticClassName *scn) {
-  Expression *e = dynamic_cast<Expression*>(scn);
-  if (e) return e->getOriginalScope();
-  return dynamic_cast<Statement*>(scn)->getScope();
-}
-
 ClassScopePtr StaticClassName::resolveClass() {
   m_present = false;
   m_unknown = true;
   if (m_class) return ClassScopePtr();
-  BlockScopeRawPtr scope = originalScope(this);
+  auto scope = dynamic_cast<Construct*>(this)->getScope();
   if (m_self) {
     if (ClassScopePtr self = scope->getContainingClass()) {
       m_origClassName = self->getOriginalName();

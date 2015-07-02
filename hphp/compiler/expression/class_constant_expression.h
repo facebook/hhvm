@@ -39,15 +39,15 @@ public:
 
   const std::string &getConName() const { return m_varName; }
 
-  bool isValid() const { return m_valid; }
-  bool isDynamic() const;
+  ClassScopeRawPtr getOriginalClassScope() const;
+
   bool hasClass() const = delete;
   bool isColonColonClass() const { return m_varName == "class"; }
 private:
   std::string m_varName;
-  BlockScope *m_defScope;
-  bool m_valid;
   bool m_depsSet;
+  bool m_originalScopeSet;
+  BlockScopeRawPtr m_originalScope;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

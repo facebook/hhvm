@@ -31,7 +31,6 @@ public:
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
-  bool isTemporary() const override;
   int getLocalEffects() const override;
   bool isLiteralString() const override;
   std::string getLiteralString() const override;

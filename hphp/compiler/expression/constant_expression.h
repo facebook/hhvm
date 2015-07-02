@@ -36,9 +36,6 @@ public:
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
-  bool isTemporary() const override {
-    return isNull() || isBoolean();
-  }
   bool isScalar() const override;
   bool isLiteralNull() const override;
   int getLocalEffects() const override { return NoEffect; }

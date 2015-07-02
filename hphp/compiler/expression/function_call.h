@@ -36,7 +36,6 @@ public:
   void analyzeProgram(AnalysisResultPtr ar) override;
 
   bool isRefable(bool checkError = false) const override { return true;}
-  bool isTemporary() const override;
 
   ConstructPtr getNthKid(int n) const override;
   void setNthKid(int n, ConstructPtr cp) override;

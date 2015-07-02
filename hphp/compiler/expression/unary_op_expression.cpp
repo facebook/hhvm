@@ -110,18 +110,6 @@ ExpressionPtr UnaryOpExpression::clone() {
   return exp;
 }
 
-bool UnaryOpExpression::isTemporary() const {
-  switch (m_op) {
-  case '!':
-  case '+':
-  case '-':
-  case '~':
-  case T_ARRAY:
-    return true;
-  }
-  return false;
-}
-
 bool UnaryOpExpression::isScalar() const {
   switch (m_op) {
   case '!':

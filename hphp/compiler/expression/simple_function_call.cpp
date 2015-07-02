@@ -528,8 +528,8 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
           !m_classScope->getAttribute(
             ClassScope::InheritsUnknownStaticMethodHandler)))) {
       bool ok = false;
-      if (m_classScope && getOriginalClass()) {
-        FunctionScopeRawPtr fs = getOriginalFunction();
+      if (m_classScope && getClassScope()) {
+        FunctionScopeRawPtr fs = getFunctionScope();
         if (fs && !fs->isStatic() &&
             (m_classScope->getAttribute(
               ClassScope::HasUnknownMethodHandler) ||
@@ -1239,11 +1239,11 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
           return SimpleFunctionCallPtr();
         }
         if (func->isPrivate() ?
-            (cls != call->getOriginalClass() ||
+            (cls != call->getClassScope() ||
              !cls->findFunction(ar, smethod, false)) :
             (func->isProtected() &&
-             (!call->getOriginalClass() ||
-              !call->getOriginalClass()->derivesFrom(ar, sclass,
+             (!call->getClassScope() ||
+              !call->getClassScope()->derivesFrom(ar, sclass,
                                                      true, false)))) {
           error = true;
           return SimpleFunctionCallPtr();

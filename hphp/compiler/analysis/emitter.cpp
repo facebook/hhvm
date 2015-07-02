@@ -2622,7 +2622,7 @@ void EmitterVisitor::visit(FileScopePtr file) {
 static StringData* getClassName(ExpressionPtr e) {
   ClassScopeRawPtr cls;
   if (e->isThis()) {
-    cls = e->getOriginalClass();
+    cls = e->getClassScope();
   }
   if (cls && !cls->isTrait()) {
     return makeStaticString(cls->getScopeName());
@@ -3638,7 +3638,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           e.UnboxR();
           e.InstanceOf();
         } else if (s != "") {
-          ClassScopeRawPtr cls = second->getOriginalClass();
+          ClassScopeRawPtr cls = second->getClassScope();
           bool isTrait = cls && cls->isTrait();
           bool isSelf = s == "self" && notQuoted;
           bool isParent = s == "parent" && notQuoted;
@@ -3758,8 +3758,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       visit(cls);
       emitAGet(e);
       emitClsCns();
-    } else if (cc->getOriginalClass() &&
-               !cc->getOriginalClass()->isTrait()) {
+    } else if (cc->getOriginalClassScope() &&
+               !cc->getOriginalClassScope()->isTrait()) {
       // C::Constant inside a class
       auto nCls = getOriginalClassName();
       if (cc->isColonColonClass()) {
@@ -4192,7 +4192,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       static_pointer_cast<NewObjectExpression>(node));
     ExpressionListPtr params(ne->getParams());
     int numParams = params ? params->getCount() : 0;
-    ClassScopeRawPtr cls = ne->getOriginalClass();
+    ClassScopeRawPtr cls = ne->getClassScope();
 
     Offset fpiStart;
     if (ne->isStatic()) {
@@ -7221,7 +7221,7 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
   prepareEvalStack();
 
   m_evalStack.push(StackSym::K);
-  auto const func = node->getOriginalFunction();
+  auto const func = node->getFunctionScope();
 
   if (node->isStatic()) {
     m_evalStack.setClsBaseType(SymbolicStack::CLS_LATE_BOUND);
@@ -7250,8 +7250,8 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
       m_evalStack.setUnnamedLocal(clsBaseIdx, unnamedLoc, m_ue.bcPos());
       emitPop(e);
     }
-  } else if (!node->getOriginalClass() ||
-             node->getOriginalClass()->isTrait() ||
+  } else if (!node->getClassScope() ||
+             node->getClassScope()->isTrait() ||
              (func && func->isClosure())) {
     // In a trait, a potentially rebound closure or psuedo-main, we can't
     // resolve self:: or parent:: yet, so we emit special instructions that do
@@ -7266,7 +7266,7 @@ void EmitterVisitor::emitVirtualClassBase(Emitter& e, Expr* node) {
         makeStaticString(node->getOriginalClassName()));
     }
   } else if (node->isParent() &&
-             node->getOriginalClass()->getOriginalParent().empty()) {
+             node->getClassScope()->getOriginalParent().empty()) {
     // parent:: in a class without a parent.  We'll emit a Parent
     // opcode because it can handle this error case.
     m_evalStack.setClsBaseType(SymbolicStack::CLS_PARENT);

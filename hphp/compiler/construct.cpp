@@ -53,19 +53,12 @@ void Construct::copyLocationTo(ConstructPtr other) {
   other->m_r = m_r;
 }
 
-void Construct::resetScope(BlockScopeRawPtr scope, bool resetOrigScope) {
+void Construct::resetScope(BlockScopeRawPtr scope) {
   setBlockScope(scope);
-  if (resetOrigScope) {
-    ExpressionPtr expr =
-      dynamic_pointer_cast<Expression>(shared_from_this());
-    if (expr) {
-      expr->setOriginalScope(scope);
-    }
-  }
   for (int i = 0, n = getKidCount(); i < n; i++) {
     if (ConstructPtr kid = getNthKid(i)) {
       if (FunctionWalker::SkipRecurse(kid)) continue;
-      kid->resetScope(scope, resetOrigScope);
+      kid->resetScope(scope);
     }
   }
 }

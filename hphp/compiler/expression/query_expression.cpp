@@ -192,7 +192,7 @@ ClosureExpressionPtr QueryExpression::clientSideRewrite(
     (new FunctionScope(ar, false, name, func, false, 1, 1,
                        nullptr, attr, docComment, fileScope, uattrs));
   fileScope->addFunction(ar, funcScope);
-  func->resetScope(funcScope, true);
+  func->resetScope(funcScope);
   funcScope->setOuterScope(fileScope);
 
   // Now construct a closure expression to create the closure value to

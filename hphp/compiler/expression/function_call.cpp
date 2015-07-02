@@ -73,10 +73,6 @@ void FunctionCall::reset() {
   m_variableArgument = false;
 }
 
-bool FunctionCall::isTemporary() const {
-  return m_funcScope && !m_funcScope->isRefReturn();
-}
-
 bool FunctionCall::isNamed(const char* name) const {
   return !strcasecmp(m_origName.c_str(), name);
 }

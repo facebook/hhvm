@@ -38,23 +38,27 @@ ClassConstantExpression::ClassConstantExpression
  ExpressionPtr classExp, const std::string &varName)
   : Expression(
       EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ClassConstantExpression)),
-    StaticClassName(classExp), m_varName(varName), m_defScope(nullptr),
-    m_valid(false), m_depsSet(false) {
+    StaticClassName(classExp), m_varName(varName), m_depsSet(false),
+    m_originalScopeSet(false) {
 }
 
 ExpressionPtr ClassConstantExpression::clone() {
-  ClassConstantExpressionPtr exp(new ClassConstantExpression(*this));
+  auto exp = std::make_shared<ClassConstantExpression>(*this);
   Expression::deepCopy(exp);
   exp->m_class = Clone(m_class);
   exp->m_depsSet = false;
+  exp->m_originalScopeSet = true;
+  exp->m_originalScope = m_originalScope ? m_originalScope : getScope();
   return exp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// parser functions
-
-///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
+
+ClassScopeRawPtr ClassConstantExpression::getOriginalClassScope() const {
+  auto scope = m_originalScopeSet ? m_originalScope : getScope();
+  return scope ? scope->getContainingClass() : ClassScopeRawPtr();
+}
 
 bool ClassConstantExpression::containsDynamicConstant(AnalysisResultPtr ar)
   const {
@@ -172,9 +176,4 @@ void ClassConstantExpression::outputPHP(CodeGenerator &cg,
   cg_printf("\\");
   StaticClassName::outputPHP(cg, ar);
   cg_printf("::%s", m_varName.c_str());
-}
-
-bool ClassConstantExpression::isDynamic() const {
-  if (!m_valid) return true;
-  return m_defScope->getConstants()->isDynamic(m_varName);
 }

@@ -65,7 +65,7 @@ Expression::ExprClass Expression::Classes[] = {
 
 Expression::Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS)
     : Construct(scope, r, kindOf), m_context(RValue),
-      m_originalScopeSet(false), m_unused(false), m_error(0) {
+      m_unused(false), m_error(0) {
 }
 
 ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
@@ -126,7 +126,6 @@ void Expression::setArgNum(int n) {
 
 void Expression::deepCopy(ExpressionPtr exp) {
   exp->m_unused = false;
-  exp->m_replacement.reset();
   exp->clearVisited();
 };
 
@@ -244,29 +243,6 @@ bool Expression::IsIdentifier(const string &value) {
 void Expression::analyzeProgram(AnalysisResultPtr ar) {
 }
 
-BlockScopeRawPtr Expression::getOriginalScope() {
-  if (!m_originalScopeSet) {
-    m_originalScopeSet = true;
-    m_originalScope = getScope();
-  }
-  return m_originalScope;
-}
-
-void Expression::setOriginalScope(BlockScopeRawPtr scope) {
-  m_originalScope = scope;
-  m_originalScopeSet = true;
-}
-
-ClassScopeRawPtr Expression::getOriginalClass() {
-  BlockScopeRawPtr scope = getOriginalScope();
-  return scope ? scope->getContainingClass() : ClassScopeRawPtr();
-}
-
-FunctionScopeRawPtr Expression::getOriginalFunction() {
-  BlockScopeRawPtr scope = getOriginalScope();
-  return scope ? scope->getContainingFunction() : FunctionScopeRawPtr();
-}
-
 void Expression::setDynamicByIdentifier(AnalysisResultPtr ar,
                                         const std::string &value) {
   string id = toLower(value);
@@ -336,12 +312,6 @@ ExpressionPtr Expression::MakeConstant(AnalysisResultConstPtr ar,
     assert(false);
   }
   return exp;
-}
-
-ExpressionPtr Expression::fetchReplacement() {
-  ExpressionPtr t = m_replacement;
-  m_replacement.reset();
-  return t;
 }
 
 void Expression::computeLocalExprAltered() {

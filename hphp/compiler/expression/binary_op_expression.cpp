@@ -84,25 +84,6 @@ ExpressionPtr BinaryOpExpression::clone() {
   return exp;
 }
 
-bool BinaryOpExpression::isTemporary() const {
-  switch (m_op) {
-  case '+':
-  case '-':
-  case '*':
-  case '/':
-  case T_SL:
-  case T_SR:
-  case T_BOOLEAN_OR:
-  case T_BOOLEAN_AND:
-  case T_LOGICAL_OR:
-  case T_LOGICAL_AND:
-  case T_INSTANCEOF:
-  case T_COLLECTION:
-    return true;
-  }
-  return false;
-}
-
 bool BinaryOpExpression::isRefable(bool checkError /* = false */) const {
   return checkError && m_assign;
 }
@@ -371,11 +352,11 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           return ExpressionPtr();
         }
       }
-      if (!Option::WholeProgram || !Option::ParseTimeOpts) {
+      if ((!Option::WholeProgram || !Option::ParseTimeOpts) && getScope()) {
         // In the VM, don't optimize __CLASS__ if within a trait, since
         // __CLASS__ is not resolved yet.
-        ClassScopeRawPtr clsScope = getOriginalClass();
-        if (clsScope && clsScope->isTrait()) {
+        auto cs = getClassScope();
+        if (cs && cs->isTrait()) {
           if ((scalar1 && scalar1->getType() == T_CLASS_C) ||
               (scalar2 && scalar2->getType() == T_CLASS_C)) {
             return ExpressionPtr();

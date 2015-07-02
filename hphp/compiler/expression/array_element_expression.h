@@ -36,7 +36,6 @@ public:
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
   bool isRefable(bool checkError = false) const override { return true;}
-  bool isTemporary() const override;
 
   ExpressionPtr getVariable() const { return m_variable;}
   ExpressionPtr getOffset() const { return m_offset;}

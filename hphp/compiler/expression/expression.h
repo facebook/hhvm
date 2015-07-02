@@ -159,21 +159,12 @@ public:
   void setArgNum(int n);
 
   /**
-   * Implementing Construct.
-   */
-  BlockScopeRawPtr getOriginalScope();
-  void setOriginalScope(BlockScopeRawPtr scope);
-  ClassScopeRawPtr getOriginalClass();
-  FunctionScopeRawPtr getOriginalFunction();
-
-  /**
     * For generic walks
     */
   virtual int getKidCount() const { return 0; }
   ExpressionPtr getNthExpr(int n) const { return
       static_pointer_cast<Expression>(getNthKid(n)); }
 
-  virtual bool isTemporary() const { return false; }
   virtual bool isScalar() const { return false; }
   bool isArray() const;
   bool isCollection() const;
@@ -224,8 +215,6 @@ public:
 
   bool isUnused() const { return m_unused; }
   void setUnused(bool u) { m_unused = u; }
-  ExpressionPtr fetchReplacement();
-  void setReplacement(ExpressionPtr rep) { m_replacement = rep; }
 
   /**
    * Correctly compute the local expression altered bit
@@ -238,7 +227,6 @@ protected:
   int m_argNum;
 
 private:
-  bool m_originalScopeSet;
   bool m_unused;
   mutable int m_error;
 
@@ -247,9 +235,6 @@ protected:
                               const std::string &value);
  private:
   static ExprClass Classes[];
-
-  BlockScopeRawPtr m_originalScope;
-  ExpressionPtr m_replacement;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

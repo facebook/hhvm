@@ -32,7 +32,6 @@ public:
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   bool isRefable(bool checkError = false) const override { return checkError; }
-  bool isTemporary() const override { return true; }
 private:
   bool m_dynamic;
 };

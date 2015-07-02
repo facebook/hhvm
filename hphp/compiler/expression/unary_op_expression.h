@@ -42,7 +42,6 @@ public:
 
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
   void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
-  bool isTemporary() const override;
   bool isRefable(bool checkError = false) const override;
   bool isScalar() const override;
   bool isThis() const override;

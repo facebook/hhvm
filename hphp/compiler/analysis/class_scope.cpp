@@ -383,7 +383,7 @@ void ClassScope::importTraitProperties(AnalysisResultPtr ar) {
       if (prop) {
         ClassVariablePtr cloneProp = dynamic_pointer_cast<ClassVariable>(
           dynamic_pointer_cast<ClassStatement>(m_stmt)->addClone(prop));
-        cloneProp->resetScope(shared_from_this(), true);
+        cloneProp->resetScope(shared_from_this());
         cloneProp->addTraitPropsToScope(ar,
                       dynamic_pointer_cast<ClassScope>(shared_from_this()));
       }
@@ -416,7 +416,7 @@ ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
     std::make_shared<HPHP::FunctionScope>(
       funcScope, ar, origMethName, cloneMeth,
       cloneMeth->getModifiers(), cScope->isUserClass());
-  cloneMeth->resetScope(cloneFuncScope, true);
+  cloneMeth->resetScope(cloneFuncScope);
   cloneFuncScope->setOuterScope(shared_from_this());
   informClosuresAboutScopeClone(cloneMeth, cloneFuncScope, ar);
 

@@ -288,7 +288,7 @@ public:
   ClassScopeRawPtr getClassScope() const {
     return m_blockScope->getContainingClass();
   }
-  void resetScope(BlockScopeRawPtr scope, bool resetOrigScope=false);
+  void resetScope(BlockScopeRawPtr scope);
   void parseTimeFatal(FileScopeRawPtr fs, Compiler::ErrorType error,
                       const char *fmt, ...) ATTRIBUTE_PRINTF(4,5);
   void analysisTimeFatal(Compiler::ErrorType error, const char *fmt, ...)

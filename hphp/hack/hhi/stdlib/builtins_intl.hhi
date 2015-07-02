@@ -481,7 +481,7 @@ class IntlDateFormatter {
     public function setTimeZoneId($zone);
 }
 
-class ResourceBundle implements Traversable {
+class ResourceBundle<T> implements Traversable<T> {
     public function __construct($locale, $bundlename, $fallback = null);
     public function count();
     public static function create($locale, $bundlename, $fallback = null);
@@ -625,7 +625,7 @@ class IntlGregorianCalendar extends IntlCalendar {
 class IntlException extends Exception {
 }
 
-class IntlIterator implements Iterator, Traversable {
+class IntlIterator<T> implements Iterator<T> {
     public function current();
     public function key();
     public function next();
@@ -633,7 +633,7 @@ class IntlIterator implements Iterator, Traversable {
     public function valid();
 }
 
-class IntlBreakIterator implements Traversable {
+class IntlBreakIterator<T> implements Traversable<T> {
     const int DONE = -1;
     const int WORD_NONE = 0;
     const int WORD_NONE_LIMIT = 100;
@@ -676,18 +676,18 @@ class IntlBreakIterator implements Traversable {
     public function setText($text);
 }
 
-class IntlRuleBasedBreakIterator extends IntlBreakIterator {
+class IntlRuleBasedBreakIterator<T> extends IntlBreakIterator<T> {
     public function getBinaryRules();
     public function getRuleStatus();
     public function getRuleStatusVec();
     public function getRules();
 }
 
-class IntlCodePointBreakIterator extends IntlBreakIterator {
+class IntlCodePointBreakIterator<T> extends IntlBreakIterator<T> {
     public function getLastCodePoint();
 }
 
-class IntlPartsIterator extends IntlIterator {
+class IntlPartsIterator<T> extends IntlIterator<T> {
     const int KEY_SEQUENTIAL = 0;
     const int KEY_LEFT = 1;
     const int KEY_RIGHT = 2;

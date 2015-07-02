@@ -10,8 +10,8 @@
  */
 
 const int INTL_MAX_LOCALE_LEN = 80;
-const float INTL_ICU_VERSION = 52.1;
-const float INTL_ICU_DATA_VERSION = 52.1;
+const string INTL_ICU_VERSION = '52.1';
+const string INTL_ICU_DATA_VERSION = '52.1';
 
 const int IDNA_ALLOW_UNASSIGNED = 1;
 const int IDNA_CHECK_BIDI = 4;
@@ -392,7 +392,7 @@ class Collator {
 class Locale {
   const int ACTUAL_LOCALE = 0;
   const int VALID_LOCALE = 1;
-  const string DEFAULT_LOCALE = "";
+  const string DEFAULT_LOCALE = '';
   const string LANG_TAG = 'language';
   const string EXTLANG_TAG = 'extlang';
   const string SCRIPT_TAG = 'script';

@@ -35,6 +35,12 @@ abstract final class Shapes {
     arraykey $index,
     $default = null,
   ) {}
+
+  /**
+   * Check if a field in shape exists.
+   * Similar to array_key_exists, but for shapes.
+   */
+  public static function keyExists(shape() $shape, arraykey $index): bool {}
 }
 
 

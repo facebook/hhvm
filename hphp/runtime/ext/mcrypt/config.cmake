@@ -1,0 +1,7 @@
+HHVM_EXTENSION_CHECK_DEPENDENCIES(mcrypt Mcrypt)
+if (ENABLE_EXTENSION_MCRYPT)  
+  HHVM_SELECT_SOURCES(HRE_CURRENT_EXT_PATH)
+  message(STATUS "Building the mcrypt extension")
+else()
+  message("Not building the mcrypt extension")
+endif ()

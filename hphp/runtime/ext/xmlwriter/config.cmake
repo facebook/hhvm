@@ -1,0 +1,7 @@
+HHVM_EXTENSION_CHECK_DEPENDENCIES(xmlwriter LibXml2)
+if (ENABLE_EXTENSION_XMLWRITER)
+  HHVM_SELECT_SOURCES(HRE_CURRENT_EXT_PATH)
+  message(STATUS "Building the xmlwriter extension")
+else()
+  message("Not building the xmlwriter extension")
+endif ()

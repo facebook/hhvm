@@ -1,0 +1,7 @@
+HHVM_EXTENSION_CHECK_DEPENDENCIES(xml EXPAT)
+if (ENABLE_EXTENSION_XML)
+  HHVM_SELECT_SOURCES(HRE_CURRENT_EXT_PATH)
+  message(STATUS "Building the xml extension")
+else()
+  message("Not building the xml extension")
+endif ()

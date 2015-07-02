@@ -1,0 +1,7 @@
+HHVM_EXTENSION_CHECK_DEPENDENCIES(libxml LibXml2)
+if (ENABLE_EXTENSION_LIBXML)
+  HHVM_SELECT_SOURCES(HRE_CURRENT_EXT_PATH)
+  message(STATUS "Building the libxml extension")
+else()
+  message("Not building the libxml extension")
+endif ()

@@ -1,0 +1,7 @@
+HHVM_EXTENSION_CHECK_DEPENDENCIES(memcached Libmemcached)
+if (ENABLE_EXTENSION_MEMCACHED)
+  HHVM_SELECT_SOURCES(HRE_CURRENT_EXT_PATH)
+  message(STATUS "Building the memcached extension")
+else()
+  message("Not building the memcached extension")
+endif()

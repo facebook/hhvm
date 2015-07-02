@@ -58,45 +58,6 @@ if (LIBICONV_CONST)
   add_definitions("-DICONV_CONST=const")
 endif()
 
-# mysql checks - if we're using async mysql, we use webscalesqlclient from
-# third-party/ instead
-if (ENABLE_ASYNC_MYSQL)
-  include_directories(
-    ${TP_DIR}/re2/src/
-    ${TP_DIR}/squangle/src/
-    ${TP_DIR}/webscalesqlclient/src/include/
-  )
-  set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
-  # Unlike the .so, the static library intentionally does not link against
-  # yassl, despite building it :/
-  set(MYSQL_CLIENT_LIBS
-    ${MYSQL_CLIENT_LIB_DIR}/libmysql/libwebscalesqlclient_r.a
-    ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/libyassl.a
-    ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/taocrypt/libtaocrypt.a
-  )
-else()
-  find_package(MySQL REQUIRED)
-  link_directories(${MYSQL_LIB_DIR})
-  include_directories(${MYSQL_INCLUDE_DIR})
-endif()
-MYSQL_SOCKET_SEARCH()
-if (MYSQL_UNIX_SOCK_ADDR)
-  add_definitions(-DPHP_MYSQL_UNIX_SOCK_ADDR="${MYSQL_UNIX_SOCK_ADDR}")
-else ()
-  message(FATAL_ERROR "Could not find MySQL socket path - if you install a MySQL server, this should be automatically detected. Alternatively, specify -DMYSQL_UNIX_SOCK_ADDR=/path/to/mysql.socket ; if you don't care about unix socket support for MySQL, specify -DMYSQL_UNIX_SOCK_ADDR=/dev/null")
-endif ()
-
-# libmemcached checks
-find_package(Libmemcached REQUIRED)
-if (LIBMEMCACHED_VERSION VERSION_LESS "0.39")
-  unset(LIBMEMCACHED_INCLUDE_DIR CACHE)
-  unset(LIBMEMCACHED_LIBRARY CACHE)
-  unset(LIBMEMCACHED_VERSION CACHE)
-  message(FATAL_ERROR "libmemcache is too old, found ${LIBMEMCACHED_VERSION} and we need 0.39")
-endif ()
-include_directories(${LIBMEMCACHED_INCLUDE_DIR})
-link_directories(${LIBMEMCACHED_LIBRARY_DIRS})
-
 # pcre checks
 find_package(PCRE)
 include_directories(${PCRE_INCLUDE_DIR})
@@ -126,32 +87,10 @@ if (LibXed_INCLUDE_DIR AND LibXed_LIBRARY)
   add_definitions("-DHAVE_LIBXED")
 endif()
 
-# CURL checks
-find_package(CURL REQUIRED)
-include_directories(${CURL_INCLUDE_DIR})
-
-set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBRARIES}")
-CHECK_FUNCTION_EXISTS("curl_multi_select" HAVE_CURL_MULTI_SELECT)
-CHECK_FUNCTION_EXISTS("curl_multi_wait" HAVE_CURL_MULTI_WAIT)
-if (HAVE_CURL_MULTI_SELECT)
-  add_definitions("-DHAVE_CURL_MULTI_SELECT")
-endif()
-if (HAVE_CURL_MULTI_WAIT)
-  add_definitions("-DHAVE_CURL_MULTI_WAIT")
-endif()
-set(CMAKE_REQUIRED_LIBRARIES)
-
 # LibXML2 checks
 find_package(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 add_definitions(${LIBXML2_DEFINITIONS})
-
-find_package(LibXslt REQUIRED)
-include_directories(${LIBXSLT_INCLUDE_DIR})
-add_definitions(${LIBXSLT_DEFINITIONS})
-
-find_package(EXPAT REQUIRED)
-include_directories(${EXPAT_INCLUDE_DIRS})
 
 # libsqlite3
 find_package(LibSQLite)
@@ -193,18 +132,6 @@ if (LIBZIP_INCLUDE_DIR_ZIP AND LIBZIP_INCLUDE_DIR_ZIPCONF)
 else ()
   message(STATUS "Using third-party bundled libzip")
 endif()
-
-# ICU
-find_package(ICU REQUIRED)
-if (ICU_FOUND)
-  if (ICU_VERSION VERSION_LESS "4.2")
-    unset(ICU_FOUND CACHE)
-    unset(ICU_INCLUDE_DIRS CACHE)
-    unset(ICU_LIBRARIES CACHE)
-    message(FATAL_ERROR "ICU is too old, found ${ICU_VERSION} and we need 4.2")
-  endif ()
-  include_directories(${ICU_INCLUDE_DIRS})
-endif (ICU_FOUND)
 
 # jemalloc/tmalloc and profiler
 if (USE_GOOGLE_HEAP_PROFILER OR USE_GOOGLE_CPU_PROFILER)
@@ -302,10 +229,6 @@ endif()
 include_directories(${TBB_INCLUDE_DIRS})
 link_directories(${TBB_LIBRARY_DIRS})
 
-# mcrypt libs
-find_package(Mcrypt REQUIRED)
-include_directories(${Mcrypt_INCLUDE_DIR})
-
 # OpenSSL libs
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
@@ -333,10 +256,6 @@ add_definitions(${BZIP2_DEFINITIONS})
 # oniguruma
 find_package(ONIGURUMA REQUIRED)
 include_directories(${ONIGURUMA_INCLUDE_DIRS})
-
-# LDAP
-find_package(Ldap REQUIRED)
-include_directories(${LDAP_INCLUDE_DIR})
 
 # libpthreads
 find_package(PThread REQUIRED)
@@ -443,14 +362,11 @@ macro(hphp_link target)
   endif()
 
   target_link_libraries(${target} ${Boost_LIBRARIES})
-  target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
   if (ENABLE_ASYNC_MYSQL)
     target_link_libraries(${target} squangle)
   endif()
   target_link_libraries(${target} ${PCRE_LIBRARY})
-  target_link_libraries(${target} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
   target_link_libraries(${target} ${LIBEVENT_LIB})
-  target_link_libraries(${target} ${CURL_LIBRARIES})
   target_link_libraries(${target} ${LIBGLOG_LIBRARY})
   if (LIBJSONC_LIBRARY)
     target_link_libraries(${target} ${LIBJSONC_LIBRARY})
@@ -496,20 +412,13 @@ macro(hphp_link target)
   target_link_libraries(${target} ${BZIP2_LIBRARIES})
 
   target_link_libraries(${target} ${LIBXML2_LIBRARIES})
-  target_link_libraries(${target} ${LIBXSLT_LIBRARIES})
-  target_link_libraries(${target} ${LIBXSLT_EXSLT_LIBRARIES})
-  target_link_libraries(${target} ${EXPAT_LIBRARY})
   target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
-  target_link_libraries(${target} ${Mcrypt_LIB})
 
   if (LIBUODBC_LIBRARIES)
     target_link_libraries(${target} ${LIBUODBC_LIBRARIES})
   endif()
 
-  target_link_libraries(${target} ${LDAP_LIBRARIES})
   target_link_libraries(${target} ${LBER_LIBRARIES})
-
-  target_link_libraries(${target} ${LIBMEMCACHED_LIBRARY})
 
   target_link_libraries(${target} ${CRYPT_LIB})
 

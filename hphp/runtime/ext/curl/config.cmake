@@ -1,0 +1,7 @@
+HHVM_EXTENSION_CHECK_DEPENDENCIES(curl CURL)
+if (ENABLE_EXTENSION_CURL)
+  HHVM_SELECT_SOURCES(HRE_CURRENT_EXT_PATH)
+  message(STATUS "Building the curl extension")
+else()
+  message("Not building the curl extension")
+endif ()

@@ -1,0 +1,5 @@
+option([1]intersect(App \A<>))
+[2]intersect(App \A<>)
+option([3]intersect(App \A<>, App \B<>))
+[4]intersect(App \AB<>, App \B<>, App \A<>)
+No errors

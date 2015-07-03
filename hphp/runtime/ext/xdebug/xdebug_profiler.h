@@ -21,7 +21,7 @@
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
 #include "hphp/runtime/ext/xdebug/xdebug_utils.h"
 
-#include "hphp/runtime/ext/ext_hotprofiler.h"
+#include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

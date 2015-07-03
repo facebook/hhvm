@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/ext/ext_hotprofiler.h"
+#include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/timer.h"
 

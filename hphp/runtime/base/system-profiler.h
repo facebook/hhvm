@@ -21,7 +21,7 @@
 #include <string>
 
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/ext/ext_hotprofiler.h"
+#include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
 
 namespace HPHP {
 

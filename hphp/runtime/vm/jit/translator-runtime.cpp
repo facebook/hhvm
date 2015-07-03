@@ -1047,9 +1047,11 @@ Cell lookupClassConstantTv(TypedValue* cache,
 
 ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {
   collections::initElem(coll, &value);
-  // consume the input value. the collection setter either threw or created a
-  // reference to value, so we can use a cheaper decref.
-  tvRefcountedDecRefNZ(value);
+  // If we specialized this on Vector we could use a DecRefNZ here (since we
+  // could assume that initElem has incref'd the value).  Right now, HH\Set
+  // goes through this code path also, though, and it might fail to add the new
+  // element.
+  tvRefcountedDecRef(value);
   return coll;
 }
 

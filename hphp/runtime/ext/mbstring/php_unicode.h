@@ -100,9 +100,9 @@
 #define UC_PI 0x00008000 /* Punctuation, Initial       */
 #define UC_PF 0x00010000 /* Punctuation, Final         */
 
-#define PHP_UNICODE_CASE_UPPER	0
-#define PHP_UNICODE_CASE_LOWER	1
-#define PHP_UNICODE_CASE_TITLE	2
+#define PHP_UNICODE_CASE_UPPER 0
+#define PHP_UNICODE_CASE_LOWER 1
+#define PHP_UNICODE_CASE_TITLE 2
 
 #define php_unicode_is_alpha(cc) php_unicode_is_prop(cc, UC_LU|UC_LL|UC_LM|UC_LO|UC_LT, 0)
 #define php_unicode_is_digit(cc) php_unicode_is_prop(cc, UC_ND, 0)

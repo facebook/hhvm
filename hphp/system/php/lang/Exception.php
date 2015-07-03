@@ -241,8 +241,8 @@ class Exception {
       if (isset($top['class']) && isset($top['function']) &&
           strcasecmp($top['class'], 'exception') === 0 &&
           strcasecmp($top['function'], '__init__') === 0) {
-          if (isset($top['file'])) $this->file = $top['file'];
-          if (isset($top['line'])) $this->line = $top['line'];
+        if (isset($top['file'])) $this->file = $top['file'];
+        if (isset($top['line'])) $this->line = $top['line'];
         break;
       }
     }

@@ -35,9 +35,9 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/runtime/ext/array/ext_array.h"
-#include "hphp/runtime/ext/pdo_driver.h"
-#include "hphp/runtime/ext/pdo_mysql.h"
-#include "hphp/runtime/ext/pdo_sqlite.h"
+#include "hphp/runtime/ext/pdo/pdo_driver.h"
+#include "hphp/runtime/ext/pdo/pdo_mysql.h"
+#include "hphp/runtime/ext/pdo/pdo_sqlite.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"

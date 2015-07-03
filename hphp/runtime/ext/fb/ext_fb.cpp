@@ -47,7 +47,7 @@
 #include "hphp/runtime/ext/fb/FBSerialize.h"
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
-#include "hphp/runtime/ext/VariantController.h"
+#include "hphp/runtime/ext/fb/VariantController.h"
 #include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/parser/parser.h"

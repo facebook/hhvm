@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/vm/native-data.h"
-#include "hphp/runtime/ext/libmemcached_portability.h"
+#include "hphp/runtime/ext/memcached/libmemcached_portability.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/ini-setting.h"

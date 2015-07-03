@@ -1,6 +1,6 @@
 File "shape24.php", line 17, characters 10-11:
-Invalid return type (Typing[4057])
+Invalid return type (Typing[4140])
 File "shape24.php", line 16, characters 15-15:
-The field 'z' is missing
+The field 'z' may be set to an unknown type. Explicitly null out the field, or remove it (with Shapes::removeKey(...))
 File "shape24.php", line 16, characters 22-22:
-The field 'z' is defined
+The field 'z' is defined as optional

@@ -1,0 +1,14 @@
+HHVM_DEFINE_EXTENSION("curl"
+  SOURCES
+    ext_curl.cpp
+  HEADERS
+    ext_curl.h
+  EXTENSION_LIBRARY
+    ext_curl.php
+  DEPENDS_UPON
+    ext_asio
+    libBoost
+    libCurl
+    libFolly
+    libOpenSSL
+)

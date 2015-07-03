@@ -26,13 +26,25 @@
 #include "hphp/facebook/extensions/phpmc/ext_phpmc.h"
 #endif
 
+#ifdef ENABLE_EXTENSION_CLOSURE
 #include "hphp/runtime/ext/ext_closure.h"
+#endif
+#ifdef ENABLE_EXTENSION_COLLECTIONS
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#endif
+#ifdef ENABLE_EXTENSION_GENERATOR
 #include "hphp/runtime/ext/ext_generator.h"
+#endif
+#ifdef ENABLE_EXTENSION_FB
 #include "hphp/runtime/ext/fb/ext_fb.h"
+#endif
+#ifdef ENABLE_EXTENSION_SIMPLEXML
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
+#endif
 
 // half-IDL, half-HNI
+#ifdef ENABLE_EXTENSION_ASIO
 #include "hphp/runtime/ext/asio/ext_asio.h"
+#endif
 
 #endif // incl_EXT_LIST_EXT_H_

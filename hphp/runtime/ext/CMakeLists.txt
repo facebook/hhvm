@@ -2,6 +2,8 @@ set(CXX_SOURCES)
 set(C_SOURCES)
 set(ASM_SOURCES)
 set(HEADER_SOURCES)
+set(IDL_SOURCES)
+set(PHP_SOURCES)
 
 # Pick up all files in the base ext/ folder unconditionally
 auto_sources(files "*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -15,6 +17,7 @@ list(APPEND HEADER_SOURCES ${files})
 
 set(HRE_LIBARIES)
 include(EXTFunctions)
+include(HHVMExtensionConfig)
 
 # For each directory under ext/, either pull in standard
 # source lists, or let the particular extension make that
@@ -30,9 +33,12 @@ foreach (dir ${subdirs})
     endif()
   endif()
 endforeach()
+HHVM_EXTENSION_RESOLVE_DEPENDENCIES()
+set(EXTENSION_IDL_SOURCES ${IDL_SOURCES} CACHE INTERNAL "" FORCE)
+set(EXTENSION_SYSTEMLIB_SOURCES ${PHP_SOURCES} CACHE INTERNAL "" FORCE)
 
 ADD_LIBRARY(hphp_runtime_ext STATIC
-            ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES})
+            ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES})
 if (ENABLE_ASYNC_MYSQL)
   add_dependencies(hphp_runtime_ext webscalesqlclient squangle)
 endif ()

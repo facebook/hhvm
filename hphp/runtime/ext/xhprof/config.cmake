@@ -1,0 +1,10 @@
+HHVM_DEFINE_EXTENSION("xhprof"
+  SOURCES
+    ext_xhprof.cpp
+  HEADERS
+    ext_xhprof.h
+  EXTENSION_LIBRARY
+    ext_xhprof.php
+  DEPENDS_UPON
+    ext_hotprofiler
+)

@@ -1,0 +1,12 @@
+HHVM_DEFINE_EXTENSION("xsl"
+  SOURCES
+    ext_xsl.cpp
+  EXTENSION_LIBRARY
+    ext_xsl.php
+  DEPENDS_UPON
+    ext_domdocument
+    ext_libxml
+    ext_simplexml
+    ext_std
+    libXSLT
+)

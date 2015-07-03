@@ -1,0 +1,10 @@
+HHVM_DEFINE_EXTENSION("debugger"
+  SOURCES
+    ext_debugger.cpp
+  HEADERS
+    ext_debugger.h
+  EXTENSION_LIBRARY
+    ext_debugger.php
+  DEPENDS_UPON
+    ext_sockets
+)

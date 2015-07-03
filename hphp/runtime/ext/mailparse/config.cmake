@@ -1,0 +1,14 @@
+HHVM_DEFINE_EXTENSION("mailparse"
+  SOURCES
+    ext_mailparse.cpp
+    mime.cpp
+    rfc822.cpp
+  HEADERS
+    mime.h
+    rfc822.h
+  EXTENSION_LIBRARY
+    ext_mailparse.php
+  DEPENDS_UPON
+    ext_stream
+    libMbfl
+)

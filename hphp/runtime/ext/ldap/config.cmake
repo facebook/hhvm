@@ -1,0 +1,12 @@
+HHVM_DEFINE_EXTENSION("ldap"
+  SOURCES
+    ext_ldap.cpp
+  HEADERS
+    ext_ldap.h
+  EXTENSION_LIBRARY
+    ext_ldap.php
+  DEPENDS_UPON
+    ext_std
+    libFolly
+    libLdap
+)

@@ -1,7 +1,11 @@
-HHVM_EXT_OPTION(GMP LibGmp)
-if (GMP_INCLUDE_DIR)
-  HHVM_EXTENSION(gmp ext_gmp.cpp)
-  HHVM_SYSTEMLIB(gmp ext_gmp.php)
-  HHVM_LINK_LIBRARIES(gmp ${GMP_LIBRARY})
-  HHVM_ADD_INCLUDES(gmp ${GMP_INCLUDE_DIR})
-endif()
+HHVM_DEFINE_EXTENSION("gmp"
+  IS_ENABLED EXT_GMP
+  SOURCES
+    ext_gmp.cpp
+  HEADERS
+    ext_gmp.h
+  EXTENSION_LIBRARY
+    ext_gmp.php
+  DEPENDS_UPON
+    libGmp
+)

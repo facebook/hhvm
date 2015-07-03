@@ -1,0 +1,25 @@
+HHVM_DEFINE_EXTENSION("collections" REQUIRED
+  SOURCES
+    ext_collections.cpp
+    ext_collections-map.cpp
+    ext_collections-pair.cpp
+    ext_collections-set.cpp
+    ext_collections-vector.cpp
+  HEADERS
+    ext_collections.h
+    ext_collections-idl.h
+    ext_collections-map.h
+    ext_collections-pair.h
+    ext_collections-set.h
+    ext_collections-vector.h
+  EXTENSION_LIBRARY
+    ext_collections-map.php
+    ext_collections-pair.php
+    ext_collections-set.php
+    ext_collections-vector.php
+  IDL
+    collections.idl.json
+  DEPENDS_UPON
+    ext_array
+    systemlib
+)

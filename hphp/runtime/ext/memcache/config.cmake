@@ -1,0 +1,9 @@
+HHVM_DEFINE_EXTENSION("memcache"
+  SOURCES
+    ext_memcache.cpp
+  EXTENSION_LIBRARY
+    ext_memcache.php
+  DEPENDS_UPON
+    ext_sockets
+    libMemcached
+)

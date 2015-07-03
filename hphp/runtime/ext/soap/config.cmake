@@ -1,0 +1,30 @@
+HHVM_DEFINE_EXTENSION("soap"
+  SOURCES
+    encoding.cpp
+    ext_soap.cpp
+    packet.cpp
+    schema.cpp
+    sdl.cpp
+    soap.cpp
+    xml.cpp
+  HEADERS
+    encoding.h
+    ext_soap.h
+    packet.h
+    sdl.h
+    soap.h
+    xml.h
+  EXTENSION_LIBRARY
+    ext_soap.php
+  DEPENDS_UPON
+    ext_apc
+    ext_array
+    ext_libxml
+    ext_simplexml
+    ext_std
+    ext_stream
+    ext_string
+    ext_zlib
+    libFolly
+    systemlib
+)

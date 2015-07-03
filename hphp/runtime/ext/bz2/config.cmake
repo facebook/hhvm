@@ -1,0 +1,13 @@
+HHVM_DEFINE_EXTENSION("bz2"
+  SOURCES
+    bz2-file.cpp
+    ext_bz2.cpp
+  HEADERS
+    bz2-file.h
+  EXTENSION_LIBRARY
+    ext_bz2.php
+  DEPENDS_UPON
+    ext_std
+    libBz2
+    libFolly
+)

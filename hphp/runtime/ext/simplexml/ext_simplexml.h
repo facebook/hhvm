@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_SIMPLEXML_H_
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/ext_simplexml_include.h"
+#include "hphp/runtime/ext/simplexml/ext_simplexml_include.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

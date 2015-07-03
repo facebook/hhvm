@@ -32,7 +32,7 @@
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/ext_generator.h"
-#include "hphp/runtime/ext/ext_simplexml.h"
+#include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 
 #include "hphp/runtime/vm/class.h"

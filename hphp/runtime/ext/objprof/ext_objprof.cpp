@@ -15,7 +15,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/ext_objprof.h"
+#include "hphp/runtime/ext/extension.h"
+
+/*
+ *                       Project ObjProf
+ * What is it?
+ * Breakdown of allocated memory by object types.
+ *
+ * How does it work?
+ * We traverse all instances of ObjectData* to measure their memory.
+ *
+ * How do I use it?
+ * Call objprof_get_data to trigger the scan.
+ */
 
 #include <set>
 #include <unordered_map>

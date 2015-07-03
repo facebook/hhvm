@@ -102,7 +102,6 @@
 
 
 #if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
-#undef NOUSER
 #include <windows.h>
 #include <winuser.h>
 #endif

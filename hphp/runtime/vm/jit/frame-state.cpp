@@ -72,14 +72,13 @@ bool merge_into(SlotState<Stack>& dst, const SlotState<Stack>& src) {
   // Get the least common ancestor across both states.
   if (merge_util(dst.value, least_common_ancestor(dst.value, src.value))) {
     changed = true;
-    assert(dst.value == nullptr || dst.type <= dst.value->type());
+  }
 
-    // We keep the invariant that the known value either has the same
-    // type as the known type or be nullptr.  Otherwise, we may end up
-    // using a value with a more general type than is known about it.
-    if (dst.value && dst.type < dst.value->type()) {
-      dst.value = nullptr;
-    }
+  // We may have changed either dst.value or dst.type in a way that could fail
+  // to preserve SlotState invariants.  So check if we can't keep the value.
+  if (dst.value != nullptr && dst.value->type() != dst.type) {
+    dst.value = nullptr;
+    changed = true;
   }
 
   if (merge_into(dst.typeSrcs, src.typeSrcs)) {
@@ -183,6 +182,14 @@ bool check_invariants(const FrameState& state) {
       id,
       local.predictedType,
       local.type
+    );
+
+    always_assert_flog(
+      local.value == nullptr || local.value->type() == local.type,
+      "local {} had type {}, but value {}\n",
+      id,
+      local.type,
+      local.value->toString()
     );
 
     if (state.curFunc->isPseudoMain()) {

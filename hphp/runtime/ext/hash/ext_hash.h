@@ -33,7 +33,7 @@ Variant HHVM_FUNCTION(hash_init, const String& algo, int64_t options = 0,
 Variant HHVM_FUNCTION(hash_file, const String& algo, const String& filename,
                                  bool raw_output = false);
 Variant HHVM_FUNCTION(hash_final, const Resource& context,
-		                  bool raw_output = false);
+                                  bool raw_output = false);
 bool HHVM_FUNCTION(hash_update, const Resource& context, const String& data);
 Resource HHVM_FUNCTION(hash_copy, const Resource& context);
 bool HHVM_FUNCTION(hash_equals, const Variant& known, const Variant& user);

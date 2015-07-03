@@ -33,7 +33,7 @@
 #include "hphp/runtime/ext/ext_generator.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
-#include "hphp/runtime/ext/ext_hash.h"
+#include "hphp/runtime/ext/hash/ext_hash.h"
 #include "hphp/runtime/ext/ext_simplexml.h"
 #include "hphp/runtime/ext/soap/ext_soap.h"
 #include "hphp/runtime/ext/spl/ext_spl.h"

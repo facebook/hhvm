@@ -8,7 +8,7 @@ HHVM_PUBLIC_HEADERS(hhbc ${files})
 
 # remove anything in a test folder
 foreach (file ${CXX_SOURCES})
-  if (${file} MATCHES "/test/")
+  if (${file} MATCHES "/test/" OR MATCHES "main.cpp$")
     list(REMOVE_ITEM CXX_SOURCES ${file})
   endif()
 endforeach(file ${CXX_SOURCES})

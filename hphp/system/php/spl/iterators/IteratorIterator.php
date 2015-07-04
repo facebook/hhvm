@@ -33,6 +33,8 @@ class IteratorIterator implements OuterIterator {
     }
     if ($iterator instanceof \Iterator) {
       $this->iterator = $iterator;
+    } else if ($iterator instanceof \SimpleXMLElement) {
+      $this->iterator = $iterator->getIterator();
     } else {
       throw new Exception(
         "Need to pass a Traversable that is convertable to an iterator");

@@ -109,3 +109,7 @@ array(23) {
   [22]=>
   string(7) "__unset"
 }
+Of basic XML structure the 1th nodes contents is: 
+Of basic XML structure the 2th nodes contents is: b
+Of basic XML structure the 3th nodes contents is: c1
+Basic XML has 3 root children

@@ -114,7 +114,7 @@
             ],
             "ifaces": [
                 "ArrayAccess",
-                "IteratorAggregate",
+                "Traversable",
                 "Countable"
             ],
             "desc": "Represents an element in an XML document.",
@@ -587,6 +587,484 @@
                         "type": "Variant"
                     },
                     "args": [
+                    ]
+                }
+            ],
+            "consts": [
+            ]
+        },
+        {
+            "name": "SimpleXMLIterator",
+            "ifaces": [
+                "RecursiveIterator",
+                "Countable"
+            ],
+            "parent": "SimpleXMLElement",
+            "bases": [
+                "Sweepable"
+            ],
+            "desc": "",
+            "flags": [
+                "NoDefaultSweep"
+            ],
+            "footer": "",
+            "funcs": [
+                {
+                    "name": "__construct",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "data",
+                            "type": "String"
+                        },
+                        {
+                            "name": "options",
+                            "type": "Int64",
+                            "value": "0"
+                        },
+                        {
+                            "name": "data_is_url",
+                            "type": "Boolean",
+                            "value": "false"
+                        },
+                        {
+                            "name": "ns",
+                            "type": "String",
+                            "value": "\"\""
+                        },
+                        {
+                            "name": "is_prefix",
+                            "type": "Boolean",
+                            "value": "false"
+                        }
+                    ]
+                },
+                {
+                    "name": "getChildren",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "hasChildren",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "current",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "key",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "next",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "rewind",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "valid",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "offsetExists",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "offsetGet",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "offsetSet",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "newvalue",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "offsetUnset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "getIterator",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "count",
+                    "desc": "This method counts the number of children of an element.",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Int64",
+                        "desc": "Returns the number of elements of an element."
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "xpath",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant",
+                        "desc": "Returns an array of SimpleXMLElement objects or FALSE in case of an error."
+                    },
+                    "args": [
+                        {
+                            "name": "path",
+                            "type": "String",
+                            "desc": "An XPath path"
+                        }
+                    ]
+                },
+                {
+                    "name": "registerXPathNamespace",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "prefix",
+                            "type": "String"
+                        },
+                        {
+                            "name": "ns",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "asXML",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "filename",
+                            "type": "String",
+                            "value": "\"\""
+                        }
+                    ]
+                },
+                {
+                    "name": "saveXML",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "filename",
+                            "type": "String",
+                            "value": "\"\""
+                        }
+                    ]
+                },
+                {
+                    "name": "getNamespaces",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "StringMap"
+                    },
+                    "args": [
+                        {
+                            "name": "recursive",
+                            "type": "Boolean",
+                            "value": "false"
+                        }
+                    ]
+                },
+                {
+                    "name": "getDocNamespaces",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "StringMap"
+                    },
+                    "args": [
+                        {
+                            "name": "recursive",
+                            "type": "Boolean",
+                            "value": "false"
+                        },
+                        {
+                            "name": "from_root",
+                            "type": "Boolean",
+                            "value": "true"
+                        }
+                    ]
+                },
+                {
+                    "name": "children",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object",
+                        "desc": "Returns a SimpleXMLElement element, whether the node has children or not."
+                    },
+                    "args": [
+                        {
+                            "name": "ns",
+                            "type": "String",
+                            "value": "\"\"",
+                            "desc": "An XML namespace."
+                        },
+                        {
+                            "name": "is_prefix",
+                            "type": "Boolean",
+                            "value": "false",
+                            "desc": "If is_prefix is TRUE, ns will be regarded as a prefix. If FALSE, ns will be regarded as a namespace URL."
+                        }
+                    ]
+                },
+                {
+                    "name": "getName",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "attributes",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Object"
+                    },
+                    "args": [
+                        {
+                            "name": "ns",
+                            "type": "String",
+                            "value": "\"\"",
+                            "desc": "An optional namespace for the retrieved attributes"
+                        },
+                        {
+                            "name": "is_prefix",
+                            "type": "Boolean",
+                            "value": "false",
+                            "desc": "Default to FALSE"
+                        }
+                    ]
+                },
+                {
+                    "name": "addChild",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "qname",
+                            "type": "String"
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "value": "null_string"
+                        },
+                        {
+                            "name": "ns",
+                            "type": "Variant",
+                            "value": "null"
+                        }
+                    ]
+                },
+                {
+                    "name": "addAttribute",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": null
+                    },
+                    "args": [
+                        {
+                            "name": "qname",
+                            "type": "String"
+                        },
+                        {
+                            "name": "value",
+                            "type": "String",
+                            "value": "null_string"
+                        },
+                        {
+                            "name": "ns",
+                            "type": "String",
+                            "value": "null_string"
+                        }
+                    ]
+                },
+                {
+                    "name": "__toString",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "String"
+                    },
+                    "args": [
+                    ]
+                },
+                {
+                    "name": "__get",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__set",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        },
+                        {
+                            "name": "value",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__isset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Boolean"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
+                    ]
+                },
+                {
+                    "name": "__unset",
+                    "flags": [
+                    ],
+                    "return": {
+                        "type": "Variant"
+                    },
+                    "args": [
+                        {
+                            "name": "name",
+                            "type": "Variant"
+                        }
                     ]
                 }
             ],

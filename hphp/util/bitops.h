@@ -17,6 +17,10 @@
 #ifndef incl_HPHP_BITOPS_H_
 #define incl_HPHP_BITOPS_H_
 
+#if !defined(__x86_64__) && !defined(__AARCH64EL__)
+#include <folly/Bits.h>
+#endif
+
 namespace HPHP {
 
 // GLIBC doesn't provide an fls primitive. Since we're rolling our own
@@ -44,6 +48,9 @@ inline bool ffs64(I64 input, I64 &out) {
     :
     "cc"
   );
+#else
+  out = folly::findFirstSet(input);
+  retval = input != 0;
 #endif
   return retval;
 }
@@ -71,6 +78,9 @@ inline bool fls64(I64 input, I64 &out) {
     "r"(input):
     "cc"
   );
+#else
+  out = folly::findLastSet(input);
+  retval = input != 0;
 #endif
   return retval;
 }

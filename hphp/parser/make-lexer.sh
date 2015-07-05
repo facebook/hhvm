@@ -24,18 +24,19 @@ if [ $? -ne 0 ] ; then
   exit 1
 fi
 
+SED=`which sed`
+if [ ! -x "$SED" ]; then
+  echo "sed not found" 1>&2
+  exit 1
+fi
+
+$SED -i \
+  -e "1i// @""generated" \
+  -e "s@/.*lex.yy.cpp@lex.yy.cpp@g" \
+  -e "s@/.*hphp.ll@hphp.ll@g" \
+  $OUTFILE
+
 # We still want the files in our tree since they are checked in
 if [ -n "${INSTALL_DIR}" ]; then
-
-  SED=`which sed`
-  if [ ! -x "$SED" ]; then
-    echo "sed not found" 1>&2
-    exit 1
-  fi
-
-  $SED -i \
-    -e "1i// @""generated" \
-    -e "s@/.*lex.yy.cpp@lex.yy.cpp@" \
-    $OUTFILE
   cp $OUTFILE ${DIR}/lex.yy.cpp
 fi

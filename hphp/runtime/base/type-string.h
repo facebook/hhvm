@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_STRING_H_
 #define incl_HPHP_STRING_H_
 
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -67,11 +67,11 @@ std::string convDblToStrWithPhpFormat(double n);
  * literal string handling (to avoid string copying).
  */
 class String {
-  SmartPtr<StringData> m_str;
+  req::ptr<StringData> m_str;
 
 protected:
-  using IsUnowned = SmartPtr<StringData>::IsUnowned;
-  using NoIncRef = SmartPtr<StringData>::NoIncRef;
+  using IsUnowned = req::ptr<StringData>::IsUnowned;
+  using NoIncRef = req::ptr<StringData>::NoIncRef;
 
   String(StringData* sd, NoIncRef) : m_str(sd, NoIncRef{}) {}
 
@@ -211,7 +211,7 @@ public:
   const String& shrink(size_t len) {
     assert(m_str);
     if (m_str->capacity() - len > kMinShrinkThreshold) {
-      m_str = SmartPtr<StringData>::attach(m_str->shrinkImpl(len));
+      m_str = req::ptr<StringData>::attach(m_str->shrinkImpl(len));
     } else {
       assert(len < StringData::MaxSize);
       m_str->setSize(len);
@@ -222,7 +222,7 @@ public:
     if (!m_str) return MutableSlice("", 0);
     auto const tmp = m_str->reserve(size);
     if (UNLIKELY(tmp != m_str)) {
-      m_str = SmartPtr<StringData>::attach(tmp);
+      m_str = req::ptr<StringData>::attach(tmp);
     }
     return m_str->bufferSlice();
   }
@@ -421,8 +421,8 @@ public:
   void dump() const;
 
  private:
-  static SmartPtr<StringData> buildString(int n);
-  static SmartPtr<StringData> buildString(int64_t n);
+  static req::ptr<StringData> buildString(int n);
+  static req::ptr<StringData> buildString(int64_t n);
 
   String rvalAtImpl(int key) const {
     if (m_str) {
@@ -432,7 +432,7 @@ public:
   }
 
   static void compileTimeAssertions() {
-    static_assert(sizeof(String) == sizeof(SmartPtr<StringData>), "");
+    static_assert(sizeof(String) == sizeof(req::ptr<StringData>), "");
   }
 };
 
@@ -578,7 +578,7 @@ public:
   StaticString(const char* s, int length); // binary string
   explicit StaticString(std::string s);
   ~StaticString() {
-    // prevent ~SmartPtr from destroying contents.
+    // prevent ~req::ptr from destroying contents.
     detach();
   }
   StaticString& operator=(const StaticString &str);
@@ -599,7 +599,7 @@ inline String::String(const StaticString& str) :
 }
 
 inline String& String::operator=(const StaticString& v) {
-  m_str = SmartPtr<StringData>::attach(v.m_str.get());
+  m_str = req::ptr<StringData>::attach(v.m_str.get());
   return *this;
 }
 

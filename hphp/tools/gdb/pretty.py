@@ -125,8 +125,8 @@ class PtrPrinter(object):
         return '%s "%s"' % (out, s) if s is not None else out
 
 
-class SmartPtrPrinter(PtrPrinter):
-    RECOGNIZE = '^HPHP::(SmartPtr<.*>)$'
+class ReqPtrPrinter(PtrPrinter):
+    RECOGNIZE = '^HPHP::(req::ptr<.*>)$'
 
     def __init__(self, val):
         self.val = val
@@ -137,25 +137,25 @@ class SmartPtrPrinter(PtrPrinter):
     def _pointer(self):
         return self.val['m_px']
 
-class StringPrinter(SmartPtrPrinter):
+class StringPrinter(ReqPtrPrinter):
     RECOGNIZE = '^HPHP::(Static)?String$'
 
     def __init__(self, val):
         super(StringPrinter, self).__init__(val['m_str'])
 
-class ArrayPrinter(SmartPtrPrinter):
+class ArrayPrinter(ReqPtrPrinter):
     RECOGNIZE = '^HPHP::Array$'
 
     def __init__(self, val):
         super(ArrayPrinter, self).__init__(val['m_arr'])
 
-class ObjectPrinter(SmartPtrPrinter):
+class ObjectPrinter(ReqPtrPrinter):
     RECOGNIZE = '^HPHP::Object$'
 
     def __init__(self, val):
         super(ObjectPrinter, self).__init__(val['m_obj'])
 
-class ResourcePrinter(SmartPtrPrinter):
+class ResourcePrinter(ReqPtrPrinter):
     RECOGNIZE = '^HPHP::Resource$'
 
     def __init__(self, val):
@@ -346,7 +346,7 @@ class RefDataPrinter(object):
 
 printer_classes = [
     TypedValuePrinter,
-    SmartPtrPrinter,
+    ReqPtrPrinter,
     ArrayPrinter,
     ObjectPrinter,
     StringPrinter,

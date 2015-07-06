@@ -42,7 +42,7 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
+DebuggerProxy::DebuggerProxy(req::ptr<Socket> socket, bool local)
     : m_local(local),
       m_signalThread(this, &DebuggerProxy::pollSignal),
       m_signum(CmdSignal::SignalNone) {

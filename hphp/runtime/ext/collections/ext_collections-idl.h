@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/system/systemlib.h"
 
 #include <limits>
@@ -1377,7 +1377,7 @@ class BaseMap : public HashCollection {
  protected:
   template<class TVector>
   Object php_values() {
-    auto target = makeSmartPtr<TVector>();
+    auto target = req::make<TVector>();
     int64_t sz = m_size;
     target->reserve(sz);
     assert(target->canMutateBuffer());
@@ -1392,7 +1392,7 @@ class BaseMap : public HashCollection {
 
   template<class TVector>
   Object php_keys() {
-    auto vec = makeSmartPtr<TVector>();
+    auto vec = req::make<TVector>();
     vec->reserve(m_size);
     assert(vec->canMutateBuffer());
     auto* e = firstElm();
@@ -1716,7 +1716,7 @@ class BaseSet : public HashCollection {
   // PHP-land methods exported by child classes.
   template<class TVector>
   Object php_values() {
-    auto vec = makeSmartPtr<TVector>();
+    auto vec = req::make<TVector>();
     vec->init(VarNR(this));
     return Object{std::move(vec)};
   }

@@ -738,7 +738,7 @@ public:
                            // same time, before FD_CLOEXEC is set on the fds.
                            // NOTE: no need to lock with light processes.
 
-  bool readFile(const SmartPtr<File>& file) {
+  bool readFile(const req::ptr<File>& file) {
     mode = DESC_FILE;
     childend = dup(file->fd());
     if (childend < 0) {
@@ -812,7 +812,7 @@ public:
       /* mark the descriptor close-on-exec, so that it won't be inherited
          by potential other children */
       fcntl(parentend, F_SETFD, FD_CLOEXEC);
-      return Resource(makeSmartPtr<PlainFile>(parentend, true));
+      return Resource(req::make<PlainFile>(parentend, true));
     }
 
     return Resource();
@@ -904,7 +904,7 @@ static Variant post_proc_open(const String& cmd, Variant& pipes,
   }
 
   /* we forked/spawned and this is the parent */
-  auto proc = makeSmartPtr<ChildProcess>();
+  auto proc = req::make<ChildProcess>();
   proc->command = cmd;
   proc->child = child;
   proc->env = env;

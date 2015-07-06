@@ -366,7 +366,7 @@ Resource XboxServer::TaskStart(const String& msg, const String& reqInitDoc /* = 
          RuntimeOption::XboxServerThreadCount ||
          s_dispatcher->getQueuedJobs() <
          RuntimeOption::XboxServerMaxQueueLength)) {
-      auto task = makeSmartPtr<XboxTask>(msg, reqInitDoc);
+      auto task = req::make<XboxTask>(msg, reqInitDoc);
       XboxTransport *job = task->getJob();
       job->incRefCount(); // paired with worker's decRefCount()
 

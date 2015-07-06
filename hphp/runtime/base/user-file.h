@@ -28,7 +28,7 @@ public:
   DECLARE_RESOURCE_ALLOCATION(UserFile);
 
   explicit UserFile(Class *cls,
-                    const SmartPtr<StreamContext>& context = nullptr);
+                    const req::ptr<StreamContext>& context = nullptr);
   virtual ~UserFile();
 
   // overriding ResourceData

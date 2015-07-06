@@ -33,55 +33,55 @@ namespace HPHP {
  */
 const std::size_t kExpectedMPxOffset = 0;
 
-template<typename T>
-class SmartPtr final {
-public:
-  SmartPtr() : m_px(nullptr) {}
-  /* implicit */ SmartPtr(std::nullptr_t) : m_px(nullptr) { }
-  explicit SmartPtr(T* px) : m_px(px) {
+namespace req {
+
+template<typename T> struct ptr final {
+  ptr() : m_px(nullptr) {}
+  /* implicit */ ptr(std::nullptr_t) : m_px(nullptr) { }
+  explicit ptr(T* px) : m_px(px) {
     if (LIKELY(m_px != nullptr)) m_px->incRefCount();
   }
-  SmartPtr(const SmartPtr<T>& src) : m_px(src.get()) {
+  ptr(const ptr<T>& src) : m_px(src.get()) {
     if (LIKELY(m_px != nullptr)) m_px->incRefCount();
   }
 
   enum class IsUnowned {};
-  SmartPtr(T* px, IsUnowned) : m_px(px) {
+  ptr(T* px, IsUnowned) : m_px(px) {
     assert(!m_px || m_px->getCount() == 0);
     if (LIKELY(m_px != nullptr)) m_px->setRefCount(1);
   }
 
   enum class NoIncRef {};
-  explicit SmartPtr(T* px, NoIncRef) : m_px(px) {}
+  explicit ptr(T* px, NoIncRef) : m_px(px) {}
 
   enum class NonNull {};
-  explicit SmartPtr(T* px, NonNull) : m_px(px) {
+  explicit ptr(T* px, NonNull) : m_px(px) {
     assert(px);
     m_px->incRefCount();
   }
 
   enum class UnownedAndNonNull {};
-  SmartPtr(T* px, UnownedAndNonNull) : m_px(px) {
+  ptr(T* px, UnownedAndNonNull) : m_px(px) {
     assert(m_px && m_px->getCount() == 0);
     m_px->setRefCount(1);
   }
 
   // Move ctor
-  SmartPtr(SmartPtr&& src) noexcept : m_px(src.get()) {
+  ptr(ptr&& src) noexcept : m_px(src.get()) {
     src.m_px = nullptr;
   }
 
   template<class Y>
-  SmartPtr(const SmartPtr<Y>& src) : m_px(src.get()) {
+  ptr(const ptr<Y>& src) : m_px(src.get()) {
     if (LIKELY(m_px != nullptr)) m_px->incRefCount();
   }
   // Move ctor for derived types
   template<class Y>
-  SmartPtr(SmartPtr<Y>&& src) : m_px(src.get()) {
+  ptr(ptr<Y>&& src) : m_px(src.get()) {
     src.m_px = nullptr;
   }
 
-  ~SmartPtr() {
+  ~ptr() {
     decRefPtr(m_px);
     if (debug) {
       m_px = reinterpret_cast<T*>(0xdeadbeeffaceb004);
@@ -91,21 +91,21 @@ public:
   /**
    * Assignments.
    */
-  SmartPtr& operator=(const SmartPtr<T>& src) {
+  ptr& operator=(const ptr<T>& src) {
     return operator=(src.m_px);
   }
   // Move assignment
-  SmartPtr& operator=(SmartPtr&& src) {
+  ptr& operator=(ptr&& src) {
     std::swap(m_px, src.m_px);
     return *this;
   }
   template<class Y>
-  SmartPtr& operator=(const SmartPtr<Y>& src) {
+  ptr& operator=(const ptr<Y>& src) {
     return operator=(src.get());
   }
   // Move assignment for derived types
   template<class Y>
-  SmartPtr& operator=(SmartPtr<Y>&& src) {
+  ptr& operator=(ptr<Y>&& src) {
     assert((void*)this != (void*)&src);
     // Update m_px before releasing the goner
     auto goner = m_px;
@@ -114,7 +114,7 @@ public:
     decRefPtr(goner);
     return *this;
   }
-  SmartPtr& operator=(T* px) {
+  ptr& operator=(T* px) {
     // Works with self-assignment because incRefCount is
     // called before decRefCount.
     if (LIKELY(px != nullptr)) px->incRefCount();
@@ -127,7 +127,7 @@ public:
   /**
    * Swap two smart pointers
    */
-  void swap(SmartPtr& rhs) {
+  void swap(ptr& rhs) {
     std::swap(m_px, rhs.m_px);
   }
 
@@ -184,70 +184,62 @@ public:
    * Take ownership of a pointer without touching the ref count.
    */
   template <typename Y>
-  static SmartPtr<Y> attach(Y* ptr) {
-    SmartPtr<Y> sp;
-    sp.m_px = ptr;
-    return sp;
+  static ptr<Y> attach(Y* y) {
+    ptr<Y> py;
+    py.m_px = y;
+    return py;
   }
 
 private:
-  // For templatized SmartPtr<Y> move constructor.
-  template <typename Y> friend class SmartPtr;
+  // For templatized ptr<Y> move constructor.
+  template <typename Y> friend class ptr;
 
   static ALWAYS_INLINE void decRefPtr(T* ptr) {
     if (LIKELY(ptr != nullptr)) ptr->decRefAndRelease();
   }
   static void compileTimeAssertions() {
-    static_assert(offsetof(SmartPtr, m_px) == kExpectedMPxOffset, "");
+    static_assert(offsetof(ptr, m_px) == kExpectedMPxOffset, "");
   }
 
   T* m_px;  // raw pointer
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// SmartPtr helper functions
+// req::ptr helper functions
 
 // Note: don't define the other relational (<,>,<=,=>) operators in
 // terms of the underlying pointer.  If the underlying pointer is
 // moved (e.g. by GC) the relation may no longer hold.
 
 template <typename T>
-struct isValidSmartPtrRelopArg {
+struct isValidPtrRelopArg {
   enum { value = false };
 };
 
 template <>
-struct isValidSmartPtrRelopArg<std::nullptr_t> {
+struct isValidPtrRelopArg<std::nullptr_t> {
   enum { value = true };
 };
 
 template <typename T>
-struct isValidSmartPtrRelopArg<SmartPtr<T>> {
+struct isValidPtrRelopArg<req::ptr<T>> {
   enum { value = true };
 };
 
 template <typename T>
-struct isValidSmartPtrRelopArg<T*> {
+struct isValidPtrRelopArg<T*> {
   enum { value = true };
 };
 
 template <typename T>
-struct isValidSmartPtrRelopArg<const T*> {
+struct isValidPtrRelopArg<const T*> {
   enum { value = true };
 };
 
-template <typename T>
-struct isSmartPtr {
-  enum { value = false };
-};
+} // namespace req
 
 template <typename T>
-struct isSmartPtr<SmartPtr<T>> {
-  enum { value = true };
-};
-
-template <typename T>
-inline T* deref(const SmartPtr<T>& p) { return p.get(); }
+inline T* deref(const req::ptr<T>& p) { return p.get(); }
 
 template <typename T>
 inline const T* deref(const T* p) { return p; }
@@ -257,7 +249,7 @@ inline std::nullptr_t deref(std::nullptr_t) { return nullptr; }
 template <typename A, typename B>
 inline
 typename std::enable_if<
-  (isValidSmartPtrRelopArg<A>::value && isValidSmartPtrRelopArg<B>::value),
+  (req::isValidPtrRelopArg<A>::value && req::isValidPtrRelopArg<B>::value),
   bool
 >::type operator==(const A& a, const B& b) {
   return deref(a) == deref(b);
@@ -266,7 +258,7 @@ typename std::enable_if<
 template <typename A, typename B>
 inline
 typename std::enable_if<
-  (isValidSmartPtrRelopArg<A>::value && isValidSmartPtrRelopArg<B>::value),
+  (req::isValidPtrRelopArg<A>::value && req::isValidPtrRelopArg<B>::value),
   bool
 >::type operator!=(const A& a, const B& b) {
   return !(a == b);
@@ -289,9 +281,9 @@ void throw_invalid_object_type(const Variant& p) ATTRIBUTE_NORETURN;
 void throw_invalid_object_type(const Resource& p) ATTRIBUTE_NORETURN;
 void throw_invalid_object_type(const Object& p) ATTRIBUTE_NORETURN;
 template <typename T>
-void throw_invalid_object_type(const SmartPtr<T>& p) ATTRIBUTE_NORETURN;
+void throw_invalid_object_type(const req::ptr<T>& p) ATTRIBUTE_NORETURN;
 template <typename T>
-void throw_invalid_object_type(const SmartPtr<T>& p) {
+void throw_invalid_object_type(const req::ptr<T>& p) {
   throw_invalid_object_type(p.get());
 }
 
@@ -323,16 +315,16 @@ inline bool isa_or_null(const P& p) {
 // be passed through.
 template <typename T, typename P>
 struct unsafe_cast_helper {
-  SmartPtr<T> operator()(P&& p) const {
-    return SmartPtr<T>::attach(static_cast<T*>(detach<T>(std::move(p))));
+  req::ptr<T> operator()(P&& p) const {
+    return req::ptr<T>::attach(static_cast<T*>(detach<T>(std::move(p))));
   }
-  SmartPtr<T> operator()(const P& p) const {
-    return SmartPtr<T>(static_cast<T*>(deref<T>(p)));
+  req::ptr<T> operator()(const P& p) const {
+    return req::ptr<T>(static_cast<T*>(deref<T>(p)));
   }
 };
 
 template <typename T, typename P>
-inline SmartPtr<T> unsafe_cast_or_null(P&& p) {
+inline req::ptr<T> unsafe_cast_or_null(P&& p) {
   using decayedP = typename std::decay<P>::type;
   return unsafe_cast_helper<T,decayedP>()(std::forward<P>(p));
 }
@@ -341,7 +333,7 @@ inline SmartPtr<T> unsafe_cast_or_null(P&& p) {
 // to be castable to T (checked by assertion).  Null pointers will
 // result in an exception.
 template <typename T, typename P>
-inline SmartPtr<T> unsafe_cast(P&& p) {
+inline req::ptr<T> unsafe_cast(P&& p) {
   if (!is_null(p)) {
     return unsafe_cast_or_null<T>(std::forward<P>(p));
   }
@@ -351,7 +343,7 @@ inline SmartPtr<T> unsafe_cast(P&& p) {
 // Perform a cast operation on p.  If p is null or not castable to
 // a T, an exception will be thrown.
 template <typename T, typename P>
-inline SmartPtr<T> cast(P&& p) {
+inline req::ptr<T> cast(P&& p) {
   if (!is_null(p)) {
     if (isa_non_null<T>(p)) {
       return unsafe_cast_or_null<T>(std::forward<P>(p));
@@ -364,7 +356,7 @@ inline SmartPtr<T> cast(P&& p) {
 // a T, an exception will be thrown.  Null pointers will be
 // passed through.
 template <typename T, typename P>
-inline SmartPtr<T> cast_or_null(P&& p) {
+inline req::ptr<T> cast_or_null(P&& p) {
   if (!is_null(p)) {
     if (isa_non_null<T>(p)) {
       return unsafe_cast_or_null<T>(std::forward<P>(p));
@@ -378,7 +370,7 @@ inline SmartPtr<T> cast_or_null(P&& p) {
 // a T, a null value is returned.  If p is null, an exception
 // is thrown.
 template <typename T, typename P>
-inline SmartPtr<T> dyn_cast(P&& p) {
+inline req::ptr<T> dyn_cast(P&& p) {
   if (!is_null(p)) {
     if (isa_non_null<T>(p)) {
       return unsafe_cast_or_null<T>(std::forward<P>(p));
@@ -391,7 +383,7 @@ inline SmartPtr<T> dyn_cast(P&& p) {
 // Perform a cast operation on p.  If p is null or not castable to
 // a T, a null value is returned.
 template <typename T, typename P>
-inline SmartPtr<T> dyn_cast_or_null(P&& p) {
+inline req::ptr<T> dyn_cast_or_null(P&& p) {
   return isa<T>(p) ? unsafe_cast_or_null<T>(std::forward<P>(p)) : nullptr;
 }
 
@@ -403,8 +395,8 @@ inline SmartPtr<T> dyn_cast_or_null(P&& p) {
 
 namespace std {
 template<class T>
-struct hash<HPHP::SmartPtr<T>> {
-  size_t operator()(const HPHP::SmartPtr<T>& p) const {
+struct hash<HPHP::req::ptr<T>> {
+  size_t operator()(const HPHP::req::ptr<T>& p) const {
     return std::hash<T*>()(p.get());
   }
 };

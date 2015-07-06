@@ -18,7 +18,7 @@
 #define incl_HPHP_OBJECT_H_
 
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
 
@@ -33,9 +33,9 @@ namespace HPHP {
  * Object type wrapping around ObjectData to implement reference count.
  */
 class Object {
-  SmartPtr<ObjectData> m_obj;
+  req::ptr<ObjectData> m_obj;
 
-  using NoIncRef = SmartPtr<ObjectData>::NoIncRef;
+  using NoIncRef = req::ptr<ObjectData>::NoIncRef;
 public:
   Object() {}
 
@@ -61,12 +61,12 @@ public:
   }
 
   template <typename T>
-  explicit Object(const SmartPtr<T> &ptr) : m_obj(ptr) {
+  explicit Object(const req::ptr<T> &ptr) : m_obj(ptr) {
     assert(!m_obj || m_obj->hasMultipleRefs());
   }
 
   template <typename T>
-  explicit Object(SmartPtr<T>&& ptr) : m_obj(std::move(ptr)) {
+  explicit Object(req::ptr<T>&& ptr) : m_obj(std::move(ptr)) {
     assert(!m_obj || m_obj->getCount() > 0);
   }
 
@@ -90,7 +90,7 @@ public:
   }
 
   template <typename T>
-  Object& operator=(const SmartPtr<T>& src) {
+  Object& operator=(const req::ptr<T>& src) {
     m_obj = src;
     assert(!m_obj || m_obj->hasMultipleRefs());
     return *this;
@@ -104,7 +104,7 @@ public:
   }
 
   template <typename T>
-  Object& operator=(SmartPtr<T>&& src) {
+  Object& operator=(req::ptr<T>&& src) {
     m_obj = std::move(src);
     assert(!m_obj || m_obj->getCount() > 0);
     return *this;
@@ -137,7 +137,7 @@ public:
    */
   template<typename T>
   [[deprecated("Please use one of the cast family of functions instead.")]]
-  SmartPtr<T> getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
+  req::ptr<T> getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
     static_assert(std::is_base_of<ObjectData, T>::value, "");
 
     ObjectData *cur = get();
@@ -154,7 +154,7 @@ public:
       return nullptr;
     }
 
-    return SmartPtr<T>(static_cast<T*>(cur));
+    return req::ptr<T>(static_cast<T*>(cur));
   }
 
   template<typename T>
@@ -203,7 +203,7 @@ public:
   // Take ownership of a reference without touching the ref count
   static Object attach(ObjectData *object) {
     assert(!object || object->getCount() > 0);
-    return Object{SmartPtr<ObjectData>::attach(object)};
+    return Object{req::ptr<ObjectData>::attach(object)};
   }
 
 private:

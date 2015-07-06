@@ -34,11 +34,11 @@ struct DebuggerThriftBuffer : ThriftBuffer {
   DebuggerThriftBuffer()
     : ThriftBuffer(BUFFER_SIZE, VariableSerializer::Type::DebuggerSerialize) {}
 
-  SmartPtr<Socket> getSocket() {
-    return makeSmartPtr<Socket>(m_socket);
+  req::ptr<Socket> getSocket() {
+    return req::make<Socket>(m_socket);
   }
 
-  void create(SmartPtr<Socket> socket) {
+  void create(req::ptr<Socket> socket) {
     m_socket = socket->getData();
   }
   void close() {

@@ -62,7 +62,7 @@ struct VectorIterator {
   void rewind() { m_pos = 0; }
 
  private:
-  SmartPtr<BaseVector> m_obj;
+  req::ptr<BaseVector> m_obj;
   uint32_t m_pos{0};
   int32_t  m_version{0};
 };

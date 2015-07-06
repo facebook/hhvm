@@ -104,7 +104,7 @@ struct PDOMySqlResource : PDOResource {
 struct PDOMySqlStatement : PDOStatement {
   DECLARE_RESOURCE_ALLOCATION(PDOMySqlStatement);
 
-  PDOMySqlStatement(SmartPtr<PDOMySqlResource>&& conn, MYSQL* server);
+  PDOMySqlStatement(req::ptr<PDOMySqlResource>&& conn, MYSQL* server);
   virtual ~PDOMySqlStatement();
 
   bool create(const String& sql, const Array& options);
@@ -529,9 +529,9 @@ int PDOMySqlConnection::handleError(const char *file, int line,
 
 bool PDOMySqlConnection::preparer(const String& sql, sp_PDOStatement *stmt,
                                   const Variant& options) {
-  auto rsrc = makeSmartPtr<PDOMySqlResource>(
+  auto rsrc = req::make<PDOMySqlResource>(
       std::dynamic_pointer_cast<PDOMySqlConnection>(shared_from_this()));
-  auto s = makeSmartPtr<PDOMySqlStatement>(std::move(rsrc), m_server);
+  auto s = req::make<PDOMySqlStatement>(std::move(rsrc), m_server);
 
   *stmt = s;
 
@@ -852,7 +852,7 @@ static const char *type_to_name_native(int type) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PDOMySqlStatement::PDOMySqlStatement(SmartPtr<PDOMySqlResource>&& conn,
+PDOMySqlStatement::PDOMySqlStatement(req::ptr<PDOMySqlResource>&& conn,
                                      MYSQL* server)
   : m_conn(conn->conn())
   , m_server(server)
@@ -1075,7 +1075,7 @@ bool PDOMySqlStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Variant(makeSmartPtr<PDOColumn>()));
+      columns.set(i, Variant(req::make<PDOColumn>()));
     }
   }
 
@@ -1356,15 +1356,15 @@ bool PDOMySqlStatement::cursorCloser() {
 
 PDOMySql::PDOMySql() : PDODriver("mysql") {}
 
-SmartPtr<PDOResource> PDOMySql::createResourceImpl() {
-  return makeSmartPtr<PDOMySqlResource>(
+req::ptr<PDOResource> PDOMySql::createResourceImpl() {
+  return req::make<PDOMySqlResource>(
       std::make_shared<PDOMySqlConnection>());
 }
 
-SmartPtr<PDOResource> PDOMySql::createResourceImpl(
+req::ptr<PDOResource> PDOMySql::createResourceImpl(
   const sp_PDOConnection& conn
 ) {
-  return makeSmartPtr<PDOMySqlResource>(
+  return req::make<PDOMySqlResource>(
       std::dynamic_pointer_cast<PDOMySqlConnection>(conn));
 }
 

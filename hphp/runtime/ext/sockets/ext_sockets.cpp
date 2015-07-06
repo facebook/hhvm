@@ -124,7 +124,7 @@ static bool get_sockaddr(sockaddr *sa, socklen_t salen,
 
 static bool php_set_inet6_addr(struct sockaddr_in6 *sin6,
                                const char *address,
-                               SmartPtr<Socket> sock) {
+                               req::ptr<Socket> sock) {
   struct in6_addr tmp;
   struct addrinfo hints;
   struct addrinfo *addrinfo = NULL;
@@ -160,7 +160,7 @@ static bool php_set_inet6_addr(struct sockaddr_in6 *sin6,
 
 static bool php_set_inet_addr(struct sockaddr_in *sin,
                               const char *address,
-                              SmartPtr<Socket> sock) {
+                              req::ptr<Socket> sock) {
   struct in_addr tmp;
 
   if (inet_aton(address, &tmp)) {
@@ -184,7 +184,7 @@ static bool php_set_inet_addr(struct sockaddr_in *sin,
   return true;
 }
 
-static bool set_sockaddr(sockaddr_storage &sa_storage, SmartPtr<Socket> sock,
+static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
                          const char *addr, int port,
                          struct sockaddr *&sa_ptr, size_t &sa_size) {
   struct sockaddr *sock_type = (struct sockaddr*) &sa_storage;
@@ -268,7 +268,7 @@ static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
   sockets = ret;
 }
 
-static int php_read(SmartPtr<Socket> sock, void *buf, int maxlen, int flags) {
+static int php_read(req::ptr<Socket> sock, void *buf, int maxlen, int flags) {
   int m = fcntl(sock->fd(), F_GETFL);
   if (m < 0) {
     return m;
@@ -321,7 +321,7 @@ static int php_read(SmartPtr<Socket> sock, void *buf, int maxlen, int flags) {
   return n;
 }
 
-static SmartPtr<Socket> create_new_socket(
+static req::ptr<Socket> create_new_socket(
   const HostURL &hosturl,
   Variant &errnum,
   Variant &errstr
@@ -336,7 +336,7 @@ static SmartPtr<Socket> create_new_socket(
     domain = AF_UNIX;
   }
 
-  auto sock = makeSmartPtr<Socket>(
+  auto sock = req::make<Socket>(
     socket(domain, type, 0),
     domain,
     hosturl.getHost().c_str(),
@@ -405,13 +405,13 @@ static int connect_with_timeout(int fd, struct sockaddr *sa_ptr,
 }
 
 static Variant new_socket_connect(const HostURL &hosturl, double timeout,
-                                  const SmartPtr<StreamContext>& streamctx,
+                                  const req::ptr<StreamContext>& streamctx,
                                   Variant &errnum, Variant &errstr) {
   int domain = AF_UNSPEC;
   int type = SOCK_STREAM;
   auto const& scheme = hosturl.getScheme();
-  SmartPtr<Socket> sock;
-  SmartPtr<SSLSocket> sslsock;
+  req::ptr<Socket> sock;
+  req::ptr<SSLSocket> sslsock;
   std::string sockerr;
   int error;
 
@@ -428,7 +428,7 @@ static Variant new_socket_connect(const HostURL &hosturl, double timeout,
     size_t sa_size;
 
     fd = socket(domain, type, 0);
-    sock = makeSmartPtr<Socket>(
+    sock = req::make<Socket>(
       fd, domain, hosturl.getHost().c_str(), hosturl.getPort());
 
     if (!set_sockaddr(sa_storage, sock, hosturl.getHost().c_str(),
@@ -479,7 +479,7 @@ static Variant new_socket_connect(const HostURL &hosturl, double timeout,
     if (sslsock) {
       sock = sslsock;
     } else {
-      sock = makeSmartPtr<Socket>(fd,
+      sock = req::make<Socket>(fd,
                                   domain,
                                   hosturl.getHost().c_str(),
                                   hosturl.getPort());
@@ -511,12 +511,12 @@ Variant HHVM_FUNCTION(socket_create,
   check_socket_parameters(domain, type);
   int socketId = socket(domain, type, protocol);
   if (socketId == -1) {
-    SOCKET_ERROR(makeSmartPtr<Socket>(),
+    SOCKET_ERROR(req::make<Socket>(),
                  "Unable to create socket",
                  errno);
     return false;
   }
-  return Variant(makeSmartPtr<Socket>(socketId, domain));
+  return Variant(req::make<Socket>(socketId, domain));
 }
 
 Variant HHVM_FUNCTION(socket_create_listen,
@@ -533,7 +533,7 @@ Variant HHVM_FUNCTION(socket_create_listen,
   la.sin_family = result.hostbuf.h_addrtype;
   la.sin_port = htons((unsigned short)port);
 
-  auto sock = makeSmartPtr<Socket>(
+  auto sock = req::make<Socket>(
     socket(PF_INET, SOCK_STREAM, 0), PF_INET, "0.0.0.0", port);
 
   if (!sock->valid()) {
@@ -566,16 +566,16 @@ bool HHVM_FUNCTION(socket_create_pair,
 
   int fds_array[2];
   if (socketpair(domain, type, protocol, fds_array) != 0) {
-    SOCKET_ERROR(makeSmartPtr<Socket>(),
+    SOCKET_ERROR(req::make<Socket>(),
                  "unable to create socket pair",
                  errno);
     return false;
   }
 
   fd = make_packed_array(
-    Variant(makeSmartPtr<Socket>(fds_array[0], domain, nullptr, 0, 0.0,
+    Variant(req::make<Socket>(fds_array[0], domain, nullptr, 0, 0.0,
                                  s_socktype_generic)),
-    Variant(makeSmartPtr<Socket>(fds_array[1], domain, nullptr, 0, 0.0,
+    Variant(req::make<Socket>(fds_array[1], domain, nullptr, 0, 0.0,
                                  s_socktype_generic))
   );
   return true;
@@ -980,7 +980,7 @@ Variant HHVM_FUNCTION(socket_accept,
   auto sock = cast<Socket>(socket);
   struct sockaddr sa;
   socklen_t salen = sizeof(sa);
-  auto new_sock = makeSmartPtr<Socket>(
+  auto new_sock = req::make<Socket>(
     accept(sock->fd(), &sa, &salen), sock->getType());
   if (!new_sock->valid()) {
     SOCKET_ERROR(new_sock, "unable to accept incoming connection", errno);
@@ -1352,7 +1352,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
           folly::to<std::string>(hosturl.getPort());
     auto sockItr = s_sockets.find(key);
     if (sockItr != s_sockets.end()) {
-      auto sock = makeSmartPtr<Socket>(sockItr->second);
+      auto sock = req::make<Socket>(sockItr->second);
 
       if (sock->getError() == 0 && sock->checkLiveness()) {
         return Variant(sock);
@@ -1371,7 +1371,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   }
 
 
-  SmartPtr<StreamContext> streamctx;
+  req::ptr<StreamContext> streamctx;
   if (context.isResource()) {
     streamctx = cast<StreamContext>(context.toResource());
   }

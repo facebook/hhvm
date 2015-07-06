@@ -1425,7 +1425,7 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   if (!po.show.empty()) {
-    auto f = makeSmartPtr<PlainFile>();
+    auto f = req::make<PlainFile>();
     f->open(po.show, "r");
     if (!f->valid()) {
       Logger::Error("Unable to open file %s", po.show.c_str());

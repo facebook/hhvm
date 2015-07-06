@@ -494,7 +494,7 @@ Resource Variant::toResourceHelper() const {
     case KindOfString:
     case KindOfArray:
     case KindOfObject:
-      return Resource(makeSmartPtr<DummyResource>());
+      return Resource(req::make<DummyResource>());
 
     case KindOfResource:
       return m_data.pres;
@@ -927,7 +927,7 @@ void unserializeVariant(Variant& self, VariableUnserializer *uns,
       rsrcName.unserialize(uns);
       uns->expectChar('{');
       uns->expectChar('}');
-      auto rsrc = makeSmartPtr<DummyResource>();
+      auto rsrc = req::make<DummyResource>();
       rsrc->o_setResourceId(id);
       rsrc->m_class_name = rsrcName;
       self = std::move(rsrc);

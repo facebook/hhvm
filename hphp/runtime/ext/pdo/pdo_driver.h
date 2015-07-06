@@ -19,7 +19,7 @@
 #define incl_HPHP_PDO_DRIVER_H_
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,8 +30,8 @@ class PDOResource;
 class PDOStatement;
 
 using sp_PDOConnection = std::shared_ptr<PDOConnection>;
-using sp_PDOStatement = SmartPtr<PDOStatement>;
-using sp_PDOResource = SmartPtr<PDOResource>;
+using sp_PDOStatement = req::ptr<PDOStatement>;
+using sp_PDOResource = req::ptr<PDOResource>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -223,11 +223,11 @@ struct PDODriver {
 
   const char *getName() const { return m_name;}
 
-  SmartPtr<PDOResource> createResource(const String& datasource,
+  req::ptr<PDOResource> createResource(const String& datasource,
                                        const String& username,
                                        const String& password,
                                        const Array& options);
-  SmartPtr<PDOResource> createResource(const sp_PDOConnection& conn);
+  req::ptr<PDOResource> createResource(const sp_PDOConnection& conn);
 
   static const PDODriverMap& GetDrivers() { return s_drivers; }
 
@@ -237,8 +237,8 @@ private:
   const char *m_name;
 
   // Methods a driver needs to implement.
-  virtual SmartPtr<PDOResource> createResourceImpl() = 0;
-  virtual SmartPtr<PDOResource>
+  virtual req::ptr<PDOResource> createResourceImpl() = 0;
+  virtual req::ptr<PDOResource>
     createResourceImpl(const sp_PDOConnection& conn) = 0;
 };
 
@@ -507,10 +507,10 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using sp_PDOBoundParam = SmartPtr<PDOBoundParam>;
+using sp_PDOBoundParam = req::ptr<PDOBoundParam>;
 
 class c_pdo;
-using sp_pdo = SmartPtr<c_pdo>;
+using sp_pdo = req::ptr<c_pdo>;
 
 /*
  * Represents a prepared statement.

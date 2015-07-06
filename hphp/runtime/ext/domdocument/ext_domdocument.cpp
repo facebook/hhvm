@@ -704,7 +704,7 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, int mode,
 
   xmlInitParser();
 
-  SmartPtr<File> stream;
+  req::ptr<File> stream;
 
   if (mode == DOM_LOAD_FILE) {
     String file_dest = libxml_get_valid_file_path(source);
@@ -1140,7 +1140,7 @@ static String domClassname(xmlNodePtr obj) {
 }
 
 Variant php_dom_create_object(xmlNodePtr obj,
-                              SmartPtr<XMLDocumentData> doc) {
+                              req::ptr<XMLDocumentData> doc) {
   String clsname = domClassname(obj);
   if (!clsname) {
     raise_warning("Unsupported node type: %d", obj->type);
@@ -1175,7 +1175,7 @@ Variant php_dom_create_object(xmlNodePtr obj,
 }
 
 static Variant create_node_object(xmlNodePtr node,
-                                  SmartPtr<XMLDocumentData> doc) {
+                                  req::ptr<XMLDocumentData> doc) {
   if (!node) {
     return init_null();
   }
@@ -1187,7 +1187,7 @@ static Variant create_node_object(xmlNodePtr node,
 }
 
 static Variant create_node_object(xmlNodePtr obj) {
-  return create_node_object(obj, SmartPtr<XMLDocumentData>(nullptr));
+  return create_node_object(obj, req::ptr<XMLDocumentData>(nullptr));
 }
 
 static Variant create_node_object(xmlNodePtr obj, Object docObj) {
@@ -1621,7 +1621,7 @@ Object newDOMDocument(bool construct /* = true */) {
   return doc;
 }
 
-static Object newDOMNamedNodeMap(SmartPtr<XMLDocumentData> doc, Object base,
+static Object newDOMNamedNodeMap(req::ptr<XMLDocumentData> doc, Object base,
                           int node_type, xmlHashTable* ht = nullptr) {
   Object nodemap{getDOMNamedNodeMapClass()};
   auto data = Native::data<DOMIterable>(nodemap);
@@ -1633,7 +1633,7 @@ static Object newDOMNamedNodeMap(SmartPtr<XMLDocumentData> doc, Object base,
   return nodemap;
 }
 
-static Object newDOMNodeList(SmartPtr<XMLDocumentData> doc, Object base,
+static Object newDOMNodeList(req::ptr<XMLDocumentData> doc, Object base,
                              int node_type, String local = String(),
                              String ns = String()) {
   Object ret{getDOMNodeListClass()};

@@ -54,7 +54,7 @@ bool ZipFile::open(const String& filename, const String& mode) {
       raise_warning("Cannot write to this stream type");
       return false;
     }
-    auto file = makeSmartPtr<TempFile>();
+    auto file = req::make<TempFile>();
     while (!m_innerFile->eof()) {
       file->write(m_innerFile->read(File::CHUNK_SIZE));
     }

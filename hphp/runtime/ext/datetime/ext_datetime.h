@@ -64,11 +64,11 @@ public:
 
   static int64_t getTimestamp(const Object& obj);
   static int64_t getTimestamp(const ObjectData* od);
-  static Object wrap(SmartPtr<DateTime> dt);
-  static SmartPtr<DateTime> unwrap(const Object& datetime);
+  static Object wrap(req::ptr<DateTime> dt);
+  static req::ptr<DateTime> unwrap(const Object& datetime);
   static Class* getClass();
 
-  SmartPtr<DateTime> m_dt;
+  req::ptr<DateTime> m_dt;
   static Class* s_class;
   static const StaticString s_className;
 };
@@ -145,11 +145,11 @@ public:
     return m_tz->name();
   }
 
-  static Object wrap(SmartPtr<TimeZone> tz);
-  static SmartPtr<TimeZone> unwrap(const Object& timezone);
+  static Object wrap(req::ptr<TimeZone> tz);
+  static req::ptr<TimeZone> unwrap(const Object& timezone);
   static Class* getClass();
 
-  SmartPtr<TimeZone> m_tz;
+  req::ptr<TimeZone> m_tz;
   static Class* s_class;
   static const StaticString s_className;
 };
@@ -180,11 +180,11 @@ public:
     return *this;
   }
 
-  static Object wrap(SmartPtr<DateInterval> di);
-  static SmartPtr<DateInterval> unwrap(const Object& di);
+  static Object wrap(req::ptr<DateInterval> di);
+  static req::ptr<DateInterval> unwrap(const Object& di);
   static Class* getClass();
 
-  SmartPtr<DateInterval> m_di;
+  req::ptr<DateInterval> m_di;
   static Class* s_class;
   static const StaticString s_className;
 };

@@ -145,7 +145,7 @@ Variant HHVM_FUNCTION(msg_get_queue,
       return false;
     }
   }
-  auto q = makeSmartPtr<MessageQueue>();
+  auto q = req::make<MessageQueue>();
   q->key = key;
   q->id = id;
   return Variant(std::move(q));
@@ -518,7 +518,7 @@ Variant HHVM_FUNCTION(sem_get,
     }
   }
 
-  auto sem_ptr = makeSmartPtr<Semaphore>();
+  auto sem_ptr = req::make<Semaphore>();
   sem_ptr->key   = key;
   sem_ptr->semid = semid;
   sem_ptr->count = 0;

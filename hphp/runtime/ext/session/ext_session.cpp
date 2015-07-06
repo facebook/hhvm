@@ -1118,7 +1118,7 @@ public:
   WddxSessionSerializer() : SessionSerializer("wddx") {}
 
   virtual String encode() {
-    auto wddxPacket = makeSmartPtr<WddxPacket>(empty_string_variant_ref,
+    auto wddxPacket = req::make<WddxPacket>(empty_string_variant_ref,
                                                true, true);
     for (ArrayIter iter(php_global(s__SESSION).toArray()); iter; ++iter) {
       Variant key = iter.first();

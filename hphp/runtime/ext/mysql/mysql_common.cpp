@@ -193,7 +193,7 @@ std::shared_ptr<MySQL> MySQL::GetDefaultConn() {
 }
 
 void MySQL::SetDefaultConn(std::shared_ptr<MySQL> conn) {
-  s_mysql_data->defaultConn = makeSmartPtr<MySQLResource>(std::move(conn));
+  s_mysql_data->defaultConn = req::make<MySQLResource>(std::move(conn));
 }
 
 int MySQL::GetDefaultReadTimeout() {
@@ -374,7 +374,7 @@ IMPLEMENT_RESOURCE_ALLOCATION(MySQLResource)
 namespace {
 
 template <typename T>
-SmartPtr<MySQLResult> php_mysql_extract_result_helper(const T& result) {
+req::ptr<MySQLResult> php_mysql_extract_result_helper(const T& result) {
   auto const res = dyn_cast_or_null<MySQLResult>(result);
   if (res == nullptr || res->isInvalid()) {
     raise_warning("supplied argument is not a valid MySQL result resource");
@@ -385,11 +385,11 @@ SmartPtr<MySQLResult> php_mysql_extract_result_helper(const T& result) {
 
 }
 
-SmartPtr<MySQLResult> php_mysql_extract_result(const Resource& result) {
+req::ptr<MySQLResult> php_mysql_extract_result(const Resource& result) {
   return php_mysql_extract_result_helper(result);
 }
 
-SmartPtr<MySQLResult> php_mysql_extract_result(const Variant& result) {
+req::ptr<MySQLResult> php_mysql_extract_result(const Variant& result) {
   return php_mysql_extract_result_helper(result);
 }
 
@@ -648,7 +648,7 @@ Variant php_mysql_do_connect_on_link(std::shared_ptr<MySQL> mySQL,
     MySQL::SetCurrentNumPersistent(MySQL::GetCurrentNumPersistent() + 1);
   }
   MySQL::SetDefaultConn(mySQL);
-  return Variant(makeSmartPtr<MySQLResource>(mySQL));
+  return Variant(req::make<MySQLResource>(mySQL));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1195,7 +1195,7 @@ Variant MySQLStmt::result_metadata() {
   }
 
   Array args;
-  args.append(Variant(makeSmartPtr<MySQLResult>(mysql_result)));
+  args.append(Variant(req::make<MySQLResult>(mysql_result)));
 
   auto cls = Unit::lookupClass(s_mysqli_result.get());
   Object obj{cls};
@@ -1322,7 +1322,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
     return true;
   }
   mysql->status = MYSQL_STATUS_READY;
-  Variant result(makeSmartPtr<MySQLResult>(nullptr, true));
+  Variant result(req::make<MySQLResult>(nullptr, true));
   if (!php_mysql_read_rows(mysql, result)) {
     return false;
   }
@@ -1517,7 +1517,7 @@ Variant php_mysql_get_result(const Variant& link_id, bool use_store) {
     return true;
   }
 
-  auto r = makeSmartPtr<MySQLResult>(mysql_result);
+  auto r = req::make<MySQLResult>(mysql_result);
 
   if (RuntimeOption::MaxSQLRowCount > 0 &&
       (s_mysql_data->totalRowCount += r->getRowCount())

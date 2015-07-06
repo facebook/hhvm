@@ -26,7 +26,7 @@ namespace HPHP {
 TEST(MemoryManager, RootMaps) {
   {
     ASSERT_EQ(MM().lookupRoot<DummyResource>(0), nullptr);
-    auto dummy = makeSmartPtr<DummyResource>();
+    auto dummy = req::make<DummyResource>();
     auto id = MM().addRoot(dummy);
     ASSERT_EQ(MM().lookupRoot<DummyResource>(id), dummy);
     auto removed = MM().removeRoot<DummyResource>(id);
@@ -39,7 +39,7 @@ TEST(MemoryManager, RootMaps) {
   }
   {
     ASSERT_EQ(MM().lookupRoot<c_Vector>(0), nullptr);
-    auto vec = makeSmartPtr<c_Vector>();
+    auto vec = req::make<c_Vector>();
     auto id = MM().addRoot(vec);
     ASSERT_EQ(MM().lookupRoot<c_Vector>(id), vec);
     auto removed = MM().removeRoot<c_Vector>(id);

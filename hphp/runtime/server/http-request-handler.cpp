@@ -155,13 +155,13 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
     snprintf(age, sizeof(age), "max-age=%d", RuntimeOption::ExpiresDefault);
     transport->addHeader("Cache-Control", age);
     transport->addHeader("Expires",
-      makeSmartPtr<DateTime>(exp, true)->toString(
+      req::make<DateTime>(exp, true)->toString(
         DateTime::DateFormat::HttpHeader).c_str());
   }
 
   if (mtime) {
     transport->addHeader("Last-Modified",
-      makeSmartPtr<DateTime>(mtime, true)->toString(
+      req::make<DateTime>(mtime, true)->toString(
         DateTime::DateFormat::HttpHeader).c_str());
   }
   transport->addHeader("Accept-Ranges", "bytes");

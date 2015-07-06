@@ -34,7 +34,7 @@ const Object Object::s_nullObject = Object();
 ///////////////////////////////////////////////////////////////////////////////
 
 void Object::compileTimeAssertions() {
-  static_assert(sizeof(Object) == sizeof(SmartPtr<ObjectData>), "Fix this.");
+  static_assert(sizeof(Object) == sizeof(req::ptr<ObjectData>), "Fix this.");
 }
 
 void ObjNR::compileTimeAssertions() {

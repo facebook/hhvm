@@ -98,7 +98,7 @@ static std::shared_ptr<MySQL> get_connection(const Object& obj) {
                                  : nullptr;
 }
 
-static SmartPtr<MySQLStmt> getStmt(const Object& obj) {
+static req::ptr<MySQLStmt> getStmt(const Object& obj) {
   auto res = obj->o_realProp(
     s_stmt,
     ObjectData::RealPropUnchecked,
@@ -108,7 +108,7 @@ static SmartPtr<MySQLStmt> getStmt(const Object& obj) {
   return cast<MySQLStmt>(*res);
 }
 
-static SmartPtr<MySQLResult> getResult(const Object& obj) {
+static req::ptr<MySQLResult> getResult(const Object& obj) {
   auto res = obj->o_realProp(
     s_result,
     ObjectData::RealPropUnchecked,
@@ -272,7 +272,7 @@ static Variant HHVM_METHOD(mysqli, hh_get_result, bool use_store) {
 
 static void HHVM_METHOD(mysqli, hh_init) {
   auto data = std::make_shared<MySQL>(nullptr, 0, nullptr, nullptr, nullptr);
-  auto rsrc = makeSmartPtr<MySQLResource>(std::move(data));
+  auto rsrc = req::make<MySQLResource>(std::move(data));
   this_->o_set(s_connection, Variant(std::move(rsrc)), s_mysqli);
 }
 
@@ -927,7 +927,7 @@ static void HHVM_METHOD(mysqli_stmt, hh_init, const Object& connection) {
     raise_warning("invalid object or resource mysqli");
     return;
   }
-  auto data = makeSmartPtr<MySQLStmt>(conn->get());
+  auto data = req::make<MySQLStmt>(conn->get());
   this_->o_set(s_stmt, Variant(std::move(data)), s_mysqli_stmt);
 }
 

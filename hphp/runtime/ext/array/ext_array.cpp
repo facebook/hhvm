@@ -1546,7 +1546,7 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
 ///////////////////////////////////////////////////////////////////////////////
 // diff functions
 
-static inline void addToSetHelper(const SmartPtr<c_Set>& st,
+static inline void addToSetHelper(const req::ptr<c_Set>& st,
                                   const Cell c,
                                   TypedValue* strTv,
                                   bool convertIntLikeStrs) {
@@ -1570,7 +1570,7 @@ static inline void addToSetHelper(const SmartPtr<c_Set>& st,
   }
 }
 
-static inline bool checkSetHelper(const SmartPtr<c_Set>& st,
+static inline bool checkSetHelper(const req::ptr<c_Set>& st,
                                   const Cell c,
                                   TypedValue* strTv,
                                   bool convertIntLikeStrs) {
@@ -1592,7 +1592,7 @@ static inline bool checkSetHelper(const SmartPtr<c_Set>& st,
   return st->contains(s);
 }
 
-static void containerValuesToSetHelper(const SmartPtr<c_Set>& st,
+static void containerValuesToSetHelper(const req::ptr<c_Set>& st,
                                        const Variant& container) {
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
@@ -1602,7 +1602,7 @@ static void containerValuesToSetHelper(const SmartPtr<c_Set>& st,
   }
 }
 
-static void containerKeysToSetHelper(const SmartPtr<c_Set>& st,
+static void containerKeysToSetHelper(const req::ptr<c_Set>& st,
                                      const Variant& container) {
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
@@ -1661,7 +1661,7 @@ Variant HHVM_FUNCTION(array_diff,
   // Put all of the values from all the containers (except container1 into a
   // Set. All types aside from integer and string will be cast to string, and
   // we also convert int-like strings to integers.
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   st->reserve(largestSize);
   containerValuesToSetHelper(st, container2);
   if (UNLIKELY(moreThanTwo)) {
@@ -1711,7 +1711,7 @@ Variant HHVM_FUNCTION(array_diff_key,
   // Put all of the keys from all the containers (except container1) into a
   // Set. All types aside from integer and string will be cast to string, and
   // we also convert int-like strings to integers.
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   st->reserve(largestSize);
   containerKeysToSetHelper(st, container2);
   if (UNLIKELY(moreThanTwo)) {
@@ -1853,7 +1853,7 @@ static inline TypedValue* makeContainerListHelper(const Variant& a,
   return containers;
 }
 
-static inline void addToIntersectMapHelper(const SmartPtr<c_Map>& mp,
+static inline void addToIntersectMapHelper(const req::ptr<c_Map>& mp,
                                            const Cell c,
                                            TypedValue* intOneTv,
                                            TypedValue* strTv,
@@ -1878,7 +1878,7 @@ static inline void addToIntersectMapHelper(const SmartPtr<c_Map>& mp,
   }
 }
 
-static inline void updateIntersectMapHelper(const SmartPtr<c_Map>& mp,
+static inline void updateIntersectMapHelper(const req::ptr<c_Map>& mp,
                                             const Cell c,
                                             int pos,
                                             TypedValue* strTv,
@@ -1915,11 +1915,11 @@ static inline void updateIntersectMapHelper(const SmartPtr<c_Map>& mp,
   }
 }
 
-static void containerValuesIntersectHelper(const SmartPtr<c_Set>& st,
+static void containerValuesIntersectHelper(const req::ptr<c_Set>& st,
                                            TypedValue* containers,
                                            int count) {
   assert(count >= 2);
-  auto mp = makeSmartPtr<c_Map>();
+  auto mp = req::make<c_Map>();
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
@@ -1954,11 +1954,11 @@ static void containerValuesIntersectHelper(const SmartPtr<c_Set>& st,
   }
 }
 
-static void containerKeysIntersectHelper(const SmartPtr<c_Set>& st,
+static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
                                          TypedValue* containers,
                                          int count) {
   assert(count >= 2);
-  auto mp = makeSmartPtr<c_Map>();
+  auto mp = req::make<c_Map>();
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
@@ -2036,7 +2036,7 @@ Variant HHVM_FUNCTION(array_intersect,
   ARRAY_INTERSECT_PRELUDE()
   // Build up a Set containing the values that are present in all the
   // containers (except container1)
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   if (LIKELY(!moreThanTwo)) {
     // There is only one container (not counting container1) so we can
     // just call containerValuesToSetHelper() to build the Set.
@@ -2091,7 +2091,7 @@ Variant HHVM_FUNCTION(array_intersect_key,
   }
   // Build up a Set containing the keys that are present in all the containers
   // (except container1)
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   if (LIKELY(!moreThanTwo)) {
     // There is only one container (not counting container1) so we can just
     // call containerKeysToSetHelper() to build the Set.

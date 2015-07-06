@@ -57,13 +57,13 @@ Variant HHVM_FUNCTION(bzopen, const Variant& filename, const String& mode) {
     return false;
   }
 
-  SmartPtr<BZ2File> bz;
+  req::ptr<BZ2File> bz;
   if (filename.isString()) {
     if (filename.asCStrRef().empty()) {
       raise_warning("filename cannot be empty");
       return false;
     }
-    bz = makeSmartPtr<BZ2File>();
+    bz = req::make<BZ2File>();
     bool ret = bz->open(File::TranslatePath(filename.toString()), mode);
     if (!ret) {
       raise_warning("%s", folly::errnoStr(errno).c_str());
@@ -106,7 +106,7 @@ Variant HHVM_FUNCTION(bzopen, const Variant& filename, const String& mode) {
       return false;
     }
 
-    bz = makeSmartPtr<BZ2File>(std::move(f));
+    bz = req::make<BZ2File>(std::move(f));
   }
   return Variant(std::move(bz));
 }

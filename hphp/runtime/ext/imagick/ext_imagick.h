@@ -77,7 +77,7 @@ class ImagickExtension final : public Extension {
    private: \
     static void initClass() {                                   \
       cls = Unit::lookupClass(                                  \
-        SmartPtr<StringData>::attach(                           \
+        req::ptr<StringData>::attach(                           \
           StringData::Make(#CLS)                                \
         ).get()                                                 \
       );                                                        \
@@ -189,13 +189,13 @@ void setWandResource(const StaticString& className,
                      const Object& obj,
                      Wand* wand,
                      bool owner = true) {
-  auto res = makeSmartPtr<WandResource<Wand>>(wand, owner);
+  auto res = req::make<WandResource<Wand>>(wand, owner);
   obj->o_set("wand", Variant(std::move(res)), className);
 }
 
 template<typename Wand>
 ALWAYS_INLINE
-SmartPtr<WandResource<Wand>> getWandResource(const StaticString& className,
+req::ptr<WandResource<Wand>> getWandResource(const StaticString& className,
                                              const Object& obj) {
   if (!obj.instanceof(className)) {
     return nullptr;
@@ -206,7 +206,7 @@ SmartPtr<WandResource<Wand>> getWandResource(const StaticString& className,
 
 template<typename Wand, typename T>
 ALWAYS_INLINE
-SmartPtr<WandResource<Wand>> getWandResource(const StaticString& className,
+req::ptr<WandResource<Wand>> getWandResource(const StaticString& className,
                                              const Object& obj,
                                              const std::string& msg) {
   auto ret = getWandResource<Wand>(className, obj);
@@ -218,28 +218,28 @@ SmartPtr<WandResource<Wand>> getWandResource(const StaticString& className,
 }
 
 ALWAYS_INLINE
-SmartPtr<WandResource<MagickWand>> getMagickWandResource(const Object& obj) {
+req::ptr<WandResource<MagickWand>> getMagickWandResource(const Object& obj) {
   return getWandResource<MagickWand, ImagickException>(
     s_Imagick, obj,
     "Can not process invalid Imagick object");
 }
 
 ALWAYS_INLINE
-SmartPtr<WandResource<DrawingWand>> getDrawingWandResource(const Object& obj) {
+req::ptr<WandResource<DrawingWand>> getDrawingWandResource(const Object& obj) {
   return getWandResource<DrawingWand, ImagickDrawException>(
     s_ImagickDraw, obj,
     "Can not process invalid ImagickDraw object");
 }
 
 ALWAYS_INLINE
-SmartPtr<WandResource<PixelWand>> getPixelWandResource(const Object& obj) {
+req::ptr<WandResource<PixelWand>> getPixelWandResource(const Object& obj) {
   auto ret = getWandResource<PixelWand>(s_ImagickPixel, obj);
   assert(ret != nullptr && ret->getWand() != nullptr);
   return ret;
 }
 
 ALWAYS_INLINE
-SmartPtr<WandResource<PixelIterator>>
+req::ptr<WandResource<PixelIterator>>
 getPixelIteratorResource(const Object& obj) {
   return getWandResource<PixelIterator, ImagickPixelIteratorException>(
     s_ImagickPixelIterator, obj,
@@ -345,11 +345,11 @@ Object createImagickPixel(PixelWand* wand, bool owner = true);
 Array createImagickPixelArray(
   size_t num, PixelWand* wands[], bool owner = true);
 
-SmartPtr<WandResource<PixelWand>> newPixelWand();
+req::ptr<WandResource<PixelWand>> newPixelWand();
 
-SmartPtr<WandResource<PixelWand>> buildColorWand(const Variant& color);
+req::ptr<WandResource<PixelWand>> buildColorWand(const Variant& color);
 
-SmartPtr<WandResource<PixelWand>> buildOpacityWand(const Variant& opacity);
+req::ptr<WandResource<PixelWand>> buildOpacityWand(const Variant& opacity);
 
 //////////////////////////////////////////////////////////////////////////////
 // ImagickPixel Helper

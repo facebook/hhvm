@@ -123,7 +123,7 @@ struct AddScanMethodsAction : public PluginASTAction {
     m_needsScanMethodNames.insert("HPHP::Variant");
     m_needsScanMethodNames.insert("HPHP::Object");
     m_needsScanMethodNames.insert("HPHP::Resource");
-    m_needsScanMethodNames.insert("HPHP::SmartPtr");
+    m_needsScanMethodNames.insert("HPHP::req::ptr");
     m_needsScanMethodNames.insert("HPHP::LowPtr");
     //m_needsScanMethodNames.insert("HPHP::SweepableMember");
     //m_needsScanMethodNames.insert("HPHP::RequestEventHandler");
@@ -153,7 +153,7 @@ struct AddScanMethodsAction : public PluginASTAction {
     m_hasScanMethodNames.insert("HPHP::req::hash_multimap");
     m_hasScanMethodNames.insert("HPHP::req::hash_set");
     m_hasScanMethodNames.insert("HPHP::req::unique_ptr");
-    m_hasScanMethodNames.insert("HPHP::SmartPtr");
+    m_hasScanMethodNames.insert("HPHP::req::ptr");
     m_hasScanMethodNames.insert("HPHP::AtomicSmartPtr");
     m_hasScanMethodNames.insert("HPHP::AtomicSharedPtr");
     m_hasScanMethodNames.insert("HPHP::SString");

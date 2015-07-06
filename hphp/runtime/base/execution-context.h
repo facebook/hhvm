@@ -258,8 +258,8 @@ public:
   Variant getExitCallback();
   void setExitCallback(Variant);
 
-  void setStreamContext(const SmartPtr<StreamContext>&);
-  const SmartPtr<StreamContext>& getStreamContext();
+  void setStreamContext(const req::ptr<StreamContext>&);
+  const req::ptr<StreamContext>& getStreamContext();
 
   int getPageletTasksStarted() const;
   void incrPageletTasksStarted();
@@ -571,7 +571,7 @@ private:
   String m_timezone;
   String m_timezoneDefault;
   bool m_throwAllErrors;
-  SmartPtr<StreamContext> m_streamContext;
+  req::ptr<StreamContext> m_streamContext;
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;

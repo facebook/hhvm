@@ -18,7 +18,7 @@
 #define incl_HPHP_ARRAY_H_
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/types.h"
 
 #include <algorithm>
@@ -40,7 +40,7 @@ class ArrayIter;
  * escalation.
  */
 class Array {
-  using Ptr = SmartPtr<ArrayData>;
+  using Ptr = req::ptr<ArrayData>;
   using NoIncRef = Ptr::NoIncRef;
   using NonNull = Ptr::NonNull;
 

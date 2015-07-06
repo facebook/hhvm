@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 
 namespace HPHP {
@@ -62,7 +62,7 @@ class c_GenMapWaitHandle final : public c_WaitableWaitHandle {
                   c_WaitableWaitHandle* child);
 
   Object m_exception;
-  SmartPtr<c_Map> m_deps;
+  req::ptr<c_Map> m_deps;
   ssize_t m_iterPos;
   AsioBlockable m_blockable;
 

@@ -193,7 +193,7 @@ String WddxPacket::wrapValue(const String& start,
 // helpers
 
 void find_var_recursive(const TypedValue* tv,
-                        const SmartPtr<WddxPacket>& wddxPacket) {
+                        const req::ptr<WddxPacket>& wddxPacket) {
   if (tvIsString(tv)) {
     String var_name = tvCastToString(tv);
     wddxPacket->add_var(var_name, true);
@@ -218,7 +218,7 @@ static TypedValue* add_vars_helper(ActRec* ar) {
 }
 
 static TypedValue* serialize_vars_helper(ActRec* ar) {
-  auto wddxPacket = makeSmartPtr<WddxPacket>(empty_string_variant_ref,
+  auto wddxPacket = req::make<WddxPacket>(empty_string_variant_ref,
                                              true, true);
   int start_index = 0;
   for (int i = start_index; i < ar->numArgs(); i++) {
@@ -245,12 +245,12 @@ static String HHVM_FUNCTION(wddx_packet_end, const Resource& packet_id) {
 }
 
 static Resource HHVM_FUNCTION(wddx_packet_start, const Variant& comment) {
-  return Resource(makeSmartPtr<WddxPacket>(comment, true, false));
+  return Resource(req::make<WddxPacket>(comment, true, false));
 }
 
 static String HHVM_FUNCTION(wddx_serialize_value, const Variant& var,
                             const Variant& comment) {
-  auto wddxPacket = makeSmartPtr<WddxPacket>(comment, false, false);
+  auto wddxPacket = req::make<WddxPacket>(comment, false, false);
   wddxPacket->serialize_value(var);
   return wddxPacket->packet_end();
 }

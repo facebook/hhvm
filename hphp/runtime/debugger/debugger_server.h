@@ -49,8 +49,8 @@ struct DebuggerServer {
 private:
   static DebuggerServer s_debugger_server;
 
-  SmartPtr<Socket> nthSocket(unsigned i) const {
-    return makeSmartPtr<Socket>(m_socks[i]);
+  req::ptr<Socket> nthSocket(unsigned i) const {
+    return req::make<Socket>(m_socks[i]);
   }
 
   AsyncFunc<DebuggerServer> m_serverThread;

@@ -85,7 +85,7 @@ public:
   /**
    * Starts/stops a debugger client.
    */
-  static SmartPtr<Socket> Start(const DebuggerClientOptions &options);
+  static req::ptr<Socket> Start(const DebuggerClientOptions &options);
   static void Stop();
 
   /**
@@ -490,7 +490,7 @@ private:
   // connections
   void closeAllConnections();
   void switchMachine(std::shared_ptr<DMachineInfo> machine);
-  SmartPtr<Socket> connectLocal();
+  req::ptr<Socket> connectLocal();
   bool connectRemote(const std::string &host, int port);
   bool tryConnect(const std::string &host, int port, bool clearmachines);
 

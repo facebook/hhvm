@@ -142,7 +142,7 @@ class c_SimpleXMLElementIterator : public ExtObjectData {
   public: Variant t_valid();
 
 public:
-  SmartPtr<c_SimpleXMLElement> sxe;
+  req::ptr<c_SimpleXMLElement> sxe;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

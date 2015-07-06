@@ -42,7 +42,7 @@ Object c_RescheduleWaitHandle::ti_create(int64_t queue, int64_t priority) {
       "Expected priority to be a non-negative integer");
   }
 
-  auto wh = makeSmartPtr<c_RescheduleWaitHandle>();
+  auto wh = req::make<c_RescheduleWaitHandle>();
   wh->initialize(static_cast<uint32_t>(queue), priority);
   return Object(std::move(wh));
 }

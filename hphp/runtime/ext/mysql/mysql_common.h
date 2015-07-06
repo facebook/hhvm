@@ -246,7 +246,7 @@ struct MySQLRequestData final : RequestEventHandler {
     totalRowCount = 0;
   }
 
-  SmartPtr<MySQLResource> defaultConn;
+  req::ptr<MySQLResource> defaultConn;
   int readTimeout;
   int totalRowCount; // from all queries in current request
 
@@ -422,8 +422,8 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 // helper
 
-SmartPtr<MySQLResult> php_mysql_extract_result(const Resource& result);
-SmartPtr<MySQLResult> php_mysql_extract_result(const Variant& result);
+req::ptr<MySQLResult> php_mysql_extract_result(const Resource& result);
+req::ptr<MySQLResult> php_mysql_extract_result(const Variant& result);
 
 
 enum MySQLFieldEntryType { NAME, TABLE, LEN, TYPE, FLAGS };

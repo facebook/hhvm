@@ -1423,7 +1423,7 @@ Array HHVM_FUNCTION(str_getcsv,
   char enclosure_char = check_arg(enclosure, '"');
   char escape_char = check_arg(escape, '\\');
 
-  auto dummy = makeSmartPtr<PlainFile>();
+  auto dummy = req::make<PlainFile>();
   return dummy->readCSV(0, delimiter_char, enclosure_char, escape_char, &str);
 }
 

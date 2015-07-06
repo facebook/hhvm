@@ -145,12 +145,12 @@ public:
   AsyncMysqlQueryErrorResult& operator=(const AsyncMysqlQueryErrorResult&)
     = delete;
   void sweep();
-  void create(std::shared_ptr<am::Operation> op, SmartPtr<c_Vector> results);
+  void create(std::shared_ptr<am::Operation> op, req::ptr<c_Vector> results);
   static Class* getClass();
   static Object newInstance(std::shared_ptr<am::Operation> op,
-                            SmartPtr<c_Vector> results);
+                            req::ptr<c_Vector> results);
 
-  SmartPtr<c_Vector> m_query_results;
+  req::ptr<c_Vector> m_query_results;
   static Class* s_class;
   static const StaticString s_className;
 

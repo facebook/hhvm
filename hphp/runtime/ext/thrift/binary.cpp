@@ -206,7 +206,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       String format = fieldspec.rvalAt(s_format,
                                        AccessFlags::None).toString();
       if (format.equal(s_collection)) {
-        auto obj(makeSmartPtr<c_Map>(size));
+        auto obj(req::make<c_Map>(size));
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(types[0], transport, keyspec);
           Variant value = binary_deserialize(types[1], transport, valspec);
@@ -233,7 +233,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
                                        AccessFlags::None).toString();
 
       if (format.equal(s_collection)) {
-        auto const pvec(makeSmartPtr<c_Vector>(size));
+        auto const pvec(req::make<c_Vector>(size));
         for (uint32_t s = 0; s < size; ++s) {
           pvec->t_add(binary_deserialize(type, transport, elemspec));
         }
@@ -258,7 +258,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       String format = fieldspec.rvalAt(s_format,
                                        AccessFlags::None).toString();
       if (format.equal(s_collection)) {
-        auto set_ret(makeSmartPtr<c_Set>(size));
+        auto set_ret(req::make<c_Set>(size));
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(type, transport, elemspec);
 

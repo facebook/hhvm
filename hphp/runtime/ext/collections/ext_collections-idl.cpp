@@ -48,7 +48,7 @@ namespace HPHP {
 template<typename TCollection>
 ALWAYS_INLINE
 static Object materializeImpl(ObjectData* obj) {
-  auto col = makeSmartPtr<TCollection>();
+  auto col = req::make<TCollection>();
   col->init(VarNR(obj));
   return Object{std::move(col)};
 }
@@ -187,7 +187,7 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_fromKeysOf(const Variant& container) {
-  if (container.isNull()) { return Object{makeSmartPtr<TVector>()}; }
+  if (container.isNull()) { return Object{req::make<TVector>()}; }
 
   const auto& cellContainer = *container.asCell();
   if (UNLIKELY(!isContainer(cellContainer))) {
@@ -196,7 +196,7 @@ BaseVector::php_fromKeysOf(const Variant& container) {
   }
 
   ArrayIter iter(cellContainer);
-  auto target = makeSmartPtr<TVector>();
+  auto target = req::make<TVector>();
   target->reserve(getContainerSize(cellContainer));
   assert(target->canMutateBuffer());
   for (; iter; ++iter) { target->addRaw(iter.first()); }
@@ -215,7 +215,7 @@ BaseVector::php_map(const Variant& callback, MakeArgs makeArgs) const {
       "Parameter must be a valid callback");
   }
 
-  auto nv = makeSmartPtr<TVector>();
+  auto nv = req::make<TVector>();
   uint32_t sz = m_size;
   nv->reserve(sz);
   assert(nv->canMutateBuffer());
@@ -244,7 +244,7 @@ BaseVector::php_filter(const Variant& callback, MakeArgs makeArgs) const {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto nv = makeSmartPtr<TVector>();
+  auto nv = req::make<TVector>();
   uint32_t sz = m_size;
   int32_t version = m_version;
   assert(nv->canMutateBuffer());
@@ -271,7 +271,7 @@ BaseVector::php_take(const Variant& n) {
       "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
-  auto vec = makeSmartPtr<TVector>();
+  auto vec = req::make<TVector>();
   if (len <= 0) {
     return Object{std::move(vec)};
   }
@@ -296,7 +296,7 @@ BaseVector::php_takeWhile(const Variant& fn) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto vec = makeSmartPtr<TVector>();
+  auto vec = req::make<TVector>();
   assert(vec->m_size == 0);
   int32_t version UNUSED;
   if (checkVersion) {
@@ -325,7 +325,7 @@ BaseVector::php_skip(const Variant& n) {
       "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
-  auto vec = makeSmartPtr<TVector>();
+  auto vec = req::make<TVector>();
   if (len <= 0) len = 0;
   size_t skipAmt = std::min<size_t>(len, m_size);
   size_t sz = size_t(m_size) - skipAmt;
@@ -349,7 +349,7 @@ BaseVector::php_skipWhile(const Variant& fn) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto vec = makeSmartPtr<TVector>();
+  auto vec = req::make<TVector>();
   assert(vec->canMutateBuffer());
   uint32_t i = 0;
   int32_t version UNUSED;
@@ -388,7 +388,7 @@ BaseVector::php_slice(const Variant& start, const Variant& len) {
   }
   size_t skipAmt = std::min<size_t>(istart, m_size);
   size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
-  auto vec = makeSmartPtr<TVector>();
+  auto vec = req::make<TVector>();
   vec->reserve(sz);
   assert(vec->canMutateBuffer());
   vec->setSize(sz);
@@ -412,7 +412,7 @@ void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
     if (bvec->m_capacity <= bvec->m_size) {
       bvec->grow();
     }
-    auto pair = makeSmartPtr<c_Pair>(c_Pair::NoInit{});
+    auto pair = req::make<c_Pair>(c_Pair::NoInit{});
     pair->initAdd(&m_data[i]);
     pair->initAdd(v);
     bvec->m_data[i].m_data.pobj = pair.detach();
@@ -851,7 +851,7 @@ Object c_Vector::t_clear() {
 }
 
 Object c_Vector::t_keys() {
-  auto vec = makeSmartPtr<c_Vector>();
+  auto vec = req::make<c_Vector>();
   BaseVector::keys(vec.get());
   return Object{std::move(vec)};
 }
@@ -1004,7 +1004,7 @@ Object c_Vector::t_filterwithkey(const Variant& callback) {
 }
 
 Object c_Vector::t_zip(const Variant& iterable) {
-  auto vec = makeSmartPtr<c_Vector>();
+  auto vec = req::make<c_Vector>();
   BaseVector::zip(vec.get(), iterable);
   return Object{std::move(vec)};
 }
@@ -1064,7 +1064,7 @@ typename std::enable_if<
 BaseVector::php_concat(const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  auto vec = makeSmartPtr<TVector>();
+  auto vec = req::make<TVector>();
   uint32_t sz = m_size;
   vec->reserve((size_t)sz + itSize);
   assert(vec->canMutateBuffer());
@@ -1118,7 +1118,7 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::php_fromItems(const Variant& iterable) {
-  auto target = makeSmartPtr<TVector>();
+  auto target = req::make<TVector>();
   if (iterable.isNull()) return Object{std::move(target)};
   target->init(iterable);
   return Object{std::move(target)};
@@ -1145,7 +1145,7 @@ Object c_Vector::ti_fromarray(const Variant& arr) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter arr must be an array");
   }
-  auto target = makeSmartPtr<c_Vector>();
+  auto target = req::make<c_Vector>();
   auto* ad = arr.getArrayData();
   uint32_t sz = ad->size();
   target->reserve(sz);
@@ -1260,7 +1260,7 @@ void c_Vector::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 // already exist) and then return it
 Object c_Vector::getImmutableCopy() {
   if (m_immCopy.isNull()) {
-    auto vec = makeSmartPtr<c_ImmVector>();
+    auto vec = req::make<c_ImmVector>();
     vec->m_data = m_data;
     vec->m_size = m_size;
     vec->m_capacity = m_capacity;
@@ -1313,13 +1313,13 @@ Object c_ImmVector::t_filterwithkey(const Variant& callback) {
 }
 
 Object c_ImmVector::t_zip(const Variant& iterable) {
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   BaseVector::zip(vec.get(), iterable);
   return Object{std::move(vec)};
 }
 
 Object c_ImmVector::t_keys() {
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   BaseVector::keys(vec.get());
   return Object{std::move(vec)};
 }
@@ -2104,7 +2104,7 @@ BaseMap::php_map(const Variant& callback, MakeArgs makeArgs) const {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto mp = makeSmartPtr<TMap>();
+  auto mp = req::make<TMap>();
   if (!m_size) return Object{std::move(mp)};
   assert(posLimit() != 0);
   assert(hashSize() > 0);
@@ -2185,7 +2185,7 @@ BaseMap::php_filter(const Variant& callback, MakeArgs makeArgs) const {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto map = makeSmartPtr<TMap>();
+  auto map = req::make<TMap>();
   if (!m_size) return Object(std::move(map));
   map->mutate();
   int32_t version = m_version;
@@ -2277,7 +2277,7 @@ typename std::enable_if<
 BaseMap::php_zip(const Variant& iterable) const {
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  auto mp = makeSmartPtr<TMap>();
+  auto mp = req::make<TMap>();
   if (!m_size) {
     return Object{std::move(mp)};
   }
@@ -2287,7 +2287,7 @@ BaseMap::php_zip(const Variant& iterable) const {
     if (isTombstone(i)) continue;
     const Elm& e = data()[i];
     Variant v = iter.second();
-    auto pair = makeSmartPtr<c_Pair>(c_Pair::NoInit{});
+    auto pair = req::make<c_Pair>(c_Pair::NoInit{});
     pair->initAdd(&e.data);
     pair->initAdd(v);
     TypedValue tv;
@@ -2327,7 +2327,7 @@ BaseMap::php_take(const Variant& n) {
     // so we can just call Clone() and return early here.
     return Object::attach(TMap::Clone(this));
   }
-  auto mp = makeSmartPtr<TMap>();
+  auto mp = req::make<TMap>();
   if (len <= 0) {
     // We know the resulting Map will be empty, so we can return
     // early here.
@@ -2365,7 +2365,7 @@ BaseMap::php_takeWhile(const Variant& fn) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto mp = makeSmartPtr<TMap>();
+  auto mp = req::make<TMap>();
   if (!m_size) return Object{std::move(mp)};
   int32_t version UNUSED;
   if (checkVersion) {
@@ -2406,7 +2406,7 @@ BaseMap::php_skip(const Variant& n) {
     // so we can just call Clone() and return early here.
     return Object::attach(TMap::Clone(this));
   }
-  auto mp = makeSmartPtr<TMap>();
+  auto mp = req::make<TMap>();
   if (len >= m_size) {
     // We know the resulting Map will be empty, so we can return
     // early here.
@@ -2446,7 +2446,7 @@ BaseMap::php_skipWhile(const Variant& fn) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto mp = makeSmartPtr<TMap>();
+  auto mp = req::make<TMap>();
   if (!m_size) return Object{std::move(mp)};
   int32_t version;
   if (checkVersion) {
@@ -2493,7 +2493,7 @@ BaseMap::php_slice(const Variant& start, const Variant& len) {
   }
   size_t skipAmt = std::min<size_t>(istart, m_size);
   size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
-  auto mp = makeSmartPtr<TMap>();
+  auto mp = req::make<TMap>();
   mp->reserve(sz);
   mp->setSize(sz);
   mp->setPosLimit(sz);
@@ -2570,7 +2570,7 @@ typename std::enable_if<
 BaseMap::php_concat(const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  auto vec = makeSmartPtr<TVector>();
+  auto vec = req::make<TVector>();
   uint32_t sz = m_size;
   vec->reserve((size_t)sz + itSize);
   assert(vec->canMutateBuffer());
@@ -2646,10 +2646,10 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_mapFromItems(const Variant& iterable) {
-  if (iterable.isNull()) return Object{makeSmartPtr<TMap>()};
+  if (iterable.isNull()) return Object{req::make<TMap>()};
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  auto target = makeSmartPtr<TMap>();
+  auto target = req::make<TMap>();
   target->reserve(sz);
   for (; iter; ++iter) {
     Variant v = iter.second();
@@ -2682,7 +2682,7 @@ BaseMap::php_mapFromArray(const Variant& arr) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter arr must be an array");
   }
-  auto map = makeSmartPtr<TMap>();
+  auto map = req::make<TMap>();
   ArrayData* ad = arr.getArrayData();
   map->reserve(ad->size());
   for (ssize_t pos = ad->iter_begin(), limit = ad->iter_end(); pos != limit;
@@ -3134,7 +3134,7 @@ void BaseMap::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 // already exist) and then return it
 Object c_Map::getImmutableCopy() {
   if (m_immCopy.isNull()) {
-    auto mp = makeSmartPtr<c_ImmMap>();
+    auto mp = req::make<c_ImmMap>();
     mp->m_size = m_size;
     mp->m_version = m_version;
     mp->m_data = m_data;
@@ -3544,7 +3544,7 @@ bool BaseSet::ToBool(const ObjectData* obj) {
 // already exist) and then return it
 Object c_Set::getImmutableCopy() {
   if (m_immCopy.isNull()) {
-    auto st = makeSmartPtr<c_ImmSet>();
+    auto st = req::make<c_ImmSet>();
     st->m_size = m_size;
     st->m_version = m_version;
     st->m_data = m_data;
@@ -3735,7 +3735,7 @@ BaseSet::php_map(const Variant& callback, MakeArgs makeArgs) const {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto st = makeSmartPtr<TSet>();
+  auto st = req::make<TSet>();
   if (!m_size) return Object{std::move(st)};
   assert(posLimit() != 0);
   assert(hashSize() > 0);
@@ -3770,7 +3770,7 @@ BaseSet::php_filter(const Variant& callback, MakeArgs makeArgs) const {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto set = makeSmartPtr<TSet>();
+  auto set = req::make<TSet>();
   if (!m_size) return Object(std::move(set));
   // we don't reserve(), because we don't know how selective callback will be
   set->mutate();
@@ -3807,7 +3807,7 @@ BaseSet::php_zip(const Variant& iterable) {
     // the zip operation will always fail
     throwBadValueType();
   }
-  return Object(makeSmartPtr<TSet>());
+  return Object(req::make<TSet>());
 }
 
 template<class MakeArgs>
@@ -3861,7 +3861,7 @@ BaseSet::php_take(const Variant& n) {
     // so we can just call Clone() and return early here.
     return Object::attach(TSet::Clone(this));
   }
-  auto st = makeSmartPtr<TSet>();
+  auto st = req::make<TSet>();
   if (len <= 0) {
     // We know the resulting Set will be empty, so we can return
     // early here.
@@ -3899,7 +3899,7 @@ BaseSet::php_takeWhile(const Variant& fn) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto set = makeSmartPtr<TSet>();
+  auto set = req::make<TSet>();
   if (!m_size) return Object(std::move(set));
   set->mutate();
   int32_t version UNUSED;
@@ -3943,7 +3943,7 @@ BaseSet::php_skip(const Variant& n) {
     // so we can just call Clone() and return early here.
     return Object::attach(TSet::Clone(this));
   }
-  auto st = makeSmartPtr<TSet>();
+  auto st = req::make<TSet>();
   if (len >= m_size) {
     // We know the resulting Set will be empty, so we can return
     // early here.
@@ -3986,7 +3986,7 @@ BaseSet::php_skipWhile(const Variant& fn) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto set = makeSmartPtr<TSet>();
+  auto set = req::make<TSet>();
   if (!m_size) return Object(std::move(set));
   // we don't reserve(), because we don't know how selective fn will be
   set->mutate();
@@ -4037,7 +4037,7 @@ BaseSet::php_slice(const Variant& start, const Variant& len) {
   }
   size_t skipAmt = std::min<size_t>(istart, m_size);
   size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
-  auto st = makeSmartPtr<TSet>();
+  auto st = req::make<TSet>();
   st->reserve(sz);
   st->setSize(sz);
   st->setPosLimit(sz);
@@ -4064,7 +4064,7 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromItems(const Variant& iterable) {
-  auto set = makeSmartPtr<TSet>();
+  auto set = req::make<TSet>();
   set->addAll(iterable);
   return Object(std::move(set));
 }
@@ -4075,10 +4075,10 @@ typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromKeysOf(const Variant& container) {
   if (container.isNull()) {
-    return Object(makeSmartPtr<TSet>());
+    return Object(req::make<TSet>());
   }
   const auto& cellContainer = container_as_cell(container);
-  auto target = makeSmartPtr<TSet>();
+  auto target = req::make<TSet>();
   target->addAllKeysOf(cellContainer);
   return Object(std::move(target));
 }
@@ -4092,7 +4092,7 @@ BaseSet::php_fromArray(const Variant& arr) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter arr must be an array");
   }
-  auto set = makeSmartPtr<TSet>();
+  auto set = req::make<TSet>();
   ArrayData* ad = arr.getArrayData();
   auto oldCap = set->cap();
   set->reserve(ad->size()); // presume minimum collisions ...
@@ -4110,7 +4110,7 @@ ALWAYS_INLINE
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_fromArrays(int _argc, const Array& _argv /* = null_array */) {
-  auto set = makeSmartPtr<TSet>();
+  auto set = req::make<TSet>();
   auto oldCap = set->cap();
   for (ArrayIter iter(_argv); iter; ++iter) {
     Variant arr = iter.second();
@@ -4312,7 +4312,7 @@ typename std::enable_if<
 BaseSet::php_concat(const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  auto vec = makeSmartPtr<TVector>();
+  auto vec = req::make<TVector>();
   uint32_t sz = m_size;
   vec->reserve((size_t)sz + itSize);
   assert(vec->canMutateBuffer());
@@ -4519,7 +4519,7 @@ Object c_Pair::t_items() {
 
 Object c_Pair::t_keys() {
   assert(isFullyConstructed());
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   vec->reserve(2);
   assert(vec->canMutateBuffer());
   vec->setSize(2);
@@ -4531,7 +4531,7 @@ Object c_Pair::t_keys() {
 }
 
 Object c_Pair::t_values() {
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   vec->init(VarNR(this));
   return Object{std::move(vec)};
 }
@@ -4616,7 +4616,7 @@ Object c_Pair::t_map(const Variant& callback) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   vec->reserve(2);
   assert(vec->canMutateBuffer());
   for (uint64_t i = 0; i < 2; ++i) {
@@ -4634,7 +4634,7 @@ Object c_Pair::t_mapwithkey(const Variant& callback) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   vec->reserve(2);
   assert(vec->canMutateBuffer());
   for (uint64_t i = 0; i < 2; ++i) {
@@ -4653,7 +4653,7 @@ Object c_Pair::t_filter(const Variant& callback) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   for (uint64_t i = 0; i < 2; ++i) {
     if (invokeAndCastToBool(ctx, 1, &getElms()[i])) {
       vec->addRaw(&getElms()[i]);
@@ -4670,7 +4670,7 @@ Object c_Pair::t_filterwithkey(const Variant& callback) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   for (uint64_t i = 0; i < 2; ++i) {
     TypedValue args[2] = { make_tv<KindOfInt64>(i), getElms()[i] };
     if (invokeAndCastToBool(ctx, 2, args)) {
@@ -4684,7 +4684,7 @@ Object c_Pair::t_zip(const Variant& iterable) {
   assert(isFullyConstructed());
   size_t sz;
   ArrayIter iter = getArrayIterHelper(iterable, sz);
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   vec->reserve(std::min(sz, size_t(2)));
   assert(vec->canMutateBuffer());
   for (uint64_t i = 0; i < 2 && iter; ++i, ++iter) {
@@ -4692,7 +4692,7 @@ Object c_Pair::t_zip(const Variant& iterable) {
     if (vec->m_capacity <= vec->m_size) {
       vec->grow();
     }
-    auto pair = makeSmartPtr<c_Pair>(c_Pair::NoInit{});
+    auto pair = req::make<c_Pair>(c_Pair::NoInit{});
     pair->initAdd(&getElms()[i]);
     pair->initAdd(v);
     vec->m_data[i].m_data.pobj = pair.detach();
@@ -4708,7 +4708,7 @@ Object c_Pair::t_take(const Variant& n) {
       "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   if (len <= 0) {
     return Object{std::move(vec)};
   }
@@ -4729,7 +4729,7 @@ Object c_Pair::t_takewhile(const Variant& callback) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   for (uint32_t i = 0; i < 2; ++i) {
     if (!invokeAndCastToBool(ctx, 1, &getElms()[i])) break;
     vec->addRaw(&getElms()[i]);
@@ -4743,7 +4743,7 @@ Object c_Pair::t_skip(const Variant& n) {
       "Parameter n must be an integer");
   }
   int64_t len = n.toInt64();
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   if (len <= 0) len = 0;
   size_t skipAmt = std::min<size_t>(len, 2);
   size_t sz = size_t(m_size) - skipAmt;
@@ -4763,7 +4763,7 @@ Object c_Pair::t_skipwhile(const Variant& fn) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   uint32_t i = 0;
   for (; i < 2; ++i) {
     if (!invokeAndCastToBool(ctx, 1, &getElms()[i])) break;
@@ -4787,7 +4787,7 @@ Object c_Pair::t_slice(const Variant& start, const Variant& len) {
   }
   size_t skipAmt = std::min<size_t>(istart, 2);
   size_t sz = std::min<size_t>(ilen, size_t(2) - skipAmt);
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   vec->reserve(sz);
   assert(vec->canMutateBuffer());
   vec->setSize(sz);
@@ -4800,7 +4800,7 @@ Object c_Pair::t_slice(const Variant& start, const Variant& len) {
 Object c_Pair::t_concat(const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  auto vec = makeSmartPtr<c_ImmVector>();
+  auto vec = req::make<c_ImmVector>();
   vec->reserve((size_t)2 + itSize);
   assert(vec->canMutateBuffer());
   vec->setSize(2);

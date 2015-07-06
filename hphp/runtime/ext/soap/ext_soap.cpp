@@ -1052,7 +1052,7 @@ static std::shared_ptr<sdlFunction> deserialize_function_call
                                     "mustUnderstand value is not boolean");
           }
         }
-        auto h = makeSmartPtr<soapHeader>();
+        auto h = req::make<soapHeader>();
         h->function = find_function(sdl, hdr_func, h->function_name).get();
         h->mustUnderstand = mustUnderstand;
         h->hdr = nullptr;
@@ -1819,7 +1819,7 @@ const StaticString
 static void send_soap_server_fault(
     std::shared_ptr<sdlFunction> function,
     Variant fault,
-    const SmartPtr<soapHeader>& hdr) {
+    const req::ptr<soapHeader>& hdr) {
   USE_SOAP_GLOBAL;
   bool use_http_error_status = true;
   if (php_global(s__SERVER).toArray()[s_HTTP_USER_AGENT].toString() ==
@@ -1850,7 +1850,7 @@ static void send_soap_server_fault(
 static void send_soap_server_fault(
     std::shared_ptr<sdlFunction> function,
     Exception &e,
-    const SmartPtr<soapHeader>& hdr) {
+    const req::ptr<soapHeader>& hdr) {
   USE_SOAP_GLOBAL;
   if (SOAP_GLOBAL(use_soap_error_handler)) {
     send_soap_server_fault(
@@ -2388,7 +2388,7 @@ void HHVM_METHOD(SoapServer, addsoapheader,
                  const Variant& fault) {
   auto* data = Native::data<SoapServer>(this_);
   SoapServerScope ss(this_);
-  auto p = makeSmartPtr<soapHeader>();
+  auto p = req::make<soapHeader>();
   p->function = nullptr;
   p->mustUnderstand = false;
   p->retval = fault.toObject();
@@ -2451,7 +2451,7 @@ void HHVM_METHOD(SoapClient, __construct,
     }
 
     if (options.exists(s_stream_context)) {
-      SmartPtr<StreamContext> sc;
+      req::ptr<StreamContext> sc;
       if (options[s_stream_context].isResource()) {
         sc = cast<StreamContext>(options[s_stream_context]);
       }

@@ -149,9 +149,9 @@ struct Variant : private TypedValue {
   }
 
   template <typename T>
-  explicit Variant(const SmartPtr<T>& ptr) : Variant(ptr.get()) { }
+  explicit Variant(const req::ptr<T>& ptr) : Variant(ptr.get()) { }
   template <typename T>
-  explicit Variant(SmartPtr<T>&& ptr) noexcept
+  explicit Variant(req::ptr<T>&& ptr) noexcept
     : Variant(ptr.detach(), Attach{}) { }
 
   /*
@@ -942,7 +942,7 @@ struct Variant : private TypedValue {
   /*
    * This set of constructors act like the normal constructors for the
    * given types except that they do not increment the reference count
-   * of the passed value.  They are used for the SmartPtr move constructor.
+   * of the passed value.  They are used for the req::ptr move constructor.
    */
   Variant(StringData* var, Attach) noexcept {
     if (var) {
@@ -1022,12 +1022,12 @@ struct Variant : private TypedValue {
   void set(Resource&& v) noexcept { steal(detach<ResourceData>(std::move(v))); }
 
   template<typename T>
-  void set(const SmartPtr<T> &v) noexcept {
+  void set(const req::ptr<T> &v) noexcept {
     return set(v.get());
   }
 
   template <typename T>
-  void set(SmartPtr<T>&& v) noexcept {
+  void set(req::ptr<T>&& v) noexcept {
     return steal(v.detach());
   }
 
@@ -1399,12 +1399,12 @@ ALWAYS_INLINE Variant empty_string_variant() {
 }
 
 template <typename T>
-inline Variant toVariant(const SmartPtr<T>& p) {
+inline Variant toVariant(const req::ptr<T>& p) {
   return p ? Variant(p) : Variant(false);
 }
 
 template <typename T>
-inline Variant toVariant(SmartPtr<T>&& p) {
+inline Variant toVariant(req::ptr<T>&& p) {
   return p ? Variant(std::move(p)) : Variant(false);
 }
 

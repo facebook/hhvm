@@ -38,19 +38,19 @@ public:
   void o_setResourceId(int64_t id) { o_id = id; }
 };
 
-TEST(SmartPtr, Refcounts) {
+TEST(ReqPtr, Refcounts) {
   {
-    auto ptr = makeSmartPtr<DummyResource>();
+    auto ptr = req::make<DummyResource>();
     EXPECT_TRUE(ptr->hasExactlyOneRef());
-    SmartPtr<ResourceData> r(std::move(ptr));
+    req::ptr<ResourceData> r(std::move(ptr));
     EXPECT_TRUE(r.get()->getCount() == 1);
   }
 
   {
-    auto ptr = makeSmartPtr<DummyResource>();
+    auto ptr = req::make<DummyResource>();
     EXPECT_TRUE(ptr->hasExactlyOneRef());
     {
-      SmartPtr<ResourceData> r(ptr);
+      req::ptr<ResourceData> r(ptr);
       EXPECT_TRUE(ptr->getCount() == 2);
       EXPECT_TRUE(r.get()->getCount() == 2);
     }
@@ -58,18 +58,18 @@ TEST(SmartPtr, Refcounts) {
   }
 }
 
-TEST(SmartPtr, Assignment) {
-  auto ptr = makeSmartPtr<DummyResource>();
+TEST(ReqPtr, Assignment) {
+  auto ptr = req::make<DummyResource>();
   auto* tmp = ptr.get();
   ptr = ptr;
   EXPECT_TRUE(ptr->hasExactlyOneRef());
   EXPECT_TRUE(ptr.get() == tmp);
 }
 
-TEST(SmartPtr, Operators) {
+TEST(ReqPtr, Operators) {
   {
-    SmartPtr<DummyResource> p1;
-    SmartPtr<DummyResource2> p2;
+    req::ptr<DummyResource> p1;
+    req::ptr<DummyResource2> p2;
     EXPECT_TRUE(p1 == p1);
     EXPECT_TRUE(p1 == p2);
     EXPECT_TRUE(p1 == nullptr);
@@ -80,8 +80,8 @@ TEST(SmartPtr, Operators) {
     EXPECT_FALSE(nullptr != p1);
   }
   {
-    auto p1 = makeSmartPtr<DummyResource>();
-    auto p2 = makeSmartPtr<DummyResource>();
+    auto p1 = req::make<DummyResource>();
+    auto p2 = req::make<DummyResource>();
     auto p3 = p1;
     EXPECT_FALSE(p1 == p2);
     EXPECT_TRUE(p1 == p3);
@@ -93,29 +93,29 @@ TEST(SmartPtr, Operators) {
     EXPECT_TRUE(nullptr != p1);
   }
   {
-    auto p1 = makeSmartPtr<DummyResource>();
-    auto p2 = makeSmartPtr<DummyResource2>();
+    auto p1 = req::make<DummyResource>();
+    auto p2 = req::make<DummyResource2>();
     EXPECT_FALSE(p1 == p2);
     EXPECT_TRUE(p1 != p2);
   }
   {
-    auto p1 = makeSmartPtr<DummyResource>();
-    SmartPtr<ResourceData> p2(p1);
+    auto p1 = req::make<DummyResource>();
+    req::ptr<ResourceData> p2(p1);
     EXPECT_TRUE(p1 == p2);
     EXPECT_FALSE(p1 != p2);
   }
 }
 
-TEST(SmartPtr, Casts) {
+TEST(ReqPtr, Casts) {
   // Test cast operations
   {
-    EXPECT_FALSE(isa<DummyResource>(SmartPtr<DummyResource>(nullptr)));
-    EXPECT_TRUE(isa_or_null<DummyResource>(SmartPtr<DummyResource>(nullptr)));
+    EXPECT_FALSE(isa<DummyResource>(req::ptr<DummyResource>(nullptr)));
+    EXPECT_TRUE(isa_or_null<DummyResource>(req::ptr<DummyResource>(nullptr)));
 
-    auto dummy = makeSmartPtr<DummyResource>();
-    SmartPtr<ResourceData> res(dummy);
-    SmartPtr<ResourceData> empty;
-    SmartPtr<File> emptyFile;
+    auto dummy = req::make<DummyResource>();
+    req::ptr<ResourceData> res(dummy);
+    req::ptr<ResourceData> empty;
+    req::ptr<File> emptyFile;
 
     EXPECT_TRUE(isa<DummyResource>(res));
     EXPECT_TRUE(isa_or_null<DummyResource>(res));
@@ -175,12 +175,12 @@ TEST(SmartPtr, Casts) {
   }
 }
 
-TEST(SmartPtr, MoveCasts) {
-  auto res = unsafe_cast_or_null<DummyResource>(makeSmartPtr<DummyResource>());
+TEST(ReqPtr, MoveCasts) {
+  auto res = unsafe_cast_or_null<DummyResource>(req::make<DummyResource>());
   EXPECT_NE(res, nullptr);
-  auto res2 = dyn_cast<DummyResource>(makeSmartPtr<DummyResource>());
+  auto res2 = dyn_cast<DummyResource>(req::make<DummyResource>());
   EXPECT_NE(res2, nullptr);
-  auto res3 = dyn_cast<DummyResource2>(makeSmartPtr<DummyResource>());
+  auto res3 = dyn_cast<DummyResource2>(req::make<DummyResource>());
   EXPECT_EQ(res3, nullptr);
 }
 

@@ -3084,7 +3084,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   auto callArgs = argGroup(inst);
   if (isBuiltinByRef(funcReturnType)) {
     // First arg is pointer to storage for that return value
-    if (isSmartPtrRef(funcReturnType)) {
+    if (isReqPtrRef(funcReturnType)) {
       returnOffset += TVOFF(m_data);
     }
     // Pass the address of tvBuiltinReturn to the native function as the
@@ -3124,7 +3124,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
 
   for (uint32_t i = 0; i < numArgs; ++i, ++srcNum) {
     auto const& pi = callee->params()[i];
-    if (TVOFF(m_data) && isSmartPtrRef(pi.builtinType)) {
+    if (TVOFF(m_data) && isReqPtrRef(pi.builtinType)) {
       assertx(inst->src(srcNum)->type() <= TPtrToGen);
       callArgs.addr(srcLoc(inst, srcNum).reg(), TVOFF(m_data));
     } else {
@@ -3150,7 +3150,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   // the builtin writes the return value into MInstrState::tvBuiltinReturn
   // TV, from where it has to be tested and copied.
   if (returnType.isReferenceType()) {
-    assertx(isBuiltinByRef(funcReturnType) && isSmartPtrRef(funcReturnType));
+    assertx(isBuiltinByRef(funcReturnType) && isReqPtrRef(funcReturnType));
     // return type is String, Array, or Object; fold nullptr to KindOfNull
     auto rtype = v.cns(returnType.toDataType());
     auto nulltype = v.cns(KindOfNull);
@@ -3164,7 +3164,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   }
   if (returnType <= TCell || returnType <= TBoxedCell) {
     // return type is Variant; fold KindOfUninit to KindOfNull
-    assertx(isBuiltinByRef(funcReturnType) && !isSmartPtrRef(funcReturnType));
+    assertx(isBuiltinByRef(funcReturnType) && !isReqPtrRef(funcReturnType));
     auto nulltype = v.cns(KindOfNull);
     auto tmp_type = v.makeReg();
     emitLoadTVType(v, rdsReg[returnOffset + TVOFF(m_type)], tmp_type);

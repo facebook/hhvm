@@ -24,14 +24,14 @@ namespace HPHP {
 
 TEST(Resource, Refcounts) {
   {
-    auto ptr = makeSmartPtr<DummyResource>();
+    auto ptr = req::make<DummyResource>();
     EXPECT_TRUE(ptr->hasExactlyOneRef());
     Resource r(std::move(ptr));
     EXPECT_TRUE(r->getCount() == 1);
   }
 
   {
-    auto ptr = makeSmartPtr<DummyResource>();
+    auto ptr = req::make<DummyResource>();
     EXPECT_TRUE(ptr->hasExactlyOneRef());
     {
       Resource r(ptr);
@@ -48,7 +48,7 @@ TEST(Resource, Casts) {
     EXPECT_FALSE(isa<DummyResource>(Resource()));
     EXPECT_TRUE(isa_or_null<DummyResource>(Resource()));
 
-    auto dummy = makeSmartPtr<DummyResource>();
+    auto dummy = req::make<DummyResource>();
     Resource res(dummy);
     Resource empty;
     EXPECT_TRUE(isa<DummyResource>(res));

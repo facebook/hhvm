@@ -327,7 +327,7 @@ String HHVM_FUNCTION(spl_autoload_extensions,
 ///////////////////////////////////////////////////////////////////////////////
 
 template <class T>
-static SmartPtr<T> getDir(const Object& dir_iter) {
+static req::ptr<T> getDir(const Object& dir_iter) {
   static_assert(std::is_base_of<Directory, T>::value,
                 "Only cast to directories");
   return cast<T>(*dir_iter->o_realProp("dir", 0, s_directory_iterator));

@@ -47,7 +47,7 @@ bool Debugger::StartServer() {
 
 DebuggerProxyPtr Debugger::StartClient(const DebuggerClientOptions &options) {
   TRACE(2, "Debugger::StartClient\n");
-  SmartPtr<Socket> localProxy = DebuggerClient::Start(options);
+  req::ptr<Socket> localProxy = DebuggerClient::Start(options);
   if (localProxy.get()) {
     s_clientStarted = true;
     return CreateProxy(localProxy, true);
@@ -80,7 +80,7 @@ void Debugger::UnregisterSandbox(const String& id) {
   s_debugger.unregisterSandbox(id.get());
 }
 
-DebuggerProxyPtr Debugger::CreateProxy(SmartPtr<Socket> socket, bool local) {
+DebuggerProxyPtr Debugger::CreateProxy(req::ptr<Socket> socket, bool local) {
   TRACE(2, "Debugger::CreateProxy\n");
   return s_debugger.createProxy(socket, local);
 }
@@ -453,7 +453,7 @@ void Debugger::setDebuggerFlag(const StringData* sandboxId, bool flag) {
 #undef FOREACH_SANDBOX_THREAD_BEGIN
 #undef FOREACH_SANDBOX_THREAD_END
 
-DebuggerProxyPtr Debugger::createProxy(SmartPtr<Socket> socket, bool local) {
+DebuggerProxyPtr Debugger::createProxy(req::ptr<Socket> socket, bool local) {
   TRACE(2, "Debugger::createProxy\n");
   // Creates a proxy and threads needed to handle it. At this point, there is
   // not enough information to attach a sandbox.

@@ -46,7 +46,7 @@ Array createImagickPixelArray(size_t num, PixelWand* wands[], bool owner) {
 }
 
 ALWAYS_INLINE
-SmartPtr<WandResource<PixelWand>> getPixelWand(const Variant& obj) {
+req::ptr<WandResource<PixelWand>> getPixelWand(const Variant& obj) {
   if (!obj.isObject()) {
     IMAGICKPIXEL_THROW("Invalid color parameter provided");
   } else if (!obj.getObjectData()->instanceof(s_ImagickPixel)) {
@@ -54,19 +54,19 @@ SmartPtr<WandResource<PixelWand>> getPixelWand(const Variant& obj) {
       "The parameter must be an instance of ImagickPixel or a string");
   } else {
     auto wand = getPixelWandResource(obj.toCObjRef());
-    return makeSmartPtr<WandResource<PixelWand>>(wand->getWand(), false);
+    return req::make<WandResource<PixelWand>>(wand->getWand(), false);
   }
 }
 
-SmartPtr<WandResource<PixelWand>> newPixelWand() {
-  auto ret = makeSmartPtr<WandResource<PixelWand>>(NewPixelWand());
+req::ptr<WandResource<PixelWand>> newPixelWand() {
+  auto ret = req::make<WandResource<PixelWand>>(NewPixelWand());
   if (ret->getWand() == nullptr) {
     IMAGICKPIXEL_THROW("Failed to allocate PixelWand structure");
   }
   return ret;
 }
 
-SmartPtr<WandResource<PixelWand>> buildColorWand(const Variant& color) {
+req::ptr<WandResource<PixelWand>> buildColorWand(const Variant& color) {
   if (!color.isString()) {
     return getPixelWand(color);
   }
@@ -78,7 +78,7 @@ SmartPtr<WandResource<PixelWand>> buildColorWand(const Variant& color) {
   return ret;
 }
 
-SmartPtr<WandResource<PixelWand>> buildOpacityWand(const Variant& opacity) {
+req::ptr<WandResource<PixelWand>> buildOpacityWand(const Variant& opacity) {
   if (!opacity.isInteger() && !opacity.isDouble()) {
     return getPixelWand(opacity);
   }

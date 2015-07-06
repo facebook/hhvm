@@ -33,7 +33,7 @@
 namespace HPHP {
 
 template<class T>
-static SmartPtr<T> safe_cast(const Resource& res) {
+static req::ptr<T> safe_cast(const Resource& res) {
   auto ptr = dyn_cast_or_null<T>(res);
   if (!ptr) {
     raise_warning("supplied argument is not a valid ODBC resource");
@@ -372,7 +372,7 @@ bool ODBCCursor::prepare_query(const String& query)
 
   // store information about data types the db is expecting
   for (int i=1; i <= params_size_; i++) {
-    params_.append(Variant(makeSmartPtr<ODBCParam>(hdl_stmt_, i)));
+    params_.append(Variant(req::make<ODBCParam>(hdl_stmt_, i)));
   }
   assert(params_.size() == params_size_);
   return true;
@@ -438,7 +438,7 @@ bool ODBCCursor::bind_buffer()
 
   // retrieve info about columns
   for (int i_col=1; i_col <= columns_count_; i_col++) {
-    auto column = makeSmartPtr<ODBCColumn>(hdl_stmt_, i_col);
+    auto column = req::make<ODBCColumn>(hdl_stmt_, i_col);
     row_size += column->total_column_size();
     columns_.append(Variant(std::move(column)));
   }
@@ -690,7 +690,7 @@ void ODBCLink::close()
 
 Variant ODBCLink::exec(const String& query)
 {
-  auto cursor = makeSmartPtr<ODBCCursor>(hdl_dbconn_);
+  auto cursor = req::make<ODBCCursor>(hdl_dbconn_);
 
   if (!cursor->exec_query(query)) {
     raise_warning("SQL error: [%s] %s",
@@ -703,7 +703,7 @@ Variant ODBCLink::exec(const String& query)
 
 Variant ODBCLink::prepare(const String& query)
 {
-  auto cursor = makeSmartPtr<ODBCCursor>(hdl_dbconn_);
+  auto cursor = req::make<ODBCCursor>(hdl_dbconn_);
 
   if (!cursor->prepare_query(query)) {
     return false;
@@ -799,7 +799,7 @@ bool HHVM_FUNCTION(odbc_commit, const Resource& link)
 Variant HHVM_FUNCTION(odbc_connect, const String& dsn, const String& username,
     const String& password, const Variant& cursor_type /* = 0 */)
 {
-  auto odbc_link = makeSmartPtr<ODBCLink>();
+  auto odbc_link = req::make<ODBCLink>();
 
   if (!odbc_link->connect(dsn, username, password)) {
     return false;

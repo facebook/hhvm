@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/classname-is.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/util/thread-local.h"
 
@@ -238,15 +238,17 @@ template <typename F> friend void scan(const T& this_, F& mark);
   static_assert(std::is_base_of<ResourceData,T>::value, ""); \
   void HPHP::T::sweep() { this->~T(); }
 
+namespace req {
 template<class T, class... Args>
 typename std::enable_if<
   std::is_convertible<T*, ResourceData*>::value,
-  SmartPtr<T>
->::type makeSmartPtr(Args&&... args) {
-  using UnownedAndNonNull = typename SmartPtr<T>::UnownedAndNonNull;
-  return SmartPtr<T>(newres<T>(std::forward<Args>(args)...),
+  req::ptr<T>
+>::type make(Args&&... args) {
+  using UnownedAndNonNull = typename req::ptr<T>::UnownedAndNonNull;
+  return req::ptr<T>(newres<T>(std::forward<Args>(args)...),
                      UnownedAndNonNull{});
 }
+} // namespace req
 
 ///////////////////////////////////////////////////////////////////////////////
 }

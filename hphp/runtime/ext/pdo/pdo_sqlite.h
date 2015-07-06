@@ -31,8 +31,8 @@ namespace HPHP {
 
 struct PDOSqlite : PDODriver {
   PDOSqlite();
-  SmartPtr<PDOResource> createResourceImpl() override;
-  SmartPtr<PDOResource> createResourceImpl(const sp_PDOConnection&) override;
+  req::ptr<PDOResource> createResourceImpl() override;
+  req::ptr<PDOResource> createResourceImpl(const sp_PDOConnection&) override;
 };
 
 struct PDOSqliteError {

@@ -56,7 +56,7 @@ void Array::setEvalScalar() const {
 }
 
 void Array::compileTimeAssertions() {
-  static_assert(sizeof(Array) == sizeof(SmartPtr<ArrayData>), "Fix this.");
+  static_assert(sizeof(Array) == sizeof(req::ptr<ArrayData>), "Fix this.");
 }
 
 void ArrNR::compileTimeAssertions() {
@@ -85,7 +85,7 @@ Array &Array::operator=(const Variant& var) {
 // Move assign
 Array& Array::operator=(Variant&& v) {
   if (v.asTypedValue()->m_type == KindOfArray) {
-    m_arr = SmartPtr<ArrayData>::attach(v.asTypedValue()->m_data.parr);
+    m_arr = req::ptr<ArrayData>::attach(v.asTypedValue()->m_data.parr);
     v.asTypedValue()->m_type = KindOfNull;
   } else {
     *this = const_cast<const Variant&>(v);

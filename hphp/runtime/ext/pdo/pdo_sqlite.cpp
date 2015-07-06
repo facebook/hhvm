@@ -182,7 +182,7 @@ bool PDOSqliteConnection::preparer(const String& sql, sp_PDOStatement *stmt,
   if (sqlite3_prepare(m_db, sql.data(), sql.size(), &rawstmt, &tail)
       == SQLITE_OK) {
 
-    *stmt = makeSmartPtr<PDOSqliteStatement>(m_db, rawstmt);
+    *stmt = req::make<PDOSqliteStatement>(m_db, rawstmt);
     return true;
   }
 
@@ -432,7 +432,7 @@ bool PDOSqliteStatement::describer(int colno) {
 
   if (columns.empty()) {
     for (int i = 0; i < column_count; i++) {
-      columns.set(i, Variant(makeSmartPtr<PDOColumn>()));
+      columns.set(i, Variant(req::make<PDOColumn>()));
     }
   }
 
@@ -639,15 +639,15 @@ bool PDOSqliteStatement::cursorCloser() {
 
 PDOSqlite::PDOSqlite() : PDODriver("sqlite") {}
 
-SmartPtr<PDOResource> PDOSqlite::createResourceImpl() {
-  return makeSmartPtr<PDOSqliteResource>(
+req::ptr<PDOResource> PDOSqlite::createResourceImpl() {
+  return req::make<PDOSqliteResource>(
     std::make_shared<PDOSqliteConnection>());
 }
 
-SmartPtr<PDOResource> PDOSqlite::createResourceImpl(
+req::ptr<PDOResource> PDOSqlite::createResourceImpl(
   const sp_PDOConnection& conn
 ) {
-  return makeSmartPtr<PDOSqliteResource>(
+  return req::make<PDOSqliteResource>(
       std::dynamic_pointer_cast<PDOSqliteConnection>(conn));
 }
 

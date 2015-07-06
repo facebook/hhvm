@@ -393,7 +393,7 @@ inline StringDataNode& MemoryManager::getStringList() {
 //////////////////////////////////////////////////////////////////////
 
 template <typename T>
-MemoryManager::RootId MemoryManager::addRoot(SmartPtr<T>&& ptr) {
+MemoryManager::RootId MemoryManager::addRoot(req::ptr<T>&& ptr) {
   assert(ptr);
   const RootId token = ptr->getId();
   getRootMap<T>().emplace(token, std::move(ptr));
@@ -401,7 +401,7 @@ MemoryManager::RootId MemoryManager::addRoot(SmartPtr<T>&& ptr) {
 }
 
 template <typename T>
-MemoryManager::RootId MemoryManager::addRoot(const SmartPtr<T>& ptr) {
+MemoryManager::RootId MemoryManager::addRoot(const req::ptr<T>& ptr) {
   assert(ptr);
   const RootId token = ptr->getId();
   getRootMap<T>()[token] = ptr;
@@ -409,14 +409,14 @@ MemoryManager::RootId MemoryManager::addRoot(const SmartPtr<T>& ptr) {
 }
 
 template <typename T>
-SmartPtr<T> MemoryManager::lookupRoot(RootId token) const {
+req::ptr<T> MemoryManager::lookupRoot(RootId token) const {
   auto& handleMap = getRootMap<T>();
   auto itr = handleMap.find(token);
   return itr != handleMap.end() ? unsafe_cast_or_null<T>(itr->second) : nullptr;
 }
 
 template <typename T>
-SmartPtr<T> MemoryManager::removeRoot(RootId token) {
+req::ptr<T> MemoryManager::removeRoot(RootId token) {
   auto& handleMap = getRootMap<T>();
   auto itr = handleMap.find(token);
   if(itr != handleMap.end()) {
@@ -428,7 +428,7 @@ SmartPtr<T> MemoryManager::removeRoot(RootId token) {
 }
 
 template <typename T>
-bool MemoryManager::removeRoot(const SmartPtr<T>& ptr) {
+bool MemoryManager::removeRoot(const req::ptr<T>& ptr) {
   return (bool)removeRoot<T>(ptr->getId());
 }
 

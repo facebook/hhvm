@@ -68,7 +68,7 @@ struct SetIterator {
   }
 
  private:
-  SmartPtr<BaseSet> m_obj;
+  req::ptr<BaseSet> m_obj;
   uint32_t m_pos{0};
   int32_t  m_version{0};
 };

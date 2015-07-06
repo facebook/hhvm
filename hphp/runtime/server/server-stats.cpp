@@ -580,9 +580,9 @@ void ServerStats::ReportStatus(std::string &output, Writer::Format format) {
   timeval up;
   up.tv_sec = now - HttpServer::StartTime;
   up.tv_usec = 0;
-  w->writeEntry("now", makeSmartPtr<DateTime>(now)->
+  w->writeEntry("now", req::make<DateTime>(now)->
                        toString(DateTime::DateFormatCookie).data());
-  w->writeEntry("start", makeSmartPtr<DateTime>(HttpServer::StartTime)->
+  w->writeEntry("start", req::make<DateTime>(HttpServer::StartTime)->
                          toString(DateTime::DateFormatCookie).data());
   w->writeEntry("up", format_duration(up));
   w->endObject("process");
@@ -617,7 +617,7 @@ void ServerStats::ReportStatus(std::string &output, Writer::Format format) {
     w->writeEntry("tid", (int64_t)ts.m_threadPid);
     w->writeEntry("req", ts.m_requestCount);
     w->writeEntry("bytes", ts.m_writeBytes);
-    w->writeEntry("start", makeSmartPtr<DateTime>(ts.m_start.tv_sec)->
+    w->writeEntry("start", req::make<DateTime>(ts.m_start.tv_sec)->
                            toString(DateTime::DateFormatCookie).data());
     w->writeEntry("duration", format_duration(duration));
     if (ts.m_requestCount > 0) {

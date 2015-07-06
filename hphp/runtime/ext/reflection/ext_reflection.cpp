@@ -1028,7 +1028,7 @@ static Array HHVM_METHOD(ReflectionClass, getRequirementNames) {
 static Array HHVM_METHOD(ReflectionClass, getInterfaceNames) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
 
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   auto const& allIfaces = cls->allInterfaces();
   st->reserve(allIfaces.size());
 
@@ -1102,7 +1102,7 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
   StringISet visitedMethods;
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   st->reserve(cls->numMethods());
 
   auto add = [&] (const Func* m) {
@@ -1197,7 +1197,7 @@ static Variant HHVM_METHOD(ReflectionClass, getConstant, const String& name) {
 
 static
 void addClassConstantNames(const Class* cls,
-                           const SmartPtr<c_Set>& st,
+                           const req::ptr<c_Set>& st,
                            size_t limit) {
   assert(cls && st && (st->size() < limit));
 
@@ -1230,7 +1230,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedConstants) {
     return Array::Create();
   }
 
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   st->reserve(numConsts);
 
   addClassConstantNames(cls, st, numConsts);
@@ -1255,7 +1255,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
     return Array::Create();
   }
 
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   st->reserve(numConsts);
 
   const Class::Const* consts = cls->constants();
@@ -1280,7 +1280,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedTypeConstants) {
     return Array::Create();
   }
 
-  auto st = makeSmartPtr<c_Set>();
+  auto st = req::make<c_Set>();
   st->reserve(numConsts);
 
   const Class::Const* consts = cls->constants();

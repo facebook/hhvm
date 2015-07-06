@@ -63,8 +63,8 @@ public:
 
 private:
   gzFile m_gzFile;
-  SmartPtr<File> m_innerFile;
-  SmartPtr<File> m_tempFile;
+  req::ptr<File> m_innerFile;
+  req::ptr<File> m_tempFile;
 
   bool closeImpl();
 };

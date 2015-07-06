@@ -33,7 +33,7 @@ const StaticString s_input("Input");
 const StaticString s_temp("TEMP");
 const StaticString s_memory("MEMORY");
 
-SmartPtr<File> PhpStreamWrapper::openFD(const char *sFD) {
+req::ptr<File> PhpStreamWrapper::openFD(const char *sFD) {
   if (!RuntimeOption::ClientExecutionMode()) {
     raise_warning("Direct access to file descriptors "
                   "is only available from command-line");
@@ -54,7 +54,7 @@ SmartPtr<File> PhpStreamWrapper::openFD(const char *sFD) {
     return nullptr;
   }
 
-  return makeSmartPtr<PlainFile>(dup(nFD), true, s_php);
+  return req::make<PlainFile>(dup(nFD), true, s_php);
 }
 
 static void phpStreamApplyFilterList(const Resource& fpres,
@@ -72,11 +72,11 @@ static void phpStreamApplyFilterList(const Resource& fpres,
   }
 }
 
-static SmartPtr<File>
+static req::ptr<File>
 phpStreamOpenFilter(const char* sFilter,
                     const String& modestr,
                     int options,
-                    const SmartPtr<StreamContext>& context) {
+                    const req::ptr<StreamContext>& context) {
   const char *mode = modestr.c_str();
   int rwMode = 0;
   if (strchr(mode, 'r') || strchr(mode, '+')) {
@@ -115,9 +115,9 @@ phpStreamOpenFilter(const char* sFilter,
   return fp;
 }
 
-SmartPtr<File>
+req::ptr<File>
 PhpStreamWrapper::open(const String& filename, const String& mode,
-                       int options, const SmartPtr<StreamContext>& context) {
+                       int options, const req::ptr<StreamContext>& context) {
   if (strncasecmp(filename.c_str(), "php://", 6)) {
     return nullptr;
   }
@@ -125,13 +125,13 @@ PhpStreamWrapper::open(const String& filename, const String& mode,
   const char *req = filename.c_str() + sizeof("php://") - 1;
 
   if (!strcasecmp(req, "stdin")) {
-    return makeSmartPtr<PlainFile>(dup(STDIN_FILENO), true, s_php);
+    return req::make<PlainFile>(dup(STDIN_FILENO), true, s_php);
   }
   if (!strcasecmp(req, "stdout")) {
-    return makeSmartPtr<PlainFile>(dup(STDOUT_FILENO), true, s_php);
+    return req::make<PlainFile>(dup(STDOUT_FILENO), true, s_php);
   }
   if (!strcasecmp(req, "stderr")) {
-    return makeSmartPtr<PlainFile>(dup(STDERR_FILENO), true, s_php);
+    return req::make<PlainFile>(dup(STDERR_FILENO), true, s_php);
   }
   if (!strncasecmp(req, "fd/", sizeof("fd/") - 1)) {
     return openFD(req + sizeof("fd/") - 1);
@@ -142,7 +142,7 @@ PhpStreamWrapper::open(const String& filename, const String& mode,
   }
 
   if (!strncasecmp(req, "temp", sizeof("temp") - 1)) {
-    auto file = makeSmartPtr<TempFile>(true, s_php, s_temp);
+    auto file = req::make<TempFile>(true, s_php, s_temp);
     if (!file->valid()) {
       raise_warning("Unable to create temporary file");
       return nullptr;
@@ -150,7 +150,7 @@ PhpStreamWrapper::open(const String& filename, const String& mode,
     return file;
   }
   if (!strcasecmp(req, "memory")) {
-    auto file = makeSmartPtr<TempFile>(true, s_php, s_memory);
+    auto file = req::make<TempFile>(true, s_php, s_memory);
     if (!file->valid()) {
       raise_warning("Unable to create temporary file");
       return nullptr;
@@ -160,12 +160,12 @@ PhpStreamWrapper::open(const String& filename, const String& mode,
 
   if (!strcasecmp(req, "input")) {
     auto raw_post = g_context->getRawPostData();
-    return makeSmartPtr<MemFile>(
+    return req::make<MemFile>(
       raw_post.c_str(), raw_post.size(), s_php, s_input);
   }
 
   if (!strcasecmp(req, "output")) {
-    return makeSmartPtr<OutputFile>(filename);
+    return req::make<OutputFile>(filename);
   }
 
   return nullptr;

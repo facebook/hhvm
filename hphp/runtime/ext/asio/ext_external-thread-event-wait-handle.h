@@ -45,7 +45,7 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   static void ti_setonfailcallback(const Variant& callback);
 
  public:
-  static SmartPtr<c_ExternalThreadEventWaitHandle>
+  static req::ptr<c_ExternalThreadEventWaitHandle>
     Create(AsioExternalThreadEvent* event, ObjectData* priv_data);
 
   c_ExternalThreadEventWaitHandle* getNextToProcess() {

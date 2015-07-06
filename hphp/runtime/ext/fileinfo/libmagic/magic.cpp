@@ -347,7 +347,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
   unsigned char *buf;
   struct stat  sb;
   ssize_t nbytes = 0;  /* number of bytes read from a datafile */
-  HPHP::SmartPtr<HPHP::File> file;
+  HPHP::req::ptr<HPHP::File> file;
 
   if (!inname && !stream) {
     return NULL;

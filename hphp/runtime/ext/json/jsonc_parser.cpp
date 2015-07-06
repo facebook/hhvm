@@ -100,7 +100,7 @@ Variant json_type_array_to_variant(json_object *new_obj, const bool assoc,
   Variant var, tmpvar;
   nb = json_object_array_length(new_obj);
   if (collections) {
-    var = makeSmartPtr<c_Vector>();
+    var = req::make<c_Vector>();
   } else {
     var = Array::Create();
   }
@@ -124,7 +124,7 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
     Variant       var, tmpvar;
 
   if (collections) {
-    var = makeSmartPtr<c_Map>();
+    var = req::make<c_Map>();
   } else if (assoc) {
     var = Array::Create();
   } else {

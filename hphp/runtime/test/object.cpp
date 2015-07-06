@@ -43,7 +43,7 @@ TEST(Object, Casts) {
     EXPECT_FALSE(isa<c_Vector>(Object()));
     EXPECT_TRUE(isa_or_null<c_Vector>(Object()));
 
-    auto dummy = makeSmartPtr<c_Vector>();
+    auto dummy = req::make<c_Vector>();
     Object res(dummy);
     Object empty;
     EXPECT_TRUE(isa<c_Vector>(res));

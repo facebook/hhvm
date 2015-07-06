@@ -136,7 +136,7 @@ struct HashContext : SweepableResourceData {
     : ops(ops_), context(context_), options(options_), key(nullptr) {
   }
 
-  explicit HashContext(SmartPtr<HashContext>&& ctx) {
+  explicit HashContext(req::ptr<HashContext>&& ctx) {
     assert(ctx->ops);
     assert(ctx->ops->context_size >= 0);
     ops = ctx->ops;
@@ -313,7 +313,7 @@ Variant HHVM_FUNCTION(hash_init, const String& algo,
   void *context = malloc(ops->context_size);
   ops->hash_init(context);
 
-  const auto hash = makeSmartPtr<HashContext>(ops, context, options);
+  const auto hash = req::make<HashContext>(ops, context, options);
   if (options & k_HASH_HMAC) {
     hash->key = prepare_hmac_key(ops, context, key);
   }
@@ -357,7 +357,7 @@ Variant HHVM_FUNCTION(hash_final, const Resource& context,
 
 Resource HHVM_FUNCTION(hash_copy, const Resource& context) {
   auto oldhash = dyn_cast<HashContext>(context);
-  return Resource(makeSmartPtr<HashContext>(std::move(oldhash)));
+  return Resource(req::make<HashContext>(std::move(oldhash)));
 }
 
 /**

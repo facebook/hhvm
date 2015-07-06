@@ -34,7 +34,7 @@ struct XDebugUtils {
   // Helper that writes a timestamp in the given file in the format used by
   // xdebug
   static void fprintTimestamp(FILE* f) {
-    auto now = makeSmartPtr<DateTime>(time(nullptr));
+    auto now = req::make<DateTime>(time(nullptr));
     fprintf(f, "[%d-%02d-%02d %02d:%02d:%02d]",
             now->year(), now->month(), now->day(),
             now->hour(), now->minute(), now->second());

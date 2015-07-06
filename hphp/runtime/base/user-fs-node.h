@@ -30,7 +30,7 @@ class StreamContext;
 class UserFSNode {
 public:
   explicit UserFSNode(Class* cls,
-                      const SmartPtr<StreamContext>& context = nullptr);
+                      const req::ptr<StreamContext>& context = nullptr);
 
 protected:
   Variant invoke(const Func* func, const String& name, const Array& args,

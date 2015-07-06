@@ -61,7 +61,7 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
   if (type == Type::Serialize ||
       type == Type::APCSerialize ||
       type == Type::DebuggerSerialize) {
-    m_arrayIds = new SmartPtrCtrMap();
+    m_arrayIds = new ReqPtrCtrMap();
   } else {
     m_arrayIds = nullptr;
   }
@@ -696,7 +696,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
   case Type::APCSerialize:
     {
       assert(m_arrayIds);
-      SmartPtrCtrMap::const_iterator iter = m_arrayIds->find(ptr);
+      ReqPtrCtrMap::const_iterator iter = m_arrayIds->find(ptr);
       assert(iter != m_arrayIds->end());
       int id = iter->second;
       if (isObject) {

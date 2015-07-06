@@ -17,7 +17,7 @@
 #define incl_HPHP_PROXY_ARRAY_H
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
@@ -121,7 +121,7 @@ private:
    * Make a ZendCustomElement resource wrapping the given data block. If pDest
    * is non-null, it will be set to the newly-allocated location for the block.
    */
-  SmartPtr<ResourceData> makeElementResource(void *pData, uint nDataSize,
+  req::ptr<ResourceData> makeElementResource(void *pData, uint nDataSize,
                                              void **pDest) const;
 
   DtorFunc m_destructor;

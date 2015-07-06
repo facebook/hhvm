@@ -23,7 +23,7 @@
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include <hphp/runtime/ext/asio/ext_static-wait-handle.h>
 #include "hphp/system/systemlib.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 
@@ -119,7 +119,7 @@ Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
       }
     }
 
-    auto my_wh = makeSmartPtr<c_GenArrayWaitHandle>();
+    auto my_wh = req::make<c_GenArrayWaitHandle>();
     my_wh->initialize(exception, depCopy, current_pos, ctx_idx, child_wh);
 
     auto const session = AsioSession::Get();

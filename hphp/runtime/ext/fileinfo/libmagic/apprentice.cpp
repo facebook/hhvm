@@ -944,7 +944,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
   ms->file = fn;
   auto wrapper = HPHP::Stream::getWrapperFromURI(fn);
   auto file = wrapper ? wrapper->open(fn, "rb", 0, nullptr)
-                      : HPHP::SmartPtr<HPHP::File>();
+                      : HPHP::req::ptr<HPHP::File>();
 
   if (!file) {
     if (errno != ENOENT)
@@ -1134,7 +1134,7 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
   char **filearr = NULL;
   struct stat st;
   struct magic_map *map;
-  HPHP::SmartPtr<HPHP::Directory> dir;
+  HPHP::req::ptr<HPHP::Directory> dir;
 
   ms->flags |= MAGIC_CHECK;  /* Enable checks for parsed files */
 
@@ -2604,7 +2604,7 @@ apprentice_map(struct magic_set *ms, const char *fn)
   struct magic_map *map;
   size_t i;
   HPHP::Stream::Wrapper* wrapper;
-  HPHP::SmartPtr<HPHP::File> file;
+  HPHP::req::ptr<HPHP::File> file;
   struct stat sb;
 
   if ((map = CAST(struct magic_map *, ecalloc(1, sizeof(*map)))) == NULL) {
@@ -2745,7 +2745,7 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
   int rv = -1;
   uint32_t i;
   HPHP::Stream::Wrapper *wrapper;
-  HPHP::SmartPtr<HPHP::File> file;
+  HPHP::req::ptr<HPHP::File> file;
 
   dbname = mkdbname(ms, fn, 0);
 

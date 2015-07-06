@@ -147,9 +147,9 @@ bool File::IsVirtualFile(const String& filename) {
     StaticContentCache::TheFileCache->fileExists(filename.data(), false);
 }
 
-SmartPtr<File> File::Open(const String& filename, const String& mode,
+req::ptr<File> File::Open(const String& filename, const String& mode,
                           int options /* = 0 */,
-                          const SmartPtr<StreamContext>& context /* = null */) {
+                          const req::ptr<StreamContext>& context /* = null */) {
   Stream::Wrapper *wrapper = Stream::getWrapperFromURI(filename);
   if (!wrapper) return nullptr;
   if (filename.find('\0') >= 0) return nullptr;
@@ -482,23 +482,23 @@ bool File::stat(struct stat *sb) {
   return false;
 }
 
-void File::appendReadFilter(const SmartPtr<StreamFilter>& filter) {
+void File::appendReadFilter(const req::ptr<StreamFilter>& filter) {
   m_readFilters.push_back(filter);
 }
 
-void File::appendWriteFilter(const SmartPtr<StreamFilter>& filter) {
+void File::appendWriteFilter(const req::ptr<StreamFilter>& filter) {
   m_writeFilters.push_back(filter);
 }
 
-void File::prependReadFilter(const SmartPtr<StreamFilter>& filter) {
+void File::prependReadFilter(const req::ptr<StreamFilter>& filter) {
   m_readFilters.push_front(filter);
 }
 
-void File::prependWriteFilter(const SmartPtr<StreamFilter>& filter) {
+void File::prependWriteFilter(const req::ptr<StreamFilter>& filter) {
   m_writeFilters.push_front(filter);
 }
 
-bool File::removeFilter(const SmartPtr<StreamFilter>& filter) {
+bool File::removeFilter(const req::ptr<StreamFilter>& filter) {
   for (auto it = m_readFilters.begin(); it != m_readFilters.end(); ++it) {
     if (*it == filter) {
       m_readFilters.erase(it);
@@ -507,12 +507,12 @@ bool File::removeFilter(const SmartPtr<StreamFilter>& filter) {
   }
   for (auto it = m_writeFilters.begin(); it != m_writeFilters.end(); ++it) {
     if (*it == filter) {
-      std::list<SmartPtr<StreamFilter>> closing_filters;
+      std::list<req::ptr<StreamFilter>> closing_filters;
       closing_filters.push_back(filter);
       String result(applyFilters(empty_string_ref,
                                  closing_filters,
                                  /* closing = */ true));
-      std::list<SmartPtr<StreamFilter>> later_filters;
+      std::list<req::ptr<StreamFilter>> later_filters;
       auto dupit(it);
       for (++dupit; dupit != m_writeFilters.end(); ++dupit) {
         later_filters.push_back(*dupit);
@@ -1054,18 +1054,18 @@ String File::applyFilters(const String& buffer,
   if (buffer.empty() && !closing) {
     return buffer;
   }
-  SmartPtr<BucketBrigade> in;
-  SmartPtr<BucketBrigade> out;
+  req::ptr<BucketBrigade> in;
+  req::ptr<BucketBrigade> out;
 
   if (buffer.empty()) {
-    out = makeSmartPtr<BucketBrigade>();
+    out = req::make<BucketBrigade>();
   } else {
-    out = makeSmartPtr<BucketBrigade>(buffer);
+    out = req::make<BucketBrigade>(buffer);
   }
 
   for (const auto& filter : filters) {
     in = out;
-    out = makeSmartPtr<BucketBrigade>();
+    out = req::make<BucketBrigade>();
 
     auto result = filter->invokeFilter(in, out, closing);
     // PSFS_ERR_FATAL doesn't raise a fatal in Zend - appears to be

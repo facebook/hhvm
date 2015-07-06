@@ -32,12 +32,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-SmartPtr<c_AwaitAllWaitHandle> c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
+req::ptr<c_AwaitAllWaitHandle> c_AwaitAllWaitHandle::Alloc(int32_t cnt) {
   auto size = c_AwaitAllWaitHandle::heapSize(cnt);
   auto mem = MM().objMalloc(size);
   auto handle = new (mem) c_AwaitAllWaitHandle(cnt);
   assert(handle->hasExactlyOneRef());
-  return SmartPtr<c_AwaitAllWaitHandle>::attach(handle);
+  return req::ptr<c_AwaitAllWaitHandle>::attach(handle);
 }
 
 void delete_AwaitAllWaitHandle(ObjectData* od, const Class*) {
@@ -265,7 +265,7 @@ void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {
   assert(m_cur >= 0);
 
   if (UNLIKELY(AsioSession::Get()->hasOnAwaitAllCreate())) {
-    auto vector = makeSmartPtr<c_Vector>();
+    auto vector = req::make<c_Vector>();
     for (int32_t idx = m_cur; idx >= 0; --idx) {
       TypedValue child = make_tv<KindOfObject>(m_children[idx]);
       vector->add(&child);

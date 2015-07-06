@@ -36,7 +36,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 
 // used for mmapping contiguous heap space
 // If used, anonymous pages are not cleared when mapped with mmap. It is not
@@ -853,14 +853,14 @@ struct MemoryManager {
    *
    * The id/object associations are only valid for a single request.  This
    * interface is useful for extensions that cannot physically hold on to a
-   * SmartPtr, etc. or other handle class.
+   * req::ptr, etc. or other handle class.
    */
-  template <typename T> RootId addRoot(SmartPtr<T>&& ptr);
-  template <typename T> RootId addRoot(const SmartPtr<T>& ptr);
-  template <typename T> SmartPtr<T> lookupRoot(RootId tok) const;
-  template <typename T> bool removeRoot(const SmartPtr<T>& ptr);
+  template <typename T> RootId addRoot(req::ptr<T>&& ptr);
+  template <typename T> RootId addRoot(const req::ptr<T>& ptr);
+  template <typename T> req::ptr<T> lookupRoot(RootId tok) const;
+  template <typename T> bool removeRoot(const req::ptr<T>& ptr);
   template <typename T> bool removeRoot(const T* ptr);
-  template <typename T> SmartPtr<T> removeRoot(RootId token);
+  template <typename T> req::ptr<T> removeRoot(RootId token);
   template <typename F> void scanRootMaps(F& m) const;
 
   /*
@@ -899,10 +899,10 @@ private:
   using RootMap =
     std::unordered_map<
       RootId,
-      SmartPtr<T>,
+      req::ptr<T>,
       std::hash<RootId>,
       std::equal_to<RootId>,
-      req::Allocator<std::pair<const RootId,SmartPtr<T>>>
+      req::Allocator<std::pair<const RootId,req::ptr<T>>>
     >;
 
   /*

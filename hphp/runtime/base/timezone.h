@@ -44,7 +44,7 @@ public:
    * Get/set current timezone that controls how local time is interpreted.
    */
   static String CurrentName();            // current timezone's name
-  static SmartPtr<TimeZone> Current(); // current timezone
+  static req::ptr<TimeZone> Current(); // current timezone
   static bool SetCurrent(const String& name);   // returns false if invalid
 
   /**
@@ -114,7 +114,7 @@ public:
   /**
    * Make a copy of this timezone object, so it can be changed independently.
    */
-  SmartPtr<TimeZone> cloneTimeZone() const;
+  req::ptr<TimeZone> cloneTimeZone() const;
 
 protected:
   friend class DateTime;

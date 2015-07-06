@@ -116,13 +116,13 @@ public:
   Type getType() const { return m_type; }
 
 private:
-  typedef req::hash_map<void*, int, pointer_hash<void> > SmartPtrCtrMap;
+  using ReqPtrCtrMap = req::hash_map<void*, int, pointer_hash<void>>;
   Type m_type;
   int m_option;                  // type specific extra options
   StringBuffer *m_buf;
   int m_indent;
-  SmartPtrCtrMap m_counts;       // counting seen arrays for recursive levels
-  SmartPtrCtrMap *m_arrayIds;    // reference ids for objs/arrays
+  ReqPtrCtrMap m_counts;         // counting seen arrays for recursive levels
+  ReqPtrCtrMap *m_arrayIds;      // reference ids for objs/arrays
   int m_valueCount;              // Current ref index
   bool m_referenced;             // mark current array element as reference
   int m_refCount;                // current variable's reference count

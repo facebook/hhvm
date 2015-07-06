@@ -60,17 +60,17 @@ public:
   // overriding ResourceData
   virtual const String& o_getClassNameHook() const { return classnameof(); }
 
-  explicit StreamFilter(const Object& filter, const SmartPtr<File>& stream):
+  explicit StreamFilter(const Object& filter, const req::ptr<File>& stream):
       m_filter(filter), m_stream(stream) { }
 
-  int64_t invokeFilter(const SmartPtr<BucketBrigade>& in,
-                       const SmartPtr<BucketBrigade>& out,
+  int64_t invokeFilter(const req::ptr<BucketBrigade>& in,
+                       const req::ptr<BucketBrigade>& out,
                        bool closing);
   void invokeOnClose();
   bool remove();
 private:
   Object m_filter;
-  SmartPtr<File> m_stream;
+  req::ptr<File> m_stream;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -21,7 +21,7 @@
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/smart-ptr.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/util/network.h"
 #include "hphp/util/logger.h"
 
@@ -102,7 +102,7 @@ bool DebuggerServer::start() {
     if (s_fd < 0 && errno == EAFNOSUPPORT) {
       continue;
     }
-    auto m_sock = makeSmartPtr<Socket>(
+    auto m_sock = req::make<Socket>(
       s_fd, cur->ai_family, cur->ai_addr->sa_data, port);
 
     int yes = 1;
@@ -168,7 +168,7 @@ void DebuggerServer::accept() {
         socklen_t salen = sizeof(sa);
         try {
           auto sock = nthSocket(i);
-          auto new_sock = makeSmartPtr<Socket>(
+          auto new_sock = req::make<Socket>(
             ::accept(sock->fd(), &sa, &salen), sock->getType());
           if (new_sock->valid()) {
             Debugger::CreateProxy(new_sock, false);

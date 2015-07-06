@@ -345,7 +345,7 @@ void DebuggerClient::LoadCodeColor(CodeColor index, const IniSetting::Map& ini,
   DefaultCodeColors[index * 2 + 1] = color ? ANSI_COLOR_END : nullptr;
 }
 
-SmartPtr<Socket> DebuggerClient::Start(const DebuggerClientOptions &options) {
+req::ptr<Socket> DebuggerClient::Start(const DebuggerClientOptions &options) {
   TRACE(2, "DebuggerClient::Start\n");
   auto ret = getStaticDebuggerClient().connectLocal();
   getStaticDebuggerClient().start(options);
@@ -552,14 +552,14 @@ void DebuggerClient::switchMachine(std::shared_ptr<DMachineInfo> machine) {
   }
 }
 
-SmartPtr<Socket> DebuggerClient::connectLocal() {
+req::ptr<Socket> DebuggerClient::connectLocal() {
   TRACE(2, "DebuggerClient::connectLocal\n");
   int fds[2];
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) != 0) {
     throw Exception("unable to create socket pair for local debugging");
   }
-  auto socket1 = makeSmartPtr<Socket>(fds[0], AF_UNIX);
-  auto socket2 = makeSmartPtr<Socket>(fds[1], AF_UNIX);
+  auto socket1 = req::make<Socket>(fds[0], AF_UNIX);
+  auto socket2 = req::make<Socket>(fds[1], AF_UNIX);
 
   socket1->unregister();
   socket2->unregister();
@@ -629,7 +629,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
   /* try possible families (v4, v6) until we get a connection */
   struct addrinfo *cur;
   for (cur = ai; cur; cur = cur->ai_next) {
-    auto sock = makeSmartPtr<Socket>(
+    auto sock = req::make<Socket>(
       socket(cur->ai_family, cur->ai_socktype, 0),
       cur->ai_family,
       cur->ai_addr->sa_data,

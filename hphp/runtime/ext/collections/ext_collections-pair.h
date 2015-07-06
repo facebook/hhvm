@@ -58,7 +58,7 @@ struct PairIterator {
   void rewind() { m_pos = 0; }
 
  private:
-  SmartPtr<c_Pair> m_obj;
+  req::ptr<c_Pair> m_obj;
   uint32_t m_pos{0};
 };
 

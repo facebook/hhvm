@@ -47,10 +47,10 @@ namespace {
 
 static class ZlibStreamWrapper : public Stream::Wrapper {
  public:
-  virtual SmartPtr<File> open(const String& filename,
+  virtual req::ptr<File> open(const String& filename,
                               const String& mode,
                               int options,
-                              const SmartPtr<StreamContext>& context) {
+                              const req::ptr<StreamContext>& context) {
     String fname;
     static const char cz[] = "compress.zlib://";
 
@@ -73,7 +73,7 @@ static class ZlibStreamWrapper : public Stream::Wrapper {
       translated = fname;
     }
 
-    auto file = makeSmartPtr<ZipFile>();
+    auto file = req::make<ZipFile>();
     bool ret = file->open(translated, mode);
     if (!ret) {
       raise_warning("%s", file->getLastError().c_str());
@@ -313,7 +313,7 @@ String HHVM_FUNCTION(zlib_get_coding_type) {
 
 Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
                               int64_t use_include_path /* = 0 */) {
-  auto file = makeSmartPtr<ZipFile>();
+  auto file = req::make<ZipFile>();
   bool ret = file->open(File::TranslatePath(filename), mode);
   if (!ret) {
     return false;

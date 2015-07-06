@@ -442,10 +442,10 @@ void ProxyArray::proxyInit(uint32_t nSize,
   m_destructor = pDestructor;
 }
 
-SmartPtr<ResourceData>
+req::ptr<ResourceData>
 ProxyArray::makeElementResource(void* pData, uint nDataSize,
                                 void** pDest) const {
-  auto elt = makeSmartPtr<ZendCustomElement>(pData, nDataSize, m_destructor);
+  auto elt = req::make<ZendCustomElement>(pData, nDataSize, m_destructor);
   if (pDest) *pDest = elt->data();
   return elt;
 }

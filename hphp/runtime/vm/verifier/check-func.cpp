@@ -180,7 +180,7 @@ FuncChecker::FuncChecker(const Func* f, bool verbose)
 }
 
 // Needs to be a sorted map so we can divide funcs into contiguous sections.
-typedef std::map<Offset,Offset> SectionMap;
+using SectionMap = std::map<Offset,Offset>;
 
 /**
  * Return the start offset of the nearest enclosing section.  Caller must
@@ -207,8 +207,7 @@ bool FuncChecker::checkOffsets() {
   checkRegion("func", base, past, "unit", 0, unit()->bclen(), false);
   // find instruction boundaries and make sure no branches escape
   SectionMap sections;
-  for (Range<FixedVector<EHEnt> > i(m_func->ehtab()); !i.empty(); ) {
-    const EHEnt& eh = i.popFront();
+  for (auto& eh : m_func->ehtab()) {
     if (eh.m_type == EHEnt::Type::Fault) {
       ok &= checkOffset("fault funclet", eh.m_fault, "func bytecode", base,
                         past, false);
@@ -219,17 +218,16 @@ bool FuncChecker::checkOffsets() {
   sections[base] = funclets; // primary body
   // Get instruction boundaries and check branches within primary body
   // and each faultlet.
-  for (Range<SectionMap> i(sections); !i.empty(); ) {
-    Offset section_base = i.popFront().first;
-    Offset section_past = i.empty() ? past : i.front().first;
+  for (auto i = sections.begin(), end = sections.end(); i != end;) {
+    Offset section_base = i->first; ++i;
+    Offset section_past = i == end ? past : i->first;
     sections[section_base] = section_past;
     ok &= checkSection(section_base == base,
                        section_base == base ? "primary body" : "funclet body",
                        section_base, section_past);
   }
   // DV entry points must be in the primary function body
-  for (Range<FixedVector<Func::ParamInfo> > p(m_func->params()); !p.empty(); ) {
-    const Func::ParamInfo& param = p.popFront();
+  for (auto& param : m_func->params()) {
     if (param.hasDefaultValue()) {
       ok &= checkOffset("dv-entry", param.funcletOff, "func body", base,
                         funclets);
@@ -237,8 +235,7 @@ bool FuncChecker::checkOffsets() {
   }
   // Every FPI region must be contained within one section, either the
   // primary body or one fault funclet
-  for (Range<FixedVector<FPIEnt> > i(m_func->fpitab()); !i.empty(); ) {
-    const FPIEnt& fpi = i.popFront();
+  for (auto& fpi : m_func->fpitab()) {
     Offset fpi_base = fpiBase(fpi, bc);
     Offset fpi_past = fpiPast(fpi, bc);
     if (checkRegion("fpi", fpi_base, fpi_past, "func", base, past)) {
@@ -253,8 +250,7 @@ bool FuncChecker::checkOffsets() {
     }
   }
   // check EH regions and targets
-  for (Range<FixedVector<EHEnt> > i(m_func->ehtab()); !i.empty(); ) {
-    const EHEnt& eh = i.popFront();
+  for (auto& eh : m_func->ehtab()) {
     if (eh.m_type == EHEnt::Type::Fault) {
       ok &= checkOffset("fault", eh.m_fault, "funclets", funclets, past);
     }
@@ -321,8 +317,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
   }
   // Check each branch target lands on a valid instruction boundary
   // within this region.
-  for (Range<BranchList> i(branches); !i.empty();) {
-    PC branch = i.popFront();
+  for (auto branch : branches) {
     if (isSwitch(*reinterpret_cast<const Op*>(branch))) {
       foreachSwitchTarget((Op*)branch, [&](Offset& o) {
         // TODO(#2464197): dce breaks switch for verify
@@ -1082,8 +1077,7 @@ bool FuncChecker::checkFlow() {
     ok &= checkSuccEdges(b, &cur);
   }
   // Make sure eval stack is correct at start of each try region
-  for (Range<FixedVector<EHEnt> > i(m_func->ehtab()); !i.empty(); ) {
-    const EHEnt& handler = i.popFront();
+  for (auto& handler : m_func->ehtab()) {
     if (handler.m_type == EHEnt::Type::Catch) {
       ok &= checkEHStack(handler, builder.at(handler.m_base));
     }

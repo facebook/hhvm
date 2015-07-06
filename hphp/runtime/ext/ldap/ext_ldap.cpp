@@ -445,10 +445,10 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
       ldap_filter = (char*)sfilter.data();
     }
 
-    smart::vector<SmartPtr<LdapLink>> lds;
+    req::vector<SmartPtr<LdapLink>> lds;
     lds.resize(nlinks);
 
-    smart::vector<int> rcs;
+    req::vector<int> rcs;
     rcs.resize(nlinks);
 
     ArrayIter iter(link.toArray());

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/heap-scan.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -81,10 +81,10 @@ struct Marker {
   void operator()(const StringBuffer&);
   void operator()(const NameValueTable&);
 
-  template<class T> void operator()(const smart::vector<T>& c) {
+  template<class T> void operator()(const req::vector<T>& c) {
     for (auto& e : c) (*this)(e);
   }
-  template<class T> void operator()(const smart::set<T>& c) {
+  template<class T> void operator()(const req::set<T>& c) {
     for (auto& e : c) (*this)(e);
   }
   template<class T,class U> void operator()(const std::pair<T,U>& p) {
@@ -92,7 +92,7 @@ struct Marker {
     (*this)(p.second);
   }
   template<class T,class U,class V,class W>
-  void operator()(const smart::hash_map<T,U,V,W>& c) {
+  void operator()(const req::hash_map<T,U,V,W>& c) {
     for (auto& e : c) (*this)(e); // each element is pair<T,U>
   }
 

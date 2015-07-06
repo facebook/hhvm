@@ -121,16 +121,13 @@ template<class T> void destroy_raw(T* p);
  */
 template<class T> T* make_raw_array(size_t count);
 template<class T> void destroy_raw_array(T* t, size_t count);
-}
 
 //////////////////////////////////////////////////////////////////////
-
-namespace smart {
 
 // STL-style allocator for the smart allocator.  (Unfortunately we
 // can't use allocator_traits yet.)
 //
-// You can also use smart::Allocator as a model of folly's
+// You can also use req::Allocator as a model of folly's
 // SimpleAllocator where appropriate.
 //
 
@@ -905,7 +902,7 @@ private:
       SmartPtr<T>,
       std::hash<RootId>,
       std::equal_to<RootId>,
-      smart::Allocator<std::pair<const RootId,SmartPtr<T>>>
+      req::Allocator<std::pair<const RootId,SmartPtr<T>>>
     >;
 
   /*

@@ -1002,7 +1002,7 @@ pthread_mutex_t TraceProfiler::s_inUse = PTHREAD_MUTEX_INITIALIZER;
 class SampleProfiler : public Profiler {
 private:
   typedef std::pair<int64_t, int64_t> Timestamp;
-  typedef smart::vector<std::pair<Timestamp, std::string>> SampleVec;
+  typedef req::vector<std::pair<Timestamp, std::string>> SampleVec;
   SampleVec m_samples; // outcome
 
 public:

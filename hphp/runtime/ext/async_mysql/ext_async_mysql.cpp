@@ -711,7 +711,7 @@ void AsyncMysqlQueryResult::create(std::shared_ptr<am::Operation> op,
   m_query_result =
       folly::make_unique<am::QueryResult>(std::move(query_result));
   m_field_index =
-      smart::make_shared<FieldIndex>(m_query_result->getRowFields());
+      req::make_shared<FieldIndex>(m_query_result->getRowFields());
 }
 
 am::Operation* AsyncMysqlQueryResult::op() {

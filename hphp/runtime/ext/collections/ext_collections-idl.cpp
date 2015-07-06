@@ -4140,7 +4140,7 @@ BaseSet::~BaseSet() {
 
 NEVER_INLINE
 void HashCollection::warnOnStrIntDup() const {
-  smart::hash_set<int64_t> seenVals;
+  req::hash_set<int64_t> seenVals;
 
   auto* eLimit = elmLimit();
   for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {

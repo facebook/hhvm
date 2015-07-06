@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/smart-ptr.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-resource.h"
@@ -318,8 +318,8 @@ private:
   StringData* m_wrapperType;
   StringData* m_streamType;
   SmartPtr<StreamContext> m_streamContext;
-  smart::list<SmartPtr<StreamFilter>> m_readFilters;
-  smart::list<SmartPtr<StreamFilter>> m_writeFilters;
+  req::list<SmartPtr<StreamFilter>> m_readFilters;
+  req::list<SmartPtr<StreamFilter>> m_writeFilters;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

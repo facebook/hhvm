@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_STREAM_USER_FILTERS_H_
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 
 namespace HPHP {
 
@@ -48,7 +48,7 @@ public:
 
   String createString();
 private:
-  smart::list<Object> m_buckets;
+  req::list<Object> m_buckets;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

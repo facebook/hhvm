@@ -663,7 +663,7 @@ MySQLResult::MySQLResult(MYSQL_RES *res, bool localized /* = false */)
 {
   if (localized) {
     m_res = nullptr; // ensure that localized results don't have another result
-    m_rows = smart::list<smart::vector<Variant>>(1); // sentinel
+    m_rows = req::list<req::vector<Variant>>(1); // sentinel
     m_current_row = m_rows->begin();
     m_row_ready = false;
     m_row_count = 0;
@@ -686,7 +686,7 @@ void MySQLResult::sweep() {
 
 void MySQLResult::addRow() {
   m_row_count++;
-  m_rows->push_back(smart::vector<Variant>());
+  m_rows->push_back(req::vector<Variant>());
   m_rows->back().reserve(getFieldCount());
 }
 
@@ -1076,14 +1076,14 @@ Variant MySQLStmt::attr_set(int64_t attr, int64_t value) {
 Variant MySQLStmt::bind_param(const String& types, const Array& vars) {
   VALIDATE_PREPARED
 
-  m_param_vars = smart::make_unique<MySQLStmtVariables>(vars);
+  m_param_vars = req::make_unique<MySQLStmtVariables>(vars);
   return m_param_vars->init_params(m_stmt, types);
 }
 
 Variant MySQLStmt::bind_result(const Array& vars) {
   VALIDATE_PREPARED
 
-  m_result_vars = smart::make_unique<MySQLStmtVariables>(vars);
+  m_result_vars = req::make_unique<MySQLStmtVariables>(vars);
   return m_result_vars->bind_result(m_stmt);
 }
 

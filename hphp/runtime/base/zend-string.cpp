@@ -545,7 +545,7 @@ String string_replace(const char *input, int len,
     return String();
   }
 
-  smart::vector<int> founds;
+  req::vector<int> founds;
   founds.reserve(16);
   if (len_search == 1) {
     for (int pos = string_find(input, len, *search, 0, case_sensitive);

@@ -39,7 +39,7 @@ namespace HPHP {
 namespace {
   template<bool decRef, class TWaitHandle>
   void exitContextQueue(context_idx_t ctx_idx,
-                        smart::deque<TWaitHandle*>& queue) {
+                        req::deque<TWaitHandle*>& queue) {
     while (!queue.empty()) {
       auto wait_handle = queue.front();
       queue.pop_front();
@@ -50,7 +50,7 @@ namespace {
 
   template<class TWaitHandle>
   void exitContextVector(context_idx_t ctx_idx,
-                         smart::vector<TWaitHandle*> &vector) {
+                         req::vector<TWaitHandle*> &vector) {
     while (!vector.empty()) {
       auto wait_handle = vector.back();
       vector.pop_back();

@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/container-functions.h"
@@ -46,7 +46,7 @@ const StaticString
   s_exception("exception"),
   s_previous("previous");
 
-using SmartCufIterPtr = smart::unique_ptr<CufIter>;
+using SmartCufIterPtr = req::unique_ptr<CufIter>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -104,7 +104,7 @@ bool vm_decode_function_cufiter(const Variant& function,
     return false;
   }
 
-  cufIter = smart::make_unique<CufIter>();
+  cufIter = req::make_unique<CufIter>();
   cufIter->setFunc(func);
   cufIter->setName(invName);
   if (obj) {
@@ -130,7 +130,7 @@ void AutoloadHandler::requestInit() {
   assert(m_map_root.get() == nullptr);
   assert(m_loading.get() == nullptr);
   m_spl_stack_inited = false;
-  new (&m_handlers) smart::deque<HandlerBundle>();
+  new (&m_handlers) req::deque<HandlerBundle>();
 }
 
 void AutoloadHandler::requestShutdown() {

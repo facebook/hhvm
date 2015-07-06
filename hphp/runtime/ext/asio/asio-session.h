@@ -177,8 +177,8 @@ private:
 
 private:
   static DECLARE_THREAD_LOCAL_PROXY(AsioSession, false, s_current);
-  smart::vector<AsioContext*> m_contexts;
-  smart::vector<c_SleepWaitHandle*> m_sleepEvents;
+  req::vector<AsioContext*> m_contexts;
+  req::vector<c_SleepWaitHandle*> m_sleepEvents;
   AsioExternalThreadEventQueue m_externalThreadEventQueue;
 
   Object m_abruptInterruptException;

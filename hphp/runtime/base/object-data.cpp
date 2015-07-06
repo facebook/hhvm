@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
@@ -1224,8 +1224,7 @@ struct PropAccessInfo::Hash {
 };
 
 struct PropRecurInfo {
-  typedef smart::hash_set<PropAccessInfo,PropAccessInfo::Hash> RecurSet;
-
+  typedef req::hash_set<PropAccessInfo,PropAccessInfo::Hash> RecurSet;
   const PropAccessInfo* activePropInfo;
   RecurSet* activeSet;
 };

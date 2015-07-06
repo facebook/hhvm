@@ -37,7 +37,7 @@
 #ifndef PHP_YAML_INT_H
 #define PHP_YAML_INT_H
 
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,7 +60,7 @@ typedef struct y_emit_state_s {
   yaml_emitter_t *emitter;
   HashTable *recursive;
   HashTable *callbacks;
-  HPHP::smart::hash_map<void*, int, HPHP::pointer_hash<void> > seen;
+  HPHP::req::hash_map<void*, int, HPHP::pointer_hash<void> > seen;
 } y_emit_state_t;
 
 /* }}} */

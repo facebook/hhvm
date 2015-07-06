@@ -27,7 +27,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR
@@ -344,9 +344,9 @@ protected:
   MYSQL_RES *m_res;
   MYSQL_ROW m_current_async_row;
   bool m_localized; // whether all the rows have been localized
-  smart::vector<MySQLFieldInfo> m_fields;
-  folly::Optional<smart::list<smart::vector<Variant>>> m_rows;
-  smart::list<smart::vector<Variant>>::const_iterator m_current_row;
+  req::vector<MySQLFieldInfo> m_fields;
+  folly::Optional<req::list<req::vector<Variant>>> m_rows;
+  req::list<req::vector<Variant>>::const_iterator m_current_row;
   int64_t m_current_field;
   bool m_row_ready; // set to false after seekRow, true after fetchRow
   int64_t m_row_count;
@@ -367,7 +367,7 @@ struct MySQLStmtVariables {
 
 private:
   Array                   m_arr;
-  smart::vector<Variant>  m_value_arr;
+  req::vector<Variant>   m_value_arr;
   MYSQL_BIND             *m_vars;
   my_bool                *m_null;
   unsigned long          *m_length;
@@ -415,8 +415,8 @@ struct MySQLStmt : public SweepableResourceData {
 protected:
   MYSQL_STMT *m_stmt;
   bool m_prepared;
-  smart::unique_ptr<MySQLStmtVariables> m_param_vars;
-  smart::unique_ptr<MySQLStmtVariables> m_result_vars;
+  req::unique_ptr<MySQLStmtVariables> m_param_vars;
+  req::unique_ptr<MySQLStmtVariables> m_result_vars;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

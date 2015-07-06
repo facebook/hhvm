@@ -137,22 +137,22 @@ struct AddScanMethodsAction : public PluginASTAction {
     // If a particular class causes problems with the scan
     // generator, you may want to include it in this list and
     // make sure there is a hand written scan method.
-    m_hasScanMethodNames.insert("HPHP::smart::vector");
-    m_hasScanMethodNames.insert("HPHP::smart::dequeue");
-    m_hasScanMethodNames.insert("HPHP::smart::priority_queue");
-    m_hasScanMethodNames.insert("HPHP::smart::flat_map");
-    m_hasScanMethodNames.insert("HPHP::smart::flat_multimap");
-    m_hasScanMethodNames.insert("HPHP::smart::flat_set");
-    m_hasScanMethodNames.insert("HPHP::smart::flat_multiset");
-    m_hasScanMethodNames.insert("HPHP::smart::stack");
-    m_hasScanMethodNames.insert("HPHP::smart::map");
-    m_hasScanMethodNames.insert("HPHP::smart::multimap");
-    m_hasScanMethodNames.insert("HPHP::smart::set");
-    m_hasScanMethodNames.insert("HPHP::smart::multiset");
-    m_hasScanMethodNames.insert("HPHP::smart::hash_map");
-    m_hasScanMethodNames.insert("HPHP::smart::hash_multimap");
-    m_hasScanMethodNames.insert("HPHP::smart::hash_set");
-    m_hasScanMethodNames.insert("HPHP::smart::unique_ptr");
+    m_hasScanMethodNames.insert("HPHP::req::vector");
+    m_hasScanMethodNames.insert("HPHP::req::dequeue");
+    m_hasScanMethodNames.insert("HPHP::req::priority_queue");
+    m_hasScanMethodNames.insert("HPHP::req::flat_map");
+    m_hasScanMethodNames.insert("HPHP::req::flat_multimap");
+    m_hasScanMethodNames.insert("HPHP::req::flat_set");
+    m_hasScanMethodNames.insert("HPHP::req::flat_multiset");
+    m_hasScanMethodNames.insert("HPHP::req::stack");
+    m_hasScanMethodNames.insert("HPHP::req::map");
+    m_hasScanMethodNames.insert("HPHP::req::multimap");
+    m_hasScanMethodNames.insert("HPHP::req::set");
+    m_hasScanMethodNames.insert("HPHP::req::multiset");
+    m_hasScanMethodNames.insert("HPHP::req::hash_map");
+    m_hasScanMethodNames.insert("HPHP::req::hash_multimap");
+    m_hasScanMethodNames.insert("HPHP::req::hash_set");
+    m_hasScanMethodNames.insert("HPHP::req::unique_ptr");
     m_hasScanMethodNames.insert("HPHP::SmartPtr");
     m_hasScanMethodNames.insert("HPHP::AtomicSmartPtr");
     m_hasScanMethodNames.insert("HPHP::AtomicSharedPtr");

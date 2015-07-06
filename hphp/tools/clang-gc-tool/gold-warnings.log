@@ -2,8 +2,8 @@
 ./X.h:6:39:warning: 'std::vector<foobar>' is not a subclass of any garbage collectible class but it contains a field with collectible type 'foobar *'.
 ./X.h:25:3:warning: 'bad_class2' is not a subclass of any garbage collectible class but it contains a field with collectible type 'std::vector<foobar>'.
 ./X.h:25:3:warning: found use of bad container type (std::vector<foobar>) bad_class2::vec
-./X.h:10:39:warning: 'smart::vector<foobar>' is not a subclass of any garbage collectible class but it contains a field with collectible type 'foobar *'.
-./X.h:29:3:warning: 'not_bad_class' is not a subclass of any garbage collectible class but it contains a field with collectible type 'smart::vector<foobar>'.
+./X.h:10:39:warning: 'req::vector<foobar>' is not a subclass of any garbage collectible class but it contains a field with collectible type 'foobar *'.
+./X.h:29:3:warning: 'not_bad_class' is not a subclass of any garbage collectible class but it contains a field with collectible type 'req::vector<foobar>'.
 ./X.h:33:3:warning: found use of bad container type (std::vector<foobar>) bad_template_use::vec
 ./X.h:38:63:warning: found raw pointer to X (X::x)
 ./X.h:47:3:warning: found union Y::Z::m

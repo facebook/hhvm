@@ -11,7 +11,7 @@ namespace std {
 template <typename T> struct vector { T* data; };
 }
 
-namespace smart {
+namespace req {
 template <typename T> struct vector { T* data; };
 }
 
@@ -31,7 +31,7 @@ struct bad_class2 {
 };
 
 struct not_bad_class {
-  smart::vector<foobar> vec;
+  req::vector<foobar> vec;
 };
 
 struct bad_template_use : public HPHP::ResourceData {

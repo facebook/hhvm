@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_MEMORY_SMART_CONTAINERS_H_
-#define incl_HPHP_RUNTIME_BASE_MEMORY_SMART_CONTAINERS_H_
+#ifndef incl_HPHP_RUNTIME_BASE_MEMORY_HEAP_CONTAINERS_H_
+#define incl_HPHP_RUNTIME_BASE_MEMORY_HEAP_CONTAINERS_H_
 
 #include <cstdlib>
 #include <deque>
@@ -35,25 +35,25 @@
 
 #include "hphp/runtime/base/memory-manager.h"
 
-namespace HPHP { namespace smart {
+namespace HPHP { namespace req {
 
 //////////////////////////////////////////////////////////////////////
 
 /*
  * Defines a family of types similar to std:: collections and
- * pointers, except using the request-local allocator, which we
- * consider smart.
+ * pointers, except using the request-local allocator.
  *
- * Replace std:: with smart:: if you know the data is request-local.
- *
+ * Replace std:: with req:: if you know the data is request-local.
  */
 
 /*
- * Shorthand to create an std::unique_ptr to a smart-allocated object.
+ * Shorthands to create std::unique_ptr or std::shared_ptr to a
+ * heap-allocated object. Memory will be request-scoped; the pointer
+ * wrapper remembers how to properly delete the object with req::Allocator.
  *
  * Usage:
- *
- *   auto ptr = smart::make_unique<Foo>(arg1, arg2);
+ *   auto ptr = req::make_unique<Foo>(...);
+ *   auto ptr = req::make_shared<Foo>(...);
  */
 
 template<class T>
@@ -78,7 +78,7 @@ std::shared_ptr<T> make_shared(Args&&... args) {
 #ifndef __APPLE__ // XXX: this affects codegen quality but not correctness
 static_assert(
   sizeof(unique_ptr<int>) == sizeof(std::unique_ptr<int>),
-  "smart::unique_ptr pointer should not be larger than std::unique_ptr"
+  "req::unique_ptr pointer should not be larger than std::unique_ptr"
 );
 #endif
 
@@ -137,11 +137,11 @@ using flat_multiset = boost::container::flat_multiset<K, Pref, Allocator<K>>;
 
 /*
  * We are deriving from the std::collection classes to get
- * smart::collection classes that use smart allocation. To avoid the
+ * req::collection classes that use request-heap allocation. To avoid the
  * various issues involved with deriving from value types, we want to
  * make sure that there are no references to the base classes here
  * other than the ones below. That way we know that a pointer to a
- * smart::collection can never decay to a pointer to a
+ * req::collection can never decay to a pointer to a
  * std::collection.
  *
  * Derivation from value types is generally bad. We also add no

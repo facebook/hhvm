@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_PREG_H_
 #define incl_HPHP_PREG_H_
 
-#include "hphp/runtime/base/smart-containers.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/type-string.h"
 
 #include <cstdint>

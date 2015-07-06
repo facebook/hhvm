@@ -178,8 +178,8 @@ class FieldIndex {
   String getFieldString(size_t field_index) const;
 
  private:
-  smart::vector<String> field_names_;
-  smart::hash_map<
+  req::vector<String> field_names_;
+  req::hash_map<
     String,
     size_t,
     hphp_string_hash,

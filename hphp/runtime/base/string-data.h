@@ -196,6 +196,9 @@ struct StringData {
    * Reference-counting related.
    */
   IMPLEMENT_COUNTABLE_METHODS_WITH_STATIC
+  bool cowCheck() const {
+    return maybeShared();
+  }
 
   /*
    * Append the supplied range to this string.  If there is not sufficient

@@ -1,20 +1,20 @@
 File "method_swap_error.php", line 17, characters 14-23:
 Invalid argument (Typing[4110])
 File "method_swap_error.php", line 12, characters 24-30:
-This is the expression dependent type <expr#352>::T
+This is the expression dependent type <expr#355>::T
   that is compatible with the abstract type constant X::T
   that is compatible with an array key (int/string)
 File "method_swap_error.php", line 17, characters 5-7:
-  where '<expr#352>' is a reference to this expression
+  where '<expr#355>' is a reference to this expression
 File "method_swap_error.php", line 4, characters 19-26:
   resulting from expanding a type constant as follows:
     X::T
 File "method_swap_error.php", line 4, characters 19-26:
 It is incompatible with an array key (int/string)
 File "method_swap_error.php", line 8, characters 26-32:
-Considering the constraint on '<expr#353>::T'
+Considering the constraint on '<expr#356>::T'
 File "method_swap_error.php", line 17, characters 14-16:
-  where '<expr#353>' is a reference to this expression
+  where '<expr#356>' is a reference to this expression
 File "method_swap_error.php", line 4, characters 19-26:
   resulting from expanding a type constant as follows:
     X::T

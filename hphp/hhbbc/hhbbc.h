@@ -256,12 +256,18 @@ struct Options {
    */
   bool HardPrivatePropInference = true;
 
-  /**
+  /*
    * If true, we'll assume that dynamic function calls (like '$f()') do not
    * have effects on unknown locals (i.e. are not extract / compact /...).
    * See, e.g. __SystemLib\\extract vs extract.
    */
   bool DisallowDynamicVarEnvFuncs = true;
+
+  /*
+   * The filepath where to save the stats file.  If the path is empty, then we
+   * save the stats file to a temporary file.
+   */
+  std::string stats_file;
 };
 extern Options options;
 

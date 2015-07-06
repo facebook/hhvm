@@ -28,14 +28,21 @@ function f_opt(?arraykey $k1, arraykey $k2): arraykey {
   return f($k1, $k2);
 }
 
+abstract class C {}
+function get_classname(): classname<C> {
+  return C::class;
+}
+
 function test(): void {
   f(1, 1);
   f('a', 'a');
   f(1, 'a');
   f('a', 1);
+  f(get_classname(), C::class);
 
   generic(1, 1);
   generic('a', 'a');
+  generic(get_classname(), get_classname());
 
   f_opt(1, 1);
   f_opt('a', 'a');

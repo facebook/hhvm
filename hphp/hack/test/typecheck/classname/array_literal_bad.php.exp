@@ -1,0 +1,8 @@
+array<[1]intersect(Tstring), [2]intersect(Tclassname<\C2>)>
+array<[3]intersect(Tstring), [4]intersect(Tclassname<\D>)>
+File "array_literal_bad.php", line 23, characters 10-13:
+Invalid return type (Typing[4110])
+File "array_literal_bad.php", line 20, characters 53-53:
+This is an object of type I
+File "array_literal_bad.php", line 4, characters 7-8:
+It is incompatible with an object of type D; implicitly defined constant ::class is a string that contains the fully qualified name of C1

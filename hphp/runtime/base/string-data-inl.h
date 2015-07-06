@@ -63,11 +63,19 @@ inline StringData* StringData::Make(const StringData* s1, const char* lit2) {
 //////////////////////////////////////////////////////////////////////
 
 inline bool StringData::isStatic() const {
-  return m_hdr.count == StaticValue;
+  if (m_hdr.count == StaticValue) {
+    assert(m_hdr.mrb);
+    return true;
+  }
+  return false;
 }
 
 inline bool StringData::isUncounted() const {
-  return m_hdr.count == UncountedValue;
+  if (m_hdr.count == UncountedValue) {
+    assert(m_hdr.mrb);
+    return true;
+  }
+  return false;
 }
 
 inline StringSlice StringData::slice() const {

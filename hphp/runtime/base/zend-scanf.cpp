@@ -157,9 +157,9 @@ static const char *BuildCharSet(CharSet *cset, const char *format) {
     ch = end++;
   }
 
-  cset->chars = (char *)smart_malloc(end - format - 1);
+  cset->chars = (char *)req::malloc(end - format - 1);
   if (nranges > 0) {
-    cset->ranges = (::Range*)smart_malloc(sizeof(::Range) * nranges);
+    cset->ranges = (::Range*)req::malloc(sizeof(::Range) * nranges);
   } else {
     cset->ranges = nullptr;
   }
@@ -266,9 +266,9 @@ static int CharInSet(CharSet *cset, int c) {
  *----------------------------------------------------------------------
  */
 static void ReleaseCharSet(CharSet *cset) {
-  smart_free((char *)cset->chars);
+  req::free((char *)cset->chars);
   if (cset->ranges) {
-    smart_free((char *)cset->ranges);
+    req::free((char *)cset->ranges);
   }
 }
 
@@ -309,7 +309,7 @@ static int ValidateFormat(const char *format, int numVars, int *totalSubs) {
    * a variable is multiply assigned or left unassigned.
    */
   if (numVars > nspace) {
-    nassign = (int*)smart_malloc(sizeof(int) * numVars);
+    nassign = (int*)req::malloc(sizeof(int) * numVars);
     nspace = numVars;
   }
   for (i = 0; i < nspace; i++) {
@@ -381,7 +381,7 @@ notXpg:
     gotSequential = 1;
     if (gotXpg) {
 mixedXPG:
-      if (nassign != staticAssign) smart_free((char *)nassign);
+      if (nassign != staticAssign) req::free((char *)nassign);
       throw_invalid_argument
         ("format: cannot mix \"%%\" and \"%%n$\" conversion specifiers");
       return SCAN_ERROR_INVALID_FORMAT;
@@ -468,12 +468,12 @@ xpgCheckDone:
       }
       break;
     badSet:
-      if (nassign != staticAssign) smart_free((char *)nassign);
+      if (nassign != staticAssign) req::free((char *)nassign);
       throw_invalid_argument("format: Unmatched [ in format string");
       return SCAN_ERROR_INVALID_FORMAT;
 
     default:
-      if (nassign != staticAssign) smart_free((char *)nassign);
+      if (nassign != staticAssign) req::free((char *)nassign);
       throw_invalid_argument("Bad scan conversion character \"%c\"", *ch);
       return SCAN_ERROR_INVALID_FORMAT;
     }
@@ -492,12 +492,12 @@ xpgCheckDone:
           nspace += STATIC_LIST_SIZE;
         }
         if (nassign == staticAssign) {
-          nassign = (int*)smart_malloc(nspace * sizeof(int));
+          nassign = (int*)req::malloc(nspace * sizeof(int));
           for (i = 0; i < STATIC_LIST_SIZE; ++i) {
             nassign[i] = staticAssign[i];
           }
         } else {
-          nassign = (int*)smart_realloc((void *)nassign, nspace * sizeof(int));
+          nassign = (int*)req::realloc((void *)nassign, nspace * sizeof(int));
         }
         for (i = value; i < nspace; i++) {
           nassign[i] = 0;
@@ -523,7 +523,7 @@ xpgCheckDone:
   }
   for (i = 0; i < numVars; i++) {
     if (nassign[i] > 1) {
-      if (nassign != staticAssign) smart_free((char *)nassign);
+      if (nassign != staticAssign) req::free((char *)nassign);
       throw_invalid_argument
         ("format: Variable is assigned by multiple \"%%n$\" specifiers");
       return SCAN_ERROR_INVALID_FORMAT;
@@ -532,18 +532,18 @@ xpgCheckDone:
        * If the space is empty, and xpgSize is 0 (means XPG wasn't
        * used, and/or numVars != 0), then too many vars were given
        */
-      if (nassign != staticAssign) smart_free((char *)nassign);
+      if (nassign != staticAssign) req::free((char *)nassign);
       throw_invalid_argument
         ("format: Variable is not assigned by any conversion specifiers");
       return SCAN_ERROR_INVALID_FORMAT;
     }
   }
 
-  if (nassign != staticAssign) smart_free((char *)nassign);
+  if (nassign != staticAssign) req::free((char *)nassign);
   return SCAN_SUCCESS;
 
 badIndex:
-  if (nassign != staticAssign) smart_free((char *)nassign);
+  if (nassign != staticAssign) req::free((char *)nassign);
   if (gotXpg) {
     throw_invalid_argument
       ("format: \"%%n$\" argument index out of range");

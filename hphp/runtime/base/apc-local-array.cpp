@@ -66,10 +66,10 @@ const Variant& APCLocalArray::GetValueRef(const ArrayData* adIn, ssize_t pos) {
       return tvAsCVarRef(tv);
     }
   } else {
-    static_assert(KindOfUninit == 0, "must be 0 since we use smart_calloc");
+    static_assert(KindOfUninit == 0, "must be 0 since we use req::calloc");
     unsigned cap = ad->m_arr->capacity();
     ad->m_localCache = static_cast<TypedValue*>(
-      smart_calloc(cap, sizeof(TypedValue))
+      req::calloc(cap, sizeof(TypedValue))
     );
   }
   auto const tv = &ad->m_localCache[pos];
@@ -85,7 +85,7 @@ APCLocalArray::~APCLocalArray() {
          tv < end; ++tv) {
       tvRefcountedDecRef(tv);
     }
-    smart_free(m_localCache);
+    req::free(m_localCache);
   }
   m_arr->getHandle()->unreference();
   MM().removeApcArray(this);

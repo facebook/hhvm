@@ -39,7 +39,7 @@ void XDebugProfiler::ensureBufferSpace() {
 
   try {
     int64_t new_buf_bytes = new_buf_size * sizeof(FrameData);
-    m_frameBuffer = (FrameData*) smart_realloc((void*) m_frameBuffer,
+    m_frameBuffer = (FrameData*) req::realloc((void*) m_frameBuffer,
                                                new_buf_bytes);
     m_frameBufferSize = new_buf_size;
   } catch (const OutOfMemoryException& e) {

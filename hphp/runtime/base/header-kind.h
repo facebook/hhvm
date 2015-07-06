@@ -28,8 +28,8 @@ enum class HeaderKind : uint8_t {
   Vector, Map, Set, Pair, ImmVector, ImmMap, ImmSet,
   ResumableFrame, // ResumableNode followed by Frame, Resumable, ObjectData
   NativeData, // a NativeData header preceding an HNI ObjectData
-  SmallMalloc, // small smart_malloc'd block
-  BigMalloc, // big smart_malloc'd block
+  SmallMalloc, // small req::malloc'd block
+  BigMalloc, // big req::malloc'd block
   BigObj, // big size-tracked object (valid header follows BigNode)
   Free, // small block in a FreeList
   Hole // wasted space not in any freelist

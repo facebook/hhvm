@@ -32,11 +32,11 @@ static String mpzToString(mpz_t gmpData, const int64_t base) {
     ++charLength;
   }
 
-  char *charStr = (char*)smart_malloc(charLength);
+  char *charStr = (char*)req::malloc(charLength);
   mpz_get_str(charStr, base, gmpData);
 
   String returnValue(charStr);
-  smart_free(charStr);
+  req::free(charStr);
 
   return returnValue;
 }

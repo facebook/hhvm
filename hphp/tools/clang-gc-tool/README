@@ -24,7 +24,7 @@ classes.
 
 The final list (badContainers) contains a list of container classes that are
 not suitable for containing smart allocated objects, e.g. std::vector. These
-classes are a problem because they use new (not smart_malloc) to allocate
+classes are a problem because they use new (not req::malloc) to allocate
 internal memory. A warning is generated any time a class in this set is used
 to store a scannable class.
 
@@ -121,7 +121,7 @@ C.cpp:
 #include "A.h"  // A defined but B not
 
 handle NativeData
-- adding all classes too permissive.  should only add ones that have a 
+- adding all classes too permissive.  should only add ones that have a
   "need scan" field.
 
 templates

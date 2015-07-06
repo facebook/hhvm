@@ -122,7 +122,7 @@ String StringUtil::Implode(const Variant& items, const String& delim,
   int size = getContainerSize(items);
   if (size == 0) return empty_string();
 
-  String* sitems = (String*)smart_malloc(size * sizeof(String));
+  String* sitems = (String*)req::malloc(size * sizeof(String));
   int len = 0;
   int lenDelim = delim.size();
   int i = 0;
@@ -152,7 +152,7 @@ String StringUtil::Implode(const Variant& items, const String& delim,
     p += lenItem;
     sitems[i].~String();
   }
-  smart_free(sitems);
+  req::free(sitems);
   assert(p - buffer == len);
   s.setSize(len);
   return s;

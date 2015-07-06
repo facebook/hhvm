@@ -36,8 +36,8 @@ class c_ExternalThreadEventWaitHandle;
 typedef uint8_t context_idx_t;
 
 struct AsioContext final {
-  void* operator new(size_t size) { return smart_malloc(size); }
-  void operator delete(void* ptr) { smart_free(ptr); }
+  void* operator new(size_t size) { return req::malloc(size); }
+  void operator delete(void* ptr) { req::free(ptr); }
 
   explicit AsioContext(ActRec* savedFP) : m_savedFP(savedFP) {}
   void exit(context_idx_t ctx_idx);

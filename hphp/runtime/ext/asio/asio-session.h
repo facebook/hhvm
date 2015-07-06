@@ -40,8 +40,8 @@ struct AsioSession final {
   static void Init();
   static AsioSession* Get() { return s_current.get(); }
 
-  void* operator new(size_t size) { return smart_malloc(size); }
-  void operator delete(void* ptr) { smart_free(ptr); }
+  void* operator new(size_t size) { return req::malloc(size); }
+  void operator delete(void* ptr) { req::free(ptr); }
 
   // context
   void enterContext(ActRec* savedFP);

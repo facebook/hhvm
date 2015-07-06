@@ -75,7 +75,7 @@ MemoryManager& MM();
 //////////////////////////////////////////////////////////////////////
 
 /*
- * smart_malloc api for request-scoped memory
+ * req::malloc api for request-scoped memory
  *
  * This is the most generic entry point to the request local
  * allocator.  If you easily know the size of the allocation at free
@@ -90,34 +90,38 @@ MemoryManager& MM();
  * These functions only guarantee 8-byte alignment for the returned
  * pointer.
  */
-void* smart_malloc(size_t nbytes);
-void* smart_calloc(size_t count, size_t bytes);
-void* smart_realloc(void* ptr, size_t nbytes);
-void  smart_free(void* ptr);
+
+namespace req {
+
+void* malloc(size_t nbytes);
+void* calloc(size_t count, size_t bytes);
+void* realloc(void* ptr, size_t nbytes);
+void  free(void* ptr);
 
 /*
- * Smart (de)allocate for non-POD C++-style stuff.  (Runs constructors
- * and destructors.)
+ * request-heap (de)allocators for non-POD C++-style stuff. Runs constructors
+ * and destructors.
  *
- * Unlike the normal operator delete, smart_delete requires ~T() must
+ * Unlike the normal operator delete, req::destroy_raw() requires ~T() must
  * be nothrow and that p is not null.
  */
-template<class T, class... Args> T* smart_new(Args&&...);
-template<class T> void smart_delete(T* p);
+template<class T, class... Args> T* make_raw(Args&&...);
+template<class T> void destroy_raw(T* p);
 
 /*
- * Allocate an array of objects.  Similar to smart_malloc, but with
+ * Allocate an array of objects.  Similar to req::malloc, but with
  * support for constructors.
  *
- * Note that explicitly calling smart_delete will run the destructors,
+ * Note that explicitly calling req::destroy_raw will run the destructors,
  * but if you let the allocator sweep it the destructors will not be
  * called.
  *
- * Unlike the normal operator delete, smart_delete_array requires ~T()
- * must be nothrow.
+ * Unlike the normal operator delete, req::destroy_raw_array requires
+ * ~T() must be nothrow.
  */
-template<class T> T* smart_new_array(size_t count);
-template<class T> void smart_delete_array(T* t, size_t count);
+template<class T> T* make_raw_array(size_t count);
+template<class T> void destroy_raw_array(T* t, size_t count);
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -162,7 +166,7 @@ struct Allocator {
   }
 
   pointer allocate(size_type num, const void* = 0) {
-    pointer ret = (pointer)smart_malloc(num * sizeof(T));
+    pointer ret = (pointer)req::malloc(num * sizeof(T));
     return ret;
   }
 
@@ -176,7 +180,7 @@ struct Allocator {
   }
 
   void deallocate(pointer p, size_type num) {
-    smart_free(p);
+    req::free(p);
   }
 
   template<class U> bool operator==(const Allocator<U>&) const {
@@ -445,7 +449,7 @@ struct BigNode {
   uint32_t& index() { return hdr.hi32; }
 };
 
-// Header used for small smart_malloc allocations (but not *Size allocs)
+// Header used for small req::malloc allocations (but not *Size allocs)
 struct SmallNode {
   size_t padbytes;
   HeaderWord<> hdr;
@@ -878,10 +882,10 @@ struct MemoryManager {
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  friend void* smart_malloc(size_t nbytes);
-  friend void* smart_calloc(size_t count, size_t bytes);
-  friend void* smart_realloc(void* ptr, size_t nbytes);
-  friend void  smart_free(void* ptr);
+  friend void* req::malloc(size_t nbytes);
+  friend void* req::calloc(size_t count, size_t bytes);
+  friend void* req::realloc(void* ptr, size_t nbytes);
+  friend void  req::free(void* ptr);
 
   struct FreeList {
     void* maybePop();
@@ -967,7 +971,7 @@ private:
     RootMap<ResourceData>&
   >::type getRootMap() {
     if (UNLIKELY(!m_resourceRoots)) {
-      m_resourceRoots = smart_new<RootMap<ResourceData>>();
+      m_resourceRoots = req::make_raw<RootMap<ResourceData>>();
     }
     return *m_resourceRoots;
   }
@@ -978,7 +982,7 @@ private:
     RootMap<ObjectData>&
   >::type getRootMap() {
     if (UNLIKELY(!m_objectRoots)) {
-      m_objectRoots = smart_new<RootMap<ObjectData>>();
+      m_objectRoots = req::make_raw<RootMap<ObjectData>>();
     }
     return *m_objectRoots;
   }
@@ -989,7 +993,7 @@ private:
     const RootMap<ResourceData>&
   >::type getRootMap() const {
     if (UNLIKELY(!m_resourceRoots)) {
-      m_resourceRoots = smart_new<RootMap<ResourceData>>();
+      m_resourceRoots = req::make_raw<RootMap<ResourceData>>();
     }
     return *m_resourceRoots;
   }
@@ -1000,7 +1004,7 @@ private:
     const RootMap<ObjectData>&
   >::type getRootMap() const {
     if (UNLIKELY(!m_objectRoots)) {
-      m_objectRoots = smart_new<RootMap<ObjectData>>();
+      m_objectRoots = req::make_raw<RootMap<ObjectData>>();
     }
     return *m_objectRoots;
   }

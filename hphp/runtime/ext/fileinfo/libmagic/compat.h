@@ -28,10 +28,10 @@
 
 #define PCRE_CASELESS 0x00000001
 #define PCRE_MULTILINE 0x00000002
-#define emalloc HPHP::smart_malloc
-#define ecalloc HPHP::smart_calloc
-#define efree HPHP::smart_free
-#define erealloc HPHP::smart_realloc
+#define emalloc HPHP::req::malloc
+#define ecalloc HPHP::req::calloc
+#define efree HPHP::req::free
+#define erealloc HPHP::req::realloc
 #define php_stream HPHP::File
 
 inline char *estrndup(const char *s, unsigned int length) {

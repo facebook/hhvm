@@ -172,7 +172,7 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign,
   if (value == 0.0) {
     *decpt = 1 - fmode; /* 1 for 'e', 0 for 'f' */
     *sign = 0;
-    if ((rve = s = (char *)smart_malloc(ndigit?siz:2)) == nullptr) {
+    if ((rve = s = (char *)req::malloc(ndigit?siz:2)) == nullptr) {
       return(nullptr);
     }
     *rve++ = '0';
@@ -193,7 +193,7 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign,
     if (pad && fmode) {
       siz += *decpt;
     }
-    if ((s = (char *)smart_malloc(siz+1)) == nullptr) {
+    if ((s = (char *)req::malloc(siz+1)) == nullptr) {
       zend_freedtoa(p);
       return(nullptr);
     }
@@ -489,7 +489,7 @@ char * php_conv_fp(register char format, register double num,
     *len = strlen(p);
     memcpy(buf, p, *len + 1);
     *is_negative = 0;
-    smart_free(p_orig);
+    req::free(p_orig);
     return (buf);
   }
   if (format == 'F') {
@@ -553,7 +553,7 @@ char * php_conv_fp(register char format, register double num,
     }
   }
   *len = s - buf;
-  smart_free(p_orig);
+  req::free(p_orig);
   return (buf);
 }
 

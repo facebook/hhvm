@@ -273,7 +273,7 @@ END_EXTERN_C()
   { \
     HPHP::File *__file; \
     ZEND_FETCH_RESOURCE2((__file), HPHP::File *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream()) \
-    (xstr) = HPHP::smart_new<php_stream>(__file); \
+    (xstr) = HPHP::req::make_raw<php_stream>(__file); \
   }
 #else
 #define php_stream_from_zval(xstr, ppzval)  ZEND_FETCH_RESOURCE2((xstr), php_stream *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())
@@ -284,7 +284,7 @@ END_EXTERN_C()
     HPHP::File *__file; \
     __file = static_cast<HPHP::File*>(zend_fetch_resource((ppzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())); \
     assert(__file); \
-    (xstr) = HPHP::smart_new<php_stream>(__file); \
+    (xstr) = HPHP::req::make_raw<php_stream>(__file); \
  }
 #else
 #define php_stream_from_zval_no_verify(xstr, ppzval)  (xstr) = (php_stream*)zend_fetch_resource((ppzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())

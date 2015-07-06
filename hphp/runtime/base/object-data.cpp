@@ -1239,7 +1239,7 @@ bool magic_prop_impl(TypedValue* retval,
                      Invoker invoker) {
   if (UNLIKELY(propRecurInfo.activePropInfo != nullptr)) {
     if (!propRecurInfo.activeSet) {
-      propRecurInfo.activeSet = smart_new<PropRecurInfo::RecurSet>();
+      propRecurInfo.activeSet = req::make_raw<PropRecurInfo::RecurSet>();
       propRecurInfo.activeSet->insert(*propRecurInfo.activePropInfo);
     }
     if (!propRecurInfo.activeSet->insert(info).second) {
@@ -1258,7 +1258,7 @@ bool magic_prop_impl(TypedValue* retval,
   SCOPE_EXIT {
     propRecurInfo.activePropInfo = nullptr;
     if (UNLIKELY(propRecurInfo.activeSet != nullptr)) {
-      smart_delete(propRecurInfo.activeSet);
+      req::destroy_raw(propRecurInfo.activeSet);
       propRecurInfo.activeSet = nullptr;
     }
   };

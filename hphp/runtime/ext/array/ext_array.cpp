@@ -479,11 +479,11 @@ Variant HHVM_FUNCTION(array_map, const Variant& callback,
   // Handle the uncommon case where the caller passed a callback
   // and two or more containers
   ArrayIter* iters =
-    (ArrayIter*)smart_malloc(sizeof(ArrayIter) * (_argv.size() + 1));
+    (ArrayIter*)req::malloc(sizeof(ArrayIter) * (_argv.size() + 1));
   size_t numIters = 0;
   SCOPE_EXIT {
     while (numIters--) iters[numIters].~ArrayIter();
-    smart_free(iters);
+    req::free(iters);
   };
   size_t maxLen = getContainerSize(cell_arr1);
   (void) new (&iters[numIters]) ArrayIter(cell_arr1);
@@ -1834,7 +1834,7 @@ static inline TypedValue* makeContainerListHelper(const Variant& a,
   assert(smallestPos < count);
   // Allocate a TypedValue array and copy 'a' and the contents of 'argv'
   TypedValue* containers =
-    (TypedValue*)smart_malloc(count * sizeof(TypedValue));
+    (TypedValue*)req::malloc(count * sizeof(TypedValue));
   tvCopy(*a.asCell(), containers[0]);
   int pos = 1;
   for (ArrayIter argvIter(argv); argvIter; ++argvIter, ++pos) {
@@ -2047,7 +2047,7 @@ Variant HHVM_FUNCTION(array_intersect,
     int count = args.size() + 1;
     TypedValue* containers =
       makeContainerListHelper(container2, args, count, smallestPos);
-    SCOPE_EXIT { smart_free(containers); };
+    SCOPE_EXIT { req::free(containers); };
     // Build a Set of the values that were present in all of the containers
     containerValuesIntersectHelper(st, containers, count);
   }
@@ -2102,7 +2102,7 @@ Variant HHVM_FUNCTION(array_intersect_key,
     int count = args.size() + 1;
     TypedValue* containers =
       makeContainerListHelper(container2, args, count, smallestPos);
-    SCOPE_EXIT { smart_free(containers); };
+    SCOPE_EXIT { req::free(containers); };
     // Build a Set of the keys that were present in all of the containers
     containerKeysIntersectHelper(st, containers, count);
   }

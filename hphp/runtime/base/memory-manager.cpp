@@ -204,11 +204,11 @@ void MemoryManager::dropRootMaps() {
 
 void MemoryManager::deleteRootMaps() {
   if (m_objectRoots) {
-    smart_delete(m_objectRoots);
+    req::destroy_raw(m_objectRoots);
     m_objectRoots = nullptr;
   }
   if (m_resourceRoots) {
-    smart_delete(m_resourceRoots);
+    req::destroy_raw(m_resourceRoots);
     m_resourceRoots = nullptr;
   }
 }
@@ -515,7 +515,7 @@ void MemoryManager::flush() {
 }
 
 /*
- * smart_malloc & friends implementation notes
+ * req::malloc & friends implementation notes
  *
  * There are three kinds of smart mallocation:
  *
@@ -596,13 +596,13 @@ inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
   assert(nbytes > 0);
   auto const n = static_cast<MallocNode*>(ptr) - 1;
   if (LIKELY(n->small.padbytes <= kMaxSmartSize)) {
-    void* newmem = smart_malloc(nbytes);
+    void* newmem = req::malloc(nbytes);
     auto const copySize = std::min(
       n->small.padbytes - sizeof(SmallNode),
       nbytes
     );
     newmem = memcpy(newmem, ptr, copySize);
-    smart_free(ptr);
+    req::free(ptr);
     return newmem;
   }
   // Ok, it's a big allocation.
@@ -944,36 +944,37 @@ void* MemoryManager::smartCallocBig(size_t totalbytes) {
   return block.ptr;
 }
 
-// smart_malloc api entry points, with support for malloc/free corner cases.
-
-void* smart_malloc(size_t nbytes) {
+// req::malloc api entry points, with support for malloc/free corner cases.
+namespace req {
+void* malloc(size_t nbytes) {
   auto& mm = MM();
   auto const size = std::max(nbytes, size_t(1));
   return mm.smartMalloc(size);
 }
 
-void* smart_calloc(size_t count, size_t nbytes) {
+void* calloc(size_t count, size_t nbytes) {
   auto& mm = MM();
   auto const totalBytes = std::max<size_t>(count * nbytes, 1);
   if (totalBytes <= kMaxSmartSize) {
-    return memset(smart_malloc(totalBytes), 0, totalBytes);
+    return memset(req::malloc(totalBytes), 0, totalBytes);
   }
   return mm.smartCallocBig(totalBytes);
 }
 
-void* smart_realloc(void* ptr, size_t nbytes) {
+void* realloc(void* ptr, size_t nbytes) {
   auto& mm = MM();
-  if (!ptr) return smart_malloc(nbytes);
+  if (!ptr) return req::malloc(nbytes);
   if (!nbytes) {
-    smart_free(ptr);
+    req::free(ptr);
     return nullptr;
   }
   return mm.smartRealloc(ptr, nbytes);
 }
 
-void smart_free(void* ptr) {
+void free(void* ptr) {
   if (ptr) MM().smartFree(ptr);
 }
+} // namespace req
 
 //////////////////////////////////////////////////////////////////////
 

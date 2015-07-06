@@ -44,7 +44,7 @@ class String;
 enum AttachStringMode { AttachString };
 
 // const char* points to client-owned memory, StringData will copy it
-// at construct-time using smart_malloc.  This is only ok when the StringData
+// at construct-time using req::malloc.  This is only ok when the StringData
 // itself was smart-allocated.
 enum CopyStringMode { CopyString };
 

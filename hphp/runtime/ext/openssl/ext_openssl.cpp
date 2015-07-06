@@ -1812,10 +1812,10 @@ static void add_bignum_as_string(Array &arr,
     return;
   }
   int num_bytes = BN_num_bytes(bn);
-  unsigned char *out = (unsigned char *)smart_malloc(num_bytes);
+  unsigned char *out = (unsigned char *)req::malloc(num_bytes);
   BN_bn2bin(bn, out);
   arr.set(key, String((const char *)out, num_bytes, CopyString));
-  smart_free(out);
+  req::free(out);
 }
 
 Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {

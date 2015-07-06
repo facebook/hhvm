@@ -329,7 +329,7 @@ ODBCCursor::~ODBCCursor() {
   SQLFreeStmt(hdl_stmt_, SQL_CLOSE);
   SQLFreeHandle(SQL_HANDLE_STMT, hdl_stmt_);
   if (is_buffer_bound) {
-    smart_free(buffer_);
+    req::free(buffer_);
   }
 }
 
@@ -338,7 +338,7 @@ void ODBCCursor::sweep()
   SQLFreeStmt(hdl_stmt_, SQL_CLOSE);
   SQLFreeHandle(SQL_HANDLE_STMT, hdl_stmt_);
   if (is_buffer_bound) {
-    smart_free(buffer_);
+    req::free(buffer_);
   }
 }
 
@@ -391,7 +391,7 @@ bool ODBCCursor::exec_prepared_query(const Array params)
     num_rows = cur_array.size();
 
     // allocate buffer we'll pass to odbc
-    input[i] = (SQLCHAR*)smart_malloc(num_rows * param->col_size);
+    input[i] = (SQLCHAR*)req::malloc(num_rows * param->col_size);
 
     // copy each element of our input array to the buffer
     for (int j=0; j < num_rows; j++) {
@@ -425,7 +425,7 @@ bool ODBCCursor::exec_prepared_query(const Array params)
   }
 
   for (int i=0; i < params_size_; i++) {
-    smart_free(input[i]);
+    req::free(input[i]);
   }
 
   set_num_cols();
@@ -442,7 +442,7 @@ bool ODBCCursor::bind_buffer()
     row_size += column->total_column_size();
     columns_.append(Variant(std::move(column)));
   }
-  buffer_ = (SQLPOINTER)smart_malloc(row_size * per_fetch_rows);
+  buffer_ = (SQLPOINTER)req::malloc(row_size * per_fetch_rows);
 
   // since this buffer can be quite big
   if (buffer_ == nullptr) {

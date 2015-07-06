@@ -815,9 +815,9 @@ MySQLFieldInfo *MySQLResult::fetchFieldInfo() {
 
 MySQLStmtVariables::MySQLStmtVariables(const Array& arr): m_arr(arr) {
   int count = m_arr.size();
-  m_vars   = (MYSQL_BIND*)smart_calloc(count, sizeof(MYSQL_BIND));
-  m_null   = (my_bool*)smart_calloc(count, sizeof(my_bool));
-  m_length = (unsigned long*)smart_calloc(count, sizeof(unsigned long));
+  m_vars   = (MYSQL_BIND*)req::calloc(count, sizeof(MYSQL_BIND));
+  m_null   = (my_bool*)req::calloc(count, sizeof(my_bool));
+  m_length = (unsigned long*)req::calloc(count, sizeof(unsigned long));
 
   for (int i = 0; i < count; i++) {
     m_null[i] = false;
@@ -836,13 +836,13 @@ MySQLStmtVariables::~MySQLStmtVariables() {
   for (int i = 0; i < m_arr.size(); i++) {
     auto buf = &m_vars[i];
     if (buf->buffer_length > 0) {
-      smart_free(buf->buffer);
+      req::free(buf->buffer);
     }
   }
 
-  smart_free(m_vars);
-  smart_free(m_null);
-  smart_free(m_length);
+  req::free(m_vars);
+  req::free(m_null);
+  req::free(m_length);
 }
 
 bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
@@ -904,7 +904,7 @@ bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
     }
 
     if (b->buffer_length > 0) {
-      b->buffer = smart_calloc(1, b->buffer_length);
+      b->buffer = req::calloc(1, b->buffer_length);
     }
   }
   mysql_free_result(res);

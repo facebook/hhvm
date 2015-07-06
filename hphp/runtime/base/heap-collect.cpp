@@ -203,7 +203,7 @@ void Marker::operator()(const StringData* p) {
 // ignore the interior pointer; NVT should be scanned by VarEnv::scan.
 void Marker::operator()(const NameValueTable* p) {}
 
-// VarEnvs are allocated with smart_new, so they aren't first-class heap
+// VarEnvs are allocated with req::make, so they aren't first-class heap
 // objects. assume a VarEnv* is a unique ptr, and scan it eagerly.
 void Marker::operator()(const VarEnv* p) {
   if (p) p->scan(*this);
@@ -412,7 +412,7 @@ void Marker::sweep() {
         break;
       case HK::SmallMalloc:
       case HK::BigMalloc:
-        // these are managed by smart_malloc and should not have been marked.
+        // these are managed by req::malloc and should not have been marked.
         assert(!h->hdr_.mark);
         break;
       case HK::Free:

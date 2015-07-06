@@ -49,7 +49,7 @@ struct XDebugProfiler : Profiler {
     if (m_tracingEnabled) {
       disableTracing();
     }
-    smart_free(m_frameBuffer);
+    req::free(m_frameBuffer);
   }
 
   // Returns true if function enter/exit event collection is required by the

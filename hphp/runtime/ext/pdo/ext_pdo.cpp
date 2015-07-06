@@ -2483,7 +2483,7 @@ int pdo_parse_params(sp_PDOStatement stmt, const String& in, String &out) {
         query_type |= PDO_PLACEHOLDER_POSITIONAL;
       }
 
-      plc = (placeholder*)smart_malloc(sizeof(*plc));
+      plc = (placeholder*)req::malloc(sizeof(*plc));
       memset(plc, 0, sizeof(*plc));
       plc->next = NULL;
       plc->pos = s.tok;
@@ -2737,7 +2737,7 @@ clean_up:
     plc = placeholders;
     placeholders = plc->next;
     plc->quoted.reset();
-    smart_free(plc);
+    req::free(plc);
   }
 
   return ret;

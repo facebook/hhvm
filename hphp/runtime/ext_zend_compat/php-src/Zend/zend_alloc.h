@@ -63,7 +63,7 @@ END_EXTERN_C()
 #include "Zend/zend_types.h"
 /**
  * Sometimes a zval is passed to efree() and friends, but unfortunately
- * zvals (i.e. RefDatas) are not allocated using smart_malloc but rather
+ * zvals (i.e. RefDatas) are not allocated using req::malloc but rather
  * they are allocated using their own allocator, so we have a different
  * overload of _efree() to handle freeing these correctly.
  */

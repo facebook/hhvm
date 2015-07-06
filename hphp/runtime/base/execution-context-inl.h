@@ -21,7 +21,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void* ExecutionContext::operator new(size_t s) {
-  return smart_malloc(s);
+  return req::malloc(s);
 }
 
 inline void* ExecutionContext::operator new(size_t s, void* p) {
@@ -29,7 +29,7 @@ inline void* ExecutionContext::operator new(size_t s, void* p) {
 }
 
 inline void ExecutionContext::operator delete(void* p) {
-  smart_free(p);
+  req::free(p);
 }
 
 inline Transport* ExecutionContext::getTransport() {

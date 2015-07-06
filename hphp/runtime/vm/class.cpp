@@ -96,9 +96,9 @@ Class::PropInitVec::~PropInitVec() {
 
 Class::PropInitVec*
 Class::PropInitVec::allocWithSmartAllocator(const PropInitVec& src) {
-  PropInitVec* p = smart_new<PropInitVec>();
+  PropInitVec* p = req::make_raw<PropInitVec>();
   p->m_size = src.size();
-  p->m_data = smart_new_array<TypedValueAux>(src.size());
+  p->m_data = req::make_raw_array<TypedValueAux>(src.size());
   memcpy(p->m_data, src.m_data, src.size() * sizeof(*p->m_data));
   p->m_smart = true;
   return p;
@@ -601,8 +601,8 @@ void Class::initProps() const {
     }
   } catch (...) {
     // Undo the allocation of propVec
-    smart_delete_array(propVec->begin(), propVec->size());
-    smart_delete(propVec);
+    req::destroy_raw_array(propVec->begin(), propVec->size());
+    req::destroy_raw(propVec);
     *m_propDataCache = nullptr;
     throw;
   }

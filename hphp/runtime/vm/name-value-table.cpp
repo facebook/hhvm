@@ -88,7 +88,7 @@ NameValueTable::~NameValueTable() {
       }
     }
   }
-  smart_free(m_table);
+  req::free(m_table);
 }
 
 void NameValueTable::suspend(const ActRec* oldFP, ActRec* newFP) {
@@ -144,7 +144,7 @@ void NameValueTable::detach(ActRec* fp) {
 void NameValueTable::leak() {
   m_elms = 0;
   m_tabMask = 0;
-  smart_free(m_table);
+  req::free(m_table);
   m_table = nullptr;
 }
 
@@ -207,12 +207,12 @@ void NameValueTable::allocate(const size_t newCapac) {
   Elm* oldTab = m_table;
   const size_t oldMask = m_tabMask;
 
-  m_table = static_cast<Elm*>(smart_calloc(sizeof(Elm), newCapac));
+  m_table = static_cast<Elm*>(req::calloc(sizeof(Elm), newCapac));
   m_tabMask = uint32_t(newCapac - 1);
 
   if (oldTab) {
     rehash(oldTab, oldMask);
-    smart_free(oldTab);
+    req::free(oldTab);
   }
 }
 

@@ -325,7 +325,7 @@ const StaticString s_GLOBALS("GLOBALS");
 
 void VarEnv::createGlobal() {
   assert(!g_context->m_globalVarEnv);
-  g_context->m_globalVarEnv = smart_new<VarEnv>();
+  g_context->m_globalVarEnv = req::make_raw<VarEnv>();
 }
 
 VarEnv::VarEnv()
@@ -391,11 +391,11 @@ void VarEnv::deallocate(ActRec* fp) {
 }
 
 VarEnv* VarEnv::createLocal(ActRec* fp) {
-  return smart_new<VarEnv>(fp, fp->getExtraArgs());
+  return req::make_raw<VarEnv>(fp, fp->getExtraArgs());
 }
 
 VarEnv* VarEnv::clone(ActRec* fp) const {
-  return smart_new<VarEnv>(this, fp);
+  return req::make_raw<VarEnv>(this, fp);
 }
 
 void VarEnv::suspend(const ActRec* oldFP, ActRec* newFP) {
@@ -441,7 +441,7 @@ void VarEnv::exitFP(ActRec* fp) {
 
     // don't free global VarEnv
     if (!isGlobalScope()) {
-      smart_delete(this);
+      req::destroy_raw(this);
     }
   } else {
     auto const prevFP = g_context->getPrevVMState(fp);
@@ -523,7 +523,7 @@ ExtraArgs::~ExtraArgs() {}
 
 void* ExtraArgs::allocMem(unsigned nargs) {
   assert(nargs > 0);
-  return smart_malloc(sizeof(TypedValue) * nargs + sizeof(ExtraArgs));
+  return req::malloc(sizeof(TypedValue) * nargs + sizeof(ExtraArgs));
 }
 
 ExtraArgs* ExtraArgs::allocateCopy(TypedValue* args, unsigned nargs) {
@@ -545,12 +545,11 @@ ExtraArgs* ExtraArgs::allocateUninit(unsigned nargs) {
 
 void ExtraArgs::deallocate(ExtraArgs* ea, unsigned nargs) {
   assert(nargs > 0);
-
   for (unsigned i = 0; i < nargs; ++i) {
     tvRefcountedDecRef(ea->m_extraArgs + i);
   }
   ea->~ExtraArgs();
-  smart_free(ea);
+  req::free(ea);
 }
 
 void ExtraArgs::deallocate(ActRec* ar) {
@@ -7844,7 +7843,7 @@ void ExecutionContext::requestInit() {
   assert(SystemLib::s_nativeFuncUnit);
   assert(SystemLib::s_nativeClassUnit);
 
-  EnvConstants::requestInit(smart_new<EnvConstants>());
+  EnvConstants::requestInit(req::make_raw<EnvConstants>());
   VarEnv::createGlobal();
   vmStack().requestInit();
   ObjectData::resetMaxId();
@@ -7912,8 +7911,8 @@ void ExecutionContext::requestExit() {
   tl_miter_table.clear();
 
   if (m_globalVarEnv) {
-    smart_delete(m_globalVarEnv);
-    m_globalVarEnv = 0;
+    req::destroy_raw(m_globalVarEnv);
+    m_globalVarEnv = nullptr;
   }
 
   if (!m_lastError.isNull()) {

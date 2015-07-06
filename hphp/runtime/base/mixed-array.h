@@ -551,7 +551,6 @@ private:
    */
   MixedArray* resize();
   MixedArray* resizeIfNeeded();
-  MixedArray* resizePackedIfNeeded();
 
   Elm* data() const {
     return const_cast<Elm*>(reinterpret_cast<Elm const*>(this + 1));

@@ -289,7 +289,7 @@ void emitBuildExtraArgs(const PhpFunc& func, std::ostream& out,
 {0}      ai.set(i-{1}, tvAsVariant(extraArg));
 {0}    }}
 {0}  }}
-{0}  extraArgs = ai.create();
+{0}  extraArgs = ai.toArray();
 {0}}}
 )",
     ind,

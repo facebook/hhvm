@@ -681,7 +681,6 @@ void BaseVector::mutateImpl() {
   }
   auto* oldAd = arrayData();
   m_data = packedData(PackedArray::Copy(oldAd));
-  arrayData()->incRefCount();
   assert(oldAd->hasMultipleRefs());
   oldAd->decRefCount();
 }
@@ -1414,7 +1413,6 @@ void HashCollection::mutateImpl() {
   m_data = mixedData(
     reinterpret_cast<MixedArray*>(MixedArray::Copy(oldAd))
   );
-  arrayData()->incRefCount();
   assert(oldAd->hasMultipleRefs());
   oldAd->decRefCount();
 }
@@ -1696,7 +1694,6 @@ void HashCollection::grow(uint32_t newScale) {
     // MixedArray::Grow can only handle non-empty cases where the
     // buffer's refcount is 1.
     m_data = mixedData(MixedArray::Grow(oldAd, newScale));
-    arrayData()->incRefCount();
     decRefArr(oldAd);
   } else {
     // For cases where m_size is zero or the buffer's refcount is

@@ -123,7 +123,7 @@ ArrayData* MixedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   // }
   if (UNLIKELY(hasUserDefinedCmp(sf) || a->hasMultipleRefs())) {
     auto ret = a->copyMixed();
-    assert(ret->getCount() == 0);
+    assert(ret->hasExactlyOneRef());
     return ret;
   } else {
     return a;
@@ -140,7 +140,7 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   if (isSortFamily(sf)) {               // sort/rsort/usort
     if (UNLIKELY(ad->hasMultipleRefs())) {
       auto ret = PackedArray::Copy(ad);
-      assert(ret->getCount() == 0);
+      assert(ret->hasExactlyOneRef());
       return ret;
     } else {
       return ad;
@@ -148,7 +148,7 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   }
   assert(checkInvariants(ad));
   auto ret = ToMixedCopy(ad);
-  assert(ret->getCount() == 0);
+  assert(ret->hasExactlyOneRef());
   return ret;
 }
 

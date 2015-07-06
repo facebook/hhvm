@@ -71,6 +71,7 @@ GlobalsArray::GlobalsArray(NameValueTable* tab)
 #undef X
 
   g_variables = this;
+  assert(hasExactlyOneRef());
 }
 
 //////////////////////////////////////////////////////////////////////

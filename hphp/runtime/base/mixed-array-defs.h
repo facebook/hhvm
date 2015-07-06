@@ -92,6 +92,7 @@ bool MixedArray::isFull() const {
 ALWAYS_INLINE
 void MixedArray::InitSmall(MixedArray* a, RefCount count, uint32_t size,
                            int64_t nextIntKey) {
+  assert(count != 0);
   // Intentionally initialize hash table before header.
 #ifdef __x86_64__
   static_assert(MixedArray::Empty == -1, "");

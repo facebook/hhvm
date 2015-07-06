@@ -207,7 +207,7 @@ bool ExpressionList::getScalarValue(Variant &value) {
           init.setKeyUnconverted(n, v);
         }
       }
-      value = Array(init.create());
+      value = init.toVariant();
       return true;
     }
     return false;

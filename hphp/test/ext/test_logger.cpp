@@ -54,7 +54,7 @@ bool TestLogger::initializeRun() {
   data.set(String("gitRevision"),  getGitRevision());
   data.set(String("tags"),         make_packed_array("hphp", "c++"));
 
-  Array dataArr(data.create());
+  auto dataArr = data.toArray();
 
   Array response = postData(make_map_array("runData", dataArr));
 

@@ -40,10 +40,11 @@ class ArrayIter;
  * escalation.
  */
 class Array {
-  SmartPtr<ArrayData> m_arr;
+  using Ptr = SmartPtr<ArrayData>;
+  using NoIncRef = Ptr::NoIncRef;
+  using NonNull = Ptr::NonNull;
 
-  typedef SmartPtr<ArrayData>::NoIncRef NoIncRef;
-  typedef SmartPtr<ArrayData>::NonNull NonNull;
+  Ptr m_arr;
 
   Array(ArrayData* ad, NoIncRef) : m_arr(ad, NoIncRef{}) {}
 
@@ -53,11 +54,11 @@ public:
    * different than those copying constructors that also take one value.
    */
   static Array Create() {
-    return Array(ArrayData::Create());
+    return Array(ArrayData::Create(), NoIncRef{});
   }
 
   static Array Create(const Variant& value) {
-    return Array(ArrayData::Create(value));
+    return Array(ArrayData::Create(value), NoIncRef{});
   }
 
   static Array Create(const Variant& key, const Variant& value);
@@ -83,6 +84,17 @@ public:
 
   void escalate();
 
+  // Make a copy of this array. Like the underlying ArrayData::copy operation,
+  // the returned Array may point to the same underlying array as the original,
+  // or a new one.
+  Array copy() const {
+    if (!m_arr)
+      return Array{};
+    auto new_arr = m_arr->copy();
+    return (new_arr != m_arr) ?
+      Array{new_arr, NoIncRef{}} : Array{*this};
+  }
+
   /*
    * Constructors. Those that take "arr" or "var" are copy constructors, taking
    * array value from the parameter, and they are NOT constructing an array
@@ -92,12 +104,12 @@ public:
   /* implicit */ Array(const Array& arr) : m_arr(arr.m_arr) { }
 
   /*
-   * Special constructor for use from ArrayInit that creates an Array
-   * without a null check.
+   * Special constructor for use from ArrayInit that creates an Array without a
+   * null check and without an inc-ref.
    */
   enum class ArrayInitCtor { Tag };
   explicit Array(ArrayData* ad, ArrayInitCtor)
-    : m_arr(ad, NonNull{})
+    : m_arr(ad, NoIncRef{})
   {}
 
   // Move ctor
@@ -424,16 +436,16 @@ public:
   void removeImpl(const T& key) {
     if (m_arr) {
       ArrayData* escalated = m_arr->remove(key, (m_arr->hasMultipleRefs()));
-      if (escalated != m_arr) m_arr = escalated;
+      if (escalated != m_arr) m_arr = Ptr::attach(escalated);
     }
   }
 
   template<typename T>
   Variant& lvalAtImpl(const T& key, ACCESSPARAMS_DECL) {
-    if (!m_arr) m_arr = ArrayData::Create();
+    if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
     Variant* ret = nullptr;
     ArrayData* escalated = m_arr->lval(key, ret, m_arr->hasMultipleRefs());
-    if (escalated != m_arr) m_arr = escalated;
+    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
     assert(ret);
     return *ret;
   }

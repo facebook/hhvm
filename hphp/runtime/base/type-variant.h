@@ -155,12 +155,12 @@ struct Variant : private TypedValue {
     : Variant(ptr.detach(), Attach{}) { }
 
   /*
-   * Creation constructor from ArrayInit that avoids a null check.
+   * Creation constructor from ArrayInit that avoids a null check and an
+   * inc-ref.
    */
   explicit Variant(ArrayData* ad, ArrayInitCtor) noexcept {
     m_type = KindOfArray;
     m_data.parr = ad;
-    ad->incRefCount();
   }
 
   // for static strings only

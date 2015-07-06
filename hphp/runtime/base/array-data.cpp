@@ -82,6 +82,7 @@ ArrayData* ArrayData::GetScalarArray(ArrayData* arr,
     } else {
       ad = arr->nonSmartCopy();
     }
+    assert(ad->hasExactlyOneRef());
     ad->setStatic();
     ad->onSetEvalScalar();
     acc->second = ad;
@@ -140,12 +141,10 @@ static ArrayData* ZAppendThrow(ArrayData* ad, RefData* v, int64_t* key_ptr) {
  *   array doesn't have to copy if it was asked to remove an element
  *   that doesn't exist.
  *
- *   When a function with these semantics returns a new array, the new
- *   array is not yet incref'd (for historical reasons relating to our
- *   smart pointers).  Correctly using functions with these semantics
- *   usually involves checking whether the return value is the same
- *   pointer to be able to conditionally incref it.  TODO(#2926276):
- *   we want to change this to make callsites cheaper.
+ *   When a function with these semantics returns a new array, the new array is
+ *   already incref'd. In a few cases, an existing array (different than the
+ *   source array) may be returned. In this case, the array will already be
+ *   incref'd.
  */
 
 extern const ArrayFunctions g_array_funcs_unmodified = {
@@ -411,9 +410,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    *
    *   Must be called before calling any of the sort routines on an
    *   array. This gives arrays a chance to change to a kind that
-   *   supports sorting. If the original ArrayData is returned, the
-   *   refcount is unchanged; otherwise the returned ArrayData has
-   *   refcount of 0.
+   *   supports sorting.
    */
   DISPATCH(EscalateForSort)
 
@@ -537,9 +534,7 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    *
    *    Performs array addition, logically mutating the first array.
    *    It may return a new array if the array needed to grow, or if
-   *    it needed to COW because hasMultipleRefs was true---in this
-   *    case the new returned array will already have a reference
-   *    count of 1.
+   *    it needed to COW because hasMultipleRefs was true.
    */
   DISPATCH(PlusEq)
 
@@ -548,26 +543,24 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
    *
    *   Perform part of the semantics of the php function array_merge.
    *   (Renumbering keys is not done by this routine currently.)
-   *
-   *   This function always produces a new array with reference count 1.
    */
   DISPATCH(Merge)
 
   /*
    * ArrayData* Pop(ArrayData*, Variant& value);
    *
-   *   Remove the last element from the array and assign it to
-   *   `value'.  This function may return a new (not yet incref'd)
-   *   array if it decided to COW due to hasMultipleRefs().
+   *   Remove the last element from the array and assign it to `value'.  This
+   *   function may return a new array if it decided to COW due to
+   *   hasMultipleRefs().
    */
   DISPATCH(Pop)
 
   /*
    * ArrayData* Dequeue(ArrayData*, Variant& value)
    *
-   *   Remove the first element from the array and assign it to
-   *   `value'.  This function may return a new (not yet incref'd)
-   *   array if it decided to COW due to hasMultipleRefs().
+   *   Remove the first element from the array and assign it to `value'.  This
+   *   function may return a new array if it decided to COW due to
+   *   hasMultipleRefs().
    */
   DISPATCH(Dequeue)
 

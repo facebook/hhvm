@@ -54,7 +54,7 @@ static void fail() {
 }
 
 Object c_GenArrayWaitHandle::ti_create(const Array& inputDependencies) {
-  Array depCopy(inputDependencies->copy());
+  auto depCopy = inputDependencies.copy();
   if (UNLIKELY(depCopy->kind() > ArrayData::kEmptyKind)) {
     // The only array kind that can return a non-k{Packed,Mixed,Empty}Kind
     // from ->copy() is GlobalsArray, which returns itself.

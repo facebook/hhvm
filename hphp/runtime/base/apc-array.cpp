@@ -120,7 +120,9 @@ Variant APCArray::MakeArray(const APCHandle* handle) {
     auto const serArr = APCString::fromHandle(handle)->getStringData();
     return apc_unserialize(serArr->data(), serArr->size());
   }
-  return APCLocalArray::Make(APCArray::fromHandle(handle))->asArrayData();
+  return Variant::attach(
+    APCLocalArray::Make(APCArray::fromHandle(handle))->asArrayData()
+  );
 }
 
 void APCArray::Delete(APCHandle* handle) {

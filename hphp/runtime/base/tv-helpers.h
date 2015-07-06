@@ -327,6 +327,24 @@ inline void tvSet(const Cell fr, TypedValue& inTo) {
 }
 
 /*
+ * Assign the value of the Cell in `fr' to `to', decrementing the reference
+ * count of 'to', but not incrementing 'to'.
+ *
+ * If `to' is KindOfRef, places the value of `fr' in the RefData
+ * pointed to by `to'.
+ *
+ * `to' must contain a live php value; use cellCopy when it doesn't.
+ */
+inline void tvMove(const Cell fr, TypedValue& inTo) {
+  assert(cellIsPlausible(fr));
+  Cell* to = tvToCell(&inTo);
+  auto const oldType = to->m_type;
+  auto const oldDatum = to->m_data.num;
+  cellCopy(fr, *to);
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+/*
  * Assign null to `to', with appropriate reference count modifications.
  *
  * `to' must contain a live php value; use tvWriteNull when it doesn't.
@@ -379,6 +397,38 @@ inline void cellSet(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   assert(cellIsPlausible(to));
   tvSetIgnoreRef(fr, to);
+}
+
+/*
+ * Assign the value of the Cell in `fr' to `to', decrementing the reference
+ * count of 'to', but not incrementing 'from'.
+ *
+ * If `to' is KindOfRef, this function will decref the RefData and
+ * replace it with the value in `fr', unlike tvMove.
+ *
+ * `to' must contain a live php value; use cellCopy when it doesnt.
+ *
+ * Post: `to' is a Cell.
+ */
+inline void tvMoveIgnoreRef(const Cell fr, TypedValue& to) {
+  assert(cellIsPlausible(fr));
+  auto const oldType = to.m_type;
+  auto const oldDatum = to.m_data.num;
+  cellCopy(fr, to);
+  tvRefcountedDecRefHelper(oldType, oldDatum);
+}
+
+/*
+ * Assign the value of the Cell in `fr' to the Cell `to', decrementing the
+ * reference count of 'to', but not incrementing 'from'.
+ *
+ * This function has the same effects as tvMoveIgnoreRef, with stronger
+ * assertions on `to'.
+ */
+inline void cellMove(const Cell fr, Cell& to) {
+  assert(cellIsPlausible(fr));
+  assert(cellIsPlausible(to));
+  tvMoveIgnoreRef(fr, to);
 }
 
 // Assumes 'to' and 'fr' are live

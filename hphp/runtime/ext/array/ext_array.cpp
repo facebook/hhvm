@@ -419,7 +419,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
       // There is no need to do toKey() conversion, for a key that is already
       // in the array.
       Variant &v = arr1.lvalAt(key, AccessFlags::Key);
-      Array subarr1(v.toArray()->copy());
+      auto subarr1 = v.toArray().copy();
       php_array_merge_recursive(seen, v.isReferenced(), subarr1,
                                 value.toArray());
       v.unset(); // avoid contamination of the value that was strongly bound
@@ -1318,7 +1318,7 @@ static Variant iter_op_impl(VRefParam refParam, OpPtr op, NonArrayRet nonArray,
   if (doCow && ad->hasMultipleRefs() && !(ad->*pred)() &&
       !ad->noCopyOnWrite()) {
     ad = ad->copy();
-    cellSet(make_tv<KindOfArray>(ad), cell);
+    cellMove(make_tv<KindOfArray>(ad), cell);
   }
   return (ad->*op)();
 }
@@ -2312,11 +2312,11 @@ class ArraySortTmp {
  public:
   explicit ArraySortTmp(Array& arr, SortFunction sf) : m_arr(arr) {
     m_ad = arr.get()->escalateForSort(sf);
-    assert(m_ad == arr.get() || m_ad->getCount() == 0);
+    assert(m_ad == arr.get() || m_ad->hasExactlyOneRef());
   }
   ~ArraySortTmp() {
     if (m_ad != m_arr.get()) {
-      m_arr = m_ad;
+      m_arr = Array::attach(m_ad);
     }
   }
   ArrayData* operator->() { return m_ad; }

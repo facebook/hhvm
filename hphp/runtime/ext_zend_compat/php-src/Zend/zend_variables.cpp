@@ -33,10 +33,10 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC) {
     zvalue->tv()->m_type = HPHP::KindOfString; // not KindOfStaticString anymore
   } else if (zvalue->tv()->m_type == HPHP::KindOfArray) {
     HPHP::ArrayData * ad = zvalue->tv()->m_data.parr->copy();
-    ad->incRefCount();
+    assert(ad != zvalue->tv()->m_data.parr);
     if (!ad->isProxyArray()) {
       ad = HPHP::ProxyArray::Make(ad);
-      ad->incRefCount();
+      assert(ad->hasExactlyOneRef());
     }
     zvalue->tv()->m_data.parr = ad;
   } else if (IS_REFCOUNTED_TYPE(zvalue->tv()->m_type)) {

@@ -480,14 +480,16 @@ public:
     if (ad->isEmptyArray()) {
       assert(!"can't forceAsProxyArray an empty array");
     } else {
-      ad = ad->copy();
+	  auto tmp = ad->copy();
+	  assert(tmp != ad);
+	  ad = tmp;
     }
-    ad->incRefCount();
+
     // copy() causes an array to be unproxied, so we normally need
     // to reproxy it
     if (!ad->isProxyArray()) {
       ad = ProxyArray::Make(ad);
-      ad->incRefCount();
+	  assert(ad->hasExactlyOneRef());
     }
     m_tv->m_data.parr->decRefCount();
     m_tv->m_data.parr = ad;

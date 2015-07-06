@@ -34,6 +34,7 @@ namespace HPHP {
 
 bool APCLocalArray::checkInvariants(const ArrayData* ad) {
   assert(ad->isApcArray());
+  assert(ad->getCount() != 0);
   DEBUG_ONLY auto const shared = static_cast<const APCLocalArray*>(ad);
   if (auto ptr = shared->m_localCache) {
     auto const cap = shared->m_arr->capacity();
@@ -91,6 +92,7 @@ APCLocalArray::~APCLocalArray() {
 }
 
 void APCLocalArray::Release(ArrayData* ad) {
+  assert(ad->hasExactlyOneRef());
   auto const a = asApcArray(ad);
   a->~APCLocalArray();
   MM().smartFreeSize(a, sizeof(APCLocalArray));
@@ -143,6 +145,7 @@ ArrayData* APCLocalArray::loadElems() const {
   if (elems->isStatic()) {
     elems = elems->copy();
   }
+  assert(elems->hasExactlyOneRef());
   return elems;
 }
 
@@ -231,12 +234,12 @@ APCLocalArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
 }
 
 ArrayData* APCLocalArray::PlusEq(ArrayData* ad, const ArrayData *elems) {
-  Array escalated{Escalate(ad)};
+  auto escalated = Array::attach(Escalate(ad));
   return (escalated += const_cast<ArrayData*>(elems)).detach();
 }
 
 ArrayData* APCLocalArray::Merge(ArrayData* ad, const ArrayData *elems) {
-  Array escalated{Escalate(ad)};
+  auto escalated = Array::attach(Escalate(ad));
   return escalated->merge(elems);
 }
 
@@ -249,6 +252,7 @@ ArrayData *APCLocalArray::Escalate(const ArrayData* ad) {
   auto smap = asApcArray(ad);
   auto ret = smap->loadElems();
   assert(!ret->isStatic());
+  assert(ret->hasExactlyOneRef());
   return ret;
 }
 
@@ -286,7 +290,7 @@ ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   if (ret != elems) {
     elems->release();
   }
-  assert(ret->getCount() == 0);
+  assert(ret->hasExactlyOneRef());
   assert(!ret->isStatic());
   return ret;
 }

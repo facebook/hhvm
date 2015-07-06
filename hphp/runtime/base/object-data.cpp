@@ -497,7 +497,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
 
     if (UNLIKELY(flags->m_type == KindOfInt64 &&
                  flags->m_data.num == ARRAYOBJ_STD_PROP_LIST)) {
-      Array ret(ArrayData::Create());
+      auto ret = Array::Create();
       o_getArray(ret, true);
       return ret;
     }
@@ -509,7 +509,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
   } else if (UNLIKELY(instanceof(DateTimeData::getClass()))) {
     return Native::data<DateTimeData>(this)->getDebugInfo();
   } else {
-    Array ret(ArrayData::Create());
+    auto ret = Array::Create();
     o_getArray(ret, pubOnly);
     return ret;
   }
@@ -786,7 +786,7 @@ inline Array getSerializeProps(const ObjectData* obj,
     // When ArrayIterator is cast to an array, it returns its array object,
     // however when it's being var_dump'd or print_r'd, it shows its properties
     if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
-      Array ret(ArrayData::Create());
+      auto ret = Array::Create();
       obj->o_getArray(ret);
       return ret;
     }
@@ -794,7 +794,7 @@ inline Array getSerializeProps(const ObjectData* obj,
     // Same with Closure, since it's a dynamic object but still has its own
     // different behavior for var_dump and cast to array
     if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
-      Array ret(ArrayData::Create());
+      auto ret = Array::Create();
       obj->o_getArray(ret);
       return ret;
     }

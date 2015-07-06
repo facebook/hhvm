@@ -474,9 +474,10 @@ void tvCastToArrayInPlace(TypedValue* tv) {
     not_reached();
   } while (0);
 
+  assert(a->isStatic() || a->hasExactlyOneRef());
+
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;
-  tv->m_data.parr->incRefCount();
 }
 
 void tvCastToObjectInPlace(TypedValue* tv) {

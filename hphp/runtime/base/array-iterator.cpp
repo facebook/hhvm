@@ -823,7 +823,7 @@ void MArrayIter::escalateCheck() {
     if (!data) return;
     auto const esc = data->escalate();
     if (data != esc) {
-      cellSet(make_tv<KindOfArray>(esc), *getRef()->tv());
+      cellMove(make_tv<KindOfArray>(esc), *getRef()->tv());
     }
     return;
   }
@@ -832,7 +832,6 @@ void MArrayIter::escalateCheck() {
   auto const data = getAd();
   auto const esc = data->escalate();
   if (data != esc) {
-    esc->incRefCount();
     decRefArr(data);
     setAd(esc);
   }
@@ -844,7 +843,7 @@ ArrayData* MArrayIter::cowCheck() {
     if (!data) return nullptr;
     if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
       data = data->copyWithStrongIterators();
-      cellSet(make_tv<KindOfArray>(data), *getRef()->tv());
+      cellMove(make_tv<KindOfArray>(data), *getRef()->tv());
     }
     return data;
   }
@@ -853,7 +852,7 @@ ArrayData* MArrayIter::cowCheck() {
   auto const data = getAd();
   if (data->hasMultipleRefs() && !data->noCopyOnWrite()) {
     ArrayData* copied = data->copyWithStrongIterators();
-    copied->incRefCount();
+    assert(data != copied);
     decRefArr(data);
     setAd(copied);
     return copied;

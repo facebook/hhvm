@@ -336,9 +336,14 @@ VarEnv::VarEnv()
 {
   TRACE(3, "Creating VarEnv %p [global scope]\n", this);
   auto globals = new (MM().objMalloc(sizeof(GlobalsArray)))
-                 GlobalsArray(&m_nvTable);
+    GlobalsArray(&m_nvTable);
+  assert(globals->hasExactlyOneRef());
+
   auto globalArray = make_tv<KindOfArray>(globals->asArrayData());
   m_nvTable.set(s_GLOBALS.get(), &globalArray);
+
+  assert(globals->hasMultipleRefs());
+  globals->decRefCount();
 }
 
 VarEnv::VarEnv(ActRec* fp, ExtraArgs* eArgs)
@@ -495,11 +500,11 @@ Array VarEnv::getDefinedVariables() const {
   }
   {
     // Make result independent of the hashtable implementation.
-    ArrayData* sorted = ret.get()->escalateForSort(SORTFUNC_KSORT);
-    assert(sorted == ret.get() || sorted->getCount() == 0);
+    ArrayData* sorted = ret->escalateForSort(SORTFUNC_KSORT);
+    assert(sorted == ret.get() || sorted->hasExactlyOneRef());
     SCOPE_EXIT {
       if (sorted != ret.get()) {
-        ret = sorted;
+        ret = Array::attach(sorted);
       }
     };
     sorted->ksort(0, true);
@@ -1686,7 +1691,7 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
       for (ArrayIter iter(args); iter; ++iter) {
         ai.appendWithRef(iter.secondRefPlus());
       }
-      stack.pushArray(ai.create());
+      stack.pushArrayNoRc(ai.create());
     }
   }
 
@@ -1823,8 +1828,8 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
     assert(!iter); // iter should now be exhausted
     if (hasVarParam) {
       auto const ad = ai.create();
-      stack.pushArray(ad);
       assert(ad->hasExactlyOneRef());
+      stack.pushArrayNoRc(ad);
     }
     ar->initNumArgs(nargs);
     ar->setExtraArgs(extraArgs);
@@ -1856,8 +1861,8 @@ static bool prepareArrayArgs(ActRec* ar, const Cell args,
       }
       assert(!iter); // iter should now be exhausted
       auto const ad = ai.create();
-      stack.pushArray(ad);
       assert(ad->hasExactlyOneRef());
+      stack.pushArrayNoRc(ad);
     }
     ar->initNumArgs(f->numParams());
   }

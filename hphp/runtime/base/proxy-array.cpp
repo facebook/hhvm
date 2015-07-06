@@ -82,7 +82,6 @@ void ProxyArray::Release(ArrayData*ad) {
 void ProxyArray::reseatable(const ArrayData* oldArr, ArrayData* newArr) {
   if (innerArr(oldArr) != newArr) {
     auto old = innerArr(oldArr);
-    newArr->incRefCount();
     asProxyArray(oldArr)->m_ref->tv()->m_data.parr = newArr;
     decRefArr(old);
   }
@@ -269,9 +268,7 @@ ProxyArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
 
 ArrayData*
 ProxyArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
-  auto const ret = ad->hasMultipleRefs() ? Make(innerArr(ad))
-                                         : asProxyArray(ad);
-  auto r = innerArr(ret)->plusEq(elems);
+  auto r = innerArr(ad)->plusEq(elems);
   reseatable(ad, r);
   return ad;
 }

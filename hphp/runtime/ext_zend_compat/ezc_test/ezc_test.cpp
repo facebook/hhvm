@@ -817,4 +817,3 @@ zend_module_entry ezc_test_module_entry = {
 #ifdef COMPILE_DL_EZC_TEST
 ZEND_GET_MODULE(ezc_test)
 #endif
-

@@ -66,11 +66,11 @@ protected:
    */
   explicit ArrayData(ArrayKind kind)
     : m_sizeAndPos(uint32_t(-1)) {
-    m_hdr.init(static_cast<HeaderKind>(kind), 0);
+    m_hdr.init(static_cast<HeaderKind>(kind), 1);
     assert(m_size == -1);
     assert(m_pos == 0);
     assert(m_hdr.kind == static_cast<HeaderKind>(kind));
-    assert(getCount() == 0);
+    assert(hasExactlyOneRef());
   }
 
   /*

@@ -30,6 +30,7 @@ inline APCLocalArray::APCLocalArray(const APCArray* source)
   m_size = m_arr->size();
   source->getHandle()->reference();
   MM().addApcArray(this);
+  assert(hasExactlyOneRef());
 }
 
 template<class... Args>

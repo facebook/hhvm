@@ -210,6 +210,7 @@ template<class T, class... Args> T* newres(Args&&... args) {
   try {
     auto r = new (mem) T(std::forward<Args>(args)...);
     r->m_hdr.aux = sizeof(T);
+    assert(r->hasExactlyOneRef());
     return r;
   } catch (...) {
     MM().smartFreeSize(mem, sizeof(T));
@@ -244,9 +245,9 @@ typename std::enable_if<
   std::is_convertible<T*, ResourceData*>::value,
   req::ptr<T>
 >::type make(Args&&... args) {
-  using UnownedAndNonNull = typename req::ptr<T>::UnownedAndNonNull;
+  using NoIncRef = typename req::ptr<T>::NoIncRef;
   return req::ptr<T>(newres<T>(std::forward<Args>(args)...),
-                     UnownedAndNonNull{});
+                     NoIncRef{});
 }
 } // namespace req
 

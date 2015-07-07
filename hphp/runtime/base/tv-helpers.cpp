@@ -565,7 +565,6 @@ void tvCastToResourceInPlace(TypedValue* tv) {
 
   tv->m_type = KindOfResource;
   tv->m_data.pres = newres<DummyResource>();
-  tv->m_data.pres->incRefCount();
 }
 
 bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {

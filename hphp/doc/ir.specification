@@ -1108,7 +1108,7 @@ To string conversions:
 
 8. Allocation
 
-| AllocObj, DAllocObj, S(Cls), Er
+| AllocObj, DAllocObj, S(Cls), PRc|Er
 
   Allocates a new object of class S1.
 
@@ -1135,7 +1135,7 @@ To string conversions:
   Calls the static property initializer function (86sinit) for class. May
   throw.
 
-| NewInstanceRaw<class>, DAllocObj, NA, NF
+| NewInstanceRaw<class>, DAllocObj, NA, PRc
 
   Allocates an instance of class.
 

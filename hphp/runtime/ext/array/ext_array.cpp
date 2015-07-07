@@ -1345,7 +1345,7 @@ static Variant iter_op_impl(VRefParam refParam, OpPtr op, const String& objOp,
 
   auto ad = cell.m_data.parr;
   auto constexpr doCow = !std::is_same<DoCow, NoCow>::value;
-  if (doCow && ad->hasMultipleRefs() && !(ad->*pred)() &&
+  if (doCow && ad->cowCheck() && !(ad->*pred)() &&
       !ad->noCopyOnWrite()) {
     ad = ad->copy();
     if (LIKELY(refParam.isRefData()))

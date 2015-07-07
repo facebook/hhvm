@@ -592,7 +592,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
   m_data = packedData(MixedArray::MakeReserve(newCap));
   m_capacity = arrayData()->cap();
   arrayData()->m_size = m_size;
-  if (LIKELY(!oldAd->hasMultipleRefs())) {
+  if (LIKELY(!oldAd->cowCheck())) {
     std::memcpy(m_data, oldBuf, m_size * sizeof(TypedValue));
     // Mark oldAd as having 0 elements so that the array release logic doesn't
     // decRef the elements (since we teleported the elements to a new array)
@@ -1690,7 +1690,7 @@ void HashCollection::grow(uint32_t newScale) {
   assert(m_size <= newCap);
   auto oldAd = arrayData();
   dropImmCopy();
-  if (m_size > 0 && !oldAd->hasMultipleRefs()) {
+  if (m_size > 0 && !oldAd->cowCheck()) {
     // MixedArray::Grow can only handle non-empty cases where the
     // buffer's refcount is 1.
     m_data = mixedData(MixedArray::Grow(oldAd, newScale));
@@ -1707,7 +1707,7 @@ void HashCollection::grow(uint32_t newScale) {
 void HashCollection::compact() {
   assert(isDensityTooLow());
   dropImmCopy();
-  if (!arrayData()->hasMultipleRefs()) {
+  if (!arrayData()->cowCheck()) {
     // MixedArray::compact can only handle cases where the buffer's
     // refcount is 1.
     arrayData()->compact(false);
@@ -1749,7 +1749,7 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
   assert(SmallSize <= newCap && newCap <= MaxSize);
   assert(m_size <= newCap);
   auto* oldAd = arrayData();
-  if (!oldAd->hasMultipleRefs()) {
+  if (!oldAd->cowCheck()) {
     // If the buffer's refcount is 1, we can teleport the elements
     // to a new buffer
     auto* oldBuf = data();

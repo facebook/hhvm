@@ -274,13 +274,15 @@ void fpushObjMethodWithBaseClass(IRGS& env,
     return;
   }
 
+  assertx(!magicCall);
+
   /*
    * If we found the func in baseClass and it's private, this is always
    * going to be the called function.
    */
   if (func->attrs() & AttrPrivate) {
     fpushObjMethodExactFunc(env, obj, baseClass, func, methodName,
-                            magicCall, numParams, shouldFatal);
+                            /* magicCall */false, numParams, shouldFatal);
     return;
   }
 
@@ -309,7 +311,7 @@ void fpushObjMethodWithBaseClass(IRGS& env,
     funcTmp,
     objOrCls,
     numParams,
-    magicCall ? methodName : nullptr,
+    /* invName */nullptr,
     /* fromFPushCtor */false
   );
 }

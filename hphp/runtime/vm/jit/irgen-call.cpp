@@ -219,7 +219,6 @@ void fpushObjMethodExactFunc(
   );
 }
 
-
 void fpushObjMethodWithBaseClass(IRGS& env,
                                  SSATmp* obj,
                                  const Class* baseClass,
@@ -231,56 +230,10 @@ void fpushObjMethodWithBaseClass(IRGS& env,
   const Func* func = lookupImmutableMethod(baseClass,
                                            methodName,
                                            magicCall,
-                                           /* staticLookup: */
-                                           false,
+                                           /* staticLookup: */false,
                                            curClass(env));
 
-  if (!func) {
-    if (baseClass && !(baseClass->attrs() & AttrInterface)) {
-      auto const res =
-        g_context->lookupObjMethod(func, baseClass, methodName, curClass(env),
-                                   false);
-      if (res == LookupResult::MethodFoundWithThis ||
-          res == LookupResult::MethodFoundNoThis) {
-        /*
-         * If we found the func in baseClass and its private, this is always
-         * going to be the called function.
-         */
-        if (func->attrs() & AttrPrivate) {
-          fpushObjMethodExactFunc(env, obj, baseClass, func, methodName,
-                                  magicCall, numParams, shouldFatal);
-          return;
-        }
-
-        emitIncStat(env, Stats::ObjMethod_methodslot, 1);
-        auto const clsTmp = gen(env, LdObjClass, obj);
-        auto const funcTmp = gen(
-          env,
-          LdClsMethod,
-          clsTmp,
-          cns(env, -(func->methodSlot() + 1))
-        );
-        SSATmp* objOrCls = obj;
-        if (res == LookupResult::MethodFoundNoThis) {
-          gen(env, DecRef, obj);
-          objOrCls = clsTmp;
-        }
-        fpushActRec(env,
-          funcTmp,
-          objOrCls,
-          numParams,
-          magicCall ? methodName : nullptr,
-          /* fromFPushCtor */false
-        );
-        return;
-      } else {
-        // method lookup did not find anything
-        func = nullptr; // force lookup
-      }
-    }
-  }
-
-  if (func != nullptr) {
+  if (func) {
     fpushObjMethodExactFunc(env, obj, baseClass, func, methodName,
                             magicCall, numParams, shouldFatal);
     return;
@@ -306,7 +259,59 @@ void fpushObjMethodWithBaseClass(IRGS& env,
     }
   }
 
-  fpushObjMethodUnknown(env, obj, methodName, numParams, shouldFatal);
+  if (!baseClass || (baseClass->attrs() & AttrInterface)) {
+    fpushObjMethodUnknown(env, obj, methodName, numParams, shouldFatal);
+    return;
+  }
+
+  auto const res = g_context->lookupObjMethod(func, baseClass, methodName,
+                                              curClass(env), /* raise */false);
+
+  if (res != LookupResult::MethodFoundWithThis &&
+      res != LookupResult::MethodFoundNoThis) {
+    // Method lookup did not find anything.
+    fpushObjMethodUnknown(env, obj, methodName, numParams, shouldFatal);
+    return;
+  }
+
+  /*
+   * If we found the func in baseClass and it's private, this is always
+   * going to be the called function.
+   */
+  if (func->attrs() & AttrPrivate) {
+    fpushObjMethodExactFunc(env, obj, baseClass, func, methodName,
+                            magicCall, numParams, shouldFatal);
+    return;
+  }
+
+  /*
+   * If we found the func in the baseClass and it's not private, any
+   * derived class must have a func that matches in staticness
+   * and is at least as accessible (and in particular, you can't
+   * override a public/protected method with a private method).  In
+   * this case, we emit code to dynamically lookup the method given
+   * the Object and the method slot, which is the same as func's.
+   */
+  emitIncStat(env, Stats::ObjMethod_methodslot, 1);
+  auto const clsTmp = gen(env, LdObjClass, obj);
+  auto const funcTmp = gen(
+    env,
+    LdClsMethod,
+    clsTmp,
+    cns(env, -(func->methodSlot() + 1))
+  );
+  SSATmp* objOrCls = obj;
+  if (res == LookupResult::MethodFoundNoThis) {
+    gen(env, DecRef, obj);
+    objOrCls = clsTmp;
+  }
+  fpushActRec(env,
+    funcTmp,
+    objOrCls,
+    numParams,
+    magicCall ? methodName : nullptr,
+    /* fromFPushCtor */false
+  );
 }
 
 static const StringData* classProfileKey = makeStaticString(

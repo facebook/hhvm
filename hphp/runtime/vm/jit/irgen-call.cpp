@@ -178,6 +178,48 @@ bool findInterfaceVtableSlot(IRGS& env,
   return false;
 }
 
+void fpushObjMethodExactFunc(
+  IRGS& env,
+  SSATmp* obj,
+  const Class* baseClass,
+  const Func* func,
+  const StringData* methodName,
+  bool magicCall,
+  int32_t numParams,
+  bool shouldFatal
+) {
+  /*
+   * lookupImmutableMethod will return Funcs from AttrUnique classes, but in
+   * this case, we have an object, so there's no need to check that the class
+   * exists.
+   *
+   * Static function: store base class into this slot instead of obj and decref
+   * the obj that was pushed as the this pointer since the obj won't be in the
+   * actrec and thus MethodCache::lookup won't decref it.
+   *
+   * Static closure body: we still need to pass the object instance for the
+   * closure prologue to properly do its dispatch (and extract use vars). It
+   * will decref it and put the class on the actrec before entering the "real"
+   * cloned closure body.
+   */
+  SSATmp* objOrCls = obj;
+  emitIncStat(env, Stats::ObjMethod_known, 1);
+  if (func->isStatic() && !func->isClosureBody()) {
+    assertx(baseClass);
+    gen(env, DecRef, obj);
+    objOrCls = cns(env, baseClass);
+  }
+  fpushActRec(
+    env,
+    cns(env, func),
+    objOrCls,
+    numParams,
+    magicCall ? methodName : nullptr,
+    /* fromFPushCtor */false
+  );
+}
+
+
 void fpushObjMethodWithBaseClass(IRGS& env,
                                  SSATmp* obj,
                                  const Class* baseClass,
@@ -185,7 +227,6 @@ void fpushObjMethodWithBaseClass(IRGS& env,
                                  int32_t numParams,
                                  bool shouldFatal,
                                  bool isMonomorphic) {
-  SSATmp* objOrCls = obj;
   bool magicCall = false;
   const Func* func = lookupImmutableMethod(baseClass,
                                            methodName,
@@ -202,37 +243,36 @@ void fpushObjMethodWithBaseClass(IRGS& env,
       if (res == LookupResult::MethodFoundWithThis ||
           res == LookupResult::MethodFoundNoThis) {
         /*
-         * If we found the func in baseClass, then either:
-         *  a) its private, and this is always going to be the
-         *     called function. This case is handled further down.
-         * OR
-         *  b) any derived class must have a func that matches in staticness
-         *     and is at least as accessible (and in particular, you can't
-         *     override a public/protected method with a private method).  In
-         *     this case, we emit code to dynamically lookup the method given
-         *     the Object and the method slot, which is the same as func's.
+         * If we found the func in baseClass and its private, this is always
+         * going to be the called function.
          */
-        if (!(func->attrs() & AttrPrivate)) {
-          emitIncStat(env, Stats::ObjMethod_methodslot, 1);
-          auto const clsTmp = gen(env, LdObjClass, obj);
-          auto const funcTmp = gen(
-            env,
-            LdClsMethod,
-            clsTmp,
-            cns(env, -(func->methodSlot() + 1))
-          );
-          if (res == LookupResult::MethodFoundNoThis) {
-            gen(env, DecRef, obj);
-            objOrCls = clsTmp;
-          }
-          fpushActRec(env,
-                      funcTmp,
-                      objOrCls,
-                      numParams,
-                      magicCall ? methodName : nullptr,
-                      false);
+        if (func->attrs() & AttrPrivate) {
+          fpushObjMethodExactFunc(env, obj, baseClass, func, methodName,
+                                  magicCall, numParams, shouldFatal);
           return;
         }
+
+        emitIncStat(env, Stats::ObjMethod_methodslot, 1);
+        auto const clsTmp = gen(env, LdObjClass, obj);
+        auto const funcTmp = gen(
+          env,
+          LdClsMethod,
+          clsTmp,
+          cns(env, -(func->methodSlot() + 1))
+        );
+        SSATmp* objOrCls = obj;
+        if (res == LookupResult::MethodFoundNoThis) {
+          gen(env, DecRef, obj);
+          objOrCls = clsTmp;
+        }
+        fpushActRec(env,
+          funcTmp,
+          objOrCls,
+          numParams,
+          magicCall ? methodName : nullptr,
+          /* fromFPushCtor */false
+        );
+        return;
       } else {
         // method lookup did not find anything
         func = nullptr; // force lookup
@@ -241,33 +281,8 @@ void fpushObjMethodWithBaseClass(IRGS& env,
   }
 
   if (func != nullptr) {
-    /*
-     * lookupImmutableMethod will return Funcs from AttrUnique classes,
-     * but in this case, we have an object, so there's no need to check
-     * that the class exists.
-     *
-     * static function: store base class into this slot instead of obj
-     * and decref the obj that was pushed as the this pointer since
-     * the obj won't be in the actrec and thus MethodCache::lookup won't
-     * decref it
-     *
-     * static closure body: we still need to pass the object instance
-     * for the closure prologue to properly do its dispatch (and
-     * extract use vars).  It will decref it and put the class on the
-     * actrec before entering the "real" cloned closure body.
-     */
-    emitIncStat(env, Stats::ObjMethod_known, 1);
-    if (func->isStatic() && !func->isClosureBody()) {
-      assertx(baseClass);
-      gen(env, DecRef, obj);
-      objOrCls = cns(env, baseClass);
-    }
-    fpushActRec(env,
-                cns(env, func),
-                objOrCls,
-                numParams,
-                magicCall ? methodName : nullptr,
-                false);
+    fpushObjMethodExactFunc(env, obj, baseClass, func, methodName,
+                            magicCall, numParams, shouldFatal);
     return;
   }
 
@@ -281,6 +296,7 @@ void fpushObjMethodWithBaseClass(IRGS& env,
       auto func = gen(env, LdIfaceMethod,
                       IfaceMethodData{vtableSlot, ifaceFunc->methodSlot()},
                       cls);
+      SSATmp* objOrCls = obj;
       if (ifaceFunc->attrs() & AttrStatic) {
         gen(env, DecRef, obj);
         objOrCls = cls;

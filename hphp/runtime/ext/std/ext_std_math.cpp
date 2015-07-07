@@ -398,15 +398,32 @@ int64_t HHVM_FUNCTION(getrandmax) { return RAND_MAX;}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static bool s_rand_is_seeded = false;
+struct RandomBuf {
+  random_data data;
+  char        buf[128];
+  enum {
+    Uninit = 0, ThreadInit, RequestInit
+  }           state;
+};
+
+static __thread RandomBuf s_state;
+
+static void randinit(uint32_t seed) {
+  if (s_state.state == RandomBuf::Uninit) {
+    initstate_r(seed, s_state.buf, sizeof s_state.buf, &s_state.data);
+  } else {
+    srandom_r(seed, &s_state.data);
+  }
+  s_state.state = RandomBuf::RequestInit;
+}
 
 void HHVM_FUNCTION(srand, const Variant& seed /* = null_variant */) {
-  s_rand_is_seeded = true;
   if (seed.isNull()) {
-    return srand(math_generate_seed());
+    randinit(math_generate_seed());
+    return;
   }
   if (seed.isNumeric(true)) {
-    srand(seed.toInt32());
+    randinit(seed.toInt32());
   } else {
     raise_warning("srand() expects parameter 1 to be long");
   }
@@ -415,12 +432,12 @@ void HHVM_FUNCTION(srand, const Variant& seed /* = null_variant */) {
 int64_t HHVM_FUNCTION(rand,
                       int64_t min /* = 0 */,
                       const Variant& max /* = null_variant */) {
-  if (!s_rand_is_seeded) {
-    s_rand_is_seeded = true;
-    srand(math_generate_seed());
+  if (s_state.state != RandomBuf::RequestInit) {
+    randinit(math_generate_seed());
   }
 
-  int64_t number = rand();
+  int32_t number;
+  random_r(&s_state.data, &number);
   int64_t int_max = max.isNull() ? RAND_MAX : max.toInt64();
   if (min != 0 || int_max != RAND_MAX) {
     RAND_RANGE(number, min, int_max, RAND_MAX);
@@ -462,6 +479,12 @@ const StaticString s_PHP_ROUND_HALF_ODD("PHP_ROUND_HALF_ODD");
 
 #define DCONST(nm)                                                             \
   Native::registerConstant<KindOfDouble>(makeStaticString("M_"#nm), k_M_##nm)  \
+
+void StandardExtension::requestInit() {
+  if (s_state.state == RandomBuf::RequestInit) {
+    s_state.state = RandomBuf::ThreadInit;
+  }
+}
 
 void StandardExtension::initMath() {
   ICONST(PHP_ROUND_HALF_UP);

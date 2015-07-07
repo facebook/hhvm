@@ -15,6 +15,7 @@ function call_user_func_array<T>($function, Container<T> $params);
 function call_user_func($function, ...);
 function forward_static_call_array<T>($function, Container<T> $params);
 function forward_static_call($function, ...);
+/* A get_called_class is treated at static::class */
 function get_called_class(): string; // false if called from outside class
 <<__Deprecated('Use an anonymous function instead.')>>
 function create_function($args, $code);

@@ -184,9 +184,7 @@ void fpushObjMethodExactFunc(
   const Class* baseClass,
   const Func* func,
   const StringData* methodName,
-  bool magicCall,
-  int32_t numParams,
-  bool shouldFatal
+  int32_t numParams
 ) {
   /*
    * lookupImmutableMethod will return Funcs from AttrUnique classes, but in
@@ -214,54 +212,29 @@ void fpushObjMethodExactFunc(
     cns(env, func),
     objOrCls,
     numParams,
-    magicCall ? methodName : nullptr,
+    methodName,
     /* fromFPushCtor */false
   );
 }
 
-void fpushObjMethodWithBaseClass(IRGS& env,
-                                 SSATmp* obj,
-                                 const Class* baseClass,
-                                 const StringData* methodName,
-                                 int32_t numParams,
-                                 bool shouldFatal,
-                                 bool isMonomorphic) {
-  bool magicCall = false;
-  const Func* func = lookupImmutableMethod(baseClass,
-                                           methodName,
-                                           magicCall,
-                                           /* staticLookup: */false,
-                                           curClass(env));
+const Func* lookupExactFuncForFPushObjMethod(
+  IRGS& env,
+  SSATmp* obj,
+  const Class* baseClass,
+  const StringData* methodName,
+  bool& magicCall
+) {
+  const Func* func = lookupImmutableMethod(
+    baseClass,
+    methodName,
+    magicCall,
+    /* staticLookup: */false,
+    curClass(env)
+  );
 
-  if (func) {
-    fpushObjMethodExactFunc(env, obj, baseClass, func, methodName,
-                            magicCall, numParams, shouldFatal);
-    return;
-  }
-
-  if (!isMonomorphic && classIsUniqueInterface(baseClass)) {
-    Slot vtableSlot;
-    const Func* ifaceFunc;
-    if (findInterfaceVtableSlot(env, baseClass, methodName,
-                                vtableSlot, ifaceFunc)) {
-      emitIncStat(env, Stats::ObjMethod_ifaceslot, 1);
-      auto cls = gen(env, LdObjClass, obj);
-      auto func = gen(env, LdIfaceMethod,
-                      IfaceMethodData{vtableSlot, ifaceFunc->methodSlot()},
-                      cls);
-      SSATmp* objOrCls = obj;
-      if (ifaceFunc->attrs() & AttrStatic) {
-        gen(env, DecRef, obj);
-        objOrCls = cls;
-      }
-      fpushActRec(env, func, objOrCls, numParams, nullptr, false);
-      return;
-    }
-  }
-
+  if (func) return func;
   if (!baseClass || (baseClass->attrs() & AttrInterface)) {
-    fpushObjMethodUnknown(env, obj, methodName, numParams, shouldFatal);
-    return;
+    return nullptr;
   }
 
   auto const res = g_context->lookupObjMethod(func, baseClass, methodName,
@@ -270,21 +243,97 @@ void fpushObjMethodWithBaseClass(IRGS& env,
   if (res != LookupResult::MethodFoundWithThis &&
       res != LookupResult::MethodFoundNoThis) {
     // Method lookup did not find anything.
-    fpushObjMethodUnknown(env, obj, methodName, numParams, shouldFatal);
-    return;
+    return nullptr;
   }
 
+  /*
+   * The only way this could be a magic call is if the LookupResult indicated
+   * as much. Since we just checked that res is either MethodFoundWithThis or
+   * MethodFoundNoThis, magicCall must be false.
+   */
   assertx(!magicCall);
 
   /*
    * If we found the func in baseClass and it's private, this is always
    * going to be the called function.
    */
-  if (func->attrs() & AttrPrivate) {
-    fpushObjMethodExactFunc(env, obj, baseClass, func, methodName,
-                            /* magicCall */false, numParams, shouldFatal);
-    return;
+  if (func->attrs() & AttrPrivate) return func;
+
+  /*
+   * If it's not private it could be overridden, so we don't have an exact func.
+   */
+  return nullptr;
+}
+
+const Func* lookupInterfaceFuncForFPushObjMethod(
+  IRGS& env,
+  const Class* baseClass,
+  const StringData* methodName,
+  const bool isMonomorphic
+) {
+  if (!baseClass) return nullptr;
+  if (isMonomorphic) return nullptr;
+  if (!classIsUniqueInterface(baseClass)) return nullptr;
+
+  Slot vtableSlot;
+  const Func* ifaceFunc;
+  if (findInterfaceVtableSlot(env, baseClass, methodName,
+                              vtableSlot, ifaceFunc)) {
+    return ifaceFunc;
   }
+
+  return nullptr;
+}
+
+void fpushObjMethodInterfaceFunc(
+  IRGS& env,
+  SSATmp* obj,
+  const Class* baseClass,
+  const StringData* methodName,
+  int32_t numParams
+) {
+  Slot vtableSlot;
+  const Func* ifaceFunc;
+  findInterfaceVtableSlot(env, baseClass, methodName, vtableSlot, ifaceFunc);
+
+  emitIncStat(env, Stats::ObjMethod_ifaceslot, 1);
+  auto cls = gen(env, LdObjClass, obj);
+  auto func = gen(env, LdIfaceMethod,
+                  IfaceMethodData{vtableSlot, ifaceFunc->methodSlot()},
+                  cls);
+  SSATmp* objOrCls = obj;
+  if (ifaceFunc->attrs() & AttrStatic) {
+    gen(env, DecRef, obj);
+    objOrCls = cls;
+  }
+  fpushActRec(env, func, objOrCls, numParams,
+              /* invName */nullptr, false);
+  return;
+}
+
+
+const Func* lookupNonExactFuncForFPushObjMethod(
+  IRGS& env,
+  const Class* baseClass,
+  const StringData* methodName
+) {
+  if (!baseClass) return nullptr;
+
+  const Func* func = nullptr;
+  auto const res = g_context->lookupObjMethod(func, baseClass, methodName,
+                                              curClass(env), /* raise */false);
+
+  if (res != LookupResult::MethodFoundWithThis &&
+      res != LookupResult::MethodFoundNoThis) {
+    // Method lookup did not find anything.
+    return nullptr;
+  }
+
+  /*
+   * If we found the func in baseClass and it's private, this would have already
+   * been handled as an exact Func.
+   */
+  assertx(!(func->attrs() & AttrPrivate));
 
   /*
    * If we found the func in the baseClass and it's not private, any
@@ -294,6 +343,16 @@ void fpushObjMethodWithBaseClass(IRGS& env,
    * this case, we emit code to dynamically lookup the method given
    * the Object and the method slot, which is the same as func's.
    */
+  return func;
+}
+
+void fpushObjMethodNonExactFunc(
+  IRGS& env,
+  SSATmp* obj,
+  const Class* baseClass,
+  const Func* func,
+  int32_t numParams
+) {
   emitIncStat(env, Stats::ObjMethod_methodslot, 1);
   auto const clsTmp = gen(env, LdObjClass, obj);
   auto const funcTmp = gen(
@@ -303,7 +362,7 @@ void fpushObjMethodWithBaseClass(IRGS& env,
     cns(env, -(func->methodSlot() + 1))
   );
   SSATmp* objOrCls = obj;
-  if (res == LookupResult::MethodFoundNoThis) {
+  if (func->attrs() & AttrStatic && !func->isClosureBody()) {
     gen(env, DecRef, obj);
     objOrCls = clsTmp;
   }
@@ -314,6 +373,39 @@ void fpushObjMethodWithBaseClass(IRGS& env,
     /* invName */nullptr,
     /* fromFPushCtor */false
   );
+}
+
+void fpushObjMethodWithBaseClass(
+  IRGS& env,
+  SSATmp* obj,
+  const Class* baseClass,
+  const StringData* methodName,
+  int32_t numParams,
+  bool shouldFatal,
+  bool isMonomorphic
+) {
+  bool magicCall = false;
+  if (auto const exactFunc = lookupExactFuncForFPushObjMethod(
+      env, obj, baseClass, methodName, magicCall)) {
+    fpushObjMethodExactFunc(env, obj, baseClass, exactFunc,
+                            magicCall ? methodName : nullptr,
+                            numParams);
+    return;
+  }
+
+  if (lookupInterfaceFuncForFPushObjMethod(env, baseClass, methodName,
+                                           isMonomorphic)) {
+    fpushObjMethodInterfaceFunc(env, obj, baseClass, methodName, numParams);
+    return;
+  }
+
+  if (auto const nonExactFunc = lookupNonExactFuncForFPushObjMethod(
+      env, baseClass, methodName)) {
+    fpushObjMethodNonExactFunc(env, obj, baseClass, nonExactFunc, numParams);
+    return;
+  }
+
+  fpushObjMethodUnknown(env, obj, methodName, numParams, shouldFatal);
 }
 
 static const StringData* classProfileKey = makeStaticString(

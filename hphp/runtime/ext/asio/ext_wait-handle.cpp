@@ -94,7 +94,7 @@ bool c_WaitHandle::t_isfailed() {
 }
 
 int64_t c_WaitHandle::t_getid() {
-  return ((long) this) / sizeof(void*);
+  return ((intptr_t)this) / sizeof(void*);
 }
 
 String c_WaitHandle::t_getname() {

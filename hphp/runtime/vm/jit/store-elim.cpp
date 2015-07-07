@@ -295,6 +295,7 @@ struct Global {
   // Block states are indexed by block->id().  These are only meaningful after
   // we do dataflow.
   StateVector<Block,BlockState> blockStates;
+  jit::vector<IRInstruction*> reStores;
   bool needsReflow{false};
 };
 
@@ -307,6 +308,8 @@ struct Local {
   ALocBits mayStore;   // Things that may be written in the block
   ALocBits avlLoc;     // Copied to BlockAnalysis::avlLoc
   ALocBits delLoc;     // Copied to BlockAnalysis::delLoc
+
+  ALocBits reStores;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -351,14 +354,14 @@ bool isDeadSet(Local& env, const ALocBits& bits) {
   return (~env.antLoc & bits).none();
 }
 
-void removeDead(Local& env, IRInstruction& inst) {
+bool removeDead(Local& env, IRInstruction& inst, bool trash) {
   BISECTOR(store_delete);
-  if (!store_delete.go()) return;
+  if (!store_delete.go()) return false;
 
   FTRACE(4, "      dead (removed)\n");
 
   IRInstruction* dbgInst = nullptr;
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+  if (trash && RuntimeOption::EvalHHIRGenerateAsserts) {
     switch (inst.op()) {
     case StStk:
       dbgInst = env.global.unit.gen(
@@ -389,7 +392,9 @@ void removeDead(Local& env, IRInstruction& inst) {
   auto pos = block->erase(&inst);
   if (dbgInst) {
     block->insert(pos, dbgInst);
+    return false;
   }
+  return true;
 }
 
 void addLoadSet(Local& env, const ALocBits& bits) {
@@ -410,12 +415,16 @@ void mustStore(Local& env, int bit) {
     env.delLoc[bit] = 1;
   }
   env.antLoc[bit] = 1;
+  env.mayStore[bit] = 0;
+  env.reStores[bit] = 0;
 }
 
 void mustStoreSet(Local& env, const ALocBits& bits) {
   FTRACE(4, "      mustStore: {}\n", show(bits));
   env.delLoc |= bits & ~(env.antLoc | env.mayLoad);
   env.antLoc |= bits;
+  env.mayStore &= ~bits;
+  env.reStores &= ~bits;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -429,13 +438,14 @@ void mayStore(Local& env, AliasClass acls) {
   auto const mayStore = env.global.ainfo.may_alias(canon);
   FTRACE(4, "       mayStore: {}\n", show(mayStore));
   env.mayStore |= mayStore;
+  env.reStores &= ~mayStore;
 }
 
 void mustStore(Local& env, AliasClass acls) {
   auto const canon = canonicalize(acls);
   auto const kill = env.global.ainfo.expand(canon);
-  mustStoreSet(env, kill);
   mayStore(env, acls);
+  mustStoreSet(env, kill);
 }
 
 folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
@@ -456,7 +466,16 @@ void visit(Local& env, IRInstruction& inst) {
     effects,
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { addAllLoad(env); env.mayStore.set(); },
-    [&] (PureLoad l)        { load(env, l.src); },
+    [&] (PureLoad l)        {
+      if (auto bit = pure_store_bit(env, l.src)) {
+        if (env.reStores[*bit]) {
+          FTRACE(4, "Killing self-store: {}\n",
+                 env.global.reStores[*bit]->toString());
+          removeDead(env, *env.global.reStores[*bit], false);
+        }
+      }
+      load(env, l.src);
+    },
     [&] (GeneralEffects l)  { load(env, l.loads);
                               mayStore(env, l.stores);
                               mustStore(env, l.kills); },
@@ -503,16 +522,39 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (PureStore l) {
       if (auto bit = pure_store_bit(env, l.dst)) {
         if (isDead(env, *bit)) {
-          removeDead(env, inst);
-        } else {
-          if (!env.antLoc[*bit] &&
-              !env.mayLoad[*bit] &&
-              !env.mayStore[*bit]) {
-            env.avlLoc[*bit] = 1;
-            set_movable_store(env, *bit, inst);
+          if (!removeDead(env, inst, true)) {
+            mayStore(env, l.dst);
+            mustStore(env, *bit);
           }
+          return;
         }
+        if (!env.antLoc[*bit] &&
+            !env.mayLoad[*bit] &&
+            !env.mayStore[*bit]) {
+          env.avlLoc[*bit] = 1;
+          set_movable_store(env, *bit, inst);
+        }
+        mayStore(env, l.dst);
         mustStore(env, *bit);
+        if (l.value->inst()->block() != inst.block()) return;
+        auto const le = memory_effects(*l.value->inst());
+        auto pl = boost::get<PureLoad>(&le);
+        if (!pl) return;
+        auto lbit = pure_store_bit(env, pl->src);
+        if (!lbit || *lbit != *bit) return;
+        /*
+         * The source of the store is a load from
+         * the same address, which is also in this
+         * block. If there's no interference, we
+         * can kill this store. We won't know until
+         * we see the load though.
+         */
+        if (env.global.reStores.size() <= *bit) {
+          env.global.reStores.resize(*bit + 1);
+        }
+        env.global.reStores[*bit] = &inst;
+        env.reStores[*bit] = 1;
+        return;
       }
       mayStore(env, l.dst);
     },
@@ -524,7 +566,7 @@ void visit(Local& env, IRInstruction& inst) {
         // eliminate this instruction.  We can also count all of them as
         // redefined.
         if (isDeadSet(env, it->second)) {
-          removeDead(env, inst);
+          if (removeDead(env, inst, true)) return;
         } else {
           auto avlLoc = it->second & ~(env.antLoc | env.mayLoad |
                                        env.mayStore);
@@ -533,7 +575,9 @@ void visit(Local& env, IRInstruction& inst) {
             env.avlLoc |= avlLoc;
           }
         }
+        mayStore(env, l.stk);
         mustStoreSet(env, it->second);
+        return;
       }
       mayStore(env, l.stk);
     }

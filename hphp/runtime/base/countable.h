@@ -115,7 +115,7 @@ inline bool isStatic(RefCount count) {
 
 inline void incRefCount(RefCount& count) {
   assert(check_refcount(count));
-  if (isRefCounted(count)) { ++count; }
+  if (isRefCounted(count)) { count += 2; }
 }
 
 inline RefCount decRefCount(RefCount& count) {

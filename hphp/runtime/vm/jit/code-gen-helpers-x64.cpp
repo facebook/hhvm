@@ -97,7 +97,7 @@ void emitIncRef(Vout& v, Vreg base) {
   }
   // emit incref
   auto const sf = v.makeReg();
-  v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
+  v << addqim{2, base[FAST_REFCOUNT_OFFSET], sf};
   emitAssertFlagsNonNegative(v, sf);
 }
 

@@ -82,14 +82,10 @@ void emitIncRef(Vout& v, Vreg base) {
   v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
   emitAssertFlagsNonNegative(v, sf);
 
-  // if the refcount is greater than 1, set the mrb
-  auto const sf2 = v.makeReg();
-  v << cmplim{1, base[FAST_REFCOUNT_OFFSET], sf2};
-  ifThen(v, CC_NLE, sf2, [&](Vout& v) {
-    // TODO don't hardcode this
-    // TODO orb instruction
-    v << orwim{1 << 2, base[HeaderKindOffset + 1], v.makeReg()};
-  });
+  // set the mrb
+  // TODO don't hardcode this
+  // TODO orb instruction
+  v << orwim{1 << 2, base[HeaderKindOffset + 1], v.makeReg()};
 
 }
 

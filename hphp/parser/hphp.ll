@@ -1232,8 +1232,9 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
   YYCURSOR--;
 
-  // The rules that lead to this state all consume an end-of-line.
-  bool lookingForEndLabel = true;
+  // T_START_HEREDOC has a trailing newline, so we can start looking
+  // for the ending label right away
+  bool lookingForEndLabel = _scanner->lastToken() == T_START_HEREDOC;
 
   while (refillResult == EOB_ACT_CONTINUE_SCAN) {
     while (YYCURSOR < YYLIMIT) {

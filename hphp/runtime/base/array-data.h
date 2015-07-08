@@ -85,7 +85,15 @@ protected:
 public:
   IMPLEMENT_COUNTABLE_METHODS
   bool cowCheck() const {
-    return maybeShared();
+    #ifdef COW_MRB
+      return maybeShared();
+    #endif
+    #ifdef COW_BLIND
+      return true;
+    #endif
+    #ifdef COW_RC
+      return hasMultipleRefs();
+    #endif
   }
 
   /**

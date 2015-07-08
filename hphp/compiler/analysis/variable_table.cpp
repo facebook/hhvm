@@ -39,7 +39,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 VariableTable::VariableTable(BlockScope &blockScope)
-    : SymbolTable(blockScope, false), m_attribute(0), m_nextParam(0),
+    : SymbolTable(blockScope), m_attribute(0), m_nextParam(0),
       m_hasGlobal(false), m_hasStatic(false),
       m_hasPrivate(false), m_hasNonStaticPrivate(false),
       m_forcedVariants(0) {

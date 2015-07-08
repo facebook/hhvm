@@ -30,7 +30,7 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
 ConstantTable::ConstantTable(BlockScope &blockScope)
-    : SymbolTable(blockScope, true),
+    : SymbolTable(blockScope),
       m_hasDynamic(false) {
 }
 

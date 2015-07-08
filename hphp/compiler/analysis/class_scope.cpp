@@ -146,10 +146,6 @@ std::string ClassScope::getDocName() const {
   return name + Option::IdPrefix + folly::to<std::string>(m_redeclaring);
 }
 
-bool ClassScope::NeedStaticArray(ClassScopePtr cls, FunctionScopePtr func) {
-  return cls && cls->getAttribute(NotFinal) && !func->isPrivate();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassScope::derivedMagicMethods(ClassScopePtr super) {

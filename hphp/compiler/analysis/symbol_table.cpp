@@ -170,20 +170,9 @@ void Symbol::serializeClassVar(JSON::DocTarget::OutputStream &out) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// statics
 
-Mutex SymbolTable::AllSymbolTablesMutex;
-SymbolTablePtrList SymbolTable::AllSymbolTables;
-
-void SymbolTable::Purge() {
-  Lock lock(AllSymbolTablesMutex);
-  AllSymbolTables.clear();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-SymbolTable::SymbolTable(BlockScope &blockScope, bool isConst) :
-    m_blockScope(blockScope), m_const(isConst) {
+SymbolTable::SymbolTable(BlockScope &blockScope) :
+    m_blockScope(blockScope) {
 }
 
 SymbolTable::~SymbolTable() {

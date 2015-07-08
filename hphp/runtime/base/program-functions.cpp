@@ -2043,7 +2043,7 @@ void hphp_memory_cleanup() {
   // I considered just clearing the inited flags; which works for some
   // RequestEventHandlers - but its a disaster for others. So just fail hard
   // here.
-  always_assert(!g_context->hasRequestEventHandlers());
+  always_assert(g_context.isNull() || !g_context->hasRequestEventHandlers());
 
   // g_context is request allocated, and has some members that need
   // cleanup, so destroy it before its too late

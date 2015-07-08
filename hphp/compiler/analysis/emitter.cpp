@@ -32,6 +32,7 @@
 
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/expression/array_element_expression.h"
@@ -9461,7 +9462,7 @@ class EmitterWorker
   : public JobQueueWorker<FileScopeRawPtr, void*, true, true> {
  public:
   EmitterWorker() : m_ret(true) {}
-  virtual void doJob(JobType job) {
+  void doJob(JobType job) override {
     try {
       AnalysisResultPtr ar = ((AnalysisResult*)m_context)->shared_from_this();
       UnitEmitter* ue = emitHHBCVisitor(ar, job);
@@ -9477,6 +9478,9 @@ class EmitterWorker
       Logger::Error("Fatal: An unexpected exception was thrown");
       m_ret = false;
     }
+  }
+  void onThreadExit() override {
+    hphp_memory_cleanup();
   }
  private:
   bool m_ret;
@@ -9519,6 +9523,8 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
     /* same for TypeConstraint */
     TypeConstraint tc;
   }
+
+  Compiler::ClearErrors();
 
   JobQueueDispatcher<EmitterWorker>
     dispatcher(threadCount, true, 0, false, ar.get());
@@ -9651,7 +9657,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       filename = "";
       unitOrigin = UnitOrigin::Eval;
     }
-    SCOPE_EXIT { SymbolTable::Purge(); };
 
     std::unique_ptr<UnitEmitter> ue;
     // Check if this file contains raw hip hop bytecode instead of

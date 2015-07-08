@@ -63,24 +63,6 @@ public:
     ContainsAssert = 4096,
   };
 
-  enum JumpTableType {
-    JumpReturn,
-    JumpSet,
-    JumpInitialized,
-    JumpInitializedString,
-    JumpIndex,
-    JumpReturnString
-  };
-
-  enum JumpTableName {
-    JumpTableGlobalGetImpl,
-    JumpTableGlobalExists,
-    JumpTableGlobalGetIndex,
-
-    JumpTableLocalGetImpl,
-    JumpTableLocalExists,
-  };
-
   enum AlteredVarClass {
     NonPrivateNonStaticVars = 1,
     NonPrivateStaticVars = 2,

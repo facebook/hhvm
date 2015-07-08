@@ -51,9 +51,6 @@ typedef hphp_hash_map<BlockScopeRawPtr, int,
 typedef hphp_hash_set<BlockScopeRawPtr,
                       smart_pointer_hash<BlockScopeRawPtr>
                       > BlockScopeRawPtrHashSet;
-typedef tbb::concurrent_hash_map<BlockScopeRawPtr, int,
-                                 smart_pointer_hash<BlockScopeRawPtr> >
-        ConcurrentBlockScopeRawPtrIntHashMap;
 
 typedef std::vector<BlockScopeRawPtr> BlockScopeRawPtrVec;
 typedef std::list<BlockScopeRawPtr>   BlockScopeRawPtrQueue;
@@ -63,8 +60,6 @@ typedef std::pair< BlockScopeRawPtr, int* >
         BlockScopeRawPtrFlagsPtrPair;
 typedef std::vector< std::pair< BlockScopeRawPtr, int* > >
         BlockScopeRawPtrFlagsPtrVec;
-
-typedef SimpleMutex InferTypesMutex;
 
 /**
  * Base class of ClassScope and FunctionScope.
@@ -81,49 +76,13 @@ public:
 
   enum UseKinds {
     /* Callers */
-    UseKindCallerInline   = 0x1,
     UseKindCallerParam    = 0x1 << 1,
     UseKindCallerReturn   = 0x1 << 2,
-    UseKindCaller         = (UseKindCallerInline |
-                             UseKindCallerParam  |
+    UseKindCaller         = (UseKindCallerParam  |
                              UseKindCallerReturn),
 
     /* Static references */
     UseKindStaticRef      = 0x1 << 3,
-
-    /* 16 bits of Non static references */
-    UseKindNonStaticRef0  = 0x1 << 4,
-    UseKindNonStaticRef1  = 0x1 << 5,
-    UseKindNonStaticRef2  = 0x1 << 6,
-    UseKindNonStaticRef3  = 0x1 << 7,
-    UseKindNonStaticRef4  = 0x1 << 8,
-    UseKindNonStaticRef5  = 0x1 << 9,
-    UseKindNonStaticRef6  = 0x1 << 10,
-    UseKindNonStaticRef7  = 0x1 << 11,
-    UseKindNonStaticRef8  = 0x1 << 12,
-    UseKindNonStaticRef9  = 0x1 << 13,
-    UseKindNonStaticRef10 = 0x1 << 14,
-    UseKindNonStaticRef11 = 0x1 << 15,
-    UseKindNonStaticRef12 = 0x1 << 16,
-    UseKindNonStaticRef13 = 0x1 << 17,
-    UseKindNonStaticRef14 = 0x1 << 18,
-    UseKindNonStaticRef15 = 0x1 << 19,
-    UseKindNonStaticRef   = (UseKindNonStaticRef0  |
-                             UseKindNonStaticRef1  |
-                             UseKindNonStaticRef2  |
-                             UseKindNonStaticRef3  |
-                             UseKindNonStaticRef4  |
-                             UseKindNonStaticRef5  |
-                             UseKindNonStaticRef6  |
-                             UseKindNonStaticRef7  |
-                             UseKindNonStaticRef8  |
-                             UseKindNonStaticRef9  |
-                             UseKindNonStaticRef10 |
-                             UseKindNonStaticRef11 |
-                             UseKindNonStaticRef12 |
-                             UseKindNonStaticRef13 |
-                             UseKindNonStaticRef14 |
-                             UseKindNonStaticRef15),
 
     /* Constants */
     UseKindConstRef       = 0x1 << 20,
@@ -135,19 +94,6 @@ public:
     UseKindAny            = (unsigned)-1
   };
 
-  /* Assert the size and bit-consecutiveness of UseKindNonStaticRef */
-  static_assert(BitCount<UseKindNonStaticRef>::value == 16,
-                "UseKindNonStaticRef should have 16 bits set");
-  static_assert(BitPhase<UseKindNonStaticRef>::value <= 2,
-                "UseKindNonStaticRef set bits should be consecutive");
-
-  static int GetNonStaticRefUseKind(unsigned int hash) {
-    int res = ((int)UseKindNonStaticRef0) << (hash % 16);
-    assert(res >= ((int)UseKindNonStaticRef0) &&
-           res <= ((int)UseKindNonStaticRef15));
-    return res;
-  }
-
   enum Marks {
     MarkWaitingInQueue,
     MarkProcessingDeps,
@@ -158,6 +104,8 @@ public:
     MarkProcessed
   };
 
+  BlockScope(const BlockScope&) = delete;
+  BlockScope& operator=(const BlockScope&) = delete;
   BlockScope(const std::string &name, const std::string &docComment,
              StatementPtr stmt, KindOf kind);
   virtual ~BlockScope() {}
@@ -284,7 +232,6 @@ protected:
 
   int m_loopNestedLevel;
   ModifierExpressionPtr m_modifiers;
-  StatementListPtr m_includes;
   int m_pass;
   int m_updated;
   int m_runId;

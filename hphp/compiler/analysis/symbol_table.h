@@ -264,16 +264,15 @@ private:
 class SymbolTable : public std::enable_shared_from_this<SymbolTable>,
                     public JSON::CodeError::ISerializable {
 public:
-  static Mutex AllSymbolTablesMutex;
-  static SymbolTablePtrList AllSymbolTables; // for stats purpose
-  static void Purge();
   BlockScope *getScopePtr() const { return &m_blockScope; }
   BlockScopeRawPtr getBlockScope() const {
     return BlockScopeRawPtr(&m_blockScope);
   }
 public:
-  SymbolTable(BlockScope &blockScope, bool isConst);
-  SymbolTable();
+  SymbolTable& operator=(const SymbolTable&) = delete;
+  SymbolTable(const SymbolTable&) = delete;
+  explicit SymbolTable(BlockScope &blockScope);
+  SymbolTable() = delete;
   virtual ~SymbolTable();
 
   /**
@@ -316,13 +315,6 @@ public:
   ConstructPtr getDeclaration(const std::string &name) const;
   ConstructPtr getValue(const std::string &name) const;
 
-  /**
-   * How big of a hash table for generate C++ switch statements.
-   */
-  int getJumpTableSize() const {
-    return folly::nextPowTwo(m_symbolVec.size() * 2);
-  }
-
   void canonicalizeSymbolOrder();
   void getSymbols(std::vector<Symbol*> &syms, bool filterHidden = false) const;
   void getSymbols(std::vector<std::string> &syms) const;
@@ -345,7 +337,6 @@ protected:
   StringToSymbolMap     m_symbolMap;
 private:
   const Symbol* getSymbolImpl(const std::string &name) const;
-  bool m_const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

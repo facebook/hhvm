@@ -339,14 +339,6 @@ public:
   virtual int getKidCount() const = 0;
 
   // helpers for GDB
-  void dump(int spc, AnalysisResultPtr ar) {
-    AnalysisResultConstPtr arp(ar);
-    dump(spc, arp);
-  }
-  void dumpNode(int spc, AnalysisResultPtr ar) {
-    AnalysisResultConstPtr arp(ar);
-    dumpNode(spc, arp);
-  }
   void dumpNode(int spc);
   void dumpNode(int spc) const;
 

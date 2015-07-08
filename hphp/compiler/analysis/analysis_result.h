@@ -354,15 +354,6 @@ public:
   static DECLARE_THREAD_LOCAL(BlockScopeRawPtrFlagsHashMap,
                               s_changedScopesMapThreadLocal);
 
-#ifdef HPHP_INSTRUMENT_PROCESS_PARALLEL
-  static std::atomic<int>                     s_NumDoJobCalls;
-  static ConcurrentBlockScopeRawPtrIntHashMap s_DoJobUniqueScopes;
-  static std::atomic<int>                     s_NumForceRerunGlobal;
-  static std::atomic<int>                     s_NumReactivateGlobal;
-  static std::atomic<int>                     s_NumForceRerunUseKinds;
-  static std::atomic<int>                     s_NumReactivateUseKinds;
-#endif /* HPHP_INSTRUMENT_PROCESS_PARALLEL */
-
 private:
   template <typename Visitor>
   void processScopesParallel(const char *id, void *opaque = nullptr);

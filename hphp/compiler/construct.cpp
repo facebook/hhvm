@@ -353,7 +353,7 @@ public:
   }
   int before(ConstructRawPtr cp) {
     int ret = m_functionOnly ? FunctionWalker::before(cp) : WalkContinue;
-    cp->dumpNode(m_spc, m_ar);
+    cp->dumpNode(m_spc);
     m_spc += 2;
     m_showEnds = false;
     return ret;
@@ -367,7 +367,7 @@ public:
         s -= n;
       }
       std::cout << "<<";
-      cp->dumpNode(0, m_ar);
+      cp->dumpNode(0);
     }
     m_spc -= 2;
     // HACK: dump the closure function as a "child" of the

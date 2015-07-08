@@ -47,10 +47,6 @@ BlockScope::BlockScope(const std::string &name, const std::string &docComment,
   m_scopeName = name;
   m_variables = VariableTablePtr(new VariableTable(*this));
   m_constants = ConstantTablePtr(new ConstantTable(*this));
-
-  Lock lock(SymbolTable::AllSymbolTablesMutex);
-  SymbolTable::AllSymbolTables.push_back(m_variables);
-  SymbolTable::AllSymbolTables.push_back(m_constants);
 }
 
 void BlockScope::incLoopNestedLevel() {

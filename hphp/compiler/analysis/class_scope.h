@@ -108,10 +108,6 @@ public:
     Final = 32
   };
 
-  enum JumpTableName {
-    JumpTableCallInfo
-  };
-
 public:
   ClassScope(FileScopeRawPtr fs,
              KindOf kindOf, const std::string &originalName,
@@ -328,7 +324,6 @@ public:
   bool hasProperty(const std::string &name) const;
   bool hasConst(const std::string &name) const;
 
-  static bool NeedStaticArray(ClassScopePtr cls, FunctionScopePtr func);
   void inheritedMagicMethods(ClassScopePtr super);
   void derivedMagicMethods(ClassScopePtr super);
   /* true if it might, false if it doesnt */

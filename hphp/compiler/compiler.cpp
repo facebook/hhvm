@@ -413,6 +413,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   // The configuration command line strings were already processed above
   // Don't process them again.
   RuntimeOption::Load(iniR, runtime);
+  RuntimeOption::EvalJit = false;
 
   initialize_repo();
 

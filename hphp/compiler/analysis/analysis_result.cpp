@@ -773,13 +773,13 @@ class OptWorker : public JobQueueWorker<BlockScope*,
 public:
   OptWorker() {}
 
-  virtual void onThreadEnter() {
+  void onThreadEnter() override {
   }
 
-  virtual void onThreadExit() {
+  void onThreadExit() override {
   }
 
-  virtual void doJob(BlockScope *scope) {
+  void doJob(BlockScope *scope) override {
     try {
       auto visitor =
         (DepthFirstVisitor<When, OptVisitor>*) m_context;

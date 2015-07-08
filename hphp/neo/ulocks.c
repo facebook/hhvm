@@ -22,9 +22,9 @@
 #include <Windows.h>
 
 #define O_NDELAY 0
-#define	LOCK_EX	2
-#define	LOCK_NB	4
-#define	LOCK_UN	8
+#define LOCK_EX 2
+#define LOCK_NB 4
+#define LOCK_UN 8
 
 #define F_LOCK 0
 #define F_ULOCK LOCK_UN

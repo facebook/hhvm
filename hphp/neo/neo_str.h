@@ -16,6 +16,7 @@ __BEGIN_DECLS
 
 #include <stdarg.h>
 #include <stdio.h>
+#include "hphp/neo/neo_bool.h"
 #include "hphp/neo/neo_misc.h"
 
 /* This modifies the string its called with by replacing all the white

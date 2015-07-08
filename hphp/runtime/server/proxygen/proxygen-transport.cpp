@@ -555,7 +555,12 @@ void ProxygenTransport::sendImpl(const void *data, int size, int code,
       HTTPMessage::getDefaultReason(code) : reasonStr.c_str();
     m_response.setStatusMessage(reason);
     m_response.setHTTPVersion(1, 1);
+
+    // If it is a HEAD request, lie to Proxygen about the chunked status, since
+    // Proxygen is broken and will send a response body consisting of an empty
+    // chunk if the chunked flag is set.
     m_response.setIsChunked(chunked && !suppressBody);
+
     m_response.dumpMessage(4);
     m_server->putResponseMessage(
       ResponseMessage(shared_from_this(),

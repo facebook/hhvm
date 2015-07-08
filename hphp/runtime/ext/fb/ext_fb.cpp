@@ -45,8 +45,6 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/fb/FBSerialize.h"
-#include "hphp/runtime/ext/mysql/ext_mysql.h"
-#include "hphp/runtime/ext/mysql/mysql_common.h"
 #include "hphp/runtime/ext/fb/VariantController.h"
 #include "hphp/runtime/vm/unwind.h"
 

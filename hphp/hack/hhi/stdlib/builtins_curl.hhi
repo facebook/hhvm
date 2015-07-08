@@ -146,6 +146,7 @@ const int CURLOPT_UNRESTRICTED_AUTH = 0;
 const int CURLOPT_FTPSSLAUTH = 0;
 const int CURLOPT_FTPPORT = 0;
 const int CURLOPT_POSTQUOTE = 0;
+const int CURLOPT_RESOLVE = 0;
 const int CURLOPT_QUOTE = 0;
 
 const int CURLE_ABORTED_BY_CALLBACK = 0;

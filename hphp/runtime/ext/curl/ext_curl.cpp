@@ -782,6 +782,7 @@ public:
     case CURLOPT_QUOTE:
     case CURLOPT_HTTP200ALIASES:
     case CURLOPT_POSTQUOTE:
+    case CURLOPT_RESOLVE:
       if (value.is(KindOfArray) || value.is(KindOfObject)) {
         Array arr = value.toArray();
         curl_slist *slist = nullptr;
@@ -802,8 +803,8 @@ public:
       } else {
         raise_warning("You must pass either an object or an array with "
                       "the CURLOPT_HTTPHEADER, CURLOPT_QUOTE, "
-                      "CURLOPT_HTTP200ALIASES and CURLOPT_POSTQUOTE "
-                      "arguments");
+                      "CURLOPT_HTTP200ALIASES, CURLOPT_POSTQUOTE "
+                      "and CURLOPT_RESOLVE arguments");
         return false;
       }
       break;
@@ -2059,6 +2060,7 @@ const int64_t k_CURLOPT_RANGE = CURLOPT_RANGE;
 const int64_t k_CURLOPT_READDATA = CURLOPT_READDATA;
 const int64_t k_CURLOPT_READFUNCTION = CURLOPT_READFUNCTION;
 const int64_t k_CURLOPT_REFERER = CURLOPT_REFERER;
+const int64_t k_CURLOPT_RESOLVE = CURLOPT_RESOLVE;
 const int64_t k_CURLOPT_RESUME_FROM = CURLOPT_RESUME_FROM;
 const int64_t k_CURLOPT_RETURNTRANSFER = CURLOPT_RETURNTRANSFER;
 #ifdef FACEBOOK
@@ -2341,6 +2343,7 @@ const StaticString s_CURLOPT_RANGE("CURLOPT_RANGE");
 const StaticString s_CURLOPT_READDATA("CURLOPT_READDATA");
 const StaticString s_CURLOPT_READFUNCTION("CURLOPT_READFUNCTION");
 const StaticString s_CURLOPT_REFERER("CURLOPT_REFERER");
+const StaticString s_CURLOPT_RESOLVE("CURLOPT_RESOLVE");
 const StaticString s_CURLOPT_RESUME_FROM("CURLOPT_RESUME_FROM");
 const StaticString s_CURLOPT_RETURNTRANSFER("CURLOPT_RETURNTRANSFER");
 #ifdef FACEBOOK
@@ -2994,6 +2997,9 @@ class CurlExtension final : public Extension {
     );
     Native::registerConstant<KindOfInt64>(
       s_CURLOPT_REFERER.get(), k_CURLOPT_REFERER
+    );
+    Native::registerConstant<KindOfInt64>(
+      s_CURLOPT_RESOLVE.get(), k_CURLOPT_RESOLVE
     );
     Native::registerConstant<KindOfInt64>(
       s_CURLOPT_RESUME_FROM.get(), k_CURLOPT_RESUME_FROM

@@ -11,6 +11,7 @@ class X {
 
   public function alias_this_get(): this::T {
     $this_for_hack = $this;
+    /* HH_FIXME[4110] - Temporary until we make $this expression dependent */
     return $this_for_hack->val;
   }
 
@@ -20,6 +21,7 @@ class X {
   }
 
   public function new_static_get(): this::T {
+    /* HH_FIXME[4110] - Temporary until we make 'new' expression dependent */
     return (new static($this->val))->val;
   }
 
@@ -50,6 +52,9 @@ trait X_Trait {
   }
 
   public function parent_get(): this::T {
+    /* HH_FIXME[4110] - Temporary until we parent for expression dependent
+     * types
+     */
     return parent::get();
   }
 }

@@ -189,6 +189,8 @@ class Mutex : public BaseMutex<false> {
 public:
   explicit Mutex(bool recursive = true, Rank rank = RankUnranked) :
     BaseMutex<false>(recursive, rank) {}
+  explicit Mutex(Rank rank, bool recursive = true) :
+    BaseMutex<false>(recursive, rank) {}
   pthread_mutex_t &getRaw() { return m_mutex; }
 };
 

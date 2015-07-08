@@ -109,7 +109,7 @@ inline bool check_refcount_ns_nz(int32_t count) {
     assert(!MemoryManager::sweeping());                                 \
     assert(check_refcount(m_hdr.count));                                \
     if (isRefCounted()) { ++m_hdr.count; }                              \
-    if ((uint32_t)m_hdr.count > 1) { m_hdr.mrb = true; }                \
+    m_hdr.mrb = true;                                                   \
   }                                                                     \
                                                                         \
   void setRefCount(RefCount count) {                                    \

@@ -667,7 +667,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return '}';
 }
 
-<ST_LOOKING_FOR_VARNAME>{LABEL} {
+<ST_LOOKING_FOR_VARNAME>{LABEL}[[}] {
+        yyless(yyleng - 1);
         SETTOKEN(T_STRING_VARNAME);
         // Change state to IN_SCRIPTING; current state will be popped
         // when we encounter '}'

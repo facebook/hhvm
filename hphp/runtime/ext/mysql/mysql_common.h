@@ -39,6 +39,17 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class MySQLUtil {
+public:
+  enum TimeoutType {
+    ConnectTimeout,
+    ReadTimeout,
+    WriteTimeout
+  };
+
+  static int set_mysql_timeout(MYSQL *mysql, MySQLUtil::TimeoutType type, int ms);
+};
+
 enum class MySQLState : int8_t {
   CLOSED = 0,
   INITED = 1,

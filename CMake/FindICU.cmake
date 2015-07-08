@@ -60,7 +60,7 @@ if(ICU_INCLUDE_DIR AND ICU_LIBRARY)
   # Look for the ICU data libraries
   find_library(
       ICU_DATA_LIBRARY
-    NAMES icudata cygicudata cygicudata32
+    NAMES icudt icudata cygicudata cygicudata32
     DOC "Libraries to link against for ICU data")
   mark_as_advanced(ICU_DATA_LIBRARY)
   if (ICU_DATA_LIBRARY)

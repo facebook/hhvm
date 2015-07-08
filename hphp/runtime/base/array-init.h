@@ -320,7 +320,7 @@ public:
    */
   PackedArrayInit(size_t n, CheckAllocation) {
     auto allocsz = sizeof(ArrayData) + sizeof(TypedValue) * n;
-    if (UNLIKELY(allocsz > kMaxSmartSize && MM().preAllocOOM(allocsz))) {
+    if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
       check_request_surprise_unlikely();
     }
     m_vec = MixedArray::MakeReserve(n);

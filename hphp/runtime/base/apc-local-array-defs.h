@@ -35,7 +35,7 @@ inline APCLocalArray::APCLocalArray(const APCArray* source)
 
 template<class... Args>
 APCLocalArray* APCLocalArray::Make(Args&&... args) {
-  return new (MM().smartMallocSize(sizeof(APCLocalArray)))
+  return new (MM().mallocSmallSize(sizeof(APCLocalArray)))
     APCLocalArray(std::forward<Args>(args)...);
 }
 

@@ -184,10 +184,10 @@ void ObjectData::releaseNoObjDestructCheck() noexcept {
   auto const size =
     reinterpret_cast<char*>(stop) - reinterpret_cast<char*>(this);
   assert(size == sizeForNProps(nProps));
-  if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSize(this, size);
+  if (LIKELY(size <= kMaxSmallSize)) {
+    return MM().freeSmallSize(this, size);
   }
-  MM().smartFreeSizeBig(this, size);
+  MM().freeBigSize(this, size);
 }
 
 NEVER_INLINE
@@ -1080,14 +1080,14 @@ ObjectData* ObjectData::callCustomInstanceInit() {
 
 // called from jit code
 ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
-  auto o = new (MM().smartMallocSize(size)) ObjectData(cls, NoInit{});
+  auto o = new (MM().mallocSmallSize(size)) ObjectData(cls, NoInit{});
   assert(o->hasExactlyOneRef());
   return o;
 }
 
 // called from jit code
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  auto o = new (MM().smartMallocSizeBig<false>(size).ptr)
+  auto o = new (MM().mallocBigSize<false>(size).ptr)
     ObjectData(cls, NoInit{});
   assert(o->hasExactlyOneRef());
   return o;

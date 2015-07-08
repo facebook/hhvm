@@ -255,8 +255,8 @@ uint32_t PackedArray::getMaxCapInPlaceFast(uint32_t cap) {
   }
   static_assert(sizeof(TypedValue) == 16, "sizeof TypedValue changed?");
   static_assert(sizeof(ArrayData) == 16, "sizeof ArrayData changed?");
-  assert((cap + 1) * 16U <= kMaxSmartSize);
-  uint32_t newCap = (MemoryManager::smartSizeClass((cap + 1) << 4) >> 4) - 1;
+  assert((cap + 1) * 16U <= kMaxSmallSize);
+  uint32_t newCap = (MemoryManager::smallSizeClass((cap + 1) << 4) >> 4) - 1;
   if (UNLIKELY(newCap > CapCode::Threshold)) {
     newCap = CapCode::floor(newCap).decode();
   }

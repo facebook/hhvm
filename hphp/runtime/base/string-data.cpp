@@ -60,8 +60,8 @@ std::pair<StringData*,CapCode> allocFlatForLen(size_t len) {
 
   if (LIKELY(len <= CapCode::Threshold - kCapOverhead)) {
     // fast path for most small strings
-    auto need = MemoryManager::smartSizeClass(len + kCapOverhead);
-    auto sd = static_cast<StringData*>(MM().smartMallocSize(need));
+    auto need = MemoryManager::smallSizeClass(len + kCapOverhead);
+    auto sd = static_cast<StringData*>(MM().mallocSmallSize(need));
     // size class rounding ensures need >= (len+kCapOverhead), but rounding up
     // might have caused our capacity value (need - kCapOverhead) to
     // cross CapCode::Threshold. Truncate it to an encodable value. This is
@@ -76,16 +76,16 @@ std::pair<StringData*,CapCode> allocFlatForLen(size_t len) {
   }
   auto const encoded = CapCode::ceil(len);
   auto const need = encoded.decode() + kCapOverhead;
-  if (LIKELY(need <= kMaxSmartSize)) {
-    auto cap = MemoryManager::smartSizeClass(need);
+  if (LIKELY(need <= kMaxSmallSize)) {
+    auto cap = MemoryManager::smallSizeClass(need);
     auto cc = CapCode::floor(cap - kCapOverhead);
     assert(cc.decode() >= len);
     auto const sd = static_cast<StringData*>(
-        MM().smartMallocSize(cc.decode() + kCapOverhead)
+        MM().mallocSmallSize(cc.decode() + kCapOverhead)
     );
     return std::make_pair(sd, cc);
   }
-  auto const block = MM().smartMallocSizeBig<true>(need);
+  auto const block = MM().mallocBigSize<true>(need);
   auto cc = CapCode::floor(block.size - kCapOverhead);
   assert(cc.decode() >= len);
   return std::make_pair(static_cast<StringData*>(block.ptr), cc);
@@ -93,10 +93,10 @@ std::pair<StringData*,CapCode> allocFlatForLen(size_t len) {
 
 ALWAYS_INLINE
 void freeForSize(void* vp, uint32_t size) {
-  if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSize(vp, size);
+  if (LIKELY(size <= kMaxSmallSize)) {
+    return MM().freeSmallSize(vp, size);
   }
-  return MM().smartFreeSizeBig(vp, size);
+  return MM().freeBigSize(vp, size);
 }
 
 }
@@ -213,7 +213,7 @@ unsigned StringData::sweepAll() {
   for (StringDataNode *next, *n = head.next; n != &head; n = next) {
     count++;
     next = n->next;
-    assert(next && uintptr_t(next) != kSmartFreeWord);
+    assert(next && uintptr_t(next) != kSmallFreeWord);
     assert(next && uintptr_t(next) != kMallocFreeWord);
     auto const s = node2str(n);
     assert(s->isShared());
@@ -413,7 +413,7 @@ ALWAYS_INLINE void StringData::enlist() {
 NEVER_INLINE
 StringData* StringData::MakeAPCSlowPath(const APCString* shared) {
   auto const sd = static_cast<StringData*>(
-      MM().smartMallocSize(sizeof(StringData) + sizeof(SharedPayload))
+      MM().mallocSmallSize(sizeof(StringData) + sizeof(SharedPayload))
   );
   auto const data = shared->getStringData();
   sd->m_data = const_cast<char*>(data->m_data);
@@ -452,8 +452,8 @@ StringData* StringData::Make(const APCString* shared) {
   static_assert(SmallStringReserve + sizeof(StringData) + 1 <
                 CapCode::Threshold, "");
   auto const need = sizeof(StringData) + len + 1;
-  auto const cap = MemoryManager::smartSizeClass(need);
-  auto const sd = static_cast<StringData*>(MM().smartMallocSize(cap));
+  auto const cap = MemoryManager::smallSizeClass(need);
+  auto const sd = static_cast<StringData*>(MM().mallocSmallSize(cap));
   auto const pdst = reinterpret_cast<char*>(sd + 1);
   auto const cc = CapCode::ceil(cap - kCapOverhead);
   assert(cc.code == cap - kCapOverhead);

@@ -137,10 +137,10 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
   }
 
   size_t size = ObjectData::sizeForNProps(nProps) + ndsize(ndi->sz);
-  if (LIKELY(size <= kMaxSmartSize)) {
-    return MM().smartFreeSize(node, size);
+  if (LIKELY(size <= kMaxSmallSize)) {
+    return MM().freeSmallSize(node, size);
   }
-  MM().smartFreeSizeBig(node, size);
+  MM().freeBigSize(node, size);
 }
 
 Variant nativeDataSleep(const ObjectData* obj) {

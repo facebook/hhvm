@@ -35,17 +35,16 @@
 
 namespace HPHP {
 
-class ZendUserIniData : public UserIniData {
-public:
-
-  ZendUserIniData (zend_ini_entry *p) : UserIniData(), p(p) {
-  }
+struct ZendUserIniData : UserIniData {
+  explicit ZendUserIniData (zend_ini_entry *p)
+    : UserIniData(), p(p)
+  {}
 
   virtual ~ZendUserIniData () {
     if (p) {
       /*
-       * The string p->value was allocated by estrndup, which calls*
-       * through to MemoryManager::smartMalloc.
+       * The string p->value was allocated by estrndup, which calls
+       * req::malloc.
        * As such, the string will be freed at the end of the request.
        *
        * This destructor is called, for example, in the course
@@ -112,7 +111,7 @@ static int hhvm_register_ini_entries_do_work(
        *
        * It should be safe to free the string we previously allocated,
        * since we have not got to the end of the request when the
-       * MemoryManager::smartMalloc engine will free these strings.
+       * MemoryManager will free these strings.
        */
       efree(p->value);
       p->value = data;

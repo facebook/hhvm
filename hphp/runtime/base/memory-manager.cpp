@@ -160,11 +160,11 @@ void MemoryManager::threadStats(uint64_t*& allocated, uint64_t*& deallocated,
 
 static void* MemoryManagerInit() {
   // We store the free list pointers right at the start of each
-  // object, overlapping SmartHeader.data, and we also clobber _count
-  // as a free-object flag when the object is deallocated.  This
+  // object (overlapping whatever it's first word holds), and we also clobber
+  // _count as a free-object flag when the object is deallocated. This
   // assert just makes sure they don't overflow.
   assert(FAST_REFCOUNT_OFFSET + sizeof(int) <=
-    MemoryManager::smartSizeClass(1));
+    MemoryManager::smallSizeClass(1));
   MemoryManager::TlsWrapper tls;
   return (void*)tls.getNoCheck;
 }
@@ -263,17 +263,17 @@ void MemoryManager::resetStatsImpl(bool isInternalCall) {
 #endif
 
     // The effect of this call is simply to ignore anything we've done *outside*
-    // the smart allocator after we initialized to avoid attributing shared
-    // structure initialization that happens during init_thread_locals() to this
-    // session.
+    // the MemoryManager allocator after we initialized to avoid attributing
+    // shared structure initialization that happens during init_thread_locals()
+    // to this session.
 
     // We don't want to clear the other values because we do already have some
-    // sized smart allocator usage and live slabs and wiping now will result in
+    // small-sized allocator usage and live slabs and wiping now will result in
     // negative values when we try to reconcile our accounting with jemalloc.
 #ifdef USE_JEMALLOC
-    // Anything that was definitively allocated by the smart allocator should
-    // be counted in this number even if we're otherwise zeroing out the count
-    // for each thread.
+    // Anything that was definitively allocated by the MemoryManager allocator
+    // should be counted in this number even if we're otherwise zeroing out
+    // the count for each thread.
     m_stats.totalAlloc = s_statsEnabled ? m_stats.jemallocDebt : 0;
 
     m_enableStatsSync = s_statsEnabled;
@@ -342,7 +342,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   //
   //   int64 musage = delta - delta0;
   //
-  // Note however, that SmartAllocator adds to m_stats.jemallocDebt
+  // Note however, the slab allocator adds to m_stats.jemallocDebt
   // when it calls malloc(), so that this function can avoid
   // double-counting the malloced memory. Thus musage in the example
   // code may well substantially exceed m_stats.usage.
@@ -466,7 +466,7 @@ void MemoryManager::sweep() {
       auto ndi = obj->getVMClass()->getNativeDataInfo();
       ndi->sweep(obj);
       // trash the native data but leave the header and object parsable
-      assert(memset(node+1, kSmartFreeFill, node->obj_offset - sizeof(*node)));
+      assert(memset(node+1, kSmallFreeFill, node->obj_offset - sizeof(*node)));
     }
   } while (!m_sweepables.empty());
 
@@ -517,12 +517,12 @@ void MemoryManager::flush() {
 /*
  * req::malloc & friends implementation notes
  *
- * There are three kinds of smart mallocation:
+ * There are three kinds of allocations:
  *
- *  a) Large allocations.  (size >= kMaxSmartSize)
+ *  a) Big allocations.  (size >= kMaxSmallSize)
  *
  *     In this case we behave as a wrapper around the normal libc
- *     malloc/free.  We insert a SweepNode header at the front of the
+ *     malloc/free.  We insert a BigNode header at the front of the
  *     allocation in order to find these at sweep time (end of
  *     request) so we can give them back to libc.
  *
@@ -533,10 +533,8 @@ void MemoryManager::flush() {
  *
  *     In this situation, we put a SmallNode header at the front of
  *     the block that tells us the size for when we need to free it
- *     later.  We differentiate this from a SweepNode (for a big
- *     allocation) by assuming that no SweepNode::prev will point to
- *     an address in the first kMaxSmartSize bytes of virtual address
- *     space.
+ *     later.  We differentiate this from a BigNode using the size
+ *     field in either structure (they overlap at the same address).
  *
  *  c) Size-untracked small allocation
  *
@@ -546,8 +544,8 @@ void MemoryManager::flush() {
  *     out 16-byte aligned pointers easily.
  *
  *     We know when we have one of these because it has to be freed
- *     through a different entry point.  (E.g. MM().smartFreeSize or
- *     MM().smartFreeSizeBig.)
+ *     through a different entry point.  (E.g. MM().freeSmallSize() or
+ *     MM().freeBigSize().)
  *
  * When small blocks are freed (case b and c), they're placed in the
  * appropriate size-segregated freelist.  Large blocks are immediately
@@ -563,15 +561,15 @@ void MemoryManager::flush() {
  * case c and combine the lists eventually.
  */
 
-inline void* MemoryManager::smartMalloc(size_t nbytes) {
+inline void* MemoryManager::malloc(size_t nbytes) {
   auto const nbytes_padded = nbytes + sizeof(SmallNode);
-  if (LIKELY(nbytes_padded) <= kMaxSmartSize) {
-    auto const ptr = static_cast<SmallNode*>(smartMallocSize(nbytes_padded));
+  if (LIKELY(nbytes_padded) <= kMaxSmallSize) {
+    auto const ptr = static_cast<SmallNode*>(mallocSmallSize(nbytes_padded));
     ptr->padbytes = nbytes_padded;
     ptr->hdr.kind = HeaderKind::SmallMalloc;
     return ptr + 1;
   }
-  return smartMallocBig(nbytes);
+  return mallocBig(nbytes);
 }
 
 union MallocNode {
@@ -581,21 +579,21 @@ union MallocNode {
 
 static_assert(sizeof(SmallNode) == sizeof(BigNode), "");
 
-inline void MemoryManager::smartFree(void* ptr) {
+inline void MemoryManager::free(void* ptr) {
   assert(ptr != 0);
   auto const n = static_cast<MallocNode*>(ptr) - 1;
   auto const padbytes = n->small.padbytes;
-  if (LIKELY(padbytes <= kMaxSmartSize)) {
-    return smartFreeSize(&n->small, n->small.padbytes);
+  if (LIKELY(padbytes <= kMaxSmallSize)) {
+    return freeSmallSize(&n->small, n->small.padbytes);
   }
   m_heap.freeBig(ptr);
 }
 
-inline void* MemoryManager::smartRealloc(void* ptr, size_t nbytes) {
-  FTRACE(3, "smartRealloc: {} to {}\n", ptr, nbytes);
+inline void* MemoryManager::realloc(void* ptr, size_t nbytes) {
+  FTRACE(3, "MemoryManager::realloc: {} to {}\n", ptr, nbytes);
   assert(nbytes > 0);
   auto const n = static_cast<MallocNode*>(ptr) - 1;
-  if (LIKELY(n->small.padbytes <= kMaxSmartSize)) {
+  if (LIKELY(n->small.padbytes <= kMaxSmallSize)) {
     void* newmem = req::malloc(nbytes);
     auto const copySize = std::min(
       n->small.padbytes - sizeof(SmallNode),
@@ -640,9 +638,9 @@ void MemoryManager::initHole() {
 // initialize the FreeNode header on all freelist entries.
 void MemoryManager::initFree() {
   initHole();
-  for (auto i = 0; i < kNumSmartSizes; i++) {
+  for (auto i = 0; i < kNumSmallSizes; i++) {
     for (auto n = m_freelists[i].head; n; n = n->next) {
-      n->hdr.init(HeaderKind::Free, smartIndex2Size(i));
+      n->hdr.init(HeaderKind::Free, smallIndex2Size(i));
     }
   }
   m_needInitFree = false;
@@ -703,7 +701,7 @@ void MemoryManager::checkHeap() {
   });
 
   // check the free lists
-  for (auto i = 0; i < kNumSmartSizes; i++) {
+  for (auto i = 0; i < kNumSmallSizes; i++) {
     for (auto n = m_freelists[i].head; n; n = n->next) {
       assert(free_blocks.find(n) != free_blocks.end());
       free_blocks.erase(n);
@@ -747,7 +745,7 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
   storeTail(m_front, (char*)m_limit - (char*)m_front);
   if (debug && RuntimeOption::EvalCheckHeapOnAlloc) checkHeap();
   auto slab = m_heap.allocSlab(kSlabSize);
-  assert((uintptr_t(slab.ptr) & kSmartSizeAlignMask) == 0);
+  assert((uintptr_t(slab.ptr) & kSmallSizeAlignMask) == 0);
   m_stats.borrow(slab.size);
   m_stats.alloc += slab.size;
   if (m_stats.alloc > m_stats.peakAlloc) {
@@ -760,21 +758,21 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
 }
 
 /*
- * Allocate `bytes' from the current slab, aligned to kSmartSizeAlign.
+ * Allocate `bytes' from the current slab, aligned to kSmallSizeAlign.
  */
 inline void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   FTRACE(3, "slabAlloc({}, {}): m_front={}, m_limit={}\n", bytes, index,
             m_front, m_limit);
-  uint32_t nbytes = smartSizeClass(bytes);
+  uint32_t nbytes = smallSizeClass(bytes);
 
   assert(nbytes <= kSlabSize);
-  assert((nbytes & kSmartSizeAlignMask) == 0);
-  assert((uintptr_t(m_front) & kSmartSizeAlignMask) == 0);
+  assert((nbytes & kSmallSizeAlignMask) == 0);
+  assert((uintptr_t(m_front) & kSmallSizeAlignMask) == 0);
 
   if (UNLIKELY(m_bypassSlabAlloc)) {
-    // Stats correction; smartMallocSizeBig() pulls stats from jemalloc.
+    // Stats correction; mallocBigSize() pulls stats from jemalloc.
     m_stats.usage -= bytes;
-    return smartMallocSizeBig<false>(nbytes).ptr;
+    return mallocBigSize<false>(nbytes).ptr;
   }
 
   void* ptr = m_front;
@@ -788,10 +786,10 @@ inline void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   }
   // Preallocate more of the same in order to amortize entry into this method.
   unsigned nPrealloc;
-  if (nbytes * kSmartPreallocCountLimit <= kSmartPreallocBytesLimit) {
-    nPrealloc = kSmartPreallocCountLimit;
+  if (nbytes * kSmallPreallocCountLimit <= kSmallPreallocBytesLimit) {
+    nPrealloc = kSmallPreallocCountLimit;
   } else {
-    nPrealloc = kSmartPreallocBytesLimit / nbytes;
+    nPrealloc = kSmallPreallocBytesLimit / nbytes;
   }
   {
     void* front = (void*)(uintptr_t(m_front) + nPrealloc*nbytes);
@@ -817,10 +815,10 @@ inline void MemoryManager::storeTail(void* tail, uint32_t tailBytes) {
   void* rem = tail;
   for (uint32_t remBytes = tailBytes; remBytes > 0;) {
     uint32_t fragBytes = remBytes;
-    assert(fragBytes >= kSmartSizeAlign);
-    assert((fragBytes & kSmartSizeAlignMask) == 0);
-    unsigned fragInd = smartSize2Index(fragBytes + 1) - 1;
-    uint32_t fragUsable = smartIndex2Size(fragInd);
+    assert(fragBytes >= kSmallSizeAlign);
+    assert((fragBytes & kSmallSizeAlignMask) == 0);
+    unsigned fragInd = smallSize2Index(fragBytes + 1) - 1;
+    uint32_t fragUsable = smallIndex2Size(fragInd);
     void* frag = (void*)(uintptr_t(rem) + remBytes - fragUsable);
     FTRACE(4, "MemoryManager::storeTail({}, {}): rem={}, remBytes={}, "
               "frag={}, fragBytes={}, fragUsable={}, fragInd={}\n", tail,
@@ -838,9 +836,9 @@ inline void MemoryManager::storeTail(void* tail, uint32_t tailBytes) {
 inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
                                      unsigned nSplit, uint32_t splitUsable,
                                      unsigned splitInd) {
-  assert(tailBytes >= kSmartSizeAlign);
-  assert((tailBytes & kSmartSizeAlignMask) == 0);
-  assert((splitUsable & kSmartSizeAlignMask) == 0);
+  assert(tailBytes >= kSmallSizeAlign);
+  assert((tailBytes & kSmallSizeAlignMask) == 0);
+  assert((splitUsable & kSmallSizeAlignMask) == 0);
   assert(nSplit * splitUsable <= tailBytes);
   for (uint32_t i = nSplit; i--;) {
     void* split = (void*)(uintptr_t(tail) + i * splitUsable);
@@ -857,29 +855,29 @@ inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
   storeTail(rem, remBytes);
 }
 
-void* MemoryManager::smartMallocSizeSlow(uint32_t bytes, unsigned index) {
-  size_t nbytes = smartIndex2Size(index);
+void* MemoryManager::mallocSmallSizeSlow(uint32_t bytes, unsigned index) {
+  size_t nbytes = smallIndex2Size(index);
   static constexpr unsigned nContigTab[] = {
-#define SMART_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
+#define SMALL_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
     ncontig,
-  SMART_SIZES
-#undef SMART_SIZE
+  SMALL_SIZES
+#undef SMALL_SIZE
   };
   unsigned nContig = nContigTab[index];
   size_t contigMin = nContig * nbytes;
-  unsigned contigInd = smartSize2Index(contigMin);
-  for (unsigned i = contigInd; i < kNumSmartSizes; ++i) {
-    FTRACE(4, "MemoryManager::SmartMallocSizeSlow({}-->{}, {}): contigMin={}, "
+  unsigned contigInd = smallSize2Index(contigMin);
+  for (unsigned i = contigInd; i < kNumSmallSizes; ++i) {
+    FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}-->{}, {}): contigMin={}, "
               "contigInd={}, try i={}\n", bytes, nbytes, index, contigMin,
               contigInd, i);
     void* p = m_freelists[i].maybePop();
     if (p != nullptr) {
-      FTRACE(4, "MemoryManager::smartMallocSizeSlow({}-->{}, {}): "
+      FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}-->{}, {}): "
                 "contigMin={}, contigInd={}, use i={}, size={}, p={}\n", bytes,
-                nbytes, index, contigMin, contigInd, i, smartIndex2Size(i),
+                nbytes, index, contigMin, contigInd, i, smallIndex2Size(i),
                 p);
       // Split tail into preallocations and store them back into freelists.
-      uint32_t availBytes = smartIndex2Size(i);
+      uint32_t availBytes = smallIndex2Size(i);
       uint32_t tailBytes = availBytes - nbytes;
       if (tailBytes > 0) {
         void* tail = (void*)(uintptr_t(p) + nbytes);
@@ -904,7 +902,7 @@ inline void MemoryManager::updateBigStats() {
 }
 
 NEVER_INLINE
-void* MemoryManager::smartMallocBig(size_t nbytes) {
+void* MemoryManager::mallocBig(size_t nbytes) {
   assert(nbytes > 0);
   auto block = m_heap.allocBig(nbytes, HeaderKind::BigMalloc);
   updateBigStats();
@@ -912,12 +910,12 @@ void* MemoryManager::smartMallocBig(size_t nbytes) {
 }
 
 template NEVER_INLINE
-MemBlock MemoryManager::smartMallocSizeBig<true>(size_t);
+MemBlock MemoryManager::mallocBigSize<true>(size_t);
 template NEVER_INLINE
-MemBlock MemoryManager::smartMallocSizeBig<false>(size_t);
+MemBlock MemoryManager::mallocBigSize<false>(size_t);
 
 template<bool callerSavesActualSize> NEVER_INLINE
-MemBlock MemoryManager::smartMallocSizeBig(size_t bytes) {
+MemBlock MemoryManager::mallocBigSize(size_t bytes) {
   auto block = m_heap.allocBig(bytes, HeaderKind::BigObj);
   auto szOut = block.size;
 #ifdef USE_JEMALLOC
@@ -931,13 +929,13 @@ MemBlock MemoryManager::smartMallocSizeBig(size_t bytes) {
 #endif
   updateBigStats();
   auto ptrOut = block.ptr;
-  FTRACE(3, "smartMallocSizeBig: {} ({} requested, {} usable)\n",
+  FTRACE(3, "mallocBigSize: {} ({} requested, {} usable)\n",
          ptrOut, bytes, szOut);
   return {ptrOut, szOut};
 }
 
 NEVER_INLINE
-void* MemoryManager::smartCallocBig(size_t totalbytes) {
+void* MemoryManager::callocBig(size_t totalbytes) {
   assert(totalbytes > 0);
   auto block = m_heap.callocBig(totalbytes);
   updateBigStats();
@@ -947,32 +945,29 @@ void* MemoryManager::smartCallocBig(size_t totalbytes) {
 // req::malloc api entry points, with support for malloc/free corner cases.
 namespace req {
 void* malloc(size_t nbytes) {
-  auto& mm = MM();
   auto const size = std::max(nbytes, size_t(1));
-  return mm.smartMalloc(size);
+  return MM().malloc(size);
 }
 
 void* calloc(size_t count, size_t nbytes) {
-  auto& mm = MM();
   auto const totalBytes = std::max<size_t>(count * nbytes, 1);
-  if (totalBytes <= kMaxSmartSize) {
+  if (totalBytes <= kMaxSmallSize) {
     return memset(req::malloc(totalBytes), 0, totalBytes);
   }
-  return mm.smartCallocBig(totalBytes);
+  return MM().callocBig(totalBytes);
 }
 
 void* realloc(void* ptr, size_t nbytes) {
-  auto& mm = MM();
   if (!ptr) return req::malloc(nbytes);
   if (!nbytes) {
     req::free(ptr);
     return nullptr;
   }
-  return mm.smartRealloc(ptr, nbytes);
+  return MM().realloc(ptr, nbytes);
 }
 
 void free(void* ptr) {
-  if (ptr) MM().smartFree(ptr);
+  if (ptr) MM().free(ptr);
 }
 } // namespace req
 
@@ -1374,7 +1369,7 @@ void* ContiguousHeap::heapAlloc(size_t nbytes, size_t &cap) {
   auto cur = m_freeList.next;
   while (cur != nullptr ) {
     if (cur->size() >= alignedSize &&
-        cur->size() < alignedSize + kMaxSmartSize) {
+        cur->size() < alignedSize + kMaxSmallSize) {
       // found freed heap node that fits allocation and doesn't need to split
       ptr = cur;
       prev->next = cur->next;

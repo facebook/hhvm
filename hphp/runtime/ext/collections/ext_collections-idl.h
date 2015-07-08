@@ -2125,7 +2125,7 @@ template<class T, class... Args> T* newCollectionObj(Args&&... args) {
   static_assert(std::is_convertible<T*,BaseVector*>::value ||
                 std::is_convertible<T*,HashCollection*>::value ||
                 std::is_convertible<T*,c_Pair*>::value, "");
-  auto const mem = MM().smartMallocSize(sizeof(T));
+  auto const mem = MM().mallocSmallSize(sizeof(T));
   auto col = new (mem) T(std::forward<Args>(args)...);
   assert(col->hasExactlyOneRef());
   return col;

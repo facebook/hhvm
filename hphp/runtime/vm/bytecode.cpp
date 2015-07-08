@@ -378,7 +378,7 @@ VarEnv::~VarEnv() {
   if (isGlobalScope()) {
     /*
      * When detaching the global scope, we leak any live objects (and
-     * let the smart allocator clean them up).  This is because we're
+     * let MemoryManager clean them up).  This is because we're
      * not supposed to run destructors for objects that are live at
      * the end of a request.
      */
@@ -674,7 +674,7 @@ void flush_evaluation_stack() {
      * It is possible to create a new thread, but then not use it
      * because another thread became available and stole the job.
      * If that thread becomes idle, it will have a g_context, and
-     * some smart allocated memory
+     * some request-allocated memory
      */
     hphp_memory_cleanup();
   }

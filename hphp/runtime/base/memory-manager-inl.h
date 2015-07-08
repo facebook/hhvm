@@ -27,8 +27,8 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 static_assert(
-  kMaxSmartSize <= std::numeric_limits<uint32_t>::max(),
-  "Size-specified smart malloc functions assume this"
+  kMaxSmallSize <= std::numeric_limits<uint32_t>::max(),
+  "Size-specified small block alloc functions assume this"
 );
 
 //////////////////////////////////////////////////////////////////////
@@ -153,7 +153,7 @@ inline void* MemoryManager::FreeList::maybePop() {
 inline void MemoryManager::FreeList::push(void* val, size_t size) {
   FTRACE(4, "FreeList::push({}, {}), prev head = {}\n", val, size, head);
   auto constexpr kMaxFreeSize = std::numeric_limits<uint32_t>::max();
-  static_assert(kMaxSmartSize <= kMaxFreeSize, "");
+  static_assert(kMaxSmallSize <= kMaxFreeSize, "");
   assert(size > 0 && size <= kMaxFreeSize);
   auto const node = static_cast<FreeNode*>(val);
   node->next = head;
@@ -164,8 +164,8 @@ inline void MemoryManager::FreeList::push(void* val, size_t size) {
 
 //////////////////////////////////////////////////////////////////////
 
-inline uint32_t MemoryManager::estimateSmartCap(uint32_t requested) {
-  return requested <= kMaxSmartSize ? smartSizeClass(requested)
+inline uint32_t MemoryManager::estimateCap(uint32_t requested) {
+  return requested <= kMaxSmallSize ? smallSizeClass(requested)
                                     : requested;
 }
 
@@ -183,99 +183,99 @@ inline uint32_t MemoryManager::bsr(uint32_t x) {
 #endif
 }
 
-inline uint8_t MemoryManager::smartSize2IndexCompute(uint32_t size) {
+inline uint8_t MemoryManager::computeSmallSize2Index(uint32_t size) {
   uint32_t x = bsr((size<<1)-1);
-  uint32_t shift = (x < kLgSizeClassesPerDoubling + kLgSmartSizeQuantum)
-                   ? 0 : x - (kLgSizeClassesPerDoubling + kLgSmartSizeQuantum);
+  uint32_t shift = (x < kLgSizeClassesPerDoubling + kLgSmallSizeQuantum)
+                   ? 0 : x - (kLgSizeClassesPerDoubling + kLgSmallSizeQuantum);
   uint32_t grp = shift << kLgSizeClassesPerDoubling;
 
   int32_t lgReduced = x - kLgSizeClassesPerDoubling
                       - 1; // Counteract left shift of bsr() argument.
-  uint32_t lgDelta = (lgReduced < int32_t(kLgSmartSizeQuantum))
-                     ? kLgSmartSizeQuantum : lgReduced;
+  uint32_t lgDelta = (lgReduced < int32_t(kLgSmallSizeQuantum))
+                     ? kLgSmallSizeQuantum : lgReduced;
   uint32_t deltaInverseMask = -1 << lgDelta;
   constexpr uint32_t kModMask = (1u << kLgSizeClassesPerDoubling) - 1;
   uint32_t mod = ((((size-1) & deltaInverseMask) >> lgDelta)) & kModMask;
 
   auto const index = grp + mod;
-  assert(index < kNumSmartSizes);
+  assert(index < kNumSmallSizes);
   return index;
 }
 
-inline uint8_t MemoryManager::smartSize2IndexLookup(uint32_t size) {
-  uint8_t index = kSmartSize2Index[(size-1) >> kLgSmartSizeQuantum];
-  assert(index == smartSize2IndexCompute(size));
+inline uint8_t MemoryManager::lookupSmallSize2Index(uint32_t size) {
+  uint8_t index = kSmallSize2Index[(size-1) >> kLgSmallSizeQuantum];
+  assert(index == computeSmallSize2Index(size));
   return index;
 }
 
-inline uint8_t MemoryManager::smartSize2Index(uint32_t size) {
+inline uint8_t MemoryManager::smallSize2Index(uint32_t size) {
   assert(size > 0);
-  assert(size <= kMaxSmartSize);
-  if (LIKELY(size <= kMaxSmartSizeLookup)) {
-    return smartSize2IndexLookup(size);
+  assert(size <= kMaxSmallSize);
+  if (LIKELY(size <= kMaxSmallSizeLookup)) {
+    return lookupSmallSize2Index(size);
   }
-  return smartSize2IndexCompute(size);
+  return computeSmallSize2Index(size);
 }
 
-inline uint32_t MemoryManager::smartIndex2Size(uint8_t index) {
-  return kSmartIndex2Size[index];
+inline uint32_t MemoryManager::smallIndex2Size(uint8_t index) {
+  return kSmallIndex2Size[index];
 }
 
-inline uint32_t MemoryManager::smartSizeClass(uint32_t reqBytes) {
+inline uint32_t MemoryManager::smallSizeClass(uint32_t reqBytes) {
   uint32_t x = bsr((reqBytes<<1)-1);
   int32_t lgReduced = x - kLgSizeClassesPerDoubling
                       - 1; // Counteract left shift of bsr() argument.
-  uint32_t lgDelta = (lgReduced < int32_t(kLgSmartSizeQuantum))
-                      ? kLgSmartSizeQuantum : lgReduced;
+  uint32_t lgDelta = (lgReduced < int32_t(kLgSmallSizeQuantum))
+                      ? kLgSmallSizeQuantum : lgReduced;
   uint32_t delta = 1u << lgDelta;
   uint32_t deltaMask = delta - 1;
   auto const ret = (reqBytes + deltaMask) & ~deltaMask;
-  assert(ret <= kMaxSmartSize);
+  assert(ret <= kMaxSmallSize);
   return ret;
 }
 
-inline void* MemoryManager::smartMallocSize(uint32_t bytes) {
+inline void* MemoryManager::mallocSmallSize(uint32_t bytes) {
   assert(bytes > 0);
-  assert(bytes <= kMaxSmartSize);
+  assert(bytes <= kMaxSmallSize);
 
   // Note: unlike req::malloc, we don't track internal fragmentation
-  // in the usage stats when we're going through smartMallocSize.
+  // in the usage stats when we're going through mallocSmallSize.
   m_stats.usage += bytes;
 
-  unsigned index = smartSize2Index(bytes);
+  unsigned index = smallSize2Index(bytes);
   void *p = m_freelists[index].maybePop();
   if (UNLIKELY(p == nullptr)) {
-    p = smartMallocSizeSlow(bytes, index);
+    p = mallocSmallSizeSlow(bytes, index);
   }
-  assert((reinterpret_cast<uintptr_t>(p) & kSmartSizeAlignMask) == 0);
-  FTRACE(3, "smartMallocSize: {} -> {}\n", bytes, p);
+  assert((reinterpret_cast<uintptr_t>(p) & kSmallSizeAlignMask) == 0);
+  FTRACE(3, "mallocSmallSize: {} -> {}\n", bytes, p);
   return p;
 }
 
-inline void MemoryManager::smartFreeSize(void* ptr, uint32_t bytes) {
+inline void MemoryManager::freeSmallSize(void* ptr, uint32_t bytes) {
   assert(bytes > 0);
-  assert(bytes <= kMaxSmartSize);
-  assert((reinterpret_cast<uintptr_t>(ptr) & kSmartSizeAlignMask) == 0);
+  assert(bytes <= kMaxSmallSize);
+  assert((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);
 
   if (UNLIKELY(m_bypassSlabAlloc)) {
-    return smartFreeSizeBig(ptr, bytes);
+    return freeBigSize(ptr, bytes);
   }
-  unsigned i = smartSize2Index(bytes);
-  FTRACE(3, "smartFreeSize({}, {}), freelist {}\n", ptr, bytes, i);
+  unsigned i = smallSize2Index(bytes);
+  FTRACE(3, "freeSmallSize({}, {}), freelist {}\n", ptr, bytes, i);
   m_freelists[i].push(ptr, bytes);
   assert(m_needInitFree = true); // intentional debug-only side-effect.
   m_stats.usage -= bytes;
 
-  FTRACE(3, "smartFreeSize: {} ({} bytes)\n", ptr, bytes);
+  FTRACE(3, "freeSmallSize: {} ({} bytes)\n", ptr, bytes);
 }
 
 ALWAYS_INLINE
-void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
+void MemoryManager::freeBigSize(void* vp, size_t bytes) {
   m_stats.usage -= bytes;
   // Since we account for these direct allocations in our usage and adjust for
   // them on allocation, we also need to adjust for them negatively on free.
   m_stats.borrow(-bytes);
-  FTRACE(3, "smartFreeSizeBig: {} ({} bytes)\n", vp, bytes);
+  FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp, bytes);
   m_heap.freeBig(vp);
 }
 
@@ -283,14 +283,14 @@ void MemoryManager::smartFreeSizeBig(void* vp, size_t bytes) {
 
 ALWAYS_INLINE
 void* MemoryManager::objMalloc(size_t size) {
-  if (LIKELY(size <= kMaxSmartSize)) return smartMallocSize(size);
-  return smartMallocSizeBig<false>(size).ptr;
+  if (LIKELY(size <= kMaxSmallSize)) return mallocSmallSize(size);
+  return mallocBigSize<false>(size).ptr;
 }
 
 ALWAYS_INLINE
 void MemoryManager::objFree(void* vp, size_t size) {
-  if (LIKELY(size <= kMaxSmartSize)) return smartFreeSize(vp, size);
-  smartFreeSizeBig(vp, size);
+  if (LIKELY(size <= kMaxSmallSize)) return freeSmallSize(vp, size);
+  freeBigSize(vp, size);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -375,7 +375,7 @@ inline bool MemoryManager::contains(void *p) const {
 }
 
 inline bool MemoryManager::checkContains(void* p) const {
-  // Be conservative if the smart allocator is disabled.
+  // Be conservative if the small-block allocator is disabled.
   assert(RuntimeOption::DisableSmartAllocator || contains(p));
   return true;
 }

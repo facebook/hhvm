@@ -35,7 +35,7 @@ struct Sweepable: private boost::noncopyable {
 
   /*
    * There is no default behavior. Make sure this function frees all
-   * NON-SMART-ALLOCATED resources ONLY.
+   * only non-request-allocated resources.
    */
   virtual void sweep() = 0;
 

@@ -118,12 +118,12 @@ class ResourceData {
  * Rules to avoid memory problems/leaks from ResourceData classes
  * ==============================================================
  *
- * 1. If a ResourceData is entirely smart allocated, for example,
+ * 1. If a ResourceData is entirely request-allocated, for example,
  *
  *    class EntirelySmartAllocated : public ResourceData {
  *    public:
  *       int number; // primitives are allocated together with "this"
- *       String str; // smart-allocated objects are fine
+ *       String str; // request-allocated objects are fine
  *    };
  *
  *    Then, the best choice is to use this macro to make sure the object
@@ -134,7 +134,7 @@ class ResourceData {
  *    This object doesn't participate in sweep(), as object allocator doesn't
  *    have any callback installed.
  *
- * 2. If a ResourceData is entirely not smart allocated, for example,
+ * 2. If a ResourceData is entirely not request allocated, for example,
  *
  *    class NonSmartAllocated : public SweepableResourceData {
  *    public:
@@ -154,16 +154,16 @@ class ResourceData {
  *       DECLARE_RESOURCE_ALLOCATION(T);
  *       IMPLEMENT_RESOURCE_ALLOCATION(T);
  *
- * 3. If a ResourceData is a mix of smart allocated data members and non-
- *    smart allocated data members, sweep() has to be overwritten to only
- *    free non-smart allocated data members. This is because smart allocated
+ * 3. If a ResourceData is a mix of request allocated data members and globally
+ *    allocated data members, sweep() has to be overwritten to only free
+ *    the globally allocated members. This is because request-allocated
  *    data members may have their own sweep() defined to destruct, and another
  *    destruction from this ResourceData's default sweep() will cause double-
- *    free problems on these smart allocated data members.
+ *    free problems on these request-allocated data members.
  *
  *    This means, std::vector<String> is almost always wrong, because there is
  *    no way to free up vector's memory without touching String, which is
- *    smart allocated.
+ *    request-allocated.
  *
  *    class MixedSmartAllocated : public SweepableResourceData {
  *    public:
@@ -174,7 +174,7 @@ class ResourceData {
  *       std::vector<int> *vec;
  *
  *       HANDLE ptr; // raw pointers that need to be free-d somehow
- *       String str; // smart-allocated objects are fine
+ *       String str; // request-allocated objects are fine
  *
  *       DECLARE_RESOURCE_ALLOCATION(T);
  *    };
@@ -189,7 +189,7 @@ class ResourceData {
 class SweepableResourceData : public ResourceData, public Sweepable {
 protected:
   void sweep() override {
-    // ResourceData objects are non-smart allocated by default (see
+    // ResourceData objects are globally allocated by default (see
     // operator delete in ResourceData), so sweeping will destroy the
     // object and deallocate its seat as well.
     delete this;
@@ -204,16 +204,16 @@ ALWAYS_INLINE bool decRefRes(ResourceData* res) {
 
 // allocate and construct a resource subclass type T
 template<class T, class... Args> T* newres(Args&&... args) {
-  static_assert(sizeof(T) <= 0xffff && sizeof(T) < kMaxSmartSize, "");
+  static_assert(sizeof(T) <= 0xffff && sizeof(T) < kMaxSmallSize, "");
   static_assert(std::is_convertible<T*,ResourceData*>::value, "");
-  auto const mem = MM().smartMallocSize(sizeof(T));
+  auto const mem = MM().mallocSmallSize(sizeof(T));
   try {
     auto r = new (mem) T(std::forward<Args>(args)...);
     r->m_hdr.aux = sizeof(T);
     assert(r->hasExactlyOneRef());
     return r;
   } catch (...) {
-    MM().smartFreeSize(mem, sizeof(T));
+    MM().freeSmallSize(mem, sizeof(T));
     throw;
   }
 }
@@ -228,7 +228,7 @@ template <typename F> friend void scan(const T& this_, F& mark);
   ALWAYS_INLINE void operator delete(void* p) {                 \
     static_assert(std::is_base_of<ResourceData,T>::value, "");  \
     assert(static_cast<T*>(p)->heapSize() == sizeof(T));        \
-    MM().smartFreeSize(p, sizeof(T));                     \
+    MM().freeSmallSize(p, sizeof(T));                     \
   }
 
 #define DECLARE_RESOURCE_ALLOCATION(T)                          \

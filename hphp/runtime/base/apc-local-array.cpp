@@ -95,7 +95,7 @@ void APCLocalArray::Release(ArrayData* ad) {
   assert(ad->hasExactlyOneRef());
   auto const a = asApcArray(ad);
   a->~APCLocalArray();
-  MM().smartFreeSize(a, sizeof(APCLocalArray));
+  MM().freeSmallSize(a, sizeof(APCLocalArray));
 }
 
 size_t APCLocalArray::Vsize(const ArrayData*) { not_reached(); }

@@ -139,7 +139,7 @@ struct ObjectData {
    * uninitialized object of that class. These are meant to be called from the
    * JIT.
    *
-   * newInstanceRaw should be called only when size <= kMaxSmartSize,
+   * newInstanceRaw should be called only when size <= kMaxSmallSize,
    * otherwise use newInstanceRawBig.
    *
    * The initial ref-count will be set to one.
@@ -513,13 +513,13 @@ typename std::enable_if<
   std::is_convertible<T*, ObjectData*>::value,
   req::ptr<T>
 >::type make(Args&&... args) {
-  auto const mem = MM().smartMallocSize(sizeof(T));
+  auto const mem = MM().mallocSmallSize(sizeof(T));
   try {
     auto t = new (mem) T(std::forward<Args>(args)...);
     assert(t->hasExactlyOneRef());
     return req::ptr<T>::attach(t);
   } catch (...) {
-    MM().smartFreeSize(mem, sizeof(T));
+    MM().freeSmallSize(mem, sizeof(T));
     throw;
   }
 }

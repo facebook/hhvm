@@ -1,4 +1,4 @@
-Fatal error: Uncaught exception 'HH\InvariantException' with message 'nope' in :
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'nope' in %s/test/slow/lang/invariant.php:8
 Stack trace:
 #0 %s/test/slow/lang/invariant.php(8): HH\invariant_violation()
 #1 {main}

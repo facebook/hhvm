@@ -10,4 +10,5 @@ NULL
 int(1)
 int(3)
 
-Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Integer key 3 is out of bounds' in :%a
+Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Integer key 3 is out of bounds' in %s:%d
+%a

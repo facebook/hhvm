@@ -64,7 +64,7 @@ string(2) "10"
 string(3) "foo"
 a broken assert()
 
-Fatal error: Uncaught exception 'UnexpectedValueException' with message 'welp is not a valid value for Bar' in :
+Fatal error: Uncaught exception 'UnexpectedValueException' with message 'welp is not a valid value for Bar' in %s:70
 Stack trace:
 #0 %s(70): HH\BuiltinEnum::assert()
 #1 {main}

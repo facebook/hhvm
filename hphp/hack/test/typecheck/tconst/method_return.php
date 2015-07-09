@@ -50,9 +50,6 @@ trait X_Trait {
   }
 
   public function parent_get(): this::T {
-    /* HH_FIXME[4110] - Temporary until we parent for expression dependent
-     * types
-     */
     return parent::get();
   }
 }

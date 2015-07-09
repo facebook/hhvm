@@ -622,9 +622,6 @@ class IntlGregorianCalendar extends IntlCalendar {
   public function setGregorianChange($date) {}
 }
 
-class IntlException extends Exception {
-}
-
 class IntlIterator<T> implements Iterator<T> {
   public function current() {}
   public function key() {}

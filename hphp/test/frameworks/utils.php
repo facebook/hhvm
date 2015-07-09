@@ -77,10 +77,10 @@ function find_first_file_recursive(Set $filenames, string $root_dir,
   $sit = new SortedIterator($rit);
 
   foreach ($sit as $fileinfo) {
-    if ($filenames->contains($fileinfo->getFileName())) {
+    if ($filenames->contains($fileinfo->getFilename())) {
       return $just_path_to_file
              ? $fileinfo->getPath()
-             : $fileinfo->getPathName();
+             : $fileinfo->getPathname();
     }
   }
 
@@ -99,11 +99,11 @@ function find_all_files(string $pattern, string $root_dir,
   $rit = new RecursiveIteratorIterator($dit);
   $sit = new SortedIterator($rit);
   foreach ($sit as $fileinfo) {
-    if (preg_match($pattern, $fileinfo->getFileName()) === 1 &&
-        preg_match($exclude_file_pattern, $fileinfo->getFileName()) === 0 &&
+    if (preg_match($pattern, $fileinfo->getFilename()) === 1 &&
+        preg_match($exclude_file_pattern, $fileinfo->getFilename()) === 0 &&
         strstr($fileinfo->getPath(), '/vendor/') === false &&
         !nullthrows($exclude_dirs)->contains(dirname($fileinfo->getPath()))) {
-      $files[] = $fileinfo->getPathName();
+      $files[] = $fileinfo->getPathname();
     }
   }
 
@@ -125,11 +125,11 @@ function find_all_files_containing_text(
   $rit = new RecursiveIteratorIterator($dit);
   $sit = new SortedIterator($rit);
   foreach ($sit as $fileinfo) {
-    if (strpos(file_get_contents($fileinfo->getPathName()), $text) !== false &&
-        preg_match($exclude_file_pattern, $fileinfo->getFileName()) === 0 &&
+    if (strpos(file_get_contents($fileinfo->getPathname()), $text) !== false &&
+        preg_match($exclude_file_pattern, $fileinfo->getFilename()) === 0 &&
         strstr($fileinfo->getPath(), '/vendor/') === false &&
         !nullthrows($exclude_dirs)->contains(dirname($fileinfo->getPath()))) {
-      $files[] = $fileinfo->getPathName();
+      $files[] = $fileinfo->getPathname();
     }
   }
 

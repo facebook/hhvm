@@ -107,3 +107,5 @@ function invariant(
   $condition, // e.g. is_int($x) or ($y instanceof SomeClass)
   \HH\FormatString<PlainSprintf> $f, ...$f_args
 ): void;
+
+function invariant_callback_register((function(string, ...): void) $callback): void {}

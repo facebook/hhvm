@@ -16,8 +16,12 @@
 */
 
 #include "hphp/runtime/ext/pdo/pdo_driver.h"
+#ifdef ENABLE_EXTENSION_PDO_SQLITE
 #include "hphp/runtime/ext/pdo/pdo_sqlite.h"
+#endif
+#ifdef ENABLE_EXTENSION_PDO_MYSQL
 #include "hphp/runtime/ext/pdo/pdo_mysql.h"
+#endif
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
@@ -28,8 +32,12 @@ namespace HPHP {
 PDODriverMap PDODriver::s_drivers;
 
 // We will have to list them all here for proper static initialization.
+#ifdef ENABLE_EXTENSION_PDO_SQLITE
 static PDOSqlite s_sqlite_driver;
+#endif
+#ifdef ENABLE_EXTENSION_PDO_MYSQL
 static PDOMySql s_mysql_driver;
+#endif
 
 const StaticString s_general_error_code("HY000");
 

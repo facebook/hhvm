@@ -1,5 +1,8 @@
+# This will be run after runtime/ext has, so we can use the output of
+# that.
 auto_sources(IDL_SRCS "*.idl.json" "RECURSE"
              "${CMAKE_CURRENT_SOURCE_DIR}/../system/idl")
+list(APPEND IDL_SRCS ${EXTENSION_IDL_SOURCES})
 
 add_custom_command(
   OUTPUT "class_map.cpp" "constants.h"

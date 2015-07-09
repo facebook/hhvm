@@ -1,0 +1,10 @@
+HHVM_DEFINE_EXTENSION("zip"
+  SOURCES
+    ext_zip.cpp
+  EXTENSION_LIBRARY
+    ext_zip.php
+  DEPENDS_UPON
+    ext_pcre
+    ext_std
+    libZip
+)

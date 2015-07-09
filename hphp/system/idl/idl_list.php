@@ -53,7 +53,9 @@ foreach ($files as $file) {
   switch ($format) {
   case 'ext':
     $path = $prefix ? "hphp/$prefix" : "hphp/runtime/ext/";
+    fwrite($f, "#ifdef ENABLE_EXTENSION_" . strtoupper($name) . "\n");
     fwrite($f, "#include \"${path}ext_$name.h\"\n");
+    fwrite($f, "#endif\n");
     break;
   }
 }

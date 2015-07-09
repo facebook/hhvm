@@ -1,0 +1,11 @@
+HHVM_DEFINE_EXTENSION("objprof"
+  SOURCES
+    ext_objprof.cpp
+  HEADERS
+    ext_objprof.h
+  EXTENSION_LIBRARY
+    ext_objprof.php
+  DEPENDS_UPON
+    ext_datetime
+    ext_simplexml
+)

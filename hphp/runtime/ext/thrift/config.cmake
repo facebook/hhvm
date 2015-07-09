@@ -1,0 +1,15 @@
+HHVM_DEFINE_EXTENSION("thrift"
+  SOURCES
+    binary.cpp
+    compact.cpp
+    ext_thrift.cpp
+  HEADERS
+    ext_thrift.h
+    transport.h
+  EXTENSION_LIBRARY
+    ext_thrift.php
+  DEPENDS_UPON
+    ext_collections
+    ext_reflection
+    ext_std
+)

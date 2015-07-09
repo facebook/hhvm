@@ -1,0 +1,11 @@
+HHVM_DEFINE_EXTENSION("posix"
+  SOURCES
+    ext_posix.cpp
+  HEADERS
+    ext_posix.h
+  EXTENSION_LIBRARY
+    ext_posix.php
+  DEPENDS_UPON
+    libFolly
+    osPosix
+)

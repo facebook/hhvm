@@ -1,0 +1,9 @@
+HHVM_DEFINE_EXTENSION("mcrypt"
+  SOURCES
+    ext_mcrypt.cpp
+  EXTENSION_LIBRARY
+    ext_mcrypt.php
+  DEPENDS_UPON
+    ext_std
+    libMCrypt
+)

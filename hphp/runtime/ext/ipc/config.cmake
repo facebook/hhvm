@@ -1,0 +1,15 @@
+HHVM_DEFINE_EXTENSION("ipc"
+  SOURCES
+    ext_ipc.cpp
+  HEADERS
+    ext_ipc.h
+  EXTENSION_LIBRARY
+    ext_sysvmsg.php
+    ext_sysvsem.php
+    ext_sysvshm.php
+  DEPENDS_UPON
+    ext_std
+    libFolly
+    osPosix
+    systemlib
+)

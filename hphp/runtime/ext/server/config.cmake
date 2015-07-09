@@ -1,0 +1,10 @@
+HHVM_DEFINE_EXTENSION("server"
+  SOURCES
+    ext_server.cpp
+  HEADERS
+    ext_server.h
+  EXTENSION_LIBRARY
+    ext_server.php
+  DEPENDS_UPON
+    libFolly
+)

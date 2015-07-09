@@ -1,0 +1,11 @@
+HHVM_DEFINE_EXTENSION("openssl"
+  SOURCES
+    ext_openssl.cpp
+  HEADERS
+    ext_openssl.h
+  EXTENSION_LIBRARY
+    ext_openssl.php
+  DEPENDS_UPON
+    libOpenSSL
+    systemlib
+)

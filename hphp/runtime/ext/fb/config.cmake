@@ -1,0 +1,19 @@
+HHVM_DEFINE_EXTENSION("fb"
+  PRETTY_NAME "FB Serializer"
+  SOURCES
+    ext_fb.cpp
+  HEADERS
+    ext_fb.h
+    FBSerialize.h
+    FBSerialize-inl.h
+    VariantController.h
+  EXTENSION_LIBRARY
+    ext_fb.php
+  IDL
+    fb.idl.json
+  DEPENDS_UPON
+    ext_mysql
+    ext_std
+    libFolly
+    libICU
+)

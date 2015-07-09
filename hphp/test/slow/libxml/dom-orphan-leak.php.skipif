@@ -1,5 +1,5 @@
 <?php
 // Our memory accounting is broken when we compile without jemalloc.  There's no
 // easy way to check if an HHVM binary was compiled with jemalloc or not, so
-// just estimate it by seeing if the smart allocator is disabled.
-if (ini_get('hhvm.disable_smart_allocator')) echo 'skip';
+// just estimate it by seeing if the small-block allocator is disabled.
+if (ini_get('hhvm.disable_small_allocator')) echo 'skip';

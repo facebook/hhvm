@@ -194,7 +194,7 @@ MemoryManager::MemoryManager()
   m_stats.maxBytes = std::numeric_limits<int64_t>::max();
   // make the circular-lists empty.
   m_strings.next = m_strings.prev = &m_strings;
-  m_bypassSlabAlloc = RuntimeOption::DisableSmartAllocator;
+  m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
 }
 
 void MemoryManager::dropRootMaps() {
@@ -1103,7 +1103,7 @@ void MemoryManager::requestShutdown() {
           &profctx.prof_active, sizeof(bool));
 #endif
 
-  MM().m_bypassSlabAlloc = RuntimeOption::DisableSmartAllocator;
+  MM().m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
   profctx = ReqProfContext{};
 }
 

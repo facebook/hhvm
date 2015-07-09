@@ -336,9 +336,9 @@ bool RuntimeOption::WarnOnCollectionToArray = false;
 bool RuntimeOption::UseDirectCopy = false;
 
 #ifdef FOLLY_SANITIZE_ADDRESS
-bool RuntimeOption::DisableSmartAllocator = true;
+bool RuntimeOption::DisableSmallAllocator = true;
 #else
-bool RuntimeOption::DisableSmartAllocator = false;
+bool RuntimeOption::DisableSmallAllocator = false;
 #endif
 
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
@@ -1041,9 +1041,9 @@ void RuntimeOption::Load(
       throw std::runtime_error("Code coverage is not supported with "
         "Eval.Jit=true");
     }
-    Config::Bind(DisableSmartAllocator, ini, config,
-                 "Eval.DisableSmartAllocator", DisableSmartAllocator);
-    SetArenaSlabAllocBypass(DisableSmartAllocator);
+    Config::Bind(DisableSmallAllocator, ini, config,
+                 "Eval.DisableSmallAllocator", DisableSmallAllocator);
+    SetArenaSlabAllocBypass(DisableSmallAllocator);
 
     if (RecordCodeCoverage) CheckSymLink = true;
     Config::Bind(CodeCoverageOutputFile, ini, config,

@@ -8,14 +8,14 @@ namespace HH {
       arraykey $index,
       $default = null,
     ) {
-      return hphp_array_idx($shape, $index, $default);
+      return \hphp_array_idx($shape, $index, $default);
     }
 
     public static function keyExists(
       array $shape,
       arraykey $index,
     ): bool {
-      return array_key_exists($index, $shape);
+      return \array_key_exists($index, $shape);
     }
 
     public static function removeKey(

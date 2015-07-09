@@ -11,7 +11,6 @@ class X {
 
   public function alias_this_get(): this::T {
     $this_for_hack = $this;
-    /* HH_FIXME[4110] - Temporary until we make $this expression dependent */
     return $this_for_hack->val;
   }
 

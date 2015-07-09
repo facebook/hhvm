@@ -45,7 +45,7 @@ enum AttachStringMode { AttachString };
 
 // const char* points to client-owned memory, StringData will copy it
 // at construct-time using req::malloc.  This is only ok when the StringData
-// itself was smart-allocated.
+// itself was request-allocated.
 enum CopyStringMode { CopyString };
 
 /*
@@ -172,7 +172,7 @@ struct StringData {
   static unsigned sweepAll();
 
   /*
-   * Called to return a StringData to the smart allocator.  This is
+   * Called to return a StringData to the request allocator.  This is
    * normally called when the reference count goes to zero (e.g. with
    * a helper like decRefStr).
    */

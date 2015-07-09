@@ -83,8 +83,8 @@ ExecutionContext::ExecutionContext()
   , m_executingSetprofileCallback(false)
 {
   resetCoverageCounters();
-  // We don't want a new execution context to cause any smart allocations
-  // (because it will cause us to hold a slab, even while idle)
+  // We don't want a new execution context to cause any request-heap
+  // allocations (because it will cause us to hold a slab, even while idle).
   static auto s_cwd = makeStaticString(Process::CurrentWorkingDirectory);
   m_cwd = s_cwd;
 

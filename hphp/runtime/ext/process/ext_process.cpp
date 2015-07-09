@@ -706,7 +706,7 @@ public:
 };
 
 void ChildProcess::sweep() {
-  // do nothing here, as everything will be collected by SmartAllocator
+  // do nothing here, as everything will be collected by MemoryManager
 }
 
 #define DESC_PIPE       1

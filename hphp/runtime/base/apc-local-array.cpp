@@ -357,8 +357,8 @@ bool APCLocalArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   not_reached();  // we should've escalated
 }
 
-ArrayData* APCLocalArray::NonSmartCopy(const ArrayData*) {
-  raise_error("APCLocalArray::nonSmartCopy not implemented.");
+ArrayData* APCLocalArray::CopyStatic(const ArrayData*) {
+  raise_error("APCLocalArray::copyStatic not implemented.");
   return nullptr;
 }
 

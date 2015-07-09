@@ -2045,7 +2045,7 @@ void hphp_memory_cleanup() {
   // here.
   always_assert(!g_context->hasRequestEventHandlers());
 
-  // g_context is smart allocated, and has some members that need
+  // g_context is request allocated, and has some members that need
   // cleanup, so destroy it before its too late
   g_context.destroy();
 

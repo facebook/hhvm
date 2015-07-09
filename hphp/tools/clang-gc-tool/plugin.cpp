@@ -27,7 +27,7 @@
  * functions.  These classes may overlap with needScanMethodNames classes.
  *
  * badContainerNames are names of container classes that are not suitable for
- * holding smart allocated objects, e.g. std::vector.
+ * holding request-allocated objects, e.g. std::vector.
  *
  * HandleTranslationUnit is the method that runs the different passes.  It is
  * invoked by Clang once any source files have finished parsing.
@@ -170,7 +170,7 @@ struct AddScanMethodsAction : public PluginASTAction {
     m_hasScanMethodNames.insert("folly::Optional");
     m_hasScanMethodNames.insert("boost::variant");
 
-    // These are classes that use non-smart allocation internally.
+    // These are classes that use malloc/new allocation internally.
     // They should generally not be used to store scanable things.
     // This list is used to generate warnings.
     m_badContainerNames.insert("std::vector");

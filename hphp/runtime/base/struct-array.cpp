@@ -78,7 +78,7 @@ StructArray* StructArray::createNoCopy(Shape* shape, size_t length) {
   return new (NotNull{}, ptr) StructArray(length, 0, shape);
 }
 
-StructArray* StructArray::createNonSmart(Shape* shape, size_t length) {
+StructArray* StructArray::createStatic(Shape* shape, size_t length) {
   auto ptr = malloc(bytesForCapacity(shape->capacity()));
   return new (NotNull{}, ptr) StructArray(length, 0, shape);
 }
@@ -430,10 +430,10 @@ ArrayData* StructArray::CopyWithStrongIterators(const ArrayData* ad) {
   return cpy;
 }
 
-ArrayData* StructArray::NonSmartCopy(const ArrayData* ad) {
+ArrayData* StructArray::CopyStatic(const ArrayData* ad) {
   auto structArray = asStructArray(ad);
   auto shape = structArray->shape();
-  auto ret = StructArray::createNonSmart(shape, structArray->size());
+  auto ret = StructArray::createStatic(shape, structArray->size());
 
   ret->m_pos = structArray->m_pos;
 
@@ -592,7 +592,7 @@ StructArray* StructArray::Grow(StructArray* old, Shape* newShape) {
 
 MixedArray* StructArray::ToMixedHeader(size_t neededSize) {
   auto const scale   = computeScaleFromSize(neededSize);
-  auto const ad      = smartAllocArray(scale);
+  auto const ad      = reqAllocArray(scale);
 
   ad->m_sizeAndPos       = 0; // We'll set size and pos later.
   ad->m_hdr.init(HeaderKind::Mixed, 1);

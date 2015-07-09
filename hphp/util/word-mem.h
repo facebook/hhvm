@@ -152,7 +152,7 @@ inline void memcpy16_inline(void* dst, const void* src, uint64_t len) {
  * terminator.
  *
  * Assumes it can load more words than the size to compare (this is often
- * possible in HPHP when you know you are dealing with smart allocated memory).
+ * possible in HPHP when you know you dealing with request-allocated memory).
  * The final word compare is adjusted to handle the slack in lenBytes so only
  * the bytes we care about are compared.
  */

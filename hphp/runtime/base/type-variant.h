@@ -321,7 +321,7 @@ struct Variant : private TypedValue {
   //////////////////////////////////////////////////////////////////////
 
   /*
-   * During sweeping, smart resources are not allowed to be decref'd
+   * During sweeping, request-allocated things are not allowed to be decref'd
    * or manipulated.  This function is used to cause a Variant to go
    * into a state where its destructor will have no effects on the
    * request local heap, in cases where sweepable objects can't

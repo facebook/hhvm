@@ -410,8 +410,8 @@ ArrayData* ProxyArray::CopyWithStrongIterators(const ArrayData* ad) {
   return innerArr(ad)->copyWithStrongIterators();
 }
 
-ArrayData* ProxyArray::NonSmartCopy(const ArrayData* ad) {
-  return innerArr(ad)->nonSmartCopy();
+ArrayData* ProxyArray::CopyStatic(const ArrayData* ad) {
+  return innerArr(ad)->copyStatic();
 }
 
 void ProxyArray::proxyAppend(void* data, uint32_t data_size, void** dest) {

@@ -120,7 +120,7 @@ class ResourceData {
  *
  * 1. If a ResourceData is entirely request-allocated, for example,
  *
- *    class EntirelySmartAllocated : public ResourceData {
+ *    class EntirelyRequestAllocated : public ResourceData {
  *    public:
  *       int number; // primitives are allocated together with "this"
  *       String str; // request-allocated objects are fine
@@ -136,7 +136,7 @@ class ResourceData {
  *
  * 2. If a ResourceData is entirely not request allocated, for example,
  *
- *    class NonSmartAllocated : public SweepableResourceData {
+ *    class NonRequestAllocated : public SweepableResourceData {
  *    public:
  *       int number; // primitives are always not in consideration
  *       std::string str; // this has malloc() in its own
@@ -165,7 +165,7 @@ class ResourceData {
  *    no way to free up vector's memory without touching String, which is
  *    request-allocated.
  *
- *    class MixedSmartAllocated : public SweepableResourceData {
+ *    class MixedRequestAllocated : public SweepableResourceData {
  *    public:
  *       int number; // primitives are always not in consideration
  *
@@ -178,7 +178,7 @@ class ResourceData {
  *
  *       DECLARE_RESOURCE_ALLOCATION(T);
  *    };
- *    void MixedSmartAllocated::sweep() {
+ *    void MixedRequestAllocated::sweep() {
  *       delete stdstr;
  *       delete vec;
  *       close_handle(ptr);

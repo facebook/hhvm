@@ -87,8 +87,8 @@ struct PackedArray {
   static void CopyPackedHelper(const ArrayData* adIn, ArrayData* ad);
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
-  static ArrayData* NonSmartCopy(const ArrayData*);
-  static ArrayData* NonSmartCopyHelper(const ArrayData*);
+  static ArrayData* CopyStatic(const ArrayData*);
+  static ArrayData* CopyStaticHelper(const ArrayData*);
   static ArrayData* EscalateForSort(ArrayData*, SortFunction);
   static void Ksort(ArrayData*, int, bool);
   static void Sort(ArrayData*, int, bool);
@@ -119,10 +119,10 @@ struct PackedArray {
 
   /*
    * Accepts any array of any kind satisfying isVectorData() and makes a
-   * non-smart packed copy, like NonSmartCopy().
+   * static packed copy, like CopyStatic().
    */
-  static ArrayData* NonSmartConvert(const ArrayData*);
-  static ArrayData* NonSmartConvertHelper(const ArrayData*);
+  static ArrayData* ConvertStatic(const ArrayData*);
+  static ArrayData* ConvertStaticHelper(const ArrayData*);
 
   static ptrdiff_t entriesOffset();
   static uint32_t getMaxCapInPlaceFast(uint32_t cap);

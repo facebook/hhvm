@@ -1008,7 +1008,7 @@ private:
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  TRACE_SET_MOD(smartalloc);
+  TRACE_SET_MOD(mm);
 
   void* m_front;
   void* m_limit;

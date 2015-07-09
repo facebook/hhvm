@@ -53,8 +53,8 @@ inline bool check_refcount_ns(int32_t count) {
 /*
  * Real count values should always be less than or equal to
  * RefCountMaxRealistic, and asserting this will also catch
- * common malloc freed-memory patterns (e.g. 0x5a5a5a5a and smart
- * allocator's 0x6a6a6a6a).
+ * common malloc freed-memory patterns (e.g. 0x5a5a5a5a and
+ * MemoryManager's 0x6a6a6a6a).
  */
 inline bool check_refcount(int32_t count) {
   return count <= StaticValue || check_refcount_ns(count);

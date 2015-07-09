@@ -636,8 +636,8 @@ StringData* StringData::reserve(size_t cap) {
 
   sd->m_data          = data;
   sd->m_hdr.init(cc, HeaderKind::String, 1);
-  // Smart allocated StringData are always aligned at 16 bytes, thus it is safe
-  // to copy in 16-byte groups. This copies m_lenAndHash (8 bytes), the
+  // request-allocated StringData are always aligned at 16 bytes, thus it is
+  // safe to copy in 16-byte groups. This copies m_lenAndHash (8 bytes), the
   // characters (m_len bytes), add the trailing zero (1 byte).
   memcpy16_inline(&sd->m_lenAndHash, &m_lenAndHash,
                   (m_len + 8 + 1 + 15) & ~0xF);

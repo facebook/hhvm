@@ -37,7 +37,7 @@ struct StringBufferLimitException : FatalErrorException {
  * Efficient string concatenation.
  *
  * StringBuffer is designed not to contain any malloc()d memory (only
- * per-request smart allocated memory) based on sweeping-related assumptions.
+ * per-request allocated memory) based on sweeping-related assumptions.
  */
 struct StringBuffer {
   static constexpr int kDefaultOutputLimit = StringData::MaxSize;

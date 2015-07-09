@@ -438,7 +438,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
 
   // ClassInfoUnique is only created by ClassInfo::Load(), which is called
   // from hphp_process_init() in the thread-neutral initialization phase.
-  // It is OK to create StaticStrings here, and throw the smart ptrs away,
+  // It is OK to create StaticStrings here, and throw the String wrapper away,
   // because the underlying static StringData will not be released.
   m_name = staticString(*p++);
   m_parent = staticString(*p++);

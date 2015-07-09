@@ -471,14 +471,6 @@ public:
   void resumeAsyncFuncThrow(Resumable* resumable, ObjectData* freeObj,
                             ObjectData* exception);
 
-  template<typename T>
-  using SmartStringIMap = req::hash_map<
-    String,
-    T,
-    hphp_string_hash,
-    hphp_string_isame
-  >;
-
 public:
   template<class F> void scan(F& mark) {
     //mark(m_transport);

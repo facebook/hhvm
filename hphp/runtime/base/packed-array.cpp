@@ -64,11 +64,11 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
 
   auto const oldSize = old->m_size;
   auto const scale   = computeScaleFromSize(neededSize);
-  auto const ad      = smartAllocArray(scale);
-  ad->m_sizeAndPos       = oldSize | int64_t{old->m_pos} << 32;
+  auto const ad      = reqAllocArray(scale);
+  ad->m_sizeAndPos   = oldSize | int64_t{old->m_pos} << 32;
   ad->m_hdr.init(HeaderKind::Mixed, 1);
-  ad->m_scale_used       = scale | uint64_t{oldSize} << 32; // used=oldSize
-  ad->m_nextKI           = oldSize;
+  ad->m_scale_used   = scale | uint64_t{oldSize} << 32; // used=oldSize
+  ad->m_nextKI       = oldSize;
 
   assert(ad->m_size == oldSize);
   assert(ad->m_pos == old->m_pos);
@@ -352,12 +352,12 @@ ArrayData* PackedArray::CopyWithStrongIterators(const ArrayData* ad) {
 }
 
 NEVER_INLINE
-ArrayData* PackedArray::NonSmartCopy(const ArrayData* adIn) {
+ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   assert(checkInvariants(adIn));
 
   ArrayData* ad;
   if (LIKELY(adIn->m_size <= CapCode::Threshold)) {
-    // There's no reason to use the full capacity, since non-smart
+    // There's no reason to use the full capacity, since static/uncounted
     // arrays are not mutable.
     auto const cap = adIn->m_size;
     ad = static_cast<ArrayData*>(
@@ -366,7 +366,7 @@ ArrayData* PackedArray::NonSmartCopy(const ArrayData* adIn) {
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = adIn->m_sizeAndPos;
   } else {
-    ad = NonSmartCopyHelper(adIn);
+    ad = CopyStaticHelper(adIn);
   }
 
   CopyPackedHelper(adIn, ad);
@@ -381,7 +381,7 @@ ArrayData* PackedArray::NonSmartCopy(const ArrayData* adIn) {
 }
 
 NEVER_INLINE
-ArrayData* PackedArray::NonSmartCopyHelper(const ArrayData* adIn) {
+ArrayData* PackedArray::CopyStaticHelper(const ArrayData* adIn) {
   auto const fpcap = CapCode::ceil(adIn->m_size);
   auto const cap = fpcap.decode();
   auto const ad = static_cast<ArrayData*>(
@@ -396,7 +396,7 @@ ArrayData* PackedArray::NonSmartCopyHelper(const ArrayData* adIn) {
   return ad;
 }
 
-ArrayData* PackedArray::NonSmartConvert(const ArrayData* arr) {
+ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   assert(arr->isVectorData());
 
   ArrayData* ad;
@@ -412,7 +412,7 @@ ArrayData* PackedArray::NonSmartConvert(const ArrayData* arr) {
     assert(ad->cap() == cap);
     assert(ad->m_size == arr->m_size);
   } else {
-    ad = NonSmartConvertHelper(arr);
+    ad = ConvertStaticHelper(arr);
   }
   auto data = reinterpret_cast<TypedValue*>(ad + 1);
   auto pos_limit = arr->iter_end();
@@ -428,7 +428,7 @@ ArrayData* PackedArray::NonSmartConvert(const ArrayData* arr) {
 }
 
 NEVER_INLINE
-ArrayData* PackedArray::NonSmartConvertHelper(const ArrayData* arr) {
+ArrayData* PackedArray::ConvertStaticHelper(const ArrayData* arr) {
   auto const fpcap = CapCode::ceil(arr->m_size);
   auto const cap = fpcap.decode();
   auto const ad = static_cast<ArrayData*>(

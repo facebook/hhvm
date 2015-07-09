@@ -36,15 +36,17 @@ class StreamFilter;
 
 extern int __thread s_pcloseRet;
 
-// This structure holds the non-smart allocated data members of File.  The
+// This structure holds the request allocated data members of File.  The
 // purpose of the class is to allow File (and subclasses) to be managed by
-// the smart allocator while also allowing them to be persisted beyond the
-// lifetime of a request.  The FileData is stored in a shared_ptr and managed
-// by new/delete, so it is safe to store in an object whose lifetime is longer
-// than a request.  A File (or subclass) can be reconstructed using a shared_ptr
-// to a FileData.  Note that subclasses of File that need to be persisted must
-// subclass FileData to add any persistent data members, e.g. see Socket.
-// Classes in the FileData hierarchy may not contain smart allocated data.
+// the request heap while also allowing their underlying OS handles to be
+// persisted beyond the lifetime of a request.
+//
+// The FileData is stored in a shared_ptr and managed by new/delete, so it is
+// safe to store in an object whose lifetime is longer than a request.
+// A File (or subclass) can be reconstructed using a shared_ptr to a FileData.
+// Note that subclasses of File that need to be persisted must subclass
+// FileData to add any persistent data members, e.g. see Socket.
+// Classes in the FileData hierarchy may not contain request-allocated data.
 struct FileData {
   static const int CHUNK_SIZE;
 

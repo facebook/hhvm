@@ -95,7 +95,7 @@ public:
   static ArrayData *CreateRef(const Variant& name, Variant& value);
 
   /*
-   * Called to return an ArrayData to the smart allocator.  This is
+   * Called to return an ArrayData to the request heap.  This is
    * normally called when the reference count goes to zero (e.g. via a
    * helper like decRefArr).
    */
@@ -318,13 +318,13 @@ public:
   /**
    * Make a copy of myself.
    *
-   * The nonSmartCopy() version means not to use the smart allocator.
-   * Is only implemented for array types that need to be able to go
+   * copyStatic() means not to use the request-scoped heap.
+   * It is only implemented for array types that need to be able to go
    * into the static array list.
    */
   ArrayData* copy() const;
   ArrayData* copyWithStrongIterators() const;
-  ArrayData* nonSmartCopy() const;
+  ArrayData* copyStatic() const;
 
   /**
    * Append a value to the array. If "copy" is true, make a copy first
@@ -527,7 +527,7 @@ struct ArrayFunctions {
   bool (*uasort[NK])(ArrayData* ad, const Variant& cmp_function);
   ArrayData* (*copy[NK])(const ArrayData*);
   ArrayData* (*copyWithStrongIterators[NK])(const ArrayData*);
-  ArrayData* (*nonSmartCopy[NK])(const ArrayData*);
+  ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, const Variant& v, bool copy);
   ArrayData* (*appendRef[NK])(ArrayData*, Variant& v, bool copy);
   ArrayData* (*appendWithRef[NK])(ArrayData*, const Variant& v, bool copy);

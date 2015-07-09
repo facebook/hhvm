@@ -169,7 +169,7 @@ private:
     struct {
       Offset m_resumeOffset;
 
-      // Size of the smart allocated memory that includes this resumable.
+      // Size of the memory block that includes this resumable.
       int32_t m_size;
     };
     uint64_t m_offsetAndSize;

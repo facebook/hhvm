@@ -86,7 +86,7 @@ bool EmptyArray::AdvanceMArrayIter(ArrayData*, MArrayIter& fp) {
 
 // We're always already a static array.
 void EmptyArray::OnSetEvalScalar(ArrayData*) { not_reached(); }
-ArrayData* EmptyArray::NonSmartCopy(const ArrayData* ad) { not_reached(); }
+ArrayData* EmptyArray::CopyStatic(const ArrayData* ad) { not_reached(); }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -157,7 +157,7 @@ std::pair<ArrayData*,TypedValue*> EmptyArray::MakePacked(TypedValue tv) {
 NEVER_INLINE
 std::pair<ArrayData*,TypedValue*>
 EmptyArray::MakeMixed(StringData* key, TypedValue val) {
-  auto const ad = smartAllocArray(MixedArray::SmallScale);
+  auto const ad = reqAllocArray(MixedArray::SmallScale);
   MixedArray::InitSmall(ad, 1/*count*/, 1/*size*/, 0/*nextIntKey*/);
   auto const data = ad->data();
   auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);
@@ -186,7 +186,7 @@ EmptyArray::MakeMixed(StringData* key, TypedValue val) {
  */
 std::pair<ArrayData*,TypedValue*>
 EmptyArray::MakeMixed(int64_t key, TypedValue val) {
-  auto const ad = smartAllocArray(MixedArray::SmallScale);
+  auto const ad = reqAllocArray(MixedArray::SmallScale);
   MixedArray::InitSmall(ad, 1/*count*/, 1/*size*/, (key >= 0) ? key + 1 : 0);
   auto const data = ad->data();
   auto const hash = reinterpret_cast<int32_t*>(data + MixedArray::SmallSize);

@@ -125,7 +125,7 @@ template<typename T> struct ptr final {
   }
 
   /**
-   * Swap two smart pointers
+   * Swap two pointers
    */
   void swap(ptr& rhs) {
     std::swap(m_px, rhs.m_px);

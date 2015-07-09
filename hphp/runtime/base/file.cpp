@@ -189,9 +189,9 @@ File::~File() {
 }
 
 void File::sweep() {
-  // Clear non-smart state without deleting `this`. Therefore assumes
-  // `this` has been smart allocated. Note that the derived class'
-  // sweep() is responsible for closing m_fd and any other non-smart
+  // Clear non-request-local state without deleting `this`. Therefore assumes
+  // `this` has been request-heap allocated. Note that the derived class'
+  // sweep() is responsible for closing m_fd and any other non-request
   // resources it might have allocated.
   assert(!valid());
   File::closeImpl();

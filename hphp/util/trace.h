@@ -151,7 +151,7 @@ namespace Trace {
       TM(runtime)       \
       TM(servicereq)    \
       TM(simplify)      \
-      TM(smartalloc)    \
+      TM(mm)            \
       TM(heaptrace)     \
       TM(stat)          \
       TM(statgroups)    \

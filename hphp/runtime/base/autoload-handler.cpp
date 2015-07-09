@@ -46,7 +46,7 @@ const StaticString
   s_exception("exception"),
   s_previous("previous");
 
-using SmartCufIterPtr = req::unique_ptr<CufIter>;
+using CufIterPtr = req::unique_ptr<CufIter>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -92,7 +92,7 @@ Variant vm_call_user_func_cufiter(const CufIter& cufIter,
  * Helper method from converting between a PHP function and a CufIter.
  */
 bool vm_decode_function_cufiter(const Variant& function,
-                                SmartCufIterPtr& cufIter) {
+                                CufIterPtr& cufIter) {
   ObjectData* obj = nullptr;
   Class* cls = nullptr;
   CallerFrame cf;
@@ -582,7 +582,7 @@ bool AutoloadHandler::CompareBundles::operator()(
 }
 
 bool AutoloadHandler::addHandler(const Variant& handler, bool prepend) {
-  SmartCufIterPtr cufIter = nullptr;
+  CufIterPtr cufIter = nullptr;
   if (!vm_decode_function_cufiter(handler, cufIter)) {
     return false;
   }
@@ -611,7 +611,7 @@ bool AutoloadHandler::isRunning() {
 }
 
 void AutoloadHandler::removeHandler(const Variant& handler) {
-  SmartCufIterPtr cufIter = nullptr;
+  CufIterPtr cufIter = nullptr;
   if (!vm_decode_function_cufiter(handler, cufIter)) {
     return;
   }

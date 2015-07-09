@@ -50,7 +50,7 @@ TRACE_SET_MOD(runtime);
 
 ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
   auto const scale = computeScaleFromSize(size);
-  auto const ad    = smartAllocArray(scale);
+  auto const ad    = reqAllocArray(scale);
 
   // Intialize the hash table first, because the header is already in L1 cache,
   // but the hash table may not be.  So let's issue the cache request ASAP.
@@ -156,7 +156,7 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
   assert(size > 0);
 
   auto const scale = computeScaleFromSize(size);
-  auto const ad    = smartAllocArray(scale);
+  auto const ad    = reqAllocArray(scale);
 
   auto const data = mixedData(ad);
   auto const hash = mixedHash(data, scale);
@@ -211,13 +211,13 @@ StructArray* MixedArray::MakeStructArray(
   return ret;
 }
 
-// for internal use by nonSmartCopy() and copyMixed()
+// for internal use by copyStatic() and copyMixed()
 ALWAYS_INLINE
 MixedArray* MixedArray::CopyMixed(const MixedArray& other,
                                   AllocMode mode) {
   auto const scale = other.m_scale;
-  auto const ad = mode == AllocMode::Smart ? smartAllocArray(scale)
-                                           : mallocArray(scale);
+  auto const ad = mode == AllocMode::Request ? reqAllocArray(scale)
+                                           : staticAllocArray(scale);
 
   // Copy everything including tombstones.  We want to copy the elements and
   // the hash separately, because the array may not be very full.
@@ -267,15 +267,15 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   return ad;
 }
 
-NEVER_INLINE ArrayData* MixedArray::NonSmartCopy(const ArrayData* in) {
+NEVER_INLINE ArrayData* MixedArray::CopyStatic(const ArrayData* in) {
   auto a = asMixed(in);
   assert(a->checkInvariants());
-  return CopyMixed(*a, AllocMode::NonSmart);
+  return CopyMixed(*a, AllocMode::Static);
 }
 
 NEVER_INLINE MixedArray* MixedArray::copyMixed() const {
   assert(checkInvariants());
-  return CopyMixed(*this, AllocMode::Smart);
+  return CopyMixed(*this, AllocMode::Request);
 }
 
 ALWAYS_INLINE
@@ -386,7 +386,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
   auto a = asMixed(array);
   assertx(!a->empty());
   auto const scale = a->scale();
-  auto const ad = mallocArray(scale);
+  auto const ad = staticAllocArray(scale);
   auto const used = a->m_used;
   // Do a raw copy first, without worrying about counted types or refcount
   // manipulation.  To copy in 32-byte chunks, we add 24 bytes to the length.
@@ -1061,7 +1061,7 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   assert(MixedArray::Capacity(newScale) >= old->m_size);
   assert(newScale >= 1 && (newScale & (newScale - 1)) == 0);
 
-  auto ad            = smartAllocArray(newScale);
+  auto ad            = reqAllocArray(newScale);
   auto const oldUsed = old->m_used;
   ad->m_sizeAndPos   = old->m_sizeAndPos;
   ad->m_hdr.init(old->m_hdr, 1);
@@ -1583,7 +1583,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
                                     size_t expectedSize) {
   assert(!src->isPacked());
   auto const scale = computeScaleFromSize(expectedSize);
-  auto const ad    = smartAllocArray(scale);
+  auto const ad    = reqAllocArray(scale);
   auto const oldUsed = src->m_used;
 
   ad->m_sizeAndPos      = src->m_sizeAndPos;

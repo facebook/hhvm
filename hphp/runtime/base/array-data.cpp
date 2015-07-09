@@ -78,9 +78,9 @@ ArrayData* ArrayData::GetScalarArray(ArrayData* arr,
     ArrayData* ad;
 
     if (arr->isVectorData() && !arr->isPacked()) {
-      ad = PackedArray::NonSmartConvert(arr);
+      ad = PackedArray::ConvertStatic(arr);
     } else {
-      ad = arr->nonSmartCopy();
+      ad = arr->copyStatic();
     }
     assert(ad->hasExactlyOneRef());
     ad->setStatic();
@@ -488,14 +488,14 @@ extern const ArrayFunctions g_array_funcs_unmodified = {
   DISPATCH(CopyWithStrongIterators)
 
   /*
-   * ArrayData* NonSmartCopy(const ArrayData*)
+   * ArrayData* CopyStatic(const ArrayData*)
    *
    *   Copy an array, allocating the new array with malloc() instead
    *   of from the request local allocator.  This function does
    *   guarantee the returned array is a new copy---but it may throw a
    *   fatal error if this cannot be accomplished (e.g. for $GLOBALS).
    */
-  DISPATCH(NonSmartCopy)
+  DISPATCH(CopyStatic)
 
   /*
    * ArrayData* Append(ArrayData*, const Variant& v, bool copy)

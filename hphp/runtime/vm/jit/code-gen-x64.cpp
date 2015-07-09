@@ -638,7 +638,7 @@ CodeGenerator::cgCallHelper(Vout& v, CppCall call, const CallDest& dstInfo,
   Fixup syncFixup;
   if (RuntimeOption::HHProfServerEnabled || sync != SyncOptions::kNoSyncPoint) {
     // If we are profiling the heap, we always need to sync because regs need
-    // to be correct during smart allocations no matter what
+    // to be correct during allocations no matter what
     syncFixup = makeFixup(inst->marker(), sync);
   }
 
@@ -3095,7 +3095,7 @@ void CodeGenerator::cgCallBuiltin(IRInstruction* inst) {
   // Non-pointer args are plain values passed by value.  String, Array,
   // Object, and Variant are passed by const&, ie a pointer to stack memory
   // holding the value, so expect PtrToT types for these.
-  // Pointers to smartptr types (String, Array, Object) need adjusting to
+  // Pointers to req::ptr types (String, Array, Object) need adjusting to
   // point to &ptr->m_data.
   auto srcNum = uint32_t{2};
   if (callee->isMethod()) {

@@ -1,0 +1,7 @@
+[\C]App \C<>
+[\C]App \C<>
+[1]intersect([\C]App \C<>, [\D]App \D<>)
+[2]intersect(option([3]tvar_3), [\D]App \D<>, [\C]App \C<>)
+[\C]App \C<>
+[\D]App \D<>
+No errors

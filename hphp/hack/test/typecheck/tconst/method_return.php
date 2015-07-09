@@ -20,7 +20,6 @@ class X {
   }
 
   public function new_static_get(): this::T {
-    /* HH_FIXME[4110] - Temporary until we make 'new' expression dependent */
     return (new static($this->val))->val;
   }
 

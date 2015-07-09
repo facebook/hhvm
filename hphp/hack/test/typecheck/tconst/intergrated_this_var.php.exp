@@ -6,7 +6,3 @@ File "intergrated_this_var.php", line 5, characters 7-7:
 This is an object of type C
 File "intergrated_this_var.php", line 18, characters 12-16:
 It is incompatible with an object of type I
-File "intergrated_this_var.php", line 18, characters 12-16:
-  where '<static>' is a reference to this expression
-File "intergrated_this_var.php", line 18, characters 12-16:
-Considering the constraint on '<static>'

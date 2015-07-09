@@ -1,9 +1,5 @@
 File "method_swap_error.php", line 17, characters 14-23:
 Invalid argument (Typing[4110])
-File "method_swap_error.php", line 17, characters 14-23:
-Some type constraint(s) here are violated
-File "method_swap_error.php", line 4, characters 19-26:
-'X::T' is a constrained type
 File "method_swap_error.php", line 12, characters 24-30:
 This is the expression dependent type <expr#257>::T
   that is compatible with the abstract type constant X::T

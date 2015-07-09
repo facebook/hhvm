@@ -79,23 +79,14 @@ template<class Destroy>
 void emitDecRefWork(Vout& v, Vout& vcold, Vreg rData,
                     Destroy destroy, bool unlikelyDestroy) {
   auto const sf = v.makeReg();
-  v << cmplim{1, rData[FAST_REFCOUNT_OFFSET], sf};
-  ifThenElse(
-    v, vcold, CC_E, sf,
-    destroy,
-    [&] (Vout& v) {
-      /*
-       * If it's not static, actually reduce the reference count.  This does
-       * another branch using the same status flags from the cmplim above.
-       */
-      ifThen(
-        v, CC_NL, sf,
-        [&] (Vout& v) {
-          emitDecRef(v, rData);
-        }
-      );
-    },
-    unlikelyDestroy
+  // check if mrb is set
+  v << andbim{1 << 2, rData[HeaderKindOffset + 1], sf};
+  auto const sf2 = v.makeReg();
+  v << cmpli{0, sf, sf2};
+  // if mrb is not set, run 'destroy'
+  ifThen(
+    v, vcold, CC_E, sf2,
+    destroy, unlikelyDestroy
   );
 }
 

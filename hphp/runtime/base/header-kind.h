@@ -56,6 +56,8 @@ template<class T = uint16_t> struct HeaderWord {
           mutable uint8_t mark:1;
           mutable uint8_t cmark:1;
           mutable uint8_t mrb:1;
+          mutable uint8_t counted:1;
+          mutable uint8_t _static:1;
         };
         uint32_t lo32;
       };
@@ -71,8 +73,18 @@ template<class T = uint16_t> struct HeaderWord {
     q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
         uint64_t(count) << 32;
     // TODO make fast
-    if ((uint32_t)count <= 1) mrb = false;
-    else mrb = true; 
+    assert(count <= 1);
+    mrb = false;
+    counted = true;
+    if (count == StaticValue) {
+      mrb     = true;
+      counted = false;
+      _static = true;
+    } else if (count == UncountedValue) {
+      mrb     = true;
+      counted = false;
+      _static = false;
+    }
   }
 
   void init(T aux, HeaderKind kind, RefCount count) {
@@ -80,16 +92,36 @@ template<class T = uint16_t> struct HeaderWord {
         static_cast<uint16_t>(aux) |
         uint64_t(count) << 32;
     // TODO make fast
-    if ((uint32_t)count <= 1) mrb = false;
-    else mrb = true; 
+    assert(count <= 1);
+    mrb = false;
+    counted = true;
+    if (count == StaticValue) {
+      mrb     = true;
+      counted = false;
+      _static = true;
+    } else if (count == UncountedValue) {
+      mrb     = true;
+      counted = false;
+      _static = false;
+    }
     static_assert(sizeof(T) == 2, "header layout requres 2-byte aux");
   }
 
   void init(const HeaderWord<T>& h, RefCount count) {
     q = h.lo32 | uint64_t(count) << 32;
     // TODO make fast
-    if ((uint32_t)count <= 1) mrb = false;
-    else mrb = true; 
+    assert(count <= 1);
+    mrb = false;
+    counted = true;
+    if (count == StaticValue) {
+      mrb     = true;
+      counted = false;
+      _static = true;
+    } else if (count == UncountedValue) {
+      mrb     = true;
+      counted = false;
+      _static = false;
+    }
   }
 };
 

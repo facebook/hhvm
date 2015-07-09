@@ -135,9 +135,10 @@ void ifNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
   }
 
   auto const sf = v.makeReg();
-  v << cmplim{0, loc.reg()[FAST_REFCOUNT_OFFSET], sf};
-  static_assert(UncountedValue < 0 && StaticValue < 0, "");
-  ifThen(v, CC_GE, sf, then);
+  v << andbim{1 << 3, loc.reg()[HeaderKindOffset + 1], sf};
+  auto const sf2 = v.makeReg();
+  v << cmpli{0, sf, sf2};
+  ifThen(v, CC_E, sf2, then);
 }
 
 template<class Then>

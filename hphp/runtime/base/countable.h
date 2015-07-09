@@ -90,9 +90,7 @@ inline bool check_refcount_ns_nz(int32_t count) {
   }                                                                     \
                                                                         \
   bool hasMultipleRefs() const {                                        \
-    assert(check_refcount(m_hdr.count));                                \
-    if ((uint32_t)m_hdr.count > 1) assert(m_hdr.mrb);                   \
-    return (uint32_t)m_hdr.count > 1;                                   \
+    return m_hdr.mrb;                                                   \
   }                                                                     \
                                                                         \
   bool maybeShared() const {                                            \
@@ -100,37 +98,27 @@ inline bool check_refcount_ns_nz(int32_t count) {
   }                                                                     \
                                                                         \
   bool hasExactlyOneRef() const {                                       \
-    assert(check_refcount(m_hdr.count));                                \
-    if ((uint32_t)m_hdr.count > 1) assert(m_hdr.mrb);                   \
-    return (uint32_t)m_hdr.count == 1;                                  \
+    return !m_hdr.mrb; /* deal with static? */                          \
   }                                                                     \
                                                                         \
   void incRefCount() const {                                            \
     assert(!MemoryManager::sweeping());                                 \
-    assert(check_refcount(m_hdr.count));                                \
-    if (isRefCounted()) { ++m_hdr.count; }                              \
     m_hdr.mrb = true;                                                   \
   }                                                                     \
                                                                         \
   void setRefCount(RefCount count) {                                    \
     assert(count == StaticValue || !MemoryManager::sweeping());         \
-    assert(check_refcount(m_hdr.count));                                \
-    m_hdr.count = count;                                                \
-    if ((uint32_t)m_hdr.count > 1) { m_hdr.mrb = true; }                \
-    assert(check_refcount(m_hdr.count));                                \
+    if (count > 1) { m_hdr.mrb = true; }                                \
+    else m_hdr.mrb = false;                                             \
   }                                                                     \
                                                                         \
   RefCount decRefCount() const {                                        \
     assert(!MemoryManager::sweeping());                                 \
-    assert(check_refcount_nz(m_hdr.count));                             \
-    return isRefCounted() ? --m_hdr.count : m_hdr.count;                \
+    return m_hdr.mrb;                                                   \
   }                                                                     \
   ALWAYS_INLINE bool decReleaseCheck() {                                \
     assert(!MemoryManager::sweeping());                                 \
-    assert(check_refcount_nz(m_hdr.count));                             \
-    if (m_hdr.count == 1) return true;                                  \
-    if (m_hdr.count > 1) --m_hdr.count;                                 \
-    return false;                                                       \
+    return !m_hdr.mrb;                                                  \
   }                                                                     \
   ALWAYS_INLINE void decRefAndRelease() {                               \
     if (decReleaseCheck()) release();                                   \
@@ -138,28 +126,20 @@ inline bool check_refcount_ns_nz(int32_t count) {
 
 #define IMPLEMENT_COUNTABLE_METHODS             \
   void setStatic() const {                      \
-    assert(check_refcount(m_hdr.count));        \
-    m_hdr.count = StaticValue;                  \
-    m_hdr.mrb = true;                           \
+    m_hdr.mrb     = true;                       \
+    m_hdr.counted = false;                      \
+    m_hdr._static = true;                       \
   }                                             \
   bool isStatic() const {                       \
-    if (m_hdr.count == StaticValue) {           \
-      assert(m_hdr.mrb);                        \
-      return true;                              \
-    }                                           \
-    return false;                               \
+    return !m_hdr.counted && m_hdr._static;     \
   }                                             \
   void setUncounted() const {                   \
-    assert(check_refcount(m_hdr.count));        \
-    m_hdr.count = UncountedValue;               \
-    m_hdr.mrb = true;                           \
+    m_hdr.mrb     = true;                       \
+    m_hdr.counted = false;                      \
+    m_hdr._static = false;                      \
   }                                             \
   bool isUncounted() const {                    \
-    if (m_hdr.count == UncountedValue) {        \
-      assert(m_hdr.mrb);                        \
-      return true;                              \
-    }                                           \
-    return false;                               \
+    return !m_hdr.counted && !m_hdr._static;    \
   }                                             \
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
@@ -172,38 +152,31 @@ inline bool check_refcount_ns_nz(int32_t count) {
   bool isRefCounted() const { return true; }            \
                                                         \
   bool hasMultipleRefs() const {                        \
-    assert(check_refcount_ns(m_hdr.count));             \
-    return m_hdr.count > 1;                             \
+    return m_hdr.mrb;                                   \
   }                                                     \
                                                         \
   bool hasExactlyOneRef() const {                       \
-    assert(check_refcount(m_hdr.count));                \
-    return m_hdr.count == 1;                            \
+    return !m_hdr.mrb;                                  \
   }                                                     \
                                                         \
   void incRefCount() const {                            \
     assert(!MemoryManager::sweeping());                 \
-    assert(check_refcount_ns(m_hdr.count));             \
-    ++m_hdr.count;                                      \
+    m_hdr.mrb = true;                                   \
   }                                                     \
                                                         \
   RefCount decRefCount() const {                        \
-    assert(!MemoryManager::sweeping());                 \
-    assert(check_refcount_ns_nz(m_hdr.count));          \
-    return --m_hdr.count;                               \
+                                                        \
   }                                                     \
                                                         \
   void setRefCount(RefCount count) {                    \
     assert(!MemoryManager::sweeping());                 \
-    assert(check_refcount_ns(m_hdr.count));             \
-    m_hdr.count = count;                                \
-    assert(check_refcount_ns(m_hdr.count));             \
+    if (count > 1) { m_hdr.mrb = true; }                \
+    else m_hdr.mrb = false;                             \
   }                                                     \
                                                         \
   ALWAYS_INLINE bool decRefAndRelease() {               \
     assert(!MemoryManager::sweeping());                 \
-    assert(check_refcount_ns_nz(m_hdr.count));          \
-    if (!--m_hdr.count) {                               \
+    if (!m_hdr.mrb) {                                   \
       release();                                        \
       return true;                                      \
     }                                                   \

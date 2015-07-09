@@ -826,12 +826,16 @@ void StringData::preCompute() {
 }
 
 void StringData::setStatic() {
-  setRefCount(StaticValue);
+  m_hdr.mrb     = true;
+  m_hdr.counted = false;
+  m_hdr._static = true;
   preCompute();
 }
 
 void StringData::setUncounted() {
-  setRefCount(UncountedValue);
+  m_hdr.mrb     = true;
+  m_hdr.counted = false;
+  m_hdr._static = false;
   preCompute();
 }
 

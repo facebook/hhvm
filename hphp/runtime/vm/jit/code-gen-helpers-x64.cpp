@@ -86,36 +86,6 @@ void emitGetGContext(Asm& as, PhysReg dest) {
   emitGetGContext(Vauto(as.code()).main(), dest);
 }
 
-// IfCountNotStatic --
-//   Emits if (%reg->_count < 0) { ... }.
-//   This depends on UncountedValue and StaticValue
-//   being the only valid negative refCounts and both indicating no
-//   ref count is needed.
-//   May short-circuit this check if the type is known to be
-//   static already.
-struct IfCountNotStatic {
-  typedef CondBlock<FAST_REFCOUNT_OFFSET,
-                    0,
-                    CC_S,
-                    int32_t> NonStaticCondBlock;
-  static_assert(UncountedValue < 0 && StaticValue < 0, "");
-  NonStaticCondBlock *m_cb; // might be null
-  IfCountNotStatic(Asm& as, PhysReg reg,
-                   MaybeDataType t = folly::none) {
-
-    // Objects and variants cannot be static
-    if (t != KindOfObject && t != KindOfResource && t != KindOfRef) {
-      m_cb = new NonStaticCondBlock(as, reg);
-    } else {
-      m_cb = nullptr;
-    }
-  }
-
-  ~IfCountNotStatic() {
-    delete m_cb;
-  }
-};
-
 void emitTransCounterInc(Vout& v) {
   if (!mcg->tx().isTransDBEnabled()) return;
   auto t = v.cns(mcg->tx().getTransCounterAddr());
@@ -127,21 +97,10 @@ void emitTransCounterInc(Asm& a) {
 }
 
 Vreg emitDecRef(Vout& v, Vreg base) {
-  auto const sf = v.makeReg();
-  v << declm{base[FAST_REFCOUNT_OFFSET], sf};
-  emitAssertFlagsNonNegative(v, sf);
-  return sf;
+  return base;
 }
 
 void emitIncRef(Vout& v, Vreg base) {
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitAssertRefCount(v, base);
-  }
-  // emit incref
-  auto const sf = v.makeReg();
-  v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
-  emitAssertFlagsNonNegative(v, sf);
-
   // set the mrb
   // TODO don't hardcode this
   auto const sf2 = v.makeReg();
@@ -154,21 +113,15 @@ void emitIncRef(Asm& as, PhysReg base) {
 }
 
 void emitIncRefCheckNonStatic(Asm& as, PhysReg base, DataType dtype) {
-  { // if !static then
-    IfCountNotStatic ins(as, base, dtype);
-    emitIncRef(as, base);
-  } // endif
+  // ignore check because we are just going to set the mrb anyway
+  emitIncRef(as, base);
 }
 
 void emitIncRefGenericRegSafe(Asm& as, PhysReg base, int disp, PhysReg tmpReg) {
   { // if RC
     IfRefCounted irc(as, base, disp);
     as.   loadq  (base[disp + TVOFF(m_data)], tmpReg);
-    { // if !static
-      IfCountNotStatic ins(as, tmpReg);
-      //as. incl(tmpReg[FAST_REFCOUNT_OFFSET]);
-      emitIncRef(as, tmpReg);
-    } // endif
+    emitIncRef(as, tmpReg);
   } // endif
 }
 
@@ -178,13 +131,7 @@ void emitAssertFlagsNonNegative(Vout& v, Vreg sf) {
 }
 
 void emitAssertRefCount(Vout& v, Vreg base) {
-  auto const sf = v.makeReg();
-  v << cmplim{StaticValue, base[FAST_REFCOUNT_OFFSET], sf};
-  ifThen(v, CC_NLE, sf, [&](Vout& v) {
-    auto const sf = v.makeReg();
-    v << cmplim{RefCountMaxRealistic, base[FAST_REFCOUNT_OFFSET], sf};
-    ifThen(v, CC_NBE, sf, [&](Vout& v) { v << ud2{}; });
-  });
+
 }
 
 // Logical register move: ensures the value in src will be in dest

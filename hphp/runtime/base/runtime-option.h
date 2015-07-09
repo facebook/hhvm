@@ -51,9 +51,11 @@ constexpr int kDefaultInitialStaticStringTableSize = 500000;
  */
 class RuntimeOption {
 public:
-  static void Load(IniSettingMap &ini, Hdf& config,
+  static void Load(
+    IniSettingMap &ini, Hdf& config,
     const std::vector<std::string>& iniClis = std::vector<std::string>(),
-    const std::vector<std::string>& hdfClis = std::vector<std::string>());
+    const std::vector<std::string>& hdfClis = std::vector<std::string>(),
+    std::vector<std::string>* messages = nullptr);
 
   static bool ServerExecutionMode() {
     return strcmp(ExecutionMode, "srv") == 0;
@@ -105,7 +107,6 @@ public:
 
   static std::map<std::string, AccessLogFileData> RPCLogs;
 
-  static std::string Tier;
   static std::string Host;
   static std::string DefaultServerNameSuffix;
   static std::string ServerType;

@@ -19,12 +19,26 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/asio/ext_async-generator.h"
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
 
 typedef std::unordered_map<const StringData*,NativeDataInfo> NativeDataInfoMap;
 static NativeDataInfoMap s_nativedatainfo;
+
+size_t ndsize(const ObjectData* obj, const NativeDataInfo* ndi) {
+  auto cls = obj->getVMClass();
+  if (cls == Generator::getClass() || cls == AsyncGenerator::getClass()) {
+    return (cls == Generator::getClass())
+      ? Native::data<Generator>(obj)->resumable()->size()
+      - sizeof(ObjectData)
+      : Native::data<AsyncGenerator>(obj)->resumable()->size()
+      - sizeof(ObjectData);
+  }
+  return ndsize(ndi->sz);
+}
 
 void registerNativeDataInfo(const StringData* name,
                             size_t sz,
@@ -70,7 +84,7 @@ NativeDataInfo* getNativeDataInfo(const StringData* name) {
  * NativeNode is a link in the NativeData sweep list for this ND block
  */
 ObjectData* nativeDataInstanceCtor(Class* cls) {
-  Attr attrs = cls->attrs();
+  HPHP::Attr attrs = cls->attrs();
   if (UNLIKELY(attrs &
                (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
     ObjectData::raiseAbstractClassError(cls);
@@ -136,7 +150,7 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
     MM().removeNativeObject(node);
   }
 
-  size_t size = ObjectData::sizeForNProps(nProps) + ndsize(ndi->sz);
+  size_t size = ObjectData::sizeForNProps(nProps) + ndsize(obj, ndi);
   if (LIKELY(size <= kMaxSmallSize)) {
     return MM().freeSmallSize(node, size);
   }

@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/system/systemlib.h"
@@ -37,8 +38,9 @@ public:
     Running = 2,  // generator is currently being iterated
     Done    = 3   // generator has finished its execution
   };
+
   static constexpr ptrdiff_t resumableOff() {
-    return -sizeof(Resumable);
+    return offsetof(BaseGenerator, m_resumable);
   }
   static constexpr ptrdiff_t arOff() {
     return resumableOff() + Resumable::arOff();
@@ -52,10 +54,41 @@ public:
   static constexpr ptrdiff_t stateOff() {
     return offsetof(BaseGenerator, m_state);
   }
+  /**
+   * Get adjusted Generator function base() where the real user code starts.
+   *
+   * Skips CreateCont and PopC opcodes.
+   */
+  static Offset userBase(const Func* func) {
+    assert(func->isGenerator());
+    auto base = func->base();
+
+    DEBUG_ONLY auto op = reinterpret_cast<const Op*>(func->unit()->at(base));
+    assert(op[0] == OpCreateCont);
+    assert(op[1] == OpPopC);
+
+    return base + 2;
+  }
+
+  static size_t genSize(size_t ndSize, size_t frameSz) {
+    return alignTypedValue(sizeof(NativeNode) + frameSz + ndSize) +
+      sizeof(ObjectData);
+  }
+
+  static ObjectData* Alloc(Class* cls, size_t totalSize) {
+    auto const node = reinterpret_cast<NativeNode*>(MM().objMalloc(totalSize));
+    const size_t objOff = totalSize - sizeof(ObjectData);
+    node->obj_offset = objOff;
+    node->hdr.kind = HeaderKind::NativeData;
+    auto const obj = new (reinterpret_cast<char*>(node) + objOff)
+                     ObjectData(cls, ObjectData::HasNativeData);
+    assert(obj->hasExactlyOneRef());
+    assert(obj->noDestruct());
+    return obj;
+  }
 
   Resumable* resumable() const {
-    return reinterpret_cast<Resumable*>(
-      const_cast<char*>(reinterpret_cast<const char*>(this) + resumableOff()));
+    return const_cast<Resumable*>(&m_resumable);
   }
 
   ActRec* actRec() const {
@@ -96,39 +129,43 @@ public:
     setState(State::Running);
   }
 
-  /**
-   * Get adjusted generator function base() where the real user code starts.
-   *
-   * Skips CreateCont and PopC opcodes.
-   */
-  static Offset userBase(const Func* func) {
-    assert(func->isGenerator());
-    auto base = func->base();
-
-    DEBUG_ONLY auto op = reinterpret_cast<const Op*>(func->unit()->at(base));
-    assert(op[0] == OpCreateCont);
-    assert(op[1] == OpPopC);
-
-    return base + 2;
-  }
-
-private:
+  Resumable m_resumable;
   State m_state;
 };
+
+// Resumable stores function locals and iterators in front of it
+static_assert(offsetof(BaseGenerator, m_resumable) == 0,
+              "Resumable must be the first member of the Generator");
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Generator
 class Generator final : public BaseGenerator {
 public:
+  explicit Generator();
   ~Generator();
+  Generator& operator=(const Generator& other);
 
   template <bool clone>
   static ObjectData* Create(const ActRec* fp, size_t numSlots,
                             jit::TCA resumeAddr, Offset resumeOffset);
-  static Generator* fromObject(ObjectData *obj);
-  static Generator* Clone(ObjectData* obj);
+  static Class* getClass() {
+    assert(s_class);
+    return s_class;
+  }
   static constexpr ptrdiff_t objectOff() {
-    return sizeof(Generator);
+    return -(Native::dataOffset<Generator>());
+  }
+  static Generator* fromObject(ObjectData *obj) {
+    return Native::data<Generator>(obj);
+  }
+  static ObjectData* allocClone(ObjectData *obj) {
+    auto const genDataSz = Native::getNativeNode(
+                             obj, getClass()->getNativeDataInfo())->obj_offset;
+    auto const clone = BaseGenerator::Alloc(getClass(),
+                         genDataSz + sizeof(ObjectData));
+    UNUSED auto const genData = new (Native::data<Generator>(clone))
+                                Generator();
+    return clone;
   }
 
   void yield(Offset resumeOffset, const Cell* key, Cell value);
@@ -136,59 +173,19 @@ public:
   void ret() { done(); }
   void fail() { done(); }
   ObjectData* toObject() {
-    return reinterpret_cast<ObjectData*>(
-      reinterpret_cast<char*>(this) + objectOff());
+    return Native::object<Generator>(this);
   }
 
 private:
-  explicit Generator();
   void done();
 
 public:
   int64_t m_index;
   Cell m_key;
   Cell m_value;
-};
-///////////////////////////////////////////////////////////////////////////////
-// class BaseGenerator
 
-class c_BaseGenerator : public
-      ExtObjectDataFlags<ObjectData::HasClone> {
-public:
-  explicit c_BaseGenerator(Class* cls)
-    : ExtObjectDataFlags(cls, HeaderKind::ResumableObj)
-  {}
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// class Generator
-
-class c_Generator final : public c_BaseGenerator {
-public:
-  DECLARE_CLASS_NO_SWEEP(Generator)
-
-  explicit c_Generator(Class* cls = c_Generator::classof())
-    : c_BaseGenerator(cls)
-  {}
-  ~c_Generator() {
-    data()->~Generator();
-  }
-
-  void t___construct();
-  Variant t_current();
-  Variant t_key();
-  void t_next();
-  void t_rewind();
-  bool t_valid();
-  void t_send(const Variant& v);
-  void t_raise(const Variant& v);
-  String t_getorigfuncname();
-  String t_getcalledclass();
-
-  Generator *data() {
-    return reinterpret_cast<Generator*>(reinterpret_cast<char*>(
-      static_cast<c_BaseGenerator*>(this)) - Generator::objectOff());
-  }
+  static Class* s_class;
+  static const StaticString s_className;
 };
 
 template <bool clone>
@@ -197,27 +194,20 @@ ObjectData* Generator::Create(const ActRec* fp, size_t numSlots,
   assert(fp);
   assert(fp->resumed() == clone);
   assert(fp->func()->isNonAsyncGenerator());
-  const size_t frameSize = Resumable::getFrameSize(numSlots);
-  const size_t totalSize = sizeof(ResumableNode) + frameSize +
-                           sizeof(Resumable) +
-                           sizeof(Generator) + sizeof(c_Generator);
-  auto const resumable = Resumable::Create(frameSize, totalSize);
-  resumable->initialize<clone>(fp,
-                               resumeAddr,
-                               resumeOffset,
-                               frameSize,
-                               totalSize);
-  auto const genData = new (resumable + 1) Generator();
-  auto const gen = new (genData + 1) c_Generator();
-  assert(gen->hasExactlyOneRef());
-  assert(gen->noDestruct());
+  const size_t frameSz = Resumable::getFrameSize(numSlots);
+  const size_t genSz = genSize(sizeof(Generator), frameSz);
+  auto const obj = BaseGenerator::Alloc(s_class, genSz);
+  auto const genData = new (Native::data<Generator>(obj)) Generator();
+  genData->resumable()->initialize<clone>(fp,
+                                          resumeAddr,
+                                          resumeOffset,
+                                          frameSz,
+                                          genSz);
   genData->setState(State::Created);
-  return static_cast<ObjectData*>(gen);
+  return obj;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-#include "hphp/runtime/ext/ext_generator_inl.h"
 
 #endif // incl_HPHP_EXT_GENERATOR_H_

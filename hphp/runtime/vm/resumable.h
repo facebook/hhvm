@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
@@ -41,19 +42,19 @@ namespace HPHP {
  *                        | Parent object           |
  *                        +-------------------------+ high address
  *
- * Header of the resumable frame used by generators:
+ * Header of the native frame used by generators:
  *
  *         Header*     -> +-------------------------+ low address
- *                        | ResumableNode           |
+ *                        | NativeNode              |
  *                        +-------------------------+
  *                        | Function locals and     |
  *                        | iterators               |
- *         Resumable*  -> +-------------------------+
- *                        | ActRec in Resumable     |
+ *     BaseGenerator*  -> +-------------------------+
+ *     < NativeData >     | ActRec in Resumable     |
  *                        +-------------------------+
  *                        | Rest of Resumable       |
- *  BaseGenerator* ->     +-------------------------+
- *                        | Parent Generator Data   |
+ *                        +-------------------------+
+ *                        | Rest of Generator Data  |
  *         ObjectData* -> +-------------------------+
  *                        | Parent object           |
  *                        +-------------------------+ high address

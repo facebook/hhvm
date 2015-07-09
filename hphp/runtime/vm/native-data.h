@@ -69,6 +69,16 @@ T* data(const Object& obj) {
   return data<T>(obj.get());
 }
 
+template<class T>
+constexpr ptrdiff_t dataOffset() {
+  return -sizeof(T);
+}
+
+template<class T>
+ObjectData* object(T *data) {
+  return reinterpret_cast<ObjectData*>(data + 1);
+}
+
 void registerNativeDataInfo(const StringData* name,
                             size_t sz,
                             NativeDataInfo::InitFunc init,
@@ -193,15 +203,13 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls);
 Variant nativeDataSleep(const ObjectData* obj);
 void nativeDataWakeup(ObjectData* obj, const Variant& data);
 
+size_t ndsize(const ObjectData* obj, const NativeDataInfo* ndi);
+
 // return the full native header size, which is also the distance from
 // the allocated pointer to the ObjectData*.
 inline size_t ndsize(size_t dataSize) {
   return alignTypedValue(dataSize + sizeof(NativeNode));
  }
-
-inline size_t ndsize(const ObjectData* obj, const NativeDataInfo* ndi) {
-  return ndsize(ndi->sz);
-}
 
 inline size_t ndextra(const ObjectData* obj, const NativeDataInfo* ndi) {
   return ndsize(obj, ndi) - ndsize(ndi->sz);

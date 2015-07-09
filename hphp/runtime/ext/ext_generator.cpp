@@ -25,14 +25,9 @@
 #include "hphp/runtime/base/stats.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-void delete_Generator(ObjectData* od, const Class*) {
-  auto gen = static_cast<c_Generator*>(od);
-  Resumable::Destroy(gen->data()->resumable()->size(), gen);
-}
-
-///////////////////////////////////////////////////////////////////////////////
+Class* Generator::s_class = nullptr;
+const StaticString Generator::s_className("Generator");
 
 Generator::Generator()
   : m_index(-1LL)
@@ -54,6 +49,24 @@ Generator::~Generator() {
   // the generator has already been exited. We don't want redundant calls.
   ActRec* ar = actRec();
   frame_free_locals_inl_no_hook<false>(ar, ar->func()->numLocals());
+}
+
+Generator& Generator::operator=(const Generator& other) {
+  auto const fp = other.actRec();
+  const size_t numSlots = fp->func()->numSlotsInFrame();
+  const size_t frameSz = Resumable::getFrameSize(numSlots);
+  const size_t genSz = genSize(sizeof(Generator), frameSz);
+  resumable()->initialize<true>(fp,
+                                other.resumable()->resumeAddr(),
+                                other.resumable()->resumeOffset(),
+                                frameSz,
+                                genSz);
+  copyVars(fp);
+  setState(other.getState());
+  m_index = other.m_index;
+  cellSet(other.m_key, m_key);
+  cellSet(other.m_value, m_value);
+  return *this;
 }
 
 void Generator::copyVars(const ActRec* srcFp) {
@@ -108,39 +121,25 @@ void Generator::done() {
   setState(State::Done);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-void c_Generator::t___construct() {}
-
-// Functions with native implementation.
-void c_Generator::t_next() { always_assert(false); }
-void c_Generator::t_send(const Variant& v) { always_assert(false); }
-void c_Generator::t_raise(const Variant& v) { always_assert(false); }
-bool c_Generator::t_valid() { always_assert(false); }
-Variant c_Generator::t_current() { always_assert(false); }
-Variant c_Generator::t_key() { always_assert(false); }
-
-const StaticString s_next("next");
-void c_Generator::t_rewind() {
-  this->o_invoke_few_args(s_next, 0);
-}
-
 const StaticString s__closure_("{closure}");
-String c_Generator::t_getorigfuncname() {
-  const Func* origFunc = data()->actRec()->func();
+String HHVM_METHOD(Generator, getOrigFuncName) {
+  Generator* gen = Native::data<Generator>(this_);
+  const Func* origFunc = gen->actRec()->func();
   auto const origName = origFunc->isClosureBody() ? s__closure_.get()
                                                   : origFunc->name();
   assert(origName->isStatic());
   return String(const_cast<StringData*>(origName));
 }
 
-String c_Generator::t_getcalledclass() {
+String HHVM_METHOD(Generator, getCalledClass) {
+  Generator* gen = Native::data<Generator>(this_);
   String called_class;
 
-  if (data()->actRec()->hasThis()) {
-    called_class = data()->actRec()->getThis()->getVMClass()->name()->data();
-  } else if (data()->actRec()->hasClass()) {
-    called_class = data()->actRec()->getClass()->name()->data();
+  if (gen->actRec()->hasThis()) {
+    called_class =
+      gen->actRec()->getThis()->getVMClass()->name()->data();
+  } else if (gen->actRec()->hasClass()) {
+    called_class = gen->actRec()->getClass()->name()->data();
   } else {
     called_class = empty_string();
   }
@@ -148,22 +147,25 @@ String c_Generator::t_getcalledclass() {
   return called_class;
 }
 
-Generator *Generator::Clone(ObjectData* obj) {
-  auto thiz = Generator::fromObject(obj);
-  auto fp = thiz->actRec();
+///////////////////////////////////////////////////////////////////////////////
 
-  auto objClone = Create<true>(fp, fp->func()->numSlotsInFrame(),
-                               thiz->resumable()->resumeAddr(),
-                               thiz->resumable()->resumeOffset());
-  auto cont = Generator::fromObject(objClone);
-  cont->copyVars(fp);
-  cont->setState(thiz->getState());
-  cont->m_index  = thiz->m_index;
-  cellSet(thiz->m_key, cont->m_key);
-  cellSet(thiz->m_value, cont->m_value);
+class GeneratorExtension final : public Extension {
+public:
+  GeneratorExtension() : Extension("generator") {}
 
-  return cont;
-}
+  void moduleInit() override {
+    HHVM_ME(Generator, getOrigFuncName);
+    HHVM_ME(Generator, getCalledClass);
+    Native::registerNativeDataInfo<Generator>(
+      Generator::s_className.get(),
+      Native::NDIFlags::NO_SWEEP);
+    loadSystemlib("generator");
+    Generator::s_class = Unit::lookupClass(Generator::s_className.get());
+    assert(Generator::s_class);
+  }
+};
+
+static GeneratorExtension s_generator_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

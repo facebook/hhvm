@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
@@ -30,14 +31,9 @@
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-void delete_AsyncGenerator(ObjectData* od, const Class*) {
-  auto gen = static_cast<c_AsyncGenerator*>(od);
-  Resumable::Destroy(gen->data()->resumable()->size(), gen);
-}
-
-///////////////////////////////////////////////////////////////////////////////
+Class* AsyncGenerator::s_class = nullptr;
+const StaticString AsyncGenerator::s_className("HH\\AsyncGenerator");
 
 AsyncGenerator::~AsyncGenerator() {
   if (LIKELY(getState() == State::Done)) {
@@ -58,23 +54,17 @@ AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
   assert(fp);
   assert(!fp->resumed());
   assert(fp->func()->isAsyncGenerator());
-  const size_t frameSize = Resumable::getFrameSize(numSlots);
-  const size_t totalSize = sizeof(ResumableNode) + frameSize +
-                           sizeof(Resumable) +
-                           sizeof(AsyncGenerator) + sizeof(c_AsyncGenerator);
-  auto const resumable = Resumable::Create(frameSize, totalSize);
-  resumable->initialize<false>(fp,
-                               resumeAddr,
-                               resumeOffset,
-                               frameSize,
-                               totalSize);
-  auto const genData = new (resumable + 1) AsyncGenerator();
-  auto const gen = new (genData + 1) c_AsyncGenerator();
-  assert(gen->hasExactlyOneRef());
-  assert(gen->noDestruct());
+  const size_t frameSz = Resumable::getFrameSize(numSlots);
+  const size_t genSz = genSize(sizeof(AsyncGenerator), frameSz);
+  auto const obj = BaseGenerator::Alloc(s_class, genSz);
+  auto const genData = new (Native::data<AsyncGenerator>(obj)) AsyncGenerator();
+  genData->resumable()->initialize<false>(fp,
+                                          resumeAddr,
+                                          resumeOffset,
+                                          frameSz,
+                                          genSz);
   genData->setState(State::Created);
-  genData->m_waitHandle = nullptr;
-  return static_cast<ObjectData*>(gen);
+  return obj;
 }
 
 c_AsyncGeneratorWaitHandle*
@@ -158,13 +148,17 @@ void AsyncGenerator::failCpp() {
     m_waitHandle = nullptr;
   }
 }
+///////////////////////////////////////////////////////////////////////////////
 
-void c_AsyncGenerator::t___construct() {}
-
-// Functions with native implementation.
-void c_AsyncGenerator::t_next() {always_assert(false);}
-void c_AsyncGenerator::t_send(const Variant& value) {always_assert(false);}
-void c_AsyncGenerator::t_raise(const Object& exception) {always_assert(false);}
+void AsioExtension::initAsyncGenerator() {
+  Native::registerNativeDataInfo<AsyncGenerator>(
+    AsyncGenerator::s_className.get(),
+    Native::NDIFlags::NO_SWEEP | Native::NDIFlags::NO_COPY);
+  loadSystemlib("async-generator");
+  AsyncGenerator::s_class =
+    Unit::lookupClass(AsyncGenerator::s_className.get());
+  assert(AsyncGenerator::s_class);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

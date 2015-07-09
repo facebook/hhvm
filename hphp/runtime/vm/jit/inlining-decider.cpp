@@ -108,7 +108,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee) {
   if (callee->maxStackCells() >= kStackCheckLeafPadding) {
     return refuse("function stack depth too deep");
   }
-  if (callee->isMethod() && callee->cls() == c_Generator::classof()) {
+  if (callee->isMethod() && callee->cls() == Generator::getClass()) {
     return refuse("generator member function");
   }
   return true;

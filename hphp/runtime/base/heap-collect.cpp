@@ -137,6 +137,8 @@ void Marker::operator()(const ObjectData* p) {
   if (p->getAttribute(ObjectData::HasNativeData)) {
     // HNI style native object; mark the NativeNode header, queue the object.
     // [NativeNode][NativeData][ObjectData][props] is one allocation.
+    // For generators -
+    // [NativeNode][locals][Resumable][GeneratorData][ObjectData]
     auto h = Native::getNativeNode(p, p->getVMClass()->getNativeDataInfo());
     if (mark(h)) {
       enqueue(p);

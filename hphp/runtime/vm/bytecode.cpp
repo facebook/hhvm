@@ -7056,9 +7056,9 @@ OPTBLD_INLINE void iopCreateCl(IOP_ARGS) {
 
 static inline BaseGenerator* this_base_generator(const ActRec* fp) {
   auto const obj = fp->getThis();
-  assert(obj->getVMClass() == c_AsyncGenerator::classof() ||
-         obj->getVMClass() == c_Generator::classof());
-  return obj->getVMClass() == c_Generator::classof()
+  assert(obj->getVMClass() == AsyncGenerator::getClass() ||
+         obj->getVMClass() == Generator::getClass());
+  return obj->getVMClass() == Generator::getClass()
     ? static_cast<BaseGenerator*>(Generator::fromObject(obj))
     : static_cast<BaseGenerator*>(AsyncGenerator::fromObject(obj));
 }

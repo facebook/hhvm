@@ -115,13 +115,13 @@ inline size_t Header::size() const {
     case HeaderKind::BigObj:    // [BigNode][Header...]
       return big_.nbytes;
     case HeaderKind::ResumableFrame:
-      // Generators -
-      // [ResumableNode][locals][Resumable][BaseGenerator][ObjectData]
       // Async functions -
       // [ResumableNode][locals][Resumable][ObjectData<WaitHandle>]
       return resumable()->size();
     case HeaderKind::NativeData:
       // [NativeNode][NativeData][ObjectData][props] is one allocation.
+      // Generators -
+      // [NativeNode][NativeData<locals><Resumable><GeneratorData>][ObjectData]
       return native_.obj_offset + Native::obj(&native_)->heapSize();
     case HeaderKind::Free:
     case HeaderKind::Hole:

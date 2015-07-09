@@ -999,14 +999,11 @@ ObjectData* ObjectData::clone() {
       return collections::clone(this);
     } else if (instanceof(c_Closure::classof())) {
       return c_Closure::Clone(this);
-    } else if (instanceof(c_Generator::classof())) {
-      return Generator::Clone(this)->toObject();
     } else if (instanceof(c_SimpleXMLElement::classof())) {
       return c_SimpleXMLElement::Clone(this);
     }
     always_assert(false);
   }
-
   return cloneImpl();
 }
 
@@ -1991,7 +1988,10 @@ void ObjectData::cloneSet(ObjectData* clone) {
 }
 
 ObjectData* ObjectData::cloneImpl() {
-  Object o{m_cls};
+  ObjectData* obj = instanceof(Generator::getClass())
+                    ? Generator::allocClone(this)
+                    : ObjectData::newInstance(m_cls);
+  Object o = Object::attach(obj);
   cloneSet(o.get());
   if (UNLIKELY(getAttribute(HasNativeData))) {
     Native::nativeDataInstanceCopy(o.get(), this);

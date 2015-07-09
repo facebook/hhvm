@@ -258,7 +258,7 @@ void emitCreateCont(IRGS& env) {
   assertx(!resumed(env));
   assertx(curFunc(env)->isGenerator());
 
-  if (curFunc(env)->isAsyncGenerator()) PUNT(CreateCont-AsyncGenerator);
+  if (curFunc(env)->isAsync()) PUNT(CreateCont-AsyncGenerator);
 
   // Create the Generator object. CreateCont takes care of copying local
   // variables and iterators.
@@ -292,11 +292,11 @@ void emitCreateCont(IRGS& env) {
 void emitContEnter(IRGS& env) {
   auto const returnOffset = nextBcOff(env);
   assertx(curClass(env));
-  assertx(curClass(env)->classof(c_AsyncGenerator::classof()) ||
-          curClass(env)->classof(c_Generator::classof()));
+  assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
+          curClass(env)->classof(Generator::getClass()));
   assertx(curFunc(env)->contains(returnOffset));
 
-  auto isAsync = curClass(env)->classof(c_AsyncGenerator::classof());
+  auto isAsync = curClass(env)->classof(AsyncGenerator::getClass());
   // Load generator's FP and resume address.
   auto const genObj = ldThis(env);
   auto const genFp  = gen(env, LdContActRec, IsAsyncData(isAsync), genObj);
@@ -353,7 +353,7 @@ void emitYieldK(IRGS& env) {
   assertx(resumed(env));
   assertx(curFunc(env)->isGenerator());
 
-  if (curFunc(env)->isAsyncGenerator()) PUNT(YieldK-AsyncGenerator);
+  if (curFunc(env)->isAsync()) PUNT(YieldK-AsyncGenerator);
 
   yieldImpl(env, resumeOffset);
 
@@ -372,21 +372,21 @@ void emitYieldK(IRGS& env) {
 
 void emitContCheck(IRGS& env, int32_t checkStarted) {
   assertx(curClass(env));
-  assertx(curClass(env)->classof(c_AsyncGenerator::classof()) ||
-          curClass(env)->classof(c_Generator::classof()));
+  assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
+          curClass(env)->classof(Generator::getClass()));
   auto const cont = ldThis(env);
   gen(env, ContPreNext,
-    IsAsyncData(curClass(env)->classof(c_AsyncGenerator::classof())),
+    IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())),
     makeExitSlow(env), cont, cns(env, static_cast<bool>(checkStarted)));
 }
 
 void emitContValid(IRGS& env) {
   assertx(curClass(env));
-  assertx(curClass(env)->classof(c_AsyncGenerator::classof()) ||
-          curClass(env)->classof(c_Generator::classof()));
+  assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
+          curClass(env)->classof(Generator::getClass()));
   auto const cont = ldThis(env);
   push(env, gen(env, ContValid,
-    IsAsyncData(curClass(env)->classof(c_AsyncGenerator::classof())), cont));
+    IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())), cont));
 }
 
 void emitContKey(IRGS& env) {

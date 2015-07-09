@@ -35,6 +35,21 @@
 
 namespace HPHP {
 
+
+class AsioExtension final : public Extension {
+public:
+  AsioExtension() : Extension("asio", "0.1") {}
+
+  void moduleInit() override {
+    initAsyncGenerator();
+    initFunctions();
+  }
+
+private:
+  void initAsyncGenerator();
+  void initFunctions();
+};
+
 Object HHVM_FUNCTION(asio_get_running);
 
 }

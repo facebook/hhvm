@@ -9066,14 +9066,11 @@ ContMethMapT s_genMethods = {
 static int32_t emitGeneratorMethod(UnitEmitter& ue,
                                    FuncEmitter* fe,
                                    GeneratorMethod m) {
-  static const StringData* valStr = makeStaticString("value");
-
   Attr attrs = (Attr)(AttrBuiltin | AttrPublic);
   fe->init(0, 0, ue.bcPos(), attrs, false, staticEmptyString());
   switch (m) {
     case METH_SEND:
     case METH_RAISE:
-      fe->appendParam(valStr, FuncEmitter::ParamInfo());
     case METH_NEXT: {
       // We always want these methods to be cloned with new funcids in
       // subclasses so we can burn Class*s and Func*s into the
@@ -9178,19 +9175,6 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
   ue->m_filepath = s_systemlibNativeCls.get();
   ue->addTrivialPseudoMain();
 
-  ContMethMap asyncGenMethods;
-  asyncGenMethods[makeStaticString("next")] = METH_NEXT;
-  asyncGenMethods[makeStaticString("send")] = METH_SEND;
-  asyncGenMethods[makeStaticString("raise")] = METH_RAISE;
-
-  ContMethMap genMethods;
-  genMethods[makeStaticString("next")] = METH_NEXT;
-  genMethods[makeStaticString("send")] = METH_SEND;
-  genMethods[makeStaticString("raise")] = METH_RAISE;
-  genMethods[makeStaticString("valid")] = METH_VALID;
-  genMethods[makeStaticString("current")] = METH_CURRENT;
-  genMethods[makeStaticString("key")] = METH_KEY;
-
   // Build up extClassHash, a hashtable that maps class names to structures
   // containing C++ function pointers for the class's methods and constructors
   if (!Class::s_extClassHash.empty()) {
@@ -9269,29 +9253,16 @@ emitHHBCNativeClassUnit(const HhbcExtClassInfo* builtinClasses,
     bool hasCtor = false;
     for (ssize_t j = 0; j < e.info->m_methodCount; ++j) {
       const HhbcExtMethodInfo* methodInfo = &(e.info->m_methods[j]);
-      static const StringData* asyncGenCls =
-        makeStaticString("hh\\asyncgenerator");
-      static const StringData* generatorCls = makeStaticString("generator");
       static const StringData* waitHandleCls =
         makeStaticString("hh\\waithandle");
       static const StringData* gwhMeth = makeStaticString("getwaithandle");
       static const StringData* resultMeth = makeStaticString("result");
       StringData* methName = makeStaticString(methodInfo->m_name);
-      GeneratorMethod* cmeth;
 
       FuncEmitter* fe = ue->newMethodEmitter(methName, pce);
       pce->addMethod(fe);
       auto stackPad = int32_t{0};
-      // The following for generators is temporary until HNI conversion
-      if (e.name->isame(asyncGenCls) &&
-          (cmeth = folly::get_ptr(asyncGenMethods, methName))) {
-        auto methCpy = *cmeth;
-        stackPad = emitGeneratorMethod(*ue, fe, methCpy);
-      } else if (e.name->isame(generatorCls) &&
-          (cmeth = folly::get_ptr(genMethods, methName))) {
-        auto methCpy = *cmeth;
-        stackPad = emitGeneratorMethod(*ue, fe, methCpy);
-      } else if (e.name->isame(waitHandleCls) && methName->isame(gwhMeth)) {
+      if (e.name->isame(waitHandleCls) && methName->isame(gwhMeth)) {
         stackPad = emitGetWaitHandleMethod(*ue, fe);
       } else if (e.name->isame(waitHandleCls) && methName->isame(resultMeth)) {
         stackPad = emitWaitHandleResultMethod(*ue, fe);

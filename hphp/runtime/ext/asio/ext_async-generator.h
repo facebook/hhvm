@@ -34,13 +34,20 @@ class c_WaitableWaitHandle;
 
 class AsyncGenerator final : public BaseGenerator {
 public:
+   AsyncGenerator() : m_waitHandle(nullptr) {}
   ~AsyncGenerator();
 
   static ObjectData* Create(const ActRec* fp, size_t numSlots,
                             jit::TCA resumeAddr, Offset resumeOffset);
-  static AsyncGenerator* fromObject(ObjectData *obj);
+  static Class* getClass() {
+    assert(s_class);
+    return s_class;
+  }
   static constexpr ptrdiff_t objectOff() {
-    return sizeof(AsyncGenerator);
+    return -(Native::dataOffset<AsyncGenerator>());
+  }
+  static AsyncGenerator* fromObject(ObjectData *obj) {
+    return Native::data<AsyncGenerator>(obj);
   }
 
   c_AsyncGeneratorWaitHandle* await(Offset resumeOffset,
@@ -52,8 +59,7 @@ public:
   void failCpp();
 
   ObjectData* toObject() {
-    return reinterpret_cast<ObjectData*>(
-      reinterpret_cast<char*>(this) + objectOff());
+    return Native::object<AsyncGenerator>(this);
   }
 
   bool isEagerlyExecuted() const {
@@ -65,38 +71,17 @@ public:
     assert(getState() == State::Running);
     return m_waitHandle;
   }
+
 private:
   // valid only in Running state; null during eager execution
   c_AsyncGeneratorWaitHandle* m_waitHandle;
-};
-///////////////////////////////////////////////////////////////////////////////
-// class AsyncGenerator
-
-class c_AsyncGenerator final : public c_BaseGenerator {
-public:
-  DECLARE_CLASS_NO_SWEEP(AsyncGenerator)
-
-  explicit c_AsyncGenerator(Class* cls = c_AsyncGenerator::classof())
-    : c_BaseGenerator(cls)
-  {}
-  ~c_AsyncGenerator() {
-    data()->~AsyncGenerator();
-  }
-  void t___construct();
-  void t_next();
-  void t_send(const Variant& value);
-  void t_raise(const Object& exception);
 
 public:
-  AsyncGenerator *data() {
-    return reinterpret_cast<AsyncGenerator*>(reinterpret_cast<char*>(
-      static_cast<c_BaseGenerator*>(this)) - AsyncGenerator::objectOff());
-  }
+  static Class* s_class;
+  static const StaticString s_className;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-#include "hphp/runtime/ext/asio/ext_async-generator-inl.h"
 
 #endif // incl_HPHP_EXT_ASIO_ASYNC_GENERATOR_H_

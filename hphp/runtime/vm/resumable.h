@@ -60,9 +60,13 @@ namespace HPHP {
  *                        +-------------------------+ high address
  */
 struct Resumable {
-  static Resumable* FromObj(ObjectData* obj);
-  static const Resumable* FromObj(const ObjectData* obj);
-
+  // This function is used only by AFWH, temporary till AFWH is converted to HNI
+  static Resumable* FromObj(ObjectData* obj) {
+    return reinterpret_cast<Resumable*>(obj) - 1;
+  }
+  static const Resumable* FromObj(const ObjectData* obj) {
+    return reinterpret_cast<const Resumable*>(obj) - 1;
+  }
   static constexpr ptrdiff_t arOff() {
     return offsetof(Resumable, m_actRec);
   }

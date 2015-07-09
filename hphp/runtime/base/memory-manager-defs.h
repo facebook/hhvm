@@ -65,10 +65,9 @@ struct Header {
     );
   }
   ObjectData* resumableObj() const {
-    auto const func = resumable()->actRec()->func();
-    return func->isGenerator()
-      ? reinterpret_cast<ObjectData*>((char*)this + resumable()->size()) - 1
-      : reinterpret_cast<ObjectData*>(resumable() + 1);
+    DEBUG_ONLY auto const func = resumable()->actRec()->func();
+    assert(func->isAsyncFunction());
+    return reinterpret_cast<ObjectData*>(resumable() + 1);
   }
 };
 

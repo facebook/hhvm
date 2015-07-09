@@ -259,6 +259,14 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
       }
     }
     if (m_modifiers->isAbstract()) {
+      if (funcScope->userAttributes().count("__Memoize")) {
+        m_modifiers->parseTimeFatal(
+          fileScope,
+          Compiler::InvalidAttribute,
+          "Abstract method %s::%s cannot be memoized",
+          classScope->getOriginalName().c_str(),
+          getOriginalName().c_str());
+      }
       if (m_modifiers->isPrivate() || m_modifiers->isFinal() || isNative) {
         m_modifiers->parseTimeFatal(
           fileScope,

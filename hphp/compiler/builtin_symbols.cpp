@@ -259,7 +259,7 @@ ClassScopePtr BuiltinSymbols::ImportClassScopePtr(AnalysisResultPtr ar,
     ar, cls->getName().toCppString(), parent.toCppString(),
     stdIfaces, methods);
 
-  for (uint i = 0; i < methods.size(); ++i) {
+  for (uint32_t i = 0; i < methods.size(); ++i) {
     methods[i]->setOuterScope(cl);
   }
 

@@ -131,13 +131,13 @@ ArrayData* APCLocalArray::loadElems() const {
   ArrayData* elems;
   if (m_arr->isPacked()) {
     PackedArrayInit ai(count);
-    for (uint i = 0; i < count; i++) {
+    for (uint32_t i = 0; i < count; i++) {
       ai.append(GetValueRef(this, i));
     }
     elems = ai.create();
   } else {
     ArrayInit ai(count, ArrayInit::Mixed{});
-    for (uint i = 0; i < count; i++) {
+    for (uint32_t i = 0; i < count; i++) {
       ai.add(getKey(i), GetValueRef(this, i), true);
     }
     elems = ai.create();

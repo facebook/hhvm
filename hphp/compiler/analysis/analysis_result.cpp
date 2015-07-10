@@ -671,7 +671,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
 void AnalysisResult::analyzeProgramFinal() {
   AnalysisResultPtr ar = shared_from_this();
   setPhase(AnalysisResult::AnalyzeFinal);
-  for (uint i = 0; i < m_fileScopes.size(); i++) {
+  for (uint32_t i = 0; i < m_fileScopes.size(); i++) {
     m_fileScopes[i]->analyzeProgram(ar);
   }
 

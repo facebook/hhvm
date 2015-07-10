@@ -121,7 +121,7 @@ private:
    * Make a ZendCustomElement resource wrapping the given data block. If pDest
    * is non-null, it will be set to the newly-allocated location for the block.
    */
-  req::ptr<ResourceData> makeElementResource(void *pData, uint nDataSize,
+  req::ptr<ResourceData> makeElementResource(void *pData, uint32_t nDataSize,
                                              void **pDest) const;
 
   DtorFunc m_destructor;

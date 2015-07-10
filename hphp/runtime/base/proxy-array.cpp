@@ -443,7 +443,7 @@ void ProxyArray::proxyInit(uint32_t nSize,
 }
 
 req::ptr<ResourceData>
-ProxyArray::makeElementResource(void* pData, uint nDataSize,
+ProxyArray::makeElementResource(void* pData, uint32_t nDataSize,
                                 void** pDest) const {
   auto elt = req::make<ZendCustomElement>(pData, nDataSize, m_destructor);
   if (pDest) *pDest = elt->data();

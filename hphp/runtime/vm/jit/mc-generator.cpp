@@ -1729,7 +1729,7 @@ template <typename T> void ClearContainer(T& container) {
 void
 CodeGenFixups::process_only(
   GrowableVector<IncomingBranch>* inProgressTailBranches) {
-  for (uint i = 0; i < m_pendingFixups.size(); i++) {
+  for (uint32_t i = 0; i < m_pendingFixups.size(); i++) {
     TCA tca = m_pendingFixups[i].m_tca;
     assertx(mcg->isValidCodeAddress(tca));
     mcg->fixupMap().recordFixup(tca, m_pendingFixups[i].m_fixup);
@@ -2508,7 +2508,7 @@ void MCGenerator::setJmpTransID(TCA jmp) {
 }
 
 void
-emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint index, int n, bool force) {
+emitIncStat(CodeBlock& cb, uint64_t* tl_table, uint32_t index, int n, bool force) {
   if (!force && !Stats::enabled()) return;
   intptr_t disp = uintptr_t(&tl_table[index]) - tlsBase();
 

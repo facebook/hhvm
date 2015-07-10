@@ -336,7 +336,7 @@ do { \
 } while (0)
 
 // original Zend name is _estrndup
-static char *php_strndup_impl(const char* s, uint length
+static char *php_strndup_impl(const char* s, uint32_t length
 #ifdef IM_MEMORY_CHECK
 , int ln
 #endif
@@ -1828,7 +1828,7 @@ php_open_plain_file(const String& filename, const char *mode, FILE **fpp) {
   return nullptr;
 }
 
-static int php_write(void *buf, uint size) {
+static int php_write(void *buf, uint32_t size) {
   g_context->write((const char *)buf, size);
   return size;
 }

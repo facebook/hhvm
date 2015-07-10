@@ -3095,7 +3095,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       emitPop(e);
       return false;
     }
-    uint ncase = cases->getCount();
+    uint32_t ncase = cases->getCount();
     std::vector<Label> caseLabels(ncase);
     Label& brkTarget = registerBreak(sw, region.get(), 1, false)->m_label;
     Label& contTarget =
@@ -3156,7 +3156,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       }
 
       int defI = -1;
-      for (uint i = 0; i < ncase; i++) {
+      for (uint32_t i = 0; i < ncase; i++) {
         CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
         ExpressionPtr condition = c->getCondition();
         if (condition) {
@@ -3189,7 +3189,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         e.Jmp(brkTarget);
       }
     }
-    for (uint i = 0; i < ncase; i++) {
+    for (uint32_t i = 0; i < ncase; i++) {
       caseLabels[i].set(e);
       CaseStatementPtr c(static_pointer_cast<CaseStatement>((*cases)[i]));
       enterRegion(region);
@@ -6703,7 +6703,7 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
   }
 
   if (!m_curFunc->isMemoizeImpl) {
-    for (uint i = 0; i < m_curFunc->params.size(); i++) {
+    for (uint32_t i = 0; i < m_curFunc->params.size(); i++) {
       const TypeConstraint& tc = m_curFunc->params[i].typeConstraint;
       if (!tc.hasConstraint()) continue;
       emitVirtualLocal(i);
@@ -6885,7 +6885,7 @@ void EmitterVisitor::emitMemoizeProp(Emitter& e,
                                      MethodStatementPtr meth,
                                      Id localID,
                                      const std::vector<Id>& paramIDs,
-                                     uint numParams) {
+                                     uint32_t numParams) {
   assert(m_curFunc->isMemoizeWrapper);
 
   if (meth->is(Statement::KindOfFunctionStatement)) {
@@ -6904,7 +6904,7 @@ void EmitterVisitor::emitMemoizeProp(Emitter& e,
   }
 
   assert(numParams <= paramIDs.size());
-  for (uint i = 0; i < numParams; i++) {
+  for (uint32_t i = 0; i < numParams; i++) {
     if (i == 0 && m_curFunc->hasMemoizeSharedProp) {
       e.Int(m_curFunc->memoizeSharedPropIndex);
     } else {
@@ -7063,7 +7063,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   }
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);
-    for (uint i = 0; i < numParams; i++) {
+    for (uint32_t i = 0; i < numParams; i++) {
       emitVirtualLocal(i);
       emitFPass(e, i, PassByRefKind::ErrorOnCell);
     }

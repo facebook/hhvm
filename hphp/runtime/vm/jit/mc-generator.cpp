@@ -719,14 +719,13 @@ TCA MCGenerator::emitFuncPrologue(Func* func, int argc) {
   // Careful: this isn't necessarily the real entry point. For funcIsMagic
   // prologues, this is just a possible prologue.
   TCA aStart = code.main().frontier();
-  TCA start  = aStart;
 
   // Give the prologue a TransID if we have profiling data.
   auto transID = m_tx.profData()
     ? m_tx.profData()->addTransPrologue(m_tx.mode(), funcBody, paramIndex)
     : kInvalidTransID;
 
-  genFuncPrologue(transID, func, argc, start);
+  TCA start = genFuncPrologue(transID, func, argc);
 
   auto loc = maker.markEnd();
   if (RuntimeOption::EvalEnableReusableTC) {

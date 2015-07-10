@@ -182,11 +182,6 @@ struct BackEnd final : jit::BackEnd {
     return arm::funcPrologueToGuard(prologue, func);
   }
 
-  SrcKey emitFuncPrologue(TransID transID, Func* func, int argc,
-                          TCA& start) override {
-    return arm::emitFuncPrologue(transID, func, argc, start);
-  }
-
   TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs) override {
     return arm::emitCallArrayPrologue(func, dvs);
   }

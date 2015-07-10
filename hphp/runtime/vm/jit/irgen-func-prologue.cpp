@@ -316,7 +316,6 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
 
 void emitMagicFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   DEBUG_ONLY auto const func = env.context.func;
-
   assertx(func->isMagic());
   assertx(func->numParams() == 2);
   assertx(!func->hasVariadicCaptureParam());

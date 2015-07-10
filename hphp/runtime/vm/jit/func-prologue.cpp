@@ -75,7 +75,7 @@ void genFuncGuard(Func* func, CodeBlock& cb) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void genFuncPrologue(TransID transID, Func* func, int argc, TCA& start) {
+TCA genFuncPrologue(TransID transID, Func* func, int argc) {
   auto const context = TransContext(
     transID,
     SrcKey{func, func->getEntryForNumArgs(argc), SrcKey::PrologueTag{}},
@@ -87,11 +87,13 @@ void genFuncPrologue(TransID transID, Func* func, int argc, TCA& start) {
 
   // Dump the func guard in the TC before anything else.
   genFuncGuard(func, cb);
-  start = cb.frontier();
+  auto start = cb.frontier();
 
   irgen::emitFuncPrologue(env, argc, transID);
   irgen::sealUnit(env);
   genCode(env.unit, CodeKind::CrossTrace);
+
+  return start;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

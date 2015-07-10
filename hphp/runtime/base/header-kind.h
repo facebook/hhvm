@@ -75,7 +75,9 @@ template<class T = uint16_t> struct HeaderWord {
     q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
         uint64_t(count) << 32;
     // TODO make fast
-    assert(count <= 1);
+    if (kind != HeaderKind::Free){
+      assert(count <= 1);
+    }
     mrb = false;
     counted = true;
     if (count == StaticValue) {
@@ -94,7 +96,9 @@ template<class T = uint16_t> struct HeaderWord {
         static_cast<uint16_t>(aux) |
         uint64_t(count) << 32;
     // TODO make fast
-    assert(count <= 1);
+    if (kind != HeaderKind::Free){
+      assert(count <= 1);
+    }
     mrb = false;
     counted = true;
     if (count == StaticValue) {
@@ -112,7 +116,9 @@ template<class T = uint16_t> struct HeaderWord {
   void init(const HeaderWord<T>& h, RefCount count) {
     q = h.lo32 | uint64_t(count) << 32;
     // TODO make fast
-    assert(count <= 1);
+    if (kind != HeaderKind::Free){
+      assert(count <= 1);
+    }
     mrb = false;
     counted = true;
     if (count == StaticValue) {

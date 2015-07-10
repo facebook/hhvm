@@ -1,0 +1,6 @@
+File "array_plus_sub_4.php", line 12, characters 3-15:
+Typing error (Typing[4110])
+File "array_plus_sub_4.php", line 3, characters 18-22:
+This is an array (used like a vector)
+File "array_plus_sub_4.php", line 6, characters 19-23:
+It is incompatible with an array (used like a hashtable)

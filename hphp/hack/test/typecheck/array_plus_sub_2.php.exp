@@ -1,0 +1,6 @@
+File "array_plus_sub_2.php", line 13, characters 10-11:
+Invalid return type (Typing[4110])
+File "array_plus_sub_2.php", line 10, characters 26-28:
+This is a num (int/float)
+File "array_plus_sub_2.php", line 3, characters 24-29:
+It is incompatible with a string

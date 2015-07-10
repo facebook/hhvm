@@ -293,6 +293,7 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
     def __init__(self):
         super(IdxCommand, self).__init__('idx', gdb.COMMAND_DATA)
 
+    @errorwrap
     def invoke(self, args, from_tty):
         argv = parse_argv(args)
 
@@ -314,6 +315,7 @@ class IdxFunction(gdb.Function):
     def __init__(self):
         super(IdxFunction, self).__init__('idx')
 
+    @errorwrap
     def invoke(self, container, val):
         return idx(container, val)
 

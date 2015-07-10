@@ -204,6 +204,7 @@ remains where it left off after the previous call.
         super(HHXCommand, self).__init__('hhx', gdb.COMMAND_DATA)
         self.bcpos = None
 
+    @errorwrap
     def invoke(self, args, from_tty):
         argv = parse_argv(args)
 

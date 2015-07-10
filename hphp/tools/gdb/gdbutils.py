@@ -12,6 +12,7 @@ import functools
 import gdb
 import re
 import struct
+import traceback
 import types
 
 
@@ -42,6 +43,22 @@ def invalidate_all_memoizers():
 
     for cache in _all_caches:
         cache.clear()
+
+
+#------------------------------------------------------------------------------
+# Exception debugging.
+
+def errorwrap(func):
+    @functools.wraps(func)
+    def wrapped(*args):
+        try:
+            func(*args)
+        except:
+            print('')
+            traceback.print_exc()
+            print('')
+            raise
+    return wrapped
 
 
 #------------------------------------------------------------------------------

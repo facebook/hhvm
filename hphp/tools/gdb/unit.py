@@ -25,6 +25,7 @@ Use `unit none` to unset.  Just `unit` displays the current Unit.
         super(UnitCommand, self).__init__('unit', gdb.COMMAND_DATA,
                                           gdb.COMPLETE_NONE, True)
 
+    @errorwrap
     def invoke(self, args, from_tty):
         argv = gdb.string_to_argv(args)
         global curunit

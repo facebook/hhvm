@@ -26,7 +26,7 @@ The output backtrace has the following format:
     def __init__(self):
         super(WalkstkCommand, self).__init__('walkstk', gdb.COMMAND_STACK)
 
-
+    @errorwrap
     def invoke(self, args, from_tty):
         argv = parse_argv(args)
 

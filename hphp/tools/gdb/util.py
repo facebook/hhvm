@@ -18,6 +18,7 @@ class PtrFunction(gdb.Function):
     def __init__(self):
         super(PtrFunction, self).__init__('ptr')
 
+    @errorwrap
     def invoke(self, val):
         return rawptr(val)
 
@@ -33,6 +34,7 @@ class DerefFunction(gdb.Function):
     def __init__(self):
         super(DerefFunction, self).__init__('deref')
 
+    @errorwrap
     def invoke(self, val):
         return deref(val)
 
@@ -50,6 +52,7 @@ class StrhashFunction(gdb.Function):
     def __init__(self):
         super(StrhashFunction, self).__init__('strhash')
 
+    @errorwrap
     def invoke(self, val):
         return strinfo(val)['hash']
 
@@ -65,6 +68,7 @@ class HHCryCommand(gdb.Command):
     def __init__(self):
         super(HHCryCommand, self).__init__('hhcry', gdb.COMMAND_SUPPORT)
 
+    @errorwrap
     def invoke(self, args, from_tty):
         invalidate_all_memoizers()
 

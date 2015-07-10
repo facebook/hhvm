@@ -38,6 +38,7 @@ class SizeOfCommand(gdb.Command):
     def __init__(self):
         super(SizeOfCommand, self).__init__('sizeof', gdb.COMMAND_DATA)
 
+    @errorwrap
     def invoke(self, args, from_tty):
         argv = parse_argv(args)
 

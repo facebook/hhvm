@@ -41,6 +41,7 @@ class LookupFuncCommand(gdb.Command):
         super(LookupFuncCommand, self).__init__('lookup func',
                                                 gdb.COMMAND_DATA)
 
+    @errorwrap
     def invoke(self, args, from_tty):
         argv = parse_argv(args)
 
@@ -55,6 +56,7 @@ class LookupFuncFunction(gdb.Function):
     def __init__(self):
         super(LookupFuncFunction, self).__init__('lookup_func')
 
+    @errorwrap
     def invoke(self, val):
         return lookup_func(val)
 
@@ -87,6 +89,7 @@ If no Unit is given, the current unit (set by `unit') is used.
         super(LookupLitstrCommand, self).__init__('lookup litstr',
                                                   gdb.COMMAND_DATA)
 
+    @errorwrap
     def invoke(self, args, from_tty):
         argv = parse_argv(args)
 

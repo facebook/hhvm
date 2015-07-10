@@ -1,26 +1,26 @@
-[<expr#344>::T][\C::T]Tnum
-[<expr#344>::T][\C::T]Tnum
-[<expr#344>::T][\C::T]Tnum
+[<expr#352>::T][\C::T]Tnum
+[<expr#352>::T][\C::T]Tnum
+[<expr#352>::T][\C::T]Tnum
 App \I<>
-[<expr#344>::T][\I::T]Tnum
-[<expr#354>::T][\C::T]Tnum
+[<expr#352>::T][\I::T]Tnum
+[<expr#362>::T][\C::T]Tnum
 File "lvar_expr_dependent.php", line 42, characters 13-18:
 Invalid argument (Typing[4110])
 File "lvar_expr_dependent.php", line 13, characters 26-32:
-This is the expression dependent type <expr#354>::T
+This is the expression dependent type <expr#362>::T
   that is compatible with the abstract type constant C::T
   that is compatible with a num (int/float)
 File "lvar_expr_dependent.php", line 42, characters 5-6:
-  where '<expr#354>' is a reference to this expression
+  where '<expr#362>' is a reference to this expression
 File "lvar_expr_dependent.php", line 10, characters 28-30:
   resulting from expanding a type constant as follows:
     C::T
 File "lvar_expr_dependent.php", line 10, characters 28-30:
 It is incompatible with a num (int/float)
 File "lvar_expr_dependent.php", line 12, characters 35-41:
-Considering the constraint on '<expr#344>::T'
+Considering the constraint on '<expr#352>::T'
 File "lvar_expr_dependent.php", line 38, characters 14-15:
-  where '<expr#344>' is a reference to this expression
+  where '<expr#352>' is a reference to this expression
 File "lvar_expr_dependent.php", line 10, characters 28-30:
   resulting from expanding a type constant as follows:
     C::T

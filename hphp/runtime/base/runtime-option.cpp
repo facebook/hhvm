@@ -749,36 +749,30 @@ void RuntimeOption::Load(
 
   {
     // Logging
-    if (config["Log"]["Level"] == "None") {
-      Logger::LogLevel = Logger::LogNone;
-    } else if (config["Log"]["Level"] == "Error") {
-      Logger::LogLevel = Logger::LogError;
-    } else if (config["Log"]["Level"] == "Warning") {
-      Logger::LogLevel = Logger::LogWarning;
-    } else if (config["Log"]["Level"] == "Info") {
-      Logger::LogLevel = Logger::LogInfo;
-    } else if (config["Log"]["Level"] == "Verbose") {
-      Logger::LogLevel = Logger::LogVerbose;
+    auto setLogLevel = [](const std::string& value) {
+      // ini parsing treats "None" as ""
+      if (value == "None" || value == "") {
+        Logger::LogLevel = Logger::LogNone;
+      } else if (value == "Error") {
+        Logger::LogLevel = Logger::LogError;
+      } else if (value == "Warning") {
+        Logger::LogLevel = Logger::LogWarning;
+      } else if (value == "Info") {
+        Logger::LogLevel = Logger::LogInfo;
+      } else if (value == "Verbose") {
+        Logger::LogLevel = Logger::LogVerbose;
+      } else {
+        return false;
+      }
+      return true;
+    };
+    auto str = Config::GetString(ini, config, "Log.Level");
+    if (!str.empty()) {
+      setLogLevel(str);
     }
     IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
                      "hhvm.log.level", IniSetting::SetAndGet<std::string>(
-      [](const std::string& value) {
-        // ini parsing treats "None" as ""
-        if (value == "None" || value == "") {
-          Logger::LogLevel = Logger::LogNone;
-        } else if (value == "Error") {
-          Logger::LogLevel = Logger::LogError;
-        } else if (value == "Warning") {
-          Logger::LogLevel = Logger::LogWarning;
-        } else if (value == "Info") {
-          Logger::LogLevel = Logger::LogInfo;
-        } else if (value == "Verbose") {
-          Logger::LogLevel = Logger::LogVerbose;
-        } else {
-          return false;
-        }
-        return true;
-      },
+      setLogLevel,
       []() {
         switch (Logger::LogLevel) {
           case Logger::LogNone:

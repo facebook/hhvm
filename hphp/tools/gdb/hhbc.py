@@ -170,7 +170,7 @@ class HHBC(object):
         instrlen = 1
         imms = []
 
-        for i in xrange(0, HHBC.num_imms(op)):
+        for i in xrange(0, int(HHBC.num_imms(op))):
             immoff = bc + instrlen
             immtype = HHBC.imm_type(op, i)
             imminfo = HHBC.imm_info(immoff, immtype)

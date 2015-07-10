@@ -968,6 +968,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileObjClass:
   case LdIfaceMethod:
   case InstanceOfIfaceVtable:
+  case CheckARMagicFlag:
+  case StARNumArgsAndFlags:
+  case LdARInvName:
+  case StARInvName:
     return IrrelevantEffects {};
 
   //////////////////////////////////////////////////////////////////////
@@ -1106,6 +1110,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GetCtxFwdCallDyn:
   case DbgTraceCall:
   case InitCtx:
+  case PackMagicArgs:
     return may_load_store(AEmpty, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:

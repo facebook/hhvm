@@ -45,10 +45,6 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool is_supported(Func* func, uint32_t argc) {
-  return !func->isMagic();
-}
-
 void genFuncGuard(Func* func, CodeBlock& cb) {
   Vauto vasm { cb };
 
@@ -80,11 +76,6 @@ void genFuncGuard(Func* func, CodeBlock& cb) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void genFuncPrologue(TransID transID, Func* func, int argc, TCA& start) {
-  if (!is_supported(func, argc)) {
-    mcg->backEnd().emitFuncPrologue(transID, func, argc, start);
-    return;
-  }
-
   auto const context = TransContext(
     transID,
     SrcKey{func, func->getEntryForNumArgs(argc), SrcKey::PrologueTag{}},

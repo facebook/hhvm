@@ -5625,8 +5625,66 @@ void CodeGenerator::cgCheckSurpriseAndStack(IRInstruction* inst) {
   m_state.catch_calls[inst->taken()] = CatchCall::CPP;
 }
 
-void CodeGenerator::print() const {
-  jit::print(std::cout, m_state.unit, m_state.asmInfo);
+void CodeGenerator::cgCheckARMagicFlag(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+
+  auto& v = vmain();
+  auto const arflags = v.makeReg();
+  auto const tmp = v.makeReg();
+  auto const sf = v.makeReg();
+
+  auto const mask = static_cast<int32_t>(ActRec::Flags::MagicDispatch);
+
+  v << loadl{fp[AROFF(m_numArgsAndFlags)], arflags};
+  v << andli{mask, arflags, tmp, v.makeReg()};
+  v << cmpli{mask, tmp, sf};
+  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
+}
+
+void CodeGenerator::cgStARNumArgsAndFlags(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+  auto const val = srcLoc(inst, 1).reg();
+  vmain() << storel{val, fp[AROFF(m_numArgsAndFlags)]};
+}
+
+void CodeGenerator::cgLdARInvName(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+  auto const dst = dstLoc(inst, 0).reg();
+  vmain() << load{fp[AROFF(m_invName)], dst};
+}
+
+void CodeGenerator::cgStARInvName(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+  auto const val = srcLoc(inst, 1).reg();
+  vmain() << store{val, fp[AROFF(m_invName)]};
+}
+
+void CodeGenerator::cgPackMagicArgs(IRInstruction* inst) {
+  auto const fp = srcLoc(inst, 0).reg();
+
+  auto& v = vmain();
+  auto const naaf = v.makeReg();
+  auto const num_args = v.makeReg();
+
+  v << loadl{fp[AROFF(m_numArgsAndFlags)], naaf};
+  v << andli{ActRec::kNumArgsMask, naaf, num_args, v.makeReg()};
+
+  auto const offset = v.makeReg();
+  auto const values = v.makeReg();
+
+  static_assert(sizeof(Cell) == 16, "");
+  v << shlli{4, num_args, offset, v.makeReg()};
+  v << subq{offset, fp, values, v.makeReg()};
+
+  cgCallHelper(
+    v,
+    CppCall::direct(MixedArray::MakePacked),
+    callDest(inst),
+    SyncOptions::kSyncPoint,
+    argGroup(inst)
+      .reg(num_args)
+      .reg(values)
+  );
 }
 
 void CodeGenerator::cgProfileObjClass(IRInstruction* inst) {
@@ -5638,6 +5696,10 @@ void CodeGenerator::cgProfileObjClass(IRInstruction* inst) {
   cgCallHelper(v, CppCall::direct(profileObjClassHelper),
                kVoidDest, SyncOptions::kNoSyncPoint,
                argGroup(inst).reg(profile).ssa(0));
+}
+
+void CodeGenerator::print() const {
+  jit::print(std::cout, m_state.unit, m_state.asmInfo);
 }
 
 }}}

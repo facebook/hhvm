@@ -200,6 +200,8 @@ bool canDCE(IRInstruction* inst) {
   case LdColArray:
   case OrdStr:
   case CheckRange:
+  case LdARInvName:
+  case PackMagicArgs:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -486,6 +488,9 @@ bool canDCE(IRInstruction* inst) {
   case InitExtraArgs:
   case InitCtx:
   case CheckSurpriseFlagsEnter:
+  case CheckARMagicFlag:
+  case StARNumArgsAndFlags:
+  case StARInvName:
   case ExitPlaceholder:
   case ThrowOutOfBounds:
   case MapIdx:

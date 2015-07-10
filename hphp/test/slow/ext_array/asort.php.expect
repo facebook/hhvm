@@ -9,20 +9,20 @@ array(4) {
   string(6) "orange"
 }
 array(3) {
+  [2]=>
+  string(8) "num10ber"
   [1]=>
   string(7) "num1ber"
   [0]=>
   string(7) "num2ber"
-  [2]=>
-  string(8) "num10ber"
 }
 array(4) {
-  [0]=>
-  string(6) "Gíiron"
-  [1]=>
-  string(9) "GÃ³nzales"
   [2]=>
   string(7) "GÃ© ara"
+  [1]=>
+  string(9) "GÃ³nzales"
   [3]=>
   string(6) "Gárcia"
+  [0]=>
+  string(6) "Gíiron"
 }

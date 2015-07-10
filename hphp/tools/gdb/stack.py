@@ -5,6 +5,8 @@ GDB commands related to the HHVM stack.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
+from compatibility import *
+
 import gdb
 from gdbutils import *
 import frame

@@ -5,6 +5,8 @@ Assorted utilities for HHVM GDB bindings.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
+from compatibility import *
+
 import collections
 import functools
 import gdb

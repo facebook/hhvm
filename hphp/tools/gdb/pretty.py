@@ -5,6 +5,8 @@ GDB pretty printers for HHVM types.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
+from compatibility import *
+
 import gdb
 import re
 from gdbutils import *

@@ -5,6 +5,8 @@ Set the target Unit; used implicitly by some other commands.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
+from compatibility import *
+
 import gdb
 from gdbutils import *
 

@@ -5,6 +5,8 @@ GDB utility convenience functions.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
+from compatibility import *
+
 import gdb
 from gdbutils import *
 

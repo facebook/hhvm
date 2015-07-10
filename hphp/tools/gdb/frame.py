@@ -5,6 +5,8 @@ Helpers for collecting and printing frame data.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
+from compatibility import *
+
 import os
 import gdb
 import bisect

@@ -5,6 +5,8 @@ Hash functions for use with container accessors.
 # @lint-avoid-pyflakes3
 # @lint-avoid-pyflakes2
 
+from compatibility import *
+
 import gdb
 from gdbutils import *
 
@@ -47,7 +49,7 @@ def hash_of(value):
         # pointer_hash<> is just hash_int64().
         return hash_int64(value.cast(T('intptr_t')))
 
-    for (htype, hfunc) in hashes.iteritems():
+    for (htype, hfunc) in hashes.items():
         try:  # Skip over nonexistent types.
             if t == T(htype):
                 return hfunc(value)

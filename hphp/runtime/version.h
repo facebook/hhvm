@@ -4,7 +4,7 @@
 #include <boost/preprocessor/stringize.hpp>
 
 #define HHVM_VERSION_MAJOR 3
-#define HHVM_VERSION_MINOR 8
+#define HHVM_VERSION_MINOR 9
 #define HHVM_VERSION_PATCH 0
 #define HHVM_VERSION_SUFFIX "-dev"
 

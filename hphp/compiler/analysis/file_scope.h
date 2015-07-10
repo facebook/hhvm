@@ -17,27 +17,29 @@
 #ifndef incl_HPHP_FILE_SCOPE_H_
 #define incl_HPHP_FILE_SCOPE_H_
 
-#include <string>
 #include <map>
+#include <set>
+#include <string>
+#include <vector>
+
 #include <boost/algorithm/string.hpp>
 
 #include "hphp/compiler/analysis/block_scope.h"
-#include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/analysis/code_error.h"
-#include "hphp/compiler/code_generator.h"
-#include <set>
-#include <vector>
+#include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/json.h"
+
+#include "hphp/util/deprecated/declare-boost-types.h"
 #include "hphp/util/md5.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CodeGenerator;
-DECLARE_BOOST_TYPES(StatementList);
-DECLARE_BOOST_TYPES(ClassScope);
+DECLARE_EXTENDED_BOOST_TYPES(ClassScope);
+DECLARE_BOOST_TYPES(Expression)
 DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(FunctionScope);
+DECLARE_BOOST_TYPES(StatementList);
 
 /**
  * A FileScope stores what's parsed from one single source file. It's up to

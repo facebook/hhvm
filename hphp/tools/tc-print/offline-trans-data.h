@@ -17,17 +17,16 @@
 #ifndef incl_HPHP_OFFLINE_TRANS_DATA_
 #define incl_HPHP_OFFLINE_TRANS_DATA_
 
-#include <string>
-#include <vector>
 #include <map>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
-#include "hphp/util/deprecated/base.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/func.h"
 
 #include "hphp/tools/tc-print/perf-events.h"
-#include "hphp/runtime/vm/jit/translator.h"
 
 #define INVALID_ID ((TransID)-1)
 

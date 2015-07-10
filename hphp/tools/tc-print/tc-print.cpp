@@ -18,7 +18,6 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include <string.h>
 
 #include <cstdint>
 #include <string>
@@ -82,7 +81,9 @@ void error(const std::string& msg) {
   exit(1);
 }
 
-void warnTooFew(std::string name, uint32_t requested, uint32_t available) {
+void warnTooFew(const std::string& name,
+                uint32_t requested,
+                uint32_t available) {
   fprintf(stderr,
           "Requested top %u %s, but there are only %u available.\n",
           requested,

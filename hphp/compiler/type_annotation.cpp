@@ -15,7 +15,10 @@
 */
 
 #include "hphp/compiler/type_annotation.h"
+
 #include <vector>
+
+#include "hphp/compiler/code_generator.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {

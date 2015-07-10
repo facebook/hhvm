@@ -17,13 +17,18 @@
 #ifndef incl_HPHP_TYPEANNOTATION_H_
 #define incl_HPHP_TYPEANNOTATION_H_
 
-#include "hphp/util/deprecated/base.h"
+#include <cstring>
+#include <string>
 #include <vector>
+
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/compiler/code_generator.h"
+
+#include "hphp/util/deprecated/declare-boost-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+class CodeGenerator;
 
 DECLARE_BOOST_TYPES(TypeAnnotation);
 
@@ -196,4 +201,3 @@ private:
 }
 
 #endif
-

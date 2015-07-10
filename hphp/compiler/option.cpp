@@ -15,81 +15,83 @@
 */
 
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/runtime/base/ini-setting.h"
-#include "hphp/parser/scanner.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/text-util.h"
-#include "hphp/util/process.h"
-#include "hphp/hhbbc/hhbbc.h"
-#include <boost/algorithm/string/trim.hpp>
+
 #include <map>
 #include <set>
+#include <string>
 #include <vector>
-#include "hphp/runtime/base/preg.h"
+
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/file_scope.h"
+#include "hphp/compiler/analysis/variable_table.h"
+
+#include "hphp/parser/scanner.h"
+
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/preg.h"
+
+#include "hphp/util/hdf.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/process.h"
+#include "hphp/util/text-util.h"
+
+#include "hphp/hhbbc/hhbbc.h"
 
 namespace HPHP {
-
-using std::set;
-using std::map;
-using std::map;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 std::string Option::RootDirectory;
-set<string> Option::PackageDirectories;
-set<string> Option::PackageFiles;
-set<string> Option::PackageExcludeDirs;
-set<string> Option::PackageExcludeFiles;
-set<string> Option::PackageExcludePatterns;
-set<string> Option::PackageExcludeStaticDirs;
-set<string> Option::PackageExcludeStaticFiles;
-set<string> Option::PackageExcludeStaticPatterns;
+std::set<std::string> Option::PackageDirectories;
+std::set<std::string> Option::PackageFiles;
+std::set<std::string> Option::PackageExcludeDirs;
+std::set<std::string> Option::PackageExcludeFiles;
+std::set<std::string> Option::PackageExcludePatterns;
+std::set<std::string> Option::PackageExcludeStaticDirs;
+std::set<std::string> Option::PackageExcludeStaticFiles;
+std::set<std::string> Option::PackageExcludeStaticPatterns;
 bool Option::CachePHPFile = false;
 
-vector<string> Option::ParseOnDemandDirs;
+std::vector<std::string> Option::ParseOnDemandDirs;
 
-map<string, string> Option::IncludeRoots;
-map<string, string> Option::AutoloadRoots;
-vector<string> Option::IncludeSearchPaths;
-string Option::DefaultIncludeRoot;
-map<string, int> Option::DynamicFunctionCalls;
+std::map<std::string, std::string> Option::IncludeRoots;
+std::map<std::string, std::string> Option::AutoloadRoots;
+std::vector<std::string> Option::IncludeSearchPaths;
+std::string Option::DefaultIncludeRoot;
+std::map<std::string, int> Option::DynamicFunctionCalls;
 
 bool Option::GeneratePickledPHP = false;
 bool Option::GenerateInlinedPHP = false;
 bool Option::GenerateTrimmedPHP = false;
 bool Option::ConvertSuperGlobals = false;
 bool Option::ConvertQOpExpressions = false;
-string Option::ProgramPrologue;
-string Option::TrimmedPrologue;
-vector<string> Option::DynamicFunctionPrefixes;
-vector<string> Option::DynamicFunctionPostfixes;
-vector<string> Option::DynamicMethodPrefixes;
-vector<string> Option::DynamicMethodPostfixes;
-vector<string> Option::DynamicClassPrefixes;
-vector<string> Option::DynamicClassPostfixes;
-set<string, stdltistr> Option::DynamicInvokeFunctions;
-set<string> Option::VolatileClasses;
-map<string,string,stdltistr> Option::AutoloadClassMap;
-map<string,string,stdltistr> Option::AutoloadFuncMap;
-map<string,string> Option::AutoloadConstMap;
-string Option::AutoloadRoot;
+std::string Option::ProgramPrologue;
+std::string Option::TrimmedPrologue;
+std::vector<std::string> Option::DynamicFunctionPrefixes;
+std::vector<std::string> Option::DynamicFunctionPostfixes;
+std::vector<std::string> Option::DynamicMethodPrefixes;
+std::vector<std::string> Option::DynamicMethodPostfixes;
+std::vector<std::string> Option::DynamicClassPrefixes;
+std::vector<std::string> Option::DynamicClassPostfixes;
+std::set<std::string, stdltistr> Option::DynamicInvokeFunctions;
+std::set<std::string> Option::VolatileClasses;
+std::map<std::string,std::string,stdltistr> Option::AutoloadClassMap;
+std::map<std::string,std::string,stdltistr> Option::AutoloadFuncMap;
+std::map<std::string,std::string> Option::AutoloadConstMap;
+std::string Option::AutoloadRoot;
 
-map<string, string> Option::FunctionSections;
+std::map<std::string, std::string> Option::FunctionSections;
 
 bool Option::GenerateTextHHBC = false;
 bool Option::GenerateBinaryHHBC = false;
-string Option::RepoCentralPath;
+std::string Option::RepoCentralPath;
 bool Option::RepoDebugInfo = false;
 
-string Option::IdPrefix = "$$";
+std::string Option::IdPrefix = "$$";
 
-string Option::LambdaPrefix = "df_";
-string Option::Tab = "  ";
+std::string Option::LambdaPrefix = "df_";
+std::string Option::Tab = "  ";
 
 const char *Option::UserFilePrefix = "php/";
 
@@ -151,8 +153,10 @@ bool Option::GenerateDocComments = true;
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file
 
-void Option::LoadRootHdf(const IniSetting::Map& ini, const Hdf &roots,
-                         const std::string& name, map<string, string> &map) {
+void Option::LoadRootHdf(const IniSetting::Map& ini,
+                         const Hdf &roots,
+                         const std::string& name,
+                         std::map<std::string, std::string> &map) {
   if (roots.exists()) {
     for (Hdf hdf = roots[name].firstChild(); hdf.exists(); hdf = hdf.next()) {
       map[Config::Get(ini, hdf, "root", "", false)] =
@@ -161,8 +165,10 @@ void Option::LoadRootHdf(const IniSetting::Map& ini, const Hdf &roots,
   }
 }
 
-void Option::LoadRootHdf(const IniSetting::Map& ini, const Hdf &roots,
-                         const std::string& name, vector<string> &vec) {
+void Option::LoadRootHdf(const IniSetting::Map& ini,
+                         const Hdf &roots,
+                         const std::string& name,
+                         std::vector<std::string> &vec) {
   if (roots.exists()) {
     for (Hdf hdf = roots[name].firstChild(); hdf.exists(); hdf = hdf.next()) {
       vec.push_back(Config::GetString(ini, hdf, "", "", false));
@@ -191,7 +197,7 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(ParseOnDemandDirs, ini, config, "ParseOnDemandDirs");
 
   {
-    string tmp;
+    std::string tmp;
 
 #define READ_CG_OPTION(name)                    \
     tmp = Config::GetString(ini, config, "CodeGeneration."#name); \
@@ -323,17 +329,17 @@ static bool postfix_iequal(const std::string& s, const std::string& postfix) {
 bool Option::IsDynamic(const std::string &name,
                        const std::vector<std::string> &prefixes,
                        const std::vector<std::string> &postfixes) {
-  if (prefix_iequal(name, "dyn_")) return true;
+  if (prefix_iequal(name, "dyn_")) {
+    return true;
+  }
 
-  for (unsigned int i = 0; i < prefixes.size(); i++) {
-    const string &prefix = prefixes[i];
+  for (auto const& prefix : prefixes) {
     if (prefix_iequal(name, prefix)) {
       return true;
     }
   }
 
-  for (unsigned int i = 0; i < postfixes.size(); i++) {
-    const string &postfix = postfixes[i];
+  for (auto const& postfix : postfixes) {
     if (postfix_iequal(name, postfix)) {
       return true;
     }
@@ -343,17 +349,16 @@ bool Option::IsDynamic(const std::string &name,
 }
 
 std::string Option::GetAutoloadRoot(const std::string &name) {
-  for (map<string, string>::const_iterator iter = AutoloadRoots.begin();
-       iter != AutoloadRoots.end(); ++iter) {
-    if (name.substr(0, iter->first.length()) == iter->first) {
-      return iter->second;
+  for (auto const& pair : AutoloadRoots) {
+    if (name.substr(0, pair.first.length()) == pair.first) {
+      return pair.second;
     }
   }
   return "";
 }
 
 std::string Option::MangleFilename(const std::string &name, bool id) {
-  string ret = UserFilePrefix;
+  std::string ret = UserFilePrefix;
   ret += name;
 
   if (id) {
@@ -367,9 +372,7 @@ std::string Option::MangleFilename(const std::string &name, bool id) {
 bool Option::IsFileExcluded(const std::string &file,
                             const std::set<std::string> &patterns) {
   String sfile(file.c_str(), file.size(), CopyString);
-  for (set<string>::const_iterator iter = patterns.begin();
-       iter != patterns.end(); ++iter) {
-    const std::string &pattern = *iter;
+  for (auto const& pattern : patterns) {
     Variant matches;
     Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
                                     CopyString), sfile, &matches);

@@ -16,27 +16,31 @@
 #include "hphp/compiler/analysis/file_scope.h"
 
 #include <sys/stat.h>
-#include <map>
 #include <folly/ScopeGuard.h>
+#include <map>
 
-#include "hphp/compiler/analysis/code_error.h"
-#include "hphp/compiler/analysis/lambda_names.h"
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/statement/statement_list.h"
-#include "hphp/compiler/statement/exp_statement.h"
-#include "hphp/compiler/option.h"
+#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/parser/parser.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/deprecated/base.h"
-#include "hphp/compiler/expression/expression_list.h"
-#include "hphp/compiler/statement/function_statement.h"
+#include "hphp/compiler/analysis/lambda_names.h"
 #include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/compiler/expression/simple_function_call.h"
+
+#include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/include_expression.h"
+#include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/expression/user_attribute.h"
+
+#include "hphp/compiler/option.h"
+
+#include "hphp/compiler/parser/parser.h"
+
+#include "hphp/compiler/statement/exp_statement.h"
+#include "hphp/compiler/statement/function_statement.h"
+#include "hphp/compiler/statement/statement_list.h"
+
+#include "hphp/util/logger.h"
 
 namespace HPHP {
 

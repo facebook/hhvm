@@ -388,7 +388,7 @@ void OfflineX86Code::loadSymbolsMapNm() {
 // just returns the address
 string OfflineX86Code::getSymbolName(TCA addr) {
   string sym;
-  Addr2SymMap::iterator it = addr2SymMap.find(addr);
+  auto it = addr2SymMap.find(addr);
   if (it != addr2SymMap.end()) {
     sym = "  # " + it->second;
   } else {

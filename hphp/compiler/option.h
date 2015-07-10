@@ -17,29 +17,25 @@
 #ifndef incl_HPHP_OPTION_H_
 #define incl_HPHP_OPTION_H_
 
-#include "hphp/util/hdf.h"
-
-#include <folly/dynamic.h>
-
 #include <map>
 #include <set>
 #include <vector>
+
+#include <folly/dynamic.h>
+
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/util/functional.h"
 #include "hphp/util/string-bag.h"
-#include "hphp/util/deprecated/base.h"
-#include "hphp/util/deprecated/declare-boost-types.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-DECLARE_BOOST_TYPES(BlockScope);
-DECLARE_BOOST_TYPES(FileScope);
+
+class Hdf;
 
 // Can we make sure this equals IniSettingMap?
-typedef folly::dynamic IniSettingMap;
+using IniSettingMap = folly::dynamic;
 
-class Option {
-public:
-
+struct Option {
   /**
    * Load options from different sources.
    */

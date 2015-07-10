@@ -134,6 +134,7 @@ constexpr auto FAST_REFCOUNT_OFFSET = HeaderOffset +
 // TODO don't hardcode
 constexpr auto FAST_GC_BYTE_OFFSET = HeaderKindOffset + 1;
 constexpr int8_t FAST_MRB_MASK = 1 << 2;
+constexpr int8_t FAST_STATIC_BIT_MASK = 1 << 3;
 
 inline bool isObjectKind(HeaderKind k) {
   return k >= HeaderKind::Object && k <= HeaderKind::ImmSet;

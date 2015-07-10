@@ -80,12 +80,10 @@ void emitDecRefWork(Vout& v, Vout& vcold, Vreg rData,
                     Destroy destroy, bool unlikelyDestroy) {
   auto const sf = v.makeReg();
   // check if mrb is set
-  v << andbim{1 << 2, rData[HeaderKindOffset + 1], sf};
-  auto const sf2 = v.makeReg();
-  v << cmpli{0, sf, sf2};
+  v << testbim{FAST_MRB_MASK, rData[FAST_GC_BYTE_OFFSET], sf};
   // if mrb is not set, run 'destroy'
   ifThen(
-    v, vcold, CC_E, sf2,
+    v, vcold, CC_Z, sf,
     destroy, unlikelyDestroy
   );
 }

@@ -135,10 +135,8 @@ void ifNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
   }
 
   auto const sf = v.makeReg();
-  v << andbim{1 << 3, loc.reg()[HeaderKindOffset + 1], sf};
-  auto const sf2 = v.makeReg();
-  v << cmpli{0, sf, sf2};
-  ifThen(v, CC_E, sf2, then);
+  v << testbim{FAST_STATIC_BIT_MASK, loc.reg()[FAST_GC_BYTE_OFFSET], sf};
+  ifThen(v, CC_Z, sf, then);
 }
 
 template<class Then>
@@ -3612,8 +3610,8 @@ void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
   v << load{vecReg[rawPtrOffset], ptr};
   auto const sf = v.makeReg();
   // check if mrb is set
-  v << testbim{FAST_MRB_MASK, FAST_GC_BYTE_OFFSET, sf}
-  v << jcc{CC_NE, sf, {label(inst->next()), label(inst->taken())}};
+  v << testbim{FAST_MRB_MASK, ptr[mrbOffset], sf};
+  v << jcc{CC_NZ, sf, {label(inst->next()), label(inst->taken())}};
 }
 
 /**
@@ -3846,8 +3844,8 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       srcType.subtypeOfAny(TStr, TArr) &&
       srcType.maybe(typeParam)) {
     assertx(srcType.maybe(TStatic));
-    v << cmplim{0, rData[FAST_REFCOUNT_OFFSET], sf};
-    doJcc(CC_L, sf);
+    v << testbim{FAST_STATIC_BIT_MASK, rData[FAST_GC_BYTE_OFFSET], sf};
+    doJcc(CC_NZ, sf);
     doMov();
     return;
   }

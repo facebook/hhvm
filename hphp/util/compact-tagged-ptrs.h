@@ -38,7 +38,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-#ifdef __x86_64__
+#if defined(__x86_64__) || defined(_M_X64)
 
 template<class T, class TagType = uint32_t>
 struct CompactTaggedPtr {

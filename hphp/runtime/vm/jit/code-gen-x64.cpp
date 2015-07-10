@@ -100,9 +100,10 @@ using namespace jit::reg;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+ATTRIBUTE_NORETURN
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
             const Func* vmFunc, bool resumed,
-            TransID profTransId) ATTRIBUTE_NORETURN;
+            TransID profTransId);
 
 void cgPunt(const char* file, int line, const char* func, uint32_t bcOff,
             const Func* vmFunc, bool resumed, TransID profTransId) {

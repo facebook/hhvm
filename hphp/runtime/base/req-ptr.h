@@ -274,14 +274,14 @@ inline auto deref(const P& p) -> decltype(P().get()) {
   return p.get();
 }
 
-extern void throw_null_pointer_exception() ATTRIBUTE_NORETURN;
-void throw_invalid_object_type(ResourceData* p) ATTRIBUTE_NORETURN;
-void throw_invalid_object_type(ObjectData* p) ATTRIBUTE_NORETURN;
-void throw_invalid_object_type(const Variant& p) ATTRIBUTE_NORETURN;
-void throw_invalid_object_type(const Resource& p) ATTRIBUTE_NORETURN;
-void throw_invalid_object_type(const Object& p) ATTRIBUTE_NORETURN;
+ATTRIBUTE_NORETURN extern void throw_null_pointer_exception();
+ATTRIBUTE_NORETURN void throw_invalid_object_type(ResourceData* p);
+ATTRIBUTE_NORETURN void throw_invalid_object_type(ObjectData* p);
+ATTRIBUTE_NORETURN void throw_invalid_object_type(const Variant& p);
+ATTRIBUTE_NORETURN void throw_invalid_object_type(const Resource& p);
+ATTRIBUTE_NORETURN void throw_invalid_object_type(const Object& p);
 template <typename T>
-void throw_invalid_object_type(const req::ptr<T>& p) ATTRIBUTE_NORETURN;
+ATTRIBUTE_NORETURN void throw_invalid_object_type(const req::ptr<T>& p);
 template <typename T>
 void throw_invalid_object_type(const req::ptr<T>& p) {
   throw_invalid_object_type(p.get());

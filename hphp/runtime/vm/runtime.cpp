@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/ext_closure.h"
-#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo.h"

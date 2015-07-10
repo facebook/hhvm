@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"

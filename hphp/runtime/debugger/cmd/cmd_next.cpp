@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
-#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"

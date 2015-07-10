@@ -28,7 +28,7 @@
 
 #include "hphp/runtime/ext/ext_closure.h"
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 

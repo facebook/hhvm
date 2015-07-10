@@ -36,7 +36,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 
 #include <folly/Optional.h>
 

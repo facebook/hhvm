@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 
 namespace HPHP { namespace Native {

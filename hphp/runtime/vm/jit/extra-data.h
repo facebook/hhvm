@@ -20,7 +20,7 @@
 #include <algorithm>
 
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/ext/ext_generator.h"
+#include "hphp/runtime/ext/generator/ext_generator.h"
 
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/types.h"

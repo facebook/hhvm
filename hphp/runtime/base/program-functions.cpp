@@ -742,9 +742,10 @@ NEVER_INLINE void copyHashFuncs() {
              hash_func(hash_string_cs_crc), 48);
     copyFunc(hash_func(hash_string_cs),
              hash_func(hash_string_cs_unaligned_crc), 64);
-    copyFunc(reinterpret_cast<void*>(hash_string_i_unsafe),
+ 
+    copyFunc(reinterpret_cast<void*>(hash_string_i_unsafe_mask_stub_),
              reinterpret_cast<void*>(hash_string_i_crc), 64);
-    copyFunc(reinterpret_cast<void*>(hash_string_i),
+    copyFunc(reinterpret_cast<void*>(hash_string_i_mask_stub_),
              reinterpret_cast<void*>(hash_string_i_unaligned_crc), 80);
   }
 #endif

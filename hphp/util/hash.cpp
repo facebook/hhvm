@@ -61,16 +61,11 @@ strhash_t hash_string_i_fallback(const char *arKey, uint32_t nKeyLength) {
   }
 }
 
-#if FACEBOOK && defined USE_SSECRC
 
+#if FACEBOOK && defined USE_SSECRC
 NEVER_INLINE
 strhash_t hash_string_cs(const char *arKey, uint32_t nKeyLength) {
   return hash_string_cs_fallback(arKey, nKeyLength);
-}
-
-NEVER_INLINE
-strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_i_fallback(arKey, nKeyLength);
 }
 
 NEVER_INLINE
@@ -78,11 +73,80 @@ strhash_t hash_string_cs_unsafe(const char *arKey, uint32_t nKeyLength) {
   return hash_string_cs(arKey, nKeyLength);
 }
 
+#ifdef __OPTIMIZE__
+NEVER_INLINE
+strhash_t hash_string_i_unsafe_mask_stub_(const char *arKey, uint32_t nKeyLength, uint64_t mask) {
+  return hash_string_i(arKey, nKeyLength);
+}
+
+NEVER_INLINE   
+strhash_t hash_string_i_mask_stub_(const char *arKey, uint32_t nKeyLength, uint64_t mask) {
+  return hash_string_i_fallback(arKey, nKeyLength);
+}
+
+inline 
+strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_unsafe_mask_stub_(arKey, nKeyLength, 0xdfdfdfdfdfdfdfdfULL);
+}
+
+inline
+strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_mask_stub_(arKey, nKeyLength, 0xdfdfdfdfdfdfdfdfULL);
+}
+#else
 NEVER_INLINE
 strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength) {
   return hash_string_i(arKey, nKeyLength);
 }
 
+NEVER_INLINE
+strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_fallback(arKey, nKeyLength);
+}
 #endif
+#else
+inline strhash_t hash_string_cs(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_cs_fallback(arKey, nKeyLength);
+}
+
+inline
+strhash_t hash_string_cs_unsafe(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_cs_fallback(arKey, nKeyLength);
+}
+
+inline strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_fallback(arKey, nKeyLength);
+}
+
+inline
+strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_fallback(arKey, nKeyLength);
+}
+
+#endif
+
+inline strhash_t hash_string(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i(arKey, nKeyLength);
+}
+
+inline strhash_t hash_string_unsafe(const char *arKey, uint32_t nKeyLength) {
+  return hash_string_i_unsafe(arKey, nKeyLength);
+}
+
+/**
+ * We probably should get rid of this, so to detect code generation errors,
+ * where a binary string is treated as a NULL-terminated literal. Do we ever
+ * allow binary strings as array keys or symbol names?
+ */
+inline strhash_t hash_string(const char *arKey) {
+  return hash_string(arKey, strlen(arKey));
+}
+
+inline strhash_t hash_string_i(const char *arKey) {
+  return hash_string_i(arKey, strlen(arKey));
+}
+
+
+
 
 }

@@ -53,7 +53,9 @@
 #ifdef _MSC_VER
 #define ATTRIBUTE_NORETURN __declspec(noreturn)
 #define ATTRIBUTE_PRINTF(a1, a2)
-#define ATTRIBUTE_TLS __declspec(thread)
+#ifndef __thread
+# define __thread __declspec(thread)
+#endif
 #define ATTRIBUTE_UNUSED
 
 #define ALWAYS_INLINE __forceinline
@@ -65,7 +67,6 @@
 #define ATTRIBUTE_NORETURN __attribute__((__noreturn__))
 #define ATTRIBUTE_PRINTF(a1, a2) \
   __attribute__((__format__ (__printf__, a1, a2)))
-#define ATTRIBUTE_TLS __thread
 #define ATTRIBUTE_UNUSED   __attribute__((__unused__))
 
 #define ALWAYS_INLINE      inline __attribute__((__always_inline__))

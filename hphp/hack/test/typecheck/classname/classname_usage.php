@@ -87,11 +87,3 @@ function classname_polymorphism2<T as I>(classname<T> $name): string {
   hh_show($ret);
   return $ret;
 }
-
-function classname_instanceof(C_NotI $something, classname<I> $name): ?I {
-  if ($something instanceof $name) {
-    hh_show($something);
-    return $something;
-  }
-  return null;
-}

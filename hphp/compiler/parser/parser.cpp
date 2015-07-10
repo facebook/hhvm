@@ -105,17 +105,17 @@
 #define NEW_EXP0(cls)                                           \
   std::make_shared<cls>(BlockScopePtr(),                        \
                         getRange())
-#define NEW_EXP(cls, e...)                                      \
+#define NEW_EXP(cls, ...)                                      \
   std::make_shared<cls>(BlockScopePtr(),                        \
-                        getRange(), ##e)
+                        getRange(), ##__VA_ARGS__)
 #define NEW_STMT0(cls)                                          \
   std::make_shared<cls>(BlockScopePtr(), getLabelScope(),       \
                         getRange())
-#define NEW_STMT(cls, e...)                                     \
+#define NEW_STMT(cls, ...)                                     \
   std::make_shared<cls>(BlockScopePtr(), getLabelScope(),       \
-                        getRange(), ##e)
+                        getRange(), ##__VA_ARGS__)
 
-#define PARSE_ERROR(fmt, args...)  HPHP_PARSER_ERROR(fmt, this, ##args)
+#define PARSE_ERROR(fmt, ...)  HPHP_PARSER_ERROR(fmt, this, ##__VA_ARGS__)
 
 using namespace HPHP::Compiler;
 

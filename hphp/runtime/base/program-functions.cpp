@@ -201,7 +201,7 @@ String k_PHP_BINDIR;
 String k_PHP_OS;
 String k_PHP_SAPI;
 
-static __thread bool s_sessionInitialized{false};
+static ATTRIBUTE_TLS bool s_sessionInitialized{false};
 
 static void process_cmd_arguments(int argc, char **argv) {
   php_global_set(s_argc, Variant(argc));

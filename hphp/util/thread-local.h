@@ -310,10 +310,10 @@ public:
   }
 
 private:
-  static __thread T *s_singleton;
+  static ATTRIBUTE_TLS T *s_singleton;
   typedef typename std::aligned_storage<sizeof(T), sizeof(void*)>::type
           StorageType;
-  static __thread StorageType s_storage;
+  static ATTRIBUTE_TLS StorageType s_storage;
   static bool s_inited; // no-fast-TLS requires construction so be consistent
 };
 
@@ -331,8 +331,8 @@ T *ThreadLocalSingleton<T>::getCheck() {
   return s_singleton;
 }
 
-template<typename T> __thread T *ThreadLocalSingleton<T>::s_singleton;
-template<typename T> __thread typename ThreadLocalSingleton<T>::StorageType
+template<typename T> ATTRIBUTE_TLS T *ThreadLocalSingleton<T>::s_singleton;
+template<typename T> ATTRIBUTE_TLS typename ThreadLocalSingleton<T>::StorageType
                               ThreadLocalSingleton<T>::s_storage;
 
 
@@ -384,19 +384,19 @@ struct ThreadLocalProxy {
  */
 
 #define DECLARE_THREAD_LOCAL(T, f) \
-  __thread ThreadLocal<T> f
+  ATTRIBUTE_TLS ThreadLocal<T> f
 #define IMPLEMENT_THREAD_LOCAL(T, f) \
-  __thread HPHP::ThreadLocal<T> f
+  ATTRIBUTE_TLS HPHP::ThreadLocal<T> f
 
 #define DECLARE_THREAD_LOCAL_NO_CHECK(T, f) \
-  __thread ThreadLocalNoCheck<T> f
+  ATTRIBUTE_TLS ThreadLocalNoCheck<T> f
 #define IMPLEMENT_THREAD_LOCAL_NO_CHECK(T, f) \
-  __thread ThreadLocalNoCheck<T> f
+  ATTRIBUTE_TLS ThreadLocalNoCheck<T> f
 
 #define DECLARE_THREAD_LOCAL_PROXY(T, N, f) \
-  __thread ThreadLocalProxy<T, N> f
+  ATTRIBUTE_TLS ThreadLocalProxy<T, N> f
 #define IMPLEMENT_THREAD_LOCAL_PROXY(T, N, f) \
-  __thread ThreadLocalProxy<T, N> f
+  ATTRIBUTE_TLS ThreadLocalProxy<T, N> f
 
 #else /* USE_GCC_FAST_TLS */
 

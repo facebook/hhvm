@@ -302,8 +302,8 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
 
 //////////////////////////////////////////////////////////////////////
 
-__thread void* tl_base = nullptr;
-static __thread std::aligned_storage<
+ATTRIBUTE_TLS void* tl_base = nullptr;
+static ATTRIBUTE_TLS std::aligned_storage<
   sizeof(Array),
   alignof(Array)
 >::type s_constantsStorage;

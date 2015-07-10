@@ -26,8 +26,8 @@
 namespace HPHP {
 #ifdef DEBUG
 static const int kMaxLockDepth=256;
-static __thread Rank tl_rankStack[kMaxLockDepth];
-static __thread int tl_curRankDepth;
+static ATTRIBUTE_TLS Rank tl_rankStack[kMaxLockDepth];
+static ATTRIBUTE_TLS int tl_curRankDepth;
 
 Rank currentRank() {
   // Our current rank is the most recent ranked lock we've acquired.

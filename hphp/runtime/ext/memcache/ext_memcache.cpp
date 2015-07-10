@@ -49,7 +49,7 @@ struct MEMCACHEGlobals final {
   std::string hash_function;
 };
 
-static __thread MEMCACHEGlobals* s_memcache_globals;
+static ATTRIBUTE_TLS MEMCACHEGlobals* s_memcache_globals;
 #define MEMCACHEG(name) s_memcache_globals->name
 
 const StaticString s_MemcacheData("MemcacheData");

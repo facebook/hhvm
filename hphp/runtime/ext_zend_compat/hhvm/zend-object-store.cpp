@@ -20,7 +20,7 @@
 
 namespace HPHP {
 
-__thread RequestLocal<ZendObjectStore> ZendObjectStore::tl_instance;
+ATTRIBUTE_TLS RequestLocal<ZendObjectStore> ZendObjectStore::tl_instance;
 
 void ZendObjectStore::requestShutdown() {
   m_store.clear();

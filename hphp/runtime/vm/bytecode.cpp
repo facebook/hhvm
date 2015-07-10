@@ -7539,8 +7539,8 @@ void PrintTCCallerInfo() {
 }
 
 // thread-local cached coverage info
-static __thread Unit* s_prev_unit;
-static __thread int s_prev_line;
+static ATTRIBUTE_TLS Unit* s_prev_unit;
+static ATTRIBUTE_TLS int s_prev_line;
 
 void recordCodeCoverage(PC pc) {
   Unit* unit = vmfp()->m_func->unit();

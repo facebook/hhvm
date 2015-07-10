@@ -60,7 +60,7 @@ void IntlError::clearError(bool clearGlobalError /*= true */) {
 /////////////////////////////////////////////////////////////////////////////
 // INI Setting
 
-static __thread std::string* s_defaultLocale;
+static ATTRIBUTE_TLS std::string* s_defaultLocale;
 
 void IntlExtension::bindIniSettings() {
   // TODO: t5226715 We shouldn't need to check s_defaultLocale here,

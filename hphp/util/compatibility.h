@@ -28,7 +28,7 @@ namespace HPHP {
 
 #define PHP_DIR_SEPARATOR '/'
 
-extern __thread int64_t s_extra_request_microseconds;
+extern ATTRIBUTE_TLS int64_t s_extra_request_microseconds;
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
 char *strndup(const char* str, size_t len);

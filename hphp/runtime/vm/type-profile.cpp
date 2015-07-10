@@ -54,10 +54,10 @@ void profileInit() {
  * In server mode, we exclude warmup document requests from profiling, then
  * record samples for EvalJitProfileInterpRequests standard requests.
  */
-bool __thread profileOn = false;
+bool ATTRIBUTE_TLS profileOn = false;
 static bool warmingUp;
 static int64_t numRequests;
-bool __thread standardRequest = true;
+bool ATTRIBUTE_TLS standardRequest = true;
 static std::atomic<bool> singleJitLock;
 static std::atomic<int> singleJitRequests;
 static std::atomic<int> relocateRequests;

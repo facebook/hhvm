@@ -22,8 +22,8 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-static __thread GlobalsArray* g_variables;
-static __thread EnvConstants* g_envConstants;
+static ATTRIBUTE_TLS GlobalsArray* g_variables;
+static ATTRIBUTE_TLS EnvConstants* g_envConstants;
 
 GlobalsArray* get_global_variables() {
   assert(g_variables);

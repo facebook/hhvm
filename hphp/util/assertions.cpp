@@ -29,7 +29,7 @@ namespace HPHP {
 
 static AssertFailLogger s_logger;
 
-__thread AssertDetailImpl* AssertDetailImpl::s_head = nullptr;
+ATTRIBUTE_TLS AssertDetailImpl* AssertDetailImpl::s_head = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////
 

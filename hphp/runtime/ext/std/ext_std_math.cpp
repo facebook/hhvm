@@ -406,7 +406,7 @@ struct RandomBuf {
   }           state;
 };
 
-static __thread RandomBuf s_state;
+static ATTRIBUTE_TLS RandomBuf s_state;
 
 static void randinit(uint32_t seed) {
   if (s_state.state == RandomBuf::Uninit) {

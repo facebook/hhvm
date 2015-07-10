@@ -444,7 +444,7 @@ enum TransPerfCounter {
 };
 #undef TPC
 
-extern __thread int64_t s_perfCounters[];
+extern ATTRIBUTE_TLS int64_t s_perfCounters[];
 #define INC_TPC(n) ++jit::s_perfCounters[jit::tpc_##n];
 
 /*

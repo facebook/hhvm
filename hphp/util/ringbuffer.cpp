@@ -33,8 +33,8 @@ namespace Trace {
  * Thread-private ascii ringbuffer.
  */
 static const int kMaxRBBytes = 1 << 19; // 512KB
-__thread int  tl_rbPtr;
-__thread char* tl_ring_ptr;
+ATTRIBUTE_TLS int  tl_rbPtr;
+ATTRIBUTE_TLS char* tl_ring_ptr;
 
 const char* ringbufferName(RingBufferType t) {
   switch (t) {

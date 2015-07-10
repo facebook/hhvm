@@ -101,7 +101,7 @@ void VariableSerializer::popObjectInfo() {
   m_objectInfos.pop_back();
 }
 
-__thread int64_t VariableSerializer::serializationSizeLimit =
+ATTRIBUTE_TLS int64_t VariableSerializer::serializationSizeLimit =
   StringData::MaxSize;
 
 void VariableSerializer::popResourceInfo() {

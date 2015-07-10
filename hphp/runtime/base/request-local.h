@@ -109,16 +109,16 @@ void RequestLocal<T>::create() {
 }
 
 #define IMPLEMENT_REQUEST_LOCAL(T,f) \
-  __thread RequestLocal<T> f
+  ATTRIBUTE_TLS RequestLocal<T> f
 
 #define DECLARE_STATIC_REQUEST_LOCAL(T,f) \
-  static __thread RequestLocal<T> f
+  static ATTRIBUTE_TLS RequestLocal<T> f
 
 #define IMPLEMENT_STATIC_REQUEST_LOCAL(T,f) \
-  static __thread RequestLocal<T> f
+  static ATTRIBUTE_TLS RequestLocal<T> f
 
 #define DECLARE_EXTERN_REQUEST_LOCAL(T,f) \
-  extern __thread RequestLocal<T> f
+  extern ATTRIBUTE_TLS RequestLocal<T> f
 
 #else // defined(USE_GCC_FAST_TLS)
 

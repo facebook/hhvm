@@ -228,7 +228,7 @@ IMPLEMENT_THREAD_LOCAL(PCREglobals, tl_pcre_globals);
 static PCRECache s_pcreCache;
 
 // The last pcre error code is available for the whole thread.
-static __thread int tl_last_error_code;
+static ATTRIBUTE_TLS int tl_last_error_code;
 
 ///////////////////////////////////////////////////////////////////////////////
 // pcre_cache_entry implementation

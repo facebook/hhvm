@@ -66,7 +66,7 @@ std::atomic<GenCount> s_oldestRequestInFlight(0);
  * allocates a new thread id from s_nextThreadIdx with fetch_add.
  */
 std::atomic<int64_t> s_nextThreadIdx{0};
-__thread int64_t s_thisThreadIdx{-1};
+ATTRIBUTE_TLS int64_t s_thisThreadIdx{-1};
 
 //////////////////////////////////////////////////////////////////////
 

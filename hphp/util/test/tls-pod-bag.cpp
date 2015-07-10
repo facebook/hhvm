@@ -36,7 +36,7 @@ using Vec = TlsPodBag<Ty,std::allocator<Ty>>;
 //////////////////////////////////////////////////////////////////////
 
 TEST(TlsPodBag, Simple) {
-  static __thread Vec v = {};
+  static ATTRIBUTE_TLS Vec v = {};
   EXPECT_TRUE(v.empty());
 
   constexpr auto kCount = 15;
@@ -78,7 +78,7 @@ TEST(TlsPodBag, Simple) {
 }
 
 TEST(TlsPodBag, More) {
-  static __thread Vec v = {};
+  static ATTRIBUTE_TLS Vec v = {};
 
   constexpr auto kBase = 1024;
   constexpr auto kTop = 1024;

@@ -21,7 +21,7 @@
 namespace HPHP {
 
 // Register dirtiness: thread-private.
-__thread VMRegState tl_regState = VMRegState::CLEAN;
+ATTRIBUTE_TLS VMRegState tl_regState = VMRegState::CLEAN;
 
 VMRegAnchor::VMRegAnchor()
   : m_old(tl_regState)

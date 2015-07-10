@@ -27,7 +27,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // resources have a separate id space
-__thread int ResourceData::os_max_resource_id;
+ATTRIBUTE_TLS int ResourceData::os_max_resource_id;
 
 ResourceData::ResourceData() {
   m_hdr.init(0, HeaderKind::Resource, 1);

@@ -37,10 +37,10 @@ const char* g_counterNames[] = {
 #undef STAT
 #undef O
 };
-__thread uint64_t tl_counters[kNumStatCounters];
+ATTRIBUTE_TLS uint64_t tl_counters[kNumStatCounters];
 
 typedef hphp_const_char_map<hphp_const_char_map<uint64_t>> StatGroupMap;
-__thread StatGroupMap* tl_stat_groups = nullptr;
+ATTRIBUTE_TLS StatGroupMap* tl_stat_groups = nullptr;
 
 void init() {
   if (!enabledAny()) return;
@@ -48,7 +48,7 @@ void init() {
   tl_stat_groups = new StatGroupMap();
 }
 
-static __thread int64_t epoch;
+static ATTRIBUTE_TLS int64_t epoch;
 void dump() {
   if (!enabledAny()) return;
 

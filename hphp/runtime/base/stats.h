@@ -112,7 +112,7 @@ enum StatCounter {
 #undef O
 
 extern const char* g_counterNames[kNumStatCounters];
-extern __thread uint64_t tl_counters[kNumStatCounters];
+extern ATTRIBUTE_TLS uint64_t tl_counters[kNumStatCounters];
 
 inline bool enabled() {
   return Trace::moduleEnabled(Trace::stats, 1);

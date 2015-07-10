@@ -90,8 +90,8 @@ void flush_thread_caches() {
 #endif
 }
 
-__thread uintptr_t s_stackLimit;
-__thread size_t s_stackSize;
+ATTRIBUTE_TLS uintptr_t s_stackLimit;
+ATTRIBUTE_TLS size_t s_stackSize;
 const size_t s_pageSize =  sysconf(_SC_PAGESIZE);
 
 static NEVER_INLINE uintptr_t get_stack_top() {
@@ -176,7 +176,7 @@ void flush_thread_stack() {
   }
 }
 
-int32_t __thread s_numaNode;
+int32_t ATTRIBUTE_TLS s_numaNode;
 
 #if !defined USE_JEMALLOC || !defined HAVE_NUMA
 void enable_numa(bool local) {}

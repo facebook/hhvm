@@ -57,7 +57,7 @@ public:
     if (m_arrayIds) delete m_arrayIds;
   }
 
-  static __thread int64_t serializationSizeLimit;
+  static ATTRIBUTE_TLS int64_t serializationSizeLimit;
 
   /**
    * Top level entry function called by f_ functions.

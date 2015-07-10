@@ -156,4 +156,10 @@
 
 //////////////////////////////////////////////////////////////////////
 
+#ifdef _MSC_VER
+#include "hphp/util/portability-fnmatch.h"
+#include "hphp/util/portability-glob.h"
+#include "hphp/util/portability-rand_r.h"
+#endif
+
 #endif

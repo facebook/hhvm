@@ -72,12 +72,12 @@ auto const vauto_gp = x64::rAsm | reg::r11;
 auto const vauto_simd = reg::xmm5 | reg::xmm6 | reg::xmm7;
 
 const Abi vauto_abi {
-  .gpUnreserved = vauto_gp,
-  .gpReserved = x64::abi.gp() - vauto_gp,
-  .simdUnreserved = vauto_simd,
-  .simdReserved = x64::abi.simd() - vauto_simd,
-  .calleeSaved = x64::abi.calleeSaved,
-  .sf = x64::abi.sf
+  vauto_gp,
+  x64::abi.gp() - vauto_gp,
+  vauto_simd,
+  x64::abi.simd() - vauto_simd,
+  x64::abi.calleeSaved,
+  x64::abi.sf
 };
 
 Vauto::~Vauto() {

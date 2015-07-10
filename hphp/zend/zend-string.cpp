@@ -155,9 +155,14 @@ int string_crc32(const char *p, int len) {
 ///////////////////////////////////////////////////////////////////////////////
 // crypt
 
+#ifdef _MSC_VER
+#define PHP_CRYPT_R 1
+#include "hphp/zend/php-crypt_r.h"
+#else
 #include <unistd.h>
 #if !defined(__APPLE__) && !defined(__FreeBSD__)
 # include <crypt.h>
+#endif
 #endif
 #include "hphp/zend/crypt-blowfish.h"
 
@@ -208,6 +213,9 @@ char *string_crypt(const char *key, const char *salt) {
 #  error "Data struct used by crypt_r() is unknown. Please report."
 # endif
     char *crypt_res = crypt_r(key, salt, &buffer);
+#elif defined(PHP_CRYPT_R)
+    php_crypt_extended_data buffer;
+    char *crypt_res = php_crypt_r(key, salt, &buffer);
 #else
     static Mutex mutex;
     Lock lock(mutex);

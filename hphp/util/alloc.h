@@ -213,8 +213,8 @@ class ScopedMem {
   void* m_ptr;
 };
 
-extern __thread uintptr_t s_stackLimit;
-extern __thread size_t s_stackSize;
+extern ATTRIBUTE_TLS uintptr_t s_stackLimit;
+extern ATTRIBUTE_TLS size_t s_stackSize;
 void init_stack_limits(pthread_attr_t* attr);
 
 extern const size_t s_pageSize;
@@ -222,7 +222,7 @@ extern const size_t s_pageSize;
 /*
  * The numa node this thread is bound to
  */
-extern __thread int32_t s_numaNode;
+extern ATTRIBUTE_TLS int32_t s_numaNode;
 /*
  * enable the numa support in hhvm,
  * and determine whether threads should default to using

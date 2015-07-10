@@ -129,7 +129,7 @@ private:
   virtual std::string run() const = 0;
 
 private:
-  static __thread AssertDetailImpl* s_head;
+  static ATTRIBUTE_TLS AssertDetailImpl* s_head;
 
   const char* m_name;
   AssertDetailImpl* m_next{nullptr};

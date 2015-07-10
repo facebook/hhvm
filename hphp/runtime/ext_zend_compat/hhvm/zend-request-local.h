@@ -24,7 +24,7 @@
 
 namespace HPHP {
 
-#define ZEND_REQUEST_LOCAL_VECTOR(T, F, N) static __thread HPHP::RequestLocal<HPHP::ZendRequestLocalVector<T, F> > N;
+#define ZEND_REQUEST_LOCAL_VECTOR(T, F, N) static ATTRIBUTE_TLS HPHP::RequestLocal<HPHP::ZendRequestLocalVector<T, F> > N;
 template <class T, class F>
 struct ZendRequestLocalVector final : RequestEventHandler {
   static_assert(std::is_pointer<T>::value,
@@ -50,7 +50,7 @@ private:
   F m_destroy_callback;
 };
 
-#define ZEND_REQUEST_LOCAL_MAP(K, V, N) static __thread HPHP::RequestLocal<HPHP::ZendRequestLocalMap<K,V> > N;
+#define ZEND_REQUEST_LOCAL_MAP(K, V, N) static ATTRIBUTE_TLS HPHP::RequestLocal<HPHP::ZendRequestLocalMap<K,V> > N;
 template <class K, class V>
 struct ZendRequestLocalMap final : RequestEventHandler {
   typedef std::unordered_map<K, V> container;

@@ -36,7 +36,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-__thread Timer::Counter s_counters[Timer::kNumTimers];
+ATTRIBUTE_TLS Timer::Counter s_counters[Timer::kNumTimers];
 
 struct TimerName { const char* str; Timer::Name name; };
 const TimerName s_names[] = {

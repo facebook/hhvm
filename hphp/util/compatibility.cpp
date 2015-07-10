@@ -107,7 +107,7 @@ static int gettime_helper(clockid_t which_clock, struct timespec *tp) {
 #endif
 }
 
-__thread int64_t s_extra_request_microseconds;
+ATTRIBUTE_TLS int64_t s_extra_request_microseconds;
 int gettime(clockid_t which_clock, struct timespec* tp) {
   auto ret = gettime_helper(which_clock, tp);
 #ifdef CLOCK_THREAD_CPUTIME_ID

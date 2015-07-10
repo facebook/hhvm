@@ -42,12 +42,12 @@ int64_t requestCount();
  */
 void profileIncrementFuncCounter(const Func*);
 
-extern __thread bool profileOn;
+extern ATTRIBUTE_TLS bool profileOn;
 inline bool isProfileRequest() {
   return profileOn;
 }
 
-extern __thread bool standardRequest;
+extern ATTRIBUTE_TLS bool standardRequest;
 inline bool isStandardRequest() {
   return standardRequest;
 }

@@ -49,7 +49,7 @@ const StaticString
   s_key("key"),
   s_current("current");
 
-__thread MIterTable tl_miter_table;
+ATTRIBUTE_TLS MIterTable tl_miter_table;
 
 //////////////////////////////////////////////////////////////////////
 

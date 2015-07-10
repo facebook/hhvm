@@ -69,7 +69,7 @@ void checkHHConfig(const Unit* unit) {
 /**
  * The default of "true" here is correct -- see autoTypecheckRequestInit().
  */
-static __thread bool tl_doneAutoTypecheck = true;
+static ATTRIBUTE_TLS bool tl_doneAutoTypecheck = true;
 
 /**
  * autoTypecheckRequestInit() and autoTypecheckRequestExit() work together to

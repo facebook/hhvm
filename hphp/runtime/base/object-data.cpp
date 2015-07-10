@@ -55,7 +55,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 // current maximum object identifier
-__thread int ObjectData::os_max_id;
+ATTRIBUTE_TLS int ObjectData::os_max_id;
 
 TRACE_SET_MOD(runtime);
 
@@ -1226,7 +1226,7 @@ struct PropRecurInfo {
   RecurSet* activeSet;
 };
 
-__thread PropRecurInfo propRecurInfo;
+ATTRIBUTE_TLS PropRecurInfo propRecurInfo;
 
 template<class Invoker>
 bool magic_prop_impl(TypedValue* retval,

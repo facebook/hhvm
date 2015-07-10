@@ -40,7 +40,7 @@ struct IMarker;
  */
 class ResourceData {
  private:
-  static __thread int os_max_resource_id;
+  static ATTRIBUTE_TLS int os_max_resource_id;
 
  public:
   static void resetMaxId() { os_max_resource_id = 0; }

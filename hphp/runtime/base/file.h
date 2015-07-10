@@ -34,7 +34,7 @@ namespace HPHP {
 class StreamContext;
 class StreamFilter;
 
-extern int __thread s_pcloseRet;
+extern int ATTRIBUTE_TLS s_pcloseRet;
 
 // This structure holds the request allocated data members of File.  The
 // purpose of the class is to allow File (and subclasses) to be managed by

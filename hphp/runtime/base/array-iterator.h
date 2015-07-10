@@ -581,7 +581,7 @@ struct MIterTable {
   TlsPodBag<Ent,req::Allocator<Ent>> extras;
 };
 static_assert(sizeof(MIterTable) == 2*64, "");
-extern __thread MIterTable tl_miter_table;
+extern ATTRIBUTE_TLS MIterTable tl_miter_table;
 
 void free_strong_iterators(ArrayData*);
 ArrayData* move_strong_iterators(ArrayData* dest, ArrayData* src);

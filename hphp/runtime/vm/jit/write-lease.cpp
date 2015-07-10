@@ -24,7 +24,7 @@
 namespace HPHP { namespace jit {
 TRACE_SET_MOD(txlease);
 
-static __thread bool threadCanAcquire = true;
+static ATTRIBUTE_TLS bool threadCanAcquire = true;
 
 bool Lease::amOwner() const {
   return m_held && m_owner == pthread_self();

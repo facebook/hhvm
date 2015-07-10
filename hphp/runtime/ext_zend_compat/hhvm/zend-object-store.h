@@ -54,7 +54,7 @@ struct ZendObjectStore final : RequestEventHandler {
   zend_object_handle cloneObject(zend_object_handle handle);
 
 private:
-  static __thread RequestLocal<ZendObjectStore> tl_instance;
+  static ATTRIBUTE_TLS RequestLocal<ZendObjectStore> tl_instance;
 
   std::vector<zend_object_store_bucket> m_store;
   zend_object_handle m_free_list_head;

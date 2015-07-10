@@ -510,7 +510,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
                                 CloneFlag doClone,
                                 Block* srcBlock) {
-  static DEBUG_ONLY __thread int instNest = 0;
+  static DEBUG_ONLY ATTRIBUTE_TLS int instNest = 0;
   if (debug) ++instNest;
   SCOPE_EXIT { if (debug) --instNest; };
   DEBUG_ONLY auto indent = [&] { return std::string(instNest * 2, ' '); };

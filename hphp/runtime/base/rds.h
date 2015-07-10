@@ -131,7 +131,7 @@ folly::Range<const char*> persistentSection();
 /*
  * The thread-local pointer to the base of RDS.
  */
-extern __thread void* tl_base;
+extern ATTRIBUTE_TLS void* tl_base;
 
 //////////////////////////////////////////////////////////////////////
 

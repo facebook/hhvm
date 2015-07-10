@@ -50,7 +50,7 @@ void dumpEntry(const RingBufferEntry* e) {
     }
     case RBTypeFuncEntry:
     case RBTypeFuncExit: {
-      static __thread int indentDepth = 0;
+      static ATTRIBUTE_TLS int indentDepth = 0;
       // Quick and dirty attempt at dtrace -F style function nesting.
       // Looks like:
       //

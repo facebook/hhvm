@@ -118,8 +118,8 @@ static const char* const kPerfCounterNames[] = {
 };
 #undef TPC
 
-__thread int64_t s_perfCounters[tpc_num_counters];
-static __thread size_t s_initialTCSize;
+ATTRIBUTE_TLS int64_t s_perfCounters[tpc_num_counters];
+static ATTRIBUTE_TLS size_t s_initialTCSize;
 
 // The global MCGenerator object.
 MCGenerator* mcg;
@@ -1180,13 +1180,13 @@ class FreeRequestStubTrigger {
 #ifdef DEBUG
 
 struct DepthGuard {
-  static __thread int m_depth;
+  static ATTRIBUTE_TLS int m_depth;
   DepthGuard()  { m_depth++; TRACE(2, "DepthGuard: %d {\n", m_depth); }
   ~DepthGuard() { TRACE(2, "DepthGuard: %d }\n", m_depth); m_depth--; }
 
   bool depthOne() const { return m_depth == 1; }
 };
-__thread int DepthGuard::m_depth;
+ATTRIBUTE_TLS int DepthGuard::m_depth;
 
 #else
 
@@ -2110,7 +2110,7 @@ void MCGenerator::codeEmittedThisRequest(size_t& requestEntry,
 }
 
 namespace {
-__thread std::unordered_map<const ActRec*, TCA>* tl_debuggerCatches{nullptr};
+ATTRIBUTE_TLS std::unordered_map<const ActRec*, TCA>* tl_debuggerCatches{nullptr};
 }
 
 void pushDebuggerCatch(const ActRec* fp) {

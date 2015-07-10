@@ -250,7 +250,7 @@ void ftraceRelease(Args&&... args) {
 void traceRingBufferRelease(const char* fmt, ...) ATTRIBUTE_PRINTF(1,2);
 
 extern int levels[NumModules];
-extern __thread int tl_levels[NumModules];
+extern ATTRIBUTE_TLS int tl_levels[NumModules];
 const char* moduleName(Module mod);
 inline bool moduleEnabledRelease(Module tm, int level = 1) {
   return levels[tm] + tl_levels[tm] >= level;
@@ -333,7 +333,7 @@ const bool enabled = true;
  * indentation. Create an Indent object on the stack to increase the nesting
  * level, then use ITRACE just as you would use FTRACE.
  */
-extern __thread int indentDepth;
+extern ATTRIBUTE_TLS int indentDepth;
 struct Indent {
   explicit Indent(int n = 2) : n(n) { indentDepth += n; }
   ~Indent()                         { indentDepth -= n; }

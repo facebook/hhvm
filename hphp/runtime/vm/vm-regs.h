@@ -55,7 +55,7 @@ enum class VMRegState : uint8_t {
   CLEAN,
   DIRTY
 };
-extern __thread VMRegState tl_regState;
+extern ATTRIBUTE_TLS VMRegState tl_regState;
 
 inline void checkVMRegState() {
   assert(tl_regState == VMRegState::CLEAN);

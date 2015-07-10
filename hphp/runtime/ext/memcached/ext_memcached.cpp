@@ -210,7 +210,7 @@ const StaticString
 struct MEMCACHEDGlobals final {
   std::string sess_prefix;
 };
-static __thread MEMCACHEDGlobals* s_memcached_globals;
+static ATTRIBUTE_TLS MEMCACHEDGlobals* s_memcached_globals;
 #define MEMCACHEDG(name) s_memcached_globals->name
 
 namespace {

@@ -47,7 +47,7 @@ Mutex s_thread_info_mutex;
  * Either null, or populated by initialization of ThreadInfo as an approximation
  * of the highest address of the current thread's stack.
  */
-__thread char* t_stackbase = nullptr;
+ATTRIBUTE_TLS char* t_stackbase = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

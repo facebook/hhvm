@@ -51,7 +51,7 @@ using std::vector;
 ///////////////////////////////////////////////////////////////////////////////
 
 static ReadWriteMutex s_proxyMutex;
-static __thread unsigned int s_randState = 0xfaceb00c;
+static ATTRIBUTE_TLS unsigned int s_randState = 0xfaceb00c;
 
 static bool matchAnyPattern(const std::string &path,
                             const std::vector<std::string> &patterns) {

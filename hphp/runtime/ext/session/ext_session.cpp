@@ -145,7 +145,7 @@ public:
   String id;
 };
 
-static __thread SessionRequestData* s_session;
+static ATTRIBUTE_TLS SessionRequestData* s_session;
 
 void SessionRequestData::requestShutdownImpl() {
   if (mod_is_open()) {

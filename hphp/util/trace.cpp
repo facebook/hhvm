@@ -40,8 +40,8 @@ TRACE_SET_MOD(tprefix);
 namespace Trace {
 
 int levels[NumModules];
-__thread int tl_levels[NumModules];
-__thread int indentDepth = 0;
+ATTRIBUTE_TLS int tl_levels[NumModules];
+ATTRIBUTE_TLS int indentDepth = 0;
 
 static FILE* out;
 

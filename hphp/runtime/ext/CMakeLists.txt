@@ -45,6 +45,8 @@ set(EXTENSION_SYSTEMLIB_SOURCES ${PHP_SOURCES} CACHE INTERNAL "" FORCE)
 
 ADD_LIBRARY(hphp_runtime_ext STATIC
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES})
+auto_source_group("hphp_util" "${CMAKE_CURRENT_SOURCE_DIR}"
+  ${ASM_SOURCES} ${C_SOURCES} ${CXX_SOURCES} ${HEADER_SOURCES})
 if (ENABLE_ASYNC_MYSQL)
   add_dependencies(hphp_runtime_ext webscalesqlclient squangle)
 endif ()

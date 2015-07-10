@@ -104,7 +104,7 @@ public:
         case Kind::SmartPtr:
           m_u.smart_ptr.~EntryPtr();
           break;
-        case Kind::Accessor:
+        case Kind::AccessorKind:
           m_u.accessor.~ConstAccessor();
           break;
       }
@@ -119,7 +119,7 @@ public:
 
     Accessor& operator=(EntryPtr&& ep) {
       switch (m_kind) {
-        case Kind::Accessor:
+        case Kind::AccessorKind:
           m_u.accessor.~ConstAccessor();
         case Kind::Empty:
         case Kind::Ptr:
@@ -141,10 +141,10 @@ public:
           m_u.smart_ptr.~EntryPtr();
         case Kind::Empty:
         case Kind::Ptr:
-          m_kind = Kind::Accessor;
+          m_kind = Kind::AccessorKind;
           new (&m_u.accessor) LRUCache::ConstAccessor();
           break;
-        case Kind::Accessor:
+        case Kind::AccessorKind:
           break;
       }
       return m_u.accessor;
@@ -155,7 +155,7 @@ public:
         case Kind::Empty:    return nullptr;
         case Kind::Ptr:      return m_u.ptr;
         case Kind::SmartPtr: return m_u.smart_ptr.get();
-        case Kind::Accessor: return m_u.accessor->get();
+        case Kind::AccessorKind: return m_u.accessor->get();
       }
       always_assert(false);
     }
@@ -170,7 +170,7 @@ public:
       Empty,
       Ptr,
       SmartPtr,
-      Accessor,
+      AccessorKind,
     };
 
     union Ptr {

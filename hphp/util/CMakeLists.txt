@@ -30,6 +30,10 @@ add_custom_command(
 #  include_directories(${LIBNUMA_INCLUDE_DIRS})
 #endif()
 
+if(HAVE_STRPTIME)
+  list(REMOVE_ITEM CXX_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/strptime.cpp")
+endif()
+
 add_library(hphp_util STATIC ${CXX_SOURCES} ${ASM_SOURCES}
             "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-repo-schema.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/../hphp-build-info.cpp")

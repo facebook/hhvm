@@ -188,6 +188,9 @@ bool CmdMachine::AttachSandbox(DebuggerClient &client,
   return cmdMachine->m_succeed;
 }
 
+#ifdef s_host
+# undef s_host
+#endif
 const StaticString
   s_host("host"),
   s_port("port"),

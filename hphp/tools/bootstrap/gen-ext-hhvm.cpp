@@ -43,7 +43,7 @@ std::unordered_map<fbstring, const PhpClass*> g_classMap;
 // this purpose, not part of the normal argument sequence.
 bool g_armMode = false;
 
-constexpr char* g_allIncludes = R"(
+const char* const g_allIncludes = R"(
 #include "hphp/runtime/ext_hhvm/ext_hhvm.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/array-init.h"

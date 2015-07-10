@@ -66,17 +66,19 @@ namespace HPHP {
  *
  * These are intended for use primarily by the assert macros below.
  */
+ATTRIBUTE_NORETURN
 void assert_fail(const char* e,
                  const char* file,
                  unsigned int line,
                  const char* func,
-                 const std::string& msg) __attribute__((__noreturn__));
+                 const std::string& msg);
 
+ATTRIBUTE_NORETURN
 void assert_fail_no_log(const char* e,
                         const char* file,
                         unsigned int line,
                         const char* func,
-                        const std::string& msg) __attribute__((__noreturn__));
+                        const std::string& msg);
 
 void assert_log_failure(const char* title, const std::string& msg);
 

@@ -149,7 +149,7 @@ namespace MethodCache {
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
-NEVER_INLINE __attribute__((__noreturn__))
+NEVER_INLINE ATTRIBUTE_NORETURN
 void raiseFatal(ActRec* ar, Class* cls, StringData* name, Class* ctx) {
   try {
     g_context->lookupMethodCtx(

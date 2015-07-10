@@ -375,6 +375,15 @@ bool HardwareCounter::addPerfEvent(const char* event) {
 
   checkLLCHack(event, type, config);
 
+  // Check if we have a raw spec.
+  if (!found && event[0] == 'r' && event[1] != 0) {
+    config = strtoull(event + 1, const_cast<char**>(&ev), 16);
+    if (*ev == 0) {
+      found = true;
+      type = PERF_TYPE_RAW;
+    }
+  }
+
   if (!found || *ev) {
     Logger::Warning("failed to find perf event: %s", event);
     return false;

@@ -165,7 +165,8 @@ inline bool check_refcount_ns_nz(int32_t count) {
   }                                                     \
                                                         \
   RefCount decRefCount() const {                        \
-                                                        \
+    assert(!MemoryManager::sweeping());                 \
+    return m_hdr.mrb;                                   \
   }                                                     \
                                                         \
   void setRefCount(RefCount count) {                    \

@@ -2601,10 +2601,7 @@ void CodeGenerator::cgCufIterSpillFrame(IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << testq{name, name, sf};
   ifThenElse(v, CC_NZ, sf, [&](Vout& v) {
-    auto const sf = v.makeReg();
-    v << cmplim{0, name[FAST_REFCOUNT_OFFSET], sf};
-    static_assert(UncountedValue < 0 && StaticValue < 0, "");
-    ifThen(v, CC_NS, sf, [&](Vout& v) { emitIncRef(v, name); });
+    emitIncRef(v, name);
     v << store{name, spReg[spOffset + int(AROFF(m_invName))]};
     auto const encoded = ActRec::encodeNumArgsAndFlags(
       safe_cast<int32_t>(nArgs),
@@ -3343,15 +3340,14 @@ void CodeGenerator::cgStaticLocInitCached(IRInstruction* inst) {
   auto& v = vmain();
 
   // If we're here, the target-cache-local RefData is all zeros, so we
-  // can initialize it by storing the new value into it's TypedValue
-  // and incrementing the RefData reference count (which will set it
-  // to 1).
+  // can initialize it by storing the new value into it's TypedValue.
+  // We would need to increment the reference count here to set it to 1,
+  // if we had one.
   //
   // We are storing the rdSrc value into the static, but we don't need
   // to inc ref it because it's a bytecode invariant that it's not a
   // reference counted type.
   emitStoreTV(v, rdSrc[RefData::tvOffset()], srcLoc(inst, 1), inst->src(1));
-  v << inclm{rdSrc[FAST_REFCOUNT_OFFSET], v.makeReg()};
   v << storebi{uint8_t(HeaderKind::Ref), rdSrc[HeaderKindOffset]};
   static_assert(sizeof(HeaderKind) == 1, "");
 }
@@ -3607,15 +3603,16 @@ void CodeGenerator::cgVectorHasImmCopy(IRInstruction* inst) {
 
   // Vector::m_data field holds an address of an ArrayData plus
   // sizeof(ArrayData) bytes. We need to check this ArrayData's
-  // m_count field to see if we need to call Vector::triggerCow().
+  // mrb field to see if we need to call Vector::triggerCow().
   auto rawPtrOffset = collections::dataOffset(CollectionType::Vector) +
                       kExpectedMPxOffset;
-  auto countOffset = (int64_t)FAST_REFCOUNT_OFFSET - (int64_t)sizeof(ArrayData);
+  auto mrbOffset = (int64_t)FAST_GC_BYTE_OFFSET - (int64_t)sizeof(ArrayData);
 
   auto ptr = v.makeReg();
   v << load{vecReg[rawPtrOffset], ptr};
   auto const sf = v.makeReg();
-  v << cmplim{1, ptr[countOffset], sf};
+  // check if mrb is set
+  v << testbim{FAST_MRB_MASK, FAST_GC_BYTE_OFFSET, sf}
   v << jcc{CC_NE, sf, {label(inst->next()), label(inst->taken())}};
 }
 

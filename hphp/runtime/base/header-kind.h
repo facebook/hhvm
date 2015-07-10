@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_HEADER_KIND_H_
 #define incl_HPHP_HEADER_KIND_H_
 
+#include "/home/peter/hhvm/hphp/runtime/base/countable.h"
+
 namespace HPHP {
 
 enum class HeaderKind : uint8_t {
@@ -129,6 +131,9 @@ constexpr auto HeaderOffset = sizeof(void*);
 constexpr auto HeaderKindOffset = HeaderOffset + offsetof(HeaderWord<>, kind);
 constexpr auto FAST_REFCOUNT_OFFSET = HeaderOffset +
                                       offsetof(HeaderWord<>, count);
+// TODO don't hardcode
+constexpr auto FAST_GC_BYTE_OFFSET = HeaderKindOffset + 1;
+constexpr int8_t FAST_MRB_MASK = 1 << 2;
 
 inline bool isObjectKind(HeaderKind k) {
   return k >= HeaderKind::Object && k <= HeaderKind::ImmSet;

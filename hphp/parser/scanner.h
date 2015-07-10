@@ -25,6 +25,7 @@
 #include <limits.h>
 
 #include "hphp/util/exception.h"
+#include "hphp/util/portability.h"
 #include "hphp/parser/location.h"
 #include "hphp/parser/hphp.tab.hpp"
 

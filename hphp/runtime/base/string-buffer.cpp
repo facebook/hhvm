@@ -370,7 +370,7 @@ void CstrBuffer::append(StringSlice slice) {
   auto const data = slice.ptr;
   auto const len = slice.len;
 
-  static_assert(std::is_unsigned<typeof(len)>::value,
+  static_assert(std::is_unsigned<decltype(len)>::value,
                 "len is supposed to be unsigned");
   assert(m_buffer);
 

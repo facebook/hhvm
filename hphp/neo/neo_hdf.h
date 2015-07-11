@@ -12,12 +12,12 @@
 #ifndef incl_HPHP_NEO_HDF_H_
 #define incl_HPHP_NEO_HDF_H_ 1
 
-__BEGIN_DECLS
 
 #include <stdio.h>
 #include "hphp/neo/neo_err.h"
 #include "hphp/neo/neo_hash.h"
 
+__BEGIN_DECLS
 #define FORCE_HASH_AT 10
 
 typedef struct _hdf HDF;

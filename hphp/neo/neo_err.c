@@ -222,7 +222,7 @@ void nerr_log_error (NEOERR *err)
       }
       else
       {
-	r = uListGet (Errors, err->error - 1, (void *)&err_name);
+	r = uListGet (Errors, err->error - 1, (void **)&err_name);
 	if (r != STATUS_OK)
 	{
 	  err_name = buf;
@@ -275,7 +275,7 @@ void nerr_error_string (NEOERR *err, NEOSTRING *str)
       }
       else
       {
-	r = uListGet (Errors, err->error - 1, (void *)&err_name);
+	r = uListGet (Errors, err->error - 1, (void **)&err_name);
 	if (r != STATUS_OK)
 	{
 	  err_name = buf;
@@ -321,7 +321,7 @@ void nerr_error_traceback (NEOERR *err, NEOSTRING *str)
       }
       else
       {
-	r = uListGet (Errors, err->error - 1, (void *)&err_name);
+	r = uListGet (Errors, err->error - 1, (void **)&err_name);
 	if (r != STATUS_OK)
 	{
 	  err_name = buf;

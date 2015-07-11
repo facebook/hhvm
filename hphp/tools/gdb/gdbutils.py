@@ -252,26 +252,30 @@ def rawptr(val):
         return val.referenced_type().address
 
     name = template_type(t)
+    ptr = None
 
     if name == 'std::unique_ptr':
-        return val['_M_t']['_M_head_impl']
+        ptr = val['_M_t']['_M_head_impl']
 
     if name == 'HPHP::default_ptr':
-        return val['m_p']
+        ptr = val['m_p']
 
-    if name == 'HPHP::req::ptr' or name == 'HPHP::AtomicSharedPtr':
-        return val['m_px']
+    if name == 'HPHP::req::ptr' or name == 'HPHP::AtomicSharedPtrImpl':
+        ptr = val['m_px']
 
-    if name == 'HPHP::LowPtr' or name == 'HPHP::LowPtrImpl':
+    if name == 'HPHP::LowPtr' or name == 'HPHP::detail::LowPtrImpl':
         inner = t.template_argument(0)
-        return val['m_s'].cast(inner.pointer())
+        ptr = val['m_s'].cast(inner.pointer())
 
     if name == 'HPHP::CompactTaggedPtr':
         inner = t.template_argument(0)
-        return (val['m_data'] & 0xffffffffffff).cast(inner.pointer())
+        ptr = (val['m_data'] & 0xffffffffffff).cast(inner.pointer())
 
     if name == 'HPHP::CompactSizedPtr':
-        return rawptr(val['m_data'])
+        ptr = rawptr(val['m_data'])
+
+    if ptr is not None:
+        return rawptr(ptr)
 
     return None
 

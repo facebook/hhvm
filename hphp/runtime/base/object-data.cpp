@@ -268,6 +268,13 @@ Object ObjectData::iterableObject(bool& isIterable,
     }
     obj = o;
   }
+  if (!isIterator() && obj->instanceof(c_SimpleXMLElement::classof())) {
+    auto iterator = cast<c_SimpleXMLElement>(obj)
+      ->t_getiterator()
+      .toObject();
+    isIterable = true;
+    return iterator;
+  }
   isIterable = false;
   return obj;
 }

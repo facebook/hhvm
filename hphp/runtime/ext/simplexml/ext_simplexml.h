@@ -146,6 +146,26 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// class SimpleXMLElementIterator
+
+class c_SimpleXMLIterator : public c_SimpleXMLElement {
+ public:
+  DECLARE_CLASS_NO_SWEEP(SimpleXMLIterator)
+
+  c_SimpleXMLIterator(Class* cls = c_SimpleXMLIterator::classof())
+    : c_SimpleXMLElement(cls)
+  {}
+  ~c_SimpleXMLIterator() {}
+  Variant t_current();
+  Variant t_key();
+  Variant t_next();
+  Variant t_rewind();
+  Variant t_valid();
+  bool t_haschildren();
+  Object t_getchildren();
+};
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // incl_HPHP_EXT_SIMPLEXML_H_

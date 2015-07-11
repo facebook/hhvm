@@ -1,14 +1,13 @@
-App \Foo<[1][<expr#346>]App \Bar<>, >
+App \Foo<[1][<expr#1>]App \Bar<>, >
 File "this_ret_bad2.php", line 41, characters 16-34:
 Invalid argument (Typing[4110])
-File "this_ret_bad2.php", line 41, characters 16-19:
-  where '<expr#346>' is a reference to this expression
 File "this_ret_bad2.php", line 33, characters 15-17:
-This is the expression dependent type <expr#346>
-  that is compatible with an object of type Bar
+This is the expression dependent type <expr#1>
+File "this_ret_bad2.php", line 41, characters 16-19:
+  where '<expr#1>' is a reference to this expression
 File "this_ret_bad2.php", line 25, characters 27-29:
 It is incompatible with an object of type Bar
 File "this_ret_bad2.php", line 33, characters 15-17:
 Since Bar is not final
-File "this_ret_bad2.php", line 33, characters 15-17:
+File "this_ret_bad2.php", line 25, characters 27-29:
 this might not be a Bar

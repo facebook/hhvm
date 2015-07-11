@@ -9,6 +9,10 @@ abstract class C {
   abstract public function get(): this::T;
   abstract public function get_a_C(): C;
 
+  public function test_reset_expr_dispaly_ids(C $c): void {
+    // Expression Display Ids should be reset within method bo
+  }
+
   public function test(Vector<C> $vec): void {
     list($c1, $c2) = $vec;
     // $c1 and $c2 have different expression ids

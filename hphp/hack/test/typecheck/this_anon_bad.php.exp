@@ -1,10 +1,8 @@
 File "this_anon_bad.php", line 34, characters 11-19:
 Invalid argument (Typing[4110])
-File "this_anon_bad.php", line 21, characters 13-17:
-  where '<static>' is a reference to this expression
 File "this_anon_bad.php", line 14, characters 41-44:
 This is the expression dependent type <static>
-  that is compatible with the type 'this'
-  that is compatible with an object of type Foo
+File "this_anon_bad.php", line 21, characters 13-17:
+  where '<static>' refers to the late bound type of the enclosing class
 File "this_anon_bad.php", line 34, characters 11-19:
 It is incompatible with an object of type Foo

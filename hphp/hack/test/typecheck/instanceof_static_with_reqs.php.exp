@@ -5,10 +5,8 @@ App \INeedsFoo<[1]intersect(), >
 File "instanceof_static_with_reqs.php", line 31, characters 12-17:
 Invalid return type (Typing[4110])
 File "instanceof_static_with_reqs.php", line 7, characters 49-52:
-  where '<static>' is a reference to this expression
-File "instanceof_static_with_reqs.php", line 7, characters 49-52:
 This is the expression dependent type <static>
-  that is compatible with the type 'this'
-  that is compatible with an object of type BaseField
+File "instanceof_static_with_reqs.php", line 7, characters 49-52:
+  where '<static>' refers to the late bound type of the enclosing class
 File "instanceof_static_with_reqs.php", line 23, characters 27-35:
 It is incompatible with an object of type INeedsFoo

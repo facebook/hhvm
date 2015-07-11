@@ -6,7 +6,6 @@ File "tconst_with_static.php", line 5, characters 22-29:
   resulting from expanding a type constant as follows:
     Test::TC_ID::ALIAS -> IntID::ALIAS
 File "tconst_with_static.php", line 9, characters 19-21:
-  resulting from expanding a type constant as follows:
-    IntID::ID
+  resulting from expanding the type constant IntID::ID
 File "tconst_with_static.php", line 16, characters 12-13:
 It is incompatible with a string

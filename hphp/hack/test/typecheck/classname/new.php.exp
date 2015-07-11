@@ -1,5 +1,5 @@
-[<expr#358>]generic T as <App \I<>>
-[<expr#364>]generic T as <App \C<>>
-[<expr#370>]generic Td as <App \D<App \I<>, >>
-[<expr#388>]generic T as <App \C<>>
+[<expr#1>]generic T as <App \I<>>
+[<expr#1>]generic T as <App \C<>>
+[<expr#1>]generic Td as <App \D<App \I<>, >>
+[<expr#1>]generic T as <App \C<>>
 No errors

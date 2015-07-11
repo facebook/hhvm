@@ -13,43 +13,25 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#ifndef incl_HPHP_LOCALE_PORTABILITY_H_
+#define incl_HPHP_LOCALE_PORTABILITY_H_
 
-#ifndef incl_HPHP_SETLOCALE_H_
-#define incl_HPHP_SETLOCALE_H_
+#include <locale.h>
 
-#include <vector>
-#include <string>
-#include "hphp/util/locale-portability.h"
-#include "hphp/util/thread-local.h"
+#ifdef _MSC_VER
+typedef _locale_t locale_t;
 
-namespace HPHP {
+#define LC_ALL_MASK       LC_ALL
+#define LC_COLLATE_MASK   LC_COLLATE
+#define LC_CTYPE_MASK     LC_CTYPE
+#define LC_MONETARY_MASK  LC_MONETARY
+#define LC_NUMERIC_MASK   LC_NUMERIC
+#define LC_TIME_MASK      LC_TIME
 
-class ThreadSafeLocaleHandler {
-private:
-  typedef struct {
-    int category;
-    int category_mask;
-    std::string category_str;
-    std::string locale_str;
-  } CategoryAndLocaleMap;
+inline locale_t _current_locale() { return _get_current_locale(); }
+#else
+#include <langinfo.h>
+#include <xlocale.h>
+#endif
 
-public:
-  ThreadSafeLocaleHandler();
-  ~ThreadSafeLocaleHandler();
-  void reset();
-  const char* actuallySetLocale(int category, const char* locale);
-  struct lconv* localeconv();
-
-private:
-  void generate_LC_ALL_String();
-
-  std::vector<CategoryAndLocaleMap> m_category_locale_map;
-  locale_t m_locale;
-};
-
-extern DECLARE_THREAD_LOCAL(ThreadSafeLocaleHandler,
-                            g_thread_safe_locale_handler);
-
-}
-
-#endif // incl_HPHP_SETLOCALE_H_
+#endif

@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/thread-safe-setlocale.h"
 #include <string.h>
-#include <langinfo.h>
 #include <math.h>
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-local.h"

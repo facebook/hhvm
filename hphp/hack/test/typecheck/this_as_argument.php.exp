@@ -1,0 +1,10 @@
+File "this_as_argument.php", line 20, characters 18-19:
+Invalid argument (Typing[4110])
+File "this_as_argument.php", line 20, characters 5-20:
+This is an object of type C
+File "this_as_argument.php", line 9, characters 24-24:
+It is incompatible with an object of type C
+File "this_as_argument.php", line 20, characters 5-5:
+Since C is not final
+File "this_as_argument.php", line 20, characters 5-20:
+this might not be a C

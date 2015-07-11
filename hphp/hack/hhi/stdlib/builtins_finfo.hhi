@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh // decl     /* -*- php -*- */
 /**
  * Copyright(c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -26,8 +26,21 @@ function finfo_buffer($finfo ,$string, $options = FILEINFO_NONE, $context = NULL
 function mime_content_type($filename) {}
 
 class finfo {
-  public function __construct($options = null, $arg = null) {}
-  public function buffer($string, $options = null, $context = null) {}
-  public function file($filename, $options = null, $context = null) {}
-  public function set_flags($options) {}
+  // Methods
+  public function __construct(
+    int $options = FILEINFO_NONE,
+    $magic_file = null,
+  );
+  public function buffer(
+    $string = null,
+    int $options = FILEINFO_NONE,
+    $context = null,
+  ): string;
+  public function file(
+    $file_name = null,
+    int $options = FILEINFO_NONE,
+    $context = null,
+  ): string;
+  public function set_flags(int $options): bool;
+
 }

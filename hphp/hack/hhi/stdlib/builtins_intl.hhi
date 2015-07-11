@@ -622,71 +622,92 @@ class IntlGregorianCalendar extends IntlCalendar {
   public function setGregorianChange($date) {}
 }
 
-class IntlIterator<T> implements Iterator<T> {
-  public function current() {}
-  public function key() {}
-  public function next() {}
-  public function rewind() {}
-  public function valid() {}
+class IntlIterator<Tv> implements KeyedIterator<int, Tv> {
+  // Methods
+  public function current(): Tv;
+  public function key(): int;
+  public function next(): void;
+  public function rewind(): void;
+  public function valid(): bool;
+
 }
 
-class IntlBreakIterator<T> implements Traversable<T> {
-  const int DONE = -1;
-  const int WORD_NONE = 0;
-  const int WORD_NONE_LIMIT = 100;
-  const int WORD_NUMBER = 100;
-  const int WORD_NUMBER_LIMIT = 200;
-  const int WORD_LETTER = 200;
-  const int WORD_LETTER_LIMIT = 300;
-  const int WORD_KANA = 300;
-  const int WORD_KANA_LIMIT = 400;
-  const int WORD_IDEO = 400;
-  const int WORD_IDEO_LIMIT = 500;
-  const int LINE_SOFT = 0;
-  const int LINE_SOFT_LIMIT = 100;
-  const int LINE_HARD = 100;
-  const int LINE_HARD_LIMIT = 200;
-  const int SENTENCE_TERM = 0;
-  const int SENTENCE_TERM_LIMIT = 100;
-  const int SENTENCE_SEP = 100;
-  const int SENTENCE_SEP_LIMIT = 200;
-  private function __construct() {}
-  public static function createCharacterInstance($locale = null) {}
-  public static function createCodePointInstance() {}
-  public static function createLineInstance($locale = null) {}
-  public static function createSentenceInstance($locale = null) {}
-  public static function createTitleInstance($locale = null) {}
-  public static function createWordInstance($locale = null) {}
-  public function current() {}
-  public function first() {}
-  public function following($offset) {}
-  public function getErrorCode() {}
-  public function getErrorMessage() {}
-  public function getLocale($locale_type) {}
-  public function getPartsIterator($key_type = null) {}
-  public function getText() {}
-  public function isBoundary($offset) {}
-  public function last() {}
-  public function next($offset = null) {}
-  public function preceding($offset) {}
-  public function previous() {}
-  public function setText($text) {}
+class IntlBreakIterator implements KeyedTraversable<int, int> {
+
+  // Constants
+  const DONE = -1;
+  const WORD_NONE = 0;
+  const WORD_NONE_LIMIT = 100;
+  const WORD_NUMBER = 100;
+  const WORD_LETTER = 200;
+  const WORD_KANA = 300;
+  const WORD_KANA_LIMIT = 400;
+  const WORD_IDEO = 400;
+  const WORD_IDEO_LIMIT = 500;
+  const LINE_SOFT = 0;
+  const LINE_SOFT_LIMIT = 100;
+  const LINE_HARD = 100;
+  const LINE_HARD_LIMIT = 200;
+  const SENTENCE_TERM = 0;
+  const SENTENCE_SEP = 100;
+  const WORD_NUMBER_LIMIT = 200;
+  const WORD_LETTER_LIMIT = 300;
+  const SENTENCE_TERM_LIMIT = 100;
+  const SENTENCE_SEP_LIMIT = 200;
+
+  // Methods
+  public static function createCharacterInstance(
+    $locale = null,
+  ): IntlBreakIterator;
+  public static function createCodePointInstance(
+  ): IntlCodePointBreakIterator;
+  public static function createLineInstance(
+    $locale = null,
+  ): IntlBreakIterator;
+  public static function createSentenceInstance(
+    $locale = null,
+  ): IntlBreakIterator;
+  public static function createTitleInstance(
+    $locale = null,
+  ): IntlBreakIterator;
+  public static function createWordInstance(
+    $locale = null,
+  ): IntlBreakIterator;
+  public function key(): mixed; // returns int or false
+  public function rewind(): int;
+  public function valid(): bool;
+  public function current(): int;
+  public function first(): int;
+  public function following(int $offset): mixed; // returns int or false
+  public function getErrorCode(): int;
+  public function getErrorMessage(): string;
+  public function getLocale(int $locale_type): mixed; // returns string or false
+  public function getPartsIterator(string $key_type): IntlPartsIterator;
+  public function getText(): ?string;
+  public function isBoundary(int $offset): bool;
+  public function last(): int;
+  public function next($offset = null): mixed; // returns int or false
+  public function preceding(int $offset): mixed; // returns int or false
+  public function previous(): int;
+  public function setText(string $text): bool;
 }
 
-class IntlRuleBasedBreakIterator<T> extends IntlBreakIterator<T> {
-  public function getBinaryRules() {}
-  public function getRuleStatus() {}
-  public function getRuleStatusVec() {}
-  public function getRules() {}
+class IntlRuleBasedBreakIterator extends IntlBreakIterator {
+  // Methods
+  public function __construct(string $rules, bool $compiled = false);
+  public function getRules(): mixed; // returns string or false
+  public function getRuleStatus(): int;
+  public function getRuleStatusVec(): mixed; // returns array<int> or false
+  public function getBinaryRules(): mixed; // returns string or false
 }
 
-class IntlCodePointBreakIterator<T> extends IntlBreakIterator<T> {
-  public function getLastCodePoint() {}
+class IntlCodePointBreakIterator extends IntlBreakIterator {
+  public function getLastCodePoint(): int {}
 }
 
-class IntlPartsIterator<T> extends IntlIterator<T> {
+class IntlPartsIterator extends IntlIterator<string> {
   const int KEY_SEQUENTIAL = 0;
   const int KEY_LEFT = 1;
   const int KEY_RIGHT = 2;
-  public function getBreakIterator() {}
+  public function getBreakIterator(): IntlBreakIterator {}
 }

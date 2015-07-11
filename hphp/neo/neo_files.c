@@ -16,11 +16,19 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <string.h>
-#include <unistd.h>
 #include <errno.h>
 #include <limits.h>
-#include <dirent.h>
 #include <sys/stat.h>
+
+#ifdef _MSC_VER
+#include <io.h>
+#include <windows.h>
+#include <shellapi.h>
+#include <strsafe.h>
+#else
+#include <unistd.h>
+#include <dirent.h>
+#endif
 
 #include "neo_misc.h"
 #include "neo_err.h"
@@ -146,6 +154,23 @@ NEOERR *ne_save_file (const char *path, char *str)
 
 NEOERR *ne_remove_dir (const char *path)
 {
+#ifdef _MSC_VER
+  SHFILEOPSTRUCT op;
+  op.hwnd = NULL;
+  op.wFunc = FO_DELETE;
+  char* tmp = (char*)calloc(1, strlen(path) + 2);
+  memcpy(tmp, path, strlen(path));
+  op.pFrom = tmp;
+  op.pTo = NULL;
+  op.fFlags = FOF_SILENT;
+  op.hNameMappings = NULL;
+  op.lpszProgressTitle = NULL;
+
+  int res = SHFileOperation(&op);
+  free(tmp);
+  if (res != 0)
+    return nerr_raise_errno(NERR_SYSTEM, "Unable to stat file %s", path);
+#else
   NEOERR *err;
   DIR *dp;
   struct stat s;
@@ -197,6 +222,7 @@ NEOERR *ne_remove_dir (const char *path)
   {
     return nerr_raise_errno (NERR_SYSTEM, "Unable to rmdir %s", path);
   }
+#endif
   return STATUS_OK;
 }
 
@@ -218,10 +244,8 @@ NEOERR *ne_listdir_match(const char *path, ULIST **files, const char *match)
 NEOERR *ne_listdir_fmatch(const char *path, ULIST **files, MATCH_FUNC fmatch,
                           void *rock)
 {
-  DIR *dp;
-  struct dirent *de;
-  ULIST *myfiles = NULL;
   NEOERR *err = STATUS_OK;
+  ULIST *myfiles = NULL;
 
   if (files == NULL)
     return nerr_raise(NERR_ASSERT, "Invalid call to ne_listdir_fmatch");
@@ -236,6 +260,32 @@ NEOERR *ne_listdir_fmatch(const char *path, ULIST **files, MATCH_FUNC fmatch,
     myfiles = *files;
   }
 
+#ifdef _MSC_VER
+  HANDLE hFind = INVALID_HANDLE_VALUE;
+  WIN32_FIND_DATA ffd;
+  CHAR rootDir[MAX_PATH];
+
+  StringCchCopy(rootDir, MAX_PATH, path);
+  StringCchCat(rootDir, MAX_PATH, TEXT("\\*"));
+  hFind = FindFirstFile(rootDir, &ffd);
+  if (hFind == INVALID_HANDLE_VALUE)
+    return nerr_raise_errno(NERR_IO, "Unable to opendir %s", path);
+
+  do {
+    if (!strcmp(ffd.cFileName, ".") || !strcmp(ffd.cFileName, ".."))
+      continue;
+
+    if (fmatch != NULL && !fmatch(rock, ffd.cFileName))
+      continue;
+
+    err = uListAppend(myfiles, strdup(ffd.cFileName));
+    if (err) break;
+  } while (FindNextFile(hFind, &ffd) != 0);
+
+  FindClose(hFind);
+#else
+  DIR *dp;
+  struct dirent *de;
   if ((dp = opendir (path)) == NULL)
   {
     return nerr_raise_errno(NERR_IO, "Unable to opendir %s", path);
@@ -252,6 +302,7 @@ NEOERR *ne_listdir_fmatch(const char *path, ULIST **files, MATCH_FUNC fmatch,
     if (err) break;
   }
   closedir(dp);
+#endif
   if (err && *files == NULL)
   {
     uListDestroy(&myfiles, ULIST_FREE);

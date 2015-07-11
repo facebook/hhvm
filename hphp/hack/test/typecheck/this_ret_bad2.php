@@ -9,13 +9,34 @@
  *
  */
 
-class Foo<T> {
+interface IFoo<+T> {}
+
+class Foo<T> implements IFoo<T> {
   public function __construct(T $x) {}
 }
 
 class Bar {
-  // Since Foo's type variable isn't known to be covariant, this is an error
   public function getFooOfBar(): Foo<this> {
     return new Foo($this);
   }
+
+}
+
+function expectFooBar(Foo<Bar> $foo): void {}
+
+function expectIFooBar(IFoo<Bar> $foo): void {}
+
+function expectFooAsBar<T as Bar>(Foo<T> $foo): Foo<T> {
+  return $foo;
+}
+
+function test(Bar $bar): void {
+  // Passing it to an 'as' constrained Bar is fine
+  hh_show(expectFooAsBar($bar->getFooOfBar()));
+
+  // Can treat as IFoo<Bar> since T in IFoo is covariant
+  expectIFooBar($bar->getFooOfBar());
+
+  // But not to Foo<Bar> since T is invariant
+  expectFooBar($bar->getFooOfBar());
 }

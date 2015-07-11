@@ -8,7 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-
+<<__ConsistentConstruct>>
 class Foo {
   public static function get(): this {
     return new static();
@@ -16,5 +16,10 @@ class Foo {
 
   public function set(this $x): this {
     return $x;
+  }
+
+  public function test(Foo $foo): void {
+    $this->set(new static());
+    $this->set($foo);
   }
 }

@@ -1,2 +1,2 @@
 File "unsupported_this1.php", line 3, characters 23-26:
-The type "this" can only be used as a return type, to instantiate a covariant type variable, or as a private non-static member variable (Naming[2043])
+The type "this" cannot be used as a constraint on a classes generic, or as the type of a static member variable (Naming[2043])

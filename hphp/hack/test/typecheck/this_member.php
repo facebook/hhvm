@@ -10,5 +10,9 @@
  */
 
 class X {
-  public this $y;
+  public function __construct(public this $y) {}
+
+  public function test(X $x): void {
+    $x->y = $this->y;
+  }
 }

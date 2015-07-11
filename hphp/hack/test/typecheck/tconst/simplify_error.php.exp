@@ -1,0 +1,14 @@
+File "simplify_error.php", line 7, characters 16-16:
+This object is of type C (Typing[4110])
+File "simplify_error.php", line 7, characters 26-26:
+It is incompatible with this object of type P
+because some declarations are incompatible.
+Read the following to see why:
+File "simplify_error.php", line 7, characters 28-34:
+This is the abstract type constant C::T
+File "simplify_error.php", line 4, characters 38-38:
+  via this generic T
+File "simplify_error.php", line 8, characters 23-23:
+  resulting from expanding the type constant C::T
+File "simplify_error.php", line 13, characters 38-38:
+It is incompatible with an object of type T

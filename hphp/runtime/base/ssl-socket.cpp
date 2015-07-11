@@ -633,7 +633,7 @@ bool SSLSocket::enableCrypto(bool activate /* = true */) {
           (tvs.tv_sec + (double) tvs.tv_usec / 1000000);
         if (timeout < 0) {
           raise_warning("SSL: connection timeout");
-          return -1;
+          return false;
         }
       } else {
         n = SSL_accept(m_data->m_handle);

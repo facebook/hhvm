@@ -94,6 +94,7 @@ class PDO {
   public function __construct($dsn, $username = null, $password = null, $options = null) { }
   public function prepare($statement, $options = null) { }
   public function beginTransaction() { }
+  public function inTransaction() { }
   public function commit() { }
   public function rollBack() { }
   public function setAttribute($attribute, $value) { }

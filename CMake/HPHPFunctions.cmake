@@ -104,9 +104,9 @@ function(append_systemlib TARGET SOURCE SECTNAME)
     # for each library append the following line to embed.rc
     # $sectionname RCDATA "$source"
     add_custom_command(TARGET generate_rc
-      COMMAND echo "${SECTNAME} RCDATA \"${SOURCE}\"" >> embed.rc
+      COMMAND echo "\"${SECTNAME}\" RCDATA \"${SOURCE}\"" >> embed.rc
       COMMENT "Adding ${SOURCE} as ${SECTNAME} to embed.rc"
-      VERBATIM)
+      )
   else()
     if (APPLE)
       set(${TARGET}_SLIBS ${${TARGET}_SLIBS} -Wl,-sectcreate,__text,${SECTNAME},${SOURCE} PARENT_SCOPE)

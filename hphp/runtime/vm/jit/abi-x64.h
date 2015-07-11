@@ -72,12 +72,21 @@ constexpr Reg64 rAsm         = reg::r10;
  * translator manages via its RegMap.
  */
 
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+const RegSet kGPCallerSaved =
+  reg::rax | reg::rcx | reg::rdx |
+  reg::r8  | reg::r9  | reg::r10 | reg::r11;
+
+const RegSet kGPCalleeSaved =
+  reg::rbx | reg::rsi | reg::rdi | reg::r13 | reg::r14 | reg::r15;
+#else
 const RegSet kGPCallerSaved =
   reg::rax | reg::rcx | reg::rdx | reg::rsi | reg::rdi |
   reg::r8  | reg::r9  | reg::r10 | reg::r11;
 
 const RegSet kGPCalleeSaved =
   reg::rbx | reg::r13 | reg::r14 | reg::r15;
+#endif
 
 const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
 
@@ -163,9 +172,15 @@ const RegSet kScratchCrossTraceRegs = kXMMCallerSaved |
  */
 
 // x64 INTEGER class argument registers.
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+const PhysReg argNumToRegName[] = {
+  reg::rcx, reg::rdx, reg::r8, reg::r9
+};
+#else
 const PhysReg argNumToRegName[] = {
   reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9
 };
+#endif
 const int kNumRegisterArgs = sizeof(argNumToRegName) / sizeof(PhysReg);
 
 inline RegSet argSet(int n) {
@@ -177,10 +192,16 @@ inline RegSet argSet(int n) {
 }
 
 // x64 SSE class argument registers.
+#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+const PhysReg argNumToSIMDRegName[] = {
+  reg::xmm0, reg::xmm1, reg::xmm2, reg::xmm3,
+};
+#else
 const PhysReg argNumToSIMDRegName[] = {
   reg::xmm0, reg::xmm1, reg::xmm2, reg::xmm3,
   reg::xmm4, reg::xmm5, reg::xmm6, reg::xmm7,
 };
+#endif
 const int kNumSIMDRegisterArgs = sizeof(argNumToSIMDRegName) / sizeof(PhysReg);
 
 /*

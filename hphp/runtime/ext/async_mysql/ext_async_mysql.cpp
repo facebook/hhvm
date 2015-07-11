@@ -1104,7 +1104,7 @@ void HHVM_METHOD(AsyncMysqlRowBlockIterator, next) {
 bool HHVM_METHOD(AsyncMysqlRowBlockIterator, valid) {
   auto* data = Native::data<AsyncMysqlRowBlockIterator>(this_);
 
-  static_assert(std::is_unsigned<typeof(data->m_row_number)>::value,
+  static_assert(std::is_unsigned<decltype(data->m_row_number)>::value,
                 "m_row_number should be unsigned");
   int64_t count = HHVM_MN(AsyncMysqlRowBlock, count)(
     data->m_row_block.get());
@@ -1222,7 +1222,7 @@ void HHVM_METHOD(AsyncMysqlRowIterator, next) {
 bool HHVM_METHOD(AsyncMysqlRowIterator, valid) {
   auto* data = Native::data<AsyncMysqlRowIterator>(this_);
 
-  static_assert(std::is_unsigned<typeof(data->m_field_number)>::value,
+  static_assert(std::is_unsigned<decltype(data->m_field_number)>::value,
                 "m_field_number should be unsigned");
   int64_t count = HHVM_MN(AsyncMysqlRow, count)(data->m_row.get());
   return data->m_field_number < count;

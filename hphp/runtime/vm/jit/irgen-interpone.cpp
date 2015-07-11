@@ -97,7 +97,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
   using namespace jit::InstrFlags;
   auto localType = [&]{
     auto locId = localInputId(inst);
-    static_assert(std::is_unsigned<typeof(locId)>::value,
+    static_assert(std::is_unsigned<decltype(locId)>::value,
                   "locId should be unsigned");
     assertx(locId < curFunc(env)->numLocals());
     return env.irb->localType(locId, DataTypeSpecific);

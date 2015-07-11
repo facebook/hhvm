@@ -49,7 +49,7 @@ struct PairIterator {
   }
 
   bool valid() const {
-    static_assert(std::is_unsigned<typeof(m_pos)>::value,
+    static_assert(std::is_unsigned<decltype(m_pos)>::value,
                   "m_pos should be unsigned");
     return m_obj && (m_pos < 2);
   }

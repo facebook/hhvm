@@ -72,7 +72,7 @@ enum class EntBitmask {
 };
 
 namespace entity_charset_enum {
-enum entity_charset {
+enum entity_charset_impl {
   cs_terminator, cs_8859_1, cs_cp1252,
   cs_8859_15, cs_utf_8, cs_big5, cs_gb2312,
   cs_big5hkscs, cs_sjis, cs_eucjp, cs_koi8r,
@@ -81,7 +81,7 @@ enum entity_charset {
   cs_end
 };
 }
-typedef entity_charset_enum::entity_charset entity_charset;
+typedef entity_charset_enum::entity_charset_impl entity_charset;
 
 struct HtmlBasicEntity {
   unsigned short charcode;

@@ -241,45 +241,72 @@ void HHVM_FUNCTION(hphp_clear_unflushed) {
 }
 
 bool HHVM_FUNCTION(trigger_error, const String& error_msg,
-                                  int error_type /* = k_E_USER_NOTICE */) {
-  std::string msg = error_msg.data();
+                   int error_type /* = k_E_USER_NOTICE */) {
+  std::string msg = error_msg.data(); // not toCppString()
   if (UNLIKELY(g_context->getThrowAllErrors())) {
     throw Exception(folly::sformat("throwAllErrors: {}", error_type));
   }
   if (error_type == k_E_USER_ERROR) {
     g_context->handleError(msg, error_type, true,
-                       ExecutionContext::ErrorThrowMode::IfUnhandled,
-                       "\nFatal error: ");
-  } else if (error_type == k_E_USER_WARNING) {
+                           ExecutionContext::ErrorThrowMode::IfUnhandled,
+                           "\nFatal error: ");
+    return true;
+  }
+  if (error_type == k_E_USER_WARNING) {
     g_context->handleError(msg, error_type, true,
-                       ExecutionContext::ErrorThrowMode::Never,
-                       "\nWarning: ");
-  } else if (error_type == k_E_USER_NOTICE) {
+                           ExecutionContext::ErrorThrowMode::Never,
+                           "\nWarning: ");
+    return true;
+  }
+  if (error_type == k_E_USER_NOTICE) {
     g_context->handleError(msg, error_type, true,
-                       ExecutionContext::ErrorThrowMode::Never,
-                       "\nNotice: ");
-  } else if (error_type == k_E_USER_DEPRECATED) {
+                           ExecutionContext::ErrorThrowMode::Never,
+                           "\nNotice: ");
+    return true;
+  }
+  if (error_type == k_E_USER_DEPRECATED) {
     g_context->handleError(msg, error_type, true,
-                       ExecutionContext::ErrorThrowMode::Never,
-                       "\nDeprecated: ");
-  } else {
-    ActRec* fp = g_context->getStackFrame();
-    if (fp->m_func->isBuiltin() && error_type == k_E_ERROR) {
+                           ExecutionContext::ErrorThrowMode::Never,
+                           "\nDeprecated: ");
+    return true;
+  }
+  if (error_type == k_E_STRICT) {
+    // So that we can raise strict warnings for mismatched
+    // params in FCallBuiltin
+    raise_strict_warning(msg);
+    return true;
+  }
+
+  ActRec* fp = g_context->getStackFrame();
+
+  if (fp->m_func->isNative() &&
+      fp->m_func->nativeFuncPtr() == (BuiltinFunction)HHVM_FN(trigger_error)) {
+    fp = g_context->getOuterVMFrame(fp);
+  }
+  if (fp && fp->m_func->isBuiltin()) {
+    if (error_type == k_E_ERROR) {
       raise_error_without_first_frame(msg);
-    } else if (fp->m_func->isBuiltin() && error_type == k_E_WARNING) {
+      return true;
+    }
+    if (error_type == k_E_WARNING) {
       raise_warning_without_first_frame(msg);
-    } else if (fp->m_func->isBuiltin() && error_type == k_E_NOTICE) {
+      return true;
+    }
+    if (error_type == k_E_NOTICE) {
       raise_notice_without_first_frame(msg);
-    } else if (fp->m_func->isBuiltin() && error_type == k_E_DEPRECATED) {
+      return true;
+    }
+    if (error_type == k_E_DEPRECATED) {
       raise_deprecated_without_first_frame(msg);
-    } else if (fp->m_func->isBuiltin() && error_type == k_E_RECOVERABLE_ERROR) {
+      return true;
+    }
+    if (error_type == k_E_RECOVERABLE_ERROR) {
       raise_recoverable_error_without_first_frame(msg);
-    } else {
-    raise_warning("Invalid error type specified");
-    return false;
+      return true;
     }
   }
-  return true;
+  raise_warning("Invalid error type specified");
+  return false;
 }
 
 bool HHVM_FUNCTION(user_error, const String& error_msg,

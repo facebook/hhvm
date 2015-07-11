@@ -129,6 +129,10 @@ namespace HPHP {
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString
+  s_trigger_error("trigger_error"),
+  s_is_deprecated("deprecated function");
+
 using uchar = unsigned char;
 
 namespace StackSym {
@@ -4560,7 +4564,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     for (int i = 0; i < useCount; ++i) {
       ce->type() == ClosureType::Short
         ? emitLambdaCaptureArg(e, (*valuesList)[i])
-        : emitBuiltinCallArg(e, (*valuesList)[i], i, useVars[i].second);
+        : (void)emitBuiltinCallArg(e, (*valuesList)[i], i,
+                                   useVars[i].second, false);
     }
 
     // The parser generated a unique name for the function,
@@ -5043,8 +5048,8 @@ void EmitterVisitor::emitCGet(Emitter& e) {
   }
 }
 
-void EmitterVisitor::emitVGet(Emitter& e) {
-  if (checkIfStackEmpty("VGet*")) return;
+bool EmitterVisitor::emitVGet(Emitter& e, bool skipCells) {
+  if (checkIfStackEmpty("VGet*")) return false;
   LocationGuard loc(e, m_tempLoc);
   m_tempLoc.clear();
 
@@ -5057,7 +5062,7 @@ void EmitterVisitor::emitVGet(Emitter& e) {
   if (sz == 0 || (sz == 1 && StackSym::GetMarker(sym) == StackSym::S)) {
     switch (sym) {
       case StackSym::L:  e.VGetL(m_evalStack.getLoc(i)); break;
-      case StackSym::C:  e.Box();   break;
+      case StackSym::C:  if (skipCells) return true; e.Box(); break;
       case StackSym::LN: e.CGetL(m_evalStack.getLoc(i)); // fall through
       case StackSym::CN: e.VGetN(); break;
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i)); // fall through
@@ -5076,6 +5081,7 @@ void EmitterVisitor::emitVGet(Emitter& e) {
     buildVectorImm(vectorImm, i, iLast, true, e);
     e.VGetM(vectorImm);
   }
+  return false;
 }
 
 Id EmitterVisitor::emitVisitAndSetUnnamedL(Emitter& e, ExpressionPtr exp) {
@@ -5176,18 +5182,42 @@ EmitterVisitor::getPassByRefKind(ExpressionPtr exp) {
   return PassByRefKind::ErrorOnCell;
 }
 
-void EmitterVisitor::emitBuiltinCallArg(Emitter& e,
-                                         ExpressionPtr exp,
-                                         int paramId,
-                                         bool byRef) {
+bool EmitterVisitor::emitBuiltinCallArg(Emitter& e,
+                                        ExpressionPtr exp,
+                                        int paramId,
+                                        bool byRef,
+                                        bool mustBeRef) {
   visit(exp);
-  if (checkIfStackEmpty("Builtin arg*")) return;
+  if (checkIfStackEmpty("Builtin arg*")) return true;
   if (byRef) {
-    emitVGet(e);
+    auto wasCell = emitVGet(e, true);
+    if (wasCell && mustBeRef) {
+      auto kind = getPassByRefKind(exp);
+      switch (kind) {
+        case PassByRefKind::AllowCell:
+          // nop
+          break;
+        case PassByRefKind::WarnOnCell:
+          e.String(
+            makeStaticString("Only variables should be passed by reference"));
+          e.Int(k_E_STRICT);
+          e.FCallBuiltin(2, 2, s_trigger_error.get());
+          emitPop(e);
+          break;
+        case PassByRefKind::ErrorOnCell:
+          auto save = m_evalStack;
+          e.String(
+            makeStaticString("Only variables can be passed by reference"));
+          e.Fatal(FatalOp::Runtime);
+          m_evalStackIsUnknown = false;
+          m_evalStack = save;
+          return false;
+      }
+    }
   } else {
     emitCGet(e);
   }
-  return;
+  return true;
 }
 
 static bool isNormalLocalVariable(const ExpressionPtr& expr) {
@@ -6710,10 +6740,6 @@ void EmitterVisitor::emitMethodPrologue(Emitter& e, MethodStatementPtr meth) {
   }
 }
 
-const StaticString
-  s_trigger_error("trigger_error"),
-  s_is_deprecated("deprecated function");
-
 void EmitterVisitor::emitDeprecationWarning(Emitter& e,
                                             MethodStatementPtr meth) {
   auto funcScope = meth->getFunctionScope();
@@ -7581,7 +7607,11 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       // for builtin calls, since we don't push the ActRec, we
       // must determine the reffiness statically
       bool byRef = fcallBuiltin->byRef(i);
-      emitBuiltinCallArg(e, (*params)[i], i, byRef);
+      bool mustBeRef = fcallBuiltin->mustBeRef(i);
+      if (!emitBuiltinCallArg(e, (*params)[i], i, byRef, mustBeRef)) {
+        while (i--) emitPop(e);
+        return;
+      }
     }
 
     if (fcallBuiltin->methInfo()) {

@@ -690,7 +690,7 @@ public:
   void emitCGetL3(Emitter& e);
   void emitPushL(Emitter& e);
   void emitCGet(Emitter& e);
-  void emitVGet(Emitter& e);
+  bool emitVGet(Emitter& e, bool skipCells = false);
   void emitIsset(Emitter& e);
   void emitIsType(Emitter& e, IsTypeOp op);
   void emitEmpty(Emitter& e);
@@ -798,8 +798,8 @@ public:
                     ExpressionListPtr paramsOverride = nullptr);
   void emitFuncCallArg(Emitter& e, ExpressionPtr exp, int paramId,
                        bool isUnpack);
-  void emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
-                         bool byRef);
+  bool emitBuiltinCallArg(Emitter& e, ExpressionPtr exp, int paramId,
+                          bool byRef, bool mustBeRef);
   void emitLambdaCaptureArg(Emitter& e, ExpressionPtr exp);
   void emitBuiltinDefaultArg(Emitter& e, Variant& v,
                              MaybeDataType t, int paramId);

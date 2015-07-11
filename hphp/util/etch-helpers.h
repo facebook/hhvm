@@ -14,6 +14,14 @@
 #define ETCH_LABEL(x)   .L##x
 #define ETCH_TYPE(x, y) /* Not used on Windows */
 #define ETCH_NAME_REL(x) $ x
+#define ETCH_ARG1       %rcx
+#define ETCH_ARG2       %rdx
+#define ETCH_ARG3       %r8
+#define ETCH_ARG4       %r9
+#define ETCH_ARG5       %r10  /* Use r10 here */
+#define ETCH_ARG6       %r11  /* Use r11 here */
+#define ETCH_GET_ARG5   mov 0x28(%rsp), %r10  /* Get the argument from the stack to r10 */
+#define ETCH_GET_ARG6   mov 0x30(%rsp), %r11  /* Get the argument from the stack to r11 */
 #elif defined(__APPLE__)
 #define CFI(x)          .cfi_##x
 #define CFI2(x, y)      .cfi_##x y
@@ -27,6 +35,14 @@
 #define ETCH_LABEL(x)   .L##_##x
 #define ETCH_TYPE(x, y) /* not used on OSX */
 #define ETCH_NAME_REL(x) _##x@GOTPCREL(%rip)
+#define ETCH_ARG1       %rdi
+#define ETCH_ARG2       %rsi
+#define ETCH_ARG3       %rdx
+#define ETCH_ARG4       %rcx
+#define ETCH_ARG5       %r8
+#define ETCH_ARG6       %r9
+#define ETCH_GET_ARG5   /* not used on OSX */
+#define ETCH_GET_ARG6   /* not used on OSX */
 #else
 #define CFI(x)          .cfi_##x
 #define CFI2(x, y)      .cfi_##x y
@@ -40,6 +56,14 @@
 #define ETCH_LABEL(x)   .L##x
 #define ETCH_TYPE(x, y) .type x, y
 #define ETCH_NAME_REL(x) $ x
+#define ETCH_ARG1       %rdi
+#define ETCH_ARG2       %rsi
+#define ETCH_ARG3       %rdx
+#define ETCH_ARG4       %rcx
+#define ETCH_ARG5       %r8
+#define ETCH_ARG6       %r9
+#define ETCH_GET_ARG5   /* not used on Linux */
+#define ETCH_GET_ARG6   /* not used on Linux */
 #endif
 
 #endif // incl_ETCH_HELPERS_H

@@ -32,7 +32,7 @@
 
 #define IMPLIES(a, b) (!(a) || (b))
 
-#ifdef __INTEL_COMPILER
+#if defined(__INTEL_COMPILER) || defined(_MSC_VER)
 #define not_reached()                                                \
   do {                                                               \
     assert(false);                                                   \

@@ -60,10 +60,11 @@ const VarNR NAN_varNR(std::numeric_limits<double>::quiet_NaN());
 const Variant empty_string_variant_ref(staticEmptyString(),
                                        Variant::StaticStrInit{});
 
+NEVER_INLINE
 static void unserializeProp(VariableUnserializer *uns,
                             ObjectData *obj, const String& key,
                             Class* ctx, const String& realKey,
-                            int nProp) NEVER_INLINE;
+                            int nProp);
 
 ///////////////////////////////////////////////////////////////////////////////
 // static strings

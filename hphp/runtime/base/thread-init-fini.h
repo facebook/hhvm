@@ -22,10 +22,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void init_thread_locals(void *arg = nullptr)
-  NEVER_INLINE;
-void finish_thread_locals(void *arg = nullptr)
-  NEVER_INLINE;
+NEVER_INLINE
+void init_thread_locals(void *arg = nullptr);
+NEVER_INLINE
+void finish_thread_locals(void *arg = nullptr);
 
 struct InitFiniNode {
   enum class When {

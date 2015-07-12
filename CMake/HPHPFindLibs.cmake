@@ -40,6 +40,24 @@ if (FEATURES_HEADER)
   add_definitions("-DHAVE_FEATURES_H=1")
 endif()
 
+# cxxabi.h
+FIND_PATH(CXXABI_HEADER cxxabi.h)
+if (CXXABI_HEADER)
+  add_definitions("-DHAVE_CXXABI_H=1")
+endif()
+
+# unwind.h
+FIND_PATH(UNWIND_HEADER unwind.h)
+if (UNWIND_HEADER)
+  add_definitions("-DHAVE_UNWIND_H=1")
+endif()
+
+# strfmon
+CHECK_FUNCTION_EXISTS(strfmon HAVE_STRFMON)
+if (HAVE_STRFMON)
+  add_definitions("-DHAVE_STRFMON=1")
+endif()
+
 # google-glog
 find_package(Glog REQUIRED)
 include_directories(${LIBGLOG_INCLUDE_DIR})

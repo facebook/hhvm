@@ -22,14 +22,12 @@
 #include <cstdio>
 
 #include <sys/types.h>
-#if defined(__CYGWIN__) || defined(__MINGW__)
-#include <pthread.h>
-#elif defined(_MSC_VER)
-#include <windows.h>
+#ifdef _MSC_VER
+# include <windows.h>
 #else
-#include <sys/syscall.h>
+# include <sys/syscall.h>
+# include <unistd.h>
 #endif
-#include <unistd.h>
 #include <pthread.h>
 
 namespace HPHP {
@@ -152,7 +150,7 @@ public:
 #elif defined(__CYGWIN__) || defined(__MINGW__)
     return (long)pthread_self();
 #elif defined(_MSC_VER)
-  return GetCurrentThreadId();
+    return GetCurrentThreadId();
 #else
     return syscall(SYS_gettid);
 #endif
@@ -227,7 +225,11 @@ public:
 
 private:
   static int Exec(const char *path, const char *argv[], int *fdin, int *fdout,
-                  int *fderr);
+                  int *fderr
+#ifdef _MSC_VER
+                  , PROCESS_INFORMATION* procInfo
+#endif
+                 );
 };
 
 ///////////////////////////////////////////////////////////////////////////////

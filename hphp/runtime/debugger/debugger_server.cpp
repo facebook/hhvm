@@ -154,7 +154,7 @@ void DebuggerServer::accept() {
   Debugger::InitUsageLogging();
   // server loop
   unsigned int count = m_socks.size();
-  struct pollfd fds[count];
+  struct pollfd* fds = (struct pollfd*)alloca(sizeof(struct pollfd) * count);
 
   for (unsigned int i = 0; i < count; i++) {
     fds[i].fd = nthSocket(i)->fd();

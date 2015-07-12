@@ -93,7 +93,7 @@ std::string ProfileDump::toPProfFormat() const {
   // we are going to manually resolve symbols ourselves later, and the
   // addresses we are dumping as part of the stack trace aren't even real
   // addresses anyway
-  size_t buflen = 64;
+  constexpr size_t buflen = 64;
   folly::toAppend("\nMAPPED_LIBRARIES:\n", &res);
   char buf[buflen];
   snprintf(buf, buflen, "/proc/%d/maps", getpid());

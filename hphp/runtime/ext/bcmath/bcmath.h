@@ -33,6 +33,7 @@
 #define incl_HPHP_BCMATH_H_
 
 #include "hphp/runtime/ext/bcmath/config.h"
+#include <stdint.h>
 
 typedef enum {PLUS, MINUS} sign;
 

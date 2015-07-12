@@ -37,6 +37,9 @@ inline uintptr_t tlsBase() {
   asm ("xor %0,%0,%0\n\t"
        "or  %0,%0,13\n\t"
       : "=r" (retval));
+#elif defined(_M_X64)
+  retval = (uintptr_t)_readfsbase_u64();
+  retval = *(uintptr_t*)(retval + 88);
 #else
 # error How do you access thread-local storage on this machine?
 #endif

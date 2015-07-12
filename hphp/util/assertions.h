@@ -28,6 +28,8 @@
 #include <folly/Format.h>
 #include <folly/Preprocessor.h>
 
+#include "hphp/util/portability.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define IMPLIES(a, b) (!(a) || (b))

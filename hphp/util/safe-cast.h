@@ -22,6 +22,7 @@
 #include <folly/Conv.h>
 
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/portability.h"
 
 namespace HPHP {
 

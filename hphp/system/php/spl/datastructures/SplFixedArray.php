@@ -246,14 +246,12 @@ class SplFixedArray implements \HH\Iterator, ArrayAccess, Countable {
   public static function fromArray($array, $save_indexes = true) {
     $fixed_array = new self;
     if ($save_indexes) {
+      $fixed_array->setSize(max(array_keys($array)) + 1);
       foreach ($array as $key => $value) {
         if (!is_numeric($key) || $key < 0) {
           throw new InvalidArgumentException(
             'array must contain only positive integer keys'
           );
-        }
-        if ($key >= $fixed_array->count()) {
-          $fixed_array->setSize($key + 1);
         }
         $fixed_array[$key] = $value;
       }

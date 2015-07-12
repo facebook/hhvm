@@ -188,11 +188,8 @@ bool CmdMachine::AttachSandbox(DebuggerClient &client,
   return cmdMachine->m_succeed;
 }
 
-#ifdef s_host
-# undef s_host
-#endif
 const StaticString
-  s_host("host"),
+  s_host_string("host"),
   s_port("port"),
   s_auth("auth"),
   s_timeout("timeout");
@@ -202,7 +199,7 @@ void CmdMachine::UpdateIntercept(DebuggerClient &client,
   CmdMachine cmd;
   cmd.m_body = "rpc";
   cmd.m_rpcConfig = make_map_array
-    (s_host, String(host),
+    (s_host_string, String(host),
      s_port, port ? port : RuntimeOption::DebuggerDefaultRpcPort,
      s_auth, String(RuntimeOption::DebuggerDefaultRpcAuth),
      s_timeout, RuntimeOption::DebuggerDefaultRpcTimeout);
@@ -315,7 +312,7 @@ void CmdMachine::onClient(DebuggerClient &client) {
 
 bool CmdMachine::onServer(DebuggerProxy &proxy) {
   if (m_body == "rpc") {
-    String host = m_rpcConfig[s_host].toString();
+    String host = m_rpcConfig[s_host_string].toString();
     if (host.empty()) {
       register_intercept("", false, uninit_null());
     } else {

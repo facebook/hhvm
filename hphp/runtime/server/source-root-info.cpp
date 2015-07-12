@@ -233,7 +233,7 @@ std::string
 SourceRootInfo::parseSandboxServerVariable(const std::string &format) const {
   std::ostringstream res;
   bool control = false;
-  for (uint i = 0; i < format.size(); i++) {
+  for (uint32_t i = 0; i < format.size(); i++) {
     char c = format[i];
     if (control) {
       switch (c) {

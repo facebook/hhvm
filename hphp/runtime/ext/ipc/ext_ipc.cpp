@@ -310,7 +310,7 @@ bool HHVM_FUNCTION(msg_receive,
   msgtype = (int)buffer->mtype;
   if (unserialize) {
     const char *bufText = (const char *)buffer->mtext;
-    uint bufLen = strlen(bufText);
+    uint32_t bufLen = strlen(bufText);
     VariableUnserializer vu(bufText, bufLen,
                             VariableUnserializer::Type::Serialize);
     try {

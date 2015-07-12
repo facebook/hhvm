@@ -190,7 +190,7 @@ struct Profiler {
    */
   static inline uint8_t hprof_inline_hash(const char * str) {
     unsigned long h = 5381;
-    uint i = 0;
+    uint32_t i = 0;
     uint8_t res = 0;
 
     while (*str) {

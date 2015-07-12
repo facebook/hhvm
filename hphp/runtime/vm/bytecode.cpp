@@ -608,7 +608,7 @@ IMPLEMENT_THREAD_LOCAL(StackElms, t_se);
 const int Stack::sSurprisePageSize = sysconf(_SC_PAGESIZE);
 // We reserve the bottom page of each stack for use as the surprise
 // page, so the minimum useful stack size is the next power of two.
-const uint Stack::sMinStackElms = 2 * sSurprisePageSize / sizeof(TypedValue);
+const uint32_t Stack::sMinStackElms = 2 * sSurprisePageSize / sizeof(TypedValue);
 
 void Stack::ValidateStackSize() {
   if (RuntimeOption::EvalVMStackElms < sMinStackElms) {

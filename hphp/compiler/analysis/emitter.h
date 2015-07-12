@@ -763,7 +763,7 @@ public:
   void emitDeprecationWarning(Emitter& e, MethodStatementPtr meth);
   void emitMethod(MethodStatementPtr meth);
   void emitMemoizeProp(Emitter& e, MethodStatementPtr meth, Id localID,
-                       const std::vector<Id>& paramIDs, uint numParams);
+                       const std::vector<Id>& paramIDs, uint32_t numParams);
   void addMemoizeProp(MethodStatementPtr meth);
   void emitMemoizeMethod(MethodStatementPtr meth, const StringData* methName);
   void emitConstMethodCallNoParams(Emitter& e, string name);

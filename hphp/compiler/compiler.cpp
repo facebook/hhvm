@@ -156,6 +156,7 @@ int compiler_main(int argc, char **argv) {
     Timer totalTimer(Timer::WallTime, "running hphp");
     createOutputDirectory(po);
     if (ret == 0) {
+#ifndef _MSC_VER
       if (!po.nofork && !Process::IsUnderGDB()) {
         int pid = fork();
         if (pid == 0) {
@@ -164,7 +165,9 @@ int compiler_main(int argc, char **argv) {
         }
         wait(&ret);
         ret = WIFEXITED(ret) ? WEXITSTATUS(ret) : -1;
-      } else {
+      } else
+#endif
+      {
         ret = process(po);
       }
     }

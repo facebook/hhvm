@@ -176,7 +176,8 @@ using SrcKeySet = hphp_hash_set<SrcKey,SrcKey::Hasher>;
 std::string show(SrcKey sk);
 std::string showShort(SrcKey sk);
 
-void sktrace(SrcKey sk, const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+void sktrace(SrcKey sk, ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+  ATTRIBUTE_PRINTF(2,3);
 #define SKTRACE(level, sk, ...) \
   ONTRACE(level, sktrace(sk, __VA_ARGS__))
 

@@ -112,7 +112,8 @@ public:
   /**
    * Raise a parser error.
    */
-  virtual void error(const char* fmt, ...) ATTRIBUTE_PRINTF(2,3) = 0;
+  virtual void error(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
+    ATTRIBUTE_PRINTF(2,3) = 0;
 
   /**
    * Public accessors.

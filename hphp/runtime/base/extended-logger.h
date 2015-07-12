@@ -35,10 +35,14 @@ public:
   static void Info(const std::string &msg);
   static void Verbose(const std::string &msg);
 
-  static void Error(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
-  static void Warning(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
-  static void Info(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
-  static void Verbose(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
+  static void Error(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(1,2);
+  static void Warning(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(1,2);
+  static void Info(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(1,2);
+  static void Verbose(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(1,2);
 
   // Log additional injected stacktrace.
   static void Log(LogLevelType level, const Array& stackTrace, bool escape = true,

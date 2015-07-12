@@ -54,8 +54,8 @@ static xmlChar *xslt_string_to_xpathexpr(const char *);
 static void xslt_ext_function_php(xmlXPathParserContextPtr, int, int);
 static void xslt_ext_function_string_php(xmlXPathParserContextPtr, int);
 static void xslt_ext_function_object_php(xmlXPathParserContextPtr, int);
-static void xslt_ext_error_handler(void *, const char *, ...)
-  ATTRIBUTE_PRINTF(2,3);
+static void xslt_ext_error_handler(void *,
+  ATTRIBUTE_PRINTF_STRING const char *, ...) ATTRIBUTE_PRINTF(2,3);
 
 ///////////////////////////////////////////////////////////////////////////////
 // NativeData

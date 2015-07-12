@@ -64,10 +64,14 @@ public:
   static void Info(const std::string &msg);
   static void Verbose(const std::string &msg);
 
-  static void Error(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
-  static void Warning(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
-  static void Info(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
-  static void Verbose(const char *fmt, ...) ATTRIBUTE_PRINTF(1,2);
+  static void Error(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(1,2);
+  static void Warning(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(1,2);
+  static void Info(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(1,2);
+  static void Verbose(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(1,2);
 
   template<typename... Args> static void FError(Args&&... args);
   template<typename... Args> static void FWarning(Args&&... args);
@@ -116,10 +120,10 @@ protected:
   };
   static DECLARE_THREAD_LOCAL(ThreadData, s_threadData);
 
-  static void Log(LogLevelType level, const char *fmt, va_list ap)
-    ATTRIBUTE_PRINTF(2,0);
-  static void LogEscapeMore(LogLevelType level, const char *fmt, va_list ap)
-    ATTRIBUTE_PRINTF(2,0);
+  static void Log(LogLevelType level,
+    ATTRIBUTE_PRINTF_STRING const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
+  static void LogEscapeMore(LogLevelType level,
+    ATTRIBUTE_PRINTF_STRING const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
   static void Log(LogLevelType level, const std::string &msg,
                   const StackTrace *stackTrace,
                   bool escape = false, bool escapeMore = false);

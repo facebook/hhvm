@@ -244,9 +244,9 @@ public:
   }
   void resetScope(BlockScopeRawPtr scope);
   void parseTimeFatal(FileScopeRawPtr fs, Compiler::ErrorType error,
-                      const char *fmt, ...) ATTRIBUTE_PRINTF(4,5);
-  void analysisTimeFatal(Compiler::ErrorType error, const char *fmt, ...)
-    ATTRIBUTE_PRINTF(3,4);
+    ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(4,5);
+  void analysisTimeFatal(Compiler::ErrorType error,
+    ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
   virtual int getLocalEffects() const { return UnknownEffect;}
   int getChildrenEffects() const;
   int getContainedEffects() const;

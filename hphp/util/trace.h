@@ -236,7 +236,8 @@ std::string prettyNode(const char* name, const P1& p1, const P2& p2) {
     string(")");
 }
 
-void traceRelease(const char*, ...) ATTRIBUTE_PRINTF(1,2);
+void traceRelease(ATTRIBUTE_PRINTF_STRING const char*, ...)
+  ATTRIBUTE_PRINTF(1,2);
 void traceRelease(const std::string& s);
 
 template<typename... Args>
@@ -248,7 +249,8 @@ void ftraceRelease(Args&&... args) {
 #define TRACE_RB(n, ...)                                        \
   ONTRACE(n, HPHP::Trace::traceRingBufferRelease(__VA_ARGS__)); \
   TRACE(n, __VA_ARGS__);
-void traceRingBufferRelease(const char* fmt, ...) ATTRIBUTE_PRINTF(1,2);
+void traceRingBufferRelease(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
+  ATTRIBUTE_PRINTF(1,2);
 
 extern int levels[NumModules];
 extern __thread int tl_levels[NumModules];
@@ -358,13 +360,14 @@ inline void itraceImpl(const char* fmtRaw, Args&&... args) {
 #define ITRACE_MOD(mod, level, ...)                             \
   ONTRACE_MOD(mod, level, Trace::itraceImpl(__VA_ARGS__));
 
-void trace(const char *, ...) ATTRIBUTE_PRINTF(1,2);
+void trace(ATTRIBUTE_PRINTF_STRING const char *, ...) ATTRIBUTE_PRINTF(1,2);
 void trace(const std::string&);
 
 template<typename Pretty>
 inline void trace(Pretty p) { trace(p.pretty() + std::string("\n")); }
 
-void vtrace(const char *fmt, va_list args) ATTRIBUTE_PRINTF(1,0);
+void vtrace(ATTRIBUTE_PRINTF_STRING const char *fmt, va_list args)
+  ATTRIBUTE_PRINTF(1,0);
 void dumpRingbuffer();
 
 //////////////////////////////////////////////////////////////////////

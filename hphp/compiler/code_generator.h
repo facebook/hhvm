@@ -136,10 +136,13 @@ public:
   /**
    * Output strings.
    */
-  void printf(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-  void indentBegin(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void printf(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
+  void indentBegin(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
   void indentBegin();
-  void indentEnd(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void indentEnd(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
   void indentEnd();
   void printRaw(const char *msg) { print(msg, false);}
   /**
@@ -151,8 +154,10 @@ public:
   void namespaceEnd();
   bool ensureInNamespace();
   bool ensureOutOfNamespace();
-  void ifdefBegin(bool ifdef, const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
-  void ifdefEnd(const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+  void ifdefBegin(bool ifdef, ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(3,4);
+  void ifdefEnd(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
+    ATTRIBUTE_PRINTF(2,3);
   void printDocComment(const std::string comment);
   const char *getGlobals(AnalysisResultPtr ar);
   static std::string EscapeLabel(const std::string &name, bool *binary = nullptr);
@@ -315,7 +320,8 @@ private:
   public: void print(const char *msg, bool indent = true);
 
  private:
-  void print(const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
+  void print(ATTRIBUTE_PRINTF_STRING const char *fmt, va_list ap)
+    ATTRIBUTE_PRINTF(2,0);
   void printSubstring(const char *start, int length);
   void printIndent();
   std::string getFormattedName(const std::string &file);

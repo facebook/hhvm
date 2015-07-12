@@ -1094,7 +1094,7 @@ static int get_php_tiff_bytes_per_format(int format) {
 #define TAG_FMT_DOUBLE    12
 
 static int php_vspprintf(char **pbuf, size_t max_len,
-                         const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
+  ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
 static int php_vspprintf(char **pbuf, size_t max_len,
                          const char *fmt, ...) {
   va_list arglist;
@@ -1114,7 +1114,7 @@ static int php_vspprintf(char **pbuf, size_t max_len,
 }
 
 static int php_vspprintf_ap(char **pbuf, size_t max_len,
-                            const char *fmt, va_list ap) ATTRIBUTE_PRINTF(3,0);
+    ATTRIBUTE_PRINTF_STRING const char *fmt, va_list ap) ATTRIBUTE_PRINTF(3,0);
 static int php_vspprintf_ap(char **pbuf, size_t max_len,
                             const char *fmt, va_list ap) {
   char *buf;

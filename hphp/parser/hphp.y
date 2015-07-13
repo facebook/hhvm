@@ -100,8 +100,8 @@
 
 
 // macros for rules
-#define BEXP(e...) _p->onBinaryOpExp(e);
-#define UEXP(e...) _p->onUnaryOpExp(e);
+#define BEXP(...) _p->onBinaryOpExp(__VA_ARGS__);
+#define UEXP(...) _p->onUnaryOpExp(__VA_ARGS__);
 
 using namespace HPHP::HPHP_PARSER_NS;
 

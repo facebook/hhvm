@@ -2484,12 +2484,6 @@ void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
                v.makeReg()};
   }
 
-  if (!ty.maybe(TStatic)) {
-    auto const sf = emitDecRef(v, base);
-    ifThen(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
-    return;
-  }
-
   emitDecRefWork(v, vcold(), base, destroy, unlikelyDestroy);
 }
 

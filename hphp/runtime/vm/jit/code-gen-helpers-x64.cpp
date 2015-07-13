@@ -97,7 +97,8 @@ void emitTransCounterInc(Asm& a) {
 }
 
 Vreg emitDecRef(Vout& v, Vreg base) {
-  return base;
+  // this will give errors if actually called
+  return v.makeReg();
 }
 
 void emitIncRef(Vout& v, Vreg base) {

@@ -31,7 +31,7 @@ struct Abi;
 struct Block;
 struct CodeGenerator;
 struct CodegenState;
-struct Constraint;
+enum class Constraint;
 struct IRInstruction;
 struct IRUnit;
 struct PhysReg;

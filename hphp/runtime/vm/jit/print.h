@@ -30,7 +30,7 @@ struct AsmInfo;
 struct Block;
 struct GuardConstraints;
 struct IRInstruction;
-class  SSATmp;
+struct SSATmp;
 
 // IRInstruction
 void printInstr(std::ostream& ostream, const IRInstruction*,

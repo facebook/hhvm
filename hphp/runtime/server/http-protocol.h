@@ -25,7 +25,7 @@ namespace HPHP {
 class Array;
 class RequestURI;
 class SourceRootInfo;
-class StringBuffer;
+struct StringBuffer;
 class Variant;
 class VirtualHost;
 

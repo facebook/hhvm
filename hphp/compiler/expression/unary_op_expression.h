@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(UnaryOpExpression);
 
-struct Variant;
+class Variant;
 
 class UnaryOpExpression : public Expression,
                           public LocalEffectsContainer {

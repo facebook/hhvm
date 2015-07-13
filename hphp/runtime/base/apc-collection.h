@@ -20,8 +20,8 @@
 
 namespace HPHP {
 
-struct ObjectData;
-struct Object;
+class ObjectData;
+class Object;
 
 //////////////////////////////////////////////////////////////////////
 

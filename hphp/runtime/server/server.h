@@ -74,7 +74,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Server;
+class Server;
 struct ServerFactory;
 using ServerPtr = std::unique_ptr<Server>;
 using ServerFactoryPtr = std::shared_ptr<ServerFactory>;

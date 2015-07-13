@@ -30,9 +30,9 @@ namespace HPHP {
 struct Class;
 struct ArrayData;
 struct StringData;
-struct ObjectData;
+class ObjectData;
 struct RefData;
-struct ResourceData;
+class ResourceData;
 struct TypedValue;
 
 //////////////////////////////////////////////////////////////////////

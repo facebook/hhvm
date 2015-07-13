@@ -27,7 +27,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class Array;
-struct Variant;
+class Variant;
 
 extern const StaticString k_HPHP_TRIM_CHARLIST;
 

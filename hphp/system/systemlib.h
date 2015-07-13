@@ -22,9 +22,9 @@
 
 namespace HPHP {
 class ObjectData;
-class Unit;
-class Class;
-class Func;
+struct Unit;
+struct Class;
+struct Func;
 } //namespace HPHP
 
 namespace HPHP { namespace SystemLib {

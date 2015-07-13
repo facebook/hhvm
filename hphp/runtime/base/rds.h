@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/types.h"
 
 namespace HPHP {
-  struct Array;
+  class Array;
   struct StringData;
 }
 

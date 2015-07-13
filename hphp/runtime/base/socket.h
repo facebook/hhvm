@@ -42,7 +42,7 @@ struct SocketData : FileData {
   ~SocketData();
 
  private:
-  friend class Socket;
+  friend struct Socket;
   std::string m_address;
   int m_port{0};
   int m_type{-1};

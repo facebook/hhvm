@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Variant;
+class Variant;
 
 #define COLLATOR_SORT_REGULAR   0
 #define COLLATOR_SORT_STRING    1

@@ -35,11 +35,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class AccessLogFileData;
-struct VirtualHost;
-struct IpBlockMap;
-struct SatelliteServerInfo;
-struct FilesMatch;
-struct Hdf;
+class VirtualHost;
+class IpBlockMap;
+class SatelliteServerInfo;
+class FilesMatch;
+class Hdf;
 // Can we make sure this equals IniSetting::Map?
 typedef folly::dynamic IniSettingMap;
 

@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct SatelliteServerInfo;
+class SatelliteServerInfo;
 
 class SatelliteServer {
 public:

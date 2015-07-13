@@ -30,7 +30,7 @@ const int64_t k_STREAM_FILTER_ALL   = k_STREAM_FILTER_READ |
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class File;
+struct File;
 
 class BucketBrigade : public ResourceData {
 public:

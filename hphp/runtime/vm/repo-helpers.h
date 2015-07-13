@@ -29,8 +29,8 @@
 namespace HPHP {
 
 // Forward declaration.
-class BlobDecoder;
-class BlobEncoder;
+struct BlobDecoder;
+struct BlobEncoder;
 struct StringData;
 struct TypedValue;
 class Repo;

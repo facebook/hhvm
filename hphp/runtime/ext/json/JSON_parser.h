@@ -23,7 +23,7 @@
 namespace HPHP {
 
 struct StringBuffer;
-struct Variant;
+class Variant;
 
 void utf16_to_utf8(StringBuffer& buf, unsigned short utf16);
 bool JSON_parser(Variant& z, const char *p, int length,

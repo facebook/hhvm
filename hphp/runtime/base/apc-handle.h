@@ -199,7 +199,7 @@ private:
   constexpr static uint8_t FAPCCollection   = 1 << 4;
 
 private:
-  friend struct APCTypedValue;
+  friend class APCTypedValue;
   friend struct APCString;
   friend struct APCArray;
   friend struct APCObject;

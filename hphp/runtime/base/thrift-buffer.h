@@ -59,7 +59,7 @@ namespace HPHP {
 
 class Array;
 class Object;
-struct Variant;
+class Variant;
 
 /**
  * Efficient thrift input/output preparation. Used by automatically generated

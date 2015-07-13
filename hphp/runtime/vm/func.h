@@ -48,7 +48,7 @@ struct Class;
 struct NamedEntity;
 struct PreClass;
 struct StringData;
-template <typename T> struct AtomicVector;
+template <typename T> class AtomicVector;
 
 /*
  * C++ builtin function type.
@@ -117,7 +117,7 @@ struct FPIEnt {
  *
  */
 struct Func {
-  friend class FuncEmitter;
+  friend struct FuncEmitter;
   template <typename F> friend void scan(const Func&, F&);
 
   /////////////////////////////////////////////////////////////////////////////

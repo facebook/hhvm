@@ -28,7 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class Array;
-struct XboxServerInfo;
+class XboxServerInfo;
 class RPCRequestHandler;
 class XboxTransport;
 

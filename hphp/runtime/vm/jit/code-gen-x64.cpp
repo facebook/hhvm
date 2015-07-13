@@ -135,8 +135,9 @@ void ifNonStatic(Vout& v, Type ty, Vloc loc, Then then) {
   }
 
   auto const sf = v.makeReg();
-  v << testbim{FAST_STATIC_BIT_MASK, loc.reg()[FAST_GC_BYTE_OFFSET], sf};
-  ifThen(v, CC_Z, sf, then);
+  // Emit 'then' only if the counted bit is set
+  v << testbim{FAST_COUNTED_BIT_MASK, loc.reg()[FAST_GC_BYTE_OFFSET], sf};
+  ifThen(v, CC_NZ, sf, then);
 }
 
 template<class Then>
@@ -3346,6 +3347,8 @@ void CodeGenerator::cgStaticLocInitCached(IRInstruction* inst) {
   // to inc ref it because it's a bytecode invariant that it's not a
   // reference counted type.
   emitStoreTV(v, rdSrc[RefData::tvOffset()], srcLoc(inst, 1), inst->src(1));
+  // 0x8 = 1000 which is just the counted flag set (no mrb, no static)
+  v << storebi{uint8_t(0x8), rdSrc[FAST_GC_BYTE_OFFSET]};
   v << storebi{uint8_t(HeaderKind::Ref), rdSrc[HeaderKindOffset]};
   static_assert(sizeof(HeaderKind) == 1, "");
 }
@@ -3844,7 +3847,7 @@ void CodeGenerator::cgCheckType(IRInstruction* inst) {
       srcType.subtypeOfAny(TStr, TArr) &&
       srcType.maybe(typeParam)) {
     assertx(srcType.maybe(TStatic));
-    v << testbim{FAST_STATIC_BIT_MASK, rData[FAST_GC_BYTE_OFFSET], sf};
+    v << testbim{FAST_COUNTED_BIT_MASK, rData[FAST_GC_BYTE_OFFSET], sf};
     doJcc(CC_NZ, sf);
     doMov();
     return;

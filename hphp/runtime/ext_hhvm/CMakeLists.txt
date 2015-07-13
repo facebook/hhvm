@@ -16,6 +16,8 @@ macro(EXT_HHVM_FILE SOURCES HEADERS REL EHHVM_ARCH SOURCE_REL BUILD_TARGET)
   set(f_OBJ "${TARGET_ABS}/CMakeFiles/${BUILD_TARGET}.dir/${REL}")
   list(APPEND ${SOURCES} "${f_OBJ}.ext_hhvm.cpp")
   list(APPEND ${HEADERS} "${f_OBJ}.ext_hhvm.h")
+
+  file(MAKE_DIRECTORY "${TARGET_ABS}/CMakeFiles/${BUILD_TARGET}.dir")
   add_custom_command(
     OUTPUT "${f_OBJ}.ext_hhvm.cpp" "${f_OBJ}.ext_hhvm.h"
     DEPENDS ${f_SRC} gen-ext-hhvm

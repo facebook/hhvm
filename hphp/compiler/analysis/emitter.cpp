@@ -155,8 +155,8 @@ namespace StackSym {
   static const char P = 0x50; // Property marker
   static const char S = 0x60; // Static property marker
   static const char M = 0x70; // Non elem/prop/W part of M-vector
-  static const char K = 0x80; // Marker for information about a class base
-  static const char Q = 0x90; // NullSafe Property marker
+  static const char K = (char)0x80; // Marker for information about a class base
+  static const char Q = (char)0x90; // NullSafe Property marker
 
   static const char CN = C | N;
   static const char CG = C | G;

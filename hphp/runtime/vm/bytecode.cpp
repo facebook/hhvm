@@ -3819,7 +3819,6 @@ OPTBLD_INLINE void iopConcat(IOP_ARGS) {
   auto const s2 = cellAsVariant(*c2).toString();
   auto const s1 = cellAsCVarRef(*c1).toString();
   cellAsVariant(*c2) = concat(s2, s1);
-  assert(check_refcount_nz(c2->m_data.pstr->getCount()));
   vmStack().popC();
 }
 

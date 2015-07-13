@@ -24,7 +24,7 @@ namespace HPHP {
 
 
 // Rules for ICU's RuleBasedBreakIterator class.
-const char* strRules = "\n\
+const char* strRules = u8"\n\
 !!chain;\n\
 $CR           = [\\p{Word_Break = CR}];\n\
 $LF           = [\\p{Word_Break = LF}];\n\

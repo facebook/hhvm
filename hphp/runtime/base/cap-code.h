@@ -30,13 +30,19 @@ namespace HPHP {
 // The max encodable value is 0xffe00000, which is larger than necessary
 // for any packed array or string, whose sizes are limited to signed int32
 // values (max-int32 = 0x7fffffff).
+//
+// Note that the internal representation used here is able to represent numbers
+// larger than std::numeric_limits<uint32_t>::max(), but we intentionally limit
+// the range so that we can always decode into a uint32_t.
 
 struct CapCode {
   static auto constexpr B = 11u;
   static auto constexpr M = (1 << B) - 1; // mask with B low-order 1s
   static auto constexpr Threshold = M;
-  static auto constexpr Max = M << (32 - B);
   static auto constexpr MaxExp = (1 << (16 - B)) - 1;
+  // Don't pass numbers larger than this to the encoder, after rounding up, the
+  // decoded number won't fit in 32 bits.
+  static uint32_t constexpr Max = 0xffe00000;
 
   uint16_t code;
 

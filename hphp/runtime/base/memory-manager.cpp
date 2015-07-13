@@ -763,8 +763,9 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
 inline void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   FTRACE(3, "slabAlloc({}, {}): m_front={}, m_limit={}\n", bytes, index,
             m_front, m_limit);
-  uint32_t nbytes = smallSizeClass(bytes);
+  uint32_t nbytes = smallIndex2Size(index);
 
+  assert(bytes <= nbytes);
   assert(nbytes <= kSlabSize);
   assert((nbytes & kSmallSizeAlignMask) == 0);
   assert((uintptr_t(m_front) & kSmallSizeAlignMask) == 0);

@@ -70,15 +70,16 @@ enum CopyStringMode { CopyString };
  *   Shared |        |          |    X
  */
 struct StringData {
+  friend class APCString;
+  friend StringData* allocFlatSmallImpl(size_t len);
+  friend StringData* allocFlatSlowImpl(size_t len);
+
   /*
    * Max length of a string, not counting the terminal 0.
    *
-   * This is MAX_INT-1 to avoid this kind of hazard in client code:
-   *
-   *   int size = string_data->size();
-   *   ... = size + 1; // oops, wraparound.
+   * This is smaller than MAX_INT, and we want a CapCode to precisely encode it.
    */
-  static constexpr uint32_t MaxSize = 0x7ffffffe; // 2^31-2
+  static constexpr uint32_t MaxSize = 0x7ff00000; // 11 bits of 1's
 
   /*
    * Creates an empty request-local string with an unspecified amount of
@@ -489,8 +490,6 @@ private:
     };
     uint64_t m_lenAndHash;
   };
-
-  friend class APCString;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -499,7 +498,7 @@ private:
  * A reasonable length to reserve for small strings.  This is the
  * default reserve size for StringData::Make(), also.
  */
-const uint32_t SmallStringReserve = 64 - sizeof(StringData) - 1;
+constexpr uint32_t SmallStringReserve = 64 - sizeof(StringData) - 1;
 
 /*
  * DecRef a string s, calling release if its reference count goes to

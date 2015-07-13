@@ -408,7 +408,7 @@ Array ExecutionContext::obGetStatus(bool full) {
     }
     status.set(s_level, level);
     status.set(s_chunk_size, buffer.chunk_size);
-    status.set(s_buffer_used, buffer.oss.size());
+    status.set(s_buffer_used, static_cast<uint64_t>(buffer.oss.size()));
 
     if (full) {
       ret.append(status);

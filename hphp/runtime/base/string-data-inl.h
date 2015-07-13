@@ -19,12 +19,6 @@
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
-
-inline StringData* StringData::Make() {
-  return Make(SmallStringReserve);
-}
-
-//////////////////////////////////////////////////////////////////////
 // CopyString
 
 inline StringData* StringData::Make(const char* data) {
@@ -91,6 +85,7 @@ inline void StringData::setSize(int len) {
   assert(!hasMultipleRefs());
   m_data[len] = 0;
   m_lenAndHash = len;
+  assert(m_hash == 0);
   assert(checkSane());
 }
 

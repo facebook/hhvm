@@ -402,6 +402,9 @@ constexpr unsigned kLgSizeClassesPerDoubling = 2;
  * We want kMaxSmallSize to be the largest size-class less than kSlabSize.
  */
 constexpr uint32_t kNumSmallSizes = 63;
+static_assert(kNumSmallSizes <= (1 << 6),
+              "only 6 bits available in HeaderWord");
+
 constexpr uint32_t kMaxSmallSize = kSmallIndex2Size[kNumSmallSizes-1];
 static_assert(kMaxSmallSize > kSmallSizeAlign * 2,
               "Too few size classes");
@@ -667,6 +670,25 @@ struct MemoryManager {
    */
   void* objMalloc(size_t size);
   void objFree(void* vp, size_t size);
+
+  /*
+   * Allocate/deallocate by size class index.  This is useful when size
+   * class is already calculated at the call site.
+   */
+  void* mallocSmallIndex(size_t index, uint32_t size);
+  void freeSmallIndex(void* ptr, size_t index, uint32_t size);
+
+  /*
+   * These functions are useful when working directly with size classes outside
+   * this class.
+   *
+   * Note that we intentionally use size_t for size class index here, so that
+   * gcc would not generate inefficient code.
+   */
+  static size_t computeSmallSize2Index(uint32_t size);
+  static size_t lookupSmallSize2Index(uint32_t size);
+  static size_t smallSize2Index(uint32_t size);
+  static uint32_t smallIndex2Size(size_t index);
 
   /////////////////////////////////////////////////////////////////////////////
   // Cleanup.
@@ -936,10 +958,6 @@ private:
   void  free(void* ptr);
 
   static uint32_t bsr(uint32_t x);
-  static uint8_t computeSmallSize2Index(uint32_t size);
-  static uint8_t lookupSmallSize2Index(uint32_t size);
-  static uint8_t smallSize2Index(uint32_t size);
-  static uint32_t smallIndex2Size(uint8_t index);
 
   static void threadStatsInit();
   static void threadStats(uint64_t*&, uint64_t*&, size_t*&, size_t&);

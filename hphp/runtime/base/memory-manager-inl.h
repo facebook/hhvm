@@ -183,7 +183,7 @@ inline uint32_t MemoryManager::bsr(uint32_t x) {
 #endif
 }
 
-inline uint8_t MemoryManager::computeSmallSize2Index(uint32_t size) {
+inline size_t MemoryManager::computeSmallSize2Index(uint32_t size) {
   uint32_t x = bsr((size<<1)-1);
   uint32_t shift = (x < kLgSizeClassesPerDoubling + kLgSmallSizeQuantum)
                    ? 0 : x - (kLgSizeClassesPerDoubling + kLgSmallSizeQuantum);
@@ -202,13 +202,13 @@ inline uint8_t MemoryManager::computeSmallSize2Index(uint32_t size) {
   return index;
 }
 
-inline uint8_t MemoryManager::lookupSmallSize2Index(uint32_t size) {
-  uint8_t index = kSmallSize2Index[(size-1) >> kLgSmallSizeQuantum];
+inline size_t MemoryManager::lookupSmallSize2Index(uint32_t size) {
+  auto const index = kSmallSize2Index[(size-1) >> kLgSmallSizeQuantum];
   assert(index == computeSmallSize2Index(size));
   return index;
 }
 
-inline uint8_t MemoryManager::smallSize2Index(uint32_t size) {
+inline size_t MemoryManager::smallSize2Index(uint32_t size) {
   assert(size > 0);
   assert(size <= kMaxSmallSize);
   if (LIKELY(size <= kMaxSmallSizeLookup)) {
@@ -217,7 +217,7 @@ inline uint8_t MemoryManager::smallSize2Index(uint32_t size) {
   return computeSmallSize2Index(size);
 }
 
-inline uint32_t MemoryManager::smallIndex2Size(uint8_t index) {
+inline uint32_t MemoryManager::smallIndex2Size(size_t index) {
   return kSmallIndex2Size[index];
 }
 
@@ -234,15 +234,11 @@ inline uint32_t MemoryManager::smallSizeClass(uint32_t reqBytes) {
   return ret;
 }
 
-inline void* MemoryManager::mallocSmallSize(uint32_t bytes) {
-  assert(bytes > 0);
-  assert(bytes <= kMaxSmallSize);
-
-  // Note: unlike req::malloc, we don't track internal fragmentation
-  // in the usage stats when we're going through mallocSmallSize.
+inline void* MemoryManager::mallocSmallIndex(size_t index, uint32_t bytes) {
+  assert(index < kNumSmallSizes);
+  assert(bytes <= kSmallIndex2Size[index]);
   m_stats.usage += bytes;
 
-  unsigned index = smallSize2Index(bytes);
   void *p = m_freelists[index].maybePop();
   if (UNLIKELY(p == nullptr)) {
     p = mallocSmallSizeSlow(bytes, index);
@@ -250,6 +246,31 @@ inline void* MemoryManager::mallocSmallSize(uint32_t bytes) {
   assert((reinterpret_cast<uintptr_t>(p) & kSmallSizeAlignMask) == 0);
   FTRACE(3, "mallocSmallSize: {} -> {}\n", bytes, p);
   return p;
+}
+
+inline void* MemoryManager::mallocSmallSize(uint32_t bytes) {
+  assert(bytes > 0);
+  assert(bytes <= kMaxSmallSize);
+  unsigned index = smallSize2Index(bytes);
+  return mallocSmallIndex(index, bytes);
+}
+
+inline void MemoryManager::freeSmallIndex(void* ptr, size_t index,
+                                          uint32_t bytes) {
+  assert(index < kNumSmallSizes);
+  assert((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);
+  assert(bytes <= kSmallIndex2Size[index]);
+
+  if (UNLIKELY(m_bypassSlabAlloc)) {
+    return freeBigSize(ptr, bytes);
+  }
+
+  FTRACE(3, "freeSmallSize({}, {}), freelist {}\n", ptr, bytes, index);
+
+  m_freelists[index].push(ptr, bytes);
+  m_stats.usage -= bytes;
+
+  FTRACE(3, "freeSmallSize: {} ({} bytes)\n", ptr, bytes);
 }
 
 inline void MemoryManager::freeSmallSize(void* ptr, uint32_t bytes) {
@@ -260,8 +281,10 @@ inline void MemoryManager::freeSmallSize(void* ptr, uint32_t bytes) {
   if (UNLIKELY(m_bypassSlabAlloc)) {
     return freeBigSize(ptr, bytes);
   }
-  unsigned i = smallSize2Index(bytes);
+
+  auto const i = smallSize2Index(bytes);
   FTRACE(3, "freeSmallSize({}, {}), freelist {}\n", ptr, bytes, i);
+
   m_freelists[i].push(ptr, bytes);
   assert(m_needInitFree = true); // intentional debug-only side-effect.
   m_stats.usage -= bytes;

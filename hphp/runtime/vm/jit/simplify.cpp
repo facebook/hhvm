@@ -1589,8 +1589,7 @@ SSATmp* simplifyCoerceCellToDbl(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-template<class Oper>
-SSATmp* roundImpl(State& env, const IRInstruction* inst, Oper op) {
+SSATmp* roundImpl(State& env, const IRInstruction* inst, double (*op)(double)) {
   auto const src  = inst->src(0);
 
   if (src->hasConstVal()) {

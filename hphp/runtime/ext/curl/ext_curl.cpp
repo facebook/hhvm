@@ -159,7 +159,7 @@ public:
 
     // wait until the user-specified timeout for an available handle
     struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
+    gettime(CLOCK_REALTIME, &ts);
     ts.tv_sec += m_waitTimeout / 1000;
     ts.tv_nsec += 1000000 * (m_waitTimeout % 1000);
     while (m_handleStack.empty()) {

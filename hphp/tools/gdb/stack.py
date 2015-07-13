@@ -32,6 +32,7 @@ The output backtrace has the following format:
 
         if len(argv) > 2:
             print('Usage: walkstk [sp] [rip]')
+            return
 
         # Set sp = $rbp.
         sp_type = T('uintptr_t').pointer()

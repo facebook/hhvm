@@ -1,0 +1,4 @@
+[1]intersect([2]intersect(Tfloat))
+[3]intersect([4]intersect(Tint), [5]intersect(Tstring))
+[6]intersect([7]intersect(Tfloat), [8]intersect(Tstring), [9]intersect(Tint))
+No errors

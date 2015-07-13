@@ -52,4 +52,3 @@ function testPointerModifications() {
   echo current($arrayObject), "\n";
 }
 testPointerModifications();
-

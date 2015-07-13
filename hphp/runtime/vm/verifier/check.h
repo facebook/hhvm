@@ -23,8 +23,8 @@
 
 namespace HPHP {
 
-class Unit;
-class Func;
+struct Unit;
+struct Func;
 
 namespace Verifier {
 

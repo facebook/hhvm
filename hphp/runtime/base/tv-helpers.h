@@ -27,7 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Variant;
+class Variant;
 
 /*
  * Assertions on Cells and TypedValues.  Should usually only happen

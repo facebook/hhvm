@@ -33,7 +33,7 @@ class Object;
 class Resource;
 class Variant;
 class VarNR;
-class RefData;
+struct RefData;
 
 extern const Variant null_variant;      // uninitialized variant
 extern const Variant init_null_variant; // php null
@@ -54,17 +54,17 @@ extern const StaticString array_string; // String("Array")
 extern const StaticString empty_string_ref; // const StaticString&
 extern const Variant empty_string_variant_ref; // const Variant&
 
-class StringData;
-class ArrayData;
+struct StringData;
+struct ArrayData;
 class ObjectData;
 class ResourceData;
-class MArrayIter;
+struct MArrayIter;
 
-class Class;
-class Func;
+struct Class;
+struct Func;
 
 class VariableSerializer;
-class VariableUnserializer;
+struct VariableUnserializer;
 
 using LowStringPtr = LowPtr<const StringData>;
 

@@ -45,7 +45,7 @@ struct PDOSqliteError {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct PDOSqliteConnection : PDOConnection {
-  friend class PDOSqliteResource;
+  friend struct PDOSqliteResource;
 
   PDOSqliteConnection();
   virtual ~PDOSqliteConnection();

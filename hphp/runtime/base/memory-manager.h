@@ -46,8 +46,8 @@
 namespace HPHP {
 struct APCLocalArray;
 struct MemoryManager;
-struct ObjectData;
-struct ResourceData;
+class ObjectData;
+class ResourceData;
 
 //////////////////////////////////////////////////////////////////////
 

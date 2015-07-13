@@ -39,12 +39,12 @@ namespace HPHP {
 
 struct Class;
 struct Func;
-struct ObjectData;
+class ObjectData;
 struct NamedEntity;
 struct StringData;
 struct Unit;
 
-struct PreClassEmitter;
+class PreClassEmitter;
 
 namespace Native { struct NativeDataInfo; }
 

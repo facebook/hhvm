@@ -24,7 +24,7 @@ namespace HPHP {
 
 struct ArrayData;
 struct MArrayIter;
-struct Variant;
+class Variant;
 
 //////////////////////////////////////////////////////////////////////
 

@@ -39,7 +39,7 @@ struct RequestInjectionData;
 //////////////////////////////////////////////////////////////////////
 
 struct RequestTimer {
-  friend class RequestInjectionData;
+  friend struct RequestInjectionData;
 
   RequestTimer(RequestInjectionData*, clockid_t);
   ~RequestTimer();

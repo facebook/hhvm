@@ -26,7 +26,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-class ArrayInit;
+struct ArrayInit;
 struct MemoryProfile;
 class Shape;
 struct StructArray;

@@ -33,7 +33,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class Array;
-struct Variant;
+class Variant;
 
 /**
  * For storing headers and cookies.

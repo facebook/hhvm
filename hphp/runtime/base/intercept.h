@@ -20,7 +20,7 @@ namespace HPHP {
 
 class Array;
 class String;
-struct Variant;
+class Variant;
 
 ///////////////////////////////////////////////////////////////////////////////
 // fb_intercept()

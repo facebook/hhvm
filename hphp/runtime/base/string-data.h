@@ -34,7 +34,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-class APCString;
+struct APCString;
 class Array;
 class String;
 
@@ -490,7 +490,7 @@ private:
     uint64_t m_lenAndHash;
   };
 
-  friend class APCString;
+  friend struct APCString;
 };
 
 //////////////////////////////////////////////////////////////////////

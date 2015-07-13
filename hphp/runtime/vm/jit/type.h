@@ -35,7 +35,7 @@ namespace HPHP {
 struct ArrayData;
 struct Class;
 struct Func;
-struct Shape;
+class Shape;
 struct StringData;
 struct TypedValue;
 

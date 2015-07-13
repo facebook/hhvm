@@ -28,7 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // forward declaration
-class ArrayIter;
+struct ArrayIter;
 
 /*
  * Array type wrapping around ArrayData to implement reference

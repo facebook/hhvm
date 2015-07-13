@@ -30,7 +30,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct Variant;
+class Variant;
 struct ArrayData;
 struct RefData;
 struct StringData;

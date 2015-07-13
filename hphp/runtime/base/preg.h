@@ -49,7 +49,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class Array;
-struct Variant;
+class Variant;
 
 class pcre_cache_entry {
   pcre_cache_entry(const pcre_cache_entry&);

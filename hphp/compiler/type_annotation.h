@@ -28,7 +28,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CodeGenerator;
+struct CodeGenerator;
 
 DECLARE_BOOST_TYPES(TypeAnnotation);
 

@@ -36,7 +36,7 @@ namespace HPHP {
 
 struct Class;
 struct Func;
-struct ObjectData;
+class ObjectData;
 
 // Is this thread being debugged?
 inline bool isDebuggerAttached(ThreadInfo* ti = nullptr) {

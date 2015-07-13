@@ -31,7 +31,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class BlockScope;
-class CodeGenerator;
+struct CodeGenerator;
 class Variant;
 DECLARE_BOOST_TYPES(Construct);
 DECLARE_EXTENDED_BOOST_TYPES(Type);

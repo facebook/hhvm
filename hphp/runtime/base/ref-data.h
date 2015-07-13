@@ -62,7 +62,7 @@ struct RefData {
   void initInRDS() {
     assert(isUninitializedInRDS());
     m_hdr.kind = HeaderKind::Ref;
-    m_hdr.count = 1;
+    m_hdr.mrb = 0;
     assert(!m_hdr.aux.cow && !m_hdr.aux.z); // because RDS is pre-zeroed
   }
 
@@ -91,7 +91,7 @@ struct RefData {
   void release() noexcept {
     assert(!hasMultipleRefs());
     if (UNLIKELY(m_hdr.aux.cow)) {
-      m_hdr.count = 1;
+      m_hdr.mrb = 0;
       m_hdr.aux.cow = m_hdr.aux.z = 0;
       return;
     }
@@ -127,13 +127,11 @@ struct RefData {
   }
 
   int32_t getRealCount() const {
-    assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
-    return m_hdr.count + m_hdr.aux.cow;
+    return m_hdr.mrb + 1 + m_hdr.aux.cow;
   }
 
   bool isReferenced() const {
-    assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
-    return m_hdr.count >= 2 && !m_hdr.aux.cow;
+    return m_hdr.mrb && !m_hdr.aux.cow;
   }
 
   /**
@@ -145,20 +143,19 @@ struct RefData {
   RefData() {
     m_tv.m_type = KindOfNull;
     m_hdr.kind = HeaderKind::Ref;
-    m_hdr.count = 0;
+    m_hdr.mrb = 0;
     m_hdr.aux.cow = m_hdr.aux.z = 0;
     assert(!m_hdr.aux.cow && !m_hdr.aux.z);
   }
 
   bool zIsRef() const {
-    assert(m_hdr.aux.cow == 0 || (m_hdr.aux.cow == 1 && m_hdr.count >= 1));
-    return !m_hdr.aux.cow && (m_hdr.count >= 2 || m_hdr.aux.z);
+    return !m_hdr.aux.cow && (m_hdr.mrb || m_hdr.aux.z);
   }
 
   void zSetIsRef() const {
     auto realCount = getRealCount();
     if (realCount >= 2) {
-      m_hdr.count = realCount;
+      m_hdr.mrb = 1;
       m_hdr.aux.cow = m_hdr.aux.z = 0;
     } else {
       assert(!m_hdr.aux.cow);
@@ -170,7 +167,7 @@ struct RefData {
   void zUnsetIsRef() const {
     auto realCount = getRealCount();
     if (realCount >= 2) {
-      m_hdr.count = realCount - 1;
+      m_hdr.mrb = 1;
       m_hdr.aux.cow = 1;
       m_hdr.aux.z = 0;
     } else {
@@ -193,12 +190,12 @@ struct RefData {
 
   void zAddRef() {
     if (getRealCount() != 1) {
-      ++m_hdr.count;
+      m_hdr.mrb = 1;
       return;
     }
     assert(!m_hdr.aux.cow);
     assert(m_hdr.aux.z < 2);
-    m_hdr.count = m_hdr.aux.z + 1;
+    m_hdr.mrb = m_hdr.aux.z;
     m_hdr.aux.cow = !m_hdr.aux.z;
     m_hdr.aux.z = 0;
   }
@@ -206,10 +203,9 @@ struct RefData {
   void zDelRef() {
     if (getRealCount() != 2) {
       assert(getRealCount() != 0);
-      --m_hdr.count;
       return;
     }
-    m_hdr.count = 1;
+    m_hdr.mrb = 0;
     m_hdr.aux.z = !m_hdr.aux.cow;
     m_hdr.aux.cow = 0;
   }
@@ -222,13 +218,13 @@ struct RefData {
     bool isRef = zIsRef();
     m_hdr.aux.cow = !zeroOrOne && !isRef;
     m_hdr.aux.z = zeroOrOne && isRef;
-    m_hdr.count = val - m_hdr.aux.cow;
+    m_hdr.mrb = 1;
     assert(zRefcount() == val);
     assert(zIsRef() == isRef);
   }
 
   void zInit() {
-    m_hdr.count = 1;
+    m_hdr.mrb = 0;
     m_hdr.aux.cow = m_hdr.aux.z = 0;
     m_tv.m_type = KindOfNull;
     m_tv.m_data.num = 0;
@@ -243,7 +239,7 @@ private:
   RefData(DataType t, int64_t datum) {
     // Initialize this value by laundering uninitNull -> Null.
     m_hdr.kind = HeaderKind::Ref;
-    m_hdr.count = 1;
+    m_hdr.mrb = 0;
     m_hdr.aux.cow = m_hdr.aux.z = 0;
     if (!IS_NULL_TYPE(t)) {
       m_tv.m_type = t;

@@ -91,6 +91,7 @@ const int WSDL_CACHE_BOTH = 3;
 function use_soap_error_handler($handler = true);
 function is_soap_fault($fault);
 function _soap_active_version();
+
 class SoapServer {
   public function __construct($wsdl, $options = null);
   public function setclass($name, ...);
@@ -102,6 +103,7 @@ class SoapServer {
   public function fault($code, $fault, $actor = null, $detail = null, $name = null);
   public function addsoapheader($fault);
 }
+
 class SoapClient {
   public function __construct($wsdl, $options = null);
   public function __call($name, $args);
@@ -117,12 +119,39 @@ class SoapClient {
   public function __setlocation($new_location = null);
   public function __setsoapheaders($headers = null);
 }
+
 class SoapVar {
   public function __construct($data, $type, $type_name = null, $type_namespace = null, $node_name = null, $node_namespace = null);
 }
+
 class SoapParam {
   public function __construct($data, $name);
 }
+
 class SoapHeader {
   public function __construct($ns, $name, $data = null, $mustunderstand = false, $actor = null);
+}
+
+class SoapFault extends Exception {
+
+  // Properties
+  public $faultcode;
+  public $faultcodens;
+  public $faultstring;
+  public $faultactor;
+  public $detail;
+  public $_name;
+  public $headerfault;
+
+  // Methods
+  public function __construct(
+    $code,
+    $message,
+    $actor = null,
+    $detail = null,
+    $name = null,
+    $header = null,
+  );
+  public function __toString();
+
 }

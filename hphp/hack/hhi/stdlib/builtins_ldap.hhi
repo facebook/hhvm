@@ -50,3 +50,17 @@ function ldap_get_values_len($link, $result_entry, $attribute) { }
 function ldap_get_values($link, $result_entry, $attribute) { }
 function ldap_control_paged_result($link, $pagesize, $iscritical = false, $cookie = '') { }
 function ldap_control_paged_result_response($link, $result, &$cookie = null, &$estimated = null) { }
+
+const int LDAP_OPT_DEREF = 2;
+const int LDAP_OPT_SIZELIMIT = 3;
+const int LDAP_OPT_TIMELIMIT = 4;
+const int LDAP_OPT_NETWORK_TIMEOUT = 20485;
+const int LDAP_OPT_PROTOCOL_VERSION = 17;
+const int LDAP_OPT_ERROR_NUMBER = 49;
+const int LDAP_OPT_REFERRALS = 8;
+const int LDAP_OPT_RESTART = 9;
+const int LDAP_OPT_HOST_NAME = 48;
+const int LDAP_OPT_ERROR_STRING = 50;
+const int LDAP_OPT_MATCHED_DN = 51;
+const int LDAP_OPT_SERVER_CONTROLS = 18;
+const int LDAP_OPT_CLIENT_CONTROLS = 19;

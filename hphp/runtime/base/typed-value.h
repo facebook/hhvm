@@ -113,7 +113,7 @@ constexpr size_t alignTypedValue(size_t sz) {
  */
 struct TypedValueAux : TypedValue {
   static constexpr size_t auxOffset = offsetof(TypedValue, m_aux);
-  static const size_t auxSize = sizeof(m_aux);
+  static const size_t auxSize = sizeof(decltype(m_aux));
   int32_t& hash() { return m_aux.u_hash; }
   const int32_t& hash() const { return m_aux.u_hash; }
   int32_t& rdsHandle() { return m_aux.u_rdsHandle; }

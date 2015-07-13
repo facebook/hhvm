@@ -224,7 +224,7 @@ private:
 
   };
   static_assert(
-    sizeof(m_flags_val) == sizeof(m_flags),
+    sizeof(decltype(m_flags_val)) == sizeof(decltype(m_flags)),
     "m_flags_val must cover all the flags");
 
   ConstructPtr        m_declaration;

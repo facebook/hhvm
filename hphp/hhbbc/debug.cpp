@@ -46,14 +46,14 @@ void with_file(fs::path dir, borrowed_ptr<const php::Unit> u, Operation op) {
   fs::ofstream out(file);
   if (!out.is_open()) {
     throw std::runtime_error(std::string("failed to open file ") +
-      file.native());
+      file.string());
   }
 
   op(out);
 
   if (out.bad()) {
     throw std::runtime_error(std::string("couldn't write file ") +
-      file.native());
+      file.string());
   }
 }
 

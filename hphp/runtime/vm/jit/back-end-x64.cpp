@@ -88,7 +88,7 @@ struct BackEnd final : jit::BackEnd {
    * when we call it from C++, we have to tell gcc to clobber all the other
    * callee-saved registers.
    */
-#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+#if defined(__CYGWIN__) || defined(__MINGW__)
   #define CALLEE_SAVED_BARRIER()                                    \
       asm volatile("" : : : "rbx", "rsi", "rdi", "r12", "r13", "r14", "r15");
 #else

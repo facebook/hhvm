@@ -73,7 +73,7 @@ endforeach()
 add_custom_command(
   OUTPUT ${INFOTABS_SOURCE}
   DEPENDS ${CXX_HEADERS} gen-infotabs
-  COMMAND "${CMAKE_CURRENT_BINARY_DIR}/../../tools/bootstrap/gen-infotabs"
+  COMMAND gen-infotabs
   ARGS ${INFOTABS_SOURCE} ${INFOTABS_HEADER} ${HPHP_IDLS})
 list(APPEND CXX_SOURCES ${INFOTABS_SOURCE})
 

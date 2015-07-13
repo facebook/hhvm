@@ -898,6 +898,7 @@ int64_t HHVM_FUNCTION(ord,
   return (int64_t)(unsigned char)str[0];
 }
 
+#ifdef HAVE_STRFMON
 Variant HHVM_FUNCTION(money_format,
                       const String& format,
                       double number) {
@@ -905,6 +906,7 @@ Variant HHVM_FUNCTION(money_format,
   if (s.isNull()) return false;
   return s;
 }
+#endif
 
 String HHVM_FUNCTION(number_format,
                      double number,
@@ -2163,7 +2165,9 @@ public:
     HHVM_FE(sscanf);
     HHVM_FE(chr);
     HHVM_FE(ord);
+#ifdef HAVE_STRFMON
     HHVM_FE(money_format);
+#endif
     HHVM_FE(number_format);
     HHVM_FE(strcmp);
     HHVM_FE(strncmp);

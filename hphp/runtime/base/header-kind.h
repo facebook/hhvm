@@ -55,11 +55,16 @@ template<class T = uint16_t> struct HeaderWord {
         struct {
           T aux;
           HeaderKind kind;
-          mutable uint8_t mark:1;
-          mutable uint8_t cmark:1;
-          mutable uint8_t mrb:1;
-          mutable uint8_t counted:1;
-          mutable uint8_t _static:1;
+          union {
+            struct {
+              mutable uint8_t mark:1;
+              mutable uint8_t cmark:1;
+              mutable uint8_t mrb:1;
+              mutable uint8_t counted:1;
+              mutable uint8_t _static:1;
+            };
+            uint8_t gcbyte;
+          };
         };
         uint32_t lo32;
       };
@@ -72,73 +77,50 @@ template<class T = uint16_t> struct HeaderWord {
   };
 
   void init(HeaderKind kind, RefCount count) {
+    uint8_t gcb = 0x8; // 01000
+    if (count < 0) {
+      gcb = 0x14; // 10100
+      if (count == UncountedValue) {
+        gcb = 0x4; // 00100
+      }
+    }
     q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
+        gcb << (8 * offsetof(HeaderWord, gcbyte)) |
         uint64_t(count) << 32;
-    // TODO make fast
-    if (kind != HeaderKind::Free){
-      assert(count <= 1);
-    }
-    mrb = false;
-    counted = true;
-    if (count == StaticValue) {
-      mrb     = true;
-      counted = false;
-      _static = true;
-    } else if (count == UncountedValue) {
-      mrb     = true;
-      counted = false;
-      _static = false;
-    }
   }
 
   void init(T aux, HeaderKind kind, RefCount count) {
+    uint8_t gcb = 0x8; // 01000
+    if (count < 0) {
+      gcb = 0x14; // 10100
+      if (count == UncountedValue) {
+        gcb = 0x4; // 00100
+      }
+    }
     q = static_cast<uint32_t>(kind) << (8 * offsetof(HeaderWord, kind)) |
+        gcb << (8 * offsetof(HeaderWord, gcbyte)) |
         static_cast<uint16_t>(aux) |
         uint64_t(count) << 32;
-    // TODO make fast
-    if (kind != HeaderKind::Free){
-      assert(count <= 1);
-    }
-    mrb = false;
-    counted = true;
-    if (count == StaticValue) {
-      mrb     = true;
-      counted = false;
-      _static = true;
-    } else if (count == UncountedValue) {
-      mrb     = true;
-      counted = false;
-      _static = false;
-    }
+
     static_assert(sizeof(T) == 2, "header layout requres 2-byte aux");
   }
 
   void init(const HeaderWord<T>& h, RefCount count) {
-    q = h.lo32 | uint64_t(count) << 32;
-    // TODO make fast
-    if (kind != HeaderKind::Free){
-      assert(count <= 1);
+    uint8_t gcb = 0x8; // 01000
+    if (count < 0) {
+      gcb = 0x14; // 10100
+      if (count == UncountedValue) {
+        gcb = 0x4; // 00100
+      }
     }
-    mrb = false;
-    counted = true;
-    if (count == StaticValue) {
-      mrb     = true;
-      counted = false;
-      _static = true;
-    } else if (count == UncountedValue) {
-      mrb     = true;
-      counted = false;
-      _static = false;
-    }
+    q = h.lo32 | gcb << (8 * offsetof(HeaderWord, gcbyte)) |
+        uint64_t(count) << 32;
   }
 };
 
 constexpr auto HeaderOffset = sizeof(void*);
 constexpr auto HeaderKindOffset = HeaderOffset + offsetof(HeaderWord<>, kind);
-constexpr auto FAST_REFCOUNT_OFFSET = HeaderOffset +
-                                      offsetof(HeaderWord<>, count);
-// TODO don't hardcode
-constexpr auto FAST_GC_BYTE_OFFSET = HeaderKindOffset + 1;
+constexpr auto FAST_GC_BYTE_OFFSET = HeaderOffset + offsetof(HeaderWord<>, gcbyte);
 constexpr int8_t FAST_MRB_MASK = 1 << 2;
 constexpr int8_t FAST_COUNTED_BIT_MASK = 1 << 3;
 

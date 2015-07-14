@@ -7958,7 +7958,8 @@ void EmitterVisitor::emitClass(Emitter& e,
             bool added UNUSED = pce->addConstant(
               constName, typeConstraint, &tvVal,
               makeStaticString(os.str()),
-              cc->isTypeconst());
+              cc->isTypeconst(),
+              cc->getTypeStructure());
             assert(added);
           }
         }

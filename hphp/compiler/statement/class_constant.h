@@ -17,10 +17,13 @@
 #ifndef incl_HPHP_CLASS_CONSTANT_H_
 #define incl_HPHP_CLASS_CONSTANT_H_
 
+#include "hphp/compiler/type_annotation.h"
 #include "hphp/compiler/statement/statement.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+struct ArrayData;
 
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(ClassConstant);
@@ -28,7 +31,8 @@ DECLARE_BOOST_TYPES(ClassConstant);
 class ClassConstant : public Statement, public IParseHandler {
 public:
   ClassConstant(STATEMENT_CONSTRUCTOR_PARAMETERS, std::string typeConstraint,
-                ExpressionListPtr exp, bool abstract, bool typeconst);
+                ExpressionListPtr exp, bool abstract,
+                bool typeconst, TypeAnnotationPtr typeAnnot);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
@@ -38,6 +42,7 @@ public:
                     ClassScopePtr scope) override;
 
   std::string getTypeConstraint() const { return m_typeConstraint; }
+  ArrayData* getTypeStructure() const { return m_typeStructure; }
 
   ExpressionListPtr getConList() { return m_exp; }
   bool isAbstract() { return m_abstract; }
@@ -47,6 +52,7 @@ private:
   ExpressionListPtr m_exp;
   bool m_abstract;
   bool m_typeconst;
+  ArrayData* m_typeStructure = nullptr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

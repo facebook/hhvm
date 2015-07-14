@@ -1070,3 +1070,26 @@ class ReflectionExtension implements Reflector {
     return $this->info['info'];
   }
 }
+
+/* These enum values correspond to the 'kind' field in the
+ * TypeStructure shape returned by type_structure() or
+ * ReflectionTypeConstant::getTypeStructure(). The following enum
+ * values are replicated in hphp/runtime/base/type-structure.h
+ */
+enum TypeStructureKind: int {
+  OF_VOID = 0;
+  OF_INT = 1;
+  OF_BOOL = 2;
+  OF_FLOAT = 3;
+  OF_STRING = 4;
+  OF_RESOURCE = 5;
+  OF_NUM = 6;
+  OF_ARRAYKEY = 7;
+  OF_NORETURN = 8;
+  OF_MIXED = 9;
+  OF_TUPLE = 10;
+  OF_FUNCTION = 11;
+  OF_ARRAY = 12;
+  OF_GENERIC = 13;
+  OF_CLASS = 14;
+}

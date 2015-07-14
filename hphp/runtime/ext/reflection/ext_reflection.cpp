@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native-data.h"
 
@@ -1512,7 +1513,23 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
     return String(cst->m_val.m_data.pstr);
   }
 
+  if (cst->m_val.m_type == KindOfArray) {
+    return TypeStructure::toString(cst->m_val.m_data.parr);
+  }
+
   return String();
+}
+
+static Array HHVM_METHOD(ReflectionTypeConstant, getTypeStructure) {
+  auto const cst = ReflectionConstHandle::GetConstFor(this_);
+  assert(cst->isType());
+  if (cst->isAbstract()) {
+    assert(cst->m_val.m_type == KindOfUninit);
+    return Array();
+  } else {
+    assert(cst->m_val.m_type == KindOfArray);
+    return Array(const_cast<ArrayData*>(cst->m_val.m_data.parr));
+  }
 }
 
 // private helper for getDeclaringClass
@@ -1624,7 +1641,6 @@ static Variant HHVM_METHOD(ReflectionProperty, __init,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
 class ReflectionExtension final : public Extension {
  public:
   ReflectionExtension() : Extension("reflection", "$Id$") { }
@@ -1680,6 +1696,7 @@ class ReflectionExtension final : public Extension {
     HHVM_ME(ReflectionTypeConstant, isAbstract);
     HHVM_ME(ReflectionTypeConstant, getAssignedTypeHint);
     HHVM_ME(ReflectionTypeConstant, getDeclaringClassname);
+    HHVM_ME(ReflectionTypeConstant, getTypeStructure);
 
     HHVM_ME(ReflectionProperty, __init);
 

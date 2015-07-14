@@ -2298,4 +2298,11 @@ class ReflectionTypeConstant implements Reflector {
 
   <<__Native>>
   private function getDeclaringClassname(): string;
+
+  /* returns the shape containing the full type information for this
+   * type constant. The structure of this shape is specified in
+   * reflection.hhi. */
+  <<__Native>>
+  public function getTypeStructure(): array;
+
 }

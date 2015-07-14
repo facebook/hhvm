@@ -357,15 +357,19 @@ void Parser::onClassTypeConstant(Token &out, Token &var, Token &value) {
 
   if (isAbstract) {
     onClassAbstractConstant(typeConst, nullptr, var);
+    typeConst.typeAnnotation = nullptr;
   } else {
     value.setText(value.typeAnnotationName());
     Token typeConstValue;
     onScalar(typeConstValue, T_STRING, value);
 
     onClassConstant(typeConst, nullptr, var, typeConstValue);
+    typeConst.typeAnnotation = value.typeAnnotation;
   }
 
-  onClassVariableStart(out, nullptr, typeConst, nullptr, isAbstract, true);
+  onClassVariableStart(out, nullptr, typeConst, nullptr, isAbstract,
+                       /* isTypeConst = */ true,
+                       typeConst.typeAnnotation);
 }
 
 void Parser::onVariable(Token &out, Token *exprs, Token &var, Token *value,
@@ -1587,7 +1591,8 @@ void Parser::onTraitAliasRuleModify(Token &out, Token &rule,
 
 void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
                                   Token *type, bool abstract /* = false */,
-                                  bool typeconst /* = false */) {
+                                  bool typeconst /* = false */,
+                                  const TypeAnnotationPtr& typeAnnot) {
   if (modifiers) {
     ModifierExpressionPtr exp = modifiers->exp ?
       dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
@@ -1603,7 +1608,8 @@ void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
       (type) ? type->typeAnnotationName() : "",
       dynamic_pointer_cast<ExpressionList>(decl->exp),
       abstract,
-      typeconst);
+      typeconst,
+      typeAnnot);
   }
 }
 

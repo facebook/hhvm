@@ -122,7 +122,7 @@ class SplFileObject extends SplFileInfo
     string $enclosure = "\"",
     string $escape = "\\",
   ): array;
-  public function fgets(): string;
+  public function fgets();
   public function fgetss(?string $allowable_tags = null): string;
   public function flock(int $operation, mixed &$wouldblock = false): bool;
   public function fpassthru(): int;
@@ -149,6 +149,7 @@ class SplFileObject extends SplFileInfo
   /* (always) returns null -- violates RecursiveIterator interface */
   public function getChildren();
   public function hasChildren(): bool;
+  public function key(): int;
   public function next(): void;
   public function rewind(): void;
   public function seek(int $line_pos): void;

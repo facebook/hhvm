@@ -538,16 +538,29 @@ ALWAYS_INLINE StringData* staticEmptyString() {
 }
 
 namespace folly {
-template<> struct FormatValue<HPHP::StringData> {
-  explicit FormatValue(const HPHP::StringData& str) : m_val(str) {}
+template<> struct FormatValue<const HPHP::StringData*> {
+  explicit FormatValue(const HPHP::StringData* str) : m_val(str) {}
 
   template<typename Callback>
   void format(FormatArg& arg, Callback& cb) const {
-    format_value::formatString(m_val.data(), arg, cb);
+    auto piece = folly::StringPiece(m_val->data(), m_val->size());
+    format_value::formatString(piece, arg, cb);
   }
 
  private:
-  const HPHP::StringData& m_val;
+  const HPHP::StringData* m_val;
+};
+
+template<> struct FormatValue<HPHP::StringData*> {
+  explicit FormatValue(const HPHP::StringData* str) : m_val(str) {}
+
+  template<typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
+    FormatValue<const HPHP::StringData*>(m_val).format(arg, cb);
+  }
+
+ private:
+  const HPHP::StringData* m_val;
 };
 }
 

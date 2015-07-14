@@ -170,7 +170,7 @@ std::string show(const Builtins& builtins) {
          it != builtins.builtinsInfo.end(); ++it) {
       ret += folly::format(
         "  {: >30} [tot:{: >8}, red:{: >8}]\t\ttype: {}\n",
-        it->first->data(),
+        it->first,
         std::get<1>(it->second),
         std::get<2>(it->second),
         show(std::get<0>(it->second))

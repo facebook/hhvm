@@ -257,10 +257,13 @@ void Func::setFullName(int numParams) {
     char* to = (char*)(m_prologueTable + numPrologues);
 
     Debug::DebugInfo::recordDataMap(
-      from, to, folly::format("Func-{}",
-                              (isPseudoMain() ?
-                               m_unit->filepath()->data() :
-                               m_fullName->data())).str());
+      from,
+      to,
+      folly::format(
+        "Func-{}",
+        isPseudoMain() ? m_unit->filepath() : m_fullName.get()
+      ).str()
+    );
   }
   if (RuntimeOption::DynamicInvokeFunctions.size()) {
     if (RuntimeOption::DynamicInvokeFunctions.find(m_fullName->data()) !=

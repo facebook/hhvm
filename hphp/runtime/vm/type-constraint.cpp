@@ -419,7 +419,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
           "Value returned from {}{} {}() must be of type {}, {} given",
           func->isAsync() ? "async " : "",
           func->preClass() ? "method" : "function",
-          func->fullName()->data(),
+          func->fullName(),
           name,
           givenType
         ).str();
@@ -445,7 +445,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
       folly::format(
         "Argument {} to {}() must be of type {}, {} given; argument {} was "
         "implicitly cast to array",
-        id + 1, func->fullName()->data(), name, givenType, id + 1
+        id + 1, func->fullName(), name, givenType, id + 1
       ).str()
     );
     tvCastToArrayInPlace(tv);
@@ -458,14 +458,14 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     raise_warning_unsampled(
       folly::format(
         "Argument {} to {}() must be of type {}, {} given",
-        id + 1, func->fullName()->data(), name, givenType
+        id + 1, func->fullName(), name, givenType
       ).str()
     );
   } else if (isExtended() && isNullable()) {
     raise_typehint_error(
       folly::format(
         "Argument {} to {}() must be of type {}, {} given",
-        id + 1, func->fullName()->data(), name, givenType
+        id + 1, func->fullName(), name, givenType
       ).str()
     );
   } else {
@@ -474,14 +474,14 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
       raise_typehint_error(
         folly::format(
           "Argument {} passed to {}() must implement interface {}, {} given",
-          id + 1, func->fullName()->data(), name, givenType
+          id + 1, func->fullName(), name, givenType
         ).str()
       );
     } else {
       raise_typehint_error(
         folly::format(
           "Argument {} passed to {}() must be an instance of {}, {} given",
-          id + 1, func->fullName()->data(), name, givenType
+          id + 1, func->fullName(), name, givenType
         ).str()
       );
     }

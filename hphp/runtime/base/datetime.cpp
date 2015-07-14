@@ -855,7 +855,7 @@ bool DateTime::fromString(const String& input, req::ptr<TimeZone> tz,
     auto msg = folly::format(
       "DateTime::__construct(): Failed to parse time string "
       "({}) at position {} ({}): {}",
-      input.data(),
+      input,
       error->error_messages[0].position,
       error->error_messages[0].character,
       error->error_messages[0].message

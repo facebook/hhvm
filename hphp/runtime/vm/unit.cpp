@@ -521,7 +521,7 @@ void Unit::loadFunc(const Func *func) {
     Debug::DebugInfo::recordDataMap(
       (char*)(intptr_t)ne->m_cachedFunc.handle(),
       (char*)(intptr_t)ne->m_cachedFunc.handle() + sizeof(void*),
-      folly::format("rds+Func-{}", func->name()->data()).str());
+      folly::format("rds+Func-{}", func->name()).str());
   }
 }
 
@@ -683,11 +683,11 @@ Class* Unit::defClass(const PreClass* preClass,
     if (RuntimeOption::EvalPerfDataMap) {
       Debug::DebugInfo::recordDataMap(
         newClass.get(), newClass.get() + 1,
-        folly::format("Class-{}", preClass->name()->data()).str());
+        folly::format("Class-{}", preClass->name()).str());
       Debug::DebugInfo::recordDataMap(
         (char*)(intptr_t)nameList->m_cachedClass.handle(),
         (char*)(intptr_t)nameList->m_cachedClass.handle() + sizeof(void*),
-        folly::format("rds+Class-{}", preClass->name()->data()).str());
+        folly::format("rds+Class-{}", preClass->name()).str());
     }
     /*
      * call setCached after adding to the class list, otherwise the
@@ -1027,7 +1027,7 @@ void Unit::initialMerge() {
 
   if (RuntimeOption::EvalPerfDataMap) {
     Debug::DebugInfo::recordDataMap(
-      this, this + 1, folly::format("Unit-{}", m_filepath->data()).str());
+      this, this + 1, folly::format("Unit-{}", m_filepath.get()).str());
   }
   int state = 0;
   bool needsCompact = false;

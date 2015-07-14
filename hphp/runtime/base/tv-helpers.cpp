@@ -756,7 +756,7 @@ TVCoercionException::TVCoercionException(const Func* func,
         folly::format("Unable to coerce param {} to {}() "
                       "from {} to {}",
                       arg_num,
-                      func->name()->data(),
+                      func->name(),
                       actual,
                       expected).str())
 {

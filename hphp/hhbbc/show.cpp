@@ -173,7 +173,7 @@ std::string show(const Func& func) {
 #undef X
 
   ret += folly::format("digraph {} {{\n  node [shape=box];\n{}}}\n",
-    func.name->data(), indent(2, dot_cfg(func))).str();
+    func.name, indent(2, dot_cfg(func))).str();
 
   for (auto& blk : func.blocks) {
     ret += folly::format(

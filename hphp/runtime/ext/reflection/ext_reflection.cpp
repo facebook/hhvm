@@ -1432,7 +1432,7 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
     String clsName = content.toString();
     String result = init(clsName);
     if (result.empty()) {
-      auto msg = folly::format("Class {} does not exist", clsName.data()).str();
+      auto msg = folly::format("Class {} does not exist", clsName).str();
       throw Reflection::AllocReflectionExceptionObject(String(msg));
     }
 

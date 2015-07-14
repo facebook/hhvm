@@ -43,9 +43,13 @@ std::string show(SrcKey sk) {
 
 std::string showShort(SrcKey sk) {
   if (!sk.valid()) return "<invalid SrcKey>";
-  return folly::format("{}(id {:#x})@{}{}",
-                       sk.func()->fullName()->data(), sk.funcID(),
-                       sk.offset(), sk.resumed() ? "r" : "").str();
+  return folly::format(
+    "{}(id {:#x})@{}{}",
+    sk.func()->fullName(),
+    sk.funcID(),
+    sk.offset(),
+    sk.resumed() ? "r" : ""
+  ).str();
 }
 
 void sktrace(SrcKey sk, const char *fmt, ...) {
@@ -70,7 +74,7 @@ std::string SrcKey::getSymbol() const {
   if (f->isPseudoMain()) {
     return folly::format(
       "{{pseudo-main}}::{}::line-{}",
-      u->filepath()->data(),
+      u->filepath(),
       u->getLineNumber(offset())
     ).str();
   }
@@ -78,8 +82,8 @@ std::string SrcKey::getSymbol() const {
   if (f->isMethod() && !f->cls()) {
     return folly::format(
       "{}::{}::line-{}",
-      f->preClass()->name()->data(),
-      f->name()->data(),
+      f->preClass()->name(),
+      f->name(),
       u->getLineNumber(offset())
     ).str();
   }
@@ -87,7 +91,7 @@ std::string SrcKey::getSymbol() const {
   // methods with a cls() and functions
   return folly::format(
     "{}::line-{}",
-    f->fullName()->data(),
+    f->fullName(),
     u->getLineNumber(offset())
   ).str();
 }

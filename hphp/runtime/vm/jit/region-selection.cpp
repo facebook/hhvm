@@ -1061,7 +1061,7 @@ std::string show(RegionContext::PreLiveAR ar) {
   return folly::format(
     "AR@{}: {} ({})",
     ar.stackOff,
-    ar.func->fullName()->data(),
+    ar.func->fullName(),
     ar.objOrCls.toString()
   ).str();
 }
@@ -1122,7 +1122,7 @@ std::string show(const RegionDesc::Block& b) {
         inlined = " (call is inlined)";
       }
       knownFunc = folly::format(" (top func: {}{})",
-                                topFunc->fullName()->data(), inlined).str();
+                                topFunc->fullName(), inlined).str();
     } else {
       assertx((i < b.length() - 1 || !b.inlinedCallee()) &&
              "inlined FCall without a known funcd");

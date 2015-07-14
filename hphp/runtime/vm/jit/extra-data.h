@@ -124,7 +124,7 @@ struct ClsMethodData : IRExtraData {
   {}
 
   std::string show() const {
-    return folly::format("{}::{}", *clsName, *methodName).str();
+    return folly::format("{}::{}", clsName, methodName).str();
   }
 
   bool equals(const ClsMethodData& o) const {
@@ -188,7 +188,7 @@ struct FuncArgData : IRExtraData {
   {}
 
   std::string show() const {
-    return folly::format("{},{}", func->name()->data(), argNum).str();
+    return folly::format("{},{}", func->name(), argNum).str();
   }
 
   const Func* func;
@@ -652,7 +652,7 @@ struct CallData : IRExtraData {
     return folly::to<std::string>(
       spOffset.offset, ',', numParams, ',', after,
       callee
-        ? folly::format(",{}", callee->fullName()->data()).str()
+        ? folly::format(",{}", callee->fullName()).str()
         : std::string{},
       destroyLocals ? ",destroyLocals" : ""
     );
@@ -884,7 +884,7 @@ struct CoerceStkData : IRExtraData {
     return folly::sformat(
       "{},{},{}",
       offset.offset,
-      callee->name()->data(),
+      callee->name(),
       argNum
     );
   }
@@ -899,11 +899,7 @@ struct CoerceMemData : IRExtraData {
     : callee(f), argNum(arg_num) {}
 
   std::string show() const {
-    return folly::sformat(
-      "{},{}",
-      callee->name()->data(),
-      argNum
-    );
+    return folly::sformat("{},{}", callee->name(), argNum);
   }
 
   const Func* callee;
@@ -1086,7 +1082,7 @@ struct FuncEntryData : IRExtraData {
   std::string show() const {
     return folly::format(
       "{}({} args)",
-      func->fullName()->data(),
+      func->fullName(),
       argc
     ).str();
   }

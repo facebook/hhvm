@@ -757,8 +757,8 @@ static void unserializeProp(VariableUnserializer* uns,
   auto msg = folly::format(
     "Property {} for class {} was deserialized with type ({}) that "
     "didn't match what we inferred in static analysis",
-    key.data(),
-    obj->getVMClass()->name()->data(),
+    key,
+    obj->getVMClass()->name(),
     tname(t->asTypedValue()->m_type)
   ).str();
   throw Exception(msg);

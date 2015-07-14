@@ -34,7 +34,7 @@ std::string BCMarker::show() const {
     m_sk.resumed() ? "r" : "",
     m_fp ? folly::to<std::string>(m_fp->id()) : "_",
     m_spOff.offset,
-    m_sk.func()->fullName()->data(),
+    m_sk.func()->fullName(),
     m_profTransID != kInvalidTransID
       ? folly::format(" [profTrans={}]", m_profTransID).str()
       : std::string{}

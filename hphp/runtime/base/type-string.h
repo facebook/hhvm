@@ -613,4 +613,18 @@ ALWAYS_INLINE String empty_string() {
 
 }
 
+namespace folly {
+template<> struct FormatValue<HPHP::String> {
+  explicit FormatValue(const HPHP::String& str) : m_val(str) {}
+
+  template<typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
+    FormatValue<HPHP::StringData*>(m_val.get()).format(arg, cb);
+  }
+
+ private:
+  const HPHP::String& m_val;
+};
+}
+
 #endif

@@ -46,7 +46,7 @@ FailedCodeGen::FailedCodeGen(const char* _file,
   : std::runtime_error(
       folly::format("FailedCodeGen @ {}:{} in {}. {}@{}{}. tid = {}",
                     _file, _line, _func,
-                    _vmFunc->fullName()->data(), _bcOff,
+                    _vmFunc->fullName(), _bcOff,
                     _resumed ? "r" : "", _profTransId).str())
   , file(_file)
   , line(_line)

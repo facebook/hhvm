@@ -269,9 +269,10 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
       throw;
     } catch (ExtendedException& ee) {
       auto fileAndLine = ee.getFileAndLine();
-      err = (fileAndLine.first.empty()) ? ee.getMessage()
-        : folly::format("{0} in {1} on line {2}",
-                        ee.getMessage(), fileAndLine.first.c_str(),
+      err = (fileAndLine.first.empty())
+        ? ee.getMessage()
+        : folly::format("{} in {} on line {}",
+                        ee.getMessage(), fileAndLine.first,
                         fileAndLine.second).str();
     } catch (Exception& e) {
       err = e.getMessage();

@@ -1556,7 +1556,7 @@ void Translator::addTranslation(const TransRec& transRec) {
     Trace::traceRelease("New translation: %" PRId64 " %s %u %u %d\n",
                         HPHP::Timer::GetCurrentTimeMicros() - m_createdTime,
                         folly::format("{}:{}:{}",
-                          transRec.src.unit()->filepath()->data(),
+                          transRec.src.unit()->filepath(),
                           transRec.src.funcID(),
                           transRec.src.offset()).str().c_str(),
                         transRec.aLen,

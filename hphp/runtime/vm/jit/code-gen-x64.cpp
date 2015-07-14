@@ -2485,7 +2485,9 @@ void CodeGenerator::decRefImpl(Vout& v, const IRInstruction* inst,
   }
 
   if (!ty.maybe(TStatic)) {
-    auto const sf = emitDecRef(v, base);
+    auto const sf = v.makeReg();
+    v << declm{base[FAST_REFCOUNT_OFFSET], sf};
+    emitAssertFlagsNonNegative(v, sf);
     ifThen(v, vcold(), CC_E, sf, destroy, unlikelyDestroy);
     return;
   }
@@ -2561,7 +2563,10 @@ void CodeGenerator::cgDecRefNZ(IRInstruction* inst) {
   ifRefCountedNonStatic(
     vmain(), ty, srcLoc(inst, 0),
     [&] (Vout& v) {
-      emitDecRef(v, srcLoc(inst, 0).reg());
+      auto const base = srcLoc(inst, 0).reg();
+      auto const sf = v.makeReg();
+      v << declm{base[FAST_REFCOUNT_OFFSET], sf};
+      emitAssertFlagsNonNegative(v, sf);
     }
   );
 }

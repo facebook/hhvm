@@ -61,14 +61,7 @@ void emitGetGContext(Vout& as, Vreg dest);
 void emitTransCounterInc(Asm& a);
 void emitTransCounterInc(Vout&);
 
-/*
- * Emit a decrement on the m_count field of `base', which must contain a
- * reference counted heap object.  This helper also conditionally makes some
- * sanity checks on the reference count of the object.
- *
- * Returns: the status flags register for the decrement instruction.
- */
-Vreg emitDecRef(Vout& v, Vreg base);
+void emitAssertFlagsNonNegative(Vout& v, Vreg sf);
 
 /*
  * Assuming rData is the data pointer for a refcounted (but possibly static)
@@ -91,7 +84,9 @@ void emitDecRefWork(Vout& v, Vout& vcold, Vreg rData,
       ifThen(
         v, CC_NL, sf,
         [&] (Vout& v) {
-          emitDecRef(v, rData);
+          auto const sf = v.makeReg();
+          v << declm{rData[FAST_REFCOUNT_OFFSET], sf};
+          emitAssertFlagsNonNegative(v, sf);
         }
       );
     },

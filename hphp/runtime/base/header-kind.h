@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_HEADER_KIND_H_
 #define incl_HPHP_HEADER_KIND_H_
 
-#include "/home/peter/hhvm/hphp/runtime/base/countable.h"
+#include "hphp/runtime/base/countable.h"
 
 namespace HPHP {
 

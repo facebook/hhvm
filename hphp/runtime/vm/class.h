@@ -731,7 +731,8 @@ public:
   /*
    * Whether this class has a type constant named `typeCnsName'.
    */
-  bool hasTypeConstant(const StringData* typeCnsName) const;
+  bool hasTypeConstant(const StringData* typeCnsName,
+                       bool includeAbs = false) const;
 
   /*
    * Look up the actual value of a class constant.  Perform dynamic
@@ -750,11 +751,15 @@ public:
    *
    * Return nullptr if this class has no constant of the given name.
    *
+   * Return nullptr if the constant is abstract.
+   *
    * The TypedValue represents the constant's value iff it is a scalar,
    * otherwise it has m_type set to KindOfUninit.  Non-scalar class constants
    * need to run 86cinit code to determine their value at runtime.
    */
-  const Cell* cnsNameToTV(const StringData* clsCnsName, Slot& clsCnsInd) const;
+  const Cell* cnsNameToTV(const StringData* clsCnsName,
+                          Slot& clsCnsInd,
+                          bool includeTypeCns = false) const;
 
   /*
    * Provide the current runtime type of this class constant.

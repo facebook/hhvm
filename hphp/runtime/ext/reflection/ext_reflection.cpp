@@ -452,6 +452,44 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
   tvAsVariant(lookup.prop) = value;
 }
 
+/*
+ * cls_or_obj: the name of a class or an instance of the class;
+ * cst_name: the name of the type constant of the class;
+ *
+ * If the type constant exists and is not abstract, this function
+ * returns the shape representing the type associated with the type
+ * constant.
+ */
+Array HHVM_FUNCTION(type_structure,
+                    const Variant& cls_or_obj, const String& cst_name) {
+  auto const cls = get_cls(cls_or_obj);
+
+  if (!cls) {
+    // an object must have an associated class
+    assert(!cls_or_obj.is(KindOfObject));
+    auto const cls_sd = cls_or_obj.toString().get();
+    raise_error("Non-existent class %s", cls_sd->data());
+  }
+
+  auto const cls_sd = cls->name();
+  auto const cst_sd = cst_name.get();
+  Slot typeCstInd;
+  auto typeCst = cls->cnsNameToTV(cst_sd, typeCstInd, true);
+  if (!typeCst) {
+    if (cls->hasTypeConstant(cst_sd, true)) {
+      raise_error("Type constant %s::%s is abstract",
+                  cls_sd->data(), cst_sd->data());
+    } else {
+      raise_error("Non-existent type constant %s::%s",
+                  cls_sd->data(), cst_sd->data());
+    }
+  }
+
+  assert(typeCst->m_type == KindOfArray);
+  assert(typeCst->m_data.parr->isStatic());
+  return Array::attach(typeCst->m_data.parr);
+}
+
 String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
   Class* cls = Unit::loadClass(name.get());
   if (!cls) return empty_string();
@@ -1520,18 +1558,6 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
   return String();
 }
 
-static Array HHVM_METHOD(ReflectionTypeConstant, getTypeStructure) {
-  auto const cst = ReflectionConstHandle::GetConstFor(this_);
-  assert(cst->isType());
-  if (cst->isAbstract()) {
-    assert(cst->m_val.m_type == KindOfUninit);
-    return Array();
-  } else {
-    assert(cst->m_val.m_type == KindOfArray);
-    return Array(const_cast<ArrayData*>(cst->m_val.m_data.parr));
-  }
-}
-
 // private helper for getDeclaringClass
 static String HHVM_METHOD(ReflectionTypeConstant, getDeclaringClassname) {
   auto const cst = ReflectionConstHandle::GetConstFor(this_);
@@ -1655,6 +1681,7 @@ class ReflectionExtension final : public Extension {
     HHVM_FE(hphp_invoke_method);
     HHVM_FE(hphp_set_property);
     HHVM_FE(hphp_set_static_property);
+    HHVM_FE(type_structure);
 
     HHVM_ME(ReflectionFunctionAbstract, getName);
     HHVM_ME(ReflectionFunctionAbstract, isHack);
@@ -1696,7 +1723,6 @@ class ReflectionExtension final : public Extension {
     HHVM_ME(ReflectionTypeConstant, isAbstract);
     HHVM_ME(ReflectionTypeConstant, getAssignedTypeHint);
     HHVM_ME(ReflectionTypeConstant, getDeclaringClassname);
-    HHVM_ME(ReflectionTypeConstant, getTypeStructure);
 
     HHVM_ME(ReflectionProperty, __init);
 

@@ -2302,7 +2302,11 @@ class ReflectionTypeConstant implements Reflector {
   /* returns the shape containing the full type information for this
    * type constant. The structure of this shape is specified in
    * reflection.hhi. */
-  <<__Native>>
-  public function getTypeStructure(): array;
+  public function getTypeStructure() {
+    return type_structure(
+      $this->getDeclaringClassname(),
+      $this->getName()
+    );
+  }
 
 }

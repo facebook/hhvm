@@ -292,3 +292,11 @@ class ReflectionTypeConstant implements Reflector {
   public function getDeclaringClass(): ReflectionClass;
   public function getAssignedTypeText(): ?string;
 }
+
+/*
+ * returns the shape associated with the type constant.
+ */
+function type_structure(mixed $cls_or_obj, string $cns_name);
+// becomes:
+// type_structure('C' or C::class or new C, 'type_const_name')
+//   : TypeStructure

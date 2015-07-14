@@ -949,12 +949,16 @@ Cell Class::clsCnsGet(const StringData* clsCnsName) const {
 }
 
 const Cell* Class::cnsNameToTV(const StringData* clsCnsName,
-                               Slot& clsCnsInd) const {
+                               Slot& clsCnsInd,
+                               bool includeTypeCns) const {
   clsCnsInd = m_constants.findIndex(clsCnsName);
   if (clsCnsInd == kInvalidSlot) {
     return nullptr;
   }
-  if (m_constants[clsCnsInd].isAbstract() || m_constants[clsCnsInd].isType()) {
+  if (m_constants[clsCnsInd].isAbstract()) {
+    return nullptr;
+  }
+  if (!includeTypeCns && m_constants[clsCnsInd].isType()) {
     return nullptr;
   }
   auto const ret = const_cast<TypedValueAux*>(&m_constants[clsCnsInd].m_val);

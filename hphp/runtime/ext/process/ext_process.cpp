@@ -434,7 +434,7 @@ bool HHVM_FUNCTION(pcntl_sigprocmask,
       return false;
     }
     Array aoldset;
-    for (int signum = 1; true; ++signum) {
+    for (int signum = 1; signum < NSIG; ++signum) {
       result = sigismember(&coldset, signum);
       if (result == 1) {
         aoldset.append(signum);

@@ -1,4 +1,6 @@
-File "DynamicYield7.php", line 25, characters 10-30:
-The pseudo-method genInt is deprecated; instead of relying on DynamicYield::__call, call getInt directly (Typing[4128])
-File "DynamicYield7.php", line 19, characters 19-24:
-Definition is here
+File "DynamicYield7.php", line 25, characters 23-28:
+Could not find method genInt in an object of type Foo (Typing[4053])
+File "DynamicYield7.php", line 25, characters 10-20:
+This is why I think it is an object of type Foo
+File "DynamicYield7.php", line 16, characters 7-9:
+Declaration of Foo is here

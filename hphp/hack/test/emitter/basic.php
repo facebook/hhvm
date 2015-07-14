@@ -44,6 +44,8 @@ function test(): void {
 
   var_dump(nus());
 
+  doecho();
+
   var_dump(interesting_array(343));
   var_dump(interesting_kv_array(343));
 }
@@ -201,4 +203,13 @@ function nus(): Nus {
   var_dump($y->bar($za[0]));
   var_dump($y->bar($z));
   return $y;
+}
+
+function doecho(): void {
+  echo 'done', 'argh\n', "\n";
+}
+
+function infinite_loop(): void {
+  while (true) {
+  }
 }

@@ -246,16 +246,6 @@ IMPLEMENT_STEAL(ResourceData, pres, KindOfResource)
 #undef IMPLEMENT_STEAL
 
 int Variant::getRefCount() const noexcept {
-  switch (m_type) {
-    DT_UNCOUNTED_CASE:
-      return 1;
-    case KindOfString:    return m_data.pstr->getCount();
-    case KindOfArray:     return m_data.parr->getCount();
-    case KindOfObject:    return m_data.pobj->getCount();
-    case KindOfResource:  return m_data.pres->getCount();
-    case KindOfRef:       return m_data.pref->var()->getRefCount();
-    case KindOfClass:     break;
-  }
   not_reached();
 }
 

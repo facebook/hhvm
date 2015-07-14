@@ -623,7 +623,6 @@ bool MixedArray::checkInvariants() const {
   );
 
   // All arrays:
-  assert(getCount() != 0);
   assert(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
   assert(MixedArray::HashSize(m_scale) ==
          folly::nextPowTwo<uint64_t>(capacity()));

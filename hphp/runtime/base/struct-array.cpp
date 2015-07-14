@@ -564,7 +564,6 @@ ArrayData* StructArray::Escalate(const ArrayData* ad) {
 }
 
 bool StructArray::checkInvariants(const ArrayData* ad) {
-  assert(ad->getCount() != 0);
   return true;
 }
 

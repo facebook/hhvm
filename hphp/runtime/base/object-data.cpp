@@ -117,7 +117,7 @@ NEVER_INLINE bool ObjectData::destructImpl() {
   // prevent the refcount from going to zero when the destructor returns.
   CountableHelper h(this);
   invoke_destructor(this, dtor);
-  return getCount() == 1;
+  return hasExactlyOneRef();
 }
 
 void ObjectData::destructForExit() {

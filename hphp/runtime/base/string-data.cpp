@@ -137,7 +137,6 @@ StringData* StringData::MakeShared(StringSlice sl, bool trueStatic) {
   // Recalculating ret from mcret avoids a spill.
 
   assert(ret->m_hash == 0);
-  assert(ret->getCount() == 0);
   if (trueStatic) {
     ret->setStatic();
   } else {
@@ -174,7 +173,7 @@ StringData* StringData::MakeEmpty() {
   assert(sd->m_hash == 0);
   assert(sd->capacity() == 0);
   assert(sd->m_hdr.kind == HeaderKind::String);
-  assert(sd->getCount() == 0);
+  assert(!sd->hasMultipleRefs());
   sd->setStatic();
   assert(sd->isFlat());
   assert(sd->isStatic());
@@ -337,7 +336,7 @@ StringData* StringData::Make(const StringData* s1, const StringData* s2) {
   auto next = memcpy8(data, s1->m_data, s1->m_len);
   *memcpy8(next, s2->m_data, s2->m_len) = 0;
 
-  assert(sd->getCount() == 1);
+  assert(sd->hasExactlyOneRef());
   assert(sd->isFlat());
   assert(sd->checkSane());
   return sd;
@@ -698,7 +697,7 @@ StringData* StringData::escalate(size_t cap) {
 void StringData::dump() const {
   StringSlice s = slice();
 
-  printf("StringData(%d) (%s%s%d): [", getCount(),
+  printf("StringData(%d) (%s%s%d): [", hasMultipleRefs(),
          isShared() ? "shared " : "",
          isStatic() ? "static " : "",
          s.len);

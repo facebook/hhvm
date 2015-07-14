@@ -85,8 +85,7 @@ inline bool check_refcount_ns_nz(int32_t count) {
   }                                                                     \
                                                                         \
   bool isRefCounted() const {                                           \
-    assert(check_refcount(m_hdr.count));                                \
-    return m_hdr.count >= 0;                                            \
+    return m_hdr.counted;                                               \
   }                                                                     \
                                                                         \
   bool hasMultipleRefs() const {                                        \

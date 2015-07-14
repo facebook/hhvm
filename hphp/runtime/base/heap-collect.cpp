@@ -103,7 +103,7 @@ struct Marker {
 
 private:
   template<class T> static bool counted(T* p) {
-    return p && p->getCount() >= 0;
+    return p && p->isRefCounted();
   }
   bool mark(const void*);
   bool inRds(const void* vp) {

@@ -100,7 +100,6 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   }
   if (auto const ctor = cls->instanceCtor()) {
     auto obj = ctor(cls);
-    assert(obj->getCount() > 0);
     return obj;
   }
   Attr attrs = cls->attrs();
@@ -127,7 +126,6 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   }
 
   // callCustomInstanceInit may have inc-refd.
-  assert(obj->getCount() > 0);
   return obj;
 }
 

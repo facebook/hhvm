@@ -9,3 +9,5 @@ trait T {
 class Lol {
   use T;
 }
+
+function test(): void {}

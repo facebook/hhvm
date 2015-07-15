@@ -28,18 +28,32 @@
 
 namespace HPHP {
 
+///////////////////////////////////////////////////////////////////////////////
+
 struct Func;
+
+///////////////////////////////////////////////////////////////////////////////
 
 namespace jit { namespace arm {
 
+///////////////////////////////////////////////////////////////////////////////
+
+namespace detail {
+
+///////////////////////////////////////////////////////////////////////////////
+
 inline const Func** funcPrologueToGuardImmPtr(jit::TCA prologue) {
-  assertx(arch() == Arch::ARM);
   return reinterpret_cast<const Func**>(prologue) - 1;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 inline bool funcPrologueHasGuard(jit::TCA prologue, const Func* func) {
-  assertx(arch() == Arch::ARM);
-  return *funcPrologueToGuardImmPtr(prologue) == func;
+  return *detail::funcPrologueToGuardImmPtr(prologue) == func;
 }
 
 inline TCA funcPrologueToGuard(TCA prologue, const Func* func) {
@@ -66,14 +80,10 @@ inline TCA funcPrologueToGuard(TCA prologue, const Func* func) {
 }
 
 inline void funcPrologueSmashGuard(jit::TCA prologue, const Func* func) {
-  *funcPrologueToGuardImmPtr(prologue) = nullptr;
+  *detail::funcPrologueToGuardImmPtr(prologue) = nullptr;
 }
 
-//////////////////////////////////////////////////////////////////////
-
-jit::TCA emitCallArrayPrologue(Func* func, DVFuncletsVec& dvs);
-
-SrcKey emitFuncPrologue(TransID transID, Func* func, int argc, TCA& start);
+///////////////////////////////////////////////////////////////////////////////
 
 }}}
 

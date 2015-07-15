@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/code-gen-arm.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers-arm.h"
-#include "hphp/runtime/vm/jit/func-prologues-arm.h"
+#include "hphp/runtime/vm/jit/func-guard-arm.h"
 #include "hphp/runtime/vm/jit/unique-stubs-arm.h"
 #include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/unwind-arm.h"

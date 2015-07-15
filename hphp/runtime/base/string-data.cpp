@@ -825,16 +825,12 @@ void StringData::preCompute() {
 }
 
 void StringData::setStatic() {
-  m_hdr.mrb     = true;
-  m_hdr.counted = false;
-  m_hdr._static = true;
+  m_hdr.gcbyte = 0x14; // 10100
   preCompute();
 }
 
 void StringData::setUncounted() {
-  m_hdr.mrb     = true;
-  m_hdr.counted = false;
-  m_hdr._static = false;
+  m_hdr.gcbyte = 0x4; // 00100
   preCompute();
 }
 

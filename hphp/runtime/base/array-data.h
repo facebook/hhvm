@@ -84,6 +84,9 @@ protected:
 
 public:
   IMPLEMENT_COUNTABLE_METHODS
+  bool cowCheck() const {
+    return maybeShared();
+  }
 
   /**
    * Create a new ArrayData with specified array element(s).

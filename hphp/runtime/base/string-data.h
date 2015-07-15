@@ -198,15 +198,7 @@ struct StringData {
   bool isStatic() const;
   bool isUncounted() const;
   bool cowCheck() const {
-    #ifdef COW_MRB
-      return maybeShared();
-    #endif
-    #ifdef COW_BLIND
-      return true;
-    #endif
-    #ifdef COW_RC
-      return hasMultipleRefs();
-    #endif
+    return maybeShared();
   }
 
   /*
